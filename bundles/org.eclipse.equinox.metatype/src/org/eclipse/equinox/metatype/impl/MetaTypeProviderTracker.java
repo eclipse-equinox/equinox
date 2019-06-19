@@ -272,22 +272,22 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 								return ad.getDefaultValue();
 							}
 
-					    @Override
+							@Override
 							public Map<String, String> getExtensionAttributes(String schema) {
 								return Collections.<String, String> emptyMap();
 							}
 
-					    @Override
+							@Override
 							public Set<String> getExtensionUris() {
 								return Collections.<String> emptySet();
 							}
 
-					    @Override
+							@Override
 							public String getMax() {
 								return null;
 							}
 
-					    @Override
+							@Override
 							public String getMin() {
 								return null;
 							}

@@ -19,16 +19,16 @@ package org.eclipse.equinox.console.common;
  */
 public enum KEYS {
 	UP, 
-    DOWN,
-    RIGHT,
-    LEFT,
-    CENTER,
-    HOME,
-    END,
-    PGUP,
-    PGDN,
-    INS,
-    DEL,
-    UNFINISHED,
-    UNKNOWN
+	DOWN,
+	RIGHT,
+	LEFT,
+	CENTER,
+	HOME,
+	END,
+	PGUP,
+	PGDN,
+	INS,
+	DEL,
+	UNFINISHED,
+	UNKNOWN
 }

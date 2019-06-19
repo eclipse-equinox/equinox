@@ -48,22 +48,22 @@ public class CompletionHandler {
 	}
 	
 	public Map<String, Integer> getCandidates(byte[] buf, int cursor) {
-        String currentInput = new String(buf);
-        String currentToken = CommandLineParser.getCurrentToken(currentInput, cursor);
-        if (currentToken ==  null){
-        	return new HashMap<>();
-        }
-        if (currentToken.contains(FILE) == true) {
-        	completers.add(new FileNamesCompleter());
-        }else{
-         	if ((cursor - currentToken.length() > 0) && (buf[cursor - currentToken.length() - 1] == VARIABLE_PREFIX)){
-        		completers.add(new VariableNamesCompleter(session));
-        	}else {
-        		completers.add(new CommandNamesCompleter(context, session));
-        		completers.add(new FileNamesCompleter());
-        	}
-        }
-        lookupCustomCompleters();
+		String currentInput = new String(buf);
+		String currentToken = CommandLineParser.getCurrentToken(currentInput, cursor);
+		if (currentToken ==  null){
+			return new HashMap<>();
+		}
+		if (currentToken.contains(FILE) == true) {
+			completers.add(new FileNamesCompleter());
+		}else{
+			if ((cursor - currentToken.length() > 0) && (buf[cursor - currentToken.length() - 1] == VARIABLE_PREFIX)){
+				completers.add(new VariableNamesCompleter(session));
+			}else {
+				completers.add(new CommandNamesCompleter(context, session));
+				completers.add(new FileNamesCompleter());
+			}
+		}
+		lookupCustomCompleters();
 		Map<String, Integer> candidates = new TreeMap<>();
 		for (Completer completer : completers) {
 			candidates.putAll(completer.getCandidates(currentInput, cursor));

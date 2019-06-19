@@ -28,43 +28,43 @@ public class SshInputScannerTests {
 	private static final byte ESC = 27;
 	
 	@Test
-    public void testScan() throws Exception {
-        ConsoleInputStream in = new ConsoleInputStream();
-        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-        ConsoleOutputStream out = new ConsoleOutputStream(byteOut);
-        SshInputScanner scanner = new SshInputScanner(in, out);
-        try {
-            scanner.scan((byte) 'a');
-            scanner.scan((byte) 'b');
-            scanner.scan((byte) 'c');
-        } catch (IOException e) {
-            System.out.println("Error while scanning: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
-        }
+	public void testScan() throws Exception {
+		ConsoleInputStream in = new ConsoleInputStream();
+		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+		ConsoleOutputStream out = new ConsoleOutputStream(byteOut);
+		SshInputScanner scanner = new SshInputScanner(in, out);
+		try {
+			scanner.scan((byte) 'a');
+			scanner.scan((byte) 'b');
+			scanner.scan((byte) 'c');
+		} catch (IOException e) {
+			System.out.println("Error while scanning: " + e.getMessage());
+			e.printStackTrace();
+			throw e;
+		}
 
-        String output = byteOut.toString();
-        Assert.assertTrue("Output incorrect. Expected abc, but read " + output, output.equals("abc"));
-    }
+		String output = byteOut.toString();
+		Assert.assertTrue("Output incorrect. Expected abc, but read " + output, output.equals("abc"));
+	}
 
-    @Test
-    public void testScanESC() throws Exception {
-        ConsoleInputStream in = new ConsoleInputStream();
-        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-        ConsoleOutputStream out = new ConsoleOutputStream(byteOut);
-        SshInputScanner scanner = new SshInputScanner(in, out);
+	@Test
+	public void testScanESC() throws Exception {
+		ConsoleInputStream in = new ConsoleInputStream();
+		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+		ConsoleOutputStream out = new ConsoleOutputStream(byteOut);
+		SshInputScanner scanner = new SshInputScanner(in, out);
 
-        try {
-            scanner.scan((byte) 'a');
-            scanner.scan(ESC);
-            scanner.scan((byte) 'b');
-        } catch (IOException e) {
-            System.out.println("Error while scanning: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
-        }
+		try {
+			scanner.scan((byte) 'a');
+			scanner.scan(ESC);
+			scanner.scan((byte) 'b');
+		} catch (IOException e) {
+			System.out.println("Error while scanning: " + e.getMessage());
+			e.printStackTrace();
+			throw e;
+		}
 
-        String output = byteOut.toString();
-        Assert.assertTrue("Output incorrect. Expected ab, but read " + output, output.equals("ab"));
-    }
+		String output = byteOut.toString();
+		Assert.assertTrue("Output incorrect. Expected ab, but read " + output, output.equals("ab"));
+	}
 }

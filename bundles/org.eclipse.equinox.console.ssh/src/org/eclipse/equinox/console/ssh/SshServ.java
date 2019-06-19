@@ -47,55 +47,55 @@ public class SshServ extends Thread {
 	private static final String SSH_CUSTOM_PUBLIC_KEY_AUTHENTICATION = "ssh.custom.publickeys.auth";
 	private static final String EQUINOX_CONSOLE_DOMAIN = "equinox_console";
 
-    public SshServ(List<CommandProcessor> processors, BundleContext context, String host, int port) {
-    	this.context = context;
+	public SshServ(List<CommandProcessor> processors, BundleContext context, String host, int port) {
+		this.context = context;
 		this.host = host;
-    	this.port = port;
-    	shellFactory = new SshShellFactory(processors, context);
-    }
+		this.port = port;
+		shellFactory = new SshShellFactory(processors, context);
+	}
 
-    @Override
+	@Override
 	public void run() throws RuntimeException {
-    	sshServer = SshServer.setUpDefaultServer();
+		sshServer = SshServer.setUpDefaultServer();
 		if (host != null) {
 			sshServer.setHost(host);
 		}
-    	sshServer.setPort(port);
-    	sshServer.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(Paths.get(System.getProperty(SSH_KEYSTORE_PROP, SSH_KEYSTORE_PROP_DEFAULT))));
-    	sshServer.setShellFactory(shellFactory);
-    	sshServer.setPasswordAuthenticator(createJaasPasswordAuthenticator());
-    	sshServer.setPublickeyAuthenticator(createSimpleAuthorizedKeysAuthenticator());
-    	try {
+		sshServer.setPort(port);
+		sshServer.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(Paths.get(System.getProperty(SSH_KEYSTORE_PROP, SSH_KEYSTORE_PROP_DEFAULT))));
+		sshServer.setShellFactory(shellFactory);
+		sshServer.setPasswordAuthenticator(createJaasPasswordAuthenticator());
+		sshServer.setPublickeyAuthenticator(createSimpleAuthorizedKeysAuthenticator());
+		try {
 			sshServer.start();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-    }
+	}
 
 
 	public synchronized void stopSshServer() {
-    	try {
+		try {
 			sshServer.stop(true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-    }
+	}
 
-    public synchronized void addCommandProcessor(CommandProcessor processor) {
-    	shellFactory.addCommandProcessor(processor);
-    }
+	public synchronized void addCommandProcessor(CommandProcessor processor) {
+		shellFactory.addCommandProcessor(processor);
+	}
 
-    public synchronized void removeCommandProcessor(CommandProcessor processor) {
-    	shellFactory.removeCommandProcessor(processor);
-    }
+	public synchronized void removeCommandProcessor(CommandProcessor processor) {
+		shellFactory.removeCommandProcessor(processor);
+	}
 
-    private PasswordAuthenticator createJaasPasswordAuthenticator() {
-            JaasPasswordAuthenticator jaasPasswordAuthenticator = new JaasPasswordAuthenticator();
-            jaasPasswordAuthenticator.setDomain(EQUINOX_CONSOLE_DOMAIN);
-            return jaasPasswordAuthenticator;
-    }
+	private PasswordAuthenticator createJaasPasswordAuthenticator() {
+			JaasPasswordAuthenticator jaasPasswordAuthenticator = new JaasPasswordAuthenticator();
+			jaasPasswordAuthenticator.setDomain(EQUINOX_CONSOLE_DOMAIN);
+			return jaasPasswordAuthenticator;
+	}
 
-    private PublickeyAuthenticator createSimpleAuthorizedKeysAuthenticator() {
+	private PublickeyAuthenticator createSimpleAuthorizedKeysAuthenticator() {
 		// use authorized keys file if property is set
 		final String authorizedKeysFile = System.getProperty(SSH_AUTHORIZED_KEYS_FILE_PROP);
 		if (null != authorizedKeysFile) {
@@ -131,5 +131,5 @@ public class SshServ extends Thread {
 		}
 
 		return null;
-    }
+	}
 }

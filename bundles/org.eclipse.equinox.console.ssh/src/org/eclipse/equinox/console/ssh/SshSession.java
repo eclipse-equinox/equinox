@@ -46,14 +46,14 @@ public class SshSession extends Thread implements Closeable {
 	private Map<String, KEYS> currentEscapesToKey;
 	
 	private static final String PROMPT = "prompt";
-    private static final String OSGI_PROMPT = "osgi> ";
-    private static final String SCOPE = "SCOPE";
-    private static final String EQUINOX_SCOPE = "equinox:*";
-    private static final String INPUT_SCANNER = "INPUT_SCANNER";
-    private static final String SSH_INPUT_SCANNER = "SSH_INPUT_SCANNER";
-    private static final String USER_STORAGE_PROPERTY_NAME = "osgi.console.ssh.useDefaultSecureStorage";
-    private static final String DEFAULT_USER = "equinox";
-    private static final String CLOSEABLE = "CLOSEABLE";
+	private static final String OSGI_PROMPT = "osgi> ";
+	private static final String SCOPE = "SCOPE";
+	private static final String EQUINOX_SCOPE = "equinox:*";
+	private static final String INPUT_SCANNER = "INPUT_SCANNER";
+	private static final String SSH_INPUT_SCANNER = "SSH_INPUT_SCANNER";
+	private static final String USER_STORAGE_PROPERTY_NAME = "osgi.console.ssh.useDefaultSecureStorage";
+	private static final String DEFAULT_USER = "equinox";
+	private static final String CLOSEABLE = "CLOSEABLE";
 	private static final int ADD_USER_COUNTER_LIMIT = 2;
 	
 	public SshSession(CommandProcessor processor, BundleContext context, SshShell sshShell, InputStream in, OutputStream out, TerminalTypeMappings currentMappings, Map<String, KEYS> currentExcapesToKey) {

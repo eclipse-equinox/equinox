@@ -41,42 +41,42 @@ public class TelnetCommandTests {
 	@Test
 	public void testTelnetCommand() throws Exception {
 		try (CommandSession session = EasyMock.createMock(CommandSession.class)) {
-    	session.put((String)EasyMock.anyObject(), EasyMock.anyObject());
-        EasyMock.expectLastCall().times(3);
-        EasyMock.expect(session.execute((String)EasyMock.anyObject())).andReturn(new Object());
-        session.close();
+		session.put((String)EasyMock.anyObject(), EasyMock.anyObject());
+		EasyMock.expectLastCall().times(3);
+		EasyMock.expect(session.execute((String)EasyMock.anyObject())).andReturn(new Object());
+		session.close();
 		EasyMock.expectLastCall();
-        EasyMock.replay(session);
-        
-        CommandProcessor processor = EasyMock.createMock(CommandProcessor.class);
-        EasyMock.expect(processor.createSession((ConsoleInputStream)EasyMock.anyObject(), (PrintStream)EasyMock.anyObject(), (PrintStream)EasyMock.anyObject())).andReturn(session);
-        EasyMock.replay(processor);
-        
-        BundleContext context = EasyMock.createMock(BundleContext.class);
-        EasyMock.expect(context.getProperty(USE_CONFIG_ADMIN_PROP)).andReturn(FALSE);
-        EasyMock.expect(context.getProperty(TELNET_PORT_PROP_NAME)).andReturn(Integer.toString(TELNET_PORT));
-        EasyMock.expect(context.registerService((String)EasyMock.anyObject(), EasyMock.anyObject(), (Dictionary<String, ?>)EasyMock.anyObject())).andReturn(null);
-        EasyMock.replay(context);
-        
-        TelnetCommand command = new TelnetCommand(processor, context);
-        command.startService();
-        
-        try (Socket socketClient = new Socket(HOST, TELNET_PORT);){
-            OutputStream outClient = socketClient.getOutputStream();
-            outClient.write(TEST_CONTENT);
-            outClient.write('\n');
-            outClient.flush();
+		EasyMock.replay(session);
+		
+		CommandProcessor processor = EasyMock.createMock(CommandProcessor.class);
+		EasyMock.expect(processor.createSession((ConsoleInputStream)EasyMock.anyObject(), (PrintStream)EasyMock.anyObject(), (PrintStream)EasyMock.anyObject())).andReturn(session);
+		EasyMock.replay(processor);
+		
+		BundleContext context = EasyMock.createMock(BundleContext.class);
+		EasyMock.expect(context.getProperty(USE_CONFIG_ADMIN_PROP)).andReturn(FALSE);
+		EasyMock.expect(context.getProperty(TELNET_PORT_PROP_NAME)).andReturn(Integer.toString(TELNET_PORT));
+		EasyMock.expect(context.registerService((String)EasyMock.anyObject(), EasyMock.anyObject(), (Dictionary<String, ?>)EasyMock.anyObject())).andReturn(null);
+		EasyMock.replay(context);
+		
+		TelnetCommand command = new TelnetCommand(processor, context);
+		command.startService();
+		
+		try (Socket socketClient = new Socket(HOST, TELNET_PORT);){
+			OutputStream outClient = socketClient.getOutputStream();
+			outClient.write(TEST_CONTENT);
+			outClient.write('\n');
+			outClient.flush();
 
-            // wait for the accept thread to finish execution
-            try {
-                Thread.sleep(WAIT_TIME);
-            } catch (InterruptedException ie) {
-                // do nothing
-            }
-        } finally {
-            command.telnet(new String[] {STOP_COMMAND});
-        }
-        EasyMock.verify(context);
+			// wait for the accept thread to finish execution
+			try {
+				Thread.sleep(WAIT_TIME);
+			} catch (InterruptedException ie) {
+				// do nothing
+			}
+		} finally {
+			command.telnet(new String[] {STOP_COMMAND});
+		}
+		EasyMock.verify(context);
 		}
 	}
 }

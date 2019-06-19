@@ -135,15 +135,15 @@ public class ServletRequestAdvisor extends Object {
 		
 		HttpsURLConnection httpsConn = (HttpsURLConnection)url.openConnection();
 		httpsConn.setSSLSocketFactory(sslContext.getSocketFactory());
-	    httpsConn.setRequestMethod("GET");
-	    httpsConn.setDoOutput(false);
-	    httpsConn.setDoInput(true);
-	    httpsConn.setConnectTimeout(150 * 1000);
-	    httpsConn.setReadTimeout(150 * 1000);
-	    httpsConn.connect();
-	    
-	    assertEquals("Request to the url " + spec + " was not successful", 200 , httpsConn.getResponseCode());
-	    InputStream stream = httpsConn.getInputStream();
+		httpsConn.setRequestMethod("GET");
+		httpsConn.setDoOutput(false);
+		httpsConn.setDoInput(true);
+		httpsConn.setConnectTimeout(150 * 1000);
+		httpsConn.setReadTimeout(150 * 1000);
+		httpsConn.connect();
+		
+		assertEquals("Request to the url " + spec + " was not successful", 200 , httpsConn.getResponseCode());
+		InputStream stream = httpsConn.getInputStream();
 		try {
 			return drain(stream);
 		} finally {
@@ -153,41 +153,41 @@ public class ServletRequestAdvisor extends Object {
 
 	private void initializeSSLContext(SSLContext sslContext, String ksPath, String ksPassword) throws Exception {
 		KeyManager keyManagers[] = null;
-        if (ksPath != null) {
-       	 	KeyManagerFactory kmFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            File ksFile = new File(ksPath);
-            KeyStore keyStore = KeyStore.getInstance("JKS");
+		if (ksPath != null) {
+			KeyManagerFactory kmFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+			File ksFile = new File(ksPath);
+			KeyStore keyStore = KeyStore.getInstance("JKS");
 
-            try(InputStream ksStream = new FileInputStream(ksFile)){
-            	keyStore.load(ksStream, ksPassword.toCharArray());
-            	kmFactory.init(keyStore, ksPassword.toCharArray());
-	            keyManagers = kmFactory.getKeyManagers();
-            }          
-        }
-        
-       TrustManager[] trustManagers = getTrustManager();
-       
-       sslContext.init(keyManagers, trustManagers, null);  
+			try(InputStream ksStream = new FileInputStream(ksFile)){
+				keyStore.load(ksStream, ksPassword.toCharArray());
+				kmFactory.init(keyStore, ksPassword.toCharArray());
+				keyManagers = kmFactory.getKeyManagers();
+			}          
+		}
+		
+		TrustManager[] trustManagers = getTrustManager();
+		
+		sslContext.init(keyManagers, trustManagers, null);  
 		
 	}
 	
 	private TrustManager[] getTrustManager() {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-            @Override
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return null;
-            }
+			@Override
+			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+				return null;
+			}
 
-            @Override
-            public void checkClientTrusted(
-                                           java.security.cert.X509Certificate[] certs, String authType) {}
+			@Override
+			public void checkClientTrusted(
+										   java.security.cert.X509Certificate[] certs, String authType) {}
 
-            @Override
-            public void checkServerTrusted(
-                                           java.security.cert.X509Certificate[] certs, String authType) {}
-        } };
+			@Override
+			public void checkServerTrusted(
+										   java.security.cert.X509Certificate[] certs, String authType) {}
+		} };
 
-        return trustAllCerts;
+		return trustAllCerts;
 	}
 
 	public Map<String, List<String>> request(String value, Map<String, List<String>> headers) throws IOException {

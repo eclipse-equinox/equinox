@@ -32,13 +32,13 @@ import static org.easymock.EasyMock.*;
 
 public class TelnetServerTests {
 
-    private static final String HOST = "localhost";
-    private static final int PORT = 38888;
-    private static final long WAIT_TIME = 5000;
-    private static final int TEST_CONTENT = 100;
+	private static final String HOST = "localhost";
+	private static final int PORT = 38888;
+	private static final long WAIT_TIME = 5000;
+	private static final int TEST_CONTENT = 100;
 
-    @Test
-    public void testTelnetServer() throws Exception {
+	@Test
+	public void testTelnetServer() throws Exception {
 		try (CommandSession session = EasyMock.createMock(CommandSession.class)) {
 			session.put((String) EasyMock.anyObject(), EasyMock.anyObject());
 			EasyMock.expectLastCall().times(3);
@@ -76,9 +76,9 @@ public class TelnetServerTests {
 				telnetServer.stopTelnetServer();
 			}
 		}
-    }
+	}
 
-    @Test
+	@Test
 	public void testTelnetServerWithoutHost() throws Exception {
 		try (CommandSession session = EasyMock.createMock(CommandSession.class)) {
 			session.put((String) EasyMock.anyObject(), EasyMock.anyObject());

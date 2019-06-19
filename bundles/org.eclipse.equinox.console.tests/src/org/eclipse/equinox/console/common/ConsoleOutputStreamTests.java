@@ -21,11 +21,11 @@ import java.io.ByteArrayOutputStream;
 
 public class ConsoleOutputStreamTests {
 
-    private static final int DATA_LENGTH = 4;
+	private static final int DATA_LENGTH = 4;
 
-    @Test
-    public void testWrite() throws Exception {
-        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+	@Test
+	public void testWrite() throws Exception {
+		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 		try (ConsoleOutputStream out = new ConsoleOutputStream(byteOut)) {
 			byte[] data = new byte[] { 'a', 'b', 'c', 'd' };
 			for (byte b : data) {
@@ -35,11 +35,11 @@ public class ConsoleOutputStreamTests {
 			byte[] res = byteOut.toByteArray();
 
 			Assert.assertNotNull("Bytes not written; result null", res);
-        Assert.assertFalse("Bytes not written; result empty", res.length == 0);
+		Assert.assertFalse("Bytes not written; result empty", res.length == 0);
 
-        for (int i = 0; i < DATA_LENGTH; i++) {
-            Assert.assertEquals("Wrong char read. Position " + i + ", expected " + data[i] + ", read " + res[i], data[i], res[i]);
-        }
-        }
-    }
+		for (int i = 0; i < DATA_LENGTH; i++) {
+			Assert.assertEquals("Wrong char read. Position " + i + ", expected " + data[i] + ", read " + res[i], data[i], res[i]);
+		}
+		}
+	}
 }

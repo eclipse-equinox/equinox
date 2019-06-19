@@ -43,12 +43,12 @@ public class HelpCommand {
 	private ServiceTracker<CommandsTracker, CommandsTracker> commandsTrackerTracker;
 	private static final String COMMANDS = ".commands";
 	
-    public class CommandProviderCustomizer implements ServiceTrackerCustomizer<CommandProvider, Set<CommandProvider>> {
-    	private BundleContext context;
-    	public CommandProviderCustomizer(BundleContext context) {
-    		this.context = context;
-    	}
-    	
+	public class CommandProviderCustomizer implements ServiceTrackerCustomizer<CommandProvider, Set<CommandProvider>> {
+		private BundleContext context;
+		public CommandProviderCustomizer(BundleContext context) {
+			this.context = context;
+		}
+		
 		@Override
 		public Set<CommandProvider> addingService(
 				ServiceReference<CommandProvider> reference) {
@@ -75,8 +75,8 @@ public class HelpCommand {
 			CommandProvider provider = context.getService(reference);
 			providers.remove(provider);
 		}
-    	
-    }
+		
+	}
 	
 	public HelpCommand(BundleContext context) {
 		this.context = context;

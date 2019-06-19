@@ -51,14 +51,14 @@ public class StructuredTextJava extends StructuredTextTypeHandler {
 	}
 
 	/**
-	     *  Locates occurrences of 4 special strings:
-	     *  <ol>
-	     *    <li>spaces</li>
-	     *    <li>literals starting with quotation mark</li>
-	     *    <li>comments starting with slash-asterisk</li>
-	     *    <li>comments starting with slash-slash</li>
-	     *  </ol>
-	     */
+	 *  Locates occurrences of 4 special strings:
+	 *  <ol>
+	 *    <li>spaces</li>
+	 *    <li>literals starting with quotation mark</li>
+	 *    <li>comments starting with slash-asterisk</li>
+	 *    <li>comments starting with slash-slash</li>
+	 *  </ol>
+	 */
 	@Override
 	public int indexOfSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets, int caseNumber, int fromIndex) {
 		switch (caseNumber) {
@@ -77,12 +77,12 @@ public class StructuredTextJava extends StructuredTextTypeHandler {
 
 	/**
 	 *  Processes the 4 special cases as follows.
-	     *  <ol>
-	     *    <li>skip the run of spaces</li>
-	     *    <li>look for a matching quotation mark and skip until after it</li>
-	     *    <li>skip until after the closing asterisk-slash</li>
-	     *    <li>skip until after a line separator</li>
-	     *  </ol>
+	 *  <ol>
+	 *    <li>skip the run of spaces</li>
+	 *    <li>look for a matching quotation mark and skip until after it</li>
+	 *    <li>skip until after the closing asterisk-slash</li>
+	 *    <li>skip until after a line separator</li>
+	 *  </ol>
 	 */
 	@Override
 	public int processSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets, int caseNumber, int separLocation) {

@@ -24,21 +24,21 @@ import java.io.OutputStream;
  */
 public class TelnetOutputStream extends ConsoleOutputStream {
 	
-    static final byte[] autoMessage = new byte[]{(byte) 255, (byte) 251, (byte) 1, // IAC WILL ECHO
-                                                 (byte) 255, (byte) 251, (byte) 3, // IAC WILL SUPPRESS GO_AHEAD
-                                                 (byte) 255, (byte) 253, (byte) 31, // IAC DO NAWS
-                                                 (byte) 255, (byte) 253, (byte) 24}; // IAC DO TTYPE
-  
-    public TelnetOutputStream(OutputStream out) {
-        super(out);
-    }
+	static final byte[] autoMessage = new byte[]{(byte) 255, (byte) 251, (byte) 1, // IAC WILL ECHO
+												 (byte) 255, (byte) 251, (byte) 3, // IAC WILL SUPPRESS GO_AHEAD
+												 (byte) 255, (byte) 253, (byte) 31, // IAC DO NAWS
+												 (byte) 255, (byte) 253, (byte) 24}; // IAC DO TTYPE
+	
+	public TelnetOutputStream(OutputStream out) {
+		super(out);
+	}
 
-    /**
-     * Sends the options which a server wants to negotiate with a telnet client.
-     */
-    public synchronized void autoSend() throws IOException {
-        write(autoMessage);
-        flush();
-    }
+	/**
+	 * Sends the options which a server wants to negotiate with a telnet client.
+	 */
+	public synchronized void autoSend() throws IOException {
+		write(autoMessage);
+		flush();
+	}
 
 }

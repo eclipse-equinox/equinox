@@ -41,7 +41,7 @@ import org.osgi.framework.InvalidSyntaxException;
  */
 public class ApplicationAdminPermission extends Permission {
 	private static final long serialVersionUID = 1L;
-  
+	
 	/**
 	 * Allows the lifecycle management of the target applications.
 	 */
@@ -154,7 +154,7 @@ public class ApplicationAdminPermission extends Permission {
 			}
 		}
 		else	
-		    newPerm = new ApplicationAdminPermission( this.applicationDescriptor, this.actions );
+			newPerm = new ApplicationAdminPermission( this.applicationDescriptor, this.actions );
 		
 		newPerm.applicationID = applicationId;
 		
@@ -181,177 +181,177 @@ public class ApplicationAdminPermission extends Permission {
 	 * @return true if this permission implies the {@code otherPermission}, false otherwise.
 	 */
 	@Override
-  public boolean implies(Permission otherPermission) {
-  	  if( otherPermission == null )
-  	  	return false;
-  	  	
-      if(!(otherPermission instanceof ApplicationAdminPermission))
-          return false;
+	public boolean implies(Permission otherPermission) {
+		if( otherPermission == null )
+			return false;
+				
+		if(!(otherPermission instanceof ApplicationAdminPermission))
+			return false;
 
-      ApplicationAdminPermission other = (ApplicationAdminPermission) otherPermission;
+		ApplicationAdminPermission other = (ApplicationAdminPermission) otherPermission;
 
-      if( !filter.equals("*") ) {
-       	if( other.applicationDescriptor == null )
-       		return false;
-       	
-      	if( filter.equals( "<<SELF>>") ) {
-            if( other.applicationID == null )
-          		return false; /* it cannot be, this might be a bug */
-            
-      		if( !other.applicationID.equals( other.applicationDescriptor.getApplicationId() ) )
-      			return false;
-      	}
-      	else {
-      		Hashtable props = new Hashtable();
-      		props.put( "pid", other.applicationDescriptor.getApplicationId() );
-      		props.put( "signer", new SignerWrapper( other.applicationDescriptor ) );
-      		      		
-      		Filter flt = getFilter();
-      		if( flt == null )
-      			return false;
-      		
-      		if( !flt.match( props ) )
-      			return false;
-      	}
-      }
-      
-      if( !actionsVector.containsAll( other.actionsVector ) )
-      	return false;
-      
-      return true;
-  }
-
-	@Override
-  public boolean equals(Object with) {
-  	if( with == null || !(with instanceof ApplicationAdminPermission) )
-  		return false;
-  	
-  	ApplicationAdminPermission other = (ApplicationAdminPermission)with;  	
-  	
-  	// Compare actions:
-  	if( other.actionsVector.size() != actionsVector.size() )
-  		return false;
-  	
-  	for( int i=0; i != actionsVector.size(); i++ )
-  		if( !other.actionsVector.contains( actionsVector.get( i ) ) )
-  			return false;
-  	
-  	
-  	return equal(this.filter, other.filter ) && equal(this.applicationDescriptor, other.applicationDescriptor)
-  			&& equal(this.applicationID, other.applicationID);
-  }
-  
-  /**
-   * Compares parameters for equality. If both object are null, they are considered
-   * equal.
-   * @param a object to compare
-   * @param b other object to compare
-   * @return true if both objects are equal or both are null
-   */
-  private static boolean equal(Object a, Object b) {
-	  // This equation is true if both references are null or both point
-	  // to the same object. In both cases they are considered as equal.
-	  if( a == b ) {
-		  return true;
-	  }
-	  
-	  return a.equals(b);
-  }
+		if( !filter.equals("*") ) {
+			if( other.applicationDescriptor == null )
+				return false;
+			
+			if( filter.equals( "<<SELF>>") ) {
+				if( other.applicationID == null )
+					return false; /* it cannot be, this might be a bug */
+			
+				if( !other.applicationID.equals( other.applicationDescriptor.getApplicationId() ) )
+					return false;
+			}
+			else {
+				Hashtable props = new Hashtable();
+				props.put( "pid", other.applicationDescriptor.getApplicationId() );
+				props.put( "signer", new SignerWrapper( other.applicationDescriptor ) );
+								
+				Filter flt = getFilter();
+				if( flt == null )
+					return false;
+			
+				if( !flt.match( props ) )
+					return false;
+			}
+		}
+		
+		if( !actionsVector.containsAll( other.actionsVector ) )
+			return false;
+		
+		return true;
+	}
 
 	@Override
-  public int hashCode() {
-	  int hc = 0;
-	  for( int i=0; i != actionsVector.size(); i++ )
-		  hc ^= ((String)actionsVector.get( i )).hashCode();
-	  hc ^= (null == this.filter )? 0 : this.filter.hashCode();
-	  hc ^= (null == this.applicationDescriptor) ? 0 : this.applicationDescriptor.hashCode();
-	  hc ^= (null == this.applicationID) ? 0 : this.applicationID.hashCode();
-	  return hc;
-  }
+	public boolean equals(Object with) {
+		if( with == null || !(with instanceof ApplicationAdminPermission) )
+			return false;
+		
+		ApplicationAdminPermission other = (ApplicationAdminPermission)with;  	
+		
+		// Compare actions:
+		if( other.actionsVector.size() != actionsVector.size() )
+			return false;
+		
+		for( int i=0; i != actionsVector.size(); i++ )
+			if( !other.actionsVector.contains( actionsVector.get( i ) ) )
+				return false;
+		
+		
+		return equal(this.filter, other.filter ) && equal(this.applicationDescriptor, other.applicationDescriptor)
+				&& equal(this.applicationID, other.applicationID);
+	}
+	
+	/**
+	* Compares parameters for equality. If both object are null, they are considered
+	* equal.
+	* @param a object to compare
+	* @param b other object to compare
+	* @return true if both objects are equal or both are null
+	*/
+	private static boolean equal(Object a, Object b) {
+		// This equation is true if both references are null or both point
+		// to the same object. In both cases they are considered as equal.
+		if( a == b ) {
+			return true;
+		}
+		
+		return a.equals(b);
+	}
 
-  /**
-   * Returns the actions of this permission.
-   * @return the actions specified when this permission was created
-   */
 	@Override
-  public String getActions() {
-  	return actions;
-  }
+	public int hashCode() {
+		int hc = 0;
+		for( int i=0; i != actionsVector.size(); i++ )
+			hc ^= ((String)actionsVector.get( i )).hashCode();
+		hc ^= (null == this.filter )? 0 : this.filter.hashCode();
+		hc ^= (null == this.applicationDescriptor) ? 0 : this.applicationDescriptor.hashCode();
+		hc ^= (null == this.applicationID) ? 0 : this.applicationID.hashCode();
+		return hc;
+	}
 
-  private String applicationID;
+	/**
+	* Returns the actions of this permission.
+	* @return the actions specified when this permission was created
+	*/
+	@Override
+	public String getActions() {
+		return actions;
+	}
 
-  private static final Vector ACTIONS = new Vector();
-  private              Vector actionsVector;
-  private final        String filter;
-  private final        String actions;
-  private              Filter appliedFilter = null; 
-  
-  static {
-      ACTIONS.add(LIFECYCLE_ACTION);
-      ACTIONS.add(SCHEDULE_ACTION);
-      ACTIONS.add(LOCK_ACTION);
-  }
+	private String applicationID;
 
-  private static Vector actionsVector(String actions) {
-      Vector v = new Vector();
-      StringTokenizer t = new StringTokenizer(actions.toUpperCase(), ",");
-      while (t.hasMoreTokens()) {
-          String action = t.nextToken().trim();
-          v.add(action.toLowerCase());
-      }
-      
-      if( v.contains( SCHEDULE_ACTION ) && !v.contains( LIFECYCLE_ACTION ) )
-    	  v.add( LIFECYCLE_ACTION );
-      
-      return v;
-  }
-  
+	private static final Vector ACTIONS = new Vector();
+	private              Vector actionsVector;
+	private final        String filter;
+	private final        String actions;
+	private              Filter appliedFilter = null; 
+	
+	static {
+		ACTIONS.add(LIFECYCLE_ACTION);
+		ACTIONS.add(SCHEDULE_ACTION);
+		ACTIONS.add(LOCK_ACTION);
+	}
 
-  private static class SignerWrapper extends Object {
-  	private String pattern;
-  	private ApplicationDescriptor appDesc;
-  	
-  	/**
-  	 * @param pattern
-  	 */
-  	public SignerWrapper(String pattern) {
-  		this.pattern = pattern;    			
-  	}
-  	
-  	SignerWrapper(ApplicationDescriptor appDesc) {
-  		this.appDesc = appDesc;
-  	}
-  	
-	  @Override
-  	public boolean equals(Object o) {
-  		if (!(o instanceof SignerWrapper))
-  			return false;
-  		SignerWrapper other = (SignerWrapper) o;
-  		ApplicationDescriptor matchAppDesc = (ApplicationDescriptor) (appDesc != null ? appDesc : other.appDesc);
-  		String matchPattern = appDesc != null ? other.pattern : pattern;
-  		return matchAppDesc.matchDNChain(matchPattern);
-  	}
-  }
-  
-  private void init() {
+	private static Vector actionsVector(String actions) {
+		Vector v = new Vector();
+		StringTokenizer t = new StringTokenizer(actions.toUpperCase(), ",");
+		while (t.hasMoreTokens()) {
+			String action = t.nextToken().trim();
+			v.add(action.toLowerCase());
+		}
+		
+		if( v.contains( SCHEDULE_ACTION ) && !v.contains( LIFECYCLE_ACTION ) )
+			v.add( LIFECYCLE_ACTION );
+		
+		return v;
+	}
+	
+
+	private static class SignerWrapper extends Object {
+		private String pattern;
+		private ApplicationDescriptor appDesc;
+		
+		/**
+		 * @param pattern
+		 */
+		public SignerWrapper(String pattern) {
+			this.pattern = pattern;    			
+		}
+		
+		SignerWrapper(ApplicationDescriptor appDesc) {
+			this.appDesc = appDesc;
+		}
+		
+		@Override
+		public boolean equals(Object o) {
+			if (!(o instanceof SignerWrapper))
+				return false;
+			SignerWrapper other = (SignerWrapper) o;
+			ApplicationDescriptor matchAppDesc = (ApplicationDescriptor) (appDesc != null ? appDesc : other.appDesc);
+			String matchPattern = appDesc != null ? other.pattern : pattern;
+			return matchAppDesc.matchDNChain(matchPattern);
+		}
+	}
+	
+	private void init() {
 		actionsVector = actionsVector( actions );
 
 		if ( actions.equals("*") )
 			actionsVector = actionsVector( LIFECYCLE_ACTION + "," + SCHEDULE_ACTION + "," + LOCK_ACTION );
 		else if (!ACTIONS.containsAll(actionsVector))
-      throw new IllegalArgumentException("Illegal action!");
+			throw new IllegalArgumentException("Illegal action!");
 		
 		applicationID = null;
-  }
-  
-  private Filter getFilter() {
-  	if (appliedFilter == null) {
-  		try {
-  			appliedFilter = FrameworkUtil.createFilter(filter);
-		} catch (InvalidSyntaxException e) {
-			//we will return null
-		}
-  	}     		
-  	return appliedFilter;
-  }
+	}
+	
+	private Filter getFilter() {
+		if (appliedFilter == null) {
+			try {
+				appliedFilter = FrameworkUtil.createFilter(filter);
+			} catch (InvalidSyntaxException e) {
+				//we will return null
+			}
+		}	
+		return appliedFilter;
+	}
 }

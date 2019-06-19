@@ -35,57 +35,57 @@ import org.osgi.framework.BundleContext;
 public class TelnetServer extends Thread {
 	
 	private ServerSocket server;
-    private boolean isRunning = true;
-    private List<CommandProcessor> processors = null;
-    private BundleContext context;
-    private List<Socket> sockets = new ArrayList<>();
-    private Map<CommandProcessor, List<TelnetConnection>> processorToConnectionsMapping = new HashMap<>();
-    
-    public TelnetServer(BundleContext context, List<CommandProcessor> processors, String host, int port) throws IOException {
-    	this.context = context;
-    	this.processors = processors;
-    	if(host != null) {
-    		server = new ServerSocket(port, 0, InetAddress.getByName(host));
-    	} else {
-    		server = new ServerSocket(port);
-    	}
-    }
-    
+	private boolean isRunning = true;
+	private List<CommandProcessor> processors = null;
+	private BundleContext context;
+	private List<Socket> sockets = new ArrayList<>();
+	private Map<CommandProcessor, List<TelnetConnection>> processorToConnectionsMapping = new HashMap<>();
+	
+	public TelnetServer(BundleContext context, List<CommandProcessor> processors, String host, int port) throws IOException {
+		this.context = context;
+		this.processors = processors;
+		if(host != null) {
+			server = new ServerSocket(port, 0, InetAddress.getByName(host));
+		} else {
+			server = new ServerSocket(port);
+		}
+	}
+	
 	@Override
 	public void run()
-    {
-        try
-        {
-            while (isRunning)
-            {
-                final Socket socket = server.accept();
-                sockets.add(socket);
-                for (CommandProcessor processor : processors) {
-                	TelnetConnection telnetConnection = new TelnetConnection(socket, processor, context);
-                	List<TelnetConnection> telnetConnections = processorToConnectionsMapping.get(processor);
-                	if (telnetConnections == null) {
-                		telnetConnections = new ArrayList<>();
-                		processorToConnectionsMapping.put(processor, telnetConnections);
-                	}
-                	telnetConnections.add(telnetConnection);
-                	telnetConnection.start();
-                }
-            }
-        } catch (IOException e) {
-            if (isRunning == true) {
-                e.printStackTrace();
-            }
-        } finally {
-        	isRunning = false;
-            try {
-                if (server != null) {
-                    server.close();
-                }
-            } catch (IOException e){
-            	// do nothing
-            }
-        }
-    }
+	{
+		try
+		{
+			while (isRunning)
+			{
+				final Socket socket = server.accept();
+				sockets.add(socket);
+				for (CommandProcessor processor : processors) {
+					TelnetConnection telnetConnection = new TelnetConnection(socket, processor, context);
+					List<TelnetConnection> telnetConnections = processorToConnectionsMapping.get(processor);
+					if (telnetConnections == null) {
+						telnetConnections = new ArrayList<>();
+						processorToConnectionsMapping.put(processor, telnetConnections);
+					}
+					telnetConnections.add(telnetConnection);
+					telnetConnection.start();
+				}
+			}
+		} catch (IOException e) {
+			if (isRunning == true) {
+				e.printStackTrace();
+			}
+		} finally {
+			isRunning = false;
+			try {
+				if (server != null) {
+					server.close();
+				}
+			} catch (IOException e){
+				// do nothing
+			}
+		}
+	}
 	
 	public synchronized void addCommandProcessor(CommandProcessor processor) {
 		processors.add(processor);
@@ -113,19 +113,19 @@ public class TelnetServer extends Thread {
 	public synchronized void stopTelnetServer() {
 		isRunning = false;
 		try {
-            if (server != null) {
-                server.close();
-            }    
-        } catch (IOException e){
-        	// do nothing
-        }
-        
-        for(List<TelnetConnection> telnetConnections : processorToConnectionsMapping.values()) {
-        	for (TelnetConnection telnetConnection : telnetConnections) {
-        		telnetConnection.close();
-        	}
-        }
-        
+			if (server != null) {
+				server.close();
+			}    
+		} catch (IOException e){
+			// do nothing
+		}
+		
+		for(List<TelnetConnection> telnetConnections : processorToConnectionsMapping.values()) {
+			for (TelnetConnection telnetConnection : telnetConnections) {
+				telnetConnection.close();
+			}
+		}
+		
 		this.interrupt();
 	}
 }

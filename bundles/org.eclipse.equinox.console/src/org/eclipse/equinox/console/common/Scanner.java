@@ -35,73 +35,73 @@ public abstract class Scanner {
 
 	private byte BACKSPACE;
 	private byte DEL;
-    protected static final byte BS = 8;  
-    protected static final byte LF = 10;
-    protected static final byte CR = 13;
-    protected static final byte ESC = 27;
-    protected static final byte SPACE = 32;
-    protected static final byte MAX_CHAR = 127;
-    protected static final String DEFAULT_TTYPE = File.separatorChar == '/' ? "XTERM" : "ANSI";
-    // shows if user input should be echoed to the console
-    private boolean isEchoEnabled = true;
+	protected static final byte BS = 8;  
+	protected static final byte LF = 10;
+	protected static final byte CR = 13;
+	protected static final byte ESC = 27;
+	protected static final byte SPACE = 32;
+	protected static final byte MAX_CHAR = 127;
+	protected static final String DEFAULT_TTYPE = File.separatorChar == '/' ? "XTERM" : "ANSI";
+	// shows if user input should be echoed to the console
+	private boolean isEchoEnabled = true;
 
-    protected OutputStream toTelnet;
-    protected ConsoleInputStream toShell;
-    protected Map<String, KEYS> currentEscapesToKey;
-    protected final Map<String, TerminalTypeMappings> supportedEscapeSequences;
-    protected String[] escapes;
-    
-    public Scanner(ConsoleInputStream toShell, OutputStream toTelnet) {
-        this.toShell = toShell;
-        this.toTelnet = toTelnet;
-        supportedEscapeSequences = new HashMap<> ();
-        supportedEscapeSequences.put("ANSI", new ANSITerminalTypeMappings());
-        supportedEscapeSequences.put("VT100", new VT100TerminalTypeMappings());
-        VT220TerminalTypeMappings vtMappings = new VT220TerminalTypeMappings();
-        supportedEscapeSequences.put("VT220", vtMappings);
-        supportedEscapeSequences.put("XTERM", vtMappings);
-        supportedEscapeSequences.put("VT320", new VT320TerminalTypeMappings());
-        supportedEscapeSequences.put("SCO", new SCOTerminalTypeMappings());
-    }
+	protected OutputStream toTelnet;
+	protected ConsoleInputStream toShell;
+	protected Map<String, KEYS> currentEscapesToKey;
+	protected final Map<String, TerminalTypeMappings> supportedEscapeSequences;
+	protected String[] escapes;
+	
+	public Scanner(ConsoleInputStream toShell, OutputStream toTelnet) {
+		this.toShell = toShell;
+		this.toTelnet = toTelnet;
+		supportedEscapeSequences = new HashMap<> ();
+		supportedEscapeSequences.put("ANSI", new ANSITerminalTypeMappings());
+		supportedEscapeSequences.put("VT100", new VT100TerminalTypeMappings());
+		VT220TerminalTypeMappings vtMappings = new VT220TerminalTypeMappings();
+		supportedEscapeSequences.put("VT220", vtMappings);
+		supportedEscapeSequences.put("XTERM", vtMappings);
+		supportedEscapeSequences.put("VT320", new VT320TerminalTypeMappings());
+		supportedEscapeSequences.put("SCO", new SCOTerminalTypeMappings());
+	}
 
-    public abstract void scan(int b) throws IOException;
+	public abstract void scan(int b) throws IOException;
 
-    public void toggleEchoEnabled(boolean isEnabled) {
-    	isEchoEnabled = isEnabled;
-    }
-    
-    protected void echo(int b) throws IOException {
-    	if (isEchoEnabled) {
-    		toTelnet.write(b);
-    	}
-    }
+	public void toggleEchoEnabled(boolean isEnabled) {
+		isEchoEnabled = isEnabled;
+	}
+	
+	protected void echo(int b) throws IOException {
+		if (isEchoEnabled) {
+			toTelnet.write(b);
+		}
+	}
 
-    protected void flush() throws IOException {
-        toTelnet.flush();
-    }
+	protected void flush() throws IOException {
+		toTelnet.flush();
+	}
 
-    protected KEYS checkEscape(String possibleEsc) {
-        if (currentEscapesToKey.get(possibleEsc) != null) {
-            return currentEscapesToKey.get(possibleEsc);
-        }
+	protected KEYS checkEscape(String possibleEsc) {
+		if (currentEscapesToKey.get(possibleEsc) != null) {
+			return currentEscapesToKey.get(possibleEsc);
+		}
 
-        for (String escape : escapes) {
-            if (escape.startsWith(possibleEsc)) {
-                return KEYS.UNFINISHED;
-            }
-        }
-        return KEYS.UNKNOWN;
-    }
+		for (String escape : escapes) {
+			if (escape.startsWith(possibleEsc)) {
+				return KEYS.UNFINISHED;
+			}
+		}
+		return KEYS.UNKNOWN;
+	}
 
-    protected String esc;
-    protected boolean isEsc = false;
+	protected String esc;
+	protected boolean isEsc = false;
 
-    protected void startEsc() {
-        isEsc = true;
-        esc = "";
-    }
+	protected void startEsc() {
+		isEsc = true;
+		esc = "";
+	}
 
-    protected abstract void scanEsc(final int b) throws IOException;
+	protected abstract void scanEsc(final int b) throws IOException;
 
 	public byte getBackspace() {
 		return BACKSPACE;
@@ -128,22 +128,22 @@ public abstract class Scanner {
 	}
 
 	public String[] getEscapes() {
-        if (escapes != null) {
-        	String[] copy = new String[escapes.length];
-        	System.arraycopy(escapes, 0, copy, 0, escapes.length);
-        	return copy;
-        } else {
-            return null;
-        }
+		if (escapes != null) {
+			String[] copy = new String[escapes.length];
+			System.arraycopy(escapes, 0, copy, 0, escapes.length);
+			return copy;
+		} else {
+			return null;
+		}
 	}
 
 	public void setEscapes(String[] escapes) {
-        if (escapes != null) {
-            this.escapes = new String[escapes.length];
-        	System.arraycopy(escapes, 0, this.escapes, 0, escapes.length);
-        } else {
-            this.escapes = null;
-        }
+		if (escapes != null) {
+			this.escapes = new String[escapes.length];
+			System.arraycopy(escapes, 0, this.escapes, 0, escapes.length);
+		} else {
+			this.escapes = null;
+		}
 	}
 
 }

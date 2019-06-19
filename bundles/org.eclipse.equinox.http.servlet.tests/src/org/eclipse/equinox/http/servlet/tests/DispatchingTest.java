@@ -1439,8 +1439,8 @@ public class DispatchingTest extends BaseTest {
 			protected void service(HttpServletRequest request, HttpServletResponse response)
 				throws ServletException, IOException {
 
-		        response.setContentType("text/event-stream");
-		        response.setCharacterEncoding("UTF-8");
+				response.setContentType("text/event-stream");
+				response.setCharacterEncoding("UTF-8");
 
 				try (ServletOutputStream out = response.getOutputStream()) {
 					for (int i = 1; i <= 10; ++i) {
@@ -1515,8 +1515,8 @@ public class DispatchingTest extends BaseTest {
 			protected void service(HttpServletRequest request, HttpServletResponse response)
 				throws ServletException, IOException {
 
-		        response.setContentType("text/event-stream");
-		        response.setCharacterEncoding("UTF-8");
+				response.setContentType("text/event-stream");
+				response.setCharacterEncoding("UTF-8");
 
 				try (PrintWriter writer = response.getWriter()) {
 					for (int i = 1; i <= 10; ++i) {

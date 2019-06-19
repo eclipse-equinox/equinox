@@ -22,7 +22,7 @@ package org.osgi.service.prefs;
  * @version $Id$
  */
 public class BackingStoreException extends Exception {
-    static final long serialVersionUID = -1415637364122829574L;
+	static final long serialVersionUID = -1415637364122829574L;
 
 	/**
 	 * Constructs a {@code BackingStoreException} with the specified detail

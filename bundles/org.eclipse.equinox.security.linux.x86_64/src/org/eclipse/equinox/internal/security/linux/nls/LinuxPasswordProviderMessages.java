@@ -17,18 +17,18 @@ import org.eclipse.osgi.util.NLS;
 
 public class LinuxPasswordProviderMessages extends NLS {
 
-  private static final String BUNDLE_NAME = "org.eclipse.equinox.internal.security.linux.nls.messages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.equinox.internal.security.linux.nls.messages"; //$NON-NLS-1$
 
-  public static String getMasterPasswordError;
-  public static String saveMasterPasswordError;
-  public static String newMasterPasswordGenerated;
+	public static String getMasterPasswordError;
+	public static String saveMasterPasswordError;
+	public static String newMasterPasswordGenerated;
 
-  static {
-    // load message values from bundle file
-    reloadMessages();
-  }
+	static {
+		// load message values from bundle file
+		reloadMessages();
+	}
 
-  public static void reloadMessages() {
-    NLS.initializeMessages(BUNDLE_NAME, LinuxPasswordProviderMessages.class);
-  }
+	public static void reloadMessages() {
+		NLS.initializeMessages(BUNDLE_NAME, LinuxPasswordProviderMessages.class);
+	}
 }

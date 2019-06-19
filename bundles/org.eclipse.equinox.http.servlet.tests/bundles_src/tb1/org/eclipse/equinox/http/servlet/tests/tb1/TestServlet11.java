@@ -45,12 +45,12 @@ public class TestServlet11 extends AbstractTestServlet {
 		OutputStream out = response.getOutputStream();
 
 		try {
-			  byte[] buffer = new byte[2048];
-			  int bytesRead;
+			byte[] buffer = new byte[2048];
+			int bytesRead;
 
-			  while ((bytesRead = in.read(buffer)) != -1) {
-				 out.write(buffer, 0, bytesRead);
-			  }
+			while ((bytesRead = in.read(buffer)) != -1) {
+				out.write(buffer, 0, bytesRead);
+			}
 		}
 		finally {
 			out.close();

@@ -27,7 +27,7 @@ import org.eclipse.equinox.console.common.InputHandler;
  */
 public class SshInputHandler extends InputHandler {
 	public SshInputHandler(InputStream input, ConsoleInputStream in, ConsoleOutputStream out) {
-        super(input, in, out);
-        inputScanner = new SshInputScanner(in, out);
-    }
+		super(input, in, out);
+		inputScanner = new SshInputScanner(in, out);
+	}
 }

@@ -25,48 +25,48 @@ import java.io.OutputStream;
  */
 public abstract class InputHandler extends Thread {
 
-    protected Scanner inputScanner;
-    protected OutputStream out;
-    protected ConsoleInputStream in;
-    protected InputStream input;
-    protected byte[] buffer;
-    protected static final int MAX_SIZE = 2048;
+	protected Scanner inputScanner;
+	protected OutputStream out;
+	protected ConsoleInputStream in;
+	protected InputStream input;
+	protected byte[] buffer;
+	protected static final int MAX_SIZE = 2048;
 
-    public InputHandler(InputStream input, ConsoleInputStream in, OutputStream out) {
-        this.input = input;
-        this.in = in;
-        this.out = out;
-        buffer = new byte[MAX_SIZE];
-    }
+	public InputHandler(InputStream input, ConsoleInputStream in, OutputStream out) {
+		this.input = input;
+		this.in = in;
+		this.out = out;
+		buffer = new byte[MAX_SIZE];
+	}
 
-    @Override
+	@Override
 	public void run() {
-        int count;
-        try {
-            while ((count = input.read(buffer)) > -1) {
-                for (int i = 0; i < count; i++) {
-                    inputScanner.scan(buffer[i]);
-                }
-            }
-        } catch (IOException e) {
-            // Printing stack trace is not needed since the streams are closed immediately
-            // do nothing
-        } finally {
-        	try {
-                in.close();
-            } catch (IOException e1) {
-                // do nothing
-            }
-            try {
-                out.close();
-            } catch (IOException e1) {
-                // do nothing
-            }
-        }
-    }
-    
-    public Scanner getScanner() {
-    	return inputScanner;
-    }
+		int count;
+		try {
+			while ((count = input.read(buffer)) > -1) {
+				for (int i = 0; i < count; i++) {
+					inputScanner.scan(buffer[i]);
+				}
+			}
+		} catch (IOException e) {
+			// Printing stack trace is not needed since the streams are closed immediately
+			// do nothing
+		} finally {
+			try {
+				in.close();
+			} catch (IOException e1) {
+				// do nothing
+			}
+			try {
+				out.close();
+			} catch (IOException e1) {
+				// do nothing
+			}
+		}
+	}
+	
+	public Scanner getScanner() {
+		return inputScanner;
+	}
 
 }

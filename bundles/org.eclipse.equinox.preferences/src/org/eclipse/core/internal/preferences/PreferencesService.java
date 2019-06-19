@@ -1129,11 +1129,11 @@ public class PreferencesService implements IPreferencesService {
 	}
 
 	/*
-	  * Set the default search order to use when there is nothing else set. Clients should not
-	  * call this method because it is in an internal class and has been created solely for use by
-	  * the org.eclipse.core.resources bundle in response to this bug:
-	  *     https://bugs.eclipse.org/330320
-	  */
+	 * Set the default search order to use when there is nothing else set. Clients should not
+	 * call this method because it is in an internal class and has been created solely for use by
+	 * the org.eclipse.core.resources bundle in response to this bug:
+	 *     https://bugs.eclipse.org/330320
+	 */
 	public void setDefaultDefaultLookupOrder(String[] order) {
 		// shouldn't happen but let's protect against an NPE.
 		if (order == null)

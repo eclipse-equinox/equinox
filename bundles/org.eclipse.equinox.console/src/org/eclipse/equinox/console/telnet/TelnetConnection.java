@@ -37,14 +37,14 @@ public class TelnetConnection extends Thread implements Closeable {
 	private CommandProcessor processor;
 	private BundleContext context;
 	protected boolean isTelnetNegotiationFinished = false;
-    private Callback callback;
-    private static final long TIMEOUT = 1000;
-    private static final long NEGOTIATION_TIMEOUT = 60000;
-    private static final String PROMPT = "prompt";
-    private static final String OSGI_PROMPT = "osgi> ";
-    private static final String SCOPE = "SCOPE";
-    private static final String EQUINOX_SCOPE = "equinox:*";
-    private static final String CLOSEABLE = "CLOSEABLE";
+	private Callback callback;
+	private static final long TIMEOUT = 1000;
+	private static final long NEGOTIATION_TIMEOUT = 60000;
+	private static final String PROMPT = "prompt";
+	private static final String OSGI_PROMPT = "osgi> ";
+	private static final String SCOPE = "SCOPE";
+	private static final String EQUINOX_SCOPE = "equinox:*";
+	private static final String CLOSEABLE = "CLOSEABLE";
 	
 	public TelnetConnection (Socket socket, CommandProcessor processor, BundleContext context) {
 		this.socket = socket;
@@ -78,35 +78,35 @@ public class TelnetConnection extends Thread implements Closeable {
 			
 			ConsoleInputStream inp = new ConsoleInputStream();
 			
-	        ConsoleInputHandler consoleInputHandler = new ConsoleInputHandler(in, inp, out);
-	        consoleInputHandler.getScanner().setBackspace(telnetInputHandler.getScanner().getBackspace());
-	        consoleInputHandler.getScanner().setDel(telnetInputHandler.getScanner().getDel());
-	        consoleInputHandler.getScanner().setCurrentEscapesToKey(telnetInputHandler.getScanner().getCurrentEscapesToKey());
-	        consoleInputHandler.getScanner().setEscapes(telnetInputHandler.getScanner().getEscapes());
-	        ((ConsoleInputScanner)consoleInputHandler.getScanner()).setContext(context);
-	        
-	        consoleInputHandler.start();
-	        
-	        session = processor.createSession(inp, output, output);
-	        session.put(SCOPE, EQUINOX_SCOPE);
-	        session.put(PROMPT, OSGI_PROMPT);
-	        // Store this closeable object in the session, so that the disconnect command can close it
-	        session.put(CLOSEABLE, this);
-	        ((ConsoleInputScanner)consoleInputHandler.getScanner()).setSession(session);
-	        
+			ConsoleInputHandler consoleInputHandler = new ConsoleInputHandler(in, inp, out);
+			consoleInputHandler.getScanner().setBackspace(telnetInputHandler.getScanner().getBackspace());
+			consoleInputHandler.getScanner().setDel(telnetInputHandler.getScanner().getDel());
+			consoleInputHandler.getScanner().setCurrentEscapesToKey(telnetInputHandler.getScanner().getCurrentEscapesToKey());
+			consoleInputHandler.getScanner().setEscapes(telnetInputHandler.getScanner().getEscapes());
+			((ConsoleInputScanner)consoleInputHandler.getScanner()).setContext(context);
+			
+			consoleInputHandler.start();
+			
+			session = processor.createSession(inp, output, output);
+			session.put(SCOPE, EQUINOX_SCOPE);
+			session.put(PROMPT, OSGI_PROMPT);
+			// Store this closeable object in the session, so that the disconnect command can close it
+			session.put(CLOSEABLE, this);
+			((ConsoleInputScanner)consoleInputHandler.getScanner()).setSession(session);
+			
 			try {
-	            session.execute("gosh --login --noshutdown");
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	        } finally {
-	            session.close();
-	            try {
-	                socket.close();
-	            }
-	            catch (IOException e) {
-	            	// do nothing
-	            }
-	        }
+				session.execute("gosh --login --noshutdown");
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				session.close();
+				try {
+					socket.close();
+				}
+				catch (IOException e) {
+					// do nothing
+				}
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

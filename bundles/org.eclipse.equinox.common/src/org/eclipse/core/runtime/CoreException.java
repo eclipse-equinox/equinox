@@ -48,11 +48,11 @@ public class CoreException extends Exception {
 	}
 
 	/**
-	  * Returns the cause of this exception, or <code>null</code> if none.
-	  * 
-	  * @return the cause for this exception
-	  * @since 3.4
-	  */
+	 * Returns the cause of this exception, or <code>null</code> if none.
+	 * 
+	 * @return the cause for this exception
+	 * @since 3.4
+	 */
 	@Override
 	public Throwable getCause() {
 		return status.getException();

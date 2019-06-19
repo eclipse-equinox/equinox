@@ -24,8 +24,8 @@ import java.io.OutputStream;
  */
 public class ConsoleInputHandler extends InputHandler {
 	
-    public ConsoleInputHandler(InputStream input, ConsoleInputStream in, OutputStream out) {
-        super(input, in, out);
-        inputScanner = new ConsoleInputScanner(in, out);
-    } 
+	public ConsoleInputHandler(InputStream input, ConsoleInputStream in, OutputStream out) {
+		super(input, in, out);
+		inputScanner = new ConsoleInputScanner(in, out);
+	} 
 }

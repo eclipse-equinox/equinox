@@ -65,21 +65,21 @@ public class DigestUtil {
 	}
 	
 	//byte array into hexademical string
-    private static String asHex(byte[] buf)
-    {
-        char[] chars = new char[2 * buf.length];
-        for (int i = 0; i < buf.length; ++i)
-        {
-            chars[2 * i] = HEX_CHARS[(buf[i] & 0xF0) >>> 4];
-            chars[2 * i + 1] = HEX_CHARS[buf[i] & 0x0F];
-        }
-        return new String(chars);
-    }
-    
-    //generate digest byte[]  
-    private static byte[] getDigest(byte[] inputData, String algorithm) throws NoSuchAlgorithmException { 
-    	MessageDigest md = MessageDigest.getInstance(algorithm);
-    	md.update(inputData);
-        return md.digest();
-    }
+	private static String asHex(byte[] buf)
+	{
+		char[] chars = new char[2 * buf.length];
+		for (int i = 0; i < buf.length; ++i)
+		{
+			chars[2 * i] = HEX_CHARS[(buf[i] & 0xF0) >>> 4];
+			chars[2 * i + 1] = HEX_CHARS[buf[i] & 0x0F];
+		}
+		return new String(chars);
+	}
+	
+	//generate digest byte[]  
+	private static byte[] getDigest(byte[] inputData, String algorithm) throws NoSuchAlgorithmException { 
+		MessageDigest md = MessageDigest.getInstance(algorithm);
+		md.update(inputData);
+		return md.digest();
+	}
 }

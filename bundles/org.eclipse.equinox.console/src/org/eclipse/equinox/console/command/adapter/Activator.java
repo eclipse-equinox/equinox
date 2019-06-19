@@ -133,18 +133,18 @@ public class Activator implements BundleActivator {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-				    try {
-				    	gogoSession.put("SCOPE", "equinox:*");
-				    	gogoSession.put("prompt", "osgi> ");
-				        gogoSession.execute("gosh --login --noshutdown");
-				    }
-				    catch (Exception e) {
-				        e.printStackTrace();
-				    }
-				    finally {
-				        gogoSession.close();
-				        equinoxSession.close();
-				    }
+					try {
+						gogoSession.put("SCOPE", "equinox:*");
+						gogoSession.put("prompt", "osgi> ");
+						gogoSession.execute("gosh --login --noshutdown");
+					}
+					catch (Exception e) {
+						e.printStackTrace();
+					}
+					finally {
+						gogoSession.close();
+						equinoxSession.close();
+					}
 				}
 			}, "Equinox Console Session").start();
 			return null;

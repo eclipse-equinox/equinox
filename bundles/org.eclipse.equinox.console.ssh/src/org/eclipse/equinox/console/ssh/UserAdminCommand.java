@@ -34,9 +34,9 @@ import org.eclipse.equinox.console.storage.SecureUserStore;
  *
  */
 public class UserAdminCommand {
-    private static final String INPUT_SCANNER = "INPUT_SCANNER";
-    private static final String SSH_INPUT_SCANNER = "SSH_INPUT_SCANNER";
-    private static final String DEFAULT_USER = "equinox";
+	private static final String INPUT_SCANNER = "INPUT_SCANNER";
+	private static final String SSH_INPUT_SCANNER = "SSH_INPUT_SCANNER";
+	private static final String DEFAULT_USER = "equinox";
 	private static final int MINIMAL_PASSWORD_LENGTH = 8;
 	private static final int PASSWORD_INPUT_TRIALS_LIMIT = 3;
 

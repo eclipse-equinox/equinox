@@ -23,15 +23,15 @@ import org.osgi.framework.ServiceReference;
 public class ServiceReferenceMap extends AbstractMap<String, Object> {
 
 	public ServiceReferenceMap(ServiceReference<?> serviceReference) {
-		 String[] propertyKeys = serviceReference.getPropertyKeys();
+		String[] propertyKeys = serviceReference.getPropertyKeys();
 
-		 entries = new HashSet<Map.Entry<String,Object>>(propertyKeys.length);
+		entries = new HashSet<Map.Entry<String,Object>>(propertyKeys.length);
 
-		 for (String key : propertyKeys) {
-			 Map.Entry<String,Object> entry = new ReferenceEntry(
-				 key, serviceReference.getProperty(key));
+		for (String key : propertyKeys) {
+			Map.Entry<String,Object> entry = new ReferenceEntry(
+				key, serviceReference.getProperty(key));
 
-			 entries.add(entry);
+			entries.add(entry);
 		}
 	}
 

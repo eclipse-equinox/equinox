@@ -53,23 +53,23 @@ public class SshShell implements Command {
 	private static final String DEFAULT_TTYPE = File.separatorChar == '/' ? "XTERM" : "ANSI";
 	private TerminalTypeMappings currentMappings;
 	private Map<String, KEYS> currentEscapesToKey;
-    private static final String TERMINAL_PROPERTY = "TERM";
+	private static final String TERMINAL_PROPERTY = "TERM";
 	
 	public SshShell(List<CommandProcessor> processors, BundleContext context) {
 		this.processors = processors;
 		this.context = context;
 		supportedEscapeSequences = new HashMap<> ();
-        supportedEscapeSequences.put("ANSI", new ANSITerminalTypeMappings());
-        supportedEscapeSequences.put("WINDOWS", new ANSITerminalTypeMappings());
-        supportedEscapeSequences.put("VT100", new VT100TerminalTypeMappings());
-        VT220TerminalTypeMappings vtMappings = new VT220TerminalTypeMappings();
-        supportedEscapeSequences.put("VT220", vtMappings);
-        supportedEscapeSequences.put("XTERM", vtMappings);
-        supportedEscapeSequences.put("VT320", new VT320TerminalTypeMappings());
-        supportedEscapeSequences.put("SCO", new SCOTerminalTypeMappings());
-        
-        currentMappings = supportedEscapeSequences.get(DEFAULT_TTYPE);
-        currentEscapesToKey = currentMappings.getEscapesToKey();
+		supportedEscapeSequences.put("ANSI", new ANSITerminalTypeMappings());
+		supportedEscapeSequences.put("WINDOWS", new ANSITerminalTypeMappings());
+		supportedEscapeSequences.put("VT100", new VT100TerminalTypeMappings());
+		VT220TerminalTypeMappings vtMappings = new VT220TerminalTypeMappings();
+		supportedEscapeSequences.put("VT220", vtMappings);
+		supportedEscapeSequences.put("XTERM", vtMappings);
+		supportedEscapeSequences.put("VT320", new VT320TerminalTypeMappings());
+		supportedEscapeSequences.put("SCO", new SCOTerminalTypeMappings());
+		
+		currentMappings = supportedEscapeSequences.get(DEFAULT_TTYPE);
+		currentEscapesToKey = currentMappings.getEscapesToKey();
 	}
 
 	@Override
@@ -157,8 +157,8 @@ public class SshShell implements Command {
 	
 	private SshSession startNewConsoleSession(CommandProcessor processor) {
 		SshSession consoleSession = new SshSession(processor, context, this, in, out, currentMappings, currentEscapesToKey);
-        consoleSession.start();
-        return consoleSession;
+		consoleSession.start();
+		return consoleSession;
 	}
 
 }

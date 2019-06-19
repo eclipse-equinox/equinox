@@ -97,9 +97,9 @@ public class MultipartSupportPart implements Part {
 
 		public IteratorCollection(Iterator<String> iterator) {
 			this.collection = new ArrayList<String>();
-		    while (iterator.hasNext()) {
-		        collection.add(iterator.next());
-		    }
+			while (iterator.hasNext()) {
+				collection.add(iterator.next());
+			}
 		}
 
 		@Override

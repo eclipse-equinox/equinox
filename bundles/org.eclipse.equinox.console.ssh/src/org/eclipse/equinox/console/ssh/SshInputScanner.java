@@ -31,11 +31,11 @@ public class SshInputScanner extends Scanner {
 
 	public SshInputScanner(ConsoleInputStream toShell, OutputStream toTelnet) {
 		super(toShell, toTelnet);
-        TerminalTypeMappings currentMapping = supportedEscapeSequences.get(DEFAULT_TTYPE);
-    	currentEscapesToKey = currentMapping.getEscapesToKey();
-    	escapes = currentMapping.getEscapes();
-    	setBackspace(currentMapping.getBackspace());
-    	setDel(currentMapping.getDel());
+		TerminalTypeMappings currentMapping = supportedEscapeSequences.get(DEFAULT_TTYPE);
+		currentEscapesToKey = currentMapping.getEscapesToKey();
+		escapes = currentMapping.getEscapes();
+		setBackspace(currentMapping.getBackspace());
+		setDel(currentMapping.getDel());
 	}
 	
 	@Override
@@ -43,37 +43,37 @@ public class SshInputScanner extends Scanner {
 		b &= 0xFF;
 
 		if (isEsc) {
-            scanEsc(b);
-        } else {
-        	switch (b) {
-        	case ESC:
-        		startEsc();
-        		toShell.add(new byte[]{(byte) b});
-        		break;
-        	default:
-        		if (b >= SPACE && b < MAX_CHAR) {
-        			echo((byte) b);
-        			flush();
-        		}
-        		toShell.add(new byte[]{(byte) b});
-        	}
-        }
+			scanEsc(b);
+		} else {
+			switch (b) {
+			case ESC:
+				startEsc();
+				toShell.add(new byte[]{(byte) b});
+				break;
+			default:
+				if (b >= SPACE && b < MAX_CHAR) {
+					echo((byte) b);
+					flush();
+				}
+				toShell.add(new byte[]{(byte) b});
+			}
+		}
 	}
 
 	@Override
 	protected void scanEsc(int b) throws IOException {
 		esc += (char) b;
-        toShell.add(new byte[]{(byte) b});
-        KEYS key = checkEscape(esc);
-        if (key == KEYS.UNFINISHED) {
-            return;
-        }
-        if (key == KEYS.UNKNOWN) {
-            isEsc = false;
-            scan(b);
-            return;
-        }
-        isEsc = false;
+		toShell.add(new byte[]{(byte) b});
+		KEYS key = checkEscape(esc);
+		if (key == KEYS.UNFINISHED) {
+			return;
+		}
+		if (key == KEYS.UNKNOWN) {
+			isEsc = false;
+			scan(b);
+			return;
+		}
+		isEsc = false;
 	}
 
 }

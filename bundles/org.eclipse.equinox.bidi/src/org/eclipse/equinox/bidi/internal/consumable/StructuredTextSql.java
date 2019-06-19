@@ -52,15 +52,15 @@ public class StructuredTextSql extends StructuredTextTypeHandler {
 	}
 
 	/**
-	  *  Locates occurrences of 5 special strings:
-	  *  <ol>
-	  *    <li>spaces</li>
-	  *    <li>literals starting with apostrophe</li>
-	  *    <li>identifiers starting with quotation mark</li>
-	  *    <li>comments starting with slash-asterisk</li>
-	  *    <li>comments starting with hyphen-hyphen</li>
-	  *  </ol>
-	  */
+	 *  Locates occurrences of 5 special strings:
+	 *  <ol>
+	 *    <li>spaces</li>
+	 *    <li>literals starting with apostrophe</li>
+	 *    <li>identifiers starting with quotation mark</li>
+	 *    <li>comments starting with slash-asterisk</li>
+	 *    <li>comments starting with hyphen-hyphen</li>
+	 *  </ol>
+	 */
 	@Override
 	public int indexOfSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets, int caseNumber, int fromIndex) {
 		switch (caseNumber) {
@@ -81,13 +81,13 @@ public class StructuredTextSql extends StructuredTextTypeHandler {
 
 	/**
 	 *  Processes the 5 special cases as follows.
-	     *  <ol>
-	     *    <li>skip the run of spaces</li>
-	     *    <li>look for a matching apostrophe and skip until after it</li>
-	     *    <li>look for a matching quotation mark and skip until after it</li>
-	     *    <li>skip until after the closing asterisk-slash</li>
-	     *    <li>skip until after a line separator</li>
-	     *  </ol>
+	 *  <ol>
+	 *    <li>skip the run of spaces</li>
+	 *    <li>look for a matching apostrophe and skip until after it</li>
+	 *    <li>look for a matching quotation mark and skip until after it</li>
+	 *    <li>skip until after the closing asterisk-slash</li>
+	 *    <li>skip until after a line separator</li>
+	 *  </ol>
 	 */
 	@Override
 	public int processSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets, int caseNumber, int separLocation) {

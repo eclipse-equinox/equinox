@@ -67,19 +67,19 @@ public class ApplicationException extends Exception {
 	 * during launch. The exception is available from {@code getCause()}.
 	 */
 	public static final int APPLICATION_INTERNAL_ERROR = 0x03;
-    
-    /**
-     * The application schedule could not be created due to some internal error
-     * (for example, the schedule information couldn't be saved due to some
+	
+	/**
+	 * The application schedule could not be created due to some internal error
+	 * (for example, the schedule information couldn't be saved due to some
 	 * storage error).
-     */
-    public static final int APPLICATION_SCHEDULING_FAILED = 0x04;
-    
-    /**
-     * The application scheduling failed because the specified identifier
-     * is already in use.
-     */
-    public static final int APPLICATION_DUPLICATE_SCHEDULE_ID = 0x05;
+	 */
+	public static final int APPLICATION_SCHEDULING_FAILED = 0x04;
+	
+	/**
+	 * The application scheduling failed because the specified identifier
+	 * is already in use.
+	 */
+	public static final int APPLICATION_DUPLICATE_SCHEDULE_ID = 0x05;
 
 	/**
 	 * The exit value is not available for an application instance because the
@@ -87,7 +87,7 @@ public class ApplicationException extends Exception {
 	 *
 	 * @since 1.1
 	 */
-    public static final int APPLICATION_EXITVALUE_NOT_AVAILABLE = 0x06;
+	public static final int APPLICATION_EXITVALUE_NOT_AVAILABLE = 0x06;
 
 	/**
 	 * One of the specified startup arguments is invalid, for example its 
@@ -95,7 +95,7 @@ public class ApplicationException extends Exception {
 	 *
 	 * @since 1.1
 	 */
-    public static final int APPLICATION_INVALID_STARTUP_ARGUMENT = 0x07;
+	public static final int APPLICATION_INVALID_STARTUP_ARGUMENT = 0x07;
 
 	/**
 	 * Creates an {@code ApplicationException} with the specified error code.

@@ -55,14 +55,14 @@ public class UserAdminCommandTests {
 		SecureUserStore.initStorage();
 		
 		CommandSession session = EasyMock.createMock(CommandSession.class);
-        EasyMock.expect(session.put((String)EasyMock.anyObject(), EasyMock.anyObject())).andReturn(new Object()).times(3);
-        EasyMock.replay(session);
-        
-        UserAdminCommand command = new UserAdminCommand();
-        command.addUser(new String[] {USERNAME_OPTION, USERNAME1, PASSWORD_OPTION, PASSWORD1});
-        command.addUser(new String[] {USERNAME_OPTION, USERNAME2, PASSWORD_OPTION, PASSWORD2, ROLES_OPTION, ROLES2});
-        
-        String[] usernames = SecureUserStore.getUserNames();
+		EasyMock.expect(session.put((String)EasyMock.anyObject(), EasyMock.anyObject())).andReturn(new Object()).times(3);
+		EasyMock.replay(session);
+		
+		UserAdminCommand command = new UserAdminCommand();
+		command.addUser(new String[] {USERNAME_OPTION, USERNAME1, PASSWORD_OPTION, PASSWORD1});
+		command.addUser(new String[] {USERNAME_OPTION, USERNAME2, PASSWORD_OPTION, PASSWORD2, ROLES_OPTION, ROLES2});
+		
+		String[] usernames = SecureUserStore.getUserNames();
 		boolean arePresent = (usernames[0].equals(USERNAME1) || usernames[0].equals(USERNAME2)) && (usernames[1].equals(USERNAME1) || usernames[1].equals(USERNAME2)) && (!usernames[0].equals(usernames[1]));
 		assertTrue("Usernames not correctly saved", arePresent);
 		
@@ -98,10 +98,10 @@ public class UserAdminCommandTests {
 	@After
 	public void cleanUp() {
 		System.setProperty(USER_STORE_FILE_NAME_PROPERTY, "");
-    	File file = new File(USER_STORE_FILE_NAME);
-    	if(file.exists()) {
-    		file.delete();
-    	}
+		File file = new File(USER_STORE_FILE_NAME);
+		if(file.exists()) {
+			file.delete();
+		}
 	}
 	
 	private boolean compareRoles(String expectedRoles, String actualRoles) {

@@ -372,7 +372,7 @@ public class DefaultPreferences extends EclipsePreferences {
 				e.printStackTrace();
 			}
 		}
-	     finally {
+		finally {
 			if (input != null)
 				try {
 					input.close();

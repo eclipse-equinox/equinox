@@ -49,14 +49,14 @@ public class CommandProviderAdapterTest {
 	}
 
 	class TestCommandProvider implements CommandProvider {
-        public String _test(CommandInterpreter i) {
-        	return "test";
-        }
-        
-        public String _echo(CommandInterpreter i) {
-        	return i.nextArgument();
-        }
-        
+		public String _test(CommandInterpreter i) {
+			return "test";
+		}
+		
+		public String _echo(CommandInterpreter i) {
+			return i.nextArgument();
+		}
+		
 		@Override
 		public String getHelp() {
 			return "this is a test command provider";

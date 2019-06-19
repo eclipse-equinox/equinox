@@ -91,10 +91,10 @@ public class SecureUserStoreTests {
 	@After
 	public void cleanUp() {
 		System.setProperty(USER_STORE_FILE_NAME_PROPERTY, "");
-    	File file = new File(USER_STORE_FILE_NAME);
-    	if(file.exists()) {
-    		file.delete();
-    	}
+		File file = new File(USER_STORE_FILE_NAME);
+		if(file.exists()) {
+			file.delete();
+		}
 	}
 	
 	private boolean compareRoles(String expectedRoles, String actualRoles) {

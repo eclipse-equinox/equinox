@@ -31,13 +31,13 @@ public abstract class TerminalTypeMappings {
 	
 	public TerminalTypeMappings() {
 		escapesToKey = new HashMap<>();
-        escapesToKey.put("[A", KEYS.UP); //$NON-NLS-1$
-        escapesToKey.put("[B", KEYS.DOWN); //$NON-NLS-1$
-        escapesToKey.put("[C", KEYS.RIGHT); //$NON-NLS-1$
-        escapesToKey.put("[D", KEYS.LEFT); //$NON-NLS-1$
-        escapesToKey.put("[G", KEYS.CENTER); //$NON-NLS-1$
-        setKeypadMappings();
-        createEscapes();
+		escapesToKey.put("[A", KEYS.UP); //$NON-NLS-1$
+		escapesToKey.put("[B", KEYS.DOWN); //$NON-NLS-1$
+		escapesToKey.put("[C", KEYS.RIGHT); //$NON-NLS-1$
+		escapesToKey.put("[D", KEYS.LEFT); //$NON-NLS-1$
+		escapesToKey.put("[G", KEYS.CENTER); //$NON-NLS-1$
+		setKeypadMappings();
+		createEscapes();
 	}
 	
 	public Map<String, KEYS> getEscapesToKey() {
@@ -45,13 +45,13 @@ public abstract class TerminalTypeMappings {
 	}
 	
 	public String[] getEscapes() {
-        if (escapes != null) {
-        	String[] copy = new String[escapes.length];
-        	System.arraycopy(escapes, 0, copy, 0, escapes.length);
-        	return copy;
-        } else {
-            return null;
-        }
+		if (escapes != null) {
+			String[] copy = new String[escapes.length];
+			System.arraycopy(escapes, 0, copy, 0, escapes.length);
+			return copy;
+		} else {
+			return null;
+		}
 	}
 	
 	public byte getBackspace() {
@@ -66,9 +66,9 @@ public abstract class TerminalTypeMappings {
 	
 	private void createEscapes() {
 		escapes = new String[escapesToKey.size()];
-        Object[] temp = escapesToKey.keySet().toArray();
-        for (int i = 0; i < escapes.length; i++) {
-            escapes[i] = (String) temp[i];
-        }
+		Object[] temp = escapesToKey.keySet().toArray();
+		for (int i = 0; i < escapes.length; i++) {
+			escapes[i] = (String) temp[i];
+		}
 	}
 }

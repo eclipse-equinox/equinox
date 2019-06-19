@@ -21,17 +21,17 @@ public class ANSITerminalTypeMappings extends TerminalTypeMappings {
 	
 	public ANSITerminalTypeMappings() {
 		super();
-        BACKSPACE = 8;
-        DEL = 127;
+		BACKSPACE = 8;
+		DEL = 127;
 	}
 	
 	@Override
 	public void setKeypadMappings() {
 		escapesToKey.put("[1~", KEYS.HOME); //$NON-NLS-1$
-        escapesToKey.put("[4~", KEYS.END); //$NON-NLS-1$
-        escapesToKey.put("[5~", KEYS.PGUP); //$NON-NLS-1$
-        escapesToKey.put("[6~", KEYS.PGDN); //$NON-NLS-1$
-        escapesToKey.put("[2~", KEYS.INS); //$NON-NLS-1$
-        escapesToKey.put("[3~", KEYS.DEL); //$NON-NLS-1$
+		escapesToKey.put("[4~", KEYS.END); //$NON-NLS-1$
+		escapesToKey.put("[5~", KEYS.PGUP); //$NON-NLS-1$
+		escapesToKey.put("[6~", KEYS.PGDN); //$NON-NLS-1$
+		escapesToKey.put("[2~", KEYS.INS); //$NON-NLS-1$
+		escapesToKey.put("[3~", KEYS.DEL); //$NON-NLS-1$
 	}
 }

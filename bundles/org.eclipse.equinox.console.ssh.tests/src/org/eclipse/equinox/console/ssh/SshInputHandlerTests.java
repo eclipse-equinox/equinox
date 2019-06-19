@@ -28,23 +28,23 @@ public class SshInputHandlerTests {
 
 	private static final long WAIT_TIME = 10000;
 
-    @Test
-    public void testHandler() throws Exception {
+	@Test
+	public void testHandler() throws Exception {
 		ByteArrayInputStream input = new ByteArrayInputStream("abcde".getBytes(StandardCharsets.UTF_8));
-        ConsoleInputStream in = new ConsoleInputStream();
-        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-        ConsoleOutputStream out = new ConsoleOutputStream(byteOut);
-        SshInputHandler handler = new SshInputHandler(input, in, out);
-        handler.start();
+		ConsoleInputStream in = new ConsoleInputStream();
+		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+		ConsoleOutputStream out = new ConsoleOutputStream(byteOut);
+		SshInputHandler handler = new SshInputHandler(input, in, out);
+		handler.start();
 
-        // wait for the accept thread to start execution
-        try {
-            Thread.sleep(WAIT_TIME);
-        } catch (InterruptedException ie) {
-            // do nothing
-        }
+		// wait for the accept thread to start execution
+		try {
+			Thread.sleep(WAIT_TIME);
+		} catch (InterruptedException ie) {
+			// do nothing
+		}
 
-        String res = byteOut.toString();
-        Assert.assertTrue("Wrong input. Expected abcde, read " + res, res.equals("abcde"));
-    }
+		String res = byteOut.toString();
+		Assert.assertTrue("Wrong input. Expected abcde, read " + res, res.equals("abcde"));
+	}
 }
