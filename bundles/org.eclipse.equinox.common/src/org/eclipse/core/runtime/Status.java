@@ -240,7 +240,7 @@ public class Status implements IStatus {
 	 */
 	@Override
 	public String toString() {
-		StringBuffer buf = new StringBuffer();
+		StringBuilder buf = new StringBuilder();
 		buf.append("Status "); //$NON-NLS-1$
 		if (severity == OK) {
 			buf.append("OK"); //$NON-NLS-1$

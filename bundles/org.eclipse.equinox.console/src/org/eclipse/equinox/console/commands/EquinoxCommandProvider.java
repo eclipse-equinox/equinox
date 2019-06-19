@@ -533,7 +533,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	public void services(@Descriptor(ConsoleMsg.CONSOLE_HELP_FILTER_ARGUMENT_DESCRIPTION)String... filters) throws Exception {
 		String filter = null;
 		if (filters != null && filters.length > 0) {
-			StringBuffer buf = new StringBuffer();
+			StringBuilder buf = new StringBuilder();
 			for (String singleFilter : filters) {
 				buf.append(' ');
 				buf.append(singleFilter);
@@ -1456,7 +1456,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		// No need to sort if an action was specified.
 		Util.sortByString(threads);
 
-		StringBuffer sb = new StringBuffer(120);
+		StringBuilder sb = new StringBuilder(120);
 		System.out.println();
 		System.out.println(ConsoleMsg.CONSOLE_THREADGROUP_TITLE);
 		for (int i = 0; i < threadGroups.length; i++) {

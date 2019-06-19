@@ -627,7 +627,7 @@ public class Log implements LogInterface, ServiceTrackerCustomizer<LogService, L
 			return prefix + " [" + moduleID + "] " + msgID + " : " + (message == null ? "" : message);
 		}
 
-		StringBuffer sBuf = new StringBuffer(prefix).append("[");
+		StringBuilder sBuf = new StringBuilder(prefix).append("[");
 
 		String module = getModuleName(moduleID);
 		sBuf.append(module != null ? module : "" + moduleID);
@@ -729,7 +729,7 @@ public class Log implements LogInterface, ServiceTrackerCustomizer<LogService, L
 		if (fos == null)
 			synchronized (this) {
 				if (fos == null) {
-					StringBuffer fname = new StringBuffer(logsdir.length() + baseName.length() + 1);
+					StringBuilder fname = new StringBuilder(logsdir.length() + baseName.length() + 1);
 					fname.append(logsdir).append(File.separatorChar).append(baseName);
 					try {
 						fos = new FileOutputStream(fname.toString(), true);

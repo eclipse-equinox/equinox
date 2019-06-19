@@ -196,11 +196,11 @@ public class Util {
 			return input.substring(start, length);
 		}
 
-		StringBuffer padding = new StringBuffer(length - size);
+		StringBuilder padding = new StringBuilder(length - size);
 		for (int i = size; i < length; i++)
 			padding.append(pad);
 
-		StringBuffer stringBuffer = new StringBuffer(length);
+		StringBuilder stringBuffer = new StringBuilder(length);
 		if (onLeft)
 			stringBuffer.append(padding.toString());
 		stringBuffer.append(input);

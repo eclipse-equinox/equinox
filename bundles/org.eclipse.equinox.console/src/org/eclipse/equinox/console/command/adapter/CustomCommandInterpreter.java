@@ -261,7 +261,7 @@ public void printBundleResource(Bundle bundle, String resource) {
    texts that explain the command.
    */
   public String getHelp() {
-    StringBuffer help = new StringBuffer(256);
+    StringBuilder help = new StringBuilder(256);
     help.append("---Controlling the Console---");
     help.append(newline);
     help.append(tab);

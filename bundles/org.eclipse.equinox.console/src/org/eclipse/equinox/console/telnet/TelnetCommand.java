@@ -192,7 +192,7 @@ public class TelnetCommand {
     }
     
     private void printHelp() {
-    	StringBuffer help = new StringBuffer();
+    	StringBuilder help = new StringBuilder();
     	help.append("telnet - start simple telnet server");
     	help.append("\n");
     	help.append("Usage: telnet start | stop [-port port] [-host host]");
