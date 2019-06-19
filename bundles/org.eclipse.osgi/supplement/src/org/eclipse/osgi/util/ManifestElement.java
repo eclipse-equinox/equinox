@@ -350,7 +350,7 @@ public class ManifestElement {
 			if (next == null)
 				throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
 			List<String> headerValues = new ArrayList<>();
-			StringBuffer headerValue = new StringBuffer(next);
+			StringBuilder headerValue = new StringBuilder(next);
 			headerValues.add(next);
 
 			if (SupplementDebug.STATIC_DEBUG_MANIFEST)

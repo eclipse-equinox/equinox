@@ -73,7 +73,7 @@ public class Tokenizer {
 		int cur = cursor;
 		if (cur >= max)
 			return null;
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		char c;
 		for (; cur < max; cur++) {
 			c = val[cur];
@@ -110,7 +110,7 @@ public class Tokenizer {
 		if (cur < max) {
 			if (val[cur] == '\"') /* if a quoted string */
 			{
-				StringBuffer sb = new StringBuffer();
+				StringBuilder sb = new StringBuilder();
 				cur++; /* skip quote */
 				char c = '\0';
 				for (; cur < max; cur++) {

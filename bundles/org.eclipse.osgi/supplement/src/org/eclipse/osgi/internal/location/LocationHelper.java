@@ -133,7 +133,7 @@ public class LocationHelper {
 		//them to spaces on certain class library implementations.
 		if (plusEncoded && urlString.indexOf('+') >= 0) {
 			int len = urlString.length();
-			StringBuffer buf = new StringBuffer(len);
+			StringBuilder buf = new StringBuilder(len);
 			for (int i = 0; i < len; i++) {
 				char c = urlString.charAt(i);
 				if (c == '+')
