@@ -1350,7 +1350,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		if ((toFilter.getState() & searchedState) == 0) {
 			return false;
 		}
-		if (searchedName != null && searchedName.length > 0 && toFilter.getSymbolicName() != null && toFilter.getSymbolicName().indexOf(searchedName[0]) == -1) {
+		if (searchedName != null && searchedName.length > 0 && toFilter.getSymbolicName() != null && !toFilter.getSymbolicName().contains(searchedName[0])) {
 			return false;
 		}
 		return true;

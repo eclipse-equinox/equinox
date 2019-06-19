@@ -319,7 +319,7 @@ public class Path implements IPath, Cloneable {
 	@Override
 	public IPath append(String tail) {
 		//optimize addition of a single segment
-		if (tail.indexOf(SEPARATOR) == -1 && tail.indexOf("\\") == -1 && tail.indexOf(DEVICE_SEPARATOR) == -1) { //$NON-NLS-1$
+		if (tail.indexOf(SEPARATOR) == -1 && !tail.contains("\\") && tail.indexOf(DEVICE_SEPARATOR) == -1) { //$NON-NLS-1$
 			int tailLength = tail.length();
 			if (tailLength < 3) {
 				//some special cases

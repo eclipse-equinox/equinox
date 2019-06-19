@@ -234,7 +234,7 @@ public class AppCommands implements CommandProvider {
 				return apps[i]; // always return a perfect match
 			if (perfectMatch)
 				continue;
-			if (id.indexOf(targetId) >= 0) {
+			if (id.contains(targetId)) {
 				if (result != null)
 					ambigous = true;
 				result = apps[i];

@@ -155,7 +155,7 @@ public final class PluginVersionIdentifier {
 			Assert.isTrue(false, NLS.bind(CommonMessages.parse_separatorStartVersion, s));
 		if (s.endsWith(SEPARATOR))
 			Assert.isTrue(false, NLS.bind(CommonMessages.parse_separatorEndVersion, s));
-		if (s.indexOf(SEPARATOR + SEPARATOR) != -1)
+		if (s.contains(SEPARATOR + SEPARATOR))
 			Assert.isTrue(false, NLS.bind(CommonMessages.parse_doubleSeparatorVersion, s));
 
 		StringTokenizer st = new StringTokenizer(s, SEPARATOR);
