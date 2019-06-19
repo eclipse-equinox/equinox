@@ -58,7 +58,7 @@ public class JNIBridge {
 	private void loadLibrary() {
 		if (library != null) {
 			try {
-				if (library.indexOf("wpf") != -1) { //$NON-NLS-1$
+				if (library.contains("wpf")) { //$NON-NLS-1$
 					int idx = library.indexOf("eclipse_"); //$NON-NLS-1$
 					if (idx != -1) {
 						String comLibrary = library.substring(0, idx) + "com_"; //$NON-NLS-1$
@@ -186,7 +186,7 @@ public class JNIBridge {
 	 */
 	public boolean uninitialize() {
 		if (libraryLoaded && library != null) {
-			if (library.indexOf("wpf") != -1) { //$NON-NLS-1$
+			if (library.contains("wpf")) { //$NON-NLS-1$
 				try {
 					OleUninitialize();
 				} catch (UnsatisfiedLinkError e) {
