@@ -619,8 +619,7 @@ public abstract class StateImpl implements State {
 			return reResolve; // if reResolve length==0 then we want to prevent pending removal
 		// merge in all removal pending bundles that are not already in the list
 		List<BundleDescription> result = new ArrayList<>(reResolve.length + removed.length);
-		for (int i = 0; i < reResolve.length; i++)
-			result.add(reResolve[i]);
+		Collections.addAll(result, reResolve);
 		for (int i = 0; i < removed.length; i++) {
 			boolean found = false;
 			for (int j = 0; j < reResolve.length; j++) {
@@ -756,16 +755,14 @@ public abstract class StateImpl implements State {
 				ExportPackageDescription[] bundlePackages = bundle.getSelectedExports();
 				if (bundlePackages == null)
 					continue;
-				for (int i = 0; i < bundlePackages.length; i++)
-					allExportedPackages.add(bundlePackages[i]);
+				Collections.addAll(allExportedPackages, bundlePackages);
 			}
 			for (Iterator<BundleDescription> iter = removalPendings.iterator(); iter.hasNext();) {
 				BundleDescription bundle = iter.next();
 				ExportPackageDescription[] bundlePackages = bundle.getSelectedExports();
 				if (bundlePackages == null)
 					continue;
-				for (int i = 0; i < bundlePackages.length; i++)
-					allExportedPackages.add(bundlePackages[i]);
+				Collections.addAll(allExportedPackages, bundlePackages);
 			}
 			return allExportedPackages.toArray(new ExportPackageDescription[allExportedPackages.size()]);
 		}

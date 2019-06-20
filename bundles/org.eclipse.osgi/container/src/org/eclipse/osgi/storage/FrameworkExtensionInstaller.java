@@ -23,6 +23,7 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleCapability;
@@ -167,9 +168,7 @@ public class FrameworkExtensionInstaller {
 			// must create a copy because paths could be unmodifiable
 			paths = new ArrayList<>(paths);
 			String[] devPaths = configuration.getDevClassPath(revision.getSymbolicName());
-			for (String devPath : devPaths) {
-				paths.add(devPath);
-			}
+			Collections.addAll(paths, devPaths);
 		}
 		List<File> results = new ArrayList<>(paths.size());
 		for (String path : paths) {

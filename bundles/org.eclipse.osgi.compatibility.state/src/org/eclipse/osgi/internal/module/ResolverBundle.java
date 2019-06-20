@@ -17,6 +17,7 @@ package org.eclipse.osgi.internal.module;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -197,8 +198,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 
 	private <T> List<T> getAll(T[] hostEntries, Map<Long, List<T>> fragmentMap) {
 		List<T> result = new ArrayList<>(hostEntries.length);
-		for (T entry : hostEntries)
-			result.add(entry);
+		Collections.addAll(result, hostEntries);
 		for (ResolverBundle fragment : fragments) {
 			List<T> fragEntries = fragmentMap.get(fragment.bundleID);
 			if (fragEntries != null)

@@ -1095,9 +1095,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			return empty;
 		}
 		List<ServiceReference<S>> result = new ArrayList<>(refs.length);
-		for (ServiceReference<S> b : refs) {
-			result.add(b);
-		}
+		Collections.addAll(result, refs);
 		return result;
 	}
 

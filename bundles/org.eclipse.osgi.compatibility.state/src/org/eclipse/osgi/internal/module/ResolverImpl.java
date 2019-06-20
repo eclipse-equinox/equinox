@@ -597,8 +597,7 @@ public class ResolverImpl implements Resolver {
 			return reRefresh; // no new bundles found to refresh
 		// add the original reRefresh bundles to the set
 		if (reRefresh != null)
-			for (int i = 0; i < reRefresh.length; i++)
-				additionalRefresh.add(reRefresh[i]);
+			Collections.addAll(additionalRefresh, reRefresh);
 		return additionalRefresh.toArray(new BundleDescription[additionalRefresh.size()]);
 	}
 

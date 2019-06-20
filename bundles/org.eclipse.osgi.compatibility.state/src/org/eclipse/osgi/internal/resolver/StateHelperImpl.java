@@ -120,8 +120,7 @@ public final class StateHelperImpl implements StateHelper {
 		Map<String, List<GenericDescription>> generics = getGenericsMap(state, false);
 		Set<VersionConstraint> result = new HashSet<>();
 		List<BundleDescription> bundleList = new ArrayList<>(bundles.length);
-		for (int i = 0; i < bundles.length; i++)
-			bundleList.add(bundles[i]);
+		Collections.addAll(bundleList, bundles);
 		for (int i = 0; i < bundleList.size(); i++) {
 			BundleDescription description = bundleList.get(i);
 			VersionConstraint[] constraints = getUnsatisfiedConstraints(description, hook);

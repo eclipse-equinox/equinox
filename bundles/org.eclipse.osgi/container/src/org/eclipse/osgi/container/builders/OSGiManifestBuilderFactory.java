@@ -612,9 +612,7 @@ public final class OSGiManifestBuilderFactory {
 			List<String> classpath = new ArrayList<>();
 			for (ManifestElement element : classpathElements) {
 				String[] components = element.getValueComponents();
-				for (String component : components) {
-					classpath.add(component);
-				}
+				Collections.addAll(classpath, components);
 			}
 			attributes.put(EquinoxModuleDataNamespace.CAPABILITY_CLASSPATH, classpath);
 		}
@@ -624,9 +622,7 @@ public final class OSGiManifestBuilderFactory {
 		if (buddyPolicies != null) {
 			List<String> policies = new ArrayList<>();
 			for (ManifestElement element : buddyPolicies) {
-				for (String component : element.getValueComponents()) {
-					policies.add(component);
-				}
+				Collections.addAll(policies, element.getValueComponents());
 			}
 			attributes.put(EquinoxModuleDataNamespace.CAPABILITY_BUDDY_POLICY, policies);
 		}
@@ -636,9 +632,7 @@ public final class OSGiManifestBuilderFactory {
 		if (registeredBuddies != null) {
 			List<String> buddies = new ArrayList<>();
 			for (ManifestElement element : registeredBuddies) {
-				for (String component : element.getValueComponents()) {
-					buddies.add(component);
-				}
+				Collections.addAll(buddies, element.getValueComponents());
 			}
 			attributes.put(EquinoxModuleDataNamespace.CAPABILITY_BUDDY_REGISTERED, buddies);
 		}

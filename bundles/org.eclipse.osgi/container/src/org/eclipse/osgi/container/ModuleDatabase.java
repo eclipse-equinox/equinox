@@ -1019,9 +1019,7 @@ public class ModuleDatabase {
 			Map<ModuleRevision, ModuleWiring> wirings = moduleDatabase.wirings;
 			for (ModuleWiring wiring : wirings.values()) {
 				Collection<String> substituted = wiring.getSubstitutedNames();
-				for (String pkgName : substituted) {
-					allStrings.add(pkgName);
-				}
+				allStrings.addAll(substituted);
 			}
 
 			// Now persist all the Strings

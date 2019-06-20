@@ -121,9 +121,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 			includeIdentity.add(genericIdentity);
 		}
 		if (genericCapabilities != null) {
-			for (GenericDescription genericDescription : genericCapabilities) {
-				includeIdentity.add(genericDescription);
-			}
+			Collections.addAll(includeIdentity, genericCapabilities);
 		}
 		if (!includeIdentity.isEmpty()) {
 			bundle.setGenericCapabilities(includeIdentity.toArray(new GenericDescription[includeIdentity.size()]));

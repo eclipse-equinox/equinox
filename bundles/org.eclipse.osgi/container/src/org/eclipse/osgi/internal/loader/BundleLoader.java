@@ -1106,8 +1106,7 @@ public class BundleLoader extends ModuleLoader {
 		StringBuilder importSpec = new StringBuilder();
 		for (ManifestElement dynamicImportElement : packages) {
 			String[] names = dynamicImportElement.getValueComponents();
-			for (String name : names)
-				dynamicImports.add(name);
+			Collections.addAll(dynamicImports, names);
 			if (importSpec.length() > 0) {
 				importSpec.append(',');
 			}

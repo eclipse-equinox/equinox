@@ -16,6 +16,7 @@ package org.eclipse.osgi.internal.resolver;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -177,8 +178,7 @@ public class StateBuilder {
 		if (aliasList == null || aliasList.size() == 0)
 			return genericRequires;
 		if (genericRequires != null)
-			for (int i = 0; i < genericRequires.length; i++)
-				aliasList.add(genericRequires[i]);
+			Collections.addAll(aliasList, genericRequires);
 		return aliasList.toArray(new ManifestElement[aliasList.size()]);
 	}
 
@@ -206,8 +206,7 @@ public class StateBuilder {
 		if (aliasList == null || aliasList.size() == 0)
 			return genericCapabilities;
 		if (genericCapabilities != null)
-			for (int i = 0; i < genericCapabilities.length; i++)
-				aliasList.add(genericCapabilities[i]);
+			Collections.addAll(aliasList, genericCapabilities);
 		return aliasList.toArray(new ManifestElement[aliasList.size()]);
 	}
 

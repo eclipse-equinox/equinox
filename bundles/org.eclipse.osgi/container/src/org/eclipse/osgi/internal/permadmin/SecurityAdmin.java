@@ -304,8 +304,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		synchronized (lock) {
 			SecurityRow[] rows = condAdminTable.getRows();
 			List<ConditionalPermissionInfo> vRows = new ArrayList<>(rows.length);
-			for (int i = 0; i < rows.length; i++)
-				vRows.add(rows[i]);
+			Collections.addAll(vRows, rows);
 			return Collections.enumeration(vRows);
 		}
 	}

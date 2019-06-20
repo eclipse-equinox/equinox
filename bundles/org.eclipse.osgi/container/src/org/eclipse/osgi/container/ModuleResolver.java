@@ -606,9 +606,7 @@ final class ModuleResolver {
 			this.optionals = new LinkedHashSet<>(unresolved);
 			if (this.triggersMandatory) {
 				// do this the hard way because the 'optimization' in removeAll hurts us
-				for (ModuleRevision triggerRevision : triggers) {
-					this.optionals.remove(triggerRevision);
-				}
+				this.optionals.removeAll(triggers);
 			}
 			this.wirings = new HashMap<>(wirings);
 			this.previouslyResolved = new HashSet<>(wirings.keySet());
@@ -1406,9 +1404,7 @@ final class ModuleResolver {
 			Collection<ModuleRevision> enabledCandidates = new ArrayList<>(unresolved);
 			hook.filterResolvable(InternalUtils.asListBundleRevision((List<? extends BundleRevision>) enabledCandidates));
 			// do this the hard way because the 'optimization' in removeAll hurts us
-			for (ModuleRevision enabledRevision : enabledCandidates) {
-				disabled.remove(enabledRevision);
-			}
+			disabled.removeAll(enabledCandidates);
 			for (ModuleRevision revision : disabled) {
 				reportBuilder.addEntry(revision, Entry.Type.FILTERED_BY_RESOLVER_HOOK, null);
 				if (DEBUG_HOOKS) {
