@@ -23,5 +23,6 @@
   <packaging>eclipse-test-plugin</packaging>
   <properties>
     <skipTests>true</skipTests>
+    <skipAPIAnalysis>true</skipAPIAnalysis>
   </properties>
 </project>

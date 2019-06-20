@@ -19,6 +19,7 @@
   </parent>
   <properties>
     <skipTests>true</skipTests>
+    <skipAPIAnalysis>true</skipAPIAnalysis>
   </properties>
   <groupId>org.eclipse.equinox</groupId>
   <artifactId>org.eclipse.equinox.console.ssh.tests</artifactId>
