@@ -1,3 +1,4 @@
 # maven
 /*/*/target/
 /bundles/org.eclipse.osgi/supplement/target/
+/target/

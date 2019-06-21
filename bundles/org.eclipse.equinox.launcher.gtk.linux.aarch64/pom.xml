@@ -26,5 +26,6 @@
     <os>linux</os>
     <ws>gtk</ws>
     <arch>aarch64</arch>
+    <skipAPIAnalysis>true</skipAPIAnalysis>
   </properties>
 </project>

@@ -26,6 +26,7 @@
     <os>macosx</os>
     <ws>cocoa</ws>
     <arch>x86_64</arch>
+    <skipAPIAnalysis>true</skipAPIAnalysis>
   </properties>
 
 </project>
