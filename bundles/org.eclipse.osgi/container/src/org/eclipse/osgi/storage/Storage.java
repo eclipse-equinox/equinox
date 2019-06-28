@@ -282,6 +282,10 @@ public class Storage {
 		return runtimeVersion;
 	}
 
+	public MRUBundleFileList getMRUBundleFileList() {
+		return mruList;
+	}
+
 	private int getBundleFileLimit(EquinoxConfiguration configuration) {
 		int propValue = 100; // enable to 100 open files by default
 		try {
@@ -550,6 +554,14 @@ public class Storage {
 	}
 
 	public URLConnection getContentConnection(Module module, String bundleLocation, final InputStream in) throws IOException {
+		List<StorageHookFactory<?, ?, ?>> storageHooks = getConfiguration().getHookRegistry().getStorageHookFactories();
+		for (StorageHookFactory<?, ?, ?> storageHook : storageHooks) {
+			URLConnection hookContent = storageHook.handleContentConnection(module, bundleLocation, in);
+			if (hookContent != null) {
+				return hookContent;
+			}
+		}
+
 		if (in != null) {
 			return new URLConnection(null) {
 				/**
@@ -913,7 +925,7 @@ public class Storage {
 			if (t instanceof BundleException) {
 				throw (BundleException) t;
 			}
-			throw new BundleException("Error occurred installing a bundle.", t); //$NON-NLS-1$
+			throw new BundleException("Error occurred updating a bundle.", t); //$NON-NLS-1$
 		} finally {
 			bundleInfo.unlockGeneration(newGen);
 		}
@@ -1473,8 +1485,10 @@ public class Storage {
 								continue; // ignore system bundle
 							}
 							StorageHook<Object, Object> hook = factory.createStorageHookAndValidateFactoryClass(generation);
-							hook.load(loadContext, temp);
-							getHooks(hookMap, generation).add(hook);
+							if (hook != null) {
+								hook.load(loadContext, temp);
+								getHooks(hookMap, generation).add(hook);
+							}
 						}
 					} else {
 						// recover by reinitializing the hook
@@ -1483,8 +1497,10 @@ public class Storage {
 								continue; // ignore system bundle
 							}
 							StorageHook<Object, Object> hook = factory.createStorageHookAndValidateFactoryClass(generation);
-							hook.initialize(generation.getHeaders());
-							getHooks(hookMap, generation).add(hook);
+							if (hook != null) {
+								hook.initialize(generation.getHeaders());
+								getHooks(hookMap, generation).add(hook);
+							}
 						}
 					}
 				} catch (BundleException e) {
@@ -1504,11 +1520,13 @@ public class Storage {
 					continue; // ignore system bundle
 				}
 				StorageHook<Object, Object> hook = next.createStorageHookAndValidateFactoryClass(generation);
-				try {
-					hook.initialize(generation.getHeaders());
-					getHooks(hookMap, generation).add(hook);
-				} catch (BundleException e) {
-					throw new IOException(e);
+				if (hook != null) {
+					try {
+						hook.initialize(generation.getHeaders());
+						getHooks(hookMap, generation).add(hook);
+					} catch (BundleException e) {
+						throw new IOException(e);
+					}
 				}
 			}
 		}

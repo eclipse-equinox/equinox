@@ -13,13 +13,21 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.hooks.framework.storage.a;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLConnection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.jar.Attributes;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.ModuleRevisionBuilder;
@@ -117,6 +125,32 @@ public class TestHookConfigurator implements HookConfigurator {
 				factoryClass = StorageHookFactory.class;
 			return new TestStorageHook(generation, factoryClass);
 		}
+
+		@Override
+		public URLConnection handleContentConnection(Module module, String location, InputStream in) throws IOException {
+			if (handleContentConnection) {
+				final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				Manifest manifest = new Manifest();
+				Attributes attrs = manifest.getMainAttributes();
+				attrs.putValue("Manifest-Version", "1.0"); //$NON-NLS-1$ //$NON-NLS-2$
+				attrs.putValue(Constants.BUNDLE_MANIFESTVERSION, "2");
+				attrs.putValue(Constants.BUNDLE_SYMBOLICNAME, "testHandleContentConnection");
+				JarOutputStream jos = new JarOutputStream(baos, manifest);
+				jos.close();
+				return new URLConnection(null) {
+					@Override
+					public void connect() {
+						connected = true;
+					}
+
+					@Override
+					public InputStream getInputStream() {
+						return new ByteArrayInputStream(baos.toByteArray());
+					}
+				};
+			}
+			return super.handleContentConnection(module, location, in);
+		}
 	}
 
 	public static volatile boolean createStorageHookCalled;
@@ -127,6 +161,7 @@ public class TestHookConfigurator implements HookConfigurator {
 	public static volatile boolean deletingGenerationCalled;
 	public static volatile boolean adaptManifest;
 	public static volatile boolean replaceModuleBuilder;
+	public static volatile boolean handleContentConnection;
 
 	public void addHooks(HookRegistry hookRegistry) {
 		hookRegistry.addStorageHookFactory(new TestStorageHookFactory());

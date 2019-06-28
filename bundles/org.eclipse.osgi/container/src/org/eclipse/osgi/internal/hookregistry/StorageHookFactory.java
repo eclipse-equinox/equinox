@@ -17,6 +17,8 @@ package org.eclipse.osgi.internal.hookregistry;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLConnection;
 import java.util.Dictionary;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleContainer;
@@ -31,9 +33,9 @@ import org.osgi.framework.BundleException;
  * A StorageHookFactory hooks into the persistent storage loading and saving of bundle {@link Generation generations}.
  * A factory creates StorageHook instances that get associated with each Generation object installed.<p>
  * @see Generation#getStorageHook(Class)
- * @param <S> the StorageHook type
+ * @param <S> the save context type
  * @param <L> the load context type
- * @param <H> the save context type
+ * @param <H> the StorageHook type
  */
 public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.StorageHook<S, L>> {
 	protected final String KEY = this.getClass().getName().intern();
@@ -45,7 +47,9 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 	 * data the storage version should be incremented. 
 	 * @return the storage version of this storage hook
 	 */
-	public abstract int getStorageVersion();
+	public int getStorageVersion() {
+		return 0;
+	}
 
 	/**
 	 * Returns the implementation class name for the hook implementation
@@ -73,7 +77,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 	 * Creates a save context object for a storage hook.  The 
 	 * save context is passed to the {@link StorageHook#save(Object, DataOutputStream)}
 	 * for each generation being persisted by the framework.
-	 * @return a save context object
+	 * @return a save context object or {@code null} if no save context is needed
 	 */
 	public S createSaveContext() {
 		return null;
@@ -85,7 +89,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 	 * for each generation being loaded from persistent storage
 	 * by the framework.
 	 * @param version the persistent version
-	 * @return the load context object
+	 * @return the load context object or {@code null} if no load context is needed
 	 */
 	public L createLoadContext(int version) {
 		return null;
@@ -94,9 +98,11 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 	/**
 	 * Creates a storage hook for the specified generation.
 	 * @param generation the generation for the storage hook
-	 * @return a storage hook
+	 * @return a storage hook or {@code null} if no hook is needed for the generation
 	 */
-	protected abstract H createStorageHook(Generation generation);
+	protected H createStorageHook(Generation generation) {
+		return null;
+	}
 
 	/**
 	 * Creates a storage hook for the specified generation and checks that the
@@ -105,17 +111,35 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 	 * 
 	 * @param generation - The generation for which a storage hook should be
 	 *        created.
-	 * @return A newly created storage hook.
+	 * @return A newly created storage hook or {@code null} if no hook is needed
+	 *         for the generation
 	 * @throws IllegalStateException - If the factory class of the storage hook
 	 *         is not equal to the class of this storage hook factory.
 	 */
 	public final H createStorageHookAndValidateFactoryClass(Generation generation) {
 		H result = createStorageHook(generation);
+		if (result == null) {
+			return result;
+		}
 		Class<?> factoryClass = getClass();
 		Class<?> factoryClassOfStorageHook = result.getFactoryClass();
 		if (!factoryClass.equals(factoryClassOfStorageHook))
 			throw new IllegalStateException(String.format("The factory class '%s' of storage hook '%s' does not match the creating factory class of '%s'", factoryClassOfStorageHook.getName(), result, factoryClass.getName())); //$NON-NLS-1$
 		return result;
+	}
+
+	/**
+	 * Allows a storage hook factory to handle the {@link URLConnection connection} to the
+	 * content for bundle install or update operation.
+	 * @param module the module being updated.  Will be {@code null} for install operations
+	 * @param location the bundle location be installed.  Will be {@code null} for update operations
+	 * @param in the input stream for the install or update operation.  May be {@code null}
+	 * @return a connection to the content or {@code null} to let the framework handle the content
+	 * @throws IOException if any error occurs which will result in a {@link BundleException} being
+	 * thrown from the update or install operation.
+	 */
+	public URLConnection handleContentConnection(Module module, String location, InputStream in) throws IOException {
+		return null;
 	}
 
 	/**
@@ -126,7 +150,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 	 * @param <S> the save context type
 	 * @param <L> the load context type
 	 */
-	public static abstract class StorageHook<S, L> {
+	public static class StorageHook<S, L> {
 		private final Class<? extends StorageHookFactory<S, L, ? extends StorageHook<S, L>>> factoryClass;
 		private final Generation generation;
 
@@ -149,7 +173,9 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 		 * @param manifest the bundle manifest to load into this storage hook
 		 * @throws BundleException if any error occurs
 		 */
-		public abstract void initialize(Dictionary<String, String> manifest) throws BundleException;
+		public void initialize(Dictionary<String, String> manifest) throws BundleException {
+			// do nothing by default
+		}
 
 		/**
 		 * Allows a builder to be modified before it is used by the framework to create a {@link ModuleRevision revision}
@@ -182,7 +208,9 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 		 * @see #save(Object, DataOutputStream)
 		 * @throws IOException if any error occurs
 		 */
-		public abstract void load(L loadContext, DataInputStream is) throws IOException;
+		public void load(L loadContext, DataInputStream is) throws IOException {
+			// do nothing by default
+		}
 
 		/**
 		 * Saves the data from this storage hook into the specified output stream.  This method
@@ -194,7 +222,9 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 		 * @param os an output stream used to save the storage hook's data from.
 		 * @throws IOException if any error occurs
 		 */
-		public abstract void save(S saveContext, DataOutputStream os) throws IOException;
+		public void save(S saveContext, DataOutputStream os) throws IOException {
+			// do nothing by default
+		}
 
 		/**
 		 * Gets called during {@link Generation#delete()} to inform the hook that the generation

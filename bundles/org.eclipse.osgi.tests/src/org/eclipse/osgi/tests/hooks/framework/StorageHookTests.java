@@ -15,6 +15,7 @@ package org.eclipse.osgi.tests.hooks.framework;
 
 import static org.junit.Assert.assertNotEquals;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
@@ -44,6 +45,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	private static final String HOOK_CONFIGURATOR_FIELD_DELETING_CALLED = "deletingGenerationCalled";
 	private static final String HOOK_CONFIGURATOR_FIELD_ADAPT_MANIFEST = "adaptManifest";
 	private static final String HOOK_CONFIGURATOR_FIELD_REPLACE_BUILDER = "replaceModuleBuilder";
+	private static final String HOOK_CONFIGURATOR_FIELD_HANDLE_CONTENT = "handleContentConnection";
 
 	private Map<String, String> configuration;
 	private Framework framework;
@@ -233,6 +235,41 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		assertEquals("Wrong bundle found.", framework.getBundleContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION), b);
 	}
 
+	public void testHandleContent() throws Exception {
+		initAndStartFramework();
+
+		// install with an empty stream, the hook will replace it will content to a real bundle
+		setFactoryClassHandleContent(true);
+		Bundle b = framework.getBundleContext().installBundle("testBundle", new ByteArrayInputStream(new byte[0]));
+		assertEquals("Wrong symbolicName", "testHandleContentConnection", b.getSymbolicName());
+		b.uninstall();
+
+		// install with no stream, the hook will supply the real content of the bundle
+		b = framework.getBundleContext().installBundle("testBundle");
+		assertEquals("Wrong symbolicName", "testHandleContentConnection", b.getSymbolicName());
+		b.uninstall();
+
+		// tell the hook to no longer handle content, the default behavior of the framework will be used
+		setFactoryClassHandleContent(false);
+		b = installBundle();
+		assertEquals("Wrong symbolicName", "test1", b.getSymbolicName());
+
+		// tell the hook to handle content again, update will update to the content supplied from the hook
+		setFactoryClassHandleContent(true);
+		b.update(new ByteArrayInputStream(new byte[0]));
+		assertEquals("Wrong symbolicName", "testHandleContentConnection", b.getSymbolicName());
+
+		// tell the hook to no longer handle content, update will go back to using content derived from the original location
+		setFactoryClassHandleContent(false);
+		b.update();
+		assertEquals("Wrong symbolicName", "test1", b.getSymbolicName());
+
+		// now update again with hook handling content
+		setFactoryClassHandleContent(true);
+		b.update();
+		assertEquals("Wrong symbolicName", "testHandleContentConnection", b.getSymbolicName());
+	}
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -289,8 +326,8 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		initAndStart(framework);
 	}
 
-	private void installBundle() throws Exception {
-		framework.getBundleContext().installBundle(location);
+	private Bundle installBundle() throws Exception {
+		return framework.getBundleContext().installBundle(location);
 	}
 
 	private void resetStorageHook() throws Exception {
@@ -331,6 +368,11 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	private void setFactoryHookFailLoad(boolean value) throws Exception {
 		Class<?> clazz = classLoader.loadClass(HOOK_CONFIGURATOR_CLASS);
 		clazz.getField(HOOK_CONFIGURATOR_FIELD_FAIL_LOAD).set(null, value);
+	}
+
+	private void setFactoryClassHandleContent(boolean value) throws Exception {
+		Class<?> clazz = classLoader.loadClass(HOOK_CONFIGURATOR_CLASS);
+		clazz.getField(HOOK_CONFIGURATOR_FIELD_HANDLE_CONTENT).set(null, value);
 	}
 
 	private void updateBundle() throws Exception {
