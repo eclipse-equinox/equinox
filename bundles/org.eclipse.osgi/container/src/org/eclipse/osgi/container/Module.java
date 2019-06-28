@@ -485,7 +485,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			publishEvent(event);
 			// only print bundleTime information if we actually fired an event for this bundle
 			if (container.DEBUG_BUNDLE_START_TIME) {
-				Debug.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime) + "ms for total start time of " + this); //$NON-NLS-1$
+				Debug.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime) + " ms for total start time event " + event + " - " + this); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 
