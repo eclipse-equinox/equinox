@@ -29,6 +29,7 @@ import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.BundleInstaller;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.connect.FrameworkUtilHelper;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
@@ -72,7 +73,7 @@ public abstract class AbstractFrameworkHookTests extends CoreTest {
 					throw new RuntimeException(e);
 				}
 			}
-			if (name.startsWith("org.eclipse") || name.startsWith("org.osgi.framework.FrameworkUtil")) {
+			if (name.startsWith("org.eclipse") || name.startsWith("org.osgi.framework.FrameworkUtil") || name.equals(FrameworkUtilHelper.class.getName())) {
 				Class<?> result = findLoadedClass(name);
 				if (result == null)
 					result = findClass(name);

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.osgi" version="2">
+    <resource path="container/src/org/eclipse/osgi/launch/EquinoxFactory.java" type="org.eclipse.osgi.launch.EquinoxFactory">
+        <filter comment="Not for OSGi API" id="1143996420">
+            <message_arguments>
+                <message_argument value="newFramework(Map&lt;String,String&gt;, ConnectFactory)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/connect/ConnectContent.java" type="org.osgi.framework.connect.ConnectContent">
+        <filter comment="Not for OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.connect.ConnectContent"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/connect/ConnectFactory.java" type="org.osgi.framework.connect.ConnectFactory">
+        <filter comment="Not for OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.connect.ConnectFactory"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/connect/ConnectModule.java" type="org.osgi.framework.connect.ConnectModule">
+        <filter comment="Not for OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.connect.ConnectModule"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/connect/FrameworkUtilHelper.java" type="org.osgi.framework.connect.FrameworkUtilHelper">
+        <filter comment="Not for OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.connect.FrameworkUtilHelper"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/launch/FrameworkFactory.java" type="org.osgi.framework.launch.FrameworkFactory">
+        <filter comment="Not for OSGi packages" id="403804204">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.launch.FrameworkFactory"/>
+                <message_argument value="newFramework(Map&lt;String,String&gt;, ConnectFactory)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Not for OSGi packages" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.3"/>
+                <message_argument value="3.16"/>
+                <message_argument value="newFramework(Map&lt;String,String&gt;, ConnectFactory)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Not for OSGi packages" id="1211105284">
+            <message_arguments>
+                <message_argument value="newFramework(Map&lt;String,String&gt;, ConnectFactory)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>

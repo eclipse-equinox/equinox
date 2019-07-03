@@ -1,134 +1,646 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" output="bundle_tests/test" path="bundles_src/test"/>
-	<classpathentry kind="src" output="bundle_tests/test2" path="bundles_src/test2"/>
-	<classpathentry kind="src" output="bundle_tests/chain.test" path="bundles_src/chain.test"/>
-	<classpathentry kind="src" output="bundle_tests/chain.test.a" path="bundles_src/chain.test.a"/>
-	<classpathentry kind="src" output="bundle_tests/chain.test.b" path="bundles_src/chain.test.b"/>
-	<classpathentry kind="src" output="bundle_tests/chain.test.c" path="bundles_src/chain.test.c"/>
-	<classpathentry kind="src" output="bundle_tests/chain.test.d" path="bundles_src/chain.test.d"/>
-	<classpathentry kind="src" output="bundle_tests/circularity.test" path="bundles_src/circularity.test"/>
-	<classpathentry kind="src" output="bundle_tests/circularity.test.a" path="bundles_src/circularity.test.a"/>
-	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.host.a" path="bundles_src/fragment.test.attach.host.a"/>
-	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.host.a.v2" path="bundles_src/fragment.test.attach.host.a.v2"/>
-	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.host.a.require" path="bundles_src/fragment.test.attach.host.a.require"/>
-	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.frag.a" path="bundles_src/fragment.test.attach.frag.a"/>
-	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.frag.b" path="bundles_src/fragment.test.attach.frag.b"/>
-	<classpathentry kind="src" output="bundle_tests/legacy.lazystart" path="bundles_src/legacy.lazystart"/>
-	<classpathentry kind="src" output="bundle_tests/legacy.lazystart.a" path="bundles_src/legacy.lazystart.a"/>
-	<classpathentry kind="src" output="bundle_tests/legacy.lazystart.b" path="bundles_src/legacy.lazystart.b"/>
-	<classpathentry kind="src" output="bundle_tests/legacy.lazystart.c" path="bundles_src/legacy.lazystart.c"/>
-	<classpathentry kind="src" output="bundle_tests/osgi.lazystart" path="bundles_src/osgi.lazystart"/>
-	<classpathentry kind="src" output="bundle_tests/osgi.lazystart.a" path="bundles_src/osgi.lazystart.a"/>
-	<classpathentry kind="src" output="bundle_tests/osgi.lazystart.b" path="bundles_src/osgi.lazystart.b"/>
-	<classpathentry kind="src" output="bundle_tests/osgi.lazystart.c" path="bundles_src/osgi.lazystart.c"/>
-	<classpathentry kind="src" output="bundle_tests/osgi.lazystart.d" path="bundles_src/osgi.lazystart.d"/>
-	<classpathentry kind="src" output="bundle_tests/osgi.lazystart.e" path="bundles_src/osgi.lazystart.e"/>
-	<classpathentry kind="src" output="bundle_tests/thread.locktest" path="bundles_src/thread.locktest"/>
-	<classpathentry kind="src" output="bundle_tests/buddy.registered.a" path="bundles_src/buddy.registered.a"/>
-	<classpathentry kind="src" output="bundle_tests/buddy.registered.a.test1" path="bundles_src/buddy.registered.a.test1"/>
-	<classpathentry kind="src" output="bundle_tests/buddy.registered.a.test2" path="bundles_src/buddy.registered.a.test2"/>
-	<classpathentry kind="src" output="bundle_tests/buddy.dependent.a" path="bundles_src/buddy.dependent.a"/>
-	<classpathentry kind="src" output="bundle_tests/buddy.dependent.a.test1" path="bundles_src/buddy.dependent.a.test1"/>
-	<classpathentry kind="src" output="bundle_tests/buddy.dependent.a.test2" path="bundles_src/buddy.dependent.a.test2"/>
-	<classpathentry kind="src" output="bundle_tests/buddy.invalid.a" path="bundles_src/buddy.invalid.a"/>
-	<classpathentry kind="src" output="bundle_tests/nativetest.a1" path="bundles_src/nativetest.a1"/>
-	<classpathentry kind="src" output="bundle_tests/nativetest.a2" path="bundles_src/nativetest.a2"/>
-	<classpathentry kind="src" output="bundle_tests/nativetest.b1" path="bundles_src/nativetest.b1"/>
-	<classpathentry kind="src" output="bundle_tests/nativetest.b2" path="bundles_src/nativetest.b2"/>
-	<classpathentry kind="src" output="bundle_tests/nativetest.c" path="bundles_src/nativetest.c"/>
-	<classpathentry kind="src" output="bundle_tests/nativetest.d" path="bundles_src/nativetest.d"/>
-	<classpathentry kind="src" output="bundle_tests/nativetest.e" path="bundles_src/nativetest.e"/>
-	<classpathentry kind="src" output="bundle_tests/nativetest.f" path="bundles_src/nativetest.f"/>
-	<classpathentry kind="src" output="bundle_tests/host.multiple.exports" path="bundles_src/host.multiple.exports"/>
-	<classpathentry kind="src" output="bundle_tests/frag.multiple.exports" path="bundles_src/frag.multiple.exports"/>
-	<classpathentry kind="src" output="bundle_tests/client1.multiple.exports" path="bundles_src/client1.multiple.exports"/>
-	<classpathentry kind="src" output="bundle_tests/client2.multiple.exports" path="bundles_src/client2.multiple.exports"/>
-	<classpathentry kind="src" output="bundle_tests/xfriends.test1" path="bundles_src/xfriends.test1"/>
-	<classpathentry kind="src" output="bundle_tests/xfriends.test2" path="bundles_src/xfriends.test2"/>
-	<classpathentry kind="src" output="bundle_tests/xfriends.test3" path="bundles_src/xfriends.test3"/>
-	<classpathentry kind="src" output="bundle_tests/ext.framework.a" path="bundles_src/ext.framework.a"/>
-	<classpathentry kind="src" output="bundle_tests/ext.framework.a.importer" path="bundles_src/ext.framework.a.importer"/>
-	<classpathentry kind="src" output="bundle_tests/ext.framework.a.requires" path="bundles_src/ext.framework.a.requires"/>
-	<classpathentry kind="src" output="bundle_tests/ext.framework.b" path="bundles_src/ext.framework.b"/>
-	<classpathentry kind="src" output="bundle_tests/ext.extclasspath.a" path="bundles_src/ext.extclasspath.a"/>
-	<classpathentry kind="src" output="bundle_tests/ext.extclasspath.a.importer" path="bundles_src/ext.extclasspath.a.importer"/>
-	<classpathentry kind="src" output="bundle_tests/exporter.importer1" path="bundles_src/exporter.importer1"/>
-	<classpathentry kind="src" output="bundle_tests/exporter.importer2" path="bundles_src/exporter.importer2"/>
-	<classpathentry kind="src" output="bundle_tests/exporter.importer3" path="bundles_src/exporter.importer3"/>
-	<classpathentry kind="src" output="bundle_tests/exporter.importer4" path="bundles_src/exporter.importer4"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug235958.x" path="bundles_src/test.bug235958.x"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug235958.y" path="bundles_src/test.bug235958.y"/>
-	<classpathentry kind="src" output="bundle_tests/test.fragment1" path="bundles_src/test.fragment1"/>
-	<classpathentry kind="src" output="bundle_tests/test.fragment2" path="bundles_src/test.fragment2"/>
-	<classpathentry kind="src" output="bundle_tests/test.fragment3" path="bundles_src/test.fragment3"/>
-	<classpathentry kind="src" output="bundle_tests/test.fragment4" path="bundles_src/test.fragment4"/>
-	<classpathentry kind="src" output="bundle_tests/test.fragment5" path="bundles_src/test.fragment5"/>
-	<classpathentry kind="src" output="bundle_tests/substitutes.a" path="bundles_src/substitutes.a"/>
-	<classpathentry kind="src" output="bundle_tests/substitutes.a.frag" path="bundles_src/substitutes.a.frag"/>
-	<classpathentry kind="src" output="bundle_tests/substitutes.b" path="bundles_src/substitutes.b"/>
-	<classpathentry kind="src" output="bundle_tests/substitutes.b.frag" path="bundles_src/substitutes.b.frag"/>
-	<classpathentry kind="src" output="bundle_tests/substitutes.c" path="bundles_src/substitutes.c"/>
-	<classpathentry kind="src" output="bundle_tests/substitutes.d" path="bundles_src/substitutes.d"/>
-	<classpathentry kind="src" output="bundle_tests/substitutes.e" path="bundles_src/substitutes.e"/>
-	<classpathentry kind="src" output="bundle_tests/substitutes.f" path="bundles_src/substitutes.f"/>
-	<classpathentry kind="src" output="bundle_tests/substitutes.g" path="bundles_src/substitutes.g"/>
-	<classpathentry kind="src" output="bundle_tests/substitutes.h" path="bundles_src/substitutes.h"/>
-	<classpathentry kind="src" output="bundle_tests/substitutes.i" path="bundles_src/substitutes.i"/>
-	<classpathentry kind="src" output="bundle_tests/substitutes.j" path="bundles_src/substitutes.j"/>
-	<classpathentry kind="src" output="bundle_tests/substitutes.k" path="bundles_src/substitutes.k"/>
-	<classpathentry kind="src" output="bundle_tests/substitutes.l" path="bundles_src/substitutes.l"/>
-	<classpathentry kind="src" output="bundle_tests/substitutes.m" path="bundles_src/substitutes.m"/>
-	<classpathentry kind="src" output="bundle_tests/substitutes.n" path="bundles_src/substitutes.n"/>
-	<classpathentry kind="src" output="bundle_tests/substitutes.p" path="bundles_src/substitutes.p"/>
-	<classpathentry kind="src" output="bundle_tests/substitutes.q" path="bundles_src/substitutes.q"/>
-	<classpathentry kind="src" output="bundle_tests/activator.error1" path="bundles_src/activator.error1"/>
-	<classpathentry kind="src" output="bundle_tests/activator.error2" path="bundles_src/activator.error2"/>
-	<classpathentry kind="src" output="bundle_tests/activator.error3" path="bundles_src/activator.error3"/>
-	<classpathentry kind="src" output="bundle_tests/activator.error4" path="bundles_src/activator.error4"/>
-	<classpathentry kind="src" output="bundle_tests/security.a" path="bundles_src/security.a"/>
-	<classpathentry kind="src" output="bundle_tests/security.a.frag.a" path="bundles_src/security.a.frag.a"/>
-	<classpathentry kind="src" output="bundle_tests/security.b" path="bundles_src/security.b"/>
-	<classpathentry kind="src" output="bundle_tests/test.filter.a" path="bundles_src/test.filter.a"/>
-	<classpathentry kind="src" output="bundle_tests/test.link.a" path="bundles_src/test.link.a"/>
-	<classpathentry kind="src" output="bundle_tests/test.link.a.client" path="bundles_src/test.link.a.client"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug259903.a" path="bundles_src/test.bug259903.a"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug259903.a.update" path="bundles_src/test.bug259903.a.update"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug259903.b" path="bundles_src/test.bug259903.b"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug259903.c" path="bundles_src/test.bug259903.c"/>
-	<classpathentry kind="src" output="bundle_tests/test.tccl" path="bundles_src/test.tccl"/>
-	<classpathentry kind="src" output="bundle_tests/test.manifestpackage" path="bundles_src/test.manifestpackage"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug286307" path="bundles_src/test.bug286307"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug287636.a1" path="bundles_src/test.bug287636.a1"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug287636.a2" path="bundles_src/test.bug287636.a2"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug287636.b" path="bundles_src/test.bug287636.b"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug287750" path="bundles_src/test.bug287750"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug306181a" path="bundles_src/test.bug306181a"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug306181b" path="bundles_src/test.bug306181b"/>
-	<classpathentry kind="src" output="bundle_tests/test.logging.a" path="bundles_src/test.logging.a"/>
-	<classpathentry kind="src" output="bundle_tests/geturl" path="bundles_src/geturl"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug375784" path="bundles_src/test.bug375784"/>
-	<classpathentry kind="src" output="bundle_tests/storage.hooks.a" path="bundles_src/storage.hooks.a"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug412228" path="bundles_src/test.bug412228"/>
-	<classpathentry kind="src" output="bundle_tests/test.uninstall.start1" path="bundles_src/test.uninstall.start1"/>
-	<classpathentry kind="src" output="bundle_tests/test.uninstall.start2" path="bundles_src/test.uninstall.start2"/>
-	<classpathentry kind="src" output="bundle_tests/ext.framework.osgiee.b.jar" path="bundles_src/ext.framework.osgiee.b"/>
-	<classpathentry kind="src" output="bundle_tests/classloader.hooks.a" path="bundles_src/classloader.hooks.a"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug438904.host" path="bundles_src/test.bug438904.host"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug438904.frag" path="bundles_src/test.bug438904.frag"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug438904.global" path="bundles_src/test.bug438904.global"/>
-	<classpathentry kind="src" output="bundle_tests/test.system.nls" path="bundles_src/test.system.nls"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug449484" path="bundles_src/test.bug449484"/>
-	<classpathentry kind="src" output="bundle_tests/wrapper.hooks.a" path="bundles_src/wrapper.hooks.a"/>
-	<classpathentry kind="src" output="bundle_tests/test.protocol.handler" path="bundles_src/test.protocol.handler"/>
-	<classpathentry kind="src" output="bundle_tests/test.protocol.handler.user" path="bundles_src/test.protocol.handler.user"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug471551" path="bundles_src/test.bug471551"/>
-	<classpathentry kind="src" output="bundle_tests/test.dynamicimport" path="bundles_src/test.dynamicimport"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug490902.a" path="bundles_src/test.bug490902.a"/>
-	<classpathentry kind="src" output="bundle_tests/test.bug490902.b" path="bundles_src/test.bug490902.b"/>
-	<classpathentry kind="src" output="bundle_tests/mrBundleInputBase" path="bundles_src/mrBundleInputBase"/>
+	<classpathentry kind="src" path="src">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test" path="bundles_src/test">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test2" path="bundles_src/test2">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/chain.test" path="bundles_src/chain.test">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/chain.test.a" path="bundles_src/chain.test.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/chain.test.b" path="bundles_src/chain.test.b">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/chain.test.c" path="bundles_src/chain.test.c">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/chain.test.d" path="bundles_src/chain.test.d">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/circularity.test" path="bundles_src/circularity.test">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/circularity.test.a" path="bundles_src/circularity.test.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.host.a" path="bundles_src/fragment.test.attach.host.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.host.a.v2" path="bundles_src/fragment.test.attach.host.a.v2">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.host.a.require" path="bundles_src/fragment.test.attach.host.a.require">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.frag.a" path="bundles_src/fragment.test.attach.frag.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.frag.b" path="bundles_src/fragment.test.attach.frag.b">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/legacy.lazystart" path="bundles_src/legacy.lazystart">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/legacy.lazystart.a" path="bundles_src/legacy.lazystart.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/legacy.lazystart.b" path="bundles_src/legacy.lazystart.b">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/legacy.lazystart.c" path="bundles_src/legacy.lazystart.c">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/osgi.lazystart" path="bundles_src/osgi.lazystart">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/osgi.lazystart.a" path="bundles_src/osgi.lazystart.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/osgi.lazystart.b" path="bundles_src/osgi.lazystart.b">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/osgi.lazystart.c" path="bundles_src/osgi.lazystart.c">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/osgi.lazystart.d" path="bundles_src/osgi.lazystart.d">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/osgi.lazystart.e" path="bundles_src/osgi.lazystart.e">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/thread.locktest" path="bundles_src/thread.locktest">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/buddy.registered.a" path="bundles_src/buddy.registered.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/buddy.registered.a.test1" path="bundles_src/buddy.registered.a.test1">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/buddy.registered.a.test2" path="bundles_src/buddy.registered.a.test2">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/buddy.dependent.a" path="bundles_src/buddy.dependent.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/buddy.dependent.a.test1" path="bundles_src/buddy.dependent.a.test1">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/buddy.dependent.a.test2" path="bundles_src/buddy.dependent.a.test2">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/buddy.invalid.a" path="bundles_src/buddy.invalid.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/nativetest.a1" path="bundles_src/nativetest.a1">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/nativetest.a2" path="bundles_src/nativetest.a2">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/nativetest.b1" path="bundles_src/nativetest.b1">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/nativetest.b2" path="bundles_src/nativetest.b2">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/nativetest.c" path="bundles_src/nativetest.c">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/nativetest.d" path="bundles_src/nativetest.d">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/nativetest.e" path="bundles_src/nativetest.e">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/nativetest.f" path="bundles_src/nativetest.f">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/host.multiple.exports" path="bundles_src/host.multiple.exports">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/frag.multiple.exports" path="bundles_src/frag.multiple.exports">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/client1.multiple.exports" path="bundles_src/client1.multiple.exports">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/client2.multiple.exports" path="bundles_src/client2.multiple.exports">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/xfriends.test1" path="bundles_src/xfriends.test1">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/xfriends.test2" path="bundles_src/xfriends.test2">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/xfriends.test3" path="bundles_src/xfriends.test3">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/ext.framework.a" path="bundles_src/ext.framework.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/ext.framework.a.importer" path="bundles_src/ext.framework.a.importer">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/ext.framework.a.requires" path="bundles_src/ext.framework.a.requires">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/ext.framework.b" path="bundles_src/ext.framework.b">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/ext.extclasspath.a" path="bundles_src/ext.extclasspath.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/ext.extclasspath.a.importer" path="bundles_src/ext.extclasspath.a.importer">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/exporter.importer1" path="bundles_src/exporter.importer1">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/exporter.importer2" path="bundles_src/exporter.importer2">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/exporter.importer3" path="bundles_src/exporter.importer3">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/exporter.importer4" path="bundles_src/exporter.importer4">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug235958.x" path="bundles_src/test.bug235958.x">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug235958.y" path="bundles_src/test.bug235958.y">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.fragment1" path="bundles_src/test.fragment1">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.fragment2" path="bundles_src/test.fragment2">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.fragment3" path="bundles_src/test.fragment3">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.fragment4" path="bundles_src/test.fragment4">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.fragment5" path="bundles_src/test.fragment5">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/substitutes.a" path="bundles_src/substitutes.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/substitutes.a.frag" path="bundles_src/substitutes.a.frag">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/substitutes.b" path="bundles_src/substitutes.b">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/substitutes.b.frag" path="bundles_src/substitutes.b.frag">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/substitutes.c" path="bundles_src/substitutes.c">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/substitutes.d" path="bundles_src/substitutes.d">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/substitutes.e" path="bundles_src/substitutes.e">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/substitutes.f" path="bundles_src/substitutes.f">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/substitutes.g" path="bundles_src/substitutes.g">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/substitutes.h" path="bundles_src/substitutes.h">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/substitutes.i" path="bundles_src/substitutes.i">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/substitutes.j" path="bundles_src/substitutes.j">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/substitutes.k" path="bundles_src/substitutes.k">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/substitutes.l" path="bundles_src/substitutes.l">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/substitutes.m" path="bundles_src/substitutes.m">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/substitutes.n" path="bundles_src/substitutes.n">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/substitutes.p" path="bundles_src/substitutes.p">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/substitutes.q" path="bundles_src/substitutes.q">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/activator.error1" path="bundles_src/activator.error1">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/activator.error2" path="bundles_src/activator.error2">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/activator.error3" path="bundles_src/activator.error3">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/activator.error4" path="bundles_src/activator.error4">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/security.a" path="bundles_src/security.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/security.a.frag.a" path="bundles_src/security.a.frag.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/security.b" path="bundles_src/security.b">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.filter.a" path="bundles_src/test.filter.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.link.a" path="bundles_src/test.link.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.link.a.client" path="bundles_src/test.link.a.client">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug259903.a" path="bundles_src/test.bug259903.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug259903.a.update" path="bundles_src/test.bug259903.a.update">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug259903.b" path="bundles_src/test.bug259903.b">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug259903.c" path="bundles_src/test.bug259903.c">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.tccl" path="bundles_src/test.tccl">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.manifestpackage" path="bundles_src/test.manifestpackage">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug286307" path="bundles_src/test.bug286307">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug287636.a1" path="bundles_src/test.bug287636.a1">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug287636.a2" path="bundles_src/test.bug287636.a2">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug287636.b" path="bundles_src/test.bug287636.b">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug287750" path="bundles_src/test.bug287750">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug306181a" path="bundles_src/test.bug306181a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug306181b" path="bundles_src/test.bug306181b">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.logging.a" path="bundles_src/test.logging.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/geturl" path="bundles_src/geturl">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug375784" path="bundles_src/test.bug375784">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/storage.hooks.a" path="bundles_src/storage.hooks.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug412228" path="bundles_src/test.bug412228">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.uninstall.start1" path="bundles_src/test.uninstall.start1">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.uninstall.start2" path="bundles_src/test.uninstall.start2">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/ext.framework.osgiee.b.jar" path="bundles_src/ext.framework.osgiee.b">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/classloader.hooks.a" path="bundles_src/classloader.hooks.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug438904.host" path="bundles_src/test.bug438904.host">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug438904.frag" path="bundles_src/test.bug438904.frag">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug438904.global" path="bundles_src/test.bug438904.global">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.system.nls" path="bundles_src/test.system.nls">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug449484" path="bundles_src/test.bug449484">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/wrapper.hooks.a" path="bundles_src/wrapper.hooks.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.protocol.handler" path="bundles_src/test.protocol.handler">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.protocol.handler.user" path="bundles_src/test.protocol.handler.user">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug471551" path="bundles_src/test.bug471551">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.dynamicimport" path="bundles_src/test.dynamicimport">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug490902.a" path="bundles_src/test.bug490902.a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/test.bug490902.b" path="bundles_src/test.bug490902.b">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="bundle_tests/mrBundleInputBase" path="bundles_src/mrBundleInputBase">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

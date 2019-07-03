@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Properties;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.cds.CDSHookConfigurator;
+import org.eclipse.osgi.internal.connect.ConnectHookConfigurator;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.hooks.DevClassLoadingHook;
@@ -106,6 +107,8 @@ public final class HookRegistry {
 		List<FrameworkLogEntry> errors = new ArrayList<>(0); // optimistic that no errors will occur
 		mergeFileHookConfigurators(configurators, errors);
 		mergePropertyHookConfigurators(configurators);
+		// make sure to add connect configurator first always
+		configurators.add(0, ConnectHookConfigurator.class.getName());
 		synchronized (this) {
 			addClassLoaderHook(new DevClassLoadingHook(container.getConfiguration()));
 			addClassLoaderHook(new EclipseLazyStarter(container));

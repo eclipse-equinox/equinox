@@ -13,10 +13,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.framework;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.security.AccessController;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +47,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.connect.ConnectFactory;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
@@ -53,6 +57,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	public static final String NAME = "org.eclipse.osgi"; //$NON-NLS-1$
 	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 
+	private final ConnectFactory connectFactory;
 	private final EquinoxConfiguration equinoxConfig;
 	private final EquinoxLogServices logServices;
 	private final Storage storage;
@@ -75,7 +80,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	private ScheduledExecutorService executor;
 	private StorageSaver storageSaver;
 
-	public EquinoxContainer(Map<String, ?> configuration) {
+	public EquinoxContainer(Map<String, ?> configuration, ConnectFactory connectFactory) {
 		ClassLoader platformClassLoader = null;
 		try {
 			Method getPlatformClassLoader = ClassLoader.class.getMethod("getPlatformClassLoader"); //$NON-NLS-1$
@@ -86,9 +91,13 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 				/* boot class loader */};
 		}
 		this.bootLoader = platformClassLoader;
+		this.connectFactory = connectFactory;
 		this.equinoxConfig = new EquinoxConfiguration(configuration, new HookRegistry(this));
 		this.logServices = new EquinoxLogServices(this.equinoxConfig);
 		this.equinoxConfig.logMessages(this.logServices);
+
+		initConnectFactory(connectFactory, this.equinoxConfig);
+
 		this.equinoxConfig.getHookRegistry().initialize();
 		try {
 			this.storage = Storage.createStorage(this);
@@ -131,6 +140,21 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 			supportRecursion &= hook.isProcessClassRecursionSupported();
 		}
 		isProcessClassRecursionSupportedByAll = supportRecursion;
+	}
+
+	private static void initConnectFactory(ConnectFactory connectFactory, EquinoxConfiguration equinoxConfig) {
+		if (connectFactory == null) {
+			return;
+		}
+		URL configUrl = equinoxConfig.getEquinoxLocations().getConfigurationLocation().getURL();
+		final File fwkStore = new File(configUrl.getPath());
+		@SuppressWarnings({"rawtypes", "unchecked"})
+		Map<String, String> config = (Map) equinoxConfig.getInitialConfig();
+		connectFactory.initialize(fwkStore, Collections.unmodifiableMap(config));
+	}
+
+	public ConnectFactory getConnectFactory() {
+		return connectFactory;
 	}
 
 	public Storage getStorage() {

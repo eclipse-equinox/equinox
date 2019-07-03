@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2005, 2016). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2018). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,30 @@
 
 package org.osgi.framework;
 
+import static java.lang.invoke.MethodHandles.publicLookup;
+
+import java.lang.invoke.MethodHandle;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.Set;
+
 import javax.security.auth.x500.X500Principal;
 import org.eclipse.osgi.internal.framework.FilterImpl;
-import org.eclipse.osgi.internal.hookregistry.FrameworkUtilHelper;
+import org.osgi.framework.connect.FrameworkUtilHelper;
 
 /**
  * Framework Utility class.
@@ -185,26 +199,6 @@ public class FrameworkUtil {
 		return DNChainMatching.match(matchPattern, dnChain);
 	}
 
-	private final static List<FrameworkUtilHelper> helpers;
-	static {
-		List<FrameworkUtilHelper> l = new ArrayList<>();
-		try {
-			ServiceLoader<FrameworkUtilHelper> helperLoader = AccessController.doPrivileged(new PrivilegedAction<ServiceLoader<FrameworkUtilHelper>>() {
-				@Override
-				public ServiceLoader<FrameworkUtilHelper> run() {
-					return ServiceLoader.load(FrameworkUtilHelper.class, FrameworkUtilHelper.class.getClassLoader());
-				}
-			});
-			for (Iterator<FrameworkUtilHelper> iHelpers = helperLoader.iterator(); iHelpers.hasNext();) {
-				l.add(iHelpers.next());
-			}
-		} catch (Throwable t) {
-			// should not fail out of static initializers
-			t.printStackTrace();
-		}
-		helpers = Collections.unmodifiableList(l);
-	}
-
 	/**
 	 * Return a {@code Bundle} for the specified bundle class. The returned
 	 * {@code Bundle} is the bundle associated with the bundle class loader
@@ -218,12 +212,9 @@ public class FrameworkUtil {
 	public static Bundle getBundle(final Class<?> classFromBundle) {
 		// We use doPriv since the caller may not have permission
 		// to call getClassLoader.
-		Object cl = AccessController.doPrivileged(new PrivilegedAction<Object>() {
-			@Override
-			public Object run() {
-				return classFromBundle.getClassLoader();
-			}
-		});
+		ClassLoader cl = AccessController
+				.doPrivileged( (PrivilegedAction<ClassLoader>) 
+						() -> classFromBundle.getClassLoader());
 
 		if (cl instanceof BundleReference) {
 			return ((BundleReference) cl).getBundle();
@@ -236,6 +227,29 @@ public class FrameworkUtil {
 			}
 		}
 		return null;
+	}
+
+	private final static List<FrameworkUtilHelper> helpers;
+	static {
+		List<FrameworkUtilHelper> l = new ArrayList<>();
+		try {
+			ServiceLoader<FrameworkUtilHelper> helperLoader = AccessController
+					.doPrivileged(
+							(PrivilegedAction<ServiceLoader<FrameworkUtilHelper>>) () -> ServiceLoader
+									.load(FrameworkUtilHelper.class,
+											FrameworkUtilHelper.class.getClassLoader()));
+
+			helperLoader.forEach((h) -> l.add(h));
+		} catch (Throwable error) {
+			// try hard not to fail static <clinit>
+			try {
+				Thread t = Thread.currentThread();
+				t.getUncaughtExceptionHandler().uncaughtException(t, error);
+			} catch (Throwable ignored) {
+				// we ignore this
+			}
+		}
+		helpers = Collections.unmodifiableList(l);
 	}
 
 	/**
