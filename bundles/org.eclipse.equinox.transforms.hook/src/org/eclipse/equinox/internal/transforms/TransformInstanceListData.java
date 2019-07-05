@@ -53,7 +53,7 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 	/**
 	 * Create a new transform list bound to the given context. If new transforms are registered against the given context the contents of this list will change.
 	 * @param context the bundle context
-	 * @param logServices 
+	 * @param logServices
 	 * @throws InvalidSyntaxException thrown if there's an issue listening for changes to the given transformer type
 	 */
 	public TransformInstanceListData(BundleContext context, EquinoxLogServices logServices) throws InvalidSyntaxException {
@@ -102,8 +102,7 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 
 		if (hasTransformsFor == null) {
 			hasTransformsFor = Boolean.FALSE;
-			for (Iterator<TransformTuple> i = rawTuples.iterator(); i.hasNext();) {
-				TransformTuple tuple = i.next();
+			for (TransformTuple tuple : rawTuples) {
 				if (tuple.bundlePattern.matcher(bundleName).matches()) {
 					hasTransformsFor = Boolean.TRUE;
 				}
@@ -128,10 +127,8 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 		if (serviceReferences == null)
 			return;
 
-		for (int i = 0; i < serviceReferences.length; i++) {
-			ServiceReference<URL> serviceReference = serviceReferences[i];
+		for (ServiceReference<URL> serviceReference : serviceReferences) {
 			String type = serviceReference.getProperty(TransformTuple.TRANSFORMER_TYPE).toString();
-
 			URL url = getService(serviceReference);
 			TransformTuple[] transforms;
 			try {
@@ -144,14 +141,12 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 					transformerToTuple.put(type, newTransforms);
 				} else
 					transformerToTuple.put(type, transforms);
-
-				for (int j = 0; j < transforms.length; j++) {
-					rawTuples.add(transforms[j]);
+				for (TransformTuple transform : transforms) {
+					rawTuples.add(transform);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-
 		}
 	}
 

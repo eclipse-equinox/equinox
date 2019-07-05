@@ -391,8 +391,7 @@ public class FrameworkLauncher {
 		String[] args = buildCommandLineArguments();
 
 		// Handle commandline -D properties
-		for (int i = 0; i < args.length; i++) {
-			String arg = args[i];
+		for (String arg : args) {
 			if (arg.startsWith("-D")) { //$NON-NLS-1$
 				int equalsIndex = arg.indexOf('=');
 				if (equalsIndex == -1) {
@@ -572,8 +571,7 @@ public class FrameworkLauncher {
 	protected Map<String, String> buildInitialPropertyMap() {
 		Map<String, String> initialPropertyMap = new HashMap<>();
 		Properties launchProperties = loadProperties(resourceBase + LAUNCH_INI);
-		for (Iterator it = launchProperties.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
+		for (Map.Entry entry : launchProperties.entrySet()) {
 			String key = (String) entry.getKey();
 			String value = (String) entry.getValue();
 			setInitialProperty(initialPropertyMap, key, value);
@@ -798,8 +796,7 @@ public class FrameworkLauncher {
 			Set<String> paths = context.getResourcePaths(resourcePath);
 			if (paths == null)
 				return;
-			for (Iterator<String> it = paths.iterator(); it.hasNext();) {
-				String path = it.next();
+			for (String path : paths) {
 				File newFile = new File(target, path.substring(resourcePath.length()));
 				copyResource(path, newFile);
 			}
@@ -841,11 +838,11 @@ public class FrameworkLauncher {
 	protected static boolean deleteDirectory(File directory) {
 		if (directory.isDirectory()) {
 			File[] files = directory.listFiles();
-			for (int i = 0; i < files.length; i++) {
-				if (files[i].isDirectory()) {
-					deleteDirectory(files[i]);
+			for (File file : files) {
+				if (file.isDirectory()) {
+					deleteDirectory(file);
 				} else {
-					files[i].delete();
+					file.delete();
 				}
 			}
 		}

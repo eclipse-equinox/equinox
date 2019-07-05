@@ -179,10 +179,10 @@ public class ThreadPoolManagerImpl extends ObjectPool implements TimerListener, 
 		int count = 0;
 		int all = 0;
 		synchronized (getSyncMonitor()) {
-			for (int i = 0; i < buff.length; i++) {
-				if (buff[i] != null) {
-					for (int j = 0; j < buff[i].length; j++) {
-						Executor e = (Executor) buff[i][j];
+			for (Object[] b : buff) {
+				if (b != null) {
+					for (Object item : b) {
+						Executor e = (Executor) item;
 						if (e != null) {
 							all++;
 							if (!e.accessed)

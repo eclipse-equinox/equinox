@@ -333,9 +333,9 @@ public class SupplementerRegistry implements ISupplementerRegistry {
                 }
             }
 
-            // remove this supplementer from the list of supplementers per other bundle
-            for (int i = 0; i < supplementedBundles.length; i++) {
-                final long bundleId = supplementedBundles[i].getBundleId();
+	    // remove this supplementer from the list of supplementers per other bundle
+            for (Bundle supplementedBundle : supplementedBundles) {
+                final long bundleId = supplementedBundle.getBundleId();
                 final List<Supplementer> supplementerList = new ArrayList<Supplementer>(
                         Arrays.asList(this.supplementersByBundle.get(bundleId)));
                 supplementerList.remove(supplementer);
@@ -358,21 +358,18 @@ public class SupplementerRegistry implements ISupplementerRegistry {
 
         final List<Bundle> bundlesToRefresh = new ArrayList<Bundle>();
 
-        for (int i = 0; i < installedBundles.length; i++) {
+        for (Bundle installedBundle : installedBundles) {
             try {
-                final Bundle bundle = installedBundles[i];
-
+                final Bundle bundle = installedBundle;
                 // skip the bundle itself, just resupplement already installed bundles
                 if (bundle.getSymbolicName().equals(
                         supplementer.getSymbolicName())) {
                     continue;
                 }
-
                 // skip bundles that should not be woven
                 if (dontWeaveTheseBundles.contains(bundle.getSymbolicName())) {
                     continue;
                 }
-
                 // find out which of the installed bundles matches the new supplementer
                 final Dictionary<?, ?> manifest = bundle.getHeaders(""); //$NON-NLS-1$
                 final ManifestElement[] imports = ManifestElement.parseHeader(
@@ -381,7 +378,6 @@ public class SupplementerRegistry implements ISupplementerRegistry {
                 final ManifestElement[] exports = ManifestElement.parseHeader(
                         Constants.EXPORT_PACKAGE,
                         (String) manifest.get(Constants.EXPORT_PACKAGE));
-
                 if (isSupplementerMatching(bundle.getSymbolicName(), imports,
                         exports, supplementer)) {
                     final IWeavingAdaptor adaptor = this.adaptorProvider
@@ -405,11 +401,10 @@ public class SupplementerRegistry implements ISupplementerRegistry {
 
                         this.supplementersByBundle.put(bundle.getBundleId(),
                                 enhancedSupplementerList
-                                        .toArray(new Supplementer[0]));
+                                .toArray(new Supplementer[0]));
                     }
                 }
-
-            } catch (final BundleException e) {
+            }catch (final BundleException e) {
                 e.printStackTrace();
             }
         }

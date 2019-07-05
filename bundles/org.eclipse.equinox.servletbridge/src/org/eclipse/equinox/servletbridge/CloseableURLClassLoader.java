@@ -192,10 +192,10 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		this.registeredAsParallel = CLOSEABLE_REGISTERED_AS_PARALLEL && this.getClass() == CloseableURLClassLoader.class;
 		this.context = AccessController.getContext();
 		this.verifyJars = verifyJars;
-		for (int i = 0; i < urls.length; i++) {
-			if (isFileJarURL(urls[i])) {
-				loaderURLs.add(urls[i]);
-				safeAddLoader(urls[i]);
+		for (URL url : urls) {
+			if (isFileJarURL(url)) {
+				loaderURLs.add(url);
+				safeAddLoader(url);
 			}
 		}
 	}
@@ -253,9 +253,10 @@ public class CloseableURLClassLoader extends URLClassLoader {
 
 	private static URL[] excludeFileJarURLS(URL[] urls) {
 		ArrayList<URL> urlList = new ArrayList<>();
-		for (int i = 0; i < urls.length; i++) {
-			if (!isFileJarURL(urls[i]))
-				urlList.add(urls[i]);
+		for (URL url : urls) {
+			if (!isFileJarURL(url)) {
+				urlList.add(url);
+			}
 		}
 		return urlList.toArray(new URL[urlList.size()]);
 	}
@@ -391,8 +392,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 				synchronized (loaders) {
 					if (closed)
 						return null;
-					for (Iterator<CloseableJarFileLoader> iterator = loaders.iterator(); iterator.hasNext();) {
-						CloseableJarFileLoader loader = iterator.next();
+					for (CloseableJarFileLoader loader : loaders) {
 						URL resourceURL = loader.getURL(name);
 						if (resourceURL != null)
 							return resourceURL;
@@ -415,8 +415,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 				synchronized (loaders) {
 					if (closed)
 						return null;
-					for (Iterator<CloseableJarFileLoader> iterator = loaders.iterator(); iterator.hasNext();) {
-						CloseableJarFileLoader loader = iterator.next();
+					for (CloseableJarFileLoader loader : loaders) {
 						URL resourceURL = loader.getURL(name);
 						if (resourceURL != null)
 							resources.add(resourceURL);
@@ -441,8 +440,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		synchronized (loaders) {
 			if (closed)
 				return;
-			for (Iterator<CloseableJarFileLoader> iterator = loaders.iterator(); iterator.hasNext();) {
-				CloseableJarFileLoader loader = iterator.next();
+			for (CloseableJarFileLoader loader : loaders) {
 				loader.close();
 			}
 			closed = true;

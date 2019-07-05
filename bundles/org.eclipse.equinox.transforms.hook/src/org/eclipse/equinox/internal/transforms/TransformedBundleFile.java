@@ -96,15 +96,14 @@ public class TransformedBundleFile extends BundleFileWrapper {
 		String[] transformTypes = transformerHook.getTransformTypes();
 		if (transformTypes.length == 0)
 			return null;
-		for (int i = 0; i < transformTypes.length; i++) {
-			StreamTransformer transformer = transformerHook.getTransformer(transformTypes[i]);
+		for (String transformType : transformTypes) {
+			StreamTransformer transformer = transformerHook.getTransformer(transformType);
 			if (transformer == null)
 				continue;
-			TransformTuple[] transformTuples = transformerHook.getTransformsFor(transformTypes[i]);
+			TransformTuple[] transformTuples = transformerHook.getTransformsFor(transformType);
 			if (transformTuples == null)
 				continue;
-			for (int j = 0; j < transformTuples.length; j++) {
-				TransformTuple transformTuple = transformTuples[j];
+			for (TransformTuple transformTuple : transformTuples) {
 				if (match(transformTuple.bundlePattern, namespace) && match(transformTuple.pathPattern, path)) {
 					try {
 						return transformer.getInputStream(inputStream, transformTuple.transformerUrl);

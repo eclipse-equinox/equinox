@@ -134,15 +134,14 @@ public class WeavingHook extends AbstractWeavingHook {
 
         // re-build supplementer registry state for installed bundles
         final Bundle[] installedBundles = context.getBundles();
-        for (int i = 0; i < installedBundles.length; i++) {
-            if (installedBundles[i].getState() != Bundle.UNINSTALLED) {
-                supplementerRegistry
-                        .addSupplementer(installedBundles[i], false);
+        for (Bundle installedBundle : installedBundles) {
+            if (installedBundle.getState() != Bundle.UNINSTALLED) {
+                supplementerRegistry.addSupplementer(installedBundle, false);
             }
         }
-        for (int i = 0; i < installedBundles.length; i++) {
-            if (installedBundles[i].getState() != Bundle.UNINSTALLED) {
-                supplementerRegistry.addSupplementedBundle(installedBundles[i]);
+        for (Bundle installedBundle : installedBundles) {
+            if (installedBundle.getState() != Bundle.UNINSTALLED) {
+                supplementerRegistry.addSupplementedBundle(installedBundle);
             }
         }
 

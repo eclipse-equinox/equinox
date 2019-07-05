@@ -99,17 +99,16 @@ public class WeavingLoaderDelegateHook extends ClassLoaderHook {
             final Supplementer[] supplementers = supplementerRegistry
                     .getSupplementers(bundleID);
             if (supplementers != null) {
-                for (int i = 0; i < supplementers.length; i++) {
+                for (Supplementer supplementer : supplementers) {
                     try {
-                        final Bundle bundle = supplementers[i]
-                                .getSupplementerHost();
+                        final Bundle bundle = supplementer.getSupplementerHost();
                         if (bundle.getState() != Bundle.UNINSTALLED) {
                             final Class<?> clazz = bundle.loadClass(name);
                             if (clazz != null) {
                                 return clazz;
                             }
                         }
-                    } catch (final ClassNotFoundException e) {
+                    }catch (final ClassNotFoundException e) {
                     }
                 }
             }
@@ -140,14 +139,13 @@ public class WeavingLoaderDelegateHook extends ClassLoaderHook {
             final Supplementer[] supplementers = supplementerRegistry
                     .getSupplementers(bundleID);
             if (supplementers != null) {
-                for (int i = 0; i < supplementers.length; i++) {
+                for (Supplementer supplementer : supplementers) {
                     try {
-                        final URL resource = supplementers[i]
-                                .getSupplementerHost().getResource(name);
+                        final URL resource = supplementer.getSupplementerHost().getResource(name);
                         if (resource != null) {
                             return resource;
                         }
-                    } catch (final Exception e) {
+                    }catch (final Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -179,15 +177,14 @@ public class WeavingLoaderDelegateHook extends ClassLoaderHook {
             final Supplementer[] supplementers = supplementerRegistry
                     .getSupplementers(bundleID);
             if (supplementers != null) {
-                for (int i = 0; i < supplementers.length; i++) {
+                for (Supplementer supplementer : supplementers) {
                     try {
-                        final Enumeration<URL> resource = supplementers[i]
-                                .getSupplementerHost().getResources(name);
+                        final Enumeration<URL> resource = supplementer.getSupplementerHost().getResources(name);
                         if (resource != null) {
                             // TODO: if more than one enumeration is found, we should return all items
                             return resource;
                         }
-                    } catch (final Exception e) {
+                    }catch (final Exception e) {
                         e.printStackTrace();
                     }
                 }

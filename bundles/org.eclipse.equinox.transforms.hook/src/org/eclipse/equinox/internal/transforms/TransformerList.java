@@ -51,7 +51,7 @@ public class TransformerList extends ServiceTracker<Object, Object> {
 	}
 
 	/**
-	 * Return the transformer of the given type being monitored by this list.  
+	 * Return the transformer of the given type being monitored by this list.
 	 * If the list is stale it will first be rebuilt.
 	 * @param type the type of transformer
 	 * @return the transformer or null if no transformer of the given type is available.
@@ -80,8 +80,7 @@ public class TransformerList extends ServiceTracker<Object, Object> {
 		if (serviceReferences == null)
 			return;
 
-		for (int i = 0; i < serviceReferences.length; i++) {
-			ServiceReference<Object> serviceReference = serviceReferences[i];
+		for (ServiceReference<Object> serviceReference : serviceReferences) {
 			String type = serviceReference.getProperty(TransformTuple.TRANSFORMER_TYPE).toString();
 			if (type == null || transformers.get(type) != null)
 				continue;
