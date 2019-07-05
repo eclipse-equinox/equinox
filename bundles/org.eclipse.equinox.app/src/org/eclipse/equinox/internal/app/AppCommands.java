@@ -176,8 +176,9 @@ public class AppCommands implements CommandProvider {
 	private Dictionary<String, Object> getServiceProps(ServiceReference ref) {
 		String[] keys = ref.getPropertyKeys();
 		Hashtable<String, Object> props = new Hashtable<>(keys.length);
-		for (int i = 0; i < keys.length; i++)
-			props.put(keys[i], ref.getProperty(keys[i]));
+		for (String key : keys) {
+			props.put(key, ref.getProperty(key));
+		}
 		return props;
 	}
 
@@ -187,8 +188,8 @@ public class AppCommands implements CommandProvider {
 			intp.println("No applications found."); //$NON-NLS-1$
 			return;
 		}
-		for (int i = 0; i < apps.length; i++) {
-			String application = (String) apps[i].getProperty(ApplicationDescriptor.APPLICATION_PID);
+		for (ServiceReference app : apps) {
+			String application = (String) app.getProperty(ApplicationDescriptor.APPLICATION_PID);
 			intp.print(application);
 
 			if (getApplication(applicationHandles.getServiceReferences(), application, ApplicationHandle.APPLICATION_DESCRIPTOR, true) != null)
@@ -196,14 +197,14 @@ public class AppCommands implements CommandProvider {
 
 			if (getApplication(scheduledApplications.getServiceReferences(), application, ScheduledApplication.APPLICATION_PID, true) != null)
 				intp.print(" [scheduled]"); //$NON-NLS-1$ 
-
-			if (!launchableApp.match(getServiceProps(apps[i])))
+			if (!launchableApp.match(getServiceProps(app))) {
 				intp.print(" [not launchable]"); //$NON-NLS-1$ 
-			else
+			} else {
 				intp.print(" [launchable]"); //$NON-NLS-1$ 
-
-			if (lockedApp.match(getServiceProps(apps[i])))
+			}
+			if (lockedApp.match(getServiceProps(app))) {
 				intp.print(" [locked]"); //$NON-NLS-1$ 
+			}
 			intp.println();
 		}
 	}
@@ -214,10 +215,10 @@ public class AppCommands implements CommandProvider {
 			intp.println("No active applications found"); //$NON-NLS-1$
 			return;
 		}
-		for (int i = 0; i < active.length; i++) {
-			intp.print(active[i].getProperty(ApplicationHandle.APPLICATION_PID));
+		for (ServiceReference r : active) {
+			intp.print(r.getProperty(ApplicationHandle.APPLICATION_PID));
 			intp.print(" ["); //$NON-NLS-1$
-			intp.print(activeApp.match(getServiceProps(active[i])) ? "running" : "stopping"); //$NON-NLS-1$ //$NON-NLS-2$
+			intp.print(activeApp.match(getServiceProps(r)) ? "running" : "stopping"); //$NON-NLS-1$ //$NON-NLS-2$
 			intp.println("]"); //$NON-NLS-1$
 		}
 	}
@@ -228,16 +229,17 @@ public class AppCommands implements CommandProvider {
 
 		ServiceReference result = null;
 		boolean ambigous = false;
-		for (int i = 0; i < apps.length; i++) {
-			String id = (String) apps[i].getProperty(idKey);
-			if (targetId.equals(id))
-				return apps[i]; // always return a perfect match
+		for (ServiceReference app : apps) {
+			String id = (String) app.getProperty(idKey);
+			if (targetId.equals(id)) {
+				return app; // always return a perfect match
+			}
 			if (perfectMatch)
 				continue;
 			if (id.contains(targetId)) {
 				if (result != null)
 					ambigous = true;
-				result = apps[i];
+				result = app;
 			}
 		}
 		return ambigous ? null : result;

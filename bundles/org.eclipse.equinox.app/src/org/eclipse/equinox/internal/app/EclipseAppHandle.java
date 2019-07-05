@@ -273,11 +273,11 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 
 			@Override
 			public void run() throws Exception {
-				for (int i = 0; i < monitors.length; i++) {
-					StartupMonitor monitor = (StartupMonitor) Activator.getContext().getService(monitors[i]);
+				for (ServiceReference m : monitors) {
+					StartupMonitor monitor = (StartupMonitor) Activator.getContext().getService(m);
 					if (monitor != null) {
 						monitor.applicationRunning();
-						Activator.getContext().ungetService(monitors[i]);
+						Activator.getContext().ungetService(m);
 					}
 				}
 			}

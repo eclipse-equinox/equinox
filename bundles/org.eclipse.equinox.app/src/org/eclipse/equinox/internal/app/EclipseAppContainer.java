@@ -272,8 +272,9 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 	 */
 	private void registerAppDescriptors() {
 		IExtension[] availableApps = getAvailableAppExtensions();
-		for (int i = 0; i < availableApps.length; i++)
-			createAppDescriptor(availableApps[i]);
+		for (IExtension availableApp : availableApps) {
+			createAppDescriptor(availableApp);
+		}
 	}
 
 	private void registerAppDescriptor(String applicationId) {
@@ -382,8 +383,8 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 		try {
 			ServiceReference[] runningRefs = context.getServiceReferences(ApplicationHandle.class.getName(), "(!(application.state=STOPPING))"); //$NON-NLS-1$
 			if (runningRefs != null)
-				for (int i = 0; i < runningRefs.length; i++) {
-					ApplicationHandle handle = (ApplicationHandle) context.getService(runningRefs[i]);
+				for (ServiceReference runningRef : runningRefs) {
+					ApplicationHandle handle = (ApplicationHandle) context.getService(runningRef);
 					try {
 						if (handle != null)
 							handle.destroy();
@@ -391,8 +392,9 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 						String message = NLS.bind(Messages.application_error_stopping, handle.getInstanceId());
 						Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, t, null));
 					} finally {
-						if (handle != null)
-							context.ungetService(runningRefs[i]);
+						if (handle != null) {
+							context.ungetService(runningRef);
+						}
 					}
 				}
 		} catch (InvalidSyntaxException e) {
@@ -439,16 +441,15 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 		}
 		IConfigurationElement[] elements = extensionRegistry.getConfigurationElementsFor(PI_RUNTIME, PT_PRODUCTS);
 		List<FrameworkLogEntry> logEntries = null;
-		for (int i = 0; i < elements.length; i++) {
-			IConfigurationElement element = elements[i];
+		for (IConfigurationElement element : elements) {
 			if (element.getName().equalsIgnoreCase("provider")) { //$NON-NLS-1$
 				try {
 					Object provider = element.createExecutableExtension("run"); //$NON-NLS-1$
 					Object[] products = (Object[]) EclipseAppContainer.callMethod(provider, "getProducts", null, null); //$NON-NLS-1$
 					if (products != null)
-						for (int j = 0; j < products.length; j++) {
-							if (productId.equalsIgnoreCase((String) EclipseAppContainer.callMethod(products[j], "getId", null, null))) { //$NON-NLS-1$
-								branding = new ProviderExtensionBranding(products[j]);
+						for (Object product : products) {
+							if (productId.equalsIgnoreCase((String) EclipseAppContainer.callMethod(product, "getId", null, null))) { //$NON-NLS-1$
+								branding = new ProviderExtensionBranding(product);
 								return branding;
 							}
 						}
@@ -633,8 +634,9 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 
 	@Override
 	public void added(IExtension[] extensions) {
-		for (int i = 0; i < extensions.length; i++)
-			createAppDescriptor(extensions[i]);
+		for (IExtension extension : extensions) {
+			createAppDescriptor(extension);
+		}
 	}
 
 	@Override
@@ -644,8 +646,9 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 
 	@Override
 	public void removed(IExtension[] extensions) {
-		for (int i = 0; i < extensions.length; i++)
-			removeAppDescriptor(extensions[i].getUniqueIdentifier());
+		for (IExtension extension : extensions) {
+			removeAppDescriptor(extension.getUniqueIdentifier());
+		}
 	}
 
 	@Override

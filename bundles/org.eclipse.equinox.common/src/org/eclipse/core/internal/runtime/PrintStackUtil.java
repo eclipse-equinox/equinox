@@ -23,12 +23,12 @@ public class PrintStackUtil {
 		IStatus[] children = status.getChildren();
 		if (children == null || children.length == 0)
 			return;
-		for (int i = 0; i < children.length; i++) {
-			output.println("Contains: " + children[i].getMessage()); //$NON-NLS-1$
-			Throwable exception = children[i].getException();
+		for (IStatus child : children) {
+			output.println("Contains: " + child.getMessage()); //$NON-NLS-1$
+			Throwable exception = child.getException();
 			if (exception != null)
 				exception.printStackTrace(output);
-			printChildren(children[i], output);
+			printChildren(child, output);
 		}
 	}
 
@@ -36,13 +36,13 @@ public class PrintStackUtil {
 		IStatus[] children = status.getChildren();
 		if (children == null || children.length == 0)
 			return;
-		for (int i = 0; i < children.length; i++) {
-			output.println("Contains: " + children[i].getMessage()); //$NON-NLS-1$
+		for (IStatus child : children) {
+			output.println("Contains: " + child.getMessage()); //$NON-NLS-1$
 			output.flush(); // call to synchronize output
-			Throwable exception = children[i].getException();
+			Throwable exception = child.getException();
 			if (exception != null)
 				exception.printStackTrace(output);
-			printChildren(children[i], output);
+			printChildren(child, output);
 		}
 	}
 

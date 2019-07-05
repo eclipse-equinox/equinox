@@ -43,8 +43,7 @@ public class ProductExtensionBranding implements IBranding {
 	private void loadProperties(IConfigurationElement element) {
 		IConfigurationElement[] children = element.getChildren();
 		properties = new HashMap<>(children.length);
-		for (int i = 0; i < children.length; i++) {
-			IConfigurationElement child = children[i];
+		for (IConfigurationElement child : children) {
 			String key = child.getAttribute(ATTR_NAME);
 			String value = child.getAttribute(ATTR_VALUE);
 			if (key != null && value != null)

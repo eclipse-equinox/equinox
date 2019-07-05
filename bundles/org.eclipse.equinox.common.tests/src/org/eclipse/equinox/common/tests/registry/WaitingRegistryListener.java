@@ -177,11 +177,11 @@ public class WaitingRegistryListener extends Assert implements IRegistryEventLis
 		if (children == null) {
 			return true;
 		}
-		for (int i = 0; i < children.length; i++) {
-			if (!children[i].isValid()) {
+		for (IConfigurationElement child : children) {
+			if (!child.isValid()) {
 				return false;
 			}
-			if (!validContents(children[i].getChildren())) {
+			if (!validContents(child.getChildren())) {
 				return false;
 			}
 		}

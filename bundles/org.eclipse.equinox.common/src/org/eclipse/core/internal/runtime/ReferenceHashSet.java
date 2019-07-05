@@ -325,10 +325,11 @@ public class ReferenceHashSet<T> {
 		cleanupGarbageCollectedValues();
 		Object[] result = new Object[elementSize];
 		int resultSize = 0;
-		for (int i = 0; i < values.length; i++) {
-			if (values[i] == null)
+		for (HashedReference<T> value : values) {
+			if (value == null) {
 				continue;
-			Object tmp = values[i].get();
+			}
+			Object tmp = value.get();
 			if (tmp != null)
 				result[resultSize++] = tmp;
 		}

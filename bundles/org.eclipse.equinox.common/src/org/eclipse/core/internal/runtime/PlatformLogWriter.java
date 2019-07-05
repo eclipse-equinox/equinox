@@ -78,8 +78,8 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 
 		if (status.isMultiStatus()) {
 			IStatus[] children = status.getChildren();
-			for (int i = 0; i < children.length; i++) {
-				childlist.add(getLog(children[i]));
+			for (IStatus child : children) {
+				childlist.add(getLog(child));
 			}
 		}
 

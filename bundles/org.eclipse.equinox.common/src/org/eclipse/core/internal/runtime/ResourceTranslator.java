@@ -95,8 +95,8 @@ public class ResourceTranslator {
 			ManifestElement[] prereqs = ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE, b.getHeaders("").get(Constants.REQUIRE_BUNDLE)); //$NON-NLS-1$
 			if (prereqs == null)
 				return false;
-			for (int i = 0; i < prereqs.length; i++) {
-				if ("2.1".equals(prereqs[i].getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE)) && "org.eclipse.core.runtime".equals(prereqs[i].getValue())) { //$NON-NLS-1$//$NON-NLS-2$
+			for (ManifestElement prereq : prereqs) {
+				if ("2.1".equals(prereq.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE)) && "org.eclipse.core.runtime".equals(prereq.getValue())) {//$NON-NLS-1$//$NON-NLS-2$
 					return true;
 				}
 			}
@@ -124,9 +124,9 @@ public class ResourceTranslator {
 		if (fragments == null)
 			return;
 
-		for (int i = 0; i < fragments.length; i++) {
-			addClasspathEntries(fragments[i], classpath);
-			addDevEntries(fragments[i], classpath);
+		for (Bundle fragment : fragments) {
+			addClasspathEntries(fragment, classpath);
+			addDevEntries(fragment, classpath);
 		}
 	}
 
@@ -136,8 +136,8 @@ public class ResourceTranslator {
 			classpathElements = ManifestElement.parseHeader(Constants.BUNDLE_CLASSPATH, b.getHeaders("").get(Constants.BUNDLE_CLASSPATH)); //$NON-NLS-1$
 			if (classpathElements == null)
 				return;
-			for (int i = 0; i < classpathElements.length; i++) {
-				URL classpathEntry = b.getEntry(classpathElements[i].getValue());
+			for (ManifestElement classpathElement : classpathElements) {
+				URL classpathEntry = b.getEntry(classpathElement.getValue());
 				if (classpathEntry != null)
 					classpath.add(classpathEntry);
 			}
@@ -155,8 +155,8 @@ public class ResourceTranslator {
 			return;
 
 		String[] binaryPaths = DevClassPathHelper.getDevClassPath(b.getSymbolicName());
-		for (int i = 0; i < binaryPaths.length; i++) {
-			URL classpathEntry = b.getEntry(binaryPaths[i]);
+		for (String binaryPath : binaryPaths) {
+			URL classpathEntry = b.getEntry(binaryPath);
 			if (classpathEntry != null)
 				classpath.add(classpathEntry);
 		}

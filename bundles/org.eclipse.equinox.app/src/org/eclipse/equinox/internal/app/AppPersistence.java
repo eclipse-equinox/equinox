@@ -359,14 +359,15 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 							continue;
 						apps = timerApps.toArray(new EclipseScheduledApplication[timerApps.size()]);
 					}
-					for (int i = 0; i < apps.length; i++) {
+					for (EclipseScheduledApplication app : apps) {
 						try {
-							String filterString = apps[i].getEventFilter();
+							String filterString = app.getEventFilter();
 							Filter filter = filterString == null ? null : FrameworkUtil.createFilter(filterString);
-							if (filter == null || filter.match(props))
-								apps[i].handleEvent(timerEvent);
+							if (filter == null || filter.match(props)) {
+								app.handleEvent(timerEvent);
+							}
 						} catch (Throwable t) {
-							String message = NLS.bind(Messages.scheduled_app_launch_error, apps[i].getAppPid());
+							String message = NLS.bind(Messages.scheduled_app_launch_error, app.getAppPid());
 							Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, t, null));
 						}
 					}

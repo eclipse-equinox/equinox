@@ -215,8 +215,8 @@ public class FindSupport {
 			return null;
 
 		URL result = null;
-		for (int i = 0; i < nlVariants.length; i++) {
-			IPath filePath = new Path(nlVariants[i]).append(path);
+		for (String nlVariant : nlVariants) {
+			IPath filePath = new Path(nlVariant).append(path);
 			result = findInPlugin(b, filePath, multiple);
 			if (result != null && multiple == null)
 				return result;
@@ -250,8 +250,8 @@ public class FindSupport {
 		if (multiple != null)
 			multiple.ensureCapacity(fragments.length + 1);
 
-		for (int i = 0; i < fragments.length; i++) {
-			URL fileURL = fragments[i].getEntry(filePath.toString());
+		for (Bundle fragment : fragments) {
+			URL fileURL = fragment.getEntry(filePath.toString());
 			if (fileURL != null) {
 				if (multiple == null)
 					return fileURL;

@@ -107,14 +107,15 @@ public final class AdapterManager implements IAdapterManager {
 			IAdapterFactory factory = factoryList.get(i);
 			if (factory instanceof IAdapterFactoryExt) {
 				String[] adapters = ((IAdapterFactoryExt) factory).getAdapterNames();
-				for (int j = 0; j < adapters.length; j++) {
-					if (table.get(adapters[j]) == null)
-						table.put(adapters[j], factory);
+				for (String adapter : adapters) {
+					if (table.get(adapter) == null) {
+						table.put(adapter, factory);
+					}
 				}
 			} else {
 				Class<?>[] adapters = factory.getAdapterList();
-				for (int j = 0; j < adapters.length; j++) {
-					String adapterName = adapters[j].getName();
+				for (Class<?> adapter : adapters) {
+					String adapterName = adapter.getName();
 					if (table.get(adapterName) == null)
 						table.put(adapterName, factory);
 				}
@@ -172,9 +173,9 @@ public final class AdapterManager implements IAdapterManager {
 						return null;
 					Class<?>[] adapterList = factory.getAdapterList();
 					clazz = null;
-					for (int i = 0; i < adapterList.length; i++) {
-						if (typeName.equals(adapterList[i].getName())) {
-							clazz = adapterList[i];
+					for (Class<?> adapter : adapterList) {
+						if (typeName.equals(adapter.getName())) {
+							clazz = adapter;
 							break;
 						}
 					}
@@ -208,8 +209,9 @@ public final class AdapterManager implements IAdapterManager {
 			// calculate adapters for the class
 			table = new HashMap<>(4);
 			Class<?>[] classes = computeClassOrder(adaptable);
-			for (int i = 0; i < classes.length; i++)
-				addFactoriesFor(classes[i].getName(), table);
+			for (Class<?> cl : classes) {
+				addFactoriesFor(cl.getName(), table);
+			}
 			// cache the table
 			lookup.put(adaptable.getName(), table);
 		}
@@ -253,15 +255,15 @@ public final class AdapterManager implements IAdapterManager {
 		}
 		//now traverse interface hierarchy for each class
 		Class<?>[] classHierarchy = classes.toArray(new Class[classes.size()]);
-		for (int i = 0; i < classHierarchy.length; i++)
-			computeInterfaceOrder(classHierarchy[i].getInterfaces(), classes, seen);
+		for (Class<?> cl : classHierarchy) {
+			computeInterfaceOrder(cl.getInterfaces(), classes, seen);
+		}
 		return classes.toArray(new Class[classes.size()]);
 	}
 
 	private void computeInterfaceOrder(Class<?>[] interfaces, Collection<Class<?>> classes, Set<Class<?>> seen) {
 		List<Class<?>> newInterfaces = new ArrayList<>(interfaces.length);
-		for (int i = 0; i < interfaces.length; i++) {
-			Class<?> interfac = interfaces[i];
+		for (Class<?> interfac : interfaces) {
 			if (seen.add(interfac)) {
 				//note we cannot recurse here without changing the resulting interface order
 				classes.add(interfac);

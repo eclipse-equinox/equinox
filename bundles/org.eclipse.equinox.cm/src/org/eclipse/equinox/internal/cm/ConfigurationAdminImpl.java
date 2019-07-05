@@ -103,13 +103,13 @@ class ConfigurationAdminImpl implements ConfigurationAdmin {
 
 		List<Configuration> result = new ArrayList<>(configs.length);
 		SecurityManager sm = System.getSecurityManager();
-		for (int i = 0; i < configs.length; i++) {
+		for (ConfigurationImpl config : configs) {
 			try {
 				if (sm != null) {
-					this.configurationAdminFactory.checkConfigurePermission(configs[i].getLocation(), bundleLocation);
+					this.configurationAdminFactory.checkConfigurePermission(config.getLocation(), bundleLocation);
 				}
-				result.add(configs[i]);
-			} catch (SecurityException e) {
+				result.add(config);
+			}catch (SecurityException e) {
 				// ignore;
 			}
 		}
