@@ -13,7 +13,15 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.debug;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
 import java.text.MessageFormat;
@@ -193,7 +201,7 @@ class EclipseDebugTrace implements DebugTrace {
 	public void traceEntry(final String optionPath, final Object[] methodArguments) {
 
 		if (isDebuggingEnabled(optionPath)) {
-			final StringBuffer messageBuffer = new StringBuffer(EclipseDebugTrace.MESSAGE_ENTER_METHOD_WITH_PARAMS);
+			final StringBuilder messageBuffer = new StringBuilder(EclipseDebugTrace.MESSAGE_ENTER_METHOD_WITH_PARAMS);
 			if (methodArguments != null) {
 				int i = 0;
 				while (i < methodArguments.length) {
@@ -237,7 +245,7 @@ class EclipseDebugTrace implements DebugTrace {
 	public void traceExit(final String optionPath, final Object result) {
 
 		if (isDebuggingEnabled(optionPath)) {
-			final StringBuffer messageBuffer = new StringBuffer(EclipseDebugTrace.MESSAGE_EXIT_METHOD_WITH_RESULTS);
+			final StringBuilder messageBuffer = new StringBuilder(EclipseDebugTrace.MESSAGE_EXIT_METHOD_WITH_RESULTS);
 			if (result == null) {
 				messageBuffer.append(EclipseDebugTrace.NULL_VALUE);
 			} else {
@@ -257,7 +265,7 @@ class EclipseDebugTrace implements DebugTrace {
 	public void traceDumpStack(final String optionPath) {
 
 		if (isDebuggingEnabled(optionPath)) {
-			final StringBuffer messageBuffer = new StringBuffer(EclipseDebugTrace.MESSAGE_THREAD_DUMP);
+			final StringBuilder messageBuffer = new StringBuilder(EclipseDebugTrace.MESSAGE_THREAD_DUMP);
 			StackTraceElement[] elements = new Exception().getStackTrace();
 			// the first element in this stack trace is going to be this class, so ignore it
 			// the second element in this stack trace is going to either be the caller or the trace class.  Ignore it only if a traceClass is defined
@@ -288,7 +296,7 @@ class EclipseDebugTrace implements DebugTrace {
 
 		String argument = null;
 		if (!debugOptions.isVerbose()) {
-			final StringBuffer classMethodName = new StringBuffer(record.getClassName());
+			final StringBuilder classMethodName = new StringBuilder(record.getClassName());
 			classMethodName.append("#"); //$NON-NLS-1$
 			classMethodName.append(record.getMethodName());
 			classMethodName.append(" "); //$NON-NLS-1$
@@ -309,7 +317,7 @@ class EclipseDebugTrace implements DebugTrace {
 	 */
 	private final String convertStackTraceElementsToString(final StackTraceElement[] elements) {
 
-		final StringBuffer buffer = new StringBuffer();
+		final StringBuilder buffer = new StringBuilder();
 		if (elements != null) {
 			buffer.append("java.lang.Throwable: "); //$NON-NLS-1$
 			buffer.append(EclipseDebugTrace.LINE_SEPARATOR);
@@ -461,7 +469,7 @@ class EclipseDebugTrace implements DebugTrace {
 	 */
 	private void writeComment(final Writer traceWriter, final String comment) throws IOException {
 
-		StringBuffer commentText = new StringBuffer(EclipseDebugTrace.TRACE_COMMENT);
+		StringBuilder commentText = new StringBuilder(EclipseDebugTrace.TRACE_COMMENT);
 		commentText.append(" "); //$NON-NLS-1$
 		commentText.append(comment);
 		commentText.append(EclipseDebugTrace.LINE_SEPARATOR);
@@ -534,7 +542,7 @@ class EclipseDebugTrace implements DebugTrace {
 	 */
 	private void writeMessage(final Writer traceWriter, final FrameworkDebugTraceEntry entry) throws IOException {
 
-		final StringBuffer message = new StringBuffer(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
+		final StringBuilder message = new StringBuilder(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
 		message.append(" "); //$NON-NLS-1$
 		message.append(encodeText(entry.getThreadName()));
 		message.append(" "); //$NON-NLS-1$
@@ -601,7 +609,7 @@ class EclipseDebugTrace implements DebugTrace {
 	private static String encodeText(final String inputString) {
 		if (inputString == null || inputString.indexOf(TRACE_ELEMENT_DELIMITER) < 0)
 			return inputString;
-		final StringBuffer tempBuffer = new StringBuffer(inputString);
+		final StringBuilder tempBuffer = new StringBuilder(inputString);
 		int currentIndex = tempBuffer.indexOf(TRACE_ELEMENT_DELIMITER);
 		while (currentIndex >= 0) {
 			tempBuffer.replace(currentIndex, currentIndex + TRACE_ELEMENT_DELIMITER.length(), TRACE_ELEMENT_DELIMITER_ENCODED);

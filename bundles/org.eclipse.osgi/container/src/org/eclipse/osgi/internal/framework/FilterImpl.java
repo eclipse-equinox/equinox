@@ -14,16 +14,33 @@
 
 package org.eclipse.osgi.internal.framework;
 
-import java.lang.reflect.*;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.internal.serviceregistry.ServiceReferenceImpl;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.*;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Version;
 
 /**
  * RFC 1960-based Filter. Filter objects can be created by calling
@@ -349,8 +366,8 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	 * 
 	 * @return This <code>Filter</code>'s filter string.
 	 */
-	private StringBuffer normalize() {
-		StringBuffer sb = new StringBuffer();
+	private StringBuilder normalize() {
+		StringBuilder sb = new StringBuilder();
 		sb.append('(');
 
 		switch (op) {

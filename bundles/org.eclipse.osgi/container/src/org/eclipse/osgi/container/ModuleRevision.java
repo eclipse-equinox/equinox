@@ -13,15 +13,21 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.internal.container.InternalUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.framework.namespace.IdentityNamespace;
-import org.osgi.framework.wiring.*;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRequirement;
+import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 
@@ -208,7 +214,7 @@ public final class ModuleRevision implements BundleRevision {
 			return ""; //$NON-NLS-1$
 		String assignment = directives ? ":=" : "="; //$NON-NLS-1$ //$NON-NLS-2$
 		Set<Entry<String, V>> set = map.entrySet();
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (Entry<String, V> entry : set) {
 			sb.append("; "); //$NON-NLS-1$
 			String key = entry.getKey();

@@ -148,7 +148,7 @@ public class FrameworkDebugTraceEntry {
 	@Override
 	public String toString() {
 
-		final StringBuffer buffer = new StringBuffer(threadName);
+		final StringBuilder buffer = new StringBuilder(threadName);
 		buffer.append(" "); //$NON-NLS-1$
 		buffer.append(timestamp);
 		buffer.append(" "); //$NON-NLS-1$

@@ -719,7 +719,7 @@ public final class OSGiManifestBuilderFactory {
 		if (breeFilters.size() == 1) {
 			filterSpec = breeFilters.get(0);
 		} else {
-			StringBuffer filterBuf = new StringBuffer("(|"); //$NON-NLS-1$
+			StringBuilder filterBuf = new StringBuilder("(|"); //$NON-NLS-1$
 			for (String breeFilter : breeFilters) {
 				filterBuf.append(breeFilter);
 			}

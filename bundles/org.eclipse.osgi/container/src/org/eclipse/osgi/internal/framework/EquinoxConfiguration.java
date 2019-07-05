@@ -391,7 +391,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		}
 
 		public String substituteVars(String path, boolean preserveDelimiters) {
-			StringBuffer buf = new StringBuffer(path.length());
+			StringBuilder buf = new StringBuilder(path.length());
 			StringTokenizer st = new StringTokenizer(path, VARIABLE_DELIM_STRING, true);
 			boolean varStarted = false; // indicates we are processing a var subtitute
 			String var = null; // the current var key
@@ -1107,7 +1107,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			return Integer.parseInt(value);
 		} catch (NumberFormatException e) {
 			// try up to the first non-number char
-			StringBuffer sb = new StringBuffer(value.length());
+			StringBuilder sb = new StringBuilder(value.length());
 			char[] chars = value.toCharArray();
 			for (int i = 0; i < chars.length; i++) {
 				if (!Character.isDigit(chars[i]))
