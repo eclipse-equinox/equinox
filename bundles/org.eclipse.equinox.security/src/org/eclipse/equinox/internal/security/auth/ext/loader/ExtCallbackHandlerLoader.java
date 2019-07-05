@@ -38,8 +38,8 @@ public class ExtCallbackHandlerLoader {
 		IExtensionPoint point = registry.getExtensionPoint(POINT_MAPPING);
 		IExtension[] extenders = point.getExtensions();
 		String extensionId = null;
-		for (int i = 0; i < extenders.length; i++) {
-			IConfigurationElement[] confEelements = extenders[i].getConfigurationElements();
+		for (IExtension extender : extenders) {
+			IConfigurationElement[] confEelements = extender.getConfigurationElements();
 			if (confEelements.length != 1)
 				continue; // TBD error message?
 			extensionId = loadMappingEntry(confEelements[0], configName);

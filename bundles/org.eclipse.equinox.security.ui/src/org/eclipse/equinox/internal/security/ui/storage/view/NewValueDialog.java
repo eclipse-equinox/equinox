@@ -96,8 +96,8 @@ public class NewValueDialog extends TitleAreaDialog {
 			valid = false;
 		else {
 			valid = true;
-			for (int i = 0; i < existingKeys.length; i++) {
-				if (existingKeys[i].equals(tmp)) {
+			for (String existingKey : existingKeys) {
+				if (existingKey.equals(tmp)) {
 					valid = false;
 					break;
 				}

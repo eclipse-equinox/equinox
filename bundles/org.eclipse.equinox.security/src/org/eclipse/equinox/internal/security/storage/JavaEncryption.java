@@ -246,9 +246,8 @@ public class JavaEncryption {
 		Provider[] providers = Security.getProviders();
 		Set<String> algorithms = new HashSet<>();
 		int prefixLength = prefix.length();
-		for (int i = 0; i < providers.length; i++) {
-			for (Iterator<Entry<Object, Object>> j = providers[i].entrySet().iterator(); j.hasNext();) {
-				Entry<Object, Object> entry = j.next();
+		for (Provider provider : providers) {
+			for (Entry<Object, Object> entry : provider.entrySet()) {
 				Object key = entry.getKey();
 				if (key == null)
 					continue;

@@ -72,22 +72,22 @@ public class ReEncrypter {
 		String[] keys = node.keys();
 		if (keys.length > 0) {
 			Map<String, String> map = new HashMap<>(keys.length); // could be less than that
-			for (int i = 0; i < keys.length; i++) {
+			for (String key : keys) {
 				try {
-					if (!node.isEncrypted(keys[i]))
+					if (!node.isEncrypted(key)) {
 						continue;
+					}
 					if (!(node instanceof SecurePreferencesWrapper))
 						continue;
-					String encryptionModule = ((SecurePreferencesWrapper) node).getModule(keys[i]);
+					String encryptionModule = ((SecurePreferencesWrapper) node).getModule(key);
 					if (encryptionModule == null)
 						continue;
 					if (!encryptionModule.equals(moduleID))
 						continue;
-
-					map.put(keys[i], node.get(keys[i], null));
+					map.put(key, node.get(key, null));
 				} catch (StorageException e) {
 					// this value will not be re-coded
-					String msg = NLS.bind(SecAuthMessages.decryptingError, keys[i], node.absolutePath());
+					String msg = NLS.bind(SecAuthMessages.decryptingError, key, node.absolutePath());
 					AuthPlugin.getDefault().logError(msg, e);
 					processedOK = false;
 				}
@@ -96,8 +96,8 @@ public class ReEncrypter {
 				elements.add(new TmpElement(node.absolutePath(), map));
 		}
 		String[] childrenNames = node.childrenNames();
-		for (int i = 0; i < childrenNames.length; i++) {
-			decrypt(node.node(childrenNames[i]));
+		for (String childrenName : childrenNames) {
+			decrypt(node.node(childrenName));
 		}
 	}
 
@@ -127,8 +127,7 @@ public class ReEncrypter {
 		for (TmpElement element : elements) {
 			ISecurePreferences node = root.node(element.getPath());
 			Map<String, String> values = element.getValues();
-			for (Iterator<Entry<String, String>> it = values.entrySet().iterator(); it.hasNext();) {
-				Entry<String, String> entry = it.next();
+			for (Entry<String, String> entry : values.entrySet()) {
 				String key = entry.getKey();
 				try {
 					node.put(key, entry.getValue(), true);

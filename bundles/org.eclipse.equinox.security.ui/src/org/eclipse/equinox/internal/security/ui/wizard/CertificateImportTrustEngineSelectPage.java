@@ -62,12 +62,11 @@ public class CertificateImportTrustEngineSelectPage extends WizardPage implement
 		trustEngines.clear();
 
 		// get a list of trust engine and fill the combo
-		for (int i = 0; i < availableEngines.length; i++) {
-			if (!availableEngines[i].isReadOnly()) {
-				trustEngines.add(availableEngines[i]);
-				trustEngineCombo.add(availableEngines[i].getName());
+		for (TrustEngine availableEngine : availableEngines) {
+			if (!availableEngine.isReadOnly()) {
+				trustEngines.add(availableEngine);
+				trustEngineCombo.add(availableEngine.getName());
 			}
-
 		}
 		if (trustEngineCombo.getItemCount() == 0)
 			setErrorMessage(SecurityUIMsg.WIZARD_ERROR_NO_WRITE_ENGINE);

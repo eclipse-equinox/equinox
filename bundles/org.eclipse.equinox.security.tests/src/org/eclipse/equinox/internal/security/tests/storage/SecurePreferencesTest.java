@@ -553,10 +553,10 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 		assertNotNull(array1);
 		assertNotNull(array2);
 		assertEquals(array1.length, array2.length);
-		for (int i = 0; i < array1.length; i++) {
+		for (String s : array1) {
 			boolean found = false;
-			for (int j = 0; j < array2.length; j++) {
-				if (array1[i].equals(array2[j])) {
+			for (String s2 : array2) {
+				if (s.equals(s2)) {
 					found = true;
 					break;
 				}

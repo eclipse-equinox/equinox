@@ -263,8 +263,7 @@ public class TabPassword {
 		Set<String> defaultDisabledModules = getDefaultDisabledModules();
 
 		TableItem[] items = providerTable.getItems();
-		for (int i = 0; i < items.length; i++) {
-			TableItem item = items[i];
+		for (TableItem item : items) {
 			String moduleId = getModuleId(item);
 			boolean enabled = defaultDisabledModules == null || moduleId == null || !defaultDisabledModules.contains(moduleId);
 			if (item.getChecked() != enabled) {
@@ -281,14 +280,15 @@ public class TabPassword {
 		StringBuffer tmp = new StringBuffer();
 		boolean first = true;
 		TableItem[] items = providerTable.getItems();
-		for (int i = 0; i < items.length; i++) {
-			if (items[i].getChecked())
+		for (TableItem item : items) {
+			if (item.getChecked()) {
 				continue;
+			}
 			if (!first)
 				tmp.append(',');
 			else
 				first = false;
-			tmp.append(((PasswordProviderDescription) items[i].getData()).getId());
+			tmp.append(((PasswordProviderDescription) item.getData()).getId());
 		}
 
 		IEclipsePreferences node = ConfigurationScope.INSTANCE.getNode(PREFERENCES_PLUGIN);
@@ -370,8 +370,8 @@ public class TabPassword {
 			return null;
 		HashSet<String> modules = new HashSet<>();
 		String[] disabledProviders = joinedModuleIds.split(","); //$NON-NLS-1$
-		for (int i = 0; i < disabledProviders.length; i++) {
-			modules.add(disabledProviders[i]);
+		for (String disabledProvider : disabledProviders) {
+			modules.add(disabledProvider);
 		}
 		return modules;
 	}

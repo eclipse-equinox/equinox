@@ -112,8 +112,8 @@ public class CertificateImportCertSelectPage extends WizardPage implements Liste
 
 	public void showCertificate(X509Certificate cert) {
 		Control ctrls[] = certPreview.getChildren();
-		for (int i = 0; i < ctrls.length; i++) {
-			ctrls[i].dispose();
+		for (Control ctrl : ctrls) {
+			ctrl.dispose();
 		}
 		CertificateViewer certViewer = new CertificateViewer(certPreview);
 		certViewer.setCertificate(cert);

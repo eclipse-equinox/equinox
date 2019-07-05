@@ -149,8 +149,7 @@ public class WaitingRegistryListener extends org.junit.Assert implements IRegist
 
 	private void extensionsToString(IExtension[] extensions) {
 		extensionIDs = new ArrayList<>(extensions.length);
-		for (int i = 0; i < extensions.length; i++) {
-			IExtension extension = extensions[i];
+		for (IExtension extension : extensions) {
 			extensionIDs.add(extension.getUniqueIdentifier());
 
 			// test navigation: to extension point
@@ -165,19 +164,22 @@ public class WaitingRegistryListener extends org.junit.Assert implements IRegist
 	private boolean validContents(IConfigurationElement[] children) {
 		if (children == null)
 			return true;
-		for (int i = 0; i < children.length; i++) {
-			if (!children[i].isValid())
+		for (IConfigurationElement child : children) {
+			if (!child.isValid()) {
 				return false;
-			if (!validContents(children[i].getChildren()))
+			}
+			if (!validContents(child.getChildren())) {
 				return false;
+			}
 		}
 		return true;
 	}
 
 	private void extPointsToString(IExtensionPoint[] extensionPoints) {
 		extPointIDs = new ArrayList<>(extensionPoints.length);
-		for (int i = 0; i < extensionPoints.length; i++)
-			extPointIDs.add(extensionPoints[i].getUniqueIdentifier());
+		for (IExtensionPoint extensionPoint : extensionPoints) {
+			extPointIDs.add(extensionPoint.getUniqueIdentifier());
+		}
 	}
 
 }

@@ -63,8 +63,7 @@ public class SecurityConfigurationSection implements ISystemSummarySection {
 		Map<String, String> attributes = service.getAttributes();
 		if ((null != attributes) && (0 < attributes.size())) {
 			writer.println("    Attributes:"); //$NON-NLS-1$
-			for (Iterator<Entry<String, String>> it = attributes.entrySet().iterator(); it.hasNext();) {
-				Entry<String, String> entry = it.next();
+			for (Entry<String, String> entry : attributes.entrySet()) {
 				String key = entry.getKey();
 				writer.print("      " + key + ": "); //$NON-NLS-1$//$NON-NLS-2$
 				writer.println(entry.getValue());
@@ -77,8 +76,7 @@ public class SecurityConfigurationSection implements ISystemSummarySection {
 		Hashtable<String, String> serviceList = new Hashtable<>();
 		Hashtable<String, Hashtable<String, String>> attributeMap = new Hashtable<>(); // "type" => "Hashtable of (attribute,value) pairs"
 		Hashtable<String, List<String>> aliasMap = new Hashtable<>(); // "type" => "Arraylist of aliases"
-		for (Iterator<Entry<Object, Object>> it = provider.entrySet().iterator(); it.hasNext();) {
-			Entry<Object, Object> entry = it.next();
+		for (Entry<Object, Object> entry : provider.entrySet()) {
 			String key = (String) entry.getKey();
 
 			// this is provider info, available off the Provider API
@@ -126,8 +124,7 @@ public class SecurityConfigurationSection implements ISystemSummarySection {
 
 		ProviderService[] serviceArray = new ProviderService[serviceList.size()];
 		int serviceCount = 0;
-		for (Iterator<Entry<String, String>> it = serviceList.entrySet().iterator(); it.hasNext();) {
-			Entry<String, String> entry = it.next();
+		for (Entry<String, String> entry : serviceList.entrySet()) {
 			String key = entry.getKey();
 			String type = key.substring(0, key.indexOf('.'));
 			String algo = key.substring(key.indexOf('.') + 1, key.length());

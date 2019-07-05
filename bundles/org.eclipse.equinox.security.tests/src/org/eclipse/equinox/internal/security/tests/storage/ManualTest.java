@@ -42,9 +42,8 @@ public class ManualTest {
 		// few aliases are useful and it will be harder to separate human-redable
 		// aliases from internal ones
 		Provider[] providers = Security.getProviders();
-		for (int i = 0; i < providers.length; i++) {
-			for (Iterator<Map.Entry<Object, Object>> j = providers[i].entrySet().iterator(); j.hasNext();) {
-				Map.Entry<Object, Object> entry = j.next();
+		for (Provider provider : providers) {
+			for (Map.Entry<Object, Object> entry : provider.entrySet()) {
 				String key = (String) entry.getKey();
 				if (key == null)
 					continue;
@@ -65,32 +64,29 @@ public class ManualTest {
 			 * algorithm should be really irrelevant. That said, Blowfish would not work with JavaCrypt
 			 * - so need to manually test all and exclude those that we know not supported
 			 * (or provide a roundtrip test - if it fails, exclude the value)
-			[keyFactory] PBKDF2WithHmacSHA1
-			[keyFactory] DES
-			[keyFactory] DESede
-			[keyFactory] PBE
-			[keyFactory] PBEWithSHA1AndRC2_40
-			[keyFactory] PBEWithSHA1AndDESede
-			[keyFactory] PBEWithMD5AndTripleDES
-			[keyFactory] PBEWithMD5AndDES
-			
-			
-			[cypher] DES
-			[cypher] Blowfish
-			[cypher] RC2
-			[cypher] AES
-			[cypher] DESede
-			[cypher] PBEWithMD5AndDES
-			[cypher] PBEWithMD5AndTripleDES
-			[cypher] ARCFOUR
-			[cypher] RSA
-			[cypher] AESWrap
-			[cypher] PBEWithSHA1AndRC2_40
-			[cypher] PBEWithSHA1AndDESede
-			[cypher] DESedeWrap
-			
-			http://java.sun.com/javase/6/docs/technotes/guides/security/StandardNames.html#SecretKeyFactory
-			http://java.sun.com/j2se/1.4.2/docs/guide/security/jce/JCERefGuide.html#AppA
+		[keyFactory] PBKDF2WithHmacSHA1
+		[keyFactory] DES
+		[keyFactory] DESede
+		[keyFactory] PBE
+		[keyFactory] PBEWithSHA1AndRC2_40
+		[keyFactory] PBEWithSHA1AndDESede
+		[keyFactory] PBEWithMD5AndTripleDES
+		[keyFactory] PBEWithMD5AndDES
+		[cypher] DES
+		[cypher] Blowfish
+		[cypher] RC2
+		[cypher] AES
+		[cypher] DESede
+		[cypher] PBEWithMD5AndDES
+		[cypher] PBEWithMD5AndTripleDES
+		[cypher] ARCFOUR
+		[cypher] RSA
+		[cypher] AESWrap
+		[cypher] PBEWithSHA1AndRC2_40
+		[cypher] PBEWithSHA1AndDESede
+		[cypher] DESedeWrap
+		http://java.sun.com/javase/6/docs/technotes/guides/security/StandardNames.html#SecretKeyFactory
+		http://java.sun.com/j2se/1.4.2/docs/guide/security/jce/JCERefGuide.html#AppA
 			 */
 		}
 	}

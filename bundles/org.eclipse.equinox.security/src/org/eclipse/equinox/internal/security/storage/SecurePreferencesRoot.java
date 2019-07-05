@@ -143,8 +143,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 			properties.remove(KEY_FACTORY_KEY);
 		}
 
-		for (Iterator<Entry<Object, Object>> it = properties.entrySet().iterator(); it.hasNext();) {
-			Entry<Object, Object> entry = it.next();
+		for (Entry<Object, Object> entry : properties.entrySet()) {
 			Object externalKey = entry.getKey();
 			Object value = entry.getValue();
 			if (!(externalKey instanceof String))

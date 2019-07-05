@@ -50,13 +50,13 @@ public class ConfigurationFederator extends Configuration {
 			System.arraycopy(configs, 0, allConfigs, 0, configs.length);
 			allConfigs[configs.length] = defaultConfiguration;
 		}
-		for (int i = 0; i < allConfigs.length; i++) {
+		for (Configuration c : allConfigs) {
 			boolean found = false;
-			AppConfigurationEntry[] config = allConfigs[i].getAppConfigurationEntry(name);
+			AppConfigurationEntry[] config = c.getAppConfigurationEntry(name);
 			if (config == null)
 				continue;
 			String cachedProviderName = configToProviderMap.get(name);
-			if (cachedProviderName != null && !cachedProviderName.equals(allConfigs[i].getClass().getName())) {
+			if (cachedProviderName != null && !cachedProviderName.equals(c.getClass().getName())) {
 				String message = NLS.bind(SecAuthMessages.duplicateJaasConfig1, name, cachedProviderName);
 				AuthPlugin.getDefault().logError(message, null);
 			} else {
@@ -65,7 +65,7 @@ public class ConfigurationFederator extends Configuration {
 					AuthPlugin.getDefault().logError(message, null);
 				} else if ((config != null) && (config.length != 0)) {
 					returnValue = config;
-					configToProviderMap.put(name, allConfigs[i].getClass().getName());
+					configToProviderMap.put(name, c.getClass().getName());
 					configCache.put(name, returnValue);
 					found = true;
 				}
@@ -81,8 +81,9 @@ public class ConfigurationFederator extends Configuration {
 
 	@Override
 	public synchronized void refresh() {
-		for (int i = 0; i < federatedConfigs.length; i++)
-			federatedConfigs[i].refresh();
+		for (Configuration federatedConfig : federatedConfigs) {
+			federatedConfig.refresh();
+		}
 		if (defaultConfiguration != null)
 			defaultConfiguration.refresh();
 

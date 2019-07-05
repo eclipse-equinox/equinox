@@ -153,8 +153,8 @@ public class PasswordManagement {
 	static private String mashPassword(String[] answers) {
 		// form a string composing answers
 		StringBuffer tmp = new StringBuffer();
-		for (int i = 0; i < answers.length; i++) {
-			tmp.append(answers[i].trim());
+		for (String answer : answers) {
+			tmp.append(answer.trim());
 		}
 		// mix it up
 		StringBuffer mix = new StringBuffer();

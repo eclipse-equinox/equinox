@@ -237,8 +237,7 @@ public class X500PrincipalHelper {
 		ArrayList<String> retList = new ArrayList<>();
 		String searchPart = attributeID + attrTerminator;
 
-		for (Iterator<List<String>> iter = rdnNameArray.iterator(); iter.hasNext();) {
-			List<String> nameList = iter.next();
+		for (List<String> nameList : rdnNameArray) {
 			String namePart = nameList.get(0);
 
 			if (namePart.startsWith(searchPart)) {
@@ -259,8 +258,7 @@ public class X500PrincipalHelper {
 		String retNamePart = null;
 		String searchPart = attributeID + attrTerminator;
 
-		for (Iterator<List<String>> iter = rdnNameArray.iterator(); iter.hasNext();) {
-			List<String> nameList = iter.next();
+		for (List<String> nameList : rdnNameArray) {
 			String namePart = nameList.get(0);
 
 			if (namePart.startsWith(searchPart)) {

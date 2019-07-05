@@ -94,14 +94,14 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 
 		ArrayList<ExtStorageModule> allAvailableModules = new ArrayList<>(extensions.length);
 
-		for (int i = 0; i < extensions.length; i++) {
-			String moduleID = extensions[i].getUniqueIdentifier();
+		for (IExtension extension : extensions) {
+			String moduleID = extension.getUniqueIdentifier();
 			if (moduleID == null) // IDs on those extensions are mandatory; if not specified, ignore the extension
 				continue;
 			moduleID = moduleID.toLowerCase();
 			if (expectedID != null && !expectedID.equals(moduleID))
 				continue;
-			IConfigurationElement[] elements = extensions[i].getConfigurationElements();
+			IConfigurationElement[] elements = extension.getConfigurationElements();
 			if (elements.length == 0)
 				continue;
 			IConfigurationElement element = elements[0]; // only one module is allowed per extension
@@ -118,21 +118,18 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 				if (priority > 10)
 					priority = 10;
 			}
-			String name = extensions[i].getLabel();
-
+			String name = extension.getLabel();
 			String description = element.getAttribute(MODULE_DESCRIPTION);
-
 			List<String> suppliedHints = null;
 			IConfigurationElement[] hints = element.getChildren(HINTS_NAME);
 			if (hints.length != 0) {
 				suppliedHints = new ArrayList<>(hints.length);
-				for (int j = 0; j < hints.length; j++) {
-					String hint = hints[j].getAttribute(HINT_VALUE);
+				for (IConfigurationElement h : hints) {
+					String hint = h.getAttribute(HINT_VALUE);
 					if (hint != null)
 						suppliedHints.add(hint);
 				}
 			}
-
 			Object clazz;
 			try {
 				clazz = element.createExecutableExtension(CLASS_NAME);
@@ -143,7 +140,6 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 			} catch (CoreException e) {
 				continue;
 			}
-
 			allAvailableModules.add(new ExtStorageModule(moduleID, element, priority, name, description, suppliedHints));
 		}
 
@@ -260,8 +256,8 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 			return null;
 		HashSet<String> disabledModules = new HashSet<>();
 		String[] disabledProviders = tmp.split(","); //$NON-NLS-1$
-		for (int i = 0; i < disabledProviders.length; i++) {
-			disabledModules.add(disabledProviders[i]);
+		for (String disabledProvider : disabledProviders) {
+			disabledModules.add(disabledProvider);
 		}
 		return disabledModules;
 	}

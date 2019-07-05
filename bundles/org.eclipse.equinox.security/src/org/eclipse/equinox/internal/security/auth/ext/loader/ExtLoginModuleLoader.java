@@ -40,12 +40,12 @@ public class ExtLoginModuleLoader {
 		String targetPoint = (String) options.get(ExtensionLoginModule.OPTION_MODULE_POINT);
 
 		LoginModule loginModule = null;
-		for (int i = 0; i < extensions.length; i++) {
-			String sourcePoint = extensions[i].getUniqueIdentifier();
+		for (IExtension extension : extensions) {
+			String sourcePoint = extension.getUniqueIdentifier();
 			if (sourcePoint == null) // technically, IDs on extensions are optional
 				continue;
 			if (sourcePoint.equals(targetPoint)) {
-				IConfigurationElement[] elements = extensions[i].getConfigurationElements();
+				IConfigurationElement[] elements = extension.getConfigurationElements();
 				int elementCount = elements.length;
 				if (elementCount == 1)
 					loginModule = readEntry(elements[0]);

@@ -44,10 +44,10 @@ public class ConfigurationFactory {
 		IExtension[] extensions = point.getExtensions();
 
 		ArrayList<Configuration> returnValue = new ArrayList<>(extensions.length);
-		for (int i = 0; i < extensions.length; i++) {
-			IConfigurationElement[] elements = extensions[i].getConfigurationElements();
-			for (int j = 0; j < elements.length; j++) {
-				Configuration provider = readProvider(elements[j]);
+		for (IExtension extension : extensions) {
+			IConfigurationElement[] elements = extension.getConfigurationElements();
+			for (IConfigurationElement element : elements) {
+				Configuration provider = readProvider(element);
 				if (provider != null)
 					returnValue.add(provider);
 			}
