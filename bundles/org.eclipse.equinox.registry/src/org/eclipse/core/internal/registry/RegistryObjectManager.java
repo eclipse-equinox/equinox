@@ -136,8 +136,7 @@ public class RegistryObjectManager implements IObjectManager {
 	// Also can return null if empty array is passed in or objects are of an unexpected type
 	private String findCommonNamespaceIdentifier(RegistryObject[] registryObjects) {
 		String namespaceName = null;
-		for (int i = 0; i < registryObjects.length; i++) {
-			RegistryObject currentObject = registryObjects[i];
+		for (RegistryObject currentObject : registryObjects) {
 			String tmp = null;
 			if (currentObject instanceof ExtensionPoint)
 				tmp = ((ExtensionPoint) currentObject).getNamespace();
@@ -687,8 +686,7 @@ public class RegistryObjectManager implements IObjectManager {
 	 */
 	synchronized void addNavigableObjects(Map<Integer, RegistryObject> associatedObjects) {
 		Map<Integer, RegistryObject> result = new HashMap<>();
-		for (Iterator<RegistryObject> iter = associatedObjects.values().iterator(); iter.hasNext();) {
-			RegistryObject object = iter.next();
+		for (RegistryObject object : associatedObjects.values()) {
 			if (object instanceof Extension) {
 				// add extension point
 				ExtensionPoint extPoint = getExtensionPointObject(((Extension) object).getExtensionPointIdentifier());
@@ -750,9 +748,9 @@ public class RegistryObjectManager implements IObjectManager {
 
 	private void collectChildren(RegistryObject ce, int level, Map<Integer, RegistryObject> collector) {
 		ConfigurationElement[] children = (ConfigurationElement[]) getObjects(ce.getRawChildren(), level == 0 || ce.noExtraData() ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
-		for (int j = 0; j < children.length; j++) {
-			collector.put(Integer.valueOf(children[j].getObjectId()), children[j]);
-			collectChildren(children[j], level + 1, collector);
+		for (ConfigurationElement child : children) {
+			collector.put(Integer.valueOf(child.getObjectId()), child);
+			collectChildren(child, level + 1, collector);
 		}
 	}
 
@@ -767,8 +765,8 @@ public class RegistryObjectManager implements IObjectManager {
 
 	// Called from a synchronized method only
 	private boolean unlinkChildFromContributions(KeyedElement[] contributions, int id) {
-		for (int i = 0; i < contributions.length; i++) {
-			Contribution candidate = (Contribution) contributions[i];
+		for (KeyedElement contribution : contributions) {
+			Contribution candidate = (Contribution) contribution;
 			if (candidate == null)
 				continue;
 			if (candidate.hasChild(id)) {
@@ -801,9 +799,10 @@ public class RegistryObjectManager implements IObjectManager {
 		// filter extensions with no extension point (orphan extensions)
 		List<Handle> tmp = new ArrayList<>();
 		Extension[] exts = (Extension[]) getObjects(namespaceExtensions, EXTENSION);
-		for (int i = 0; i < exts.length; i++) {
-			if (getExtensionPointObject(exts[i].getExtensionPointIdentifier()) != null)
-				tmp.add(getHandle(exts[i].getObjectId(), EXTENSION));
+		for (Extension ext : exts) {
+			if (getExtensionPointObject(ext.getExtensionPointIdentifier()) != null) {
+				tmp.add(getHandle(ext.getObjectId(), EXTENSION));
+			}
 		}
 		if (tmp.size() == 0)
 			return EMPTY_EXTENSIONS_ARRAY;

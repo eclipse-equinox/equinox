@@ -229,8 +229,8 @@ public class ExtensionsParser extends DefaultHandler {
 				if (extensions.size() > 0) {
 					Extension[] renamedExtensions = fixRenamedExtensionPoints(extensions.toArray(new Extension[extensions.size()]));
 					namespaceChildren[Contribution.EXTENSION] = renamedExtensions.length;
-					for (int i = 0; i < renamedExtensions.length; i++) {
-						namespaceChildren[position++] = renamedExtensions[i].getObjectId();
+					for (Extension renamedExtension : renamedExtensions) {
+						namespaceChildren[position++] = renamedExtension.getObjectId();
 					}
 					extensions.clear();
 				}
@@ -302,8 +302,7 @@ public class ExtensionsParser extends DefaultHandler {
 	 * Remove all elements that we have added so far into registry manager
 	 */
 	private void cleanup() {
-		for (Iterator<RegistryObject> i = addedRegistryObjects.iterator(); i.hasNext();) {
-			RegistryObject object = i.next();
+		for (RegistryObject object : addedRegistryObjects) {
 			if (object instanceof ExtensionPoint) {
 				String id = ((ExtensionPoint) object).getUniqueIdentifier();
 				objectManager.removeExtensionPoint(id);
@@ -694,8 +693,7 @@ public class ExtensionsParser extends DefaultHandler {
 	private Extension[] fixRenamedExtensionPoints(Extension[] extensions) {
 		if (extensions == null || versionAtLeast(VERSION_3_0) || RegistryProperties.getProperty(NO_EXTENSION_MUNGING) != null)
 			return extensions;
-		for (int i = 0; i < extensions.length; i++) {
-			Extension extension = extensions[i];
+		for (Extension extension : extensions) {
 			String oldPointId = extension.getExtensionPointIdentifier();
 			String newPointId = extensionPointMap.get(oldPointId);
 			if (newPointId != null) {

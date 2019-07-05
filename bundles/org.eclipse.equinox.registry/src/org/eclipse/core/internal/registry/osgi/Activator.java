@@ -90,13 +90,14 @@ public class Activator implements BundleActivator {
 		String[] args = EquinoxUtils.getCommandLine(bundleContext, ref);
 		if (args == null || args.length == 0)
 			return;
-		for (int i = 0; i < args.length; i++) {
-			if (args[i].equalsIgnoreCase(IRegistryConstants.NO_REGISTRY_CACHE))
+		for (String arg : args) {
+			if (arg.equalsIgnoreCase(IRegistryConstants.NO_REGISTRY_CACHE)) {
 				RegistryProperties.setProperty(IRegistryConstants.PROP_NO_REGISTRY_CACHE, "true"); //$NON-NLS-1$
-			else if (args[i].equalsIgnoreCase(IRegistryConstants.NO_LAZY_REGISTRY_CACHE_LOADING))
+			} else if (arg.equalsIgnoreCase(IRegistryConstants.NO_LAZY_REGISTRY_CACHE_LOADING)) {
 				RegistryProperties.setProperty(IRegistryConstants.PROP_NO_LAZY_CACHE_LOADING, "true"); //$NON-NLS-1$
-			else if (args[i].equalsIgnoreCase(IRegistryConstants.MULTI_LANGUAGE))
+			} else if (arg.equalsIgnoreCase(IRegistryConstants.MULTI_LANGUAGE)) {
 				RegistryProperties.setProperty(IRegistryConstants.PROP_MULTI_LANGUAGE, "true"); //$NON-NLS-1$
+			}
 		}
 	}
 

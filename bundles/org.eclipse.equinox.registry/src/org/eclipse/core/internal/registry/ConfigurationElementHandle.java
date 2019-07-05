@@ -83,14 +83,14 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 
 		IConfigurationElement[] result = new IConfigurationElement[1];
 		int idx = 0;
-		for (int i = 0; i < children.length; i++) {
-			if (children[i].getName().equals(name)) {
+		for (ConfigurationElement child : children) {
+			if (child.getName().equals(name)) {
 				if (idx != 0) {
 					IConfigurationElement[] copy = new IConfigurationElement[result.length + 1];
 					System.arraycopy(result, 0, copy, 0, result.length);
 					result = copy;
 				}
-				result[idx++] = (IConfigurationElement) objectManager.getHandle(children[i].getObjectId(), actualCE.noExtraData() ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
+				result[idx++] = (IConfigurationElement) objectManager.getHandle(child.getObjectId(), actualCE.noExtraData() ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
 			}
 		}
 		if (idx == 0)

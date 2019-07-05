@@ -290,11 +290,11 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		RegistryTimestamp expectedTimestamp = new RegistryTimestamp();
 		BundleContext context = Activator.getContext();
 		Bundle[] allBundles = context.getBundles();
-		for (int i = 0; i < allBundles.length; i++) {
-			URL pluginManifest = EclipseBundleListener.getExtensionURL(allBundles[i], false);
+		for (Bundle b : allBundles) {
+			URL pluginManifest = EclipseBundleListener.getExtensionURL(b, false);
 			if (pluginManifest == null)
 				continue;
-			long timestamp = getExtendedTimestamp(allBundles[i], pluginManifest);
+			long timestamp = getExtendedTimestamp(b, pluginManifest);
 			expectedTimestamp.add(timestamp);
 		}
 		return expectedTimestamp.getContentsTimestamp();

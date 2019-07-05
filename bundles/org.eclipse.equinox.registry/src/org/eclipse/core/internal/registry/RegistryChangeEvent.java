@@ -53,8 +53,9 @@ public final class RegistryChangeEvent implements IRegistryChangeEvent {
 		if (hostDeltas.length == 0)
 			return new IExtensionDelta[0];
 		int extensionDeltasSize = 0;
-		for (int i = 0; i < hostDeltas.length; i++)
-			extensionDeltasSize += hostDeltas[i].getExtensionDeltasCount();
+		for (RegistryDelta hostDelta : hostDeltas) {
+			extensionDeltasSize += hostDelta.getExtensionDeltasCount();
+		}
 		IExtensionDelta[] extensionDeltas = new IExtensionDelta[extensionDeltasSize];
 		for (int i = 0, offset = 0; i < hostDeltas.length; i++) {
 			IExtensionDelta[] hostExtDeltas = hostDeltas[i].getExtensionDeltas();

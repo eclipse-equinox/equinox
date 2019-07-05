@@ -38,8 +38,7 @@ public class RegistryDelta {
 
 	public IExtensionDelta[] getExtensionDeltas(String extensionPoint) {
 		Collection<IExtensionDelta> selectedExtDeltas = new LinkedList<>();
-		for (Iterator<IExtensionDelta> extDeltasIter = extensionDeltas.iterator(); extDeltasIter.hasNext();) {
-			IExtensionDelta extensionDelta = extDeltasIter.next();
+		for (IExtensionDelta extensionDelta : extensionDeltas) {
 			if (extensionDelta.getExtension().getExtensionPointUniqueIdentifier().equals(extensionPoint))
 				selectedExtDeltas.add(extensionDelta);
 		}
@@ -51,8 +50,7 @@ public class RegistryDelta {
 	 * @param extensionId must not be null
 	 */
 	public IExtensionDelta getExtensionDelta(String extensionPointId, String extensionId) {
-		for (Iterator<IExtensionDelta> extDeltasIter = extensionDeltas.iterator(); extDeltasIter.hasNext();) {
-			IExtensionDelta extensionDelta = extDeltasIter.next();
+		for (IExtensionDelta extensionDelta : extensionDeltas) {
 			IExtension extension = extensionDelta.getExtension();
 			if (extension.getExtensionPointUniqueIdentifier().equals(extensionPointId) && extension.getUniqueIdentifier() != null && extension.getUniqueIdentifier().equals(extensionId))
 				return extensionDelta;

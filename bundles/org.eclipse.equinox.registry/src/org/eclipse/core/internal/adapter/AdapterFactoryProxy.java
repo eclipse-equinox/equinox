@@ -96,10 +96,10 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 	public String[] getAdapterNames() {
 		IConfigurationElement[] children = element.getChildren();
 		ArrayList<String> adapters = new ArrayList<>(children.length);
-		for (int i = 0; i < children.length; i++) {
+		for (IConfigurationElement child : children) {
 			//ignore unknown children for forward compatibility
-			if ("adapter".equals(children[i].getName())) { //$NON-NLS-1$
-				String type = children[i].getAttribute("type"); //$NON-NLS-1$
+			if ("adapter".equals(child.getName())) {//$NON-NLS-1$
+				String type = child.getAttribute("type"); //$NON-NLS-1$
 				if (type != null)
 					adapters.add(type);
 			}

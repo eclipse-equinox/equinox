@@ -89,11 +89,12 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 	}
 
 	public void processBundles(Bundle[] bundles) {
-		for (int i = 0; i < bundles.length; i++) {
-			if (isBundleResolved(bundles[i]))
-				addBundle(bundles[i], false);
-			else
-				removeBundle(bundles[i]);
+		for (Bundle bundle : bundles) {
+			if (isBundleResolved(bundle)) {
+				addBundle(bundle, false);
+			} else {
+				removeBundle(bundle);
+			}
 		}
 	}
 
@@ -198,8 +199,9 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		if (hosts == null)
 			return;
 		// check to see if the hosts should be refreshed because the fragment contains NLS properties files.
-		for (int i = 0; i < hosts.length; i++)
-			checkForNLSFiles(hosts[i], bundle);
+		for (Bundle host : hosts) {
+			checkForNLSFiles(host, bundle);
+		}
 	}
 
 	private void checkForNLSFiles(Bundle host, Bundle fragment) {
@@ -230,11 +232,12 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 			// force the host and fragments to be removed and added back
 			removeBundle(host);
 			addBundle(host, false);
-			for (int i = 0; i < fragments.length; i++) {
-				if (fragment.equals(fragments[i]))
+			for (Bundle b : fragments) {
+				if (fragment.equals(b)) {
 					continue; // skip fragment that was just resolved; it will be added in by the caller
-				removeBundle(fragments[i]);
-				addBundle(fragments[i], false);
+				}
+				removeBundle(b);
+				addBundle(b, false);
 			}
 			synchronized (currentStateStamp) {
 				// mark this host as processed for the current state stamp.

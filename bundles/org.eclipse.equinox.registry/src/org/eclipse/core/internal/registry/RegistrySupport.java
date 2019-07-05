@@ -75,8 +75,8 @@ public class RegistrySupport {
 				newPrefix = "\t"; //$NON-NLS-1$
 			else
 				newPrefix = prefix + "\t"; //$NON-NLS-1$
-			for (int i = 0; i < children.length; i++) {
-				log(children[i], newPrefix);
+			for (IStatus child : children) {
+				log(child, newPrefix);
 			}
 		}
 	}

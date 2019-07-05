@@ -77,8 +77,8 @@ public class BaseExtensionPointHandle extends Handle implements IExtensionPoint 
 			return ConfigurationElementHandle.EMPTY_ARRAY;
 
 		ArrayList<Handle> result = new ArrayList<>();
-		for (int i = 0; i < tmpExtensions.length; i++) {
-			result.addAll(Arrays.asList(objectManager.getHandles(tmpExtensions[i].getRawChildren(), RegistryObjectManager.CONFIGURATION_ELEMENT)));
+		for (Extension tmpExtension : tmpExtensions) {
+			result.addAll(Arrays.asList(objectManager.getHandles(tmpExtension.getRawChildren(), RegistryObjectManager.CONFIGURATION_ELEMENT)));
 		}
 		return result.toArray(new IConfigurationElement[result.size()]);
 	}

@@ -49,10 +49,10 @@ public final class AdapterManagerListener implements IRegistryEventListener, IAd
 
 		boolean factoriesAdded = false;
 		IExtension[] extensions = point.getExtensions();
-		for (int i = 0; i < extensions.length; i++) {
-			IConfigurationElement[] elements = extensions[i].getConfigurationElements();
-			for (int j = 0; j < elements.length; j++) {
-				AdapterFactoryProxy proxy = AdapterFactoryProxy.createProxy(elements[j]);
+		for (IExtension extension : extensions) {
+			IConfigurationElement[] elements = extension.getConfigurationElements();
+			for (IConfigurationElement element : elements) {
+				AdapterFactoryProxy proxy = AdapterFactoryProxy.createProxy(element);
 				if (proxy != null) {
 					adapterManager.registerFactory(proxy, proxy.getAdaptableType());
 					factoriesAdded = true;
@@ -65,8 +65,8 @@ public final class AdapterManagerListener implements IRegistryEventListener, IAd
 
 	private void registerExtension(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
-		for (int j = 0; j < elements.length; j++) {
-			AdapterFactoryProxy proxy = AdapterFactoryProxy.createProxy(elements[j]);
+		for (IConfigurationElement element : elements) {
+			AdapterFactoryProxy proxy = AdapterFactoryProxy.createProxy(element);
 			if (proxy != null)
 				theAdapterManager.registerFactory(proxy, proxy.getAdaptableType());
 		}
@@ -74,22 +74,24 @@ public final class AdapterManagerListener implements IRegistryEventListener, IAd
 
 	@Override
 	public synchronized void added(IExtension[] extensions) {
-		for (int i = 0; i < extensions.length; i++)
-			registerExtension(extensions[i]);
+		for (IExtension extension : extensions) {
+			registerExtension(extension);
+		}
 		theAdapterManager.flushLookup();
 	}
 
 	@Override
 	public synchronized void removed(IExtension[] extensions) {
 		theAdapterManager.flushLookup();
-		for (int i = 0; i < extensions.length; i++) {
+		for (IExtension extension : extensions) {
 			for (Iterator<List<IAdapterFactory>> it = theAdapterManager.getFactories().values().iterator(); it.hasNext();) {
 				for (Iterator<IAdapterFactory> it2 = (it.next()).iterator(); it2.hasNext();) {
 					IAdapterFactory factory = it2.next();
 					if (!(factory instanceof AdapterFactoryProxy))
 						continue;
-					if (((AdapterFactoryProxy) factory).originatesFrom(extensions[i]))
+					if (((AdapterFactoryProxy) factory).originatesFrom(extension)) {
 						it2.remove();
+					}
 				}
 			}
 		}

@@ -60,8 +60,9 @@ public class RegistryCommandProvider implements CommandProvider {
 			String[] namespaces = RegistryFactory.getRegistry().getNamespaces();
 			ci.println("Namespace(s):"); //$NON-NLS-1$
 			ci.println("-------------------"); //$NON-NLS-1$
-			for (int i = 0; i < namespaces.length; i++)
-				ci.println(namespaces[i]);
+			for (String n : namespaces) {
+				ci.println(n);
+			}
 			return;
 		}
 
@@ -69,15 +70,17 @@ public class RegistryCommandProvider implements CommandProvider {
 		IExtensionPoint[] extpts = registry.getExtensionPoints(namespace);
 		ci.println("Extension point(s):"); //$NON-NLS-1$
 		ci.println("-------------------"); //$NON-NLS-1$
-		for (int i = 0; i < extpts.length; i++)
-			displayExtensionPoint(extpts[i], ci);
+		for (IExtensionPoint extpt : extpts) {
+			displayExtensionPoint(extpt, ci);
+		}
 
 		if (verbose) {
 			ci.println("\nExtension(s):"); //$NON-NLS-1$
 			ci.println("-------------------"); //$NON-NLS-1$
 			IExtension[] exts = RegistryFactory.getRegistry().getExtensions(namespace);
-			for (int j = 0; j < exts.length; j++)
-				displayExtension(exts[j], ci, true /*full*/);
+			for (IExtension ext : exts) {
+				displayExtension(ext, ci, true /*full*/);
+			}
 		}
 	}
 
@@ -93,12 +96,13 @@ public class RegistryCommandProvider implements CommandProvider {
 		IExtension[] exts = extpt.getExtensions();
 		ci.println("\nExtension(s):"); //$NON-NLS-1$
 		ci.println("-------------------"); //$NON-NLS-1$
-		for (int i = 0; i < exts.length; i++) {
-			displayExtension(exts[i], ci, false /*short*/);
+		for (IExtension ext : exts) {
+			displayExtension(ext, ci, false /*short*/);
 			if (verbose) {
-				IConfigurationElement[] ce = exts[i].getConfigurationElements();
-				for (int j = 0; j < ce.length; j++)
-					displayConfigElement(ci, ce[j], 1);
+				IConfigurationElement[] ce = ext.getConfigurationElements();
+				for (IConfigurationElement ce1 : ce) {
+					displayConfigElement(ci, ce1, 1);
+				}
 				ci.println();
 			}
 		}
@@ -158,14 +162,16 @@ public class RegistryCommandProvider implements CommandProvider {
 		String spacing = spacing(ci, level);
 		ci.println(spacing + '<' + ce.getName() + '>');
 		String[] attrs = ce.getAttributeNames();
-		for (int k = 0; k < attrs.length; k++)
-			ci.println(indent + spacing + attrs[k] + " = " + ce.getAttribute(attrs[k])); //$NON-NLS-1$
+		for (String attr : attrs) {
+			ci.println(indent + spacing + attr + " = " + ce.getAttribute(attr)); //$NON-NLS-1$
+		}
 		String value = ce.getValue();
 		if (value != null)
 			ci.println(indent + spacing + value);
 		IConfigurationElement[] children = ce.getChildren();
-		for (int z = 0; z < children.length; z++)
-			displayConfigElement(ci, children[z], level + 1);
+		for (IConfigurationElement child : children) {
+			displayConfigElement(ci, child, level + 1);
+		}
 		ci.println(spacing + "</" + ce.getName() + '>'); //$NON-NLS-1$
 	}
 
