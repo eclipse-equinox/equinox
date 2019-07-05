@@ -13,13 +13,25 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.debug;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.location.LocationHelper;
-import org.eclipse.osgi.service.debug.*;
-import org.osgi.framework.*;
+import org.eclipse.osgi.service.debug.DebugOptions;
+import org.eclipse.osgi.service.debug.DebugOptionsListener;
+import org.eclipse.osgi.service.debug.DebugTrace;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -256,7 +268,7 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	}
 
 	private String getSymbolicName(String option) {
-		int firstSlashIndex = option.indexOf("/"); //$NON-NLS-1$
+		int firstSlashIndex = option.indexOf('/');
 		if (firstSlashIndex > 0)
 			return option.substring(0, firstSlashIndex);
 		return null;
