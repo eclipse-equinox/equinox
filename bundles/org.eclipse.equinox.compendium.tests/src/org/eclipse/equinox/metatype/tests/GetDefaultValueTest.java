@@ -45,82 +45,82 @@ public class GetDefaultValueTest extends AbstractTest {
 		Assert.assertEquals("Wrong object class definition name", "getDefaultValues", ocd.getName()); //$NON-NLS-1$ //$NON-NLS-2$
 		AttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
 		Assert.assertEquals("Wrong number of attribute definitions", 24, ads.length); //$NON-NLS-1$
-		for (int i = 0; i < ads.length; i++) {
-			switch (Integer.parseInt(ads[i].getID())) {
-				case 1 :
-					assertAttributeDefinition(ads[i], 0, null, null, "1", null, null, null, AttributeDefinition.INTEGER); //$NON-NLS-1$
+		for (AttributeDefinition ad : ads) {
+			switch (Integer.parseInt(ad.getID())) {
+				case 1:
+					assertAttributeDefinition(ad, 0, null, null, "1", null, null, null, AttributeDefinition.INTEGER); //$NON-NLS-1$
 					break;
-				case 2 :
-					assertAttributeDefinition(ads[i], 1, null, null, "2", null, null, null, AttributeDefinition.DOUBLE); //$NON-NLS-1$
+				case 2:
+					assertAttributeDefinition(ad, 1, null, null, "2", null, null, null, AttributeDefinition.DOUBLE); //$NON-NLS-1$
 					break;
-				case 3 :
-					assertAttributeDefinition(ads[i], -1, null, null, "3", null, null, null, AttributeDefinition.SHORT); //$NON-NLS-1$
+				case 3:
+					assertAttributeDefinition(ad, -1, null, null, "3", null, null, null, AttributeDefinition.SHORT); //$NON-NLS-1$
 					break;
-				case 4 :
-					assertAttributeDefinition(ads[i], 5, null, null, "4", null, null, null, AttributeDefinition.BYTE); //$NON-NLS-1$
+				case 4:
+					assertAttributeDefinition(ad, 5, null, null, "4", null, null, null, AttributeDefinition.BYTE); //$NON-NLS-1$
 					break;
-				case 5 :
-					assertAttributeDefinition(ads[i], -10, null, null, "5", null, null, null, AttributeDefinition.INTEGER); //$NON-NLS-1$
+				case 5:
+					assertAttributeDefinition(ad, -10, null, null, "5", null, null, null, AttributeDefinition.INTEGER); //$NON-NLS-1$
 					break;
-				case 6 :
-					assertAttributeDefinition(ads[i], 0, null, null, "6", null, null, null, AttributeDefinition.STRING); //$NON-NLS-1$
+				case 6:
+					assertAttributeDefinition(ad, 0, null, null, "6", null, null, null, AttributeDefinition.STRING); //$NON-NLS-1$
 					break;
-				case 7 :
-					assertAttributeDefinition(ads[i], 1, null, null, "7", null, null, null, AttributeDefinition.PASSWORD); //$NON-NLS-1$
+				case 7:
+					assertAttributeDefinition(ad, 1, null, null, "7", null, null, null, AttributeDefinition.PASSWORD); //$NON-NLS-1$
 					break;
-				case 8 :
-					assertAttributeDefinition(ads[i], -1, null, null, "8", null, null, null, AttributeDefinition.STRING); //$NON-NLS-1$
+				case 8:
+					assertAttributeDefinition(ad, -1, null, null, "8", null, null, null, AttributeDefinition.STRING); //$NON-NLS-1$
 					break;
-				case 9 :
-					assertAttributeDefinition(ads[i], 20, null, null, "9", null, null, null, AttributeDefinition.PASSWORD); //$NON-NLS-1$
+				case 9:
+					assertAttributeDefinition(ad, 20, null, null, "9", null, null, null, AttributeDefinition.PASSWORD); //$NON-NLS-1$
 					break;
-				case 10 :
-					assertAttributeDefinition(ads[i], -9, null, null, "10", null, null, null, AttributeDefinition.STRING); //$NON-NLS-1$
+				case 10:
+					assertAttributeDefinition(ad, -9, null, null, "10", null, null, null, AttributeDefinition.STRING); //$NON-NLS-1$
 					break;
-				case 11 :
-					assertAttributeDefinition(ads[i], 0, null, null, "11", null, null, null, AttributeDefinition.BYTE); //$NON-NLS-1$
+				case 11:
+					assertAttributeDefinition(ad, 0, null, null, "11", null, null, null, AttributeDefinition.BYTE); //$NON-NLS-1$
 					break;
-				case 12 :
-					assertAttributeDefinition(ads[i], 1, null, null, "12", null, null, null, AttributeDefinition.SHORT); //$NON-NLS-1$
+				case 12:
+					assertAttributeDefinition(ad, 1, null, null, "12", null, null, null, AttributeDefinition.SHORT); //$NON-NLS-1$
 					break;
-				case 13 :
-					assertAttributeDefinition(ads[i], -1, null, null, "13", null, null, null, AttributeDefinition.INTEGER); //$NON-NLS-1$
+				case 13:
+					assertAttributeDefinition(ad, -1, null, null, "13", null, null, null, AttributeDefinition.INTEGER); //$NON-NLS-1$
 					break;
-				case 14 :
-					assertAttributeDefinition(ads[i], 7, null, null, "14", null, null, null, AttributeDefinition.DOUBLE); //$NON-NLS-1$
+				case 14:
+					assertAttributeDefinition(ad, 7, null, null, "14", null, null, null, AttributeDefinition.DOUBLE); //$NON-NLS-1$
 					break;
-				case 15 :
-					assertAttributeDefinition(ads[i], -3, null, null, "15", null, null, null, AttributeDefinition.DOUBLE); //$NON-NLS-1$
+				case 15:
+					assertAttributeDefinition(ad, -3, null, null, "15", null, null, null, AttributeDefinition.DOUBLE); //$NON-NLS-1$
 					break;
-				case 16 :
-					assertAttributeDefinition(ads[i], 0, new String[] {""}, null, "16", null, null, null, AttributeDefinition.STRING); //$NON-NLS-1$ //$NON-NLS-2$
+				case 16:
+					assertAttributeDefinition(ad, 0, new String[] {""}, null, "16", null, null, null, AttributeDefinition.STRING); //$NON-NLS-1$ //$NON-NLS-2$
 					break;
-				case 17 :
-					assertAttributeDefinition(ads[i], 1, new String[0], null, "17", null, null, null, AttributeDefinition.PASSWORD); //$NON-NLS-1$
+				case 17:
+					assertAttributeDefinition(ad, 1, new String[0], null, "17", null, null, null, AttributeDefinition.PASSWORD); //$NON-NLS-1$
 					break;
-				case 18 :
-					assertAttributeDefinition(ads[i], -1, new String[0], null, "18", null, null, null, AttributeDefinition.STRING); //$NON-NLS-1$
+				case 18:
+					assertAttributeDefinition(ad, -1, new String[0], null, "18", null, null, null, AttributeDefinition.STRING); //$NON-NLS-1$
 					break;
-				case 19 :
-					assertAttributeDefinition(ads[i], 42, new String[0], null, "19", null, null, null, AttributeDefinition.PASSWORD); //$NON-NLS-1$
+				case 19:
+					assertAttributeDefinition(ad, 42, new String[0], null, "19", null, null, null, AttributeDefinition.PASSWORD); //$NON-NLS-1$
 					break;
-				case 20 :
-					assertAttributeDefinition(ads[i], -210, new String[0], null, "20", null, null, null, AttributeDefinition.STRING); //$NON-NLS-1$
+				case 20:
+					assertAttributeDefinition(ad, -210, new String[0], null, "20", null, null, null, AttributeDefinition.STRING); //$NON-NLS-1$
 					break;
-				case 21 :
-					assertAttributeDefinition(ads[i], 2, new String[] {"", ""}, null, "21", null, null, null, AttributeDefinition.STRING); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				case 21:
+					assertAttributeDefinition(ad, 2, new String[] {"", ""}, null, "21", null, null, null, AttributeDefinition.STRING); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					break;
-				case 22 :
-					assertAttributeDefinition(ads[i], -2, new String[] {"", ""}, null, "22", null, null, null, AttributeDefinition.PASSWORD); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				case 22:
+					assertAttributeDefinition(ad, -2, new String[] {"", ""}, null, "22", null, null, null, AttributeDefinition.PASSWORD); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					break;
-				case 23 :
-					assertAttributeDefinition(ads[i], 4, new String[] {"", "", ""}, null, "23", null, null, null, AttributeDefinition.STRING); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				case 23:
+					assertAttributeDefinition(ad, 4, new String[] {"", "", ""}, null, "23", null, null, null, AttributeDefinition.STRING); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					break;
-				case 24 :
-					assertAttributeDefinition(ads[i], -8, new String[] {"", "", "", "", ""}, null, "24", null, null, null, AttributeDefinition.PASSWORD); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+				case 24:
+					assertAttributeDefinition(ad, -8, new String[] {"", "", "", "", ""}, null, "24", null, null, null, AttributeDefinition.PASSWORD); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 					break;
-				default :
-					fail("Unexpected attribute definition ID: " + ads[i].getID()); //$NON-NLS-1$
+				default:
+					fail("Unexpected attribute definition ID: " + ad.getID()); //$NON-NLS-1$
 			}
 		}
 	}

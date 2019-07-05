@@ -49,14 +49,15 @@ public class DSTestsActivator implements BundleActivator {
 	private static void activateBundle(String symbolicName) {
 		if (instance != null) {
 			Bundle[] bundles = instance.context.getBundles();
-			for (int i = 0; i < bundles.length; i++) {
-				if (symbolicName.equals(bundles[i].getSymbolicName())) {
-					if (bundles[i].getState() != Bundle.ACTIVE)
+			for (Bundle bundle : bundles) {
+				if (symbolicName.equals(bundle.getSymbolicName())) {
+					if (bundle.getState() != Bundle.ACTIVE) {
 						try {
-							bundles[i].start(Bundle.START_TRANSIENT);
-						} catch (BundleException e) {
+							bundle.start(Bundle.START_TRANSIENT);
+						}catch (BundleException e) {
 							e.printStackTrace();
 						}
+					}
 				}
 			}
 		}

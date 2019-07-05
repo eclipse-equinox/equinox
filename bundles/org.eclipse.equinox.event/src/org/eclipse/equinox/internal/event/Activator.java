@@ -31,9 +31,11 @@ public class Activator implements BundleActivator {
 		//don't register the service if this bundle has already registered it declaratively
 		ServiceReference<?>[] refs = bundleContext.getBundle().getRegisteredServices();
 		if (refs != null) {
-			for (int i = 0; i < refs.length; i++)
-				if (serviceFilter.match(refs[i]))
+			for (ServiceReference<?> ref : refs) {
+				if (serviceFilter.match(ref)) {
 					return; // We found a service registered by this bundle already
+				}
+			}
 		}
 
 		eventAdmin = new EventComponent();

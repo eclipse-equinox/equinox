@@ -125,11 +125,12 @@ public abstract class AbstractTest {
 	protected AttributeDefinition findAttributeDefinitionById(String id, AttributeDefinition[] ads) {
 		if (id == null || ads == null)
 			return null;
-		for (int i = 0; i < ads.length; i++) {
-			if (ads[i] == null)
+		for (AttributeDefinition ad : ads) {
+			if (ad == null) {
 				continue;
-			if (id.equals(ads[i].getID())) {
-				return ads[i];
+			}
+			if (id.equals(ad.getID())) {
+				return ad;
 			}
 		}
 		return null;

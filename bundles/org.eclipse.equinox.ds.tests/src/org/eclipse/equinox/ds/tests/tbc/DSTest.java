@@ -1476,13 +1476,13 @@ public class DSTest {
     if (services == null) {
       return false;
     }
-    for (int i = 0; i < services.length; i++) {
-      if (services[i] instanceof NamespaceProvider) {
-        NamespaceProvider s = (NamespaceProvider) services[i];
-        if (s.getComponentNSID() == nsid) {
-          return true;
+    for (Object service : services) {
+        if (service instanceof NamespaceProvider) {
+           NamespaceProvider s = (NamespaceProvider) service;
+            if (s.getComponentNSID() == nsid) {
+                return true;
+            }
         }
-      }
     }
 
     return false;
@@ -2507,8 +2507,8 @@ public class DSTest {
     ServiceReference ref = trackerBaseService.getServiceReference();
     assertNotNull("Provided service of " + COMP + " should be available", ref);
     String[] keys = ref.getPropertyKeys();
-    for (int i = 0; i < keys.length; i++) {
-      assertTrue("Private properties should not be propagated", !keys[i].startsWith("."));
+    for (String key : keys) {
+        assertTrue("Private properties should not be propagated", !key.startsWith("."));
     }
 
     uninstallBundle(tb22);
@@ -2983,15 +2983,15 @@ public class DSTest {
     if (services == null) {
       return null;
     }
-    for (int i = 0; i < services.length; i++) {
-      if (services[i] instanceof PropertiesProvider) {
-        PropertiesProvider s = (PropertiesProvider) services[i];
-        Dictionary props = s.getProperties();
-        if (props != null && ((String) props.get(ComponentConstants.COMPONENT_NAME)).equals(componentName)) {
-          return s;
+    for (Object service : services) {
+        if (service instanceof PropertiesProvider) {
+            PropertiesProvider s = (PropertiesProvider) service;
+            Dictionary props = s.getProperties();
+            if (props != null && ((String) props.get(ComponentConstants.COMPONENT_NAME)).equals(componentName)) {
+                return s;
+                }
+            }
         }
-      }
-    }
     return null;
   }
 

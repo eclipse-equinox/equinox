@@ -42,9 +42,9 @@ public class AttributeTypePasswordTest extends AbstractTest {
 		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
 		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null); //$NON-NLS-1$
 		AttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
-		for (int i = 0; i < ads.length; i++) {
-			if (ads[i].getID().equals("password1")) { //$NON-NLS-1$
-				Assert.assertEquals("Attribute type is not PASSWORD", AttributeDefinition.PASSWORD, ads[i].getType()); //$NON-NLS-1$
+		for (AttributeDefinition ad : ads) {
+			if (ad.getID().equals("password1")) { //$NON-NLS-1$
+				Assert.assertEquals("Attribute type is not PASSWORD", AttributeDefinition.PASSWORD, ad.getType()); //$NON-NLS-1$
 			}
 		}
 	}

@@ -36,8 +36,7 @@ public class BundleAdvisor extends Object {
 			throw new IllegalArgumentException("symbolicName must not be null"); //$NON-NLS-1$
 		BundleContext context = getBundleContext();
 		Bundle[] bundles = context.getBundles();
-		for (int i = 0; i < bundles.length; i++) {
-			Bundle bundle = bundles [ i ];
+		for (Bundle bundle : bundles) {
 			String bsn = bundle.getSymbolicName();
 			boolean match = symbolicName.equals(bsn); 
 			if (match) {

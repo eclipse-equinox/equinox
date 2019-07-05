@@ -57,18 +57,18 @@ public class ExtendableTest extends AbstractTest {
 		Assert.assertEquals("Wrong attributes size", 1, attributes.size()); //$NON-NLS-1$
 		Assert.assertEquals("Wrong value", "true", attributes.get("enabled")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		EquinoxAttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
-		for (int i = 0; i < ads.length; i++) {
-			if (ads[i].getID().equals("ad1")) { //$NON-NLS-1$
-				schemas = ads[i].getExtensionUris();
+		for (EquinoxAttributeDefinition ad : ads) {
+			if (ad.getID().equals("ad1")) { //$NON-NLS-1$
+				schemas = ad.getExtensionUris();
 				Assert.assertNotNull("Null extension schemas", schemas); //$NON-NLS-1$
 				Assert.assertEquals("Wrong schemas size", 2, schemas.size()); //$NON-NLS-1$
 				assertTrue("Missing schema", schemas.contains("urn:xmlns:foo")); //$NON-NLS-1$ //$NON-NLS-2$
 				assertTrue("Missing schema", schemas.contains("urn:xmlns:validation")); //$NON-NLS-1$ //$NON-NLS-2$
-				attributes = ads[i].getExtensionAttributes("urn:xmlns:foo"); //$NON-NLS-1$
+				attributes = ad.getExtensionAttributes("urn:xmlns:foo"); //$NON-NLS-1$
 				Assert.assertNotNull("Null attributes", attributes); //$NON-NLS-1$
 				Assert.assertEquals("Wrong attributes size", 1, attributes.size()); //$NON-NLS-1$
 				Assert.assertEquals("Wrong value", "foo", attributes.get("bar")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				attributes = ads[i].getExtensionAttributes("urn:xmlns:validation"); //$NON-NLS-1$
+				attributes = ad.getExtensionAttributes("urn:xmlns:validation"); //$NON-NLS-1$
 				Assert.assertNotNull("Null attributes", attributes); //$NON-NLS-1$
 				Assert.assertEquals("Wrong attributes size", 2, attributes.size()); //$NON-NLS-1$
 				Assert.assertEquals("Wrong value", "[a-zA-Z0-9]", attributes.get("regexp")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

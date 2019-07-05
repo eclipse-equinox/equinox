@@ -367,11 +367,11 @@ public class HttpServerManager implements ManagedServiceFactory {
 	private static boolean deleteDirectory(File directory) {
 		if (directory.exists() && directory.isDirectory()) {
 			File[] files = directory.listFiles();
-			for (int i = 0; i < files.length; i++) {
-				if (files[i].isDirectory()) {
-					deleteDirectory(files[i]);
+			for (File file : files) {
+				if (file.isDirectory()) {
+					deleteDirectory(file);
 				} else {
-					files[i].delete();
+					file.delete();
 				}
 			}
 		}

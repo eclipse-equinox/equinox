@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Lazar Kirchev, SAP AG - derivative implementation to migrate the commands from FrameworkCommandProvider to Gogo shell commands
@@ -79,7 +79,7 @@ import org.osgi.service.startlevel.StartLevel;
 
 /**
  * This class provides methods to execute commands from the command line.  It registers
- * itself as a service so it can be invoked by a CommandProcessor. 
+ * itself as a service so it can be invoked by a CommandProcessor.
  *
  * The commands provided by this class are:
  ---Controlling the OSGi framework---
@@ -138,18 +138,18 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 	/** this list contains the bundles known to be lazily awaiting activation */
 	private final List<Bundle> lazyActivation = new ArrayList<>();
-	
+
 	private Activator activator;
-	
-	/** commands provided by this command provider */ 
-	private static final String[] functions = new String[] {"exit", "shutdown", "sta", "start", "sto", "stop", "i", 
+
+	/** commands provided by this command provider */
+	private static final String[] functions = new String[] {"exit", "shutdown", "sta", "start", "sto", "stop", "i",
 		"install", "up", "up", "up", "update", "update", "update", "un", "uninstall", "s", "status", "se", "services",
 		"p", "p", "packages", "packages", "bundles", "b", "bundle", "gc", "init", "close", "r", "refresh", "exec",
 		"fork", "h", "headers", "pr", "props", "setp", "setprop", "ss", "t", "threads", "sl", "setfwsl", "setbsl",
-		"setibsl", "requiredBundles", "classSpaces", "profilelog", "getPackages", "getprop", "diag", "enableBundle", 
+		"setibsl", "requiredBundles", "classSpaces", "profilelog", "getPackages", "getprop", "diag", "enableBundle",
 		"disableBundle", "disabledBundles"};
-	
-	
+
+
 	/**
 	 *  Constructor.
 	 *
@@ -171,7 +171,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	public void startService() {
 		EquinoxCommandsConverter converter = new EquinoxCommandsConverter(context);
 		converterReg = context.registerService(Converter.class.getName(), converter, null);
-		
+
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
 		props.put(CommandProcessor.COMMAND_SCOPE, "equinox");
@@ -184,9 +184,9 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		if (converterReg != null) {
 			converterReg.unregister();
 		}
-		
+
 		context.removeBundleListener(this);
-		
+
 		if (providerReg != null) {
 			providerReg.unregister();
 		}
@@ -233,12 +233,12 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
 			return;
 		}
-		
+
 		if (bundles.length == 0) {
 			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
 			return;
 		}
-		
+
 		for(Bundle bundle : bundles) {
 				bundle.start();
 		}
@@ -265,12 +265,12 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
 			return;
 		}
-		
+
 		if (bundles.length == 0) {
 			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
 			return;
 		}
-		
+
 		for(Bundle bundle : bundles) {
 				bundle.stop();
 		}
@@ -326,7 +326,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	public void up(@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles) throws Exception {
 		update(bundles);
 	}
-	
+
 	/**
 	 *  Handle the update command's abbreviation.  Invoke update()
 	 *
@@ -336,12 +336,12 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_SOURCE_COMMAND_DESCRIPTION)
 	public void up(
 			@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_SOURCE_COMMAND_BUNDLE_ARGUMENT_DESCRIPTION)
-			Bundle bundle, 
+			Bundle bundle,
 			@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_SOURCE_COMMAND_URL_ARGUMENT_DESCRIPTION)
 			URL source) throws Exception {
 		update(bundle, source);
 	}
-	
+
 	/**
 	 *  Handle the update command.  Update the specified bundle(s).
 	 *
@@ -353,12 +353,12 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
 			return;
 		}
-		
+
 		if(bundles.length == 0) {
 			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
 			return;
 		}
-		
+
 		for(Bundle bundle : bundles) {
 			bundle.update();
 		}
@@ -373,7 +373,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_SOURCE_COMMAND_DESCRIPTION)
 	public void update(
 			@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_SOURCE_COMMAND_BUNDLE_ARGUMENT_DESCRIPTION)
-			Bundle bundle, 
+			Bundle bundle,
 			@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_SOURCE_COMMAND_URL_ARGUMENT_DESCRIPTION)
 			URL source) throws Exception {
 		bundle.update(source.openStream());
@@ -400,12 +400,12 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
 			return;
 		}
-		
+
 		if(bundles.length == 0) {
 			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
 			return;
 		}
-		
+
 		for (Bundle bundle : bundles) {
 				bundle.uninstall();
 		}
@@ -431,11 +431,11 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		}
 		return stateFilter;
 	}
-	
+
 	/**
 	 *  Handle the status command's abbreviation.  Invoke status()
 	 *
-	 *  @param arguments 
+	 *  @param arguments
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_STATUS_COMMAND_DESCRIPTION)
 	public void s(@Descriptor(ConsoleMsg.CONSOLE_HELP_STATUS_ARGUMENT_DESCRIPTION) String... arguments) throws Exception {
@@ -455,10 +455,10 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			System.out.println(ConsoleMsg.CONSOLE_FRAMEWORK_IS_SHUTDOWN_MESSAGE);
 		}
 		System.out.println();
-		
+
 		String states = "";
 		String[] bsnSegments = null;
-		
+
 		if(arguments != null && arguments.length > 0) {
 			if(arguments[0].equals("-s")) {
 				if (arguments.length > 1) {
@@ -474,13 +474,13 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		}
 
 		int stateFilter;
-		
+
 		try {
 			stateFilter = getStatesFromConstants(states);
 		} catch (IllegalArgumentException e) {
 			return;
 		}
-		
+
 		Bundle[] bundles = context.getBundles();
 		int size = bundles.length;
 
@@ -488,7 +488,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			System.out.println(ConsoleMsg.CONSOLE_NO_INSTALLED_BUNDLES_ERROR);
 			return;
 		}
-		
+
 		System.out.print(ConsoleMsg.CONSOLE_ID);
 		System.out.print(tab);
 		System.out.println(ConsoleMsg.CONSOLE_BUNDLE_LOCATION_MESSAGE);
@@ -580,9 +580,9 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 					if (users != null) {
 						System.out.print("  "); //$NON-NLS-1$
 						System.out.println(ConsoleMsg.CONSOLE_BUNDLES_USING_SERVICE_MESSAGE);
-						for (int k = 0; k < users.length; k++) {
+						for (Bundle user : users) {
 							System.out.print("    "); //$NON-NLS-1$
-							System.out.println(users[k]);
+							System.out.println(user);
 						}
 					} else {
 						System.out.print("  "); //$NON-NLS-1$
@@ -604,7 +604,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	public void p(@Descriptor(ConsoleMsg.CONSOLE_HELP_PACKAGES_BUNDLE_ARGUMENT_DESCRIPTION)Bundle... bundle) throws Exception {
 		packages(bundle);
 	}
-	
+
 	/**
 	 *  Handle the packages command's abbreviation.  Invoke packages()
 	 *
@@ -614,7 +614,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	public void p(@Descriptor(ConsoleMsg.CONSOLE_HELP_PACKAGES_PACKAGE_ARGUMENT_DESCRIPTION)String packageName) throws Exception {
 		packages(packageName);
 	}
-	
+
 	/**
 	 *  Handle the packages command.  Display imported/exported packages details.
 	 *
@@ -635,7 +635,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			System.out.println(ConsoleMsg.CONSOLE_NO_EXPORTED_PACKAGES_NO_PACKAGE_ADMIN_MESSAGE);
 		}
 	}
-	
+
 	/**
 	 *  Handle the packages command.  Display imported/exported packages details.
 	 *
@@ -651,34 +651,30 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			System.out.println(ConsoleMsg.CONSOLE_NO_EXPORTED_PACKAGES_NO_PACKAGE_ADMIN_MESSAGE);
 		}
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	private void getPackages(ExportedPackage[] packages) throws Exception {
 		if (packages == null) {
 			System.out.println(ConsoleMsg.CONSOLE_NO_EXPORTED_PACKAGES_MESSAGE);
 			return;
 		}
-		for (int i = 0; i < packages.length; i++) {
-			org.osgi.service.packageadmin.ExportedPackage pkg = packages[i];
+		for (ExportedPackage pkg : packages) {
 			System.out.print(pkg);
-
 			boolean removalPending = pkg.isRemovalPending();
 			if (removalPending) {
 				System.out.print("("); //$NON-NLS-1$
 				System.out.print(ConsoleMsg.CONSOLE_REMOVAL_PENDING_MESSAGE);
 				System.out.println(")"); //$NON-NLS-1$
 			}
-
 			org.osgi.framework.Bundle exporter = pkg.getExportingBundle();
 			if (exporter != null) {
 				System.out.print("<"); //$NON-NLS-1$
 				System.out.print(exporter);
 				System.out.println(">"); //$NON-NLS-1$
-
 				org.osgi.framework.Bundle[] importers = pkg.getImportingBundles();
-				for (int j = 0; j < importers.length; j++) {
+				for (Bundle importer : importers) {
 					System.out.print("  "); //$NON-NLS-1$
-					System.out.print(importers[j]);
+					System.out.print(importer);
 					System.out.print(" "); //$NON-NLS-1$
 					System.out.println(ConsoleMsg.CONSOLE_IMPORTS_MESSAGE);
 				}
@@ -699,7 +695,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	public void bundles(@Descriptor(ConsoleMsg.CONSOLE_HELP_STATUS_ARGUMENT_DESCRIPTION) String... arguments) throws Exception {
 		String states = "";
 		String[] bsnSegments = null;
-		
+
 		if(arguments != null && arguments.length > 0) {
 			if(arguments[0].equals("-s")) {
 				if (arguments.length > 1) {
@@ -750,9 +746,9 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			if (services != null) {
 				System.out.print("  "); //$NON-NLS-1$
 				System.out.println(ConsoleMsg.CONSOLE_REGISTERED_SERVICES_MESSAGE);
-				for (int j = 0; j < services.length; j++) {
+				for (ServiceReference<?> service : services) {
 					System.out.print("    "); //$NON-NLS-1$
-					System.out.println(services[j]);
+					System.out.println(service);
 				}
 			} else {
 				System.out.print("  "); //$NON-NLS-1$
@@ -763,9 +759,9 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			if (services != null) {
 				System.out.print("  "); //$NON-NLS-1$
 				System.out.println(ConsoleMsg.CONSOLE_SERVICES_IN_USE_MESSAGE);
-				for (int j = 0; j < services.length; j++) {
+				for (ServiceReference<?> service : services) {
 					System.out.print("    "); //$NON-NLS-1$
-					System.out.println(services[j]);
+					System.out.println(service);
 				}
 			} else {
 				System.out.print("  "); //$NON-NLS-1$
@@ -795,7 +791,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
 			return;
 		}
-		
+
 		for (Bundle bundle : bundles) {
 			long id = bundle.getBundleId();
 			System.out.println(bundle);
@@ -816,9 +812,9 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			if (services != null) {
 				System.out.print("  "); //$NON-NLS-1$
 				System.out.println(ConsoleMsg.CONSOLE_REGISTERED_SERVICES_MESSAGE);
-				for (int j = 0; j < services.length; j++) {
+				for (ServiceReference<?> service : services) {
 					System.out.print("    "); //$NON-NLS-1$
-					System.out.println(services[j]);
+					System.out.println(service);
 				}
 			} else {
 				System.out.print("  "); //$NON-NLS-1$
@@ -829,9 +825,9 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			if (services != null) {
 				System.out.print("  "); //$NON-NLS-1$
 				System.out.println(ConsoleMsg.CONSOLE_SERVICES_IN_USE_MESSAGE);
-				for (int j = 0; j < services.length; j++) {
+				for (ServiceReference<?> service : services) {
 					System.out.print("    "); //$NON-NLS-1$
-					System.out.println(services[j]);
+					System.out.println(service);
 				}
 			} else {
 				System.out.print("  "); //$NON-NLS-1$
@@ -934,10 +930,10 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 				}
 
 			}
-	 
+
 			System.out.println();
 			System.out.println();
-		}		
+		}
 	}
 
 	private List<BundleRequirement> getUnresolvedImports(
@@ -1069,8 +1065,9 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			securityAdmin.setDefaultPermissions(null);
 			String[] permLocations = securityAdmin.getLocations();
 			if (permLocations != null)
-				for (int i = 0; i < permLocations.length; i++)
-					securityAdmin.setPermissions(permLocations[i], null);
+				for (String permLocation : permLocations) {
+					securityAdmin.setPermissions(permLocation, null);
+				}
 			ConditionalPermissionUpdate update = condPermAdmin.newConditionalPermissionUpdate();
 			update.getConditionalPermissionInfos().clear();
 			update.commit();
@@ -1083,7 +1080,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 	/**
 	 *  Handle the close command.  Shutdown and exit.
-	
+
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_CLOSE_COMMAND_DESCRIPTION)
 	public void close() throws Exception {
@@ -1187,19 +1184,19 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_HEADERS_COMMAND_DESCRIPTION)
 	public List<Dictionary<String, String>> headers(@Descriptor(ConsoleMsg.CONSOLE_HELP_HEADERS_COMMAND_ARGUMENT_DESCRIPTION) Bundle... bundles) throws Exception {
 		ArrayList<Dictionary<String, String>> headers = new ArrayList<>();
-		
+
 		if (bundles == null || bundles.length == 0) {
 			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
 			return headers;
 		}
-		
-		
+
+
 		for (Bundle bundle : bundles) {
 			headers.add(bundle.getHeaders());
 		}
 		return headers;
 	}
-	
+
 	/**
 	 * Handles the props command's abbreviation.  Invokes props()
 	 *
@@ -1278,10 +1275,10 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			System.out.println(ConsoleMsg.CONSOLE_FRAMEWORK_IS_SHUTDOWN_MESSAGE);
 		}
 		System.out.println();
-		
+
 		String states = "";
 		String[] bsnSegments = null;
-		
+
 		if(arguments != null && arguments.length > 0) {
 			if(arguments[0].equals("-s")) {
 				if (arguments.length > 1) {
@@ -1297,13 +1294,13 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		}
 
 		int stateFilter;
-		
+
 		try {
 			stateFilter = getStatesFromConstants(states);
 		} catch (IllegalArgumentException e) {
 			return;
 		}
-		
+
 		Bundle[] bundles = context.getBundles();
 		int size = bundles.length;
 
@@ -1316,7 +1313,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			System.out.print(tab);
 			System.out.println(ConsoleMsg.CONSOLE_STATE_BUNDLE_TITLE);
 			for (Bundle b : bundles) {
-				
+
 				if (!match(b, bsnSegments, stateFilter))
 					continue;
 				String label = b.getSymbolicName();
@@ -1324,13 +1321,14 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 					label = b.toString();
 				else
 					label = label + "_" + b.getVersion(); //$NON-NLS-1$
-				System.out.println(b.getBundleId() + "\t" + getStateName(b) + label); //$NON-NLS-1$ 
+				System.out.println(b.getBundleId() + "\t" + getStateName(b) + label); //$NON-NLS-1$
 				PackageAdmin packageAdmin = activator.getPackageAdmin();
 				if ((packageAdmin.getBundleType(b) & PackageAdmin.BUNDLE_TYPE_FRAGMENT) != 0) {
 					Bundle[] hosts = packageAdmin.getHosts(b);
 					if (hosts != null)
-						for (int j = 0; j < hosts.length; j++)
-							System.out.println("\t            Master=" + hosts[j].getBundleId()); //$NON-NLS-1$
+						for (Bundle host : hosts) {
+							System.out.println("\t            Master=" + host.getBundleId()); //$NON-NLS-1$
+						}
 				} else {
 					Bundle[] fragments = packageAdmin.getFragments(b);
 					if (fragments != null) {
@@ -1364,12 +1362,12 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	public void t() throws Exception {
 		t(null, null);
 	}
-	
+
 	@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ACTION_DESCRIPTION)
 	public void t(@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_ACTION_DESCRIPTION) String action, @Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THREAD_DESCRIPTION) String thread) throws Exception {
 		t(action, thread, null);
 	}
-	
+
 	@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ACTION_THROWABLE_DESCRIPTION)
 	public void t(@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_ACTION_DESCRIPTION) String action, @Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THREAD_DESCRIPTION) String thread, @Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THROWABLE_DESCRIPTION) Class<? extends Throwable> throwable) throws Exception {
 		threads(action, thread, throwable);
@@ -1379,7 +1377,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	public void threads() throws Exception {
 		threads(null, null);
 	}
-	
+
 	@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ACTION_DESCRIPTION)
 	public void threads(@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_ACTION_DESCRIPTION) String action, @Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THREAD_DESCRIPTION) String thread) throws Exception {
 		threads(action, thread, null);
@@ -1399,7 +1397,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		ThreadGroup tg = getTopThreadGroup();
 		Thread[] threads = new Thread[tg.activeCount()];
 		int count = tg.enumerate(threads, true);
-		
+
 		// Was an action specified?
 		if (action != null) {
 			// An action was specified. Process it here and return without
@@ -1408,10 +1406,10 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 				// A thread needs to be stopped.
 				// Locate the thread with the specified name.
 				Thread t = null;
-				for (int i = 0; i < threads.length; i++) {
-					if (threads[i].getName().equals(thread)) {
+				for (Thread namedthread : threads) {
+					if (namedthread.getName().equals(thread)) {
 						// Found the thread. Stop the loop.
-						t = threads[i];
+						t = namedthread;
 						break;
 					}
 				}
@@ -1452,15 +1450,15 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			System.out.println(ConsoleMsg.THREADS_UNRECOGNIZED_ACTION);
 			return;
 		}
-			
+
 		// No need to sort if an action was specified.
 		Util.sortByString(threads);
 
 		StringBuilder sb = new StringBuilder(120);
 		System.out.println();
 		System.out.println(ConsoleMsg.CONSOLE_THREADGROUP_TITLE);
-		for (int i = 0; i < threadGroups.length; i++) {
-			tg = threadGroups[i];
+		for (ThreadGroup threadGroup : threadGroups) {
+			tg = threadGroup;
 			int all = tg.activeCount(); //tg.allThreadsCount();
 			int local = tg.enumerate(new Thread[all], false); //tg.threadsCount();
 			ThreadGroup p = tg.getParent();
@@ -1484,7 +1482,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 * Handles the sl (startlevel) command. 
+	 * Handles the sl (startlevel) command.
 	 *
 	 * @param bundle bundle to display startlevel for; if no bundle is specified, the framework startlevel is displayed
 	 */
@@ -1505,7 +1503,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 * Handles the setfwsl (set framework startlevel) command. 
+	 * Handles the setfwsl (set framework startlevel) command.
 	 *
 	 * @param newSL new value for the framewrok start level
 	 */
@@ -1524,7 +1522,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 * Handles the setbsl (set bundle startlevel) command. 
+	 * Handles the setbsl (set bundle startlevel) command.
 	 *
 	 * @param newSL new value for bundle start level
 	 * @param bundles bundles whose start value will be changed
@@ -1532,7 +1530,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	@SuppressWarnings("deprecation")
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_SETBSL_COMMAND_DESCRIPTION)
 	public void setbsl(
-			@Descriptor(ConsoleMsg.CONSOLE_HELP_SETFWSL_COMMAND_ARGUMENT_DESCRIPTION)int newSL, 
+			@Descriptor(ConsoleMsg.CONSOLE_HELP_SETFWSL_COMMAND_ARGUMENT_DESCRIPTION)int newSL,
 			@Descriptor(ConsoleMsg.CONSOLE_HELP_SETBSL_COMMAND_ARGUMENT_DESCRIPTION) Bundle... bundles) throws Exception {
 		StartLevel startLevel = activator.getStartLevel();
 		if (startLevel != null) {
@@ -1540,7 +1538,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 				System.out.println(ConsoleMsg.STARTLEVEL_NO_STARTLEVEL_OR_BUNDLE_GIVEN);
 				return;
 			}
-			for (Bundle bundle : bundles) {	
+			for (Bundle bundle : bundles) {
 				try {
 					startLevel.setBundleStartLevel(bundle, newSL);
 					System.out.println(NLS.bind(ConsoleMsg.STARTLEVEL_BUNDLE_STARTLEVEL, Long.valueOf(bundle.getBundleId()), Integer.valueOf(newSL)));
@@ -1552,7 +1550,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 * Handles the setibsl (set initial bundle startlevel) command. 
+	 * Handles the setibsl (set initial bundle startlevel) command.
 	 *
 	 * @param newInitialSL new value for initial start level
 	 */
@@ -1572,7 +1570,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 	/**
 	 * Lists required bundles having the specified symbolic name or all if no bsn is specified
-	 * 
+	 *
 	 * @param symbolicName
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_REQUIRED_BUNDLES_COMMAND_DESCRIPTION)
@@ -1582,7 +1580,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 	/**
 	 * Lists required bundles having the specified symbolic name or all if no bsn is specified
-	 * 
+	 *
 	 * @param symbolicName
 	 */
 	@SuppressWarnings("deprecation")
@@ -1644,7 +1642,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 * Handles the profilelog command. 
+	 * Handles the profilelog command.
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_PROFILELOG_COMMAND_DESCRIPTION)
 	public void profilelog() throws Exception {
@@ -1676,7 +1674,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			System.out.println("Bundle is not resolved.");
 			return;
 		}
-		
+
 		Map<String, List<PackageSource>> packages = getPackagesInternal(wiring);
 		for (List<PackageSource> packageSources : packages.values()) {
 			for (PackageSource packageSource : packageSources) {
@@ -1781,7 +1779,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 	/**
 	 *  Given a string containing a startlevel value, validate it and convert it to an int
-	 * 
+	 *
 	 *  @param intp A CommandInterpreter object used for printing out error messages
 	 *  @param value A string containing a potential startlevel
 	 *  @return The start level or an int <0 if it was invalid
@@ -1898,7 +1896,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			}
 		}
 	}
-	
+
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION)
 	public void diag(@Descriptor(ConsoleMsg.CONSOLE_HELP_DIAG_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles) throws Exception {
 		if (bundles.length == 0) {
@@ -1924,7 +1922,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			}
 		}
 	}
-	
+
 	private ResolutionReport getResolutionReport(Bundle[] bundles) {
 		DiagReportListener reportListener = new DiagReportListener(bundles);
 		ServiceRegistration<ResolverHookFactory> hookReg = context.registerService(ResolverHookFactory.class, reportListener, null);
@@ -1947,7 +1945,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 					targetTriggers.add(revision);
 				}
 			}
-			
+
 		}
 		volatile ResolutionReport report = null;
 		class DiagResolverHook implements ResolverHook, ResolutionReport.Listener {
@@ -1978,7 +1976,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			public void end() {
 				// nothing
 			}
-			
+
 		}
 		@Override
 		public ResolverHook begin(Collection<BundleRevision> triggers) {
@@ -2014,11 +2012,11 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		}
 
 	}
-	
+
 	private boolean confirmStop() {
 		System.out.print(ConsoleMsg.CONSOLE_STOP_MESSAGE);
 		System.out.flush();
-		
+
 		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 		String reply = null;
 		try {
@@ -2026,13 +2024,13 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		} catch (IOException e) {
 			System.out.println(ConsoleMsg.CONSOLE_STOP_ERROR_READ_CONFIRMATION);
 		}
-		
+
 		if (reply != null) {
 			if (reply.toLowerCase().startsWith(ConsoleMsg.CONSOLE_STOP_CONFIRMATION_YES) || reply.length() == 0) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 }
