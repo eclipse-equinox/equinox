@@ -73,8 +73,8 @@ public class JspClassLoader extends URLClassLoader {
 		addBundleClassPathJars(bundle);
 		Bundle[] fragments = Activator.getFragments(bundle);
 		if (fragments != null) {
-			for (int i = 0; i < fragments.length; i++) {
-				addBundleClassPathJars(fragments[i]);
+			for (Bundle fragment : fragments) {
+				addBundleClassPathJars(fragment);
 			}
 		}
 	}

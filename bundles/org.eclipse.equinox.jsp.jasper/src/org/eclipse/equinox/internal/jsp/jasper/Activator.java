@@ -90,11 +90,12 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Pack
 			throw new IllegalStateException("Not started"); //$NON-NLS-1$
 
 		ExportedPackage[] exportedPackages = packageAdmin.getExportedPackages("org.apache.jasper.servlet"); //$NON-NLS-1$
-		for (int i = 0; i < exportedPackages.length; i++) {
-			Bundle[] importingBundles = exportedPackages[i].getImportingBundles();
-			for (int j = 0; j < importingBundles.length; j++) {
-				if (thisBundle.equals(importingBundles[j]))
-					return exportedPackages[i].getExportingBundle();
+		for (ExportedPackage exportedPackage : exportedPackages) {
+			Bundle[] importingBundles = exportedPackage.getImportingBundles();
+			for (Bundle importingBundle : importingBundles) {
+				if (thisBundle.equals(importingBundle)) {
+					return exportedPackage.getExportingBundle();
+				}
 			}
 		}
 		return null;

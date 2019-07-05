@@ -221,8 +221,7 @@ public class JspServlet extends HttpServlet {
 	private static Map<Method, Method> createContextToHandlerMethods() {
 		Map<Method, Method> methods = new HashMap<>();
 		Method[] handlerMethods = ServletContextAdaptor.class.getDeclaredMethods();
-		for (int i = 0; i < handlerMethods.length; i++) {
-			Method handlerMethod = handlerMethods[i];
+		for (Method handlerMethod : handlerMethods) {
 			String name = handlerMethod.getName();
 			Class<?>[] parameterTypes = handlerMethod.getParameterTypes();
 			try {

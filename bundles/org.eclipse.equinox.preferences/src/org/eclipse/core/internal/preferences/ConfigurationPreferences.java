@@ -114,8 +114,9 @@ public class ConfigurationPreferences extends EclipsePreferences {
 				if (baseLocation == null)
 					return;
 				String[] names = computeChildren(baseLocation);
-				for (int i = 0; i < names.length; i++)
-					addChild(names[i], null);
+				for (String n : names) {
+					addChild(n, null);
+				}
 			}
 		} finally {
 			initialized = true;

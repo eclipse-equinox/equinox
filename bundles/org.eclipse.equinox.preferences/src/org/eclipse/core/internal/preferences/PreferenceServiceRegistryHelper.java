@@ -115,13 +115,13 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 			return null;
 		}
 		boolean foundInitializer = false;
-		for (int i = 0; i < extensions.length; i++) {
-			IConfigurationElement[] elements = extensions[i].getConfigurationElements();
-			for (int j = 0; j < elements.length; j++)
-				if (ELEMENT_INITIALIZER.equals(elements[j].getName())) {
-					if (name.equals(elements[j].getContributor().getName())) {
+		for (IExtension extension : extensions) {
+			IConfigurationElement[] elements = extension.getConfigurationElements();
+			for (IConfigurationElement element : elements) {
+				if (ELEMENT_INITIALIZER.equals(element.getName())) {
+					if (name.equals(element.getContributor().getName())) {
 						if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
-							IExtension theExtension = elements[j].getDeclaringExtension();
+							IExtension theExtension = element.getDeclaringExtension();
 							String extensionNamespace = theExtension.getContributor().getName();
 							Bundle underlyingBundle = PreferencesOSGiUtils.getDefault().getBundle(extensionNamespace);
 							String ownerName;
@@ -131,11 +131,12 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 								ownerName = extensionNamespace;
 							PrefsMessages.message("Running default preference customization as defined by: " + ownerName); //$NON-NLS-1$
 						}
-						runInitializer(elements[j]);
+						runInitializer(element);
 						// don't return yet in case we have multiple initializers registered
 						foundInitializer = true;
 					}
 				}
+			}
 		}
 		if (foundInitializer)
 			return null;
@@ -201,11 +202,13 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 		if (modifyListeners == null) {
 			modifyListeners = new ListenerList<>();
 			IExtension[] extensions = getPrefExtensions();
-			for (int i = 0; i < extensions.length; i++) {
-				IConfigurationElement[] elements = extensions[i].getConfigurationElements();
-				for (int j = 0; j < elements.length; j++)
-					if (ELEMENT_MODIFIER.equalsIgnoreCase(elements[j].getName()))
-						addModifyListener(elements[j]);
+			for (IExtension extension : extensions) {
+				IConfigurationElement[] elements = extension.getConfigurationElements();
+				for (IConfigurationElement element : elements) {
+					if (ELEMENT_MODIFIER.equalsIgnoreCase(element.getName())) {
+						addModifyListener(element);
+					}
+				}
 			}
 		}
 		return modifyListeners;
@@ -244,11 +247,13 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	 */
 	private void initializeScopes() {
 		IExtension[] extensions = getPrefExtensions();
-		for (int i = 0; i < extensions.length; i++) {
-			IConfigurationElement[] elements = extensions[i].getConfigurationElements();
-			for (int j = 0; j < elements.length; j++)
-				if (ELEMENT_SCOPE.equalsIgnoreCase(elements[j].getName()))
-					scopeAdded(elements[j]);
+		for (IExtension extension : extensions) {
+			IConfigurationElement[] elements = extension.getConfigurationElements();
+			for (IConfigurationElement element : elements) {
+				if (ELEMENT_SCOPE.equalsIgnoreCase(element.getName())) {
+					scopeAdded(element);
+				}
+			}
 		}
 	}
 
@@ -263,17 +268,18 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 
 		if (deltas.length == 0)
 			return;
-		// dynamically adjust the registered scopes
-		for (int i = 0; i < deltas.length; i++) {
-			IConfigurationElement[] elements = deltas[i].getExtension().getConfigurationElements();
-			for (int j = 0; j < elements.length; j++) {
-				switch (deltas[i].getKind()) {
-					case IExtensionDelta.ADDED :
-						if (ELEMENT_SCOPE.equalsIgnoreCase(elements[j].getName()))
-							scopeAdded(elements[j]);
+	    // dynamically adjust the registered scopes
+		for (IExtensionDelta delta : deltas) {
+			IConfigurationElement[] elements = delta.getExtension().getConfigurationElements();
+			for (IConfigurationElement element : elements) {
+				switch (delta.getKind()) {
+					case IExtensionDelta.ADDED:
+						if (ELEMENT_SCOPE.equalsIgnoreCase(element.getName())) {
+							scopeAdded(element);
+						}
 						break;
-					case IExtensionDelta.REMOVED :
-						String scope = elements[j].getAttribute(ATTRIBUTE_NAME);
+					case IExtensionDelta.REMOVED:
+						String scope = element.getAttribute(ATTRIBUTE_NAME);
 						if (scope != null)
 							scopeRemoved(scope);
 						break;

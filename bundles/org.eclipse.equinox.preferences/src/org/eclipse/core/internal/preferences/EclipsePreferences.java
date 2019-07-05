@@ -116,8 +116,9 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		if (!visitor.visit(this))
 			return;
 		IEclipsePreferences[] toVisit = getChildren(true);
-		for (int i = 0; i < toVisit.length; i++)
-			toVisit[i].accept(visitor);
+		for (IEclipsePreferences p : toVisit) {
+			p.accept(visitor);
+		}
 	}
 
 	protected IEclipsePreferences addChild(String childName, IEclipsePreferences child) {
@@ -200,8 +201,9 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			keys = properties.keys();
 		}
 		//don't synchronize remove call because it calls listeners
-		for (int i = 0; i < keys.length; i++)
-			remove(keys[i]);
+		for (String key : keys) {
+			remove(key);
+		}
 		makeDirty();
 	}
 
@@ -214,9 +216,9 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		File file = dir.toFile();
 		File[] totalFiles = file.listFiles();
 		if (totalFiles != null) {
-			for (int i = 0; i < totalFiles.length; i++) {
-				if (totalFiles[i].isFile()) {
-					String filename = totalFiles[i].getName();
+			for (File totalFile : totalFiles) {
+				if (totalFile.isFile()) {
+					String filename = totalFile.getName();
 					if (filename.endsWith(extension)) {
 						String shortName = filename.substring(0, filename.length() - extension.length());
 						result.add(shortName);
@@ -326,8 +328,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		}
 		// recursively add the child information
 		IEclipsePreferences[] childNodes = getChildren(true);
-		for (int i = 0; i < childNodes.length; i++) {
-			EclipsePreferences child = (EclipsePreferences) childNodes[i];
+		for (IEclipsePreferences childNode : childNodes) {
+			EclipsePreferences child = (EclipsePreferences) childNode;
 			String fullPath = addSeparator ? prefix + PATH_SEPARATOR + child.name() : child.name();
 			child.convertToProperties(result, fullPath);
 		}
@@ -411,8 +413,9 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		// if this node or a parent is not the load level, then flush the children
 		if (loadLevel == null) {
 			String[] childrenNames = childrenNames();
-			for (int i = 0; i < childrenNames.length; i++)
-				node(childrenNames[i]).flush();
+			for (String childrenName : childrenNames) {
+				node(childrenName).flush();
+			}
 			return null;
 		}
 
@@ -497,8 +500,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	protected IEclipsePreferences[] getChildren(boolean create) {
 		ArrayList<IEclipsePreferences> result = new ArrayList<>();
 		String[] names = internalChildNames();
-		for (int i = 0; i < names.length; i++) {
-			IEclipsePreferences child = getChild(names[i], null, create);
+		for (String n : names) {
+			IEclipsePreferences child = getChild(n, null, create);
 			if (child != null)
 				result.add(child);
 		}
@@ -966,8 +969,9 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		// clear all the property values. do it "the long way" so
 		// everyone gets notification
 		String[] keys = keys();
-		for (int i = 0; i < keys.length; i++)
-			remove(keys[i]);
+		for (String key : keys) {
+			remove(key);
+		}
 		// don't remove the global root or the scope root from the
 		// parent but remove all its children
 		if (parent != null && !(parent instanceof RootPreferences)) {
@@ -976,13 +980,14 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			parent.removeNode(this);
 		}
 		IEclipsePreferences[] childNodes = getChildren(false);
-		for (int i = 0; i < childNodes.length; i++)
+		for (IEclipsePreferences childNode : childNodes) {
 			try {
-				childNodes[i].removeNode();
-			} catch (IllegalStateException e) {
+				childNode.removeNode();
+			}catch (IllegalStateException e) {
 				// ignore since we only get this exception if we have already
 				// been removed. no work to do.
 			}
+		}
 	}
 
 	/*
@@ -1088,9 +1093,11 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		}
 		temp.shareStrings(pool);
 		IEclipsePreferences[] myChildren = getChildren(false);
-		for (int i = 0; i < myChildren.length; i++)
-			if (myChildren[i] instanceof EclipsePreferences)
-				((EclipsePreferences) myChildren[i]).shareStrings(pool);
+		for (IEclipsePreferences child : myChildren) {
+			if (child instanceof EclipsePreferences) {
+				((EclipsePreferences) child).shareStrings(pool);
+			}
+		}
 	}
 
 	/*
@@ -1219,12 +1226,12 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 				buffer.append(node);
 				buffer.append('\n');
 				String[] keys = node.keys();
-				for (int i = 0; i < keys.length; i++) {
+				for (String key : keys) {
 					buffer.append(node.absolutePath());
 					buffer.append(PATH_SEPARATOR);
-					buffer.append(keys[i]);
+					buffer.append(key);
 					buffer.append('=');
-					buffer.append(node.get(keys[i], "*default*")); //$NON-NLS-1$
+					buffer.append(node.get(key, "*default*")); //$NON-NLS-1$
 					buffer.append('\n');
 				}
 				return true;

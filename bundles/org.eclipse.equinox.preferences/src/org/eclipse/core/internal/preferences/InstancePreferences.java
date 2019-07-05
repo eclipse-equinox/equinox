@@ -210,8 +210,9 @@ public class InstancePreferences extends EclipsePreferences {
 		try {
 			synchronized (this) {
 				String[] names = computeChildren(getBaseLocation());
-				for (int i = 0; i < names.length; i++)
-					addChild(names[i], null);
+				for (String n : names) {
+					addChild(n, null);
+				}
 			}
 		} finally {
 			initialized = true;

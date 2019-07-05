@@ -48,10 +48,11 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 			return new String[0]; // return none if not active
 		MetaTypeProviderWrapper[] wrappers = getMetaTypeProviders();
 		ArrayList<String> results = new ArrayList<String>();
-		for (int i = 0; i < wrappers.length; i++) {
+		for (MetaTypeProviderWrapper wrapper : wrappers) {
 			// return only the correct type of pids (regular or factory)
-			if (factory == wrappers[i].factory)
-				results.add(wrappers[i].pid);
+			if (factory == wrapper.factory) {
+				results.add(wrapper.pid);
+			}
 		}
 		return results.toArray(new String[results.size()]);
 	}
@@ -73,10 +74,11 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 		if (_bundle.getState() != Bundle.ACTIVE)
 			return null; // return none if not active
 		MetaTypeProviderWrapper[] wrappers = getMetaTypeProviders();
-		for (int i = 0; i < wrappers.length; i++) {
-			if (id.equals(wrappers[i].pid))
+		for (MetaTypeProviderWrapper wrapper : wrappers) {
+			if (id.equals(wrapper.pid)) {
 				// found a matching pid now call the actual provider
-				return wrappers[i].getObjectClassDefinition(id, locale);
+				return wrapper.getObjectClassDefinition(id, locale);
+			}
 		}
 		return null;
 	}
@@ -87,13 +89,15 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 		MetaTypeProviderWrapper[] wrappers = getMetaTypeProviders();
 		ArrayList<String> locales = new ArrayList<String>();
 		// collect all the unique locales from all providers we found
-		for (int i = 0; i < wrappers.length; i++) {
-			String[] wrappedLocales = wrappers[i].getLocales();
+		for (MetaTypeProviderWrapper wrapper : wrappers) {
+			String[] wrappedLocales = wrapper.getLocales();
 			if (wrappedLocales == null)
 				continue;
-			for (int j = 0; j < wrappedLocales.length; j++)
-				if (!locales.contains(wrappedLocales[j]))
-					locales.add(wrappedLocales[j]);
+			for (String wrappedLocale : wrappedLocales) {
+				if (!locales.contains(wrappedLocale)) {
+					locales.add(wrappedLocale);
+				}
+			}
 		}
 		return locales.toArray(new String[locales.size()]);
 	}

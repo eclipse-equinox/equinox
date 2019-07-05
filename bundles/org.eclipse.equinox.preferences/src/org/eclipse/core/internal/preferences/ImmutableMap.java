@@ -98,9 +98,11 @@ public abstract class ImmutableMap implements Cloneable {
 				return EMPTY_STRING_ARRAY;
 			String[] result = new String[elementSize];
 			int next = 0;
-			for (int i = 0; i < keyTable.length; i++)
-				if (keyTable[i] != null)
-					result[next++] = keyTable[i];
+			for (String key : keyTable) {
+				if (key != null) {
+					result[next++] = key;
+				}
+			}
 			return result;
 		}
 

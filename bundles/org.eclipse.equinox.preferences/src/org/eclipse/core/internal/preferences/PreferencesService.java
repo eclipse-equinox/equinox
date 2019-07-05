@@ -156,19 +156,17 @@ public class PreferencesService implements IPreferencesService {
 
 				// the list for properties to remove
 				List<String> propsToRemove = new ArrayList<>();
-				for (int i = 0; i < globalNode.keys().length; i++) {
-					propsToRemove.add(globalNode.keys()[i]);
+				for (String key : globalNode.keys()) {
+					propsToRemove.add(key);
 				}
 
 				if (keys.length > 0) {
 					String key = null;
-					for (int i = 0; i < keys.length; i++) {
-						key = keys[i];
-
+					for (String k : keys) {
+						key = k;
 						// preferences that are not in the applied node
 						// will be removed
 						propsToRemove.remove(key);
-
 						// intern strings we import because some people
 						// in their property change listeners use identity
 						// instead of equals. See bug 20193 and 20534.
@@ -305,16 +303,15 @@ public class PreferencesService implements IPreferencesService {
 					return false;
 				String path = absolutePath.length() <= baseLength ? EMPTY_STRING : EclipsePreferences.makeRelative(absolutePath.substring(baseLength));
 				// check the excludes list to see if this node should be considered
-				for (int i = 0; i < excludesList.length; i++) {
-					String exclusion = EclipsePreferences.makeRelative(excludesList[i]);
+				for (String exclude : excludesList) {
+					String exclusion = EclipsePreferences.makeRelative(exclude);
 					if (path.startsWith(exclusion))
 						return false;
 				}
 				boolean needToAddVersion = InstanceScope.SCOPE.equals(scope);
 				// check the excludes list for each preference
 				String[] keys = node.keys();
-				for (int i = 0; i < keys.length; i++) {
-					String key = keys[i];
+				for (String key : keys) {
 					boolean ignore = false;
 					for (int j = 0; !ignore && j < excludesList.length; j++)
 						if (EclipsePreferences.encodePath(path, key).startsWith(EclipsePreferences.makeRelative(excludesList[j])))
@@ -357,16 +354,18 @@ public class PreferencesService implements IPreferencesService {
 	 */
 	void copyFromTo(Preferences source, Preferences destination, String[] keys, int depth) throws BackingStoreException {
 		String[] keysToCopy = keys == null ? source.keys() : keys;
-		for (int i = 0; i < keysToCopy.length; i++) {
-			String value = source.get(keysToCopy[i], null);
-			if (value != null)
-				destination.put(keysToCopy[i], value);
+		for (String key : keysToCopy) {
+			String value = source.get(key, null);
+			if (value != null) {
+				destination.put(key, value);
+			}
 		}
 		if (depth == 0)
 			return;
 		String[] children = source.childrenNames();
-		for (int i = 0; i < children.length; i++)
-			copyFromTo(source.node(children[i]), destination.node(children[i]), keys, depth);
+		for (String child : children) {
+			copyFromTo(source.node(child), destination.node(child), keys, depth);
+		}
 	}
 
 	public WeakReference<Object> applyRuntimeDefaults(String name, WeakReference<Object> pluginReference) {
@@ -464,8 +463,7 @@ public class PreferencesService implements IPreferencesService {
 	public String get(String key, String defaultValue, Preferences[] nodes) {
 		if (nodes == null)
 			return defaultValue;
-		for (int i = 0; i < nodes.length; i++) {
-			Preferences node = nodes[i];
+		for (Preferences node : nodes) {
 			if (node != null) {
 				String result = node.get(key, null);
 				if (result != null)
@@ -597,8 +595,7 @@ public class PreferencesService implements IPreferencesService {
 		String[] order = getLookupOrder(qualifier, key);
 		final String childPath = EclipsePreferences.makeRelative(EclipsePreferences.decodePath(key)[0]);
 		final ArrayList<Preferences> result = new ArrayList<>();
-		for (int i = 0; i < order.length; i++) {
-			final String scopeString = order[i];
+		for (String scopeString : order) {
 			AtomicReference<IllegalStateException> error = new AtomicReference<>();
 			SafeRunner.run(new ISafeRunnable() {
 
@@ -703,8 +700,9 @@ public class PreferencesService implements IPreferencesService {
 	 */
 	private void internalApply(IEclipsePreferences tree, IPreferenceFilter[] filters) throws BackingStoreException {
 		ArrayList<IEclipsePreferences> trees = new ArrayList<>();
-		for (int i = 0; i < filters.length; i++)
-			trees.add(trimTree(tree, filters[i]));
+		for (IPreferenceFilter filter : filters) {
+			trees.add(trimTree(tree, filter));
+		}
 		// merge the union of the matching filters
 		IEclipsePreferences toApply = mergeTrees(trees.toArray(new IEclipsePreferences[trees.size()]));
 
@@ -731,8 +729,9 @@ public class PreferencesService implements IPreferencesService {
 	 */
 	private void internalExport(IEclipsePreferences node, IPreferenceFilter filters[], OutputStream output) throws BackingStoreException, CoreException {
 		ArrayList<IEclipsePreferences> trees = new ArrayList<>();
-		for (int i = 0; i < filters.length; i++)
-			trees.add(trimTree(node, filters[i]));
+		for (IPreferenceFilter filter : filters) {
+			trees.add(trimTree(node, filter));
+		}
 		IEclipsePreferences toExport = mergeTrees(trees.toArray(new IEclipsePreferences[trees.size()]));
 		exportPreferences(toExport, output, (String[]) null);
 	}
@@ -747,8 +746,7 @@ public class PreferencesService implements IPreferencesService {
 			throw new IllegalArgumentException();
 		String treePath = tree.absolutePath();
 		// see if this node is applicable by going over all our scopes
-		for (int i = 0; i < scopes.length; i++) {
-			String scope = scopes[i];
+		for (String scope : scopes) {
 			Map<String, PreferenceFilterEntry[]> mapping = filter.getMapping(scope);
 			// if the mapping is null then we match everything
 			if (mapping == null) {
@@ -763,8 +761,7 @@ public class PreferencesService implements IPreferencesService {
 				continue;
 			}
 			// iterate over the list of declared nodes
-			for (Iterator<String> iter = mapping.keySet().iterator(); iter.hasNext();) {
-				String nodePath = iter.next();
+			for (String nodePath : mapping.keySet()) {
 				String nodeFullPath = '/' + scope + '/' + nodePath;
 				// if this subtree isn't in a hierarchy we are interested in, then go to the next one
 				if (!nodeFullPath.startsWith(treePath))
@@ -789,14 +786,17 @@ public class PreferencesService implements IPreferencesService {
 							return true;
 					} else {
 						// otherwise check to see if we have any applicable keys
-						for (int j = 0; j < entries.length; j++) {
-							if (entries[j] == null)
+						for (PreferenceFilterEntry entry : entries) {
+							if (entry == null) {
 								continue;
-							if (entries[j].getMatchType() == null) {
-								if (child.get(entries[j].getKey(), null) != null)
+							}
+							if (entry.getMatchType() == null) {
+								if (child.get(entry.getKey(), null) != null) {
 									return true;
-							} else if (internalMatchesWithMatchType(entries[j], child.keys()))
+								}
+							} else if (internalMatchesWithMatchType(entry, child.keys())) {
 								return true;
+							}
 						}
 					}
 				}
@@ -810,9 +810,11 @@ public class PreferencesService implements IPreferencesService {
 	 */
 	private IPreferenceFilter[] internalMatches(IEclipsePreferences tree, IPreferenceFilter[] filters) throws BackingStoreException {
 		ArrayList<IPreferenceFilter> result = new ArrayList<>();
-		for (int i = 0; i < filters.length; i++)
-			if (internalMatches(tree, filters[i]))
-				result.add(filters[i]);
+		for (IPreferenceFilter filter : filters) {
+			if (internalMatches(tree, filter)) {
+				result.add(filter);
+			}
+		}
 		return result.toArray(new IPreferenceFilter[result.size()]);
 	}
 
@@ -826,9 +828,10 @@ public class PreferencesService implements IPreferencesService {
 		String matchType = entry.getMatchType();
 		if (!matchType.equalsIgnoreCase(MATCH_TYPE_PREFIX))
 			return false;
-		for (int i = 0; i < keys.length; i++) {
-			if (keys[i].startsWith(key))
+		for (String k : keys) {
+			if (k.startsWith(key)) {
 				return true;
+			}
 		}
 		return false;
 	}
@@ -870,8 +873,9 @@ public class PreferencesService implements IPreferencesService {
 				return true;
 			}
 		};
-		for (int i = 0; i < trees.length; i++)
-			trees[i].accept(visitor);
+		for (IEclipsePreferences tree : trees) {
+			tree.accept(visitor);
+		}
 		return result;
 	}
 
@@ -974,9 +978,8 @@ public class PreferencesService implements IPreferencesService {
 		if (scopes == null)
 			throw new IllegalArgumentException();
 		String treePath = tree.absolutePath();
-		// see if this node is applicable by going over all our scopes
-		for (int i = 0; i < scopes.length; i++) {
-			String scope = scopes[i];
+	    // see if this node is applicable by going over all our scopes
+		for (String scope : scopes) {
 			Map<String, PreferenceFilterEntry[]> mapping = filter.getMapping(scope);
 			// if the mapping is null then copy everything if the scope matches
 			if (mapping == null) {
@@ -989,8 +992,7 @@ public class PreferencesService implements IPreferencesService {
 				continue;
 			}
 			// iterate over the list of declared nodes
-			for (Iterator<String> iter = mapping.keySet().iterator(); iter.hasNext();) {
-				String nodePath = iter.next();
+			for (String nodePath : mapping.keySet()) {
 				String nodeFullPath = '/' + scope + '/' + nodePath;
 				// if this subtree isn't in a hierarchy we are interested in, then go to the next one
 				if (!nodeFullPath.startsWith(treePath))
@@ -1011,9 +1013,10 @@ public class PreferencesService implements IPreferencesService {
 					String[] keys = null;
 					if (entries != null) {
 						ArrayList<String> list = new ArrayList<>();
-						for (int j = 0; j < entries.length; j++) {
-							if (entries[j] != null)
-								addMatchedKeys(list, entries[j], child.keys());
+						for (PreferenceFilterEntry entry : entries) {
+							if (entry != null) {
+								addMatchedKeys(list, entry, child.keys());
+							}
 						}
 						keys = list.toArray(new String[list.size()]);
 					}
@@ -1037,9 +1040,10 @@ public class PreferencesService implements IPreferencesService {
 		if (keys == null)
 			return;
 		String key = entry.getKey();
-		for (int i = 0; i < keys.length; i++) {
-			if (matchType.equals(MATCH_TYPE_PREFIX) && keys[i].startsWith(key))
-				list.add(keys[i]);
+		for (String k : keys) {
+			if (matchType.equals(MATCH_TYPE_PREFIX) && k.startsWith(key)) {
+				list.add(k);
+			}
 		}
 	}
 

@@ -51,17 +51,17 @@ public class OSGiPreferencesServiceManager implements ServiceFactory<org.osgi.se
 			//get list of currently installed bundles
 			Bundle[] allBundles = context.getBundles();
 			Set<String> bundleQualifiers = new TreeSet<>();
-			for (int i = 0; i < allBundles.length; i++) {
-				bundleQualifiers.add(getQualifier(allBundles[i]));
+			for (Bundle allBundle : allBundles) {
+				bundleQualifiers.add(getQualifier(allBundle));
 			}
 
 			//get list of bundles we created prefs for
 			String[] prefsBundles = prefBundles.keys();
 
 			//remove prefs nodes for bundles that are no longer installed
-			for (int i = 0; i < prefsBundles.length; i++) {
-				if (!bundleQualifiers.contains(prefsBundles[i])) {
-					removePrefs(prefsBundles[i]);
+			for (String prefsBundle : prefsBundles) {
+				if (!bundleQualifiers.contains(prefsBundle)) {
+					removePrefs(prefsBundle);
 				}
 			}
 

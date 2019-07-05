@@ -24,9 +24,11 @@ public class LookupOrder {
 	private String[] order;
 
 	LookupOrder(String[] order) {
-		for (int i = 0; i < order.length; i++)
-			if (order[i] == null)
+		for (String o : order) {
+			if (o == null) {
 				throw new IllegalArgumentException();
+			}
+		}
 		this.order = order;
 	}
 

@@ -36,10 +36,10 @@ public class RootPreferences extends EclipsePreferences {
 		// flush all children
 		BackingStoreException exception = null;
 		String[] names = childrenNames();
-		for (int i = 0; i < names.length; i++) {
+		for (String n : names) {
 			try {
-				node(names[i]).flush();
-			} catch (BackingStoreException e) {
+				node(n).flush();
+			}catch (BackingStoreException e) {
 				// store the first exception we get and still try and flush
 				// the rest of the children.
 				if (exception == null)
@@ -114,10 +114,10 @@ public class RootPreferences extends EclipsePreferences {
 		// sync all children
 		BackingStoreException exception = null;
 		String[] names = childrenNames();
-		for (int i = 0; i < names.length; i++) {
+		for (String n : names) {
 			try {
-				node(names[i]).sync();
-			} catch (BackingStoreException e) {
+				node(n).sync();
+			}catch (BackingStoreException e) {
 				// store the first exception we get and still try and sync
 				// the rest of the children.
 				if (exception == null)

@@ -4,7 +4,7 @@ Bundle-Name: %bundleName
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-SymbolicName: org.eclipse.equinox.jsp.jasper.registry
-Bundle-Version: 1.1.200.qualifier
+Bundle-Version: 1.1.300.qualifier
 Bundle-Activator: org.eclipse.equinox.internal.jsp.jasper.registry.Activator
 Import-Package: org.eclipse.equinox.jsp.jasper,
  org.osgi.framework;version="1.3.0",
