@@ -101,16 +101,9 @@ public final class RegionManager implements BundleActivator {
 			// no persistent digraph available, create a new one
 			return createRegionDigraph();
 		}
-		FileInputStream in = new FileInputStream(digraphFile);
-		try {
+		try (InputStream in = new BufferedInputStream(new FileInputStream(digraphFile))) {
 			// TODO need to validate bundle IDs to make sure they are consistent with current bundles
 			return StandardRegionDigraphPersistence.readRegionDigraph(new DataInputStream(in), this.bundleContext, this.threadLocal);
-		} finally {
-			try {
-				in.close();
-			} catch (IOException e) {
-				// We tried our best to clean up
-			}
 		}
 	}
 
@@ -124,17 +117,9 @@ public final class RegionManager implements BundleActivator {
 	}
 
 	private void saveDigraph() throws IOException {
-		FileOutputStream digraphFile = new FileOutputStream(bundleContext.getDataFile(DIGRAPH_FILE));
-		try {
-			digraph.getRegionDigraphPersistence().save(digraph, digraphFile);
-		} finally {
-			try {
-				digraphFile.close();
-			} catch (IOException e) {
-				// ignore;
-			}
+		try (OutputStream out = new BufferedOutputStream(new FileOutputStream(bundleContext.getDataFile(DIGRAPH_FILE)))) {
+			digraph.getRegionDigraphPersistence().save(digraph, out);
 		}
-
 	}
 
 	private StandardManageableRegionDigraph registerDigraphMbean(RegionDigraph regionDigraph) {
