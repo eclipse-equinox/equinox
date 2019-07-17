@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.equinox.supplement
-Bundle-Version: 1.9.100.qualifier
+Bundle-Version: 1.10.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Export-Package: org.eclipse.equinox.log;version="1.1",
@@ -18,7 +18,7 @@ Export-Package: org.eclipse.equinox.log;version="1.1",
  org.eclipse.osgi.service.urlconversion;version="1.0",
  org.eclipse.osgi.storagemanager;version="1.0",
  org.eclipse.osgi.util;version="1.1"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: org.osgi.framework,
  org.osgi.framework.hooks.resolver,
  org.osgi.resource,
