@@ -248,6 +248,9 @@ public final class ModuleRevisionBuilder {
 	}
 
 	private void checkFrameworkExtensionPermission(Module module, ModuleRevision revision) {
+		if (System.getSecurityManager() == null) {
+			return;
+		}
 		if ((revision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
 			Collection<?> systemNames = Collections.emptyList();
 			Module systemModule = module.getContainer().getModule(0);
@@ -320,9 +323,6 @@ public final class ModuleRevisionBuilder {
 	}
 
 	private static void basicAddGenericInfo(List<GenericInfo> infos, String namespace, Map<String, String> directives, Map<String, Object> attributes) {
-		if (infos == null) {
-			infos = new ArrayList<>();
-		}
 		infos.add(new GenericInfo(namespace, unmodifiableMap(directives), unmodifiableMap(attributes)));
 	}
 
@@ -343,5 +343,14 @@ public final class ModuleRevisionBuilder {
 			}
 		}
 		return (Map<K, V>) map;
+	}
+
+	void clear() {
+		capabilityInfos.clear();
+		requirementInfos.clear();
+		id = -1;
+		symbolicName = null;
+		version = Version.emptyVersion;
+		types = 0;
 	}
 }

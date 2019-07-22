@@ -1163,8 +1163,9 @@ public class ModuleDatabase {
 				}
 			}
 			int numModules = in.readInt();
+			ModuleRevisionBuilder builder = new ModuleRevisionBuilder();
 			for (int i = 0; i < numModules; i++) {
-				readModule(moduleDatabase, in, objectTable, version);
+				readModule(builder, moduleDatabase, in, objectTable, version);
 			}
 
 			moduleDatabase.revisionsTimeStamp.set(revisionsTimeStamp);
@@ -1243,8 +1244,8 @@ public class ModuleDatabase {
 			out.writeLong(module.getLastModified());
 		}
 
-		private static void readModule(ModuleDatabase moduleDatabase, DataInputStream in, List<Object> objectTable, int version) throws IOException {
-			ModuleRevisionBuilder builder = new ModuleRevisionBuilder();
+		private static void readModule(ModuleRevisionBuilder builder, ModuleDatabase moduleDatabase, DataInputStream in, List<Object> objectTable, int version) throws IOException {
+			builder.clear();
 			int moduleIndex = in.readInt();
 			String location = readString(in, objectTable);
 			long id = in.readLong();
