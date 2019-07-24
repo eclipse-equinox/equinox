@@ -36,13 +36,7 @@ public final class StandardRegionFilterBuilder implements RegionFilterBuilder {
 		if (filter == null)
 			throw new IllegalArgumentException("The filter must not be null."); //$NON-NLS-1$
 		synchronized (this.monitor) {
-			Collection<Filter> namespaceFilters = policy.get(namespace);
-			if (namespaceFilters == null) {
-				// use set to avoid duplicates
-				namespaceFilters = new LinkedHashSet<Filter>();
-				policy.put(namespace, namespaceFilters);
-			}
-
+			Collection<Filter> namespaceFilters = getNamespaceFilters(namespace);
 			namespaceFilters.add(createFilter(filter));
 		}
 		if (VISIBLE_SERVICE_NAMESPACE.equals(namespace)) {
@@ -64,12 +58,7 @@ public final class StandardRegionFilterBuilder implements RegionFilterBuilder {
 		if (namespace == null)
 			throw new IllegalArgumentException("The namespace must not be null."); //$NON-NLS-1$
 		synchronized (this.monitor) {
-			Collection<Filter> namespaceFilters = policy.get(namespace);
-			if (namespaceFilters == null) {
-				// use set to avoid duplicates
-				namespaceFilters = new LinkedHashSet<Filter>();
-				policy.put(namespace, namespaceFilters);
-			}
+			Collection<Filter> namespaceFilters = getNamespaceFilters(namespace);
 			// remove any other filters since this will override them all.
 			namespaceFilters.clear();
 			namespaceFilters.add(StandardRegionFilter.ALL);
@@ -79,6 +68,16 @@ public final class StandardRegionFilterBuilder implements RegionFilterBuilder {
 			allowAll(VISIBLE_OSGI_SERVICE_NAMESPACE);
 		}
 		return this;
+	}
+
+	private Collection<Filter> getNamespaceFilters(String namespace) {
+		Collection<Filter> namespaceFilters = policy.get(namespace);
+		if (namespaceFilters == null) {
+				// use set to avoid duplicates
+				namespaceFilters = new LinkedHashSet<Filter>();
+			policy.put(namespace, namespaceFilters);
+		}
+		return namespaceFilters;
 	}
 
 	@Override

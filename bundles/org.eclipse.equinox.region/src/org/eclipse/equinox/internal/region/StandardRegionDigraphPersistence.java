@@ -159,7 +159,7 @@ public final class StandardRegionDigraphPersistence implements RegionDigraphPers
 		if (head == null)
 			throw new IOException("Could not find head region: " + headName); //$NON-NLS-1$
 		// read the sharing policy
-		RegionFilterBuilder builder = digraph.createRegionFilterBuilder();
+		Map<String, Collection<Filter>> filters = new HashMap<>();
 		// read the number of name spaces
 		int numSpaces = in.readInt();
 		// read each name space policy
@@ -170,10 +170,15 @@ public final class StandardRegionDigraphPersistence implements RegionDigraphPers
 			int numFilters = in.readInt();
 			for (int j = 0; j < numFilters; j++) {
 				String filter = in.readUTF();
-				builder.allow(namespace, filter);
+				Collection<Filter> namespaceFilters = filters.get(namespace);
+				if (namespaceFilters == null) {
+					namespaceFilters = new ArrayList<>(numFilters);
+					filters.put(namespace, namespaceFilters);
+				}
+				namespaceFilters.add(FrameworkUtil.createFilter(filter));
 			}
 		}
-		digraph.connect(tail, builder.build(), head);
+		digraph.connect(tail, new StandardRegionFilter(filters), head);
 	}
 
 	/** 
