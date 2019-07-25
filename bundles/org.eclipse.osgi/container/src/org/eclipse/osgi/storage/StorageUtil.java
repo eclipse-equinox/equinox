@@ -14,14 +14,22 @@
 
 package org.eclipse.osgi.storage;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.osgi.internal.debug.Debug;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
 
 /**
  * A utility class with some generally useful static methods for adaptor hook implementations
@@ -154,9 +162,7 @@ public class StorageUtil {
 	 * @return the service registration object
 	 */
 	public static ServiceRegistration<?> register(String name, Object service, BundleContext context) {
-		Dictionary<String, Object> properties = new Hashtable<>(7);
-		Dictionary<String, String> headers = context.getBundle().getHeaders();
-		properties.put(Constants.SERVICE_VENDOR, headers.get(Constants.BUNDLE_VENDOR));
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
 		properties.put(Constants.SERVICE_PID, context.getBundle().getBundleId() + "." + service.getClass().getName()); //$NON-NLS-1$
 		return context.registerService(name, service, properties);

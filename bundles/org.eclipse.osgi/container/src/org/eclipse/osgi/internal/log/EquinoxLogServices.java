@@ -24,7 +24,11 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.storage.StorageUtil;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.log.LogLevel;
 import org.osgi.service.log.admin.LoggerContext;
 
@@ -133,10 +137,8 @@ public class EquinoxLogServices {
 	private ServiceRegistration<?> registerPerformanceLog(BundleContext context) {
 		Object service = createPerformanceLog(context.getBundle());
 		String serviceName = FrameworkLog.class.getName();
-		Dictionary<String, Object> serviceProperties = new Hashtable<>(7);
-		Dictionary<String, String> headers = context.getBundle().getHeaders();
+		Dictionary<String, Object> serviceProperties = new Hashtable<>();
 
-		serviceProperties.put(Constants.SERVICE_VENDOR, headers.get(Constants.BUNDLE_VENDOR));
 		serviceProperties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
 		serviceProperties.put(Constants.SERVICE_PID, context.getBundle().getBundleId() + '.' + service.getClass().getName());
 		serviceProperties.put(FrameworkLog.SERVICE_PERFORMANCE, Boolean.TRUE.toString());

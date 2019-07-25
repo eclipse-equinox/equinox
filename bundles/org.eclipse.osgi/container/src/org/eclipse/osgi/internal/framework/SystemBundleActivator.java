@@ -220,9 +220,7 @@ public class SystemBundleActivator implements BundleActivator {
 
 	private void register(BundleContext context, String serviceClass, Object service, boolean setRanking, Dictionary<String, Object> properties) {
 		if (properties == null)
-			properties = new Hashtable<>(7);
-		Dictionary<String, String> headers = context.getBundle().getHeaders();
-		properties.put(Constants.SERVICE_VENDOR, headers.get(Constants.BUNDLE_VENDOR));
+			properties = new Hashtable<>();
 		if (setRanking) {
 			properties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
 		}
