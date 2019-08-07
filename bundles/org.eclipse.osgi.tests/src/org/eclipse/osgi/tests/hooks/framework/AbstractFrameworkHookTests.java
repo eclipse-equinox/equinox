@@ -14,6 +14,9 @@
 package org.eclipse.osgi.tests.hooks.framework;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
@@ -31,8 +34,11 @@ import org.osgi.framework.launch.FrameworkFactory;
 
 public abstract class AbstractFrameworkHookTests extends CoreTest {
 	protected static class BasicURLClassLoader extends URLClassLoader {
-		public BasicURLClassLoader(URL[] urls, ClassLoader parent) {
+		private volatile String testURL;
+
+		public BasicURLClassLoader(URL[] urls, ClassLoader parent, String testURL) {
 			super(urls, parent);
+			this.testURL = testURL;
 		}
 
 		@Override
@@ -56,6 +62,16 @@ public abstract class AbstractFrameworkHookTests extends CoreTest {
 
 		@Override
 		protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+			if (testURL != null) {
+				try {
+					URL fileUrl = new URI(testURL).toURL();
+					fileUrl.toString();
+				} catch (MalformedURLException | URISyntaxException e) {
+					// stop doing the URI creating
+					testURL = null;
+					throw new RuntimeException(e);
+				}
+			}
 			if (name.startsWith("org.eclipse") || name.startsWith("org.osgi.framework.FrameworkUtil")) {
 				Class<?> result = findLoadedClass(name);
 				if (result == null)
@@ -73,6 +89,7 @@ public abstract class AbstractFrameworkHookTests extends CoreTest {
 	protected static final String BUNDLES_ROOT = "bundle_tests";
 
 	protected BasicURLClassLoader classLoader;
+	protected String testURL = null;
 	protected BundleInstaller bundleInstaller;
 
 	public BundleContext getContext() {
@@ -154,6 +171,6 @@ public abstract class AbstractFrameworkHookTests extends CoreTest {
 			urls = new URL[] {new URL(osgiFramework), new URL(osgiFramework + "bin/")};
 		else
 			urls = new URL[] {new URL(osgiFramework)};
-		classLoader = new BasicURLClassLoader(urls, getClass().getClassLoader());
+		classLoader = new BasicURLClassLoader(urls, getClass().getClassLoader(), testURL);
 	}
 }

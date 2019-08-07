@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: test.protocol.handler.user
+Bundle-Activator: test.protocol.handler.user.Activator
+Import-Package: org.osgi.framework

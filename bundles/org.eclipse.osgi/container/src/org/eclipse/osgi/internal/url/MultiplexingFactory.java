@@ -11,14 +11,24 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.url;
 
-import java.lang.reflect.*;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.*;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.framework.EquinoxBundle;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.storage.StorageUtil;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
 /*
  * An abstract class for handler factory impls (Stream and Content) that can 
@@ -40,6 +50,7 @@ public abstract class MultiplexingFactory {
 	 * it the ability to call setAccessible(true) on other types from the java.base module
 	 */
 	static final Collection<AccessibleObject> setAccessible;
+	static final Collection<ClassLoader> systemLoaders;
 	static {
 		Collection<AccessibleObject> result = null;
 		try {
@@ -64,6 +75,18 @@ public abstract class MultiplexingFactory {
 			// ingore as if there is no Unsafe
 		}
 		setAccessible = result;
+
+		Collection<ClassLoader> loaders = new ArrayList<>();
+		try {
+			ClassLoader cl = ClassLoader.getSystemClassLoader();
+			while (cl != null) {
+				loaders.add(cl);
+				cl = cl.getParent();
+			}
+		} catch (Throwable t) {
+			// ignore as if no loaders
+		}
+		systemLoaders = Collections.unmodifiableCollection(loaders);
 	}
 	protected EquinoxContainer container;
 	protected BundleContext context;
@@ -101,7 +124,8 @@ public abstract class MultiplexingFactory {
 			setParentFactory.invoke(factory, new Object[] {getParentFactory()});
 		} catch (Exception e) {
 			container.getLogServices().log(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, "register", e); //$NON-NLS-1$
-			throw new RuntimeException(e.getMessage(), e);
+			// just return and not have it registered
+			return;
 		}
 		addFactory(factory);
 	}
@@ -116,7 +140,7 @@ public abstract class MultiplexingFactory {
 			closeTracker.invoke(factory, (Object[]) null);
 		} catch (Exception e) {
 			container.getLogServices().log(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, "unregister", e); //$NON-NLS-1$
-			throw new RuntimeException(e.getMessage(), e);
+			// just return without blowing up here
 		}
 	}
 
@@ -155,7 +179,7 @@ public abstract class MultiplexingFactory {
 		List<Object> current = getFactories();
 		Class<?>[] classStack = internalSecurityManager.getClassContext();
 		for (Class<?> clazz : classStack) {
-			if (clazz == InternalSecurityManager.class || clazz == MultiplexingFactory.class || ignoredClasses.contains(clazz))
+			if (clazz == InternalSecurityManager.class || clazz == MultiplexingFactory.class || ignoredClasses.contains(clazz) || isSystemClass(clazz))
 				continue;
 			if (hasAuthority(clazz))
 				return this;
@@ -169,7 +193,7 @@ public abstract class MultiplexingFactory {
 					}
 				} catch (Exception e) {
 					container.getLogServices().log(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, "findAuthorizedURLStreamHandler-loop", e); //$NON-NLS-1$
-					throw new RuntimeException(e.getMessage(), e);
+					// we continue to the next factory here instead of failing
 				}
 			}
 		}
@@ -177,6 +201,17 @@ public abstract class MultiplexingFactory {
 		// This means the root factory may provide protocol handlers for call stacks
 		// that have no classes loaded by an bundle class loader.
 		return this;
+	}
+
+	private boolean isSystemClass(final Class<?> clazz) {
+		// we want to ignore classes from the system
+		ClassLoader cl = AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+			@Override
+			public ClassLoader run() {
+				return clazz.getClassLoader();
+			}
+		});
+		return cl == null || systemLoaders.contains(cl);
 	}
 
 	public boolean hasAuthority(Class<?> clazz) {
