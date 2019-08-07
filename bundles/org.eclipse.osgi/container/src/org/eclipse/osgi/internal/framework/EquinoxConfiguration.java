@@ -85,6 +85,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	private static final String INTERNAL_OS_OS400 = "OS/400"; //$NON-NLS-1$
 	private static final String INTERNAL_OS_OS390 = "OS/390"; //$NON-NLS-1$
 	private static final String INTERNAL_OS_ZOS = "z/OS"; //$NON-NLS-1$
+	private static final String INTERNAL_OS_FREEBSD = "FreeBSD"; //$NON-NLS-1$
 	// While we recognize the i386 architecture, we change
 	// this internally to be x86.
 	private static final String INTERNAL_ARCH_I386 = "i386"; //$NON-NLS-1$
@@ -749,6 +750,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			return Constants.WS_WIN32;
 		if (osName.equals(Constants.OS_LINUX))
 			return Constants.WS_GTK;
+		if (osName.equals(Constants.OS_FREEBSD))
+			return Constants.WS_GTK;
 		if (osName.equals(Constants.OS_MACOSX))
 			return Constants.WS_COCOA;
 		if (osName.equals(Constants.OS_HPUX))
@@ -784,6 +787,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			return Constants.OS_OS390;
 		if (osName.equalsIgnoreCase(INTERNAL_OS_ZOS))
 			return Constants.OS_ZOS;
+		if (osName.equalsIgnoreCase(INTERNAL_OS_FREEBSD))
+			return Constants.OS_FREEBSD;
 		// os.name on Mac OS can be either Mac OS or Mac OS X
 		if (osName.regionMatches(true, 0, INTERNAL_OS_MACOSX, 0, INTERNAL_OS_MACOSX.length()))
 			return Constants.OS_MACOSX;

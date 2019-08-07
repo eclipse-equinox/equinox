@@ -96,6 +96,13 @@ public interface Constants {
 	public static final String OS_ZOS = "z/os"; //$NON-NLS-1$
 
 	/**
+	 * Constant string (value "freebsd") indicating the platform is running on a
+	 * FreeBSD-based operating system.
+	 * @since 3.15
+	 */
+	public static final String OS_FREEBSD = "freebsd";//$NON-NLS-1$
+
+	/**
 	 * Constant string (value "unknown") indicating the platform is running on a
 	 * machine running an unknown operating system.
 	 */
