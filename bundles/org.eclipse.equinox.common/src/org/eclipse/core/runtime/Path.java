@@ -558,7 +558,7 @@ public class Path implements IPath, Cloneable {
 	 * Returns the platform-neutral encoding of the given segment onto
 	 * the given string buffer. This escapes literal colon characters with double colons.
 	 */
-	private void encodeSegment(String string, StringBuffer buf) {
+	private void encodeSegment(String string, StringBuilder buf) {
 		int len = string.length();
 		for (int i = 0; i < len; i++) {
 			char c = string.charAt(i);
@@ -1143,7 +1143,7 @@ public class Path implements IPath, Cloneable {
 		int resultSize = computeLength();
 		if (resultSize <= 0)
 			return EMPTY_STRING;
-		StringBuffer result = new StringBuffer(resultSize);
+		StringBuilder result = new StringBuilder(resultSize);
 		if (device != null)
 			result.append(device);
 		if ((flags & HAS_LEADING) != 0)
