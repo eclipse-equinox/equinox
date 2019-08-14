@@ -152,7 +152,7 @@ public class BERProcessor {
 	 */
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		switch (classOfTag) {
 			case UNIVERSAL_TAGCLASS :
 				sb.append('U');

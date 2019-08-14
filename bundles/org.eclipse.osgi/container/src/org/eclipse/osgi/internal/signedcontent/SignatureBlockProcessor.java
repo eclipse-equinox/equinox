@@ -454,14 +454,14 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 	private static String stripContinuations(String entry) {
 		if (entry.indexOf("\n ") < 0 && entry.indexOf("\r ") < 0) //$NON-NLS-1$//$NON-NLS-2$
 			return entry;
-		StringBuffer buffer = new StringBuffer(entry);
+		StringBuilder buffer = new StringBuilder(entry);
 		removeAll(buffer, "\r\n "); //$NON-NLS-1$
 		removeAll(buffer, "\n "); //$NON-NLS-1$
 		removeAll(buffer, "\r "); //$NON-NLS-1$
 		return buffer.toString();
 	}
 
-	private static StringBuffer removeAll(StringBuffer buffer, String toRemove) {
+	private static StringBuilder removeAll(StringBuilder buffer, String toRemove) {
 		int index = buffer.indexOf(toRemove);
 		int length = toRemove.length();
 		while (index > 0) {

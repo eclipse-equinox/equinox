@@ -73,7 +73,7 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append(Constants.REQUIRE_CAPABILITY).append(": ").append(getType()); //$NON-NLS-1$
 		if (matchingFilter != null)
 			sb.append("; filter=\"").append(getMatchingFilter()).append('"'); //$NON-NLS-1$

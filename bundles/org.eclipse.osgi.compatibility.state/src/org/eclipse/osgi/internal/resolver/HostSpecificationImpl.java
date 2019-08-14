@@ -154,7 +154,7 @@ public class HostSpecificationImpl extends VersionConstraintImpl implements Host
 	}
 
 	private String createFilterDirective() {
-		StringBuffer filter = new StringBuffer();
+		StringBuilder filter = new StringBuilder();
 		filter.append("(&"); //$NON-NLS-1$
 		synchronized (this.monitor) {
 			addFilterAttribute(filter, BundleRevision.HOST_NAMESPACE, getName());

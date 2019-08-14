@@ -589,7 +589,7 @@ public class ManifestElement {
 		Enumeration<String> directiveKeys = getDirectiveKeys();
 		if (attrKeys == null && directiveKeys == null)
 			return mainValue;
-		StringBuffer result = new StringBuffer(mainValue);
+		StringBuilder result = new StringBuilder(mainValue);
 		if (attrKeys != null) {
 			while (attrKeys.hasMoreElements()) {
 				String key = attrKeys.nextElement();
@@ -605,7 +605,7 @@ public class ManifestElement {
 		return result.toString();
 	}
 
-	private void addValues(boolean directive, String key, String[] values, StringBuffer result) {
+	private void addValues(boolean directive, String key, String[] values, StringBuilder result) {
 		if (values == null)
 			return;
 		for (String value : values) {

@@ -165,7 +165,7 @@ public class StateBuilder {
 				if (aliasReqs == null)
 					continue;
 				for (ManifestElement aliasReq : aliasReqs) {
-					StringBuffer strBuf = new StringBuffer();
+					StringBuilder strBuf = new StringBuilder();
 					strBuf.append(aliasReq.getValue()).append(':').append(genericAlias[2]);
 					String filter = aliasReq.getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE);
 					if (filter != null)
@@ -192,7 +192,7 @@ public class StateBuilder {
 				if (aliasCapabilities == null)
 					continue;
 				for (ManifestElement aliasCapability : aliasCapabilities) {
-					StringBuffer strBuf = new StringBuffer();
+					StringBuilder strBuf = new StringBuilder();
 					strBuf.append(aliasCapability.getValue()).append(':').append(genericAlias[2]);
 					for (Enumeration<String> keys = aliasCapability.getKeys(); keys != null && keys.hasMoreElements();) {
 						String key = keys.nextElement();
@@ -532,7 +532,7 @@ public class StateBuilder {
 		if (breeFilters.size() == 1) {
 			filterSpec = breeFilters.get(0);
 		} else {
-			StringBuffer filterBuf = new StringBuffer("(|"); //$NON-NLS-1$
+			StringBuilder filterBuf = new StringBuilder("(|"); //$NON-NLS-1$
 			for (String breeFilter : breeFilters) {
 				filterBuf.append(breeFilter);
 			}

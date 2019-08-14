@@ -66,7 +66,7 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 		Class<?> clazz;
 		StringTokenizer tok = new StringTokenizer(builtInHandlers, "|"); //$NON-NLS-1$
 		while (tok.hasMoreElements()) {
-			StringBuffer name = new StringBuffer();
+			StringBuilder name = new StringBuilder();
 			name.append(tok.nextToken());
 			name.append("."); //$NON-NLS-1$
 			name.append(protocol);

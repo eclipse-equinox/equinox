@@ -56,7 +56,7 @@ public abstract class BaseDescriptionImpl implements BaseDescription {
 			return ""; //$NON-NLS-1$
 		String assignment = directives ? ":=" : "="; //$NON-NLS-1$//$NON-NLS-2$
 		Set<Entry<String, V>> set = map.entrySet();
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (Entry<String, V> entry : set) {
 			sb.append("; "); //$NON-NLS-1$
 			String key = entry.getKey();

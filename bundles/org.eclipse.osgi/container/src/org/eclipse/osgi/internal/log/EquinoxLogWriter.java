@@ -410,7 +410,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	private String getDate(Date date) {
 		Calendar c = Calendar.getInstance();
 		c.setTime(date);
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		appendPaddedInt(c.get(Calendar.YEAR), 4, sb).append('-');
 		appendPaddedInt(c.get(Calendar.MONTH) + 1, 2, sb).append('-');
 		appendPaddedInt(c.get(Calendar.DAY_OF_MONTH), 2, sb).append(' ');
@@ -421,7 +421,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 		return sb.toString();
 	}
 
-	private StringBuffer appendPaddedInt(int value, int pad, StringBuffer buffer) {
+	private StringBuilder appendPaddedInt(int value, int pad, StringBuilder buffer) {
 		pad = pad - 1;
 		if (pad == 0)
 			return buffer.append(Integer.toString(value));

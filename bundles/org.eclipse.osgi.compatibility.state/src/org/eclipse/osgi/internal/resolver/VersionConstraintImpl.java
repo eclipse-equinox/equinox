@@ -198,18 +198,18 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 		}
 	}
 
-	static StringBuffer addFilterAttributes(StringBuffer filter, Map<String, ?> attributes) {
+	static StringBuilder addFilterAttributes(StringBuilder filter, Map<String, ?> attributes) {
 		for (Map.Entry<String, ?> entry : attributes.entrySet()) {
 			addFilterAttribute(filter, entry.getKey(), entry.getValue());
 		}
 		return filter;
 	}
 
-	static StringBuffer addFilterAttribute(StringBuffer filter, String attr, Object value) {
+	static StringBuilder addFilterAttribute(StringBuilder filter, String attr, Object value) {
 		return addFilterAttribute(filter, attr, value, true);
 	}
 
-	static StringBuffer addFilterAttribute(StringBuffer filter, String attr, Object value, boolean escapeWildCard) {
+	static StringBuilder addFilterAttribute(StringBuilder filter, String attr, Object value, boolean escapeWildCard) {
 		if (value instanceof VersionRange) {
 			VersionRange range = (VersionRange) value;
 			filter.append(range.toFilterString(attr));

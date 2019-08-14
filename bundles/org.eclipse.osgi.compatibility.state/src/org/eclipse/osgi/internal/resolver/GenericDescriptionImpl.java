@@ -76,7 +76,7 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append(Constants.PROVIDE_CAPABILITY).append(": ").append(getType()); //$NON-NLS-1$
 		Map<String, Object> attrs = getDeclaredAttributes();
 		sb.append(toString(attrs, false));

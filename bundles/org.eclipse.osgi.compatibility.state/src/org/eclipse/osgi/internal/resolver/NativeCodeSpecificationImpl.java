@@ -174,7 +174,7 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		NativeCodeDescription[] suppliers = getPossibleSuppliers();
 		for (int i = 0; i < suppliers.length; i++) {
 			if (i > 0)

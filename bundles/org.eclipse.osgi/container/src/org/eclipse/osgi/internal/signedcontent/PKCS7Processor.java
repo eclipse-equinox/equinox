@@ -59,7 +59,7 @@ public class PKCS7Processor implements SignedContentConstants {
 	private Date signingTime;
 
 	private static String oid2String(int oid[]) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < oid.length; i++) {
 			if (i > 0)
 				sb.append('.');
@@ -205,7 +205,7 @@ public class PKCS7Processor implements SignedContentConstants {
 			// create the appropriate date time string format
 			// date format could be yyyyMMddHHmmss[.s...]Z or yyyyMMddHHmmssZ
 			int dotIndex = dateString.indexOf('.');
-			StringBuffer dateFormatSB = new StringBuffer("yyyyMMddHHmmss"); //$NON-NLS-1$
+			StringBuilder dateFormatSB = new StringBuilder("yyyyMMddHHmmss"); //$NON-NLS-1$
 			if (dotIndex != -1) {
 				// yyyyMMddHHmmss[.s...]Z, find out number of s in the bracket
 				int noS = dateString.indexOf('Z') - 1 - dotIndex;

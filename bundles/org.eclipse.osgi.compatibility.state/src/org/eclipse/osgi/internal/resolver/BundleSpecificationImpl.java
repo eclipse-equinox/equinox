@@ -137,7 +137,7 @@ public class BundleSpecificationImpl extends VersionConstraintImpl implements Bu
 	}
 
 	private String createFilterDirective() {
-		StringBuffer filter = new StringBuffer();
+		StringBuilder filter = new StringBuilder();
 		filter.append("(&"); //$NON-NLS-1$
 		synchronized (this.monitor) {
 			addFilterAttribute(filter, BundleRevision.BUNDLE_NAMESPACE, getName());

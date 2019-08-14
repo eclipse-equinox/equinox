@@ -393,7 +393,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	@Override
 	public String toString() {
 		Bundle b = getBundle();
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		if (b == null)
 			return result.toString();
 		return result.append('[').append(b.getSymbolicName()).append(':').append(b.getVersion()).append("(id=").append(b.getBundleId()).append(")]").toString(); //$NON-NLS-1$//$NON-NLS-2$

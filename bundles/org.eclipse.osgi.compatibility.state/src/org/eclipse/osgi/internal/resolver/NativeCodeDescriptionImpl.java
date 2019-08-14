@@ -116,7 +116,7 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 
 		String[] paths = getNativePaths();
 		for (int i = 0; i < paths.length; i++) {

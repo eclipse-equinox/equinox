@@ -281,7 +281,7 @@ public class ResolverImpl implements Resolver {
 		// check to see if the bundle is disabled
 		DisabledInfo[] disabledInfos = state.getDisabledInfos(bundleDesc);
 		if (disabledInfos.length > 0) {
-			StringBuffer message = new StringBuffer();
+			StringBuilder message = new StringBuilder();
 			for (int i = 0; i < disabledInfos.length; i++) {
 				if (i > 0)
 					message.append(' ');
@@ -303,7 +303,7 @@ public class ResolverImpl implements Resolver {
 							matchedEE = true;
 						}
 		if (!matchedEE) {
-			StringBuffer bundleEE = new StringBuffer(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT.length() + 20);
+			StringBuilder bundleEE = new StringBuilder(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT.length() + 20);
 			bundleEE.append(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT).append(": "); //$NON-NLS-1$
 			for (int i = 0; i < ees.length; i++) {
 				if (i > 0)
@@ -1025,7 +1025,7 @@ public class ResolverImpl implements Resolver {
 	}
 
 	private void printCombination(int[] curCombination) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append('[');
 		for (int i = 0; i < curCombination.length; i++) {
 			sb.append(curCombination[i]);

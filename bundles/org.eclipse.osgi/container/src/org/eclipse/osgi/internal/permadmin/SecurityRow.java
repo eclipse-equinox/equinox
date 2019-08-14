@@ -162,7 +162,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		return result;
 	}
 
-	private static void escapeString(String str, StringBuffer output) {
+	private static void escapeString(String str, StringBuilder output) {
 		int len = str.length();
 		for (int i = 0; i < len; i++) {
 			char c = str.charAt(i);
@@ -186,7 +186,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	}
 
 	private static String unescapeString(String str) {
-		StringBuffer output = new StringBuffer(str.length());
+		StringBuilder output = new StringBuilder(str.length());
 		int end = str.length();
 		for (int i = 0; i < end; i++) {
 			char c = str.charAt(i);
@@ -439,7 +439,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	}
 
 	static String getEncoded(String name, ConditionInfo[] conditionInfos, PermissionInfo[] permissionInfos, boolean deny) {
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 		if (deny)
 			result.append(ConditionalPermissionInfo.DENY);
 		else

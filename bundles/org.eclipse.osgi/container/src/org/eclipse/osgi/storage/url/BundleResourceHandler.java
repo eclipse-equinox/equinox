@@ -193,7 +193,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 	 */
 	@Override
 	protected String toExternalForm(URL url) {
-		StringBuffer result = new StringBuffer(url.getProtocol());
+		StringBuilder result = new StringBuilder(url.getProtocol());
 		result.append("://"); //$NON-NLS-1$
 
 		String host = url.getHost();

@@ -1667,7 +1667,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 		}
 
 		private String parse_value() throws InvalidSyntaxException {
-			StringBuffer sb = new StringBuffer(filterChars.length - pos);
+			StringBuilder sb = new StringBuilder(filterChars.length - pos);
 
 			parseloop: while (true) {
 				char c = filterChars[pos];
@@ -1703,7 +1703,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 		}
 
 		private Object parse_substring() throws InvalidSyntaxException {
-			StringBuffer sb = new StringBuffer(filterChars.length - pos);
+			StringBuilder sb = new StringBuilder(filterChars.length - pos);
 
 			List<String> operands = new ArrayList<>(10);
 

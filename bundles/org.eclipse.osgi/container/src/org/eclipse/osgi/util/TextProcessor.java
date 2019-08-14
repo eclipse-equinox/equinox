@@ -171,7 +171,7 @@ public class TextProcessor {
 
 		delimiter = delimiter == null ? getDefaultDelimiters() : delimiter;
 
-		StringBuffer target = new StringBuffer();
+		StringBuilder target = new StringBuilder();
 		target.append(LRE);
 		char ch;
 
@@ -240,7 +240,7 @@ public class TextProcessor {
 		if (!IS_PROCESSING_NEEDED || str == null || str.length() <= 1)
 			return str;
 
-		StringBuffer buf = new StringBuffer();
+		StringBuilder buf = new StringBuilder();
 		for (int i = 0; i < str.length(); i++) {
 			char c = str.charAt(i);
 			switch (c) {

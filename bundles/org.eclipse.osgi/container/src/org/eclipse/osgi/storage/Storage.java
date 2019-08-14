@@ -2019,7 +2019,7 @@ public class Storage {
 	}
 
 	public static String sanitizeFilterInput(String filePattern) throws InvalidSyntaxException {
-		StringBuffer buffer = null;
+		StringBuilder buffer = null;
 		boolean foundEscape = false;
 		for (int i = 0; i < filePattern.length(); i++) {
 			char c = filePattern.charAt(i);
@@ -2034,7 +2034,7 @@ public class Storage {
 				case ')' :
 					if (!foundEscape) {
 						if (buffer == null) {
-							buffer = new StringBuffer(filePattern.length() + 16);
+							buffer = new StringBuilder(filePattern.length() + 16);
 							buffer.append(filePattern.substring(0, i));
 						}
 						// must escape with '\'

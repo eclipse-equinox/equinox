@@ -108,7 +108,7 @@ public class NestedDirBundleFile extends BundleFile {
 	private String prependNestedDir(String path) {
 		if (path.length() > 0 && path.charAt(0) == '/')
 			path = path.substring(1);
-		return new StringBuffer(nestedDirName).append(path).toString();
+		return new StringBuilder(nestedDirName).append(path).toString();
 	}
 
 	@Override

@@ -53,7 +53,7 @@ final class BundleDeltaImpl implements BundleDelta {
 	}
 
 	private static String toTypeString(int type) {
-		StringBuffer typeStr = new StringBuffer();
+		StringBuilder typeStr = new StringBuilder();
 		if ((type & BundleDelta.ADDED) != 0)
 			typeStr.append("ADDED,"); //$NON-NLS-1$
 		if ((type & BundleDelta.REMOVED) != 0)

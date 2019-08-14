@@ -210,7 +210,7 @@ class StateConverter {
 		if (map.isEmpty())
 			return ""; //$NON-NLS-1$
 		Set<Entry<String, V>> set = map.entrySet();
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (Entry<String, V> entry : set) {
 			sb.append("; "); //$NON-NLS-1$
 			String key = entry.getKey();
