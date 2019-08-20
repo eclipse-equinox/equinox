@@ -36,6 +36,7 @@ public class BundleTests {
 		suite.addTest(ClassLoadingBundleTests.suite());
 		suite.addTest(NativeCodeBundleTests.suite());
 		suite.addTest(PlatformAdminBundleTests.suite());
+		suite.addTest(ListenerTests.suite());
 		return suite;
 	}
 }

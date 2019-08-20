@@ -13,15 +13,20 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
-import java.io.*;
-import java.util.HashMap;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Map;
-import java.util.jar.*;
+import java.util.jar.Attributes;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
 
 /*
  * The framework must discard a persisted bundle when the 
@@ -155,13 +160,6 @@ public class DiscardBundleTests extends AbstractBundleTests {
 		return manifest;
 	}
 
-	private Map<String, Object> createConfiguration() {
-		File file = OSGiTestsActivator.getContext().getDataFile(getName());
-		Map<String, Object> result = new HashMap<String, Object>();
-		result.put(Constants.FRAMEWORK_STORAGE, file.getAbsolutePath());
-		return result;
-	}
-
 	private void doTest(Map<String, ?> configuration, boolean discard) throws Exception {
 		doTest(configuration, discard, getDirectoryLocation());
 		doTest(configuration, discard, getJarLocation());
@@ -206,11 +204,6 @@ public class DiscardBundleTests extends AbstractBundleTests {
 		return new File(root, BUNDLE_JAR);
 	}
 
-	private void initAndStart(Equinox equinox) throws BundleException {
-		equinox.init();
-		equinox.start();
-	}
-
 	private Equinox restart(Equinox equinox, Map<String, ?> configuration) throws BundleException, InterruptedException {
 		stop(equinox);
 		equinox = new Equinox(configuration);
@@ -222,17 +215,6 @@ public class DiscardBundleTests extends AbstractBundleTests {
 		equinox.stop();
 		FrameworkEvent event = equinox.waitForStop(5000);
 		assertEquals("The framework was not stopped", FrameworkEvent.STOPPED, event.getType());
-	}
-
-	private void stopQuietly(Equinox equinox) {
-		if (equinox == null)
-			return;
-		try {
-			equinox.stop();
-			equinox.waitForStop(5000);
-		} catch (Exception e) {
-			// Ignore
-		}
 	}
 
 	private void touchFile(File file) {

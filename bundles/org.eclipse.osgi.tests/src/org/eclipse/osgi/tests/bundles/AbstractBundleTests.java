@@ -13,9 +13,24 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.jar.Attributes;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 import org.eclipse.core.tests.harness.CoreTest;
+import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
 
 public class AbstractBundleTests extends CoreTest {
 	public static int BUNDLE_LISTENER = 0x01;
@@ -27,6 +42,36 @@ public class AbstractBundleTests extends CoreTest {
 	public static SyncEventListenerTestResults syncListenerResults;
 	public static EventListenerTestResults frameworkListenerResults;
 	public static BundleInstaller installer;
+
+	static class BundleBuilder {
+		static class BundleManifestBuilder {
+			private final Manifest manifest = new Manifest();
+
+			public Manifest build() {
+				manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
+				return manifest;
+			}
+
+			public BundleManifestBuilder symbolicName(String value) {
+				manifest.getMainAttributes().putValue(Constants.BUNDLE_SYMBOLICNAME, value);
+				return this;
+			}
+		}
+
+		private final BundleManifestBuilder manifestBuilder = new BundleManifestBuilder();
+
+		public InputStream build() throws IOException {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			JarOutputStream jos = new JarOutputStream(baos, manifestBuilder.build());
+			jos.close();
+			return new ByteArrayInputStream(baos.toByteArray());
+		}
+
+		public BundleBuilder symbolicName(String value) {
+			manifestBuilder.symbolicName(value);
+			return this;
+		}
+	}
 
 	protected void setUp() throws Exception {
 		installer = new BundleInstaller(BUNDLES_ROOT, OSGiTestsActivator.getContext());
@@ -208,6 +253,29 @@ public class AbstractBundleTests extends CoreTest {
 		}
 		result.append("] ").append(event.getSource());
 		return result.toString();
+	}
+
+	protected Map<String, Object> createConfiguration() {
+		File file = OSGiTestsActivator.getContext().getDataFile(getName());
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put(Constants.FRAMEWORK_STORAGE, file.getAbsolutePath());
+		return result;
+	}
+
+	protected void initAndStart(Equinox equinox) throws BundleException {
+		equinox.init();
+		equinox.start();
+	}
+
+	protected void stopQuietly(Equinox equinox) {
+		if (equinox == null)
+			return;
+		try {
+			equinox.stop();
+			equinox.waitForStop(5000);
+		} catch (Exception e) {
+			// Ignore
+		}
 	}
 
 }

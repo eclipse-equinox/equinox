@@ -14,19 +14,49 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
-import java.security.*;
-import java.util.*;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.ProtectionDomain;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleRevision;
-import org.eclipse.osgi.framework.eventmgr.*;
+import org.eclipse.osgi.framework.eventmgr.CopyOnWriteIdentityMap;
+import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
+import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.*;
-import org.osgi.framework.hooks.service.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceException;
+import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceObjects;
+import org.osgi.framework.ServicePermission;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.hooks.service.EventHook;
+import org.osgi.framework.hooks.service.EventListenerHook;
+import org.osgi.framework.hooks.service.FindHook;
+import org.osgi.framework.hooks.service.ListenerHook;
 import org.osgi.framework.hooks.service.ListenerHook.ListenerInfo;
 
 /**
@@ -97,7 +127,7 @@ public class ServiceRegistry {
 		publishedServicesByClass = new HashMap<>(initialCapacity);
 		publishedServicesByContext = new HashMap<>(initialCapacity);
 		allPublishedServices = new ArrayList<>(initialCapacity);
-		serviceEventListeners = new HashMap<>(initialCapacity);
+		serviceEventListeners = new LinkedHashMap<>(initialCapacity);
 		Module systemModule = container.getStorage().getModuleContainer().getModule(0);
 		systemBundleContext = (BundleContextImpl) systemModule.getBundle().getBundleContext();
 		systemBundleContext.provisionServicesInUseMap();
@@ -819,7 +849,7 @@ public class ServiceRegistry {
 		Set<Map.Entry<ServiceListener, FilteredServiceListener>> systemServiceListenersOrig = null;
 		BundleContextImpl systemContext = null;
 		synchronized (serviceEventListeners) {
-			listenerSnapshot = new HashMap<>(serviceEventListeners.size());
+			listenerSnapshot = new LinkedHashMap<>(serviceEventListeners.size());
 			for (Map.Entry<BundleContextImpl, CopyOnWriteIdentityMap<ServiceListener, FilteredServiceListener>> entry : serviceEventListeners.entrySet()) {
 				Map<ServiceListener, FilteredServiceListener> listeners = entry.getValue();
 				if (!listeners.isEmpty()) {
