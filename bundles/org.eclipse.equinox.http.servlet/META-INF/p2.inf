@@ -1,5 +1,3 @@
-provides.0.namespace = osgi.implementation
-provides.0.name = osgi.http
 provides.1.namespace = osgi.service
 provides.1.name = org.osgi.service.http.HttpService
 provides.2.namespace = osgi.service
