@@ -1,4 +1,0 @@
-provides.1.namespace = osgi.service
-provides.1.name = org.osgi.service.http.HttpService
-provides.2.namespace = osgi.service
-provides.2.name = org.osgi.service.http.runtime.HttpServiceRuntime

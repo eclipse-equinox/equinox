@@ -4,7 +4,7 @@ Bundle-Name: %bundleName
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-SymbolicName: org.eclipse.equinox.cm
-Bundle-Version: 1.4.100.qualifier
+Bundle-Version: 1.4.200.qualifier
 Bundle-Activator: org.eclipse.equinox.internal.cm.Activator
 Import-Package: org.osgi.framework;version="1.7.0",
  org.osgi.service.cm;version="[1.6,1.7)",

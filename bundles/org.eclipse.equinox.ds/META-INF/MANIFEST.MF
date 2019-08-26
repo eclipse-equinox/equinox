@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-SymbolicName: org.eclipse.equinox.ds;singleton:=true
-Bundle-Version: 1.6.0.qualifier
+Bundle-Version: 1.6.100.qualifier
 Bundle-Vendor: %bundleVendor
 Bundle-Activator: org.eclipse.equinox.internal.ds.Activator
 Bundle-Description: This bundle provides support for OSGi 

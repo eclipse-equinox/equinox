@@ -1,6 +1,0 @@
-provides.0.namespace = osgi.implementation
-provides.0.name = osgi.metatype
-provides.1.namespace = osgi.extender
-provides.1.name = osgi.metatype
-provides.2.namespace = osgi.service
-provides.2.name = org.osgi.service.metatype.MetaTypeService

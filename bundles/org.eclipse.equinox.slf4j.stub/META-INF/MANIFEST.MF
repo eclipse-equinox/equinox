@@ -4,5 +4,7 @@ Bundle-Name: slf4j Stub
 Bundle-SymbolicName: org.eclipse.equinox.slf4j.stub
 Bundle-Version: 1.0.200.qualifier
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Provide-Capability: generic; generic="org.slf4j.impl.StaticLoggerBinder"; version:Version="1.6.1"
+Provide-Capability: 
+ generic; generic="org.slf4j.impl.StaticLoggerBinder"; version:Version="1.6.1",
+ org.slf4j.api; org.slf4j.api="org.slf4j.impl.StaticLoggerBinder"; version:Version="1.6.1"
 Automatic-Module-Name: org.eclipse.equinox.slf4j.stub
