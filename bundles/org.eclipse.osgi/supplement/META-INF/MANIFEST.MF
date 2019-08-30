@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.eclipse.equinox.supplement
 Bundle-Version: 1.9.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Export-Package: org.eclipse.equinox.log;version="1.0",
+Export-Package: org.eclipse.equinox.log;version="1.1",
  org.eclipse.osgi.framework.console;version="1.1",
  org.eclipse.osgi.framework.eventmgr;version="1.2",
  org.eclipse.osgi.framework.log;version="1.1",
