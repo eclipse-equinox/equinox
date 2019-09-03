@@ -19,9 +19,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -102,12 +102,12 @@ public class ManifestElement {
 	/**
 	 * The table of attributes for the manifest element.
 	 */
-	private Hashtable<String, Object> attributes;
+	private HashMap<String, Object> attributes;
 
 	/**
 	 * The table of directives for the manifest element.
 	 */
-	private Hashtable<String, Object> directives;
+	private HashMap<String, Object> directives;
 
 	/**
 	 * Constructs an empty manifest element with no value or attributes.
@@ -260,12 +260,14 @@ public class ManifestElement {
 	/*
 	 * Return the last value associated with the given key in the specified table.
 	 */
-	private String getTableValue(Hashtable<String, Object> table, String key) {
-		if (table == null)
+	private String getTableValue(HashMap<String, Object> table, String key) {
+		if (table == null) {
 			return null;
+		}
 		Object result = table.get(key);
-		if (result == null)
+		if (result == null) {
 			return null;
+		}
 		if (result instanceof String)
 			return (String) result;
 
@@ -278,12 +280,14 @@ public class ManifestElement {
 	/*
 	 * Return the values associated with the given key in the specified table.
 	 */
-	private String[] getTableValues(Hashtable<String, Object> table, String key) {
-		if (table == null)
+	private String[] getTableValues(HashMap<String, Object> table, String key) {
+		if (table == null) {
 			return null;
+		}
 		Object result = table.get(key);
-		if (result == null)
+		if (result == null) {
 			return null;
+		}
 		if (result instanceof String)
 			return new String[] {(String) result};
 		@SuppressWarnings("unchecked")
@@ -294,10 +298,10 @@ public class ManifestElement {
 	/*
 	 * Return an enumeration of table keys for the specified table. 
 	 */
-	private Enumeration<String> getTableKeys(Hashtable<String, Object> table) {
+	private Enumeration<String> getTableKeys(HashMap<String, Object> table) {
 		if (table == null)
 			return null;
-		return table.keys();
+		return Collections.enumeration(table.keySet());
 	}
 
 	/*
@@ -306,9 +310,9 @@ public class ManifestElement {
 	 * append the new value to the end of the list.
 	 */
 	@SuppressWarnings("unchecked")
-	private Hashtable<String, Object> addTableValue(Hashtable<String, Object> table, String key, String value) {
+	private HashMap<String, Object> addTableValue(HashMap<String, Object> table, String key, String value) {
 		if (table == null) {
-			table = new Hashtable<>(7);
+			table = new HashMap<>(7);
 		}
 		Object curValue = table.get(key);
 		if (curValue != null) {
