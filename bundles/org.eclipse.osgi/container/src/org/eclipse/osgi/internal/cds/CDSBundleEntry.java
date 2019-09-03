@@ -31,21 +31,29 @@ import org.eclipse.osgi.storage.bundlefile.BundleEntry;
  * A bundle entry for a class that is found in the shared classes cache
  */
 public class CDSBundleEntry extends BundleEntry {
-	String path;
-	byte[] classbytes;
-	BundleEntry wrapped;
+	final String path;
+	final byte[] classbytes;
+	final CDSBundleFile bundleFile;
 
 	/**
 	 * The constructor
 	 * @param path the path to the class file
 	 * @param classbytes the magic cookie bytes for the class in the shared cache
-	 * @param wrapped the actual bundleEntry where the class comes from
+	 * @param bundleFile the bundle file where the class comes from
 	 */
-	public CDSBundleEntry(String path, byte[] classbytes, BundleEntry wrapped) {
+	public CDSBundleEntry(String path, byte[] classbytes, CDSBundleFile bundleFile) {
 		super();
 		this.path = path;
 		this.classbytes = classbytes;
-		this.wrapped = wrapped;
+		this.bundleFile = bundleFile;
+	}
+
+	private BundleEntry getEntry() {
+		BundleEntry entry = bundleFile.getEntry(path);
+		if (entry == null) {
+			throw new IllegalStateException("Could not find original entry for the class: " + path); //$NON-NLS-1$
+		}
+		return entry;
 	}
 
 	/*
@@ -58,7 +66,7 @@ public class CDSBundleEntry extends BundleEntry {
 	 */
 	@Override
 	public URL getFileURL() {
-		return wrapped.getFileURL();
+		return getEntry().getFileURL();
 	}
 
 	/*
@@ -71,7 +79,7 @@ public class CDSBundleEntry extends BundleEntry {
 	public InputStream getInputStream() throws IOException {
 		// someone is trying to get the real bytes of the class file!!
 		// just return the entry from the wrapped file instead of the magic cookie
-		return wrapped.getInputStream();
+		return getEntry().getInputStream();
 	}
 
 	/*
@@ -83,9 +91,6 @@ public class CDSBundleEntry extends BundleEntry {
 	 */
 	@Override
 	public byte[] getBytes() throws IOException {
-		if (classbytes == null) {
-			classbytes = wrapped.getBytes();
-		}
 		return classbytes;
 	}
 
@@ -99,7 +104,7 @@ public class CDSBundleEntry extends BundleEntry {
 	 */
 	@Override
 	public URL getLocalURL() {
-		return wrapped.getLocalURL();
+		return getEntry().getLocalURL();
 	}
 
 	@Override
@@ -109,11 +114,11 @@ public class CDSBundleEntry extends BundleEntry {
 
 	@Override
 	public long getSize() {
-		return wrapped.getSize();
+		return getEntry().getSize();
 	}
 
 	@Override
 	public long getTime() {
-		return wrapped.getTime();
+		return getEntry().getTime();
 	}
 }

@@ -35,7 +35,7 @@ import org.eclipse.osgi.storage.bundlefile.BundleFileWrapper;
  */
 public class CDSBundleFile extends BundleFileWrapper {
 	private final static String classFileExt = ".class"; //$NON-NLS-1$
-	private URL url; // the URL to the content of the real bundle file
+	private final URL url; // the URL to the content of the real bundle file
 	private SharedClassURLHelper urlHelper; // the url helper set by the classloader
 	private boolean primed = false;
 
@@ -46,11 +46,13 @@ public class CDSBundleFile extends BundleFileWrapper {
 	public CDSBundleFile(BundleFile wrapped) {
 		super(wrapped);
 		// get the url to the content of the real bundle file
+		URL content = null;
 		try {
-			this.url = new URL("file", "", wrapped.getBaseFile().getAbsolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
+			content = new URL("file", "", wrapped.getBaseFile().getAbsolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (MalformedURLException e) {
 			// do nothing
 		}
+		this.url = content;
 	}
 
 	public CDSBundleFile(BundleFile bundleFile, SharedClassURLHelper urlHelper) {
@@ -69,16 +71,15 @@ public class CDSBundleFile extends BundleFileWrapper {
 	 */
 	@Override
 	public BundleEntry getEntry(String path) {
-		BundleEntry wrappedEntry = super.getEntry(path);
-		if (wrappedEntry == null) {
-			return null;
-		}
 		if (!primed || !path.endsWith(classFileExt)) {
-			return wrappedEntry;
+			return super.getEntry(path);
+		}
+		byte[] classbytes = getClassBytes(path.substring(0, path.length() - classFileExt.length()));
+		if (classbytes == null) {
+			return super.getEntry(path);
 		}
 
-		byte[] classbytes = getClassBytes(path.substring(0, path.length() - classFileExt.length()));
-		BundleEntry be = new CDSBundleEntry(path, classbytes, wrappedEntry);
+		BundleEntry be = new CDSBundleEntry(path, classbytes, this);
 		return be;
 	}
 
