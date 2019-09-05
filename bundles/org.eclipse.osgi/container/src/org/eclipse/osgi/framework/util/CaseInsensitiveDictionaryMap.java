@@ -16,7 +16,16 @@ package org.eclipse.osgi.framework.util;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.*;
+import java.util.AbstractSet;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.util.NLS;
 
@@ -178,10 +187,14 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 	public V put(K key, V value) {
 		requireNonNull(value);
 		if (key instanceof String) {
-			Object wrappedKey = keyWrap(((String) key).intern());
-			V previous = map.remove(wrappedKey); // remove so we put key into map
-			map.put(wrappedKey, value);
-			return previous;
+			Object wrappedKey = keyWrap(key);
+			V existing = map.put(wrappedKey, value);
+			if (existing != null) {
+				// must remove to replace key if case has changed
+				map.remove(wrappedKey);
+				map.put(wrappedKey, value);
+			}
+			return existing;
 		}
 		return map.put(requireNonNull(key), value);
 	}
@@ -388,25 +401,33 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 		}
 	}
 
+	static int computeHashCode(String key) {
+		int h = 1;
+		for (char c : key.toCharArray()) {
+			if (c < 0x80) { // ASCII
+				if (c >= 'A' && c <= 'Z') {
+					c += 'a' - 'A'; // convert to ASCII lowercase
+				}
+			} else {
+				c = Character.toLowerCase(Character.toUpperCase(c));
+			}
+			h = 31 * h + c;
+		}
+		return h;
+	}
+
 	private static final class CaseInsensitiveKey {
 		final String key;
-		private transient int hashCode;
+		final private int hashCode;
 
 		CaseInsensitiveKey(String key) {
 			this.key = key;
+			this.hashCode = computeHashCode(key);
 		}
 
 		@Override
 		public int hashCode() {
-			int h = hashCode;
-			if (h != 0) {
-				return h;
-			}
-			h = 1;
-			for (char c : key.toCharArray()) {
-				h = 31 * h + Character.toLowerCase(Character.toUpperCase(c));
-			}
-			return hashCode = h;
+			return hashCode;
 		}
 
 		@Override

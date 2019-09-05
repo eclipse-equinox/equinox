@@ -524,7 +524,8 @@ public class ManifestElement {
 				}
 				String header = line.substring(0, colon).trim();
 				String value = line.substring(colon + 1).trim();
-				headers.put(header, value);
+				// intern the header here because they likely have constants for them anyway
+				headers.put(header.intern(), value);
 			}
 		} finally {
 			try {
