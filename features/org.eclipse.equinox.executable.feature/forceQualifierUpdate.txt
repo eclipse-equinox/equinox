@@ -9,3 +9,4 @@ Bug 492013 - comparator error in I20160419-0800 related to launcher feature
 Bug 494151 - Eclipse crashes after displaying splash screen with java.lang.NoClassDefFoundError
 Bug 506597 - Build failure on I20161026-2000
 Bug 550714 - Comparator errors in I20190903-1110
+Bug 550674 - Specify hardened runtime for Mac app signing
