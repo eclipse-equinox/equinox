@@ -175,7 +175,7 @@ public final class StandardRegionDigraphPersistence implements RegionDigraphPers
 					namespaceFilters = new ArrayList<>(numFilters);
 					filters.put(namespace, namespaceFilters);
 				}
-				namespaceFilters.add(FrameworkUtil.createFilter(filter));
+				namespaceFilters.add(StandardRegionFilterBuilder.createFilter(filter));
 			}
 		}
 		digraph.connect(tail, new StandardRegionFilter(filters), head);

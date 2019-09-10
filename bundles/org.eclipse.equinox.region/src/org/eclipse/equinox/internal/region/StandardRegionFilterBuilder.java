@@ -46,7 +46,7 @@ public final class StandardRegionFilterBuilder implements RegionFilterBuilder {
 		return this;
 	}
 
-	public Filter createFilter(String spec) throws InvalidSyntaxException {
+	public static Filter createFilter(String spec) throws InvalidSyntaxException {
 		// TODO need to use BundleContext.createFilter here
 		Filter filter = FrameworkUtil.createFilter(spec);
 		return (StandardRegionFilter.ALL.equals(filter)) ? StandardRegionFilter.ALL : filter;
@@ -73,8 +73,8 @@ public final class StandardRegionFilterBuilder implements RegionFilterBuilder {
 	private Collection<Filter> getNamespaceFilters(String namespace) {
 		Collection<Filter> namespaceFilters = policy.get(namespace);
 		if (namespaceFilters == null) {
-				// use set to avoid duplicates
-				namespaceFilters = new LinkedHashSet<Filter>();
+			// use set to avoid duplicates
+			namespaceFilters = new LinkedHashSet<Filter>();
 			policy.put(namespace, namespaceFilters);
 		}
 		return namespaceFilters;
