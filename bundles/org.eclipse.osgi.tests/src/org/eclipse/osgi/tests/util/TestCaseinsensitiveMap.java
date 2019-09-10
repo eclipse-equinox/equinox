@@ -38,9 +38,11 @@ public class TestCaseinsensitiveMap extends CoreTest {
 			"jmx.objectname", //$NON-NLS-1$
 
 			// common bundle manifest headers
+			"Manifest-Version", // $NON-NLS-1$
 			Constants.BUNDLE_ACTIVATIONPOLICY, //
 			Constants.BUNDLE_ACTIVATOR, //
 			Constants.BUNDLE_CLASSPATH, //
+			Constants.BUNDLE_DESCRIPTION, //
 			Constants.BUNDLE_LICENSE, //
 			Constants.BUNDLE_LOCALIZATION, //
 			Constants.BUNDLE_MANIFESTVERSION, //
@@ -51,11 +53,13 @@ public class TestCaseinsensitiveMap extends CoreTest {
 			Constants.BUNDLE_SYMBOLICNAME, //
 			Constants.BUNDLE_VENDOR, //
 			Constants.BUNDLE_VERSION, //
+			Constants.DYNAMICIMPORT_PACKAGE, //
 			Constants.EXPORT_PACKAGE, //
 			Constants.FRAGMENT_HOST, //
 			Constants.IMPORT_PACKAGE, //
 			Constants.REQUIRE_BUNDLE, //
-			Constants.REQUIRE_CAPABILITY //
+			Constants.REQUIRE_CAPABILITY, //
+			Constants.PROVIDE_CAPABILITY //
 	};
 
 	String[] OTHER_KEY_NAMES = new String[] {"test.key0", //
@@ -70,8 +74,8 @@ public class TestCaseinsensitiveMap extends CoreTest {
 			"test.key9" //
 	};
 
-	private static final String VALUE1 = "test value1";
-	private static final String VALUE2 = "test value2";
+	private static final String VALUE1 = "-VALUE1";
+	private static final String VALUE2 = "-VALUE2";
 
 	public void testCommonKeys() {
 		testKeys(COMMON_KEY_NAMES);
@@ -85,8 +89,8 @@ public class TestCaseinsensitiveMap extends CoreTest {
 		Map<String, Object> testMap = new CaseInsensitiveDictionaryMap<>();
 		// first put a value in for all common keys
 		for (String key : keys) {
-			testMap.put(key, VALUE1);
-			assertEquals("Wrong value found.", VALUE1, testMap.get(key));
+			testMap.put(key, key + VALUE1);
+			assertEquals("Wrong value found.", key + VALUE1, testMap.get(key));
 		}
 
 		Set<String> upperKeys = new HashSet<>();
@@ -94,16 +98,16 @@ public class TestCaseinsensitiveMap extends CoreTest {
 			// now upper case all keys
 			String upperKey = key.toUpperCase();
 			upperKeys.add(upperKey);
-			assertEquals("Wrong value found.", VALUE1, testMap.get(upperKey));
+			assertEquals("Wrong value found.", key + VALUE1, testMap.get(upperKey));
 			// replace with value2 using upper case
-			assertEquals("Wrong value found.", VALUE1, testMap.put(upperKey, VALUE2));
+			assertEquals("Wrong value found.", key + VALUE1, testMap.put(upperKey, key + VALUE2));
 			// both original key and upper case key should give same value
-			assertEquals("Wrong value found.", VALUE2, testMap.get(key));
-			assertEquals("Wrong value found.", VALUE2, testMap.get(upperKey));
+			assertEquals("Wrong value found.", key + VALUE2, testMap.get(key));
+			assertEquals("Wrong value found.", key + VALUE2, testMap.get(upperKey));
 		}
 
 		Set<String> currentKeys = testMap.keySet();
 		assertEquals("Wrong number of keys.", upperKeys.size(), currentKeys.size());
-		assertTrue("Wrong keys found: " + currentKeys, upperKeys.containsAll(upperKeys));
+		assertTrue("Wrong keys found: " + currentKeys, upperKeys.containsAll(currentKeys));
 	}
 }

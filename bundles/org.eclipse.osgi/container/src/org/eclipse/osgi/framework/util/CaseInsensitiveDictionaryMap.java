@@ -28,6 +28,7 @@ import java.util.Objects;
 import java.util.Set;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.util.NLS;
+import org.osgi.framework.Constants;
 
 /**
  * CaseInsensitiveDictionaryMap classes. This class implements Dictionary and Map with
@@ -40,6 +41,151 @@ import org.eclipse.osgi.util.NLS;
  * @since 3.13
  */
 public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> implements Map<K, V> {
+	// common core service property keys
+	private static final CaseInsensitiveKey KEY_SERVICE_OBJECTCLASS = new CaseInsensitiveKey(Constants.OBJECTCLASS);
+	private static final CaseInsensitiveKey KEY_SERVICE_BUNDLE_ID = new CaseInsensitiveKey(Constants.SERVICE_BUNDLEID);
+	private static final CaseInsensitiveKey KEY_SERVICE_CHANGECOUNT = new CaseInsensitiveKey(Constants.SERVICE_CHANGECOUNT);
+	private static final CaseInsensitiveKey KEY_SERVICE_DESCRIPTION = new CaseInsensitiveKey(Constants.SERVICE_DESCRIPTION);
+	private static final CaseInsensitiveKey KEY_SERVICE_ID = new CaseInsensitiveKey(Constants.SERVICE_ID);
+	private static final CaseInsensitiveKey KEY_SERVICE_PID = new CaseInsensitiveKey(Constants.SERVICE_PID);
+	private static final CaseInsensitiveKey KEY_SERVICE_RANKING = new CaseInsensitiveKey(Constants.SERVICE_RANKING);
+	private static final CaseInsensitiveKey KEY_SERVICE_SCOPE = new CaseInsensitiveKey(Constants.SERVICE_SCOPE);
+	private static final CaseInsensitiveKey KEY_SERVICE_VENDER = new CaseInsensitiveKey(Constants.SERVICE_VENDOR);
+
+	// common SCR service property keys
+	private static final CaseInsensitiveKey KEY_COMPONENT_NAME = new CaseInsensitiveKey("component.name"); //$NON-NLS-1$
+	private static final CaseInsensitiveKey KEY_COMPONENT_ID = new CaseInsensitiveKey("component.id"); //$NON-NLS-1$
+
+	// common meta-type property keys
+	private static final CaseInsensitiveKey KEY_METATYPE_PID = new CaseInsensitiveKey("metatype.pid"); //$NON-NLS-1$
+	private static final CaseInsensitiveKey KEY_METATYPE_FACTORY_PID = new CaseInsensitiveKey("metatype.factory.pid"); //$NON-NLS-1$
+
+	// common event admin keys
+	private static final CaseInsensitiveKey KEY_EVENT_TOPICS = new CaseInsensitiveKey("event.topics"); //$NON-NLS-1$
+	private static final CaseInsensitiveKey KEY_EVENT_FILTER = new CaseInsensitiveKey("event.filter"); //$NON-NLS-1$
+
+	// jmx keys
+	private static final CaseInsensitiveKey KEY_JMX_OBJECTNAME = new CaseInsensitiveKey("jmx.objectname"); //$NON-NLS-1$
+
+	// common bundle manifest headers
+	private static final CaseInsensitiveKey KEY_JAR_MANIFESTVERSION = new CaseInsensitiveKey("Manifest-Version"); //$NON-NLS-1$
+	private static final CaseInsensitiveKey KEY_BUNDLE_ACTIVATIONPOLICY = new CaseInsensitiveKey(Constants.BUNDLE_ACTIVATIONPOLICY);
+	private static final CaseInsensitiveKey KEY_BUNDLE_ACTIVATOR = new CaseInsensitiveKey(Constants.BUNDLE_ACTIVATOR);
+	private static final CaseInsensitiveKey KEY_BUNDLE_CLASSPATH = new CaseInsensitiveKey(Constants.BUNDLE_CLASSPATH);
+	private static final CaseInsensitiveKey KEY_BUNDLE_DESCRIPTION = new CaseInsensitiveKey(Constants.BUNDLE_DESCRIPTION);
+	private static final CaseInsensitiveKey KEY_BUNDLE_LICENSE = new CaseInsensitiveKey(Constants.BUNDLE_LICENSE);
+	private static final CaseInsensitiveKey KEY_BUNDLE_LOCALIZATION = new CaseInsensitiveKey(Constants.BUNDLE_LOCALIZATION);
+	private static final CaseInsensitiveKey KEY_BUNDLE_MANIFESTVERSION = new CaseInsensitiveKey(Constants.BUNDLE_MANIFESTVERSION);
+	private static final CaseInsensitiveKey KEY_BUNDLE_NAME = new CaseInsensitiveKey(Constants.BUNDLE_NAME);
+	private static final CaseInsensitiveKey KEY_BUNDLE_NATIVECODE = new CaseInsensitiveKey(Constants.BUNDLE_NATIVECODE);
+	@SuppressWarnings("deprecation")
+	private static final CaseInsensitiveKey KEY_BUNDLE_REQUIREDEXECUTIONENVIRONMENT = new CaseInsensitiveKey(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT);
+	private static final CaseInsensitiveKey KEY_BUNDLE_SCM = new CaseInsensitiveKey(Constants.BUNDLE_SCM);
+	private static final CaseInsensitiveKey KEY_BUNDLE_SYMBOLICNAME = new CaseInsensitiveKey(Constants.BUNDLE_SYMBOLICNAME);
+	private static final CaseInsensitiveKey KEY_BUNDLE_VENDOR = new CaseInsensitiveKey(Constants.BUNDLE_VENDOR);
+	private static final CaseInsensitiveKey KEY_BUNDLE_VERSION = new CaseInsensitiveKey(Constants.BUNDLE_VERSION);
+	private static final CaseInsensitiveKey KEY_BUNDLE_DYNAMICIMPORT_PACKAGE = new CaseInsensitiveKey(Constants.DYNAMICIMPORT_PACKAGE);
+	private static final CaseInsensitiveKey KEY_BUNDLE_EXPORT_PACKAGE = new CaseInsensitiveKey(Constants.EXPORT_PACKAGE);
+	private static final CaseInsensitiveKey KEY_BUNDLE_FRAGMENT_HOST = new CaseInsensitiveKey(Constants.FRAGMENT_HOST);
+	private static final CaseInsensitiveKey KEY_BUNDLE_IMPORT_PACKAGE = new CaseInsensitiveKey(Constants.IMPORT_PACKAGE);
+	private static final CaseInsensitiveKey KEY_BUNDLE_REQUIRE_BUNDLE = new CaseInsensitiveKey(Constants.REQUIRE_BUNDLE);
+	private static final CaseInsensitiveKey KEY_BUNDLE_REQUIRE_CAPABILITY = new CaseInsensitiveKey(Constants.REQUIRE_CAPABILITY);
+	private static final CaseInsensitiveKey KEY_BUNDLE_PROVIDE_CAPABILITY = new CaseInsensitiveKey(Constants.PROVIDE_CAPABILITY);
+
+	@SuppressWarnings("deprecation")
+	public static CaseInsensitiveKey findCommonKeyIndex(String key) {
+		switch (key) {
+			// common core service property keys
+			case Constants.OBJECTCLASS :
+				return KEY_SERVICE_OBJECTCLASS;
+			case Constants.SERVICE_BUNDLEID :
+				return KEY_SERVICE_BUNDLE_ID;
+			case Constants.SERVICE_CHANGECOUNT :
+				return KEY_SERVICE_CHANGECOUNT;
+			case Constants.SERVICE_DESCRIPTION :
+				return KEY_SERVICE_DESCRIPTION;
+			case Constants.SERVICE_ID :
+				return KEY_SERVICE_ID;
+			case Constants.SERVICE_PID :
+				return KEY_SERVICE_PID;
+			case Constants.SERVICE_RANKING :
+				return KEY_SERVICE_RANKING;
+			case Constants.SERVICE_SCOPE :
+				return KEY_SERVICE_SCOPE;
+			case Constants.SERVICE_VENDOR :
+				return KEY_SERVICE_VENDER;
+
+			// common SCR service property keys
+			case "component.name" : //$NON-NLS-1$
+				return KEY_COMPONENT_NAME;
+			case "component.id" : //$NON-NLS-1$
+				return KEY_COMPONENT_ID;
+
+			// common meta-type property keys
+			case "metatype.pid" : //$NON-NLS-1$
+				return KEY_METATYPE_PID;
+			case "metatype.factory.pid" : //$NON-NLS-1$
+				return KEY_METATYPE_FACTORY_PID;
+
+			// common event admin keys
+			case "event.topics" : //$NON-NLS-1$
+				return KEY_EVENT_TOPICS;
+			case "event.filter" : //$NON-NLS-1$
+				return KEY_EVENT_FILTER;
+
+			// jmx keys
+			case "jmx.objectname" : //$NON-NLS-1$
+				return KEY_JMX_OBJECTNAME;
+
+			// common bundle manifest headers
+			case "Manifest-Version" : //$NON-NLS-1$
+				return KEY_JAR_MANIFESTVERSION;
+			case Constants.BUNDLE_ACTIVATIONPOLICY :
+				return KEY_BUNDLE_ACTIVATIONPOLICY;
+			case Constants.BUNDLE_ACTIVATOR :
+				return KEY_BUNDLE_ACTIVATOR;
+			case Constants.BUNDLE_CLASSPATH :
+				return KEY_BUNDLE_CLASSPATH;
+			case Constants.BUNDLE_DESCRIPTION :
+				return KEY_BUNDLE_DESCRIPTION;
+			case Constants.BUNDLE_LICENSE :
+				return KEY_BUNDLE_LICENSE;
+			case Constants.BUNDLE_LOCALIZATION :
+				return KEY_BUNDLE_LOCALIZATION;
+			case Constants.BUNDLE_MANIFESTVERSION :
+				return KEY_BUNDLE_MANIFESTVERSION;
+			case Constants.BUNDLE_NAME :
+				return KEY_BUNDLE_NAME;
+			case Constants.BUNDLE_NATIVECODE :
+				return KEY_BUNDLE_NATIVECODE;
+			case Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT :
+				return KEY_BUNDLE_REQUIREDEXECUTIONENVIRONMENT;
+			case Constants.BUNDLE_SCM :
+				return KEY_BUNDLE_SCM;
+			case Constants.BUNDLE_SYMBOLICNAME :
+				return KEY_BUNDLE_SYMBOLICNAME;
+			case Constants.BUNDLE_VENDOR :
+				return KEY_BUNDLE_VENDOR;
+			case Constants.BUNDLE_VERSION :
+				return KEY_BUNDLE_VERSION;
+			case Constants.DYNAMICIMPORT_PACKAGE :
+				return KEY_BUNDLE_DYNAMICIMPORT_PACKAGE;
+			case Constants.EXPORT_PACKAGE :
+				return KEY_BUNDLE_EXPORT_PACKAGE;
+			case Constants.FRAGMENT_HOST :
+				return KEY_BUNDLE_FRAGMENT_HOST;
+			case Constants.IMPORT_PACKAGE :
+				return KEY_BUNDLE_IMPORT_PACKAGE;
+			case Constants.REQUIRE_BUNDLE :
+				return KEY_BUNDLE_REQUIRE_BUNDLE;
+			case Constants.REQUIRE_CAPABILITY :
+				return KEY_BUNDLE_REQUIRE_CAPABILITY;
+			case Constants.PROVIDE_CAPABILITY :
+				return KEY_BUNDLE_PROVIDE_CAPABILITY;
+		}
+		return null;
+	}
+
 	final Map<Object, V> map;
 
 	/**
@@ -155,6 +301,10 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 	 */
 	private Object keyWrap(Object key) {
 		if (key instanceof String) {
+			CaseInsensitiveKey commonKey = findCommonKeyIndex((String) key);
+			if (commonKey != null) {
+				return commonKey;
+			}
 			return new CaseInsensitiveKey((String) key);
 		}
 		return key;
