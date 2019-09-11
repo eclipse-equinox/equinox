@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.equinox.core.sdk"
       label="%featureName"
-      version="3.19.0.qualifier"
+      version="3.19.100.qualifier"
       provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
@@ -244,7 +244,7 @@
          fragment="true"
          unpack="false"/>
 
-    <plugin
+   <plugin
          id="org.eclipse.equinox.security.macosx.source"
          os="macosx"
          download-size="0"
@@ -286,6 +286,7 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
    <plugin
          id="org.eclipse.equinox.log.stream"
          download-size="0"
@@ -299,7 +300,6 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-
 
    <plugin
          id="org.eclipse.equinox.console"
