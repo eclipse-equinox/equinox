@@ -48,8 +48,8 @@ public class CDSBundleEntry extends BundleEntry {
 		this.bundleFile = bundleFile;
 	}
 
-	private BundleEntry getEntry() {
-		BundleEntry entry = bundleFile.getEntry(path);
+	private BundleEntry getWrappedEntry() {
+		BundleEntry entry = bundleFile.getWrappedEntry(path);
 		if (entry == null) {
 			throw new IllegalStateException("Could not find original entry for the class: " + path); //$NON-NLS-1$
 		}
@@ -66,7 +66,7 @@ public class CDSBundleEntry extends BundleEntry {
 	 */
 	@Override
 	public URL getFileURL() {
-		return getEntry().getFileURL();
+		return getWrappedEntry().getFileURL();
 	}
 
 	/*
@@ -79,7 +79,7 @@ public class CDSBundleEntry extends BundleEntry {
 	public InputStream getInputStream() throws IOException {
 		// someone is trying to get the real bytes of the class file!!
 		// just return the entry from the wrapped file instead of the magic cookie
-		return getEntry().getInputStream();
+		return getWrappedEntry().getInputStream();
 	}
 
 	/*
@@ -104,7 +104,7 @@ public class CDSBundleEntry extends BundleEntry {
 	 */
 	@Override
 	public URL getLocalURL() {
-		return getEntry().getLocalURL();
+		return getWrappedEntry().getLocalURL();
 	}
 
 	@Override
@@ -114,11 +114,11 @@ public class CDSBundleEntry extends BundleEntry {
 
 	@Override
 	public long getSize() {
-		return getEntry().getSize();
+		return getWrappedEntry().getSize();
 	}
 
 	@Override
 	public long getTime() {
-		return getEntry().getTime();
+		return getWrappedEntry().getTime();
 	}
 }

@@ -83,6 +83,10 @@ public class CDSBundleFile extends BundleFileWrapper {
 		return be;
 	}
 
+	BundleEntry getWrappedEntry(String path) {
+		return super.getEntry(path);
+	}
+
 	/**
 	 * Returns the file url to the content of the actual bundle file 
 	 * @return the file url to the content of the actual bundle file
