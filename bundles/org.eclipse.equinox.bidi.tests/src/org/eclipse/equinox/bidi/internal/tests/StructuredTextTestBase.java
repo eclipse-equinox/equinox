@@ -99,7 +99,7 @@ public class StructuredTextTestBase {
 		if (array == null) {
 			return "null";
 		}
-		StringBuffer sb = new StringBuffer(50);
+		StringBuilder sb = new StringBuilder(50);
 		int len = array.length;
 		for (int i = 0; i < len; i++) {
 			sb.append(array[i]);

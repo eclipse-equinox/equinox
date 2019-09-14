@@ -277,7 +277,7 @@ public class TabPassword {
 		if (!providerModified)
 			return;
 		// save current selection
-		StringBuffer tmp = new StringBuffer();
+		StringBuilder tmp = new StringBuilder();
 		boolean first = true;
 		TableItem[] items = providerTable.getItems();
 		for (TableItem item : items) {

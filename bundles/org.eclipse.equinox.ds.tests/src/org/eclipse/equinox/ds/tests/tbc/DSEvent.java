@@ -88,7 +88,7 @@ public class DSEvent implements Comparable {
   
   @Override
   public String toString() {
-    StringBuffer buf = new StringBuffer("DSEvent[");
+    StringBuilder buf = new StringBuilder("DSEvent[");
     buf.append("time=" + this.time + ";action=");
     buf.append(getActionAsString());
     buf.append(";object=" + (this.object != null ? this.object.toString() : "null"));

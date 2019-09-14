@@ -407,7 +407,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 		long num1 = rand.nextInt(10000);
 		long num2 = rand.nextInt(10000);
 
-		StringBuffer tmp = new StringBuffer();
+		StringBuilder tmp = new StringBuilder();
 		tmp.append(num1);
 		tmp.append('\t');
 		tmp.append(num2);

@@ -39,7 +39,7 @@ public class ValueTokenizer {
 		// whitespace characters. Whitespace between two non-whitespace
 		// characters may or may not be escaped. Also, any character may be
 		// escaped. The escape character is '\'. The delimiter is ','.
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		// Loop over the characters within the input string and extract each
 		// value token.
 		for (int i = 0; i < values_str.length(); i++) {
@@ -136,7 +136,7 @@ public class ValueTokenizer {
 		if (values.size() == 1) {
 			return values.get(0);
 		}
-		StringBuffer buffer = new StringBuffer(values.get(0));
+		StringBuilder buffer = new StringBuilder(values.get(0));
 		for (int i = 1; i < values.size(); i++) {
 			buffer.append(',');
 			buffer.append(values.get(i));

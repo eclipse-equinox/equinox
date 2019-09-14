@@ -71,7 +71,7 @@ public class ExportedPreferences extends EclipsePreferences implements IExported
 	 */
 	@Override
 	public String toString() {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		if (isExportRoot)
 			buffer.append("* "); //$NON-NLS-1$
 		buffer.append(absolutePath());

@@ -281,7 +281,7 @@ public abstract class ImmutableMap implements Cloneable {
 
 	@Override
 	public String toString() {
-		StringBuffer s = new StringBuffer();
+		StringBuilder s = new StringBuilder();
 		String[] keys = keys();
 		for (int i = 0, length = keys.length; i < length; i++)
 			s.append(keys[i]).append(" -> ").append(get(keys[i])).append("\n"); //$NON-NLS-2$ //$NON-NLS-1$

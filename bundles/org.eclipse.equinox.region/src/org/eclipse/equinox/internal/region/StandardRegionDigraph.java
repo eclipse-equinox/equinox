@@ -323,7 +323,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	@Override
 	public String toString() {
 		synchronized (this.monitor) {
-			StringBuffer s = new StringBuffer();
+			StringBuilder s = new StringBuilder();
 			boolean first = true;
 			s.append("RegionDigraph{"); //$NON-NLS-1$
 			for (Region r : this) {

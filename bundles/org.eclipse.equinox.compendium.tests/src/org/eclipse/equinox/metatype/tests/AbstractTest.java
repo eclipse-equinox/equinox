@@ -111,7 +111,7 @@ public abstract class AbstractTest {
 		if (value == null || value.length() == 0) {
 			return value;
 		}
-		StringBuffer result = new StringBuffer(value.length() + 20);
+		StringBuilder result = new StringBuilder(value.length() + 20);
 		for (int i = 0; i < value.length(); i++) {
 			char c = value.charAt(i);
 			if (c == ',' || c == '\\' || Character.isWhitespace(c)) {

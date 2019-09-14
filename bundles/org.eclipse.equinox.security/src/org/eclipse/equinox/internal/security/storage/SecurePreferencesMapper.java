@@ -180,7 +180,7 @@ public class SecurePreferencesMapper {
 		BufferedReader is = null;
 		try {
 			is = new BufferedReader(new FileReader(file));
-			StringBuffer buffer = new StringBuffer();
+			StringBuilder buffer = new StringBuilder();
 			for (;;) { // this eliminates new line characters but that's fine
 				String tmp = is.readLine();
 				if (tmp == null)

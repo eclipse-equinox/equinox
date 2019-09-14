@@ -118,7 +118,7 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 			elements.add(sigAlgoItem);
 
 			boolean keyUsagesArray[] = theCert.getKeyUsage();
-			StringBuffer keyUsages = new StringBuffer();
+			StringBuilder keyUsages = new StringBuilder();
 			//
 			//  Only set the string field, If we got some data
 			if (keyUsagesArray != null && keyUsagesArray.length > 0) {
@@ -158,7 +158,7 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 			}
 			int basicCnstrnts = theCert.getBasicConstraints();
 			Integer basicConstraint = Integer.valueOf(basicCnstrnts);
-			StringBuffer basicCnstrntsBfr = new StringBuffer();
+			StringBuilder basicCnstrntsBfr = new StringBuilder();
 			if (basicCnstrnts == -1) {
 				// Not a CA
 				basicCnstrntsBfr.append(SecurityUIMsg.LABEL_NAMECONSTRAINTS_NOTCA + listDelim);
@@ -178,7 +178,7 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 			List<String> exKeyUsg;
 			try {
 				exKeyUsg = theCert.getExtendedKeyUsage();
-				StringBuffer exKeyUsgBfr = new StringBuffer();
+				StringBuilder exKeyUsgBfr = new StringBuilder();
 				if (exKeyUsg != null && exKeyUsg.size() > 0) {
 					for (Iterator<String> exKeyUsgIter = exKeyUsg.iterator(); exKeyUsgIter.hasNext();) {
 						exKeyUsgBfr.append((exKeyUsgIter.next()) + listDelim);

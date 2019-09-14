@@ -241,7 +241,7 @@ public class SshCommand {
 	}
 	
 	private void printHelp() {
-		StringBuffer help = new StringBuffer();
+		StringBuilder help = new StringBuilder();
 		help.append("ssh - start simple ssh server");
 		help.append("\n");
 		help.append("Usage: ssh start | stop [-port port] [-host host]");

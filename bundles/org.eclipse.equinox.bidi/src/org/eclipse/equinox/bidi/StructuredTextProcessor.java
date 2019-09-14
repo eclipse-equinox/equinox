@@ -180,7 +180,7 @@ public final class StructuredTextProcessor {
 		if ((str == null) || (str.length() <= 1))
 			return str;
 
-		StringBuffer buf = new StringBuffer();
+		StringBuilder buf = new StringBuilder();
 		int strLen = str.length();
 		for (int i = 0; i < strLen; i++) {
 			char c = str.charAt(i);

@@ -79,7 +79,7 @@ public class ServletRequestAdvisor extends Object {
 	}
 
 	private String createUrlSpec(String value, boolean isHttps) {
-		StringBuffer buffer = new StringBuffer(100);
+		StringBuilder buffer = new StringBuilder(100);
 		String protocol = "http://"; //$NON-NLS-1$
 		if (isHttps) {
 			protocol = "https://";
@@ -104,7 +104,7 @@ public class ServletRequestAdvisor extends Object {
 
 	private String drain(InputStream stream) throws IOException {
 		byte[] bytes = new byte[100];
-		StringBuffer buffer = new StringBuffer(500);
+		StringBuilder buffer = new StringBuilder(500);
 		int length;
 		while ((length = stream.read(bytes)) != -1) {
 			String chunk = new String(bytes, 0, length);

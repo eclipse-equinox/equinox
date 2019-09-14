@@ -152,12 +152,12 @@ public class PasswordManagement {
 	 */
 	static private String mashPassword(String[] answers) {
 		// form a string composing answers
-		StringBuffer tmp = new StringBuffer();
+		StringBuilder tmp = new StringBuilder();
 		for (String answer : answers) {
 			tmp.append(answer.trim());
 		}
 		// mix it up
-		StringBuffer mix = new StringBuffer();
+		StringBuilder mix = new StringBuilder();
 		int pos = tmp.length() - 1;
 		for (int i = 0; i <= pos; i++) {
 			mix.append(tmp.charAt(i));
