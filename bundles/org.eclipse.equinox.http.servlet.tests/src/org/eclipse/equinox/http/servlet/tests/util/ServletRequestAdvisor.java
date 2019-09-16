@@ -16,6 +16,7 @@ package org.eclipse.equinox.http.servlet.tests.util;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,6 +27,7 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,21 +51,31 @@ public class ServletRequestAdvisor extends Object {
 	private final String port;
 	private final String ksPath;
 	private final String ksPassword;
+	private final int timeout;
 
 	public ServletRequestAdvisor(String port, String contextPath) {
-		this(port, contextPath, null, null);
+		this(port, contextPath, null, null, 150);
 	}
-	
+
+	public ServletRequestAdvisor(String port, String contextPath, int timeout) {
+		this(port, contextPath, null, null, timeout);
+	}
+
 	public ServletRequestAdvisor(String port, String contextPath, String ksPath, String ksPassword) {
+		this(port, contextPath, ksPath, ksPassword, 150);
+	}
+
+	public ServletRequestAdvisor(String port, String contextPath, String ksPath, String ksPassword, int timeout) {
 		super();
 		if (port == null)
-		 {
+		{
 			throw new IllegalArgumentException("port must not be null"); //$NON-NLS-1$
 		}
 		this.port = port;
 		this.contextPath = contextPath;
 		this.ksPath = ksPath;
 		this.ksPassword = ksPassword;
+		this.timeout = timeout * 100000;
 	}
 
 	private String createUrlSpec(String value, boolean isHttps) {
@@ -83,13 +95,13 @@ public class ServletRequestAdvisor extends Object {
 			buffer.append(value);
 		}
 		return buffer.toString();
-		
+
 	}
 
 	private String createUrlSpec(String value) {
 		return createUrlSpec(value, false);
 	}
-	
+
 	private String drain(InputStream stream) throws IOException {
 		byte[] bytes = new byte[100];
 		StringBuffer buffer = new StringBuffer(500);
@@ -114,8 +126,8 @@ public class ServletRequestAdvisor extends Object {
 		HttpURLConnection connection = (HttpURLConnection)url.openConnection();
 
 		connection.setInstanceFollowRedirects(false);
-		connection.setConnectTimeout(150 * 100000);
-		connection.setReadTimeout(150 * 100000);
+		connection.setConnectTimeout(timeout);
+		connection.setReadTimeout(timeout);
 		connection.connect();
 
 		InputStream stream = connection.getInputStream();
@@ -125,30 +137,30 @@ public class ServletRequestAdvisor extends Object {
 			stream.close();
 		}
 	}
-	
+
 	public String requestHttps(String value) throws Exception {
 		String spec = createUrlSpec(value, true);
 		log("Requesting " + spec); //$NON-NLS-1$
 		URL url = new URL(spec);
 		SSLContext sslContext = SSLContext.getInstance("SSL");
 		initializeSSLContext(sslContext, ksPath, ksPassword);
-		
+
 		HttpsURLConnection httpsConn = (HttpsURLConnection)url.openConnection();
 		httpsConn.setSSLSocketFactory(sslContext.getSocketFactory());
 		httpsConn.setRequestMethod("GET");
 		httpsConn.setDoOutput(false);
 		httpsConn.setDoInput(true);
-		httpsConn.setConnectTimeout(150 * 1000);
-		httpsConn.setReadTimeout(150 * 1000);
+		httpsConn.setConnectTimeout(timeout);
+		httpsConn.setReadTimeout(timeout);
 		httpsConn.connect();
-		
+
 		assertEquals("Request to the url " + spec + " was not successful", 200 , httpsConn.getResponseCode());
 		InputStream stream = httpsConn.getInputStream();
 		try {
 			return drain(stream);
 		} finally {
 			stream.close();
-		}	
+		}
 	}
 
 	private void initializeSSLContext(SSLContext sslContext, String ksPath, String ksPassword) throws Exception {
@@ -162,15 +174,15 @@ public class ServletRequestAdvisor extends Object {
 				keyStore.load(ksStream, ksPassword.toCharArray());
 				kmFactory.init(keyStore, ksPassword.toCharArray());
 				keyManagers = kmFactory.getKeyManagers();
-			}          
+			}
 		}
-		
+
 		TrustManager[] trustManagers = getTrustManager();
-		
-		sslContext.init(keyManagers, trustManagers, null);  
-		
+
+		sslContext.init(keyManagers, trustManagers, null);
+
 	}
-	
+
 	private TrustManager[] getTrustManager() {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 			@Override
@@ -180,11 +192,11 @@ public class ServletRequestAdvisor extends Object {
 
 			@Override
 			public void checkClientTrusted(
-										   java.security.cert.X509Certificate[] certs, String authType) {}
+										java.security.cert.X509Certificate[] certs, String authType) {}
 
 			@Override
 			public void checkServerTrusted(
-										   java.security.cert.X509Certificate[] certs, String authType) {}
+										java.security.cert.X509Certificate[] certs, String authType) {}
 		} };
 
 		return trustAllCerts;
@@ -197,8 +209,8 @@ public class ServletRequestAdvisor extends Object {
 		HttpURLConnection connection = (HttpURLConnection)url.openConnection();
 
 		connection.setInstanceFollowRedirects(false);
-		connection.setConnectTimeout(150 * 1000);
-		connection.setReadTimeout(150 * 1000);
+		connection.setConnectTimeout(timeout);
+		connection.setReadTimeout(timeout);
 
 		if (headers != null) {
 			for(Map.Entry<String, List<String>> entry : headers.entrySet()) {
@@ -240,8 +252,8 @@ public class ServletRequestAdvisor extends Object {
 		connection.setDoOutput(true);
 		//connection.setRequestProperty("Connection", "Close");
 		connection.setInstanceFollowRedirects(false);
-		connection.setConnectTimeout(150 * 1000);
-		connection.setReadTimeout(150 * 1000);
+		connection.setConnectTimeout(timeout);
+		connection.setReadTimeout(timeout);
 
 		if (headers != null) {
 			for(Map.Entry<String, List<String>> entry : headers.entrySet()) {
@@ -277,18 +289,25 @@ public class ServletRequestAdvisor extends Object {
 		HttpURLConnection connection = (HttpURLConnection)url.openConnection();
 
 		connection.setInstanceFollowRedirects(false);
-		connection.setConnectTimeout(150 * 1000);
-		connection.setReadTimeout(150 * 1000);
+		connection.setConnectTimeout(timeout);
+		connection.setReadTimeout(timeout);
+		connection.setUseCaches(false);
 
 		if (headers != null) {
 			if (headers.containsKey("method")) {
-				connection.setRequestMethod((String)headers.remove("method").get(0));
+				String method = (String)headers.remove("method").get(0);
+				connection.setRequestMethod(method);
 			}
 
 			for(Map.Entry<String, List<Object>> entry : headers.entrySet()) {
 				for(Object entryValue : entry.getValue()) {
 					if (entryValue instanceof String) {
-						connection.setRequestProperty(entry.getKey(), (String)entryValue);
+						if (entry.getKey().equals("x-www-form-urlencoded")) {
+							postFormURLEncoded(connection, (String)entryValue);
+						}
+						else {
+							connection.setRequestProperty(entry.getKey(), (String)entryValue);
+						}
 					}
 					else if (entryValue instanceof URL) {
 						uploadFileConnection(connection, entry.getKey(), (URL)entryValue);
@@ -319,6 +338,21 @@ public class ServletRequestAdvisor extends Object {
 			return map;
 		} finally {
 			stream.close();
+		}
+	}
+
+	private void postFormURLEncoded(HttpURLConnection connection, String param)
+		throws IOException {
+
+		byte[] bytes = param.getBytes(StandardCharsets.UTF_8);
+
+		connection.setDoOutput(true);
+		connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		//connection.setRequestProperty("Content-Length", Integer.toString(bytes.length));
+
+		try(DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
+			wr.write(bytes);
+			wr.flush();
 		}
 	}
 

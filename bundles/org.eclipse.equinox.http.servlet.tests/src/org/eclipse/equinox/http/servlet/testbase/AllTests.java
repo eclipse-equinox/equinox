@@ -13,8 +13,9 @@
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.testbase;
 
-import org.eclipse.equinox.http.servlet.tests.ContextHelperCustomizerTests;
 import org.eclipse.equinox.http.servlet.tests.AuthenticationTest;
+import org.eclipse.equinox.http.servlet.tests.Bug500783_Test;
+import org.eclipse.equinox.http.servlet.tests.ContextHelperCustomizerTests;
 import org.eclipse.equinox.http.servlet.tests.DispatchingTest;
 import org.eclipse.equinox.http.servlet.tests.PreprocessorTestCase;
 import org.eclipse.equinox.http.servlet.tests.ServletTest;
@@ -94,7 +95,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	TestHttpServiceAndErrorPage.class,
 	TestHttpServiceAndNamedServlet.class,
 	TestUpload.class,
-	ContextHelperCustomizerTests.class
+	ContextHelperCustomizerTests.class,
+	Bug500783_Test.class
 })
 public class AllTests {
 	// see @SuiteClasses

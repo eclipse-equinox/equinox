@@ -87,7 +87,7 @@ public class BaseTest {
 	@Before
 	public void setUp() throws Exception {
 		// Quiet logging for tests
-		System.setProperty("/.LEVEL", "OFF");
+		System.setProperty("log.LEVEL", "OFF");
 		System.setProperty("org.eclipse.jetty.server.LEVEL", "OFF");
 		System.setProperty("org.eclipse.jetty.servlet.LEVEL", "OFF");
 		System.setProperty("org.osgi.service.http.port", "0");
