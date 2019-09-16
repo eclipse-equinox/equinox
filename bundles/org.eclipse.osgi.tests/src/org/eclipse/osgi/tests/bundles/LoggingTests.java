@@ -13,17 +13,38 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
-import java.util.*;
-import junit.framework.*;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.List;
+import junit.framework.AssertionFailedError;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import org.eclipse.core.internal.runtime.RuntimeLog;
-import org.eclipse.core.runtime.*;
-import org.eclipse.equinox.log.*;
+import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.ILogListener;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.equinox.log.ExtendedLogEntry;
+import org.eclipse.equinox.log.ExtendedLogReaderService;
+import org.eclipse.equinox.log.ExtendedLogService;
+import org.eclipse.equinox.log.LogFilter;
 import org.eclipse.equinox.log.Logger;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.osgi.framework.*;
-import org.osgi.service.event.*;
-import org.osgi.service.log.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
+import org.osgi.service.log.LogEntry;
+import org.osgi.service.log.LogListener;
+import org.osgi.service.log.LogService;
 
 public class LoggingTests extends AbstractBundleTests {
 	static final String EQUINOX_LOGGER = "org.eclipse.equinox.logger";
@@ -115,16 +136,10 @@ public class LoggingTests extends AbstractBundleTests {
 			super(context);
 		}
 
-		List entries = new ArrayList();
-
 		public void logging(IStatus status, String plugin) {
-			entries.add(new ILogEntry(status, plugin));
 			checkContext(status);
 		}
 
-		List getEntries() {
-			return entries;
-		}
 	}
 
 	class TestLogListener extends TestListener implements LogListener, LogFilter {
