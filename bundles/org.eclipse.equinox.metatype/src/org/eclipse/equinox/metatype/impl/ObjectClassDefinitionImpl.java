@@ -219,14 +219,15 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 
 	/**
 	 * Method to set the resource bundle for this OCD and all its ADs.
+	 * @param resourceBundleCache 
 	 */
-	void setResourceBundle(String assignedLocale, Bundle bundle) {
-		setLocaleAndBundle(assignedLocale, bundle);
+	void setResourceBundle(String assignedLocale, Bundle bundle, Map<String, ResourceBundle> resourceBundleCache) {
+		setLocaleAndBundle(assignedLocale, bundle, resourceBundleCache);
 		for (AttributeDefinitionImpl ad : _required) {
-			ad.setLocaleAndBundle(assignedLocale, bundle);
+			ad.setLocaleAndBundle(assignedLocale, bundle, resourceBundleCache);
 		}
 		for (AttributeDefinitionImpl ad : _optional) {
-			ad.setLocaleAndBundle(assignedLocale, bundle);
+			ad.setLocaleAndBundle(assignedLocale, bundle, resourceBundleCache);
 		}
 	}
 

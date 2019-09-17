@@ -16,6 +16,7 @@ package org.eclipse.equinox.metatype.impl;
 import java.net.URL;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.parsers.SAXParser;
 import org.eclipse.equinox.metatype.EquinoxObjectClassDefinition;
 import org.eclipse.osgi.util.NLS;
@@ -48,6 +49,8 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 
 	// Give access to subclasses.
 	protected final LogTracker logger;
+
+	private final Map<String, ResourceBundle> resourceBundleCache = new ConcurrentHashMap<>();
 
 	/**
 	 * Constructor of class MetaTypeProviderImpl.
@@ -137,11 +140,11 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 		ObjectClassDefinitionImpl ocd;
 		if (_allPidOCDs.containsKey(pid)) {
 			ocd = (ObjectClassDefinitionImpl) (_allPidOCDs.get(pid)).clone();
-			ocd.setResourceBundle(locale, _bundle);
+			ocd.setResourceBundle(locale, _bundle, resourceBundleCache);
 			return ocd;
 		} else if (_allFPidOCDs.containsKey(pid)) {
 			ocd = (ObjectClassDefinitionImpl) (_allFPidOCDs.get(pid)).clone();
-			ocd.setResourceBundle(locale, _bundle);
+			ocd.setResourceBundle(locale, _bundle, resourceBundleCache);
 			return ocd;
 		} else {
 			throw new IllegalArgumentException(NLS.bind(MetaTypeMsg.OCD_PID_NOT_FOUND, pid));
