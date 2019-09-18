@@ -7,4 +7,3 @@ Bug 506953 - Update prereqs for Oxygen Milestones: Orbit URL
 Bug 514338 - Update felix SCR to 2.0.12
 Bug 529719 - Update felix SCR to 2.0.14
 Touch feature for I20180903-0800 failure due to new felix.scr qualifier.
-
