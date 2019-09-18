@@ -51,4 +51,23 @@ public class BundleFileWrapperChain extends BundleFileWrapper {
 	public BundleFileWrapperChain getNext() {
 		return next;
 	}
+
+	/**
+	 * Returns the first bundle file wrapped in this chain which
+	 * also is an instance of the specified type.
+	 * @param <T> The type being searched for
+	 * @param type the class of the type being searched for
+	 * @return the found bundle file that is an instance of the specified type
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T getWrappedType(Class<T> type) {
+		BundleFileWrapperChain current = this;
+		do {
+			if (type.isInstance(current.getWrapped())) {
+				return (T) current.getWrapped();
+			}
+			current = current.getNext();
+		} while (current != null);
+		return null;
+	}
 }

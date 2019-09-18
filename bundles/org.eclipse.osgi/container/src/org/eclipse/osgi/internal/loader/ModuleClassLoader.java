@@ -18,9 +18,16 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.*;
+import java.security.AllPermission;
+import java.security.CodeSource;
+import java.security.PermissionCollection;
+import java.security.ProtectionDomain;
 import java.security.cert.Certificate;
-import java.util.*;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
@@ -353,10 +360,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 			Certificate[] certs = null;
 			SignedContent signedContent = null;
 			if (bundlefile instanceof BundleFileWrapperChain) {
-				BundleFileWrapperChain wrapper = (BundleFileWrapperChain) bundlefile;
-				while (wrapper != null && (!(wrapper.getWrapped() instanceof SignedContent)))
-					wrapper = wrapper.getNext();
-				signedContent = wrapper == null ? null : (SignedContent) wrapper.getWrapped();
+				signedContent = ((BundleFileWrapperChain) bundlefile).getWrappedType(SignedContent.class);
 			}
 			if (getConfiguration().CLASS_CERTIFICATE && signedContent != null && signedContent.isSigned()) {
 				SignerInfo[] signers = signedContent.getSignerInfos();

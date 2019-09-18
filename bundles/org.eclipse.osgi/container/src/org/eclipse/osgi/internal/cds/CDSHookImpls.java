@@ -54,23 +54,10 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 	// WrapperChain -> Wrapper<N> -> WrapperChain -> CDSBundleFile -> WrapperChain -> BundleFile
 	//
 	private static CDSBundleFile getCDSBundleFile(BundleFile bundleFile) {
-		CDSBundleFile cdsBundleFile = null;
-
 		if (bundleFile instanceof BundleFileWrapperChain) {
-			// Equinox > 3.4
-			BundleFile wrapped = null;
-			do {
-				wrapped = ((BundleFileWrapperChain) bundleFile).getWrapped();
-				if (wrapped instanceof CDSBundleFile) {
-					cdsBundleFile = (CDSBundleFile) wrapped;
-					break;
-				}
-
-				//Go to next wrapper chain.
-				bundleFile = ((BundleFileWrapperChain) bundleFile).getNext();
-			} while (wrapped != null);
+			return ((BundleFileWrapperChain) bundleFile).getWrappedType(CDSBundleFile.class);
 		}
-		return cdsBundleFile;
+		return null;
 	}
 
 	@Override
