@@ -60,22 +60,7 @@ public class DispatchTargets {
 	}
 
 	public void addRequestParameters(HttpServletRequest request) {
-		if (queryString == null) {
-			parameterMap = request.getParameterMap();
-			queryString = request.getQueryString();
-
-			return;
-		}
-
-		Map<String, String[]> parameterMapCopy = queryStringToParameterMap(queryString);
-
-		for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
-			String[] values = parameterMapCopy.get(entry.getKey());
-			values = Params.append(values, entry.getValue());
-			parameterMapCopy.put(entry.getKey(), values);
-		}
-
-		parameterMap = Collections.unmodifiableMap(parameterMapCopy);
+		currentRequest = request;
 	}
 
 	public void doDispatch(
@@ -154,6 +139,19 @@ public class DispatchTargets {
 	}
 
 	public Map<String, String[]> getParameterMap() {
+		if ((parameterMap == null) && (currentRequest != null)) {
+			Map<String, String[]> parameterMapCopy = queryStringToParameterMap(queryString);
+
+			for (Map.Entry<String, String[]> entry : currentRequest.getParameterMap().entrySet()) {
+				String[] values = parameterMapCopy.get(entry.getKey());
+				if (!Arrays.equals(values, entry.getValue())) {
+					values = Params.append(values, entry.getValue());
+					parameterMapCopy.put(entry.getKey(), values);
+				}
+			}
+
+			parameterMap = Collections.unmodifiableMap(parameterMapCopy);
+		}
 		return parameterMap;
 	}
 
@@ -162,6 +160,9 @@ public class DispatchTargets {
 	}
 
 	public String getQueryString() {
+		if ((queryString == null) && (currentRequest != null)) {
+			queryString = currentRequest.getQueryString();
+		}
 		return queryString;
 	}
 
@@ -207,7 +208,7 @@ public class DispatchTargets {
 
 	private static Map<String, String[]> queryStringToParameterMap(String queryString) {
 		if ((queryString == null) || (queryString.length() == 0)) {
-			return new HashMap<String, String[]>();
+			return new LinkedHashMap<String, String[]>();
 		}
 
 		try {
@@ -264,6 +265,7 @@ public class DispatchTargets {
 	private final ContextController contextController;
 	private DispatcherType dispatcherType;
 	private final EndpointRegistration<?> endpointRegistration;
+	private volatile HttpServletRequest currentRequest;
 	private final List<FilterRegistration> matchingFilterRegistrations;
 	private final String pathInfo;
 	private Map<String, String[]> parameterMap;

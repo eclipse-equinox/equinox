@@ -52,8 +52,6 @@ public class Bug500783_Test extends BaseTest {
 			protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 				int contentLength = req.getContentLength();
 
-				System.out.println(req.getParameterMap().entrySet().toString());
-
 				InputStream in = req.getInputStream();
 				// Read the input stream
 				int bytesRead = 0;
@@ -100,7 +98,7 @@ public class Bug500783_Test extends BaseTest {
 		map.put("x-www-form-urlencoded", Arrays.<Object>asList("fielda=foo&fieldb=bar"));
 
 		Map<String, List<String>> response = requestAdvisor.upload("MyServlet", map);
-		assertEquals("21|fieldb=[bar]|fielda=[foo]|0", response.get("responseBody").get(0));
+		assertEquals("21|21", response.get("responseBody").get(0));
 		assertEquals(HttpServletResponse.SC_OK + "", response.get("responseCode").get(0));
 	}
 
