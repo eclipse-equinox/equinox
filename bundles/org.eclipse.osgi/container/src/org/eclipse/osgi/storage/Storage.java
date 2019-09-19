@@ -754,7 +754,9 @@ public class Storage {
 			@SuppressWarnings("unchecked")
 			StorageHookFactory<Object, Object, StorageHook<Object, Object>> next = (StorageHookFactory<Object, Object, StorageHook<Object, Object>>) iFactories.next();
 			StorageHook<Object, Object> hook = next.createStorageHookAndValidateFactoryClass(generation);
-			hooks.add(hook);
+			if (hook != null) {
+				hooks.add(hook);
+			}
 		}
 		generation.setStorageHooks(Collections.unmodifiableList(hooks), true);
 		for (StorageHook<?, ?> hook : hooks) {
@@ -1407,7 +1409,9 @@ public class Storage {
 					}
 					@SuppressWarnings({"rawtypes", "unchecked"})
 					StorageHook<Object, Object> hook = generation.getStorageHook((Class) factory.getClass());
-					hook.save(saveContext, temp);
+					if (hook != null) {
+						hook.save(saveContext, temp);
+					}
 				}
 			} finally {
 				temp.close();

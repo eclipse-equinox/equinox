@@ -46,6 +46,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	private static final String HOOK_CONFIGURATOR_FIELD_ADAPT_MANIFEST = "adaptManifest";
 	private static final String HOOK_CONFIGURATOR_FIELD_REPLACE_BUILDER = "replaceModuleBuilder";
 	private static final String HOOK_CONFIGURATOR_FIELD_HANDLE_CONTENT = "handleContentConnection";
+	private static final String HOOK_CONFIGURATOR_FIELD_NULL_STORAGE_HOOK = "returnNullStorageHook";
 
 	private Map<String, String> configuration;
 	private Framework framework;
@@ -270,6 +271,32 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		assertEquals("Wrong symbolicName", "testHandleContentConnection", b.getSymbolicName());
 	}
 
+	public void testNullStorageHook() throws Exception {
+
+		initAndStartFramework();
+		File bundlesBase = new File(OSGiTestsActivator.getContext().getDataFile(getName()), "bundles");
+		bundlesBase.mkdirs();
+		String initialBundleLoc = SystemBundleTests.createBundle(bundlesBase, getName(), false, false).toURI().toString();
+		Bundle initialBundle = framework.getBundleContext().installBundle(initialBundleLoc);
+		assertNotNull("Expected to have an initial bundle.", initialBundle);
+
+		// Have storage hook factory return null StorageHook
+		setFactoryNullStorageHook(true);
+		Bundle b = installBundle();
+		assertNotNull("Expected to have a bundle after install.", b);
+		framework.stop();
+		framework.waitForStop(5000);
+
+		// create new framework to make sure null storage hook works from persistence also.
+		framework = createFramework(configuration);
+		framework.init();
+
+		initialBundle = framework.getBundleContext().getBundle(initialBundleLoc);
+		assertNotNull("Expected to have initial bundle after restart.", initialBundle);
+		b = framework.getBundleContext().getBundle(location);
+		assertNotNull("Expected to have a bundle after restart.", b);
+	}
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -339,6 +366,9 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		clazz.getField(HOOK_CONFIGURATOR_FIELD_DELETING_CALLED).set(null, false);
 		clazz.getField(HOOK_CONFIGURATOR_FIELD_ADAPT_MANIFEST).set(null, false);
 		clazz.getField(HOOK_CONFIGURATOR_FIELD_FAIL_LOAD).set(null, false);
+		clazz.getField(HOOK_CONFIGURATOR_FIELD_HANDLE_CONTENT).set(null, false);
+		clazz.getField(HOOK_CONFIGURATOR_FIELD_REPLACE_BUILDER).set(null, false);
+		clazz.getField(HOOK_CONFIGURATOR_FIELD_NULL_STORAGE_HOOK).set(null, false);
 	}
 
 	private void restartFramework() throws Exception {
@@ -373,6 +403,11 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	private void setFactoryClassHandleContent(boolean value) throws Exception {
 		Class<?> clazz = classLoader.loadClass(HOOK_CONFIGURATOR_CLASS);
 		clazz.getField(HOOK_CONFIGURATOR_FIELD_HANDLE_CONTENT).set(null, value);
+	}
+
+	private void setFactoryNullStorageHook(boolean value) throws Exception {
+		Class<?> clazz = classLoader.loadClass(HOOK_CONFIGURATOR_CLASS);
+		clazz.getField(HOOK_CONFIGURATOR_FIELD_NULL_STORAGE_HOOK).set(null, value);
 	}
 
 	private void updateBundle() throws Exception {

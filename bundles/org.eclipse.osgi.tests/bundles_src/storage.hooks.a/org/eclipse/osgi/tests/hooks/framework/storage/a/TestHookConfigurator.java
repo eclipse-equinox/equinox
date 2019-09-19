@@ -120,6 +120,9 @@ public class TestHookConfigurator implements HookConfigurator {
 		@Override
 		protected TestStorageHook createStorageHook(Generation generation) {
 			createStorageHookCalled = true;
+			if (returnNullStorageHook) {
+				return null;
+			}
 			Class<?> factoryClass = TestStorageHookFactory.class;
 			if (invalidFactoryClass)
 				factoryClass = StorageHookFactory.class;
@@ -162,6 +165,7 @@ public class TestHookConfigurator implements HookConfigurator {
 	public static volatile boolean adaptManifest;
 	public static volatile boolean replaceModuleBuilder;
 	public static volatile boolean handleContentConnection;
+	public static volatile boolean returnNullStorageHook;
 
 	public void addHooks(HookRegistry hookRegistry) {
 		hookRegistry.addStorageHookFactory(new TestStorageHookFactory());
