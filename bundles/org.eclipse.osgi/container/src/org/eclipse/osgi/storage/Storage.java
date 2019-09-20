@@ -357,7 +357,7 @@ public class Storage {
 			try {
 				hook.validate();
 			} catch (IllegalStateException e) {
-				// TODO Logging?
+				equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, "Error validating installed bundle.", e); //$NON-NLS-1$
 				return true;
 			}
 		}
