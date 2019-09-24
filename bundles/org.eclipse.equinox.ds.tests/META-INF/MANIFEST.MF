@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Declarative Services Tests
 Bundle-Category: test
 Bundle-SymbolicName: org.eclipse.equinox.ds.tests
-Bundle-Version: 1.5.500.qualifier
+Bundle-Version: 1.5.600.qualifier
 Bundle-Activator: org.eclipse.equinox.ds.tests.DSTestsActivator
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.junit
