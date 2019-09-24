@@ -516,9 +516,7 @@ public class Storage {
 		if (systemContent == null) {
 			// only do a version check in this case
 			ModuleRevisionBuilder newBuilder = getBuilder(existing, extraCapabilities, extraExports);
-			if (!currentRevision.getVersion().equals(newBuilder.getVersion())) {
-				return true;
-			}
+			return !currentRevision.getVersion().equals(newBuilder.getVersion());
 		}
 		if (existing.isDirectory()) {
 			systemContent = new File(systemContent, "META-INF/MANIFEST.MF"); //$NON-NLS-1$
