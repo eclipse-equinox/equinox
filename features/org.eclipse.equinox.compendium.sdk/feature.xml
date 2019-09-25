@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.equinox.compendium.sdk"
       label="%featureName"
-      version="3.19.100.qualifier"
+      version="3.20.0.qualifier"
       provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
@@ -104,34 +104,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.equinox.io"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.io.source"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.ip"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.ip.source"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.equinox.metatype"
          download-size="0"
          install-size="0"
@@ -182,20 +154,6 @@
 
    <plugin
          id="org.eclipse.equinox.wireadmin.source"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.util"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.util.source"
          download-size="0"
          install-size="0"
          version="0.0.0"

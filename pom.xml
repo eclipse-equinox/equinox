@@ -113,8 +113,6 @@
     <module>bundles/org.eclipse.equinox.http.servlet</module>
     <module>bundles/org.eclipse.equinox.http.servlet.tests</module>
     <module>bundles/org.eclipse.equinox.http.servletbridge</module>
-    <module>bundles/org.eclipse.equinox.io</module>
-    <module>bundles/org.eclipse.equinox.ip</module>
     <module>bundles/org.eclipse.equinox.jsp.jasper</module>
     <module>bundles/org.eclipse.equinox.jsp.jasper.registry</module>
     <module>bundles/org.eclipse.equinox.log.stream</module>
@@ -131,7 +129,6 @@
     <module>bundles/org.eclipse.equinox.transforms.hook</module>
     <module>bundles/org.eclipse.equinox.transforms.xslt</module>
     <module>bundles/org.eclipse.equinox.useradmin</module>
-    <module>bundles/org.eclipse.equinox.util</module>
     <module>bundles/org.eclipse.equinox.weaving.caching</module>
     <module>bundles/org.eclipse.equinox.weaving.caching.j9</module>
     <module>bundles/org.eclipse.equinox.weaving.hook</module>
