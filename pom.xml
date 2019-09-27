@@ -129,11 +129,9 @@
     <module>bundles/org.eclipse.equinox.transforms.hook</module>
     <module>bundles/org.eclipse.equinox.transforms.xslt</module>
     <module>bundles/org.eclipse.equinox.useradmin</module>
-    <module>bundles/org.eclipse.equinox.util</module>
     <module>bundles/org.eclipse.equinox.weaving.caching</module>
     <module>bundles/org.eclipse.equinox.weaving.caching.j9</module>
     <module>bundles/org.eclipse.equinox.weaving.hook</module>
-    <module>bundles/org.eclipse.equinox.wireadmin</module>
   </modules>
 
 </project>
