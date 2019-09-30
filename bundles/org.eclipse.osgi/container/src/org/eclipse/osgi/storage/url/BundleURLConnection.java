@@ -63,8 +63,8 @@ public class BundleURLConnection extends URLConnection {
 	}
 
 	@Override
-	public int getContentLength() {
-		return ((int) bundleEntry.getSize());
+	public long getContentLengthLong() {
+		return bundleEntry.getSize();
 	}
 
 	@Override
