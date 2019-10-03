@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-SymbolicName: org.eclipse.equinox.console.ssh
-Bundle-Version: 1.2.300.qualifier
+Bundle-Version: 1.2.400.qualifier
 Bundle-Activator: org.eclipse.equinox.console.ssh.Activator
 Bundle-Vendor: %bundleVendor
 Bundle-Localization: plugin
