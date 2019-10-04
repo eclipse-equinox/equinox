@@ -32,7 +32,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	SubMonitorTest.class,
 	SubProgressTest.class,
 	URIUtilTest.class,
-	URLTest.class
+	URLTest.class,
+	PlatformLogWriterTest.class
 })
 public class RuntimeTests {
 	// intentionally left blank

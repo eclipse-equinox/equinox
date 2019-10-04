@@ -135,17 +135,19 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 
 	private static IStatus convertRawEntryToStatus(LogEntry logEntry) {
 		int severity;
-		switch (logEntry.getLevel()) {
-			case LogService.LOG_ERROR :
+		switch (logEntry.getLogLevel()) {
+			case ERROR :
 				severity = IStatus.ERROR;
 				break;
-			case LogService.LOG_WARNING :
+			case WARN :
 				severity = IStatus.WARNING;
 				break;
-			case LogService.LOG_INFO :
+			case INFO :
 				severity = IStatus.INFO;
 				break;
-			case LogService.LOG_DEBUG :
+			case DEBUG :
+			case TRACE :
+			case AUDIT :
 				severity = IStatus.OK;
 				break;
 			default :
