@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Common Eclipse Runtime Tests
 Bundle-SymbolicName: org.eclipse.equinox.common.tests;singleton:=true
-Bundle-Version: 3.10.400.qualifier
+Bundle-Version: 3.10.600.qualifier
 Automatic-Module-Name: org.eclipse.equinox.common.tests
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
@@ -12,6 +12,7 @@ Require-Bundle: org.junit,
  org.eclipse.equinox.registry;bundle-version="3.8.200"
 Import-Package: org.eclipse.osgi.service.localization,
  org.osgi.framework,
+ org.osgi.service.log,
  org.osgi.service.packageadmin,
  org.osgi.util.tracker
 Eclipse-BundleShape: dir
