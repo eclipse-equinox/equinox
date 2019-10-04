@@ -69,7 +69,6 @@
     <module>bundles/org.eclipse.equinox.bidi.tests</module>
     <module>bundles/org.eclipse.equinox.cm.test</module>
     <module>bundles/org.eclipse.equinox.common.tests</module>
-    <module>bundles/org.eclipse.equinox.compendium.tests</module>
 
 <!-- no longer built in M6
     <module>bundles/org.eclipse.equinox.console.ssh.tests</module>
