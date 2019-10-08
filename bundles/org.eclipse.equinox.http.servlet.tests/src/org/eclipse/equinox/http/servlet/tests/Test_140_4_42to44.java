@@ -60,13 +60,13 @@ public class Test_140_4_42to44 extends BaseTest {
 		class BServlet extends HttpServlet {
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 				response.getWriter().write("failed");
 			}
 
 		}
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "a");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/a");
 		registrations.add(getBundleContext().registerService(Servlet.class, new AServlet(), properties));
@@ -80,7 +80,7 @@ public class Test_140_4_42to44 extends BaseTest {
 		// init failed, no servlet
 		assertEquals("404", response.get("responseCode").get(0));
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/a");
 		registrations.add(getBundleContext().registerService(Servlet.class, new BServlet(), properties));
 

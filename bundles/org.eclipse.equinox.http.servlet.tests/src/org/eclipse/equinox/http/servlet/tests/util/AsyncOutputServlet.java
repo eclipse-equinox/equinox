@@ -16,7 +16,6 @@ package org.eclipse.equinox.http.servlet.tests.util;
 import java.io.IOException;
 
 import javax.servlet.AsyncContext;
-import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServlet;
@@ -28,7 +27,7 @@ public class AsyncOutputServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		resp.setStatus(HttpServletResponse.SC_OK);
 		resp.setContentType("text/plain");
 		resp.setBufferSize(16);

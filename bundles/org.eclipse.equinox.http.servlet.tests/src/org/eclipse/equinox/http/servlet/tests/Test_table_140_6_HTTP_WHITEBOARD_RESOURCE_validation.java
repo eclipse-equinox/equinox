@@ -33,10 +33,10 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 public class Test_table_140_6_HTTP_WHITEBOARD_RESOURCE_validation extends BaseTest {
 
 	@Test
-	public void test_table_140_6_HTTP_WHITEBOARD_RESOURCE_validation() throws Exception {
+	public void test_table_140_6_HTTP_WHITEBOARD_RESOURCE_validation() {
 		BundleContext context = getBundleContext();
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN, 34l);
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX, "/org/eclipse/equinox/http/servlet/tests");
 		ServiceRegistration<Object> sr = context.registerService(Object.class, new Object(), properties);

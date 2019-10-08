@@ -34,25 +34,25 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 public class Test_table_140_1_HTTP_WHITEBOARD_CONTEXT_NAME_tieGoesToOldest extends BaseTest {
 
 	@Test
-	public void test_table_140_1_HTTP_WHITEBOARD_CONTEXT_NAME_tieGoesToOldest() throws Exception {
+	public void test_table_140_1_HTTP_WHITEBOARD_CONTEXT_NAME_tieGoesToOldest() {
 		BundleContext context = getBundleContext();
 		String contextPath = "/context1";
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, DEFAULT);
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
 		properties.put(Constants.SERVICE_RANKING, Integer.valueOf(1000));
 		registrations.add(context.registerService(ServletContextHelper.class, new ServletContextHelper() {}, properties));
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, DEFAULT);
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/otherContext");
 		properties.put(Constants.SERVICE_RANKING, Integer.valueOf(1000));
 		registrations.add(context.registerService(ServletContextHelper.class, new ServletContextHelper() {}, properties));
 
-		AtomicReference<ServletContext> sc1 = new AtomicReference<ServletContext>();
+		AtomicReference<ServletContext> sc1 = new AtomicReference<>();
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 		registrations.add(context.registerService(ServletContextListener.class, new MockSCL(sc1), properties));
 

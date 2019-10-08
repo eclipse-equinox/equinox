@@ -37,27 +37,27 @@ public class Test_140_2_26to27 extends BaseTest {
 
 	@SuppressWarnings("serial")
 	@Test
-	public void test_140_2_26to27() throws Exception {
+	public void test_140_2_26to27() {
 		BundleContext context = getBundleContext();
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "foo");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/foo");
 		registrations.add(context.registerService(ServletContextHelper.class, new ServletContextHelper() {}, properties));
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "foobar");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/foo");
 		properties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
 		registrations.add(context.registerService(ServletContextHelper.class, new ServletContextHelper() {}, properties));
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(osgi.http.whiteboard.context.name=foo)");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "first");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/bar/someServlet");
 		registrations.add(context.registerService(Servlet.class, new HttpServlet() {}, properties));
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(osgi.http.whiteboard.context.name=foobar)");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "second");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/bar/someServlet");

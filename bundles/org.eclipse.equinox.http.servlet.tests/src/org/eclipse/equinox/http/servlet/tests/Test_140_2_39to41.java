@@ -32,15 +32,15 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 public class Test_140_2_39to41 extends BaseTest {
 
 	@Test
-	public void test_140_2_39to41() throws Exception {
+	public void test_140_2_39to41() {
 		BundleContext context = getBundleContext();
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "foo");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/foo");
 		registrations.add(context.registerService(ServletContextHelper.class, new ServletContextHelper() {}, properties));
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "foo");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/foo/bar");
 		properties.put(Constants.SERVICE_RANKING, Integer.valueOf(1000));

@@ -57,9 +57,8 @@ public class TestUpload extends BaseTest {
 	}
 
 	private void setupUploadServlet(final CountDownLatch receivedLatch,
-			final Map<String,Long> contents)
-			throws Exception {
-		final Dictionary<String,Object> servletProps = new Hashtable<String,Object>();
+			final Map<String,Long> contents) {
+		final Dictionary<String,Object> servletProps = new Hashtable<>();
 		servletProps.put(HTTP_WHITEBOARD_SERVLET_PATTERN, "/post");
 		servletProps.put(HTTP_WHITEBOARD_SERVLET_MULTIPART_ENABLED,
 				Boolean.TRUE);
@@ -91,7 +90,7 @@ public class TestUpload extends BaseTest {
 	}
 
 	private void postContent(final URL resource, final int expectedRT) throws IOException {
-		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
+		Map<String, List<Object>> map = new HashMap<>();
 
 		map.put("method", Arrays.<Object>asList("POST"));
 		map.put("text.txt", Arrays.<Object>asList(resource));

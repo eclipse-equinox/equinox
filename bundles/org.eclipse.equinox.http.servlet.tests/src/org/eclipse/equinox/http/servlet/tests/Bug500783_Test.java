@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -49,7 +48,7 @@ public class Bug500783_Test extends BaseTest {
 
 		HttpServlet myServlet = new HttpServlet() {
 			@Override
-			protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 				int contentLength = req.getContentLength();
 
 				InputStream in = req.getInputStream();
@@ -89,11 +88,11 @@ public class Bug500783_Test extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/MyServlet");
 		registrations.add(context.registerService(Servlet.class, myServlet, properties));
 
-		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
+		Map<String, List<Object>> map = new HashMap<>();
 		map.put("method", Arrays.<Object>asList("POST"));
 		map.put("x-www-form-urlencoded", Arrays.<Object>asList("fielda=foo&fieldb=bar"));
 

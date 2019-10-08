@@ -19,7 +19,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -54,7 +53,7 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED extends Ba
 			final ExecutorService	executor	= Executors.newCachedThreadPool();
 
 			@Override
-			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
 				doGetAsync(req.startAsync());
 			}
 
@@ -79,7 +78,7 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED extends Ba
 
 		}
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED, "true");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "a");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/a");
@@ -97,7 +96,7 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED extends Ba
 		assertTrue(invoked.get());
 		invoked.set(false);
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED, "false");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "b");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/b");

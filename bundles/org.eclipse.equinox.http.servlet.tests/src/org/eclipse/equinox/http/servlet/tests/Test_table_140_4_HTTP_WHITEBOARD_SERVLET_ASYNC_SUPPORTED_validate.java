@@ -34,10 +34,10 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED_validate e
 
 	@SuppressWarnings("serial")
 	@Test
-	public void test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED_validate() throws Exception {
+	public void test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED_validate() {
 		BundleContext context = getBundleContext();
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED, "blah");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/a");
 		registrations.add(context.registerService(Servlet.class, new HttpServlet() {}, properties));
@@ -48,7 +48,7 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED_validate e
 		assertNotNull(requestInfoDTO.servletDTO);
 		assertFalse(requestInfoDTO.servletDTO.asyncSupported);
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED, "true");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/b");
 		registrations.add(context.registerService(Servlet.class, new HttpServlet() {}, properties));
@@ -59,7 +59,7 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED_validate e
 		assertNotNull(requestInfoDTO.servletDTO);
 		assertTrue(requestInfoDTO.servletDTO.asyncSupported);
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED, "false");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/c");
 		registrations.add(context.registerService(Servlet.class, new HttpServlet() {}, properties));
@@ -70,7 +70,7 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED_validate e
 		assertNotNull(requestInfoDTO.servletDTO);
 		assertFalse(requestInfoDTO.servletDTO.asyncSupported);
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED, 234l);
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/d");
 		registrations.add(context.registerService(Servlet.class, new HttpServlet() {}, properties));
@@ -81,7 +81,7 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED_validate e
 		assertNotNull(requestInfoDTO.servletDTO);
 		assertFalse(requestInfoDTO.servletDTO.asyncSupported);
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/e");
 		registrations.add(context.registerService(Servlet.class, new HttpServlet() {}, properties));
 

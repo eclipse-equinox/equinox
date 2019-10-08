@@ -40,7 +40,7 @@ public class TestHttpServiceAndNamedServlet extends BaseTest {
 		try {
 			final String name1 = "testname1";
 			final String name2 = "testname2";
-			Dictionary<String,Object> properties = new Hashtable<String,Object>();
+			Dictionary<String,Object> properties = new Hashtable<>();
 			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME,
 					name1);
 			properties.put(

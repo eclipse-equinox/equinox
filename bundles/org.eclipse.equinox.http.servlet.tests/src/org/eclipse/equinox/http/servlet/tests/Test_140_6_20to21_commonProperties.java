@@ -36,7 +36,7 @@ public class Test_140_6_20to21_commonProperties extends BaseTest {
 	public void test_140_6_20to21_commonProperties() throws Exception {
 		BundleContext context = getBundleContext();
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN, "/other.txt");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX, "/org/eclipse/equinox/http/servlet/tests/index.txt");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(osgi.http.whiteboard.context.name=foo)");

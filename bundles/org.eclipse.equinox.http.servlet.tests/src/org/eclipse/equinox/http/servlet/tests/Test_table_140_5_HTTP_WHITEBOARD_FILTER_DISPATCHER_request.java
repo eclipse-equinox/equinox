@@ -39,13 +39,13 @@ public class Test_table_140_5_HTTP_WHITEBOARD_FILTER_DISPATCHER_request extends 
 	public void test_table_140_5_HTTP_WHITEBOARD_FILTER_DISPATCHER_request() throws Exception {
 		BundleContext context = getBundleContext();
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "a");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/a");
 		ServiceRegistration<?> srA = context.registerService(Filter.class, new MockFilter().around("b"), properties);
 		registrations.add(srA);
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "a");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/a");
 		ServiceRegistration<?> srB = context.registerService(Servlet.class, new MockServlet().content("a"), properties);
@@ -61,7 +61,7 @@ public class Test_table_140_5_HTTP_WHITEBOARD_FILTER_DISPATCHER_request extends 
 
 		assertEquals("bab", requestAdvisor.request("a"));
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, "REQUEST");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "a");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/a");

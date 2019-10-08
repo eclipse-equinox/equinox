@@ -40,11 +40,11 @@ public class Test_140_6_1 extends BaseTest {
 	public void test_140_6_1() throws Exception {
 		BundleContext context = getBundleContext();
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/*");
 		registrations.add(context.registerService(Servlet.class, new MockServlet().content("b"), properties));
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN, "/*");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX, "/org/eclipse/equinox/http/servlet/tests");
 		ServiceRegistration<Object> sr = context.registerService(Object.class, new Object(), properties);

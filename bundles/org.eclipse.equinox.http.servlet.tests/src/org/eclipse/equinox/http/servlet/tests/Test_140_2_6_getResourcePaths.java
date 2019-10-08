@@ -36,7 +36,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 public class Test_140_2_6_getResourcePaths extends BaseTest {
 
 	@Test
-	public void test_140_2_6_getResourcePaths() throws Exception {
+	public void test_140_2_6_getResourcePaths() {
 		BundleContext context = getBundleContext();
 
 		final AtomicBoolean invoked = new AtomicBoolean(false);
@@ -52,14 +52,14 @@ public class Test_140_2_6_getResourcePaths extends BaseTest {
 
 		};
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "context1");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/context1");
 		registrations.add(context.registerService(ServletContextHelper.class, servletContextHelper, properties));
 
-		AtomicReference<ServletContext> sc1 = new AtomicReference<ServletContext>();
+		AtomicReference<ServletContext> sc1 = new AtomicReference<>();
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(osgi.http.whiteboard.context.name=context1)");
 		registrations.add(context.registerService(ServletContextListener.class, new MockSCL(sc1), properties));

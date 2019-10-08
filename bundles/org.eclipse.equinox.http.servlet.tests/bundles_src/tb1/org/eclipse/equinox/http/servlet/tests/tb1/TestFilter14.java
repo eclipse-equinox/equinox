@@ -14,7 +14,6 @@
 
 package org.eclipse.equinox.http.servlet.tests.tb1;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,14 +22,12 @@ import java.util.Hashtable;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.equinox.http.servlet.tests.tb.AbstractTestServlet;
 import org.eclipse.equinox.http.servlet.tests.util.BaseFilter;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.http.NamespaceException;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 /*
@@ -39,21 +36,21 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  */
 public class TestFilter14 extends AbstractTestServlet {
 	private static final long serialVersionUID = 1L;
-	private final Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+	private final Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 
 	@Override
-	public void activate(ComponentContext componentContext) throws ServletException, NamespaceException {
+	public void activate(ComponentContext componentContext) {
 
-		Dictionary<String, String> servletProps = new Hashtable<String, String>();
+		Dictionary<String, String> servletProps = new Hashtable<>();
 		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, extensionAlias());
 		registrations.add(componentContext.getBundleContext().registerService(Servlet.class, this, servletProps));
 
-		Dictionary<String, String> filterProps = new Hashtable<String, String>();
+		Dictionary<String, String> filterProps = new Hashtable<>();
 		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
 		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, extensionAlias());
 		registrations.add(componentContext.getBundleContext().registerService(Filter.class, f1, filterProps));
 
-		filterProps = new Hashtable<String, String>();
+		filterProps = new Hashtable<>();
 		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F2");
 		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, extensionAlias());
 		registrations.add(componentContext.getBundleContext().registerService(Filter.class, f2, filterProps));
@@ -67,7 +64,7 @@ public class TestFilter14 extends AbstractTestServlet {
 	}
 
 	@Override
-	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) throws ServletException, IOException {
+	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) {
 		writer.print('a');
 	}
 

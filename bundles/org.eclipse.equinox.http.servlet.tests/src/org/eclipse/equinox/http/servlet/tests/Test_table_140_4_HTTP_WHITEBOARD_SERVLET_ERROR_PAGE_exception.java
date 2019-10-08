@@ -56,7 +56,7 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ERROR_PAGE_exception exten
 		class AServlet extends HttpServlet {
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 				throw new AException();
 			}
 
@@ -66,7 +66,7 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ERROR_PAGE_exception exten
 		class BServlet extends HttpServlet {
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 				invoked.set(true);
 				String exception = (String) request.getAttribute(RequestDispatcher.ERROR_EXCEPTION_TYPE);
 				response.getWriter().write((exception == null) ? "" : exception);
@@ -74,12 +74,12 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ERROR_PAGE_exception exten
 
 		}
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "a");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/a");
 		registrations.add(context.registerService(Servlet.class, new AServlet(), properties));
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "b");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, ServletException.class.getName());
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/error");

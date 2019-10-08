@@ -14,10 +14,8 @@
 
 package org.eclipse.equinox.http.servlet.tests.wb.t2;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.equinox.http.servlet.tests.tb.AbstractWhiteboardTestServlet;
@@ -29,7 +27,7 @@ public class WBServlet2 extends AbstractWhiteboardTestServlet {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) throws ServletException, IOException {
+	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) {
 		writer.print('a');
 	}
 

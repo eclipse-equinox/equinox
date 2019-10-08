@@ -18,7 +18,6 @@ import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,16 +26,16 @@ public class TestWBServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	public static final String STATUS_PARAM = "status";
 	
-	private final AtomicReference<String> status = new AtomicReference<String>("none");
+	private final AtomicReference<String> status = new AtomicReference<>("none");
 	private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
 	@Override
-	public void init() throws ServletException {
+	public void init() {
 		status.set(getServletConfig().getInitParameter(STATUS_PARAM));
 	}
 
 	@Override
-	protected final void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected final void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		PrintWriter writer = response.getWriter();
 		try {
 			handleDoGet(request, writer);
@@ -45,7 +44,7 @@ public class TestWBServlet extends HttpServlet {
 		}
 	}
 
-	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) throws ServletException, IOException {
+	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) {
 		if (destroyed.get()) {
 			writer.print("destroyed");
 		} else {

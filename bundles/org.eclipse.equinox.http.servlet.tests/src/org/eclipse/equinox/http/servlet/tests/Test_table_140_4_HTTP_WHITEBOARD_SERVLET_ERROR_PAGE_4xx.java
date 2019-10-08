@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -56,7 +55,7 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ERROR_PAGE_4xx extends Bas
 		class AServlet extends HttpServlet {
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 				response.sendError(HttpServletResponse.SC_FORBIDDEN, "a");
 			}
 
@@ -66,7 +65,7 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ERROR_PAGE_4xx extends Bas
 		class BServlet extends HttpServlet {
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 				invoked.set(true);
 				String message = (String) request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
 				response.getWriter().write((message == null) ? "" : message);
@@ -74,13 +73,13 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ERROR_PAGE_4xx extends Bas
 
 		}
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "a");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/a");
 		registrations.add(context.registerService(Servlet.class, new AServlet(), properties));
 
 		// Register the 4xx (b)
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "b");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, "4xx");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/b");
@@ -98,7 +97,7 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ERROR_PAGE_4xx extends Bas
 		assertEquals(HttpServletResponse.SC_FORBIDDEN + "", response.get("responseCode").get(0));
 
 		// register a 4xx which will be shadowed (c)
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "c");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, "4xx");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/c");
@@ -109,7 +108,7 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ERROR_PAGE_4xx extends Bas
 		assertEquals(DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE, failedErrorPageDTO.failureReason);
 
 		// register a specific 404 which shouldn't shadow 4xx (b)
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "d");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, "404");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/d");

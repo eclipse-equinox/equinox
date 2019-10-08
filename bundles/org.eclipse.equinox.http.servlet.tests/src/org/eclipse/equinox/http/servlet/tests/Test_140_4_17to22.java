@@ -22,7 +22,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -48,7 +47,7 @@ public class Test_140_4_17to22 extends BaseTest {
 
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response)
-					throws ServletException, IOException {
+					throws IOException {
 
 				response.getWriter().write(content);
 			}
@@ -57,7 +56,7 @@ public class Test_140_4_17to22 extends BaseTest {
 
 		}
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "a");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/a");
 		ServiceRegistration<Servlet> srA = getBundleContext().registerService(Servlet.class, new AServlet("a"), properties);
@@ -65,7 +64,7 @@ public class Test_140_4_17to22 extends BaseTest {
 
 		assertEquals("a", requestAdvisor.request("a"));
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "b");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/a");
 		ServiceRegistration<Servlet> srB = getBundleContext().registerService(Servlet.class, new AServlet("b"), properties);
@@ -83,7 +82,7 @@ public class Test_140_4_17to22 extends BaseTest {
 				getServiceId(srB),
 				failedServletDTO.serviceId);
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "c");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/a");
 		properties.put(Constants.SERVICE_RANKING, 1000);

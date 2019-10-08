@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,16 +40,16 @@ public class TestServletPrototype extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	final BundleContext context;
-	final AtomicReference<String> lastGetName = new AtomicReference<String>();
-	final AtomicReference<String> lastUngetName = new AtomicReference<String>();
-	final ConcurrentMap<String, Factory> factories = new ConcurrentHashMap<String, Factory>();
+	final AtomicReference<String> lastGetName = new AtomicReference<>();
+	final AtomicReference<String> lastUngetName = new AtomicReference<>();
+	final ConcurrentMap<String, Factory> factories = new ConcurrentHashMap<>();
 
 	public TestServletPrototype(BundleContext context) {
 		this.context = context;
 	}
 
 	@Override
-	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		PrintWriter writer = response.getWriter();
 
 		try {
@@ -62,7 +61,7 @@ public class TestServletPrototype extends HttpServlet {
 	}
 
 	class Factory implements PrototypeServiceFactory<Servlet> {
-		final AtomicReference<ServiceRegistration<Servlet>> registration = new AtomicReference<ServiceRegistration<Servlet>>();
+		final AtomicReference<ServiceRegistration<Servlet>> registration = new AtomicReference<>();
 		@Override
 		public Servlet getService(Bundle bundle, ServiceRegistration<Servlet> registration) {
 			String name = (String) registration.getReference().getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME);
@@ -97,7 +96,7 @@ public class TestServletPrototype extends HttpServlet {
 
 	}
 
-	protected void handleDoGet(HttpServletRequest request, HttpServletResponse response, PrintWriter writer) throws ServletException, IOException {
+	protected void handleDoGet(HttpServletRequest request, HttpServletResponse response, PrintWriter writer) throws IOException {
 		String pathInfo = request.getPathInfo();
 		if ("/lastGet".equals(pathInfo)) {
 			writer.print(lastGetName.getAndSet(null));
@@ -124,7 +123,7 @@ public class TestServletPrototype extends HttpServlet {
 
 	private static void configure(Factory factory, HttpServletRequest request) {
 		// copy existing properties
-		Hashtable<String, Object> serviceProps = new Hashtable<String, Object>();
+		Hashtable<String, Object> serviceProps = new Hashtable<>();
 
 		// Update ranking
 		String serviceRanking = request.getParameter(Constants.SERVICE_RANKING);

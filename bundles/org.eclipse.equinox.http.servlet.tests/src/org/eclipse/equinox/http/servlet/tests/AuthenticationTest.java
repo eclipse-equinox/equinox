@@ -82,11 +82,11 @@ public class AuthenticationTest extends BaseTest {
 
 	private static final String	REC_PAR		= "rec";
 
-	private void setup(final List<String> callStack) throws Exception {
+	private void setup(final List<String> callStack) {
 		final BundleContext context = getBundleContext();
 
 		// setup context 1
-		final Dictionary<String,Object> ctx1Props = new Hashtable<String,Object>();
+		final Dictionary<String,Object> ctx1Props = new Hashtable<>();
 		ctx1Props.put(HTTP_WHITEBOARD_CONTEXT_NAME, "context1");
 		ctx1Props.put(HTTP_WHITEBOARD_CONTEXT_PATH, "/context1");
 		registrations.add(context.registerService(
@@ -94,8 +94,7 @@ public class AuthenticationTest extends BaseTest {
 			new ServletContextHelper() {
 
 				@Override
-				public boolean handleSecurity(final HttpServletRequest request, final HttpServletResponse response)
-					throws IOException {
+				public boolean handleSecurity(final HttpServletRequest request, final HttpServletResponse response) {
 
 					if (request.getParameter(AUTH_PAR) != null) {
 						callStack.add("handle1");
@@ -114,7 +113,7 @@ public class AuthenticationTest extends BaseTest {
 		);
 
 		// setup context 2
-		final Dictionary<String,Object> ctx2Props = new Hashtable<String,Object>();
+		final Dictionary<String,Object> ctx2Props = new Hashtable<>();
 		ctx2Props.put(HTTP_WHITEBOARD_CONTEXT_NAME, "context2");
 		ctx2Props.put(HTTP_WHITEBOARD_CONTEXT_PATH, "/context2");
 		registrations.add(context.registerService(
@@ -122,8 +121,7 @@ public class AuthenticationTest extends BaseTest {
 			new ServletContextHelper() {
 
 				@Override
-				public boolean handleSecurity(final HttpServletRequest request, final HttpServletResponse response)
-					throws IOException {
+				public boolean handleSecurity(final HttpServletRequest request, final HttpServletResponse response) {
 
 					callStack.add("handle2");
 					return true;
@@ -168,9 +166,9 @@ public class AuthenticationTest extends BaseTest {
 				response.setStatus(200);
 			}
 
-		};
+		}
 
-		final Dictionary<String,Object> servletProps = new Hashtable<String,Object>();
+		final Dictionary<String,Object> servletProps = new Hashtable<>();
 
 		servletProps.put(HTTP_WHITEBOARD_SERVLET_PATTERN, new String[] {"/servlet"});
 		servletProps.put(HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HTTP_WHITEBOARD_CONTEXT_NAME + "=context1)");

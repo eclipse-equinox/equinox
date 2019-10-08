@@ -38,10 +38,10 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 public class Test_140_7_validation extends BaseTest {
 
 	@Test
-	public void test_140_7_validation() throws Exception {
+	public void test_140_7_validation() {
 		BundleContext context = getBundleContext();
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 		ServiceRegistration<?> sr = context.registerService(
 				ServletContextListener.class, new MockSCL(new AtomicReference<ServletContext>()), properties);

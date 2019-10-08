@@ -14,7 +14,6 @@
 
 package org.eclipse.equinox.http.servlet.tests.tb;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
@@ -35,6 +34,7 @@ public abstract class AbstractTestResource {
 
 	private HttpService service;
 
+	@SuppressWarnings("unused")
 	public void activate(ComponentContext componentContext) throws ServletException, NamespaceException {
 		HttpService service = getHttpService();
 		String alias = getAlias();
@@ -78,7 +78,7 @@ public abstract class AbstractTestResource {
 		return clazz.getSimpleName();
 	}
 
-	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) throws ServletException, IOException {
+	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) {
 		writer.print(AbstractTestResource.STATUS_OK);
 	}
 

@@ -40,7 +40,7 @@ public class TestHttpServiceAndErrorPage extends BaseTest {
 		try {
 			final String name1 = "testname1";
 			final String name2 = "testname2";
-			Dictionary<String,Object> properties = new Hashtable<String,Object>();
+			Dictionary<String,Object> properties = new Hashtable<>();
 			properties.put(
 					HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE,
 					name1);

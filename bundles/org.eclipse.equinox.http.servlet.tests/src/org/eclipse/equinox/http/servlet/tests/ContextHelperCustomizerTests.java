@@ -50,31 +50,31 @@ public class ContextHelperCustomizerTests extends BaseTest {
 	private BundleContext context;
 	
 	@Before
-	public void begin() throws Exception {
+	public void begin() {
 		httpServiceReference = getBundleContext().getServiceReference(HttpService.class);	
 		context = httpServiceReference.getBundle().getBundleContext();
 		httpService = context.getService(httpServiceReference);
 	}
 	
 	@After
-	public void end() throws Exception {
+	public void end() {
 		context.ungetService(httpServiceReference);
 	}
 
 	@Test
-	public void testCreateDefaultHttpContextCreatesNewServletContextHelper() throws Exception {
+	public void testCreateDefaultHttpContextCreatesNewServletContextHelper() {
 		HttpContext context1 = httpService.createDefaultHttpContext();
 		HttpContext context2 = httpService.createDefaultHttpContext();
 		Assert.assertNotEquals(context1, context2);	
 	}
 	
 	@Test
-	public void testServletContextHelpersNotHiddenWhenRegisteredUsingConsumingContext() throws Exception {
+	public void testServletContextHelpersNotHiddenWhenRegisteredUsingConsumingContext() {
 		ServiceRegistration<ServletContextHelper> helperReg = null;
 		ServiceRegistration<FindHook> findHookReg = null;
 		
 		try {
-			Dictionary<String, Object> properties = new Hashtable<String, Object>();
+			Dictionary<String, Object> properties = new Hashtable<>();
 			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "context1");
 			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/context1");
 			//register a ServletContextHelper using the consuming bundle context "org.eclipse.equinox.http.servlet"
@@ -104,9 +104,9 @@ public class ContextHelperCustomizerTests extends BaseTest {
 			};
 
 			findHookReg = context.registerService(FindHook.class, findHook, null);
-			AtomicReference<ServletContext> sc1 = new AtomicReference<ServletContext>();
+			AtomicReference<ServletContext> sc1 = new AtomicReference<>();
 
-			properties = new Hashtable<String, Object>();
+			properties = new Hashtable<>();
 			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(osgi.http.whiteboard.context.name=context1)");
 			context.registerService(ServletContextListener.class, new MockSCL(sc1), properties);
@@ -132,7 +132,7 @@ public class ContextHelperCustomizerTests extends BaseTest {
 		ServiceRegistration<FindHook> findHookReg = null;
 		
 		try {
-			Dictionary<String, String> helperProps = new Hashtable<String, String>();
+			Dictionary<String, String> helperProps = new Hashtable<>();
 			helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "testContext" + testName.getMethodName());
 			helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/helperContext");
 			helperProps.put(TEST_PATH_CUSTOMIZER_NAME, testName.getMethodName());
@@ -168,7 +168,7 @@ public class ContextHelperCustomizerTests extends BaseTest {
 						
 			//Register a servlet service with a matching context helper
 			BaseServlet baseServlet = new BaseServlet("content");
-			Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();		
+			Dictionary<String, Object> serviceProps = new Hashtable<>();		
 			serviceProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/servlet");
 			serviceProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" + "testContext" + testName.getMethodName() + ")");
 			servlet = context.registerService(Servlet.class, baseServlet, serviceProps);
@@ -199,7 +199,7 @@ public class ContextHelperCustomizerTests extends BaseTest {
 		ServiceRegistration<FindHook> findHookReg = null;
 		
 		try {
-			Dictionary<String, String> helperProps = new Hashtable<String, String>();
+			Dictionary<String, String> helperProps = new Hashtable<>();
 			helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "testContext" + testName.getMethodName());
 			helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/helperContext");
 			helperProps.put(TEST_PATH_CUSTOMIZER_NAME, testName.getMethodName());
@@ -235,7 +235,7 @@ public class ContextHelperCustomizerTests extends BaseTest {
 						
 			//Register a servlet service with a matching context helper
 			BaseServlet baseServlet = new BaseServlet("content");
-			Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();		
+			Dictionary<String, Object> serviceProps = new Hashtable<>();		
 			serviceProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/servlet");
 			//Filter property
 			serviceProps.put("servlet.init." + TEST_PATH_CUSTOMIZER_NAME, testName.getMethodName());

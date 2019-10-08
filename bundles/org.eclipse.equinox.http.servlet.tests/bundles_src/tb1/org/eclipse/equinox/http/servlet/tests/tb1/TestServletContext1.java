@@ -14,13 +14,10 @@
 
 package org.eclipse.equinox.http.servlet.tests.tb1;
 
-import java.io.IOException;
 import java.io.PrintWriter;
-
 import java.util.Set;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.equinox.http.servlet.tests.tb.AbstractTestServlet;
@@ -33,7 +30,7 @@ public class TestServletContext1 extends AbstractTestServlet {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) throws ServletException, IOException {
+	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) {
 		ServletContext servletContext = request.getServletContext();
 		Set<String> resourcePaths = servletContext.getResourcePaths("/org/eclipse/equinox/http/servlet/tests/tb1");
 

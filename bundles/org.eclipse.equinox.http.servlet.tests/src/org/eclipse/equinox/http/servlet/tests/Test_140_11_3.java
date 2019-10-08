@@ -35,7 +35,7 @@ public class Test_140_11_3 extends BaseTest {
 	public static final String	CAPABILITY_OBJECTCLASS_ATTRIBUTE	= "objectClass";
 
 	@Test
-	public void test_140_11_3() throws Exception {
+	public void test_140_11_3() {
 		BundleContext context = getBundleContext();
 
 		ServiceReference<HttpServiceRuntime> srA = context.getServiceReference(HttpServiceRuntime.class);

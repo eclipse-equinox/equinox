@@ -40,6 +40,7 @@ public class AbstractWhiteboardTestServlet extends HttpServlet {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) throws ServletException, IOException {
 		writer.print(AbstractTestServlet.STATUS_OK);
 	}

@@ -43,7 +43,7 @@ public class EventHandler {
 
 				// Ref: https://html.spec.whatwg.org/multipage/comms.html#server-sent-events
 
-				Map<String, String> eventMap = new HashMap<String, String>();
+				Map<String, String> eventMap = new HashMap<>();
 
 				BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
@@ -54,7 +54,7 @@ public class EventHandler {
 						if (current.length() == 0) {
 							handle(eventMap);
 
-							eventMap = new HashMap<String, String>();
+							eventMap = new HashMap<>();
 
 							continue;
 						}

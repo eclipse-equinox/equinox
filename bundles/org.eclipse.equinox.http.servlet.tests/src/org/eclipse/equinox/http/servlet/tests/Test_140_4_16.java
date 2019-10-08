@@ -24,7 +24,6 @@ import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -47,7 +46,7 @@ public class Test_140_4_16 extends BaseTest {
 
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response)
-					throws ServletException, IOException {
+					throws IOException {
 
 				invoked.set(true);
 
@@ -61,7 +60,7 @@ public class Test_140_4_16 extends BaseTest {
 
 		};
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, new String[] {"/a", "/fee/fi/foo/fum"});
 		registrations.add(context.registerService(Servlet.class, servlet, properties));
 

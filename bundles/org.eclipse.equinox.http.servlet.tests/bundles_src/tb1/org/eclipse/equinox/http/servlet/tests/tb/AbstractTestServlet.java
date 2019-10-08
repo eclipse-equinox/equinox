@@ -16,7 +16,6 @@ package org.eclipse.equinox.http.servlet.tests.tb;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -92,6 +91,7 @@ public abstract class AbstractTestServlet extends HttpServlet {
 		return clazz.getSimpleName();
 	}
 
+	@SuppressWarnings("unused")
 	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) throws ServletException, IOException {
 		writer.print(AbstractTestServlet.STATUS_OK);
 	}

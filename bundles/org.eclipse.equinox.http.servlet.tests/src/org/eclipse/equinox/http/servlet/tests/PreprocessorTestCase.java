@@ -45,7 +45,7 @@ import org.osgi.service.http.whiteboard.Preprocessor;
 public class PreprocessorTestCase extends BaseTest {
 
 	@Test
-	public void testPreprocessorInitParameters() throws Exception {
+	public void testPreprocessorInitParameters() {
 		Dictionary<String,Object> properties = new Hashtable<>();
 		properties
 				.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_PREPROCESSOR_INIT_PARAM_PREFIX

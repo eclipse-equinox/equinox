@@ -14,9 +14,7 @@
 
 package org.eclipse.equinox.http.servlet.tests.tb1;
 
-import java.io.IOException;
 import java.io.PrintWriter;
-
 import java.util.Hashtable;
 
 import javax.servlet.Filter;
@@ -26,7 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.eclipse.equinox.http.servlet.ExtendedHttpService;
 import org.eclipse.equinox.http.servlet.tests.tb.AbstractTestServlet;
 import org.eclipse.equinox.http.servlet.tests.util.BaseFilter;
-
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.NamespaceException;
 
@@ -43,7 +40,7 @@ public class TestFilter4 extends AbstractTestServlet {
 		service.registerServlet(regexAlias(), this, null, null);
 		service.registerFilter(regexAlias(), f1, new Hashtable<String, String>(), null);
 		service.registerFilter(regexAlias(), f2, new Hashtable<String, String>(), null);
-		Hashtable<String, String> hashtable = new Hashtable<String, String>();
+		Hashtable<String, String> hashtable = new Hashtable<>();
 		hashtable.put("filter-priority", "1");
 		service.registerFilter(regexAlias(), f3, hashtable, null);
 	}
@@ -58,7 +55,7 @@ public class TestFilter4 extends AbstractTestServlet {
 	}
 
 	@Override
-	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) throws ServletException, IOException {
+	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) {
 		writer.print('a');
 	}
 

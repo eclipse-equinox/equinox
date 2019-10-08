@@ -25,7 +25,6 @@ import java.util.Map;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -45,7 +44,7 @@ public class Test_table_140_5_HTTP_WHITEBOARD_FILTER_DISPATCHER_error extends Ba
 	public void test_table_140_5_HTTP_WHITEBOARD_FILTER_DISPATCHER_error() throws Exception {
 		BundleContext context = getBundleContext();
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, "ERROR");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "a");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_SERVLET, "a");
@@ -57,7 +56,7 @@ public class Test_table_140_5_HTTP_WHITEBOARD_FILTER_DISPATCHER_error extends Ba
 		assertEquals(1, filterDTO.dispatcher.length);
 		assertEquals("ERROR", filterDTO.dispatcher[0]);
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, "4xx");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "a");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/a");
@@ -73,13 +72,13 @@ public class Test_table_140_5_HTTP_WHITEBOARD_FILTER_DISPATCHER_error extends Ba
 		MockServlet mockServlet = new MockServlet() {
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			}
 
 		};
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "b");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/b");
 		ServiceRegistration<?> srC = context.registerService(Servlet.class, mockServlet, properties);

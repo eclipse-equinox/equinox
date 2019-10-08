@@ -16,12 +16,10 @@ package org.eclipse.equinox.http.servlet.tests.util;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import javax.servlet.AsyncContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -44,8 +42,7 @@ public class BaseAsyncServlet extends BaseServlet {
 
 	@Override
 	protected void service(
-			HttpServletRequest request, HttpServletResponse response)
-		throws ServletException, IOException {
+			HttpServletRequest request, HttpServletResponse response) {
 
 		AsyncContext asyncContext = request.startAsync(request, response);
 

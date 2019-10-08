@@ -39,6 +39,7 @@ public class BaseServlet extends HttpServlet {
 		this.content = content;
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	protected void service(
 			HttpServletRequest request, HttpServletResponse response)

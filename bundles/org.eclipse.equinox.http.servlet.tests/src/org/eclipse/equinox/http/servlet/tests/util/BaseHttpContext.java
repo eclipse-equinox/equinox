@@ -14,8 +14,6 @@
 
 package org.eclipse.equinox.http.servlet.tests.util;
 
-import java.io.IOException;
-
 import java.net.URL;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,7 +36,7 @@ public class BaseHttpContext implements HttpContext {
 
 	@Override
 	public boolean handleSecurity(HttpServletRequest request,
-			HttpServletResponse response) throws IOException {
+			HttpServletResponse response) {
 		return handleSecurity;
 	}
 

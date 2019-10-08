@@ -23,7 +23,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -52,7 +51,7 @@ public class Test_140_4_26to31 extends BaseTest {
 
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response)
-					throws ServletException, IOException {
+					throws IOException {
 
 				response.getWriter().write(content);
 			}
@@ -61,7 +60,7 @@ public class Test_140_4_26to31 extends BaseTest {
 
 		}
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "a");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/a");
 		//properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(osgi.http.whiteboard.context.name=org_eclipse_equinox_http_servlet_internal_HttpServiceImpl_DefaultHttpContext-0)");

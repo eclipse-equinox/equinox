@@ -228,7 +228,7 @@ public class BaseTest {
 			return Arrays.asList((String[])property);
 		}
 		else if (Collection.class.isInstance(property)) {
-			List<String> list = new ArrayList<String>();
+			List<String> list = new ArrayList<>();
 			for (@SuppressWarnings("rawtypes")
 				Iterator i = ((Collection)property).iterator(); i.hasNext();) {
 
@@ -246,6 +246,7 @@ public class BaseTest {
 		return installer.installBundle(bundle);
 	}
 
+	@SuppressWarnings("unused")
 	protected void startBundles() throws BundleException {
 	}
 
@@ -295,6 +296,7 @@ public class BaseTest {
 		requestAdvisor = new ServletRequestAdvisor(port, contextPath, ksPath, ksPassword);
 	}
 
+	@SuppressWarnings("unused")
 	protected void stopBundles() throws BundleException {
 	}
 
@@ -635,7 +637,7 @@ public class BaseTest {
 	protected BundleInstaller installer;
 	protected BundleAdvisor advisor;
 	protected ServletRequestAdvisor requestAdvisor;
-	protected final Collection<ServiceRegistration<? extends Object>> registrations = new ArrayList<ServiceRegistration<? extends Object>>();
+	protected final Collection<ServiceRegistration<? extends Object>> registrations = new ArrayList<>();
 	protected ServiceTracker<HttpServiceRuntime, ServiceReference<HttpServiceRuntime>> runtimeTracker;
 
 	protected static class TestFilter implements Filter {
@@ -644,7 +646,7 @@ public class BaseTest {
 		public TestFilter() {}
 
 		@Override
-		public void init(FilterConfig filterConfig) throws ServletException {
+		public void init(FilterConfig filterConfig) {
 			// nothing
 		}
 
@@ -677,7 +679,7 @@ public class BaseTest {
 		static class TestServletContextHelper extends ServletContextHelper {
 			public TestServletContextHelper(Bundle bundle) {
 				super(bundle);
-			}};
+			}}
 
 		public TestServletContextHelperFactory() {}
 
@@ -740,7 +742,7 @@ public class BaseTest {
 		@Override
 		protected void service(
 				HttpServletRequest request, HttpServletResponse response)
-			throws ServletException ,IOException {
+			throws IOException {
 
 			if (response.isCommitted()) {
 				System.out.println("Problem?");
@@ -756,6 +758,6 @@ public class BaseTest {
 			writer.print(errorCode + " : " + status + " : ERROR : " + requestURI);
 		}
 
-	};
+	}
 
 }

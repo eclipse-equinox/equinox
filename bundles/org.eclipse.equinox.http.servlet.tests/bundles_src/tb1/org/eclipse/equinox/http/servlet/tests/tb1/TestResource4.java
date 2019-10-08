@@ -22,7 +22,6 @@ import javax.servlet.ServletException;
 import org.eclipse.equinox.http.servlet.ExtendedHttpService;
 import org.eclipse.equinox.http.servlet.tests.tb.AbstractTestResource;
 import org.eclipse.equinox.http.servlet.tests.util.BaseFilter;
-
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.NamespaceException;
 
@@ -37,7 +36,7 @@ public class TestResource4 extends AbstractTestResource {
 		service.registerResources(regexAlias(), getName() , null);
 		service.registerFilter(regexAlias(), f1, new Hashtable<String, String>(), null);
 		service.registerFilter(regexAlias(), f2, new Hashtable<String, String>(), null);
-		Hashtable<String, String> hashtable = new Hashtable<String, String>();
+		Hashtable<String, String> hashtable = new Hashtable<>();
 		hashtable.put("filter-priority", "1");
 		service.registerFilter(regexAlias(), f3, hashtable, null);
 	}

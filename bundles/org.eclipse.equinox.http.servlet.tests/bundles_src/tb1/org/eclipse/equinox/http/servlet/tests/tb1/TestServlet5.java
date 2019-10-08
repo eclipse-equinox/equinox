@@ -14,16 +14,12 @@
 
 package org.eclipse.equinox.http.servlet.tests.tb1;
 
-import java.io.IOException;
 import java.io.PrintWriter;
-
 import java.util.Map;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.equinox.http.servlet.tests.tb.AbstractTestServlet;
-
 import org.osgi.framework.Constants;
 import org.osgi.service.http.runtime.HttpServiceRuntime;
 
@@ -35,7 +31,7 @@ public class TestServlet5 extends AbstractTestServlet {
 	private Map<String, Object> properties;
 
 	@Override
-	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) throws ServletException, IOException {
+	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) {
 		writer.print(properties.get(Constants.SERVICE_DESCRIPTION));
 	}
 

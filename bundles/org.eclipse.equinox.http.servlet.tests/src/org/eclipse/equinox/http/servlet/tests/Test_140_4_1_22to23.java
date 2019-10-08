@@ -44,7 +44,7 @@ public class Test_140_4_1_22to23 extends BaseTest {
 		class AServlet extends HttpServlet {
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 				response.sendError(HttpServletResponse.SC_BAD_GATEWAY, "a");
 			}
 
@@ -54,19 +54,19 @@ public class Test_140_4_1_22to23 extends BaseTest {
 		class BServlet extends HttpServlet {
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 				invoked.set(true);
 				throw new ServletException();
 			}
 
 		}
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "a");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/a");
 		registrations.add(getBundleContext().registerService(Servlet.class, new AServlet(), properties));
 
-		properties = new Hashtable<String, Object>();
+		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "b");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, HttpServletResponse.SC_BAD_GATEWAY + "");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/b");

@@ -15,15 +15,12 @@
 package org.eclipse.equinox.http.servlet.tests.bundle;
 
 import java.io.IOException;
-
 import java.net.URL;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.osgi.service.urlconversion.URLConverter;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -33,13 +30,13 @@ import org.osgi.util.tracker.ServiceTracker;
 public class BundleInstaller {
 	private BundleContext context;
 	private String rootLocation;
-	private HashMap<String, Bundle> bundles = new HashMap<String, Bundle>();
+	private HashMap<String, Bundle> bundles = new HashMap<>();
 	private ServiceTracker<Object, Object> converter;
 
 	public BundleInstaller(String bundlesRoot, BundleContext context) throws InvalidSyntaxException {
 		this.context = context;
 		rootLocation = bundlesRoot;
-		converter = new ServiceTracker<Object, Object>(context, context.createFilter("(&(objectClass=" + URLConverter.class.getName() + ")(protocol=bundleentry))"), null);
+		converter = new ServiceTracker<>(context, context.createFilter("(&(objectClass=" + URLConverter.class.getName() + ")(protocol=bundleentry))"), null);
 		converter.open();
 	}
 
@@ -143,7 +140,7 @@ public class BundleInstaller {
 		if (bundles == null) {
 			return null;
 		}
-		ArrayList<Bundle> result = new ArrayList<Bundle>(bundles.size());
+		ArrayList<Bundle> result = new ArrayList<>(bundles.size());
 		for (Object element : bundles.values()) {
 			Bundle bundle = (Bundle) element;
 			try {

@@ -33,7 +33,6 @@ import org.eclipse.equinox.http.servlet.tests.tb.AbstractTestServlet;
 import org.eclipse.equinox.http.servlet.tests.util.BaseFilter;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.http.NamespaceException;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 /*
@@ -42,14 +41,14 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  */
 public class TestErrorPage2 extends AbstractTestServlet {
 	private static final long serialVersionUID = 1L;
-	private final Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+	private final Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 	@Override
-	public void activate(ComponentContext componentContext) throws ServletException, NamespaceException {
-		Dictionary<String, String> servletProps = new Hashtable<String, String>();
+	public void activate(ComponentContext componentContext) {
+		Dictionary<String, String> servletProps = new Hashtable<>();
 		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
 		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, regexAlias());
 		registrations.add(componentContext.getBundleContext().registerService(Servlet.class, this, servletProps));
-		Dictionary<String, Object> errorProps = new Hashtable<String, Object>();
+		Dictionary<String, Object> errorProps = new Hashtable<>();
 		errorProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E1");
 		errorProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, new String[] {MyException.class.getName()});
 		registrations.add(componentContext.getBundleContext().registerService(Servlet.class, errorServlet, errorProps));
@@ -64,7 +63,7 @@ public class TestErrorPage2 extends AbstractTestServlet {
 
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response)
-		throws ServletException ,IOException {
+		throws ServletException {
 
 		throw new MyException();
 	}
@@ -76,7 +75,7 @@ public class TestErrorPage2 extends AbstractTestServlet {
 		@Override
 		protected void service(
 				HttpServletRequest request, HttpServletResponse response)
-			throws ServletException ,IOException {
+			throws IOException {
 
 			if (response.isCommitted()) {
 				System.out.println("Problem?");

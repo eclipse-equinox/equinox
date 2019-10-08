@@ -222,7 +222,7 @@ public class ServletRequestAdvisor extends Object {
 
 		int responseCode = connection.getResponseCode();
 
-		Map<String, List<String>> map = new HashMap<String, List<String>>(connection.getHeaderFields());
+		Map<String, List<String>> map = new HashMap<>(connection.getHeaderFields());
 		map.put("responseCode", Collections.singletonList(String.valueOf(responseCode)));
 
 		InputStream stream;
@@ -265,7 +265,7 @@ public class ServletRequestAdvisor extends Object {
 
 		int responseCode = connection.getResponseCode();
 
-		Map<String, List<String>> map = new HashMap<String, List<String>>(connection.getHeaderFields());
+		Map<String, List<String>> map = new HashMap<>(connection.getHeaderFields());
 		map.put("responseCode", Collections.singletonList(String.valueOf(responseCode)));
 
 		InputStream stream;
@@ -321,7 +321,7 @@ public class ServletRequestAdvisor extends Object {
 
 		int responseCode = connection.getResponseCode();
 
-		Map<String, List<String>> map = new HashMap<String, List<String>>(connection.getHeaderFields());
+		Map<String, List<String>> map = new HashMap<>(connection.getHeaderFields());
 		map.put("responseCode", Collections.singletonList(String.valueOf(responseCode)));
 
 		InputStream stream;

@@ -15,7 +15,6 @@
 package org.eclipse.equinox.http.servlet.tests.util;
 
 import java.io.CharArrayWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 
 import javax.servlet.ServletOutputStream;
@@ -35,11 +34,11 @@ public class CharResponseWrapper  extends HttpServletResponseWrapper {
 	}
 
 	@Override
-	public ServletOutputStream getOutputStream() throws IOException {
+	public ServletOutputStream getOutputStream() {
 		return new ServletOutputStream() {
 
 			@Override
-			public void write(int b) throws IOException {
+			public void write(int b) {
 				output.write(b);
 			}
 

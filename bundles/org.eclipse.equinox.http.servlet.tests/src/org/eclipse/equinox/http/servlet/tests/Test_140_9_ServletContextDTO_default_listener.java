@@ -35,14 +35,14 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 public class Test_140_9_ServletContextDTO_default_listener extends BaseTest {
 
 	@Test
-	public void test_140_9_ServletContextDTO_default_listener() throws Exception {
+	public void test_140_9_ServletContextDTO_default_listener() {
 		BundleContext context = getBundleContext();
 		ServletContextDTO servletContextDTO = getServletContextDTOByName(DEFAULT);
 		assertNotNull(servletContextDTO);
 
-		AtomicReference<ServletContext> sc1 = new AtomicReference<ServletContext>();
+		AtomicReference<ServletContext> sc1 = new AtomicReference<>();
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 		ServiceRegistration<?> sr = context.registerService(ServletContextListener.class, new MockSCL(sc1), properties);
 		registrations.add(sr);

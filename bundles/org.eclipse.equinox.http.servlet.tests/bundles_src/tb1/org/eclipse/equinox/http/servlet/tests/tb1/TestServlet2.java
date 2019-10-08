@@ -13,11 +13,9 @@
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.tests.tb1;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.equinox.http.servlet.tests.tb.AbstractTestServlet;
@@ -36,7 +34,7 @@ public class TestServlet2 extends AbstractTestServlet {
 	}
 
 	@Override
-	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) throws ServletException, IOException {
+	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) {
 		int version = getEffectiveMajorVersion();
 		writer.print(version);
 	}

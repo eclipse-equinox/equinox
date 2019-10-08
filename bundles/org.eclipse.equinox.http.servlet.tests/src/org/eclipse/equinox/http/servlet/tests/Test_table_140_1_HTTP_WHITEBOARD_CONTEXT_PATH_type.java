@@ -33,10 +33,10 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 public class Test_table_140_1_HTTP_WHITEBOARD_CONTEXT_PATH_type extends BaseTest {
 
 	@Test
-	public void test_table_140_1_HTTP_WHITEBOARD_CONTEXT_PATH_type() throws Exception {
+	public void test_table_140_1_HTTP_WHITEBOARD_CONTEXT_PATH_type() {
 		BundleContext context = getBundleContext();
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "context");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, Boolean.FALSE);
 		registrations.add(context.registerService(ServletContextHelper.class, new ServletContextHelper() {}, properties));

@@ -37,7 +37,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 public class Test_140_2_17to22 extends BaseTest {
 
 	@Test
-	public void test_140_2_17to22() throws Exception {
+	public void test_140_2_17to22() {
 		final BundleContext context = getBundleContext();
 
 		FindHook findHook = new FindHook() {
@@ -65,9 +65,9 @@ public class Test_140_2_17to22 extends BaseTest {
 
 		registrations.add(context.registerService(FindHook.class, findHook, null));
 
-		AtomicReference<ServletContext> sc1 = new AtomicReference<ServletContext>();
+		AtomicReference<ServletContext> sc1 = new AtomicReference<>();
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 		ServiceRegistration<ServletContextListener> serviceRegistration = context.registerService(ServletContextListener.class, new MockSCL(sc1), properties);
 		registrations.add(serviceRegistration);

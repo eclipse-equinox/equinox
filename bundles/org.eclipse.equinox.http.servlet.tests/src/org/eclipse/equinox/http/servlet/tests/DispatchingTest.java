@@ -37,8 +37,8 @@ import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
@@ -66,7 +66,7 @@ public class DispatchingTest extends BaseTest {
 
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response)
-					throws ServletException, IOException {
+					throws IOException {
 
 				StringWriter writer = new StringWriter();
 
@@ -81,12 +81,12 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
@@ -108,17 +108,17 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
@@ -156,22 +156,22 @@ public class DispatchingTest extends BaseTest {
 
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, new String[] {DispatcherType.REQUEST.toString()});
@@ -212,22 +212,22 @@ public class DispatchingTest extends BaseTest {
 
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, new String[] {DispatcherType.FORWARD.toString(),DispatcherType.REQUEST.toString()});
@@ -262,22 +262,22 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/c1");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s3/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
@@ -319,27 +319,27 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/c1");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s3/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet3, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s4/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
@@ -372,7 +372,7 @@ public class DispatchingTest extends BaseTest {
 			@Override
 			protected void doGet(
 				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
+				throws IOException {
 
 				PrintWriter writer = resp.getWriter();
 				writer.write(String.valueOf(req.getQueryString()));
@@ -385,18 +385,18 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/c1");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "s1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, sA, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "s2");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
@@ -425,18 +425,18 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/c1");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "s1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, sA, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "s2");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
@@ -468,7 +468,7 @@ public class DispatchingTest extends BaseTest {
 			@Override
 			protected void doGet(
 				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
+				throws IOException {
 
 				PrintWriter writer = resp.getWriter();
 				writer.write(req.getQueryString());
@@ -481,12 +481,12 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S13A");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet13A/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, sA, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S13B");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet13B/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, sB, props));
@@ -508,17 +508,17 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
@@ -556,22 +556,22 @@ public class DispatchingTest extends BaseTest {
 
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, new String[] {DispatcherType.REQUEST.toString()});
@@ -612,22 +612,22 @@ public class DispatchingTest extends BaseTest {
 
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, new String[] {DispatcherType.FORWARD.toString(),DispatcherType.REQUEST.toString()});
@@ -662,7 +662,7 @@ public class DispatchingTest extends BaseTest {
 
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
+				throws IOException {
 
 				response.getWriter().print("s8target");
 			}
@@ -691,17 +691,17 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
@@ -739,22 +739,22 @@ public class DispatchingTest extends BaseTest {
 
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, new String[] {DispatcherType.REQUEST.toString()});
@@ -795,22 +795,22 @@ public class DispatchingTest extends BaseTest {
 
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, new String[] {DispatcherType.INCLUDE.toString(), DispatcherType.REQUEST.toString()});
@@ -845,22 +845,22 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/c1");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s3/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
@@ -902,27 +902,27 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/c1");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s3/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet3, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s4/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
@@ -955,7 +955,7 @@ public class DispatchingTest extends BaseTest {
 			@Override
 			protected void doGet(
 				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
+				throws IOException {
 
 				PrintWriter writer = resp.getWriter();
 				writer.write(req.getQueryString());
@@ -968,18 +968,18 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/c1");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "s1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, sA, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "s2");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
@@ -1008,18 +1008,18 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/c1");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "s1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, sA, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "s2");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
@@ -1051,7 +1051,7 @@ public class DispatchingTest extends BaseTest {
 			@Override
 			protected void doGet(
 				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
+				throws IOException {
 
 				PrintWriter writer = resp.getWriter();
 				writer.write(req.getQueryString());
@@ -1064,12 +1064,12 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S13A");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet13A/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, sA, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S13B");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet13B/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, sB, props));
@@ -1091,17 +1091,17 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
@@ -1139,22 +1139,22 @@ public class DispatchingTest extends BaseTest {
 
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, new String[] {DispatcherType.REQUEST.toString()});
@@ -1195,22 +1195,22 @@ public class DispatchingTest extends BaseTest {
 
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, new String[] {DispatcherType.INCLUDE.toString(), DispatcherType.REQUEST.toString()});
@@ -1231,9 +1231,9 @@ public class DispatchingTest extends BaseTest {
 			@Override
 			protected void doGet(
 				final HttpServletRequest req, final HttpServletResponse resp)
-				throws ServletException, IOException {
+				throws IOException {
 
-				final AtomicReference<String[]> results = new AtomicReference<String[]>();
+				final AtomicReference<String[]> results = new AtomicReference<>();
 
 				Thread thread = new Thread() {
 
@@ -1267,7 +1267,7 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "Bug479115");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Bug479115/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
@@ -1309,8 +1309,7 @@ public class DispatchingTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response)
-					throws ServletException, IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) {
 
 				response.addCookie(new Cookie("foo","baz"));
 				response.addDateHeader("X-date", date2);
@@ -1324,11 +1323,11 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
 
@@ -1384,8 +1383,7 @@ public class DispatchingTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response)
-					throws ServletException, IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) {
 
 				response.addCookie(new Cookie("foo","baz"));
 				response.addDateHeader("X-date", date2);
@@ -1399,11 +1397,11 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
 
@@ -1460,7 +1458,7 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
@@ -1536,7 +1534,7 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
@@ -1587,7 +1585,7 @@ public class DispatchingTest extends BaseTest {
 			@Override
 			protected void doGet(
 				final HttpServletRequest req, final HttpServletResponse resp)
-				throws ServletException, IOException {
+				throws IOException {
 
 				String requestURI = req.getRequestURI();
 
@@ -1598,7 +1596,7 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "Bug497510");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Bug497510/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
@@ -1616,7 +1614,7 @@ public class DispatchingTest extends BaseTest {
 			@Override
 			protected void doGet(
 				final HttpServletRequest req, final HttpServletResponse resp)
-				throws ServletException, IOException {
+				throws IOException {
 
 				String requestURI = req.getRequestURI();
 
@@ -1627,7 +1625,7 @@ public class DispatchingTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "Bug 497510");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Bug 497510/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));

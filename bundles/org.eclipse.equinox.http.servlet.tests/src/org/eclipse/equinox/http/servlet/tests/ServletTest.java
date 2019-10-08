@@ -232,16 +232,16 @@ public class ServletTest extends BaseTest {
 	@Test
 	public void test_ErrorPage5() throws Exception {
 		BundleContext bundleContext = getBundleContext();
-		Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
+		Dictionary<String, Object> serviceProps = new Hashtable<>();
 		serviceProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/prototype/*");
 		TestServletPrototype testDriver = new TestServletPrototype(bundleContext);
 		registrations.add(bundleContext.registerService(Servlet.class, testDriver, serviceProps));
 
-		Dictionary<String, Object> errorProps = new Hashtable<String, Object>();
+		Dictionary<String, Object> errorProps = new Hashtable<>();
 		errorProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E5.4xx");
 		errorProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, "4xx");
 		registrations.add(getBundleContext().registerService(Servlet.class, new ErrorServlet("4xx"), errorProps));
-		errorProps = new Hashtable<String, Object>();
+		errorProps = new Hashtable<>();
 		errorProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E5.5xx");
 		errorProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, "5xx");
 		registrations.add(getBundleContext().registerService(Servlet.class, new ErrorServlet("5xx"), errorProps));
@@ -269,7 +269,7 @@ public class ServletTest extends BaseTest {
 			@Override
 			protected void service(
 				HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
+				throws IOException {
 
 				response.getWriter().write("Hello!");
 				response.setStatus(444);
@@ -277,11 +277,11 @@ public class ServletTest extends BaseTest {
 
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E6");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/TestErrorPage6/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E6.error");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, "444");
 		registrations.add(getBundleContext().registerService(Servlet.class, new ErrorServlet("444"), props));
@@ -309,7 +309,7 @@ public class ServletTest extends BaseTest {
 			@Override
 			protected void doGet(
 				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
+				throws IOException {
 
 				resp.setStatus(status);
 
@@ -325,11 +325,11 @@ public class ServletTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E7");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/TestErrorPage7/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E7.error");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, String.valueOf(status));
 		registrations.add(getBundleContext().registerService(Servlet.class, new ErrorServlet(String.valueOf(status)), props));
@@ -350,18 +350,17 @@ public class ServletTest extends BaseTest {
 
 			@Override
 			protected void doGet(
-				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
+				HttpServletRequest req, HttpServletResponse resp) {
 
 				throw new RuntimeException();
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E8");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/TestErrorPage8/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E8.error");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, RuntimeException.class.getName());
 		registrations.add(getBundleContext().registerService(Servlet.class, new ErrorServlet("500"), props));
@@ -383,17 +382,17 @@ public class ServletTest extends BaseTest {
 			@Override
 			protected void doGet(
 				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
+				throws IOException {
 
 				throw new IOException();
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E9");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/TestErrorPage9/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E9.error");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, IOException.class.getName());
 		registrations.add(getBundleContext().registerService(Servlet.class, new ErrorServlet("500"), props));
@@ -408,14 +407,14 @@ public class ServletTest extends BaseTest {
 	}
 
 	@Test
-	public void test_ErrorPage10() throws Exception {
+	public void test_ErrorPage10() {
 		Servlet servlet = new HttpServlet() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void doGet(
 				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
+				throws IOException {
 
 				resp.getWriter().write("some output");
 				resp.flushBuffer();
@@ -424,7 +423,7 @@ public class ServletTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E10");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/TestErrorPage10/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
@@ -442,21 +441,21 @@ public class ServletTest extends BaseTest {
 	}
 
 	@Test
-	public void test_ErrorPage11() throws Exception {
+	public void test_ErrorPage11() {
 		Servlet servlet = new HttpServlet() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void doGet(
 				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
+				throws IOException {
 
 				resp.sendError(403);
 				resp.getOutputStream().flush();
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E10");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/TestErrorPage11/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
@@ -769,17 +768,17 @@ public class ServletTest extends BaseTest {
 		TestFilter testFilter2 = new TestFilter();
 		Servlet testServlet = new BaseServlet(expected);
 
-		Dictionary<String, String> props = new Hashtable<String, String>();
+		Dictionary<String, String> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/hello");
 		registrations.add(getBundleContext().registerService(Filter.class, testFilter1, props));
 
-		props = new Hashtable<String, String>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F2");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/hello/*");
 		registrations.add(getBundleContext().registerService(Filter.class, testFilter2, props));
 
-		props = new Hashtable<String, String>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/hello/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, testServlet, props));
 
@@ -797,8 +796,8 @@ public class ServletTest extends BaseTest {
 	}
 
 	public void basicFilterTest22( String servlet1Pattern, String servlet2Pattern, String filterPattern, String expected, String[] dispatchers ) throws Exception {
-		final AtomicReference<HttpServletRequestWrapper> httpServletRequestWrapper = new AtomicReference<HttpServletRequestWrapper>();
-		final AtomicReference<HttpServletResponseWrapper> httpServletResponseWrapper = new AtomicReference<HttpServletResponseWrapper>();
+		final AtomicReference<HttpServletRequestWrapper> httpServletRequestWrapper = new AtomicReference<>();
+		final AtomicReference<HttpServletResponseWrapper> httpServletResponseWrapper = new AtomicReference<>();
 
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;
@@ -849,15 +848,15 @@ public class ServletTest extends BaseTest {
 
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, servlet1Pattern);
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, servlet2Pattern);
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
 
-		props = new Hashtable<String, Object>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F22");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, dispatchers);
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, filterPattern);
@@ -974,9 +973,9 @@ public class ServletTest extends BaseTest {
 		TestFilter testFilter2 = new TestFilter();
 		Servlet testServlet = new BaseServlet(expected);
 
-		registrations.add(getBundleContext().registerService(Filter.class, testFilter1, new Hashtable<String, String>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*"))));
-		registrations.add(getBundleContext().registerService(Filter.class, testFilter2, new Hashtable<String, String>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/hello/*"))));
-		registrations.add(getBundleContext().registerService(Servlet.class, testServlet, new Hashtable<String, String>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/"))));
+		registrations.add(getBundleContext().registerService(Filter.class, testFilter1, new Hashtable<>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*"))));
+		registrations.add(getBundleContext().registerService(Filter.class, testFilter2, new Hashtable<>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/hello/*"))));
+		registrations.add(getBundleContext().registerService(Servlet.class, testServlet, new Hashtable<>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/"))));
 
 		String actual = requestAdvisor.request("hello_test/request");
 		Assert.assertEquals(expected, actual);
@@ -999,9 +998,9 @@ public class ServletTest extends BaseTest {
 		TestFilter testFilter1 = new TestFilter();
 		Servlet testServlet = new BaseServlet(expected);
 
-		ServiceRegistration<Filter> filterReg = getBundleContext().registerService(Filter.class, testFilter1, new Hashtable<String, String>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/hello/*")));
+		ServiceRegistration<Filter> filterReg = getBundleContext().registerService(Filter.class, testFilter1, new Hashtable<>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/hello/*")));
 		try {
-			registrations.add(getBundleContext().registerService(Servlet.class, testServlet, new Hashtable<String, String>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/hello/*"))));
+			registrations.add(getBundleContext().registerService(Servlet.class, testServlet, new Hashtable<>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/hello/*"))));
 
 			String actual = requestAdvisor.request("hello/request");
 			Assert.assertEquals(expected, actual);
@@ -1261,7 +1260,7 @@ public class ServletTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public void init(ServletConfig config) throws ServletException {
+			public void init(ServletConfig config) {
 				throw new IllegalStateException("Init error.");
 			}
 
@@ -1281,13 +1280,12 @@ public class ServletTest extends BaseTest {
 		Filter initError = new Filter() {
 
 			@Override
-			public void init(FilterConfig filterConfig) throws ServletException {
+			public void init(FilterConfig filterConfig) {
 				throw new IllegalStateException("Init error.");
 			}
 
 			@Override
-			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
-					ServletException {
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
 				// nothing
 			}
 
@@ -1316,8 +1314,7 @@ public class ServletTest extends BaseTest {
 			}
 
 			@Override
-			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
-					ServletException {
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
 				// nothing
 			}
 
@@ -1353,11 +1350,11 @@ public class ServletTest extends BaseTest {
 
 		};
 
-		Hashtable<String, String> props = new Hashtable<String, String>();
+		Hashtable<String, String> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, servletName);
 		registrations.add(getBundleContext().registerService(Servlet.class, namedServlet, props));
 
-		props = new Hashtable<String, String>();
+		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
 		registrations.add(getBundleContext().registerService(Servlet.class, targetServlet, props));
 
@@ -1372,7 +1369,7 @@ public class ServletTest extends BaseTest {
 		Filter tcclFilter = new Filter() {
 
 			@Override
-			public void init(FilterConfig filterConfig) throws ServletException {
+			public void init(FilterConfig filterConfig) {
 				filterTCCL.add(Thread.currentThread().getContextClassLoader().getClass().getName());
 			}
 
@@ -1405,8 +1402,7 @@ public class ServletTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
-					IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 				servletTCCL.add(Thread.currentThread().getContextClassLoader().getClass().getName());
 				response.getWriter().print(Thread.currentThread().getContextClassLoader().getClass().getName());
 			}
@@ -1477,8 +1473,7 @@ public class ServletTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
-					IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 				HttpSession session = request.getSession();
 				if (session.getAttribute("test.attribute") == null) {
 					session.setAttribute("test.attribute", bindingListener);
@@ -1492,14 +1487,14 @@ public class ServletTest extends BaseTest {
 		};
 		ServiceRegistration<Servlet> servletReg = null;
 		ServiceRegistration<HttpSessionListener> sessionListenerReg = null;
-		Dictionary<String, Object> servletProps = new Hashtable<String, Object>();
+		Dictionary<String, Object> servletProps = new Hashtable<>();
 		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/sessions");
 		String actual = null;
 		CookieHandler previous = CookieHandler.getDefault();
 		CookieHandler.setDefault(new CookieManager( null, CookiePolicy.ACCEPT_ALL ) );
 		try {
 			servletReg = getBundleContext().registerService(Servlet.class, sessionServlet, servletProps);
-			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			Dictionary<String, String> listenerProps = new Hashtable<>();
 			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			sessionListenerReg = getBundleContext().registerService(HttpSessionListener.class, sessionListener, listenerProps);
 
@@ -1551,14 +1546,13 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void test_Sessions02() {
-		final AtomicReference<HttpSession> sessionReference = new AtomicReference<HttpSession>();
+		final AtomicReference<HttpSession> sessionReference = new AtomicReference<>();
 
 		HttpServlet sessionServlet = new HttpServlet() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
-					IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 				HttpSession session = request.getSession();
 				sessionReference.set(session);
 				if (session.getAttribute("test.attribute") == null) {
@@ -1571,7 +1565,7 @@ public class ServletTest extends BaseTest {
 			}
 		};
 		ServiceRegistration<Servlet> servletReg = null;
-		Dictionary<String, Object> servletProps = new Hashtable<String, Object>();
+		Dictionary<String, Object> servletProps = new Hashtable<>();
 		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/sessions");
 		String actual = null;
 		CookieHandler previous = CookieHandler.getDefault();
@@ -1634,7 +1628,7 @@ public class ServletTest extends BaseTest {
 		};
 		final AtomicBoolean sessionCreated = new AtomicBoolean(false);
 		final AtomicBoolean sessionDestroyed = new AtomicBoolean(false);
-		final AtomicReference<String> sessionId = new AtomicReference<String>();
+		final AtomicReference<String> sessionId = new AtomicReference<>();
 		HttpSessionListener sessionListener = new HttpSessionListener() {
 
 			@Override
@@ -1651,8 +1645,7 @@ public class ServletTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
-					IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 				HttpSession session = request.getSession();
 				if (session.getAttribute("test.attribute") == null) {
 					session.setAttribute("test.attribute", bindingListener);
@@ -1667,14 +1660,14 @@ public class ServletTest extends BaseTest {
 		};
 		ServiceRegistration<Servlet> servletReg = null;
 		ServiceRegistration<HttpSessionListener> sessionListenerReg = null;
-		Dictionary<String, Object> servletProps = new Hashtable<String, Object>();
+		Dictionary<String, Object> servletProps = new Hashtable<>();
 		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/sessions");
 		String actual = null;
 		CookieHandler previous = CookieHandler.getDefault();
 		CookieHandler.setDefault(new CookieManager( null, CookiePolicy.ACCEPT_ALL ) );
 		try {
 			servletReg = getBundleContext().registerService(Servlet.class, sessionServlet, servletProps);
-			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			Dictionary<String, String> listenerProps = new Hashtable<>();
 			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			sessionListenerReg = getBundleContext().registerService(HttpSessionListener.class, sessionListener, listenerProps);
 
@@ -1769,8 +1762,7 @@ public class ServletTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
-					IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 				HttpSession session = request.getSession();
 				if (session.getAttribute("test.attribute") == null) {
 					session.setAttribute("test.attribute", bindingListener);
@@ -1784,13 +1776,13 @@ public class ServletTest extends BaseTest {
 		};
 		ServiceRegistration<Servlet> servletReg = null;
 		ServiceRegistration<HttpSessionListener> sessionListenerReg = null;
-		Dictionary<String, Object> servletProps = new Hashtable<String, Object>();
+		Dictionary<String, Object> servletProps = new Hashtable<>();
 		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/sessions");
 		String actual = null;
 
 		try {
 			servletReg = getBundleContext().registerService(Servlet.class, sessionServlet, servletProps);
-			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			Dictionary<String, String> listenerProps = new Hashtable<>();
 			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			sessionListenerReg = getBundleContext().registerService(HttpSessionListener.class, sessionListener, listenerProps);
 
@@ -1842,7 +1834,7 @@ public class ServletTest extends BaseTest {
 	}
 
 	@Test
-	public void test_Sessions05_Bug541607_MemoryLeak() throws Exception {
+	public void test_Sessions05_Bug541607_MemoryLeak() {
 		final List<String> sessionIds = new CopyOnWriteArrayList<>();
 		HttpSessionListener sessionListener = new HttpSessionListener() {
 
@@ -1860,8 +1852,7 @@ public class ServletTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException,
-					IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 				HttpSession session = request.getSession();
 				response.getWriter().print("created " + session.getId());
 			}
@@ -1869,12 +1860,12 @@ public class ServletTest extends BaseTest {
 		};
 		ServiceRegistration<Servlet> servletReg = null;
 		ServiceRegistration<HttpSessionListener> sessionListenerReg = null;
-		Dictionary<String, Object> servletProps = new Hashtable<String, Object>();
+		Dictionary<String, Object> servletProps = new Hashtable<>();
 		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/sessions");
 
 		try {
 			servletReg = getBundleContext().registerService(Servlet.class, sessionServlet, servletProps);
-			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			Dictionary<String, String> listenerProps = new Hashtable<>();
 			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			sessionListenerReg = getBundleContext().registerService(HttpSessionListener.class, sessionListener, listenerProps);
 
@@ -2000,7 +1991,7 @@ public class ServletTest extends BaseTest {
 				return null;
 			}
 		};
-		Dictionary<String, Object> contextProps = new Hashtable<String, Object>();
+		Dictionary<String, Object> contextProps = new Hashtable<>();
 		contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "foo");
 		contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/foo");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, customSCH, contextProps));
@@ -2032,7 +2023,7 @@ public class ServletTest extends BaseTest {
 				return null;
 			}
 		};
-		Dictionary<String, Object> contextProps = new Hashtable<String, Object>();
+		Dictionary<String, Object> contextProps = new Hashtable<>();
 		contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "foo");
 		contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/foo");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, customSCH, contextProps));
@@ -2069,7 +2060,7 @@ public class ServletTest extends BaseTest {
 				return userAgent.contains("Foo") && contentType.startsWith("video/");
 			}
 		};
-		Dictionary<String, Object> contextProps = new Hashtable<String, Object>();
+		Dictionary<String, Object> contextProps = new Hashtable<>();
 		contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "foo");
 		contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/foo");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, customSCH, contextProps));
@@ -2261,7 +2252,7 @@ public class ServletTest extends BaseTest {
 
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
+				throws IOException {
 
 				response.getWriter().write('a');
 			}
@@ -2273,7 +2264,7 @@ public class ServletTest extends BaseTest {
 
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
+				throws IOException {
 
 				response.getWriter().write('b');
 			}
@@ -2298,7 +2289,7 @@ public class ServletTest extends BaseTest {
 			@Override
 			protected void doGet(
 				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
+				throws IOException {
 
 				PrintWriter writer = resp.getWriter();
 				writer.write(req.getQueryString());
@@ -2309,7 +2300,7 @@ public class ServletTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S13");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet13/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
@@ -2326,7 +2317,7 @@ public class ServletTest extends BaseTest {
 
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
+				throws IOException {
 
 				response.getWriter().write('a');
 			}
@@ -2338,7 +2329,7 @@ public class ServletTest extends BaseTest {
 
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
+				throws IOException {
 
 				response.getWriter().write('b');
 			}
@@ -2393,13 +2384,13 @@ public class ServletTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S16");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet16/*");
 		props.put("equinox.http.multipartSupported", Boolean.TRUE);
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
 
-		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
+		Map<String, List<Object>> map = new HashMap<>();
 
 		map.put("file", Arrays.<Object>asList(getClass().getResource("resource1.txt")));
 
@@ -2422,12 +2413,12 @@ public class ServletTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S16");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet16/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
 
-		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
+		Map<String, List<Object>> map = new HashMap<>();
 
 		map.put("file", Arrays.<Object>asList(getClass().getResource("resource1.txt")));
 
@@ -2467,14 +2458,14 @@ public class ServletTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S16");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet16/*");
 		props.put("equinox.http.multipartSupported", Boolean.TRUE);
 		props.put("equinox.http.whiteboard.servlet.multipart.location", "file-upload-test");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
 
-		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
+		Map<String, List<Object>> map = new HashMap<>();
 
 		map.put("file", Arrays.<Object>asList(getClass().getResource("resource1.txt")));
 
@@ -2515,7 +2506,7 @@ public class ServletTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S16");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet16/*");
 		props.put("equinox.http.multipartSupported", Boolean.TRUE);
@@ -2523,7 +2514,7 @@ public class ServletTest extends BaseTest {
 		props.put("equinox.http.whiteboard.servlet.multipart.fileSizeThreshold", 10);
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
 
-		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
+		Map<String, List<Object>> map = new HashMap<>();
 
 		map.put("file", Arrays.<Object>asList(getClass().getResource("resource1.txt")));
 
@@ -2546,7 +2537,7 @@ public class ServletTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S16");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet16/*");
 		props.put("equinox.http.multipartSupported", Boolean.TRUE);
@@ -2555,7 +2546,7 @@ public class ServletTest extends BaseTest {
 		props.put("equinox.http.whiteboard.servlet.multipart.maxFileSize", 24L);
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
 
-		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
+		Map<String, List<Object>> map = new HashMap<>();
 
 		map.put("file", Arrays.<Object>asList(getClass().getResource("resource1.txt")));
 
@@ -2577,7 +2568,7 @@ public class ServletTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S16");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet16/*");
 		props.put("equinox.http.multipartSupported", Boolean.TRUE);
@@ -2586,7 +2577,7 @@ public class ServletTest extends BaseTest {
 		props.put("equinox.http.whiteboard.servlet.multipart.maxRequestSize", 26L);
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
 
-		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
+		Map<String, List<Object>> map = new HashMap<>();
 
 		map.put("file", Arrays.<Object>asList(getClass().getResource("resource1.txt")));
 
@@ -2647,7 +2638,7 @@ public class ServletTest extends BaseTest {
 
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
+				throws IOException {
 				// get a resource that is imported
 				URL url = request.getServletContext().getResource("org/osgi/service/http/HttpService.class");
 				response.getWriter().write(url == null ? "null" : url.getProtocol());
@@ -2672,7 +2663,7 @@ public class ServletTest extends BaseTest {
 
 			@Override
 			protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-				throws IOException, ServletException {
+				throws IOException {
 
 				boolean isMultipart = ServletFileUpload.isMultipartContent(req);
 				Assert.assertTrue(isMultipart);
@@ -2710,12 +2701,12 @@ public class ServletTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S16");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet16/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
 
-		Map<String, List<Object>> map = new HashMap<String, List<Object>>();
+		Map<String, List<Object>> map = new HashMap<>();
 
 		map.put("file", Arrays.<Object>asList(getClass().getResource("blue.png")));
 
@@ -2732,7 +2723,7 @@ public class ServletTest extends BaseTest {
 
 			@Override
 			protected void service(HttpServletRequest req, HttpServletResponse resp)
-					throws ServletException, IOException {
+					throws IOException {
 
 				PrintWriter writer = resp.getWriter();
 
@@ -2740,12 +2731,12 @@ public class ServletTest extends BaseTest {
 			}
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S16");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/Servlet16/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
 
-		Map<String, List<String>> map = new HashMap<String, List<String>>();
+		Map<String, List<String>> map = new HashMap<>();
 
 		Map<String, List<String>> result = requestAdvisor.request("Servlet16/NEEO-a5056097%2Fdevice%2Fapt-neeo_io%3Avirtual%3A6jzOoAtL%2FTemperature_GF_Living%2Fnone%2F1%2Fdirectory%2Factor/default", map);
 
@@ -2796,15 +2787,14 @@ public class ServletTest extends BaseTest {
 
 			@Override
 			protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
+				HttpServletRequest request, HttpServletResponse response) {
 
 				getServletContext().setAttribute("name", null);
 			}
 
 		};
 
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/S1/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet, props));
@@ -2818,17 +2808,17 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void testServletContextUnsupportedOperations() {
-		final AtomicReference<ServletContext> contextHolder = new AtomicReference<ServletContext>();
+		final AtomicReference<ServletContext> contextHolder = new AtomicReference<>();
 		Servlet unsupportedServlet = new HttpServlet() {
 			private static final long serialVersionUID = 1L;
 			@Override
-			public void init(ServletConfig config) throws ServletException {
+			public void init(ServletConfig config) {
 				contextHolder.set(config.getServletContext());
 			}
 		};
 
 		ServiceRegistration<Servlet> servletReg = null;
-		Dictionary<String, Object> servletProps = new Hashtable<String, Object>();
+		Dictionary<String, Object> servletProps = new Hashtable<>();
 		servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/sessions");
 		try {
 			servletReg = getBundleContext().registerService(Servlet.class, unsupportedServlet, servletProps);
@@ -2864,7 +2854,7 @@ public class ServletTest extends BaseTest {
 	}
 
 	static private List<Method> getUnsupportedMethods() {
-		List<Method> methods = new ArrayList<Method>();
+		List<Method> methods = new ArrayList<>();
 		Class<ServletContext> contextClass = ServletContext.class;
 		for(Method m : contextClass.getMethods()) {
 			String name = m.getName();
@@ -2876,32 +2866,32 @@ public class ServletTest extends BaseTest {
 	}
 
 	@Test
-	public void test_ServletContextHelper1() throws Exception {
+	public void test_ServletContextHelper1() {
 		BundleContext bundleContext = getBundleContext();
 		Bundle bundle = bundleContext.getBundle();
 
 		ServletContextHelper servletContextHelper = new ServletContextHelper(bundle){};
-		Dictionary<String, String> contextProps = new Hashtable<String, String>();
+		Dictionary<String, String> contextProps = new Hashtable<>();
 		registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
 
 		servletContextHelper = new ServletContextHelper(bundle){};
-		contextProps = new Hashtable<String, String>();
+		contextProps = new Hashtable<>();
 		contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "test.sch.one");
 		registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
 
 		servletContextHelper = new ServletContextHelper(bundle){};
-		contextProps = new Hashtable<String, String>();
+		contextProps = new Hashtable<>();
 		contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/test-sch2");
 		registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
 
 		servletContextHelper = new ServletContextHelper(bundle){};
-		contextProps = new Hashtable<String, String>();
+		contextProps = new Hashtable<>();
 		contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "Test SCH 3!");
 		contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/test-sch3");
 		registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
 
 		servletContextHelper = new ServletContextHelper(bundle){};
-		contextProps = new Hashtable<String, String>();
+		contextProps = new Hashtable<>();
 		contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "test.sch.four");
 		contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "test$sch$4");
 		registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
@@ -2932,14 +2922,14 @@ public class ServletTest extends BaseTest {
 		ServletContextHelper servletContextHelper = new ServletContextHelper(bundle){};
 		Servlet s1 = new BaseServlet("a");
 
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			Dictionary<String, String> contextProps = new Hashtable<String, String>();
+			Dictionary<String, String> contextProps = new Hashtable<>();
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/");
 			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
 
-			Dictionary<String, String> servletProps = new Hashtable<String, String>();
+			Dictionary<String, String> servletProps = new Hashtable<>();
 			servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
 			servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1");
 			servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
@@ -2965,14 +2955,14 @@ public class ServletTest extends BaseTest {
 		ServletContextHelper servletContextHelper = new ServletContextHelper(bundle){};
 		Servlet s1 = new BaseServlet("b");
 
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			Dictionary<String, String> contextProps = new Hashtable<String, String>();
+			Dictionary<String, String> contextProps = new Hashtable<>();
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
 
-			Dictionary<String, String> servletProps = new Hashtable<String, String>();
+			Dictionary<String, String> servletProps = new Hashtable<>();
 			servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
 			servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1");
 			servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
@@ -3001,19 +2991,19 @@ public class ServletTest extends BaseTest {
 		Servlet s1 = new BaseServlet(expected1);
 		Servlet s2 = new BaseServlet(expected2);
 
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			Dictionary<String, String> contextProps = new Hashtable<String, String>();
+			Dictionary<String, String> contextProps = new Hashtable<>();
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
 
-			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
+			Dictionary<String, String> servletProps1 = new Hashtable<>();
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
 			registrations.add(bundleContext.registerService(Servlet.class, s1, servletProps1));
 
-			Dictionary<String, String> servletProps2 = new Hashtable<String, String>();
+			Dictionary<String, String> servletProps2 = new Hashtable<>();
 			servletProps2.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
 			servletProps2.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
 			servletProps2.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
@@ -3045,7 +3035,7 @@ public class ServletTest extends BaseTest {
 		Servlet s1 = new BaseServlet(expected1);
 
 
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
 			// register a hook that hides the helper from the registering bundle
 			registrations.add(bundleContext.registerService(FindHook.class, new FindHook() {
@@ -3059,12 +3049,12 @@ public class ServletTest extends BaseTest {
 				}
 			}, null));
 
-			Dictionary<String, String> contextProps = new Hashtable<String, String>();
+			Dictionary<String, String> contextProps = new Hashtable<>();
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
 
-			Dictionary<String, String> servletProps2 = new Hashtable<String, String>();
+			Dictionary<String, String> servletProps2 = new Hashtable<>();
 			servletProps2.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
 			servletProps2.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
 			servletProps2.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
@@ -3135,7 +3125,7 @@ public class ServletTest extends BaseTest {
 			@Override
 			protected void service(
 					HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
+				throws IOException {
 
 				StringBuilder builder = new StringBuilder();
 				builder.append(request.getServletContext().getInitParameter("a")).append(',');
@@ -3145,9 +3135,9 @@ public class ServletTest extends BaseTest {
 			}
 		};
 
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			Dictionary<String, Object> contextProps = new Hashtable<String, Object>();
+			Dictionary<String, Object> contextProps = new Hashtable<>();
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX + "a", "a");
@@ -3155,7 +3145,7 @@ public class ServletTest extends BaseTest {
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX + "c", Integer.valueOf(1));
 			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
 
-			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
+			Dictionary<String, String> servletProps1 = new Hashtable<>();
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
@@ -3190,7 +3180,7 @@ public class ServletTest extends BaseTest {
 		Filter f1 = new Filter() {
 
 			@Override
-			public void init(FilterConfig filterConfig) throws ServletException {
+			public void init(FilterConfig filterConfig) {
 			}
 
 			@Override
@@ -3210,25 +3200,25 @@ public class ServletTest extends BaseTest {
 		Servlet s1 = new HttpServlet() {
 			private static final long serialVersionUID = 1L;
 			@Override
-			public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+			public void service(ServletRequest req, ServletResponse res) throws IOException {
 				res.getWriter().print(req.getAttribute(testName.getMethodName() + ".fromFilter"));
 			}
 
 		};
 
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			Dictionary<String, String> contextProps = new Hashtable<String, String>();
+			Dictionary<String, String> contextProps = new Hashtable<>();
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/");
 			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
 
-			Dictionary<String, String> filterProps = new Hashtable<String, String>();
+			Dictionary<String, String> filterProps = new Hashtable<>();
 			filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*");
 			filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 			registrations.add(bundleContext.registerService(Filter.class, f1, filterProps));
 
-			Dictionary<String, String> servletProps = new Hashtable<String, String>();
+			Dictionary<String, String> servletProps = new Hashtable<>();
 			servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
 			servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1");
 			servletProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
@@ -3253,25 +3243,25 @@ public class ServletTest extends BaseTest {
 		ServletContextHelper servletContextHelperA = new ServletContextHelper(bundle){};
 		ServletContextHelper servletContextHelperB = new ServletContextHelper(bundle){};
 
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			final AtomicReference<File> fileA = new AtomicReference<File>();
+			final AtomicReference<File> fileA = new AtomicReference<>();
 
 			Servlet servletA = new HttpServlet() {
 				private static final long serialVersionUID = 1L;
 				@Override
 				protected void service(HttpServletRequest req, HttpServletResponse resp)
-					throws IOException, ServletException {
+					throws IOException {
 					fileA.set((File)getServletContext().getAttribute(ServletContext.TEMPDIR));
 					new File(fileA.get(), "test").createNewFile();
 				}
 			};
 
-			Dictionary<String, String> contextProps = new Hashtable<String, String>();
+			Dictionary<String, String> contextProps = new Hashtable<>();
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelperA, contextProps));
-			Dictionary<String, Object> props = new Hashtable<String, Object>();
+			Dictionary<String, Object> props = new Hashtable<>();
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "SA");
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/SA");
@@ -3281,7 +3271,7 @@ public class ServletTest extends BaseTest {
 			Assert.assertNotNull(fileA.get());
 			Assert.assertTrue(new File(fileA.get(), "test").exists());
 
-			contextProps = new Hashtable<String, String>();
+			contextProps = new Hashtable<>();
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "b");
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/b");
 			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelperB, contextProps));
@@ -3311,9 +3301,9 @@ public class ServletTest extends BaseTest {
 
 		ServletContextHelper servletContextHelperA = new ServletContextHelper(bundle){};
 
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			final AtomicReference<String> path = new AtomicReference<String>();
+			final AtomicReference<String> path = new AtomicReference<>();
 
 			Servlet servletA = new HttpServlet() {
 				private static final long serialVersionUID = 1L;
@@ -3327,22 +3317,21 @@ public class ServletTest extends BaseTest {
 			Servlet servletB = new HttpServlet() {
 				private static final long serialVersionUID = 1L;
 				@Override
-				protected void service(HttpServletRequest req, HttpServletResponse resp)
-					throws IOException, ServletException {
+				protected void service(HttpServletRequest req, HttpServletResponse resp) {
 					path.set((String)req.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH));
 				}
 			};
 
-			Dictionary<String, String> contextProps = new Hashtable<String, String>();
+			Dictionary<String, String> contextProps = new Hashtable<>();
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelperA, contextProps));
-			Dictionary<String, Object> props = new Hashtable<String, Object>();
+			Dictionary<String, Object> props = new Hashtable<>();
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "SA");
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/SA");
 			registrations.add(getBundleContext().registerService(Servlet.class, servletA, props));
-			props = new Hashtable<String, Object>();
+			props = new Hashtable<>();
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "SB");
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/SB");
@@ -3381,9 +3370,9 @@ public class ServletTest extends BaseTest {
 
 		ServletContextHelper servletContextHelperA = new ServletContextHelper(bundle){};
 
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			final AtomicReference<String> path = new AtomicReference<String>();
+			final AtomicReference<String> path = new AtomicReference<>();
 
 			Servlet servletA = new HttpServlet() {
 				private static final long serialVersionUID = 1L;
@@ -3397,22 +3386,21 @@ public class ServletTest extends BaseTest {
 			Servlet servletB = new HttpServlet() {
 				private static final long serialVersionUID = 1L;
 				@Override
-				protected void service(HttpServletRequest req, HttpServletResponse resp)
-					throws IOException, ServletException {
+				protected void service(HttpServletRequest req, HttpServletResponse resp) {
 					path.set((String)req.getAttribute(RequestDispatcher.FORWARD_CONTEXT_PATH));
 				}
 			};
 
-			Dictionary<String, String> contextProps = new Hashtable<String, String>();
+			Dictionary<String, String> contextProps = new Hashtable<>();
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelperA, contextProps));
-			Dictionary<String, Object> props = new Hashtable<String, Object>();
+			Dictionary<String, Object> props = new Hashtable<>();
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "SA");
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/SA");
 			registrations.add(getBundleContext().registerService(Servlet.class, servletA, props));
-			props = new Hashtable<String, Object>();
+			props = new Hashtable<>();
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "SB");
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/SB");
@@ -3446,24 +3434,23 @@ public class ServletTest extends BaseTest {
 			startJetty();
 		}
 
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			final AtomicReference<String> getRequestURI = new AtomicReference<String>();
+			final AtomicReference<String> getRequestURI = new AtomicReference<>();
 
 			Servlet servletA = new HttpServlet() {
 				private static final long serialVersionUID = 1L;
 				@Override
-				protected void service(HttpServletRequest req, HttpServletResponse resp)
-					throws IOException, ServletException {
+				protected void service(HttpServletRequest req, HttpServletResponse resp) {
 					getRequestURI.set(req.getRequestURI());
 				}
 			};
 
-			Dictionary<String, Object> props = new Hashtable<String, Object>();
+			Dictionary<String, Object> props = new Hashtable<>();
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "SA");
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, new String[] {"/*", "/"});
 			registrations.add(getBundleContext().registerService(Servlet.class, servletA, props));
-			props = new Hashtable<String, Object>();
+			props = new Hashtable<>();
 
 			requestAdvisor.request("a/b/c/");
 
@@ -3501,26 +3488,25 @@ public class ServletTest extends BaseTest {
 			startJetty();
 		}
 
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			final AtomicReference<String> getRequestURI = new AtomicReference<String>();
+			final AtomicReference<String> getRequestURI = new AtomicReference<>();
 
 			Servlet servletA = new HttpServlet() {
 				private static final long serialVersionUID = 1L;
 				@Override
-				protected void service(HttpServletRequest req, HttpServletResponse resp)
-					throws IOException, ServletException {
+				protected void service(HttpServletRequest req, HttpServletResponse resp) {
 					HttpSession session = req.getSession();
 					session.setAttribute("test", req.getParameter("p1"));
 					getRequestURI.set(resp.encodeURL(req.getRequestURI()));
 				}
 			};
 
-			Dictionary<String, Object> props = new Hashtable<String, Object>();
+			Dictionary<String, Object> props = new Hashtable<>();
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "SA");
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/*");
 			registrations.add(getBundleContext().registerService(Servlet.class, servletA, props));
-			props = new Hashtable<String, Object>();
+			props = new Hashtable<>();
 
 			requestAdvisor.request("a/b/c/?p1=v1");
 			// get the session
@@ -3554,24 +3540,23 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void test_getRequestURI_trailingSlash3() throws Exception {
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			final AtomicReference<String> getRequestURI = new AtomicReference<String>();
+			final AtomicReference<String> getRequestURI = new AtomicReference<>();
 
 			Servlet servletA = new HttpServlet() {
 				private static final long serialVersionUID = 1L;
 				@Override
-				protected void service(HttpServletRequest req, HttpServletResponse resp)
-					throws IOException, ServletException {
+				protected void service(HttpServletRequest req, HttpServletResponse resp) {
 					getRequestURI.set(req.getRequestURI());
 				}
 			};
 
-			Dictionary<String, Object> props = new Hashtable<String, Object>();
+			Dictionary<String, Object> props = new Hashtable<>();
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "SA");
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, new String[] {"/*", "/"});
 			registrations.add(getBundleContext().registerService(Servlet.class, servletA, props));
-			props = new Hashtable<String, Object>();
+			props = new Hashtable<>();
 
 			requestAdvisor.request("a/b/c/");
 			Assert.assertEquals("/a/b/c/", getRequestURI.get());
@@ -3593,26 +3578,25 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void test_getRequestURI_trailingSlash4() throws Exception {
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			final AtomicReference<String> getRequestURI = new AtomicReference<String>();
+			final AtomicReference<String> getRequestURI = new AtomicReference<>();
 
 			Servlet servletA = new HttpServlet() {
 				private static final long serialVersionUID = 1L;
 				@Override
-				protected void service(HttpServletRequest req, HttpServletResponse resp)
-					throws IOException, ServletException {
+				protected void service(HttpServletRequest req, HttpServletResponse resp) {
 					HttpSession session = req.getSession();
 					session.setAttribute("test", req.getParameter("p1"));
 					getRequestURI.set(resp.encodeURL(req.getRequestURI()));
 				}
 			};
 
-			Dictionary<String, Object> props = new Hashtable<String, Object>();
+			Dictionary<String, Object> props = new Hashtable<>();
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "SA");
 			props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/*");
 			registrations.add(getBundleContext().registerService(Servlet.class, servletA, props));
-			props = new Hashtable<String, Object>();
+			props = new Hashtable<>();
 
 			requestAdvisor.request("a/b/c/?p1=v1");
 			// get the session
@@ -3638,11 +3622,11 @@ public class ServletTest extends BaseTest {
 	}
 
 	@Test
-	public void test_Listener1() throws Exception {
+	public void test_Listener1() {
 		BaseServletContextListener scl1 =
 			new BaseServletContextListener();
 
-		Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+		Dictionary<String, String> listenerProps = new Hashtable<>();
 		listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 		ServiceRegistration<ServletContextListener> registration = getBundleContext().registerService(ServletContextListener.class, scl1, listenerProps);
 		registration.unregister();
@@ -3653,21 +3637,21 @@ public class ServletTest extends BaseTest {
 	}
 
 	@Test
-	public void test_Listener2() throws Exception {
+	public void test_Listener2() {
 		BundleContext bundleContext = getBundleContext();
 		Bundle bundle = bundleContext.getBundle();
 
 		ServletContextHelper servletContextHelper = new ServletContextHelper(bundle){};
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			Dictionary<String, String> contextProps = new Hashtable<String, String>();
+			Dictionary<String, String> contextProps = new Hashtable<>();
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
 
 			BaseServletContextListener scl1 =
 					new BaseServletContextListener();
-			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			Dictionary<String, String> listenerProps = new Hashtable<>();
 			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			ServiceRegistration<ServletContextListener> registration = getBundleContext().registerService(ServletContextListener.class, scl1, listenerProps);
@@ -3684,20 +3668,20 @@ public class ServletTest extends BaseTest {
 	}
 
 	@Test
-	public void test_Listener3() throws Exception {
+	public void test_Listener3() {
 		BundleContext bundleContext = getBundleContext();
 		Bundle bundle = bundleContext.getBundle();
 
 		ServletContextHelper servletContextHelper = new ServletContextHelper(bundle){};
 		BaseServletContextListener scl1 = new BaseServletContextListener();
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			Dictionary<String, String> contextProps = new Hashtable<String, String>();
+			Dictionary<String, String> contextProps = new Hashtable<>();
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 			contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 			registrations.add(bundleContext.registerService(ServletContextHelper.class, servletContextHelper, contextProps));
 
-			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			Dictionary<String, String> listenerProps = new Hashtable<>();
 			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			registrations.add(bundleContext.registerService(ServletContextListener.class, scl1, listenerProps));
@@ -3719,13 +3703,13 @@ public class ServletTest extends BaseTest {
 			new BaseServletContextAttributeListener();
 		Servlet s1 = new BaseServlet("a");
 
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			Dictionary<String, String> listenerProps = new Hashtable<>();
 			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			registrations.add(getBundleContext().registerService(ServletContextAttributeListener.class, scal1, listenerProps));
 
-			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
+			Dictionary<String, String> servletProps1 = new Hashtable<>();
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
 			registrations.add(getBundleContext().registerService(Servlet.class, s1, servletProps1));
@@ -3763,13 +3747,13 @@ public class ServletTest extends BaseTest {
 
 		Servlet s1 = new BaseServlet("a");
 
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			Dictionary<String, String> listenerProps = new Hashtable<>();
 			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			registrations.add(getBundleContext().registerService(ServletRequestListener.class, srl1, listenerProps));
 
-			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
+			Dictionary<String, String> servletProps1 = new Hashtable<>();
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
 			registrations.add(getBundleContext().registerService(Servlet.class, s1, servletProps1));
@@ -3793,13 +3777,13 @@ public class ServletTest extends BaseTest {
 
 		Servlet s1 = new BaseServlet("a");
 
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			Dictionary<String, String> listenerProps = new Hashtable<>();
 			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			registrations.add(getBundleContext().registerService(ServletRequestAttributeListener.class, sral1, listenerProps));
 
-			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
+			Dictionary<String, String> servletProps1 = new Hashtable<>();
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
 			registrations.add(getBundleContext().registerService(Servlet.class, s1, servletProps1));
@@ -3825,13 +3809,13 @@ public class ServletTest extends BaseTest {
 
 		Servlet s1 = new BaseServlet("test_Listener7");
 
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			Dictionary<String, String> listenerProps = new Hashtable<>();
 			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			registrations.add(getBundleContext().registerService(HttpSessionAttributeListener.class, hsal1, listenerProps));
 
-			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
+			Dictionary<String, String> servletProps1 = new Hashtable<>();
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
 			registrations.add(getBundleContext().registerService(Servlet.class, s1, servletProps1));
@@ -3857,7 +3841,7 @@ public class ServletTest extends BaseTest {
 				}
 			}
 
-			Map<String, List<String>> requestHeaders = new HashMap<String, List<String>>();
+			Map<String, List<String>> requestHeaders = new HashMap<>();
 			requestHeaders.put("Cookie", Arrays.asList(sessionId));
 
 			requestAdvisor.request("s", requestHeaders);
@@ -3885,13 +3869,13 @@ public class ServletTest extends BaseTest {
 
 		Servlet s1 = new BaseChangeSessionIdServlet("test_Listener8");
 
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			Dictionary<String, String> listenerProps = new Hashtable<>();
 			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			registrations.add(getBundleContext().registerService(HttpSessionIdListener.class, hsil1, listenerProps));
 
-			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
+			Dictionary<String, String> servletProps1 = new Hashtable<>();
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S8");
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
 			registrations.add(getBundleContext().registerService(Servlet.class, s1, servletProps1));
@@ -3928,7 +3912,7 @@ public class ServletTest extends BaseTest {
 			@Override
 			protected void doGet(
 				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
+				throws IOException {
 
 				PrintWriter writer = resp.getWriter();
 				writer.write("S9 included");
@@ -3937,13 +3921,13 @@ public class ServletTest extends BaseTest {
 
 		BaseServletRequestListener srl1 = new BaseServletRequestListener();
 
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+			Dictionary<String, String> listenerProps = new Hashtable<>();
 			listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			registrations.add(getBundleContext().registerService(ServletRequestListener.class, srl1, listenerProps));
 
-			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
+			Dictionary<String, String> servletProps1 = new Hashtable<>();
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S9A");
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s9A");
 			registrations.add(getBundleContext().registerService(Servlet.class, sA, servletProps1));
@@ -3966,25 +3950,25 @@ public class ServletTest extends BaseTest {
 	}
 
 	@Test
-	public void test_Listener10() throws Exception {
+	public void test_Listener10() {
 		BaseServletContextListener scl1 = new BaseServletContextListener();
 		BaseServletContextListener scl2 = new BaseServletContextListener();
 		BaseServletContextListener scl3 = new BaseServletContextListener();
 
-		Dictionary<String, String> listenerProps = new Hashtable<String, String>();
+		Dictionary<String, String> listenerProps = new Hashtable<>();
 		listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 		registrations.add(getBundleContext().registerService(ServletContextListener.class, scl1, listenerProps));
 
-		listenerProps = new Hashtable<String, String>();
+		listenerProps = new Hashtable<>();
 		listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 		registrations.add(getBundleContext().registerService(ServletContextListener.class, scl2, listenerProps));
 
-		Dictionary<String, String> contextProps = new Hashtable<String, String>();
+		Dictionary<String, String> contextProps = new Hashtable<>();
 		contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		contextProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
 		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper(){}, contextProps));
 
-		listenerProps = new Hashtable<String, String>();
+		listenerProps = new Hashtable<>();
 		listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 		listenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(ServletContextListener.class, scl3, listenerProps));
@@ -4019,7 +4003,7 @@ public class ServletTest extends BaseTest {
 	public void test_Listener11() throws Exception {
 
 		final AtomicInteger listenerBalance = new AtomicInteger(0);
-		final AtomicReference<HttpSession> sessionReference = new AtomicReference<HttpSession>();
+		final AtomicReference<HttpSession> sessionReference = new AtomicReference<>();
 
 		ServletContextListener scl = new ServletContextListener() {
 
@@ -4051,7 +4035,7 @@ public class ServletTest extends BaseTest {
 			@Override
 			protected void doGet(
 				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
+				throws IOException {
 
 				HttpSession session = req.getSession();
 				sessionReference.set(session);
@@ -4062,17 +4046,17 @@ public class ServletTest extends BaseTest {
 			}
 		};
 
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			Dictionary<String, String> scListenerProps = new Hashtable<String, String>();
+			Dictionary<String, String> scListenerProps = new Hashtable<>();
 			scListenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			registrations.add(getBundleContext().registerService(ServletContextListener.class, scl, scListenerProps));
 
-			Dictionary<String, String> sListenerProps = new Hashtable<String, String>();
+			Dictionary<String, String> sListenerProps = new Hashtable<>();
 			sListenerProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 			registrations.add(getBundleContext().registerService(HttpSessionListener.class, sl, sListenerProps));
 
-			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
+			Dictionary<String, String> servletProps1 = new Hashtable<>();
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S11");
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s11");
 			registrations.add(getBundleContext().registerService(Servlet.class, sA, servletProps1));
@@ -4099,9 +4083,9 @@ public class ServletTest extends BaseTest {
 	public void test_Async1() throws Exception {
 
 		Servlet s1 = new BaseAsyncServlet("test_Listener8");
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			Dictionary<String, Object> servletProps1 = new Hashtable<String, Object>();
+			Dictionary<String, Object> servletProps1 = new Hashtable<>();
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S1");
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s");
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED, true);
@@ -4121,9 +4105,9 @@ public class ServletTest extends BaseTest {
 	@Test
 	public void test_AsyncOutput1() throws Exception {
 		Servlet s1 = new AsyncOutputServlet();
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			Dictionary<String, Object> servletProps1 = new Hashtable<String, Object>();
+			Dictionary<String, Object> servletProps1 = new Hashtable<>();
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "AsyncOutputServlet");
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/asyncOutput");
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED, true);
@@ -4173,9 +4157,9 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void test_BufferedOutput() throws Exception {
-		Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 		try {
-			Dictionary<String, String> servletProps1 = new Hashtable<String, String>();
+			Dictionary<String, String> servletProps1 = new Hashtable<>();
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "S9");
 			servletProps1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s9");
 			registrations.add(getBundleContext().registerService(Servlet.class, new BufferedServlet(), servletProps1));
@@ -4196,14 +4180,14 @@ public class ServletTest extends BaseTest {
 	@Test
 	public void testWBServletChangeInitParams() throws Exception{
 		BundleContext bundleContext = getBundleContext();
-		Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
+		Dictionary<String, Object> serviceProps = new Hashtable<>();
 		serviceProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/prototype/*");
 		TestServletPrototype testDriver = new TestServletPrototype(bundleContext);
 		registrations.add(bundleContext.registerService(Servlet.class, testDriver, serviceProps));
 
 			String actual;
 
-			Map<String, String> params = new HashMap<String, String>();
+			Map<String, String> params = new HashMap<>();
 			params.put(TEST_PROTOTYPE_NAME, testName.getMethodName());
 			params.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, '/' + testName.getMethodName());
 			params.put(STATUS_PARAM, testName.getMethodName());
@@ -4222,14 +4206,14 @@ public class ServletTest extends BaseTest {
 	@Test
 	public void testWBServletChangePattern() throws Exception{
 		BundleContext bundleContext = getBundleContext();
-		Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
+		Dictionary<String, Object> serviceProps = new Hashtable<>();
 		serviceProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/prototype/*");
 		TestServletPrototype testDriver = new TestServletPrototype(bundleContext);
 		registrations.add(bundleContext.registerService(Servlet.class, testDriver, serviceProps));
 
 		String actual;
 
-		Map<String, String> params = new HashMap<String, String>();
+		Map<String, String> params = new HashMap<>();
 		params.put(TEST_PROTOTYPE_NAME, testName.getMethodName());
 		params.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, '/' + testName.getMethodName());
 		params.put(STATUS_PARAM, testName.getMethodName());
@@ -4248,7 +4232,7 @@ public class ServletTest extends BaseTest {
 	@Test
 	public void testWBServletChangeRanking() throws Exception{
 		BundleContext bundleContext = getBundleContext();
-		Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
+		Dictionary<String, Object> serviceProps = new Hashtable<>();
 		serviceProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/prototype/*");
 		TestServletPrototype testDriver = new TestServletPrototype(bundleContext);
 		registrations.add(bundleContext.registerService(Servlet.class, testDriver, serviceProps));
@@ -4256,7 +4240,7 @@ public class ServletTest extends BaseTest {
 		String actual;
 
 		// Configure two servlets with the second one registered ranking higher
-		Map<String, String> params1 = new HashMap<String, String>();
+		Map<String, String> params1 = new HashMap<>();
 		params1.put(TEST_PROTOTYPE_NAME, testName.getMethodName() + 1);
 		params1.put(Constants.SERVICE_RANKING, "1");
 		params1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, '/' + testName.getMethodName());
@@ -4264,7 +4248,7 @@ public class ServletTest extends BaseTest {
 		actual = doRequest(CONFIGURE, params1);
 		Assert.assertEquals(testName.getMethodName() + 1, actual);
 
-		Map<String, String> params2 = new HashMap<String, String>();
+		Map<String, String> params2 = new HashMap<>();
 		params2.put(TEST_PROTOTYPE_NAME, testName.getMethodName() + 2);
 		params2.put(Constants.SERVICE_RANKING, "2");
 		params2.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, '/' + testName.getMethodName());
@@ -4294,12 +4278,12 @@ public class ServletTest extends BaseTest {
 	@Test
 	public void testWBServletDefaultContextAdaptor1() throws Exception{
 		BundleContext bundleContext = getBundleContext();
-		Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
+		Dictionary<String, Object> serviceProps = new Hashtable<>();
 		serviceProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/prototype/*");
 		TestServletPrototype testDriver = new TestServletPrototype(bundleContext);
 		registrations.add(bundleContext.registerService(Servlet.class, testDriver, serviceProps));
 
-		Dictionary<String, String> helperProps = new Hashtable<String, String>();
+		Dictionary<String, String> helperProps = new Hashtable<>();
 		helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "testContext" + testName.getMethodName());
 		helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/testContext");
 		helperProps.put(TEST_PATH_CUSTOMIZER_NAME, testName.getMethodName());
@@ -4307,7 +4291,7 @@ public class ServletTest extends BaseTest {
 
 		ServiceRegistration<ContextPathCustomizer> pathAdaptorReg = null;
 		try {
-			Map<String, String> params = new HashMap<String, String>();
+			Map<String, String> params = new HashMap<>();
 			params.put(TEST_PROTOTYPE_NAME, testName.getMethodName());
 			params.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, '/' + testName.getMethodName());
 			params.put(STATUS_PARAM, testName.getMethodName());
@@ -4341,12 +4325,12 @@ public class ServletTest extends BaseTest {
 	@Test
 	public void testWBServletDefaultContextAdaptor2() throws Exception{
 		BundleContext bundleContext = getBundleContext();
-		Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
+		Dictionary<String, Object> serviceProps = new Hashtable<>();
 		serviceProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/prototype/*");
 		TestServletPrototype testDriver = new TestServletPrototype(bundleContext);
 		registrations.add(bundleContext.registerService(Servlet.class, testDriver, serviceProps));
 
-		Dictionary<String, String> helperProps = new Hashtable<String, String>();
+		Dictionary<String, String> helperProps = new Hashtable<>();
 		helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "testContext" + testName.getMethodName());
 		helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/testContext");
 		helperProps.put(TEST_PATH_CUSTOMIZER_NAME, testName.getMethodName());
@@ -4354,7 +4338,7 @@ public class ServletTest extends BaseTest {
 
 		ServiceRegistration<ContextPathCustomizer> pathAdaptorReg = null;
 		try {
-			Map<String, String> params = new HashMap<String, String>();
+			Map<String, String> params = new HashMap<>();
 			params.put(TEST_PROTOTYPE_NAME, testName.getMethodName());
 			params.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, '/' + testName.getMethodName());
 			params.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" + "testContext" + testName.getMethodName() + ")");
@@ -4389,13 +4373,13 @@ public class ServletTest extends BaseTest {
 	@Test
 	public void testWBServletDefaultContextAdaptor3() throws Exception{
 		BundleContext bundleContext = getBundleContext();
-		Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
+		Dictionary<String, Object> serviceProps = new Hashtable<>();
 		serviceProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/prototype/*");
 		TestServletPrototype testDriver = new TestServletPrototype(bundleContext);
 		registrations.add(bundleContext.registerService(Servlet.class, testDriver, serviceProps));
 
 		// test the ContextPathCustomizer with a ServletContextHelper that has a '/' context path
-		Dictionary<String, String> helperProps = new Hashtable<String, String>();
+		Dictionary<String, String> helperProps = new Hashtable<>();
 		helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "testContext" + testName.getMethodName());
 		helperProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/");
 		helperProps.put(TEST_PATH_CUSTOMIZER_NAME, testName.getMethodName());
@@ -4403,7 +4387,7 @@ public class ServletTest extends BaseTest {
 
 		ServiceRegistration<ContextPathCustomizer> pathAdaptorReg = null;
 		try {
-			Map<String, String> params = new HashMap<String, String>();
+			Map<String, String> params = new HashMap<>();
 			params.put(TEST_PROTOTYPE_NAME, testName.getMethodName());
 			params.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, '/' + testName.getMethodName());
 			params.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" + "testContext" + testName.getMethodName() + ")");
@@ -4442,7 +4426,7 @@ public class ServletTest extends BaseTest {
 		HttpContext testContext = new HttpContext() {
 
 			@Override
-			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
+			public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) {
 				request.setAttribute(HttpContext.REMOTE_USER, "TEST");
 				request.setAttribute(HttpContext.AUTHENTICATION_TYPE, "Basic");
 				return true;
@@ -4463,7 +4447,7 @@ public class ServletTest extends BaseTest {
 
 			@Override
 			protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-					throws ServletException, IOException {
+					throws IOException {
 				resp.setContentType("text/html");
 				PrintWriter out = resp.getWriter();
 				out.print("USER: " + req.getRemoteUser() + " AUTH_TYPE: " + req.getAuthType());
