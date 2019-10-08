@@ -36,8 +36,8 @@ import org.eclipse.equinox.bidi.internal.StructuredTextActivator;
 public class StructuredTextSql extends StructuredTextTypeHandler {
 	private static final byte WS = Character.DIRECTIONALITY_WHITESPACE;
 	static final String lineSep = StructuredTextActivator.getProperty("line.separator"); //$NON-NLS-1$
-	private static final Integer STATE_LITERAL = new Integer(2);
-	private static final Integer STATE_SLASH_ASTER_COMMENT = new Integer(4);
+	private static final Integer STATE_LITERAL = Integer.valueOf(2);
+	private static final Integer STATE_SLASH_ASTER_COMMENT = Integer.valueOf(4);
 
 	public StructuredTextSql() {
 		super("\t!#%&()*+,-./:;<=>?|[]{}"); //$NON-NLS-1$

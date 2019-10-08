@@ -43,7 +43,7 @@ public class Test_140_2_39to41 extends BaseTest {
 		properties = new Hashtable<String, Object>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "foo");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/foo/bar");
-		properties.put(Constants.SERVICE_RANKING, new Integer(1000));
+		properties.put(Constants.SERVICE_RANKING, Integer.valueOf(1000));
 		registrations.add(context.registerService(ServletContextHelper.class, new ServletContextHelper() {}, properties));
 
 		FailedServletContextDTO failedServletContextDTO = getFailedServletContextDTOByName("foo");

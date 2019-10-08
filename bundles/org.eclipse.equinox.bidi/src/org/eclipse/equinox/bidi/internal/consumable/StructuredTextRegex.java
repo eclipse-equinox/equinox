@@ -63,8 +63,8 @@ public class StructuredTextRegex extends StructuredTextTypeHandler {
 	static final byte AL = Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC;
 	static final byte AN = Character.DIRECTIONALITY_ARABIC_NUMBER;
 	static final byte EN = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
-	private static final Integer STATE_COMMENT = new Integer(1);
-	private static final Integer STATE_QUOTED_SEQUENCE = new Integer(17);
+	private static final Integer STATE_COMMENT = Integer.valueOf(1);
+	private static final Integer STATE_QUOTED_SEQUENCE = Integer.valueOf(17);
 
 	/**
 	 *  Retrieves the number of special cases handled by this handler.

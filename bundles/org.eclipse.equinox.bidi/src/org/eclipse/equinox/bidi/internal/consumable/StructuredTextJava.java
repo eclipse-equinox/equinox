@@ -36,7 +36,7 @@ import org.eclipse.equinox.bidi.internal.StructuredTextActivator;
 public class StructuredTextJava extends StructuredTextTypeHandler {
 	private static final byte WS = Character.DIRECTIONALITY_WHITESPACE;
 	static final String lineSep = StructuredTextActivator.getProperty("line.separator"); //$NON-NLS-1$
-	private static final Integer STATE_SLASH_ASTER_COMMENT = new Integer(3);
+	private static final Integer STATE_SLASH_ASTER_COMMENT = Integer.valueOf(3);
 
 	public StructuredTextJava() {
 		super("[](){}.+-<>=~!&*/%^|?:,;\t"); //$NON-NLS-1$

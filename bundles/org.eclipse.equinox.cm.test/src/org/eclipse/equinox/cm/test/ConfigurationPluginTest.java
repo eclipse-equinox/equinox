@@ -190,7 +190,7 @@ public class ConfigurationPluginTest {
 			}
 		};
 		Dictionary<String, Object> pluginDict = new Hashtable<String, Object>();
-		pluginDict.put(ConfigurationPlugin.CM_RANKING, new Integer(1));
+		pluginDict.put(ConfigurationPlugin.CM_RANKING, Integer.valueOf(1));
 		ServiceRegistration<ConfigurationPlugin> pluginReg1 = Activator.getBundleContext().registerService(ConfigurationPlugin.class, plugin, pluginDict);
 
 		ConfigurationPlugin plugin2 = new ConfigurationPlugin() {
@@ -241,7 +241,7 @@ public class ConfigurationPluginTest {
 		final List<String> pluginsCalled = new ArrayList<String>();
 
 		Hashtable<String, Object> pluginProps = new Hashtable<String, Object>();
-		pluginProps.put(Constants.SERVICE_RANKING, new Integer(1));
+		pluginProps.put(Constants.SERVICE_RANKING, Integer.valueOf(1));
 		ConfigurationPlugin plugin1 = new ConfigurationPlugin() {
 			public void modifyConfiguration(ServiceReference<?> serviceReference, Dictionary<String, Object> properties) {
 				pluginsCalled.add("plugin1");
@@ -255,7 +255,7 @@ public class ConfigurationPluginTest {
 			}
 		};
 
-		pluginProps.put(Constants.SERVICE_RANKING, new Integer(2));
+		pluginProps.put(Constants.SERVICE_RANKING, Integer.valueOf(2));
 		ServiceRegistration<ConfigurationPlugin> pluginReg2 = Activator.getBundleContext().registerService(ConfigurationPlugin.class, plugin2, pluginProps);
 
 		ConfigurationPlugin plugin3 = new ConfigurationPlugin() {
@@ -264,7 +264,7 @@ public class ConfigurationPluginTest {
 			}
 		};
 
-		pluginProps.put(Constants.SERVICE_RANKING, new Integer(1));
+		pluginProps.put(Constants.SERVICE_RANKING, Integer.valueOf(1));
 		ServiceRegistration<ConfigurationPlugin> pluginReg3 = Activator.getBundleContext().registerService(ConfigurationPlugin.class, plugin3, pluginProps);
 
 		ManagedService ms = new ManagedService() {

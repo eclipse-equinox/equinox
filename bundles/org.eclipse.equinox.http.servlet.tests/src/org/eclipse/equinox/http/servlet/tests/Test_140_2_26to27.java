@@ -48,7 +48,7 @@ public class Test_140_2_26to27 extends BaseTest {
 		properties = new Hashtable<String, Object>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "foobar");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/foo");
-		properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
+		properties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
 		registrations.add(context.registerService(ServletContextHelper.class, new ServletContextHelper() {}, properties));
 
 		properties = new Hashtable<String, Object>();
