@@ -373,7 +373,7 @@ public class ServletRequestAdvisor extends Object {
 
 		try {
 			output = connection.getOutputStream();
-			writer = new PrintWriter(new OutputStreamWriter(output, "UTF-8"), true);
+			writer = new PrintWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8), true);
 
 			writer.append("--" + boundary);
 			writer.append(CRLF);

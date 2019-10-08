@@ -1,6 +1,7 @@
 package org.eclipse.equinox.metatype.impl;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /*******************************************************************************
@@ -19,7 +20,6 @@ import java.util.*;
 
 public class Persistence {
 	private static final int PERSISTENCE_VERSION = 0;
-	private static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 	private static final byte NULL = 0;
 	private static final byte OBJECT = 1;
 	private static final byte INDEX = 2;
@@ -67,7 +67,7 @@ public class Persistence {
 				int length = in.readInt();
 				byte[] data = new byte[length];
 				in.readFully(data);
-				string = new String(data, UTF_8);
+				string = new String(data, StandardCharsets.UTF_8);
 			} else {
 				string = in.readUTF();
 			}
@@ -149,7 +149,7 @@ public class Persistence {
 			if (string == null)
 				out.writeByte(NULL);
 			else {
-				byte[] data = string.getBytes(UTF_8);
+				byte[] data = string.getBytes(StandardCharsets.UTF_8);
 
 				if (data.length > 65535) {
 					out.writeByte(LONG_STRING);

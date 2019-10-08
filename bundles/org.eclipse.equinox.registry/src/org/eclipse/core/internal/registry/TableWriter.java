@@ -14,6 +14,7 @@
 package org.eclipse.core.internal.registry;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Map.Entry;
 import org.eclipse.core.runtime.*;
@@ -423,7 +424,7 @@ public class TableWriter {
 		if (string == null)
 			out.writeByte(TableReader.NULL);
 		else {
-			byte[] data = string.getBytes(TableReader.UTF_8);
+			byte[] data = string.getBytes(StandardCharsets.UTF_8);
 			if (data.length > 65535) {
 				out.writeByte(TableReader.LOBJECT);
 				out.writeInt(data.length);

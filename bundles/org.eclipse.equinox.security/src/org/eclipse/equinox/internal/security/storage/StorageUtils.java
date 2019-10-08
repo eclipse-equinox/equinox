@@ -16,9 +16,9 @@ package org.eclipse.equinox.internal.security.storage;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import org.eclipse.equinox.internal.security.auth.AuthPlugin;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
-import org.eclipse.osgi.util.NLS;
 
 /**
  * PLEASE READ BEFORE CHANGING THIS FILE
@@ -37,16 +37,9 @@ import org.eclipse.osgi.util.NLS;
 public class StorageUtils {
 
 	/**
-	 * Characters encoding used by the secure storage.
-	 */
-	final public static String CHAR_ENCODING = "UTF-8"; //$NON-NLS-1$
-
-	/**
 	 * Default name of the storage file
 	 */
 	final private static String propertiesFileName = ".eclipse/org.eclipse.equinox.security/secure_storage"; //$NON-NLS-1$
-
-	static private boolean firstCharsetException = true;
 
 	/**
 	 * Default locations:
@@ -128,16 +121,7 @@ public class StorageUtils {
 	static public byte[] getBytes(String string) {
 		if (string == null)
 			return null;
-		try {
-			return string.getBytes(CHAR_ENCODING);
-		} catch (UnsupportedEncodingException e) {
-			if (firstCharsetException) { // log error once per session
-				String msg = NLS.bind(SecAuthMessages.unsupoprtedCharEncoding, StorageUtils.CHAR_ENCODING);
-				AuthPlugin.getDefault().logMessage(msg);
-				firstCharsetException = false;
-			}
-			return string.getBytes();
-		}
+		return string.getBytes(StandardCharsets.UTF_8);
 	}
 
 	/**
@@ -150,16 +134,7 @@ public class StorageUtils {
 	static public String getString(byte[] bytes) {
 		if (bytes == null)
 			return null;
-		try {
-			return new String(bytes, CHAR_ENCODING);
-		} catch (UnsupportedEncodingException e) {
-			if (firstCharsetException) { // log error once per session
-				String msg = NLS.bind(SecAuthMessages.unsupoprtedCharEncoding, StorageUtils.CHAR_ENCODING);
-				AuthPlugin.getDefault().logMessage(msg);
-				firstCharsetException = false;
-			}
-			return new String(bytes);
-		}
+		return new String(bytes, StandardCharsets.UTF_8);
 	}
 
 }

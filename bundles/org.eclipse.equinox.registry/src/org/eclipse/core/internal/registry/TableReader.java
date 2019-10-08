@@ -15,6 +15,7 @@ package org.eclipse.core.internal.registry;
 
 import java.io.*;
 import java.lang.ref.SoftReference;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.core.runtime.IStatus;
@@ -67,8 +68,6 @@ public class TableReader {
 	//The orphan file
 	static final String ORPHANS = ".orphans"; //$NON-NLS-1$
 	File orphansFile;
-
-	static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 
 	//Status code
 	private static final byte fileError = 0;
@@ -659,7 +658,7 @@ public class TableReader {
 			int length = in.readInt();
 			byte[] data = new byte[length];
 			in.readFully(data);
-			value = new String(data, UTF_8);
+			value = new String(data, StandardCharsets.UTF_8);
 		} else {
 			value = in.readUTF();
 		}
