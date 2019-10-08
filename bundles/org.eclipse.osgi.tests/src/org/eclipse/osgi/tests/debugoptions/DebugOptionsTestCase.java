@@ -14,10 +14,26 @@
 
 package org.eclipse.osgi.tests.debugoptions;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.Test;
@@ -25,7 +41,9 @@ import junit.framework.TestSuite;
 import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.debug.FrameworkDebugTraceEntry;
-import org.eclipse.osgi.service.debug.*;
+import org.eclipse.osgi.service.debug.DebugOptions;
+import org.eclipse.osgi.service.debug.DebugOptionsListener;
+import org.eclipse.osgi.service.debug.DebugTrace;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -236,7 +254,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		String key1 = getName() + "/debug/disableCheck1";
 		String key2 = getName() + "/debug/disableCheck2";
 		String key3 = getName() + "/debug/disableCheck3";
-		Map /* <String, String> */newOptions = new HashMap();
+		Map /* <String, String> */ newOptions = new HashMap();
 		newOptions.put(key1, "ok1");
 		newOptions.put(key2, "ok2");
 		newOptions.put(key3, "ok3");
@@ -247,7 +265,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		// make sure the listener got called
 		assertTrue("Listener did not get called when setting batch options when tracing is enabled", listener.gotCalled()); //$NON-NLS-1$
 		// get all of the options
-		Map/* <String, String> */currentOptions = debugOptions.getOptions();
+		Map/* <String, String> */ currentOptions = debugOptions.getOptions();
 		// make sure the Map object returned is not the same Map object that was set
 		assertNotSame("The Map object set is the exact same Map object returned", newOptions, currentOptions);
 		// make sure the size is correct (it should be the same as the original Map)
@@ -263,7 +281,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		String key4 = getName() + "/debug/disableCheck4";
 		String key5 = getName() + "/debug/disableCheck5";
 		String key6 = getName() + "/debug/disableCheck6";
-		Map /* <String, String> */newOptions2 = new HashMap();
+		Map /* <String, String> */ newOptions2 = new HashMap();
 		newOptions2.put(key4, "ok4");
 		newOptions2.put(key5, "ok5");
 		newOptions2.put(key6, "ok6");
@@ -330,7 +348,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		String key1 = getName() + "/debug/disableCheck1";
 		String key2 = getName() + "/debug/disableCheck2";
 		String key3 = getName() + "/debug/disableCheck3";
-		Map /* <String, String> */newOptions = new HashMap();
+		Map /* <String, String> */ newOptions = new HashMap();
 		newOptions.put(key1, "ok1");
 		newOptions.put(key2, "ok2");
 		newOptions.put(key3, "ok3");
@@ -363,7 +381,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		String key4 = getName() + "/debug/disableCheck4";
 		String key5 = getName() + "/debug/disableCheck5";
 		String key6 = getName() + "/debug/disableCheck6";
-		Map /* <String, String> */newOptions2 = new HashMap();
+		Map /* <String, String> */ newOptions2 = new HashMap();
 		newOptions2.put(key4, "ok4");
 		newOptions2.put(key5, "ok5");
 		newOptions2.put(key6, "ok6");
@@ -1027,7 +1045,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		List traceEntries = new ArrayList();
 		this.verboseDebug = true; // default is true
 		try {
-			traceReader = new BufferedReader(new InputStreamReader(new FileInputStream(traceFile), "UTF-8")); //$NON-NLS-1$
+			traceReader = new BufferedReader(new InputStreamReader(new FileInputStream(traceFile), StandardCharsets.UTF_8));
 			TraceEntry entry = null;
 			while ((entry = this.readMessage(traceReader)) != null) {
 				traceEntries.add(entry);

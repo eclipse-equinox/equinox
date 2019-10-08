@@ -21,7 +21,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -115,7 +115,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		bundleEntries.put("multi/release/test/testResource11.txt", getBytes("multi/release/test/testResource11.txt", base));
 
 		bundleEntries.put("META-INF/services/", null);
-		bundleEntries.put("META-INF/services/multi.release.test.TestService", "multi.release.test.TestServiceBase".getBytes("UTF-8"));
+		bundleEntries.put("META-INF/services/multi.release.test.TestService", "multi.release.test.TestServiceBase".getBytes(StandardCharsets.UTF_8));
 		bundleEntries.put("META-INF/versions/", null);
 		bundleEntries.put("META-INF/versions/8/", null);
 		bundleEntries.put("META-INF/versions/8/multi/", null);
@@ -127,11 +127,11 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		bundleEntries.put("META-INF/versions/8/multi/release/test/testResourceAdd8.txt", getBytes("multi/release/test/testResourceAdd8.txt", base));
 		bundleEntries.put("META-INF/versions/9/", null);
 		bundleEntries.put("META-INF/versions/9/META-INF/", null);
-		bundleEntries.put("META-INF/versions/9/META-INF/addedFor9.txt", "added for 9".getBytes("UTF-8"));
+		bundleEntries.put("META-INF/versions/9/META-INF/addedFor9.txt", "added for 9".getBytes(StandardCharsets.UTF_8));
 		bundleEntries.put("META-INF/versions/9/META-INF/addedDirFor9/", null);
-		bundleEntries.put("META-INF/versions/9/META-INF/addedDirFor9/addedFor9.txt", "added for 9".getBytes("UTF-8"));
+		bundleEntries.put("META-INF/versions/9/META-INF/addedDirFor9/addedFor9.txt", "added for 9".getBytes(StandardCharsets.UTF_8));
 		bundleEntries.put("META-INF/versions/9/META-INF/services/", null);
-		bundleEntries.put("META-INF/versions/9/META-INF/services/multi.release.test.TestService", "multi.release.test.TestService9".getBytes("UTF-8"));
+		bundleEntries.put("META-INF/versions/9/META-INF/services/multi.release.test.TestService", "multi.release.test.TestService9".getBytes(StandardCharsets.UTF_8));
 		bundleEntries.put("META-INF/versions/9/multi/", null);
 		bundleEntries.put("META-INF/versions/9/multi/release/", null);
 		bundleEntries.put("META-INF/versions/9/multi/release/test/", null);
@@ -246,7 +246,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 				"Manifest-Version: 1\n" + //
 						"Multi-Release: true\n\n";
 		bundleEntries.put("classPathDir/META-INF/", null);
-		bundleEntries.put("classPathDir/META-INF/MANIFEST.MF", classPathDirManifest.getBytes(Charset.forName("UTF-8")));
+		bundleEntries.put("classPathDir/META-INF/MANIFEST.MF", classPathDirManifest.getBytes(StandardCharsets.UTF_8));
 		bundleEntries.put("classPathDir/META-INF/versions/", null);
 		bundleEntries.put("classPathDir/META-INF/versions/8/", null);
 		bundleEntries.put("classPathDir/META-INF/versions/8/multi/", null);

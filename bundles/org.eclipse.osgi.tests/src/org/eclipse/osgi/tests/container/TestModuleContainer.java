@@ -26,6 +26,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -2193,7 +2194,7 @@ public class TestModuleContainer extends AbstractTest {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 		String utfString = "a.with.�.multibyte";
-		while (utfString.getBytes("UTF8").length < 500) {
+		while (utfString.getBytes(StandardCharsets.UTF_8).length < 500) {
 			Map<String, String> manifest = getUTFManifest(utfString);
 			Module testModule = installDummyModule(manifest, manifest.get(Constants.BUNDLE_SYMBOLICNAME), container);
 			Assert.assertEquals("Wrong bns for the bundle.", utfString, testModule.getCurrentRevision().getSymbolicName());
