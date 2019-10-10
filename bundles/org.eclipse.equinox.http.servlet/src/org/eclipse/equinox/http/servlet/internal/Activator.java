@@ -52,16 +52,20 @@ public class Activator
 	public static void addProxyServlet(ProxyServlet proxyServlet) {
 		Object previousRegistration = registrations.putIfAbsent(
 			proxyServlet, proxyServlet);
+		BundleContext currentContext = context;
+		try {
+			if (!(previousRegistration instanceof ServiceRegistration) &&
+				(currentContext != null)) {
+				ServiceRegistration<HttpServlet> serviceRegistration =
+					currentContext.registerService(
+						HttpServlet.class, proxyServlet,
+						new Hashtable<String, Object>());
 
-		if (!(previousRegistration instanceof ServiceRegistration) &&
-			(context != null)) {
-
-			ServiceRegistration<HttpServlet> serviceRegistration =
-				context.registerService(
-					HttpServlet.class, proxyServlet,
-					new Hashtable<String, Object>());
-
-			registrations.put(proxyServlet, serviceRegistration);
+				registrations.put(proxyServlet, serviceRegistration);
+			}
+		} catch (IllegalStateException ex) {
+			//If the currentContext is no longer valid.
+			return;
 		}
 	}
 
@@ -82,7 +86,7 @@ public class Activator
 		processRegistrations();
 
 		serviceTracker = new ServiceTracker<HttpServlet, HttpTuple>(
-			context, HttpServlet.class, this);
+			bundleContext, HttpServlet.class, this);
 
 		serviceTracker.open();
 	}
@@ -95,100 +99,109 @@ public class Activator
 
 	public HttpTuple addingService(
 		ServiceReference<HttpServlet> serviceReference) {
-
-		HttpServlet httpServlet = context.getService(serviceReference);
-
-		if (!(httpServlet instanceof ProxyServlet)) {
-			context.ungetService(serviceReference);
+		BundleContext currentContext = context;
+		if (currentContext == null) {
 			return null;
 		}
 
-		ProxyServlet proxyServlet = (ProxyServlet)httpServlet;
+		try {
+			HttpServlet httpServlet = currentContext.getService(serviceReference);
 
-		ServletConfig servletConfig = proxyServlet.getServletConfig();
-		ServletContext servletContext = servletConfig.getServletContext();
-
-		Dictionary<String, Object> serviceProperties =
-			new Hashtable<String, Object>(3);
-
-		Enumeration<String> initparameterNames =
-			servletConfig.getInitParameterNames();
-
-		while (initparameterNames.hasMoreElements()) {
-			String name = initparameterNames.nextElement();
-
-			serviceProperties.put(
-				name, servletConfig.getInitParameter(name));
-		}
-
-		if (serviceProperties.get(Constants.SERVICE_VENDOR) == null) {
-			serviceProperties.put(
-				Constants.SERVICE_VENDOR, DEFAULT_SERVICE_VENDOR);
-		}
-
-		if (serviceProperties.get(Constants.SERVICE_DESCRIPTION) == null) {
-			serviceProperties.put(
-				Constants.SERVICE_DESCRIPTION, DEFAULT_SERVICE_DESCRIPTION);
-		}
-
-		Object httpServiceEndpointObj = serviceProperties.get(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT);
-
-		if (httpServiceEndpointObj == null) {
-			String[] httpServiceEndpoints = getHttpServiceEndpoints(
-				serviceProperties, servletContext, servletConfig.getServletName());
-
-			serviceProperties.put(
-				HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT,
-				httpServiceEndpoints);
-		}
-		else {
-			List<String> httpServiceEndpoints = new ArrayList<String>();
-
-			String contextPath = servletContext.getContextPath();
-
-			for (String httpServiceEndpoint : StringPlus.from(httpServiceEndpointObj)) {
-				if (!httpServiceEndpoint.startsWith(Const.HTTP.concat(":")) && !httpServiceEndpoint.startsWith(contextPath)) { //$NON-NLS-1$
-					httpServiceEndpoint = contextPath + httpServiceEndpoint;
-				}
-
-				httpServiceEndpoints.add(httpServiceEndpoint);
+			if (!(httpServlet instanceof ProxyServlet)) {
+				currentContext.ungetService(serviceReference);
+				return null;
 			}
 
-			serviceProperties.put(
-				HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT,
-				httpServiceEndpoints);
+			ProxyServlet proxyServlet = (ProxyServlet)httpServlet;
+
+			ServletConfig servletConfig = proxyServlet.getServletConfig();
+			ServletContext servletContext = servletConfig.getServletContext();
+
+			Dictionary<String, Object> serviceProperties =
+				new Hashtable<String, Object>(3);
+
+			Enumeration<String> initparameterNames =
+				servletConfig.getInitParameterNames();
+
+			while (initparameterNames.hasMoreElements()) {
+				String name = initparameterNames.nextElement();
+
+				serviceProperties.put(
+					name, servletConfig.getInitParameter(name));
+			}
+
+			if (serviceProperties.get(Constants.SERVICE_VENDOR) == null) {
+				serviceProperties.put(
+					Constants.SERVICE_VENDOR, DEFAULT_SERVICE_VENDOR);
+			}
+
+			if (serviceProperties.get(Constants.SERVICE_DESCRIPTION) == null) {
+				serviceProperties.put(
+					Constants.SERVICE_DESCRIPTION, DEFAULT_SERVICE_DESCRIPTION);
+			}
+
+			Object httpServiceEndpointObj = serviceProperties.get(HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT);
+
+			if (httpServiceEndpointObj == null) {
+				String[] httpServiceEndpoints = getHttpServiceEndpoints(
+					serviceProperties, servletContext, servletConfig.getServletName());
+
+				serviceProperties.put(
+					HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT,
+					httpServiceEndpoints);
+			}
+			else {
+				List<String> httpServiceEndpoints = new ArrayList<String>();
+
+				String contextPath = servletContext.getContextPath();
+
+				for (String httpServiceEndpoint : StringPlus.from(httpServiceEndpointObj)) {
+					if (!httpServiceEndpoint.startsWith(Const.HTTP.concat(":")) && !httpServiceEndpoint.startsWith(contextPath)) { //$NON-NLS-1$
+						httpServiceEndpoint = contextPath + httpServiceEndpoint;
+					}
+
+					httpServiceEndpoints.add(httpServiceEndpoint);
+				}
+
+				serviceProperties.put(
+					HttpServiceRuntimeConstants.HTTP_SERVICE_ENDPOINT,
+					httpServiceEndpoints);
+			}
+
+			// need a unique id for our service to match old HttpService HttpContext
+			serviceProperties.put(UNIQUE_SERVICE_ID, new Random().nextLong());
+			// white board support
+			// determine if the system bundle context should be used:
+			boolean useSystemContext = Boolean.valueOf(currentContext.getProperty(PROP_GLOBAL_WHITEBOARD));
+			BundleContext trackingContext = useSystemContext ? currentContext.getBundle(Constants.SYSTEM_BUNDLE_LOCATION).getBundleContext() : currentContext;
+			HttpServiceRuntimeImpl httpServiceRuntime = new HttpServiceRuntimeImpl(
+				trackingContext, currentContext, servletContext, serviceProperties);
+			httpServiceRuntime.open();
+
+			proxyServlet.setHttpServiceRuntimeImpl(httpServiceRuntime);
+
+			// imperative API support;
+			// the http service must be registered first so we can get its service id
+			HttpServiceFactory httpServiceFactory = new HttpServiceFactory(httpServiceRuntime);
+			ServiceRegistration<?> hsfRegistration = currentContext.registerService(
+				HTTP_SERVICES_CLASSES, httpServiceFactory, serviceProperties);
+
+			serviceProperties.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ID, Collections.singletonList(hsfRegistration.getReference().getProperty(Constants.SERVICE_ID)));
+
+			ServiceRegistration<HttpServiceRuntime> hsrRegistration =
+				currentContext.registerService(
+					HttpServiceRuntime.class, httpServiceRuntime,
+					serviceProperties);
+
+			httpServiceRuntime.setHsrRegistration(hsrRegistration);
+
+			return new HttpTuple(
+				proxyServlet, httpServiceFactory, hsfRegistration,
+				httpServiceRuntime, hsrRegistration);
+		} catch (IllegalStateException ex) {
+			//If the currentContext is no longer valid.
+			return null;
 		}
-
-		// need a unique id for our service to match old HttpService HttpContext
-		serviceProperties.put(UNIQUE_SERVICE_ID, new Random().nextLong());
-		// white board support
-		// determine if the system bundle context should be used:
-		boolean useSystemContext = Boolean.valueOf(context.getProperty(PROP_GLOBAL_WHITEBOARD));
-		BundleContext trackingContext = useSystemContext ? context.getBundle(Constants.SYSTEM_BUNDLE_LOCATION).getBundleContext() : context;
-		HttpServiceRuntimeImpl httpServiceRuntime = new HttpServiceRuntimeImpl(
-			trackingContext, context, servletContext, serviceProperties);
-		httpServiceRuntime.open();
-
-		proxyServlet.setHttpServiceRuntimeImpl(httpServiceRuntime);
-
-		// imperative API support;
-		// the http service must be registered first so we can get its service id
-		HttpServiceFactory httpServiceFactory = new HttpServiceFactory(httpServiceRuntime);
-		ServiceRegistration<?> hsfRegistration = context.registerService(
-			HTTP_SERVICES_CLASSES, httpServiceFactory, serviceProperties);
-
-		serviceProperties.put(HttpServiceRuntimeConstants.HTTP_SERVICE_ID, Collections.singletonList(hsfRegistration.getReference().getProperty(Constants.SERVICE_ID)));
-
-		ServiceRegistration<HttpServiceRuntime> hsrRegistration =
-			context.registerService(
-				HttpServiceRuntime.class, httpServiceRuntime,
-				serviceProperties);
-
-		httpServiceRuntime.setHsrRegistration(hsrRegistration);
-
-		return new HttpTuple(
-			proxyServlet, httpServiceFactory, hsfRegistration,
-			httpServiceRuntime, hsrRegistration);
 	}
 
 	public void modifiedService(
@@ -200,10 +213,16 @@ public class Activator
 
 	public void removedService(
 		ServiceReference<HttpServlet> serviceReference, HttpTuple httpTuple) {
-
-		context.ungetService(serviceReference);
-
-		httpTuple.destroy();
+		BundleContext currentContext = context;
+		if (currentContext != null) {
+			try {
+				currentContext.ungetService(serviceReference);
+				httpTuple.destroy();
+			} catch (IllegalStateException ex) {
+				//If the currentContext is no longer valid.
+				return;
+			}
+		}
 	}
 
 	private String[] getHttpServiceEndpoints(
@@ -304,20 +323,28 @@ public class Activator
 	private void processRegistrations() {
 		Iterator<Entry<ProxyServlet, Object>> iterator =
 			registrations.entrySet().iterator();
+		BundleContext currentContext = context;
+		if (currentContext == null) {
+			return;
+		}
 
 		while (iterator.hasNext()) {
 			Entry<ProxyServlet, Object> entry = iterator.next();
-
 			ProxyServlet proxyServlet = entry.getKey();
 			Object value = entry.getValue();
 
-			if (!(value instanceof ServiceRegistration)) {
-				ServiceRegistration<HttpServlet> serviceRegistration =
-					context.registerService(
-						HttpServlet.class, proxyServlet,
-						new Hashtable<String, Object>());
+			try {
+				if (!(value instanceof ServiceRegistration)) {
+					ServiceRegistration<HttpServlet> serviceRegistration =
+						currentContext.registerService(
+							HttpServlet.class, proxyServlet,
+							new Hashtable<String, Object>());
 
-				entry.setValue(serviceRegistration);
+					entry.setValue(serviceRegistration);
+				}
+			} catch (IllegalStateException ex) {
+				//If the currentContext is no longer valid.
+				return;
 			}
 		}
 	}
