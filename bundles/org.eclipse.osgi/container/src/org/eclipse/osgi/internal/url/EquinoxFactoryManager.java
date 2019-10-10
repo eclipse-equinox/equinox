@@ -13,8 +13,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.url;
 
-import java.lang.reflect.*;
-import java.net.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandlerFactory;
 import java.util.Hashtable;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
@@ -44,9 +48,10 @@ public class EquinoxFactoryManager {
 			try {
 				// ok we failed now use more drastic means to set the factory
 				forceURLStreamHandlerFactory(shf);
-			} catch (Exception ex) {
+			} catch (Throwable ex) {
 				container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, ex.getMessage(), ex);
-				throw err;
+				urlStreamHandlerFactory = null;
+				return;
 			}
 		}
 		urlStreamHandlerFactory = shf;
@@ -75,7 +80,7 @@ public class EquinoxFactoryManager {
 			}
 			factoryField.set(null, null);
 			// always attempt to clear the handlers cache
-			// This allows an optomization for the single framework use-case
+			// This allows an optimization for the single framework use-case
 			resetURLStreamHandlers();
 			URL.setURLStreamHandlerFactory(factory);
 		}
@@ -113,10 +118,11 @@ public class EquinoxFactoryManager {
 			// ok we failed now use more drastic means to set the factory
 			try {
 				forceContentHandlerFactory(chf);
-			} catch (Exception ex) {
+			} catch (Throwable ex) {
 				// this is unexpected, log the exception and throw the original error
 				container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, ex.getMessage(), ex);
-				throw err;
+				contentHandlerFactory = null;
+				return;
 			}
 		}
 		contentHandlerFactory = chf;
@@ -145,7 +151,7 @@ public class EquinoxFactoryManager {
 			// null out the field so that we can successfully call setContentHandlerFactory			
 			factoryField.set(null, null);
 			// always attempt to clear the handlers cache
-			// This allows an optomization for the single framework use-case
+			// This allows an optimization for the single framework use-case
 			resetContentHandlers();
 			URLConnection.setContentHandlerFactory(factory);
 		}
@@ -167,6 +173,9 @@ public class EquinoxFactoryManager {
 	}
 
 	private void uninstallURLStreamHandlerFactory() {
+		if (urlStreamHandlerFactory == null) {
+			return; // didn't succeed in setting the factory at launch
+		}
 		try {
 			Field factoryField = getField(URL.class, URLStreamHandlerFactory.class, false);
 			if (factoryField == null)
@@ -190,12 +199,15 @@ public class EquinoxFactoryManager {
 				if (factory != null)
 					URL.setURLStreamHandlerFactory(factory);
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			// ignore and continue closing the framework
 		}
 	}
 
 	private void uninstallContentHandlerFactory() {
+		if (contentHandlerFactory == null) {
+			return; // didn't succeed in setting the factory at launch
+		}
 		try {
 			Field factoryField = getField(URLConnection.class, java.net.ContentHandlerFactory.class, false);
 			if (factoryField == null)
@@ -222,7 +234,7 @@ public class EquinoxFactoryManager {
 				if (factory != null)
 					URLConnection.setContentHandlerFactory(factory);
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			// ignore and continue closing the framework
 		}
 	}
