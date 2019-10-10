@@ -14,11 +14,19 @@
 package org.eclipse.osgi.internal.loader.buddy;
 
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.StringTokenizer;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
 import org.eclipse.osgi.internal.framework.EquinoxBundle;
 import org.eclipse.osgi.internal.loader.BundleLoader;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 public class PolicyHandler implements SynchronousBundleListener {
@@ -40,13 +48,15 @@ public class PolicyHandler implements SynchronousBundleListener {
 	//Support to cut class / resource loading cycles in the context of one thread. The contained object is a set of classname
 	private final ThreadLocal<Set<String>> beingLoaded;
 	private final PackageAdmin packageAdmin;
+	private final ClassLoader bootLoader;
 
-	public PolicyHandler(BundleLoader loader, List<String> buddyList, PackageAdmin packageAdmin) {
+	public PolicyHandler(BundleLoader loader, List<String> buddyList, PackageAdmin packageAdmin, ClassLoader bootLoader) {
 		policedLoader = loader;
 		this.originalBuddyList = buddyList;
 		policies = buddyList.toArray();
 		beingLoaded = new ThreadLocal<>();
 		this.packageAdmin = packageAdmin;
+		this.bootLoader = bootLoader;
 	}
 
 	static Object[] getArrayFromList(String stringList) {
@@ -74,15 +84,15 @@ public class PolicyHandler implements SynchronousBundleListener {
 					return (IBuddyPolicy) policiesSnapshot[policyOrder];
 				}
 				if (BOOT_POLICY.equals(buddyName)) {
-					policiesSnapshot[policyOrder] = SystemPolicy.getInstance(SystemPolicy.BOOT);
+					policiesSnapshot[policyOrder] = SystemPolicy.getInstance(SystemPolicy.BOOT, bootLoader);
 					return (IBuddyPolicy) policiesSnapshot[policyOrder];
 				}
 				if (APP_POLICY.equals(buddyName)) {
-					policiesSnapshot[policyOrder] = SystemPolicy.getInstance(SystemPolicy.APP);
+					policiesSnapshot[policyOrder] = SystemPolicy.getInstance(SystemPolicy.APP, bootLoader);
 					return (IBuddyPolicy) policiesSnapshot[policyOrder];
 				}
 				if (EXT_POLICY.equals(buddyName)) {
-					policiesSnapshot[policyOrder] = SystemPolicy.getInstance(SystemPolicy.EXT);
+					policiesSnapshot[policyOrder] = SystemPolicy.getInstance(SystemPolicy.EXT, bootLoader);
 					return (IBuddyPolicy) policiesSnapshot[policyOrder];
 				}
 				if (DEPENDENT_POLICY.equals(buddyName)) {

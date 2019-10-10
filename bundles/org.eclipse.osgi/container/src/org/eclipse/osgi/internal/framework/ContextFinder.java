@@ -17,7 +17,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 
@@ -49,9 +55,9 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 
 	private final ClassLoader parentContextClassLoader;
 
-	public ContextFinder(ClassLoader contextClassLoader) {
+	public ContextFinder(ClassLoader contextClassLoader, ClassLoader bootLoader) {
 		super(contextClassLoader);
-		this.parentContextClassLoader = contextClassLoader != null ? contextClassLoader : EquinoxContainerAdaptor.BOOT_CLASSLOADER;
+		this.parentContextClassLoader = contextClassLoader != null ? contextClassLoader : bootLoader;
 	}
 
 	// Return a list of all classloaders on the stack that are neither the 

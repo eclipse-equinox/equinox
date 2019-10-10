@@ -14,6 +14,7 @@
 package org.eclipse.osgi.internal.framework;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -65,6 +66,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 
 	private final Object monitor = new Object();
 
+	private final ClassLoader bootLoader;
 	private ServiceRegistry serviceRegistry;
 	private ContextFinder contextFinder;
 
@@ -74,6 +76,16 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	private StorageSaver storageSaver;
 
 	public EquinoxContainer(Map<String, ?> configuration) {
+		ClassLoader platformClassLoader = null;
+		try {
+			Method getPlatformClassLoader = ClassLoader.class.getMethod("getPlatformClassLoader"); //$NON-NLS-1$
+			platformClassLoader = (ClassLoader) getPlatformClassLoader.invoke(null);
+		} catch (Throwable t) {
+			// try everything possible to not fail
+			platformClassLoader = new ClassLoader(Object.class.getClassLoader()) {
+				/* boot class loader */};
+		}
+		this.bootLoader = platformClassLoader;
 		this.equinoxConfig = new EquinoxConfiguration(configuration, new HookRegistry(this));
 		this.logServices = new EquinoxLogServices(this.equinoxConfig);
 		this.equinoxConfig.logMessages(this.logServices);
@@ -210,7 +222,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 			if (EquinoxConfiguration.CONTEXTCLASSLOADER_PARENT_APP.equals(type))
 				parent = ClassLoader.getSystemClassLoader();
 			else if (EquinoxConfiguration.CONTEXTCLASSLOADER_PARENT_BOOT.equals(type))
-				parent = EquinoxContainerAdaptor.BOOT_CLASSLOADER;
+				parent = bootLoader;
 			else if (EquinoxConfiguration.CONTEXTCLASSLOADER_PARENT_FWK.equals(type))
 				parent = EquinoxContainer.class.getClassLoader();
 			else if (EquinoxConfiguration.CONTEXTCLASSLOADER_PARENT_EXT.equals(type)) {
@@ -220,7 +232,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 			} else { // default is ccl (null or any other value will use ccl)
 				parent = current.getContextClassLoader();
 			}
-			contextFinder = new ContextFinder(parent);
+			contextFinder = new ContextFinder(parent, bootLoader);
 			current.setContextClassLoader(contextFinder);
 			return;
 		} catch (Exception e) {
@@ -316,4 +328,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 		// Do nothing; just used to ensure the active thread is created during init
 	}
 
+	public ClassLoader getBootLoader() {
+		return bootLoader;
+	}
 }

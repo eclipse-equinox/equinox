@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.framework;
 
-import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
 import java.util.EnumSet;
 import java.util.List;
@@ -57,19 +56,6 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.wiring.BundleRevision;
 
 public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
-	public static final ClassLoader BOOT_CLASSLOADER;
-	static {
-		ClassLoader platformClassLoader = null;
-		try {
-			Method getPlatformClassLoader = ClassLoader.class.getMethod("getPlatformClassLoader"); //$NON-NLS-1$
-			platformClassLoader = (ClassLoader) getPlatformClassLoader.invoke(null);
-		} catch (Throwable t) {
-			// try everything possible to not fail <clinit>
-			platformClassLoader = new ClassLoader(Object.class.getClassLoader()) {
-				/* boot class loader */};
-		}
-		BOOT_CLASSLOADER = platformClassLoader;
-	}
 	private final EquinoxContainer container;
 	private final Storage storage;
 	private final OSGiFrameworkHooks hooks;
@@ -88,7 +74,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 		this.storage = storage;
 		this.hooks = new OSGiFrameworkHooks(container, storage);
 		this.initial = initial;
-		this.moduleClassLoaderParent = getModuleClassLoaderParent(container.getConfiguration());
+		this.moduleClassLoaderParent = getModuleClassLoaderParent(container.getConfiguration(), container.getBootLoader());
 		this.lastSecurityAdminFlush = new AtomicLong();
 
 		EquinoxConfiguration config = container.getConfiguration();
@@ -174,7 +160,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 		};
 	}
 
-	private static ClassLoader getModuleClassLoaderParent(EquinoxConfiguration configuration) {
+	private static ClassLoader getModuleClassLoaderParent(EquinoxConfiguration configuration, ClassLoader bootLoader) {
 		// allow hooks to determine the parent class loader
 		for (ClassLoaderHook hook : configuration.getHookRegistry().getClassLoaderHooks()) {
 			ClassLoader parent = hook.getModuleClassLoaderParent(configuration);
@@ -193,7 +179,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 
 		if (Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK.equalsIgnoreCase(type) || EquinoxConfiguration.PARENT_CLASSLOADER_FWK.equalsIgnoreCase(type)) {
 			ClassLoader cl = EquinoxContainer.class.getClassLoader();
-			return cl == null ? BOOT_CLASSLOADER : cl;
+			return cl == null ? bootLoader : cl;
 		}
 		if (Constants.FRAMEWORK_BUNDLE_PARENT_APP.equalsIgnoreCase(type))
 			return ClassLoader.getSystemClassLoader();
@@ -202,7 +188,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 			if (appCL != null)
 				return appCL.getParent();
 		}
-		return BOOT_CLASSLOADER;
+		return bootLoader;
 
 	}
 
@@ -252,7 +238,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	public ModuleLoader createModuleLoader(ModuleWiring wiring) {
 		if (wiring.getBundle().getBundleId() == 0) {
 			ClassLoader cl = EquinoxContainer.class.getClassLoader();
-			cl = cl == null ? BOOT_CLASSLOADER : cl;
+			cl = cl == null ? container.getBootLoader() : cl;
 			return new SystemBundleLoader(wiring, container, cl);
 		}
 		if ((wiring.getRevision().getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
