@@ -20,8 +20,16 @@ import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 
 public class EquinoxClassLoader extends ModuleClassLoader {
-	private static final boolean EQUINOX_REGISTERED_AS_PARALLEL = ClassLoader.registerAsParallelCapable();
-
+	protected static final boolean EQUINOX_REGISTERED_AS_PARALLEL;
+	static {
+		boolean registered;
+		try {
+			registered = ClassLoader.registerAsParallelCapable();
+		} catch (Throwable t) {
+			registered = false;
+		}
+		EQUINOX_REGISTERED_AS_PARALLEL = registered;
+	}
 	private final EquinoxConfiguration configuration;
 	private final Debug debug;
 	private final BundleLoader delegate;

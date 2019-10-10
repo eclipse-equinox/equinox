@@ -60,7 +60,16 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	 * A PermissionCollection for AllPermissions; shared across all ProtectionDomains when security is disabled
 	 */
 	protected static final PermissionCollection ALLPERMISSIONS;
-	protected static final boolean REGISTERED_AS_PARALLEL = ClassLoader.registerAsParallelCapable();
+	protected static final boolean REGISTERED_AS_PARALLEL;
+	static {
+		boolean registered;
+		try {
+			registered = ClassLoader.registerAsParallelCapable();
+		} catch (Throwable t) {
+			registered = false;
+		}
+		REGISTERED_AS_PARALLEL = registered;
+	}
 
 	static {
 		AllPermission allPerm = new AllPermission();
