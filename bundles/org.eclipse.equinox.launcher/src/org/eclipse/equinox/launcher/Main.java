@@ -562,7 +562,7 @@ public class Main {
 
 		if (protectBase && (System.getProperty(PROP_SHARED_CONFIG_AREA) == null)) {
 			System.err.println("This application is configured to run in a cascaded mode only."); //$NON-NLS-1$
-			System.setProperty(PROP_EXITCODE, Integer.toString(14)); //$NON-NLS-1$
+			System.setProperty(PROP_EXITCODE, Integer.toString(14));
 			return;
 		}
 		// need to ensure that getInstallLocation is called at least once to initialize the value.
@@ -2004,7 +2004,7 @@ public class Main {
 				path = new String(chars);
 			}
 		if (path.toLowerCase().endsWith(".jar")) //$NON-NLS-1$
-			path = path.substring(0, path.lastIndexOf('/') + 1); //$NON-NLS-1$
+			path = path.substring(0, path.lastIndexOf('/') + 1);
 		if (path.toLowerCase().endsWith("/plugins/")) //$NON-NLS-1$ 
 			path = path.substring(0, path.length() - "/plugins/".length()); //$NON-NLS-1$
 		try {
