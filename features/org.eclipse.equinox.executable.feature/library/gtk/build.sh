@@ -90,10 +90,6 @@ case $defaultOS in
 				defaultJava=DEFAULT_JAVA_EXEC
 				[ -d /bluebird/teamswt/swt-builddir/JDKs/x86_64/jdk1.5.0 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/x86_64/jdk1.5.0"
 				;;
-			i?86 | "x86")
-				defaultOSArch="x86"
-				[ -d /bluebird/teamswt/swt-builddir/JDKs/x86/ibm-java2-i386-50 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/x86/ibm-java2-i386-50"
-				;;
 			"ppc64le")
 				defaultOSArch="ppc64le"
 				defaultJava=DEFAULT_JAVA_EXEC
@@ -101,20 +97,10 @@ case $defaultOS in
 				defaultJavaHome=`readlink -f /usr/bin/java | sed "s:jre/bin/java::"`
 				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
-			"s390")
-				defaultOSArch="s390"
-				defaultJava=DEFAULT_JAVA_EXEC
-				OUTPUT_DIR="$EXEC_DIR/contributed/$defaultWS/$defaultOS/$defaultOSArch"
-				;;
 			"s390x")
 				defaultOSArch="s390x"
 				defaultJava=DEFAULT_JAVA_EXEC
 				OUTPUT_DIR="$EXEC_DIR/contributed/$defaultWS/$defaultOS/$defaultOSArch"
-				;;
-			arm*)
-				defaultOSArch="arm"
-				defaultJava=DEFAULT_JAVA_EXEC
-				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
             "aarch64")
 				defaultOSArch="aarch64"
@@ -152,19 +138,10 @@ fi
 if [ $defaultOSArch = "ppc64le" ];  then
 	M_ARCH=-m64
 	export M_ARCH
-elif [ "$defaultOSArch" = "s390" ];  then
-	if [ "${JAVA_HOME}" = "" ]; then
-		export JAVA_HOME="/home/swtbuild/java5/s390/ibm-java2-s390-50"
-	fi
-	M_ARCH=-m31
-	export M_ARCH
 elif [ "$defaultOSArch" = "s390x" ];  then
 	if [ "${JAVA_HOME}" = "" ]; then
 		export JAVA_HOME="/home/swtbuild/java5/s390x/ibm-java2-s390x-50"
 	fi
-elif [ "$defaultOSArch" = "x86" ];  then
-	M_ARCH=-m32
-	export M_ARCH
 fi
 
 LIBRARY_DIR="$EXEC_DIR/../org.eclipse.equinox.launcher.$defaultWS.$defaultOS.$defaultOSArch"

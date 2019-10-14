@@ -45,14 +45,6 @@ EXEC_DIR ?= ../../../../../rt.equinox.binaries/org.eclipse.equinox.executable
 OUTPUT_DIR ?= $(EXEC_DIR)/bin/$(DEFAULT_WS)/$(DEFAULT_OS)/$(DEFAULT_OS_ARCH)
 LIBRARY_DIR ?= $(EXEC_DIR)/../org.eclipse.equinox.launcher.$(DEFAULT_WS).$(DEFAULT_OS).$(DEFAULT_OS_ARCH)
 
-# Architecture specific Vars:
-# 32 bit specific flag:
-ifeq ($(M_ARCH),)
-ifeq ($(DEFAULT_OS_ARCH),x86)
-M_ARCH ?= -m32
-endif
-endif
-
 # 64 bit specific flag:
 ifeq ($(M_CFLAGS),)
 ifeq ($(DEFAULT_OS_ARCH),x86_64)
@@ -64,8 +56,6 @@ endif
 # Determine launch mode.
 ifeq ($(DEFAULT_OS_ARCH),x86_64)
 DEFAULT_JAVA ?= DEFAULT_JAVA_EXEC
-else ifeq ($(DEFAULT_OS_ARCH),x86)
-DEFAULT_JAVA ?= DEFAULT_JAVA_JNI
 endif
 
 CC ?= gcc
@@ -160,7 +150,7 @@ dev_build_install: all
 ifeq "$(origin DEV_ECLIPSE)" "environment"
 	$(info Copying $(EXEC) and $(DLL) into your development eclipse folder:)
 	cp $(EXEC) ${DEV_ECLIPSE}/
-	cp $(DLL) ${DEV_ECLIPSE}/plugins/org.eclipse.equinox.launcher.gtk.linux.x86_*/
+	cp $(DLL) ${DEV_ECLIPSE}/plugins/org.eclipse.equinox.launcher.gtk.linux.x86_64/
 else
 	$(error $(DEV_INSTALL_ERROR_MSG))
 endif
