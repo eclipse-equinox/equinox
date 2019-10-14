@@ -33,16 +33,7 @@
 
 /* Global Variables */
 _TCHAR* osArg        = _T_ECLIPSE(DEFAULT_OS);
-#ifdef MACOSX
-	/* on the mac we have a universal binary, decide ppc vs x86 based on endianness */
-	#ifdef __BIG_ENDIAN__
-		_TCHAR* osArchArg    = _T_ECLIPSE("ppc");
-	#else
-		_TCHAR* osArchArg    = _T_ECLIPSE(DEFAULT_OS_ARCH);
-	#endif
-#else
 _TCHAR* osArchArg    = _T_ECLIPSE(DEFAULT_OS_ARCH);
-#endif
 _TCHAR* wsArg        = _T_ECLIPSE(DEFAULT_WS);	/* the SWT supported GUI to be used */
 
 /* Local Variables */

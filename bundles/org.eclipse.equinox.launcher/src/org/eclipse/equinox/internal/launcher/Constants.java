@@ -18,7 +18,6 @@ package org.eclipse.equinox.internal.launcher;
  *
  */
 public class Constants {
-	public static final String INTERNAL_ARCH_I386 = "i386"; //$NON-NLS-1$
 	public static final String INTERNAL_AMD64 = "amd64"; //$NON-NLS-1$
 	public static final String INTERNAL_OS_SUNOS = "SunOS"; //$NON-NLS-1$
 	public static final String INTERNAL_OS_LINUX = "Linux"; //$NON-NLS-1$

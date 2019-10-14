@@ -66,7 +66,7 @@
  * The options that can be specified by the user to the launcher are:
  *  -vm <javaVM>               the Java VM to be used
  *  -os <opSys>                the operating system being run on
- *  -arch <osArch>             the hardware architecture of the OS: x86, sparc, hp9000
+ *  -arch <osArch>             the hardware architecture of the OS: x86_64
  *  -ws <gui>                  the window system to be used: win32, gtk, cocoa, ...
  *  -nosplash                  do not display the splash screen. The java application will
  *                             not receive the -showsplash command.
@@ -2001,8 +2001,6 @@ _TCHAR ** getVMLibrarySearchPath(_TCHAR * vmLibrary) {
 const _TCHAR* getVMArch() {
 	if (_tcscmp(osArchArg, _T_ECLIPSE("x86_64")) == 0)
 		return _T_ECLIPSE("amd64");
-	else if (_tcscmp(osArchArg, _T_ECLIPSE("x86")) == 0)
-		return _T_ECLIPSE("i386");
 	else
 		return osArchArg;
 }

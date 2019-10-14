@@ -400,11 +400,8 @@ public class Main {
 			return arch;
 		}
 		String name = System.getProperty("os.arch");//$NON-NLS-1$
-		// Map i386 architecture to x86
-		if (name.equalsIgnoreCase(Constants.INTERNAL_ARCH_I386))
-			return Constants.ARCH_X86;
 		// Map amd64 architecture to x86_64
-		else if (name.equalsIgnoreCase(Constants.INTERNAL_AMD64))
+		if (name.equalsIgnoreCase(Constants.INTERNAL_AMD64))
 			return Constants.ARCH_X86_64;
 
 		return name;
@@ -993,9 +990,9 @@ public class Main {
 		URL[] result = getDevPath(url);
 		if (debug) {
 			System.out.println("Framework classpath:"); //$NON-NLS-1$
-		    for (URL devPath : result) {
-			System.out.println("    " + devPath.toExternalForm()); //$NON-NLS-1$
-		    }
+			for (URL devPath : result) {
+				System.out.println("    " + devPath.toExternalForm()); //$NON-NLS-1$
+			}
 		}
 		return result;
 	}
