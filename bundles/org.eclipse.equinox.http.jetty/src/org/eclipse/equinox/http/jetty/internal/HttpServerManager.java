@@ -150,16 +150,10 @@ public class HttpServerManager implements ManagedServiceFactory {
 		if (null != customizer)
 			httpContext = (ServletContextHandler) customizer.customizeContext(httpContext, dictionary);
 
-		SessionHandler sessionManager = httpContext.getSessionHandler();
-		try {
-			sessionManager.addEventListener((HttpSessionIdListener) holder.getServlet());
-		} catch (ServletException e) {
-			throw new ConfigurationException(pid, e.getMessage(), e);
-		}
-
 		try {
 			server.start();
-
+			SessionHandler sessionManager = httpContext.getSessionHandler();
+			sessionManager.addEventListener((HttpSessionIdListener) holder.getServlet());
 			HouseKeeper houseKeeper = server.getSessionIdManager().getSessionHouseKeeper();
 			houseKeeper.setIntervalSec(Details.getLong(dictionary, JettyConstants.HOUSEKEEPER_INTERVAL, houseKeeper.getIntervalSec()));
 		} catch (Exception e) {
