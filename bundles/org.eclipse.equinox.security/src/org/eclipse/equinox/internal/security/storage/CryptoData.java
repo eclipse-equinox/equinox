@@ -99,7 +99,9 @@ public class CryptoData {
 			encryptedText.append(Base64.encode(iv));
 		}
 		if (salt != null) {
-			encryptedText.append(IV_SEPARATOR);
+			if (iv != null) {
+				encryptedText.append(IV_SEPARATOR);
+			}
 			encryptedText.append(Base64.encode(salt));
 		}
 		if (encryptedData != null) {

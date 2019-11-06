@@ -16,7 +16,7 @@
 package org.eclipse.equinox.internal.security.storage;
 
 import java.security.*;
-import java.security.spec.InvalidKeySpecException;
+import java.security.spec.*;
 import java.util.*;
 import java.util.Map.Entry;
 import javax.crypto.*;
@@ -145,7 +145,18 @@ public class JavaEncryption {
 
 			Cipher c = Cipher.getInstance(cipherAlgorithm);
 			c.init(Cipher.ENCRYPT_MODE, key, entropy);
-			byte[] iv = c.getIV();
+			byte[] iv = null;
+
+			//check if IV is required by PBE algorithm
+			AlgorithmParameterSpec paramSpec;
+			try {
+				paramSpec = c.getParameters().getParameterSpec(PBEParameterSpec.class).getParameterSpec();
+				if (paramSpec != null && paramSpec instanceof IvParameterSpec) {
+					iv = c.getIV();
+				}
+			} catch (InvalidParameterSpecException e) {
+				/*do nothing*/
+			}
 
 			byte[] result = c.doFinal(clearText);
 			return new CryptoData(passwordExt.getModuleID(), salt, result, iv);
