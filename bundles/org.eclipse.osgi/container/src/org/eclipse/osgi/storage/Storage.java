@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2018 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Christoph Läubrich - Bug 527175 - Storage#getSystemContent() should first make the file absolute 
  *******************************************************************************/
 package org.eclipse.osgi.storage;
 
@@ -1595,7 +1596,7 @@ public class Storage {
 			return null;
 		}
 		// TODO assumes the location is a file URL
-		File result = new File(frameworkValue.substring(5));
+		File result = new File(frameworkValue.substring(5)).getAbsoluteFile();
 		if (!result.exists()) {
 			throw new IllegalStateException("Configured framework location does not exist: " + result.getAbsolutePath()); //$NON-NLS-1$
 		}
