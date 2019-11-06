@@ -105,6 +105,9 @@ public class ConnectBundleFile extends CloseableBundleFile<ConnectEntry> {
 
 	@Override
 	protected BundleEntry findEntry(String path) {
+		if (path.length() > 0 && path.charAt(0) == '/') {
+			path = path.substring(1);
+		}
 		return content.getEntry(path).map(ConnectBundleEntry::new).orElse(null);
 	}
 

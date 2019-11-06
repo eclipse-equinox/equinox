@@ -563,11 +563,24 @@ public class ConnectTests extends AbstractBundleTests {
 					assertEquals("Wrong number of wiring entry URLs.", entries.size(), wiringEntryUrls.size());
 					assertTrue("Wrong wiring entry URLs: " + wiringEntryUrls, entries.containsAll(wiringEntryUrls));
 
-					String txtPath = "org/eclipse/osgi/tests/bundles/resources/" + id + ".txt";
+					String txtPathDir = "org/eclipse/osgi/tests/bundles/resources/";
+					String txtPath = txtPathDir + id + ".txt";
 					Optional<ConnectEntry> txtConnectEntry = m.getContent().getEntry(txtPath);
 					assertTrue("Could not find text entry.", txtConnectEntry.isPresent());
+
 					checkEntry(txtConnectEntry.get(), b.getEntry(txtPath), id);
 					checkEntry(txtConnectEntry.get(), b.getResource(txtPath), id);
+					Enumeration<URL> found = b.findEntries(txtPathDir, "*.txt", false);
+					checkEntry(txtConnectEntry.get(), found.nextElement(), id);
+					assertFalse("More entries found.", found.hasMoreElements());
+
+					// now try with leading '/'
+					String slashTxtPath = '/' + txtPath;
+					checkEntry(txtConnectEntry.get(), b.getEntry(slashTxtPath), id);
+					checkEntry(txtConnectEntry.get(), b.getResource(slashTxtPath), id);
+					found = b.findEntries('/' + txtPathDir, "*.txt", false);
+					checkEntry(txtConnectEntry.get(), found.nextElement(), id);
+					assertFalse("More entries found.", found.hasMoreElements());
 				}
 			} catch (Throwable t) {
 				sneakyThrow(t);
@@ -619,7 +632,8 @@ public class ConnectTests extends AbstractBundleTests {
 	}
 
 	void checkEntry(ConnectEntry expected, URL actual, Integer id) throws IOException {
-		assertEquals("Wring path.", expected.getName(), actual.getPath().substring(1));
+		assertNotNull("No entry found.", actual);
+		assertEquals("Wrong path.", expected.getName(), actual.getPath().substring(1));
 		URLConnection connection = actual.openConnection();
 		assertEquals("Wrong last modified.", expected.getLastModified(), connection.getLastModified());
 		assertEquals("Wrong content length.", expected.getContentLength(), connection.getContentLengthLong());
