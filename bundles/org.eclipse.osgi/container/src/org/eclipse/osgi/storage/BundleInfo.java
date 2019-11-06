@@ -45,6 +45,7 @@ import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.hookregistry.StorageHookFactory;
 import org.eclipse.osgi.internal.hookregistry.StorageHookFactory.StorageHook;
 import org.eclipse.osgi.internal.messages.Msg;
+import org.eclipse.osgi.storage.ContentProvider.Type;
 import org.eclipse.osgi.storage.Storage.StorageException;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
@@ -67,7 +68,6 @@ public final class BundleInfo {
 		private final Dictionary<String, String> cachedHeaders;
 		private File content;
 		private boolean isDirectory;
-		private boolean isReference;
 		private boolean hasPackageInfo;
 		private BundleFile bundleFile;
 		private Map<String, String> rawHeaders;
@@ -78,17 +78,18 @@ public final class BundleInfo {
 		private List<StorageHook<?, ?>> storageHooks;
 		private long lastModified;
 		private boolean isMRJar;
+		private Type contentType;
 
 		Generation(long generationId) {
 			this.generationId = generationId;
 			this.cachedHeaders = new CachedManifest(this, Collections.<String, String> emptyMap());
 		}
 
-		Generation(long generationId, File content, boolean isDirectory, boolean isReference, boolean hasPackageInfo, Map<String, String> cached, long lastModified, boolean isMRJar) {
+		Generation(long generationId, File content, boolean isDirectory, Type contentType, boolean hasPackageInfo, Map<String, String> cached, long lastModified, boolean isMRJar) {
 			this.generationId = generationId;
 			this.content = content;
 			this.isDirectory = isDirectory;
-			this.isReference = isReference;
+			this.contentType = contentType;
 			this.hasPackageInfo = hasPackageInfo;
 			this.cachedHeaders = new CachedManifest(this, cached);
 			this.lastModified = lastModified;
@@ -211,12 +212,6 @@ public final class BundleInfo {
 			}
 		}
 
-		public boolean isReference() {
-			synchronized (this.genMonitor) {
-				return this.isReference;
-			}
-		}
-
 		public boolean hasPackageInfo() {
 			synchronized (this.genMonitor) {
 				return this.hasPackageInfo;
@@ -235,11 +230,17 @@ public final class BundleInfo {
 			}
 		}
 
-		void setContent(File content, boolean isReference) {
+		public Type getContentType() {
+			synchronized (this.genMonitor) {
+				return this.contentType;
+			}
+		}
+
+		void setContent(File content, Type contentType) {
 			synchronized (this.genMonitor) {
 				this.content = content;
 				this.isDirectory = content == null ? false : Storage.secureAction.isDirectory(content);
-				this.isReference = isReference;
+				this.contentType = contentType;
 				setLastModified(content);
 			}
 		}
@@ -488,9 +489,9 @@ public final class BundleInfo {
 		}
 	}
 
-	Generation restoreGeneration(long generationId, File content, boolean isDirectory, boolean isReference, boolean hasPackageInfo, Map<String, String> cached, long lastModified, boolean isMRJar) {
+	Generation restoreGeneration(long generationId, File content, boolean isDirectory, Type contentType, boolean hasPackageInfo, Map<String, String> cached, long lastModified, boolean isMRJar) {
 		synchronized (this.infoMonitor) {
-			Generation restoredGeneration = new Generation(generationId, content, isDirectory, isReference, hasPackageInfo, cached, lastModified, isMRJar);
+			Generation restoredGeneration = new Generation(generationId, content, isDirectory, contentType, hasPackageInfo, cached, lastModified, isMRJar);
 			return restoredGeneration;
 		}
 	}

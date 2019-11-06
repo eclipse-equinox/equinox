@@ -13,30 +13,19 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.connect;
 
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.jar.JarOutputStream;
-import java.util.zip.ZipEntry;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.ModuleRevisionBuilder;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
-import org.eclipse.osgi.internal.connect.ConnectBundleFileFactory.ConnectBundleFileWrapper;
-import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
+import org.eclipse.osgi.internal.framework.EquinoxContainer.ConnectModules;
 import org.eclipse.osgi.internal.hookregistry.ActivatorHookFactory;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
 import org.eclipse.osgi.internal.hookregistry.HookConfigurator;
@@ -48,7 +37,6 @@ import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
 import org.eclipse.osgi.storage.bundlefile.BundleFileWrapperChain;
-import org.eclipse.osgi.storage.url.reference.ReferenceInputStream;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -57,45 +45,11 @@ import org.osgi.framework.connect.ConnectFactory;
 import org.osgi.framework.connect.ConnectModule;
 
 public class ConnectHookConfigurator implements HookConfigurator {
-	static final ConnectModule NULL_MODULE = new ConnectModule() {
-		@Override
-		public ConnectContent getContent() throws IOException {
-			throw new IOException();
-		}
-	};
-
-	static final byte[] EMPTY_JAR;
-	static {
-		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			JarOutputStream jos = new JarOutputStream(baos);
-			ZipEntry bootBundlePropsEntry = new ZipEntry("ConnectBundle.properties"); //$NON-NLS-1$
-			jos.putNextEntry(bootBundlePropsEntry);
-			Properties bootBundleProps = new Properties();
-			bootBundleProps.setProperty("ConnectBundle", "true"); //$NON-NLS-1$ //$NON-NLS-2$
-			bootBundleProps.store(jos, "ConnectBundle"); //$NON-NLS-1$
-			jos.close();
-			EMPTY_JAR = baos.toByteArray();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
 
 	@Override
 	public void addHooks(final HookRegistry hookRegistry) {
-		ConnectFactory connectFactory = hookRegistry.getContainer().getConnectFactory();
-		final ConnectModules connectModules = new ConnectModules(connectFactory);
-
-		URL configUrl = hookRegistry.getContainer().getLocations().getConfigurationLocation().getURL();
-		final File storage = new File(configUrl.getPath());
-		final File emptyJar = new File(storage, "connectEmptyBundle.jar"); //$NON-NLS-1$
-		if (connectFactory != null && !emptyJar.exists()) {
-			try {
-				Files.write(emptyJar.toPath(), EMPTY_JAR);
-			} catch (IOException e) {
-				throw new UncheckedIOException(e);
-			}
-		}
+		final ConnectModules connectModules = hookRegistry.getContainer().getConnectModules();
+		ConnectFactory connectFactory = connectModules.getConnectFactory();
 
 		hookRegistry.addStorageHookFactory(new StorageHookFactory<Object, Object, StorageHook<Object, Object>>() {
 			@Override
@@ -118,7 +72,7 @@ public class ConnectHookConfigurator implements HookConfigurator {
 					@Override
 					public void validate() throws IllegalStateException {
 						// make sure we have the module still from the factory
-						if (hasModule && connectModules.getConnectModule(generation.getBundleInfo().getLocation()) == null) {
+						if (hasModule && m == null) {
 							throw new IllegalStateException("Connect Factory no longer has the module at locataion: " + generation.getBundleInfo().getLocation()); //$NON-NLS-1$
 						}
 					}
@@ -152,16 +106,7 @@ public class ConnectHookConfigurator implements HookConfigurator {
 				}
 				ConnectModule m = connectModules.getConnectModule(location);
 				if (m != null) {
-					return new URLConnection(null) {
-						@Override
-						public void connect() throws IOException {
-							connected = true;
-						}
-
-						public InputStream getInputStream() throws IOException {
-							return new ReferenceInputStream(emptyJar);
-						}
-					};
+					return ConnectInputStream.URL_CONNECTION_INSTANCE;
 				}
 				return null;
 			}
@@ -178,19 +123,20 @@ public class ConnectHookConfigurator implements HookConfigurator {
 				if (m != null) {
 					BundleFile bundlefile = generation.getBundleFile();
 					if (bundlefile instanceof BundleFileWrapperChain) {
-						ConnectBundleFileWrapper content = ((BundleFileWrapperChain) bundlefile).getWrappedType(ConnectBundleFileWrapper.class);
-						if (content != null) {
-							return content.getConnectBundleFile().getClassLoader().map((l) //
-							-> new DelegatingConnectClassLoader(parent, configuration, delegate, generation, l)).orElse(null);
+						BundleFileWrapperChain chain = (BundleFileWrapperChain) bundlefile;
+						while (chain.getNext() != null) {
+							chain = chain.getNext();
 						}
+						bundlefile = chain.getBundleFile();
+					}
+					if (bundlefile instanceof ConnectBundleFile) {
+						return ((ConnectBundleFile) bundlefile).getClassLoader().map((l) //
+						-> new DelegatingConnectClassLoader(parent, configuration, delegate, generation, l)).orElse(null);
 					}
 				}
 				return null;
 			}
 		});
-
-		final Debug debug = hookRegistry.getContainer().getConfiguration().getDebug();
-		hookRegistry.addBundleFileWrapperFactoryHook(new ConnectBundleFileFactory(connectModules, debug));
 
 		hookRegistry.addActivatorHookFactory(new ActivatorHookFactory() {
 
@@ -215,31 +161,6 @@ public class ConnectHookConfigurator implements HookConfigurator {
 				};
 			}
 		});
-	}
-
-	static class ConnectModules {
-		final ConnectFactory connectFactory;
-		private final ConcurrentMap<String, ConnectModule> connectModules = new ConcurrentHashMap<>();
-		volatile File emptyJar;
-
-		public ConnectModules(ConnectFactory connectFactory) {
-			this.connectFactory = connectFactory;
-		}
-
-		ConnectModule getConnectModule(String location) {
-			if (connectFactory == null) {
-				return null;
-			}
-			ConnectModule result = connectModules.computeIfAbsent(location, (l) -> {
-				try {
-					return connectFactory.getModule(location).orElse(NULL_MODULE);
-				} catch (IllegalStateException e) {
-					return NULL_MODULE;
-				}
-			});
-			return result == NULL_MODULE ? null : result;
-		}
-
 	}
 
 	@SuppressWarnings("unchecked")

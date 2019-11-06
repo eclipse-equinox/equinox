@@ -14,10 +14,20 @@ package org.eclipse.osgi.internal.signedcontent;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.signedcontent.SignerInfo;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
@@ -94,7 +104,7 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 
 		// Step 1, verify the .SF file is signed by the private key that corresponds to the public key 
 		// in the .RSA/.DSA file
-		String baseFile = bf.getBaseFile() != null ? bf.getBaseFile().toString() : null;
+		String baseFile = String.valueOf(bf.getBaseFile());
 		PKCS7Processor processor = new PKCS7Processor(pkcs7Bytes, 0, pkcs7Bytes.length, signer, baseFile);
 		// call the Step 1 in the Jar File Verification algorithm
 		processor.verifySFSignature(sfBytes, 0, sfBytes.length);
@@ -158,7 +168,7 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 
 				// check if the the computed digest value of manifest file equals to the digest value in the .sf file
 				if (!digestValue.equals(manifestDigest)) {
-					SignatureException se = new SignatureException(NLS.bind(SignedContentMessages.Security_File_Is_Tampered, new String[] {signedBundle.getBaseFile().toString()}));
+					SignatureException se = new SignatureException(NLS.bind(SignedContentMessages.Security_File_Is_Tampered, new String[] {String.valueOf(signedBundle.getBaseFile())}));
 					signedBundleHook.log(se.getMessage(), FrameworkLogEntry.ERROR, se);
 					throw se;
 				}

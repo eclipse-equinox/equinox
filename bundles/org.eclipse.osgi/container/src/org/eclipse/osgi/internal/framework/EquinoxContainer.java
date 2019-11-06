@@ -24,6 +24,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -47,7 +49,9 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.connect.ConnectContent;
 import org.osgi.framework.connect.ConnectFactory;
+import org.osgi.framework.connect.ConnectModule;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
@@ -56,8 +60,14 @@ import org.osgi.util.tracker.ServiceTracker;
 public class EquinoxContainer implements ThreadFactory, Runnable {
 	public static final String NAME = "org.eclipse.osgi"; //$NON-NLS-1$
 	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
+	static final ConnectModule NULL_MODULE = new ConnectModule() {
+		@Override
+		public ConnectContent getContent() throws IOException {
+			throw new IOException();
+		}
+	};
 
-	private final ConnectFactory connectFactory;
+	private final ConnectModules connectModules;
 	private final EquinoxConfiguration equinoxConfig;
 	private final EquinoxLogServices logServices;
 	private final Storage storage;
@@ -91,10 +101,10 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 				/* boot class loader */};
 		}
 		this.bootLoader = platformClassLoader;
-		this.connectFactory = connectFactory;
 		this.equinoxConfig = new EquinoxConfiguration(configuration, new HookRegistry(this));
 		this.logServices = new EquinoxLogServices(this.equinoxConfig);
 		this.equinoxConfig.logMessages(this.logServices);
+		this.connectModules = new ConnectModules(connectFactory);
 
 		initConnectFactory(connectFactory, this.equinoxConfig);
 
@@ -151,10 +161,6 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 		@SuppressWarnings({"rawtypes", "unchecked"})
 		Map<String, String> config = (Map) equinoxConfig.getInitialConfig();
 		connectFactory.initialize(fwkStore, Collections.unmodifiableMap(config));
-	}
-
-	public ConnectFactory getConnectFactory() {
-		return connectFactory;
 	}
 
 	public Storage getStorage() {
@@ -354,5 +360,36 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 
 	public ClassLoader getBootLoader() {
 		return bootLoader;
+	}
+
+	public ConnectModules getConnectModules() {
+		return connectModules;
+	}
+
+	public static class ConnectModules {
+		final ConnectFactory connectFactory;
+		private final ConcurrentMap<String, ConnectModule> connectModules = new ConcurrentHashMap<>();
+
+		public ConnectModules(ConnectFactory connectFactory) {
+			this.connectFactory = connectFactory;
+		}
+
+		public ConnectModule getConnectModule(String location) {
+			if (connectFactory == null) {
+				return null;
+			}
+			ConnectModule result = connectModules.computeIfAbsent(location, (l) -> {
+				try {
+					return connectFactory.getModule(location).orElse(NULL_MODULE);
+				} catch (IllegalStateException e) {
+					return NULL_MODULE;
+				}
+			});
+			return result == NULL_MODULE ? null : result;
+		}
+
+		public ConnectFactory getConnectFactory() {
+			return connectFactory;
+		}
 	}
 }

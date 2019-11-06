@@ -542,7 +542,9 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 		}
 
 		private IOException enrichExceptionWithBaseFile(IOException e) {
-			return new IOException(getBaseFile().toString(), e);
+			File baseFile = getBaseFile();
+			String extraInfo = baseFile == null ? generation.getBundleInfo().getLocation() : baseFile.toString();
+			return new IOException(extraInfo, e);
 		}
 	}
 }

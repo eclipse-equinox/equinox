@@ -65,6 +65,7 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.FilePath;
 import org.eclipse.osgi.framework.util.ObjectPool;
 import org.eclipse.osgi.framework.util.SecureAction;
+import org.eclipse.osgi.internal.connect.ConnectBundleFile;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
@@ -81,6 +82,7 @@ import org.eclipse.osgi.internal.permadmin.SecurityAdmin;
 import org.eclipse.osgi.internal.url.URLStreamHandlerFactoryImpl;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
+import org.eclipse.osgi.storage.ContentProvider.Type;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
 import org.eclipse.osgi.storage.bundlefile.BundleFileWrapper;
@@ -90,7 +92,6 @@ import org.eclipse.osgi.storage.bundlefile.MRUBundleFileList;
 import org.eclipse.osgi.storage.bundlefile.NestedDirBundleFile;
 import org.eclipse.osgi.storage.bundlefile.ZipBundleFile;
 import org.eclipse.osgi.storage.url.reference.Handler;
-import org.eclipse.osgi.storage.url.reference.ReferenceInputStream;
 import org.eclipse.osgi.storagemanager.ManagedOutputStream;
 import org.eclipse.osgi.storagemanager.StorageManager;
 import org.eclipse.osgi.util.ManifestElement;
@@ -102,6 +103,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
+import org.osgi.framework.connect.ConnectModule;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.namespace.NativeNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
@@ -133,9 +135,10 @@ public class Storage {
 
 	}
 
-	public static final int VERSION = 5;
-	private static final int MR_JAR_VERSION = 4;
+	public static final int VERSION = 6;
+	private static final int CONTENT_TYPE_VERSION = 6;
 	private static final int CACHED_SYSTEM_CAPS_VERION = 5;
+	private static final int MR_JAR_VERSION = 4;
 	private static final int LOWEST_VERSION_SUPPORTED = 3;
 	public static final String BUNDLE_DATA_DIR = "data"; //$NON-NLS-1$
 	public static final String BUNDLE_FILE_NAME = "bundleFile"; //$NON-NLS-1$
@@ -362,6 +365,9 @@ public class Storage {
 			}
 		}
 		File content = generation.getContent();
+		if (content == null) {
+			return false;
+		}
 		if (getConfiguration().inCheckConfigurationMode()) {
 			if (generation.isDirectory()) {
 				content = new File(content, "META-INF/MANIFEST.MF"); //$NON-NLS-1$
@@ -384,7 +390,7 @@ public class Storage {
 				newGeneration = info.createGeneration();
 
 				File contentFile = getSystemContent();
-				newGeneration.setContent(contentFile, false);
+				newGeneration.setContent(contentFile, Type.DEFAULT);
 
 				// First we must make sure the VM profile has been loaded
 				loadVMProfile(newGeneration);
@@ -410,7 +416,7 @@ public class Storage {
 					File contentFile = currentGeneration.getContent();
 					if (systemNeedsUpdate(contentFile, currentRevision, currentGeneration, extraCapabilities, extraExports, cachedInfo)) {
 						newGeneration = currentGeneration.getBundleInfo().createGeneration();
-						newGeneration.setContent(contentFile, false);
+						newGeneration.setContent(contentFile, Type.DEFAULT);
 						ModuleRevisionBuilder newBuilder = getBuilder(newGeneration, extraCapabilities, extraExports);
 						moduleContainer.update(systemModule, newBuilder, newGeneration);
 						moduleContainer.refresh(Collections.singleton(systemModule));
@@ -687,16 +693,18 @@ public class Storage {
 			return (Generation) existingLocation.getCurrentRevision().getRevisionInfo();
 		}
 
-		boolean isReference = in instanceof ReferenceInputStream;
-		File staged = stageContent(in, sourceURL);
+		ContentProvider contentProvider = getContentProvider(in, sourceURL);
+		Type contentType = contentProvider.getType();
+		File staged = contentProvider.getContent();
+
 		Generation generation = null;
 		try {
 			Long nextID = moduleDatabase.getAndIncrementNextId();
 			BundleInfo info = new BundleInfo(this, nextID, bundleLocation, 0);
 			generation = info.createGeneration();
 
-			File contentFile = getContentFile(staged, isReference, nextID, generation.getGenerationId());
-			generation.setContent(contentFile, isReference);
+			File contentFile = getContentFile(staged, contentType, nextID, generation.getGenerationId());
+			generation.setContent(contentFile, contentType);
 			// Check that we can open the bundle file
 			generation.getBundleFile().open();
 			setStorageHooks(generation);
@@ -712,7 +720,7 @@ public class Storage {
 			}
 			return generation;
 		} catch (Throwable t) {
-			if (!isReference) {
+			if (contentType == Type.DEFAULT) {
 				try {
 					delete(staged);
 				} catch (IOException e) {
@@ -740,6 +748,24 @@ public class Storage {
 				generation.getBundleInfo().unlockGeneration(generation);
 			}
 		}
+	}
+
+	ContentProvider getContentProvider(final InputStream in, final URL sourceURL) {
+		if (in instanceof ContentProvider) {
+			return (ContentProvider) in;
+		}
+		return new ContentProvider() {
+
+			@Override
+			public Type getType() {
+				return Type.DEFAULT;
+			}
+
+			@Override
+			public File getContent() throws BundleException {
+				return stageContent(in, sourceURL);
+			}
+		};
 	}
 
 	private void setStorageHooks(Generation generation) throws BundleException {
@@ -879,7 +905,10 @@ public class Storage {
 		ModuleRevision current = module.getCurrentRevision();
 		Generation currentGen = (Generation) current.getRevisionInfo();
 		File content = currentGen.getContent();
-		String spec = (currentGen.isReference() ? "reference:" : "") + content.toURI().toString(); //$NON-NLS-1$ //$NON-NLS-2$
+		if (content == null) {
+			return;
+		}
+		String spec = (currentGen.getContentType() == Type.REFERENCE ? "reference:" : "") + content.toURI().toString(); //$NON-NLS-1$ //$NON-NLS-2$
 		URLConnection contentConn;
 		try {
 			contentConn = getContentConnection(spec);
@@ -900,8 +929,11 @@ public class Storage {
 		} catch (Throwable e) {
 			throw new BundleException("Error reading bundle content.", e); //$NON-NLS-1$
 		}
-		boolean isReference = in instanceof ReferenceInputStream;
-		File staged = stageContent(in, sourceURL);
+
+		ContentProvider contentProvider = getContentProvider(in, sourceURL);
+		Type contentType = contentProvider.getType();
+		File staged = contentProvider.getContent();
+
 		ModuleRevision current = module.getCurrentRevision();
 		Generation currentGen = (Generation) current.getRevisionInfo();
 
@@ -909,8 +941,8 @@ public class Storage {
 		Generation newGen = bundleInfo.createGeneration();
 
 		try {
-			File contentFile = getContentFile(staged, isReference, bundleInfo.getBundleId(), newGen.getGenerationId());
-			newGen.setContent(contentFile, isReference);
+			File contentFile = getContentFile(staged, contentType, bundleInfo.getBundleId(), newGen.getGenerationId());
+			newGen.setContent(contentFile, contentType);
 			// Check that we can open the bundle file
 			newGen.getBundleFile().open();
 			setStorageHooks(newGen);
@@ -918,7 +950,7 @@ public class Storage {
 			ModuleRevisionBuilder builder = getBuilder(newGen);
 			moduleContainer.update(module, builder, newGen);
 		} catch (Throwable t) {
-			if (!isReference) {
+			if (contentType == Type.DEFAULT) {
 				try {
 					delete(staged);
 				} catch (IOException e) {
@@ -944,14 +976,14 @@ public class Storage {
 		return newGen;
 	}
 
-	private File getContentFile(final File staged, final boolean isReference, final long bundleID, final long generationID) throws BundleException {
+	private File getContentFile(final File staged, Type contentType, final long bundleID, final long generationID) throws BundleException {
 		if (System.getSecurityManager() == null)
-			return getContentFile0(staged, isReference, bundleID, generationID);
+			return getContentFile0(staged, contentType, bundleID, generationID);
 		try {
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<File>() {
 				@Override
 				public File run() throws BundleException {
-					return getContentFile0(staged, isReference, bundleID, generationID);
+					return getContentFile0(staged, contentType, bundleID, generationID);
 				}
 			});
 		} catch (PrivilegedActionException e) {
@@ -961,9 +993,10 @@ public class Storage {
 		}
 	}
 
-	File getContentFile0(File staged, boolean isReference, long bundleID, long generationID) throws BundleException {
-		File contentFile;
-		if (!isReference) {
+	File getContentFile0(File staged, Type contentType, long bundleID, long generationID) throws BundleException {
+		File contentFile = staged;
+
+		if (contentType == Type.DEFAULT) {
 			File generationRoot = new File(childRoot, bundleID + "/" + generationID); //$NON-NLS-1$
 			generationRoot.mkdirs();
 			if (!generationRoot.isDirectory()) {
@@ -973,8 +1006,6 @@ public class Storage {
 			if (!StorageUtil.move(staged, contentFile, getConfiguration().getDebug().DEBUG_STORAGE)) {
 				throw new BundleException("Error while renaming bundle file to final location: " + contentFile); //$NON-NLS-1$
 			}
-		} else {
-			contentFile = staged;
 		}
 		return contentFile;
 	}
@@ -1053,7 +1084,7 @@ public class Storage {
 		return result;
 	}
 
-	private File stageContent(final InputStream in, final URL sourceURL) throws BundleException {
+	File stageContent(final InputStream in, final URL sourceURL) throws BundleException {
 		if (System.getSecurityManager() == null)
 			return stageContent0(in, sourceURL);
 		try {
@@ -1073,10 +1104,6 @@ public class Storage {
 	File stageContent0(InputStream in, URL sourceURL) throws BundleException {
 		File outFile = null;
 		try {
-			if (in instanceof ReferenceInputStream) {
-				return ((ReferenceInputStream) in).getReference();
-			}
-
 			outFile = File.createTempFile(BUNDLE_FILE_NAME, ".tmp", childRoot); //$NON-NLS-1$
 			String protocol = sourceURL == null ? null : sourceURL.getProtocol();
 
@@ -1133,9 +1160,12 @@ public class Storage {
 	}
 
 	public BundleFile createBundleFile(File content, Generation generation, boolean isDirectory, boolean isBase) {
-		BundleFile result;
+		BundleFile result = null;
 		try {
-			if (isDirectory) {
+			ConnectModule connectModule = equinoxContainer.getConnectModules().getConnectModule(generation.getBundleInfo().getLocation());
+			if (connectModule != null && isBase) {
+				result = new ConnectBundleFile(connectModule, content, generation, mruList, getConfiguration().getDebug());
+			} else if (isDirectory) {
 				boolean strictPath = Boolean.parseBoolean(equinoxContainer.getConfiguration().getConfiguration(EquinoxConfiguration.PROPERTY_STRICT_BUNDLE_ENTRY_PATH, Boolean.FALSE.toString()));
 				result = new DirBundleFile(content, strictPath);
 			} else {
@@ -1339,13 +1369,14 @@ public class Storage {
 			out.writeLong(bundleInfo.getNextGenerationId());
 			out.writeLong(generation.getGenerationId());
 			out.writeBoolean(generation.isDirectory());
-			out.writeBoolean(generation.isReference());
+			Type contentType = generation.getContentType();
+			out.writeInt(contentType.ordinal());
 			out.writeBoolean(generation.hasPackageInfo());
-			if (bundleInfo.getBundleId() == 0) {
-				// just write empty string for system bundle content in this case
+			if (bundleInfo.getBundleId() == 0 || contentType == Type.CONNECT) {
+				// just write empty string for system bundle content and connect content in this case
 				out.writeUTF(""); //$NON-NLS-1$
 			} else {
-				if (generation.isReference()) {
+				if (contentType == Type.REFERENCE) {
 					// make reference installs relative to the install path
 					out.writeUTF(new FilePath(installPath).makeRelative(new FilePath(generation.getContent().getAbsolutePath())));
 				} else {
@@ -1445,13 +1476,23 @@ public class Storage {
 		int numInfos = in.readInt();
 		Map<Long, Generation> result = new HashMap<>(numInfos);
 		List<Generation> generations = new ArrayList<>(numInfos);
+		Type[] contentTypes = Type.values();
 		for (int i = 0; i < numInfos; i++) {
 			long infoId = in.readLong();
 			String infoLocation = ObjectPool.intern(in.readUTF());
 			long nextGenId = in.readLong();
 			long generationId = in.readLong();
 			boolean isDirectory = in.readBoolean();
-			boolean isReference = in.readBoolean();
+
+			Type contentType = Type.DEFAULT;
+			if (version >= CONTENT_TYPE_VERSION) {
+				contentType = contentTypes[in.readInt()];
+			} else {
+				if (in.readBoolean()) {
+					contentType = Type.REFERENCE;
+				}
+			}
+
 			boolean hasPackageInfo = in.readBoolean();
 			String contentPath = in.readUTF();
 			long lastModified = in.readLong();
@@ -1468,29 +1509,34 @@ public class Storage {
 			}
 			boolean isMRJar = (version >= MR_JAR_VERSION) ? in.readBoolean() : false;
 
-			File content;
+			File content = null;
 			if (infoId == 0) {
 				content = getSystemContent();
 				isDirectory = content != null ? content.isDirectory() : false;
 				// Note that we do not do any checking for absolute paths with
 				// the system bundle.  We always take the content as discovered
 				// by getSystemContent()
-			} else {
+			} else if (contentType != Type.CONNECT) {
 				content = new File(contentPath);
 				if (!content.isAbsolute()) {
 					// make sure it has the absolute location instead
-					if (isReference) {
-						// reference installs are relative to the installPath
-						content = new File(installPath, contentPath);
-					} else {
-						// normal installs are relative to the storage area
-						content = getFile(contentPath, true);
+					switch (contentType) {
+						case REFERENCE :
+							// reference installs are relative to the installPath
+							content = new File(installPath, contentPath);
+							break;
+						case DEFAULT :
+							// normal installs are relative to the storage area
+							content = getFile(contentPath, true);
+							break;
+						default :
+							throw new IllegalArgumentException("Unknown type: " + contentType); //$NON-NLS-1$
 					}
 				}
 			}
 
 			BundleInfo info = new BundleInfo(this, infoId, infoLocation, nextGenId);
-			Generation generation = info.restoreGeneration(generationId, content, isDirectory, isReference, hasPackageInfo, cachedHeaders, lastModified, isMRJar);
+			Generation generation = info.restoreGeneration(generationId, content, isDirectory, contentType, hasPackageInfo, cachedHeaders, lastModified, isMRJar);
 			result.put(infoId, generation);
 			generations.add(generation);
 		}
