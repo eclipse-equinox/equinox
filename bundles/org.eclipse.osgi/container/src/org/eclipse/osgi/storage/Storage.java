@@ -10,7 +10,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Christoph Läubrich - Bug 527175 - Storage#getSystemContent() should first make the file absolute 
+ *      Christoph Laeubrich - Bug 527175 - Storage#getSystemContent() should first make the file absolute 
  *******************************************************************************/
 package org.eclipse.osgi.storage;
 
