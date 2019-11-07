@@ -12,6 +12,15 @@
 		<AD id="getMinAsNotANumber" type="String" min="foo"/>
 		<AD id="minMaxValidUsingInt" type="Password" min="8" max="16"/>
 		<AD id="minMaxValidUsingString" type="String" min="1" max="1.2"/>
+		<AD id="getDouble" type="Double" min="1" max="100"/>
+		<AD id="getFloat" type="Float" min="1" max="100"/>
+		<AD id="getByte" type="Byte" min="1" max="2"/>
+		<AD id="getShort" type="Short" min="1" max="2"/>
+		<AD id="getCharacter" type="Character" min="a" max="z"/>
+		<AD id="getBoolean" type="Boolean" min="false" max="true"/>
+		<AD id="getLong" type="Long" min="1" max="1000"/>
+		<AD id="getBigInteger" type="BigInteger" min="1" max="1000"/>
+		<AD id="getBigDecimal" type="BigDecimal" min="1.1" max="1000.1"/>
 	</OCD>
 	<Designate pid="org.eclipse.equinox.metatype.tests.getMinMax.tb1">
 		<Object ocdref="getMinMax"/>

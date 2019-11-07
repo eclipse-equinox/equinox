@@ -37,31 +37,84 @@ public class GetMinMaxTest extends AbstractTest {
 	@Test
 	public void testGetMax() throws Exception {
 		assertMaxValue("getMax", "0"); //$NON-NLS-1$ //$NON-NLS-2$
+		restartMetatype();
+		assertMaxValue("getMax", "0"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	@Test
 	public void testGetMaxAsNotANumber() {
+		assertMaxValue("getMaxAsNotANumber", "1.0.0"); //$NON-NLS-1$ //$NON-NLS-2$
+		restartMetatype();
 		assertMaxValue("getMaxAsNotANumber", "1.0.0"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	@Test
 	public void testGetMaxNull() {
 		assertMaxValue("getMaxNull", null); //$NON-NLS-1$
+		restartMetatype();
+		assertMaxValue("getMaxNull", null); //$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetMin() {
+		assertMinValue("getMin", "5"); //$NON-NLS-1$ //$NON-NLS-2$
+		restartMetatype();
 		assertMinValue("getMin", "5"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	@Test
 	public void testGetMinAsNotANumber() {
 		assertMinValue("getMinAsNotANumber", "foo"); //$NON-NLS-1$ //$NON-NLS-2$
+		restartMetatype();
+		assertMinValue("getMinAsNotANumber", "foo"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	@Test
 	public void testGetMinNull() {
 		assertMinValue("getMinNull", null); //$NON-NLS-1$
+		restartMetatype();
+		assertMinValue("getMinNull", null); //$NON-NLS-1$
+	}
+
+	@Test
+	public void testGetTheRest() {
+		assertMinValue("getDouble", "1.0"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMaxValue("getDouble", "100.0"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMinValue("getFloat", "1.0"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMaxValue("getFloat", "100.0"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMinValue("getByte", "1"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMaxValue("getByte", "2"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMinValue("getShort", "1"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMaxValue("getShort", "2"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMinValue("getLong", "1"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMaxValue("getLong", "1000"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMinValue("getCharacter", "a"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMaxValue("getCharacter", "z"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMinValue("getBoolean", "false"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMaxValue("getBoolean", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMinValue("getBigInteger", "1"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMaxValue("getBigInteger", "1000"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMinValue("getBigDecimal", "1.1"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMaxValue("getBigDecimal", "1000.1"); //$NON-NLS-1$ //$NON-NLS-2$
+		restartMetatype();
+		assertMinValue("getDouble", "1.0"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMaxValue("getDouble", "100.0"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMinValue("getFloat", "1.0"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMaxValue("getFloat", "100.0"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMinValue("getByte", "1"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMaxValue("getByte", "2"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMinValue("getShort", "1"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMaxValue("getShort", "2"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMinValue("getLong", "1"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMaxValue("getLong", "1000"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMinValue("getCharacter", "a"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMaxValue("getCharacter", "z"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMinValue("getBoolean", "false"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMaxValue("getBoolean", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMinValue("getBigInteger", "1"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMaxValue("getBigInteger", "1000"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMinValue("getBigDecimal", "1.1"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertMaxValue("getBigDecimal", "1000.1"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	@Test

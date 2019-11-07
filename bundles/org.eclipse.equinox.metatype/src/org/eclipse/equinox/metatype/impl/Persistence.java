@@ -105,7 +105,7 @@ public class Persistence {
 		}
 
 		public double readDouble() throws IOException {
-			return readDouble();
+			return in.readDouble();
 		}
 
 		public float readFloat() throws IOException {

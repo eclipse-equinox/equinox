@@ -18,7 +18,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({AttributeTypePasswordTest.class, Bug332161Test.class, Bug340899Test.class, BugTests.class, SameOcdPidFactoryPidTest.class, ExtendableTest.class, Bug358969Test.class, UnresolvedBundleTest.class, GetDefaultValueTest.class, IconTest.class, Bug395196Test.class, NoADTest.class})
+@SuiteClasses({AttributeTypePasswordTest.class, Bug332161Test.class, Bug340899Test.class, BugTests.class, SameOcdPidFactoryPidTest.class, ExtendableTest.class, Bug358969Test.class, UnresolvedBundleTest.class, GetDefaultValueTest.class, IconTest.class, Bug395196Test.class, NoADTest.class, GetMinMaxTest.class})
 public class AllTests {
 	//see @SuiteClasses
 }

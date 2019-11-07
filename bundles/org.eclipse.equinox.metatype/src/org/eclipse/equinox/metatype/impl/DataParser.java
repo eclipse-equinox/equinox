@@ -71,6 +71,8 @@ public class DataParser {
 	private static final String BOOLEAN = "Boolean"; //$NON-NLS-1$
 	private static final String SHORT = "Short"; //$NON-NLS-1$
 	private static final String PASSWORD = "Password"; //$NON-NLS-1$
+	private static final String BIGINTEGER = "BigInteger"; //$NON-NLS-1$
+	private static final String BIGDECIMAL = "BigDecimal"; //$NON-NLS-1$
 
 	protected Bundle _dp_bundle;
 	protected URL _dp_url;
@@ -443,6 +445,7 @@ public class DataParser {
 			super(handler);
 		}
 
+		@SuppressWarnings("deprecation")
 		public void init(String name, Attributes atts, List<AttributeDefinitionImpl> ads) {
 
 			logger.log(LogTracker.LOG_DEBUG, "Here is AttributeDefinitionHandler():init()"); //$NON-NLS-1$
@@ -492,6 +495,10 @@ public class DataParser {
 				_dataType = AttributeDefinition.SHORT;
 			} else if (ad_type_val.equalsIgnoreCase(PASSWORD)) {
 				_dataType = AttributeDefinition.PASSWORD;
+			} else if (ad_type_val.equalsIgnoreCase(BIGDECIMAL)) {
+				_dataType = AttributeDefinition.BIGDECIMAL;
+			} else if (ad_type_val.equalsIgnoreCase(BIGINTEGER)) {
+				_dataType = AttributeDefinition.BIGINTEGER;
 			} else {
 				_isParsedDataValid = false;
 				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.INVALID_TYPE, new Object[] {ad_type_val, ad_id_val, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
