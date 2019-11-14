@@ -49,7 +49,7 @@ public abstract class MultiplexingFactory {
 	 * The setAccessible class will be defined in the java.base module which grants
 	 * it the ability to call setAccessible(true) on other types from the java.base module
 	 */
-	static final Collection<AccessibleObject> setAccessible;
+	public static final Collection<AccessibleObject> setAccessible;
 	static final Collection<ClassLoader> systemLoaders;
 	static {
 		Collection<AccessibleObject> result = null;
