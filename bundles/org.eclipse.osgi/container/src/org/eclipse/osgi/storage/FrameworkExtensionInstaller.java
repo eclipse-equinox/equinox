@@ -14,6 +14,7 @@
 package org.eclipse.osgi.storage;
 
 import java.io.File;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -36,6 +37,7 @@ import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.hookregistry.ActivatorHookFactory;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.internal.messages.Msg;
+import org.eclipse.osgi.internal.url.MultiplexingFactory;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
@@ -50,34 +52,53 @@ import org.osgi.resource.Capability;
 public class FrameworkExtensionInstaller {
 	private static final ClassLoader CL = FrameworkExtensionInstaller.class.getClassLoader();
 	private static final Method ADD_FWK_URL_METHOD = findAddURLMethod(CL, "addURL"); //$NON-NLS-1$
+	private static final Method ADD_FWK_FILE_PATH_METHOD = ADD_FWK_URL_METHOD == null ? findAddFilePathMethod(CL, "appendToClassPathForInstrumentation") : null; //$NON-NLS-1$
 	private final ArrayMap<BundleActivator, Bundle> hookActivators = new ArrayMap<>(5);
 
 	private static Method findAddURLMethod(ClassLoader cl, String name) {
 		if (cl == null)
 			return null;
-		return findMethod(cl.getClass(), name, new Class[] {URL.class});
+		return findMethod(cl.getClass(), name, new Class[] {URL.class}, null);
+	}
+
+	private static Method findAddFilePathMethod(ClassLoader cl, String name) {
+		if (cl == null)
+			return null;
+		return findMethod(cl.getClass(), name, new Class[] {String.class}, MultiplexingFactory.setAccessible);
 	}
 
 	// recursively searches a class and it's superclasses for a (potentially inaccessable) method
-	private static Method findMethod(Class<?> clazz, String name, Class<?>[] args) {
+	private static Method findMethod(Class<?> clazz, String name, Class<?>[] args, Collection<AccessibleObject> setAccessible) {
 		if (clazz == null)
 			return null; // ends the recursion when getSuperClass returns null
 		try {
 			Method result = clazz.getDeclaredMethod(name, args);
-			result.setAccessible(true);
+			if (setAccessible != null) {
+				setAccessible.add(result);
+			} else {
+				result.setAccessible(true);
+			}
 			return result;
 		} catch (SecurityException e) {
 			// if we do not have the permissions then we will not find the method
 		} catch (NoSuchMethodException | RuntimeException e) {
 			// do nothing look in super class below
 			// have to avoid blowing up <clinit>
-		}  
-		return findMethod(clazz.getSuperclass(), name, args);
+		}
+		return findMethod(clazz.getSuperclass(), name, args, setAccessible);
 	}
 
 	private static void callAddURLMethod(URL arg) throws InvocationTargetException {
 		try {
 			ADD_FWK_URL_METHOD.invoke(CL, new Object[] {arg});
+		} catch (Throwable t) {
+			throw new InvocationTargetException(t);
+		}
+	}
+
+	private static void callAddFilePathMethod(File file) throws InvocationTargetException {
+		try {
+			ADD_FWK_FILE_PATH_METHOD.invoke(CL, new Object[] {file.getCanonicalPath()});
 		} catch (Throwable t) {
 			throw new InvocationTargetException(t);
 		}
@@ -113,34 +134,36 @@ public class FrameworkExtensionInstaller {
 			// framework extensions
 			return;
 		}
-		if (CL == null || ADD_FWK_URL_METHOD == null) {
-			// use the first revision as the blame
-			ModuleRevision revision = revisions.iterator().next();
-			throw new BundleException("Cannot support framework extension bundles without a public addURL(URL) method on the framework class loader: " + revision.getBundle()); //$NON-NLS-1$
-		}
 
 		for (ModuleRevision revision : revisions) {
-			File[] files = getExtensionFiles(revision);
-			if (files == null) {
-				return;
+			if (CL == null || (ADD_FWK_URL_METHOD == null && ADD_FWK_FILE_PATH_METHOD == null)) {
+				// use the first revision as the blame
+				throw new BundleException("Cannot support framework extension bundles without a public addURL(URL) or appendToClassPathForInstrumentation(String) method on the framework class loader: " + revision.getBundle()); //$NON-NLS-1$
 			}
+			File[] files = getExtensionFiles(revision);
 			for (File file : files) {
 				if (file == null) {
-					continue; 
+					continue;
 				}
 				try {
-					callAddURLMethod(StorageUtil.encodeFileURL(file));
-				}catch (InvocationTargetException | MalformedURLException e) {
+					if (ADD_FWK_URL_METHOD != null) {
+						callAddURLMethod(StorageUtil.encodeFileURL(file));
+					} else if (ADD_FWK_FILE_PATH_METHOD != null) {
+						callAddFilePathMethod(file);
+					}
+				} catch (InvocationTargetException | MalformedURLException e) {
 					throw new BundleException("Error adding extension content.", e); //$NON-NLS-1$
 				}
 			}
 		}
 
-		try {
-			// initialize the new urls
-			CL.loadClass("thisIsNotAClass"); //$NON-NLS-1$
-		} catch (ClassNotFoundException e) {
-			// do nothing
+		if (CL != null) {
+			try {
+				// initialize the new urls
+				CL.loadClass("thisIsNotAClass"); //$NON-NLS-1$
+			} catch (ClassNotFoundException e) {
+				// do nothing
+			}
 		}
 		if (systemModule != null) {
 			BundleContext systemContext = systemModule.getBundle().getBundleContext();
