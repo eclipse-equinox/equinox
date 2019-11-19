@@ -13,8 +13,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.ui.storage;
 
-import java.util.*;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.*;
 import org.eclipse.equinox.internal.security.storage.friends.*;
@@ -194,10 +194,8 @@ public class TabPassword {
 		TableColumn priorityColumn = new TableColumn(providerTable, SWT.CENTER);
 		priorityColumn.setText(SecUIMessages.priorityColumn);
 
-		List<PasswordProviderDescription> availableModules = InternalExchangeUtils.passwordProvidersFind();
 		HashSet<String> disabledModules = getDisabledModules();
-		for (Iterator<PasswordProviderDescription> i = availableModules.iterator(); i.hasNext();) {
-			PasswordProviderDescription module = i.next();
+		for (PasswordProviderDescription module : InternalExchangeUtils.passwordProvidersFind()) {
 			TableItem item = new TableItem(providerTable, SWT.NONE);
 			item.setText(new String[] {module.getName(), Integer.toString(module.getPriority())});
 			item.setData(module);

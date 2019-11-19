@@ -180,8 +180,8 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 				exKeyUsg = theCert.getExtendedKeyUsage();
 				StringBuilder exKeyUsgBfr = new StringBuilder();
 				if (exKeyUsg != null && exKeyUsg.size() > 0) {
-					for (Iterator<String> exKeyUsgIter = exKeyUsg.iterator(); exKeyUsgIter.hasNext();) {
-						exKeyUsgBfr.append((exKeyUsgIter.next()) + listDelim);
+					for (String string : exKeyUsg) {
+						exKeyUsgBfr.append((string) + listDelim);
 					}
 
 					X509CertificateAttribute exKeyUsgProp = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_EXKEY_USAGE, (exKeyUsgBfr.toString()).substring(0, exKeyUsgBfr.length() - 2), theCert.getExtendedKeyUsage());

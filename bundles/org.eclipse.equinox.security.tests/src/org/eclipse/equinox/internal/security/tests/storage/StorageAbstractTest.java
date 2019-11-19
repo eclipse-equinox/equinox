@@ -42,8 +42,7 @@ public class StorageAbstractTest {
 	@After
 	public void tearDown() throws Exception {
 		synchronized (openPreferences) {
-			for (Iterator<ISecurePreferences> i = openPreferences.iterator(); i.hasNext();) {
-				ISecurePreferences root = i.next();
+			for (ISecurePreferences root : openPreferences) {
 				SecurePreferencesMapper.close((((SecurePreferencesWrapper) root).getContainer().getRootData()));
 				URL location = ((SecurePreferencesWrapper) root).getContainer().getLocation();
 				StorageUtils.delete(location);

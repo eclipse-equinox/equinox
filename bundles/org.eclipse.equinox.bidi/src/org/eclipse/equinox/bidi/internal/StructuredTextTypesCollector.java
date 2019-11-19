@@ -92,11 +92,9 @@ public class StructuredTextTypesCollector implements IRegistryEventListener {
 		}
 
 		IExtensionPoint extPoint = registry.getExtensionPoint(EXT_POINT);
-		IExtension[] extensions = extPoint.getExtensions();
 
-		for (IExtension extension : extensions) {
-			IConfigurationElement[] confElements = extension.getConfigurationElements();
-			for (IConfigurationElement confElement : confElements) {
+		for (IExtension extension : extPoint.getExtensions()) {
+			for (IConfigurationElement confElement : extension.getConfigurationElements()) {
 				if (!CE_NAME.equals(confElement.getName()))
 					StructuredTextActivator.logError("BiDi types: unexpected element name " + confElement.getName(), new IllegalArgumentException()); //$NON-NLS-1$
 				String type = confElement.getAttribute(ATTR_TYPE);

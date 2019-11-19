@@ -244,8 +244,8 @@ public class TableWriter {
 		Collection<?> entries = contributors.values();
 		outputContributors.writeInt(entries.size());
 
-		for (Iterator<?> i = entries.iterator(); i.hasNext();) {
-			RegistryContributor contributor = (RegistryContributor) i.next();
+		for (Object entry : entries) {
+			RegistryContributor contributor = (RegistryContributor) entry;
 			writeStringOrNull(contributor.getActualId(), outputContributors);
 			writeStringOrNull(contributor.getActualName(), outputContributors);
 			writeStringOrNull(contributor.getId(), outputContributors);
@@ -291,8 +291,8 @@ public class TableWriter {
 			return;
 		}
 		out.writeInt(array.length);
-		for (int i = 0; i < array.length; i++) {
-			out.writeInt(array[i]);
+		for (int element : array) {
+			out.writeInt(element);
 		}
 	}
 

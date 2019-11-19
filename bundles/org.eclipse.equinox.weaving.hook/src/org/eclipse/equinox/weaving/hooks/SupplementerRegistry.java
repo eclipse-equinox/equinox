@@ -7,11 +7,11 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *   Matthew Webster           initial implementation
- *   Martin Lippert            supplementing mechanism reworked     
- *   Heiko Seeberger           Enhancements for service dynamics     
+ *   Martin Lippert            supplementing mechanism reworked
+ *   Heiko Seeberger           Enhancements for service dynamics
  *   Martin Lippert            fragment handling fixed
  *******************************************************************************/
 
@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +41,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
 /**
  * The supplementer registry controls the set of installed supplementer bundles
  * and calculates which other bundles are supplemented by them.
- * 
+ *
  * @author mlippert
  */
 public class SupplementerRegistry implements ISupplementerRegistry {
@@ -52,7 +51,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
      * names (and optionally, version numbers) of any bundles supplemented by
      * this bundle. All supplemented bundles will have all the exported packages
      * of this bundle added to their imports list
-     * 
+     *
      * <p>
      * The attribute value may be retrieved from the <code>Dictionary</code>
      * object returned by the <code>Bundle.getHeaders</code> method.
@@ -64,7 +63,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
      * names (and optionally, version numbers) of the packages that the bundle
      * supplements. All exporters of one of these packages will have the
      * exported packages of this bundle added to their imports list.
-     * 
+     *
      * <p>
      * The attribute value may be retrieved from the <code>Dictionary</code>
      * object returned by the <code>Bundle.getHeaders</code> method.
@@ -76,7 +75,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
      * names (and optionally, version numbers) of the packages that the bundle
      * supplements. All importers of one of these packages will have the
      * exported packages of this bundle added to their imports in addition.
-     * 
+     *
      * <p>
      * The attribute value may be retrieved from the <code>Dictionary</code>
      * object returned by the <code>Bundle.getHeaders</code> method.
@@ -155,9 +154,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
 
     private void addSupplementedBundle(final Bundle supplementedBundle,
             final List<Supplementer> supplementers) {
-        for (final Iterator<Supplementer> iterator = supplementers.iterator(); iterator
-                .hasNext();) {
-            final Supplementer supplementer = iterator.next();
+        for (final Supplementer supplementer : supplementers) {
             supplementer.addSupplementedBundle(supplementedBundle);
         }
     }
@@ -167,7 +164,8 @@ public class SupplementerRegistry implements ISupplementerRegistry {
      *      boolean)
      */
     @Override
-    public void addSupplementer(final Bundle bundle, final boolean updateBundles) {
+    public void addSupplementer(final Bundle bundle,
+            final boolean updateBundles) {
         try {
             final Dictionary<?, ?> manifest = bundle.getHeaders(""); //$NON-NLS-1$
             final ManifestElement[] supplementBundle = ManifestElement
@@ -184,7 +182,8 @@ public class SupplementerRegistry implements ISupplementerRegistry {
                     || supplementExporter != null) {
 
                 final Bundle[] hosts = this.packageAdmin.getHosts(bundle);
-                final Bundle host = hosts != null && hosts.length == 1 ? hosts[0]
+                final Bundle host = hosts != null && hosts.length == 1
+                        ? hosts[0]
                         : null;
 
                 final Supplementer newSupplementer = new Supplementer(bundle,
@@ -215,9 +214,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
         if (supplementers.size() > 0
                 && !this.dontWeaveTheseBundles.contains(symbolicName)) {
             result = new LinkedList<Supplementer>();
-            for (final Iterator<Supplementer> i = supplementers.values()
-                    .iterator(); i.hasNext();) {
-                final Supplementer supplementer = i.next();
+            for (Supplementer supplementer : supplementers.values()) {
                 if (isSupplementerMatching(symbolicName, imports, exports,
                         supplementer)) {
                     result.add(supplementer);
@@ -262,8 +259,8 @@ public class SupplementerRegistry implements ISupplementerRegistry {
         final String supplementerName = supplementer.getSymbolicName();
         if (!supplementerName.equals(symbolicName)) {
             if (supplementer.matchSupplementer(symbolicName)
-                    || (imports != null && supplementer
-                            .matchesSupplementImporter(imports))
+                    || (imports != null
+                            && supplementer.matchesSupplementImporter(imports))
                     || (exports != null && supplementer
                             .matchesSupplementExporter(exports))) {
                 return true;
@@ -274,7 +271,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
 
     /**
      * Refreshes the given bundles
-     * 
+     *
      * @param bundles The bundles to refresh
      */
     @Override
@@ -306,13 +303,12 @@ public class SupplementerRegistry implements ISupplementerRegistry {
         if (supplementers.containsKey(bundle.getSymbolicName())) {
 
             // remove the supplementer from the list of supplementers
-            final Supplementer supplementer = supplementers.get(bundle
-                    .getSymbolicName());
+            final Supplementer supplementer = supplementers
+                    .get(bundle.getSymbolicName());
             supplementers.remove(bundle.getSymbolicName());
-            if (AbstractWeavingHook.verbose)
-                System.err
-                        .println("[org.eclipse.equinox.weaving.hook] info removing supplementer " //$NON-NLS-1$
-                                + bundle.getSymbolicName());
+            if (AbstractWeavingHook.verbose) System.err.println(
+                    "[org.eclipse.equinox.weaving.hook] info removing supplementer " //$NON-NLS-1$
+                            + bundle.getSymbolicName());
 
             // refresh bundles that where supplemented by this bundle
             final Bundle[] supplementedBundles = supplementer
@@ -321,8 +317,8 @@ public class SupplementerRegistry implements ISupplementerRegistry {
                 final List<Bundle> bundlesToRefresh = new ArrayList<Bundle>(
                         supplementedBundles.length);
                 for (final Bundle bundleToRefresh : supplementedBundles) {
-                    if (this.adaptorProvider.getAdaptor(bundleToRefresh
-                            .getBundleId()) != null) {
+                    if (this.adaptorProvider.getAdaptor(
+                            bundleToRefresh.getBundleId()) != null) {
                         bundlesToRefresh.add(bundleToRefresh);
                     }
                 }
@@ -333,11 +329,12 @@ public class SupplementerRegistry implements ISupplementerRegistry {
                 }
             }
 
-	    // remove this supplementer from the list of supplementers per other bundle
+            // remove this supplementer from the list of supplementers per other bundle
             for (Bundle supplementedBundle : supplementedBundles) {
                 final long bundleId = supplementedBundle.getBundleId();
                 final List<Supplementer> supplementerList = new ArrayList<Supplementer>(
-                        Arrays.asList(this.supplementersByBundle.get(bundleId)));
+                        Arrays.asList(
+                                this.supplementersByBundle.get(bundleId)));
                 supplementerList.remove(supplementer);
                 this.supplementersByBundle.put(bundleId,
                         supplementerList.toArray(new Supplementer[0]));
@@ -346,9 +343,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
     }
 
     private void removeSupplementedBundle(final Bundle bundle) {
-        for (final Iterator<Supplementer> iterator = this.supplementers
-                .values().iterator(); iterator.hasNext();) {
-            final Supplementer supplementer = iterator.next();
+        for (final Supplementer supplementer : this.supplementers.values()) {
             supplementer.removeSupplementedBundle(bundle);
         }
     }
@@ -362,8 +357,8 @@ public class SupplementerRegistry implements ISupplementerRegistry {
             try {
                 final Bundle bundle = installedBundle;
                 // skip the bundle itself, just resupplement already installed bundles
-                if (bundle.getSymbolicName().equals(
-                        supplementer.getSymbolicName())) {
+                if (bundle.getSymbolicName()
+                        .equals(supplementer.getSymbolicName())) {
                     continue;
                 }
                 // skip bundles that should not be woven
@@ -401,10 +396,10 @@ public class SupplementerRegistry implements ISupplementerRegistry {
 
                         this.supplementersByBundle.put(bundle.getBundleId(),
                                 enhancedSupplementerList
-                                .toArray(new Supplementer[0]));
+                                        .toArray(new Supplementer[0]));
                     }
                 }
-            }catch (final BundleException e) {
+            } catch (final BundleException e) {
                 e.printStackTrace();
             }
         }

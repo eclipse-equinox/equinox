@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.ui.storage;
 
-import java.util.Iterator;
 import java.util.Map;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -58,8 +57,7 @@ public class TabAdvanced {
 
 		// fill cipher selector
 		int position = 0;
-		for (Iterator<String> i = availableCiphers.keySet().iterator(); i.hasNext();) {
-			String cipherAlgorithm = i.next();
+		for (String cipherAlgorithm : availableCiphers.keySet()) {
 			cipherSelector.add(cipherAlgorithm, position);
 			if (defaultCipherAlgorithm.equals(cipherAlgorithm))
 				cipherSelector.select(position);
