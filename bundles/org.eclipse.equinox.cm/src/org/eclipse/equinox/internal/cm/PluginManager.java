@@ -44,8 +44,8 @@ public class PluginManager {
 			return null;
 
 		ServiceReference<ConfigurationPlugin>[] references = pluginTracker.getServiceReferences();
-		for (int i = 0; i < references.length; ++i) {
-			Collection<?> pids = getStringProperty(references[i].getProperty(ConfigurationPlugin.CM_TARGET));
+		for (ServiceReference<ConfigurationPlugin> reference : references) {
+			Collection<?> pids = getStringProperty(reference.getProperty(ConfigurationPlugin.CM_TARGET));
 			if (pids != null) {
 				String pid = config.getFactoryPid();
 				if (pid == null) {
@@ -54,9 +54,9 @@ public class PluginManager {
 				if (!pids.contains(pid))
 					continue;
 			}
-			ConfigurationPlugin plugin = pluginTracker.getService(references[i]);
+			ConfigurationPlugin plugin = pluginTracker.getService(reference);
 			if (plugin != null) {
-				int rank = getRank(references[i]);
+				int rank = getRank(reference);
 				if (rank < 0 || rank > 1000) {
 					plugin.modifyConfiguration(managedReference, ((ConfigurationDictionary) properties).copy());
 				} else {

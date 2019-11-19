@@ -269,8 +269,8 @@ public class ReferenceHashSet<T> {
 		ReferenceHashSet<T> newHashSet = new ReferenceHashSet<>(this.elementSize * 2); // double the number of expected elements
 		newHashSet.referenceQueue = this.referenceQueue;
 		HashedReference<T> currentValue;
-		for (int i = 0, length = this.values.length; i < length; i++)
-			if ((currentValue = this.values[i]) != null)
+		for (HashedReference<T> value : this.values)
+			if ((currentValue = value) != null)
 				newHashSet.addValue(currentValue);
 
 		this.values = newHashSet.values;
@@ -307,8 +307,7 @@ public class ReferenceHashSet<T> {
 	@Override
 	public String toString() {
 		StringBuilder buffer = new StringBuilder("{"); //$NON-NLS-1$
-		for (int i = 0, length = this.values.length; i < length; i++) {
-			HashedReference<T> value = this.values[i];
+		for (HashedReference<T> value : this.values) {
 			if (value != null) {
 				Object ref = value.get();
 				if (ref != null) {

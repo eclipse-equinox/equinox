@@ -80,8 +80,7 @@ public class EventDispatcher {
 		if (refs == null)
 			return;
 
-		for (int i = 0; i < refs.length; ++i) {
-			final ServiceReference<ConfigurationListener> ref = refs[i];
+		for (final ServiceReference<ConfigurationListener> ref : refs) {
 			queue.put(new Runnable() {
 				@Override
 				public void run() {

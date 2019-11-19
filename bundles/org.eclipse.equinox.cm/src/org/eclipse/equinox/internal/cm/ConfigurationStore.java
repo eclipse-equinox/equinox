@@ -46,8 +46,8 @@ class ConfigurationStore {
 
 		store.mkdir();
 		File[] configurationFiles = store.listFiles();
-		for (int i = 0; i < configurationFiles.length; ++i) {
-			String configurationFileName = configurationFiles[i].getName();
+		for (File configurationFile : configurationFiles) {
+			String configurationFileName = configurationFile.getName();
 			if (!configurationFileName.endsWith(CFG_EXT))
 				continue;
 
@@ -55,7 +55,7 @@ class ConfigurationStore {
 			ObjectInputStream ois = null;
 			boolean deleteFile = false;
 			try {
-				ris = new ReliableFileInputStream(configurationFiles[i]);
+				ris = new ReliableFileInputStream(configurationFile);
 				ois = new ObjectInputStream(ris);
 				@SuppressWarnings("unchecked")
 				Dictionary<String, Object> dictionary = (Dictionary<String, Object>) ois.readObject();
@@ -67,7 +67,7 @@ class ConfigurationStore {
 						dictionary.remove(ConfigurationAdmin.SERVICE_BUNDLELOCATION);
 					}
 				}
-				ConfigurationImpl config = new ConfigurationImpl(configurationAdminFactory, this, dictionary, configurationFiles[i]);
+				ConfigurationImpl config = new ConfigurationImpl(configurationAdminFactory, this, dictionary, configurationFile);
 				configurations.put(config.getPid(), config);
 			} catch (IOException e) {
 				String message = e.getMessage();
@@ -94,8 +94,8 @@ class ConfigurationStore {
 				}
 			}
 			if (deleteFile) {
-				ReliableFile.delete(configurationFiles[i]);
-				configurationFiles[i].delete();
+				ReliableFile.delete(configurationFile);
+				configurationFile.delete();
 			}
 		}
 	}

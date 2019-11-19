@@ -299,8 +299,8 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 		try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(locksData))) {
 			out.writeInt(DATA_VERSION);
 			out.writeInt(locks.size());
-			for (Iterator<String> iterLocks = locks.iterator(); iterLocks.hasNext();)
-				out.writeUTF(iterLocks.next());
+			for (String lock : locks)
+				out.writeUTF(lock);
 		}
 	}
 
@@ -309,8 +309,7 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 		try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(schedulesData))) {
 			out.writeInt(DATA_VERSION);
 			out.writeInt(scheduledApps.size());
-			for (Iterator<EclipseScheduledApplication> apps = scheduledApps.values().iterator(); apps.hasNext();) {
-				EclipseScheduledApplication app = apps.next();
+			for (EclipseScheduledApplication app : scheduledApps.values()) {
 				writeStringOrNull(out, app.getScheduleId());
 				writeStringOrNull(out, app.getAppPid());
 				writeStringOrNull(out, app.getTopic());

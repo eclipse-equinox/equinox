@@ -203,24 +203,24 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 			qualifiedPids: for (String qualifiedPid : qualifiedPids) {
 				ConfigurationImpl[] configs = configurationStore.getFactoryConfigurations(qualifiedPid);
 				try {
-					for (int i = 0; i < configs.length; ++i) {
-						configs[i].lock();
+					for (ConfigurationImpl config : configs) {
+						config.lock();
 					}
 					boolean foundConfig = false;
-					for (int i = 0; i < configs.length; ++i) {
-						if (configs[i].isDeleted()) {
+					for (ConfigurationImpl config : configs) {
+						if (config.isDeleted()) {
 							// ignore this config
 						} else {
-							String location = configs[i].getLocation();
+							String location = config.getLocation();
 							boolean shouldBind = location == null || !location.startsWith("?"); //$NON-NLS-1$
 							boolean hasLocPermission = configurationAdminFactory.checkTargetPermission(location, reference);
 							if (hasLocPermission) {
-								if (shouldBind && configs[i].bind(ConfigurationAdminImpl.getLocation(reference.getBundle())) || !shouldBind) {
-									Dictionary<String, Object> properties = configurationAdminFactory.modifyConfiguration(reference, configs[i]);
-									asynchUpdated(serviceFactory, configs[i].getPid(), properties);
+								if (shouldBind && config.bind(ConfigurationAdminImpl.getLocation(reference.getBundle())) || !shouldBind) {
+									Dictionary<String, Object> properties = configurationAdminFactory.modifyConfiguration(reference, config);
+									asynchUpdated(serviceFactory, config.getPid(), properties);
 									foundConfig = true;
 								} else {
-									configurationAdminFactory.log(LogService.LOG_WARNING, "Configuration for " + Constants.SERVICE_PID + "=" + configs[i].getPid() + " could not be bound to " + ConfigurationAdminImpl.getLocation(reference.getBundle())); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+									configurationAdminFactory.log(LogService.LOG_WARNING, "Configuration for " + Constants.SERVICE_PID + "=" + config.getPid() + " could not be bound to " + ConfigurationAdminImpl.getLocation(reference.getBundle())); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 								}
 							}
 						}
@@ -229,8 +229,8 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 						break qualifiedPids;
 					}
 				} finally {
-					for (int i = 0; i < configs.length; ++i)
-						configs[i].unlock();
+					for (ConfigurationImpl config : configs)
+						config.unlock();
 				}
 			}
 		}

@@ -103,8 +103,7 @@ public final class AdapterManager implements IAdapterManager {
 		List<IAdapterFactory> factoryList = getFactories().get(typeName);
 		if (factoryList == null)
 			return;
-		for (int i = 0, imax = factoryList.size(); i < imax; i++) {
-			IAdapterFactory factory = factoryList.get(i);
+		for (IAdapterFactory factory : factoryList) {
 			if (factory instanceof IAdapterFactoryExt) {
 				String[] adapters = ((IAdapterFactoryExt) factory).getAdapterNames();
 				for (String adapter : adapters) {

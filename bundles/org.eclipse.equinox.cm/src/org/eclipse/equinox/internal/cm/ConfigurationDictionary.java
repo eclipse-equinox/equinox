@@ -55,9 +55,8 @@ public class ConfigurationDictionary extends Dictionary<String, Object> implemen
 
 		// Is it a Collection of simples
 		if (value instanceof Collection) {
-			Collection<?> valueCollection = (Collection<?>) value;
-			for (Iterator<?> it = valueCollection.iterator(); it.hasNext();) {
-				Class<?> containedClazz = it.next().getClass();
+			for (Object simple : (Collection<?>) value) {
+				Class<?> containedClazz = simple.getClass();
 				if (!simples.contains(containedClazz)) {
 					throw new IllegalArgumentException(containedClazz.getName() + " in " + clazz.getName()); //$NON-NLS-1$
 				}

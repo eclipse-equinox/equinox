@@ -472,8 +472,8 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 
 	private void refreshAppDescriptors() {
 		synchronized (lock) {
-			for (Iterator<EclipseAppDescriptor> allApps = apps.values().iterator(); allApps.hasNext();)
-				allApps.next().refreshProperties();
+			for (EclipseAppDescriptor eclipseAppDescriptor : apps.values())
+				eclipseAppDescriptor.refreshProperties();
 		}
 	}
 
