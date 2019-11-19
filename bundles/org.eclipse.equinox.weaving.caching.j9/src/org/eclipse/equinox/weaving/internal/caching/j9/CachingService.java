@@ -101,10 +101,8 @@ public class CachingService implements ICachingService {
         } catch (final NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-        final byte[] bytes = md.digest(namespace.getBytes());
         final StringBuffer result = new StringBuffer();
-        for (int i = 0; i < bytes.length; i++) {
-            final byte b = bytes[i];
+        for (final byte b : md.digest(namespace.getBytes())) {
             int num;
             if (b < 0) {
                 num = b + 256;

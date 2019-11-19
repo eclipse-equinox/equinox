@@ -96,10 +96,10 @@ public class RegistryIndexChildren {
 		}
 		int[] result = new int[size];
 		int pos = 0;
-		for (int i = 0; i < children.length; i++) {
-			if (children[i] == -1)
+		for (int child : children) {
+			if (child == -1)
 				continue;
-			result[pos] = children[i];
+			result[pos] = child;
 			pos++;
 		}
 		return true;

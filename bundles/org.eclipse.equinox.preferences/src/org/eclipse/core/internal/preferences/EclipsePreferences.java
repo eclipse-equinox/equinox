@@ -243,8 +243,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			// ignore for now
 		}
 		table.remove(VERSION_KEY);
-		for (Iterator<?> i = table.keySet().iterator(); i.hasNext();) {
-			String fullKey = (String) i.next();
+		for (Object propName : table.keySet()) {
+			String fullKey = (String) propName;
 			String value = table.getProperty(fullKey);
 			if (value != null) {
 				String[] splitPath = decodePath(fullKey);
@@ -320,15 +320,13 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		synchronized (childAndPropertyLock) {
 			temp = properties;
 		}
-		String[] keys = temp.keys();
-		for (int i = 0, imax = keys.length; i < imax; i++) {
-			String value = temp.get(keys[i]);
+		for (String key : temp.keys()) {
+			String value = temp.get(key);
 			if (value != null)
-				result.put(encodePath(prefix, keys[i]), value);
+				result.put(encodePath(prefix, key), value);
 		}
 		// recursively add the child information
-		IEclipsePreferences[] childNodes = getChildren(true);
-		for (IEclipsePreferences childNode : childNodes) {
+		for (IEclipsePreferences childNode : getChildren(true)) {
 			EclipsePreferences child = (EclipsePreferences) childNode;
 			String fullPath = addSeparator ? prefix + PATH_SEPARATOR + child.name() : child.name();
 			child.convertToProperties(result, fullPath);

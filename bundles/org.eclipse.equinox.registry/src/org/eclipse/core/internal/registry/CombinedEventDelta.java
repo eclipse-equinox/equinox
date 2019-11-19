@@ -127,8 +127,8 @@ public class CombinedEventDelta {
 			return;
 		if (exts.length == 0)
 			return;
-		for (int i = 0; i < exts.length; i++)
-			rememberExtension(extensionPoint, exts[i]);
+		for (int ext : exts)
+			rememberExtension(extensionPoint, ext);
 	}
 
 	public IExtensionPoint[] getExtensionPoints(String id) {

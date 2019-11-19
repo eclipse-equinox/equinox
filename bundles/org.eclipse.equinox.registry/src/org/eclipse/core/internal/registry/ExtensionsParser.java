@@ -219,8 +219,8 @@ public class ExtensionsParser extends DefaultHandler {
 				// Put the extension points into this namespace
 				if (extensionPoints.size() > 0) {
 					namespaceChildren[Contribution.EXTENSION_POINT] = extensionPoints.size();
-					for (Iterator<?> iter = extensionPoints.iterator(); iter.hasNext();) {
-						namespaceChildren[position++] = ((RegistryObject) iter.next()).getObjectId();
+					for (Object extPoint : extensionPoints) {
+						namespaceChildren[position++] = ((RegistryObject) extPoint).getObjectId();
 					}
 					extensionPoints.clear();
 				}
@@ -494,8 +494,8 @@ public class ExtensionsParser extends DefaultHandler {
 				String msg = NLS.bind(RegistryMessages.parse_duplicateExtension, new String[] {currentSupplier, existingSupplier, uniqueId});
 				registry.log(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, 0, msg, null));
 			} else if (processedExtensionIds != null) { // check elements in this contribution
-				for (Iterator<String> i = processedExtensionIds.iterator(); i.hasNext();) {
-					if (uniqueId.equals(i.next())) {
+				for (String extensionId : processedExtensionIds) {
+					if (uniqueId.equals(extensionId)) {
 						String currentSupplier = contribution.getDefaultNamespace();
 						String existingSupplier = currentSupplier;
 						String msg = NLS.bind(RegistryMessages.parse_duplicateExtension, new String[] {currentSupplier, existingSupplier, uniqueId});

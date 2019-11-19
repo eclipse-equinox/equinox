@@ -45,8 +45,7 @@ class ConfigurationStore {
 			return; // no persistent store
 
 		store.mkdir();
-		File[] configurationFiles = store.listFiles();
-		for (File configurationFile : configurationFiles) {
+		for (File configurationFile : store.listFiles()) {
 			String configurationFileName = configurationFile.getName();
 			if (!configurationFileName.endsWith(CFG_EXT))
 				continue;

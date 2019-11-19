@@ -969,10 +969,7 @@ public class ContextController {
 
 		List<FilterDTO> filterDTOs = new ArrayList<FilterDTO>();
 
-		for (int i = 0; i < matchedFilterRegistrations.size() ; i++) {
-			FilterRegistration filterRegistration =
-				matchedFilterRegistrations.get(i);
-
+		for (FilterRegistration filterRegistration : matchedFilterRegistrations) {
 			if (Arrays.binarySearch(filterRegistration.getD().dispatcher, DispatcherType.REQUEST.toString()) > -1) {
 				filterDTOs.add(filterRegistration.getD());
 			}

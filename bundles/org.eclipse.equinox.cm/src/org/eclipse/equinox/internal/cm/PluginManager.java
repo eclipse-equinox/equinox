@@ -43,8 +43,7 @@ public class PluginManager {
 		if (properties == null)
 			return null;
 
-		ServiceReference<ConfigurationPlugin>[] references = pluginTracker.getServiceReferences();
-		for (ServiceReference<ConfigurationPlugin> reference : references) {
+		for (ServiceReference<ConfigurationPlugin> reference : pluginTracker.getServiceReferences()) {
 			Collection<?> pids = getStringProperty(reference.getProperty(ConfigurationPlugin.CM_TARGET));
 			if (pids != null) {
 				String pid = config.getFactoryPid();

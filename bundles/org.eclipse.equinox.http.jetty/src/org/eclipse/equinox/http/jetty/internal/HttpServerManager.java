@@ -208,8 +208,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 	}
 
 	public synchronized void shutdown() throws Exception {
-		for (Iterator<Server> it = servers.values().iterator(); it.hasNext();) {
-			Server server = it.next();
+		for (Server server : servers.values()) {
 			server.stop();
 		}
 		servers.clear();

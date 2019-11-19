@@ -20,7 +20,6 @@ import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 // This class is a slightly augmented copy of org.eclipse.core.runtime.internal.adaptor.ContextFinder
@@ -127,10 +126,9 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction<Ar
 			throw new ClassNotFoundException(arg0);
 
 		try {
-			ArrayList<ClassLoader> toConsult = findClassLoaders();
-			for (Iterator<ClassLoader> loaders = toConsult.iterator(); loaders.hasNext();)
+			for (ClassLoader classLoader : findClassLoaders())
 				try {
-					return loaders.next().loadClass(arg0);
+					return classLoader.loadClass(arg0);
 				} catch (ClassNotFoundException e) {
 					// go to the next class loader
 				}
@@ -146,9 +144,8 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction<Ar
 		if (startLoading(arg0) == false)
 			return null;
 		try {
-			ArrayList<ClassLoader> toConsult = findClassLoaders();
-			for (Iterator<ClassLoader> loaders = toConsult.iterator(); loaders.hasNext();) {
-				URL result = loaders.next().getResource(arg0);
+			for (ClassLoader classLoader : findClassLoaders()) {
+				URL result = classLoader.getResource(arg0);
 				if (result != null)
 					return result;
 				// go to the next class loader
@@ -165,9 +162,8 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction<Ar
 		if (startLoading(arg0) == false)
 			return null;
 		try {
-			ArrayList<ClassLoader> toConsult = findClassLoaders();
-			for (Iterator<ClassLoader> loaders = toConsult.iterator(); loaders.hasNext();) {
-				Enumeration<URL> result = loaders.next().getResources(arg0);
+			for (ClassLoader classLoader : findClassLoaders()) {
+				Enumeration<URL> result = classLoader.getResources(arg0);
 				if (result != null && result.hasMoreElements())
 					return result;
 				// go to the next class loader

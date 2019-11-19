@@ -153,8 +153,8 @@ public class InstancePreferences extends EclipsePreferences {
 		}
 
 		// Store values in the preferences object
-		for (Iterator<?> i = values.keySet().iterator(); i.hasNext();) {
-			String key = (String) i.next();
+		for (Object propName : values.keySet()) {
+			String key = (String) propName;
 			String value = values.getProperty(key);
 			// value shouldn't be null but check just in case...
 			if (value != null) {

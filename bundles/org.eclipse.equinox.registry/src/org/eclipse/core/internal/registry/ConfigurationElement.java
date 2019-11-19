@@ -140,8 +140,8 @@ public class ConfigurationElement extends RegistryObject {
 		ConfigurationElement[] result = new ConfigurationElement[1]; //Most of the time there is only one match
 		int idx = 0;
 		RegistryObjectManager objectManager = registry.getObjectManager();
-		for (int i = 0; i < children.length; i++) {
-			ConfigurationElement toTest = (ConfigurationElement) objectManager.getObject(children[i], noExtraData() ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
+		for (int child : children) {
+			ConfigurationElement toTest = (ConfigurationElement) objectManager.getObject(child, noExtraData() ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
 			if (toTest.name.equals(childrenName)) {
 				if (idx != 0) {
 					ConfigurationElement[] copy = new ConfigurationElement[result.length + 1];

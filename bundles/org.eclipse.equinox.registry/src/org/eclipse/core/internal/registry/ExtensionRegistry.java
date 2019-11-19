@@ -187,15 +187,13 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	private Set<String> addExtensionsAndExtensionPoints(Contribution element) {
 		// now add and resolve extensions and extension points
 		Set<String> affectedNamespaces = new HashSet<>();
-		int[] extPoints = element.getExtensionPoints();
-		for (int i = 0; i < extPoints.length; i++) {
-			String namespace = this.addExtensionPoint(extPoints[i]);
+		for (int extPoint : element.getExtensionPoints()) {
+			String namespace = this.addExtensionPoint(extPoint);
 			if (namespace != null)
 				affectedNamespaces.add(namespace);
 		}
-		int[] extensions = element.getExtensions();
-		for (int i = 0; i < extensions.length; i++) {
-			String namespace = this.addExtension(extensions[i]);
+		for (int extension : element.getExtensions()) {
+			String namespace = this.addExtension(extension);
 			if (namespace != null)
 				affectedNamespaces.add(namespace);
 		}
@@ -238,8 +236,8 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	}
 
 	private void setObjectManagers(Set<String> affectedNamespaces, IObjectManager manager) {
-		for (Iterator<String> iter = affectedNamespaces.iterator(); iter.hasNext();) {
-			getDelta(iter.next()).setObjectManager(manager);
+		for (String namespace : affectedNamespaces) {
+			getDelta(namespace).setObjectManager(manager);
 		}
 		if (eventDelta != null)
 			eventDelta.setObjectManager(manager);
@@ -358,8 +356,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		} finally {
 			access.exitRead();
 		}
-		for (int i = 0; i < extensions.length; i++) {
-			ExtensionHandle suspect = extensions[i];
+		for (ExtensionHandle suspect : extensions) {
 			if (extensionId.equals(suspect.getUniqueIdentifier()))
 				return suspect;
 		}
@@ -554,9 +551,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		if (extensions == null || extensions.length == 0)
 			return namespace;
 		RegistryDelta pluginDelta = getDelta(extPoint.getNamespace());
-		for (int i = 0; i < extensions.length; i++) {
+		for (int extension : extensions) {
 			ExtensionDelta extensionDelta = new ExtensionDelta();
-			extensionDelta.setExtension(extensions[i]);
+			extensionDelta.setExtension(extension);
 			extensionDelta.setExtensionPoint(extPoint.getObjectId());
 			extensionDelta.setKind(kind);
 			pluginDelta.addExtensionDelta(extensionDelta);
@@ -645,17 +642,15 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	private Set<String> removeExtensionsAndExtensionPoints(String contributorId) {
 		Set<String> affectedNamespaces = new HashSet<>();
-		int[] extensions = registryObjects.getExtensionsFrom(contributorId);
-		for (int i = 0; i < extensions.length; i++) {
-			String namespace = this.removeExtension(extensions[i]);
+		for (int extension : registryObjects.getExtensionsFrom(contributorId)) {
+			String namespace = this.removeExtension(extension);
 			if (namespace != null)
 				affectedNamespaces.add(namespace);
 		}
 
 		// remove extension points
-		int[] extPoints = registryObjects.getExtensionPointsFrom(contributorId);
-		for (int i = 0; i < extPoints.length; i++) {
-			String namespace = this.removeExtensionPoint(extPoints[i]);
+		for (int extPoint : registryObjects.getExtensionPointsFrom(contributorId)) {
+			String namespace = this.removeExtensionPoint(extPoint);
 			if (namespace != null)
 				affectedNamespaces.add(namespace);
 		}
@@ -836,10 +831,9 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 * Clear the registry cache files from the file manager so on next start-up we recompute it.
 	 */
 	public void clearRegistryCache() {
-		String[] keys = new String[] {TableReader.TABLE, TableReader.MAIN, TableReader.EXTRA, TableReader.CONTRIBUTIONS, TableReader.ORPHANS};
-		for (int i = 0; i < keys.length; i++)
+		for (String key : new String[] {TableReader.TABLE, TableReader.MAIN, TableReader.EXTRA, TableReader.CONTRIBUTIONS, TableReader.ORPHANS})
 			try {
-				cacheStorageManager.remove(keys[i]);
+				cacheStorageManager.remove(key);
 			} catch (IOException e) {
 				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, IStatus.ERROR, RegistryMessages.meta_registryCacheReadProblems, e));
 			}
@@ -937,8 +931,8 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		final CombinedEventDelta extendedDelta = (CombinedEventDelta) scheduledDeltas.remove(notNamespace);
 
 		final MultiStatus result = new MultiStatus(RegistryMessages.OWNER_NAME, IStatus.OK, RegistryMessages.plugin_eventListenerError, null);
-		for (int i = 0; i < listenerInfos.length; i++) {
-			final ListenerInfo listenerInfo = (ListenerInfo) listenerInfos[i];
+		for (Object info : listenerInfos) {
+			final ListenerInfo listenerInfo = (ListenerInfo) info;
 			if ((listenerInfo.listener instanceof IRegistryChangeListener) && scheduledDeltas.size() != 0) {
 				if (listenerInfo.filter == null || scheduledDeltas.containsKey(listenerInfo.filter)) {
 					SafeRunner.run(new ISafeRunnable() {
@@ -973,8 +967,8 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 				}
 			}
 		}
-		for (Iterator<?> iter = scheduledDeltas.values().iterator(); iter.hasNext();) {
-			((RegistryDelta) iter.next()).getObjectManager().close();
+		for (Object delta : scheduledDeltas.values()) {
+			((RegistryDelta) delta).getObjectManager().close();
 		}
 		IObjectManager manager = extendedDelta.getObjectManager();
 		if (manager != null)
@@ -1311,8 +1305,8 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		// process children
 		ConfigurationElementDescription[] children = description.getChildren();
 		if (children != null) {
-			for (int i = 0; i < children.length; i++) {
-				createExtensionData(contributorId, children[i], currentConfigurationElement, persist);
+			for (ConfigurationElementDescription element : children) {
+				createExtensionData(contributorId, element, currentConfigurationElement, persist);
 			}
 		}
 

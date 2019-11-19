@@ -678,9 +678,8 @@ public class FrameworkLauncher {
 	 * clearPrefixedSystemProperties clears System Properties by writing null properties in the targetPropertyMap that match a prefix
 	 */
 	private static void clearPrefixedSystemProperties(String prefix, Map<String, String> targetPropertyMap) {
-		for (@SuppressWarnings("rawtypes")
-		Iterator it = System.getProperties().keySet().iterator(); it.hasNext();) {
-			String propertyName = (String) it.next();
+		for (Object key : System.getProperties().keySet()) {
+			String propertyName = (String) key;
 			if (propertyName.startsWith(prefix) && !targetPropertyMap.containsKey(propertyName)) {
 				targetPropertyMap.put(propertyName, null);
 			}

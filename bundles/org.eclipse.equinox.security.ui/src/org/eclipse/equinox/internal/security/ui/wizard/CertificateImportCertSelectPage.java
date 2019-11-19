@@ -79,10 +79,9 @@ public class CertificateImportCertSelectPage extends WizardPage implements Liste
 
 		try {
 			certList = new ArrayList<>();
-			Collection<? extends Certificate> collection = certFact.generateCertificates(new FileInputStream(certImportWizard.selectedImportFile));
 			// For a set or list
-			for (Iterator<? extends Certificate> it = collection.iterator(); it.hasNext();) {
-				certList.add(it.next());
+			for (Certificate certificate : certFact.generateCertificates(new FileInputStream(certImportWizard.selectedImportFile))) {
+				certList.add(certificate);
 			}
 
 		} catch (CertificateException e) {
@@ -91,8 +90,8 @@ public class CertificateImportCertSelectPage extends WizardPage implements Liste
 			setErrorMessage(e.getMessage());
 		}
 
-		for (int i = 0; i < certList.size(); i++) {
-			X509Certificate x509Cert = (X509Certificate) certList.get(i);
+		for (Certificate certificate : certList) {
+			X509Certificate x509Cert = (X509Certificate) certificate;
 			String subjectDN = x509Cert.getSubjectDN().getName();
 			certDropDown.add(subjectDN);
 		}

@@ -84,8 +84,8 @@ public final class AdapterManagerListener implements IRegistryEventListener, IAd
 	public synchronized void removed(IExtension[] extensions) {
 		theAdapterManager.flushLookup();
 		for (IExtension extension : extensions) {
-			for (Iterator<List<IAdapterFactory>> it = theAdapterManager.getFactories().values().iterator(); it.hasNext();) {
-				for (Iterator<IAdapterFactory> it2 = (it.next()).iterator(); it2.hasNext();) {
+			for (List<IAdapterFactory> adapterFactories : theAdapterManager.getFactories().values()) {
+				for (Iterator<IAdapterFactory> it2 = (adapterFactories).iterator(); it2.hasNext();) {
 					IAdapterFactory factory = it2.next();
 					if (!(factory instanceof AdapterFactoryProxy))
 						continue;

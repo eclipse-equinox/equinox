@@ -138,8 +138,7 @@ public class BundleInstaller {
 		if (bundles == null)
 			return null;
 		List<Bundle> result = new ArrayList<Bundle>(bundles.size());
-		for (Iterator<Bundle> iter = bundles.values().iterator(); iter.hasNext();) {
-			Bundle bundle = iter.next();
+		for (Bundle bundle : bundles.values()) {
 			try {
 				bundle.uninstall();
 			} catch (IllegalStateException e) {
