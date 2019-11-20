@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -37,45 +37,45 @@ public class KeyStoreTrustEngineTest extends TestCase {
 
 	private static TestCase[] s_tests = {
 			/* findTrustAnchor tests */
-			new KeyStoreTrustEngineTest("findTrustAnchor positive test: self signed trusted", new String[] {"ca1_root"}) { //$NON-NLS-1$ //$NON-NLS-2$
+			new KeyStoreTrustEngineTest("findTrustAnchor positive test: self signed trusted", "ca1_root") { //$NON-NLS-1$ //$NON-NLS-2$
 				public void runTest() {
 					testFindTrustAnchor0();
 				}
-			}, new KeyStoreTrustEngineTest("findTrustAnchor positive test: chain with root trusted", new String[] {"ca1_root"}) { //$NON-NLS-1$ //$NON-NLS-2$
+			}, new KeyStoreTrustEngineTest("findTrustAnchor positive test: chain with root trusted", "ca1_root") { //$NON-NLS-1$ //$NON-NLS-2$
 				public void runTest() {
 					testFindTrustAnchor1();
 				}
-			}, new KeyStoreTrustEngineTest("findTrustAnchor positive test: chain with intermediate trusted", new String[] {"ca1_ou"}) { //$NON-NLS-1$ //$NON-NLS-2$
+			}, new KeyStoreTrustEngineTest("findTrustAnchor positive test: chain with intermediate trusted", "ca1_ou") { //$NON-NLS-1$ //$NON-NLS-2$
 				public void runTest() {
 					testFindTrustAnchor2();
 				}
-			}, new KeyStoreTrustEngineTest("findTrustAnchor positive test: chain with leaf trusted", new String[] {"ca1_leafb"}) { //$NON-NLS-1$ //$NON-NLS-2$
+			}, new KeyStoreTrustEngineTest("findTrustAnchor positive test: chain with leaf trusted", "ca1_leafb") { //$NON-NLS-1$ //$NON-NLS-2$
 				public void runTest() {
 					testFindTrustAnchor3();
 				}
-			}, new KeyStoreTrustEngineTest("findTrustAnchor negative test: untrusted self signed", null) { //$NON-NLS-1$
+			}, new KeyStoreTrustEngineTest("findTrustAnchor negative test: untrusted self signed") { //$NON-NLS-1$
 				public void runTest() {
 					testFindTrustAnchor4();
 				}
-			}, new KeyStoreTrustEngineTest("findTrustAnchor negative test: untrusted chain", null) { //$NON-NLS-1$
+			}, new KeyStoreTrustEngineTest("findTrustAnchor negative test: untrusted chain") { //$NON-NLS-1$
 				public void runTest() {
 					testFindTrustAnchor5();
 				}
-			}, new KeyStoreTrustEngineTest("findTrustAnchor negative test: invalid chain", null) { //$NON-NLS-1$
+			}, new KeyStoreTrustEngineTest("findTrustAnchor negative test: invalid chain") { //$NON-NLS-1$
 				public void runTest() {
 					testFindTrustAnchor6();
 				}
-			}, new KeyStoreTrustEngineTest("findTrustAnchor negative test: incomplete-able chain", null) { //$NON-NLS-1$
+			}, new KeyStoreTrustEngineTest("findTrustAnchor negative test: incomplete-able chain") { //$NON-NLS-1$
 				public void runTest() {
 					testFindTrustAnchor7();
 				}
-			}, new KeyStoreTrustEngineTest("findTrustAnchor negative test: null chain", null) { //$NON-NLS-1$
+			}, new KeyStoreTrustEngineTest("findTrustAnchor negative test: null chain") { //$NON-NLS-1$
 				public void runTest() {
 					testFindTrustAnchor8();
 				}
 			},
 			/* addTrustAnchor tests */
-			new KeyStoreTrustEngineTest("addTrustAnchor positive test: add with alias", null) { //$NON-NLS-1$
+			new KeyStoreTrustEngineTest("addTrustAnchor positive test: add with alias") { //$NON-NLS-1$
 				public void runTest() {
 					testAddTrustAnchor0();
 				}
@@ -84,61 +84,61 @@ public class KeyStoreTrustEngineTest extends TestCase {
 																																																																																																																																															testAddTrustAnchor1();
 																																																																																																																																														}
 																																																																																																																																													}*/
-			new KeyStoreTrustEngineTest("addTrustAnchor negative test: null cert specified", null) { //$NON-NLS-1$
+			new KeyStoreTrustEngineTest("addTrustAnchor negative test: null cert specified") { //$NON-NLS-1$
 				public void runTest() {
 					testAddTrustAnchor2();
 				}
-			}, new KeyStoreTrustEngineTest("addTrustAnchor negative test: existing cert specified", new String[] {"ca1_root"}) { //$NON-NLS-1$ //$NON-NLS-2$
+			}, new KeyStoreTrustEngineTest("addTrustAnchor negative test: existing cert specified", "ca1_root") { //$NON-NLS-1$ //$NON-NLS-2$
 				public void runTest() {
 					testAddTrustAnchor3();
 				}
-			}, new KeyStoreTrustEngineTest("addTrustAnchor negative test: existing alias specified", new String[] {"ca1_root"}) { //$NON-NLS-1$ //$NON-NLS-2$
+			}, new KeyStoreTrustEngineTest("addTrustAnchor negative test: existing alias specified", "ca1_root") { //$NON-NLS-1$ //$NON-NLS-2$
 				public void runTest() {
 					testAddTrustAnchor4();
 				}
 			}
 			/* removeTrustAnchor tests */
-			, new KeyStoreTrustEngineTest("removeTrustAnchor positive test: remove by alias", new String[] {"ca1_root"}) { //$NON-NLS-1$ //$NON-NLS-2$
+			, new KeyStoreTrustEngineTest("removeTrustAnchor positive test: remove by alias", "ca1_root") { //$NON-NLS-1$ //$NON-NLS-2$
 				public void runTest() {
 					testRemoveTrustAnchor0();
 				}
-			}, new KeyStoreTrustEngineTest("removeTrustAnchor positive test: remove by cert", new String[] {"ca1_root"}) { //$NON-NLS-1$ //$NON-NLS-2$
+			}, new KeyStoreTrustEngineTest("removeTrustAnchor positive test: remove by cert", "ca1_root") { //$NON-NLS-1$ //$NON-NLS-2$
 				public void runTest() {
 					testRemoveTrustAnchor1();
 				}
-			}, new KeyStoreTrustEngineTest("removeTrustAnchor negative test: cert not found", null) { //$NON-NLS-1$
+			}, new KeyStoreTrustEngineTest("removeTrustAnchor negative test: cert not found") { //$NON-NLS-1$
 				public void runTest() {
 					testRemoveTrustAnchor2();
 				}
-			}, new KeyStoreTrustEngineTest("removeTrustAnchor negative test: by alias not found", null) { //$NON-NLS-1$
+			}, new KeyStoreTrustEngineTest("removeTrustAnchor negative test: by alias not found") { //$NON-NLS-1$
 				public void runTest() {
 					testRemoveTrustAnchor3();
 				}
-			}, new KeyStoreTrustEngineTest("removeTrustAnchor negative test: remove by null alias", null) { //$NON-NLS-1$
+			}, new KeyStoreTrustEngineTest("removeTrustAnchor negative test: remove by null alias") { //$NON-NLS-1$
 				public void runTest() {
 					testRemoveTrustAnchor4();
 				}
-			}, new KeyStoreTrustEngineTest("removeTrustAnchor negative test: remove by null certificate", null) { //$NON-NLS-1$
+			}, new KeyStoreTrustEngineTest("removeTrustAnchor negative test: remove by null certificate") { //$NON-NLS-1$
 				public void runTest() {
 					testRemoveTrustAnchor5();
 				}
 			},
 			/* getTrustAnchor tests*/
-			new KeyStoreTrustEngineTest("getTrustAnchor positive test: get by alias", new String[] {"ca1_root"}) { //$NON-NLS-1$ //$NON-NLS-2$
+			new KeyStoreTrustEngineTest("getTrustAnchor positive test: get by alias", "ca1_root") { //$NON-NLS-1$ //$NON-NLS-2$
 				public void runTest() {
 					testGetTrustAnchor0();
 				}
-			}, new KeyStoreTrustEngineTest("getTrustAnchor negative test: get by null alias", null) { //$NON-NLS-1$
+			}, new KeyStoreTrustEngineTest("getTrustAnchor negative test: get by null alias") { //$NON-NLS-1$
 				public void runTest() {
 					testGetTrustAnchor1();
 				}
-			}, new KeyStoreTrustEngineTest("getTrustAnchor negative test: does not exist", null) { //$NON-NLS-1$
+			}, new KeyStoreTrustEngineTest("getTrustAnchor negative test: does not exist") { //$NON-NLS-1$
 				public void runTest() {
 					testGetTrustAnchor2();
 				}
 			},
 			/* getAliases tests */
-			new KeyStoreTrustEngineTest("getAliases positive test: get the alias list", new String[] {"ca1_root", "ca2_root"}) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			new KeyStoreTrustEngineTest("getAliases positive test: get the alias list", "ca1_root", "ca2_root") { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				public void runTest() {
 					testGetAliases0();
 				}
@@ -172,7 +172,7 @@ public class KeyStoreTrustEngineTest extends TestCase {
 		//placeholder
 	}
 
-	public KeyStoreTrustEngineTest(String name, String[] aliases) {
+	public KeyStoreTrustEngineTest(String name, String... aliases) {
 		super(name);
 		this.aliases = aliases;
 	}
@@ -223,12 +223,12 @@ public class KeyStoreTrustEngineTest extends TestCase {
 		return supportStore.getCertificate(alias);
 	}
 
-	private static Certificate[] getTestCertificateChain(String[] aliases) throws KeyStoreException {
-		ArrayList certs = new ArrayList(aliases.length);
+	private static Certificate[] getTestCertificateChain(String... aliases) throws KeyStoreException {
+		ArrayList<Certificate> certs = new ArrayList<>(aliases.length);
 		for (String alias : aliases) {
 			certs.add(getTestCertificate(alias));
 		}
-		return (Certificate[]) certs.toArray(new Certificate[] {});
+		return certs.toArray(new Certificate[] {});
 	}
 
 	//findTrustAnchor positive test: self signed trusted
@@ -245,7 +245,7 @@ public class KeyStoreTrustEngineTest extends TestCase {
 	//findTrustAnchor positive test: chain with root trusted
 	public void testFindTrustAnchor1() {
 		try {
-			Certificate cert = engine.findTrustAnchor(getTestCertificateChain(new String[] {"ca1_leafb", "ca1_ou", "ca1_root"})); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			Certificate cert = engine.findTrustAnchor(getTestCertificateChain("ca1_leafb", "ca1_ou", "ca1_root")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			assertNotNull("Certificate did not come back in trusted root case", cert); //$NON-NLS-1$
 			assertEquals("Output cert is not root trusted cert", cert, getTestCertificate("ca1_root")); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (Throwable t) {
@@ -256,7 +256,7 @@ public class KeyStoreTrustEngineTest extends TestCase {
 	//findTrustAnchor positive test: chain with intermediate trusted
 	public void testFindTrustAnchor2() {
 		try {
-			Certificate cert = engine.findTrustAnchor(getTestCertificateChain(new String[] {"ca1_leafb", "ca1_ou", "ca1_root"})); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			Certificate cert = engine.findTrustAnchor(getTestCertificateChain("ca1_leafb", "ca1_ou", "ca1_root")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			assertNotNull("Certificate did not come back in trusted intermediate case", cert); //$NON-NLS-1$
 			assertEquals("Output cert is not intermediate trusted cert", cert, getTestCertificate("ca1_ou")); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (Throwable t) {
@@ -267,7 +267,7 @@ public class KeyStoreTrustEngineTest extends TestCase {
 	//findTrustAnchor positive test: chain with leaf trusted
 	public void testFindTrustAnchor3() {
 		try {
-			Certificate cert = engine.findTrustAnchor(getTestCertificateChain(new String[] {"ca1_leafb", "ca1_ou", "ca1_root"})); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			Certificate cert = engine.findTrustAnchor(getTestCertificateChain("ca1_leafb", "ca1_ou", "ca1_root")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			assertNotNull("Certificate did not come back in trusted leaf case", cert); //$NON-NLS-1$
 			assertEquals("Output cert is not leaf trusted cert", cert, getTestCertificate("ca1_leafb")); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (Throwable t) {
@@ -288,7 +288,7 @@ public class KeyStoreTrustEngineTest extends TestCase {
 	//findTrustAnchor negative test: untrusted chain
 	public void testFindTrustAnchor5() {
 		try {
-			Certificate cert = engine.findTrustAnchor(getTestCertificateChain(new String[] {"ca2_leafb", "ca2_ou", "ca2_root"})); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			Certificate cert = engine.findTrustAnchor(getTestCertificateChain("ca2_leafb", "ca2_ou", "ca2_root")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			assertNull("Incorrectly returned a certificate for untrusted chain case", cert); //$NON-NLS-1$
 		} catch (Throwable t) {
 			fail("Unexpected exception testing untrusted chain: " + t.getMessage()); //$NON-NLS-1$
@@ -298,7 +298,7 @@ public class KeyStoreTrustEngineTest extends TestCase {
 	//findTrustAnchor negative test: invalid chain
 	public void testFindTrustAnchor6() {
 		try {
-			Certificate cert = engine.findTrustAnchor(getTestCertificateChain(new String[] {"ca2_leafa", "ca1_root"})); //$NON-NLS-1$ //$NON-NLS-2$
+			Certificate cert = engine.findTrustAnchor(getTestCertificateChain("ca2_leafa", "ca1_root")); //$NON-NLS-1$ //$NON-NLS-2$
 			assertNull("Incorrectly returned a certificate on invalid certificate chain", cert); //$NON-NLS-1$
 		} catch (Throwable t) {
 			assertNull("Incorrectly thrown exception thrown on invalid certificate chain", t); //$NON-NLS-1$
@@ -308,7 +308,7 @@ public class KeyStoreTrustEngineTest extends TestCase {
 	//findTrustAnchor negative test: incomplete-able chain
 	public void testFindTrustAnchor7() {
 		try {
-			Certificate cert = engine.findTrustAnchor(getTestCertificateChain(new String[] {"ca1_leafb", "ca1_root"})); //$NON-NLS-1$ //$NON-NLS-2$
+			Certificate cert = engine.findTrustAnchor(getTestCertificateChain("ca1_leafb", "ca1_root")); //$NON-NLS-1$ //$NON-NLS-2$
 			assertNull("Incorrectly returned a certificate on incomplete-able certificate chain", cert); //$NON-NLS-1$
 		} catch (Throwable t) {
 			assertNull("Incorrectly thrown exception thrown on incomplete-able certificate chain", t); //$NON-NLS-1$
