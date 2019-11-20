@@ -21,3 +21,4 @@ Bug 462096 - Latest X-build fails on "equinox-sdk" product due to dependencies m
 Bug 506597 - Build failure on I20161026-2000
 Bug 528810 - Compilation failure in I20171214-2000
 Bug 444188 - EclipsePreferences is not thread safe
+Bug 553238 - Unanticipated comparator errors in I20191119-1800
