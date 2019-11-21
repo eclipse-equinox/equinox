@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2016 IBM Corporation and others.
+ * Copyright (c) 2003, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,11 +14,35 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import java.io.*;
-import java.util.*;
-import org.eclipse.osgi.service.resolver.*;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import org.eclipse.osgi.service.resolver.BaseDescription;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.BundleSpecification;
+import org.eclipse.osgi.service.resolver.DisabledInfo;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.GenericDescription;
+import org.eclipse.osgi.service.resolver.GenericSpecification;
+import org.eclipse.osgi.service.resolver.ImportPackageSpecification;
+import org.eclipse.osgi.service.resolver.NativeCodeDescription;
+import org.eclipse.osgi.service.resolver.NativeCodeSpecification;
+import org.eclipse.osgi.service.resolver.StateWire;
+import org.eclipse.osgi.service.resolver.VersionConstraint;
 import org.eclipse.osgi.service.resolver.VersionRange;
-import org.osgi.framework.*;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.Version;
 
 /**
  * This class is <strong>not</strong> thread safe. Instances must not be
@@ -718,7 +742,7 @@ class StateWriter {
 		if (string == null)
 			out.writeByte(StateReader.NULL);
 		else {
-			byte[] data = string.getBytes(StateReader.UTF_8);
+			byte[] data = string.getBytes(StandardCharsets.UTF_8);
 
 			if (data.length > 65535) {
 				out.writeByte(StateReader.LONG_STRING);

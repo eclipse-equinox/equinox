@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2014 IBM Corporation and others.
+ * Copyright (c) 2006, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,7 @@
 package org.eclipse.osgi.internal.signedcontent;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.SignatureException;
 
 /**
@@ -220,7 +221,7 @@ public class BERProcessor {
 	 * @return the content from the current structure as a String.
 	 */
 	public String getString() {
-		return new String(buffer, contentOffset, contentLength, SignedContentConstants.UTF8);
+		return new String(buffer, contentOffset, contentLength, StandardCharsets.UTF_8);
 	}
 
 	/**

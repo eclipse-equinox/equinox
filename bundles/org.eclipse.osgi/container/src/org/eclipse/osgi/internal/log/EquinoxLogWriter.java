@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2017 IBM Corporation and others.
+ * Copyright (c) 2004, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -372,7 +372,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 				Reader fileIn = null;
 				try {
 					openFile();
-					fileIn = new InputStreamReader(ExtendedLogServiceFactory.secureAction.getFileInputStream(oldOutFile), "UTF-8"); //$NON-NLS-1$
+					fileIn = new InputStreamReader(ExtendedLogServiceFactory.secureAction.getFileInputStream(oldOutFile), StandardCharsets.UTF_8);
 					copyReader(fileIn, this.writer);
 				} catch (IOException e) {
 					copyFailed = true;
