@@ -60,6 +60,18 @@ public class MultiStatus extends Status {
 	}
 
 	/**
+	 * Creates and returns a new multi-status object with no children.
+	 *
+	 * @param pluginId the unique identifier of the relevant plug-in
+	 * @param code the plug-in-specific status code
+	 * @param message a human-readable message, localized to the current locale 
+	 * @since 3.11
+	 */
+	public MultiStatus(String pluginId, int code, String message) {
+		super(OK, pluginId, code, message, null);
+	}
+
+	/**
 	 * Adds the given status to this multi-status.
 	 *
 	 * @param status the new child status
