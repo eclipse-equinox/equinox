@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2016 IBM Corporation and others.
+ * Copyright (c) 2007, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which accompanies this distribution,
@@ -33,6 +33,7 @@ import org.eclipse.osgi.storage.bundlefile.BundleFile;
 import org.eclipse.osgi.util.NLS;
 
 public class SignedContentImpl implements SignedContent {
+	final static int VERIFY_LIMIT = 1000 * 1024; // 1 mb; not sure what the best limit is
 	final static SignerInfo[] EMPTY_SIGNERINFO = new SignerInfo[0];
 	// the content which is signed
 	volatile SignedBundleFile content; // TODO can this be more general?
@@ -196,7 +197,17 @@ public class SignedContentImpl implements SignedContent {
 			}
 			if (entry == null)
 				throw new InvalidContentException(NLS.bind(SignedContentMessages.file_is_removed_from_jar, entryName, currentContent.getBaseFile().toString()), exception);
-			entry.getBytes();
+
+			if (entry.getSize() > VERIFY_LIMIT) {
+				try (InputStream in = entry.getInputStream()) {
+					final byte[] buf = new byte[1024];
+					while (in.read(buf) > 0) {
+						// just exhausting the stream to verify
+					}
+				}
+			} else {
+				entry.getBytes();
+			}
 		}
 	}
 }
