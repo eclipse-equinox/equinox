@@ -7,6 +7,22 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="osgi/src/org/osgi/framework/FrameworkUtil.java" type="org.osgi.framework.FrameworkUtil">
+        <filter comment="Not for OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.10"/>
+                <message_argument value="3.16"/>
+                <message_argument value="asDictionary(Map&lt;? extends K,? extends V&gt;)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Not for OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.10"/>
+                <message_argument value="3.16"/>
+                <message_argument value="asMap(Dictionary&lt;? extends K,? extends V&gt;)"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="osgi/src/org/osgi/framework/connect/ConnectContent.java" type="org.osgi.framework.connect.ConnectContent">
         <filter comment="Not for OSGi API" id="1110441988">
             <message_arguments>
