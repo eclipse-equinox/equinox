@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2016 IBM Corporation and others.
+ * Copyright (c) 2006, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which accompanies this distribution,
@@ -14,11 +14,28 @@ package org.eclipse.osgi.internal.signedcontent;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
-import java.security.*;
-import java.security.cert.*;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.security.cert.Certificate;
-import java.text.*;
-import java.util.*;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
 import javax.security.auth.x500.X500Principal;
 import org.eclipse.osgi.util.NLS;
 
@@ -198,7 +215,7 @@ public class PKCS7Processor implements SignedContentConstants {
 			eContentBER.stepOver();
 
 			// check time ends w/ 'Z'
-			String dateString = new String(eContentBER.getBytes(), SignedContentConstants.UTF8);
+			String dateString = new String(eContentBER.getBytes(), StandardCharsets.UTF_8);
 			if (!dateString.endsWith("Z")) //$NON-NLS-1$
 				throw new SignatureException("Wrong dateformat used in time-stamp token"); //$NON-NLS-1$
 

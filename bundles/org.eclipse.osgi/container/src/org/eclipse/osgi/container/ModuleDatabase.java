@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,7 @@ package org.eclipse.osgi.container;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -141,6 +142,7 @@ public class ModuleDatabase {
 
 	static enum Sort {
 		BY_DEPENDENCY, BY_START_LEVEL, BY_ID;
+
 		/**
 		 * Tests if this option is contained in the specified options
 		 */
@@ -962,7 +964,6 @@ public class ModuleDatabase {
 		private static final byte OBJECT = 1;
 		private static final byte INDEX = 2;
 		private static final byte LONG_STRING = 3;
-		private static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 
 		private static final byte VALUE_STRING = 0;
 		// REMOVED treated as List<String> - private static final byte VALUE_STRING_ARRAY = 1;
@@ -1669,7 +1670,7 @@ public class ModuleDatabase {
 			if (string == null)
 				out.writeByte(NULL);
 			else {
-				byte[] data = string.getBytes(UTF_8);
+				byte[] data = string.getBytes(StandardCharsets.UTF_8);
 
 				if (data.length > 65535) {
 					out.writeByte(LONG_STRING);
@@ -1706,7 +1707,7 @@ public class ModuleDatabase {
 				int length = in.readInt();
 				byte[] data = new byte[length];
 				in.readFully(data);
-				string = new String(data, UTF_8);
+				string = new String(data, StandardCharsets.UTF_8);
 			} else {
 				string = in.readUTF();
 			}

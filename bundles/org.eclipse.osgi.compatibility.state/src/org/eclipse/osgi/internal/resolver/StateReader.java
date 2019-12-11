@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2016 IBM Corporation and others.
+ * Copyright (c) 2003, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,16 +14,38 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import org.eclipse.osgi.framework.util.ObjectPool;
 import org.eclipse.osgi.framework.util.SecureAction;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BaseDescription;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.BundleSpecification;
+import org.eclipse.osgi.service.resolver.DisabledInfo;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.GenericDescription;
+import org.eclipse.osgi.service.resolver.GenericSpecification;
+import org.eclipse.osgi.service.resolver.ImportPackageSpecification;
+import org.eclipse.osgi.service.resolver.NativeCodeSpecification;
+import org.eclipse.osgi.service.resolver.StateWire;
 import org.eclipse.osgi.service.resolver.VersionRange;
-import org.osgi.framework.*;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.Version;
 
 /**
  * This class is internally threadsafe and supports client locking. Clients must <strong>not</strong> hold the monitor for
@@ -33,7 +55,6 @@ import org.osgi.framework.*;
 final class StateReader {
 	public static final String STATE_FILE = ".state"; //$NON-NLS-1$
 	public static final String LAZY_FILE = ".lazy"; //$NON-NLS-1$
-	public static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 	private static final int BUFFER_SIZE_LAZY = 4096;
 	private static final int BUFFER_SIZE_FULLYREAD = 16384;
 	private static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
@@ -761,7 +782,7 @@ final class StateReader {
 			int length = in.readInt();
 			byte[] data = new byte[length];
 			in.readFully(data);
-			String string = new String(data, UTF_8);
+			String string = new String(data, StandardCharsets.UTF_8);
 
 			if (intern)
 				return string.intern();

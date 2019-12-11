@@ -29,6 +29,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
@@ -1408,7 +1409,7 @@ public class Storage {
 			out.writeInt(0);
 		} else {
 			// don't use out.writeUTF because it has a hard string limit
-			byte[] data = value.getBytes("UTF-8"); //$NON-NLS-1$
+			byte[] data = value.getBytes(StandardCharsets.UTF_8);
 			out.writeInt(data.length);
 			out.write(data);
 		}
@@ -1418,7 +1419,7 @@ public class Storage {
 		int length = in.readInt();
 		byte[] data = new byte[length];
 		in.readFully(data);
-		return new String(data, "UTF-8"); //$NON-NLS-1$
+		return new String(data, StandardCharsets.UTF_8);
 	}
 
 	private void saveStorageHookData(DataOutputStream out, List<Generation> generations) throws IOException {
