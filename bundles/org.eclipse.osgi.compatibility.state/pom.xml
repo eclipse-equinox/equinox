@@ -19,6 +19,6 @@
   </parent>
   <groupId>org.eclipse.osgi</groupId>
   <artifactId>org.eclipse.osgi.compatibility.state</artifactId>
-  <version>1.1.600-SNAPSHOT</version>
+  <version>1.1.700-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 </project>
