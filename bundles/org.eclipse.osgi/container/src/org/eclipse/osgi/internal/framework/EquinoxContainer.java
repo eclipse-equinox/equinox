@@ -374,6 +374,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 			this.connectFramework = connectFramework;
 		}
 
+		@SuppressWarnings("unused")
 		public ConnectModule getConnectModule(String location) {
 			if (connectFramework == null) {
 				return null;
@@ -381,8 +382,8 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 			ConnectModule result = connectModules.computeIfAbsent(location, (l) -> {
 				try {
 					return connectFramework.getModule(location).orElse(NULL_MODULE);
-				} catch (IllegalStateException e) {
-					return NULL_MODULE;
+				} catch (BundleException e) {
+					throw new IllegalStateException(e);
 				}
 			});
 			return result == NULL_MODULE ? null : result;
@@ -391,5 +392,10 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 		public ConnectFramework getConnectFramework() {
 			return connectFramework;
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <E extends Throwable> void sneakyThrow(Throwable e) throws E {
+		throw (E) e;
 	}
 }

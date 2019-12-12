@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.connect;
 
+import static org.eclipse.osgi.internal.framework.EquinoxContainer.sneakyThrow;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -54,7 +56,15 @@ public class ConnectHookConfigurator implements HookConfigurator {
 		hookRegistry.addStorageHookFactory(new StorageHookFactory<Object, Object, StorageHook<Object, Object>>() {
 			@Override
 			protected StorageHook<Object, Object> createStorageHook(Generation generation) {
-				final ConnectModule m = connectModules.getConnectModule(generation.getBundleInfo().getLocation());
+				ConnectModule tmp = null;
+				try {
+					tmp = connectModules.getConnectModule(generation.getBundleInfo().getLocation());
+				} catch (IllegalStateException e) {
+					if (!(e.getCause() instanceof BundleException)) {
+						throw e;
+					}
+				}
+				final ConnectModule m = tmp;
 
 				return new StorageHook<Object, Object>(generation, this.getClass()) {
 					boolean hasModule = false;
@@ -104,9 +114,15 @@ public class ConnectHookConfigurator implements HookConfigurator {
 				if (location == null) {
 					location = module.getLocation();
 				}
-				ConnectModule m = connectModules.getConnectModule(location);
-				if (m != null) {
-					return ConnectInputStream.URL_CONNECTION_INSTANCE;
+				try {
+					ConnectModule m = connectModules.getConnectModule(location);
+					if (m != null) {
+						return ConnectInputStream.URL_CONNECTION_INSTANCE;
+					}
+				} catch (IllegalStateException e) {
+					if (e.getCause() instanceof BundleException) {
+						sneakyThrow(e.getCause());
+					}
 				}
 				return null;
 			}
@@ -161,10 +177,5 @@ public class ConnectHookConfigurator implements HookConfigurator {
 				};
 			}
 		});
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <E extends Throwable> void sneakyThrow(Throwable e) throws E {
-		throw (E) e;
 	}
 }

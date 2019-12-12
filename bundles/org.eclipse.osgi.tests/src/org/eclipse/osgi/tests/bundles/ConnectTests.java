@@ -104,11 +104,11 @@ public class ConnectTests extends AbstractBundleTests {
 		}
 
 		@Override
-		public Optional<ConnectModule> getModule(String location) {
+		public Optional<ConnectModule> getModule(String location) throws BundleException {
 			getModuleCalled.add(location);
 			ConnectModule m = modules.get(location);
-			if (m == ILLEGAL_STATE_EXCEPTION) {
-				throw new IllegalStateException();
+			if (m == BUNDLE_EXCEPTION) {
+				throw new BundleException("Test fail install with getModule");
 			}
 			return Optional.ofNullable(m);
 		}
@@ -301,7 +301,7 @@ public class ConnectTests extends AbstractBundleTests {
 
 	}
 
-	static final TestConnectModule ILLEGAL_STATE_EXCEPTION = new TestConnectModule(null);
+	static final TestConnectModule BUNDLE_EXCEPTION = new TestConnectModule(null);
 
 	public void testConnectFactoryNoModules() {
 		TestCountingConnectFramework connectFactory = new TestCountingConnectFramework();
@@ -449,7 +449,7 @@ public class ConnectTests extends AbstractBundleTests {
 		});
 
 		connectFactory.setModule("b.2", null);
-		connectFactory.setModule("b.3", ILLEGAL_STATE_EXCEPTION);
+		connectFactory.setModule("b.3", BUNDLE_EXCEPTION);
 		doTestConnect(connectFactory, new HashMap<>(), (f) -> {
 			try {
 				f.init();

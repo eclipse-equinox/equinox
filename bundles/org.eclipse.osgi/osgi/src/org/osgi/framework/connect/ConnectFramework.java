@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 
@@ -66,9 +67,9 @@ public interface ConnectFramework {
 	 * 
 	 * @param location the bundle location used to install a bundle
 	 * @return the connect module for the specified bundle location
-	 * @throws IllegalStateException if the location cannot be handled
+	 * @throws BundleException if the location cannot be handled
 	 */
-	Optional<ConnectModule> getModule(String location);
+	Optional<ConnectModule> getModule(String location) throws BundleException;
 
 	/**
 	 * Creates a new activator for this connect framework. A new activator is
