@@ -477,5 +477,10 @@ public abstract class FilterTests extends TestCase {
 			}
 			return new CaseInsensitiveDictionaryMap(dictionary);
 		}
+
+		@Override
+		public Object adapt(Class type) {
+			return null;
+		}
 	}
 }

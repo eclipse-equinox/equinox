@@ -1,12 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.osgi" version="2">
-    <resource path="container/src/org/eclipse/osgi/launch/EquinoxFactory.java" type="org.eclipse.osgi.launch.EquinoxFactory">
-        <filter comment="Not for OSGi API" id="1143996420">
-            <message_arguments>
-                <message_argument value="newFramework(Map&lt;String,String&gt;, ConnectFactory)"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="osgi/src/org/osgi/framework/FrameworkUtil.java" type="org.osgi.framework.FrameworkUtil">
         <filter comment="Not for OSGi API" id="1141899266">
             <message_arguments>
@@ -22,6 +15,35 @@
                 <message_argument value="asMap(Dictionary&lt;? extends K,? extends V&gt;)"/>
             </message_arguments>
         </filter>
+        <filter comment="Not for OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.10"/>
+                <message_argument value="3.16"/>
+                <message_argument value="getBundle(ClassLoader)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/ServiceReference.java" type="org.osgi.framework.ServiceReference">
+        <filter comment="Not for OSGi API" id="403804204">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.ServiceReference"/>
+                <message_argument value="adapt(Class&lt;A&gt;)"/>
+            </message_arguments>
+        </filter>
+        <filter id="403984517">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.ServiceReference"/>
+                <message_argument value="org.osgi.framework.BundleReference"/>
+                <message_argument value="getBundle()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Not for OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.10"/>
+                <message_argument value="3.16"/>
+                <message_argument value="adapt(Class&lt;A&gt;)"/>
+            </message_arguments>
+        </filter>
     </resource>
     <resource path="osgi/src/org/osgi/framework/connect/ConnectContent.java" type="org.osgi.framework.connect.ConnectContent">
         <filter comment="Not for OSGi API" id="1110441988">
@@ -34,6 +56,20 @@
         <filter comment="Not for OSGi API" id="1110441988">
             <message_arguments>
                 <message_argument value="org.osgi.framework.connect.ConnectFactory"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/connect/ConnectFramework.java" type="org.osgi.framework.connect.ConnectFramework">
+        <filter comment="Not for OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.connect.ConnectFramework"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/connect/ConnectFrameworkFactory.java" type="org.osgi.framework.connect.ConnectFrameworkFactory">
+        <filter comment="Not for OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.connect.ConnectFrameworkFactory"/>
             </message_arguments>
         </filter>
     </resource>

@@ -14,7 +14,8 @@
 package org.eclipse.osgi.launch;
 
 import java.util.Map;
-import org.osgi.framework.connect.ConnectFactory;
+import org.osgi.framework.connect.ConnectFramework;
+import org.osgi.framework.connect.ConnectFrameworkFactory;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
@@ -22,7 +23,7 @@ import org.osgi.framework.launch.FrameworkFactory;
  * The framework factory implementation for the Equinox framework.
  * @since 3.5
  */
-public class EquinoxFactory implements FrameworkFactory {
+public class EquinoxFactory implements FrameworkFactory, ConnectFrameworkFactory {
 
 	@Override
 	public Framework newFramework(Map<String, String> configuration) {
@@ -30,7 +31,7 @@ public class EquinoxFactory implements FrameworkFactory {
 	}
 
 	@Override
-	public Framework newFramework(Map<String, String> configuration, ConnectFactory connectFactory) {
-		return new Equinox(configuration, connectFactory);
+	public Framework newFramework(Map<String, String> configuration, ConnectFramework connectFramework) {
+		return new Equinox(configuration, connectFramework);
 	}
 }

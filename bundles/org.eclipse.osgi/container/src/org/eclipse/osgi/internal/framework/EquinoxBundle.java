@@ -971,7 +971,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 	}
 
 	/**
-	 * Check for permission to get a service.
+	 * Check for permission to adapt.
 	 */
 	private <A> void checkAdaptPermission(Class<A> adapterType) {
 		SecurityManager sm = System.getSecurityManager();

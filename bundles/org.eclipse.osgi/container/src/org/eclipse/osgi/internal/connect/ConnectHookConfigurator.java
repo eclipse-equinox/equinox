@@ -41,7 +41,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.connect.ConnectContent;
-import org.osgi.framework.connect.ConnectFactory;
+import org.osgi.framework.connect.ConnectFramework;
 import org.osgi.framework.connect.ConnectModule;
 
 public class ConnectHookConfigurator implements HookConfigurator {
@@ -49,7 +49,7 @@ public class ConnectHookConfigurator implements HookConfigurator {
 	@Override
 	public void addHooks(final HookRegistry hookRegistry) {
 		final ConnectModules connectModules = hookRegistry.getContainer().getConnectModules();
-		ConnectFactory connectFactory = connectModules.getConnectFactory();
+		ConnectFramework connectFramework = connectModules.getConnectFramework();
 
 		hookRegistry.addStorageHookFactory(new StorageHookFactory<Object, Object, StorageHook<Object, Object>>() {
 			@Override
@@ -112,7 +112,7 @@ public class ConnectHookConfigurator implements HookConfigurator {
 			}
 		});
 
-		if (connectFactory == null) {
+		if (connectFramework == null) {
 			return;
 		}
 
@@ -143,7 +143,7 @@ public class ConnectHookConfigurator implements HookConfigurator {
 			@Override
 			public BundleActivator createActivator() {
 				final List<BundleActivator> activators = new ArrayList<>();
-				connectFactory.createBundleActivator().ifPresent((a) -> activators.add(a));
+				connectFramework.createBundleActivator().ifPresent((a) -> activators.add(a));
 				return new BundleActivator() {
 					@Override
 					public void start(BundleContext context) throws Exception {

@@ -30,7 +30,7 @@ import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
-import org.osgi.framework.connect.ConnectFactory;
+import org.osgi.framework.connect.ConnectFramework;
 import org.osgi.framework.launch.Framework;
 
 /**
@@ -49,8 +49,8 @@ public class Equinox implements Framework {
 	/**
 	 * @since 3.16
 	 */
-	public Equinox(Map<String, ?> configuration, ConnectFactory connectFactory) {
-		EquinoxContainer container = new EquinoxContainer(configuration, connectFactory);
+	public Equinox(Map<String, ?> configuration, ConnectFramework connectFramework) {
+		EquinoxContainer container = new EquinoxContainer(configuration, connectFramework);
 		systemBundle = (Framework) container.getStorage().getModuleContainer().getModule(0).getBundle();
 	}
 

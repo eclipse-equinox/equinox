@@ -50,7 +50,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.connect.ConnectContent;
-import org.osgi.framework.connect.ConnectFactory;
+import org.osgi.framework.connect.ConnectFramework;
 import org.osgi.framework.connect.ConnectModule;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
@@ -90,7 +90,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	private ScheduledExecutorService executor;
 	private StorageSaver storageSaver;
 
-	public EquinoxContainer(Map<String, ?> configuration, ConnectFactory connectFactory) {
+	public EquinoxContainer(Map<String, ?> configuration, ConnectFramework connectFramework) {
 		ClassLoader platformClassLoader = null;
 		try {
 			Method getPlatformClassLoader = ClassLoader.class.getMethod("getPlatformClassLoader"); //$NON-NLS-1$
@@ -104,9 +104,9 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 		this.equinoxConfig = new EquinoxConfiguration(configuration, new HookRegistry(this));
 		this.logServices = new EquinoxLogServices(this.equinoxConfig);
 		this.equinoxConfig.logMessages(this.logServices);
-		this.connectModules = new ConnectModules(connectFactory);
+		this.connectModules = new ConnectModules(connectFramework);
 
-		initConnectFactory(connectFactory, this.equinoxConfig);
+		initConnectFramework(connectFramework, this.equinoxConfig);
 
 		this.equinoxConfig.getHookRegistry().initialize();
 		try {
@@ -152,15 +152,15 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 		isProcessClassRecursionSupportedByAll = supportRecursion;
 	}
 
-	private static void initConnectFactory(ConnectFactory connectFactory, EquinoxConfiguration equinoxConfig) {
-		if (connectFactory == null) {
+	private static void initConnectFramework(ConnectFramework connectFramework, EquinoxConfiguration equinoxConfig) {
+		if (connectFramework == null) {
 			return;
 		}
 		URL configUrl = equinoxConfig.getEquinoxLocations().getConfigurationLocation().getURL();
 		final File fwkStore = new File(configUrl.getPath());
 		@SuppressWarnings({"rawtypes", "unchecked"})
 		Map<String, String> config = (Map) equinoxConfig.getInitialConfig();
-		connectFactory.initialize(fwkStore, Collections.unmodifiableMap(config));
+		connectFramework.initialize(fwkStore, Collections.unmodifiableMap(config));
 	}
 
 	public Storage getStorage() {
@@ -367,20 +367,20 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	}
 
 	public static class ConnectModules {
-		final ConnectFactory connectFactory;
+		final ConnectFramework connectFramework;
 		private final ConcurrentMap<String, ConnectModule> connectModules = new ConcurrentHashMap<>();
 
-		public ConnectModules(ConnectFactory connectFactory) {
-			this.connectFactory = connectFactory;
+		public ConnectModules(ConnectFramework connectFramework) {
+			this.connectFramework = connectFramework;
 		}
 
 		public ConnectModule getConnectModule(String location) {
-			if (connectFactory == null) {
+			if (connectFramework == null) {
 				return null;
 			}
 			ConnectModule result = connectModules.computeIfAbsent(location, (l) -> {
 				try {
-					return connectFactory.getModule(location).orElse(NULL_MODULE);
+					return connectFramework.getModule(location).orElse(NULL_MODULE);
 				} catch (IllegalStateException e) {
 					return NULL_MODULE;
 				}
@@ -388,8 +388,8 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 			return result == NULL_MODULE ? null : result;
 		}
 
-		public ConnectFactory getConnectFactory() {
-			return connectFactory;
+		public ConnectFramework getConnectFramework() {
+			return connectFramework;
 		}
 	}
 }
