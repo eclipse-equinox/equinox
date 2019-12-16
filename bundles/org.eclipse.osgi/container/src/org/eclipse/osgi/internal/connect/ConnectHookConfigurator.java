@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
@@ -45,6 +47,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.connect.ConnectContent;
 import org.osgi.framework.connect.ConnectFramework;
 import org.osgi.framework.connect.ConnectModule;
+import org.osgi.framework.namespace.IdentityNamespace;
 
 public class ConnectHookConfigurator implements HookConfigurator {
 
@@ -92,14 +95,32 @@ public class ConnectHookConfigurator implements HookConfigurator {
 						if (m != null) {
 							try {
 								ConnectContent content = m.getContent();
-								return content.getHeaders().map((h) -> {
+								ModuleRevisionBuilder connectBuilder = content.getHeaders().map((h) -> {
 									try {
 										return OSGiManifestBuilderFactory.createBuilder(h);
 									} catch (BundleException e) {
 										sneakyThrow(e);
 									}
 									return null; // should never get here
-								}).orElse(null);
+								}).orElse(builder);
+								connectBuilder.getCapabilities().stream() //
+										.filter(i -> IdentityNamespace.IDENTITY_NAMESPACE.equals(i.getNamespace())) //
+										.findFirst().ifPresent((i) -> {
+											i.getAttributes().compute(IdentityNamespace.CAPABILITY_TAGS_ATTRIBUTE, (k, v) -> {
+												if (v == null) {
+													return Collections.singletonList(ConnectContent.TAG_OSGI_CONNECT);
+												}
+												if (v instanceof List) {
+													@SuppressWarnings({"unchecked", "rawtypes"})
+													List<String> l = new ArrayList<>((List) v);
+													l.add(ConnectContent.TAG_OSGI_CONNECT);
+													return Collections.unmodifiableList(l);
+												}
+												// should not get here, but just recover 
+												return Arrays.asList(v, ConnectContent.TAG_OSGI_CONNECT);
+											});
+										});
+								return connectBuilder;
 							} catch (IOException e) {
 								sneakyThrow(new BundleException("Error reading bundle.", BundleException.READ_ERROR, e)); //$NON-NLS-1$
 							}

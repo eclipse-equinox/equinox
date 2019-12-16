@@ -45,6 +45,7 @@ import java.util.jar.Manifest;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.eclipse.osgi.container.ModuleContainer;
 import org.eclipse.osgi.launch.EquinoxFactory;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.classes.Activator;
@@ -60,8 +61,12 @@ import org.osgi.framework.connect.ConnectFramework;
 import org.osgi.framework.connect.ConnectFrameworkFactory;
 import org.osgi.framework.connect.ConnectModule;
 import org.osgi.framework.launch.Framework;
+import org.osgi.framework.namespace.IdentityNamespace;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.framework.wiring.FrameworkWiring;
+import org.osgi.resource.Namespace;
 
 public class ConnectTests extends AbstractBundleTests {
 
@@ -427,7 +432,9 @@ public class ConnectTests extends AbstractBundleTests {
 				for (String l : locations) {
 					Bundle b = f.getBundleContext().installBundle(l);
 					assertEquals("Wrong symbolic name.", l, b.getSymbolicName());
+					checkConnectTag(b);
 				}
+				checkConnectTags(f, locations);
 			} catch (Throwable t) {
 				sneakyThrow(t);
 			}
@@ -442,6 +449,8 @@ public class ConnectTests extends AbstractBundleTests {
 					Bundle b = f.getBundleContext().getBundle(l);
 					assertNotNull("No bundle at location: " + l, b);
 					assertEquals("Wrong symbolic name.", l, b.getSymbolicName());
+					checkConnectTag(b);
+					checkConnectTags(f, locations);
 				}
 			} catch (BundleException e) {
 				sneakyThrow(e);
@@ -462,11 +471,31 @@ public class ConnectTests extends AbstractBundleTests {
 					} else {
 						assertNotNull("No bundle at location: " + l, b);
 						assertEquals("Wrong symbolic name.", l, b.getSymbolicName());
+						checkConnectTag(b);
 					}
 				}
 			} catch (BundleException e) {
 				sneakyThrow(e);
 			}
+		});
+	}
+
+	private static void checkConnectTag(Bundle b) {
+		List<String> tags = (List<String>) b.adapt(BundleRevision.class) //
+				.getCapabilities(IdentityNamespace.IDENTITY_NAMESPACE).stream().findFirst() //
+				.get().getAttributes().get(IdentityNamespace.CAPABILITY_TAGS_ATTRIBUTE);
+		assertNotNull("No tags found.", tags);
+		assertEquals("Wrong number of tags.", 1, tags.size());
+		assertTrue("Connect tag not found.", tags.contains(ConnectContent.TAG_OSGI_CONNECT));
+	}
+
+	private static void checkConnectTags(Framework f, List<String> locations) {
+		Collection<BundleCapability> osgiConnectTags = f.adapt(FrameworkWiring.class).findProviders( //
+				ModuleContainer.createRequirement(IdentityNamespace.IDENTITY_NAMESPACE, //
+						Collections.singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, "(tags=osgi.connect)"), //
+						Collections.emptyMap()));
+		osgiConnectTags.forEach(c -> {
+			assertTrue("Unexpected tag on bundle: " + c.getRevision().getBundle(), locations.contains(c.getRevision().getBundle().getLocation()));
 		});
 	}
 

@@ -52,13 +52,6 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/framework/connect/ConnectFactory.java" type="org.osgi.framework.connect.ConnectFactory">
-        <filter comment="Not for OSGi API" id="1110441988">
-            <message_arguments>
-                <message_argument value="org.osgi.framework.connect.ConnectFactory"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="osgi/src/org/osgi/framework/connect/ConnectFramework.java" type="org.osgi.framework.connect.ConnectFramework">
         <filter comment="Not for OSGi API" id="1110441988">
             <message_arguments>
@@ -104,6 +97,15 @@
         <filter comment="Not for OSGi packages" id="1211105284">
             <message_arguments>
                 <message_argument value="newFramework(Map&lt;String,String&gt;, ConnectFactory)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/namespace/IdentityNamespace.java" type="org.osgi.framework.namespace.IdentityNamespace">
+        <filter comment="Not for OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.2"/>
+                <message_argument value="3.16"/>
+                <message_argument value="CAPABILITY_TAGS_ATTRIBUTE"/>
             </message_arguments>
         </filter>
     </resource>
