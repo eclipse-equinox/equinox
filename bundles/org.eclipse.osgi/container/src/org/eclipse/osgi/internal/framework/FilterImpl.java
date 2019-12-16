@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2017 IBM Corporation and others.
+ * Copyright (c) 2003, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,9 +14,12 @@
 
 package org.eclipse.osgi.internal.framework;
 
+import static java.lang.invoke.MethodHandles.publicLookup;
+import static java.util.Objects.requireNonNull;
+
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.security.AccessController;
@@ -43,28 +46,25 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 
 /**
- * RFC 1960-based Filter. Filter objects can be created by calling
- * the constructor with the desired filter string.
- * A Filter object can be called numerous times to determine if the
- * match argument matches the filter string that was used to create the Filter
- * object.
- *
- * <p>The syntax of a filter string is the string representation
- * of LDAP search filters as defined in RFC 1960:
- * <i>A String Representation of LDAP Search Filters</i> (available at
- * http://www.ietf.org/rfc/rfc1960.txt).
- * It should be noted that RFC 2254:
- * <i>A String Representation of LDAP Search Filters</i>
- * (available at http://www.ietf.org/rfc/rfc2254.txt) supersedes
- * RFC 1960 but only adds extensible matching and is not applicable for this
- * API.
- *
- * <p>The string representation of an LDAP search filter is defined by the
+ * RFC 1960-based Filter. Filter objects can be created by calling the
+ * constructor with the desired filter string. A Filter object can be called
+ * numerous times to determine if the match argument matches the filter string
+ * that was used to create the Filter object.
+ * <p>
+ * The syntax of a filter string is the string representation of LDAP search
+ * filters as defined in RFC 1960: <i>A String Representation of LDAP Search
+ * Filters</i> (available at http://www.ietf.org/rfc/rfc1960.txt). It should be
+ * noted that RFC 2254: <i>A String Representation of LDAP Search Filters</i>
+ * (available at http://www.ietf.org/rfc/rfc2254.txt) supersedes RFC 1960 but
+ * only adds extensible matching and is not applicable for this API.
+ * <p>
+ * The string representation of an LDAP search filter is defined by the
  * following grammar. It uses a prefix format.
+ * 
  * <pre>
  *   &lt;filter&gt; ::= '(' &lt;filtercomp&gt; ')'
  *   &lt;filtercomp&gt; ::= &lt;and&gt; | &lt;or&gt; | &lt;not&gt; | &lt;item&gt;
- *   &lt;and&gt; ::= '&' &lt;filterlist&gt;
+ *   &lt;and&gt; ::= '&amp;' &lt;filterlist&gt;
  *   &lt;or&gt; ::= '|' &lt;filterlist&gt;
  *   &lt;not&gt; ::= '!' &lt;filter&gt;
  *   &lt;filterlist&gt; ::= &lt;filter&gt; | &lt;filter&gt; &lt;filterlist&gt;
@@ -72,7 +72,7 @@ import org.osgi.framework.Version;
  *   &lt;simple&gt; ::= &lt;attr&gt; &lt;filtertype&gt; &lt;value&gt;
  *   &lt;filtertype&gt; ::= &lt;equal&gt; | &lt;approx&gt; | &lt;greater&gt; | &lt;less&gt;
  *   &lt;equal&gt; ::= '='
- *   &lt;approx&gt; ::= '~='
+ *   &lt;approx&gt; ::= '&tilde;='
  *   &lt;greater&gt; ::= '&gt;='
  *   &lt;less&gt; ::= '&lt;='
  *   &lt;present&gt; ::= &lt;attr&gt; '=*'
@@ -82,82 +82,97 @@ import org.osgi.framework.Version;
  *   &lt;starval&gt; ::= NULL | &lt;value&gt; '*' &lt;starval&gt;
  *   &lt;final&gt; ::= NULL | &lt;value&gt;
  * </pre>
- *
- * <code>&lt;attr&gt;</code> is a string representing an attribute, or
- * key, in the properties objects of the registered services.
- * Attribute names are not case sensitive;
- * that is cn and CN both refer to the same attribute.
- * <code>&lt;value&gt;</code> is a string representing the value, or part of
- * one, of a key in the properties objects of the registered services.
- * If a <code>&lt;value&gt;</code> must
- * contain one of the characters '<code>*</code>' or '<code>(</code>'
- * or '<code>)</code>', these characters
- * should be escaped by preceding them with the backslash '<code>\</code>'
- * character.
- * Note that although both the <code>&lt;substring&gt;</code> and
- * <code>&lt;present&gt;</code> productions can
- * produce the <code>'attr=*'</code> construct, this construct is used only to
- * denote a presence filter.
- *
- * <p>Examples of LDAP filters are:
- *
+ * 
+ * {@code &lt;attr&gt;} is a string representing an attribute, or key, in the
+ * properties objects of the registered services. Attribute names are not case
+ * sensitive; that is cn and CN both refer to the same attribute.
+ * {@code &lt;value&gt;} is a string representing the value, or part of one, of
+ * a key in the properties objects of the registered services. If a
+ * {@code &lt;value&gt;} must contain one of the characters ' {@code *}' or
+ * '{@code (}' or '{@code )}', these characters should be escaped by preceding
+ * them with the backslash '{@code \}' character. Note that although both the
+ * {@code &lt;substring&gt;} and {@code &lt;present&gt;} productions can produce
+ * the {@code 'attr=*'} construct, this construct is used only to denote a
+ * presence filter.
+ * <p>
+ * Examples of LDAP filters are:
+ * 
  * <pre>
  *   &quot;(cn=Babs Jensen)&quot;
  *   &quot;(!(cn=Tim Howes))&quot;
- *   &quot;(&(&quot; + Constants.OBJECTCLASS + &quot;=Person)(|(sn=Jensen)(cn=Babs J*)))&quot;
+ *   &quot;(&amp;(&quot; + Constants.OBJECTCLASS + &quot;=Person)(|(sn=Jensen)(cn=Babs J*)))&quot;
  *   &quot;(o=univ*of*mich*)&quot;
  * </pre>
- *
- * <p>The approximate match (<code>~=</code>) is implementation specific but
- * should at least ignore case and white space differences. Optional are
- * codes like soundex or other smart "closeness" comparisons.
- *
- * <p>Comparison of values is not straightforward. Strings
- * are compared differently than numbers and it is
- * possible for a key to have multiple values. Note that
- * that keys in the match argument must always be strings.
- * The comparison is defined by the object type of the key's
- * value. The following rules apply for comparison:
- *
- * <blockquote>
+ * <p>
+ * The approximate match ({@code ~=}) is implementation specific but should at
+ * least ignore case and white space differences. Optional are codes like
+ * soundex or other smart "closeness" comparisons.
+ * <p>
+ * Comparison of values is not straightforward. Strings are compared differently
+ * than numbers and it is possible for a key to have multiple values. Note that
+ * that keys in the match argument must always be strings. The comparison is
+ * defined by the object type of the key's value. The following rules apply for
+ * comparison: <blockquote>
  * <TABLE BORDER=0>
- * <TR><TD><b>Property Value Type </b></TD><TD><b>Comparison Type</b></TD></TR>
- * <TR><TD>String </TD><TD>String comparison</TD></TR>
- * <TR valign=top><TD>Integer, Long, Float, Double, Byte, Short, BigInteger, BigDecimal </TD><TD>numerical comparison</TD></TR>
- * <TR><TD>Character </TD><TD>character comparison</TD></TR>
- * <TR><TD>Boolean </TD><TD>equality comparisons only</TD></TR>
- * <TR><TD>[] (array)</TD><TD>recursively applied to values </TD></TR>
- * <TR><TD>Vector</TD><TD>recursively applied to elements </TD></TR>
+ * <TR>
+ * <TD><b>Property Value Type </b></TD>
+ * <TD><b>Comparison Type</b></TD>
+ * </TR>
+ * <TR>
+ * <TD>String</TD>
+ * <TD>String comparison</TD>
+ * </TR>
+ * <TR valign=top>
+ * <TD>Integer, Long, Float, Double, Byte, Short, BigInteger, BigDecimal</TD>
+ * <TD>numerical comparison</TD>
+ * </TR>
+ * <TR>
+ * <TD>Character</TD>
+ * <TD>character comparison</TD>
+ * </TR>
+ * <TR>
+ * <TD>Boolean</TD>
+ * <TD>equality comparisons only</TD>
+ * </TR>
+ * <TR>
+ * <TD>[] (array)</TD>
+ * <TD>recursively applied to values</TD>
+ * </TR>
+ * <TR>
+ * <TD>Collection</TD>
+ * <TD>recursively applied to values</TD>
+ * </TR>
  * </TABLE>
- * Note: arrays of primitives are also supported.
- * </blockquote>
- *
- * A filter matches a key that has multiple values if it
- * matches at least one of those values. For example,
+ * Note: arrays of primitives are also supported. </blockquote> A filter matches
+ * a key that has multiple values if it matches at least one of those values.
+ * For example,
+ * 
  * <pre>
- *   Dictionary d = new Hashtable();
- *   d.put( "cn", new String[] { "a", "b", "c" } );
+ * Dictionary d = new Hashtable();
+ * d.put(&quot;cn&quot;, new String[] {
+ * 		&quot;a&quot;, &quot;b&quot;, &quot;c&quot;
+ * });
  * </pre>
- *   d will match <code>(cn=a)</code> and also <code>(cn=b)</code>
- *
- * <p>A filter component that references a key having an unrecognizable
- * data type will evaluate to <code>false</code> .
+ * 
+ * d will match {@code (cn=a)} and also {@code (cn=b)}
+ * <p>
+ * A filter component that references a key having an unrecognizable data type
+ * will evaluate to {@code false} .
  */
-
-public class FilterImpl implements Filter /* since Framework 1.1 */ {
-	/* public methods in org.osgi.framework.Filter */
+public abstract class FilterImpl implements Filter {
+	/* normalized filter string for Filter object */
+	private transient String filterString;
 
 	/**
-	 * Constructs a {@link FilterImpl} object. This filter object may be used
-	 * to match a {@link ServiceReferenceImpl} or a Dictionary.
-	 *
-	 * <p> If the filter cannot be parsed, an {@link InvalidSyntaxException}
-	 * will be thrown with a human readable message where the
-	 * filter became unparsable.
-	 *
+	 * Creates a {@link FilterImpl} object. This filter object may be used to
+	 * match a {@link ServiceReference} or a Dictionary.
+	 * <p>
+	 * If the filter cannot be parsed, an {@link InvalidSyntaxException} will be
+	 * thrown with a human readable message where the filter became unparsable.
+	 * 
 	 * @param filterString the filter string.
-	 * @exception InvalidSyntaxException If the filter parameter contains
-	 * an invalid filter string that cannot be parsed.
+	 * @throws InvalidSyntaxException If the filter parameter contains an
+	 *             invalid filter string that cannot be parsed.
 	 */
 	public static FilterImpl newInstance(String filterString) throws InvalidSyntaxException {
 		return newInstance(filterString, false);
@@ -165,6 +180,10 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 
 	public static FilterImpl newInstance(String filterString, boolean debug) throws InvalidSyntaxException {
 		return new Parser(filterString, debug).parse();
+	}
+
+	FilterImpl() {
+		// empty constructor for subclasses
 	}
 
 	/**
@@ -175,16 +194,13 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	 * insensitive manner.
 	 * 
 	 * @param reference The reference to the service whose properties are used
-	 *        in the match.
+	 *            in the match.
 	 * @return {@code true} if the service's properties match this
 	 *         {@code Filter}; {@code false} otherwise.
 	 */
 	@Override
 	public boolean match(ServiceReference<?> reference) {
-		if (reference instanceof ServiceReferenceImpl) {
-			return matches(((ServiceReferenceImpl<?>) reference).getRegistration().getProperties());
-		}
-		return matches(new ServiceReferenceMap(reference));
+		return matches0((reference != null) ? ServiceReferenceMap.asMap(reference) : Collections.<String, Object> emptyMap());
 	}
 
 	/**
@@ -193,18 +209,15 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	 * and values. The keys are looked up in a case insensitive manner.
 	 * 
 	 * @param dictionary The {@code Dictionary} whose key/value pairs are used
-	 *        in the match.
+	 *            in the match.
 	 * @return {@code true} if the {@code Dictionary}'s values match this
 	 *         filter; {@code false} otherwise.
 	 * @throws IllegalArgumentException If {@code dictionary} contains case
-	 *         variants of the same key name.
+	 *             variants of the same key name.
 	 */
 	@Override
 	public boolean match(Dictionary<String, ?> dictionary) {
-		if (dictionary == null) {
-			return matches(null);
-		}
-		return matches(new CaseInsensitiveDictionaryMap<>(dictionary));
+		return matches0((dictionary != null) ? new CaseInsensitiveDictionaryMap<>(dictionary) : Collections.<String, Object> emptyMap());
 	}
 
 	/**
@@ -213,64 +226,14 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	 * up in a normal manner respecting case.
 	 * 
 	 * @param dictionary The {@code Dictionary} whose key/value pairs are used
-	 *        in the match.
+	 *            in the match.
 	 * @return {@code true} if the {@code Dictionary}'s values match this
 	 *         filter; {@code false} otherwise.
 	 * @since 1.3
 	 */
 	@Override
 	public boolean matchCase(Dictionary<String, ?> dictionary) {
-		switch (op) {
-			case AND : {
-				FilterImpl[] filters = (FilterImpl[]) value;
-				for (FilterImpl f : filters) {
-					if (!f.matchCase(dictionary)) {
-						return false;
-					}
-				}
-
-				return true;
-			}
-
-			case OR : {
-				FilterImpl[] filters = (FilterImpl[]) value;
-				for (FilterImpl f : filters) {
-					if (f.matchCase(dictionary)) {
-						return true;
-					}
-				}
-
-				return false;
-			}
-
-			case NOT : {
-				FilterImpl filter = (FilterImpl) value;
-
-				return !filter.matchCase(dictionary);
-			}
-
-			case SUBSTRING :
-			case EQUAL :
-			case GREATER :
-			case LESS :
-			case APPROX : {
-				Object prop = (dictionary == null) ? null : dictionary.get(attr);
-
-				return compare(op, prop, value);
-			}
-
-			case PRESENT : {
-				if (debug) {
-					Debug.println("PRESENT(" + attr + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-
-				Object prop = (dictionary == null) ? null : dictionary.get(attr);
-
-				return prop != null;
-			}
-		}
-
-		return false;
+		return matches0((dictionary != null) ? DictionaryMap.asMap(dictionary) : Collections.<String, Object> emptyMap());
 	}
 
 	/**
@@ -279,194 +242,56 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	 * normal manner respecting case.
 	 * 
 	 * @param map The {@code Map} whose key/value pairs are used in the match.
-	 *        Maps with {@code null} key or values are not supported. A
-	 *        {@code null} value is considered not present to the filter.
+	 *            Maps with {@code null} key or values are not supported. A
+	 *            {@code null} value is considered not present to the filter.
 	 * @return {@code true} if the {@code Map}'s values match this filter;
 	 *         {@code false} otherwise.
 	 * @since 1.6
 	 */
 	@Override
 	public boolean matches(Map<String, ?> map) {
-		switch (op) {
-			case AND : {
-				FilterImpl[] filters = (FilterImpl[]) value;
-				for (FilterImpl f : filters) {
-					if (!f.matches(map)) {
-						return false;
-					}
-				}
-
-				return true;
-			}
-
-			case OR : {
-				FilterImpl[] filters = (FilterImpl[]) value;
-				for (FilterImpl f : filters) {
-					if (f.matches(map)) {
-						return true;
-					}
-				}
-
-				return false;
-			}
-
-			case NOT : {
-				FilterImpl filter = (FilterImpl) value;
-
-				return !filter.matches(map);
-			}
-
-			case SUBSTRING :
-			case EQUAL :
-			case GREATER :
-			case LESS :
-			case APPROX : {
-				Object prop = (map == null) ? null : map.get(attr);
-
-				return compare(op, prop, value);
-			}
-
-			case PRESENT : {
-				if (debug) {
-					Debug.println("PRESENT(" + attr + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-
-				Object prop = (map == null) ? null : map.get(attr);
-
-				return prop != null;
-			}
-		}
-
-		return false;
+		return matches0((map != null) ? map : Collections.<String, Object> emptyMap());
 	}
 
+	abstract boolean matches0(Map<String, ?> map);
+
 	/**
-	 * Returns this <code>Filter</code> object's filter string.
+	 * Returns this {@code Filter}'s filter string.
 	 * <p>
 	 * The filter string is normalized by removing whitespace which does not
 	 * affect the meaning of the filter.
-	 *
-	 * @return Filter string.
+	 * 
+	 * @return This {@code Filter}'s filter string.
 	 */
-
 	@Override
 	public String toString() {
 		String result = filterString;
 		if (result == null) {
-			filterString = result = normalize().toString();
+			filterString = result = normalize(new StringBuilder()).toString();
 		}
 		return result;
 	}
 
 	/**
-	 * Returns this <code>Filter</code>'s normalized filter string.
+	 * Returns this {@code Filter}'s normalized filter string.
 	 * <p>
 	 * The filter string is normalized by removing whitespace which does not
 	 * affect the meaning of the filter.
 	 * 
-	 * @return This <code>Filter</code>'s filter string.
+	 * @return This {@code Filter}'s filter string.
 	 */
-	private StringBuilder normalize() {
-		StringBuilder sb = new StringBuilder();
-		sb.append('(');
-
-		switch (op) {
-			case AND : {
-				sb.append('&');
-
-				FilterImpl[] filters = (FilterImpl[]) value;
-				for (FilterImpl f : filters) {
-					sb.append(f.normalize());
-				}
-
-				break;
-			}
-
-			case OR : {
-				sb.append('|');
-
-				FilterImpl[] filters = (FilterImpl[]) value;
-				for (FilterImpl f : filters) {
-					sb.append(f.normalize());
-				}
-
-				break;
-			}
-
-			case NOT : {
-				sb.append('!');
-				FilterImpl filter = (FilterImpl) value;
-				sb.append(filter.normalize());
-
-				break;
-			}
-
-			case SUBSTRING : {
-				sb.append(attr);
-				sb.append('=');
-
-				String[] substrings = (String[]) value;
-
-				for (String substr : substrings) {
-					if (substr == null) /* * */ {
-						sb.append('*');
-					} else /* xxx */ {
-						sb.append(encodeValue(substr));
-					}
-				}
-
-				break;
-			}
-			case EQUAL : {
-				sb.append(attr);
-				sb.append('=');
-				sb.append(encodeValue((String) value));
-
-				break;
-			}
-			case GREATER : {
-				sb.append(attr);
-				sb.append(">="); //$NON-NLS-1$
-				sb.append(encodeValue((String) value));
-
-				break;
-			}
-			case LESS : {
-				sb.append(attr);
-				sb.append("<="); //$NON-NLS-1$
-				sb.append(encodeValue((String) value));
-
-				break;
-			}
-			case APPROX : {
-				sb.append(attr);
-				sb.append("~="); //$NON-NLS-1$
-				sb.append(encodeValue(approxString((String) value)));
-
-				break;
-			}
-
-			case PRESENT : {
-				sb.append(attr);
-				sb.append("=*"); //$NON-NLS-1$
-
-				break;
-			}
-		}
-
-		sb.append(')');
-
-		return sb;
-	}
+	abstract StringBuilder normalize(StringBuilder sb);
 
 	/**
-	 * Compares this <code>Filter</code> object to another object.
-	 *
-	 * @param obj The object to compare against this <code>Filter</code>
-	 *        object.
-	 * @return If the other object is a <code>Filter</code> object, then
-	 *         returns <code>this.toString().equals(obj.toString()</code>;
-	 *         <code>false</code> otherwise.
+	 * Compares this {@code Filter} to another {@code Filter}.
+	 * <p>
+	 * This implementation returns the result of calling
+	 * {@code this.toString().equals(obj.toString()}.
+	 * 
+	 * @param obj The object to compare against this {@code Filter}.
+	 * @return If the other object is a {@code Filter} object, then returns the
+	 *         result of calling {@code this.toString().equals(obj.toString()};
+	 *         {@code false} otherwise.
 	 */
 	@Override
 	public boolean equals(Object obj) {
@@ -482,906 +307,1144 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	}
 
 	/**
-		 * Returns the hashCode for this <code>Filter</code> object.
-	 *
-		 * @return The hashCode of the filter string; that is,
-	 * <code>this.toString().hashCode()</code>.
+	 * Returns the hashCode for this {@code Filter}.
+	 * <p>
+	 * This implementation returns the result of calling
+	 * {@code this.toString().hashCode()}.
+	 * 
+	 * @return The hashCode of this {@code Filter}.
 	 */
 	@Override
 	public int hashCode() {
 		return this.toString().hashCode();
 	}
 
-	/* non public fields and methods for the Filter implementation */
+	static final class And extends FilterImpl {
+		private final FilterImpl[] operands;
 
-	/** filter operation */
-	private final int op;
-	private static final int EQUAL = 1;
-	private static final int APPROX = 2;
-	private static final int GREATER = 3;
-	private static final int LESS = 4;
-	private static final int PRESENT = 5;
-	private static final int SUBSTRING = 6;
-	private static final int AND = 7;
-	private static final int OR = 8;
-	private static final int NOT = 9;
+		And(FilterImpl[] operands) {
+			this.operands = operands;
+		}
 
-	/** filter attribute or null if operation AND, OR or NOT */
-	private final String attr;
-	/** filter operands */
-	private final Object value;
-	/** debug mode */
-	private final boolean debug;
+		@Override
+		boolean matches0(Map<String, ?> map) {
+			for (FilterImpl operand : operands) {
+				if (!operand.matches0(map)) {
+					return false;
+				}
+			}
+			return true;
+		}
 
-	/* normalized filter string for topLevel Filter object */
-	private transient volatile String filterString;
+		@Override
+		StringBuilder normalize(StringBuilder sb) {
+			sb.append('(').append('&');
+			for (FilterImpl operand : operands) {
+				operand.normalize(sb);
+			}
+			return sb.append(')');
+		}
 
-	FilterImpl(int operation, String attr, Object value, boolean debug) {
-		this.op = operation;
-		this.attr = attr;
-		this.value = value;
-		this.debug = debug;
+		@Override
+		public String getPrimaryKeyValue(String primaryKey) {
+			// just checking for simple filters here where primaryKey is the only attr or it is one attr of a base '&' clause
+			// (primaryKey=org.acme.BrickService) OK
+			// (&(primaryKey=org.acme.BrickService)(|(vendor=IBM)(vendor=SUN))) OK
+			// (primaryKey=org.acme.*) NOT OK
+			// (|(primaryKey=org.acme.BrickService)(primaryKey=org.acme.CementService)) NOT OK
+			// (&(primaryKey=org.acme.BrickService)(primaryKey=org.acme.CementService)) OK but only the first primaryKey is returned
+			for (FilterImpl operand : operands) {
+				if (operand instanceof Equal) {
+					String result = operand.getPrimaryKeyValue(primaryKey);
+					if (result != null) {
+						return result;
+					}
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public List<FilterImpl> getChildren() {
+			return new ArrayList<>(Arrays.asList(operands));
+		}
+
+		@Override
+		void getAttributesInternal(List<String> results) {
+			for (FilterImpl operand : operands) {
+				operand.getAttributesInternal(results);
+			}
+		}
+
+		@Override
+		void addAttributes(Map<String, String> attributes, Map<String, Range> versionAttrs, boolean not) {
+			for (FilterImpl operand : operands) {
+				operand.addAttributes(attributes, versionAttrs, false);
+			}
+		}
 	}
 
-	/**
-	 * Encode the value string such that '(', '*', ')'
-	 * and '\' are escaped.
-	 *
-	 * @param value unencoded value string.
-	 * @return encoded value string.
-	 */
-	private static String encodeValue(String value) {
-		boolean encoded = false;
-		int inlen = value.length();
-		int outlen = inlen << 1; /* inlen * 2 */
+	static final class Or extends FilterImpl {
+		private final FilterImpl[] operands;
 
-		char[] output = new char[outlen];
-		value.getChars(0, inlen, output, inlen);
+		Or(FilterImpl[] operands) {
+			this.operands = operands;
+		}
 
-		int cursor = 0;
-		for (int i = inlen; i < outlen; i++) {
-			char c = output[i];
+		@Override
+		boolean matches0(Map<String, ?> map) {
+			for (FilterImpl operand : operands) {
+				if (operand.matches0(map)) {
+					return true;
+				}
+			}
+			return false;
+		}
 
-			switch (c) {
-				case '(' :
-				case '*' :
-				case ')' :
-				case '\\' : {
-					output[cursor] = '\\';
-					cursor++;
-					encoded = true;
+		@Override
+		StringBuilder normalize(StringBuilder sb) {
+			sb.append('(').append('|');
+			for (FilterImpl operand : operands) {
+				operand.normalize(sb);
+			}
+			return sb.append(')');
+		}
 
+		@Override
+		public List<FilterImpl> getChildren() {
+			return new ArrayList<>(Arrays.asList(operands));
+		}
+
+		@Override
+		void getAttributesInternal(List<String> results) {
+			for (FilterImpl operand : operands) {
+				operand.getAttributesInternal(results);
+			}
+		}
+
+		@Override
+		public Map<String, String> getStandardOSGiAttributes(String... versions) {
+			throw new IllegalArgumentException("Invalid filter for standard OSGi Attributes: OR"); //$NON-NLS-1$
+		}
+
+		@Override
+		void addAttributes(Map<String, String> attributes, Map<String, Range> versionAttrs, boolean not) {
+			throw new IllegalStateException("Invalid filter for standard OSGi requirements: OR"); //$NON-NLS-1$
+		}
+	}
+
+	static final class Not extends FilterImpl {
+		private final FilterImpl operand;
+
+		Not(FilterImpl operand) {
+			this.operand = operand;
+		}
+
+		@Override
+		boolean matches0(Map<String, ?> map) {
+			return !operand.matches0(map);
+		}
+
+		@Override
+		StringBuilder normalize(StringBuilder sb) {
+			sb.append('(').append('!');
+			operand.normalize(sb);
+			return sb.append(')');
+		}
+
+		@Override
+		void getAttributesInternal(List<String> results) {
+			operand.getAttributesInternal(results);
+		}
+
+		@Override
+		public Map<String, String> getStandardOSGiAttributes(String... versions) {
+			throw new IllegalArgumentException("Invalid filter for standard OSGi Attributes: NOT"); //$NON-NLS-1$
+		}
+
+		@Override
+		void addAttributes(Map<String, String> attributes, Map<String, Range> versionAttrs, boolean not) {
+			operand.addAttributes(attributes, versionAttrs, true);
+		}
+	}
+
+	static final class Present extends FilterImpl {
+		/** debug mode */
+		final boolean debug;
+		private final String attr;
+
+		Present(String attr, boolean debug) {
+			this.attr = attr;
+			this.debug = debug;
+		}
+
+		@Override
+		boolean matches0(Map<String, ?> map) {
+			if (debug) {
+				Debug.println("PRESENT(" + attr + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			return map.get(attr) != null;
+		}
+
+		@Override
+		StringBuilder normalize(StringBuilder sb) {
+			return sb.append('(').append(attr).append('=').append('*').append(')');
+		}
+
+		@Override
+		void getAttributesInternal(List<String> results) {
+			results.add(attr);
+		}
+
+		@Override
+		void addAttributes(Map<String, String> attributes, Map<String, Range> versionAttrs, boolean not) {
+			attributes.put(attr, "*"); //$NON-NLS-1$
+		}
+	}
+
+	static abstract class Item extends FilterImpl {
+		/** debug mode */
+		final boolean debug;
+		final String attr;
+		final Object value;
+
+		Item(String attr, Object value, boolean debug) {
+			this.attr = attr;
+			this.value = value;
+			this.debug = debug;
+		}
+
+		@Override
+		boolean matches0(Map<String, ?> map) {
+			return compare(map.get(attr), value);
+		}
+
+		abstract String operation();
+
+		private boolean compare(Object value1, Object value2) {
+			if (debug) {
+				if (value1 == null) {
+					Debug.println("compare(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				} else if (!(value1.getClass().isArray() || (value1 instanceof Collection<?>))) {
+					Debug.println(operation() + "(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				}
+			}
+			if (value1 == null) {
+				return false;
+			}
+			if (value1 instanceof String) {
+				return compare_String((String) value1, value2);
+			}
+			if (value1 instanceof Version) {
+				return compare_Version((Version) value1, value2);
+			}
+
+			Class<?> clazz = value1.getClass();
+			if (clazz.isArray()) {
+				Class<?> type = clazz.getComponentType();
+				if (type.isPrimitive()) {
+					return compare_PrimitiveArray(type, value1, value2);
+				}
+				return compare_ObjectArray((Object[]) value1, value2);
+			}
+			if (value1 instanceof Collection<?>) {
+				return compare_Collection((Collection<?>) value1, value2);
+			}
+			if (value1 instanceof Integer) {
+				return compare_Integer(((Integer) value1).intValue(), value2);
+			}
+			if (value1 instanceof Long) {
+				return compare_Long(((Long) value1).longValue(), value2);
+			}
+			if (value1 instanceof Byte) {
+				return compare_Byte(((Byte) value1).byteValue(), value2);
+			}
+			if (value1 instanceof Short) {
+				return compare_Short(((Short) value1).shortValue(), value2);
+			}
+			if (value1 instanceof Character) {
+				return compare_Character(((Character) value1).charValue(), value2);
+			}
+			if (value1 instanceof Float) {
+				return compare_Float(((Float) value1).floatValue(), value2);
+			}
+			if (value1 instanceof Double) {
+				return compare_Double(((Double) value1).doubleValue(), value2);
+			}
+			if (value1 instanceof Boolean) {
+				return compare_Boolean(((Boolean) value1).booleanValue(), value2);
+			}
+			if (value1 instanceof Comparable<?>) {
+				@SuppressWarnings("unchecked")
+				Comparable<Object> comparable = (Comparable<Object>) value1;
+				return compare_Comparable(comparable, value2);
+			}
+			return compare_Unknown(value1, value2);
+		}
+
+		private boolean compare_Collection(Collection<?> collection, Object value2) {
+			for (Object value1 : collection) {
+				if (compare(value1, value2)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		private boolean compare_ObjectArray(Object[] array, Object value2) {
+			for (Object value1 : array) {
+				if (compare(value1, value2)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		private boolean compare_PrimitiveArray(Class<?> type, Object primarray, Object value2) {
+			if (Integer.TYPE.isAssignableFrom(type)) {
+				int[] array = (int[]) primarray;
+				for (int value1 : array) {
+					if (debug) {
+						Debug.println(operation() + "(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					if (compare_Integer(value1, value2)) {
+						return true;
+					}
+				}
+				return false;
+			}
+			if (Long.TYPE.isAssignableFrom(type)) {
+				long[] array = (long[]) primarray;
+				for (long value1 : array) {
+					if (debug) {
+						Debug.println(operation() + "(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					if (compare_Long(value1, value2)) {
+						return true;
+					}
+				}
+				return false;
+			}
+			if (Byte.TYPE.isAssignableFrom(type)) {
+				byte[] array = (byte[]) primarray;
+				for (byte value1 : array) {
+					if (debug) {
+						Debug.println(operation() + "(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					if (compare_Byte(value1, value2)) {
+						return true;
+					}
+				}
+				return false;
+			}
+			if (Short.TYPE.isAssignableFrom(type)) {
+				short[] array = (short[]) primarray;
+				for (short value1 : array) {
+					if (debug) {
+						Debug.println(operation() + "(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					if (compare_Short(value1, value2)) {
+						return true;
+					}
+				}
+				return false;
+			}
+			if (Character.TYPE.isAssignableFrom(type)) {
+				char[] array = (char[]) primarray;
+				for (char value1 : array) {
+					if (debug) {
+						Debug.println(operation() + "(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					if (compare_Character(value1, value2)) {
+						return true;
+					}
+				}
+				return false;
+			}
+			if (Float.TYPE.isAssignableFrom(type)) {
+				float[] array = (float[]) primarray;
+				for (float value1 : array) {
+					if (debug) {
+						Debug.println(operation() + "(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					if (compare_Float(value1, value2)) {
+						return true;
+					}
+				}
+				return false;
+			}
+			if (Double.TYPE.isAssignableFrom(type)) {
+				double[] array = (double[]) primarray;
+				for (double value1 : array) {
+					if (debug) {
+						Debug.println(operation() + "(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					if (compare_Double(value1, value2)) {
+						return true;
+					}
+				}
+				return false;
+			}
+			if (Boolean.TYPE.isAssignableFrom(type)) {
+				boolean[] array = (boolean[]) primarray;
+				for (boolean value1 : array) {
+					if (debug) {
+						Debug.println(operation() + "(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					if (compare_Boolean(value1, value2)) {
+						return true;
+					}
+				}
+				return false;
+			}
+			return false;
+		}
+
+		boolean compare_String(String string, Object value2) {
+			return false;
+		}
+
+		boolean compare_Version(Version value1, Object value2) {
+			return false;
+		}
+
+		boolean compare_Comparable(Comparable<Object> value1, Object value2) {
+			return false;
+		}
+
+		boolean compare_Unknown(Object value1, Object value2) {
+			return false;
+		}
+
+		boolean compare_Boolean(boolean boolval, Object value2) {
+			return false;
+		}
+
+		boolean compare_Byte(byte byteval, Object value2) {
+			return false;
+		}
+
+		boolean compare_Character(char charval, Object value2) {
+			return false;
+		}
+
+		boolean compare_Double(double doubleval, Object value2) {
+			return false;
+		}
+
+		boolean compare_Float(float floatval, Object value2) {
+			return false;
+		}
+
+		boolean compare_Integer(int intval, Object value2) {
+			return false;
+		}
+
+		boolean compare_Long(long longval, Object value2) {
+			return false;
+		}
+
+		boolean compare_Short(short shortval, Object value2) {
+			return false;
+		}
+
+		/**
+		 * Encode the value string such that '(', '*', ')' and '\' are escaped.
+		 * 
+		 * @param value unencoded value string.
+		 */
+		static StringBuilder encodeValue(StringBuilder sb, String value) {
+			for (int i = 0, len = value.length(); i < len; i++) {
+				char c = value.charAt(i);
+				switch (c) {
+					case '(' :
+					case '*' :
+					case ')' :
+					case '\\' :
+						sb.append('\\');
+						// FALL-THROUGH
+					default :
+						sb.append(c);
+						break;
+				}
+			}
+			return sb;
+		}
+
+		@Override
+		void getAttributesInternal(List<String> results) {
+			results.add(attr);
+		}
+
+		static Object valueOf(Class<?> target, String value2) {
+			do {
+				Method method;
+				try {
+					method = target.getMethod("valueOf", String.class); //$NON-NLS-1$
+				} catch (NoSuchMethodException e) {
 					break;
 				}
-			}
-
-			output[cursor] = c;
-			cursor++;
-		}
-
-		return encoded ? new String(output, 0, cursor) : value;
-	}
-
-	private boolean compare(int operation, Object value1, Object value2) {
-		if (value1 == null) {
-			if (debug) {
-				Debug.println("compare(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}
-
-			return false;
-		}
-
-		if (value1 instanceof String) {
-			return compare_String(operation, (String) value1, value2);
-		}
-
-		if (value1 instanceof Version) {
-			return compare_Version(operation, (Version) value1, value2);
-		}
-
-		Class<?> clazz = value1.getClass();
-		if (clazz.isArray()) {
-			Class<?> type = clazz.getComponentType();
-			if (type.isPrimitive()) {
-				return compare_PrimitiveArray(operation, type, value1, value2);
-			}
-			return compare_ObjectArray(operation, (Object[]) value1, value2);
-		}
-		if (value1 instanceof Collection<?>) {
-			return compare_Collection(operation, (Collection<?>) value1, value2);
-		}
-
-		if (value1 instanceof Integer) {
-			return compare_Integer(operation, ((Integer) value1).intValue(), value2);
-		}
-
-		if (value1 instanceof Long) {
-			return compare_Long(operation, ((Long) value1).longValue(), value2);
-		}
-
-		if (value1 instanceof Byte) {
-			return compare_Byte(operation, ((Byte) value1).byteValue(), value2);
-		}
-
-		if (value1 instanceof Short) {
-			return compare_Short(operation, ((Short) value1).shortValue(), value2);
-		}
-
-		if (value1 instanceof Character) {
-			return compare_Character(operation, ((Character) value1).charValue(), value2);
-		}
-
-		if (value1 instanceof Float) {
-			return compare_Float(operation, ((Float) value1).floatValue(), value2);
-		}
-
-		if (value1 instanceof Double) {
-			return compare_Double(operation, ((Double) value1).doubleValue(), value2);
-		}
-
-		if (value1 instanceof Boolean) {
-			return compare_Boolean(operation, ((Boolean) value1).booleanValue(), value2);
-		}
-		if (value1 instanceof Comparable<?>) {
-			@SuppressWarnings("unchecked")
-			Comparable<Object> comparable = (Comparable<Object>) value1;
-			return compare_Comparable(operation, comparable, value2);
-		}
-
-		return compare_Unknown(operation, value1, value2); // RFC 59
-	}
-
-	private boolean compare_Collection(int operation, Collection<?> collection, Object value2) {
-		for (Object value1 : collection) {
-			if (compare(operation, value1, value2)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean compare_ObjectArray(int operation, Object[] array, Object value2) {
-		for (Object value1 : array) {
-			if (compare(operation, value1, value2)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean compare_PrimitiveArray(int operation, Class<?> type, Object primarray, Object value2) {
-		if (Integer.TYPE.isAssignableFrom(type)) {
-			int[] array = (int[]) primarray;
-			for (int value1 : array) {
-				if (compare_Integer(operation, value1, value2)) {
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		if (Long.TYPE.isAssignableFrom(type)) {
-			long[] array = (long[]) primarray;
-			for (long value1 : array) {
-				if (compare_Long(operation, value1, value2)) {
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		if (Byte.TYPE.isAssignableFrom(type)) {
-			byte[] array = (byte[]) primarray;
-			for (byte value1 : array) {
-				if (compare_Byte(operation, value1, value2)) {
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		if (Short.TYPE.isAssignableFrom(type)) {
-			short[] array = (short[]) primarray;
-			for (short value1 : array) {
-				if (compare_Short(operation, value1, value2)) {
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		if (Character.TYPE.isAssignableFrom(type)) {
-			char[] array = (char[]) primarray;
-			for (char value1 : array) {
-				if (compare_Character(operation, value1, value2)) {
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		if (Float.TYPE.isAssignableFrom(type)) {
-			float[] array = (float[]) primarray;
-			for (float value1 : array) {
-				if (compare_Float(operation, value1, value2)) {
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		if (Double.TYPE.isAssignableFrom(type)) {
-			double[] array = (double[]) primarray;
-			for (double value1 : array) {
-				if (compare_Double(operation, value1, value2)) {
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		if (Boolean.TYPE.isAssignableFrom(type)) {
-			boolean[] array = (boolean[]) primarray;
-			for (boolean value1 : array) {
-				if (compare_Boolean(operation, value1, value2)) {
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		return false;
-	}
-
-	private boolean compare_String(int operation, String string, Object value2) {
-		switch (operation) {
-			case SUBSTRING : {
-				if (debug) {
-					Debug.println("SUBSTRING(" + string + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-
-				String[] substrings = (String[]) value2;
-				int pos = 0;
-				for (int i = 0, size = substrings.length; i < size; i++) {
-					String substr = substrings[i];
-
-					if (i + 1 < size) /* if this is not that last substr */ {
-						if (substr == null) /* * */ {
-							String substr2 = substrings[i + 1];
-
-							if (substr2 == null) /* ** */
-								continue; /* ignore first star */
-							/* *xxx */
-							if (debug) {
-								Debug.println("indexOf(\"" + substr2 + "\"," + pos + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-							}
-							int index = string.indexOf(substr2, pos);
-							if (index == -1) {
-								return false;
-							}
-
-							pos = index + substr2.length();
-							if (i + 2 < size) // if there are more substrings, increment over the string we just matched; otherwise need to do the last substr check
-								i++;
-						} else /* xxx */ {
-							int len = substr.length();
-
-							if (debug) {
-								Debug.println("regionMatches(" + pos + ",\"" + substr + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-							}
-							if (string.regionMatches(pos, substr, 0, len)) {
-								pos += len;
-							} else {
-								return false;
-							}
-						}
-					} else /* last substr */ {
-						if (substr == null) /* * */ {
-							return true;
-						}
-						/* xxx */
-						if (debug) {
-							Debug.println("regionMatches(" + pos + "," + substr + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						}
-						return string.endsWith(substr);
+				if (Modifier.isStatic(method.getModifiers()) && target.isAssignableFrom(method.getReturnType())) {
+					setAccessible(method);
+					try {
+						MethodHandle mh = publicLookup().unreflect(method);
+						return mh.invoke(value2.trim());
+					} catch (Error e) {
+						throw e;
+					} catch (Throwable e) {
+						return null;
 					}
 				}
+			} while (false);
 
-				return true;
-			}
-			case EQUAL : {
-				if (debug) {
-					Debug.println("EQUAL(" + string + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return string.equals(value2);
-			}
-			case APPROX : {
-				if (debug) {
-					Debug.println("APPROX(" + string + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-
-				string = approxString(string);
-				String string2 = approxString((String) value2);
-
-				return string.equalsIgnoreCase(string2);
-			}
-			case GREATER : {
-				if (debug) {
-					Debug.println("GREATER(" + string + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return string.compareTo((String) value2) >= 0;
-			}
-			case LESS : {
-				if (debug) {
-					Debug.println("LESS(" + string + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return string.compareTo((String) value2) <= 0;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean compare_Integer(int operation, int intval, Object value2) {
-		if (operation == SUBSTRING) {
-			if (debug) {
-				Debug.println("SUBSTRING(" + intval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}
-			return false;
-		}
-
-		int intval2;
-		try {
-			intval2 = Integer.parseInt(((String) value2).trim());
-		} catch (IllegalArgumentException e) {
-			return false;
-		}
-		switch (operation) {
-			case EQUAL : {
-				if (debug) {
-					Debug.println("EQUAL(" + intval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return intval == intval2;
-			}
-			case APPROX : {
-				if (debug) {
-					Debug.println("APPROX(" + intval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return intval == intval2;
-			}
-			case GREATER : {
-				if (debug) {
-					Debug.println("GREATER(" + intval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return intval >= intval2;
-			}
-			case LESS : {
-				if (debug) {
-					Debug.println("LESS(" + intval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return intval <= intval2;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean compare_Long(int operation, long longval, Object value2) {
-		if (operation == SUBSTRING) {
-			if (debug) {
-				Debug.println("SUBSTRING(" + longval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}
-			return false;
-		}
-
-		long longval2;
-		try {
-			longval2 = Long.parseLong(((String) value2).trim());
-		} catch (IllegalArgumentException e) {
-			return false;
-		}
-		switch (operation) {
-			case EQUAL : {
-				if (debug) {
-					Debug.println("EQUAL(" + longval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return longval == longval2;
-			}
-			case APPROX : {
-				if (debug) {
-					Debug.println("APPROX(" + longval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return longval == longval2;
-			}
-			case GREATER : {
-				if (debug) {
-					Debug.println("GREATER(" + longval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return longval >= longval2;
-			}
-			case LESS : {
-				if (debug) {
-					Debug.println("LESS(" + longval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return longval <= longval2;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean compare_Byte(int operation, byte byteval, Object value2) {
-		if (operation == SUBSTRING) {
-			if (debug) {
-				Debug.println("SUBSTRING(" + byteval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}
-			return false;
-		}
-
-		byte byteval2;
-		try {
-			byteval2 = Byte.parseByte(((String) value2).trim());
-		} catch (IllegalArgumentException e) {
-			return false;
-		}
-		switch (operation) {
-			case EQUAL : {
-				if (debug) {
-					Debug.println("EQUAL(" + byteval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return byteval == byteval2;
-			}
-			case APPROX : {
-				if (debug) {
-					Debug.println("APPROX(" + byteval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return byteval == byteval2;
-			}
-			case GREATER : {
-				if (debug) {
-					Debug.println("GREATER(" + byteval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return byteval >= byteval2;
-			}
-			case LESS : {
-				if (debug) {
-					Debug.println("LESS(" + byteval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return byteval <= byteval2;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean compare_Short(int operation, short shortval, Object value2) {
-		if (operation == SUBSTRING) {
-			if (debug) {
-				Debug.println("SUBSTRING(" + shortval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}
-			return false;
-		}
-
-		short shortval2;
-		try {
-			shortval2 = Short.parseShort(((String) value2).trim());
-		} catch (IllegalArgumentException e) {
-			return false;
-		}
-		switch (operation) {
-			case EQUAL : {
-				if (debug) {
-					Debug.println("EQUAL(" + shortval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return shortval == shortval2;
-			}
-			case APPROX : {
-				if (debug) {
-					Debug.println("APPROX(" + shortval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return shortval == shortval2;
-			}
-			case GREATER : {
-				if (debug) {
-					Debug.println("GREATER(" + shortval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return shortval >= shortval2;
-			}
-			case LESS : {
-				if (debug) {
-					Debug.println("LESS(" + shortval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return shortval <= shortval2;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean compare_Character(int operation, char charval, Object value2) {
-		if (operation == SUBSTRING) {
-			if (debug) {
-				Debug.println("SUBSTRING(" + charval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}
-			return false;
-		}
-
-		char charval2;
-		try {
-			charval2 = ((String) value2).charAt(0);
-		} catch (IndexOutOfBoundsException e) {
-			return false;
-		}
-		switch (operation) {
-			case EQUAL : {
-				if (debug) {
-					Debug.println("EQUAL(" + charval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return charval == charval2;
-			}
-			case APPROX : {
-				if (debug) {
-					Debug.println("APPROX(" + charval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return (charval == charval2) || (Character.toUpperCase(charval) == Character.toUpperCase(charval2)) || (Character.toLowerCase(charval) == Character.toLowerCase(charval2));
-			}
-			case GREATER : {
-				if (debug) {
-					Debug.println("GREATER(" + charval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return charval >= charval2;
-			}
-			case LESS : {
-				if (debug) {
-					Debug.println("LESS(" + charval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return charval <= charval2;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean compare_Boolean(int operation, boolean boolval, Object value2) {
-		if (operation == SUBSTRING) {
-			if (debug) {
-				Debug.println("SUBSTRING(" + boolval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}
-			return false;
-		}
-
-		boolean boolval2 = Boolean.valueOf(((String) value2).trim()).booleanValue();
-		switch (operation) {
-			case EQUAL : {
-				if (debug) {
-					Debug.println("EQUAL(" + boolval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return boolval == boolval2;
-			}
-			case APPROX : {
-				if (debug) {
-					Debug.println("APPROX(" + boolval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return boolval == boolval2;
-			}
-			case GREATER : {
-				if (debug) {
-					Debug.println("GREATER(" + boolval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return boolval == boolval2;
-			}
-			case LESS : {
-				if (debug) {
-					Debug.println("LESS(" + boolval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return boolval == boolval2;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean compare_Float(int operation, float floatval, Object value2) {
-		if (operation == SUBSTRING) {
-			if (debug) {
-				Debug.println("SUBSTRING(" + floatval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}
-			return false;
-		}
-
-		float floatval2;
-		try {
-			floatval2 = Float.parseFloat(((String) value2).trim());
-		} catch (IllegalArgumentException e) {
-			return false;
-		}
-		switch (operation) {
-			case EQUAL : {
-				if (debug) {
-					Debug.println("EQUAL(" + floatval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return Float.compare(floatval, floatval2) == 0;
-			}
-			case APPROX : {
-				if (debug) {
-					Debug.println("APPROX(" + floatval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return Float.compare(floatval, floatval2) == 0;
-			}
-			case GREATER : {
-				if (debug) {
-					Debug.println("GREATER(" + floatval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return Float.compare(floatval, floatval2) >= 0;
-			}
-			case LESS : {
-				if (debug) {
-					Debug.println("LESS(" + floatval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return Float.compare(floatval, floatval2) <= 0;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean compare_Double(int operation, double doubleval, Object value2) {
-		if (operation == SUBSTRING) {
-			if (debug) {
-				Debug.println("SUBSTRING(" + doubleval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}
-			return false;
-		}
-
-		double doubleval2;
-		try {
-			doubleval2 = Double.parseDouble(((String) value2).trim());
-		} catch (IllegalArgumentException e) {
-			return false;
-		}
-		switch (operation) {
-			case EQUAL : {
-				if (debug) {
-					Debug.println("EQUAL(" + doubleval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return Double.compare(doubleval, doubleval2) == 0;
-			}
-			case APPROX : {
-				if (debug) {
-					Debug.println("APPROX(" + doubleval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return Double.compare(doubleval, doubleval2) == 0;
-			}
-			case GREATER : {
-				if (debug) {
-					Debug.println("GREATER(" + doubleval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return Double.compare(doubleval, doubleval2) >= 0;
-			}
-			case LESS : {
-				if (debug) {
-					Debug.println("LESS(" + doubleval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return Double.compare(doubleval, doubleval2) <= 0;
-			}
-		}
-
-		return false;
-	}
-
-	private static Object valueOf(Class<?> target, String value2) {
-		do {
-			Method method;
-			try {
-				method = target.getMethod("valueOf", String.class); //$NON-NLS-1$
-			} catch (NoSuchMethodException e) {
-				break;
-			}
-			if (Modifier.isStatic(method.getModifiers()) && target.isAssignableFrom(method.getReturnType())) {
-				setAccessible(method);
+			do {
+				Constructor<?> constructor;
 				try {
-					return method.invoke(null, value2.trim());
-				} catch (IllegalAccessException | InvocationTargetException e) {
+					constructor = target.getConstructor(String.class);
+				} catch (NoSuchMethodException e) {
+					break;
+				}
+				setAccessible(constructor);
+				try {
+					MethodHandle mh = publicLookup().unreflectConstructor(constructor);
+					return mh.invoke(value2.trim());
+				} catch (Error e) {
+					throw e;
+				} catch (Throwable e) {
 					return null;
 				}
-			}
-		} while (false);
+			} while (false);
 
-		do {
-			Constructor<?> constructor;
+			return null;
+		}
+
+		private static void setAccessible(final AccessibleObject accessible) {
+			if (!accessible.isAccessible()) {
+				AccessController.doPrivileged(new PrivilegedAction<Void>() {
+					@Override
+					public Void run() {
+						accessible.setAccessible(true);
+						return null;
+					}
+				});
+			}
+		}
+	}
+
+	static final class Substring extends Item {
+		Substring(String attr, Object value, boolean debug) {
+			super(attr, value, debug);
+		}
+
+		@Override
+		String operation() {
+			return "SUBSTRING"; //$NON-NLS-1$
+		}
+
+		@Override
+		boolean compare_String(String string, Object value2) {
+			String[] substrings = (String[]) value2;
+			int pos = 0;
+			for (int i = 0, size = substrings.length; i < size; i++) {
+				String substr = substrings[i];
+				if (i + 1 < size) /* if this is not that last substr */ {
+					if (substr == null) /* * */ {
+						String substr2 = substrings[i + 1];
+						if (substr2 == null) /* ** */
+							continue; /* ignore first star */
+						/* xxx */
+						if (debug) {
+							Debug.println("indexOf(\"" + substr2 + "\"," + pos + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						}
+						int index = string.indexOf(substr2, pos);
+						if (index == -1) {
+							return false;
+						}
+						pos = index + substr2.length();
+						if (i + 2 < size) // if there are more
+							// substrings, increment
+							// over the string we just
+							// matched; otherwise need
+							// to do the last substr
+							// check
+							i++;
+					} else /* xxx */ {
+						int len = substr.length();
+						if (debug) {
+							Debug.println("regionMatches(" + pos + ",\"" + substr + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						}
+						if (string.regionMatches(pos, substr, 0, len)) {
+							pos += len;
+						} else {
+							return false;
+						}
+					}
+				} else /* last substr */ {
+					if (substr == null) /* * */ {
+						return true;
+					}
+					/* xxx */
+					if (debug) {
+						Debug.println("regionMatches(" + pos + "," + substr + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					return string.endsWith(substr);
+				}
+			}
+			return true;
+		}
+
+		@Override
+		StringBuilder normalize(StringBuilder sb) {
+			sb.append('(').append(attr).append('=');
+			return value(sb).append(')');
+		}
+
+		private StringBuilder value(StringBuilder sb) {
+			String[] substrings = (String[]) value;
+			for (String substr : substrings) {
+				if (substr == null) /* * */ {
+					sb.append('*');
+				} else /* xxx */ {
+					encodeValue(sb, substr);
+				}
+			}
+			return sb;
+		}
+
+		@Override
+		void addAttributes(Map<String, String> attributes, Map<String, Range> versionAttrs, boolean not) {
+			attributes.put(attr, value(new StringBuilder()).toString());
+		}
+	}
+
+	static class Equal extends Item {
+		Equal(String attr, Object value, boolean debug) {
+			super(attr, value, debug);
+		}
+
+		@Override
+		String operation() {
+			return "EQUAL"; //$NON-NLS-1$
+		}
+
+		@Override
+		boolean compare_String(String string, Object value2) {
+			return string.equals(value2);
+		}
+
+		@Override
+		boolean compare_Version(Version value1, Object value2) {
 			try {
-				constructor = target.getConstructor(String.class);
-			} catch (NoSuchMethodException e) {
-				break;
+				Version version2 = Version.valueOf((String) value2);
+				return value1.compareTo(version2) == 0;
+			} catch (Exception e) {
+				// if the valueOf or compareTo method throws an exception
+				return false;
 			}
-			setAccessible(constructor);
+		}
+
+		@Override
+		boolean compare_Boolean(boolean boolval, Object value2) {
+			return boolval == Boolean.valueOf(((String) value2).trim()).booleanValue();
+		}
+
+		@Override
+		boolean compare_Byte(byte byteval, Object value2) {
 			try {
-				return constructor.newInstance(value2.trim());
-			} catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
-				return null;
+				return byteval == Byte.parseByte(((String) value2).trim());
+			} catch (IllegalArgumentException e) {
+				return false;
 			}
-		} while (false);
+		}
 
-		return null;
+		@Override
+		boolean compare_Character(char charval, Object value2) {
+			try {
+				return charval == ((String) value2).charAt(0);
+			} catch (IndexOutOfBoundsException e) {
+				return false;
+			}
+		}
+
+		@Override
+		boolean compare_Double(double doubleval, Object value2) {
+			double doubleval2;
+			try {
+				doubleval2 = Double.parseDouble(((String) value2).trim());
+			} catch (IllegalArgumentException e) {
+				return false;
+			}
+			return Double.compare(doubleval, doubleval2) == 0;
+		}
+
+		@Override
+		boolean compare_Float(float floatval, Object value2) {
+			float floatval2;
+			try {
+				floatval2 = Float.parseFloat(((String) value2).trim());
+			} catch (IllegalArgumentException e) {
+				return false;
+			}
+			return Float.compare(floatval, floatval2) == 0;
+		}
+
+		@Override
+		boolean compare_Integer(int intval, Object value2) {
+			try {
+				return intval == Integer.parseInt(((String) value2).trim());
+			} catch (IllegalArgumentException e) {
+				return false;
+			}
+		}
+
+		@Override
+		boolean compare_Long(long longval, Object value2) {
+			try {
+				return longval == Long.parseLong(((String) value2).trim());
+			} catch (IllegalArgumentException e) {
+				return false;
+			}
+		}
+
+		@Override
+		boolean compare_Short(short shortval, Object value2) {
+			try {
+				return shortval == Short.parseShort(((String) value2).trim());
+			} catch (IllegalArgumentException e) {
+				return false;
+			}
+		}
+
+		@Override
+		boolean compare_Comparable(Comparable<Object> value1, Object value2) {
+			value2 = valueOf(value1.getClass(), (String) value2);
+			if (value2 == null) {
+				return false;
+			}
+			try {
+				return value1.compareTo(value2) == 0;
+			} catch (Exception e) {
+				// if the compareTo method throws an exception; return false
+				return false;
+			}
+		}
+
+		@Override
+		boolean compare_Unknown(Object value1, Object value2) {
+			value2 = valueOf(value1.getClass(), (String) value2);
+			if (value2 == null) {
+				return false;
+			}
+			try {
+				return value1.equals(value2);
+			} catch (Exception e) {
+				// if the equals method throws an exception; return false
+				return false;
+			}
+		}
+
+		@Override
+		StringBuilder normalize(StringBuilder sb) {
+			sb.append('(').append(attr).append('=');
+			return encodeValue(sb, (String) value).append(')');
+		}
+
+		@Override
+		public String getPrimaryKeyValue(String primaryKey) {
+			if (attr.equalsIgnoreCase(primaryKey) && (value instanceof String)) {
+				return (String) value;
+			}
+			return null;
+		}
+
+		@Override
+		void addAttributes(Map<String, String> attributes, Map<String, Range> versionAttrs, boolean not) {
+			if (!versionAttrs.containsKey(attr)) {
+				attributes.put(attr, (String) value);
+			} else {
+				// this is an exact range e.g. [value,value]
+				Range currentRange = versionAttrs.get(attr);
+				if (currentRange != null) {
+					if (not) {
+						// this is an expanded form of the filter, e.g.:
+						// [1.0,2.0) -> (&(version>=1.0)(version<=2.0)(!(version=2.0)))
+						currentRange.addExclude(Version.valueOf((String) value));
+					} else {
+						throw new IllegalStateException("Invalid range for: " + attr); //$NON-NLS-1$
+					}
+				} else {
+					currentRange = new Range();
+					Version version = Version.valueOf((String) value);
+					currentRange.setLeft('[', version);
+					currentRange.setRight(']', version);
+					versionAttrs.put(attr, currentRange);
+				}
+			}
+		}
 	}
 
-	private static void setAccessible(AccessibleObject accessible) {
-		if (!accessible.isAccessible()) {
-			AccessController.doPrivileged(new SetAccessibleAction(accessible));
+	static final class Less extends Equal {
+		Less(String attr, Object value, boolean debug) {
+			super(attr, value, debug);
+		}
+
+		@Override
+		String operation() {
+			return "LESS"; //$NON-NLS-1$
+		}
+
+		@Override
+		boolean compare_String(String string, Object value2) {
+			return string.compareTo((String) value2) <= 0;
+		}
+
+		@Override
+		boolean compare_Version(Version value1, Object value2) {
+			try {
+				Version version2 = Version.valueOf((String) value2);
+				return value1.compareTo(version2) <= 0;
+			} catch (Exception e) {
+				// if the valueOf or compareTo method throws an exception
+				return false;
+			}
+		}
+
+		@Override
+		boolean compare_Byte(byte byteval, Object value2) {
+			try {
+				return byteval <= Byte.parseByte(((String) value2).trim());
+			} catch (IllegalArgumentException e) {
+				return false;
+			}
+		}
+
+		@Override
+		boolean compare_Character(char charval, Object value2) {
+			try {
+				return charval <= ((String) value2).charAt(0);
+			} catch (IndexOutOfBoundsException e) {
+				return false;
+			}
+		}
+
+		@Override
+		boolean compare_Double(double doubleval, Object value2) {
+			double doubleval2;
+			try {
+				doubleval2 = Double.parseDouble(((String) value2).trim());
+			} catch (IllegalArgumentException e) {
+				return false;
+			}
+			return Double.compare(doubleval, doubleval2) <= 0;
+		}
+
+		@Override
+		boolean compare_Float(float floatval, Object value2) {
+			float floatval2;
+			try {
+				floatval2 = Float.parseFloat(((String) value2).trim());
+			} catch (IllegalArgumentException e) {
+				return false;
+			}
+			return Float.compare(floatval, floatval2) <= 0;
+		}
+
+		@Override
+		boolean compare_Integer(int intval, Object value2) {
+			try {
+				return intval <= Integer.parseInt(((String) value2).trim());
+			} catch (IllegalArgumentException e) {
+				return false;
+			}
+		}
+
+		@Override
+		boolean compare_Long(long longval, Object value2) {
+			try {
+				return longval <= Long.parseLong(((String) value2).trim());
+			} catch (IllegalArgumentException e) {
+				return false;
+			}
+		}
+
+		@Override
+		boolean compare_Short(short shortval, Object value2) {
+			try {
+				return shortval <= Short.parseShort(((String) value2).trim());
+			} catch (IllegalArgumentException e) {
+				return false;
+			}
+		}
+
+		@Override
+		boolean compare_Comparable(Comparable<Object> value1, Object value2) {
+			value2 = valueOf(value1.getClass(), (String) value2);
+			if (value2 == null) {
+				return false;
+			}
+			try {
+				return value1.compareTo(value2) <= 0;
+			} catch (Exception e) {
+				// if the compareTo method throws an exception; return false
+				return false;
+			}
+		}
+
+		@Override
+		StringBuilder normalize(StringBuilder sb) {
+			sb.append('(').append(attr).append('<').append('=');
+			return encodeValue(sb, (String) value).append(')');
+		}
+
+		@Override
+		public String getPrimaryKeyValue(String primaryKey) {
+			return null;
+		}
+
+		@Override
+		public Map<String, String> getStandardOSGiAttributes(String... versions) {
+			throw new IllegalArgumentException("Invalid filter for standard OSGi Attributes: " + operation()); //$NON-NLS-1$
+		}
+
+		@Override
+		void addAttributes(Map<String, String> attributes, Map<String, Range> versionAttrs, boolean not) {
+			if (!versionAttrs.containsKey(attr)) {
+				throw new IllegalStateException("Invalid attribute: " + attr); //$NON-NLS-1$
+			}
+			Range currentRange = versionAttrs.get(attr);
+			if (currentRange == null) {
+				currentRange = new Range();
+				versionAttrs.put(attr, currentRange);
+			}
+			if (not) {
+				// this must be a range start "(value"
+				if (!currentRange.setLeft('(', Version.valueOf((String) value))) {
+					throw new IllegalStateException("range start is already processed for attribute: " + attr); //$NON-NLS-1$
+				}
+			} else {
+				// this must be a range end "value]"
+				if (!currentRange.setRight(']', Version.valueOf((String) value))) {
+					throw new IllegalStateException("range end is already processed for attribute: " + attr); //$NON-NLS-1$
+				}
+			}
 		}
 	}
 
-	private boolean compare_Version(int operation, Version value1, Object value2) {
-		if (operation == SUBSTRING) {
-			if (debug) {
-				Debug.println("SUBSTRING(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}
-			return false;
+	static final class Greater extends Equal {
+		Greater(String attr, Object value, boolean debug) {
+			super(attr, value, debug);
 		}
-		try {
-			Version version = Version.valueOf(((String) value2).trim());
 
-			switch (operation) {
-				case EQUAL : {
-					if (debug) {
-						Debug.println("EQUAL(" + value1 + "," + value + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
-					return value1.equals(version);
+		@Override
+		String operation() {
+			return "GREATER"; //$NON-NLS-1$
+		}
+
+		@Override
+		boolean compare_String(String string, Object value2) {
+			return string.compareTo((String) value2) >= 0;
+		}
+
+		@Override
+		boolean compare_Version(Version value1, Object value2) {
+			try {
+				Version version2 = Version.valueOf((String) value2);
+				return value1.compareTo(version2) >= 0;
+			} catch (Exception e) {
+				// if the valueOf or compareTo method throws an exception
+				return false;
+			}
+		}
+
+		@Override
+		boolean compare_Byte(byte byteval, Object value2) {
+			try {
+				return byteval >= Byte.parseByte(((String) value2).trim());
+			} catch (IllegalArgumentException e) {
+				return false;
+			}
+		}
+
+		@Override
+		boolean compare_Character(char charval, Object value2) {
+			try {
+				return charval >= ((String) value2).charAt(0);
+			} catch (IndexOutOfBoundsException e) {
+				return false;
+			}
+		}
+
+		@Override
+		boolean compare_Double(double doubleval, Object value2) {
+			double doubleval2;
+			try {
+				doubleval2 = Double.parseDouble(((String) value2).trim());
+			} catch (IllegalArgumentException e) {
+				return false;
+			}
+			return Double.compare(doubleval, doubleval2) >= 0;
+		}
+
+		@Override
+		boolean compare_Float(float floatval, Object value2) {
+			float floatval2;
+			try {
+				floatval2 = Float.parseFloat(((String) value2).trim());
+			} catch (IllegalArgumentException e) {
+				return false;
+			}
+			return Float.compare(floatval, floatval2) >= 0;
+		}
+
+		@Override
+		boolean compare_Integer(int intval, Object value2) {
+			try {
+				return intval >= Integer.parseInt(((String) value2).trim());
+			} catch (IllegalArgumentException e) {
+				return false;
+			}
+		}
+
+		@Override
+		boolean compare_Long(long longval, Object value2) {
+			try {
+				return longval >= Long.parseLong(((String) value2).trim());
+			} catch (IllegalArgumentException e) {
+				return false;
+			}
+		}
+
+		@Override
+		boolean compare_Short(short shortval, Object value2) {
+			try {
+				return shortval >= Short.parseShort(((String) value2).trim());
+			} catch (IllegalArgumentException e) {
+				return false;
+			}
+		}
+
+		@Override
+		boolean compare_Comparable(Comparable<Object> value1, Object value2) {
+			value2 = valueOf(value1.getClass(), (String) value2);
+			if (value2 == null) {
+				return false;
+			}
+			try {
+				return value1.compareTo(value2) >= 0;
+			} catch (Exception e) {
+				// if the compareTo method throws an exception; return false
+				return false;
+			}
+		}
+
+		@Override
+		StringBuilder normalize(StringBuilder sb) {
+			sb.append('(').append(attr).append('>').append('=');
+			return encodeValue(sb, (String) value).append(')');
+		}
+
+		@Override
+		public String getPrimaryKeyValue(String primaryKey) {
+			return null;
+		}
+
+		@Override
+		public Map<String, String> getStandardOSGiAttributes(String... versions) {
+			throw new IllegalArgumentException("Invalid filter for standard OSGi Attributes: " + operation()); //$NON-NLS-1$
+		}
+
+		@Override
+		void addAttributes(Map<String, String> attributes, Map<String, Range> versionAttrs, boolean not) {
+			if (!versionAttrs.containsKey(attr)) {
+				throw new IllegalStateException("Invalid attribute: " + attr); //$NON-NLS-1$
+			}
+			Range currentRange = versionAttrs.get(attr);
+			if (currentRange == null) {
+				currentRange = new Range();
+				versionAttrs.put(attr, currentRange);
+			}
+			if (not) {
+				// this must be a range end "value)"
+				if (!currentRange.setRight(')', Version.valueOf((String) value))) {
+					throw new IllegalStateException("range end is already processed for attribute: " + attr); //$NON-NLS-1$
 				}
-				case APPROX : {
-					if (debug) {
-						Debug.println("APPROX(" + value1 + "," + value + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
-					return value1.equals(version);
-				}
-				case GREATER : {
-					if (debug) {
-						Debug.println("GREATER(" + value1 + "," + value + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
-					return value1.compareTo(version) >= 0;
-				}
-				case LESS : {
-					if (debug) {
-						Debug.println("LESS(" + value1 + "," + value + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
-					return value1.compareTo(version) <= 0;
+			} else {
+				// this must be a range start "[value"
+				if (!currentRange.setLeft('[', Version.valueOf((String) value))) {
+					throw new IllegalStateException("range start is already processed for attribute: " + attr); //$NON-NLS-1$
 				}
 			}
-		} catch (Exception e) {
-			// if the valueOf or compareTo method throws an exception
-			return false;
 		}
-		return false;
 	}
 
-	private boolean compare_Comparable(int operation, Comparable<Object> value1, Object value2) {
-		if (operation == SUBSTRING) {
-			if (debug) {
-				Debug.println("SUBSTRING(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	static final class Approx extends Equal {
+		Approx(String attr, Object value, boolean debug) {
+			super(attr, value, debug);
+		}
+
+		@Override
+		String operation() {
+			return "APPROX"; //$NON-NLS-1$
+		}
+
+		@Override
+		boolean compare_String(String string, Object value2) {
+			string = approxString(string);
+			String string2 = approxString((String) value2);
+			return string.equalsIgnoreCase(string2);
+		}
+
+		@Override
+		boolean compare_Character(char charval, Object value2) {
+			char charval2;
+			try {
+				charval2 = ((String) value2).charAt(0);
+			} catch (IndexOutOfBoundsException e) {
+				return false;
 			}
-			return false;
-		}
-		value2 = valueOf(value1.getClass(), (String) value2);
-		if (value2 == null) {
-			return false;
+			return (charval == charval2) || (Character.toUpperCase(charval) == Character.toUpperCase(charval2)) || (Character.toLowerCase(charval) == Character.toLowerCase(charval2));
 		}
 
-		try {
-			switch (operation) {
-				case EQUAL : {
-					if (debug) {
-						Debug.println("EQUAL(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
-					return value1.compareTo(value2) == 0;
-				}
-				case APPROX : {
-					if (debug) {
-						Debug.println("APPROX(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
-					return value1.compareTo(value2) == 0;
-				}
-				case GREATER : {
-					if (debug) {
-						Debug.println("GREATER(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
-					return value1.compareTo(value2) >= 0;
-				}
-				case LESS : {
-					if (debug) {
-						Debug.println("LESS(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
-					return value1.compareTo(value2) <= 0;
-				}
-			}
-		} catch (Exception e) {
-			// if the compareTo method throws an exception; return false
-			return false;
-		}
-		return false;
-	}
-
-	private boolean compare_Unknown(int operation, Object value1, Object value2) { //RFC 59
-		if (operation == SUBSTRING) {
-			if (debug) {
-				Debug.println("SUBSTRING(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}
-			return false;
-		}
-		value2 = valueOf(value1.getClass(), (String) value2);
-		if (value2 == null) {
-			return false;
+		@Override
+		StringBuilder normalize(StringBuilder sb) {
+			sb.append('(').append(attr).append('~').append('=');
+			return encodeValue(sb, approxString((String) value)).append(')');
 		}
 
-		try {
-			switch (operation) {
-				case EQUAL : {
-					if (debug) {
-						Debug.println("EQUAL(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
-					return value1.equals(value2);
+		/**
+		 * Map a string for an APPROX (~=) comparison. This implementation
+		 * removes white spaces. This is the minimum implementation allowed by
+		 * the OSGi spec.
+		 * 
+		 * @param input Input string.
+		 * @return String ready for APPROX comparison.
+		 */
+		static String approxString(String input) {
+			boolean changed = false;
+			char[] output = input.toCharArray();
+			int cursor = 0;
+			for (char c : output) {
+				if (Character.isWhitespace(c)) {
+					changed = true;
+					continue;
 				}
-				case APPROX : {
-					if (debug) {
-						Debug.println("APPROX(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
-					return value1.equals(value2);
-				}
-				case GREATER : {
-					if (debug) {
-						Debug.println("GREATER(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
-					return value1.equals(value2);
-				}
-				case LESS : {
-					if (debug) {
-						Debug.println("LESS(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
-					return value1.equals(value2);
-				}
-			}
-		} catch (Exception e) {
-			// if the equals method throws an exception; return false
-			return false;
-		}
 
-		return false;
-	}
-
-	/**
-	 * Map a string for an APPROX (~=) comparison.
-	 *
-	 * This implementation removes white spaces.
-	 * This is the minimum implementation allowed by
-	 * the OSGi spec.
-	 *
-	 * @param input Input string.
-	 * @return String ready for APPROX comparison.
-	 */
-	private static String approxString(String input) {
-		boolean changed = false;
-		char[] output = input.toCharArray();
-		int cursor = 0;
-		for (char c : output) {
-			if (Character.isWhitespace(c)) {
-				changed = true;
-				continue;
+				output[cursor] = c;
+				cursor++;
 			}
 
-			output[cursor] = c;
-			cursor++;
+			return changed ? new String(output, 0, cursor) : input;
 		}
 
-		return changed ? new String(output, 0, cursor) : input;
+		@Override
+		public String getPrimaryKeyValue(String primaryKey) {
+			return null;
+		}
+
+		@Override
+		public Map<String, String> getStandardOSGiAttributes(String... versions) {
+			throw new IllegalArgumentException("Invalid filter for standard OSGi Attributes: " + operation()); //$NON-NLS-1$
+		}
 	}
 
 	/**
@@ -1406,28 +1469,10 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 		// (primaryKey=org.acme.*) NOT OK
 		// (|(primaryKey=org.acme.BrickService)(primaryKey=org.acme.CementService)) NOT OK
 		// (&(primaryKey=org.acme.BrickService)(primaryKey=org.acme.CementService)) OK but only the first objectClass is returned
-		switch (op) {
-			case EQUAL :
-				if (attr.equalsIgnoreCase(primaryKey) && (value instanceof String))
-					return (String) value;
-				break;
-			case AND :
-				FilterImpl[] clauses = (FilterImpl[]) value;
-				for (FilterImpl clause : clauses)
-					if (clause.op == EQUAL) {
-						String result = clause.getPrimaryKeyValue(primaryKey);
-						if (result != null)
-							return result;
-					}
-				break;
-		}
 		return null;
 	}
 
 	public List<FilterImpl> getChildren() {
-		if (value instanceof FilterImpl[]) {
-			return new ArrayList<>(Arrays.asList((FilterImpl[]) value));
-		}
 		return Collections.emptyList();
 	}
 
@@ -1438,31 +1483,38 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	public String[] getAttributes() {
 		List<String> results = new ArrayList<>();
 		getAttributesInternal(results);
-		return results.toArray(new String[results.size()]);
+		return results.toArray(new String[0]);
 	}
 
-	private void getAttributesInternal(List<String> results) {
-		if (value instanceof FilterImpl[]) {
-			FilterImpl[] children = (FilterImpl[]) value;
-			for (FilterImpl child : children)
-				child.getAttributesInternal(results);
-			return;
-		} else if (value instanceof FilterImpl) {
-			// The NOT operation only has one child filter (bug 188075)
-			FilterImpl child = ((FilterImpl) value);
-			child.getAttributesInternal(results);
-			return;
+	abstract void getAttributesInternal(List<String> results);
+
+	public Map<String, String> getStandardOSGiAttributes(String... versions) {
+		Map<String, String> result = new HashMap<>();
+		Map<String, Range> versionAttrs = new HashMap<>();
+		if (versions != null) {
+			for (String versionAttr : versions) {
+				versionAttrs.put(versionAttr, null);
+			}
 		}
-		if (attr != null)
-			results.add(attr);
+		addAttributes(result, versionAttrs, false);
+		for (Map.Entry<String, Range> entry : versionAttrs.entrySet()) {
+			Range range = entry.getValue();
+			if (range != null) {
+				result.put(entry.getKey(), range.toString());
+			}
+		}
+
+		return result;
 	}
+
+	abstract void addAttributes(Map<String, String> attributes, Map<String, Range> versionAttrs, boolean not);
 
 	/**
-	 * Parser class for OSGi filter strings. This class parses
-	 * the complete filter string and builds a tree of Filter
-	 * objects rooted at the parent.
+	 * Parser class for OSGi filter strings. This class parses the complete
+	 * filter string and builds a tree of FilterImpl objects rooted at the
+	 * parent.
 	 */
-	private static class Parser {
+	static private final class Parser {
 		private final boolean debug;
 		private final String filterstring;
 		private final char[] filterChars;
@@ -1552,7 +1604,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 				operands.add(child);
 			}
 
-			return new FilterImpl(FilterImpl.AND, null, operands.toArray(new FilterImpl[operands.size()]), debug);
+			return new FilterImpl.And(operands.toArray(new FilterImpl[0]));
 		}
 
 		private FilterImpl parse_or() throws InvalidSyntaxException {
@@ -1571,7 +1623,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 				operands.add(child);
 			}
 
-			return new FilterImpl(FilterImpl.OR, null, operands.toArray(new FilterImpl[operands.size()]), debug);
+			return new FilterImpl.Or(operands.toArray(new FilterImpl[0]));
 		}
 
 		private FilterImpl parse_not() throws InvalidSyntaxException {
@@ -1585,7 +1637,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 
 			FilterImpl child = parse_filter();
 
-			return new FilterImpl(FilterImpl.NOT, null, child, debug);
+			return new FilterImpl.Not(child);
 		}
 
 		private FilterImpl parse_item() throws InvalidSyntaxException {
@@ -1597,21 +1649,21 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 				case '~' : {
 					if (filterChars[pos + 1] == '=') {
 						pos += 2;
-						return new FilterImpl(FilterImpl.APPROX, attr, parse_value(), debug);
+						return new FilterImpl.Approx(attr, parse_value(), debug);
 					}
 					break;
 				}
 				case '>' : {
 					if (filterChars[pos + 1] == '=') {
 						pos += 2;
-						return new FilterImpl(FilterImpl.GREATER, attr, parse_value(), debug);
+						return new FilterImpl.Greater(attr, parse_value(), debug);
 					}
 					break;
 				}
 				case '<' : {
 					if (filterChars[pos + 1] == '=') {
 						pos += 2;
-						return new FilterImpl(FilterImpl.LESS, attr, parse_value(), debug);
+						return new FilterImpl.Less(attr, parse_value(), debug);
 					}
 					break;
 				}
@@ -1621,7 +1673,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 						pos += 2;
 						skipWhiteSpace();
 						if (filterChars[pos] == ')') {
-							return new FilterImpl(FilterImpl.PRESENT, attr, null, debug);
+							return new FilterImpl.Present(attr, debug);
 						}
 						pos = oldpos;
 					}
@@ -1630,9 +1682,9 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 					Object string = parse_substring();
 
 					if (string instanceof String) {
-						return new FilterImpl(FilterImpl.EQUAL, attr, string, debug);
+						return new FilterImpl.Equal(attr, string, debug);
 					}
-					return new FilterImpl(FilterImpl.SUBSTRING, attr, string, debug);
+					return new FilterImpl.Substring(attr, string, debug);
 				}
 			}
 
@@ -1757,14 +1809,14 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 			}
 
 			if (size == 1) {
-				Object single = operands.get(0);
+				String single = operands.get(0);
 
 				if (single != null) {
 					return single;
 				}
 			}
 
-			return operands.toArray(new String[size]);
+			return operands.toArray(new String[0]);
 		}
 
 		private void skipWhiteSpace() {
@@ -1775,25 +1827,37 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 	}
 
 	/**
-	 * This Map is used for key lookup from a ServiceReference during
-	 * filter evaluation. This Map implementation only supports the get
-	 * operation using a String key as no other operations are used by the
-	 * Filter implementation.
-	 * 
+	 * This Map is used for key lookup during filter
+	 * evaluation. This Map implementation only supports the get operation using
+	 * a String key as no other operations are used by the Filter
+	 * implementation.
 	 */
-	static private final class ServiceReferenceMap extends AbstractMap<String, Object> implements Map<String, Object> {
-		private final ServiceReference<?> reference;
+	private static final class DictionaryMap extends AbstractMap<String, Object> implements Map<String, Object> {
+		static Map<String, ?> asMap(Dictionary<String, ?> dictionary) {
+			if (dictionary instanceof Map) {
+				@SuppressWarnings("unchecked")
+				Map<String, ?> coerced = (Map<String, ?>) dictionary;
+				return coerced;
+			}
+			return new DictionaryMap(dictionary);
+		}
 
-		ServiceReferenceMap(ServiceReference<?> reference) {
-			this.reference = reference;
+		private final Dictionary<String, ?> dictionary;
+
+		/**
+		 * Create a case insensitive map from the specified dictionary.
+		 * 
+		 * @param dictionary
+		 * @throws IllegalArgumentException If {@code dictionary} contains case
+		 *             variants of the same key name.
+		 */
+		DictionaryMap(Dictionary<String, ?> dictionary) {
+			this.dictionary = requireNonNull(dictionary);
 		}
 
 		@Override
 		public Object get(Object key) {
-			if (reference == null) {
-				return null;
-			}
-			return reference.getProperty((String) key);
+			return dictionary.get(key);
 		}
 
 		@Override
@@ -1802,17 +1866,34 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 		}
 	}
 
-	private static class SetAccessibleAction implements PrivilegedAction<Void> {
-		private final AccessibleObject accessible;
+	/**
+	 * This Map is used for key lookup from a ServiceReference during filter
+	 * evaluation. This Map implementation only supports the get operation using
+	 * a String key as no other operations are used by the Filter
+	 * implementation.
+	 */
+	private static final class ServiceReferenceMap extends AbstractMap<String, Object> implements Map<String, Object> {
+		static Map<String, ?> asMap(ServiceReference<?> reference) {
+			if (reference instanceof ServiceReferenceImpl) {
+				return ((ServiceReferenceImpl<?>) reference).getRegistration().getProperties();
+			}
+			return new ServiceReferenceMap(reference);
+		}
 
-		SetAccessibleAction(AccessibleObject accessible) {
-			this.accessible = accessible;
+		private final ServiceReference<?> reference;
+
+		ServiceReferenceMap(ServiceReference<?> reference) {
+			this.reference = requireNonNull(reference);
 		}
 
 		@Override
-		public Void run() {
-			accessible.setAccessible(true);
-			return null;
+		public Object get(Object key) {
+			return reference.getProperty((String) key);
+		}
+
+		@Override
+		public Set<Entry<String, Object>> entrySet() {
+			throw new UnsupportedOperationException();
 		}
 	}
 
@@ -1854,107 +1935,4 @@ public class FilterImpl implements Filter /* since Framework 1.1 */ {
 		}
 	}
 
-	public Map<String, String> getStandardOSGiAttributes(String... versions) {
-		if (op != AND && op != EQUAL && op != SUBSTRING && op != PRESENT)
-			throw new IllegalArgumentException("Invalid filter for Starndard OSGi Attributes: " + op); //$NON-NLS-1$
-		Map<String, String> result = new HashMap<>();
-		Map<String, Range> versionAttrs = new HashMap<>();
-		if (versions != null) {
-			for (String versionAttr : versions) {
-				versionAttrs.put(versionAttr, null);
-			}
-		}
-		addAttributes(result, versionAttrs, false);
-		for (Map.Entry<String, Range> entry : versionAttrs.entrySet()) {
-			Range range = entry.getValue();
-			if (range != null) {
-				result.put(entry.getKey(), range.toString());
-			}
-		}
-
-		return result;
-	}
-
-	private void addAttributes(Map<String, String> attributes, Map<String, Range> versionAttrs, boolean not) {
-		if (op == EQUAL) {
-			if (!versionAttrs.containsKey(attr)) {
-				attributes.put(attr, (String) value);
-			} else {
-				// this is an exact range e.g. [value,value]
-				Range currentRange = versionAttrs.get(attr);
-				if (currentRange != null) {
-					if (not) {
-						// this is an expanded form of the filter, e.g.:
-						// [1.0,2.0) -> (&(version>=1.0)(version<=2.0)(!(version=2.0)))
-						currentRange.addExclude(new Version((String) value));
-					} else {
-						throw new IllegalStateException("Invalid range for: " + attr); //$NON-NLS-1$
-					}
-				} else {
-					currentRange = new Range();
-					Version version = new Version((String) value);
-					currentRange.setLeft('[', version);
-					currentRange.setRight(']', version);
-					versionAttrs.put(attr, currentRange);
-				}
-			}
-		} else if (op == SUBSTRING || op == PRESENT) {
-			if (value == null) {
-				attributes.put(attr, "*"); //$NON-NLS-1$
-			} else {
-				StringBuilder builder = new StringBuilder();
-				for (String component : (String[]) value) {
-					if (component == null) {
-						builder.append('*');
-					} else {
-						builder.append(component);
-					}
-				}
-				attributes.put(attr, builder.toString());
-			}
-
-		} else if (op == LESS) {
-			if (!versionAttrs.containsKey(attr))
-				throw new IllegalStateException("Invalid attribute: " + attr); //$NON-NLS-1$
-			Range currentRange = versionAttrs.get(attr);
-			if (currentRange == null) {
-				currentRange = new Range();
-				versionAttrs.put(attr, currentRange);
-			}
-			if (not) {
-				// this must be a range start "(value"
-				if (!currentRange.setLeft('(', new Version((String) value)))
-					throw new IllegalStateException("range start is already processed for attribute: " + attr); //$NON-NLS-1$
-			} else {
-				// this must be a range end "value]"
-				if (!currentRange.setRight(']', new Version((String) value)))
-					throw new IllegalStateException("range end is already processed for attribute: " + attr); //$NON-NLS-1$
-			}
-		} else if (op == GREATER) {
-			if (!versionAttrs.containsKey(attr))
-				throw new IllegalStateException("Invalid attribute: " + attr); //$NON-NLS-1$
-			Range currentRange = versionAttrs.get(attr);
-			if (currentRange == null) {
-				currentRange = new Range();
-				versionAttrs.put(attr, currentRange);
-			}
-			if (not) {
-				// this must be a range end "value)"
-				if (!currentRange.setRight(')', new Version((String) value)))
-					throw new IllegalStateException("range end is already processed for attribute: " + attr); //$NON-NLS-1$
-			} else {
-				// this must be a range start "[value"
-				if (!currentRange.setLeft('[', new Version((String) value)))
-					throw new IllegalStateException("range start is already processed for attribute: " + attr); //$NON-NLS-1$
-			}
-		} else if (op == AND) {
-			for (FilterImpl component : (FilterImpl[]) value) {
-				component.addAttributes(attributes, versionAttrs, false);
-			}
-		} else if (op == NOT) {
-			((FilterImpl) value).addAttributes(attributes, versionAttrs, true);
-		} else {
-			throw new IllegalStateException("Invalid filter for standard OSGi requirements: " + op); //$NON-NLS-1$
-		}
-	}
 }
