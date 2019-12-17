@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.storage.BundleInfo;
@@ -124,6 +125,10 @@ public class ConnectBundleFile extends CloseableBundleFile<ConnectEntry> {
 	@Override
 	protected InputStream doGetInputStream(ConnectEntry entry) throws IOException {
 		return entry.getInputStream();
+	}
+
+	public Map<String, String> getConnectHeaders() {
+		return content.getHeaders().orElse(null);
 	}
 
 	Optional<ClassLoader> getClassLoader() {

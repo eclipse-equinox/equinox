@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import static org.junit.Assert.assertNotEquals;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -24,12 +26,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
@@ -75,9 +79,16 @@ public class ConnectTests extends AbstractBundleTests {
 	}
 
 	void doTestConnect(ConnectFramework connectFactory, Map<String, String> fwkConfig, Consumer<Framework> test) {
+		doTestConnect(connectFactory, fwkConfig, test, false);
+	}
+
+	void doTestConnect(ConnectFramework connectFactory, Map<String, String> fwkConfig, Consumer<Framework> test, boolean enableRuntimeVerification) {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		config.mkdirs();
 		fwkConfig.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		if (enableRuntimeVerification) {
+			fwkConfig.put("osgi.signedcontent.support", "runtime");
+		}
 		ConnectFrameworkFactory fwkFactory = new EquinoxFactory();
 		Framework framework = fwkFactory.newFramework(fwkConfig, connectFactory);
 		boolean passed = false;
@@ -664,6 +675,56 @@ public class ConnectTests extends AbstractBundleTests {
 		});
 	}
 
+	public void testConnectBundleHeaders() throws IOException {
+		doTestConnectBundleHeaders(false, false);
+		doTestConnectBundleHeaders(true, false);
+		doTestConnectBundleHeaders(false, true);
+		doTestConnectBundleHeaders(true, true);
+	}
+
+	void doTestConnectBundleHeaders(boolean withSignedHook, boolean withManifest) throws IOException {
+		final String NAME1 = "bundle1";
+		final String NAME2 = "bundle2";
+		TestCountingConnectFramework connectFactory = new TestCountingConnectFramework();
+		TestConnectModule m = withManifest ? createSimpleManifestModule(NAME1) : createSimpleHeadersModule(NAME1);
+		connectFactory.setModule(NAME1, m);
+		doTestConnect(connectFactory, new HashMap<>(), (f) -> {
+			try {
+				f.start();
+				Bundle b = f.getBundleContext().installBundle(NAME1);
+				Dictionary<String, String> headers1 = b.getHeaders();
+				assertEquals("Wrong name.", NAME1, b.getSymbolicName());
+				if (withManifest) {
+					assertEquals("Wrong symbolic name header.", NAME1, headers1.get(Constants.BUNDLE_SYMBOLICNAME));
+				} else {
+					checkHeaders(m.getContent().getHeaders().get(), headers1);
+				}
+				// set the new content 
+				m.setContent(withManifest ? createSimpleManifestContent(NAME2) : createSimpleHeadersContent(NAME2));
+				b.update();
+				Dictionary<String, String> headers2 = b.getHeaders();
+				assertNotEquals("Headers not updated", headers1, headers2);
+				assertEquals("Wrong name.", NAME2, b.getSymbolicName());
+				if (withManifest) {
+					assertEquals("Wrong symbolic name header.", NAME2, headers2.get(Constants.BUNDLE_SYMBOLICNAME));
+				} else {
+					checkHeaders(m.getContent().getHeaders().get(), headers2);
+				}
+				b.uninstall();
+			} catch (Throwable t) {
+				sneakyThrow(t);
+			}
+		}, withSignedHook);
+	}
+
+	private void checkHeaders(Map<String, String> expected, Dictionary<String, String> actual) {
+		assertEquals("Headers size not equals", expected.size(), actual.size());
+		for (Entry<String, String> entry : expected.entrySet()) {
+			String key = entry.getKey();
+			assertEquals(key + " header value not equal", entry.getValue(), actual.get(key));
+		}
+	}
+
 	void checkEntry(ConnectEntry expected, URL actual, Integer id) throws IOException {
 		assertNotNull("No entry found.", actual);
 		assertEquals("Wrong path.", expected.getName(), actual.getPath().substring(1));
@@ -693,6 +754,10 @@ public class ConnectTests extends AbstractBundleTests {
 	}
 
 	TestConnectModule createSimpleManifestModule(String name) throws IOException {
+		return new TestConnectModule(createSimpleManifestContent(name));
+	}
+
+	TestConnectContent createSimpleManifestContent(String name) throws IOException {
 		Manifest manifest = new Manifest();
 		Attributes headers = manifest.getMainAttributes();
 		headers.putValue("Manifest-Version", "1");
@@ -703,7 +768,7 @@ public class ConnectTests extends AbstractBundleTests {
 		manifest.write(manifestBytes);
 		TestConnectContent c = new TestConnectContent(null, null);
 		addEntry("META-INF/MANIFEST.MF", manifestBytes.toByteArray(), c);
-		return new TestConnectModule(c);
+		return c;
 	}
 
 	TestConnectModule createAdvancedModule(Integer id, boolean provideLoader) {

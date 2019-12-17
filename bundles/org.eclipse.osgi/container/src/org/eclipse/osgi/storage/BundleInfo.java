@@ -38,6 +38,7 @@ import org.eclipse.osgi.container.ModuleRevisionBuilder;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
 import org.eclipse.osgi.framework.util.ThreadInfoReport;
+import org.eclipse.osgi.internal.connect.ConnectBundleFile;
 import org.eclipse.osgi.internal.container.LockSet;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
@@ -49,6 +50,7 @@ import org.eclipse.osgi.storage.ContentProvider.Type;
 import org.eclipse.osgi.storage.Storage.StorageException;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
+import org.eclipse.osgi.storage.bundlefile.BundleFileWrapperChain;
 import org.eclipse.osgi.storage.url.BundleResourceHandler;
 import org.eclipse.osgi.storage.url.bundleentry.Handler;
 import org.eclipse.osgi.util.ManifestElement;
@@ -128,7 +130,19 @@ public final class BundleInfo {
 		Map<String, String> getRawHeaders() {
 			synchronized (genMonitor) {
 				if (rawHeaders == null) {
-					BundleEntry manifest = getBundleFile().getEntry(OSGI_BUNDLE_MANIFEST);
+					BundleFile bFile = getBundleFile();
+
+					if (this.contentType == Type.CONNECT) {
+						if (bFile instanceof BundleFileWrapperChain) {
+							bFile = ((BundleFileWrapperChain) bFile).getWrappedType(ConnectBundleFile.class);
+						}
+						rawHeaders = ((ConnectBundleFile) bFile).getConnectHeaders();
+						if (rawHeaders != null) {
+							return rawHeaders;
+						}
+					}
+
+					BundleEntry manifest = bFile.getEntry(OSGI_BUNDLE_MANIFEST);
 					if (manifest == null) {
 						rawHeaders = Collections.emptyMap();
 					} else {
