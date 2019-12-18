@@ -14,10 +14,8 @@
 
 package org.eclipse.osgi.internal.framework;
 
-import static java.lang.invoke.MethodHandles.publicLookup;
 import static java.util.Objects.requireNonNull;
 
-import java.lang.invoke.MethodHandle;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -787,8 +785,7 @@ public abstract class FilterImpl implements Filter {
 				if (Modifier.isStatic(method.getModifiers()) && target.isAssignableFrom(method.getReturnType())) {
 					setAccessible(method);
 					try {
-						MethodHandle mh = publicLookup().unreflect(method);
-						return mh.invoke(value2.trim());
+						return method.invoke(null, value2.trim());
 					} catch (Error e) {
 						throw e;
 					} catch (Throwable e) {
@@ -806,8 +803,7 @@ public abstract class FilterImpl implements Filter {
 				}
 				setAccessible(constructor);
 				try {
-					MethodHandle mh = publicLookup().unreflectConstructor(constructor);
-					return mh.invoke(value2.trim());
+					return constructor.newInstance(value2.trim());
 				} catch (Error e) {
 					throw e;
 				} catch (Throwable e) {
