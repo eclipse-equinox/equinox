@@ -133,12 +133,13 @@ public final class BundleInfo {
 					BundleFile bFile = getBundleFile();
 
 					if (this.contentType == Type.CONNECT) {
-						if (bFile instanceof BundleFileWrapperChain) {
-							bFile = ((BundleFileWrapperChain) bFile).getWrappedType(ConnectBundleFile.class);
-						}
-						rawHeaders = ((ConnectBundleFile) bFile).getConnectHeaders();
-						if (rawHeaders != null) {
-							return rawHeaders;
+						ConnectBundleFile connectContent = bFile instanceof BundleFileWrapperChain ? //
+								((BundleFileWrapperChain) bFile).getWrappedType(ConnectBundleFile.class) : //
+								(ConnectBundleFile) bFile;
+
+						Map<String, String> connectHeaders = connectContent.getConnectHeaders();
+						if (connectHeaders != null) {
+							return rawHeaders = connectHeaders;
 						}
 					}
 
