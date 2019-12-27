@@ -28,9 +28,9 @@ import org.eclipse.osgi.util.NLS;
 public final class SafeRunner {
 
 	/**
-	 * Runs the given runnable in a protected mode.   Exceptions
+	 * Runs the given runnable in a protected mode. Exceptions
 	 * thrown in the runnable are logged and passed to the runnable's
-	 * exception handler.  Such exceptions are not rethrown by this method.
+	 * exception handler. Such exceptions are not rethrown by this method.
 	 * <p>
 	 * In addition to catching all {@link Exception} types, this method also catches certain {@link Error} 
 	 * types that typically result from programming errors in the code being executed. 
@@ -48,29 +48,66 @@ public final class SafeRunner {
 		}
 	}
 
-	private static void handleException(ISafeRunnable code, Throwable e) {
-		if (!(e instanceof OperationCanceledException)) {
-			// try to obtain the correct plug-in id for the bundle providing the safe runnable 
-			Activator activator = Activator.getDefault();
-			String pluginId = null;
-			if (activator != null)
-				pluginId = activator.getBundleId(code);
-			if (pluginId == null)
-				pluginId = IRuntimeConstants.PI_COMMON;
-			String message = NLS.bind(CommonMessages.meta_pluginProblems, pluginId);
-			IStatus status;
-			if (e instanceof CoreException) {
-				status = new MultiStatus(pluginId, IRuntimeConstants.PLUGIN_ERROR, message, e);
-				((MultiStatus) status).merge(((CoreException) e).getStatus());
-			} else {
-				status = new Status(IStatus.ERROR, pluginId, IRuntimeConstants.PLUGIN_ERROR, message, e);
-			}
-			// Make sure user sees the exception: if the log is empty, log the exceptions on stderr 
-			if (!RuntimeLog.isEmpty())
-				RuntimeLog.log(status);
-			else
-				e.printStackTrace();
+	/**
+	 * Runs the given runnable in a protected mode and returns the result given by the runnable. Exceptions
+	 * thrown in the runnable are logged and passed to the runnable's
+	 * exception handler. Such exceptions are not rethrown by this method, instead null is returned.
+	 * <p>
+	 * In addition to catching all {@link Exception} types, this method also catches certain {@link Error}
+	 * types that typically result from programming errors in the code being executed. 
+	 * Severe errors that are not generally safe to catch are not caught by this method.
+	 * </p>
+	 * @param <T> the result type
+	 *
+	 * @param code the runnable to run
+	 * @return the result
+	 *
+	 * @since 3.11
+	 */
+	public static <T> T run(ISafeRunnableWithResult<T> code) {
+		Assert.isNotNull(code);
+		try {
+			return code.runWithResult();
+		} catch (Exception | LinkageError | AssertionError e) {
+			handleException(code, e);
+			return null;
 		}
-		code.handleException(e);
+	}
+
+	private static void handleException(ISafeRunnable code, Throwable exception) {
+		if (!(exception instanceof OperationCanceledException)) {
+			String pluginId = getBundleIdOfSafeRunnable(code);
+			IStatus status = convertToStatus(exception, pluginId);
+			makeSureUserSeesException(exception, status);
+		}
+		code.handleException(exception);
+	}
+
+	private static void makeSureUserSeesException(Throwable exception, IStatus status) {
+		if (RuntimeLog.isEmpty()) {
+			exception.printStackTrace();
+		} else {
+			RuntimeLog.log(status);
+		}
+	}
+
+	private static String getBundleIdOfSafeRunnable(ISafeRunnable code) {
+		Activator activator = Activator.getDefault();
+		String pluginId = null;
+		if (activator != null)
+			pluginId = activator.getBundleId(code);
+		if (pluginId == null)
+			return IRuntimeConstants.PI_COMMON;
+		return pluginId;
+	}
+
+	private static IStatus convertToStatus(Throwable exception, String pluginId) {
+		String message = NLS.bind(CommonMessages.meta_pluginProblems, pluginId);
+		if (exception instanceof CoreException) {
+			MultiStatus status = new MultiStatus(pluginId, IRuntimeConstants.PLUGIN_ERROR, message, exception);
+			status.merge(((CoreException) exception).getStatus());
+			return status;
+		}
+		return new Status(IStatus.ERROR, pluginId, IRuntimeConstants.PLUGIN_ERROR, message, exception);
 	}
 }
