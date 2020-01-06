@@ -26,18 +26,18 @@ import java.security.spec.DSAPublicKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
-import org.apache.mina.util.Base64;
 
 /**
  * Reader for 'authorized_keys' file as typically found on Unix systems.
  */
 public class AuthorizedKeys {
 
-	public static enum KeyType {
+	public enum KeyType {
 		RSA, DSA
 	}
 
@@ -48,7 +48,7 @@ public class AuthorizedKeys {
 
 		/**
 		 * Creates a new instance.
-		 * 
+		 *
 		 * @param message
 		 * @param cause
 		 */
@@ -86,7 +86,7 @@ public class AuthorizedKeys {
 
 	/**
 	 * Creates a new instance.
-	 * 
+	 *
 	 * @throws FileNotFoundException
 	 */
 	public AuthorizedKeys(final String authorizedKeysFile) throws FileNotFoundException, IOException {
@@ -122,7 +122,7 @@ public class AuthorizedKeys {
 
 	/**
 	 * Returns the keys.
-	 * 
+	 *
 	 * @return the keys
 	 */
 	public List<PublicKey> getKeys() {
@@ -165,10 +165,10 @@ public class AuthorizedKeys {
 		// key
 		final int keyEndIdx = line.indexOf(' ');
 		if (keyEndIdx != -1) {
-			key = Base64.decodeBase64(asBytes(line.substring(0, keyEndIdx)));
+			key = Base64.getDecoder().decode(asBytes(line.substring(0, keyEndIdx)));
 			line = line.substring(keyEndIdx + 1);
 		} else {
-			key = Base64.decodeBase64(asBytes(line));
+			key = Base64.getDecoder().decode(asBytes(line));
 		}
 
 		// wrap key into byte buffer
