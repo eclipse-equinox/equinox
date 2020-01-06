@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Lazar Kirchev, SAP AG - initial API and implementation
  *******************************************************************************/
@@ -22,13 +22,13 @@ import java.util.Map;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.eclipse.equinox.console.common.ConsoleInputHandler;
+import org.eclipse.equinox.console.common.ConsoleInputScanner;
 import org.eclipse.equinox.console.common.ConsoleInputStream;
 import org.eclipse.equinox.console.common.ConsoleOutputStream;
 import org.eclipse.equinox.console.common.KEYS;
 import org.eclipse.equinox.console.common.terminal.TerminalTypeMappings;
 import org.eclipse.equinox.console.storage.SecureUserStore;
-import org.eclipse.equinox.console.common.ConsoleInputHandler;
-import org.eclipse.equinox.console.common.ConsoleInputScanner;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -44,7 +44,7 @@ public class SshSession extends Thread implements Closeable {
 	private OutputStream out;
 	private TerminalTypeMappings currentMappings;
 	private Map<String, KEYS> currentEscapesToKey;
-	
+
 	private static final String PROMPT = "prompt";
 	private static final String OSGI_PROMPT = "osgi> ";
 	private static final String SCOPE = "SCOPE";
@@ -55,7 +55,7 @@ public class SshSession extends Thread implements Closeable {
 	private static final String DEFAULT_USER = "equinox";
 	private static final String CLOSEABLE = "CLOSEABLE";
 	private static final int ADD_USER_COUNTER_LIMIT = 2;
-	
+
 	public SshSession(CommandProcessor processor, BundleContext context, SshShell sshShell, InputStream in, OutputStream out, TerminalTypeMappings currentMappings, Map<String, KEYS> currentExcapesToKey) {
 		this.processor = processor;
 		this.context = context;
@@ -65,7 +65,7 @@ public class SshSession extends Thread implements Closeable {
 		this.currentMappings = currentMappings;
 		this.currentEscapesToKey = currentExcapesToKey;
 	}
-	
+
 	@Override
 	public void run() {
 		ConsoleInputStream input = new ConsoleInputStream();
@@ -86,29 +86,30 @@ public class SshSession extends Thread implements Closeable {
 		((ConsoleInputScanner)consoleInputHandler.getScanner()).setContext(context);
 		consoleInputHandler.start();
 
-		final CommandSession session;
 		final PrintStream output = new PrintStream(outp);
 
-		session = processor.createSession(inp, output, output);
-		session.put(SCOPE, EQUINOX_SCOPE);
-		session.put(PROMPT, OSGI_PROMPT);
-		session.put(INPUT_SCANNER, consoleInputHandler.getScanner());
-		session.put(SSH_INPUT_SCANNER, inputHandler.getScanner());
-		// Store this closeable object in the session, so that the disconnect command can close it
-		session.put(CLOSEABLE, this);
-		((ConsoleInputScanner)consoleInputHandler.getScanner()).setSession(session);
+		try (CommandSession session = processor.createSession(inp, output, output)) {
+			session.put(SCOPE, EQUINOX_SCOPE);
+			session.put(PROMPT, OSGI_PROMPT);
+			session.put(INPUT_SCANNER, consoleInputHandler.getScanner());
+			session.put(SSH_INPUT_SCANNER, inputHandler.getScanner());
+			// Store this closeable object in the session, so that the disconnect command
+			// can close it
+			session.put(CLOSEABLE, this);
+			((ConsoleInputScanner) consoleInputHandler.getScanner()).setSession(session);
 
-		try {
 			if ("true".equals(context.getProperty(USER_STORAGE_PROPERTY_NAME))) {
 				String[] names = SecureUserStore.getUserNames();
 				for (String name : names) {
-					// if the default user is the only user, request creation of a new user and delete the default
+					// if the default user is the only user, request creation of a new user and
+					// delete the default
 					if (DEFAULT_USER.equals(name)) {
 						if (names.length == 1) {
-							session.getConsole().println("Currently the default user is the only one; since it will be deleted after first login, create a new user:");
-							boolean isUserAdded =false;
+							session.getConsole().println(
+									"Currently the default user is the only one; since it will be deleted after first login, create a new user:");
+							boolean isUserAdded = false;
 							int count = 0;
-							while (!isUserAdded && count < ADD_USER_COUNTER_LIMIT ){
+							while (!isUserAdded && count < ADD_USER_COUNTER_LIMIT) {
 								isUserAdded = ((Boolean) session.execute("addUser")).booleanValue();
 								count++;
 							}
@@ -126,12 +127,10 @@ public class SshSession extends Thread implements Closeable {
 			session.execute("gosh --login --noshutdown");
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			session.close();
 		}
 
 	}
-	
+
 	@Override
 	public void close() throws IOException {
 		this.interrupt();
