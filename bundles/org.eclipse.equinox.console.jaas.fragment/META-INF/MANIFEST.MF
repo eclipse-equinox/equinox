@@ -7,5 +7,5 @@ Bundle-SymbolicName: org.eclipse.equinox.console.jaas.fragment
 Bundle-Version: 1.0.200.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 DynamicImport-Package: org.eclipse.equinox.console.jaas
-Fragment-Host: org.apache.sshd.core;bundle-version="0.5.0"
+Fragment-Host: org.apache.sshd.osgi;bundle-version="2.2.0"
 Automatic-Module-Name: org.eclipse.equinox.console.jaas.fragment
