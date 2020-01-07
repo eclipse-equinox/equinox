@@ -13,10 +13,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests;
 
-import org.eclipse.core.runtime.ISafeRunnable;
-import org.eclipse.core.runtime.ISafeRunnableWithResult;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.*;
 import org.eclipse.core.tests.harness.CoreTest;
 
 /**
@@ -25,36 +22,89 @@ import org.eclipse.core.tests.harness.CoreTest;
 public class SafeRunnerTest extends CoreTest {
 
 	/**
-	 * Ensures that cancellation exceptions are handled
+	 * Ensures that cancelation exceptions are handled
 	 */
-	public void testOperationCanceledExceptionAreHandled() {
+	public void testCancel() {
+		boolean caught = false;
 		try {
-			SafeRunner.run(() -> {
-				throw new OperationCanceledException();
+			SafeRunner.run(new ISafeRunnable() {
+				@Override
+				public void handleException(Throwable exception) {
+				}
+
+				@Override
+				public void run() throws Exception {
+					throw new OperationCanceledException();
+				}
 			});
 		} catch (OperationCanceledException e) {
-			fail("OperationCanceledException unexpectedly caught.", e);
+			caught = true;
 		}
+		assertFalse("1.0", caught);
 	}
 
-	public void testAssertionErrorIsCaught() {
-		assertExceptionHandled(new AssertionError());
+	/**
+	 * Tests that SafeRunner catches the expected exception types.
+	 */
+	public void testCaughtExceptionTypes() {
+		Throwable[] failures = new Throwable[] {new AssertionError(), new LinkageError(), new RuntimeException()};
+		for (int i = 0; i < failures.length; i++) {
+			final Throwable[] handled = new Throwable[1];
+			final Throwable current = failures[i];
+			try {
+				SafeRunner.run(new ISafeRunnable() {
+					@Override
+					public void handleException(Throwable exception) {
+						handled[0] = exception;
+					}
+
+					@Override
+					public void run() throws Exception {
+						if (current instanceof Exception) {
+							throw (Exception) current;
+						} else if (current instanceof Error) {
+							throw (Error) current;
+						}
+					}
+				});
+			} catch (Throwable t) {
+				fail("1." + i, t);
+			}
+			assertEquals("2." + i, current, handled[0]);
+		}
+
 	}
 
-	public void testLinkageErrorIsCaught() {
-		assertExceptionHandled(new LinkageError());
-	}
+	/**
+	 * Tests that SafeRunner re-throws expected exception types.
+	 */
+	public void testThrownExceptionTypes() {
+		//thrown exceptions
+		final Throwable[] thrown = new Throwable[] {new Error(), new OutOfMemoryError()};
+		for (int i = 0; i < thrown.length; i++) {
+			boolean caught = false;
+			final Throwable current = thrown[i];
+			try {
+				SafeRunner.run(new ISafeRunnable() {
+					@Override
+					public void handleException(Throwable exception) {
+					}
 
-	public void testRuntimeExceptionIsCaught() {
-		assertExceptionHandled(new RuntimeException());
-	}
-
-	public void testRethrowsError() {
-		assertExceptionRethrown(new Error());
-	}
-
-	public void testRethrowsOutOfMemoryError() {
-		assertExceptionRethrown(new OutOfMemoryError());
+					@Override
+					public void run() throws Exception {
+						if (current instanceof Exception) {
+							throw (Exception) current;
+						} else if (current instanceof Error) {
+							throw (Error) current;
+						}
+					}
+				});
+			} catch (Throwable t) {
+				assertEquals("1." + i, current, t);
+				caught = true;
+			}
+			assertTrue("2." + i, caught);
+		}
 	}
 
 	public void testNull() {
@@ -62,7 +112,7 @@ public class SafeRunnerTest extends CoreTest {
 			SafeRunner.run(null);
 			fail("1.0");
 		} catch (RuntimeException e) {
-			// expected
+			//expected
 		}
 	}
 
@@ -70,7 +120,7 @@ public class SafeRunnerTest extends CoreTest {
 	 * Ensures that exceptions are propagated when the safe runner re-throws it
 	 */
 	public void testRethrow() {
-		IllegalArgumentException caughtException = null;
+		boolean caught = false;
 		try {
 			SafeRunner.run(new ISafeRunnable() {
 				@Override
@@ -86,64 +136,9 @@ public class SafeRunnerTest extends CoreTest {
 				}
 			});
 		} catch (IllegalArgumentException e) {
-			caughtException = e;
+			caught = true;
 		}
-		assertNotNull("Cathed exception expected.", caughtException);
+		assertTrue("1.0", caught);
 
-	}
-
-	public void testWithResult() {
-		assertEquals("TestRun", SafeRunner.run(() -> "TestRun"));
-	}
-
-	public void testWithResultReturnsNullOnException() {
-		ISafeRunnableWithResult<String> code = () -> {
-			throw new IllegalArgumentException();
-		};
-		assertNull(SafeRunner.run(code));
-	}
-
-	private void assertExceptionRethrown(Throwable current) {
-		Throwable caughtException = null;
-		try {
-			SafeRunner.run(new ISafeRunnable() {
-
-				@Override
-				public void run() throws Exception {
-					if (current instanceof Exception) {
-						throw (Exception) current;
-					} else if (current instanceof Error) {
-						throw (Error) current;
-					}
-				}
-			});
-		} catch (Throwable t) {
-			caughtException = t;
-		}
-		assertEquals("Unexpected exception.", current, caughtException);
-	}
-
-	private void assertExceptionHandled(Throwable throwable) {
-		final Throwable[] handled = new Throwable[1];
-		try {
-			SafeRunner.run(new ISafeRunnable() {
-				@Override
-				public void handleException(Throwable exception) {
-					handled[0] = exception;
-				}
-
-				@Override
-				public void run() throws Exception {
-					if (throwable instanceof Exception) {
-						throw (Exception) throwable;
-					} else if (throwable instanceof Error) {
-						throw (Error) throwable;
-					}
-				}
-			});
-		} catch (Throwable t) {
-			fail("Exception unexpectedly caught.", t);
-		}
-		assertEquals("Unexpected exception.", throwable, handled[0]);
 	}
 }
