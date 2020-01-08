@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2017 IBM Corporation and others.
+ * Copyright (c) 2008, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,7 @@
 package org.eclipse.osgi.internal.permadmin;
 
 import java.io.File;
+import java.io.FilePermission;
 import java.lang.reflect.Constructor;
 import java.security.AccessController;
 import java.security.AllPermission;
@@ -33,19 +34,31 @@ public final class PermissionInfoCollection extends PermissionCollection {
 	static private final Class<?> oneStringClassArray[] = new Class[] {String.class};
 	static private final Class<?> noArgClassArray[] = new Class[] {};
 	static private final Class<?>[][] permClassArrayArgs = new Class[][] {noArgClassArray, oneStringClassArray, twoStringClassArray};
+	static private final String ALL_PERMISSION_NAME = AllPermission.class.getName();
+	static final String FILE_PERMISSION_NAME = FilePermission.class.getName();
+	static final String ALL_FILES = "<<ALL FILES>>"; //$NON-NLS-1$
 
-	/* @GuardedBy(cachedPermisssionCollections) */
+	/* @GuardedBy(cachedPermissionCollections) */
 	private final Map<Class<? extends Permission>, PermissionCollection> cachedPermissionCollections = new HashMap<>();
+	private final Map<BundlePermissions, PermissionCollection> cachedRelativeFilePermissionCollections;
 	private final boolean hasAllPermission;
 	private final PermissionInfo[] permInfos;
 
 	public PermissionInfoCollection(PermissionInfo[] permInfos) {
 		this.permInfos = permInfos;
 		boolean tempAllPermissions = false;
-		for (int i = 0; i < permInfos.length && !tempAllPermissions; i++)
-			if (permInfos[i].getType().equals(AllPermission.class.getName()))
+		boolean allAbsolutePaths = true;
+		for (PermissionInfo info : permInfos) {
+			if (ALL_PERMISSION_NAME.equals(info.getType())) {
 				tempAllPermissions = true;
+			} else if (FILE_PERMISSION_NAME.equals(info.getType())) {
+				if (!(new File(info.getActions()).isAbsolute())) {
+					allAbsolutePaths = false;
+				}
+			}
+		}
 		this.hasAllPermission = tempAllPermissions;
+		this.cachedRelativeFilePermissionCollections = allAbsolutePaths ? null : new HashMap<BundlePermissions, PermissionCollection>();
 		setReadOnly(); // collections are managed with ConditionalPermissionAdmin
 	}
 
@@ -62,13 +75,14 @@ public final class PermissionInfoCollection extends PermissionCollection {
 
 	@Override
 	public boolean implies(Permission perm) {
+		return implies(null, perm);
+	}
+
+	boolean implies(final BundlePermissions bundlePermissions, Permission perm) {
 		if (hasAllPermission)
 			return true;
 		final Class<? extends Permission> permClass = perm.getClass();
-		PermissionCollection collection;
-		synchronized (cachedPermissionCollections) {
-			collection = cachedPermissionCollections.get(permClass);
-		}
+		PermissionCollection collection = getCachedCollection(bundlePermissions, permClass);
 		// must populate the collection outside of the lock to prevent class loader deadlock
 		if (collection == null) {
 			collection = perm.newPermissionCollection();
@@ -80,10 +94,9 @@ public final class PermissionInfoCollection extends PermissionCollection {
 				AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 					@Override
 					public Object run() throws Exception {
-						addPermissions(targetCollection, permClass);
+						addPermissions(bundlePermissions, targetCollection, permClass);
 						return null;
 					}
-
 				});
 
 			} catch (Exception e) {
@@ -92,23 +105,43 @@ public final class PermissionInfoCollection extends PermissionCollection {
 				}
 				throw new SecurityException("Exception creating permissions: " + permClass + ": " + e.getMessage(), e); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			synchronized (cachedPermissionCollections) {
-				// check to see if another thread beat this thread at adding the collection
-				PermissionCollection exists = cachedPermissionCollections.get(permClass);
-				if (exists != null)
-					collection = exists;
-				else
-					cachedPermissionCollections.put(permClass, collection);
-			}
+			collection = cacheCollection(bundlePermissions, permClass, collection);
 		}
 		return collection.implies(perm);
+	}
+
+	PermissionCollection getCachedCollection(BundlePermissions bundlePermissions, Class<? extends Permission> permClass) {
+		synchronized (cachedPermissionCollections) {
+			if (bundlePermissions != null && cachedRelativeFilePermissionCollections != null && FILE_PERMISSION_NAME.equals(permClass.getName())) {
+				return cachedRelativeFilePermissionCollections.get(bundlePermissions);
+			}
+			return cachedPermissionCollections.get(permClass);
+		}
+	}
+
+	private PermissionCollection cacheCollection(BundlePermissions bundlePermissions, Class<? extends Permission> permClass, PermissionCollection collection) {
+		synchronized (cachedPermissionCollections) {
+			// check to see if another thread beat this thread at adding the collection
+			boolean relativeFiles = bundlePermissions != null && cachedRelativeFilePermissionCollections != null && FILE_PERMISSION_NAME.equals(permClass.getName());
+			PermissionCollection exists = relativeFiles ? cachedRelativeFilePermissionCollections.get(bundlePermissions) : cachedPermissionCollections.get(permClass);
+			if (exists != null) {
+				collection = exists;
+			} else {
+				if (relativeFiles) {
+					cachedRelativeFilePermissionCollections.put(bundlePermissions, collection);
+				} else {
+					cachedPermissionCollections.put(permClass, collection);
+				}
+			}
+			return collection;
+		}
 	}
 
 	PermissionInfo[] getPermissionInfos() {
 		return permInfos;
 	}
 
-	void addPermissions(PermissionCollection collection, Class<? extends Permission> permClass) throws Exception {
+	void addPermissions(BundlePermissions bundlePermissions, PermissionCollection collection, Class<? extends Permission> permClass) throws Exception {
 		String permClassName = permClass.getName();
 		Constructor<? extends Permission> constructor = null;
 		int numArgs = -1;
@@ -121,8 +154,9 @@ public final class PermissionInfoCollection extends PermissionCollection {
 				// ignore
 			}
 		}
-		if (constructor == null)
+		if (constructor == null) {
 			throw new NoSuchMethodException(permClass.getName() + ".<init>()"); //$NON-NLS-1$
+		}
 		/*
 		 * TODO: We need to cache the permission constructors to enhance performance (see bug 118813).
 		 */
@@ -135,13 +169,17 @@ public final class PermissionInfoCollection extends PermissionCollection {
 				if (numArgs > 1) {
 					args[1] = permInfo.getActions();
 				}
-				if (permInfo.getType().equals("java.io.FilePermission")) { //$NON-NLS-1$
+				if (permInfo.getType().equals(FILE_PERMISSION_NAME)) {
 					// map FilePermissions for relative names to the bundle's data area
-					if (!args[0].equals("<<ALL FILES>>")) { //$NON-NLS-1$
+					if (!args[0].equals(ALL_FILES)) {
 						File file = new File(args[0]);
 						if (!file.isAbsolute()) { // relative name
-							// TODO need to figure out how to do relative FilePermissions from the dataFile
-							continue;
+							File target = bundlePermissions == null ? null : bundlePermissions.getBundle().getDataFile(permInfo.getName());
+							if (target == null) {
+								// ignore if we cannot find the data area
+								continue;
+							}
+							args[0] = target.getPath();
 						}
 					}
 				}
@@ -153,6 +191,9 @@ public final class PermissionInfoCollection extends PermissionCollection {
 	void clearPermissionCache() {
 		synchronized (cachedPermissionCollections) {
 			cachedPermissionCollections.clear();
+			if (cachedRelativeFilePermissionCollections != null) {
+				cachedRelativeFilePermissionCollections.clear();
+			}
 		}
 	}
 }
