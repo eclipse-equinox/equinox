@@ -62,7 +62,7 @@ public class AbstractRegionSystemTest {
 
 	@Before
 	public void setUp() throws Exception {
-		testsBundle = FrameworkUtil.getBundle(this.getClass());;
+		testsBundle = FrameworkUtil.getBundle(this.getClass());
 		BundleContext context = getContext();
 
 		digraphReference = context.getServiceReference(RegionDigraph.class);
