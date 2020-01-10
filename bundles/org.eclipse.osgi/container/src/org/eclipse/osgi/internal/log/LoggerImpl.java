@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2018 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2020 Cognos Incorporated, IBM Corporation and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which
@@ -298,6 +298,9 @@ public class LoggerImpl implements Logger {
 	}
 
 	private StackTraceElement getLocation() {
+		if (!logServiceImpl.getFactory().captureLogEntryLocation()) {
+			return null;
+		}
 		StackTraceElement[] elements = Thread.currentThread().getStackTrace();
 		if (elements.length == 0) {
 			return null;

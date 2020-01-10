@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2018 IBM Corporation and others.
+ * Copyright (c) 2008, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -68,6 +68,7 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.equinox.log.ExtendedLogReaderService;
 import org.eclipse.equinox.log.ExtendedLogService;
+import org.eclipse.equinox.log.test.TestListener;
 import org.eclipse.equinox.log.test.TestListener2;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.framework.util.FilePath;
@@ -116,6 +117,7 @@ import org.osgi.resource.Requirement;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogLevel;
 import org.osgi.service.log.LogReaderService;
+import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
@@ -1136,7 +1138,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		for (File testBundle : testBundles) {
 			try {
 				systemContext.installBundle("reference:file:///" + testBundle.getAbsolutePath()); //$NON-NLS-1$
-			}catch (BundleException e) {
+			} catch (BundleException e) {
 				fail("Unexpected install error", e); //$NON-NLS-1$
 			}
 		}
@@ -3279,7 +3281,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
-	public static void doLoggingOnMultipleListeners(Equinox equinox) throws InterruptedException {
+	static void doLoggingOnMultipleListeners(Equinox equinox) throws InterruptedException {
 		int listenersSize = 100;
 		int logSize = 10000;
 		BundleContext bc = equinox.getBundleContext();
@@ -3309,6 +3311,46 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 		for (int i = 1; i < listenersSize; i++) {
 			assertTrue(listeners.get(i).getLogs().equals(listeners.get(0).getLogs()));
+		}
+	}
+
+	public void testCaptureLogEntryLocation() throws BundleException, InterruptedException {
+		doTestCaptureLogEntryLocation(true);
+		doTestCaptureLogEntryLocation(false);
+	}
+
+	private void doTestCaptureLogEntryLocation(boolean captureLocation) throws BundleException, InterruptedException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map configuration = new HashMap();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		if (!captureLocation) {
+			// the default is true; only set for false
+			configuration.put(EquinoxConfiguration.PROP_LOG_CAPTURE_ENTRY_LOCATION, Boolean.toString(captureLocation));
+		}
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.start();
+
+			BundleContext bc = equinox.getBundleContext();
+			LogReaderService logReader = bc.getService(bc.getServiceReference(LogReaderService.class));
+			LogService logService = bc.getService(bc.getServiceReference(LogService.class));
+
+			TestListener listener = new TestListener(Constants.SYSTEM_BUNDLE_LOCATION);
+			logReader.addLogListener(listener);
+
+			final String testMsg = "TEST MESSAGE";
+			logService.getLogger(this.getClass()).error(testMsg);
+
+			LogEntry logEntry = listener.getEntryX();
+			assertEquals("Wrong message.", testMsg, logEntry.getMessage());
+			if (captureLocation) {
+				assertNotNull("No location found.", logEntry.getLocation());
+			} else {
+				assertNull("Found location.", logEntry.getLocation());
+			}
+		} finally {
+			equinox.stop();
+			equinox.waitForStop(1000);
 		}
 	}
 

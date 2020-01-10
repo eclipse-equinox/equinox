@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2018 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2020 Cognos Incorporated, IBM Corporation and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which
@@ -37,10 +37,15 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 	private final Permission logPermission = new LogPermission("*", LogPermission.LOG); //$NON-NLS-1$
 	final ExtendedLogReaderServiceFactory logReaderServiceFactory;
 	private final LoggerAdmin loggerAdmin = new EquinoxLoggerAdmin();
+	private final boolean captureLogEntryLocation;
 
-	public ExtendedLogServiceFactory(ExtendedLogReaderServiceFactory logReaderServiceFactory) {
+	public ExtendedLogServiceFactory(ExtendedLogReaderServiceFactory logReaderServiceFactory, boolean captureLogEntryLocation) {
 		this.logReaderServiceFactory = logReaderServiceFactory;
+		this.captureLogEntryLocation = captureLogEntryLocation;
+	}
 
+	boolean captureLogEntryLocation() {
+		return captureLogEntryLocation;
 	}
 
 	@Override
