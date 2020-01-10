@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2017 IBM Corporation and others.
+ * Copyright (c) 2008, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -95,13 +95,6 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	private final PermissionInfo[] impliedPermissionInfos;
 	private final EquinoxSecurityManager supportedSecurityManager;
 
-	private SecurityAdmin(EquinoxSecurityManager supportedSecurityManager, PermissionInfo[] impliedPermissionInfos, PermissionInfoCollection permAdminDefaults) {
-		this.supportedSecurityManager = supportedSecurityManager;
-		this.impliedPermissionInfos = impliedPermissionInfos;
-		this.permAdminDefaults = permAdminDefaults;
-		this.permissionStorage = null;
-	}
-
 	public SecurityAdmin(EquinoxSecurityManager supportedSecurityManager, PermissionData permissionStorage) {
 		this.supportedSecurityManager = supportedSecurityManager;
 		this.permissionStorage = permissionStorage;
@@ -160,7 +153,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			curPermAdminDefaults = permAdminDefaults;
 		}
 		if (locationCollection != null)
-			return locationCollection.implies(permission);
+			return locationCollection.implies(bundlePermissions, permission);
 		// if conditional admin table is empty the fall back to defaults
 		if (curCondAdminTable.isEmpty())
 			return curPermAdminDefaults != null ? curPermAdminDefaults.implies(permission) : DEFAULT_DEFAULT.implies(permission);
@@ -281,8 +274,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 
 	@Override
 	public AccessControlContext getAccessControlContext(String[] signers) {
-		SecurityAdmin snapShot = getSnapShot();
-		return new AccessControlContext(new ProtectionDomain[] {createProtectionDomain(createMockBundle(signers), snapShot)});
+		return new AccessControlContext(new ProtectionDomain[] {createProtectionDomain(createMockBundle(signers), this)});
 	}
 
 	/**
@@ -315,19 +307,6 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	@Override
 	public ConditionalPermissionInfo setConditionalPermissionInfo(String name, ConditionInfo[] conds, PermissionInfo[] perms) {
 		return setConditionalPermissionInfo(name, conds, perms, true);
-	}
-
-	private SecurityAdmin getSnapShot() {
-		SecurityAdmin sa;
-		synchronized (lock) {
-			sa = new SecurityAdmin(supportedSecurityManager, impliedPermissionInfos, permAdminDefaults);
-			SecurityRow[] rows = condAdminTable.getRows();
-			SecurityRow[] rowsSnapShot = new SecurityRow[rows.length];
-			for (int i = 0; i < rows.length; i++)
-				rowsSnapShot[i] = new SecurityRow(sa, rows[i].getName(), rows[i].getConditionInfos(), rows[i].getPermissionInfos(), rows[i].getAccessDecision());
-			sa.condAdminTable = new SecurityTable(sa, rowsSnapShot);
-		}
-		return sa;
 	}
 
 	private ConditionalPermissionInfo setConditionalPermissionInfo(String name, ConditionInfo[] conds, PermissionInfo[] perms, boolean firstTry) {
@@ -427,8 +406,8 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		PermissionInfo[] results = new PermissionInfo[permissionInfos.length];
 		for (int i = 0; i < permissionInfos.length; i++) {
 			results[i] = permissionInfos[i];
-			if ("java.io.FilePermission".equals(permissionInfos[i].getType())) { //$NON-NLS-1$
-				if (!"<<ALL FILES>>".equals(permissionInfos[i].getName())) { //$NON-NLS-1$
+			if (PermissionInfoCollection.FILE_PERMISSION_NAME.equals(permissionInfos[i].getType())) {
+				if (!PermissionInfoCollection.ALL_FILES.equals(permissionInfos[i].getName())) {
 					File file = new File(permissionInfos[i].getName());
 					if (!file.isAbsolute()) { // relative name
 						try {

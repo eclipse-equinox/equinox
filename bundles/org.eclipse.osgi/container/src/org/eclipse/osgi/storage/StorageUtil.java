@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
@@ -169,25 +170,7 @@ public class StorageUtil {
 	}
 
 	public static boolean canWrite(File installDir) {
-		if (installDir.canWrite() == false)
-			return false;
-
-		if (!installDir.isDirectory())
-			return false;
-
-		File fileTest = null;
-		try {
-			// we use the .dll suffix to properly test on Vista virtual directories
-			// on Vista you are not allowed to write executable files on virtual directories like "Program Files"
-			fileTest = File.createTempFile("writableArea", ".dll", installDir); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (IOException e) {
-			//If an exception occured while trying to create the file, it means that it is not writtable
-			return false;
-		} finally {
-			if (fileTest != null)
-				fileTest.delete();
-		}
-		return true;
+		return installDir.isDirectory() && Files.isWritable(installDir.toPath());
 	}
 
 	public static URL encodeFileURL(File file) throws MalformedURLException {

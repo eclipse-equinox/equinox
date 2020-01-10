@@ -46,6 +46,7 @@ import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
 import org.osgi.service.permissionadmin.PermissionAdmin;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
+@SuppressWarnings("deprecation")
 public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 	private static final PermissionInfo[] SOCKET_INFOS = new PermissionInfo[] {new PermissionInfo("java.net.SocketPermission", "localhost", "accept")}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -55,6 +56,8 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 			new PermissionInfo("java.io.FilePermission", "<<ALL FILES>>", "read"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			new PermissionInfo("java.io.FilePermission", "<<ALL FILES>>", "write") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	};
+
+	private static final PermissionInfo[] RELATIVE_EXEC_FILE_INFOS = new PermissionInfo[] {new PermissionInfo("java.io.FilePermission", "bin/*", "execute")};
 
 	private static final PermissionInfo[] RUNTIME_INFOS = new PermissionInfo[] {new PermissionInfo("java.lang.RuntimePermission", "exitVM", null)}; //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -91,27 +94,27 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 			private static final long serialVersionUID = 3258131349494708277L;
 
 			// A simple PermissionCollection that only has AllPermission
-		@Override
+			@Override
 			public void add(Permission permission) {
 				//no adding to this policy
 			}
 
-		@Override
+			@Override
 			public boolean implies(Permission permission) {
 				return true;
 			}
 
-		@Override
+			@Override
 			public Enumeration elements() {
 				return new Enumeration() {
 					int cur = 0;
 
-			@Override
+					@Override
 					public boolean hasMoreElements() {
 						return cur < 1;
 					}
 
-			@Override
+					@Override
 					public Object nextElement() {
 						if (cur == 0) {
 							cur = 1;
@@ -125,12 +128,12 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 		Policy.setPolicy(new Policy() {
 
-		@Override
+			@Override
 			public PermissionCollection getPermissions(CodeSource codesource) {
 				return allPermissions;
 			}
 
-		@Override
+			@Override
 			public void refresh() {
 				// nothing
 			}
@@ -1052,15 +1055,115 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 	}
 
 	public void testBug286307() {
-		Bundle test = installTestBundle("test.bug286307"); //$NON-NLS-1$
+		Bundle test = installTestBundle("test.bug286307");
 		AccessControlContext acc = test.adapt(AccessControlContext.class);
-		testPermission(acc, new FilePermission("test", "read"), true); //$NON-NLS-1$ //$NON-NLS-2$
+		testPermission(acc, new FilePermission("test", "read"), true);
 		testPermission(acc, new AllPermission(), false);
 	}
 
+	public void testRelativeFilePermission() {
+		Bundle test = installTestBundle(TEST_BUNDLE);
+		File dataArea = test.getDataFile("");
+		File testFile = new File(dataArea, "testFile.txt");
+		File testExecutable = new File(dataArea, "bin/execFile");
+		AccessControlContext acc = test.adapt(AccessControlContext.class);
+
+		// test set by location
+		pa.setPermissions(test.getLocation(), RELATIVE_EXEC_FILE_INFOS);
+
+		testPermission(acc, new FilePermission(testFile.getPath(), "write"), true);
+		testPermission(acc, new FilePermission(testFile.getPath(), "read"), true);
+		testPermission(acc, new FilePermission(testFile.getPath(), "execute"), false);
+		testPermission(acc, new FilePermission(testExecutable.getPath(), "write"), true);
+		testPermission(acc, new FilePermission(testExecutable.getPath(), "read"), true);
+		testPermission(acc, new FilePermission(testExecutable.getPath(), "execute"), true);
+		testPermission(acc, new AllPermission(), false);
+
+		// clear location
+		pa.setPermissions(test.getLocation(), null);
+		// goes back to all permission by default
+		testPermission(acc, new FilePermission(testFile.getPath(), "write"), true);
+		testPermission(acc, new FilePermission(testFile.getPath(), "read"), true);
+		testPermission(acc, new FilePermission(testFile.getPath(), "execute"), true);
+		testPermission(acc, new FilePermission(testExecutable.getPath(), "write"), true);
+		testPermission(acc, new FilePermission(testExecutable.getPath(), "read"), true);
+		testPermission(acc, new FilePermission(testExecutable.getPath(), "execute"), true);
+		testPermission(acc, new AllPermission(), true);
+
+		// test set by conditions
+		ConditionalPermissionUpdate update = cpa.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		rows.add(cpa.newConditionalPermissionInfo(null, getLocationConditions(test.getLocation(), false), RELATIVE_EXEC_FILE_INFOS, ConditionalPermissionInfo.ALLOW));
+		assertTrue("failed to commit", update.commit());
+
+		testPermission(acc, new FilePermission(testFile.getPath(), "write"), true);
+		testPermission(acc, new FilePermission(testFile.getPath(), "read"), true);
+		testPermission(acc, new FilePermission(testFile.getPath(), "execute"), false);
+		testPermission(acc, new FilePermission(testExecutable.getPath(), "write"), true);
+		testPermission(acc, new FilePermission(testExecutable.getPath(), "read"), true);
+		testPermission(acc, new FilePermission(testExecutable.getPath(), "execute"), true);
+		testPermission(acc, new AllPermission(), false);
+
+		// update condition to only have read only, not that a bundle always
+		// implicitly has r/w permission to its data area
+		update = cpa.newConditionalPermissionUpdate();
+		rows = update.getConditionalPermissionInfos();
+		rows.clear();
+		rows.add(cpa.newConditionalPermissionInfo(null, getLocationConditions(test.getLocation(), false), READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
+		assertTrue("failed to commit", update.commit());
+
+		testPermission(acc, new FilePermission(testFile.getPath(), "write"), true);
+		testPermission(acc, new FilePermission(testFile.getPath(), "read"), true);
+		testPermission(acc, new FilePermission(testFile.getPath(), "execute"), false);
+		testPermission(acc, new FilePermission(testExecutable.getPath(), "write"), true);
+		testPermission(acc, new FilePermission(testExecutable.getPath(), "read"), true);
+		testPermission(acc, new FilePermission(testExecutable.getPath(), "execute"), false);
+		testPermission(acc, new AllPermission(), false);
+
+		// clear the conditions
+		update = cpa.newConditionalPermissionUpdate();
+		update.getConditionalPermissionInfos().clear();
+		assertTrue("failed to commit", update.commit());
+
+		// test that the default permissions of PA do not handle relative
+		pa.setDefaultPermissions(RELATIVE_EXEC_FILE_INFOS);
+
+		testPermission(acc, new FilePermission(testFile.getPath(), "write"), true);
+		testPermission(acc, new FilePermission(testFile.getPath(), "read"), true);
+		testPermission(acc, new FilePermission(testFile.getPath(), "execute"), false);
+		testPermission(acc, new FilePermission(testExecutable.getPath(), "write"), true);
+		testPermission(acc, new FilePermission(testExecutable.getPath(), "read"), true);
+		testPermission(acc, new FilePermission(testExecutable.getPath(), "execute"), false);
+		testPermission(acc, new AllPermission(), false);
+
+		// go back to default all permission
+		pa.setDefaultPermissions(null);
+		testPermission(acc, new AllPermission(), true);
+
+		// Test that the ACC returned from CPA.getAccessControlContext does not handle relative file permissions
+		update = cpa.newConditionalPermissionUpdate();
+		rows = update.getConditionalPermissionInfos();
+		rows.add(cpa.newConditionalPermissionInfo(null, new ConditionInfo[] {SIGNER_CONDITION1}, RELATIVE_EXEC_FILE_INFOS, ConditionalPermissionInfo.ALLOW));
+		assertTrue("failed to commit", update.commit());
+
+		File relativeExecutable = new File("bin/executableFile");
+		acc = cpa.getAccessControlContext(new String[] {"cn=t1,c=FR;cn=test1,c=US"});
+		testPermission(acc, new FilePermission(relativeExecutable.getAbsolutePath(), "execute"), false);
+
+		// update CPA to use absolute path
+		update = cpa.newConditionalPermissionUpdate();
+		rows = update.getConditionalPermissionInfos();
+		rows.clear();
+		PermissionInfo[] absExectInfos = new PermissionInfo[] {new PermissionInfo("java.io.FilePermission", relativeExecutable.getAbsolutePath(), "execute")};
+		rows.add(cpa.newConditionalPermissionInfo(null, new ConditionInfo[] {SIGNER_CONDITION1}, absExectInfos, ConditionalPermissionInfo.ALLOW));
+		assertTrue("failed to commit", update.commit());
+
+		testPermission(acc, new FilePermission(relativeExecutable.getAbsolutePath(), "execute"), true);
+	}
+
 	private void checkInfos(ConditionalPermissionInfo testInfo1, ConditionalPermissionInfo testInfo2) {
-		assertTrue("Infos are not equal: " + testInfo1.getEncoded() + " " + testInfo2.getEncoded(), testInfo1.equals(testInfo2)); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("Info hash code is not equal", testInfo1.hashCode(), testInfo2.hashCode()); //$NON-NLS-1$
+		assertTrue("Infos are not equal: " + testInfo1.getEncoded() + " " + testInfo2.getEncoded(), testInfo1.equals(testInfo2));
+		assertEquals("Info hash code is not equal", testInfo1.hashCode(), testInfo2.hashCode());
 	}
 
 	private void checkBadInfo(String encoded) {

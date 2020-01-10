@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2018 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2020 Cognos Incorporated, IBM Corporation and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which
@@ -61,9 +61,9 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 	private EventAdminAdapter eventAdminAdapter;
 	private ConfigAdminListener configAdminListener;
 
-	public LogServiceManager(int maxHistory, LogLevel defaultLevel, LogListener... systemListeners) {
+	public LogServiceManager(int maxHistory, LogLevel defaultLevel, boolean captureLogEntryLocation, LogListener... systemListeners) {
 		logReaderServiceFactory = new ExtendedLogReaderServiceFactory(maxHistory, defaultLevel);
-		logServiceFactory = new ExtendedLogServiceFactory(logReaderServiceFactory);
+		logServiceFactory = new ExtendedLogServiceFactory(logReaderServiceFactory, captureLogEntryLocation);
 		systemBundleLog = logServiceFactory.getLogService(new MockSystemBundle());
 		for (LogListener logListener : systemListeners) {
 			if (logListener instanceof LogFilter)

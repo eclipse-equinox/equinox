@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2016 IBM Corporation and others.
+ * Copyright (c) 2008, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -339,12 +339,12 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 
 	Decision evaluate(BundlePermissions bundlePermissions, Permission permission) {
 		if (bundleConditions == null || bundlePermissions == null)
-			return evaluatePermission(permission);
+			return evaluatePermission(bundlePermissions, permission);
 		Condition[] conditions = getConditions(bundlePermissions);
 		if (conditions == ABSTAIN_LIST)
 			return DECISION_ABSTAIN;
 		if (conditions == SATISFIED_LIST)
-			return evaluatePermission(permission);
+			return evaluatePermission(bundlePermissions, permission);
 
 		boolean empty = true;
 		List<Condition> postponedConditions = null;
@@ -370,7 +370,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 			} else { // postponed case
 				if (postponedPermCheck == null)
 					// perform a permission check now
-					postponedPermCheck = evaluatePermission(permission);
+					postponedPermCheck = evaluatePermission(bundlePermissions, permission);
 				if (postponedPermCheck == DECISION_ABSTAIN)
 					return postponedPermCheck; // no need to postpone the condition if the row abstains
 				// this row will deny or allow the permission; must queue the postponed condition
@@ -387,7 +387,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		}
 		if (postponedPermCheck != null)
 			return new Decision(postponedPermCheck.decision | SecurityTable.POSTPONED, postponedConditions.toArray(new Condition[postponedConditions.size()]), this, bundlePermissions);
-		return evaluatePermission(permission);
+		return evaluatePermission(bundlePermissions, permission);
 	}
 
 	private boolean isPostponed(Condition condition) {
@@ -395,8 +395,8 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		return condition.isPostponed() && securityAdmin.getSupportedSecurityManager() != null;
 	}
 
-	private Decision evaluatePermission(Permission permission) {
-		return permissionInfoCollection.implies(permission) ? (deny ? DECISION_DENIED : DECISION_GRANTED) : DECISION_ABSTAIN;
+	private Decision evaluatePermission(BundlePermissions bundlePermissions, Permission permission) {
+		return permissionInfoCollection.implies(bundlePermissions, permission) ? (deny ? DECISION_DENIED : DECISION_GRANTED) : DECISION_ABSTAIN;
 	}
 
 	@Override
