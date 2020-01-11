@@ -4,7 +4,7 @@ Bundle-Name: %bundleName
 Bundle-Vendor: %bundleVendor
 Bundle-Localization: plugin
 Bundle-SymbolicName: org.eclipse.equinox.console.jaas.fragment
-Bundle-Version: 1.0.200.qualifier
+Bundle-Version: 1.0.300.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 DynamicImport-Package: org.eclipse.equinox.console.jaas
 Fragment-Host: org.apache.sshd.osgi;bundle-version="2.2.0"
