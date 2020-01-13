@@ -3571,6 +3571,73 @@ public class TestModuleContainer extends AbstractTest {
 		stopError.printStackTrace();
 	}
 
+	@Test
+	public void testUsesWithRequireReexport() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		// install the system.bundle
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, null, container);
+		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
+		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
+
+		// install part 1 (ui.workbench)
+		Map<String, String> split1Manifest = new HashMap<String, String>();
+		split1Manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		split1Manifest.put(Constants.BUNDLE_SYMBOLICNAME, "split1");
+		split1Manifest.put(Constants.EXPORT_PACKAGE, "split.pkg");
+		Module moduleSplit1 = installDummyModule(split1Manifest, "split1", container);
+
+		// install part 2 (e4.ui.ide)
+		Map<String, String> split2Manifest = new HashMap<String, String>();
+		split2Manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		split2Manifest.put(Constants.BUNDLE_SYMBOLICNAME, "split2");
+		split2Manifest.put(Constants.EXPORT_PACKAGE, "split.pkg");
+		Module moduleSplit2 = installDummyModule(split2Manifest, "split2", container);
+
+		// install part 3 which requires part 1 and 2, reexports 1 and 2 (ui.ide)
+		Map<String, String> split3Manifest = new HashMap<String, String>();
+		split3Manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		split3Manifest.put(Constants.BUNDLE_SYMBOLICNAME, "split3");
+		split3Manifest.put(Constants.EXPORT_PACKAGE, "split.pkg");
+		// the reexport here are not necessary; but cause issues for the resolver
+		split3Manifest.put(Constants.REQUIRE_BUNDLE, "split1; visibility:=reexport, split2; visibility:=reexport");
+		Module moduleSplit3 = installDummyModule(split3Manifest, "split3", container);
+
+		// install reexporter of part1 (ui)
+		Map<String, String> reexporterPart1Manifest = new HashMap<String, String>();
+		reexporterPart1Manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		reexporterPart1Manifest.put(Constants.BUNDLE_SYMBOLICNAME, "reexport1");
+		reexporterPart1Manifest.put(Constants.REQUIRE_BUNDLE, "split1; visibility:=reexport");
+		Module moduleReexport1 = installDummyModule(reexporterPart1Manifest, "reexport1", container);
+
+		// install reexporter of split3
+		Map<String, String> reexporterSplit3Manifest = new HashMap<String, String>();
+		reexporterSplit3Manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		reexporterSplit3Manifest.put(Constants.BUNDLE_SYMBOLICNAME, "reexportSplit3");
+		reexporterSplit3Manifest.put(Constants.REQUIRE_BUNDLE, "split3; visibility:=reexport");
+		Module moduleReexportSplit3 = installDummyModule(reexporterSplit3Manifest, "reexportSplit3", container);
+
+		// install test export that requires reexportSplit3 (should get access to all 3 parts)
+		Map<String, String> testExporterUses = new HashMap<String, String>();
+		testExporterUses.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		testExporterUses.put(Constants.BUNDLE_SYMBOLICNAME, "test.exporter");
+		testExporterUses.put(Constants.REQUIRE_BUNDLE, "reexportSplit3");
+		testExporterUses.put(Constants.EXPORT_PACKAGE, "export.pkg; uses:=split.pkg");
+		Module testExporter = installDummyModule(testExporterUses, "test.exporter", container);
+
+		// install test requirer that requires the exporter and reexport1 (should get access to only part 1)
+		// part 1 is a subset of what the exporter has access to so it should resolve
+		Map<String, String> testRequireUses = new HashMap<String, String>();
+		testRequireUses.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		testRequireUses.put(Constants.BUNDLE_SYMBOLICNAME, "test.requirer");
+		testRequireUses.put(Constants.REQUIRE_BUNDLE, "test.exporter, reexport1");
+		Module testRequirer = installDummyModule(testRequireUses, "test.requirer", container);
+
+		report = container.resolve(Arrays.asList(moduleSplit1, moduleSplit2, moduleSplit3, moduleReexport1, moduleReexportSplit3, testExporter, testRequirer), true);
+		Assert.assertNull("Failed to resolve", report.getResolutionException());
+	}
+
 	private static void assertWires(List<ModuleWire> required, List<ModuleWire>... provided) {
 		for (ModuleWire requiredWire : required) {
 			for (List<ModuleWire> providedList : provided) {
