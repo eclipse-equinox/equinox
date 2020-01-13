@@ -182,6 +182,7 @@ public class BridgeServlet extends HttpServlet {
 	 * sp_start - Starts a deployed platform
 	 * sp_stop - Stops the platform 
 	 */
+	@SuppressWarnings("resource")
 	private boolean serviceFrameworkControls(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		String pathInfo = req.getPathInfo();
 		if (pathInfo.equals("/sp_start")) { //$NON-NLS-1$
