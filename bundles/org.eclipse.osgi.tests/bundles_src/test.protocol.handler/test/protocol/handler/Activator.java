@@ -28,7 +28,7 @@ public class Activator extends AbstractURLStreamHandlerService implements Bundle
 	@Override
 	public void start(BundleContext context) throws Exception {
 		bc = context;
-		Dictionary<String, String> props = new Hashtable<String, String>();
+		Dictionary<String, String> props = new Hashtable<>();
 		props.put(URLConstants.URL_HANDLER_PROTOCOL, "testing1");
 		context.registerService(URLStreamHandlerService.class, this, props);
 	}

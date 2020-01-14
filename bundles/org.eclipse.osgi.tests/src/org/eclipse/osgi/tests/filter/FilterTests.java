@@ -360,7 +360,7 @@ public abstract class FilterTests extends TestCase {
 	}
 
 	public void testNullValueMatch() throws InvalidSyntaxException {
-		Dictionary<String, Object> nullProps = new MapDictionary<String, Object>();
+		Dictionary<String, Object> nullProps = new MapDictionary<>();
 		nullProps.put("test.null", null);
 		nullProps.put("test.non.null", "v1");
 		assertFalse(createFilter("(test.null=*)").match(nullProps));
@@ -368,7 +368,7 @@ public abstract class FilterTests extends TestCase {
 	}
 
 	public void testNullKeyMatch() throws InvalidSyntaxException {
-		Dictionary<String, Object> nullProps = new MapDictionary<String, Object>();
+		Dictionary<String, Object> nullProps = new MapDictionary<>();
 		nullProps.put(null, "null.v1");
 		nullProps.put("test.non.null", "v1");
 		assertTrue(createFilter("(test.non.null=v1)").match(nullProps));

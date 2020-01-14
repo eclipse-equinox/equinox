@@ -41,8 +41,8 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 	private final ModuleContainer container;
 	private final ResolverHookFactory resolverHookFactory;
 	private final DebugOptions debugOptions;
-	private final AtomicReference<CountDownLatch> startLatch = new AtomicReference<CountDownLatch>();
-	private final AtomicReference<CountDownLatch> stopLatch = new AtomicReference<CountDownLatch>();
+	private final AtomicReference<CountDownLatch> startLatch = new AtomicReference<>();
+	private final AtomicReference<CountDownLatch> stopLatch = new AtomicReference<>();
 	private volatile Executor resolverExecutor;
 	private volatile ScheduledExecutorService timeoutExecutor;
 

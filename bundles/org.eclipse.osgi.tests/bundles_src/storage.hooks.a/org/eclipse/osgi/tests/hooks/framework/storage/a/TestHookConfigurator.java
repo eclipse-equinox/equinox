@@ -100,7 +100,7 @@ public class TestHookConfigurator implements HookConfigurator {
 					// try setting the ID to something which is checked during the test
 					builder.setId(5678);
 					Map<String, String> dirs = Collections.emptyMap();
-					Map<String, Object> attrs = new HashMap<String, Object>();
+					Map<String, Object> attrs = new HashMap<>();
 					attrs.put("test.file.path", getGeneration().getContent().getPath() + " - " + adaptCount.getAndIncrement());
 					attrs.put("test.operation", operation.toString());
 					attrs.put("test.origin", origin.getLocation());

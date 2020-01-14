@@ -2224,8 +2224,8 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		};
 
 		testThread.set(Boolean.TRUE);
-		final Set<String> weavingHookClasses = new HashSet<String>();
-		final List<WovenClass> called = new ArrayList<WovenClass>();
+		final Set<String> weavingHookClasses = new HashSet<>();
+		final List<WovenClass> called = new ArrayList<>();
 		final AtomicBoolean loadNewClassInWeave = new AtomicBoolean(false);
 
 		ServiceFactory<WeavingHook> topFactory = new ServiceFactory<WeavingHook>() {
@@ -2296,7 +2296,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	public void testLoaderUninstalledBundle() throws BundleException, IOException {
 		String testResourcePath = "testResource";
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
-		Map<String, String> testHeaders = new HashMap<String, String>();
+		Map<String, String> testHeaders = new HashMap<>();
 		testHeaders.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		testHeaders.put(Constants.BUNDLE_SYMBOLICNAME, getName());
 		config.mkdirs();

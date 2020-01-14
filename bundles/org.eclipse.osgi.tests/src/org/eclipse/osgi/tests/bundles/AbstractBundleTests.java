@@ -257,7 +257,7 @@ public class AbstractBundleTests extends CoreTest {
 
 	protected Map<String, Object> createConfiguration() {
 		File file = OSGiTestsActivator.getContext().getDataFile(getName());
-		Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, Object> result = new HashMap<>();
 		result.put(Constants.FRAMEWORK_STORAGE, file.getAbsolutePath());
 		return result;
 	}

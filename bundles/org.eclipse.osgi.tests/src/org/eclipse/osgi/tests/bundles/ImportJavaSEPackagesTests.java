@@ -59,7 +59,7 @@ public class ImportJavaSEPackagesTests extends AbstractBundleTests {
 
 	public void testExportPackageCannotContainJavaPackages() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
-		Map<String, String> headers = new HashMap<String, String>();
+		Map<String, String> headers = new HashMap<>();
 		headers.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		headers.put(Constants.BUNDLE_SYMBOLICNAME, getName());
 		headers.put(Constants.EXPORT_PACKAGE, JAVA_LANG);
@@ -89,7 +89,7 @@ public class ImportJavaSEPackagesTests extends AbstractBundleTests {
 
 	public void testImportPackageCanContainJavaPackages() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
-		Map<String, String> headers = new HashMap<String, String>();
+		Map<String, String> headers = new HashMap<>();
 		headers.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		headers.put(Constants.BUNDLE_SYMBOLICNAME, getName());
 		headers.put(Constants.IMPORT_PACKAGE, JAVA_LANG);
@@ -120,7 +120,7 @@ public class ImportJavaSEPackagesTests extends AbstractBundleTests {
 	}
 
 	public void testSystemPackages() throws Exception {
-		Map<Integer, Integer> packagesPerVersion = new HashMap<Integer, Integer>();
+		Map<Integer, Integer> packagesPerVersion = new HashMap<>();
 		packagesPerVersion.put(7, 56);
 		packagesPerVersion.put(8, 63);
 		if (!originalSpecVersion.startsWith("1.")) {
@@ -186,7 +186,7 @@ public class ImportJavaSEPackagesTests extends AbstractBundleTests {
 		}
 
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
-		Map<String, String> headers = new HashMap<String, String>();
+		Map<String, String> headers = new HashMap<>();
 		headers.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		headers.put(Constants.BUNDLE_SYMBOLICNAME, getName());
 		config.mkdirs();

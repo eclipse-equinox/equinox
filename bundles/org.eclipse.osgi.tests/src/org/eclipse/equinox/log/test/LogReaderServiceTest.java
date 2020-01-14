@@ -76,7 +76,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		rootLoggerContext = loggerAdmin.getLoggerContext(null);
 		rootLogLevels = rootLoggerContext.getLogLevels();
 
-		Map<String, LogLevel> copyLogLevels = new HashMap<String, LogLevel>(rootLogLevels);
+		Map<String, LogLevel> copyLogLevels = new HashMap<>(rootLogLevels);
 		copyLogLevels.put(Logger.ROOT_LOGGER_NAME, LogLevel.TRACE);
 		rootLoggerContext.setLogLevels(copyLogLevels);
 	}
@@ -226,7 +226,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 	}
 
 	public void testLogFrameworkEventType() throws Exception {
-		final List<LogEntry> events = new CopyOnWriteArrayList<LogEntry>();
+		final List<LogEntry> events = new CopyOnWriteArrayList<>();
 		final CountDownLatch countDown = new CountDownLatch(3);
 		final Bundle b = getContext().getBundle();
 		LogListener listener = new LogListener() {
@@ -257,7 +257,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 
 	public void testLogHistory1() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
-		Map<String, Object> configuration = new HashMap<String, Object>();
+		Map<String, Object> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		configuration.put(EquinoxConfiguration.PROP_LOG_HISTORY_MAX, "10");
 		Equinox equinox = new Equinox(configuration);
@@ -291,7 +291,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 
 	public void testLogHistory2() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
-		Map<String, Object> configuration = new HashMap<String, Object>();
+		Map<String, Object> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		Equinox equinox = new Equinox(configuration);
 		equinox.start();

@@ -85,7 +85,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 
 		Bundle base = installer.installBundle("mrBundleInputBase");
 
-		Map<String, String> bundleHeaders = new LinkedHashMap<String, String>();
+		Map<String, String> bundleHeaders = new LinkedHashMap<>();
 		bundleHeaders.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		bundleHeaders.put(Constants.BUNDLE_SYMBOLICNAME, "mrBundle");
 		bundleHeaders.put(Constants.BUNDLE_VERSION, "1.0.0");
@@ -95,7 +95,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		bundleHeaders.put(Constants.PROVIDE_CAPABILITY, "capbase, cap8, cap9, cap10, cap11");
 		bundleHeaders.put(Constants.BUNDLE_CLASSPATH, "., " + classpathMrJar.getName() + ", classPathDir");
 
-		Map<String, byte[]> bundleEntries = new LinkedHashMap<String, byte[]>();
+		Map<String, byte[]> bundleEntries = new LinkedHashMap<>();
 		bundleEntries.put("multi/", null);
 		bundleEntries.put("multi/release/", null);
 		bundleEntries.put("multi/release/test/", null);
@@ -165,7 +165,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		bundleEntries.put("META-INF/versions/11/OSGI-INF/", null);
 		bundleEntries.put("META-INF/versions/11/OSGI-INF/MANIFEST.MF", getBytes("manifests/manifest11.mf", base));
 
-		Map<String, byte[]> classPathJarEntries = new LinkedHashMap<String, byte[]>();
+		Map<String, byte[]> classPathJarEntries = new LinkedHashMap<>();
 		classPathJarEntries.put("multi/", null);
 		classPathJarEntries.put("multi/release/", null);
 		classPathJarEntries.put("multi/release/test/", null);
@@ -633,8 +633,8 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			System.setProperty("java.specification.version", Integer.toString(rv));
 		}
 
-		Collection<String> expected = new ArrayList<String>();
-		Collection<String> expectedRecurse = new ArrayList<String>();
+		Collection<String> expected = new ArrayList<>();
+		Collection<String> expectedRecurse = new ArrayList<>();
 
 		expected.add("multi/release/test/testResourceBase.txt");
 		expected.add("multi/release/test/testResource8.txt");

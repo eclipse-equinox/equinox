@@ -417,7 +417,7 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 		String entryName = "file_with_" + c + "_char";
 		File bundlesDirectory = OSGiTestsActivator.getContext().getDataFile(getName());
 		bundlesDirectory.mkdirs();
-		Map<String, String> headers = new HashMap<String, String>();
+		Map<String, String> headers = new HashMap<>();
 		headers.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		headers.put(Constants.BUNDLE_SYMBOLICNAME, getName());
 		Map<String, String> entry = Collections.singletonMap(entryName, "value");
@@ -444,7 +444,7 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 		String nativeCode = "../../lib/nativeCode";
 		File bundlesDirectory = OSGiTestsActivator.getContext().getDataFile(getName());
 		bundlesDirectory.mkdirs();
-		Map<String, String> headers = new HashMap<String, String>();
+		Map<String, String> headers = new HashMap<>();
 		headers.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		headers.put(Constants.BUNDLE_SYMBOLICNAME, getName());
 		headers.put(Constants.BUNDLE_CLASSPATH, "., " + cp1);

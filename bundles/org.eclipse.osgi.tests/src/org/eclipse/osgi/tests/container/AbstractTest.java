@@ -43,7 +43,7 @@ public abstract class AbstractTest {
 
 	@Before
 	public void setUp() {
-		serviceRegistrations = new HashSet<ServiceRegistration<?>>();
+		serviceRegistrations = new HashSet<>();
 	}
 
 	@After

@@ -62,7 +62,7 @@ public class ExtendedLogServiceTest extends TestCase {
 		rootLoggerContext = loggerAdmin.getLoggerContext(null);
 		rootLogLevels = rootLoggerContext.getLogLevels();
 
-		Map<String, LogLevel> copyLogLevels = new HashMap<String, LogLevel>(rootLogLevels);
+		Map<String, LogLevel> copyLogLevels = new HashMap<>(rootLogLevels);
 		copyLogLevels.put(Logger.ROOT_LOGGER_NAME, LogLevel.TRACE);
 		rootLoggerContext.setLogLevels(copyLogLevels);
 	}

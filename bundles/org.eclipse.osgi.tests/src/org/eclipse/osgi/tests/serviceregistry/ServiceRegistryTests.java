@@ -538,7 +538,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 	public void testNullValue() throws InvalidSyntaxException {
 		ServiceRegistration reg = null;
 		try {
-			Dictionary<String, Object> nullProps = new MapDictionary<String, Object>();
+			Dictionary<String, Object> nullProps = new MapDictionary<>();
 			nullProps.put("test.null", null);
 			nullProps.put("test.non.null", "v1");
 			reg = OSGiTestsActivator.getContext().registerService(Object.class, new Object(), nullProps);
@@ -555,7 +555,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 	public void testNullKey() throws InvalidSyntaxException {
 		ServiceRegistration reg = null;
 		try {
-			Dictionary<String, Object> nullProps = new MapDictionary<String, Object>();
+			Dictionary<String, Object> nullProps = new MapDictionary<>();
 			nullProps.put(null, "null.v1");
 			nullProps.put("test.non.null", "v1");
 			reg = OSGiTestsActivator.getContext().registerService(Object.class, new Object(), nullProps);

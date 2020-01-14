@@ -13,17 +13,20 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.container.dummys;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 
 public class UnresolvedProviderEntryBuilder {
-	private final Map<Requirement, List<Capability>> data = new HashMap<Requirement, List<Capability>>();
+	private final Map<Requirement, List<Capability>> data = new HashMap<>();
 
 	private Requirement lastRequirement;
 
 	public Map<Requirement, List<Capability>> build() {
-		return new HashMap<Requirement, List<Capability>>(data);
+		return new HashMap<>(data);
 	}
 
 	public UnresolvedProviderEntryBuilder capability(Capability value) {

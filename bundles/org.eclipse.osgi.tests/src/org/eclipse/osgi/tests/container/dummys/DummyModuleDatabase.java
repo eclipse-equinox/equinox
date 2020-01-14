@@ -29,8 +29,8 @@ public class DummyModuleDatabase extends ModuleDatabase {
 		super(adaptor);
 	}
 
-	private List<DummyModuleEvent> moduleEvents = new ArrayList<DummyModuleEvent>();
-	private List<DummyContainerEvent> containerEvents = new ArrayList<DummyContainerEvent>();
+	private List<DummyModuleEvent> moduleEvents = new ArrayList<>();
+	private List<DummyContainerEvent> containerEvents = new ArrayList<>();
 
 	void addEvent(DummyModuleEvent event) {
 		synchronized (moduleEvents) {
@@ -56,7 +56,7 @@ public class DummyModuleDatabase extends ModuleDatabase {
 
 	private static <E> List<E> getEvents(List<E> events) {
 		synchronized (events) {
-			List<E> result = new ArrayList<E>(events);
+			List<E> result = new ArrayList<>(events);
 			events.clear();
 			return result;
 		}
@@ -82,7 +82,7 @@ public class DummyModuleDatabase extends ModuleDatabase {
 				}
 				timeout = timeout - (System.currentTimeMillis() - startTime);
 			}
-			List<E> result = new ArrayList<E>(events);
+			List<E> result = new ArrayList<>(events);
 			events.clear();
 			return result;
 		}
