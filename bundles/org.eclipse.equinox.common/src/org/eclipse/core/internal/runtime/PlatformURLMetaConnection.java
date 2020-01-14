@@ -40,7 +40,7 @@ public class PlatformURLMetaConnection extends PlatformURLConnection {
 			spec = spec.substring(1);
 		if (!spec.startsWith(META))
 			throw new IOException(NLS.bind(CommonMessages.url_badVariant, url.toString()));
-		int ix = spec.indexOf('/', META.length() + 1); //$NON-NLS-1$
+		int ix = spec.indexOf('/', META.length() + 1);
 		String ref = ix == -1 ? spec.substring(META.length() + 1) : spec.substring(META.length() + 1, ix);
 		String id = getId(ref);
 		Activator activator = Activator.getDefault();

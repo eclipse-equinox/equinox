@@ -49,7 +49,7 @@ public class PlatformURLFragmentConnection extends PlatformURLConnection {
 			spec = spec.substring(1);
 		if (!spec.startsWith(FRAGMENT))
 			throw new IOException(NLS.bind(CommonMessages.url_badVariant, url));
-		int ix = spec.indexOf('/', FRAGMENT.length() + 1); //$NON-NLS-1$
+		int ix = spec.indexOf('/', FRAGMENT.length() + 1);
 		String ref = ix == -1 ? spec.substring(FRAGMENT.length() + 1) : spec.substring(FRAGMENT.length() + 1, ix);
 		String id = getId(ref);
 		Activator activator = Activator.getDefault();

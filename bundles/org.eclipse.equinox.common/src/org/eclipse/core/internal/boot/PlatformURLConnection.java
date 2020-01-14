@@ -299,7 +299,7 @@ public abstract class PlatformURLConnection extends URLConnection {
 			isInCache = true;
 		} else {
 			// attempt to cache
-			int ix = file.lastIndexOf('/'); //$NON-NLS-1$
+			int ix = file.lastIndexOf('/');
 			tmp = file.substring(ix + 1);
 			tmp = cacheLocation + filePrefix + (new java.util.Date()).getTime() + "_" + tmp; //$NON-NLS-1$
 			tmp = tmp.replace(File.separatorChar, '/');

@@ -51,7 +51,7 @@ public class PlatformURLHandler extends AbstractURLStreamHandlerService {
 		String spec = url.getFile().trim();
 		if (spec.startsWith("/")) //$NON-NLS-1$
 			spec = spec.substring(1);
-		int ix = spec.indexOf('/'); //$NON-NLS-1$
+		int ix = spec.indexOf('/');
 		if (ix == -1)
 			throw new MalformedURLException(NLS.bind(CommonMessages.url_invalidURL, url.toExternalForm()));
 
