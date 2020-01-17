@@ -33,7 +33,7 @@ public class EmbeddedEquinoxWithURLInClassLoadTests extends AbstractFrameworkHoo
 		testURL = myManifest.toExternalForm();
 		super.setUp();
 		File file = OSGiTestsActivator.getContext().getDataFile(getName());
-		Map<String, String> configuration = new HashMap<String, String>();
+		Map<String, String> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, file.getAbsolutePath());
 		framework = createFramework(configuration);
 	}

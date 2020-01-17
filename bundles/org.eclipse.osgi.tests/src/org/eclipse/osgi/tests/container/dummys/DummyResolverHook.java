@@ -1,12 +1,16 @@
 package org.eclipse.osgi.tests.container.dummys;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.osgi.framework.hooks.resolver.ResolverHook;
-import org.osgi.framework.wiring.*;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRequirement;
+import org.osgi.framework.wiring.BundleRevision;
 
 public class DummyResolverHook implements ResolutionReport.Listener, ResolverHook {
-	private final List<ResolutionReport> reports = new ArrayList<ResolutionReport>();
+	private final List<ResolutionReport> reports = new ArrayList<>();
 
 	@Override
 	public void filterResolvable(Collection<BundleRevision> candidates) {

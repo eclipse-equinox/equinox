@@ -140,7 +140,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 		});
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
-		Map<String, Object> configuration = new HashMap<String, Object>();
+		Map<String, Object> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
 		equinox = new Equinox(configuration);

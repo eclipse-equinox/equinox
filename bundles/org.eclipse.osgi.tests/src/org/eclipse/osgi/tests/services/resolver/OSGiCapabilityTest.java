@@ -53,7 +53,7 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 	private Dictionary loadManifest(String manifest) {
 		URL url = getContext().getBundle().getEntry(MANIFEST_ROOT + manifest);
 		try {
-			CaseInsensitiveDictionaryMap<String, String> headers = new CaseInsensitiveDictionaryMap<String, String>();
+			CaseInsensitiveDictionaryMap<String, String> headers = new CaseInsensitiveDictionaryMap<>();
 			ManifestElement.parseBundleManifest(url.openStream(), headers);
 			return headers.asUnmodifiableDictionary();
 		} catch (IOException e) {

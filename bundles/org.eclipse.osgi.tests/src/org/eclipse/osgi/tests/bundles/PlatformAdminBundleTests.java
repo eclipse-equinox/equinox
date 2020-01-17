@@ -19,9 +19,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.ImportPackageSpecification;
+import org.eclipse.osgi.service.resolver.PlatformAdmin;
+import org.eclipse.osgi.service.resolver.State;
+import org.eclipse.osgi.service.resolver.VersionConstraint;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.FrameworkWiring;
 
@@ -140,7 +149,7 @@ public class PlatformAdminBundleTests extends AbstractBundleTests {
 	}
 
 	public void testNativeCodeFilterWithSpecialChars() throws BundleException, InterruptedException {
-		final AtomicReference<FrameworkEvent> error = new AtomicReference<FrameworkEvent>();
+		final AtomicReference<FrameworkEvent> error = new AtomicReference<>();
 		final CountDownLatch errorCnt = new CountDownLatch(1);
 		FrameworkListener errorListener = new FrameworkListener() {
 

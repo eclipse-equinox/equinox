@@ -13,10 +13,14 @@
  ******************************************************************************/
 package org.eclipse.osgi.tests.util;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MapDictionary<K, V> extends Dictionary<K, V> {
-	Map<K, V> map = new HashMap<K, V>();
+	Map<K, V> map = new HashMap<>();
 
 	@Override
 	public int size() {

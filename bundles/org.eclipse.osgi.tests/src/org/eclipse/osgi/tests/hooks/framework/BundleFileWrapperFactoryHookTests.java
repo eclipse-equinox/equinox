@@ -40,7 +40,7 @@ public class BundleFileWrapperFactoryHookTests extends AbstractFrameworkHookTest
 		classLoader.addURL(new URL(loc));
 		location = bundleInstaller.getBundleLocation(TEST_BUNDLE);
 		File file = OSGiTestsActivator.getContext().getDataFile(getName());
-		configuration = new HashMap<String, String>();
+		configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, file.getAbsolutePath());
 		configuration.put(HookRegistry.PROP_HOOK_CONFIGURATORS_INCLUDE, HOOK_CONFIGURATOR_CLASS);
 		framework = createFramework(configuration);

@@ -13,9 +13,16 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.datalocation;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.runtime.Platform;
@@ -26,8 +33,13 @@ import org.eclipse.osgi.internal.location.EquinoxLocations;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
-import org.osgi.framework.*;
-import org.osgi.service.log.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.log.LogEntry;
+import org.osgi.service.log.LogListener;
+import org.osgi.service.log.LogReaderService;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class BasicLocationTests extends CoreTest {
@@ -50,8 +62,8 @@ public class BasicLocationTests extends CoreTest {
 
 		prefix = windows ? "c:" : "";
 
-		configLocationTracker = new ServiceTracker<Location, Location>(OSGiTestsActivator.getContext(), OSGiTestsActivator.getContext().createFilter(Location.CONFIGURATION_FILTER), null);
-		instanceLocationTracker = new ServiceTracker<Location, Location>(OSGiTestsActivator.getContext(), OSGiTestsActivator.getContext().createFilter(Location.INSTANCE_FILTER), null);
+		configLocationTracker = new ServiceTracker<>(OSGiTestsActivator.getContext(), OSGiTestsActivator.getContext().createFilter(Location.CONFIGURATION_FILTER), null);
+		instanceLocationTracker = new ServiceTracker<>(OSGiTestsActivator.getContext(), OSGiTestsActivator.getContext().createFilter(Location.INSTANCE_FILTER), null);
 
 		configLocationTracker.open();
 		instanceLocationTracker.open();
@@ -294,7 +306,7 @@ public class BasicLocationTests extends CoreTest {
 	}
 
 	public void testSlashes() throws BundleException, InvalidSyntaxException {
-		Map<String, String> fwkConfig = new HashMap<String, String>();
+		Map<String, String> fwkConfig = new HashMap<>();
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
 		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, prefix + "/a");
 		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, prefix + "/c/d");
@@ -312,7 +324,7 @@ public class BasicLocationTests extends CoreTest {
 	}
 
 	private static Map<String, Location> getLocations(Equinox equinox) throws InvalidSyntaxException {
-		Map<String, Location> locations = new HashMap<String, Location>();
+		Map<String, Location> locations = new HashMap<>();
 		BundleContext context = equinox.getBundleContext();
 		addLocation(context, Location.CONFIGURATION_FILTER, locations);
 		addLocation(context, Location.INSTALL_FILTER, locations);
@@ -329,7 +341,7 @@ public class BasicLocationTests extends CoreTest {
 	}
 
 	public void testSchemes() throws Exception {
-		Map<String, String> fwkConfig = new HashMap<String, String>();
+		Map<String, String> fwkConfig = new HashMap<>();
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
 		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "http://example.com/a");
 		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "ftp://example.com/c/d");
@@ -351,7 +363,7 @@ public class BasicLocationTests extends CoreTest {
 	}
 
 	public void testNone() throws Exception {
-		Map<String, String> fwkConfig = new HashMap<String, String>();
+		Map<String, String> fwkConfig = new HashMap<>();
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
 		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "@none");
 		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "@none");
@@ -372,7 +384,7 @@ public class BasicLocationTests extends CoreTest {
 	}
 
 	public void testNoDefault() throws Exception {
-		Map<String, String> fwkConfig = new HashMap<String, String>();
+		Map<String, String> fwkConfig = new HashMap<>();
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
 		fwkConfig.put(EquinoxLocations.PROP_INSTALL_AREA, "file:" + prefix + "/g");
 		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "@noDefault");
@@ -392,7 +404,7 @@ public class BasicLocationTests extends CoreTest {
 	}
 
 	public void testUserDir() throws Exception {
-		Map<String, String> fwkConfig = new HashMap<String, String>();
+		Map<String, String> fwkConfig = new HashMap<>();
 		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "@user.dir");
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
 		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "@user.dir");
@@ -413,7 +425,7 @@ public class BasicLocationTests extends CoreTest {
 	}
 
 	public void testUserHome() throws Exception {
-		Map<String, String> fwkConfig = new HashMap<String, String>();
+		Map<String, String> fwkConfig = new HashMap<>();
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
 		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "@user.home");
 		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "@user.home");
@@ -437,7 +449,7 @@ public class BasicLocationTests extends CoreTest {
 	public void testUNC() throws Exception {
 		if (!windows)
 			return;
-		Map<String, String> fwkConfig = new HashMap<String, String>();
+		Map<String, String> fwkConfig = new HashMap<>();
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
 		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "//server/share/a");
 		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "//server/share/b");
@@ -462,7 +474,7 @@ public class BasicLocationTests extends CoreTest {
 		debugOptions.put("org.eclipse.osgi/debug/location", "true");
 		File debugOptionsFile = OSGiTestsActivator.getContext().getDataFile(getName() + ".options");
 		debugOptions.store(new FileOutputStream(debugOptionsFile), getName());
-		Map<String, String> fwkConfig = new HashMap<String, String>();
+		Map<String, String> fwkConfig = new HashMap<>();
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
 		fwkConfig.put(EquinoxLocations.PROP_INSTALL_AREA, "file:" + prefix + "/g");
 		fwkConfig.put(EquinoxConfiguration.PROP_DEBUG, debugOptionsFile.getAbsolutePath());
@@ -471,7 +483,7 @@ public class BasicLocationTests extends CoreTest {
 		Equinox equinox = new Equinox(fwkConfig);
 		equinox.init();
 		try {
-			final List<LogEntry> logEntries = new ArrayList<LogEntry>();
+			final List<LogEntry> logEntries = new ArrayList<>();
 			LogReaderService logReaderService = getLogReaderService(equinox);
 			LogListener logListener = new SynchronousLogListener() {
 				@Override

@@ -34,7 +34,7 @@ public class ContextFinderTests extends AbstractFrameworkHookTests {
 	protected void setUp() throws Exception {
 		super.setUp();
 		File file = OSGiTestsActivator.getContext().getDataFile(getName());
-		configuration = new HashMap<String, String>();
+		configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, file.getAbsolutePath());
 		framework = createFramework(configuration);
 		initAndStart(framework);

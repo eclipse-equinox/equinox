@@ -37,7 +37,7 @@ public class DevClassPathWithExtensionTests extends AbstractFrameworkHookTests {
 		super.setUp();
 		location = bundleInstaller.getBundleLocation(TEST_BUNDLE);
 		File file = OSGiTestsActivator.getContext().getDataFile(getName());
-		configuration = new HashMap<String, String>();
+		configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, file.getAbsolutePath());
 		configuration.put(EquinoxConfiguration.PROP_DEV, "bin/");
 		framework = createFramework(configuration);

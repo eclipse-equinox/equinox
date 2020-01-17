@@ -32,7 +32,7 @@ public class CascadeConfigTests extends AbstractBundleTests {
 	public void testCascadeConfigBundleInstall() throws Exception {
 		// First create a framework with the 'parent' configuration
 		File configParent = OSGiTestsActivator.getContext().getDataFile(getName() + "_parent");
-		Map<String, Object> parentMap = new HashMap<String, Object>();
+		Map<String, Object> parentMap = new HashMap<>();
 		parentMap.put(Constants.FRAMEWORK_STORAGE, configParent.getAbsolutePath());
 		Equinox equinox = new Equinox(parentMap);
 		equinox.init();
@@ -45,7 +45,7 @@ public class CascadeConfigTests extends AbstractBundleTests {
 
 		// Now create a child framework and make sure test1 bundle is there
 		File configChild = OSGiTestsActivator.getContext().getDataFile(getName() + "_child");
-		Map<String, Object> childMap = new HashMap<String, Object>();
+		Map<String, Object> childMap = new HashMap<>();
 		childMap.put(Constants.FRAMEWORK_STORAGE, configChild.getAbsolutePath());
 		childMap.put("osgi.sharedConfiguration.area", configParent.getCanonicalPath());
 
@@ -91,7 +91,7 @@ public class CascadeConfigTests extends AbstractBundleTests {
 	public void testCascadeConfigDataArea() throws Exception {
 		// First create a framework with the 'parent' configuration
 		File configParent = OSGiTestsActivator.getContext().getDataFile(getName() + "_parent");
-		Map<String, Object> parentMap = new HashMap<String, Object>();
+		Map<String, Object> parentMap = new HashMap<>();
 		parentMap.put(Constants.FRAMEWORK_STORAGE, configParent.getAbsolutePath());
 		Equinox equinox = new Equinox(parentMap);
 		equinox.init();
@@ -105,7 +105,7 @@ public class CascadeConfigTests extends AbstractBundleTests {
 
 		// Now create a child framework and make sure bundle is there
 		File configChild = OSGiTestsActivator.getContext().getDataFile(getName() + "_child");
-		Map<String, Object> childMap = new HashMap<String, Object>();
+		Map<String, Object> childMap = new HashMap<>();
 		childMap.put(Constants.FRAMEWORK_STORAGE, configChild.getAbsolutePath());
 		childMap.put("osgi.sharedConfiguration.area", configParent.getCanonicalPath());
 
@@ -168,7 +168,7 @@ public class CascadeConfigTests extends AbstractBundleTests {
 		childProps.put("parent.child.key", "child");
 		childProps.put("child.key", "child");
 		childProps.store(new FileOutputStream(childConfigIni), "Parent config.ini");
-		Map<String, Object> childMap = new HashMap<String, Object>();
+		Map<String, Object> childMap = new HashMap<>();
 		childMap.put(Constants.FRAMEWORK_STORAGE, configChild.getAbsolutePath());
 		childMap.put("osgi.sharedConfiguration.area", configParent.getCanonicalPath());
 

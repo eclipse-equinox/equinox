@@ -43,62 +43,62 @@ public class CaseMapPerformanceTest extends OSGiTest {
 	}
 
 	public void testHeaders004() {
-		final Map<String, Object> headers = new Headers<String, Object>(4);
+		final Map<String, Object> headers = new Headers<>(4);
 		doTestMap(headers, 4);
 	}
 
 	public void testHeaders005() {
-		final Map<String, Object> headers = new Headers<String, Object>(5);
+		final Map<String, Object> headers = new Headers<>(5);
 		doTestMap(headers, 5);
 	}
 
 	public void testHeaders006() {
-		final Map<String, Object> headers = new Headers<String, Object>(6);
+		final Map<String, Object> headers = new Headers<>(6);
 		doTestMap(headers, 6);
 	}
 
 	public void testHeaders010() {
-		final Map<String, Object> headers = new Headers<String, Object>(10);
+		final Map<String, Object> headers = new Headers<>(10);
 		doTestMap(headers, 10);
 	}
 
 	public void testHeaders020() {
-		final Map<String, Object> headers = new Headers<String, Object>(20);
+		final Map<String, Object> headers = new Headers<>(20);
 		doTestMap(headers, 20);
 	}
 
 	public void testHeaders100() {
-		final Map<String, Object> headers = new Headers<String, Object>(100);
+		final Map<String, Object> headers = new Headers<>(100);
 		doTestMap(headers, 100);
 	}
 
 	public void testXCaseMap004() {
-		final Map<String, Object> headers = new CaseInsensitiveDictionaryMap<String, Object>(4);
+		final Map<String, Object> headers = new CaseInsensitiveDictionaryMap<>(4);
 		doTestMap(headers, 4);
 	}
 
 	public void testXCaseMap005() {
-		final Map<String, Object> headers = new CaseInsensitiveDictionaryMap<String, Object>(5);
+		final Map<String, Object> headers = new CaseInsensitiveDictionaryMap<>(5);
 		doTestMap(headers, 5);
 	}
 
 	public void testXCaseMap006() {
-		final Map<String, Object> headers = new CaseInsensitiveDictionaryMap<String, Object>(6);
+		final Map<String, Object> headers = new CaseInsensitiveDictionaryMap<>(6);
 		doTestMap(headers, 6);
 	}
 
 	public void testXCaseMap010() {
-		final Map<String, Object> headers = new CaseInsensitiveDictionaryMap<String, Object>(10);
+		final Map<String, Object> headers = new CaseInsensitiveDictionaryMap<>(10);
 		doTestMap(headers, 10);
 	}
 
 	public void testXCaseMap034() {
-		final Map<String, Object> headers = new CaseInsensitiveDictionaryMap<String, Object>(34);
+		final Map<String, Object> headers = new CaseInsensitiveDictionaryMap<>(34);
 		doTestMap(headers, 34);
 	}
 
 	public void testXCaseMap100() {
-		final Map<String, Object> headers = new CaseInsensitiveDictionaryMap<String, Object>(100);
+		final Map<String, Object> headers = new CaseInsensitiveDictionaryMap<>(100);
 		doTestMap(headers, 100);
 	}
 

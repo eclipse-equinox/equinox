@@ -987,7 +987,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		PrintStream old = System.out;
 		File traceFile = OSGiTestsActivator.getContext().getDataFile(getName() + ".trace"); //$NON-NLS-1$
 		OutputStream out = new FileOutputStream(traceFile);
-		final AtomicReference<Boolean> closed = new AtomicReference<Boolean>(Boolean.FALSE);
+		final AtomicReference<Boolean> closed = new AtomicReference<>(Boolean.FALSE);
 		out = new FilterOutputStream(out) {
 
 			@Override
