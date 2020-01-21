@@ -244,7 +244,9 @@ public class FrameworkExtensionInstaller {
 			current = new ArrayMap<>(hookActivators.getKeys(), hookActivators.getValues());
 			hookActivators.clear();
 		}
-		for (BundleActivator activator : current) {
+		// indexing into the current collection the hard way to reverse de-activation
+		for (int i = current.getKeys().size() - 1; i >= 0; i--) {
+			BundleActivator activator = current.getKey(i);
 			try {
 				activator.stop(context);
 			} catch (Exception e) {
