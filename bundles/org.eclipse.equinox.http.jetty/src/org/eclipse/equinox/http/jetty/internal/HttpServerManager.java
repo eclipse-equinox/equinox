@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2018 IBM Corporation and others.
+ * Copyright (c) 2007, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -166,7 +166,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 		ServerConnector httpsConnector = null;
 		if (Details.getBoolean(dictionary, JettyConstants.HTTPS_ENABLED, false)) {
 			// SSL Context Factory for HTTPS and SPDY
-			SslContextFactory sslContextFactory = new SslContextFactory();
+			SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
 			//sslContextFactory.setKeyStore(KeyS)
 
 			//Not sure if the next tree are properly migrated from jetty 8...
