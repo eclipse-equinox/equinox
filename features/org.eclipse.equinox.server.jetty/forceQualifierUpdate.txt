@@ -30,3 +30,4 @@ Bug 552395 - Update platform to Jetty 9.4.22
 Bug 553238 - Unanticipated comparator errors in I20191119-1800
 Bug 553363 - Update platform to Jetty 9.4.24
 Bug 559005 - Update platform to Jetty 9.4.25
+Bug 559370 - Update platform to Jetty 9.4.26 
