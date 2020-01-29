@@ -13,13 +13,17 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.registry;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import junit.framework.TestCase;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.spi.IDynamicExtensionRegistry;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -30,16 +34,9 @@ import org.osgi.framework.FrameworkUtil;
  *
  * @since 3.3
  */
-public class ContributorsTest extends TestCase {
+public class ContributorsTest {
 
-	public ContributorsTest() {
-		super();
-	}
-
-	public ContributorsTest(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testResolution() throws IOException, BundleException {
 		Bundle bundle = null;
 		Bundle fragment = null;
@@ -79,6 +76,7 @@ public class ContributorsTest extends TestCase {
 	 * @throws IOException
 	 * @throws BundleException
 	 */
+	@Test
 	public void testByContributor() throws IOException, BundleException {
 		Bundle bundleA = null;
 		Bundle bundleB = null;
@@ -137,6 +135,7 @@ public class ContributorsTest extends TestCase {
 	 * @throws IOException
 	 * @throws BundleException
 	 */
+	@Test
 	public void testContributorRemoval() throws IOException {
 		Object masterKey = new Object();
 		IExtensionRegistry registry = RegistryFactory.createRegistry(null, masterKey, null);

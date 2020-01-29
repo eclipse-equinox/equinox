@@ -13,21 +13,25 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.registry;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
-import junit.framework.*;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
+import org.junit.FixMethodOrder;
+import org.junit.Test;
+import org.junit.runners.MethodSorters;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkUtil;
 
-public class NamespaceTest extends TestCase {
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+public class NamespaceTest {
 
-	public NamespaceTest(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testNamespaceBasic() throws IOException, BundleException {
 		//test the addition of an extension point
 		BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
@@ -74,6 +78,7 @@ public class NamespaceTest extends TestCase {
 		BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] {bundle01});
 	}
 
+	@Test
 	public void testNamespaceDynamic() throws BundleException, IOException {
 
 		// add another bundle
@@ -106,11 +111,4 @@ public class NamespaceTest extends TestCase {
 		BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] {anotherNamespaceBundle});
 	}
 
-	public static Test suite() {
-		//Order is important
-		TestSuite sameSession = new TestSuite(NamespaceTest.class.getName());
-		sameSession.addTest(new NamespaceTest("testNamespaceBasic"));
-		sameSession.addTest(new NamespaceTest("testNamespaceDynamic"));
-		return sameSession;
-	}
 }

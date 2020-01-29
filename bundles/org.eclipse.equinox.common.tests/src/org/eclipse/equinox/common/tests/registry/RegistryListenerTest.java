@@ -13,10 +13,16 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.registry;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
-import junit.framework.TestCase;
+
 import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -26,29 +32,21 @@ import org.osgi.framework.FrameworkUtil;
  * Tests "new" registry event listener.
  * @since 3.4
  */
-public class RegistryListenerTest extends TestCase {
+public class RegistryListenerTest {
 
 	final private static int MAX_TIME_PER_BUNDLE = 10000; // maximum time to wait for bundle event in milliseconds
 
-	private BundleContext fBundleContext;
+	private static BundleContext fBundleContext;
 	
-	public RegistryListenerTest() {
-		super();
-	}
-
-	public RegistryListenerTest(String name) {
-		super(name);
-	}
-	
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		fBundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
+	@BeforeClass
+	public static void setUp() throws Exception {
+		fBundleContext = FrameworkUtil.getBundle(RegistryListenerTest.class).getBundleContext();
 	}
 
 	/**
 	 * Producer and consumer bundles are installed and removed in a "normal" order
 	 */
+	@Test
 	public void testRegularOrder() throws IOException, BundleException {
 		Bundle bundle01 = null;
 		Bundle bundle02 = null;
@@ -107,6 +105,7 @@ public class RegistryListenerTest extends TestCase {
 	/**
 	 * Producer and consumer bundles are installed and removed in an inverse order
 	 */
+	@Test
 	public void testInverseOrder() throws IOException, BundleException {
 		Bundle bundle01 = null;
 		Bundle bundle02 = null;
@@ -166,6 +165,7 @@ public class RegistryListenerTest extends TestCase {
 	 * Tests modifications to multiple extensions and extension points
 	 * Three listeners are tested: global; on xp1 (two extensions); on xp2 (no extensions)
 	 */
+	@Test
 	public void testMultiplePoints() throws IOException, BundleException {
 		Bundle bundle = null;
 		WaitingRegistryListener listenerGlobal = new WaitingRegistryListener();
@@ -243,6 +243,7 @@ public class RegistryListenerTest extends TestCase {
 	/**
 	 * Tests listener registered multiple times: once on xp1, once on xp2
 	 */
+	@Test
 	public void testMultipleRegistrations() throws IOException, BundleException {
 		Bundle bundle = null;
 		WaitingRegistryListener listener = new WaitingRegistryListener();

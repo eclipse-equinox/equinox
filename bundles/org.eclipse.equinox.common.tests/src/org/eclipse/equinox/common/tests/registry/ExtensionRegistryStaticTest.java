@@ -14,31 +14,35 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.registry;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
-import junit.framework.*;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
+import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
+import org.junit.Test;
+import org.junit.runners.MethodSorters;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkUtil;
 
-public class ExtensionRegistryStaticTest extends TestCase {
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+public class ExtensionRegistryStaticTest {
 
-	private BundleContext fBundleContext;
+	private static BundleContext fBundleContext;
 
-	public ExtensionRegistryStaticTest(String name) {
-		super(name);
-	}
-	
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		fBundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
+	@BeforeClass
+	public static void setUp() throws Exception {
+		fBundleContext = FrameworkUtil.getBundle(ExtensionRegistryStaticTest.class).getBundleContext();
 	}
 
+	@Test
 	public void testA() throws IOException, BundleException {
 		//test the addition of an extension point
 		String name = "A";
@@ -46,12 +50,12 @@ public class ExtensionRegistryStaticTest extends TestCase {
 		BundleTestingHelper.refreshPackages(fBundleContext, new Bundle[] {bundle01});
 		testExtensionPoint(name);
 	}
-
+	@Test
 	public void testAFromCache() {
 		//Check that it has been persisted
 		testExtensionPoint("A");
 	}
-
+	
 	private void testExtensionPoint(String name) {
 		assertNotNull(RegistryFactory.getRegistry().getExtensionPoint("test" + name + ".xpt" + name));
 		assertEquals(RegistryFactory.getRegistry().getExtensionPoint("test" + name + ".xpt" + name).getLabel(), "Label xpt" + name);
@@ -60,14 +64,14 @@ public class ExtensionRegistryStaticTest extends TestCase {
 		assertEquals(RegistryFactory.getRegistry().getExtensionPoint("test" + name + ".xpt" + name).getContributor().getName(), "test" + name);
 		assertEquals(RegistryFactory.getRegistry().getExtensionPoint("test" + name + ".xpt" + name).getSchemaReference(), "schema/xpt" + name + ".exsd");
 	}
-
+	@Test
 	public void testB() throws IOException, BundleException {
 		//test the addition of an extension without extension point
 		Bundle bundle01 = BundleTestingHelper.installBundle("", fBundleContext, "Plugin_Testing/registry/testB/1");
 		BundleTestingHelper.refreshPackages(fBundleContext, new Bundle[] {bundle01});
 		assertNull(RegistryFactory.getRegistry().getExtension("testB2", "xptB2", "ext1"));
 	}
-
+	@Test
 	public void testBFromCache() throws IOException, BundleException {
 		// Test the addition of an extension point when orphans extension exists
 		assertNull(RegistryFactory.getRegistry().getExtension("testB2", "xptB2", "ext1"));
@@ -99,7 +103,7 @@ public class ExtensionRegistryStaticTest extends TestCase {
 		assertEquals(RegistryFactory.getRegistry().getExtensionPoints("testB2").length, 0);
 		assertNull(RegistryFactory.getRegistry().getExtensionPoint("testB2.xptB2"));
 	}
-
+	@Test
 	public void testBRemoved() {
 		//Test if testB has been removed.
 		assertNull(RegistryFactory.getRegistry().getExtension("testB1.ext1"));
@@ -107,7 +111,7 @@ public class ExtensionRegistryStaticTest extends TestCase {
 		assertEquals(RegistryFactory.getRegistry().getExtensionPoints("testB2").length, 0);
 		assertNull(RegistryFactory.getRegistry().getExtensionPoint("testB2.xptB2"));
 	}
-
+	@Test
 	public void testC() throws IOException, BundleException {
 		//test the addition of an extension point then the addition of an extension
 		Bundle bundle01 = BundleTestingHelper.installBundle("", fBundleContext, "Plugin_Testing/registry/testC/1");
@@ -131,7 +135,7 @@ public class ExtensionRegistryStaticTest extends TestCase {
 		assertNotNull(RegistryFactory.getRegistry().getExtensionPoint("testC1.xptC1").getExtension("testC2.ext1"));
 		assertEquals(RegistryFactory.getRegistry().getExtensionPoint("testC1.xptC1").getExtensions()[0].getUniqueIdentifier(), "testC2.ext1");
 	}
-
+	@Test
 	public void testD() throws IOException, BundleException {
 		//test the addition of an extension then the addition of an extension point
 		Bundle bundle02 = BundleTestingHelper.installBundle("", fBundleContext, "Plugin_Testing/registry/testD/2");
@@ -155,7 +159,7 @@ public class ExtensionRegistryStaticTest extends TestCase {
 		assertNotNull(RegistryFactory.getRegistry().getExtensionPoint("testD1.xptD1").getExtension("testD2.ext1"));
 		assertEquals(RegistryFactory.getRegistry().getExtensionPoint("testD1.xptD1").getExtensions()[0].getUniqueIdentifier(), "testD2.ext1");
 	}
-
+	@Test
 	public void testE() throws IOException, BundleException {
 		//test the addition of an extension point and then add the extension through a fragment
 		Bundle bundle01 = BundleTestingHelper.installBundle("", fBundleContext, "Plugin_Testing/registry/testE/1");
@@ -179,7 +183,7 @@ public class ExtensionRegistryStaticTest extends TestCase {
 		assertNotNull(RegistryFactory.getRegistry().getExtensionPoint("testE1.xptE1").getExtension("testE1.ext1"));
 		assertEquals(RegistryFactory.getRegistry().getExtensionPoint("testE1.xptE1").getExtensions()[0].getUniqueIdentifier(), "testE1.ext1");
 	}
-
+	@Test
 	public void testF() throws IOException, BundleException {
 		//test the addition of the extension through a fragment then the addition of an extension point
 		Bundle bundle02 = BundleTestingHelper.installBundle("", fBundleContext, "Plugin_Testing/registry/testF/2");
@@ -207,7 +211,7 @@ public class ExtensionRegistryStaticTest extends TestCase {
 		assertEquals(Arrays.asList(RegistryFactory.getRegistry().getNamespaces()).contains("testF1"), true);
 		assertEquals(Arrays.asList(RegistryFactory.getRegistry().getNamespaces()).contains("testF2"), false);
 	}
-
+	@Test
 	public void testG() throws IOException, BundleException {
 		//fragment contributing an extension point to a plugin that do not have extension or extension point
 		Bundle bundle01 = BundleTestingHelper.installBundle("", fBundleContext, "Plugin_Testing/registry/testG/1");
@@ -226,7 +230,7 @@ public class ExtensionRegistryStaticTest extends TestCase {
 		assertEquals(Arrays.asList(RegistryFactory.getRegistry().getNamespaces()).contains("testG1"), true);
 		assertEquals(Arrays.asList(RegistryFactory.getRegistry().getNamespaces()).contains("testG2"), false);
 	}
-
+	@Test
 	public void testH() throws IOException, BundleException {
 		//		fragment contributing an extension to a plugin that does not have extension or extension point
 		Bundle bundle01 = BundleTestingHelper.installBundle("", fBundleContext, "Plugin_Testing/registry/testH/1");
@@ -258,8 +262,8 @@ public class ExtensionRegistryStaticTest extends TestCase {
 		assertEquals(Arrays.asList(RegistryFactory.getRegistry().getNamespaces()).contains("testH3"), true);
 		assertEquals(Arrays.asList(RegistryFactory.getRegistry().getNamespaces()).contains("testH2"), false); //fragments do not come with their namespace
 	}
-
-	public void test71826() throws MalformedURLException, BundleException, IOException {
+	@Test
+	public void testH71826() throws MalformedURLException, BundleException, IOException {
 		Bundle bundle01 = BundleTestingHelper.installBundle("", fBundleContext, "Plugin_Testing/registry/71826/fragmentF");
 		BundleTestingHelper.refreshPackages(fBundleContext, new Bundle[] {bundle01});
 
@@ -276,7 +280,7 @@ public class ExtensionRegistryStaticTest extends TestCase {
 		assertNotNull("1.2", xp.getExtension("71826A.F1"));
 		assertNotNull("1.3", xp.getExtension("71826B.B1"));
 	}
-
+	@Test
 	public void testJ() throws MalformedURLException, BundleException, IOException {
 		//Test the third level configuration elements
 		Bundle bundle01 = BundleTestingHelper.installBundle("", fBundleContext, "Plugin_Testing/registry/testI");
@@ -295,7 +299,7 @@ public class ExtensionRegistryStaticTest extends TestCase {
 		assertEquals(ce.getChildren()[0].getChildren()[0].getChildren()[0].getName(), "ce4");
 		assertNotNull(ce.getChildren()[0].getChildren()[0].getChildren()[0].getValue());
 	}
-
+	@Test
 	public void testJbis() {
 		//Test the third level configuration elements from cache
 		IExtension ext = RegistryFactory.getRegistry().getExtension("testI.ext1");
@@ -311,49 +315,26 @@ public class ExtensionRegistryStaticTest extends TestCase {
 		assertEquals(ce.getChildren()[0].getChildren()[0].getChildren()[0].getName(), "ce4");
 		assertNotNull(ce.getChildren()[0].getChildren()[0].getChildren()[0].getValue());
 	}
-
-	public void testNonSingletonBundle() throws MalformedURLException, BundleException, IOException {
+	@Test
+	public void testKNonSingletonBundle() throws MalformedURLException, BundleException, IOException {
 		//Non singleton bundles are not supposed to be added
 		Bundle nonSingletonBundle = BundleTestingHelper.installBundle("", fBundleContext, "Plugin_Testing/registry/nonSingleton");
 		BundleTestingHelper.refreshPackages(fBundleContext, new Bundle[] {nonSingletonBundle});
 		assertNull(RegistryFactory.getRegistry().getExtensionPoint("NonSingleton.ExtensionPoint"));
 	}
-
-	public void testSingletonFragment() throws MalformedURLException, BundleException, IOException {
+	@Test
+	public void testLSingletonFragment() throws MalformedURLException, BundleException, IOException {
 		//Fragments to non singleton host can not contribute extension or extension points
 		Bundle fragmentToNonSingleton = BundleTestingHelper.installBundle("", fBundleContext, "Plugin_Testing/registry/fragmentToNonSingleton");
 		BundleTestingHelper.refreshPackages(fBundleContext, new Bundle[] {fragmentToNonSingleton});
 		assertNull(RegistryFactory.getRegistry().getExtensionPoint("NonSingleton.Bar"));
 	}
-
-	public void testNonSingletonFragment() throws MalformedURLException, BundleException, IOException {
+	@Test
+	public void testMNonSingletonFragment() throws MalformedURLException, BundleException, IOException {
 		//Non singleton bundles are not supposed to be added
 		Bundle regular = BundleTestingHelper.installBundle("", fBundleContext, "Plugin_Testing/registry/nonSingletonFragment/plugin");
 		Bundle nonSingletonFragment = BundleTestingHelper.installBundle("", fBundleContext, "Plugin_Testing/registry/nonSingletonFragment/fragment");
 		BundleTestingHelper.refreshPackages(fBundleContext, new Bundle[] {regular, nonSingletonFragment});
 		assertNull(RegistryFactory.getRegistry().getExtensionPoint("Regular.Bar"));
-	}
-
-	public static Test suite() {
-		//Order is important
-		TestSuite sameSession = new TestSuite(ExtensionRegistryStaticTest.class.getName());
-		sameSession.addTest(new ExtensionRegistryStaticTest("testA"));
-		sameSession.addTest(new ExtensionRegistryStaticTest("testAFromCache"));
-		sameSession.addTest(new ExtensionRegistryStaticTest("testB"));
-		sameSession.addTest(new ExtensionRegistryStaticTest("testBFromCache"));
-		sameSession.addTest(new ExtensionRegistryStaticTest("testBRemoved"));
-		sameSession.addTest(new ExtensionRegistryStaticTest("testC"));
-		sameSession.addTest(new ExtensionRegistryStaticTest("testD"));
-		sameSession.addTest(new ExtensionRegistryStaticTest("testE"));
-		sameSession.addTest(new ExtensionRegistryStaticTest("testF"));
-		sameSession.addTest(new ExtensionRegistryStaticTest("testG"));
-		sameSession.addTest(new ExtensionRegistryStaticTest("testH"));
-		sameSession.addTest(new ExtensionRegistryStaticTest("test71826"));
-		sameSession.addTest(new ExtensionRegistryStaticTest("testJ"));
-		sameSession.addTest(new ExtensionRegistryStaticTest("testJbis"));
-		sameSession.addTest(new ExtensionRegistryStaticTest("testNonSingletonBundle"));
-		sameSession.addTest(new ExtensionRegistryStaticTest("testSingletonFragment"));
-		sameSession.addTest(new ExtensionRegistryStaticTest("testNonSingletonFragment"));
-		return sameSession;
 	}
 }

@@ -14,15 +14,21 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.registry;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.util.Locale;
-import junit.framework.TestCase;
 import org.eclipse.core.internal.registry.IRegistryConstants;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.spi.RegistryStrategy;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
 import org.eclipse.core.tests.harness.FileSystemHelper;
 import org.eclipse.osgi.service.localization.LocaleProvider;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
@@ -30,7 +36,7 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * Run with no NL argument or with "-nl en".
  */
-public class MultiLanguageTest extends TestCase {
+public class MultiLanguageTest {
 
 	class LocaleProviderTest implements LocaleProvider {
 		public Locale currentLocale;
@@ -69,10 +75,8 @@ public class MultiLanguageTest extends TestCase {
 
 	private BundleContext testBundleContext;
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-
+	@Before
+	public void setUp() throws Exception {
 		testBundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
 		bundle = BundleTestingHelper.installBundle("0.1", testBundleContext, "Plugin_Testing/registry/multiLang/bundleA");
 		bundleFragment = BundleTestingHelper.installBundle("0.2", testBundleContext, "Plugin_Testing/registry/multiLang/fragmentA");
@@ -88,8 +92,8 @@ public class MultiLanguageTest extends TestCase {
 		System.setProperty(IRegistryConstants.PROP_MULTI_LANGUAGE, "true");
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		// delete registry cache
 		FileSystemHelper.clear(tmpPath.toFile());
 
@@ -109,7 +113,6 @@ public class MultiLanguageTest extends TestCase {
 			bundleTracker.close();
 			bundleTracker = null;
 		}
-		super.tearDown();
 	}
 
 	private void refreshPackages(Bundle[] refresh) {
@@ -143,6 +146,7 @@ public class MultiLanguageTest extends TestCase {
 	/**
 	 * Tests APIs that take Locale as an argument.
 	 */
+	@Test
 	public void testMultiLocale() {
 		Object masterToken = new Object();
 		// Create a multi-language extension registry
@@ -167,6 +171,7 @@ public class MultiLanguageTest extends TestCase {
 	/**
 	 * Tests APIs that use implicit default Locale.
 	 */
+	@Test
 	public void testMultiLocaleService() {
 		Object masterToken = new Object();
 		// Create a multi-language extension registry

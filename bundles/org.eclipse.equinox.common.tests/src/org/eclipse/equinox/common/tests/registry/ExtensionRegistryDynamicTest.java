@@ -13,27 +13,24 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.registry;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
-import junit.framework.TestCase;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.dynamichelpers.*;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
 import org.eclipse.core.tests.harness.TestRegistryChangeListener;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkUtil;
 
-public class ExtensionRegistryDynamicTest extends TestCase {
+public class ExtensionRegistryDynamicTest {
 
-	public ExtensionRegistryDynamicTest() {
-		super();
-	}
-
-	public ExtensionRegistryDynamicTest(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testAddition() throws IOException, BundleException {
 		Bundle bundle01 = null;
 		Bundle bundle02 = null;
@@ -64,6 +61,7 @@ public class ExtensionRegistryDynamicTest extends TestCase {
 	/**
 	 * @see bug 65783
 	 */
+	@Test
 	public void testReresolving() throws IOException, BundleException {
 		Bundle bundle01 = null;
 		Bundle bundle02 = null;
@@ -95,6 +93,7 @@ public class ExtensionRegistryDynamicTest extends TestCase {
 	/**
 	 * @see bug 178028
 	 */
+	@Test
 	public void testEventTracker() throws IOException, BundleException {
 		Bundle bundle01 = null;
 		Bundle bundle02 = null;
