@@ -717,6 +717,52 @@ public class ConnectTests extends AbstractBundleTests {
 		}, withSignedHook);
 	}
 
+	public void testGetConnectHeaders() throws Exception {
+		final String NAME = "bundle";
+		final AtomicReference<Dictionary<String, String>> headers1 = new AtomicReference<>();
+		final AtomicReference<Dictionary<String, String>> headers2 = new AtomicReference<>();
+
+		TestCountingConnectFramework connectFactory = new TestCountingConnectFramework();
+		TestConnectModule m = createSimpleHeadersModule(NAME);
+		connectFactory.setModule(NAME, m);
+		doTestConnect(connectFactory, new HashMap<>(), (f) -> {
+			try {
+				f.start();
+				Bundle b = f.getBundleContext().installBundle(NAME);
+				assertEquals("Wrong name.", NAME, b.getSymbolicName());
+				headers1.set(b.getHeaders());
+				f.stop();
+				f.waitForStop(5000);
+			} catch (Throwable t) {
+				sneakyThrow(t);
+			}
+		});
+
+		doTestConnect(connectFactory, new HashMap<>(), (f) -> {
+			try {
+				f.start();
+				Bundle b = f.getBundleContext().getBundle(NAME);
+				assertFalse("Content is not closed", m.getContent().isOpen());
+				//Bundle.getHeaders() will eventually call ConnectBundleFile.getConnectHeaders() which opens the connect content
+				headers2.set(b.getHeaders());
+				assertTrue("Content is not open", m.getContent().isOpen());
+				f.stop();
+				f.waitForStop(5000);
+			} catch (Throwable t) {
+				sneakyThrow(t);
+			}
+		});
+		Dictionary<String, String> h1 = headers1.get();
+		Dictionary<String, String> h2 = headers2.get();
+
+		assertEquals("Headers size not equal", h1.size(), h2.size());
+
+		for (Enumeration<String> keys = h1.keys(); keys.hasMoreElements();) {
+			String key = keys.nextElement();
+			assertEquals(key + " header value not equal", h1.get(key), h2.get(key));
+		}
+	}
+
 	private void checkHeaders(Map<String, String> expected, Dictionary<String, String> actual) {
 		assertEquals("Headers size not equals", expected.size(), actual.size());
 		for (Entry<String, String> entry : expected.entrySet()) {
