@@ -61,9 +61,9 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.connect.ConnectContent;
 import org.osgi.framework.connect.ConnectContent.ConnectEntry;
-import org.osgi.framework.connect.ConnectFramework;
 import org.osgi.framework.connect.ConnectFrameworkFactory;
 import org.osgi.framework.connect.ConnectModule;
+import org.osgi.framework.connect.ModuleConnector;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.wiring.BundleCapability;
@@ -78,11 +78,11 @@ public class ConnectTests extends AbstractBundleTests {
 		return new TestSuite(ConnectTests.class);
 	}
 
-	void doTestConnect(ConnectFramework connectFactory, Map<String, String> fwkConfig, Consumer<Framework> test) {
-		doTestConnect(connectFactory, fwkConfig, test, false);
+	void doTestConnect(ModuleConnector moduleConnector, Map<String, String> fwkConfig, Consumer<Framework> test) {
+		doTestConnect(moduleConnector, fwkConfig, test, false);
 	}
 
-	void doTestConnect(ConnectFramework connectFactory, Map<String, String> fwkConfig, Consumer<Framework> test, boolean enableRuntimeVerification) {
+	void doTestConnect(ModuleConnector moduleConnector, Map<String, String> fwkConfig, Consumer<Framework> test, boolean enableRuntimeVerification) {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		config.mkdirs();
 		fwkConfig.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
@@ -90,7 +90,7 @@ public class ConnectTests extends AbstractBundleTests {
 			fwkConfig.put("osgi.signedcontent.support", "runtime");
 		}
 		ConnectFrameworkFactory fwkFactory = new EquinoxFactory();
-		Framework framework = fwkFactory.newFramework(fwkConfig, connectFactory);
+		Framework framework = fwkFactory.newFramework(fwkConfig, moduleConnector);
 		boolean passed = false;
 		try {
 			test.accept(framework);
@@ -107,20 +107,20 @@ public class ConnectTests extends AbstractBundleTests {
 		}
 	}
 
-	public static class TestCountingConnectFramework implements ConnectFramework {
+	public static class TestCountingModuleConnector implements ModuleConnector {
 		private final AtomicInteger initializeCalled = new AtomicInteger();
 		private final Queue<String> getModuleCalled = new ConcurrentLinkedQueue<>();
 		private final AtomicInteger createBundleActivatorCalled = new AtomicInteger();
-		private final Map<String, ConnectModule> modules = new ConcurrentHashMap<String, ConnectModule>();
+		private final Map<String, ConnectModule> modules = new ConcurrentHashMap<>();
 
 		@Override
-		public ConnectFramework initialize(File storage, Map<String, String> config) {
+		public ModuleConnector initialize(File storage, Map<String, String> config) {
 			initializeCalled.getAndIncrement();
 			return this;
 		}
 
 		@Override
-		public Optional<ConnectModule> getModule(String location) throws BundleException {
+		public Optional<ConnectModule> connect(String location) throws BundleException {
 			getModuleCalled.add(location);
 			ConnectModule m = modules.get(location);
 			if (m == BUNDLE_EXCEPTION) {
@@ -320,7 +320,7 @@ public class ConnectTests extends AbstractBundleTests {
 	static final TestConnectModule BUNDLE_EXCEPTION = new TestConnectModule(null);
 
 	public void testConnectFactoryNoModules() {
-		TestCountingConnectFramework connectFactory = new TestCountingConnectFramework();
+		TestCountingModuleConnector connectFactory = new TestCountingModuleConnector();
 
 		doTestConnect(connectFactory, new HashMap<>(), (f) -> {
 			try {
@@ -350,7 +350,7 @@ public class ConnectTests extends AbstractBundleTests {
 	public void testConnectActivator() {
 		final AtomicInteger bundleActvatorStartCalled = new AtomicInteger();
 		final AtomicInteger bundleActvatorStopCalled = new AtomicInteger();
-		ConnectFramework activatorConnectFramework = new TestCountingConnectFramework() {
+		ModuleConnector activatorModuleConnector = new TestCountingModuleConnector() {
 			@Override
 			public Optional<BundleActivator> createBundleActivator() {
 				super.createBundleActivator();
@@ -369,7 +369,7 @@ public class ConnectTests extends AbstractBundleTests {
 			}
 		};
 
-		doTestConnect(activatorConnectFramework, new HashMap<>(), (f) -> {
+		doTestConnect(activatorModuleConnector, new HashMap<>(), (f) -> {
 			try {
 				f.start();
 				f.stop();
@@ -389,9 +389,9 @@ public class ConnectTests extends AbstractBundleTests {
 		final AtomicReference<File> initFile = new AtomicReference<>();
 		final AtomicReference<File> storeFile = new AtomicReference<>();
 		final AtomicReference<Map<String, String>> initConfig = new AtomicReference<>();
-		ConnectFramework activatorConnectFramework = new TestCountingConnectFramework() {
+		ModuleConnector initParamsModuleConnector = new TestCountingModuleConnector() {
 			@Override
-			public ConnectFramework initialize(File storage, Map<String, String> config) {
+			public ModuleConnector initialize(File storage, Map<String, String> config) {
 				super.initialize(storage, config);
 				initFile.set(storage);
 				initConfig.set(config);
@@ -403,7 +403,7 @@ public class ConnectTests extends AbstractBundleTests {
 		config.put("k1", "v1");
 		config.put("k2", "v2");
 
-		doTestConnect(activatorConnectFramework, config, (f) -> {
+		doTestConnect(initParamsModuleConnector, config, (f) -> {
 			try {
 				f.init();
 				BundleContext bc = f.getBundleContext();
@@ -431,7 +431,7 @@ public class ConnectTests extends AbstractBundleTests {
 	}
 
 	void doTestConnectContentSimple(boolean withManifest) throws IOException {
-		TestCountingConnectFramework connectFactory = new TestCountingConnectFramework();
+		TestCountingModuleConnector connectFactory = new TestCountingModuleConnector();
 		final List<String> locations = Arrays.asList("b.1", "b.2", "b.3", "b.4");
 		for (String l : locations) {
 			connectFactory.setModule(l, withManifest ? createSimpleManifestModule(l) : createSimpleHeadersModule(l));
@@ -519,7 +519,7 @@ public class ConnectTests extends AbstractBundleTests {
 	}
 
 	void doTestConnectContentActivators(boolean provideLoader) {
-		TestCountingConnectFramework connectFactory = new TestCountingConnectFramework();
+		TestCountingModuleConnector connectFactory = new TestCountingModuleConnector();
 		final List<Integer> ids = Arrays.asList(1, 2, 3);
 		for (Integer id : ids) {
 			connectFactory.setModule(id.toString(), createAdvancedModule(id, provideLoader));
@@ -557,7 +557,7 @@ public class ConnectTests extends AbstractBundleTests {
 	}
 
 	void doTestConnectContentEntries(boolean provideLoader) {
-		TestCountingConnectFramework connectFactory = new TestCountingConnectFramework();
+		TestCountingModuleConnector connectFactory = new TestCountingModuleConnector();
 		final List<Integer> ids = Arrays.asList(1, 2, 3);
 		final Map<Integer, TestConnectModule> modules = new HashMap<>();
 		for (Integer id : ids) {
@@ -635,7 +635,7 @@ public class ConnectTests extends AbstractBundleTests {
 	public void testOpenCloseUpdateConnectContent() {
 		final String NAME1 = "testUpdate.1";
 		final String NAME2 = "testUpdate.2";
-		TestCountingConnectFramework connectFactory = new TestCountingConnectFramework();
+		TestCountingModuleConnector connectFactory = new TestCountingModuleConnector();
 		TestConnectModule m = createSimpleHeadersModule(NAME1);
 		connectFactory.setModule(NAME1, m);
 
@@ -685,7 +685,7 @@ public class ConnectTests extends AbstractBundleTests {
 	void doTestConnectBundleHeaders(boolean withSignedHook, boolean withManifest) throws IOException {
 		final String NAME1 = "bundle1";
 		final String NAME2 = "bundle2";
-		TestCountingConnectFramework connectFactory = new TestCountingConnectFramework();
+		TestCountingModuleConnector connectFactory = new TestCountingModuleConnector();
 		TestConnectModule m = withManifest ? createSimpleManifestModule(NAME1) : createSimpleHeadersModule(NAME1);
 		connectFactory.setModule(NAME1, m);
 		doTestConnect(connectFactory, new HashMap<>(), (f) -> {
@@ -722,7 +722,7 @@ public class ConnectTests extends AbstractBundleTests {
 		final AtomicReference<Dictionary<String, String>> headers1 = new AtomicReference<>();
 		final AtomicReference<Dictionary<String, String>> headers2 = new AtomicReference<>();
 
-		TestCountingConnectFramework connectFactory = new TestCountingConnectFramework();
+		TestCountingModuleConnector connectFactory = new TestCountingModuleConnector();
 		TestConnectModule m = createSimpleHeadersModule(NAME);
 		connectFactory.setModule(NAME, m);
 		doTestConnect(connectFactory, new HashMap<>(), (f) -> {

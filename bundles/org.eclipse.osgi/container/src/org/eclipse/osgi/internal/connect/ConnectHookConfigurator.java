@@ -27,7 +27,6 @@ import java.util.List;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.ModuleRevisionBuilder;
-import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer.ConnectModules;
 import org.eclipse.osgi.internal.hookregistry.ActivatorHookFactory;
@@ -45,8 +44,8 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.connect.ConnectContent;
-import org.osgi.framework.connect.ConnectFramework;
 import org.osgi.framework.connect.ConnectModule;
+import org.osgi.framework.connect.ModuleConnector;
 import org.osgi.framework.namespace.IdentityNamespace;
 
 public class ConnectHookConfigurator implements HookConfigurator {
@@ -54,7 +53,7 @@ public class ConnectHookConfigurator implements HookConfigurator {
 	@Override
 	public void addHooks(final HookRegistry hookRegistry) {
 		final ConnectModules connectModules = hookRegistry.getContainer().getConnectModules();
-		ConnectFramework connectFramework = connectModules.getConnectFramework();
+		ModuleConnector moduleConnector = connectModules.getConnectFramework();
 
 		hookRegistry.addStorageHookFactory(new StorageHookFactory<Object, Object, StorageHook<Object, Object>>() {
 			@Override
@@ -93,37 +92,25 @@ public class ConnectHookConfigurator implements HookConfigurator {
 					@Override
 					public ModuleRevisionBuilder adaptModuleRevisionBuilder(ModuleEvent operation, Module origin, ModuleRevisionBuilder builder) {
 						if (m != null) {
-							try {
-								ConnectContent content = m.getContent();
-								ModuleRevisionBuilder connectBuilder = content.getHeaders().map((h) -> {
-									try {
-										return OSGiManifestBuilderFactory.createBuilder(h);
-									} catch (BundleException e) {
-										sneakyThrow(e);
-									}
-									return null; // should never get here
-								}).orElse(builder);
-								connectBuilder.getCapabilities().stream() //
-										.filter(i -> IdentityNamespace.IDENTITY_NAMESPACE.equals(i.getNamespace())) //
-										.findFirst().ifPresent((i) -> {
-											i.getAttributes().compute(IdentityNamespace.CAPABILITY_TAGS_ATTRIBUTE, (k, v) -> {
-												if (v == null) {
-													return Collections.singletonList(ConnectContent.TAG_OSGI_CONNECT);
-												}
-												if (v instanceof List) {
-													@SuppressWarnings({"unchecked", "rawtypes"})
-													List<String> l = new ArrayList<>((List) v);
-													l.add(ConnectContent.TAG_OSGI_CONNECT);
-													return Collections.unmodifiableList(l);
-												}
-												// should not get here, but just recover 
-												return Arrays.asList(v, ConnectContent.TAG_OSGI_CONNECT);
-											});
-										});
-								return connectBuilder;
-							} catch (IOException e) {
-								sneakyThrow(new BundleException("Error reading bundle.", BundleException.READ_ERROR, e)); //$NON-NLS-1$
-							}
+							builder.getCapabilities()
+								.stream() //
+								.filter(i -> IdentityNamespace.IDENTITY_NAMESPACE.equals(i.getNamespace())) //
+								.findFirst().ifPresent((i) -> {
+									i.getAttributes().compute(IdentityNamespace.CAPABILITY_TAGS_ATTRIBUTE, (k, v) -> {
+										if (v == null) {
+											return Collections.singletonList(ConnectContent.TAG_OSGI_CONNECT);
+										}
+										if (v instanceof List) {
+											@SuppressWarnings({"unchecked", "rawtypes"})
+											List<String> l = new ArrayList<>((List) v);
+											l.add(ConnectContent.TAG_OSGI_CONNECT);
+											return Collections.unmodifiableList(l);
+										}
+										// should not get here, but just recover 
+										return Arrays.asList(v, ConnectContent.TAG_OSGI_CONNECT);
+									});
+								});
+							return builder;
 						}
 						return null;
 					}
@@ -149,7 +136,7 @@ public class ConnectHookConfigurator implements HookConfigurator {
 			}
 		});
 
-		if (connectFramework == null) {
+		if (moduleConnector == null) {
 			return;
 		}
 
@@ -180,7 +167,7 @@ public class ConnectHookConfigurator implements HookConfigurator {
 			@Override
 			public BundleActivator createActivator() {
 				final List<BundleActivator> activators = new ArrayList<>();
-				connectFramework.createBundleActivator().ifPresent((a) -> activators.add(a));
+				moduleConnector.createBundleActivator().ifPresent((a) -> activators.add(a));
 				return new BundleActivator() {
 					@Override
 					public void start(BundleContext context) throws Exception {

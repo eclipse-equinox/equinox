@@ -80,6 +80,13 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="osgi/src/org/osgi/framework/connect/ModuleConnector.java" type="org.osgi.framework.connect.ModuleConnector">
+        <filter comment="Not for OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.connect.ModuleConnector"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="osgi/src/org/osgi/framework/launch/FrameworkFactory.java" type="org.osgi.framework.launch.FrameworkFactory">
         <filter comment="Not for OSGi packages" id="403804204">
             <message_arguments>

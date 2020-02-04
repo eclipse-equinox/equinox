@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2013 IBM Corporation and others.
+ * Copyright (c) 2008, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -30,7 +30,7 @@ import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
-import org.osgi.framework.connect.ConnectFramework;
+import org.osgi.framework.connect.ModuleConnector;
 import org.osgi.framework.launch.Framework;
 
 /**
@@ -49,8 +49,8 @@ public class Equinox implements Framework {
 	/**
 	 * @since 3.16
 	 */
-	public Equinox(Map<String, ?> configuration, ConnectFramework connectFramework) {
-		EquinoxContainer container = new EquinoxContainer(configuration, connectFramework);
+	public Equinox(Map<String, ?> configuration, ModuleConnector moduleConnector) {
+		EquinoxContainer container = new EquinoxContainer(configuration, moduleConnector);
 		systemBundle = (Framework) container.getStorage().getModuleContainer().getModule(0).getBundle();
 	}
 
