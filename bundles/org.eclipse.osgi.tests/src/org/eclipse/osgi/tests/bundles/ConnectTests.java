@@ -114,9 +114,8 @@ public class ConnectTests extends AbstractBundleTests {
 		private final Map<String, ConnectModule> modules = new ConcurrentHashMap<>();
 
 		@Override
-		public ModuleConnector initialize(File storage, Map<String, String> config) {
+		public void initialize(File storage, Map<String, String> config) {
 			initializeCalled.getAndIncrement();
-			return this;
 		}
 
 		@Override
@@ -211,20 +210,18 @@ public class ConnectTests extends AbstractBundleTests {
 
 		@SuppressWarnings("unused")
 		@Override
-		public ConnectContent open() throws IOException {
+		public void open() throws IOException {
 			if (!isOpen.compareAndSet(false, true)) {
 				throw new IllegalStateException("Already Opened.");
 			}
-			return this;
 		}
 
 		@SuppressWarnings("unused")
 		@Override
-		public ConnectContent close() throws IOException {
+		public void close() throws IOException {
 			if (!isOpen.compareAndSet(true, false)) {
 				throw new IllegalStateException("Already Closed.");
 			}
-			return this;
 		}
 
 		void addEntry(String path, ConnectEntry entry) {
@@ -391,11 +388,10 @@ public class ConnectTests extends AbstractBundleTests {
 		final AtomicReference<Map<String, String>> initConfig = new AtomicReference<>();
 		ModuleConnector initParamsModuleConnector = new TestCountingModuleConnector() {
 			@Override
-			public ModuleConnector initialize(File storage, Map<String, String> config) {
+			public void initialize(File storage, Map<String, String> config) {
 				super.initialize(storage, config);
 				initFile.set(storage);
 				initConfig.set(config);
-				return this;
 			}
 		};
 
