@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Marcus Höpfner and others.
+ * Copyright (c) 2020 Marcus Hoepfner and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     Marcus Höpfner - initial API and implementation
+ *     Marcus Hoepfner - initial API and implementation
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
