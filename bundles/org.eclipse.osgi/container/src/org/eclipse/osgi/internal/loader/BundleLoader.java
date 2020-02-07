@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2018 IBM Corporation and others.
+ * Copyright (c) 2004, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -414,24 +414,20 @@ public class BundleLoader extends ModuleLoader {
 	 * Finds the class for a bundle.  This method is used for delegation by the bundle's classloader.
 	 */
 	public Class<?> findClass(String name) throws ClassNotFoundException {
-		return findClass(name, true);
-	}
 
-	Class<?> findClass(String name, boolean checkParent) throws ClassNotFoundException {
-		if (checkParent && parent != null && name.startsWith(JAVA_PACKAGE))
+		if (parent != null && name.startsWith(JAVA_PACKAGE)) {
 			// 1) if startsWith "java." delegate to parent and terminate search
 			// we want to throw ClassNotFoundExceptions if a java.* class cannot be loaded from the parent.
 			return parent.loadClass(name);
-		return findClassInternal(name, checkParent);
-	}
+		}
 
-	private Class<?> findClassInternal(String name, boolean checkParent) throws ClassNotFoundException {
 		if (debug.DEBUG_LOADER)
-			Debug.println("BundleLoader[" + this + "].findClassInternal(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			Debug.println("BundleLoader[" + this + "].findClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
 		String pkgName = getPackageName(name);
 		boolean bootDelegation = false;
 		// follow the OSGi delegation model
-		if (checkParent && parent != null && container.isBootDelegationPackage(pkgName)) {
+		if (parent != null && container.isBootDelegationPackage(pkgName)) {
 			// 2) if part of the bootdelegation list then delegate to parent and continue of failure
 			try {
 				return parent.loadClass(name);
@@ -458,6 +454,11 @@ public class BundleLoader extends ModuleLoader {
 			}
 			// 3) found import source terminate search at the source
 			result = source.loadClass(name);
+			if (result == null) {
+				// last ditch find loaded check in case something is reflectively
+				// calling defineClass on our loader.
+				result = getModuleClassLoader().publicFindLoaded(name);
+			}
 			if (result != null)
 				return result;
 			throw new ClassNotFoundException(name + " cannot be found by " + this); //$NON-NLS-1$
@@ -503,7 +504,8 @@ public class BundleLoader extends ModuleLoader {
 			return result;
 		// hack to support backwards compatibility for bootdelegation
 		// or last resort; do class context trick to work around VM bugs
-		if (parent != null && !bootDelegation && ((checkParent && container.getConfiguration().compatibilityBootDelegation) || isRequestFromVM())) {
+		if (parent != null && !bootDelegation
+				&& ((container.getConfiguration().compatibilityBootDelegation) || isRequestFromVM())) {
 			// we don't need to continue if a CNFE is thrown here.
 			try {
 				return parent.loadClass(name);
