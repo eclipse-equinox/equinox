@@ -4157,6 +4157,51 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	public void testDynamicImportPrivatePackage() throws IOException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Map configuration = new HashMap();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = null;
+		try {
+			equinox = new Equinox(configuration);
+			equinox.start();
+			BundleContext bc = equinox.getBundleContext();
+
+			Bundle importer = bc.installBundle(installer.getBundleLocation("test.dynamic.privateimport"));
+			importer.start();
+
+			Map<String, String> exporter = new HashMap<>();
+			exporter.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+			exporter.put(Constants.BUNDLE_SYMBOLICNAME, getName() + ".exporter");
+			exporter.put(Constants.EXPORT_PACKAGE, "test.dynamic.privateimport");
+			File f1 = SystemBundleTests.createBundle(config, getName() + ".exporter", exporter);
+			Bundle exporterBundle = bc.installBundle("reference:file:///" + f1.getAbsolutePath()); //$NON-NLS-1$
+			exporterBundle.start();
+
+			try {
+				importer.loadClass("test.dynamic.privateimport.DoesNotExist");
+			} catch (ClassNotFoundException e) {
+				// expected
+			}
+
+			importer.stop();
+			importer.start();
+		} catch (BundleException e) {
+			fail("Unexpected BundleException", e);
+		} finally {
+			try {
+				if (equinox != null) {
+					equinox.stop();
+					equinox.waitForStop(1000);
+				}
+			} catch (BundleException e) {
+				fail("Failed to stop framework.", e);
+			} catch (InterruptedException e) {
+				fail("Failed to stop framework.", e);
+			}
+		}
+	}
+
 	// Note this is more of a performance test.  It has a timeout that will cause it to
 	// fail if it takes too long.
 	public void testMassiveParallelInstallStart() {
