@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.net.*;
 
 /**
- * URLStreamHandler for reference protocol.  A reference URL is used to hold a 
+ * URLStreamHandler for reference protocol.  A reference URL is used to hold a
  * reference to a local file URL.  A reference URL allows bundles to be installed
  * by reference.  This means the content of the bundle will not be copied.  Instead
  * the content of the bundle will be loaded from the reference location specified
@@ -44,7 +44,7 @@ public class Handler extends URLStreamHandler {
 	}
 
 	/**
-	 * @throws IOException  
+	 * @throws IOException
 	 */
 	@Override
 	protected URLConnection openConnection(URL url) throws IOException {

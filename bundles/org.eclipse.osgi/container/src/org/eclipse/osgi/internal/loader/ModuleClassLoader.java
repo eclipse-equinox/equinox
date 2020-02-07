@@ -154,9 +154,9 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	/**
 	 * Loads a class for the bundle.  First delegate.findClass(name) is called.
 	 * The delegate will query the system class loader, bundle imports, bundle
-	 * local classes, bundle hosts and fragments.  The delegate will call 
-	 * BundleClassLoader.findLocalClass(name) to find a class local to this 
-	 * bundle.  
+	 * local classes, bundle hosts and fragments.  The delegate will call
+	 * BundleClassLoader.findLocalClass(name) to find a class local to this
+	 * bundle.
 	 * @param name the name of the class to load.
 	 * @param resolve indicates whether to resolve the loaded class or not.
 	 * @return The Class object.
@@ -199,11 +199,11 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	}
 
 	/**
-	 * Gets a resource for the bundle.  First delegate.findResource(name) is 
+	 * Gets a resource for the bundle.  First delegate.findResource(name) is
 	 * called. The delegate will query the system class loader, bundle imports,
-	 * bundle local resources, bundle hosts and fragments.  The delegate will 
-	 * call BundleClassLoader.findLocalResource(name) to find a resource local 
-	 * to this bundle.  
+	 * bundle local resources, bundle hosts and fragments.  The delegate will
+	 * call BundleClassLoader.findLocalResource(name) to find a resource local
+	 * to this bundle.
 	 * @param name The resource path to get.
 	 * @return The URL of the resource or null if it does not exist.
 	 */
@@ -263,7 +263,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	}
 
 	/**
-	 * Finds a library for this bundle.  Simply calls 
+	 * Finds a library for this bundle.  Simply calls
 	 * manager.findLibrary(libname) to find the library.
 	 * @param libname The library to find.
 	 * @return The absolution path to the library or null if not found
@@ -350,7 +350,7 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	 * Creates a ProtectionDomain which uses specified BundleFile and the permissions of the baseDomain
 	 * @param bundlefile The source bundlefile the domain is for.
 	 * @param domainGeneration the source generation for the domain
-	 * @return a ProtectionDomain which uses specified BundleFile and the permissions of the baseDomain 
+	 * @return a ProtectionDomain which uses specified BundleFile and the permissions of the baseDomain
 	 */
 	@SuppressWarnings("deprecation")
 	protected ProtectionDomain createProtectionDomain(BundleFile bundlefile, Generation domainGeneration) {

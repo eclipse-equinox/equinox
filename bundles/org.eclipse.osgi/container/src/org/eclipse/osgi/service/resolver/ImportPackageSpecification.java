@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -16,7 +16,7 @@ package org.eclipse.osgi.service.resolver;
 import java.util.Map;
 
 /**
- * A representation of one package import constraint as seen in a 
+ * A representation of one package import constraint as seen in a
  * bundle manifest and managed by a state and resolver.
  * <p>
  * This interface is not intended to be implemented by clients.  The
@@ -47,7 +47,7 @@ public interface ImportPackageSpecification extends VersionConstraint {
 	public String getBundleSymbolicName();
 
 	/**
-	 * Returns the version range which this import package may be resolved to. 
+	 * Returns the version range which this import package may be resolved to.
 	 * @return the version range which this import package may be resolved to.
 	 */
 	public VersionRange getBundleVersionRange();

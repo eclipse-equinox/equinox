@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -160,7 +160,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String ECLIPSE_FRAMEWORK_VENDOR = "Eclipse"; //$NON-NLS-1$
 
 	public static final String PROP_OSGI_JAVA_PROFILE = "osgi.java.profile"; //$NON-NLS-1$
-	public static final String PROP_OSGI_JAVA_PROFILE_NAME = "osgi.java.profile.name"; //$NON-NLS-1$ 
+	public static final String PROP_OSGI_JAVA_PROFILE_NAME = "osgi.java.profile.name"; //$NON-NLS-1$
 	// OSGi java profile bootdelegation; used to indicate how the org.osgi.framework.bootdelegation
 	// property defined in the java profile should be processed, (ingnore, override, none). default is ignore
 	public static final String PROP_OSGI_JAVA_PROFILE_BOOTDELEGATION = "osgi.java.profile.bootdelegation"; //$NON-NLS-1$
@@ -186,7 +186,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	public static final String PROP_ROOT_LOCALE = "equinox.root.locale"; //$NON-NLS-1$
 
-	public static final String PROP_PARENT_CLASSLOADER = "osgi.parentClassloader"; //$NON-NLS-1$	
+	public static final String PROP_PARENT_CLASSLOADER = "osgi.parentClassloader"; //$NON-NLS-1$
 	// A parent classloader type that specifies the framework classlaoder
 	public static final String PARENT_CLASSLOADER_FWK = "fwk"; //$NON-NLS-1$
 	// System property used to set the context classloader parent classloader type (ccl is the default)
@@ -415,7 +415,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 								Method getenv = System.class.getMethod("getenv", new Class[] {String.class}); //$NON-NLS-1$
 								prop = (String) getenv.invoke(null, new Object[] {var});
 							} catch (Throwable t) {
-								// do nothing; 
+								// do nothing;
 								// on 1.4 VMs this throws an error
 								// on J2ME this method does not exist
 							}
@@ -1036,7 +1036,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		/*
 		 * Initializes the execution context for this run of the platform.  The context
 		 * includes information about the locale, operating system and window system.
-		 * 
+		 *
 		 * NOTE: The OS, WS, and ARCH values should never be null. The executable should
 		 * be setting these values and therefore this code path is obsolete for Eclipse
 		 * when run from the executable.
@@ -1053,7 +1053,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		nlValue = Locale.getDefault().toString();
 		setConfiguration(PROP_OSGI_NL, nlValue);
 
-		// if the user didn't set the operating system with a command line 
+		// if the user didn't set the operating system with a command line
 		// argument then use the default.
 		String osValue = getConfiguration(PROP_OSGI_OS);
 		if (osValue == null) {
@@ -1061,7 +1061,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			setConfiguration(PROP_OSGI_OS, osValue);
 		}
 
-		// if the user didn't set the window system with a command line 
+		// if the user didn't set the window system with a command line
 		// argument then use the default.
 		String wsValue = getConfiguration(PROP_OSGI_WS);
 		if (wsValue == null) {
@@ -1069,7 +1069,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			setConfiguration(PROP_OSGI_WS, wsValue);
 		}
 
-		// if the user didn't set the system architecture with a command line 
+		// if the user didn't set the system architecture with a command line
 		// argument then use the default.
 		String archValue = getConfiguration(PROP_OSGI_ARCH);
 		if (archValue == null) {
@@ -1138,22 +1138,22 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	 * <p>
 	 * Converts a String to a Locale.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * This method takes the string format of a locale and creates the locale object from it.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * This method validates the input strictly. The language code must be lowercase. The country
 	 * code must be uppercase. The separator must be an underscore. The length must be correct.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * This method is inspired by <code>org.apache.commons.lang.LocaleUtils.toLocale(String)</code>
 	 * by fixing the parsing error for uncommon Locales like having a language and a variant code
 	 * but no country code, or a Locale that only consists of a country code.
 	 * </p>
-	 * 
+	 *
 	 * @param str
 	 *            the locale String to convert
 	 * @param defaultLocale

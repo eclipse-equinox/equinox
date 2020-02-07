@@ -27,7 +27,7 @@ public class FrameworkUtilHelper {
 	/**
 	 * See {@link FrameworkUtil#getBundle(Class)}
 	 * @param classFromBundle a class defined by a bundle class loader.
-	 * @return A Bundle for the specified bundle class or null if the 
+	 * @return A Bundle for the specified bundle class or null if the
 	 * specified class was not defined by a bundle class loader.
 	 */
 	public Bundle getBundle(Class<?> classFromBundle) {

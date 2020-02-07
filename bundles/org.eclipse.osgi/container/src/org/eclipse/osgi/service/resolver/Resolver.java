@@ -42,7 +42,7 @@ public interface Resolver {
 	 * Note the given state is destructively modified to reflect the results of
 	 * resolution.
 	 * </p>
-	 * @param discard the list of bundles to discard the resolve status and 
+	 * @param discard the list of bundles to discard the resolve status and
 	 * reresolve.  A <code>null</code> value indicates that all currently unresolved
 	 * bundles in the state should be resolved.
 	 * @param platformProperties the platform properties used to match platform filters
@@ -62,7 +62,7 @@ public interface Resolver {
 	 * Returns the state associated with this resolver. A state can work with
 	 * at most one resolver at any given time. Similarly, a resolver can work
 	 * with at most one state at a time.
-	 * 
+	 *
 	 * @return the state for this resolver. null is returned if the resolver
 	 * does not have a state
 	 */
@@ -77,7 +77,7 @@ public interface Resolver {
 	 * the following expression must be included in this method if the given
 	 * state (value) is not identical to the result of this.getState().
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 *  if (this.getState() != value) value.setResolver(this);
 	 * </pre>
@@ -110,30 +110,30 @@ public interface Resolver {
 	/**
 	 * Attempts to find an ExportPackageDescription that will satisfy a dynamic import
 	 * for the specified requestedPackage for the specified importingBundle.  If no
-	 * ExportPackageDescription is available that satisfies a dynamic import for the 
+	 * ExportPackageDescription is available that satisfies a dynamic import for the
 	 * importingBundle then <code>null</code> is returned.
 	 * @param importingBundle the BundleDescription that is requesting a dynamic package
 	 * @param requestedPackage the name of the package that is being requested
-	 * @return the ExportPackageDescription that satisfies the dynamic import request; 
+	 * @return the ExportPackageDescription that satisfies the dynamic import request;
 	 * a value of <code>null</code> is returned if none is available.
 	 */
 	public ExportPackageDescription resolveDynamicImport(BundleDescription importingBundle, String requestedPackage);
 
 	/**
-	 * Sets the selection policy for this resolver.  A selection policy is used to sort 
+	 * Sets the selection policy for this resolver.  A selection policy is used to sort
 	 * possible suppliers of a version constraint in descending order.  That is an order
-	 * which is from most desired to least desired.  The objects passed to the 
-	 * selection policy {@link Comparator#compare(Object, Object)} method 
-	 * will be of type {@link BaseDescription}.  The selection policy should return a 
-	 * negative number, zero, or a positive number depending on if the first object is 
+	 * which is from most desired to least desired.  The objects passed to the
+	 * selection policy {@link Comparator#compare(Object, Object)} method
+	 * will be of type {@link BaseDescription}.  The selection policy should return a
+	 * negative number, zero, or a positive number depending on if the first object is
 	 * more desired, equal amount of desire, or less desired than the second object respectively.
 	 * <p>
 	 * If no selection policy is set then a default policy will be used which sorts according
-	 * to the following rules: 
+	 * to the following rules:
 	 * <ol>
 	 * <li> The resolution status of the bundle which supplies the base description.  Resolved bundles take priority over unresolved ones.
 	 * <li> The version of the base description.  Higher versions take priority over lower versions.
-	 * <li> The bundle ID which supplies the base description.  Lower IDs take priority over higher IDs. 
+	 * <li> The bundle ID which supplies the base description.  Lower IDs take priority over higher IDs.
 	 * </ol>
 	 * @param selectionPolicy the selection policy for this resolver
 	 * @since 3.2
@@ -141,9 +141,9 @@ public interface Resolver {
 	public void setSelectionPolicy(Comparator<BaseDescription> selectionPolicy);
 
 	/**
-	 * Returns the selection policy for this resolver or null if it is not set 
+	 * Returns the selection policy for this resolver or null if it is not set
 	 * @return the selection policy for this resolver or null if it is not set
-	 * @since 3.2 
+	 * @since 3.2
 	 */
 	public Comparator<BaseDescription> getSelectionPolicy();
 }

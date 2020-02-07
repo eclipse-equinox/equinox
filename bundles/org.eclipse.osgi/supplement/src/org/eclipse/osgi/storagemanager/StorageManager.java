@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -33,8 +33,8 @@ import org.eclipse.osgi.internal.location.Locker;
 import org.eclipse.osgi.internal.messages.Msg;
 
 /**
- * Storage managers provide a facility for tracking the state of a group of files having 
- * relationship with each others and being updated by several entities at the same time. 
+ * Storage managers provide a facility for tracking the state of a group of files having
+ * relationship with each others and being updated by several entities at the same time.
  * The typical usecase is in shared configuration data areas.
  * <p>
  * The facilities provided here are cooperative. That is, all participants must
@@ -55,13 +55,13 @@ import org.eclipse.osgi.internal.messages.Msg;
  * // Ignore the exception. The registry will be rebuilt from source.
  * }
  *
- * //To read from a file 
+ * //To read from a file
  * java.io.File fileA = cacheStorageManager.lookup("fileA", false));
  * java.io.File fileB = cacheStorageManager.lookup("fileB", false));
- * //Do the reading code 
+ * //Do the reading code
  * new java.io.FileOutputStream(fileA);
  *
- * //To write in files 
+ * //To write in files
  * cacheStorageManager.add("fileC"); //add the file to the filemanager (in this case we assume it is not already here)
  * cacheStorageManager.add("fileD");
  *
@@ -71,7 +71,7 @@ import org.eclipse.osgi.internal.messages.Msg;
  *
  * //Do the actual writing here...
  *
- * //Finally update the storagemanager with the actual file to manage. 
+ * //Finally update the storagemanager with the actual file to manage.
  * cacheStorageManager.update(new String[] {"fileC", "fileD"}, new String[] {fileC.getName(), fileD.getName()};
  *
  * //Close the file manager at the end
@@ -79,22 +79,22 @@ import org.eclipse.osgi.internal.messages.Msg;
  * </pre>
  * <p>
  * Implementation details <br>
- * The following implementation details are provided to help with understanding the 
+ * The following implementation details are provided to help with understanding the
  * behavior of this class.
  * The general principle is to maintain a table which maps user-level file names
- * onto an actual disk files.  If a file needs to be modified, 
+ * onto an actual disk files.  If a file needs to be modified,
  * it is stored into a new file.  The old content is not removed from disk until all entities
  * have closed there instance of the storage manager.
  * Once the instance has been created, open() must be called before performing any other operation.
  * On open the storage manager obtains a snapshot of the current managed files contents. If an
- * entity updates a managed file, the storage manager will save the content for that instance of the 
- * storage manager, all other storage manager instances will still have access to that managed file's 
+ * entity updates a managed file, the storage manager will save the content for that instance of the
+ * storage manager, all other storage manager instances will still have access to that managed file's
  * content as it was when the instance was first opened.
  * </p>
  * @since 3.2
  */
 
-// Note the implementation of this class originated from the following deprecated classes: 
+// Note the implementation of this class originated from the following deprecated classes:
 // /org.eclipse.osgi/eclipseAdaptor/src/org/eclipse/core/runtime/adaptor/FileManager.java
 // /org.eclipse.osgi/eclipseAdaptor/src/org/eclipse/core/runtime/adaptor/StreamManager.java
 public final class StorageManager {
@@ -103,7 +103,7 @@ public final class StorageManager {
 	private static final String MANAGER_FOLDER = ".manager"; //$NON-NLS-1$
 	private static final String TABLE_FILE = ".fileTable"; //$NON-NLS-1$
 	private static final String LOCK_FILE = ".fileTableLock"; //$NON-NLS-1$
-	private static final int MAX_LOCK_WAIT = 5000; // 5 seconds 
+	private static final int MAX_LOCK_WAIT = 5000; // 5 seconds
 	// these should be static but the tests expect to be able to create new managers after changing this setting dynamically
 	private final boolean useReliableFiles = Boolean.valueOf(System.getProperty("osgi.useReliableFiles")).booleanValue(); //$NON-NLS-1$
 	private final boolean tempCleanup = Boolean.valueOf(System.getProperty("osgi.embedded.cleanTempFiles")).booleanValue(); //$NON-NLS-1$
@@ -167,10 +167,10 @@ public final class StorageManager {
 	/**
 	 * Returns a new storage manager for the area identified by the given base
 	 * directory.
-	 * 
+	 *
 	 * @param base the directory holding the files to be managed
-	 * @param lockMode the lockMode to use for the storage manager. It can have one the 3 values: none, java.io, java.nio 
-	 * and also supports null in which case the lock strategy will be the global one.  
+	 * @param lockMode the lockMode to use for the storage manager. It can have one the 3 values: none, java.io, java.nio
+	 * and also supports null in which case the lock strategy will be the global one.
 	 */
 	public StorageManager(File base, String lockMode) {
 		this(base, lockMode, false);
@@ -179,10 +179,10 @@ public final class StorageManager {
 	/**
 	 * Returns a new storage manager for the area identified by the given base
 	 * directory.
-	 * 
+	 *
 	 * @param base the directory holding the files to be managed
-	 * @param lockMode the lockMode to use for the storage manager. It can have one the 3 values: none, java.io, java.nio 
-	 * and also supports null in which case the lock strategy will be the global one.  
+	 * @param lockMode the lockMode to use for the storage manager. It can have one the 3 values: none, java.io, java.nio
+	 * and also supports null in which case the lock strategy will be the global one.
 	 * @param readOnly true if the managed files are read-only
 	 */
 	public StorageManager(File base, String lockMode, boolean readOnly) {
@@ -210,7 +210,7 @@ public final class StorageManager {
 
 	/**
 	 * Add the given managed file name to the list of files managed by this manager.
-	 * 
+	 *
 	 * @param managedFile name of the file to manage
 	 * @throws IOException if there are any problems adding the given file name to the manager
 	 */
@@ -220,9 +220,9 @@ public final class StorageManager {
 
 	/* (non-Javadoc
 	 * Add the given file name to the list of files managed by this manager.
-	 * 
+	 *
 	 * @param managedFile name of the file to manage.
-	 * @param fileType the file type. 
+	 * @param fileType the file type.
 	 * @throws IOException if there are any problems adding the given file to the manager
 	 */
 	private void add(String managedFile, int fileType) throws IOException {
@@ -258,10 +258,10 @@ public final class StorageManager {
 	}
 
 	/* (non-Javadoc)
-	 * Find the oldest generation of a file still available on disk 
+	 * Find the oldest generation of a file still available on disk
 	 * @param file the file from which to obtain the oldest generation.
 	 * @return the oldest generation of the file or 0 if the file does
-	 * not exist. 
+	 * not exist.
 	 */
 	private int findOldestGeneration(String managedFile) {
 		String[] files = base.list();
@@ -287,12 +287,12 @@ public final class StorageManager {
 
 	/**
 	 * Update the given managed files with the content in the given source files.
-	 * The managedFiles is a list of managed file names which are currently managed. 
-	 * If a managed file name is not currently managed it will be added as a 
+	 * The managedFiles is a list of managed file names which are currently managed.
+	 * If a managed file name is not currently managed it will be added as a
 	 * managed file for this storage manager.
-	 * The sources are absolute (or relative to the current working directory) 
+	 * The sources are absolute (or relative to the current working directory)
 	 * file paths containing the new content for the corresponding managed files.
-	 * 
+	 *
 	 * @param managedFiles the managed files to update
 	 * @param sources the new content for the managed files
 	 * @throws IOException if there are any problems updating the given managed files
@@ -329,7 +329,7 @@ public final class StorageManager {
 
 	/**
 	 * Returns a list of all the managed files currently being managed.
-	 * 
+	 *
 	 * @return the names of the managed files
 	 */
 	public String[] getManagedFiles() {
@@ -347,7 +347,7 @@ public final class StorageManager {
 	/**
 	 * Returns the directory containing the files being managed by this storage
 	 * manager.
-	 * 
+	 *
 	 * @return the directory containing the managed files
 	 */
 	public File getBase() {
@@ -356,9 +356,9 @@ public final class StorageManager {
 
 	/**
 	 * Returns the current numeric id (appendage) of the given managed file.
-	 * <code>managedFile + "." + getId(target)</code>. A value of -1 is returned 
+	 * <code>managedFile + "." + getId(target)</code>. A value of -1 is returned
 	 * if the given name is not managed.
-	 * 
+	 *
 	 * @param managedFile the name of the managed file
 	 * @return the id of the managed file
 	 */
@@ -373,7 +373,7 @@ public final class StorageManager {
 
 	/**
 	 * Returns if readOnly state this storage manager is using.
-	 * 
+	 *
 	 * @return if this storage manager update state is read-only.
 	 */
 	public boolean isReadOnly() {
@@ -387,7 +387,7 @@ public final class StorageManager {
 	 * Locking a manager is advisory only. That is, it does not prevent other
 	 * applications from modifying the files managed by this manager.
 	 * </p>
-	 * 
+	 *
 	 * @exception IOException
 	 *                         if there was an unexpected problem while acquiring the
 	 *                         lock.
@@ -421,15 +421,15 @@ public final class StorageManager {
 	}
 
 	/**
-	 * Returns the actual file location to use when reading the given managed file. 
-	 * A value of <code>null</code> can be returned if the given managed file name is not 
-	 * managed and add is set to false.  
+	 * Returns the actual file location to use when reading the given managed file.
+	 * A value of <code>null</code> can be returned if the given managed file name is not
+	 * managed and add is set to false.
 	 * <p>
 	 * The returned file should be considered read-only.  Any updates to the content of this
 	 * file should be done using {@link #update(String[], String[])}.
-	 * 
+	 *
 	 * @param managedFile the managed file to lookup
-	 * @param add indicate whether the managed file name should be added to the manager if 
+	 * @param add indicate whether the managed file name should be added to the manager if
 	 * it is not already managed.
 	 * @throws IOException if the add flag is set to true and the addition of the managed file failed
 	 * @return the absolute file location to use for the given managed file or
@@ -471,7 +471,7 @@ public final class StorageManager {
 
 	/**
 	 * Removes the given managed file from management by this storage manager.
-	 * 
+	 *
 	 * @param managedFile the managed file to remove
 	 * @throws IOException if an error occured removing the managed file
 	 */
@@ -480,7 +480,7 @@ public final class StorageManager {
 			throw new IOException(Msg.fileManager_notOpen);
 		if (readOnly)
 			throw new IOException(Msg.fileManager_illegalInReadOnlyMode);
-		// The removal needs to be done eagerly, so the value is effectively removed from the disktable. 
+		// The removal needs to be done eagerly, so the value is effectively removed from the disktable.
 		// Otherwise, an updateTable() caused by an update(,)  could cause the file to readded to the local table.
 		if (!lock(true))
 			throw new IOException(Msg.fileManager_cannotLock);
@@ -701,7 +701,7 @@ public final class StorageManager {
 	}
 
 	/**
-	 * This methods opens the storage manager. 
+	 * This methods opens the storage manager.
 	 * This method must be called before any operation on the storage manager.
 	 * @param wait indicates if the open operation must wait in case of contention on the lock file.
 	 * @throws IOException if an error occurred opening the storage manager
@@ -748,11 +748,11 @@ public final class StorageManager {
 	}
 
 	/**
-	 * Returns a managed <code>InputStream</code> for a managed file. 
-	 * <code>null</code> can be returned if the given name is not managed. 
-	 * 
+	 * Returns a managed <code>InputStream</code> for a managed file.
+	 * <code>null</code> can be returned if the given name is not managed.
+	 *
 	 * @param managedFile the name of the managed file to open.
-	 * @return an input stream to the managed file or 
+	 * @return an input stream to the managed file or
 	 * <code>null</code> if the given name is not managed.
 	 * @throws IOException if the content is missing, corrupt or an error occurs.
 	 */
@@ -761,11 +761,11 @@ public final class StorageManager {
 	}
 
 	/**
-	 * Returns a managed input stream set for the managed file names. 
+	 * Returns a managed input stream set for the managed file names.
 	 * Elements of the returned set may be <code>null</code> if a given name is not managed.
-	 * This method should be used for managed file sets which use the output streams returned 
+	 * This method should be used for managed file sets which use the output streams returned
 	 * by the {@link #getOutputStreamSet(String[])} to save data.
-	 * 
+	 *
 	 * @param managedFiles the names of the managed files to open.
 	 * @return a set input streams to the given managed files.
 	 * @throws IOException if the content of one of the managed files is missing, corrupt or an error occurs.
@@ -791,10 +791,10 @@ public final class StorageManager {
 	}
 
 	/**
-	 * Returns a <code>ManagedOutputStream</code> for a managed file.  
-	 * Closing the ouput stream will update the storage manager with the 
+	 * Returns a <code>ManagedOutputStream</code> for a managed file.
+	 * Closing the ouput stream will update the storage manager with the
 	 * new content of the managed file.
-	 * 
+	 *
 	 * @param managedFile the name of the managed file to write.
 	 * @return a managed output stream for the managed file.
 	 * @throws IOException if an error occurs opening the managed file.
@@ -811,10 +811,10 @@ public final class StorageManager {
 	/**
 	 * Returns an array of <code>ManagedOutputStream</code> for a set of managed files.
 	 * When all managed output streams in the set have been closed, the storage manager
-	 * will be updated with the new content of the managed files. 
-	 * Aborting any one of the streams will cause the entire content of the set to abort 
+	 * will be updated with the new content of the managed files.
+	 * Aborting any one of the streams will cause the entire content of the set to abort
 	 * and be discarded.
-	 * 
+	 *
 	 * @param managedFiles list of names of the managed file to write.
 	 * @return an array of managed output streams respectively of managed files.
 	 * @throws IOException if an error occurs opening the managed files.
@@ -876,10 +876,10 @@ public final class StorageManager {
 	}
 
 	/* (non-Javadoc)
-	 * Close the managed output stream and update the new content to  
+	 * Close the managed output stream and update the new content to
 	 * this manager. If this managed output stream is part of a set, only after closing
 	 * all managed output streams in the set will storage manager be updated.
-	 * 
+	 *
 	 * @param smos the output stream.
 	 * @throws IOException if an errors occur.
 	 * @see #getOutputStream(String)
@@ -934,7 +934,7 @@ public final class StorageManager {
 					targets[idx] = smos.getTarget();
 					File outputFile = smos.getOutputFile();
 					if (outputFile == null) {
-						// this is a ReliableFile 
+						// this is a ReliableFile
 						add(smos.getTarget(), StorageManager.FILETYPE_RELIABLEFILE);
 						ReliableFileOutputStream rfos = (ReliableFileOutputStream) smos.getOutputStream();
 						File file = rfos.closeIntermediateFile(); //multiple calls to close() ok

@@ -18,12 +18,12 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This class manages a list of listeners. 
- * 
+ * This class manages a list of listeners.
+ *
  * Listeners may be added or removed as necessary.
- * 
+ *
  * This class uses identity for comparison, not equals.
- * 
+ *
  * @since 3.1
  * @deprecated As of 3.5. Replaced by CopyOnWriteIdentityMap.
  * @noextend This class is not intended to be subclassed by clients.
@@ -76,7 +76,7 @@ public class EventListeners<K, V> {
 
 	/**
 	 * Remove all listeners from the list.
-	 * 
+	 *
 	 * This method calls the clear method.
 	 */
 	public void removeAllListeners() {

@@ -26,7 +26,7 @@ import org.eclipse.osgi.storage.url.BundleResourceHandler;
 import org.eclipse.osgi.storage.url.bundleresource.Handler;
 
 /**
- * The BundleFile API is used by Adaptors to read resources out of an 
+ * The BundleFile API is used by Adaptors to read resources out of an
  * installed Bundle in the Framework.
  * <p/>
  * Clients wishing to modify or extend the functionality of this class at
@@ -43,7 +43,7 @@ abstract public class BundleFile {
 
 	/**
 	 * BundleFile constructor
-	 * @param basefile The File object where this BundleFile is 
+	 * @param basefile The File object where this BundleFile is
 	 * persistently stored.
 	 */
 	public BundleFile(File basefile) {
@@ -69,35 +69,35 @@ abstract public class BundleFile {
 	 */
 	abstract public BundleEntry getEntry(String path);
 
-	/** 
-	 * Performs the same function as calling 
+	/**
+	 * Performs the same function as calling
 	 * {@link #getEntryPaths(String, boolean)} with <code>recurse</code> equal
 	 * to <code>false</code>.
 	 * @param path path of the entry to locate in the bundle
 	 * @return an Enumeration of Strings that indicate the paths found or
-	 * null if the path does not exist. 
+	 * null if the path does not exist.
 	 */
 	public Enumeration<String> getEntryPaths(String path) {
 		return getEntryPaths(path, false);
 	}
 
-	/** 
-	 * Allows to access the entries of the bundle. 
-	 * Since the bundle content is usually a jar, this 
+	/**
+	 * Allows to access the entries of the bundle.
+	 * Since the bundle content is usually a jar, this
 	 * allows to access the jar contents.
-	 * 
+	 *
 	 * GetEntryPaths allows to enumerate the content of "path".
 	 * If path is a directory, it is equivalent to listing the directory
-	 * contents. The returned names are either files or directories 
-	 * themselves. If a returned name is a directory, it finishes with a 
+	 * contents. The returned names are either files or directories
+	 * themselves. If a returned name is a directory, it finishes with a
 	 * slash. If a returned name is a file, it does not finish with a slash.
 	 * @param path path of the entry to locate in the bundle
-	 * @param recurse - If <code>true</code>, provide entries for the files and 
+	 * @param recurse - If <code>true</code>, provide entries for the files and
 	 *        directories within the directory denoted by <code>path</code> plus
 	 *        all sub-directories and files; otherwise, provide only the entries
 	 *        within the immediate directory.
 	 * @return an Enumeration of Strings that indicate the paths found or
-	 * null if the path does not exist. 
+	 * null if the path does not exist.
 	 */
 	abstract public Enumeration<String> getEntryPaths(String path, boolean recurse);
 

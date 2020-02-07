@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -984,7 +984,7 @@ public class TestModuleContainer extends AbstractTest {
 		Module f = installDummyModule("sub.f.MF", "f", container);
 		Module e = installDummyModule("sub.e.MF", "e", container);
 
-		// resolve order does matter so that transitive dependencies are pulled in 
+		// resolve order does matter so that transitive dependencies are pulled in
 		// and cause substitution to happen in a certain way
 		container.resolve(Arrays.asList(g, f, e), true);
 
@@ -1017,7 +1017,7 @@ public class TestModuleContainer extends AbstractTest {
 		installDummyModule("sub.j.MF", "j", container);
 		Module k = installDummyModule("sub.k.MF", "k", container);
 
-		// resolve order does matter so that transitive dependencies are pulled in 
+		// resolve order does matter so that transitive dependencies are pulled in
 		// and cause substitution to happen in a certain way
 		container.resolve(Arrays.asList(k), true);
 
@@ -1558,7 +1558,7 @@ public class TestModuleContainer extends AbstractTest {
 		// make sure h1 is not resolved
 		ModuleWiring h1Wiring = h1.getCurrentRevision().getWiring();
 		Assert.assertNull("h1 got resolved somehow.", h1Wiring);
-		// do not resolve the host first; make sure it gets pulled in while attempting to resolve 
+		// do not resolve the host first; make sure it gets pulled in while attempting to resolve
 		// to a fragment capability.
 		ModuleWire dynamicWire = container.resolveDynamic("f1.a", dynamic2.getCurrentRevision());
 		Assert.assertNotNull("Dynamic wire not found.", dynamicWire);
@@ -2178,13 +2178,13 @@ public class TestModuleContainer extends AbstractTest {
 		Map<String, String> nativeCodeManifest = new HashMap<>();
 		nativeCodeManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		nativeCodeManifest.put(Constants.BUNDLE_SYMBOLICNAME, "importer");
-		nativeCodeManifest.put(Constants.BUNDLE_NATIVECODE, // 
+		nativeCodeManifest.put(Constants.BUNDLE_NATIVECODE, //
 				"/lib/mylib.dll; osname=\"win32\"; osname=\"Windows NT (unknown)\"," + //
 						"/lib/mylib.lib; osname=\"Linux\"");
 
 		Module nativeCodeModule = installDummyModule(nativeCodeManifest, "nativeCodeBundle", container);
 
-		// unsatisfied optional and dynamic imports do not fail a resolve. 
+		// unsatisfied optional and dynamic imports do not fail a resolve.
 		report = container.resolve(Arrays.asList(nativeCodeModule), true);
 		Assert.assertNull("Failed to resolve nativeCodeBundle.", report.getResolutionException());
 	}
@@ -2229,7 +2229,7 @@ public class TestModuleContainer extends AbstractTest {
 		optionalImporterManifest.put(Constants.DYNAMICIMPORT_PACKAGE, "exporter");
 		Module optionalImporterModule = installDummyModule(optionalImporterManifest, "optionalImporter", container);
 
-		// unsatisfied optional and dynamic imports do not fail a resolve. 
+		// unsatisfied optional and dynamic imports do not fail a resolve.
 		report = container.resolve(Arrays.asList(optionalImporterModule), true);
 		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
 
@@ -2276,7 +2276,7 @@ public class TestModuleContainer extends AbstractTest {
 		optionalImporterManifest.put(Constants.DYNAMICIMPORT_PACKAGE, "exporter");
 		Module optionalImporterModule = installDummyModule(optionalImporterManifest, "optionalImporter", container);
 
-		// unsatisfied optional and dynamic imports do not fail a resolve. 
+		// unsatisfied optional and dynamic imports do not fail a resolve.
 		report = container.resolve(Arrays.asList(optionalImporterModule), true);
 		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
 

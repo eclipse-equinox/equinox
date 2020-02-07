@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -43,7 +43,7 @@ import org.osgi.service.log.admin.LoggerAdmin;
 import org.osgi.service.log.admin.LoggerContext;
 
 class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
-	private static final String PASSWORD = "-password"; //$NON-NLS-1$	
+	private static final String PASSWORD = "-password"; //$NON-NLS-1$
 	/** The session tag */
 	private static final String SESSION = "!SESSION"; //$NON-NLS-1$
 	/** The entry tag */
@@ -179,7 +179,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	 * @return the session timestamp
 	 */
 	private String getSessionTimestamp() {
-		// Main should have set the session start-up timestamp so return that. 
+		// Main should have set the session start-up timestamp so return that.
 		// Return the "now" time if not available.
 		String ts = environmentInfo.getConfiguration("eclipse.startTime"); //$NON-NLS-1$
 		if (ts != null) {
@@ -233,7 +233,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 		write(", ARCH=" + environmentInfo.getOSArch()); //$NON-NLS-1$
 		write(", WS=" + environmentInfo.getWS()); //$NON-NLS-1$
 		writeln(", NL=" + environmentInfo.getNL()); //$NON-NLS-1$
-		// Add the command-line arguments used to invoke the platform 
+		// Add the command-line arguments used to invoke the platform
 		// XXX: this includes runtime-private arguments - should we do that?
 		if (includeCommandLine) {
 			writeArgs("Framework arguments: ", environmentInfo.getNonFrameworkArgs()); //$NON-NLS-1$
@@ -303,7 +303,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 			writeLog(0, logEntry);
 			writer.flush();
 		} catch (Exception e) {
-			// any exceptions during logging should be caught 
+			// any exceptions during logging should be caught
 			System.err.println("An exception occurred while writing to the platform log:");//$NON-NLS-1$
 			e.printStackTrace(System.err);
 			System.err.println("Logging to the console instead.");//$NON-NLS-1$
@@ -326,7 +326,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	}
 
 	/**
-	 * @throws IOException  
+	 * @throws IOException
 	 */
 	public synchronized void setFile(File newFile, boolean append) throws IOException {
 		if (newFile != null && !newFile.equals(this.outFile)) {
@@ -591,7 +591,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	}
 
 	/**
-	 * Checks the log file size.  If the log file size reaches the limit then the log 
+	 * Checks the log file size.  If the log file size reaches the limit then the log
 	 * is rotated
 	 * @return false if an error occured trying to rotate the log
 	 */
@@ -614,7 +614,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 				File backupFile = new File(backupFilename);
 				if (backupFile.exists()) {
 					if (!backupFile.delete()) {
-						System.err.println("Error when trying to delete old log file: " + backupFile.getName());//$NON-NLS-1$ 
+						System.err.println("Error when trying to delete old log file: " + backupFile.getName());//$NON-NLS-1$
 						if (backupFile.renameTo(new File(backupFile.getAbsolutePath() + System.currentTimeMillis()))) {
 							System.err.println("So we rename it to filename: " + backupFile.getName()); //$NON-NLS-1$
 						} else {

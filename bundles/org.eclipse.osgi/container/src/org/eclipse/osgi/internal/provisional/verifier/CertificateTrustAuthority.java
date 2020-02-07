@@ -19,12 +19,12 @@ import java.security.cert.CertificateException;
 
 /**
  * A CertificateTrustAuthority is used to check if certificate chains are trusted.
- * 
+ *
  */
 public interface CertificateTrustAuthority {
 
 	/**
-	 * Determines if the certificates are trusted.  This method will throw a 
+	 * Determines if the certificates are trusted.  This method will throw a
 	 * <code>CertificateException</code> if the specified certificate chain is not trusted.
 	 * @param certChain a chain of certificates
 	 * @throws CertificateException if the certficates are not trusted
@@ -33,7 +33,7 @@ public interface CertificateTrustAuthority {
 
 	/**
 	 * Add the specified certificate chain as a trusted certificate chain.
-	 * 
+	 *
 	 * @param certChain a chain of certificates
 	 */
 	public void addTrusted(Certificate[] certChain) throws CertificateException;

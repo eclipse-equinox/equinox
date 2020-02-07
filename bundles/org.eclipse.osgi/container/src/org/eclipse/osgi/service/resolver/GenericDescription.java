@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -40,14 +40,14 @@ public interface GenericDescription extends BaseDescription {
 	public String getType();
 
 	/**
-	 * This method is deprecated.  Capabilities do not always have a 
+	 * This method is deprecated.  Capabilities do not always have a
 	 * name associated with them.  All matching attributes associated
-	 * with a capability are available in the attributes of a 
-	 * capability.  This method will return the value of the 
+	 * with a capability are available in the attributes of a
+	 * capability.  This method will return the value of the
 	 * attribute with the same key as this capabilities type.
 	 * If this attribute's value is not a String then null is
 	 * returned.
-	 * @deprecated matching should only be done against a capability's 
+	 * @deprecated matching should only be done against a capability's
 	 * attributes.
 	 */
 	@Override
@@ -57,7 +57,7 @@ public interface GenericDescription extends BaseDescription {
 	 * This method is deprecated.  Capabilities do not always have a
 	 * version associated with them. All matching attributes associated
 	 * with a capability are available in the attributes of a
-	 * capability.  This method will return the value of the 
+	 * capability.  This method will return the value of the
 	 * attribute with the key <code>"version"</code>.
 	 * If this attribute's value is not a {@link Version} then null is
 	 * returned.

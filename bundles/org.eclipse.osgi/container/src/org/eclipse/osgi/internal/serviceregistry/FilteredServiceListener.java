@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -73,7 +73,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 
 	/**
 	 * Receives notification that a service has had a lifecycle change.
-	 * 
+	 *
 	 * @param event The <code>ServiceEvent</code> object.
 	 */
 	@Override
@@ -85,7 +85,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 			String[] classes = reference.getClasses();
 			int size = classes.length;
 			for (int i = 0; i < size; i++) {
-				if (classes[i] == objectClass) // objectClass strings have previously been interned for identity comparison 
+				if (classes[i] == objectClass) // objectClass strings have previously been interned for identity comparison
 					break objectClassCheck;
 			}
 			return; // no class in this event matches a required part of the filter; we do not need to deliver this event
@@ -117,7 +117,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	/**
 	 * Returns a service event that should be delivered to the listener based on the filter evaluation.
 	 * This may result in a service event of type MODIFIED_ENDMATCH.
-	 * 
+	 *
 	 * @param delivered The service event delivered by the framework.
 	 * @return The event to be delivered or null if no event is to be delivered to the listener.
 	 */
@@ -155,7 +155,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 		return listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)) + filterString; //$NON-NLS-1$
 	}
 
-	/** 
+	/**
 	 * Return the bundle context for the ListenerHook.
 	 * @return The context of the bundle which added the service listener.
 	 * @see org.osgi.framework.hooks.service.ListenerHook.ListenerInfo#getBundleContext()
@@ -165,7 +165,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 		return context;
 	}
 
-	/** 
+	/**
 	 * Return the filter string for the ListenerHook.
 	 * @return The filter string with which the listener was added. This may
 	 * be <code>null</code> if the listener was added without a filter.
@@ -185,7 +185,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	 * indicating the listener has been added but has not been removed.
 	 * After the listener has been removed, this method must always return
 	 * <code>true</code>.
-	 * 
+	 *
 	 * @return <code>false</code> if the listener has not been been removed,
 	 *         <code>true</code> otherwise.
 	 */
@@ -194,7 +194,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 		return removed;
 	}
 
-	/** 
+	/**
 	 * Mark the service listener registration as removed.
 	 */
 	void markRemoved() {
@@ -203,7 +203,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 
 	/**
 	 * Returns an objectClass filter string for the specified class name.
-	 * @return A filter string for the specified class name or <code>null</code> if the 
+	 * @return A filter string for the specified class name or <code>null</code> if the
 	 * specified class name is <code>null</code>.
 	 */
 	private static String getObjectClassFilterString(String className) {

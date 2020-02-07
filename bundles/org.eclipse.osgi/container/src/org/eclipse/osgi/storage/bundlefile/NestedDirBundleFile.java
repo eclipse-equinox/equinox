@@ -143,7 +143,7 @@ public class NestedDirBundleFile extends BundleFile {
 	}
 
 	/**
-	 * @throws IOException  
+	 * @throws IOException
 	 */
 	@Override
 	public void open() throws IOException {

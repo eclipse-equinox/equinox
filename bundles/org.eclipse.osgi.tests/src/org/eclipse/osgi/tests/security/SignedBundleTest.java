@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -31,7 +31,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 
 	/*
 	private static Test[] s_tests = {
-	// positive tests 
+	// positive tests
 	new SignedBundleTest("testSignedContent01", "unsigned", new String[] {}) {
 		public void runTest() {
 			testSignedContent01();
@@ -55,19 +55,19 @@ public class SignedBundleTest extends BaseSecurityTest {
 	n/a		n/a		n/a		= positive, unsigned				('unsigned.jar')
 	yes		n/a		yes		= positive, 1 signer				('signed.jar','ca1_leafa')
 	yes		yes		yes		= positive, 2 signers				('multiply_signed.jar','ca1_leafa,'ca1_leafb')
-	
+
 	//negative = untrusted tests
-	no		n/a		yes		= negative, 1 signer, 1 untrusted	('signed.jar')		
+	no		n/a		yes		= negative, 1 signer, 1 untrusted	('signed.jar')
 	no		no		yes		= negative, 2 signers, 2 untrusted  ('multiply_signed.jar')
 	yes		no		yes		= negative, 2 signers, 1 untrusted	('multiply_signed.jar', 'ca1_leafa')
-	
+
 	//negative = validity tests
 	yes		n/a		no		= negative, 1 signer, 1 corrupt		('signed_with_corrupt.jar','ca1_leafa')
 	yes		yes		no		= negative, 2 signers, 2 corrupt
-	
+
 	//TODO: OSGi-specific partial signer cases
 	//TODO: TSA tests (w/TSA signer trusted, untrusted, etc)
-	//TODO: More? NESTED JARS? 		
+	//TODO: More? NESTED JARS?
 	*/
 
 	//private String jarName;
@@ -97,11 +97,11 @@ public class SignedBundleTest extends BaseSecurityTest {
 		registerEclipseTrustEngine();
 		/*
 				TrustEngine engine = getTrustEngine();
-		
+
 				if (supportStore == null) {
 					fail("Could not open keystore with test certificates!");
 				}
-		
+
 				// get the certs from the support store and add
 				for (int i = 0; i < aliases.length; i++) {
 					Certificate cert = supportStore.getCertificate(aliases[i]);

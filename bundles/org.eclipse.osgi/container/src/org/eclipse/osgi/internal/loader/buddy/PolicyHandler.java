@@ -190,7 +190,7 @@ public class PolicyHandler implements SynchronousBundleListener {
 					results = new ArrayList<>(policyCount);
 				while (result.hasMoreElements()) {
 					URL url = result.nextElement();
-					if (!results.contains(url)) //only add if not already added 
+					if (!results.contains(url)) //only add if not already added
 						results.add(url);
 				}
 			}

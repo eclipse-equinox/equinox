@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -261,7 +261,7 @@ public final class ModuleWiring implements BundleWiring {
 	}
 
 	/**
-	 * Returns the module loader for this wiring.  If the module 
+	 * Returns the module loader for this wiring.  If the module
 	 * loader does not exist yet then one will be created
 	 * @return the module loader for this wiring.
 	 */
@@ -384,7 +384,7 @@ public final class ModuleWiring implements BundleWiring {
 	}
 
 	/**
-	 * Returns an unmodifiable collection of package names for 
+	 * Returns an unmodifiable collection of package names for
 	 * package capabilities that have been substituted.
 	 * @return the substituted package names
 	 */

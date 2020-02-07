@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -23,8 +23,8 @@ import org.eclipse.osgi.storage.bundlefile.BundleFileWrapper;
  */
 public interface BundleFileWrapperFactoryHook {
 	/**
-	 * Wraps a bundle file for the given content and base data.  If the 
-	 * specified bundle file should not be wrapped then null is returned 
+	 * Wraps a bundle file for the given content and base data.  If the
+	 * specified bundle file should not be wrapped then null is returned
 	 * @param bundleFile the bundle file to be wrapped
 	 * @param generation the generation the bundle file is for
 	 * @param base true if the content is for the base bundle (not an inner jar, directory etc.)

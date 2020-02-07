@@ -293,7 +293,7 @@ public class CaseInsensitiveDictionaryMap<K, V> extends Dictionary<K, V> impleme
 	}
 
 	/**
-	 * Returns the specified key or, if the key is a String, returns 
+	 * Returns the specified key or, if the key is a String, returns
 	 * a case-insensitive wrapping of the key.
 	 *
 	 * @param key

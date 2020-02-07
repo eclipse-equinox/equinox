@@ -56,7 +56,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	private String location;
 
 	/*
-	 * Bundles must be discarded if a storage hook throws an 
+	 * Bundles must be discarded if a storage hook throws an
 	 * IllegalStateException during validation.
 	 */
 	public void testBundleDiscardedWhenClasspathStorageHookInvalidates() throws Exception {

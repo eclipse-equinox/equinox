@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -56,7 +56,7 @@ public interface ExportPackageDescription extends BaseDescription {
 	public Object getDirective(String key);
 
 	/**
-	 * Returns the exporter of this package. 
+	 * Returns the exporter of this package.
 	 * @return the exporter of this package.
 	 */
 	public BundleDescription getExporter();

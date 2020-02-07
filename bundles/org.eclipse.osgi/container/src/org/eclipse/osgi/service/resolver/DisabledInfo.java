@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -19,8 +19,8 @@ package org.eclipse.osgi.service.resolver;
  * method and enabled by removing disabled info with the {@link State#removeDisabledInfo(DisabledInfo)} method.
  * A bundle is not considered to be enabled unless there are no disabled info objects for the bundle.
  * <p>
- * While resolving the bundle if the {@link Resolver} encounters a {@link BundleDescription} which 
- * has disabled info returned by {@link State#getDisabledInfos(BundleDescription)} then the bundle 
+ * While resolving the bundle if the {@link Resolver} encounters a {@link BundleDescription} which
+ * has disabled info returned by {@link State#getDisabledInfos(BundleDescription)} then the bundle
  * must not be allowed to resolve and a ResolverError of type {@link ResolverError#DISABLED_BUNDLE}
  * must be added to the state.
  * </p>

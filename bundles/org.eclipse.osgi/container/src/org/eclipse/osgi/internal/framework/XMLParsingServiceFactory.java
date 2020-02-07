@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -33,10 +33,10 @@ class XMLParsingServiceFactory implements ServiceFactory<Object> {
 			return createService();
 		/*
 		 * Set the TCCL while creating jaxp factory instances to the
-		 * requesting bundles class loader.  This is needed to 
-		 * work around bug 285505.  There are issues if multiple 
+		 * requesting bundles class loader.  This is needed to
+		 * work around bug 285505.  There are issues if multiple
 		 * xerces implementations are available on the bundles class path
-		 * 
+		 *
 		 * The real issue is that the ContextFinder will only delegate
 		 * to the framework class loader in this case.  This class
 		 * loader forces the requesting bundle to be delegated to for

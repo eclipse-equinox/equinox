@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Andrew Niefer - IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -28,7 +28,7 @@ public class DefaultStartupMonitor implements StartupMonitor {
 	/**
 	 * Create a new startup monitor using the given splash handler.  The splash handle must
 	 * have an updateSplash method.
-	 * 
+	 *
 	 * @param splashHandler
 	 * @throws IllegalStateException
 	 */
@@ -42,7 +42,7 @@ public class DefaultStartupMonitor implements StartupMonitor {
 			//TODO maybe we could do something else in the update method in this case, like print something to the console?
 			throw new IllegalStateException(e.getMessage(), e);
 		}
-    
+
 	}
 
 	/* (non-Javadoc)
@@ -64,7 +64,7 @@ public class DefaultStartupMonitor implements StartupMonitor {
 	@Override
 	public void applicationRunning() {
 		if (EclipseStarter.debug) {
-			String timeString = equinoxConfig.getConfiguration("eclipse.startTime"); //$NON-NLS-1$ 
+			String timeString = equinoxConfig.getConfiguration("eclipse.startTime"); //$NON-NLS-1$
 			long time = timeString == null ? 0L : Long.parseLong(timeString);
 			Debug.println("Application started in : " + (System.currentTimeMillis() - time) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
 		}

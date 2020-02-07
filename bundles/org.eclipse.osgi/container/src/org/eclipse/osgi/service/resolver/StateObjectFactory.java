@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -27,7 +27,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
 
 /**
- * A factory for states and their component objects.  
+ * A factory for states and their component objects.
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
@@ -44,9 +44,9 @@ public interface StateObjectFactory {
 	public static final StateObjectFactory defaultFactory = new StateObjectFactoryProxy();
 
 	/**
-	 * Creates an empty state. The returned state does not have an 
+	 * Creates an empty state. The returned state does not have an
 	 * attached resolver.
-	 * 
+	 *
 	 * @return the created state
 	 * @deprecated use {@link #createState(boolean) }
 	 */
@@ -54,7 +54,7 @@ public interface StateObjectFactory {
 
 	/**
 	 * Creates an empty state with or without a resolver.
-	 * 
+	 *
 	 * @param resolver true if the created state should be initialized with a resolver.
 	 * @return the created state
 	 * @since 3.2
@@ -62,12 +62,12 @@ public interface StateObjectFactory {
 	public State createState(boolean resolver);
 
 	/**
-	 * Creates a new state that is a copy of the given state. The returned state 
+	 * Creates a new state that is a copy of the given state. The returned state
 	 * will contain copies of all bundle descriptions in the given state.
 	 * The user objects from the original bundle descriptions is not copied and
-	 * no data pertaining to resolution is copied.  The returned state will have a 
+	 * no data pertaining to resolution is copied.  The returned state will have a
 	 * new resolver attached to it.
-	 *  
+	 *
 	 * @param state a state to be copied
 	 * @return the created state
 	 */
@@ -75,21 +75,21 @@ public interface StateObjectFactory {
 
 	/**
 	 * Creates a bundle description from the given parameters.
-	 * 
-	 * @param id id for the bundle 
-	 * @param symbolicName symbolic name for the bundle (may be 
-	 * <code>null</code>) 
+	 *
+	 * @param id id for the bundle
+	 * @param symbolicName symbolic name for the bundle (may be
+	 * <code>null</code>)
 	 * @param version version for the bundle (may be <code>null</code>)
 	 * @param location location for the bundle (may be <code>null</code>)
-	 * @param required version constraints for all required bundles (may be 
+	 * @param required version constraints for all required bundles (may be
 	 * <code>null</code>)
-	 * @param host version constraint specifying the host for the bundle to be  
+	 * @param host version constraint specifying the host for the bundle to be
 	 * created. Should be <code>null</code> if the bundle is not a fragment
-	 * @param imports version constraints for all packages imported 
+	 * @param imports version constraints for all packages imported
 	 * (may be <code>null</code>)
 	 * @param exports package descriptions of all the exported packages
 	 * (may be <code>null</code>)
-	 * @param providedPackages the list of provided packages (may be <code>null</code>) 
+	 * @param providedPackages the list of provided packages (may be <code>null</code>)
 	 * @param singleton whether the bundle created should be a singleton
 	 * @return the created bundle description
 	 * @deprecated use {@link #createBundleDescription(long, String, Version, String, BundleSpecification[], HostSpecification, ImportPackageSpecification[], ExportPackageDescription[], boolean, boolean, boolean, String, String[], GenericSpecification[], GenericDescription[])}
@@ -98,21 +98,21 @@ public interface StateObjectFactory {
 
 	/**
 	 * Creates a bundle description from the given parameters.
-	 * 
-	 * @param id id for the bundle 
-	 * @param symbolicName symbolic name for the bundle (may be 
-	 * <code>null</code>) 
+	 *
+	 * @param id id for the bundle
+	 * @param symbolicName symbolic name for the bundle (may be
+	 * <code>null</code>)
 	 * @param version version for the bundle (may be <code>null</code>)
 	 * @param location location for the bundle (may be <code>null</code>)
-	 * @param required version constraints for all required bundles (may be 
+	 * @param required version constraints for all required bundles (may be
 	 * <code>null</code>)
-	 * @param host version constraint specifying the host for the bundle to be  
+	 * @param host version constraint specifying the host for the bundle to be
 	 * created. Should be <code>null</code> if the bundle is not a fragment
-	 * @param imports version constraints for all packages imported 
+	 * @param imports version constraints for all packages imported
 	 * (may be <code>null</code>)
 	 * @param exports package descriptions of all the exported packages
 	 * (may be <code>null</code>)
-	 * @param providedPackages the list of provided packages (may be <code>null</code>) 
+	 * @param providedPackages the list of provided packages (may be <code>null</code>)
 	 * @param singleton whether the bundle created should be a singleton
 	 * @param attachFragments whether the bundle allows fragments to attach
 	 * @param dynamicFragments whether the bundle allows fragments to dynamically attach
@@ -127,9 +127,9 @@ public interface StateObjectFactory {
 
 	/**
 	 * Creates a bundle description from the given parameters.
-	 * 
-	 * @param id id for the bundle 
-	 * @param symbolicName symbolic name for the bundle (may be  <code>null</code>) 
+	 *
+	 * @param id id for the bundle
+	 * @param symbolicName symbolic name for the bundle (may be  <code>null</code>)
 	 * @param version version for the bundle (may be <code>null</code>)
 	 * @param location location for the bundle (may be <code>null</code>)
 	 * @param required version constraints for all required bundles (may be  <code>null</code>)
@@ -149,9 +149,9 @@ public interface StateObjectFactory {
 
 	/**
 	 * Creates a bundle description from the given parameters.
-	 * 
-	 * @param id id for the bundle 
-	 * @param symbolicName symbolic name for the bundle (may be  <code>null</code>) 
+	 *
+	 * @param id id for the bundle
+	 * @param symbolicName symbolic name for the bundle (may be  <code>null</code>)
 	 * @param version version for the bundle (may be <code>null</code>)
 	 * @param location location for the bundle (may be <code>null</code>)
 	 * @param required version constraints for all required bundles (may be  <code>null</code>)
@@ -174,7 +174,7 @@ public interface StateObjectFactory {
 	/**
 	 * Creates a bundle description from the given parameters.
 	 *
-	 * @param id id for the bundle 
+	 * @param id id for the bundle
 	 * @param symbolicName the symbolic name of the bundle.  This may include directives and/or attributes encoded using the Bundle-SymbolicName header.
 	 * @param version version for the bundle (may be <code>null</code>)
 	 * @param location location for the bundle (may be <code>null</code>)
@@ -194,28 +194,28 @@ public interface StateObjectFactory {
 
 	/**
 	 * Returns a bundle description based on the information in the supplied manifest dictionary.
-	 * The manifest should contain String keys and String values which correspond to 
+	 * The manifest should contain String keys and String values which correspond to
 	 * proper OSGi manifest headers and values.
-	 * 
+	 *
 	 * @param state the state for which the description is being created
 	 * @param manifest a collection of OSGi manifest headers and values
 	 * @param location the URL location of the bundle (may be <code>null</code>)
 	 * @param id the id of the bundle
 	 * @return a bundle description derived from the given information
-	 * @throws BundleException if an error occurs while reading the manifest 
+	 * @throws BundleException if an error occurs while reading the manifest
 	 */
 	public BundleDescription createBundleDescription(State state, Dictionary<String, String> manifest, String location, long id) throws BundleException;
 
 	/**
 	 * Returns a bundle description based on the information in the supplied manifest dictionary.
-	 * The manifest should contain String keys and String values which correspond to 
+	 * The manifest should contain String keys and String values which correspond to
 	 * proper OSGi manifest headers and values.
-	 * 
+	 *
 	 * @param manifest a collection of OSGi manifest headers and values
 	 * @param location the URL location of the bundle (may be <code>null</code>)
 	 * @param id the id of the bundle
 	 * @return a bundle description derived from the given information
-	 * @throws BundleException if an error occurs while reading the manifest 
+	 * @throws BundleException if an error occurs while reading the manifest
 	 * @deprecated use {@link #createBundleDescription(State, Dictionary, String, long)}
 	 */
 	public BundleDescription createBundleDescription(Dictionary<String, String> manifest, String location, long id) throws BundleException;
@@ -223,7 +223,7 @@ public interface StateObjectFactory {
 	/**
 	 * Creates a bundle description that is a copy of the given description.
 	 * The user object of the original bundle description is not copied.
-	 * 
+	 *
 	 * @param original the bundle description to be copied
 	 * @return the created bundle description
 	 */
@@ -231,10 +231,10 @@ public interface StateObjectFactory {
 
 	/**
 	 * Creates a bundle specification from the given parameters.
-	 * 
+	 *
 	 * @param requiredSymbolicName the symbolic name for the required bundle
 	 * @param requiredVersionRange the required version range (may be <code>null</code>)
-	 * @param export whether the required bundle should be re-exported 
+	 * @param export whether the required bundle should be re-exported
 	 * @param optional whether the constraint should be optional
 	 * @return the created bundle specification
 	 * @see VersionConstraint for information on the available match rules
@@ -243,7 +243,7 @@ public interface StateObjectFactory {
 
 	/**
 	 * Creates a bundle specification that is a copy of the given constraint.
-	 *  
+	 *
 	 * @param original the constraint to be copied
 	 * @return the created bundle specification
 	 */
@@ -260,11 +260,11 @@ public interface StateObjectFactory {
 
 	/**
 	 * Creates a host specification from the given parameters.
-	 *  
+	 *
 	 * @param hostSymbolicName the symbolic name for the host bundle
 	 * @param hostVersionRange the version range for the host bundle (may be <code>null</code>)
 	 * @return the created host specification
-	 * @see VersionConstraint for information on the available match rules 
+	 * @see VersionConstraint for information on the available match rules
 	 */
 	public HostSpecification createHostSpecification(String hostSymbolicName, VersionRange hostVersionRange);
 
@@ -279,7 +279,7 @@ public interface StateObjectFactory {
 
 	/**
 	 * Creates a host specification that is a copy of the given constraint.
-	 * 
+	 *
 	 * @param original the constraint to be copied
 	 * @return the created host specification
 	 */
@@ -287,7 +287,7 @@ public interface StateObjectFactory {
 
 	/**
 	 * Creates an import package specification from the given parameters.
-	 *  
+	 *
 	 * @param packageName the package name
 	 * @param versionRange the package versionRange (may be <code>null</code>).
 	 * @param bundleSymbolicName the Bundle-SymbolicName of the bundle that must export the package (may be <code>null</code>)
@@ -302,7 +302,7 @@ public interface StateObjectFactory {
 	/**
 	 * Creates an import package specification that is a copy of the given import package
 	 * @param original the import package to be copied
-	 * @return the created package specification 
+	 * @return the created package specification
 	 */
 	public ImportPackageSpecification createImportPackageSpecification(ImportPackageSpecification original);
 
@@ -319,7 +319,7 @@ public interface StateObjectFactory {
 	 * Used by the Resolver to dynamically create ExportPackageDescription objects during the resolution process.
 	 * The Resolver needs to create ExportPackageDescriptions dynamically for a host when a fragment.
 	 * exports a package<p>
-	 * 
+	 *
 	 * @param packageName the package name
 	 * @param version the version of the package (may be <code>null</code>)
 	 * @param directives the directives for the package (may be <code>null</code>)
@@ -423,12 +423,12 @@ public interface StateObjectFactory {
 
 	/**
 	 * Persists the given state in the given output stream. Closes the stream.
-	 * 
+	 *
 	 * @param state the state to be written
 	 * @param stream the stream where to write the state to
-	 * @throws IOException if an IOException happens while writing the state to 
+	 * @throws IOException if an IOException happens while writing the state to
 	 * the stream
-	 * @throws IllegalArgumentException if the state provided was not created by 
+	 * @throws IllegalArgumentException if the state provided was not created by
 	 * this factory
 	 * @deprecated use {@link #writeState(State, File)} instead
 	 * @since 3.1
@@ -437,12 +437,12 @@ public interface StateObjectFactory {
 
 	/**
 	 * Persists the given state in the given output stream. Closes the stream.
-	 * 
+	 *
 	 * @param state the state to be written
 	 * @param stream the stream where to write the state to
-	 * @throws IOException if an IOException happens while writing the state to 
+	 * @throws IOException if an IOException happens while writing the state to
 	 * the stream
-	 * @throws IllegalArgumentException if the state provided was not created by 
+	 * @throws IllegalArgumentException if the state provided was not created by
 	 * this factory
 	 * @deprecated use {@link #writeState(State, File)} instead
 	 * @see #writeState(State, OutputStream)
@@ -451,22 +451,22 @@ public interface StateObjectFactory {
 
 	/**
 	 * Persists the given state in the given directory.
-	 * 
+	 *
 	 * @param state the state to be written
 	 * @param stateDirectory the directory where to write the state to
-	 * @throws IOException if an IOException happens while writing the state to 
+	 * @throws IOException if an IOException happens while writing the state to
 	 * the stream
-	 * @throws IllegalArgumentException if the state provided was not created by 
+	 * @throws IllegalArgumentException if the state provided was not created by
 	 * this factory
 	 */
 	public void writeState(State state, File stateDirectory) throws IOException;
 
 	/**
 	 * Reads a persisted state from the given stream. Closes the stream.
-	 * 
+	 *
 	 * @param stream the stream where to read the state from
 	 * @return the state read
-	 * @throws IOException if an IOException happens while reading the state from 
+	 * @throws IOException if an IOException happens while reading the state from
 	 * the stream
 	 * @deprecated use {@link #readState(File)} instead
 	 * @since 3.1
@@ -475,10 +475,10 @@ public interface StateObjectFactory {
 
 	/**
 	 * Reads a persisted state from the given stream. Closes the stream.
-	 * 
+	 *
 	 * @param stream the stream where to read the state from
 	 * @return the state read
-	 * @throws IOException if an IOException happens while reading the state from 
+	 * @throws IOException if an IOException happens while reading the state from
 	 * the stream
 	 * @deprecated use {@link #readState(File)} instead
 	 * @see #readState(InputStream)
@@ -487,10 +487,10 @@ public interface StateObjectFactory {
 
 	/**
 	 * Reads a persisted state from the given directory.
-	 * 
+	 *
 	 * @param stateDirectory the directory where to read the state from
 	 * @return the state read
-	 * @throws IOException if an IOException happens while reading the state from 
+	 * @throws IOException if an IOException happens while reading the state from
 	 * the stream
 	 */
 	public State readState(File stateDirectory) throws IOException;

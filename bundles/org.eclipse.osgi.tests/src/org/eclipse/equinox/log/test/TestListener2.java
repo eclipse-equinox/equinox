@@ -31,7 +31,7 @@ public class TestListener2 extends TestCase implements LogListener {
 
 	@Override
 	public void logged(LogEntry entry) {
-		//logged is never called in parallel. Added a check to see if two threads are accessing the logged method at the same time. 
+		//logged is never called in parallel. Added a check to see if two threads are accessing the logged method at the same time.
 		assertTrue(flag.compareAndSet(0, 1));
 		if (entry.getBundle().getSymbolicName().equals("org.eclipse.osgi")) {
 			list.add(entry.getMessage());

@@ -74,7 +74,7 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 			try {
 				clazz = secureAction.loadSystemClass(name.toString());
 				if (clazz != null)
-					return clazz; //this class exists, it is a built in handler	
+					return clazz; //this class exists, it is a built in handler
 			} catch (ClassNotFoundException ex) {
 				// keep looking
 			}

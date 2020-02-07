@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -59,7 +59,7 @@ import org.osgi.service.resolver.Resolver;
  * the wiring states.
  * <p>
  * <strong>Concurrent Semantics</strong><br />
- * 
+ *
  * Implementations must be thread safe.  The database allows for concurrent
  * read operations and all read operations are protected by the
  * {@link #readLock() read} lock.  All write operations are
@@ -72,7 +72,7 @@ import org.osgi.service.resolver.Resolver;
  * to upgrade from a read to a write lock.
  * <p>
  * A database is associated with a {@link ModuleContainer container}.  The container
- * associated with a database provides public API for manipulating the modules 
+ * associated with a database provides public API for manipulating the modules
  * and their wiring states.  For example, installing, updating, uninstalling,
  * resolving and unresolving modules.  Except for the {@link #load(DataInputStream)},
  * all other methods that perform write operations are intended to be used by
@@ -481,13 +481,13 @@ public class ModuleDatabase {
 
 	/**
 	 * Returns a cloned snapshot of the wirings of all revisions.  This
-	 * performs a clone of each {@link ModuleWiring}.  The 
+	 * performs a clone of each {@link ModuleWiring}.  The
 	 * {@link ModuleWiring#getRevision() revision},
 	 * {@link ModuleWiring#getModuleCapabilities(String) capabilities},
 	 * {@link ModuleWiring#getModuleRequirements(String) requirements},
 	 * {@link ModuleWiring#getProvidedModuleWires(String) provided wires},
 	 * {@link ModuleWiring#getRequiredModuleWires(String) required wires}, and
-	 * {@link ModuleWiring#getSubstitutedNames()} of 
+	 * {@link ModuleWiring#getSubstitutedNames()} of
 	 * each wiring are copied into a cloned copy of the wiring.
 	 * <p>
 	 * The returned map of wirings may be safely read from while not holding
@@ -813,7 +813,7 @@ public class ModuleDatabase {
 
 	/**
 	 * Adds the {@link ModuleRevision#getModuleCapabilities(String) capabilities}
-	 * provided by the specified revision to this database.  These capabilities must 
+	 * provided by the specified revision to this database.  These capabilities must
 	 * become available for lookup with the {@link ModuleDatabase#findCapabilities(Requirement)}
 	 * method.
 	 * <p>
@@ -832,7 +832,7 @@ public class ModuleDatabase {
 	/**
 	 * Removes the {@link ModuleRevision#getModuleCapabilities(String) capabilities}
 	 * provided by the specified revision from this database.  These capabilities
-	 * must no longer be available for lookup with the 
+	 * must no longer be available for lookup with the
 	 * {@link ModuleDatabase#findCapabilities(Requirement)} method.
 	 * <p>
 	 * This method must be called while holding the {@link #writeLock() write} lock.
@@ -844,7 +844,7 @@ public class ModuleDatabase {
 	}
 
 	/**
-	 * Returns a mutable snapshot of capabilities that are candidates for 
+	 * Returns a mutable snapshot of capabilities that are candidates for
 	 * satisfying the specified requirement.
 	 * <p>
 	 * A read operation protected by the {@link #readLock() read} lock.
@@ -866,14 +866,14 @@ public class ModuleDatabase {
 	 * Writes this database in a format suitable for using the {@link #load(DataInputStream)}
 	 * method.  All modules are stored which have a current {@link ModuleRevision revision}.
 	 * Only the current revision of each module is stored (no removal pending revisions
-	 * are stored).  Optionally the {@link ModuleWiring wiring} of each current revision 
+	 * are stored).  Optionally the {@link ModuleWiring wiring} of each current revision
 	 * may be stored.  Wiring can only be stored if there are no {@link #getRemovalPending()
 	 * removal pending} revisions.
 	 * <p>
 	 * This method acquires the {@link #readLock() read} lock while writing this
 	 * database.
 	 * <p>
-	 * After this database have been written, the output stream is flushed.  
+	 * After this database have been written, the output stream is flushed.
 	 * The output stream remains open after this method returns.
 	 * @param out the data output steam.
 	 * @param persistWirings true if wirings should be persisted.  This option will be ignored

@@ -114,7 +114,7 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 			// Catch linkage errors as these are generally recoverable but let other Errors propagate (see bug 222001)
 			getErrorStream().println("LogListener.logged threw a non-fatal unchecked exception as follows:"); //$NON-NLS-1$
 			e.printStackTrace(getErrorStream());
-		} 	
+		}
 	}
 
 	public ExtendedLogReaderServiceFactory(int maxHistory, LogLevel defaultLevel) {

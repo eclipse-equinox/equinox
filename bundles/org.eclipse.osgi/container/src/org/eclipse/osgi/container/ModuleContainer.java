@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -117,7 +117,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	final ModuleContainerAdaptor adaptor;
 
 	/**
-	 * The module resolver which implements the ResolverContext and handles calling the 
+	 * The module resolver which implements the ResolverContext and handles calling the
 	 * resolver service.
 	 */
 	private final ModuleResolver moduleResolver;
@@ -191,7 +191,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	}
 
 	/**
-	 * Returns the module installed with the specified id, or null if no 
+	 * Returns the module installed with the specified id, or null if no
 	 * such module is installed.
 	 * @param id the id of the module
 	 * @return the module with the specified id, or null of no such module is installed.
@@ -201,7 +201,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	}
 
 	/**
-	 * Returns the module installed with the specified location, or null if no 
+	 * Returns the module installed with the specified location, or null if no
 	 * such module is installed.
 	 * @param location the location of the module
 	 * @return the module with the specified location, or null of no such module is installed.
@@ -224,17 +224,17 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * Installs a new module using the specified location.  The specified
-	 * builder is used to create a new {@link ModuleRevision revision} 
+	 * builder is used to create a new {@link ModuleRevision revision}
 	 * which will become the {@link Module#getCurrentRevision() current}
 	 * revision of the new module.
 	 * <p>
-	 * If a module already exists with the specified location then the 
+	 * If a module already exists with the specified location then the
 	 * existing module is returned and the builder is not used.
 	 * @param origin the module performing the install, may be {@code null}.
-	 * @param location The location identifier of the module to install. 
+	 * @param location The location identifier of the module to install.
 	 * @param builder the builder used to create the revision to install.
 	 * @param revisionInfo the revision info for the new revision, may be {@code null}.
-	 * @return a new module or a existing module if one exists at the 
+	 * @return a new module or a existing module if one exists at the
 	 *     specified location.
 	 * @throws BundleException if some error occurs installing the module
 	 */
@@ -325,7 +325,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * Updates the specified module with a new revision.  The specified
-	 * builder is used to create a new {@link ModuleRevision revision} 
+	 * builder is used to create a new {@link ModuleRevision revision}
 	 * which will become the {@link Module#getCurrentRevision() current}
 	 * revision of the new module.
 	 * @param module the module to update
@@ -481,7 +481,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	 * Attempts to resolve the current revisions of the specified modules.
 	 * @param triggers the modules to resolve or {@code null} to resolve all unresolved
 	 *    current revisions.
-	 * @param triggersMandatory true if the triggers must be resolved.  This will result in 
+	 * @param triggersMandatory true if the triggers must be resolved.  This will result in
 	 *   a {@link ResolutionException} if set to true and one of the triggers could not be resolved.
 	 * @see FrameworkWiring#resolveBundles(Collection)
 	 * @return A resolution report for the resolve operation
@@ -562,7 +562,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	 * Attempts to resolve the specified dynamic package name request for the specified revision.
 	 * @param dynamicPkgName the package name to attempt a dynamic resolution for
 	 * @param revision the module revision the dynamic resolution request is for
-	 * @return the new resolution wire establishing a dynamic package resolution or null if 
+	 * @return the new resolution wire establishing a dynamic package resolution or null if
 	 * a dynamic wire could not be established.
 	 */
 	public ModuleWire resolveDynamic(String dynamicPkgName, ModuleRevision revision) {
@@ -1141,8 +1141,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 	/**
 	 * Returns the dependency closure of for the specified modules.
 	 * @param initial The initial modules for which to generate the dependency closure
-	 * @return A collection containing a snapshot of the dependency closure of the specified 
-	 *    modules, or an empty collection if there were no specified modules. 
+	 * @return A collection containing a snapshot of the dependency closure of the specified
+	 *    modules, or an empty collection if there were no specified modules.
 	 */
 	public Collection<Module> getDependencyClosure(Collection<Module> initial) {
 		moduleDatabase.readLock();
@@ -1164,11 +1164,11 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * Return the active start level value of this container.
-	 * 
+	 *
 	 * If the container is in the process of changing the start level this
 	 * method must return the active start level if this differs from the
 	 * requested start level.
-	 * 
+	 *
 	 * @return The active start level value of the Framework.
 	 */
 	public int getStartLevel() {

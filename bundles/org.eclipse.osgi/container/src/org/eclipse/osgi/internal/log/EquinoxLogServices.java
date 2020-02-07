@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -114,7 +114,7 @@ public class EquinoxLogServices {
 	private ServiceRegistration<?> perfLogReg;
 
 	/**
-	 * @throws BundleException  
+	 * @throws BundleException
 	 */
 	public void start(BundleContext context) throws BundleException {
 		logServiceManager.start(context);
@@ -123,7 +123,7 @@ public class EquinoxLogServices {
 	}
 
 	/**
-	 * @throws BundleException  
+	 * @throws BundleException
 	 */
 	public void stop(BundleContext context) throws BundleException {
 		frameworkLogReg.unregister();

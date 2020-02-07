@@ -82,7 +82,7 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 					modified = true;
 				}
 				if (modified) {
-					// Class bytes have been modified by weaving hooks. 
+					// Class bytes have been modified by weaving hooks.
 					// Such classes need to be stored as Orphans, so skip the call to storeSharedClass()
 					return;
 				}
@@ -169,7 +169,7 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 				}
 			}
 		} catch (HelperAlreadyDefinedException e) {
-			// We should never get here. 
+			// We should never get here.
 			// If we do, we simply won't share for this ClassLoader
 		}
 	}

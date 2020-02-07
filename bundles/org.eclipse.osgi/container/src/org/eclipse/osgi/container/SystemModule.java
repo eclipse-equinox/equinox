@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -179,7 +179,7 @@ public abstract class SystemModule extends Module {
 	}
 
 	/**
-	 * @throws BundleException  
+	 * @throws BundleException
 	 */
 	protected void initWorker() throws BundleException {
 		// Do nothing
@@ -197,7 +197,7 @@ public abstract class SystemModule extends Module {
 	@Override
 	public void stop(StopOptions... options) throws BundleException {
 		ContainerEvent containerEvent = ContainerEvent.STOPPED_TIMEOUT;
-		// Need to lock the state change lock with no state to prevent 
+		// Need to lock the state change lock with no state to prevent
 		// other threads from starting the framework while we are shutting down
 		try {
 			if (stateChangeLock.tryLock(10, TimeUnit.SECONDS)) {

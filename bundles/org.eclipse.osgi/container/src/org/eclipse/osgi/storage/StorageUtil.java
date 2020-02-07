@@ -222,7 +222,7 @@ public class StorageUtil {
 	/**
 	 * To remain Java 6 compatible work around the unreliable renameTo() via
 	 * retries: http://bugs.java.com/view_bug.do?bug_id=6213298
-	 * 
+	 *
 	 * @param from
 	 * @param to
 	 */

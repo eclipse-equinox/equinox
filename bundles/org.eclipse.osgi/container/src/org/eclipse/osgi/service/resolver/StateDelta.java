@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -30,11 +30,11 @@ public interface StateDelta {
 
 	/**
 	 * Returns an array of all the members
-	 * of this delta which match the given flags.  If an exact match is requested 
+	 * of this delta which match the given flags.  If an exact match is requested
 	 * then only delta members whose type exactly matches the given mask are
 	 * included.  Otherwise, all bundle deltas whose type's bit-wise and with the
-	 * mask is non-zero are included. 
-	 * 
+	 * mask is non-zero are included.
+	 *
 	 * @param mask match mask
 	 * @param exact whether exact match or bit-wise matching should be performed
 	 * @return an array of bundle deltas matching the given match criteria.

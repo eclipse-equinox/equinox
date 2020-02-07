@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -37,7 +37,7 @@ public abstract class ModuleLoader {
 	protected abstract List<URL> findEntries(String path, String filePattern, int options);
 
 	/**
-	 * 
+	 *
 	 * @param path
 	 * @param filePattern
 	 * @param options

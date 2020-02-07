@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -25,7 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * over and over then new ReentrantLocks are created each time.  This set should be
  * used with care.  If the same object is going to be locked/unlocked over and over then
  * consider using a different locking strategy.
- * 
+ *
  * Previous implementations of this class attempted to use a WeakHashMap to cache
  * the locks, but this proved to be a flawed approach because of the unpredictable
  * timing of garbage collection, particularly with autoboxed types (e.g. bundle

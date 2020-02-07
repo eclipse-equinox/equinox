@@ -84,7 +84,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 					// If the revision has been removed from the list of revisions then it has been deleted
 					// because the bundle has been uninstalled or updated
 					if (!r.getRevisions().getModuleRevisions().contains(r)) {
-						// instead of filling the log with errors about missing files from 
+						// instead of filling the log with errors about missing files from
 						// uninstalled/updated bundles just give it an info level
 						eventType = ContainerEvent.INFO;
 					}
@@ -148,7 +148,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 	 * Extracts a directory and all sub content to disk
 	 * @param dirName the directory name to extract
 	 * @return the File used to extract the content to.  A value
-	 * of <code>null</code> is returned if the directory to extract does 
+	 * of <code>null</code> is returned if the directory to extract does
 	 * not exist or if content extraction is not supported.
 	 */
 	File extractDirectory(String dirName) {
@@ -294,7 +294,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 			LinkedHashSet<String> result = new LinkedHashSet<>();
 			// Get all entries and add the ones of interest.
 			for (String entryPath : getPaths()) {
-				// Is the entry of possible interest? Note that 
+				// Is the entry of possible interest? Note that
 				// string.startsWith("") == true.
 				if (entryPath.startsWith(path)) {
 					// If we get here, we know that the entry is either (1) equal to
@@ -430,7 +430,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 	 * This method will ensure the bundle file is open,
 	 * call {@link #doGetInputStream(Object)} to get the
 	 * actual input stream, then if the bundle file limit
-	 * is enabled it will wrapper the input stream in a 
+	 * is enabled it will wrapper the input stream in a
 	 * special input stream that keeps track of active
 	 * input streams to prevent the bundle file from being
 	 * closed until the stream is closed (or a timeout happens).

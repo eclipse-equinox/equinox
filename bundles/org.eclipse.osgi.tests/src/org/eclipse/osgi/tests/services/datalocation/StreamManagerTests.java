@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -107,7 +107,7 @@ public class StreamManagerTests extends OSGiTest {
 	/**
 	 * This tests that FM will keep a backup version of a reliableFile and that
 	 * corrupting the reliableFile will recover the previous contents.
-	 * 
+	 *
 	 */
 	public void testReliableFile() {
 		String fileName = "testReliableFile.txt";

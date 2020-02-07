@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -153,9 +153,9 @@ public class FileManagerTests extends OSGiTest {
 	}
 
 	/**
-	 * This tests a FM update where the a specific file is managed with a 
+	 * This tests a FM update where the a specific file is managed with a
 	 * revision number of (n) and an update is requested while there already
-	 * exists a file with revision number (n+1). FM should skip that generation 
+	 * exists a file with revision number (n+1). FM should skip that generation
 	 * number and update the database with file version set to (n+2). This test is
 	 * possible if a power loss occurs between FM rename() and FM save().
 	 */
@@ -219,7 +219,7 @@ public class FileManagerTests extends OSGiTest {
 
 	/**
 	 * This tests that FM apis throw exceptions if FM has not yet been opened
-	 * or if FM has been closed.  
+	 * or if FM has been closed.
 	 */
 	public void testNotOpen() {
 		String permanentFile = "testNotOpen.txt";
@@ -314,10 +314,10 @@ public class FileManagerTests extends OSGiTest {
 	 * This tests FM remove() then add().  On a remove(), the file can not be deleted as it may
 	 * be in use by another FM. Then add() the file back and see if the version number written to
 	 * is (n+1) where (n) is the version when remove() called.  This is likely if framework uses
-	 * -clean where on clean we remove the file, then on exit we add the file back.  Make sure 
+	 * -clean where on clean we remove the file, then on exit we add the file back.  Make sure
 	 * this is orderly.
-	 * 
-	 * Currently is is a known issues that remove() will never delete any old manager contents. 
+	 *
+	 * Currently is is a known issues that remove() will never delete any old manager contents.
 	 */
 	public void testRemoveThenAdd() {
 		String fileName = "testRemoveThenAdd.txt";
@@ -384,7 +384,7 @@ public class FileManagerTests extends OSGiTest {
 	 */
 	public void testMultipleFileManagers() {
 		// This test relies on a file lock to fail if the same process already
-		// holds a file lock. This is true on Win32 but not on Linux/Mac unless using Java 6. 
+		// holds a file lock. This is true on Win32 but not on Linux/Mac unless using Java 6.
 		// So run this test for windows only.
 		String ee = System.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
 		if (!"win32".equalsIgnoreCase(System.getProperty("osgi.os")) && ee.indexOf("JavaSE-1.6") == -1)
@@ -545,7 +545,7 @@ public class FileManagerTests extends OSGiTest {
 			assertTrue(file3.toString(), file3.exists());
 
 			// This test relies on a file lock to fail if the same process already
-			// holds a file lock. This is true on Win32 but not on Linux/Mac unless using Java 6. 
+			// holds a file lock. This is true on Win32 but not on Linux/Mac unless using Java 6.
 			// So run this test for windows only or Java 6 or higher.
 			String ee = System.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
 			if ("win32".equalsIgnoreCase(System.getProperty("osgi.os")) || ee.indexOf("JavaSE-1.6") != -1) {

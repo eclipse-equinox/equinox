@@ -19,7 +19,7 @@ import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
 
 /**
- * This implementation of State does a bookkeeping of all added/removed 
+ * This implementation of State does a bookkeeping of all added/removed
  */
 public class UserState extends StateImpl {
 	// TODO this is not an accurate way to record updates
@@ -43,7 +43,7 @@ public class UserState extends StateImpl {
 	}
 
 	/**
-	 * @throws BundleException  
+	 * @throws BundleException
 	 */
 	public StateDelta compare(State baseState) throws BundleException {
 		BundleDescription[] currentBundles = this.getBundles();

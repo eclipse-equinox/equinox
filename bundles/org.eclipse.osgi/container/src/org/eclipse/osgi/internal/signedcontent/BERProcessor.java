@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -83,11 +83,11 @@ public class BERProcessor {
 	/**
 	 * Constructs a BERProcessor to operate on the passed buffer. The first structure in the
 	 * buffer will be processed before this method returns.
-	 * 
+	 *
 	 * @param buffer the buffer containing the BER structures.
 	 * @param offset the offset into <code>buffer</code> to the start of the first structure.
 	 * @param len the length of the BER structure.
-	 * @throws SignatureException 
+	 * @throws SignatureException
 	 */
 	public BERProcessor(byte buffer[], int offset, int len) throws SignatureException {
 		this.buffer = buffer;
@@ -98,7 +98,7 @@ public class BERProcessor {
 
 	/**
 	 * Parse the structure found at the current <code>offset</code> into <code>buffer</code>.
-	 * Most methods, constructor, and stepinto, will call this method automatically. If 
+	 * Most methods, constructor, and stepinto, will call this method automatically. If
 	 * <code>offset</code> is modified outside of those methods, this method will need to
 	 * be invoked.
 	 */
@@ -197,7 +197,7 @@ public class BERProcessor {
 
 	/**
 	 * Returns a BERProcessor for the content of the current structure.
-	 * @throws SignatureException 
+	 * @throws SignatureException
 	 */
 	public BERProcessor stepInto() throws SignatureException {
 		return new BERProcessor(buffer, contentOffset, contentLength);

@@ -7,16 +7,16 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.service.runnable;
 
 /**
- * Like a {@link java.lang.Runnable}, an object which captures a block of code which can 
- * be passed around and executed.  Unlike standard runnables, paramaterized 
- * runnables allow an arbitrary {@link java.lang.Object} to be passed in when the 
+ * Like a {@link java.lang.Runnable}, an object which captures a block of code which can
+ * be passed around and executed.  Unlike standard runnables, paramaterized
+ * runnables allow an arbitrary {@link java.lang.Object} to be passed in when the
  * block is evaluated.
  * <p>
  * Clients may implement this interface.
@@ -32,7 +32,7 @@ public interface ParameterizedRunnable {
 	/**
 	 * Executes the block of code encapsulated by this runnable in the context of
 	 * the given object and returns the result.  The result may be <code>null</code>.
-	 * 
+	 *
 	 * @param context the context for evaluating the runnable
 	 * @return the result of evaluating the runnable in the given context
 	 * @throws Exception if there is a problem running this runnable

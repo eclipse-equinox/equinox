@@ -17,11 +17,11 @@ package org.eclipse.osgi.internal.container;
 import java.util.*;
 
 /**
- * Borrowed from org.eclipse.core.internal.resources.ComputeProjectOrder 
+ * Borrowed from org.eclipse.core.internal.resources.ComputeProjectOrder
  * to be used when computing the stop order.
  * Implementation of a sort algorithm for computing the node order. This
  * algorithm handles cycles in the node reference graph in a reasonable way.
- * 
+ *
  * @since 3.0
  */
 public class ComputeNodeOrder {
@@ -93,14 +93,14 @@ public class ComputeNodeOrder {
 			 * Ordered list of adjacent vertexes. In other words, "this" is the
 			 * "from" vertex and the elements of this list are all "to"
 			 * vertexes.
-			 * 
+			 *
 			 * Element type: <code>Vertex</code>
 			 */
 			public List<Vertex> adjacent = new ArrayList<>(3);
 
 			/**
 			 * Creates a new vertex with the given id.
-			 * 
+			 *
 			 * @param id the vertex id
 			 */
 			public Vertex(Object id) {
@@ -110,14 +110,14 @@ public class ComputeNodeOrder {
 
 		/**
 		 * Ordered list of all vertexes in this graph.
-		 * 
+		 *
 		 * Element type: <code>Vertex</code>
 		 */
 		private List<Vertex> vertexList = new ArrayList<>(100);
 
 		/**
 		 * Map from id to vertex.
-		 * 
+		 *
 		 * Key type: <code>Object</code>; value type: <code>Vertex</code>
 		 */
 		private Map<Object, Vertex> vertexMap = new HashMap<>(100);
@@ -170,7 +170,7 @@ public class ComputeNodeOrder {
 		 * Defines a new vertex with the given id. The depth-first search is
 		 * performed in the relative order in which vertexes were added to the
 		 * graph.
-		 * 
+		 *
 		 * @param id the id of the vertex
 		 * @exception IllegalArgumentException if the vertex id is
 		 * already defined or if the graph is frozen
@@ -194,7 +194,7 @@ public class ComputeNodeOrder {
 		 * <code>addVertex</code>. The depth-first search is performed in the
 		 * relative order in which adjacent "to" vertexes were added to a given
 		 * "from" index.
-		 * 
+		 *
 		 * @param fromId the id of the "from" vertex
 		 * @param toId the id of the "to" vertex
 		 * @exception IllegalArgumentException if either vertex is undefined or
@@ -215,7 +215,7 @@ public class ComputeNodeOrder {
 		/**
 		 * Returns the ids of the vertexes in this graph ordered by depth-first
 		 * search finish time. The graph must be frozen.
-		 * 
+		 *
 		 * @param increasing <code>true</code> if objects are to be arranged
 		 * into increasing order of depth-first search finish time, and
 		 * <code>false</code> if objects are to be arranged into decreasing
@@ -244,7 +244,7 @@ public class ComputeNodeOrder {
 
 		/**
 		 * Returns whether the graph contains cycles. The graph must be frozen.
-		 * 
+		 *
 		 * @return <code>true</code> if this graph contains at least one cycle,
 		 * and <code>false</code> if this graph is cycle free
 		 * @exception IllegalArgumentException if the graph is not frozen
@@ -260,9 +260,9 @@ public class ComputeNodeOrder {
 		 * Returns the non-trivial components of this graph. A non-trivial
 		 * component is a set of 2 or more vertexes that were traversed
 		 * together. The graph must be frozen.
-		 * 
+		 *
 		 * @return the possibly empty list of non-trivial components, where
-		 * each component is an array of ids (element type: 
+		 * each component is an array of ids (element type:
 		 * <code>Object[]</code>)
 		 * @exception IllegalArgumentException if the graph is not frozen
 		 */
@@ -311,7 +311,7 @@ public class ComputeNodeOrder {
 		//		 * </p>
 		//		 */
 		//		private void recursiveDFS() {
-		//			// initialize 
+		//			// initialize
 		//			// all vertex.color initially Vertex.WHITE;
 		//			// all vertex.predecessor initially null;
 		//			time = 0;
@@ -325,7 +325,7 @@ public class ComputeNodeOrder {
 		//
 		//		/**
 		//		 * Helper method. Performs a depth first search of this graph.
-		//		 * 
+		//		 *
 		//		 * @param vertex the vertex to visit
 		//		 */
 		//		private void DFSVisit(Vertex vertex) {
@@ -364,7 +364,7 @@ public class ComputeNodeOrder {
 			// use precomputed objects to avoid garbage
 			final Integer NEXT_VERTEX_OBJECT = Integer.valueOf(NEXT_VERTEX);
 			final Integer AFTER_NEXTED_DFS_VISIT_OBJECT = Integer.valueOf(AFTER_NEXTED_DFS_VISIT);
-			// initialize 
+			// initialize
 			// all vertex.color initially Vertex.WHITE;
 			// all vertex.predecessor initially null;
 			time = 0;
@@ -460,7 +460,7 @@ public class ComputeNodeOrder {
 	 * Algorithms</it>, McGraw-Hill, 1990. The strongly-connected-components
 	 * algorithm is in section 23.5.
 	 * </p>
-	 * 
+	 *
 	 * @param objects a list of projects (element type:
 	 * <code>IProject</code>)
 	 * @param references a list of project references [A,B] meaning that A

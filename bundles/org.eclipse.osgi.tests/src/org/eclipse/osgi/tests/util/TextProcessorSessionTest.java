@@ -21,7 +21,7 @@ public class TextProcessorSessionTest extends ConfigurationSessionTestSuite {
 	private String lang = null;
 
 	/**
-	 * Create a session test for the given class.  
+	 * Create a session test for the given class.
 	 * @param pluginId tests plugin id
 	 * @param clazz the test class to run
 	 * @param language the language to run the tests under (the -nl parameter value)

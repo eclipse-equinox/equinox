@@ -109,7 +109,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		ExportPackageDescriptionImpl pkgDes = (ExportPackageDescriptionImpl) supplier;
 
 		// If we are in strict mode, check to see if the export specifies friends.
-		// If it does, are we one of the friends 
+		// If it does, are we one of the friends
 		String[] friends = (String[]) pkgDes.getDirective(StateImpl.FRIENDS_DIRECTIVE);
 		Boolean internal = (Boolean) pkgDes.getDirective(StateImpl.INTERNAL_DIRECTIVE);
 		if (internal.booleanValue() || friends != null) {

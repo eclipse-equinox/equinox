@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -27,17 +27,17 @@ import java.util.zip.Checksum;
  */
 public class ReliableFile {
 	/**
-	 * Open mask. Obtain the best data stream available. If the primary data 
-	 * contents are invalid (corrupt, missing, etc.), the data for a prior 
-	 * version may be used. 
+	 * Open mask. Obtain the best data stream available. If the primary data
+	 * contents are invalid (corrupt, missing, etc.), the data for a prior
+	 * version may be used.
 	 * An IOException will be thrown if a valid data content can not be
-	 * determined. 
+	 * determined.
 	 * This is mutually exclusive with <code>OPEN_FAIL_ON_PRIMARY</code>.
 	 */
 	public static final int OPEN_BEST_AVAILABLE = 0;
 	/**
-	 * Open mask. Obtain only the data stream for the primary file where any other 
-	 * version will not be valid. This should be used for data streams that are 
+	 * Open mask. Obtain only the data stream for the primary file where any other
+	 * version will not be valid. This should be used for data streams that are
 	 * managed as a group as a prior contents may not match the other group data.
 	 * If the primary data is not invalid, a IOException will be thrown.
 	 * This is mutually exclusive with <code>OPEN_BEST_AVAILABLE</code>.
@@ -62,14 +62,14 @@ public class ReliableFile {
 
 	/**
 	 * Property to set the maximum size of a file that will be buffered. When calculating a ReliableFile
-	 * checksum, if the file is this size or small, ReliableFile will read the file contents into a 
+	 * checksum, if the file is this size or small, ReliableFile will read the file contents into a
 	 * <code>BufferedInputStream</code> and reset the buffer to avoid having to read the data from the
 	 * media twice. Since this method require memory for storage, it is limited to this size. The default
 	 * maximum is 128-KBytes.
 	 */
 	public static final String PROP_MAX_BUFFER = "osgi.reliableFile.maxInputStreamBuffer"; //$NON-NLS-1$
 	/**
-	 * The maximum number of generations to keep as backup files in case last generation 
+	 * The maximum number of generations to keep as backup files in case last generation
 	 * file is determined to be invalid.
 	 */
 	public static final String PROP_MAX_GENERATIONS = "osgi.ReliableFile.maxGenerations"; //$NON-NLS-1$
@@ -231,7 +231,7 @@ public class ReliableFile {
 	 * Returns an InputStream object for reading the target file.
 	 *
 	 * @param generation the maximum generation to evaluate
-	 * @param openMask mask used to open data. 
+	 * @param openMask mask used to open data.
 	 * are invalid (corrupt, missing, etc).
 	 * @return An InputStream object which can be used to read the target file.
 	 * @throws IOException If an error occurs preparing the file.
@@ -340,7 +340,7 @@ public class ReliableFile {
 
 	/**
 	 * Returns an OutputStream object for writing the target file.
-	 * 
+	 *
 	 * @param append append new data to an existing file.
 	 * @param appendGeneration specific generation of file to append from.
 	 * @return An OutputStream object which can be used to write the target file.
@@ -445,7 +445,7 @@ public class ReliableFile {
 		String name = referenceFile.getName();
 		File parent = new File(referenceFile.getParent());
 		int generationCount = generations.length;
-		// if a base file is in the list (0 in generations[]), we will 
+		// if a base file is in the list (0 in generations[]), we will
 		//  never delete these files, so don't count them in the old
 		//  generation count.
 		if (generations[generationCount - 1] == 0)
@@ -529,7 +529,7 @@ public class ReliableFile {
 
 	/**
 	 * Answers a boolean indicating whether or not the specified reliable file
-	 * exists on the underlying file system. This call only returns if a file 
+	 * exists on the underlying file system. This call only returns if a file
 	 * exists and not if the file contents are valid.
 	 * @param file returns true if the specified reliable file exists; otherwise false is returned
 	 *
@@ -556,7 +556,7 @@ public class ReliableFile {
 	}
 
 	/**
-	 * Returns the time that the reliable file was last modified. Only the time 
+	 * Returns the time that the reliable file was last modified. Only the time
 	 * of the last file generation is returned.
 	 * @param file the file to determine the time of.
 	 * @return time the file was last modified (see java.io.File.lastModified()).
@@ -590,7 +590,7 @@ public class ReliableFile {
 	/**
 	 * Returns the a version number of a reliable managed file. The version can be expected
 	 * to be unique for each successful file update.
-	 * 
+	 *
 	 * @param file the file to determine the version of.
 	 * @return a unique version of this current file. A value of -1 indicates the file does
 	 * not exist or an error occurred.
@@ -634,7 +634,7 @@ public class ReliableFile {
 	 * Get a list of ReliableFile base names in a given directory. Only files with a valid
 	 * ReliableFile generation are included.
 	 * @param directory the directory to inquire.
-	 * @return an array of ReliableFile names in the directory. 
+	 * @return an array of ReliableFile names in the directory.
 	 * @throws IOException if an error occurs.
 	 */
 	public static String[] getBaseFiles(File directory) throws IOException {
@@ -682,7 +682,7 @@ public class ReliableFile {
 	}
 
 	/**
-	 * Inform ReliableFile that a file has been updated outside of 
+	 * Inform ReliableFile that a file has been updated outside of
 	 * ReliableFile.
 	 * @param file
 	 */
@@ -710,10 +710,10 @@ public class ReliableFile {
 
 	/**
 	 * Returns the size of the ReliableFile signature + CRC at the end of the file.
-	 * This method should be called only after calling getInputStream() or 
+	 * This method should be called only after calling getInputStream() or
 	 * getOutputStream() methods.
 	 *
-	 * @return <code>int</code> size of the ReliableFIle signature + CRC appended 
+	 * @return <code>int</code> size of the ReliableFIle signature + CRC appended
 	 * to the end of the file.
 	 * @throws IOException if getInputStream() or getOutputStream has not been
 	 * called.
@@ -745,11 +745,11 @@ public class ReliableFile {
 	}
 
 	/**
-	 * Returns a Checksum object for the current file contents. This method 
-	 * should be called only after calling getInputStream() or 
+	 * Returns a Checksum object for the current file contents. This method
+	 * should be called only after calling getInputStream() or
 	 * getOutputStream() methods.
 	 *
-	 * @return Object implementing Checksum interface initialized to the 
+	 * @return Object implementing Checksum interface initialized to the
 	 * current file contents.
 	 * @throws IOException if getOutputStream for append has not been called.
 	 */

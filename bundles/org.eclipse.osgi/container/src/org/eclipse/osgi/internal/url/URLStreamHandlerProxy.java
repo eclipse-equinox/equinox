@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -25,17 +25,17 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
- * The URLStreamHandlerProxy is a URLStreamHandler that acts as a proxy for registered 
- * URLStreamHandlerServices.  When a URLStreamHandler is requested from the URLStreamHandlerFactory 
- * and it exists in the service registry, a URLStreamHandlerProxy is created which will pass all the 
- * requests from the requestor to the real URLStreamHandlerService.  We can't return the real 
- * URLStreamHandlerService from the URLStreamHandlerFactory because the JVM caches URLStreamHandlers 
- * and therefore would not support a dynamic environment of URLStreamHandlerServices being registered 
+ * The URLStreamHandlerProxy is a URLStreamHandler that acts as a proxy for registered
+ * URLStreamHandlerServices.  When a URLStreamHandler is requested from the URLStreamHandlerFactory
+ * and it exists in the service registry, a URLStreamHandlerProxy is created which will pass all the
+ * requests from the requestor to the real URLStreamHandlerService.  We can't return the real
+ * URLStreamHandlerService from the URLStreamHandlerFactory because the JVM caches URLStreamHandlers
+ * and therefore would not support a dynamic environment of URLStreamHandlerServices being registered
  * and unregistered.
  */
 
 public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTrackerCustomizer<URLStreamHandlerService, ServiceReference<URLStreamHandlerService>> {
-	// TODO lots of type-based names 
+	// TODO lots of type-based names
 	protected URLStreamHandlerService realHandlerService;
 
 	protected URLStreamHandlerSetter urlSetter;
@@ -159,8 +159,8 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	@Override
 	public void setURL(URL url, String protocol, String host, int port, String file, String ref) {
 
-		//using non-deprecated URLStreamHandler.setURL method. 
-		//setURL(URL u, String protocol, String host, int port, String authority, String userInfo, String file, String query, String ref) 
+		//using non-deprecated URLStreamHandler.setURL method.
+		//setURL(URL u, String protocol, String host, int port, String authority, String userInfo, String file, String query, String ref)
 		super.setURL(url, protocol, host, port, null, null, file, null, ref);
 	}
 
@@ -201,7 +201,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 		int newRank = getRank(reference);
 		if (reference == urlStreamServiceReference) {
 			if (newRank < ranking) {
-				// The URLHandler we are currently using has dropped it's ranking below a URLHandler registered 
+				// The URLHandler we are currently using has dropped it's ranking below a URLHandler registered
 				// for the same protocol. We need to swap out URLHandlers.
 				// this should get us the highest ranked service, if available
 				ServiceReference<URLStreamHandlerService> newReference = urlStreamHandlerServiceTracker.getServiceReference();

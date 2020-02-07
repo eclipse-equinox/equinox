@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -25,7 +25,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 /**
  * The ContentHandlerProxy is a ContentHandler that acts as a proxy for registered ContentHandlers.
  * When a ContentHandler is requested from the ContentHandlerFactory and it exists in the service
- * registry, a ContentHandlerProxy is created which will pass all the requests from the requestor to 
+ * registry, a ContentHandlerProxy is created which will pass all the requests from the requestor to
  * the real ContentHandler.  We can't return the real ContentHandler from the ContentHandlerFactory
  * because the JVM caches ContentHandlers and therefore would not support a dynamic environment of
  * ContentHandlers being registered and unregistered.
@@ -47,7 +47,7 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 		this.context = context;
 		this.contentType = contentType;
 
-		// In case the reference == null, the proxy is constructed with DefaultContentHandler for a Content Handler 
+		// In case the reference == null, the proxy is constructed with DefaultContentHandler for a Content Handler
 		// until a real ContentHandler for this mime-type is registered
 		setNewHandler(reference, getRank(reference));
 
@@ -105,7 +105,7 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 		int newrank = getRank(reference);
 		if (reference == contentHandlerServiceReference) {
 			if (newrank < ranking) {
-				// The ContentHandler we are currently using has dropped it's ranking below a ContentHandler 
+				// The ContentHandler we are currently using has dropped it's ranking below a ContentHandler
 				// registered for the same protocol.  We need to swap out ContentHandlers.
 				// this should get us the highest ranked service, if available
 				ServiceReference<ContentHandler> newReference = contentHandlerServiceTracker.getServiceReference();

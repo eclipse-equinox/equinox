@@ -37,9 +37,9 @@ import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
 
 /**
- * A ClasspathEntry contains a single <code>BundleFile</code> which is used as 
- * a source to load classes and resources from, and a single 
- * <code>ProtectionDomain</code> which is used as the domain to define classes 
+ * A ClasspathEntry contains a single <code>BundleFile</code> which is used as
+ * a source to load classes and resources from, and a single
+ * <code>ProtectionDomain</code> which is used as the domain to define classes
  * loaded from this ClasspathEntry.
  * @since 3.2
  */

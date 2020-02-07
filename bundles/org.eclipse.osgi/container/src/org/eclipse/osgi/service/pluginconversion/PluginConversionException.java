@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -15,7 +15,7 @@ package org.eclipse.osgi.service.pluginconversion;
 
 /**
  * Custom exception for errors that can happen during plugin conversion.
- * 
+ *
  * @since 3.0
  */
 public class PluginConversionException extends Exception {
@@ -35,7 +35,7 @@ public class PluginConversionException extends Exception {
 
 	/**
 	 * Create a new exception with the given message.
-	 * 
+	 *
 	 * @param message the message for the exception
 	 */
 	public PluginConversionException(String message) {
@@ -44,7 +44,7 @@ public class PluginConversionException extends Exception {
 
 	/**
 	 * Create a new exception with the given message and nested exception.
-	 * 
+	 *
 	 * @param message the message for the exception
 	 * @param cause the nested exception
 	 */
@@ -55,7 +55,7 @@ public class PluginConversionException extends Exception {
 
 	/**
 	 * Create a new exception with the given nested exception.
-	 * 
+	 *
 	 * @param cause the nested exception
 	 */
 	public PluginConversionException(Throwable cause) {
@@ -65,7 +65,7 @@ public class PluginConversionException extends Exception {
 	/**
 	 * Return the nested exception for this exception or <code>null</code>
 	 * if there is none.
-	 * 
+	 *
 	 * @return the nested exception or <code>null</code>
 	 */
 	@Override

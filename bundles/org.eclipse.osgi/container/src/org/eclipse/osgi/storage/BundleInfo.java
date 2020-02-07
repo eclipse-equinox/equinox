@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -307,9 +307,9 @@ public final class BundleInfo {
 		}
 
 		/**
-		 * Gets called by BundleFile during {@link BundleFile#getFile(String, boolean)}.  This method 
-		 * will allocate a File object where content of the specified path may be 
-		 * stored for this generation.  The returned File object may 
+		 * Gets called by BundleFile during {@link BundleFile#getFile(String, boolean)}.  This method
+		 * will allocate a File object where content of the specified path may be
+		 * stored for this generation.  The returned File object may
 		 * not exist if the content has not previously been stored.
 		 * @param path the path to the content to extract from the generation
 		 * @return a file object where content of the specified path may be stored.
@@ -320,14 +320,14 @@ public final class BundleInfo {
 		}
 
 		/**
-		 * Gets called by BundleFile during {@link BundleFile#getFile(String, boolean)}.  This method 
-		 * will allocate a File object where content of the specified path may be 
-		 * stored for this generation.  The returned File object may 
+		 * Gets called by BundleFile during {@link BundleFile#getFile(String, boolean)}.  This method
+		 * will allocate a File object where content of the specified path may be
+		 * stored for this generation.  The returned File object may
 		 * not exist if the content has not previously been stored.
 		 * @param path the path to the content to extract from the generation
 		 * @param base the base path that is prepended to the path, may be null
 		 * @return a file object where content of the specified path may be stored.
-		 * @throws StorageException if the path will escape the persistent storage of 
+		 * @throws StorageException if the path will escape the persistent storage of
 		 * the generation starting at the specified base
 		 */
 		public File getExtractFile(String base, String path) {
@@ -556,7 +556,7 @@ public final class BundleInfo {
 								return true;
 						break;
 					case 'I' :
-						if (line.startsWith("Implementation-Title: ") || line.startsWith("Implementation-Version: ") || line.startsWith("Implementation-Vendor: ")) //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$ 
+						if (line.startsWith("Implementation-Title: ") || line.startsWith("Implementation-Version: ") || line.startsWith("Implementation-Vendor: ")) //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 							return true;
 						break;
 				}

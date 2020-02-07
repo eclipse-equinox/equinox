@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -23,20 +23,20 @@ import org.osgi.framework.*;
 
 public class ExceptionHandlerTests extends TestCase {
 	//These tests exercise the code change for bug 73111.
-	
+
 	class FrameworkEventListenerWithResult implements FrameworkListener {
 		FrameworkEvent event = null;
-		
+
 		public synchronized void frameworkEvent(FrameworkEvent newEvent) {
 			if (newEvent.getType() != FrameworkEvent.ERROR)
 				return;
-			
+
 			if (this.event != null)
 				return;
 			event = newEvent;
 			notify();
 		}
-		
+
 		public synchronized FrameworkEvent getResult(long timeout) {
 			if (event != null) {
 				FrameworkEvent tmp = event;
@@ -53,13 +53,13 @@ public class ExceptionHandlerTests extends TestCase {
 		}
 	}
 
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
-	
-	
-	public void testNonFatalException() {	
+
+
+	public void testNonFatalException() {
 		FrameworkEventListenerWithResult fwkListener = new FrameworkEventListenerWithResult();
 		OSGiTestsActivator.getContext().addFrameworkListener(fwkListener);
 
@@ -67,9 +67,9 @@ public class ExceptionHandlerTests extends TestCase {
 			public void bundleChanged(BundleEvent event) {
 				throw new NullPointerException("Generated exception");
 			}
-		};	
+		};
 		OSGiTestsActivator.getContext().addBundleListener(npeGenerator);
-		
+
 		try {
 			BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle09");
 			FrameworkEvent eventReceived = fwkListener.getResult(60000);
@@ -85,9 +85,9 @@ public class ExceptionHandlerTests extends TestCase {
 		OSGiTestsActivator.getContext().removeFrameworkListener(fwkListener);
 		OSGiTestsActivator.getContext().removeBundleListener(npeGenerator);
 	}
-	
-	
-	public void testFatalException() {	
+
+
+	public void testFatalException() {
 		FrameworkEventListenerWithResult fwkListener = new FrameworkEventListenerWithResult();
 		OSGiTestsActivator.getContext().addFrameworkListener(fwkListener);
 
@@ -97,8 +97,8 @@ public class ExceptionHandlerTests extends TestCase {
 			}
 		};
 		OSGiTestsActivator.getContext().addBundleListener(fatalException);
-		
-	
+
+
 		try {
 			System.setProperty("eclipse.exitOnError","false"); //Here we set the value to false, because otherwise we would simply exit
 			BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle10");
@@ -116,5 +116,5 @@ public class ExceptionHandlerTests extends TestCase {
 		OSGiTestsActivator.getContext().removeFrameworkListener(fwkListener);
 		OSGiTestsActivator.getContext().removeBundleListener(fatalException);
 	}
- 
+
 }

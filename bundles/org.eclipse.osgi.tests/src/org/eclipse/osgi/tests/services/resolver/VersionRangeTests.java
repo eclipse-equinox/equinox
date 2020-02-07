@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -43,7 +43,7 @@ public class VersionRangeTests extends TestCase {
 	}
 
 	public void testGreaterThan() {
-		// any version equal or greater than 1.0 is ok 
+		// any version equal or greater than 1.0 is ok
 		VersionRange lowerBound = new VersionRange("1.0.0"); //$NON-NLS-1$
 		assertTrue("1.0", !lowerBound.isIncluded(Version.parseVersion("0.9"))); //$NON-NLS-1$ //$NON-NLS-2$
 		assertTrue("1.1", lowerBound.isIncluded(Version.parseVersion("1.0"))); //$NON-NLS-1$ //$NON-NLS-2$
@@ -52,7 +52,7 @@ public class VersionRangeTests extends TestCase {
 	}
 
 	public void testLowerThan() {
-		// any version lower than 2.0 is ok 		
+		// any version lower than 2.0 is ok
 		VersionRange upperBound = new VersionRange("[0,2.0)"); //$NON-NLS-1$
 		assertTrue("1.0", upperBound.isIncluded(Version.parseVersion("0.0"))); //$NON-NLS-1$ //$NON-NLS-2$
 		assertTrue("1.1", upperBound.isIncluded(Version.parseVersion("0.9"))); //$NON-NLS-1$ //$NON-NLS-2$

@@ -98,7 +98,7 @@ public class DebugOptionsTestCase extends CoreTest {
 	 * Test that a new {@link FrameworkDebugTraceEntry} object created without a trace class
 	 * has 'org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase' as the class name and
 	 * 'testTracingEntry01' as the method name that it determined as the caller of it.
-	 * 
+	 *
 	 * This test mimics the tracing framework to ensure that the correct class name and method name
 	 * are returned and written to the trace file.
 	 */
@@ -110,7 +110,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		FrameworkDebugTraceEntry traceEntry = new FrameworkDebugTraceEntry(bundleName, optionPath, message, null);
 		String correctClassName = "org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase"; //$NON-NLS-1$
 		String correctMethodName = "testTracingEntry01"; //$NON-NLS-1$
-		assertEquals("The class calling the trace API does not match the expected value.", correctClassName, traceEntry.getClassName()); //$NON-NLS-1$  
+		assertEquals("The class calling the trace API does not match the expected value.", correctClassName, traceEntry.getClassName()); //$NON-NLS-1$
 		assertEquals("The method calling the trace API does not match the expected value.", correctMethodName, traceEntry.getMethodName()); //$NON-NLS-1$
 	}
 
@@ -118,7 +118,7 @@ public class DebugOptionsTestCase extends CoreTest {
 	 * Test that a new {@link FrameworkDebugTraceEntry} object created with a trace class
 	 * of 'org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase' has the correct class name and
 	 * method name of the caller.
-	 * 
+	 *
 	 * This test mimics the tracing framework to ensure that the correct class name and method name
 	 * are returned and written to the trace file.
 	 */
@@ -127,7 +127,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		String correctClassName = Runner1.class.getName();
 		String correctMethodName = "run"; //$NON-NLS-1$
 		FrameworkDebugTraceEntry traceEntry = new Runner1().run();
-		assertEquals("The class calling the trace API does not match the expected value.", correctClassName, traceEntry.getClassName()); //$NON-NLS-1$  
+		assertEquals("The class calling the trace API does not match the expected value.", correctClassName, traceEntry.getClassName()); //$NON-NLS-1$
 		assertEquals("The method calling the trace API does not match the expected value.", correctMethodName, traceEntry.getMethodName()); //$NON-NLS-1$
 	}
 
@@ -229,7 +229,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		assertNull("Found bad value: " + listener.getIncorrectValue(), listener.getIncorrectValue()); //$NON-NLS-1$
 
 		listener.clear();
-		checkValues.put(getName() + "/debug", null); //$NON-NLS-1$ 
+		checkValues.put(getName() + "/debug", null); //$NON-NLS-1$
 		listener.setCheckValues(checkValues);
 		debugOptions.setDebugEnabled(false);
 		assertFalse("Debug is enabled", debugOptions.isDebugEnabled()); //$NON-NLS-1$
@@ -560,7 +560,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		expectedThrowableText1.append(exceptionMessage1);
 		expectedThrowableText1.append(DebugOptionsTestCase.LINE_SEPARATOR);
 		expectedThrowableText1.append(DebugOptionsTestCase.TAB_CHARACTER);
-		expectedThrowableText1.append("at org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase.testVerboseDebugging(DebugOptionsTestCase.java:"); //$NON-NLS-1$		
+		expectedThrowableText1.append("at org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase.testVerboseDebugging(DebugOptionsTestCase.java:"); //$NON-NLS-1$
 		if (!traceOutput[0].getThrowableText().startsWith(expectedThrowableText1.toString())) {
 			final StringBuilder errorMessage = new StringBuilder("The expected throwable text does not start with the actual throwable text."); //$NON-NLS-1$
 			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
@@ -659,7 +659,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		final String exceptionMessage2 = "An error 2"; //$NON-NLS-1$
 		final String exceptionMessage3 = "An error 3"; //$NON-NLS-1$
 		try {
-			debugTrace.trace("/debug", "testing 1", new Exception(exceptionMessage1)); //$NON-NLS-1$ //$NON-NLS-2$ 
+			debugTrace.trace("/debug", "testing 1", new Exception(exceptionMessage1)); //$NON-NLS-1$ //$NON-NLS-2$
 			debugTrace.trace("/notset", "testing 2", new Exception(exceptionMessage2)); //$NON-NLS-1$ //$NON-NLS-2$
 			debugTrace.trace("/debug", "testing 3", new Exception(exceptionMessage3)); //$NON-NLS-1$ //$NON-NLS-2$
 			traceOutput = readTraceFile(traceFile); // Note: this call will also delete the trace file
@@ -671,7 +671,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		expectedThrowableText1.append(exceptionMessage1);
 		expectedThrowableText1.append(DebugOptionsTestCase.LINE_SEPARATOR);
 		expectedThrowableText1.append(DebugOptionsTestCase.TAB_CHARACTER);
-		expectedThrowableText1.append("at org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase.testTraceFile02(DebugOptionsTestCase.java:"); //$NON-NLS-1$		
+		expectedThrowableText1.append("at org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase.testTraceFile02(DebugOptionsTestCase.java:"); //$NON-NLS-1$
 
 		assertEquals("Wrong number of trace entries", 2, traceOutput.length); //$NON-NLS-1$
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[0].getThreadName()); //$NON-NLS-1$
@@ -706,7 +706,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		expectedThrowableText2.append(exceptionMessage3);
 		expectedThrowableText2.append(DebugOptionsTestCase.LINE_SEPARATOR);
 		expectedThrowableText2.append(DebugOptionsTestCase.TAB_CHARACTER);
-		expectedThrowableText2.append("at org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase.testTraceFile02(DebugOptionsTestCase.java:"); //$NON-NLS-1$		
+		expectedThrowableText2.append("at org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase.testTraceFile02(DebugOptionsTestCase.java:"); //$NON-NLS-1$
 
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[1].getThreadName()); //$NON-NLS-1$
 		assertEquals("Bundle name is incorrect", getName(), traceOutput[1].getBundleSymbolicName()); //$NON-NLS-1$
@@ -1179,7 +1179,7 @@ public class DebugOptionsTestCase extends CoreTest {
 
 		/**
 		 * The date and time when the trace occurred.
-		 * 
+		 *
 		 */
 		private final long timestamp;
 

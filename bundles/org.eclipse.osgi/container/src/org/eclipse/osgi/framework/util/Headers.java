@@ -157,8 +157,8 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 * @param key Key name.
 	 * @param value Value of the key or null to remove key.
 	 * @param replace A value of true will allow a previous
-	 * value of the key to be replaced.  A value of false 
-	 * will cause an IllegalArgumentException to be thrown 
+	 * value of the key to be replaced.  A value of false
+	 * will cause an IllegalArgumentException to be thrown
 	 * if a previous value of the key exists.
 	 * @return the previous value to which the key was mapped,
 	 * or null if the key did not have a previous mapping.

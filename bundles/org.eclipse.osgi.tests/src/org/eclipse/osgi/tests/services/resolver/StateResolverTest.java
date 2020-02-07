@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -66,7 +66,7 @@ public class StateResolverTest extends AbstractStateTest {
 	 * Tests adding 3 new bundles to an already resolved state and then
 	 * resolving only one of the bundles. The result should be all 3 added
 	 * bundles being resolved.
-	 *  
+	 *
 	 */
 	public void testAdd3Resolve1() throws BundleException {
 		State state = buildInitialState();
@@ -455,7 +455,7 @@ public class StateResolverTest extends AbstractStateTest {
 	 * resolving only one of the bundles. The result should be all 3 added
 	 * bundles being resolved. Then re-resolving the same bundle. The result
 	 * should be only the one bundle being resolved.
-	 *  
+	 *
 	 */
 	public void testReresolveBundle() throws BundleException {
 		State state = buildInitialState();

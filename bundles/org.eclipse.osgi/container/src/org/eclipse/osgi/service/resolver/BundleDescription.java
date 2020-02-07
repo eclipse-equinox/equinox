@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -53,7 +53,7 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	/**
 	 * Returns an array of bundle specifications defined by the Require-Bundle
 	 * clause in this bundle.
-	 * 
+	 *
 	 * @return an array of bundle specifications
 	 */
 	public BundleSpecification[] getRequiredBundles();
@@ -115,7 +115,7 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	/**
 	 * Returns all the capabilities provided by ths bundle that have been selected by
 	 * the resolver.  The returned list will include the capabilities
-	 * returned by {@link #getGenericCapabilities()} that have been selected by the 
+	 * returned by {@link #getGenericCapabilities()} that have been selected by the
 	 * resolver and any capabilities provided by fragments attached to this bundle.
 	 * @return the selected capabilities that this bundle provides.  If the bundle is
 	 * unresolved or has no capabilities then an empty array is returned.
@@ -151,7 +151,7 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 
 	/**
 	 * Returns true if this bundle is resolved in its host state.
-	 * 
+	 *
 	 * @return true if this bundle is resolved in its host state.
 	 */
 	public boolean isResolved();
@@ -159,14 +159,14 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	/**
 	 * Returns the state object which hosts this bundle. null is returned if
 	 * this bundle is not currently in a state.
-	 * 
+	 *
 	 * @return the state object which hosts this bundle.
 	 */
 	public State getContainingState();
 
 	/**
 	 * Returns the string representation of this bundle.
-	 * 
+	 *
 	 * @return String representation of this bundle.
 	 */
 	@Override
@@ -175,36 +175,36 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	/**
 	 * Returns the host for this bundle. null is returned if this bundle is not
 	 * a fragment.
-	 * 
+	 *
 	 * @return the host for this bundle.
 	 */
 	public HostSpecification getHost();
 
 	/**
 	 * Returns the numeric id of this bundle.  Typically a bundle description
-	 * will only have a numeric id if it represents a bundle that is installed in a 
+	 * will only have a numeric id if it represents a bundle that is installed in a
 	 * framework as the framework assigns the ids.  -1 is returned if the id is not known.
-	 * 
+	 *
 	 * @return the numeric id of this bundle description
 	 */
 	public long getBundleId();
 
 	/**
 	 * Returns all fragments known to this bundle (regardless resolution status).
-	 * 
+	 *
 	 * @return an array of BundleDescriptions containing all known fragments
 	 */
 	public BundleDescription[] getFragments();
 
 	/**
-	 * Returns whether this bundle is a singleton.  Singleton bundles require 
-	 * that at most one single version of the bundle can be resolved at a time. 
+	 * Returns whether this bundle is a singleton.  Singleton bundles require
+	 * that at most one single version of the bundle can be resolved at a time.
 	 * <p>
 	 * The existence of a single bundle marked as singleton causes all bundles
-	 * with the same symbolic name to be treated as singletons as well.  
+	 * with the same symbolic name to be treated as singletons as well.
 	 * </p>
-	 * 
-	 * @return <code>true</code>, if this bundle is a singleton, 
+	 *
+	 * @return <code>true</code>, if this bundle is a singleton,
 	 * <code>false</code> otherwise
 	 */
 	public boolean isSingleton();
@@ -220,7 +220,7 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 
 	/**
 	 * Returns all bundles which depend on this bundle.  A bundle depends on
-	 * another bundle if it requires the bundle, imports a package which is 
+	 * another bundle if it requires the bundle, imports a package which is
 	 * exported by the bundle, is a fragment to the bundle or is the host
 	 * of the bundle.
 	 * @return all bundles which depend on this bundle.
@@ -247,8 +247,8 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	public boolean dynamicFragments();
 
 	/**
-	 * Returns the list of execution environments that are required by 
-	 * this bundle.  Any one of the listed execution environments will 
+	 * Returns the list of execution environments that are required by
+	 * this bundle.  Any one of the listed execution environments will
 	 * allow this bundle to be resolved.
 	 * @since 3.2
 	 * @return the list of execution environments that are required.

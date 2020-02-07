@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -17,14 +17,14 @@ import org.osgi.resource.Namespace;
 
 /**
  * Eclipse Platform and Requirement Namespace.
- * 
+ *
  * <p>
  * This class defines the names for the attributes and directives for this
  * namespace. All unspecified capability attributes are of type {@code String}
  * and are used as arbitrary matching attributes for the capability. The values
  * associated with the specified directive and attribute keys are of type
  * {@code String}, unless otherwise indicated.
- * 
+ *
  * @Immutable
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @since 3.10

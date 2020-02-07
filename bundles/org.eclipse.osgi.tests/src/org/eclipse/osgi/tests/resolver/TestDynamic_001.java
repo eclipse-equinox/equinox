@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -29,7 +29,7 @@ public class TestDynamic_001 extends AbstractStateTest {
 	BundleDescription bundle_1 = null;
 	BundleDescription bundle_2 = null;
 
-	
+
 	public void testTest_001() {
 		State state = buildEmptyState();
 		StateObjectFactory sof = StateObjectFactory.defaultFactory;
@@ -56,23 +56,23 @@ public class TestDynamic_001 extends AbstractStateTest {
 		ExportPackageDescription exp = state.linkDynamicImport(bundle_1, "p");
 		assertNotNull("Package [p] is not wired when it should be ", exp);
 		assertEquals("Package [p] is wired incorrectly ", exp.getExporter(), bundle_2);
-		
+
 	} // end of method
 
-	
+
 	public void checkWiringState_1() {
 	} // end method
 
 	public void checkWiringState_2() {
 	} // end method
-	
+
 
 	public void checkWiring_a() {
 		checkWiringState_1();
 		checkWiringState_2();
 	} // end method
 
-	
+
 	public void addBundlesToState_a(State state) {
 		boolean added = false;
 		added = state.addBundle(bundle_1);
@@ -81,13 +81,13 @@ public class TestDynamic_001 extends AbstractStateTest {
 		assertTrue("failed to add bundle ", added);
 	} // end method
 
-	
+
 	public void checkBundlesResolved_a() {
 		assertTrue("unexpected bundle resolution state", bundle_1.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_2.isResolved());
 	} // end method
 
-	
+
 	public BundleDescription create_bundle_1(StateObjectFactory sof) {
 		java.util.Dictionary dictionary_1 = new java.util.Properties();
 		BundleDescription bundle = null;

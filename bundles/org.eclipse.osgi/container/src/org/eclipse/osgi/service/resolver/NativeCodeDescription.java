@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -33,7 +33,7 @@ public interface NativeCodeDescription extends BaseDescription, Comparable<Nativ
 
 	/**
 	 * Returns the processors supported by the native code.
-	 * @return the processors supported by the native code.  An 
+	 * @return the processors supported by the native code.  An
 	 * empty array is returned if no processors are supported.
 	 */
 	public String[] getProcessors();
@@ -54,7 +54,7 @@ public interface NativeCodeDescription extends BaseDescription, Comparable<Nativ
 
 	/**
 	 * Returns the languages supported by the native code.
-	 * @return the languages supported by the native code.  An empty array is 
+	 * @return the languages supported by the native code.  An empty array is
 	 * returned if all languages are supported.
 	 */
 	public String[] getLanguages();
@@ -81,7 +81,7 @@ public interface NativeCodeDescription extends BaseDescription, Comparable<Nativ
 
 	/**
 	 * Indicates if this native code description has invalid native code paths.  Native
-	 * code paths are invalid if they can not be found in the bundle content. 
+	 * code paths are invalid if they can not be found in the bundle content.
 	 * @return true if the native code paths are invalid; otherwise false is returned.
 	 */
 	public boolean hasInvalidNativePaths();

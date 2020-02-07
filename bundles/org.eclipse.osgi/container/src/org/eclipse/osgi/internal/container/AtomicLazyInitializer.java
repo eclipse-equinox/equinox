@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -17,8 +17,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * A helper class for doing lazy initialization 
- * 
+ * A helper class for doing lazy initialization
+ *
  * @param <V> the type of object to lazy initialize
  */
 public class AtomicLazyInitializer<V> {

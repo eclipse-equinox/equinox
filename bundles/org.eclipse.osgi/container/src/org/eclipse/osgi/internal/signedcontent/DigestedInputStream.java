@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -40,12 +40,12 @@ class DigestedInputStream extends FilterInputStream {
 	 * Constructs an InputStream that uses another InputStream as a source and
 	 * calculates the digest. At the end of the stream an exception will be
 	 * thrown if the calculated digest doesn't match the passed digest.
-	 * 
+	 *
 	 * @param in the stream to use as an input source.
 	 * @param signerInfos the signers.
 	 * @param results the expected digest.
-	 * @throws IOException 
-	 * @throws NoSuchAlgorithmException 
+	 * @throws IOException
+	 * @throws NoSuchAlgorithmException
 	 */
 	DigestedInputStream(BundleEntry entry, BundleFile bundleFile, SignerInfo[] signerInfos, byte results[][], long size) throws IOException, NoSuchAlgorithmException {
 		super(entry.getInputStream());
@@ -77,7 +77,7 @@ class DigestedInputStream extends FilterInputStream {
 	/**
 	 * Read a byte from the InputStream. Digests are calculated on reads. At the
 	 * end of the stream the calculated digests must match the expected digests.
-	 * 
+	 *
 	 * @return the character read or -1 at end of stream.
 	 * @throws IOException if there was an problem reading the byte or at the
 	 *         end of the stream the calculated digests do not match the
@@ -115,7 +115,7 @@ class DigestedInputStream extends FilterInputStream {
 	/**
 	 * Read bytes from the InputStream. Digests are calculated on reads. At the
 	 * end of the stream the calculated digests must match the expected digests.
-	 * 
+	 *
 	 * @return the number of characters read or -1 at end of stream.
 	 * @throws IOException if there was an problem reading or at the
 	 *         end of the stream the calculated digests do not match the
@@ -143,7 +143,7 @@ class DigestedInputStream extends FilterInputStream {
 
 	/**
 	 * Not supported.
-	 * 
+	 *
 	 * @throws IOException always thrown if this method is called since mark/reset is not supported.
 	 * @see java.io.InputStream#reset()
 	 */

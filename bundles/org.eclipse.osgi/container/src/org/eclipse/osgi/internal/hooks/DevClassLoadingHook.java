@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -77,7 +77,7 @@ public class DevClassLoadingHook extends ClassLoaderHook implements KeyedElement
 				}
 			}
 		}
-		// mark the first entry of the list.  
+		// mark the first entry of the list.
 		// This way we can quickly tell that dev classpath entries have been added to the list
 		if (result && cpEntries.size() > 0)
 			cpEntries.get(0).addUserObject(this);

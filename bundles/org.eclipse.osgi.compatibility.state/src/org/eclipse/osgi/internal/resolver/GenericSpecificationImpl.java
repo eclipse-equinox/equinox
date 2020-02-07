@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Rob Harrop - SpringSource Inc. (bug 247522)
@@ -28,7 +28,7 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 	private Map<String, Object> attributes;
 	private Map<String, String> arbitraryDirectives;
 	/*
-	 * Indicates that a generic constraint was from converting the BREE header 
+	 * Indicates that a generic constraint was from converting the BREE header
 	 */
 	public static final int RESOLUTION_FROM_BREE = 0x04;
 

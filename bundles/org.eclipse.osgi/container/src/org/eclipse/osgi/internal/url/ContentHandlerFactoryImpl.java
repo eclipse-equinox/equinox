@@ -35,7 +35,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * The ContentHandlerFactory is registered with the JVM to provide content handlers
  * to requestors.  The ContentHandlerFactory will first look for built-in content handlers.
  * If a built in handler exists, this factory will return null.  Otherwise, this ContentHandlerFactory
- * will search the service registry for a maching Content-Handler and, if found, return a 
+ * will search the service registry for a maching Content-Handler and, if found, return a
  * proxy for that content handler.
  */
 public class ContentHandlerFactoryImpl extends MultiplexingFactory implements java.net.ContentHandlerFactory {
@@ -88,7 +88,7 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 				try {
 					clazz = URLStreamHandlerFactoryImpl.secureAction.loadSystemClass(name.toString());
 					if (clazz != null) {
-						return (null); //this class exists, it is a built in handler, let the JVM handle it	
+						return (null); //this class exists, it is a built in handler, let the JVM handle it
 					}
 				} catch (ClassNotFoundException ex) {
 					//keep looking

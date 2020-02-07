@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -24,11 +24,11 @@ import org.osgi.framework.*;
 
 /**
  * This class represents the use of a service by a bundle. One is created for each
- * service acquired by a bundle. 
- * 
+ * service acquired by a bundle.
+ *
  * <p>
  * This class manages a prototype service factory.
- * 
+ *
  * @ThreadSafe
  */
 public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
@@ -49,9 +49,9 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 
 	/**
 	 * Create a new service object for the service.
-	 * 
+	 *
 	 * <p>
-	 * 
+	 *
 	 * @return The service object.
 	 */
 	/* @GuardedBy("this") */
@@ -79,7 +79,7 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 
 	/**
 	 * Release a service object for the service.
-	 * 
+	 *
 	 * @param service The service object to release.
 	 * @return true if the service was released; otherwise false.
 	 * @throws IllegalArgumentException If the specified service was not
@@ -105,7 +105,7 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 
 	/**
 	 * Release all uses of the service and reset the use count to zero.
-	 * 
+	 *
 	 * <ol>
 	 * <li>The bundle's use count for this service is set to zero.
 	 * <li>The {@link PrototypeServiceFactory#ungetService(Bundle, ServiceRegistration, Object)} method
@@ -127,7 +127,7 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 
 	/**
 	 * Is this service use using any services?
-	 * 
+	 *
 	 * @return true if no services are being used and this service use can be discarded.
 	 */
 	/* @GuardedBy("this") */

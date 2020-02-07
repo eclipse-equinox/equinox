@@ -16,7 +16,7 @@ import org.osgi.service.log.LogListener;
 /**
  * Extends the OSGi Log Services <code>LogEntry</code> object to provide additional context information.
  * Otherwise similarly accessible by registering a <code>LogListener</code> object.
- * 
+ *
  * @ThreadSafe
  * @see LogListener
  * @since 3.7
@@ -26,7 +26,7 @@ public interface ExtendedLogEntry extends LogEntry {
 	/**
 	 * Returns the logger name associated with this <code>LogEntry</code>
 	 * object.
-	 * 
+	 *
 	 * @return <code>String</code> containing the logger name associated with this
 	 *         <code>LogEntry</code> object;<code>null</code> if no logger name is
 	 *         associated with this <code>LogEntry</code> object.
@@ -37,7 +37,7 @@ public interface ExtendedLogEntry extends LogEntry {
 	/**
 	 * Returns the context associated with this <code>LogEntry</code>
 	 * object.
-	 * 
+	 *
 	 * @return <code>Object</code> containing the context associated with this
 	 *         <code>LogEntry</code> object;<code>null</code> if no context is
 	 *         associated with this <code>LogEntry</code> object.
@@ -47,7 +47,7 @@ public interface ExtendedLogEntry extends LogEntry {
 	/**
 	 * Returns the thread id of the logging thread associated with this <code>LogEntry</code>
 	 * object.
-	 * 
+	 *
 	 * @return <code>long</code> containing the thread id associated with this
 	 *         <code>LogEntry</code> object.
 	 */
@@ -56,7 +56,7 @@ public interface ExtendedLogEntry extends LogEntry {
 	/**
 	 * Returns the thread name of the logging thread associated with this <code>LogEntry</code>
 	 * object.
-	 * 
+	 *
 	 * @return <code>String</code> containing the message associated with this
 	 *         <code>LogEntry</code> object.
 	 */
@@ -64,8 +64,8 @@ public interface ExtendedLogEntry extends LogEntry {
 
 	/**
 	 * Returns the log sequence number associated with this <code>LogEntry</code>
-	 * object. 
-	 * 
+	 * object.
+	 *
 	 * @return <code>long</code> containing the sequence number associated with this
 	 *         <code>LogEntry</code> object.
 	 */

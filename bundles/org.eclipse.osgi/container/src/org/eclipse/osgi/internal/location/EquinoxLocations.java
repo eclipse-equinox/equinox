@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Rapicorp, Inc - Support for Mac Layout (bug 431116)
@@ -115,8 +115,8 @@ public class EquinoxLocations {
 			// only compute the default if the configuration area property is not set
 			defaultLocation = buildURL(computeDefaultConfigurationLocation(), true);
 		configurationLocation = buildLocation(PROP_CONFIG_AREA, defaultLocation, "", false, false, null); //$NON-NLS-1$
-		// get the parent location based on the system property. This will have been set on the 
-		// way in either by the caller/user or by main.  There will be no parent location if we are not 
+		// get the parent location based on the system property. This will have been set on the
+		// way in either by the caller/user or by main.  There will be no parent location if we are not
 		// cascaded.
 		URL parentLocation = computeSharedConfigurationLocation();
 		if (parentLocation != null && !parentLocation.equals(configurationLocation.getURL())) {
@@ -183,10 +183,10 @@ public class EquinoxLocations {
 	@SuppressWarnings("deprecation")
 	private Location buildLocation(String property, URL defaultLocation, String userDefaultAppendage, boolean readOnlyDefault, boolean computeReadOnly, String dataAreaPrefix) {
 		String location = equinoxConfig.clearConfiguration(property);
-		// the user/product may specify a non-default readOnly setting   
+		// the user/product may specify a non-default readOnly setting
 		String userReadOnlySetting = equinoxConfig.getConfiguration(property + READ_ONLY_AREA_SUFFIX);
 		boolean readOnly = (userReadOnlySetting == null ? readOnlyDefault : Boolean.valueOf(userReadOnlySetting).booleanValue());
-		// if the instance location is not set, predict where the workspace will be and 
+		// if the instance location is not set, predict where the workspace will be and
 		// put the instance area inside the workspace meta area.
 		if (location == null)
 			return new BasicLocation(property, defaultLocation, userReadOnlySetting != null || !computeReadOnly ? readOnly : !canWrite(defaultLocation), dataAreaPrefix, equinoxConfig, container, debugLocations);
@@ -247,16 +247,16 @@ public class EquinoxLocations {
 			sharedConfigurationURL = new URL(installURL, sharedConfigurationURL.getPath());
 			equinoxConfig.setConfiguration(PROP_SHARED_CONFIG_AREA, sharedConfigurationURL.toExternalForm());
 		} catch (MalformedURLException e) {
-			// do nothing here since it is basically impossible to get a bogus url 
+			// do nothing here since it is basically impossible to get a bogus url
 		}
 		return null;
 	}
 
 	private String computeDefaultConfigurationLocation() {
 		// 1) We store the config state relative to the 'eclipse' directory if possible
-		// 2) If this directory is read-only 
-		//    we store the state in <user.home>/.eclipse/<application-id>_<version> where <user.home> 
-		//    is unique for each local user, and <application-id> is the one 
+		// 2) If this directory is read-only
+		//    we store the state in <user.home>/.eclipse/<application-id>_<version> where <user.home>
+		//    is unique for each local user, and <application-id> is the one
 		//    defined in .eclipseproduct marker file. If .eclipseproduct does not
 		//    exist, use "eclipse" as the application-id.
 
@@ -285,8 +285,8 @@ public class EquinoxLocations {
 	}
 
 	private String computeDefaultUserAreaLocation(String pathAppendage) {
-		//    we store the state in <user.home>/.eclipse/<application-id>_<version> where <user.home> 
-		//    is unique for each local user, and <application-id> is the one 
+		//    we store the state in <user.home>/.eclipse/<application-id>_<version> where <user.home>
+		//    is unique for each local user, and <application-id> is the one
 		//    defined in .eclipseproduct marker file. If .eclipseproduct does not
 		//    exist, use "eclipse" as the application-id.
 		String installProperty = equinoxConfig.getConfiguration(PROP_INSTALL_AREA);
@@ -310,7 +310,7 @@ public class EquinoxLocations {
 					appVersion = ""; //$NON-NLS-1$
 				appName += File.separator + appId + "_" + appVersion + "_" + installDirHash; //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (IOException e) {
-				// Do nothing if we get an exception.  We will default to a standard location 
+				// Do nothing if we get an exception.  We will default to a standard location
 				// in the user's home dir.
 				// add the hash to help prevent collisions
 				appName += File.separator + installDirHash;

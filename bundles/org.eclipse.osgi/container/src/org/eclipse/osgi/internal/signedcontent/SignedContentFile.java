@@ -20,9 +20,9 @@ import java.util.*;
 import org.eclipse.osgi.signedcontent.*;
 
 /*
- * This class is used by the SignedContentFactory to create SignedContent objects from File objects.  This is needed 
- * to avoid leaving the underlying ZipFiles open for the SignedContent objects returned from the 
- * SignedContentFactory (bug 225090) 
+ * This class is used by the SignedContentFactory to create SignedContent objects from File objects.  This is needed
+ * to avoid leaving the underlying ZipFiles open for the SignedContent objects returned from the
+ * SignedContentFactory (bug 225090)
  */
 public class SignedContentFile implements SignedContent {
 

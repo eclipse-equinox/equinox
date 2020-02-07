@@ -367,7 +367,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 			}
 		};
 		Hashtable props = new Hashtable();
-		props.put("name", testMethodName); //$NON-NLS-1$ 
+		props.put("name", testMethodName); //$NON-NLS-1$
 		props.put(Constants.SERVICE_DESCRIPTION, "min value"); //$NON-NLS-1$
 		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
 		ServiceRegistration reg1 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
@@ -422,7 +422,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 			}
 		};
 		Hashtable props = new Hashtable();
-		props.put("name", testMethodName); //$NON-NLS-1$ 
+		props.put("name", testMethodName); //$NON-NLS-1$
 		props.put(Constants.SERVICE_DESCRIPTION, "min value"); //$NON-NLS-1$
 		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
 		ServiceRegistration reg1 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);

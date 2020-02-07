@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -30,7 +30,7 @@ public class OSGiTest extends CoreTest {
 	public OSGiTest(String name) {
 		super(name);
 	}
-	
+
 	public BundleContext getContext() {
 		return OSGiTestsActivator.getContext();
 	}

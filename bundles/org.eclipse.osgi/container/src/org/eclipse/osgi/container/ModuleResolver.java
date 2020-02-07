@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -150,11 +150,11 @@ final class ModuleResolver {
 
 	/**
 	 * Attempts to resolve all unresolved modules installed in the specified module database.
-	 * returns a delta containing the new wirings or modified wirings that should be 
+	 * returns a delta containing the new wirings or modified wirings that should be
 	 * merged into the specified moduleDatabase.
 	 * <p>
 	 * This method only does read operations on the database no wirings are modified
-	 * directly by this method.  The returned wirings need to be merged into 
+	 * directly by this method.  The returned wirings need to be merged into
 	 * the database.
 	 * @param triggers the triggers that caused the resolver operation to occur
 	 * @param triggersMandatory true if the triggers must be resolved by the resolve process
@@ -563,12 +563,12 @@ final class ModuleResolver {
 		private final Collection<ModuleRevision> unresolved;
 		/*
 		 * Contains unresolved revisions that should not be resolved as part of
-		 * this process. The reasons they should not be resolved will vary. For 
+		 * this process. The reasons they should not be resolved will vary. For
 		 * example, some might have been filtered out by the resolver hook while
 		 * others represent singleton collisions. It is assumed that all
 		 * unresolved revisions are disabled at the start of the resolve
 		 * process (see initialization in constructors). Any not filtered out
-		 * by ResolverHook.filterResolvable are then removed but may be added 
+		 * by ResolverHook.filterResolvable are then removed but may be added
 		 * back later for other reasons.
 		 */
 		private final Collection<ModuleRevision> disabled;
@@ -589,7 +589,7 @@ final class ModuleResolver {
 		private AtomicReference<ScheduledFuture<?>> timoutFuture = new AtomicReference<>();
 		/*
 		 * Used to generate the UNRESOLVED_PROVIDER resolution report entries.
-		 * 
+		 *
 		 * The inner map associates a requirement to the set of all matching
 		 * capabilities that were found. The outer map associates the requiring
 		 * resource to the inner map so that its contents may easily be looked
@@ -973,7 +973,7 @@ final class ModuleResolver {
 						Map<Resource, List<Wire>> dynamicAttachWirings = resolveNonPayLoadFragments();
 						applyInterimResultToWiringCopy(dynamicAttachWirings);
 						if (!dynamicAttachWirings.isEmpty()) {
-							// be sure to remove the revisions from the optional and triggers 
+							// be sure to remove the revisions from the optional and triggers
 							// so they no longer attempt to be resolved
 							Set<Resource> fragmentResources = dynamicAttachWirings.keySet();
 							triggers.removeAll(fragmentResources);

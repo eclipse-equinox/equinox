@@ -3,11 +3,11 @@
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
- * which accompanies this distribution, and is available at 
+ * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Rapicorp, Inc - Default the configuration to Application Support (bug 461725)
@@ -17,7 +17,7 @@ package org.eclipse.equinox.launcher;
 /**
  * <b>Note:</b> This class should not be referenced programmatically by
  * other Java code. This class exists only for the purpose of interacting with
- * a native launcher. To launch Eclipse programmatically, use 
+ * a native launcher. To launch Eclipse programmatically, use
  * org.eclipse.core.runtime.adaptor.EclipseStarter. This class is not API.
  *
  * @noextend This class is not intended to be subclassed by clients.
@@ -48,7 +48,7 @@ public class JNIBridge {
 
 	/**
 	 * @noreference This constructor is not intended to be referenced by clients.
-	 * 
+	 *
 	 * @param library the given library
 	 */
 	public JNIBridge(String library) {
@@ -155,10 +155,10 @@ public class JNIBridge {
 	}
 
 	/**
-	 * Whether or not we loaded the shared library here from java.  
+	 * Whether or not we loaded the shared library here from java.
 	 * False does not imply the library is not available, it could have
 	 * been loaded natively by the executable.
-	 * 
+	 *
 	 * @return boolean
 	 */
 	boolean isLibraryLoadedByJava() {

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -32,7 +32,7 @@ public class TestGrouping_003 extends AbstractStateTest {
 	BundleDescription bundle_4 = null;
 	BundleDescription bundle_5 = null;
 
-	
+
 	public void testTest_003() {
 		State state = buildEmptyState();
 		StateObjectFactory sof = StateObjectFactory.defaultFactory;
@@ -59,7 +59,7 @@ public class TestGrouping_003 extends AbstractStateTest {
 		checkWiring_a();
 	} // end of method
 
-	
+
 	public void checkWiringState_1() {
 		ExportPackageDescription[] exports = bundle_1.getResolvedImports();
 		assertNotNull("export array is unexpectedly null", exports);
@@ -102,7 +102,7 @@ public class TestGrouping_003 extends AbstractStateTest {
 
 	public void checkWiringState_5() {
 	} // end method
-	
+
 
 	public void checkWiring_a() {
 		checkWiringState_1();
@@ -112,7 +112,7 @@ public class TestGrouping_003 extends AbstractStateTest {
 		checkWiringState_5();
 	} // end method
 
-	
+
 	public void addBundlesToState_a(State state) {
 		boolean added = false;
 		added = state.addBundle(bundle_1);
@@ -127,7 +127,7 @@ public class TestGrouping_003 extends AbstractStateTest {
 		assertTrue("failed to add bundle ", added);
 	} // end method
 
-	
+
 	public void checkBundlesResolved_a() {
 		assertTrue("unexpected bundle resolution state", bundle_1.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_2.isResolved());
@@ -136,7 +136,7 @@ public class TestGrouping_003 extends AbstractStateTest {
 		assertTrue("unexpected bundle resolution state", bundle_5.isResolved());
 	} // end method
 
-	
+
 	public BundleDescription create_bundle_1(StateObjectFactory sof) {
 		java.util.Dictionary dictionary_1 = new java.util.Properties();
 		BundleDescription bundle = null;

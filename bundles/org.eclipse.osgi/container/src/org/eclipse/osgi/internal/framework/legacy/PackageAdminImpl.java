@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -57,7 +57,7 @@ import org.osgi.service.packageadmin.RequiredBundle;
 public class PackageAdminImpl implements PackageAdmin {
 	private final ModuleContainer container;
 
-	/* 
+	/*
 	 * We need to make sure that the GetBundleAction class loads early to prevent a ClassCircularityError when checking permissions.
 	 * See bug 161561
 	 */

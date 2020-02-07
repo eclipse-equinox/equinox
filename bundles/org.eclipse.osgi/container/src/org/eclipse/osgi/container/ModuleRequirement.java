@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -24,7 +24,7 @@ import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.resource.Namespace;
 
 /**
- * An implementation of {@link BundleRequirement}.  This requirement implements 
+ * An implementation of {@link BundleRequirement}.  This requirement implements
  * the matches method according to the OSGi specification which includes
  * implementing the mandatory directive for the osgi.wiring.* namespaces.
  * @since 3.10

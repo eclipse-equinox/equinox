@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -20,11 +20,11 @@ import org.osgi.framework.ServiceException;
 
 /**
  * This class represents the use of a service by a bundle. One is created for each
- * service acquired by a bundle. 
- * 
+ * service acquired by a bundle.
+ *
  * <p>
  * This class manages a singleton service.
- * 
+ *
  * @ThreadSafe
  */
 public class ServiceUse<S> {
@@ -60,10 +60,10 @@ public class ServiceUse<S> {
 
 	/**
 	 * Unget a service's service object.
-	 * 
+	 *
 	 * <p>
 	 * Decrements the use count if the service was being used.
-	 * 
+	 *
 	 * @return true if the service was ungotten; otherwise false.
 	 */
 	/* @GuardedBy("this") */
@@ -88,10 +88,10 @@ public class ServiceUse<S> {
 
 	/**
 	 * Get a new service object for the service.
-	 * 
+	 *
 	 * <p>
 	 * By default, this returns the result of {@link #getService()}.
-	 * 
+	 *
 	 * @return The service object.
 	 */
 	/* @GuardedBy("this") */
@@ -101,10 +101,10 @@ public class ServiceUse<S> {
 
 	/**
 	 * Release a service object for the service.
-	 * 
+	 *
 	 * <p>
 	 * By default, this returns the result of {@link #ungetService()}.
-	 * 
+	 *
 	 * @param service The service object to release.
 	 * @return true if the service was released; otherwise false.
 	 * @throws IllegalArgumentException If the specified service was not
@@ -129,7 +129,7 @@ public class ServiceUse<S> {
 
 	/**
 	 * Is this service use using any services?
-	 * 
+	 *
 	 * @return true if no services are being used and this service use can be discarded.
 	 */
 	/* @GuardedBy("this") */
@@ -140,7 +140,7 @@ public class ServiceUse<S> {
 
 	/**
 	 * Is the use count non zero?
-	 * 
+	 *
 	 * @return true if the use count is greater than zero.
 	 */
 	/* @GuardedBy("this") */

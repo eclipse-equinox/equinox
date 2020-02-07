@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -22,7 +22,7 @@ import java.net.URL;
  * <p>
  * Clients may implement this interface.
  * </p>
- * 
+ *
  * @since 3.1
  */
 public interface URLConverter {
@@ -30,13 +30,13 @@ public interface URLConverter {
 	/**
 	 * Converts a URL that uses a user-defined protocol into a URL that uses the file
 	 * protocol. The contents of the URL may be extracted into a cache on the file-system
-	 * in order to get a file URL. 
+	 * in order to get a file URL.
 	 * <p>
 	 * If the protocol for the given URL is not recognized by this converter, the original
 	 * URL is returned as-is.
 	 * </p>
 	 * @param url the original URL
-	 * @return the converted file URL or the original URL passed in if it is 
+	 * @return the converted file URL or the original URL passed in if it is
 	 * 	not recognized by this converter
 	 * @throws IOException if an error occurs during the conversion
 	 * @since 3.2

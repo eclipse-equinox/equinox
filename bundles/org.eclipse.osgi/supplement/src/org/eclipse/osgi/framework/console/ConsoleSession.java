@@ -20,13 +20,13 @@ import org.osgi.framework.*;
 /**
  * A console session service provides the input and output to a single console session.
  * The input will be used by the console to read in console commands.  The output will
- * be used to print the results of console commands. 
+ * be used to print the results of console commands.
  * <p>
- * The console session must be registered as an OSGi service in order to be associated 
- * with a console instance. The console implementation will discover any console session 
- * services and will create a new console instance using the console session for input and 
- * output.  When a session is closed then the console session service will be unregistered 
- * and the console instance will terminate and be disposed of.  The console instance will 
+ * The console session must be registered as an OSGi service in order to be associated
+ * with a console instance. The console implementation will discover any console session
+ * services and will create a new console instance using the console session for input and
+ * output.  When a session is closed then the console session service will be unregistered
+ * and the console instance will terminate and be disposed of.  The console instance will
  * also terminate if the console session service is unregistered for any reason.
  * </p>
  * @since 3.6
@@ -48,7 +48,7 @@ public abstract class ConsoleSession implements ServiceFactory<Object> {
 			try {
 				current.unregister();
 			} catch (IllegalStateException e) {
-				// This can happen if the service is in the process of being 
+				// This can happen if the service is in the process of being
 				// unregistered or if another thread unregistered the service.
 				// Ignoring the exception.
 			}
@@ -56,8 +56,8 @@ public abstract class ConsoleSession implements ServiceFactory<Object> {
 	}
 
 	/**
-	 * Called by the {@link #close()} method to free resources associated 
-	 * with this console session.  For example, closing the streams 
+	 * Called by the {@link #close()} method to free resources associated
+	 * with this console session.  For example, closing the streams
 	 * associated with the input and output for this session.
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
@@ -72,7 +72,7 @@ public abstract class ConsoleSession implements ServiceFactory<Object> {
 	public abstract InputStream getInput();
 
 	/**
-	 * Returns the output for this console session.  This output will be 
+	 * Returns the output for this console session.  This output will be
 	 * used to write the results of console commands.
 	 * @return the output for this console session.
 	 * @noreference This method is not intended to be referenced by clients.

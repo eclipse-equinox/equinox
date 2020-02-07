@@ -21,7 +21,7 @@ import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
 
 /**
- * This class has debug constants which can be used by the Framework implementation 
+ * This class has debug constants which can be used by the Framework implementation
  * and Adaptor implementations
  * @since 3.1
  */

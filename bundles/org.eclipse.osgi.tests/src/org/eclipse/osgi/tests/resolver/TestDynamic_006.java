@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -30,11 +30,11 @@ public class TestDynamic_006 extends AbstractStateTest {
 	BundleDescription bundle_2 = null;
 	BundleDescription bundle_3 = null;
 
-	
+
 	public void testTest_005() {
 		State state = buildEmptyState();
 		StateObjectFactory sof = StateObjectFactory.defaultFactory;
-		
+
 		bundle_1 = create_bundle_1(sof);
 		bundle_2 = create_bundle_2(sof);
 		bundle_3 = create_bundle_3(sof);
@@ -53,15 +53,15 @@ public class TestDynamic_006 extends AbstractStateTest {
 		}
 		checkBundlesResolved_a();
 		checkWiring_a();
-		
+
 		// Dynamics
 		ExportPackageDescription exp = state.linkDynamicImport(bundle_1, "p.b");
 		assertNotNull("Package [p.b] is not wired when it should be ", exp);
 		assertEquals("Package [p.b] is wired incorrectly ", exp.getExporter(), bundle_3);
-		
+
 	} // end of method
 
-	
+
 	public void checkWiringState_1() {
 	} // end method
 
@@ -71,14 +71,14 @@ public class TestDynamic_006 extends AbstractStateTest {
 	public void checkWiringState_3() {
 	} // end method
 
-	
+
 	public void checkWiring_a() {
 		checkWiringState_1();
 		checkWiringState_2();
 		checkWiringState_3();
 	} // end method
 
-	
+
 	public void addBundlesToState_a(State state) {
 		boolean added = false;
 		added = state.addBundle(bundle_1);
@@ -89,14 +89,14 @@ public class TestDynamic_006 extends AbstractStateTest {
 		assertTrue("failed to add bundle ", added);
 	} // end method
 
-	
+
 	public void checkBundlesResolved_a() {
 		assertTrue("unexpected bundle resolution state", bundle_1.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_2.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_3.isResolved());
 	} // end method
 
-	
+
 	public BundleDescription create_bundle_1(StateObjectFactory sof) {
 		java.util.Dictionary dictionary_1 = new java.util.Properties();
 		BundleDescription bundle = null;

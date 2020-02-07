@@ -17,7 +17,7 @@ package org.eclipse.osgi.storage.bundlefile;
 import org.eclipse.osgi.internal.hookregistry.BundleFileWrapperFactoryHook;
 
 /**
- * Used to chain the BundleFile objects returned from {@link BundleFileWrapperFactoryHook}.  
+ * Used to chain the BundleFile objects returned from {@link BundleFileWrapperFactoryHook}.
  * This class is useful for traversing the chain of wrapped bundle files.
  */
 public class BundleFileWrapperChain extends BundleFileWrapper {

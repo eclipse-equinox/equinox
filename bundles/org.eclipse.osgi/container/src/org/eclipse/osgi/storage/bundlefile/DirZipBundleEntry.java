@@ -19,7 +19,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * Represents a directory entry in a ZipBundleFile.  This object is used to 
+ * Represents a directory entry in a ZipBundleFile.  This object is used to
  * reference a directory entry in a ZipBundleFile when the directory entries are
  * not included in the zip file.
  */
@@ -40,7 +40,7 @@ public class DirZipBundleEntry extends BundleEntry {
 	}
 
 	/**
-	 * @throws IOException  
+	 * @throws IOException
 	 */
 	@Override
 	public InputStream getInputStream() throws IOException {

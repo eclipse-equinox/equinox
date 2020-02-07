@@ -19,13 +19,13 @@ package org.eclipse.core.launcher;
  * <p>
  * <b>Note:</b> This class should not be referenced programmatically by
  * other Java code. This class exists only for the purpose of launching Eclipse
- * from the command line. To launch Eclipse programmatically, use 
+ * from the command line. To launch Eclipse programmatically, use
  * org.eclipse.core.runtime.adaptor.EclipseStarter. The fields and methods
  * on this class are not API.
  * @noextend This class is not intended to be subclassed by clients.
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noreference This class is not intended to be referenced by clients.
- * 
+ *
  * @deprecated
  *
  * This API is planned to be deleted, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=544262
@@ -36,7 +36,7 @@ public class Main {
 
 	/**
 	 * Pass our args along to the real Main class.
-	 * 
+	 *
 	 * @param args the given arguments
 	 * @noreference This method is not intended to be referenced by clients.
 	 */

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -18,7 +18,7 @@ package org.eclipse.osgi.service.resolver;
  * There are 4 parts to a state wire.
  * <ul>
  * <li>The requirement which may have been specified by a host bundle or one of its attached fragments.</li>
- * <li>The host bundle which is associated with the requirement.  There are cases where the host 
+ * <li>The host bundle which is associated with the requirement.  There are cases where the host
  * bundle may not be the same as the bundle which declared the requirement.  For example, if a fragment
  * specifies additional requirements.</li>
  * <li>The capability which may have been specified by a host bundle or one of its attached fragments.</li>

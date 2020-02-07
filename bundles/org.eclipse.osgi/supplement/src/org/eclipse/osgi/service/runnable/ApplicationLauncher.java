@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -15,7 +15,7 @@
 package org.eclipse.osgi.service.runnable;
 
 /**
- * An ApplicationLauncher is used to launch ParameterizedRunnable objects using 
+ * An ApplicationLauncher is used to launch ParameterizedRunnable objects using
  * the main thread.
  * <p>
  * This interface is not intended to be implemented by clients.
@@ -24,7 +24,7 @@ package org.eclipse.osgi.service.runnable;
  * This class is for internal use by the platform-related plug-ins.
  * Clients outside of the base platform should not reference or subclass this class.
  * </p>
- * 
+ *
  * @since 3.2
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -37,11 +37,11 @@ public interface ApplicationLauncher {
 	void launch(ParameterizedRunnable runnable, Object context);
 
 	/**
-	 * Forces the current runnable which is running to be stopped.  
+	 * Forces the current runnable which is running to be stopped.
 	 * This method will return after the currently running ParameterizedRunnable
 	 * has completely stopped.
 	 * <p>
-	 * After this method returns this ApplicationLauncher will no longer allow 
+	 * After this method returns this ApplicationLauncher will no longer allow
 	 * applications to be launched.
 	 */
 	void shutdown();

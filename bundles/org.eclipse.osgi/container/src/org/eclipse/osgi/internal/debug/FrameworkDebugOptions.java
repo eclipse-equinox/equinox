@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -39,7 +39,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * The DebugOptions implementation class that allows accessing the list of debug options specified
  * for the application as well as creating {@link DebugTrace} objects for the purpose of having
  * dynamic enablement of debug tracing.
- * 
+ *
  * @since 3.1
  */
 public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustomizer<DebugOptionsListener, DebugOptionsListener> {

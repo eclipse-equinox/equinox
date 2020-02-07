@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -15,13 +15,13 @@ package org.eclipse.osgi.framework.util;
 
 import java.io.File;
 
-/** 
+/**
  * A utility class for manipulating file system paths.
  * <p>
  * This class is not intended to be subclassed by clients but
  * may be instantiated.
  * </p>
- * 
+ *
  * @since 3.1
  */
 public class FilePath {
@@ -44,7 +44,7 @@ public class FilePath {
 
 	/**
 	 * Constructs a new file path from the given File object.
-	 * 
+	 *
 	 * @param location
 	 */
 	public FilePath(File location) {
@@ -57,7 +57,7 @@ public class FilePath {
 
 	/**
 	 * Constructs a new file path from the given string path.
-	 * 
+	 *
 	 * @param original
 	 */
 	public FilePath(String original) {
@@ -85,7 +85,7 @@ public class FilePath {
 	}
 
 	/*
-	 * Splits the given path string into an array of segments. 
+	 * Splits the given path string into an array of segments.
 	 */
 	private String[] computeSegments(String path) {
 		int maxSegmentCount = computeSegmentCount(path);
@@ -96,7 +96,7 @@ public class FilePath {
 		// allways absolute
 		int firstPosition = isAbsolute() ? 1 : 0;
 		int lastPosition = hasTrailingSlash() ? len - 2 : len - 1;
-		// for non-empty paths, the number of segments is 
+		// for non-empty paths, the number of segments is
 		// the number of slashes plus 1, ignoring any leading
 		// and trailing slashes
 		int next = firstPosition;
@@ -125,10 +125,10 @@ public class FilePath {
 	}
 
 	/**
-	 * Returns the device for this file system path, or <code>null</code> if 
+	 * Returns the device for this file system path, or <code>null</code> if
 	 * none exists. The device string ends with a colon.
-	 * 
-	 * @return the device string or null 
+	 *
+	 * @return the device string or null
 	 */
 	public String getDevice() {
 		return device;
@@ -136,8 +136,8 @@ public class FilePath {
 
 	/**
 	 * Returns the segments in this path. If this path has no segments, returns an empty array.
-	 * 
-	 * @return an array containing all segments for this path 
+	 *
+	 * @return an array containing all segments for this path
 	 */
 	public String[] getSegments() {
 		return segments.clone();
@@ -145,7 +145,7 @@ public class FilePath {
 
 	/**
 	 * Returns whether this path ends with a slash.
-	 * 
+	 *
 	 * @return <code>true</code> if the path ends with a slash, false otherwise
 	 */
 	public boolean hasTrailingSlash() {
@@ -158,7 +158,7 @@ public class FilePath {
 			// only deal with devices/UNC paths on Windows
 			int deviceSeparatorPos = original.indexOf(DEVICE_SEPARATOR);
 			if (deviceSeparatorPos >= 0) {
-				//extract device if any				
+				//extract device if any
 				//remove leading slash from device part to handle output of URL.getFile()
 				int start = original.charAt(0) == SEPARATOR ? 1 : 0;
 				device = original.substring(start, deviceSeparatorPos + 1);
@@ -186,7 +186,7 @@ public class FilePath {
 
 	/**
 	 * Returns whether this path is absolute (begins with a slash).
-	 * 
+	 *
 	 * @return <code>true</code> if this path is absolute, <code>false</code> otherwise
 	 */
 	public boolean isAbsolute() {
@@ -197,11 +197,11 @@ public class FilePath {
 	 * Returns a string representing this path as a relative to the given base path.
 	 * <p>
 	 * If this path and the given path do not use the same device letter, this path's
-	 * string representation is returned as is. 
+	 * string representation is returned as is.
 	 * </p>
-	 * 
+	 *
 	 * @param base the path this path should be made relative to
-	 * @return a string representation for this path as relative to the given base path 
+	 * @return a string representation for this path as relative to the given base path
 	 */
 	public String makeRelative(FilePath base) {
 		if (base.device != null && !base.device.equalsIgnoreCase(this.device))
@@ -210,7 +210,7 @@ public class FilePath {
 		int count = this.matchingFirstSegments(base);
 		if (baseCount == count && count == base.segments.length)
 			return base.hasTrailingSlash() ? ("." + SEPARATOR) : "."; //$NON-NLS-1$ //$NON-NLS-2$
-		StringBuilder relative = new StringBuilder(); //	
+		StringBuilder relative = new StringBuilder(); //
 		for (int j = 0; j < baseCount - count; j++)
 			relative.append(PARENT_DIR + SEPARATOR);
 		for (int i = 0; i < base.segments.length - count; i++) {
@@ -222,7 +222,7 @@ public class FilePath {
 		return relative.toString();
 	}
 
-	/* 
+	/*
 	 * Returns the number of segments in this matching the first segments of the
 	 * given path.
 	 */
@@ -240,7 +240,7 @@ public class FilePath {
 
 	/**
 	 * Returns a string representation of this path.
-	 * 
+	 *
 	 * @return  a string representation of this path
 	 */
 	@Override

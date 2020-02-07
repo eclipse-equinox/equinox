@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 package org.eclipse.osgi.internal.module;
@@ -124,7 +124,7 @@ public class GroupingChecker {
 	/*
 	 * Verifies the uses constraint consistency for the importingBundle with the possible dynamic matching export.
 	 * If an inconsistency is found the export returned; otherwise null is returned.
-	 * Dynamic imports must perform extra checks to ensure that existing wires to package roots are 
+	 * Dynamic imports must perform extra checks to ensure that existing wires to package roots are
 	 * consistent with the possible matching dynamic export.
 	 */
 	public PackageRoots[][] isDynamicConsistent(ResolverBundle importingBundle, ResolverExport matchingExport) {
@@ -188,7 +188,7 @@ public class GroupingChecker {
 		visited.add(bundle); // prevent endless cycles
 		// check imports
 		if (bundle.getBundleDescription().isResolved()) {
-			// must check resolved imports to get any dynamically resolved imports 
+			// must check resolved imports to get any dynamically resolved imports
 			ExportPackageDescription[] imports = bundle.getBundleDescription().getResolvedImports();
 			for (ExportPackageDescription importPkg : imports) {
 				if (importPkg.getExporter() == bundle.getBundleDescription() || !importPkg.getName().equals(packageName))
@@ -297,7 +297,7 @@ public class GroupingChecker {
 				roots = new ResolverExport[] {export};
 				return;
 			}
-			// need to do an extra check to make sure we are not adding the same package name 
+			// need to do an extra check to make sure we are not adding the same package name
 			// from multiple versions of the same bundle
 			String exportBSN = export.getExporter().getName();
 			if (exportBSN != null) {

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -28,14 +28,14 @@ import org.osgi.resource.Namespace;
  *       header.</li>
  *   <li>The bundle class loading policy.
  * </ul>
- * 
- * This capability is provided for informational purposes and 
+ *
+ * This capability is provided for informational purposes and
  * should not be considered as effective by the resolver.
  * <p>
  * This class defines the names for the attributes and directives for this
  * namespace.  Capabilities in this namespace are not intended to be used to
  * match requirements and should not be considered as effective by a resolver.
- * 
+ *
  * @Immutable
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @since 3.10
@@ -59,8 +59,8 @@ public class EquinoxModuleDataNamespace extends Namespace {
 	/** An Eclipse-LazyStart header attribute used to specify exception classes for auto start */
 	public static final String LAZYSTART_EXCEPTIONS_ATTRIBUTE = "exceptions"; //$NON-NLS-1$
 
-	/** 
-	 * The Equinox specific header for specifying the lazy start policy 
+	/**
+	 * The Equinox specific header for specifying the lazy start policy
 	 * @deprecated use {@link #LAZYSTART_HEADER}
 	 */
 	public static final String AUTOSTART_HEADER = "Eclipse-AutoStart"; //$NON-NLS-1$
@@ -75,7 +75,7 @@ public class EquinoxModuleDataNamespace extends Namespace {
 	 * The directive value identifying a {@link #CAPABILITY_EFFECTIVE_DIRECTIVE
 	 * capability} that is effective for information purposes.  Capabilities
 	 * in this namespace must have an effective directive value of information.
-	 * 
+	 *
 	 * @see #CAPABILITY_EFFECTIVE_DIRECTIVE
 	 */
 	public final static String EFFECTIVE_INFORMATION = "information"; //$NON-NLS-1$
@@ -95,19 +95,19 @@ public class EquinoxModuleDataNamespace extends Namespace {
 	public final static String CAPABILITY_ACTIVATION_POLICY_LAZY = "lazy"; //$NON-NLS-1$
 
 	/**
-	 * When the {@link #CAPABILITY_ACTIVATION_POLICY_LAZY lazy} policy is used this 
+	 * When the {@link #CAPABILITY_ACTIVATION_POLICY_LAZY lazy} policy is used this
 	 * attribute contains the package names that must
 	 * trigger the activation when a class is loaded of these packages.
-	 * If the attribute is not defined then the default is all package names. 
+	 * If the attribute is not defined then the default is all package names.
 	 * The value of this attribute must be of type {@code List<String>}.
 	 */
 	public final static String CAPABILITY_LAZY_INCLUDE_ATTRIBUTE = "lazy.include"; //$NON-NLS-1$
 
 	/**
-	 * When the {@link #CAPABILITY_ACTIVATION_POLICY_LAZY lazy} policy is used this 
+	 * When the {@link #CAPABILITY_ACTIVATION_POLICY_LAZY lazy} policy is used this
 	 * attribute contains the package names that must not
 	 * trigger the activation when a class is loaded of these packages.
-	 * If the attribute is not defined then the default is no package names. 
+	 * If the attribute is not defined then the default is no package names.
 	 * The value of this attribute must be of type {@code List<String>}.
 	 */
 	public final static String CAPABILITY_LAZY_EXCLUDE_ATTRIBUTE = "lazy.exclude"; //$NON-NLS-1$
@@ -129,7 +129,7 @@ public class EquinoxModuleDataNamespace extends Namespace {
 
 	/**
 	 * The capability attribute contains the list buddy loading policies
-	 * for the providing module revision as specified in the Eclipse-BuddyPolicy header.  
+	 * for the providing module revision as specified in the Eclipse-BuddyPolicy header.
 	 * The value of this attribute must be of type
 	 * {@code List<String>}.
 	 */
@@ -137,7 +137,7 @@ public class EquinoxModuleDataNamespace extends Namespace {
 
 	/**
 	 * The capability attribute contains the list of symbolic names the
-	 * providing module revision is a registered buddy of as specified by 
+	 * providing module revision is a registered buddy of as specified by
 	 * the Eclipse-BuddyPolicy header.  The value of this attribute must be of type
 	 * {@code List<String>}.
 	 */

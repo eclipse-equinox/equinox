@@ -27,7 +27,7 @@ public interface Locker {
 
 	static class MockLocker implements Locker {
 		/**
-		 * @throws IOException  
+		 * @throws IOException
 		 */
 		@Override
 		public boolean lock() throws IOException {

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -60,7 +60,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 		this.parentContextClassLoader = contextClassLoader != null ? contextClassLoader : bootLoader;
 	}
 
-	// Return a list of all classloaders on the stack that are neither the 
+	// Return a list of all classloaders on the stack that are neither the
 	// ContextFinder classloader nor the boot classloader.  The last classloader
 	// in the list is either a bundle classloader or the framework's classloader
 	// We assume that the bootclassloader never uses the context classloader to find classes in itself.
@@ -85,7 +85,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 		return result;
 	}
 
-	// ensures that a classloader does not have the ContextFinder as part of the 
+	// ensures that a classloader does not have the ContextFinder as part of the
 	// parent hierachy.  A classloader which has the ContextFinder as a parent must
 	// not be used as a delegate, otherwise we endup in endless recursion.
 	private boolean checkClassLoader(ClassLoader classloader) {
@@ -109,7 +109,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 	}
 
 	//Return whether the request for loading "name" should proceed.
-	//False is returned when a cycle is being detected 
+	//False is returned when a cycle is being detected
 	private boolean startLoading(String name) {
 		Set<String> classesAndResources = cycleDetector.get();
 		if (classesAndResources != null && classesAndResources.contains(name))

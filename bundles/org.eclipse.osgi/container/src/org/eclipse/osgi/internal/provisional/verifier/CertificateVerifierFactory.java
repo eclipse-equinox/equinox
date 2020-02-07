@@ -37,7 +37,7 @@ public interface CertificateVerifierFactory {
 
 	/**
 	 * Returns a certificate verifier for the specified bundle.
-	 * @param bundle the bundle to get a verifier for 
+	 * @param bundle the bundle to get a verifier for
 	 * @return a certificate verifier for the specified bundle.
 	 * @throws IOException if an IO exception occurs while reading the bundle content
 	 */

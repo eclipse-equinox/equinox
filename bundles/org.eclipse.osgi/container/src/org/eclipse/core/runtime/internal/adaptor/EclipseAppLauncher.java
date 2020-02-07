@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -71,7 +71,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 
 	/*
 	 * Starts this application launcher on the current thread.  This method
-	 * should be called by the main thread to ensure that applications are 
+	 * should be called by the main thread to ensure that applications are
 	 * launched in the main thread.
 	 */
 	public Object start(Object defaultContext) throws Exception {
@@ -128,9 +128,9 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 			// this must happen after we have acquired an application (by acquiring waitForAppLock above).
 			runningLock.acquire();
 			if (EclipseStarter.debug) {
-				String timeString = equinoxConfig.getConfiguration("eclipse.startTime"); //$NON-NLS-1$ 
+				String timeString = equinoxConfig.getConfiguration("eclipse.startTime"); //$NON-NLS-1$
 				long time = timeString == null ? 0L : Long.parseLong(timeString);
-				Debug.println("Starting application: " + (System.currentTimeMillis() - time)); //$NON-NLS-1$ 
+				Debug.println("Starting application: " + (System.currentTimeMillis() - time)); //$NON-NLS-1$
 			}
 			try {
 				// run the actual application on the current thread (main).
@@ -179,7 +179,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 
 	/*
 	 * Similar to the start method this method will restart the default method on current thread.
-	 * This method assumes that the default application was launched at least once and that an ApplicationDescriptor 
+	 * This method assumes that the default application was launched at least once and that an ApplicationDescriptor
 	 * exists that can be used to relaunch the default application.
 	 */
 	public Object reStart(Object argument) throws Exception {

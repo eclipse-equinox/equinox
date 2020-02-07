@@ -33,13 +33,13 @@ import org.eclipse.equinox.internal.launcher.Constants;
 
 /**
  * The launcher for Eclipse.
- * 
+ *
  * <b>Note:</b> This class should not be referenced programmatically by
  * other Java code. This class exists only for the purpose of launching Eclipse
- * from the command line. To launch Eclipse programmatically, use 
+ * from the command line. To launch Eclipse programmatically, use
  * org.eclipse.core.runtime.adaptor.EclipseStarter. The fields and methods
  * on this class are not API.
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
@@ -172,7 +172,7 @@ public class Main {
 	private static final String STARTER = "org.eclipse.core.runtime.adaptor.EclipseStarter"; //$NON-NLS-1$
 	private static final String PLATFORM_URL = "platform:/base/"; //$NON-NLS-1$
 	private static final String ECLIPSE_PROPERTIES = "eclipse.properties"; //$NON-NLS-1$
-	private static final String FILE_SCHEME = "file:"; //$NON-NLS-1$    
+	private static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
 	protected static final String REFERENCE_SCHEME = "reference:"; //$NON-NLS-1$
 	protected static final String JAR_SCHEME = "jar:"; //$NON-NLS-1$
 
@@ -208,7 +208,7 @@ public class Main {
 	private static final String PROP_FRAMEWORK_PARENT_CLASSLOADER = "osgi.frameworkParentClassloader"; //$NON-NLS-1$
 	private static final String PROP_NL = "osgi.nl"; //$NON-NLS-1$
 	static final String PROP_NOSHUTDOWN = "osgi.noShutdown"; //$NON-NLS-1$
-	private static final String PROP_DEBUG = "osgi.debug"; //$NON-NLS-1$	
+	private static final String PROP_DEBUG = "osgi.debug"; //$NON-NLS-1$
 	private static final String PROP_OS = "osgi.os"; //$NON-NLS-1$
 	private static final String PROP_WS = "osgi.ws"; //$NON-NLS-1$
 	private static final String PROP_ARCH = "osgi.arch"; //$NON-NLS-1$
@@ -265,7 +265,7 @@ public class Main {
 
 	/**
 	 * A structured form for a version identifier.
-	 * 
+	 *
 	 * @see "http://www.oracle.com/technetwork/java/javase/versioning-naming-139433.html for information on valid version strings"
 	 * @see "http://openjdk.java.net/jeps/223 for information on the JavaSE-9 version JEP 223"
 	 */
@@ -301,13 +301,13 @@ public class Main {
 					service = Integer.parseInt(tokenizer.nextToken());
 			} catch (NumberFormatException nfe) {
 				// ignore the minor and service qualifiers in that case and default to 0
-				// this will allow us to tolerate other non-conventional version numbers 
+				// this will allow us to tolerate other non-conventional version numbers
 			}
 		}
 
 		/**
 		 * Returns true if this id is considered to be greater than or equal to the given baseline.
-		 * e.g. 
+		 * e.g.
 		 * 1.2.9 >= 1.3.1 -> false
 		 * 1.3.0 >= 1.3.1 -> false
 		 * 1.3.1 >= 1.3.1 -> true
@@ -545,7 +545,7 @@ public class Main {
 
 	/**
 	 * Executes the launch.
-	 * 
+	 *
 	 * @param args command-line arguments
 	 * @exception Exception thrown if a problem occurs during the launch
 	 */
@@ -567,7 +567,7 @@ public class Main {
 		}
 		// need to ensure that getInstallLocation is called at least once to initialize the value.
 		// Do this AFTER processing the configuration to allow the configuration to set
-		// the install location.  
+		// the install location.
 		getInstallLocation();
 
 		// locate boot plugin (may return -dev mode variations)
@@ -576,7 +576,7 @@ public class Main {
 		//Set up the JNI bridge.  We need to know the install location to find the shared library
 		setupJNI(bootPath);
 
-		//ensure minimum Java version, do this after JNI is set up so that we can write an error message 
+		//ensure minimum Java version, do this after JNI is set up so that we can write an error message
 		//with exitdata if we fail.
 		if (!checkVersion(System.getProperty("java.version"), System.getProperty(PROP_REQUIRED_JAVA_VERSION))) //$NON-NLS-1$
 			return;
@@ -667,11 +667,11 @@ public class Main {
 	}
 
 	/**
-	 * Checks whether the given available version is greater or equal to the 
+	 * Checks whether the given available version is greater or equal to the
 	 * given required version.
 	 * <p>Will set PROP_EXITCODE/PROP_EXITDATA accordingly if check fails.</p>
-	 *   
-	 * @return a boolean indicating whether the checking passed 
+	 *
+	 * @return a boolean indicating whether the checking passed
 	 */
 	private boolean checkVersion(String availableVersion, String requiredVersion) {
 		if (requiredVersion == null || availableVersion == null)
@@ -681,7 +681,7 @@ public class Main {
 			Identifier available = new Identifier(availableVersion);
 			boolean compatible = available.isGreaterEqualTo(required);
 			if (!compatible) {
-				// any non-zero value should do it - 14 used to be used for version incompatibility in Eclipse 2.1 
+				// any non-zero value should do it - 14 used to be used for version incompatibility in Eclipse 2.1
 				System.setProperty(PROP_EXITCODE, "14"); //$NON-NLS-1$
 				System.setProperty(PROP_EXITDATA, "<title>Incompatible JVM</title>Version " + availableVersion + " of the JVM is not suitable for this product. Version: " + requiredVersion + " or greater is required."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
@@ -700,9 +700,9 @@ public class Main {
 	 * If the system property "osgi.configuration.area.readOnly" is set
 	 * the check always succeeds.
 	 * <p>Will set PROP_EXITCODE/PROP_EXITDATA accordingly if check fails.</p>
-	 * 
+	 *
 	 * @param locationUrl  configuration area URL, may be <code>null</code>
-	 * @return a boolean indicating whether the checking passed 
+	 * @return a boolean indicating whether the checking passed
 	 */
 	private boolean checkConfigurationLocation(URL locationUrl) {
 		if (locationUrl == null || !"file".equals(locationUrl.getProtocol())) //$NON-NLS-1$
@@ -738,7 +738,7 @@ public class Main {
 	 */
 	protected String decode(String urlString) {
 		try {
-			//first encode '+' characters, because URLDecoder incorrectly converts 
+			//first encode '+' characters, because URLDecoder incorrectly converts
 			//them to spaces on certain class library implementations.
 			if (urlString.indexOf('+') >= 0) {
 				int len = urlString.length();
@@ -760,7 +760,7 @@ public class Main {
 
 	/**
 	 * Returns the result of converting a list of comma-separated tokens into an array
-	 * 
+	 *
 	 * @return the array of string tokens
 	 * @param prop the initial comma-separated string
 	 */
@@ -781,7 +781,7 @@ public class Main {
 	/**
 	 * Returns the <code>URL</code>-based class path describing where the boot classes
 	 * are located when running in development mode.
-	 * 
+	 *
 	 * @return the url-based class path
 	 * @param base the base location
 	 * @exception MalformedURLException if a problem occurs computing the class path
@@ -961,7 +961,7 @@ public class Main {
 
 	/**
 	 * Returns the <code>URL</code>-based class path describing where the boot classes are located.
-	 * 
+	 *
 	 * @return the url-based class path
 	 * @param base the base location
 	 * @exception MalformedURLException if a problem occurs computing the class path
@@ -1000,7 +1000,7 @@ public class Main {
 	/**
 	 * Searches for the given target directory starting in the "plugins" subdirectory
 	 * of the given location.
-	 * 
+	 *
 	 * @return the location where target directory was found, <code>null</code> otherwise
 	 * @param start the location to begin searching
 	 */
@@ -1102,7 +1102,7 @@ public class Main {
 	}
 
 	/**
-	 * Compares version strings. 
+	 * Compares version strings.
 	 * @return result of comparison, as integer;
 	 * <code><0</code> if left < right;
 	 * <code>0</code> if left == right;
@@ -1192,7 +1192,7 @@ public class Main {
 	/**
 	 * Resolve the given file against  osgi.install.area.
 	 * If osgi.install.area is not set, or the file is not relative, then
-	 * the file is returned as is. 
+	 * the file is returned as is.
 	 */
 	private static File resolveFile(File toAdjust) {
 		if (!toAdjust.isAbsolute()) {
@@ -1219,7 +1219,7 @@ public class Main {
 		URL result = null;
 		String location = System.getProperty(property);
 		System.clearProperty(property);
-		// if the instance location is not set, predict where the workspace will be and 
+		// if the instance location is not set, predict where the workspace will be and
 		// put the instance area inside the workspace meta area.
 		try {
 			if (location == null)
@@ -1256,18 +1256,18 @@ public class Main {
 		return value + source.substring(var.length());
 	}
 
-	/** 
+	/**
 	 * Retuns the default file system path for the configuration location.
 	 * By default the configuration information is in the installation directory
 	 * if this is writeable.  Otherwise it is located somewhere in the user.home
-	 * area relative to the current product. 
+	 * area relative to the current product.
 	 * @return the default file system path for the configuration information
 	 */
 	private String computeDefaultConfigurationLocation() {
 		// 1) We store the config state relative to the 'eclipse' directory if possible
-		// 2) If this directory is read-only 
-		//    we store the state in <user.home>/.eclipse/<application-id>_<version> where <user.home> 
-		//    is unique for each local user, and <application-id> is the one 
+		// 2) If this directory is read-only
+		//    we store the state in <user.home>/.eclipse/<application-id>_<version> where <user.home>
+		//    is unique for each local user, and <application-id> is the one
 		//    defined in .eclipseproduct marker file. If .eclipseproduct does not
 		//    exist, use "eclipse" as the application-id.
 
@@ -1298,8 +1298,8 @@ public class Main {
 	 *   product and the given appendage
 	 */
 	private String computeDefaultUserAreaLocation(String pathAppendage) {
-		//    we store the state in <user.home>/.eclipse/<application-id>_<version> where <user.home> 
-		//    is unique for each local user, and <application-id> is the one 
+		//    we store the state in <user.home>/.eclipse/<application-id>_<version> where <user.home>
+		//    is unique for each local user, and <application-id> is the one
 		//    defined in .eclipseproduct marker file. If .eclipseproduct does not
 		//    exist, use "eclipse" as the application-id.
 		URL installURL = getInstallLocation();
@@ -1332,7 +1332,7 @@ public class Main {
 					appVersion = ""; //$NON-NLS-1$
 				appName += File.separator + appId + "_" + appVersion + "_" + installDirHash; //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (IOException e) {
-				// Do nothing if we get an exception.  We will default to a standard location 
+				// Do nothing if we get an exception.  We will default to a standard location
 				// in the user's home dir.
 				// add the hash to help prevent collisions
 				appName += File.separator + installDirHash;
@@ -1389,7 +1389,7 @@ public class Main {
 
 	/**
 	 * Runs this launcher with the arguments specified in the given string.
-	 * 
+	 *
 	 * @param argString the arguments string
 	 */
 	public static void main(String argString) {
@@ -1410,7 +1410,7 @@ public class Main {
 	 * Clients wishing to run the platform without a following <code>System.exit</code>
 	 * call should use <code>run()</code>.
 	 * </p>
-	 * 
+	 *
 	 * @param args the command line arguments
 	 * @see #run(String[])
 	 */
@@ -1452,8 +1452,8 @@ public class Main {
 				result = 17;
 			}
 		} catch (Throwable e) {
-			// only log the exceptions if they have not been caught by the 
-			// EclipseStarter (i.e., if the exitCode is not 13) 
+			// only log the exceptions if they have not been caught by the
+			// EclipseStarter (i.e., if the exitCode is not 13)
 			if (!"13".equals(System.getProperty(PROP_EXITCODE))) { //$NON-NLS-1$
 				log("Exception launching the Eclipse Platform:"); //$NON-NLS-1$
 				log(e);
@@ -1502,7 +1502,7 @@ public class Main {
 	 * consume the arguments and leave them to be processed by Eclipse proper.
 	 * There are a few args which are directed towards main() and a few others
 	 * which we need to know about. Very few should actually be consumed here.
-	 * 
+	 *
 	 * @return the arguments to pass through to the launched application
 	 * @param args the command line arguments
 	 */
@@ -1547,7 +1547,7 @@ public class Main {
 			}
 
 			// check if development mode should be enabled for the entire platform
-			// If this is the last arg or there is a following arg (i.e., arg+1 has a leading -), 
+			// If this is the last arg or there is a following arg (i.e., arg+1 has a leading -),
 			// simply enable development mode.  Otherwise, assume that that the following arg is
 			// actually some additional development time class path entries.  This will be processed below.
 			if (args[i].equalsIgnoreCase(DEV) && ((i + 1 == args.length) || ((i + 1 < args.length) && (args[i + 1].startsWith("-"))))) { //$NON-NLS-1$
@@ -1577,7 +1577,7 @@ public class Main {
 				}
 			}
 
-			// done checking for args.  Remember where an arg was found 
+			// done checking for args.  Remember where an arg was found
 			if (found) {
 				configArgs[configArgIndex++] = i;
 				continue;
@@ -1604,7 +1604,7 @@ public class Main {
 				continue;
 			String arg = args[++i];
 
-			// look for the development mode and class path entries.  
+			// look for the development mode and class path entries.
 			if (args[i - 1].equalsIgnoreCase(DEV)) {
 				inDevelopmentMode = true;
 				devClassPathProps = processDevArg(arg);
@@ -1624,7 +1624,7 @@ public class Main {
 
 			if (args[i - 1].equalsIgnoreCase(OS)) {
 				os = arg;
-				// passed thru this arg 
+				// passed thru this arg
 				continue;
 			}
 
@@ -1639,16 +1639,16 @@ public class Main {
 			}
 
 			// look for explicitly set install root
-			// Consume the arg here to ensure that the launcher and Eclipse get the 
-			// same value as each other.  
+			// Consume the arg here to ensure that the launcher and Eclipse get the
+			// same value as each other.
 			if (args[i - 1].equalsIgnoreCase(INSTALL)) {
 				System.setProperty(PROP_INSTALL_AREA, arg);
 				found = true;
 			}
 
-			// look for the configuration to use.  
-			// Consume the arg here to ensure that the launcher and Eclipse get the 
-			// same value as each other.  
+			// look for the configuration to use.
+			// Consume the arg here to ensure that the launcher and Eclipse get the
+			// same value as each other.
 			if (args[i - 1].equalsIgnoreCase(CONFIGURATION)) {
 				System.setProperty(PROP_CONFIG_AREA, arg);
 				found = true;
@@ -1665,7 +1665,7 @@ public class Main {
 				found = true;
 			}
 
-			// look for the startup jar used 
+			// look for the startup jar used
 			if (args[i - 1].equalsIgnoreCase(STARTUP)) {
 				//not doing anything with this right now, but still consume it
 				//startup = arg;
@@ -1703,7 +1703,7 @@ public class Main {
 				found = true;
 			}
 
-			// done checking for args.  Remember where an arg was found 
+			// done checking for args.  Remember where an arg was found
 			if (found) {
 				configArgs[configArgIndex++] = i - 1;
 				configArgs[configArgIndex++] = i;
@@ -1759,7 +1759,7 @@ public class Main {
 		// if the configuration area is not already defined, discover the config area by
 		// trying to find a base config area.  This is either defined in a system property or
 		// is computed relative to the install location.
-		// Note that the config info read here is only used to determine a value 
+		// Note that the config info read here is only used to determine a value
 		// for the user configuration area
 		URL baseConfigurationLocation = null;
 		Properties baseConfiguration = null;
@@ -1781,7 +1781,7 @@ public class Main {
 				}
 			baseConfiguration = loadConfiguration(baseConfigurationLocation);
 			if (baseConfiguration != null) {
-				// if the base sets the install area then use that value if the property.  We know the 
+				// if the base sets the install area then use that value if the property.  We know the
 				// property is not already set.
 				String location = baseConfiguration.getProperty(PROP_CONFIG_AREA);
 				if (location != null)
@@ -1797,11 +1797,11 @@ public class Main {
 
 		// Now we know where the base configuration is supposed to be.  Go ahead and load
 		// it and merge into the System properties.  Then, if cascaded, read the parent configuration.
-		// Note that in a cascaded situation, the user configuration may be ignored if the parent 
-		// configuration has changed since the user configuration has been written. 
-		// Note that the parent may or may not be the same parent as we read above since the 
+		// Note that in a cascaded situation, the user configuration may be ignored if the parent
+		// configuration has changed since the user configuration has been written.
+		// Note that the parent may or may not be the same parent as we read above since the
 		// base can define its parent.  The first parent we read was either defined by the user
-		// on the command line or was the one in the install dir.  
+		// on the command line or was the one in the install dir.
 		// if the config or parent we are about to read is the same as the base config we read above,
 		// just reuse the base
 		Properties configuration = baseConfiguration;
@@ -1826,8 +1826,8 @@ public class Main {
 			if (sharedConfigURL != null) {
 				if (sharedConfigURL.equals(getConfigurationLocation())) {
 					//After all we are not in a shared configuration setup.
-					// - remove the property to show that we do not have a parent 
-					// - merge configuration with the system properties 
+					// - remove the property to show that we do not have a parent
+					// - merge configuration with the system properties
 					System.clearProperty(PROP_SHARED_CONFIG_AREA);
 					mergeWithSystemProperties(configuration, null);
 				} else {
@@ -1905,7 +1905,7 @@ public class Main {
 	/**
 	 * Ensures the value for a system property is an absolute URL. Relative URLs are translated to
 	 * absolute URLs by taking the install URL as reference.
-	 *   
+	 *
 	 * @param locationProperty the key for a system property containing a URL
 	 */
 	private void ensureAbsolute(String locationProperty) {
@@ -1978,7 +1978,7 @@ public class Main {
 		path = file.toString().replace('\\', '/');
 		// TODO need a better test for windows
 		// If on Windows then canonicalize the drive letter to be lowercase.
-		// remember that there may be UNC paths 
+		// remember that there may be UNC paths
 		if (File.separatorChar == '\\')
 			if (Character.isUpperCase(path.charAt(0))) {
 				char[] chars = path.toCharArray();
@@ -1987,20 +1987,20 @@ public class Main {
 			}
 		if (path.toLowerCase().endsWith(".jar")) //$NON-NLS-1$
 			path = path.substring(0, path.lastIndexOf('/') + 1);
-		if (path.toLowerCase().endsWith("/plugins/")) //$NON-NLS-1$ 
+		if (path.toLowerCase().endsWith("/plugins/")) //$NON-NLS-1$
 			path = path.substring(0, path.length() - "/plugins/".length()); //$NON-NLS-1$
 		try {
 			try {
-				// create a file URL (via File) to normalize the form (e.g., put 
+				// create a file URL (via File) to normalize the form (e.g., put
 				// the leading / on if necessary)
 				path = new File(path).toURL().getFile();
 			} catch (MalformedURLException e1) {
-				// will never happen.  The path is straight from a URL.  
+				// will never happen.  The path is straight from a URL.
 			}
 			installLocation = new URL(result.getProtocol(), result.getHost(), result.getPort(), path);
 			System.setProperty(PROP_INSTALL_AREA, installLocation.toExternalForm());
 		} catch (MalformedURLException e) {
-			// TODO Very unlikely case.  log here.  
+			// TODO Very unlikely case.  log here.
 		}
 		if (debug)
 			System.out.println("Install location:\n    " + installLocation); //$NON-NLS-1$
@@ -2054,7 +2054,7 @@ public class Main {
 	}
 
 	/*
-	 * Load the configuration  
+	 * Load the configuration
 	 */
 	private Properties load(URL url, String suffix) throws IOException {
 		// figure out what we will be loading
@@ -2083,22 +2083,22 @@ public class Main {
 	/*
 	 * Handle splash screen.
 	 *  The splash screen is displayed natively.  Whether or not the splash screen
-	 *  was displayed by the launcher, we invoke JNIBridge.showSplash() and the 
+	 *  was displayed by the launcher, we invoke JNIBridge.showSplash() and the
 	 *  native code handles the case of the splash screen already existing.
-	 * 
+	 *
 	 * The -showsplash argument may indicate the bitmap used by the native launcher,
 	 * or the bitmap location may be extracted from the config.ini
-	 * 
+	 *
 	 * We pass a handler (Runnable) to the platform which is called as a result of the
-	 * launched application calling Platform.endSplash(). This handle calls 
+	 * launched application calling Platform.endSplash(). This handle calls
 	 * JNIBridge.takeDownSplash and the native code will close the splash screen.
-	 * 
+	 *
 	 * The -endsplash argument is longer used and has the same result as -nosplash
-	 * 
+	 *
 	 * @param defaultPath search path for the boot plugin
 	 */
 	private void handleSplash(URL[] defaultPath) {
-		// run without splash if we are initializing or nosplash 
+		// run without splash if we are initializing or nosplash
 		// was specified (splashdown = true)
 		if (initialize || splashDown || bridge == null) {
 			showSplash = false;
@@ -2107,7 +2107,7 @@ public class Main {
 		}
 
 		if (showSplash || endSplash != null) {
-			// Register the endSplashHandler to be run at VM shutdown. This hook will be 
+			// Register the endSplashHandler to be run at VM shutdown. This hook will be
 			// removed once the splash screen has been taken down.
 			try {
 				Runtime.getRuntime().addShutdownHook(splashHandler);
@@ -2147,7 +2147,7 @@ public class Main {
 	}
 
 	/*
-	 * Take down the splash screen. 
+	 * Take down the splash screen.
 	 */
 	protected void takeDownSplash() {
 		if (splashDown || bridge == null) // splash is already down
@@ -2242,7 +2242,7 @@ public class Main {
 	}
 
 	/*
-	 * Look for the specified spash file in the given JAR and extract it to the config 
+	 * Look for the specified spash file in the given JAR and extract it to the config
 	 * area for caching purposes.
 	 */
 	private String extractFromJAR(String jarPath, String jarEntry) {
@@ -2312,9 +2312,9 @@ public class Main {
 
 	/*
 	 * Build an array of path suffixes based on the given NL which is suitable
-	 * for splash path searching.  The returned array contains paths in order 
-	 * from most specific to most generic. So, in the FR_fr locale, it will return 
-	 * "nl/fr/FR/splash.bmp", then "nl/fr/splash.bmp", and finally "splash.bmp". 
+	 * for splash path searching.  The returned array contains paths in order
+	 * from most specific to most generic. So, in the FR_fr locale, it will return
+	 * "nl/fr/FR/splash.bmp", then "nl/fr/splash.bmp", and finally "splash.bmp".
 	 * (we always search the root)
 	 */
 	private static String[] buildNLVariants(String locale) {
@@ -2514,13 +2514,13 @@ public class Main {
 			String value = source.getProperty(key);
 
 			// Check to see if we are supposed to override existing values from the user configuraiton.
-			// This is done only in the case of shared install where we have already set the user values 
+			// This is done only in the case of shared install where we have already set the user values
 			// but want to override them with values from the shared location's config.
 			if (userConfiguration != null && !key.endsWith(EXT_OVERRIDE_USER)) {
 				// check all levels to see if the "override" property was set
 				final String overrideKey = key + EXT_OVERRIDE_USER;
 				boolean shouldOverride = System.getProperty(overrideKey) != null || source.getProperty(overrideKey) != null;
-				// only set the value if the user specified the override property and if the 
+				// only set the value if the user specified the override property and if the
 				// original property wasn't set by a commad-line arg
 				if (shouldOverride && !userConfiguration.contains(key)) {
 					System.setProperty(key, value);
@@ -2558,13 +2558,13 @@ public class Main {
 	 * NOTE: It is ok here for EclipsePolicy to use 1.4 methods because the methods
 	 * that it calls them from don't exist in Foundation so they will never be called. A more
 	 * detailed explanation from Tom:
-	 * 
-	 * They will never get called because in a pre 1.4 VM the methods 
-	 * getPermissions(CodeSource) and implies(ProtectionDomain, Permission) are 
-	 * undefined on the Policy class which is what EclipsePolicy extends.  EclipsePolicy 
-	 * implements these two methods so it can proxy them to the parent Policy.  
-	 * But since these methods are not actually defined on Policy in a pre-1.4 VM 
-	 * nobody will actually call them (unless they casted the policy to EclipsePolicy and 
+	 *
+	 * They will never get called because in a pre 1.4 VM the methods
+	 * getPermissions(CodeSource) and implies(ProtectionDomain, Permission) are
+	 * undefined on the Policy class which is what EclipsePolicy extends.  EclipsePolicy
+	 * implements these two methods so it can proxy them to the parent Policy.
+	 * But since these methods are not actually defined on Policy in a pre-1.4 VM
+	 * nobody will actually call them (unless they casted the policy to EclipsePolicy and
 	 * called our methods)
 	 */
 	private class EclipsePolicy extends Policy {

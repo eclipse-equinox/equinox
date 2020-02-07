@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -44,7 +44,7 @@ public class ServiceObjectsImpl<S> implements ServiceObjects<S> {
 	/**
 	 * Returns a service object for the {@link #getServiceReference()
 	 * referenced} service.
-	 * 
+	 *
 	 * <p>
 	 * This {@code ServiceObjects} object can be used to obtain multiple service
 	 * objects for the referenced service if the service has
@@ -54,11 +54,11 @@ public class ServiceObjectsImpl<S> implements ServiceObjects<S> {
 	 * as calling the {@link BundleContext#getService(ServiceReference)} method
 	 * for the referenced service. That is, only one, use-counted service object
 	 * is available from this {@link ServiceObjects} object.
-	 * 
+	 *
 	 * <p>
 	 * This method will always return {@code null} when the referenced service
 	 * has been unregistered.
-	 * 
+	 *
 	 * <p>
 	 * For a prototype scope service, the following steps are required to get
 	 * the service object:
@@ -76,7 +76,7 @@ public class ServiceObjectsImpl<S> implements ServiceObjects<S> {
 	 * {@link ServiceException} describing the error is fired.</li>
 	 * <li>The service object is returned.</li>
 	 * </ol>
-	 * 
+	 *
 	 * @return A service object for the referenced service or {@code null} if
 	 *         the service is not registered, the service object returned by a
 	 *         {@code ServiceFactory} does not implement the classes under which
@@ -95,7 +95,7 @@ public class ServiceObjectsImpl<S> implements ServiceObjects<S> {
 	/**
 	 * Releases a service object for the {@link #getServiceReference()
 	 * referenced} service.
-	 * 
+	 *
 	 * <p>
 	 * This {@code ServiceObjects} object can be used to obtain multiple service
 	 * objects for the referenced service if the service has
@@ -105,7 +105,7 @@ public class ServiceObjectsImpl<S> implements ServiceObjects<S> {
 	 * as calling the {@link BundleContext#ungetService(ServiceReference)}
 	 * method for the referenced service. That is, only one, use-counted service
 	 * object is available from this {@link ServiceObjects} object.
-	 * 
+	 *
 	 * <p>
 	 * For a prototype scope service, the following steps are required to
 	 * release the service object:
@@ -116,11 +116,11 @@ public class ServiceObjectsImpl<S> implements ServiceObjects<S> {
 	 * {@link PrototypeServiceFactory#ungetService(Bundle, ServiceRegistration, Object)}
 	 * method is called to release the specified service object.</li>
 	 * </ol>
-	 * 
+	 *
 	 * <p>
 	 * The specified service object must no longer be used and all references to
 	 * it should be destroyed after calling this method.
-	 * 
+	 *
 	 * @param service A service object previously provided by this
 	 *        {@code ServiceObjects} object.
 	 * @throws IllegalStateException If the BundleContext used to create this
@@ -144,7 +144,7 @@ public class ServiceObjectsImpl<S> implements ServiceObjects<S> {
 	/**
 	 * Returns the {@link ServiceReference} for the service associated with this
 	 * {@code ServiceObjects} object.
-	 * 
+	 *
 	 * @return The {@link ServiceReference} for the service associated with this
 	 *         {@code ServiceObjects} object.
 	 */

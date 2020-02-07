@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -96,7 +96,7 @@ public class MovableConfigurationAreaTest extends OSGiTest {
 	 */
 	public void testAfterMoving() throws MalformedURLException, IOException, BundleException {
 		// try to install plug-in
-		// ensure it is not installed		
+		// ensure it is not installed
 		Bundle installed = null;
 		try {
 			installed = BundleTestingHelper.installBundle(getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle02");
@@ -106,13 +106,13 @@ public class MovableConfigurationAreaTest extends OSGiTest {
 			// success
 		} finally {
 			if (installed != null)
-				// clean-up - only runs if we end-up accepting an invalid manifest				
+				// clean-up - only runs if we end-up accepting an invalid manifest
 				installed.uninstall();
 		}
 	}
 
 	public void testInitialization() throws MalformedURLException, IOException {
-		// initialization session		
+		// initialization session
 		try {
 			Bundle installed = BundleTestingHelper.installBundle("1.0", getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle01");
 			// not read-only yet, should work fine

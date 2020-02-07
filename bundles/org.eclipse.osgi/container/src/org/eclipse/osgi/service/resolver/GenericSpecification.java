@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -46,7 +46,7 @@ public interface GenericSpecification extends VersionConstraint {
 	 * Returns the resolution type of the required capability.  The returned
 	 * value is a bit mask that may have the optional bit {@link #RESOLUTION_OPTIONAL}
 	 * and/or the multiple bit {@link #RESOLUTION_MULTIPLE} set.
-	 * 
+	 *
 	 * @return the resolution type of the required capability
 	 */
 	public int getResolution();

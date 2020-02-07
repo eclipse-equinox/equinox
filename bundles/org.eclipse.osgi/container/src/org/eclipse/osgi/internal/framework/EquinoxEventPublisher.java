@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -120,7 +120,7 @@ public class EquinoxEventPublisher {
 	/**
 	 * Deliver a BundleEvent to SynchronousBundleListeners (synchronous) and
 	 * BundleListeners (asynchronous).
-	 * 
+	 *
 	 * @param type
 	 *            BundleEvent type.
 	 * @param bundle
@@ -250,7 +250,7 @@ public class EquinoxEventPublisher {
 
 	private void notifyEventHooksPrivileged(final BundleEvent event, final Collection<BundleContext> result) {
 		if (container.getConfiguration().getDebug().DEBUG_HOOKS) {
-			Debug.println("notifyBundleEventHooks(" + event.getType() + ":" + event.getBundle() + ", " + result + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$  
+			Debug.println("notifyBundleEventHooks(" + event.getType() + ":" + event.getBundle() + ", " + result + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 
 		ServiceRegistry serviceRegistry = container.getServiceRegistry();
@@ -283,7 +283,7 @@ public class EquinoxEventPublisher {
 
 	/**
 	 * Deliver a FrameworkEvent.
-	 * 
+	 *
 	 * @param type
 	 *            FrameworkEvent type.
 	 * @param bundle
