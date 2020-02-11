@@ -15,10 +15,8 @@
 package org.eclipse.osgi.internal.framework;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URLConnection;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
@@ -182,14 +180,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	@Override
 	public Bundle installBundle(String location, InputStream in) throws BundleException {
 		checkValid();
-		try {
-			URLConnection content = container.getStorage().getContentConnection(null, location, in);
-			Generation generation = container.getStorage().install(bundle.getModule(), location, content);
-			return generation.getRevision().getBundle();
-		} catch (IOException e) {
-			throw new BundleException("Error reading bundle content.", e); //$NON-NLS-1$
-		}
 
+		Generation generation = container.getStorage().install(bundle.getModule(), location, in);
+		return generation.getRevision().getBundle();
 	}
 
 	/**

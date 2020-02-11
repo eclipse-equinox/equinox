@@ -49,7 +49,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
-import org.osgi.framework.connect.ConnectContent;
 import org.osgi.framework.connect.ConnectModule;
 import org.osgi.framework.connect.ModuleConnector;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -60,12 +59,6 @@ import org.osgi.util.tracker.ServiceTracker;
 public class EquinoxContainer implements ThreadFactory, Runnable {
 	public static final String NAME = "org.eclipse.osgi"; //$NON-NLS-1$
 	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
-	static final ConnectModule NULL_MODULE = new ConnectModule() {
-		@Override
-		public ConnectContent getContent() throws IOException {
-			throw new IOException();
-		}
-	};
 
 	private final ConnectModules connectModules;
 	private final EquinoxConfiguration equinoxConfig;
@@ -374,23 +367,26 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 			this.moduleConnector = moduleConnector;
 		}
 
-		@SuppressWarnings("unused")
-		public ConnectModule getConnectModule(String location) {
+		public ConnectModule connect(String location) {
 			if (moduleConnector == null) {
 				return null;
 			}
-			ConnectModule result = connectModules.computeIfAbsent(location, (l) -> {
+			ConnectModule result = connectModules.compute(location, (k, v) -> {
 				try {
-					return moduleConnector.connect(location).orElse(NULL_MODULE);
+					return moduleConnector.connect(location).orElse(null);
 				} catch (BundleException e) {
 					throw new IllegalStateException(e);
 				}
 			});
-			return result == NULL_MODULE ? null : result;
+			return result;
 		}
 
-		public ModuleConnector getConnectFramework() {
+		public ModuleConnector getModuleConnector() {
 			return moduleConnector;
+		}
+
+		public ConnectModule getConnectModule(String location) {
+			return connectModules.get(location);
 		}
 	}
 

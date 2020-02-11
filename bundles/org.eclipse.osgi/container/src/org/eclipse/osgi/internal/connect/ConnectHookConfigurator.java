@@ -53,20 +53,12 @@ public class ConnectHookConfigurator implements HookConfigurator {
 	@Override
 	public void addHooks(final HookRegistry hookRegistry) {
 		final ConnectModules connectModules = hookRegistry.getContainer().getConnectModules();
-		ModuleConnector moduleConnector = connectModules.getConnectFramework();
+		ModuleConnector moduleConnector = connectModules.getModuleConnector();
 
 		hookRegistry.addStorageHookFactory(new StorageHookFactory<Object, Object, StorageHook<Object, Object>>() {
 			@Override
 			protected StorageHook<Object, Object> createStorageHook(Generation generation) {
-				ConnectModule tmp = null;
-				try {
-					tmp = connectModules.getConnectModule(generation.getBundleInfo().getLocation());
-				} catch (IllegalStateException e) {
-					if (!(e.getCause() instanceof BundleException)) {
-						throw e;
-					}
-				}
-				final ConnectModule m = tmp;
+				final ConnectModule m = connectModules.getConnectModule(generation.getBundleInfo().getLocation());
 
 				return new StorageHook<Object, Object>(generation, this.getClass()) {
 					boolean hasModule = false;
@@ -119,11 +111,15 @@ public class ConnectHookConfigurator implements HookConfigurator {
 
 			@Override
 			public URLConnection handleContentConnection(Module module, String location, InputStream in) {
+				if (in != null) {
+					// Do not call ModuleConnector method connect when input stream is non null.
+					return null;
+				}
 				if (location == null) {
 					location = module.getLocation();
 				}
 				try {
-					ConnectModule m = connectModules.getConnectModule(location);
+					ConnectModule m = connectModules.connect(location);
 					if (m != null) {
 						return ConnectInputStream.URL_CONNECTION_INSTANCE;
 					}

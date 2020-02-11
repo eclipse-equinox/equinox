@@ -571,41 +571,47 @@ public class Storage {
 		return osgiLocation.isReadOnly();
 	}
 
-	public URLConnection getContentConnection(Module module, String bundleLocation, final InputStream in) throws IOException {
-		List<StorageHookFactory<?, ?, ?>> storageHooks = getConfiguration().getHookRegistry().getStorageHookFactories();
-		for (StorageHookFactory<?, ?, ?> storageHook : storageHooks) {
-			URLConnection hookContent = storageHook.handleContentConnection(module, bundleLocation, in);
-			if (hookContent != null) {
-				return hookContent;
-			}
-		}
-
-		if (in != null) {
-			return new URLConnection(null) {
-				/**
-				 * @throws IOException  
-				 */
-				@Override
-				public void connect() throws IOException {
-					connected = true;
+	public URLConnection getContentConnection(Module module, String bundleLocation, final InputStream in)
+			throws BundleException {
+		try {
+			List<StorageHookFactory<?, ?, ?>> storageHooks = getConfiguration().getHookRegistry()
+					.getStorageHookFactories();
+			for (StorageHookFactory<?, ?, ?> storageHook : storageHooks) {
+				URLConnection hookContent = storageHook.handleContentConnection(module, bundleLocation, in);
+				if (hookContent != null) {
+					return hookContent;
 				}
-
-				/**
-				 * @throws IOException  
-				 */
-				@Override
-				public InputStream getInputStream() throws IOException {
-					return (in);
-				}
-			};
-		}
-		if (module == null) {
-			if (bundleLocation == null) {
-				throw new IllegalArgumentException("Module and location cannot be null"); //$NON-NLS-1$
 			}
-			return getContentConnection(bundleLocation);
+
+			if (in != null) {
+				return new URLConnection(null) {
+					/**
+					 * @throws IOException
+					 */
+					@Override
+					public void connect() throws IOException {
+						connected = true;
+					}
+
+					/**
+					 * @throws IOException
+					 */
+					@Override
+					public InputStream getInputStream() throws IOException {
+						return (in);
+					}
+				};
+			}
+			if (module == null) {
+				if (bundleLocation == null) {
+					throw new IllegalArgumentException("Module and location cannot be null"); //$NON-NLS-1$
+				}
+				return getContentConnection(bundleLocation);
+			}
+			return getContentConnection(getUpdateLocation(module));
+		} catch (IOException e) {
+			throw new BundleException("Error reading bundle content.", e); //$NON-NLS-1$
 		}
-		return getContentConnection(getUpdateLocation(module));
 	}
 
 	private String getUpdateLocation(final Module module) {
@@ -657,7 +663,8 @@ public class Storage {
 		return new URL(spec);
 	}
 
-	public Generation install(Module origin, String bundleLocation, URLConnection content) throws BundleException {
+	public Generation install(Module origin, String bundleLocation, InputStream toInstall) throws BundleException {
+		URLConnection content = getContentConnection(null, bundleLocation, toInstall);
 		if (osgiLocation.isReadOnly()) {
 			throw new BundleException("The framework storage area is read only.", BundleException.INVALID_OPERATION); //$NON-NLS-1$
 		}
@@ -908,6 +915,7 @@ public class Storage {
 		Generation currentGen = (Generation) current.getRevisionInfo();
 		File content = currentGen.getContent();
 		if (content == null) {
+			// TODO Handle connect bundle
 			return;
 		}
 		String spec = (currentGen.getContentType() == Type.REFERENCE ? "reference:" : "") + content.toURI().toString(); //$NON-NLS-1$ //$NON-NLS-2$
@@ -920,7 +928,12 @@ public class Storage {
 		update(module, contentConn);
 	}
 
-	public Generation update(Module module, URLConnection content) throws BundleException {
+	public Generation update(Module module, InputStream updateIn) throws BundleException {
+		return update(module, getContentConnection(module, null, updateIn));
+	}
+
+	private Generation update(Module module, URLConnection content) throws BundleException {
+
 		if (osgiLocation.isReadOnly()) {
 			throw new BundleException("The framework storage area is read only.", BundleException.INVALID_OPERATION); //$NON-NLS-1$
 		}
@@ -1163,8 +1176,11 @@ public class Storage {
 
 	public BundleFile createBundleFile(File content, Generation generation, boolean isDirectory, boolean isBase) {
 		BundleFile result = null;
+		ConnectModule connectModule = null;
+		if (generation.getContentType() == Type.CONNECT) {
+			connectModule = equinoxContainer.getConnectModules().getConnectModule(generation.getBundleInfo().getLocation());
+		}
 		try {
-			ConnectModule connectModule = equinoxContainer.getConnectModules().getConnectModule(generation.getBundleInfo().getLocation());
 			if (connectModule != null && isBase) {
 				result = new ConnectBundleFile(connectModule, content, generation, mruList, getConfiguration().getDebug());
 			} else if (isDirectory) {
@@ -1543,8 +1559,21 @@ public class Storage {
 			generations.add(generation);
 		}
 
+		connectPersistentBundles(generations);
 		loadStorageHookData(generations, in);
 		return result;
+	}
+
+	private void connectPersistentBundles(List<Generation> generations) {
+		generations.forEach(g -> {
+			try {
+				equinoxContainer.getConnectModules().connect(g.getBundleInfo().getLocation());
+			} catch (IllegalStateException e) {
+				if (!(e.getCause() instanceof BundleException)) {
+					throw e;
+				}
+			}
+		});
 	}
 
 	private void loadStorageHookData(List<Generation> generations, DataInputStream in) throws IOException {

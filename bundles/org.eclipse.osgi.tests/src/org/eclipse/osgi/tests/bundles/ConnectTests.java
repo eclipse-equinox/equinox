@@ -78,6 +78,10 @@ public class ConnectTests extends AbstractBundleTests {
 		return new TestSuite(ConnectTests.class);
 	}
 
+	void cleanStorage() {
+		delete(getContext().getDataFile(getName()));
+	}
+
 	void doTestConnect(ModuleConnector moduleConnector, Map<String, String> fwkConfig, Consumer<Framework> test) {
 		doTestConnect(moduleConnector, fwkConfig, test, false);
 	}
@@ -317,9 +321,9 @@ public class ConnectTests extends AbstractBundleTests {
 	static final TestConnectModule BUNDLE_EXCEPTION = new TestConnectModule(null);
 
 	public void testConnectFactoryNoModules() {
-		TestCountingModuleConnector connectFactory = new TestCountingModuleConnector();
+		TestCountingModuleConnector connector = new TestCountingModuleConnector();
 
-		doTestConnect(connectFactory, new HashMap<>(), (f) -> {
+		doTestConnect(connector, new HashMap<>(), (f) -> {
 			try {
 				f.start();
 				f.stop();
@@ -331,7 +335,7 @@ public class ConnectTests extends AbstractBundleTests {
 				sneakyThrow(t);
 			}
 		});
-		doTestConnect(connectFactory, new HashMap<>(), (f) -> {
+		doTestConnect(connector, new HashMap<>(), (f) -> {
 			try {
 				f.start();
 				f.stop();
@@ -340,8 +344,8 @@ public class ConnectTests extends AbstractBundleTests {
 			}
 		});
 
-		assertEquals("Wrong number of init called.", 2, connectFactory.getInitializeCnt());
-		assertEquals("Wrong number of create activator called.", 3, connectFactory.getCreateBundleActivatorCnt());
+		assertEquals("Wrong number of init called.", 2, connector.getInitializeCnt());
+		assertEquals("Wrong number of create activator called.", 3, connector.getCreateBundleActivatorCnt());
 	}
 
 	public void testConnectActivator() {
@@ -427,13 +431,13 @@ public class ConnectTests extends AbstractBundleTests {
 	}
 
 	void doTestConnectContentSimple(boolean withManifest) throws IOException {
-		TestCountingModuleConnector connectFactory = new TestCountingModuleConnector();
+		TestCountingModuleConnector connector = new TestCountingModuleConnector();
 		final List<String> locations = Arrays.asList("b.1", "b.2", "b.3", "b.4");
 		for (String l : locations) {
-			connectFactory.setModule(l, withManifest ? createSimpleManifestModule(l) : createSimpleHeadersModule(l));
+			connector.setModule(l, withManifest ? createSimpleManifestModule(l) : createSimpleHeadersModule(l));
 		}
 
-		doTestConnect(connectFactory, new HashMap<>(), (f) -> {
+		doTestConnect(connector, new HashMap<>(), (f) -> {
 			try {
 				f.init();
 				for (String l : locations) {
@@ -447,7 +451,7 @@ public class ConnectTests extends AbstractBundleTests {
 			}
 		});
 
-		doTestConnect(connectFactory, new HashMap<>(), (f) -> {
+		doTestConnect(connector, new HashMap<>(), (f) -> {
 			try {
 				f.init();
 				Bundle[] bundles = f.getBundleContext().getBundles();
@@ -464,9 +468,9 @@ public class ConnectTests extends AbstractBundleTests {
 			}
 		});
 
-		connectFactory.setModule("b.2", null);
-		connectFactory.setModule("b.3", BUNDLE_EXCEPTION);
-		doTestConnect(connectFactory, new HashMap<>(), (f) -> {
+		connector.setModule("b.2", null);
+		connector.setModule("b.3", BUNDLE_EXCEPTION);
+		doTestConnect(connector, new HashMap<>(), (f) -> {
 			try {
 				f.init();
 				Bundle[] bundles = f.getBundleContext().getBundles();
@@ -515,13 +519,13 @@ public class ConnectTests extends AbstractBundleTests {
 	}
 
 	void doTestConnectContentActivators(boolean provideLoader) {
-		TestCountingModuleConnector connectFactory = new TestCountingModuleConnector();
+		TestCountingModuleConnector connector = new TestCountingModuleConnector();
 		final List<Integer> ids = Arrays.asList(1, 2, 3);
 		for (Integer id : ids) {
-			connectFactory.setModule(id.toString(), createAdvancedModule(id, provideLoader));
+			connector.setModule(id.toString(), createAdvancedModule(id, provideLoader));
 		}
 
-		doTestConnect(connectFactory, new HashMap<>(), (f) -> {
+		doTestConnect(connector, new HashMap<>(), (f) -> {
 			try {
 				f.start();
 				for (Integer id : ids) {
@@ -553,16 +557,16 @@ public class ConnectTests extends AbstractBundleTests {
 	}
 
 	void doTestConnectContentEntries(boolean provideLoader) {
-		TestCountingModuleConnector connectFactory = new TestCountingModuleConnector();
+		TestCountingModuleConnector connector = new TestCountingModuleConnector();
 		final List<Integer> ids = Arrays.asList(1, 2, 3);
 		final Map<Integer, TestConnectModule> modules = new HashMap<>();
 		for (Integer id : ids) {
 			TestConnectModule m = createAdvancedModule(id, provideLoader);
 			modules.put(id, m);
-			connectFactory.setModule(id.toString(), m);
+			connector.setModule(id.toString(), m);
 		}
 
-		doTestConnect(connectFactory, new HashMap<>(), (f) -> {
+		doTestConnect(connector, new HashMap<>(), (f) -> {
 			try {
 				f.start();
 				for (Integer id : ids) {
@@ -631,11 +635,11 @@ public class ConnectTests extends AbstractBundleTests {
 	public void testOpenCloseUpdateConnectContent() {
 		final String NAME1 = "testUpdate.1";
 		final String NAME2 = "testUpdate.2";
-		TestCountingModuleConnector connectFactory = new TestCountingModuleConnector();
+		TestCountingModuleConnector connector = new TestCountingModuleConnector();
 		TestConnectModule m = createSimpleHeadersModule(NAME1);
-		connectFactory.setModule(NAME1, m);
+		connector.setModule(NAME1, m);
 
-		doTestConnect(connectFactory, new HashMap<>(), (f) -> {
+		doTestConnect(connector, new HashMap<>(), (f) -> {
 			try {
 				f.start();
 				Bundle b = f.getBundleContext().installBundle(NAME1);
@@ -681,10 +685,10 @@ public class ConnectTests extends AbstractBundleTests {
 	void doTestConnectBundleHeaders(boolean withSignedHook, boolean withManifest) throws IOException {
 		final String NAME1 = "bundle1";
 		final String NAME2 = "bundle2";
-		TestCountingModuleConnector connectFactory = new TestCountingModuleConnector();
+		TestCountingModuleConnector connector = new TestCountingModuleConnector();
 		TestConnectModule m = withManifest ? createSimpleManifestModule(NAME1) : createSimpleHeadersModule(NAME1);
-		connectFactory.setModule(NAME1, m);
-		doTestConnect(connectFactory, new HashMap<>(), (f) -> {
+		connector.setModule(NAME1, m);
+		doTestConnect(connector, new HashMap<>(), (f) -> {
 			try {
 				f.start();
 				Bundle b = f.getBundleContext().installBundle(NAME1);
@@ -718,10 +722,10 @@ public class ConnectTests extends AbstractBundleTests {
 		final AtomicReference<Dictionary<String, String>> headers1 = new AtomicReference<>();
 		final AtomicReference<Dictionary<String, String>> headers2 = new AtomicReference<>();
 
-		TestCountingModuleConnector connectFactory = new TestCountingModuleConnector();
+		TestCountingModuleConnector connector = new TestCountingModuleConnector();
 		TestConnectModule m = createSimpleHeadersModule(NAME);
-		connectFactory.setModule(NAME, m);
-		doTestConnect(connectFactory, new HashMap<>(), (f) -> {
+		connector.setModule(NAME, m);
+		doTestConnect(connector, new HashMap<>(), (f) -> {
 			try {
 				f.start();
 				Bundle b = f.getBundleContext().installBundle(NAME);
@@ -734,7 +738,7 @@ public class ConnectTests extends AbstractBundleTests {
 			}
 		});
 
-		doTestConnect(connectFactory, new HashMap<>(), (f) -> {
+		doTestConnect(connector, new HashMap<>(), (f) -> {
 			try {
 				f.start();
 				Bundle b = f.getBundleContext().getBundle(NAME);
@@ -757,6 +761,48 @@ public class ConnectTests extends AbstractBundleTests {
 			String key = keys.nextElement();
 			assertEquals(key + " header value not equal", h1.get(key), h2.get(key));
 		}
+	}
+
+	public void testInstallUpdateWithInputStream() throws Exception {
+		dotestInstallUpdate(false, false);
+		dotestInstallUpdate(false, true);
+		dotestInstallUpdate(true, false);
+		dotestInstallUpdate(true, true);
+	}
+
+	void dotestInstallUpdate(boolean installWithInputStream, boolean updateWithInputStream) throws Exception {
+		final InputStream in1 = installWithInputStream ? new URL(installer.getBundleLocation("test")).openStream() : null;
+		final InputStream in2 = updateWithInputStream ? new URL(installer.getBundleLocation("test2")).openStream() : null;
+		final String NAME1 = installWithInputStream ? "test1" : "bundle1";
+		final String NAME2 = updateWithInputStream ? "test2" : "bundle2";
+
+		TestCountingModuleConnector connector = new TestCountingModuleConnector();
+
+		TestConnectModule m = createSimpleHeadersModule(NAME1);
+		connector.setModule(NAME1, m);
+
+		doTestConnect(connector, new HashMap<>(), (f) -> {
+			try {
+				f.start();
+				Bundle test = f.getBundleContext().installBundle(NAME1, in1);
+				assertEquals("Wrong name.", NAME1, test.getSymbolicName());
+				if (installWithInputStream) {
+					assertNotNull("Resource not found", test.getResource("stuff/data/resource1"));
+				}
+				m.setContent(createSimpleHeadersContent(NAME2));
+				test.update(in2);
+				assertEquals("Wrong name.", NAME2, test.getSymbolicName());
+				if (updateWithInputStream) {
+					assertNotNull("Resource not found", test.getResource("stuff/data/resource2"));
+				}
+				f.stop();
+				f.waitForStop(5000);
+			} catch (Throwable t) {
+				sneakyThrow(t);
+			} finally {
+				cleanStorage();
+			}
+		});
 	}
 
 	private void checkHeaders(Map<String, String> expected, Dictionary<String, String> actual) {
