@@ -2343,6 +2343,67 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
+	public void testSubstitutableExportBatch() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.singletonMap(EquinoxConfiguration.PROP_RESOLVER_REVISION_BATCH_SIZE, Integer.toString(1)));
+		ModuleContainer container = adaptor.getContainer();
+
+		// install the system.bundle
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, null, container);
+		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
+		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
+
+		Map<String, String> manifest = new HashMap<>();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "substitutableExporter");
+		manifest.put(Constants.EXPORT_PACKAGE, "exporter; uses:=usedPkg; version=1.1, usedPkg");
+		manifest.put(Constants.IMPORT_PACKAGE, "exporter; pickme=true");
+
+		Module moduleSubsExport = installDummyModule(manifest, "substitutableExporter", container);
+
+		manifest = new HashMap<>();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "exporter");
+		manifest.put(Constants.EXPORT_PACKAGE, "exporter; version=1.0; pickme=true");
+		Module moduleExport = installDummyModule(manifest, "exporter", container);
+
+		manifest = new HashMap<>();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "importer1");
+		manifest.put(Constants.IMPORT_PACKAGE, "exporter, usedPkg");
+		Module moduleImporter1 = installDummyModule(manifest, "importer1", container);
+
+		manifest = new HashMap<>();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "importer2");
+		manifest.put(Constants.EXPORT_PACKAGE, "pkgUser; uses:=exporter");
+		manifest.put(Constants.IMPORT_PACKAGE, "exporter, usedPkg");
+		Module moduleImporter2 = installDummyModule(manifest, "importer2", container);
+
+		manifest = new HashMap<>();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "importer3");
+		manifest.put(Constants.IMPORT_PACKAGE, "pkgUser, exporter");
+		Module moduleImporter3 = installDummyModule(manifest, "importer3", container);
+
+		report = container.resolve(Arrays.asList(moduleExport, moduleSubsExport, moduleImporter1, moduleImporter2, moduleImporter3), true);
+		Assert.assertNull("Failed to resolve", report.getResolutionException());
+
+		ModuleWiring subsExportWiring = moduleSubsExport.getCurrentRevision().getWiring();
+		Collection<String> substituteNames = subsExportWiring.getSubstitutedNames();
+		Assert.assertEquals("Wrong number of exports: " + substituteNames, 1, substituteNames.size());
+		List<ModuleWire> providedWires = moduleSubsExport.getCurrentRevision().getWiring().getProvidedModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
+		assertEquals("Wrong number of wires.", 2, providedWires.size());
+
+		ModuleWiring importer3Wiring = moduleImporter3.getCurrentRevision().getWiring();
+		for (ModuleWire wire : importer3Wiring.getRequiredModuleWires(PackageNamespace.PACKAGE_NAMESPACE)) {
+			if ("exporter".equals(wire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE))) {
+				assertEquals("wrong provider", moduleExport.getCurrentRevision(), wire.getProvider());
+			}
+
+		}
+	}
+
+	@Test
 	public void testR3() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
@@ -3581,22 +3642,32 @@ public class TestModuleContainer extends AbstractTest {
 		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
 		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
 
+		// install and resolve used.pkg exporter to force substitution
+		Map<String, String> usedPkgExportManifest = new HashMap<>();
+		usedPkgExportManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		usedPkgExportManifest.put(Constants.BUNDLE_SYMBOLICNAME, "used.pkg");
+		usedPkgExportManifest.put(Constants.EXPORT_PACKAGE, "used.pkg");
+		Module moduleUsedPkg = installDummyModule(usedPkgExportManifest, "usedPkg", container);
+		report = container.resolve(Arrays.asList(moduleUsedPkg), true);
+		Assert.assertNull("Failed to resolve usedPkg.", report.getResolutionException());
+
 		// install part 1 (ui.workbench)
-		Map<String, String> split1Manifest = new HashMap<String, String>();
+		Map<String, String> split1Manifest = new HashMap<>();
 		split1Manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		split1Manifest.put(Constants.BUNDLE_SYMBOLICNAME, "split1");
-		split1Manifest.put(Constants.EXPORT_PACKAGE, "split.pkg");
+		split1Manifest.put(Constants.EXPORT_PACKAGE, "split.pkg; uses:=used.pkg, used.pkg");
+		split1Manifest.put(Constants.IMPORT_PACKAGE, "used.pkg");
 		Module moduleSplit1 = installDummyModule(split1Manifest, "split1", container);
 
 		// install part 2 (e4.ui.ide)
-		Map<String, String> split2Manifest = new HashMap<String, String>();
+		Map<String, String> split2Manifest = new HashMap<>();
 		split2Manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		split2Manifest.put(Constants.BUNDLE_SYMBOLICNAME, "split2");
 		split2Manifest.put(Constants.EXPORT_PACKAGE, "split.pkg");
 		Module moduleSplit2 = installDummyModule(split2Manifest, "split2", container);
 
 		// install part 3 which requires part 1 and 2, reexports 1 and 2 (ui.ide)
-		Map<String, String> split3Manifest = new HashMap<String, String>();
+		Map<String, String> split3Manifest = new HashMap<>();
 		split3Manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		split3Manifest.put(Constants.BUNDLE_SYMBOLICNAME, "split3");
 		split3Manifest.put(Constants.EXPORT_PACKAGE, "split.pkg");
@@ -3605,21 +3676,21 @@ public class TestModuleContainer extends AbstractTest {
 		Module moduleSplit3 = installDummyModule(split3Manifest, "split3", container);
 
 		// install reexporter of part1 (ui)
-		Map<String, String> reexporterPart1Manifest = new HashMap<String, String>();
+		Map<String, String> reexporterPart1Manifest = new HashMap<>();
 		reexporterPart1Manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		reexporterPart1Manifest.put(Constants.BUNDLE_SYMBOLICNAME, "reexport1");
 		reexporterPart1Manifest.put(Constants.REQUIRE_BUNDLE, "split1; visibility:=reexport");
 		Module moduleReexport1 = installDummyModule(reexporterPart1Manifest, "reexport1", container);
 
 		// install reexporter of split3
-		Map<String, String> reexporterSplit3Manifest = new HashMap<String, String>();
+		Map<String, String> reexporterSplit3Manifest = new HashMap<>();
 		reexporterSplit3Manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		reexporterSplit3Manifest.put(Constants.BUNDLE_SYMBOLICNAME, "reexportSplit3");
 		reexporterSplit3Manifest.put(Constants.REQUIRE_BUNDLE, "split3; visibility:=reexport");
 		Module moduleReexportSplit3 = installDummyModule(reexporterSplit3Manifest, "reexportSplit3", container);
 
 		// install test export that requires reexportSplit3 (should get access to all 3 parts)
-		Map<String, String> testExporterUses = new HashMap<String, String>();
+		Map<String, String> testExporterUses = new HashMap<>();
 		testExporterUses.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		testExporterUses.put(Constants.BUNDLE_SYMBOLICNAME, "test.exporter");
 		testExporterUses.put(Constants.REQUIRE_BUNDLE, "reexportSplit3");
@@ -3628,7 +3699,7 @@ public class TestModuleContainer extends AbstractTest {
 
 		// install test requirer that requires the exporter and reexport1 (should get access to only part 1)
 		// part 1 is a subset of what the exporter has access to so it should resolve
-		Map<String, String> testRequireUses = new HashMap<String, String>();
+		Map<String, String> testRequireUses = new HashMap<>();
 		testRequireUses.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		testRequireUses.put(Constants.BUNDLE_SYMBOLICNAME, "test.requirer");
 		testRequireUses.put(Constants.REQUIRE_BUNDLE, "test.exporter, reexport1");

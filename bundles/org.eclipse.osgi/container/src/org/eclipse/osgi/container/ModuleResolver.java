@@ -481,7 +481,8 @@ final class ModuleResolver {
 		addRequiredWires(requiredWires, existingRequiredWires, existingRequirements);
 
 		InternalUtils.filterCapabilityPermissions(existingCapabilities);
-		return new ModuleWiring(revision, existingCapabilities, existingRequirements, existingProvidedWires, existingRequiredWires, Collections.EMPTY_LIST);
+		return new ModuleWiring(revision, existingCapabilities, existingRequirements, existingProvidedWires,
+				existingRequiredWires, existingWiring.getSubstitutedNames());
 	}
 
 	static boolean isSingleton(ModuleRevision revision) {
