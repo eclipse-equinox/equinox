@@ -5,8 +5,7 @@ Bundle-SymbolicName: org.eclipse.equinox.console.ssh.tests
 Bundle-Version: 1.1.0.qualifier
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: junit.framework;version="4.8.1",
- org.apache.sshd.client.future,
+Import-Package: org.apache.sshd.client.future,
  org.apache.sshd.client,
  org.apache.sshd.client.session,
  org.apache.sshd.client.channel,
