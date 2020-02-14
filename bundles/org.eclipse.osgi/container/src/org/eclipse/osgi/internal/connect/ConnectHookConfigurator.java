@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.eclipse.osgi.container.Module;
@@ -46,9 +47,13 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.connect.ConnectContent;
 import org.osgi.framework.connect.ConnectModule;
 import org.osgi.framework.connect.ModuleConnector;
+import org.osgi.framework.namespace.BundleNamespace;
+import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.namespace.IdentityNamespace;
 
 public class ConnectHookConfigurator implements HookConfigurator {
+	static final Collection<String> CONNECT_TAG_NAMESPACES = new ArrayList<>(Arrays.asList(
+			BundleNamespace.BUNDLE_NAMESPACE, HostNamespace.HOST_NAMESPACE, IdentityNamespace.IDENTITY_NAMESPACE));
 
 	@Override
 	public void addHooks(final HookRegistry hookRegistry) {
@@ -86,9 +91,9 @@ public class ConnectHookConfigurator implements HookConfigurator {
 						if (m != null) {
 							builder.getCapabilities()
 								.stream() //
-								.filter(i -> IdentityNamespace.IDENTITY_NAMESPACE.equals(i.getNamespace())) //
-								.findFirst().ifPresent((i) -> {
-									i.getAttributes().compute(IdentityNamespace.CAPABILITY_TAGS_ATTRIBUTE, (k, v) -> {
+								.filter(c -> CONNECT_TAG_NAMESPACES.contains(c.getNamespace())) //
+								.forEach((c) -> {
+									c.getAttributes().compute(IdentityNamespace.CAPABILITY_TAGS_ATTRIBUTE, (k, v) -> {
 										if (v == null) {
 											return Collections.singletonList(ConnectContent.TAG_OSGI_CONNECT);
 										}

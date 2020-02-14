@@ -65,6 +65,8 @@ import org.osgi.framework.connect.ConnectFrameworkFactory;
 import org.osgi.framework.connect.ConnectModule;
 import org.osgi.framework.connect.ModuleConnector;
 import org.osgi.framework.launch.Framework;
+import org.osgi.framework.namespace.BundleNamespace;
+import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
@@ -492,12 +494,19 @@ public class ConnectTests extends AbstractBundleTests {
 	}
 
 	private static void checkConnectTag(Bundle b) {
-		List<String> tags = (List<String>) b.adapt(BundleRevision.class) //
-				.getCapabilities(IdentityNamespace.IDENTITY_NAMESPACE).stream().findFirst() //
-				.get().getAttributes().get(IdentityNamespace.CAPABILITY_TAGS_ATTRIBUTE);
-		assertNotNull("No tags found.", tags);
-		assertEquals("Wrong number of tags.", 1, tags.size());
-		assertTrue("Connect tag not found.", tags.contains(ConnectContent.TAG_OSGI_CONNECT));
+		final List<String> namespaces = new ArrayList<>(Arrays.asList(BundleNamespace.BUNDLE_NAMESPACE, HostNamespace.HOST_NAMESPACE, IdentityNamespace.IDENTITY_NAMESPACE));
+
+		b.adapt(BundleRevision.class).getCapabilities(null)
+			.stream()
+			.filter(c -> namespaces.contains(c.getNamespace()))
+			.forEach(c -> {
+				List<String> tags = (List<String>) c.getAttributes().get(IdentityNamespace.CAPABILITY_TAGS_ATTRIBUTE);
+				assertNotNull("No tags found.", tags);
+				assertEquals("Wrong number of tags.", 1, tags.size());
+				assertTrue("Connect tag not found.", tags.contains(ConnectContent.TAG_OSGI_CONNECT));
+				namespaces.remove(c.getNamespace());
+			});
+		assertTrue("Connect tag namespaces were not removed completely. Found " + namespaces, namespaces.isEmpty());
 	}
 
 	private static void checkConnectTags(Framework f, List<String> locations) {
