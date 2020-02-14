@@ -14,19 +14,25 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests;
 
-import java.util.*;
-import junit.framework.TestCase;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
 
-/**
- *
- */
 @SuppressWarnings("deprecation")
-public class SubProgressTest extends TestCase {
+public class SubProgressTest {
 
-	private long startTime;
 	/**
 	 * <p>Depth of the chain chain of progress monitors. In all of the tests, we create
 	 * a nested chain of progress monitors rathar than a single monitor, to test its
@@ -47,54 +53,15 @@ public class SubProgressTest extends TestCase {
 	 */
 	public static final int PROGRESS_SIZE = 100000;
 
-	public SubProgressTest() {
-		super();
-	}
-
-	public SubProgressTest(String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		startTime = System.currentTimeMillis();
-		super.setUp();
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		long endTime = System.currentTimeMillis();
-		SubMonitorTest.reportPerformance(getClass().getName(), getName(), startTime, endTime);
-		super.tearDown();
-	}
-
-	/**
-	 * Calls done on the given progress monitor and all of its parents, to a maximum
-	 * of the given depth.
-	 *
-	 * @deprecated to suppress deprecation warnings
-	 *
-	 * @param monitor
-	 * @param depth
-	 */
-	@Deprecated
-	public static void callDoneOnChain(IProgressMonitor monitor, int depth) {
-		IProgressMonitor current = monitor;
-		for (int count = 0; count < depth; count++) {
-			current.done();
-			if (!(current instanceof SubProgressMonitor)) {
-				return;
-			}
-			SubProgressMonitor cur = (SubProgressMonitor) current;
-			current = cur.getWrappedProgressMonitor();
-		}
-	}
+	@Rule
+	public TestName name = new TestName();
 
 	/**
 	 * Tests the style bits in SubProgressMonitor
 	 * @deprecated to suppress deprecation warnings
 	 */
 	@Deprecated
+	@Test
 	public void testStyles() {
 
 		int[] styles = new int[] {0, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK | SubProgressMonitor.SUPPRESS_SUBTASK_LABEL};
@@ -139,51 +106,13 @@ public class SubProgressTest extends TestCase {
 			child.done();
 		}
 
-		String failure = null;
 		// Output the code for the observed results, in case one of them has changed intentionally
 		for (Map.Entry<String, String[]> entry : results.entrySet()) {
 			String[] expectedResult = expected.get(entry.getKey());
 			String[] value = entry.getValue();
-			if (compareArray(value, expectedResult)) {
-				continue;
-			}
-
-			System.out.print("expected.put(\"" + entry.getKey() + "\", new String[] {");
-			failure = entry.getKey();
-			String list = concatArray(value);
-			System.out.println(list + "});");
+			assertArrayEquals(value, expectedResult);
 		}
 
-		if (failure != null) {
-			Assert.assertEquals(failure, concatArray(expected.get(failure)), concatArray(results.get(failure)));
-		}
-	}
-
-	private boolean compareArray(String[] value, String[] expectedResult) {
-		if (value.length != expectedResult.length) {
-			return false;
-		}
-		for (int i = 0; i < expectedResult.length; i++) {
-			String next = expectedResult[i];
-			if (!next.equals(value[i])) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private String concatArray(String[] value) {
-		StringBuilder buf = new StringBuilder();
-		boolean isFirst = true;
-		for (String nextValue : value) {
-			if (!isFirst) {
-				buf.append(", ");
-			}
-			isFirst = false;
-			buf.append("\"" + nextValue + "\"");
-		}
-		String list = buf.toString();
-		return list;
 	}
 
 	private String[] runChildTest(int depth, TestProgressMonitor root, IProgressMonitor child, int ticks) {
@@ -203,6 +132,7 @@ public class SubProgressTest extends TestCase {
 	 * @deprecated to suppress deprecation warnings
 	 */
 	@Deprecated
+	@Test
 	public void testConstructorNestingFP() {
 		TestProgressMonitor top = new TestProgressMonitor();
 		top.beginTask("", 2000);
@@ -213,7 +143,7 @@ public class SubProgressTest extends TestCase {
 		fpMonitor.internalWorked(50.0);
 		fpMonitor.internalWorked(-10.0); // should have no effect
 
-		Assert.assertEquals(500.0, top.getTotalWork(), 0.01d);
+		assertEquals(500.0, top.getTotalWork(), 0.01d);
 
 		// Create a child monitor, and ensure that it grabs the correct amount of work
 		// from the parent.
@@ -222,7 +152,7 @@ public class SubProgressTest extends TestCase {
 		childMonitor.worked(100);
 		childMonitor.done();
 
-		Assert.assertEquals(700.0, top.getTotalWork(), 0.01d);
+		assertEquals(700.0, top.getTotalWork(), 0.01d);
 
 		// Create a child monitor, and ensure that it grabs the correct amount of work
 		// from the parent.
@@ -231,7 +161,7 @@ public class SubProgressTest extends TestCase {
 		childMonitor2.worked(100);
 		childMonitor2.done();
 
-		Assert.assertEquals(1000.0, top.getTotalWork(), 0.01d);
+		assertEquals(1000.0, top.getTotalWork(), 0.01d);
 
 		// Ensure that creating another child will have no effect
 		SubProgressMonitor childMonitor3 = new SubProgressMonitor(fpMonitor, 10);
@@ -239,11 +169,11 @@ public class SubProgressTest extends TestCase {
 		childMonitor3.worked(100);
 		childMonitor3.done();
 
-		Assert.assertEquals(1000.0, top.getTotalWork(), 0.01d);
+		assertEquals(1000.0, top.getTotalWork(), 0.01d);
 		fpMonitor.worked(100);
-		Assert.assertEquals(1000.0, top.getTotalWork(), 0.01d);
+		assertEquals(1000.0, top.getTotalWork(), 0.01d);
 		fpMonitor.done();
-		Assert.assertEquals(1000.0, top.getTotalWork(), 0.01d);
+		assertEquals(1000.0, top.getTotalWork(), 0.01d);
 	}
 
 	/**
@@ -252,6 +182,7 @@ public class SubProgressTest extends TestCase {
 	 * @deprecated to suppress deprecation warnings
 	 */
 	@Deprecated
+	@Test
 	public void testConstructorNestingInt() {
 		TestProgressMonitor top = new TestProgressMonitor();
 		top.beginTask("", 2000);
@@ -261,7 +192,7 @@ public class SubProgressTest extends TestCase {
 		fpMonitor.beginTask("", 100);
 		fpMonitor.worked(50);
 
-		Assert.assertEquals(500.0, top.getTotalWork(), 0.01d);
+		assertEquals(500.0, top.getTotalWork(), 0.01d);
 
 		// Create a child monitor, and ensure that it grabs the correct amount of work
 		// from the parent.
@@ -270,7 +201,7 @@ public class SubProgressTest extends TestCase {
 		childMonitor.worked(100);
 		childMonitor.done();
 
-		Assert.assertEquals(700.0, top.getTotalWork(), 0.01d);
+		assertEquals(700.0, top.getTotalWork(), 0.01d);
 
 		// Create a child monitor, and ensure that it grabs the correct amount of work
 		// from the parent.
@@ -279,7 +210,7 @@ public class SubProgressTest extends TestCase {
 		childMonitor2.worked(100);
 		childMonitor2.done();
 
-		Assert.assertEquals(1000.0, top.getTotalWork(), 0.01d);
+		assertEquals(1000.0, top.getTotalWork(), 0.01d);
 
 		// Ensure that creating another child will have no effect
 		SubProgressMonitor childMonitor3 = new SubProgressMonitor(fpMonitor, 10);
@@ -287,11 +218,11 @@ public class SubProgressTest extends TestCase {
 		childMonitor3.worked(100);
 		childMonitor3.done();
 
-		Assert.assertEquals(1000.0, top.getTotalWork(), 0.01d);
+		assertEquals(1000.0, top.getTotalWork(), 0.01d);
 		fpMonitor.worked(100);
-		Assert.assertEquals(1000.0, top.getTotalWork(), 0.01d);
+		assertEquals(1000.0, top.getTotalWork(), 0.01d);
 		fpMonitor.done();
-		Assert.assertEquals(1000.0, top.getTotalWork(), 0.01d);
+		assertEquals(1000.0, top.getTotalWork(), 0.01d);
 	}
 
 	/**
@@ -299,6 +230,7 @@ public class SubProgressTest extends TestCase {
 	 * @deprecated to suppress deprecation warnings
 	 */
 	@Deprecated
+	@Test
 	public void testParallelChildren() {
 		TestProgressMonitor top = new TestProgressMonitor();
 		top.beginTask("", 1000);
@@ -308,35 +240,36 @@ public class SubProgressTest extends TestCase {
 		SubProgressMonitor monitor1 = new SubProgressMonitor(mon, 200);
 		SubProgressMonitor monitor2 = new SubProgressMonitor(mon, 200);
 
-		Assert.assertEquals("Ensure no work has been reported yet", 0.0, top.getTotalWork(), 0.01d);
+		assertEquals("Ensure no work has been reported yet", 0.0, top.getTotalWork(), 0.01d);
 		monitor1.beginTask("", 1000);
-		Assert.assertEquals("Ensure no work has been reported yet", 0.0, top.getTotalWork(), 0.01d);
+		assertEquals("Ensure no work has been reported yet", 0.0, top.getTotalWork(), 0.01d);
 		monitor2.beginTask("", 1000);
-		Assert.assertEquals("Should not have cleaned up monitor 1", 0.0, top.getTotalWork(), 0.01d);
+		assertEquals("Should not have cleaned up monitor 1", 0.0, top.getTotalWork(), 0.01d);
 		monitor1.done();
 
-		Assert.assertEquals("Should have cleaned up monitor 1", 200.0, top.getTotalWork(), 0.01d);
+		assertEquals("Should have cleaned up monitor 1", 200.0, top.getTotalWork(), 0.01d);
 		monitor1.worked(1000);
-		Assert.assertEquals("Monitor1 shouldn't report work once it's complete", 200.0, top.getTotalWork(), 0.01d);
+		assertEquals("Monitor1 shouldn't report work once it's complete", 200.0, top.getTotalWork(), 0.01d);
 		monitor2.worked(500);
-		Assert.assertEquals(300.0, top.getTotalWork(), 0.01d);
+		assertEquals(300.0, top.getTotalWork(), 0.01d);
 
 		// Create a monitor that will leak - monitors won't be auto-completed until their done methods are
 		// called
 		SubProgressMonitor monitor3 = new SubProgressMonitor(mon, 300);
-		Assert.assertEquals("Monitor2 should not have been cleaned up yet", 300.0, top.getTotalWork(), 0.01d);
+		assertEquals("Monitor2 should not have been cleaned up yet", 300.0, top.getTotalWork(), 0.01d);
 		SubProgressMonitor monitor4 = new SubProgressMonitor(mon, 300);
 		monitor4.beginTask("", 100);
 		mon.done();
 		Assert.assertNotNull(monitor3);
 
-		Assert.assertEquals("All leaked work should have been collected", 1000.0, top.getTotalWork(), 0.01d);
+		assertEquals("All leaked work should have been collected", 1000.0, top.getTotalWork(), 0.01d);
 	}
 
 	/**
 	 * @deprecated to suppress deprecation warnings
 	 */
 	@Deprecated
+	@Test
 	public void testCancellation() {
 		TestProgressMonitor root = new TestProgressMonitor();
 		root.beginTask("", 1000);
@@ -345,15 +278,15 @@ public class SubProgressTest extends TestCase {
 
 		// Test that changes at the root propogate to the child
 		root.setCanceled(true);
-		Assert.assertTrue(spm.isCanceled());
+		assertTrue(spm.isCanceled());
 		root.setCanceled(false);
-		Assert.assertFalse(spm.isCanceled());
+		assertFalse(spm.isCanceled());
 
 		// Test that changes to the child propogate to the root
 		spm.setCanceled(true);
-		Assert.assertTrue(root.isCanceled());
+		assertTrue(root.isCanceled());
 		spm.setCanceled(false);
-		Assert.assertFalse(root.isCanceled());
+		assertFalse(root.isCanceled());
 
 		// Test a chain of depth 2
 		spm.beginTask("", 1000);
@@ -361,22 +294,23 @@ public class SubProgressTest extends TestCase {
 
 		// Test that changes at the root propogate to the child
 		root.setCanceled(true);
-		Assert.assertTrue(spm2.isCanceled());
+		assertTrue(spm2.isCanceled());
 		root.setCanceled(false);
-		Assert.assertFalse(spm2.isCanceled());
+		assertFalse(spm2.isCanceled());
 
 		// Test that changes to the child propogate to the root
 		spm2.setCanceled(true);
-		Assert.assertTrue(root.isCanceled());
+		assertTrue(root.isCanceled());
 		spm2.setCanceled(false);
-		Assert.assertFalse(root.isCanceled());
+		assertFalse(root.isCanceled());
 	}
 
 	/**
-	 * Tests creating progress monitors under a custom progress monitor
-	 * parent. This is the same as the performance test as the same name,
-	 * but it verifies correctness rather than performance.
+	 * Tests creating progress monitors under a custom progress monitor parent. This
+	 * is the same as the performance test as the same name, but it verifies
+	 * correctness rather than performance.
 	 */
+	@Test
 	public void testCreateChildrenUnderCustomParent() {
 		TestProgressMonitor monitor = new TestProgressMonitor();
 		createChildrenUnderParent(monitor, SubProgressTest.PROGRESS_SIZE);
@@ -385,182 +319,8 @@ public class SubProgressTest extends TestCase {
 		// know what it was rooted under and would have had to report more progress than necessary... but we
 		// should be able to check that there was no redundancy.
 
-		Assert.assertTrue(monitor.getRedundantWorkCalls() == 0);
-		Assert.assertTrue(monitor.getWorkCalls() >= 100);
-	}
-
-	/**
-	 * Creates a chain of n nested progress monitors. Calls beginTask on all monitors
-	 * except for the innermost one.
-	 *
-	 * @deprecated to suppress deprecation warnings
-	 *
-	 * @param parent
-	 * @param depth
-	 * @return the innermost SubProgressMonitor
-	 */
-	@Deprecated
-	private static SubProgressMonitor createSubProgressChain(IProgressMonitor parent, int depth) {
-		SubProgressMonitor current;
-		do {
-			parent.beginTask("", 100);
-			current = new SubProgressMonitor(parent, 100);
-			parent = current;
-			depth--;
-		} while (depth > 0);
-		return current;
-	}
-
-	/**
-	 * Reports progress by iterating over a loop of the given size, reporting 1 progress
-	 * at each iteration. Simulates the progress of worked(int) in loops.
-	 *
-	 * @param monitor progress monitor (callers are responsible for calling done() if necessary)
-	 * @param loopSize size of the loop
-	 */
-	private static void reportWorkInLoop(IProgressMonitor monitor, int loopSize) {
-		monitor.beginTask("", loopSize);
-		for (int i = 0; i < loopSize; i++) {
-			monitor.worked(1);
-		}
-	}
-
-	/**
-	 * Reports progress by iterating over a loop of the given size, reporting 1 progress
-	 * at each iteration. Simulates the progress of internalWorked(double) in loops.
-	 *
-	 * @param monitor progress monitor (callers are responsible for calling done() if necessary)
-	 * @param loopSize size of the loop
-	 */
-	private static void reportFloatingPointWorkInLoop(IProgressMonitor monitor, int loopSize) {
-		monitor.beginTask("", loopSize);
-		for (int i = 0; i < loopSize; i++) {
-			monitor.internalWorked(1.0d);
-		}
-	}
-
-	/**
-	 * Reports progress by creating a balanced binary tree of progress monitors. Simulates
-	 * mixed usage of IProgressMonitor in a typical usage. Calls isCanceled once each time work
-	 * is reported. Half of the work is reported using internalWorked and half is reported using worked,
-	 * to simulate mixed usage of the progress monitor.
-	 *
-	 * @deprecated to suppress deprecation warnings
-	 *
-	 * @param monitor progress monitor (callers are responsible for calling done() if necessary)
-	 * @param loopSize total size of the recursion tree
-	 */
-	@Deprecated
-	public static void reportWorkInBalancedTree(IProgressMonitor monitor, int loopSize) {
-		monitor.beginTask("", 100);
-		int leftBranch = loopSize / 2;
-		int rightBranch = loopSize - leftBranch;
-
-		if (leftBranch > 1) {
-			SubProgressMonitor leftProgress = new SubProgressMonitor(monitor, 50);
-			reportWorkInBalancedTree(leftProgress, leftBranch);
-			leftProgress.done();
-		} else {
-			monitor.worked(25);
-			monitor.internalWorked(25.0);
-			monitor.isCanceled();
-		}
-
-		if (rightBranch > 1) {
-			SubProgressMonitor rightProgress = new SubProgressMonitor(monitor, 50);
-			reportWorkInBalancedTree(rightProgress, rightBranch);
-			rightProgress.done();
-		} else {
-			monitor.worked(25);
-			monitor.internalWorked(25.0);
-			monitor.isCanceled();
-		}
-	}
-
-	/**
-	 * Creates a balanced binary tree of progress monitors, without calling worked. Tests
-	 * progress monitor creation and cleanup time, and ensures that excess progress is
-	 * being collected when IProgressMonitor.done() is called.
-	 *
-	 * @deprecated to suppress deprecation warnings
-	 *
-	 * @param monitor progress monitor (callers are responsible for calling done() if necessary)
-	 * @param loopSize total size of the recursion tree
-	 */
-	@Deprecated
-	public static void createBalancedTree(IProgressMonitor monitor, int loopSize) {
-		monitor.beginTask("", 100);
-		int leftBranch = loopSize / 2;
-		int rightBranch = loopSize - leftBranch;
-
-		if (leftBranch > 1) {
-			SubProgressMonitor leftProgress = new SubProgressMonitor(monitor, 50);
-			createBalancedTree(leftProgress, leftBranch);
-			leftProgress.done();
-		}
-
-		if (rightBranch > 1) {
-			SubProgressMonitor rightProgress = new SubProgressMonitor(monitor, 50);
-			createBalancedTree(rightProgress, rightBranch);
-			rightProgress.done();
-		}
-	}
-
-	/**
-	 * The innermost loop for the looping test. We make this a static method so
-	 * that it can be used both in this performance test and in the correctness test.
-	 *
-	 * @deprecated to suppress deprecation warnings
-	 */
-	@Deprecated
-	public static void runTestWorked(IProgressMonitor monitor) {
-		SubProgressMonitor nestedMonitor = createSubProgressChain(monitor, SubProgressTest.CHAIN_DEPTH);
-		reportWorkInLoop(nestedMonitor, SubProgressTest.PROGRESS_SIZE);
-		callDoneOnChain(nestedMonitor, SubProgressTest.CHAIN_DEPTH + 1);
-	}
-
-	/**
-	 * The innermost loop for the looping test. We make this a static method so
-	 * that it can be used both in this performance test and in the correctness test.
-	 *
-	 * @deprecated to suppress deprecation warnings
-	 */
-	@Deprecated
-	public static void runTestInternalWorked(IProgressMonitor monitor) {
-		SubProgressMonitor nestedMonitor = createSubProgressChain(monitor, SubProgressTest.CHAIN_DEPTH);
-		reportFloatingPointWorkInLoop(nestedMonitor, SubProgressTest.PROGRESS_SIZE);
-		callDoneOnChain(nestedMonitor, SubProgressTest.CHAIN_DEPTH + 1);
-	}
-
-	/**
-	 * The innermost loop for the recursion test. We make this a static method so
-	 * that it can be used both in this performance test and in the correctness test.
-	 *
-	 * @deprecated to suppress deprecation warnings
-	 */
-	@Deprecated
-	public static void runTestTypicalUsage(IProgressMonitor monitor) {
-		SubProgressMonitor nestedMonitor = createSubProgressChain(monitor, SubProgressTest.CHAIN_DEPTH);
-		reportWorkInBalancedTree(nestedMonitor, SubProgressTest.PROGRESS_SIZE);
-		callDoneOnChain(nestedMonitor, SubProgressTest.CHAIN_DEPTH + 1);
-	}
-
-	/**
-	 * <p>The innermost loop for the create tree test. We make this a static method so
-	 * that it can be used both in this performance test and in the correctness test.</p>
-	 *
-	 * <p>The performance test ensures that it is fast to create a lot of progress monitors.</p>
-	 *
-	 * <p>The correctness test ensures that creating and destroying SubProgressMonitors
-	 * is enough to report progress, even if worked(int) and worked(double) are never called</p>
-	 *
-	 * @deprecated to suppress deprecation warnings
-	 */
-	@Deprecated
-	public static void runTestCreateTree(IProgressMonitor monitor) {
-		SubProgressMonitor nestedMonitor = createSubProgressChain(monitor, SubProgressTest.CHAIN_DEPTH);
-		createBalancedTree(nestedMonitor, SubProgressTest.PROGRESS_SIZE);
-		callDoneOnChain(nestedMonitor, SubProgressTest.CHAIN_DEPTH + 1);
+		assertEquals(0, monitor.getRedundantWorkCalls());
+		assertTrue(monitor.getWorkCalls() >= 100);
 	}
 
 	/**
@@ -586,6 +346,7 @@ public class SubProgressTest extends TestCase {
 	/**
 	 * Test SubProgressMonitor's created with negative a work value.
 	 */
+	@Test
 	public void testNegativeWorkValues() {
 		TestProgressMonitor top = new TestProgressMonitor();
 		top.beginTask("", 10);
@@ -593,9 +354,9 @@ public class SubProgressTest extends TestCase {
 		SubProgressMonitor childMonitor = new SubProgressMonitor(top, IProgressMonitor.UNKNOWN); // -1
 		childMonitor.beginTask("", 10);
 		childMonitor.worked(5);
-		Assert.assertEquals(0.0, top.getTotalWork(), 0.01d);
+		assertEquals(0.0, top.getTotalWork(), 0.01d);
 		childMonitor.done();
-		Assert.assertEquals(0.0, top.getTotalWork(), 0.01d);
+		assertEquals(0.0, top.getTotalWork(), 0.01d);
 
 		top.done();
 	}

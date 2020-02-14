@@ -13,27 +13,24 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.registry.simple;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
+
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.RegistryFactory;
+import org.junit.Test;
 
 /**
  * Tests registry token-based access rules.
+ *
  * @since 3.2
  */
-public class TokenAccessTest extends TestCase {
-
-	public TokenAccessTest() {
-		super();
-	}
-
-	public TokenAccessTest(String name) {
-		super(name);
-	}
+public class TokenAccessTest {
 
 	/**
 	 * Tests token access to sensetive registry methods
 	 */
+	@Test
 	public void testControlledAccess() {
 		Object tokenGood = new Object();
 		Object tokenBad = new Object();
@@ -56,17 +53,12 @@ public class TokenAccessTest extends TestCase {
 		// and stopped with a good token - should be no exception
 		registry.stop(tokenGood);
 
-		// registry created with a good token
-		registry = RegistryFactory.createRegistry(null, tokenGood, null);
-		assertNotNull(registry);
+
 		// and stopped with a bad token - should be an exception
-		boolean bException = false;
-		try {
-			registry.stop(tokenBad);
-		} catch (IllegalArgumentException e) {
-			// this is good; this is expected
-			bException = true;
-		}
-		assertTrue(bException);
+		assertThrows(IllegalArgumentException.class, () -> {// registry created with a good token
+			IExtensionRegistry registry1 = RegistryFactory.createRegistry(null, tokenGood, null);
+			assertNotNull(registry1);
+			registry1.stop(tokenBad);
+		});
 	}
 }

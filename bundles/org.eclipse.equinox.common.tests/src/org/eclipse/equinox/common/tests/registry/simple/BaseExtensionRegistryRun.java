@@ -13,16 +13,24 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.registry.simple;
 
-import java.io.*;
+import static org.junit.Assert.assertNotNull;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-import junit.framework.TestCase;
 
 import org.eclipse.core.internal.runtime.MetaDataKeeper;
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.IContributor;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.core.runtime.spi.RegistryStrategy;
+import org.junit.After;
+import org.junit.Before;
 import org.osgi.framework.FrameworkUtil;
 
-public class BaseExtensionRegistryRun extends TestCase {
+public class BaseExtensionRegistryRun {
 
 	// The imaging device registry
 	protected IExtensionRegistry simpleRegistry;
@@ -32,14 +40,6 @@ public class BaseExtensionRegistryRun extends TestCase {
 	// Path to the XML files
 	private final static String xmlPath = "Plugin_Testing/registry/testSimple/"; //$NON-NLS-1$
 
-	public BaseExtensionRegistryRun() {
-		super();
-	}
-
-	public BaseExtensionRegistryRun(String name) {
-		super(name);
-	}
-
 	protected URL getXML(String fileName) {
 		return FrameworkUtil.getBundle(getClass()).getEntry(xmlPath + fileName);
 	}
@@ -47,8 +47,8 @@ public class BaseExtensionRegistryRun extends TestCase {
 	/**
 	 * Create the "imaging device" registry
 	 */
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		// create the imaging device registry
 		simpleRegistry = startRegistry();
 	}
@@ -56,8 +56,8 @@ public class BaseExtensionRegistryRun extends TestCase {
 	/**
 	 * Properly dispose of the extension registry
 	 */
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		stopRegistry();
 	}
 
@@ -90,24 +90,20 @@ public class BaseExtensionRegistryRun extends TestCase {
 		simpleRegistry.stop(masterToken);
 	}
 
-	protected void processXMLContribution(IContributor nonBundleContributor, URL url) {
+	protected void processXMLContribution(IContributor nonBundleContributor, URL url) throws IOException {
 		processXMLContribution(nonBundleContributor, url, false);
 	}
 
-	protected void processXMLContribution(IContributor nonBundleContributor, URL url, boolean persist) {
-		try {
+	protected void processXMLContribution(IContributor nonBundleContributor, URL url, boolean persist)
+			throws IOException {
 			InputStream is = url.openStream();
 			simpleRegistry.addContribution(is, nonBundleContributor, persist, url.getFile(), null, persist ? masterToken : userToken);
-		} catch (IOException eFile) {
-			fail(eFile.getMessage());
-			return;
-		}
 	}
 
 	protected String qualifiedName(String namespace, String simpleName) {
 		return namespace + "." + simpleName; //$NON-NLS-1$
 	}
-	
+
 	protected IPath getStateLocation() {
 		IPath stateLocation = MetaDataKeeper.getMetaArea().getStateLocation(FrameworkUtil.getBundle(getClass()));
 		stateLocation.toFile().mkdirs();

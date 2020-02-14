@@ -13,29 +13,29 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests;
 
-import junit.framework.TestCase;
 import org.eclipse.core.runtime.SubMonitor;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Ensures that creating a SubMonitor with a small number of
  * ticks will not prevent it from reporting accurate progress.
  */
-public class SubMonitorSmallTicksTest extends TestCase {
+public class SubMonitorSmallTicksTest {
 
 	private TestProgressMonitor topmostMonitor;
 	private SubMonitor smallTicksChild;
-	private long startTime;
 
 	private static int TOTAL_WORK = 1000;
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		topmostMonitor = new TestProgressMonitor();
 		smallTicksChild = SubMonitor.convert(topmostMonitor, 10);
-		super.setUp();
-		startTime = System.currentTimeMillis();
 	}
 
+	@Test
 	public void testWorked() {
 		SubMonitor bigTicksChild = smallTicksChild.newChild(10).setWorkRemaining(TOTAL_WORK);
 		for (int i = 0; i < TOTAL_WORK; i++) {
@@ -44,6 +44,7 @@ public class SubMonitorSmallTicksTest extends TestCase {
 		bigTicksChild.done();
 	}
 
+	@Test
 	public void testInternalWorked() {
 		double delta = 10.0d / TOTAL_WORK;
 
@@ -52,6 +53,7 @@ public class SubMonitorSmallTicksTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testSplit() {
 		SubMonitor bigTicksChild = smallTicksChild.newChild(10).setWorkRemaining(TOTAL_WORK);
 		for (int i = 0; i < TOTAL_WORK; i++) {
@@ -60,14 +62,11 @@ public class SubMonitorSmallTicksTest extends TestCase {
 		bigTicksChild.done();
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		smallTicksChild.done();
 		topmostMonitor.done();
-		long endTime = System.currentTimeMillis();
-		SubMonitorTest.reportPerformance(getClass().getName(), getName(), startTime, endTime);
 		topmostMonitor.assertOptimal();
-		super.tearDown();
 	}
 
 }

@@ -13,8 +13,25 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.registry.simple;
 
-import org.eclipse.core.runtime.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+
+import org.eclipse.core.runtime.ContributorFactorySimple;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IContributor;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionDelta;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IRegistryChangeEvent;
+import org.eclipse.core.runtime.IRegistryChangeListener;
+import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.equinox.common.tests.registry.simple.utils.SimpleRegistryListener;
+import org.junit.Test;
 
 /**
  * Tests removal APIs using a simple registry.
@@ -28,16 +45,10 @@ public class DirectExtensionRemoveTest extends BaseExtensionRegistryRun {
 	private final static String extensionA1 = "TestExtensionA1"; //$NON-NLS-1$
 	private final static String extensionA2 = "TestExtensionA2"; //$NON-NLS-1$
 
-	public DirectExtensionRemoveTest() {
-		super();
-	}
-
-	public DirectExtensionRemoveTest(String name) {
-		super(name);
-	}
 
 	// Fill the registry; remove half; check listener; check what's left
-	public void testExtensionPointAddition() {
+	@Test
+	public void testExtensionPointAddition() throws IOException {
 		IContributor nonBundleContributor = ContributorFactorySimple.createContributor("DirectRemoveProvider"); //$NON-NLS-1$
 		String namespace = nonBundleContributor.getName();
 		fillRegistry(nonBundleContributor);
@@ -53,10 +64,13 @@ public class DirectExtensionRemoveTest extends BaseExtensionRegistryRun {
 	}
 
 	/**
-	 * Tests that configuration elements associated with the removed extension
-	 * are removed.
+	 * Tests that configuration elements associated with the removed extension are
+	 * removed.
+	 *
+	 * @throws IOException
 	 */
-	public void testAssociatedConfigElements() {
+	@Test
+	public void testAssociatedConfigElements() throws IOException {
 		IContributor nonBundleContributor = ContributorFactorySimple.createContributor("CETest"); //$NON-NLS-1$
 		String namespace = nonBundleContributor.getName();
 		processXMLContribution(nonBundleContributor, getXML("CERemovalTest.xml")); //$NON-NLS-1$
@@ -64,7 +78,7 @@ public class DirectExtensionRemoveTest extends BaseExtensionRegistryRun {
 		IExtensionPoint extensionPointA = simpleRegistry.getExtensionPoint(qualifiedName(namespace, "PointA")); //$NON-NLS-1$
 		assertNotNull(extensionPointA);
 		IExtension[] extensionsA = extensionPointA.getExtensions();
-		assertTrue(extensionsA.length == 2);
+		assertEquals(2, extensionsA.length);
 
 		// check first extension
 		IExtension ext1 = extensionPointA.getExtension(qualifiedName(namespace, "TestExtensionA1")); //$NON-NLS-1$
@@ -98,9 +112,9 @@ public class DirectExtensionRemoveTest extends BaseExtensionRegistryRun {
 		// listener to verify that valid CEs are included in the notification
 		IRegistryChangeListener listener = event -> {
 			IExtensionDelta[] deltas = event.getExtensionDeltas();
-			assertTrue(deltas.length == 1);
+			assertEquals(1, deltas.length);
 			for (IExtensionDelta delta : deltas) {
-				assertTrue(delta.getKind() == IExtensionDelta.REMOVED);
+				assertEquals(IExtensionDelta.REMOVED, delta.getKind());
 				IExtension extension = delta.getExtension();
 				assertNotNull(extension);
 
@@ -131,25 +145,12 @@ public class DirectExtensionRemoveTest extends BaseExtensionRegistryRun {
 
 		// basic checks
 		IExtension[] extensionsRemoved = extensionPointA.getExtensions();
-		assertTrue(extensionsRemoved.length == 1);
+		assertEquals(1, extensionsRemoved.length);
 
 		// re-check configuration elements
-		boolean exceptionFound = false;
-		try {
-			ces11[0].getAttributeNames(); // should produce an exception
-		} catch (InvalidRegistryObjectException e) {
-			exceptionFound = true;
-		}
-		assertTrue(exceptionFound);
+		assertThrows(InvalidRegistryObjectException.class, () -> ces11[0].getAttributeNames()); // should produce an
 
-		exceptionFound = false;
-		try {
-			ces12[0].getAttributeNames(); // should produce an exception
-		} catch (InvalidRegistryObjectException e) {
-			exceptionFound = true;
-		}
-
-		assertTrue(exceptionFound);
+		assertThrows(InvalidRegistryObjectException.class, () -> ces12[0].getAttributeNames()); // should produce an
 		// the non-removed extension CEs should still be valid
 		String[] attrs22removed = ces22[0].getAttributeNames();
 		assertNotNull(attrs22removed);
@@ -157,7 +158,7 @@ public class DirectExtensionRemoveTest extends BaseExtensionRegistryRun {
 		assertEquals("value", attrs22removed[0]); //$NON-NLS-1$
 	}
 
-	private void fillRegistry(IContributor contributor) {
+	private void fillRegistry(IContributor contributor) throws IOException {
 		processXMLContribution(contributor, getXML("RemovalTest.xml")); //$NON-NLS-1$
 	}
 
@@ -167,9 +168,9 @@ public class DirectExtensionRemoveTest extends BaseExtensionRegistryRun {
 		IExtensionPoint extensionPointB = simpleRegistry.getExtensionPoint(qualifiedName(namespace, pointB));
 		assertNotNull(extensionPointB);
 		IExtension[] extensionsA = extensionPointA.getExtensions();
-		assertTrue(extensionsA.length == 2);
+		assertEquals(2, extensionsA.length);
 		IExtension[] extensionsB = extensionPointB.getExtensions();
-		assertTrue(extensionsB.length == 2);
+		assertEquals(2, extensionsB.length);
 	}
 
 	private void remove(String namespace) {
@@ -186,7 +187,7 @@ public class DirectExtensionRemoveTest extends BaseExtensionRegistryRun {
 		IExtensionPoint extensionPointB = simpleRegistry.getExtensionPoint(qualifiedName(namespace, pointB));
 		assertNull(extensionPointB);
 		IExtension[] extensionsA = extensionPointA.getExtensions();
-		assertTrue(extensionsA.length == 1);
+		assertEquals(1, extensionsA.length);
 		String Id = extensionsA[0].getUniqueIdentifier();
 		assertTrue(qualifiedName(namespace, extensionA2).equals(Id));
 	}
@@ -194,9 +195,9 @@ public class DirectExtensionRemoveTest extends BaseExtensionRegistryRun {
 	private void checkListener(SimpleRegistryListener listener) {
 		IRegistryChangeEvent event = listener.getEvent(5000);
 		IExtensionDelta[] deltas = event.getExtensionDeltas();
-		assertTrue(deltas.length == 2);
+		assertEquals(2, deltas.length);
 		for (IExtensionDelta delta : deltas) {
-			assertTrue(delta.getKind() == IExtensionDelta.REMOVED);
+			assertEquals(IExtensionDelta.REMOVED, delta.getKind());
 			assertNotNull(delta.getExtension());
 			assertNotNull(delta.getExtensionPoint());
 		}

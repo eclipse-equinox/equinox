@@ -13,10 +13,23 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.registry.simple;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
-import org.eclipse.core.runtime.*;
+import java.io.IOException;
+
+import org.eclipse.core.runtime.ContributorFactorySimple;
+import org.eclipse.core.runtime.IContributor;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.core.runtime.spi.RegistryStrategy;
 import org.eclipse.equinox.common.tests.registry.simple.utils.HiddenLogRegistryStrategy;
+import org.junit.Test;
 
 /**
  * Tests addition of extensions and extension points with duplicate IDs.
@@ -30,14 +43,6 @@ public class DuplicatePointsTest extends BaseExtensionRegistryRun {
 
 	private final static String errMsg1 = "Error:  Ignored duplicate extension point \"testDuplicates.duplicateExtensionPoint\" supplied by \"2\"." + "Warning:  Extensions supplied by \"2\" and \"1\" have the same Id: \"testDuplicates.duplicateExtension\".";
 	private final static String errMsg2 = "Error:  Ignored duplicate extension point \"testSame.duplicateExtensionPointSame\" supplied by \"3\"." + "Warning:  Extensions supplied by \"3\" and \"3\" have the same Id: \"testSame.duplicateExtensionSame\".";
-
-	public DuplicatePointsTest() {
-		super();
-	}
-
-	public DuplicatePointsTest(String name) {
-		super(name);
-	}
 
 	/**
 	 * Use registry strategy with modified logging
@@ -53,7 +58,8 @@ public class DuplicatePointsTest extends BaseExtensionRegistryRun {
 		return RegistryFactory.createRegistry(registryStrategy, masterToken, userToken);
 	}
 
-	public void testDuplicates() {
+	@Test
+	public void testDuplicates() throws IOException {
 		HiddenLogRegistryStrategy.output = ""; //$NON-NLS-1$
 		IContributor contributor1 = ContributorFactorySimple.createContributor("1"); //$NON-NLS-1$
 		processXMLContribution(contributor1, getXML("DuplicatePoints1.xml")); //$NON-NLS-1$
@@ -74,10 +80,10 @@ public class DuplicatePointsTest extends BaseExtensionRegistryRun {
 		assertTrue(errMsg1.equals(HiddenLogRegistryStrategy.output));
 
 		IExtensionPoint[] extensionPoints = simpleRegistry.getExtensionPoints(namespace);
-		assertTrue(extensionPoints.length == 2);
+		assertEquals(2, extensionPoints.length);
 
 		IExtension[] extensions = simpleRegistry.getExtensions(namespace);
-		assertTrue(extensions.length == 3);
+		assertEquals(3, extensions.length);
 
 		IExtension extension = simpleRegistry.getExtension(qualifiedName(namespace, "nonDuplicateExtension")); //$NON-NLS-1$
 		assertNotNull(extension);
@@ -87,9 +93,9 @@ public class DuplicatePointsTest extends BaseExtensionRegistryRun {
 		assertTrue(errMsg2.equals(HiddenLogRegistryStrategy.output));
 
 		IExtensionPoint[] extensionPoints = simpleRegistry.getExtensionPoints(namespace);
-		assertTrue(extensionPoints.length == 1);
+		assertEquals(1, extensionPoints.length);
 
 		IExtension[] extensions = simpleRegistry.getExtensions(namespace);
-		assertTrue(extensions.length == 2);
+		assertEquals(2, extensions.length);
 	}
 }

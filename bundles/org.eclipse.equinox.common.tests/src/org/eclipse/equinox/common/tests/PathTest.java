@@ -15,6 +15,7 @@
 package org.eclipse.equinox.common.tests;
 
 import java.util.ArrayList;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.tests.harness.CoreTest;
@@ -81,9 +82,9 @@ public class PathTest extends CoreTest {
 		assertEquals("1.0", combo, fore.append(aft));
 		assertEquals("1.1", combo, fore.removeTrailingSeparator().append(aft));
 		assertEquals("1.2", combo, Path.ROOT.append(fore).append(aft));
-		assertTrue("1.3", !fore.append(aft).hasTrailingSeparator());
-		assertTrue("1.4", !Path.ROOT.append(fore).append(aft).hasTrailingSeparator());
-		assertTrue("1.5", !fore.removeTrailingSeparator().append(aft).hasTrailingSeparator());
+		assertFalse("1.3", fore.append(aft).hasTrailingSeparator());
+		assertFalse("1.4", Path.ROOT.append(fore).append(aft).hasTrailingSeparator());
+		assertFalse("1.5", fore.removeTrailingSeparator().append(aft).hasTrailingSeparator());
 		// append empty and root path together
 		assertEquals("1.6", Path.EMPTY, Path.EMPTY.append(Path.EMPTY));
 		assertEquals("1.7", Path.EMPTY, Path.EMPTY.append(Path.ROOT));

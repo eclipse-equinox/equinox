@@ -13,13 +13,23 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.adaptable;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
-import junit.framework.TestCase;
 
 import org.eclipse.core.internal.runtime.AdapterManager;
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.AssertionFailedException;
+import org.eclipse.core.runtime.IAdapterFactory;
+import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
+import org.junit.Before;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -28,21 +38,21 @@ import org.osgi.framework.FrameworkUtil;
 /**
  * Tests API on the IAdapterManager class.
  */
-public class IAdapterManagerTest extends TestCase {
-	//following classes are for testComputeClassOrder
-	static interface C {
+public class IAdapterManagerTest {
+	// following classes are for testComputeClassOrder
+	interface C {
 	}
 
-	static interface D {
+	interface D {
 	}
 
-	static interface M {
+	interface M {
 	}
 
-	static interface N {
+	interface N {
 	}
 
-	static interface O {
+	interface O {
 	}
 
 	interface A extends M, N {
@@ -62,34 +72,27 @@ public class IAdapterManagerTest extends TestCase {
 	private static final String TEST_ADAPTER_CL = "testAdapter.testUnknown";
 	private IAdapterManager manager;
 
-	public IAdapterManagerTest(String name) {
-		super(name);
-	}
-
-	public IAdapterManagerTest() {
-		super("");
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		manager = AdapterManager.getDefault();
 	}
 
 	/**
 	 * Tests API method IAdapterManager.hasAdapter.
 	 */
+	@Test
 	public void testHasAdapter() {
 		TestAdaptable adaptable = new TestAdaptable();
-		//request non-existing adaptable
-		assertTrue("1.0", !manager.hasAdapter("", NON_EXISTING));
+		// request non-existing adaptable
+		assertFalse("1.0", manager.hasAdapter("", NON_EXISTING));
 
-		//request adapter that is in XML but has no registered factory
+		// request adapter that is in XML but has no registered factory
 		assertTrue("1.1", manager.hasAdapter(adaptable, TEST_ADAPTER));
 
-		//request adapter that is not in XML
-		assertTrue("1.2", !manager.hasAdapter(adaptable, "java.lang.String"));
+		// request adapter that is not in XML
+		assertFalse("1.2", manager.hasAdapter(adaptable, "java.lang.String"));
 
-		//register an adapter factory that maps adaptables to strings
+		// register an adapter factory that maps adaptables to strings
 		IAdapterFactory fac = new IAdapterFactory() {
 			@Override
 			public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
@@ -101,37 +104,38 @@ public class IAdapterManagerTest extends TestCase {
 
 			@Override
 			public Class<?>[] getAdapterList() {
-				return new Class[] {String.class};
+				return new Class[] { String.class };
 			}
 		};
 		manager.registerAdapters(fac, TestAdaptable.class);
 		try {
-			//request adapter for factory that we've just added
+			// request adapter for factory that we've just added
 			assertTrue("1.3", manager.hasAdapter(adaptable, "java.lang.String"));
 		} finally {
 			manager.unregisterAdapters(fac, TestAdaptable.class);
 		}
 
-		//request adapter that was unloaded
-		assertTrue("1.4", !manager.hasAdapter(adaptable, "java.lang.String"));
+		// request adapter that was unloaded
+		assertFalse("1.4", manager.hasAdapter(adaptable, "java.lang.String"));
 	}
 
 	/**
 	 * Tests API method IAdapterManager.getAdapter.
 	 */
+	@Test
 	public void testGetAdapter() {
 		TestAdaptable adaptable = new TestAdaptable();
-		//request non-existing adaptable
+		// request non-existing adaptable
 		assertNull("1.0", manager.getAdapter("", NON_EXISTING));
 
-		//request adapter that is in XML but has no registered factory
+		// request adapter that is in XML but has no registered factory
 		Object result = manager.getAdapter(adaptable, TEST_ADAPTER);
 		assertTrue("1.1", result instanceof TestAdapter);
 
-		//request adapter that is not in XML
+		// request adapter that is not in XML
 		assertNull("1.2", manager.getAdapter(adaptable, "java.lang.String"));
 
-		//register an adapter factory that maps adaptables to strings
+		// register an adapter factory that maps adaptables to strings
 		IAdapterFactory fac = new IAdapterFactory() {
 			@Override
 			public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
@@ -143,54 +147,45 @@ public class IAdapterManagerTest extends TestCase {
 
 			@Override
 			public Class<?>[] getAdapterList() {
-				return new Class[] {String.class};
+				return new Class[] { String.class };
 			}
 		};
 		manager.registerAdapters(fac, TestAdaptable.class);
 		try {
-			//request adapter for factory that we've just added
+			// request adapter for factory that we've just added
 			result = manager.getAdapter(adaptable, "java.lang.String");
 			assertTrue("1.3", result instanceof String);
 		} finally {
 			manager.unregisterAdapters(fac, TestAdaptable.class);
 		}
-		//request adapter that was unloaded
+		// request adapter that was unloaded
 		assertNull("1.4", manager.getAdapter(adaptable, "java.lang.String"));
 	}
 
+	@Test
 	public void testGetAdapterNullArgs() {
 		TestAdaptable adaptable = new TestAdaptable();
-		try {
-			manager.getAdapter(adaptable, (Class<?>) null);
-			fail("1.0");
-		} catch (RuntimeException e) {
-			//expected
-		}
-		try {
-			manager.getAdapter(null, NON_EXISTING);
-			fail("1.0");
-		} catch (RuntimeException e) {
-			//expected
-		}
-
+		assertThrows(RuntimeException.class, () -> manager.getAdapter(adaptable, (Class<?>) null));
+		assertThrows(RuntimeException.class, () -> manager.getAdapter(null, NON_EXISTING));
 	}
 
 	/**
 	 * Tests API method IAdapterManager.loadAdapter.
 	 */
+	@Test
 	public void testLoadAdapter() {
 		TestAdaptable adaptable = new TestAdaptable();
-		//request non-existing adaptable
+		// request non-existing adaptable
 		assertNull("1.0", manager.loadAdapter("", NON_EXISTING));
 
-		//request adapter that is in XML but has no registered factory
+		// request adapter that is in XML but has no registered factory
 		Object result = manager.loadAdapter(adaptable, TEST_ADAPTER);
 		assertTrue("1.1", result instanceof TestAdapter);
 
-		//request adapter that is not in XML
+		// request adapter that is not in XML
 		assertNull("1.2", manager.loadAdapter(adaptable, "java.lang.String"));
 
-		//register an adapter factory that maps adaptables to strings
+		// register an adapter factory that maps adaptables to strings
 		IAdapterFactory fac = new IAdapterFactory() {
 			@Override
 			public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
@@ -202,27 +197,27 @@ public class IAdapterManagerTest extends TestCase {
 
 			@Override
 			public Class<?>[] getAdapterList() {
-				return new Class[] {String.class};
+				return new Class[] { String.class };
 			}
 		};
 		manager.registerAdapters(fac, TestAdaptable.class);
 		try {
-			//request adapter for factory that we've just added
+			// request adapter for factory that we've just added
 			result = manager.loadAdapter(adaptable, "java.lang.String");
 			assertTrue("1.3", result instanceof String);
 		} finally {
 			manager.unregisterAdapters(fac, TestAdaptable.class);
 		}
-		//request adapter that was unloaded
+		// request adapter that was unloaded
 		assertNull("1.4", manager.loadAdapter(adaptable, "java.lang.String"));
 	}
 
 	/**
 	 * Test adapting to classes not reachable by the default bundle class loader
-	 * (bug 200068).
-	 * NOTE: This test uses .class file compiled with 1.4 JRE. As a result,
-	 * the test can not be run on pre-1.4 JRE.
+	 * (bug 200068). NOTE: This test uses .class file compiled with 1.4 JRE. As a
+	 * result, the test can not be run on pre-1.4 JRE.
 	 */
+	@Test
 	public void testAdapterClassLoader() throws MalformedURLException, BundleException, IOException {
 		TestAdaptable adaptable = new TestAdaptable();
 		assertTrue(manager.hasAdapter(adaptable, TEST_ADAPTER_CL));
@@ -230,8 +225,9 @@ public class IAdapterManagerTest extends TestCase {
 		Bundle bundle = null;
 		try {
 			BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
-			bundle = BundleTestingHelper.installBundle("0.1", bundleContext, "Plugin_Testing/adapters/testAdapter_1.0.0");
-			BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] {bundle});
+			bundle = BundleTestingHelper.installBundle("0.1", bundleContext,
+					"Plugin_Testing/adapters/testAdapter_1.0.0");
+			BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] { bundle });
 
 			assertTrue(manager.hasAdapter(adaptable, TEST_ADAPTER_CL));
 			Object result = manager.loadAdapter(adaptable, TEST_ADAPTER_CL);
@@ -247,6 +243,7 @@ public class IAdapterManagerTest extends TestCase {
 	/**
 	 * Tests for {@link IAdapterManager#computeClassOrder(Class)}.
 	 */
+	@Test
 	public void testComputeClassOrder() {
 		Class<?>[] expected = new Class[] { X.class, Y.class, Object.class, A.class, B.class, M.class, N.class, O.class,
 				C.class, D.class };
@@ -257,6 +254,7 @@ public class IAdapterManagerTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testFactoryViolatingContract() {
 		class Private {
 		}
@@ -279,14 +277,12 @@ public class IAdapterManagerTest extends TestCase {
 		};
 		try {
 			manager.registerAdapters(fac, Private.class);
-			try {
-				manager.getAdapter(new Private(), Private.class);
-				fail("Should throw AssertionFailedException!");
-			} catch (AssertionFailedException e) {
-				assertTrue(e.getMessage().contains(fac.getClass().getName()));
-				assertTrue(e.getMessage().contains(Boolean.class.getName()));
-				assertTrue(e.getMessage().contains(Private.class.getName()));
-			}
+			AssertionFailedException e = assertThrows(
+					AssertionFailedException.class,
+					() -> manager.getAdapter(new Private(), Private.class));
+			assertTrue(e.getMessage().contains(fac.getClass().getName()));
+			assertTrue(e.getMessage().contains(Boolean.class.getName()));
+			assertTrue(e.getMessage().contains(Private.class.getName()));
 		} finally {
 			manager.unregisterAdapters(fac, Private.class);
 		}

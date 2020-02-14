@@ -13,10 +13,21 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.registry.simple;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.net.URL;
+
 import org.eclipse.core.internal.registry.ExtensionRegistry;
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.ContributorFactoryOSGi;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IContributor;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.RegistryFactory;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
@@ -25,8 +36,8 @@ import org.osgi.framework.FrameworkUtil;
  * @since 3.2
  */
 public class XMLExtensionCreateEclipseTest extends BaseExtensionRegistryRun {
-
-	public void testDynamicContribution() {
+	@Test
+	public void testDynamicContribution() throws IllegalArgumentException, IOException {
 		// specify this bundle as a contributor
 		Bundle thisBundle = FrameworkUtil.getBundle(getClass());
 		IContributor thisContributor = ContributorFactoryOSGi.createContributor(thisBundle);
@@ -34,15 +45,10 @@ public class XMLExtensionCreateEclipseTest extends BaseExtensionRegistryRun {
 		checkRegistry(thisContributor.getName());
 	}
 
-	private void fillRegistry(IContributor contributor) {
-		try {
+	private void fillRegistry(IContributor contributor) throws IllegalArgumentException, IOException {
 			Object userKey = ((ExtensionRegistry) RegistryFactory.getRegistry()).getTemporaryUserToken();
 			URL xmlURL = getXML("DynamicExtension.xml"); //$NON-NLS-1$
 			RegistryFactory.getRegistry().addContribution(xmlURL.openStream(), contributor, false, xmlURL.getFile(), null, userKey);
-		} catch (IOException eFile) {
-			fail(eFile.getMessage());
-			return;
-		}
 	}
 
 	private void checkRegistry(String namespace) {
@@ -51,7 +57,7 @@ public class XMLExtensionCreateEclipseTest extends BaseExtensionRegistryRun {
 		IExtensionPoint dynamicExtensionPoint = eclipseRegistry.getExtensionPoint(uniqueId);
 		assertNotNull(dynamicExtensionPoint);
 		IConfigurationElement[] elements = eclipseRegistry.getConfigurationElementsFor(uniqueId);
-		assertTrue(elements.length == 1);
+		assertEquals(1, elements.length);
 		for (IConfigurationElement element : elements) {
 			assertTrue("org.eclipse.equinox.common.tests.registry.simple.utils.ExecutableRegistryObject".equals(element.getAttribute("class")));
 		}

@@ -13,12 +13,16 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.registry;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import org.eclipse.core.runtime.*;
+
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -56,22 +60,22 @@ public class NamespaceTest {
 		// Check linkage extension <-> extension point
 		assertTrue(ext.getExtensionPointUniqueIdentifier().equals(extpt.getUniqueIdentifier()));
 		IExtension[] extensions = extpt.getExtensions();
-		assertTrue(extensions.length == 1);
+		assertEquals(1, extensions.length);
 		assertTrue(extensions[0].equals(ext));
 
 		// Exactly one extension and one extension point in the "org.abc" namespace
 		IExtensionPoint[] namespaceExtensionPoints = RegistryFactory.getRegistry().getExtensionPoints("org.abc");
-		assertTrue(namespaceExtensionPoints.length == 1);
+		assertEquals(1, namespaceExtensionPoints.length);
 		assertTrue(namespaceExtensionPoints[0].equals(extpt));
 		IExtension[] namespaceExtensions = RegistryFactory.getRegistry().getExtensions("org.abc");
-		assertTrue(namespaceExtensions.length == 1);
+		assertEquals(1, namespaceExtensions.length);
 		assertTrue(namespaceExtensions[0].equals(ext));
 
 		// There should not be extension points or extensions in the default namespace
 		IExtensionPoint[] defaultExtensionPoints = RegistryFactory.getRegistry().getExtensionPoints("testNamespace1");
-		assertTrue(defaultExtensionPoints.length == 0);
+		assertEquals(0, defaultExtensionPoints.length);
 		IExtension[] defaultExtensions = RegistryFactory.getRegistry().getExtensions("testNamespace1");
-		assertTrue(defaultExtensions.length == 0);
+		assertEquals(0, defaultExtensions.length);
 
 		// remove the first bundle
 		bundle01.uninstall();
@@ -100,10 +104,10 @@ public class NamespaceTest {
 
 		// Exactly one extension and one extension point in the "org.abc" namespace
 		IExtensionPoint[] namespaceExtensionPoints2 = RegistryFactory.getRegistry().getExtensionPoints("org.abc");
-		assertTrue(namespaceExtensionPoints2.length == 1);
+		assertEquals(1, namespaceExtensionPoints2.length);
 		assertTrue(namespaceExtensionPoints2[0].equals(extpt2));
 		IExtension[] namespaceExtensions2 = RegistryFactory.getRegistry().getExtensions("org.abc");
-		assertTrue(namespaceExtensions2.length == 1);
+		assertEquals(1, namespaceExtensions2.length);
 		assertTrue(namespaceExtensions2[0].equals(ext2));
 
 		// remove the second bundle

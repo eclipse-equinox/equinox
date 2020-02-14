@@ -13,8 +13,21 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.registry.simple;
 
-import org.eclipse.core.runtime.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+
+import org.eclipse.core.runtime.ContributorFactorySimple;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IContributor;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionDelta;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IRegistryChangeEvent;
 import org.eclipse.equinox.common.tests.registry.simple.utils.SimpleRegistryListener;
+import org.junit.Test;
 
 /**
  * Tests addition of extension point and the extension to the registry via
@@ -25,15 +38,8 @@ import org.eclipse.equinox.common.tests.registry.simple.utils.SimpleRegistryList
  */
 public class XMLExtensionCreateTest extends BaseExtensionRegistryRun {
 
-	public XMLExtensionCreateTest() {
-		super();
-	}
-
-	public XMLExtensionCreateTest(String name) {
-		super(name);
-	}
-
-	public void testExtensionPointAddition() {
+	@Test
+	public void testExtensionPointAddition() throws IOException {
 		SimpleRegistryListener listener = new SimpleRegistryListener();
 		listener.register(simpleRegistry);
 
@@ -53,7 +59,7 @@ public class XMLExtensionCreateTest extends BaseExtensionRegistryRun {
 		checkRegistry(nonBundleContributor.getName());
 	}
 
-	private void fillRegistry(IContributor contributor) {
+	private void fillRegistry(IContributor contributor) throws IOException {
 		// Add extension point
 		processXMLContribution(contributor, getXML("ExtensionPoint.xml")); //$NON-NLS-1$
 		// Add extension
@@ -65,10 +71,10 @@ public class XMLExtensionCreateTest extends BaseExtensionRegistryRun {
 		assertNotNull(extensionPoint);
 		IExtension[] namespaceExtensions = simpleRegistry.getExtensions(namespace);
 		assertNotNull(namespaceExtensions);
-		assertTrue(namespaceExtensions.length == 1);
+		assertEquals(1, namespaceExtensions.length);
 		IExtension[] extensions = extensionPoint.getExtensions();
 		assertNotNull(extensions);
-		assertTrue(extensions.length == 1);
+		assertEquals(1, extensions.length);
 		for (IExtension extension : extensions) {
 			String extensionId = extension.getUniqueIdentifier();
 			assertTrue(extensionId.equals(qualifiedName(namespace, "XMLDirectExtensionID"))); //$NON-NLS-1$
@@ -82,9 +88,9 @@ public class XMLExtensionCreateTest extends BaseExtensionRegistryRun {
 				String configElementName = configElement.getName();
 				assertTrue(configElementName.equals("StorageDevice")); //$NON-NLS-1$
 				String[] attributeNames = configElement.getAttributeNames();
-				assertTrue(attributeNames.length == 1);
+				assertEquals(1, attributeNames.length);
 				IConfigurationElement[] configElementChildren = configElement.getChildren();
-				assertTrue(configElementChildren.length == 2);
+				assertEquals(2, configElementChildren.length);
 			}
 		}
 	}
@@ -92,9 +98,9 @@ public class XMLExtensionCreateTest extends BaseExtensionRegistryRun {
 	private void checkListener(String namespace, SimpleRegistryListener listener) {
 		IRegistryChangeEvent event = listener.getEvent(5000);
 		IExtensionDelta[] deltas = event.getExtensionDeltas();
-		assertTrue(deltas.length == 1); // only one notification
+		assertEquals(1, deltas.length); // only one notification
 		for (IExtensionDelta delta : deltas) {
-			assertTrue(delta.getKind() == IExtensionDelta.ADDED);
+			assertEquals(delta.getKind(), IExtensionDelta.ADDED);
 			IExtensionPoint theExtensionPoint = delta.getExtensionPoint();
 			IExtension theExtension = delta.getExtension();
 			String Id1 = theExtension.getExtensionPointUniqueIdentifier();

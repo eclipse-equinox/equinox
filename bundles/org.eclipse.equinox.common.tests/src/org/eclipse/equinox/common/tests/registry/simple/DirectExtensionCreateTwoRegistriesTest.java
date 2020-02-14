@@ -13,8 +13,18 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.registry.simple;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import org.eclipse.core.internal.registry.ExtensionRegistry;
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.ContributorFactorySimple;
+import org.eclipse.core.runtime.IContributor;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Test simultaneous work of two extension registries.
@@ -29,21 +39,16 @@ public class DirectExtensionCreateTwoRegistriesTest extends BaseExtensionRegistr
 	private IExtensionRegistry theDeviceRegistryA;
 	private IExtensionRegistry theDeviceRegistryB;
 
-	public DirectExtensionCreateTwoRegistriesTest() {
-		super();
-	}
-
-	public DirectExtensionCreateTwoRegistriesTest(String name) {
-		super(name);
-	}
 
 	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		startRegistries();
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		stopRegistries();
 	}
 
@@ -60,6 +65,7 @@ public class DirectExtensionCreateTwoRegistriesTest extends BaseExtensionRegistr
 		theDeviceRegistryB.stop(masterToken);
 	}
 
+	@Test
 	public void testExtensionPointAddition() {
 		// Test with non-bundle contributor
 		IContributor nonBundleContributor = ContributorFactorySimple.createContributor("ABC"); //$NON-NLS-1$

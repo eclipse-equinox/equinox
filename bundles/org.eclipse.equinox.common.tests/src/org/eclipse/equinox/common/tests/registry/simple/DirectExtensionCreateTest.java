@@ -13,10 +13,19 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.registry.simple;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import org.eclipse.core.internal.registry.ExtensionRegistry;
 import org.eclipse.core.internal.registry.spi.ConfigurationElementAttribute;
 import org.eclipse.core.internal.registry.spi.ConfigurationElementDescription;
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.ContributorFactorySimple;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IContributor;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.junit.Test;
 
 /**
  * Tests programmatic creation of extension and extension point by using direct
@@ -29,14 +38,7 @@ import org.eclipse.core.runtime.*;
  */
 public class DirectExtensionCreateTest extends BaseExtensionRegistryRun {
 
-	public DirectExtensionCreateTest() {
-		super();
-	}
-
-	public DirectExtensionCreateTest(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testExtensionPointAddition() {
 		IContributor contributor = ContributorFactorySimple.createContributor("1"); //$NON-NLS-1$
 		String extensionPointId = "DirectExtPoint"; //$NON-NLS-1$
@@ -108,10 +110,10 @@ public class DirectExtensionCreateTest extends BaseExtensionRegistryRun {
 
 		IExtension[] namespaceExtensions = simpleRegistry.getExtensions(namespace);
 		assertNotNull(namespaceExtensions);
-		assertTrue(namespaceExtensions.length == 1);
+		assertEquals(1, namespaceExtensions.length);
 		IExtension[] extensions = extensionPoint.getExtensions();
 		assertNotNull(extensions);
-		assertTrue(extensions.length == 1);
+		assertEquals(1, extensions.length);
 		for (IExtension extension : extensions) {
 			String storedExtensionId = extension.getUniqueIdentifier();
 			assertTrue(storedExtensionId.equals(qualifiedName(namespace, extensionId)));
@@ -127,9 +129,9 @@ public class DirectExtensionCreateTest extends BaseExtensionRegistryRun {
 				String configElementValue = configElement.getValue();
 				assertTrue(configElementValue.equals(extensionValue));
 				String[] attributeNames = configElement.getAttributeNames();
-				assertTrue(attributeNames.length == 2);
+				assertEquals(2, attributeNames.length);
 				IConfigurationElement[] configElementChildren = configElement.getChildren();
-				assertTrue(configElementChildren.length == 2);
+				assertEquals(2, configElementChildren.length);
 			}
 		}
 	}

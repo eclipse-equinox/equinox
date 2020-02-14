@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.registry;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -151,7 +152,7 @@ public class InputErrorTest {
 		IExtension extensionA = registry.getExtension(extID);
 		assertNotNull(extensionA);
 		IConfigurationElement[] configElements = extensionA.getConfigurationElements();
-		assertTrue(configElements.length == 1);
+		assertEquals(1, configElements.length);
 		String value = configElements[0].getAttribute("testAttr");
 		assertTrue(expectedValue.equals(value));
 	}

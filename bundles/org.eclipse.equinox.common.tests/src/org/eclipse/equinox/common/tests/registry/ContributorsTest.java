@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.registry;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -20,7 +21,14 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import org.eclipse.core.runtime.*;
+
+import org.eclipse.core.runtime.ContributorFactoryOSGi;
+import org.eclipse.core.runtime.ContributorFactorySimple;
+import org.eclipse.core.runtime.IContributor;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.core.runtime.spi.IDynamicExtensionRegistry;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
 import org.junit.Test;
@@ -43,8 +51,9 @@ public class ContributorsTest {
 		try {
 			BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
 			bundle = BundleTestingHelper.installBundle("0.1", bundleContext, "Plugin_Testing/registry/contributors/A");
-			fragment = BundleTestingHelper.installBundle("0.2", bundleContext, "Plugin_Testing/registry/contributors/B");
-			BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] {bundle, fragment});
+			fragment = BundleTestingHelper.installBundle("0.2", bundleContext,
+					"Plugin_Testing/registry/contributors/B");
+			BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] { bundle, fragment });
 
 			IExtensionRegistry registry = RegistryFactory.getRegistry();
 			IExtensionPoint bundleExtPoint = registry.getExtensionPoint("testContributors.xptContibutorsA");
@@ -69,9 +78,9 @@ public class ContributorsTest {
 	}
 
 	/**
-	 * bundleA, bundleB, and fragment on bundleA all use the same namespace. Verify that getting
-	 * elements by contributor returns all elements from the contributor and only from that
-	 * contributor.
+	 * bundleA, bundleB, and fragment on bundleA all use the same namespace. Verify
+	 * that getting elements by contributor returns all elements from the
+	 * contributor and only from that contributor.
 	 *
 	 * @throws IOException
 	 * @throws BundleException
@@ -83,10 +92,13 @@ public class ContributorsTest {
 		Bundle fragment = null;
 		try {
 			BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
-			bundleA = BundleTestingHelper.installBundle("0.1", bundleContext, "Plugin_Testing/registry/elementsByContributor/A");
-			bundleB = BundleTestingHelper.installBundle("0.2", bundleContext, "Plugin_Testing/registry/elementsByContributor/B");
-			fragment = BundleTestingHelper.installBundle("0.2", bundleContext, "Plugin_Testing/registry/elementsByContributor/Afragment");
-			BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] {bundleA, bundleB, fragment});
+			bundleA = BundleTestingHelper.installBundle("0.1", bundleContext,
+					"Plugin_Testing/registry/elementsByContributor/A");
+			bundleB = BundleTestingHelper.installBundle("0.2", bundleContext,
+					"Plugin_Testing/registry/elementsByContributor/B");
+			fragment = BundleTestingHelper.installBundle("0.2", bundleContext,
+					"Plugin_Testing/registry/elementsByContributor/Afragment");
+			BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] { bundleA, bundleB, fragment });
 
 			IExtensionRegistry registry = RegistryFactory.getRegistry();
 
@@ -95,24 +107,25 @@ public class ContributorsTest {
 
 			IExtensionPoint[] extPointsA = registry.getExtensionPoints(contributorA);
 			assertNotNull(extPointsA);
-			assertTrue(extPointsA.length == 1);
+			assertEquals(1, extPointsA.length);
 			assertTrue(extPointsA[0].getUniqueIdentifier().equals("org.eclipse.test.registryByContrib.PointA"));
 
 			IExtension[] extsA = registry.getExtensions(contributorA);
 			assertNotNull(extsA);
-			assertTrue(extsA.length == 1);
+			assertEquals(1, extsA.length);
 			assertTrue(extsA[0].getUniqueIdentifier().equals("org.eclipse.test.registryByContrib.ExtensionA"));
 
 			// verify fragment
 			IContributor contributorAF = ContributorFactoryOSGi.createContributor(fragment);
 			IExtensionPoint[] extPointsFragmentA = registry.getExtensionPoints(contributorAF);
 			assertNotNull(extPointsFragmentA);
-			assertTrue(extPointsFragmentA.length == 1);
-			assertTrue(extPointsFragmentA[0].getUniqueIdentifier().equals("org.eclipse.test.registryByContrib.PointFA"));
+			assertEquals(1, extPointsFragmentA.length);
+			assertTrue(
+					extPointsFragmentA[0].getUniqueIdentifier().equals("org.eclipse.test.registryByContrib.PointFA"));
 
 			IExtension[] extsFragmentA = registry.getExtensions(contributorAF);
 			assertNotNull(extsFragmentA);
-			assertTrue(extsFragmentA.length == 1);
+			assertEquals(1, extsFragmentA.length);
 			assertTrue(extsFragmentA[0].getUniqueIdentifier().equals("org.eclipse.test.registryByContrib.ExtensionFA"));
 
 		} finally {
@@ -129,8 +142,10 @@ public class ContributorsTest {
 	}
 
 	/**
-	 * Checks {@link IDynamicExtensionRegistry#removeContributor(IContributor, Object)}. A separate
-	 * registry is created as removal functionality is not allowed by the default Eclipse registry.
+	 * Checks
+	 * {@link IDynamicExtensionRegistry#removeContributor(IContributor, Object)}. A
+	 * separate registry is created as removal functionality is not allowed by the
+	 * default Eclipse registry.
 	 *
 	 * @throws IOException
 	 * @throws BundleException
@@ -148,7 +163,7 @@ public class ContributorsTest {
 
 		IContributor[] contributors = ((IDynamicExtensionRegistry) registry).getAllContributors();
 		assertNotNull(contributors);
-		assertTrue(contributors.length == 2);
+		assertEquals(2, contributors.length);
 		IContributor contributorB = null;
 		for (IContributor contributor : contributors) {
 			if ("B".equals(contributor.getName())) {
@@ -168,7 +183,8 @@ public class ContributorsTest {
 		String fullPath = "Plugin_Testing/registry/elementsByContributor/" + fileName + "/plugin.xml";
 		URL urlA = FrameworkUtil.getBundle(getClass()).getEntry(fullPath);
 		if (urlA == null) {
-			throw new IOException("No entry to '"+fullPath+"' could be found or caller does not have the appropriate permissions.");//$NON-NLS-1$ //$NON-NLS-2$
+			throw new IOException("No entry to '" + fullPath //$NON-NLS-1$
+					+ "' could be found or caller does not have the appropriate permissions.");//$NON-NLS-1$
 		}
 		InputStream is = urlA.openStream();
 		IContributor nonBundleContributor = ContributorFactorySimple.createContributor(fileName);

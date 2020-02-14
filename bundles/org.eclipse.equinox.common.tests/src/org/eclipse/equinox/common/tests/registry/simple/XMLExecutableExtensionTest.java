@@ -13,42 +13,51 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.registry.simple;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
-import org.eclipse.core.runtime.*;
+import java.io.IOException;
+
+import org.eclipse.core.runtime.ContributorFactorySimple;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IContributor;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.core.runtime.spi.RegistryStrategy;
 import org.eclipse.equinox.common.tests.registry.simple.utils.ExeExtensionStrategy;
 import org.eclipse.equinox.common.tests.registry.simple.utils.ExecutableRegistryObject;
+import org.junit.Test;
 
 /**
- * Tests that executable extensions present in the simple registry actually
- * gets processed.
+ * Tests that executable extensions present in the simple registry actually gets
+ * processed.
+ *
  * @since 3.2
  */
 public class XMLExecutableExtensionTest extends BaseExtensionRegistryRun {
 
-	public XMLExecutableExtensionTest() {
-		super();
-	}
-
-	public XMLExecutableExtensionTest(String name) {
-		super(name);
-	}
-
 	/**
 	 * Provide own class loader to the registry executable element strategry
+	 *
 	 * @return - open extension registry
 	 */
 	@Override
 	protected IExtensionRegistry startRegistry() {
 		// use plugin's metadata directory to save cache data
 		IPath userDataPath = getStateLocation();
-		File[] registryLocations = new File[] {new File(userDataPath.toOSString())};
-		boolean[] readOnly = new boolean[] {false};
+		File[] registryLocations = new File[] { new File(userDataPath.toOSString()) };
+		boolean[] readOnly = new boolean[] { false };
 		RegistryStrategy registryStrategy = new ExeExtensionStrategy(registryLocations, readOnly);
 		return RegistryFactory.createRegistry(registryStrategy, masterToken, userToken);
 	}
 
-	public void testExecutableExtensionCreation() {
+	@Test
+	public void testExecutableExtensionCreation() throws IOException, CoreException {
 		// Test with non-bundle contributor
 		IContributor nonBundleContributor = ContributorFactorySimple.createContributor("ABC"); //$NON-NLS-1$
 		assertFalse(ExecutableRegistryObject.createCalled);
@@ -60,21 +69,17 @@ public class XMLExecutableExtensionTest extends BaseExtensionRegistryRun {
 		assertTrue(ExecutableRegistryObject.createCalled);
 	}
 
-	private void fillRegistry(IContributor contributor) {
+	private void fillRegistry(IContributor contributor) throws IOException {
 		processXMLContribution(contributor, getXML("ExecutableExtension.xml")); //$NON-NLS-1$
 	}
 
-	private void checkRegistry(String namespace) {
-		IConfigurationElement[] elements = simpleRegistry.getConfigurationElementsFor(qualifiedName(namespace, "XMLExecutableExtPoint")); //$NON-NLS-1$
-		assertTrue(elements.length == 1);
+	private void checkRegistry(String namespace) throws CoreException {
+		IConfigurationElement[] elements = simpleRegistry
+				.getConfigurationElementsFor(qualifiedName(namespace, "XMLExecutableExtPoint")); //$NON-NLS-1$
+		assertEquals(1, elements.length);
 		for (IConfigurationElement element : elements) {
-			try {
-				Object object = element.createExecutableExtension("class"); //$NON-NLS-1$
-				assertNotNull(object);
-			} catch (CoreException e) {
-				assertTrue(false);
-				e.printStackTrace();
-			}
+			Object object = element.createExecutableExtension("class"); //$NON-NLS-1$
+			assertNotNull(object);
 		}
 	}
 }
