@@ -13,24 +13,11 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.perf;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-public class AllTests extends TestSuite {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({ StatePerformanceTest.class, StateUsesPerformanceTest.class })
+public class AllTests {
 	public static final String DEGRADATION_RESOLUTION = "Performance decrease caused by additional fuctionality required for ResovlerHooks in OSGi R4.3 specification. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=324753 for details.";
-
-	public AllTests() {
-		super();
-	}
-
-	public AllTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		TestSuite suite = new TestSuite(AllTests.class.getName());
-		suite.addTest(StatePerformanceTest.suite());
-		suite.addTest(StateUsesPerformanceTest.suite());
-		return suite;
-	}
 }

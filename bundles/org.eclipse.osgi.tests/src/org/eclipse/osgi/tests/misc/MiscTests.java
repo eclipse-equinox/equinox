@@ -13,20 +13,21 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.misc;
 
-import junit.framework.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.container.ModuleWiring;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.sources.SingleSourcePackage;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
 
-public class MiscTests extends TestCase {
-	public static Test suite() {
-		return new TestSuite(MiscTests.class);
-	}
-
+public class MiscTests {
+	@Test
 	public void testBug251427() {
 		Bundle testsBundle = OSGiTestsActivator.getContext().getBundle();
 		assertNotNull("tests bundle is null", testsBundle); //$NON-NLS-1$

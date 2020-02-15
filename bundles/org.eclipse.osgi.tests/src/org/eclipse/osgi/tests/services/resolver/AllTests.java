@@ -13,32 +13,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
-import junit.framework.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-public class AllTests extends TestCase {
-
-	public AllTests() {
-		super(null);
-	}
-
-	public AllTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		TestSuite suite = new TestSuite(AllTests.class.getName());
-		suite.addTest(SubstitutableExportsTest.suite());
-		suite.addTest(DisabledInfoTest.suite());
-		suite.addTest(PlatformAdminTest.suite());
-		suite.addTest(StateResolverTest.suite());
-		suite.addTest(StateCycleTest.suite());
-		suite.addTest(StateComparisonTest.suite());
-		suite.addTest(VersionRangeTests.suite());
-		suite.addTest(R4ResolverTest.suite());
-		suite.addTest(XFriendsInternalResolverTest.suite());
-		suite.addTest(GenericCapabilityTest.suite());
-		suite.addTest(OSGiCapabilityTest.suite());
-		suite.addTest(DevModeTest.suite());
-		return suite;
-	}
+@RunWith(Suite.class)
+@Suite.SuiteClasses({ SubstitutableExportsTest.class, DisabledInfoTest.class, PlatformAdminTest.class,
+		StateResolverTest.class, StateCycleTest.class, StateComparisonTest.class, VersionRangeTests.class,
+		R4ResolverTest.class, XFriendsInternalResolverTest.class, GenericCapabilityTest.class, OSGiCapabilityTest.class,
+		DevModeTest.class })
+public class AllTests {
 }

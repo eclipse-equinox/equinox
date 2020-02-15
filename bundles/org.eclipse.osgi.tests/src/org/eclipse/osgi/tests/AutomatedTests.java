@@ -13,60 +13,34 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests;
 
-import junit.framework.*;
 import org.eclipse.osgi.tests.bundles.BundleTests;
 import org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase;
 import org.eclipse.osgi.tests.eventmgr.EventManagerTests;
-import org.eclipse.osgi.tests.filter.FilterTests;
+import org.eclipse.osgi.tests.filter.BundleContextFilterTests;
+import org.eclipse.osgi.tests.filter.FrameworkUtilFilterTests;
 import org.eclipse.osgi.tests.hooks.framework.AllFrameworkHookTests;
 import org.eclipse.osgi.tests.internal.plugins.InstallTests;
 import org.eclipse.osgi.tests.listeners.ExceptionHandlerTests;
 import org.eclipse.osgi.tests.misc.MiscTests;
-import org.eclipse.osgi.tests.permissions.PermissionTests;
+import org.eclipse.osgi.tests.permissions.AdminPermissionTests;
+import org.eclipse.osgi.tests.permissions.PackagePermissionTests;
+import org.eclipse.osgi.tests.permissions.ServicePermissionTests;
 import org.eclipse.osgi.tests.serviceregistry.ServiceRegistryTests;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-public class AutomatedTests extends TestCase {
-	public final static String PI_OSGI_TESTS = "org.eclipse.osgi.tests"; //$NON-NLS-1$
+@RunWith(Suite.class)
+@Suite.SuiteClasses({ org.eclipse.osgi.tests.container.AllTests.class, AllFrameworkHookTests.class, InstallTests.class,
+		org.eclipse.osgi.tests.eclipseadaptor.AllTests.class, org.eclipse.osgi.tests.services.resolver.AllTests.class,
+		DebugOptionsTestCase.class, org.eclipse.equinox.log.test.AllTests.class,
+		org.eclipse.osgi.tests.security.SecurityTestSuite.class, org.eclipse.osgi.tests.appadmin.AllTests.class,
+		ExceptionHandlerTests.class, org.eclipse.osgi.tests.configuration.AllTests.class,
+		org.eclipse.osgi.tests.services.datalocation.AllTests.class, org.eclipse.osgi.tests.util.AllTests.class,
+		MiscTests.class, BundleTests.class, ServiceRegistryTests.class, EventManagerTests.class,
+		BundleContextFilterTests.class, FrameworkUtilFilterTests.class, AdminPermissionTests.class,
+		ServicePermissionTests.class, PackagePermissionTests.class,
+		org.eclipse.osgi.tests.securityadmin.AllSecurityAdminTests.class,
+		org.eclipse.osgi.tests.resource.AllTests.class })
 
-	/**
-	 * AllTests constructor.
-	 */
-	public AutomatedTests() {
-		super(null);
-	}
-
-	/**
-	 * AllTests constructor comment.
-	 * @param name java.lang.String
-	 */
-	public AutomatedTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		TestSuite suite = new TestSuite(AutomatedTests.class.getName());
-		//		suite.addTest(new TestSuite(SimpleTests.class));
-		suite.addTest(org.eclipse.osgi.tests.container.AllTests.suite());
-		suite.addTest(AllFrameworkHookTests.suite());
-		suite.addTest(new TestSuite(InstallTests.class));
-		suite.addTest(org.eclipse.osgi.tests.eclipseadaptor.AllTests.suite());
-		suite.addTest(org.eclipse.osgi.tests.services.resolver.AllTests.suite());
-		suite.addTest(DebugOptionsTestCase.suite());
-		suite.addTest(org.eclipse.equinox.log.test.AllTests.suite());
-		suite.addTest(org.eclipse.osgi.tests.security.SecurityTestSuite.suite());
-		suite.addTest(org.eclipse.osgi.tests.appadmin.AllTests.suite());
-		suite.addTest(new TestSuite(ExceptionHandlerTests.class));
-		suite.addTest(org.eclipse.osgi.tests.configuration.AllTests.suite());
-		suite.addTest(org.eclipse.osgi.tests.services.datalocation.AllTests.suite());
-		suite.addTest(org.eclipse.osgi.tests.util.AllTests.suite());
-		suite.addTest(MiscTests.suite());
-		suite.addTest(BundleTests.suite());
-		suite.addTest(ServiceRegistryTests.suite());
-		suite.addTest(EventManagerTests.suite());
-		suite.addTest(FilterTests.suite());
-		suite.addTest(PermissionTests.suite());
-		suite.addTest(org.eclipse.osgi.tests.securityadmin.AllSecurityAdminTests.suite());
-		suite.addTest(org.eclipse.osgi.tests.resource.AllTests.suite());
-		return suite;
-	}
+public class AutomatedTests {
 }

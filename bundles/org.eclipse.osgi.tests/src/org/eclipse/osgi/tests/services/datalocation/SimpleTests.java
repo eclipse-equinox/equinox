@@ -13,57 +13,43 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.datalocation;
 
-import java.io.*;
+import static org.junit.Assert.assertEquals;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
+import java.io.File;
+import java.io.IOException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.storagemanager.StorageManager;
+import org.junit.Before;
+import org.junit.Test;
 
-public class SimpleTests extends TestCase {
+public class SimpleTests {
 	StorageManager manager1;
 	StorageManager manager2;
 	File base;
 	static String TEST1 = "test.txt";
 
-	/**
-	 * Constructs a test case with the given name.
-	 */
-	public SimpleTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new TestSuite(SimpleTests.class);
-	}
-
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
 		base = new File(Platform.getConfigurationLocation().getURL().getPath());
 		manager1 = new StorageManager(base, null);
 	}
 
-	protected void tearDown() throws Exception {
-		super.tearDown();
-	}
-
+	@Test
 	public void testAddRemove() {
 		try {
-		manager1.open(true);
-		assertEquals(null, manager1.lookup(TEST1, false));
-		assertEquals(-1, manager1.getId(TEST1));
+			manager1.open(true);
+			assertEquals(null, manager1.lookup(TEST1, false));
+			assertEquals(-1, manager1.getId(TEST1));
 
-		manager1.add(TEST1);
-		assertEquals(new File(base, TEST1 + ".0"), manager1.lookup(TEST1, false));
-		assertEquals(0, manager1.getId(TEST1));
+			manager1.add(TEST1);
+			assertEquals(new File(base, TEST1 + ".0"), manager1.lookup(TEST1, false));
+			assertEquals(0, manager1.getId(TEST1));
 
-		manager1.remove(TEST1);
-		assertEquals(null, manager1.lookup(TEST1, false));
-		assertEquals(-1, manager1.getId(TEST1));
-		} catch(IOException e) {
-			//No exception can occurs since all the lookup calls are done with false
+			manager1.remove(TEST1);
+			assertEquals(null, manager1.lookup(TEST1, false));
+			assertEquals(-1, manager1.getId(TEST1));
+		} catch (IOException e) {
+			// No exception can occurs since all the lookup calls are done with false
 			e.printStackTrace();
 		}
 	}

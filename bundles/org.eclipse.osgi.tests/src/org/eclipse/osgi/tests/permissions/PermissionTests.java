@@ -13,23 +13,23 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.permissions;
 
-import java.io.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
-import junit.framework.*;
 import org.osgi.framework.PackagePermission;
 import org.osgi.framework.ServicePermission;
 
-public class PermissionTests extends TestCase {
-	public static Test suite() {
-		TestSuite suite = new TestSuite(PermissionTests.class.getName());
-		suite.addTest(AdminPermissionTests.suite());
-		suite.addTest(ServicePermissionTests.suite());
-		suite.addTest(PackagePermissionTests.suite());
-		return suite;
-	}
+public class PermissionTests {
 
 	protected void badServicePermission(String name, String actions) {
 		try {

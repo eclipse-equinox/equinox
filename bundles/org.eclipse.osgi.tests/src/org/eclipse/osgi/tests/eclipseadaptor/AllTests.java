@@ -13,14 +13,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.eclipseadaptor;
 
-import junit.framework.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({ EnvironmentInfoTest.class, FilePathTest.class, LocaleTransformationTest.class })
 public class AllTests {
-	public static Test suite() {
-		TestSuite suite = new TestSuite(AllTests.class.getName());
-		suite.addTest(EnvironmentInfoTest.suite());
-		suite.addTest(FilePathTest.suite());
-		suite.addTest(new JUnit4TestAdapter(LocaleTransformationTest.class));
-		return suite;
-	}
 }

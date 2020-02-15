@@ -13,14 +13,16 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.security;
 
-import junit.framework.*;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 public class SecurityTestSuite extends TestCase {
 	public static Test suite() {
 		TestSuite suite = new TestSuite("Unit tests for Equinox security");
-		//trust engine tests
+		// trust engine tests
 		suite.addTest(KeyStoreTrustEngineTest.suite());
-		//signed bundle tests - *uses* trust engine
+		// signed bundle tests - *uses* trust engine
 		suite.addTest(SignedBundleTest.suite());
 		suite.addTest(SignedBundleTest.localSuite());
 		suite.addTest(OSGiAPICertificateTest.suite());

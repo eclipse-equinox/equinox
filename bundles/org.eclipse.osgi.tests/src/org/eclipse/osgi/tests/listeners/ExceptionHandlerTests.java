@@ -15,14 +15,18 @@ package org.eclipse.osgi.tests.listeners;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import junit.framework.TestCase;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.junit.Assert;
-import org.osgi.framework.*;
+import org.junit.Test;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
 
-public class ExceptionHandlerTests extends TestCase {
-	//These tests exercise the code change for bug 73111.
+public class ExceptionHandlerTests {
+	// These tests exercise the code change for bug 73111.
 
 	class FrameworkEventListenerWithResult implements FrameworkListener {
 		FrameworkEvent event = null;
@@ -53,12 +57,7 @@ public class ExceptionHandlerTests extends TestCase {
 		}
 	}
 
-
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
-
+	@Test
 	public void testNonFatalException() {
 		FrameworkEventListenerWithResult fwkListener = new FrameworkEventListenerWithResult();
 		OSGiTestsActivator.getContext().addFrameworkListener(fwkListener);
@@ -71,12 +70,13 @@ public class ExceptionHandlerTests extends TestCase {
 		OSGiTestsActivator.getContext().addBundleListener(npeGenerator);
 
 		try {
-			BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle09");
+			BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(),
+					OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle09");
 			FrameworkEvent eventReceived = fwkListener.getResult(60000);
 			Assert.assertEquals(FrameworkEvent.ERROR, eventReceived.getType());
 			Assert.assertEquals(true, eventReceived.getThrowable() instanceof NullPointerException);
 		} catch (MalformedURLException e) {
-			//Does not happen
+			// Does not happen
 		} catch (BundleException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -86,7 +86,7 @@ public class ExceptionHandlerTests extends TestCase {
 		OSGiTestsActivator.getContext().removeBundleListener(npeGenerator);
 	}
 
-
+	@Test
 	public void testFatalException() {
 		FrameworkEventListenerWithResult fwkListener = new FrameworkEventListenerWithResult();
 		OSGiTestsActivator.getContext().addFrameworkListener(fwkListener);
@@ -98,16 +98,17 @@ public class ExceptionHandlerTests extends TestCase {
 		};
 		OSGiTestsActivator.getContext().addBundleListener(fatalException);
 
-
 		try {
-			System.setProperty("eclipse.exitOnError","false"); //Here we set the value to false, because otherwise we would simply exit
-			BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle10");
+			System.setProperty("eclipse.exitOnError", "false"); // Here we set the value to false, because otherwise we
+																// would simply exit
+			BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(),
+					OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle10");
 			FrameworkEvent eventReceived = fwkListener.getResult(10000);
 			Assert.assertEquals(FrameworkEvent.ERROR, eventReceived.getType());
 			Assert.assertEquals(true, eventReceived.getThrowable() instanceof VirtualMachineError);
-			System.setProperty("eclipse.exitOnError","true");
+			System.setProperty("eclipse.exitOnError", "true");
 		} catch (MalformedURLException e) {
-			//Does not happen
+			// Does not happen
 		} catch (BundleException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

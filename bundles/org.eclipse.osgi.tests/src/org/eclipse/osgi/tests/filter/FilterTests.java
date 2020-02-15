@@ -13,6 +13,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.filter;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -22,29 +26,22 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import junit.framework.AssertionFailedError;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
 import org.eclipse.osgi.tests.util.MapDictionary;
+import org.junit.Assert;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-public abstract class FilterTests extends TestCase {
-	public static Test suite() {
-		TestSuite suite = new TestSuite(FilterTests.class.getName());
-		suite.addTest(BundleContextFilterTests.suite());
-		suite.addTest(FrameworkUtilFilterTests.suite());
-		return suite;
-	}
+public abstract class FilterTests {
 
 	/**
 	 * Fail with cause t.
 	 *
 	 * @param message Failure message.
-	 * @param t Cause of the failure.
+	 * @param t       Cause of the failure.
 	 */
 	public static void fail(String message, Throwable t) {
 		AssertionFailedError e = new AssertionFailedError(message + ": " + t.getMessage());
@@ -61,7 +58,7 @@ public abstract class FilterTests extends TestCase {
 	private Dictionary getProperties() {
 		Dictionary props = new Hashtable();
 		props.put("room", "bedroom");
-		props.put("channel", new Object[] {Integer.valueOf(34), "101"});
+		props.put("channel", new Object[] { Integer.valueOf(34), "101" });
 		props.put("status", "(on\\)*");
 		List vec = new ArrayList(10);
 		vec.add(Long.valueOf(150));
@@ -77,14 +74,14 @@ public abstract class FilterTests extends TestCase {
 		props.put("charvalue", Character.valueOf('A'));
 		props.put("booleanvalue", Boolean.TRUE);
 		props.put("weirdvalue", new Hashtable());
-		props.put("primintarrayvalue", new int[] {1, 2, 3});
-		props.put("primlongarrayvalue", new long[] {1, 2, 3});
-		props.put("primbytearrayvalue", new byte[] {(byte) 1, (byte) 2, (byte) 3});
-		props.put("primshortarrayvalue", new short[] {(short) 1, (short) 2, (short) 3});
-		props.put("primfloatarrayvalue", new float[] {(float) 1.1, (float) 2.2, (float) 3.3});
-		props.put("primdoublearrayvalue", new double[] {1.1, 2.2, 3.3});
-		props.put("primchararrayvalue", new char[] {'A', 'b', 'C', 'd'});
-		props.put("primbooleanarrayvalue", new boolean[] {false});
+		props.put("primintarrayvalue", new int[] { 1, 2, 3 });
+		props.put("primlongarrayvalue", new long[] { 1, 2, 3 });
+		props.put("primbytearrayvalue", new byte[] { (byte) 1, (byte) 2, (byte) 3 });
+		props.put("primshortarrayvalue", new short[] { (short) 1, (short) 2, (short) 3 });
+		props.put("primfloatarrayvalue", new float[] { (float) 1.1, (float) 2.2, (float) 3.3 });
+		props.put("primdoublearrayvalue", new double[] { 1.1, 2.2, 3.3 });
+		props.put("primchararrayvalue", new char[] { 'A', 'b', 'C', 'd' });
+		props.put("primbooleanarrayvalue", new boolean[] { false });
 		props.put("bigintvalue", new BigInteger("4123456"));
 		props.put("bigdecvalue", new BigDecimal("4.123456"));
 		props.put("*", "foo");
@@ -99,6 +96,7 @@ public abstract class FilterTests extends TestCase {
 		return props;
 	}
 
+	@Test
 	public void testFilter() {
 		Dictionary props = getProperties();
 		testFilter("(room=*)", props, ISTRUE);
@@ -158,6 +156,7 @@ public abstract class FilterTests extends TestCase {
 		testFilter("(space=*)", props, ISTRUE);
 	}
 
+	@Test
 	public void testInvalidValues() {
 		Dictionary props = getProperties();
 		testFilter("(intvalue=*)", props, ISTRUE);
@@ -185,6 +184,7 @@ public abstract class FilterTests extends TestCase {
 		testFilter("(booleanvalue=)", props, ISFALSE);
 	}
 
+	@Test
 	public void testIllegal() {
 		Dictionary props = getProperties();
 		testFilter("", props, ISILLEGAL);
@@ -199,6 +199,7 @@ public abstract class FilterTests extends TestCase {
 		testFilter("  (room = =b**oo*m*) ) ", props, ISILLEGAL);
 	}
 
+	@Test
 	public void testScalarSubstring() {
 		Dictionary props = getProperties();
 		testFilter("(shortValue =100*) ", props, ISFALSE);
@@ -213,6 +214,7 @@ public abstract class FilterTests extends TestCase {
 		testFilter("(booleanValue =t*ue) ", props, ISFALSE);
 	}
 
+	@Test
 	public void testNormalization() {
 		try {
 			Filter f1 = createFilter("( a = bedroom  )");
@@ -235,7 +237,7 @@ public abstract class FilterTests extends TestCase {
 			f1 = createFilter(query);
 
 			if (expect == ISILLEGAL) {
-				fail("expected exception");
+				Assert.fail("expected exception");
 			}
 		} catch (InvalidSyntaxException e) {
 			if (expect != ISILLEGAL) {
@@ -269,6 +271,7 @@ public abstract class FilterTests extends TestCase {
 
 	}
 
+	@Test
 	public void testComparable() {
 		Filter f1 = null;
 		Object comp42 = new SampleComparable("42");
@@ -328,6 +331,7 @@ public abstract class FilterTests extends TestCase {
 		assertFalse("does match filter", f1.match(new DictionaryServiceReference(hash)));
 	}
 
+	@Test
 	public void testObject() {
 		Filter f1 = null;
 		Object obj42 = new SampleObject("42");
@@ -359,6 +363,7 @@ public abstract class FilterTests extends TestCase {
 		assertFalse("does match filter", f1.match(new DictionaryServiceReference(hash)));
 	}
 
+	@Test
 	public void testNullValueMatch() throws InvalidSyntaxException {
 		Dictionary<String, Object> nullProps = new MapDictionary<>();
 		nullProps.put("test.null", null);
@@ -367,6 +372,7 @@ public abstract class FilterTests extends TestCase {
 		assertTrue(createFilter("(&(!(test.null=*))(test.non.null=v1))").match(nullProps));
 	}
 
+	@Test
 	public void testNullKeyMatch() throws InvalidSyntaxException {
 		Dictionary<String, Object> nullProps = new MapDictionary<>();
 		nullProps.put(null, "null.v1");

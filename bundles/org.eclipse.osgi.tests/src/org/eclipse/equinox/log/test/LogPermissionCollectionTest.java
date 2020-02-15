@@ -10,12 +10,15 @@
  ******************************************************************************/
 package org.eclipse.equinox.log.test;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.eclipse.equinox.log.LogPermission;
 import org.eclipse.equinox.log.LogPermissionCollection;
+import org.junit.Test;
 
-public class LogPermissionCollectionTest extends TestCase {
-
+public class LogPermissionCollectionTest {
+	@Test
 	public void testImplies() {
 
 		LogPermission permission = new LogPermission("*", "*"); //$NON-NLS-1$//$NON-NLS-2$
