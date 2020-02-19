@@ -17,8 +17,8 @@ import java.security.SignatureException;
 import java.security.cert.*;
 
 /**
- * A certificate verifier is used to verify the authenticity of a signed 
- * repository.  A certificate verifier is created using a 
+ * A certificate verifier is used to verify the authenticity of a signed
+ * repository.  A certificate verifier is created using a
  * {@link CertificateVerifierFactory}.
  * <p>
  * <strong>EXPERIMENTAL</strong>. This class or interface has been added as
@@ -30,8 +30,8 @@ import java.security.cert.*;
 public interface CertificateVerifier {
 	/**
 	 * Verify the content of the repository.
-	 * 
-	 * @throws CertificateException			
+	 *
+	 * @throws CertificateException
 	 * @throws CertificateExpiredException
 	 * @throws CertificateParsingException
 	 * @throws SignatureException
@@ -39,10 +39,10 @@ public interface CertificateVerifier {
 	public void checkContent() throws CertificateException, CertificateExpiredException, SignatureException;
 
 	/**
-	 * Verifies the content of the repository.  An array is returned with the entry names 
+	 * Verifies the content of the repository.  An array is returned with the entry names
 	 * which are corrupt.  If no entries are corrupt then an empty array is returned.
-	 * @return An array of entry names which are corrupt.  An empty array is returned if the 
-	 * repository is not corrupt or if the repository is not signed. 
+	 * @return An array of entry names which are corrupt.  An empty array is returned if the
+	 * repository is not corrupt or if the repository is not signed.
 	 */
 	public String[] verifyContent();
 
@@ -54,7 +54,7 @@ public interface CertificateVerifier {
 
 	/**
 	 * Returns all certificate chains of the repository.  All certificate chains
-	 * are returned whether they are trusted or not.  If the repository is not signed 
+	 * are returned whether they are trusted or not.  If the repository is not signed
 	 * then an empty array is returned.
 	 * @return all certificate chains of the repository
 	 */

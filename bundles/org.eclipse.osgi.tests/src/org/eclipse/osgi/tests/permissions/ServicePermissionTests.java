@@ -16,16 +16,11 @@ package org.eclipse.osgi.tests.permissions;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.util.PropertyPermission;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.Test;
 import org.osgi.framework.ServicePermission;
 
 public class ServicePermissionTests extends PermissionTests {
-
-	public static Test suite() {
-		return new TestSuite(ServicePermissionTests.class);
-	}
-
+	@Test
 	public void testServicePermission() {
 		badServicePermission("a.b.c", "x"); //$NON-NLS-1$ //$NON-NLS-2$
 		badServicePermission("a.b.c", "   get  ,  x   "); //$NON-NLS-1$ //$NON-NLS-2$

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -207,7 +207,7 @@ public class Capabilities {
 
 	/**
 	 * Adds the {@link ModuleRevision#getModuleCapabilities(String) capabilities}
-	 * provided by the specified revision to this database.  These capabilities must 
+	 * provided by the specified revision to this database.  These capabilities must
 	 * become available for lookup with the {@link #findCapabilities(Requirement)}
 	 * method.
 	 * @param revision the revision which has capabilities to add
@@ -240,7 +240,7 @@ public class Capabilities {
 	/**
 	 * Removes the {@link ModuleRevision#getModuleCapabilities(String) capabilities}
 	 * provided by the specified revision from this database.  These capabilities
-	 * must no longer be available for lookup with the 
+	 * must no longer be available for lookup with the
 	 * {@link #findCapabilities(Requirement)} method.
 	 * @param revision
 	 */
@@ -254,7 +254,7 @@ public class Capabilities {
 	}
 
 	/**
-	 * Returns a mutable snapshot of capabilities that are candidates for 
+	 * Returns a mutable snapshot of capabilities that are candidates for
 	 * satisfying the specified requirement.
 	 * @param requirement the requirement
 	 * @return the candidates for the requirement

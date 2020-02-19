@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 package org.eclipse.osgi.internal.signedcontent;
@@ -228,7 +228,7 @@ public class PKCS7Processor implements SignedContentConstants {
 				int noS = dateString.indexOf('Z') - 1 - dotIndex;
 				dateFormatSB.append('.');
 
-				// append s	
+				// append s
 				for (int i = 0; i < noS; i++) {
 					dateFormatSB.append('s');
 				}
@@ -237,8 +237,8 @@ public class PKCS7Processor implements SignedContentConstants {
 
 			try {
 				// if the current locale is th_TH, or ja_JP_JP, then our dateFormat object will end up with
-				// a calendar such as Buddhist or Japanese Imperial Calendar, and the signing time will be 
-				// incorrect ... so always use English as the locale for parsing the time, resulting in a 
+				// a calendar such as Buddhist or Japanese Imperial Calendar, and the signing time will be
+				// incorrect ... so always use English as the locale for parsing the time, resulting in a
 				// Gregorian calendar
 				DateFormat dateFormt = new SimpleDateFormat(dateFormatSB.toString(), Locale.ENGLISH);
 				dateFormt.setTimeZone(TimeZone.getTimeZone("GMT")); //$NON-NLS-1$
@@ -305,7 +305,7 @@ public class PKCS7Processor implements SignedContentConstants {
 	}
 
 	private Certificate processSignerInfos(BERProcessor bp, List<Certificate> certs) throws CertificateException, NoSuchAlgorithmException, SignatureException {
-		// We assume there is only one SingerInfo element 
+		// We assume there is only one SingerInfo element
 
 		// PKCS7: SignerINFOS processing
 		bp = bp.stepInto(); // Step into the set of signerinfos
@@ -317,7 +317,7 @@ public class PKCS7Processor implements SignedContentConstants {
 			throw new CertificateException(SignedContentMessages.PKCS7_SignerInfo_Version_Not_Supported);
 		}
 
-		// PKCS7: version CMSVersion 
+		// PKCS7: version CMSVersion
 		bp.stepOver(); // Skip the version
 
 		// PKCS7: sid [SignerIdentifier : issuerAndSerialNumber or subjectKeyIdentifer]
@@ -367,7 +367,7 @@ public class PKCS7Processor implements SignedContentConstants {
 		// PKCS7: signature
 		signature = bp.getBytes();
 
-		// PKCS7: Step into the unsignedAttrs, 
+		// PKCS7: Step into the unsignedAttrs,
 		bp.stepOver();
 
 		// process the unsigned attributes if there is any
@@ -383,7 +383,7 @@ public class PKCS7Processor implements SignedContentConstants {
 			// there are some unsignedAttrs are found!!
 			unsignedAttrs = new HashMap<>();
 
-			// step into a set of unsigned attributes, I believe, when steps 
+			// step into a set of unsigned attributes, I believe, when steps
 			// into here, the 'poiter' is pointing to the first element
 			BERProcessor unsignedAttrsBERS = bp.stepInto();
 			do {
@@ -445,7 +445,7 @@ public class PKCS7Processor implements SignedContentConstants {
 
 	/**
 	 * Return a map of signed attributes, the key(objid) = value(PKCSBlock in bytes for the key)
-	 * 
+	 *
 	 * @return  map if there is any signed attributes, null otherwise
 	 */
 	public Map<int[], byte[]> getUnsignedAttrs() {
@@ -454,7 +454,7 @@ public class PKCS7Processor implements SignedContentConstants {
 
 	/**
 	 * Return a map of signed attributes, the key(objid) = value(PKCSBlock in bytes for the key)
-	 * 
+	 *
 	 * @return  map if there is any signed attributes, null otherwise
 	 */
 	public Map<int[], byte[]> getSignedAttrs() {
@@ -462,12 +462,12 @@ public class PKCS7Processor implements SignedContentConstants {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param bp
 	 * @return		a List of certificates from target cert to root cert in order
-	 * 
+	 *
 	 * @throws CertificateException
-	 * @throws SignatureException 
+	 * @throws SignatureException
 	 */
 	private List<Certificate> processCertificates(BERProcessor bp) throws CertificateException, SignatureException {
 		List<Certificate> rtvList = new ArrayList<>(3);

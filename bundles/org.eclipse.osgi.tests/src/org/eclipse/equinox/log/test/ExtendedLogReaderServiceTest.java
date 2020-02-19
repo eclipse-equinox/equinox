@@ -10,16 +10,21 @@
  ******************************************************************************/
 package org.eclipse.equinox.log.test;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import junit.framework.TestCase;
 import org.eclipse.equinox.log.ExtendedLogEntry;
 import org.eclipse.equinox.log.ExtendedLogReaderService;
 import org.eclipse.equinox.log.ExtendedLogService;
 import org.eclipse.equinox.log.LogFilter;
 import org.eclipse.equinox.log.SynchronousLogListener;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogEntry;
@@ -30,7 +35,7 @@ import org.osgi.service.log.Logger;
 import org.osgi.service.log.admin.LoggerAdmin;
 import org.osgi.service.log.admin.LoggerContext;
 
-public class ExtendedLogReaderServiceTest extends TestCase {
+public class ExtendedLogReaderServiceTest {
 
 	private ExtendedLogService log;
 	private ServiceReference logReference;
@@ -42,11 +47,8 @@ public class ExtendedLogReaderServiceTest extends TestCase {
 	Map<String, LogLevel> rootLogLevels;
 	boolean called;
 
-	public ExtendedLogReaderServiceTest(String name) {
-		super(name);
-	}
-
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		logReference = OSGiTestsActivator.getContext().getServiceReference(ExtendedLogService.class.getName());
 		readerReference = OSGiTestsActivator.getContext().getServiceReference(ExtendedLogReaderService.class.getName());
 		loggerAdminReference = OSGiTestsActivator.getContext().getServiceReference(LoggerAdmin.class);
@@ -63,13 +65,15 @@ public class ExtendedLogReaderServiceTest extends TestCase {
 		rootLoggerContext.setLogLevels(copyLogLevels);
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		rootLoggerContext.setLogLevels(rootLogLevels);
 		OSGiTestsActivator.getContext().ungetService(loggerAdminReference);
 		OSGiTestsActivator.getContext().ungetService(logReference);
 		OSGiTestsActivator.getContext().ungetService(readerReference);
 	}
 
+	@Test
 	public void testaddFilteredListener() throws Exception {
 		TestListener listener = new TestListener();
 		reader.addLogListener(listener, new LogFilter() {
@@ -81,6 +85,7 @@ public class ExtendedLogReaderServiceTest extends TestCase {
 		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
 	}
 
+	@Test
 	public void testaddNullFilterr() throws Exception {
 		TestListener listener = new TestListener();
 
@@ -92,6 +97,7 @@ public class ExtendedLogReaderServiceTest extends TestCase {
 		fail();
 	}
 
+	@Test
 	public void testaddFilteredListenerTwice() throws Exception {
 		TestListener listener = new TestListener();
 		reader.addLogListener(listener, new LogFilter() {
@@ -112,6 +118,7 @@ public class ExtendedLogReaderServiceTest extends TestCase {
 		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
 	}
 
+	@Test
 	public void testaddNullListener() throws Exception {
 		try {
 			reader.addLogListener(null);
@@ -121,6 +128,7 @@ public class ExtendedLogReaderServiceTest extends TestCase {
 		fail();
 	}
 
+	@Test
 	public void testBadFilter() throws Exception {
 		TestListener listener = new TestListener();
 		reader.addLogListener(listener, new LogFilter() {
@@ -133,6 +141,7 @@ public class ExtendedLogReaderServiceTest extends TestCase {
 			fail();
 	}
 
+	@Test
 	public void testSynchronousLogListener() throws Exception {
 		final Thread loggerThread = Thread.currentThread();
 		called = false;
@@ -147,6 +156,7 @@ public class ExtendedLogReaderServiceTest extends TestCase {
 		assertTrue(called);
 	}
 
+	@Test
 	public void testExtendedLogEntry() throws Exception {
 		TestListener listener = new TestListener();
 		reader.addLogListener(listener);

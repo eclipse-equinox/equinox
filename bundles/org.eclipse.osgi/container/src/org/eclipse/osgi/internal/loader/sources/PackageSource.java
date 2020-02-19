@@ -149,7 +149,7 @@ public abstract class PackageSource {
 				@SuppressWarnings("deprecation")
 				Bundle bundle = container.getPackageAdmin().getBundle(serviceClass);
 				if (bundle != null && bundle != registrant)
-					// in this case we have a wacky ServiceFactory that is doing something we cannot 
+					// in this case we have a wacky ServiceFactory that is doing something we cannot
 					// verify if it is correct.  Instead of failing we allow the assignment and hope for the best
 					// bug 326918
 					return true;

@@ -32,8 +32,8 @@ import org.eclipse.osgi.framework.eventmgr.EventManager.EventThread;
  * can then be synchronously or asynchronously delivered to the list of
  * listeners. After the event has been dispatched for delivery, the
  * ListenerQueue object should be discarded as it is likely the list of listeners is stale.
- * A new ListenerQueue object should be created when it is time to deliver 
- * another event. The Sets used to build the list of listeners must not change after being 
+ * A new ListenerQueue object should be created when it is time to deliver
+ * another event. The Sets used to build the list of listeners must not change after being
  * added to the list.
  * @since 3.1
  */
@@ -48,7 +48,7 @@ public class ListenerQueue<K, V, E> {
 	private final Map<Set<Map.Entry<K, V>>, EventDispatcher<K, V, E>> queue;
 
 	/**
-	 * Once the listener queue has been used to dispatch an event, 
+	 * Once the listener queue has been used to dispatch an event,
 	 * you cannot add modify the queue.
 	 * Access to this field must be protected by a synchronized region.
 	 */

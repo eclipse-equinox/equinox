@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -21,7 +21,7 @@ import java.io.IOException;
  * A <code>SignedContentEntry</code> represents a content entry which may be
  * signed.
  * <p>
- * A <code>SignedContentEntry</code> object is intended to provide information about 
+ * A <code>SignedContentEntry</code> object is intended to provide information about
  * the signers of the content entry, and cannot be used to access the actual data of the entry.
  * </p>
  * <p>
@@ -46,7 +46,7 @@ public interface SignedContentEntry {
 
 	/**
 	 * Returns true if the entry is signed; false otherwise.  This is a convenience method
-	 * equivalent to calling <code>{@link #getSignerInfos()}.length &gt; 0</code> 
+	 * equivalent to calling <code>{@link #getSignerInfos()}.length &gt; 0</code>
 	 * @return true if the content is signed
 	 */
 	public boolean isSigned();

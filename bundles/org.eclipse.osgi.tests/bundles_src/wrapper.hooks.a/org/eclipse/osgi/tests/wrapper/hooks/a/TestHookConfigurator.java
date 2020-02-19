@@ -57,7 +57,7 @@ public class TestHookConfigurator implements HookConfigurator {
 								}
 
 								/**
-								 * @throws IOException  
+								 * @throws IOException
 								 */
 								@Override
 								public InputStream getInputStream() throws IOException {

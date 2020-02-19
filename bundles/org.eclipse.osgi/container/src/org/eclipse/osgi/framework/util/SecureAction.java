@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -41,9 +41,9 @@ public class SecureAction {
 	});
 
 	/*
-	 * Package privaet constructor a new SecureAction object.  
-	 * The constructed SecureAction object uses the caller's AccessControlContext 
-	 * to perform security checks 
+	 * Package privaet constructor a new SecureAction object.
+	 * The constructed SecureAction object uses the caller's AccessControlContext
+	 * to perform security checks
 	 */
 	SecureAction() {
 		// save the control context to be used.

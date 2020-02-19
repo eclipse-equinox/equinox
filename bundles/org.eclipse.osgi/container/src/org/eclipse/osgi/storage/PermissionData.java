@@ -107,7 +107,7 @@ public class PermissionData {
 
 	/**
 	 * Returns the persistent array of encoded ConditionalPermissionInfo strings
-	 * @return an array of encoded ConditionalPermissionInfo strings or null 
+	 * @return an array of encoded ConditionalPermissionInfo strings or null
 	 * if none exist in persistent storage.
 	 */
 	public String[] getConditionalPermissionInfos() {

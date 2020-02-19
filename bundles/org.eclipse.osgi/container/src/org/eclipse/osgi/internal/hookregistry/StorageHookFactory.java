@@ -41,10 +41,10 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 	protected final String KEY = this.getClass().getName().intern();
 
 	/**
-	 * Returns the storage version of this storage hook.  This version 
-	 * is used by the storage to check the consistency of cached persistent 
-	 * data.  Any time a storage hook changes the format of its persistent 
-	 * data the storage version should be incremented. 
+	 * Returns the storage version of this storage hook.  This version
+	 * is used by the storage to check the consistency of cached persistent
+	 * data.  Any time a storage hook changes the format of its persistent
+	 * data the storage version should be incremented.
 	 * @return the storage version of this storage hook
 	 */
 	public int getStorageVersion() {
@@ -60,13 +60,13 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 	}
 
 	/**
-	 * Returns true if the persisted version is compatible with the 
+	 * Returns true if the persisted version is compatible with the
 	 * current version of this storage hook.  The default implementation
 	 * returns true if the specified version is identical to the current
 	 * version.  Implementations must override this method if they
 	 * want to support other (older) versions for migration purposes.
 	 * @param version the persisted version
-	 * @return true if the persisted version is compatible with 
+	 * @return true if the persisted version is compatible with
 	 * the current version.
 	 */
 	public boolean isCompatibleWith(int version) {
@@ -74,7 +74,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 	}
 
 	/**
-	 * Creates a save context object for a storage hook.  The 
+	 * Creates a save context object for a storage hook.  The
 	 * save context is passed to the {@link StorageHook#save(Object, DataOutputStream)}
 	 * for each generation being persisted by the framework.
 	 * @return a save context object or {@code null} if no save context is needed
@@ -108,7 +108,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 	 * Creates a storage hook for the specified generation and checks that the
 	 * factory class of the storage hook equals the class of this storage hook
 	 * factory.
-	 * 
+	 *
 	 * @param generation - The generation for which a storage hook should be
 	 *        created.
 	 * @return A newly created storage hook or {@code null} if no hook is needed
@@ -168,7 +168,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 		}
 
 		/**
-		 * Initializes this storage hook with the content of the specified bundle manifest.  
+		 * Initializes this storage hook with the content of the specified bundle manifest.
 		 * This method is called when a bundle is installed or updated.
 		 * @param manifest the bundle manifest to load into this storage hook
 		 * @throws BundleException if any error occurs
@@ -184,7 +184,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 		 * This will be either {@link ModuleEvent#INSTALLED installed} or {@link ModuleEvent#UPDATED updated}.
 		 * @param origin The module which originated the lifecycle operation. The origin may be {@code null} for
 		 * {@link ModuleEvent#INSTALLED installed} operations.  This is the module
-		 * passed to the {@link ModuleContainer#install(Module, String, ModuleRevisionBuilder, Object) install} or 
+		 * passed to the {@link ModuleContainer#install(Module, String, ModuleRevisionBuilder, Object) install} or
 		 * {@link ModuleContainer#update(Module, ModuleRevisionBuilder, Object) update} method.
 		 * @param builder the builder that will be used to create a new {@link ModuleRevision}.
 		 * @return The modified builder or a completely new builder to be used by the bundle.  A {@code null} value
@@ -198,10 +198,10 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 		}
 
 		/**
-		 * Loads the data from the specified 
-		 * input stream into the storage hook.  This method is called during startup to 
+		 * Loads the data from the specified
+		 * input stream into the storage hook.  This method is called during startup to
 		 * load all the persistently installed bundles. <p>
-		 * It is important that this method and the {@link #save(Object, DataOutputStream)} method 
+		 * It is important that this method and the {@link #save(Object, DataOutputStream)} method
 		 * stay in sync.  This method must be able to successfully read the data saved by the
 		 * {@link #save(Object, DataOutputStream)} method.
 		 * @param is an input stream used to load the storage hook's data from.
@@ -216,7 +216,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 		 * Saves the data from this storage hook into the specified output stream.  This method
 		 * is called if some persistent data has changed for the bundle. <p>
 		 * It is important that this method and the {@link #load(Object, DataInputStream)}
-		 * method stay in sync.  This method must be able to save data which the 
+		 * method stay in sync.  This method must be able to save data which the
 		 * {@link #load(Object, DataInputStream)} method can ready successfully.
 		 * @see #load(Object, DataInputStream)
 		 * @param os an output stream used to save the storage hook's data from.
@@ -235,7 +235,7 @@ public abstract class StorageHookFactory<S, L, H extends StorageHookFactory.Stor
 		}
 
 		/**
-		 * Validates the data in this storage hook, if the data is invalid then an illegal state 
+		 * Validates the data in this storage hook, if the data is invalid then an illegal state
 		 * exception is thrown
 		 * @throws IllegalStateException if the data is invalid
 		 */

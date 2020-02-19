@@ -95,7 +95,7 @@ public class ZipBundleEntry extends BundleEntry {
 		try {
 			return new URL("jar:" + bundleFile.basefile.toURL() + "!/" + zipEntry.getName()); //$NON-NLS-1$//$NON-NLS-2$
 		} catch (MalformedURLException e) {
-			//This can not happen. 
+			//This can not happen.
 			return null;
 		}
 	}
@@ -108,7 +108,7 @@ public class ZipBundleEntry extends BundleEntry {
 			if (file != null)
 				return file.toURL();
 		} catch (MalformedURLException e) {
-			//This can not happen. 
+			//This can not happen.
 		}
 		return null;
 	}

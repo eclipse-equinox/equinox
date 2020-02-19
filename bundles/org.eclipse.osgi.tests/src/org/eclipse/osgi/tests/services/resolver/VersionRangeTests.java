@@ -7,17 +7,23 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
-import junit.framework.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import org.eclipse.osgi.service.resolver.VersionRange;
+import org.junit.Test;
 import org.osgi.framework.Version;
 
-public class VersionRangeTests extends TestCase {
+public class VersionRangeTests {
+	@Test
 	public void testSingleVersionRange() {
 		VersionRange range;
 		range = new VersionRange("[1.0.0, 1.0.0.-)"); //$NON-NLS-1$
@@ -32,6 +38,7 @@ public class VersionRangeTests extends TestCase {
 		assertTrue("2.4", !range.isIncluded(Version.parseVersion("2"))); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	@Test
 	public void testInvertedRange() {
 		VersionRange range;
 		range = new VersionRange("[2.0.0, 1.0.0]"); //$NON-NLS-1$
@@ -42,8 +49,9 @@ public class VersionRangeTests extends TestCase {
 		assertTrue("1.4", !range.isIncluded(Version.parseVersion("0.5"))); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	@Test
 	public void testGreaterThan() {
-		// any version equal or greater than 1.0 is ok 
+		// any version equal or greater than 1.0 is ok
 		VersionRange lowerBound = new VersionRange("1.0.0"); //$NON-NLS-1$
 		assertTrue("1.0", !lowerBound.isIncluded(Version.parseVersion("0.9"))); //$NON-NLS-1$ //$NON-NLS-2$
 		assertTrue("1.1", lowerBound.isIncluded(Version.parseVersion("1.0"))); //$NON-NLS-1$ //$NON-NLS-2$
@@ -51,8 +59,9 @@ public class VersionRangeTests extends TestCase {
 		assertTrue("1.3", lowerBound.isIncluded(Version.parseVersion("999.999.999.foo"))); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	@Test
 	public void testLowerThan() {
-		// any version lower than 2.0 is ok 		
+		// any version lower than 2.0 is ok
 		VersionRange upperBound = new VersionRange("[0,2.0)"); //$NON-NLS-1$
 		assertTrue("1.0", upperBound.isIncluded(Version.parseVersion("0.0"))); //$NON-NLS-1$ //$NON-NLS-2$
 		assertTrue("1.1", upperBound.isIncluded(Version.parseVersion("0.9"))); //$NON-NLS-1$ //$NON-NLS-2$
@@ -62,6 +71,7 @@ public class VersionRangeTests extends TestCase {
 		assertTrue("1.5", !upperBound.isIncluded(Version.parseVersion("2.1"))); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	@Test
 	public void testNullMin() {
 		VersionRange nullMin = new VersionRange(null, true, new Version("1.0"), false); //$NON-NLS-1$
 		assertNotNull("0.1", nullMin.getMinimum()); //$NON-NLS-1$
@@ -74,6 +84,7 @@ public class VersionRangeTests extends TestCase {
 		assertFalse("1.5", nullMin.isIncluded(Version.parseVersion("2.1"))); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	@Test
 	public void testNullMax() {
 		VersionRange nullMaxAny = new VersionRange(new Version("0"), true, null, true); //$NON-NLS-1$
 		assertTrue("1.0", nullMaxAny.isIncluded(Version.parseVersion("0.0"))); //$NON-NLS-1$ //$NON-NLS-2$
@@ -84,7 +95,4 @@ public class VersionRangeTests extends TestCase {
 		assertTrue("1.5", nullMaxAny.isIncluded(new Version(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE))); //$NON-NLS-1$
 	}
 
-	public static Test suite() {
-		return new TestSuite(VersionRangeTests.class);
-	}
 }

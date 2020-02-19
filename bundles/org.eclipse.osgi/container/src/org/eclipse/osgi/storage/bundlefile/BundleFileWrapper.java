@@ -22,12 +22,12 @@ import org.eclipse.osgi.internal.hookregistry.BundleFileWrapperFactoryHook;
 import org.eclipse.osgi.storage.BundleInfo;
 
 /**
- * A {@link BundleFile bundle file} decorator. 
+ * A {@link BundleFile bundle file} decorator.
  * <p/>
- * Clients wishing to modify or extend the behavior of a bundle file at runtime 
- * should extend this class instead. A hook is provided by the related {@link 
- * BundleFileWrapperFactoryHook abstract factory} class in response to a 
- * {@link BundleFileWrapperFactoryHook#wrapBundleFile(BundleFile, 
+ * Clients wishing to modify or extend the behavior of a bundle file at runtime
+ * should extend this class instead. A hook is provided by the related {@link
+ * BundleFileWrapperFactoryHook abstract factory} class in response to a
+ * {@link BundleFileWrapperFactoryHook#wrapBundleFile(BundleFile,
  * BundleInfo.Generation, boolean) call} from the framework.
  */
 public class BundleFileWrapper extends BundleFile {
@@ -36,7 +36,7 @@ public class BundleFileWrapper extends BundleFile {
 	/**
 	 * Creates a new <code>BundleFileWrapper</code> instance wrapping the
 	 * given {@link BundleFile bundle file}.
-	 * 
+	 *
 	 * @param bundleFile - The bundle file to wrap.
 	 * @throws NullPointerException - If the bundle file is <code>null</code>.
 	 */
@@ -67,7 +67,7 @@ public class BundleFileWrapper extends BundleFile {
 
 	/**
 	 * Get the wrapped bundle file.
-	 * 
+	 *
 	 * @return The wrapped bundle file.
 	 */
 	public BundleFile getBundleFile() {

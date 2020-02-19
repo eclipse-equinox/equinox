@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -29,7 +29,7 @@ public class TestGrouping_002 extends AbstractStateTest {
 	BundleDescription bundle_2 = null;
 	BundleDescription bundle_3 = null;
 
-	
+
 	public void testTest_002() {
 		State state = buildEmptyState();
 		StateObjectFactory sof = StateObjectFactory.defaultFactory;
@@ -54,7 +54,7 @@ public class TestGrouping_002 extends AbstractStateTest {
 		checkWiring_a();
 	} // end of method
 
-	
+
 	public void checkWiringState_1() {
 	} // end method
 
@@ -71,7 +71,7 @@ public class TestGrouping_002 extends AbstractStateTest {
 		checkWiringState_3();
 	} // end method
 
-	
+
 	public void addBundlesToState_a(State state) {
 		boolean added = false;
 		added = state.addBundle(bundle_1);
@@ -82,14 +82,14 @@ public class TestGrouping_002 extends AbstractStateTest {
 		assertTrue("failed to add bundle ", added);
 	} // end method
 
-	
+
 	public void checkBundlesResolved_a() {
 		assertTrue("unexpected bundle resolution state", !bundle_1.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_2.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_3.isResolved());
 	} // end method
 
-	
+
 	public BundleDescription create_bundle_1(StateObjectFactory sof) {
 		java.util.Dictionary dictionary_1 = new java.util.Properties();
 		BundleDescription bundle = null;

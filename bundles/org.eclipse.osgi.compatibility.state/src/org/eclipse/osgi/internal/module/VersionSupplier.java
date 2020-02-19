@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -48,7 +48,7 @@ public abstract class VersionSupplier {
 		return substitute;
 	}
 
-	// sets the dropped status.  This should only be called by the VersionHashMap 
+	// sets the dropped status.  This should only be called by the VersionHashMap
 	// when VersionSuppliers are removed
 	void setSubstitute(VersionSupplier substitute) {
 		this.substitute = substitute;
@@ -60,7 +60,7 @@ public abstract class VersionSupplier {
 	abstract public BundleDescription getBundleDescription();
 
 	/*
-	 * returns the ResolverBundle which supplies this VersionSupplier 
+	 * returns the ResolverBundle which supplies this VersionSupplier
 	 */
 	abstract ResolverBundle getResolverBundle();
 

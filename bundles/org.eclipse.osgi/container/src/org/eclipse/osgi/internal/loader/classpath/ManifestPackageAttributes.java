@@ -38,8 +38,8 @@ class ManifestPackageAttributes {
 	 * Factory method for creating ManifestPackageAttributes.  If any of the given title,
 	 * version, or vendor values are <code>null</code> then the defaultAttributes will be
 	 * used.  If the defaultAttributes is null or returns all <code>null</code> values then
-	 * <code>null</code> values will be used.  If <code>null</code> values are used for all of the 
-	 * versions, titles, and vendors then {@link #NONE} is returned. 
+	 * <code>null</code> values will be used.  If <code>null</code> values are used for all of the
+	 * versions, titles, and vendors then {@link #NONE} is returned.
 	 * @param specificationTitle the package specification title
 	 * @param specificationVersion the package specification version
 	 * @param specificationVendor the package specification vendor

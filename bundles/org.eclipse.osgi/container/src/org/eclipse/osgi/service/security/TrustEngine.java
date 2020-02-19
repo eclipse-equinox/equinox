@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -19,7 +19,7 @@ import java.security.cert.Certificate;
 import org.eclipse.osgi.internal.signedcontent.TrustEngineListener;
 
 /**
- * A <code>TrustEngine</code> is used to establish the authenticity of a 
+ * A <code>TrustEngine</code> is used to establish the authenticity of a
  * {@link Certificate} chain.
  * <p>
  * Clients may implement this interface.
@@ -29,7 +29,7 @@ import org.eclipse.osgi.internal.signedcontent.TrustEngineListener;
 public abstract class TrustEngine {
 	/**
 	 * Returns the certificate trust anchor contained in the specified chain which
-	 * was used to establish the authenticity of the chain.  If no 
+	 * was used to establish the authenticity of the chain.  If no
 	 * trust anchor is found in the chain then <code>null</code> is returned.
 	 * @param chain - a complete or incomplete certificate chain, implementations *MAY* complete chains
 	 * @return - the certificate trust anchor used to establish authenticity
@@ -38,7 +38,7 @@ public abstract class TrustEngine {
 	public abstract Certificate findTrustAnchor(Certificate[] chain) throws IOException;
 
 	/**
-	 * Add a trust anchor point to this trust engine. A trust anchor implies that a certificate, 
+	 * Add a trust anchor point to this trust engine. A trust anchor implies that a certificate,
 	 * and any of its children, is to be considered trusted.  If <code>null</code> is used
 	 * as the alias then an alias will be generated based on the trust anchor certificate.
 	 * @param anchor - the certificate to add as an anchor point
@@ -58,7 +58,7 @@ public abstract class TrustEngine {
 	}
 
 	/**
-	 * Add a trust anchor point to this trust engine. A trust anchor implies that a certificate, 
+	 * Add a trust anchor point to this trust engine. A trust anchor implies that a certificate,
 	 * and any of its children, is to be considered trusted.  If <code>null</code> is used
 	 * as the alias then an alias will be generated based on the trust anchor certificate.
 	 * @param anchor - the certificate to add as an anchor point
@@ -118,7 +118,7 @@ public abstract class TrustEngine {
 
 	/**
 	 * Return the certificate associated with the unique "friendly name" in the engine.
-	 * @param alias - the friendly name  
+	 * @param alias - the friendly name
 	 * @return the associated trust anchor
 	 * @throws IOException if there is a problem connecting to the backing store
 	 * @throws GeneralSecurityException if there is a certificate problem
@@ -135,14 +135,14 @@ public abstract class TrustEngine {
 
 	/**
 	 * Return a value indicate whether this trust engine is read-only.
-	 * 
+	 *
 	 * @return	true if this trust engine is read-only false otherwise.
 	 */
 	public abstract boolean isReadOnly();
 
 	/**
 	 * Return a representation string of this trust engine
-	 * 
+	 *
 	 * @return	a string
 	 */
 	public abstract String getName();

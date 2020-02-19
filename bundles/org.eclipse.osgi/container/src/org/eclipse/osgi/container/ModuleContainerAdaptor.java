@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -242,7 +242,7 @@ public abstract class ModuleContainerAdaptor {
 	}
 
 	/**
-	 * This is called when a wiring is made invalid and allows the adaptor to react 
+	 * This is called when a wiring is made invalid and allows the adaptor to react
 	 * to this.  This method is called while holding state change lock for the
 	 * module as well as for the module database.  Care must be taken not to introduce
 	 * deadlock.
@@ -256,7 +256,7 @@ public abstract class ModuleContainerAdaptor {
 	/**
 	 * This is called if a request to refresh modules causes the system module
 	 * to be refreshed.  This causes the system module to be stopped in a back
-	 * ground thread.  This method is called before the background thread is 
+	 * ground thread.  This method is called before the background thread is
 	 * started to stop the system module.
 	 */
 	public void refreshedSystemModule() {
@@ -303,7 +303,7 @@ public abstract class ModuleContainerAdaptor {
 	}
 
 	/**
-	 * Returns the executor used to by the 
+	 * Returns the executor used to by the
 	 * {@link ModuleContainer#getFrameworkStartLevel() FrameworkStartLevel} implementation to
 	 * start bundles that have the same start level.  This allows bundles to be
 	 * started in parallel.
@@ -319,11 +319,11 @@ public abstract class ModuleContainerAdaptor {
 	 * call when a new module is {@link ModuleContainer#install(Module, String, ModuleRevisionBuilder, Object) installed}
 	 * into the container or when an existing module is {@link ModuleContainer#update(Module, ModuleRevisionBuilder, Object) updated}
 	 * with a new revision.  The container does not call any methods on the builder before calling this method.
-	 * @param operation The lifecycle operation event that is in progress using the supplied builder. 
+	 * @param operation The lifecycle operation event that is in progress using the supplied builder.
 	 * This will be either {@link ModuleEvent#INSTALLED installed} or {@link ModuleEvent#UPDATED updated}.
 	 * @param origin The module which originated the lifecycle operation. The origin may be {@code null} for
 	 * {@link ModuleEvent#INSTALLED installed} operations.  This is the module
-	 * passed to the {@link ModuleContainer#install(Module, String, ModuleRevisionBuilder, Object) install} or 
+	 * passed to the {@link ModuleContainer#install(Module, String, ModuleRevisionBuilder, Object) install} or
 	 * {@link ModuleContainer#update(Module, ModuleRevisionBuilder, Object) update} method.
 	 * @param builder the builder that will be used to create a new {@link ModuleRevision}.
 	 * @param revisionInfo the revision info that will be used for the new revision, may be {@code null}.

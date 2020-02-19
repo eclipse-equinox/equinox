@@ -14,22 +14,27 @@
 
 package org.eclipse.osgi.tests.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import junit.framework.TestCase;
 import org.eclipse.osgi.util.ManifestElement;
 import org.junit.Assert;
+import org.junit.Test;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
-public class ManifestElementTestCase extends TestCase {
+public class ManifestElementTestCase {
 
+	@Test
 	public void testSpacesInValues() throws BundleException {
-		ManifestElement[] elements = ManifestElement.parseHeader("test-spaces", "\"comp 1\";\"comp 2\";\"comp 3\";attr=\"val 1\";dir:=\"val 2\"");
+		ManifestElement[] elements = ManifestElement.parseHeader("test-spaces",
+				"\"comp 1\";\"comp 2\";\"comp 3\";attr=\"val 1\";dir:=\"val 2\"");
 		assertNotNull("1.0", elements);
 		assertEquals("1.1", elements.length, 1);
 		String[] components = elements[0].getValueComponents();
@@ -43,8 +48,10 @@ public class ManifestElementTestCase extends TestCase {
 		assertEquals("3.1", elements[0].getDirective("dir"), "val 2");
 	}
 
+	@Test
 	public void testBug238675_01() throws BundleException {
-		ManifestElement[] elements = ManifestElement.parseHeader("Bundle-NativeCode", "\"external:C:/tmp/x.dll\";\"external:C:/tmp/y.dll\"; osname =WindowsXP; osverison = 2.0; processor = x86"); //$NON-NLS-1$//$NON-NLS-2$
+		ManifestElement[] elements = ManifestElement.parseHeader("Bundle-NativeCode", //$NON-NLS-1$
+				"\"external:C:/tmp/x.dll\";\"external:C:/tmp/y.dll\"; osname =WindowsXP; osverison = 2.0; processor = x86"); //$NON-NLS-1$
 		assertNotNull("1.0", elements);
 		assertEquals("1.1", 1, elements.length);
 		String[] components = elements[0].getValueComponents();
@@ -54,8 +61,10 @@ public class ManifestElementTestCase extends TestCase {
 		assertEquals("2.1", "external:C:/tmp/y.dll", components[1]);
 	}
 
+	@Test
 	public void testBug238675_02() throws BundleException {
-		ManifestElement[] elements = ManifestElement.parseHeader("Bundle-NativeCode", "\"external:test1:test2\";\"test3:test4:\"; osname =WindowsXP; osverison = 2.0; processor = x86"); //$NON-NLS-1$ //$NON-NLS-2$
+		ManifestElement[] elements = ManifestElement.parseHeader("Bundle-NativeCode", //$NON-NLS-1$
+				"\"external:test1:test2\";\"test3:test4:\"; osname =WindowsXP; osverison = 2.0; processor = x86"); //$NON-NLS-1$
 		assertNotNull("1.0", elements);
 		assertEquals("1.1", 1, elements.length);
 		String[] components = elements[0].getValueComponents();
@@ -75,14 +84,17 @@ public class ManifestElementTestCase extends TestCase {
 			"" //
 	);
 
+	@Test
 	public void testManifestWithCR() throws IOException, BundleException {
 		doManifestTest("\r");
 	}
 
+	@Test
 	public void testManifestWithLF() throws IOException, BundleException {
 		doManifestTest("\n");
 	}
 
+	@Test
 	public void testManifestWithCRLF() throws IOException, BundleException {
 		doManifestTest("\r\n");
 	}
@@ -93,11 +105,13 @@ public class ManifestElementTestCase extends TestCase {
 		Assert.assertEquals("Wrong Import-Package.", "test1,test2,test3", manifest.get(Constants.IMPORT_PACKAGE));
 	}
 
-	private Map<String, String> getManifest(List<String> manifestLines, String newLine) throws IOException, BundleException {
+	private Map<String, String> getManifest(List<String> manifestLines, String newLine)
+			throws IOException, BundleException {
 		StringBuilder manifestText = new StringBuilder();
 		for (String line : manifestLines) {
 			manifestText.append(line).append(newLine);
 		}
-		return ManifestElement.parseBundleManifest(new ByteArrayInputStream(manifestText.toString().getBytes(StandardCharsets.UTF_8)), null);
+		return ManifestElement.parseBundleManifest(
+				new ByteArrayInputStream(manifestText.toString().getBytes(StandardCharsets.UTF_8)), null);
 	}
 }

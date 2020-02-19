@@ -29,11 +29,11 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 
 /*
- * The framework must discard a persisted bundle when the 
+ * The framework must discard a persisted bundle when the
  * osgi.checkConfiguration configuration property is specified and equal to
  * true.
- * 
- * On a related note, if the osgi.dev configuration property is specified but 
+ *
+ * On a related note, if the osgi.dev configuration property is specified but
  * the osgi.checkConfiguration configuration property is not specified, the
  * framework must specify the osgi.checkConfiguration configuration property
  * with a value equal to true.

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -20,10 +20,10 @@ import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleRevisions;
 
 /**
- * An implementation of {@link BundleRevisions} which represent a 
+ * An implementation of {@link BundleRevisions} which represent a
  * {@link Module} installed in a {@link ModuleContainer container}.
- * The ModuleRevisions provides a bridge between the revisions, the 
- * module and the container they are associated with.  The 
+ * The ModuleRevisions provides a bridge between the revisions, the
+ * module and the container they are associated with.  The
  * ModuleRevisions holds the information about the installation of
  * a module in a container such as the module id and location.
  * @since 3.10
@@ -77,7 +77,7 @@ public final class ModuleRevisions implements BundleRevisions {
 
 	/**
 	 * Returns the current {@link ModuleRevision revision} associated with this revisions.
-	 * 
+	 *
 	 * @return the current {@link ModuleRevision revision} associated with this revisions
 	 *     or {@code null} if the current revision does not exist.
 	 */

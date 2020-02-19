@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Rob Harrop - SpringSource Inc. (bug 247522)
@@ -755,7 +755,7 @@ final class StateReader {
 
 	/**
 	 * expectedTimestamp is the expected value for the timestamp. or -1, if
-	 * 	no checking should be performed 
+	 * 	no checking should be performed
 	 */
 	public synchronized boolean loadStateDeprecated(StateImpl state, DataInputStream input, long expectedTimestamp) throws IOException {
 		try {
@@ -767,7 +767,7 @@ final class StateReader {
 
 	/**
 	 * expectedTimestamp is the expected value for the timestamp. or -1, if
-	 * 	no checking should be performed 
+	 * 	no checking should be performed
 	 */
 	public synchronized boolean loadState(StateImpl state, long expectedTimestamp) throws IOException {
 		return readState(state, expectedTimestamp);

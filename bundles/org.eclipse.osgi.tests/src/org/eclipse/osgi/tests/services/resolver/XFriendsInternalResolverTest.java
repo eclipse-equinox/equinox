@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -31,7 +31,7 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 	/**
 	 * Tests the x-friends directive.  A bundle should not be allowed to import a package which
 	 * declares an x-friends directive and the importer is not a friend.  When a bundle requires
-	 * anther bundle which exports packages which declare an x-friends directive it should not 
+	 * anther bundle which exports packages which declare an x-friends directive it should not
 	 * have access to the packages unless the requiring bundle is a friend.
 	 * @throws BundleException
 	 */
@@ -44,7 +44,7 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.exporter");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
-		manifest.put(Constants.EXPORT_PACKAGE, 
+		manifest.put(Constants.EXPORT_PACKAGE,
 				"test.exporter.foo1; x-friends:=\"test.importer1, test.requirer1\"," +
 				"test.exporter.foo2; x-friends:=\"test.importer2, test.requirer2\"," +
 				"test.exporter.bar1; x-friends:=\"test.importer1, test.requirer1\"," +
@@ -55,7 +55,7 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.importer1");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
-		manifest.put(Constants.IMPORT_PACKAGE, 
+		manifest.put(Constants.IMPORT_PACKAGE,
 				"test.exporter.foo1," +
 				"test.exporter.bar1," +
 				"test.exporter.foo2; resolution:=optional," +
@@ -66,7 +66,7 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.importer2");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
-		manifest.put(Constants.IMPORT_PACKAGE, 
+		manifest.put(Constants.IMPORT_PACKAGE,
 				"test.exporter.foo1; resolution:=optional," +
 				"test.exporter.bar1; resolution:=optional," +
 				"test.exporter.foo2," +
@@ -77,7 +77,7 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.importer3");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
-		manifest.put(Constants.IMPORT_PACKAGE, 
+		manifest.put(Constants.IMPORT_PACKAGE,
 				"test.exporter.foo1," +
 				"test.exporter.bar1," +
 				"test.exporter.foo2; resolution:=optional," +
@@ -200,7 +200,7 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.base.exporter");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
-		manifest.put(Constants.EXPORT_PACKAGE, 
+		manifest.put(Constants.EXPORT_PACKAGE,
 				"test.base; base.exporter=split; mandatory:=base.exporter");
 		BundleDescription baseExporter = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
@@ -209,7 +209,7 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.base.exporter.require");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.REQUIRE_BUNDLE, "test.base.exporter");
-		manifest.put(Constants.EXPORT_PACKAGE, 
+		manifest.put(Constants.EXPORT_PACKAGE,
 				"test.base; base.exporter.require=split; mandatory:=base.exporter.require");
 		BundleDescription baseExporterRequire = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
@@ -217,7 +217,7 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.base.exporter.require2");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
-		manifest.put(Constants.REQUIRE_BUNDLE, 
+		manifest.put(Constants.REQUIRE_BUNDLE,
 				"test.base.exporter.require");
 		manifest.put(Constants.EXPORT_PACKAGE, "test.base.exporter.require");
 		BundleDescription baseExporterRequire2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
@@ -227,7 +227,7 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.base.importer");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
-		manifest.put(Constants.REQUIRE_BUNDLE, 
+		manifest.put(Constants.REQUIRE_BUNDLE,
 				"test.base.exporter.require");
 		BundleDescription baseImporter = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
@@ -332,7 +332,7 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
-		manifest.put(Constants.REQUIRE_BUNDLE, "B; " + Constants.VISIBILITY_DIRECTIVE + ":=" + Constants.VISIBILITY_REEXPORT + 
+		manifest.put(Constants.REQUIRE_BUNDLE, "B; " + Constants.VISIBILITY_DIRECTIVE + ":=" + Constants.VISIBILITY_REEXPORT +
 																	",C");
 		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 

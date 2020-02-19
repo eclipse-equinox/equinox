@@ -21,13 +21,13 @@ import org.osgi.service.log.*;
 public interface ExtendedLogReaderService extends LogReaderService {
 	/**
 	 * Subscribes to <code>LogEntry</code> objects.
-	 * 
+	 *
 	 * <p>
 	 * This method registers a <code>LogListener</code> object with the Log Reader
 	 * Service with a <code>LogFilter</code> to allow pre-filtering of interesting log entries.
 	 * The <code>LogListener.logged(LogEntry)</code> method will be
 	 * called for each <code>LogEntry</code> object placed into the log that matches the filter.
-	 * 
+	 *
 	 * @param listener A <code>LogListener</code> object to register; the
 	 *        <code>LogListener</code> object is used to receive <code>LogEntry</code>
 	 *        objects.

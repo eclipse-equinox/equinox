@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -44,7 +44,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 */
 	public static enum StartOptions {
 		/**
-		 * The module start operation is transient and the persistent 
+		 * The module start operation is transient and the persistent
 		 * autostart or activation policy setting of the module is not modified.
 		 */
 		TRANSIENT,
@@ -87,7 +87,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 */
 	public static enum StopOptions {
 		/**
-		 * The module stop operation is transient and the persistent 
+		 * The module stop operation is transient and the persistent
 		 * autostart setting of the module is not modified.
 		 */
 		TRANSIENT;
@@ -379,7 +379,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	/**
-	 * Returns the thread that currently owns the state change lock for this module, or 
+	 * Returns the thread that currently owns the state change lock for this module, or
 	 * <code>null</code> if not owned.
 	 * @return the owner, or <code>null</code> if not owned.
 	 */

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -142,7 +142,7 @@ public interface Constants {
 	/**
 	 * Constant string (value "x86_64") indicating the platform is running on an
 	 * x86 64bit-based architecture.
-	 * 
+	 *
 	 * @since 3.1
 	 */
 	public static final String ARCH_X86_64 = "x86_64";//$NON-NLS-1$
@@ -150,7 +150,7 @@ public interface Constants {
 	/**
 	 * Constant string (value "amd64") indicating the platform is running on an
 	 * AMD64-based architecture.
-	 * 
+	 *
 	 * @deprecated use <code>ARCH_X86_64</code> instead. Note the values
 	 * has been changed to be the value of the <code>ARCH_X86_64</code> constant.
 	 */
@@ -165,7 +165,7 @@ public interface Constants {
 	/**
 	 * Constant string (value "ia64_32") indicating the platform is running on an
 	 * IA64 32bit-based architecture.
-	 * 
+	 *
 	 * @since 3.1
 	 */
 	public static final String ARCH_IA64_32 = "ia64_32";//$NON-NLS-1$

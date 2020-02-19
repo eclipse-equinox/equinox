@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -39,14 +39,14 @@ public interface SignerInfo {
 	public Certificate getTrustAnchor();
 
 	/**
-	 * Returns true if the trust anchor has been authenticated.  This is a convenience 
+	 * Returns true if the trust anchor has been authenticated.  This is a convenience
 	 * method equivalent to calling <code>{@link #getTrustAnchor()} != null</code>
 	 * @return true if the the signer info is trusted
 	 */
 	public boolean isTrusted();
 
 	/**
-	 * Returns the <code>MessageDigest</code> algorithm used to verify content signed by this 
+	 * Returns the <code>MessageDigest</code> algorithm used to verify content signed by this
 	 * signer info.
 	 * @return the algorithm
 	 */

@@ -213,7 +213,7 @@ public class BundleLoader extends ModuleLoader {
 					if (!exportNames.contains(name)) {
 						// must force filtered and reexport sources to be created early
 						// to prevent lazy normal package source creation.
-						// We only do this for the first export of a package name. 
+						// We only do this for the first export of a package name.
 						sources.createPackageSource(export, true);
 					}
 				}
@@ -370,9 +370,9 @@ public class BundleLoader extends ModuleLoader {
 	}
 
 	/**
-	 * This method gets a resource from the bundle.  The resource is searched 
-	 * for in the same manner as it would if it was being loaded from a bundle 
-	 * (i.e. all hosts, fragments, import, required bundles and 
+	 * This method gets a resource from the bundle.  The resource is searched
+	 * for in the same manner as it would if it was being loaded from a bundle
+	 * (i.e. all hosts, fragments, import, required bundles and
 	 * local resources are searched).
 	 *
 	 * @param name the name of the desired resource.
@@ -386,7 +386,7 @@ public class BundleLoader extends ModuleLoader {
 	 * Finds a class local to this bundle.  Only the classloader for this bundle is searched.
 	 * @param name The name of the class to find.
 	 * @return The loaded Class or null if the class is not found.
-	 * @throws ClassNotFoundException 
+	 * @throws ClassNotFoundException
 	 */
 	public Class<?> findLocalClass(String name) throws ClassNotFoundException {
 		long start = 0;
@@ -960,7 +960,7 @@ public class BundleLoader extends ModuleLoader {
 		for (ModuleWire bundleWire : requiredBundleWires) {
 			if (local != null || BundleNamespace.VISIBILITY_REEXPORT.equals(bundleWire.getRequirement().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE))) {
 				// always add required bundles first if we locally provide the package
-				// This allows a bundle to provide a package from a required bundle without 
+				// This allows a bundle to provide a package from a required bundle without
 				// re-exporting the whole required bundle.
 				BundleLoader loader = getProviderLoader(bundleWire);
 				if (loader != null) {
@@ -1147,7 +1147,7 @@ public class BundleLoader extends ModuleLoader {
 		PackageSource result = findImportedSource(pkgName, null);
 		if (result != null)
 			return result;
-		// Note that dynamic imports are not checked to avoid aggressive wiring (bug 105779)  
+		// Note that dynamic imports are not checked to avoid aggressive wiring (bug 105779)
 		return findRequiredSource(pkgName, null);
 	}
 
@@ -1225,7 +1225,7 @@ public class BundleLoader extends ModuleLoader {
 			// so we do not have to do the search again for this package.
 			source = NullPackageSource.getNullPackageSource(pkgName);
 		} else if (result.size() == 1) {
-			// if there is just one source, remember just the single source 
+			// if there is just one source, remember just the single source
 			source = result.get(0);
 		} else {
 			// if there was more than one source, build a multisource and cache that.
@@ -1240,7 +1240,7 @@ public class BundleLoader extends ModuleLoader {
 
 	/*
 	 * Gets the package source for the pkgName.  This will include the local package source
-	 * if the bundle exports the package.  This is used to compare the PackageSource of a 
+	 * if the bundle exports the package.  This is used to compare the PackageSource of a
 	 * package from two different bundles.
 	 */
 	public final PackageSource getPackageSource(String pkgName) {

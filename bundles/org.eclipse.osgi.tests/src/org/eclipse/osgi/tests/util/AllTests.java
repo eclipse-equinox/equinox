@@ -14,6 +14,7 @@
 
 package org.eclipse.osgi.tests.util;
 
+import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -27,7 +28,7 @@ public class AllTests extends TestSuite {
 	public AllTests() {
 		addTest(new TestSuite(TestCaseinsensitiveMap.class));
 		addTest(new TestSuite(ObjectPoolTestCase.class));
-		addTest(new TestSuite(ManifestElementTestCase.class));
+		addTest(new JUnit4TestAdapter(ManifestElementTestCase.class));
 		addTest(new TestSuite(NLSTestCase.class));
 		addBidiTests();
 		addLatinTests();

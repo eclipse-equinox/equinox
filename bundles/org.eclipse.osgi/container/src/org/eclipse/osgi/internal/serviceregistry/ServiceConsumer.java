@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -16,10 +16,10 @@ package org.eclipse.osgi.internal.serviceregistry;
 
 /**
  * Closure to allow sharing the same code for getting and ungetting a service.
- * The {@link #prototypeConsumer} closure must be used for calls from 
+ * The {@link #prototypeConsumer} closure must be used for calls from
  * ServiceObjects and the {@link #singletonConsumer} closure must be used
  * for calls from BundleContext.
- * 
+ *
  * The closure instance calls the correct method on the specified ServiceUse
  * object for the current service consumer type.
  */
@@ -56,7 +56,7 @@ public interface ServiceConsumer {
 
 	/**
 	 * Get a service for the consumer.
-	 * 
+	 *
 	 * @param use Service Use object to get the service from.
 	 * @return The obtained service.
 	 */
@@ -64,7 +64,7 @@ public interface ServiceConsumer {
 
 	/**
 	 * Unget the service for the consumer.
-	 * 
+	 *
 	 * @param use Service Use object to unget the service from.
 	 * @param service The Service to unget.
 	 * @return true if the service was ungotten, false otherwise.

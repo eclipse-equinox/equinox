@@ -44,7 +44,7 @@ public interface Logger extends org.osgi.service.log.Logger {
 	/**
 	 * Extends the <code>LogService</code>
 	 * Logs a message with a context object
-	 * 
+	 *
 	 * @param context The context object this message is associated with.
 	 * @param level The log level or severity of the message.
 	 * @param message A human readable string to associate with log entry.
@@ -55,8 +55,8 @@ public interface Logger extends org.osgi.service.log.Logger {
 	/**
 	 * Logs a message with an exception associated and a
 	 * context object.
-	 * 
-	 * 
+	 *
+	 *
 	 * @param context The context object this message is associated with.
 	 * @param level The log level or severity of the message.
 	 * @param message A human readable string to associate with log entry.
@@ -66,10 +66,10 @@ public interface Logger extends org.osgi.service.log.Logger {
 	public void log(Object context, int level, String message, Throwable exception);
 
 	/**
-	 * Pre-checks if there are LogListeners who are listening for a matching log entry from this <code>Logger</code>. 
-	 * 
+	 * Pre-checks if there are LogListeners who are listening for a matching log entry from this <code>Logger</code>.
+	 *
 	 * @param level The log level or severity of the message.
-	 * @return <code>boolean</code> True if there a LogListener listening that can handle a log entry for this log level; false otherwise. 
+	 * @return <code>boolean</code> True if there a LogListener listening that can handle a log entry for this log level; false otherwise.
 	 * @see ExtendedLogReaderService#addLogListener(org.osgi.service.log.LogListener, LogFilter)
 	 * @see LogFilter
 	 */
@@ -78,7 +78,7 @@ public interface Logger extends org.osgi.service.log.Logger {
 	/**
 	 * Returns the name associated with this <code>Logger</code>
 	 * object.
-	 * 
+	 *
 	 * @return <code>String</code> containing the name associated with this
 	 *         <code>Logger</code> object;<code>null</code> if no name is
 	 *         associated.

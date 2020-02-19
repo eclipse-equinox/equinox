@@ -27,7 +27,7 @@ class TitleVersionVendor {
 	private final String vendor;
 
 	/**
-	 * Factory for creating TitleVersionVendor objects.  If the given title, version and 
+	 * Factory for creating TitleVersionVendor objects.  If the given title, version and
 	 * vendor are <code>null</code> then {@link #NONE} is returned.
 	 * @param title
 	 * @param version

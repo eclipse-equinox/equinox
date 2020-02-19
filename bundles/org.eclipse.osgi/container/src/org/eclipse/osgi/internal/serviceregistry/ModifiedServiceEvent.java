@@ -29,7 +29,7 @@ class ModifiedServiceEvent extends ServiceEvent {
 
 	/**
 	 * Create a ServiceEvent containing the service properties prior to modification.
-	 * 
+	 *
 	 * @param reference Reference to service with modified properties.
 	 * @param previousProperties Service properties prior to modification.
 	 */
@@ -42,7 +42,7 @@ class ModifiedServiceEvent extends ServiceEvent {
 
 	/**
 	 * Return the service event of type MODIFIED.
-	 * 
+	 *
 	 * @return The service event of type MODIFIED.
 	 */
 	ServiceEvent getModifiedEvent() {
@@ -51,7 +51,7 @@ class ModifiedServiceEvent extends ServiceEvent {
 
 	/**
 	 * Return the service event of type MODIFIED_ENDMATCH.
-	 * 
+	 *
 	 * @return The service event of type MODIFIED_ENDMATCH.
 	 */
 	ServiceEvent getModifiedEndMatchEvent() {
@@ -59,15 +59,15 @@ class ModifiedServiceEvent extends ServiceEvent {
 	}
 
 	/**
-	 * Return if the specified filter matches the previous service 
+	 * Return if the specified filter matches the previous service
 	 * properties.
-	 * 
-	 * @param filter The filer to evaluate using the previous service 
+	 *
+	 * @param filter The filer to evaluate using the previous service
 	 * properties.
 	 * @return True is the filter matches the previous service properties.
 	 */
 	boolean matchPreviousProperties(Filter filter) {
-		/* We use matches here since ServiceProperties already 
+		/* We use matches here since ServiceProperties already
 		 * does case insensitive lookup.
 		 */
 		return filter.matches(previousProperties);

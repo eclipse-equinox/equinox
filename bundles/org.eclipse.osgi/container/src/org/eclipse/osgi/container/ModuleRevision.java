@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -119,8 +119,8 @@ public final class ModuleRevision implements BundleRevision {
 
 	/**
 	 * Returns the capabilities declared by this revision
-	 * @param namespace The namespace of the declared capabilities to return or 
-	 * {@code null} to return the declared capabilities from all namespaces. 
+	 * @param namespace The namespace of the declared capabilities to return or
+	 * {@code null} to return the declared capabilities from all namespaces.
 	 * @return An unmodifiable list containing the declared capabilities.
 	 */
 	public List<ModuleCapability> getModuleCapabilities(String namespace) {
@@ -137,8 +137,8 @@ public final class ModuleRevision implements BundleRevision {
 
 	/**
 	 * Returns the requirements declared by this revision
-	 * @param namespace The namespace of the declared requirements to return or 
-	 * {@code null} to return the declared requirements from all namespaces. 
+	 * @param namespace The namespace of the declared requirements to return or
+	 * {@code null} to return the declared requirements from all namespaces.
 	 * @return An unmodifiable list containing the declared requirements.
 	 */
 	public List<ModuleRequirement> getModuleRequirements(String namespace) {

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -46,7 +46,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 	private final SignedBundleHook signedBundleHook;
 
 	/**
-	 * Create a new KeyStoreTrustEngine that is backed by a KeyStore 
+	 * Create a new KeyStoreTrustEngine that is backed by a KeyStore
 	 * @param path - path to the keystore
 	 * @param type - the type of keystore at the path location
 	 * @param password - the password required to unlock the keystore
@@ -77,7 +77,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 
 	/**
 	 * Return the password
-	 * @return password - the password as a char[] 
+	 * @return password - the password as a char[]
 	 */
 	private char[] getPassword() {
 		return password;

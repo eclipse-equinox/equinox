@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -231,7 +231,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 		// do this outside of the lock to avoid deadlock
 		currentSaver.close();
 		currentStorage.close();
-		// Must be done last since it will result in termination of the 
+		// Must be done last since it will result in termination of the
 		// framework active thread.
 		currentExecutor.shutdown();
 	}

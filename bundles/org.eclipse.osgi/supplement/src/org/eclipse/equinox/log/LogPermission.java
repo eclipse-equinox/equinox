@@ -15,9 +15,9 @@ import java.security.PermissionCollection;
 
 /**
  * Indicates a bundle's authority to log on behalf of other bundles.
- * 
+ *
  * This permission has only a single action: LOG.
- * 
+ *
  * @ThreadSafe
  * @since 3.7
  */
@@ -32,7 +32,7 @@ public class LogPermission extends Permission {
 
 	/**
 	 * Create a new LogPermission.
-	 * 
+	 *
 	 * @param name Name must be &quot;*&quot;.
 	 * @param actions <code>log</code> or &quot;*&quot;.
 	 */

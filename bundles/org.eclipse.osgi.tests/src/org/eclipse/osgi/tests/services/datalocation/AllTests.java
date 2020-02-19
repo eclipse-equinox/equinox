@@ -7,32 +7,17 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.datalocation;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-public class AllTests extends TestSuite {
-
-	public AllTests() {
-		super();
-	}
-
-	public AllTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		TestSuite suite = new TestSuite(AllTests.class.getName());
-		suite.addTest(LocationAreaSessionTest.suite());
-		suite.addTest(BasicLocationTests.suite());
-		suite.addTest(SimpleTests.suite());
-		suite.addTest(FileManagerTests.suite());
-		suite.addTest(StreamManagerTests.suite());
-		return suite;
-	}
+@RunWith(Suite.class)
+@Suite.SuiteClasses({ LocationAreaSessionTest.class, BasicLocationTests.class, SimpleTests.class,
+		FileManagerTests.class, StreamManagerTests.class })
+public class AllTests {
 }

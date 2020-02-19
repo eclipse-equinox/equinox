@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -67,7 +67,7 @@ public interface BaseDescription {
 
 	/**
 	 * Returns the capability represented by this description.
-	 * Some descriptions types may not be able to represent 
+	 * Some descriptions types may not be able to represent
 	 * a capability.  In such cases <code>null</code> is
 	 * returned.
 	 * @return the capability represented by this base description
@@ -76,9 +76,9 @@ public interface BaseDescription {
 	public BundleCapability getCapability();
 
 	/**
-	 * Returns the user object associated to this description, or 
+	 * Returns the user object associated to this description, or
 	 * <code>null</code> if none exists.
-	 *  
+	 *
 	 * @return the user object associated to this description,
 	 * or <code>null</code>
 	 * @since 3.8
@@ -87,11 +87,11 @@ public interface BaseDescription {
 
 	/**
 	 * Associates a user-provided object to this description, or
-	 * removes an existing association, if <code>null</code> is provided. The 
-	 * provided object is not interpreted in any ways by this 
+	 * removes an existing association, if <code>null</code> is provided. The
+	 * provided object is not interpreted in any ways by this
 	 * description.
-	 * 
-	 * @param userObject an arbitrary object provided by the user, or 
+	 *
+	 * @param userObject an arbitrary object provided by the user, or
 	 * <code>null</code>
 	 * @since 3.8
 	 */

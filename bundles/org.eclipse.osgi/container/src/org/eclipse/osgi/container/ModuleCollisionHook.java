@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -41,17 +41,17 @@ public interface ModuleCollisionHook {
 	 * <li> {@link #INSTALLING installing} - The target is the module associated
 	 * which is performing the install operation. The
 	 * collision candidate collection contains the existing modules installed
-	 * which have a current revision with the same symbolic name and version as the 
+	 * which have a current revision with the same symbolic name and version as the
 	 * module being installed.
-	 * <li> {@link #UPDATING updating} - The target is the module being updated. 
+	 * <li> {@link #UPDATING updating} - The target is the module being updated.
 	 * The collision candidate collection contains the existing modules installed which have
-	 * a current revision with the same symbolic name and version as the content the target 
+	 * a current revision with the same symbolic name and version as the content the target
 	 * module is being updated to.
 	 * </ul>
 	 * This method can filter the collection of collision candidates by removing
 	 * potential collisions. For the specified operation to succeed, the
 	 * collection of collision candidates must be empty when this method returns.
-	 * 
+	 *
 	 * @param operationType The operation type. Must be the value of
 	 *        {@link #INSTALLING installing} or {@link #UPDATING updating}.
 	 * @param target The target module used to determine what collision

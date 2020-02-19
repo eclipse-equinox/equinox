@@ -24,7 +24,7 @@ import org.osgi.framework.namespace.BundleNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
 
 /**
- * DependentPolicy is an implementation of a buddy policy. 
+ * DependentPolicy is an implementation of a buddy policy.
  * It is responsible for looking up a class in the dependents of the bundle
  * to which this policy is attached to.
  */

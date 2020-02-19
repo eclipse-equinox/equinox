@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -17,7 +17,7 @@ import org.eclipse.osgi.signedcontent.SignedContent;
 
 /**
  * An event that is fired when an AuthorizationEngine implementation makes
- * a decision. 
+ * a decision.
  * @since 3.4
  */
 public class AuthorizationEvent {
@@ -39,7 +39,7 @@ public class AuthorizationEvent {
 
 	/**
 	 * Create a new AuthorizationEvent
-	 * @param result - the result code 
+	 * @param result - the result code
 	 * @param content - the signed content
 	 * @param context - operation specific context
 	 * @param severity - severity code

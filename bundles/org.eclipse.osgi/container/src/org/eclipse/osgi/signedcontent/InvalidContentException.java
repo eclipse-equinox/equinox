@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -27,7 +27,7 @@ public class InvalidContentException extends IOException {
 
 	/**
 	 * Constructs an <code>InvalidContentException</code> with the specified detail
-	 * message and cause. 
+	 * message and cause.
 	 *
 	 * @param message the exception message
 	 * @param cause the cause, may be <code>null</code>
@@ -40,7 +40,7 @@ public class InvalidContentException extends IOException {
 	/**
 	 * Returns the cause of this exception or <code>null</code> if no cause
 	 * was specified when this exception was created.
-	 * 
+	 *
 	 * @return The cause of this exception or <code>null</code> if no cause was created.
 	 */
 	@Override
@@ -50,7 +50,7 @@ public class InvalidContentException extends IOException {
 
 	/**
 	 * The cause of this exception can only be set when constructed.
-	 * 
+	 *
 	 * @param t Cause of the exception.
 	 * @return This object.
 	 * @throws java.lang.IllegalStateException This method will always throw an

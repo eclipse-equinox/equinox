@@ -120,7 +120,7 @@ public class ShrinkableValueCollectionMap<K, V> extends AbstractMap<K, Collectio
 		}
 	}
 
-	/** 
+	/**
 	 * Iterator class used for entry sets.
 	 */
 	private final class EntryIterator implements Iterator<Map.Entry<K, Collection<V>>> {

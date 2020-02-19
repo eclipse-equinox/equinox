@@ -1,23 +1,27 @@
 /*******************************************************************************
-s
-s This
- * program and the accompanying materials are made available under the terms of
- * the Eclipse Public License 2.0 which accompanies this distribution, and is
- * available at
+ * Copyright (c) 20107, 2020 IBM Corporation and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0 which
+ * accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
- * Contributors: IBM Corporation - initial API and implementation
- *******************************************************************************/
+ ******************************************************************************/
 package org.eclipse.equinox.log.test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-import junit.framework.TestCase;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -30,7 +34,7 @@ import org.osgi.service.log.admin.LoggerAdmin;
 import org.osgi.service.log.admin.LoggerContext;
 
 @SuppressWarnings("deprecation")
-public class LogServiceTest extends TestCase {
+public class LogServiceTest {
 
 	private LogService log;
 	private ServiceReference logReference;
@@ -42,11 +46,8 @@ public class LogServiceTest extends TestCase {
 	LoggerContext rootLoggerContext;
 	Map<String, LogLevel> rootLogLevels;
 
-	public LogServiceTest(String name) {
-		super(name);
-	}
-
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		logReference = OSGiTestsActivator.getContext().getServiceReference(LogService.class.getName());
 		readerReference = OSGiTestsActivator.getContext().getServiceReference(LogReaderService.class.getName());
 		loggerAdminReference = OSGiTestsActivator.getContext().getServiceReference(LoggerAdmin.class);
@@ -66,7 +67,8 @@ public class LogServiceTest extends TestCase {
 		rootLoggerContext.setLogLevels(copyLogLevels);
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		rootLoggerContext.setLogLevels(rootLogLevels);
 		reader.removeLogListener(listener);
 		OSGiTestsActivator.getContext().ungetService(loggerAdminReference);
@@ -74,21 +76,25 @@ public class LogServiceTest extends TestCase {
 		OSGiTestsActivator.getContext().ungetService(readerReference);
 	}
 
+	@Test
 	public void testLogDebug() throws Exception {
 		log.log(LogService.LOG_DEBUG, "debug"); //$NON-NLS-1$
 		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_DEBUG);
 	}
 
+	@Test
 	public void testLogError() throws Exception {
 		log.log(LogService.LOG_ERROR, "error"); //$NON-NLS-1$
 		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_ERROR);
 	}
 
+	@Test
 	public void testLogInfo() throws Exception {
 		log.log(LogService.LOG_INFO, "info"); //$NON-NLS-1$
 		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
 	}
 
+	@Test
 	public void testLogWarning() throws Exception {
 		log.log(LogService.LOG_WARNING, "warning"); //$NON-NLS-1$
 		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_WARNING);
@@ -99,47 +105,56 @@ public class LogServiceTest extends TestCase {
 		assertTrue(listener.getEntryX().getLevel() == 0);
 	}
 
+	@Test
 	public void testLogNegativeLevel() throws Exception {
 		log.log(-1, "negative"); //$NON-NLS-1$
 		assertTrue(listener.getEntryX().getLevel() == -1);
 	}
 
+	@Test
 	public void testLogMessage() throws Exception {
 		log.log(LogService.LOG_INFO, "message"); //$NON-NLS-1$
 		assertTrue(listener.getEntryX().getMessage().equals("message")); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testLogNullMessage() throws Exception {
 		log.log(LogService.LOG_INFO, null);
 		assertTrue(listener.getEntryX().getMessage() == null);
 	}
 
+	@Test
 	public void testLogThrowable() throws Exception {
 		Throwable t = new Throwable("throwable"); //$NON-NLS-1$
 		log.log(LogService.LOG_INFO, null, t);
 		assertTrue(listener.getEntryX().getException().getMessage().equals(t.getMessage()));
 	}
 
+	@Test
 	public void testLogNullThrowable() throws Exception {
 		log.log(LogService.LOG_INFO, null, null);
 		assertTrue(listener.getEntryX().getException() == null);
 	}
 
+	@Test
 	public void testLogServiceReference() throws Exception {
 		log.log(logReference, LogService.LOG_INFO, null);
 		assertTrue(listener.getEntryX().getServiceReference().equals(logReference));
 	}
 
+	@Test
 	public void testNullLogServiceReference() throws Exception {
 		log.log(null, LogService.LOG_INFO, null);
 		assertTrue(listener.getEntryX().getServiceReference() == null);
 	}
 
+	@Test
 	public void testLogServiceReferenceWithNullThrowable() throws Exception {
 		log.log(logReference, LogService.LOG_INFO, null, null);
 		assertTrue(listener.getEntryX().getServiceReference().equals(logReference));
 	}
 
+	@Test
 	public void testLogNull1() throws Exception {
 		log.log(0, null);
 		LogEntry entry = listener.getEntryX();
@@ -149,6 +164,7 @@ public class LogServiceTest extends TestCase {
 		assertTrue(entry.getServiceReference() == null);
 	}
 
+	@Test
 	public void testLogNull2() throws Exception {
 		log.log(0, null, null);
 		LogEntry entry = listener.getEntryX();
@@ -158,6 +174,7 @@ public class LogServiceTest extends TestCase {
 		assertTrue(entry.getServiceReference() == null);
 	}
 
+	@Test
 	public void testLogNull3() throws Exception {
 		log.log(null, 0, null);
 		LogEntry entry = listener.getEntryX();
@@ -167,6 +184,7 @@ public class LogServiceTest extends TestCase {
 		assertTrue(entry.getServiceReference() == null);
 	}
 
+	@Test
 	public void testLogNull4() throws Exception {
 		log.log(null, 0, null, null);
 		LogEntry entry = listener.getEntryX();
@@ -176,6 +194,7 @@ public class LogServiceTest extends TestCase {
 		assertTrue(entry.getServiceReference() == null);
 	}
 
+	@Test
 	public void testLogFull1() throws Exception {
 		String message = "test"; //$NON-NLS-1$
 		log.log(LogService.LOG_INFO, message);
@@ -186,6 +205,7 @@ public class LogServiceTest extends TestCase {
 		assertTrue(entry.getServiceReference() == null);
 	}
 
+	@Test
 	public void testLogFull2() throws Exception {
 		String message = "test"; //$NON-NLS-1$
 		Throwable t = new Throwable("test"); //$NON-NLS-1$
@@ -197,6 +217,7 @@ public class LogServiceTest extends TestCase {
 		assertTrue(entry.getServiceReference() == null);
 	}
 
+	@Test
 	public void testLogFull3() throws Exception {
 		String message = "test"; //$NON-NLS-1$
 		log.log(logReference, LogService.LOG_INFO, message);
@@ -207,6 +228,7 @@ public class LogServiceTest extends TestCase {
 		assertTrue(entry.getServiceReference() == logReference);
 	}
 
+	@Test
 	public void testLogFull4() throws Exception {
 		String message = "test"; //$NON-NLS-1$
 		Throwable t = new Throwable("test"); //$NON-NLS-1$
@@ -218,6 +240,7 @@ public class LogServiceTest extends TestCase {
 		assertTrue(entry.getServiceReference() == logReference);
 	}
 
+	@Test
 	public void testServiceEventLog() throws InterruptedException {
 		BundleContext context = OSGiTestsActivator.getContext();
 		ServiceRegistration<Object> reg = context.registerService(Object.class, new Object(), null);

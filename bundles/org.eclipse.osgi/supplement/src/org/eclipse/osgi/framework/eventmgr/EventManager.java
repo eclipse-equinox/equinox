@@ -26,8 +26,8 @@ import java.util.Set;
  * ListenerQueue for dispatching events. CopyOnWriteIdentityMap objects
  * must be used to manage listener lists.
  *
- * <p>This example uses the fictitious SomeEvent class and shows how to use this package 
- * to deliver a SomeEvent to a set of SomeEventListeners.  
+ * <p>This example uses the fictitious SomeEvent class and shows how to use this package
+ * to deliver a SomeEvent to a set of SomeEventListeners.
  * <pre>
  *
  * 	// Create an EventManager with a name for an asynchronous event dispatch thread
@@ -43,7 +43,7 @@ import java.util.Set;
  *	ListenerQueue listenerQueue = new ListenerQueue(eventManager);
  *	// Add the listeners to the queue and associate them with the event dispatcher
  *	listenerQueue.queueListeners(eventListeners.entrySet(), new EventDispatcher() {
- *		public void dispatchEvent(Object eventListener, Object listenerObject, 
+ *		public void dispatchEvent(Object eventListener, Object listenerObject,
  *                                    int eventAction, Object eventObject) {
  * 			try {
  *				(SomeEventListener)eventListener.someEventOccured((SomeEvent)eventObject);
@@ -52,51 +52,51 @@ import java.util.Set;
  * 			}
  *		}
  *	});
- *	// Deliver the event to the listeners. 
+ *	// Deliver the event to the listeners.
  *	listenerQueue.dispatchEventAsynchronous(0, new SomeEvent());
- *		
+ *
  *	// Remove the listener from the listener list
  *	eventListeners.remove(someEventListener);
  *
  *	// Close EventManager to clean when done to terminate async event dispatch thread.
- *	// Note that closing the event manager while asynchronously delivering events 
- *	// may cause some events to not be delivered before the async event dispatch 
+ *	// Note that closing the event manager while asynchronously delivering events
+ *	// may cause some events to not be delivered before the async event dispatch
  *	// thread terminates
  *	eventManager.close();
  * </pre>
- * 
+ *
  * <p>At first glance, this package may seem more complicated than necessary
  * but it has support for some important features. The listener list supports
  * companion objects for each listener object. This is used by the OSGi framework
  * to create wrapper objects for a listener which are passed to the event dispatcher.
  * The ListenerQueue class is used to build a snap shot of the listeners prior to beginning
- * event dispatch. 
- * 
- * The OSGi framework uses a 2 level listener list for each listener type (4 types). 
- * Level one is managed per framework instance and contains the list of BundleContexts which have 
- * registered a listener. Level 2 is managed per BundleContext for the listeners in that 
- * context. This allows all the listeners of a bundle to be easily and atomically removed from 
- * the level one list. To use a "flat" list for all bundles would require the list to know which 
- * bundle registered a listener object so that the list could be traversed when stopping a bundle 
- * to remove all the bundle's listeners. 
- * 
- * When an event is fired, a snapshot list (ListenerQueue) must be made of the current listeners before delivery 
- * is attempted. The snapshot list is necessary to allow the listener list to be modified while the 
+ * event dispatch.
+ *
+ * The OSGi framework uses a 2 level listener list for each listener type (4 types).
+ * Level one is managed per framework instance and contains the list of BundleContexts which have
+ * registered a listener. Level 2 is managed per BundleContext for the listeners in that
+ * context. This allows all the listeners of a bundle to be easily and atomically removed from
+ * the level one list. To use a "flat" list for all bundles would require the list to know which
+ * bundle registered a listener object so that the list could be traversed when stopping a bundle
+ * to remove all the bundle's listeners.
+ *
+ * When an event is fired, a snapshot list (ListenerQueue) must be made of the current listeners before delivery
+ * is attempted. The snapshot list is necessary to allow the listener list to be modified while the
  * event is being delivered to the snapshot list. The memory cost of the snapshot list is
- * low since the ListenerQueue object uses the copy-on-write semantics 
+ * low since the ListenerQueue object uses the copy-on-write semantics
  * of the CopyOnWriteIdentityMap. This guarantees the snapshot list is never modified once created.
- * 
+ *
  * The OSGi framework also uses a 2 level dispatch technique (EventDispatcher).
- * Level one dispatch is used by the framework to add the level 2 listener list of each 
+ * Level one dispatch is used by the framework to add the level 2 listener list of each
  * BundleContext to the snapshot in preparation for delivery of the event.
- * Level 2 dispatch is used as the final event deliverer and must cast the listener 
+ * Level 2 dispatch is used as the final event deliverer and must cast the listener
  * and event objects to the proper type before calling the listener. Level 2 dispatch
- * will cancel delivery of an event 
+ * will cancel delivery of an event
  * to a bundle that has stopped between the time the snapshot was created and the
  * attempt was made to deliver the event.
- * 
- * <p> The highly dynamic nature of the OSGi framework had necessitated these features for 
- * proper and efficient event delivery.  
+ *
+ * <p> The highly dynamic nature of the OSGi framework had necessitated these features for
+ * proper and efficient event delivery.
  * @since 3.1
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -110,9 +110,9 @@ public class EventManager {
 	 */
 	private EventThread<?, ?, ?> thread;
 
-	/** 
-	 * Once closed, an attempt to create a new EventThread will result in an 
-	 * IllegalStateException. 
+	/**
+	 * Once closed, an attempt to create a new EventThread will result in an
+	 * IllegalStateException.
 	 */
 	private boolean closed;
 
@@ -167,8 +167,8 @@ public class EventManager {
 	 * This method can be called to release any resources associated with this
 	 * EventManager.
 	 * <p>
-	 * Closing this EventManager while it is asynchronously delivering events 
-	 * may cause some events to not be delivered before the async event dispatch 
+	 * Closing this EventManager while it is asynchronously delivering events
+	 * may cause some events to not be delivered before the async event dispatch
 	 * thread terminates.
 	 */
 	public synchronized void close() {
@@ -291,8 +291,8 @@ public class EventManager {
 		private volatile boolean running;
 
 		/**
-		 * Constructor for the event thread. 
-		 * @param threadName Name of the EventThread 
+		 * Constructor for the event thread.
+		 * @param threadName Name of the EventThread
 		 */
 		EventThread(ThreadGroup threadGroup, String threadName) {
 			super(threadGroup, threadName == null ? getNextName() : threadName);
@@ -308,8 +308,8 @@ public class EventManager {
 		}
 
 		/**
-		 * Constructor for the event thread. 
-		 * @param threadName Name of the EventThread 
+		 * Constructor for the event thread.
+		 * @param threadName Name of the EventThread
 		 */
 		EventThread(String threadName) {
 			this(null, threadName);
@@ -344,7 +344,7 @@ public class EventManager {
 					}
 					EventManager.dispatchEvent(item.listeners, item.dispatcher, item.action, item.object);
 					// Bug 299589: since the call to getNextEvent() will eventually block for a long time, we need to make sure that the 'item'
-					// variable is cleared of the previous value before the call to getNextEvent(). See VM SPec 2.5.7 for why the compiler 
+					// variable is cleared of the previous value before the call to getNextEvent(). See VM SPec 2.5.7 for why the compiler
 					// will not automatically clear this variable for each loop iteration.
 					item = null;
 				}

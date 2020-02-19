@@ -1225,7 +1225,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 				assertNotNull("No manifest for: " + bundle, bundle.getEntry("/META-INF/MANIFEST.MF"));
 			}
 		} catch (Throwable t) {
-			// An exception used to get thrown here when we tried to close 
+			// An exception used to get thrown here when we tried to close
 			// the least used bundle file
 			fail("Failed to get bundle entries", t);
 		}
@@ -1593,7 +1593,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 				bundle.getHeaders(); //$NON-NLS-1$
 			}
 		} catch (Throwable t) {
-			// An exception used to get thrown here when we tried to close 
+			// An exception used to get thrown here when we tried to close
 			// the least used bundle file
 			fail("Failed to get bundle entries", t);
 		}
@@ -1819,7 +1819,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		List packages1 = wiring1.getRequiredWires(BundleRevision.PACKAGE_NAMESPACE);
 		List packages2 = wiring2.getRequiredWires(BundleRevision.PACKAGE_NAMESPACE);
 
-		// could make this a more complete check, but with the bug the dynamic wires 
+		// could make this a more complete check, but with the bug the dynamic wires
 		// are missing altogether because we fail to save the resolver state cache.
 		assertEquals("Wrong number of wires for wiring1", 1, packages1.size());
 		assertEquals("Wrong number of wires for wiring2", 1, packages2.size());

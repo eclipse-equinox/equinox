@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -58,7 +58,7 @@ import org.osgi.framework.Version;
  * <p>
  * The string representation of an LDAP search filter is defined by the
  * following grammar. It uses a prefix format.
- * 
+ *
  * <pre>
  *   &lt;filter&gt; ::= '(' &lt;filtercomp&gt; ')'
  *   &lt;filtercomp&gt; ::= &lt;and&gt; | &lt;or&gt; | &lt;not&gt; | &lt;item&gt;
@@ -80,7 +80,7 @@ import org.osgi.framework.Version;
  *   &lt;starval&gt; ::= NULL | &lt;value&gt; '*' &lt;starval&gt;
  *   &lt;final&gt; ::= NULL | &lt;value&gt;
  * </pre>
- * 
+ *
  * {@code &lt;attr&gt;} is a string representing an attribute, or key, in the
  * properties objects of the registered services. Attribute names are not case
  * sensitive; that is cn and CN both refer to the same attribute.
@@ -94,7 +94,7 @@ import org.osgi.framework.Version;
  * presence filter.
  * <p>
  * Examples of LDAP filters are:
- * 
+ *
  * <pre>
  *   &quot;(cn=Babs Jensen)&quot;
  *   &quot;(!(cn=Tim Howes))&quot;
@@ -144,14 +144,14 @@ import org.osgi.framework.Version;
  * Note: arrays of primitives are also supported. </blockquote> A filter matches
  * a key that has multiple values if it matches at least one of those values.
  * For example,
- * 
+ *
  * <pre>
  * Dictionary d = new Hashtable();
  * d.put(&quot;cn&quot;, new String[] {
  * 		&quot;a&quot;, &quot;b&quot;, &quot;c&quot;
  * });
  * </pre>
- * 
+ *
  * d will match {@code (cn=a)} and also {@code (cn=b)}
  * <p>
  * A filter component that references a key having an unrecognizable data type
@@ -167,7 +167,7 @@ public abstract class FilterImpl implements Filter {
 	 * <p>
 	 * If the filter cannot be parsed, an {@link InvalidSyntaxException} will be
 	 * thrown with a human readable message where the filter became unparsable.
-	 * 
+	 *
 	 * @param filterString the filter string.
 	 * @throws InvalidSyntaxException If the filter parameter contains an
 	 *             invalid filter string that cannot be parsed.
@@ -190,7 +190,7 @@ public abstract class FilterImpl implements Filter {
 	 * This {@code Filter} is executed using the keys and values of the
 	 * referenced service's properties. The keys are looked up in a case
 	 * insensitive manner.
-	 * 
+	 *
 	 * @param reference The reference to the service whose properties are used
 	 *            in the match.
 	 * @return {@code true} if the service's properties match this
@@ -205,7 +205,7 @@ public abstract class FilterImpl implements Filter {
 	 * Filter using a {@code Dictionary} with case insensitive key lookup. This
 	 * {@code Filter} is executed using the specified {@code Dictionary}'s keys
 	 * and values. The keys are looked up in a case insensitive manner.
-	 * 
+	 *
 	 * @param dictionary The {@code Dictionary} whose key/value pairs are used
 	 *            in the match.
 	 * @return {@code true} if the {@code Dictionary}'s values match this
@@ -222,7 +222,7 @@ public abstract class FilterImpl implements Filter {
 	 * Filter using a {@code Dictionary}. This {@code Filter} is executed using
 	 * the specified {@code Dictionary}'s keys and values. The keys are looked
 	 * up in a normal manner respecting case.
-	 * 
+	 *
 	 * @param dictionary The {@code Dictionary} whose key/value pairs are used
 	 *            in the match.
 	 * @return {@code true} if the {@code Dictionary}'s values match this
@@ -238,7 +238,7 @@ public abstract class FilterImpl implements Filter {
 	 * Filter using a {@code Map}. This {@code Filter} is executed using the
 	 * specified {@code Map}'s keys and values. The keys are looked up in a
 	 * normal manner respecting case.
-	 * 
+	 *
 	 * @param map The {@code Map} whose key/value pairs are used in the match.
 	 *            Maps with {@code null} key or values are not supported. A
 	 *            {@code null} value is considered not present to the filter.
@@ -258,7 +258,7 @@ public abstract class FilterImpl implements Filter {
 	 * <p>
 	 * The filter string is normalized by removing whitespace which does not
 	 * affect the meaning of the filter.
-	 * 
+	 *
 	 * @return This {@code Filter}'s filter string.
 	 */
 	@Override
@@ -275,7 +275,7 @@ public abstract class FilterImpl implements Filter {
 	 * <p>
 	 * The filter string is normalized by removing whitespace which does not
 	 * affect the meaning of the filter.
-	 * 
+	 *
 	 * @return This {@code Filter}'s filter string.
 	 */
 	abstract StringBuilder normalize(StringBuilder sb);
@@ -285,7 +285,7 @@ public abstract class FilterImpl implements Filter {
 	 * <p>
 	 * This implementation returns the result of calling
 	 * {@code this.toString().equals(obj.toString()}.
-	 * 
+	 *
 	 * @param obj The object to compare against this {@code Filter}.
 	 * @return If the other object is a {@code Filter} object, then returns the
 	 *         result of calling {@code this.toString().equals(obj.toString()};
@@ -309,7 +309,7 @@ public abstract class FilterImpl implements Filter {
 	 * <p>
 	 * This implementation returns the result of calling
 	 * {@code this.toString().hashCode()}.
-	 * 
+	 *
 	 * @return The hashCode of this {@code Filter}.
 	 */
 	@Override
@@ -714,7 +714,7 @@ public abstract class FilterImpl implements Filter {
 
 		/**
 		 * Encode the value string such that '(', '*', ')' and '\' are escaped.
-		 * 
+		 *
 		 * @param value unencoded value string.
 		 */
 		static StringBuilder encodeValue(StringBuilder sb, String value) {
@@ -1258,7 +1258,7 @@ public abstract class FilterImpl implements Filter {
 		 * Map a string for an APPROX (~=) comparison. This implementation
 		 * removes white spaces. This is the minimum implementation allowed by
 		 * the OSGi spec.
-		 * 
+		 *
 		 * @param input Input string.
 		 * @return String ready for APPROX comparison.
 		 */
@@ -1292,7 +1292,7 @@ public abstract class FilterImpl implements Filter {
 
 	/**
 	 * Returns the leftmost required objectClass value for the filter to evaluate to true.
-	 * 
+	 *
 	 * @return The leftmost required objectClass value or null if none could be determined.
 	 */
 	public String getRequiredObjectClass() {
@@ -1682,7 +1682,7 @@ public abstract class FilterImpl implements Filter {
 
 		/**
 		 * Create a case insensitive map from the specified dictionary.
-		 * 
+		 *
 		 * @param dictionary
 		 * @throws IllegalArgumentException If {@code dictionary} contains case
 		 *             variants of the same key name.

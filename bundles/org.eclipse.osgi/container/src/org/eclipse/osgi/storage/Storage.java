@@ -7,10 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *      Christoph Laeubrich - Bug 527175 - Storage#getSystemContent() should first make the file absolute 
+ *      Christoph Laeubrich - Bug 527175 - Storage#getSystemContent() should first make the file absolute
  *******************************************************************************/
 package org.eclipse.osgi.storage;
 
@@ -2035,7 +2035,7 @@ public class Storage {
 					// search the generation until we have searched them all
 					while (nextElement == null && curDataIndex < generationArray.length)
 						nextElement = generationArray[curDataIndex++].getEntry(curPath);
-					// we have searched all datas then advance to the next path 
+					// we have searched all datas then advance to the next path
 					if (curDataIndex >= generationArray.length) {
 						curPathIndex++;
 						curDataIndex = 0;
@@ -2137,7 +2137,7 @@ public class Storage {
 		return buffer == null ? filePattern : buffer.toString();
 	}
 
-	// Use LinkedHashSet for optimized performance of contains() plus ordering 
+	// Use LinkedHashSet for optimized performance of contains() plus ordering
 	// guarantees.
 	private static LinkedHashSet<String> listEntryPaths(BundleFile bundleFile, String path, Filter patternFilter, Hashtable<String, String> patternProps, int options, LinkedHashSet<String> pathList) {
 		if (pathList == null)
@@ -2192,7 +2192,7 @@ public class Storage {
 		// This has been worked around by the bundles loading the libraries in a particular order (and setting some LIB_PATH env).
 		// The one catch is that the libraries need to be in the same directory and they must use their original lib names.
 		//
-		// This bit of code attempts to do that by using the bundle ID as an ID for the temp dir along with an incrementing ID 
+		// This bit of code attempts to do that by using the bundle ID as an ID for the temp dir along with an incrementing ID
 		// in cases where the temp dir may already exist.
 		Long bundleID = new Long(generation.getBundleInfo().getBundleId());
 		for (int i = 0; i < Integer.MAX_VALUE; i++) {

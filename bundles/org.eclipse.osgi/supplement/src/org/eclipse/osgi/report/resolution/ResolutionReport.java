@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -52,7 +52,7 @@ import org.osgi.service.resolver.ResolutionException;
 					targetTriggers.add(revision);
 				}
 			}
-			
+
 		}
 
 		class DiagResolverHook implements ResolverHook, ResolutionReport.Listener {
@@ -70,7 +70,7 @@ import org.osgi.service.resolver.ResolutionException;
 					Collection<BundleCapability> candidates) { }
 
 			public void end() { }
-			
+
 		}
 		public ResolverHook begin(Collection<BundleRevision> triggers) {
 			if (triggers.containsAll(targetTriggers)) {
@@ -85,7 +85,7 @@ import org.osgi.service.resolver.ResolutionException;
 			return report;
 		}
 	}
- * </pre> 
+ * </pre>
  * @since 3.10
  */
 public interface ResolutionReport {
@@ -131,10 +131,10 @@ public interface ResolutionReport {
 		// TODO Can this make use of generics? Or should this be Map<String, Object>
 		// and each enum would define the key constants?
 		/**
-		 * Returns the data associated with this resolution report entry.  The 
+		 * Returns the data associated with this resolution report entry.  The
 		 * structure of the data is determined by the <code>Type</code>
 		 * of the entry and may by <code>null</code>.
-		 * 
+		 *
 		 * @return the data associated with this resolution report entry.
 		 * @see Type
 		 */
@@ -159,7 +159,7 @@ public interface ResolutionReport {
 
 	/**
 	 * Returns all resolution report entries associated with this report.
-	 * The key is the unresolved resource and the value is a list of 
+	 * The key is the unresolved resource and the value is a list of
 	 * report entries that caused the associated resource  to not be able to resolve.
 	 * @return all resolution report entries associated with this report.
 	 */
@@ -168,10 +168,10 @@ public interface ResolutionReport {
 	/**
 	 * Returns the resolution exception associated with the resolve process
 	 * or {@code null} if there is no resolution exception.  For some resolve
-	 * operations a resolution exception may not be thrown even if the 
+	 * operations a resolution exception may not be thrown even if the
 	 * resolve process could not resolve some resources.  For example, if
 	 * the resources are optional resources to resolve.
-	 * @return the resolution exception or {@code null} if there is 
+	 * @return the resolution exception or {@code null} if there is
 	 * no resolution exception.
 	 */
 	ResolutionException getResolutionException();

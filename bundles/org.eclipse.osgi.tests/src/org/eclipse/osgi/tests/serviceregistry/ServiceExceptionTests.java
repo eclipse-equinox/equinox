@@ -30,7 +30,7 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		// test a service factory which returns wrong object types
 		ServiceExceptionServiceFactory wrongObjectFactory = new ServiceExceptionServiceFactory("A String"); //$NON-NLS-1$
 		Hashtable props = new Hashtable();
-		props.put("name", testMethodName); //$NON-NLS-1$ 
+		props.put("name", testMethodName); //$NON-NLS-1$
 		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), wrongObjectFactory, props);
 		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(OSGiTestsActivator.getContext().getBundle(), null, ServiceException.FACTORY_ERROR);
 		OSGiTestsActivator.getContext().addFrameworkListener(listener);
@@ -68,7 +68,7 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		// test a service factory which returns null objects
 		ServiceExceptionServiceFactory nullObjectFactory = new ServiceExceptionServiceFactory(null);
 		Hashtable props = new Hashtable();
-		props.put("name", testMethodName); //$NON-NLS-1$ 
+		props.put("name", testMethodName); //$NON-NLS-1$
 		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), nullObjectFactory, props);
 		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(OSGiTestsActivator.getContext().getBundle(), null, ServiceException.FACTORY_ERROR);
 		OSGiTestsActivator.getContext().addFrameworkListener(listener);
@@ -107,7 +107,7 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		RuntimeException cause = new RuntimeException(testMethodName);
 		ServiceExceptionServiceFactory runtimeExceptionFactory = new ServiceExceptionServiceFactory(cause);
 		Hashtable props = new Hashtable();
-		props.put("name", testMethodName); //$NON-NLS-1$ 
+		props.put("name", testMethodName); //$NON-NLS-1$
 		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runtimeExceptionFactory, props);
 		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(OSGiTestsActivator.getContext().getBundle(), cause, ServiceException.FACTORY_EXCEPTION);
 		OSGiTestsActivator.getContext().addFrameworkListener(listener);
@@ -146,7 +146,7 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		Error cause = new Error(testMethodName);
 		ServiceExceptionServiceFactory errorFactory = new ServiceExceptionServiceFactory(cause);
 		Hashtable props = new Hashtable();
-		props.put("name", testMethodName); //$NON-NLS-1$ 
+		props.put("name", testMethodName); //$NON-NLS-1$
 		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), errorFactory, props);
 		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(OSGiTestsActivator.getContext().getBundle(), cause, ServiceException.FACTORY_EXCEPTION);
 		OSGiTestsActivator.getContext().addFrameworkListener(listener);

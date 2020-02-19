@@ -35,7 +35,7 @@ import org.osgi.framework.*;
  * the service. This implies that if a
  * bundle wants to keep its service registered, it should keep the
  * ServiceRegistration object referenced.
- * 
+ *
  * @ThreadSafe
  */
 public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Comparable<ServiceRegistrationImpl<?>> {
@@ -57,7 +57,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	/* @GuardedBy("registrationLock") */
 	private ServiceReferenceImpl<S> reference;
 
-	/** List of contexts using the service. 
+	/** List of contexts using the service.
 	 * List&lt;BundleContextImpl&gt;.
 	 * */
 	/* @GuardedBy("registrationLock") */
@@ -258,7 +258,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 
 	/**
 	 * Is this registration unregistered?
-	 * 
+	 *
 	 * @return true if unregistered; otherwise false.
 	 */
 	boolean isUnregistered() {
@@ -454,7 +454,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	}
 
 	/**
-	 * This method returns the bundle which registered the 
+	 * This method returns the bundle which registered the
 	 * service regardless of the registration status of this
 	 * service registration.  This is not an OSGi specified
 	 * method.
@@ -529,7 +529,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 				}
 				S serviceObject = consumer.getService(use);
 				/* if the service factory failed to return an object and
-				 * we created the service use, then remove the 
+				 * we created the service use, then remove the
 				 * optimistically added ServiceUse. */
 				if ((serviceObject == null) && added) {
 					synchronized (servicesInUse) {
@@ -546,7 +546,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 
 	/**
 	 * Create a new ServiceObjects for the requesting bundle.
-	 * 
+	 *
 	 * @param user The requesting bundle.
 	 * @return A new ServiceObjects for this service and the requesting bundle.
 	 */
@@ -563,7 +563,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 
 	/**
 	 * Create a new ServiceUse object for this service and user.
-	 * 
+	 *
 	 * @param user The bundle using this service.
 	 * @return The ServiceUse object for the bundle using this service.
 	 */
@@ -717,12 +717,12 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	/**
 	 * Compares this <code>ServiceRegistrationImpl</code> with the specified
 	 * <code>ServiceRegistrationImpl</code> for order.
-	 * 
+	 *
 	 * <p>
 	 * This does a reverse comparison so that the highest item is sorted to the left.
 	 * We keep ServiceRegistationImpls in sorted lists such that the highest
 	 * ranked service is at element 0 for quick retrieval.
-	 * 
+	 *
 	 * @param other The <code>ServiceRegistrationImpl</code> to be compared.
 	 * @return Returns a negative integer, zero, or a positive integer if this
 	 *         <code>ServiceRegistrationImpl</code> is greater than, equal to, or

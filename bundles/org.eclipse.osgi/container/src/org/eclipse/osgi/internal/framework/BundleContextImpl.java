@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -257,7 +257,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 
 	void notifyFindHooksPriviledged(final BundleContextImpl context, final Collection<Bundle> allBundles) {
 		if (debug.DEBUG_HOOKS) {
-			Debug.println("notifyBundleFindHooks(" + allBundles + ")"); //$NON-NLS-1$ //$NON-NLS-2$ 
+			Debug.println("notifyBundleFindHooks(" + allBundles + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		container.getServiceRegistry().notifyHooksPrivileged(new HookContext() {
 			@Override
@@ -274,7 +274,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 
 			@Override
 			public String getHookMethodName() {
-				return "find"; //$NON-NLS-1$ 
+				return "find"; //$NON-NLS-1$
 			}
 
 			@Override
@@ -853,7 +853,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			String clazz = null;
 			clazz = bundleActivator.getClass().getName();
 
-			throw new BundleException(NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION, new Object[] {clazz, "start", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName()}), BundleException.ACTIVATOR_ERROR, t); //$NON-NLS-1$ //$NON-NLS-2$ 
+			throw new BundleException(NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION, new Object[] {clazz, "start", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName()}), BundleException.ACTIVATOR_ERROR, t); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
@@ -909,16 +909,16 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 
 			String clazz = (activator == null) ? "" : activator.getClass().getName(); //$NON-NLS-1$
 
-			throw new BundleException(NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION, new Object[] {clazz, "stop", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName()}), BundleException.ACTIVATOR_ERROR, t); //$NON-NLS-1$ //$NON-NLS-2$ 
+			throw new BundleException(NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION, new Object[] {clazz, "stop", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName()}), BundleException.ACTIVATOR_ERROR, t); //$NON-NLS-1$ //$NON-NLS-2$
 		} finally {
 			activator = null;
 		}
 	}
 
-	/** 
+	/**
 	 * Return the map of ServiceRegistrationImpl to ServiceUse for services being
 	 * used by this context.
-	 * @return A map of ServiceRegistrationImpl to ServiceUse for services in use by 
+	 * @return A map of ServiceRegistrationImpl to ServiceUse for services in use by
 	 * this context.
 	 */
 	public Map<ServiceRegistrationImpl<?>, ServiceUse<?>> getServicesInUseMap() {
@@ -1050,7 +1050,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	}
 
 	/**
-	 * This method checks that the context is still valid. 
+	 * This method checks that the context is still valid.
 	 *
 	 * @return true if the context is still valid; false otherwise
 	 */

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  *******************************************************************************/
 package org.eclipse.osgi.internal.url;
 
@@ -31,7 +31,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
 /*
- * An abstract class for handler factory impls (Stream and Content) that can 
+ * An abstract class for handler factory impls (Stream and Content) that can
  * handle environments running multiple osgi frameworks with the same VM.
  */
 public abstract class MultiplexingFactory {
@@ -159,7 +159,7 @@ public abstract class MultiplexingFactory {
 		Object successor = released.remove(0);
 		try {
 			Class<?> clazz = successor.getClass();
-			Method register = clazz.getMethod("register", new Class[] {Object.class}); //$NON-NLS-1$		
+			Method register = clazz.getMethod("register", new Class[] {Object.class}); //$NON-NLS-1$
 			for (Object r : released) {
 				register.invoke(successor, new Object[] {r});
 			}

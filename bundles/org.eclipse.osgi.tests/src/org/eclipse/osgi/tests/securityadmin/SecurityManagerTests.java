@@ -215,7 +215,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 
 		BundleContext systemContext = equinox.getBundleContext();
 		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
-		// try installing a bundle to tests bug 
+		// try installing a bundle to tests bug
 		String locationSecurityA = installer.getBundleLocation("security.a"); //$NON-NLS-1$
 		// set the security for the bundle
 		ConditionalPermissionAdmin ca = (ConditionalPermissionAdmin) systemContext.getService(systemContext.getServiceReference(ConditionalPermissionAdmin.class.getName()));
@@ -284,7 +284,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 
 		BundleContext systemContext = equinox.getBundleContext();
 		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
-		// try installing a bundle to tests bug 
+		// try installing a bundle to tests bug
 		String locationLinkA = installer.getBundleLocation("test.link.a"); //$NON-NLS-1$
 		String locationLinkAClient = installer.getBundleLocation("test.link.a.client"); //$NON-NLS-1$
 
@@ -354,7 +354,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 
 		BundleContext systemContext = equinox.getBundleContext();
 		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
-		// try installing a bundle to tests bug 
+		// try installing a bundle to tests bug
 		String locationLinkA = installer.getBundleLocation("test.link.a"); //$NON-NLS-1$
 		String locationLinkAClient = installer.getBundleLocation("test.link.a.client"); //$NON-NLS-1$
 

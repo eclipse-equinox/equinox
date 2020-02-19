@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -21,7 +21,7 @@ import java.util.Date;
  * A <code>SignedContent</code> object represents content which may be signed.  A
  * {@link SignedContentFactory} is used to create signed content objects.
  * <p>
- * A <code>SignedContent</code> object is intended to provide information about 
+ * A <code>SignedContent</code> object is intended to provide information about
  * the signers of the content, and cannot be used to access the actual data of the content.
  * </p>
  * <p>
@@ -34,13 +34,13 @@ public interface SignedContent {
 
 	/**
 	 * Returns all entries of the content.  The returned entries can be used
-	 * to verify the entry content using {@link SignedContentEntry#verify()} and 
+	 * to verify the entry content using {@link SignedContentEntry#verify()} and
 	 * get signer info for each entry in this content using {@link SignedContentEntry#getSignerInfos()}.
-	 * Note that this operation may be expensive because it requires an 
+	 * Note that this operation may be expensive because it requires an
 	 * exhaustive search for entries over the entire content.
 	 * <p>
 	 * Unsigned entries are included in the result.  Entries for which signer info exists
-	 * but no content is found are also returned. For example, when an entry is removed from 
+	 * but no content is found are also returned. For example, when an entry is removed from
 	 * a signed jar but the jar is not resigned, the signer thinks the entry should exist
 	 * but the content got removed.  This would be considered an invalid entry which would fail verification.
 	 * </p>
@@ -64,7 +64,7 @@ public interface SignedContent {
 
 	/**
 	 * Returns true if the content is signed; false otherwise.  This is a convenience method
-	 * equivalent to calling <code>{@link #getSignerInfos()}.length &gt; 0</code> 
+	 * equivalent to calling <code>{@link #getSignerInfos()}.length &gt; 0</code>
 	 * @return true if the content is signed
 	 */
 	public boolean isSigned();
@@ -84,8 +84,8 @@ public interface SignedContent {
 	public SignerInfo getTSASignerInfo(SignerInfo signerInfo);
 
 	/**
-	 * Checks if the certificates are valid for the specified signer.  If the signer has a singing time 
-	 * returned by {@link #getSigningTime(SignerInfo)} then that time is used to check the 
+	 * Checks if the certificates are valid for the specified signer.  If the signer has a singing time
+	 * returned by {@link #getSigningTime(SignerInfo)} then that time is used to check the
 	 * validity of the certificates; otherwise the current time is used.
 	 * @param signerInfo the signer info to check validity for.
 	 * @throws CertificateExpiredException if one of the certificates of this signer is expired

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -42,7 +42,7 @@ public class FilePathTest extends OSGiTest {
 			assertEquals("3.2", "a", segments[1]);
 			return;
 		}
-		// this runs on non-Windows platforms		
+		// this runs on non-Windows platforms
 		assertTrue("1.0", path.isAbsolute());
 		assertNull("2.0", path.getDevice());
 		String[] segments = path.getSegments();

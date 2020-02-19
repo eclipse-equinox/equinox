@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -39,7 +39,7 @@ public class VersionRange extends org.osgi.framework.VersionRange {
 	 * then {@link Version#emptyVersion} is used.
 	 * @param maxVersion the maximum version of the range. If <code>null</code>
 	 * then new Version(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE)
-	 * is used. 
+	 * is used.
 	 */
 	public VersionRange(Version minVersion, boolean includeMin, Version maxVersion, boolean includeMax) {
 		super(includeMin ? INCLUDE_MIN : EXCLUDE_MIN, minVersion == null ? Version.emptyVersion : minVersion, versionMax.equals(maxVersion) ? null : maxVersion, includeMax ? INCLUDE_MAX : EXCLUDE_MAX);
@@ -47,7 +47,7 @@ public class VersionRange extends org.osgi.framework.VersionRange {
 
 	/**
 	 * Creates a version range from the specified string.
-	 * 
+	 *
 	 * <p>
 	 * Here is the grammar for version range strings.
 	 * </p>
@@ -62,7 +62,7 @@ public class VersionRange extends org.osgi.framework.VersionRange {
 	 * include-max ::= ']'
 	 * exclude-max ::= ')'
 	 * </pre>
-	 * 
+	 *
 	 * @param versionRange string representation of the version range or <code>null</code>
 	 * for the empty range "0.0.0"
 	 * @see Version#Version(String) definition of <code>version</code>
@@ -92,7 +92,7 @@ public class VersionRange extends org.osgi.framework.VersionRange {
 	 * Returns the maximum Version of this VersionRange.
 	 * <p>
 	 * This method is deprecated.  For ranges that have no maximum this method
-	 * incorrectly returns a version equal to 
+	 * incorrectly returns a version equal to
 	 * <code>Version(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE)</code>.
 	 * Use {@link org.osgi.framework.VersionRange#getRight()} instead.
 	 * @return the maximum Version of this VersionRange
@@ -116,11 +116,11 @@ public class VersionRange extends org.osgi.framework.VersionRange {
 	 * Returns whether the given version is included in this VersionRange.
 	 * This will depend on the minimum and maximum versions of this VersionRange
 	 * and the given version.
-	 * 
-	 * @param version a version to be tested for inclusion in this VersionRange. 
+	 *
+	 * @param version a version to be tested for inclusion in this VersionRange.
 	 * If <code>null</code> then {@link Version#emptyVersion} is used.
-	 * @return <code>true</code> if the version is included, 
-	 * <code>false</code> otherwise 
+	 * @return <code>true</code> if the version is included,
+	 * <code>false</code> otherwise
 	 */
 	public boolean isIncluded(Version version) {
 		if (version == null)

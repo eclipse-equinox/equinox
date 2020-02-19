@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -20,13 +20,13 @@ import org.eclipse.osgi.internal.permadmin.SecurityRow.Decision;
 import org.osgi.service.condpermadmin.Condition;
 
 /**
- * 
+ *
  * This security manager implements the ConditionalPermission processing for
  * OSGi. It is to be used with ConditionalPermissionAdmin.
- * 
+ *
  */
 public class EquinoxSecurityManager extends SecurityManager {
-	/* 
+	/*
 	 * This is super goofy, but we need to make sure that the CheckContext and
 	 * CheckPermissionAction classes load early. Otherwise, we run into problems later.
 	 */
@@ -96,7 +96,7 @@ public class EquinoxSecurityManager extends SecurityManager {
 	/**
 	 * Gets the AccessControlContext currently being evaluated by
 	 * the SecurityManager.
-	 * 
+	 *
 	 * @return the AccessControlContext currently being evaluated by the SecurityManager, or
 	 * null if no AccessControlContext is being evaluated. Note: this method will
 	 * return null if the permission check is being done directly on the AccessControlContext

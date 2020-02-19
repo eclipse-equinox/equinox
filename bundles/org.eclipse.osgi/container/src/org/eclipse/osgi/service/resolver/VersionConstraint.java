@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -16,7 +16,7 @@ package org.eclipse.osgi.service.resolver;
 import org.osgi.framework.wiring.BundleRequirement;
 
 /**
- * VersionConstraints represent the relationship between two bundles (in the 
+ * VersionConstraints represent the relationship between two bundles (in the
  * case of bundle requires) or a bundle and a package (in the case of import/export).
  * <p>
  * This interface is not intended to be implemented by clients.  The
@@ -29,7 +29,7 @@ public interface VersionConstraint extends Cloneable {
 
 	/**
 	 * Returns this constraint's name.
-	 * 
+	 *
 	 * @return this constraint's name
 	 */
 	public String getName();
@@ -42,16 +42,16 @@ public interface VersionConstraint extends Cloneable {
 
 	/**
 	 * Returns the bundle that declares this constraint.
-	 * 
+	 *
 	 * @return a bundle description
 	 */
 	public BundleDescription getBundle();
 
 	/**
-	 * Returns whether this constraint is resolved. A resolved constraint 
-	 * is guaranteed to have its supplier defined. 
-	 * 
-	 * @return <code>true</code> if this bundle is resolved, <code>false</code> 
+	 * Returns whether this constraint is resolved. A resolved constraint
+	 * is guaranteed to have its supplier defined.
+	 *
+	 * @return <code>true</code> if this bundle is resolved, <code>false</code>
 	 * otherwise
 	 */
 	public boolean isResolved();
@@ -60,25 +60,25 @@ public interface VersionConstraint extends Cloneable {
 	 * Returns whether this constraint could be satisfied by the given supplier.
 	 * This will depend on the suppliers different attributes including its name,
 	 * versions and other arbitrary attributes
-	 * 
-	 * @param supplier a supplier to be tested against this constraint (may be 
+	 *
+	 * @param supplier a supplier to be tested against this constraint (may be
 	 * <code>null</code>)
-	 * @return <code>true</code> if this constraint could be resolved using the supplier, 
-	 * <code>false</code> otherwise 
+	 * @return <code>true</code> if this constraint could be resolved using the supplier,
+	 * <code>false</code> otherwise
 	 */
 	public boolean isSatisfiedBy(BaseDescription supplier);
 
 	/**
 	 * Returns the supplier that satisfies this constraint, if it is resolved.
-	 *  
-	 * @return a supplier, or <code>null</code> 
+	 *
+	 * @return a supplier, or <code>null</code>
 	 * @see #isResolved()
 	 */
 	public BaseDescription getSupplier();
 
 	/**
 	 * Returns the requirement represented by this constraint.
-	 * Some constraint types may not be able to represent 
+	 * Some constraint types may not be able to represent
 	 * a requirement.  In such cases <code>null</code> is
 	 * returned.
 	 * @return the requirement represented by this constraint
@@ -87,9 +87,9 @@ public interface VersionConstraint extends Cloneable {
 	public BundleRequirement getRequirement();
 
 	/**
-	 * Returns the user object associated to this constraint, or 
+	 * Returns the user object associated to this constraint, or
 	 * <code>null</code> if none exists.
-	 *  
+	 *
 	 * @return the user object associated to this constraint,
 	 * or <code>null</code>
 	 * @since 3.8
@@ -98,11 +98,11 @@ public interface VersionConstraint extends Cloneable {
 
 	/**
 	 * Associates a user-provided object to this constraint, or
-	 * removes an existing association, if <code>null</code> is provided. The 
-	 * provided object is not interpreted in any ways by this 
+	 * removes an existing association, if <code>null</code> is provided. The
+	 * provided object is not interpreted in any ways by this
 	 * constrain.
-	 * 
-	 * @param userObject an arbitrary object provided by the user, or 
+	 *
+	 * @param userObject an arbitrary object provided by the user, or
 	 * <code>null</code>
 	 * @since 3.8
 	 */

@@ -38,12 +38,12 @@ public interface State {
 	 * <p>
 	 * If the bundle already exists in another state then an <code>IllegalStateException</code>
 	 * will be thrown.  Note that even if you remove a <code>BundleDescription</code> from
-	 * one <code>State</code> object using {@link State#removeBundle(BundleDescription)} it 
+	 * one <code>State</code> object using {@link State#removeBundle(BundleDescription)} it
 	 * may still be considered as removing pending if other bundles in that state depend on the
-	 * bundle you removed.  To complete a pending removal a call must be done to 
+	 * bundle you removed.  To complete a pending removal a call must be done to
 	 * {@link State#resolve(BundleDescription[])} with the removed bundle.
 	 * </p>
-	 * 
+	 *
 	 * @param description the description to add
 	 * @return a boolean indicating whether the bundle was successfully added
 	 * @throws IllegalStateException if the bundle already exists in another state
@@ -55,17 +55,17 @@ public interface State {
 	 * given state. The given state is taken as the base so the absence of a bundle
 	 * in this state is reported as a deletion, etc.
 	 *<p>Note that the generated StateDelta will contain BundleDeltas with one
-	 *of the following types: BundleDelta.ADDED, BundleDelta.REMOVED and 
+	 *of the following types: BundleDelta.ADDED, BundleDelta.REMOVED and
 	 *BundleDelta.UPDATED</p>
-	 * 
+	 *
 	 * @param baseState the base state
-	 * @return a delta describing differences between this and the base state state 
+	 * @return a delta describing differences between this and the base state state
 	 */
 	public StateDelta compare(State baseState) throws BundleException;
 
 	/**
 	 * Removes a bundle description with the given bundle id.
-	 * 
+	 *
 	 * @param bundleId the id of the bundle description to be removed
 	 * @return the removed bundle description, or <code>null</code>, if a bundle
 	 * 	with the given id does not exist in this state
@@ -74,42 +74,42 @@ public interface State {
 
 	/**
 	 * Removes the given bundle description.
-	 * 
+	 *
 	 * @param bundle the bundle description to be removed
-	 * @return <code>true</code>, if if the bundle description was removed, 
-	 * 	<code>false</code> otherwise 	
+	 * @return <code>true</code>, if if the bundle description was removed,
+	 * 	<code>false</code> otherwise
 	 */
 	public boolean removeBundle(BundleDescription bundle);
 
 	/**
-	 * Updates an existing bundle description with the given description. 
-	 * 
+	 * Updates an existing bundle description with the given description.
+	 *
 	 * @param newDescription the bundle description to replace an existing one
-	 * @return <code>true</code>, if if the bundle description was updated, 
-	 * 	<code>false</code> otherwise 	
+	 * @return <code>true</code>, if if the bundle description was updated,
+	 * 	<code>false</code> otherwise
 	 */
 	public boolean updateBundle(BundleDescription newDescription);
 
 	/**
 	 * Returns the delta representing the changes from the time this state was
 	 * first captured until now.
-	 * 
+	 *
 	 * @return the state delta
 	 */
 	public StateDelta getChanges();
 
 	/**
 	 * Returns descriptions for all bundles known to this state.
-	 * 
+	 *
 	 * @return the descriptions for all bundles known to this state.
 	 */
 	public BundleDescription[] getBundles();
 
 	/**
-	 * Returns the bundle descriptor for the bundle with the given id. 
-	 * <code>null</code> is returned if no such bundle is found in 
-	 * this state. 
-	 * 
+	 * Returns the bundle descriptor for the bundle with the given id.
+	 * <code>null</code> is returned if no such bundle is found in
+	 * this state.
+	 *
 	 * @return the descriptor for the identified bundle
 	 * @see BundleDescription#getBundleId()
 	 */
@@ -122,7 +122,7 @@ public interface State {
 	 * If multiple bundles with the same resolution state are available, the bundle
 	 * with the highest version number is returned if the <code>version</code> is
 	 * null.
-	 * 
+	 *
 	 * @param symbolicName symbolic name of the bundle to query
 	 * @param version version of the bundle to query. null matches any bundle
 	 * @return the descriptor for the identified bundle
@@ -131,8 +131,8 @@ public interface State {
 
 	/**
 	 * Returns the bundle descriptor for the bundle with the given location
-	 * identifier. null is returned if no such bundle is found in this state. 
-	 * 
+	 * identifier. null is returned if no such bundle is found in this state.
+	 *
 	 * @param location location identifier of the bundle to query
 	 * @return the descriptor for the identified bundle
 	 */
@@ -144,7 +144,7 @@ public interface State {
 	 * the system state timestamp is 4 but then some bundles are installed,
 	 * the system state timestamp is updated. By comparing 4 to the current system
 	 * state timestamp it is possible to detect if the states are out of sync.
-	 * 
+	 *
 	 * @return the timestamp of this state
 	 */
 	public long getTimeStamp();
@@ -158,7 +158,7 @@ public interface State {
 	/**
 	 * Returns true if there have been no modifications to this state since the
 	 * last time resolve() was called.
-	 * 
+	 *
 	 * @return whether or not this state has changed since last resolved.
 	 */
 	public boolean isResolved();
@@ -166,15 +166,15 @@ public interface State {
 	/**
 	 * Resolves the given version constraint with the given supplier. The given
 	 * constraint object is destructively modified to reflect its new resolved
-	 * state. Note that a constraint can be unresolved by passing null for 
+	 * state. Note that a constraint can be unresolved by passing null for
 	 * the supplier.
 	 * <p>
 	 * This method is intended to be used by resolvers in the process of
 	 * determining which constraints are satisfied by which components.
 	 * </p>
-	 * 
+	 *
 	 * @param constraint the version constraint to update
-	 * @param supplier the supplier which satisfies the constraint. May be null if 
+	 * @param supplier the supplier which satisfies the constraint. May be null if
 	 * the constraint is to be unresolved.
 	 * @throws IllegalStateException if this is not done during a call to
 	 * <code>resolve</code>
@@ -187,7 +187,7 @@ public interface State {
 	 * This method is intended to be used by resolvers in the process of
 	 * determining which constraints are satisfied by which components.
 	 * </p>
-	 * 
+	 *
 	 * @param bundle the bundle to update
 	 * @param status whether or not the given bundle is resolved, if false the other parameters are ignored
 	 * @param hosts the host for the resolve fragment, can be <code>null</code>
@@ -205,7 +205,7 @@ public interface State {
 	 * This method is intended to be used by resolvers in the process of
 	 * determining which constraints are satisfied by which components.
 	 * </p>
-	 * 
+	 *
 	 * @param bundle the bundle to update
 	 * @param status whether or not the given bundle is resolved, if false the other parameters are ignored
 	 * @param hosts the host for the resolve fragment, can be <code>null</code>
@@ -225,7 +225,7 @@ public interface State {
 	 * This method is intended to be used by resolvers in the process of
 	 * determining which constraints are satisfied by which components.
 	 * </p>
-	 * 
+	 *
 	 * @param bundle the bundle to update
 	 * @param status whether or not the given bundle is resolved, if false the other parameters are ignored
 	 * @param hosts the host for the resolve fragment, can be <code>null</code>
@@ -244,7 +244,7 @@ public interface State {
 	/**
 	 * Sets the given removal pending bundle to removal complete for this state.
 	 * <p>
-	 * This method is intended to be used by resolvers in the process of 
+	 * This method is intended to be used by resolvers in the process of
 	 * resolving bundles.
 	 * </p>
 	 * @param bundle the bundle to set a removal complete.
@@ -259,7 +259,7 @@ public interface State {
 	 * This method is intended to be used by resolvers in the process of
 	 * resolving.
 	 * </p>
-	 * 
+	 *
 	 * @param bundle the bundle to add a new <code>ResolverError</code> for
 	 * @param type the type of <code>ResolverError</code> to add
 	 * @param data the data for the <code>ResolverError</code>
@@ -276,7 +276,7 @@ public interface State {
 	 * This method is intended to be used by resolvers in the process of
 	 * resolving.
 	 * </p>
-	 * 
+	 *
 	 * @param bundle the bundle to remove all <code>ResolverError</code>s for
 	 * @throws IllegalStateException if this is not done during a call to <code>resolve</code>
 	 * @since 3.2
@@ -295,7 +295,7 @@ public interface State {
 	 * Returns the resolver associated with this state. A state can work with
 	 * at most one resolver at any given time. Similarly, a resolver can work
 	 * with at most one state at a time.
-	 * 
+	 *
 	 * @return the resolver for this state. null is returned if the state does
 	 * not have a resolver
 	 */
@@ -310,11 +310,11 @@ public interface State {
 	 * the following expression must be included in this method if the given
 	 * resolver (value) is not identical to the result of this.getResolver().
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 *  if (this.getResolver() != value) value.setState(this);
 	 * </pre>
-	 * 
+	 *
 	 */
 	// TODO what happens if you set the Resolver after some bundles have
 	// been added to the state but it is not resolved?  Should setting
@@ -327,11 +327,11 @@ public interface State {
 	 * changes in resolved states and dependencies in the state.
 	 * <p>
 	 * Note that this method is typically implemented using
-	 * 
+	 *
 	 * <pre>
 	 *  this.getResolver().resolve();
 	 * </pre>
-	 * 
+	 *
 	 * and is the preferred path for invoking resolution. In particular, states
 	 * should refuse to perform updates (@see #select() and
 	 * #resolveConstraint()) if they are not currently involved in a resolution
@@ -340,9 +340,9 @@ public interface State {
 	 * Note the given state is destructively modified to reflect the results of
 	 * resolution.
 	 * </p>
-	 * 
+	 *
 	 * @param incremental a flag controlling whether resolution should be incremental
-	 * @return a delta describing the changes in resolved state and 
+	 * @return a delta describing the changes in resolved state and
 	 * interconnections
 	 */
 	public StateDelta resolve(boolean incremental);
@@ -354,14 +354,14 @@ public interface State {
 
 	/**
 	 * Resolves the constraints contained in this state using the resolver
-	 * currently associated with the state in an incremental, "least-perturbing" 
-	 * mode, and returns a delta describing the changes in resolved states and 
+	 * currently associated with the state in an incremental, "least-perturbing"
+	 * mode, and returns a delta describing the changes in resolved states and
 	 * dependencies in the state.
-	 * 
-	 * @param discard an array containing descriptions for bundles whose 
+	 *
+	 * @param discard an array containing descriptions for bundles whose
 	 * 	current resolution state should be forgotten.  If <code>null</code>
 	 *  then all the current removal pending BundleDescriptions are refreshed.
-	 * @return a delta describing the changes in resolved state and 
+	 * @return a delta describing the changes in resolved state and
 	 * 	interconnections
 	 */
 	public StateDelta resolve(BundleDescription[] discard);
@@ -370,13 +370,13 @@ public interface State {
 	 * Resolves the constraints contained in this state using the resolver
 	 * currently associated with the state in an incremental, "least-perturbing"
 	 * mode, and returns a delta describing the changes in resolved states and
-	 * dependencies in the state.  If discard is set to true the 
-	 * the descriptions contained in the resolve array will have their 
+	 * dependencies in the state.  If discard is set to true the
+	 * the descriptions contained in the resolve array will have their
 	 * current resolution state discarded and will be re-resolved.
 	 * This method will attempt to resolve the supplied descriptions
 	 * and may attempt to resolve any other unresolved descriptions contained
 	 * in this state.
-	 * 
+	 *
 	 * @param resolve an array containing descriptions for bundles to resolve.
 	 * @param discard a value of true indicates the resolve descriptions
 	 * should have their current resolution state discarded and re-resolved.
@@ -391,7 +391,7 @@ public interface State {
 	 * of this state. Version overrides allow external forces to
 	 * refine/override the version constraints setup by the components in the
 	 * state.
-	 * 
+	 *
 	 * @param value Format undefined.
 	 * @deprecated The exact form of this has never been defined.  There is
 	 * no alternative method available.
@@ -400,7 +400,7 @@ public interface State {
 
 	/**
 	 * Returns descriptions for all bundles currently resolved in this state.
-	 * 
+	 *
 	 * @return the descriptions for all bundles currently resolved in this
 	 * state.
 	 */
@@ -415,7 +415,7 @@ public interface State {
 
 	/**
 	 * Returns the dependency closure for the specified bundles.
-	 * 
+	 *
 	 * <p>
 	 * A graph of bundles is computed starting with the specified bundles. The
 	 * graph is expanded by adding any bundle that is either wired to a package
@@ -423,7 +423,7 @@ public interface State {
 	 * in the graph. The graph is fully constructed when there is no bundle
 	 * outside the graph that is wired to a bundle in the graph. The graph may
 	 * contain removal pending bundles.
-	 * 
+	 *
 	 * @param bundles The initial bundles for which to generate the dependency
 	 *        closure.
 	 * @return A collection containing a snapshot of the dependency closure of
@@ -435,13 +435,13 @@ public interface State {
 
 	/**
 	 * Returns whether this state is empty.
-	 * @return <code>true</code> if this state is empty, <code>false</code> 
+	 * @return <code>true</code> if this state is empty, <code>false</code>
 	 * 	otherwise
 	 */
 	public boolean isEmpty();
 
 	/**
-	 * Returns all exported packages in this state, according to the OSGi rules for resolution. 
+	 * Returns all exported packages in this state, according to the OSGi rules for resolution.
 	 * @see org.osgi.service.packageadmin.PackageAdmin#getExportedPackages(org.osgi.framework.Bundle)
 	 */
 	public ExportPackageDescription[] getExportedPackages();
@@ -456,25 +456,25 @@ public interface State {
 
 	/**
 	 * Returns the factory that created this state.
-	 * @return the state object factory that created this state 
+	 * @return the state object factory that created this state
 	 */
 	public StateObjectFactory getFactory();
 
 	/**
 	 * Attempts to find an ExportPackageDescription that will satisfy a dynamic import
 	 * for the specified requestedPackage for the specified importingBundle.  If no
-	 * ExportPackageDescription is available that satisfies a dynamic import for the 
+	 * ExportPackageDescription is available that satisfies a dynamic import for the
 	 * importingBundle then <code>null</code> is returned.
 	 * @param importingBundle the BundleDescription that is requesting a dynamic package
 	 * @param requestedPackage the name of the package that is being requested
-	 * @return the ExportPackageDescription that satisfies the dynamic import request; 
+	 * @return the ExportPackageDescription that satisfies the dynamic import request;
 	 * a value of <code>null</code> is returned if none is available.
 	 */
 	public ExportPackageDescription linkDynamicImport(BundleDescription importingBundle, String requestedPackage);
 
 	/**
-	 * Adds the specified dynamic imports to the specified importingBundle.  The added 
-	 * dynamic imports are only valid for the instance of this state and will be 
+	 * Adds the specified dynamic imports to the specified importingBundle.  The added
+	 * dynamic imports are only valid for the instance of this state and will be
 	 * forgotten if this state is read from a persistent cache.
 	 * @param importingBundle the bundle to add the imports to.
 	 * @param dynamicImports the dynamic imports to add.
@@ -499,34 +499,34 @@ public interface State {
 	 * <li>osgi.ws - the platform windowing system.</li>
 	 * <li>osgi.resolverMode - the resolver mode.  A value of "strict" will set the resolver mode to strict.</li>
 	 * <li>org.osgi.framework.system.packages - the packages exported by the system bundle.</li>
-	 * <li>org.osgi.framework.executionenvironment - the comma separated list of supported execution environments.  
+	 * <li>org.osgi.framework.executionenvironment - the comma separated list of supported execution environments.
 	 * This property is then used to resolve the required execution environment the bundles in a state.</li>
-	 * <li>org.osgi.framework.os.name - the name of the operating system.  This property is used to resolve the osname attribute of 
+	 * <li>org.osgi.framework.os.name - the name of the operating system.  This property is used to resolve the osname attribute of
 	 * bundle native code (i.e. Bundle-NativeCode).</li>
-	 * <li>org.osgi.framework.os.version - the version of the operating system.  This property is used to resolve the osversion attribute 
+	 * <li>org.osgi.framework.os.version - the version of the operating system.  This property is used to resolve the osversion attribute
 	 * of bundle native code (i.e. Bundle-NativeCode).</li>
-	 * <li>org.osgi.framework.processor - the processor name.  This property is used to resolve the processor attribute 
+	 * <li>org.osgi.framework.processor - the processor name.  This property is used to resolve the processor attribute
 	 * of bundle native code (i.e. Bundle-NativeCode).</li>
-	 * <li>org.osgi.framework.language - the language being used.  This property is used to resolve the language attribute 
+	 * <li>org.osgi.framework.language - the language being used.  This property is used to resolve the language attribute
 	 * of bundle native code (i.e. Bundle-NativeCode).</li>
 	 * </ul>
 	 * The values used for the supported properties can be <code>String</code> type
 	 * to specify a single value for the property or they can by <code>String[]</code>
-	 * to specify a list of values for the property. 
+	 * to specify a list of values for the property.
 	 * @param platformProperties the platform properties of the state
 	 * @return false if the platformProperties specified do not change any of the
-	 * supported properties already set.  If any of the supported property values 
+	 * supported properties already set.  If any of the supported property values
 	 * are changed as a result of calling this method then true is returned.
 	 */
 	public boolean setPlatformProperties(Dictionary<?, ?> platformProperties);
 
 	/**
-	 * Sets the platform properties of the state to a list of platform properties.  
+	 * Sets the platform properties of the state to a list of platform properties.
 	 * @see #setPlatformProperties(Dictionary)
-	 * 
+	 *
 	 * @param platformProperties a set of platform properties for the state
 	 * @return false if the platformProperties specified do not change any of the
-	 * supported properties already set.  If any of the supported property values 
+	 * supported properties already set.  If any of the supported property values
 	 * are changed as a result of calling this method then true is returned.
 	 */
 	public boolean setPlatformProperties(Dictionary<?, ?>[] platformProperties);
@@ -539,7 +539,7 @@ public interface State {
 	public Dictionary[] getPlatformProperties();
 
 	/**
-	 * Returns the list of system packages which are exported by the system bundle.  
+	 * Returns the list of system packages which are exported by the system bundle.
 	 * The list of system packages is set by the org.osgi.framework.system.packages
 	 * value in the platform properties for this state.
 	 * @see #setPlatformProperties(Dictionary)
@@ -548,13 +548,13 @@ public interface State {
 	public ExportPackageDescription[] getSystemPackages();
 
 	/**
-	 * Returns a state helper object. State helpers provide convenience methods 
-	 * for manipulating states. 
+	 * Returns a state helper object. State helpers provide convenience methods
+	 * for manipulating states.
 	 * <p>
 	 * A possible implementation for this
 	 * method would provide the same single StateHelper instance to all clients.
 	 * </p>
-	 * 
+	 *
 	 * @return a state helper
 	 * @see StateHelper
 	 * @since 3.2
@@ -562,10 +562,10 @@ public interface State {
 	public StateHelper getStateHelper();
 
 	/**
-	 * Returns the highest bundle ID.  The value -1 is returned if no 
+	 * Returns the highest bundle ID.  The value -1 is returned if no
 	 * bundles exist in this state.
 	 * <p>
-	 * Note that this method returns the highest bundle ID the ever existed in this 
+	 * Note that this method returns the highest bundle ID the ever existed in this
 	 * this state object.  This bundle may have been removed from the state.
 	 * @return the highest bundle ID.
 	 * @since 3.3
@@ -597,7 +597,7 @@ public interface State {
 
 	/**
 	 * Adds the disabled info to this state.  If a disable info already exists
-	 * for the specified policy and the specified bundle then it is replaced with 
+	 * for the specified policy and the specified bundle then it is replaced with
 	 * the given disabled info.
 	 * @param disabledInfo the disabled info to add.
 	 * @throws IllegalArgumentException if the <code>BundleDescription</code> for
@@ -632,7 +632,7 @@ public interface State {
 	public DisabledInfo getDisabledInfo(BundleDescription bundle, String policyName);
 
 	/**
-	 * Sets the resolver hook factory for this state.  The resolver hook factory is 
+	 * Sets the resolver hook factory for this state.  The resolver hook factory is
 	 * used during resolve operations according to the OSGi specification for the
 	 * resolver hook factory.
 	 * @param hookFactory the resolver hook factory

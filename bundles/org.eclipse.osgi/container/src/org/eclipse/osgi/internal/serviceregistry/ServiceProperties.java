@@ -23,7 +23,7 @@ import org.osgi.framework.Constants;
 
 /**
  * Service properties.
- * 
+ *
  * Supports case-insensitive key lookup.
  */
 class ServiceProperties extends CaseInsensitiveDictionaryMap<String, Object> {

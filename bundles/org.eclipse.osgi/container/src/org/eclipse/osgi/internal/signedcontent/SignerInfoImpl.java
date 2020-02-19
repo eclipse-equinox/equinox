@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 package org.eclipse.osgi.internal.signedcontent;
@@ -57,7 +57,7 @@ public class SignerInfoImpl implements SignerInfo {
 			result += cert.hashCode();
 		}
 		// Note that we do not hash based on trustAnchor;
-		// this changes dynamically but we need a constant hashCode for purposes of 
+		// this changes dynamically but we need a constant hashCode for purposes of
 		// hashing in a Set.
 		return result;
 	}

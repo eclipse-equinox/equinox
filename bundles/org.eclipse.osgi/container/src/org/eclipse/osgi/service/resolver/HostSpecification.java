@@ -7,14 +7,14 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
 
 /**
- * A representation of one host bundle constraint as seen in a 
+ * A representation of one host bundle constraint as seen in a
  * bundle manifest and managed by a state and resolver.
  * <p>
  * This interface is not intended to be implemented by clients.  The

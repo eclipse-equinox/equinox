@@ -16,16 +16,12 @@ package org.eclipse.osgi.tests.permissions;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.util.PropertyPermission;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.Test;
 import org.osgi.framework.AdminPermission;
 
 public class AdminPermissionTests extends PermissionTests {
 
-	public static Test suite() {
-		return new TestSuite(AdminPermissionTests.class);
-	}
-
+	@Test
 	public void testAdminPermission() {
 		AdminPermission p1 = new AdminPermission();
 		AdminPermission p2 = new AdminPermission("*", "*"); //$NON-NLS-1$ //$NON-NLS-2$

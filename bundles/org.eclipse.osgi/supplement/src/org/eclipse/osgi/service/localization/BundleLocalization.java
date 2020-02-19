@@ -17,8 +17,8 @@ import java.util.ResourceBundle;
 import org.osgi.framework.Bundle;
 
 /**
- * The interface of the service that gets {@link ResourceBundle} objects from a given 
- * bundle with a given locale. 
+ * The interface of the service that gets {@link ResourceBundle} objects from a given
+ * bundle with a given locale.
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
@@ -32,7 +32,7 @@ public interface BundleLocalization {
 	 * @param bundle the bundle to get localization for
 	 * @param locale the name of the locale to get, or <code>null</code> if
 	 * the default locale is to be used
-	 * 
+	 *
 	 * @return A <code>ResourceBundle</code> object for the given bundle and locale,
 	 * or <code>null</code> is returned if no ResourceBundle object can
 	 * be loaded.

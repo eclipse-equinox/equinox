@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -24,11 +24,11 @@ import org.osgi.framework.*;
 
 /**
  * This class represents the use of a service by a bundle. One is created for each
- * service acquired by a bundle. 
- * 
+ * service acquired by a bundle.
+ *
  * <p>
  * This class manages a service factory.
- * 
+ *
  * @ThreadSafe
  */
 public class ServiceFactoryUse<S> extends ServiceUse<S> {
@@ -73,7 +73,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 	 * is called to create a service object for the context bundle.
 	 * This service object is cached.
 	 * While the use count is greater than zero,
-	 * subsequent calls to get the service object 
+	 * subsequent calls to get the service object
 	 * will return the cached service object.
 	 * <br>If the service object returned by the {@link ServiceFactory}
 	 * is not an <code>instanceof</code>
@@ -127,7 +127,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 
 	/**
 	 * Unget a service's service object.
-	 * 
+	 *
 	 * <p>
 	 * Decrements the use count if the service was being used.
 	 *
@@ -166,7 +166,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 
 	/**
 	 * Release all uses of the service and reset the use count to zero.
-	 * 
+	 *
 	 * <ol>
 	 * <li>The bundle's use count for this service is set to zero.
 	 * <li>The {@link ServiceFactory#ungetService(Bundle, ServiceRegistration, Object)} method
@@ -203,7 +203,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 
 	/**
 	 *  Call the service factory to get the service.
-	 *  
+	 *
 	 * @return The service returned by the factory or null if there was an error.
 	 */
 	/* @GuardedBy("this") */
@@ -223,7 +223,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 			}
 			// allow the adaptor to handle this unexpected error
 			context.getContainer().handleRuntimeError(t);
-			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "getService"), ServiceException.FACTORY_EXCEPTION, t); //$NON-NLS-1$ 
+			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "getService"), ServiceException.FACTORY_EXCEPTION, t); //$NON-NLS-1$
 			context.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
 			return null;
 		}
@@ -253,7 +253,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 
 	/**
 	 *  Call the service factory to unget the service.
-	 *  
+	 *
 	 *  @param service The service object to pass to the factory.
 	 */
 	/* @GuardedBy("this") */
@@ -272,7 +272,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 				Debug.printStackTrace(t);
 			}
 
-			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "ungetService"), ServiceException.FACTORY_EXCEPTION, t); //$NON-NLS-1$ 
+			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "ungetService"), ServiceException.FACTORY_EXCEPTION, t); //$NON-NLS-1$
 			context.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
 		}
 	}

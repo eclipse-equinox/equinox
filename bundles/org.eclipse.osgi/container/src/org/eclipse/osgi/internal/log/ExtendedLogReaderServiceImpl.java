@@ -32,7 +32,7 @@ public class ExtendedLogReaderServiceImpl implements ExtendedLogReaderService {
 			throw new IllegalArgumentException("LogListener must not be null"); //$NON-NLS-1$
 
 		if (filter == null)
-			throw new IllegalArgumentException("LogFilter must not be null"); //$NON-NLS-1$		
+			throw new IllegalArgumentException("LogFilter must not be null"); //$NON-NLS-1$
 
 		listeners.add(listener);
 		factory.addLogListener(listener, filter);

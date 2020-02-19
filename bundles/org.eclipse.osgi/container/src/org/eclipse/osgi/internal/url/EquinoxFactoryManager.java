@@ -65,7 +65,7 @@ public class EquinoxFactoryManager {
 		Object lock = getURLStreamHandlerFactoryLock();
 		synchronized (lock) {
 			URLStreamHandlerFactory factory = (URLStreamHandlerFactory) factoryField.get(null);
-			// doing a null check here just in case, but it would be really strange if it was null, 
+			// doing a null check here just in case, but it would be really strange if it was null,
 			// because we failed to set the factory normally!!
 			if (factory != null) {
 				try {
@@ -134,7 +134,7 @@ public class EquinoxFactoryManager {
 			throw new Exception("Could not find ContentHandlerFactory field"); //$NON-NLS-1$
 		synchronized (URLConnection.class) {
 			java.net.ContentHandlerFactory factory = (java.net.ContentHandlerFactory) factoryField.get(null);
-			// doing a null check here just in case, but it would be really strange if it was null, 
+			// doing a null check here just in case, but it would be really strange if it was null,
 			// because we failed to set the factory normally!!
 
 			if (factory != null) {
@@ -148,7 +148,7 @@ public class EquinoxFactoryManager {
 					factory = chf;
 				}
 			}
-			// null out the field so that we can successfully call setContentHandlerFactory			
+			// null out the field so that we can successfully call setContentHandlerFactory
 			factoryField.set(null, null);
 			// always attempt to clear the handlers cache
 			// This allows an optimization for the single framework use-case
@@ -221,7 +221,7 @@ public class EquinoxFactoryManager {
 					Method unregister = factory.getClass().getMethod("unregister", new Class[] {Object.class}); //$NON-NLS-1$
 					unregister.invoke(factory, new Object[] {contentHandlerFactory});
 				}
-				// null out the field so that we can successfully call setContentHandlerFactory									
+				// null out the field so that we can successfully call setContentHandlerFactory
 				factoryField.set(null, null);
 				// always attempt to clear the handlers cache
 				// This allows an optomization for the single framework use-case

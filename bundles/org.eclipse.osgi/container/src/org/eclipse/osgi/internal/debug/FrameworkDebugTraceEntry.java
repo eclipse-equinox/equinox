@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -27,7 +27,7 @@ public class FrameworkDebugTraceEntry {
 
 	/**
 	 * The date and time when the trace occurred.
-	 * 
+	 *
 	 */
 	private final long timestamp;
 
@@ -68,7 +68,7 @@ public class FrameworkDebugTraceEntry {
 
 	/**
 	 * Construct a new FrameworkTraceRecord object
-	 * 
+	 *
 	 * @param bundleSymbolicName
 	 *            The symbolic name of the bundle being traced
 	 * @param optionPath
@@ -84,7 +84,7 @@ public class FrameworkDebugTraceEntry {
 
 	/**
 	 * Construct a new FrameworkTraceRecord object
-	 * 
+	 *
 	 * @param bundleSymbolicName
 	 *            The symbolic name of the bundle being traced
 	 * @param optionPath
@@ -94,7 +94,7 @@ public class FrameworkDebugTraceEntry {
 	 * @param error
 	 *            An exception to be traced
 	 * @param traceClass
-	 *            The class that calls the trace API 
+	 *            The class that calls the trace API
 	 */
 	public FrameworkDebugTraceEntry(String bundleSymbolicName, final String optionPath, final String message, final Throwable error, final String traceClass) {
 		threadName = Thread.currentThread().getName();
@@ -123,7 +123,7 @@ public class FrameworkDebugTraceEntry {
 				 * is likely that class so we should find out who called it.  If a
 				 * trace class has not been specified, or has been specified and this
 				 * stack element is not that class, then we assume this stack element
-				 * is the caller of the trace API. 
+				 * is the caller of the trace API.
 				 */
 				if ((traceClass == null) || !fullClassName.equals(traceClass)) {
 					determineClassName = stackElements[i].getClassName();
@@ -142,7 +142,7 @@ public class FrameworkDebugTraceEntry {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -173,7 +173,7 @@ public class FrameworkDebugTraceEntry {
 
 	/**
 	 * Accessor to the threads name
-	 * 
+	 *
 	 * @return the name of the thread
 	 */
 	public final String getThreadName() {
@@ -183,7 +183,7 @@ public class FrameworkDebugTraceEntry {
 
 	/**
 	 * Accessor to the timestamp for this trace record
-	 * 
+	 *
 	 * @return the date
 	 */
 	public final long getTimestamp() {
@@ -193,7 +193,7 @@ public class FrameworkDebugTraceEntry {
 
 	/**
 	 * Accessor for the symbolic name of the bundle being traced
-	 * 
+	 *
 	 * @return The symbolic name of the bundle being traced
 	 */
 	public final String getBundleSymbolicName() {
@@ -203,7 +203,7 @@ public class FrameworkDebugTraceEntry {
 
 	/**
 	 * Accessor for the trace message
-	 * 
+	 *
 	 * @return the trace message
 	 */
 	public final String getMessage() {
@@ -213,7 +213,7 @@ public class FrameworkDebugTraceEntry {
 
 	/**
 	 * Accessor for the trace exception. This may be null if there is no exception.
-	 * 
+	 *
 	 * @return the trace exception or null if none was defined.
 	 */
 	public final Throwable getThrowable() {
@@ -223,7 +223,7 @@ public class FrameworkDebugTraceEntry {
 
 	/**
 	 * Accessor for the name of the class being traced.
-	 * 
+	 *
 	 * @return The name of the class being traced.
 	 */
 	public final String getClassName() {
@@ -233,7 +233,7 @@ public class FrameworkDebugTraceEntry {
 
 	/**
 	 * Accessor for the method being traced.
-	 * 
+	 *
 	 * @return The name of the method being traced.
 	 */
 	public final String getMethodName() {
@@ -244,14 +244,14 @@ public class FrameworkDebugTraceEntry {
 	/**
 	 * Accessor for the option-path being traced. The <i>&lt;option-path&gt;</i> part of the debug option string
 	 * required for the Eclipse debugging framework.
-	 * 
+	 *
 	 * <pre>
 	 *    Examples:
 	 *       1) If a trace string com.ibm.myplugin.core/debug=true is specified then 'debug' is the option-path value.
 	 *       2) If a trace string com.ibm.myplugin.core/debug/perf=true is specified then 'debug/perf' is the option-path value.
 	 * </pre>
-	 * 
-	 * 
+	 *
+	 *
 	 * @return The option-path being traced.
 	 */
 	public final String getOptionPath() {
@@ -261,7 +261,7 @@ public class FrameworkDebugTraceEntry {
 
 	/**
 	 * Return the line number in the class/method where the trace originator
-	 * 
+	 *
 	 * @return The line number from the class and method where the trace request originated
 	 */
 	public final int getLineNumber() {
@@ -270,7 +270,7 @@ public class FrameworkDebugTraceEntry {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param newMessage
 	 */
 	void setMessage(final String newMessage) {

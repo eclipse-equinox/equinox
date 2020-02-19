@@ -7,27 +7,21 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.tests.eclipseadaptor;
 
+import static org.junit.Assert.assertEquals;
+
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
-
-import junit.framework.*;
 import org.eclipse.osgi.service.environment.Constants;
+import org.junit.Test;
 
-public class EnvironmentInfoTest extends TestCase {
+public class EnvironmentInfoTest {
 
-	public static Test suite() {
-		return new TestSuite(EnvironmentInfoTest.class);
-	}
-
-	public EnvironmentInfoTest(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testAIX() {
 		assertEquals("1.0", Constants.OS_AIX, EquinoxConfiguration.guessOS("AIX"));
 		assertEquals("1.1", Constants.OS_AIX, EquinoxConfiguration.guessOS("aix"));
@@ -35,6 +29,7 @@ public class EnvironmentInfoTest extends TestCase {
 		assertEquals("2.0", Constants.WS_MOTIF, EquinoxConfiguration.guessWS(Constants.OS_AIX));
 	}
 
+	@Test
 	public void testHPUX() {
 		assertEquals("1.0", Constants.OS_HPUX, EquinoxConfiguration.guessOS("HP-UX"));
 		assertEquals("1.1", Constants.OS_HPUX, EquinoxConfiguration.guessOS("hp-ux"));
@@ -42,6 +37,7 @@ public class EnvironmentInfoTest extends TestCase {
 		assertEquals("2.0", Constants.WS_MOTIF, EquinoxConfiguration.guessWS(Constants.OS_HPUX));
 	}
 
+	@Test
 	public void testLinux() {
 		assertEquals("1.0", Constants.OS_LINUX, EquinoxConfiguration.guessOS("Linux"));
 		assertEquals("1.1", Constants.OS_LINUX, EquinoxConfiguration.guessOS("linux"));
@@ -49,6 +45,7 @@ public class EnvironmentInfoTest extends TestCase {
 		assertEquals("2.0", Constants.WS_GTK, EquinoxConfiguration.guessWS(Constants.OS_LINUX));
 	}
 
+	@Test
 	public void testMacOSX() {
 		assertEquals("1.0", Constants.OS_MACOSX, EquinoxConfiguration.guessOS("Mac OS"));
 		assertEquals("1.1", Constants.OS_MACOSX, EquinoxConfiguration.guessOS("Mac OS X"));
@@ -56,6 +53,7 @@ public class EnvironmentInfoTest extends TestCase {
 		assertEquals("2.0", Constants.WS_COCOA, EquinoxConfiguration.guessWS(Constants.OS_MACOSX));
 	}
 
+	@Test
 	public void testQNX() {
 		assertEquals("1.0", Constants.OS_QNX, EquinoxConfiguration.guessOS("QNX"));
 		assertEquals("1.1", Constants.OS_QNX, EquinoxConfiguration.guessOS("qnx"));
@@ -63,6 +61,7 @@ public class EnvironmentInfoTest extends TestCase {
 		assertEquals("2.0", Constants.WS_PHOTON, EquinoxConfiguration.guessWS(Constants.OS_QNX));
 	}
 
+	@Test
 	public void testSolaris() {
 		assertEquals("1.0", Constants.OS_UNKNOWN, EquinoxConfiguration.guessOS("Solaris"));
 		assertEquals("1.1", Constants.OS_UNKNOWN, EquinoxConfiguration.guessOS("solaris"));
@@ -73,6 +72,7 @@ public class EnvironmentInfoTest extends TestCase {
 		assertEquals("2.0", Constants.WS_GTK, EquinoxConfiguration.guessWS(Constants.OS_SOLARIS));
 	}
 
+	@Test
 	public void testWindows() {
 		assertEquals("1.0", Constants.OS_WIN32, EquinoxConfiguration.guessOS("Windows XP"));
 		assertEquals("1.1", Constants.OS_WIN32, EquinoxConfiguration.guessOS("Windows 98"));
@@ -82,6 +82,7 @@ public class EnvironmentInfoTest extends TestCase {
 		assertEquals("2.0", Constants.WS_WIN32, EquinoxConfiguration.guessWS(Constants.OS_WIN32));
 	}
 
+	@Test
 	public void testISeries() {
 		assertEquals("1.0", Constants.OS_OS400, EquinoxConfiguration.guessOS("OS/400"));
 		assertEquals("1.1", Constants.OS_OS400, EquinoxConfiguration.guessOS("os/400"));
@@ -89,6 +90,7 @@ public class EnvironmentInfoTest extends TestCase {
 		assertEquals("2.0", Constants.WS_UNKNOWN, EquinoxConfiguration.guessWS(Constants.OS_OS400));
 	}
 
+	@Test
 	public void testZSeries() {
 		assertEquals("1.0", Constants.OS_OS390, EquinoxConfiguration.guessOS("OS/390"));
 		assertEquals("1.1", Constants.OS_OS390, EquinoxConfiguration.guessOS("os/390"));

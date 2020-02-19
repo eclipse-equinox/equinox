@@ -30,17 +30,17 @@ public class ReliableFileInputStream extends FilterInputStream {
 	 */
 	private ReliableFile reliable;
 
-	/** 
+	/**
 	 * size of crc and signature
 	 */
 	private int sigSize;
 
-	/** 
+	/**
 	 * current position reading from file
 	 */
 	private long readPos;
 
-	/** 
+	/**
 	 * total file length available for reading
 	 */
 	private long length;
@@ -72,7 +72,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 	/**
 	 * Constructs a new ReliableFileInputStream on the File <code>file</code>.  If the
 	 * file does not exist, the <code>FileNotFoundException</code> is thrown.
-	 * 
+	 *
 	 * @param file the File on which to stream reads.
 	 * @param generation a specific generation requested.
 	 * @param openMask mask used to open data.
@@ -84,10 +84,10 @@ public class ReliableFileInputStream extends FilterInputStream {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param reliable The ReliableFile on which to read.
 	 * @param generation a specific generation requested.
-	 * @param openMask mask used to open data. 
+	 * @param openMask mask used to open data.
 	 * are invalid (corrupt, missing, etc).
 	 * @throws IOException If an error occurs opening the file.
 	 */
@@ -170,7 +170,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default available method.
-	 * @throws IOException 
+	 * @throws IOException
 	 * @see FilterInputStream#available()
 	 */
 	@Override

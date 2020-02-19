@@ -1,13 +1,13 @@
 /*******************************************************************************
  * Copyright (c) 2006, 2012 IBM Corporation and others.
  *
- * This program and the accompanying materials 
+ * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -27,7 +27,7 @@ import java.util.Locale;
  * its semantic meaning and conforms with the Unicode BiDi algorithm within each
  * segment.
  * </p>
- * 
+ *
  * @since 3.2
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -71,7 +71,7 @@ public class TextProcessor {
 	// whether or not processing is needed
 	private static boolean IS_PROCESSING_NEEDED = false;
 
-	// constant used to indicate an LRM need not precede a delimiter 
+	// constant used to indicate an LRM need not precede a delimiter
 	private static final int INDEX_NOT_SET = 999999999;
 
 	static {
@@ -91,7 +91,7 @@ public class TextProcessor {
 	 * substitution based on the locale. This is equivalent to calling
 	 * <code>process(String, String)</code> with the default set of
 	 * delimiters.
-	 * 
+	 *
 	 * @param text
 	 *            the text to be processed
 	 * @return the manipulated string
@@ -144,7 +144,7 @@ public class TextProcessor {
 	 * <code>String.length()</code> called on the resulting string will not
 	 * return the same values as would be returned for the original string.
 	 * </p>
-	 * 
+	 *
 	 * @param str
 	 *            the text to process, if <code>null</code> return the string
 	 *            as it was passed in
@@ -185,7 +185,7 @@ public class TextProcessor {
 			} else if (Character.isDigit(ch)) {
 				if (delimIndex != INDEX_NOT_SET) {
 					// consecutive neutral and weak directional characters
-					// explicitly force direction to be LRM					
+					// explicitly force direction to be LRM
 					target.insert(delimIndex, LRM);
 					delimIndex = INDEX_NOT_SET;
 					isLastRTL = false;
@@ -195,7 +195,7 @@ public class TextProcessor {
 					isStringBidi = true;
 					if (delimIndex != INDEX_NOT_SET) {
 						// neutral character followed by strong right directional character
-						// explicitly force direction to be LRM	
+						// explicitly force direction to be LRM
 						target.insert(delimIndex, LRM);
 						delimIndex = INDEX_NOT_SET;
 					}
@@ -211,10 +211,10 @@ public class TextProcessor {
 		/*
 		 * TextProcessor is not aware of the orientation of the component owning
 		 * the processed string. Enclose the string in LRE/PDF in either of 2
-		 * cases: 
+		 * cases:
 		 * (1) The string contains BiDi characters - implying that the
-		 * string appearance depends on the basic orientation 
-		 * (2) The runtime locale is BiDi AND either the string does not start with 
+		 * string appearance depends on the basic orientation
+		 * (2) The runtime locale is BiDi AND either the string does not start with
 		 * an LTR character or it ends with LTR char or digit.
 		 */
 		if (isStringBidi || !Character.isLetter(str.charAt(0)) || isNeutral(str.charAt(str.length() - 1))) {
@@ -226,12 +226,12 @@ public class TextProcessor {
 	}
 
 	/**
-	 * Removes directional marker characters in the given string that were inserted by 
+	 * Removes directional marker characters in the given string that were inserted by
 	 * utilizing the <code>process(String)</code> or <code>process(String, String)</code>
 	 * methods.
-	 * 
+	 *
 	 * @param str string with directional markers to remove
-	 * @return string with no directional markers 
+	 * @return string with no directional markers
 	 * @see #process(String)
 	 * @see #process(String, String)
 	 * @since 3.3
@@ -261,7 +261,7 @@ public class TextProcessor {
 	/**
 	 * Return the string containing all the default delimiter characters to be
 	 * used to segment a given string.
-	 * 
+	 *
 	 * @return delimiter string
 	 */
 	public static String getDefaultDelimiters() {
@@ -275,11 +275,11 @@ public class TextProcessor {
 		/*
 		 * Cannot use Character.getDirectionality() since the OSGi library can
 		 * be compiled with execution environments that pre-date that API.
-		 * 
+		 *
 		 * The first range of characters is Unicode Hebrew and Arabic
 		 * characters. The second range of characters is Unicode Hebrew and
 		 * Arabic presentation forms.
-		 * 
+		 *
 		 * NOTE: Farsi and Urdu fall within the Arabic scripts.
 		 */
 		return (((c >= 0x05d0) && (c <= 0x07b1)) || ((c >= 0xfb1d) && (c <= 0xfefc)));

@@ -25,7 +25,7 @@ import org.osgi.framework.Bundle;
  * The framework will register a factory implementation as an OSGi service.
  * This service can be used to get <code>SignedContent</code> for a bundle.
  * It can also be used to get <code>SignedContent</code> for a repository file.
- * The supported formats for file repositories are jar files and  directories containing the 
+ * The supported formats for file repositories are jar files and  directories containing the
  * content of an extracted jar.
  * </p>
  * <p>
@@ -50,7 +50,7 @@ public interface SignedContentFactory {
 
 	/**
 	 * Returns a <code>SignedContent</code> object for the specified bundle.
-	 * @param bundle the bundle to get a signed content for. 
+	 * @param bundle the bundle to get a signed content for.
 	 * @return signed content for the specified bundle.
 	 * @throws IOException if an IO exception occurs while reading the bundle content
 	 * @throws NoSuchProviderException if there's no security provider for the signed content

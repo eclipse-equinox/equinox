@@ -19,7 +19,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.PackagePermission;
 
 /**
- * A list of DynamicImport-Package statements that are to be used for adding new 
+ * A list of DynamicImport-Package statements that are to be used for adding new
  * dynamic imports to a bundle class loader.
  *
  */

@@ -45,8 +45,8 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		this.bundleEntry = bundleEntry;
 	}
 
-	/** 
-	 * Parse reference URL. 
+	/**
+	 * Parse reference URL.
 	 */
 	@Override
 	protected void parseURL(URL url, String str, int start, int end) {

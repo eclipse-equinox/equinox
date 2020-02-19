@@ -52,7 +52,7 @@ public class BundleLoaderSources {
 	// creates a PackageSource from an ExportPackageDescription.  This is called when initializing
 	// a BundleLoader to ensure that the proper PackageSource gets created and used for
 	// filtered and reexport packages.  The storeSource flag is used by initialize to indicate
-	// that the source for special case package sources (filtered or re-exported should be stored 
+	// that the source for special case package sources (filtered or re-exported should be stored
 	// in the cache.  if this flag is set then a normal SinglePackageSource will not be created
 	// (i.e. it will be created lazily)
 	public PackageSource createPackageSource(ModuleCapability packageCapability, boolean storeSource) {

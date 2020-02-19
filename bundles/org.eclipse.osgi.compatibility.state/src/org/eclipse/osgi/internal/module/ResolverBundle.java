@@ -7,10 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Karsten Thoms (itemis) - Consider devmode for generic capabilities 
+ *     Karsten Thoms (itemis) - Consider devmode for generic capabilities
  *        & constraints
  *******************************************************************************/
 package org.eclipse.osgi.internal.module;
@@ -502,7 +502,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 				resolver.getState().addResolverError(fragment, ResolverError.FRAGMENT_CONFLICT, newRequire.toString(), newRequire);
 			}
 		}
-		// generic constraints cannot conflict; 
+		// generic constraints cannot conflict;
 		// only check that a fragment does not add generic constraints to an already resolved host
 		if (isResolved() && newGenericRequires != null) {
 			for (GenericSpecification genericSpecification : newGenericRequires) {
@@ -556,7 +556,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 		initFragments();
 
 		// must save off old imports and requires before we remove the fragment;
-		// this will be used to merge the constraints of the same name from the remaining fragments 
+		// this will be used to merge the constraints of the same name from the remaining fragments
 		ResolverImport[] oldImports = getImportPackages();
 		BundleConstraint[] oldRequires = getRequires();
 		if (!fragments.remove(fragment))

@@ -23,7 +23,7 @@ import org.osgi.service.url.URLStreamHandlerSetter;
  * The NullURLStreamService is created when a registered URLStreamHandler service
  * with an associated URLStreamHandlerProxy becomes unregistered.  The associated
  * URLStreamHandlerProxy must still handle all future requests for the now unregistered
- * scheme (the JVM caches URLStreamHandlers making up impossible to "unregister" them). 
+ * scheme (the JVM caches URLStreamHandlers making up impossible to "unregister" them).
  * When requests come in for an unregistered URLStreamHandlerService, the
  * NullURLStreamHandlerService is used in it's place.
  */

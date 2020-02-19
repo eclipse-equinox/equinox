@@ -7,13 +7,14 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.tests.container.dummys;
 
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -56,7 +57,7 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 
 	public DummyContainerAdaptor(ModuleCollisionHook collisionHook, Map<String, String> configuration, ResolverHookFactory resolverHookFactory, DebugOptions debugOptions) {
 		this.collisionHook = collisionHook;
-		this.configuration = configuration;
+		this.configuration = configuration == null ? new HashMap<String, String>() : configuration;
 		this.resolverHookFactory = resolverHookFactory;
 		this.moduleDatabase = new DummyModuleDatabase(this);
 		this.debugOptions = debugOptions;

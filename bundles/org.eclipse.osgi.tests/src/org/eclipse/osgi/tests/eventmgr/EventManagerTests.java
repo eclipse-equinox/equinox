@@ -13,15 +13,25 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.eventmgr;
 
-import java.util.*;
-import junit.framework.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
 import org.eclipse.osgi.framework.eventmgr.CopyOnWriteIdentityMap;
+import org.junit.Test;
 
-public class EventManagerTests extends TestCase {
-	public static Test suite() {
-		return new TestSuite(EventManagerTests.class);
-	}
+public class EventManagerTests {
 
+	@Test
 	public void testCopyOnWriteIdentityMap() {
 		Object l1 = new Object();
 		Object l2 = new Object();
@@ -162,9 +172,9 @@ public class EventManagerTests extends TestCase {
 		assertTrue("missed key", k1.contains(l2)); //$NON-NLS-1$
 		assertTrue("missed key", k1.contains(l3)); //$NON-NLS-1$
 		assertTrue("missed key", k1.contains(l4)); //$NON-NLS-1$
-		assertTrue("missed key", k1.containsAll(Arrays.asList(new Object[] {l1, l2, l3, l4}))); //$NON-NLS-1$
-		assertTrue("array unequal", Arrays.equals(new Object[] {l1, l3, l2, l4}, k1.toArray())); //$NON-NLS-1$
-		assertTrue("array unequal", Arrays.equals(new Object[] {l1, l3, l2, l4}, k1.toArray(new Object[4]))); //$NON-NLS-1$
+		assertTrue("missed key", k1.containsAll(Arrays.asList(new Object[] { l1, l2, l3, l4 }))); //$NON-NLS-1$
+		assertTrue("array unequal", Arrays.equals(new Object[] { l1, l3, l2, l4 }, k1.toArray())); //$NON-NLS-1$
+		assertTrue("array unequal", Arrays.equals(new Object[] { l1, l3, l2, l4 }, k1.toArray(new Object[4]))); //$NON-NLS-1$
 
 		Iterator i1 = k1.iterator();
 		assertTrue("missing next", i1.hasNext()); //$NON-NLS-1$
@@ -192,7 +202,7 @@ public class EventManagerTests extends TestCase {
 			i1.next();
 			fail("next did not throw exception"); //$NON-NLS-1$
 		} catch (NoSuchElementException e) {
-			//expected
+			// expected
 		}
 
 		assertTrue("not empty", k2.isEmpty()); //$NON-NLS-1$
@@ -204,28 +214,28 @@ public class EventManagerTests extends TestCase {
 			i2.next();
 			fail("next did not throw exception"); //$NON-NLS-1$
 		} catch (NoSuchElementException e) {
-			//expected
+			// expected
 		}
 
 		try {
 			k2.add(l1);
 			fail("add did not throw exception"); //$NON-NLS-1$
 		} catch (UnsupportedOperationException e) {
-			//expected
+			// expected
 		}
 		try {
-			k2.addAll(Arrays.asList(new Object[] {l1, l2}));
+			k2.addAll(Arrays.asList(new Object[] { l1, l2 }));
 			fail("addAll did not throw exception"); //$NON-NLS-1$
 		} catch (UnsupportedOperationException e) {
-			//expected
+			// expected
 		}
 
 		k3.remove(l3);
 		assertFalse("not removed", k3.contains(l3)); //$NON-NLS-1$
-		k3.removeAll(Arrays.asList(new Object[] {l1, l2}));
+		k3.removeAll(Arrays.asList(new Object[] { l1, l2 }));
 		assertFalse("not removed", k3.contains(l1)); //$NON-NLS-1$
 		assertFalse("not removed", k3.contains(l2)); //$NON-NLS-1$
-		k4.retainAll(Arrays.asList(new Object[] {l1, l2}));
+		k4.retainAll(Arrays.asList(new Object[] { l1, l2 }));
 		assertTrue("missing", k4.contains(l1)); //$NON-NLS-1$
 		assertTrue("missing", k4.contains(l2)); //$NON-NLS-1$
 		assertFalse("not removed", k4.contains(l3)); //$NON-NLS-1$
@@ -239,9 +249,9 @@ public class EventManagerTests extends TestCase {
 		assertTrue("missed key", v1.contains(c2)); //$NON-NLS-1$
 		assertTrue("missed key", v1.contains(c3)); //$NON-NLS-1$
 		assertTrue("missed key", v1.contains(c4)); //$NON-NLS-1$
-		assertTrue("missed key", v1.containsAll(Arrays.asList(new Object[] {c1, c2, c3, c4}))); //$NON-NLS-1$
-		assertTrue("array unequal", Arrays.equals(new Object[] {c1, c3, c2, c4}, v1.toArray())); //$NON-NLS-1$
-		assertTrue("array unequal", Arrays.equals(new Object[] {c1, c3, c2, c4}, v1.toArray(new Object[4]))); //$NON-NLS-1$
+		assertTrue("missed key", v1.containsAll(Arrays.asList(new Object[] { c1, c2, c3, c4 }))); //$NON-NLS-1$
+		assertTrue("array unequal", Arrays.equals(new Object[] { c1, c3, c2, c4 }, v1.toArray())); //$NON-NLS-1$
+		assertTrue("array unequal", Arrays.equals(new Object[] { c1, c3, c2, c4 }, v1.toArray(new Object[4]))); //$NON-NLS-1$
 
 		Iterator i3 = v1.iterator();
 		assertTrue("missing next", i3.hasNext()); //$NON-NLS-1$
@@ -269,7 +279,7 @@ public class EventManagerTests extends TestCase {
 			i3.next();
 			fail("next did not throw exception"); //$NON-NLS-1$
 		} catch (NoSuchElementException e) {
-			//expected
+			// expected
 		}
 
 		assertTrue("not empty", v2.isEmpty()); //$NON-NLS-1$
@@ -281,28 +291,28 @@ public class EventManagerTests extends TestCase {
 			i4.next();
 			fail("next did not throw exception"); //$NON-NLS-1$
 		} catch (NoSuchElementException e) {
-			//expected
+			// expected
 		}
 
 		try {
 			v2.add(c1);
 			fail("add did not throw exception"); //$NON-NLS-1$
 		} catch (UnsupportedOperationException e) {
-			//expected
+			// expected
 		}
 		try {
-			v2.addAll(Arrays.asList(new Object[] {c1, c2}));
+			v2.addAll(Arrays.asList(new Object[] { c1, c2 }));
 			fail("addAll did not throw exception"); //$NON-NLS-1$
 		} catch (UnsupportedOperationException e) {
-			//expected
+			// expected
 		}
 
 		v3.remove(c3);
 		assertFalse("not removed", v3.contains(c3)); //$NON-NLS-1$
-		v3.removeAll(Arrays.asList(new Object[] {c1, c2}));
+		v3.removeAll(Arrays.asList(new Object[] { c1, c2 }));
 		assertFalse("not removed", v3.contains(c1)); //$NON-NLS-1$
 		assertFalse("not removed", v3.contains(c2)); //$NON-NLS-1$
-		v4.retainAll(Arrays.asList(new Object[] {c1, c2}));
+		v4.retainAll(Arrays.asList(new Object[] { c1, c2 }));
 		assertTrue("missing", v4.contains(c1)); //$NON-NLS-1$
 		assertTrue("missing", v4.contains(c2)); //$NON-NLS-1$
 		assertFalse("not removed", v4.contains(c3)); //$NON-NLS-1$
@@ -322,7 +332,7 @@ public class EventManagerTests extends TestCase {
 			me1.setValue(c2);
 			fail("remove did not throw exception"); //$NON-NLS-1$
 		} catch (UnsupportedOperationException e) {
-			//expected
+			// expected
 		}
 		i5.remove();
 		assertEquals("wrong size", 3, e1.size()); //$NON-NLS-1$
@@ -335,7 +345,7 @@ public class EventManagerTests extends TestCase {
 			me3.setValue(c2);
 			fail("remove did not throw exception"); //$NON-NLS-1$
 		} catch (UnsupportedOperationException e) {
-			//expected
+			// expected
 		}
 		i5.remove();
 		assertEquals("wrong size", 2, e1.size()); //$NON-NLS-1$
@@ -348,7 +358,7 @@ public class EventManagerTests extends TestCase {
 			me2.setValue(c3);
 			fail("remove did not throw exception"); //$NON-NLS-1$
 		} catch (UnsupportedOperationException e) {
-			//expected
+			// expected
 		}
 		i5.remove();
 		assertEquals("wrong size", 1, e1.size()); //$NON-NLS-1$
@@ -361,7 +371,7 @@ public class EventManagerTests extends TestCase {
 			me4.setValue(c2);
 			fail("remove did not throw exception"); //$NON-NLS-1$
 		} catch (UnsupportedOperationException e) {
-			//expected
+			// expected
 		}
 		i5.remove();
 		assertEquals("wrong size", 0, e1.size()); //$NON-NLS-1$
@@ -371,7 +381,7 @@ public class EventManagerTests extends TestCase {
 			i1.next();
 			fail("next did not throw exception"); //$NON-NLS-1$
 		} catch (NoSuchElementException e) {
-			//expected
+			// expected
 		}
 
 		assertTrue("not empty", e2.isEmpty()); //$NON-NLS-1$
@@ -383,27 +393,27 @@ public class EventManagerTests extends TestCase {
 			i6.next();
 			fail("next did not throw exception"); //$NON-NLS-1$
 		} catch (NoSuchElementException e) {
-			//expected
+			// expected
 		}
 
 		try {
 			e2.add(me1);
 			fail("add did not throw exception"); //$NON-NLS-1$
 		} catch (UnsupportedOperationException e) {
-			//expected
+			// expected
 		}
 		try {
-			e2.addAll(Arrays.asList(new Map.Entry[] {me2, me4}));
+			e2.addAll(Arrays.asList(new Map.Entry[] { me2, me4 }));
 			fail("addAll did not throw exception"); //$NON-NLS-1$
 		} catch (UnsupportedOperationException e) {
-			//expected
+			// expected
 		}
 		e3.remove(me3);
 		assertFalse("not removed", e3.contains(me3)); //$NON-NLS-1$
-		e3.removeAll(Arrays.asList(new Object[] {me1, me2}));
+		e3.removeAll(Arrays.asList(new Object[] { me1, me2 }));
 		assertFalse("not removed", e3.contains(me1)); //$NON-NLS-1$
 		assertFalse("not removed", e3.contains(me2)); //$NON-NLS-1$
-		e4.retainAll(Arrays.asList(new Object[] {me1, me2}));
+		e4.retainAll(Arrays.asList(new Object[] { me1, me2 }));
 		assertTrue("missing", e4.contains(me1)); //$NON-NLS-1$
 		assertTrue("missing", e4.contains(me2)); //$NON-NLS-1$
 		assertFalse("not removed", e4.contains(me3)); //$NON-NLS-1$
@@ -411,11 +421,12 @@ public class EventManagerTests extends TestCase {
 		e4.clear();
 		assertTrue("not empty", e4.isEmpty()); //$NON-NLS-1$
 
-		assertTrue("array unequal", Arrays.equals(new Map.Entry[] {me1, me3, me2, me4}, e5.toArray())); //$NON-NLS-1$
-		assertTrue("array unequal", Arrays.equals(new Map.Entry[] {me1, me3, me2, me4}, e5.toArray(new Map.Entry[4]))); //$NON-NLS-1$
+		assertTrue("array unequal", Arrays.equals(new Map.Entry[] { me1, me3, me2, me4 }, e5.toArray())); //$NON-NLS-1$
+		assertTrue("array unequal", //$NON-NLS-1$
+				Arrays.equals(new Map.Entry[] { me1, me3, me2, me4 }, e5.toArray(new Map.Entry[4])));
 
 		el2.clear();
-		el2.putAll(new Object[] {l1, l3});
+		el2.putAll(new Object[] { l1, l3 });
 		assertFalse("empty", el2.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 2, el2.size()); //$NON-NLS-1$
 		assertTrue("missed key", el2.containsKey(l1)); //$NON-NLS-1$

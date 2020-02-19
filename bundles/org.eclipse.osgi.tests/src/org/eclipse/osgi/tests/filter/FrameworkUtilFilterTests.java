@@ -13,17 +13,15 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.filter;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertTrue;
+
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.Test;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 
 public class FrameworkUtilFilterTests extends FilterTests {
-	public static Test suite() {
-		return new TestSuite(FrameworkUtilFilterTests.class);
-	}
 
 	@Override
 	public Filter createFilter(String filterString) throws InvalidSyntaxException {
@@ -32,9 +30,11 @@ public class FrameworkUtilFilterTests extends FilterTests {
 
 	// Equinox specific test to make sure we continue to use the Equinox FilterImpl
 	// from the FrameworkUtil createFilter method
+	@Test
 	public void testFrameworkUtilCreateFilter() throws InvalidSyntaxException {
 		Filter bundleContextFilter = OSGiTestsActivator.getContext().createFilter("(simplefilter=true)");
 		Filter frameworkUtilFilter = FrameworkUtil.createFilter("(simplefilter=true)");
-		assertTrue("Wrong Fitler impl type: " + frameworkUtilFilter.getClass().getName(), bundleContextFilter.getClass().equals(frameworkUtilFilter.getClass()));
+		assertTrue("Wrong Fitler impl type: " + frameworkUtilFilter.getClass().getName(),
+				bundleContextFilter.getClass().equals(frameworkUtilFilter.getClass()));
 	}
 }

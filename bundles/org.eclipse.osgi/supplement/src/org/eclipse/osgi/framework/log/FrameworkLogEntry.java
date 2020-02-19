@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -27,21 +27,21 @@ public class FrameworkLogEntry {
 	 */
 	public static final int OK = 0;
 
-	/** 
+	/**
 	 * Severity constant (bit mask, value 1) indicating this log entry is informational only.
 	 * @see #getSeverity()
 	 * @since 3.2
 	 */
 	public static final int INFO = 0x01;
 
-	/** 
+	/**
 	 * Severity constant (bit mask, value 2) indicating this log entry represents a warning.
 	 * @see #getSeverity()
 	 * @since 3.2
 	 */
 	public static final int WARNING = 0x02;
 
-	/** 
+	/**
 	 * Severity constant (bit mask, value 4) indicating this log entry represents an error.
 	 * @see #getSeverity()
 	 * @since 3.2
@@ -57,7 +57,7 @@ public class FrameworkLogEntry {
 
 	// It would be nice to rename some of these fields but we cannot change the getter method
 	// names without breaking clients.  Changing only the field names would be confusing.
-	//TODO "entry" has another meaning here - title, summary, tag are better names 
+	//TODO "entry" has another meaning here - title, summary, tag are better names
 	private final String entry;
 	private final String message;
 	//TODO get rid of this
@@ -120,7 +120,7 @@ public class FrameworkLogEntry {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return Returns the children.
 	 */
 	public FrameworkLogEntry[] getChildren() {
@@ -170,7 +170,7 @@ public class FrameworkLogEntry {
 	 * no children.
 	 * </p>
 	 *
-	 * @return the severity: one of <code>OK</code>, <code>ERROR</code>, 
+	 * @return the severity: one of <code>OK</code>, <code>ERROR</code>,
 	 * <code>INFO</code>, <code>WARNING</code>,  or <code>CANCEL</code>
 	 * @since 3.2
 	 */
@@ -191,7 +191,7 @@ public class FrameworkLogEntry {
 	/**
 	 * Returns the context associated with this <code>FrameworkLogEntry</code>
 	 * object.
-	 * 
+	 *
 	 * @return <code>Object</code> containing the context associated with this
 	 *         <code>FrameworkLogEntry</code> object;<code>null</code> if no context is
 	 *         associated with this <code>FrameworkLogEntry</code> object.

@@ -27,7 +27,7 @@ public interface HookContext {
 
 	/**
 	 * Call the specified hook.
-	 * 
+	 *
 	 * @param hook The hook object to call. The hook object must be of the type
 	 * supported by this hook context. If it is not, then this method will
 	 * simply return.
@@ -38,14 +38,14 @@ public interface HookContext {
 
 	/**
 	 * Return the class name of the hook type supported by this hook context.
-	 * 
+	 *
 	 * @return The class name of the hook type supported by this hook context.
 	 */
 	public String getHookClassName();
 
 	/**
 	 * Return the hook method name called by this hook context.
-	 * 
+	 *
 	 * @return The hook method name called by this hook context.
 	 */
 	public String getHookMethodName();

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -275,7 +275,7 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 	}
 
 	public void testAdminPermission03() {
-		// test trusted cert with exact match pattern + ! operation 
+		// test trusted cert with exact match pattern + ! operation
 		try {
 			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$

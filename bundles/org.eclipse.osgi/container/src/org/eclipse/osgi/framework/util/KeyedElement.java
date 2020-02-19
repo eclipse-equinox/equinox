@@ -20,7 +20,7 @@ package org.eclipse.osgi.framework.util;
  * A keyed element can easily be put into a standard Map implementation by using the keyed element
  * key for the mapping.
  * <p>
- * An element of an <code>KeyedHashSet</code>.  A KeyedElement privides the key which is used to hash 
+ * An element of an <code>KeyedHashSet</code>.  A KeyedElement privides the key which is used to hash
  * the elements in an <code>KeyedHashSet</code>.
  * @since 3.2
  */

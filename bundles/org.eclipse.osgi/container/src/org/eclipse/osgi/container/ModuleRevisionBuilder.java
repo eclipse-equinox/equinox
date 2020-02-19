@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -32,9 +32,9 @@ import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Namespace;
 
 /**
- * A builder for creating module {@link ModuleRevision} objects.  A builder can only be used by 
- * the module {@link ModuleContainer container} to build revisions when 
- * {@link ModuleContainer#install(Module, String, ModuleRevisionBuilder, Object) 
+ * A builder for creating module {@link ModuleRevision} objects.  A builder can only be used by
+ * the module {@link ModuleContainer container} to build revisions when
+ * {@link ModuleContainer#install(Module, String, ModuleRevisionBuilder, Object)
  * installing} or {@link ModuleContainer#update(Module, ModuleRevisionBuilder, Object) updating} a module.
  * <p>
  * The builder provides the instructions to the container for creating a {@link ModuleRevision}.

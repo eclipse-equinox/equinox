@@ -19,14 +19,14 @@ import junit.framework.TestSuite;
 import org.eclipse.osgi.launch.Equinox;
 
 /*
- * The framework must persist data according to the value of the 
+ * The framework must persist data according to the value of the
  * eclipse.stateSaveDelayInterval property. The value is of type long and
  * represents the number of milliseconds between persists. A positive value
  * represents the number of milliseconds between persists. A value of zero
  * indicates data should be immediately persisted with each update. A negative
- * value disables persistence on update altogether (but data will still be 
+ * value disables persistence on update altogether (but data will still be
  * persisted on shutdown).
- * 
+ *
  */
 public class PersistedBundleTests extends AbstractBundleTests {
 
@@ -130,7 +130,7 @@ public class PersistedBundleTests extends AbstractBundleTests {
 			initAndStart(equinox2);
 			try {
 				// The bundle should not have been persisted and therefore be
-				// unknown to the second equinox instance. This check must 
+				// unknown to the second equinox instance. This check must
 				// happen before the first period elapses.
 				assertNull("Bundle exists", equinox2.getBundleContext().getBundle(getName()));
 				stopQuietly(equinox2);

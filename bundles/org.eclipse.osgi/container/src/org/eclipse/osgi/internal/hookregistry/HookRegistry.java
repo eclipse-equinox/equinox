@@ -41,15 +41,15 @@ import org.eclipse.osgi.util.ManifestElement;
 public final class HookRegistry {
 	/**
 	 * The hook configurators properties file (&quot;hookconfigurators.properties&quot;) <p>
-	 * A framework extension may supply a hook configurators properties file to specify a 
+	 * A framework extension may supply a hook configurators properties file to specify a
 	 * list of hook configurators.
 	 * @see #HOOK_CONFIGURATORS
 	 */
 	public static final String HOOK_CONFIGURATORS_FILE = "hookconfigurators.properties"; //$NON-NLS-1$
 
 	/**
-	 * The hook configurators property key (&quot;hookconfigurators.properties&quot;) used in 
-	 * a hook configurators properties file to specify a comma separated list of fully 
+	 * The hook configurators property key (&quot;hookconfigurators.properties&quot;) used in
+	 * a hook configurators properties file to specify a comma separated list of fully
 	 * qualified hook configurator classes.
 	 */
 	public static final String HOOK_CONFIGURATORS = "hook.configurators"; //$NON-NLS-1$
@@ -61,7 +61,7 @@ public final class HookRegistry {
 	public static final String PROP_HOOK_CONFIGURATORS_INCLUDE = "osgi.hook.configurators.include"; //$NON-NLS-1$
 
 	/**
-	 * A system property (&quot;osgi.hook.configurators.exclude&quot;) used to exclude 
+	 * A system property (&quot;osgi.hook.configurators.exclude&quot;) used to exclude
 	 * any hook configurators.  This is helpful for disabling hook
 	 * configurators that is specified in hook configurator properties files.
 	 */
@@ -69,7 +69,7 @@ public final class HookRegistry {
 
 	/**
 	 * A system property (&quot;osgi.hook.configurators&quot;) used to specify the list
-	 * of hook configurators.  If this property is set then the list of configurators 
+	 * of hook configurators.  If this property is set then the list of configurators
 	 * specified will be the only configurators used.
 	 */
 	public static final String PROP_HOOK_CONFIGURATORS = "osgi.hook.configurators"; //$NON-NLS-1$
@@ -93,9 +93,9 @@ public final class HookRegistry {
 
 	/**
 	 * Initializes the hook configurators.  The following steps are used to initialize the hook configurators. <p>
-	 * 1. Get a list of hook configurators from all hook configurators properties files on the classpath, 
+	 * 1. Get a list of hook configurators from all hook configurators properties files on the classpath,
 	 *    add this list to the overall list of hook configurators, remove duplicates. <p>
-	 * 2. Get a list of hook configurators from the (&quot;osgi.hook.configurators.include&quot;) system property 
+	 * 2. Get a list of hook configurators from the (&quot;osgi.hook.configurators.include&quot;) system property
 	 *    and add this list to the overall list of hook configurators, remove duplicates. <p>
 	 * 3. Get a list of hook configurators from the (&quot;osgi.hook.configurators.exclude&quot;) system property
 	 *    and remove this list from the overall list of hook configurators. <p>

@@ -61,7 +61,7 @@ public class CDSBundleEntry extends BundleEntry {
 	 * @see org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry#getFileURL()
 	 * uses the wrapped bundle file to get the actual file url to the content of
 	 * the class on disk.
-	 * 
+	 *
 	 * This should is likely never to be called.
 	 */
 	@Override
@@ -85,7 +85,7 @@ public class CDSBundleEntry extends BundleEntry {
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry#getBytes()
-	 * if classbytes is not null, it returns the magic cookie for the shared class.  This is used to define 
+	 * if classbytes is not null, it returns the magic cookie for the shared class.  This is used to define
 	 * the class during class loading.
 	 * if classbytes is null, it gets the contents from actual BundleEntry and caches it in classbytes.
 	 */
@@ -99,7 +99,7 @@ public class CDSBundleEntry extends BundleEntry {
 	 * @see org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry#getLocalURL()
 	 * uses the wrapped bundle file to get the actual local url to the content of
 	 * the class on disk.
-	 * 
+	 *
 	 * This should is likely never to be called.
 	 */
 	@Override

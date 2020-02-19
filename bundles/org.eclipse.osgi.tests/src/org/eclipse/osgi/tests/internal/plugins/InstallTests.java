@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -51,7 +51,7 @@ public class InstallTests extends CoreTest {
 			fail("1.0"); //$NON-NLS-1$
 		} finally {
 			if (installed != null)
-				// clean-up - only runs if we end-up accepting an invalid manifest				
+				// clean-up - only runs if we end-up accepting an invalid manifest
 				installed.uninstall();
 		}
 	}
@@ -70,7 +70,7 @@ public class InstallTests extends CoreTest {
 			assertEquals("Expected manifest error", BundleException.MANIFEST_ERROR, be.getType()); //$NON-NLS-1$
 		} finally {
 			if (installed != null)
-				// clean-up - only runs if we end-up accepting an invalid manifest				
+				// clean-up - only runs if we end-up accepting an invalid manifest
 				installed.uninstall();
 		}
 	}
@@ -89,7 +89,7 @@ public class InstallTests extends CoreTest {
 			assertEquals("Expected manifest error", BundleException.MANIFEST_ERROR, be.getType()); //$NON-NLS-1$
 		} finally {
 			if (installed != null)
-				// clean-up - only runs if we end-up accepting an invalid manifest				
+				// clean-up - only runs if we end-up accepting an invalid manifest
 				installed.uninstall();
 		}
 	}
@@ -108,7 +108,7 @@ public class InstallTests extends CoreTest {
 			assertEquals("Expected manifest error", BundleException.MANIFEST_ERROR, be.getType()); //$NON-NLS-1$
 		} finally {
 			if (installed != null)
-				// clean-up - only runs if we end-up accepting an invalid manifest				
+				// clean-up - only runs if we end-up accepting an invalid manifest
 				installed.uninstall();
 		}
 	}
@@ -127,7 +127,7 @@ public class InstallTests extends CoreTest {
 			assertEquals("Expected manifest error", BundleException.MANIFEST_ERROR, be.getType()); //$NON-NLS-1$
 		} finally {
 			if (installed != null)
-				// clean-up - only runs if we end-up accepting an invalid manifest				
+				// clean-up - only runs if we end-up accepting an invalid manifest
 				installed.uninstall();
 		}
 	}
@@ -156,7 +156,7 @@ public class InstallTests extends CoreTest {
 
 		} finally {
 			if (installed != null)
-				// clean-up - only runs if we end-up accepting an invalid manifest				
+				// clean-up - only runs if we end-up accepting an invalid manifest
 				installed.uninstall();
 		}
 	}
@@ -213,7 +213,7 @@ public class InstallTests extends CoreTest {
 			assertEquals("Expected unsupported error", BundleException.UNSUPPORTED_OPERATION, be.getType()); //$NON-NLS-1$
 		} finally {
 			if (installed != null)
-				// clean-up - only runs if we end-up accepting an invalid manifest				
+				// clean-up - only runs if we end-up accepting an invalid manifest
 				installed.uninstall();
 		}
 	}

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -38,9 +38,9 @@ public abstract class AuthorizationEngine {
 	}
 
 	/**
-	 * Authorizes a <code>SignedContent</code> object.  The engine determines if the 
-	 * signed content authorization should be granted.  The context is the entity 
-	 * associated with the signed content.  For example, signed content 
+	 * Authorizes a <code>SignedContent</code> object.  The engine determines if the
+	 * signed content authorization should be granted.  The context is the entity
+	 * associated with the signed content.  For example, signed content
 	 * for a bundle will have a <code>Bundle</code> object as the context.
 	 * @param content the signed content. The value may be <code>null</code>.
 	 * @param context the context associated with the signed content. The value may be <code>null</code>.
@@ -65,7 +65,7 @@ public abstract class AuthorizationEngine {
 	}
 
 	/**
-	 * Authorizes a <code>SignedContent</code> object.  The engine determines if the 
+	 * Authorizes a <code>SignedContent</code> object.  The engine determines if the
 	 * signed content authorization should be granted.
 	 * @param content
 	 * @param context the context associated with the signed content
@@ -76,7 +76,7 @@ public abstract class AuthorizationEngine {
 
 	/**
 	 * Return the current status of the Authorization system.
-	 * 
+	 *
 	 * @return A value of {@link AuthorizationStatus#OK} or {@link AuthorizationStatus#ERROR}
 	 * @see AuthorizationStatus#OK
 	 * @see AuthorizationStatus#ERROR

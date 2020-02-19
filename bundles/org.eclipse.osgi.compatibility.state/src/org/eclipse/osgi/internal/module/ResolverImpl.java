@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Danail Nachev -  ProSyst - bug 218625
@@ -589,7 +589,7 @@ public class ResolverImpl implements Resolver {
 	private BundleDescription[] addDevConstraints(BundleDescription[] reRefresh) {
 		if (!developmentMode)
 			return reRefresh; // we don't care about this unless we are in development mode
-		// when in develoment mode we need to reRefresh hosts  of unresolved fragments that add new constraints 
+		// when in develoment mode we need to reRefresh hosts  of unresolved fragments that add new constraints
 		// and reRefresh and unresolved bundles that have dependents
 		Set<BundleDescription> additionalRefresh = new HashSet<>();
 		ResolverBundle[] allUnresolved  = unresolvedBundles.toArray(new ResolverBundle[unresolvedBundles.size()]);
@@ -915,7 +915,7 @@ public class ResolverImpl implements Resolver {
 		List<ResolverConstraint> initialConflicts = getConflicts(bundles, packageConstraints, bundleConstraints, multiRequirementWithMultiSuppliers);
 		if (initialConflicts == null || "tryFirst".equals(usesMode) || usesCalculationTimeout) { //$NON-NLS-1$
 			groupingChecker.clear();
-			// the first combination have no conflicts or 
+			// the first combination have no conflicts or
 			// we only are trying the first combination or
 			// we have timed out the calculation; return without iterating over all combinations
 			return initialConflicts;
@@ -962,7 +962,7 @@ public class ResolverImpl implements Resolver {
 	}
 
 	private List<ResolverConstraint> findBestCombination(ResolverBundle[] bundles, ResolverConstraint[][] multipleSuppliers, int[] bestCombination, List<ResolverConstraint> bestConflicts) {
-		// now iterate over every possible combination until either zero conflicts are found 
+		// now iterate over every possible combination until either zero conflicts are found
 		// or we have run out of combinations
 		// if all combinations are tried then return the combination with the lowest number of conflicts
 		long initialTime = System.currentTimeMillis();

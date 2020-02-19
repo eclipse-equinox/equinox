@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Danail Nachev -  ProSyst - bug 218625
@@ -70,13 +70,13 @@ public abstract class StateImpl implements State {
 	public static final String ECLIPSE_PLATFORMFILTER = "Eclipse-PlatformFilter"; //$NON-NLS-1$
 	public static final String Eclipse_JREBUNDLE = "Eclipse-JREBundle"; //$NON-NLS-1$
 	/**
-	 * Manifest Export-Package directive indicating that the exported package should only 
+	 * Manifest Export-Package directive indicating that the exported package should only
 	 * be made available when the resolver is not in strict mode.
 	 */
 	public static final String INTERNAL_DIRECTIVE = "x-internal"; //$NON-NLS-1$
 
 	/**
-	 * Manifest Export-Package directive indicating that the exported package should only 
+	 * Manifest Export-Package directive indicating that the exported package should only
 	 * be made available to friends of the exporting bundle.
 	 */
 	public static final String FRIENDS_DIRECTIVE = "x-friends"; //$NON-NLS-1$
@@ -103,7 +103,7 @@ public abstract class StateImpl implements State {
 	 * by the required bundle must be reprovided by the requiring bundle.
 	 * The default value is <tt>false</tt>.
 	 * <p>
-	 * The attribute value is encoded in the Require-Bundle manifest 
+	 * The attribute value is encoded in the Require-Bundle manifest
 	 * header like:
 	 * <pre>
 	 * Require-Bundle: com.acme.module.test; reprovide="true"
@@ -119,11 +119,11 @@ public abstract class StateImpl implements State {
 	 * Manifest header attribute (named &quot;optional&quot;)
 	 * for Require-Bundle
 	 * identifying that a required bundle is optional and that
-	 * the requiring bundle can be resolved if there is no 
+	 * the requiring bundle can be resolved if there is no
 	 * suitable required bundle.
 	 * The default value is <tt>false</tt>.
 	 *
-	 * <p>The attribute value is encoded in the Require-Bundle manifest 
+	 * <p>The attribute value is encoded in the Require-Bundle manifest
 	 * header like:
 	 * <pre>
 	 * Require-Bundle: com.acme.module.test; optional="true"
@@ -177,7 +177,7 @@ public abstract class StateImpl implements State {
 
 	final Object monitor = new Object();
 
-	// to prevent extra-package instantiation 
+	// to prevent extra-package instantiation
 	protected StateImpl() {
 		// always add the default platform property keys.
 		addPlatformPropertyKeys(PROPS);
@@ -436,7 +436,7 @@ public abstract class StateImpl implements State {
 			if (!resolving)
 				throw new IllegalStateException(); // TODO need error message here!
 			BundleDescriptionImpl modifiable = (BundleDescriptionImpl) bundle;
-			// must record the change before setting the resolve state to 
+			// must record the change before setting the resolve state to
 			// accurately record if a change has happened.
 			getDelta().recordBundleResolved(modifiable, status);
 			// force the new resolution data to stay in memory; we will not read this from disk anymore
@@ -556,7 +556,7 @@ public abstract class StateImpl implements State {
 					if (resolved && reResolve == null)
 						return new StateDeltaImpl(this);
 					if (developmentMode) {
-						// in dev mode we need to aggressively flush removal pendings 
+						// in dev mode we need to aggressively flush removal pendings
 						if (removalPendings.size() > 0) {
 							BundleDescription[] removed = internalGetRemovalPending();
 							reResolve = mergeBundles(reResolve, removed);
@@ -945,7 +945,7 @@ public abstract class StateImpl implements State {
 				addSystemExports(exports, ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, (String) platformProperties[i].get(Constants.FRAMEWORK_SYSTEMPACKAGES)), i);
 				addSystemExports(exports, ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, (String) platformProperties[i].get(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA)), i);
 			} catch (BundleException e) {
-				// TODO consider throwing this... 
+				// TODO consider throwing this...
 			}
 	}
 
@@ -983,7 +983,7 @@ public abstract class StateImpl implements State {
 				addSystemCapabilities(capabilities, ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, (String) platformProperties[i].get(Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA)), i);
 				checkOSGiEE(capabilities, (String) platformProperties[i].get(Constants.FRAMEWORK_EXECUTIONENVIRONMENT), i);
 			} catch (BundleException e) {
-				// TODO consider throwing this... 
+				// TODO consider throwing this...
 			}
 	}
 

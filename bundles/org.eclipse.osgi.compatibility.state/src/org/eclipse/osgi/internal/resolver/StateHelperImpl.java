@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Rob Harrop - SpringSource Inc. (bug 247522)
@@ -147,7 +147,7 @@ public final class StateHelperImpl implements StateHelper {
 					for (BaseDescription baseDescription : satisfied) {
 						if (!baseDescription.getSupplier().isResolved() && !bundleList.contains(baseDescription.getSupplier())) {
 							bundleList.add(baseDescription.getSupplier());
-							// TODO only add the first supplier that is not resolved; 
+							// TODO only add the first supplier that is not resolved;
 							// this is the previous behavior before the fix for bug 333071; should consider adding all unresolved
 							break;
 						}
@@ -539,18 +539,18 @@ public final class StateHelperImpl implements StateHelper {
 }
 
 /*
- * This class is used to encapsulate the import packages of a bundle used by getVisiblePackages(). If the method is called with the option 
- * VISIBLE_INCLUDE_ALL_HOST_WIRES, it uses resolved import packages to find all visible packages by a bundle. Called without this option, 
- * it uses imported packages instead of resolved imported packages and does not consider resolved dynamic imports. 
+ * This class is used to encapsulate the import packages of a bundle used by getVisiblePackages(). If the method is called with the option
+ * VISIBLE_INCLUDE_ALL_HOST_WIRES, it uses resolved import packages to find all visible packages by a bundle. Called without this option,
+ * it uses imported packages instead of resolved imported packages and does not consider resolved dynamic imports.
  * ImportsHolder serves to hide which of these is used, so that the body of getVisiblePackages() does not become full of checks.
- * 
+ *
  */
 class ImportsHolder {
 	private final ImportPackageSpecification[] importedPackages;
 	private final ExportPackageDescription[] resolvedImports;
 	private final boolean isUsingResolved;
 
-	// Depending on the options used, either importedPackages or resolvedImports is initialize, but not both. 
+	// Depending on the options used, either importedPackages or resolvedImports is initialize, but not both.
 	ImportsHolder(BundleDescription bundle, int options) {
 		isUsingResolved = (options & StateHelper.VISIBLE_INCLUDE_ALL_HOST_WIRES) != 0;
 		if (isUsingResolved) {
@@ -582,10 +582,10 @@ class ImportsHolder {
 }
 
 /*
- * This class is used to encapsulate the required bundles by a bundle, used by getVisiblePackages(). If the method is called with the option 
- * VISIBLE_INCLUDE_ALL_HOST_WIRES, it uses resolved required bundles to find all visible packages by a bundle. Called without this option, 
- * it uses required bundles instead of resolved required bundles and does not consider the constraints from fragments. 
- * RequiresHolder serves to hide which of these is used.  
+ * This class is used to encapsulate the required bundles by a bundle, used by getVisiblePackages(). If the method is called with the option
+ * VISIBLE_INCLUDE_ALL_HOST_WIRES, it uses resolved required bundles to find all visible packages by a bundle. Called without this option,
+ * it uses required bundles instead of resolved required bundles and does not consider the constraints from fragments.
+ * RequiresHolder serves to hide which of these is used.
  */
 class RequiresHolder {
 	private final BundleSpecification[] requiredBundles;

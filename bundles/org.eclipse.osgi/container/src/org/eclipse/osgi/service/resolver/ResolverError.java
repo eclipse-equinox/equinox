@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -24,7 +24,7 @@ package org.eclipse.osgi.service.resolver;
  */
 public interface ResolverError {
 	/**
-	 * Error type constant (bit mask) indicating that an Import-Package could 
+	 * Error type constant (bit mask) indicating that an Import-Package could
 	 * not be resolved.
 	 * @see ResolverError#getType()
 	 */
@@ -55,7 +55,7 @@ public interface ResolverError {
 	public static final int FRAGMENT_CONFLICT = 0x0010;
 	/**
 	 * Error type constant (bit mask) indicating that an Import-Package could
-	 * not be resolved because of a uses directive conflict. 
+	 * not be resolved because of a uses directive conflict.
 	 * @see ResolverError#getType()
 	 */
 	public static final int IMPORT_PACKAGE_USES_CONFLICT = 0x0020;
@@ -88,14 +88,14 @@ public interface ResolverError {
 	public static final int REQUIRE_BUNDLE_PERMISSION = 0x0200;
 	/**
 	 * Error type constant (bit mask) indicating that a Require-Bundle could
-	 * not be resolved because no bundle with the required symbolic name has 
+	 * not be resolved because no bundle with the required symbolic name has
 	 * the correct permissions to provide the required symbolic name.
 	 * @see ResolverError#getType()
 	 */
 	public static final int PROVIDE_BUNDLE_PERMISSION = 0x0400;
 	/**
 	 * Error type constant (bit mask) indicating that a Fragment-Host could
-	 * not be resolved because no bundle with the required symbolic name has 
+	 * not be resolved because no bundle with the required symbolic name has
 	 * the correct permissions to host a fragment.
 	 * @see ResolverError#getType()
 	 */
@@ -123,7 +123,7 @@ public interface ResolverError {
 	public static final int MISSING_EXECUTION_ENVIRONMENT = 0x4000;
 
 	/**
-	 * Error type constant (bit mask) indicating that a bundle could not be 
+	 * Error type constant (bit mask) indicating that a bundle could not be
 	 * resolved because the required generic capability could not be resolved.
 	 */
 	public static final int MISSING_GENERIC_CAPABILITY = 0x8000;
@@ -160,7 +160,7 @@ public interface ResolverError {
 
 	/**
 	 * Error type constant (bit mask) indicating that a Require-Bundle could
-	 * not be resolved because no bundle with the required symbolic name has 
+	 * not be resolved because no bundle with the required symbolic name has
 	 * the correct permissions to provide the required symbolic name.
 	 * @see ResolverError#getType()
 	 * @since 3.7
@@ -188,8 +188,8 @@ public interface ResolverError {
 	public String getData();
 
 	/**
-	 * Returns the unsatisfied constraint if this ResolverError occurred 
-	 * because of an unsatisfied constraint; otherwise <code>null</code> 
+	 * Returns the unsatisfied constraint if this ResolverError occurred
+	 * because of an unsatisfied constraint; otherwise <code>null</code>
 	 * is returned.
 	 * @return the unsatisfied constraint or <code>null</code>.
 	 */

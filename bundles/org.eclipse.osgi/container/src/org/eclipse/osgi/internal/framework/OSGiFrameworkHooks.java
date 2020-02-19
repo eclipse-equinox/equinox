@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -115,7 +115,7 @@ class OSGiFrameworkHooks {
 
 		void notifyCollisionHooksPriviledged(final int operationType, final Bundle target, final Collection<Bundle> collisionCandidates) {
 			if (debug.DEBUG_HOOKS) {
-				Debug.println("notifyCollisionHooks(" + operationType + ", " + target + ", " + collisionCandidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+				Debug.println("notifyCollisionHooks(" + operationType + ", " + target + ", " + collisionCandidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
 			ServiceRegistry registry = container.getServiceRegistry();
 			if (registry != null) {
@@ -134,7 +134,7 @@ class OSGiFrameworkHooks {
 
 					@Override
 					public String getHookMethodName() {
-						return "filterCollisions"; //$NON-NLS-1$ 
+						return "filterCollisions"; //$NON-NLS-1$
 					}
 
 					@Override
@@ -150,7 +150,7 @@ class OSGiFrameworkHooks {
 	 * This class encapsulates the delegation to ResolverHooks that are registered with the service
 	 * registry.  This way the resolver implementation only has to call out to a single hook
 	 * which does all the necessary service registry lookups.
-	 * 
+	 *
 	 * This class is not thread safe and expects external synchronization.
 	 *
 	 */
