@@ -67,7 +67,6 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.FilePath;
 import org.eclipse.osgi.framework.util.ObjectPool;
 import org.eclipse.osgi.framework.util.SecureAction;
-import org.eclipse.osgi.internal.connect.ConnectBundleFile;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
@@ -1182,7 +1181,8 @@ public class Storage {
 		}
 		try {
 			if (connectModule != null && isBase) {
-				result = new ConnectBundleFile(connectModule, content, generation, mruList, getConfiguration().getDebug());
+				result = equinoxContainer.getConnectModules().getConnectBundleFile(connectModule, content, generation,
+						mruList, getConfiguration().getDebug());
 			} else if (isDirectory) {
 				boolean strictPath = Boolean.parseBoolean(equinoxContainer.getConfiguration().getConfiguration(EquinoxConfiguration.PROPERTY_STRICT_BUNDLE_ENTRY_PATH, Boolean.FALSE.toString()));
 				result = new DirBundleFile(content, strictPath);

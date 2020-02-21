@@ -689,6 +689,12 @@ public class ConnectTests extends AbstractBundleTests {
 				TestConnectContent newContent = m.getContent();
 				assertTrue("New content is not open.", newContent.isOpen());
 				assertFalse("Original content is open.", original.isOpen());
+
+				// now update with no new content
+				b.update();
+				assertNull(b.getEntry("doesNotExist.txt"));
+				assertTrue("New content is not open.", newContent.isOpen());
+				assertFalse("Original content is open.", original.isOpen());
 			} catch (Throwable t) {
 				sneakyThrow(t);
 			}

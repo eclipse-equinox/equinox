@@ -15,6 +15,7 @@ package org.eclipse.osgi.internal.framework;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.AccessController;
@@ -24,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
@@ -32,6 +34,8 @@ import java.util.concurrent.ThreadFactory;
 import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
+import org.eclipse.osgi.internal.connect.ConnectBundleFile;
+import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.legacy.PackageAdminImpl;
 import org.eclipse.osgi.internal.framework.legacy.StartLevelImpl;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
@@ -41,7 +45,9 @@ import org.eclipse.osgi.internal.log.EquinoxLogServices;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
 import org.eclipse.osgi.signedcontent.SignedContentFactory;
+import org.eclipse.osgi.storage.BundleInfo;
 import org.eclipse.osgi.storage.Storage;
+import org.eclipse.osgi.storage.bundlefile.MRUBundleFileList;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.AdminPermission;
@@ -49,6 +55,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.connect.ConnectContent;
 import org.osgi.framework.connect.ConnectModule;
 import org.osgi.framework.connect.ModuleConnector;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -362,6 +369,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	public static class ConnectModules {
 		final ModuleConnector moduleConnector;
 		private final ConcurrentMap<String, ConnectModule> connectModules = new ConcurrentHashMap<>();
+		private final WeakHashMap<ConnectContent, WeakReference<ConnectBundleFile>> contents = new WeakHashMap<>();
 
 		public ConnectModules(ModuleConnector moduleConnector) {
 			this.moduleConnector = moduleConnector;
@@ -379,6 +387,23 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 				}
 			});
 			return result;
+		}
+
+		public ConnectBundleFile getConnectBundleFile(ConnectModule module, File basefile,
+				BundleInfo.Generation generation, MRUBundleFileList mruList, Debug debug) throws IOException {
+			ConnectContent content = module.getContent();
+			synchronized (contents) {
+				WeakReference<ConnectBundleFile> ref = contents.get(content);
+				if (ref != null) {
+					ConnectBundleFile bundleFile = ref.get();
+					if (bundleFile != null) {
+						return bundleFile;
+					}
+				}
+				ConnectBundleFile bundleFile = new ConnectBundleFile(module, basefile, generation, mruList, debug);
+				contents.put(content, new WeakReference<>(bundleFile));
+				return bundleFile;
+			}
 		}
 
 		public ModuleConnector getModuleConnector() {
