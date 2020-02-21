@@ -1528,31 +1528,32 @@ public class Storage {
 			boolean isMRJar = (version >= MR_JAR_VERSION) ? in.readBoolean() : false;
 
 			File content = null;
-			if (infoId == 0) {
-				content = getSystemContent();
-				isDirectory = content != null ? content.isDirectory() : false;
-				// Note that we do not do any checking for absolute paths with
-				// the system bundle.  We always take the content as discovered
-				// by getSystemContent()
-			} else if (contentType != Type.CONNECT) {
-				content = new File(contentPath);
-				if (!content.isAbsolute()) {
-					// make sure it has the absolute location instead
-					switch (contentType) {
-						case REFERENCE :
+			if (contentType != Type.CONNECT) {
+				if (infoId == 0) {
+					content = getSystemContent();
+					isDirectory = content != null ? content.isDirectory() : false;
+					// Note that we do not do any checking for absolute paths with
+					// the system bundle. We always take the content as discovered
+					// by getSystemContent()
+				} else {
+					content = new File(contentPath);
+					if (!content.isAbsolute()) {
+						// make sure it has the absolute location instead
+						switch (contentType) {
+						case REFERENCE:
 							// reference installs are relative to the installPath
 							content = new File(installPath, contentPath);
 							break;
-						case DEFAULT :
+						case DEFAULT:
 							// normal installs are relative to the storage area
 							content = getFile(contentPath, true);
 							break;
-						default :
+						default:
 							throw new IllegalArgumentException("Unknown type: " + contentType); //$NON-NLS-1$
+						}
 					}
 				}
 			}
-
 			BundleInfo info = new BundleInfo(this, infoId, infoLocation, nextGenId);
 			Generation generation = info.restoreGeneration(generationId, content, isDirectory, contentType, hasPackageInfo, cachedHeaders, lastModified, isMRJar);
 			result.put(infoId, generation);
@@ -1567,7 +1568,9 @@ public class Storage {
 	private void connectPersistentBundles(List<Generation> generations) {
 		generations.forEach(g -> {
 			try {
-				equinoxContainer.getConnectModules().connect(g.getBundleInfo().getLocation());
+				if (g.getContentType() == Type.CONNECT) {
+					equinoxContainer.getConnectModules().connect(g.getBundleInfo().getLocation());
+				}
 			} catch (IllegalStateException e) {
 				if (!(e.getCause() instanceof BundleException)) {
 					throw e;
@@ -2288,5 +2291,9 @@ public class Storage {
 			}
 		}
 		return storageStream;
+	}
+
+	EquinoxContainer getEquinoxContainer() {
+		return equinoxContainer;
 	}
 }

@@ -58,6 +58,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.connect.ConnectContent;
 import org.osgi.framework.connect.ConnectContent.ConnectEntry;
@@ -88,7 +89,8 @@ public class ConnectTests extends AbstractBundleTests {
 		doTestConnect(moduleConnector, fwkConfig, test, false);
 	}
 
-	void doTestConnect(ModuleConnector moduleConnector, Map<String, String> fwkConfig, Consumer<Framework> test, boolean enableRuntimeVerification) {
+	void doTestConnect(ModuleConnector moduleConnector, Map<String, String> fwkConfig, Consumer<Framework> test,
+			boolean enableRuntimeVerification) {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		config.mkdirs();
 		fwkConfig.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
@@ -415,7 +417,8 @@ public class ConnectTests extends AbstractBundleTests {
 			}
 		});
 		TestCase.assertEquals("Wrong init store file.", storeFile.get(), initFile.get());
-		assertTrue("Did not find all init configs: " + initConfig.get(), initConfig.get().entrySet().containsAll(config.entrySet()));
+		assertTrue("Did not find all init configs: " + initConfig.get(),
+				initConfig.get().entrySet().containsAll(config.entrySet()));
 		try {
 			initConfig.get().put("k3", "v3");
 			fail("Expected unmodifiable map");
@@ -494,18 +497,18 @@ public class ConnectTests extends AbstractBundleTests {
 	}
 
 	private static void checkConnectTag(Bundle b) {
-		final List<String> namespaces = new ArrayList<>(Arrays.asList(BundleNamespace.BUNDLE_NAMESPACE, HostNamespace.HOST_NAMESPACE, IdentityNamespace.IDENTITY_NAMESPACE));
+		final List<String> namespaces = new ArrayList<>(Arrays.asList(BundleNamespace.BUNDLE_NAMESPACE,
+				HostNamespace.HOST_NAMESPACE, IdentityNamespace.IDENTITY_NAMESPACE));
 
-		b.adapt(BundleRevision.class).getCapabilities(null)
-			.stream()
-			.filter(c -> namespaces.contains(c.getNamespace()))
-			.forEach(c -> {
-				List<String> tags = (List<String>) c.getAttributes().get(IdentityNamespace.CAPABILITY_TAGS_ATTRIBUTE);
-				assertNotNull("No tags found.", tags);
-				assertEquals("Wrong number of tags.", 1, tags.size());
-				assertTrue("Connect tag not found.", tags.contains(ConnectContent.TAG_OSGI_CONNECT));
-				namespaces.remove(c.getNamespace());
-			});
+		b.adapt(BundleRevision.class).getCapabilities(null).stream().filter(c -> namespaces.contains(c.getNamespace()))
+				.forEach(c -> {
+					List<String> tags = (List<String>) c.getAttributes()
+							.get(IdentityNamespace.CAPABILITY_TAGS_ATTRIBUTE);
+					assertNotNull("No tags found.", tags);
+					assertEquals("Wrong number of tags.", 1, tags.size());
+					assertTrue("Connect tag not found.", tags.contains(ConnectContent.TAG_OSGI_CONNECT));
+					namespaces.remove(c.getNamespace());
+				});
 		assertTrue("Connect tag namespaces were not removed completely. Found " + namespaces, namespaces.isEmpty());
 	}
 
@@ -515,7 +518,8 @@ public class ConnectTests extends AbstractBundleTests {
 						Collections.singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, "(tags=osgi.connect)"), //
 						Collections.emptyMap()));
 		osgiConnectTags.forEach(c -> {
-			assertTrue("Unexpected tag on bundle: " + c.getRevision().getBundle(), locations.contains(c.getRevision().getBundle().getLocation()));
+			assertTrue("Unexpected tag on bundle: " + c.getRevision().getBundle(),
+					locations.contains(c.getRevision().getBundle().getLocation()));
 		});
 	}
 
@@ -544,11 +548,14 @@ public class ConnectTests extends AbstractBundleTests {
 					ServiceReference<?>[] registered = b.getRegisteredServices();
 					assertNotNull("No services found.", registered);
 					assertEquals("Wrong number of services.", 1, registered.length);
-					assertEquals("Wrong service property.", Activator.class.getSimpleName() + id, (String) registered[0].getProperty("activator"));
+					assertEquals("Wrong service property.", Activator.class.getSimpleName() + id,
+							(String) registered[0].getProperty("activator"));
 					if (provideLoader) {
-						assertTrue("Expected the same classes.", Activator.class.equals(b.loadClass(Activator.class.getName())));
+						assertTrue("Expected the same classes.",
+								Activator.class.equals(b.loadClass(Activator.class.getName())));
 					} else {
-						assertFalse("Expected different classes.", Activator.class.equals(b.loadClass(Activator.class.getName())));
+						assertFalse("Expected different classes.",
+								Activator.class.equals(b.loadClass(Activator.class.getName())));
 					}
 				}
 			} catch (Throwable t) {
@@ -596,17 +603,21 @@ public class ConnectTests extends AbstractBundleTests {
 					assertTrue("Wrong bundle entry URLs: " + bundleEntryUrls, entries.containsAll(bundleEntryUrls));
 
 					List<String> bundleEntryPaths = new ArrayList<>();
-					for (Enumeration<String> ePaths = b.getEntryPaths("org/eclipse/osgi/tests/bundles/resources"); ePaths.hasMoreElements();) {
+					for (Enumeration<String> ePaths = b
+							.getEntryPaths("org/eclipse/osgi/tests/bundles/resources"); ePaths.hasMoreElements();) {
 						bundleEntryPaths.add(ePaths.nextElement());
 					}
 					assertEquals("Wrong number of bundle entry paths from root.", 1, bundleEntryPaths.size());
-					assertEquals("Wrong bundle entry found at root.", "org/eclipse/osgi/tests/bundles/resources/" + id + ".txt", bundleEntryPaths.get(0));
+					assertEquals("Wrong bundle entry found at root.",
+							"org/eclipse/osgi/tests/bundles/resources/" + id + ".txt", bundleEntryPaths.get(0));
 
 					BundleWiring wiring = b.adapt(BundleWiring.class);
 					assertNotNull("No wiring.", wiring);
-					Collection<String> wiringResourcePaths = wiring.listResources("/", "*", BundleWiring.LISTRESOURCES_LOCAL | BundleWiring.LISTRESOURCES_RECURSE);
+					Collection<String> wiringResourcePaths = wiring.listResources("/", "*",
+							BundleWiring.LISTRESOURCES_LOCAL | BundleWiring.LISTRESOURCES_RECURSE);
 					assertEquals("Wrong number of resource paths.", entries.size(), wiringResourcePaths.size());
-					assertTrue("Wrong resource paths: " + wiringResourcePaths, entries.containsAll(wiringResourcePaths));
+					assertTrue("Wrong resource paths: " + wiringResourcePaths,
+							entries.containsAll(wiringResourcePaths));
 
 					Set<String> wiringEntryUrls = new HashSet<>();
 					for (URL url : wiring.findEntries("/", "*", BundleWiring.FINDENTRIES_RECURSE)) {
@@ -708,7 +719,7 @@ public class ConnectTests extends AbstractBundleTests {
 				} else {
 					checkHeaders(m.getContent().getHeaders().get(), headers1);
 				}
-				// set the new content 
+				// set the new content
 				m.setContent(withManifest ? createSimpleManifestContent(NAME2) : createSimpleHeadersContent(NAME2));
 				b.update();
 				Dictionary<String, String> headers2 = b.getHeaders();
@@ -752,7 +763,8 @@ public class ConnectTests extends AbstractBundleTests {
 				f.start();
 				Bundle b = f.getBundleContext().getBundle(NAME);
 				assertFalse("Content is not closed", m.getContent().isOpen());
-				//Bundle.getHeaders() will eventually call ConnectBundleFile.getConnectHeaders() which opens the connect content
+				// Bundle.getHeaders() will eventually call
+				// ConnectBundleFile.getConnectHeaders() which opens the connect content
 				headers2.set(b.getHeaders());
 				assertTrue("Content is not open", m.getContent().isOpen());
 				f.stop();
@@ -780,8 +792,10 @@ public class ConnectTests extends AbstractBundleTests {
 	}
 
 	void dotestInstallUpdate(boolean installWithInputStream, boolean updateWithInputStream) throws Exception {
-		final InputStream in1 = installWithInputStream ? new URL(installer.getBundleLocation("test")).openStream() : null;
-		final InputStream in2 = updateWithInputStream ? new URL(installer.getBundleLocation("test2")).openStream() : null;
+		final InputStream in1 = installWithInputStream ? new URL(installer.getBundleLocation("test")).openStream()
+				: null;
+		final InputStream in2 = updateWithInputStream ? new URL(installer.getBundleLocation("test2")).openStream()
+				: null;
 		final String NAME1 = installWithInputStream ? "test1" : "bundle1";
 		final String NAME2 = updateWithInputStream ? "test2" : "bundle2";
 
@@ -812,6 +826,33 @@ public class ConnectTests extends AbstractBundleTests {
 				cleanStorage();
 			}
 		});
+	}
+
+	public void testSystemBundleContent() {
+		TestCountingModuleConnector connector = new TestCountingModuleConnector();
+		Bundle systemBundle = getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION);
+		Map<String, String> headers = new HashMap<>(FrameworkUtil.asMap(systemBundle.getHeaders()));
+		headers.put("test.key", "test.value");
+		// remove bundle manifest version to allow java export
+		headers.remove(Constants.BUNDLE_MANIFESTVERSION);
+
+		TestConnectModule systemModule = new TestConnectModule(
+				new TestConnectContent(headers, systemBundle.adapt(BundleWiring.class).getClassLoader()));
+		connector.setModule(Constants.SYSTEM_BUNDLE_LOCATION, systemModule);
+		Consumer<Framework> test = f -> {
+			try {
+				f.init();
+				Dictionary<String, String> h = f.getHeaders();
+				assertEquals("Wrong system BSN", systemBundle.getSymbolicName(), f.getSymbolicName());
+				assertEquals("Wrong test value", "test.value", h.get("test.key"));
+			} catch (Throwable t) {
+				sneakyThrow(t);
+			}
+		};
+
+		// run twice to test clean and persistent start
+		doTestConnect(connector, new HashMap<>(), test);
+		doTestConnect(connector, new HashMap<>(), test);
 	}
 
 	private void checkHeaders(Map<String, String> expected, Dictionary<String, String> actual) {

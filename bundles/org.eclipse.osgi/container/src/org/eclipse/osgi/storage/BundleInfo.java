@@ -57,6 +57,7 @@ import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.connect.ConnectModule;
 
 public final class BundleInfo {
 	public static final String OSGI_BUNDLE_MANIFEST = "META-INF/MANIFEST.MF"; //$NON-NLS-1$
@@ -101,7 +102,7 @@ public final class BundleInfo {
 		public BundleFile getBundleFile() {
 			synchronized (genMonitor) {
 				if (bundleFile == null) {
-					if (getBundleId() == 0 && content == null) {
+					if (getBundleId() == 0 && content == null && contentType != Type.CONNECT) {
 						bundleFile = new SystemBundleFile();
 					} else {
 						bundleFile = getStorage().createBundleFile(content, this, isDirectory, true);
@@ -252,6 +253,14 @@ public final class BundleInfo {
 		}
 
 		void setContent(File content, Type contentType) {
+			if (getBundleId() == 0) {
+				// check connect for content first
+				ConnectModule connected = getStorage().getEquinoxContainer().getConnectModules().connect(getLocation());
+				if (connected != null) {
+					content = null;
+					contentType = Type.CONNECT;
+				}
+			}
 			synchronized (this.genMonitor) {
 				this.content = content;
 				this.isDirectory = content == null ? false : Storage.secureAction.isDirectory(content);
