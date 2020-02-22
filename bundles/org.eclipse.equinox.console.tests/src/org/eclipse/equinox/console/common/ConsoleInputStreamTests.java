@@ -17,8 +17,6 @@ package org.eclipse.equinox.console.common;
 import org.junit.Assert;
 import org.junit.Test;
 
-import org.eclipse.equinox.console.common.ConsoleInputStream;
-
 public class ConsoleInputStreamTests {
 
 	private static final int DATA_LENGTH = 4;
