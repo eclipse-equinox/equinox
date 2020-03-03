@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2017 IBM Corporation and others.
+ * Copyright (c) 2003, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -49,26 +49,25 @@ public class EventListeners<K, V> {
 	}
 
 	/**
-	 * Add a listener to the list.
-	 * If a listener object is already in the list, then it is replaced.
-	 * This method calls the put method.
+	 * Add a listener to the list. If a listener object is already in the list, then
+	 * it is replaced. This method calls the put method.
 	 *
-	 * @param listener This is the listener object to be added to the list.
-	 * @param listenerObject This is an optional listener-specific object.
-	 * This object will be passed to the EventDispatcher along with the listener
-	 * when the listener is to be called. This may be null
-	 * @throws IllegalArgumentException If listener is null.
+	 * @param listener       This is the listener object to be added to the list.
+	 * @param listenerObject This is an optional listener-specific object. This
+	 *                       object will be passed to the EventDispatcher along with
+	 *                       the listener when the listener is to be called. This
+	 *                       may be null
+	 * @throws NullPointerException If listener is null.
 	 */
 	public void addListener(K listener, V listenerObject) {
 		list.put(listener, listenerObject);
 	}
 
 	/**
-	 * Remove a listener from the list.
-	 * This method calls the remove method.
+	 * Remove a listener from the list. This method calls the remove method.
 	 *
 	 * @param listener This is the listener object to be removed from the list.
-	 * @throws IllegalArgumentException If listener is null.
+	 * @throws NullPointerException If listener is null.
 	 */
 	public void removeListener(K listener) {
 		list.remove(listener);
