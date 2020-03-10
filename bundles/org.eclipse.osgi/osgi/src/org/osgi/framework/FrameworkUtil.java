@@ -983,23 +983,11 @@ public class FrameworkUtil {
 		@SuppressWarnings("unchecked")
 		MapAsDictionary(Map< ? extends K, ? extends V> map) {
 			this.map = (Map<K,V>) requireNonNull(map);
-			boolean nullKey;
-			try {
-				nullKey = map.containsKey(null);
-			} catch (NullPointerException e) {
-				nullKey = false; // map does not allow null key
-			}
-			if (nullKey) {
+			if (map.containsKey(null)) {
 				throw new NullPointerException(
 						"a Dictionary cannot contain a null key");
 			}
-			boolean nullValue;
-			try {
-				nullValue = map.containsValue(null);
-			} catch (NullPointerException e) {
-				nullValue = false; // map does not allow null value
-			}
-			if (nullValue) {
+			if (map.containsValue(null)) {
 				throw new NullPointerException(
 						"a Dictionary cannot contain a null value");
 			}
