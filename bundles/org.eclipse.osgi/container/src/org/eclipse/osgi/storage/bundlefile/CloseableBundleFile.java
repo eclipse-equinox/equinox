@@ -72,7 +72,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 	 * Checks if the bundle file is open
 	 * @return true if the bundle file is open and locked
 	 */
-	private boolean lockOpen() {
+	protected boolean lockOpen() {
 		try {
 			open(true);
 			return true;
@@ -95,6 +95,13 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 			// throw new RuntimeException("Failed to open bundle file.", e);
 			return false;
 		}
+	}
+
+	/**
+	 * Unlocks the open lock
+	 */
+	protected void releaseOpen() {
+		openLock.unlock();
 	}
 
 	/**
@@ -162,7 +169,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 			}
 			return getExtractFile(dirName);
 		} finally {
-			openLock.unlock();
+			releaseOpen();
 		}
 	}
 
@@ -219,7 +226,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 				generation.getBundleInfo().getStorage().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Unable to extract content: " + generation.getRevision() + ": " + entry, e); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		} finally {
-			openLock.unlock();
+			releaseOpen();
 		}
 		return null;
 	}
@@ -251,7 +258,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 				}
 			}
 		} finally {
-			openLock.unlock();
+			releaseOpen();
 		}
 		return false;
 	}
@@ -264,7 +271,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 		try {
 			return findEntry(path);
 		} finally {
-			openLock.unlock();
+			releaseOpen();
 		}
 	}
 
@@ -307,7 +314,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 			}
 			return result.size() == 0 ? null : Collections.enumeration(result);
 		} finally {
-			openLock.unlock();
+			releaseOpen();
 		}
 	}
 
@@ -449,7 +456,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 			}
 			return in;
 		} finally {
-			openLock.unlock();
+			releaseOpen();
 		}
 	}
 
@@ -542,7 +549,9 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 		}
 
 		private IOException enrichExceptionWithBaseFile(IOException e) {
-			return new IOException(getBaseFile().toString(), e);
+			File baseFile = getBaseFile();
+			String extraInfo = baseFile == null ? generation.getBundleInfo().getLocation() : baseFile.toString();
+			return new IOException(extraInfo, e);
 		}
 	}
 }

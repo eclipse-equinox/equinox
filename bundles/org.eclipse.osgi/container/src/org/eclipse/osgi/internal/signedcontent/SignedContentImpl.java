@@ -196,7 +196,7 @@ public class SignedContentImpl implements SignedContent {
 				exception = e;
 			}
 			if (entry == null)
-				throw new InvalidContentException(NLS.bind(SignedContentMessages.file_is_removed_from_jar, entryName, currentContent.getBaseFile().toString()), exception);
+				throw new InvalidContentException(NLS.bind(SignedContentMessages.file_is_removed_from_jar, entryName, String.valueOf(currentContent.getBaseFile())), exception);
 
 			if (entry.getSize() > VERIFY_LIMIT) {
 				try (InputStream in = entry.getInputStream()) {

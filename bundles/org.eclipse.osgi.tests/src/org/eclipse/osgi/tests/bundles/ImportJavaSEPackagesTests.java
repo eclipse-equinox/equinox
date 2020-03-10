@@ -121,7 +121,6 @@ public class ImportJavaSEPackagesTests extends AbstractBundleTests {
 
 	public void testSystemPackages() throws Exception {
 		Map<Integer, Integer> packagesPerVersion = new HashMap<>();
-		packagesPerVersion.put(7, 56);
 		packagesPerVersion.put(8, 63);
 		if (!originalSpecVersion.startsWith("1.")) {
 			packagesPerVersion.put(9, calculateJavaPackageCount());

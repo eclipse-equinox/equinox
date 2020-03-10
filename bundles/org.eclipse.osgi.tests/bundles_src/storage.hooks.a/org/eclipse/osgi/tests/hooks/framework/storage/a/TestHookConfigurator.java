@@ -184,15 +184,14 @@ public class TestHookConfigurator implements HookConfigurator {
 			@Override
 			public BundleActivator createActivator() {
 				return new BundleActivator() {
-
 					@Override
 					public void start(BundleContext context) throws Exception {
-						TestHelper.testBundle = context.getBundle(Constants.SYSTEM_BUNDLE_LOCATION);
+						TestHelper.setBundle(context.getBundle(Constants.SYSTEM_BUNDLE_LOCATION));
 					}
 
 					@Override
 					public void stop(BundleContext context) throws Exception {
-						// nothing
+						TestHelper.setBundle(null);
 					}
 				};
 			}

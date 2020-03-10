@@ -25,6 +25,7 @@ public class AllFrameworkHookTests {
 		suite.addTest(new TestSuite(ContextFinderTests.class));
 		suite.addTest(new TestSuite(DevClassPathWithExtensionTests.class));
 		suite.addTest(new TestSuite(EmbeddedEquinoxWithURLInClassLoadTests.class));
+		suite.addTest(new TestSuite(ActivatorOrderTest.class));
 		return suite;
 	}
 }

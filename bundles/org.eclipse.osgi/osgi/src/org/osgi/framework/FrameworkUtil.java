@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2005, 2016). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2019). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,27 @@
 
 package org.osgi.framework;
 
+import static java.util.Objects.requireNonNull;
+
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.AbstractMap;
+import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.ServiceLoader;
+import java.util.Set;
+
 import javax.security.auth.x500.X500Principal;
 import org.eclipse.osgi.internal.framework.FilterImpl;
-import org.eclipse.osgi.internal.hookregistry.FrameworkUtilHelper;
+import org.osgi.framework.connect.FrameworkUtilHelper;
 
 /**
  * Framework Utility class.
@@ -185,57 +196,69 @@ public class FrameworkUtil {
 		return DNChainMatching.match(matchPattern, dnChain);
 	}
 
+	/**
+	 * Return a {@code Bundle} for the specified bundle class loader.
+	 * 
+	 * @param bundleClassLoader A bundle class loader.
+	 * @return An Optional containing {@code Bundle} for the specified bundle
+	 *         class loader or an empty Optional if the specified class loader
+	 *         is not associated with a specific bundle.
+	 * @since 1.10
+	 */
+	public static Optional<Bundle> getBundle(ClassLoader bundleClassLoader) {
+		requireNonNull(bundleClassLoader);
+		return Optional
+				.ofNullable((bundleClassLoader instanceof BundleReference)
+						? ((BundleReference) bundleClassLoader).getBundle()
+						: null);
+	}
+
+	/**
+	 * Return a {@code Bundle} for the specified bundle class.
+	 * 
+	 * @param classFromBundle A class defined by a bundle.
+	 * @return A {@code Bundle} for the specified bundle class or {@code null}
+	 *         if the specified class was not defined by a bundle.
+	 * @since 1.5
+	 */
+	public static Bundle getBundle(Class< ? > classFromBundle) {
+		// We use doPriv since the caller may not have permission
+		// to call getClassLoader.
+		Optional<ClassLoader> cl = Optional
+				.ofNullable(AccessController.doPrivileged(
+						(PrivilegedAction<ClassLoader>) () -> classFromBundle
+								.getClassLoader()));
+
+		return cl.flatMap(FrameworkUtil::getBundle)
+				.orElseGet(() -> helpers.stream()
+						.map(helper -> helper.getBundle(classFromBundle))
+						.filter(Optional::isPresent)
+						.map(Optional::get)
+						.findFirst()
+						.orElse(null));
+	}
+
 	private final static List<FrameworkUtilHelper> helpers;
 	static {
 		List<FrameworkUtilHelper> l = new ArrayList<>();
 		try {
-			ServiceLoader<FrameworkUtilHelper> helperLoader = AccessController.doPrivileged(new PrivilegedAction<ServiceLoader<FrameworkUtilHelper>>() {
-				@Override
-				public ServiceLoader<FrameworkUtilHelper> run() {
-					return ServiceLoader.load(FrameworkUtilHelper.class, FrameworkUtilHelper.class.getClassLoader());
-				}
-			});
-			for (Iterator<FrameworkUtilHelper> iHelpers = helperLoader.iterator(); iHelpers.hasNext();) {
-				l.add(iHelpers.next());
+			ServiceLoader<FrameworkUtilHelper> helperLoader = AccessController
+					.doPrivileged(
+							(PrivilegedAction<ServiceLoader<FrameworkUtilHelper>>) () -> ServiceLoader
+									.load(FrameworkUtilHelper.class,
+											FrameworkUtilHelper.class
+													.getClassLoader()));
+			helperLoader.forEach(l::add);
+		} catch (Throwable error) {
+			// try hard not to fail static <clinit>
+			try {
+				Thread t = Thread.currentThread();
+				t.getUncaughtExceptionHandler().uncaughtException(t, error);
+			} catch (Throwable ignored) {
+				// we ignore this
 			}
-		} catch (Throwable t) {
-			// should not fail out of static initializers
-			t.printStackTrace();
 		}
 		helpers = Collections.unmodifiableList(l);
-	}
-
-	/**
-	 * Return a {@code Bundle} for the specified bundle class. The returned
-	 * {@code Bundle} is the bundle associated with the bundle class loader
-	 * which defined the specified class.
-	 * 
-	 * @param classFromBundle A class defined by a bundle class loader.
-	 * @return A {@code Bundle} for the specified bundle class or {@code null}
-	 *         if the specified class was not defined by a bundle class loader.
-	 * @since 1.5
-	 */
-	public static Bundle getBundle(final Class<?> classFromBundle) {
-		// We use doPriv since the caller may not have permission
-		// to call getClassLoader.
-		Object cl = AccessController.doPrivileged(new PrivilegedAction<Object>() {
-			@Override
-			public Object run() {
-				return classFromBundle.getClassLoader();
-			}
-		});
-
-		if (cl instanceof BundleReference) {
-			return ((BundleReference) cl).getBundle();
-		}
-
-		for (FrameworkUtilHelper helper : helpers) {
-			Bundle b = helper.getBundle(classFromBundle);
-			if (b != null) {
-				return b;
-			}
-		}
-		return null;
 	}
 
 	/**
@@ -680,4 +703,345 @@ public class FrameworkUtil {
 			return sb.toString();
 		}
 	}
+
+	/**
+	 * Return a Map wrapper around a Dictionary.
+	 *
+	 * @param <K> The type of the key.
+	 * @param <V> The type of the value.
+	 * @param dictionary The dictionary to wrap.
+	 * @return A Map object which wraps the specified dictionary. If the
+	 *         specified dictionary can be cast to a Map, then the specified
+	 *         dictionary is returned.
+	 * @since 1.10
+	 */
+	public static <K, V> Map<K,V> asMap(
+			Dictionary< ? extends K, ? extends V> dictionary) {
+		if (dictionary instanceof Map) {
+			@SuppressWarnings("unchecked")
+			Map<K,V> coerced = (Map<K,V>) dictionary;
+			return coerced;
+		}
+		return new DictionaryAsMap<>(dictionary);
+	}
+
+	private static class DictionaryAsMap<K, V> extends AbstractMap<K,V> {
+		private final Dictionary<K,V> dict;
+
+		@SuppressWarnings("unchecked")
+		DictionaryAsMap(Dictionary< ? extends K, ? extends V> dict) {
+			this.dict = (Dictionary<K,V>) requireNonNull(dict);
+		}
+
+		Iterator<K> keys() {
+			List<K> keys = new ArrayList<>(dict.size());
+			for (Enumeration<K> e = dict.keys(); e.hasMoreElements();) {
+				keys.add(e.nextElement());
+			}
+			return keys.iterator();
+		}
+
+		@Override
+		public int size() {
+			return dict.size();
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return dict.isEmpty();
+		}
+
+		@Override
+		public boolean containsKey(Object key) {
+			if (key == null) {
+				return false;
+			}
+			return dict.get(key) != null;
+		}
+
+		@Override
+		public V get(Object key) {
+			if (key == null) {
+				return null;
+			}
+			return dict.get(key);
+		}
+
+		@Override
+		public V put(K key, V value) {
+			return dict.put(
+					requireNonNull(key,
+							"a Dictionary cannot contain a null key"),
+					requireNonNull(value,
+							"a Dictionary cannot contain a null value"));
+		}
+
+		@Override
+		public V remove(Object key) {
+			if (key == null) {
+				return null;
+			}
+			return dict.remove(key);
+		}
+
+		@Override
+		public void clear() {
+			for (Iterator<K> iter = keys(); iter.hasNext();) {
+				dict.remove(iter.next());
+			}
+		}
+
+		@Override
+		public Set<K> keySet() {
+			return new KeySet();
+		}
+
+		@Override
+		public Set<Map.Entry<K,V>> entrySet() {
+			return new EntrySet();
+		}
+
+		@Override
+		public String toString() {
+			return dict.toString();
+		}
+
+		final class KeySet extends AbstractSet<K> {
+			@Override
+			public Iterator<K> iterator() {
+				return new KeyIterator();
+			}
+
+			@Override
+			public int size() {
+				return DictionaryAsMap.this.size();
+			}
+
+			@Override
+			public boolean isEmpty() {
+				return DictionaryAsMap.this.isEmpty();
+			}
+
+			@Override
+			public boolean contains(Object key) {
+				return DictionaryAsMap.this.containsKey(key);
+			}
+
+			@Override
+			public boolean remove(Object key) {
+				return DictionaryAsMap.this.remove(key) != null;
+			}
+
+			@Override
+			public void clear() {
+				DictionaryAsMap.this.clear();
+			}
+		}
+
+		final class KeyIterator implements Iterator<K> {
+			private final Iterator<K>	keys	= DictionaryAsMap.this.keys();
+			private K					key		= null;
+
+			@Override
+			public boolean hasNext() {
+				return keys.hasNext();
+			}
+
+			@Override
+			public K next() {
+				return key = keys.next();
+			}
+
+			@Override
+			public void remove() {
+				if (key == null) {
+					throw new IllegalStateException();
+				}
+				DictionaryAsMap.this.remove(key);
+				key = null;
+			}
+		}
+
+		final class EntrySet extends AbstractSet<Map.Entry<K,V>> {
+			@Override
+			public Iterator<Map.Entry<K,V>> iterator() {
+				return new EntryIterator();
+			}
+
+			@Override
+			public int size() {
+				return DictionaryAsMap.this.size();
+			}
+
+			@Override
+			public boolean isEmpty() {
+				return DictionaryAsMap.this.isEmpty();
+			}
+
+			@Override
+			public boolean contains(Object o) {
+				if (o instanceof Map.Entry) {
+					Map.Entry< ? , ? > e = (Map.Entry< ? , ? >) o;
+					return containsEntry(e);
+				}
+				return false;
+			}
+
+			private boolean containsEntry(Map.Entry< ? , ? > e) {
+				Object key = e.getKey();
+				if (key == null) {
+					return false;
+				}
+				Object value = e.getValue();
+				if (value == null) {
+					return false;
+				}
+				return Objects.equals(DictionaryAsMap.this.get(key), value);
+			}
+
+			@Override
+			public boolean remove(Object o) {
+				if (o instanceof Map.Entry) {
+					Map.Entry< ? , ? > e = (Map.Entry< ? , ? >) o;
+					if (containsEntry(e)) {
+						DictionaryAsMap.this.remove(e.getKey());
+						return true;
+					}
+				}
+				return false;
+			}
+
+			@Override
+			public void clear() {
+				DictionaryAsMap.this.clear();
+			}
+		}
+
+		final class EntryIterator implements Iterator<Map.Entry<K,V>> {
+			private final Iterator<K>	keys	= DictionaryAsMap.this.keys();
+			private K					key		= null;
+
+			@Override
+			public boolean hasNext() {
+				return keys.hasNext();
+			}
+
+			@Override
+			public Map.Entry<K,V> next() {
+				return new Entry(key = keys.next());
+			}
+
+			@Override
+			public void remove() {
+				if (key == null) {
+					throw new IllegalStateException();
+				}
+				DictionaryAsMap.this.remove(key);
+				key = null;
+			}
+		}
+
+		final class Entry extends SimpleEntry<K,V> {
+			private static final long serialVersionUID = 1L;
+
+			Entry(K key) {
+				super(key, DictionaryAsMap.this.get(key));
+			}
+
+			@Override
+			public V setValue(V value) {
+				DictionaryAsMap.this.put(getKey(), value);
+				return super.setValue(value);
+			}
+		}
+	}
+
+	/**
+	 * Return a Dictionary wrapper around a Map.
+	 *
+	 * @param <K> The type of the key.
+	 * @param <V> The type of the value.
+	 * @param map The map to wrap.
+	 * @return A Dictionary object which wraps the specified map. If the
+	 *         specified map can be cast to a Dictionary, then the specified map
+	 *         is returned.
+	 * @since 1.10
+	 */
+	public static <K, V> Dictionary<K,V> asDictionary(
+			Map< ? extends K, ? extends V> map) {
+		if (map instanceof Dictionary) {
+			@SuppressWarnings("unchecked")
+			Dictionary<K,V> coerced = (Dictionary<K,V>) map;
+			return coerced;
+		}
+		return new MapAsDictionary<>(map);
+	}
+
+	private static class MapAsDictionary<K, V> extends Dictionary<K,V> {
+		private final Map<K,V> map;
+
+		@SuppressWarnings("unchecked")
+		MapAsDictionary(Map< ? extends K, ? extends V> map) {
+			this.map = (Map<K,V>) requireNonNull(map);
+			if (map.containsKey(null)) {
+				throw new NullPointerException(
+						"a Dictionary cannot contain a null key");
+			}
+			if (map.containsValue(null)) {
+				throw new NullPointerException(
+						"a Dictionary cannot contain a null value");
+			}
+		}
+
+		@Override
+		public int size() {
+			return map.size();
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return map.isEmpty();
+		}
+
+		@Override
+		public Enumeration<K> keys() {
+			return Collections.enumeration(map.keySet());
+		}
+
+		@Override
+		public Enumeration<V> elements() {
+			return Collections.enumeration(map.values());
+		}
+
+		@Override
+		public V get(Object key) {
+			if (key == null) {
+				return null;
+			}
+			return map.get(key);
+		}
+
+		@Override
+		public V put(K key, V value) {
+			return map.put(
+					requireNonNull(key,
+							"a Dictionary cannot contain a null key"),
+					requireNonNull(value,
+							"a Dictionary cannot contain a null value"));
+		}
+
+		@Override
+		public V remove(Object key) {
+			if (key == null) {
+				return null;
+			}
+			return map.remove(key);
+		}
+
+		@Override
+		public String toString() {
+			return map.toString();
+		}
+	}
+
 }

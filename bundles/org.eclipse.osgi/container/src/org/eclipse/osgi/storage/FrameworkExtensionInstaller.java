@@ -39,6 +39,7 @@ import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.internal.url.MultiplexingFactory;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
+import org.eclipse.osgi.storage.ContentProvider.Type;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -181,6 +182,11 @@ public class FrameworkExtensionInstaller {
 	 * @return a list of classpath files for an extension bundle
 	 */
 	private File[] getExtensionFiles(ModuleRevision revision) {
+		Generation generation = (Generation) revision.getRevisionInfo();
+		if (generation.getContentType() == Type.CONNECT) {
+			// Don't do anything for connect bundles
+			return new File[0];
+		}
 		List<ModuleCapability> metaDatas = revision.getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
 		@SuppressWarnings("unchecked")
 		List<String> paths = metaDatas.isEmpty() ? null : (List<String>) metaDatas.get(0).getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_CLASSPATH);
@@ -238,7 +244,9 @@ public class FrameworkExtensionInstaller {
 			current = new ArrayMap<>(hookActivators.getKeys(), hookActivators.getValues());
 			hookActivators.clear();
 		}
-		for (BundleActivator activator : current) {
+		// indexing into the current collection the hard way to reverse de-activation
+		for (int i = current.getKeys().size() - 1; i >= 0; i--) {
+			BundleActivator activator = current.getKey(i);
 			try {
 				activator.stop(context);
 			} catch (Exception e) {

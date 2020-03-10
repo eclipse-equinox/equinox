@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2017). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2019). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -866,7 +866,7 @@ final class ServicePermissionCollection extends PermissionCollection {
 		// work our way up the tree...
 		int last;
 		int offset = requestedName.length() - 1;
-		while ((last = requestedName.lastIndexOf(".", offset)) != -1) {
+		while ((last = requestedName.lastIndexOf('.', offset)) != -1) {
 			requestedName = requestedName.substring(0, last + 1) + "*";
 			sp = pc.get(requestedName);
 			if (sp != null) {

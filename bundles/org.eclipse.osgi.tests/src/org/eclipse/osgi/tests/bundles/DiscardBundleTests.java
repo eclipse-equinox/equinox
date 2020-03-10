@@ -119,7 +119,7 @@ public class DiscardBundleTests extends AbstractBundleTests {
 			// will sometimes result in failure presumably due to a locked
 			// file.
 			stop(equinox);
-			rm(bundleFile);
+			delete(bundleFile);
 			equinox = restart(equinox, configuration);
 			assertDiscarded(location, equinox);
 		} finally {
@@ -221,22 +221,5 @@ public class DiscardBundleTests extends AbstractBundleTests {
 		if (file.isDirectory())
 			file = new File(file, BUNDLE_MANIFEST);
 		assertTrue("Could not set last modified: " + file, file.setLastModified(file.lastModified() + 1000));
-	}
-
-	public static boolean rm(File file) {
-		if (file.exists()) {
-			if (file.isDirectory()) {
-				String list[] = file.list();
-				if (list != null) {
-					int len = list.length;
-					for (int i = 0; i < len; i++) {
-						rm(new File(file, list[i]));
-					}
-				}
-			}
-
-			return file.delete();
-		}
-		return (true);
 	}
 }

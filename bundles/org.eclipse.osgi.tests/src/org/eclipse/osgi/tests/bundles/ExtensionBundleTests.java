@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -27,6 +29,8 @@ public class ExtensionBundleTests extends AbstractBundleTests {
 	public static Test suite() {
 		return new TestSuite(ExtensionBundleTests.class);
 	}
+
+	public static List<String> events = new ArrayList<>();
 
 	public void testFrameworkExtension01() throws Exception {
 		Bundle fwkext = installer.installBundle("ext.framework.a", false); //$NON-NLS-1$
@@ -83,5 +87,29 @@ public class ExtensionBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong provider for host: " + hostWire.getProvider().getBundle(), 0, hostWire.getProvider().getBundle().getBundleId());
 		BundleWire eeWire = wiring.getRequiredWires(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE).get(0);
 		assertEquals("Wrong provider for osgi.ee: " + eeWire.getProvider().getBundle(), 0, eeWire.getProvider().getBundle().getBundleId());
+	}
+
+	public void testActivatorOrder() throws Exception {
+		Bundle b = installer.installBundle("ext.framework.a", false);
+		Bundle bImp = installer.installBundle("ext.framework.a.importer");
+		Bundle bReq = installer.installBundle("ext.framework.a.requires");
+		installer.resolveBundles(new Bundle[] {b, bImp, bReq});
+
+		try {
+			bImp.start();
+			bReq.start();
+		} finally {
+			installer.uninstallAllBundles();
+		}
+		List<String> expectedEvents = Arrays.asList(bImp.getSymbolicName() + " STARTED", bReq.getSymbolicName() + " STARTED", bReq.getSymbolicName() + " STOPPED", bImp.getSymbolicName() + " STOPPED");
+		assertEquals("Expected number of events not found", expectedEvents.size(), events.size());
+		for (int i = 0; i < events.size(); i++) {
+			assertEquals("Expected event not found", expectedEvents.get(i), events.get(i));
+		}
+	}
+
+	public void tearDown() throws Exception {
+		super.tearDown();
+		events.clear();
 	}
 }
