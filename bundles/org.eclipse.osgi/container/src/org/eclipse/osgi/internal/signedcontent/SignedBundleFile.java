@@ -17,20 +17,11 @@ package org.eclipse.osgi.internal.signedcontent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateNotYetValidException;
+import java.security.*;
+import java.security.cert.*;
 import java.util.Date;
-import org.eclipse.osgi.signedcontent.SignedContent;
-import org.eclipse.osgi.signedcontent.SignedContentEntry;
-import org.eclipse.osgi.signedcontent.SignerInfo;
-import org.eclipse.osgi.storage.bundlefile.BundleEntry;
-import org.eclipse.osgi.storage.bundlefile.BundleFile;
-import org.eclipse.osgi.storage.bundlefile.BundleFileWrapper;
+import org.eclipse.osgi.signedcontent.*;
+import org.eclipse.osgi.storage.bundlefile.*;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -82,7 +73,7 @@ public class SignedBundleFile extends BundleFileWrapper implements SignedContent
 			// double check that no signer thinks it should exist
 			SignedContentEntry signedEntry = signedContent.getSignedEntry(path);
 			if (signedEntry != null)
-				throw new SecurityException(NLS.bind(SignedContentMessages.file_is_removed_from_jar, path, String.valueOf(getBaseFile())));
+				throw new SecurityException(NLS.bind(SignedContentMessages.file_is_removed_from_jar, path, getBaseFile().toString()));
 			return null;
 		}
 		return new SignedBundleEntry(be);

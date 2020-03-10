@@ -480,9 +480,13 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 	@Override
 	public void update(InputStream input) throws BundleException {
-		Storage storage = equinoxContainer.getStorage();
-		storage.update(module, input);
-		signerInfos = null;
+		try {
+			Storage storage = equinoxContainer.getStorage();
+			storage.update(module, storage.getContentConnection(module, null, input));
+			signerInfos = null;
+		} catch (IOException e) {
+			throw new BundleException("Error reading bundle content.", e); //$NON-NLS-1$
+		}
 	}
 
 	@Override
@@ -967,7 +971,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 	}
 
 	/**
-	 * Check for permission to adapt.
+	 * Check for permission to get a service.
 	 */
 	private <A> void checkAdaptPermission(Class<A> adapterType) {
 		SecurityManager sm = System.getSecurityManager();

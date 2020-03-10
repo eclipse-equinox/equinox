@@ -15,14 +15,7 @@
 package org.eclipse.osgi.internal.serviceregistry;
 
 import java.util.Dictionary;
-import org.eclipse.osgi.internal.framework.DTOBuilder;
-import org.osgi.framework.AdaptPermission;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.framework.dto.ServiceReferenceDTO;
+import org.osgi.framework.*;
 
 /**
  * A reference to a service.
@@ -324,23 +317,5 @@ public class ServiceReferenceImpl<S> implements ServiceReference<S> {
 	@Override
 	public Dictionary<String, Object> getProperties() {
 		return registration.getPropertiesCopy();
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <A> A adapt(Class<A> type) {
-		checkAdaptPermission(type);
-		if (ServiceReferenceDTO.class.equals(type)) {
-			return (A) DTOBuilder.newServiceReferenceDTO(this);
-		}
-		return null;
-	}
-
-	private <A> void checkAdaptPermission(Class<A> adapterType) {
-		SecurityManager sm = System.getSecurityManager();
-		if (sm == null) {
-			return;
-		}
-		sm.checkPermission(new AdaptPermission(adapterType.getName(), registration.getRegisteringBundle(), AdaptPermission.ADAPT));
 	}
 }

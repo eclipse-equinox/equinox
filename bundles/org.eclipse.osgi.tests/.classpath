@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" output="bundle_tests/test" path="bundles_src/test"/>
@@ -112,7 +112,6 @@
 	<classpathentry kind="src" output="bundle_tests/geturl" path="bundles_src/geturl"/>
 	<classpathentry kind="src" output="bundle_tests/test.bug375784" path="bundles_src/test.bug375784"/>
 	<classpathentry kind="src" output="bundle_tests/storage.hooks.a" path="bundles_src/storage.hooks.a"/>
-	<classpathentry kind="src" output="bundle_tests/activator.hooks.a" path="bundles_src/activator.hooks.a"/>
 	<classpathentry kind="src" output="bundle_tests/test.bug412228" path="bundles_src/test.bug412228"/>
 	<classpathentry kind="src" output="bundle_tests/test.uninstall.start1" path="bundles_src/test.uninstall.start1"/>
 	<classpathentry kind="src" output="bundle_tests/test.uninstall.start2" path="bundles_src/test.uninstall.start2"/>

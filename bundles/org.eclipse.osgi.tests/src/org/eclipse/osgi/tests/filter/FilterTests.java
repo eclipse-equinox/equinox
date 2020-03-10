@@ -483,10 +483,5 @@ public abstract class FilterTests {
 			}
 			return new CaseInsensitiveDictionaryMap(dictionary);
 		}
-
-		@Override
-		public Object adapt(Class type) {
-			return null;
-		}
 	}
 }

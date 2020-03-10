@@ -37,7 +37,6 @@ import org.eclipse.osgi.internal.loader.classpath.ClasspathEntry;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
 import org.eclipse.osgi.internal.loader.classpath.FragmentClasspath;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
-import org.eclipse.osgi.storage.ContentProvider.Type;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
 import org.eclipse.osgi.storage.bundlefile.BundleFileWrapper;
@@ -193,9 +192,6 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 	//////////////// BundleFileWrapperFactoryHook //////////////
 	@Override
 	public BundleFileWrapper wrapBundleFile(BundleFile bundleFile, Generation generation, boolean base) {
-		if (generation.getContentType() == Type.CONNECT) {
-			return null;
-		}
 		// wrap the real bundle file for purposes of loading shared classes.
 		CDSBundleFile newBundleFile;
 		if (!base && generation.getBundleInfo().getBundleId() != 0) {

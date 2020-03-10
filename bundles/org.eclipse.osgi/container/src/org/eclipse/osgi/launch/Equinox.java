@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2020 IBM Corporation and others.
+ * Copyright (c) 2008, 2013 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,24 +13,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.launch;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.security.cert.X509Certificate;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.FrameworkListener;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.Version;
-import org.osgi.framework.connect.ModuleConnector;
+import org.osgi.framework.*;
 import org.osgi.framework.launch.Framework;
 
 /**
@@ -43,14 +31,7 @@ public class Equinox implements Framework {
 	private final Framework systemBundle;
 
 	public Equinox(Map<String, ?> configuration) {
-		this(configuration, null);
-	}
-
-	/**
-	 * @since 3.16
-	 */
-	public Equinox(Map<String, ?> configuration, ModuleConnector moduleConnector) {
-		EquinoxContainer container = new EquinoxContainer(configuration, moduleConnector);
+		EquinoxContainer container = new EquinoxContainer(configuration);
 		systemBundle = (Framework) container.getStorage().getModuleContainer().getModule(0).getBundle();
 	}
 

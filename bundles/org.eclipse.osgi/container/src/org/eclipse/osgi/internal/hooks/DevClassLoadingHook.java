@@ -19,11 +19,8 @@ import java.util.ArrayList;
 import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
-import org.eclipse.osgi.internal.loader.classpath.ClasspathEntry;
-import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
-import org.eclipse.osgi.internal.loader.classpath.FragmentClasspath;
+import org.eclipse.osgi.internal.loader.classpath.*;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
-import org.eclipse.osgi.storage.ContentProvider.Type;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
 
 public class DevClassLoadingHook extends ClassLoaderHook implements KeyedElement {
@@ -39,10 +36,6 @@ public class DevClassLoadingHook extends ClassLoaderHook implements KeyedElement
 
 	@Override
 	public boolean addClassPathEntry(ArrayList<ClasspathEntry> cpEntries, String cp, ClasspathManager hostmanager, Generation sourceGeneration) {
-		// if this is a connect bundle just ignore
-		if (sourceGeneration.getContentType() == Type.CONNECT) {
-			return false;
-		}
 		// first check that we are in devmode for this sourcedata
 		String[] devClassPaths = !configuration.inDevelopmentMode() ? null : configuration.getDevClassPath(sourceGeneration.getRevision().getSymbolicName());
 		if (devClassPaths == null || devClassPaths.length == 0)

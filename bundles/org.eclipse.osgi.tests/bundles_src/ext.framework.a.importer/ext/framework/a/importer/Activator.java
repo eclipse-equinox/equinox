@@ -14,12 +14,9 @@
 package ext.framework.a.importer;
 
 import ext.framework.a.FrameworkExtTest;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
-import org.eclipse.osgi.tests.bundles.ExtensionBundleTests;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -28,7 +25,6 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		AbstractBundleTests.simpleResults.addEvent(new FrameworkExtTest().testIt("success")); //$NON-NLS-1$
 		AbstractBundleTests.simpleResults.addEvent(getURLContent(this.getClass().getResource("/ext/framework/a/fwkresource.txt"))); //$NON-NLS-1$
-		ExtensionBundleTests.events.add(context.getBundle().getSymbolicName() + " STARTED");
 	}
 
 	private String getURLContent(URL resource) throws IOException {
@@ -41,7 +37,7 @@ public class Activator implements BundleActivator {
 	}
 
 	public void stop(BundleContext context) throws Exception {
-		ExtensionBundleTests.events.add(context.getBundle().getSymbolicName() + " STOPPED");
+		// nothing
 	}
 
 }

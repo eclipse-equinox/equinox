@@ -15,44 +15,17 @@
 package org.eclipse.osgi.internal.framework;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import org.osgi.dto.DTO;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.Version;
-import org.osgi.framework.dto.BundleDTO;
-import org.osgi.framework.dto.FrameworkDTO;
-import org.osgi.framework.dto.ServiceReferenceDTO;
+import org.osgi.framework.*;
+import org.osgi.framework.dto.*;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.framework.startlevel.dto.BundleStartLevelDTO;
 import org.osgi.framework.startlevel.dto.FrameworkStartLevelDTO;
-import org.osgi.framework.wiring.BundleCapability;
-import org.osgi.framework.wiring.BundleRequirement;
-import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.framework.wiring.BundleRevisions;
-import org.osgi.framework.wiring.BundleWire;
-import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.framework.wiring.dto.BundleRevisionDTO;
-import org.osgi.framework.wiring.dto.BundleWireDTO;
-import org.osgi.framework.wiring.dto.BundleWiringDTO;
-import org.osgi.framework.wiring.dto.FrameworkWiringDTO;
-import org.osgi.resource.dto.CapabilityDTO;
-import org.osgi.resource.dto.CapabilityRefDTO;
-import org.osgi.resource.dto.RequirementDTO;
-import org.osgi.resource.dto.RequirementRefDTO;
-import org.osgi.resource.dto.WireDTO;
+import org.osgi.framework.wiring.*;
+import org.osgi.framework.wiring.dto.*;
+import org.osgi.resource.dto.*;
 
 public class DTOBuilder {
 	private final Map<BundleRevision, BundleRevisionDTO> resources;
@@ -345,7 +318,7 @@ public class DTOBuilder {
 			size = references == null ? 0 : references.length;
 			List<ServiceReferenceDTO> refDTOs = newList(size);
 			for (int i = 0; i < size; i++) {
-				ServiceReferenceDTO serviceRefDTO = newServiceReferenceDTO(references[i]);
+				ServiceReferenceDTO serviceRefDTO = getServiceReferenceDTO(references[i]);
 				if (serviceRefDTO != null) {
 					refDTOs.add(serviceRefDTO);
 				}
@@ -362,21 +335,23 @@ public class DTOBuilder {
 		return (Map<String, Object>) m;
 	}
 
-	public static ServiceReferenceDTO newServiceReferenceDTO(ServiceReference<?> ref) {
+	private static ServiceReferenceDTO getServiceReferenceDTO(ServiceReference<?> ref) {
 		if (ref == null) {
 			return null;
 		}
-
+		Bundle b = ref.getBundle();
+		if (b == null) {
+			// service has been unregistered
+			return null;
+		}
 		ServiceReferenceDTO dto = new ServiceReferenceDTO();
+		dto.bundle = b.getBundleId();
 		String[] keys = ref.getPropertyKeys();
 		Map<String, Object> properties = newMap(keys.length);
 		for (String k : keys) {
 			Object v = ref.getProperty(k);
 			if (Constants.SERVICE_ID.equals(k)) {
 				dto.id = ((Long) v).longValue();
-			}
-			if (Constants.SERVICE_BUNDLEID.equals(k)) {
-				dto.bundle = ((Long) v).longValue();
 			}
 			properties.put(k, mapValue(v));
 		}
@@ -408,7 +383,7 @@ public class DTOBuilder {
 		final int length = references.length;
 		List<ServiceReferenceDTO> refDTOs = new ArrayList<>(length);
 		for (int i = 0; i < length; i++) {
-			ServiceReferenceDTO dto = newServiceReferenceDTO(references[i]);
+			ServiceReferenceDTO dto = getServiceReferenceDTO(references[i]);
 			if (dto != null) {
 				refDTOs.add(dto);
 			}

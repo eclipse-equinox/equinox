@@ -13,29 +13,20 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.framework;
 
-import java.io.File;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.security.AccessController;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
-import org.eclipse.osgi.internal.connect.ConnectBundleFile;
-import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.legacy.PackageAdminImpl;
 import org.eclipse.osgi.internal.framework.legacy.StartLevelImpl;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
@@ -45,9 +36,7 @@ import org.eclipse.osgi.internal.log.EquinoxLogServices;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
 import org.eclipse.osgi.signedcontent.SignedContentFactory;
-import org.eclipse.osgi.storage.BundleInfo;
 import org.eclipse.osgi.storage.Storage;
-import org.eclipse.osgi.storage.bundlefile.MRUBundleFileList;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.AdminPermission;
@@ -55,9 +44,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
-import org.osgi.framework.connect.ConnectContent;
-import org.osgi.framework.connect.ConnectModule;
-import org.osgi.framework.connect.ModuleConnector;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
@@ -67,7 +53,6 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	public static final String NAME = "org.eclipse.osgi"; //$NON-NLS-1$
 	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 
-	private final ConnectModules connectModules;
 	private final EquinoxConfiguration equinoxConfig;
 	private final EquinoxLogServices logServices;
 	private final Storage storage;
@@ -90,7 +75,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	private ScheduledExecutorService executor;
 	private StorageSaver storageSaver;
 
-	public EquinoxContainer(Map<String, ?> configuration, ModuleConnector moduleConnector) {
+	public EquinoxContainer(Map<String, ?> configuration) {
 		ClassLoader platformClassLoader = null;
 		try {
 			Method getPlatformClassLoader = ClassLoader.class.getMethod("getPlatformClassLoader"); //$NON-NLS-1$
@@ -104,10 +89,6 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 		this.equinoxConfig = new EquinoxConfiguration(configuration, new HookRegistry(this));
 		this.logServices = new EquinoxLogServices(this.equinoxConfig);
 		this.equinoxConfig.logMessages(this.logServices);
-		this.connectModules = new ConnectModules(moduleConnector);
-
-		initConnectFramework(moduleConnector, this.equinoxConfig);
-
 		this.equinoxConfig.getHookRegistry().initialize();
 		try {
 			this.storage = Storage.createStorage(this);
@@ -150,17 +131,6 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 			supportRecursion &= hook.isProcessClassRecursionSupported();
 		}
 		isProcessClassRecursionSupportedByAll = supportRecursion;
-	}
-
-	private static void initConnectFramework(ModuleConnector moduleConnector, EquinoxConfiguration equinoxConfig) {
-		if (moduleConnector == null) {
-			return;
-		}
-		URL configUrl = equinoxConfig.getEquinoxLocations().getConfigurationLocation().getURL();
-		final File fwkStore = new File(configUrl.getPath());
-		@SuppressWarnings({"rawtypes", "unchecked"})
-		Map<String, String> config = (Map) equinoxConfig.getInitialConfig();
-		moduleConnector.initialize(fwkStore, Collections.unmodifiableMap(config));
 	}
 
 	public Storage getStorage() {
@@ -360,63 +330,5 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 
 	public ClassLoader getBootLoader() {
 		return bootLoader;
-	}
-
-	public ConnectModules getConnectModules() {
-		return connectModules;
-	}
-
-	public static class ConnectModules {
-		final ModuleConnector moduleConnector;
-		private final ConcurrentMap<String, ConnectModule> connectModules = new ConcurrentHashMap<>();
-		private final WeakHashMap<ConnectContent, WeakReference<ConnectBundleFile>> contents = new WeakHashMap<>();
-
-		public ConnectModules(ModuleConnector moduleConnector) {
-			this.moduleConnector = moduleConnector;
-		}
-
-		public ConnectModule connect(String location) {
-			if (moduleConnector == null) {
-				return null;
-			}
-			ConnectModule result = connectModules.compute(location, (k, v) -> {
-				try {
-					return moduleConnector.connect(location).orElse(null);
-				} catch (BundleException e) {
-					throw new IllegalStateException(e);
-				}
-			});
-			return result;
-		}
-
-		public ConnectBundleFile getConnectBundleFile(ConnectModule module, File basefile,
-				BundleInfo.Generation generation, MRUBundleFileList mruList, Debug debug) throws IOException {
-			ConnectContent content = module.getContent();
-			synchronized (contents) {
-				WeakReference<ConnectBundleFile> ref = contents.get(content);
-				if (ref != null) {
-					ConnectBundleFile bundleFile = ref.get();
-					if (bundleFile != null) {
-						return bundleFile;
-					}
-				}
-				ConnectBundleFile bundleFile = new ConnectBundleFile(module, basefile, generation, mruList, debug);
-				contents.put(content, new WeakReference<>(bundleFile));
-				return bundleFile;
-			}
-		}
-
-		public ModuleConnector getModuleConnector() {
-			return moduleConnector;
-		}
-
-		public ConnectModule getConnectModule(String location) {
-			return connectModules.get(location);
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <E extends Throwable> void sneakyThrow(Throwable e) throws E {
-		throw (E) e;
 	}
 }

@@ -17,13 +17,12 @@ package org.eclipse.osgi.storage.url.reference;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import org.eclipse.osgi.storage.ContentProvider;
 
 /**
  * InputStream subclass which provides a reference (via File) to the data
  * rather than allowing the input stream to be directly read.
  */
-public class ReferenceInputStream extends InputStream implements ContentProvider {
+public class ReferenceInputStream extends InputStream {
 	private final File reference;
 
 	public ReferenceInputStream(File reference) {
@@ -38,16 +37,6 @@ public class ReferenceInputStream extends InputStream implements ContentProvider
 	}
 
 	public File getReference() {
-		return getContent();
-	}
-
-	@Override
-	public File getContent() {
 		return reference;
-	}
-
-	@Override
-	public Type getType() {
-		return Type.REFERENCE;
 	}
 }

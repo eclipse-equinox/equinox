@@ -105,7 +105,7 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 
 		// Step 1, verify the .SF file is signed by the private key that corresponds to the public key
 		// in the .RSA/.DSA file
-		String baseFile = String.valueOf(bf.getBaseFile());
+		String baseFile = bf.getBaseFile() != null ? bf.getBaseFile().toString() : null;
 		PKCS7Processor processor = new PKCS7Processor(pkcs7Bytes, 0, pkcs7Bytes.length, signer, baseFile);
 		// call the Step 1 in the Jar File Verification algorithm
 		processor.verifySFSignature(sfBytes, 0, sfBytes.length);
@@ -169,7 +169,7 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 
 				// check if the the computed digest value of manifest file equals to the digest value in the .sf file
 				if (!digestValue.equals(manifestDigest)) {
-					SignatureException se = new SignatureException(NLS.bind(SignedContentMessages.Security_File_Is_Tampered, new String[] {String.valueOf(signedBundle.getBaseFile())}));
+					SignatureException se = new SignatureException(NLS.bind(SignedContentMessages.Security_File_Is_Tampered, new String[] {signedBundle.getBaseFile().toString()}));
 					signedBundleHook.log(se.getMessage(), FrameworkLogEntry.ERROR, se);
 					throw se;
 				}
