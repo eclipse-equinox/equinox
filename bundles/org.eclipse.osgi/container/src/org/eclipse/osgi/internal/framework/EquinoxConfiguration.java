@@ -957,8 +957,15 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 				setConfiguration(PROP_FRAMEWORK, externalForm);
 			}
 			if (getConfiguration(EquinoxLocations.PROP_INSTALL_AREA) == null) {
-				String filePart = getFrameworkPath(url.getPath(), true);
-				setConfiguration(EquinoxLocations.PROP_INSTALL_AREA, filePart);
+				String installArea;
+				if ("file".equals(url.getProtocol())) { //$NON-NLS-1$
+					installArea = getFrameworkPath(url.getPath(), true);
+				} else {
+					// likely not a full eclipse install, and probably not loaded out of a typical
+					// URL class loader. Just default to the user dir.
+					installArea = System.getProperty("user.dir"); //$NON-NLS-1$
+				}
+				setConfiguration(EquinoxLocations.PROP_INSTALL_AREA, installArea);
 			}
 		}
 		// always decode these properties
