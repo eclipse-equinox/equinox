@@ -58,7 +58,7 @@ public class FrameworkExtensionInstaller {
 	private static Method findAddURLMethod(ClassLoader cl, String name) {
 		if (cl == null)
 			return null;
-		return findMethod(cl.getClass(), name, new Class[] {URL.class}, null);
+		return findMethod(cl.getClass(), name, new Class[] { URL.class }, MultiplexingFactory.setAccessible);
 	}
 
 	private static Method findAddFilePathMethod(ClassLoader cl, String name) {
