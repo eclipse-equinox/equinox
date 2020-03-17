@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.equinox.server.p2"
       label="%featureName"
-      version="1.9.200.qualifier"
+      version="1.9.300.qualifier"
       provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
