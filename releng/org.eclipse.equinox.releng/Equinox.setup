@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<setup:Project
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:git="http://www.eclipse.org/oomph/setup/git/1.0"
+    xmlns:jdt="http://www.eclipse.org/oomph/setup/jdt/1.0"
+    xmlns:predicates="http://www.eclipse.org/oomph/predicates/1.0"
+    xmlns:setup="http://www.eclipse.org/oomph/setup/1.0"
+    xmlns:setup.p2="http://www.eclipse.org/oomph/setup/p2/1.0"
+    xmlns:setup.targlets="http://www.eclipse.org/oomph/setup/targlets/1.0"
+    xmlns:setup.workingsets="http://www.eclipse.org/oomph/setup/workingsets/1.0"
+    xmlns:workingsets="http://www.eclipse.org/oomph/workingsets/1.0"
+    xsi:schemaLocation="http://www.eclipse.org/oomph/setup/git/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/Git.ecore http://www.eclipse.org/oomph/setup/jdt/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/JDT.ecore http://www.eclipse.org/oomph/predicates/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/Predicates.ecore http://www.eclipse.org/oomph/setup/targlets/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/SetupTarglets.ecore http://www.eclipse.org/oomph/setup/workingsets/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/SetupWorkingSets.ecore http://www.eclipse.org/oomph/workingsets/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/WorkingSets.ecore"
+    name="equinox"
+    label="Equinox">
+  <setupTask
+      xsi:type="setup.p2:P2Task">
+    <requirement
+        name="org.eclipse.pde.api.tools.ee.feature.feature.group"/>
+  </setupTask>
+  <setupTask
+      xsi:type="setup:CompoundTask"
+      name="refresh.enabled">
+    <setupTask
+        xsi:type="setup:PreferenceTask"
+        key="/instance/org.eclipse.core.resources/refresh.enabled"
+        value="true"/>
+  </setupTask>
+  <setupTask
+      xsi:type="setup:EclipseIniTask"
+      option="-Xmx"
+      value="2048m"
+      vm="true"/>
+  <setupTask
+      xsi:type="setup:ResourceCreationTask"
+      excludedTriggers="STARTUP MANUAL"
+      content="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xD;&#xA;&lt;section name=&quot;Workbench&quot;>&#xD;&#xA;&#x9;&lt;section name=&quot;org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart&quot;>&#xD;&#xA;&#x9;&#x9;&lt;item value=&quot;true&quot; key=&quot;group_libraries&quot;/>&#xD;&#xA;&#x9;&#x9;&lt;item value=&quot;false&quot; key=&quot;linkWithEditor&quot;/>&#xD;&#xA;&#x9;&#x9;&lt;item value=&quot;2&quot; key=&quot;layout&quot;/>&#xD;&#xA;&#x9;&#x9;&lt;item value=&quot;2&quot; key=&quot;rootMode&quot;/>&#xD;&#xA;&#x9;&#x9;&lt;item value=&quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;&amp;#x0D;&amp;#x0A;&amp;lt;packageExplorer configured=&amp;quot;true&amp;quot; group_libraries=&amp;quot;1&amp;quot; layout=&amp;quot;2&amp;quot; linkWithEditor=&amp;quot;0&amp;quot; rootMode=&amp;quot;2&amp;quot; sortWorkingSets=&amp;quot;false&amp;quot; workingSetName=&amp;quot;&amp;quot;&amp;gt;&amp;#x0D;&amp;#x0A;&amp;lt;localWorkingSetManager&amp;gt;&amp;#x0D;&amp;#x0A;&amp;lt;workingSet editPageId=&amp;quot;org.eclipse.jdt.internal.ui.OthersWorkingSet&amp;quot; factoryID=&amp;quot;org.eclipse.ui.internal.WorkingSetFactory&amp;quot; id=&amp;quot;1382792884467_1&amp;quot; label=&amp;quot;Other Projects&amp;quot; name=&amp;quot;Other Projects&amp;quot;/&amp;gt;&amp;#x0D;&amp;#x0A;&amp;lt;/localWorkingSetManager&amp;gt;&amp;#x0D;&amp;#x0A;&amp;lt;activeWorkingSet workingSetName=&amp;quot;Other Projects&amp;quot;/&amp;gt;&amp;#x0D;&amp;#x0A;&amp;lt;allWorkingSets workingSetName=&amp;quot;Other Projects&amp;quot;/&amp;gt;&amp;#x0D;&amp;#x0A;&amp;lt;/packageExplorer&amp;gt;&quot; key=&quot;memento&quot;/>&#xD;&#xA;&#x9;&lt;/section>&#xD;&#xA;&lt;/section>&#xD;&#xA;"
+      targetURL="${workspace.location|uri}/.metadata/.plugins/org.eclipse.jdt.ui/dialog_settings.xml"
+      encoding="UTF-8">
+    <description>Initialize the Package Explorer to display workings sets.</description>
+  </setupTask>
+  <setupTask
+      xsi:type="setup:VariableTask"
+      name="eclipse.target.platform"
+      value="${eclipse.target.platform.latest}"
+      storageURI="scope://Workspace"/>
+  <setupTask
+      xsi:type="setup:VariableTask"
+      name="eclipse.api.baseline.target.platform"
+      value="${eclipse.api.baseline.target.platform.latest.released}"
+      storageURI="scope://Workspace"/>
+  <setupTask
+      xsi:type="jdt:JRETask"
+      version="JavaSE-1.8"
+      location="${jre.location-1.8}"/>
+  <setupTask
+      xsi:type="setup.targlets:TargletTask"
+      targetName="Modular API Baseline Target"
+      activateTarget="false">
+    <targlet
+        name="Equinox Platform"
+        activeRepositoryList="${eclipse.api.baseline.target.platform}"
+        includeSources="false">
+      <requirement
+          name="org.eclipse.equinox.sdk.feature.group"/>
+    </targlet>
+  </setupTask>
+  <setupTask
+      xsi:type="setup.targlets:TargletTask">
+    <targlet
+        name="Equinox Platform"
+        activeRepositoryList="CBI+Orbit">
+      <requirement
+          name="org.eclipse.platform.feature.group"/>
+      <requirement
+          name="org.eclipse.jdt.feature.group"/>
+      <requirement
+          name="org.eclipse.pde.feature.group"/>
+      <requirement
+          name="org.eclipse.equinox.executable.feature.group"/>
+      <repositoryList
+          name="CBI+Orbit">
+        <repository
+            url="http://download.eclipse.org/cbi/updates/license"/>
+        <repository
+            url="http://download.eclipse.org/tools/orbit/downloads/latest-R"/>
+      </repositoryList>
+    </targlet>
+  </setupTask>
+  <setupTask
+      xsi:type="setup:CompoundTask"
+      name="Preferences">
+    <setupTask
+        xsi:type="setup:CompoundTask"
+        name="org.eclipse.egit.ui">
+      <setupTask
+          xsi:type="setup:PreferenceTask"
+          key="/instance/org.eclipse.egit.ui/commit_dialog_signed_off_by"
+          value="true">
+        <description>Insert Signed-off-by Footer</description>
+      </setupTask>
+    </setupTask>
+  </setupTask>
+  <project name="bundles"
+      label="Bundles">
+    <setupTask
+        xsi:type="git:GitCloneTask"
+        id="git.clone.equinox.bundles"
+        remoteURI="equinox/rt.equinox.bundles">
+      <annotation
+          source="http://www.eclipse.org/oomph/setup/InducedChoices">
+        <detail
+            key="inherit">
+          <value>eclipse.git.gerrit.remoteURIs</value>
+        </detail>
+        <detail
+            key="label">
+          <value>Equinox Bundles Git or Gerrit Repository</value>
+        </detail>
+        <detail
+            key="target">
+          <value>remoteURI</value>
+        </detail>
+      </annotation>
+      <configSections
+          name="gerrit">
+        <properties
+            key="createchangeid"
+            value="true"/>
+      </configSections>
+      <description>Equinox Bundles</description>
+    </setupTask>
+    <setupTask
+        xsi:type="setup:TextModifyTask"
+        excludedTriggers="BOOTSTRAP"
+        url="${git.clone.equinox.bundles.location|uri}/bundles/org.eclipse.equinox.security.linux.x86_64/.project"
+        encoding="UTF-8">
+      <modification
+          pattern="\t(&lt;nature>org.eclipse.m2e.core.maven2Nature&lt;/nature>)">
+        <substitution>&lt;!-- \1 --></substitution>
+      </modification>
+    </setupTask>
+    <setupTask
+        xsi:type="setup.targlets:TargletTask">
+      <targlet
+          name="Equinox Bundles">
+        <requirement
+            name="*"/>
+        <requirement
+            name="org.apache.sshd.core"/>
+        <sourceLocator
+            rootFolder="${git.clone.equinox.bundles.location}"/>
+      </targlet>
+    </setupTask>
+    <setupTask
+        xsi:type="setup.workingsets:WorkingSetTask">
+      <workingSet
+          name="Equinox Bundles">
+        <predicate
+            xsi:type="predicates:RepositoryPredicate"
+            project="org.eclipse.equinox.common"/>
+      </workingSet>
+    </setupTask>
+    <stream
+        name="master"
+        label="Master"/>
+    <description>The Equinox Bundles support</description>
+  </project>
+  <project name="framework"
+      label="Framework">
+    <setupTask
+        xsi:type="git:GitCloneTask"
+        id="git.clone.equinox.framework"
+        remoteURI="equinox/rt.equinox.framework">
+      <annotation
+          source="http://www.eclipse.org/oomph/setup/InducedChoices">
+        <detail
+            key="inherit">
+          <value>eclipse.git.gerrit.remoteURIs</value>
+        </detail>
+        <detail
+            key="label">
+          <value>Equinox Framework Git or Gerrit Repository</value>
+        </detail>
+        <detail
+            key="target">
+          <value>remoteURI</value>
+        </detail>
+      </annotation>
+      <configSections
+          name="gerrit">
+        <properties
+            key="createchangeid"
+            value="true"/>
+      </configSections>
+      <description>Equinox Framework</description>
+    </setupTask>
+    <setupTask
+        xsi:type="setup:ResourceCreationTask"
+        excludedTriggers="BOOTSTRAP"
+        content="incompatible_api_component_version=Warning"
+        targetURL="${git.clone.equinox.framework.location|uri}/bundles/org.eclipse.osgi/supplement/.settings/org.eclipse.pde.api.tools.prefs"
+        encoding="ISO-8859-1">
+      <description>Turn off errors for API version change.</description>
+    </setupTask>
+    <setupTask
+        xsi:type="setup.targlets:TargletTask">
+      <targlet
+          name="Equinox Framework">
+        <requirement
+            name="*"/>
+        <sourceLocator
+            rootFolder="${git.clone.equinox.framework.location}"
+            locateNestedProjects="true"/>
+      </targlet>
+    </setupTask>
+    <setupTask
+        xsi:type="setup.workingsets:WorkingSetTask">
+      <workingSet
+          name="Equinox Framework">
+        <predicate
+            xsi:type="predicates:RepositoryPredicate"
+            project="org.eclipse.osgi"/>
+      </workingSet>
+    </setupTask>
+    <stream
+        name="master"
+        label="Master">
+      <setupTask
+          xsi:type="setup:EclipseIniTask"
+          option="-Doomph.redirection.equinox"
+          value="=https://git.eclipse.org/c/equinox/rt.equinox.framework.git/plain/releng/org.eclipse.equinox.releng/Equinox.setup->${git.clone.rt.equinox.framework.location|uri}/releng/org.eclipse.equinox.releng/Equinox.setup"
+          vm="true">
+        <description>Set an Oomph redirection system property to redirect the logical location of this setup to its physical location in the Git clone.</description>
+      </setupTask>
+    </stream>
+    <description>The Equinox Framework support</description>
+  </project>
+  <project name="p2"
+      label="P2">
+    <setupTask
+        xsi:type="git:GitCloneTask"
+        id="git.clone.equinox.p2"
+        remoteURI="equinox/rt.equinox.p2">
+      <annotation
+          source="http://www.eclipse.org/oomph/setup/InducedChoices">
+        <detail
+            key="inherit">
+          <value>eclipse.git.gerrit.remoteURIs</value>
+        </detail>
+        <detail
+            key="label">
+          <value>Equinox P2 Git or Gerrit Repository</value>
+        </detail>
+        <detail
+            key="target">
+          <value>remoteURI</value>
+        </detail>
+      </annotation>
+      <configSections
+          name="gerrit">
+        <properties
+            key="createchangeid"
+            value="true"/>
+      </configSections>
+      <description>Equinox P2</description>
+    </setupTask>
+    <setupTask
+        xsi:type="setup:ResourceCreationTask"
+        excludedTriggers="BOOTSTRAP"
+        content="UEsDBAoAAAAAAHtelUw05vp1HAAAABwAAAAFAHAAZW1wdHlTRFsApAAAAAAIAL/UyvdjZGBpEGFg&#xA;YDBggAAfIGZkBTNZRYFE6N2P9V9WLa2a1nDozktm3HKMTAwMTAwRDMxgaRGG/4zyDIyMELVCYEoC&#xA;IsYEEVMAEgpgtgpEHI+dAFVUDQAHuQnbWrkJ21q5CdtaU2luZ2xlIGVudHJ5IGZvciBlbXB0eSBq&#xA;YXIuClBLAQIXCwoAAAAAAHtelUw05vp1HAAAABwAAAAFABEAAAAAAAEAIAC2gQAAAABlbXB0eVNE&#xA;BACkAAAAVVQFAAe5CdtaUEsFBgAAAAABAAEARAAAAK8AAAAAAA=="
+        targetURL="${git.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.jarprocessor/lib/jarprocessor-ant.jar"
+        encoding="base64">
+      <description>Create an empty jar as a placeholder for the jar that will eventually be created.  This ensures that PDE will add the jar to the classpath of projects needing the ant jar.</description>
+    </setupTask>
+    <setupTask
+        xsi:type="setup:TextModifyTask"
+        excludedTriggers="BOOTSTRAP"
+        url="${git.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.jarprocessor/.project"
+        encoding="UTF-8">
+      <modification
+          pattern="&lt;triggers>()full,incremental,&lt;/triggers>">
+        <substitution>auto,</substitution>
+      </modification>
+    </setupTask>
+    <setupTask
+        xsi:type="setup:TextModifyTask"
+        excludedTriggers="BOOTSTRAP"
+        url="${git.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.jarprocessor/.externalToolBuilders/AntTaskBuilder.launch"
+        encoding="UTF-8">
+      <modification
+          pattern="&lt;stringAttribute key=&quot;org.eclipse.ui.externaltools.ATTR_RUN_BUILD_KINDS&quot; value=&quot;full,incremental,()&quot;/>">
+        <substitution>auto,</substitution>
+      </modification>
+      <modification
+          pattern="&lt;booleanAttribute key=&quot;org.eclipse.ant.ui.DEFAULT_VM_INSTALL&quot; value=&quot;false&quot;/>([\n\r]+)&lt;listAttribute key=&quot;org.eclipse.debug.core.MAPPED_RESOURCE_PATHS&quot;>">
+        <substitution>\1&lt;stringAttribute key=&quot;org.eclipse.debug.core.ATTR_REFRESH_SCOPE&quot; value=&quot;$${working_set:&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;&amp;#13;&amp;#10;&amp;lt;resources&amp;gt;&amp;#13;&amp;#10;&amp;lt;item path=&amp;quot;/org.eclipse.equinox.p2.jarprocessor/lib&amp;quot; type=&amp;quot;2&amp;quot;/&amp;gt;&amp;#13;&amp;#10;&amp;lt;/resources&amp;gt;}&quot;/>\1</substitution>
+      </modification>
+    </setupTask>
+    <setupTask
+        xsi:type="setup:ResourceCreationTask"
+        excludedTriggers="BOOTSTRAP"
+        content="UEsDBAoAAAAAAHtelUw05vp1HAAAABwAAAAFAHAAZW1wdHlTRFsApAAAAAAIAL/UyvdjZGBpEGFg&#xA;YDBggAAfIGZkBTNZRYFE6N2P9V9WLa2a1nDozktm3HKMTAwMTAwRDMxgaRGG/4zyDIyMELVCYEoC&#xA;IsYEEVMAEgpgtgpEHI+dAFVUDQAHuQnbWrkJ21q5CdtaU2luZ2xlIGVudHJ5IGZvciBlbXB0eSBq&#xA;YXIuClBLAQIXCwoAAAAAAHtelUw05vp1HAAAABwAAAAFABEAAAAAAAEAIAC2gQAAAABlbXB0eVNE&#xA;BACkAAAAVVQFAAe5CdtaUEsFBgAAAAABAAEARAAAAK8AAAAAAA=="
+        targetURL="${git.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.repository.tools/lib/repository-tools-ant.jar"
+        encoding="base64">
+      <description>Create an empty jar as a placeholder for the jar that will eventually be created.  This ensures that PDE will add the jar to the classpath of projects needing the ant jar.</description>
+    </setupTask>
+    <setupTask
+        xsi:type="setup:TextModifyTask"
+        excludedTriggers="BOOTSTRAP"
+        url="${git.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.repository.tools/.project"
+        encoding="UTF-8">
+      <modification
+          pattern="&lt;triggers>()full,incremental,&lt;/triggers>">
+        <substitution>auto,</substitution>
+      </modification>
+    </setupTask>
+    <setupTask
+        xsi:type="setup:TextModifyTask"
+        excludedTriggers="BOOTSTRAP"
+        url="${git.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.repository.tools/scripts/buildAntJARs.xml"
+        encoding="UTF-8">
+      <modification
+          pattern="&lt;stringAttribute key=&quot;org.eclipse.ui.externaltools.ATTR_RUN_BUILD_KINDS&quot; value=&quot;full,incremental,()&quot;/>">
+        <substitution>auto,</substitution>
+      </modification>
+    </setupTask>
+    <setupTask
+        xsi:type="setup:ResourceCopyTask"
+        excludedTriggers="BOOTSTRAP"
+        sourceURL="${git.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.tests.verifier/src/org/eclipse/equinox/internal/p2/tests/verifier/EclipseAdaptorMessages.properties"
+        targetURL="${git.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.tests.verifier/bin/org/eclipse/equinox/internal/p2/tests/verifier/EclipseAdaptorMessages.properties">
+      <description>Ensure that the bin folder of org.eclipse.equinox.p2.tests.verifier exists. This is to prevent the build path error from the following entry in the .classpath file: &lt;classpathentry exported=&quot;true&quot; kind=&quot;lib&quot; path=&quot;bin&quot; sourcepath=&quot;bin&quot;/></description>
+    </setupTask>
+    <setupTask
+        xsi:type="setup.targlets:TargletTask">
+      <targlet
+          name="Equinox P2">
+        <requirement
+            name="*"/>
+        <sourceLocator
+            rootFolder="${git.clone.equinox.p2.location/bundles}">
+          <excludedPath>bundles/org.eclipse.equinox.p2.testserver</excludedPath>
+        </sourceLocator>
+        <sourceLocator
+            rootFolder="${git.clone.equinox.p2.location/examples}"/>
+        <sourceLocator
+            rootFolder="${git.clone.equinox.p2.location/features}"/>
+        <sourceLocator
+            rootFolder="${git.clone.equinox.p2.location/org.eclipse.equinox.p2.releng}"/>
+      </targlet>
+    </setupTask>
+    <setupTask
+        xsi:type="setup.workingsets:WorkingSetTask">
+      <workingSet
+          name="Equinox p2">
+        <predicate
+            xsi:type="predicates:AndPredicate">
+          <operand
+              xsi:type="predicates:RepositoryPredicate"
+              project="org.eclipse.equinox.p2.core"/>
+          <operand
+              xsi:type="workingsets:ExclusionPredicate"
+              excludedWorkingSet="//@projects[name='p2']/@setupTasks.9/@workingSets[name='Equinox%20p2%20Tests'] //@projects[name='p2']/@setupTasks.9/@workingSets[name='Equinox%20p2%20Examples']"/>
+        </predicate>
+      </workingSet>
+      <workingSet
+          name="Equinox p2 Tests">
+        <predicate
+            xsi:type="predicates:AndPredicate">
+          <operand
+              xsi:type="predicates:RepositoryPredicate"
+              project="org.eclipse.equinox.p2.core"/>
+          <operand
+              xsi:type="predicates:NamePredicate"
+              pattern=".*test($|s.*)"/>
+        </predicate>
+      </workingSet>
+      <workingSet
+          name="Equinox p2 Examples">
+        <predicate
+            xsi:type="predicates:AndPredicate">
+          <operand
+              xsi:type="predicates:RepositoryPredicate"
+              project="org.eclipse.equinox.p2.core"/>
+          <operand
+              xsi:type="predicates:NamePredicate"
+              pattern=".*examples.*"/>
+        </predicate>
+      </workingSet>
+    </setupTask>
+    <stream
+        name="master"
+        label="Master"/>
+    <description>The Equinox P2 support</description>
+  </project>
+  <logicalProjectContainer
+      xsi:type="setup:ProjectCatalog"
+      href="index:/org.eclipse.setup#//@projectCatalogs[name='org.eclipse']"/>
+  <description>The setups for the Equinox projects</description>
+</setup:Project>
