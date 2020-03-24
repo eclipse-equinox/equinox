@@ -230,7 +230,7 @@
       <setupTask
           xsi:type="setup:EclipseIniTask"
           option="-Doomph.redirection.equinox"
-          value="=https://git.eclipse.org/c/equinox/rt.equinox.framework.git/plain/releng/org.eclipse.equinox.releng/Equinox.setup->${git.clone.rt.equinox.framework.location|uri}/releng/org.eclipse.equinox.releng/Equinox.setup"
+          value="=https://git.eclipse.org/c/equinox/rt.equinox.framework.git/plain/releng/org.eclipse.equinox.releng/Equinox.setup->$git.clone.equinox.framework.location|uri}/releng/org.eclipse.equinox.releng/Equinox.setup"
           vm="true">
         <description>Set an Oomph redirection system property to redirect the logical location of this setup to its physical location in the Git clone.</description>
       </setupTask>
