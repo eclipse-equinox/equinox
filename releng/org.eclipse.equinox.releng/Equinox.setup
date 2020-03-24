@@ -132,16 +132,6 @@
       <description>Equinox Bundles</description>
     </setupTask>
     <setupTask
-        xsi:type="setup:TextModifyTask"
-        excludedTriggers="BOOTSTRAP"
-        url="${git.clone.equinox.bundles.location|uri}/bundles/org.eclipse.equinox.security.linux.x86_64/.project"
-        encoding="UTF-8">
-      <modification
-          pattern="\t(&lt;nature>org.eclipse.m2e.core.maven2Nature&lt;/nature>)">
-        <substitution>&lt;!-- \1 --></substitution>
-      </modification>
-    </setupTask>
-    <setupTask
         xsi:type="setup.targlets:TargletTask">
       <targlet
           name="Equinox Bundles">
@@ -195,14 +185,6 @@
             value="true"/>
       </configSections>
       <description>Equinox Framework</description>
-    </setupTask>
-    <setupTask
-        xsi:type="setup:ResourceCreationTask"
-        excludedTriggers="BOOTSTRAP"
-        content="incompatible_api_component_version=Warning"
-        targetURL="${git.clone.equinox.framework.location|uri}/bundles/org.eclipse.osgi/supplement/.settings/org.eclipse.pde.api.tools.prefs"
-        encoding="ISO-8859-1">
-      <description>Turn off errors for API version change.</description>
     </setupTask>
     <setupTask
         xsi:type="setup.targlets:TargletTask">
@@ -275,56 +257,12 @@
       <description>Create an empty jar as a placeholder for the jar that will eventually be created.  This ensures that PDE will add the jar to the classpath of projects needing the ant jar.</description>
     </setupTask>
     <setupTask
-        xsi:type="setup:TextModifyTask"
-        excludedTriggers="BOOTSTRAP"
-        url="${git.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.jarprocessor/.project"
-        encoding="UTF-8">
-      <modification
-          pattern="&lt;triggers>()full,incremental,&lt;/triggers>">
-        <substitution>auto,</substitution>
-      </modification>
-    </setupTask>
-    <setupTask
-        xsi:type="setup:TextModifyTask"
-        excludedTriggers="BOOTSTRAP"
-        url="${git.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.jarprocessor/.externalToolBuilders/AntTaskBuilder.launch"
-        encoding="UTF-8">
-      <modification
-          pattern="&lt;stringAttribute key=&quot;org.eclipse.ui.externaltools.ATTR_RUN_BUILD_KINDS&quot; value=&quot;full,incremental,()&quot;/>">
-        <substitution>auto,</substitution>
-      </modification>
-      <modification
-          pattern="&lt;booleanAttribute key=&quot;org.eclipse.ant.ui.DEFAULT_VM_INSTALL&quot; value=&quot;false&quot;/>([\n\r]+)&lt;listAttribute key=&quot;org.eclipse.debug.core.MAPPED_RESOURCE_PATHS&quot;>">
-        <substitution>\1&lt;stringAttribute key=&quot;org.eclipse.debug.core.ATTR_REFRESH_SCOPE&quot; value=&quot;$${working_set:&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;&amp;#13;&amp;#10;&amp;lt;resources&amp;gt;&amp;#13;&amp;#10;&amp;lt;item path=&amp;quot;/org.eclipse.equinox.p2.jarprocessor/lib&amp;quot; type=&amp;quot;2&amp;quot;/&amp;gt;&amp;#13;&amp;#10;&amp;lt;/resources&amp;gt;}&quot;/>\1</substitution>
-      </modification>
-    </setupTask>
-    <setupTask
         xsi:type="setup:ResourceCreationTask"
         excludedTriggers="BOOTSTRAP"
         content="UEsDBAoAAAAAAHtelUw05vp1HAAAABwAAAAFAHAAZW1wdHlTRFsApAAAAAAIAL/UyvdjZGBpEGFg&#xA;YDBggAAfIGZkBTNZRYFE6N2P9V9WLa2a1nDozktm3HKMTAwMTAwRDMxgaRGG/4zyDIyMELVCYEoC&#xA;IsYEEVMAEgpgtgpEHI+dAFVUDQAHuQnbWrkJ21q5CdtaU2luZ2xlIGVudHJ5IGZvciBlbXB0eSBq&#xA;YXIuClBLAQIXCwoAAAAAAHtelUw05vp1HAAAABwAAAAFABEAAAAAAAEAIAC2gQAAAABlbXB0eVNE&#xA;BACkAAAAVVQFAAe5CdtaUEsFBgAAAAABAAEARAAAAK8AAAAAAA=="
         targetURL="${git.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.repository.tools/lib/repository-tools-ant.jar"
         encoding="base64">
       <description>Create an empty jar as a placeholder for the jar that will eventually be created.  This ensures that PDE will add the jar to the classpath of projects needing the ant jar.</description>
-    </setupTask>
-    <setupTask
-        xsi:type="setup:TextModifyTask"
-        excludedTriggers="BOOTSTRAP"
-        url="${git.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.repository.tools/.project"
-        encoding="UTF-8">
-      <modification
-          pattern="&lt;triggers>()full,incremental,&lt;/triggers>">
-        <substitution>auto,</substitution>
-      </modification>
-    </setupTask>
-    <setupTask
-        xsi:type="setup:TextModifyTask"
-        excludedTriggers="BOOTSTRAP"
-        url="${git.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.repository.tools/scripts/buildAntJARs.xml"
-        encoding="UTF-8">
-      <modification
-          pattern="&lt;stringAttribute key=&quot;org.eclipse.ui.externaltools.ATTR_RUN_BUILD_KINDS&quot; value=&quot;full,incremental,()&quot;/>">
-        <substitution>auto,</substitution>
-      </modification>
     </setupTask>
     <setupTask
         xsi:type="setup:ResourceCopyTask"
@@ -362,7 +300,7 @@
               project="org.eclipse.equinox.p2.core"/>
           <operand
               xsi:type="workingsets:ExclusionPredicate"
-              excludedWorkingSet="//@projects[name='p2']/@setupTasks.9/@workingSets[name='Equinox%20p2%20Tests'] //@projects[name='p2']/@setupTasks.9/@workingSets[name='Equinox%20p2%20Examples']"/>
+              excludedWorkingSet="//@projects[name='p2']/@setupTasks.5/@workingSets[name='Equinox%20p2%20Tests'] //@projects[name='p2']/@setupTasks.5/@workingSets[name='Equinox%20p2%20Examples']"/>
         </predicate>
       </workingSet>
       <workingSet
