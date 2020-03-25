@@ -188,8 +188,9 @@ public class Storage {
 	}
 
 	private Storage(EquinoxContainer container, String[] cachedInfo) throws IOException {
-		// default to Java 7 since that is our min
-		Version javaVersion = Version.valueOf("1.7"); //$NON-NLS-1$
+		// default to Java 8 since that is our min
+		Version defaultVersion = Version.valueOf("1.8"); //$NON-NLS-1$
+		Version javaVersion = defaultVersion;
 		// set the profile and EE based off of the java.specification.version
 		String javaSpecVersionProp = System.getProperty(EquinoxConfiguration.PROP_JVM_SPEC_VERSION);
 		StringTokenizer st = new StringTokenizer(javaSpecVersionProp, " _-"); //$NON-NLS-1$
@@ -203,6 +204,12 @@ public class Storage {
 			javaVersion = new Version(major, minor, micro);
 		} catch (IllegalArgumentException e) {
 			// do nothing
+		}
+		if (javaVersion.compareTo(defaultVersion) < 0) {
+			// the Java specification property is wrong, we are compiled to the
+			// defaultVersion
+			// just use it instead.
+			javaVersion = defaultVersion;
 		}
 		runtimeVersion = javaVersion;
 		javaSpecVersion = javaSpecVersionProp;
@@ -1770,7 +1777,7 @@ public class Storage {
 			}
 			if (profileIn == null)
 				// the profile url is still null then use the min profile the framework can use
-				profileIn = findInSystemBundle(systemGeneration, "JavaSE-1.7.profile"); //$NON-NLS-1$
+				profileIn = findInSystemBundle(systemGeneration, "JavaSE-1.8.profile"); //$NON-NLS-1$
 			if (profileIn != null) {
 				try {
 					result.load(new BufferedInputStream(profileIn));
