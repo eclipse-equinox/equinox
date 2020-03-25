@@ -31,7 +31,9 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 	static final class Finder extends SecurityManager {
 		@Override
 		public Class<?>[] getClassContext() {
-			return super.getClassContext();
+			Class<?>[] result = super.getClassContext();
+			// note that Android returns null, so handling this by returning empty
+			return result == null ? new Class[0] : result;
 		}
 	}
 
