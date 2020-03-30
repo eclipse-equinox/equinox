@@ -24,9 +24,9 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.concurrent.TimeUnit;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -219,58 +219,21 @@ public class StorageUtil {
 		return classbytes;
 	}
 
-	/**
-	 * To remain Java 6 compatible work around the unreliable renameTo() via
-	 * retries: http://bugs.java.com/view_bug.do?bug_id=6213298
-	 *
-	 * @param from
-	 * @param to
-	 */
-	public static boolean move(File from, File to, boolean DEBUG) {
-		// Try several attempts with incremental sleep
-		final int maxTries = 10;
-		final int sleepStep = 200;
-		for (int tryCount = 0, sleep = sleepStep;; sleep += sleepStep, tryCount++) {
-			if (from.renameTo(to)) {
-				return true;
-			}
-
-			if (DEBUG) {
-				Debug.println("move: failed to rename " + from + " to " + to + " (" + (maxTries - tryCount) + " attempts remaining)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			}
-
-			if (tryCount >= maxTries) {
-				break;
-			}
-
-			try {
-				TimeUnit.MILLISECONDS.sleep(sleep);
-			} catch (InterruptedException e) {
-				// Ignore
-			}
-		}
-
-		// Try a copy
+	public static void move(File from, File to, boolean DEBUG) throws IOException {
 		try {
-			if (from.isDirectory()) {
-				copyDir(from, to);
-			} else {
-				readFile(new FileInputStream(from), to);
-			}
-
-			if (!rm(from, DEBUG)) {
-				Debug.println("move: failed to delete " + from + " after copy to " + to + ". Scheduling for delete on JVM exit."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				from.deleteOnExit();
-			}
-			return true;
+			Files.move(from.toPath(), to.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 		} catch (IOException e) {
 			if (DEBUG) {
-				Debug.println("move: failed to copy " + from + " to " + to); //$NON-NLS-1$ //$NON-NLS-2$
-				Debug.printStackTrace(e);
+				Debug.println("Failed to move atomically: " + from + " to " + to); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-
-			// Give up
-			return false;
+			// remove in case it failed because the target to non-empty directory or
+			// the target type does not match the from
+			rm(to, DEBUG);
+			// also, try without atomic operation
+			Files.move(from.toPath(), to.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		}
+		if (DEBUG) {
+			Debug.println("Successfully moved file: " + from + " to " + to); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 }

@@ -354,16 +354,13 @@ public final class BundleInfo {
 			/* copy the entry to the cache */
 			File tempDest = File.createTempFile("staged", ".tmp", dir); //$NON-NLS-1$ //$NON-NLS-2$
 			StorageUtil.readFile(in, tempDest);
-			if (destination.exists() || !StorageUtil.move(tempDest, destination, getStorage().getConfiguration().getDebug().DEBUG_STORAGE)) {
+			if (destination.exists()) {
 				// maybe because some other thread already beat us there.
-				if (destination.exists()) {
-					// just delete our copy that could not get renamed
-					tempDest.delete();
-				} else {
-					throw new IOException("Failed to store the extracted content: " + destination); //$NON-NLS-1$
-				}
+				// just delete our staged copy
+				tempDest.delete();
+			} else {
+				StorageUtil.move(tempDest, destination, getStorage().getConfiguration().getDebug().DEBUG_STORAGE);
 			}
-
 			if (nativeCode) {
 				getBundleInfo().getStorage().setPermissions(destination);
 			}
