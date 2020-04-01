@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2017 IBM Corporation and others.
+ * Copyright (c) 2003, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -783,7 +783,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
 			}
-			throw new BundleException(Msg.BundleContextImpl_LoadActivatorError, BundleException.ACTIVATOR_ERROR, e);
+			throw new BundleException(Msg.BundleContextImpl_LoadActivatorError + ' ' + bundle,
+					BundleException.ACTIVATOR_ERROR, e);
 		}
 
 		if (activator != null) {
@@ -1052,7 +1053,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 */
 	public void checkValid() {
 		if (!isValid()) {
-			throw new IllegalStateException(Msg.BUNDLE_CONTEXT_INVALID_EXCEPTION);
+			throw new IllegalStateException(Msg.BUNDLE_CONTEXT_INVALID_EXCEPTION + ' ' + bundle);
 		}
 	}
 

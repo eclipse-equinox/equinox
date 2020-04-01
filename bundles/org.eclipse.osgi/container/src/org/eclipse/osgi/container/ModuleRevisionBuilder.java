@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -279,7 +279,8 @@ public final class ModuleRevisionBuilder {
 							if (systemNames.contains(hostName)) {
 								Bundle b = module.getBundle();
 								if (b != null && !b.hasPermission(new AllPermission())) {
-									SecurityException se = new SecurityException("Must have AllPermission granted to install an extension bundle"); //$NON-NLS-1$
+									SecurityException se = new SecurityException(
+											"Must have AllPermission granted to install an extension bundle: " + b); //$NON-NLS-1$
 									// TODO this is such a hack: making the cause a bundle exception so we can throw the right one later
 									BundleException be = new BundleException(se.getMessage(), BundleException.SECURITY_ERROR, se);
 									se.initCause(be);

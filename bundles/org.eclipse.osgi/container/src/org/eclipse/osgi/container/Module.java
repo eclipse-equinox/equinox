@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -350,7 +350,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			throw new BundleException(Msg.Module_LockError + exceptonInfo, BundleException.STATECHANGE_ERROR, cause);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new BundleException(Msg.Module_LockError + toString() + " " + transitionEvent, BundleException.STATECHANGE_ERROR, e); //$NON-NLS-1$
+			throw new BundleException(Msg.Module_LockError + toString() + ' ' + transitionEvent, BundleException.STATECHANGE_ERROR, e);
 		} finally {
 			if (previousInterruption) {
 				Thread.currentThread().interrupt();
@@ -428,7 +428,8 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			if (getStartLevel() > container.getStartLevel()) {
 				if (StartOptions.TRANSIENT.isContained(options)) {
 					// it is an error to attempt to transient start a bundle without its start level met
-					throw new BundleException(Msg.Module_Transient_StartError, BundleException.START_TRANSIENT_ERROR);
+					throw new BundleException(Msg.Module_Transient_StartError + ' ' + this,
+							BundleException.START_TRANSIENT_ERROR);
 				}
 				// Do nothing; start level is not met
 				return;
@@ -539,7 +540,8 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	private void checkFragment() throws BundleException {
 		ModuleRevision current = getCurrentRevision();
 		if ((current.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
-			throw new BundleException(Msg.Module_Fragment_InvalidOperation, BundleException.INVALID_OPERATION);
+			throw new BundleException(Msg.Module_Fragment_InvalidOperation + ' ' + this,
+					BundleException.INVALID_OPERATION);
 		}
 	}
 
@@ -555,7 +557,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	final void checkValid() {
 		if (getState().equals(State.UNINSTALLED))
-			throw new IllegalStateException(Msg.Module_UninstalledError);
+			throw new IllegalStateException(Msg.Module_UninstalledError + ' ' + this);
 	}
 
 	private ModuleEvent doStart(StartOptions... options) throws BundleException {
@@ -609,7 +611,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			publishEvent(ModuleEvent.STOPPING);
 			if (t instanceof BundleException)
 				throw (BundleException) t;
-			throw new BundleException(Msg.Module_StartError, BundleException.ACTIVATOR_ERROR, t);
+			throw new BundleException(Msg.Module_StartError + ' ' + this, BundleException.ACTIVATOR_ERROR, t);
 		}
 	}
 
@@ -660,7 +662,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		} catch (Throwable t) {
 			if (t instanceof BundleException)
 				throw (BundleException) t;
-			throw new BundleException(Msg.Module_StopError, BundleException.ACTIVATOR_ERROR, t);
+			throw new BundleException(Msg.Module_StopError + ' ' + this, BundleException.ACTIVATOR_ERROR, t);
 		} finally {
 			// must always set the state to stopped
 			setState(State.RESOLVED);

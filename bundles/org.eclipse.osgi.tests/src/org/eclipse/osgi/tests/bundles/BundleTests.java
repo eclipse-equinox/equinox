@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2018 IBM Corporation and others.
+ * Copyright (c) 2006, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,6 +19,7 @@ import junit.framework.TestSuite;
 public class BundleTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite(BundleTests.class.getName());
+		suite.addTest(ExceptionMessageTest.suite());
 		suite.addTest(ImportJavaSEPackagesTests.suite());
 		suite.addTest(MultiReleaseJarTests.suite());
 		suite.addTest(URLHandlerTests.suite());

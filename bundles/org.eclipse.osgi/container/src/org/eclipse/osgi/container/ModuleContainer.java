@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2018 IBM Corporation and others.
+ * Copyright (c) 2012, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -348,7 +348,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 			// Attempt to lock the name
 			try {
 				if (name != null && !(nameLocked = nameLocks.tryLock(name, 5, TimeUnit.SECONDS))) {
-					throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR, new ThreadInfoReport(nameLocks.getLockInfo(name))); //$NON-NLS-1$
+					throw new BundleException("Failed to obtain id locks for installation: " + name, //$NON-NLS-1$
+							BundleException.STATECHANGE_ERROR, new ThreadInfoReport(nameLocks.getLockInfo(name)));
 				}
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
@@ -1503,7 +1504,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 					for (Bundle bundle : bundles) {
 						Module module = bundle.adapt(Module.class);
 						if (module == null)
-							throw new IllegalStateException("Could not adapt a bundle to a module."); //$NON-NLS-1$
+							throw new IllegalStateException("Could not adapt a bundle to a module. " + bundle); //$NON-NLS-1$
 						result.add(module);
 					}
 					return result;
