@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2013 IBM Corporation and others.
+ * Copyright (c) 2004, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,8 @@
  ******************************************************************************/
 package org.eclipse.core.internal.adapter;
 
-import java.util.ArrayList;
+import java.util.*;
+import java.util.concurrent.Callable;
 import org.eclipse.core.internal.registry.Handle;
 import org.eclipse.core.internal.registry.RegistryMessages;
 import org.eclipse.core.internal.runtime.IAdapterFactoryExt;
@@ -29,19 +30,22 @@ import org.eclipse.osgi.util.NLS;
  * requested to supply an adapter.
  */
 class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
-	private IConfigurationElement element;
+
+	private String adaptableType;
+	private String[] adapterNames;
+	private String contributorName;
+	private IExtension declaringExtension;
 	/**
 	 * The real factory. Null until the factory is loaded.
 	 */
-	private IAdapterFactory factory;
-	private boolean factoryLoaded = false;
+	private Optional<IAdapterFactory> factory;
+	private Callable<IAdapterFactory> factoryLoader;
 	/**
 	 * Store Id of the declaring extension. We might need it in case
 	 * the owner goes away (in this case element becomes invalid).
 	 */
 	private String ownerId;
-
-	private int internalOwnerID = -1;
+	private int internalOwnerId = -1;
 
 	/**
 	 * Creates a new factory proxy based on the given configuration element.
@@ -49,70 +53,80 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 	 */
 	public static AdapterFactoryProxy createProxy(IConfigurationElement element) {
 		AdapterFactoryProxy result = new AdapterFactoryProxy();
-		result.element = element;
-		IExtension extension = element.getDeclaringExtension();
-		result.ownerId = extension.getUniqueIdentifier();
-		if (extension instanceof Handle)
-			result.internalOwnerID = ((Handle) extension).getId();
-		if ("factory".equals(element.getName())) //$NON-NLS-1$
-			return result;
-		result.logError();
-		return null;
+		result.contributorName = element.getContributor().getName();
+		if (!"factory".equals(element.getName())) { //$NON-NLS-1$
+			result.logError();
+			return null;
+		}
+
+		result.adaptableType = element.getAttribute("adaptableType"); //$NON-NLS-1$
+		if (result.adaptableType == null) {
+			result.logError();
+			return null;
+		}
+
+		result.adapterNames = Arrays.stream(element.getChildren())
+				// ignore unknown children for forward compatibility
+				.filter(child -> "adapter".equals(child.getName())) //$NON-NLS-1$
+				.map(child -> child.getAttribute("type")) //$NON-NLS-1$
+				.filter(Objects::nonNull).toArray(String[]::new);
+		if (result.adapterNames.length == 0) {
+			result.logError();
+			return null;
+		}
+
+		result.declaringExtension = element.getDeclaringExtension();
+		result.ownerId = result.declaringExtension.getUniqueIdentifier();
+		if (result.declaringExtension instanceof Handle) {
+			result.internalOwnerId = ((Handle) result.declaringExtension).getId();
+		}
+		result.factoryLoader = () -> {
+			return (IAdapterFactory) element.createExecutableExtension("class"); //$NON-NLS-1$
+		};
+
+		return result;
 	}
 
 	public boolean originatesFrom(IExtension extension) {
 		String id = extension.getUniqueIdentifier();
-		if (id != null) // match by public ID declared in XML
+		if (id != null) { // match by public ID declared in XML
 			return id.equals(ownerId);
-
-		if (!(extension instanceof Handle))
+		}
+		if (!(extension instanceof Handle)) {
 			return false; // should never happen
-
-		return (internalOwnerID == ((Handle) extension).getId());
+		}
+		return (internalOwnerId == ((Handle) extension).getId());
 	}
 
 	String getAdaptableType() {
-		//cannot return null because it can cause startup failure
-		String result = element.getAttribute("adaptableType"); //$NON-NLS-1$
-		if (result != null)
-			return result;
-		logError();
-		return ""; //$NON-NLS-1$
+		return adaptableType;
 	}
 
 	@Override
 	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
-		if (!factoryLoaded)
-			loadFactory(false);
-		return factory == null ? null : factory.getAdapter(adaptableObject, adapterType);
+		Optional<IAdapterFactory> adapterFactory = factory;
+		if (adapterFactory == null) {
+			adapterFactory = Optional.ofNullable(loadFactory(false));
+		}
+		return adapterFactory.map(f -> f.getAdapter(adaptableObject, adapterType)).orElse(null);
 	}
 
 	@Override
 	public Class<?>[] getAdapterList() {
-		if (!factoryLoaded)
-			loadFactory(false);
-		return factory == null ? null : factory.getAdapterList();
+		Optional<IAdapterFactory> adapterFactory = factory;
+		if (adapterFactory == null) {
+			adapterFactory = Optional.ofNullable(loadFactory(false));
+		}
+		return adapterFactory.map(f -> f.getAdapterList()).orElse(null);
 	}
 
 	@Override
 	public String[] getAdapterNames() {
-		IConfigurationElement[] children = element.getChildren();
-		ArrayList<String> adapters = new ArrayList<>(children.length);
-		for (IConfigurationElement child : children) {
-			//ignore unknown children for forward compatibility
-			if ("adapter".equals(child.getName())) {//$NON-NLS-1$
-				String type = child.getAttribute("type"); //$NON-NLS-1$
-				if (type != null)
-					adapters.add(type);
-			}
-		}
-		if (adapters.isEmpty())
-			logError();
-		return adapters.toArray(new String[adapters.size()]);
+		return adapterNames;
 	}
 
 	IExtension getExtension() {
-		return element.getDeclaringExtension();
+		return declaringExtension;
 	}
 
 	/**
@@ -124,39 +138,38 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 	 */
 	@Override
 	public synchronized IAdapterFactory loadFactory(boolean force) {
-		if (factory != null || factoryLoaded)
-			return factory;
-		String contributorName = element.getContributor().getName();
-		boolean isActive;
-		// Different VMs have different degrees of "laziness" for the class loading.
-		// To make sure that VM won't try to load EquinoxUtils before getting into
-		// this try-catch block, the fully qualified name is used (removing entry for
-		// the EquinoxUtils from the import list).
-		try {
-			isActive = org.eclipse.core.internal.registry.osgi.EquinoxUtils.isActive(contributorName);
-		} catch (NoClassDefFoundError noClass) {
-			// This block will only be triggered if VM loads classes in a very "eager" way.
-			isActive = true;
+		if (factory == null) {
+			boolean isActive;
+			// Different VMs have different degrees of "laziness" for the class loading.
+			// To make sure that VM won't try to load EquinoxUtils before getting into
+			// this try-catch block, the fully qualified name is used (removing entry for
+			// the EquinoxUtils from the import list).
+			try {
+				isActive = org.eclipse.core.internal.registry.osgi.EquinoxUtils.isActive(contributorName);
+			} catch (NoClassDefFoundError noClass) {
+				// This block will only be triggered if VM loads classes in a very "eager" way.
+				isActive = true;
+			}
+			if (!force && !isActive) {
+				return null;
+			}
+			try {
+				factory = Optional.of(factoryLoader.call());
+			} catch (Exception e) {
+				String msg = NLS.bind(RegistryMessages.adapters_cantInstansiate, adaptableType, contributorName);
+				RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, msg, e));
+				// prevent repeated attempts to load a broken factory
+				factory = Optional.empty();
+			}
 		}
-		if (!force && !isActive)
-			return null;
-		try {
-			factory = (IAdapterFactory) element.createExecutableExtension("class"); //$NON-NLS-1$
-		} catch (CoreException e) {
-			String msg = NLS.bind(RegistryMessages.adapters_cantInstansiate, getAdaptableType(), element.getContributor().getName());
-			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, msg, e));
-		} finally {
-			//set to true to prevent repeated attempts to load a broken factory
-			factoryLoaded = true;
-		}
-		return factory;
+		return factory.orElse(null);
 	}
 
 	/**
-	 * The factory extension was malformed. Log an appropriate exception
+	 * The factory extension was malformed. Log an appropriate exception.
 	 */
 	private void logError() {
-		String msg = NLS.bind(RegistryMessages.adapters_badAdapterFactory, element.getContributor().getName());
+		String msg = NLS.bind(RegistryMessages.adapters_badAdapterFactory, contributorName);
 		RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, msg, null));
 	}
 
@@ -164,9 +177,9 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("AdapterFactoryProxy [contributor: "); //$NON-NLS-1$
-		sb.append(element.getContributor());
+		sb.append(contributorName);
 		sb.append(", adaptableType: "); //$NON-NLS-1$
-		sb.append(getAdaptableType());
+		sb.append(adaptableType);
 		if (factory != null) {
 			sb.append(", factory: "); //$NON-NLS-1$
 			sb.append(factory);
