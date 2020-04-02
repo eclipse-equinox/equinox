@@ -40,6 +40,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.condition.Condition;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.permissionadmin.PermissionAdmin;
@@ -72,6 +73,11 @@ public class SystemBundleActivator implements BundleActivator {
 
 		FrameworkDebugOptions dbgOptions = (FrameworkDebugOptions) configuration.getDebugOptions();
 		dbgOptions.start(bc);
+		Hashtable<String, Object> props = new Hashtable<>(7);
+		props.clear();
+
+		props.put(Condition.CONDITION_ID, Condition.CONDITION_ID_TRUE);
+		register(bc, Condition.class, Condition.INSTANCE, false, props);
 
 		SecurityAdmin sa = bundle.getEquinoxContainer().getStorage().getSecurityAdmin();
 		ClassLoader tccl = bundle.getEquinoxContainer().getContextFinder();
@@ -84,7 +90,7 @@ public class SystemBundleActivator implements BundleActivator {
 		register(bc, PermissionAdmin.class, sa, null);
 		register(bc, ConditionalPermissionAdmin.class, sa, null);
 
-		Hashtable<String, Object> props = new Hashtable<>(7);
+
 		props.clear();
 		props.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
 		register(bc, Resolver.class, new ResolverImpl(new Logger(0), null), false, props);

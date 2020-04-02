@@ -74,6 +74,7 @@ import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.resource.Namespace;
+import org.osgi.service.condition.Condition;
 
 public class ConnectTests extends AbstractBundleTests {
 
@@ -388,6 +389,54 @@ public class ConnectTests extends AbstractBundleTests {
 		});
 		assertEquals("Wrong number of start called.", 2, bundleActvatorStartCalled.get());
 		assertEquals("Wrong number of stop called.", 2, bundleActvatorStopCalled.get());
+	}
+
+	public void testTrueCondition() {
+		final AtomicReference<ServiceReference<Condition>> trueConditionStart = new AtomicReference<>();
+		final AtomicReference<ServiceReference<Condition>> trueConditionStop = new AtomicReference<>();
+
+		ModuleConnector activatorModuleConnector = new TestCountingModuleConnector() {
+			@Override
+			public Optional<BundleActivator> createBundleActivator() {
+				super.createBundleActivator();
+				return Optional.of(new BundleActivator() {
+
+					@Override
+					public void start(BundleContext context) throws Exception {
+						trueConditionStart.set(context
+								.getServiceReferences(Condition.class,
+										'(' + Condition.CONDITION_ID + '=' + Condition.CONDITION_ID_TRUE + ')')
+								.iterator().next());
+					}
+
+					@Override
+					public void stop(BundleContext context) throws Exception {
+						trueConditionStop.set(context
+								.getServiceReferences(Condition.class,
+										'(' + Condition.CONDITION_ID + '=' + Condition.CONDITION_ID_TRUE + ')')
+								.iterator().next());
+					}
+				});
+			}
+		};
+
+		doTestConnect(activatorModuleConnector, new HashMap<>(), (f) -> {
+			try {
+				f.start();
+				ServiceReference<Condition> trueCondition = trueConditionStart.get();
+				assertNotNull("No true condition found.", trueCondition);
+				assertEquals("Wrong bundle.", f.getBundleContext().getBundle(), trueCondition.getBundle());
+				f.stop();
+				f.waitForStop(5000);
+
+				assertEquals("Different true condition found on start and stop.", trueCondition,
+						trueConditionStop.get());
+				assertNull("True condition should be unregistered on stop.", trueCondition.getBundle());
+
+			} catch (Exception e) {
+				sneakyThrow(e);
+			}
+		});
 	}
 
 	public void testConnectInit() {

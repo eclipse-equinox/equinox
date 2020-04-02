@@ -52,13 +52,6 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/framework/connect/ConnectFramework.java" type="org.osgi.framework.connect.ConnectFramework">
-        <filter comment="Not for OSGi API" id="1110441988">
-            <message_arguments>
-                <message_argument value="org.osgi.framework.connect.ConnectFramework"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="osgi/src/org/osgi/framework/connect/ConnectFrameworkFactory.java" type="org.osgi.framework.connect.ConnectFrameworkFactory">
         <filter comment="Not for OSGi API" id="1110441988">
             <message_arguments>
@@ -113,6 +106,13 @@
                 <message_argument value="1.2"/>
                 <message_argument value="3.16"/>
                 <message_argument value="CAPABILITY_TAGS_ATTRIBUTE"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/service/condition/Condition.java" type="org.osgi.service.condition.Condition">
+        <filter comment="Not for OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.service.condition.Condition"/>
             </message_arguments>
         </filter>
     </resource>
