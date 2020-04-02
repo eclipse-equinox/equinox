@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Alexander Fedorov (ArSysOp) - Bug 561712
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -31,6 +32,25 @@ public class MultiStatus extends Status {
 	/**
 	 * Creates and returns a new multi-status object with the given children.
 	 *
+	 * @param caller the relevant class to build unique identifier from
+	 * @param code the caller-specific status code
+	 * @param newChildren the list of children status objects
+	 * @param message a human-readable message, localized to the
+	 *    current locale
+	 * @param exception a low-level exception, or <code>null</code> if not
+	 *    applicable 
+	 *    
+	 * @since 3.12
+	 */
+	public MultiStatus(Class<?> caller, int code, IStatus[] newChildren, String message, Throwable exception) {
+		this(caller, code, message, exception);
+		Assert.isLegal(newChildren != null);
+		addAllInternal(newChildren);
+	}
+
+	/**
+	 * Creates and returns a new multi-status object with the given children.
+	 *
 	 * @param pluginId the unique identifier of the relevant plug-in
 	 * @param code the plug-in-specific status code
 	 * @param newChildren the list of children status objects
@@ -48,6 +68,22 @@ public class MultiStatus extends Status {
 	/**
 	 * Creates and returns a new multi-status object with no children.
 	 *
+	 * @param caller the relevant class to build unique identifier from
+	 * @param code the caller-specific status code
+	 * @param message a human-readable message, localized to the
+	 *    current locale
+	 * @param exception a low-level exception, or <code>null</code> if not
+	 *    applicable 
+	 *    
+	 * @since 3.12
+	 */
+	public MultiStatus(Class<?> caller, int code, String message, Throwable exception) {
+		super(OK, caller, code, message, exception);
+	}
+
+	/**
+	 * Creates and returns a new multi-status object with no children.
+	 *
 	 * @param pluginId the unique identifier of the relevant plug-in
 	 * @param code the plug-in-specific status code
 	 * @param message a human-readable message, localized to the
@@ -57,6 +93,19 @@ public class MultiStatus extends Status {
 	 */
 	public MultiStatus(String pluginId, int code, String message, Throwable exception) {
 		super(OK, pluginId, code, message, exception);
+	}
+
+	/**
+	 * Creates and returns a new multi-status object with no children.
+	 *
+	 * @param caller the relevant class to build unique identifier from
+	 * @param code the caller-specific status code
+	 * @param message a human-readable message, localized to the current locale 
+	 * 
+	 * @since 3.12
+	 */
+	public MultiStatus(Class<?> caller, int code, String message) {
+		super(OK, caller, code, message, null);
 	}
 
 	/**

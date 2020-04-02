@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,12 +10,30 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Alexander Fedorov (ArSysOp) - Bug 561712
  *******************************************************************************/
 package org.eclipse.equinox.common.tests;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
-import org.eclipse.core.runtime.*;
+import java.util.Collections;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.tests.harness.CoreTest;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.FrameworkUtil;
 
 public class StatusTest extends CoreTest {
 
@@ -106,6 +124,40 @@ public class StatusTest extends CoreTest {
 		multistatus1.add(multistatus1);
 		assertEquals("1.2", multistatus1, (multistatus1.getChildren())[2]);
 
+	}
+
+	public void testSingleFromClass() throws ClassNotFoundException, IOException, BundleException {
+		assertEquals("org.eclipse.equinox.common.tests", new Status(IStatus.WARNING, StatusTest.class, "").getPlugin());
+		assertEquals("org.eclipse.equinox.common", new Status(IStatus.ERROR, IStatus.class, "", null).getPlugin());
+		assertEquals("java.lang.String", new Status(IStatus.WARNING, String.class, 0, "", null).getPlugin());
+		assertEquals("org.eclipse.core.runtime.Status", new Status(IStatus.WARNING, (Class<?>) null, "").getPlugin());
+		assertEquals(TestClass.class.getName(),
+				new Status(IStatus.WARNING, installNoBSNBundle().loadClass(TestClass.class.getName()), "").getPlugin());
+	}
+
+	public void testMultiFromClass() throws ClassNotFoundException, IOException, BundleException {
+		assertEquals("org.eclipse.equinox.common", new MultiStatus(IStatus.class, 0, "").getPlugin());
+		assertEquals("org.eclipse.equinox.common.tests", new MultiStatus(StatusTest.class, 0, "").getPlugin());
+		assertEquals("java.lang.String", new MultiStatus(String.class, 0, new Status[0], "", null).getPlugin());
+		assertEquals("org.eclipse.core.runtime.MultiStatus", new MultiStatus((Class<?>) null, 0, "").getPlugin());
+		assertEquals(TestClass.class.getName(),
+				new MultiStatus(installNoBSNBundle().loadClass(TestClass.class.getName()), 0, "").getPlugin());
+	}
+
+	private Bundle installNoBSNBundle() throws IOException, BundleException {
+		BundleContext bc = FrameworkUtil.getBundle(getClass()).getBundleContext();
+		File noNameBSNFile = bc.getDataFile("noNameBSN.jar");
+		noNameBSNFile.delete();
+		URI noNameBSNJar = URI.create("jar:" + noNameBSNFile.toURI().toASCIIString());
+
+		try (FileSystem zipfs = FileSystems.newFileSystem(noNameBSNJar, Collections.singletonMap("create", "true"))) {
+			URL testClassURL = getClass().getResource("TestClass.class");
+			Path testClassPath = zipfs.getPath(testClassURL.getPath().substring(1));
+			// copy a file into the zip file
+			Files.createDirectories(testClassPath.getParent());
+			Files.copy(testClassURL.openStream(), testClassPath);
+		}
+		return bc.installBundle(noNameBSNFile.toURI().toASCIIString());
 	}
 
 	public void testAddAll() {

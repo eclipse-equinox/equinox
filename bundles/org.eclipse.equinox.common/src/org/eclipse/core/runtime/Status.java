@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,10 +10,13 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Alexander Fedorov (ArSysOp) - Bug 561712
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
+import java.util.Optional;
 import org.eclipse.core.internal.runtime.LocalizationUtils;
+import org.osgi.framework.FrameworkUtil;
 
 /**
  * A concrete status implementation, suitable either for 
@@ -78,6 +81,28 @@ public class Status implements IStatus {
 	 *
 	 * @param severity the severity; one of <code>OK</code>, <code>ERROR</code>, 
 	 * <code>INFO</code>, <code>WARNING</code>,  or <code>CANCEL</code>
+	 * @param caller the relevant class to build unique identifier from
+	 * @param code the caller-specific status code, or <code>OK</code>
+	 * @param message a human-readable message, localized to the
+	 *    current locale
+	 * @param exception a low-level exception, or <code>null</code> if not
+	 *    applicable
+	 *    
+	 * @since 3.12
+	 */
+	public Status(int severity, Class<?> caller, int code, String message, Throwable exception) {
+		setSeverity(severity);
+		setPlugin(identifier(caller));
+		setCode(code);
+		setMessage(message);
+		setException(exception);
+	}
+
+	/**
+	 * Creates a new status object.  The created status has no children.
+	 *
+	 * @param severity the severity; one of <code>OK</code>, <code>ERROR</code>, 
+	 * <code>INFO</code>, <code>WARNING</code>,  or <code>CANCEL</code>
 	 * @param pluginId the unique identifier of the relevant plug-in
 	 * @param code the plug-in-specific status code, or <code>OK</code>
 	 * @param message a human-readable message, localized to the
@@ -91,6 +116,28 @@ public class Status implements IStatus {
 		setCode(code);
 		setMessage(message);
 		setException(exception);
+	}
+
+	/**
+	 * Simplified constructor of a new status object; assumes that code is <code>OK</code>.
+	 * The created status has no children.
+	 *
+	 * @param severity the severity; one of <code>OK</code>, <code>ERROR</code>, 
+	 * <code>INFO</code>, <code>WARNING</code>,  or <code>CANCEL</code>
+	 * @param caller the relevant class to build unique identifier from
+	 * @param message a human-readable message, localized to the
+	 *    current locale
+	 * @param exception a low-level exception, or <code>null</code> if not
+	 *    applicable
+	 *     
+	 * @since 3.12
+	 */
+	public Status(int severity, Class<?> caller, String message, Throwable exception) {
+		setSeverity(severity);
+		setPlugin(identifier(caller));
+		setMessage(message);
+		setException(exception);
+		setCode(OK);
 	}
 
 	/**
@@ -121,6 +168,26 @@ public class Status implements IStatus {
 	 *
 	 * @param severity the severity; one of <code>OK</code>, <code>ERROR</code>, 
 	 * <code>INFO</code>, <code>WARNING</code>,  or <code>CANCEL</code>
+	 * @param caller the relevant class to build unique identifier from
+	 * @param message a human-readable message, localized to the
+	 *    current locale
+	 *    
+	 * @since 3.12
+	 */
+	public Status(int severity, Class<?> caller, String message) {
+		setSeverity(severity);
+		setPlugin(identifier(caller));
+		setMessage(message);
+		setCode(OK);
+		setException(null);
+	}
+
+	/**
+	 * Simplified constructor of a new status object; assumes that code is <code>OK</code> and
+	 * exception is <code>null</code>. The created status has no children.
+	 *
+	 * @param severity the severity; one of <code>OK</code>, <code>ERROR</code>, 
+	 * <code>INFO</code>, <code>WARNING</code>,  or <code>CANCEL</code>
 	 * @param pluginId the unique identifier of the relevant plug-in
 	 * @param message a human-readable message, localized to the
 	 *    current locale
@@ -133,6 +200,21 @@ public class Status implements IStatus {
 		setMessage(message);
 		setCode(OK);
 		setException(null);
+	}
+
+	/**
+	 * Extracts an identifier from the given class: either bundle symbolic name or class name, never returns <code>null</code>
+	 * 
+	 * @param caller the relevant class to build unique identifier from
+	 * @return identifier extracted for the given class
+	 */
+	private String identifier(Class<?> caller) {
+		return Optional.ofNullable(caller)//
+				.flatMap(c -> Optional.ofNullable(FrameworkUtil.getBundle(c)))//
+				.map(b -> b.getSymbolicName())//
+				.orElseGet(() -> Optional.ofNullable(caller)//
+						.map(c -> c.getName())//
+						.orElse(getClass().getName()));
 	}
 
 	@Override
