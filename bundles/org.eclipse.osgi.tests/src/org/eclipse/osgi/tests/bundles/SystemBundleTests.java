@@ -13,6 +13,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import static java.nio.file.Files.createDirectories;
+import static java.nio.file.Files.createFile;
+import static java.nio.file.Files.write;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -28,6 +32,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
+import java.nio.file.Path;
 import java.security.Permission;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -4200,6 +4205,59 @@ public class SystemBundleTests extends AbstractBundleTests {
 				fail("Failed to stop framework.", e);
 			}
 		}
+	}
+
+	public void testCorruptStageInstallUpdate() throws IOException, BundleException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
+		final Equinox equinox = new Equinox(
+				Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath()));
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
+
+		File dirBundleFile = createBundle(config, "dir.bundle", false, true);
+		File jarBundleFile = createBundle(config, "jar.bundle", false, false);
+
+		// install dir bundle to get the path to storage
+		BundleContext bc = equinox.getBundleContext();
+		Bundle dirBundle = bc.installBundle(dirBundleFile.toURI().toASCIIString());
+		assertEquals("Wrong BSN", "bundledir.bundle", dirBundle.getSymbolicName());
+
+		URLConverter converter = bc.getService(bc.getServiceReference(URLConverter.class));
+		URL dirFileURL = converter.resolve(dirBundle.getEntry("/"));
+		File dirFile = new File(dirFileURL.getPath());
+		File rootStore = dirFile.getParentFile().getParentFile().getParentFile();
+		dirBundle.uninstall();
+
+		long next = dirBundle.getBundleId() + 1;
+		next = doTestExistingBundleFile(bc, next, rootStore, jarBundleFile, "bundlejar.bundle", true);
+		next = doTestExistingBundleFile(bc, next, rootStore, jarBundleFile, "bundlejar.bundle", false);
+		next = doTestExistingBundleFile(bc, next, rootStore, dirBundleFile, "bundledir.bundle", true);
+		next = doTestExistingBundleFile(bc, next, rootStore, dirBundleFile, "bundledir.bundle", false);
+
+	}
+
+	private long doTestExistingBundleFile(BundleContext bc, long next, File rootStore, File content, String bsn,
+			boolean d) throws IOException, BundleException {
+		createGenerationContent(next, rootStore, d);
+		Bundle b = bc.installBundle(content.toURI().toASCIIString());
+		assertEquals("Wrong BSN", bsn, b.getSymbolicName());
+		assertEquals("Wrong Bundle ID", next, b.getBundleId());
+		b.uninstall();
+		return b.getBundleId() + 1;
+	}
+
+	private Path createGenerationContent(long nextBundleID, File rootStore, boolean directory) throws IOException {
+		Path nextBundleFile = new File(rootStore, nextBundleID + "/0/bundleFile").toPath();
+		if (directory) {
+			createDirectories(nextBundleFile);
+			return write(createFile(new File(nextBundleFile.toFile(), "testContent.txt").toPath()),
+					"Some Content".getBytes());
+		}
+		createDirectories(nextBundleFile.getParent());
+		return write(createFile(nextBundleFile), "Some Content".getBytes());
 	}
 
 	// Note this is more of a performance test.  It has a timeout that will cause it to

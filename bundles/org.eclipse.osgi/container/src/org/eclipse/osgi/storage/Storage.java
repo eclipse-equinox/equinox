@@ -1024,8 +1024,11 @@ public class Storage {
 				throw new BundleException("Could not create generation directory: " + generationRoot.getAbsolutePath()); //$NON-NLS-1$
 			}
 			contentFile = new File(generationRoot, BUNDLE_FILE_NAME);
-			if (!StorageUtil.move(staged, contentFile, getConfiguration().getDebug().DEBUG_STORAGE)) {
-				throw new BundleException("Error while renaming bundle file to final location: " + contentFile); //$NON-NLS-1$
+			try {
+				StorageUtil.move(staged, contentFile, getConfiguration().getDebug().DEBUG_STORAGE);
+			} catch (IOException e) {
+				throw new BundleException("Error while renaming bundle file to final location: " + contentFile, //$NON-NLS-1$
+						BundleException.READ_ERROR, e);
 			}
 		}
 		return contentFile;

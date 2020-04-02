@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -121,7 +121,7 @@ public final class ModuleRevisions implements BundleRevisions {
 			uninstalled = true;
 			// save off the current revision
 			if (revisions.isEmpty()) {
-				throw new IllegalStateException("Revisions is empty on uninstall!"); //$NON-NLS-1$
+				throw new IllegalStateException("Revisions is empty on uninstall! " + module); //$NON-NLS-1$
 			}
 			uninstalledCurrent = revisions.get(0);
 		}

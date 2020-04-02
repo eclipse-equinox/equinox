@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2018 IBM Corporation and others.
+ * Copyright (c) 2012, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -98,7 +98,7 @@ public class LockSet<T> {
 		synchronized (locks) {
 			LockHolder lock = locks.get(t);
 			if (lock == null)
-				throw new IllegalStateException("No lock found."); //$NON-NLS-1$
+				throw new IllegalStateException("No lock found: " + t); //$NON-NLS-1$
 			lock.unlock();
 			// If, after unlocking, no other thread is using the lock, discard it.
 			if (lock.decremementUseCount() == 0) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -287,14 +287,14 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		}
 
 		void addInitFrameworkListeners() {
-			BundleContext context = createBundleContext(false);
+			BundleContext context = createBundleContext();
 			for (FrameworkListener initListener : initListeners) {
 				context.addFrameworkListener(initListener);
 			}
 		}
 
 		void removeInitListeners() {
-			BundleContext context = createBundleContext(false);
+			BundleContext context = createBundleContext();
 			for (FrameworkListener initListener : initListeners) {
 				context.removeFrameworkListener(initListener);
 			}
@@ -717,10 +717,10 @@ public class EquinoxBundle implements Bundle, BundleReference {
 	@Override
 	public BundleContext getBundleContext() {
 		equinoxContainer.checkAdminPermission(this, AdminPermission.CONTEXT);
-		return createBundleContext(true);
+		return createBundleContext();
 	}
 
-	BundleContextImpl createBundleContext(boolean checkPermission) {
+	BundleContextImpl createBundleContext() {
 		if (isFragment()) {
 			// fragments cannot have contexts
 			return null;
@@ -995,7 +995,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 	private final void checkValid() {
 		if (module.getState().equals(State.UNINSTALLED))
-			throw new IllegalStateException("Module has been uninstalled."); //$NON-NLS-1$
+			throw new IllegalStateException("Bundle has been uninstalled: " + this); //$NON-NLS-1$
 	}
 
 	public boolean isFragment() {
@@ -1003,9 +1003,9 @@ public class EquinoxBundle implements Bundle, BundleReference {
 	}
 
 	void startWorker0() throws BundleException {
-		BundleContextImpl current = createBundleContext(false);
+		BundleContextImpl current = createBundleContext();
 		if (current == null) {
-			throw new BundleException("Unable to create bundle context!"); //$NON-NLS-1$
+			throw new BundleException("Unable to create bundle context! " + this); //$NON-NLS-1$
 		}
 		try {
 			current.start();

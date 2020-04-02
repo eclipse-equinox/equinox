@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2017 IBM Corporation and others.
+ * Copyright (c) 2013, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -153,7 +153,7 @@ public class FrameworkExtensionInstaller {
 						callAddFilePathMethod(file);
 					}
 				} catch (InvocationTargetException | MalformedURLException e) {
-					throw new BundleException("Error adding extension content.", e); //$NON-NLS-1$
+					throw new BundleException("Error adding extension content. " + revision, e); //$NON-NLS-1$
 				}
 			}
 		}
@@ -276,7 +276,8 @@ public class FrameworkExtensionInstaller {
 		} catch (Throwable e) {
 			BundleException eventException;
 			if (activator == null) {
-				eventException = new BundleException(Msg.BundleContextImpl_LoadActivatorError, BundleException.ACTIVATOR_ERROR, e);
+				eventException = new BundleException(Msg.BundleContextImpl_LoadActivatorError + ' ' + extensionRevision,
+						BundleException.ACTIVATOR_ERROR, e);
 			} else {
 				eventException = new BundleException(NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION, new Object[] {activator.getClass(), "start", extensionRevision.getSymbolicName()}), BundleException.ACTIVATOR_ERROR, e); //$NON-NLS-1$
 			}
