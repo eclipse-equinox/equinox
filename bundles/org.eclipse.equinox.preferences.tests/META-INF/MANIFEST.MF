@@ -3,9 +3,10 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Preferences Tests
 Bundle-Category: test
 Bundle-SymbolicName: org.eclipse.equinox.preferences.tests
-Bundle-Version: 3.7.300.qualifier
+Bundle-Version: 3.8.0.qualifier
 Require-Bundle: org.junit
 Import-Package: 
+ org.eclipse.core.internal.preferences,
  org.eclipse.core.runtime;version="3.5.0",
  org.eclipse.core.runtime.jobs,
  org.eclipse.core.runtime.preferences;version="3.3.0",

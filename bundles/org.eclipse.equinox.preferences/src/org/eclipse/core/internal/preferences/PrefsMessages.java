@@ -55,6 +55,15 @@ public class PrefsMessages extends NLS {
 	public static String childrenNames;
 	public static String childrenNames2;
 
+	public static String OsgiPreferenceMetadataStore_e_null_preference_node;
+	public static String PreferenceMetadata_e_null_default_value;
+	public static String PreferenceMetadata_e_null_description;
+	public static String PreferenceMetadata_e_null_identifier;
+	public static String PreferenceMetadata_e_null_name;
+	public static String PreferenceMetadata_e_null_value_type;
+	public static String PreferenceStorage_e_load_unsupported;
+	public static String PreferenceStorage_e_save_unsupported;
+
 	static {
 		// load message values from bundle file
 		reloadMessages();

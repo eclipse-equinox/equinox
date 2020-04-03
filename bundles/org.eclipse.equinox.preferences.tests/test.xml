@@ -23,6 +23,16 @@
       <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.equinox.preferences.tests.EclipsePreferencesTest"/>
     </ant>
+    <ant target="core-test" antfile="${library-file}" dir="${eclipse-home}">
+      <property name="data-dir" value="${preferences-folder}"/>
+      <property name="plugin-name" value="${plugin-name}"/>
+      <property name="classname" value="org.eclipse.equinox.preferences.tests.OsgiPreferenceMetadataStoreTest"/>
+    </ant>
+    <ant target="core-test" antfile="${library-file}" dir="${eclipse-home}">
+      <property name="data-dir" value="${preferences-folder}"/>
+      <property name="plugin-name" value="${plugin-name}"/>
+      <property name="classname" value="org.eclipse.equinox.preferences.tests.PreferenceMetadataTest"/>
+    </ant>
   </target>
 
   <!-- This target holds code to cleanup the testing environment after the tests -->
