@@ -70,11 +70,6 @@
     <module>bundles/org.eclipse.equinox.cm.test</module>
     <module>bundles/org.eclipse.equinox.common.tests</module>
 
-<!-- no longer built in M6
-    <module>bundles/org.eclipse.equinox.console.ssh.tests</module>
-    <module>bundles/org.eclipse.equinox.console.tests</module>
--->
-
     <module>bundles/org.eclipse.equinox.ds.tests</module>
     <module>bundles/org.eclipse.equinox.preferences.tests</module>
 <!-- removed until the dependency on aspectj is removed. see bug 470000

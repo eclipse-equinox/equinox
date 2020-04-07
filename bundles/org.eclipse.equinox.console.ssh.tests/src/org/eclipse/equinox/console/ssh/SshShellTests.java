@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 SAP AG and others.
+ * Copyright (c) 2011, 2020 SAP AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,6 +28,7 @@ import java.util.Map;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.sshd.server.Environment;
+import org.apache.sshd.server.channel.ChannelSession;
 import org.easymock.EasyMock;
 import org.eclipse.equinox.console.common.ConsoleInputStream;
 import org.eclipse.equinox.console.storage.DigestUtil;
@@ -94,7 +95,7 @@ public class SshShellTests {
 				shell = new SshShell(processors, context);
 				shell.setInputStream(socketServer.getInputStream());
 				shell.setOutputStream(socketServer.getOutputStream());
-				shell.start(env);
+				shell.start(new ChannelSession(), env);
 			}
 
 			try (OutputStream outClient = socketClient.getOutputStream()) {
