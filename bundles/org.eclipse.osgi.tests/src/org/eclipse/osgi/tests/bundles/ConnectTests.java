@@ -50,6 +50,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.container.ModuleContainer;
+import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.launch.EquinoxFactory;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.classes.Activator;
@@ -94,6 +95,7 @@ public class ConnectTests extends AbstractBundleTests {
 			boolean enableRuntimeVerification) {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		config.mkdirs();
+		fwkConfig = new HashMap<>(fwkConfig);
 		fwkConfig.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		if (enableRuntimeVerification) {
 			fwkConfig.put("osgi.signedcontent.support", "runtime");
@@ -328,7 +330,7 @@ public class ConnectTests extends AbstractBundleTests {
 	public void testConnectFactoryNoModules() {
 		TestCountingModuleConnector connector = new TestCountingModuleConnector();
 
-		doTestConnect(connector, new HashMap<>(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), (f) -> {
 			try {
 				f.start();
 				f.stop();
@@ -340,7 +342,7 @@ public class ConnectTests extends AbstractBundleTests {
 				sneakyThrow(t);
 			}
 		});
-		doTestConnect(connector, new HashMap<>(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), (f) -> {
 			try {
 				f.start();
 				f.stop();
@@ -375,7 +377,7 @@ public class ConnectTests extends AbstractBundleTests {
 			}
 		};
 
-		doTestConnect(activatorModuleConnector, new HashMap<>(), (f) -> {
+		doTestConnect(activatorModuleConnector, Collections.emptyMap(), (f) -> {
 			try {
 				f.start();
 				f.stop();
@@ -420,7 +422,7 @@ public class ConnectTests extends AbstractBundleTests {
 			}
 		};
 
-		doTestConnect(activatorModuleConnector, new HashMap<>(), (f) -> {
+		doTestConnect(activatorModuleConnector, Collections.emptyMap(), (f) -> {
 			try {
 				f.start();
 				ServiceReference<Condition> trueCondition = trueConditionStart.get();
@@ -491,7 +493,7 @@ public class ConnectTests extends AbstractBundleTests {
 			connector.setModule(l, withManifest ? createSimpleManifestModule(l) : createSimpleHeadersModule(l));
 		}
 
-		doTestConnect(connector, new HashMap<>(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), (f) -> {
 			try {
 				f.init();
 				for (String l : locations) {
@@ -505,7 +507,7 @@ public class ConnectTests extends AbstractBundleTests {
 			}
 		});
 
-		doTestConnect(connector, new HashMap<>(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), (f) -> {
 			try {
 				f.init();
 				Bundle[] bundles = f.getBundleContext().getBundles();
@@ -524,7 +526,7 @@ public class ConnectTests extends AbstractBundleTests {
 
 		connector.setModule("b.2", null);
 		connector.setModule("b.3", BUNDLE_EXCEPTION);
-		doTestConnect(connector, new HashMap<>(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), (f) -> {
 			try {
 				f.init();
 				Bundle[] bundles = f.getBundleContext().getBundles();
@@ -587,7 +589,7 @@ public class ConnectTests extends AbstractBundleTests {
 			connector.setModule(id.toString(), createAdvancedModule(id, provideLoader));
 		}
 
-		doTestConnect(connector, new HashMap<>(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), (f) -> {
 			try {
 				f.start();
 				for (Integer id : ids) {
@@ -631,7 +633,7 @@ public class ConnectTests extends AbstractBundleTests {
 			connector.setModule(id.toString(), m);
 		}
 
-		doTestConnect(connector, new HashMap<>(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), (f) -> {
 			try {
 				f.start();
 				for (Integer id : ids) {
@@ -708,7 +710,7 @@ public class ConnectTests extends AbstractBundleTests {
 		TestConnectModule m = createSimpleHeadersModule(NAME1);
 		connector.setModule(NAME1, m);
 
-		doTestConnect(connector, new HashMap<>(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), (f) -> {
 			try {
 				f.start();
 				Bundle b = f.getBundleContext().installBundle(NAME1);
@@ -763,7 +765,7 @@ public class ConnectTests extends AbstractBundleTests {
 		TestCountingModuleConnector connector = new TestCountingModuleConnector();
 		TestConnectModule m = withManifest ? createSimpleManifestModule(NAME1) : createSimpleHeadersModule(NAME1);
 		connector.setModule(NAME1, m);
-		doTestConnect(connector, new HashMap<>(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), (f) -> {
 			try {
 				f.start();
 				Bundle b = f.getBundleContext().installBundle(NAME1);
@@ -800,7 +802,7 @@ public class ConnectTests extends AbstractBundleTests {
 		TestCountingModuleConnector connector = new TestCountingModuleConnector();
 		TestConnectModule m = createSimpleHeadersModule(NAME);
 		connector.setModule(NAME, m);
-		doTestConnect(connector, new HashMap<>(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), (f) -> {
 			try {
 				f.start();
 				Bundle b = f.getBundleContext().installBundle(NAME);
@@ -813,7 +815,8 @@ public class ConnectTests extends AbstractBundleTests {
 			}
 		});
 
-		doTestConnect(connector, new HashMap<>(), (f) -> {
+		doTestConnect(connector, Collections.singletonMap(HookRegistry.PROP_HOOK_CONFIGURATORS_EXCLUDE,
+				"org.eclipse.equinox.weaving.hooks.WeavingHook"), (f) -> {
 			try {
 				f.start();
 				Bundle b = f.getBundleContext().getBundle(NAME);
@@ -859,7 +862,7 @@ public class ConnectTests extends AbstractBundleTests {
 		TestConnectModule m = createSimpleHeadersModule(NAME1);
 		connector.setModule(NAME1, m);
 
-		doTestConnect(connector, new HashMap<>(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), (f) -> {
 			try {
 				f.start();
 				Bundle test = f.getBundleContext().installBundle(NAME1, in1);
@@ -906,8 +909,8 @@ public class ConnectTests extends AbstractBundleTests {
 		};
 
 		// run twice to test clean and persistent start
-		doTestConnect(connector, new HashMap<>(), test);
-		doTestConnect(connector, new HashMap<>(), test);
+		doTestConnect(connector, Collections.emptyMap(), test);
+		doTestConnect(connector, Collections.emptyMap(), test);
 	}
 
 	private void checkHeaders(Map<String, String> expected, Dictionary<String, String> actual) {
