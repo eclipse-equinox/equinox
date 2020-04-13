@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2014 IBM Corporation and others.
+ * Copyright (c) 2006, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -223,6 +223,10 @@ public class WeavingHook extends AbstractWeavingHook {
      */
     public BundleFileWrapper wrapBundleFile(final BundleFile bundleFile,
             final Generation generation, final boolean base) {
+        if (bundleFile.getBaseFile() == null) {
+            // must have a base file to work
+            return null;
+        }
         BundleFileWrapper wrapped = null;
         if (Debug.DEBUG_BUNDLE)
             Debug.println("> WeavingHook.wrapBundleFile() bundle="
