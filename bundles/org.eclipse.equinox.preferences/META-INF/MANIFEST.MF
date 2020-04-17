@@ -10,7 +10,7 @@ Require-Bundle: org.eclipse.equinox.common;bundle-version="[3.2.0,4.0.0)",
  org.eclipse.equinox.registry;bundle-version="[3.2.0,4.0.0)";resolution:=optional
 Export-Package: org.eclipse.core.internal.preferences;x-friends:="org.eclipse.core.resources,org.eclipse.core.runtime,org.eclipse.equinox.p2.engine",
  org.eclipse.core.internal.preferences.exchange;x-friends:="org.eclipse.core.runtime",
- org.eclipse.core.runtime.preferences;version="3.3.0",
+ org.eclipse.core.runtime.preferences;version="3.4.0",
  org.osgi.service.prefs;version="1.1.1"
 Comment-Header: Both Eclipse-LazyStart and Bundle-ActivationPolicy are specified for compatibility with 3.2
 Eclipse-LazyStart: true; exceptions="org.eclipse.core.internal.preferences.exchange"
