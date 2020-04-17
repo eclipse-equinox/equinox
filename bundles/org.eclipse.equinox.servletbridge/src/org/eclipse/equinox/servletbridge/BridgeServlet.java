@@ -16,6 +16,7 @@ package org.eclipse.equinox.servletbridge;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Optional;
 import java.util.StringTokenizer;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
@@ -48,8 +49,7 @@ public class BridgeServlet extends HttpServlet {
 	public void init() throws ServletException {
 		super.init();
 
-		String enableFrameworkControlsParameter = getServletConfig().getInitParameter("enableFrameworkControls"); //$NON-NLS-1$
-		enableFrameworkControls = (enableFrameworkControlsParameter != null && enableFrameworkControlsParameter.equals("true")); //$NON-NLS-1$
+		enableFrameworkControls = Boolean.valueOf(getServletConfig().getInitParameter("enableFrameworkControls")); //$NON-NLS-1$
 
 		// Use with caution!! Some classes MUST be initialized with the web-app class loader 
 		String frameworkPreloads = getServletConfig().getInitParameter("_contextPreloads"); //$NON-NLS-1$
@@ -69,8 +69,8 @@ public class BridgeServlet extends HttpServlet {
 		}
 
 		// Forces load of the SSLSocketFactory on the web-app context class loader
-		String initSSLSocketFactory = getServletConfig().getInitParameter("_initSSLSocketFactory"); //$NON-NLS-1$
-		if (!"false".equals(initSSLSocketFactory)) { //$NON-NLS-1$
+		boolean initSSLSocketFactory = Optional.ofNullable(getServletConfig().getInitParameter("_initSSLSocketFactory")).map(Boolean::valueOf).orElse(true); //$NON-NLS-1$
+		if (initSSLSocketFactory) {
 			try {
 				Class<?> clazz = this.getClass().getClassLoader().loadClass("javax.net.ssl.SSLSocketFactory"); //$NON-NLS-1$
 				Method getDefaultMethod = clazz.getMethod("getDefault"); //$NON-NLS-1$
