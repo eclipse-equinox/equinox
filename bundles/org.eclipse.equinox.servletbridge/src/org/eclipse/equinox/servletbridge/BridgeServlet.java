@@ -249,7 +249,7 @@ public class BridgeServlet extends HttpServlet {
 	 */
 	public static synchronized void registerServletDelegate(HttpServlet servletDelegate) {
 		if (instance == null) {
-			// shutdown already
+			// shutdown already or BridgeServlet was loaded by a different class loader
 			return;
 		}
 
