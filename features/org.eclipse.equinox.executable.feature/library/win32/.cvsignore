@@ -1,8 +1,0 @@
-*.obj
-eclipse.exe
-eclipse.res
-*.pdb
-*.exp
-*.lib
-eclipse_*.dll
-eclipsec.exe
