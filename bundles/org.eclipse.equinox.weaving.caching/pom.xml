@@ -19,7 +19,7 @@
   </parent>
   <groupId>org.eclipse.equinox</groupId>
   <artifactId>org.eclipse.equinox.weaving.caching</artifactId>
-  <version>1.1.300-SNAPSHOT</version>
+  <version>1.1.400-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 
   <build>

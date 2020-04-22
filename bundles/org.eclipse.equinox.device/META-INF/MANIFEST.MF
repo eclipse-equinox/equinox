@@ -1,6 +1,6 @@
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
-Bundle-Version: 1.0.800.qualifier
+Bundle-Version: 1.0.900.qualifier
 Bundle-Activator: org.eclipse.equinox.device.Activator
 Bundle-SymbolicName: org.eclipse.equinox.device
 Bundle-Vendor: %bundleVendor
