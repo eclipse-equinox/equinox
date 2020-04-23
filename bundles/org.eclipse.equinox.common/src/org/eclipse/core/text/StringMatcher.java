@@ -192,7 +192,7 @@ public final class StringMatcher {
 			return new Position(start, start);
 		}
 		if (fIgnoreWildCards) {
-			int x = posIn(text, start, end);
+			int x = textPosIn(text, start, end, fPattern);
 			return x < 0 ? null : new Position(x, x + fLength);
 		}
 
@@ -290,7 +290,7 @@ public final class StringMatcher {
 
 		// Process first segment
 		if (!fHasLeadingStar) {
-			if (!regExpRegionMatches(text, start, current, 0, segLength)) {
+			if (!regExpRegionMatches(text, start, current, segLength)) {
 				return false;
 			}
 			++i;
@@ -323,7 +323,7 @@ public final class StringMatcher {
 		// Process final segment
 		if (!fHasTrailingStar && tCurPos != end) {
 			int clen = current.length();
-			return regExpRegionMatches(text, end - clen, current, 0, clen);
+			return regExpRegionMatches(text, end - clen, current, clen);
 		}
 		return i == segCount;
 	}
@@ -400,35 +400,6 @@ public final class StringMatcher {
 	}
 
 	/**
-	 * Determines the position of the first match of the pattern, which must not
-	 * contain wildcards, in the region {@code text[start..end-1]}.
-	 *
-	 * @param text  to find the pattern match in
-	 * @param start the starting index in the text for search, inclusive
-	 * @param end   the stopping point of search, exclusive
-	 * @return the starting index in the text of the pattern , or -1 if not found
-	 */
-	protected int posIn(String text, int start, int end) {// no wild card in pattern
-		int max = end - fLength;
-
-		if (!fIgnoreCase) {
-			int i = text.indexOf(fPattern, start);
-			if (i == -1 || i > max) {
-				return -1;
-			}
-			return i;
-		}
-
-		for (int i = start; i <= max; ++i) {
-			if (text.regionMatches(true, i, fPattern, 0, fLength)) {
-				return i;
-			}
-		}
-
-		return -1;
-	}
-
-	/**
 	 * Determines the position of the first match of pattern {@code p}, which must
 	 * not contain wildcards, in the region {@code text[start..end-1]}.
 	 *
@@ -475,7 +446,7 @@ public final class StringMatcher {
 		int max = end - plen;
 
 		for (int i = start; i <= max; ++i) {
-			if (regExpRegionMatches(text, i, p, 0, plen)) {
+			if (regExpRegionMatches(text, i, p, plen)) {
 				return i;
 			}
 		}
@@ -490,22 +461,18 @@ public final class StringMatcher {
 	 * @param tStart Index in {@code text} to start matching at
 	 * @param p      String pattern to match against; may contain single-character
 	 *               wildcards
-	 * @param pStart Start of the pattern to match against
 	 * @param plen   Length of {@code p}
 	 * @return {@code true} if the text matches; {@code false} otherwise
 	 */
-	private boolean regExpRegionMatches(String text, int tStart, String p, int pStart, int plen) {
+	private boolean regExpRegionMatches(String text, int tStart, String p, int plen) {
+		int pStart = 0;
 		while (plen-- > 0) {
-			char tchar = text.charAt(tStart++);
 			char pchar = p.charAt(pStart++);
-
-			// Process wild cards
-			if (!fIgnoreWildCards) {
-				// Skip single-character wildcards
-				if (pchar == fSingleWildCard) {
-					continue;
-				}
+			if (pchar == fSingleWildCard) {
+				tStart++;
+				continue;
 			}
+			char tchar = text.charAt(tStart++);
 			if (pchar == tchar) {
 				continue;
 			}
