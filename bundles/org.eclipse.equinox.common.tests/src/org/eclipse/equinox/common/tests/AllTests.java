@@ -16,12 +16,14 @@ package org.eclipse.equinox.common.tests;
 import org.eclipse.equinox.common.tests.adaptable.AdaptableTests;
 import org.eclipse.equinox.common.tests.registry.RegistryTests;
 import org.eclipse.equinox.common.tests.registry.simple.SimpleRegistryTests;
+import org.eclipse.equinox.common.tests.text.StringMatcherTests;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+	StringMatcherTests.class,
 	RuntimeTests.class,
 	AdaptableTests.class,
 	RegistryTests.class,
