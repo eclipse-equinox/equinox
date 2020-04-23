@@ -44,11 +44,11 @@ false	foo\*	foo*	true
 false	foo\*	foobar	false
 false	foo\\*	foo*	false
 
-# Skip for StringMatcher: even number of backslashes followed by * at the end of the pattern
-#false	foo\\*	foo\*	true
-#false	foo\\*	foo\a	true
-#false	foo\\*	foo\\*	true
-#false	foo\\*	foo\\a	true
+# Even number of backslashes followed by * at the end of the pattern
+false	foo\\*	foo\*	true
+false	foo\\*	foo\a	true
+false	foo\\*	foo\\*	true
+false	foo\\*	foo\\a	true
 false	foo\\*	foo\	true
 
 false	foo\?	foo?	true

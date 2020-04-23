@@ -343,12 +343,6 @@ public final class StringMatcher {
 		if (fPattern.startsWith("*")) { //$NON-NLS-1$
 			fHasLeadingStar = true;
 		}
-		if (fPattern.endsWith("*")) { //$NON-NLS-1$
-			// Make sure it's not an escaped wildcard
-			if (fLength > 1 && fPattern.charAt(fLength - 2) != '\\') {
-				fHasTrailingStar = true;
-			}
-		}
 
 		List<String> temp = new ArrayList<>();
 
@@ -379,6 +373,9 @@ public final class StringMatcher {
 						temp.add(buf.toString());
 						fBound += buf.length();
 						buf.setLength(0);
+					}
+					if (pos >= fLength) {
+						fHasTrailingStar = true;
 					}
 					break;
 				case '?' :
