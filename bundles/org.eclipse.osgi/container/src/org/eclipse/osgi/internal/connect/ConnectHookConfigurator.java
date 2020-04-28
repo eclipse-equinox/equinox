@@ -168,7 +168,7 @@ public class ConnectHookConfigurator implements HookConfigurator {
 			@Override
 			public BundleActivator createActivator() {
 				final List<BundleActivator> activators = new ArrayList<>();
-				moduleConnector.createBundleActivator().ifPresent((a) -> activators.add(a));
+				moduleConnector.newBundleActivator().ifPresent((a) -> activators.add(a));
 				return new BundleActivator() {
 					@Override
 					public void start(BundleContext context) throws Exception {

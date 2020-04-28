@@ -140,7 +140,7 @@ public class ConnectTests extends AbstractBundleTests {
 		}
 
 		@Override
-		public Optional<BundleActivator> createBundleActivator() {
+		public Optional<BundleActivator> newBundleActivator() {
 			createBundleActivatorCalled.getAndIncrement();
 			return Optional.empty();
 		}
@@ -360,8 +360,8 @@ public class ConnectTests extends AbstractBundleTests {
 		final AtomicInteger bundleActvatorStopCalled = new AtomicInteger();
 		ModuleConnector activatorModuleConnector = new TestCountingModuleConnector() {
 			@Override
-			public Optional<BundleActivator> createBundleActivator() {
-				super.createBundleActivator();
+			public Optional<BundleActivator> newBundleActivator() {
+				super.newBundleActivator();
 				return Optional.of(new BundleActivator() {
 
 					@Override
@@ -399,8 +399,8 @@ public class ConnectTests extends AbstractBundleTests {
 
 		ModuleConnector activatorModuleConnector = new TestCountingModuleConnector() {
 			@Override
-			public Optional<BundleActivator> createBundleActivator() {
-				super.createBundleActivator();
+			public Optional<BundleActivator> newBundleActivator() {
+				super.newBundleActivator();
 				return Optional.of(new BundleActivator() {
 
 					@Override
