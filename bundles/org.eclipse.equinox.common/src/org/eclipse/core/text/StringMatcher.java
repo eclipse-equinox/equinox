@@ -492,7 +492,7 @@ public final class StringMatcher {
 	 *               wildcards
 	 * @param pStart Start of the pattern to match against
 	 * @param plen   Length of {@code p}
-	 * @return {@©ode true} if the text matches; {@code false} otherwise
+	 * @return {@code true} if the text matches; {@code false} otherwise
 	 */
 	private boolean regExpRegionMatches(String text, int tStart, String p, int pStart, int plen) {
 		while (plen-- > 0) {
