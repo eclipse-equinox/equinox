@@ -14,10 +14,31 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.eclipse.osgi.framework.util.ArrayMap;
 import org.eclipse.osgi.internal.container.ComputeNodeOrder;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BaseDescription;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.BundleSpecification;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.GenericDescription;
+import org.eclipse.osgi.service.resolver.GenericSpecification;
+import org.eclipse.osgi.service.resolver.HostSpecification;
+import org.eclipse.osgi.service.resolver.ImportPackageSpecification;
+import org.eclipse.osgi.service.resolver.NativeCodeSpecification;
+import org.eclipse.osgi.service.resolver.State;
+import org.eclipse.osgi.service.resolver.StateHelper;
+import org.eclipse.osgi.service.resolver.VersionConstraint;
 import org.osgi.framework.Constants;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
@@ -87,10 +108,11 @@ public final class StateHelperImpl implements StateHelper {
 		for (BundleDescription bundle : bundles) {
 			ExportPackageDescription[] packages = bundle.getExportPackages();
 			for (ExportPackageDescription description : packages) {
-				List<ExportPackageDescription> exports = result.get(description.getName());
+				String name = description.getName();
+				List<ExportPackageDescription> exports = result.get(name);
 				if (exports == null) {
 					exports = new ArrayList<>();
-					result.put(description.getName(), exports);
+					result.put(name, exports);
 				}
 				exports.add(description);
 			}
@@ -107,10 +129,11 @@ public final class StateHelperImpl implements StateHelper {
 			}
 			GenericDescription[] generics = bundle.getGenericCapabilities();
 			for (GenericDescription description : generics) {
-				List<GenericDescription> genericList = result.get(description.getName());
+				String name = description.getName();
+				List<GenericDescription> genericList = result.get(name);
 				if (genericList == null) {
 					genericList = new ArrayList<>(1);
-					result.put(description.getName(), genericList);
+					result.put(name, genericList);
 				}
 				genericList.add(description);
 			}
@@ -129,15 +152,16 @@ public final class StateHelperImpl implements StateHelper {
 			VersionConstraint[] constraints = getUnsatisfiedConstraints(description, hook);
 			for (VersionConstraint constraint : constraints) {
 				Collection<BaseDescription> satisfied = null;
+				String name = constraint.getName();
 				if (constraint instanceof BundleSpecification || constraint instanceof HostSpecification) {
-					BundleDescription[] suppliers = state.getBundles(constraint.getName());
+					BundleDescription[] suppliers = state.getBundles(name);
 					satisfied = getPossibleCandidates(constraint, suppliers, constraint instanceof HostSpecification ? BundleRevision.HOST_NAMESPACE : null, hook, false);
 				} else if (constraint instanceof ImportPackageSpecification) {
-					List<ExportPackageDescription> exports = packages.get(constraint.getName());
+					List<ExportPackageDescription> exports = packages.get(name);
 					if (exports != null)
 						satisfied = getPossibleCandidates(constraint, exports.toArray(new BaseDescription[exports.size()]), null, hook, false);
 				} else if (constraint instanceof GenericSpecification) {
-					List<GenericDescription> genericSet = generics.get(constraint.getName());
+					List<GenericDescription> genericSet = generics.get(name);
 					if (genericSet != null)
 						satisfied = getPossibleCandidates(constraint, genericSet.toArray(new BaseDescription[genericSet.size()]), null, hook, false);
 				}
@@ -361,7 +385,7 @@ public final class StateHelperImpl implements StateHelper {
 				BundleDescription[] hosts = hostSpecification.getHosts();
 				for (BundleDescription host : hosts) {
 					if (host != description) {
-						references.add(new Object[]{description, host});
+						references.add(new Object[] {description, host});
 					}
 				}
 			}
@@ -391,7 +415,7 @@ public final class StateHelperImpl implements StateHelper {
 			if (fragment.isResolved()) {
 				ExportPackageDescription[] exports = fragment.getExportPackages();
 				if (exports.length > 0) {
-					references.add(new Object[]{description, fragment});
+					references.add(new Object[] {description, fragment});
 				}
 			}
 		}
@@ -433,7 +457,6 @@ public final class StateHelperImpl implements StateHelper {
 					getPackages(bundleSupplier, bundle.getSymbolicName(), importList, orderedPkgList, pkgSet, visited, strict, importNames, options);
 			}
 			importList.add(imports.getName(i)); // be sure to add to direct import list
-
 		}
 		// now find all the packages that are visible from required bundles
 		RequiresHolder requires = new RequiresHolder(bundle, options);
@@ -456,15 +479,16 @@ public final class StateHelperImpl implements StateHelper {
 		ExportPackageDescription[] imports = requiredBundle.getResolvedImports();
 		Set<String> substituteNames = null; // a temporary set used to scope packages we get from getPackages
 		for (ExportPackageDescription substitutedExport : substitutedExports) {
-			if (pkgNames == null || pkgNames.contains(substitutedExport.getName())) {
+			String exportName = substitutedExport.getName();
+			if (pkgNames == null || pkgNames.contains(exportName)) {
 				for (ExportPackageDescription resolvedImport : imports) {
-					if (substitutedExport.getName().equals(resolvedImport.getName()) && !pkgSet.contains(resolvedImport)) {
+					if (exportName.equals(resolvedImport.getName()) && !pkgSet.contains(resolvedImport)) {
 						if (substituteNames == null)
 							substituteNames = new HashSet<>(1);
 						else
 							substituteNames.clear();
 						// substituteNames is a set of one package containing the single substitute we are trying to get the source for
-						substituteNames.add(substitutedExport.getName());
+						substituteNames.add(exportName);
 						getPackages(resolvedImport.getSupplier(), symbolicName, importList, orderedPkgList, pkgSet, new HashSet<BundleDescription>(0), strict, substituteNames, options);
 					}
 				}
@@ -479,12 +503,13 @@ public final class StateHelperImpl implements StateHelper {
 		ExportPackageDescription[] exports = requiredBundle.getSelectedExports();
 		HashSet<String> exportNames = new HashSet<>(exports.length); // set is used to improve performance of duplicate check.
 		for (ExportPackageDescription export : exports) {
-			if ((pkgNames == null || pkgNames.contains(export.getName())) && !isSystemExport(export, options) && isFriend(symbolicName, export, strict) && !importList.contains(export.getName()) && !pkgSet.contains(export)) {
-				if (!exportNames.contains(export.getName())) {
+			String exportName = export.getName();
+			if ((pkgNames == null || pkgNames.contains(exportName)) && !isSystemExport(export, options) && isFriend(symbolicName, export, strict) && !importList.contains(exportName) && !pkgSet.contains(export)) {
+				if (!exportNames.contains(exportName)) {
 					// only add the first export
 					orderedPkgList.add(export);
 					pkgSet.add(export);
-					exportNames.add(export.getName());
+					exportNames.add(exportName);
 				}
 			}
 		}
@@ -631,14 +656,13 @@ class RequiresHolder {
 	 * Fragment bundles are also considered.
 	 */
 	private void determineRequiresVisibility(BundleDescription bundle) {
-		BundleSpecification[] requiredBundles = bundle.getRequiredBundles();
 		Set<BundleDescription> resolved = new HashSet<>();
 
 		for (BundleDescription resolvedRequire : resolvedRequires) {
 			resolved.add(resolvedRequire);
 		}
 		// Get the visibility of all directly required bundles
-		for (BundleSpecification required : requiredBundles) {
+		for (BundleSpecification required : bundle.getRequiredBundles()) {
 			if (required.getSupplier() != null) {
 				resolvedBundlesExported.put((BundleDescription) required.getSupplier(), Boolean.valueOf(required.isExported()));
 				resolved.remove(required.getSupplier());
