@@ -71,6 +71,7 @@ import org.eclipse.osgi.container.ModuleWire;
 import org.eclipse.osgi.container.ModuleWiring;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
+import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.util.ThreadInfoReport;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
@@ -3347,6 +3348,58 @@ public class TestModuleContainer extends AbstractTest {
 		hostWires = systemBundle.getCurrentRevision().getWiring().getProvidedModuleWires(HostNamespace.HOST_NAMESPACE);
 		List<ModuleWire> systemFrag3HostWires = systemFrag3.getCurrentRevision().getWiring().getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
 		assertWires(systemFrag3HostWires, hostWires);
+	}
+
+	@Test
+	public void testSystemBundleFragmentsWithNonEffectiveCapsReqs() throws BundleException, IOException {
+		// install the system.bundle
+		Module systemBundle = createContainerWithSystemBundle(true);
+		ModuleContainer container = systemBundle.getContainer();
+
+		ModuleWiring systemWiring = systemBundle.getCurrentRevision().getWiring();
+
+		// install an system.bundle fragment with activator
+		Map<String, String> systemFragManifest = new HashMap<>();
+		systemFragManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		systemFragManifest.put(Constants.BUNDLE_SYMBOLICNAME, "systemFrag");
+		systemFragManifest.put(Constants.FRAGMENT_HOST, Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
+		systemFragManifest.put(Constants.EXTENSION_BUNDLE_ACTIVATOR, "systemFrag.Activator");
+		systemFragManifest.put(Constants.REQUIRE_CAPABILITY,
+				"does.not.exist; effective:=never; filter:=\"(never=true)\"");
+		systemFragManifest.put(Constants.PROVIDE_CAPABILITY,
+				"non.effective.cap; non.effective.cap=test; effective:=never");
+
+		Module systemFrag = installDummyModule(systemFragManifest, "systemFrag", container);
+
+		ResolutionReport report = container.resolve(Arrays.asList(systemFrag), true);
+		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
+
+		List<ModuleWire> hostWires = systemWiring.getProvidedModuleWires(HostNamespace.HOST_NAMESPACE);
+		assertEquals("Wrong number of fragments.", 1, hostWires.size());
+		Assert.assertEquals("Unexpected fragment revision: " + hostWires, systemFrag.getCurrentRevision(),
+				hostWires.get(0).getRequirer());
+
+		List<ModuleCapability> dataCaps = systemWiring
+				.getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
+		assertTrue("Unexpected module data capabilities: " + dataCaps, dataCaps.isEmpty());
+
+		List<ModuleCapability> nonEffectiveCaps = systemBundle.getCurrentRevision().getWiring()
+				.getModuleCapabilities("non.effective.cap");
+		assertTrue("Unexpected non-effective capabilities: " + nonEffectiveCaps, nonEffectiveCaps.isEmpty());
+
+		List<ModuleRequirement> nonEffectiveReqs = systemWiring.getModuleRequirements("does.not.exist");
+		assertTrue("Unexpected non-effective requirements: " + nonEffectiveReqs, nonEffectiveReqs.isEmpty());
+
+		Map<String, String> failResolutionManifest = new HashMap<>();
+		failResolutionManifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		failResolutionManifest.put(Constants.BUNDLE_SYMBOLICNAME, "failResolution");
+		failResolutionManifest.put(Constants.FRAGMENT_HOST, Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
+		failResolutionManifest.put(Constants.REQUIRE_CAPABILITY,
+				"non.effective.cap; filter:=\"(non.effective.cap=test)\"");
+		Module failResolution = installDummyModule(failResolutionManifest, "failResolution", container);
+		report = container.resolve(Arrays.asList(failResolution), false);
+		String resolutionMsg = report.getResolutionReportMessage(failResolution.getCurrentRevision());
+		assertTrue("Wrong resolution message:" + resolutionMsg, resolutionMsg.contains("non.effective.cap"));
 	}
 
 	private Module createContainerWithSystemBundle(boolean resolveSystemBundle) throws BundleException, IOException {

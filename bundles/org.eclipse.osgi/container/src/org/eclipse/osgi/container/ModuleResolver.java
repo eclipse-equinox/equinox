@@ -365,6 +365,10 @@ final class ModuleResolver {
 				if (NON_PAYLOAD_CAPABILITIES.contains(fragmentCapability.getNamespace())) {
 					continue; // don't include, not a payload capability
 				}
+				Object effective = fragmentCapability.getDirectives().get(Namespace.CAPABILITY_EFFECTIVE_DIRECTIVE);
+				if (effective != null && !Namespace.EFFECTIVE_RESOLVE.equals(effective)) {
+					continue; // don't include, not effective
+				}
 				if (!fragmentCapability.getNamespace().equals(currentNamespace)) {
 					currentNamespace = fragmentCapability.getNamespace();
 					fastForward(iCapabilities);
@@ -382,7 +386,11 @@ final class ModuleResolver {
 			List<ModuleRequirement> fragmentRequriements = hostWire.getRequirer().getModuleRequirements(null);
 			for (ModuleRequirement fragmentRequirement : fragmentRequriements) {
 				if (NON_PAYLOAD_REQUIREMENTS.contains(fragmentRequirement.getNamespace())) {
-					continue; // don't inlcude, not a payload requirement
+					continue; // don't include, not a payload requirement
+				}
+				Object effective = fragmentRequirement.getDirectives().get(Namespace.REQUIREMENT_EFFECTIVE_DIRECTIVE);
+				if (effective != null && !Namespace.EFFECTIVE_RESOLVE.equals(effective)) {
+					continue; // don't include, not effective
 				}
 				if (!fragmentRequirement.getNamespace().equals(currentNamespace)) {
 					currentNamespace = fragmentRequirement.getNamespace();
@@ -1303,6 +1311,9 @@ final class ModuleResolver {
 			}
 
 			private boolean failToWire(ModuleRequirement requirement, ModuleRevision requirer, List<Wire> wires) {
+				if (!isEffective(requirement)) {
+					return false;
+				}
 				List<ModuleCapability> matching = moduleDatabase.findCapabilities(requirement);
 				List<Wire> newWires = new ArrayList<>(0);
 				filterProviders(requirement, matching, false);
