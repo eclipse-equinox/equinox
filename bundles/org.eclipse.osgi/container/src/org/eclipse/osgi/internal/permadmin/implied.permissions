@@ -53,3 +53,5 @@
 (org.osgi.framework.CapabilityPermission "osgi.ee" "require")
 # Added for OSGi R6
 (org.osgi.framework.CapabilityPermission "osgi.native" "require")
+# Added for OSGi R8
+(org.osgi.framework.ServicePermission "org.osgi.service.condition.Condition" "get")
