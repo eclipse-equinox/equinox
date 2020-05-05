@@ -18,6 +18,9 @@ import static org.osgi.service.http.runtime.HttpServiceRuntimeConstants.HTTP_SER
 import static org.osgi.service.http.whiteboard.HttpWhiteboardConstants.*;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
@@ -511,7 +514,7 @@ public class HttpServiceRuntimeImpl
 
 		int pos = requestURI.lastIndexOf('/');
 
-		String servletPath = requestURI;
+		String servletPath = decode(requestURI);
 		String pathInfo = null;
 
 		if (match == Match.CONTEXT_ROOT) {
@@ -537,8 +540,8 @@ public class HttpServiceRuntimeImpl
 
 			if (pos > -1) {
 				String newServletPath = requestURI.substring(0, pos);
-				pathInfo = requestURI.substring(pos);
-				servletPath = newServletPath;
+				pathInfo = decode(requestURI.substring(pos));
+				servletPath = decode(newServletPath);
 				pos = servletPath.lastIndexOf('/');
 
 				continue;
@@ -1092,7 +1095,7 @@ public class HttpServiceRuntimeImpl
 		sb.append("(objectClass=").append(HttpSessionListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append("(objectClass=").append(HttpSessionAttributeListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
 		if ((servletContext.getMajorVersion() >= 3) && (servletContext.getMinorVersion() > 0)) {
-			sb.append("(objectClass=").append(HttpSessionIdListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$		
+			sb.append("(objectClass=").append(HttpSessionIdListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		sb.append(")"); //$NON-NLS-1$
 		sb.append(")"); //$NON-NLS-1$
@@ -1279,6 +1282,15 @@ public class HttpServiceRuntimeImpl
 
 	Semaphore getSemaphore() {
 		return semaphore;
+	}
+
+	private String decode(String urlEncoded) {
+		try {
+			return URLDecoder.decode(urlEncoded, StandardCharsets.UTF_8.name());
+		}
+		catch (UnsupportedEncodingException e) {
+			return urlEncoded;
+		}
 	}
 
 	private final Map<String, Object> attributes;
