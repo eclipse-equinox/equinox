@@ -17,12 +17,38 @@ package org.eclipse.osgi.internal.resolver;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import org.eclipse.osgi.framework.util.KeyedElement;
-import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.*;
-import org.osgi.framework.wiring.*;
-import org.osgi.resource.*;
+import org.eclipse.osgi.service.resolver.BaseDescription;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.BundleSpecification;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.GenericDescription;
+import org.eclipse.osgi.service.resolver.GenericSpecification;
+import org.eclipse.osgi.service.resolver.HostSpecification;
+import org.eclipse.osgi.service.resolver.ImportPackageSpecification;
+import org.eclipse.osgi.service.resolver.NativeCodeDescription;
+import org.eclipse.osgi.service.resolver.NativeCodeSpecification;
+import org.eclipse.osgi.service.resolver.State;
+import org.eclipse.osgi.service.resolver.StateWire;
+import org.eclipse.osgi.service.resolver.VersionConstraint;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleReference;
+import org.osgi.framework.Constants;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRequirement;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWire;
+import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.resource.Capability;
+import org.osgi.resource.Requirement;
+import org.osgi.resource.Wire;
 
 public final class BundleDescriptionImpl extends BaseDescriptionImpl implements BundleDescription, KeyedElement {
 	static final String[] EMPTY_STRING = new String[0];
@@ -299,14 +325,14 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	protected void setExecutionEnvironments(String[] executionEnvironments) {
 		synchronized (this.monitor) {
 			checkLazyData();
-			lazyData.executionEnvironments = executionEnvironments;
+			lazyData.executionEnvironments = executionEnvironments == null || executionEnvironments.length > 0 ? executionEnvironments : EMPTY_STRING;
 		}
 	}
 
 	protected void setExportPackages(ExportPackageDescription[] exportPackages) {
 		synchronized (this.monitor) {
 			checkLazyData();
-			lazyData.exportPackages = exportPackages;
+			lazyData.exportPackages = exportPackages == null || exportPackages.length > 0 ? exportPackages : EMPTY_EXPORTS;
 			if (exportPackages != null) {
 				for (ExportPackageDescription exportPackage : exportPackages) {
 					((ExportPackageDescriptionImpl) exportPackage).setExporter(this);
@@ -318,7 +344,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	protected void setImportPackages(ImportPackageSpecification[] importPackages) {
 		synchronized (this.monitor) {
 			checkLazyData();
-			lazyData.importPackages = importPackages;
+			lazyData.importPackages = importPackages == null || importPackages.length > 0 ? importPackages : EMPTY_IMPORTS;
 			if (importPackages != null) {
 				for (ImportPackageSpecification importPackage : importPackages) {
 					((ImportPackageSpecificationImpl) importPackage).setBundle(this);
@@ -333,7 +359,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	protected void setRequiredBundles(BundleSpecification[] requiredBundles) {
 		synchronized (this.monitor) {
 			checkLazyData();
-			lazyData.requiredBundles = requiredBundles;
+			lazyData.requiredBundles = requiredBundles == null || requiredBundles.length > 0 ? requiredBundles : EMPTY_BUNDLESPECS;
 			if (requiredBundles != null)
 				for (BundleSpecification requiredBundle : requiredBundles) {
 					((VersionConstraintImpl) requiredBundle).setBundle(this);
@@ -344,7 +370,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	protected void setGenericCapabilities(GenericDescription[] genericCapabilities) {
 		synchronized (this.monitor) {
 			checkLazyData();
-			lazyData.genericCapabilities = genericCapabilities;
+			lazyData.genericCapabilities = genericCapabilities == null || genericCapabilities.length > 0 ? genericCapabilities : EMPTY_GENERICDESCS;
 			if (genericCapabilities != null)
 				for (GenericDescription genericCapability : genericCapabilities) {
 					((GenericDescriptionImpl) genericCapability).setSupplier(this);
@@ -355,7 +381,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	protected void setGenericRequires(GenericSpecification[] genericRequires) {
 		synchronized (this.monitor) {
 			checkLazyData();
-			lazyData.genericRequires = genericRequires;
+			lazyData.genericRequires = genericRequires == null || genericRequires.length > 0 ? genericRequires : EMPTY_GENERICSPECS;
 			if (genericRequires != null)
 				for (GenericSpecification genericRequire : genericRequires) {
 					((VersionConstraintImpl) genericRequire).setBundle(this);
@@ -433,7 +459,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	protected void setSelectedExports(ExportPackageDescription[] selectedExports) {
 		synchronized (this.monitor) {
 			checkLazyData();
-			lazyData.selectedExports = selectedExports;
+			lazyData.selectedExports = selectedExports == null || selectedExports.length > 0 ? selectedExports : EMPTY_EXPORTS;
 			if (selectedExports != null) {
 				for (ExportPackageDescription selectedExport : selectedExports) {
 					((ExportPackageDescriptionImpl) selectedExport).setExporter(this);
@@ -445,7 +471,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	protected void setSelectedCapabilities(GenericDescription[] selectedCapabilities) {
 		synchronized (this.monitor) {
 			checkLazyData();
-			lazyData.selectedCapabilities = selectedCapabilities;
+			lazyData.selectedCapabilities = selectedCapabilities == null || selectedCapabilities.length > 0 ? selectedCapabilities : EMPTY_GENERICDESCS;
 			if (selectedCapabilities != null) {
 				for (GenericDescription capability : selectedCapabilities) {
 					((GenericDescriptionImpl) capability).setSupplier(this);
@@ -457,28 +483,28 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	protected void setSubstitutedExports(ExportPackageDescription[] substitutedExports) {
 		synchronized (this.monitor) {
 			checkLazyData();
-			lazyData.substitutedExports = substitutedExports;
+			lazyData.substitutedExports = substitutedExports != null && substitutedExports.length > 0 ? substitutedExports : EMPTY_EXPORTS;
 		}
 	}
 
 	protected void setResolvedImports(ExportPackageDescription[] resolvedImports) {
 		synchronized (this.monitor) {
 			checkLazyData();
-			lazyData.resolvedImports = resolvedImports;
+			lazyData.resolvedImports = resolvedImports == null || resolvedImports.length > 0 ? resolvedImports : EMPTY_EXPORTS;
 		}
 	}
 
 	protected void setResolvedRequires(BundleDescription[] resolvedRequires) {
 		synchronized (this.monitor) {
 			checkLazyData();
-			lazyData.resolvedRequires = resolvedRequires;
+			lazyData.resolvedRequires = resolvedRequires == null || resolvedRequires.length > 0 ? resolvedRequires : EMPTY_BUNDLEDESCS;
 		}
 	}
 
 	protected void setResolvedCapabilities(GenericDescription[] resolvedCapabilities) {
 		synchronized (this.monitor) {
 			checkLazyData();
-			lazyData.resolvedCapabilities = resolvedCapabilities;
+			lazyData.resolvedCapabilities = resolvedCapabilities == null || resolvedCapabilities.length > 0 ? resolvedCapabilities : EMPTY_GENERICDESCS;
 		}
 	}
 
