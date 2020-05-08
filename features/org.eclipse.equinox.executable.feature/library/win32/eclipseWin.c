@@ -291,11 +291,12 @@ jlong getSplashHandle() {
 }
 
 void takeDownSplash() {
+	HWND window = NULL;
 	if(topWindow != NULL) {
 		if (mutex != NULL) {
 			KillTimer(topWindow, findWindowTimerId);
 
-			HWND window = findSWTMessageWindow();
+			window = findSWTMessageWindow();
 			if (window != NULL) {
 				sendOpenFileMessage(window);
 			}
