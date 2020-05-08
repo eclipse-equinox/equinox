@@ -696,8 +696,9 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		}
 	}
 
-	boolean isAssignableTo(Bundle client, String className) {
-		return PackageSource.isServiceAssignableTo(bundle, client, className, service.getClass(), context.getContainer());
+	boolean isAssignableTo(Bundle client, String className, boolean checkInternal) {
+		return PackageSource.isServiceAssignableTo(bundle, client, className, service.getClass(), checkInternal,
+				context.getContainer());
 	}
 
 	/**

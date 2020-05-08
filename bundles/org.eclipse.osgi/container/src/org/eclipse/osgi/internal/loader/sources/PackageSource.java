@@ -22,7 +22,6 @@ import org.eclipse.osgi.container.ModuleWiring;
 import org.eclipse.osgi.internal.framework.EquinoxBundle;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.loader.BundleLoader;
-import org.eclipse.osgi.internal.loader.SystemBundleLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -114,78 +113,111 @@ public abstract class PackageSource {
 	 * @param container the equinox container
 	 * @return true if assignable given package wiring
 	 */
-	public static boolean isServiceAssignableTo(Bundle registrant, Bundle client, String className, Class<?> serviceClass, EquinoxContainer container) {
+	public static boolean isServiceAssignableTo(Bundle registrant, Bundle client, String className,
+			Class<?> serviceClass, boolean checkInternal, EquinoxContainer container) {
 		// 1) if the registrant == client always return true
 		if (registrant == client) {
 			return true;
 		}
 		// 2) get the package name from the specified className
 		String pkgName = BundleLoader.getPackageName(className);
-		if (pkgName.startsWith("java.")) //$NON-NLS-1$
+		if (pkgName.startsWith("java.")) { //$NON-NLS-1$
 			return true;
+		}
 
 		BundleLoader producerBL = getBundleLoader(registrant);
-		if (producerBL == null)
+		if (producerBL == null) {
 			return false;
-		BundleLoader consumerBL = getBundleLoader(client);
-		if (consumerBL == null)
-			return false;
-		// 3) for the specified bundle, find the wiring for the package.  If no wiring is found return true
-		PackageSource consumerSource = consumerBL.getPackageSource(pkgName);
-		if (consumerSource == null)
-			return true;
-		// work around the issue when the package is in the EE and we delegate to boot for that package
-		if (container.isBootDelegationPackage(pkgName)) {
-			Bundle systemBundle = container.getStorage().getModuleContainer().getModule(0).getBundle();
-			SystemBundleLoader systemLoader = (SystemBundleLoader) getBundleLoader(systemBundle);
-			if (systemLoader.isExportedPackage(pkgName)) {
-				return true; // in this case we have a common source from the EE
-			}
 		}
+		BundleLoader consumerBL = getBundleLoader(client);
+		if (consumerBL == null) {
+			return false;
+		}
+		// 3) for the specified bundle, find the wiring for the package.  If no wiring is found return true
+		PackageSource consumerSource = getSourceFromLoader(consumerBL, pkgName, className, checkInternal);
+		if (consumerSource == null) {
+			// confirmed no source for consumer
+			return true;
+		}
+		// if boot delegate just return true
+		if (container.isBootDelegationPackage(pkgName)) {
+			return true;
+		}
+
 		// 4) For the registrant bundle, find the wiring for the package.
-		PackageSource producerSource = producerBL.getPackageSource(pkgName);
+		PackageSource producerSource = getSourceFromLoader(producerBL, pkgName, className, checkInternal);
 		if (producerSource == null) {
+			// confirmed no local class either; now check service object
 			if (serviceClass != null && ServiceFactory.class.isAssignableFrom(serviceClass)) {
 				@SuppressWarnings("deprecation")
 				Bundle bundle = container.getPackageAdmin().getBundle(serviceClass);
-				if (bundle != null && bundle != registrant)
+				if (bundle != null && bundle != registrant) {
 					// in this case we have a wacky ServiceFactory that is doing something we cannot
-					// verify if it is correct.  Instead of failing we allow the assignment and hope for the best
+					// verify if it is correct. Instead of failing we allow the assignment and hope
+					// for the best
 					// bug 326918
 					return true;
+				}
 			}
-			// 5) If no wiring is found for the registrant bundle then find the wiring for the classloader of the service object.  If no wiring is found return false.
-			producerSource = getPackageSource(serviceClass, pkgName, container.getPackageAdmin());
-			if (producerSource == null)
+			// 5) If no wiring is found for the registrant bundle then find the wiring for
+			// the classloader of the service object. If no wiring is found return false.
+			producerSource = getPackageSource(serviceClass, pkgName, className, checkInternal,
+					container.getPackageAdmin());
+			if (producerSource == null) {
 				return false;
+			}
 		}
 		// 6) If the two wirings found are equal then return true; otherwise return false.
 		return producerSource.hasCommonSource(consumerSource);
 	}
 
-	private static PackageSource getPackageSource(Class<?> serviceClass, String pkgName, @SuppressWarnings("deprecation") PackageAdmin packageAdmin) {
-		if (serviceClass == null)
+	private static PackageSource getSourceFromLoader(BundleLoader loader, String pkgName, String className,
+			boolean checkInternal) {
+		PackageSource source = loader.getPackageSource(pkgName);
+		if (source != null || !checkInternal) {
+			return source;
+		}
+		try {
+			if (loader.findLocalClass(className) != null) {
+				// create a source that represents the private package
+				return (new SingleSourcePackage(pkgName, loader));
+			}
+		} catch (ClassNotFoundException e) {
+			// ignore
+		}
+		return null;
+	}
+
+	private static PackageSource getPackageSource(Class<?> serviceClass, String pkgName, String className,
+			boolean checkInternal,
+			@SuppressWarnings("deprecation") PackageAdmin packageAdmin) {
+		if (serviceClass == null) {
 			return null;
+		}
 		@SuppressWarnings("deprecation")
 		Bundle serviceBundle = packageAdmin.getBundle(serviceClass);
-		if (serviceBundle == null)
+		if (serviceBundle == null) {
 			return null;
+		}
 		BundleLoader producerBL = getBundleLoader(serviceBundle);
-		if (producerBL == null)
+		if (producerBL == null) {
 			return null;
-		PackageSource producerSource = producerBL.getPackageSource(pkgName);
-		if (producerSource != null)
+		}
+		PackageSource producerSource = getSourceFromLoader(producerBL, pkgName, className, checkInternal);
+		if (producerSource != null) {
 			return producerSource;
+		}
 		// try the interfaces
 		Class<?>[] interfaces = serviceClass.getInterfaces();
 		// note that getInterfaces never returns null
 		for (Class<?> intf : interfaces) {
-			producerSource = getPackageSource(intf, pkgName, packageAdmin);
-			if (producerSource != null)
+			producerSource = getPackageSource(intf, pkgName, className, checkInternal, packageAdmin);
+			if (producerSource != null) {
 				return producerSource;
+			}
 		}
 		// try super class
-		return getPackageSource(serviceClass.getSuperclass(), pkgName, packageAdmin);
+		return getPackageSource(serviceClass.getSuperclass(), pkgName, className, checkInternal, packageAdmin);
 	}
 
 	private static BundleLoader getBundleLoader(Bundle bundle) {

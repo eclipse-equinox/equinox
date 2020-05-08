@@ -182,7 +182,7 @@ public class ServiceReferenceImpl<S> implements ServiceReference<S> {
 	 */
 	@Override
 	public boolean isAssignableTo(Bundle bundle, String className) {
-		return registration.isAssignableTo(bundle, className);
+		return registration.isAssignableTo(bundle, className, true);
 	}
 
 	/**

@@ -13,8 +13,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.log;
 
-import java.util.*;
-import org.osgi.framework.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -42,8 +46,8 @@ public class EventAdminAdapter implements ServiceTrackerCustomizer<Object, Objec
 	}
 
 	public void start() {
-		eventAdminTracker.open();
-		eventHandlerTracker.open();
+		eventAdminTracker.open(true);
+		eventHandlerTracker.open(true);
 	}
 
 	public void stop() {

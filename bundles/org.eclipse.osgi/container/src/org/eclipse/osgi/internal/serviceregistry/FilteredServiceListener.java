@@ -17,7 +17,14 @@ package org.eclipse.osgi.internal.serviceregistry;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.framework.FilterImpl;
-import org.osgi.framework.*;
+import org.osgi.framework.AllServiceListener;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.UnfilteredServiceListener;
 import org.osgi.framework.hooks.service.ListenerHook;
 
 /**
@@ -104,7 +111,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 		if (event == null) {
 			return;
 		}
-		if (allservices || ServiceRegistry.isAssignableTo(context, reference)) {
+		if (allservices || ServiceRegistry.isAssignableTo(context, objectClass, reference)) {
 			if (debug.DEBUG_EVENTS) {
 				String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 				Debug.println("dispatchFilteredServiceEvent(" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$

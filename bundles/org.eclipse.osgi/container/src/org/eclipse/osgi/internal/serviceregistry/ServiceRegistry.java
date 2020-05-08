@@ -348,7 +348,7 @@ public class ServiceRegistry {
 			} catch (IllegalStateException e) {
 				continue; // got unregistered, don't return reference
 			}
-			if (allservices || isAssignableTo(context, reference)) {
+			if (allservices || isAssignableTo(context, clazz, reference)) {
 				try { /* test for permission to get the service */
 					checkGetServicePermission(reference);
 				} catch (SecurityException se) {
@@ -1171,11 +1171,11 @@ public class ServiceRegistry {
 		return true;
 	}
 
-	static boolean isAssignableTo(BundleContextImpl context, ServiceReferenceImpl<?> reference) {
+	static boolean isAssignableTo(BundleContextImpl context, String clazz, ServiceReferenceImpl<?> reference) {
 		Bundle bundle = context.getBundleImpl();
 		String[] clazzes = reference.getClasses();
 		for (int i = 0, len = clazzes.length; i < len; i++)
-			if (!reference.isAssignableTo(bundle, clazzes[i]))
+			if (!reference.getRegistration().isAssignableTo(bundle, clazzes[i], clazzes[i] == clazz))
 				return false;
 		return true;
 	}
