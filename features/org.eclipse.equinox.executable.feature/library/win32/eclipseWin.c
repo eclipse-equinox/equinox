@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Kevin Cornell (Rational Software Corporation)
  *     Holger Voormann - fix for bug 384950 (http://eclip.se/384950)
+ *     Gerhard Kreuzer - fix for bug 560428
  *******************************************************************************/
 
 #include "eclipseOS.h"
@@ -41,7 +42,7 @@ _TCHAR*  vmLibrary 	   = _T("jvm.dll");
 _TCHAR*  shippedVMDir  = _T("jre\\bin\\");
 
 /* Define local variables for communicating with running eclipse instance. */
-static HANDLE	mutex;
+static HANDLE	mutex = 0;
 static UINT		findWindowTimeout = 1000;
 static UINT_PTR findWindowTimerId = 97;
 static UINT		timerCount = 0;
@@ -135,6 +136,7 @@ static void CALLBACK findWindowProc(HWND hwnd, UINT message, UINT idTimer, DWORD
 		sendOpenFileMessage(window);
 		ReleaseMutex(mutex);
 		CloseHandle(mutex);
+		mutex = 0;
 		KillTimer(hwnd, findWindowTimerId);
 		return;
 	}
@@ -144,6 +146,7 @@ static void CALLBACK findWindowProc(HWND hwnd, UINT message, UINT idTimer, DWORD
 		KillTimer(hwnd, findWindowTimerId);
 		ReleaseMutex(mutex);
 		CloseHandle(mutex);
+		mutex = 0;
 	}
 }
 
@@ -170,6 +173,7 @@ int reuseWorkbench(_TCHAR** filePath, int timeout) {
 	if (lock != WAIT_OBJECT_0) {
 		/* failed to get the lock before timeout, We won't be reusing an existing eclipse. */
 		CloseHandle(mutex);
+		mutex = 0;
 		return 0;
 	}
 	
@@ -179,6 +183,7 @@ int reuseWorkbench(_TCHAR** filePath, int timeout) {
 		sendOpenFileMessage(window);
 		ReleaseMutex(mutex);
 		CloseHandle(mutex);
+		mutex = 0;
 		return 1; /* success! */
 	} 
 	
@@ -286,7 +291,21 @@ jlong getSplashHandle() {
 }
 
 void takeDownSplash() {
+	HWND window = NULL;
 	if(topWindow != NULL) {
+		if (mutex != NULL) {
+			KillTimer(topWindow, findWindowTimerId);
+
+			window = findSWTMessageWindow();
+			if (window != NULL) {
+				sendOpenFileMessage(window);
+			}
+
+			ReleaseMutex(mutex);
+			CloseHandle(mutex);
+			mutex = 0;
+		}
+
 		DestroyWindow(topWindow);
 		dispatchMessages();
 		topWindow = 0;
