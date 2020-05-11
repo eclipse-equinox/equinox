@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) Feb. 1, 2019 Liferay, Inc.
+ * Copyright (c) 2019, 2020 Liferay, Inc.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -54,11 +54,6 @@ public class ErrorPageRegistration extends EndpointRegistration<ExtendedErrorPag
 	@Override
 	public ServiceReference<?> getServiceReference() {
 		return servletHolder.getServiceReference();
-	}
-
-	@Override
-	public boolean needDecode() {
-		return false;
 	}
 
 	@Override

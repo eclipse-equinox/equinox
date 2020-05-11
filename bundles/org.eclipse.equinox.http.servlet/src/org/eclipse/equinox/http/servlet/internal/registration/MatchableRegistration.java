@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2019 Raymond Augé and others.
+ * Copyright (c) 2014, 2020 Raymond Augé and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,9 +14,6 @@
 
 package org.eclipse.equinox.http.servlet.internal.registration;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import org.eclipse.equinox.http.servlet.internal.servlet.Match;
 import org.eclipse.equinox.http.servlet.internal.util.Const;
 import org.osgi.dto.DTO;
@@ -30,8 +27,6 @@ public abstract class MatchableRegistration<T, D extends DTO>
 	public MatchableRegistration(T t, D d) {
 		super(t, d);
 	}
-
-	public abstract boolean needDecode();
 
 	public abstract String match(
 		String name, String servletPath, String pathInfo, String extension,
@@ -59,14 +54,6 @@ public abstract class MatchableRegistration<T, D extends DTO>
 			String pattern, String servletPath, String pathInfo,
 			String extension, Match match)
 		throws IllegalArgumentException {
-		if (needDecode()) {
-			try {
-				servletPath = URLDecoder.decode(servletPath, "UTF-8"); //$NON-NLS-1$
-			}
-			catch (UnsupportedEncodingException e) {
-				// do nothing
-			}
-		}
 		if (match == Match.EXACT) {
 			return pattern.equals(servletPath);
 		}
@@ -106,21 +93,6 @@ public abstract class MatchableRegistration<T, D extends DTO>
 			}
 		}
 
-		return false;
-	}
-
-	static boolean patternsRequireDecode(String[] patterns) {
-		for (String pattern : patterns) {
-			try {
-				String encode = URLEncoder.encode(pattern, "UTF-8"); //$NON-NLS-1$
-				if (!encode.equals(pattern)) {
-					return true;
-				}
-			}
-			catch (UnsupportedEncodingException e) {
-				// do nothing
-			}
-		}
 		return false;
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 IBM Corporation and others.
+ * Copyright (c) 2011, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -41,7 +41,6 @@ public class FilterRegistration
 	private final ContextController contextController;
 	private final boolean initDestoyWithContextController;
 	private final Pattern[] compiledRegexs;
-	private final boolean needDecode;
 
 	public FilterRegistration(
 		ServiceHolder<Filter> filterHolder, FilterDTO filterDTO, int priority,
@@ -74,7 +73,6 @@ public class FilterRegistration
 		} else {
 			initDestoyWithContextController = true;
 		}
-		needDecode = MatchableRegistration.patternsRequireDecode(filterDTO.patterns);
 	}
 
 	@Override
@@ -279,11 +277,6 @@ public class FilterRegistration
 		}
 
 		return patterns;
-	}
-
-	@Override
-	public boolean needDecode() {
-		return needDecode;
 	}
 
 }

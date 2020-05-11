@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2019 Raymond Augé and others.
+ * Copyright (c) 2014, 2020 Raymond Augé and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -34,7 +34,6 @@ public class ResourceRegistration extends EndpointRegistration<ResourceDTO> {
 
 		this.serviceReference = serviceReference;
 		name = servletHolder.get().getClass().getName().concat("#").concat(getD().prefix); //$NON-NLS-1$
-		needDecode = MatchableRegistration.patternsRequireDecode(resourceDTO.patterns);
 	}
 
 	@Override
@@ -57,12 +56,6 @@ public class ResourceRegistration extends EndpointRegistration<ResourceDTO> {
 		return serviceReference;
 	}
 
-	@Override
-	public boolean needDecode() {
-		return needDecode;
-	}
-
-	private final boolean needDecode;
 	private final String name;
 	private final ServiceReference<?> serviceReference;
 

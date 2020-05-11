@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2019 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2005, 2020 Cognos Incorporated, IBM Corporation and others
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -66,7 +66,6 @@ public class ServletRegistration extends EndpointRegistration<ServletDTO> {
 		else {
 			multipartSupport = null;
 		}
-		needDecode = MatchableRegistration.patternsRequireDecode(servletDTO.patterns);
 	}
 
 	@Override
@@ -96,11 +95,6 @@ public class ServletRegistration extends EndpointRegistration<ServletDTO> {
 
 		return multipartSupport.parseRequest(request);
 	}
-	@Override
-	public boolean needDecode() {
-		return needDecode;
-	}
 
-	private final boolean needDecode;
 	private final MultipartSupport multipartSupport;
 }
