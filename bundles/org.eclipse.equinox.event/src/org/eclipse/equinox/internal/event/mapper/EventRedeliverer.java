@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,7 +22,7 @@ import org.osgi.service.event.EventAdmin;
  * 
  * @version $Revision: 1.3 $
  */
-public class EventRedeliverer implements FrameworkListener, BundleListener, ServiceListener {
+public class EventRedeliverer implements FrameworkListener, BundleListener, AllServiceListener {
 	private final EventAdmin eventAdmin;
 	private final BundleContext bc;
 
