@@ -80,8 +80,8 @@ static _TCHAR* findLib( _TCHAR* command );
  * for example jvmLocations[0] + dirSeparator + vmLibrary */
 #define MAX_LOCATION_LENGTH 25 /* none of the jvmLocations strings should be longer than this */ 
 static const _TCHAR* jvmLocations [] = { _T("j9vm"), _T("..\\jre\\bin\\j9vm"),
-										 _T("client"), _T("..\\jre\\bin\\client"), 
 										 _T("server"), _T("..\\jre\\bin\\server"),
+										 _T("client"), _T("..\\jre\\bin\\client"), 
 										 _T("classic"), _T("..\\jre\\bin\\classic"),
 										 _T("jrockit"), _T("..\\jre\\bin\\jrockit"),
 								 		 NULL };

@@ -69,14 +69,14 @@ static char * findLib(char * command);
 #define MAX_LOCATION_LENGTH 40 /* none of the jvmLocations strings should be longer than this */
 #define MAX_JVMLIB_LENGTH   15 /* none of the jvmLibs strings should be longer than this */
 static const char* jvmLocations[] = {
-	"../lib/" JAVA_ARCH "/client",
 	"../lib/" JAVA_ARCH "/server",
+	"../lib/" JAVA_ARCH "/client",
 	"../lib/client",
 	"../lib/server",
-	"../jre/lib/" JAVA_ARCH "/client",
 	"../jre/lib/" JAVA_ARCH "/server",
-	"../jre/lib/client",
+	"../jre/lib/" JAVA_ARCH "/client",
 	"../jre/lib/server",
+	"../jre/lib/client",
 	NULL
 };
 static const char* jvmLibs[] = { "libjvm.dylib", "libjvm.jnilib", "libjvm.so", NULL };

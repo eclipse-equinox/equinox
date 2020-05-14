@@ -47,11 +47,11 @@
 #define MAX_LOCATION_LENGTH 40 /* none of the jvmLocations strings should be longer than this */ 
 static const char* jvmLocations [] = { "j9vm", "../jre/bin/j9vm",
 									   "classic", "../jre/bin/classic",
-									   "../lib/" JAVA_ARCH "/client",  
 									   "../lib/" JAVA_ARCH "/server",
+									   "../lib/" JAVA_ARCH "/client",  
 									   "../lib/" JAVA_ARCH "/jrockit",
-									   "../jre/lib/" JAVA_ARCH "/client",
 									   "../jre/lib/" JAVA_ARCH "/server",
+									   "../jre/lib/" JAVA_ARCH "/client",
 									   "../jre/lib/" JAVA_ARCH "/jrockit",
 									   "../lib/jvm/jre/lib/" JAVA_ARCH "/client",
 								 	   NULL };
