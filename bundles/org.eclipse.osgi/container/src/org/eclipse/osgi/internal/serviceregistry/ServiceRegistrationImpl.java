@@ -234,6 +234,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 			}
 		}
 
+		ungetHookInstance();
 		/* must not hold the registrationLock when this event is published */
 		registry.publishServiceEvent(new ServiceEvent(ServiceEvent.UNREGISTERING, ref));
 
@@ -289,6 +290,18 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	@Override
 	public ServiceReference<S> getReference() {
 		return getReferenceImpl();
+	}
+
+	S getHookInstance() {
+		return null;
+	}
+
+	void initHookInstance() {
+		// nothing by default
+	}
+
+	void ungetHookInstance() {
+		// nothing by default
 	}
 
 	ServiceReferenceImpl<S> getReferenceImpl() {
@@ -758,5 +771,47 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 			return -1;
 		}
 		return 1;
+	}
+
+	static class FrameworkHookRegistration<S> extends ServiceRegistrationImpl<S> {
+		private volatile boolean hookInitialized = false;
+		private volatile S hookInstance;
+		private final BundleContextImpl systemContext;
+		private final Object hookLock = new Object();
+
+		FrameworkHookRegistration(ServiceRegistry registry, BundleContextImpl context, String[] clazzes, S service,
+				BundleContextImpl systemContext) {
+			super(registry, context, clazzes, service);
+			this.systemContext = systemContext;
+		}
+
+		@Override
+		S getHookInstance() {
+			if (hookInstance != null || !hookInitialized) {
+				return hookInstance;
+			}
+			synchronized (hookLock) {
+				if (hookInstance == null) {
+					hookInstance = getSafeService(systemContext, ServiceConsumer.singletonConsumer);
+				}
+			}
+			return hookInstance;
+		}
+
+		@Override
+		void initHookInstance() {
+			ServiceReference<S> ref = getReference();
+			if (ref != null) {
+				hookInstance = getSafeService(systemContext, ServiceConsumer.singletonConsumer);
+				hookInitialized = true;
+			}
+		}
+
+		@Override
+		void ungetHookInstance() {
+			if (hookInstance != null) {
+				systemContext.ungetService(getReferenceImpl());
+			}
+		}
 	}
 }

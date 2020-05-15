@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2018 IBM Corporation and others.
+ * Copyright (c) 2006, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -2283,7 +2283,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			reg.unregister();
 		}
 
-		assertEquals("Unexpected number of woven classes.", 3, called.size());
+		assertEquals("Unexpected number of woven classes.", 2, called.size());
 		for (WovenClass wovenClass : called) {
 			if (weavingHookClasses.contains(wovenClass.getClassName())) {
 				assertNull("Did not expect to find class: " + wovenClass.getDefinedClass(), wovenClass.getDefinedClass());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2017 IBM Corporation and others.
+ * Copyright (c) 2004, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -73,6 +73,7 @@ public class ServiceRegistry {
 	static final String eventHookName = EventHook.class.getName();
 	static final String eventListenerHookName = EventListenerHook.class.getName();
 	static final String listenerHookName = ListenerHook.class.getName();
+
 
 	/** Published services by class name.
 	 * The {@literal List<ServiceRegistrationImpl<?>>}s are both sorted
@@ -229,12 +230,16 @@ public class ServiceRegistry {
 			throw new IllegalArgumentException(Msg.SERVICE_EMPTY_CLASS_LIST_EXCEPTION);
 		}
 
+		boolean isListenerHook = false;
+		boolean isFrameworkHook = false;
 		/* copy the array so that changes to the original will not affect us. */
 		List<String> copy = new ArrayList<>(size);
 		// intern the strings and remove duplicates
 		for (int i = 0; i < size; i++) {
 			String clazz = clazzes[i].intern();
 			if (!copy.contains(clazz)) {
+				isListenerHook = isListenerHook || listenerHookName.equals(clazz);
+				isFrameworkHook = isFrameworkHook || isFrameworkHook(clazz);
 				copy.add(clazz);
 			}
 		}
@@ -254,12 +259,42 @@ public class ServiceRegistry {
 			}
 		}
 
-		ServiceRegistrationImpl<?> registration = new ServiceRegistrationImpl<>(this, context, clazzes, service);
+		ServiceRegistrationImpl<?> registration = isFrameworkHook
+				? new ServiceRegistrationImpl.FrameworkHookRegistration<>(this, context, clazzes, service,
+						systemBundleContext)
+				: new ServiceRegistrationImpl<>(this, context, clazzes, service);
 		registration.register(properties);
-		if (copy.contains(listenerHookName)) {
+		registration.initHookInstance();
+
+		if (isListenerHook) {
 			notifyNewListenerHook(registration);
 		}
 		return registration;
+	}
+
+	private boolean isFrameworkHook(String className) {
+		switch (className) {
+		case "org.osgi.framework.hooks.bundle.CollisionHook": //$NON-NLS-1$
+			return true;
+		case "org.osgi.framework.hooks.bundle.EventHook": //$NON-NLS-1$
+			return true;
+		case "org.osgi.framework.hooks.bundle.FindHook": //$NON-NLS-1$
+			return true;
+		case "org.osgi.framework.hooks.service.EventHook": //$NON-NLS-1$
+			return true;
+		case "org.osgi.framework.hooks.service.EventListenerHook": //$NON-NLS-1$
+			return true;
+		case "org.osgi.framework.hooks.service.FindHook": //$NON-NLS-1$
+			return true;
+		case "org.osgi.framework.hooks.service.ListenerHook": //$NON-NLS-1$
+			return true;
+		case "org.osgi.framework.hooks.weaving.WeavingHook": //$NON-NLS-1$
+			return true;
+		case "org.osgi.framework.hooks.weaving.WovenClassListener": //$NON-NLS-1$
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	/**
@@ -1335,8 +1370,11 @@ public class ServiceRegistry {
 		if (hookContext.skipRegistration(registration)) {
 			return;
 		}
-		Object hook = registration.getSafeService(context, ServiceConsumer.singletonConsumer);
-		if (hook == null) { // if the hook is null
+		Object hook = registration.getHookInstance();
+		if (hook == null) {
+			// The hook may not be initialized yet
+			// We do not call the hook until after it has been registered
+			// This means we could miss calls to a hook during the registered event.
 			return;
 		}
 		try {
@@ -1350,8 +1388,6 @@ public class ServiceRegistry {
 			container.handleRuntimeError(t);
 			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, hook.getClass().getName(), hookContext.getHookMethodName()), t);
 			container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
-		} finally {
-			registration.ungetService(context, ServiceConsumer.singletonConsumer, null);
 		}
 	}
 
