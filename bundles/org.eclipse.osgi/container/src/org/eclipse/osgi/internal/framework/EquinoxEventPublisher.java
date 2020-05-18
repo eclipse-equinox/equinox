@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -46,7 +46,8 @@ import org.osgi.framework.hooks.bundle.EventHook;
 public class EquinoxEventPublisher {
 	static final String eventHookName = EventHook.class.getName();
 	static final String collisionHookName = CollisionHook.class.getName();
-	static final int FRAMEWORK_STOPPED_MASK = (FrameworkEvent.STOPPED | FrameworkEvent.STOPPED_BOOTCLASSPATH_MODIFIED | FrameworkEvent.STOPPED_UPDATE);
+	static final int FRAMEWORK_STOPPED_MASK = (FrameworkEvent.STOPPED | FrameworkEvent.STOPPED_BOOTCLASSPATH_MODIFIED
+			| FrameworkEvent.STOPPED_UPDATE | FrameworkEvent.STOPPED_SYSTEM_REFRESHED);
 
 	static final int BUNDLEEVENT = 1;
 	static final int BUNDLEEVENTSYNC = 2;
