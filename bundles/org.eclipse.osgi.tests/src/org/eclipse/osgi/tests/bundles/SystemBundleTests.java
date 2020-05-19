@@ -163,16 +163,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		URL configURL = configLocation.getURL();
 		assertTrue("incorrect configuration location", configURL.toExternalForm().endsWith("testSystemBundle01/")); //$NON-NLS-1$ //$NON-NLS-2$
 
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
@@ -190,16 +181,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			fail("Failed to start the framework", e); //$NON-NLS-1$
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 
 		try {
@@ -208,16 +190,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			fail("Failed to start the framework", e); //$NON-NLS-1$
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
@@ -240,16 +213,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertNotNull("config property is null", configArea); //$NON-NLS-1$
 		assertTrue("Wrong configuration area", configArea.endsWith("testSystemBundle03/")); //$NON-NLS-1$ //$NON-NLS-2$
 		// don't do anything; just put the framework back to the RESOLVED state
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected error stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
@@ -289,16 +253,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
 		assertEquals("Wrong state for installed bundle", Bundle.ACTIVE, substitutesA.getState()); //$NON-NLS-1$
 		// put the framework back to the RESOLVED state
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
@@ -339,16 +294,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 		assertEquals("Wrong state for active bundle", Bundle.ACTIVE, substitutesA.getState()); //$NON-NLS-1$
 		// put the framework back to the RESOLVED state
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
@@ -389,16 +335,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 		assertEquals("Wrong state for active bundle", Bundle.ACTIVE, substitutesA.getState()); //$NON-NLS-1$
 		// put the framework back to the RESOLVED state
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 
 		try {
@@ -418,16 +355,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		// no need to start the bundle again it should have been persistently started
 		assertEquals("Wrong state for active bundle", Bundle.ACTIVE, substitutesA2.getState()); //$NON-NLS-1$
 		// put the framework back to the RESOLVED state
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 
 	}
@@ -481,29 +409,11 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox2.getState()); //$NON-NLS-1$
 
 		// put the framework 1 back to the RESOLVED state
-		try {
-			equinox1.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox1.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox1);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox1.getState()); //$NON-NLS-1$
 
 		// put the framework 2 back to the RESOLVED state
-		try {
-			equinox2.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox2.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox2);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox2.getState()); //$NON-NLS-1$
 	}
 
@@ -551,16 +461,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		URL configURL = configLocation.getURL();
 		assertTrue("incorrect configuration location", configURL.toExternalForm().endsWith("testSystemBundle07_01/")); //$NON-NLS-1$ //$NON-NLS-2$
 
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
@@ -577,16 +478,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			fail("Failed to start the framework", e); //$NON-NLS-1$
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 
 		config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle08_2"); //$NON-NLS-1$
@@ -613,16 +505,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		URL configURL = configLocation.getURL();
 		assertTrue("incorrect configuration location", configURL.toExternalForm().endsWith("testSystemBundle08_2/")); //$NON-NLS-1$ //$NON-NLS-2$
 
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
@@ -650,16 +533,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		} catch (BundleException e) {
 			fail("Unexpected exception starting test bundle", e); //$NON-NLS-1$
 		}
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
@@ -716,16 +590,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 				// nothing
 			}
 		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
@@ -756,16 +621,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong number of exports", 1, pkg2.length); //$NON-NLS-1$
 		assertEquals("Wrong package name", "test.pkg2", pkg2[0].getName()); //$NON-NLS-1$ //$NON-NLS-2$
 
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
@@ -793,16 +649,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong stopEvent", FrameworkEvent.WAIT_TIMEDOUT, stopEvent.getType()); //$NON-NLS-1$
 
 		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			stopEvent = equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stopEvent = stop(equinox);
 		assertNotNull("Stop event is null", stopEvent); //$NON-NLS-1$
 		assertEquals("Wrong stopEvent", FrameworkEvent.STOPPED, stopEvent.getType()); //$NON-NLS-1$
 	}
@@ -844,16 +691,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 		assertEquals("Wrong state for active bundle", Bundle.ACTIVE, substitutesA.getState()); //$NON-NLS-1$
 		// put the framework back to the RESOLVED state
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 
 		// initialize the framework again to the same configuration
@@ -870,16 +708,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		// make sure the bundle is there
 		assertNotNull("missing installed bundle", substitutesA); //$NON-NLS-1$
 		assertEquals("Unexpected symbolic name", "substitutes.a", substitutesA.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 
 		// initialize the framework again to the same configuration but use clean option
@@ -896,16 +725,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 		// make sure the bundle is there
 		assertNull("Unexpected bundle is installed", substitutesA); //$NON-NLS-1$
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
@@ -928,18 +748,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertNotNull("StartLevel service is null", st); //$NON-NLS-1$
 		assertEquals("Unexpected start level", 10, st.getStartLevel()); //$NON-NLS-1$
 		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-
-		FrameworkEvent stopEvent = null;
-		try {
-			stopEvent = equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		FrameworkEvent stopEvent = stop(equinox);
 		assertNotNull("Stop event is null", stopEvent); //$NON-NLS-1$
 		assertEquals("Wrong stopEvent", FrameworkEvent.STOPPED, stopEvent.getType()); //$NON-NLS-1$
 	}
@@ -1010,20 +819,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		} catch (ClassNotFoundException e) {
 			fail("failed to load class", e); //$NON-NLS-1$
 		}
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-
-		FrameworkEvent stopEvent = null;
-		try {
-			stopEvent = equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
-		assertNotNull("Stop event is null", stopEvent); //$NON-NLS-1$
-		assertEquals("Wrong stopEvent", FrameworkEvent.STOPPED, stopEvent.getType()); //$NON-NLS-1$
+		stop(equinox, FrameworkEvent.STOPPED);
 	}
 
 	public void testChangeEE() throws IOException, BundleException {
@@ -1054,12 +850,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		Assert.assertTrue("Could not resolve bundle.", equinox.adapt(FrameworkWiring.class).resolveBundles(Collections.singleton(b)));
 
 		// put the framework back to the RESOLVED state
-		equinox.stop();
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 
 		// configure equinox for java 7
 		configuration.put("osgi.java.profile", javaSE7Profile.toExternalForm());
@@ -1074,12 +865,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		Assert.assertFalse("Could resolve bundle.", equinox.adapt(FrameworkWiring.class).resolveBundles(Collections.singleton(b)));
 
 		// put the framework back to the RESOLVED state
-		equinox.stop();
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 
 		// move back to java 8
 		configuration.put("osgi.java.profile", javaSE8Profile.toExternalForm());
@@ -1094,12 +880,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		Assert.assertTrue("Could not resolve bundle.", equinox.adapt(FrameworkWiring.class).resolveBundles(Collections.singleton(b)));
 
 		// put the framework back to the RESOLVED state
-		equinox.stop();
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 	}
 
 	public void testMRUBundleFileList() {
@@ -1148,16 +929,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			}
 		}
 		// put the framework back to the RESOLVED state
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 
 		try {
 			equinox.start();
@@ -1209,16 +981,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 		openAllBundleFiles(equinox.getBundleContext());
 
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
@@ -1303,29 +1066,11 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertFalse("URL is equal: " + entry1.toExternalForm(), entry1.equals(entry2)); //$NON-NLS-1$
 
 		// put the framework 1 back to the RESOLVED state
-		try {
-			equinox1.stop();
-		} catch (BundleException e) {
-			fail("Unexpected error stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox1.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox1);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox1.getState()); //$NON-NLS-1$
 
 		// put the framework 2 back to the RESOLVED state
-		try {
-			equinox2.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox2.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox2);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox2.getState()); //$NON-NLS-1$
 	}
 
@@ -1397,29 +1142,11 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 
 		// put the framework 1 back to the RESOLVED state
-		try {
-			equinox1.stop();
-		} catch (BundleException e) {
-			fail("Unexpected error stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox1.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox1);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox1.getState()); //$NON-NLS-1$
 
 		// put the framework 2 back to the RESOLVED state
-		try {
-			equinox2.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox2.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox2);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox2.getState()); //$NON-NLS-1$
 		handlerReg.unregister();
 		System.getProperties().remove("test.url");
@@ -1452,17 +1179,14 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 		assertFalse("UUIDs are the same: " + uuid1_1, uuid1_1.equals(uuid2_1));
 
+		stop(equinox1);
+		stop(equinox2);
+
 		try {
-			equinox1.stop();
-			equinox2.stop();
-			equinox1.waitForStop(1000);
-			equinox2.waitForStop(1000);
 			equinox1.init();
 			equinox2.init();
 		} catch (BundleException e) {
 			fail("Failed to re-init frameworks.", e);
-		} catch (InterruptedException e) {
-			fail("Failed to stop frameworks.", e);
 		}
 
 		String uuid1_2 = equinox1.getBundleContext().getProperty(Constants.FRAMEWORK_UUID);
@@ -1473,16 +1197,8 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertFalse("UUIDs are the same: " + uuid1_2, uuid1_2.equals(uuid2_2));
 		assertFalse("UUIDs are the same: " + uuid2_1, uuid2_1.equals(uuid2_2));
 
-		try {
-			equinox1.stop();
-			equinox2.stop();
-			equinox1.waitForStop(1000);
-			equinox2.waitForStop(1000);
-		} catch (BundleException e) {
-			fail("Failed to re-init frameworks.", e);
-		} catch (InterruptedException e) {
-			fail("Failed to stop frameworks.", e);
-		}
+		stop(equinox1);
+		stop(equinox2);
 	}
 
 	private void verifyUUID(String uuid) {
@@ -1572,16 +1288,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 
 		// put the framework back to the RESOLVED state
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 
 		try {
 			equinox.start();
@@ -1603,16 +1310,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			fail("Failed to get bundle entries", t);
 		}
 
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
@@ -1643,16 +1341,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			URL resource = tb1.getResource("tb1/resource.txt");
 			assertNotNull("Resource is null", resource);
 
-			try {
-				equinox.stop();
-			} catch (BundleException e) {
-				fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-			}
-			try {
-				equinox.waitForStop(10000);
-			} catch (InterruptedException e) {
-				fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-			}
+			stop(equinox);
 			assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 		} finally {
 			testBundleInstaller.shutdown();
@@ -1672,16 +1361,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		} catch (BundleException e) {
 			fail("Failed to start the framework", e); //$NON-NLS-1$
 		}
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
@@ -1742,16 +1422,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			reg.unregister();
 		}
 		// put the framework back to the RESOLVED state
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected error stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 
 		try {
 			equinox.start();
@@ -1792,16 +1463,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 
 		// put the framework back to the RESOLVED state
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected error stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 
 		try {
 			equinox.start();
@@ -1829,16 +1491,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong number of wires for wiring1", 1, packages1.size());
 		assertEquals("Wrong number of wires for wiring2", 1, packages2.size());
 
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected error stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 	}
 
 	private void doTestBug351519Refresh(Boolean refreshDuplicates) {
@@ -1913,16 +1566,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			assertEquals("Refreshed bundles does not include v1", refreshed[0], tb1v1);
 		}
 
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
@@ -1950,16 +1594,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			fail("failed to install and start test bundle", e1); //$NON-NLS-1$
 		}
 
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
@@ -2020,16 +1655,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		} finally {
 			Thread.currentThread().setContextClassLoader(current);
 		}
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected error stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 	}
 
 	private void checkActive(Bundle b) {
@@ -2116,16 +1742,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			resolverHookReg.unregister();
 		}
 		// put the framework back to the RESOLVED state
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected error stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 
 		if (!errors.isEmpty()) {
 			fail("Failed to resolve dynamic", errors.iterator().next());
@@ -2180,13 +1797,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 				}
 			}
 		});
-		equinox.stop();
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			fail("Unexpected interruption.", e);
-		}
+		stop(equinox);
 
 		List<Bundle> expectedOrder = Arrays.asList(systemBundle, chainTest, chainTestA, chainTestB, chainTestC, chainTestD);
 		assertEquals("Wrong stopping order", expectedOrder.toArray(), stoppingOrder.toArray());
@@ -2206,13 +1817,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.start();
 
 		long startTime = System.currentTimeMillis();
-		equinox.stop();
-		try {
-			equinox.waitForStop(500);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			fail("Unexpected interruption.", e);
-		}
+		stop(equinox, true, 500);
 		long stopTime = System.currentTimeMillis() - startTime;
 		if (stopTime > 2000) {
 			fail("waitForStop time took too long: " + stopTime);
@@ -2240,14 +1845,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong value for test.substitute1", "Some.PASSED.test", systemContext.getProperty("test.substitute1"));
 		// check that non-substitution keeps $ delimiters.
 		assertEquals("Wrong value for test.substitute2", "Some.$test.prop2$.test", systemContext.getProperty("test.substitute2"));
-		equinox.stop();
-		try {
-			equinox.waitForStop(5000);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			fail("Unexpected interruption.", e);
-		}
-
+		stop(equinox);
 	}
 
 	public void testDynamicSecurityManager() throws BundleException {
@@ -2284,14 +1882,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 					// do nothing
 				}
 			});
-			equinox.stop();
-			try {
-				FrameworkEvent event = equinox.waitForStop(10000);
-				assertEquals("Wrong event.", FrameworkEvent.STOPPED, event.getType());
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				fail("Unexpected interruption.", e);
-			}
+			stop(equinox);
 			assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 		} finally {
 			System.setSecurityManager(null);
@@ -2616,8 +2207,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			fail("Expected to be able to load the class from boot.", e);
 		}
 		long bId = b.getBundleId();
-		equinox.stop();
-		equinox.waitForStop(5000);
+		stop(equinox);
 
 		// remove the setting to ensure false is used for the embedded case
 		configIni.remove(compatBootDelegate);
@@ -2667,8 +2257,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		};
 		systemContext.addBundleListener(systemBundleListener);
 
-		equinox.stop();
-		equinox.waitForStop(5000);
+		stop(equinox);
 		assertEquals("Wrong number of STOPPING events", 1, stoppingEvent.get());
 		assertEquals("Wrong number of STOPPED events", 1, stoppedEvent.get());
 	}
@@ -2711,9 +2300,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertTrue("Unexpected Export-Package header: " + exportPackage, exportPackage.contains("something.system"));
 		assertTrue("Unexpected Provide-Capability header: " + provideCapability, provideCapability.contains("something.extra"));
 		assertTrue("Unexpected Export-Package header: " + exportPackage, exportPackage.contains("something.extra"));
-		equinox.stop();
-
-		equinox.waitForStop(5000);
+		stop(equinox);
 
 		configuration.put(EquinoxConfiguration.PROP_SYSTEM_PROVIDE_HEADER, EquinoxConfiguration.SYSTEM_PROVIDE_HEADER_ORIGINAL);
 		equinox = new Equinox(configuration);
@@ -2725,9 +2312,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertFalse("Unexpected Export-Package header: " + exportPackage, exportPackage.contains("something.system"));
 		assertFalse("Unexpected Provide-Capability header: " + provideCapability, provideCapability.contains("something.extra"));
 		assertFalse("Unexpected Export-Package header: " + exportPackage, exportPackage.contains("something.extra"));
-		equinox.stop();
-
-		equinox.waitForStop(5000);
+		stop(equinox);
 
 		configuration.put(EquinoxConfiguration.PROP_SYSTEM_PROVIDE_HEADER, EquinoxConfiguration.SYSTEM_PROVIDE_HEADER_SYSTEM);
 		equinox = new Equinox(configuration);
@@ -2739,9 +2324,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertTrue("Unexpected Export-Package header: " + exportPackage, exportPackage.contains("something.system"));
 		assertFalse("Unexpected Provide-Capability header: " + provideCapability, provideCapability.contains("something.extra"));
 		assertFalse("Unexpected Export-Package header: " + exportPackage, exportPackage.contains("something.extra"));
-		equinox.stop();
-
-		equinox.waitForStop(5000);
+		stop(equinox);
 
 		configuration.put(EquinoxConfiguration.PROP_SYSTEM_PROVIDE_HEADER, EquinoxConfiguration.SYSTEM_PROVIDE_HEADER_SYSTEM_EXTRA);
 		equinox = new Equinox(configuration);
@@ -2753,9 +2336,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertTrue("Unexpected Export-Package header: " + exportPackage, exportPackage.contains("something.system"));
 		assertTrue("Unexpected Provide-Capability header: " + provideCapability, provideCapability.contains("something.extra"));
 		assertTrue("Unexpected Export-Package header: " + exportPackage, exportPackage.contains("something.extra"));
-		equinox.stop();
-
-		equinox.waitForStop(5000);
+		stop(equinox);
 	}
 
 	public void testSystemBundleLoader() {
@@ -2841,16 +2422,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		@SuppressWarnings("deprecation")
 		String osgiEE = equinox.getBundleContext().getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
 		// don't do anything; just put the framework back to the RESOLVED state
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected error stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 
 		assertTrue("Wrong osgi EE: expected: " + expectedEEName + " but was: " + osgiEE, osgiEE.endsWith(expectedEEName));
@@ -2987,8 +2559,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 				assertEquals("Requirement directives differ: " + outerReq.getNamespace(), outerReq.getDirectives(), innerReq.getDirectives());
 			}
 		} finally {
-			equinox.stop();
-			equinox.waitForStop(5000);
+			stop(equinox);
 		}
 	}
 
@@ -3038,16 +2609,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			fail("Unexpected update error", e); //$NON-NLS-1$
 		}
 
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
@@ -3063,8 +2625,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		Equinox equinox = new Equinox(configuration);
 		equinox.start();
 		checkActiveThreadType(equinox, true);
-		equinox.stop();
-		equinox.waitForStop(10000);
+		stop(equinox);
 
 		// test setting to 'normal'
 		// should result in a non-daemon thread
@@ -3072,8 +2633,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox = new Equinox(configuration);
 		equinox.start();
 		checkActiveThreadType(equinox, false);
-		equinox.stop();
-		equinox.waitForStop(10000);
+		stop(equinox);
 
 		// test setting to null (default)
 		// should result in a non-daemon thread
@@ -3110,8 +2670,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		// should be active now
 		assertEquals("Wrong state of bundle.", Bundle.ACTIVE, b.getState());
 		// put the framework back to the RESOLVED state
-		equinox.stop();
-		equinox.waitForStop(10000);
+		stop(equinox);
 
 		// revert back to default behavior
 		configuration.remove(EquinoxConfiguration.PROP_COMPATIBILITY_START_LAZY_ON_FAIL_CLASSLOAD);
@@ -3162,14 +2721,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		// check for substitution
 		assertEquals("Wrong value for test.config", getName(), systemContext.getProperty("test.config"));
 
-		equinox.stop();
-		try {
-			equinox.waitForStop(5000);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			fail("Unexpected interruption.", e);
-		}
-
+		stop(equinox);
 	}
 
 	void checkActiveThreadType(Equinox equinox, boolean expectIsDeamon) {
@@ -3209,16 +2761,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			fail("Failed init", e);
 		} finally {
 			System.setProperty("os.name", origOS);
-			try {
-				if (equinox != null) {
-					equinox.stop();
-					equinox.waitForStop(1000);
-				}
-			} catch (BundleException e) {
-				fail("Failed to stop framework.", e);
-			} catch (InterruptedException e) {
-				fail("Failed to stop framework.", e);
-			}
+			stop(equinox);
 		}
 	}
 
@@ -3242,16 +2785,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		} catch (BundleException e) {
 			fail("Failed init", e);
 		} finally {
-			try {
-				if (equinox != null) {
-					equinox.stop();
-					equinox.waitForStop(1000);
-				}
-			} catch (BundleException e) {
-				fail("Failed to stop framework.", e);
-			} catch (InterruptedException e) {
-				fail("Failed to stop framework.", e);
-			}
+			stop(equinox);
 		}
 	}
 
@@ -3265,24 +2799,14 @@ public class SystemBundleTests extends AbstractBundleTests {
 			equinox = new Equinox(configuration);
 			equinox.start();
 			doLoggingOnMultipleListeners(equinox);
-			equinox.stop();
-			equinox.waitForStop(1000);
+			stop(equinox);
 			equinox.start();
 			doLoggingOnMultipleListeners(equinox);
 
 		} catch (BundleException e) {
 			fail("Failed init", e);
 		} finally {
-			try {
-				if (equinox != null) {
-					equinox.stop();
-					equinox.waitForStop(1000);
-				}
-			} catch (BundleException e) {
-				fail("Failed to stop framework.", e);
-			} catch (InterruptedException e) {
-				fail("Failed to stop framework.", e);
-			}
+			stop(equinox);
 		}
 	}
 
@@ -3354,8 +2878,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 				assertNull("Found location.", logEntry.getLocation());
 			}
 		} finally {
-			equinox.stop();
-			equinox.waitForStop(1000);
+			stop(equinox);
 		}
 	}
 
@@ -3398,16 +2921,14 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 		Framework framework = factory.newFramework(configuration);
 		framework.init();
-		framework.stop();
-		framework.waitForStop(5000);
+		stop(framework);
 
 		BundleRevision systemRevision1 = framework.adapt(BundleRevision.class);
 		int capCount1 = systemRevision1.getCapabilities(null).size();
 
 		framework = factory.newFramework(configuration);
 		framework.init();
-		framework.stop();
-		framework.waitForStop(5000);
+		stop(framework);
 
 		BundleRevision systemRevision2 = framework.adapt(BundleRevision.class);
 		int capCount2 = systemRevision2.getCapabilities(null).size();
@@ -3545,8 +3066,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			expectedStopOrder = new ArrayList(expectedStopOrder.subList(0, 3 * (numBundles / 4)));
 
 			long stopTime = System.currentTimeMillis();
-			equinox.stop();
-			equinox.waitForStop(20000);
+			stop(equinox, false, 20000);
 			System.out.println("Stop time: " + (System.currentTimeMillis() - stopTime));
 
 			assertEquals("Size on expected order is wrong.", expectedStopOrder.size(), stoppedBundles.size());
@@ -3556,16 +3076,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		} catch (BundleException e) {
 			fail("Failed init", e);
 		} finally {
-			try {
-				if (equinox != null) {
-					equinox.stop();
-					equinox.waitForStop(1000);
-				}
-			} catch (BundleException e) {
-				fail("Failed to stop framework.", e);
-			} catch (InterruptedException e) {
-				fail("Failed to stop framework.", e);
-			}
+			stop(equinox);
 		}
 	}
 
@@ -3615,16 +3126,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		} catch (BundleException e) {
 			fail("Failed init", e);
 		} finally {
-			try {
-				if (equinox != null) {
-					equinox.stop();
-					equinox.waitForStop(1000);
-				}
-			} catch (BundleException e) {
-				fail("Failed to stop framework.", e);
-			} catch (InterruptedException e) {
-				fail("Failed to stop framework.", e);
-			}
+			stop(equinox);
 		}
 	}
 
@@ -3740,16 +3242,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		} catch (BundleException e) {
 			fail("Failed init", e);
 		} finally {
-			try {
-				if (equinox != null) {
-					equinox.stop();
-					equinox.waitForStop(1000);
-				}
-			} catch (BundleException e) {
-				fail("Failed to stop framework.", e);
-			} catch (InterruptedException e) {
-				fail("Failed to stop framework.", e);
-			}
+			stop(equinox);
 		}
 	}
 
@@ -3775,12 +3268,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 				fwkWiring.resolveBundles(Collections.singleton(b));
 				b.start();
 			}
-			equinox.stop();
-			try {
-				equinox.waitForStop(1000);
-			} catch (InterruptedException e) {
-				fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-			}
+			stop(equinox);
 			equinox = null;
 			equinox = new Equinox(configuration);
 			equinox.start();
@@ -3797,16 +3285,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 				}
 			}
 		} finally {
-			try {
-				if (equinox != null) {
-					equinox.stop();
-					equinox.waitForStop(1000);
-				}
-			} catch (BundleException e) {
-				fail("Failed to stop framework.", e);
-			} catch (InterruptedException e) {
-				fail("Failed to stop framework.", e);
-			}
+			stop(equinox);
 		}
 	}
 
@@ -3870,16 +3349,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 		Assert.assertEquals("Errors found.", Collections.emptyList(), errors);
 		Assert.assertEquals("Wrong number of bundles.", numBundles + 1, systemContext.getBundles().length);
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
@@ -3948,16 +3418,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			}
 		}
 
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 
 		long timeTaken = TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime);
@@ -4049,16 +3510,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			executor1.shutdown();
 			executor2.shutdown();
 		}
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 
 		if (!errorsAndWarnings.isEmpty()) {
@@ -4101,16 +3553,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		} catch (BundleException e) {
 			fail("Failed init", e);
 		} finally {
-			try {
-				if (equinox != null) {
-					equinox.stop();
-					equinox.waitForStop(1000);
-				}
-			} catch (BundleException e) {
-				fail("Failed to stop framework.", e);
-			} catch (InterruptedException e) {
-				fail("Failed to stop framework.", e);
-			}
+			stop(equinox);
 		}
 	}
 
@@ -4150,16 +3593,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		} catch (BundleException e) {
 			fail("Unexpected BundleException", e);
 		} finally {
-			try {
-				if (equinox != null) {
-					equinox.stop();
-					equinox.waitForStop(1000);
-				}
-			} catch (BundleException e) {
-				fail("Failed to stop framework.", e);
-			} catch (InterruptedException e) {
-				fail("Failed to stop framework.", e);
-			}
+			stop(equinox);
 		}
 	}
 
@@ -4195,16 +3629,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		} catch (BundleException e) {
 			fail("Unexpected BundleException", e);
 		} finally {
-			try {
-				if (equinox != null) {
-					equinox.stop();
-					equinox.waitForStop(1000);
-				}
-			} catch (BundleException e) {
-				fail("Failed to stop framework.", e);
-			} catch (InterruptedException e) {
-				fail("Failed to stop framework.", e);
-			}
+			stop(equinox);
 		}
 	}
 
@@ -4333,15 +3758,6 @@ public class SystemBundleTests extends AbstractBundleTests {
 		List<BundleWire> providedWires = equinox.adapt(BundleWiring.class).getProvidedWires(PackageNamespace.PACKAGE_NAMESPACE);
 		Assert.assertEquals("Wrong number of provided wires.", numBundles, providedWires.size());
 
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 	}
 }

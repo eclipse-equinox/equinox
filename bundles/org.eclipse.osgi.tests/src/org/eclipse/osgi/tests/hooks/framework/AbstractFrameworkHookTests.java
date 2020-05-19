@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.tests.hooks.framework;
+
+import static org.eclipse.osgi.tests.bundles.AbstractBundleTests.stop;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -28,7 +30,6 @@ import org.eclipse.osgi.launch.EquinoxFactory;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.BundleInstaller;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
@@ -125,34 +126,6 @@ public abstract class AbstractFrameworkHookTests extends CoreTest {
 	protected void setUp() throws Exception {
 		setUpBundleInstaller();
 		setUpClassLoader();
-	}
-
-	protected void stop(Framework framework) throws Exception {
-		stop(framework, false);
-	}
-
-	protected void stopQuietly(Framework framework) {
-		if (framework == null)
-			return;
-		try {
-			stop(framework, true);
-		} catch (Exception e) {
-			// ignore;
-		}
-	}
-
-	private void stop(Framework framework, boolean quietly) throws Exception {
-		try {
-			framework.stop();
-			FrameworkEvent event = framework.waitForStop(10000);
-			if (!quietly) {
-				assertEquals("The framework was not stopped", FrameworkEvent.STOPPED, event.getType());
-			}
-		} catch (Exception e) {
-			if (!quietly) {
-				throw e;
-			}
-		}
 	}
 
 	protected void tearDown() throws Exception {

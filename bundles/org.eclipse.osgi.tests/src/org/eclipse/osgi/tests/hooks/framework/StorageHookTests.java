@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2017 IBM Corporation and others.
+ * Copyright (c) 2013, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.hooks.framework;
 
+import static org.eclipse.osgi.tests.bundles.AbstractBundleTests.stop;
+import static org.eclipse.osgi.tests.bundles.AbstractBundleTests.stopQuietly;
 import static org.junit.Assert.assertNotEquals;
 
 import java.io.ByteArrayInputStream;
@@ -199,8 +201,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 
 		assertNotEquals("Path of updated bundle is the same.", path1, path2);
 
-		framework.stop();
-		framework.waitForStop(5000);
+		stop(framework);
 
 		// create new framework object to test loading of persistent capability.
 		framework = createFramework(configuration);
@@ -296,8 +297,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		setFactoryNullStorageHook(true);
 		Bundle b = installBundle();
 		assertNotNull("Expected to have a bundle after install.", b);
-		framework.stop();
-		framework.waitForStop(5000);
+		stop(framework);
 
 		// create new framework to make sure null storage hook works from persistence also.
 		framework = createFramework(configuration);

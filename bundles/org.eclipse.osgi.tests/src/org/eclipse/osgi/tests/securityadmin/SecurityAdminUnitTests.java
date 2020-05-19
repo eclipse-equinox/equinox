@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2013 IBM Corporation and others.
+ * Copyright (c) 2008, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -955,8 +955,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		updateInfos.add(cpa.newConditionalPermissionInfo(info2));
 		assertTrue("Failed commit", update.commit()); //$NON-NLS-1$
 
-		equinox.stop();
-		equinox.waitForStop(10000);
+		stop(equinox);
 		equinox.init();
 		cpa = equinox.getBundleContext().getService(equinox.getBundleContext().getServiceReference(ConditionalPermissionAdmin.class));
 		pa = equinox.getBundleContext().getService(equinox.getBundleContext().getServiceReference(PermissionAdmin.class));

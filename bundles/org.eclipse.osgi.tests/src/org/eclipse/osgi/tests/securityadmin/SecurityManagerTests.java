@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2013 IBM Corporation and others.
+ * Copyright (c) 2008, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,21 +14,44 @@
 package org.eclipse.osgi.tests.securityadmin;
 
 import java.io.File;
-import java.security.*;
-import java.util.*;
+import java.security.AllPermission;
+import java.security.CodeSource;
+import java.security.Permission;
+import java.security.PermissionCollection;
+import java.security.Policy;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.BundlePermission;
+import org.osgi.framework.Constants;
+import org.osgi.framework.PackagePermission;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.namespace.PackageNamespace;
-import org.osgi.framework.wiring.*;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRequirement;
+import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Namespace;
-import org.osgi.service.condpermadmin.*;
-import org.osgi.service.packageadmin.*;
+import org.osgi.service.condpermadmin.BundleLocationCondition;
+import org.osgi.service.condpermadmin.ConditionInfo;
+import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
+import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
+import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
+import org.osgi.service.packageadmin.ExportedPackage;
+import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.service.packageadmin.RequiredBundle;
 import org.osgi.service.permissionadmin.PermissionInfo;
 import org.osgi.service.startlevel.StartLevel;
 
@@ -131,16 +154,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
 		// put the framework back to the RESOLVED state
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
@@ -185,13 +199,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			fail("Failed to start securityA", e); //$NON-NLS-1$
 		} finally {
 			// put the framework back to the RESOLVED state
-			equinox.stop();
-
-			try {
-				equinox.waitForStop(10000);
-			} catch (InterruptedException e) {
-				fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-			}
+			stop(equinox);
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
@@ -254,13 +262,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 
 		} finally {
 			// put the framework back to the RESOLVED state
-			equinox.stop();
-
-			try {
-				equinox.waitForStop(10000);
-			} catch (InterruptedException e) {
-				fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-			}
+			stop(equinox);
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
@@ -324,13 +326,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			fail("interrupted", e); //$NON-NLS-1$
 		} finally {
 			// put the framework back to the RESOLVED state
-			equinox.stop();
-
-			try {
-				equinox.waitForStop(10000);
-			} catch (InterruptedException e) {
-				fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-			}
+			stop(equinox);
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
@@ -373,13 +369,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			assertTrue(pa.resolveBundles(new Bundle[] {linkA, linkAClient}));
 		} finally {
 			// put the framework back to the RESOLVED state
-			equinox.stop();
-
-			try {
-				equinox.waitForStop(10000);
-			} catch (InterruptedException e) {
-				fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-			}
+			stop(equinox);
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
@@ -431,13 +421,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			fail("Failed to start securityA", e); //$NON-NLS-1$
 		} finally {
 			// put the framework back to the RESOLVED state
-			equinox.stop();
-
-			try {
-				equinox.waitForStop(10000);
-			} catch (InterruptedException e) {
-				fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-			}
+			stop(equinox);
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
@@ -487,16 +471,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		}
 
 		// put the framework back to the RESOLVED state
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 
 		try {
 			equinox.start();
@@ -516,16 +491,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			fail("Failed to start security.b bundle", e); //$NON-NLS-1$
 		}
 
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
@@ -575,16 +541,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 				// nothing
 			}
 		assertEquals("Wrong startlevel", 10, sl.getStartLevel()); //$NON-NLS-1$
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
@@ -630,16 +587,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		}
 
 		// put the framework back to the RESOLVED state
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 
 		// try again from a cached state
 		try {
@@ -662,16 +610,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			// expected failure
 		}
 		// put the framework back to the RESOLVED state
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
@@ -744,16 +683,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		}
 
 		// put the framework back to the RESOLVED state
-		try {
-			equinox.stop();
-		} catch (BundleException e) {
-			fail("Unexpected error stopping framework", e); //$NON-NLS-1$
-		}
-		try {
-			equinox.waitForStop(10000);
-		} catch (InterruptedException e) {
-			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
-		}
+		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
