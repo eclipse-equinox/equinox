@@ -311,8 +311,7 @@ public class AbstractBundleTests extends CoreTest {
 	static public FrameworkEvent stop(Framework equinox, boolean quietly, long timeout) {
 		if (equinox == null)
 			return null;
-		BundleContext bc = equinox.getBundleContext();
-		final String uuid = bc == null ? null : bc.getProperty(Constants.FRAMEWORK_UUID);
+		final String uuid = getUUID(equinox);
 		try {
 			equinox.stop();
 		} catch (BundleException e) {
@@ -320,6 +319,10 @@ public class AbstractBundleTests extends CoreTest {
 				fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
 			}
 		}
+		return waitForStop(equinox, uuid, quietly, timeout);
+	}
+
+	static public FrameworkEvent waitForStop(Framework equinox, String uuid, boolean quietly, long timeout) {
 		try {
 			FrameworkEvent stopEvent = equinox.waitForStop(timeout);
 			if (stopEvent.getType() == FrameworkEvent.WAIT_TIMEDOUT) {
@@ -340,6 +343,11 @@ public class AbstractBundleTests extends CoreTest {
 			}
 		}
 		return null;
+	}
+
+	public static String getUUID(Framework equinox) {
+		BundleContext bc = equinox.getBundleContext();
+		return bc == null ? null : bc.getProperty(Constants.FRAMEWORK_UUID);
 	}
 
 	static private String getState(Framework framework) {

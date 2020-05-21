@@ -1623,13 +1623,17 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.start();
 		assertEquals("Unexpected state", Bundle.ACTIVE, testTCCL.getState()); //$NON-NLS-1$
 
+		String uuid = getUUID(equinox);
 		// test that the correct tccl is used for framework update
 		try {
 			equinox.update();
-			checkActive(testTCCL);
 		} catch (Exception e) {
 			fail("Unexpected exception", e); //$NON-NLS-1$
 		}
+		waitForStop(equinox, uuid, false, 10000);
+
+		checkActive(testTCCL);
+
 		systemContext = equinox.getBundleContext();
 		assertEquals("Unexpected state", Bundle.ACTIVE, testTCCL.getState()); //$NON-NLS-1$
 
