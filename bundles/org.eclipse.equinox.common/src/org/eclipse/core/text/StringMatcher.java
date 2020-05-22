@@ -27,9 +27,9 @@ public final class StringMatcher {
 
 	private final int fLength; // pattern length
 
-	private final boolean fIgnoreWildCards;
-
 	private final boolean fIgnoreCase;
+
+	private boolean fIgnoreWildCards;
 
 	private boolean fHasLeadingStar;
 
@@ -37,7 +37,7 @@ public final class StringMatcher {
 
 	private String fSegments[]; // the given pattern is split into * separated segments
 
-	/* Boundary value beyond which we don't need to search in the text. */
+	/* Minimum length required for a match: shorter texts cannot possibly match. */
 	private int fBound = 0;
 
 	private static final char fSingleWildCard = '\u0000';
@@ -116,21 +116,28 @@ public final class StringMatcher {
 	 * StringMatcher constructor takes in a String object that is a simple pattern.
 	 * The pattern may contain '*' for 0 and many characters and '?' for exactly one
 	 * character.
-	 *
+	 * <p>
 	 * Literal '*' and '?' characters must be escaped in the pattern e.g., "\*"
 	 * means literal "*", etc.
-	 *
+	 * </p>
+	 * <p>
 	 * The escape character '\' is an escape only if followed by '*', '?', or '\'.
 	 * All other occurrences are taken literally.
-	 *
+	 * </p>
+	 * <p>
 	 * If invoking the StringMatcher with string literals in Java, don't forget
 	 * escape characters are represented by "\\".
+	 * </p>
+	 * <p
+	 * An empty pattern matches only an empty text, unless {@link #usePrefixMatch()}
+	 * is used, in which case it always matches.
+	 * </p>
 	 *
 	 * @param pattern         the pattern to match text against, must not be {@code null}
 	 * @param ignoreCase      if true, case is ignored
 	 * @param ignoreWildCards if true, wild cards and their escape sequences are
 	 *                        ignored (everything is taken literally).
-	 * @throws IllegalArgumentException if {@code pattern == null} 
+	 * @throws IllegalArgumentException if {@code pattern == null}
 	 */
 	public StringMatcher(String pattern, boolean ignoreCase, boolean ignoreWildCards) {
 		if (pattern == null) {
@@ -146,6 +153,23 @@ public final class StringMatcher {
 		} else {
 			parseWildCards();
 		}
+	}
+
+	/**
+	 * Configures this {@link StringMatcher} to also match on prefix-only matches.
+	 * <p>
+	 * If the matcher was created with {@code ignoreWildCards == true}, any wildcard
+	 * characters in the pattern will still be matched literally.
+	 * </p>
+	 * <p>
+	 * If the pattern is empty, it will match any text.
+	 * </p>
+	 *
+	 * @since 3.13
+	 */
+	public void usePrefixMatch() {
+		fIgnoreWildCards = false;
+		fHasTrailingStar = true;
 	}
 
 	/**
@@ -484,5 +508,24 @@ public final class StringMatcher {
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		String flags = ""; //$NON-NLS-1$
+		if (fIgnoreCase) {
+			flags += 'i';
+		}
+		if (fHasTrailingStar) {
+			flags += 't';
+		}
+		if (!fIgnoreWildCards) {
+			flags += '*';
+		}
+		String result = '[' + fPattern;
+		if (!flags.isEmpty()) {
+			result += '/' + flags;
+		}
+		return result + ']';
 	}
 }
