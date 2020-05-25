@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-SymbolicName: org.eclipse.equinox.console
-Bundle-Version: 1.4.0.qualifier
+Bundle-Version: 1.4.100.qualifier
 Bundle-Activator: org.eclipse.equinox.console.command.adapter.Activator
 Bundle-Vendor: %bundleVendor
 Bundle-Localization: plugin
