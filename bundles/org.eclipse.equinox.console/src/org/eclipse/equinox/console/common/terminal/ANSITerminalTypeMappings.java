@@ -15,7 +15,6 @@
 package org.eclipse.equinox.console.common.terminal;
 
 import org.eclipse.equinox.console.common.KEYS;
-import org.eclipse.equinox.console.common.terminal.TerminalTypeMappings;
 
 public class ANSITerminalTypeMappings extends TerminalTypeMappings {
 	
