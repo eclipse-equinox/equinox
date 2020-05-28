@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.equinox.common" version="2">
+    <resource path="src/org/eclipse/core/runtime/IProgressMonitor.java" type="org.eclipse.core.runtime.IProgressMonitor">
+        <filter comment="Default implemented method is backward-compatible" id="404000815">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.IProgressMonitor"/>
+                <message_argument value="clearBlocked()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Default implemented method is backward-compatible" id="404000815">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.IProgressMonitor"/>
+                <message_argument value="setBlocked(IStatus)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>

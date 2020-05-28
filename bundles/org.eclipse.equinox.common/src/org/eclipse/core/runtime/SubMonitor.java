@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2015 IBM Corporation and others.
+ * Copyright (c) 2006, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,7 @@
  *     Stefan Xenos (Google) - bug 475747 - Support efficient, convenient cancellation checks in SubMonitor
  *     Stefan Xenos (Google) - bug 476924 - Add a SUPPRESS_ISCANCELED flag to SubMonitor
  *     IBM Corporation - ongoing maintenance
+ *     Christoph Läubrich - adjust to new API
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -260,13 +261,12 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 		}
 
 		public void clearBlocked() {
-			if (root instanceof IProgressMonitorWithBlocking)
-				((IProgressMonitorWithBlocking) root).clearBlocked();
+			root.clearBlocked();
 		}
 
 		public void setBlocked(IStatus reason) {
-			if (root instanceof IProgressMonitorWithBlocking)
-				((IProgressMonitorWithBlocking) root).setBlocked(reason);
+
+			root.setBlocked(reason);
 		}
 
 		public void checkForCancellation() {

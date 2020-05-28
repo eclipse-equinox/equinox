@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Christoph Läubrich - join with IProgressMonitorWithBlocking
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -172,4 +173,38 @@ public interface IProgressMonitor {
 	 * @param work a non-negative number of work units just completed
 	 */
 	public void worked(int work);
+
+	/**
+	 * Indicates that this operation is blocked by some background activity. If
+	 * a running operation ever calls <code>setBlocked</code>, it must
+	 * eventually call <code>clearBlocked</code> before the operation
+	 * completes.
+	 * <p>
+	 * If the caller is blocked by a currently executing job, this method will return
+	 * an <code>IJobStatus</code> indicating the job that is currently blocking
+	 * the caller. If this blocking job is not known, this method will return a plain
+	 * informational <code>IStatus</code> object.
+	 * </p>
+	 * 
+	 * @param reason an optional status object whose message describes the
+	 * reason why this operation is blocked, or <code>null</code> if this
+	 * information is not available.
+	 * @see #clearBlocked()
+	 * @since 3.13
+	 */
+	public default void setBlocked(IStatus reason) {
+		//default implementation does nothing
+	}
+
+	/**
+	 * Clears the blocked state of the running operation. If a running
+	 * operation ever calls <code>setBlocked</code>, it must eventually call
+	 * <code>clearBlocked</code> before the operation completes.
+	 * 
+	 * @see #setBlocked(IStatus)
+	 * @since 3.13
+	 */
+	public default void clearBlocked() {
+		//default implementation does nothing
+	}
 }
