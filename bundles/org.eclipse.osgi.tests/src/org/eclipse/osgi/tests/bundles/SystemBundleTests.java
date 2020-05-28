@@ -549,39 +549,9 @@ public class SystemBundleTests extends AbstractBundleTests {
 			fail("Failed to start the framework", e); //$NON-NLS-1$
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
-		final Exception[] failureException = new BundleException[1];
-		final FrameworkEvent[] success = new FrameworkEvent[] {null};
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					success[0] = equinox.waitForStop(10000);
-				} catch (InterruptedException e) {
-					failureException[0] = e;
-				}
-			}
-		}, "test waitForStop thread"); //$NON-NLS-1$
-		t.start();
-		try {
-			// delay hack to allow t thread to block on waitForStop before we update.
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			fail("unexpected interuption", e);
-		}
-		try {
-			equinox.update();
-		} catch (BundleException e) {
-			fail("Failed to update the framework", e); //$NON-NLS-1$
-		}
-		try {
-			t.join();
-		} catch (InterruptedException e) {
-			fail("unexpected interuption", e); //$NON-NLS-1$
-		}
-		if (failureException[0] != null)
-			fail("Error occurred while waiting", failureException[0]); //$NON-NLS-1$
-		assertNotNull("Wait for stop event is null", success[0]); //$NON-NLS-1$
-		assertEquals("Wait for stop event type is wrong", FrameworkEvent.STOPPED_UPDATE, success[0].getType()); //$NON-NLS-1$
+
+		FrameworkEvent success = update(equinox);
+		assertEquals("Wait for stop event type is wrong", FrameworkEvent.STOPPED_UPDATE, success.getType()); //$NON-NLS-1$
 		// TODO delay hack to allow the framework to get started again
 		for (int i = 0; i < 5 && Bundle.ACTIVE != equinox.getState(); i++)
 			try {
@@ -939,37 +909,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 		openAllBundleFiles(equinox.getBundleContext());
 
-		final Exception[] failureException = new BundleException[1];
-		final FrameworkEvent[] success = new FrameworkEvent[] {null};
-		Thread waitForUpdate = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					success[0] = equinox.waitForStop(10000);
-				} catch (InterruptedException e) {
-					failureException[0] = e;
-				}
-			}
-		}, "test waitForStop thread"); //$NON-NLS-1$
-		waitForUpdate.start();
-		try {
-			// delay hack to allow waitForUpdate thread to block on waitForStop before we update.
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			fail("unexpected interuption", e);
-		}
-		try {
-			equinox.update();
-		} catch (BundleException e) {
-			fail("Failed to update the framework", e); //$NON-NLS-1$
-		}
-		try {
-			waitForUpdate.join();
-		} catch (InterruptedException e) {
-			fail("unexpected interuption", e); //$NON-NLS-1$
-		}
-		if (failureException[0] != null)
-			fail("Error occurred while waiting", failureException[0]); //$NON-NLS-1$
+		update(equinox);
 
 		// we can either have a hack here that waits until the system bundle is active
 		// or we can just try to start it and race with the update() call above
@@ -1623,14 +1563,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.start();
 		assertEquals("Unexpected state", Bundle.ACTIVE, testTCCL.getState()); //$NON-NLS-1$
 
-		String uuid = getUUID(equinox);
-		// test that the correct tccl is used for framework update
-		try {
-			equinox.update();
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
-		waitForStop(equinox, uuid, false, 10000);
+		update(equinox);
 
 		checkActive(testTCCL);
 

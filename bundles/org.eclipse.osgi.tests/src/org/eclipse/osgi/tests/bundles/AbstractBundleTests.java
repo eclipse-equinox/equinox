@@ -308,6 +308,44 @@ public class AbstractBundleTests extends CoreTest {
 		return stop(equinox, true, 10000);
 	}
 
+	static public FrameworkEvent update(final Framework equinox) {
+		final Exception[] failureException = new BundleException[1];
+		final FrameworkEvent[] success = new FrameworkEvent[] { null };
+		final String uuid = getUUID(equinox);
+		Thread waitForUpdate = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				success[0] = waitForStop(equinox, uuid, false, 10000);
+			}
+		}, "test waitForStop thread"); //$NON-NLS-1$
+		waitForUpdate.start();
+
+		try {
+			// delay hack to allow waitForUpdate thread to block on waitForStop before we
+			// update.
+			Thread.sleep(200);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			fail("unexpected interuption", e);
+		}
+
+		try {
+			equinox.update();
+		} catch (BundleException e) {
+			fail("Failed to update the framework", e); //$NON-NLS-1$
+		}
+		try {
+			waitForUpdate.join();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			fail("unexpected interuption", e); //$NON-NLS-1$
+		}
+		if (failureException[0] != null) {
+			fail("Error occurred while waiting", failureException[0]); //$NON-NLS-1$
+		}
+		return success[0];
+	}
+
 	static public FrameworkEvent stop(Framework equinox, boolean quietly, long timeout) {
 		if (equinox == null)
 			return null;
