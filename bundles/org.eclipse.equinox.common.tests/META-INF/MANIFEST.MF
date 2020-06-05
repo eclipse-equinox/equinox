@@ -12,6 +12,7 @@ Require-Bundle: org.junit,
  org.eclipse.equinox.registry;bundle-version="3.8.200"
 Import-Package: org.eclipse.osgi.service.localization,
  org.osgi.framework,
+ org.eclipse.core.runtime,
  org.osgi.service.log,
  org.osgi.service.packageadmin,
  org.osgi.util.tracker

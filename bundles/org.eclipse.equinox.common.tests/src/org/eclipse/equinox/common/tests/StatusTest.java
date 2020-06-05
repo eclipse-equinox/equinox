@@ -146,12 +146,16 @@ public class StatusTest extends CoreTest {
 
 	private Bundle installNoBSNBundle() throws IOException, BundleException {
 		BundleContext bc = FrameworkUtil.getBundle(getClass()).getBundleContext();
+		return installTestClassBundle(bc);
+	}
+
+	public static Bundle installTestClassBundle(BundleContext bc) throws IOException, BundleException {
 		File noNameBSNFile = bc.getDataFile("noNameBSN.jar");
 		noNameBSNFile.delete();
 		URI noNameBSNJar = URI.create("jar:" + noNameBSNFile.toURI().toASCIIString());
 
 		try (FileSystem zipfs = FileSystems.newFileSystem(noNameBSNJar, Collections.singletonMap("create", "true"))) {
-			URL testClassURL = getClass().getResource("TestClass.class");
+			URL testClassURL = StatusTest.class.getResource("TestClass.class");
 			Path testClassPath = zipfs.getPath(testClassURL.getPath().substring(1));
 			// copy a file into the zip file
 			Files.createDirectories(testClassPath.getParent());

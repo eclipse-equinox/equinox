@@ -21,6 +21,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
 	CoreExceptionTest.class,
+	ServiceCallerTest.class,
 	OperationCanceledExceptionTest.class,
 	PathTest.class,
 	PluginVersionIdentifierTest.class,
