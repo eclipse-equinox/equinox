@@ -19,7 +19,7 @@
   </parent>
   <groupId>org.eclipse.equinox.feature</groupId>
   <artifactId>org.eclipse.equinox.executable</artifactId>
-  <version>3.8.800-SNAPSHOT</version>
+  <version>3.8.900-SNAPSHOT</version>
   <packaging>eclipse-feature</packaging>
 
   <build>
