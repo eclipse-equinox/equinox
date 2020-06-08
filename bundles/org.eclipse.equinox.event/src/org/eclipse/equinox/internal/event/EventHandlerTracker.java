@@ -159,7 +159,7 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 	 */
 	public synchronized Set<EventHandlerWrapper> getHandlers(final String topic) {
 		// Use a set to remove duplicates
-		Set<EventHandlerWrapper> handlers = new HashSet<>();
+		Set<EventHandlerWrapper> handlers = new LinkedHashSet<>();
 
 		// Add the "*" handlers
 		handlers.addAll(globalWildcard);
