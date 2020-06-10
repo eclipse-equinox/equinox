@@ -3678,7 +3678,7 @@ public class TestModuleContainer extends AbstractTest {
 		tStop2.start();
 
 		BundleException stopError = stopExceptions.poll(10, TimeUnit.SECONDS);
-		startLatch.countDown();
+		stopLatch.countDown();
 
 		Assert.assertEquals("Wrong cause.", TimeoutException.class, stopError.getCause().getClass());
 		Assert.assertEquals("Wrong cause.", ThreadInfoReport.class, stopError.getCause().getCause().getClass());

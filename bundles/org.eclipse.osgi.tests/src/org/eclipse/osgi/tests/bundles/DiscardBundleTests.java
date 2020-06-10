@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,7 +26,6 @@ import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkEvent;
 
 /*
  * The framework must discard a persisted bundle when the
@@ -204,17 +203,11 @@ public class DiscardBundleTests extends AbstractBundleTests {
 		return new File(root, BUNDLE_JAR);
 	}
 
-	private Equinox restart(Equinox equinox, Map<String, ?> configuration) throws BundleException, InterruptedException {
+	private Equinox restart(Equinox equinox, Map<String, ?> configuration) throws BundleException {
 		stop(equinox);
 		equinox = new Equinox(configuration);
 		initAndStart(equinox);
 		return equinox;
-	}
-
-	private void stop(Equinox equinox) throws BundleException, InterruptedException {
-		equinox.stop();
-		FrameworkEvent event = equinox.waitForStop(5000);
-		assertEquals("The framework was not stopped", FrameworkEvent.STOPPED, event.getType());
 	}
 
 	private void touchFile(File file) {

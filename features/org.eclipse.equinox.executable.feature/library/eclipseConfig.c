@@ -38,6 +38,59 @@
 
 #endif
 
+static const _TCHAR LHS[] = _T_ECLIPSE("$"); /* left-hand side marker */
+static const _TCHAR RHS[] = _T_ECLIPSE("$"); /* right-hand side marker */
+static const unsigned short LHS_LEN = (sizeof(LHS) - sizeof(_TCHAR)) / sizeof(_TCHAR);
+static const unsigned short RHS_LEN = (sizeof(RHS) - sizeof(_TCHAR)) / sizeof(_TCHAR);
+
+/* we use a function pointer to abstract out the logic from getenv()
+ to ease testing */
+_TCHAR * expandEnvVarsInternal(const _TCHAR * input, _TCHAR* (*resolve)(const _TCHAR *)) {
+	_TCHAR * result;
+	const _TCHAR * lhsOuterPos = _tcsstr(input, LHS);
+
+	if ((lhsOuterPos != NULL) && _tcslen(lhsOuterPos) > LHS_LEN) {
+		const _TCHAR * lhsInnerPos = lhsOuterPos + LHS_LEN - 1;
+		const _TCHAR * rhsInnerPos = _tcsstr(lhsInnerPos, RHS);
+
+		if (rhsInnerPos != NULL) {
+			const _TCHAR * value;
+			_TCHAR * var = (_TCHAR *) calloc((rhsInnerPos - lhsInnerPos), sizeof(_TCHAR));
+
+			_tcsncpy(var, lhsInnerPos + 1, (rhsInnerPos - lhsInnerPos - 1));
+			value = resolve(var);
+
+			free(var);
+
+			if (value != NULL) {
+				/* expand remaining of the original string */
+				_TCHAR * remaining = expandEnvVarsInternal(rhsInnerPos + RHS_LEN, resolve);
+
+				/* length of the beginning of the original string */
+				const unsigned int beginLen = lhsOuterPos - input;
+				size_t len = beginLen
+										+ _tcslen(value) 	 /* de-referenced variable */
+										+ _tcslen(remaining) /* rest of the string (expanded vars) */
+										+ 1; 				 /* string terminator */
+
+				result = (_TCHAR *) calloc(len, sizeof(_TCHAR));
+				_tcsncpy(result, input, beginLen);
+				_tcscat(result, value);
+				_tcscat(result, remaining);
+
+				free(remaining);
+
+				return result;
+			}
+		}
+	}
+
+	/* nothing to expand, just return a copy of the original string */
+	result = _tcsdup(input);
+
+	return result;
+}
+
 int readIniFile(_TCHAR* program, int *argc, _TCHAR ***argv) 
 {
 	_TCHAR* config_file = NULL;
@@ -153,7 +206,7 @@ int readConfigFile( _TCHAR * config_file, int *argc, _TCHAR ***argv )
 			if(argument[0] == _T_ECLIPSE('#'))
 				continue;
 
-			arg = _tcsdup(argument);
+			arg = expandEnvVarsInternal(argument, _tgetenv);
 			length = _tcslen(arg);
 			
 			/* basic whitespace trimming */

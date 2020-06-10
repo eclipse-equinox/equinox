@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -397,12 +397,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			assertEquals("Wrong class.", (rv >= 11) ? "BASE11" : "BASEXX", loadClass("multi.release.test.sub2.TestClass11", mrBundle, false));
 			assertEquals("Wrong class.", (rv >= 11) ? "ADD11" : CNFE, loadClass("multi.release.test.sub2.TestClassAdd11", mrBundle, true));
 		} finally {
-			try {
-				equinox.stop();
-				equinox.waitForStop(10000);
-			} catch (Exception e) {
-				// ignore;
-			}
+			stopQuietly(equinox);
 		}
 	}
 
@@ -480,12 +475,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			assertEquals("Wrong resource.", (rv >= 11) ? "ADD 11" : RNF, readResource("multi/release/test/sub2/testResourceAdd11.txt", mrBundle));
 
 		} finally {
-			try {
-				equinox.stop();
-				equinox.waitForStop(10000);
-			} catch (Exception e) {
-				// ignore;
-			}
+			stopQuietly(equinox);
 		}
 	}
 
@@ -591,12 +581,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			assertEquals("Wrong resource.", (rv >= 11) ? "ADD 11" : RNF, readResources("multi/release/test/sub2/testResourceAdd11.txt", mrBundle));
 
 		} finally {
-			try {
-				equinox.stop();
-				equinox.waitForStop(10000);
-			} catch (Exception e) {
-				// ignore;
-			}
+			stopQuietly(equinox);
 		}
 	}
 
@@ -689,12 +674,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			listResources("multi/release/test", expected, mrBundle, 0);
 			listResources("multi/release/test", expectedRecurse, mrBundle, BundleWiring.LISTRESOURCES_RECURSE);
 		} finally {
-			try {
-				equinox.stop();
-				equinox.waitForStop(10000);
-			} catch (Exception e) {
-				// ignore;
-			}
+			stopQuietly(equinox);
 		}
 	}
 
@@ -755,12 +735,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			assertTrue("Wrong package filter: " + filter, filter.contains(expectedPkg));
 
 		} finally {
-			try {
-				equinox.stop();
-				equinox.waitForStop(10000);
-			} catch (Exception e) {
-				// ignore;
-			}
+			stopQuietly(equinox);
 		}
 	}
 
@@ -776,8 +751,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			location = mrBundle.getLocation();
 			mrBundle.start();
 		} finally {
-			equinox.stop();
-			equinox.waitForStop(10000);
+			stop(equinox);
 		}
 		System.out.println("Equinox state: " + equinox.getState());
 		for (int rv = 8; rv <= 11; rv++) {
@@ -793,8 +767,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			location = mrBundle.getLocation();
 			mrBundle.start();
 		} finally {
-			equinox.stop();
-			equinox.waitForStop(10000);
+			stop(equinox);
 		}
 
 		for (int rv = 8; rv <= 11; rv++) {
@@ -838,12 +811,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			assertTrue("Wrong package filter: " + rv + " " + filter, filter.contains(expectedPkg));
 
 		} finally {
-			try {
-				equinox.stop();
-				equinox.waitForStop(10000);
-			} catch (Exception e) {
-				// ignore;
-			}
+			stopQuietly(equinox);
 		}
 	}
 
@@ -863,8 +831,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			Bundle mrBundle = systemContext.installBundle("reference:" + copyMrJarBundle.toURI().toString());
 			mrBundle.start();
 		} finally {
-			equinox.stop();
-			equinox.waitForStop(1000);
+			stop(equinox);
 		}
 
 		copyMrJarBundle.delete();
@@ -875,8 +842,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		try {
 			equinox.start();
 		} finally {
-			equinox.stop();
-			equinox.waitForStop(1000);
+			stop(equinox);
 		}
 	}
 
@@ -898,8 +864,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			Object testService = loader.iterator().next();
 			assertEquals("Wrong service found.", "SERVICE_BASE", testService.toString());
 		} finally {
-			equinox.stop();
-			equinox.waitForStop(1000);
+			stop(equinox);
 		}
 	}
 
@@ -927,8 +892,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			}
 
 		} finally {
-			equinox.stop();
-			equinox.waitForStop(1000);
+			stop(equinox);
 		}
 	}
 
@@ -948,8 +912,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			Collection<String> list = mrBundle.adapt(BundleWiring.class).listResources("/META-INF/", "*.txt", 0);
 			assertTrue("Found versioned META-INF resources: " + list, list.isEmpty());
 		} finally {
-			equinox.stop();
-			equinox.waitForStop(1000);
+			stop(equinox);
 		}
 	}
 }

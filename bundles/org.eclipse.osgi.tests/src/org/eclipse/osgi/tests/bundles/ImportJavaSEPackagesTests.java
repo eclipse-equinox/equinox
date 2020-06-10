@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 IBM Corporation and others.
+ * Copyright (c) 2018, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -76,13 +76,7 @@ public class ImportJavaSEPackagesTests extends AbstractBundleTests {
 			assertEquals("It should throw a bundle exception of type manifest error", BundleException.MANIFEST_ERROR, e.getType());
 			assertTrue("It should throw a Bundle Exception stating Invalid manifest header Export-Package", e.getMessage().contains("Cannot specify java.* packages in Export headers"));
 		} finally {
-
-			try {
-				equinox.stop();
-				equinox.waitForStop(10000);
-			} catch (Exception e) {
-				//do nothing
-			}
+			stopQuietly(equinox);
 		}
 
 	}
@@ -109,13 +103,7 @@ public class ImportJavaSEPackagesTests extends AbstractBundleTests {
 		} catch (BundleException e) {
 			fail("Failed to test Import-Package header");
 		} finally {
-
-			try {
-				equinox.stop();
-				equinox.waitForStop(10000);
-			} catch (Exception e) {
-				//do nothing
-			}
+			stopQuietly(equinox);
 		}
 	}
 
@@ -216,13 +204,7 @@ public class ImportJavaSEPackagesTests extends AbstractBundleTests {
 		} catch (BundleException e) {
 			fail("Failed to test System packages");
 		} finally {
-
-			try {
-				equinox.stop();
-				equinox.waitForStop(10000);
-			} catch (Exception e) {
-				//do nothing
-			}
+			stopQuietly(equinox);
 		}
 	}
 

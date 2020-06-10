@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2016 IBM Corporation and others.
+ * Copyright (c) 2008, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,12 +15,17 @@ package org.eclipse.osgi.tests.bundles;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.wiring.FrameworkWiring;
 
@@ -40,8 +45,7 @@ public class CascadeConfigTests extends AbstractBundleTests {
 		BundleContext systemContext = equinox.getBundleContext();
 		systemContext.installBundle(installer.getBundleLocation("test"));
 
-		equinox.stop();
-		equinox.waitForStop(10000);
+		stopQuietly(equinox);
 
 		// Now create a child framework and make sure test1 bundle is there
 		File configChild = OSGiTestsActivator.getContext().getDataFile(getName() + "_child");
@@ -58,8 +62,7 @@ public class CascadeConfigTests extends AbstractBundleTests {
 
 		systemContext.installBundle(installer.getBundleLocation("test2"));
 
-		equinox.stop();
-		equinox.waitForStop(10000);
+		stop(equinox);
 
 		// reuse the same configuration and make sure both bundles are there
 		equinox = new Equinox(childMap);
@@ -71,8 +74,7 @@ public class CascadeConfigTests extends AbstractBundleTests {
 		Bundle test2 = systemContext.getBundle(installer.getBundleLocation("test2"));
 		assertNotNull("Missing bundle.", test2);
 
-		equinox.stop();
-		equinox.waitForStop(10000);
+		stop(equinox);
 
 		// restart using the parent and make sure only the test1 bundle is there
 		equinox = new Equinox(parentMap);
@@ -84,8 +86,7 @@ public class CascadeConfigTests extends AbstractBundleTests {
 		test2 = systemContext.getBundle(installer.getBundleLocation("test2"));
 		assertNull("Unexpected bundle.", test2);
 
-		equinox.stop();
-		equinox.waitForStop(10000);
+		stop(equinox);
 	}
 
 	public void testCascadeConfigDataArea() throws Exception {
@@ -100,8 +101,7 @@ public class CascadeConfigTests extends AbstractBundleTests {
 		Bundle b = systemContext.installBundle(installer.getBundleLocation("substitutes.a"));
 		equinox.adapt(FrameworkWiring.class).resolveBundles(Collections.singletonList(b));
 
-		equinox.stop();
-		equinox.waitForStop(10000);
+		stop(equinox);
 
 		// Now create a child framework and make sure bundle is there
 		File configChild = OSGiTestsActivator.getContext().getDataFile(getName() + "_child");
@@ -123,8 +123,7 @@ public class CascadeConfigTests extends AbstractBundleTests {
 		File dataFile = test1Context.getDataFile("test1");
 		assertTrue(dataFile.getAbsolutePath().startsWith(configChild.getAbsolutePath()));
 
-		equinox.stop();
-		equinox.waitForStop(10000);
+		stop(equinox);
 
 		// get parent again
 		equinox = new Equinox(parentMap);
@@ -143,8 +142,7 @@ public class CascadeConfigTests extends AbstractBundleTests {
 		dataFile = test1Context.getDataFile("test1");
 		assertTrue(dataFile.getAbsolutePath().startsWith(configParent.getAbsolutePath()));
 
-		equinox.stop();
-		equinox.waitForStop(10000);
+		stop(equinox);
 	}
 
 	public void testCascadeConfigIni() throws Exception {
@@ -181,7 +179,6 @@ public class CascadeConfigTests extends AbstractBundleTests {
 		assertEquals("Wrong value for parent.child.key", "child", systemContext.getProperty("parent.child.key"));
 		assertEquals("Wrong value for child.key", "child", systemContext.getProperty("child.key"));
 
-		equinox.stop();
-		equinox.waitForStop(10000);
+		stop(equinox);
 	}
 }

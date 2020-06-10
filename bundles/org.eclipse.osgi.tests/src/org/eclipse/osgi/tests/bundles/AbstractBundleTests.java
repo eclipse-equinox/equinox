@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 20010 IBM Corporation and others.
+ * Copyright (c) 2006, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -24,13 +24,16 @@ import java.util.jar.Attributes;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import org.eclipse.core.tests.harness.CoreTest;
+import org.eclipse.osgi.framework.util.ThreadInfoReport;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.launch.Framework;
 
 public class AbstractBundleTests extends CoreTest {
 	public static int BUNDLE_LISTENER = 0x01;
@@ -267,15 +270,94 @@ public class AbstractBundleTests extends CoreTest {
 		equinox.start();
 	}
 
-	protected void stopQuietly(Equinox equinox) {
+	static public void stop(Framework equinox, int expected) {
+		FrameworkEvent actual = stop(equinox);
+		if (expected > 0) {
+			assertNotNull("No FrameworkEvent returned.", actual);
+			assertEquals("Wrong FrameworkEvent.", getFrameworkEventType(expected),
+					getFrameworkEventType(actual.getType()));
+		}
+	}
+
+	static private String getFrameworkEventType(int type) {
+		switch (type) {
+		case FrameworkEvent.ERROR:
+			return "ERROR";
+		case FrameworkEvent.INFO:
+			return "INFO";
+		case FrameworkEvent.STARTED:
+			return "STARTED";
+		case FrameworkEvent.STOPPED:
+			return "STOPPED";
+		case FrameworkEvent.STOPPED_BOOTCLASSPATH_MODIFIED:
+			return "STOPPED_BOOTCLASSPATH_MODIFIED";
+		case FrameworkEvent.STOPPED_SYSTEM_REFRESHED:
+			return "STOPPED_SYSTEM_REFRESHED";
+		case FrameworkEvent.STOPPED_UPDATE:
+			return "STOPPED_UPDATE";
+		default:
+			return "UNKNOWN:" + type;
+		}
+	}
+
+	static public FrameworkEvent stop(Framework equinox) {
+		return stop(equinox, false, 10000);
+	}
+
+	static public FrameworkEvent stopQuietly(Framework equinox) {
+		return stop(equinox, true, 10000);
+	}
+
+	static public FrameworkEvent update(final Framework equinox) {
+		final Exception[] failureException = new BundleException[1];
+		final FrameworkEvent[] success = new FrameworkEvent[] { null };
+		final String uuid = getUUID(equinox);
+		Thread waitForUpdate = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				success[0] = waitForStop(equinox, uuid, false, 10000);
+			}
+		}, "test waitForStop thread"); //$NON-NLS-1$
+		waitForUpdate.start();
+
+		try {
+			// delay hack to allow waitForUpdate thread to block on waitForStop before we
+			// update.
+			Thread.sleep(200);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			fail("unexpected interuption", e);
+		}
+
+		try {
+			equinox.update();
+		} catch (BundleException e) {
+			fail("Failed to update the framework", e); //$NON-NLS-1$
+		}
+		try {
+			waitForUpdate.join();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			fail("unexpected interuption", e); //$NON-NLS-1$
+		}
+		if (failureException[0] != null) {
+			fail("Error occurred while waiting", failureException[0]); //$NON-NLS-1$
+		}
+		return success[0];
+	}
+
+	static public FrameworkEvent stop(Framework equinox, boolean quietly, long timeout) {
 		if (equinox == null)
-			return;
+			return null;
+		final String uuid = getUUID(equinox);
 		try {
 			equinox.stop();
-			equinox.waitForStop(5000);
-		} catch (Exception e) {
-			// Ignore
+		} catch (BundleException e) {
+			if (!quietly) {
+				fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+			}
 		}
+		return waitForStop(equinox, uuid, quietly, timeout);
 	}
 
 	protected static boolean delete(File file) {
@@ -295,4 +377,51 @@ public class AbstractBundleTests extends CoreTest {
 		return (true);
 	}
 
+	static public FrameworkEvent waitForStop(Framework equinox, String uuid, boolean quietly, long timeout) {
+		try {
+			FrameworkEvent stopEvent = equinox.waitForStop(timeout);
+			if (stopEvent.getType() == FrameworkEvent.WAIT_TIMEDOUT) {
+				StringBuilder sb = new StringBuilder("Framework state is: ");
+				sb.append(getState(equinox)).append(" - ").append(uuid).append('\n');
+				sb.append(ThreadInfoReport.getThreadDump(null)).append('\n');
+				if (!quietly) {
+					fail(sb.toString());
+				} else {
+					System.out.println(sb.toString());
+				}
+			}
+			return stopEvent;
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			if (!quietly) {
+				fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+			}
+		}
+		return null;
+	}
+
+	public static String getUUID(Framework equinox) {
+		BundleContext bc = equinox.getBundleContext();
+		return bc == null ? null : bc.getProperty(Constants.FRAMEWORK_UUID);
+	}
+
+	static private String getState(Framework framework) {
+		int state = framework.getState();
+		switch (state) {
+		case Bundle.UNINSTALLED:
+			return "UNINSTALLED";
+		case Bundle.INSTALLED:
+			return "INSTALLED";
+		case Bundle.RESOLVED:
+			return "RESOLVED";
+		case Bundle.STARTING:
+			return "STARTING";
+		case Bundle.ACTIVE:
+			return "ACTIVE";
+		case Bundle.STOPPING:
+			return "STOPPING";
+		default:
+			return "UNKNOWN:" + state;
+		}
+	}
 }

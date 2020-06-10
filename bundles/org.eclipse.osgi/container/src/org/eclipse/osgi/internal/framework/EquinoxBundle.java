@@ -222,7 +222,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 									SystemBundle.this.getEquinoxContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error stopping the framework.", e); //$NON-NLS-1$
 								}
 							}
-						}, "Framework stop"); //$NON-NLS-1$
+						}, "Framework stop - " + getEquinoxContainer().toString()); //$NON-NLS-1$
 						t.start();
 					}
 				} finally {
@@ -246,7 +246,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 									SystemBundle.this.getEquinoxContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error updating the framework.", e); //$NON-NLS-1$
 								}
 							}
-						}, "Framework update"); //$NON-NLS-1$
+						}, "Framework update - " + getEquinoxContainer().toString()); //$NON-NLS-1$
 						t.start();
 					}
 				} finally {
