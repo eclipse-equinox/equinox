@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 VMware Inc.
+ * Copyright (c) 2011, 2020 VMware Inc.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -144,6 +144,11 @@ public class RegionServiceFindHookTests {
 			@Override
 			public Dictionary<String, Object> getProperties() {
 				return new Hashtable<>();
+			}
+
+			@Override
+			public <A> A adapt(Class<A> type) {
+				return null;
 			}
 		};
 		this.candidates.add(ref);
