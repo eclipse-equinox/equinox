@@ -245,26 +245,26 @@ public class DSTest {
     trackerBaseService = new ServiceTracker(bc, PropertiesProvider.class.getName(), null);
 
     // start listening
-    trackerNamedService.open();
-    trackerNamedServiceFactory.open();
-    trackerCM.open();
-    trackerExtendedClass.open();
-    trackerSAC.open();
-    trackerSC.open();
-    trackerDynService.open();
-    trackerDynServiceFactory.open();
-    trackerBSRC.open();
-    trackerMBSRC.open();
-    trackerSecurity.open();
-    trackerBAS.open();
-    trackerBBS.open();
-    trackerStatic.open();
-    trackerReferenced.open();
-    trackerNS.open();
-    trackerBoundServiceCounterFactory.open();
-    trackerBoundServiceCounterHelperFactory.open();
-    trackerStaticServiceCounterFactory.open();
-    trackerBaseService.open();
+    trackerNamedService.open(true);
+    trackerNamedServiceFactory.open(true);
+    trackerCM.open(true);
+    trackerExtendedClass.open(true);
+    trackerSAC.open(true);
+    trackerSC.open(true);
+    trackerDynService.open(true);
+    trackerDynServiceFactory.open(true);
+    trackerBSRC.open(true);
+    trackerMBSRC.open(true);
+    trackerSecurity.open(true);
+    trackerBAS.open(true);
+    trackerBBS.open(true);
+    trackerStatic.open(true);
+    trackerReferenced.open(true);
+    trackerNS.open(true);
+    trackerBoundServiceCounterFactory.open(true);
+    trackerBoundServiceCounterHelperFactory.open(true);
+    trackerStaticServiceCounterFactory.open(true);
+    trackerBaseService.open(true);
   }
 
   /**
@@ -406,7 +406,7 @@ public class DSTest {
     Bundle tb1a = installBundle("tb1a");
     tb1a.start();
     waitBundleStart();
-    ServiceReference sr1 = getContext().getServiceReference("org.eclipse.equinox.ds.tests.tb1a.Comp1");
+    ServiceReference sr1 = getServiceReference("org.eclipse.equinox.ds.tests.tb1a.Comp1");
     assertNotNull("Incorrect components should be ignored and the component Comp1 should be available", sr1);
     getContext().ungetService(sr1);
     uninstallBundle(tb1a);
@@ -1159,7 +1159,7 @@ public class DSTest {
     waitBundleStart();
 
     // check that the ServiceProvider is registered
-    assertNotNull("The ServiceProvider should be registered as service", getContext().getServiceReference(
+    assertNotNull("The ServiceProvider should be registered as service", getServiceReference(
         "org.eclipse.equinox.ds.tests.tb4.ServiceProvider"));
     // check that the ServiceProvider is activated
     assertTrue("The ServiceProvider should be activated", TestHelper.isActivatedServiceProvider());
@@ -1223,9 +1223,18 @@ public class DSTest {
   }
 
   private boolean checkAvailability(String service) {
-    BundleContext bc = getContext();
-    ServiceReference ref = bc.getServiceReference(service);
+    ServiceReference ref = getServiceReference(service);
     return ref != null;
+  }
+
+  private ServiceReference getServiceReference(String service) {
+    BundleContext bc = getContext();
+    try {
+		ServiceReference[] refs = bc.getAllServiceReferences(service, null);
+		return refs == null ? null : refs[0];
+	} catch (InvalidSyntaxException e) {
+		return null;
+	}
   }
 
   private boolean checkFactoryAvailability(String factory) throws InvalidSyntaxException {
@@ -1389,9 +1398,9 @@ public class DSTest {
     
     // check that the breakable circuit with dynamic optional reference has
     // bound correctly
-    ServiceReference dynBreak1Ref = getContext().getServiceReference(DYN_BREAKABLE + "1");
+    ServiceReference dynBreak1Ref = getServiceReference(DYN_BREAKABLE + "1");
     Object dynBreak1 = getContext().getService(dynBreak1Ref);
-    ServiceReference dynBreak2Ref = getContext().getServiceReference(DYN_BREAKABLE + "2");
+    ServiceReference dynBreak2Ref = getServiceReference(DYN_BREAKABLE + "2");
     Object dynBreak2 = getContext().getService(dynBreak2Ref);
     sleep0(timeout * 2); // sleep to allow the delayed bind for the broken reference cycle to be done
     try {
@@ -1411,7 +1420,7 @@ public class DSTest {
         checkAvailability(STATIC_BREAKABLE + "2"));
 
     // check that the optional reference isn't satisfied
-    ServiceReference staticBreak2Ref = getContext().getServiceReference(STATIC_BREAKABLE + "2");
+    ServiceReference staticBreak2Ref = getServiceReference(STATIC_BREAKABLE + "2");
     Object staticBreak2 = getContext().getService(staticBreak2Ref);
     try {
       assertEquals("The StaticCircuit2 component shouldn't have bound objects", 0, ((BoundTester) staticBreak2)
@@ -3150,7 +3159,7 @@ public class DSTest {
 		  
 		  // The component service should be Component1.
 		  BundleContext context = getContext();
-		  ServiceReference<?> ref = context.getServiceReference(serviceName);
+		  ServiceReference<?> ref = getServiceReference(serviceName);
 		  assertNotNull("Component service not registered on start", ref);
 		  Object service = context.getService(ref);
 		  Class clazz = service.getClass();
