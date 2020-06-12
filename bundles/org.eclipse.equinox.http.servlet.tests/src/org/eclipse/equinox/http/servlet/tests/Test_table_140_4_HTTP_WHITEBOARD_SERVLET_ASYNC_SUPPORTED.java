@@ -22,7 +22,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.PrintWriter;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -58,21 +57,18 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED extends Ba
 			}
 
 			private void doGetAsync(final AsyncContext asyncContext) {
-				executor.submit(new Callable<Void>() {
-					@Override
-					public Void call() throws Exception {
-						try {
-							invoked.set(true);
+				executor.submit(() -> {
+					try {
+						invoked.set(true);
 
-							PrintWriter writer = asyncContext.getResponse().getWriter();
+						PrintWriter writer = asyncContext.getResponse().getWriter();
 
-							writer.print("a");
-						} finally {
-							asyncContext.complete();
-						}
-
-						return null;
+						writer.print("a");
+					} finally {
+						asyncContext.complete();
 					}
+
+					return null;
 				});
 			}
 

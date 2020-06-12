@@ -16,7 +16,6 @@ package org.eclipse.equinox.http.servlet.tests;
 
 import static org.junit.Assert.assertNull;
 
-import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -40,27 +39,20 @@ public class Test_140_2_17to22 extends BaseTest {
 	public void test_140_2_17to22() {
 		final BundleContext context = getBundleContext();
 
-		FindHook findHook = new FindHook() {
+		FindHook findHook = (bundleContext, name, filter, allServices, references) -> {
 
-			@Override
-			public void find(
-					BundleContext bundleContext, String name, String filter,
-					boolean allServices, Collection<ServiceReference<?>> references) {
-
-				if (bundleContext != context) {
-					return;
-				}
-
-				// don't show default ServletContextHelper
-				for (Iterator<ServiceReference<?>> iterator = references.iterator(); iterator.hasNext();) {
-					ServiceReference<?> sr = iterator.next();
-
-					if (DEFAULT.equals(sr.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME))) {
-						iterator.remove();
-					}
-				}
+			if (bundleContext != context) {
+				return;
 			}
 
+			// don't show default ServletContextHelper
+			for (Iterator<ServiceReference<?>> iterator = references.iterator(); iterator.hasNext();) {
+				ServiceReference<?> sr = iterator.next();
+
+				if (DEFAULT.equals(sr.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME))) {
+					iterator.remove();
+				}
+			}
 		};
 
 		registrations.add(context.registerService(FindHook.class, findHook, null));

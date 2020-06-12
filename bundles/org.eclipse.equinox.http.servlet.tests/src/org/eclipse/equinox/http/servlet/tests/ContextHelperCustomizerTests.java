@@ -13,7 +13,6 @@ package org.eclipse.equinox.http.servlet.tests;
 
 import static org.junit.Assert.assertNotNull;
 
-import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -80,27 +79,20 @@ public class ContextHelperCustomizerTests extends BaseTest {
 			//register a ServletContextHelper using the consuming bundle context "org.eclipse.equinox.http.servlet"
 			helperReg = context.registerService(ServletContextHelper.class, new ServletContextHelper() {}, properties);
 
-			FindHook findHook = new FindHook() {
+			FindHook findHook = (bundleContext, name, filter, allServices, references) -> {
 
-				@Override
-				public void find(
-						BundleContext bundleContext, String name, String filter,
-						boolean allServices, Collection<ServiceReference<?>> references) {
-
-					if (bundleContext != context) {
-						return;
-					}
-
-					// don't show ServletContextHelper
-					for (Iterator<ServiceReference<?>> iterator = references.iterator(); iterator.hasNext();) {
-						ServiceReference<?> sr = iterator.next();
-
-						if ("context1".equals(sr.getProperty("osgi.http.whiteboard.context.name"))) {
-							iterator.remove();
-						}
-					}
+				if (bundleContext != context) {
+					return;
 				}
 
+				// don't show ServletContextHelper
+				for (Iterator<ServiceReference<?>> iterator = references.iterator(); iterator.hasNext();) {
+					ServiceReference<?> sr = iterator.next();
+
+					if ("context1".equals(sr.getProperty("osgi.http.whiteboard.context.name"))) {
+						iterator.remove();
+					}
+				}
 			};
 
 			findHookReg = context.registerService(FindHook.class, findHook, null);
@@ -142,26 +134,20 @@ public class ContextHelperCustomizerTests extends BaseTest {
 			ContextPathCustomizer pathAdaptor = new TestContextPathAdaptor(null, "testPrefix", testName.getMethodName());
 			pathAdaptorReg = context.registerService(ContextPathCustomizer.class, pathAdaptor, null);
 			
-			FindHook findHook = new FindHook() {
+			FindHook findHook = (bundleContext, name, filter, allServices, references) -> {
 
-				@Override
-				public void find(
-						BundleContext bundleContext, String name, String filter,
-						boolean allServices, Collection<ServiceReference<?>> references) {
-
-					if (bundleContext != context) {
-						return;
-					}
-
-					// don't show ServletContextHelper
-					for (Iterator<ServiceReference<?>> iterator = references.iterator(); iterator.hasNext();) {
-						ServiceReference<?> sr = iterator.next();
-						if (("testContext" + testName.getMethodName()).equals(sr.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME))) {
-							iterator.remove();
-						}
-					}
+				if (bundleContext != context) {
+					return;
 				}
 
+				// don't show ServletContextHelper
+				for (Iterator<ServiceReference<?>> iterator = references.iterator(); iterator.hasNext();) {
+					ServiceReference<?> sr = iterator.next();
+					if (("testContext" + testName.getMethodName())
+							.equals(sr.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME))) {
+						iterator.remove();
+					}
+				}
 			};
 
 			findHookReg = context.registerService(FindHook.class, findHook, null);
@@ -209,26 +195,20 @@ public class ContextHelperCustomizerTests extends BaseTest {
 			ContextPathCustomizer pathAdaptor = new TestContextPathAdaptor("(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" + "testContext" + testName.getMethodName() + ")", null,  testName.getMethodName());
 			pathAdaptorReg = context.registerService(ContextPathCustomizer.class, pathAdaptor, null);
 			
-			FindHook findHook = new FindHook() {
+			FindHook findHook = (bundleContext, name, filter, allServices, references) -> {
 
-				@Override
-				public void find(
-						BundleContext bundleContext, String name, String filter,
-						boolean allServices, Collection<ServiceReference<?>> references) {
-
-					if (bundleContext != context) {
-						return;
-					}
-
-					// don't show ServletContextHelper
-					for (Iterator<ServiceReference<?>> iterator = references.iterator(); iterator.hasNext();) {
-						ServiceReference<?> sr = iterator.next();
-						if (("testContext" + testName.getMethodName()).equals(sr.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME))) {
-							iterator.remove();
-						}
-					}
+				if (bundleContext != context) {
+					return;
 				}
 
+				// don't show ServletContextHelper
+				for (Iterator<ServiceReference<?>> iterator = references.iterator(); iterator.hasNext();) {
+					ServiceReference<?> sr = iterator.next();
+					if (("testContext" + testName.getMethodName())
+							.equals(sr.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME))) {
+						iterator.remove();
+					}
+				}
 			};
 
 			findHookReg = context.registerService(FindHook.class, findHook, null);
@@ -278,25 +258,19 @@ public class ContextHelperCustomizerTests extends BaseTest {
 			};
 			pathAdaptorReg = context.registerService(ContextPathCustomizer.class, pathAdaptor, null);
 			
-			FindHook findHook = new FindHook() {
+			FindHook findHook = (bundleContext, name, filter, allServices, references) -> {
 
-				@Override
-				public void find(
-						BundleContext bundleContext, String name, String filter,
-						boolean allServices, Collection<ServiceReference<?>> references) {
+				if (bundleContext != context) {
+					return;
+				}
 
-					if (bundleContext != context) {
-						return;
-					}
-
-					// don't show ServletContextHelper
-					for (Iterator<ServiceReference<?>> iterator = references.iterator(); iterator.hasNext();) {
-						ServiceReference<?> sr = iterator.next();
-						if (Boolean.TRUE.equals(sr.getProperty("equinox.legacy.context.helper"))) {
-							iterator.remove();
-						}
+				// don't show ServletContextHelper
+				for (Iterator<ServiceReference<?>> iterator = references.iterator(); iterator.hasNext();) {
+					ServiceReference<?> sr = iterator.next();
+					if (Boolean.TRUE.equals(sr.getProperty("equinox.legacy.context.helper"))) {
 						iterator.remove();
 					}
+					iterator.remove();
 				}
 			};
 

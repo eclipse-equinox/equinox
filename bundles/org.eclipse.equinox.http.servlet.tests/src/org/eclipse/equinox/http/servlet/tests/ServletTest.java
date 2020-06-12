@@ -202,8 +202,7 @@ public class ServletTest extends BaseTest {
 		actual = response.get("responseBody").get(0);
 
 		Assert.assertEquals("400", responseCode);
-		Assert.assertTrue(
-			"Expected <" + expected + "*> but got <" + actual + ">", actual.startsWith(expected));
+		Assert.assertTrue("Expected <" + expected + "*> but got <" + actual + ">", actual.startsWith(expected));
 	}
 
 	/**
