@@ -37,7 +37,7 @@ public class HttpContextManager implements Listener {
 	private static final String RESOURCEMAPPING = "resource-mapping"; //$NON-NLS-1$
 	private static final String BUNDLE = "bundle"; //$NON-NLS-1$
 
-	private List registered = new ArrayList();
+	private List<IConfigurationElement> registered = new ArrayList<>();
 	private HttpRegistryManager httpRegistryManager;
 	private ExtensionPointTracker tracker;
 
@@ -56,8 +56,7 @@ public class HttpContextManager implements Listener {
 
 	public void added(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
-		for (int i = 0; i < elements.length; i++) {
-			IConfigurationElement httpContextElement = elements[i];
+		for (IConfigurationElement httpContextElement : elements) {
 			if (!HTTPCONTEXT.equals(httpContextElement.getName()))
 				continue;
 
@@ -90,8 +89,7 @@ public class HttpContextManager implements Listener {
 					defaultContext.addResourceMapping(contributingBundle, oldPath);
 
 				IConfigurationElement[] resourceMappingElements = httpContextElement.getChildren(RESOURCEMAPPING);
-				for (int j = 0; j < resourceMappingElements.length; j++) {
-					IConfigurationElement resourceMappingElement = resourceMappingElements[j];
+				for (IConfigurationElement resourceMappingElement : resourceMappingElements) {
 					String path = resourceMappingElement.getAttribute(PATH);
 					Bundle resourceBundle = contributingBundle;
 					String bundleName = resourceMappingElement.getAttribute(BUNDLE);
@@ -109,8 +107,7 @@ public class HttpContextManager implements Listener {
 				}
 
 				IConfigurationElement[] mimeMappingElements = httpContextElement.getChildren(MIMEMAPPING);
-				for (int j = 0; j < mimeMappingElements.length; j++) {
-					IConfigurationElement mimeMappingElement = mimeMappingElements[j];
+				for (IConfigurationElement mimeMappingElement : mimeMappingElements) {
 					String mimeExtension = mimeMappingElement.getAttribute(MIMEEXTENSION);
 					String mimeType = mimeMappingElement.getAttribute(MIMETYPE);
 					defaultContext.addMimeMapping(mimeExtension, mimeType);
@@ -125,8 +122,7 @@ public class HttpContextManager implements Listener {
 
 	public void removed(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
-		for (int i = 0; i < elements.length; i++) {
-			IConfigurationElement httpContextElement = elements[i];
+		for (IConfigurationElement httpContextElement : elements) {
 			if (!HTTPCONTEXT.equals(httpContextElement.getName()))
 				continue;
 

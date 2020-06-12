@@ -23,7 +23,7 @@ import org.osgi.service.http.HttpContext;
 
 public class DefaultRegistryHttpContext implements HttpContext {
 	private HttpContext delegate;
-	private List resourceMappings;
+	private List<ResourceMapping> resourceMappings;
 	private Properties mimeMappings;
 
 	public DefaultRegistryHttpContext(HttpContext delegate) {
@@ -32,7 +32,7 @@ public class DefaultRegistryHttpContext implements HttpContext {
 
 	public void addResourceMapping(Bundle contributingBundle, String path) {
 		if (resourceMappings == null)
-			resourceMappings = new ArrayList();
+			resourceMappings = new ArrayList<>();
 
 		resourceMappings.add(new ResourceMapping(contributingBundle, path));
 	}
@@ -65,8 +65,7 @@ public class DefaultRegistryHttpContext implements HttpContext {
 		if (resourceMappings == null)
 			return null;
 
-		for (Iterator it = resourceMappings.iterator(); it.hasNext();) {
-			ResourceMapping mapping = (ResourceMapping) it.next();
+		for (ResourceMapping mapping : resourceMappings) {
 			URL resourceURL = mapping.getResource(name);
 			if (resourceURL != null)
 				return resourceURL;
@@ -74,17 +73,16 @@ public class DefaultRegistryHttpContext implements HttpContext {
 		return null;
 	}
 
-	public Set getResourcePaths(String path) {
+	public Set<String> getResourcePaths(String path) {
 		if (resourceMappings == null || path == null || !path.startsWith("/")) //$NON-NLS-1$
 			return null;
 
-		Set result = null;
-		for (Iterator it = resourceMappings.iterator(); it.hasNext();) {
-			ResourceMapping mapping = (ResourceMapping) it.next();
-			Set resourcePaths = mapping.getResourcePaths(path);
+		Set<String> result = null;
+		for (ResourceMapping mapping : resourceMappings) {
+			Set<String> resourcePaths = mapping.getResourcePaths(path);
 			if (resourcePaths != null) {
 				if (result == null)
-					result = new HashSet();
+					result = new HashSet<>();
 				result.addAll(resourcePaths);
 			}
 		}
@@ -119,10 +117,10 @@ public class DefaultRegistryHttpContext implements HttpContext {
 			if (path.length() == 0)
 				path = "/"; //$NON-NLS-1$
 			String file = sanitizeEntryName(resourceName.substring(lastSlash + 1));
-			Enumeration entryPaths = bundle.findEntries(path, file, false);
+			Enumeration<URL> entryPaths = bundle.findEntries(path, file, false);
 
 			if (entryPaths != null && entryPaths.hasMoreElements())
-				return (URL) entryPaths.nextElement();
+				return entryPaths.nextElement();
 
 			return null;
 		}
@@ -150,17 +148,17 @@ public class DefaultRegistryHttpContext implements HttpContext {
 			return (buffer == null) ? name : buffer.toString();
 		}
 
-		public Set getResourcePaths(String path) {
+		public Set<String> getResourcePaths(String path) {
 			if (bundlePath != null)
 				path = bundlePath + path;
 
-			Enumeration entryPaths = bundle.findEntries(path, null, false);
+			Enumeration<URL> entryPaths = bundle.findEntries(path, null, false);
 			if (entryPaths == null)
 				return null;
 
-			Set result = new HashSet();
+			Set<String> result = new HashSet<>();
 			while (entryPaths.hasMoreElements()) {
-				URL entryURL = (URL) entryPaths.nextElement();
+				URL entryURL = entryPaths.nextElement();
 				String entryPath = entryURL.getFile();
 
 				if (bundlePath == null)

@@ -51,7 +51,7 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 
 	private HttpRegistryManager httpRegistryManager;
 
-	private List registered = new ArrayList();
+	private List<IConfigurationElement> registered = new ArrayList<>();
 
 	private ServiceReference reference;
 

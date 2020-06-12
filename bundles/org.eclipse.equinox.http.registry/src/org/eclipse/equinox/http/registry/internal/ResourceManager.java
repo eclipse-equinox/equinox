@@ -33,7 +33,7 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 	private static final String RESOURCE = "resource"; //$NON-NLS-1$
 
 	private static final String HTTPCONTEXT_ID = "httpcontextId"; //$NON-NLS-1$
-	
+
 	private static final String SERVICESELECTOR = "serviceSelector"; //$NON-NLS-1$
 
 	private static final String CLASS = "class"; //$NON-NLS-1$
@@ -42,7 +42,7 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 
 	private ExtensionPointTracker tracker;
 
-	private List registered = new ArrayList();
+	private List<IConfigurationElement> registered = new ArrayList<>();
 
 	private HttpRegistryManager httpRegistryManager;
 
@@ -68,7 +68,7 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 			IConfigurationElement serviceSelectorElement = elements[i];
 			if (!SERVICESELECTOR.equals(serviceSelectorElement.getName()))
 				continue;
-			
+
 			org.osgi.framework.Filter serviceSelector = null;
 			String clazz = serviceSelectorElement.getAttribute(CLASS);
 			if (clazz != null) {
@@ -83,7 +83,7 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 				String filter = serviceSelectorElement.getAttribute(FILTER);
 				if (filter == null)
 					return;
-				
+
 				try {
 					serviceSelector = FrameworkUtil.createFilter(filter);
 				} catch (InvalidSyntaxException e) {
@@ -92,14 +92,13 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 					return;
 				}
 			}
-			
-			if (! serviceSelector.match(reference))
+
+			if (!serviceSelector.match(reference))
 				return;
-			
+
 			break;
 		}
-		
-		
+
 		for (int i = 0; i < elements.length; i++) {
 			IConfigurationElement resourceElement = elements[i];
 			if (!RESOURCE.equals(resourceElement.getName()))

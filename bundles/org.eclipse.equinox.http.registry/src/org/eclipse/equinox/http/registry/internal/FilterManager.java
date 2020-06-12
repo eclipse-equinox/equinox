@@ -50,7 +50,7 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 
 	private HttpRegistryManager httpRegistryManager;
 
-	private Map registered = new HashMap();
+	private Map<IConfigurationElement, Filter> registered = new HashMap<>();
 
 	private ServiceReference reference;
 
@@ -115,7 +115,7 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 			if (alias == null)
 				continue; // alias is mandatory - ignore this.
 
-			Dictionary initparams = new Hashtable();
+			Dictionary<String, String> initparams = new Hashtable<>();
 			IConfigurationElement[] initParams = filterElement.getChildren(INIT_PARAM);
 			for (int j = 0; j < initParams.length; ++j) {
 				String paramName = initParams[j].getAttribute(PARAM_NAME);
@@ -144,7 +144,7 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
 		for (int i = 0; i < elements.length; i++) {
 			IConfigurationElement filterElement = elements[i];
-			Filter filter = (Filter) registered.remove(filterElement);
+			Filter filter = registered.remove(filterElement);
 			if (filter != null)
 				httpRegistryManager.removeFilterContribution(filter);
 		}

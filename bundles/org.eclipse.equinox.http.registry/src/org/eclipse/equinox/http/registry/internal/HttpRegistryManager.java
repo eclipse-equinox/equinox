@@ -15,8 +15,9 @@ package org.eclipse.equinox.http.registry.internal;
 
 import java.lang.reflect.Method;
 import java.util.*;
-import javax.servlet.*;
 import javax.servlet.Filter;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
 import org.eclipse.core.runtime.IContributor;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.osgi.framework.*;
@@ -42,11 +43,11 @@ public class HttpRegistryManager {
 	class ServletContribution {
 		String alias;
 		Servlet servlet;
-		Dictionary initparams;
+		Dictionary<?, ?> initparams;
 		String httpContextId;
 		IContributor contributor;
 
-		public ServletContribution(String alias, Servlet servlet, Dictionary initparams, String httpContextId, IContributor contributor) {
+		public ServletContribution(String alias, Servlet servlet, Dictionary<?, ?> initparams, String httpContextId, IContributor contributor) {
 			this.alias = alias;
 			this.servlet = servlet;
 			this.initparams = initparams;
@@ -58,11 +59,11 @@ public class HttpRegistryManager {
 	class FilterContribution {
 		String alias;
 		javax.servlet.Filter filter;
-		Dictionary initparams;
+		Dictionary<?, ?> initparams;
 		String httpContextId;
 		IContributor contributor;
 
-		public FilterContribution(String alias, javax.servlet.Filter filter, Dictionary initparams, String httpContextId, IContributor contributor) {
+		public FilterContribution(String alias, javax.servlet.Filter filter, Dictionary<?, ?> initparams, String httpContextId, IContributor contributor) {
 			this.alias = alias;
 			this.filter = filter;
 			this.initparams = initparams;
@@ -87,13 +88,13 @@ public class HttpRegistryManager {
 	private ResourceManager resourceManager;
 	private HttpService httpService;
 	private PackageAdmin packageAdmin;
-	private Map contexts = new HashMap();
-	private Map filters = new HashMap();
-	private Map servlets = new HashMap();
-	private Map resources = new HashMap();
-	private Set registered = new HashSet();
+	private Map<String, HttpContextContribution> contexts = new HashMap<>();
+	private Map<String, FilterContribution> filters = new HashMap<>();
+	private Map<String, ServletContribution> servlets = new HashMap<>();
+	private Map<String, ResourcesContribution> resources = new HashMap<>();
+	private Set<String> registered = new HashSet<>();
 
-	public HttpRegistryManager(ServiceReference reference, HttpService httpService, PackageAdmin packageAdmin, IExtensionRegistry registry) {
+	public HttpRegistryManager(ServiceReference<?> reference, HttpService httpService, PackageAdmin packageAdmin, IExtensionRegistry registry) {
 		this.httpService = httpService;
 		this.packageAdmin = packageAdmin;
 
@@ -131,7 +132,7 @@ public class HttpRegistryManager {
 		return true;
 	}
 
-	public synchronized boolean addServletContribution(String alias, Servlet servlet, Dictionary initparams, String httpContextId, IContributor contributor) {
+	public synchronized boolean addServletContribution(String alias, Servlet servlet, Dictionary<?, ?> initparams, String httpContextId, IContributor contributor) {
 		if (resources.containsKey(alias) || servlets.containsKey(alias)) {
 			System.err.println("ERROR: Duplicate alias. Failed to register servlet for [alias=\"" + alias + "\", contributor=\"" + contributor + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			return false;
@@ -151,7 +152,7 @@ public class HttpRegistryManager {
 		unregister(alias);
 	}
 
-	public synchronized boolean addFilterContribution(String alias, javax.servlet.Filter filter, Dictionary initparams, String httpContextId, IContributor contributor) {
+	public synchronized boolean addFilterContribution(String alias, javax.servlet.Filter filter, Dictionary<?, ?> initparams, String httpContextId, IContributor contributor) {
 		FilterContribution contribution = new FilterContribution(alias, filter, initparams, httpContextId, contributor);
 		return registerFilter(contribution);
 	}
@@ -161,7 +162,7 @@ public class HttpRegistryManager {
 	}
 
 	public synchronized HttpContext getHttpContext(String httpContextId, Bundle bundle) {
-		HttpContextContribution contribution = (HttpContextContribution) contexts.get(httpContextId);
+		HttpContextContribution contribution = contexts.get(httpContextId);
 		if (contribution == null)
 			return null;
 
@@ -181,20 +182,17 @@ public class HttpRegistryManager {
 		}
 
 		contexts.put(httpContextId, new HttpContextContribution(context, contributor));
-		for (Iterator it = filters.values().iterator(); it.hasNext();) {
-			FilterContribution contribution = (FilterContribution) it.next();
+		for (FilterContribution contribution : filters.values()) {
 			if (httpContextId.equals(contribution.httpContextId))
 				registerFilter(contribution);
 		}
 
-		for (Iterator it = resources.values().iterator(); it.hasNext();) {
-			ResourcesContribution contribution = (ResourcesContribution) it.next();
+		for (ResourcesContribution contribution : resources.values()) {
 			if (httpContextId.equals(contribution.httpContextId))
 				registerResources(contribution);
 		}
 
-		for (Iterator it = servlets.values().iterator(); it.hasNext();) {
-			ServletContribution contribution = (ServletContribution) it.next();
+		for (ServletContribution contribution : servlets.values()) {
 			if (httpContextId.equals(contribution.httpContextId))
 				registerServlet(contribution);
 		}
@@ -203,14 +201,12 @@ public class HttpRegistryManager {
 
 	public synchronized void removeHttpContextContribution(String httpContextId) {
 		if (contexts.remove(httpContextId) != null) {
-			for (Iterator it = resources.values().iterator(); it.hasNext();) {
-				ResourcesContribution contribution = (ResourcesContribution) it.next();
+			for (ResourcesContribution contribution : resources.values()) {
 				if (httpContextId.equals(contribution.httpContextId))
 					unregister(contribution.alias);
 			}
 
-			for (Iterator it = servlets.values().iterator(); it.hasNext();) {
-				ServletContribution contribution = (ServletContribution) it.next();
+			for (ServletContribution contribution : servlets.values()) {
 				if (httpContextId.equals(contribution.httpContextId))
 					unregister(contribution.alias);
 			}
@@ -344,7 +340,7 @@ public class HttpRegistryManager {
 			return defaultContext;
 		}
 
-		HttpContextContribution contribution = (HttpContextContribution) contexts.get(httpContextId);
+		HttpContextContribution contribution = contexts.get(httpContextId);
 		if (System.getSecurityManager() != null) {
 			Bundle contributorBundle = getBundle(contributor);
 			Bundle httpContextBundle = getBundle(contribution.contributor);

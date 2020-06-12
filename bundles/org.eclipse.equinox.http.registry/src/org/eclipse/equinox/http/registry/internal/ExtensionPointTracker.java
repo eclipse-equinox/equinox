@@ -27,9 +27,11 @@ public class ExtensionPointTracker {
 
 	private static final Listener NULL_LISTENER = new Listener() {
 		public void added(IExtension extension) {
+			//empty 
 		}
 
 		public void removed(IExtension extension) {
+			//empty
 		}
 	};
 
@@ -37,7 +39,7 @@ public class ExtensionPointTracker {
 	private final String extensionPointId;
 	final String namespace;
 	final String simpleIdentifier;
-	private final Set extensionCache = new HashSet();
+	private final Set<IExtension> extensionCache = new HashSet<>();
 	protected final Listener listener;
 	private final RegistryChangeListener registryChangeListener = new RegistryChangeListener();
 	private boolean closed = true;
@@ -111,7 +113,7 @@ public class ExtensionPointTracker {
 	}
 
 	public synchronized IExtension[] getExtensions() {
-		return (IExtension[]) extensionCache.toArray(new IExtension[extensionCache.size()]);
+		return extensionCache.toArray(new IExtension[extensionCache.size()]);
 	}
 
 	class RegistryChangeListener implements IRegistryChangeListener {
