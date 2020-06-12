@@ -60,7 +60,7 @@ public final class ModuleRevisions implements BundleRevisions {
 	@Override
 	public List<BundleRevision> getRevisions() {
 		synchronized (monitor) {
-			return new ArrayList<BundleRevision>(revisions);
+			return new ArrayList<>(revisions);
 		}
 	}
 

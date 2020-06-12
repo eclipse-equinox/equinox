@@ -401,7 +401,7 @@ public class ServiceRegistry {
 			// The the removals from the hooks are ignored for the system bundle
 			copyReferences = new ArrayList<>(references);
 		}
-		Collection<ServiceReference<?>> shrinkable = new ShrinkableCollection<ServiceReference<?>>(copyReferences);
+		Collection<ServiceReference<?>> shrinkable = new ShrinkableCollection<>(copyReferences);
 		notifyFindHooks(context, clazz, filterstring, allservices, shrinkable);
 
 		int size = references.size();
@@ -906,7 +906,8 @@ public class ServiceRegistry {
 		Collection<BundleContext> contexts = asBundleContexts(listenerSnapshot.keySet());
 		notifyEventHooksPrivileged(event, contexts);
 		if (!listenerSnapshot.isEmpty()) {
-			Map<BundleContext, Collection<ListenerInfo>> listeners = new ShrinkableValueCollectionMap<BundleContext, ListenerInfo>(listenerSnapshot);
+			Map<BundleContext, Collection<ListenerInfo>> listeners = new ShrinkableValueCollectionMap<>(
+					listenerSnapshot);
 			notifyEventListenerHooksPrivileged(event, listeners);
 		}
 		// always add back the system service listeners if they were removed

@@ -266,7 +266,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 		public ConfigValues(Map<String, ?> initialConfiguration, Map<Throwable, Integer> exceptions) {
 			this.exceptions = exceptions;
-			this.initialConfig = initialConfiguration == null ? new HashMap<String, Object>(0) : new HashMap<>(initialConfiguration);
+			this.initialConfig = initialConfiguration == null ? new HashMap<>(0) : new HashMap<>(initialConfiguration);
 			Object useSystemPropsValue = initialConfig.get(PROP_USE_SYSTEM_PROPERTIES);
 			this.useSystemProperties = useSystemPropsValue == null ? false : Boolean.parseBoolean(useSystemPropsValue.toString());
 			Properties tempConfiguration = useSystemProperties ? EquinoxContainer.secureAction.getProperties() : new Properties();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1189,7 +1189,7 @@ final class ModuleResolver {
 		private void computeUnresolvedProviderResolutionReportEntries(Map<Resource, List<Wire>> resolution) {
 			// Create a collection representing the resources asked to be
 			// resolved.
-			Collection<Resource> shouldHaveResolvedResources = new ArrayList<Resource>(unresolved);
+			Collection<Resource> shouldHaveResolvedResources = new ArrayList<>(unresolved);
 			// Remove disabled resources.
 			shouldHaveResolvedResources.removeAll(disabled);
 			// Remove resolved resources, if necessary. The resolution will be

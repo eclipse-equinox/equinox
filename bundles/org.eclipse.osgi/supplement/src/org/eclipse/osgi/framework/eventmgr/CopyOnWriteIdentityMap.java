@@ -132,7 +132,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 		Iterator<? extends Map.Entry<? extends K, ? extends V>> iter = source.entrySet().iterator();
 		for (int i = 0; i < sourceSize; i++) {
 			Map.Entry<? extends K, ? extends V> mapEntry = iter.next();
-			toCopy[i] = new Entry<K, V>(mapEntry.getKey(), mapEntry.getValue());
+			toCopy[i] = new Entry<>(mapEntry.getKey(), mapEntry.getValue());
 		}
 		putAll(toCopy);
 	}
@@ -151,7 +151,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 		@SuppressWarnings("unchecked")
 		Entry<K, V>[] toCopy = new Entry[sourceSize];
 		for (int i = 0; i < sourceSize; i++) {
-			toCopy[i] = new Entry<K, V>(keys[i], null);
+			toCopy[i] = new Entry<>(keys[i], null);
 		}
 		putAll(toCopy);
 	}

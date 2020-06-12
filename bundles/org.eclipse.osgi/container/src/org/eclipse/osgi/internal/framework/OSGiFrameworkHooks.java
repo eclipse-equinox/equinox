@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -222,7 +222,8 @@ class OSGiFrameworkHooks {
 			BundleContextImpl context = (BundleContextImpl) EquinoxContainer.secureAction.getContext(systemModule.getBundle());
 
 			ServiceReferenceImpl<ResolverHookFactory>[] refs = getHookReferences(registry, context);
-			List<HookReference> hookRefs = refs == null ? Collections.<CoreResolverHookFactory.HookReference> emptyList() : new ArrayList<CoreResolverHookFactory.HookReference>(refs.length);
+			List<HookReference> hookRefs = refs == null ? Collections.<CoreResolverHookFactory.HookReference>emptyList()
+					: new ArrayList<>(refs.length);
 			if (refs != null) {
 				for (ServiceReferenceImpl<ResolverHookFactory> hookRef : refs) {
 					ResolverHookFactory factory = EquinoxContainer.secureAction.getService(hookRef, context);

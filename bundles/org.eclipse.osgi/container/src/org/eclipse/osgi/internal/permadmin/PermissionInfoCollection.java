@@ -58,7 +58,7 @@ public final class PermissionInfoCollection extends PermissionCollection {
 			}
 		}
 		this.hasAllPermission = tempAllPermissions;
-		this.cachedRelativeFilePermissionCollections = allAbsolutePaths ? null : new HashMap<BundlePermissions, PermissionCollection>();
+		this.cachedRelativeFilePermissionCollections = allAbsolutePaths ? null : new HashMap<>();
 		setReadOnly(); // collections are managed with ConditionalPermissionAdmin
 	}
 

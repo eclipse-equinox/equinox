@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.osgi.framework.namespace.NativeNamespace;
 import org.osgi.framework.wiring.BundleCapability;
 
@@ -32,7 +34,7 @@ public final class ModuleCapability implements BundleCapability {
 		this.namespace = namespace;
 		this.directives = directives;
 		this.attributes = attributes;
-		this.transientAttrs = NativeNamespace.NATIVE_NAMESPACE.equals(namespace) ? new HashMap<String, Object>(0) : null;
+		this.transientAttrs = NativeNamespace.NATIVE_NAMESPACE.equals(namespace) ? new HashMap<>(0) : null;
 		this.revision = revision;
 	}
 
