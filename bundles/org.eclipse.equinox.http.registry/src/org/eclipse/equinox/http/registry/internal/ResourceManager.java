@@ -46,9 +46,9 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 
 	private HttpRegistryManager httpRegistryManager;
 
-	private ServiceReference reference;
+	private ServiceReference<?> reference;
 
-	public ResourceManager(HttpRegistryManager httpRegistryManager, ServiceReference reference, IExtensionRegistry registry) {
+	public ResourceManager(HttpRegistryManager httpRegistryManager, ServiceReference<?> reference, IExtensionRegistry registry) {
 		this.httpRegistryManager = httpRegistryManager;
 		this.reference = reference;
 		tracker = new ExtensionPointTracker(registry, RESOURCES_EXTENSION_POINT, this);

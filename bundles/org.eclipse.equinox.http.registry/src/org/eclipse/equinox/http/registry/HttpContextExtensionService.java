@@ -17,6 +17,7 @@ package org.eclipse.equinox.http.registry;
 
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
 
 /**
  * The HttpContextExtensionService provides access to an HttpContext instance whose resources and implementation
@@ -34,5 +35,5 @@ public interface HttpContextExtensionService {
 	 * @return The HttpContext associated with the "id" and Http Service Reference; <code>null</code>
 	 *         if the HttpContext is unavailable.
 	 */
-	public HttpContext getHttpContext(ServiceReference httpServiceReference, String httpContextId);
+	public HttpContext getHttpContext(ServiceReference<HttpService> httpServiceReference, String httpContextId);
 }

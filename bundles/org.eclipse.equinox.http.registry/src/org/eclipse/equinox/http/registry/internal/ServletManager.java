@@ -53,9 +53,9 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 
 	private List<IConfigurationElement> registered = new ArrayList<>();
 
-	private ServiceReference reference;
+	private ServiceReference<?> reference;
 
-	public ServletManager(HttpRegistryManager httpRegistryManager, ServiceReference reference, IExtensionRegistry registry) {
+	public ServletManager(HttpRegistryManager httpRegistryManager, ServiceReference<?> reference, IExtensionRegistry registry) {
 		this.httpRegistryManager = httpRegistryManager;
 		this.reference = reference;
 		tracker = new ExtensionPointTracker(registry, SERVLETS_EXTENSION_POINT, this);
@@ -116,7 +116,7 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 			if (alias == null)
 				continue; // alias is mandatory - ignore this.
 
-			Dictionary initparams = new Hashtable();
+			Dictionary<String, String> initparams = new Hashtable<>();
 			IConfigurationElement[] initParams = servletElement.getChildren(INIT_PARAM);
 			for (int j = 0; j < initParams.length; ++j) {
 				String paramName = initParams[j].getAttribute(PARAM_NAME);

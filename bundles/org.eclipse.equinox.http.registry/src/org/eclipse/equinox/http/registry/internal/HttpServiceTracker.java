@@ -25,17 +25,17 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
-public class HttpServiceTracker extends ServiceTracker {
+public class HttpServiceTracker extends ServiceTracker<HttpService, HttpService> {
 
 	private BundleContext context;
 	private PackageAdmin packageAdmin;
 	private IExtensionRegistry registry;
 
-	private ServiceRegistration registration;
-	Map httpRegistryManagers = new HashMap();
+	private ServiceRegistration<?> registration;
+	Map<ServiceReference<HttpService>, HttpRegistryManager> httpRegistryManagers = new HashMap<>();
 
 	public HttpServiceTracker(BundleContext context, PackageAdmin packageAdmin, IExtensionRegistry registry) {
-		super(context, HttpService.class.getName(), null);
+		super(context, HttpService.class, null);
 		this.context = context;
 		this.packageAdmin = packageAdmin;
 		this.registry = registry;
@@ -52,8 +52,8 @@ public class HttpServiceTracker extends ServiceTracker {
 		super.close();
 	}
 
-	public synchronized Object addingService(ServiceReference reference) {
-		HttpService httpService = (HttpService) super.addingService(reference);
+	public synchronized HttpService addingService(ServiceReference<HttpService> reference) {
+		HttpService httpService = super.addingService(reference);
 		if (httpService == null)
 			return null;
 
@@ -64,25 +64,25 @@ public class HttpServiceTracker extends ServiceTracker {
 		return httpService;
 	}
 
-	public void modifiedService(ServiceReference reference, Object service) {
+	public void modifiedService(ServiceReference<HttpService> reference, HttpService service) {
 		// ignored
 	}
 
-	public synchronized void removedService(ServiceReference reference, Object service) {
-		HttpRegistryManager httpRegistryManager = (HttpRegistryManager) httpRegistryManagers.remove(reference);
+	public synchronized void removedService(ServiceReference<HttpService> reference, HttpService service) {
+		HttpRegistryManager httpRegistryManager = httpRegistryManagers.remove(reference);
 		if (httpRegistryManager != null) {
 			httpRegistryManager.stop();
 		}
 		super.removedService(reference, service);
 	}
 
-	public class HttpContextExtensionServiceFactory implements ServiceFactory {
+	public class HttpContextExtensionServiceFactory implements ServiceFactory<HttpContextExtensionService> {
 
-		public Object getService(Bundle bundle, ServiceRegistration registration) {
+		public HttpContextExtensionService getService(Bundle bundle, ServiceRegistration<HttpContextExtensionService> registration) {
 			return new HttpContextExtensionServiceImpl(bundle);
 		}
 
-		public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
+		public void ungetService(Bundle bundle, ServiceRegistration<HttpContextExtensionService> registration, HttpContextExtensionService service) {
 			// do nothing
 		}
 	}
@@ -95,9 +95,9 @@ public class HttpServiceTracker extends ServiceTracker {
 			this.bundle = bundle;
 		}
 
-		public HttpContext getHttpContext(ServiceReference httpServiceReference, String httpContextId) {
+		public HttpContext getHttpContext(ServiceReference<HttpService> httpServiceReference, String httpContextId) {
 			synchronized (HttpServiceTracker.this) {
-				HttpRegistryManager httpRegistryManager = (HttpRegistryManager) httpRegistryManagers.get(httpServiceReference);
+				HttpRegistryManager httpRegistryManager = httpRegistryManagers.get(httpServiceReference);
 				if (httpRegistryManager == null)
 					return null;
 

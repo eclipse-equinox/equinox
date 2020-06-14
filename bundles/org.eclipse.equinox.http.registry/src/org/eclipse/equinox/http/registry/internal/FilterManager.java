@@ -52,9 +52,9 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 
 	private Map<IConfigurationElement, Filter> registered = new HashMap<>();
 
-	private ServiceReference reference;
+	private ServiceReference<?> reference;
 
-	public FilterManager(HttpRegistryManager httpRegistryManager, ServiceReference reference, IExtensionRegistry registry) {
+	public FilterManager(HttpRegistryManager httpRegistryManager, ServiceReference<?> reference, IExtensionRegistry registry) {
 		this.httpRegistryManager = httpRegistryManager;
 		this.reference = reference;
 		tracker = new ExtensionPointTracker(registry, FILTERS_EXTENSION_POINT, this);
