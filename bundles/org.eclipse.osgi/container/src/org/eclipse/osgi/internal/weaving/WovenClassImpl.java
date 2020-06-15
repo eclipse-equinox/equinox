@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2017 IBM Corporation and others.
+ * Copyright (c) 2010, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.weaving;
 
-import java.security.*;
-import java.util.*;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.security.ProtectionDomain;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
@@ -27,22 +32,31 @@ import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.StorageUtil;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.*;
-import org.osgi.framework.hooks.weaving.*;
+import org.osgi.framework.AdminPermission;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.PackagePermission;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.hooks.weaving.WeavingException;
+import org.osgi.framework.hooks.weaving.WeavingHook;
+import org.osgi.framework.hooks.weaving.WovenClass;
+import org.osgi.framework.hooks.weaving.WovenClassListener;
 import org.osgi.framework.wiring.BundleWiring;
 
 public final class WovenClassImpl implements WovenClass, HookContext {
 	private final static byte FLAG_HOOKCALLED = 0x01;
 	private final static byte FLAG_HOOKSCOMPLETE = 0x02;
 	private final static byte FLAG_WEAVINGCOMPLETE = 0x04;
-	private final static String weavingHookName = WeavingHook.class.getName();
+	final static String weavingHookName = WeavingHook.class.getName();
+	final static String wovenClassListenerName = WovenClassListener.class.getName();
 	private final String className;
 	private final BundleEntry entry;
 	private final List<String> dynamicImports;
 	private final ClasspathEntry classpathEntry;
 	private final BundleLoader loader;
 	final ServiceRegistry registry;
-	private final Map<ServiceRegistration<?>, Boolean> blackList;
+	private final Map<ServiceRegistration<?>, Boolean> deniedHooks;
 	private byte[] validBytes;
 	private byte[] resultBytes;
 	private byte hookFlags = 0;
@@ -52,7 +66,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 	private int state;
 	final EquinoxContainer container;
 
-	public WovenClassImpl(String className, byte[] bytes, BundleEntry entry, ClasspathEntry classpathEntry, BundleLoader loader, EquinoxContainer container, Map<ServiceRegistration<?>, Boolean> blacklist) {
+	public WovenClassImpl(String className, byte[] bytes, BundleEntry entry, ClasspathEntry classpathEntry, BundleLoader loader, EquinoxContainer container, Map<ServiceRegistration<?>, Boolean> deniedHooks) {
 		super();
 		this.className = className;
 		this.validBytes = this.resultBytes = bytes;
@@ -62,7 +76,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 		this.loader = loader;
 		this.registry = container.getServiceRegistry();
 		this.container = container;
-		this.blackList = blacklist;
+		this.deniedHooks = deniedHooks;
 		setState(TRANSFORMING);
 	}
 
@@ -160,8 +174,8 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 			return; // do not call any other hooks once an error has occurred.
 		if (hook instanceof WeavingHook) {
 			if (skipRegistration(hookRegistration)) {
-				// Note we double check blacklist here just
-				// in case another thread blacklisted since the first check
+				// Note we double check denied hooks here just
+				// in case another thread denied the hook since the first check
 				return;
 			}
 			if ((hookFlags & FLAG_HOOKCALLED) == 0) {
@@ -176,19 +190,19 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 			} catch (WeavingException e) {
 				error = e;
 				errorHook = hookRegistration;
-				// do not blacklist on weaving exceptions
+				// do not deny the hook on weaving exceptions
 			} catch (Throwable t) {
 				error = t; // save the error to fail later
 				errorHook = hookRegistration;
-				// put the registration on the black list
-				blackList.put(hookRegistration, Boolean.TRUE);
+				// deny the registration
+				deniedHooks.put(hookRegistration, Boolean.TRUE);
 			}
 		}
 	}
 
 	@Override
 	public boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
-		return blackList.containsKey(hookRegistration);
+		return deniedHooks.containsKey(hookRegistration);
 	}
 
 	private boolean validBytes(byte[] checkBytes) {
@@ -205,52 +219,25 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 		return true;
 	}
 
-	@Override
-	public String getHookMethodName() {
-		return "weave"; //$NON-NLS-1$
-	}
-
-	@Override
-	public String getHookClassName() {
-		return weavingHookName;
-	}
-
 	private void notifyWovenClassListeners() {
-		final HookContext context = new HookContext() {
-			@Override
-			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
-				if (!(hook instanceof WovenClassListener))
-					return;
-				try {
-					((WovenClassListener) hook).modified(WovenClassImpl.this);
-				} catch (Exception e) {
-					WovenClassImpl.this.container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, hookRegistration.getReference().getBundle(), e);
-				}
-			}
-
-			@Override
-			public String getHookClassName() {
-				return WovenClassListener.class.getName();
-			}
-
-			@Override
-			public String getHookMethodName() {
-				return "modified"; //$NON-NLS-1$
-			}
-
-			@Override
-			public boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
-				return false;
+		final HookContext context = (hook, hookRegistration) -> {
+			if (!(hook instanceof WovenClassListener))
+				return;
+			try {
+				((WovenClassListener) hook).modified(WovenClassImpl.this);
+			} catch (Exception e) {
+				WovenClassImpl.this.container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR,
+						hookRegistration.getReference().getBundle(), e);
 			}
 		};
 		if (System.getSecurityManager() == null)
-			registry.notifyHooksPrivileged(context);
+			registry.notifyHooksPrivileged(wovenClassListenerName, "modified", context); //$NON-NLS-1$
 		else {
 			try {
 				AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
 					@Override
 					public Void run() {
-						registry.notifyHooksPrivileged(context);
+						registry.notifyHooksPrivileged(wovenClassListenerName, "modified", context); //$NON-NLS-1$
 						return null;
 					}
 				});
@@ -267,13 +254,13 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 		boolean rejected = false;
 		try {
 			if (sm == null) {
-				registry.notifyHooksPrivileged(this);
+				registry.notifyHooksPrivileged(weavingHookName, "weave", this); //$NON-NLS-1$
 			} else {
 				try {
 					AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
 						@Override
 						public Void run() {
-							registry.notifyHooksPrivileged(WovenClassImpl.this);
+							registry.notifyHooksPrivileged(weavingHookName, "weave", WovenClassImpl.this); //$NON-NLS-1$
 							return null;
 						}
 					});

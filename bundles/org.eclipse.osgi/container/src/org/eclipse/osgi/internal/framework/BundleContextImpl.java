@@ -35,7 +35,6 @@ import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.messages.Msg;
-import org.eclipse.osgi.internal.serviceregistry.HookContext;
 import org.eclipse.osgi.internal.serviceregistry.ServiceReferenceImpl;
 import org.eclipse.osgi.internal.serviceregistry.ServiceRegistrationImpl;
 import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
@@ -259,27 +258,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		if (debug.DEBUG_HOOKS) {
 			Debug.println("notifyBundleFindHooks(" + allBundles + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		container.getServiceRegistry().notifyHooksPrivileged(new HookContext() {
-			@Override
-			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
-				if (hook instanceof FindHook) {
-					((FindHook) hook).find(context, allBundles);
-				}
-			}
-
-			@Override
-			public String getHookClassName() {
-				return findHookName;
-			}
-
-			@Override
-			public String getHookMethodName() {
-				return "find"; //$NON-NLS-1$
-			}
-
-			@Override
-			public boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
-				return false;
+		container.getServiceRegistry().notifyHooksPrivileged(findHookName, "find", (hook, hookRegistration) -> { //$NON-NLS-1$
+			if (hook instanceof FindHook) {
+				((FindHook) hook).find(context, allBundles);
 			}
 		});
 	}

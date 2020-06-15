@@ -1245,27 +1245,9 @@ public class ServiceRegistry {
 		if (debug.DEBUG_HOOKS) {
 			Debug.println("notifyServiceFindHooks(" + context.getBundleImpl() + "," + clazz + "," + filterstring + "," + allservices + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		}
-		notifyHooksPrivileged(new HookContext() {
-			@Override
-			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
-				if (hook instanceof FindHook) {
-					((FindHook) hook).find(context, clazz, filterstring, allservices, result);
-				}
-			}
-
-			@Override
-			public String getHookClassName() {
-				return findHookName;
-			}
-
-			@Override
-			public String getHookMethodName() {
-				return "find"; //$NON-NLS-1$
-			}
-
-			@Override
-			public boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
-				return false;
+		notifyHooksPrivileged(findHookName, "find", (hook, hookRegistration) -> { //$NON-NLS-1$
+			if (hook instanceof FindHook) {
+				((FindHook) hook).find(context, clazz, filterstring, allservices, result);
 			}
 		});
 	}
@@ -1278,32 +1260,14 @@ public class ServiceRegistry {
 	 * @param event The service event to be delivered.
 	 * @param result The result to return to the caller which may have been shrunk by the EventHooks.
 	 */
+	@SuppressWarnings("deprecation")
 	private void notifyEventHooksPrivileged(final ServiceEvent event, final Collection<BundleContext> result) {
 		if (debug.DEBUG_HOOKS) {
 			Debug.println("notifyServiceEventHooks(" + event.getType() + ":" + event.getServiceReference() + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
-		notifyHooksPrivileged(new HookContext() {
-			@SuppressWarnings("deprecation")
-			@Override
-			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
-				if (hook instanceof EventHook) {
-					((EventHook) hook).event(event, result);
-				}
-			}
-
-			@Override
-			public String getHookClassName() {
-				return eventHookName;
-			}
-
-			@Override
-			public String getHookMethodName() {
-				return "event"; //$NON-NLS-1$
-			}
-
-			@Override
-			public boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
-				return false;
+		notifyHooksPrivileged(eventHookName, "event", (hook, hookRegistration) -> { //$NON-NLS-1$
+			if (hook instanceof EventHook) {
+				((EventHook) hook).event(event, result);
 			}
 		});
 	}
@@ -1320,27 +1284,9 @@ public class ServiceRegistry {
 		if (debug.DEBUG_HOOKS) {
 			Debug.println("notifyServiceEventListenerHooks(" + event.getType() + ":" + event.getServiceReference() + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
-		notifyHooksPrivileged(new HookContext() {
-			@Override
-			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
-				if (hook instanceof EventListenerHook) {
-					((EventListenerHook) hook).event(event, result);
-				}
-			}
-
-			@Override
-			public String getHookClassName() {
-				return eventListenerHookName;
-			}
-
-			@Override
-			public String getHookMethodName() {
-				return "event"; //$NON-NLS-1$
-			}
-
-			@Override
-			public boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
-				return false;
+		notifyHooksPrivileged(eventListenerHookName, "event", (hook, hookRegistration) -> { //$NON-NLS-1$
+			if (hook instanceof EventListenerHook) {
+				((EventListenerHook) hook).event(event, result);
 			}
 		});
 	}
@@ -1350,13 +1296,13 @@ public class ServiceRegistry {
 	 *
 	 * @param hookContext Context to use when calling the hook services.
 	 */
-	public void notifyHooksPrivileged(HookContext hookContext) {
-		List<ServiceRegistrationImpl<?>> hooks = lookupServiceRegistrations(hookContext.getHookClassName(), null);
+	public void notifyHooksPrivileged(String serviceName, String serviceMethod, HookContext hookContext) {
+		List<ServiceRegistrationImpl<?>> hooks = lookupServiceRegistrations(serviceName, null);
 		// Since the list is already sorted, we don't need to sort the list to call the hooks
 		// in the proper order.
 
 		for (ServiceRegistrationImpl<?> registration : hooks) {
-			notifyHookPrivileged(systemBundleContext, registration, hookContext);
+			notifyHookPrivileged(systemBundleContext, registration, serviceMethod, hookContext);
 		}
 	}
 
@@ -1367,7 +1313,8 @@ public class ServiceRegistry {
 	 * @param registration Hook service to call.
 	 * @param hookContext Context to use when calling the hook service.
 	 */
-	private void notifyHookPrivileged(BundleContextImpl context, ServiceRegistrationImpl<?> registration, HookContext hookContext) {
+	private void notifyHookPrivileged(BundleContextImpl context, ServiceRegistrationImpl<?> registration,
+			String serviceMethod, HookContext hookContext) {
 		if (hookContext.skipRegistration(registration)) {
 			return;
 		}
@@ -1382,12 +1329,13 @@ public class ServiceRegistry {
 			hookContext.call(hook, registration);
 		} catch (Throwable t) {
 			if (debug.DEBUG_HOOKS) {
-				Debug.println(hook.getClass().getName() + "." + hookContext.getHookMethodName() + "() exception: " + t.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+				Debug.println(hook.getClass().getName() + "." + serviceMethod + "() exception: " + t.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 				Debug.printStackTrace(t);
 			}
 			// allow the adaptor to handle this unexpected error
 			container.handleRuntimeError(t);
-			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, hook.getClass().getName(), hookContext.getHookMethodName()), t);
+			ServiceException se = new ServiceException(
+					NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, hook.getClass().getName(), serviceMethod), t);
 			container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
 		}
 	}
@@ -1429,27 +1377,9 @@ public class ServiceRegistry {
 		}
 
 		final Collection<ListenerInfo> listeners = Collections.unmodifiableCollection(addedListeners);
-		notifyHookPrivileged(systemBundleContext, registration, new HookContext() {
-			@Override
-			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
-				if (hook instanceof ListenerHook) {
-					((ListenerHook) hook).added(listeners);
-				}
-			}
-
-			@Override
-			public String getHookClassName() {
-				return listenerHookName;
-			}
-
-			@Override
-			public String getHookMethodName() {
-				return "added"; //$NON-NLS-1$
-			}
-
-			@Override
-			public boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
-				return false;
+		notifyHookPrivileged(systemBundleContext, registration, "added", (hook, hookRegistration) -> { //$NON-NLS-1$
+			if (hook instanceof ListenerHook) {
+				((ListenerHook) hook).added(listeners);
 			}
 		});
 	}
@@ -1485,31 +1415,13 @@ public class ServiceRegistry {
 			Debug.println("notifyServiceListenerHooks(" + listeners + "," + (added ? "added" : "removed") + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 
-		notifyHooksPrivileged(new HookContext() {
-			@Override
-			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
-				if (hook instanceof ListenerHook) {
-					if (added) {
-						((ListenerHook) hook).added(listeners);
-					} else {
-						((ListenerHook) hook).removed(listeners);
-					}
+		notifyHooksPrivileged(listenerHookName, added ? "added" : "removed", (hook, hookRegistration) -> { //$NON-NLS-1$ //$NON-NLS-2$
+			if (hook instanceof ListenerHook) {
+				if (added) {
+					((ListenerHook) hook).added(listeners);
+				} else {
+					((ListenerHook) hook).removed(listeners);
 				}
-			}
-
-			@Override
-			public String getHookClassName() {
-				return listenerHookName;
-			}
-
-			@Override
-			public String getHookMethodName() {
-				return added ? "added" : "removed"; //$NON-NLS-1$ //$NON-NLS-2$
-			}
-
-			@Override
-			public boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
-				return false;
 			}
 		});
 	}

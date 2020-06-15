@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2017 IBM Corporation and others.
+ * Copyright (c) 2010, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -23,6 +23,7 @@ import org.osgi.framework.ServiceRegistration;
  * as well as all the parameters which need to be passed to the hook method.
  *
  */
+@FunctionalInterface
 public interface HookContext {
 
 	/**
@@ -37,23 +38,11 @@ public interface HookContext {
 	public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception;
 
 	/**
-	 * Return the class name of the hook type supported by this hook context.
-	 *
-	 * @return The class name of the hook type supported by this hook context.
-	 */
-	public String getHookClassName();
-
-	/**
-	 * Return the hook method name called by this hook context.
-	 *
-	 * @return The hook method name called by this hook context.
-	 */
-	public String getHookMethodName();
-
-	/**
 	 * Returns true if the given registration should be skipped.
 	 * @param hookRegistration the registration to check
 	 * @return true if the given registration should be skipped.
 	 */
-	public boolean skipRegistration(ServiceRegistration<?> hookRegistration);
+	public default boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
+		return false;
+	}
 }

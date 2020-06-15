@@ -28,7 +28,6 @@ import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
 import org.eclipse.osgi.framework.eventmgr.EventManager;
 import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
 import org.eclipse.osgi.internal.debug.Debug;
-import org.eclipse.osgi.internal.serviceregistry.HookContext;
 import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
 import org.eclipse.osgi.internal.serviceregistry.ShrinkableCollection;
 import org.osgi.framework.AdminPermission;
@@ -38,7 +37,6 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.hooks.bundle.EventHook;
@@ -46,6 +44,7 @@ import org.osgi.framework.hooks.bundle.EventHook;
 public class EquinoxEventPublisher {
 	static final String eventHookName = EventHook.class.getName();
 	static final String collisionHookName = CollisionHook.class.getName();
+	@SuppressWarnings("deprecation")
 	static final int FRAMEWORK_STOPPED_MASK = (FrameworkEvent.STOPPED | FrameworkEvent.STOPPED_BOOTCLASSPATH_MODIFIED
 			| FrameworkEvent.STOPPED_UPDATE | FrameworkEvent.STOPPED_SYSTEM_REFRESHED);
 
@@ -256,27 +255,9 @@ public class EquinoxEventPublisher {
 
 		ServiceRegistry serviceRegistry = container.getServiceRegistry();
 		if (serviceRegistry != null) {
-			serviceRegistry.notifyHooksPrivileged(new HookContext() {
-				@Override
-				public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
-					if (hook instanceof EventHook) {
-						((EventHook) hook).event(event, result);
-					}
-				}
-
-				@Override
-				public String getHookClassName() {
-					return eventHookName;
-				}
-
-				@Override
-				public String getHookMethodName() {
-					return "event"; //$NON-NLS-1$
-				}
-
-				@Override
-				public boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
-					return false;
+			serviceRegistry.notifyHooksPrivileged(eventHookName, "event", (hook, hookRegistration) -> { //$NON-NLS-1$
+				if (hook instanceof EventHook) {
+					((EventHook) hook).event(event, result);
 				}
 			});
 		}

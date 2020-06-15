@@ -27,7 +27,6 @@ import org.eclipse.osgi.container.ModuleContainer;
 import org.eclipse.osgi.framework.util.ArrayMap;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.messages.Msg;
-import org.eclipse.osgi.internal.serviceregistry.HookContext;
 import org.eclipse.osgi.internal.serviceregistry.ServiceReferenceImpl;
 import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
 import org.eclipse.osgi.internal.serviceregistry.ShrinkableCollection;
@@ -37,7 +36,6 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
@@ -119,27 +117,9 @@ class OSGiFrameworkHooks {
 			}
 			ServiceRegistry registry = container.getServiceRegistry();
 			if (registry != null) {
-				registry.notifyHooksPrivileged(new HookContext() {
-					@Override
-					public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
-						if (hook instanceof CollisionHook) {
-							((CollisionHook) hook).filterCollisions(operationType, target, collisionCandidates);
-						}
-					}
-
-					@Override
-					public String getHookClassName() {
-						return collisionHookName;
-					}
-
-					@Override
-					public String getHookMethodName() {
-						return "filterCollisions"; //$NON-NLS-1$
-					}
-
-					@Override
-					public boolean skipRegistration(ServiceRegistration<?> hookRegistration) {
-						return false;
+				registry.notifyHooksPrivileged(collisionHookName, "filterCollisions", (hook, hookRegistration) -> { //$NON-NLS-1$
+					if (hook instanceof CollisionHook) {
+						((CollisionHook) hook).filterCollisions(operationType, target, collisionCandidates);
 					}
 				});
 			}

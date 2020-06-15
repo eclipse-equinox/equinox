@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2017 IBM Corporation and others.
+ * Copyright (c) 2010, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,11 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.weaving;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
 import org.eclipse.osgi.internal.loader.BundleLoader;
@@ -22,7 +26,9 @@ import org.eclipse.osgi.internal.loader.classpath.ClasspathEntry;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
 import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.ServiceRegistration;
 
 public class WeavingHookConfigurator extends ClassLoaderHook {
 	static class WovenClassContext {
@@ -30,8 +36,10 @@ public class WeavingHookConfigurator extends ClassLoaderHook {
 		List<String> processClassNameStack = new ArrayList<>(6);
 	}
 
-	// holds the map of black listed hooks.  Use weak map to avoid pinning and simplify cleanup.
-	private final Map<ServiceRegistration<?>, Boolean> blackList = Collections.synchronizedMap(new WeakHashMap<ServiceRegistration<?>, Boolean>());
+	// holds the map of denied hooks. Use weak map to avoid pinning and simplify
+	// cleanup.
+	private final Map<ServiceRegistration<?>, Boolean> deniedHooks = Collections
+			.synchronizedMap(new WeakHashMap<ServiceRegistration<?>, Boolean>());
 	// holds the stack of WovenClass objects currently being used to define classes
 	private final ThreadLocal<WovenClassContext> wovenClassContext = new ThreadLocal<>();
 
@@ -53,7 +61,8 @@ public class WeavingHookConfigurator extends ClassLoaderHook {
 		ModuleClassLoader classLoader = manager.getClassLoader();
 		BundleLoader loader = classLoader.getBundleLoader();
 		// create a woven class object and add it to the thread local stack
-		WovenClassImpl wovenClass = new WovenClassImpl(name, classbytes, entry, classpathEntry, loader, container, blackList);
+		WovenClassImpl wovenClass = new WovenClassImpl(name, classbytes, entry, classpathEntry, loader, container,
+				deniedHooks);
 		WovenClassContext context = wovenClassContext.get();
 		if (context == null) {
 			context = new WovenClassContext();
