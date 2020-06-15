@@ -44,7 +44,6 @@ import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleRevision;
 
 class OSGiFrameworkHooks {
-	static final String collisionHookName = CollisionHook.class.getName();
 	private final CoreResolverHookFactory resolverHookFactory;
 	private final ModuleCollisionHook collisionHook;
 
@@ -117,10 +116,8 @@ class OSGiFrameworkHooks {
 			}
 			ServiceRegistry registry = container.getServiceRegistry();
 			if (registry != null) {
-				registry.notifyHooksPrivileged(collisionHookName, "filterCollisions", (hook, hookRegistration) -> { //$NON-NLS-1$
-					if (hook instanceof CollisionHook) {
-						((CollisionHook) hook).filterCollisions(operationType, target, collisionCandidates);
-					}
+				registry.notifyHooksPrivileged(CollisionHook.class, "filterCollisions", (hook, hookRegistration) -> { //$NON-NLS-1$
+					hook.filterCollisions(operationType, target, collisionCandidates);
 				});
 			}
 		}

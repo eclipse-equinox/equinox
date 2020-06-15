@@ -68,10 +68,6 @@ import org.osgi.framework.hooks.service.ListenerHook.ListenerInfo;
 public class ServiceRegistry {
 	public static final int SERVICEEVENT = 3;
 
-	static final String findHookName = FindHook.class.getName();
-	@SuppressWarnings("deprecation")
-	static final String eventHookName = EventHook.class.getName();
-	static final String eventListenerHookName = EventListenerHook.class.getName();
 	static final String listenerHookName = ListenerHook.class.getName();
 
 
@@ -231,15 +227,15 @@ public class ServiceRegistry {
 		}
 
 		boolean isListenerHook = false;
-		boolean isFrameworkHook = false;
 		/* copy the array so that changes to the original will not affect us. */
 		List<String> copy = new ArrayList<>(size);
+		List<Class<?>> hookTypes = null;
 		// intern the strings and remove duplicates
 		for (int i = 0; i < size; i++) {
 			String clazz = clazzes[i].intern();
 			if (!copy.contains(clazz)) {
 				isListenerHook = isListenerHook || listenerHookName.equals(clazz);
-				isFrameworkHook = isFrameworkHook || isFrameworkHook(clazz);
+				hookTypes = getHookClass(clazz, hookTypes);
 				copy.add(clazz);
 			}
 		}
@@ -259,9 +255,9 @@ public class ServiceRegistry {
 			}
 		}
 
-		ServiceRegistrationImpl<?> registration = isFrameworkHook
+		ServiceRegistrationImpl<?> registration = hookTypes != null
 				? new ServiceRegistrationImpl.FrameworkHookRegistration<>(this, context, clazzes, service,
-						systemBundleContext)
+						systemBundleContext, hookTypes)
 				: new ServiceRegistrationImpl<>(this, context, clazzes, service);
 		registration.register(properties);
 		registration.initHookInstance();
@@ -272,29 +268,38 @@ public class ServiceRegistry {
 		return registration;
 	}
 
-	private boolean isFrameworkHook(String className) {
+	@SuppressWarnings("deprecation")
+	private List<Class<?>> getHookClass(String className, List<Class<?>> hookTypes) {
 		switch (className) {
 		case "org.osgi.framework.hooks.bundle.CollisionHook": //$NON-NLS-1$
-			return true;
+			return addHook(org.osgi.framework.hooks.bundle.CollisionHook.class, hookTypes);
 		case "org.osgi.framework.hooks.bundle.EventHook": //$NON-NLS-1$
-			return true;
+			return addHook(org.osgi.framework.hooks.bundle.EventHook.class, hookTypes);
 		case "org.osgi.framework.hooks.bundle.FindHook": //$NON-NLS-1$
-			return true;
+			return addHook(org.osgi.framework.hooks.bundle.FindHook.class, hookTypes);
 		case "org.osgi.framework.hooks.service.EventHook": //$NON-NLS-1$
-			return true;
+			return addHook(org.osgi.framework.hooks.service.EventHook.class, hookTypes);
 		case "org.osgi.framework.hooks.service.EventListenerHook": //$NON-NLS-1$
-			return true;
+			return addHook(org.osgi.framework.hooks.service.EventListenerHook.class, hookTypes);
 		case "org.osgi.framework.hooks.service.FindHook": //$NON-NLS-1$
-			return true;
+			return addHook(org.osgi.framework.hooks.service.FindHook.class, hookTypes);
 		case "org.osgi.framework.hooks.service.ListenerHook": //$NON-NLS-1$
-			return true;
+			return addHook(org.osgi.framework.hooks.service.ListenerHook.class, hookTypes);
 		case "org.osgi.framework.hooks.weaving.WeavingHook": //$NON-NLS-1$
-			return true;
+			return addHook(org.osgi.framework.hooks.weaving.WeavingHook.class, hookTypes);
 		case "org.osgi.framework.hooks.weaving.WovenClassListener": //$NON-NLS-1$
-			return true;
+			return addHook(org.osgi.framework.hooks.weaving.WovenClassListener.class, hookTypes);
 		default:
-			return false;
+			return hookTypes;
 		}
+	}
+
+	private List<Class<?>> addHook(Class<?> hookType, List<Class<?>> hookTypes) {
+		if (hookTypes == null) {
+			hookTypes = new ArrayList<>(1);
+		}
+		hookTypes.add(hookType);
+		return hookTypes;
 	}
 
 	/**
@@ -1245,10 +1250,8 @@ public class ServiceRegistry {
 		if (debug.DEBUG_HOOKS) {
 			Debug.println("notifyServiceFindHooks(" + context.getBundleImpl() + "," + clazz + "," + filterstring + "," + allservices + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		}
-		notifyHooksPrivileged(findHookName, "find", (hook, hookRegistration) -> { //$NON-NLS-1$
-			if (hook instanceof FindHook) {
-				((FindHook) hook).find(context, clazz, filterstring, allservices, result);
-			}
+		notifyHooksPrivileged(FindHook.class, "find", (hook, hookRegistration) -> { //$NON-NLS-1$
+			hook.find(context, clazz, filterstring, allservices, result);
 		});
 	}
 
@@ -1265,10 +1268,8 @@ public class ServiceRegistry {
 		if (debug.DEBUG_HOOKS) {
 			Debug.println("notifyServiceEventHooks(" + event.getType() + ":" + event.getServiceReference() + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
-		notifyHooksPrivileged(eventHookName, "event", (hook, hookRegistration) -> { //$NON-NLS-1$
-			if (hook instanceof EventHook) {
-				((EventHook) hook).event(event, result);
-			}
+		notifyHooksPrivileged(EventHook.class, "event", (hook, hookRegistration) -> { //$NON-NLS-1$
+			hook.event(event, result);
 		});
 	}
 
@@ -1284,41 +1285,45 @@ public class ServiceRegistry {
 		if (debug.DEBUG_HOOKS) {
 			Debug.println("notifyServiceEventListenerHooks(" + event.getType() + ":" + event.getServiceReference() + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
-		notifyHooksPrivileged(eventListenerHookName, "event", (hook, hookRegistration) -> { //$NON-NLS-1$
-			if (hook instanceof EventListenerHook) {
-				((EventListenerHook) hook).event(event, result);
-			}
+		notifyHooksPrivileged(EventListenerHook.class, "event", (hook, hookRegistration) -> { //$NON-NLS-1$
+			hook.event(event, result);
 		});
 	}
 
 	/**
 	 * Calls all hook services of the type specified by the hook context.
+	 * 
+	 * @param <T>
 	 *
 	 * @param hookContext Context to use when calling the hook services.
 	 */
-	public void notifyHooksPrivileged(String serviceName, String serviceMethod, HookContext hookContext) {
-		List<ServiceRegistrationImpl<?>> hooks = lookupServiceRegistrations(serviceName, null);
+	@SuppressWarnings("unchecked")
+	public <T> void notifyHooksPrivileged(Class<T> hookType, String serviceMethod, HookContext<T> hookContext) {
+		List<ServiceRegistrationImpl<?>> hooks = lookupServiceRegistrations(hookType.getName(), null);
 		// Since the list is already sorted, we don't need to sort the list to call the hooks
 		// in the proper order.
 
 		for (ServiceRegistrationImpl<?> registration : hooks) {
-			notifyHookPrivileged(systemBundleContext, registration, serviceMethod, hookContext);
+			notifyHookPrivileged(systemBundleContext, (ServiceRegistrationImpl<T>) registration, serviceMethod,
+					hookContext);
 		}
 	}
 
 	/**
 	 * Call a hook service via a hook context.
+	 * 
+	 * @param <T>
 	 *
-	 * @param context Context of the bundle to get the hook service.
+	 * @param context      Context of the bundle to get the hook service.
 	 * @param registration Hook service to call.
-	 * @param hookContext Context to use when calling the hook service.
+	 * @param hookContext  Context to use when calling the hook service.
 	 */
-	private void notifyHookPrivileged(BundleContextImpl context, ServiceRegistrationImpl<?> registration,
-			String serviceMethod, HookContext hookContext) {
+	private <T> void notifyHookPrivileged(BundleContextImpl context, ServiceRegistrationImpl<T> registration,
+			String serviceMethod, HookContext<T> hookContext) {
 		if (hookContext.skipRegistration(registration)) {
 			return;
 		}
-		Object hook = registration.getHookInstance();
+		T hook = registration.getHookInstance();
 		if (hook == null) {
 			// The hook may not be initialized yet
 			// We do not call the hook until after it has been registered
@@ -1415,13 +1420,11 @@ public class ServiceRegistry {
 			Debug.println("notifyServiceListenerHooks(" + listeners + "," + (added ? "added" : "removed") + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 
-		notifyHooksPrivileged(listenerHookName, added ? "added" : "removed", (hook, hookRegistration) -> { //$NON-NLS-1$ //$NON-NLS-2$
-			if (hook instanceof ListenerHook) {
-				if (added) {
-					((ListenerHook) hook).added(listeners);
-				} else {
-					((ListenerHook) hook).removed(listeners);
-				}
+		notifyHooksPrivileged(ListenerHook.class, added ? "added" : "removed", (hook, hookRegistration) -> { //$NON-NLS-1$ //$NON-NLS-2$
+			if (added) {
+				hook.added(listeners);
+			} else {
+				hook.removed(listeners);
 			}
 		});
 	}

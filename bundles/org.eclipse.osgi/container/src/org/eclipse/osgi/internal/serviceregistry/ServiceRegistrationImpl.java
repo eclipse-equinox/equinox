@@ -488,15 +488,6 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		return bundle;
 	}
 
-	S getSafeService(BundleContextImpl user, ServiceConsumer consumer) {
-		try {
-			return getService(user, consumer);
-		} catch (IllegalStateException e) {
-			// can happen if the user is stopped on another thread
-			return null;
-		}
-	}
-
 	/**
 	 * Get a service object for the using BundleContext.
 	 *
@@ -779,11 +770,13 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		private volatile S hookInstance;
 		private final BundleContextImpl systemContext;
 		private final Object hookLock = new Object();
+		private final List<Class<?>> hookTypes;
 
 		FrameworkHookRegistration(ServiceRegistry registry, BundleContextImpl context, String[] clazzes, S service,
-				BundleContextImpl systemContext) {
+				BundleContextImpl systemContext, List<Class<?>> hookTypes) {
 			super(registry, context, clazzes, service);
 			this.systemContext = systemContext;
+			this.hookTypes = hookTypes;
 		}
 
 		@Override
@@ -812,6 +805,23 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		void ungetHookInstance() {
 			if (hookInstance != null) {
 				systemContext.ungetService(getReferenceImpl());
+			}
+		}
+
+		S getSafeService(BundleContextImpl user, ServiceConsumer consumer) {
+			try {
+				S hook = getService(user, consumer);
+				if (hookTypes.stream().filter((hookType) -> !hookType.isInstance(hook)).findFirst().isPresent()) {
+					// the hook impl is wired to a different hook package than the framework
+					if (hook != null) {
+						systemContext.ungetService(getReference());
+					}
+					return null;
+				}
+				return hook;
+			} catch (IllegalStateException e) {
+				// can happen if the user is stopped on another thread
+				return null;
 			}
 		}
 	}

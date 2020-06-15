@@ -24,7 +24,7 @@ import org.osgi.framework.ServiceRegistration;
  *
  */
 @FunctionalInterface
-public interface HookContext {
+public interface HookContext<T> {
 
 	/**
 	 * Call the specified hook.
@@ -35,7 +35,7 @@ public interface HookContext {
 	 * @param hookRegistration the registration for the hook object
 	 * @throws Exception An exception thrown by the hook object.
 	 */
-	public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception;
+	public void call(T hook, ServiceRegistration<T> hookRegistration) throws Exception;
 
 	/**
 	 * Returns true if the given registration should be skipped.

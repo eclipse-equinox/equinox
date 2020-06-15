@@ -38,12 +38,9 @@ import org.osgi.framework.BundleListener;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.SynchronousBundleListener;
-import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.hooks.bundle.EventHook;
 
 public class EquinoxEventPublisher {
-	static final String eventHookName = EventHook.class.getName();
-	static final String collisionHookName = CollisionHook.class.getName();
 	@SuppressWarnings("deprecation")
 	static final int FRAMEWORK_STOPPED_MASK = (FrameworkEvent.STOPPED | FrameworkEvent.STOPPED_BOOTCLASSPATH_MODIFIED
 			| FrameworkEvent.STOPPED_UPDATE | FrameworkEvent.STOPPED_SYSTEM_REFRESHED);
@@ -255,10 +252,8 @@ public class EquinoxEventPublisher {
 
 		ServiceRegistry serviceRegistry = container.getServiceRegistry();
 		if (serviceRegistry != null) {
-			serviceRegistry.notifyHooksPrivileged(eventHookName, "event", (hook, hookRegistration) -> { //$NON-NLS-1$
-				if (hook instanceof EventHook) {
-					((EventHook) hook).event(event, result);
-				}
+			serviceRegistry.notifyHooksPrivileged(EventHook.class, "event", (hook, hookRegistration) -> { //$NON-NLS-1$
+				hook.event(event, result);
 			});
 		}
 	}

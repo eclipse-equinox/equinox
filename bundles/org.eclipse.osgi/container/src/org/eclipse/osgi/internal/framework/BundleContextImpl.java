@@ -72,7 +72,6 @@ import org.osgi.resource.Capability;
  */
 
 public class BundleContextImpl implements BundleContext, EventDispatcher<Object, Object, Object> {
-	static final String findHookName = FindHook.class.getName();
 	/** true if the bundle context is still valid */
 	private volatile boolean valid;
 
@@ -258,10 +257,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		if (debug.DEBUG_HOOKS) {
 			Debug.println("notifyBundleFindHooks(" + allBundles + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		container.getServiceRegistry().notifyHooksPrivileged(findHookName, "find", (hook, hookRegistration) -> { //$NON-NLS-1$
-			if (hook instanceof FindHook) {
-				((FindHook) hook).find(context, allBundles);
-			}
+		container.getServiceRegistry().notifyHooksPrivileged(FindHook.class, "find", (hook, hookRegistration) -> { //$NON-NLS-1$
+			hook.find(context, allBundles);
 		});
 	}
 
