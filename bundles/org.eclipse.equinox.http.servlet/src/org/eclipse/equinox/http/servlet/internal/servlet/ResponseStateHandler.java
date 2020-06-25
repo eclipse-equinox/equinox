@@ -296,7 +296,7 @@ public class ResponseStateHandler {
 			throw new IllegalStateException("Can't locate response impl"); //$NON-NLS-1$
 		}
 
-		final int status = responseWrapper.getStatus();
+		final int status = responseWrapper.getInternalStatus();
 
 		if (status < HttpServletResponse.SC_BAD_REQUEST) {
 			return;
@@ -310,8 +310,6 @@ public class ResponseStateHandler {
 		HttpServletResponse wrappedResponse = (HttpServletResponse)responseWrapper.getResponse();
 
 		if (wrappedResponse.isCommitted()) {
-			// the response is committed already, but we need to propagate the error code anyway
-			wrappedResponse.sendError(status, responseWrapper.getMessage());
 			// There's nothing more we can do here.
 			return;
 		}

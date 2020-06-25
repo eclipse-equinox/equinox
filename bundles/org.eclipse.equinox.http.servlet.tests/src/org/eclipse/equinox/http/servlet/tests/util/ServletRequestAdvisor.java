@@ -235,11 +235,14 @@ public class ServletRequestAdvisor extends Object {
 		}
 
 		try {
-			map.put("responseBody", Arrays.asList(drain(stream)));
-			return map;
+			String drainedStream = drain(stream);
+			map.put("responseBody", Arrays.asList(drainedStream));
+		} catch (IOException e){
+			map.put("responseBody", Arrays.asList(e.getMessage()));
 		} finally {
 			stream.close();
 		}
+		return map;
 	}
 
 	public Map<String, List<String>> eventSource(String value, Map<String, List<String>> headers, final EventHandler handler) throws IOException {
