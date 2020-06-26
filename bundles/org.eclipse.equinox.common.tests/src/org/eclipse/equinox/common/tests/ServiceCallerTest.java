@@ -116,6 +116,10 @@ public class ServiceCallerTest extends CoreTest {
 		assertFalse("Should not be called.", thisClassCallerFilter.call(IServiceExample::call));
 		assertFalse("Should not be called.", otherClassCaller.call(IServiceExample::call));
 
+		assertFalse("Should not be present.", thisClassCaller.current().isPresent());
+		assertFalse("Should not be present.", thisClassCallerFilter.current().isPresent());
+		assertFalse("Should not be present.", otherClassCaller.current().isPresent());
+
 		ServiceExampleFactory factory = new ServiceExampleFactory();
 		Dictionary<String, String> props = new Hashtable<>();
 		props.put("test", "value1");
@@ -123,6 +127,8 @@ public class ServiceCallerTest extends CoreTest {
 		try {
 			assertTrue("Call returned false.", thisClassCaller.call(IServiceExample::call));
 			assertTrue("Service called successfully", factory.lastCreated.called);
+			assertTrue("Should be present.", thisClassCaller.current().isPresent());
+			assertEquals("Unexpected current.", thisClassCaller.current().get(), factory.lastCreated);
 
 			assertFalse("Should not be called.", thisClassCallerFilter.call(IServiceExample::call));
 
@@ -137,7 +143,7 @@ public class ServiceCallerTest extends CoreTest {
 			assertEquals("Wrong createCount", 1, factory.getCreateCount(testBundle));
 
 			Bundle[] users = reg.getReference().getUsingBundles();
-			assertNotNull("Didn't expect users.", users);
+			assertNotNull("Expected some users", users);
 
 			Collection<Bundle> userCollection = Arrays.asList(users);
 			assertTrue("Missing bundle.", userCollection.contains(bundle));
@@ -146,10 +152,13 @@ public class ServiceCallerTest extends CoreTest {
 			reg.unregister();
 			assertFalse("Should not be called.", thisClassCaller.call(IServiceExample::call));
 			assertFalse("Should not be called.", otherClassCaller.call(IServiceExample::call));
+			assertFalse("Should not be present.", thisClassCaller.current().isPresent());
 
 			props.put("test", "value2");
 			reg = context.registerService(IServiceExample.class, factory, props);
 
+			assertTrue("Should be present.", thisClassCaller.current().isPresent());
+			assertEquals("Unexpected current.", thisClassCaller.current().get(), factory.lastCreated);
 			assertTrue("Call returned false.", thisClassCaller.call(IServiceExample::call));
 			assertTrue("Call returned false.", thisClassCallerFilter.call(IServiceExample::call));
 			assertTrue("Call returned false.", otherClassCaller.call(IServiceExample::call));
@@ -176,6 +185,7 @@ public class ServiceCallerTest extends CoreTest {
 			reg.setProperties(props);
 			assertTrue("Call returned false.", thisClassCaller.call(IServiceExample::call));
 			assertFalse("Should not be called.", thisClassCallerFilter.call(IServiceExample::call));
+			assertFalse("Should not be present.", thisClassCallerFilter.current().isPresent());
 		} finally {
 			testBundle.uninstall();
 			thisClassCaller.unget();

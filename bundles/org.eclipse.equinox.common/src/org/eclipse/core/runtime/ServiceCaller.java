@@ -262,6 +262,14 @@ public class ServiceCaller<Service> {
 		}).orElse(Boolean.FALSE);
 	}
 
+	/**
+	 * Return the currently available service.
+	 * @return the currently available service or empty if the service cannot be found.
+	 */
+	public Optional<Service> current() {
+		return trackCurrent().map((r) -> r.instance);
+	}
+
 	private Optional<ReferenceAndService> trackCurrent() {
 		ReferenceAndService current = service;
 		if (current != null) {
