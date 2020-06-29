@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2019 IBM Corporation and others.
+ * Copyright (c) 2016, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,7 @@ import org.eclipse.equinox.http.servlet.tests.AuthenticationTest;
 import org.eclipse.equinox.http.servlet.tests.Bug500783_Test;
 import org.eclipse.equinox.http.servlet.tests.Bug562843_2_Test;
 import org.eclipse.equinox.http.servlet.tests.Bug562843_Test;
+import org.eclipse.equinox.http.servlet.tests.Bug564747_Test;
 import org.eclipse.equinox.http.servlet.tests.ContextHelperCustomizerTests;
 import org.eclipse.equinox.http.servlet.tests.DispatchingTest;
 import org.eclipse.equinox.http.servlet.tests.PreprocessorTestCase;
@@ -100,7 +101,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	ContextHelperCustomizerTests.class,
 	Bug500783_Test.class,
 	Bug562843_Test.class,
-	Bug562843_2_Test.class
+	Bug562843_2_Test.class,
+	Bug564747_Test.class
 })
 public class AllTests {
 	// see @SuiteClasses

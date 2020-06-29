@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 Raymond Augé and others.
+ * Copyright (c) 2014, 2020 Raymond Augé and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -221,7 +221,7 @@ public class DispatchTargets {
 				if (values == null) {
 					values = new String[0];
 				}
-				String value = ((index > 0) && (parameter.length() > index + 1)) ? URLDecoder.decode(parameter.substring(index + 1), Const.UTF8) : null;
+				String value = ((index > 0) && (parameter.length() > index + 1)) ? URLDecoder.decode(parameter.substring(index + 1), Const.UTF8) : ""; //$NON-NLS-1$
 				values = Params.append(values, value);
 				parameterMap.put(name, values);
 			}
