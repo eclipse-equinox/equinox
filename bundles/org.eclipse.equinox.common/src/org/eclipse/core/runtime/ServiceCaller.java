@@ -103,15 +103,25 @@ public class ServiceCaller<Service> {
 		return new ServiceCaller<>(caller, serviceType).getCallUnget(consumer);
 	}
 
+	static int getRank(ServiceReference<?> ref) {
+		Object rank = ref.getProperty(Constants.SERVICE_RANKING);
+		if (rank instanceof Integer) {
+			return ((Integer) rank).intValue();
+		}
+		return 0;
+	}
+
 	class ReferenceAndService implements SynchronousBundleListener, ServiceListener {
 		final BundleContext context;
 		final ServiceReference<Service> ref;
 		final Service instance;
+		final int rank;
 
 		public ReferenceAndService(final BundleContext context, ServiceReference<Service> ref, Service instance) {
 			this.context = context;
 			this.ref = ref;
 			this.instance = instance;
+			this.rank = getRank(ref);
 		}
 
 		void unget() {
@@ -126,17 +136,28 @@ public class ServiceCaller<Service> {
 		@Override
 		public void bundleChanged(BundleEvent e) {
 			if (bundle.equals(e.getBundle()) && e.getType() == BundleEvent.STOPPING) {
-				untrack();
+				unget();
 			}
 		}
 
 		@Override
 		public void serviceChanged(ServiceEvent e) {
-			if (e.getType() == ServiceEvent.UNREGISTERING) {
-				untrack();
-			}
-			if (filter != null && e.getType() == ServiceEvent.MODIFIED_ENDMATCH) {
-				untrack();
+			if (e.getServiceReference().equals(ref)) {
+				if (e.getType() == ServiceEvent.UNREGISTERING) {
+					unget();
+				} else if (filter != null && e.getType() == ServiceEvent.MODIFIED_ENDMATCH) {
+					unget();
+				} else if (e.getType() == ServiceEvent.MODIFIED) {
+					if (getRank(ref) != rank) {
+						// rank changed; untrack to force a new ReferenceAndService with new rank
+						unget();
+					}
+				}
+			} else if (e.getType() == ServiceEvent.MODIFIED) {
+				if (getRank(e.getServiceReference()) > rank) {
+					// Another service with higher rank is available
+					unget();
+				}
 			}
 		}
 
@@ -144,18 +165,19 @@ public class ServiceCaller<Service> {
 		Optional<ReferenceAndService> track() {
 			try {
 				ServiceCaller.this.service = this;
-				// Filter specific to this service reference ID
 				context.addServiceListener(this, "(&" //$NON-NLS-1$
 						+ "(objectClass=" + serviceType.getName() + ")" // //$NON-NLS-1$ //$NON-NLS-2$
-						+ "(service.id=" + ref.getProperty(Constants.SERVICE_ID) + ")" // //$NON-NLS-1$ //$NON-NLS-2$
 						+ (filter == null ? "" : filter) // //$NON-NLS-1$
 						+ ")"); //$NON-NLS-1$
 				context.addBundleListener(this);
-				if (ref.getBundle() == null || context.getBundle() == null && ServiceCaller.this.service == this) {
+				if ((ref.getBundle() == null || context.getBundle() == null) && ServiceCaller.this.service == this) {
 					// service should have been untracked but we may have missed the event
 					// before we could added the listeners
-					untrack();
-					return Optional.empty();
+					unget();
+				}
+				if (getRank(ref) != rank) {
+					// ranking has changed; unget to force reget in case the ranking is not the highest
+					unget();
 				}
 			} catch (InvalidSyntaxException e) {
 				// really should never happen with our own filter above.
@@ -164,8 +186,12 @@ public class ServiceCaller<Service> {
 			} catch (IllegalStateException e) {
 				// bundle was stopped before we could get listeners added/removed
 				ServiceCaller.this.service = null;
-				return Optional.empty();
 			}
+			// Note that we always return this ReferenceAndService
+			// even for cases where the instance was unget
+			// It is way complicated to try again and
+			// even if we did the returned value can become
+			// stale right after return.
 			return Optional.of(this);
 		}
 
@@ -247,7 +273,9 @@ public class ServiceCaller<Service> {
 	 * <ul>
 	 * <li>The {@link #unget()} method is called.</li>
 	 * <li>The service is unregistered.</li>
+	 * <li>The service properties change such that this {@code ServiceCaller} filter no longer matches.
 	 * <li>The caller bundle is stopped.</li>
+	 * <li>The service rankings have changed.</li>
 	 * </ul>
 	 * 
 	 * After one of these conditions occur subsequent calls to this method will try to acquire the

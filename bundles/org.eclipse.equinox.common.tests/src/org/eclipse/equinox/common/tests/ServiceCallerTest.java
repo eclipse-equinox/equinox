@@ -13,7 +13,9 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests;
 
+import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertNotEquals;
+import static org.osgi.framework.FrameworkUtil.asDictionary;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -29,6 +31,7 @@ import org.eclipse.core.tests.harness.CoreTest;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceFactory;
@@ -205,6 +208,64 @@ public class ServiceCallerTest extends CoreTest {
 		} catch (IllegalArgumentException e) {
 			assertTrue("Unexpected cause.", e.getCause() instanceof InvalidSyntaxException);
 		}
+	}
+
+	public void testRank() {
+		Bundle bundle = FrameworkUtil.getBundle(ServiceCallerTest.class);
+		assertNotNull("Test only works under an OSGi runtime", bundle);
+		BundleContext context = bundle.getBundleContext();
+		ServiceExample s1 = new ServiceExample();
+		ServiceExample s2 = new ServiceExample();
+		ServiceExample s3 = new ServiceExample();
+		ServiceRegistration<IServiceExample> reg1 = null;
+		ServiceRegistration<IServiceExample> reg2 = null;
+		ServiceRegistration<IServiceExample> reg3 = null;
+		try {
+			reg1 = context.registerService(IServiceExample.class, s1,
+					asDictionary(singletonMap(Constants.SERVICE_RANKING, 1)));
+			reg2 = context.registerService(IServiceExample.class, s2,
+					asDictionary(singletonMap(Constants.SERVICE_RANKING, 2)));
+			reg3 = context.registerService(IServiceExample.class, s3,
+					asDictionary(singletonMap(Constants.SERVICE_RANKING, 3)));
+			ServiceCaller<IServiceExample> caller = new ServiceCaller<>(getClass(), IServiceExample.class);
+
+			assertHighestRankedCalled(caller, s3, s2, s1, reg3, reg2, reg1);
+
+			reg1.setProperties(asDictionary(singletonMap(Constants.SERVICE_RANKING, 10)));
+			assertHighestRankedCalled(caller, s1, s2, s3, reg1, reg2, reg3);
+
+			reg2.setProperties(asDictionary(singletonMap(Constants.SERVICE_RANKING, 10)));
+			reg1.setProperties(asDictionary(singletonMap(Constants.SERVICE_RANKING, 11)));
+			assertHighestRankedCalled(caller, s1, s2, s3, reg1, reg2, reg3);
+
+			reg1.setProperties(asDictionary(singletonMap(Constants.SERVICE_RANKING, 1)));
+			assertHighestRankedCalled(caller, s2, s1, s3, reg2, reg1, reg3);
+		} finally {
+			if (reg1 != null) {
+				reg1.unregister();
+			}
+			if (reg2 != null) {
+				reg2.unregister();
+			}
+			if (reg3 != null) {
+				reg3.unregister();
+			}
+		}
+	}
+
+	private void assertHighestRankedCalled(ServiceCaller<IServiceExample> caller, ServiceExample highest,
+			ServiceExample lower1, ServiceExample lower2, ServiceRegistration<IServiceExample> highestReg,
+			ServiceRegistration<IServiceExample> lower1Reg, ServiceRegistration<IServiceExample> lower2Reg) {
+		assertTrue("Did not call service.", caller.call(IServiceExample::call));
+		assertTrue("Highest Ranked not called.", highest.called);
+		assertFalse("Lower1 called.", lower1.called);
+		assertFalse("Lower2 called.", lower2.called);
+		assertNotNull("No users of highest.", highestReg.getReference().getUsingBundles());
+		assertNull("Users of lower ranked.", lower1Reg.getReference().getUsingBundles());
+		assertNull("Users of lower ranked.", lower2Reg.getReference().getUsingBundles());
+		highest.called = false;
+		lower1.called = false;
+		lower2.called = false;
 	}
 
 	interface IServiceExample {
