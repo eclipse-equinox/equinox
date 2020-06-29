@@ -41,7 +41,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * <p>
  * Single invocation example:
  * <pre>
- * ServiceCaller.callOnce(MyClass.class, ILog.class, (logger) -> logger.info("All systems go!"));
+ * ServiceCaller.callOnce(MyClass.class, ILog.class, (logger) -&gt; logger.info("All systems go!"));
  * </pre>
  * Note that it is generally more efficient to use a long-running service
  * utility, such as {@link ServiceTracker} or declarative services, but there
@@ -74,7 +74,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * <pre>
  * static final ServiceCaller&lt;ILog&gt; log = new ServiceCaller(MyClass.class, ILog.class);
  * static void info(String msg) {
- *   log.call(logger -> logger.info(msg);
+ *   log.call(logger -&gt; logger.info(msg);
  * }
  * </pre>
  * 
