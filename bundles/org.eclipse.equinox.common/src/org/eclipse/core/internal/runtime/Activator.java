@@ -19,6 +19,7 @@ import java.util.*;
 import org.eclipse.core.internal.boot.PlatformURLBaseConnection;
 import org.eclipse.core.internal.boot.PlatformURLHandler;
 import org.eclipse.core.runtime.IAdapterManager;
+import org.eclipse.core.runtime.ServiceCaller;
 import org.eclipse.equinox.log.ExtendedLogReaderService;
 import org.eclipse.equinox.log.ExtendedLogService;
 import org.eclipse.osgi.framework.log.FrameworkLog;
@@ -50,13 +51,15 @@ public class Activator implements BundleActivator {
 	private static Activator singleton;
 	private ServiceRegistration<URLConverter> platformURLConverterService = null;
 	private ServiceRegistration<IAdapterManager> adapterManagerService = null;
-	private ServiceTracker<Object, Location> installLocationTracker = null;
-	private ServiceTracker<Object, Location> instanceLocationTracker = null;
-	private ServiceTracker<Object, Location> configLocationTracker = null;
-	private ServiceTracker<Object, PackageAdmin> bundleTracker = null;
-	private ServiceTracker<Object, DebugOptions> debugTracker = null;
-	private ServiceTracker<Object, FrameworkLog> logTracker = null;
-	private ServiceTracker<Object, BundleLocalization> localizationTracker = null;
+	private final ServiceCaller<Location> installLocationTracker = new ServiceCaller<>(getClass(), Location.class, Location.INSTALL_FILTER);
+	private final ServiceCaller<Location> instanceLocationTracker = new ServiceCaller<>(getClass(), Location.class, Location.INSTANCE_FILTER);
+	private final ServiceCaller<Location> configLocationTracker = new ServiceCaller<>(getClass(), Location.class, Location.CONFIGURATION_FILTER);
+	@SuppressWarnings("deprecation")
+	private final ServiceCaller<PackageAdmin> bundleTracker = new ServiceCaller<>(getClass(), PackageAdmin.class);
+	private final ServiceCaller<DebugOptions> debugTracker = new ServiceCaller<>(getClass(), DebugOptions.class);
+	private final ServiceCaller<FrameworkLog> logTracker = new ServiceCaller<>(getClass(), FrameworkLog.class);
+	private final ServiceCaller<BundleLocalization> localizationTracker = new ServiceCaller<>(getClass(), BundleLocalization.class);
+
 	private ServiceRegistration<DebugOptionsListener> debugRegistration;
 
 	/*
@@ -71,14 +74,6 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		bundleContext = context;
 		singleton = this;
-
-		installLocationTracker = openServiceTracker(Location.INSTALL_FILTER);
-		instanceLocationTracker = openServiceTracker(Location.INSTANCE_FILTER);
-		configLocationTracker = openServiceTracker(Location.CONFIGURATION_FILTER);
-		bundleTracker = openServiceTracker(PackageAdmin.class);
-		debugTracker = openServiceTracker(DebugOptions.class);
-		logTracker = openServiceTracker(FrameworkLog.class);
-		localizationTracker = openServiceTracker(BundleLocalization.class);
 
 		RuntimeLog.setLogWriter(getPlatformWriter(context));
 		Dictionary<String, Object> urlProperties = new Hashtable<>();
@@ -111,28 +106,28 @@ public class Activator implements BundleActivator {
 	 * Return the configuration location service, if available.
 	 */
 	public Location getConfigurationLocation() {
-		return configLocationTracker.getService();
+		return configLocationTracker.current().orElse(null);
 	}
 
 	/*
 	 * Return the debug options service, if available.
 	 */
 	public DebugOptions getDebugOptions() {
-		return debugTracker.getService();
+		return debugTracker.current().orElse(null);
 	}
 
 	/*
 	 * Return the framework log service, if available.
 	 */
 	public FrameworkLog getFrameworkLog() {
-		return logTracker.getService();
+		return logTracker.current().orElse(null);
 	}
 
 	/*
 	 * Return the instance location service, if available.
 	 */
 	public Location getInstanceLocation() {
-		return instanceLocationTracker.getService();
+		return instanceLocationTracker.current().orElse(null);
 	}
 
 	/**
@@ -160,7 +155,7 @@ public class Activator implements BundleActivator {
 	 * Return the package admin service, if available.
 	 */
 	private PackageAdmin getBundleAdmin() {
-		return bundleTracker.getService();
+		return bundleTracker.current().orElse(null);
 	}
 
 	/*
@@ -177,20 +172,7 @@ public class Activator implements BundleActivator {
 	 * Return the install location service if available.
 	 */
 	public Location getInstallLocation() {
-		return installLocationTracker.getService();
-	}
-
-	private <T> ServiceTracker<Object, T> openServiceTracker(String filterString) throws InvalidSyntaxException {
-		Filter filter = bundleContext.createFilter(filterString);
-		ServiceTracker<Object, T> tracker = new ServiceTracker<>(bundleContext, filter, null);
-		tracker.open();
-		return tracker;
-	}
-
-	private <T> ServiceTracker<Object, T> openServiceTracker(Class<?> clazz) {
-		ServiceTracker<Object, T> tracker = new ServiceTracker<>(bundleContext, clazz.getName(), null);
-		tracker.open();
-		return tracker;
+		return installLocationTracker.current().orElse(null);
 	}
 
 	/**
@@ -218,7 +200,7 @@ public class Activator implements BundleActivator {
 		if (localizationTracker == null) {
 			throw new MissingResourceException(CommonMessages.activator_resourceBundleNotStarted, bundle.getSymbolicName(), ""); //$NON-NLS-1$
 		}
-		BundleLocalization location = localizationTracker.getService();
+		BundleLocalization location = localizationTracker.current().orElse(null);
 		ResourceBundle result = null;
 		if (location != null)
 			result = location.getLocalization(bundle, locale);
@@ -237,27 +219,6 @@ public class Activator implements BundleActivator {
 		if (adapterManagerService != null) {
 			adapterManagerService.unregister();
 			adapterManagerService = null;
-		}
-		if (installLocationTracker != null) {
-			installLocationTracker.close();
-		}
-		if (configLocationTracker != null) {
-			configLocationTracker.close();
-		}
-		if (bundleTracker != null) {
-			bundleTracker.close();
-		}
-		if (debugTracker != null) {
-			debugTracker.close();
-		}
-		if (logTracker != null) {
-			logTracker.close();
-		}
-		if (instanceLocationTracker != null) {
-			instanceLocationTracker.close();
-		}
-		if (localizationTracker != null) {
-			localizationTracker.close();
 		}
 		if (debugRegistration != null) {
 			debugRegistration.unregister();

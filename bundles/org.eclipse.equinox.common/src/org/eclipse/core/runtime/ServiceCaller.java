@@ -78,9 +78,8 @@ import org.osgi.util.tracker.ServiceTracker;
  * }
  * </pre>
  * 
- * Note that this class is intended for simple service usage patterns only.  More advanced cases that
- * require tracking of service ranking or additional service property matching must use other
- * mechanisms such as the {@link ServiceTracker} or declarative services.
+ * Note that this class is intended for simple service usage patterns only.  More advanced cases 
+ * should use other mechanisms such as the {@link ServiceTracker} or declarative services.
  * 
  * @param <Service> the service type for this caller
  * @since 3.13
