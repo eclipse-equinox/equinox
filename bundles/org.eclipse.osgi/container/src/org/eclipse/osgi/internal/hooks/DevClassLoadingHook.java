@@ -16,6 +16,11 @@ package org.eclipse.osgi.internal.hooks;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import org.eclipse.osgi.container.ModuleCapability;
+import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
@@ -50,8 +55,22 @@ public class DevClassLoadingHook extends ClassLoaderHook implements KeyedElement
 		// check that dev classpath entries have not already been added; we mark this in the first entry below
 		if (cpEntries.size() > 0 && cpEntries.get(0).getUserObject(KEY) != null)
 			return false; // this source has already had its dev classpath entries added.
+
+		// get the specified classpath from the Bundle-ClassPath header to check for dups
+		List<ModuleCapability> moduleDatas = sourceGeneration.getRevision().getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
+		@SuppressWarnings("unchecked")
+		List<String> specifiedCP = Optional.ofNullable(moduleDatas.isEmpty()
+				?
+				null
+				: (List<String>) moduleDatas.get(0).getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_CLASSPATH))
+				.orElse(Collections.singletonList(".")); //$NON-NLS-1$
 		boolean result = false;
 		for (String devClassPath : devClassPaths) {
+			if (specifiedCP.contains(devClassPath)) {
+				// dev properties contained a duplicate of an entry on the Bundle-ClassPath header
+				// don't add anything, the framework will do it for us
+				continue;
+			}
 			if (hostmanager.addClassPathEntry(cpEntries, devClassPath, hostmanager, sourceGeneration)) {
 				result = true;
 			} else {

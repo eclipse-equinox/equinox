@@ -2416,7 +2416,8 @@ public class SystemBundleTests extends AbstractBundleTests {
 		return manifest;
 	}
 
-	static File createBundle(File outputDir, String bundleName, Map<String, String> headers, Map<String, String>... entries) throws IOException {
+	public static File createBundle(File outputDir, String bundleName, Map<String, String> headers,
+			Map<String, String>... entries) throws IOException {
 		Manifest m = new Manifest();
 		Attributes attributes = m.getMainAttributes();
 		attributes.putValue("Manifest-Version", "1.0");
