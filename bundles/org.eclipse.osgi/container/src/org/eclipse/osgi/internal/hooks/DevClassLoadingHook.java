@@ -79,7 +79,7 @@ public class DevClassLoadingHook extends ClassLoaderHook implements KeyedElement
 				if (!fromFragment && devCP.indexOf("..") >= 0) { //$NON-NLS-1$
 					// if in dev mode, try using cp as a relative path from the base bundle file
 					File base = sourceGeneration.getBundleFile().getBaseFile();
-					if (base.isDirectory()) {
+					if (base != null && base.isDirectory()) {
 						// this is only supported for directory bundles
 						ClasspathEntry entry = hostmanager.getExternalClassPath(new File(base, devCP).getAbsolutePath(), sourceGeneration);
 						if (entry != null) {
