@@ -53,7 +53,6 @@ import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServicePermission;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.framework.hooks.service.EventHook;
 import org.osgi.framework.hooks.service.EventListenerHook;
 import org.osgi.framework.hooks.service.FindHook;
 import org.osgi.framework.hooks.service.ListenerHook;
@@ -1268,7 +1267,7 @@ public class ServiceRegistry {
 		if (debug.DEBUG_HOOKS) {
 			Debug.println("notifyServiceEventHooks(" + event.getType() + ":" + event.getServiceReference() + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
-		notifyHooksPrivileged(EventHook.class, "event", (hook, hookRegistration) -> { //$NON-NLS-1$
+		notifyHooksPrivileged(org.osgi.framework.hooks.service.EventHook.class, "event", (hook, hookRegistration) -> { //$NON-NLS-1$
 			hook.event(event, result);
 		});
 	}
