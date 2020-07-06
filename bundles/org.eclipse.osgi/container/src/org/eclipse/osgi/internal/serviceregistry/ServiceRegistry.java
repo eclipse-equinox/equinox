@@ -1004,28 +1004,33 @@ public class ServiceRegistry {
 	 * @param registration The modified ServiceRegistration.
 	 */
 	/* @GuardedBy("this") */
-	void modifyServiceRegistration(BundleContextImpl context, ServiceRegistrationImpl<?> registration) {
+	void modifyServiceRegistration(BundleContextImpl context, ServiceRegistrationImpl<?> registration,
+			int previousRanking) {
 		assert Thread.holdsLock(this);
 		// The list of Services published by BundleContextImpl is not sorted, so
 		// we do not need to modify it.
 
-		// Remove the ServiceRegistrationImpl from the list of Services published by Class Name
-		// and then add at the correct index.
-		int insertIndex;
-		for (String clazz : registration.getClasses()) {
-			List<ServiceRegistrationImpl<?>> services = publishedServicesByClass.get(clazz);
-			services.remove(registration);
-			// The list is sorted, so we must find the proper location to insert
-			insertIndex = -Collections.binarySearch(services, registration) - 1;
-			services.add(insertIndex, registration);
-		}
+		// If the insert location has changed
+		if (registration.compareTo(previousRanking, registration.getId()) != 0) {
+			// Remove the ServiceRegistrationImpl from the list of Services published by
+			// Class Name
+			// and then add at the correct index.
+			int insertIndex;
+			for (String clazz : registration.getClasses()) {
+				List<ServiceRegistrationImpl<?>> services = publishedServicesByClass.get(clazz);
+				services.remove(registration);
+				// The list is sorted, so we must find the proper location to insert
+				insertIndex = -1 - Collections.binarySearch(services, registration);
+				services.add(insertIndex, registration);
+			}
 
-		// Remove the ServiceRegistrationImpl from the list of all published Services
-		// and then add at the correct index.
-		allPublishedServices.remove(registration);
-		// The list is sorted, so we must find the proper location to insert
-		insertIndex = -Collections.binarySearch(allPublishedServices, registration) - 1;
-		allPublishedServices.add(insertIndex, registration);
+			// Remove the ServiceRegistrationImpl from the list of all published Services
+			// and then add at the correct index.
+			allPublishedServices.remove(registration);
+			// The list is sorted, so we must find the proper location to insert
+			insertIndex = -1 - Collections.binarySearch(allPublishedServices, registration);
+			allPublishedServices.add(insertIndex, registration);
+		}
 	}
 
 	/**

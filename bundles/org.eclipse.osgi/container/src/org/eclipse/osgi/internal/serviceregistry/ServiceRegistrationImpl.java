@@ -168,6 +168,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		final ServiceReferenceImpl<S> ref;
 		final Map<String, Object> previousProperties;
 		synchronized (registry) {
+			int previousRanking;
 			synchronized (registrationLock) {
 				if (state != REGISTERED) { /* in the process of unregisterING */
 					throw new IllegalStateException(Msg.SERVICE_ALREADY_UNREGISTERED_EXCEPTION + ' ' + this);
@@ -175,9 +176,10 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 
 				ref = reference; /* used to publish event outside sync */
 				previousProperties = this.properties;
+				previousRanking = serviceranking;
 				this.properties = createProperties(props);
 			}
-			registry.modifyServiceRegistration(context, this);
+			registry.modifyServiceRegistration(context, this, previousRanking);
 		}
 		/* must not hold the registrationLock when this event is published */
 		registry.publishServiceEvent(new ModifiedServiceEvent(ref, previousProperties));
@@ -746,23 +748,15 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	 */
 	@Override
 	public int compareTo(ServiceRegistrationImpl<?> other) {
-		final int thisRanking = this.getRanking();
-		final int otherRanking = other.getRanking();
-		if (thisRanking != otherRanking) {
-			if (thisRanking < otherRanking) {
-				return 1;
-			}
-			return -1;
+		return compareTo(other.getRanking(), other.getId());
+	}
+
+	int compareTo(int otherRanking, long otherId) {
+		int compared = Integer.compare(otherRanking, getRanking());
+		if (compared != 0) {
+			return compared;
 		}
-		final long thisId = this.getId();
-		final long otherId = other.getId();
-		if (thisId == otherId) {
-			return 0;
-		}
-		if (thisId < otherId) {
-			return -1;
-		}
-		return 1;
+		return Long.compare(getId(), otherId);
 	}
 
 	static class FrameworkHookRegistration<S> extends ServiceRegistrationImpl<S> {
