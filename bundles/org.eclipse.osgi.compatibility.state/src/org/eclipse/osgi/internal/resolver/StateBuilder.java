@@ -743,7 +743,7 @@ public class StateBuilder {
 				Map<String, Object> mapAttrs = getAttributes(element, new String[0]);
 				if (profileIndex != null)
 					mapAttrs.put(ExportPackageDescriptionImpl.EQUINOX_EE, profileIndex);
-				Dictionary<String, Object> attrs = mapAttrs == null ? new Hashtable<String, Object>() : new Hashtable<>(mapAttrs);
+				Dictionary<String, Object> attrs = mapAttrs == null ? new Hashtable<>() : new Hashtable<>(mapAttrs);
 				desc.setAttributes(attrs);
 				Map<String, String> directives = new HashMap<>();
 				Enumeration<String> keys = element.getDirectiveKeys();
@@ -776,7 +776,7 @@ public class StateBuilder {
 						throw new BundleException("A bundle is not allowed to define a capability in the " + IdentityNamespace.IDENTITY_NAMESPACE + " name space."); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				Map<String, Object> mapAttrs = getAttributes(equinoxCapability, new String[] {Constants.VERSION_ATTRIBUTE});
-				Dictionary<String, Object> attrs = mapAttrs == null ? new Hashtable<String, Object>() : new Hashtable<>(mapAttrs);
+				Dictionary<String, Object> attrs = mapAttrs == null ? new Hashtable<>() : new Hashtable<>(mapAttrs);
 				attrs.put(desc.getType(), name);
 				String versionString = equinoxCapability.getAttribute(Constants.VERSION_ATTRIBUTE);
 				if (versionString != null)

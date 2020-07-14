@@ -13,14 +13,38 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import java.io.*;
-import java.util.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import org.eclipse.osgi.internal.module.ResolverImpl;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.BundleSpecification;
+import org.eclipse.osgi.service.resolver.DisabledInfo;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.GenericDescription;
+import org.eclipse.osgi.service.resolver.GenericSpecification;
+import org.eclipse.osgi.service.resolver.HostSpecification;
+import org.eclipse.osgi.service.resolver.ImportPackageSpecification;
+import org.eclipse.osgi.service.resolver.NativeCodeDescription;
+import org.eclipse.osgi.service.resolver.NativeCodeSpecification;
+import org.eclipse.osgi.service.resolver.State;
+import org.eclipse.osgi.service.resolver.StateObjectFactory;
 import org.eclipse.osgi.service.resolver.VersionRange;
 import org.eclipse.osgi.storagemanager.StorageManager;
 import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.Version;
 
 public class StateObjectFactoryImpl implements StateObjectFactory {
 
@@ -333,7 +357,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	private GenericDescription createGenericDescription(String name, String type, Version version, Map<String, ?> attributes, Map<String, String> directives, BundleDescription supplier) {
 		GenericDescriptionImpl result = new GenericDescriptionImpl();
 		result.setType(type);
-		Dictionary<String, Object> attrs = attributes == null ? new Hashtable<String, Object>() : new Hashtable<>(attributes);
+		Dictionary<String, Object> attrs = attributes == null ? new Hashtable<>() : new Hashtable<>(attributes);
 		if (version != null) {
 			Object versionObj = attrs.get(Constants.VERSION_ATTRIBUTE);
 			if (!(versionObj instanceof Version) && version != null)
