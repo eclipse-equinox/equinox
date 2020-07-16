@@ -30,7 +30,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * <li> Multiple invocations that happen often and rapidly. In this case, maintaining
  * a cache of the service is worth the overhead.</li>
  * </ul>
- * 
+ * <p>
  * For single invocations of a service the static method
  * {@link ServiceCaller#callOnce(Class, Class, Consumer)} can be used.
  * This method will wrap a call to the consumer of the service with
@@ -38,21 +38,24 @@ import org.osgi.util.tracker.ServiceTracker;
  * exists and will do the proper get and release service operations
  * surround the calls to the service. By wrapping a call around the
  * service we can ensure that it is correctly released after use.
+ * </p>
  * <p>
  * Single invocation example:
+ * </p>
  * <pre>
  * ServiceCaller.callOnce(MyClass.class, ILog.class, (logger) -&gt; logger.info("All systems go!"));
  * </pre>
+ * <p>
  * Note that it is generally more efficient to use a long-running service
  * utility, such as {@link ServiceTracker} or declarative services, but there
  * are cases where a single one-shot lookup is preferable, especially if the
  * service is not required after use. Examples might include logging unlikely
  * conditions or processing debug options that are only read once.
- *
- * 
+ * </p>
+ * <p>
  * This allows boilerplate code to be reduced at call sites, which would
  * otherwise have to do something like:
- * 
+ * </p>
  * <pre>
  * Bundle bundle = FrameworkUtil.getBundle(BadExample.class);
  * BundleContext context = bundle == null ? null : bundle.getBundleContext();
@@ -65,32 +68,53 @@ import org.osgi.util.tracker.ServiceTracker;
  *   context.ungetService(reference);
  * }
  * </pre>
+ * <p>
  * For cases where a service is used much more often a {@code ServiceCaller} instance
  * can be used to cache and track the available service. This may be useful for cases
  * that cannot use declarative services and that want to avoid using something like
  * a {@link ServiceTracker} that does not easily allow for lazy instantiation of the service
  * instance.  For example, if logging is used more often then something like the following
  * could be used:
+ * </p>
  * <pre>
  * static final ServiceCaller&lt;ILog&gt; log = new ServiceCaller(MyClass.class, ILog.class);
  * static void info(String msg) {
- *   log.call(logger -&gt; logger.info(msg);
+ *   log.call(logger -&gt; logger.info(msg));
  * }
  * </pre>
- * 
+ * <p>
  * Note that this class is intended for simple service usage patterns only.  More advanced cases 
  * should use other mechanisms such as the {@link ServiceTracker} or declarative services.
- * 
+ * </p>
  * @param <Service> the service type for this caller
  * @since 3.13
  */
 public class ServiceCaller<Service> {
 	/**
 	 * Calls an OSGi service by dynamically looking it up and passing it to the given consumer.
-	 * 
+	 * <p>
 	 * If not running under OSGi, the caller bundle is not active or the service is not available, return false.
-	 * Any exception thrown by the consumer is rethrown by this method.
 	 * If the service is found, call the service and return true.
+	 * </p>
+	 * <p>
+	 * Any runtime exception thrown by the consumer is rethrown by this method.
+	 * If the consumer throws a checked exception, it can be propagated using a <em>sneakyThrow</em>
+	 * inside a try/catch block:
+	 * </p>
+	 * <pre>
+	 * callOnce(MyClass.class, Callable.class, (callable) -&gt; {
+	 *   try {
+	 *     callable.call();
+	 *   } catch (Exception e) {
+	 *     sneakyThrow(e);
+	 *   }
+	 * });
+	 * ...
+	 * @SuppressWarnings("unchecked")
+	 * static &lt;E extends Throwable&gt; void sneakyThrow(Throwable e) throws E {
+	 *   throw (E) e;
+	 * }
+	 * </pre>
 	 * @param caller a class from the bundle that will use service
 	 * @param serviceType the OSGi service type to look up
 	 * @param consumer the consumer of the OSGi service
@@ -266,7 +290,8 @@ public class ServiceCaller<Service> {
 	/**
 	 * Calls an OSGi service by dynamically looking it up and passing it to the given consumer.
 	 * If not running under OSGi, the caller bundle is not active or the service is not available, return false.
-	 * Any exception thrown by the consumer is rethrown by this method.
+	 * Any runtime exception thrown by the consumer is rethrown by this method.
+	 * (For handling checked exceptions, see {@link #callOnce(Class, Class, Consumer)} for a solution.)
 	 * Subsequent calls to this method will attempt to reuse the previously acquired service instance until one
 	 * of the following occurs:
 	 * <ul>
