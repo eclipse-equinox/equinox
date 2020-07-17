@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2013 VMware Inc.
+ * Copyright (c) 2011, 2020 VMware Inc.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -60,7 +60,7 @@ public class StandardRegionDigraphPeristenceTests {
 	}
 
 	@Test
-	public void testBasic() throws IOException, InvalidSyntaxException, BundleException {
+	public void testBasic() throws IOException {
 		doTest();
 	}
 
@@ -111,7 +111,7 @@ public class StandardRegionDigraphPeristenceTests {
 	}
 
 	@Test
-	public void testInvalidOperations() throws IOException, InvalidSyntaxException, BundleException {
+	public void testInvalidOperations() throws IOException, BundleException {
 		Region boot = digraph.getRegion(BOOT_REGION);
 		Bundle b = boot.installBundle("dynamic.add.a.1", new ByteArrayInputStream(new byte[0]));
 		// needed because we don't have a bundle hook to add it for us
@@ -176,7 +176,7 @@ public class StandardRegionDigraphPeristenceTests {
 		}
 	}
 
-	private void doTest() throws IOException, InvalidSyntaxException, BundleException {
+	private void doTest() throws IOException {
 		// test a single write
 		doTest(1);
 		// test writing and reading the digraph multiple times to same stream
