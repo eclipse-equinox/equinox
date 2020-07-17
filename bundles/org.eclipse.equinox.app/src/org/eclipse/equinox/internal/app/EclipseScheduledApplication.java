@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -96,7 +96,7 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 	}
 
 	private Map<String, Object> getArguments(Event trigger) {
-		Map<String, Object> result = args == null ? new HashMap<String, Object>() : getArguments();
+		Map<String, Object> result = args == null ? new HashMap<>() : getArguments();
 		result.put(TRIGGERING_EVENT, new GuardedObject(trigger, new TriggerGuard(trigger.getTopic())));
 		return result;
 	}
@@ -141,7 +141,7 @@ public class EclipseScheduledApplication implements ScheduledApplication, EventH
 
 	/*
 	 * This is used to guard the event topic argument which is passed to an application
-	 * when we are launching it from a scheduling. 
+	 * when we are launching it from a scheduling.
 	 */
 	public class TriggerGuard implements Guard {
 		String eventTopic;
