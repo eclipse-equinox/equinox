@@ -3,5 +3,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Servletbridge Template
 Bundle-SymbolicName: org.eclipse.equinox.servletbridge.template
 Bundle-Version: 1.0.300.qualifier
+Automatic-Module-Name: org.eclipse.equinox.servletbridge.template
 
 
