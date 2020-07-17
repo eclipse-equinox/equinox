@@ -126,6 +126,20 @@ public class ServiceCaller<Service> {
 		return new ServiceCaller<>(caller, serviceType).getCallUnget(consumer);
 	}
 
+	/**
+	 * As {@link #callOnce(Class, Class, Consumer)} with an additional OSGi filter.
+	 * @param caller a class from the bundle that will use service
+	 * @param serviceType the OSGi service type to look up
+	 * @param consumer the consumer of the OSGi service
+	 * @param filter an OSGi filter to restrict the services found
+	 * @param <Service> the OSGi service type to look up
+	 * @return true if the OSGi service was located and called successfully, false otherwise
+	 * @throws NullPointerException if any of the parameters are null
+	 */
+	public static <Service> boolean callOnce(Class<?> caller, Class<Service> serviceType, String filter, Consumer<Service> consumer) {
+		return new ServiceCaller<>(caller, serviceType, filter).getCallUnget(consumer);
+	}
+
 	static int getRank(ServiceReference<?> ref) {
 		Object rank = ref.getProperty(Constants.SERVICE_RANKING);
 		if (rank instanceof Integer) {

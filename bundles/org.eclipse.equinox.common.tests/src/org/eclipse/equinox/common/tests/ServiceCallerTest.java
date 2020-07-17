@@ -78,7 +78,10 @@ public class ServiceCallerTest extends CoreTest {
 		ServiceExampleFactory factory = new ServiceExampleFactory();
 		ServiceRegistration<IServiceExample> reg = null;
 		try {
-			reg = context.registerService(IServiceExample.class, factory, null);
+			Dictionary<String, String> props = new Hashtable<>();
+			props.put("test", "value");
+
+			reg = context.registerService(IServiceExample.class, factory, props);
 			ServiceCaller.callOnce(IServiceExample.class, IServiceExample.class, IServiceExample::call);
 			ServiceExample lastCreated1 = factory.lastCreated;
 			assertTrue("Service called successfully", lastCreated1.called);
@@ -86,11 +89,15 @@ public class ServiceCallerTest extends CoreTest {
 			Bundle[] users = reg.getReference().getUsingBundles();
 			assertNull("Didn't expect users.", users);
 
-			ServiceCaller.callOnce(IServiceExample.class, IServiceExample.class, IServiceExample::call);
+			ServiceCaller.callOnce(IServiceExample.class, IServiceExample.class, "(test=value)", IServiceExample::call);
 			ServiceExample lastCreated2 = factory.lastCreated;
 			assertTrue("Service called successfully", lastCreated2.called);
 
 			assertNotEquals("Should have new service each call", lastCreated1, lastCreated2);
+
+			boolean result = ServiceCaller.callOnce(IServiceExample.class, IServiceExample.class, "(test!=value)",
+					IServiceExample::call);
+			assertFalse("Should not have found service with filter", result);
 
 			assertEquals("Unexpected createCount", 2, factory.getCreateCount(bundle));
 		} finally {
@@ -204,6 +211,13 @@ public class ServiceCallerTest extends CoreTest {
 	public void testInvalidFilter() {
 		try {
 			new ServiceCaller<>(getClass(), IServiceExample.class, "invalid filter");
+			fail("Expected an exception on invalid filter.");
+		} catch (IllegalArgumentException e) {
+			assertTrue("Unexpected cause.", e.getCause() instanceof InvalidSyntaxException);
+		}
+		try {
+			ServiceCaller.callOnce(getClass(), IServiceExample.class, "invalid filter", (example) -> {
+			});
 			fail("Expected an exception on invalid filter.");
 		} catch (IllegalArgumentException e) {
 			assertTrue("Unexpected cause.", e.getCause() instanceof InvalidSyntaxException);
