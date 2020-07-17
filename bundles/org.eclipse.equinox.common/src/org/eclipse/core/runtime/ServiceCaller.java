@@ -110,7 +110,7 @@ public class ServiceCaller<Service> {
 	 *   }
 	 * });
 	 * ...
-	 * @SuppressWarnings("unchecked")
+	 * {@literal @}SuppressWarnings("unchecked")
 	 * static &lt;E extends Throwable&gt; void sneakyThrow(Throwable e) throws E {
 	 *   throw (E) e;
 	 * }
