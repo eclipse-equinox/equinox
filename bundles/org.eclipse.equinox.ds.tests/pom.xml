@@ -21,4 +21,7 @@
   <artifactId>org.eclipse.equinox.ds.tests</artifactId>
   <version>1.5.700-SNAPSHOT</version>
   <packaging>eclipse-test-plugin</packaging>
+  <properties>
+    <testClass>org.eclipse.equinox.ds.tests.AllTests</testClass>
+  </properties>
 </project>
