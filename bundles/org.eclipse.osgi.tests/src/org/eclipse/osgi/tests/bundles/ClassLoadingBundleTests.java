@@ -14,6 +14,7 @@
 package org.eclipse.osgi.tests.bundles;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -39,6 +40,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.jar.JarEntry;
+import java.util.jar.JarOutputStream;
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -2452,6 +2455,80 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 		// make sure there are no others
 		assertNull("Found more events.", events.poll(1, TimeUnit.SECONDS));
+	}
+
+	public void testBug565522FragmentClasspath() throws IOException, BundleException {
+		ByteArrayOutputStream libResourceJarBytes1 = new ByteArrayOutputStream();
+		try (JarOutputStream libResourceJar = new JarOutputStream(libResourceJarBytes1)) {
+			libResourceJar.putNextEntry(new JarEntry("META-INF/"));
+			libResourceJar.closeEntry();
+			libResourceJar.putNextEntry(new JarEntry("META-INF/services/"));
+			libResourceJar.closeEntry();
+			libResourceJar.putNextEntry(new JarEntry("META-INF/services/some.bundle.Factory"));
+			libResourceJar.write("testFactory1".getBytes());
+			libResourceJar.closeEntry();
+		}
+		ByteArrayOutputStream libResourceJarBytes2 = new ByteArrayOutputStream();
+		try (JarOutputStream libResourceJar = new JarOutputStream(libResourceJarBytes2)) {
+			libResourceJar.putNextEntry(new JarEntry("META-INF/"));
+			libResourceJar.closeEntry();
+			libResourceJar.putNextEntry(new JarEntry("META-INF/services/"));
+			libResourceJar.closeEntry();
+			libResourceJar.putNextEntry(new JarEntry("META-INF/services/some.bundle.Factory"));
+			libResourceJar.write("testFactory2".getBytes());
+			libResourceJar.closeEntry();
+		}
+
+		File outputDir = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
+		outputDir.mkdirs();
+
+		Map<String, String> hostHeaders = new HashMap<>();
+		hostHeaders.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		hostHeaders.put(Constants.BUNDLE_SYMBOLICNAME, "host");
+		hostHeaders.put(Constants.BUNDLE_CLASSPATH, "., lib/resource.jar");
+		Map<String, byte[]> hostEntries = new HashMap<>();
+		hostEntries.put("lib/", null);
+		hostEntries.put("lib/resource.jar", libResourceJarBytes1.toByteArray());
+		File hostFile = SystemBundleTests.createBundleWithBytes(outputDir, "host", hostHeaders, hostEntries);
+
+		Map<String, String> fragHeaders = new HashMap<>();
+		fragHeaders.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		fragHeaders.put(Constants.BUNDLE_SYMBOLICNAME, "fragment");
+		fragHeaders.put(Constants.BUNDLE_CLASSPATH, "., lib/resource.jar");
+		fragHeaders.put(Constants.FRAGMENT_HOST, "host");
+		Map<String, byte[]> fragEntries = new HashMap<>();
+		fragEntries.put("lib/", null);
+		fragEntries.put("lib/resource.jar", libResourceJarBytes2.toByteArray());
+		File fragFile = SystemBundleTests.createBundleWithBytes(outputDir, "frag", fragHeaders, fragEntries);
+
+		Bundle host = null, frag = null;
+		try {
+			host = getContext().installBundle(hostFile.toURI().toASCIIString());
+			frag = getContext().installBundle(fragFile.toURI().toASCIIString());
+			host.start();
+			Enumeration<URL> eResources = host.getResources("META-INF/services/some.bundle.Factory");
+			assertNotNull("No resources found.", eResources);
+			List<URL> resources = new ArrayList<>();
+			while (eResources.hasMoreElements()) {
+				resources.add(eResources.nextElement());
+			}
+			assertEquals("Wrong number of resources.", 2, resources.size());
+			assertEquals("Wrong content for resource 1", "testFactory1", readURL(resources.get(0)));
+			assertEquals("Wrong content for resource 2", "testFactory2", readURL(resources.get(1)));
+
+			// round trip the URLs
+			URL copyURL1 = new URL(resources.get(0).toExternalForm());
+			URL copyURL2 = new URL(resources.get(1).toExternalForm());
+			assertEquals("Wrong content for url copy 1", "testFactory1", readURL(copyURL1));
+			assertEquals("Wrong content for url copy 2", "testFactory2", readURL(copyURL2));
+		} finally {
+			if (host != null) {
+				host.uninstall();
+			}
+			if (frag != null) {
+				frag.uninstall();
+			}
+		}
 	}
 
 	void refreshBundles(Collection<Bundle> bundles) throws InterruptedException {

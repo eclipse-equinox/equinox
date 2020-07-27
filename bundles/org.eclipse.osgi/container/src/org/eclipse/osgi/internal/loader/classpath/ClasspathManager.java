@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2017 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -521,17 +521,18 @@ public class ClasspathManager {
 	}
 
 	private BundleEntry findLocalEntry(String path, ClasspathEntry[] cpEntries, int classPathIndex, int[] curIndex) {
-		BundleEntry result = null;
 		for (ClasspathEntry cpEntry : cpEntries) {
 			if (cpEntry != null) {
-				result = cpEntry.findEntry(path);
-				if (result != null && (classPathIndex == -1 || classPathIndex == curIndex[0])) {
-					return result;
+				if (classPathIndex == -1 || classPathIndex == curIndex[0]) {
+					BundleEntry result = cpEntry.findEntry(path);
+					if (result != null) {
+						return result;
+					}
 				}
 			}
 			curIndex[0]++;
 		}
-		return result;
+		return null;
 	}
 
 	/**

@@ -2442,6 +2442,32 @@ public class SystemBundleTests extends AbstractBundleTests {
 		return file;
 	}
 
+	public static File createBundleWithBytes(File outputDir, String bundleName, Map<String, String> headers,
+			Map<String, byte[]>... entries) throws IOException {
+		Manifest m = new Manifest();
+		Attributes attributes = m.getMainAttributes();
+		attributes.putValue("Manifest-Version", "1.0");
+		for (Map.Entry<String, String> entry : headers.entrySet()) {
+			attributes.putValue(entry.getKey(), entry.getValue());
+		}
+		File file = new File(outputDir, "bundle" + bundleName + ".jar"); //$NON-NLS-1$ //$NON-NLS-2$
+		JarOutputStream jos = new JarOutputStream(new FileOutputStream(file), m);
+		if (entries != null) {
+			for (Map<String, byte[]> entryMap : entries) {
+				for (Map.Entry<String, byte[]> entry : entryMap.entrySet()) {
+					jos.putNextEntry(new JarEntry(entry.getKey()));
+					if (entry.getValue() != null) {
+						jos.write(entry.getValue());
+					}
+					jos.closeEntry();
+				}
+			}
+		}
+		jos.flush();
+		jos.close();
+		return file;
+	}
+
 	public void testBug405919() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		config.mkdirs();
