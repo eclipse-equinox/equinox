@@ -1417,8 +1417,7 @@ public class EclipseStarter {
 			return;
 
 		final Bundle systemBundle = context.getBundle();
-		for (Iterator<Runnable> it = shutdownHandlers.iterator(); it.hasNext();) {
-			final Runnable handler = it.next();
+		for (Runnable handler : shutdownHandlers) {
 			BundleListener listener = event -> {
 				if (event.getBundle() == systemBundle && event.getType() == BundleEvent.STOPPED) {
 					handler.run();
