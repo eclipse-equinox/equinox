@@ -88,18 +88,15 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 					// need a thread to kick the main thread when the framework stops
 					final Thread mainThread = Thread.currentThread();
 					final BundleContext mainContext = context;
-					new Thread(new Runnable() {
-						@Override
-						public void run() {
-							Framework framework = (Framework) mainContext.getBundle(Constants.SYSTEM_BUNDLE_LOCATION);
-							try {
-								framework.waitForStop(0);
-								// framework is done; tell the main thread to stop
-								mainThread.interrupt();
-							} catch (InterruptedException e) {
-								Thread.interrupted();
-								// just exiting now
-							}
+					new Thread((Runnable) () -> {
+						Framework framework = (Framework) mainContext.getBundle(Constants.SYSTEM_BUNDLE_LOCATION);
+						try {
+							framework.waitForStop(0);
+							// framework is done; tell the main thread to stop
+							mainThread.interrupt();
+						} catch (InterruptedException e) {
+							Thread.interrupted();
+							// just exiting now
 						}
 					}, "Framework watcher").start(); //$NON-NLS-1$
 
