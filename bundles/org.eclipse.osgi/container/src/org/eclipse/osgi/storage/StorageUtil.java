@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -170,7 +170,27 @@ public class StorageUtil {
 	}
 
 	public static boolean canWrite(File installDir) {
-		return installDir.isDirectory() && Files.isWritable(installDir.toPath());
+		if (!installDir.isDirectory())
+			return false;
+
+		if (Files.isWritable(installDir.toPath()))
+			return true;
+
+		File fileTest = null;
+		try {
+			// we use the .dll suffix to properly test on Vista virtual directories
+			// on Vista you are not allowed to write executable files on virtual directories
+			// like "Program Files"
+			fileTest = File.createTempFile("writableArea", ".dll", installDir); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (IOException e) {
+			// If an exception occured while trying to create the file, it means that it is
+			// not writtable
+			return false;
+		} finally {
+			if (fileTest != null)
+				fileTest.delete();
+		}
+		return true;
 	}
 
 	public static URL encodeFileURL(File file) throws MalformedURLException {
