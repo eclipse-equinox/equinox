@@ -822,7 +822,9 @@ public class Storage {
 			}
 		}
 		if (generation.getBundleInfo().getBundleId() != 0) {
-			ModuleRevisionBuilder builder = allowRestrictedProvides ? OSGiManifestBuilderFactory.createBuilder(mapHeaders, null, null, "") : OSGiManifestBuilderFactory.createBuilder(mapHeaders); //$NON-NLS-1$
+			ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(mapHeaders, null, //
+					(generation.getContentType() == Type.CONNECT ? "" : null), //$NON-NLS-1$
+					(allowRestrictedProvides ? "" : null)); //$NON-NLS-1$
 			if ((builder.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
 				for (ModuleRevisionBuilder.GenericInfo reqInfo : builder.getRequirements()) {
 					if (HostNamespace.HOST_NAMESPACE.equals(reqInfo.getNamespace())) {

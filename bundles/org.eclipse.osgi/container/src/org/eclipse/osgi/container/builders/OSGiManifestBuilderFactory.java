@@ -97,7 +97,7 @@ public final class OSGiManifestBuilderFactory {
 
 		int manifestVersion = getManifestVersion(manifest);
 		if (manifestVersion >= 2) {
-			validateHeaders(manifest);
+			validateHeaders(manifest, extraExports != null);
 		}
 
 		Object symbolicName = getSymbolicNameAndVersion(builder, manifest, symbolicNameAlias, manifestVersion);
@@ -130,20 +130,20 @@ public final class OSGiManifestBuilderFactory {
 		return builder;
 	}
 
-	private static void validateHeaders(Map<String, String> manifest) throws BundleException {
+	private static void validateHeaders(Map<String, String> manifest, boolean allowJavaExports) throws BundleException {
 		for (String definedOSGiValidateHeader : DEFINED_OSGI_VALIDATE_HEADERS) {
 			String header = manifest.get(definedOSGiValidateHeader);
 			if (header != null) {
 				ManifestElement[] elements = ManifestElement.parseHeader(definedOSGiValidateHeader, header);
 				checkForDuplicateDirectivesAttributes(definedOSGiValidateHeader, elements);
 				if (definedOSGiValidateHeader == Constants.IMPORT_PACKAGE) {
-					checkImportExportSyntax(definedOSGiValidateHeader, elements, false, false);
+					checkImportExportSyntax(definedOSGiValidateHeader, elements, false, false, false);
 				}
 				if (definedOSGiValidateHeader == Constants.DYNAMICIMPORT_PACKAGE) {
-					checkImportExportSyntax(definedOSGiValidateHeader, elements, false, true);
+					checkImportExportSyntax(definedOSGiValidateHeader, elements, false, true, false);
 				}
 				if (definedOSGiValidateHeader == Constants.EXPORT_PACKAGE) {
-					checkImportExportSyntax(definedOSGiValidateHeader, elements, true, false);
+					checkImportExportSyntax(definedOSGiValidateHeader, elements, true, false, allowJavaExports);
 				}
 				if (definedOSGiValidateHeader == Constants.FRAGMENT_HOST) {
 					checkExtensionBundle(definedOSGiValidateHeader, elements, manifest);
@@ -155,7 +155,8 @@ public final class OSGiManifestBuilderFactory {
 	}
 
 	@SuppressWarnings("deprecation")
-	private static void checkImportExportSyntax(String headerKey, ManifestElement[] elements, boolean export, boolean dynamic) throws BundleException {
+	private static void checkImportExportSyntax(String headerKey, ManifestElement[] elements, boolean export,
+			boolean dynamic, boolean allowJavaExports) throws BundleException {
 		if (elements == null)
 			return;
 		int length = elements.length;
@@ -169,7 +170,7 @@ public final class OSGiManifestBuilderFactory {
 					throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_PACKAGE_DUPLICATES, packageName), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 				}
 				// check for java.*
-				if (export && packageName.startsWith("java.")) { //$NON-NLS-1$
+				if (export && !allowJavaExports && packageName.startsWith("java.")) { //$NON-NLS-1$
 					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
 					throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_PACKAGE_JAVA, packageName), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 				}
@@ -182,7 +183,7 @@ public final class OSGiManifestBuilderFactory {
 				if (specVersion != null && !specVersion.equals(version))
 					throw new BundleException(NLS.bind(Msg.HEADER_VERSION_ERROR, Constants.VERSION_ATTRIBUTE, Constants.PACKAGE_SPECIFICATION_VERSION), BundleException.MANIFEST_ERROR);
 			}
-			// check for bundle-symbolic-name and bundle-verion attibures
+			// check for bundle-symbolic-name and bundle-version attributes on exports
 			// (failure)
 			if (export) {
 				if (elements[i].getAttribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE) != null) {

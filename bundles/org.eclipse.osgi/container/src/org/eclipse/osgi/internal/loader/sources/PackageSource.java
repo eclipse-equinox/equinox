@@ -59,7 +59,6 @@ public abstract class PackageSource {
 
 	public abstract Enumeration<URL> getResources(String name) throws IOException;
 
-	//TODO See how this relates with FilteredSourcePackage. Overwriting or doing a double dispatch might be good.
 	// This is intentionally lenient; we don't force all suppliers to match (only one)
 	// it is better to get class cast exceptions in split package cases than miss an event
 	public boolean hasCommonSource(PackageSource other) {
@@ -134,7 +133,8 @@ public abstract class PackageSource {
 			return false;
 		}
 		// 3) for the specified bundle, find the wiring for the package.  If no wiring is found return true
-		PackageSource consumerSource = getSourceFromLoader(consumerBL, pkgName, className, checkInternal);
+		PackageSource consumerSource = getSourceFromLoader(consumerBL, pkgName, className, checkInternal,
+				container.getPackageAdmin());
 		if (consumerSource == null) {
 			// confirmed no source for consumer
 			return true;
@@ -145,7 +145,8 @@ public abstract class PackageSource {
 		}
 
 		// 4) For the registrant bundle, find the wiring for the package.
-		PackageSource producerSource = getSourceFromLoader(producerBL, pkgName, className, checkInternal);
+		PackageSource producerSource = getSourceFromLoader(producerBL, pkgName, className, checkInternal,
+				container.getPackageAdmin());
 		if (producerSource == null) {
 			// confirmed no local class either; now check service object
 			if (serviceClass != null && ServiceFactory.class.isAssignableFrom(serviceClass)) {
@@ -172,15 +173,28 @@ public abstract class PackageSource {
 	}
 
 	private static PackageSource getSourceFromLoader(BundleLoader loader, String pkgName, String className,
-			boolean checkInternal) {
+			boolean checkInternal, @SuppressWarnings("deprecation") PackageAdmin packageAdmin) {
 		PackageSource source = loader.getPackageSource(pkgName);
 		if (source != null || !checkInternal) {
 			return source;
 		}
 		try {
-			if (loader.findLocalClass(className) != null) {
-				// create a source that represents the private package
-				return (new SingleSourcePackage(pkgName, loader));
+			Class<?> clazz = loader.findLocalClass(className);
+			if (clazz != null) {
+				// make sure it is from this actual loader
+				@SuppressWarnings("deprecation")
+				Bundle b = packageAdmin.getBundle(clazz);
+				if (b != null) {
+					if (loader.getWiring().getBundle() == b) {
+						// create a source that represents the private package
+						return (new SingleSourcePackage(pkgName, loader));
+					}
+					// it is from a different loader (probably something with connect)
+					BundleLoader classBundleLoader = getBundleLoader(b);
+					if (classBundleLoader != null) {
+						return (new SingleSourcePackage(pkgName, classBundleLoader));
+					}
+				}
 			}
 		} catch (ClassNotFoundException e) {
 			// ignore
@@ -203,7 +217,7 @@ public abstract class PackageSource {
 		if (producerBL == null) {
 			return null;
 		}
-		PackageSource producerSource = getSourceFromLoader(producerBL, pkgName, className, checkInternal);
+		PackageSource producerSource = getSourceFromLoader(producerBL, pkgName, className, checkInternal, packageAdmin);
 		if (producerSource != null) {
 			return producerSource;
 		}

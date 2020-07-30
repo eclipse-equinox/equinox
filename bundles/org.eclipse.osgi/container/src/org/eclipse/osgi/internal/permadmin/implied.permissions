@@ -47,7 +47,7 @@
 (java.io.FilePermission "" "read")
 (java.io.FilePermission "-" "read,write,delete")
 
-# Added for OSGi SP R3 - this likely is not needed any more
+# All bundles are allowed to import any java.* package
 (org.osgi.framework.PackagePermission "java.*" "import")
 # Added for OSGi R4.3
 (org.osgi.framework.CapabilityPermission "osgi.ee" "require")

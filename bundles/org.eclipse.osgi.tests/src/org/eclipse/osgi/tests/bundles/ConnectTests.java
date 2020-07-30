@@ -70,6 +70,7 @@ import org.osgi.framework.launch.Framework;
 import org.osgi.framework.namespace.BundleNamespace;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.namespace.IdentityNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
@@ -892,7 +893,7 @@ public class ConnectTests extends AbstractBundleTests {
 		Map<String, String> headers = new HashMap<>(FrameworkUtil.asMap(systemBundle.getHeaders()));
 		headers.put("test.key", "test.value");
 		// remove bundle manifest version to allow java export
-		headers.remove(Constants.BUNDLE_MANIFESTVERSION);
+		// headers.remove(Constants.BUNDLE_MANIFESTVERSION);
 
 		TestConnectModule systemModule = new TestConnectModule(
 				new TestConnectContent(headers, systemBundle.adapt(BundleWiring.class).getClassLoader()));
@@ -911,6 +912,36 @@ public class ConnectTests extends AbstractBundleTests {
 		// run twice to test clean and persistent start
 		doTestConnect(connector, Collections.emptyMap(), test);
 		doTestConnect(connector, Collections.emptyMap(), test);
+	}
+
+	public void testJavaExportsConnect() {
+		TestCountingModuleConnector connector = new TestCountingModuleConnector();
+		connector.setModule("javaExport", createJavaExportModule());
+
+		doTestConnect(connector, Collections.emptyMap(), (f) -> {
+			try {
+				f.start();
+				Bundle b = f.getBundleContext().installBundle("javaExport");
+				b.start();
+				assertTrue("No java export found.",
+						b.adapt(BundleWiring.class).getCapabilities(PackageNamespace.PACKAGE_NAMESPACE).stream()
+								.findFirst()
+								.map((c) -> "java.test.export"
+										.equals(c.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE)))
+								.orElse(false));
+			} catch (Throwable t) {
+				sneakyThrow(t);
+			}
+		});
+	}
+
+	private ConnectModule createJavaExportModule() {
+		Map<String, String> headers = new HashMap<>();
+		headers.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		headers.put(Constants.BUNDLE_SYMBOLICNAME, "javaExport");
+		headers.put(Constants.EXPORT_PACKAGE, "java.test.export");
+		TestConnectContent c = new TestConnectContent(headers, null);
+		return new TestConnectModule(c);
 	}
 
 	private void checkHeaders(Map<String, String> expected, Dictionary<String, String> actual) {
