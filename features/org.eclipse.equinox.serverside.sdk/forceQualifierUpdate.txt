@@ -25,3 +25,4 @@ Bug 544317 - IBuild I20190210-1800 failed due to unresolved project dependencies
 Bug 549238 - 4.13.0 I-Build: I20190713-0230 - BUILD FAILED
 Bug 553238 - Unanticipated comparator errors in I20191119-1800
 Bug 565250 - Switch to use Tycho 2.0.0 snapshot 
+Comparator errors in I20200730-1800
