@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2018 IBM Corporation and others.
+ * Copyright (c) 2007, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -27,7 +27,7 @@ static _TCHAR* gtkInitFail = _T_ECLIPSE("Unable to initialize GTK+\n");
 static _TCHAR* upgradeWarning1 = _T_ECLIPSE("\nPlease upgrade GTK+ to minimum version");
 static _TCHAR* upgradeWarning2 = _T_ECLIPSE("\nor use an older version of Eclipse.\nClick OK to Exit.");
 static int minGtkMajorVersion = 3;
-static int minGtkMinorVersion = 0;
+static int minGtkMinorVersion = 20;
 static int minGtkMicroVersion = 0;
 
 /* tables to help initialize the function pointers */
