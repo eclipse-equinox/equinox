@@ -20,7 +20,7 @@
 
 struct GTK_PTRS gtk = { 1 }; /* initialize the first field "not_initialized" so we can tell when we've loaded the pointers */
 
-static _TCHAR* minVerMsg1 = _T_ECLIPSE("Starting from the Eclipse 4.7 (Oxygen) release, \nGTK+ versions below");
+static _TCHAR* minVerMsg1 = _T_ECLIPSE("Starting from the Eclipse 4.16 release, \nGTK+ versions below");
 static _TCHAR* minVerMsg2 = _T_ECLIPSE("are not supported.\nGTK+ version found is");
 static _TCHAR* minVerTitle = _T_ECLIPSE("Unsupported GTK+ version");
 static _TCHAR* gtkInitFail = _T_ECLIPSE("Unable to initialize GTK+\n");
