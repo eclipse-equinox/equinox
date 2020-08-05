@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -182,10 +182,7 @@ public class Activator implements BundleActivator {
 	public String getBundleId(Object object) {
 		if (object == null)
 			return null;
-		PackageAdmin packageAdmin = getBundleAdmin();
-		if (packageAdmin == null)
-			return null;
-		Bundle source = packageAdmin.getBundle(object.getClass());
+		Bundle source = FrameworkUtil.getBundle(object.getClass());
 		if (source != null && source.getSymbolicName() != null)
 			return source.getSymbolicName();
 		return null;
