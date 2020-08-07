@@ -35,6 +35,7 @@ public class CertificateImportFileSelectPage extends WizardPage implements Liste
 		setDescription(SecurityUIMsg.WIZARD_TITLE_FILE_SELECT);
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		Composite certSelectComposite = new Composite(parent, SWT.NONE);
 		setControl(certSelectComposite);
@@ -82,10 +83,12 @@ public class CertificateImportFileSelectPage extends WizardPage implements Liste
 		}
 	}
 
+	@Override
 	public boolean canFlipToNextPage() {
 		return (filePathField.getText().length() < 1 || null != getErrorMessage()) ? false : true;
 	}
 
+	@Override
 	public void handleEvent(Event e) {
 		if (e.widget == browseDirectoriesButton || e.widget == filePathField)
 			if (filePathField.getText().length() < 1)
@@ -95,6 +98,7 @@ public class CertificateImportFileSelectPage extends WizardPage implements Liste
 		getWizard().getContainer().updateButtons();
 	}
 
+	@Override
 	public IWizardPage getNextPage() {
 		File file = new File(filePathField.getText().trim());
 		if (file.isDirectory() || !file.exists()) {

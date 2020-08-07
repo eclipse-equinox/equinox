@@ -78,12 +78,14 @@ public class SecurityStatusControl extends ControlContribution {
 		return new IconState(mgr.isEnabled(), mgr.getStatus(), mgr.needsAttention());
 	}
 
+	@Override
 	protected Control createControl(Composite parent) {
 
 		label = new CLabel(parent, SWT.NONE);
 		label.setImage(getIcon(currentState));
 
 		Job updateJob = new Job(ID) {
+			@Override
 			public IStatus run(IProgressMonitor monitor) {
 				while (true) {
 					IconState newState = getCurrentState();
@@ -115,6 +117,7 @@ public class SecurityStatusControl extends ControlContribution {
 		return label;
 	}
 
+	@Override
 	public void dispose() {
 		Image currentImage = label.getImage();
 		if (currentImage != null) {

@@ -16,7 +16,7 @@ package org.eclipse.equinox.internal.security.ui.wizard;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.security.cert.*;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.equinox.internal.security.ui.SecurityUIMsg;
 import org.eclipse.jface.wizard.WizardPage;
@@ -47,6 +47,7 @@ public class CertificateImportCertSelectPage extends WizardPage implements Liste
 		setDescription(SecurityUIMsg.WIZARD_SELECT_CERT_FROM_DROP_DOWN);
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		Composite certSelectComposite = new Composite(parent, SWT.NONE);
 		setControl(certSelectComposite);
@@ -99,6 +100,7 @@ public class CertificateImportCertSelectPage extends WizardPage implements Liste
 
 	}
 
+	@Override
 	public void handleEvent(Event e) {
 		if (e.widget == certDropDown) {
 			// populate the preview with select cert info
@@ -122,6 +124,7 @@ public class CertificateImportCertSelectPage extends WizardPage implements Liste
 	/**
 	 * This methods get called before each page gets showed
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		if (visible)
 			populateDropDown();
@@ -129,6 +132,7 @@ public class CertificateImportCertSelectPage extends WizardPage implements Liste
 
 	}
 
+	@Override
 	public boolean canFlipToNextPage() {
 		return ((CertificateImportWizard) getWizard()).selectCert != null;
 	}

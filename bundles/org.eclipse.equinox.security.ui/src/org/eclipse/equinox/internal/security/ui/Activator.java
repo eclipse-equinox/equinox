@@ -80,6 +80,7 @@ public class Activator extends AbstractUIPlugin {
 		return plugin.getBundle().getSymbolicName();
 	}
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		bundleContext = context;
@@ -92,6 +93,7 @@ public class Activator extends AbstractUIPlugin {
 		defaultAuthzManagerReg = bundleContext.registerService(AuthorizationManager.class, new DefaultAuthorizationManager(), properties);
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		super.stop(context);
 		bundleContext = null;

@@ -33,10 +33,12 @@ public class StoragePreferencePage extends PreferencePage implements IWorkbenchP
 		//empty
 	}
 
+	@Override
 	public void init(IWorkbench workbench) {
 		// nothing to do
 	}
 
+	@Override
 	protected Control createContents(Composite parent) {
 
 		final TabFolder folder = new TabFolder(parent, SWT.TOP);
@@ -60,6 +62,7 @@ public class StoragePreferencePage extends PreferencePage implements IWorkbenchP
 		return folder;
 	}
 
+	@Override
 	protected void performDefaults() {
 		if (passwordTab != null)
 			passwordTab.performDefaults();
@@ -68,6 +71,7 @@ public class StoragePreferencePage extends PreferencePage implements IWorkbenchP
 		super.performDefaults();
 	}
 
+	@Override
 	public boolean performOk() {
 		if (passwordTab != null)
 			passwordTab.performOk();

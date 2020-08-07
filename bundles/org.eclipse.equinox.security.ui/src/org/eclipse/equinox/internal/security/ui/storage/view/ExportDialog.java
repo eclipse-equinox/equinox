@@ -52,18 +52,21 @@ public class ExportDialog extends TitleAreaDialog {
 		super(parentShell);
 	}
 
+	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		shell.setText(SecUIMessages.generalTitle);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, HELP_ID);
 	}
 
+	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		okButton = createButton(parent, IDialogConstants.OK_ID, SecUIMessages.exportDialogOK, true);
 		okButton.setEnabled(validFile());
 		createButton(parent, IDialogConstants.CANCEL_ID, SecUIMessages.exportDialogCancel, false);
 	}
 
+	@Override
 	protected Control createContents(Composite parent) {
 		Control contents = super.createContents(parent);
 		setTitle(SecUIMessages.exportDialogTitle);
@@ -73,6 +76,7 @@ public class ExportDialog extends TitleAreaDialog {
 		return contents;
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite compositeTop = (Composite) super.createDialogArea(parent);
 		Composite composite = new Composite(compositeTop, SWT.NONE);
@@ -98,10 +102,12 @@ public class ExportDialog extends TitleAreaDialog {
 		browse.setLayoutData(new GridData(GridData.END, GridData.CENTER, false, false));
 		browse.addSelectionListener(new SelectionListener() {
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				widgetSelected(e);
 			}
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog dialog = new FileDialog(getShell());
 				dialog.setText(SecUIMessages.fileSelectTitle);
@@ -143,6 +149,7 @@ public class ExportDialog extends TitleAreaDialog {
 		return valid;
 	}
 
+	@Override
 	protected void okPressed() {
 		file = fileText.getText();
 

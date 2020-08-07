@@ -47,18 +47,21 @@ public class NewValueDialog extends TitleAreaDialog {
 		this.existingKeys = existingKeys;
 	}
 
+	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		shell.setText(SecUIMessages.generalTitle);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, HELP_ID);
 	}
 
+	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		okButton = createButton(parent, IDialogConstants.OK_ID, SecUIMessages.addValueOK, true);
 		okButton.setEnabled(false);
 		createButton(parent, IDialogConstants.CANCEL_ID, SecUIMessages.addValueCancel, false);
 	}
 
+	@Override
 	protected Control createContents(Composite parent) {
 		Control contents = super.createContents(parent);
 		setTitle(SecUIMessages.addValueTitle);
@@ -68,6 +71,7 @@ public class NewValueDialog extends TitleAreaDialog {
 		return contents;
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite compositeTop = (Composite) super.createDialogArea(parent);
 		Composite composite = new Composite(compositeTop, SWT.NONE);
@@ -111,6 +115,7 @@ public class NewValueDialog extends TitleAreaDialog {
 		return valid;
 	}
 
+	@Override
 	protected void okPressed() {
 		key = keyText.getText();
 		value = valueText.getText();

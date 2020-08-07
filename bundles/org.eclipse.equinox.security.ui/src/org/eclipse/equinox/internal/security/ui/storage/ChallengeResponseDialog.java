@@ -43,22 +43,26 @@ public class ChallengeResponseDialog extends TitleAreaDialog {
 		answers = new Text[this.size];
 	}
 
+	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		shell.setText(SecUIMessages.passwordRecoveryTitle);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, HELP_ID);
 	}
 
+	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		okButton = createButton(parent, IDialogConstants.OK_ID, SecUIMessages.passwordButtonOK, true);
 		okButton.setEnabled(false);
 		createButton(parent, IDialogConstants.CANCEL_ID, SecUIMessages.passwordButtonCancel, false);
 	}
 
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite compositeTop = (Composite) super.createDialogArea(parent);
 		setTitle(SecUIMessages.passwordRecoveryTitleMsg);
@@ -121,6 +125,7 @@ public class ChallengeResponseDialog extends TitleAreaDialog {
 		okButton.setEnabled(valid);
 	}
 
+	@Override
 	protected void okPressed() {
 		questionsText = new String[size];
 		answersText = new String[size];

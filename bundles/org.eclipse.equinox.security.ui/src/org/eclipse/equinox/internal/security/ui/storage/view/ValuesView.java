@@ -95,14 +95,17 @@ public class ValuesView {
 
 	class TableContentProvider implements IStructuredContentProvider {
 
+		@Override
 		public void inputChanged(Viewer v, Object oldInput, Object newInput) {
 			selectedNode = (ISecurePreferences) newInput;
 		}
 
+		@Override
 		public void dispose() {
 			// nothing to do
 		}
 
+		@Override
 		public Object[] getElements(Object parent) {
 			if (selectedNode == null)
 				return new Object[0];
@@ -123,6 +126,7 @@ public class ValuesView {
 	}
 
 	class TableLabelProvider extends LabelProvider implements ITableLabelProvider {
+		@Override
 		public String getColumnText(Object obj, int index) {
 			if (obj == null)
 				return null;
@@ -138,14 +142,17 @@ public class ValuesView {
 			}
 		}
 
+		@Override
 		public String getText(Object element) {
 			return getColumnText(element, 0);
 		}
 
+		@Override
 		public Image getColumnImage(Object obj, int index) {
 			return null;
 		}
 
+		@Override
 		public Image getImage(Object obj) {
 			return null;
 		}
@@ -234,6 +241,7 @@ public class ValuesView {
 
 	private void makeActions() {
 		addValueAction = new Action() {
+			@Override
 			public void run() {
 				if (selectedNode == null)
 					return;
@@ -258,6 +266,7 @@ public class ValuesView {
 		addValueAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/value_new.gif")); //$NON-NLS-1$
 
 		removeValueAction = new Action() {
+			@Override
 			public void run() {
 				if (selectedNode == null)
 					return;
@@ -291,6 +300,7 @@ public class ValuesView {
 
 	private void addDevelopmentMenuOptions() {
 		showValueAction = new Action() {
+			@Override
 			public void run() {
 				if (selectedNode == null)
 					return;
@@ -322,6 +332,7 @@ public class ValuesView {
 		showValueAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/value_show.gif")); //$NON-NLS-1$
 
 		encryptValueAction = new Action() {
+			@Override
 			public void run() {
 				reCodeValue(true);
 			}
@@ -331,6 +342,7 @@ public class ValuesView {
 		encryptValueAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/encrypt.gif")); //$NON-NLS-1$
 
 		decryptValueAction = new Action() {
+			@Override
 			public void run() {
 				reCodeValue(false);
 			}

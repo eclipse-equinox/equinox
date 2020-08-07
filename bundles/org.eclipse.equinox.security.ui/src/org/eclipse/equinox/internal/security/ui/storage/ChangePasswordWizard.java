@@ -33,6 +33,7 @@ public class ChangePasswordWizard extends Wizard implements INewWizard {
 			setDescription(SecUIMessages.wizardDecode);
 		}
 
+		@Override
 		public void createControl(Composite parent) {
 			Composite container = new Composite(parent, SWT.NULL);
 			GridLayout layout = new GridLayout();
@@ -45,6 +46,7 @@ public class ChangePasswordWizard extends Wizard implements INewWizard {
 			setControl(container);
 		}
 
+		@Override
 		public IWizardPage getPreviousPage() {
 			return null;
 		}
@@ -57,6 +59,7 @@ public class ChangePasswordWizard extends Wizard implements INewWizard {
 			setDescription(SecUIMessages.wizardEncode);
 		}
 
+		@Override
 		public void createControl(Composite parent) {
 			Composite container = new Composite(parent, SWT.NULL);
 			GridLayout layout = new GridLayout();
@@ -69,6 +72,7 @@ public class ChangePasswordWizard extends Wizard implements INewWizard {
 			setControl(container);
 		}
 
+		@Override
 		public IWizardPage getPreviousPage() {
 			return null;
 		}
@@ -80,6 +84,7 @@ public class ChangePasswordWizard extends Wizard implements INewWizard {
 			setTitle(SecUIMessages.wizardDoneTitle);
 		}
 
+		@Override
 		public void createControl(Composite parent) {
 			Composite container = new Composite(parent, SWT.NULL);
 			GridLayout layout = new GridLayout();
@@ -88,6 +93,7 @@ public class ChangePasswordWizard extends Wizard implements INewWizard {
 			setControl(container);
 		}
 
+		@Override
 		public IWizardPage getPreviousPage() {
 			return null;
 		}
@@ -98,25 +104,30 @@ public class ChangePasswordWizard extends Wizard implements INewWizard {
 		setWindowTitle(SecUIMessages.changePasswordWizardTitle);
 	}
 
+	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		// nothing to do here
 	}
 
+	@Override
 	public void addPages() {
 		addPage(new DecodePage());
 		addPage(new EncodePage());
 		addPage(new DonePage());
 	}
 
+	@Override
 	public boolean canFinish() {
 		ChangePasswordWizardDialog recodeWizard = (ChangePasswordWizardDialog) getContainer();
 		return recodeWizard.isRecodeDone();
 	}
 
+	@Override
 	public boolean performFinish() {
 		return true;
 	}
 
+	@Override
 	public IWizardPage getPreviousPage(IWizardPage page) {
 		return null;
 	}

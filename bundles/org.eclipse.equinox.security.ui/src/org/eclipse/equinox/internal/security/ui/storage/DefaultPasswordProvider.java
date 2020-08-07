@@ -29,6 +29,7 @@ import org.eclipse.ui.PlatformUI;
  */
 public class DefaultPasswordProvider extends PasswordProvider {
 
+	@Override
 	public PBEKeySpec getPassword(IPreferencesContainer container, int passwordType) {
 		if (!StorageUtils.showUI(container))
 			return null;
@@ -56,6 +57,7 @@ public class DefaultPasswordProvider extends PasswordProvider {
 		return result[0];
 	}
 
+	@Override
 	public boolean retryOnError(Exception e, IPreferencesContainer container) {
 		if (!StorageUtils.showUI(container))
 			return false;

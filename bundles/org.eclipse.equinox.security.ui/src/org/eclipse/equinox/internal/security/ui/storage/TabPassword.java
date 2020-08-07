@@ -67,6 +67,7 @@ public class TabPassword {
 		buttonClearPassword.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));
 		buttonClearPassword.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				InternalExchangeUtils.passwordProvidersReset();
 				enableLogout();
@@ -107,10 +108,12 @@ public class TabPassword {
 
 		providerTable.addSelectionListener(new SelectionListener() {
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
 			}
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if ((e.detail & SWT.CHECK) != 0)
 					providerModified = true;
@@ -125,10 +128,12 @@ public class TabPassword {
 		buttonChangePassword.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false));
 		buttonChangePassword.addSelectionListener(new SelectionListener() {
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				widgetSelected(e);
 			}
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				PasswordProviderDescription selectedModule = getSelectedModule();
 				if (selectedModule == null)
@@ -153,10 +158,12 @@ public class TabPassword {
 		buttonRecoverPassword.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false));
 		buttonRecoverPassword.addSelectionListener(new SelectionListener() {
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				widgetSelected(e);
 			}
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				String moduleID = getSelectedModuleID();
 				ISecurePreferences rootNode = SecurePreferencesFactory.getDefault();

@@ -46,6 +46,7 @@ public class UICallbackProvider implements IUICallbacks {
 			return exception;
 		}
 
+		@Override
 		public void run(IProgressMonitor monitor) {
 			monitor.beginTask(SecUIMessages.initializing, IProgressMonitor.UNKNOWN);
 			try {
@@ -57,11 +58,13 @@ public class UICallbackProvider implements IUICallbacks {
 		}
 	}
 
+	@Override
 	public void setupPasswordRecovery(final int size, final String moduleID, final IPreferencesContainer container) {
 		if (!StorageUtils.showUI(container))
 			return;
 
 		UIJob reciverySetupJob = new UIJob(SecUIMessages.pswJobName) {
+			@Override
 			public IStatus runInUIThread(IProgressMonitor monitor) {
 				boolean reply = MessageDialog.openQuestion(StorageUtils.getShell(), SecUIMessages.pswdRecoveryOptionTitle, SecUIMessages.pswdRecoveryOptionMsg);
 				if (!reply)
@@ -78,6 +81,7 @@ public class UICallbackProvider implements IUICallbacks {
 		reciverySetupJob.schedule();
 	}
 
+	@Override
 	public void execute(final IStorageTask callback) throws StorageException {
 		if (!StorageUtils.showUI(null)) {
 			callback.execute();
@@ -106,6 +110,7 @@ public class UICallbackProvider implements IUICallbacks {
 			});
 		} else { // we are running in non-UI thread, use Job to show small progress indicator on the status bar
 			Job job = new Job(SecUIMessages.secureStorageInitialization) {
+				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						callback.execute();
@@ -126,6 +131,7 @@ public class UICallbackProvider implements IUICallbacks {
 			throw exception[0];
 	}
 
+	@Override
 	public Boolean ask(final String msg) {
 		if (!StorageUtils.showUI(null)) // container-independent operation
 			return null;
@@ -138,6 +144,7 @@ public class UICallbackProvider implements IUICallbacks {
 		return result[0];
 	}
 
+	@Override
 	public boolean runningUI() {
 		return StorageUtils.runningUI();
 	}

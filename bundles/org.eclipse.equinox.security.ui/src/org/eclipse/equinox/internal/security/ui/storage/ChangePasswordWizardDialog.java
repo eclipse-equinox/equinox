@@ -42,6 +42,7 @@ public class ChangePasswordWizardDialog extends WizardDialog {
 		return recodeDone;
 	}
 
+	@Override
 	protected void nextPressed() {
 		IWizardPage currentPage = getCurrentPage();
 		if (currentPage instanceof ChangePasswordWizard.DecodePage) { // decrypt

@@ -33,10 +33,12 @@ public class ConfirmationDialog extends TitleAreaDialog {
 		this.cert = cert;
 	}
 
+	@Override
 	protected Control createContents(Composite parent) {
 		return super.createContents(parent);
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		setTitle(SecurityUIMsg.CONFIRMATION_DIALOG_TITLE);
 		setMessage(SecurityUIMsg.CONFIRMATION_DIALOG_MSG);
@@ -50,6 +52,7 @@ public class ConfirmationDialog extends TitleAreaDialog {
 		return composite;
 	}
 
+	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		Button yesBtn = createButton(parent, YES, SecurityUIMsg.CONFIRMATION_DIALGO_YES, true);
 		yesBtn.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {

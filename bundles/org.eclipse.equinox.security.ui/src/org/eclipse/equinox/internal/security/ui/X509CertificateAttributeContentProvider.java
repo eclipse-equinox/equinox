@@ -60,10 +60,12 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 
 	}
 
+	@Override
 	public Object[] getElements(Object inputElement) {
 		return elements.toArray();
 	}
 
+	@Override
 	public void dispose() {
 		// TODO Auto-generated method stub
 
@@ -87,6 +89,7 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 		clear(true);
 	}
 
+	@Override
 	public void inputChanged(Viewer aViewer, Object oldInput, Object newInput) {
 		viewer = aViewer;
 		clear(false); // clear the viewer.

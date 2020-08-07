@@ -46,10 +46,12 @@ public class X509CertificateViewDialog extends TitleAreaDialog {
 		newShell.setText(SecurityUIMsg.CERTVIEW_SHELL_TITLE);
 	}
 
+	@Override
 	protected Control createContents(Composite parent) {
 		return super.createContents(parent);
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		nameHelper.setPrincipal(theCert.getSubjectX500Principal());
 
@@ -198,11 +200,13 @@ public class X509CertificateViewDialog extends TitleAreaDialog {
 		advancedTab.setControl(advTabComposite);
 	}
 
+	@Override
 	protected void setShellStyle(int newShellStyle) {
 
 		super.setShellStyle(newShellStyle | SWT.RESIZE | SWT.DIALOG_TRIM);
 	}
 
+	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// The default has only a "Close" button, but it returns the CANCEL Id
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);

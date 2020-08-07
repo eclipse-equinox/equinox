@@ -43,22 +43,26 @@ public class PasswordRecoveryDialog extends TitleAreaDialog {
 		answers = new Text[questionsText.length];
 	}
 
+	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		shell.setText(SecUIMessages.pswdRecoveryTitle);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, HELP_ID);
 	}
 
+	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		okButton = createButton(parent, IDialogConstants.OK_ID, SecUIMessages.pswRecoveryButtonOK, true);
 		okButton.setEnabled(false);
 		createButton(parent, IDialogConstants.CANCEL_ID, SecUIMessages.pswRecoveryButtonCancel, false);
 	}
 
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite compositeTop = (Composite) super.createDialogArea(parent);
 		Composite composite = new Composite(compositeTop, SWT.NONE);
@@ -102,6 +106,7 @@ public class PasswordRecoveryDialog extends TitleAreaDialog {
 		okButton.setEnabled(valid);
 	}
 
+	@Override
 	protected void okPressed() {
 		answersText = new String[questionsText.length];
 		for (int i = 0; i < questionsText.length; i++) {

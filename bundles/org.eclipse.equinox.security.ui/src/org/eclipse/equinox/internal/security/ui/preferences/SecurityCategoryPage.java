@@ -32,10 +32,12 @@ public class SecurityCategoryPage extends PreferencePage implements IWorkbenchPr
 		//empty
 	}
 
+	@Override
 	public void init(IWorkbench workbench) {
 		this.noDefaultAndApplyButton();
 	}
 
+	@Override
 	protected Control createContents(Composite parent) {
 		Composite pageArea = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();

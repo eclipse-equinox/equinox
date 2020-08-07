@@ -38,16 +38,12 @@ public class CertificateImportWizard extends Wizard implements IImportWizard {
 		super();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IWorkbenchWizard#init(org.eclipse.ui.IWorkbench, org.eclipse.jface.viewers.IStructuredSelection)
-	 */
+	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		//nothing
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.wizard.IWizard#addPages()
-	 */
+	@Override
 	public void addPages() {
 		//		mainPage = new ImportWizardPage(SecurityUIMsg.IMPORT_FILE); //NON-NLS-1
 		//		addPage(mainPage);
@@ -65,13 +61,12 @@ public class CertificateImportWizard extends Wizard implements IImportWizard {
 		addPage(certConfirmPage);
 	}
 
+	@Override
 	public boolean canFinish() {
 		return getContainer().getCurrentPage() == certConfirmPage;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.wizard.Wizard#performFinish()
-	 */
+	@Override
 	public boolean performFinish() {
 		try {
 			selectTrustEngine.addTrustAnchor(selectCert, aliasName);

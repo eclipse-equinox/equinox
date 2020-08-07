@@ -33,6 +33,7 @@ public class CertificateImportConfirmationPage extends WizardPage {
 		setDescription(SecurityUIMsg.WIZARD_IMPORT_CONFIRMATION_MSG);
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		composite = new Composite(parent, SWT.NONE);
 		setControl(composite);
@@ -48,6 +49,7 @@ public class CertificateImportConfirmationPage extends WizardPage {
 		trustEngineLabel.setText(""); //$NON-NLS-1$
 	}
 
+	@Override
 	public void setVisible(boolean visible) {
 		if (visible) {
 			CertificateImportWizard certImporWiz = (CertificateImportWizard) getWizard();

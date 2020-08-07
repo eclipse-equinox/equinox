@@ -139,6 +139,7 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		buttonSave.setEnabled(modified);
 	}
 
+	@Override
 	public void onDeleted() {
 		if (nodesView != null)
 			nodesView.postDeleted();
@@ -155,16 +156,13 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 			return;
 		File outputFile = new File(fileName);
 
-		PrintStream output;
-		try {
-			output = new PrintStream(new FileOutputStream(outputFile));
+		try (PrintStream output = new PrintStream(new FileOutputStream(outputFile))) {
+			export(root, output);
+			output.flush();
 		} catch (FileNotFoundException e) {
 			Activator.log(IStatus.ERROR, e.getMessage(), null, e);
 			return;
 		}
-		export(root, output);
-		output.flush();
-		output.close();
 	}
 
 	protected void export(ISecurePreferences node, PrintStream stream) {
@@ -178,7 +176,7 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 				try {
 					String data = key + " := " + node.get(key, ""); //$NON-NLS-1$ //$NON-NLS-2$
 					stream.println(data);
-				}catch (StorageException e) {
+				} catch (StorageException e) {
 					Activator.log(IStatus.ERROR, SecUIMessages.failedDecrypt, null, e);
 				}
 			}

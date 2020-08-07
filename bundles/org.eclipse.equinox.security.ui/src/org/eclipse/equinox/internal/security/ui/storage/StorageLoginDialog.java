@@ -69,12 +69,14 @@ public class StorageLoginDialog extends TitleAreaDialog {
 		return generatedPassword;
 	}
 
+	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		okButton = createButton(parent, IDialogConstants.OK_ID, SecUIMessages.buttonLogin, true);
 		okButton.setEnabled(false);
 		createButton(parent, IDialogConstants.CANCEL_ID, SecUIMessages.buttonExit, false);
 	}
 
+	@Override
 	protected IDialogSettings getDialogBoundsSettings() {
 		IDialogSettings settings = Activator.getDefault().getDialogSettings();
 		String settingsID = (confirmPassword) ? DIALOG_SETTINGS_SECTION_NEW : DIALOG_SETTINGS_SECTION_OLD;
@@ -84,16 +86,19 @@ public class StorageLoginDialog extends TitleAreaDialog {
 		return section;
 	}
 
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
 
+	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		shell.setText(SecUIMessages.generalDialogTitle);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, HELP_ID);
 	}
 
+	@Override
 	protected Control createContents(Composite parent) {
 		Control contents = super.createContents(parent);
 		dlgTitleImage = dlgImageDescriptor.createImage();
@@ -101,6 +106,7 @@ public class StorageLoginDialog extends TitleAreaDialog {
 		return contents;
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite compositeTop = (Composite) super.createDialogArea(parent);
 
@@ -130,10 +136,12 @@ public class StorageLoginDialog extends TitleAreaDialog {
 		showPassword = new Button(composite, SWT.CHECK | SWT.RIGHT);
 		showPassword.setText(SecUIMessages.showPassword);
 		showPassword.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				passwordVisibility();
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				passwordVisibility();
 			}
@@ -192,6 +200,7 @@ public class StorageLoginDialog extends TitleAreaDialog {
 		return true;
 	}
 
+	@Override
 	protected void okPressed() {
 		String internalPassword;
 		try {

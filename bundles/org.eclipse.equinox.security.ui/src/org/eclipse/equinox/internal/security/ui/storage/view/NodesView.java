@@ -49,6 +49,7 @@ public class NodesView {
 
 	class ViewContentProvider implements ITreeContentProvider {
 
+		@Override
 		public void inputChanged(Viewer v, Object oldInput, Object newInput) {
 			if (nodeTreeViewer != null) {
 				nodeTreeViewer.setSelection(null);
@@ -56,16 +57,19 @@ public class NodesView {
 			}
 		}
 
+		@Override
 		public void dispose() {
 			// nothing to do
 		}
 
+		@Override
 		public Object[] getElements(Object parent) {
 			if (defaultPrefs.equals(parent))
 				return new Object[] {SecurePreferencesFactory.getDefault()};
 			return new Object[0];
 		}
 
+		@Override
 		public Object getParent(Object child) {
 			if (!(child instanceof ISecurePreferences))
 				return null;
@@ -76,6 +80,7 @@ public class NodesView {
 			return node.parent();
 		}
 
+		@Override
 		public Object[] getChildren(Object parent) {
 			if (!(parent instanceof ISecurePreferences))
 				return new Object[0];
@@ -87,6 +92,7 @@ public class NodesView {
 			return result;
 		}
 
+		@Override
 		public boolean hasChildren(Object parent) {
 			if (!(parent instanceof ISecurePreferences))
 				return false;
@@ -98,6 +104,7 @@ public class NodesView {
 
 	class ViewLabelProvider extends LabelProvider {
 
+		@Override
 		public String getText(Object obj) {
 			if (!(obj instanceof ISecurePreferences))
 				return obj.toString();
@@ -107,6 +114,7 @@ public class NodesView {
 			return node.name();
 		}
 
+		@Override
 		public Image getImage(Object obj) {
 			return null;
 		}
@@ -166,6 +174,7 @@ public class NodesView {
 
 	private void makeActions() {
 		refreshNodesAction = new Action() {
+			@Override
 			public void run() {
 				nodeTreeViewer.refresh();
 			}
@@ -175,6 +184,7 @@ public class NodesView {
 		refreshNodesAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/node_refresh.gif")); //$NON-NLS-1$
 
 		addNodeAction = new Action() {
+			@Override
 			public void run() {
 				TreeSelection selection = (TreeSelection) nodeTreeViewer.getSelection();
 				Object selected = selection.getFirstElement();
@@ -205,6 +215,7 @@ public class NodesView {
 		addNodeAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/node_new.gif")); //$NON-NLS-1$
 
 		removeNodeAction = new Action() {
+			@Override
 			public void run() {
 				TreeSelection selection = (TreeSelection) nodeTreeViewer.getSelection();
 				Object selected = selection.getFirstElement();

@@ -25,6 +25,7 @@ public class SecurityConfigurationSection implements ISystemSummarySection {
 	private static final String ALG_ALIAS = "Alg.Alias."; //$NON-NLS-1$
 	private static final String PROVIDER = "Provider."; //$NON-NLS-1$
 
+	@Override
 	public void write(PrintWriter writer) {
 
 		Provider[] providers = Security.getProviders();

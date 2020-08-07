@@ -35,6 +35,7 @@ public class CertificateImportTrustEngineSelectPage extends WizardPage implement
 		setDescription(SecurityUIMsg.WIZARD_ENGINE_SELECT_MSG);
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		Composite certSelectComposite = new Composite(parent, SWT.NONE);
 		setControl(certSelectComposite);
@@ -81,6 +82,7 @@ public class CertificateImportTrustEngineSelectPage extends WizardPage implement
 		trustEngineCombo.addListener(SWT.Selection, this);
 	}
 
+	@Override
 	public void handleEvent(Event e) {
 		if (e.widget == aliasField) {
 			if (aliasField.getText().length() < 1) {
@@ -102,6 +104,7 @@ public class CertificateImportTrustEngineSelectPage extends WizardPage implement
 		getWizard().getContainer().updateButtons();
 	}
 
+	@Override
 	public boolean canFlipToNextPage() {
 		return (aliasField.getText().length() > 0) && (trustEngineCombo.getSelectionIndex() != -1);
 	}

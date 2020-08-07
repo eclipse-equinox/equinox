@@ -35,18 +35,21 @@ public class NewNodeDialog extends TitleAreaDialog {
 		super(parentShell);
 	}
 
+	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		shell.setText(SecUIMessages.newNodeTitle);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, HELP_ID);
 	}
 
+	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		okButton = createButton(parent, IDialogConstants.OK_ID, SecUIMessages.newNodeOK, true);
 		okButton.setEnabled(false);
 		createButton(parent, IDialogConstants.CANCEL_ID, SecUIMessages.newNodeCancel, false);
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite = (Composite) super.createDialogArea(parent);
 		setMessage(SecUIMessages.newNodeMsg);
@@ -77,6 +80,7 @@ public class NewNodeDialog extends TitleAreaDialog {
 		return valid;
 	}
 
+	@Override
 	protected void okPressed() {
 		name = nodeName.getText();
 		super.okPressed();

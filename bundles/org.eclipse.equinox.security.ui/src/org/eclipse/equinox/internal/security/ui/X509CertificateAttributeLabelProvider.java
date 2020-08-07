@@ -39,11 +39,13 @@ public class X509CertificateAttributeLabelProvider extends LabelProvider impleme
 
 	}
 
+	@Override
 	public Image getColumnImage(Object element, int columnIndex) {
 
 		return null;
 	}
 
+	@Override
 	public String getColumnText(Object element, int columnIndex) {
 		String text = ""; //$NON-NLS-1$
 
