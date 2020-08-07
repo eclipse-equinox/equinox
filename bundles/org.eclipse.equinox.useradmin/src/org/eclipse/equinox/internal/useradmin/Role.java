@@ -43,7 +43,7 @@ public class Role implements org.osgi.service.useradmin.Role {
 
 	protected String name;
 	protected UserAdminHashtable properties;
-	protected Vector impliedRoles;
+	protected Vector<Group> impliedRoles;
 	protected UserAdmin useradmin;
 	protected static final String anyoneString = "user.anyone"; //$NON-NLS-1$
 	protected boolean exists = true;
@@ -56,7 +56,7 @@ public class Role implements org.osgi.service.useradmin.Role {
 		// This is used only to track which Groups this role is directly a member of.
 		// This info is needed so when we delete a Role, we know which groups to remove
 		// it from.
-		impliedRoles = new Vector();
+		impliedRoles = new Vector<>();
 	}
 
 	/**
@@ -65,6 +65,7 @@ public class Role implements org.osgi.service.useradmin.Role {
 	 * @return The role's name.
 	 */
 
+	@Override
 	public String getName() {
 		useradmin.checkAlive();
 		return (name);
@@ -75,6 +76,7 @@ public class Role implements org.osgi.service.useradmin.Role {
 	 *
 	 * @return The role's type.
 	 */
+	@Override
 	public int getType() {
 		useradmin.checkAlive();
 		return (org.osgi.service.useradmin.Role.ROLE);
@@ -98,9 +100,10 @@ public class Role implements org.osgi.service.useradmin.Role {
 	 *
 	 * @return Dictionary containing the properties of this Role.
 	 */
-	public Dictionary getProperties() {
+	@Override
+	public Dictionary<String, Object> getProperties() {
 		useradmin.checkAlive();
-		return (properties);
+		return properties;
 	}
 
 	protected void addImpliedRole(Group group) {
@@ -117,9 +120,9 @@ public class Role implements org.osgi.service.useradmin.Role {
 	//we are being deleted so delete ourselves from all of the groups
 	protected synchronized void destroy() {
 		exists = false;
-		Enumeration e = impliedRoles.elements();
+		Enumeration<Group> e = impliedRoles.elements();
 		while (e.hasMoreElements()) {
-			Group group = (Group) e.nextElement();
+			Group group = e.nextElement();
 			if (group.exists) //so we don't try to remove any groups twice from storage   
 			{
 				group.removeMember(this);
@@ -129,7 +132,7 @@ public class Role implements org.osgi.service.useradmin.Role {
 		impliedRoles = null;
 	}
 
-	protected boolean isImpliedBy(Role role, Vector checkLoop) { //Roles do not imply themselves
+	protected boolean isImpliedBy(Role role, Vector<String> checkLoop) { //Roles do not imply themselves
 		//The user.anyone role is always implied
 		if (checkLoop.contains(name)) {
 			//we have a circular dependency

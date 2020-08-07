@@ -44,6 +44,7 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 	/**
 	 * Required by BundleActivator Interface.
 	 */
+	@Override
 	public void start(BundleContext context_) throws Exception {
 		this.context = context_;
 		prefsTracker = new ServiceTracker(context, PreferencesService.class.getName(), this);
@@ -68,6 +69,7 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 	/**
 	 * Required by BundleActivator Interface.
 	 */
+	@Override
 	public void stop(BundleContext context_) throws Exception {
 		if (eventAdapter != null) {
 			eventAdapter.stop();
@@ -78,15 +80,18 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 		unregisterUserAdminService();
 	}
 
+	@Override
 	public Object getService(Bundle bundle, ServiceRegistration registration_) {
 		userAdmin.setServiceReference(registration_.getReference());
 		return userAdmin;
 	}
 
+	@Override
 	public void ungetService(Bundle bundle, ServiceRegistration registration_, Object service) {
 		//do nothing
 	}
 
+	@Override
 	public Object addingService(ServiceReference reference) {
 		if (prefs == null) {
 			prefs = (PreferencesService) context.getService(reference);
@@ -100,10 +105,12 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 		return null; //we don't want to track a service we are not using
 	}
 
+	@Override
 	public void modifiedService(ServiceReference reference, Object service) {
 		// do nothing
 	}
 
+	@Override
 	public void removedService(ServiceReference reference, Object service) {
 		if (service == prefs) {
 			prefs = null;
@@ -116,7 +123,7 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 	 * Register the UserAdmin service.
 	 */
 	protected void registerUserAdminService() throws Exception {
-		Hashtable properties = new Hashtable(7);
+		Hashtable<String, String> properties = new Hashtable<>(7);
 
 		properties.put(Constants.SERVICE_VENDOR, UserAdminMsg.Service_Vendor);
 		properties.put(Constants.SERVICE_DESCRIPTION, UserAdminMsg.OSGi_User_Admin_service_IBM_Implementation_3);

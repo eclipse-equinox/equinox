@@ -87,14 +87,14 @@ import org.osgi.service.prefs.BackingStoreException;
 
 public class Group extends User implements org.osgi.service.useradmin.Group {
 
-	protected Vector requiredMembers;
-	protected Vector basicMembers;
+	protected Vector<org.osgi.service.useradmin.Role> requiredMembers;
+	protected Vector<org.osgi.service.useradmin.Role> basicMembers;
 
 	protected Group(String name, UserAdmin useradmin) {
 		super(name, useradmin);
 		this.useradmin = useradmin;
-		basicMembers = new Vector();
-		requiredMembers = new Vector();
+		basicMembers = new Vector<>();
+		requiredMembers = new Vector<>();
 	}
 
 	/**
@@ -110,6 +110,7 @@ public class Group extends User implements org.osgi.service.useradmin.Group {
 	 * @throws SecurityException If a security manager exists and the caller
 	 * does not have the <tt>UserAdminPermission</tt> with name <tt>admin</tt>.
 	 */
+	@Override
 	public boolean addMember(org.osgi.service.useradmin.Role role) {
 		useradmin.checkAlive();
 		useradmin.checkAdminPermission();
@@ -152,6 +153,7 @@ public class Group extends User implements org.osgi.service.useradmin.Group {
 	 * @throws SecurityException If a security manager exists and the caller
 	 * does not have the <tt>UserAdminPermission</tt> with name <tt>admin</tt>.
 	 */
+	@Override
 	public boolean addRequiredMember(org.osgi.service.useradmin.Role role) {
 		useradmin.checkAlive();
 		useradmin.checkAdminPermission();
@@ -190,6 +192,7 @@ public class Group extends User implements org.osgi.service.useradmin.Group {
 	 * @throws SecurityException If a security manager exists and the caller
 	 * does not have the <tt>UserAdminPermission</tt> with name <tt>admin</tt>.
 	 */
+	@Override
 	public boolean removeMember(org.osgi.service.useradmin.Role role) {
 		useradmin.checkAlive();
 		useradmin.checkAdminPermission();
@@ -221,6 +224,7 @@ public class Group extends User implements org.osgi.service.useradmin.Group {
 	 * @return The basic members of this Group, or <code>null</code> if this
 	 * Group does not contain any basic members.
 	 */
+	@Override
 	public org.osgi.service.useradmin.Role[] getMembers() {
 		useradmin.checkAlive();
 		synchronized (useradmin) {
@@ -239,6 +243,7 @@ public class Group extends User implements org.osgi.service.useradmin.Group {
 	 * @return The required members of this Group, or <code>null</code> if this
 	 * Group does not contain any required members.
 	 */
+	@Override
 	public org.osgi.service.useradmin.Role[] getRequiredMembers() {
 		useradmin.checkAlive();
 		synchronized (useradmin) {
@@ -256,12 +261,15 @@ public class Group extends User implements org.osgi.service.useradmin.Group {
 	 *
 	 * @return The role's type.
 	 */
+	@Override
 	public int getType() {
 		useradmin.checkAlive();
-		return (org.osgi.service.useradmin.Role.GROUP);
+		return org.osgi.service.useradmin.Role.GROUP;
 	}
 
-	protected boolean isImpliedBy(Role role, Vector checkLoop) {
+	@Override
+	@SuppressWarnings("unchecked")
+	protected boolean isImpliedBy(Role role, Vector<String> checkLoop) {
 		if (checkLoop.contains(name)) {
 			//we have a circular dependency
 			return (false);
@@ -271,9 +279,9 @@ public class Group extends User implements org.osgi.service.useradmin.Group {
 			return (true);
 		}
 		checkLoop.addElement(name);
-		Vector requiredCheckLoop = (Vector) checkLoop.clone();
-		Vector basicCheckLoop = (Vector) checkLoop.clone();
-		Enumeration e = requiredMembers.elements();
+		Vector<String> requiredCheckLoop = (Vector<String>) checkLoop.clone();
+		Vector<String> basicCheckLoop = (Vector<String>) checkLoop.clone();
+		Enumeration<org.osgi.service.useradmin.Role> e = requiredMembers.elements();
 
 		//check to see if we imply all of the 0 or more required roles
 		Role requiredRole;
@@ -292,7 +300,7 @@ public class Group extends User implements org.osgi.service.useradmin.Group {
 				return (true);
 			}
 		}
-		return (false);
+		return false;
 	}
 
 }

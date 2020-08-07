@@ -46,8 +46,8 @@ import org.osgi.service.useradmin.UserAdminPermission;
 
 public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 
-	protected Vector users;
-	protected Vector roles;
+	protected Vector<Role> users;
+	protected Vector<Role> roles;
 	protected BundleContext context;
 	protected UserAdminEventProducer eventProducer;
 	protected boolean alive;
@@ -57,8 +57,8 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 	protected LogTracker log;
 
 	protected UserAdmin(PreferencesService preferencesService, BundleContext context) throws Exception {
-		roles = new Vector();
-		users = new Vector();
+		roles = new Vector<>();
+		users = new Vector<>();
 		this.context = context;
 
 		log = new LogTracker(context, System.out);
@@ -100,6 +100,7 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 	 * @throws SecurityException If a security manager exists and the caller
 	 * does not have the <tt>UserAdminPermission</tt> with name <tt>admin</tt>.
 	 */
+	@Override
 	public org.osgi.service.useradmin.Role createRole(String name, int type) {
 		checkAlive();
 		checkAdminPermission();
@@ -163,6 +164,7 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 	 * @throws SecurityException If a security manager exists and the caller
 	 * does not have the <tt>UserAdminPermission</tt> with name <tt>admin</tt>.
 	 */
+	@Override
 	public boolean removeRole(String name) {
 		checkAlive();
 		checkAdminPermission();
@@ -197,15 +199,16 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 	 * @return The requested role, or <code>null</code> if this UserAdmin does
 	 * not have a role with the given name.
 	 */
+	@Override
 	public org.osgi.service.useradmin.Role getRole(String name) {
 		checkAlive();
 		if (name == null) {
 			return (null);
 		}
 		synchronized (this) {
-			Enumeration e = roles.elements();
+			Enumeration<Role> e = roles.elements();
 			while (e.hasMoreElements()) {
-				Role role = (Role) e.nextElement();
+				Role role = e.nextElement();
 				if (role.getName().equals(name)) {
 					return (role);
 				}
@@ -228,9 +231,10 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 	 * <code>null</code> filter is specified.
 	 *
 	 */
+	@Override
 	public org.osgi.service.useradmin.Role[] getRoles(String filterString) throws InvalidSyntaxException {
 		checkAlive();
-		Vector returnedRoles;
+		Vector<Role> returnedRoles;
 		synchronized (this) {
 			if (filterString == null) {
 				returnedRoles = roles;
@@ -239,9 +243,9 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 				//InvalidSyntaxException will be
 				//thrown even if there are no roles
 				//present.
-				returnedRoles = new Vector();
+				returnedRoles = new Vector<>();
 				for (int i = 0; i < roles.size(); i++) {
-					Role role = (Role) roles.elementAt(i);
+					Role role = roles.elementAt(i);
 					if (filter.match(role.getProperties())) {
 						returnedRoles.addElement(role);
 					}
@@ -270,6 +274,7 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 	 * @return A matching user, if <em>exactly</em> one is found. If zero or
 	 * more than one matching users are found, <code>null</code> is returned.
 	 */
+	@Override
 	public org.osgi.service.useradmin.User getUser(String key, String value) {
 		checkAlive();
 		if (key == null) {
@@ -277,10 +282,10 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 		}
 		User user;
 		User foundUser = null;
-		Dictionary props;
+		Dictionary<String, Object> props;
 		String keyValue;
 		synchronized (this) {
-			Enumeration e = users.elements();
+			Enumeration<Role> e = users.elements();
 			while (e.hasMoreElements()) {
 				user = (User) e.nextElement();
 				props = user.getProperties();
@@ -306,6 +311,7 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 	 *
 	 * @return the Authorization object for the specified user.
 	 */
+	@Override
 	public org.osgi.service.useradmin.Authorization getAuthorization(org.osgi.service.useradmin.User user) {
 		checkAlive();
 		return (new Authorization((User) user, this));

@@ -32,7 +32,7 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 	static protected final String userAdminListenerClass = "org.osgi.service.useradmin.UserAdminListener"; //$NON-NLS-1$
 	protected LogTracker log;
 	/** List of UserAdminListeners */
-	protected EventListeners listeners;
+	protected CopyOnWriteIdentityMap listeners;
 	/** EventManager for event delivery. */
 	protected EventManager eventManager;
 
@@ -43,14 +43,15 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 		ThreadGroup eventGroup = new ThreadGroup("Equinox User Admin"); //$NON-NLS-1$
 		eventGroup.setDaemon(true);
 		eventManager = new EventManager("UserAdmin Event Dispatcher", eventGroup); //$NON-NLS-1$
-		listeners = new EventListeners();
+		listeners = new CopyOnWriteIdentityMap<>();
 
 		open();
 	}
 
+	@Override
 	public void close() {
 		super.close();
-		listeners.removeAllListeners();
+		listeners.clear();
 		eventManager.close();
 		userAdmin = null;
 	}
@@ -63,7 +64,7 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 			ListenerQueue queue = new ListenerQueue(eventManager);
 
 			/* add set of UserAdminListeners to queue */
-			queue.queueListeners(listeners, this);
+			queue.queueListeners(listeners.entrySet(), this);
 
 			/* dispatch event to set of listeners */
 			queue.dispatchEventAsynchronous(0, event);
@@ -86,10 +87,11 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 	 * <tt>ServiceReference</tt> object or <tt>null</tt> if the <tt>ServiceReference</tt> object should not
 	 * be tracked.
 	 */
+	@Override
 	public Object addingService(ServiceReference reference) {
 		Object service = super.addingService(reference);
 
-		listeners.addListener(service, service);
+		listeners.put(service, service);
 
 		return service;
 	}
@@ -103,8 +105,9 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 	 * @param reference Reference to service that has been removed.
 	 * @param service The service object for the removed service.
 	 */
+	@Override
 	public void removedService(ServiceReference reference, Object service) {
-		listeners.removeListener(service);
+		listeners.remove(service);
 
 		super.removedService(reference, service);
 	}
@@ -129,6 +132,7 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 	 * as what event object to pass) so that this method
 	 * can complete the delivery of the event to the listener.
 	 */
+	@Override
 	public void dispatchEvent(Object listener, Object listenerObject, int eventAction, Object eventObject) {
 		if (userAdmin == null) {
 			return;

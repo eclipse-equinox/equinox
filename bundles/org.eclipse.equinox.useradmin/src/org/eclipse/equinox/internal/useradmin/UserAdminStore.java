@@ -51,13 +51,10 @@ public class UserAdminStore {
 
 	protected void init() throws BackingStoreException {
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction() {
-
-				public Object run() throws BackingStoreException {
-					rootNode = preferencesService.getUserPreferences(persistenceUserName);
-					loadRoles();
-					return (null);
-				}
+			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
+				rootNode = preferencesService.getUserPreferences(persistenceUserName);
+				loadRoles();
+				return (null);
 			});
 		} catch (PrivilegedActionException ex) {
 
@@ -67,13 +64,11 @@ public class UserAdminStore {
 
 	protected void addRole(final org.osgi.service.useradmin.Role role) throws BackingStoreException {
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws BackingStoreException {
-					Preferences node = rootNode.node(role.getName());
-					node.putInt(typeString, role.getType());
-					node.flush();
-					return (null);
-				}
+			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
+				Preferences node = rootNode.node(role.getName());
+				node.putInt(typeString, role.getType());
+				node.flush();
+				return (null);
 			});
 		} catch (PrivilegedActionException ex) {
 			log.log(LogService.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
@@ -83,13 +78,11 @@ public class UserAdminStore {
 
 	protected void removeRole(final org.osgi.service.useradmin.Role role) throws BackingStoreException {
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws BackingStoreException {
-					Preferences node = rootNode.node(role.getName());
-					node.removeNode();
-					rootNode.node("").flush(); //$NON-NLS-1$
-					return (null);
-				}
+			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
+				Preferences node = rootNode.node(role.getName());
+				node.removeNode();
+				rootNode.node("").flush(); //$NON-NLS-1$
+				return (null);
 			});
 		} catch (PrivilegedActionException ex) {
 			log.log(LogService.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
@@ -99,15 +92,13 @@ public class UserAdminStore {
 
 	protected void clearProperties(final org.osgi.service.useradmin.Role role) throws BackingStoreException {
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws BackingStoreException {
-					Preferences propertyNode = rootNode.node(role.getName() + "/" + propertiesNode); //$NON-NLS-1$
-					propertyNode.clear();
-					if (propertyNode.nodeExists(typesNode))
-						propertyNode.node(typesNode).removeNode();
-					propertyNode.flush();
-					return (null);
-				}
+			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
+				Preferences propertyNode = rootNode.node(role.getName() + "/" + propertiesNode); //$NON-NLS-1$
+				propertyNode.clear();
+				if (propertyNode.nodeExists(typesNode))
+					propertyNode.node(typesNode).removeNode();
+				propertyNode.flush();
+				return (null);
 			});
 		} catch (PrivilegedActionException ex) {
 			log.log(LogService.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
@@ -117,21 +108,19 @@ public class UserAdminStore {
 
 	protected void addProperty(final org.osgi.service.useradmin.Role role, final String key, final Object value) throws BackingStoreException {
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws BackingStoreException {
-					Preferences propertyNode = rootNode.node(role.getName() + "/" + propertiesNode); //$NON-NLS-1$
-					Preferences propertyTypesNode = propertyNode.node(typesNode);
-					if (value instanceof String) {
-						propertyNode.put(key, (String) value);
-						propertyTypesNode.putBoolean(key, true);
-					} else //must be a byte array, then
-					{
-						propertyNode.putByteArray(key, (byte[]) value);
-						propertyTypesNode.putBoolean(key, false);
-					}
-					propertyNode.flush();
-					return (null);
+			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
+				Preferences propertyNode = rootNode.node(role.getName() + "/" + propertiesNode); //$NON-NLS-1$
+				Preferences propertyTypesNode = propertyNode.node(typesNode);
+				if (value instanceof String) {
+					propertyNode.put(key, (String) value);
+					propertyTypesNode.putBoolean(key, true);
+				} else //must be a byte array, then
+				{
+					propertyNode.putByteArray(key, (byte[]) value);
+					propertyTypesNode.putBoolean(key, false);
 				}
+				propertyNode.flush();
+				return (null);
 			});
 		} catch (PrivilegedActionException ex) {
 			log.log(LogService.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
@@ -141,15 +130,13 @@ public class UserAdminStore {
 
 	protected void removeProperty(final org.osgi.service.useradmin.Role role, final String key) throws BackingStoreException {
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws BackingStoreException {
-					Preferences propertyNode = rootNode.node(role.getName() + "/" + propertiesNode); //$NON-NLS-1$
-					propertyNode.remove(key);
-					if (propertyNode.nodeExists(typesNode))
-						propertyNode.node(typesNode).remove(key);
-					propertyNode.flush();
-					return (null);
-				}
+			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
+				Preferences propertyNode = rootNode.node(role.getName() + "/" + propertiesNode); //$NON-NLS-1$
+				propertyNode.remove(key);
+				if (propertyNode.nodeExists(typesNode))
+					propertyNode.node(typesNode).remove(key);
+				propertyNode.flush();
+				return (null);
 			});
 		} catch (PrivilegedActionException ex) {
 			log.log(LogService.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
@@ -159,15 +146,13 @@ public class UserAdminStore {
 
 	protected void clearCredentials(final org.osgi.service.useradmin.Role role) throws BackingStoreException {
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws BackingStoreException {
-					Preferences credentialNode = rootNode.node(role.getName() + "/" + credentialsNode); //$NON-NLS-1$
-					credentialNode.clear();
-					if (credentialNode.nodeExists(typesNode))
-						credentialNode.node(typesNode).removeNode();
-					credentialNode.flush();
-					return (null);
-				}
+			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
+				Preferences credentialNode = rootNode.node(role.getName() + "/" + credentialsNode); //$NON-NLS-1$
+				credentialNode.clear();
+				if (credentialNode.nodeExists(typesNode))
+					credentialNode.node(typesNode).removeNode();
+				credentialNode.flush();
+				return (null);
 			});
 		} catch (PrivilegedActionException ex) {
 			log.log(LogService.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
@@ -178,21 +163,19 @@ public class UserAdminStore {
 	protected void addCredential(final org.osgi.service.useradmin.Role role, final String key, final Object value) throws BackingStoreException {
 
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws BackingStoreException {
-					Preferences credentialNode = rootNode.node(role.getName() + "/" + credentialsNode); //$NON-NLS-1$
-					Preferences credentialTypesNode = credentialNode.node(typesNode);
-					if (value instanceof String) {
-						credentialNode.put(key, (String) value);
-						credentialTypesNode.putBoolean(key, true);
-					} else //assume it is a byte array
-					{
-						credentialNode.putByteArray(key, (byte[]) value);
-						credentialTypesNode.putBoolean(key, false);
-					}
-					credentialNode.flush();
-					return (null);
+			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
+				Preferences credentialNode = rootNode.node(role.getName() + "/" + credentialsNode); //$NON-NLS-1$
+				Preferences credentialTypesNode = credentialNode.node(typesNode);
+				if (value instanceof String) {
+					credentialNode.put(key, (String) value);
+					credentialTypesNode.putBoolean(key, true);
+				} else //assume it is a byte array
+				{
+					credentialNode.putByteArray(key, (byte[]) value);
+					credentialTypesNode.putBoolean(key, false);
 				}
+				credentialNode.flush();
+				return (null);
 			});
 		} catch (PrivilegedActionException ex) {
 			log.log(LogService.LOG_ERROR, NLS.bind(UserAdminMsg.Backing_Store_Write_Exception, new Object[] {NLS.bind(UserAdminMsg.adding_Credential_to__15, role.getName())}), ex);
@@ -203,15 +186,13 @@ public class UserAdminStore {
 
 	protected void removeCredential(final org.osgi.service.useradmin.Role role, final String key) throws BackingStoreException {
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws BackingStoreException {
-					Preferences credentialNode = rootNode.node(role.getName() + "/" + credentialsNode); //$NON-NLS-1$
-					credentialNode.remove(key);
-					if (credentialNode.nodeExists(typesNode))
-						credentialNode.node(typesNode).remove(key);
-					credentialNode.flush();
-					return (null);
-				}
+			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
+				Preferences credentialNode = rootNode.node(role.getName() + "/" + credentialsNode); //$NON-NLS-1$
+				credentialNode.remove(key);
+				if (credentialNode.nodeExists(typesNode))
+					credentialNode.node(typesNode).remove(key);
+				credentialNode.flush();
+				return (null);
 			});
 		} catch (PrivilegedActionException ex) {
 			log.log(LogService.LOG_ERROR, UserAdminMsg.Backing_Store_Write_Exception, ex);
@@ -221,13 +202,11 @@ public class UserAdminStore {
 
 	protected void addMember(final Group group, final Role role) throws BackingStoreException {
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws BackingStoreException {
-					Preferences memberNode = rootNode.node(group.getName() + "/" + membersNode); //$NON-NLS-1$
-					memberNode.put(role.getName(), basicString);
-					memberNode.flush();
-					return (null);
-				}
+			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
+				Preferences memberNode = rootNode.node(group.getName() + "/" + membersNode); //$NON-NLS-1$
+				memberNode.put(role.getName(), basicString);
+				memberNode.flush();
+				return (null);
 			});
 		} catch (PrivilegedActionException ex) {
 			log.log(LogService.LOG_ERROR, NLS.bind(UserAdminMsg.Backing_Store_Write_Exception, new Object[] {NLS.bind(UserAdminMsg.adding_member__18, role.getName(), group.getName())}), ex);
@@ -237,13 +216,11 @@ public class UserAdminStore {
 
 	protected void addRequiredMember(final Group group, final Role role) throws BackingStoreException {
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws BackingStoreException {
-					Preferences memberNode = rootNode.node(group.getName() + "/" + membersNode); //$NON-NLS-1$
-					memberNode.put(role.getName(), requiredString);
-					memberNode.flush();
-					return (null);
-				}
+			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
+				Preferences memberNode = rootNode.node(group.getName() + "/" + membersNode); //$NON-NLS-1$
+				memberNode.put(role.getName(), requiredString);
+				memberNode.flush();
+				return (null);
 			});
 		} catch (PrivilegedActionException ex) {
 			log.log(LogService.LOG_ERROR, NLS.bind(UserAdminMsg.Backing_Store_Write_Exception, new Object[] {NLS.bind(UserAdminMsg.adding_required_member__21, role.getName(), group.getName())}), ex);
@@ -253,13 +230,11 @@ public class UserAdminStore {
 
 	protected void removeMember(final Group group, final Role role) throws BackingStoreException {
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws BackingStoreException {
-					Preferences memberNode = rootNode.node(group.getName() + "/" + membersNode); //$NON-NLS-1$
-					memberNode.remove(role.getName());
-					memberNode.flush();
-					return (null);
-				}
+			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
+				Preferences memberNode = rootNode.node(group.getName() + "/" + membersNode); //$NON-NLS-1$
+				memberNode.remove(role.getName());
+				memberNode.flush();
+				return (null);
 			});
 		} catch (PrivilegedActionException ex) {
 			log.log(LogService.LOG_ERROR, NLS.bind(UserAdminMsg.Backing_Store_Write_Exception, new Object[] {NLS.bind(UserAdminMsg.removing_member__24, role.getName(), group.getName())}), ex);

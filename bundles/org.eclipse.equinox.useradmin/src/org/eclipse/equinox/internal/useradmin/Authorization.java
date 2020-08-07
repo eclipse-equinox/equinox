@@ -82,6 +82,7 @@ public class Authorization implements org.osgi.service.useradmin.Authorization {
 	 * context was created for, or <code>null</code> if no user was specified
 	 * when this Authorization context was created.
 	 */
+	@Override
 	public String getName() {
 		useradmin.checkAlive();
 		return (name);
@@ -102,6 +103,7 @@ public class Authorization implements org.osgi.service.useradmin.Authorization {
 	 * @return <code>true</code> if this Authorization context implies the
 	 * specified role, otherwise <code>false</code>.
 	 */
+	@Override
 	public boolean hasRole(String name_) {
 		useradmin.checkAlive();
 		synchronized (useradmin) {
@@ -109,7 +111,7 @@ public class Authorization implements org.osgi.service.useradmin.Authorization {
 			if (checkRole == null) {
 				return (false);
 			}
-			return (checkRole.isImpliedBy(user, new Vector()));
+			return checkRole.isImpliedBy(user, new Vector<>());
 		}
 	}
 
@@ -119,6 +121,7 @@ public class Authorization implements org.osgi.service.useradmin.Authorization {
 	 * @return The names of all roles encapsulated by this Authorization 
 	 * context, or <code>null</code> if no roles are in the context.
 	 */
+	@Override
 	public String[] getRoles() {
 		useradmin.checkAlive();
 
@@ -127,10 +130,10 @@ public class Authorization implements org.osgi.service.useradmin.Authorization {
 		synchronized (useradmin) //we don't want anything changing while we get the list
 		{
 			int length = useradmin.roles.size();
-			Vector result = new Vector(length);
+			Vector<String> result = new Vector<>(length);
 			for (int i = 0; i < length; i++) {
-				Role role = (Role) useradmin.roles.elementAt(i);
-				if (role.isImpliedBy(user, new Vector())) {
+				Role role = useradmin.roles.elementAt(i);
+				if (role.isImpliedBy(user, new Vector<>())) {
 					String roleName = role.getName();
 					//exclude user.anyone from the list
 					if (!roleName.equals(Role.anyoneString)) {
@@ -144,7 +147,7 @@ public class Authorization implements org.osgi.service.useradmin.Authorization {
 			}
 			String[] copyrole = new String[size];
 			result.copyInto(copyrole);
-			return (copyrole);
+			return copyrole;
 		}
 	}
 }

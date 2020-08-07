@@ -19,8 +19,9 @@ import java.util.Hashtable;
 import org.osgi.framework.*;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-import org.osgi.service.useradmin.*;
 import org.osgi.service.useradmin.Role;
+import org.osgi.service.useradmin.UserAdminEvent;
+import org.osgi.service.useradmin.UserAdminListener;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class UserAdminEventAdapter implements UserAdminListener {
@@ -51,10 +52,10 @@ public class UserAdminEventAdapter implements UserAdminListener {
 	}
 
 	public void start() throws Exception {
-		Hashtable props = new Hashtable(3);
-		userAdminRegistration = context.registerService(UserAdminListener.class.getName(), this, props);
+		Hashtable<String, ?> props = new Hashtable<>(3);
+		userAdminRegistration = context.registerService(UserAdminListener.class, this, props);
 
-		eventAdminTracker = new ServiceTracker(context, EventAdmin.class.getName(), null);
+		eventAdminTracker = new ServiceTracker<>(context, EventAdmin.class, null);
 		eventAdminTracker.open();
 	}
 
@@ -71,6 +72,7 @@ public class UserAdminEventAdapter implements UserAdminListener {
 		this.context = null;
 	}
 
+	@Override
 	public void roleChanged(UserAdminEvent event) {
 		ServiceTracker currentTracker = eventAdminTracker;
 		EventAdmin eventAdmin = currentTracker == null ? null : ((EventAdmin) currentTracker.getService());
@@ -90,7 +92,7 @@ public class UserAdminEventAdapter implements UserAdminListener {
 					return;
 			}
 			String topic = TOPIC + TOPIC_SEPARATOR + typename;
-			Hashtable properties = new Hashtable();
+			Hashtable<String, Object> properties = new Hashtable<>();
 			ServiceReference ref = event.getServiceReference();
 			if (ref == null) {
 				throw new RuntimeException("UserAdminEvent's getServiceReference() returns null."); //$NON-NLS-1$
@@ -103,15 +105,15 @@ public class UserAdminEventAdapter implements UserAdminListener {
 			if (role != null) {
 				properties.put(ROLE, role);
 				properties.put(ROLE_NAME, role.getName());
-				properties.put(ROLE_TYPE, new Integer(role.getType()));
+				properties.put(ROLE_TYPE, Integer.valueOf(role.getType()));
 			}
 			properties.put(EVENT, event);
-			Event convertedEvent = new Event(topic, (Dictionary) properties);
+			Event convertedEvent = new Event(topic, (Dictionary<String, ?>) properties);
 			eventAdmin.postEvent(convertedEvent);
 		}
 	}
 
-	public void putServiceReferenceProperties(Hashtable properties, ServiceReference ref) {
+	public void putServiceReferenceProperties(Hashtable<String, Object> properties, ServiceReference ref) {
 		properties.put(SERVICE, ref);
 		properties.put(SERVICE_ID, ref.getProperty(org.osgi.framework.Constants.SERVICE_ID));
 		Object o = ref.getProperty(org.osgi.framework.Constants.SERVICE_PID);

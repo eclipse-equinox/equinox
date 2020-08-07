@@ -23,7 +23,7 @@ import org.osgi.service.useradmin.UserAdminEvent;
  *  and User credentials.
  */
 
-public class UserAdminHashtable extends Hashtable {
+public class UserAdminHashtable extends Hashtable<String, Object> {
 
 	/**
 	 * 
@@ -72,16 +72,11 @@ public class UserAdminHashtable extends Hashtable {
 		return retVal;
 	}
 
-	public Object put(Object key, Object value) {
-		if (!(key instanceof String)) {
-			throw new IllegalArgumentException(UserAdminMsg.INVALID_KEY_EXCEPTION);
-		}
-
+	@Override
+	public Object put(String name, Object value) {
 		if (!((value instanceof String) || (value instanceof byte[]))) {
 			throw new IllegalArgumentException(UserAdminMsg.INVALID_VALUE_EXCEPTION);
 		}
-
-		String name = (String) key;
 
 		switch (propertyType) {
 			case PROPERTIES :
@@ -95,6 +90,7 @@ public class UserAdminHashtable extends Hashtable {
 		return put(name, value, true);
 	}
 
+	@Override
 	public synchronized Object remove(Object key) {
 		if (!(key instanceof String)) {
 			throw new IllegalArgumentException(UserAdminMsg.INVALID_KEY_EXCEPTION);
@@ -126,11 +122,12 @@ public class UserAdminHashtable extends Hashtable {
 		return super.remove(name);
 	}
 
+	@Override
 	public synchronized void clear() {
-		Enumeration e = keys();
+		Enumeration<String> e = keys();
 
 		while (e.hasMoreElements()) {
-			String name = (String) e.nextElement();
+			String name = e.nextElement();
 
 			switch (propertyType) {
 				case PROPERTIES :
@@ -164,6 +161,7 @@ public class UserAdminHashtable extends Hashtable {
 		super.clear();
 	}
 
+	@Override
 	public Object get(Object key) {
 		if (!(key instanceof String)) {
 			throw new IllegalArgumentException(UserAdminMsg.INVALID_KEY_EXCEPTION);

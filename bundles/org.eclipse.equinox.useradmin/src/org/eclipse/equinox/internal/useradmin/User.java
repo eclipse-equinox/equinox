@@ -71,9 +71,10 @@ public class User extends Role implements org.osgi.service.useradmin.User {
 	 * @return Dictionary containing the credentials of this User.
 	 */
 
-	public Dictionary getCredentials() {
+	@Override
+	public Dictionary<String, Object> getCredentials() {
 		useradmin.checkAlive();
-		return (credentials);
+		return credentials;
 	}
 
 	/**
@@ -94,6 +95,7 @@ public class User extends Role implements org.osgi.service.useradmin.User {
 	 * does not have the <tt>UserAdminPermission</tt> named after the credential
 	 * key (or a prefix of it) with action <code>getCredential</code>.
 	 */
+	@Override
 	public boolean hasCredential(String key, Object value) {
 		useradmin.checkAlive();
 		Object checkValue = credentials.get(key);
@@ -127,13 +129,15 @@ public class User extends Role implements org.osgi.service.useradmin.User {
 	 *
 	 * @return The role's type.
 	 */
+	@Override
 	public int getType() {
 		useradmin.checkAlive();
 		return org.osgi.service.useradmin.Role.USER;
 	}
 
 	//A user always implies itself
-	protected boolean isImpliedBy(Role role, Vector checkLoop) {
+	@Override
+	protected boolean isImpliedBy(Role role, Vector<String> checkLoop) {
 		if (checkLoop.contains(name)) {
 			//we have a circular dependency
 			return (false);
