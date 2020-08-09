@@ -10,7 +10,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Christoph Läubrich - join with IProgressMonitorWithBlocking
+ *     Christoph Laeubrich - join with IProgressMonitorWithBlocking, add null aware helper methods
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -206,5 +206,32 @@ public interface IProgressMonitor {
 	 */
 	public default void clearBlocked() {
 		//default implementation does nothing
+	}
+
+	/**
+	 * Calls {@link #done()} on the given monitor if is non-null. If the given monitor is null,
+	 * this is a no-op.
+	 * @param monitor the monitor to make done, might be <code>null</code>
+	 * @since 3.14
+	 */
+	static void done(IProgressMonitor monitor) {
+		if (monitor != null) {
+			monitor.done();
+		}
+	}
+
+	/**
+	 * Returns a <code>null</code> safe access to the given monitor, for example in cases where a monitor is passed to
+	 *  a function the implementation can call this method to get a guaranteed non-null monitor reference
+	 * @param monitor
+	 *            the monitor to check
+	 * @return the passed monitor instance or {@link NullProgressMonitor} if monitor was <code>null</code>
+	 * @since 3.14
+	 */
+	static IProgressMonitor nullSafe(IProgressMonitor monitor) {
+		if (monitor == null) {
+			return new NullProgressMonitor();
+		}
+		return monitor;
 	}
 }
