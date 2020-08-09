@@ -10,7 +10,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Christoph Läubrich - adjust to new API
+ *     Christoph Laeubrich - adjust to new API
  *******************************************************************************/
 package org.eclipse.core.runtime;
 

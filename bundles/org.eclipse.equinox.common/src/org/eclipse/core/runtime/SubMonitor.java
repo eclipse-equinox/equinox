@@ -16,7 +16,7 @@
  *     Stefan Xenos (Google) - bug 475747 - Support efficient, convenient cancellation checks in SubMonitor
  *     Stefan Xenos (Google) - bug 476924 - Add a SUPPRESS_ISCANCELED flag to SubMonitor
  *     IBM Corporation - ongoing maintenance
- *     Christoph Läubrich - adjust to new API
+ *     Christoph Laeubrich - adjust to new API
  *******************************************************************************/
 package org.eclipse.core.runtime;
 

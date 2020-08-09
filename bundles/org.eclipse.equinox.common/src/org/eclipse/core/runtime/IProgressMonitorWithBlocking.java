@@ -10,7 +10,7 @@
  * 
  * Contributors:
  *     IBM - Initial API and implementation
- *     Christoph Läubrich - join with IProgressMonitorWithBlocking
+ *     Christoph Laeubrich - join with IProgressMonitorWithBlocking
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
