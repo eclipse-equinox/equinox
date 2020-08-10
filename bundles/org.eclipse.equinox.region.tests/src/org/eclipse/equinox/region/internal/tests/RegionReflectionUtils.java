@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2015 IBM Corporation and others.
+ * Copyright (c) 2013, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -60,10 +60,9 @@ public class RegionReflectionUtils {
 
 	private static Object newInstance(Class<?> clazz) {
 		try {
-			return clazz.newInstance();
-		} catch (InstantiationException e) {
-			fail(e.getMessage());
-		} catch (IllegalAccessException e) {
+			return clazz.getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
 			fail(e.getMessage());
 		}
 		return null;
@@ -78,88 +77,83 @@ public class RegionReflectionUtils {
 		return null;
 	}
 
-	public static Region newBundleIdBasedRegion(String regionName, RegionDigraph regionDigraph, Object bundleIdToRegionMapping, BundleContext bundleContext, ThreadLocal<Region> threadLocal) {
+	public static Region newBundleIdBasedRegion(String regionName, RegionDigraph regionDigraph,
+			Object bundleIdToRegionMapping, BundleContext bundleContext, ThreadLocal<Region> threadLocal) {
 		Class<?> bundleIdBasedRegionClazz = loadRegionImplClass(BundleIdBasedRegion);
 		Class<?> bundleIdToRegionMappingClazz = loadRegionImplClass(BundleIdToRegionMapping);
-		Class<?>[] classParams = new Class<?>[] {String.class, RegionDigraph.class, bundleIdToRegionMappingClazz, BundleContext.class, ThreadLocal.class};
-		Object[] constructorArgs = new Object[] {regionName, regionDigraph, bundleIdToRegionMapping, bundleContext, threadLocal};
+		Class<?>[] classParams = new Class<?>[] { String.class, RegionDigraph.class, bundleIdToRegionMappingClazz,
+				BundleContext.class, ThreadLocal.class };
+		Object[] constructorArgs = new Object[] { regionName, regionDigraph, bundleIdToRegionMapping, bundleContext,
+				threadLocal };
 		return (Region) newInstance(bundleIdBasedRegionClazz, classParams, constructorArgs);
 	}
 
-	private static Object newInstance(Class<?> clazz, Class<?>[] parameterTypes, Object[] constructorArgs) {
+	private static Object newInstance(Class<?> clazz, Class<?>[] parameterTypes, Object... constructorArgs) {
 		try {
 			Constructor<?> constructor = clazz.getConstructor(parameterTypes);
 			return constructor.newInstance(constructorArgs);
-		} catch (SecurityException e) {
-			fail(e.getMessage());
-		} catch (NoSuchMethodException e) {
-			fail(e.getMessage());
-		} catch (IllegalArgumentException e) {
-			fail(e.getMessage());
-		} catch (InstantiationException e) {
-			fail(e.getMessage());
-		} catch (IllegalAccessException e) {
-			fail(e.getMessage());
-		} catch (InvocationTargetException e) {
+		} catch (SecurityException | NoSuchMethodException | IllegalArgumentException | InstantiationException
+				| IllegalAccessException | InvocationTargetException e) {
 			fail(e.getMessage());
 		}
 		return null;
 	}
 
 	public static void associateBundleWithRegion(Object bundleIdToRegionMapping, long bundleId, Region region) {
-		callMethod(bundleIdToRegionMapping, StandardBundleIdToRegionMapping_associateBundleWithRegion, new Class[] {long.class, Region.class}, new Object[] {bundleId, region});
+		callMethod(bundleIdToRegionMapping, StandardBundleIdToRegionMapping_associateBundleWithRegion,
+				new Class[] { long.class, Region.class }, bundleId, region);
 	}
 
 	public static void dissociateBundleFromRegion(Object bundleIdToRegionMapping, long bundleId, Region region) {
-		callMethod(bundleIdToRegionMapping, StandardBundleIdToRegionMapping_dissociateBundleFromRegion, new Class[] {long.class, Region.class}, new Object[] {bundleId, region});
+		callMethod(bundleIdToRegionMapping, StandardBundleIdToRegionMapping_dissociateBundleFromRegion,
+				new Class[] { long.class, Region.class }, bundleId, region);
 	}
 
-	private static Object callMethod(Object target, String methodName, Class<?>[] paramTypes, Object[] paramArgs) {
+	private static Object callMethod(Object target, String methodName, Class<?>[] paramTypes, Object... paramArgs) {
 		try {
 			Method method = target.getClass().getMethod(methodName, paramTypes);
 			return method.invoke(target, paramArgs);
-		} catch (SecurityException e) {
-			fail(e.getMessage());
-		} catch (NoSuchMethodException e) {
-			fail(e.getMessage());
-		} catch (IllegalArgumentException e) {
-			fail(e.getMessage());
-		} catch (IllegalAccessException e) {
-			fail(e.getMessage());
-		} catch (InvocationTargetException e) {
+		} catch (SecurityException | NoSuchMethodException | IllegalArgumentException | IllegalAccessException
+				| InvocationTargetException e) {
 			fail(e.getMessage());
 		}
 		return null;
 	}
 
 	public static Region getRegion(Object bundleIdToRegionMapping, long testBundleId) {
-		return (Region) callMethod(bundleIdToRegionMapping, StandardBundleIdToRegionMapping_getRegion, new Class<?>[] {long.class}, new Object[] {testBundleId});
+		return (Region) callMethod(bundleIdToRegionMapping, StandardBundleIdToRegionMapping_getRegion,
+				new Class<?>[] { long.class }, testBundleId);
 	}
 
-	public static boolean isBundleAssociatedWithRegion(Object bundleIdToRegionMapping, long testBundleId, Region region) {
-		return (Boolean) callMethod(bundleIdToRegionMapping, StandardBundleIdToRegionMapping_isBundleAssociatedWithRegion, new Class<?>[] {long.class, Region.class}, new Object[] {testBundleId, region});
+	public static boolean isBundleAssociatedWithRegion(Object bundleIdToRegionMapping, long testBundleId,
+			Region region) {
+		return (Boolean) callMethod(bundleIdToRegionMapping,
+				StandardBundleIdToRegionMapping_isBundleAssociatedWithRegion,
+				new Class<?>[] { long.class, Region.class }, testBundleId, region);
 	}
 
 	@SuppressWarnings("unchecked")
 	public static Set<Long> getBundleIds(Object bundleIdToRegionMapping, Region region) {
-		return (Set<Long>) callMethod(bundleIdToRegionMapping, StandardBundleIdToRegionMapping_getBundleIds, new Class<?>[] {Region.class}, new Object[] {region});
+		return (Set<Long>) callMethod(bundleIdToRegionMapping, StandardBundleIdToRegionMapping_getBundleIds,
+				new Class<?>[] { Region.class }, region);
 	}
 
 	public static void clear(Object bundleIdToRegionMapping) {
-		callMethod(bundleIdToRegionMapping, StandardBundleIdToRegionMapping_clear, null, null);
+		callMethod(bundleIdToRegionMapping, StandardBundleIdToRegionMapping_clear, null);
 	}
 
-	public static RegionDigraph newStandardRegionDigraph(BundleContext systemBundleContext, ThreadLocal<Region> threadLocal) {
+	public static RegionDigraph newStandardRegionDigraph(BundleContext systemBundleContext,
+			ThreadLocal<Region> threadLocal) {
 		Class<?> standardRegionDigraphClazz = loadRegionImplClass(StandardRegionDigraph);
-		Class<?>[] classParams = new Class<?>[] {BundleContext.class, ThreadLocal.class};
-		Object[] constructorArgs = new Object[] {systemBundleContext, threadLocal};
+		Class<?>[] classParams = new Class<?>[] { BundleContext.class, ThreadLocal.class };
+		Object[] constructorArgs = new Object[] { systemBundleContext, threadLocal };
 		return (RegionDigraph) newInstance(standardRegionDigraphClazz, classParams, constructorArgs);
 	}
 
 	public static RegionDigraph newStandardRegionDigraph() {
 		Class<?> standardRegionDigraphClazz = loadRegionImplClass(StandardRegionDigraph);
-		Class<?>[] classParams = new Class<?>[] {standardRegionDigraphClazz};
-		Object[] constructorArgs = new Object[] {null};
+		Class<?>[] classParams = new Class<?>[] { standardRegionDigraphClazz };
+		Object[] constructorArgs = new Object[] { null };
 		return (RegionDigraph) newInstance(standardRegionDigraphClazz, classParams, constructorArgs);
 	}
 
@@ -170,43 +164,46 @@ public class RegionReflectionUtils {
 
 	public static CollisionHook newRegionBundleCollisionHook(RegionDigraph digraph, ThreadLocal<Region> threadLocal) {
 		Class<?> regionBundleCollisionHook = loadRegionImplClass(RegionBundleCollisionHook);
-		Class<?>[] classParams = new Class<?>[] {RegionDigraph.class, ThreadLocal.class};
-		Object[] constructorArgs = new Object[] {digraph, threadLocal};
+		Class<?>[] classParams = new Class<?>[] { RegionDigraph.class, ThreadLocal.class };
+		Object[] constructorArgs = new Object[] { digraph, threadLocal };
 		return (CollisionHook) newInstance(regionBundleCollisionHook, classParams, constructorArgs);
 	}
 
-	public static EventHook newRegionBundleEventHook(RegionDigraph digraph, ThreadLocal<Region> threadLocal, long bundleId) {
+	public static EventHook newRegionBundleEventHook(RegionDigraph digraph, ThreadLocal<Region> threadLocal,
+			long bundleId) {
 		Class<?> regionBundleEventHook = loadRegionImplClass(RegionBundleEventHook);
-		Class<?>[] classParams = new Class<?>[] {RegionDigraph.class, ThreadLocal.class, long.class};
-		Object[] constructorArgs = new Object[] {digraph, threadLocal, bundleId};
+		Class<?>[] classParams = new Class<?>[] { RegionDigraph.class, ThreadLocal.class, long.class };
+		Object[] constructorArgs = new Object[] { digraph, threadLocal, bundleId };
 		return (EventHook) newInstance(regionBundleEventHook, classParams, constructorArgs);
 	}
 
 	public static FindHook newRegionBundleFindHook(RegionDigraph digraph, long bundleId) {
 		Class<?> regionBundleFindHook = loadRegionImplClass(RegionBundleFindHook);
-		Class<?>[] classParams = new Class<?>[] {RegionDigraph.class, long.class};
-		Object[] constructorArgs = new Object[] {digraph, bundleId};
+		Class<?>[] classParams = new Class<?>[] { RegionDigraph.class, long.class };
+		Object[] constructorArgs = new Object[] { digraph, bundleId };
 		return (FindHook) newInstance(regionBundleFindHook, classParams, constructorArgs);
 	}
 
 	public static ResolverHook newRegionResolverHook(RegionDigraph digraph) {
 		Class<?> regionResolverHook = loadRegionImplClass(RegionResolverHook);
-		Class<?>[] classParams = new Class<?>[] {RegionDigraph.class};
-		Object[] constructorArgs = new Object[] {digraph};
+		Class<?>[] classParams = new Class<?>[] { RegionDigraph.class };
+		Object[] constructorArgs = new Object[] { digraph };
 		return (ResolverHook) newInstance(regionResolverHook, classParams, constructorArgs);
 	}
 
 	public static org.osgi.framework.hooks.service.EventHook newRegionServiceEventHook(RegionDigraph digraph) {
 		Class<?> regionServiceEventHook = loadRegionImplClass(RegionServiceEventHook);
-		Class<?>[] classParams = new Class<?>[] {RegionDigraph.class};
-		Object[] constructorArgs = new Object[] {digraph};
-		return (org.osgi.framework.hooks.service.EventHook) newInstance(regionServiceEventHook, classParams, constructorArgs);
+		Class<?>[] classParams = new Class<?>[] { RegionDigraph.class };
+		Object[] constructorArgs = new Object[] { digraph };
+		return (org.osgi.framework.hooks.service.EventHook) newInstance(regionServiceEventHook, classParams,
+				constructorArgs);
 	}
 
 	public static org.osgi.framework.hooks.service.FindHook newRegionServiceFindHook(RegionDigraph digraph) {
 		Class<?> regionServiceFindHook = loadRegionImplClass(RegionServiceFindHook);
-		Class<?>[] classParams = new Class<?>[] {RegionDigraph.class};
-		Object[] constructorArgs = new Object[] {digraph};
-		return (org.osgi.framework.hooks.service.FindHook) newInstance(regionServiceFindHook, classParams, constructorArgs);
+		Class<?>[] classParams = new Class<?>[] { RegionDigraph.class };
+		Object[] constructorArgs = new Object[] { digraph };
+		return (org.osgi.framework.hooks.service.FindHook) newInstance(regionServiceFindHook, classParams,
+				constructorArgs);
 	}
 }
