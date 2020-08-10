@@ -36,18 +36,18 @@ public class DriverTracker extends ServiceTracker {
 	protected LogTracker log;
 
 	/** Dictionary mapping DRIVER_ID strings <==> Driver ServiceReferences */
-	protected Hashtable drivers;
+	protected Hashtable<Object, Object> drivers;
 
 	/** DeviceManager object. */
 	protected Activator manager;
 
 	/** Dictionary mapping Driver ID String =>
 	 *  Hashtable (Device ServiceReference => cached Match objects) */
-	protected Hashtable matches;
+	protected Hashtable<String, Hashtable<ServiceReference, Match>> matches;
 
 	/** Dictionary mapping Driver ID String =>
 	 *  Hashtable (Device ServiceReference => cached referral String) */
-	protected Hashtable referrals;
+	protected Hashtable<String, Hashtable<ServiceReference, String>> referrals;
 
 	/**
 	 * Create the DriverTracker.
@@ -61,9 +61,9 @@ public class DriverTracker extends ServiceTracker {
 		this.manager = manager;
 		log = manager.log;
 
-		drivers = new Hashtable(37);
-		matches = new Hashtable(37);
-		referrals = new Hashtable(37);
+		drivers = new Hashtable<>(37);
+		matches = new Hashtable<>(37);
+		referrals = new Hashtable<>(37);
 
 		if (Activator.DEBUG) {
 			log.log(LogService.LOG_DEBUG, this + " constructor"); //$NON-NLS-1$
@@ -210,11 +210,7 @@ public class DriverTracker extends ServiceTracker {
 
 		if (driver_id == null) {
 			log.log(reference, LogService.LOG_WARNING, DeviceMsg.Driver_service_has_no_DRIVER_ID);
-			driver_id = (String) AccessController.doPrivileged(new PrivilegedAction() {
-				public Object run() {
-					return reference.getBundle().getLocation();
-				}
-			});
+			driver_id = AccessController.doPrivileged((PrivilegedAction<String>) () -> reference.getBundle().getLocation());
 		}
 
 		return (driver_id);
@@ -245,7 +241,7 @@ public class DriverTracker extends ServiceTracker {
 		if (references != null) {
 			int size = references.length;
 
-			Vector successfulMatches = new Vector(size);
+			Vector<Match> successfulMatches = new Vector<>(size);
 
 			for (int i = 0; i < size; i++) {
 				ServiceReference driver = references[i];
@@ -309,22 +305,22 @@ public class DriverTracker extends ServiceTracker {
 	public Match getMatch(ServiceReference driver, ServiceReference device) {
 		String driverid = getDriverID(driver);
 
-		Hashtable driverMatches = (Hashtable) matches.get(driverid);
+		Hashtable<ServiceReference, Match> driverMatches = matches.get(driverid);
 
 		if (driverMatches == null) {
 			return null;
 		}
 
-		return (Match) driverMatches.get(device);
+		return driverMatches.get(device);
 	}
 
 	public void storeMatch(ServiceReference driver, ServiceReference device, Match match) {
 		String driverid = getDriverID(driver);
 
-		Hashtable driverMatches = (Hashtable) matches.get(driverid);
+		Hashtable<ServiceReference, Match> driverMatches = matches.get(driverid);
 
 		if (driverMatches == null) {
-			driverMatches = new Hashtable(37);
+			driverMatches = new Hashtable<>(37);
 
 			matches.put(driverid, driverMatches);
 		}
@@ -388,22 +384,22 @@ public class DriverTracker extends ServiceTracker {
 	public String getReferral(ServiceReference driver, ServiceReference device) {
 		String driverid = getDriverID(driver);
 
-		Hashtable driverReferrals = (Hashtable) referrals.get(driverid);
+		Hashtable<ServiceReference, String> driverReferrals = referrals.get(driverid);
 
 		if (driverReferrals == null) {
 			return null;
 		}
 
-		return (String) driverReferrals.get(device);
+		return driverReferrals.get(device);
 	}
 
 	public void storeReferral(ServiceReference driver, ServiceReference device, String referral) {
 		String driverid = getDriverID(driver);
 
-		Hashtable driverReferrals = (Hashtable) referrals.get(driverid);
+		Hashtable<ServiceReference, String> driverReferrals = referrals.get(driverid);
 
 		if (driverReferrals == null) {
-			driverReferrals = new Hashtable(37);
+			driverReferrals = new Hashtable<>(37);
 
 			referrals.put(driverid, driverReferrals);
 		}

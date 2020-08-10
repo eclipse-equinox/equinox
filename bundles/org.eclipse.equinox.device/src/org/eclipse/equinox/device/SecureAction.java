@@ -42,12 +42,7 @@ public class SecureAction {
 	public Thread createThread(final Runnable target, final String name) {
 		if (System.getSecurityManager() == null)
 			return new Thread(target, name);
-		return (Thread) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
-				return new Thread(target, name);
-			}
-		}, controlContext);
+		return AccessController.doPrivileged((PrivilegedAction<Thread>) () -> new Thread(target, name), controlContext);
 	}
-	
-	
+
 }

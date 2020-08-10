@@ -39,7 +39,7 @@ public class DeviceTracker extends ServiceTracker {
 	protected LogTracker log;
 
 	/** Device services properties */
-	protected Dictionary properties;
+	protected Dictionary<String, ?> properties;
 
 	/** if false the algorithm must terminate */
 	protected volatile boolean running;
@@ -264,12 +264,12 @@ public class DeviceTracker extends ServiceTracker {
 	 * Readonly Dictionary for device properties.
 	 *
 	 */
-	static class Properties extends Hashtable {
+	static class Properties extends Hashtable<String, Object> {
 		private static final long serialVersionUID = -8489170394007899809L;
 		/**
 		 * keys in original case.
 		 */
-		protected Vector keys;
+		protected Vector<String> keys;
 
 		/**
 		 * Create a properties object for the service.
@@ -284,7 +284,7 @@ public class DeviceTracker extends ServiceTracker {
 			if (props != null) {
 				int size = props.length;
 
-				keys = new Vector(size);
+				keys = new Vector<>(size);
 
 				for (int i = 0; i < size; i++) {
 					String key = props[i];
@@ -297,14 +297,14 @@ public class DeviceTracker extends ServiceTracker {
 					}
 				}
 			} else {
-				keys = new Vector(0);
+				keys = new Vector<>(0);
 			}
 		}
 
 		/**
 		 * Override keys to support case-preserving of keys.
 		 */
-		public Enumeration keys() {
+		public Enumeration<String> keys() {
 			return (keys.elements());
 		}
 
@@ -313,12 +313,8 @@ public class DeviceTracker extends ServiceTracker {
 		 *
 		 * @param key header name.
 		 */
-		public Object get(Object key) {
-			if (key instanceof String) {
-				return (super.get(((String) key).toLowerCase()));
-			}
-
-			return (null);
+		public Object get(String key) {
+			return (super.get(key.toLowerCase()));
 		}
 
 		/**
@@ -328,7 +324,7 @@ public class DeviceTracker extends ServiceTracker {
 		 * @param value header value.
 		 * @throws UnsupportedOperationException
 		 */
-		public Object put(Object key, Object value) {
+		public Object put(String key, Object value) {
 			throw new UnsupportedOperationException();
 		}
 

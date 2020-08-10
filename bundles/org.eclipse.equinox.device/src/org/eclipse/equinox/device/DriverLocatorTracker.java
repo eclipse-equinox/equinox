@@ -36,7 +36,7 @@ public class DriverLocatorTracker extends ServiceTracker {
 	protected LogTracker log;
 
 	/** List of bundles to be uninstalled. */
-	protected Vector bundles;
+	protected Vector<Bundle> bundles;
 
 	/**
 	 * Create the DriverLocatorTracker.
@@ -49,7 +49,7 @@ public class DriverLocatorTracker extends ServiceTracker {
 
 		this.manager = manager;
 		log = manager.log;
-		bundles = new Vector(10, 10);
+		bundles = new Vector<>(10, 10);
 
 		if (Activator.DEBUG) {
 			log.log(LogService.LOG_DEBUG, "DriverLocatorTracker constructor"); //$NON-NLS-1$
@@ -119,7 +119,7 @@ public class DriverLocatorTracker extends ServiceTracker {
 	 * @param locators Array of DriverLocator objects
 	 * @param drivers Dictionary of drivers with key=DRIVER_ID, value=Driver object
 	 */
-	public void loadDrivers(Dictionary properties, DriverTracker drivers) {
+	public void loadDrivers(Dictionary<String, ?> properties, DriverTracker drivers) {
 		if (Activator.DEBUG) {
 			log.log(LogService.LOG_DEBUG, Thread.currentThread().getName() + ": DriverLocatorTracker loadDrivers called"); //$NON-NLS-1$
 		}

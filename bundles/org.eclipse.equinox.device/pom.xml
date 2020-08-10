@@ -19,6 +19,9 @@
   </parent>
   <groupId>org.eclipse.equinox</groupId>
   <artifactId>org.eclipse.equinox.device</artifactId>
-  <version>1.0.900-SNAPSHOT</version>
+  <version>1.1.0-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
+  <properties>
+    <code.ignoredWarnings>-warn:-deprecation,raw,unchecked,discouraged,warningToken</code.ignoredWarnings>
+  </properties>
 </project>
