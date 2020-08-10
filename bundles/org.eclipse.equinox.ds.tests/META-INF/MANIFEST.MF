@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Declarative Services Tests
+Bundle-Vendor: Eclipse.org - Equinox
 Bundle-Category: test
 Bundle-SymbolicName: org.eclipse.equinox.ds.tests
 Bundle-Version: 1.5.700.qualifier

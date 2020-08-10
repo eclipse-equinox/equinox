@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: BiDi tests
+Bundle-Vendor: Eclipse.org - Equinox
 Bundle-SymbolicName: org.eclipse.equinox.bidi.tests;singleton:=true
 Bundle-Version: 1.2.0.qualifier
 Require-Bundle: org.eclipse.equinox.bidi;bundle-version="1.0.0",

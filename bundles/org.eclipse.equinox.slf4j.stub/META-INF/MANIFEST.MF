@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: slf4j Stub
+Bundle-Vendor: Eclipse.org - Equinox
 Bundle-SymbolicName: org.eclipse.equinox.slf4j.stub
 Bundle-Version: 1.0.200.qualifier
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

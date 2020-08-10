@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Test Plug-in
+Bundle-Vendor: Eclipse.org - Equinox
 Bundle-SymbolicName: org.eclipse.equinox.cm.test
 Bundle-Version: 1.0.200.qualifier
 Bundle-Activator: org.eclipse.equinox.cm.test.Activator
