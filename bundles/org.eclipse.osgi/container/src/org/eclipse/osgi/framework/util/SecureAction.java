@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2016 IBM Corporation and others.
+ * Copyright (c) 2003, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,14 +14,27 @@
 
 package org.eclipse.osgi.framework.util;
 
-import java.io.*;
-import java.net.*;
-import java.security.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLStreamHandler;
+import java.security.AccessControlContext;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Properties;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import org.eclipse.osgi.container.Module;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -161,7 +174,7 @@ public class SecureAction {
 		return AccessController.doPrivileged(new PrivilegedAction<Long>() {
 			@Override
 			public Long run() {
-				return new Long(file.length());
+				return Long.valueOf(file.length());
 			}
 		}, controlContext).longValue();
 	}
@@ -287,7 +300,7 @@ public class SecureAction {
 		return AccessController.doPrivileged(new PrivilegedAction<Long>() {
 			@Override
 			public Long run() {
-				return new Long(file.lastModified());
+				return Long.valueOf(file.lastModified());
 			}
 		}, controlContext).longValue();
 	}

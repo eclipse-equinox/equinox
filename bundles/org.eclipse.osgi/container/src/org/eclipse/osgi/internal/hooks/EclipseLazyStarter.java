@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2017 IBM Corporation and others.
+ * Copyright (c) 2006, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -118,7 +118,7 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 			} catch (BundleException e) {
 				Bundle bundle = managerElement.getGeneration().getRevision().getBundle();
 				if (e.getType() == BundleException.STATECHANGE_ERROR) {
-					String message = NLS.bind(Msg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP, new Object[] {Thread.currentThread(), name, m.getStateChangeOwner(), bundle, new Long(System.currentTimeMillis() - startTime)});
+					String message = NLS.bind(Msg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP, new Object[] {Thread.currentThread(), name, m.getStateChangeOwner(), bundle, Long.valueOf(System.currentTimeMillis() - startTime)});
 					container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, message, e);
 					continue;
 				}

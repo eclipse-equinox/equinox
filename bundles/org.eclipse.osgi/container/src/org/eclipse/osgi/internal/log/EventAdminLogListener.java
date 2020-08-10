@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2016 IBM Corporation
+ * Copyright (c) 2007, 2020 IBM Corporation
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -131,7 +131,7 @@ public class EventAdminLogListener implements SynchronousLogListener {
 		properties.put(LOG_LEVEL, Integer.valueOf(entry.getLevel()));
 		if (entry.getMessage() != null)
 			properties.put(MESSAGE, entry.getMessage());
-		properties.put(TIMESTAMP, new Long(entry.getTime()));
+		properties.put(TIMESTAMP, Long.valueOf(entry.getTime()));
 		return event.newInstance(topic, properties);
 	}
 
@@ -149,7 +149,7 @@ public class EventAdminLogListener implements SynchronousLogListener {
 	}
 
 	public static void putBundleProperties(Hashtable<String, Object> properties, Bundle bundle) {
-		properties.put(BUNDLE_ID, new Long(bundle.getBundleId()));
+		properties.put(BUNDLE_ID, Long.valueOf(bundle.getBundleId()));
 		String symbolicName = bundle.getSymbolicName();
 		if (symbolicName != null) {
 			properties.put(BUNDLE_SYMBOLICNAME, symbolicName);

@@ -1092,7 +1092,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 		if (initial == null) {
 			return;
 		}
-		Long zero = new Long(0);
+		Long zero = Long.valueOf(0);
 		for (Iterator<Module> iModules = initial.iterator(); iModules.hasNext();) {
 			Module m = iModules.next();
 			if (m.getId().equals(zero)) {

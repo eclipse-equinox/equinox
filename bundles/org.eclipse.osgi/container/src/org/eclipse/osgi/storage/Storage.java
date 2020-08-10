@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2019 IBM Corporation and others.
+ * Copyright (c) 2012, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -2209,7 +2209,7 @@ public class Storage {
 		//
 		// This bit of code attempts to do that by using the bundle ID as an ID for the temp dir along with an incrementing ID
 		// in cases where the temp dir may already exist.
-		Long bundleID = new Long(generation.getBundleInfo().getBundleId());
+		Long bundleID = Long.valueOf(generation.getBundleInfo().getBundleId());
 		for (int i = 0; i < Integer.MAX_VALUE; i++) {
 			bundleTempDir = new File(libTempDir, bundleID.toString() + "_" + Integer.valueOf(i).toString()); //$NON-NLS-1$
 			libTempFile = new File(bundleTempDir, libName);

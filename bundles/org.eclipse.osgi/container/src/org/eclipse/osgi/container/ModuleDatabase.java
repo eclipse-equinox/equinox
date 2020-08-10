@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2019 IBM Corporation and others.
+ * Copyright (c) 2012, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1516,9 +1516,9 @@ public class ModuleDatabase {
 				case VALUE_STRING :
 					return readString(in, objectTable);
 				case VALUE_LONG :
-					return new Long(in.readLong());
+					return Long.valueOf(in.readLong());
 				case VALUE_DOUBLE :
-					return new Double(in.readDouble());
+					return Double.valueOf(in.readDouble());
 				case VALUE_VERSION :
 					return readVersion(in, objectTable);
 				case VALUE_LIST :
@@ -1599,9 +1599,9 @@ public class ModuleDatabase {
 				case VALUE_STRING :
 					return readString(in, objectTable);
 				case VALUE_LONG :
-					return new Long(in.readLong());
+					return Long.valueOf(in.readLong());
 				case VALUE_DOUBLE :
-					return new Double(in.readDouble());
+					return Double.valueOf(in.readDouble());
 				case VALUE_VERSION :
 					return readVersion(in, objectTable);
 				default :

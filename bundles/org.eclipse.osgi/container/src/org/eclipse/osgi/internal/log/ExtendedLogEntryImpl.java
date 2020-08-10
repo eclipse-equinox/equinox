@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2018 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2020 Cognos Incorporated, IBM Corporation and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which
@@ -53,7 +53,7 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 
 		Long threadId = threadIds.get(thread);
 		if (threadId == null) {
-			threadId = new Long(nextThreadId++);
+			threadId = Long.valueOf(nextThreadId++);
 			threadIds.put(thread, threadId);
 		}
 		return threadId.longValue();

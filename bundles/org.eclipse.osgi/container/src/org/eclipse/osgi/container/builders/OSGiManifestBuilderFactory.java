@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2018 IBM Corporation and others.
+ * Copyright (c) 2012, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -680,9 +680,9 @@ public final class OSGiManifestBuilderFactory {
 
 		String trimmed = value.trim();
 		if (ATTR_TYPE_DOUBLE.equalsIgnoreCase(type)) {
-			return new Double(trimmed);
+			return Double.valueOf(trimmed);
 		} else if (ATTR_TYPE_LONG.equalsIgnoreCase(type)) {
-			return new Long(trimmed);
+			return Long.valueOf(trimmed);
 		} else if (ATTR_TYPE_URI.equalsIgnoreCase(type)) {
 			// we no longer actually create URIs here; just use the string
 			return trimmed;

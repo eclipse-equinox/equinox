@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -38,7 +38,7 @@ public abstract class SystemModule extends Module {
 	private volatile AtomicReference<ContainerEvent> forStop = new AtomicReference<>();
 
 	public SystemModule(ModuleContainer container) {
-		super(new Long(0), Constants.SYSTEM_BUNDLE_LOCATION, container, EnumSet.of(Settings.AUTO_START, Settings.USE_ACTIVATION_POLICY), Integer.valueOf(0));
+		super(Long.valueOf(0), Constants.SYSTEM_BUNDLE_LOCATION, container, EnumSet.of(Settings.AUTO_START, Settings.USE_ACTIVATION_POLICY), Integer.valueOf(0));
 	}
 
 	/**
