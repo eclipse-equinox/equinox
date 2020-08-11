@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.eclipse.osgi.compatibility.state
-Bundle-Version: 1.2.0.qualifier
+Bundle-Version: 1.2.100.qualifier
 ExtensionBundle-Activator: org.eclipse.osgi.compatibility.state.Activator
 Fragment-Host: org.eclipse.osgi;bundle-version="3.12.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
