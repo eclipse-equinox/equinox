@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2018 IBM Corporation and others.
+ * Copyright (c) 2003, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -94,6 +94,7 @@ public abstract class StateImpl implements State {
 	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
 	 * @deprecated
 	 */
+	@Deprecated
 	public final static String PROVIDE_PACKAGE = "Provide-Package"; //$NON-NLS-1$
 
 	/**
@@ -113,6 +114,7 @@ public abstract class StateImpl implements State {
 	 * syntax version 2 will not recognize this attribute.
 	 * @deprecated
 	 */
+	@Deprecated
 	public final static String REPROVIDE_ATTRIBUTE = "reprovide"; //$NON-NLS-1$
 
 	/**
@@ -134,6 +136,7 @@ public abstract class StateImpl implements State {
 	 * @since 1.3 <b>EXPERIMENTAL</b>
 	 * @deprecated
 	 */
+	@Deprecated
 	public final static String OPTIONAL_ATTRIBUTE = "optional"; //$NON-NLS-1$
 
 	public static final String OSGI_RESOLVER_MODE = "osgi.resolverMode"; //$NON-NLS-1$
@@ -420,6 +423,7 @@ public abstract class StateImpl implements State {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
 		resolveBundle(bundle, status, hosts, selectedExports, null, resolvedRequires, resolvedImports);
 	}
@@ -427,6 +431,7 @@ public abstract class StateImpl implements State {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
 		resolveBundle(bundle, status, hosts, selectedExports, substitutedExports, null, resolvedRequires, resolvedImports, null, null);
 	}
@@ -1148,7 +1153,7 @@ public abstract class StateImpl implements State {
 				// ask the resolver to resolve our dynamic import
 				ExportPackageDescriptionImpl result = (ExportPackageDescriptionImpl) resolver.resolveDynamicImport(importingBundle, requestedPackage);
 				if (result == null)
-					importer.setDynamicStamp(requestedPackage, new Long(getTimeStamp()));
+					importer.setDynamicStamp(requestedPackage, Long.valueOf(getTimeStamp()));
 				else {
 					importer.setDynamicStamp(requestedPackage, null); // remove any cached timestamp
 					// need to add the result to the list of resolved imports

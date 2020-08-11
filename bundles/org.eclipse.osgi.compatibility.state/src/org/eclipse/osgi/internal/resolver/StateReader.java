@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2019 IBM Corporation and others.
+ * Copyright (c) 2003, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -363,7 +363,7 @@ final class StateReader {
 			HashMap<String, Long> dynamicStamps = new HashMap<>(dynamicPkgCnt);
 			for (int i = 0; i < dynamicPkgCnt; i++) {
 				String pkg = readString(in, false);
-				Long stamp = new Long(in.readLong());
+				Long stamp = Long.valueOf(in.readLong());
 				dynamicStamps.put(pkg, stamp);
 			}
 			result.setDynamicStamps(dynamicStamps);
@@ -471,9 +471,9 @@ final class StateReader {
 			else if (type == 3)
 				value = Integer.valueOf(in.readInt());
 			else if (type == 4)
-				value = new Long(in.readLong());
+				value = Long.valueOf(in.readLong());
 			else if (type == 5)
-				value = new Double(in.readDouble());
+				value = Double.valueOf(in.readDouble());
 			else if (type == 6)
 				value = readVersion(in);
 			else if (type == 7) {
@@ -502,10 +502,10 @@ final class StateReader {
 							list.add(Integer.valueOf(in.readInt()));
 							break;
 						case 4 :
-							list.add(new Long(in.readLong()));
+							list.add(Long.valueOf(in.readLong()));
 							break;
 						case 5 :
-							list.add(new Double(in.readDouble()));
+							list.add(Double.valueOf(in.readDouble()));
 							break;
 						case 6 :
 							list.add(readVersion(in));

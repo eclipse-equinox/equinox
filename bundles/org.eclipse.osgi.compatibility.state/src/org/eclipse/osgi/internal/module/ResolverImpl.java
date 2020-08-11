@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2018 IBM Corporation and others.
+ * Copyright (c) 2004, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which accompanies this distribution,
@@ -2153,7 +2153,7 @@ public class ResolverImpl implements Resolver {
 	private void internalBundleRemoved(BundleDescription bundle, boolean pending) {
 		// check if there are any dependants
 		if (pending)
-			removalPending.put(new Long(bundle.getBundleId()), bundle);
+			removalPending.put(Long.valueOf(bundle.getBundleId()), bundle);
 		if (!initialized)
 			return;
 		ResolverBundle rb = bundleMapping.get(bundle);
@@ -2174,7 +2174,7 @@ public class ResolverImpl implements Resolver {
 
 	private void unresolveBundle(ResolverBundle bundle, boolean removed) {
 		// check the removed list if unresolving then remove from the removed list
-		List<BundleDescription> removedBundles = removalPending.remove(new Long(bundle.getBundleDescription().getBundleId()));
+		List<BundleDescription> removedBundles = removalPending.remove(Long.valueOf(bundle.getBundleDescription().getBundleId()));
 		for (BundleDescription removedDesc : removedBundles) {
 			ResolverBundle re = bundleMapping.get(removedDesc);
 			if (re == null) {
