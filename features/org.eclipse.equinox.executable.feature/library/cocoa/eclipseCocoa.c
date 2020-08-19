@@ -426,7 +426,8 @@ char * findVMLibrary( char* command ) {
 		}
 	}
 	cmd = command;
-	if (strstr(cmd, "/JavaVM.framework/") != NULL && (strstr(cmd, "/Current/") != NULL || strstr(cmd, "/A/") != NULL)) {
+	if ((strstr(cmd, "/JavaVM.framework/") != NULL && (strstr(cmd, "/Current/") != NULL)) || strstr(cmd, "/A/") != NULL || strstr(cmd, "/usr/bin/java") != NULL ) {
+	        //On Mac we have universal library at /usr/bin/java. But actual java is some where else. So if the path received is default path we need look for java home
 		cmd = getJavaHome();
 		if (cmd == NULL) {
 			return NULL;
