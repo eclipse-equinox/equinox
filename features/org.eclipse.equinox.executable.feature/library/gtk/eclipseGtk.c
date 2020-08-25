@@ -94,7 +94,7 @@ gboolean reuseWorkbench(_TCHAR** filePath, int timeout) {
 }
 
 /**
- * Initializes variables/structures for dbus connectivity to org.eclipse.swt.
+ * Initializes variables/structures for dbus connectivity to GDBus session.
  * Can be called multiple times, only first time initializes, other times just return early (1).
  *
  * DO NOT USE TO TEST CONNECTION. Use dbus_testConnection() instead.
@@ -106,15 +106,22 @@ gboolean gdbus_initProxy () {
 	if (gdbus_proxy != NULL)
 		return 1; // already initialized.
 
+	// Construct service name: org.eclipse.swt.<name>
+	const gint serviceNameLength = strlen(GDBUS_SERVICE) + strlen(getOfficialName()) + 2;
+	gchar *serviceName = (gchar *) malloc(serviceNameLength * sizeof(gchar));
+	snprintf(serviceName, serviceNameLength, "%s.%s", GDBUS_SERVICE, getOfficialName());
+
 	// Function 'g_type_init()' is not needed anymore as of glib 2.36 as gtype system is initialized earlier. It is marked as deprecated.
 	// It is here because at the time of writing, eclipse supports glib 2.28.
 	// It is dynamic to prevent compile warning. But should be removed once min glib eclipse version >= 2.36
 	gtk.g_type_init();
 
 	GError *error = NULL; // Some functions return errors through params
-	gdbus_proxy = gtk.g_dbus_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION, G_DBUS_PROXY_FLAGS_NONE, NULL, GDBUS_SERVICE, GDBUS_OBJECT, GDBUS_INTERFACE, NULL, &error);
+
+	gdbus_proxy = gtk.g_dbus_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION, G_DBUS_PROXY_FLAGS_NONE, NULL, serviceName, GDBUS_OBJECT, GDBUS_INTERFACE, NULL, &error);
+	free(serviceName);
 	if ((gdbus_proxy == NULL) || (error != NULL)) {
-		fprintf(stderr, "Launcher error: GDBus proxy init failed to connect %s:%s on %s.\n", GDBUS_SERVICE, GDBUS_OBJECT, GDBUS_INTERFACE);
+		fprintf(stderr, "Launcher error: GDBus proxy init failed to connect %s:%s on %s.\n", serviceName, GDBUS_OBJECT, GDBUS_INTERFACE);
 		if (error != NULL) {
 			_ftprintf(stderr, "Launcher error: GDBus gdbus_proxy init failed for reason: %s\n", error->message);
 			gtk.g_error_free (error);
