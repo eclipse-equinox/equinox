@@ -2,3 +2,4 @@
 Bug 403352 - Update all parent versions to match our build stream
 Bug 407707 - A number of .class files changed, after changing to M7 JDT compiler
 Bug 509973 - Comparator errors in I20170105-0320
+Bug 566471 - I20200828-0150 - Comparator Errors Found
