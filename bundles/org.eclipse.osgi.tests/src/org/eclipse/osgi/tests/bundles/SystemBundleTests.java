@@ -3723,4 +3723,39 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 		stop(equinox);
 	}
+
+	public void testDeleteBundleFile() throws IOException, BundleException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		Equinox equinox = new Equinox(
+				Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath()));
+
+		equinox.start();
+		BundleContext bc = equinox.getBundleContext();
+
+		File b1File = createBundle(config, "b1", false, false);
+		bc.installBundle("reference:" + b1File.toURI().toASCIIString()).start();
+		File b2File = createBundle(config, "b2", false, false);
+		bc.installBundle("reference:" + b2File.toURI().toASCIIString()).start();
+
+		stop(equinox);
+
+		b1File.delete();
+		b2File.delete();
+
+		Map<String, String> launchProps = new HashMap<>();
+		launchProps.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		SecurityManager sm = new SecurityManager() {
+			public void checkPermission(Permission perm) {
+				// do nothing;
+			}
+		};
+		System.setSecurityManager(sm);
+		try {
+			equinox = new Equinox(Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath()));
+		} finally {
+			System.setSecurityManager(null);
+		}
+		equinox.start();
+		stop(equinox);
+	}
 }

@@ -271,7 +271,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 				for (ModuleRevision revision : module.getRevisions().getModuleRevisions()) {
 					Generation generation = (Generation) revision.getRevisionInfo();
 					if (generation != null) {
-						ProtectionDomain domain = generation.getDomain();
+						ProtectionDomain domain = generation.getDomain(false);
 						if (domain != null) {
 							((BundlePermissions) domain.getPermissions()).clearPermissionCache();
 						}

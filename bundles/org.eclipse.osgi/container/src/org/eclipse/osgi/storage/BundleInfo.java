@@ -317,11 +317,15 @@ public final class BundleInfo {
 		}
 
 		public ProtectionDomain getDomain() {
+			return getDomain(true);
+		}
+
+		public ProtectionDomain getDomain(boolean create) {
 			if (getBundleId() == 0 || System.getSecurityManager() == null) {
 				return null;
 			}
 			synchronized (this.genMonitor) {
-				if (domain == null) {
+				if (domain == null && create) {
 					if (revision == null) {
 						throw new IllegalStateException("The revision is not yet set for this generation."); //$NON-NLS-1$
 					}
