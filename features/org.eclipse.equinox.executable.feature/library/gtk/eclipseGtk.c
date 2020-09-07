@@ -119,15 +119,16 @@ gboolean gdbus_initProxy () {
 	GError *error = NULL; // Some functions return errors through params
 
 	gdbus_proxy = gtk.g_dbus_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION, G_DBUS_PROXY_FLAGS_NONE, NULL, serviceName, GDBUS_OBJECT, GDBUS_INTERFACE, NULL, &error);
-	free(serviceName);
 	if ((gdbus_proxy == NULL) || (error != NULL)) {
 		fprintf(stderr, "Launcher error: GDBus proxy init failed to connect %s:%s on %s.\n", serviceName, GDBUS_OBJECT, GDBUS_INTERFACE);
 		if (error != NULL) {
 			_ftprintf(stderr, "Launcher error: GDBus gdbus_proxy init failed for reason: %s\n", error->message);
 			gtk.g_error_free (error);
 		}
+		free(serviceName);
 		return 0;
 	} else {
+		free(serviceName);
 		return 1;
 	}
 }
