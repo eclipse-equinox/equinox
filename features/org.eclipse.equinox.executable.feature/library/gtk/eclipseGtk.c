@@ -110,6 +110,18 @@ gboolean gdbus_initProxy () {
 	const gint serviceNameLength = strlen(GDBUS_SERVICE) + strlen(getOfficialName()) + 2;
 	gchar *serviceName = (gchar *) malloc(serviceNameLength * sizeof(gchar));
 	snprintf(serviceName, serviceNameLength, "%s.%s", GDBUS_SERVICE, getOfficialName());
+	// Replace any characters that are not valid in a GDBus name with a hyphen.
+	int i;
+	for (i = 0; i < serviceNameLength - 1; i++) {
+		gchar c = serviceName[i];
+		if (!((c >= '0' && c <= '9') ||
+			(c >= 'A' && c <= 'Z') ||
+			(c >= 'a' && c <= 'z') ||
+			(c == '_') ||(c == '-') || (c == '.')
+		)) {
+			serviceName[i] = '-';
+		}
+	}
 
 	// Function 'g_type_init()' is not needed anymore as of glib 2.36 as gtype system is initialized earlier. It is marked as deprecated.
 	// It is here because at the time of writing, eclipse supports glib 2.28.
