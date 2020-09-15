@@ -593,8 +593,7 @@ public abstract class StateImpl implements State {
 
 				ResolverHookFactory currentFactory = hookFactory;
 				if (currentFactory != null) {
-					@SuppressWarnings("unchecked")
-					Collection<BundleRevision> triggerRevisions = Collections.unmodifiableCollection(triggers == null ? Collections.EMPTY_LIST : Arrays.asList((BundleRevision[]) triggers));
+					Collection<BundleRevision> triggerRevisions = Collections.unmodifiableCollection(triggers == null ? Collections.emptyList() : Arrays.asList((BundleRevision[]) triggers));
 					begin(triggerRevisions);
 				}
 				ResolverHookException error = null;
