@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.equinox.launcher;singleton:=true
-Bundle-Version: 1.5.800.qualifier
+Bundle-Version: 1.6.0.qualifier
 Main-Class: org.eclipse.equinox.launcher.Main
 Bundle-ClassPath: .
 Bundle-Vendor: %providerName
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Localization: launcher
 Export-Package: org.eclipse.core.launcher;x-internal:=true,
  org.eclipse.equinox.internal.launcher;x-internal:=true,
