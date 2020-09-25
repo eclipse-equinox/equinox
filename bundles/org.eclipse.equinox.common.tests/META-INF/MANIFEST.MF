@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Common Eclipse Runtime Tests
 Bundle-Vendor: Eclipse.org - Equinox
 Bundle-SymbolicName: org.eclipse.equinox.common.tests;singleton:=true
-Bundle-Version: 3.13.0.qualifier
+Bundle-Version: 3.14.0.qualifier
 Automatic-Module-Name: org.eclipse.equinox.common.tests
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy

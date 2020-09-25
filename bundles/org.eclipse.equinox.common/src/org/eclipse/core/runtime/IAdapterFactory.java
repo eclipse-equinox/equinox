@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
+ *     Christoph Laeubrich - Bug 567344 - Support registration of IAdapterFactory as OSGi Service
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -28,6 +29,19 @@ package org.eclipse.core.runtime;
  * @see IAdaptable
  */
 public interface IAdapterFactory {
+
+	/**
+	 * Service property to use when registering a factory as OSGi-service to declare the adaptable class type, this is a multi-string-property, if more than one is given the factory will be register multiple times
+	 * @since 3.14
+	 */
+	static final String SERVICE_PROPERTY_ADAPTABLE_CLASS = "adaptableClass"; //$NON-NLS-1$
+
+	/**
+	 * Optional service property to use when registering a factory as OSGi-service to declare the possible adapter types. If the property is given, the service is only queried when actually required, this is a multi-string-property.
+	 * @since 3.14
+	 */
+	static final String SERVICE_PROPERTY_ADAPTER_NAMES = "adapterNames"; //$NON-NLS-1$
+
 	/**
 	 * Returns an object which is an instance of the given class
 	 * associated with the given object. Returns <code>null</code> if

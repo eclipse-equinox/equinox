@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
+ *     Christoph Laeubrich - Bug 567344 - Support registration of IAdapterFactory as OSGi Service
  *******************************************************************************/
 package org.eclipse.core.internal.runtime;
 
@@ -18,8 +19,7 @@ import java.net.URL;
 import java.util.*;
 import org.eclipse.core.internal.boot.PlatformURLBaseConnection;
 import org.eclipse.core.internal.boot.PlatformURLHandler;
-import org.eclipse.core.runtime.IAdapterManager;
-import org.eclipse.core.runtime.ServiceCaller;
+import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.log.ExtendedLogReaderService;
 import org.eclipse.equinox.log.ExtendedLogService;
 import org.eclipse.osgi.framework.log.FrameworkLog;
@@ -62,6 +62,8 @@ public class Activator implements BundleActivator {
 
 	private ServiceRegistration<DebugOptionsListener> debugRegistration;
 
+	private ServiceTracker<IAdapterFactory, ?> adapterFactoryTracker;
+
 	/*
 	 * Returns the singleton for this Activator. Callers should be aware that
 	 * this will return null if the bundle is not active.
@@ -84,6 +86,8 @@ public class Activator implements BundleActivator {
 		Hashtable<String, String> properties = new Hashtable<>(2);
 		properties.put(DebugOptions.LISTENER_SYMBOLICNAME, PLUGIN_ID);
 		debugRegistration = context.registerService(DebugOptionsListener.class, TracingOptions.DEBUG_OPTIONS_LISTENER, properties);
+		adapterFactoryTracker = new ServiceTracker<>(context, IAdapterFactory.class, new AdapterFactoryBridge(bundleContext));
+		adapterFactoryTracker.open();
 	}
 
 	private PlatformLogWriter getPlatformWriter(BundleContext context) {
@@ -208,6 +212,9 @@ public class Activator implements BundleActivator {
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
+		if (adapterFactoryTracker != null) {
+			adapterFactoryTracker.close();
+		}
 		closeURLTrackerServices();
 		if (platformURLConverterService != null) {
 			platformURLConverterService.unregister();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2018 IBM Corporation and others.
+ * Copyright (c) 2007, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM - Initial API and implementation
  *     Alexander Kurtakov <akurtako@redhat.com> - bug 458490
+ *     Christoph Laeubrich - Bug 567344
  *******************************************************************************/
 package org.eclipse.equinox.common.tests.adaptable;
 
@@ -18,12 +19,18 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Hashtable;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.core.runtime.IAdapterManager;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -35,6 +42,7 @@ import org.osgi.util.tracker.ServiceTracker;
 public class IAdapterManagerServiceTest {
 	private static final String NON_EXISTING = "com.does.not.Exist";
 	private static final String TEST_ADAPTER = "org.eclipse.equinox.common.tests.adaptable.TestAdapter";
+	private static final String TEST_ADAPTER_OSGI = TestAdapter2.class.getName();
 
 	private static IAdapterManager manager;
 
@@ -49,6 +57,78 @@ public class IAdapterManagerServiceTest {
 		adapterManagerTracker.open();
 		manager = adapterManagerTracker.getService();
 		adapterManagerTracker.close();
+
+	}
+
+	@Test
+	public void testAdaptersOSGiLazy() {
+		AtomicBoolean created = new AtomicBoolean();
+		AtomicBoolean unregistered = new AtomicBoolean();
+		TestAdaptable2 adaptable = new TestAdaptable2();
+		assertFalse("already present", manager.hasAdapter(adaptable, TEST_ADAPTER_OSGI));
+		BundleContext context = FrameworkUtil.getBundle(IAdapterManagerServiceTest.class).getBundleContext();
+		Hashtable<String, Object> properties = new Hashtable<>();
+		properties.put(IAdapterFactory.SERVICE_PROPERTY_ADAPTABLE_CLASS, TestAdaptable2.class.getName());
+		ServiceRegistration<?> registration = context.registerService(IAdapterFactory.class.getName(),
+				new ServiceFactory<IAdapterFactory>() {
+
+					@Override
+					public IAdapterFactory getService(Bundle bundle, ServiceRegistration<IAdapterFactory> r) {
+						created.set(true);
+						return new TestAdapterFactory2(TestAdapter2::new);
+					}
+
+					@Override
+					public void ungetService(Bundle bundle, ServiceRegistration<IAdapterFactory> r,
+							IAdapterFactory service) {
+						unregistered.set(true);
+					}
+				}, properties);
+		assertFalse(created.get());
+		Object result = manager.getAdapter(adaptable, TEST_ADAPTER_OSGI);
+		assertTrue("result is not of desired type", result instanceof TestAdapter2);
+		assertTrue(created.get());
+		registration.unregister();
+		assertFalse("manager is still present", manager.hasAdapter(adaptable, TEST_ADAPTER_OSGI));
+		assertTrue(unregistered.get());
+	}
+
+	@Test
+	public void testAdaptersOSGiLazyExt() {
+		AtomicBoolean created = new AtomicBoolean();
+		AtomicBoolean unregistered = new AtomicBoolean();
+		TestAdaptable2 adaptable = new TestAdaptable2();
+		assertFalse("already present", manager.hasAdapter(adaptable, TEST_ADAPTER_OSGI));
+		BundleContext context = FrameworkUtil.getBundle(IAdapterManagerServiceTest.class).getBundleContext();
+		Hashtable<String, Object> properties = new Hashtable<>();
+		properties.put(IAdapterFactory.SERVICE_PROPERTY_ADAPTABLE_CLASS, TestAdaptable2.class.getName());
+		properties.put(IAdapterFactory.SERVICE_PROPERTY_ADAPTER_NAMES, TestAdapter2.class.getName());
+		ServiceRegistration<?> registration = context.registerService(IAdapterFactory.class.getName(),
+				new ServiceFactory<IAdapterFactory>() {
+
+					@Override
+					public IAdapterFactory getService(Bundle bundle,
+							ServiceRegistration<IAdapterFactory> r) {
+						created.set(true);
+						return new TestAdapterFactory2(TestAdapter2::new);
+					}
+
+					@Override
+					public void ungetService(Bundle bundle, ServiceRegistration<IAdapterFactory> r,
+							IAdapterFactory service) {
+						unregistered.set(true);
+					}
+				}, properties);
+		assertTrue("manager is not present", manager.hasAdapter(adaptable, TEST_ADAPTER_OSGI));
+		Object result = manager.getAdapter(adaptable, TEST_ADAPTER_OSGI);
+		assertNull("result should be null", result);
+		assertFalse(created.get());
+		result = manager.loadAdapter(adaptable, TEST_ADAPTER_OSGI);
+		assertTrue("result is not of desired type", result instanceof TestAdapter2);
+		assertTrue(created.get());
+		registration.unregister();
+		assertFalse("manager is still present", manager.hasAdapter(adaptable, TEST_ADAPTER_OSGI));
+		assertTrue(unregistered.get());
 	}
 
 	/**
@@ -178,4 +258,5 @@ public class IAdapterManagerServiceTest {
 		// request adapter that was unloaded
 		assertNull("1.4", manager.loadAdapter(adaptable, "java.lang.String"));
 	}
+
 }
