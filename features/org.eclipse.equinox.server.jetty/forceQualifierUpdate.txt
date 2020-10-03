@@ -37,3 +37,4 @@ Bug 563630 - Update to Jetty 9.4.29
 Bug 565250 - Switch to use Tycho 2.0.0 snapshot 
 Comparator errors in I20200730-1800
 Bug 565795 - Update to Jetty 9.4.31
+Bug 567559 - Update to Jetty 9.4.32
