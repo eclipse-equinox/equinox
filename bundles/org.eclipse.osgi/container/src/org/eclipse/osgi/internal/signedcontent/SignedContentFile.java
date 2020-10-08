@@ -16,8 +16,13 @@ package org.eclipse.osgi.internal.signedcontent;
 import java.io.IOException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
-import java.util.*;
-import org.eclipse.osgi.signedcontent.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import org.eclipse.osgi.signedcontent.InvalidContentException;
+import org.eclipse.osgi.signedcontent.SignedContent;
+import org.eclipse.osgi.signedcontent.SignedContentEntry;
+import org.eclipse.osgi.signedcontent.SignerInfo;
 
 /*
  * This class is used by the SignedContentFactory to create SignedContent objects from File objects.  This is needed
@@ -47,8 +52,6 @@ public class SignedContentFile implements SignedContent {
 	@Override
 	public synchronized SignedContentEntry[] getSignedEntries() {
 		SignedContentEntry[] entries = signedContent.getSignedEntries();
-		if (signedContent == null)
-			return null;
 		SignedContentEntry[] results = new SignedContentEntry[entries.length];
 		Map<String, Throwable> exceptions = getEntryExceptions(true);
 		for (int i = 0; i < entries.length; i++) {
