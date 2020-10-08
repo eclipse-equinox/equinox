@@ -46,7 +46,7 @@ public class BundleLoaderSources {
 
 	boolean forceSourceCreation(ModuleCapability packageCapability) {
 		Map<String, String> directives = packageCapability.getDirectives();
-		return directives.get(PackageNamespace.CAPABILITY_EXCLUDE_DIRECTIVE) != null || directives.get(PackageNamespace.CAPABILITY_EXCLUDE_DIRECTIVE) != null;
+		return directives.get(PackageNamespace.CAPABILITY_INCLUDE_DIRECTIVE) != null || directives.get(PackageNamespace.CAPABILITY_EXCLUDE_DIRECTIVE) != null;
 	}
 
 	// creates a PackageSource from an ExportPackageDescription.  This is called when initializing
