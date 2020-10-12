@@ -10,7 +10,8 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Christoph Laeubrich - join with IProgressMonitorWithBlocking, add null aware helper methods
+ *     Christoph Laeubrich 	- [Bug 565924] join with IProgressMonitorWithBlocking, add null aware helper methods
+ *     						- [Bug 567808] - add support for slicing a monitor
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -206,6 +207,38 @@ public interface IProgressMonitor {
 	 */
 	public default void clearBlocked() {
 		//default implementation does nothing
+	}
+
+	/**
+	 * This method creates a slice out of this monitor. The slice behaves as if a new monitor instance is created that simply reports work back to its parent monitor.
+	 * Even though it is safe to pass the sliced instance to another thread, instance itself might not be thread-safe and each slice should therefore only be used by one thread at once.
+	 * To account for this, if sliced instances are passed to another thread, only sliced instances should be used like in this example:
+	 * 
+	 * <pre>
+	 * IProgressMonitor monitor = ...
+	 * 
+	 * processAsync(monitor.slice(70));
+	 * monitor = monitor.slice(30); // get a local slice so we can use the monitor
+	 * 								// without interference with the async processing
+	 * monitor.beginTask("Working on private slice", 1);
+	 * ...
+	 * monitor.worked(1);           // this is now safe to be called further on
+	 * ...
+	 * monitor.done();				// mark our part as done, 
+	 * 								// the other slice will be finished by processAsync(...)
+	 * 								// ... and the original monitor by the caller of this method
+	 * 
+	 * </pre>
+	 * 
+	 * The caller of this method (or the Thread that gets this instance passed) is responsible to make sure that {@link #done()} is called once the monitor is no longer needed.
+	 * 
+	 * @param work the amount of work for this {@link IProgressMonitor} to slice
+	 * @return a {@link IProgressMonitor} slice for the given amount, 
+	 * 			the default implementation suppress any strings passed to {@link #setTaskName(String)}, {@link #subTask(String)} and {@link #beginTask(String, int)}, and does not propagate {@link #setCanceled(boolean)} (but reports cancelation of the parent
+	 * @since 3.14
+	 */
+	public default IProgressMonitor slice(int work) {
+		return new SlicedProgressMonitor(this, work);
 	}
 
 	/**
