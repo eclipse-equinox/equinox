@@ -121,7 +121,7 @@ org.osgi.framework.system.packages = \
  javax.xml.transform.stream,\
  javax.xml.validation,\
  javax.xml.xpath,\
- org.ieft.jgss,\
+ org.ietf.jgss,\
  org.w3c.dom,\
  org.w3c.dom.bootstrap,\
  org.w3c.dom.events,\
