@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2019 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2020 Cognos Incorporated, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
  *     IBM Corporation - bug fixes and enhancements
  *     Raymond Augé <raymond.auge@liferay.com> - Bug 436698
  *     Arnaud Mergey <a_mergey@yahoo.fr> - Bug 497510
+ *     Dirk Fauth <dirk.fauth@googlemail.com> - Bug 567831
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.internal.servlet;
 
@@ -34,7 +35,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 	private final Deque<DispatchTargets> dispatchTargets = new LinkedList<DispatchTargets>();
 	private final HttpServletRequest request;
-	private Map<String, Part> parts;
+	private List<Part> parts;
 	private final Lock lock = new ReentrantLock();
 
 	private static final Set<String> dispatcherAttributes =	new HashSet<String>();
@@ -436,12 +437,21 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 	@Override
 	public Part getPart(String name) throws IOException, ServletException {
-		return getParts0().get(name);
+		if (name != null) {
+			Collection<Part> allParts = getParts();
+			for (Part part : allParts) {
+				if (name.equals(part.getName())) {
+					return part;
+				}
+			}
+		}
+		
+		return null;
 	}
 
 	@Override
 	public Collection<Part> getParts() throws IOException, ServletException {
-		return new ArrayList<Part>(getParts0().values());
+		return new ArrayList<Part>(getParts0());
 	}
 
 	public AsyncContext startAsync() throws IllegalStateException {
@@ -458,7 +468,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		throw new IllegalStateException("Async not supported by " + endpointRegistration); //$NON-NLS-1$
 	}
 
-	private Map<String, Part> getParts0() throws IOException, ServletException {
+	private List<Part> getParts0() throws IOException, ServletException {
 		org.eclipse.equinox.http.servlet.internal.registration.ServletRegistration servletRegistration = getServletRegistration();
 
 		if (servletRegistration == null) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 IBM Corporation and others.
+ * Copyright (c) 2011, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Raymond Augé <raymond.auge@liferay.com> - Bug 436698
+ *     Dirk Fauth <dirk.fauth@googlemail.com> - Bug 567831
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.tests.util;
 
@@ -30,6 +31,7 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -286,6 +288,10 @@ public class ServletRequestAdvisor extends Object {
 	}
 
 	public Map<String, List<String>> upload(String value, Map<String, List<Object>> headers) throws IOException {
+		return upload(value, headers, null);
+	}
+	
+	public Map<String, List<String>> upload(String value, Map<String, List<Object>> headers, Map<String, Object> formFields) throws IOException {
 		String spec = createUrlSpec(value);
 		log("Requesting " + spec); //$NON-NLS-1$
 		URL url = new URL(spec);
@@ -309,11 +315,16 @@ public class ServletRequestAdvisor extends Object {
 							postFormURLEncoded(connection, (String)entryValue);
 						}
 						else {
-							connection.setRequestProperty(entry.getKey(), (String)entryValue);
+							String property = connection.getRequestProperty(entry.getKey());
+							if (property == null) {
+								connection.setRequestProperty(entry.getKey(), (String)entryValue);
+							} else {
+								connection.setRequestProperty(entry.getKey(), property + "," + entryValue);
+							}
 						}
 					}
 					else if (entryValue instanceof URL) {
-						uploadFileConnection(connection, entry.getKey(), (URL)entryValue);
+						uploadFileConnection(connection, entry.getKey(), (URL)entryValue, formFields);
 					}
 					else {
 						throw new IllegalArgumentException("only supports strings and files");
@@ -359,7 +370,8 @@ public class ServletRequestAdvisor extends Object {
 		}
 	}
 
-	private void uploadFileConnection(HttpURLConnection connection, String param, URL file)
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void uploadFileConnection(HttpURLConnection connection, String param, URL file, Map<String, Object> formFields)
 		throws IOException {
 
 		String fileName = file.getPath();
@@ -370,14 +382,41 @@ public class ServletRequestAdvisor extends Object {
 		String CRLF = "\r\n";
 		connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
 
-		InputStream input = null;
-		OutputStream output = null;
-		PrintWriter writer = null;
+		try (InputStream input = file.openStream();
+				OutputStream output = connection.getOutputStream();
+				PrintWriter writer = new PrintWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8), true);) {
 
-		try {
-			output = connection.getOutputStream();
-			writer = new PrintWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8), true);
-
+			// add optional parameter
+			if (formFields != null) {
+				formFields.entrySet().forEach(entry -> {
+					if (entry.getValue() instanceof Collection) {
+						((Collection)entry.getValue()).forEach(value -> {
+							writer.append("--" + boundary);
+							writer.append(CRLF);
+							writer.append("Content-Disposition: form-data; name=\"" + entry.getKey() + "\"");
+							writer.append(CRLF);
+							writer.append("Content-Type: text/plain; charset=UTF-8");
+							writer.append(CRLF);
+							writer.append(CRLF);
+							writer.append((String) value);
+							writer.append(CRLF);
+							writer.flush();
+						});
+					} else {
+						writer.append("--" + boundary);
+						writer.append(CRLF);
+						writer.append("Content-Disposition: form-data; name=\"" + entry.getKey() + "\"");
+						writer.append(CRLF);
+						writer.append("Content-Type: text/plain; charset=UTF-8");
+						writer.append(CRLF);
+						writer.append(CRLF);
+						writer.append((String) entry.getValue());
+						writer.append(CRLF);
+						writer.flush();
+					}
+				});
+			}
+			
 			writer.append("--" + boundary);
 			writer.append(CRLF);
 			writer.append("Content-Disposition: form-data; name=\"");
@@ -398,7 +437,6 @@ public class ServletRequestAdvisor extends Object {
 			writer.flush();
 
 			byte[] buf = new byte[64];
-			input = file.openStream();
 			int c = 0;
 			while ((c = input.read(buf, 0, buf.length)) > 0) {
 				output.write(buf, 0, c);
@@ -413,17 +451,6 @@ public class ServletRequestAdvisor extends Object {
 			writer.append("--" + boundary + "--");
 			writer.append(CRLF);
 			writer.flush();
-		}
-		finally {
-			if (input != null) {
-				input.close();
-			}
-			if (output != null) {
-				output.close();
-			}
-			if (writer != null) {
-				writer.close();
-			}
 		}
 	}
 

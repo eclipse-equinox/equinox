@@ -12,6 +12,7 @@
  *     Cognos Incorporated - initial API and implementation
  *     IBM Corporation - bug fixes and enhancements
  *     Raymond Augé - bug fixes and enhancements
+ *     Dirk Fauth <dirk.fauth@googlemail.com> - Bug 567831
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.internal.registration;
 
@@ -88,7 +89,7 @@ public class ServletRegistration extends EndpointRegistration<ServletDTO> {
 		return servletHolder.getServiceReference();
 	}
 
-	public Map<String, Part> parseRequest(HttpServletRequest request) throws IOException, ServletException {
+	public List<Part> parseRequest(HttpServletRequest request) throws IOException, ServletException {
 		if (multipartSupport == null) {
 			throw new IOException("Servlet not configured for multipart!"); //$NON-NLS-1$
 		}

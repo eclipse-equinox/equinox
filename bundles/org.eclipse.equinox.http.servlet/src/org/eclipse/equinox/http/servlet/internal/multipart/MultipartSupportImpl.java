@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2019 Raymond Augé and others.
+ * Copyright (c) 2016, 2020 Raymond Augé and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,13 +10,14 @@
  *
  * Contributors:
  *     Raymond Augé <raymond.auge@liferay.com> - Bug 497271
+ *     Dirk Fauth <dirk.fauth@googlemail.com> - Bug 567831
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.internal.multipart;
 
 import java.io.*;
 import java.security.AccessControlContext;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -79,7 +80,7 @@ public class MultipartSupportImpl implements MultipartSupport {
 	}
 
 	@Override
-	public Map<String, Part> parseRequest(HttpServletRequest request) throws IOException, ServletException {
+	public List<Part> parseRequest(HttpServletRequest request) throws IOException, ServletException {
 		if (upload == null) {
 			throw new IllegalStateException("Servlet was not configured for multipart!"); //$NON-NLS-1$
 		}
@@ -92,13 +93,13 @@ public class MultipartSupportImpl implements MultipartSupport {
 			throw new ServletException("Not a multipart request!"); //$NON-NLS-1$
 		}
 
-		Map<String, Part> parts = new HashMap<String, Part>();
+		ArrayList<Part> parts = new ArrayList<Part>();
 
 		try {
 			for (Object item : upload.parseRequest(request)) {
 				DiskFileItem diskFileItem = (DiskFileItem)item;
 
-				parts.put(diskFileItem.getFieldName(), new MultipartSupportPart(diskFileItem));
+				parts.add(new MultipartSupportPart(diskFileItem));
 			}
 		}
 		catch (FileUploadException fnfe) {
