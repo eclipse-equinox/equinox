@@ -15,7 +15,6 @@
 package org.eclipse.core.internal.preferences;
 
 import java.util.*;
-import java.util.Map.Entry;
 
 /**
  * A {@link Properties} class whose entries are sorted by key; can <strong>only</strong> be used in limited scenarios
@@ -43,13 +42,13 @@ public class SortedProperties extends Properties {
 	}
 
 	@Override
-	public Set<Entry<Object, Object>> entrySet() {
-		TreeSet<Entry<Object, Object>> set = new TreeSet<>((Entry<Object, Object> e1, Entry<Object, Object> e2) -> {
+	public Set<Map.Entry<Object, Object>> entrySet() {
+		TreeSet<Map.Entry<Object, Object>> set = new TreeSet<>((Map.Entry<Object, Object> e1, Map.Entry<Object, Object> e2) -> {
 			String s1 = (String) e1.getKey();
 			String s2 = (String) e2.getKey();
 			return s1.compareTo(s2);
 		});
-		for (java.util.Map.Entry<Object, Object> entry : super.entrySet()) {
+		for (Map.Entry<Object, Object> entry : super.entrySet()) {
 			set.add(entry);
 		}
 		return set;
