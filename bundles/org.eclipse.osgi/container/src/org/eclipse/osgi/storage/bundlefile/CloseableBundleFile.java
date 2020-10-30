@@ -134,6 +134,9 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 					// This can throw an IO exception resulting in closed remaining true on exit
 					doOpen();
 					closed = false;
+					if (debug.DEBUG_BUNDLE_FILE_OPEN) {
+						Debug.println("OPENED bundle file - " + toString()); //$NON-NLS-1$
+					}
 				}
 			} else {
 				mruListUse();
@@ -356,6 +359,9 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 				doClose();
 				mruListRemove();
 				postClose();
+				if (debug.DEBUG_BUNDLE_FILE_CLOSE) {
+					Debug.println("CLOSED bundle file - " + toString()); //$NON-NLS-1$
+				}
 			}
 		} finally {
 			openLock.unlock();

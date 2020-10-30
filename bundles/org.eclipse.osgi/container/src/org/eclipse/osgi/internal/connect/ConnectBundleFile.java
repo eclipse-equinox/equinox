@@ -141,4 +141,9 @@ public class ConnectBundleFile extends CloseableBundleFile<ConnectEntry> {
 	Optional<ClassLoader> getClassLoader() {
 		return content.getClassLoader();
 	}
+
+	@Override
+	public String toString() {
+		return content.toString();
+	}
 }

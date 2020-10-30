@@ -40,6 +40,10 @@ org.eclipse.osgi/debug/systemBundle=false
 org.eclipse.osgi/debug/storage=false
 # Debug the bundle file reading
 org.eclipse.osgi/debug/bundleFile=false
+# Debug the bundle file open calls
+org.eclipse.osgi/debug/bundleFile/open=false
+# Debug the bundle file close calls
+org.eclipse.osgi/debug/bundleFile/close=false
 
 # Eclipse adaptor options
 org.eclipse.osgi/eclipseadaptor/debug = false
