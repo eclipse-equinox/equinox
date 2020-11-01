@@ -2857,7 +2857,7 @@ public class ServletTest extends BaseTest {
 		Class<ServletContext> contextClass = ServletContext.class;
 		for(Method m : contextClass.getMethods()) {
 			String name = m.getName();
-			if (name.equals("addFilter") || name.equals("addListener") || name.equals("addServlet") || name.equals("createFilter") || name.equals("createListener") || name.equals("createServlet") | name.equals("declareRoles")) {
+			if (name.equals("addFilter") || name.equals("addListener") || name.equals("addServlet") || name.equals("createFilter") || name.equals("createListener") || name.equals("createServlet") || name.equals("declareRoles")) {
 				methods.add(m);
 			}
 		}
