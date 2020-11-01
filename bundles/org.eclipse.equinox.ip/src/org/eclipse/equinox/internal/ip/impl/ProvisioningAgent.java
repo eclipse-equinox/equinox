@@ -581,7 +581,7 @@ public class ProvisioningAgent implements BundleActivator, ProvisioningService, 
 						extraFileds = new Hashtable(3, 3);
 					}
 					extraFileds.put(name, type);
-				}//the extra field is null or the entry is the manifest
+				} //the extra field is null or the entry is the manifest
 				if (!manifestFound) {
 					if ("META-INF/MANIFEST.MF".equals(name)) {//the entry is the manifest
 						manifestFound = true;
@@ -1489,6 +1489,8 @@ public class ProvisioningAgent implements BundleActivator, ProvisioningService, 
 				if (line.startsWith(ProvisioningService.INITIALPROVISIONING_ENTRIES)) {
 					header.append(removeWhiteSpaces(line.substring(ProvisioningService.INITIALPROVISIONING_ENTRIES.length() + 1)));
 					line = br.readLine();//next line
+					if (line == null)
+						return null;
 					while (loop = (line.length() != 0 && Character.isWhitespace(line.charAt(0)))) {
 						header.append(removeWhiteSpaces(line));
 						line = br.readLine();
