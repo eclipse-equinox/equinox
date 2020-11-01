@@ -67,7 +67,7 @@ public class ProxyContext {
 			ContextAttributes contextAttributes = attributesMap.get(controller);
 
 			if (contextAttributes == null) {
-				contextAttributes = new ContextAttributes(controller);
+				contextAttributes = new ContextAttributes(controller, proxyContextTempDir);
 
 				attributesMap.put(controller, contextAttributes);
 			}
@@ -122,13 +122,13 @@ public class ProxyContext {
 		return directory.delete();
 	}
 
-	public class ContextAttributes
+	public static class ContextAttributes
 		extends Dictionary<String, Object> implements Serializable {
 
 		private static final long serialVersionUID = 1916670423277243587L;
 		private final AtomicInteger referenceCount = new AtomicInteger();
 
-		public ContextAttributes(ContextController controller) {
+		public ContextAttributes(ContextController controller, File proxyContextTempDir) {
 			if (proxyContextTempDir != null) {
 				File contextTempDir = new File(
 					proxyContextTempDir,
