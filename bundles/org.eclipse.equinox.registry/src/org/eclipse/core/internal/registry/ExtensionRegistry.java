@@ -611,9 +611,6 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		int[] existingExtensions = extPoint.getRawChildren();
 		int[] newExtensions = RegistryObjectManager.EMPTY_INT_ARRAY;
 		if (existingExtensions.length > 1) {
-			if (existingExtensions.length == 1)
-				newExtensions = RegistryObjectManager.EMPTY_INT_ARRAY;
-
 			newExtensions = new int[existingExtensions.length - 1];
 			for (int i = 0, j = 0; i < existingExtensions.length; i++)
 				if (existingExtensions[i] != extension.getObjectId())
