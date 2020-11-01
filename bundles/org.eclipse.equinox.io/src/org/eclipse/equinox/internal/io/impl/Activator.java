@@ -45,7 +45,7 @@ public class Activator implements BundleActivator {
 			connector = null;
 			log.close();
 		}
-		bc = null;
+		Activator.bc = null;
 	}
 
 	public static boolean getBoolean(String property) {
