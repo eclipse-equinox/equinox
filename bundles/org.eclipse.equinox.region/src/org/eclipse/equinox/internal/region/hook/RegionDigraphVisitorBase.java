@@ -32,15 +32,14 @@ abstract class RegionDigraphVisitorBase<C> implements RegionDigraphVisitor {
 	private final Stack<Set<C>> allowedStack = new Stack<Set<C>>();
 	private final Stack<Collection<C>> filteredStack = new Stack<Collection<C>>();
 
-	private Object monitor = new Object();
+	private final Object monitor;
 
 	private Set<C> allowed;
 
 	protected RegionDigraphVisitorBase(Collection<C> candidates) {
 		this.allCandidates = candidates;
-		synchronized (this.monitor) {
-			this.allowed = new HashSet<C>();
-		}
+		this.allowed = new HashSet<C>();
+		this.monitor = new Object();
 	}
 
 	Collection<C> getAllowed() {
