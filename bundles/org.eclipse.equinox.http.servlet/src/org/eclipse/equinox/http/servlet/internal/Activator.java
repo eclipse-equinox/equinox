@@ -35,6 +35,10 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 public class Activator
 	implements BundleActivator, ServiceTrackerCustomizer<HttpServlet, HttpTuple> {
 
+	/**
+	 * 
+	 */
+	private static final Random RANDOM = new Random();
 	private static final String DEFAULT_SERVICE_DESCRIPTION = "Equinox Servlet Bridge"; //$NON-NLS-1$
 	private static final String DEFAULT_SERVICE_VENDOR = "Eclipse.org"; //$NON-NLS-1$
 	private static final String PROP_GLOBAL_WHITEBOARD = "equinox.http.global.whiteboard"; //$NON-NLS-1$
@@ -169,7 +173,7 @@ public class Activator
 			}
 
 			// need a unique id for our service to match old HttpService HttpContext
-			serviceProperties.put(UNIQUE_SERVICE_ID, new Random().nextLong());
+			serviceProperties.put(UNIQUE_SERVICE_ID, RANDOM.nextLong());
 			// white board support
 			// determine if the system bundle context should be used:
 			boolean useSystemContext = Boolean.valueOf(currentContext.getProperty(PROP_GLOBAL_WHITEBOARD));
