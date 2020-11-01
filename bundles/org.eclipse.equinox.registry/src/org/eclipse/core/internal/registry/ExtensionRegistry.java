@@ -1137,6 +1137,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		if (identifier == null) {
 			String message = NLS.bind(RegistryMessages.create_failedExtensionPoint, label);
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, message, null));
+			throw new NullPointerException(message);
 		}
 		if (schemaReference == null)
 			schemaReference = ""; //$NON-NLS-1$
