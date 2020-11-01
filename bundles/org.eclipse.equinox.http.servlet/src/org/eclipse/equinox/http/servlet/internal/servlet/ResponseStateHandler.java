@@ -302,11 +302,6 @@ public class ResponseStateHandler {
 			return;
 		}
 
-		if (status == -1) {
-			// There's nothing more we can do here.
-			return;
-		}
-
 		HttpServletResponse wrappedResponse = (HttpServletResponse)responseWrapper.getResponse();
 
 		if (wrappedResponse.isCommitted()) {
