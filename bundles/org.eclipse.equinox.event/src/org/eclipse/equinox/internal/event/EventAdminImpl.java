@@ -94,6 +94,7 @@ public class EventAdminImpl implements EventAdmin {
 		if (event == null) {
 			log.log(LogService.LOG_ERROR, EventAdminMsg.EVENT_NULL_EVENT);
 			// continue from here will result in an NPE below; the spec for EventAdmin does not allow for null here
+			throw new NullPointerException(EventAdminMsg.EVENT_NULL_EVENT);
 		}
 
 		String topic = event.getTopic();
