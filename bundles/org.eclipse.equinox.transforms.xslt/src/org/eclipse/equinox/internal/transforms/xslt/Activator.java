@@ -45,6 +45,5 @@ public class Activator implements BundleActivator {
 			registration.unregister();
 
 		logTracker.close();
-		context = null;
 	}
 }
