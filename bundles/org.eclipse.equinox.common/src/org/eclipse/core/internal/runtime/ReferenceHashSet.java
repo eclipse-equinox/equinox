@@ -74,11 +74,11 @@ public class ReferenceHashSet<T> {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (!(obj instanceof HashableWeakReference))
+			if (!(obj instanceof HashableSoftReference))
 				return false;
 			Object referent = super.get();
 			@SuppressWarnings("unchecked")
-			Object other = ((HashableWeakReference<?>) obj).get();
+			Object other = ((HashableSoftReference<?>) obj).get();
 			if (referent == null)
 				return other == null;
 			return referent.equals(other);
