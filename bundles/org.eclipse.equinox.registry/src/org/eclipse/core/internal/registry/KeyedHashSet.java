@@ -20,10 +20,10 @@ package org.eclipse.core.internal.registry;
  */
 public class KeyedHashSet {
 	protected static final int MINIMUM_SIZE = 7;
-	private int capacity;
+	private final int capacity;
 	protected int elementCount = 0;
 	protected KeyedElement[] elements;
-	protected boolean replace;
+	protected final boolean replace;
 
 	public KeyedHashSet() {
 		this(MINIMUM_SIZE, true);
@@ -189,7 +189,7 @@ public class KeyedHashSet {
 	}
 
 	private int hash(KeyedElement element) {
-		return Math.abs(element.getKeyHashCode()) % elements.length;
+		return (element.getKeyHashCode() & 0x7FFF_FFFF) % elements.length;
 	}
 
 	public boolean isEmpty() {
@@ -197,7 +197,7 @@ public class KeyedHashSet {
 	}
 
 	private int keyHash(Object key) {
-		return Math.abs(key.hashCode()) % elements.length;
+		return (key.hashCode() & 0x7FFF_FFFF) % elements.length;
 	}
 
 	/**
