@@ -40,3 +40,4 @@ Bug 565795 - Update to Jetty 9.4.31
 Bug 567559 - Update to Jetty 9.4.32
 Bug 568292 - Update to Jetty 9.4.33
 Bug 568582 - Update to Jetty 9.4.34
+Bug 569227 - Update to Jetty 9.4.35
