@@ -542,7 +542,7 @@ public class HttpServiceRuntimeImpl
 				String newServletPath = requestURI.substring(0, pos);
 				pathInfo = decode(requestURI.substring(pos));
 				servletPath = decode(newServletPath);
-				pos = servletPath.lastIndexOf('/');
+				pos = newServletPath.lastIndexOf('/');
 
 				continue;
 			}
