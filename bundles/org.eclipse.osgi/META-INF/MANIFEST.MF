@@ -52,7 +52,7 @@ Export-Package: org.eclipse.core.runtime.adaptor;x-friends:="org.eclipse.core.ru
  org.eclipse.osgi.storage.url.reference;x-internal:=true,
  org.eclipse.osgi.storagemanager;version="1.0",
  org.eclipse.osgi.util;version="1.1",
- org.osgi.dto;version="1.1",
+ org.osgi.dto;version="1.1.1",
  org.osgi.framework;version="1.10",
  org.osgi.framework.connect;version="1.0";uses:="org.osgi.framework.launch",
  org.osgi.framework.dto;version="1.8";uses:="org.osgi.dto",
@@ -66,18 +66,18 @@ Export-Package: org.eclipse.core.runtime.adaptor;x-friends:="org.eclipse.core.ru
  org.osgi.framework.startlevel.dto;version="1.0";uses:="org.osgi.dto",
  org.osgi.framework.wiring;version="1.2";uses:="org.osgi.framework,org.osgi.resource",
  org.osgi.framework.wiring.dto;version="1.3";uses:="org.osgi.dto,org.osgi.resource.dto",
- org.osgi.resource;version="1.0",
- org.osgi.resource.dto;version="1.0";uses:="org.osgi.dto",
+ org.osgi.resource;version="1.0.1",
+ org.osgi.resource.dto;version="1.0.1";uses:="org.osgi.dto",
  org.osgi.service.condition;version="1.0",
- org.osgi.service.condpermadmin;version="1.1.1";uses:="org.osgi.framework",
+ org.osgi.service.condpermadmin;version="1.1.2";uses:="org.osgi.framework",
  org.osgi.service.log;version="1.5";uses:="org.osgi.framework",
  org.osgi.service.log.admin;version="1.0";uses:="org.osgi.service.log",
- org.osgi.service.packageadmin;version="1.2";uses:="org.osgi.framework",
- org.osgi.service.permissionadmin;version="1.2",
- org.osgi.service.resolver;version="1.1";uses:="org.osgi.resource",
- org.osgi.service.startlevel;version="1.1";uses:="org.osgi.framework",
- org.osgi.service.url;version="1.0",
- org.osgi.util.tracker;version="1.5.2";uses:="org.osgi.framework"
+ org.osgi.service.packageadmin;version="1.2.1";uses:="org.osgi.framework",
+ org.osgi.service.permissionadmin;version="1.2.1",
+ org.osgi.service.resolver;version="1.1.1";uses:="org.osgi.resource",
+ org.osgi.service.startlevel;version="1.1.1";uses:="org.osgi.framework",
+ org.osgi.service.url;version="1.0.1",
+ org.osgi.util.tracker;version="1.5.3";uses:="org.osgi.framework"
 Provide-Capability: osgi.service; objectClass:List<String>="org.osgi.service.log.LogReaderService,org.eclipse.equinox.log.ExtendedLogReaderService"; uses:="org.osgi.service.log",
  osgi.service; objectClass:List<String>="org.osgi.service.log.LoggerFactory,org.osgi.service.log.LogService,org.eclipse.equinox.log.ExtendedLogService"; uses:="org.osgi.service.log",
  osgi.service; objectClass:List<String>="org.osgi.service.log.admin.LoggerAdmin"; uses:="org.osgi.service.log.admin",
@@ -104,7 +104,7 @@ Bundle-Activator: org.eclipse.osgi.internal.framework.SystemBundleActivator
 Bundle-Description: %systemBundle
 Bundle-Copyright: %copyright
 Bundle-Vendor: %eclipse.org
-Bundle-Version: 3.16.100.qualifier
+Bundle-Version: 3.16.200.qualifier
 Bundle-Localization: systembundle
 Bundle-DocUrl: http://www.eclipse.org
 Eclipse-ExtensibleAPI: true
