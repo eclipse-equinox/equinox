@@ -103,6 +103,9 @@ public class StorageLoginDialog extends TitleAreaDialog {
 		Control contents = super.createContents(parent);
 		dlgTitleImage = dlgImageDescriptor.createImage();
 		setTitleImage(dlgTitleImage);
+		if (dlgTitleImage != null) {
+			contents.addDisposeListener(e -> dlgTitleImage.dispose());
+		}
 		return contents;
 	}
 
@@ -217,4 +220,5 @@ public class StorageLoginDialog extends TitleAreaDialog {
 
 		super.okPressed();
 	}
+
 }
