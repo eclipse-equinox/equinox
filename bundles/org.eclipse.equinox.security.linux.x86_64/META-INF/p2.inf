@@ -1,0 +1,2 @@
+requires.0.namespace=org.eclipse.equinox.security.linux
+requires.0.name=Equinox Security fragment for Linux

@@ -2,7 +2,7 @@
 <?eclipse version="3.2"?>
 <fragment>
    <extension
-         id="LinuxKeystoreIntegration"
+         id="LinuxKeystoreIntegrationJNA"
          name="%linuxModuleName"
          point="org.eclipse.equinox.security.secureStorage">
       <provider

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2018 IBM Corporation and others.
+ * Copyright (c) 2008, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,7 +25,7 @@ import org.junit.runners.Suite.SuiteClasses;
  * As such this tests should be run in a headless mode.
  */
 @RunWith(Suite.class)
-@SuiteClasses({Base64Test.class, DetectPBECiphersTest.class, SlashEncodeTest.class, DefaultPreferencesTest.class, DynamicPreferencesTest.class, WinPreferencesTest.class})
+@SuiteClasses({Base64Test.class, DetectPBECiphersTest.class, SlashEncodeTest.class, DefaultPreferencesTest.class, DynamicPreferencesTest.class, WinPreferencesTest.class, LinuxPreferencesTest.class})
 public class AllSecurityTests {
 	//see @SuiteClasses
 }
