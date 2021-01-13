@@ -20,9 +20,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
@@ -42,9 +45,14 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.namespace.IdentityNamespace;
+import org.osgi.framework.startlevel.FrameworkStartLevel;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.FrameworkWiring;
+import org.osgi.resource.Requirement;
+import org.osgi.resource.Resource;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.service.startlevel.StartLevel;
 import org.osgi.service.permissionadmin.PermissionAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -53,9 +61,11 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * The activator class controls the plug-in life cycle
  */
 public class Activator implements BundleActivator {
-	private ServiceTracker<StartLevel, StartLevel> startLevelManagerTracker;
 	private ServiceTracker<ConditionalPermissionAdmin, ConditionalPermissionAdmin> condPermAdminTracker;
 	private ServiceTracker<PermissionAdmin, PermissionAdmin> permissionAdminTracker;
+	private FrameworkStartLevel frameworkStartLevel;
+	private FrameworkWiring frameworkWiring;
+	@SuppressWarnings("deprecation")
 	private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
 	private static boolean isFirstProcessor = true;
 	private static TelnetCommand telnetConnection = null;
@@ -217,8 +227,13 @@ public class Activator implements BundleActivator {
 
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void start(BundleContext context) throws Exception {
+		Bundle systemBundle = context.getBundle(Constants.SYSTEM_BUNDLE_LOCATION);
+		frameworkStartLevel = systemBundle.adapt(FrameworkStartLevel.class);
+		frameworkWiring = systemBundle.adapt(FrameworkWiring.class);
+
 		commandProviderTracker = new ServiceTracker<>(context, CommandProvider.class, new CommandCustomizer(context));
 		commandProviderTracker.open();
 		commandProcessorTracker = new ServiceTracker<>(context, CommandProcessor.class, new ProcessorCustomizer(context));
@@ -230,9 +245,6 @@ public class Activator implements BundleActivator {
 		// grab permission admin
 		permissionAdminTracker = new ServiceTracker<>(context, PermissionAdmin.class, null);
 		permissionAdminTracker.open();
-
-		startLevelManagerTracker = new ServiceTracker<>(context, StartLevel.class, null);
-		startLevelManagerTracker.open();
 
 		packageAdminTracker = new ServiceTracker<>(context, PackageAdmin.class, null);
 		packageAdminTracker.open();
@@ -258,20 +270,40 @@ public class Activator implements BundleActivator {
 	}
 
 	private void startBundle(String bsn, boolean required) throws BundleException {
-		PackageAdmin pa = packageAdminTracker.getService();
-		if (pa != null) {
-			@SuppressWarnings("deprecation")
-			Bundle[] shells = pa.getBundles(bsn, null);
-			if (shells != null && shells.length > 0) {
-				shells[0].start(Bundle.START_TRANSIENT);
-			} else if (required) {
-				throw new BundleException("Missing required bundle: " + bsn);
+		Collection<BundleCapability> found = frameworkWiring.findProviders(new Requirement() {
+			
+			@Override
+			public Resource getResource() {
+				return null;
 			}
+			
+			@Override
+			public String getNamespace() {
+				return IdentityNamespace.IDENTITY_NAMESPACE;
+			}
+			
+			@Override
+			public Map<String, String> getDirectives() {
+				return Collections.singletonMap("filter", "("+ getNamespace() + "=" + bsn + ")");
+			}
+			
+			@Override
+			public Map<String, Object> getAttributes() {
+				return Collections.emptyMap();
+			}
+		});
+
+		if (found.isEmpty()) {
+			if (required) {
+				throw new BundleException("Missing required gogo bundle: " + bsn);
+			}
+		} else {
+			found.iterator().next().getRevision().getBundle().start(Bundle.START_TRANSIENT);
 		}
 	}
 
-	public StartLevel getStartLevel() {
-		return getServiceFromTracker(startLevelManagerTracker, StartLevel.class);
+	public FrameworkStartLevel getStartLevel() {
+		return frameworkStartLevel;
 	}
 
 	public PermissionAdmin getPermissionAdmin() {
@@ -282,6 +314,7 @@ public class Activator implements BundleActivator {
 		return getServiceFromTracker(condPermAdminTracker, ConditionalPermissionAdmin.class);
 	}
 
+	@SuppressWarnings("deprecation")
 	public PackageAdmin getPackageAdmin() {
 		return getServiceFromTracker(packageAdminTracker, PackageAdmin.class);
 	}
