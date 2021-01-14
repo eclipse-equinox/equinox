@@ -61,6 +61,67 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * The activator class controls the plug-in life cycle
  */
 public class Activator implements BundleActivator {
+	private enum GOGO {
+		RUNTIME("org.apache.felix.gogo.runtime", "runtime.implementation", true),
+		SHELL("org.apache.felix.gogo.shell", "shell.implementation", true),
+		COMMAND("org.apache.felix.gogo.command", "command.implementation", false);
+
+		private final GogoRequirement identityRequirement;
+		private final GogoRequirement implRequirement;
+		private final boolean required;
+		GOGO(String bsn, String implName, boolean required) {
+			this.identityRequirement = new GogoRequirement(IdentityNamespace.IDENTITY_NAMESPACE, bsn);
+			this.implRequirement = new GogoRequirement("org.apache.felix.gogo", implName);
+			this.required = required;
+		}
+
+		void start(FrameworkWiring frameworkWiring) throws BundleException {
+			Collection<BundleCapability> found = frameworkWiring.findProviders(implRequirement);
+			if (found.isEmpty()) {
+				found = frameworkWiring.findProviders(identityRequirement);
+			}
+
+			if (found.isEmpty()) {
+				if (required) {
+					throw new BundleException("Missing required gogo bundle: " + identityRequirement.getFilter());
+				}
+			} else {
+				found.iterator().next().getRevision().getBundle().start(Bundle.START_TRANSIENT);
+			}
+		}
+
+		class GogoRequirement implements Requirement {
+			private final String namespace;
+			private final String filter;
+			GogoRequirement(String namespace, String value) {
+				this.namespace = namespace;
+				this.filter = "("+ getNamespace() + "=" + value + ")";
+			}
+			@Override
+			public String getNamespace() {
+				return namespace;
+			}
+
+			@Override
+			public Map<String, String> getDirectives() {
+				return Collections.singletonMap("filter", filter);
+			}
+
+			@Override
+			public Map<String, Object> getAttributes() {
+				return Collections.emptyMap();
+			}
+
+			@Override
+			public Resource getResource() {
+				return null;
+			}
+
+			String getFilter() {
+				return filter;
+			}
+		}
+	}
 	private ServiceTracker<ConditionalPermissionAdmin, ConditionalPermissionAdmin> condPermAdminTracker;
 	private ServiceTracker<PermissionAdmin, PermissionAdmin> permissionAdminTracker;
 	private FrameworkStartLevel frameworkStartLevel;
@@ -264,42 +325,9 @@ public class Activator implements BundleActivator {
 		CommandsTracker commandsTracker = new CommandsTracker(context);
 		context.registerService(CommandsTracker.class.getName(), commandsTracker, null);
 
-		startBundle("org.apache.felix.gogo.runtime", true);
-		startBundle("org.apache.felix.gogo.shell", true);
-		startBundle("org.apache.felix.gogo.command", false);
-	}
-
-	private void startBundle(String bsn, boolean required) throws BundleException {
-		Collection<BundleCapability> found = frameworkWiring.findProviders(new Requirement() {
-			
-			@Override
-			public Resource getResource() {
-				return null;
-			}
-			
-			@Override
-			public String getNamespace() {
-				return IdentityNamespace.IDENTITY_NAMESPACE;
-			}
-			
-			@Override
-			public Map<String, String> getDirectives() {
-				return Collections.singletonMap("filter", "("+ getNamespace() + "=" + bsn + ")");
-			}
-			
-			@Override
-			public Map<String, Object> getAttributes() {
-				return Collections.emptyMap();
-			}
-		});
-
-		if (found.isEmpty()) {
-			if (required) {
-				throw new BundleException("Missing required gogo bundle: " + bsn);
-			}
-		} else {
-			found.iterator().next().getRevision().getBundle().start(Bundle.START_TRANSIENT);
-		}
+		GOGO.RUNTIME.start(frameworkWiring);
+		GOGO.SHELL.start(frameworkWiring);
+		GOGO.COMMAND.start(frameworkWiring);
 	}
 
 	public FrameworkStartLevel getStartLevel() {
