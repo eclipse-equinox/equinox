@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     Julien HENRY - Linux implementation
  *     Red Hat Inc. - add validation method to handle KDE failures
@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.linux;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 
 import javax.crypto.spec.PBEKeySpec;
@@ -40,25 +40,25 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 	private static final int PASSWORD_LENGTH = 64;
 
 	private static final String SECRET_COLLECTION_DEFAULT = "default"; //$NON-NLS-1$
-	
+
 	private SecretSchema fEquinoxSchema;
 	private LibSecret fLibSecret;
 	private LibGio fLibGio;
-	
+
 	public LinuxPasswordProvider() {
 		initEquinoxSchema();
 	}
 
 	private void initEquinoxSchema() {
 		fEquinoxSchema = new SecretSchema("org.eclipse.equinox", //$NON-NLS-1$
-				SecretSchemaFlags.SECRET_SCHEMA_NONE, 
-				new SecretSchemaAttribute(null, 0));
+				SecretSchemaFlags.SECRET_SCHEMA_NONE, new SecretSchemaAttribute(null, 0));
 	}
 
 	private interface LibGio extends Library {
 		Pointer g_bus_get_sync(int bus_type, Pointer cancellable, PointerByReference gerror);
 
 		void g_error_free(Pointer error);
+
 		GList.ByReference g_list_append(GList list, Pointer data);
 	}
 
@@ -96,7 +96,7 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 			throw new SecurityException(message);
 		}
 
-		fLibSecret = Native.loadLibrary("secret-1", LibSecret.class);
+		fLibSecret = Native.loadLibrary("secret-1", LibSecret.class); //$NON-NLS-1$
 		Pointer secretService = fLibSecret.secret_service_get_sync(SecretServiceFlags.SECRET_SERVICE_LOAD_COLLECTIONS,
 				Pointer.NULL, gerror);
 		if (gerror.getValue() != Pointer.NULL) {
@@ -106,8 +106,8 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 			throw new SecurityException(message);
 		}
 
-		Pointer defaultCollection = fLibSecret.secret_collection_for_alias_sync(secretService, SECRET_COLLECTION_DEFAULT,
-				SecretCollectionFlags.SECRET_COLLECTION_NONE, Pointer.NULL, gerror);
+		Pointer defaultCollection = fLibSecret.secret_collection_for_alias_sync(secretService,
+				SECRET_COLLECTION_DEFAULT, SecretCollectionFlags.SECRET_COLLECTION_NONE, Pointer.NULL, gerror);
 		if (gerror.getValue() != Pointer.NULL) {
 			GError error = new GError(gerror.getValue());
 			String message = "Unable to get secret collection: " + error.message; //$NON-NLS-1$
@@ -158,12 +158,8 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 			throw new SecurityException("Unable to find password"); //$NON-NLS-1$
 		}
 
-		try {
-			byte[] utfbytes = password.getBytes();
-			return new String(utfbytes, "UTF8"); //$NON-NLS-1$
-		} catch (UnsupportedEncodingException e) {
-			return ""; //$NON-NLS-1$
-		}
+		byte[] utfbytes = password.getBytes();
+		return new String(utfbytes, StandardCharsets.UTF_8);
 	}
 
 	private void saveMasterPassword(String password) throws SecurityException {
@@ -171,15 +167,10 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 		String passwordUTF8 = password;
 		PointerByReference gerror = new PointerByReference();
 
-		try {
-			byte[] utfbytes = password.getBytes();
-			passwordUTF8 = new String(utfbytes, "UTF8"); //$NON-NLS-1$
-		} catch (UnsupportedEncodingException e) {
-			// do nothing
-		}
+		byte[] utfbytes = password.getBytes();
+		passwordUTF8 = new String(utfbytes, StandardCharsets.UTF_8);
 
-		fLibSecret.secret_password_store_sync(fEquinoxSchema, SECRET_COLLECTION_DEFAULT,
-				"Equinox master password", //$NON-NLS-1$
+		fLibSecret.secret_password_store_sync(fEquinoxSchema, SECRET_COLLECTION_DEFAULT, "Equinox master password", //$NON-NLS-1$
 				passwordUTF8, Pointer.NULL, gerror, Pointer.NULL);
 
 		if (gerror.getValue() != Pointer.NULL) {
@@ -187,7 +178,7 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 			String message = error.message;
 			fLibGio.g_error_free(gerror.getValue());
 			throw new SecurityException(message);
-		}		
+		}
 	}
 
 	@Override
