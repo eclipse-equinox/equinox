@@ -24,7 +24,6 @@ import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
-import org.osgi.service.packageadmin.PackageAdmin;
 
 public abstract class PackageSource {
 	protected final String id;
@@ -134,7 +133,7 @@ public abstract class PackageSource {
 		}
 		// 3) for the specified bundle, find the wiring for the package.  If no wiring is found return true
 		PackageSource consumerSource = getSourceFromLoader(consumerBL, pkgName, className, checkInternal,
-				container.getPackageAdmin());
+				container);
 		if (consumerSource == null) {
 			// confirmed no source for consumer
 			return true;
@@ -146,12 +145,11 @@ public abstract class PackageSource {
 
 		// 4) For the registrant bundle, find the wiring for the package.
 		PackageSource producerSource = getSourceFromLoader(producerBL, pkgName, className, checkInternal,
-				container.getPackageAdmin());
+				container);
 		if (producerSource == null) {
 			// confirmed no local class either; now check service object
 			if (serviceClass != null && ServiceFactory.class.isAssignableFrom(serviceClass)) {
-				@SuppressWarnings("deprecation")
-				Bundle bundle = container.getPackageAdmin().getBundle(serviceClass);
+				Bundle bundle = container.getBundle(serviceClass);
 				if (bundle != null && bundle != registrant) {
 					// in this case we have a wacky ServiceFactory that is doing something we cannot
 					// verify if it is correct. Instead of failing we allow the assignment and hope
@@ -163,7 +161,7 @@ public abstract class PackageSource {
 			// 5) If no wiring is found for the registrant bundle then find the wiring for
 			// the classloader of the service object. If no wiring is found return false.
 			producerSource = getPackageSource(serviceClass, pkgName, className, checkInternal,
-					container.getPackageAdmin());
+					container);
 			if (producerSource == null) {
 				return false;
 			}
@@ -173,7 +171,7 @@ public abstract class PackageSource {
 	}
 
 	private static PackageSource getSourceFromLoader(BundleLoader loader, String pkgName, String className,
-			boolean checkInternal, @SuppressWarnings("deprecation") PackageAdmin packageAdmin) {
+			boolean checkInternal, EquinoxContainer container) {
 		PackageSource source = loader.getPackageSource(pkgName);
 		if (source != null || !checkInternal) {
 			return source;
@@ -182,8 +180,7 @@ public abstract class PackageSource {
 			Class<?> clazz = loader.findLocalClass(className);
 			if (clazz != null) {
 				// make sure it is from this actual loader
-				@SuppressWarnings("deprecation")
-				Bundle b = packageAdmin.getBundle(clazz);
+				Bundle b = container.getBundle(clazz);
 				if (b != null) {
 					if (loader.getWiring().getBundle() == b) {
 						// create a source that represents the private package
@@ -203,13 +200,11 @@ public abstract class PackageSource {
 	}
 
 	private static PackageSource getPackageSource(Class<?> serviceClass, String pkgName, String className,
-			boolean checkInternal,
-			@SuppressWarnings("deprecation") PackageAdmin packageAdmin) {
+			boolean checkInternal, EquinoxContainer container) {
 		if (serviceClass == null) {
 			return null;
 		}
-		@SuppressWarnings("deprecation")
-		Bundle serviceBundle = packageAdmin.getBundle(serviceClass);
+		Bundle serviceBundle = container.getBundle(serviceClass);
 		if (serviceBundle == null) {
 			return null;
 		}
@@ -217,7 +212,7 @@ public abstract class PackageSource {
 		if (producerBL == null) {
 			return null;
 		}
-		PackageSource producerSource = getSourceFromLoader(producerBL, pkgName, className, checkInternal, packageAdmin);
+		PackageSource producerSource = getSourceFromLoader(producerBL, pkgName, className, checkInternal, container);
 		if (producerSource != null) {
 			return producerSource;
 		}
@@ -225,13 +220,13 @@ public abstract class PackageSource {
 		Class<?>[] interfaces = serviceClass.getInterfaces();
 		// note that getInterfaces never returns null
 		for (Class<?> intf : interfaces) {
-			producerSource = getPackageSource(intf, pkgName, className, checkInternal, packageAdmin);
+			producerSource = getPackageSource(intf, pkgName, className, checkInternal, container);
 			if (producerSource != null) {
 				return producerSource;
 			}
 		}
 		// try super class
-		return getPackageSource(serviceClass.getSuperclass(), pkgName, className, checkInternal, packageAdmin);
+		return getPackageSource(serviceClass.getSuperclass(), pkgName, className, checkInternal, container);
 	}
 
 	private static BundleLoader getBundleLoader(Bundle bundle) {

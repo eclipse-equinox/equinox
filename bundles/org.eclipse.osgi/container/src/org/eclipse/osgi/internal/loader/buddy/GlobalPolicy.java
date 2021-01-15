@@ -15,10 +15,23 @@ package org.eclipse.osgi.internal.loader.buddy;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Map;
+import org.eclipse.osgi.container.ModuleContainer;
+import org.eclipse.osgi.internal.container.Capabilities;
 import org.eclipse.osgi.internal.loader.BundleLoader;
-import org.osgi.service.packageadmin.ExportedPackage;
-import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWire;
+import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.framework.wiring.FrameworkWiring;
+import org.osgi.resource.Namespace;
 
 /**
  * Global policy is an implementation of a buddy policy. It is responsible
@@ -26,52 +39,66 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * version of the same package are exported in the system, the exported package
  * with the highest version will be returned.
  */
-@SuppressWarnings("deprecation")
 public class GlobalPolicy implements IBuddyPolicy {
-	private PackageAdmin admin;
+	private FrameworkWiring frameworkWiring;
 
-	public GlobalPolicy(PackageAdmin admin) {
-		this.admin = admin;
+	public GlobalPolicy(FrameworkWiring frameworkWiring) {
+		this.frameworkWiring = frameworkWiring;
 	}
 
 	@Override
 	public Class<?> loadClass(String name) {
-		ExportedPackage pkg = admin.getExportedPackage(BundleLoader.getPackageName(name));
-		if (pkg == null)
-			return null;
-		try {
-			return pkg.getExportingBundle().loadClass(name);
-		} catch (ClassNotFoundException e) {
-			return null;
-		}
+		return getExportingBundles(BundleLoader.getPackageName(name)) //
+				.stream().findFirst().map(b -> {
+					try {
+						return b.loadClass(name);
+					} catch (ClassNotFoundException e) {
+						return null;
+					}
+				}).orElseGet(null);
 	}
 
 	@Override
 	public URL loadResource(String name) {
-		//get all exported packages that match the resource's package
-		ExportedPackage pkg = admin.getExportedPackage(BundleLoader.getResourcePackageName(name));
-		if (pkg == null)
-			return null;
-		return pkg.getExportingBundle().getResource(name);
+		return getExportingBundles(BundleLoader.getResourcePackageName(name)) //
+				.stream().findFirst().map(b -> {
+					return b.getResource(name);
+				}).orElseGet(null);
 	}
 
 	@Override
 	public Enumeration<URL> loadResources(String name) {
-		//get all exported packages that match the resource's package
-		ExportedPackage[] pkgs = admin.getExportedPackages(BundleLoader.getResourcePackageName(name));
-		if (pkgs == null || pkgs.length == 0)
-			return null;
-
-		//get all matching resources for each package
 		Enumeration<URL> results = null;
-		for (ExportedPackage pkg : pkgs) {
+		Collection<Bundle> exporters = getExportingBundles(name);
+		for (Bundle exporter : exporters) {
 			try {
-				results = BundleLoader.compoundEnumerations(results, pkg.getExportingBundle().getResources(name));
+				results = BundleLoader.compoundEnumerations(results, exporter.getResources(name));
 			}catch (IOException e) {
 				//ignore IO problems and try next package
 			}
 		}
-
 		return results;
+	}
+
+	private Collection<Bundle> getExportingBundles(String pkgName) {
+		Collection<Bundle> result = new ArrayList<>();
+		String filter = "(" + PackageNamespace.PACKAGE_NAMESPACE + "=" + pkgName + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		Map<String, String> directives = Collections
+				.<String, String>singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter);
+		Map<String, Boolean> attributes = Collections.singletonMap(Capabilities.SYNTHETIC_REQUIREMENT, Boolean.TRUE);
+		Collection<BundleCapability> packages = frameworkWiring.findProviders(
+				ModuleContainer.createRequirement(PackageNamespace.PACKAGE_NAMESPACE, directives, attributes));
+		for (BundleCapability pkg : packages) {
+			if ((pkg.getRevision().getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+				// use the hosts
+				BundleWiring wiring = pkg.getRevision().getWiring();
+				for (BundleWire hostWire : wiring.getRequiredWires(HostNamespace.HOST_NAMESPACE)) {
+					result.add(hostWire.getProvider().getBundle());
+				}
+			} else {
+				result.add(pkg.getRevision().getBundle());
+			}
+		}
+		return result;
 	}
 }

@@ -19,6 +19,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -36,8 +37,6 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.connect.ConnectBundleFile;
 import org.eclipse.osgi.internal.debug.Debug;
-import org.eclipse.osgi.internal.framework.legacy.PackageAdminImpl;
-import org.eclipse.osgi.internal.framework.legacy.StartLevelImpl;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
@@ -55,14 +54,12 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.connect.ConnectContent;
 import org.osgi.framework.connect.ConnectModule;
 import org.osgi.framework.connect.ModuleConnector;
-import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 
-@SuppressWarnings("deprecation")
 public class EquinoxContainer implements ThreadFactory, Runnable {
 	public static final String NAME = "org.eclipse.osgi"; //$NON-NLS-1$
 	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
@@ -71,8 +68,6 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	private final EquinoxConfiguration equinoxConfig;
 	private final EquinoxLogServices logServices;
 	private final Storage storage;
-	private final PackageAdmin packageAdmin;
-	private final StartLevel startLevel;
 	private final Set<String> bootDelegation;
 	private final String[] bootDelegationStems;
 	private final boolean bootDelegateAll;
@@ -114,8 +109,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 		} catch (IOException | BundleException e) {
 			throw new RuntimeException("Error initializing storage.", e); //$NON-NLS-1$
 		}
-		this.packageAdmin = new PackageAdminImpl(storage.getModuleContainer());
-		this.startLevel = new StartLevelImpl(storage.getModuleContainer());
+
 		this.eventPublisher = new EquinoxEventPublisher(this);
 
 		// set the boot delegation according to the osgi boot delegation property
@@ -179,12 +173,18 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 		return logServices;
 	}
 
-	public PackageAdmin getPackageAdmin() {
-		return packageAdmin;
-	}
-
-	public StartLevel getStartLevel() {
-		return startLevel;
+	public Bundle getBundle(Class<?> clazz) {
+		Bundle b = FrameworkUtil.getBundle(clazz);
+		if (b != null) {
+			return b;
+		}
+		// check if it is the system bundle
+		return AccessController.doPrivileged((PrivilegedAction<Bundle>) () -> {
+			if (clazz.getClassLoader() == EquinoxContainer.class.getClassLoader()) {
+				return getStorage().getModuleContainer().getModule(0).getBundle();
+			}
+			return null;
+		});
 	}
 
 	public SignedContentFactory getSignedContentFactory() {

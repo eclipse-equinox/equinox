@@ -27,7 +27,7 @@ import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.SynchronousBundleListener;
-import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.framework.wiring.FrameworkWiring;
 
 public class PolicyHandler implements SynchronousBundleListener {
 	//Key for the framework buddies
@@ -47,15 +47,16 @@ public class PolicyHandler implements SynchronousBundleListener {
 
 	//Support to cut class / resource loading cycles in the context of one thread. The contained object is a set of classname
 	private final ThreadLocal<Set<String>> beingLoaded;
-	private final PackageAdmin packageAdmin;
+	private final FrameworkWiring frameworkWiring;
 	private final ClassLoader bootLoader;
 
-	public PolicyHandler(BundleLoader loader, List<String> buddyList, PackageAdmin packageAdmin, ClassLoader bootLoader) {
+	public PolicyHandler(BundleLoader loader, List<String> buddyList, FrameworkWiring frameworkWiring,
+			ClassLoader bootLoader) {
 		policedLoader = loader;
 		this.originalBuddyList = buddyList;
 		policies = buddyList.toArray();
 		beingLoaded = new ThreadLocal<>();
-		this.packageAdmin = packageAdmin;
+		this.frameworkWiring = frameworkWiring;
 		this.bootLoader = bootLoader;
 	}
 
@@ -100,7 +101,7 @@ public class PolicyHandler implements SynchronousBundleListener {
 					return (IBuddyPolicy) policiesSnapshot[policyOrder];
 				}
 				if (GLOBAL_POLICY.equals(buddyName)) {
-					policiesSnapshot[policyOrder] = new GlobalPolicy(packageAdmin);
+					policiesSnapshot[policyOrder] = new GlobalPolicy(frameworkWiring);
 					return (IBuddyPolicy) policiesSnapshot[policyOrder];
 				}
 				if (PARENT_POLICY.equals(buddyName)) {

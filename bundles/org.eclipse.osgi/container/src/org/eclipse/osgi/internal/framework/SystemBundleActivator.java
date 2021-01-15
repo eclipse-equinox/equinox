@@ -22,6 +22,8 @@ import org.apache.felix.resolver.Logger;
 import org.apache.felix.resolver.ResolverImpl;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
+import org.eclipse.osgi.internal.framework.legacy.PackageAdminImpl;
+import org.eclipse.osgi.internal.framework.legacy.StartLevelImpl;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
 import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
 import org.eclipse.osgi.internal.permadmin.SecurityAdmin;
@@ -61,14 +63,15 @@ public class SystemBundleActivator implements BundleActivator {
 	public void start(BundleContext bc) throws Exception {
 		registrations.clear();
 		EquinoxBundle bundle = (EquinoxBundle) bc.getBundle();
+		EquinoxContainer equinoxContainer = bundle.getEquinoxContainer();
 
-		bundle.getEquinoxContainer().systemStart(bc);
+		equinoxContainer.systemStart(bc);
 
 		EquinoxConfiguration configuration = bundle.getEquinoxContainer().getConfiguration();
 		installSecurityManager(configuration);
-		bundle.getEquinoxContainer().getLogServices().start(bc);
+		equinoxContainer.getLogServices().start(bc);
 
-		urlFactoryManager = new EquinoxFactoryManager(bundle.getEquinoxContainer());
+		urlFactoryManager = new EquinoxFactoryManager(equinoxContainer);
 		urlFactoryManager.installHandlerFactories(bc);
 
 		FrameworkDebugOptions dbgOptions = (FrameworkDebugOptions) configuration.getDebugOptions();
@@ -79,14 +82,16 @@ public class SystemBundleActivator implements BundleActivator {
 		props.put(Condition.CONDITION_ID, Condition.CONDITION_ID_TRUE);
 		register(bc, Condition.class, Condition.INSTANCE, false, props);
 
-		SecurityAdmin sa = bundle.getEquinoxContainer().getStorage().getSecurityAdmin();
-		ClassLoader tccl = bundle.getEquinoxContainer().getContextFinder();
+		registerLocations(bc, equinoxContainer.getLocations());
+		register(bc, EnvironmentInfo.class, equinoxContainer.getConfiguration(), null);
+		PackageAdmin packageAdmin = new PackageAdminImpl(equinoxContainer,
+				equinoxContainer.getStorage().getModuleContainer().getFrameworkWiring());
+		register(bc, PackageAdmin.class, packageAdmin, null);
+		StartLevel startLevel = new StartLevelImpl(
+				equinoxContainer.getStorage().getModuleContainer().getFrameworkStartLevel());
+		register(bc, StartLevel.class, startLevel, null);
 
-		registerLocations(bc, bundle.getEquinoxContainer().getLocations());
-		register(bc, EnvironmentInfo.class, bundle.getEquinoxContainer().getConfiguration(), null);
-		register(bc, PackageAdmin.class, bundle.getEquinoxContainer().getPackageAdmin(), null);
-		register(bc, StartLevel.class, bundle.getEquinoxContainer().getStartLevel(), null);
-
+		SecurityAdmin sa = equinoxContainer.getStorage().getSecurityAdmin();
 		register(bc, PermissionAdmin.class, sa, null);
 		register(bc, ConditionalPermissionAdmin.class, sa, null);
 
@@ -97,6 +102,7 @@ public class SystemBundleActivator implements BundleActivator {
 
 		register(bc, DebugOptions.class, dbgOptions, null);
 
+		ClassLoader tccl = equinoxContainer.getContextFinder();
 		if (tccl != null) {
 			props.clear();
 			props.put("equinox.classloader.type", "contextClassLoader"); //$NON-NLS-1$ //$NON-NLS-2$

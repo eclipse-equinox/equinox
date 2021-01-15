@@ -13,65 +13,57 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.framework.legacy;
 
-import org.eclipse.osgi.container.Module;
-import org.eclipse.osgi.container.ModuleContainer;
-import org.eclipse.osgi.internal.framework.EquinoxBundle;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.startlevel.BundleStartLevel;
+import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.service.startlevel.StartLevel;
 
 @SuppressWarnings("deprecation")
 public class StartLevelImpl implements StartLevel {
 
-	private final ModuleContainer container;
+	private final FrameworkStartLevel frameworkStartLevel;
 
-	public StartLevelImpl(ModuleContainer container) {
-		this.container = container;
+	public StartLevelImpl(FrameworkStartLevel frameworkStartLevel) {
+		this.frameworkStartLevel = frameworkStartLevel;
 	}
 
 	@Override
 	public int getStartLevel() {
-		return container.getFrameworkStartLevel().getStartLevel();
+		return frameworkStartLevel.getStartLevel();
 	}
 
 	@Override
 	public void setStartLevel(int startlevel) {
-		container.getFrameworkStartLevel().setStartLevel(startlevel);
+		frameworkStartLevel.setStartLevel(startlevel);
 	}
 
 	@Override
 	public int getBundleStartLevel(Bundle bundle) {
-		return getModule(bundle).getStartLevel();
+		return bundle.adapt(BundleStartLevel.class).getStartLevel();
 	}
 
 	@Override
 	public void setBundleStartLevel(Bundle bundle, int startlevel) {
-		getModule(bundle).setStartLevel(startlevel);
+		bundle.adapt(BundleStartLevel.class).setStartLevel(startlevel);
 	}
 
 	@Override
 	public int getInitialBundleStartLevel() {
-		return container.getFrameworkStartLevel().getInitialBundleStartLevel();
+		return frameworkStartLevel.getInitialBundleStartLevel();
 	}
 
 	@Override
 	public void setInitialBundleStartLevel(int startlevel) {
-		container.getFrameworkStartLevel().setInitialBundleStartLevel(startlevel);
+		frameworkStartLevel.setInitialBundleStartLevel(startlevel);
 	}
 
 	@Override
 	public boolean isBundlePersistentlyStarted(Bundle bundle) {
-		return getModule(bundle).isPersistentlyStarted();
+		return bundle.adapt(BundleStartLevel.class).isPersistentlyStarted();
 	}
 
 	@Override
 	public boolean isBundleActivationPolicyUsed(Bundle bundle) {
-		return getModule(bundle).isActivationPolicyUsed();
-	}
-
-	static Module getModule(Bundle bundle) {
-		if (bundle instanceof EquinoxBundle) {
-			return ((EquinoxBundle) bundle).getModule();
-		}
-		throw new IllegalArgumentException("Bundle is not from an equinox framework: " + bundle.getClass()); //$NON-NLS-1$
+		return bundle.adapt(BundleStartLevel.class).isActivationPolicyUsed();
 	}
 }

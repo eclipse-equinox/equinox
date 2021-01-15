@@ -189,7 +189,10 @@ public class BundleLoader extends ModuleLoader {
 		List<ModuleCapability> moduleDatas = wiring.getRevision().getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
 		@SuppressWarnings("unchecked")
 		List<String> buddyList = (List<String>) (moduleDatas.isEmpty() ? null : moduleDatas.get(0).getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_BUDDY_POLICY));
-		policy = buddyList != null ? new PolicyHandler(this, buddyList, container.getPackageAdmin(), container.getBootLoader()) : null;
+		policy = buddyList != null
+				? new PolicyHandler(this, buddyList, container.getStorage().getModuleContainer().getFrameworkWiring(),
+						container.getBootLoader())
+				: null;
 		if (policy != null) {
 			Module systemModule = container.getStorage().getModuleContainer().getModule(0);
 			Bundle systemBundle = systemModule.getBundle();
