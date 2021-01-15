@@ -13,13 +13,16 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.container;
 
-import junit.framework.*;
+import junit.framework.JUnit4TestAdapter;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class AllTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite(AllTests.class.getName());
 		suite.addTest(new JUnit4TestAdapter(TestModuleContainer.class));
 		suite.addTest(new JUnit4TestAdapter(ResolutionReportTest.class));
+		suite.addTest(new JUnit4TestAdapter(ModuleContainerUsageTest.class));
 		return suite;
 	}
 }
