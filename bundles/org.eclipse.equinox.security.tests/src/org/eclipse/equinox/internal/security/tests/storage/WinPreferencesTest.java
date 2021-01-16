@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2018 IBM Corporation and others.
+ * Copyright (c) 2008, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,32 +16,29 @@ package org.eclipse.equinox.internal.security.tests.storage;
 import java.util.Map;
 import org.eclipse.equinox.internal.security.tests.SecurityTestsActivator;
 import org.junit.Before;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 
 /**
  * Tests Windows module, if available.
- *
  */
 public class WinPreferencesTest extends SecurePreferencesTest {
 
-	final private static String WIN_BUNDLE = "org.eclipse.equinox.security.win32.x86";
 	final private static String WIN_64BIT_BUNDLE = "org.eclipse.equinox.security.win32.x86_64";
-	private boolean is64Bit = "x86-64".equals(SecurityTestsActivator.getDefault().getBundleContext().getProperty(Constants.FRAMEWORK_PROCESSOR));
 
 	@Before
 	public void setUp() {
-		org.junit.Assume.assumeTrue(hasBundle(is64Bit ? WIN_64BIT_BUNDLE : WIN_BUNDLE));
+		org.junit.Assume.assumeTrue(hasBundle(WIN_64BIT_BUNDLE));
 	}
 
 	/**
 	 * Unique ID of the Windows module.
 	 */
-	static private final String WIN_MODULE_ID = "org.eclipse.equinox.security.WindowsPasswordProvider"; //$NON-NLS-1$
 	static private final String WIN_64BIT_MODULE_ID = "org.eclipse.equinox.security.WindowsPasswordProvider64bit"; //$NON-NLS-1$
 
 	@Override
 	protected String getModuleID() {
-		return is64Bit ? WIN_64BIT_MODULE_ID : WIN_MODULE_ID;
+		return WIN_64BIT_MODULE_ID;
 	}
 
 	@Override
