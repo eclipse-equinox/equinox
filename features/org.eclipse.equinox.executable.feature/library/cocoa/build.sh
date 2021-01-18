@@ -74,7 +74,8 @@ else
   JAVA_HEADERS="-I$(/usr/libexec/java_home)/include -I$(/usr/libexec/java_home)/include/darwin"
 fi
 
-ARCHS="-arch x86_64"
+ARCHS="-arch $defaultOSArch"
+
 export PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS ARCHS PROGRAM_OUTPUT_DIR JAVA_HEADERS 
 export MACOSX_DEPLOYMENT_TARGET=$DEPLOYMENT_TARGET
 
