@@ -95,7 +95,9 @@
     <module>bundles/org.eclipse.equinox.console.tests</module>
     <module>bundles/org.eclipse.equinox.coordinator</module>
     <module>bundles/org.eclipse.equinox.device</module>
+    <!-- Module is deprecated
     <module>bundles/org.eclipse.equinox.ds</module>
+    -->
     <module>bundles/org.eclipse.equinox.event</module>
 
     <!-- Module is deprecated
