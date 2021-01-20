@@ -52,6 +52,5 @@ public class Const {
 	public static final String EQUINOX_LEGACY_CONTEXT_HELPER = "equinox.legacy.context.helper"; //$NON-NLS-1$
 	public static final String EQUINOX_LEGACY_HTTP_CONTEXT_INITIATING_ID = "equinox.legacy.http.context.initiating.id"; //$NON-NLS-1$
 	public static final String EQUINOX_HTTP_WHITEBOARD_CONTEXT_HELPER_DEFAULT = "equinox.http.whiteboard.context.helper.default"; //$NON-NLS-1$
-	public static final String UTF8 = "UTF-8"; //$NON-NLS-1$
 
 }

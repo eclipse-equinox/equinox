@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2020 Raymond Augé and others.
+ * Copyright (c) 2014, 2021 Raymond Augé and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,7 @@ package org.eclipse.equinox.http.servlet.internal.context;
 
 import java.io.*;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.*;
@@ -216,12 +217,12 @@ public class DispatchTargets {
 			String[] parameters = queryString.split(Const.AMP);
 			for (String parameter : parameters) {
 				int index = parameter.indexOf('=');
-				String name = (index > 0) ? URLDecoder.decode(parameter.substring(0, index), Const.UTF8) : parameter;
+				String name = (index > 0) ? URLDecoder.decode(parameter.substring(0, index), StandardCharsets.UTF_8.name()) : parameter;
 				String[] values = parameterMap.get(name);
 				if (values == null) {
 					values = new String[0];
 				}
-				String value = ((index > 0) && (parameter.length() > index + 1)) ? URLDecoder.decode(parameter.substring(index + 1), Const.UTF8) : ""; //$NON-NLS-1$
+				String value = ((index > 0) && (parameter.length() > index + 1)) ? URLDecoder.decode(parameter.substring(index + 1), StandardCharsets.UTF_8.name()) : ""; //$NON-NLS-1$
 				values = Params.append(values, value);
 				parameterMap.put(name, values);
 			}
