@@ -60,15 +60,7 @@
 	
 	<target name="init_fragment" >
 		<!-- mac only has arch in fragment name for x86_64 -->
-		<condition property="fragmentFolder" value="org.eclipse.equinox.launcher.${ws}.${os}.${arch}" 
-											 else="org.eclipse.equinox.launcher.${ws}.${os}" >
-			<not>
-				<and>
-					<equals arg1="macosx" arg2="${os}"/>
-					<not> <equals arg1="x86_64" arg2="${arch}"/> </not>
-				</and>
-			</not>
-		</condition>
+		<property name="fragmentFolder" value="org.eclipse.equinox.launcher.${ws}.${os}.${arch}" />
 	</target>
 
 	<target name="copyMacPPC" if="copyMacPPC" >
