@@ -31,9 +31,9 @@ public class GList extends Structure {
 		read();
 	}
 
-	Pointer data;
-	GList.ByReference next;
-	GList.ByReference prev;
+	public Pointer data;
+	public GList.ByReference next;
+	public GList.ByReference prev;
 
 	@Override
 	protected List<String> getFieldOrder() {

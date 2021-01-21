@@ -19,9 +19,9 @@ import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 
 public class GError extends Structure {
-	int domain;
-	int code;
-	String message;
+	public int domain;
+	public int code;
+	public String message;
 
 	public GError(Pointer p) {
 		super(p);
