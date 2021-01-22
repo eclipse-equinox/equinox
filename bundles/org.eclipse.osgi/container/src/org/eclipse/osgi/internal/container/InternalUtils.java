@@ -14,11 +14,29 @@
 package org.eclipse.osgi.internal.container;
 
 import java.security.Permission;
-import java.util.*;
-import org.osgi.framework.*;
-import org.osgi.framework.namespace.*;
-import org.osgi.framework.wiring.*;
-import org.osgi.resource.*;
+import java.security.SecureRandom;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundlePermission;
+import org.osgi.framework.CapabilityPermission;
+import org.osgi.framework.PackagePermission;
+import org.osgi.framework.namespace.BundleNamespace;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRequirement;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWire;
+import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.resource.Capability;
+import org.osgi.resource.Requirement;
+import org.osgi.resource.Resource;
+import org.osgi.resource.Wire;
 
 public class InternalUtils {
 
@@ -173,6 +191,35 @@ public class InternalUtils {
 			return names.isEmpty() ? "unknown" : names.iterator().next().toString(); //$NON-NLS-1$
 		}
 		return "unknown"; //$NON-NLS-1$
+	}
+
+	public static String newUUID(EquinoxConfiguration config) {
+		// Note that we use simple Random to improve
+		// performance and the Framework UUID generation does not require
+		// a full SecureRandom seed.
+		boolean useSecureRandom = "true".equals(config.getConfiguration(EquinoxConfiguration.PROP_SECURE_UUID)); //$NON-NLS-1$
+		byte[] uuidBytes = new byte[16];
+		if (useSecureRandom) {
+			new SecureRandom().nextBytes(uuidBytes);
+		} else {
+			new Random().nextBytes(uuidBytes);
+		}
+		// clear the version bits - set to use version 4
+		uuidBytes[6] &= 0x0f;
+		uuidBytes[6] |= 0x40;
+		// clear the variant bits - set to use IETF variant
+		uuidBytes[8] &= 0x3f;
+		uuidBytes[8] |= 0x80;
+		// split into the most and least significant bits
+		long mostSignificantBits = 0;
+		long leastSignificantBits = 0;
+		for (int i = 0; i < 8; i++) {
+			mostSignificantBits = (mostSignificantBits << 8) | (uuidBytes[i] & 0xff);
+		}
+		for (int i = 8; i < 16; i++) {
+			leastSignificantBits = (leastSignificantBits << 8) | (uuidBytes[i] & 0xff);
+		}
+		return new UUID(mostSignificantBits, leastSignificantBits).toString();
 	}
 
 }

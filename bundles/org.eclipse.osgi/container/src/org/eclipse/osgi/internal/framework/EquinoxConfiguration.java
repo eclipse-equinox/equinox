@@ -50,10 +50,10 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.core.runtime.internal.adaptor.ConsoleManager;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.internal.container.InternalUtils;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
@@ -246,6 +246,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String ACTIVE_THREAD_TYPE_NORMAL = "normal"; //$NON-NLS-1$
 
 	public static final String PROP_GOSH_ARGS = "gosh.args"; //$NON-NLS-1$
+
+	public static final String PROP_SECURE_UUID = "equinox.uuid.secure"; //$NON-NLS-1$
 
 	public static final class ConfigValues {
 		/**
@@ -1091,9 +1093,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 				archValue = name;
 			setConfiguration(PROP_OSGI_ARCH, archValue);
 		}
-
 		// set the initial UUID so that it is set as soon as possible
-		String uuid = UUID.randomUUID().toString();
+		String uuid = InternalUtils.newUUID(this);
 		setConfiguration(FRAMEWORK_UUID, uuid);
 	}
 

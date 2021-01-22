@@ -354,7 +354,7 @@ public class AbstractBundleTests extends CoreTest {
 			equinox.stop();
 		} catch (BundleException e) {
 			if (!quietly) {
-				fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+				fail("Unexpected error stopping framework", e); //$NON-NLS-1$
 			}
 		}
 		return waitForStop(equinox, uuid, quietly, timeout);

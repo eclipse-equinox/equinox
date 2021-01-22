@@ -1181,7 +1181,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 				default :
 					break;
 			}
-			assertTrue("UUISection is too big: " + uuidSections[i], uuidSections[i].length() <= limit);
+			assertTrue("UUIDSection is too big: " + uuidSections[i], uuidSections[i].length() <= limit);
 			try {
 				Long.decode(uuidSections[i]);
 			} catch (NumberFormatException e) {

@@ -36,7 +36,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.container.Module.StartOptions;
@@ -51,6 +50,7 @@ import org.eclipse.osgi.container.ModuleWire;
 import org.eclipse.osgi.container.ModuleWiring;
 import org.eclipse.osgi.container.SystemModule;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.internal.container.InternalUtils;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
@@ -187,10 +187,11 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 			@Override
 			protected void initWorker() throws BundleException {
-				String initUUID = getEquinoxContainer().getConfiguration().setConfiguration(EquinoxConfiguration.PROP_INIT_UUID, Boolean.TRUE.toString());
+				EquinoxConfiguration config = getEquinoxContainer().getConfiguration();
+				String initUUID = config.setConfiguration(EquinoxConfiguration.PROP_INIT_UUID, Boolean.TRUE.toString());
 				if (initUUID != null) {
 					// this is not the first framework init, need to generate a new UUID
-					getEquinoxContainer().getConfiguration().setConfiguration(Constants.FRAMEWORK_UUID, UUID.randomUUID().toString());
+					config.setConfiguration(Constants.FRAMEWORK_UUID, InternalUtils.newUUID(config));
 				}
 				getEquinoxContainer().init();
 				addInitFrameworkListeners();
