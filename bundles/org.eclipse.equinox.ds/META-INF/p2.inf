@@ -1,6 +1,0 @@
-instructions.configure=\
-  setProgramProperty(propName:equinox.use.ds, propValue:true);\
-  setProgramProperty(propName:ds.delayed.keepInstances, propValue:true);
-instructions.unconfigure=\
-  setProgramProperty(propName:equinox.use.ds, propValue:);\
-  setProgramProperty(propName:ds.delayed.keepInstances, propValue:);
