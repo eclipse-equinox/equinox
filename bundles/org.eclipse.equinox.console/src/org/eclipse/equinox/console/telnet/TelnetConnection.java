@@ -44,8 +44,8 @@ public class TelnetConnection extends Thread implements Closeable {
 	private static final String OSGI_PROMPT = "osgi> ";
 	private static final String SCOPE = "SCOPE";
 	private static final String EQUINOX_SCOPE = "equinox:*";
-	private static final String CLOSEABLE = "CLOSEABLE";
-	
+	public static final String CLOSEABLE = "CLOSEABLE";
+
 	public TelnetConnection (Socket socket, CommandProcessor processor, BundleContext context) {
 		this.socket = socket;
 		this.processor = processor;

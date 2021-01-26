@@ -16,11 +16,14 @@ package org.eclipse.equinox.console.commands;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.eclipse.equinox.console.telnet.TelnetConnection;
+
 import java.io.Closeable;
 import org.osgi.framework.BundleContext;
 
@@ -28,7 +31,6 @@ import org.osgi.framework.BundleContext;
  * This class implements functionality to disconnect from telnet or ssh console.
  */
 public class DisconnectCommand {
-	private static final String CLOSEABLE = "CLOSEABLE";
 	private static final String DISCONNECT_MESSAGE = "Disconnect from console? (y/n; default=y) ";
 	private static final String DISCONNECT_CONFIRMATION_Y = "y";
 	
@@ -46,20 +48,21 @@ public class DisconnectCommand {
 	}
 	
 	public void disconnect(CommandSession session) {
-		System.out.print(DISCONNECT_MESSAGE);
-		System.out.flush();
+		PrintStream consoleStream = session.getConsole();
+		consoleStream.print(DISCONNECT_MESSAGE);
+		consoleStream.flush();
 		
 		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 		String reply = null;
 		try {
 			reply = reader.readLine();
 		} catch (IOException e) {
-			System.out.println("Error while reading confirmation");
+			consoleStream.println("Error while reading confirmation");
 		}
 		
 		if (reply != null) {
 			if (reply.toLowerCase().startsWith(DISCONNECT_CONFIRMATION_Y) || reply.length() == 0) {
-				Closeable closable = (Closeable)session.get(CLOSEABLE);
+				Closeable closable = (Closeable)session.get(TelnetConnection.CLOSEABLE);
 				if (closable != null) {
 					try {
 						closable.close();
