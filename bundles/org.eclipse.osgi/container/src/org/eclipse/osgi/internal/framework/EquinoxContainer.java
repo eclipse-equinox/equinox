@@ -106,8 +106,8 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 		this.equinoxConfig.getHookRegistry().initialize();
 		try {
 			this.storage = Storage.createStorage(this);
-		} catch (IOException | BundleException e) {
-			throw new RuntimeException("Error initializing storage.", e); //$NON-NLS-1$
+		} catch (Exception e) {
+			throw new IllegalStateException("Error initializing storage for Equinox container.", e); //$NON-NLS-1$
 		}
 
 		this.eventPublisher = new EquinoxEventPublisher(this);

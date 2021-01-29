@@ -126,8 +126,8 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		try {
 			restartFramework();
 			fail("Framework restart should have failed");
-		} catch (IllegalStateException e) {
-			assertThrowable(e);
+		} catch (RuntimeException e) {
+			assertThrowable(e.getCause());
 		}
 		assertCreateStorageHookCalled();
 	}
