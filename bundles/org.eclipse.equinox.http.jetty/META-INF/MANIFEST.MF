@@ -4,7 +4,7 @@ Bundle-Name: %bundleName
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-SymbolicName: org.eclipse.equinox.http.jetty
-Bundle-Version: 3.7.500.qualifier
+Bundle-Version: 3.7.600.qualifier
 Bundle-Activator: org.eclipse.equinox.http.jetty.internal.Activator
 Import-Package: javax.servlet;version="[3.1.0,5.0.0)",
  javax.servlet.http;version="[3.1.0,5.0.0)",
@@ -26,7 +26,5 @@ Import-Package: javax.servlet;version="[3.1.0,5.0.0)",
  org.osgi.service.cm;version="1.2.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: org.eclipse.equinox.http.jetty;version="1.5.0"
-Comment-Header: Both Eclipse-LazyStart and Bundle-ActivationPolicy are specified for compatibility with 3.2
-Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: org.eclipse.equinox.http.jetty

@@ -8,8 +8,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: org.eclipse.osgi.framework.log;version="1.0.0",
  org.osgi.framework;version="1.3.0",
  org.osgi.util.tracker;version="1.0"
-Comment-Header: Both Eclipse-LazyStart and Bundle-ActivationPolicy are specified for compatibility with 3.2
-Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: bundle
 Export-Package: org.eclipse.equinox.internal.transforms;x-internal:=true,

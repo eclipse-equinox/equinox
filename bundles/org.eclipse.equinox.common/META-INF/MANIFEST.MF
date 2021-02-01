@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.equinox.common; singleton:=true
-Bundle-Version: 3.14.0.qualifier
+Bundle-Version: 3.14.100.qualifier
 Bundle-Localization: plugin
 Export-Package: org.eclipse.core.internal.boot;x-friends:="org.eclipse.core.resources,org.eclipse.pde.build",
  org.eclipse.core.internal.runtime;common=split;mandatory:=common;
@@ -32,7 +32,5 @@ Import-Package: org.eclipse.equinox.log;version="[1.0,2.0)",
  org.osgi.service.url,
  org.osgi.util.tracker
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Comment-Header: Both Eclipse-LazyStart and Bundle-ActivationPolicy are specified for compatibility with 3.2
-Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: org.eclipse.equinox.common
