@@ -1,36 +1,156 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" output="scr_test/tb24" path="bundles_src/tb24"/>
-	<classpathentry kind="src" output="scr_test/tb1" path="bundles_src/tb1"/>
-	<classpathentry kind="src" output="scr_test/tb1a" path="bundles_src/tb1a"/>
-	<classpathentry kind="src" output="scr_test/tb2" path="bundles_src/tb2"/>
-	<classpathentry kind="src" output="scr_test/tb3" path="bundles_src/tb3"/>
-	<classpathentry kind="src" output="scr_test/tb4" path="bundles_src/tb4"/>
-	<classpathentry kind="src" output="scr_test/tb5" path="bundles_src/tb5"/>
-	<classpathentry kind="src" output="scr_test/tb6" path="bundles_src/tb6"/>
-	<classpathentry kind="src" output="scr_test/tb7" path="bundles_src/tb7"/>
-	<classpathentry kind="src" output="scr_test/tb8" path="bundles_src/tb8"/>
-	<classpathentry kind="src" output="scr_test/tb9" path="bundles_src/tb9"/>
-	<classpathentry kind="src" output="scr_test/tb10" path="bundles_src/tb10"/>
-	<classpathentry kind="src" output="scr_test/tb11" path="bundles_src/tb11"/>
-	<classpathentry kind="src" output="scr_test/tb12" path="bundles_src/tb12"/>
-	<classpathentry kind="src" output="scr_test/tb13" path="bundles_src/tb13"/>
-	<classpathentry kind="src" output="scr_test/tb14" path="bundles_src/tb14"/>
-	<classpathentry kind="src" output="scr_test/tb15" path="bundles_src/tb15"/>
-	<classpathentry kind="src" output="scr_test/tb16" path="bundles_src/tb16"/>
-	<classpathentry kind="src" output="scr_test/tb17" path="bundles_src/tb17"/>
-	<classpathentry kind="src" output="scr_test/tb18" path="bundles_src/tb18"/>
-	<classpathentry kind="src" output="scr_test/tb19" path="bundles_src/tb19"/>
-	<classpathentry kind="src" output="scr_test/tb20" path="bundles_src/tb20"/>
-	<classpathentry kind="src" output="scr_test/tb21" path="bundles_src/tb21"/>
-	<classpathentry kind="src" output="scr_test/tb21a" path="bundles_src/tb21a"/>
-	<classpathentry kind="src" output="scr_test/tb22" path="bundles_src/tb22"/>
-	<classpathentry kind="src" output="scr_test/tb23" path="bundles_src/tb23"/>
-	<classpathentry kind="src" output="scr_test/tb25" path="bundles_src/tb25"/>
-	<classpathentry kind="src" output="scr_test/tb26" path="bundles_src/tb26"/>
-	<classpathentry kind="src" output="scr_test/tb27" path="bundles_src/tb27"/>
+	<classpathentry kind="src" path="src">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb24" path="bundles_src/tb24">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb1" path="bundles_src/tb1">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb1a" path="bundles_src/tb1a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb2" path="bundles_src/tb2">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb3" path="bundles_src/tb3">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb4" path="bundles_src/tb4">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb5" path="bundles_src/tb5">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb6" path="bundles_src/tb6">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb7" path="bundles_src/tb7">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb8" path="bundles_src/tb8">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb9" path="bundles_src/tb9">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb10" path="bundles_src/tb10">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb11" path="bundles_src/tb11">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb12" path="bundles_src/tb12">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb13" path="bundles_src/tb13">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb14" path="bundles_src/tb14">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb15" path="bundles_src/tb15">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb16" path="bundles_src/tb16">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb17" path="bundles_src/tb17">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb18" path="bundles_src/tb18">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb19" path="bundles_src/tb19">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb20" path="bundles_src/tb20">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb21" path="bundles_src/tb21">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb21a" path="bundles_src/tb21a">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb22" path="bundles_src/tb22">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb23" path="bundles_src/tb23">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb25" path="bundles_src/tb25">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb26" path="bundles_src/tb26">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="scr_test/tb27" path="bundles_src/tb27">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
