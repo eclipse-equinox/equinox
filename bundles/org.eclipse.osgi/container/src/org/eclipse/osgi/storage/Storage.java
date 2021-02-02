@@ -1903,6 +1903,8 @@ public class Storage {
 	private String calculateVMPackages() {
 		try {
 			List<String> packages = new ArrayList<>();
+			Method classGetModule = Class.class.getMethod("getModule"); //$NON-NLS-1$
+			Object thisModule = classGetModule.invoke(getClass());
 			Class<?> moduleLayerClass = Class.forName("java.lang.ModuleLayer"); //$NON-NLS-1$
 			Method boot = moduleLayerClass.getMethod("boot"); //$NON-NLS-1$
 			Method modules = moduleLayerClass.getMethod("modules"); //$NON-NLS-1$
@@ -1919,6 +1921,12 @@ public class Storage {
 			Object bootLayer = boot.invoke(null);
 			Set<?> bootModules = (Set<?>) modules.invoke(bootLayer);
 			for (Object m : bootModules) {
+				if (m.equals(thisModule)) {
+					// Do not calculate the exports from the framework module.
+					// This is to handle the case where the framework is on the module path
+					// to avoid double exports from the system.bundles
+					continue;
+				}
 				Object descriptor = getDescriptor.invoke(m);
 				if ((Boolean) isAutomatic.invoke(descriptor)) {
 					/*
