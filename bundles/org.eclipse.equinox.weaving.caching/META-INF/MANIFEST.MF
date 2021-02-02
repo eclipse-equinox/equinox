@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.equinox.weaving.caching
-Bundle-Version: 1.1.400.qualifier
+Bundle-Version: 1.2.0.qualifier
 Bundle-Name: Standard Caching Service for Equinox Aspects
 Bundle-Vendor: Eclipse.org - Equinox
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: org.eclipse.equinox.weaving.internal.caching.Activator
 Import-Package: com.ibm.oti.shared;resolution:=optional,
  org.eclipse.equinox.service.weaving,
