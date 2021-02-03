@@ -991,7 +991,7 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	}
 
 	// The pair of values we store in the event queue
-	private class QueueElement {
+	private static class QueueElement {
 		Object[] listenerInfos;
 		Map<String, ?> scheduledDeltas;
 
