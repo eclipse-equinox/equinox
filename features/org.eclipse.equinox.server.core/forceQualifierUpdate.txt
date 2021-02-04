@@ -7,3 +7,4 @@ Bug 529719 - Update felix SCR to 2.0.14
 Needs a touch for felix.scr qualifier update
 Bug 547066 - IBuild I20190507-1800 failed due to unresolved project dependencies.
 Bug 544571 - Update felix SCR to 2.0.16
+4.19 I-Build: I20210204-0900 - BUILD FAILED

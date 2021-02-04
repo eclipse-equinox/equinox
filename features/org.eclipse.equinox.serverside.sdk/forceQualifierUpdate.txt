@@ -27,3 +27,4 @@ Bug 553238 - Unanticipated comparator errors in I20191119-1800
 Bug 565250 - Switch to use Tycho 2.0.0 snapshot 
 Comparator errors in I20200730-1800
 Bug 568610 - 4.18 I-Build: I20201106-1800 - BUILD FAILED
+4.19 I-Build: I20210204-0900 - BUILD FAILED
