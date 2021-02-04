@@ -2,7 +2,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-Version: 1.6.0.qualifier
 Bundle-SymbolicName: org.eclipse.equinox.event
-Bundle-Activator: org.eclipse.equinox.internal.event.Activator
 Import-Package: org.eclipse.osgi.framework.eventmgr;version="1.1.0",
  org.eclipse.osgi.util;version="1.1.0",
  org.osgi.framework;version="1.6.0",
@@ -24,4 +23,6 @@ Provide-Capability:
   osgi.implementation="osgi.event";
   uses:="org.osgi.service.event";
   version:Version="1.4"
+Require-Capability: osgi.extender;
+ filter:="(&(osgi.extender=osgi.component)(version>=1.0)(!(version>=2.0)))"
 Automatic-Module-Name: org.eclipse.equinox.event

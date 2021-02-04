@@ -29,7 +29,6 @@ public class EventAdminTest {
 
 	@Before
 	public void setUp() throws Exception {
-		Activator.getBundle(Activator.BUNDLE_EVENT).start();
 		eventAdminReference = Activator.getBundleContext().getServiceReference(EventAdmin.class);
 		eventAdmin = Activator.getBundleContext().getService(eventAdminReference);
 	}
@@ -37,7 +36,6 @@ public class EventAdminTest {
 	@After
 	public void tearDown() throws Exception {
 		Activator.getBundleContext().ungetService(eventAdminReference);
-		Activator.getBundle(Activator.BUNDLE_EVENT).stop();
 	}
 
 	/*
