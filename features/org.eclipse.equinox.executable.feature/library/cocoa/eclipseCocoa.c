@@ -100,8 +100,6 @@ static NSWindow* window = nil;
 }
 
 + (int)show: (NSString *) featureImage {
-	[[NSApplication sharedApplication] setActivationPolicy: NSApplicationActivationPolicyRegular];
-	[[NSRunningApplication currentApplication] activateWithOptions: NSApplicationActivateIgnoringOtherApps];
 	if (window != NULL)
 		return 0; /*already showing */
 	if (featureImage == NULL)

@@ -29,17 +29,6 @@ char   pathSeparator = ':';
 
 static CFBundleRef javaVMBundle = NULL;
 
-int initialized = 0;
-
-static void init() {
-	if (!initialized) {
-		[[NSApplication sharedApplication] setActivationPolicy: NSApplicationActivationPolicyRegular];
-		[[NSRunningApplication currentApplication] activateWithOptions: NSApplicationActivateIgnoringOtherApps];
-		initialized= true;
-	}
-}
-
-
 /* Initialize Window System
  *
  * Initialize Cocoa.
@@ -50,9 +39,6 @@ int initWindowSystem( int* pArgc, char* argv[], int showSplash )
 	/*debug("install dir: %s\n", homeDir);*/
 	if (homeDir != NULL)
 		chdir(homeDir);
-
-	if (showSplash)
-		init();
 
 	return 0;
 }
@@ -78,8 +64,6 @@ void displayMessage(char *title, char *message)
 	} else {
 		inError= CFStringCreateWithCString(kCFAllocatorDefault, message, kCFStringEncodingUTF8);
 	}
-
-	init();
 
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	NSAlert* alert = [NSAlert alertWithMessageText: (NSString*)(inDescription != nil ? inError : nil) defaultButton: nil alternateButton: nil otherButton: nil informativeTextWithFormat: (NSString*)(inDescription != nil ? inDescription : inError)];
