@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %osgiServices
 Bundle-SymbolicName: org.eclipse.osgi.services
-Bundle-Version: 3.9.0.qualifier
+Bundle-Version: 3.10.0.qualifier
 Bundle-Description: %osgiServicesDes
 Bundle-Localization: plugin
 Bundle-Vendor: %eclipse.org
@@ -53,5 +53,5 @@ Import-Package: javax.servlet;resolution:=optional,
  org.osgi.util.promise;version="[1.0,2.0)"
 DynamicImport-Package: javax.servlet,
  javax.servlet.http
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: org.eclipse.osgi.services
