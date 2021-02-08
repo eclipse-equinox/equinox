@@ -27,4 +27,24 @@
     <skipAPIAnalysis>true</skipAPIAnalysis>
   </properties>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+        <configuration>
+          <dependency-resolution>
+            <extraRequirements>
+              <requirement>
+                <!-- workaround usage of split package https://bugs.eclipse.org/bugs/show_bug.cgi?id=403196 -->
+                <id>org.eclipse.equinox.registry</id>
+                <versionRange>0.0.0</versionRange>
+                <type>p2-installable-unit</type>
+              </requirement>
+            </extraRequirements>
+          </dependency-resolution>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
  </project>

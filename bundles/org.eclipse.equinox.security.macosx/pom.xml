@@ -41,6 +41,16 @@
               <arch>x86_64</arch>
             </environment>
           </environments>
+          <dependency-resolution>
+            <extraRequirements>
+              <requirement>
+                <!-- workaround usage of split package https://bugs.eclipse.org/bugs/show_bug.cgi?id=403196 -->
+                <id>org.eclipse.equinox.registry</id>
+                <versionRange>0.0.0</versionRange>
+                <type>p2-installable-unit</type>
+              </requirement>
+            </extraRequirements>
+          </dependency-resolution>
         </configuration>
       </plugin>
     </plugins>
