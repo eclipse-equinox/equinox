@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.osgi" version="2">
+    <resource path="META-INF/MANIFEST.MF">
+        <filter comment="Bug 570851 - Add a module-info to the org.eclipse.osgi framework" id="930086955">
+            <message_arguments>
+                <message_argument value="3.16.200"/>
+                <message_argument value="3.16.100"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="osgi/src/org/osgi/framework/FrameworkUtil.java" type="org.osgi.framework.FrameworkUtil">
         <filter comment="Not for OSGi API" id="1141899266">
             <message_arguments>
