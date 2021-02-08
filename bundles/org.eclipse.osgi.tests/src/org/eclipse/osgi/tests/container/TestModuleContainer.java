@@ -3762,6 +3762,50 @@ public class TestModuleContainer extends AbstractTest {
 		Assert.assertNull("Failed to resolve", report.getResolutionException());
 	}
 
+	@Test
+	public void testCycleBug570984() throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		// install the system.bundle
+		Module systemBundle = installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION,
+				Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null, null, container);
+		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
+		Assert.assertNull("Failed to resolve system.bundle.", report.getResolutionException());
+
+		Map<String, String> manifestA = new HashMap<>();
+		manifestA.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifestA.put(Constants.BUNDLE_SYMBOLICNAME, "a");
+		manifestA.put(Constants.BUNDLE_VERSION, "1");
+		manifestA.put(Constants.REQUIRE_BUNDLE, "b");
+		manifestA.put(Constants.PROVIDE_CAPABILITY, "ca");
+		manifestA.put(Constants.REQUIRE_CAPABILITY, "cb");
+		Module moduleA = installDummyModule(manifestA, "a", container);
+
+		Map<String, String> manifestB = new HashMap<>();
+		manifestB.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifestB.put(Constants.BUNDLE_SYMBOLICNAME, "b");
+		manifestB.put(Constants.BUNDLE_VERSION, "1");
+		manifestB.put(Constants.REQUIRE_BUNDLE, "a");
+		manifestB.put(Constants.PROVIDE_CAPABILITY, "cb");
+		manifestB.put(Constants.REQUIRE_CAPABILITY, "ca");
+		Module moduleB = installDummyModule(manifestB, "b", container);
+
+		Map<String, String> manifestBF = new HashMap<>();
+		manifestBF.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifestBF.put(Constants.BUNDLE_SYMBOLICNAME, "bf");
+		manifestBF.put(Constants.BUNDLE_VERSION, "1");
+		manifestBF.put(Constants.FRAGMENT_HOST, "b");
+		manifestBF.put(Constants.IMPORT_PACKAGE, "e");
+		Module moduleBF = installDummyModule(manifestBF, "bf", container);
+
+		report = container.resolve(Arrays.asList(moduleA, moduleB, moduleBF), false);
+		Assert.assertNull("Failed to resolve", report.getResolutionException());
+		assertEquals("Wrong state for moduleA", State.RESOLVED, moduleA.getState());
+		assertEquals("Wrong state for moduleB", State.RESOLVED, moduleB.getState());
+		assertEquals("Wrong state for moduleBF", State.INSTALLED, moduleBF.getState());
+	}
+
 	private static void assertWires(List<ModuleWire> required, List<ModuleWire>... provided) {
 		for (ModuleWire requiredWire : required) {
 			for (List<ModuleWire> providedList : provided) {

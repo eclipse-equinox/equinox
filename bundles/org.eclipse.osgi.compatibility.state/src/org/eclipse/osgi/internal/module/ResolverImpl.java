@@ -1320,7 +1320,8 @@ public class ResolverImpl implements Resolver {
 			return;
 		cycleLoop: for (Iterator<ResolverBundle> iCycle = cycle.iterator(); iCycle.hasNext();) {
 			ResolverBundle cycleBundle = iCycle.next();
-			if (!cycleBundle.isResolvable()) {
+			// only clear cycles when not in dev mode
+			if (!developmentMode && !cycleBundle.isResolvable()) {
 				iCycle.remove(); // remove this bundle from the list of bundles that need re-resolved
 				continue cycleLoop;
 			}
@@ -1337,10 +1338,21 @@ public class ResolverImpl implements Resolver {
 					}
 				}
 				if (!resolverImport.isDynamic() && !resolverImport.isOptional() && resolverImport.getSelectedSupplier() == null) {
-					cycleBundle.setResolvable(false);
+					if (resolverImport.isFromFragment()) {
+						resolverImport.getBundle().setResolvable(false);
+					} else {
+						cycleBundle.setResolvable(false);
+					}
 					state.addResolverError(resolverImport.getVersionConstraint().getBundle(), ResolverError.MISSING_IMPORT_PACKAGE, resolverImport.getVersionConstraint().toString(), resolverImport.getVersionConstraint());
-					iCycle.remove();
 					continue cycleLoop;
+				}
+			}
+		}
+		// only clear cycles when not in dev mode
+		if (!developmentMode) {
+			for (Iterator<ResolverBundle> iCycle = cycle.iterator(); iCycle.hasNext();) {
+				if (!iCycle.next().isResolvable()) {
+					iCycle.remove();
 				}
 			}
 		}
