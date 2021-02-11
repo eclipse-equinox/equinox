@@ -29,11 +29,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -75,7 +78,6 @@ import org.osgi.resource.Namespace;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
 import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
-//import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.permissionadmin.PermissionAdmin;
@@ -881,7 +883,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			title = true;
 
 			// Get all resolved imports
-			Map<String, List<PackageSource>> packages = getPackagesInternal(wiring);
+			Map<String, Set<PackageSource>> packages = getPackagesInternal(wiring);
 			List<BundleRequirement> unresolvedImports = getUnresolvedImports(packages, wiring);
 
 			title = printImportedPackages(packages, title);
@@ -940,14 +942,14 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	private List<BundleRequirement> getUnresolvedImports(
-			Map<String, List<PackageSource>> packages, BundleWiring wiring) {
+			Map<String, Set<PackageSource>> packages, BundleWiring wiring) {
 
 		// TODO need to get this information
 		return Collections.emptyList();
 	}
 
-	private boolean printImportedPackages(Map<String, List<PackageSource>> packages, boolean title) {
-		for (List<PackageSource> packageList : packages.values()) {
+	private boolean printImportedPackages(Map<String, Set<PackageSource>> packages, boolean title) {
+		for (Set<PackageSource> packageList : packages.values()) {
 			for (PackageSource packageSource : packageList) {
 				if (title) {
 					System.out.print("  "); //$NON-NLS-1$
@@ -1656,10 +1658,10 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			return;
 		}
 
-		Map<String, List<PackageSource>> packages = getPackagesInternal(wiring);
-		for (List<PackageSource> packageSources : packages.values()) {
+		Map<String, Set<PackageSource>> packages = getPackagesInternal(wiring);
+		for (Set<PackageSource> packageSources : packages.values()) {
 			for (PackageSource packageSource : packageSources) {
-				printCapability("  ", packageSource.getCapability(), packageSource.getWire(), PackageNamespace.PACKAGE_NAMESPACE);
+				printCapability("  ", packageSource.getCapability(), packageSource.getWire(), PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
 			}
 		}
 	}
@@ -1680,82 +1682,103 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		BundleWire getWire() {
 			return wire;
 		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (o instanceof PackageSource) {
+				return Objects.equals(cap, ((PackageSource) o).cap) && Objects.equals(wire.getProvider(), ((PackageSource) o).wire.getProvider());
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return cap.hashCode() ^ wire.getProvider().hashCode();
+		}
 	}
-	private Map<String, List<PackageSource>> getPackagesInternal(BundleWiring wiring) {
-		Map<String, List<PackageSource>> packages = new TreeMap<>();
+	private Map<String, Set<PackageSource>> getPackagesInternal(BundleWiring wiring) {
+		return getPackagesInternal0(wiring, null);
+	}
+	private Map<String, Set<PackageSource>> getPackagesInternal0(BundleWiring wiring, Map<BundleWiring, Map<String, Set<PackageSource>>> allSources) {
+		if (allSources == null) {
+			allSources = new HashMap<>();
+		}
+		Map<String, Set<PackageSource>> packages = allSources.get(wiring);
+		if (packages != null) {
+			return packages;
+		}
+		packages = new TreeMap<>();
+		allSources.put(wiring, packages);
+
 		// first get the imported packages
 		List<BundleWire> packageWires = wiring.getRequiredWires(PackageNamespace.PACKAGE_NAMESPACE);
 		Set<String> importedPackageNames = new HashSet<>();
 		for (BundleWire packageWire : packageWires) {
 			String packageName = (String) packageWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
 			importedPackageNames.add(packageName);
-			List<PackageSource> packageSources = new ArrayList<>();
-			packageSources.add(new PackageSource(packageWire.getCapability(), packageWire));
-			packages.put(packageName, packageSources);
+			addAggregatePackageSource(packageWire.getCapability(), packageName, packageWire, packages, allSources);
 		}
 
 		// now get packages from required bundles
 		for (BundleWire requiredWire : wiring.getRequiredWires(BundleNamespace.BUNDLE_NAMESPACE)) {
-			getRequiredBundlePackages(requiredWire, importedPackageNames, packages);
+			getRequiredBundlePackages(requiredWire, importedPackageNames, packages, allSources);
 		}
 
 		return packages;
 	}
 
-	private void getRequiredBundlePackages(BundleWire requiredWire, Set<String> importedPackageNames, Map<String, List<PackageSource>> packages) {
-			BundleWiring providerWiring = requiredWire.getProviderWiring();
-			for (BundleCapability packageCapability : providerWiring.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
-				String packageName = (String) packageCapability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
-				if (!importedPackageNames.contains(packageName)) {
-					List<PackageSource> packageSources = packages.get(packageName);
-					if (packageSources == null) {
-						packageSources = new ArrayList<>();
-						packages.put(packageName, packageSources);
-					}
-					boolean sourceFound = false;
-					for (PackageSource packageSource : packageSources) {
-						sourceFound |= packageCapability.equals(packageSource.getCapability());
-						if (sourceFound) {
-							break;
-						}
-					}
-					if (!sourceFound) {
-						packageSources.add(new PackageSource(packageCapability, requiredWire));
-					}
-				}
-			}
+	private void addAggregatePackageSource(BundleCapability packageCap, String packageName, BundleWire wire, Map<String, Set<PackageSource>> packages, Map<BundleWiring, Map<String, Set<PackageSource>>> allSources) {
+		Set<PackageSource> packageSources = packages.get(packageName);
+		if (packageSources == null) {
+			packageSources = new LinkedHashSet<>();
+			packages.put(packageName, packageSources);
+		}
+		packageSources.add(new PackageSource(packageCap, wire));
+		// source may be a split package aggregate
+		Set<PackageSource> providerSource = getPackagesInternal0(wire.getProviderWiring(), allSources).get(packageName);
+		if (providerSource != null) {
+			packageSources.addAll(providerSource);
+		}
+	}
 
-			// get substituted packages
-			Set<String> declaredPackageNames = new HashSet<>();
-			for (BundleCapability declaredPackage : providerWiring.getRevision().getDeclaredCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
+	private void getRequiredBundlePackages(BundleWire requiredWire, Set<String> importedPackageNames, Map<String, Set<PackageSource>> packages, Map<BundleWiring, Map<String, Set<PackageSource>>> allSources) {
+		BundleWiring providerWiring = requiredWire.getProviderWiring();
+		for (BundleCapability packageCapability : providerWiring.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
+			String packageName = (String) packageCapability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
+			// if imported then packages from required bundles do not get added
+			if (!importedPackageNames.contains(packageName)) {
+				addAggregatePackageSource(packageCapability, packageName, requiredWire, packages, allSources);
+			}
+		}
+
+		// get the declared packages
+		Set<String> declaredPackageNames = new HashSet<>();
+		for (BundleCapability declaredPackage : providerWiring.getRevision().getDeclaredCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
+			declaredPackageNames.add((String) declaredPackage.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		}
+		// and from attached fragments
+		for (BundleWire fragmentWire : providerWiring.getProvidedWires(HostNamespace.HOST_NAMESPACE)) {
+			for (BundleCapability declaredPackage : fragmentWire.getRequirer().getDeclaredCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
 				declaredPackageNames.add((String) declaredPackage.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
 			}
-			// and fragments
-			for (BundleWire fragmentWire : providerWiring.getProvidedWires(HostNamespace.HOST_NAMESPACE)) {
-				for (BundleCapability declaredPackage : fragmentWire.getRequirer().getDeclaredCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
-					declaredPackageNames.add((String) declaredPackage.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
-				}
-			}
+		}
 
-			for (BundleWire packageWire : providerWiring.getRequiredWires(PackageNamespace.PACKAGE_NAMESPACE)) {
-				String packageName = (String) packageWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
-				if (declaredPackageNames.contains(packageName)) {
-					List<PackageSource> packageSources = packages.get(packageName);
-					if (packageSources == null) {
-						packageSources = new ArrayList<>();
-						packages.put(packageName, packageSources);
-					}
-					packageSources.add(new PackageSource(packageWire.getCapability(), packageWire));
-				}
+		for (BundleWire packageWire : providerWiring.getRequiredWires(PackageNamespace.PACKAGE_NAMESPACE)) {
+			String packageName = (String) packageWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
+			if (!importedPackageNames.contains(packageName) && declaredPackageNames.contains(packageName)) {
+				// if the package is a declared capability AND the wiring imports the package
+				// then it is substituted
+				addAggregatePackageSource(packageWire.getCapability(), packageName, packageWire, packages, allSources);
 			}
+		}
 
-			// now get packages from re-exported requires of the required bundle
-			for (BundleWire providerBundleWire : providerWiring.getRequiredWires(BundleNamespace.BUNDLE_NAMESPACE)) {
-				String visibilityDirective = providerBundleWire.getRequirement().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE);
-				if (BundleNamespace.VISIBILITY_REEXPORT.equals(visibilityDirective)) {
-					getRequiredBundlePackages(providerBundleWire, importedPackageNames, packages);
-				}
+		// now get packages from re-exported requires of the required bundle
+		for (BundleWire providerBundleWire : providerWiring.getRequiredWires(BundleNamespace.BUNDLE_NAMESPACE)) {
+			String visibilityDirective = providerBundleWire.getRequirement().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE);
+			if (BundleNamespace.VISIBILITY_REEXPORT.equals(visibilityDirective)) {
+				getRequiredBundlePackages(providerBundleWire, importedPackageNames, packages, allSources);
 			}
+		}
 	}
 
 	/**
