@@ -21,11 +21,12 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * As tests use registry listeners, UI listeners might cause tests to time out and fail.
- * As such this tests should be run in a headless mode.
+ * As tests use registry listeners, UI listeners might cause tests to time out
+ * and fail. As such this tests should be run in a headless mode.
  */
 @RunWith(Suite.class)
-@SuiteClasses({Base64Test.class, DetectPBECiphersTest.class, SlashEncodeTest.class, DefaultPreferencesTest.class, DynamicPreferencesTest.class, WinPreferencesTest.class, LinuxPreferencesTest.class})
+@SuiteClasses({ Base64Test.class, DetectPBECiphersTest.class, SlashEncodeTest.class, DefaultPreferencesTest.class,
+		DynamicPreferencesTest.class, WinPreferencesTest.class })
 public class AllSecurityTests {
-	//see @SuiteClasses
+	// see @SuiteClasses
 }
