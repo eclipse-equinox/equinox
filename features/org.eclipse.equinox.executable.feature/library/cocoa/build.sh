@@ -65,7 +65,7 @@ DEFAULT_WS="$defaultWS"
 DEPLOYMENT_TARGET=10.10
 EXEC_DIR=../../../../../rt.equinox.binaries/org.eclipse.equinox.executable
 PROGRAM_OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch/Eclipse.app/Contents/MacOS"
-SDKROOT_PATH="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk"
+SDKROOT_PATH="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
 
 # /System/Library/Frameworks/JavaVM.framework/Headers does not exist anymore on Yosemite
 if [ -e /System/Library/Frameworks/JavaVM.framework/Headers ]; then

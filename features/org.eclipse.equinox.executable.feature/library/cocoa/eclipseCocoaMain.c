@@ -26,6 +26,7 @@
 #include <sys/wait.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <Cocoa/Cocoa.h>
 
 #include <CoreServices/CoreServices.h>
 #include <mach-o/dyld.h>
@@ -49,14 +50,12 @@ static int fgPid;
 extern int original_main(int argc, char* argv[]);
 int main( int argc, char* argv[] ) {
 
-	SInt32 systemVersion= 0;
-	if (Gestalt(gestaltSystemVersion, &systemVersion) == noErr) {
-		systemVersion &= 0xffff;
-		if (systemVersion < 0x1050) {
-			displayMessage("Error", "This application requires Mac OS X 10.5 (Leopard) or greater.");
-			return 0;
-		}
-	}
+    
+    NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
+    if ((version.majorVersion < 10) || ((version.majorVersion == 10) && (version.minorVersion < 14))) {
+        displayMessage("Error", "This application requires Mac OS 10.14 or greater.");
+        return 0;
+    }
 
 	fgConsoleLog= fopen("/dev/console", "w");
 	fgPid= getpid();
