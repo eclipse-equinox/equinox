@@ -1160,6 +1160,29 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		testPermission(acc, new FilePermission(relativeExecutable.getAbsolutePath(), "execute"), true);
 	}
 
+	public void testPermissionCheckCache() {
+		// test single row with signer condition
+		ConditionalPermissionUpdate update = cpa.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		rows.add(cpa.newConditionalPermissionInfo(null, new ConditionInfo[] { SIGNER_CONDITION1 }, READONLY_INFOS,
+				ConditionalPermissionInfo.ALLOW));
+		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
+
+		AccessControlContext acc = cpa.getAccessControlContext(new String[] { "cn=t1,c=FR;cn=test1,c=US" }); //$NON-NLS-1$
+
+		for (int i = 0; i < 10000000; i++) {
+			try {
+				if (i % 1000 == 0) {
+					System.out.println("i=" + i);
+				}
+				acc.checkPermission(new FilePermission("test" + i, "read")); //$NON-NLS-1$ //$NON-NLS-2$
+			} catch (AccessControlException e) {
+				fail("Unexpected AccessControlExcetpion", e); //$NON-NLS-1$
+			}
+		}
+
+	}
+
 	private void checkInfos(ConditionalPermissionInfo testInfo1, ConditionalPermissionInfo testInfo2) {
 		assertTrue("Infos are not equal: " + testInfo1.getEncoded() + " " + testInfo2.getEncoded(), testInfo1.equals(testInfo2));
 		assertEquals("Info hash code is not equal", testInfo1.hashCode(), testInfo2.hashCode());

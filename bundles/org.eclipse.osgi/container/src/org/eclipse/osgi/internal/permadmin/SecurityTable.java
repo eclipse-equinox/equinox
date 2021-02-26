@@ -51,6 +51,9 @@ public class SecurityTable extends PermissionCollection {
 		if (bundlePermissions == null) {
 			return ABSTAIN;
 		}
+		if (evaluationCache.size() > 10000) {
+			clearEvaluationCache();
+		}
 		EvaluationCacheKey evaluationCacheKey = new EvaluationCacheKey(bundlePermissions, permission);
 		if (isEmpty()) {
 			evaluationCache.put(evaluationCacheKey, ABSTAIN);
