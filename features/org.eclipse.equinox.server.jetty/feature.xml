@@ -16,7 +16,7 @@
    </license>
 
    <plugin
-         id="javax.servlet"
+         id="jakarta.servlet-api"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -31,13 +31,6 @@
 
    <plugin
          id="org.eclipse.equinox.http.servlet"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.jetty.continuation"
          download-size="0"
          install-size="0"
          version="0.0.0"

@@ -182,9 +182,10 @@ public class HttpServerManager implements ManagedServiceFactory {
 			// HTTPS Configuration
 			HttpConfiguration https_config = new HttpConfiguration(http_config);
 			https_config.addCustomizer(new SecureRequestCustomizer());
+			https_config.setHttpCompliance(HttpCompliance.LEGACY);
 
 			// HTTPS connector
-			httpsConnector = new ServerConnector(server, new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(https_config, HttpCompliance.LEGACY)); //$NON-NLS-1$
+			httpsConnector = new ServerConnector(server, new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(https_config)); //$NON-NLS-1$
 			httpsConnector.setPort(Details.getInt(dictionary, JettyConstants.HTTPS_PORT, 443));
 			httpsConnector.setHost(Details.getString(dictionary, JettyConstants.HTTPS_HOST, null));
 		}
@@ -199,8 +200,9 @@ public class HttpServerManager implements ManagedServiceFactory {
 				http_config.setSecureScheme("https"); //$NON-NLS-1$
 				http_config.setSecurePort(Details.getInt(dictionary, JettyConstants.HTTPS_PORT, 443));
 			}
+			http_config.setHttpCompliance(HttpCompliance.LEGACY);
 			// HTTP connector
-			httpConnector = new ServerConnector(server, new HttpConnectionFactory(http_config, HttpCompliance.LEGACY));
+			httpConnector = new ServerConnector(server, new HttpConnectionFactory(http_config));
 			httpConnector.setPort(Details.getInt(dictionary, JettyConstants.HTTP_PORT, 80));
 			httpConnector.setHost(Details.getString(dictionary, JettyConstants.HTTP_HOST, null));
 			httpConnector.setIdleTimeout(DEFAULT_IDLE_TIMEOUT);

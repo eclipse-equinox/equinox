@@ -13,7 +13,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.http.jetty.internal;
 
-import org.eclipse.jetty.util.log.*;
+import org.eclipse.jetty.util.log.Log;
+import org.eclipse.jetty.util.log.Logger;
 
 // NOTE: This class simply allows us to override the StdErrLog built into jetty
 public class EquinoxStdErrLog implements Logger {
@@ -42,7 +43,7 @@ public class EquinoxStdErrLog implements Logger {
 		threshold = parseThresholdProperty(property);
 		// this is a hack to make sure the built-in jetty StdErrLog is not being used
 		org.eclipse.jetty.util.log.Logger rootLogger = Log.getRootLogger();
-		if (rootLogger == null || (rootLogger instanceof StdErrLog)) {
+		if (rootLogger == null || (rootLogger instanceof Log)) {
 			// The built-in jetty StdErrLog is be used; replace with ours.
 			Log.setLog(getRootLogger());
 		}
@@ -73,7 +74,7 @@ public class EquinoxStdErrLog implements Logger {
 
 	public EquinoxStdErrLog(String name, Logger realLogger) {
 		this.localName = name;
-		this.realLogger = realLogger == null ? new StdErrLog(name) : realLogger;
+		this.realLogger = realLogger;
 		if (threshold == DEBUG)
 			this.realLogger.setDebugEnabled(true);
 	}
