@@ -1,1 +1,0 @@
-This source folder is only used for doing PDE build export.
