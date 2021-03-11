@@ -182,7 +182,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 			// HTTPS Configuration
 			HttpConfiguration https_config = new HttpConfiguration(http_config);
 			https_config.addCustomizer(new SecureRequestCustomizer());
-			https_config.setHttpCompliance(HttpCompliance.LEGACY);
+			https_config.setHttpCompliance(HttpCompliance.RFC7230_LEGACY);
 
 			// HTTPS connector
 			httpsConnector = new ServerConnector(server, new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(https_config)); //$NON-NLS-1$
@@ -200,7 +200,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 				http_config.setSecureScheme("https"); //$NON-NLS-1$
 				http_config.setSecurePort(Details.getInt(dictionary, JettyConstants.HTTPS_PORT, 443));
 			}
-			http_config.setHttpCompliance(HttpCompliance.LEGACY);
+			http_config.setHttpCompliance(HttpCompliance.RFC7230_LEGACY);
 			// HTTP connector
 			httpConnector = new ServerConnector(server, new HttpConnectionFactory(http_config));
 			httpConnector.setPort(Details.getInt(dictionary, JettyConstants.HTTP_PORT, 80));

@@ -159,7 +159,7 @@ public class ServletTest extends BaseTest {
 		String responseCode = response.get("responseCode").get(0);
 		actual = response.get("responseBody").get(0);
 
-		Assert.assertEquals("403", responseCode);
+		assertEquals("403", responseCode);
 		Assert.assertTrue(
 			"Expected <" + expected + "*> but got <" + actual + ">", actual.startsWith(expected));
 	}
@@ -180,7 +180,7 @@ public class ServletTest extends BaseTest {
 		String responseCode = response.get("responseCode").get(0);
 		actual = response.get("responseBody").get(0);
 
-		Assert.assertEquals("500", responseCode);
+		assertEquals("500", responseCode);
 		Assert.assertTrue(
 			"Expected <" + expected + "*> but got <" + actual + ">", actual.startsWith(expected));
 	}
@@ -201,7 +201,7 @@ public class ServletTest extends BaseTest {
 		String responseCode = response.get("responseCode").get(0);
 		actual = response.get("responseBody").get(0);
 
-		Assert.assertEquals("400", responseCode);
+		assertEquals("400", responseCode);
 		Assert.assertTrue("Expected <" + expected + "*> but got <" + actual + ">", actual.startsWith(expected));
 	}
 
@@ -224,8 +224,8 @@ public class ServletTest extends BaseTest {
 		String responseCode = response.get("responseCode").get(0);
 		actual = response.get("responseBody").get(0);
 
-		Assert.assertEquals("401", responseCode);
-		Assert.assertEquals("", actual);
+		assertEquals("401", responseCode);
+		assertEquals("", actual);
 	}
 
 	@Test
@@ -250,7 +250,7 @@ public class ServletTest extends BaseTest {
 			String actualCode = response.get("responseCode").get(0);
 			String actualResponse = response.get("responseBody").get(0);
 
-			Assert.assertEquals(expectedCode, actualCode);
+			assertEquals(expectedCode, actualCode);
 			Assert.assertTrue(
 				"Expected <" + expectedResponse + "*> but got <" + actualResponse + ">", actualResponse.startsWith(expectedResponse));
 		}
@@ -290,7 +290,7 @@ public class ServletTest extends BaseTest {
 		String responseCode = response.get("responseCode").get(0);
 		String responseBody = response.get("responseBody").get(0);
 
-		Assert.assertEquals("444", responseCode);
+		assertEquals("444", responseCode);
 		Assert.assertNotEquals("444 : 444 : ERROR : /TestErrorPage6/a", responseBody);
 	}
 
@@ -338,7 +338,7 @@ public class ServletTest extends BaseTest {
 		String responseCode = response.get("responseCode").get(0);
 		String responseBody = response.get("responseBody").get(0);
 
-		Assert.assertEquals(String.valueOf(status), responseCode);
+		assertEquals(String.valueOf(status), responseCode);
 		Assert.assertNotEquals(status + " : " + status + " : ERROR : /TestErrorPage7/a", responseBody);
 	}
 
@@ -369,8 +369,8 @@ public class ServletTest extends BaseTest {
 		String responseCode = response.get("responseCode").get(0);
 		String responseBody = response.get("responseBody").get(0);
 
-		Assert.assertEquals("500", responseCode);
-		Assert.assertEquals("500 : 500 : ERROR : /TestErrorPage8/a", responseBody);
+		assertEquals("500", responseCode);
+		assertEquals("500 : 500 : ERROR : /TestErrorPage8/a", responseBody);
 	}
 
 	@Test
@@ -401,8 +401,8 @@ public class ServletTest extends BaseTest {
 		String responseCode = response.get("responseCode").get(0);
 		String responseBody = response.get("responseBody").get(0);
 
-		Assert.assertEquals("500", responseCode);
-		Assert.assertEquals("500 : 500 : ERROR : /TestErrorPage9/a", responseBody);
+		assertEquals("500", responseCode);
+		assertEquals("500 : 500 : ERROR : /TestErrorPage9/a", responseBody);
 	}
 
 	@Test
@@ -478,7 +478,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -492,7 +492,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -506,7 +506,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -520,7 +520,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -534,7 +534,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -548,7 +548,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -562,7 +562,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -576,7 +576,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -590,7 +590,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -604,7 +604,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -618,7 +618,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -632,7 +632,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -646,7 +646,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -660,7 +660,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -674,7 +674,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -688,7 +688,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -702,7 +702,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -716,7 +716,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -730,7 +730,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -747,14 +747,14 @@ public class ServletTest extends BaseTest {
 		extendedHttpService.registerServlet("/hello", testServlet, null, extendedHttpService.createDefaultHttpContext());
 
 		String actual = requestAdvisor.request("hello");
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 		Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
 		Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
 
 		testFilter1.clear();
 		testFilter2.clear();
 		actual = requestAdvisor.request("hello/test");
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 		Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
 		Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
 	}
@@ -782,14 +782,14 @@ public class ServletTest extends BaseTest {
 		registrations.add(getBundleContext().registerService(Servlet.class, testServlet, props));
 
 		String actual = requestAdvisor.request("hello");
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 		Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
 		Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
 
 		testFilter1.clear();
 		testFilter2.clear();
 		actual = requestAdvisor.request("hello/test");
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 		Assert.assertFalse("testFilter1 got called.", testFilter1.getCalled());
 		Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
 	}
@@ -863,7 +863,7 @@ public class ServletTest extends BaseTest {
 
 		String response = requestAdvisor.request("f22/a");
 
-		Assert.assertEquals(expected, response);
+		assertEquals(expected, response);
 	}
 
 	@Test
@@ -926,7 +926,7 @@ public class ServletTest extends BaseTest {
 		extendedHttpService.registerServlet("/hello", testServlet, null, extendedHttpService.createDefaultHttpContext());
 
 		String actual = requestAdvisor.request("hello/test/request");
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 		Assert.assertFalse("testFilter1 did get called.", testFilter1.getCalled());
 		Assert.assertFalse("testFilter2 did get called.", testFilter2.getCalled());
 		Assert.assertFalse("testFilter3 did get called.", testFilter3.getCalled());
@@ -935,7 +935,7 @@ public class ServletTest extends BaseTest {
 		testFilter2.clear();
 		testFilter3.clear();
 		actual = requestAdvisor.request("hello/test/request.ext");
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 		Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
 		Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
 		Assert.assertTrue("testFilter3 did not get called.", testFilter3.getCalled());
@@ -954,12 +954,12 @@ public class ServletTest extends BaseTest {
 		extendedHttpService.registerServlet("/", testServlet, null, extendedHttpService.createDefaultHttpContext());
 
 		String actual = requestAdvisor.request("hello_test/request");
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 		Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
 		Assert.assertFalse("testFilter2 did get called.", testFilter2.getCalled());
 
 		actual = requestAdvisor.request("hello/request");
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 		Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
 		Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
 	}
@@ -977,12 +977,12 @@ public class ServletTest extends BaseTest {
 		registrations.add(getBundleContext().registerService(Servlet.class, testServlet, new Hashtable<>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/"))));
 
 		String actual = requestAdvisor.request("hello_test/request");
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 		Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
 		Assert.assertFalse("testFilter2 did get called.", testFilter2.getCalled());
 
 		actual = requestAdvisor.request("hello/request");
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 		Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
 		Assert.assertTrue("testFilter2 did not get called.", testFilter2.getCalled());
 	}
@@ -1002,7 +1002,7 @@ public class ServletTest extends BaseTest {
 			registrations.add(getBundleContext().registerService(Servlet.class, testServlet, new Hashtable<>(Collections.singletonMap(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/hello/*"))));
 
 			String actual = requestAdvisor.request("hello/request");
-			Assert.assertEquals(expected, actual);
+			assertEquals(expected, actual);
 			Assert.assertTrue("testFilter1 did not get called.", testFilter1.getCalled());
 
 			filterReg.unregister();
@@ -1010,7 +1010,7 @@ public class ServletTest extends BaseTest {
 			testFilter1.clear();
 
 			actual = requestAdvisor.request("hello/request");
-			Assert.assertEquals(expected, actual);
+			assertEquals(expected, actual);
 			Assert.assertFalse("testFilter1 did get called.", testFilter1.getCalled());
 		} finally {
 			if (filterReg != null) {
@@ -1029,7 +1029,7 @@ public class ServletTest extends BaseTest {
 				null, new BaseServlet(), null, null);
 		}
 		catch(IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
+			assertEquals(expected, iae.getMessage());
 
 			return;
 		}
@@ -1048,7 +1048,7 @@ public class ServletTest extends BaseTest {
 				pattern, new BaseServlet(), null, null);
 		}
 		catch(IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
+			assertEquals(expected, iae.getMessage());
 
 			return;
 		}
@@ -1067,7 +1067,7 @@ public class ServletTest extends BaseTest {
 				pattern, new BaseServlet(), null, null);
 		}
 		catch(IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
+			assertEquals(expected, iae.getMessage());
 
 			return;
 		}
@@ -1088,7 +1088,7 @@ public class ServletTest extends BaseTest {
 				pattern, new BaseServlet(), null, null);
 		}
 		catch(NamespaceException ne) {
-			Assert.assertEquals(expected, ne.getMessage());
+			assertEquals(expected, ne.getMessage());
 
 			return;
 		}
@@ -1107,7 +1107,7 @@ public class ServletTest extends BaseTest {
 				alias, null, null, null);
 		}
 		catch(IllegalArgumentException iae) {
-			Assert.assertEquals(expected, iae.getMessage());
+			assertEquals(expected, iae.getMessage());
 
 			return;
 		}
@@ -1174,8 +1174,8 @@ public class ServletTest extends BaseTest {
 				ServletDTO servletDTO = servletContextDTO.servletDTOs[0];
 
 				Assert.assertFalse(servletDTO.asyncSupported);
-				Assert.assertEquals(servlet.getClass().getName(), servletDTO.name);
-				Assert.assertEquals("/blah1", servletDTO.patterns[0]);
+				assertEquals(servlet.getClass().getName(), servletDTO.name);
+				assertEquals("/blah1", servletDTO.patterns[0]);
 				Assert.assertTrue(servletDTO.serviceId < 0);
 			}
 		}
@@ -1225,8 +1225,8 @@ public class ServletTest extends BaseTest {
 			if (servletContextDTO.name.startsWith("org.eclipse.equinox.http.servlet.internal.HttpServiceImpl$")) {
 				ResourceDTO resourceDTO = servletContextDTO.resourceDTOs[0];
 
-				Assert.assertEquals("/blah1/*", resourceDTO.patterns[0]);
-				Assert.assertEquals("/foo", resourceDTO.prefix);
+				assertEquals("/blah1/*", resourceDTO.patterns[0]);
+				assertEquals("/foo", resourceDTO.prefix);
 				Assert.assertTrue(resourceDTO.serviceId < 0);
 			}
 		}
@@ -1358,7 +1358,7 @@ public class ServletTest extends BaseTest {
 		registrations.add(getBundleContext().registerService(Servlet.class, targetServlet, props));
 
 		String actual = requestAdvisor.request("s");
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -1899,7 +1899,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -1913,7 +1913,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -1927,7 +1927,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -1941,7 +1941,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -1955,7 +1955,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -1965,7 +1965,7 @@ public class ServletTest extends BaseTest {
 		extendedHttpService.registerResources("/testalias", "/org/eclipse/equinox/http/servlet/tests", null);
 
 		String actual = requestAdvisor.request("testalias/resource2.txt");
-		Assert.assertEquals("Wrong value.", "test", actual);
+		assertEquals("Wrong value.", "test", actual);
 	}
 
 	@Test
@@ -1975,7 +1975,7 @@ public class ServletTest extends BaseTest {
 		extendedHttpService.registerResources("/", "/org/eclipse/equinox/http/servlet/tests", null);
 
 		String actual = requestAdvisor.request("resource2.txt");
-		Assert.assertEquals("Wrong value.", "test", actual);
+		assertEquals("Wrong value.", "test", actual);
 	}
 
 	@Test
@@ -2003,10 +2003,10 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals("Response Code", Collections.singletonList("206"), actual.get("responseCode"));
-		Assert.assertEquals("Content-Length", Collections.singletonList("20655"), actual.get("Content-Length"));
-		Assert.assertEquals("Accept-Ranges", Collections.singletonList("bytes"), actual.get("Accept-Ranges"));
-		Assert.assertEquals("Content-Range", Collections.singletonList("bytes 0-20654/20655"), actual.get("Content-Range"));
+		assertEquals("Response Code", Collections.singletonList("206"), actual.get("responseCode"));
+		assertEquals("Content-Length", Collections.singletonList("20655"), actual.get("Content-Length"));
+		assertEquals("Accept-Ranges", Collections.singletonList("bytes"), actual.get("Accept-Ranges"));
+		assertEquals("Content-Range", Collections.singletonList("bytes 0-20654/20655"), actual.get("Content-Range"));
 	}
 
 	@Test
@@ -2034,12 +2034,12 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals("Response Code", Collections.singletonList("206"), actual.get("responseCode"));
-		Assert.assertEquals("Content-Length", Collections.singletonList("9000"), actual.get("Content-Length"));
-		Assert.assertEquals("Accept-Ranges", Collections.singletonList("bytes"), actual.get("Accept-Ranges"));
-		Assert.assertEquals("Content-Range", Collections.singletonList("bytes 1000-9999/20655"), actual.get("Content-Range"));
-		Assert.assertEquals("Response Body Prefix", "901", actual.get("responseBody").get(0).substring(0, 3));
-		Assert.assertEquals("Response Body Suffix", "567", actual.get("responseBody").get(0).substring(8997, 9000));
+		assertEquals("Response Code", Collections.singletonList("206"), actual.get("responseCode"));
+		assertEquals("Content-Length", Collections.singletonList("9000"), actual.get("Content-Length"));
+		assertEquals("Accept-Ranges", Collections.singletonList("bytes"), actual.get("Accept-Ranges"));
+		assertEquals("Content-Range", Collections.singletonList("bytes 1000-9999/20655"), actual.get("Content-Range"));
+		assertEquals("Response Body Prefix", "901", actual.get("responseBody").get(0).substring(0, 3));
+		assertEquals("Response Body Suffix", "567", actual.get("responseBody").get(0).substring(8997, 9000));
 	}
 
 	@Test
@@ -2072,12 +2072,12 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals("Response Code", Collections.singletonList("206"), actual.get("responseCode"));
-		Assert.assertEquals("Content-Length", Collections.singletonList("20655"), actual.get("Content-Length"));
-		Assert.assertEquals("Accept-Ranges", Collections.singletonList("bytes"), actual.get("Accept-Ranges"));
-		Assert.assertEquals("Content-Range", Collections.singletonList("bytes 0-20654/20655"), actual.get("Content-Range"));
-		Assert.assertEquals("Response Body Prefix", "123", actual.get("responseBody").get(0).substring(0, 3));
-		Assert.assertEquals("Response Body Suffix", "789", actual.get("responseBody").get(0).substring(8997, 9000));
+		assertEquals("Response Code", Collections.singletonList("206"), actual.get("responseCode"));
+		assertEquals("Content-Length", Collections.singletonList("20655"), actual.get("Content-Length"));
+		assertEquals("Accept-Ranges", Collections.singletonList("bytes"), actual.get("Accept-Ranges"));
+		assertEquals("Content-Range", Collections.singletonList("bytes 0-20654/20655"), actual.get("Content-Range"));
+		assertEquals("Response Body Prefix", "123", actual.get("responseBody").get(0).substring(0, 3));
+		assertEquals("Response Body Suffix", "789", actual.get("responseBody").get(0).substring(8997, 9000));
 	}
 
 	@Test
@@ -2114,22 +2114,22 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
 	public void test_Servlet2() throws Exception {
-		String expected = "3";
+		String expected = "4";
 		String actual;
 		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestServlet2");
-			Assert.assertEquals(expected, actual);
+			assertEquals(expected, actual);
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -2143,7 +2143,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -2157,7 +2157,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -2171,7 +2171,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -2185,7 +2185,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -2199,7 +2199,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -2213,7 +2213,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -2227,7 +2227,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -2241,7 +2241,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -2277,7 +2277,7 @@ public class ServletTest extends BaseTest {
 		httpService.registerServlet("*.txt", sA, null, httpContext);
 		httpService.registerServlet("/files/*.txt", sB, null, httpContext);
 
-		Assert.assertEquals("b", requestAdvisor.request("files/help.txt"));
+		assertEquals("b", requestAdvisor.request("files/help.txt"));
 	}
 
 	@Test
@@ -2306,7 +2306,7 @@ public class ServletTest extends BaseTest {
 
 		String result = requestAdvisor.request("Servlet13/a?p=1&p=2");
 
-		Assert.assertEquals("p=1&p=2|1|[1, 2]", result);
+		assertEquals("p=1&p=2|1|[1, 2]", result);
 	}
 
 	@Test
@@ -2342,7 +2342,7 @@ public class ServletTest extends BaseTest {
 		httpService.registerServlet("*.txt", sA, null, httpContext);
 		httpService.registerServlet("/files/help.txt", sB, null, httpContext);
 
-		Assert.assertEquals("b", requestAdvisor.request("files/help.txt"));
+		assertEquals("b", requestAdvisor.request("files/help.txt"));
 	}
 
 //	private static String getSubmittedFileName(Part part) {
@@ -2395,8 +2395,8 @@ public class ServletTest extends BaseTest {
 
 		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
 
-		Assert.assertEquals("200", result.get("responseCode").get(0));
-		Assert.assertEquals("resource1.txt|text/plain|25", result.get("responseBody").get(0));
+		assertEquals("200", result.get("responseCode").get(0));
+		assertEquals("resource1.txt|text/plain|25", result.get("responseBody").get(0));
 	}
 
 	@Test
@@ -2423,7 +2423,7 @@ public class ServletTest extends BaseTest {
 
 		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
 
-		Assert.assertEquals("500", result.get("responseCode").get(0));
+		assertEquals("500", result.get("responseCode").get(0));
 	}
 
 	@Test
@@ -2470,8 +2470,8 @@ public class ServletTest extends BaseTest {
 
 		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
 
-		Assert.assertEquals("200", result.get("responseCode").get(0));
-		Assert.assertEquals("resource1.txt|text/plain|25|0", result.get("responseBody").get(0));
+		assertEquals("200", result.get("responseCode").get(0));
+		assertEquals("resource1.txt|text/plain|25|0", result.get("responseBody").get(0));
 	}
 
 	@Test
@@ -2519,8 +2519,8 @@ public class ServletTest extends BaseTest {
 
 		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
 
-		Assert.assertEquals("200", result.get("responseCode").get(0));
-		Assert.assertEquals("resource1.txt|text/plain|25|1", result.get("responseBody").get(0));
+		assertEquals("200", result.get("responseCode").get(0));
+		assertEquals("resource1.txt|text/plain|25|1", result.get("responseBody").get(0));
 	}
 
 	@Test
@@ -2551,7 +2551,7 @@ public class ServletTest extends BaseTest {
 
 		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
 
-		Assert.assertEquals("500", result.get("responseCode").get(0));
+		assertEquals("500", result.get("responseCode").get(0));
 	}
 
 	@Test
@@ -2582,7 +2582,7 @@ public class ServletTest extends BaseTest {
 
 		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
 
-		Assert.assertEquals("500", result.get("responseCode").get(0));
+		assertEquals("500", result.get("responseCode").get(0));
 	}
 
 	/*
@@ -2652,7 +2652,7 @@ public class ServletTest extends BaseTest {
 		httpService.registerServlet("/testDefaultHttpContextResource", sA, null, httpContext);
 
 		// just making sure bundleresource protocol is used as proof that Bundle.getResource was called
-		Assert.assertEquals("bundleresource", requestAdvisor.request("testDefaultHttpContextResource"));
+		assertEquals("bundleresource", requestAdvisor.request("testDefaultHttpContextResource"));
 	}
 
 	@Test
@@ -2711,8 +2711,8 @@ public class ServletTest extends BaseTest {
 
 		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
 
-		Assert.assertEquals("200", result.get("responseCode").get(0));
-		Assert.assertEquals("blue.png|image/png|292", result.get("responseBody").get(0));
+		assertEquals("200", result.get("responseCode").get(0));
+		assertEquals("blue.png|image/png|292", result.get("responseBody").get(0));
 	}
 
 	@Test
@@ -2739,8 +2739,8 @@ public class ServletTest extends BaseTest {
 
 		Map<String, List<String>> result = requestAdvisor.request("Servlet16/NEEO-a5056097%2Fdevice%2Fapt-neeo_io%3Avirtual%3A6jzOoAtL%2FTemperature_GF_Living%2Fnone%2F1%2Fdirectory%2Factor/default", map);
 
-		Assert.assertEquals("200", result.get("responseCode").get(0));
-		Assert.assertEquals("/Servlet16/NEEO-a5056097%2Fdevice%2Fapt-neeo_io%3Avirtual%3A6jzOoAtL%2FTemperature_GF_Living%2Fnone%2F1%2Fdirectory%2Factor/default", result.get("responseBody").get(0));
+		assertEquals("200", result.get("responseCode").get(0));
+		assertEquals("/Servlet16/NEEO-a5056097%2Fdevice%2Fapt-neeo_io%3Avirtual%3A6jzOoAtL%2FTemperature_GF_Living%2Fnone%2F1%2Fdirectory%2Factor/default", result.get("responseBody").get(0));
 	}
 
 	@Test
@@ -2754,7 +2754,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 
 	}
 
@@ -2766,7 +2766,7 @@ public class ServletTest extends BaseTest {
 		try {
 			bundle.start();
 			actual = requestAdvisor.request("TestServletContext1");
-			Assert.assertEquals(expected, actual);
+			assertEquals(expected, actual);
 			bundle.stop();
 			bundle.start();
 			bundle.stop();
@@ -2776,7 +2776,7 @@ public class ServletTest extends BaseTest {
 			uninstallBundle(bundle);
 		}
 
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -2802,7 +2802,7 @@ public class ServletTest extends BaseTest {
 
 		String responseCode = response.get("responseCode").get(0);
 
-		Assert.assertEquals("200", responseCode);
+		assertEquals("200", responseCode);
 	}
 
 	@Test
@@ -2900,7 +2900,7 @@ public class ServletTest extends BaseTest {
 		HttpServiceRuntime runtime = bundleContext.getService(serviceReference);
 
 		RuntimeDTO runtimeDTO = runtime.getRuntimeDTO();
-		Assert.assertEquals(5, runtimeDTO.failedServletContextDTOs.length);
+		assertEquals(5, runtimeDTO.failedServletContextDTOs.length);
 
 		for (ServiceRegistration<?> registration : registrations) {
 			registration.unregister();
@@ -2908,7 +2908,7 @@ public class ServletTest extends BaseTest {
 		registrations.clear();
 
 		runtimeDTO = runtime.getRuntimeDTO();
-		Assert.assertEquals(0, runtimeDTO.failedServletContextDTOs.length);
+		assertEquals(0, runtimeDTO.failedServletContextDTOs.length);
 	}
 
 	@Test
@@ -2936,7 +2936,7 @@ public class ServletTest extends BaseTest {
 
 			String actual = requestAdvisor.request("s1");
 
-			Assert.assertEquals(expected, actual);
+			assertEquals(expected, actual);
 		}
 		finally {
 			for (ServiceRegistration<?> registration : registrations) {
@@ -2969,7 +2969,7 @@ public class ServletTest extends BaseTest {
 
 			String actual = requestAdvisor.request("a/s1");
 
-			Assert.assertEquals(expected, actual);
+			assertEquals(expected, actual);
 		}
 		finally {
 			for (ServiceRegistration<?> registration : registrations) {
@@ -3010,11 +3010,11 @@ public class ServletTest extends BaseTest {
 
 			String actual = requestAdvisor.request("s");
 
-			Assert.assertEquals(expected1, actual);
+			assertEquals(expected1, actual);
 
 			actual = requestAdvisor.request("a/s");
 
-			Assert.assertEquals(expected2, actual);
+			assertEquals(expected2, actual);
 		}
 		finally {
 			for (ServiceRegistration<?> registration : registrations) {
@@ -3082,7 +3082,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	private static final String HTTP_CONTEXT_TEST_ROOT = "http.context.test";
@@ -3096,9 +3096,9 @@ public class ServletTest extends BaseTest {
 			getHttpService().registerResources("/" + HTTP_CONTEXT_TEST_ROOT + "/1", "", ctx1);
 			getHttpService().registerResources("/" + HTTP_CONTEXT_TEST_ROOT + "/2", "", ctx2);
 			actual = requestAdvisor.request(HTTP_CONTEXT_TEST_ROOT + "/1/test");
-			Assert.assertEquals("1", actual);
+			assertEquals("1", actual);
 			actual = requestAdvisor.request(HTTP_CONTEXT_TEST_ROOT + "/2/test");
-			Assert.assertEquals("2", actual);
+			assertEquals("2", actual);
 		}
 		finally {
 			try {
@@ -3152,7 +3152,7 @@ public class ServletTest extends BaseTest {
 
 			String actual = requestAdvisor.request("a/s");
 
-			Assert.assertEquals(expected1, actual);
+			assertEquals(expected1, actual);
 		}
 		finally {
 			for (ServiceRegistration<?> registration : registrations) {
@@ -3225,7 +3225,7 @@ public class ServletTest extends BaseTest {
 
 			String actual = requestAdvisor.request("s1");
 
-			Assert.assertEquals(Boolean.TRUE.toString(), actual);
+			assertEquals(Boolean.TRUE.toString(), actual);
 		}
 		finally {
 			for (ServiceRegistration<?> registration : registrations) {
@@ -3338,7 +3338,7 @@ public class ServletTest extends BaseTest {
 
 			requestAdvisor.request("a/SA");
 
-			Assert.assertEquals("/foo/a", path.get());
+			assertEquals("/foo/a", path.get());
 		}
 		finally {
 			for (ServiceRegistration<?> registration : registrations) {
@@ -3407,7 +3407,7 @@ public class ServletTest extends BaseTest {
 
 			requestAdvisor.request("a/SA");
 
-			Assert.assertEquals("/foo/a", path.get());
+			assertEquals("/foo/a", path.get());
 		}
 		finally {
 			for (ServiceRegistration<?> registration : registrations) {
@@ -3453,15 +3453,15 @@ public class ServletTest extends BaseTest {
 
 			requestAdvisor.request("a/b/c/");
 
-			Assert.assertEquals("/foo/a/b/c/", getRequestURI.get());
+			assertEquals("/foo/a/b/c/", getRequestURI.get());
 			requestAdvisor.request("a/b/");
-			Assert.assertEquals("/foo/a/b/", getRequestURI.get());
+			assertEquals("/foo/a/b/", getRequestURI.get());
 			requestAdvisor.request("a/");
-			Assert.assertEquals("/foo/a/", getRequestURI.get());
+			assertEquals("/foo/a/", getRequestURI.get());
 			// Note using empty string here because of the way requestAdvisor works
 			// by appending a slash first.
 			requestAdvisor.request("");
-			Assert.assertEquals("/foo/", getRequestURI.get());
+			assertEquals("/foo/", getRequestURI.get());
 		}
 		finally {
 			for (ServiceRegistration<?> registration : registrations) {
@@ -3513,15 +3513,15 @@ public class ServletTest extends BaseTest {
 			int sessionIdx = initialURI.indexOf(";jsessionid=");
 			Assert.assertTrue("No session: " + initialURI, sessionIdx > -1);
 			String sessionPostfix = initialURI.substring(sessionIdx);
-			Assert.assertEquals("/foo/a/b/c/" + sessionPostfix, getRequestURI.get());
+			assertEquals("/foo/a/b/c/" + sessionPostfix, getRequestURI.get());
 			requestAdvisor.request("a/b/" + sessionPostfix);
-			Assert.assertEquals("/foo/a/b/" + sessionPostfix, getRequestURI.get());
+			assertEquals("/foo/a/b/" + sessionPostfix, getRequestURI.get());
 			requestAdvisor.request("a/" + sessionPostfix);
-			Assert.assertEquals("/foo/a/" + sessionPostfix, getRequestURI.get());
+			assertEquals("/foo/a/" + sessionPostfix, getRequestURI.get());
 			// Note using empty string here because of the way requestAdvisor works
 			// by appending a slash first.
 			requestAdvisor.request("" + sessionPostfix);
-			Assert.assertEquals("/foo/" + sessionPostfix, getRequestURI.get());
+			assertEquals("/foo/" + sessionPostfix, getRequestURI.get());
 		}
 		finally {
 			for (ServiceRegistration<?> registration : registrations) {
@@ -3558,15 +3558,15 @@ public class ServletTest extends BaseTest {
 			props = new Hashtable<>();
 
 			requestAdvisor.request("a/b/c/");
-			Assert.assertEquals("/a/b/c/", getRequestURI.get());
+			assertEquals("/a/b/c/", getRequestURI.get());
 			requestAdvisor.request("a/b/");
-			Assert.assertEquals("/a/b/", getRequestURI.get());
+			assertEquals("/a/b/", getRequestURI.get());
 			requestAdvisor.request("a/");
-			Assert.assertEquals("/a/", getRequestURI.get());
+			assertEquals("/a/", getRequestURI.get());
 			// Note using empty string here because of the way requestAdvisor works
 			// by appending a slash first.
 			requestAdvisor.request("");
-			Assert.assertEquals("/", getRequestURI.get());
+			assertEquals("/", getRequestURI.get());
 		}
 		finally {
 			for (ServiceRegistration<?> registration : registrations) {
@@ -3603,15 +3603,15 @@ public class ServletTest extends BaseTest {
 			int sessionIdx = initialURI.indexOf(";jsessionid=");
 			Assert.assertTrue("No session: " + initialURI, sessionIdx > -1);
 			String sessionPostfix = initialURI.substring(sessionIdx);
-			Assert.assertEquals("/a/b/c/" + sessionPostfix, getRequestURI.get());
+			assertEquals("/a/b/c/" + sessionPostfix, getRequestURI.get());
 			requestAdvisor.request("a/b/" + sessionPostfix);
-			Assert.assertEquals("/a/b/" + sessionPostfix, getRequestURI.get());
+			assertEquals("/a/b/" + sessionPostfix, getRequestURI.get());
 			requestAdvisor.request("a/" + sessionPostfix);
-			Assert.assertEquals("/a/" + sessionPostfix, getRequestURI.get());
+			assertEquals("/a/" + sessionPostfix, getRequestURI.get());
 			// Note using empty string here because of the way requestAdvisor works
 			// by appending a slash first.
 			requestAdvisor.request("" + sessionPostfix);
-			Assert.assertEquals("/" + sessionPostfix, getRequestURI.get());
+			assertEquals("/" + sessionPostfix, getRequestURI.get());
 		}
 		finally {
 			for (ServiceRegistration<?> registration : registrations) {
@@ -3936,9 +3936,9 @@ public class ServletTest extends BaseTest {
 			registrations.add(getBundleContext().registerService(Servlet.class, sB, servletProps1));
 
 			String result = requestAdvisor.request("s9A");
-			Assert.assertEquals("S9 included", result);
+			assertEquals("S9 included", result);
 
-			Assert.assertEquals(0, srl1.number.get());
+			assertEquals(0, srl1.number.get());
 
 		}
 		finally {
@@ -3989,11 +3989,11 @@ public class ServletTest extends BaseTest {
 		Assert.assertFalse(servletContext2.equals(servletContext3));
 
 		// Asserts two invocations return the same value
-		Assert.assertEquals(servletContext1.hashCode(), servletContext1.hashCode());
-		Assert.assertEquals(servletContext2.hashCode(), servletContext2.hashCode());
-		Assert.assertEquals(servletContext3.hashCode(), servletContext3.hashCode());
+		assertEquals(servletContext1.hashCode(), servletContext1.hashCode());
+		assertEquals(servletContext2.hashCode(), servletContext2.hashCode());
+		assertEquals(servletContext3.hashCode(), servletContext3.hashCode());
 
-		Assert.assertEquals(servletContext1.hashCode(), servletContext2.hashCode());
+		assertEquals(servletContext1.hashCode(), servletContext2.hashCode());
 		Assert.assertNotEquals(servletContext1.hashCode(), servletContext3.hashCode());
 		Assert.assertNotEquals(servletContext2.hashCode(), servletContext3.hashCode());
 	}
@@ -4061,7 +4061,7 @@ public class ServletTest extends BaseTest {
 			registrations.add(getBundleContext().registerService(Servlet.class, sA, servletProps1));
 
 			String result = requestAdvisor.request("s11");
-			Assert.assertEquals("S11 requested", result);
+			assertEquals("S11 requested", result);
 		}
 		finally {
 			for (ServiceRegistration<?> registration : registrations) {
@@ -4075,7 +4075,7 @@ public class ServletTest extends BaseTest {
 
 		session.invalidate();
 
-		Assert.assertEquals(0, listenerBalance.get());
+		assertEquals(0, listenerBalance.get());
 	}
 
 	@Test
@@ -4114,11 +4114,11 @@ public class ServletTest extends BaseTest {
 
 			String output1 = requestAdvisor.request("asyncOutput?iterations=2");
 
-			Assert.assertEquals("write(int)", "01234567890123456789", output1);
+			assertEquals("write(int)", "01234567890123456789", output1);
 
 			String output2 = requestAdvisor.request("asyncOutput?bytes=true&iterations=4");
 
-			Assert.assertEquals("write(byte[], int, int)", "0123456789012345678901234567890123456789", output2);
+			assertEquals("write(byte[], int, int)", "0123456789012345678901234567890123456789", output2);
 		} finally {
 			for (ServiceRegistration<?> registration : registrations) {
 				registration.unregister();
@@ -4137,7 +4137,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -4151,7 +4151,7 @@ public class ServletTest extends BaseTest {
 		} finally {
 			uninstallBundle(bundle);
 		}
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -4167,7 +4167,7 @@ public class ServletTest extends BaseTest {
 				"s9", Collections.<String, List<String>>emptyMap());
 
 			String responseCode = response.get("responseCode").get(0);
-			Assert.assertEquals("200", responseCode);
+			assertEquals("200", responseCode);
 		}
 		finally {
 			for (ServiceRegistration<?> registration : registrations) {
@@ -4191,15 +4191,15 @@ public class ServletTest extends BaseTest {
 			params.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, '/' + testName.getMethodName());
 			params.put(STATUS_PARAM, testName.getMethodName());
 			actual = doRequest(CONFIGURE, params);
-			Assert.assertEquals(testName.getMethodName(), actual);
+			assertEquals(testName.getMethodName(), actual);
 			actual = requestAdvisor.request(testName.getMethodName());
-			Assert.assertEquals(testName.getMethodName(), actual);
+			assertEquals(testName.getMethodName(), actual);
 
 			// change the init param
 			params.put(STATUS_PARAM, "changed");
 			doRequest(CONFIGURE, params);
 			actual = requestAdvisor.request(testName.getMethodName());
-			Assert.assertEquals("changed", actual);
+			assertEquals("changed", actual);
 	}
 
 	@Test
@@ -4217,15 +4217,15 @@ public class ServletTest extends BaseTest {
 		params.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, '/' + testName.getMethodName());
 		params.put(STATUS_PARAM, testName.getMethodName());
 		actual = doRequest(CONFIGURE, params);
-		Assert.assertEquals(testName.getMethodName(), actual);
+		assertEquals(testName.getMethodName(), actual);
 		actual = requestAdvisor.request(testName.getMethodName());
-		Assert.assertEquals(testName.getMethodName(), actual);
+		assertEquals(testName.getMethodName(), actual);
 
 		// change the pattern
 		params.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/changed");
 		doRequest(CONFIGURE, params);
 		actual = requestAdvisor.request("changed");
-		Assert.assertEquals(testName.getMethodName(), actual);
+		assertEquals(testName.getMethodName(), actual);
 	}
 
 	@Test
@@ -4245,7 +4245,7 @@ public class ServletTest extends BaseTest {
 		params1.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, '/' + testName.getMethodName());
 		params1.put(STATUS_PARAM, testName.getMethodName() + 1);
 		actual = doRequest(CONFIGURE, params1);
-		Assert.assertEquals(testName.getMethodName() + 1, actual);
+		assertEquals(testName.getMethodName() + 1, actual);
 
 		Map<String, String> params2 = new HashMap<>();
 		params2.put(TEST_PROTOTYPE_NAME, testName.getMethodName() + 2);
@@ -4253,25 +4253,25 @@ public class ServletTest extends BaseTest {
 		params2.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, '/' + testName.getMethodName());
 		params2.put(STATUS_PARAM, testName.getMethodName() + 2);
 		actual = doRequest(CONFIGURE, params2);
-		Assert.assertEquals(testName.getMethodName() + 2, actual);
+		assertEquals(testName.getMethodName() + 2, actual);
 
 		// Confirm the second registered (higher ranked) gets used
 		actual = requestAdvisor.request(testName.getMethodName());
-		Assert.assertEquals(testName.getMethodName() + 2, actual);
+		assertEquals(testName.getMethodName() + 2, actual);
 
 		// change the ranking to use the first servlet registered
 		params2.put(Constants.SERVICE_RANKING, "0");
 		doRequest(CONFIGURE, params2);
 		actual = requestAdvisor.request(testName.getMethodName());
-		Assert.assertEquals(testName.getMethodName() + 1, actual);
+		assertEquals(testName.getMethodName() + 1, actual);
 
 		// Unregister the first servlet should cause the second servlet to be used
 		actual = doRequest(UNREGISTER, Collections.singletonMap(TEST_PROTOTYPE_NAME, testName.getMethodName() + 1));
-		Assert.assertEquals(testName.getMethodName() + 1, actual);
+		assertEquals(testName.getMethodName() + 1, actual);
 
 		// Confirm the second registered is used
 		actual = requestAdvisor.request(testName.getMethodName());
-		Assert.assertEquals(testName.getMethodName() + 2, actual);
+		assertEquals(testName.getMethodName() + 2, actual);
 	}
 
 	@Test
@@ -4296,22 +4296,22 @@ public class ServletTest extends BaseTest {
 			params.put(STATUS_PARAM, testName.getMethodName());
 			params.put("servlet.init." + TEST_PATH_CUSTOMIZER_NAME, testName.getMethodName());
 			String actual = doRequest(CONFIGURE, params);
-			Assert.assertEquals(testName.getMethodName(), actual);
+			assertEquals(testName.getMethodName(), actual);
 
 			actual = requestAdvisor.request(testName.getMethodName());
-			Assert.assertEquals(testName.getMethodName(), actual);
+			assertEquals(testName.getMethodName(), actual);
 
 			ContextPathCustomizer pathAdaptor = new TestContextPathAdaptor("(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" + "testContext" + testName.getMethodName() + ")", null, testName.getMethodName());
 			pathAdaptorReg = getBundleContext().registerService(ContextPathCustomizer.class, pathAdaptor, null);
 
 			actual = requestAdvisor.request("testContext/" + testName.getMethodName());
-			Assert.assertEquals(testName.getMethodName(), actual);
+			assertEquals(testName.getMethodName(), actual);
 
 			pathAdaptorReg.unregister();
 			pathAdaptorReg = null;
 
 			actual = requestAdvisor.request(testName.getMethodName());
-			Assert.assertEquals(testName.getMethodName(), actual);
+			assertEquals(testName.getMethodName(), actual);
 			doRequest(UNREGISTER, params);
 		} finally {
 			helperReg.unregister();
@@ -4344,22 +4344,22 @@ public class ServletTest extends BaseTest {
 			params.put(STATUS_PARAM, testName.getMethodName());
 			params.put("servlet.init." + TEST_PATH_CUSTOMIZER_NAME, testName.getMethodName());
 			String actual = doRequest(CONFIGURE, params);
-			Assert.assertEquals(testName.getMethodName(), actual);
+			assertEquals(testName.getMethodName(), actual);
 
 			actual = requestAdvisor.request("testContext/" + testName.getMethodName());
-			Assert.assertEquals(testName.getMethodName(), actual);
+			assertEquals(testName.getMethodName(), actual);
 
 			ContextPathCustomizer pathAdaptor = new TestContextPathAdaptor(null, "testPrefix", testName.getMethodName());
 			pathAdaptorReg = getBundleContext().registerService(ContextPathCustomizer.class, pathAdaptor, null);
 
 			actual = requestAdvisor.request("testPrefix/testContext/" + testName.getMethodName());
-			Assert.assertEquals(testName.getMethodName(), actual);
+			assertEquals(testName.getMethodName(), actual);
 
 			pathAdaptorReg.unregister();
 			pathAdaptorReg = null;
 
 			actual = requestAdvisor.request("testContext/" + testName.getMethodName());
-			Assert.assertEquals(testName.getMethodName(), actual);
+			assertEquals(testName.getMethodName(), actual);
 			doRequest(UNREGISTER, params);
 		} finally {
 			helperReg.unregister();
@@ -4393,22 +4393,22 @@ public class ServletTest extends BaseTest {
 			params.put(STATUS_PARAM, testName.getMethodName());
 			params.put("servlet.init." + TEST_PATH_CUSTOMIZER_NAME, testName.getMethodName());
 			String actual = doRequest(CONFIGURE, params);
-			Assert.assertEquals(testName.getMethodName(), actual);
+			assertEquals(testName.getMethodName(), actual);
 
 			actual = requestAdvisor.request(testName.getMethodName());
-			Assert.assertEquals(testName.getMethodName(), actual);
+			assertEquals(testName.getMethodName(), actual);
 
 			ContextPathCustomizer pathAdaptor = new TestContextPathAdaptor(null, "testPrefix", testName.getMethodName());
 			pathAdaptorReg = getBundleContext().registerService(ContextPathCustomizer.class, pathAdaptor, null);
 
 			actual = requestAdvisor.request("testPrefix/" + testName.getMethodName());
-			Assert.assertEquals(testName.getMethodName(), actual);
+			assertEquals(testName.getMethodName(), actual);
 
 			pathAdaptorReg.unregister();
 			pathAdaptorReg = null;
 
 			actual = requestAdvisor.request(testName.getMethodName());
-			Assert.assertEquals(testName.getMethodName(), actual);
+			assertEquals(testName.getMethodName(), actual);
 			doRequest(UNREGISTER, params);
 		} finally {
 			helperReg.unregister();
@@ -4457,7 +4457,7 @@ public class ServletTest extends BaseTest {
 
 		String expected = "USER: TEST AUTH_TYPE: Basic";
 		String actual = requestAdvisor.request(testName.getMethodName());
-		Assert.assertEquals(expected, actual);
+		assertEquals(expected, actual);
 	}
 
 	@Test

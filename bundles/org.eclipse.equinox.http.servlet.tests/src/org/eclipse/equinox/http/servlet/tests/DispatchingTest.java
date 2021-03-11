@@ -1369,8 +1369,8 @@ public class DispatchingTest extends BaseTest {
 				response.addDateHeader("X-date", date1);
 				response.addHeader("X-colour", "blue");
 				response.addIntHeader("X-size", 20);
-				response.setCharacterEncoding("UTF-8");
 				response.setContentType("text/plain");
+				response.setCharacterEncoding("UTF-8");
 				response.setHeader("X-animal", "cat");
 				response.setLocale(Locale.CANADA);
 				response.setBufferSize(1024);
@@ -1389,8 +1389,8 @@ public class DispatchingTest extends BaseTest {
 				response.addDateHeader("X-date", date2);
 				response.addHeader("X-colour", "green");
 				response.addIntHeader("X-size", 30);
-				response.setCharacterEncoding("UTF-16");
 				response.setContentType("text/json");
+				response.setCharacterEncoding("UTF-16");
 				response.setHeader("X-animal", "dog");
 				response.setLocale(Locale.US);
 				response.setBufferSize(0);

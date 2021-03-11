@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 IBM Corporation and others.
+ * Copyright (c) 2011, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -132,11 +132,8 @@ public class ServletRequestAdvisor extends Object {
 		connection.setReadTimeout(timeout);
 		connection.connect();
 
-		InputStream stream = connection.getInputStream();
-		try {
+		try (InputStream stream = connection.getInputStream()){
 			return drain(stream);
-		} finally {
-			stream.close();
 		}
 	}
 

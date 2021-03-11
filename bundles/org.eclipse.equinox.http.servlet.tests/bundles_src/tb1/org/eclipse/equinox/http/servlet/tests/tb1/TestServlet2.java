@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -29,7 +29,7 @@ public class TestServlet2 extends AbstractTestServlet {
 
 	private int getEffectiveMajorVersion() {
 		ServletContext context = getServletContext();
-		return context.getEffectiveMajorVersion(); // This is a Servlet 3.0 API.
+		return context.getEffectiveMajorVersion(); // This is a Servlet 4.0 API.
 		
 	}
 
