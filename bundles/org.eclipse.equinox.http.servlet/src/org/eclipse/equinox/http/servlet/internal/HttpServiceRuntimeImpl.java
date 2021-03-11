@@ -1094,9 +1094,7 @@ public class HttpServiceRuntimeImpl
 		sb.append("(objectClass=").append(ServletRequestAttributeListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append("(objectClass=").append(HttpSessionListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append("(objectClass=").append(HttpSessionAttributeListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
-		if ((servletContext.getMajorVersion() >= 3) && (servletContext.getMinorVersion() > 0)) {
-			sb.append("(objectClass=").append(HttpSessionIdListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
+		sb.append("(objectClass=").append(HttpSessionIdListener.class.getName()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(")"); //$NON-NLS-1$
 		sb.append(")"); //$NON-NLS-1$
 

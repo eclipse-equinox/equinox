@@ -1186,11 +1186,8 @@ public class ContextController {
 			classes.add(HttpSessionAttributeListener.class);
 		}
 
-		ServletContext servletContext = proxyContext.getServletContext();
-		if ((servletContext.getMajorVersion() >= 3) && (servletContext.getMinorVersion() > 0)) {
-			if (objectClassList.contains(javax.servlet.http.HttpSessionIdListener.class.getName())) {
-				classes.add(javax.servlet.http.HttpSessionIdListener.class);
-			}
+		if (objectClassList.contains(javax.servlet.http.HttpSessionIdListener.class.getName())) {
+			classes.add(javax.servlet.http.HttpSessionIdListener.class);
 		}
 
 		return classes;
@@ -1255,11 +1252,6 @@ public class ContextController {
 
 	public void fireSessionIdChanged(String oldSessionId) {
 		if (shutdown) {
-			return;
-		}
-
-		ServletContext servletContext = proxyContext.getServletContext();
-		if ((servletContext.getMajorVersion() <= 3) && (servletContext.getMinorVersion() < 1)) {
 			return;
 		}
 
