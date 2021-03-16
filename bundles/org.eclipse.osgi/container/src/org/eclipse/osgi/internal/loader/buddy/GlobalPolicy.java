@@ -55,7 +55,7 @@ public class GlobalPolicy implements IBuddyPolicy {
 					} catch (ClassNotFoundException e) {
 						return null;
 					}
-				}).orElseGet(null);
+				}).orElse(null);
 	}
 
 	@Override
@@ -63,7 +63,7 @@ public class GlobalPolicy implements IBuddyPolicy {
 		return getExportingBundles(BundleLoader.getResourcePackageName(name)) //
 				.stream().findFirst().map(b -> {
 					return b.getResource(name);
-				}).orElseGet(null);
+				}).orElse(null);
 	}
 
 	@Override

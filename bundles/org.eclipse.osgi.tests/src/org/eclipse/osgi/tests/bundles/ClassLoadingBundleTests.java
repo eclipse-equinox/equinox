@@ -1744,6 +1744,28 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		global.loadClass("test.bug438904.frag.Test2");
 	}
 
+	public void testBuddyClassLoadingGlobalNotFound() throws Exception {
+		Bundle global = installer.installBundle("test.bug438904.global");
+
+		try {
+			global.loadClass("does.not.exist.Test");
+			fail("Expected class not found exception.");
+		} catch (ClassNotFoundException e) {
+			// expected
+		}
+		assertNull("Expected null resource found.", global.getResource("does/not/exist/Test.txt"));
+	}
+
+	public void testBuddyClassLoadingGlobalFound() throws Exception {
+		Bundle global = installer.installBundle("test.bug438904.global");
+
+		try {
+			global.loadClass("org.osgi.framework.Bundle");
+		} catch (ClassNotFoundException e) {
+			fail("Unexpected class not found exception.");
+		}
+	}
+
 	public void testUnitTestForcompoundEnumerations() {
 		Enumeration<Object> result = BundleLoader.compoundEnumerations(null, Collections.emptyEnumeration());
 		assertNotNull("Null result.", result);

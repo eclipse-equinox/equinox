@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Core OSGi Tests
 Bundle-SymbolicName: org.eclipse.osgi.tests;singleton:=true
-Bundle-Version: 3.16.200.qualifier
+Bundle-Version: 3.16.300.qualifier
 Bundle-Vendor: Eclipse.org
 Require-Bundle: 
  org.eclipse.core.runtime,
