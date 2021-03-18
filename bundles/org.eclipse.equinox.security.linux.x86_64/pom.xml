@@ -23,10 +23,6 @@
   <version>1.1.500-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 
-  <properties>
-    <skipAPIAnalysis>true</skipAPIAnalysis>
-  </properties>
-
   <build>
     <plugins>
       <plugin>
