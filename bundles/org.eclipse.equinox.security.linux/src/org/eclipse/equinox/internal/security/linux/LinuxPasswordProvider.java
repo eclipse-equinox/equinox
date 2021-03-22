@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 IBM Corporation and others.
+ * Copyright (c) 2017, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -59,7 +59,7 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 
 		void g_error_free(Pointer error);
 
-		GList.ByReference g_list_append(GList list, Pointer data);
+		GList g_list_append(GList list, Pointer data);
 	}
 
 	private interface LibSecret extends Library {
@@ -119,8 +119,7 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 		}
 		if (fLibSecret.secret_collection_get_locked(defaultCollection)) {
 			fLibSecret.secret_collection_get_label(defaultCollection);
-			GList.ByReference nullGList = new GList.ByReference(Pointer.NULL);
-			GList.ByReference list = fLibGio.g_list_append(nullGList, defaultCollection);
+			GList list = fLibGio.g_list_append(null, defaultCollection);
 			PointerByReference unlocked = new PointerByReference();
 			fLibSecret.secret_service_unlock_sync(secretService, list, Pointer.NULL, unlocked, gerror);
 			fLibGio.g_error_free(unlocked.getValue());
