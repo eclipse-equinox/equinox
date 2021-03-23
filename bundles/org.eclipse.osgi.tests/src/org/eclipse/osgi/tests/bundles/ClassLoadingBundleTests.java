@@ -1876,7 +1876,8 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		ClassLoader cl = this.getClass().getClassLoader();
 		Enumeration resources = null;
 		try {
-			Method findMethod = ClassLoader.class.getDeclaredMethod("findResources", new Class[] {String.class});
+			Method findMethod = BundleInstallUpdateTests.findDeclaredMethod(cl.getClass(), "findResources",
+					String.class);
 			findMethod.setAccessible(true);
 
 			resources = (Enumeration) findMethod.invoke(cl, new Object[] {"test/doesnotexist.txt"});

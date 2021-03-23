@@ -20,8 +20,20 @@ import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
 
+	public Method findDeclaredMethod(Class<?> clazz, String method, Class... args) throws NoSuchMethodException {
+		do {
+			try {
+				return clazz.getDeclaredMethod(method, args);
+			} catch (NoSuchMethodException e) {
+				clazz = clazz.getSuperclass();
+			}
+		} while (clazz != null);
+		throw new NoSuchMethodException(method);
+	}
+
 	public void start(BundleContext context) throws Exception {
-		Method findLibrary = ClassLoader.class.getDeclaredMethod("findLibrary", new Class[] {String.class});
+		Method findLibrary = findDeclaredMethod(this.getClass().getClassLoader().getClass(), "findLibrary",
+				String.class);
 		findLibrary.setAccessible(true);
 		AbstractBundleTests.simpleResults.addEvent(findLibrary.invoke(this.getClass().getClassLoader(), new Object[] {"nativefile.txt"}));
 	}

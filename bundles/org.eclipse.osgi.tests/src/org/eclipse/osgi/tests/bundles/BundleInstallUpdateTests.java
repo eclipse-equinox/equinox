@@ -437,6 +437,17 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 		is.close();
 	}
 
+	public static Method findDeclaredMethod(Class<?> clazz, String method, Class... args) throws NoSuchMethodException {
+		do {
+			try {
+				return clazz.getDeclaredMethod(method, args);
+			} catch (NoSuchMethodException e) {
+				clazz = clazz.getSuperclass();
+			}
+		} while (clazz != null);
+		throw new NoSuchMethodException(method);
+	}
+
 	public void testEscapeZipRoot() throws IOException, BundleException, InvalidSyntaxException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		String entry1 = "../../escapedZipRoot1.txt";
 		String entry2 = "dir1/../../../escapedZipRoot2.txt";
@@ -463,8 +474,8 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 		} catch (ClassNotFoundException e) {
 			// expected
 		}
-		ClassLoader cl = testBundle.adapt(BundleWiring.class).getClassLoader();
-		Method findLibrary = ClassLoader.class.getDeclaredMethod("findLibrary", String.class);
+		Object cl = testBundle.adapt(BundleWiring.class).getClassLoader();
+		Method findLibrary = findDeclaredMethod(cl.getClass(), "findLibrary", String.class);
 		findLibrary.setAccessible(true);
 		assertNull("Found library.", findLibrary.invoke(cl, "nativeCode"));
 
