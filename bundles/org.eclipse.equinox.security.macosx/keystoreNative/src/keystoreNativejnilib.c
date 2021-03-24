@@ -12,7 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-#include <jni.h>
+#include "jni.h"
 #include "keystoreNative.h"
 #include <CoreFoundation/CoreFoundation.h>
 #include <Security/Security.h>

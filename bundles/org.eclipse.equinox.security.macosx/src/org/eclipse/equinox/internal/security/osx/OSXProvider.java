@@ -33,7 +33,7 @@ public class OSXProvider extends PasswordProvider {
 
 	private native String getPassword(String service, String account) throws SecurityException;
 
-	private native String setPassword(String serviceName, String accountName, String password) throws SecurityException;
+	private native void setPassword(String serviceName, String accountName, String password) throws SecurityException;
 
 	@Override
 	public PBEKeySpec getPassword(IPreferencesContainer container, int passwordType) {
