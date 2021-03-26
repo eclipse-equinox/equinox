@@ -37,7 +37,7 @@ EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
 LIBS = -framework Cocoa
 
-CFLAGS = -O \
+CFLAGS = -O -s \
 	-Wall \
 	-DCOCOA -xobjective-c \
 	$(ARCHS) \

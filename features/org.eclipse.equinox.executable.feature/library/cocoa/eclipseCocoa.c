@@ -111,10 +111,11 @@ static NSWindow* window = nil;
 	NSImage* image = [[NSImage alloc] initByReferencingFile: featureImage];
 	[featureImage release];
 	if (image != NULL) {
-        NSSize size = [image size];
-		NSRect rect = {{0, 0}, {size.width, size.height}};
+		NSImageRep* imageRep = [image bestRepresentationForDevice: [[NSScreen mainScreen] deviceDescription]];
+		NSRect rect = {{0, 0}, {[imageRep pixelsWide], [imageRep pixelsHigh]}};
+		[image setSize: NSMakeSize([imageRep pixelsWide], [imageRep pixelsHigh])];
 		[image autorelease];
-		window = [[KeyWindow alloc] initWithContentRect: rect styleMask: NSWindowStyleMaskBorderless backing: NSBackingStoreBuffered defer: 0];
+		window = [[KeyWindow alloc] initWithContentRect: rect styleMask: NSBorderlessWindowMask backing: NSBackingStoreBuffered defer: 0];
 		if (window != nil) {
 			[window center];
 			[window setBackgroundColor: [NSColor colorWithPatternImage: image]];
@@ -140,7 +141,7 @@ static NSWindow* window = nil;
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	NSEvent* event;
 	NSApplication* application = [NSApplication sharedApplication];
-	while ((event = [application nextEventMatchingMask: NSEventMaskAny untilDate: nil inMode: NSDefaultRunLoopMode dequeue: TRUE]) != nil) {
+	while ((event = [application nextEventMatchingMask: NSAnyEventMask untilDate: nil inMode: NSDefaultRunLoopMode dequeue: TRUE]) != nil) {
 		[application sendEvent: event];
 	}
 	[pool release];
@@ -172,7 +173,9 @@ static NSWindow* window = nil;
 		CFURLRef url = NULL;
 		NSAppleEventDescriptor *desc = [event descriptorAtIndex:index], *coerceDesc;
 		if (!desc) continue;
-		if ((coerceDesc = [desc coerceToDescriptorType: typeFileURL]) != NULL) {
+		if ((coerceDesc = [desc coerceToDescriptorType: typeFSRef]) != NULL) {
+			url = CFURLCreateFromFSRef(kCFAllocatorDefault, [[coerceDesc data] bytes]);
+		} else if ((coerceDesc = [desc coerceToDescriptorType: typeFileURL]) != NULL) {
 			NSData *data = [coerceDesc data];
 			url = CFURLCreateWithBytes(kCFAllocatorDefault, [data bytes], [data length], kCFStringEncodingUTF8, NULL);
 		}
@@ -667,5 +670,5 @@ const char* getUUID() {
 _TCHAR* getFolderForApplicationData() {
 	NSString* bundleId = getCFBundleIdentifier();
 	NSString* appSupport = getApplicationSupport();
-	return (_TCHAR*)[[NSString stringWithFormat:@"%@/%@_%s", appSupport, bundleId, getUUID()] UTF8String];
+	return [[NSString stringWithFormat:@"%@/%@_%s", appSupport, bundleId, getUUID()] UTF8String];
 }
