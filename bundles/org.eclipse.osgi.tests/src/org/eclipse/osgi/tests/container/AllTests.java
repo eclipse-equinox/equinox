@@ -23,6 +23,7 @@ public class AllTests {
 		suite.addTest(new JUnit4TestAdapter(TestModuleContainer.class));
 		suite.addTest(new JUnit4TestAdapter(ResolutionReportTest.class));
 		suite.addTest(new JUnit4TestAdapter(ModuleContainerUsageTest.class));
+		suite.addTest(new JUnit4TestAdapter(NamespaceListTest.class));
 		return suite;
 	}
 }

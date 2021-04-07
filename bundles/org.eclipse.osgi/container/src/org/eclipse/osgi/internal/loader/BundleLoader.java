@@ -174,7 +174,7 @@ public class BundleLoader extends ModuleLoader {
 		// init the provided packages set
 		exportSources = new BundleLoaderSources(this);
 		List<ModuleCapability> exports = wiring.getModuleCapabilities(PackageNamespace.PACKAGE_NAMESPACE);
-		exports = exports == null ? new ArrayList<>(0) : exports;
+		exports = exports == null ? Collections.emptyList() : exports;
 		exportedPackages = Collections.synchronizedCollection(exports.size() > 10 ? new HashSet<String>(exports.size()) : new ArrayList<String>(exports.size()));
 		initializeExports(exports, exportSources, exportedPackages);
 

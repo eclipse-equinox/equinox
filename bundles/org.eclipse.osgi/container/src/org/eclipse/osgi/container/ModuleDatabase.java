@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
+import static org.eclipse.osgi.internal.container.NamespaceList.WIRE;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -41,6 +43,7 @@ import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.framework.util.ObjectPool;
 import org.eclipse.osgi.internal.container.Capabilities;
 import org.eclipse.osgi.internal.container.ComputeNodeOrder;
+import org.eclipse.osgi.internal.container.NamespaceList;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -409,10 +412,9 @@ public class ModuleDatabase {
 				}
 				// remove any wires from unresolved wirings that got removed
 				for (Map.Entry<ModuleWiring, Collection<ModuleWire>> entry : toRemoveWireLists.entrySet()) {
-					List<ModuleWire> provided = entry.getKey().getProvidedModuleWires(null);
-					// No null checks; we are holding the write lock here.
+					List<ModuleWire> provided = entry.getKey().getProvidedWires().copyList();
 					provided.removeAll(entry.getValue());
-					entry.getKey().setProvidedWires(provided);
+					entry.getKey().setProvidedWires(new NamespaceList<>(provided, WIRE));
 					for (ModuleWire removedWire : entry.getValue()) {
 						// invalidate the wire
 						removedWire.invalidate();
@@ -503,7 +505,9 @@ public class ModuleDatabase {
 		try {
 			Map<ModuleRevision, ModuleWiring> clonedWirings = new HashMap<>();
 			for (Map.Entry<ModuleRevision, ModuleWiring> entry : wirings.entrySet()) {
-				ModuleWiring wiring = new ModuleWiring(entry.getKey(), entry.getValue().getModuleCapabilities(null), entry.getValue().getModuleRequirements(null), entry.getValue().getProvidedModuleWires(null), entry.getValue().getRequiredModuleWires(null), entry.getValue().getSubstitutedNames());
+				ModuleWiring wiring = new ModuleWiring(entry.getKey(), entry.getValue().getCapabilities(),
+						entry.getValue().getRequirements(), entry.getValue().getProvidedWires(),
+						entry.getValue().getRequiredWires(), entry.getValue().getSubstitutedNames());
 				clonedWirings.put(entry.getKey(), wiring);
 			}
 			return clonedWirings;

@@ -3806,6 +3806,127 @@ public class TestModuleContainer extends AbstractTest {
 		assertEquals("Wrong state for moduleBF", State.INSTALLED, moduleBF.getState());
 	}
 
+	@Test
+	public void testModuleWiringLookup() throws BundleException {
+		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		ModuleContainer container = adaptor.getContainer();
+
+		Map<String, String> manifestCore = new HashMap<>();
+		manifestCore.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifestCore.put(Constants.BUNDLE_SYMBOLICNAME, "core");
+		manifestCore.put(Constants.BUNDLE_VERSION, "1");
+		manifestCore.put(Constants.PROVIDE_CAPABILITY, "core");
+		manifestCore.put(Constants.EXPORT_PACKAGE, "core.a, core.b, core.dynamic.a, core.dynamic.b");
+		installDummyModule(manifestCore, "core", container);
+
+		Map<String, String> manifestA = new HashMap<>();
+		manifestA.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifestA.put(Constants.BUNDLE_SYMBOLICNAME, "a");
+		manifestA.put(Constants.BUNDLE_VERSION, "1");
+		manifestA.put(Constants.PROVIDE_CAPABILITY, "ca; ca=1, ca; ca=2, cb; cb=1, cb; cb=2, ca; ca=3");
+		manifestA.put(Constants.REQUIRE_CAPABILITY, "core");
+		manifestA.put(Constants.IMPORT_PACKAGE, "core.a, core.b");
+		manifestA.put(Constants.DYNAMICIMPORT_PACKAGE, "core.dynamic.*");
+		Module moduleA = installDummyModule(manifestA, "a", container);
+
+		Map<String, String> manifestB = new HashMap<>();
+		manifestB.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifestB.put(Constants.BUNDLE_SYMBOLICNAME, "b");
+		manifestB.put(Constants.BUNDLE_VERSION, "1");
+		manifestB.put(Constants.REQUIRE_CAPABILITY,
+				"ca; filter:=\"(ca=1)\", ca; filter:=\"(ca=2)\", cb; filter:=\"(cb=1)\", cb; filter:=\"(cb=2)\", ca; filter:=\"(ca=3)\"");
+		Module moduleB = installDummyModule(manifestB, "b", container);
+
+		container.resolve(Arrays.asList(moduleA, moduleB), false);
+
+		ModuleWiring wiringA = moduleA.getCurrentRevision().getWiring();
+		List<ModuleCapability> caCaps = wiringA.getModuleCapabilities("ca");
+		assertEquals("Wrong number of capabilities", 3, caCaps.size());
+		List<ModuleWire> caProvidedWires = wiringA.getProvidedModuleWires("ca");
+		assertEquals("Wrong number of wires.", 3, caProvidedWires.size());
+
+		ModuleWiring wiringB = moduleB.getCurrentRevision().getWiring();
+		List<ModuleRequirement> caReqs = wiringB.getModuleRequirements("ca");
+		assertEquals("Wrong number of requirements", 3, caReqs.size());
+		List<ModuleWire> caRequiredWires = wiringB.getRequiredModuleWires("ca");
+		assertEquals("Wrong number of wires.", 3, caRequiredWires.size());
+
+		Map<String, String> manifestAFrag = new HashMap<>();
+		manifestAFrag.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifestAFrag.put(Constants.BUNDLE_SYMBOLICNAME, "a.frag");
+		manifestAFrag.put(Constants.BUNDLE_VERSION, "1");
+		manifestAFrag.put(Constants.FRAGMENT_HOST, "a");
+		manifestAFrag.put(Constants.PROVIDE_CAPABILITY, "ca; ca=4, ca; ca=5, cb; cb=3, cb; cb=4, ca; ca=6");
+		installDummyModule(manifestAFrag, "a.frag", container);
+
+		Map<String, String> manifestBFrag = new HashMap<>();
+		manifestBFrag.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifestBFrag.put(Constants.BUNDLE_SYMBOLICNAME, "b.frag");
+		manifestBFrag.put(Constants.BUNDLE_VERSION, "1");
+		manifestBFrag.put(Constants.FRAGMENT_HOST, "b");
+		manifestBFrag.put(Constants.REQUIRE_CAPABILITY,
+				"ca; filter:=\"(ca=4)\", ca; filter:=\"(ca=5)\", cb; filter:=\"(cb=3)\", cb; filter:=\"(cb=4)\", ca; filter:=\"(ca=6)\"");
+		installDummyModule(manifestBFrag, "b.frag", container);
+
+		container.refresh(Arrays.asList(moduleA, moduleB));
+
+		wiringA = moduleA.getCurrentRevision().getWiring();
+		caCaps = wiringA.getModuleCapabilities("ca");
+		assertEquals("Wrong number of capabilities", 6, caCaps.size());
+		caProvidedWires = wiringA.getProvidedModuleWires("ca");
+		assertEquals("Wrong number of wires.", 6, caProvidedWires.size());
+
+		wiringB = moduleB.getCurrentRevision().getWiring();
+		caReqs = wiringB.getModuleRequirements("ca");
+		assertEquals("Wrong number of requirements", 6, caReqs.size());
+		caRequiredWires = wiringB.getRequiredModuleWires("ca");
+		assertEquals("Wrong number of wires.", 6, caRequiredWires.size());
+
+		// dynamically resolve a fragment to already resolved host, providing more
+		// capabilities and requirements
+		Map<String, String> manifestA2Frag = new HashMap<>();
+		manifestA2Frag.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifestA2Frag.put(Constants.BUNDLE_SYMBOLICNAME, "a.frag2");
+		manifestA2Frag.put(Constants.BUNDLE_VERSION, "1");
+		manifestA2Frag.put(Constants.FRAGMENT_HOST, "a");
+		manifestA2Frag.put(Constants.PROVIDE_CAPABILITY, "ca; ca=7, ca; ca=8, cb; cb=5, cb; cb=6, ca; ca=9");
+		manifestA2Frag.put(Constants.REQUIRE_CAPABILITY, "ca; filter:=\"(ca=6)\"");
+		Module moduleAFrag2 = installDummyModule(manifestA2Frag, "a.frag1", container);
+
+		container.resolve(Arrays.asList(moduleAFrag2), true);
+		assertEquals("Wrong state for frag2", State.RESOLVED, moduleAFrag2.getState());
+		caCaps = wiringA.getModuleCapabilities("ca");
+		assertEquals("Wrong number of capabilities", 9, caCaps.size());
+		caProvidedWires = wiringA.getProvidedModuleWires("ca");
+		assertEquals("Wrong number of wires.", 7, caProvidedWires.size());
+		caReqs = wiringA.getModuleRequirements("ca");
+		assertEquals("Wrong number of requirements.", 1, caReqs.size());
+		caRequiredWires = wiringA.getRequiredModuleWires("ca");
+		assertEquals("Wrong number of wires.", 1, caRequiredWires.size());
+
+		List<ModuleRequirement> pkgReqs = wiringA.getModuleRequirements(PackageNamespace.PACKAGE_NAMESPACE);
+		assertEquals("Wrong number of requirements.", 3, pkgReqs.size());
+		List<ModuleWire> pkgWires = wiringA.getRequiredModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
+		assertEquals("Wring number of wires.", 2, pkgWires.size());
+
+		ModuleWire dynamicImport1 = container.resolveDynamic("core.dynamic.a", moduleA.getCurrentRevision());
+		assertNotNull("Dynamic resolve failed", dynamicImport1);
+
+		pkgReqs = wiringA.getModuleRequirements(PackageNamespace.PACKAGE_NAMESPACE);
+		assertEquals("Wrong number of requirements.", 3, pkgReqs.size());
+		assertEquals("Wrong last package requirement.", PackageNamespace.RESOLUTION_DYNAMIC,
+				pkgReqs.get(pkgReqs.size() - 1).getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE));
+		pkgWires = wiringA.getRequiredModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
+		assertEquals("Wring number of wires.", 3, pkgWires.size());
+		assertEquals("Wrong last package wire.", dynamicImport1, pkgWires.get(pkgWires.size() - 1));
+
+		ModuleWire dynamicImport2 = container.resolveDynamic("core.dynamic.b", moduleA.getCurrentRevision());
+		assertNotNull("Dynamic resolve failed", dynamicImport2);
+		pkgWires = wiringA.getRequiredModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
+		assertEquals("Wring number of wires.", 4, pkgWires.size());
+		assertEquals("Wrong last package wire.", dynamicImport2, pkgWires.get(pkgWires.size() - 1));
+	}
+
 	private static void assertWires(List<ModuleWire> required, List<ModuleWire>... provided) {
 		for (ModuleWire requiredWire : required) {
 			for (List<ModuleWire> providedList : provided) {

@@ -15,8 +15,14 @@
 package org.eclipse.osgi.storage;
 
 import java.io.File;
-import java.util.*;
-import org.eclipse.osgi.container.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import org.eclipse.osgi.container.ModuleRevision;
+import org.eclipse.osgi.container.ModuleWire;
+import org.eclipse.osgi.container.ModuleWiring;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
@@ -174,7 +180,7 @@ public class NativeCodeFinder {
 		}
 
 		List<ModuleWire> nativeCode = wiring.getRequiredModuleWires(NativeNamespace.NATIVE_NAMESPACE);
-		if (nativeCode.isEmpty()) {
+		if (nativeCode == null || nativeCode.isEmpty()) {
 			return Collections.emptyList();
 		}
 

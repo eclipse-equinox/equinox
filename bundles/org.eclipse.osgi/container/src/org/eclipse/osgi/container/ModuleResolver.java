@@ -13,6 +13,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
+import static org.eclipse.osgi.internal.container.NamespaceList.CAPABILITY;
+import static org.eclipse.osgi.internal.container.NamespaceList.REQUIREMENT;
+import static org.eclipse.osgi.internal.container.NamespaceList.WIRE;
+
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,12 +40,14 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import org.apache.felix.resolver.Logger;
 import org.apache.felix.resolver.ResolutionError;
 import org.apache.felix.resolver.ResolverImpl;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
 import org.eclipse.osgi.container.namespaces.EquinoxFragmentNamespace;
 import org.eclipse.osgi.internal.container.InternalUtils;
+import org.eclipse.osgi.internal.container.NamespaceList;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
@@ -183,9 +189,11 @@ final class ModuleResolver {
 		for (Map.Entry<Resource, List<Wire>> resultEntry : result.entrySet()) {
 			ModuleRevision revision = (ModuleRevision) resultEntry.getKey();
 			List<ModuleWire> requiredWires = new ArrayList<>(resultEntry.getValue().size());
+			List<String> seen = new ArrayList<>(5);
 			for (Wire wire : resultEntry.getValue()) {
 				ModuleWire moduleWire = new ModuleWire((ModuleCapability) wire.getCapability(), (ModuleRevision) wire.getProvider(), (ModuleRequirement) wire.getRequirement(), (ModuleRevision) wire.getRequirer());
-				requiredWires.add(moduleWire);
+				requiredWires.add(getInsertIndex(moduleWire.getCapability().getNamespace(), requiredWires, seen,
+						NamespaceList.WIRE), moduleWire);
 				Map<ModuleCapability, List<ModuleWire>> providedWiresMap = provided.get(moduleWire.getProvider());
 				if (providedWiresMap == null) {
 					providedWiresMap = new HashMap<>();
@@ -232,9 +240,9 @@ final class ModuleResolver {
 		if (requiredWires == null)
 			requiredWires = Collections.emptyList();
 
-		List<ModuleCapability> capabilities = new ArrayList<>(revision.getModuleCapabilities(null));
+		List<ModuleCapability> capabilities = sortByNamespaceCopy(revision.getModuleCapabilities(null), CAPABILITY);
 		ListIterator<ModuleCapability> iCapabilities = capabilities.listIterator(capabilities.size());
-		List<ModuleRequirement> requirements = new ArrayList<>(revision.getModuleRequirements(null));
+		List<ModuleRequirement> requirements = sortByNamespaceCopy(revision.getModuleRequirements(null), REQUIREMENT);
 		ListIterator<ModuleRequirement> iRequirements = requirements.listIterator(requirements.size());
 
 		// if revision is a fragment remove payload requirements and capabilities
@@ -257,7 +265,33 @@ final class ModuleResolver {
 		addProvidedWires(providedWireMap, providedWires, capabilities);
 
 		InternalUtils.filterCapabilityPermissions(capabilities);
-		return new ModuleWiring(revision, capabilities, requirements, providedWires, requiredWires, substituted);
+		return new ModuleWiring(revision, new NamespaceList<>(capabilities, CAPABILITY),
+				new NamespaceList<>(requirements, REQUIREMENT), new NamespaceList<>(providedWires, WIRE),
+				new NamespaceList<>(requiredWires, WIRE), substituted);
+	}
+
+	private <E> List<E> sortByNamespaceCopy(List<E> elements, Function<E, String> getNamespace) {
+		List<E> result = new ArrayList<>(elements.size());
+		List<String> seen = new ArrayList<>();
+		for (E e : elements) {
+			String namespace = getNamespace.apply(e);
+			result.add(getInsertIndex(namespace, result, seen, getNamespace), e);
+		}
+		return result;
+	}
+
+	private <E> int getInsertIndex(String namespace, List<E> elements, List<String> seen,
+			Function<E, String> getNamespace) {
+		if (seen.contains(namespace)) {
+			for (int i = elements.size() - 1; i > -1; i--) {
+				if (namespace.equals(getNamespace.apply(elements.get(i)))) {
+					return i + 1;
+				}
+			}
+			throw new IllegalStateException();
+		}
+		seen.add(namespace);
+		return elements.size();
 	}
 
 	private static void removePayloadContent(ListIterator<ModuleCapability> iCapabilities, ListIterator<ModuleRequirement> iRequirements) {
@@ -379,6 +413,9 @@ final class ModuleResolver {
 						}
 					}
 				}
+				if (!iCapabilities.hasPrevious()) {
+					fastForward(iCapabilities);
+				}
 				iCapabilities.add(fragmentCapability);
 			}
 			// add fragment requirements
@@ -405,6 +442,9 @@ final class ModuleResolver {
 							}
 						}
 					}
+				}
+				if (!iRequirements.hasPrevious()) {
+					fastForward(iRequirements);
 				}
 				iRequirements.add(fragmentRequirement);
 			}
@@ -466,10 +506,10 @@ final class ModuleResolver {
 
 	private static ModuleWiring createWiringDelta(ModuleRevision revision, ModuleWiring existingWiring, Map<ModuleCapability, List<ModuleWire>> providedWireMap, List<ModuleWire> requiredWires) {
 		// No null checks are done here on the wires since this is a copy.
-		List<ModuleWire> existingProvidedWires = existingWiring.getProvidedModuleWires(null);
-		List<ModuleCapability> existingCapabilities = existingWiring.getModuleCapabilities(null);
-		List<ModuleWire> existingRequiredWires = existingWiring.getRequiredModuleWires(null);
-		List<ModuleRequirement> existingRequirements = existingWiring.getModuleRequirements(null);
+		List<ModuleWire> existingProvidedWires = existingWiring.getProvidedWires().copyList();
+		List<ModuleCapability> existingCapabilities = existingWiring.getCapabilities().copyList();
+		List<ModuleWire> existingRequiredWires = existingWiring.getRequiredWires().copyList();
+		List<ModuleRequirement> existingRequirements = existingWiring.getRequirements().copyList();
 
 		// First, add newly resolved fragment capabilities and requirements
 		if (providedWireMap != null) {

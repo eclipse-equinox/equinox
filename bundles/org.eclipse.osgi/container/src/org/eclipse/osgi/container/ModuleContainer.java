@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
+import static org.eclipse.osgi.internal.container.NamespaceList.WIRE;
+
 import java.io.Closeable;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -51,6 +53,7 @@ import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.framework.util.ThreadInfoReport;
 import org.eclipse.osgi.internal.container.InternalUtils;
 import org.eclipse.osgi.internal.container.LockSet;
+import org.eclipse.osgi.internal.container.NamespaceList;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.messages.Msg;
@@ -805,9 +808,10 @@ public final class ModuleContainer implements DebugOptionsListener {
 					ModuleWiring current = wiringCopy.get(deltaEntry.getKey());
 					if (current != null) {
 						// need to update the provided capabilities, provided and required wires for currently resolved
-						current.setCapabilities(deltaEntry.getValue().getModuleCapabilities(null));
-						current.setProvidedWires(deltaEntry.getValue().getProvidedModuleWires(null));
-						current.setRequiredWires(deltaEntry.getValue().getRequiredModuleWires(null));
+						current.setCapabilities(deltaEntry.getValue().getCapabilities());
+						current.setProvidedWires(deltaEntry.getValue().getProvidedWires());
+						current.setRequirements(deltaEntry.getValue().getRequirements());
+						current.setRequiredWires(deltaEntry.getValue().getRequiredWires());
 						deltaEntry.setValue(current); // set the real wiring into the delta
 					} else {
 						ModuleRevision revision = deltaEntry.getValue().getRevision();
@@ -1045,9 +1049,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 					return null; // need to try again
 				// remove any wires from unresolved wirings that got removed
 				for (Map.Entry<ModuleWiring, Collection<ModuleWire>> entry : toRemoveWireLists.entrySet()) {
-					List<ModuleWire> provided = entry.getKey().getProvidedModuleWires(null);
+					List<ModuleWire> provided = entry.getKey().getProvidedWires().copyList();
 					provided.removeAll(entry.getValue());
-					entry.getKey().setProvidedWires(provided);
+					entry.getKey().setProvidedWires(new NamespaceList<>(provided, WIRE));
 					for (ModuleWire removedWire : entry.getValue()) {
 						// invalidate the wire
 						removedWire.invalidate();
