@@ -41,7 +41,7 @@ ifeq ($(ARCHS),-arch x86_64)
   LDFLAGS=-pagezero_size 0x1000
 endif
 
-CFLAGS = -O -s \
+CFLAGS = -O \
 	-Wall \
 	-DCOCOA -xobjective-c \
 	$(ARCHS) \

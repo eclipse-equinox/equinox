@@ -66,9 +66,12 @@ void displayMessage(char *title, char *message)
 	}
 
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-	NSAlert* alert = [NSAlert alertWithMessageText: (NSString*)(inDescription != nil ? inError : nil) defaultButton: nil alternateButton: nil otherButton: nil informativeTextWithFormat: (NSString*)(inDescription != nil ? inDescription : inError)];
+	NSAlert *alert = [[NSAlert alloc] init];
+    [alert setMessageText:(NSString*)(inDescription != nil ? inError : nil)];
+    [alert setInformativeText:(NSString*)(inDescription != nil ? inDescription : inError)];
+    [alert addButtonWithTitle:@"Ok"];
 	[[alert window] setTitle: [NSString stringWithUTF8String: title]];
-	[alert setAlertStyle: NSCriticalAlertStyle];
+	[alert setAlertStyle: NSAlertStyleCritical];
 	[alert runModal];
 	[pool release];
 	CFRelease(inError);
@@ -103,7 +106,7 @@ void * loadLibrary( char * library ){
 
 	// check if it's a JVM bundle
 	if (strstr(bundle, "libjvm") && (start = strstr(bundle, "/Contents/Home/")) != NULL) {
-		start[0] = NULL;
+		start[0] = 0;
 		loadVMBundle(bundle);
 		free(bundle);
 		if (javaVMBundle) {
@@ -143,8 +146,11 @@ char * resolveSymlinks( char * path ) {
 	char * result = 0;
 	CFURLRef url, resolved;
 	CFStringRef string;
-	FSRef fsRef;
-	Boolean isFolder, wasAliased;
+	Boolean isStale;
+    CFDataRef data;
+    CFErrorRef errorRef;
+    
+    
 
 	if(path == NULL)
 		return path;
@@ -154,24 +160,26 @@ char * resolveSymlinks( char * path ) {
 	CFRelease(string);
 	if(url == NULL)
 		return path;
-
-	if(CFURLGetFSRef(url, &fsRef)) {
-		if( FSResolveAliasFile(&fsRef, true, &isFolder, &wasAliased) == noErr) {
-			resolved = CFURLCreateFromFSRef(kCFAllocatorDefault, &fsRef);
-			if(resolved != NULL) {
-				string = CFURLCopyFileSystemPath(resolved, kCFURLPOSIXPathStyle);
-				CFIndex length = CFStringGetMaximumSizeForEncoding(CFStringGetLength(string), kCFStringEncodingUTF8);
-				char *s = malloc(length);
-				if (CFStringGetCString(string, s, length, kCFStringEncodingUTF8)) {
-					result = s;
-				} else {
-					free(s);
-				}
-				CFRelease(string);
-				CFRelease(resolved);
-			}
-		}
-	}
+    
+    data = CFURLCreateBookmarkDataFromFile(kCFAllocatorDefault, url, &errorRef);
+    if (data == NULL) {
+        CFRelease(url);
+        return path;
+    }
+    
+    resolved = CFURLCreateByResolvingBookmarkData(kCFAllocatorDefault, data, kCFURLBookmarkResolutionWithoutMountingMask|kCFURLBookmarkResolutionWithoutUIMask, NULL, NULL, &isStale, &errorRef);
+    if(resolved != NULL) {
+        string = CFURLCopyFileSystemPath(resolved, kCFURLPOSIXPathStyle);
+        CFIndex length = CFStringGetMaximumSizeForEncoding(CFStringGetLength(string), kCFStringEncodingUTF8);
+        char *s = malloc(length);
+        if (CFStringGetCString(string, s, length, kCFStringEncodingUTF8)) {
+            result = s;
+        } else {
+            free(s);
+        }
+        CFRelease(string);
+        CFRelease(resolved);
+    }
 	CFRelease(url);
 	return result;
 }

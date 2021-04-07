@@ -216,8 +216,10 @@ static _TCHAR* startupMsg =
 _T_ECLIPSE("The %s executable launcher was unable to locate its \n\
 companion launcher jar.");
 
+#ifdef LINUX
 static _TCHAR* gtk2Msg =
 _T_ECLIPSE("The %s executable launcher no longer supports running with GTK + 2.x. Continuing using GTK+ 3.x.");
+#endif
 
 static _TCHAR* homeMsg =
 _T_ECLIPSE("The %s executable launcher was unable to locate its \n\

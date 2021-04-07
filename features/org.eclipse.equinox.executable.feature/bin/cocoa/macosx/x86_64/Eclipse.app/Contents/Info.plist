@@ -3,6 +3,8 @@
 <plist version="1.0">
 
 <dict>
+	<key>NSRequiresAquaSystemAppearance</key>
+	<true/>
 	<key>CFBundleExecutable</key>
 		<string>eclipse</string>
 	<key>CFBundleGetInfoString</key>

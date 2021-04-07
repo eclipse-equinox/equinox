@@ -69,7 +69,7 @@ if [ "$defaultOSArch" == "arm64" ]
 then
   SDKROOT_PATH="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
 else
-  SDKROOT_PATH="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk"
+  SDKROOT_PATH="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk"
 fi
 
 # /System/Library/Frameworks/JavaVM.framework/Headers does not exist anymore on Yosemite
