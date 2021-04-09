@@ -98,12 +98,9 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 		}
 		System.out.print("Debug options:\n    " + optionsFile.toExternalForm()); //$NON-NLS-1$
 		try {
-			InputStream input = LocationHelper.getStream(optionsFile);
-			try {
+			try (InputStream input = LocationHelper.getStream(optionsFile)) {
 				options.load(input);
 				System.out.println(" loaded"); //$NON-NLS-1$
-			} finally {
-				input.close();
 			}
 		} catch (FileNotFoundException e) {
 			System.out.println(" not found"); //$NON-NLS-1$

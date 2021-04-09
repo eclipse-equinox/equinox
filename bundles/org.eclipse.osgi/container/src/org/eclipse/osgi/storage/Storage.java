@@ -1459,8 +1459,7 @@ public class Storage {
 
 			// create a temporary in memory stream so we can figure out the length
 			ByteArrayOutputStream tempBytes = new ByteArrayOutputStream();
-			DataOutputStream temp = new DataOutputStream(tempBytes);
-			try {
+			try (DataOutputStream temp = new DataOutputStream(tempBytes)) {
 				Object saveContext = factory.createSaveContext();
 				for (Generation generation : generations) {
 					if (generation.getBundleInfo().getBundleId() == 0) {
@@ -1472,8 +1471,6 @@ public class Storage {
 						hook.save(saveContext, temp);
 					}
 				}
-			} finally {
-				temp.close();
 			}
 			out.writeInt(tempBytes.size());
 			out.write(tempBytes.toByteArray());
@@ -1612,8 +1609,7 @@ public class Storage {
 			byte[] bytes = new byte[dataSize];
 			in.readFully(bytes);
 			if (factory != null) {
-				DataInputStream temp = new DataInputStream(new ByteArrayInputStream(bytes));
-				try {
+				try (DataInputStream temp = new DataInputStream(new ByteArrayInputStream(bytes))) {
 					if (factory.isCompatibleWith(version)) {
 						Object loadContext = factory.createLoadContext(version);
 						for (Generation generation : generations) {
@@ -1641,8 +1637,6 @@ public class Storage {
 					}
 				} catch (BundleException e) {
 					throw new IOException(e);
-				} finally {
-					temp.close();
 				}
 			}
 		}

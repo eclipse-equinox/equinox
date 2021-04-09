@@ -362,11 +362,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			if (location == null)
 				return result;
 			try {
-				InputStream in = LocationHelper.getStream(location);
-				try {
+				try (InputStream in = LocationHelper.getStream(location)) {
 					result.load(in);
-				} finally {
-					in.close();
 				}
 			} catch (FileNotFoundException e) {
 				// TODO probably should log, but the common case for non-eclipse
