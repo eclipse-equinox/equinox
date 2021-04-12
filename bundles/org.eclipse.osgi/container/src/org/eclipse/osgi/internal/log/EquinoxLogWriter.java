@@ -59,7 +59,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	private static final String LINE_SEPARATOR;
 
 	static {
-		String s = System.getProperty("line.separator"); //$NON-NLS-1$
+		String s = System.lineSeparator();
 		LINE_SEPARATOR = s == null ? "\n" : s; //$NON-NLS-1$
 	}
 

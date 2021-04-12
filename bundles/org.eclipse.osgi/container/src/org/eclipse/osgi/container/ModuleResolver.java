@@ -77,7 +77,7 @@ import org.osgi.service.resolver.Resolver;
  * in a module {@link ModuleContainer container}.
  */
 final class ModuleResolver {
-	static final String SEPARATOR = System.getProperty("line.separator"); //$NON-NLS-1$
+	static final String SEPARATOR = System.lineSeparator();
 	static final char TAB = '\t';
 
 	private static final String OPTION_RESOLVER = EquinoxContainer.NAME + "/resolver"; //$NON-NLS-1$

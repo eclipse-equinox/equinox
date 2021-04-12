@@ -71,7 +71,7 @@ class EclipseDebugTrace implements DebugTrace {
 	/** OS-specific line separator */
 	private static final String LINE_SEPARATOR;
 	static {
-		String s = System.getProperty("line.separator"); //$NON-NLS-1$
+		String s = System.lineSeparator();
 		LINE_SEPARATOR = s == null ? "\n" : s; //$NON-NLS-1$
 	}
 	/** The value written to the trace file if a null object is being traced */
