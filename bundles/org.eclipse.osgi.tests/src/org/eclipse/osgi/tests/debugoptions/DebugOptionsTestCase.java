@@ -64,7 +64,7 @@ public class DebugOptionsTestCase extends CoreTest {
 	private final static String LINE_SEPARATOR;
 	private boolean verboseDebug = true; // default is true
 	static {
-		String s = System.getProperty("line.separator"); //$NON-NLS-1$
+		String s = System.lineSeparator();
 		LINE_SEPARATOR = s == null ? "\n" : s; //$NON-NLS-1$
 	}
 	private final static String TAB_CHARACTER = "\t"; //$NON-NLS-1$
