@@ -233,6 +233,7 @@ public class Main {
 	private static final String USER_DIR = "@user.dir"; //$NON-NLS-1$
 	// Placeholder for hashcode of installation directory
 	private static final String INSTALL_HASH_PLACEHOLDER = "@install.hash"; //$NON-NLS-1$
+	private static final String LAUNCHER_DIR = "@launcher.dir"; //$NON-NLS-1$
 
 	// types of parent classloaders the framework can have
 	private static final String PARENT_CLASSLOADER_APP = "app"; //$NON-NLS-1$
@@ -1960,6 +1961,12 @@ public class Main {
 		// value is not set so compute the default and set the value
 		String installArea = System.getProperty(PROP_INSTALL_AREA);
 		if (installArea != null) {
+			if (installArea.startsWith(LAUNCHER_DIR)) {
+				String launcher = System.getProperty(PROP_LAUNCHER);
+				if (launcher == null)
+					throw new IllegalStateException("Install location depends on launcher, but launcher is not defined"); //$NON-NLS-1$
+				installArea = installArea.replaceAll(LAUNCHER_DIR, new File(launcher).getParent());
+			}
 			installLocation = buildURL(installArea, true);
 			if (installLocation == null)
 				throw new IllegalStateException("Install location is invalid: " + installArea); //$NON-NLS-1$
