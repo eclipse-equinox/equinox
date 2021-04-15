@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2020 IBM Corporation and others.
+ * Copyright (c) 2012, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,8 +12,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.container;
-
-import static org.eclipse.osgi.internal.container.NamespaceList.WIRE;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -44,6 +42,7 @@ import org.eclipse.osgi.framework.util.ObjectPool;
 import org.eclipse.osgi.internal.container.Capabilities;
 import org.eclipse.osgi.internal.container.ComputeNodeOrder;
 import org.eclipse.osgi.internal.container.NamespaceList;
+import org.eclipse.osgi.internal.container.NamespaceList.Builder;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -412,9 +411,9 @@ public class ModuleDatabase {
 				}
 				// remove any wires from unresolved wirings that got removed
 				for (Map.Entry<ModuleWiring, Collection<ModuleWire>> entry : toRemoveWireLists.entrySet()) {
-					List<ModuleWire> provided = entry.getKey().getProvidedWires().copyList();
+					NamespaceList.Builder<ModuleWire> provided = entry.getKey().getProvidedWires().createBuilder();
 					provided.removeAll(entry.getValue());
-					entry.getKey().setProvidedWires(new NamespaceList<>(provided, WIRE));
+					entry.getKey().setProvidedWires(provided.build());
 					for (ModuleWire removedWire : entry.getValue()) {
 						// invalidate the wire
 						removedWire.invalidate();
@@ -503,13 +502,9 @@ public class ModuleDatabase {
 	final Map<ModuleRevision, ModuleWiring> getWiringsClone() {
 		readLock();
 		try {
-			Map<ModuleRevision, ModuleWiring> clonedWirings = new HashMap<>();
-			for (Map.Entry<ModuleRevision, ModuleWiring> entry : wirings.entrySet()) {
-				ModuleWiring wiring = new ModuleWiring(entry.getKey(), entry.getValue().getCapabilities(),
-						entry.getValue().getRequirements(), entry.getValue().getProvidedWires(),
-						entry.getValue().getRequiredWires(), entry.getValue().getSubstitutedNames());
-				clonedWirings.put(entry.getKey(), wiring);
-			}
+			Map<ModuleRevision, ModuleWiring> clonedWirings = new HashMap<>(wirings);
+			clonedWirings.replaceAll((r, w) -> new ModuleWiring(r, w.getCapabilities(), w.getRequirements(),
+					w.getProvidedWires(), w.getRequiredWires(), w.getSubstitutedNames()));
 			return clonedWirings;
 		} finally {
 			readUnlock();
@@ -1393,25 +1388,25 @@ public class ModuleDatabase {
 				throw new NullPointerException("Could not find revision for wiring."); //$NON-NLS-1$
 
 			int numCapabilities = in.readInt();
-			List<ModuleCapability> capabilities = new ArrayList<>(numCapabilities);
+			NamespaceList.Builder<ModuleCapability> capabilities = Builder.create(NamespaceList.CAPABILITY);
 			for (int i = 0; i < numCapabilities; i++) {
 				capabilities.add((ModuleCapability) objectTable.get(in.readInt()));
 			}
 
 			int numRequirements = in.readInt();
-			List<ModuleRequirement> requirements = new ArrayList<>(numRequirements);
+			NamespaceList.Builder<ModuleRequirement> requirements = Builder.create(NamespaceList.REQUIREMENT);
 			for (int i = 0; i < numRequirements; i++) {
 				requirements.add((ModuleRequirement) objectTable.get(in.readInt()));
 			}
 
 			int numProvidedWires = in.readInt();
-			List<ModuleWire> providedWires = new ArrayList<>(numProvidedWires);
+			NamespaceList.Builder<ModuleWire> providedWires = Builder.create(NamespaceList.WIRE);
 			for (int i = 0; i < numProvidedWires; i++) {
 				providedWires.add((ModuleWire) objectTable.get(in.readInt()));
 			}
 
 			int numRequiredWires = in.readInt();
-			List<ModuleWire> requiredWires = new ArrayList<>(numRequiredWires);
+			NamespaceList.Builder<ModuleWire> requiredWires = Builder.create(NamespaceList.WIRE);
 			for (int i = 0; i < numRequiredWires; i++) {
 				requiredWires.add((ModuleWire) objectTable.get(in.readInt()));
 			}
@@ -1422,7 +1417,8 @@ public class ModuleDatabase {
 				substituted.add(readString(in, objectTable));
 			}
 
-			return new ModuleWiring(revision, capabilities, requirements, providedWires, requiredWires, substituted);
+			return new ModuleWiring(revision, capabilities.build(), requirements.build(), providedWires.build(),
+					requiredWires.build(), substituted);
 		}
 
 		private static void writeGenericInfo(String namespace, Map<String, ?> attributes, Map<String, String> directives, DataOutputStream out, Map<Object, Integer> objectTable) throws IOException {

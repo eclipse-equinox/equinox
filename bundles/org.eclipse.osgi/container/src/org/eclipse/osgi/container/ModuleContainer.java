@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2020 IBM Corporation and others.
+ * Copyright (c) 2012, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,8 +12,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.container;
-
-import static org.eclipse.osgi.internal.container.NamespaceList.WIRE;
 
 import java.io.Closeable;
 import java.security.AccessController;
@@ -1049,9 +1047,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 					return null; // need to try again
 				// remove any wires from unresolved wirings that got removed
 				for (Map.Entry<ModuleWiring, Collection<ModuleWire>> entry : toRemoveWireLists.entrySet()) {
-					List<ModuleWire> provided = entry.getKey().getProvidedWires().copyList();
+					NamespaceList.Builder<ModuleWire> provided = entry.getKey().getProvidedWires().createBuilder();
 					provided.removeAll(entry.getValue());
-					entry.getKey().setProvidedWires(new NamespaceList<>(provided, WIRE));
+					entry.getKey().setProvidedWires(provided.build());
 					for (ModuleWire removedWire : entry.getValue()) {
 						// invalidate the wire
 						removedWire.invalidate();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,10 +13,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import static org.eclipse.osgi.internal.container.NamespaceList.CAPABILITY;
-import static org.eclipse.osgi.internal.container.NamespaceList.REQUIREMENT;
-import static org.eclipse.osgi.internal.container.NamespaceList.WIRE;
-
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,7 +22,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
@@ -74,17 +69,6 @@ public final class ModuleWiring implements BundleWiring {
 	private volatile NamespaceList<ModuleWire> requiredWires;
 	volatile boolean isValid = true;
 	private final AtomicReference<Set<String>> dynamicMissRef = new AtomicReference<>();
-
-	ModuleWiring(ModuleRevision revision, List<ModuleCapability> capabilities, List<ModuleRequirement> requirements,
-			List<ModuleWire> providedWires, List<ModuleWire> requiredWires, Collection<String> substitutedPkgNames) {
-		super();
-		this.revision = revision;
-		this.capabilities = new NamespaceList<>(capabilities, CAPABILITY);
-		this.requirements = new NamespaceList<>(requirements, REQUIREMENT);
-		this.providedWires = new NamespaceList<>(providedWires, WIRE);
-		this.requiredWires = new NamespaceList<>(requiredWires, WIRE);
-		this.substitutedPkgNames = substitutedPkgNames.isEmpty() ? Collections.<String> emptyList() : substitutedPkgNames;
-	}
 
 	ModuleWiring(ModuleRevision revision, NamespaceList<ModuleCapability> capabilities,
 			NamespaceList<ModuleRequirement> requirements, NamespaceList<ModuleWire> providedWires,
@@ -156,7 +140,7 @@ public final class ModuleWiring implements BundleWiring {
 		if (!isValid) {
 			return null;
 		}
-		List<ModuleRequirement> persistentRequriements = requirements.copyList();
+		List<ModuleRequirement> persistentRequriements = new ArrayList<>(requirements.getList(null));
 		for (Iterator<ModuleRequirement> iRequirements = persistentRequriements.iterator(); iRequirements.hasNext();) {
 			ModuleRequirement requirement = iRequirements.next();
 			if (PackageNamespace.PACKAGE_NAMESPACE.equals(requirement.getNamespace())) {
@@ -213,7 +197,7 @@ public final class ModuleWiring implements BundleWiring {
 		if (!isValid) {
 			return null;
 		}
-		List<ModuleWire> persistentWires = allWires.copyList();
+		List<ModuleWire> persistentWires = new ArrayList<>(allWires.getList(null));
 		for (Iterator<ModuleWire> iWires = persistentWires.iterator(); iWires.hasNext();) {
 			ModuleWire wire = iWires.next();
 			if (PackageNamespace.PACKAGE_NAMESPACE.equals(wire.getRequirement().getNamespace())) {
@@ -436,15 +420,9 @@ public final class ModuleWiring implements BundleWiring {
 		ModuleDatabase moduleDatabase = revision.getRevisions().getContainer().moduleDatabase;
 		moduleDatabase.writeLock();
 		try {
-			List<ModuleRequirement> updatedRequirements = requirements.copyList();
-			Entry<Integer, Integer> packageStartEnd = requirements
-					.getNamespaceIndex(PackageNamespace.PACKAGE_NAMESPACE);
-			if (packageStartEnd == null) {
-				updatedRequirements.addAll(newRequirements);
-			} else {
-				updatedRequirements.addAll(packageStartEnd.getValue(), newRequirements);
-			}
-			requirements = new NamespaceList<>(updatedRequirements, REQUIREMENT);
+			NamespaceList.Builder<ModuleRequirement> requirmentsBuilder = requirements.createBuilder();
+			requirmentsBuilder.addAll(newRequirements);
+			requirements = requirmentsBuilder.build();
 		} finally {
 			moduleDatabase.writeUnlock();
 		}

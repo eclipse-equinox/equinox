@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -24,6 +24,7 @@ public class AllTests {
 		suite.addTest(new JUnit4TestAdapter(ResolutionReportTest.class));
 		suite.addTest(new JUnit4TestAdapter(ModuleContainerUsageTest.class));
 		suite.addTest(new JUnit4TestAdapter(NamespaceListTest.class));
+		suite.addTest(new JUnit4TestAdapter(NamespaceListBuilderTest.class));
 		return suite;
 	}
 }
