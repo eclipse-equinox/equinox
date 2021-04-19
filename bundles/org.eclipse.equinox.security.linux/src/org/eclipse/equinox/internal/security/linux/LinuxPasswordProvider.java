@@ -84,7 +84,7 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 
 	private void unlockSecretService() {
 
-		fLibGio = Native.loadLibrary("gio-2.0", LibGio.class); //$NON-NLS-1$
+		fLibGio = Native.load("gio-2.0", LibGio.class); //$NON-NLS-1$
 
 		PointerByReference gerror = new PointerByReference();
 		gerror.setValue(Pointer.NULL);
@@ -96,7 +96,7 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 			throw new SecurityException(message);
 		}
 
-		fLibSecret = Native.loadLibrary("secret-1", LibSecret.class); //$NON-NLS-1$
+		fLibSecret = Native.load("secret-1", LibSecret.class); //$NON-NLS-1$
 		Pointer secretService = fLibSecret.secret_service_get_sync(SecretServiceFlags.SECRET_SERVICE_LOAD_COLLECTIONS,
 				Pointer.NULL, gerror);
 		if (gerror.getValue() != Pointer.NULL) {
