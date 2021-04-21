@@ -18,14 +18,14 @@
     <relativePath>../../launcher-binary-parent</relativePath>
   </parent>
   <groupId>org.eclipse.equinox</groupId>
-  <artifactId>org.eclipse.equinox.launcher.cocoa.macosx.arm64</artifactId>
+  <artifactId>org.eclipse.equinox.launcher.cocoa.macosx.aarch64</artifactId>
   <version>1.2.200-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 
   <properties>
     <os>macosx</os>
     <ws>cocoa</ws>
-    <arch>arm64</arch>
+    <arch>aarch64</arch>
     <skipAPIAnalysis>true</skipAPIAnalysis>
   </properties>
 

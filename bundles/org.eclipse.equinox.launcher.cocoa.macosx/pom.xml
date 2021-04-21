@@ -25,7 +25,7 @@
   <properties>
     <os>macosx</os>
     <ws>cocoa</ws>
-    <arch>arm64</arch>
+    <arch>aarch64</arch>
     <skipAPIAnalysis>true</skipAPIAnalysis>
   </properties>
 
