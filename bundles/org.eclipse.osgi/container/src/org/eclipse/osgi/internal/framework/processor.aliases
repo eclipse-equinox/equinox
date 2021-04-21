@@ -18,6 +18,7 @@
 
 68k                                     # Motorola 68000 and up
 ARM                                     # Intel Strong ARM
+aarch64	arm64
 Alpha                                   # Compaq (ex DEC)
 Ignite psc1k                            # PTSC
 Mips                                    # SGI
