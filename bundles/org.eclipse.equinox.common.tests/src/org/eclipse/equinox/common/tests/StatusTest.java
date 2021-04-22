@@ -130,7 +130,7 @@ public class StatusTest extends CoreTest {
 		assertEquals("org.eclipse.equinox.common.tests", new Status(IStatus.WARNING, StatusTest.class, "").getPlugin());
 		assertEquals("org.eclipse.equinox.common", new Status(IStatus.ERROR, IStatus.class, "", null).getPlugin());
 		assertEquals("java.lang.String", new Status(IStatus.WARNING, String.class, 0, "", null).getPlugin());
-		assertEquals("org.eclipse.core.runtime.Status", new Status(IStatus.WARNING, (Class<?>) null, "").getPlugin());
+		assertEquals("unknown", new Status(IStatus.WARNING, (Class<?>) null, "").getPlugin());
 		assertEquals(TestClass.class.getName(),
 				new Status(IStatus.WARNING, installNoBSNBundle().loadClass(TestClass.class.getName()), "").getPlugin());
 	}
@@ -139,7 +139,7 @@ public class StatusTest extends CoreTest {
 		assertEquals("org.eclipse.equinox.common", new MultiStatus(IStatus.class, 0, "").getPlugin());
 		assertEquals("org.eclipse.equinox.common.tests", new MultiStatus(StatusTest.class, 0, "").getPlugin());
 		assertEquals("java.lang.String", new MultiStatus(String.class, 0, new Status[0], "", null).getPlugin());
-		assertEquals("org.eclipse.core.runtime.MultiStatus", new MultiStatus((Class<?>) null, 0, "").getPlugin());
+		assertEquals("unknown", new MultiStatus((Class<?>) null, 0, "").getPlugin());
 		assertEquals(TestClass.class.getName(),
 				new MultiStatus(installNoBSNBundle().loadClass(TestClass.class.getName()), 0, "").getPlugin());
 	}

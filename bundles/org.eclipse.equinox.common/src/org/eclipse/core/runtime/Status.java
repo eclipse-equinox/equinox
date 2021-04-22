@@ -214,7 +214,7 @@ public class Status implements IStatus {
 				.map(b -> b.getSymbolicName())//
 				.orElseGet(() -> Optional.ofNullable(caller)//
 						.map(c -> c.getName())//
-						.orElse(getClass().getName()));
+						.orElse(unknownId));
 	}
 
 	@Override
