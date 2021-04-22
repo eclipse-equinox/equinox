@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -56,18 +56,23 @@ public interface IStatus {
 	/** Status type severity (bit mask, value 1) indicating this status is informational only.
 	 * @see #getSeverity()
 	 * @see #matches(int)
+	 * @see Status#info(String)
 	 */
 	public static final int INFO = 0x01;
 
 	/** Status type severity (bit mask, value 2) indicating this status represents a warning.
 	 * @see #getSeverity()
 	 * @see #matches(int)
+	 * @see Status#warning(String)
+	 * @see Status#warning(String, Throwable)
 	 */
 	public static final int WARNING = 0x02;
 
 	/** Status type severity (bit mask, value 4) indicating this status represents an error.
 	 * @see #getSeverity()
 	 * @see #matches(int)
+	 * @see Status#error(String)
+	 * @see Status#error(String, Throwable)
 	 */
 	public static final int ERROR = 0x04;
 

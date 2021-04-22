@@ -14,6 +14,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests;
 
+import static org.junit.Assert.assertArrayEquals;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -232,6 +234,57 @@ public class StatusTest extends CoreTest {
 		multistatus2.merge(multistatus2.getChildren()[2]);
 		assertTrue("3.1", multistatus2.getChildren().length == 9);
 
+	}
+
+	public void testInfo() {
+		Status info = Status.info("message");
+		assertEquals(IStatus.INFO, info.getSeverity());
+		assertEquals("message", info.getMessage());
+		assertEquals(IStatus.OK, info.getCode());
+		assertEquals("org.eclipse.equinox.common.tests", info.getPlugin());
+		assertNull(info.getException());
+		assertArrayEquals(new IStatus[] {}, info.getChildren());
+	}
+
+	public void testWarning() {
+		Status warning = Status.warning("message");
+		assertEquals(IStatus.WARNING, warning.getSeverity());
+		assertEquals("message", warning.getMessage());
+		assertEquals(IStatus.OK, warning.getCode());
+		assertEquals("org.eclipse.equinox.common.tests", warning.getPlugin());
+		assertNull(warning.getException());
+		assertArrayEquals(new IStatus[] {}, warning.getChildren());
+	}
+
+	public void testWarningWithException() {
+
+		Status warningWithException = Status.warning("message", new Exception("exception"));
+		assertEquals(IStatus.WARNING, warningWithException.getSeverity());
+		assertEquals("message", warningWithException.getMessage());
+		assertEquals(IStatus.OK, warningWithException.getCode());
+		assertEquals("org.eclipse.equinox.common.tests", warningWithException.getPlugin());
+		assertEquals("exception", warningWithException.getException().getMessage());
+		assertArrayEquals(new IStatus[] {}, warningWithException.getChildren());
+	}
+
+	public void testError() {
+		Status error = Status.error("message");
+		assertEquals(IStatus.ERROR, error.getSeverity());
+		assertEquals("message", error.getMessage());
+		assertEquals(IStatus.OK, error.getCode());
+		assertEquals("org.eclipse.equinox.common.tests", error.getPlugin());
+		assertNull(error.getException());
+		assertArrayEquals(new IStatus[] {}, error.getChildren());
+	}
+
+	public void testErrorWithException() {
+		Status errorWithException = Status.error("message", new Exception("exception"));
+		assertEquals(IStatus.ERROR, errorWithException.getSeverity());
+		assertEquals("message", errorWithException.getMessage());
+		assertEquals(IStatus.OK, errorWithException.getCode());
+		assertEquals("org.eclipse.equinox.common.tests", errorWithException.getPlugin());
+		assertEquals("exception", errorWithException.getException().getMessage());
+		assertArrayEquals(new IStatus[] {}, errorWithException.getChildren());
 	}
 
 }

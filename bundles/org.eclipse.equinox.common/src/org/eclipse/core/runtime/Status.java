@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -23,6 +23,12 @@ import org.osgi.framework.FrameworkUtil;
  * instantiating or subclassing.
  * <p>
  * This class can be used without OSGi running.
+ * </p>
+ * <p>
+ * For performance critical code, such as when {@link Status} objects are not created
+ * for logging or error handling, there may be a small performance penalty when using
+ * static methods or constructors that automatically determine the plug-in id from
+ * the provided {@link Class} or by using {@link StackWalker}.
  * </p>
  */
 public class Status implements IStatus {
@@ -75,6 +81,117 @@ public class Status implements IStatus {
 	/** Constant to avoid generating garbage.
 	 */
 	private static final IStatus[] theEmptyStatusArray = new IStatus[0];
+
+	private static StackWalker walker = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
+
+	/**
+	 * Construct a new status object with severity {@link IStatus#INFO},
+	 * code {@link IStatus#OK}, and pluginId determined automatically
+	 * from the calling class using {@link StackWalker}.
+	 * The created status has no children.
+	 *
+	 * @param message a human-readable message, localized to the
+	 *    current locale
+	 * @return the newly created status
+	 * @since 3.15
+	 */
+	public static Status info(String message) {
+		Class<?> callerClass = null;
+		try {
+			callerClass = walker.getCallerClass();
+		} catch (IllegalCallerException e) {
+			// ignored - use null class
+		}
+		return new Status(INFO, callerClass, OK, message, null);
+	}
+
+	/**
+	 * Construct a new status object with severity {@link IStatus#WARNING},
+	 * code {@link IStatus#OK}, and pluginId determined automatically
+	 * from the calling class using {@link StackWalker}.
+	 * The created status has no children.
+	 *
+	 * @param message a human-readable message, localized to the
+	 *    current locale
+	 * @return the newly created status
+	 * @since 3.15
+	 */
+	public static Status warning(String message) {
+		Class<?> callerClass = null;
+		try {
+			callerClass = walker.getCallerClass();
+		} catch (IllegalCallerException e) {
+			// ignored - use null class
+		}
+		return new Status(WARNING, callerClass, OK, message, null);
+	}
+
+	/**
+	 * Construct a new status object with severity {@link IStatus#WARNING},
+	 * code {@link IStatus#OK}, and pluginId determined automatically
+	 * from the calling class using {@link StackWalker}.
+	 * The created status has no children.
+	 *
+	 * @param message a human-readable message, localized to the
+	 *    current locale
+	 * @param exception a low-level exception, or <code>null</code> if not
+	 *    applicable
+	 * @return the newly created status
+	 * @since 3.15
+	 */
+	public static Status warning(String message, Throwable exception) {
+		Class<?> callerClass = null;
+		try {
+			callerClass = walker.getCallerClass();
+		} catch (IllegalCallerException e) {
+			// ignored - use null class
+		}
+		return new Status(WARNING, callerClass, OK, message, exception);
+	}
+
+	/**
+	 * Construct a new status object with severity {@link IStatus#ERROR},
+	 * code {@link IStatus#OK}, and pluginId determined automatically
+	 * from the calling class using {@link StackWalker}.
+	 * The created status has no children.
+	 *
+	 * @param message a human-readable message, localized to the
+	 *    current locale
+	 * @return the newly created status
+	 * @since 3.15
+	 */
+	public static Status error(String message) {
+		Class<?> callerClass = null;
+		try {
+			callerClass = walker.getCallerClass();
+		} catch (IllegalCallerException e) {
+			// ignored - use null class
+		}
+		return new Status(ERROR, callerClass, OK, message, null);
+	}
+
+	/**
+	 * Construct a new status object with severity {@link IStatus#ERROR},
+	 * code {@link IStatus#OK}, and pluginId determined automatically
+	 * from the calling class using {@link StackWalker}.
+	 * The created status has no children.
+	 *
+	 * @param message a human-readable message, localized to the
+	 *    current locale
+	 * @param exception a low-level exception, or <code>null</code> if not
+	 *    applicable
+	 * @return the newly created status
+	 * @since 3.15
+	 */
+	public static Status error(String message, Throwable exception) {
+		Class<?> callerClass = null;
+		try {
+			callerClass = walker.getCallerClass();
+		} catch (IllegalCallerException e) {
+			// ignored - use null class
+		}
+		return new Status(ERROR, callerClass, OK, message, exception);
+	}
 
 	/**
 	 * Creates a new status object.  The created status has no children.
@@ -208,7 +325,7 @@ public class Status implements IStatus {
 	 * @param caller the relevant class to build unique identifier from
 	 * @return identifier extracted for the given class
 	 */
-	private String identifier(Class<?> caller) {
+	private static String identifier(Class<?> caller) {
 		return Optional.ofNullable(caller)//
 				.flatMap(c -> Optional.ofNullable(FrameworkUtil.getBundle(c)))//
 				.map(b -> b.getSymbolicName())//
