@@ -31,6 +31,6 @@ Import-Package: org.eclipse.equinox.log;version="[1.0,2.0)",
  org.osgi.service.packageadmin,
  org.osgi.service.url,
  org.osgi.util.tracker
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: org.eclipse.equinox.common
