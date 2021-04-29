@@ -28,6 +28,7 @@ import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Properties;
+import java.util.jar.JarFile;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import org.eclipse.osgi.container.Module;
@@ -323,13 +324,14 @@ public class SecureAction {
 	}
 
 	/**
-	 * Returns a ZipFile. Same as calling
-	 * new ZipFile(file)
-	 * @param file the file to get a ZipFile for
+	 * Returns a ZipFile. Same as calling new ZipFile(file)
+	 * 
+	 * @param file   the file to get a ZipFile for
+	 * @param verify whether or not to verify the zip file if it is signed.
 	 * @return a ZipFile
 	 * @throws IOException if an error occured
 	 */
-	public ZipFile getZipFile(final File file) throws IOException {
+	public ZipFile getZipFile(final File file, final boolean verify) throws IOException {
 		try {
 			if (System.getSecurityManager() == null)
 				return new ZipFile(file);
@@ -337,6 +339,9 @@ public class SecureAction {
 				return AccessController.doPrivileged(new PrivilegedExceptionAction<ZipFile>() {
 					@Override
 					public ZipFile run() throws IOException {
+						if (verify) {
+							return new JarFile(file);
+						}
 						return new ZipFile(file);
 					}
 				}, controlContext);

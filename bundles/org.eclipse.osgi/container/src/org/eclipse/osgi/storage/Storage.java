@@ -1196,10 +1196,12 @@ public class Storage {
 				result = equinoxContainer.getConnectModules().getConnectBundleFile(connectModule, content, generation,
 						mruList, getConfiguration().getDebug());
 			} else if (isDirectory) {
-				boolean strictPath = Boolean.parseBoolean(equinoxContainer.getConfiguration().getConfiguration(EquinoxConfiguration.PROPERTY_STRICT_BUNDLE_ENTRY_PATH, Boolean.FALSE.toString()));
+				boolean strictPath = Boolean.parseBoolean(getConfiguration().getConfiguration(
+						EquinoxConfiguration.PROPERTY_STRICT_BUNDLE_ENTRY_PATH, Boolean.FALSE.toString()));
 				result = new DirBundleFile(content, strictPath);
 			} else {
-				result = new ZipBundleFile(content, generation, mruList, getConfiguration().getDebug());
+				result = new ZipBundleFile(content, generation, mruList, getConfiguration().getDebug(),
+						getConfiguration().runtimeVerifySignedBundles);
 			}
 		} catch (IOException e) {
 			throw new RuntimeException("Could not create bundle file.", e); //$NON-NLS-1$

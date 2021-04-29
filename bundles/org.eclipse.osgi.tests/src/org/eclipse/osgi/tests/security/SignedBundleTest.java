@@ -14,7 +14,7 @@
 package org.eclipse.osgi.tests.security;
 
 import java.io.File;
-import java.security.SignatureException;
+import java.io.IOException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import junit.framework.Test;
@@ -354,20 +354,23 @@ public class SignedBundleTest extends BaseSecurityTest {
 			SignedContentEntry[] entries = signedContent.getSignedEntries();
 			assertNotNull("Entries is null", entries);
 			for (SignedContentEntry entry : entries) {
+				SignerInfo[] entryInfos = entry.getSignerInfos();
+				assertNotNull("SignerInfo is null", entryInfos);
 				try {
 					entry.verify();
 					if ("org/eclipse/equinox/security/junit/CorruptClass.class".equals(entry.getName())) {
 						fail("Expected a corruption for: " + entry.getName());
 					}
+					assertEquals("wrong number of entry signers", 1, entryInfos.length);
+					assertEquals("Entry signer does not equal content signer", infos[0], entryInfos[0]);
 				} catch (InvalidContentException e) {
 					if (!"org/eclipse/equinox/security/junit/CorruptClass.class".equals(entry.getName())) {
 						fail("Unexpected corruption in: " + entry.getName(), e);
 					}
+					// no signers if entry is corrupt
+					assertEquals("wrong number of entry signers", 0, entryInfos.length);
 				}
-				SignerInfo[] entryInfos = entry.getSignerInfos();
-				assertNotNull("SignerInfo is null", entryInfos);
-				assertEquals("wrong number of entry signers", 1, entryInfos.length);
-				assertEquals("Entry signer does not equal content signer", infos[0], entryInfos[0]);
+
 			}
 
 		} catch (Exception e) {
@@ -629,20 +632,21 @@ public class SignedBundleTest extends BaseSecurityTest {
 			SignedContentEntry[] entries = signedContent.getSignedEntries();
 			assertNotNull("Entries is null", entries);
 			for (SignedContentEntry entry : entries) {
+				SignerInfo[] entryInfos = entry.getSignerInfos();
+				assertNotNull("SignerInfo is null", entryInfos);
 				try {
 					entry.verify();
 					if ("org/eclipse/equinox/security/junit/CorruptClass.class".equals(entry.getName())) {
 						fail("Expected a corruption for: " + entry.getName());
 					}
+					assertEquals("wrong number of entry signers", 1, entryInfos.length);
+					assertEquals("Entry signer does not equal content signer", infos[0], entryInfos[0]);
 				} catch (InvalidContentException e) {
 					if (!"org/eclipse/equinox/security/junit/CorruptClass.class".equals(entry.getName())) {
 						fail("Unexpected corruption in: " + entry.getName(), e);
 					}
+					assertEquals("wrong number of entry signers", 0, entryInfos.length);
 				}
-				SignerInfo[] entryInfos = entry.getSignerInfos();
-				assertNotNull("SignerInfo is null", entryInfos);
-				assertEquals("wrong number of entry signers", 1, entryInfos.length);
-				assertEquals("Entry signer does not equal content signer", infos[0], entryInfos[0]);
 			}
 
 		} catch (Exception e) {
@@ -742,7 +746,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		assertTrue("Content is not signed!!", signedContent.isSigned());
 		SignedContentEntry[] entries = signedContent.getSignedEntries();
 		assertNotNull("Entries is null", entries);
-		assertEquals("Incorrect number of signed entries", 4, entries.length);
+		assertEquals("Incorrect number of signed entries", 5, entries.length);
 		for (SignedContentEntry entry : entries) {
 			entry.verify();
 			SignerInfo[] entryInfos = entry.getSignerInfos();
@@ -788,17 +792,21 @@ public class SignedBundleTest extends BaseSecurityTest {
 		assertTrue("Content is not signed!!", signedContent.isSigned());
 		SignedContentEntry[] entries = signedContent.getSignedEntries();
 		assertNotNull("Entries is null", entries);
-		assertEquals("Incorrect number of signed entries", 4, entries.length);
+		assertEquals("Incorrect number of signed entries", 5, entries.length);
 		for (SignedContentEntry entry : entries) {
 			try {
 				entry.verify();
 				assertFalse("Wrong entry is validated: " + entry.getName(), "META-INF/test/test1.file".equals(entry.getName()));
+				SignerInfo[] entryInfos = entry.getSignerInfos();
+				assertNotNull("SignerInfo is null", entryInfos);
+				assertEquals("wrong number of entry signers", 1, entryInfos.length);
 			} catch (InvalidContentException e) {
 				assertEquals("Wrong entry is corrupted", "META-INF/test/test1.file", entry.getName());
+				SignerInfo[] entryInfos = entry.getSignerInfos();
+				assertNotNull("SignerInfo is null", entryInfos);
+				assertEquals("wrong number of entry signers", 0, entryInfos.length);
 			}
-			SignerInfo[] entryInfos = entry.getSignerInfos();
-			assertNotNull("SignerInfo is null", entryInfos);
-			assertEquals("wrong number of entry signers", 1, entryInfos.length);
+
 		}
 		signedFile.delete();
 		assertFalse("File should not exist", signedFile.exists());
@@ -820,9 +828,8 @@ public class SignedBundleTest extends BaseSecurityTest {
 		for (SignedContentEntry entry : entries) {
 			try {
 				entry.verify();
-				assertFalse("Wrong entry is validated: " + entry.getName(), "META-INF/test.file".equals(entry.getName()));
 			} catch (InvalidContentException e) {
-				assertEquals("Wrong entry is corrupted", "META-INF/test.file", entry.getName());
+				fail("Unexpected verify error.", e);
 			}
 			SignerInfo[] entryInfos = entry.getSignerInfos();
 			assertNotNull("SignerInfo is null", entryInfos);
@@ -842,7 +849,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		try {
 			getSignedContentFactory().getSignedContent(signedFile);
 			fail("Should have gotten a SignatureException for file: " + signedFile);
-		} catch (SignatureException e) {
+		} catch (IOException e) {
 			// expected
 		}
 	}
@@ -941,33 +948,68 @@ public class SignedBundleTest extends BaseSecurityTest {
 			// get the signed content for the bundle
 			SignedContent signedContent = getSignedContentFactory().getSignedContent(testBundle);
 			assertNotNull("SignedContent is null", signedContent);
+			// Notice that if all entries are missing that have corresponding digests then
+			// the built in JarFile APIs treat the JAR is unsigned
 			// check if it is signed
-			assertTrue("Should be signed", signedContent.isSigned());
+			assertFalse("Should not be signed", signedContent.isSigned());
 			// get the signer infos
 			SignerInfo[] infos = signedContent.getSignerInfos();
 			assertNotNull("SignerInfo is null", infos);
-			assertEquals("wrong number of signers", 1, infos.length);
+			assertEquals("wrong number of signers", 0, infos.length);
 
 			SignedContentEntry[] entries = signedContent.getSignedEntries();
 			assertNotNull("Entries is null", entries);
-			for (SignedContentEntry entry : entries) {
-				try {
-					entry.verify();
-					fail("Expected a corruption for: " + entry.getName());
-				} catch (InvalidContentException e) {
-					// expected
-				}
-				SignerInfo[] entryInfos = entry.getSignerInfos();
-				assertNotNull("SignerInfo is null", entryInfos);
-				assertEquals("wrong number of entry signers", 1, entryInfos.length);
-				assertEquals("Entry signer does not equal content signer", infos[0], entryInfos[0]);
-			}
+			assertEquals("Expected no signed entries.", 0, entries.length);
 
 		} catch (Exception e) {
 			fail("Unexpected exception", e);
 		} finally {
 			try {
 				testBundle.uninstall();
+			} catch (Exception e) {
+				fail("Failed to uninstall bundle", e);
+			}
+		}
+	}
+
+	public void testSignedContentJava16() {
+
+		Bundle testBundle = null;
+		try {
+			testBundle = installBundle(getTestJarPath("signedJava16"));
+			getTrustEngine().addTrustAnchor(getTestCertificate("ca2_leafa"), "ca2_leafa");
+
+			// get the signed content for the bundle
+			SignedContent signedContent = getSignedContentFactory().getSignedContent(testBundle);
+			assertNotNull("SignedContent is null", signedContent);
+			// check if it is signed
+			assertTrue("Should be signed", signedContent.isSigned());
+			// get the signer infos
+			SignerInfo[] infos = signedContent.getSignerInfos();
+			assertNotNull("SignerInfo is null", infos);
+			assertEquals("wrong number of signers", 1, infos.length);
+			// check the signer validity
+			signedContent.checkValidity(infos[0]);
+			// check the signer trust
+			assertTrue("Signer is not trusted", infos[0].isTrusted());
+			// check the trust anchor
+			assertNotNull("Trust anchor is null", infos[0].getTrustAnchor());
+			// verify and validate the entries
+			SignedContentEntry[] entries = signedContent.getSignedEntries();
+			assertNotNull("Entries is null", entries);
+			for (SignedContentEntry entry : entries) {
+				entry.verify();
+				SignerInfo[] entryInfos = entry.getSignerInfos();
+				assertNotNull("SignerInfo is null", entryInfos);
+				assertEquals("wrong number of entry signers", 1, entryInfos.length);
+				assertEquals("Entry signer does not equal content signer", infos[0], entryInfos[0]);
+			}
+		} catch (Exception e) {
+			fail("Unexpected exception", e);
+		} finally {
+			try {
+				testBundle.uninstall();
+				getTrustEngine().removeTrustAnchor("ca2_leafa");
 			} catch (Exception e) {
 				fail("Failed to uninstall bundle", e);
 			}

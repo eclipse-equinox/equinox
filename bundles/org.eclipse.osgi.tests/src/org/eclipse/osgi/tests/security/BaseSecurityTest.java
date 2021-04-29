@@ -13,7 +13,11 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.security;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -28,7 +32,10 @@ import org.eclipse.osgi.internal.service.security.KeyStoreTrustEngine;
 import org.eclipse.osgi.service.security.TrustEngine;
 import org.eclipse.osgi.signedcontent.SignedContentFactory;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 
 public class BaseSecurityTest extends CoreTest {
 
@@ -145,14 +152,14 @@ public class BaseSecurityTest extends CoreTest {
 		return null;
 	}
 
-	protected File getEntryFile(String entryPath) throws IOException {
+	protected static File getEntryFile(String entryPath) throws IOException {
 		URL entryURL = OSGiTestsActivator.getContext().getBundle().getEntry(entryPath);
 		if (entryURL == null)
 			return null;
 		return new File(FileLocator.toFileURL(entryURL).toExternalForm().substring(5));
 	}
 
-	protected File copyEntryFile(String entryPath) throws IOException {
+	protected static File copyEntryFile(String entryPath) throws IOException {
 		URL entryURL = OSGiTestsActivator.getContext().getBundle().getEntry(entryPath);
 		if (entryURL == null)
 			return null;

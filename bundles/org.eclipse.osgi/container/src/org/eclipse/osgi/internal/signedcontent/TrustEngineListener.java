@@ -13,11 +13,13 @@
 package org.eclipse.osgi.internal.signedcontent;
 
 import java.security.cert.Certificate;
-import java.util.*;
-import org.eclipse.osgi.internal.framework.EquinoxBundle;
-import org.eclipse.osgi.internal.signedcontent.SignedStorageHook.StorageHookImpl;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
+import org.eclipse.osgi.internal.signedcontent.SignedContentFromBundleFile.BaseSignerInfo;
+import org.eclipse.osgi.signedcontent.SignedContent;
 import org.eclipse.osgi.signedcontent.SignerInfo;
-import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
@@ -35,19 +37,21 @@ public class TrustEngineListener {
 		// re-evaluate trust and check authorization for these SignedContents
 		Bundle[] bundles = context.getBundles();
 		for (Bundle bundle : bundles) {
-			SignedContentImpl signedContent = getSignedContent(bundle);
+			SignedContentFromBundleFile signedContent = getSignedContent(bundle);
 			if (signedContent != null && signedContent.isSigned()) {
 				// check the SignerInfos for this content
 				SignerInfo[] infos = signedContent.getSignerInfos();
 				for (SignerInfo info : infos) {
 					if (info.getTrustAnchor() == null) {
 						// one of the signers is not trusted
-						signedBundleHook.determineTrust(signedContent, SignedBundleHook.VERIFY_TRUST);
+						signedBundleHook.determineTrust(signedContent,
+								EquinoxConfiguration.SIGNED_CONTENT_VERIFY_TRUST);
 					} else {
 						SignerInfo tsa = signedContent.getTSASignerInfo(info);
 						if (tsa != null && tsa.getTrustAnchor() == null)
 							// one of the tsa signers is not trusted
-							signedBundleHook.determineTrust(signedContent, SignedBundleHook.VERIFY_TRUST);
+							signedBundleHook.determineTrust(signedContent,
+									EquinoxConfiguration.SIGNED_CONTENT_VERIFY_TRUST);
 					}
 				}
 			}
@@ -61,7 +65,7 @@ public class TrustEngineListener {
 		Set<Bundle> usingAnchor = new HashSet<>();
 		Set<SignerInfo> untrustedSigners = new HashSet<>();
 		for (Bundle bundle : bundles) {
-			SignedContentImpl signedContent = getSignedContent(bundle);
+			SignedContentFromBundleFile signedContent = getSignedContent(bundle);
 			if (signedContent != null && signedContent.isSigned()) {
 				// check signer infos for this content
 				SignerInfo[] infos = signedContent.getSignerInfos();
@@ -82,18 +86,16 @@ public class TrustEngineListener {
 		}
 		// remove trust anchors from untrusted signers
 		for (Iterator<SignerInfo> untrusted = untrustedSigners.iterator(); untrusted.hasNext();)
-			((SignerInfoImpl) untrusted.next()).setTrustAnchor(null);
+			((BaseSignerInfo) untrusted.next()).setTrustAnchor(null);
 		// re-establish trust
 		for (Bundle bundle : usingAnchor) {
-			SignedContentImpl signedContent = getSignedContent(bundle);
+			SignedContentFromBundleFile signedContent = getSignedContent(bundle);
 			// found an signer using the anchor for this bundle re-evaluate trust
-			signedBundleHook.determineTrust(signedContent, SignedBundleHook.VERIFY_TRUST);
+			signedBundleHook.determineTrust(signedContent, EquinoxConfiguration.SIGNED_CONTENT_VERIFY_TRUST);
 		}
 	}
 
-	private SignedContentImpl getSignedContent(Bundle bundle) {
-		Generation generation = (Generation) ((EquinoxBundle) bundle).getModule().getCurrentRevision().getRevisionInfo();
-		StorageHookImpl hook = generation.getStorageHook(SignedStorageHook.class);
-		return hook != null ? hook.signedContent : null;
+	private SignedContentFromBundleFile getSignedContent(Bundle bundle) {
+		return (SignedContentFromBundleFile) bundle.adapt(SignedContent.class);
 	}
 }

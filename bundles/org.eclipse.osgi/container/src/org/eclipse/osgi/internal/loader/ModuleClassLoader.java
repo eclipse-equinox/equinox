@@ -37,7 +37,6 @@ import org.eclipse.osgi.signedcontent.SignedContent;
 import org.eclipse.osgi.signedcontent.SignerInfo;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
-import org.eclipse.osgi.storage.bundlefile.BundleFileWrapperChain;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleReference;
 
@@ -367,14 +366,15 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 				permissions = ALLPERMISSIONS;
 			}
 			Certificate[] certs = null;
-			SignedContent signedContent = null;
-			if (bundlefile instanceof BundleFileWrapperChain) {
-				signedContent = ((BundleFileWrapperChain) bundlefile).getWrappedType(SignedContent.class);
-			}
-			if (getConfiguration().CLASS_CERTIFICATE && signedContent != null && signedContent.isSigned()) {
-				SignerInfo[] signers = signedContent.getSignerInfos();
-				if (signers.length > 0)
-					certs = signers[0].getCertificateChain();
+			if (getConfiguration().CLASS_CERTIFICATE) {
+				Bundle b = getBundle();
+				SignedContent signedContent = b == null ? null : b.adapt(SignedContent.class);
+				if (signedContent != null && signedContent.isSigned()) {
+					SignerInfo[] signers = signedContent.getSignerInfos();
+					if (signers.length > 0) {
+						certs = signers[0].getCertificateChain();
+					}
+				}
 			}
 			File file = bundlefile.getBaseFile();
 			// Bug 477787: file will be null when the osgi.framework configuration property contains an invalid value.

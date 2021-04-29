@@ -32,20 +32,23 @@ import org.eclipse.osgi.util.NLS;
  */
 public class ZipBundleFile extends CloseableBundleFile<ZipEntry> {
 
+	final boolean verify;
 	/**
 	 * The zip file
 	 */
 	volatile ZipFile zipFile;
 
-	public ZipBundleFile(File basefile, BundleInfo.Generation generation, MRUBundleFileList mruList, Debug debug) throws IOException {
+	public ZipBundleFile(File basefile, BundleInfo.Generation generation, MRUBundleFileList mruList, Debug debug,
+			boolean verify) throws IOException {
 		super(basefile, generation, mruList, debug);
+		this.verify = verify;
 		if (!BundleFile.secureAction.exists(basefile))
 			throw new IOException(NLS.bind(Msg.ADAPTER_FILEEXIST_EXCEPTION, basefile));
 	}
 
 	@Override
 	protected void doOpen() throws IOException {
-		zipFile = BundleFile.secureAction.getZipFile(this.basefile);
+		zipFile = BundleFile.secureAction.getZipFile(this.basefile, verify);
 	}
 
 	/**

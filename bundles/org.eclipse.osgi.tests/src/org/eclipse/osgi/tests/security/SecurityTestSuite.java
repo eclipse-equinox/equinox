@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.security;
 
+import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -20,6 +21,7 @@ import junit.framework.TestSuite;
 public class SecurityTestSuite extends TestCase {
 	public static Test suite() {
 		TestSuite suite = new TestSuite("Unit tests for Equinox security");
+		suite.addTest(new JUnit4TestAdapter(BundleToJarInputStreamTest.class));
 		// trust engine tests
 		suite.addTest(KeyStoreTrustEngineTest.suite());
 		// signed bundle tests - *uses* trust engine

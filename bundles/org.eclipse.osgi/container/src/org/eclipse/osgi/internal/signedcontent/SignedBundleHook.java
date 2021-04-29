@@ -18,48 +18,54 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.*;
+import java.security.AccessController;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.util.*;
-import java.util.zip.ZipFile;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.framework.EquinoxBundle;
+import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
-import org.eclipse.osgi.internal.hookregistry.*;
+import org.eclipse.osgi.internal.hookregistry.ActivatorHookFactory;
+import org.eclipse.osgi.internal.hookregistry.HookConfigurator;
+import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.internal.service.security.KeyStoreTrustEngine;
-import org.eclipse.osgi.internal.signedcontent.SignedStorageHook.StorageHookImpl;
+import org.eclipse.osgi.internal.signedcontent.SignedContentFromBundleFile.BaseSignerInfo;
 import org.eclipse.osgi.service.security.TrustEngine;
-import org.eclipse.osgi.signedcontent.*;
+import org.eclipse.osgi.signedcontent.SignedContent;
+import org.eclipse.osgi.signedcontent.SignedContentFactory;
+import org.eclipse.osgi.signedcontent.SignerInfo;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
-import org.eclipse.osgi.storage.bundlefile.*;
-import org.eclipse.osgi.util.ManifestElement;
-import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * Implements signed bundle hook support for the framework
  */
-public class SignedBundleHook implements ActivatorHookFactory, BundleFileWrapperFactoryHook, HookConfigurator, SignedContentFactory {
+public class SignedBundleHook implements ActivatorHookFactory, HookConfigurator, SignedContentFactory {
 	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
-	static final int VERIFY_CERTIFICATE = 0x01;
-	static final int VERIFY_TRUST = 0x02;
-	static final int VERIFY_RUNTIME = 0x04;
-	static final int VERIFY_ALL = VERIFY_CERTIFICATE | VERIFY_TRUST | VERIFY_RUNTIME;
-	private final static String SUPPORT_CERTIFICATE = "certificate"; //$NON-NLS-1$
-	private final static String SUPPORT_TRUST = "trust"; //$NON-NLS-1$
-	private final static String SUPPORT_RUNTIME = "runtime"; //$NON-NLS-1$
-	private final static String SUPPORT_ALL = "all"; //$NON-NLS-1$
-	private final static String SUPPORT_TRUE = "true"; //$NON-NLS-1$
 
 	//TODO: comes from configuration!;
 	private final static String CACERTS_PATH = System.getProperty("java.home") + File.separatorChar + "lib" + File.separatorChar + "security" + File.separatorChar + "cacerts"; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$
 	private final static String CACERTS_TYPE = "JKS"; //$NON-NLS-1$
-	private final static String SIGNED_BUNDLE_SUPPORT = "osgi.support.signature.verify"; //$NON-NLS-1$
-	private final static String SIGNED_CONTENT_SUPPORT = "osgi.signedcontent.support"; //$NON-NLS-1$
 	private final static String OSGI_KEYSTORE = "osgi.framework.keystore"; //$NON-NLS-1$
 	private int supportSignedBundles;
 	TrustEngineListener trustEngineListener;
@@ -93,7 +99,7 @@ public class SignedBundleHook implements ActivatorHookFactory, BundleFileWrapper
 
 	void frameworkStart(BundleContext bc) {
 		this.context = bc;
-		if ((supportSignedBundles & VERIFY_TRUST) != 0)
+		if ((supportSignedBundles & EquinoxConfiguration.SIGNED_CONTENT_VERIFY_TRUST) != 0)
 			// initialize the trust engine listener only if trust is being established with a trust engine
 			trustEngineListener = new TrustEngineListener(context, this);
 		// always register the trust engine
@@ -152,121 +158,28 @@ public class SignedBundleHook implements ActivatorHookFactory, BundleFileWrapper
 	}
 
 	@Override
-	public BundleFileWrapper wrapBundleFile(BundleFile bundleFile, Generation generation, boolean base) {
-		try {
-			if (bundleFile != null) {
-				StorageHookImpl hook = generation.getStorageHook(SignedStorageHook.class);
-				SignedBundleFile signedBaseFile;
-				if (base && hook != null) {
-					signedBaseFile = new SignedBundleFile(bundleFile, hook.signedContent, supportSignedBundles, this);
-					if (hook.signedContent == null) {
-						signedBaseFile.initializeSignedContent();
-						SignedContentImpl signedContent = signedBaseFile.getSignedContent();
-						hook.signedContent = signedContent != null && signedContent.isSigned() ? signedContent : null;
-					}
-				} else
-					signedBaseFile = new SignedBundleFile(bundleFile, null, supportSignedBundles, this);
-				signedBaseFile.initializeSignedContent();
-				SignedContentImpl signedContent = signedBaseFile.getSignedContent();
-				if (signedContent != null && signedContent.isSigned()) {
-					// only use the signed file if there are certs
-					signedContent.setContent(signedBaseFile);
-					return new BundleFileWrapper(signedBaseFile);
-				}
-			}
-		} catch (IOException | GeneralSecurityException e) {
-			log("Bad bundle file: " + bundleFile.getBaseFile(), FrameworkLogEntry.WARNING, e); //$NON-NLS-1$
-		}
-		return null;
-	}
-
-	@Override
 	public void addHooks(HookRegistry hookRegistry) {
 		container = hookRegistry.getContainer();
 		hookRegistry.addActivatorHookFactory(this);
-		String[] supportOptions = ManifestElement.getArrayFromList(hookRegistry.getConfiguration().getConfiguration(SIGNED_CONTENT_SUPPORT, hookRegistry.getConfiguration().getConfiguration(SIGNED_BUNDLE_SUPPORT)), ","); //$NON-NLS-1$
-		for (String supportOption : supportOptions) {
-			if (SUPPORT_CERTIFICATE.equals(supportOption)) {
-				supportSignedBundles |= VERIFY_CERTIFICATE;
-			} else if (SUPPORT_TRUST.equals(supportOption)) {
-				supportSignedBundles |= VERIFY_CERTIFICATE | VERIFY_TRUST;
-			} else if (SUPPORT_RUNTIME.equals(supportOption)) {
-				supportSignedBundles |= VERIFY_CERTIFICATE | VERIFY_RUNTIME;
-			} else if (SUPPORT_TRUE.equals(supportOption) || SUPPORT_ALL.equals(supportOption)) {
-				supportSignedBundles |= VERIFY_ALL;
-			}
-		}
+		supportSignedBundles = hookRegistry.getConfiguration().supportSignedBundles;
 		trustEngineNameProp = hookRegistry.getConfiguration().getConfiguration(SignedContentConstants.TRUST_ENGINE);
-
-		if ((supportSignedBundles & VERIFY_CERTIFICATE) != 0) {
-			hookRegistry.addStorageHookFactory(new SignedStorageHook());
-			hookRegistry.addBundleFileWrapperFactoryHook(this);
-		}
 	}
 
 	@Override
 	public SignedContent getSignedContent(File content) throws IOException, InvalidKeyException, SignatureException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
-		if (content == null)
-			throw new IllegalArgumentException("null content"); //$NON-NLS-1$
-		BundleFile contentBundleFile;
-		if (content.isDirectory()) {
-			contentBundleFile = new DirBundleFile(content, false);
-		} else {
-			// Make sure we have a ZipFile first, this will throw an IOException if not valid.
-			// Use SecureAction because it gives better errors about the path on exceptions
-			ZipFile temp = secureAction.getZipFile(content);
-			temp.close();
-			contentBundleFile = new ZipBundleFile(content, null, null, container.getConfiguration().getDebug());
-		}
-		SignedBundleFile result = new SignedBundleFile(contentBundleFile, null, VERIFY_ALL, this);
-		try {
-			result.initializeSignedContent();
-		} catch (InvalidKeyException e) {
-			throw new InvalidKeyException(NLS.bind(SignedContentMessages.Factory_SignedContent_Error, content), e);
-		} catch (SignatureException e) {
-			throw new SignatureException(NLS.bind(SignedContentMessages.Factory_SignedContent_Error, content), e);
-		} catch (CertificateException e) {
-			throw new CertificateException(NLS.bind(SignedContentMessages.Factory_SignedContent_Error, content), e);
-		} catch (NoSuchAlgorithmException e) {
-			throw new NoSuchAlgorithmException(NLS.bind(SignedContentMessages.Factory_SignedContent_Error, content), e);
-		} catch (NoSuchProviderException e) {
-			throw (NoSuchProviderException) new NoSuchProviderException(NLS.bind(SignedContentMessages.Factory_SignedContent_Error, content)).initCause(e);
-		}
-		return new SignedContentFile(result.getSignedContent());
+		SignedContentFromBundleFile signedContent = new SignedContentFromBundleFile(content,
+				container.getConfiguration().getDebug());
+		determineTrust(signedContent, EquinoxConfiguration.SIGNED_CONTENT_VERIFY_TRUST);
+		return signedContent;
 	}
 
 	@Override
-	public SignedContent getSignedContent(Bundle bundle) throws IOException, InvalidKeyException, SignatureException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException, IllegalArgumentException {
-		final Generation generation = (Generation) ((EquinoxBundle) bundle).getModule().getCurrentRevision().getRevisionInfo();
-		StorageHookImpl hook = generation.getStorageHook(SignedStorageHook.class);
-		SignedContent result = hook != null ? hook.signedContent : null;
-		if (result != null)
-			return result; // just reuse the signed content the storage hook
-		// must create a new signed content using the raw file
-		if (System.getSecurityManager() == null)
-			return getSignedContent(generation.getBundleFile().getBaseFile());
-		try {
-			return AccessController.doPrivileged(new PrivilegedExceptionAction<SignedContent>() {
-		    @Override
-				public SignedContent run() throws Exception {
-					return getSignedContent(generation.getBundleFile().getBaseFile());
-				}
-			});
-		} catch (PrivilegedActionException e) {
-			if (e.getException() instanceof IOException)
-				throw (IOException) e.getException();
-			if (e.getException() instanceof InvalidKeyException)
-				throw (InvalidKeyException) e.getException();
-			if (e.getException() instanceof SignatureException)
-				throw (SignatureException) e.getException();
-			if (e.getException() instanceof CertificateException)
-				throw (CertificateException) e.getException();
-			if (e.getException() instanceof NoSuchAlgorithmException)
-				throw (NoSuchAlgorithmException) e.getException();
-			if (e.getException() instanceof NoSuchProviderException)
-				throw (NoSuchProviderException) e.getException();
-			throw new RuntimeException("Unknown error.", e.getException()); //$NON-NLS-1$
-		}
+	public SignedContent getSignedContent(Bundle bundle) throws IOException, InvalidKeyException, SignatureException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
+		Generation generation = (Generation) ((EquinoxBundle) bundle).getModule().getCurrentRevision()
+				.getRevisionInfo();
+		SignedContentFromBundleFile signedContent = new SignedContentFromBundleFile(generation.getBundleFile());
+		determineTrust(signedContent, EquinoxConfiguration.SIGNED_CONTENT_VERIFY_TRUST);
+		return signedContent;
 	}
 
 	public void log(String msg, int severity, Throwable t) {
@@ -331,7 +244,7 @@ public class SignedBundleHook implements ActivatorHookFactory, BundleFileWrapper
 
 	}
 
-	void determineTrust(SignedContentImpl trustedContent, int supportFlags) {
+	void determineTrust(SignedContentFromBundleFile trustedContent, int supportFlags) {
 		TrustEngine[] engines = null;
 		SignerInfo[] signers = trustedContent.getSignerInfos();
 		for (SignerInfo signer : signers) {
@@ -342,19 +255,19 @@ public class SignedBundleHook implements ActivatorHookFactory, BundleFileWrapper
 					engines = getTrustEngines();
 				// check trust of singer certs
 				Certificate[] signerCerts = signer.getCertificateChain();
-				((SignerInfoImpl) signer).setTrustAnchor(findTrustAnchor(signerCerts, engines, supportFlags));
+				((BaseSignerInfo) signer).setTrustAnchor(findTrustAnchor(signerCerts, engines, supportFlags));
 				// if signer has a tsa check trust of tsa certs
 				SignerInfo tsaSignerInfo = trustedContent.getTSASignerInfo(signer);
 				if (tsaSignerInfo != null) {
 					Certificate[] tsaCerts = tsaSignerInfo.getCertificateChain();
-					((SignerInfoImpl) tsaSignerInfo).setTrustAnchor(findTrustAnchor(tsaCerts, engines, supportFlags));
+					((BaseSignerInfo) tsaSignerInfo).setTrustAnchor(findTrustAnchor(tsaCerts, engines, supportFlags));
 				}
 			}
 		}
 	}
 
 	private Certificate findTrustAnchor(Certificate[] certs, TrustEngine[] engines, int supportFlags) {
-		if ((supportFlags & SignedBundleHook.VERIFY_TRUST) == 0)
+		if ((supportFlags & EquinoxConfiguration.SIGNED_CONTENT_VERIFY_TRUST) == 0)
 			// we are not searching the engines; in this case we just assume the root cert is trusted
 			return certs != null && certs.length > 0 ? certs[certs.length - 1] : null;
 			for (TrustEngine engine : engines) {

@@ -46,13 +46,13 @@ public interface SignerInfo {
 	public boolean isTrusted();
 
 	/**
-	 * Returns the <code>MessageDigest</code> algorithm used to verify content signed by this
-	 * signer info.
+	 * Returns the <code>MessageDigest</code> algorithm used to verify content
+	 * signed by this signer info.
+	 * 
 	 * @return the algorithm
+	 * @deprecated This information is not readily available using the JAR APIs
+	 *             included with Java. A value {@literal unknown} will be returned.
 	 */
 	public String getMessageDigestAlgorithm();
-
-	// TODO need more thought here, TrustEngines could get stale since they are services, leaving off for now unless until we understand the usecase for this.
-	//public TrustEngine getTrustEngine();
 
 }

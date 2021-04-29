@@ -186,6 +186,9 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 
 	@Override
 	public File getFile(String entry, boolean nativeCode) {
+		if (generation == null) {
+			return null;
+		}
 		if (!lockOpen()) {
 			return null;
 		}
@@ -556,7 +559,9 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 
 		private IOException enrichExceptionWithBaseFile(IOException e) {
 			File baseFile = getBaseFile();
-			String extraInfo = baseFile == null ? generation.getBundleInfo().getLocation() : baseFile.toString();
+			String extraInfo = baseFile == null ? //
+					generation == null ? null : generation.getBundleInfo().getLocation() : //
+					baseFile.toString();
 			return new IOException(extraInfo, e);
 		}
 	}

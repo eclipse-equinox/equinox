@@ -19,10 +19,15 @@ import java.io.InputStream;
 import java.net.URL;
 import java.security.AccessControlContext;
 import java.security.AccessController;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.Permission;
 import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
+import java.security.SignatureException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -357,7 +362,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 	private final Module module;
 	private final Object monitor = new Object();
 	private BundleContextImpl context;
-	private volatile SignerInfo[] signerInfos;
+	private volatile SignedContent signedContent;
 
 	private class EquinoxModule extends Module {
 
@@ -483,7 +488,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 	public void update(InputStream input) throws BundleException {
 		Storage storage = equinoxContainer.getStorage();
 		storage.update(module, input);
-		signerInfos = null;
+		signedContent = null;
 	}
 
 	@Override
@@ -746,18 +751,9 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 	@Override
 	public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(int signersType) {
-		SignedContentFactory factory = equinoxContainer.getSignedContentFactory();
-		if (factory == null) {
-			return Collections.emptyMap();
-		}
-
 		try {
-			SignerInfo[] infos = signerInfos;
-			if (infos == null) {
-				SignedContent signedContent = factory.getSignedContent(this);
-				infos = signedContent.getSignerInfos();
-				signerInfos = infos;
-			}
+			SignedContent current = getSignedContent();
+			SignerInfo[] infos = current == null ? null : current.getSignerInfos();
 			if (infos.length == 0)
 				return Collections.emptyMap();
 			Map<X509Certificate, List<X509Certificate>> results = new HashMap<>(infos.length);
@@ -964,7 +960,27 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			Generation current = (Generation) module.getCurrentRevision().getRevisionInfo();
 			return (A) current.getDomain();
 		}
+		if (SignedContent.class.equals(adapterType)) {
+			return (A) getSignedContent();
+		}
 		return null;
+	}
+
+	private SignedContent getSignedContent() {
+		SignedContent current = signedContent;
+		if (current == null) {
+			SignedContentFactory factory = equinoxContainer.getSignedContentFactory();
+			if (factory == null) {
+				return null;
+			}
+			try {
+				signedContent = current = factory.getSignedContent(this);
+			} catch (InvalidKeyException | SignatureException | CertificateException | NoSuchAlgorithmException
+					| NoSuchProviderException | IOException e) {
+				return null;
+			}
+		}
+		return current;
 	}
 
 	/**

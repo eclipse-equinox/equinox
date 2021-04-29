@@ -249,6 +249,21 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	public static final String PROP_SECURE_UUID = "equinox.uuid.secure"; //$NON-NLS-1$
 
+	public final static String SIGNED_BUNDLE_SUPPORT = "osgi.support.signature.verify"; //$NON-NLS-1$
+	public final static String SIGNED_CONTENT_SUPPORT = "osgi.signedcontent.support"; //$NON-NLS-1$
+	public static final int SIGNED_CONTENT_VERIFY_CERTIFICATE = 0x01;
+	public static final int SIGNED_CONTENT_VERIFY_TRUST = 0x02;
+	public static final int SIGNED_CONTENT_VERIFY_RUNTIME = 0x04;
+	public static final int SIGNED_CONTENT_VERIFY_ALL = SIGNED_CONTENT_VERIFY_CERTIFICATE | SIGNED_CONTENT_VERIFY_TRUST
+			| SIGNED_CONTENT_VERIFY_RUNTIME;
+	private final static String SIGNED_CONTENT_SUPPORT_CERTIFICATE = "certificate"; //$NON-NLS-1$
+	private final static String SIGNED_CONTENT_SUPPORT_TRUST = "trust"; //$NON-NLS-1$
+	private final static String SIGNED_CONTENT_SUPPORT_RUNTIME = "runtime"; //$NON-NLS-1$
+	private final static String SIGNED_CONTENT_SUPPORT_ALL = "all"; //$NON-NLS-1$
+	private final static String SIGNED_CONTENT_SUPPORT_TRUE = "true"; //$NON-NLS-1$
+	public final int supportSignedBundles;
+	public final boolean runtimeVerifySignedBundles;
+
 	public static final class ConfigValues {
 		/**
 		 * Value of {@link #localConfig} properties that should be considered
@@ -611,7 +626,6 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 		throwErrorOnFailedStart = "true".equals(getConfiguration(PROP_COMPATIBILITY_ERROR_FAILED_START, "true")); //$NON-NLS-1$//$NON-NLS-2$
 
-		CLASS_CERTIFICATE = Boolean.valueOf(getConfiguration(PROP_CLASS_CERTIFICATE_SUPPORT, "true")).booleanValue(); //$NON-NLS-1$
 		PARALLEL_CAPABLE = CLASS_LOADER_TYPE_PARALLEL.equals(getConfiguration(PROP_CLASS_LOADER_TYPE));
 
 		// A specified osgi.dev property but unspecified osgi.checkConfiguration
@@ -621,6 +635,29 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		if (inCheckConfigurationMode && getConfiguration(PROP_CHECK_CONFIGURATION) == null) {
 			setConfiguration(PROP_CHECK_CONFIGURATION, "true"); //$NON-NLS-1$
 		}
+		supportSignedBundles = getSupportSignedBundles(this);
+		CLASS_CERTIFICATE = (supportSignedBundles & SIGNED_CONTENT_VERIFY_CERTIFICATE) != 0 && //
+				Boolean.valueOf(getConfiguration(PROP_CLASS_CERTIFICATE_SUPPORT, "true")).booleanValue(); //$NON-NLS-1$
+		runtimeVerifySignedBundles = (supportSignedBundles & SIGNED_CONTENT_VERIFY_RUNTIME) != 0;
+	}
+
+	private static int getSupportSignedBundles(EquinoxConfiguration config) {
+		int supportSignedBundles = 0;
+		String[] supportOptions = ManifestElement.getArrayFromList(
+				config.getConfiguration(SIGNED_CONTENT_SUPPORT, config.getConfiguration(SIGNED_BUNDLE_SUPPORT)), ","); //$NON-NLS-1$
+		for (String supportOption : supportOptions) {
+			if (SIGNED_CONTENT_SUPPORT_CERTIFICATE.equals(supportOption)) {
+				supportSignedBundles |= SIGNED_CONTENT_VERIFY_CERTIFICATE;
+			} else if (SIGNED_CONTENT_SUPPORT_TRUST.equals(supportOption)) {
+				supportSignedBundles |= SIGNED_CONTENT_VERIFY_CERTIFICATE | SIGNED_CONTENT_VERIFY_TRUST;
+			} else if (SIGNED_CONTENT_SUPPORT_RUNTIME.equals(supportOption)) {
+				supportSignedBundles |= SIGNED_CONTENT_VERIFY_CERTIFICATE | SIGNED_CONTENT_VERIFY_RUNTIME;
+			} else if (SIGNED_CONTENT_SUPPORT_TRUE.equals(supportOption)
+					|| SIGNED_CONTENT_SUPPORT_ALL.equals(supportOption)) {
+				supportSignedBundles |= SIGNED_CONTENT_VERIFY_ALL;
+			}
+		}
+		return supportSignedBundles;
 	}
 
 	private URL getConfigIni(EquinoxLocations locations, boolean parent) {
