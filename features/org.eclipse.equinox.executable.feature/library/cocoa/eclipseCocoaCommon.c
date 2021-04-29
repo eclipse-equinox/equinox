@@ -147,11 +147,8 @@ char * resolveSymlinks( char * path ) {
 	char * result = 0;
 	CFURLRef url, resolved;
 	CFStringRef string;
-	Boolean isStale;
-    CFDataRef data;
-    CFErrorRef errorRef;
-    
-    
+	FSRef fsRef;
+	Boolean isFolder, wasAliased;
 
 	if(path == NULL)
 		return path;
@@ -161,26 +158,24 @@ char * resolveSymlinks( char * path ) {
 	CFRelease(string);
 	if(url == NULL)
 		return path;
-    
-    data = CFURLCreateBookmarkDataFromFile(kCFAllocatorDefault, url, &errorRef);
-    if (data == NULL) {
-        CFRelease(url);
-        return path;
-    }
-    
-    resolved = CFURLCreateByResolvingBookmarkData(kCFAllocatorDefault, data, kCFURLBookmarkResolutionWithoutMountingMask|kCFURLBookmarkResolutionWithoutUIMask, NULL, NULL, &isStale, &errorRef);
-    if(resolved != NULL) {
-        string = CFURLCopyFileSystemPath(resolved, kCFURLPOSIXPathStyle);
-        CFIndex length = CFStringGetMaximumSizeForEncoding(CFStringGetLength(string), kCFStringEncodingUTF8);
-        char *s = malloc(length);
-        if (CFStringGetCString(string, s, length, kCFStringEncodingUTF8)) {
-            result = s;
-        } else {
-            free(s);
-        }
-        CFRelease(string);
-        CFRelease(resolved);
-    }
+
+	if(CFURLGetFSRef(url, &fsRef)) {
+		if( FSResolveAliasFile(&fsRef, true, &isFolder, &wasAliased) == noErr) {
+			resolved = CFURLCreateFromFSRef(kCFAllocatorDefault, &fsRef);
+			if(resolved != NULL) {
+				string = CFURLCopyFileSystemPath(resolved, kCFURLPOSIXPathStyle);
+				CFIndex length = CFStringGetMaximumSizeForEncoding(CFStringGetLength(string), kCFStringEncodingUTF8);
+				char *s = malloc(length);
+				if (CFStringGetCString(string, s, length, kCFStringEncodingUTF8)) {
+					result = s;
+				} else {
+					free(s);
+				}
+				CFRelease(string);
+				CFRelease(resolved);
+			}
+		}
+	}
 	CFRelease(url);
 	return result;
 }
