@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2015 IBM Corporation and others.
+ * Copyright (c) 2006, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -62,13 +62,14 @@ void displayMessage(char *title, char *message)
 		free(buffer);
 		inDescription= CFStringCreateWithCString(kCFAllocatorDefault, pos+2, kCFStringEncodingUTF8);
 	} else {
-		inError= CFStringCreateWithCString(kCFAllocatorDefault, message, kCFStringEncodingUTF8);
+		inError= CFStringCreateWithCString(kCFAllocatorDefault, title, kCFStringEncodingUTF8);
+		inDescription= CFStringCreateWithCString(kCFAllocatorDefault, message, kCFStringEncodingUTF8);
 	}
 
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	NSAlert *alert = [[NSAlert alloc] init];
-    [alert setMessageText:(NSString*)(inDescription != nil ? inError : nil)];
-    [alert setInformativeText:(NSString*)(inDescription != nil ? inDescription : inError)];
+    [alert setMessageText:(NSString*)inError];
+    [alert setInformativeText:(NSString*)inDescription];
     [alert addButtonWithTitle:@"Ok"];
 	[[alert window] setTitle: [NSString stringWithUTF8String: title]];
 	[alert setAlertStyle: NSAlertStyleCritical];
