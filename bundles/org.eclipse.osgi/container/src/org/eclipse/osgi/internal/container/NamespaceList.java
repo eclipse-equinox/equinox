@@ -10,7 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Hannes Wellmann - Bug 573025: introduce and apply NamespaceList.Builder
+ *     Hannes Wellmann - Bug 573025 & 573026: introduce and apply NamespaceList.Builder
  *******************************************************************************/
 package org.eclipse.osgi.internal.container;
 
@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import org.eclipse.osgi.container.ModuleCapability;
@@ -200,6 +201,56 @@ public class NamespaceList<E> {
 			size = 0;
 		}
 
+		/**
+		 * Returns an immutable list of elements with the specified namespace in this
+		 * builder.
+		 * <p>
+		 * An empty list is returned if there are no elements with the specified
+		 * namespace. For the {@code null} namespace the elements of all namespaces are
+		 * returned as flat.
+		 * </p>
+		 * 
+		 * @param namespace the namespace of the elements to return. May be {@code null}
+		 * @return the list of element with the specified namespace
+		 */
+		public List<E> getNamespaceElements(String namespace) {
+			if (namespace == null) {
+				List<E> list = new ArrayList<>(size);
+				namespaceElements.values().forEach(list::addAll);
+				return Collections.unmodifiableList(list);
+			}
+			List<E> namespaceList = namespaceElements.get(namespace);
+			return namespaceList != null ? Collections.unmodifiableList(new ArrayList<>(namespaceList))
+					: Collections.emptyList();
+		}
+
+		/**
+		 * Returns a new builder whose content is the result of applying the specified
+		 * transformation to each element of this builder.
+		 * <p>
+		 * It is assumed that the transformation does not change the element's
+		 * namespace, so the namespace of original and transformed element are the same!
+		 * This builder is not modified.
+		 * </p>
+		 * 
+		 * @param <R>             the type of elements in the returned builder
+		 * @param transformation  the transformation applied to each element
+		 * @param newGetNamespace the function to compute the namespace of a transformed
+		 *                        element
+		 * @return a new builder containing the result of applying the transformation to
+		 *         each element in this builder
+		 */
+		public <R> Builder<R> transformIntoCopy(Function<E, R> transformation, Function<R, String> newGetNamespace) {
+			Builder<R> transformedBuilder = new Builder<>(newGetNamespace, this.namespaceElements.size());
+			transformedBuilder.size = this.size;
+			this.namespaceElements.forEach((n, es) -> {
+				List<R> transformedElements = new ArrayList<>(es.size());
+				es.forEach(e -> transformedElements.add(transformation.apply(e)));
+				transformedBuilder.namespaceElements.put(n, transformedElements);
+			});
+			return transformedBuilder;
+		}
+
 		// --- addition ---
 
 		@Override
@@ -219,6 +270,11 @@ public class NamespaceList<E> {
 			}
 			prepareModification();
 
+			if (c instanceof Builder) {
+				@SuppressWarnings("unchecked")
+				Builder<E> builder = (Builder<E>) c;
+				return addAll(builder.namespaceElements);
+			}
 			String currentNamespace = null; // $NON-NLS-1$
 			List<E> currentNamespaceList = null;
 			for (E e : c) {
@@ -246,7 +302,11 @@ public class NamespaceList<E> {
 			}
 			prepareModification();
 
-			list.namespaces().forEach((n, es) -> {
+			return addAll(list.namespaces());
+		}
+
+		private boolean addAll(Map<String, List<E>> perNamespaceElements) {
+			perNamespaceElements.forEach((n, es) -> {
 				getNamespaceList(n).addAll(es);
 				this.size += es.size();
 			});
@@ -257,13 +317,77 @@ public class NamespaceList<E> {
 			return namespaceElements.computeIfAbsent(namespace, n -> new ArrayList<>());
 		}
 
-		public void addAfterLastMatch(E toAdd, Predicate<E> matcher) {
+		/**
+		 * Appends all elements in the specified NamespaceList to this builder that
+		 * satisfy both specified predicates for themselves and their namespace.
+		 * <p>
+		 * For an element to be added both predicates, the one for the namespace as well
+		 * as the one for the element itself must be satisfied.
+		 * </p>
+		 * 
+		 * @param list            the NamespaceList containing elements to be added
+		 * @param namespaceFilter the predicate that returns true for namespaces whose
+		 *                        elements should not be excluded from being added
+		 * @param elementFilter   the predicate that returns true for elements to be
+		 *                        added
+		 * 
+		 */
+		public void addAllFiltered(NamespaceList<E> list, Predicate<? super String> namespaceFilter,
+				Predicate<? super E> elementFilter) {
+
+			addAllFilteredAfterLastMatch(list, namespaceFilter, elementFilter, null);
+		}
+
+		/**
+		 * Inserts all elements in the specified NamespaceList to this builder that
+		 * satisfy both specified predicates for themselves and their namespace, after
+		 * the last element in this builder for the corresponding namespace that
+		 * satisfies the specified bi-predicate together with the corresponding element
+		 * to be added.
+		 * <p>
+		 * For an element to be added both predicates, the one for the namespace as well
+		 * as the one for the element itself must be satisfied. If both predicates are
+		 * satisfied by an element of the specified list, it is added after the <em>
+		 * last</em> element with the same namespace in this builder that satisfies the
+		 * specified bi-predicate together with the element to add.
+		 * </p>
+		 * 
+		 * @param list             the NamespaceList containing elements to be added
+		 * @param namespaceFilter  the predicate that returns true for namespaces whose
+		 *                         elements should not be excluded from being added
+		 * @param elementFilter    the predicate that returns true for elements to be
+		 *                         added
+		 * @param insertionMatcher the bi-predicate whose first argument is the element
+		 *                         to add and second argument is an element for the same
+		 *                         namespace in this builder, which returns true if the
+		 *                         element to add can be added after this builder's
+		 *                         element
+		 */
+		public void addAllFilteredAfterLastMatch(NamespaceList<E> list, Predicate<? super String> namespaceFilter,
+				Predicate<? super E> elementFilter, BiPredicate<E, E> insertionMatcher) {
+			if (list.isEmpty()) {
+				return;
+			}
 			prepareModification();
 
-			String namespace = getNamespace.apply(toAdd);
-			List<E> namespaceList = getNamespaceList(namespace);
-			addAfterLastMatch(toAdd, namespaceList, matcher);
-			this.size++;
+			list.namespaces().forEach((namespace, elementsToAdd) -> {
+				if (namespaceFilter.test(namespace)) {
+					List<E> targetList = getNamespaceList(namespace);
+					for (E toAdd : elementsToAdd) {
+						if (elementFilter.test(toAdd)) {
+							if (insertionMatcher == null) {
+								targetList.add(toAdd);
+							} else {
+								addAfterLastMatch(toAdd, targetList, e -> insertionMatcher.test(toAdd, e));
+							}
+							this.size++;
+						}
+					}
+					if (targetList.isEmpty()) { // maybe no elements are added
+						namespaceElements.remove(namespace);
+					}
+				}
+			});
 		}
 
 		private void addAfterLastMatch(E e, List<E> list, Predicate<E> matcher) {

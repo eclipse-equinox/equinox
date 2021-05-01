@@ -89,24 +89,21 @@ public class ConnectHookConfigurator implements HookConfigurator {
 					@Override
 					public ModuleRevisionBuilder adaptModuleRevisionBuilder(ModuleEvent operation, Module origin, ModuleRevisionBuilder builder) {
 						if (m != null) {
-							builder.getCapabilities()
-								.stream() //
-								.filter(c -> CONNECT_TAG_NAMESPACES.contains(c.getNamespace())) //
-								.forEach((c) -> {
-									c.getAttributes().compute(IdentityNamespace.CAPABILITY_TAGS_ATTRIBUTE, (k, v) -> {
-										if (v == null) {
-											return Collections.singletonList(ConnectContent.TAG_OSGI_CONNECT);
-										}
-										if (v instanceof List) {
-											@SuppressWarnings({"unchecked", "rawtypes"})
-											List<String> l = new ArrayList<>((List) v);
-											l.add(ConnectContent.TAG_OSGI_CONNECT);
-											return Collections.unmodifiableList(l);
-										}
-										// should not get here, but just recover 
-										return Arrays.asList(v, ConnectContent.TAG_OSGI_CONNECT);
-									});
-								});
+							CONNECT_TAG_NAMESPACES.stream().map(builder::getCapabilities).flatMap(List::stream)
+									.forEach(c -> c.getAttributes().compute(IdentityNamespace.CAPABILITY_TAGS_ATTRIBUTE,
+											(k, v) -> {
+												if (v == null) {
+													return Collections.singletonList(ConnectContent.TAG_OSGI_CONNECT);
+												}
+												if (v instanceof List) {
+													@SuppressWarnings({ "unchecked", "rawtypes" })
+													List<String> l = new ArrayList<>((List) v);
+													l.add(ConnectContent.TAG_OSGI_CONNECT);
+													return Collections.unmodifiableList(l);
+												}
+												// should not get here, but just recover
+												return Arrays.asList(v, ConnectContent.TAG_OSGI_CONNECT);
+											}));
 							return builder;
 						}
 						return null;

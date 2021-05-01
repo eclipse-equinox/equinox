@@ -10,7 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Hannes Wellmann - Bug 573025: introduce and apply NamespaceList.Builder
+ *     Hannes Wellmann - Bug 573025 & 573026: introduce and apply NamespaceList.Builder
  *******************************************************************************/
 package org.eclipse.osgi.tests.container;
 
@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import org.junit.Test;
@@ -42,8 +43,11 @@ public class NamespaceListTest extends AbstractTest {
 
 	// only access fields reflectively that are not part of the Collection-API
 	static final Method BUILDER_CREATE;
+	static final Method BUILDER_GET_NAMESPACE_ELEMENTS;
+	static final Method BUILDER_TRANSFORM_INTO_COPY;
 	static final Method BUILDER_ADD_ALL;
-	static final Method BUILDER_ADD_AFTER_LAST_MATCH;
+	static final Method BUILDER_ADD_ALL_FILTERED;
+	static final Method BUILDER_ADD_ALL_FILTERED_AFTER_LAST_MATCH;
 	static final Method BUILDER_REMOVE_NAMESPACE_IF;
 	static final Method BUILDER_REMOVE_ELEMENTS_OF_NAMESPACE_IF;
 	static final Method BUILDER_BUILD;
@@ -61,9 +65,14 @@ public class NamespaceListTest extends AbstractTest {
 			NAMESPACELIST_CREATE_BUILDER = namespaceList.getMethod("createBuilder");
 
 			BUILDER_CREATE = namespaceListBuilder.getMethod("create", Function.class);
+			BUILDER_GET_NAMESPACE_ELEMENTS = namespaceListBuilder.getMethod("getNamespaceElements", String.class);
+			BUILDER_TRANSFORM_INTO_COPY = namespaceListBuilder.getMethod("transformIntoCopy", Function.class,
+					Function.class);
 			BUILDER_ADD_ALL = namespaceListBuilder.getMethod("addAll", namespaceList);
-			BUILDER_ADD_AFTER_LAST_MATCH = namespaceListBuilder.getMethod("addAfterLastMatch", Object.class,
+			BUILDER_ADD_ALL_FILTERED = namespaceListBuilder.getMethod("addAllFiltered", namespaceList, Predicate.class,
 					Predicate.class);
+			BUILDER_ADD_ALL_FILTERED_AFTER_LAST_MATCH = namespaceListBuilder.getMethod("addAllFilteredAfterLastMatch",
+					namespaceList, Predicate.class, Predicate.class, BiPredicate.class);
 			BUILDER_REMOVE_NAMESPACE_IF = namespaceListBuilder.getMethod("removeNamespaceIf", Predicate.class);
 			BUILDER_REMOVE_ELEMENTS_OF_NAMESPACE_IF = namespaceListBuilder.getMethod("removeElementsOfNamespaceIf",
 					String.class, Predicate.class);
@@ -104,12 +113,29 @@ public class NamespaceListTest extends AbstractTest {
 		return (Collection<NamespaceElement>) BUILDER_CREATE.invoke(null, getNamespace);
 	}
 
+	static <E> List<E> builderGetNamespaceElements(Collection<E> builder, String namespace) throws Exception {
+		return (List<E>) BUILDER_GET_NAMESPACE_ELEMENTS.invoke(builder, namespace);
+	}
+
+	static <T, R> Collection<R> builderTransformIntoCopy(Collection<T> builder, Function<T, R> transformation,
+			Function<R, String> newGetNamespace) throws Exception {
+		return (Collection<R>) BUILDER_TRANSFORM_INTO_COPY.invoke(builder, transformation, newGetNamespace);
+	}
+
 	static <E> void builderAddAll(Collection<E> builder, Object namespaceList) throws Exception {
 		BUILDER_ADD_ALL.invoke(builder, namespaceList);
 	}
 
-	static <E> void builderAddAfterLastMatch(Collection<E> builder, E e, Predicate<E> matcher) throws Exception {
-		BUILDER_ADD_AFTER_LAST_MATCH.invoke(builder, e, matcher);
+	static <E> void builderAddAllFiltered(Collection<E> builder, Object namespaceList,
+			Predicate<? super String> namespaceFilter, Predicate<E> elementFilter) throws Exception {
+		BUILDER_ADD_ALL_FILTERED.invoke(builder, namespaceList, namespaceFilter, elementFilter);
+	}
+
+	static <E> void builderAddAllFilteredAfterLastMatch(Collection<E> builder, Object namespaceList,
+			Predicate<? super String> namespaceFilter, Predicate<E> elementFilter, BiPredicate<E, E> insertionMatcher)
+			throws Exception {
+		BUILDER_ADD_ALL_FILTERED_AFTER_LAST_MATCH.invoke(builder, namespaceList, namespaceFilter, elementFilter,
+				insertionMatcher);
 	}
 
 	static <E> void builderRemoveNamespaceIf(Collection<E> builder, Predicate<String> filter) throws Exception {

@@ -826,11 +826,10 @@ public class Storage {
 					(generation.getContentType() == Type.CONNECT ? "" : null), //$NON-NLS-1$
 					(allowRestrictedProvides ? "" : null)); //$NON-NLS-1$
 			if ((builder.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
-				for (ModuleRevisionBuilder.GenericInfo reqInfo : builder.getRequirements()) {
-					if (HostNamespace.HOST_NAMESPACE.equals(reqInfo.getNamespace())) {
-						if (HostNamespace.EXTENSION_BOOTCLASSPATH.equals(reqInfo.getDirectives().get(HostNamespace.REQUIREMENT_EXTENSION_DIRECTIVE))) {
-							throw new BundleException("Boot classpath extensions are not supported.", BundleException.UNSUPPORTED_OPERATION, new UnsupportedOperationException()); //$NON-NLS-1$
-						}
+				for (ModuleRevisionBuilder.GenericInfo reqInfo : builder.getRequirements(HostNamespace.HOST_NAMESPACE)) {
+					if (HostNamespace.EXTENSION_BOOTCLASSPATH.equals(reqInfo.getDirectives().get(HostNamespace.REQUIREMENT_EXTENSION_DIRECTIVE))) {
+						throw new BundleException("Boot classpath extensions are not supported.", //$NON-NLS-1$
+								BundleException.UNSUPPORTED_OPERATION, new UnsupportedOperationException());
 					}
 				}
 			}

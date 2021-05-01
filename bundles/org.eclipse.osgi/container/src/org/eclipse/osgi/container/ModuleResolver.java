@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import static org.eclipse.osgi.internal.container.NamespaceList.CAPABILITY;
-import static org.eclipse.osgi.internal.container.NamespaceList.REQUIREMENT;
 import static org.eclipse.osgi.internal.container.NamespaceList.WIRE;
 
 import java.security.Permission;
@@ -46,7 +44,6 @@ import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
 import org.eclipse.osgi.container.namespaces.EquinoxFragmentNamespace;
 import org.eclipse.osgi.internal.container.InternalUtils;
 import org.eclipse.osgi.internal.container.NamespaceList;
-import org.eclipse.osgi.internal.container.NamespaceList.Builder;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
@@ -234,10 +231,8 @@ final class ModuleResolver {
 		Map<ModuleCapability, List<ModuleWire>> providedWireMap = provided.getOrDefault(revision, Collections.emptyMap());
 		NamespaceList<ModuleWire> requiredWires = required.getOrDefault(revision, NamespaceList.empty(WIRE));
 
-		NamespaceList.Builder<ModuleCapability> capabilities = Builder.create(CAPABILITY);
-		capabilities.addAll(revision.getModuleCapabilities(null));
-		NamespaceList.Builder<ModuleRequirement> requirements = Builder.create(REQUIREMENT);
-		requirements.addAll(revision.getModuleRequirements(null));
+		NamespaceList.Builder<ModuleCapability> capabilities = revision.getCapabilities().createBuilder();
+		NamespaceList.Builder<ModuleRequirement> requirements = revision.getRequirements().createBuilder();
 
 		// if revision is a fragment remove payload requirements and capabilities
 		if ((BundleRevision.TYPE_FRAGMENT & revision.getTypes()) != 0) {
@@ -341,35 +336,29 @@ final class ModuleResolver {
 		for (ModuleWire hostWire : hostWires) {
 
 			// add fragment capabilities
-			List<ModuleCapability> fragmentCapabilities = hostWire.getRequirer().getModuleCapabilities(null);
-			for (ModuleCapability fragmentCapability : fragmentCapabilities) {
-				if (NON_PAYLOAD_CAPABILITIES.contains(fragmentCapability.getNamespace())) {
-					continue; // don't include, not a payload capability
-				}
-				Object effective = fragmentCapability.getDirectives().get(Namespace.CAPABILITY_EFFECTIVE_DIRECTIVE);
-				if (effective != null && !Namespace.EFFECTIVE_RESOLVE.equals(effective)) {
-					continue; // don't include, not effective
-				}
-				capabilities.add(fragmentCapability);
-			}
+			NamespaceList<ModuleCapability> fragmentCapabilities = hostWire.getRequirer().getCapabilities();
+			capabilities.addAllFiltered(fragmentCapabilities,
+
+					n -> !NON_PAYLOAD_CAPABILITIES.contains(n),
+
+					fc -> { // don't include, not effective
+						Object effective = fc.getDirectives().get(Namespace.CAPABILITY_EFFECTIVE_DIRECTIVE);
+						return effective == null || Namespace.EFFECTIVE_RESOLVE.equals(effective);
+					});
 
 			// add fragment requirements
-			List<ModuleRequirement> fragmentRequriements = hostWire.getRequirer().getModuleRequirements(null);
-			for (ModuleRequirement fragmentRequirement : fragmentRequriements) {
-				if (NON_PAYLOAD_REQUIREMENTS.contains(fragmentRequirement.getNamespace())) {
-					continue; // don't include, not a payload requirement
-				}
-				Object effective = fragmentRequirement.getDirectives().get(Namespace.REQUIREMENT_EFFECTIVE_DIRECTIVE);
-				if (effective != null && !Namespace.EFFECTIVE_RESOLVE.equals(effective)) {
-					continue; // don't include, not effective
-				}
-				if (!PackageNamespace.PACKAGE_NAMESPACE.equals(fragmentRequirement.getNamespace())
-						|| isDynamic(fragmentRequirement)) {
-					requirements.add(fragmentRequirement);
-				} else {
-					requirements.addAfterLastMatch(fragmentRequirement, r -> !isDynamic(r));
-				}
-			}
+			NamespaceList<ModuleRequirement> fragmentRequriements = hostWire.getRequirer().getRequirements();
+			requirements.addAllFilteredAfterLastMatch(fragmentRequriements,
+
+					n -> !NON_PAYLOAD_REQUIREMENTS.contains(n),
+
+					fr -> { // don't include, not effective
+						Object effective = fr.getDirectives().get(Namespace.REQUIREMENT_EFFECTIVE_DIRECTIVE);
+						return !(effective != null && !Namespace.EFFECTIVE_RESOLVE.equals(effective));
+					},
+
+					(fr, r) -> !PackageNamespace.PACKAGE_NAMESPACE.equals(fr.getNamespace()) || isDynamic(fr)
+							|| !isDynamic(r));
 		}
 	}
 

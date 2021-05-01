@@ -405,9 +405,8 @@ public final class ModuleWiring implements BundleWiring {
 	 * @param builder the builder that defines the new dynamic imports.
 	 */
 	public void addDynamicImports(ModuleRevisionBuilder builder) {
-		List<GenericInfo> newImports = builder.getRequirements();
-		List<ModuleRequirement> newRequirements = new ArrayList<>();
-		for (GenericInfo info : newImports) {
+		NamespaceList.Builder<GenericInfo> newImports = builder.getRequirementsBuilder();
+		NamespaceList.Builder<ModuleRequirement> newRequirements = newImports.transformIntoCopy(info -> {
 			if (!PackageNamespace.PACKAGE_NAMESPACE.equals(info.getNamespace())) {
 				throw new IllegalArgumentException("Invalid namespace for package imports: " + info.getNamespace()); //$NON-NLS-1$
 			}
@@ -415,8 +414,9 @@ public final class ModuleWiring implements BundleWiring {
 			Map<String, String> directives = new HashMap<>(info.getDirectives());
 			directives.put(DYNAMICALLY_ADDED_IMPORT_DIRECTIVE, "true"); //$NON-NLS-1$
 			directives.put(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE, PackageNamespace.RESOLUTION_DYNAMIC);
-			newRequirements.add(new ModuleRequirement(info.getNamespace(), directives, attributes, revision));
-		}
+			return new ModuleRequirement(info.getNamespace(), directives, attributes, revision);
+		}, NamespaceList.REQUIREMENT);
+
 		ModuleDatabase moduleDatabase = revision.getRevisions().getContainer().moduleDatabase;
 		moduleDatabase.writeLock();
 		try {

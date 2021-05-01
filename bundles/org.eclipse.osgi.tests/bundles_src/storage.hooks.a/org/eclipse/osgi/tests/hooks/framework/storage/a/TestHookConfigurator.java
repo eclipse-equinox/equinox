@@ -107,11 +107,9 @@ public class TestHookConfigurator implements HookConfigurator {
 					builder.addCapability("test.file.path", dirs, attrs);
 				}
 				if (TestHookConfigurator.adaptCapabilityAttribute) {
-					for (GenericInfo c : builder.getCapabilities()) {
-						if (BundleNamespace.BUNDLE_NAMESPACE.equals(c.getNamespace())) {
-							c.getAttributes().put("matching.attribute", "testAttribute");
-							c.getDirectives().put("matching.directive", "testDirective");
-						}
+					for (GenericInfo c : builder.getCapabilities(BundleNamespace.BUNDLE_NAMESPACE)) {
+						c.getAttributes().put("matching.attribute", "testAttribute");
+						c.getDirectives().put("matching.directive", "testDirective");
 					}
 				}
 				return builder;

@@ -14,11 +14,14 @@
 package org.eclipse.osgi.tests.container;
 
 import static org.eclipse.osgi.tests.container.NamespaceListTest.build;
-import static org.eclipse.osgi.tests.container.NamespaceListTest.builderAddAfterLastMatch;
 import static org.eclipse.osgi.tests.container.NamespaceListTest.builderAddAll;
+import static org.eclipse.osgi.tests.container.NamespaceListTest.builderAddAllFiltered;
+import static org.eclipse.osgi.tests.container.NamespaceListTest.builderAddAllFilteredAfterLastMatch;
 import static org.eclipse.osgi.tests.container.NamespaceListTest.builderCreate;
+import static org.eclipse.osgi.tests.container.NamespaceListTest.builderGetNamespaceElements;
 import static org.eclipse.osgi.tests.container.NamespaceListTest.builderRemoveElementsOfNamespaceIf;
 import static org.eclipse.osgi.tests.container.NamespaceListTest.builderRemoveNamespaceIf;
+import static org.eclipse.osgi.tests.container.NamespaceListTest.builderTransformIntoCopy;
 import static org.eclipse.osgi.tests.container.NamespaceListTest.createEmptyNamespaceList;
 import static org.eclipse.osgi.tests.container.NamespaceListTest.getList;
 import static org.eclipse.osgi.tests.container.NamespaceListTest.newNamespace;
@@ -26,6 +29,7 @@ import static org.eclipse.osgi.tests.container.NamespaceListTest.populate;
 import static org.eclipse.osgi.tests.container.NamespaceListTest.randomListSort;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
@@ -42,6 +46,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.eclipse.osgi.tests.container.NamespaceListTest.NamespaceElement;
 import org.junit.Test;
 
@@ -219,6 +224,71 @@ public class NamespaceListBuilderTest {
 		assertEquals(getList(namespaceList, "ns-1"), elements.subList(3, 6));
 	}
 
+	@Test
+	public void testGetNamespaceElements_contaiendNamespace() throws Exception {
+		List<NamespaceElement> elements = populate(3, 3);
+
+		Collection<NamespaceElement> builder = builderCreate();
+		builder.addAll(elements);
+
+		List<NamespaceElement> namespaceElements = builderGetNamespaceElements(builder, "ns-1");
+		assertEquals(namespaceElements, elements.subList(3, 6));
+	}
+
+	@Test
+	public void testGetNamespaceElements_nullNamespace() throws Exception {
+		List<NamespaceElement> elements = populate(3, 3);
+
+		Collection<NamespaceElement> builder = builderCreate();
+		builder.addAll(elements);
+
+		List<NamespaceElement> namespaceElements = builderGetNamespaceElements(builder, null);
+		assertEquals(elements, namespaceElements);
+	}
+
+	@Test
+	public void testGetNamespaceElements_notContainedNamespace() throws Exception {
+		List<NamespaceElement> elements = populate(3, 3);
+		Collection<NamespaceElement> builder = builderCreate();
+		builder.addAll(elements);
+
+		List<NamespaceElement> namespaceElements = builderGetNamespaceElements(builder, "ns-100");
+		assertEquals(Collections.emptyList(), namespaceElements);
+	}
+
+	@Test
+	public void testTransformIntoCopy_notEmptyBuilder() throws Exception {
+		List<NamespaceElement> elements = populate(3, 3);
+
+		Collection<NamespaceElement> builder = builderCreate();
+		builder.addAll(elements);
+
+		Function<String, String> getNamespace = e -> e.substring(0, 4);
+
+		Collection<String> transformedBuilder = builderTransformIntoCopy(builder, Object::toString, getNamespace);
+
+		List<String> transformedElements = elements.stream().map(Object::toString).collect(Collectors.toList());
+		assertStricEqualContent(transformedBuilder, transformedElements, getNamespace);
+		assertNotSame(builder, transformedBuilder);
+		// check that the original builder is not changed
+		assertStricEqualContent(builder, elements);
+	}
+
+	@Test
+	public void testTransformIntoCopy_emptyBuilder() throws Exception {
+
+		Collection<NamespaceElement> builder = builderCreate();
+
+		Function<String, String> getNamespace = e -> e.substring(0, 4);
+
+		Collection<String> transformedBuilder = builderTransformIntoCopy(builder, Object::toString, getNamespace);
+
+		assertNotSame(builder, transformedBuilder);
+		assertStricEqualContent(transformedBuilder, Collections.emptyList(), getNamespace);
+		// check that the original builder is not changed
+		assertStricEqualContent(builder, Collections.emptyList());
+	}
+
 	// --- test addition ---
 
 	@Test
@@ -306,53 +376,162 @@ public class NamespaceListBuilderTest {
 	}
 
 	@Test
-	public void testAddAfterLastMatch_matchUpUntilTheMiddle() throws Exception {
+	public void testAddAll_builderArgument() throws Exception {
+		List<NamespaceElement> elements = populate(2, 2);
+		Collection<NamespaceElement> builder = builderCreate();
+		builder.addAll(elements);
+
+		Collection<NamespaceElement> builder2 = builderCreate();
+		List<NamespaceElement> elements2 = populate(2, 2);
+		builder2.addAll(elements2);
+
+		builder.addAll(builder2);
+
+		elements.addAll(4, elements2.subList(2, 4));
+		elements.addAll(2, elements2.subList(0, 2));
+
+		assertStricEqualContent(builder, elements);
+	}
+
+	@Test
+	public void testAddAllFiltered_notEmptyBuilder() throws Exception {
+		List<NamespaceElement> elements = populate(4, 3);
+
+		Collection<NamespaceElement> builder = builderCreate();
+		builder.addAll(elements);
+
+		List<NamespaceElement> newElements = new ArrayList<>();
+		newElements.add(new NamespaceElement(0, "ns-1"));
+		newElements.add(new NamespaceElement(10, "ns-1"));
+		newElements.add(new NamespaceElement(2, "ns-20"));
+		newElements.add(new NamespaceElement(0, "ns-2"));
+		newElements.add(new NamespaceElement(2, "ns-0"));
+		newElements.add(new NamespaceElement(1, "ns-2"));
+		newElements.add(new NamespaceElement(10, "ns-20"));
+		newElements.add(new NamespaceElement(0, "ns-20"));
+		Object namespaceList = newNamespace(newElements);
+
+		builderAddAllFiltered(builder, namespaceList, n -> !n.equals("ns-2"), e -> e.id < 10);
+
+		List<NamespaceElement> expectedElements = new ArrayList<>();
+		expectedElements.add(new NamespaceElement(0, "ns-0"));
+		expectedElements.add(new NamespaceElement(1, "ns-0"));
+		expectedElements.add(new NamespaceElement(2, "ns-0"));
+		expectedElements.add(new NamespaceElement(3, "ns-0"));
+		expectedElements.add(new NamespaceElement(2, "ns-0"));
+
+		expectedElements.add(new NamespaceElement(0, "ns-1"));
+		expectedElements.add(new NamespaceElement(1, "ns-1"));
+		expectedElements.add(new NamespaceElement(2, "ns-1"));
+		expectedElements.add(new NamespaceElement(3, "ns-1"));
+		expectedElements.add(new NamespaceElement(0, "ns-1"));
+
+		expectedElements.add(new NamespaceElement(0, "ns-2"));
+		expectedElements.add(new NamespaceElement(1, "ns-2"));
+		expectedElements.add(new NamespaceElement(2, "ns-2"));
+		expectedElements.add(new NamespaceElement(3, "ns-2"));
+
+		expectedElements.add(new NamespaceElement(2, "ns-20"));
+		expectedElements.add(new NamespaceElement(0, "ns-20"));
+
+		assertStricEqualContent(builder, expectedElements);
+	}
+
+	@Test
+	public void testAddAllFiltered_emptyBuilder() throws Exception {
+
+		Collection<NamespaceElement> builder = builderCreate();
+
+		List<NamespaceElement> newElements2 = new ArrayList<>();
+		newElements2.add(new NamespaceElement(0, "ns-1"));
+		newElements2.add(new NamespaceElement(10, "ns-1"));
+		newElements2.add(new NamespaceElement(2, "ns-20"));
+		newElements2.add(new NamespaceElement(0, "ns-2"));
+		newElements2.add(new NamespaceElement(2, "ns-0"));
+		newElements2.add(new NamespaceElement(1, "ns-2"));
+		newElements2.add(new NamespaceElement(10, "ns-20"));
+		newElements2.add(new NamespaceElement(0, "ns-20"));
+		Object namespaceList = newNamespace(newElements2);
+
+		builderAddAllFiltered(builder, namespaceList, n -> !n.equals("ns-2"), e -> e.id < 10);
+
+		List<NamespaceElement> expectedElements = new ArrayList<>();
+		expectedElements.add(new NamespaceElement(0, "ns-1"));
+		expectedElements.add(new NamespaceElement(2, "ns-20"));
+		expectedElements.add(new NamespaceElement(0, "ns-20"));
+		expectedElements.add(new NamespaceElement(2, "ns-0"));
+
+		assertStricEqualContent(builder, expectedElements);
+	}
+
+	@Test
+	public void testAddAllFiltered_allElementsOfNewNamespaceFiltered() throws Exception {
+
+		Collection<NamespaceElement> builder = builderCreate();
+
+		List<NamespaceElement> newElements = new ArrayList<>();
+		newElements.add(new NamespaceElement(10, "ns-1"));
+		newElements.add(new NamespaceElement(11, "ns-1"));
+		Object namespaceList = newNamespace(newElements);
+
+		builderAddAllFiltered(builder, namespaceList, n -> true, e -> e.id < 5);
+		// All elements of namespace ns-1 are filtered
+
+		assertStricEqualContent(builder, Collections.emptyList());
+	}
+
+	@Test
+	public void testAddAllFilteredAfterLastMatch_matchUpUntilTheMiddle() throws Exception {
 		List<NamespaceElement> elements = populate(4, "ns-0");
 
 		Collection<NamespaceElement> builder = builderCreate();
 		builder.addAll(elements);
 
 		NamespaceElement element = new NamespaceElement(5, "ns-0");
-		builderAddAfterLastMatch(builder, element, e -> e.id < 2);
+		Object namespaceList = newNamespace(Collections.singletonList(element));
+		builderAddAllFilteredAfterLastMatch(builder, namespaceList, n -> true, e -> true, (toAdd, e) -> e.id < 2);
 
 		elements.add(2, element);
 		assertStricEqualContent(builder, elements);
 	}
 
 	@Test
-	public void testAddAfterLastMatch_allElementsMatches() throws Exception {
+	public void testAddAllFilteredAfterLastMatch_allElementsMatches() throws Exception {
 		List<NamespaceElement> elements = populate(4, "ns-0");
 
 		Collection<NamespaceElement> builder = builderCreate();
 		builder.addAll(elements);
 
 		NamespaceElement element = new NamespaceElement(5, "ns-0");
-		builderAddAfterLastMatch(builder, element, e -> true);
+		Object namespaceList = newNamespace(Collections.singletonList(element));
+		builderAddAllFilteredAfterLastMatch(builder, namespaceList, n -> true, e -> true, (toAdd, e) -> true);
 
 		elements.add(4, element);
 		assertStricEqualContent(builder, elements);
 	}
 
 	@Test
-	public void testAddAfterLastMatch_noMatch() throws Exception {
+	public void testAddAllFilteredAfterLastMatch_noMatch() throws Exception {
 		List<NamespaceElement> elements = populate(4, "ns-0");
 
 		Collection<NamespaceElement> builder = builderCreate();
 		builder.addAll(elements);
 
 		NamespaceElement element = new NamespaceElement(5, "ns-0");
-		builderAddAfterLastMatch(builder, element, e -> e.id > 100);
+		Object namespaceList = newNamespace(Collections.singletonList(element));
+		builderAddAllFilteredAfterLastMatch(builder, namespaceList, n -> true, e -> true, (toAdd, e) -> e.id > 100);
 
 		elements.add(0, element);
 		assertStricEqualContent(builder, elements);
 	}
 
 	@Test
-	public void testAddAfterLastMatch_emptyNamespaceList() throws Exception {
+	public void testAddAllFilteredAfterLastMatch_emptyNamespaceList() throws Exception {
 		Collection<NamespaceElement> builder = builderCreate();
 
 		NamespaceElement element = new NamespaceElement(5, "ns-0");
-		builderAddAfterLastMatch(builder, element, e -> e.id < 2);
+		Object namespaceList = newNamespace(Collections.singletonList(element));
+		builderAddAllFilteredAfterLastMatch(builder, namespaceList, n -> true, e -> true, (toAdd, e) -> e.id < 2);
 
 		assertStricEqualContent(builder, Collections.singletonList(element));
 	}
@@ -771,6 +950,7 @@ public class NamespaceListBuilderTest {
 			String namespace = entry.getKey();
 			List<E> elements = entry.getValue();
 			assertEquals(elements, getList(namespaceList, namespace));
+			assertEquals(elements, builderGetNamespaceElements(builder, namespace));
 		}
 
 		assertEquals(expectedElements, getList(namespaceList, null));
@@ -794,6 +974,7 @@ public class NamespaceListBuilderTest {
 			String namespace = entry.getKey();
 			List<NamespaceElement> elements = entry.getValue();
 			assertContentEquals(elements, getList(namespaceList, namespace));
+			assertContentEquals(elements, builderGetNamespaceElements(builder, namespace));
 		}
 
 		assertContentEquals(expectedElements, getList(namespaceList, null));

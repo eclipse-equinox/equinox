@@ -14,12 +14,13 @@
 package org.eclipse.osgi.container;
 
 import java.security.AllPermission;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.osgi.internal.container.NamespaceList;
+import org.eclipse.osgi.internal.container.NamespaceList.Builder;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
@@ -89,8 +90,8 @@ public final class ModuleRevisionBuilder {
 	private String symbolicName = null;
 	private Version version = Version.emptyVersion;
 	private int types = 0;
-	private final List<GenericInfo> capabilityInfos = new ArrayList<>();
-	private final List<GenericInfo> requirementInfos = new ArrayList<>();
+	private final NamespaceList.Builder<GenericInfo> capabilityInfos = Builder.create(GenericInfo::getNamespace);
+	private final NamespaceList.Builder<GenericInfo> requirementInfos = Builder.create(GenericInfo::getNamespace);
 	private long id = -1;
 
 	/**
@@ -166,7 +167,20 @@ public final class ModuleRevisionBuilder {
 	 * @return the capabilities
 	 */
 	public List<GenericInfo> getCapabilities() {
-		return new ArrayList<>(capabilityInfos);
+		return getCapabilities(null);
+	}
+
+	/**
+	 * Returns a snapshot of the capabilities in the given namespace for this
+	 * builder
+	 * 
+	 * @param namespace The namespace of the capabilities to return or null to
+	 *                  return the capabilities from all namespaces.
+	 * @return the capabilities
+	 * @since 3.17
+	 */
+	public List<GenericInfo> getCapabilities(String namespace) {
+		return capabilityInfos.getNamespaceElements(namespace);
 	}
 
 	/**
@@ -184,7 +198,24 @@ public final class ModuleRevisionBuilder {
 	 * @return the requirements
 	 */
 	public List<GenericInfo> getRequirements() {
-		return new ArrayList<>(requirementInfos);
+		return getRequirements(null);
+	}
+
+	NamespaceList.Builder<GenericInfo> getRequirementsBuilder() {
+		return requirementInfos;
+	}
+
+	/**
+	 * Returns a snapshot of the requirements in the given namespace for this
+	 * builder
+	 * 
+	 * @param namespace The namespace of the requirements to return or null to
+	 *                  return the requirements from all namespaces.
+	 * @return the requirements
+	 * @since 3.17
+	 */
+	public List<GenericInfo> getRequirements(String namespace) {
+		return requirementInfos.getNamespaceElements(namespace);
 	}
 
 	/**
@@ -289,18 +320,14 @@ public final class ModuleRevisionBuilder {
 								module.getContainer().checkAdminPermission(module.getBundle(), AdminPermission.EXTENSIONLIFECYCLE);
 							}
 						}
-					} catch (InvalidSyntaxException e) {
-						continue;
+					} catch (InvalidSyntaxException e) { // ignore
 					}
 				}
 			}
 		}
 	}
 
-	private void addGenericInfo(List<GenericInfo> infos, String namespace, Map<String, String> directives, Map<String, Object> attributes) {
-		if (infos == null) {
-			infos = new ArrayList<>();
-		}
+	private void addGenericInfo(NamespaceList.Builder<GenericInfo> infos, String namespace, Map<String, String> directives, Map<String, Object> attributes) {
 		infos.add(new GenericInfo(namespace, directives, attributes, true));
 	}
 
@@ -312,7 +339,7 @@ public final class ModuleRevisionBuilder {
 		basicAddGenericInfo(requirementInfos, namespace, directives, attributes);
 	}
 
-	private static void basicAddGenericInfo(List<GenericInfo> infos, String namespace, Map<String, String> directives, Map<String, Object> attributes) {
+	private static void basicAddGenericInfo(NamespaceList.Builder<GenericInfo> infos, String namespace, Map<String, String> directives, Map<String, Object> attributes) {
 		infos.add(new GenericInfo(namespace, unmodifiableMap(directives), unmodifiableMap(attributes), false));
 	}
 

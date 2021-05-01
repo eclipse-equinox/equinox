@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +22,7 @@ import java.util.Set;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.internal.container.InternalUtils;
+import org.eclipse.osgi.internal.container.NamespaceList;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.framework.namespace.IdentityNamespace;
@@ -40,13 +40,13 @@ public final class ModuleRevision implements BundleRevision {
 	private final String symbolicName;
 	private final Version version;
 	private final int types;
-	private final List<ModuleCapability> capabilities;
-	private final List<ModuleRequirement> requirements;
+	private final NamespaceList<ModuleCapability> capabilities;
+	private final NamespaceList<ModuleRequirement> requirements;
 	private final ModuleRevisions revisions;
 	private final Object revisionInfo;
 	private volatile Boolean lazyActivationPolicy = null;
 
-	ModuleRevision(String symbolicName, Version version, int types, List<GenericInfo> capabilityInfos, List<GenericInfo> requirementInfos, ModuleRevisions revisions, Object revisionInfo) {
+	ModuleRevision(String symbolicName, Version version, int types, NamespaceList.Builder<GenericInfo> capabilityInfos, NamespaceList.Builder<GenericInfo> requirementInfos, ModuleRevisions revisions, Object revisionInfo) {
 		this.symbolicName = symbolicName;
 		this.version = version;
 		this.types = types;
@@ -56,18 +56,12 @@ public final class ModuleRevision implements BundleRevision {
 		this.revisionInfo = revisionInfo;
 	}
 
-	private List<ModuleCapability> createCapabilities(List<GenericInfo> capabilityInfos) {
-		if (capabilityInfos == null || capabilityInfos.isEmpty())
-			return Collections.emptyList();
-		List<ModuleCapability> result = new ArrayList<>(capabilityInfos.size());
-		for (GenericInfo info : capabilityInfos) {
-			if (info.mutable) {
-				result.add(new ModuleCapability(info.namespace, copyUnmodifiableMap(info.directives), copyUnmodifiableMap(info.attributes), this));
-			} else {
-				result.add(new ModuleCapability(info.namespace, info.directives, info.attributes, this));
-			}
-		}
-		return result;
+	private NamespaceList<ModuleCapability> createCapabilities(NamespaceList.Builder<GenericInfo> capabilityInfos) {
+		return capabilityInfos.transformIntoCopy(i -> {
+			Map<String, String> directives = i.mutable ? copyUnmodifiableMap(i.directives) : i.directives;
+			Map<String, Object> attributes = i.mutable ? copyUnmodifiableMap(i.attributes) : i.attributes;
+			return new ModuleCapability(i.namespace, directives, attributes, this);
+		}, NamespaceList.CAPABILITY).build();
 	}
 
 	private static <K, V> Map<K, V> copyUnmodifiableMap(Map<K, V> map) {
@@ -82,14 +76,9 @@ public final class ModuleRevision implements BundleRevision {
 		return Collections.unmodifiableMap(new HashMap<>(map));
 	}
 
-	private List<ModuleRequirement> createRequirements(List<GenericInfo> requirementInfos) {
-		if (requirementInfos == null || requirementInfos.isEmpty())
-			return Collections.emptyList();
-		List<ModuleRequirement> result = new ArrayList<>(requirementInfos.size());
-		for (GenericInfo info : requirementInfos) {
-			result.add(new ModuleRequirement(info.namespace, info.directives, info.attributes, this));
-		}
-		return result;
+	private NamespaceList<ModuleRequirement> createRequirements(NamespaceList.Builder<GenericInfo> infos) {
+		return infos.transformIntoCopy(i -> new ModuleRequirement(i.namespace, i.directives, i.attributes, this),
+				NamespaceList.REQUIREMENT).build();
 	}
 
 	@Override
@@ -124,15 +113,7 @@ public final class ModuleRevision implements BundleRevision {
 	 * @return An unmodifiable list containing the declared capabilities.
 	 */
 	public List<ModuleCapability> getModuleCapabilities(String namespace) {
-		if (namespace == null)
-			return Collections.unmodifiableList(capabilities);
-		List<ModuleCapability> result = new ArrayList<>();
-		for (ModuleCapability capability : capabilities) {
-			if (namespace.equals(capability.getNamespace())) {
-				result.add(capability);
-			}
-		}
-		return Collections.unmodifiableList(result);
+		return capabilities.getList(namespace);
 	}
 
 	/**
@@ -142,15 +123,7 @@ public final class ModuleRevision implements BundleRevision {
 	 * @return An unmodifiable list containing the declared requirements.
 	 */
 	public List<ModuleRequirement> getModuleRequirements(String namespace) {
-		if (namespace == null)
-			return Collections.unmodifiableList(requirements);
-		List<ModuleRequirement> result = new ArrayList<>();
-		for (ModuleRequirement requirement : requirements) {
-			if (namespace.equals(requirement.getNamespace())) {
-				result.add(requirement);
-			}
-		}
-		return Collections.unmodifiableList(result);
+		return requirements.getList(namespace);
 	}
 
 	@Override
@@ -239,7 +212,7 @@ public final class ModuleRevision implements BundleRevision {
 			if (value instanceof List) {
 				@SuppressWarnings("unchecked")
 				List<Object> list = (List<Object>) value;
-				if (list.size() == 0)
+				if (list.isEmpty())
 					continue;
 				Object component = list.get(0);
 				String className = component.getClass().getName();
@@ -259,5 +232,13 @@ public final class ModuleRevision implements BundleRevision {
 			}
 		}
 		return sb.toString();
+	}
+
+	NamespaceList<ModuleCapability> getCapabilities() {
+		return capabilities;
+	}
+
+	NamespaceList<ModuleRequirement> getRequirements() {
+		return requirements;
 	}
 }

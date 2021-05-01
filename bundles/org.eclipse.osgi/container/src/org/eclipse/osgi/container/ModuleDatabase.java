@@ -249,20 +249,18 @@ public class ModuleDatabase {
 		if ((builder.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
 			return null;
 		}
-		for (GenericInfo info : builder.getCapabilities()) {
-			if (EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE.equals(info.getNamespace())) {
-				if (EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY.equals(info.getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY))) {
-					String compatibilityStartLazy = adaptor.getProperty(EquinoxConfiguration.PROP_COMPATIBILITY_START_LAZY);
-					if (compatibilityStartLazy == null || Boolean.valueOf(compatibilityStartLazy)) {
-						// TODO hack until p2 is fixed (bug 177641)
-						EnumSet<Settings> settings = EnumSet.noneOf(Settings.class);
-						settings.add(Settings.USE_ACTIVATION_POLICY);
-						settings.add(Settings.AUTO_START);
-						return settings;
-					}
+		for (GenericInfo info : builder.getCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE)) {
+			if (EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY.equals(info.getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY))) {
+				String compatibilityStartLazy = adaptor.getProperty(EquinoxConfiguration.PROP_COMPATIBILITY_START_LAZY);
+				if (compatibilityStartLazy == null || Boolean.valueOf(compatibilityStartLazy)) {
+					// TODO hack until p2 is fixed (bug 177641)
+					EnumSet<Settings> settings = EnumSet.noneOf(Settings.class);
+					settings.add(Settings.USE_ACTIVATION_POLICY);
+					settings.add(Settings.AUTO_START);
+					return settings;
 				}
-				return null;
 			}
+			return null;
 		}
 		return null;
 	}
