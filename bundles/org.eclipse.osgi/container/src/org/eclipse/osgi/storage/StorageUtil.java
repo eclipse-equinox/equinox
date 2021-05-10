@@ -25,7 +25,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.Hashtable;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.osgi.framework.BundleContext;
@@ -256,4 +258,44 @@ public class StorageUtil {
 			Debug.println("Successfully moved file: " + from + " to " + to); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
+
+	private static final boolean IS_WINDOWS = "\\\\.\\NUL" //$NON-NLS-1$
+			.equals(getDeviceName(new File("NUL"))); //$NON-NLS-1$
+
+	private static String getDeviceName(File file) {
+		try {
+			return file.getCanonicalPath();
+		} catch (IOException e) {
+			return null;
+		}
+	}
+
+	// reserved names according to
+	// https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file
+	private static HashSet<String> RESERVED_NAMES = new HashSet<>(
+			Arrays.asList(new String[] { "aux", "com1", "com2", "com3", "com4", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+					"com5", "com6", "com7", "com8", "com9", "con", "lpt1", "lpt2", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+					"lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9", "nul", "prn" })); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$
+
+	/** Tests whether the filename can escape path into special device **/
+	public static boolean isReservedFileName(File file) {
+		// Directory names are not checked here because illegal directory names will be
+		// handled by OS.
+		String fileName = file.getName();
+		return isReservedFileName(fileName);
+	}
+
+	private static boolean isReservedFileName(String name) {
+		// Illegal characters are not checked here because they are check by both JDK
+		// and OS. This is only a check against technical allowed but unwanted device
+		// names.
+		if (!IS_WINDOWS) { // only windows has special file names which can escape any path
+			return false;
+		}
+		int dot = name.indexOf('.');
+		// on windows, filename suffixes are not relevant to name validity
+		String basename = dot == -1 ? name : name.substring(0, dot);
+		return RESERVED_NAMES.contains(basename.toLowerCase());
+	}
+
 }

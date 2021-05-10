@@ -30,6 +30,7 @@ public class AllTests extends TestSuite {
 		addTest(new TestSuite(ObjectPoolTestCase.class));
 		addTest(new JUnit4TestAdapter(ManifestElementTestCase.class));
 		addTest(new TestSuite(NLSTestCase.class));
+		addTest(new TestSuite(StorageUtilTestCase.class));
 		addBidiTests();
 		addLatinTests();
 	}

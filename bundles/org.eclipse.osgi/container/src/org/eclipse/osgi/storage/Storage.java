@@ -30,6 +30,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
@@ -1078,18 +1079,19 @@ public class Storage {
 		}
 
 		// if base is not null then move root to include the base
-		root = new File(root, base);
-		File result = new File(root, path);
-
-		// do the extra check to make sure the path did not escape the root path
-		try {
-			String resultCanonical = result.getCanonicalPath();
-			String rootCanonical = root.getCanonicalPath();
-			if (!resultCanonical.startsWith(rootCanonical + File.separator) && !resultCanonical.equals(rootCanonical)) {
+		File rootBase = new File(root, base);
+		File result = new File(rootBase, path);
+		if (path.contains("..")) { //$NON-NLS-1$
+			// do the extra check to make sure the path did not escape the root path
+			Path resultNormalized = result.toPath().normalize();
+			Path rootBaseNormalized = rootBase.toPath().normalize();
+			if (!resultNormalized.startsWith(rootBaseNormalized)) {
 				throw new StorageException("Invalid path: " + path); //$NON-NLS-1$
 			}
-		} catch (IOException e) {
-			throw new StorageException("Invalid path: " + path, e); //$NON-NLS-1$
+		}
+		// Additional check if it is a special device instead of a regular file.
+		if (StorageUtil.isReservedFileName(result)) {
+			throw new StorageException("Invalid filename: " + path); //$NON-NLS-1$
 		}
 		return result;
 	}
