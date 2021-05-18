@@ -95,7 +95,7 @@ public class Status implements IStatus {
 	 * @return the newly created status
 	 * @since 3.15
 	 */
-	public static Status info(String message) {
+	public static IStatus info(String message) {
 		Class<?> callerClass = null;
 		try {
 			callerClass = walker.getCallerClass();
@@ -116,7 +116,7 @@ public class Status implements IStatus {
 	 * @return the newly created status
 	 * @since 3.15
 	 */
-	public static Status warning(String message) {
+	public static IStatus warning(String message) {
 		Class<?> callerClass = null;
 		try {
 			callerClass = walker.getCallerClass();
@@ -160,7 +160,7 @@ public class Status implements IStatus {
 	 * @return the newly created status
 	 * @since 3.15
 	 */
-	public static Status error(String message) {
+	public static IStatus error(String message) {
 		Class<?> callerClass = null;
 		try {
 			callerClass = walker.getCallerClass();
@@ -183,7 +183,7 @@ public class Status implements IStatus {
 	 * @return the newly created status
 	 * @since 3.15
 	 */
-	public static Status error(String message, Throwable exception) {
+	public static IStatus error(String message, Throwable exception) {
 		Class<?> callerClass = null;
 		try {
 			callerClass = walker.getCallerClass();

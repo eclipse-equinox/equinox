@@ -237,7 +237,7 @@ public class StatusTest extends CoreTest {
 	}
 
 	public void testInfo() {
-		Status info = Status.info("message");
+		IStatus info = Status.info("message");
 		assertEquals(IStatus.INFO, info.getSeverity());
 		assertEquals("message", info.getMessage());
 		assertEquals(IStatus.OK, info.getCode());
@@ -247,7 +247,7 @@ public class StatusTest extends CoreTest {
 	}
 
 	public void testWarning() {
-		Status warning = Status.warning("message");
+		IStatus warning = Status.warning("message");
 		assertEquals(IStatus.WARNING, warning.getSeverity());
 		assertEquals("message", warning.getMessage());
 		assertEquals(IStatus.OK, warning.getCode());
@@ -268,7 +268,7 @@ public class StatusTest extends CoreTest {
 	}
 
 	public void testError() {
-		Status error = Status.error("message");
+		IStatus error = Status.error("message");
 		assertEquals(IStatus.ERROR, error.getSeverity());
 		assertEquals("message", error.getMessage());
 		assertEquals(IStatus.OK, error.getCode());
@@ -278,7 +278,7 @@ public class StatusTest extends CoreTest {
 	}
 
 	public void testErrorWithException() {
-		Status errorWithException = Status.error("message", new Exception("exception"));
+		IStatus errorWithException = Status.error("message", new Exception("exception"));
 		assertEquals(IStatus.ERROR, errorWithException.getSeverity());
 		assertEquals("message", errorWithException.getMessage());
 		assertEquals(IStatus.OK, errorWithException.getCode());
