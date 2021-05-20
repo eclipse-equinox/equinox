@@ -3,6 +3,8 @@
 <plist version="1.0">
 
 <dict>
+	<key>NSRequiresAquaSystemAppearance</key>
+		<true/>
 	<key>CFBundleExecutable</key>
 		<string>eclipse</string>
 	<key>CFBundleGetInfoString</key>
@@ -29,11 +31,6 @@
 		<string>English</string>		
 	<key>Eclipse</key>
 		<array>
-			<!-- to use a specific Java version (instead of the platform's default) uncomment one of the following options,
-					or add a VM found via $/usr/libexec/java_home -V
-				<string>-vm</string><string>/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Commands/java</string>
-				<string>-vm</string><string>/Library/Java/JavaVirtualMachines/1.8.0.jdk/Contents/Home/bin/java</string>
-			-->
 			<string>-keyring</string><string>~/.eclipse_keyring</string>
 		</array>
 </dict>
