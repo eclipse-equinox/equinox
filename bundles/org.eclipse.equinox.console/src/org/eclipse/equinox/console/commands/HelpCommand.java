@@ -168,7 +168,7 @@ public class HelpCommand {
 				if (scope != null && !commandName.startsWith(scope + ":")) {
 					continue;
 				}
-				session.execute("felix:help " + commandName);
+				System.out.println(session.execute("felix:help " + commandName));
 			}
 		} catch (IllegalArgumentException e) {
 			handleCommandNotFound();
