@@ -52,8 +52,8 @@ int main( int argc, char* argv[] ) {
 
     
     NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
-    if ((version.majorVersion < 10) || ((version.majorVersion == 10) && (version.minorVersion < 14))) {
-        displayMessage("Error", "This application requires Mac OS 10.14 or greater.");
+    if ((version.majorVersion < 10) || ((version.majorVersion == 10) && (version.minorVersion < 10))) {
+        displayMessage("Error", "This application requires Mac OS 10.10 or greater.");
         return 0;
     }
 
