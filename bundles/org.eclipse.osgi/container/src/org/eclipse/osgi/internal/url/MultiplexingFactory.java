@@ -11,7 +11,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.url;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -62,16 +65,40 @@ public abstract class MultiplexingFactory {
 			theUnsafe.setAccessible(true);
 			Object unsafe = theUnsafe.get(null);
 
-			// using defineAnonymousClass here because it seems more simple to get what we need
-			Method defineAnonymousClass = unsafeClass.getMethod("defineAnonymousClass", Class.class, byte[].class, Object[].class); //$NON-NLS-1$
 			// The SetAccessible bytes stored in a resource to avoid real loading of it (see SetAccessible.java.src for source).
-			String tResource = "SetAccessible.bytes"; //$NON-NLS-1$
+			byte[] bytes = StorageUtil.getBytes(MultiplexingFactory.class.getResource("SetAccessible.bytes").openStream(), -1, 4000); //$NON-NLS-1$
 
-			byte[] bytes = StorageUtil.getBytes(MultiplexingFactory.class.getResource(tResource).openStream(), -1, 4000);
-			@SuppressWarnings("unchecked")
-			Class<Collection<AccessibleObject>> clazz = (Class<Collection<AccessibleObject>>) defineAnonymousClass.invoke(unsafe, URL.class, bytes, (Object[]) null);
-			result = clazz.getConstructor().newInstance();
+			Class<Collection<AccessibleObject>> collectionClass = null;
+			// using defineAnonymousClass here because it seems more simple to get what we need
+			try {
+				Method defineAnonymousClass = unsafeClass.getMethod("defineAnonymousClass", Class.class, byte[].class, //$NON-NLS-1$
+						Object[].class);
+				@SuppressWarnings("unchecked")
+				Class<Collection<AccessibleObject>> unchecked = (Class<Collection<AccessibleObject>>) defineAnonymousClass
+						.invoke(unsafe, URL.class, bytes, (Object[]) null);
+				collectionClass = unchecked;
+
+			} catch (NoSuchMethodException e) {
+				long offset = (long) unsafeClass.getMethod("staticFieldOffset", Field.class).invoke(unsafe, //$NON-NLS-1$
+						MethodHandles.Lookup.class.getDeclaredField("IMPL_LOOKUP")); //$NON-NLS-1$
+				MethodHandles.Lookup lookup = (MethodHandles.Lookup) unsafeClass
+						.getMethod("getObject", Object.class, long.class) //$NON-NLS-1$
+						.invoke(unsafe, MethodHandles.Lookup.class, offset);
+				lookup = lookup.in(URL.class);
+				Class<?> classOption = Class.forName("java.lang.invoke.MethodHandles$Lookup$ClassOption"); //$NON-NLS-1$
+				Object classOptions = Array.newInstance(classOption, 0);
+				Method defineHiddenClass = Lookup.class.getMethod("defineHiddenClass", byte[].class, boolean.class, //$NON-NLS-1$
+						classOptions.getClass());
+				lookup = (Lookup) defineHiddenClass.invoke(lookup, bytes, Boolean.FALSE, classOptions);
+				@SuppressWarnings("unchecked")
+				Class<Collection<AccessibleObject>> unchecked = (Class<Collection<AccessibleObject>>) lookup
+						.lookupClass();
+				collectionClass = unchecked;
+			}
+
+			result = collectionClass.getConstructor().newInstance();
 		} catch (Throwable t) {
+			t.printStackTrace();
 			// ingore as if there is no Unsafe
 		}
 		setAccessible = result;
