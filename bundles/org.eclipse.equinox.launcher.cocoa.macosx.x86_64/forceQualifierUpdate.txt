@@ -3,3 +3,4 @@ Bug 403352 - Update all parent versions to match our build stream
 Bug 532515 - Comparator erros in launcher in I20180315-2000
 Bug 548432 - Remove launcher bundles for unsupported platforms
 Bug 550714 - Comparator errors in I20190903-1110
+Bug 573793 - 4.20 I-Build: I20210526-1800 - Comparator Errors Found
