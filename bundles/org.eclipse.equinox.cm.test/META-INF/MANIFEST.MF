@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Test Plug-in
 Bundle-Vendor: Eclipse.org - Equinox
 Bundle-SymbolicName: org.eclipse.equinox.cm.test
-Bundle-Version: 1.1.0.qualifier
+Bundle-Version: 1.1.100.qualifier
 Bundle-Activator: org.eclipse.equinox.cm.test.Activator
 Import-Package: org.eclipse.equinox.log,
  org.junit;version="4.12.0",
