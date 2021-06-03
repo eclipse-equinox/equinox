@@ -24,14 +24,20 @@ public class PasswordProviderModuleExt {
 
 	final private PasswordProvider providerModule;
 	final private String moduleID;
+	final private String obsoleteID;
 
-	public PasswordProviderModuleExt(PasswordProvider module, String moduleID) {
+	public PasswordProviderModuleExt(PasswordProvider module, String moduleID, String obsoleteID) {
 		this.providerModule = module;
 		this.moduleID = moduleID;
+		this.obsoleteID = obsoleteID;
 	}
 
 	public String getID() {
 		return moduleID;
+	}
+
+	public String getObsoleteID() {
+		return obsoleteID;
 	}
 
 	public PBEKeySpec getPassword(IPreferencesContainer container, int passwordType) {

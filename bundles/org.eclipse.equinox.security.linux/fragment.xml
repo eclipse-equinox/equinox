@@ -8,11 +8,11 @@
       <provider
             class="org.eclipse.equinox.internal.security.linux.LinuxPasswordProvider"
             description="%providerDescription"
+            obsoletes="org.eclipse.equinox.security.linuxkeystoreintegration"
             priority="5">
          <hint
                value="AutomaticPasswordGeneration">
          </hint>
       </provider>
    </extension>
-
-</fragment>
+ </fragment>

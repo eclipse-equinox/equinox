@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2018 IBM Corporation and others.
+ * Copyright (c) 2008, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -38,6 +38,7 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 	final private static String STORAGE_MODULE = "provider";//$NON-NLS-1$
 	final private static String MODULE_PRIORITY = "priority";//$NON-NLS-1$
 	final private static String MODULE_DESCRIPTION = "description";//$NON-NLS-1$
+	final private static String OBSOLETES_ID = "obsoletes"; //$NON-NLS-1$
 	final private static String CLASS_NAME = "class";//$NON-NLS-1$
 	final private static String HINTS_NAME = "hint";//$NON-NLS-1$
 	final private static String HINT_VALUE = "value";//$NON-NLS-1$
@@ -46,16 +47,18 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 
 	public class ExtStorageModule {
 		public String moduleID;
+		public String obsoleteID;
 		public IConfigurationElement element;
 		public int priority;
 		public String name;
 		public String description;
 		public List<String> hints;
 
-		public ExtStorageModule(String id, IConfigurationElement element, int priority, String name, String description, List<String> hints) {
+		public ExtStorageModule(String id, String obsoleteID, IConfigurationElement element, int priority, String name, String description, List<String> hints) {
 			super();
 			this.element = element;
 			this.moduleID = id;
+			this.obsoleteID = obsoleteID;
 			this.priority = priority;
 			this.name = name;
 			this.description = description;
@@ -99,15 +102,24 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 			if (moduleID == null) // IDs on those extensions are mandatory; if not specified, ignore the extension
 				continue;
 			moduleID = moduleID.toLowerCase();
+			boolean isFound = true;
 			if (expectedID != null && !expectedID.equals(moduleID))
-				continue;
+				isFound = false;
 			IConfigurationElement[] elements = extension.getConfigurationElements();
 			if (elements.length == 0)
 				continue;
 			IConfigurationElement element = elements[0]; // only one module is allowed per extension
 			if (!STORAGE_MODULE.equals(element.getName())) {
+				if (!isFound) // don't bother issue error message if id doesn't match
+					continue;
 				reportError(SecAuthMessages.unexpectedConfigElement, element.getName(), element, null);
 				continue;
+			}
+			String obsoletes = element.getAttribute(OBSOLETES_ID);
+			if (!isFound) {
+				// check if old id has been replaced by newer one (Bug 573950)
+				if (obsoletes == null || !expectedID.equals(obsoletes))
+					continue;
 			}
 			String attribute = element.getAttribute(MODULE_PRIORITY);
 			int priority = -1;
@@ -140,7 +152,7 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 			} catch (CoreException e) {
 				continue;
 			}
-			allAvailableModules.add(new ExtStorageModule(moduleID, element, priority, name, description, suppliedHints));
+			allAvailableModules.add(new ExtStorageModule(moduleID, obsoletes, element, priority, name, description, suppliedHints));
 		}
 
 		Collections.sort(allAvailableModules, (o1, o2) -> {
@@ -178,7 +190,7 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 			if (!(clazz instanceof PasswordProvider))
 				continue;
 
-			PasswordProviderModuleExt result = new PasswordProviderModuleExt((PasswordProvider) clazz, module.moduleID);
+			PasswordProviderModuleExt result = new PasswordProviderModuleExt((PasswordProvider) clazz, module.moduleID, module.obsoleteID);
 
 			// cache the result
 			synchronized (modules) {

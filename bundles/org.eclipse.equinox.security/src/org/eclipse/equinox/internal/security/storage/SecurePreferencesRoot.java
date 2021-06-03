@@ -236,6 +236,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 
 		PasswordProviderModuleExt moduleExt = PasswordProviderSelector.getInstance().findStorageModule(moduleID);
 		String key = moduleExt.getID();
+		String obsoleteKey = moduleExt.getObsoleteID();
 		PasswordExt passwordExt = null;
 		boolean validPassword = false;
 		boolean setupPasswordRecovery = false;
@@ -258,6 +259,9 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 
 			// is there password verification string already?
 			SecurePreferences node = node(PASSWORD_VERIFICATION_NODE);
+			if (obsoleteKey != null && node.hasKey(obsoleteKey)) {
+				key = obsoleteKey;
+			}
 			boolean newPassword = !node.hasKey(key);
 			int passwordType = newPassword ? PasswordProvider.CREATE_NEW_PASSWORD : 0;
 

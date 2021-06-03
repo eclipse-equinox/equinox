@@ -26,7 +26,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({ Base64Test.class, DetectPBECiphersTest.class, SlashEncodeTest.class, DefaultPreferencesTest.class,
-		DynamicPreferencesTest.class, WinPreferencesTest.class })
+		DynamicPreferencesTest.class, ObsoletesTest.class, WinPreferencesTest.class })
 public class AllSecurityTests {
 	// see @SuiteClasses
 }

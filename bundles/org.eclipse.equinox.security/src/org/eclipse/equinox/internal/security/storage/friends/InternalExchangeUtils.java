@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2018 IBM Corporation and others.
+ * Copyright (c) 2008, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -52,6 +52,21 @@ public class InternalExchangeUtils {
 	 */
 	static public List<PasswordProviderDescription> passwordProvidersFind() {
 		List<ExtStorageModule> availableModules = PasswordProviderSelector.getInstance().findAvailableModules(null);
+		List<PasswordProviderDescription> result = new ArrayList<>(availableModules.size());
+		for (ExtStorageModule module : availableModules) {
+			result.add(new PasswordProviderDescription(module.name, module.moduleID, module.priority, module.description, module.hints));
+		}
+		return result;
+	}
+
+	/**
+	 * Gathers list of available password providers with specified id. Note: this method does not try
+	 * to instantiate providers, hence, providers listed as available by this method
+	 * might fail on instantiation and not be available for the actual use.
+	 * @return available password providers as described in extensions
+	 */
+	static public List<PasswordProviderDescription> passwordProvidersFind(String id) {
+		List<ExtStorageModule> availableModules = PasswordProviderSelector.getInstance().findAvailableModules(id);
 		List<PasswordProviderDescription> result = new ArrayList<>(availableModules.size());
 		for (ExtStorageModule module : availableModules) {
 			result.add(new PasswordProviderDescription(module.name, module.moduleID, module.priority, module.description, module.hints));
