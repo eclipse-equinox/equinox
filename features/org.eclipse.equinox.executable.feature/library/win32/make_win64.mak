@@ -1,5 +1,5 @@
 #******************************************************************************
-# Copyright (c) 2007, 2009 IBM Corporation and others.
+# Copyright (c) 2007, 2021 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -28,7 +28,6 @@ APPVER=4.0
 _WIN32_WINNT=0x0400
 _WIN32_IE=0x0300
 
-!include <ntwin32.mak>
 !include <..\make_version.mak>
 
 PROGRAM_OUTPUT=eclipse.exe
@@ -42,8 +41,13 @@ MAIN_OBJS = eclipseMain.obj
 COMMON_OBJS = eclipseConfig.obj eclipseCommon.obj   eclipseWinCommon.obj
 DLL_OBJS	= eclipse.obj  eclipseWin.obj  eclipseUtil.obj  eclipseJNI.obj eclipseShm.obj
 
-LIBS   = kernel32.lib user32.lib comctl32.lib libcmt.lib
-DLL_LIBS = kernel32.lib user32.lib comctl32.lib gdi32.lib Advapi32.lib libcmt.lib version.lib
+cdebug	= -Ox -DNDEBUG
+cvarsmt	= -D_MT -MT
+cflags	= $(cdebug) -DUNICODE -D_UNICODE /c -DUSE_ASSEMBLER -GS -DWIN64 -D_WIN64 $(cvarsmt) $(CFLAGS)
+LIBS   = kernel32.lib user32.lib comctl32.lib libcmt.lib \
+	libvcruntime.lib libucrt.lib
+DLL_LIBS = kernel32.lib user32.lib comctl32.lib gdi32.lib Advapi32.lib libcmt.lib version.lib \
+	libvcruntime.lib libucrt.lib
 LFLAGS = /DYNAMICBASE /NXCOMPAT /HIGHENTROPYVA /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:windows -entry:wmainCRTStartup
 CONSOLEFLAGS = /DYNAMICBASE /NXCOMPAT /HIGHENTROPYVA /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:console -entry:wmainCRTStartup
 #DLL_LFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /PDB:NONE /RELEASE /NOLOGO -entry:_DllMainCRTStartup@12 -dll /BASE:0x72000000 /DLL
@@ -56,51 +60,51 @@ DEBUG  = #$(cdebug)
 wcflags = -DUNICODE -I.. -DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
-	-I$(JAVA_HOME)\include -I$(JAVA_HOME)\include\win32 \
+	-I"$(JAVA_HOME)\include" -I"$(JAVA_HOME)\include\win32" \
 	$(cflags)
 all: $(EXEC) $(DLL) $(CONSOLE)
 
 eclipseMain.obj: ../eclipseUnicode.h ../eclipseCommon.h ../eclipseMain.c 
-	$(cc) $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseMain.c
+	cl $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseMain.c
 
 eclipseCommon.obj: ../eclipseCommon.h ../eclipseUnicode.h ../eclipseCommon.c
-	$(cc) $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseCommon.c
+	cl $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseCommon.c
 
 eclipse.obj: ../eclipseOS.h ../eclipseUnicode.h ../eclipse.c
-    $(cc) $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipse.c
+    cl $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipse.c
 
 eclipseUtil.obj: ../eclipseUtil.h ../eclipseUnicode.h ../eclipseUtil.c
-    $(cc) $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseUtil.c
+    cl $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseUtil.c
 
 eclipseConfig.obj: ../eclipseConfig.h ../eclipseUnicode.h ../eclipseConfig.c
-    $(cc) $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseConfig.c
+    cl $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseConfig.c
 
 eclipseWin.obj: ../eclipseOS.h ../eclipseUnicode.h eclipseWin.c
-    $(cc) $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj eclipseWin.c
+    cl $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj eclipseWin.c
 
 eclipseWinCommon.obj: ../eclipseCommon.h eclipseWinCommon.c
-    $(cc) $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj eclipseWinCommon.c
+    cl $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj eclipseWinCommon.c
 
 eclipseJNI.obj: ../eclipseCommon.h ../eclipseOS.h ../eclipseJNI.c
-	$(CC) $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseJNI.c
+	cl $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseJNI.c
 
 eclipseShm.obj: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
-	$(CC) $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseShm.c
+	cl $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseShm.c
 	
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS) $(RES)
-    $(link) $(LFLAGS) -out:$(PROGRAM_OUTPUT) $(MAIN_OBJS) $(COMMON_OBJS) $(RES) $(LIBS)
+    link $(LFLAGS) -out:$(PROGRAM_OUTPUT) $(MAIN_OBJS) $(COMMON_OBJS) $(RES) $(LIBS)
 
 #the console version needs a flag set, should look for a better way to do this
 $(CONSOLE): $(MAIN_OBJS) $(COMMON_OBJS)
 	del -f eclipseConfig.obj aeclipseConfig.obj
-	$(cc) $(DEBUG) $(wcflags) $(cvarsmt) -D_WIN32_CONSOLE /FoeclipseConfig.obj ../eclipseConfig.c
-    $(link) $(CONSOLEFLAGS) -out:$(CONSOLE) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
+	cl $(DEBUG) $(wcflags) $(cvarsmt) -D_WIN32_CONSOLE /FoeclipseConfig.obj ../eclipseConfig.c
+    link $(CONSOLEFLAGS) -out:$(CONSOLE) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
 
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
-    $(link) $(DLL_LFLAGS) -out:$(PROGRAM_LIBRARY) $(DLL_OBJS) $(COMMON_OBJS) $(DLL_LIBS)
+    link $(DLL_LFLAGS) -out:$(PROGRAM_LIBRARY) $(DLL_OBJS) $(COMMON_OBJS) $(DLL_LIBS)
 
 $(RES): $(PROGRAM_NAME).rc
-    $(rc) -r -fo $(RES) eclipse.rc
+    rc -r -fo $(RES) eclipse.rc
 
 install: all
 	copy $(EXEC) $(OUTPUT_DIR)
