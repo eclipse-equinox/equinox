@@ -1160,7 +1160,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		testPermission(acc, new FilePermission(relativeExecutable.getAbsolutePath(), "execute"), true);
 	}
 
-	public void testPermissionCheckCache() {
+	public void testPermissionCheckCache() { // takes ~6sec
 		// test single row with signer condition
 		ConditionalPermissionUpdate update = cpa.newConditionalPermissionUpdate();
 		List rows = update.getConditionalPermissionInfos();
@@ -1172,12 +1172,10 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 		for (int i = 0; i < 10000000; i++) {
 			try {
-				if (i % 1000 == 0) {
-					System.out.println("i=" + i);
-				}
 				acc.checkPermission(new FilePermission("test" + i, "read")); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (AccessControlException e) {
-				fail("Unexpected AccessControlExcetpion", e); //$NON-NLS-1$
+				System.out.println("i=" + i);
+				fail("Unexpected AccessControlException at i=" + i, e); //$NON-NLS-1$
 			}
 		}
 
