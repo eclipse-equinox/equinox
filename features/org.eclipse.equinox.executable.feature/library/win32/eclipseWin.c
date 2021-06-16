@@ -52,6 +52,17 @@ static _TCHAR**	openFilePath;
 /* Define the window system arguments for the Java VM. */
 static _TCHAR*  argVM[] = { NULL };
 
+/* Define the SWT auto-scale setting for the splash screen. */
+enum {
+	AUTOSCALE_DEFAULT = -1,
+	AUTOSCALE_FALSE = -2,
+	AUTOSCALE_QUARTER = -3,
+	AUTOSCALE_EXACT = -4,
+	AUTOSCALE_INTEGER = -5
+	/* positive values indicate a literal percentage */
+};
+static int autoScaleValue = AUTOSCALE_DEFAULT;
+
 /* Define local variables for running the JVM and detecting its exit. */
 static HANDLE  jvmProcess     = 0;
 static JavaResults* jvmResults = NULL;
@@ -226,10 +237,29 @@ int showSplash( const _TCHAR* featureImage )
     hDC = GetDC( NULL);
     depth = GetDeviceCaps( hDC, BITSPIXEL ) * GetDeviceCaps( hDC, PLANES);
 
-    /* fetch screen DPI and round it to 100% multiples, 
+    /* fetch screen DPI and round it according to the swt.autoScale setting, 
     this implementation needs to be kept in sync with org.eclipse.swt.internal.DPIUtil#setDeviceZoom(int) */
 	dpiX = GetDeviceCaps ( hDC, LOGPIXELSX );
-	dpiX = ((int)((dpiX + 24) / 96 )) * 96;
+	switch (autoScaleValue) {
+		case AUTOSCALE_FALSE:
+			dpiX = 96;
+			break;
+		case AUTOSCALE_QUARTER:
+			dpiX = ((dpiX + 12) / 24) * 24;
+			break;
+		case AUTOSCALE_EXACT:
+			break;
+		case AUTOSCALE_DEFAULT:
+		case AUTOSCALE_INTEGER:
+			dpiX = ((int)((dpiX + 24) / 96 )) * 96;
+			if (autoScaleValue == AUTOSCALE_DEFAULT) {
+				if (dpiX > 192) dpiX = 192;
+			}
+			break;
+		default:
+			dpiX = (dpiX * autoScaleValue + 50) / 100;
+			break;
+	}
 
     ReleaseDC(NULL, hDC);
     if (featureImage != NULL)
@@ -611,7 +641,37 @@ static void CALLBACK detectJvmExit( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime 
 }
 
 void processVMArgs(_TCHAR **vmargs[] ) {
-	/* nothing yet */
+	_TCHAR** arg;
+	for (arg = *vmargs; *arg != NULL; arg++) {
+		if (_tcsncmp(*arg, _T("-Dswt.autoScale="), 16) == 0) {
+			// see org.eclipse.swt.internal.DPIUtil.getZoomForAutoscaleProperty()
+			_TCHAR* value = *arg + 16;
+			if (_tcsicmp(value, _T("false")) == 0) {
+				autoScaleValue = AUTOSCALE_FALSE;
+			}
+			else if (_tcsicmp(value, _T("quarter")) == 0) {
+				autoScaleValue = AUTOSCALE_QUARTER;
+			}
+			else if (_tcsicmp(value, _T("exact")) == 0) {
+				autoScaleValue = AUTOSCALE_EXACT;
+			}
+			else if (_tcsicmp(value, _T("integer")) == 0) {
+				autoScaleValue = AUTOSCALE_INTEGER;
+			}
+			else {
+				_TCHAR* end = NULL;
+				autoScaleValue = (int)_tcstol(value, &end, 10);
+				if (end == NULL || *end != _T('\0')) {
+					/* conversion error, reset to default */
+					autoScaleValue = AUTOSCALE_DEFAULT;
+				}
+				else {
+					if (autoScaleValue < 25) autoScaleValue = 25;
+					else if (autoScaleValue > 1600) autoScaleValue = 1600;
+				}
+			}
+		}
+	}
 }
 
 JavaResults* startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* jarFile )
