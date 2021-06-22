@@ -257,7 +257,7 @@ int showSplash( const _TCHAR* featureImage )
 			}
 			break;
 		default:
-			dpiX = (dpiX * autoScaleValue + 50) / 100;
+			dpiX = (96 * autoScaleValue + 50) / 100;
 			break;
 	}
 
