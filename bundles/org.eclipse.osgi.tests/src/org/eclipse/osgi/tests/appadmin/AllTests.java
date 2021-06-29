@@ -20,6 +20,7 @@ public class AllTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite(AllTests.class.getName());
 		suite.addTest(ApplicationAdminTest.suite());
+		suite.addTest(ApplicationRelaunchTest.suite());
 		return suite;
 	}
 }

@@ -95,4 +95,16 @@
          </run>
       </application>
    </extension>
+   <extension
+         id="relaunchApp"
+         point="org.eclipse.core.runtime.applications">
+      <application
+            cardinality="1"
+            thread="main"
+            visible="true">
+         <run
+               class="org.eclipse.osgi.tests.appadmin.RelaunchApp">
+         </run>
+      </application>
+   </extension>
 </plugin>
