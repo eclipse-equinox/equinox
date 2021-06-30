@@ -46,24 +46,7 @@ IF "x.%MSVC_EDITION%"=="x." set "MSVC_EDITION=Community"
 @rem Specify VisualStudio Version: '2017' or newer '2019'
 IF "x.%MSVC_VERSION%"=="x." set "MSVC_VERSION=2019"
 
-IF x.%1==x.x86 GOTO X86
-IF x.%1==x.ia64 GOTO IA64
 GOTO X86_64
-
-:X86
-IF x.%DEV_TOOLS%==x. set DEV_TOOLS=%LAUNCHER_BUILDDIR%
-IF x.%JAVA_HOME%==x. set JAVA_HOME=%LAUNCHER_BUILDDIR%\ibm-java2-sdk-50-win-i386
-set javaHome=%JAVA_HOME%
-if not x.%MSVC_HOME% == x. goto MAKE
-set MSVC_HOME="%LAUNCHER_BUILDDIR%\MSVCs\msvc60\VC98"
-call %MSVC_HOME%\bin\vcvars32.bat
-if not "%MSSDK%" == "" goto MAKE
-set MSSDK="%LAUNCHER_BUILDDIR%\MSSDKs\feb2003"
-call %MSSDK%\setenv.bat
-IF x.%1==x.x86 shift
-set defaultOSArch=x86
-set makefile=make_win32.mak
-GOTO MAKE
 
 :X86_64
 shift
@@ -87,17 +70,6 @@ IF EXIST "%JAVA_HOME%" (
 set javaHome=%JAVA_HOME%
 set makefile=make_win64.mak
 call "%MSVC_HOME%\VC\Auxiliary\Build\vcvarsall.bat" x64
-GOTO MAKE
-
-:IA64
-shift
-set defaultOSArch=ia64
-set PROCESSOR_ARCHITECTURE=AMD64
-IF x.%JAVA_HOME%==x. set JAVA_HOME=%LAUNCHER_BUILDDIR%\ibm-sdk142-ia64
-IF "x.%MSSDK%" == "x."   set MSSDK="%LAUNCHER_BUILDDIR%\MSSDKs\Windows Server 2003 SP1 SDK"
-set javaHome=%JAVA_HOME%
-set makefile=make_win64_ia64.mak
-call %MSSDK%\setenv /SRV64 /RETAIL
 GOTO MAKE
 
 :MAKE 
