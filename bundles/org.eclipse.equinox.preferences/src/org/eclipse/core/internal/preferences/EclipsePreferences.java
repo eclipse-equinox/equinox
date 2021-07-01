@@ -1217,7 +1217,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	public String toDeepDebugString() {
-		final StringBuffer buffer = new StringBuffer();
+		final StringBuilder buffer = new StringBuilder();
 		IPreferenceNodeVisitor visitor = (IEclipsePreferences node) -> {
 			buffer.append(node);
 			buffer.append('\n');

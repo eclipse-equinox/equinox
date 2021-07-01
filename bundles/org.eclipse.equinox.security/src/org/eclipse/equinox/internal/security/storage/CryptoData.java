@@ -93,7 +93,7 @@ public class CryptoData {
 
 	@Override
 	public String toString() {
-		StringBuffer encryptedText = (moduleID == null) ? new StringBuffer() : new StringBuffer(moduleID);
+		StringBuilder encryptedText = (moduleID == null) ? new StringBuilder() : new StringBuilder(moduleID);
 		encryptedText.append(MODULE_ID_SEPARATOR);
 		if (iv != null) {
 			encryptedText.append(Base64.encode(iv));
