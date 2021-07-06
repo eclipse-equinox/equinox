@@ -11,3 +11,4 @@ Bug 568593 - Use latest slf4j from Orbit
 Bug 571080 - Update to Sshd osgi 2.6.0
 Build failure on 20210324
 Bug 572853 - Comparator errors in 4.20 I20210414-1800 build
+Bug 574602 - Eclipse 4.21 prerequisites: Orbit
