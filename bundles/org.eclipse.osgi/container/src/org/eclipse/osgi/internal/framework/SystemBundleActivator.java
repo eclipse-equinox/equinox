@@ -176,7 +176,9 @@ public class SystemBundleActivator implements BundleActivator {
 		if (configuration.getDebug().DEBUG_SECURITY)
 			Debug.println("Setting SecurityManager to: " + toInstall); //$NON-NLS-1$
 		try {
-			System.setSecurityManager(toInstall);
+			if (toInstall != null) {
+				System.setSecurityManager(toInstall);
+			}
 		} catch (UnsupportedOperationException e) {
 			throw new UnsupportedOperationException(
 					"Setting the security manager is not allowed. The java.security.manager=allow java property must be set.", //$NON-NLS-1$
