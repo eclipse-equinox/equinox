@@ -19,10 +19,12 @@ import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandlerFactory;
+import java.util.Collections;
 import java.util.Hashtable;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
 public class EquinoxFactoryManager {
 	private final EquinoxContainer container;
@@ -58,6 +60,9 @@ public class EquinoxFactoryManager {
 	}
 
 	private static void forceURLStreamHandlerFactory(URLStreamHandlerFactoryImpl shf) throws Exception {
+		// force our FrameworkUtil to initialize before we register to avoid calling
+		// getBundle before we register this as a multiplexing handler
+		FrameworkUtil.asDictionary(Collections.emptyMap());
 		Field factoryField = getField(URL.class, URLStreamHandlerFactory.class, false);
 		if (factoryField == null)
 			throw new Exception("Could not find URLStreamHandlerFactory field"); //$NON-NLS-1$
