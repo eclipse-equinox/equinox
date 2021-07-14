@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2020 IBM Corporation and others.
+ * Copyright (c) 2012, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -352,7 +352,7 @@ public final class ModuleRevisionBuilder {
 		if (size == 1) {
 			if (map.getClass() != SINGLETON_MAP_CLASS) {
 				Map.Entry<? extends K, ? extends V> entry = map.entrySet().iterator().next();
-				map = Collections.<K, V> singletonMap(entry.getKey(), entry.getValue());
+				map = Collections.singletonMap(entry.getKey(), entry.getValue());
 			}
 		} else {
 			if (map.getClass() != UNMODIFIABLE_MAP_CLASS) {

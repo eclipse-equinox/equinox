@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2020 IBM Corporation and others.
+ * Copyright (c) 2003, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1063,8 +1063,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		@SuppressWarnings("unchecked")
 		ServiceReference<S>[] refs = (ServiceReference<S>[]) getServiceReferences(clazz.getName(), filter);
 		if (refs == null) {
-			Collection<ServiceReference<S>> empty = Collections.<ServiceReference<S>> emptyList();
-			return empty;
+			return Collections.emptyList();
 		}
 		List<ServiceReference<S>> result = new ArrayList<>(refs.length);
 		Collections.addAll(result, refs);

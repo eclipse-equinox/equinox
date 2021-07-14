@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2017 IBM Corporation and others.
+ * Copyright (c) 2013, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -91,9 +91,9 @@ public class TestHookConfigurator implements HookConfigurator {
 					replace.setId(5678);
 					replace.setSymbolicName("replace");
 					replace.setVersion(Version.parseVersion("1.1.1"));
-					replace.addCapability("replace", Collections.<String, String> emptyMap(), Collections.<String, Object> emptyMap());
-					replace.addCapability(IdentityNamespace.IDENTITY_NAMESPACE, Collections.<String, String> emptyMap(), Collections.<String, Object> singletonMap(IdentityNamespace.IDENTITY_NAMESPACE, "replace"));
-					replace.addCapability(BundleNamespace.BUNDLE_NAMESPACE, Collections.<String, String> emptyMap(), Collections.<String, Object> singletonMap(BundleNamespace.BUNDLE_NAMESPACE, "replace"));
+					replace.addCapability("replace", Collections.emptyMap(), Collections.emptyMap());
+					replace.addCapability(IdentityNamespace.IDENTITY_NAMESPACE, Collections.emptyMap(), Collections.singletonMap(IdentityNamespace.IDENTITY_NAMESPACE, "replace"));
+					replace.addCapability(BundleNamespace.BUNDLE_NAMESPACE, Collections.emptyMap(), Collections.singletonMap(BundleNamespace.BUNDLE_NAMESPACE, "replace"));
 					return replace;
 				}
 				if (TestHookConfigurator.adaptManifest) {

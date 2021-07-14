@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2020 IBM Corporation and others.
+ * Copyright (c) 2012, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -467,7 +467,7 @@ public class Storage {
 	}
 
 	private Version findFrameworkVersion() {
-		Requirement osgiPackageReq = ModuleContainer.createRequirement(PackageNamespace.PACKAGE_NAMESPACE, Collections.singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, "(" + PackageNamespace.PACKAGE_NAMESPACE + "=org.osgi.framework)"), Collections.<String, String> emptyMap()); //$NON-NLS-1$ //$NON-NLS-2$
+		Requirement osgiPackageReq = ModuleContainer.createRequirement(PackageNamespace.PACKAGE_NAMESPACE, Collections.singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, "(" + PackageNamespace.PACKAGE_NAMESPACE + "=org.osgi.framework)"), Collections.emptyMap()); //$NON-NLS-1$ //$NON-NLS-2$
 		Collection<BundleCapability> osgiPackages = moduleContainer.getFrameworkWiring().findProviders(osgiPackageReq);
 		for (BundleCapability packageCapability : osgiPackages) {
 			if (packageCapability.getRevision().getBundle().getBundleId() == 0) {
@@ -1209,7 +1209,7 @@ public class Storage {
 	}
 
 	public BundleFile createNestedBundleFile(String nestedDir, BundleFile bundleFile, Generation generation) {
-		return createNestedBundleFile(nestedDir, bundleFile, generation, Collections.<String> emptyList());
+		return createNestedBundleFile(nestedDir, bundleFile, generation, Collections.emptyList());
 	}
 
 	public BundleFile createNestedBundleFile(String nestedDir, BundleFile bundleFile, Generation generation, Collection<String> filterPrefixes) {

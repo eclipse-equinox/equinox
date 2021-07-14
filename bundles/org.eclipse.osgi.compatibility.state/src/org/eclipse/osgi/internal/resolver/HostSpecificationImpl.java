@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2016 IBM Corporation and others.
+ * Copyright (c) 2003, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,8 +15,13 @@
 
 package org.eclipse.osgi.internal.resolver;
 
-import java.util.*;
-import org.eclipse.osgi.service.resolver.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import org.eclipse.osgi.service.resolver.BaseDescription;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.HostSpecification;
+import org.eclipse.osgi.service.resolver.VersionRange;
 import org.osgi.framework.Constants;
 import org.osgi.framework.wiring.BundleRevision;
 
@@ -170,7 +175,7 @@ public class HostSpecificationImpl extends VersionConstraintImpl implements Host
 
 	@Override
 	protected Map<String, Object> getInteralAttributes() {
-		return Collections.<String, Object> emptyMap();
+		return Collections.emptyMap();
 	}
 
 	@Override

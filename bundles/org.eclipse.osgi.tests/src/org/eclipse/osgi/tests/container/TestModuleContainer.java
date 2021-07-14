@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2017 IBM Corporation and others.
+ * Copyright (c) 2013, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -170,7 +170,7 @@ public class TestModuleContainer extends AbstractTest {
 				Assert.assertNull("Unexpected install errors.", installErrors);
 			}
 		}
-		container.resolve(new ArrayList<Module>(), false);
+		container.resolve(new ArrayList<>(), false);
 		List<Module> modules = container.getModules();
 		for (Module module : modules) {
 			if (module.getCurrentRevision().getWiring() == null) {
@@ -203,7 +203,7 @@ public class TestModuleContainer extends AbstractTest {
 		resolvedModuleDatabase.store(new DataOutputStream(bytes), false);
 		bytes.close();
 		adaptor.getDatabase().load(new DataInputStream(new ByteArrayInputStream(bytes.toByteArray())));
-		adaptor.getContainer().resolve(new ArrayList<Module>(), false);
+		adaptor.getContainer().resolve(new ArrayList<>(), false);
 	}
 
 	// Disabled @Test
@@ -227,7 +227,7 @@ public class TestModuleContainer extends AbstractTest {
 		resolvedModuleDatabase.store(new DataOutputStream(bytes), true);
 		bytes.close();
 		adaptor.getDatabase().load(new DataInputStream(new ByteArrayInputStream(bytes.toByteArray())));
-		adaptor.getContainer().resolve(new ArrayList<Module>(), false);
+		adaptor.getContainer().resolve(new ArrayList<>(), false);
 	}
 
 	// Disabled @Test
@@ -457,7 +457,7 @@ public class TestModuleContainer extends AbstractTest {
 
 	@Test
 	public void testInstallCollision02() throws BundleException, IOException {
-		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(true), Collections.<String, String> emptyMap());
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(true), Collections.emptyMap());
 		ModuleContainer container = adaptor.getContainer();
 		installDummyModule("system.bundle.MF", Constants.SYSTEM_BUNDLE_LOCATION, container);
 		installDummyModule("b1_v1.MF", "b1_a", container);
@@ -494,7 +494,7 @@ public class TestModuleContainer extends AbstractTest {
 	@Test
 	public void testUpdateCollision03() throws BundleException, IOException {
 
-		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(true), Collections.<String, String> emptyMap());
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(true), Collections.emptyMap());
 		ModuleContainer container = adaptor.getContainer();
 		Module b1_v1 = installDummyModule("b1_v1.MF", "b1_v1", container);
 		installDummyModule("b1_v2.MF", "b1_v2", container);
@@ -550,7 +550,7 @@ public class TestModuleContainer extends AbstractTest {
 				};
 			}
 		};
-		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.<String, String> emptyMap(), resolverHookFactory);
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.emptyMap(), resolverHookFactory);
 		ModuleContainer container = adaptor.getContainer();
 
 		Module s1 = installDummyModule("singleton1_v1.MF", "s1_v1", container);
@@ -615,7 +615,7 @@ public class TestModuleContainer extends AbstractTest {
 				};
 			}
 		};
-		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.<String, String> emptyMap(), resolverHookFactory);
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.emptyMap(), resolverHookFactory);
 		ModuleContainer container = adaptor.getContainer();
 
 		Module s1_v1 = installDummyModule("singleton1_v1.MF", "s1_v1", container);
@@ -2609,8 +2609,8 @@ public class TestModuleContainer extends AbstractTest {
 		ModuleRevisionBuilder builder = new ModuleRevisionBuilder();
 		builder.setSymbolicName("invalid.attr");
 		builder.setVersion(Version.valueOf("1.0.0"));
-		builder.addCapability("test", Collections.<String, String> emptyMap(), Collections.singletonMap("test", (Object) testInt));
-		builder.addCapability("test.list", Collections.<String, String> emptyMap(), Collections.singletonMap("test.list", (Object) testIntList));
+		builder.addCapability("test", Collections.emptyMap(), Collections.singletonMap("test", (Object) testInt));
+		builder.addCapability("test.list", Collections.emptyMap(), Collections.singletonMap("test.list", (Object) testIntList));
 		Module invalid = container.install(null, builder.getSymbolicName(), builder, null);
 
 		Object testAttr = invalid.getCurrentRevision().getCapabilities("test").get(0).getAttributes().get("test");
@@ -2902,7 +2902,7 @@ public class TestModuleContainer extends AbstractTest {
 		manifest.put(Constants.EXPORT_PACKAGE, "export");
 		installDummyModule(manifest, manifest.get(Constants.BUNDLE_SYMBOLICNAME), container);
 
-		report = container.resolve(Collections.<Module> emptySet(), false);
+		report = container.resolve(Collections.emptySet(), false);
 		Assert.assertNull("Found a error.", report.getResolutionException());
 
 		State expectedState = enabled ? State.ACTIVE : State.RESOLVED;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 IBM Corporation and others.
+ * Copyright (c) 2005, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -42,7 +42,7 @@ public class NestedDirBundleFile extends BundleFile {
 	 * @param nestedDirName
 	 */
 	public NestedDirBundleFile(BundleFile baseBundlefile, String nestedDirName) {
-		this(baseBundlefile, nestedDirName, Collections.<String> emptyList());
+		this(baseBundlefile, nestedDirName, Collections.emptyList());
 	}
 
 	/**

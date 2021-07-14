@@ -18,19 +18,50 @@
  */
 package org.apache.felix.resolver;
 
-import java.security.*;
-import java.util.*;
+import java.security.AccessControlContext;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.*;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.apache.felix.resolver.reason.ReasonException;
 import org.apache.felix.resolver.util.ArrayMap;
 import org.apache.felix.resolver.util.CandidateSelector;
 import org.apache.felix.resolver.util.OpenHashMap;
-import org.osgi.framework.namespace.*;
-import org.osgi.resource.*;
-import org.osgi.service.resolver.*;
+import org.osgi.framework.namespace.BundleNamespace;
+import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.IdentityNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
+import org.osgi.resource.Capability;
+import org.osgi.resource.Namespace;
+import org.osgi.resource.Requirement;
+import org.osgi.resource.Resource;
+import org.osgi.resource.Wire;
+import org.osgi.resource.Wiring;
+import org.osgi.service.resolver.HostedCapability;
+import org.osgi.service.resolver.ResolutionException;
+import org.osgi.service.resolver.ResolveContext;
+import org.osgi.service.resolver.Resolver;
 
 public class ResolverImpl implements Resolver
 {
@@ -325,7 +356,7 @@ public class ResolverImpl implements Resolver
 
         public Collection<Resource> getRelatedResources(Resource resource) {
             Collection<Resource> related =  m_relatedResources.get(resource);
-            return related == null ? Collections.<Resource> emptyList() : related;
+            return related == null ? Collections.emptyList() : related;
         }
 
         public void setRelatedResources(Resource resource, Collection<Resource> related) {
@@ -800,8 +831,8 @@ public class ResolverImpl implements Resolver
                 resourcePkgs,
                 wire.requirement,
                 wire.capability,
-                new HashSet<Capability>(),
-                new HashSet<Resource>());
+                new HashSet<>(),
+                new HashSet<>());
         }
 
         return resourcePkgs;
@@ -1811,7 +1842,7 @@ public class ResolverImpl implements Resolver
                 }
                 else
                 {
-                    sources.put(sourceCap, Collections.<Capability>emptySet());
+                    sources.put(sourceCap, Collections.emptySet());
                 }
             }
         }
@@ -1877,7 +1908,7 @@ public class ResolverImpl implements Resolver
         if (!session.getContext().getWirings().containsKey(unwrappedResource)
             && !wireMap.containsKey(unwrappedResource))
         {
-            wireMap.put(unwrappedResource, Collections.<Wire>emptyList());
+            wireMap.put(unwrappedResource, Collections.emptyList());
 
             List<Wire> packageWires = new ArrayList<>();
             List<Wire> bundleWires = new ArrayList<>();
@@ -1952,8 +1983,7 @@ public class ResolverImpl implements Resolver
                     // creating duplicate non-payload wires if the fragment
                     // is attached to more than one host.
                     List<Wire> fragmentWires = wireMap.get(fragment);
-                    fragmentWires = (fragmentWires == null)
-                        ? new ArrayList<>() : fragmentWires;
+                    fragmentWires = (fragmentWires == null) ? new ArrayList<>() : fragmentWires;
 
                     // Loop through all of the fragment's requirements and create
                     // any necessary wires for non-payload requirements.
@@ -2036,7 +2066,7 @@ public class ResolverImpl implements Resolver
         ResolveSession session, Map<Resource,
         List<Wire>> wireMap, Candidates allCandidates)
     {
-        wireMap.put(session.getDynamicHost(), Collections.<Wire>emptyList());
+        wireMap.put(session.getDynamicHost(), Collections.emptyList());
 
         List<Wire> packageWires = new ArrayList<>();
 
@@ -2250,7 +2280,7 @@ public class ResolverImpl implements Resolver
                 return Collections.emptySet();
             }
             Set<Capability> result = m_rootCauses.get(req);
-            return result == null ? Collections.<Capability>emptySet() : result;
+            return result == null ? Collections.emptySet() : result;
         }
 
         @Override

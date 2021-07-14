@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2020 IBM Corporation and others.
+ * Copyright (c) 2004, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -183,7 +183,7 @@ public class BundleLoader extends ModuleLoader {
 
 		// initialize the required bundle wires
 		List<ModuleWire> currentRequireBundleWires = wiring.getRequiredModuleWires(BundleNamespace.BUNDLE_NAMESPACE);
-		requiredBundleWires = currentRequireBundleWires == null || currentRequireBundleWires.isEmpty() ? Collections.<ModuleWire> emptyList() : Collections.unmodifiableList(currentRequireBundleWires);
+		requiredBundleWires = currentRequireBundleWires == null || currentRequireBundleWires.isEmpty() ? Collections.emptyList() : Collections.unmodifiableList(currentRequireBundleWires);
 
 		//Initialize the policy handler
 		List<ModuleCapability> moduleDatas = wiring.getRevision().getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
@@ -857,9 +857,9 @@ public class BundleLoader extends ModuleLoader {
 
 	public static <E> Enumeration<E> compoundEnumerations(Enumeration<E> list1, Enumeration<E> list2) {
 		if (list2 == null || !list2.hasMoreElements())
-			return list1 == null ? BundleLoader.<E> emptyEnumeration() : list1;
+			return list1 == null ? BundleLoader.emptyEnumeration() : list1;
 		if (list1 == null || !list1.hasMoreElements())
-			return list2 == null ? BundleLoader.<E> emptyEnumeration() : list2;
+			return list2 == null ? BundleLoader.emptyEnumeration() : list2;
 		List<E> compoundResults = new ArrayList<>();
 		while (list1.hasMoreElements())
 			compoundResults.add(list1.nextElement());

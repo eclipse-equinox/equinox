@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2020 IBM Corporation and others.
+ * Copyright (c) 2004, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -795,11 +795,11 @@ public class ServiceRegistry {
 
 		if (oldFilteredListener != null) {
 			oldFilteredListener.markRemoved();
-			Collection<ListenerInfo> removedListeners = Collections.<ListenerInfo> singletonList(oldFilteredListener);
+			Collection<ListenerInfo> removedListeners = Collections.singletonList(oldFilteredListener);
 			notifyListenerHooks(removedListeners, false);
 		}
 
-		Collection<ListenerInfo> addedListeners = Collections.<ListenerInfo> singletonList(filteredListener);
+		Collection<ListenerInfo> addedListeners = Collections.singletonList(filteredListener);
 		notifyListenerHooks(addedListeners, true);
 	}
 
@@ -828,7 +828,7 @@ public class ServiceRegistry {
 			return;
 		}
 		oldFilteredListener.markRemoved();
-		Collection<ListenerInfo> removedListeners = Collections.<ListenerInfo> singletonList(oldFilteredListener);
+		Collection<ListenerInfo> removedListeners = Collections.singletonList(oldFilteredListener);
 		notifyListenerHooks(removedListeners, false);
 	}
 
@@ -1080,8 +1080,7 @@ public class ServiceRegistry {
 			}
 
 			if ((result == null) || result.isEmpty()) {
-				List<ServiceRegistrationImpl<?>> empty = Collections.<ServiceRegistrationImpl<?>> emptyList();
-				return empty;
+				return Collections.emptyList();
 			}
 
 			result = new LinkedList<>(result); /* make a new list since we don't want to change the real list */
@@ -1117,8 +1116,7 @@ public class ServiceRegistry {
 		List<ServiceRegistrationImpl<?>> result = publishedServicesByContext.get(context);
 
 		if ((result == null) || result.isEmpty()) {
-			List<ServiceRegistrationImpl<?>> empty = Collections.<ServiceRegistrationImpl<?>> emptyList();
-			return empty;
+			return Collections.emptyList();
 		}
 
 		return new ArrayList<>(result); /* make a new list since we don't want to change the real list */

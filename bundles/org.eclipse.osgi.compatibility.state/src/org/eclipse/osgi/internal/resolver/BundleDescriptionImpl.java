@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2020 IBM Corporation and others.
+ * Copyright (c) 2003, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1218,7 +1218,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		public List<BundleWire> getRequiredWires(String namespace) {
 			if (!isInUse())
 				return null;
-			List<BundleWire> result = Collections.<BundleWire> emptyList();
+			List<BundleWire> result = Collections.emptyList();
 			Map<String, List<StateWire>> wireMap = getWires();
 			if (namespace == null) {
 				result = new ArrayList<>();

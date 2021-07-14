@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 IBM Corporation and others.
+ * Copyright (c) 2005, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -173,7 +173,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 	public Enumeration<URL> getResources(String arg0) throws IOException {
 		//Shortcut cycle
 		if (startLoading(arg0) == false) {
-			return Collections.enumeration(Collections.<URL> emptyList());
+			return Collections.enumeration(Collections.emptyList());
 		}
 		try {
 			List<ClassLoader> toConsult = findClassLoaders();

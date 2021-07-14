@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 IBM Corporation and others.
+ * Copyright (c) 2014, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -69,7 +69,7 @@ public class AtomicLazyInitializer<V> {
 	}
 
 	private static <T> T unchecked(Exception exception) {
-		return AtomicLazyInitializer.<T, RuntimeException> unchecked0(exception);
+		return AtomicLazyInitializer.unchecked0(exception);
 	}
 
 	@SuppressWarnings("unchecked")

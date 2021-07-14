@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2020 IBM Corporation and others.
+ * Copyright (c) 2005, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -874,7 +874,7 @@ public class ClasspathManager {
 		for (FragmentClasspath fragmentClasspath : currentFragments)
 			generations.add(fragmentClasspath.getGeneration());
 
-		List<URL> result = Collections.<URL> emptyList();
+		List<URL> result = Collections.emptyList();
 		// now search over all the bundle files
 		Enumeration<URL> eURLs = Storage.findEntries(generations, path, filePattern, options);
 		if (eURLs == null)

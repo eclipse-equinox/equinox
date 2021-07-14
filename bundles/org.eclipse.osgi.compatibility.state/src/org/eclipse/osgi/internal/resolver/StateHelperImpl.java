@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2016 IBM Corporation and others.
+ * Copyright (c) 2004, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -489,7 +489,7 @@ public final class StateHelperImpl implements StateHelper {
 							substituteNames.clear();
 						// substituteNames is a set of one package containing the single substitute we are trying to get the source for
 						substituteNames.add(exportName);
-						getPackages(resolvedImport.getSupplier(), symbolicName, importList, orderedPkgList, pkgSet, new HashSet<BundleDescription>(0), strict, substituteNames, options);
+						getPackages(resolvedImport.getSupplier(), symbolicName, importList, orderedPkgList, pkgSet, new HashSet<>(0), strict, substituteNames, options);
 					}
 				}
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2016 IBM Corporation and others.
+ * Copyright (c) 2006, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,10 +14,16 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.osgi.internal.framework.FilterImpl;
-import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.*;
+import org.eclipse.osgi.service.resolver.BaseDescription;
+import org.eclipse.osgi.service.resolver.GenericDescription;
+import org.eclipse.osgi.service.resolver.GenericSpecification;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.resource.Namespace;
 
 public class GenericSpecificationImpl extends VersionConstraintImpl implements GenericSpecification {
@@ -195,7 +201,7 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 	@Override
 	protected Map<String, Object> getInteralAttributes() {
 		synchronized (this.monitor) {
-			return attributes == null ? Collections.<String, Object> emptyMap() : new HashMap<>(attributes);
+			return attributes == null ? Collections.emptyMap() : new HashMap<>(attributes);
 		}
 	}
 

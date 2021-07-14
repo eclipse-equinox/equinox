@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2018 IBM Corporation and others.
+ * Copyright (c) 2012, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -85,7 +85,7 @@ public final class BundleInfo {
 
 		Generation(long generationId) {
 			this.generationId = generationId;
-			this.cachedHeaders = new CachedManifest(this, Collections.<String, String> emptyMap());
+			this.cachedHeaders = new CachedManifest(this, Collections.emptyMap());
 		}
 
 		Generation(long generationId, File content, boolean isDirectory, Type contentType, boolean hasPackageInfo, Map<String, String> cached, long lastModified, boolean isMRJar) {
@@ -149,14 +149,14 @@ public final class BundleInfo {
 						rawHeaders = Collections.emptyMap();
 					} else {
 						try {
-							Map<String, String> merged = ManifestElement.parseBundleManifest(manifest.getInputStream(), new CaseInsensitiveDictionaryMap<String, String>());
+							Map<String, String> merged = ManifestElement.parseBundleManifest(manifest.getInputStream(), new CaseInsensitiveDictionaryMap<>());
 							// For MRJARs only replace Import-Package and Require-Capability if the versioned values are non-null
 							if (Boolean.parseBoolean(merged.get(MULTI_RELEASE_HEADER))) {
 								for (int i = getStorage().getRuntimeVersion().getMajor(); i > 8; i--) {
 									String versionManifest = "META-INF/versions/" + i + "/OSGI-INF/MANIFEST.MF"; //$NON-NLS-1$ //$NON-NLS-2$
 									BundleEntry versionEntry = getBundleFile().getEntry(versionManifest);
 									if (versionEntry != null) {
-										Map<String, String> versioned = ManifestElement.parseBundleManifest(versionEntry.getInputStream(), new CaseInsensitiveDictionaryMap<String, String>());
+										Map<String, String> versioned = ManifestElement.parseBundleManifest(versionEntry.getInputStream(), new CaseInsensitiveDictionaryMap<>());
 										String versionedImport = versioned.get(Constants.IMPORT_PACKAGE);
 										String versionedRequireCap = versioned.get(Constants.REQUIRE_CAPABILITY);
 										if (versionedImport != null) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 IBM Corporation and others.
+ * Copyright (c) 2017, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -222,7 +222,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		classPathJarEntries.put("META-INF/versions/11/multi/release/test/sub/testResource11.txt", getBytes("multi/release/test/sub/testResource11.txt", base, new byte[] {'1', '1'}));
 		classPathJarEntries.put("META-INF/versions/11/multi/release/test/sub/testResourceAdd11.txt", getBytes("multi/release/test/sub/testResourceAdd11.txt", base));
 
-		createMRJar(classpathMrJar, Collections.<String, String> emptyMap(), classPathJarEntries);
+		createMRJar(classpathMrJar, Collections.emptyMap(), classPathJarEntries);
 		bundleEntries.put(classpathMrJar.getName(), StorageUtil.getBytes(new FileInputStream(classpathMrJar), -1, 4000));
 
 		// This will not be required by the spec, but equinox does support exploded inner jars in a bundle

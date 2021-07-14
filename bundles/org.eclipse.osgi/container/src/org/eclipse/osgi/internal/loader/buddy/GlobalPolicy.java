@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -83,8 +83,7 @@ public class GlobalPolicy implements IBuddyPolicy {
 	private Collection<Bundle> getExportingBundles(String pkgName) {
 		Collection<Bundle> result = new ArrayList<>();
 		String filter = "(" + PackageNamespace.PACKAGE_NAMESPACE + "=" + pkgName + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		Map<String, String> directives = Collections
-				.<String, String>singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter);
+		Map<String, String> directives = Collections.singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter);
 		Map<String, Boolean> attributes = Collections.singletonMap(Capabilities.SYNTHETIC_REQUIREMENT, Boolean.TRUE);
 		Collection<BundleCapability> packages = frameworkWiring.findProviders(
 				ModuleContainer.createRequirement(PackageNamespace.PACKAGE_NAMESPACE, directives, attributes));

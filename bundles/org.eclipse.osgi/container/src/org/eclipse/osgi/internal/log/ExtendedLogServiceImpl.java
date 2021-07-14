@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2016 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2021 Cognos Incorporated, IBM Corporation and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which
@@ -31,8 +31,8 @@ public class ExtendedLogServiceImpl implements ExtendedLogService {
 	public ExtendedLogServiceImpl(ExtendedLogServiceFactory factory, Bundle bundle) {
 		this.factory = factory;
 		this.bundle = bundle;
-		loggerCache.put(org.osgi.service.log.Logger.class, new HashMap<String, LoggerImpl>());
-		loggerCache.put(org.osgi.service.log.FormatterLogger.class, new HashMap<String, LoggerImpl>());
+		loggerCache.put(org.osgi.service.log.Logger.class, new HashMap<>());
+		loggerCache.put(org.osgi.service.log.FormatterLogger.class, new HashMap<>());
 	}
 
 	@SuppressWarnings("deprecation")

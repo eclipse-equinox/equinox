@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2017, 2018). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2017, 2021). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -347,8 +347,7 @@ public class PromiseFactory {
 			callbacks = new DefaultExecutors();
 			scheduledExecutor = new ScheduledExecutor(2, callbacks);
 			callbackExecutor = new ThreadPoolExecutor(0, 64, 60L,
-					TimeUnit.SECONDS, new SynchronousQueue<Runnable>(),
-					callbacks, callbacks);
+					TimeUnit.SECONDS, new SynchronousQueue<>(), callbacks, callbacks);
 		}
 
 		static Executor callbackExecutor() {

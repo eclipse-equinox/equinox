@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2017 IBM Corporation and others.
+ * Copyright (c) 2013, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.storage;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Map;
@@ -102,7 +104,7 @@ public class SystemBundleFile extends BundleFile {
 				URL url = manifests.nextElement();
 				try {
 					// check each manifest until we find one with the Eclipse-SystemBundle: true header
-					Map<String, String> headers = ManifestElement.parseBundleManifest(url.openStream(), new CaseInsensitiveDictionaryMap<String, String>());
+					Map<String, String> headers = ManifestElement.parseBundleManifest(url.openStream(), new CaseInsensitiveDictionaryMap<>());
 					if ("true".equals(headers.get(Storage.ECLIPSE_SYSTEMBUNDLE))) //$NON-NLS-1$
 						return url;
 				} catch (BundleException e) {

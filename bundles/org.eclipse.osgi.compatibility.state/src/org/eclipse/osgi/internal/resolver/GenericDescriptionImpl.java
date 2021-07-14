@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2016 IBM Corporation and others.
+ * Copyright (c) 2006, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,8 +14,16 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import java.util.*;
-import org.eclipse.osgi.service.resolver.*;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import org.eclipse.osgi.service.resolver.BaseDescription;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.GenericDescription;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
@@ -117,7 +125,7 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 	public Map<String, String> getDeclaredDirectives() {
 		synchronized (this.monitor) {
 			if (directives == null)
-				return Collections.<String, String> emptyMap();
+				return Collections.emptyMap();
 			return Collections.unmodifiableMap(directives);
 		}
 	}

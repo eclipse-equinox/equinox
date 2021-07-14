@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2017 IBM Corporation and others.
+ * Copyright (c) 2012, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -110,7 +110,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 		this.resolverExecutor = new AtomicLazyInitializer<>();
 		this.lazyResolverExecutorCreator = createLazyExecutorCreator( //
 				"Equinox resolver thread - " + EquinoxContainerAdaptor.this.toString(), //$NON-NLS-1$
-				resolverThreadCnt, new SynchronousQueue<Runnable>());
+				resolverThreadCnt, new SynchronousQueue<>());
 
 		// For the start-level we can safely use a growing queue because the thread feeding the
 		// start-level executor with work is a single thread and it can safely block waiting
@@ -118,7 +118,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 		this.startLevelExecutor = new AtomicLazyInitializer<>();
 		this.lazyStartLevelExecutorCreator = createLazyExecutorCreator(//
 				"Equinox start level thread - " + EquinoxContainerAdaptor.this.toString(), //$NON-NLS-1$
-				startLevelThreadCnt, new LinkedBlockingQueue<Runnable>(1000));
+				startLevelThreadCnt, new LinkedBlockingQueue<>(1000));
 
 	}
 

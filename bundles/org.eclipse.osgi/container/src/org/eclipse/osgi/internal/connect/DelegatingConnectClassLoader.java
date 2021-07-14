@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -56,12 +56,12 @@ public class DelegatingConnectClassLoader extends EquinoxClassLoader {
 	@Override
 	public Enumeration<URL> findLocalResources(String resource) {
 		if (connectClassLoader == null) {
-			return Collections.enumeration(Collections.<URL> emptyList());
+			return Collections.enumeration(Collections.emptyList());
 		}
 		try {
 			return connectClassLoader.getResources(resource);
 		} catch (IOException e) {
-			return Collections.enumeration(Collections.<URL> emptyList());
+			return Collections.enumeration(Collections.emptyList());
 		}
 	}
 }

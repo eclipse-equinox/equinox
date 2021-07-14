@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2016 IBM Corporation and others.
+ * Copyright (c) 2008, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,11 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A Shrinkable Collection. This class provides a wrapper for a list of collections
@@ -40,7 +44,7 @@ public class ShrinkableCollection<E> implements Collection<E> {
 		if (c == null) {
 			throw new NullPointerException();
 		}
-		List<Collection<? extends E>> empty = Collections.<Collection<? extends E>> emptyList();
+		List<Collection<? extends E>> empty = Collections.emptyList();
 		list = empty;
 		collection = c;
 	}

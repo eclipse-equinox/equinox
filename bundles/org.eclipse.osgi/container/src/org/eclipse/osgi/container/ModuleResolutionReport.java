@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2016 IBM Corporation and others.
+ * Copyright (c) 2013, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,15 +13,27 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.namespace.*;
+import org.osgi.framework.namespace.BundleNamespace;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.resource.*;
+import org.osgi.resource.Capability;
+import org.osgi.resource.Namespace;
+import org.osgi.resource.Requirement;
+import org.osgi.resource.Resource;
+import org.osgi.resource.Wire;
 import org.osgi.service.resolver.ResolutionException;
 
 /**
@@ -72,8 +84,8 @@ class ModuleResolutionReport implements ResolutionReport {
 	private final Map<Resource, List<Wire>> resolutionResult;
 
 	ModuleResolutionReport(Map<Resource, List<Wire>> resolutionResult, Map<Resource, List<Entry>> entries, ResolutionException cause) {
-		this.entries = entries == null ? Collections.<Resource, List<Entry>> emptyMap() : Collections.unmodifiableMap(new HashMap<>(entries));
-		this.resolutionResult = resolutionResult == null ? Collections.<Resource, List<Wire>> emptyMap() : Collections.unmodifiableMap(resolutionResult);
+		this.entries = entries == null ? Collections.emptyMap() : Collections.unmodifiableMap(new HashMap<>(entries));
+		this.resolutionResult = resolutionResult == null ? Collections.emptyMap() : Collections.unmodifiableMap(resolutionResult);
 		this.resolutionException = cause;
 	}
 

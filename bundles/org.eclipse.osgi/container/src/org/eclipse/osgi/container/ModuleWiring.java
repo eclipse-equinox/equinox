@@ -79,8 +79,7 @@ public final class ModuleWiring implements BundleWiring {
 		this.requirements = requirements;
 		this.providedWires = providedWires;
 		this.requiredWires = requiredWires;
-		this.substitutedPkgNames = substitutedPkgNames.isEmpty() ? Collections.<String>emptyList()
-				: substitutedPkgNames;
+		this.substitutedPkgNames = substitutedPkgNames.isEmpty() ? Collections.emptyList() : substitutedPkgNames;
 	}
 
 	@Override

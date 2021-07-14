@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2016 IBM Corporation and others.
+ * Copyright (c) 2009, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -38,7 +38,7 @@ public class ObjectPool {
 						Debug.println("[ObjectPool] Found duplicate object: " + getObjectString(obj)); //$NON-NLS-1$
 				}
 			} else {
-				objectCache.put(obj, new WeakReference<Object>(obj));
+				objectCache.put(obj, new WeakReference<>(obj));
 				if (DEBUG_OBJECTPOOL_ADDS)
 					Debug.println("[ObjectPool] Added unique object to pool: " + getObjectString(obj) + " Pool size: " + objectCache.size()); //$NON-NLS-1$ //$NON-NLS-2$
 			}

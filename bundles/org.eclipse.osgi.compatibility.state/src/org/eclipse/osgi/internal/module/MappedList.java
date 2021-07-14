@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 IBM Corporation and others.
+ * Copyright (c) 2005, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,11 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 /*
  * A MappedList maps values into keyed list arrays.  All values with the same key are stored
@@ -23,7 +27,7 @@ import java.util.*;
 public class MappedList<K, V> {
 	// the mapping with key -> Object[] mapping
 	protected final HashMap<K, List<V>> internal = new HashMap<>();
-	protected final List<V> empty = Collections.<V> emptyList();
+	protected final List<V> empty = Collections.emptyList();
 
 	public void put(K key, V value) {
 		List<V> existing = internal.get(key);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2020 IBM Corporation and others.
+ * Copyright (c) 2012, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -405,7 +405,7 @@ public final class OSGiManifestBuilderFactory {
 				if ("true".equals(optionalAttr) && packageDirectives.get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE) == null) { //$NON-NLS-1$
 					packageDirectives.put(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE, Namespace.RESOLUTION_OPTIONAL);
 				}
-				builder.addRequirement(PackageNamespace.PACKAGE_NAMESPACE, packageDirectives, new HashMap<String, Object>(0));
+				builder.addRequirement(PackageNamespace.PACKAGE_NAMESPACE, packageDirectives, new HashMap<>(0));
 			}
 		}
 	}
@@ -422,7 +422,7 @@ public final class OSGiManifestBuilderFactory {
 			filter.append('(').append(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE).append(">=").append(packageVersion).append("))"); //$NON-NLS-1$//$NON-NLS-2$
 			Map<String, String> directives = new HashMap<>(1);
 			directives.put(PackageNamespace.REQUIREMENT_FILTER_DIRECTIVE, filter.toString());
-			builder.addRequirement(PackageNamespace.PACKAGE_NAMESPACE, directives, new HashMap<String, Object>(0));
+			builder.addRequirement(PackageNamespace.PACKAGE_NAMESPACE, directives, new HashMap<>(0));
 		}
 	}
 
@@ -478,7 +478,7 @@ public final class OSGiManifestBuilderFactory {
 				if ("true".equals(reprovideAttr) && bundleDirectives.get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE) == null) { //$NON-NLS-1$
 					bundleDirectives.put(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE, BundleNamespace.VISIBILITY_REEXPORT);
 				}
-				builder.addRequirement(BundleNamespace.BUNDLE_NAMESPACE, bundleDirectives, new HashMap<String, Object>(0));
+				builder.addRequirement(BundleNamespace.BUNDLE_NAMESPACE, bundleDirectives, new HashMap<>(0));
 			}
 		}
 	}
@@ -509,10 +509,10 @@ public final class OSGiManifestBuilderFactory {
 			// need to add (&...)
 			filter.insert(0, "(&").append(')'); //$NON-NLS-1$
 		directives.put(BundleNamespace.REQUIREMENT_FILTER_DIRECTIVE, filter.toString());
-		builder.addRequirement(HostNamespace.HOST_NAMESPACE, directives, new HashMap<String, Object>(0));
+		builder.addRequirement(HostNamespace.HOST_NAMESPACE, directives, new HashMap<>(0));
 		// Add a fragment capability to advertise what host this resource is providing a fragment for
 		directives = Collections.singletonMap(EquinoxModuleDataNamespace.CAPABILITY_EFFECTIVE_DIRECTIVE, EquinoxModuleDataNamespace.EFFECTIVE_INFORMATION);
-		builder.addCapability(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, directives, Collections.<String, Object> singletonMap(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, hostName));
+		builder.addCapability(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, directives, Collections.singletonMap(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, hostName));
 	}
 
 	private static void getProvideCapabilities(ModuleRevisionBuilder builder, ManifestElement[] provideElements, boolean checkSystemCapabilities) throws BundleException {
@@ -553,7 +553,7 @@ public final class OSGiManifestBuilderFactory {
 		// only support one
 		HashMap<String, String> directives = new HashMap<>();
 		directives.put(EclipsePlatformNamespace.REQUIREMENT_FILTER_DIRECTIVE, platformFilter);
-		builder.addRequirement(EclipsePlatformNamespace.ECLIPSE_PLATFORM_NAMESPACE, directives, Collections.<String, Object> emptyMap());
+		builder.addRequirement(EclipsePlatformNamespace.ECLIPSE_PLATFORM_NAMESPACE, directives, Collections.emptyMap());
 	}
 
 	@SuppressWarnings("deprecation")
@@ -733,7 +733,7 @@ public final class OSGiManifestBuilderFactory {
 
 		Map<String, String> directives = new HashMap<>(1);
 		directives.put(ExecutionEnvironmentNamespace.REQUIREMENT_FILTER_DIRECTIVE, filterSpec);
-		builder.addRequirement(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE, directives, new HashMap<String, Object>(0));
+		builder.addRequirement(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE, directives, new HashMap<>(0));
 	}
 
 	static String escapeFilterInput(final String value) {

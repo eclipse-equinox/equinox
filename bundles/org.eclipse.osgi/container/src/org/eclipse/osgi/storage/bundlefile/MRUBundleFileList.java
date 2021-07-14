@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 IBM Corporation and others.
+ * Copyright (c) 2005, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -63,7 +63,7 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 		if (fileLimit >= MIN) {
 			this.bundleFileList = new BundleFile[fileLimit];
 			this.useStampList = new long[fileLimit];
-			this.bundleFileCloser = Collections.<Object, Object> singletonMap(this, this);
+			this.bundleFileCloser = Collections.singletonMap(this, this);
 		} else {
 			this.bundleFileList = null;
 			this.useStampList = null;

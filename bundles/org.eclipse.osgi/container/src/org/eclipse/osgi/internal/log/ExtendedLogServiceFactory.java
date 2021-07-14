@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2020 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2021 Cognos Incorporated, IBM Corporation and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which
@@ -210,7 +210,7 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 
 		@Override
 		public void clear() {
-			setLogLevels(Collections.<String, LogLevel> emptyMap());
+			setLogLevels(Collections.emptyMap());
 		}
 
 		@Override

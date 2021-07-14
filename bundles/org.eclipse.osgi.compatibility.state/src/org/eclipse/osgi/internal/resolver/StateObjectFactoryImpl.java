@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2016 IBM Corporation and others.
+ * Copyright (c) 2003, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -534,7 +534,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE, declaration);
 			if (elements == null)
-				return Collections.<BundleSpecification> emptyList();
+				return Collections.emptyList();
 			List<BundleSpecification> result = new ArrayList<>(elements.length);
 			for (ManifestElement element : elements)
 				result.add(StateBuilder.createRequiredBundle(element));
@@ -548,7 +548,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.FRAGMENT_HOST, declaration);
 			if (elements == null)
-				return Collections.<HostSpecification> emptyList();
+				return Collections.emptyList();
 			List<HostSpecification> result = new ArrayList<>(elements.length);
 			for (ManifestElement element : elements)
 				result.add(StateBuilder.createHostSpecification(element, null));
@@ -562,7 +562,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, declaration);
 			if (elements == null)
-				return Collections.<ImportPackageSpecification> emptyList();
+				return Collections.emptyList();
 			List<ImportPackageSpecification> result = new ArrayList<>(elements.length);
 			for (ManifestElement element : elements)
 				StateBuilder.addImportPackages(element, result, 2, false);
@@ -576,8 +576,8 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, declaration);
 			if (elements == null)
-				return Collections.<GenericDescription> emptyList();
-			return StateBuilder.createOSGiCapabilities(elements, new ArrayList<GenericDescription>(elements.length), (Integer) null);
+				return Collections.emptyList();
+			return StateBuilder.createOSGiCapabilities(elements, new ArrayList<>(elements.length), (Integer) null);
 		} catch (BundleException e) {
 			throw new IllegalArgumentException("Declaration is invalid: " + declaration, e); //$NON-NLS-1$
 		}
@@ -587,8 +587,8 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.REQUIRE_CAPABILITY, declaration);
 			if (elements == null)
-				return Collections.<GenericSpecification> emptyList();
-			return StateBuilder.createOSGiRequires(elements, new ArrayList<GenericSpecification>(elements.length));
+				return Collections.emptyList();
+			return StateBuilder.createOSGiRequires(elements, new ArrayList<>(elements.length));
 		} catch (BundleException e) {
 			throw new IllegalArgumentException("Declaration is invalid: " + declaration, e); //$NON-NLS-1$
 		}
@@ -598,7 +598,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		try {
 			ManifestElement[] elements = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, declaration);
 			if (elements == null)
-				return Collections.<ExportPackageDescription> emptyList();
+				return Collections.emptyList();
 			List<ExportPackageDescription> result = new ArrayList<>(elements.length);
 			for (ManifestElement element : elements)
 				StateBuilder.addExportPackages(element, result, false);

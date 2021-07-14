@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2016 IBM Corporation and others.
+ * Copyright (c) 2004, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which accompanies this distribution,
@@ -12,7 +12,10 @@
  ******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.eclipse.osgi.service.resolver.BundleSpecification;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 
@@ -40,7 +43,7 @@ public class GroupingChecker {
 		for (BundleConstraint require : requires) {
 			ResolverBundle selectedSupplier = (ResolverBundle) require.getSelectedSupplier();
 			if (selectedSupplier != null)
-				isConsistentInternal(bundle, selectedSupplier, new ArrayList<ResolverBundle>(1), true, null);
+				isConsistentInternal(bundle, selectedSupplier, new ArrayList<>(1), true, null);
 		}
 		// process all imports
 		// must check resolved imports to get any dynamically resolved imports
@@ -71,7 +74,7 @@ public class GroupingChecker {
 	 * If an inconsistency is found the export inconsistency is returned; otherwise null is returned
 	 */
 	public PackageRoots[][] isConsistent(ResolverBundle requiringBundle, ResolverBundle matchingBundle) {
-		List<PackageRoots[]> results = isConsistentInternal(requiringBundle, matchingBundle, new ArrayList<ResolverBundle>(1), false, null);
+		List<PackageRoots[]> results = isConsistentInternal(requiringBundle, matchingBundle, new ArrayList<>(1), false, null);
 		return results == null ? null : results.toArray(new PackageRoots[results.size()][]);
 	}
 

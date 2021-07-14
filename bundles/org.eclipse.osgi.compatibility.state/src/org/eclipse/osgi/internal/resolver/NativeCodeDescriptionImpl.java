@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,11 +14,18 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Map;
 import org.eclipse.osgi.internal.framework.FilterImpl;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.NativeCodeDescription;
+import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.service.resolver.VersionRange;
-import org.osgi.framework.*;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.Version;
 
 public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements NativeCodeDescription {
 	private static final VersionRange[] EMPTY_VERSIONRANGES = new VersionRange[0];
@@ -213,10 +220,10 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 	}
 
 	public Map<String, String> getDeclaredDirectives() {
-		return Collections.<String, String> emptyMap();
+		return Collections.emptyMap();
 	}
 
 	public Map<String, Object> getDeclaredAttributes() {
-		return Collections.<String, Object> emptyMap();
+		return Collections.emptyMap();
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,20 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.log;
 
-import java.lang.reflect.*;
-import java.util.*;
-import org.osgi.framework.*;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.log.LogLevel;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -191,7 +202,7 @@ class ConfigAdminListener implements ServiceTrackerCustomizer<Object, ServiceReg
 
 			String contextName = getContextName(pid);
 			if (type == CM_DELETED) {
-				setLogLevels(contextName, Collections.<String, LogLevel> emptyMap());
+				setLogLevels(contextName, Collections.emptyMap());
 				return null;
 			}
 
@@ -199,7 +210,7 @@ class ConfigAdminListener implements ServiceTrackerCustomizer<Object, ServiceReg
 				Dictionary<String, Object> configDictionary = findConfiguration(pid);
 				if (configDictionary == null) {
 					// Configuration got deleted before we could get it so treat as deleted
-					setLogLevels(contextName, Collections.<String, LogLevel> emptyMap());
+					setLogLevels(contextName, Collections.emptyMap());
 					return null;
 				}
 

@@ -494,7 +494,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	private ResolutionReport resolve(Collection<Module> triggers, boolean triggersMandatory, boolean restartTriggers) {
 		if (isRefreshingSystemModule()) {
-			return new ModuleResolutionReport(null, Collections.<Resource, List<Entry>> emptyMap(), new ResolutionException("Unable to resolve while shutting down the framework.")); //$NON-NLS-1$
+			return new ModuleResolutionReport(null, Collections.emptyMap(), new ResolutionException("Unable to resolve while shutting down the framework.")); //$NON-NLS-1$
 		}
 		ResolutionReport report = null;
 		try (ResolutionLock.Permits resolutionPermits = _resolutionLock.acquire(1)) {
@@ -505,14 +505,14 @@ public final class ModuleContainer implements DebugOptionsListener {
 					if (e.getCause() instanceof BundleException) {
 						BundleException be = (BundleException) e.getCause();
 						if (be.getType() == BundleException.REJECTED_BY_HOOK || be.getType() == BundleException.STATECHANGE_ERROR) {
-							return new ModuleResolutionReport(null, Collections.<Resource, List<Entry>> emptyMap(), new ResolutionException(be));
+							return new ModuleResolutionReport(null, Collections.emptyMap(), new ResolutionException(be));
 						}
 					}
 					throw e;
 				}
 			} while (report == null);
 		} catch (ResolutionLockException e) {
-			return new ModuleResolutionReport(null, Collections.<Resource, List<Entry>> emptyMap(), new ResolutionException("Timeout acquiring lock for resolution", e, Collections.<Requirement> emptyList())); //$NON-NLS-1$
+			return new ModuleResolutionReport(null, Collections.emptyMap(), new ResolutionException("Timeout acquiring lock for resolution", e, Collections.emptyList())); //$NON-NLS-1$
 		}
 		return report;
 	}
@@ -547,7 +547,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 		ModuleResolutionReport report = moduleResolver.resolveDelta(triggerRevisions, triggersMandatory, unresolved, wiringClone, moduleDatabase);
 		Map<Resource, List<Wire>> resolutionResult = report.getResolutionResult();
-		Map<ModuleRevision, ModuleWiring> deltaWiring = resolutionResult == null ? Collections.<ModuleRevision, ModuleWiring> emptyMap() : moduleResolver.generateDelta(resolutionResult, wiringClone);
+		Map<ModuleRevision, ModuleWiring> deltaWiring = resolutionResult == null ? Collections.emptyMap() : moduleResolver.generateDelta(resolutionResult, wiringClone);
 		if (deltaWiring.isEmpty())
 			return report; // nothing to do
 
@@ -617,7 +617,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 				for (DynamicModuleRequirement dynamicReq : dynamicReqs) {
 					ModuleResolutionReport report = moduleResolver.resolveDynamicDelta(dynamicReq, unresolved, wiringClone, moduleDatabase);
 					Map<Resource, List<Wire>> resolutionResult = report.getResolutionResult();
-					deltaWiring = resolutionResult == null ? Collections.<ModuleRevision, ModuleWiring> emptyMap() : moduleResolver.generateDelta(resolutionResult, wiringClone);
+					deltaWiring = resolutionResult == null ? Collections.emptyMap() : moduleResolver.generateDelta(resolutionResult, wiringClone);
 					if (deltaWiring.get(revision) != null) {
 						break;
 					}
@@ -656,7 +656,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 				// Save the result
 				ModuleWiring wiring = deltaWiring.get(revision);
 				result = findExistingDynamicWire(wiring, dynamicPkgName);
-			} while (!applyDelta(deltaWiring, modulesResolved, Collections.<Module> emptyList(), timestamp, false, resolutionPermits));
+			} while (!applyDelta(deltaWiring, modulesResolved, Collections.emptyList(), timestamp, false, resolutionPermits));
 		} catch (ResolutionLockException e) {
 			return null;
 		}
@@ -858,7 +858,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 		}
 
 		// If there are any triggers re-start them now if requested
-		Set<Module> triggerSet = restartTriggers ? new HashSet<>(triggers) : Collections.<Module> emptySet();
+		Set<Module> triggerSet = restartTriggers ? new HashSet<>(triggers) : Collections.emptySet();
 		if (restartTriggers) {
 			for (Module module : triggers) {
 				if (module.getId() != 0 && Module.RESOLVED_SET.contains(module.getState())) {
@@ -1415,8 +1415,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 	static Requirement getIdentityRequirement(String name, Version version) {
 		version = version == null ? Version.emptyVersion : version;
 		String filter = "(&(" + IdentityNamespace.IDENTITY_NAMESPACE + "=" + name + ")(" + IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE + "=" + version.toString() + "))"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
-		Map<String, String> directives = Collections.<String, String> singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter);
-		return new ModuleRequirement(IdentityNamespace.IDENTITY_NAMESPACE, directives, Collections.<String, Object> emptyMap(), null);
+		Map<String, String> directives = Collections.singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter);
+		return new ModuleRequirement(IdentityNamespace.IDENTITY_NAMESPACE, directives, Collections.emptyMap(), null);
 	}
 
 	class ContainerWiring implements FrameworkWiring, EventDispatcher<ContainerWiring, FrameworkListener[], Collection<Module>> {

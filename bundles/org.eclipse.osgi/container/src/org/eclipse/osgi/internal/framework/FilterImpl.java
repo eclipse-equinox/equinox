@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2020 IBM Corporation and others.
+ * Copyright (c) 2003, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -199,7 +199,7 @@ public abstract class FilterImpl implements Filter {
 	 */
 	@Override
 	public boolean match(ServiceReference<?> reference) {
-		return matches0((reference != null) ? ServiceReferenceMap.asMap(reference) : Collections.<String, Object> emptyMap());
+		return matches0((reference != null) ? ServiceReferenceMap.asMap(reference) : Collections.emptyMap());
 	}
 
 	/**
@@ -216,7 +216,7 @@ public abstract class FilterImpl implements Filter {
 	 */
 	@Override
 	public boolean match(Dictionary<String, ?> dictionary) {
-		return matches0((dictionary != null) ? new CaseInsensitiveDictionaryMap<>(dictionary) : Collections.<String, Object> emptyMap());
+		return matches0((dictionary != null) ? new CaseInsensitiveDictionaryMap<>(dictionary) : Collections.emptyMap());
 	}
 
 	/**
@@ -232,7 +232,7 @@ public abstract class FilterImpl implements Filter {
 	 */
 	@Override
 	public boolean matchCase(Dictionary<String, ?> dictionary) {
-		return matches0((dictionary != null) ? DictionaryMap.asMap(dictionary) : Collections.<String, Object> emptyMap());
+		return matches0((dictionary != null) ? DictionaryMap.asMap(dictionary) : Collections.emptyMap());
 	}
 
 	/**
@@ -249,7 +249,7 @@ public abstract class FilterImpl implements Filter {
 	 */
 	@Override
 	public boolean matches(Map<String, ?> map) {
-		return matches0((map != null) ? map : Collections.<String, Object> emptyMap());
+		return matches0((map != null) ? map : Collections.emptyMap());
 	}
 
 	abstract boolean matches0(Map<String, ?> map);

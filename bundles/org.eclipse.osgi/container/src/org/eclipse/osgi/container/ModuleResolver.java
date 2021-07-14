@@ -465,7 +465,7 @@ final class ModuleResolver {
 			}
 
 			Map<Resource, ResolutionException> getUsesConstraintViolations() {
-				return errors == null ? Collections.<Resource, ResolutionException> emptyMap() : errors;
+				return errors == null ? Collections.emptyMap() : errors;
 			}
 
 			@Override
@@ -811,7 +811,7 @@ final class ModuleResolver {
 			Collection<Resource> relatedFragments = new ArrayList<>();
 			for (String hostBSN : getHostBSNs(hostCaps)) {
 				String matchFilter = "(" + EquinoxFragmentNamespace.FRAGMENT_NAMESPACE + "=" + hostBSN + ")"; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-				Requirement fragmentRequirement = ModuleContainer.createRequirement(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, Collections.<String, String> singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, matchFilter), Collections.<String, Object> emptyMap());
+				Requirement fragmentRequirement = ModuleContainer.createRequirement(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, Collections.singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, matchFilter), Collections.emptyMap());
 				List<ModuleCapability> candidates = moduleDatabase.findCapabilities(fragmentRequirement);
 				// filter out disabled fragments and singletons
 				filterDisabled(candidates);
@@ -870,7 +870,7 @@ final class ModuleResolver {
 					if (e.getCause() instanceof BundleException) {
 						BundleException be = (BundleException) e.getCause();
 						if (be.getType() == BundleException.REJECTED_BY_HOOK) {
-							return new ModuleResolutionReport(null, Collections.<Resource, List<Entry>> emptyMap(), new ResolutionException(be));
+							return new ModuleResolutionReport(null, Collections.emptyMap(), new ResolutionException(be));
 						}
 					}
 					throw e;
