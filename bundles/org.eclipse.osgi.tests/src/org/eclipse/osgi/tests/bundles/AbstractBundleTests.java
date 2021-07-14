@@ -312,7 +312,7 @@ public class AbstractBundleTests extends CoreTest {
 		final Exception[] failureException = new BundleException[1];
 		final FrameworkEvent[] success = new FrameworkEvent[] { null };
 		final String uuid = getUUID(equinox);
-		Thread waitForUpdate = new Thread((Runnable) () -> success[0] = waitForStop(equinox, uuid, false, 10000), "test waitForStop thread"); //$NON-NLS-1$
+		Thread waitForUpdate = new Thread(() -> success[0] = waitForStop(equinox, uuid, false, 10000), "test waitForStop thread"); //$NON-NLS-1$
 		waitForUpdate.start();
 
 		try {

@@ -569,10 +569,8 @@ public class ConnectTests extends AbstractBundleTests {
 				ModuleContainer.createRequirement(IdentityNamespace.IDENTITY_NAMESPACE, //
 						Collections.singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, "(tags=osgi.connect)"), //
 						Collections.emptyMap()));
-		osgiConnectTags.forEach(c -> {
-			assertTrue("Unexpected tag on bundle: " + c.getRevision().getBundle(),
-					locations.contains(c.getRevision().getBundle().getLocation()));
-		});
+		osgiConnectTags.forEach(c -> assertTrue("Unexpected tag on bundle: " + c.getRevision().getBundle(),
+				locations.contains(c.getRevision().getBundle().getLocation())));
 	}
 
 	public void testConnectContentActivatorsWithFrameworkLoaders() {

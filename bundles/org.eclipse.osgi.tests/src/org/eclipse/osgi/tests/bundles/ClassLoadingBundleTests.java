@@ -600,7 +600,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		final Bundle osgiE = installer.installBundle("osgi.lazystart.e"); //$NON-NLS-1$
 		assertTrue("osgi lazy start resolve", installer.resolveBundles(new Bundle[] {osgiD, osgiE})); //$NON-NLS-1$
 
-		Thread t = new Thread((Runnable) () -> {
+		Thread t = new Thread(() -> {
 			try {
 				osgiD.loadClass("osgi.lazystart.d.DTest");
 			} catch (ClassNotFoundException e) {
@@ -2158,7 +2158,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		};
 		getContext().addBundleListener(delayB1);
 		try {
-			new Thread((Runnable) () -> {
+			new Thread(() -> {
 				try {
 					System.out.println(getName() + ": Initial load test.");
 					a1.loadClass("test.bug490902.a.TestLoadA1").newInstance();
@@ -2168,7 +2168,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			}, "Initial load test thread.").start();
 
 			startingB.await();
-			Thread secondThread = new Thread((Runnable) () -> {
+			Thread secondThread = new Thread(() -> {
 				try {
 					System.out.println(getName() + ": Second load test.");
 					a1.loadClass("test.bug490902.a.TestLoadA1").newInstance();

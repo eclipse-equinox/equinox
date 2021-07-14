@@ -113,9 +113,8 @@ class OSGiFrameworkHooks {
 			}
 			ServiceRegistry registry = container.getServiceRegistry();
 			if (registry != null) {
-				registry.notifyHooksPrivileged(CollisionHook.class, "filterCollisions", (hook, hookRegistration) -> { //$NON-NLS-1$
-					hook.filterCollisions(operationType, target, collisionCandidates);
-				});
+				registry.notifyHooksPrivileged(CollisionHook.class, "filterCollisions", //$NON-NLS-1$
+						(hook, hookRegistration) -> hook.filterCollisions(operationType, target, collisionCandidates));
 			}
 		}
 	}

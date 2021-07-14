@@ -151,7 +151,8 @@ public class ConnectHookConfigurator implements HookConfigurator {
 						bundlefile = chain.getBundleFile();
 					}
 					if (bundlefile instanceof ConnectBundleFile) {
-						return ((ConnectBundleFile) bundlefile).getClassLoader().map(l -> new DelegatingConnectClassLoader(parent, configuration, delegate, generation, l)).orElse(null);
+						return ((ConnectBundleFile) bundlefile).getClassLoader().map(
+								l -> new DelegatingConnectClassLoader(parent, configuration, delegate, generation, l)).orElse(null);
 					}
 				}
 				return null;
@@ -160,7 +161,7 @@ public class ConnectHookConfigurator implements HookConfigurator {
 
 		hookRegistry.addActivatorHookFactory(() -> {
 			final List<BundleActivator> activators = new ArrayList<>();
-			moduleConnector.newBundleActivator().ifPresent(a -> activators.add(a));
+			moduleConnector.newBundleActivator().ifPresent(activators::add);
 			return new BundleActivator() {
 				@Override
 				public void start(BundleContext context) throws Exception {

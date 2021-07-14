@@ -249,9 +249,7 @@ public class EquinoxEventPublisher {
 
 		ServiceRegistry serviceRegistry = container.getServiceRegistry();
 		if (serviceRegistry != null) {
-			serviceRegistry.notifyHooksPrivileged(EventHook.class, "event", (hook, hookRegistration) -> { //$NON-NLS-1$
-				hook.event(event, result);
-			});
+			serviceRegistry.notifyHooksPrivileged(EventHook.class, "event", (hook, r) -> hook.event(event, result)); //$NON-NLS-1$
 		}
 	}
 
@@ -419,7 +417,8 @@ public class EquinoxEventPublisher {
 	}
 
 	void flushFrameworkEvents() {
-		EventDispatcher<Object, Object, CountDownLatch> dispatcher = (eventListener, listenerObject, eventAction, flushedSignal) -> flushedSignal.countDown();
+		// Signal that we have flushed all events
+		EventDispatcher<Object, Object, CountDownLatch> dispatcher = (el, lo, ea, signal) -> signal.countDown();
 
 		ListenerQueue<Object, Object, CountDownLatch> queue = newListenerQueue();
 		queue.queueListeners(Collections.<Object, Object> singletonMap(dispatcher, dispatcher).entrySet(), dispatcher);

@@ -484,7 +484,7 @@ public class BasicLocationTests extends CoreTest {
 		try {
 			final List<LogEntry> logEntries = new ArrayList<>();
 			LogReaderService logReaderService = getLogReaderService(equinox);
-			SynchronousLogListener logListener = entry -> logEntries.add(entry);
+			SynchronousLogListener logListener = logEntries::add;
 			logReaderService.addLogListener(logListener);
 			Map<String, Location> locations = getLocations(equinox);
 			Location userLocation = locations.get(Location.USER_FILTER);

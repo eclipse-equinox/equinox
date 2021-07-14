@@ -1241,9 +1241,8 @@ public class ServiceRegistry {
 		if (debug.DEBUG_HOOKS) {
 			Debug.println("notifyServiceFindHooks(" + context.getBundleImpl() + "," + clazz + "," + filterstring + "," + allservices + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		}
-		notifyHooksPrivileged(FindHook.class, "find", (hook, hookRegistration) -> { //$NON-NLS-1$
-			hook.find(context, clazz, filterstring, allservices, result);
-		});
+		notifyHooksPrivileged(FindHook.class, "find", //$NON-NLS-1$
+				(hook, hookRegistration) -> hook.find(context, clazz, filterstring, allservices, result));
 	}
 
 	/**
@@ -1259,9 +1258,8 @@ public class ServiceRegistry {
 		if (debug.DEBUG_HOOKS) {
 			Debug.println("notifyServiceEventHooks(" + event.getType() + ":" + event.getServiceReference() + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
-		notifyHooksPrivileged(org.osgi.framework.hooks.service.EventHook.class, "event", (hook, hookRegistration) -> { //$NON-NLS-1$
-			hook.event(event, result);
-		});
+		notifyHooksPrivileged(org.osgi.framework.hooks.service.EventHook.class, "event", //$NON-NLS-1$
+				(hook, hookRegistration) -> hook.event(event, result));
 	}
 
 	/**
@@ -1276,9 +1274,7 @@ public class ServiceRegistry {
 		if (debug.DEBUG_HOOKS) {
 			Debug.println("notifyServiceEventListenerHooks(" + event.getType() + ":" + event.getServiceReference() + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
-		notifyHooksPrivileged(EventListenerHook.class, "event", (hook, hookRegistration) -> { //$NON-NLS-1$
-			hook.event(event, result);
-		});
+		notifyHooksPrivileged(EventListenerHook.class, "event", (hook, r) -> hook.event(event, result)); //$NON-NLS-1$
 	}
 
 	/**

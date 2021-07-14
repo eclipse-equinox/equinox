@@ -219,7 +219,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 					if (Module.ACTIVE_SET.contains(getState())) {
 						// TODO this still has a chance of a race condition:
 						// multiple threads could get started if stop is called over and over
-						Thread t = new Thread((Runnable) () -> {
+						Thread t = new Thread(() -> {
 							try {
 								stop();
 							} catch (Throwable e) {
@@ -240,7 +240,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 				lockStateChange(ModuleEvent.UPDATED);
 				try {
 					if (Module.ACTIVE_SET.contains(getState())) {
-						Thread t = new Thread((Runnable) () -> {
+						Thread t = new Thread(() -> {
 							try {
 								update();
 							} catch (Throwable e) {
