@@ -144,17 +144,14 @@ public class TestModuleContainer extends AbstractTest {
 		for (final Bundle bundle : bundles) {
 			if (bundle.getBundleId() == 0)
 				continue;
-			executor.execute(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(asMap(bundle.getHeaders("")));
-						container.install(null, bundle.getLocation(), builder, null);
-					} catch (Throwable t) {
-						t.printStackTrace();
-						synchronized (installErrors) {
-							installErrors.add(t);
-						}
+			executor.execute(() -> {
+				try {
+					ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(asMap(bundle.getHeaders("")));
+					container.install(null, bundle.getLocation(), builder, null);
+				} catch (Throwable t) {
+					t.printStackTrace();
+					synchronized (installErrors) {
+						installErrors.add(t);
 					}
 				}
 			});
@@ -522,32 +519,26 @@ public class TestModuleContainer extends AbstractTest {
 
 	@Test
 	public void testSingleton02() throws BundleException, IOException {
-		ResolverHookFactory resolverHookFactory = new ResolverHookFactory() {
+		ResolverHookFactory resolverHookFactory = triggers -> new ResolverHook() {
 
 			@Override
-			public ResolverHook begin(Collection<BundleRevision> triggers) {
-				return new ResolverHook() {
+			public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
+				collisionCandidates.clear();
+			}
 
-					@Override
-					public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
-						collisionCandidates.clear();
-					}
+			@Override
+			public void filterResolvable(Collection<BundleRevision> candidates) {
+				// nothing
+			}
 
-					@Override
-					public void filterResolvable(Collection<BundleRevision> candidates) {
-						// nothing
-					}
+			@Override
+			public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
+				// nothing
+			}
 
-					@Override
-					public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
-						// nothing
-					}
-
-					@Override
-					public void end() {
-						// nothing
-					}
-				};
+			@Override
+			public void end() {
+				// nothing
 			}
 		};
 		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.emptyMap(), resolverHookFactory);
@@ -587,32 +578,26 @@ public class TestModuleContainer extends AbstractTest {
 	@Test
 	public void testSingleton04() throws BundleException, IOException {
 		final Collection<BundleRevision> disabled = new ArrayList<>();
-		ResolverHookFactory resolverHookFactory = new ResolverHookFactory() {
+		ResolverHookFactory resolverHookFactory = triggers -> new ResolverHook() {
 
 			@Override
-			public ResolverHook begin(Collection<BundleRevision> triggers) {
-				return new ResolverHook() {
+			public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
+				// nothing
+			}
 
-					@Override
-					public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
-						// nothing
-					}
+			@Override
+			public void filterResolvable(Collection<BundleRevision> candidates) {
+				candidates.removeAll(disabled);
+			}
 
-					@Override
-					public void filterResolvable(Collection<BundleRevision> candidates) {
-						candidates.removeAll(disabled);
-					}
+			@Override
+			public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
+				// nothing
+			}
 
-					@Override
-					public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
-						// nothing
-					}
-
-					@Override
-					public void end() {
-						// nothing
-					}
-				};
+			@Override
+			public void end() {
+				// nothing
 			}
 		};
 		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), Collections.emptyMap(), resolverHookFactory);
@@ -1845,21 +1830,13 @@ public class TestModuleContainer extends AbstractTest {
 		// use sync queue to force thread creation
 		BlockingQueue<Runnable> queue = new SynchronousQueue<>();
 		// try to name the threads with useful name
-		ThreadFactory threadFactory = new ThreadFactory() {
-			@Override
-			public Thread newThread(Runnable r) {
-				Thread t = new Thread(r, "Resolver thread - UNIT TEST"); //$NON-NLS-1$
-				t.setDaemon(true);
-				return t;
-			}
+		ThreadFactory threadFactory = r -> {
+			Thread t = new Thread(r, "Resolver thread - UNIT TEST"); //$NON-NLS-1$
+			t.setDaemon(true);
+			return t;
 		};
 		// use a rejection policy that simply runs the task in the current thread once the max threads is reached
-		RejectedExecutionHandler rejectHandler = new RejectedExecutionHandler() {
-			@Override
-			public void rejectedExecution(Runnable r, ThreadPoolExecutor exe) {
-				r.run();
-			}
-		};
+		RejectedExecutionHandler rejectHandler = (r, exe) -> r.run();
 		ExecutorService executor = new ThreadPoolExecutor(coreThreads, maxThreads, idleTimeout, TimeUnit.SECONDS, queue, threadFactory, rejectHandler);
 		ScheduledExecutorService timeoutExecutor = new ScheduledThreadPoolExecutor(1);
 
@@ -2937,16 +2914,12 @@ public class TestModuleContainer extends AbstractTest {
 		try {
 			for (final Module module : modules) {
 
-				executor.execute(new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							module.start();
-						} catch (BundleException e) {
-							startErrors.offer(e);
-							e.printStackTrace();
-						}
+				executor.execute(() -> {
+					try {
+						module.start();
+					} catch (BundleException e) {
+						startErrors.offer(e);
+						e.printStackTrace();
 					}
 				});
 			}
@@ -3046,12 +3019,7 @@ public class TestModuleContainer extends AbstractTest {
 		resolverHook.container = container;
 
 		final AtomicReference<ModuleWire> dynamicWire = new AtomicReference<>();
-		Runnable runForEvents = new Runnable() {
-			@Override
-			public void run() {
-				dynamicWire.set(container.resolveDynamic("org.osgi.framework", dynamicImport.getCurrentRevision()));
-			}
-		};
+		Runnable runForEvents = () -> dynamicWire.set(container.resolveDynamic("org.osgi.framework", dynamicImport.getCurrentRevision()));
 		adaptor.setRunForEvents(runForEvents);
 		// install a bundle to resolve
 		manifest.clear();
@@ -3639,14 +3607,11 @@ public class TestModuleContainer extends AbstractTest {
 		final Module module = installDummyModule(manifest, manifest.get(Constants.BUNDLE_SYMBOLICNAME), container);
 
 		final ArrayBlockingQueue<BundleException> startExceptions = new ArrayBlockingQueue<>(2);
-		Runnable start = new Runnable() {
-			@Override
-			public void run() {
-				try {
-					module.start();
-				} catch (BundleException e) {
-					startExceptions.offer(e);
-				}
+		Runnable start = () -> {
+			try {
+				module.start();
+			} catch (BundleException e) {
+				startExceptions.offer(e);
 			}
 		};
 		Thread t1 = new Thread(start);
@@ -3662,14 +3627,11 @@ public class TestModuleContainer extends AbstractTest {
 		startError.printStackTrace();
 
 		final ArrayBlockingQueue<BundleException> stopExceptions = new ArrayBlockingQueue<>(2);
-		Runnable stop = new Runnable() {
-			@Override
-			public void run() {
-				try {
-					module.stop();
-				} catch (BundleException e) {
-					stopExceptions.offer(e);
-				}
+		Runnable stop = () -> {
+			try {
+				module.stop();
+			} catch (BundleException e) {
+				stopExceptions.offer(e);
 			}
 		};
 		Thread tStop1 = new Thread(stop);

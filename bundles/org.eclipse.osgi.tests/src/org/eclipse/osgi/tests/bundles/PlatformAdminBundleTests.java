@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2017 IBM Corporation and others.
+ * Copyright (c) 2007, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -151,14 +151,10 @@ public class PlatformAdminBundleTests extends AbstractBundleTests {
 	public void testNativeCodeFilterWithSpecialChars() throws BundleException, InterruptedException {
 		final AtomicReference<FrameworkEvent> error = new AtomicReference<>();
 		final CountDownLatch errorCnt = new CountDownLatch(1);
-		FrameworkListener errorListener = new FrameworkListener() {
-
-			@Override
-			public void frameworkEvent(FrameworkEvent event) {
-				if (event.getType() == FrameworkEvent.ERROR) {
-					error.set(event);
-					errorCnt.countDown();
-				}
+		FrameworkListener errorListener = event -> {
+			if (event.getType() == FrameworkEvent.ERROR) {
+				error.set(event);
+				errorCnt.countDown();
 			}
 		};
 		getContext().addFrameworkListener(errorListener);

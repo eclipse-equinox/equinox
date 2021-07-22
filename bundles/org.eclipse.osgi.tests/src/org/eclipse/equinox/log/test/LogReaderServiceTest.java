@@ -1,9 +1,9 @@
 /*******************************************************************************
-s
-s This
- * program and the accompanying materials are made available under the terms of
- * the Eclipse Public License 2.0 which accompanies this distribution, and is
- * available at
+ * Copyright (c) 2007, 2021 IBM Corporation and others.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
+ * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
@@ -161,12 +161,9 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		// this is just a bundle that is harmless to start/stop
 		final Bundle testBundle = installer.installBundle("test.logging.a"); //$NON-NLS-1$
 		final AtomicReference<Thread> logThread = new AtomicReference<>();
-		LogListener listener = new SynchronousLogListener() {
-			@Override
-			public void logged(LogEntry entry) {
-				if (entry.getBundle() == testBundle) {
-					logThread.compareAndSet(null, Thread.currentThread());
-				}
+		SynchronousLogListener listener = entry -> {
+			if (entry.getBundle() == testBundle) {
+				logThread.compareAndSet(null, Thread.currentThread());
 			}
 		};
 		reader.addLogListener(listener);
@@ -202,13 +199,10 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		Bundle testBundle = installer.installBundle("test.logging.a"); //$NON-NLS-1$
 		final AtomicReference<LogEntry> logEntry = new AtomicReference<>();
 		final CountDownLatch countDown = new CountDownLatch(1);
-		LogListener listener = new LogListener() {
-			@Override
-			public void logged(LogEntry entry) {
-				if ((entry.getLoggerName()).startsWith("Events.Framework.")) {
-					logEntry.set(entry);
-					countDown.countDown();
-				}
+		LogListener listener = entry -> {
+			if ((entry.getLoggerName()).startsWith("Events.Framework.")) {
+				logEntry.set(entry);
+				countDown.countDown();
 			}
 		};
 		reader.addLogListener(listener);
@@ -229,13 +223,10 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		final List<LogEntry> events = new CopyOnWriteArrayList<>();
 		final CountDownLatch countDown = new CountDownLatch(3);
 		final Bundle b = getContext().getBundle();
-		LogListener listener = new LogListener() {
-			@Override
-			public void logged(LogEntry entry) {
-				if (b.equals(entry.getBundle())) {
-					events.add(entry);
-					countDown.countDown();
-				}
+		LogListener listener = entry -> {
+			if (b.equals(entry.getBundle())) {
+				events.add(entry);
+				countDown.countDown();
 			}
 		};
 		reader.addLogListener(listener);

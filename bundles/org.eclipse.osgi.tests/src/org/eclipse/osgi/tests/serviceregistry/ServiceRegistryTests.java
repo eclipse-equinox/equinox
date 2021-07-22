@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2017 IBM Corporation and others.
+ * Copyright (c) 2008, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -37,29 +37,24 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 	public void testServiceListener01() {
 		final String testMethodName = getName();
 		// simple ServiceListener test
-		Runnable runIt = new Runnable() {
-			@Override
-			public void run() {
-				// nothing
-			}
+		Runnable runIt = () -> {
+			// nothing
 		};
 		final boolean[] results = new boolean[] {false, false, false, false};
-		ServiceListener testListener = new ServiceListener() {
-			public void serviceChanged(ServiceEvent event) {
-				switch (event.getType()) {
-					case ServiceEvent.REGISTERED :
-						results[0] = true;
-						break;
-					case ServiceEvent.MODIFIED :
-						results[1] = true;
-						break;
-					case ServiceEvent.MODIFIED_ENDMATCH :
-						results[2] = true;
-						break;
-					case ServiceEvent.UNREGISTERING :
-						results[3] = true;
-						break;
-				}
+		ServiceListener testListener = event -> {
+			switch (event.getType()) {
+				case ServiceEvent.REGISTERED :
+					results[0] = true;
+					break;
+				case ServiceEvent.MODIFIED :
+					results[1] = true;
+					break;
+				case ServiceEvent.MODIFIED_ENDMATCH :
+					results[2] = true;
+					break;
+				case ServiceEvent.UNREGISTERING :
+					results[3] = true;
+					break;
 			}
 		};
 		try {
@@ -133,29 +128,24 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 	public void testServiceListener02() {
 		final String testMethodName = getName();
 		// simple ServiceListener test
-		Runnable runIt = new Runnable() {
-			@Override
-			public void run() {
-				// nothing
-			}
+		Runnable runIt = () -> {
+			// nothing
 		};
 		final boolean[] results = new boolean[] {false, false, false, false};
-		ServiceListener testListener = new ServiceListener() {
-			public void serviceChanged(ServiceEvent event) {
-				switch (event.getType()) {
-					case ServiceEvent.REGISTERED :
-						results[0] = true;
-						break;
-					case ServiceEvent.MODIFIED :
-						results[1] = true;
-						break;
-					case ServiceEvent.MODIFIED_ENDMATCH :
-						results[2] = true;
-						break;
-					case ServiceEvent.UNREGISTERING :
-						results[3] = true;
-						break;
-				}
+		ServiceListener testListener = event -> {
+			switch (event.getType()) {
+				case ServiceEvent.REGISTERED :
+					results[0] = true;
+					break;
+				case ServiceEvent.MODIFIED :
+					results[1] = true;
+					break;
+				case ServiceEvent.MODIFIED_ENDMATCH :
+					results[2] = true;
+					break;
+				case ServiceEvent.UNREGISTERING :
+					results[3] = true;
+					break;
 			}
 		};
 		try {
@@ -229,29 +219,24 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 	public void testServiceListener03() {
 		final String testMethodName = getName();
 		// simple ServiceListener test
-		Runnable runIt = new Runnable() {
-			@Override
-			public void run() {
-				// nothing
-			}
+		Runnable runIt = () -> {
+			// nothing
 		};
 		final int[] results = new int[] {0, 0, 0, 0};
-		ServiceListener testListener = new ServiceListener() {
-			public void serviceChanged(ServiceEvent event) {
-				switch (event.getType()) {
-					case ServiceEvent.REGISTERED :
-						results[0]++;
-						break;
-					case ServiceEvent.MODIFIED :
-						results[1]++;
-						break;
-					case ServiceEvent.MODIFIED_ENDMATCH :
-						results[2]++;
-						break;
-					case ServiceEvent.UNREGISTERING :
-						results[3]++;
-						break;
-				}
+		ServiceListener testListener = event -> {
+			switch (event.getType()) {
+				case ServiceEvent.REGISTERED :
+					results[0]++;
+					break;
+				case ServiceEvent.MODIFIED :
+					results[1]++;
+					break;
+				case ServiceEvent.MODIFIED_ENDMATCH :
+					results[2]++;
+					break;
+				case ServiceEvent.UNREGISTERING :
+					results[3]++;
+					break;
 			}
 		};
 		try {
@@ -360,11 +345,8 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 	public void testServiceOrdering01() {
 		final String testMethodName = getName();
 		// test that getServiceReference returns the proper service
-		Runnable runIt = new Runnable() {
-			@Override
-			public void run() {
-				// nothing
-			}
+		Runnable runIt = () -> {
+			// nothing
 		};
 		Hashtable props = new Hashtable();
 		props.put("name", testMethodName); //$NON-NLS-1$
@@ -398,11 +380,8 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 	public void testDuplicateObjectClass() {
 		ServiceRegistration reg = null;
 		try {
-			reg = OSGiTestsActivator.getContext().registerService(new String[] {Runnable.class.getName(), Object.class.getName(), Object.class.getName()}, new Runnable() {
-				@Override
-				public void run() {
-					// nothing
-				}
+			reg = OSGiTestsActivator.getContext().registerService(new String[] {Runnable.class.getName(), Object.class.getName(), Object.class.getName()}, (Runnable) () -> {
+				// nothing
 			}, null);
 		} catch (Throwable t) {
 			fail("Failed to register service with duplicate objectClass names", t); //$NON-NLS-1$
@@ -415,11 +394,8 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 	public void testServiceReferenceCompare01() {
 		final String testMethodName = getName();
 		// test that getServiceReference returns the proper service
-		Runnable runIt = new Runnable() {
-			@Override
-			public void run() {
-				// nothing
-			}
+		Runnable runIt = () -> {
+			// nothing
 		};
 		Hashtable props = new Hashtable();
 		props.put("name", testMethodName); //$NON-NLS-1$
@@ -469,11 +445,8 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 	}
 
 	public void testModifiedRanking() {
-		Runnable runIt = new Runnable() {
-			@Override
-			public void run() {
-				// nothing
-			}
+		Runnable runIt = () -> {
+			// nothing
 		};
 		Hashtable props = new Hashtable();
 		props.put(getName(), Boolean.TRUE);
@@ -497,21 +470,13 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 
 	public void testInvalidRanking() {
 		final CountDownLatch warning = new CountDownLatch(1);
-		FrameworkListener warningListener = new FrameworkListener() {
-
-			@Override
-			public void frameworkEvent(FrameworkEvent event) {
-				if (FrameworkEvent.WARNING == event.getType() && OSGiTestsActivator.getContext().getBundle().equals(event.getBundle())) {
-					warning.countDown();
-				}
+		FrameworkListener warningListener = event -> {
+			if (FrameworkEvent.WARNING == event.getType() && OSGiTestsActivator.getContext().getBundle().equals(event.getBundle())) {
+				warning.countDown();
 			}
 		};
-		Runnable runIt = new Runnable() {
-
-			@Override
-			public void run() {
-				// nothing
-			}
+		Runnable runIt = () -> {
+			// nothing
 		};
 		Hashtable props = new Hashtable();
 		props.put(getName(), Boolean.TRUE);

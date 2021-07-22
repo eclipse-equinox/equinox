@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2015 IBM Corporation and others.
+ * Copyright (c) 2012, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -211,26 +211,11 @@ public class BasicTest extends AbstractResourceTest {
 	 */
 	private void assertTb2() {
 		final BundleRevision revision = tb2.adapt(BundleRevision.class);
-		assertNotIdentityCapability(new CapabilityProvider() {
-			@Override
-			public List getCapabilities(String namespace) {
-				return revision.getDeclaredCapabilities(namespace);
-			}
-		});
+		assertNotIdentityCapability(namespace -> revision.getDeclaredCapabilities(namespace));
 		final Resource resource = revision;
-		assertNotIdentityCapability(new CapabilityProvider() {
-			@Override
-			public List getCapabilities(String namespace) {
-				return resource.getCapabilities(namespace);
-			}
-		});
+		assertNotIdentityCapability(namespace -> resource.getCapabilities(namespace));
 		final BundleWiring wiring = tb2.adapt(BundleWiring.class);
-		assertNotIdentityCapability(new CapabilityProvider() {
-			@Override
-			public List getCapabilities(String namespace) {
-				return wiring.getCapabilities(namespace);
-			}
-		});
+		assertNotIdentityCapability(namespace -> wiring.getCapabilities(namespace));
 	}
 
 	/*

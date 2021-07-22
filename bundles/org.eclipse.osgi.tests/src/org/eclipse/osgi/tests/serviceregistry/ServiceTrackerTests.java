@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -30,11 +30,8 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 	public void testServiceTracker01() {
 		final String testMethodName = getName();
 		// simple ServiceTracker test
-		Runnable runIt = new Runnable() {
-			@Override
-			public void run() {
-				// nothing
-			}
+		Runnable runIt = () -> {
+			// nothing
 		};
 		Hashtable props = new Hashtable();
 		props.put(testMethodName, Boolean.TRUE);
@@ -110,11 +107,8 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 	public void testServiceTracker02() {
 		final String testMethodName = getName();
 		// simple ServiceTracker test
-		Runnable runIt = new Runnable() {
-			@Override
-			public void run() {
-				// nothing
-			}
+		Runnable runIt = () -> {
+			// nothing
 		};
 		Hashtable props = new Hashtable();
 		props.put(testMethodName, Boolean.FALSE);
@@ -190,11 +184,8 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 	public void testServiceTracker03() {
 		final String testMethodName = getName();
 		// simple ServiceTracker test
-		Runnable runIt = new Runnable() {
-			@Override
-			public void run() {
-				// nothing
-			}
+		Runnable runIt = () -> {
+			// nothing
 		};
 		Hashtable props = new Hashtable();
 		props.put(testMethodName, Boolean.TRUE);

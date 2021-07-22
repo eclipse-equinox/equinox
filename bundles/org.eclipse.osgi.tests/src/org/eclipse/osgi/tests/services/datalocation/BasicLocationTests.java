@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2014 IBM Corporation and others.
+ * Copyright (c) 2004, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -38,7 +38,6 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogEntry;
-import org.osgi.service.log.LogListener;
 import org.osgi.service.log.LogReaderService;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -485,12 +484,7 @@ public class BasicLocationTests extends CoreTest {
 		try {
 			final List<LogEntry> logEntries = new ArrayList<>();
 			LogReaderService logReaderService = getLogReaderService(equinox);
-			LogListener logListener = new SynchronousLogListener() {
-				@Override
-				public void logged(LogEntry entry) {
-					logEntries.add(entry);
-				}
-			};
+			SynchronousLogListener logListener = entry -> logEntries.add(entry);
 			logReaderService.addLogListener(logListener);
 			Map<String, Location> locations = getLocations(equinox);
 			Location userLocation = locations.get(Location.USER_FILTER);

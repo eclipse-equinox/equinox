@@ -1,9 +1,9 @@
 /*******************************************************************************
-s
-s This
- * program and the accompanying materials are made available under the terms of
- * the Eclipse Public License 2.0 which accompanies this distribution, and is
- * available at
+ * Copyright (c) 2007, 2021 IBM Corporation and others.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
+ * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
@@ -21,7 +21,6 @@ import java.util.Map;
 import org.eclipse.equinox.log.ExtendedLogEntry;
 import org.eclipse.equinox.log.ExtendedLogReaderService;
 import org.eclipse.equinox.log.ExtendedLogService;
-import org.eclipse.equinox.log.LogFilter;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.junit.After;
 import org.junit.Before;
@@ -112,12 +111,7 @@ public class ExtendedLogServiceTest {
 
 	@Test
 	public void testNotIsLoggableWithListener() throws Exception {
-		reader.addLogListener(listener, new LogFilter() {
-
-			public boolean isLoggable(Bundle b, String loggerName, int logLevel) {
-				return false;
-			}
-		});
+		reader.addLogListener(listener, (b, loggerName, logLevel) -> false);
 		if (log.isLoggable(LogService.LOG_INFO))
 			fail();
 	}
@@ -188,13 +182,10 @@ public class ExtendedLogServiceTest {
 
 	@Test
 	public void testLoggerIsLoggableTrue() throws Exception {
-		reader.addLogListener(listener, new LogFilter() {
-
-			public boolean isLoggable(Bundle b, String loggerName, int logLevel) {
-				if (loggerName.equals("test"))
-					return true;
-				return false;
-			}
+		reader.addLogListener(listener, (b, loggerName, logLevel) -> {
+			if (loggerName.equals("test"))
+				return true;
+			return false;
 		});
 		if (!log.getLogger("test").isLoggable(LogService.LOG_INFO))
 			fail();
@@ -202,13 +193,10 @@ public class ExtendedLogServiceTest {
 
 	@Test
 	public void testLoggerNotIsLoggableWithListener() throws Exception {
-		reader.addLogListener(listener, new LogFilter() {
-
-			public boolean isLoggable(Bundle b, String loggerName, int logLevel) {
-				if (loggerName.equals("test"))
-					return false;
-				return true;
-			}
+		reader.addLogListener(listener, (b, loggerName, logLevel) -> {
+			if (loggerName.equals("test"))
+				return false;
+			return true;
 		});
 		if (log.getLogger("test").isLoggable(LogService.LOG_INFO))
 			fail();

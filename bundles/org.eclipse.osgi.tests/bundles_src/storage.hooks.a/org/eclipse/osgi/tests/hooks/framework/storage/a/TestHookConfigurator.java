@@ -32,7 +32,6 @@ import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.ModuleRevisionBuilder;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
-import org.eclipse.osgi.internal.hookregistry.ActivatorHookFactory;
 import org.eclipse.osgi.internal.hookregistry.HookConfigurator;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.internal.hookregistry.StorageHookFactory;
@@ -177,21 +176,15 @@ public class TestHookConfigurator implements HookConfigurator {
 
 	public void addHooks(HookRegistry hookRegistry) {
 		hookRegistry.addStorageHookFactory(new TestStorageHookFactory());
-		hookRegistry.addActivatorHookFactory(new ActivatorHookFactory() {
+		hookRegistry.addActivatorHookFactory(() -> new BundleActivator() {
+			@Override
+			public void start(BundleContext context) throws Exception {
+				TestHelper.setBundle(context.getBundle(Constants.SYSTEM_BUNDLE_LOCATION));
+			}
 
 			@Override
-			public BundleActivator createActivator() {
-				return new BundleActivator() {
-					@Override
-					public void start(BundleContext context) throws Exception {
-						TestHelper.setBundle(context.getBundle(Constants.SYSTEM_BUNDLE_LOCATION));
-					}
-
-					@Override
-					public void stop(BundleContext context) throws Exception {
-						TestHelper.setBundle(null);
-					}
-				};
+			public void stop(BundleContext context) throws Exception {
+				TestHelper.setBundle(null);
 			}
 		});
 	}

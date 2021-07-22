@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2015 IBM Corporation and others.
+ * Copyright (c) 2004, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,7 +19,6 @@ import org.eclipse.core.tests.harness.BundleTestingHelper;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.junit.Assert;
 import org.junit.Test;
-import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.FrameworkEvent;
@@ -62,10 +61,8 @@ public class ExceptionHandlerTests {
 		FrameworkEventListenerWithResult fwkListener = new FrameworkEventListenerWithResult();
 		OSGiTestsActivator.getContext().addFrameworkListener(fwkListener);
 
-		BundleListener npeGenerator = new BundleListener() {
-			public void bundleChanged(BundleEvent event) {
-				throw new NullPointerException("Generated exception");
-			}
+		BundleListener npeGenerator = event -> {
+			throw new NullPointerException("Generated exception");
 		};
 		OSGiTestsActivator.getContext().addBundleListener(npeGenerator);
 
@@ -91,10 +88,8 @@ public class ExceptionHandlerTests {
 		FrameworkEventListenerWithResult fwkListener = new FrameworkEventListenerWithResult();
 		OSGiTestsActivator.getContext().addFrameworkListener(fwkListener);
 
-		BundleListener fatalException = new BundleListener() {
-			public void bundleChanged(BundleEvent event) {
-				throw new OutOfMemoryError("Generated exception");
-			}
+		BundleListener fatalException = event -> {
+			throw new OutOfMemoryError("Generated exception");
 		};
 		OSGiTestsActivator.getContext().addBundleListener(fatalException);
 

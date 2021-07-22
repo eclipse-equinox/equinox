@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -375,13 +375,10 @@ public class LoggingTests extends AbstractBundleTests {
 		LogServiceReference logRef = getLogService(getContext());
 
 		final List events = new ArrayList();
-		EventHandler testHandler = new EventHandler() {
-
-			public void handleEvent(Event event) {
-				synchronized (events) {
-					events.add(event);
-					events.notifyAll();
-				}
+		EventHandler testHandler = event -> {
+			synchronized (events) {
+				events.add(event);
+				events.notifyAll();
 			}
 		};
 
@@ -415,15 +412,12 @@ public class LoggingTests extends AbstractBundleTests {
 		LogServiceReference logRef = getLogService(getContext());
 
 		final List events = new ArrayList();
-		EventHandler testHandler = new EventHandler() {
-
-			public void handleEvent(Event event) {
-				synchronized (events) {
-					events.add(event);
-					events.notifyAll();
-				}
-				throw new NullPointerException();
+		EventHandler testHandler = event -> {
+			synchronized (events) {
+				events.add(event);
+				events.notifyAll();
 			}
+			throw new NullPointerException();
 		};
 
 		Dictionary props = new Hashtable();
@@ -453,12 +447,7 @@ public class LoggingTests extends AbstractBundleTests {
 		final Bundle testBundle = installer.installBundle("test.logging.a"); //$NON-NLS-1$
 		testBundle.start();
 		LogServiceReference logRef = getLogService(getContext());
-		ILogListener recurseLog = new ILogListener() {
-
-			public void logging(IStatus status, String plugin) {
-				Platform.getLog(testBundle).log(status);
-			}
-		};
+		ILogListener recurseLog = (status, plugin) -> Platform.getLog(testBundle).log(status);
 		Platform.addLogListener(recurseLog);
 		try {
 			logRef.fwkLog.log(new FrameworkLogEntry(getContext().getBundle().getSymbolicName(), FrameworkLogEntry.ERROR, 0, "Test message", 0, null, null));

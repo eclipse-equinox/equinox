@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2015 IBM Corporation and others.
+ * Copyright (c) 2011, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -36,41 +36,37 @@ public class ResolverHookTests extends AbstractResourceTest {
 	public void testSingletonIdentity() throws Exception {
 		final RuntimeException error[] = {null};
 		final boolean called[] = {false};
-		ResolverHookFactory resolverHookFactory = new ResolverHookFactory() {
-			public ResolverHook begin(Collection triggers) {
-				return new ResolverHook() {
+		ResolverHookFactory resolverHookFactory = triggers -> new ResolverHook() {
 
-					public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
-						if (error[0] != null)
-							return;
-						called[0] = true;
-						try {
-							assertEquals("Wrong namespace", IdentityNamespace.IDENTITY_NAMESPACE, singleton.getNamespace());
-							assertEquals("Wrong singleton directive", "true", singleton.getDirectives().get(IdentityNamespace.CAPABILITY_SINGLETON_DIRECTIVE));
-							String symbolicName = (String) singleton.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE);
-							for (Iterator iCandidates = collisionCandidates.iterator(); iCandidates.hasNext();) {
-								BundleCapability candidate = (BundleCapability) iCandidates.next();
-								assertEquals("Wrong namespace", IdentityNamespace.IDENTITY_NAMESPACE, candidate.getNamespace());
-								assertEquals("Wrong singleton directive", "true", candidate.getDirectives().get(IdentityNamespace.CAPABILITY_SINGLETON_DIRECTIVE));
-								assertEquals("Wrong symbolic name", symbolicName, (String) candidate.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE));
-							}
-						} catch (RuntimeException e) {
-							error[0] = e;
-						}
+			public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
+				if (error[0] != null)
+					return;
+				called[0] = true;
+				try {
+					assertEquals("Wrong namespace", IdentityNamespace.IDENTITY_NAMESPACE, singleton.getNamespace());
+					assertEquals("Wrong singleton directive", "true", singleton.getDirectives().get(IdentityNamespace.CAPABILITY_SINGLETON_DIRECTIVE));
+					String symbolicName = (String) singleton.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE);
+					for (Iterator iCandidates = collisionCandidates.iterator(); iCandidates.hasNext();) {
+						BundleCapability candidate = (BundleCapability) iCandidates.next();
+						assertEquals("Wrong namespace", IdentityNamespace.IDENTITY_NAMESPACE, candidate.getNamespace());
+						assertEquals("Wrong singleton directive", "true", candidate.getDirectives().get(IdentityNamespace.CAPABILITY_SINGLETON_DIRECTIVE));
+						assertEquals("Wrong symbolic name", symbolicName, (String) candidate.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE));
 					}
+				} catch (RuntimeException e) {
+					error[0] = e;
+				}
+			}
 
-					public void filterResolvable(Collection candidates) {
-						// nothing
-					}
+			public void filterResolvable(Collection candidates) {
+				// nothing
+			}
 
-					public void filterMatches(BundleRequirement requirement, Collection candidates) {
-						// nothing
-					}
+			public void filterMatches(BundleRequirement requirement, Collection candidates) {
+				// nothing
+			}
 
-					public void end() {
-						// nothing
-					}
-				};
+			public void end() {
+				// nothing
 			}
 		};
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2020 IBM Corporation and others.
+ * Copyright (c) 2008, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -635,37 +635,31 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		BundleContext systemContext = equinox.getBundleContext();
 
 		// register a no-op resolver hook to test security
-		ResolverHookFactory dummyHook = new ResolverHookFactory() {
+		ResolverHookFactory dummyHook = triggers -> new ResolverHook() {
 
 			@Override
-			public ResolverHook begin(Collection<BundleRevision> triggers) {
-				return new ResolverHook() {
-
-					@Override
-					public void filterResolvable(Collection<BundleRevision> candidates) {
-						// nothing
-					}
-
-					@Override
-					public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
-						// nothing
-					}
-
-					@Override
-					public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
-						// always remove candidates for dynamic import
-						if (PackageNamespace.RESOLUTION_DYNAMIC.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
-							candidates.clear();
-						}
-					}
-
-					@Override
-					public void end() {
-						// nothing
-					}
-
-				};
+			public void filterResolvable(Collection<BundleRevision> candidates) {
+				// nothing
 			}
+
+			@Override
+			public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
+				// nothing
+			}
+
+			@Override
+			public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
+				// always remove candidates for dynamic import
+				if (PackageNamespace.RESOLUTION_DYNAMIC.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
+					candidates.clear();
+				}
+			}
+
+			@Override
+			public void end() {
+				// nothing
+			}
+
 		};
 		systemContext.registerService(ResolverHookFactory.class, dummyHook, null);
 

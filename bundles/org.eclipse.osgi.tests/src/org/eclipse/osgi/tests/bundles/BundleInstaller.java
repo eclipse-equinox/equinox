@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2016 IBM Corporation and others.
+ * Copyright (c) 2006, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -64,12 +64,7 @@ public class BundleInstaller {
 		if (System.getSecurityManager() == null)
 			return getBundleLocation0(name);
 		try {
-			return (String) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				@Override
-				public Object run() throws Exception {
-					return getBundleLocation0(name);
-				}
-			});
+			return (String) AccessController.doPrivileged((PrivilegedExceptionAction) () -> getBundleLocation0(name));
 		} catch (PrivilegedActionException e) {
 			throw (BundleException) e.getException();
 		}
@@ -169,22 +164,16 @@ public class BundleInstaller {
 			return null;
 		PackageAdmin pa = (PackageAdmin) packageAdmin.getService();
 		final boolean[] flag = new boolean[] {false};
-		FrameworkListener listener = new FrameworkListener() {
-			public void frameworkEvent(FrameworkEvent event) {
-				if (event.getType() == FrameworkEvent.PACKAGES_REFRESHED)
-					synchronized (flag) {
-						flag[0] = true;
-						flag.notifyAll();
-					}
-			}
+		FrameworkListener listener = event -> {
+			if (event.getType() == FrameworkEvent.PACKAGES_REFRESHED)
+				synchronized (flag) {
+					flag[0] = true;
+					flag.notifyAll();
+				}
 		};
 		context.addFrameworkListener(listener);
 		final HashSet refreshed = new HashSet();
-		BundleListener refreshBundleListener = new SynchronousBundleListener() {
-			public void bundleChanged(BundleEvent event) {
-				refreshed.add(event.getBundle());
-			}
-		};
+		SynchronousBundleListener refreshBundleListener = event -> refreshed.add(event.getBundle());
 		context.addBundleListener(refreshBundleListener);
 		try {
 			pa.refreshPackages(refresh);

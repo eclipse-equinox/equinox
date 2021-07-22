@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2018 IBM Corporation and others.
+ * Copyright (c) 2009, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -23,7 +23,6 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -267,11 +266,7 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 			junk = null;
 		}
 
-		CollisionHook hook = new CollisionHook() {
-			public void filterCollisions(int operationType, Bundle target, Collection collisionCandidates) {
-				collisionCandidates.clear();
-			}
-		};
+		CollisionHook hook = (operationType, target, collisionCandidates) -> collisionCandidates.clear();
 		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(CollisionHook.class, hook, null);
 		try {
 			try {

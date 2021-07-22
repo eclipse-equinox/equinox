@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2020 IBM Corporation and others.
+ * Copyright (c) 2008, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -104,7 +104,6 @@ import org.osgi.framework.Version;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.hooks.weaving.WeavingHook;
-import org.osgi.framework.hooks.weaving.WovenClass;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 import org.osgi.framework.namespace.NativeNamespace;
@@ -1342,15 +1341,13 @@ public class SystemBundleTests extends AbstractBundleTests {
 		long testID1 = test1.getBundleId();
 
 		final Bundle testFinal1 = test1;
-		ServiceRegistration reg = systemContext.registerService(WeavingHook.class, new WeavingHook() {
-			public void weave(WovenClass wovenClass) {
-				if (!testFinal1.equals(wovenClass.getBundleWiring().getBundle()))
-					return;
-				if (!"substitutes.x.Ax".equals(wovenClass.getClassName()))
-					return;
-				List dynamicImports = wovenClass.getDynamicImports();
-				dynamicImports.add("*");
-			}
+		ServiceRegistration reg = systemContext.registerService(WeavingHook.class, wovenClass -> {
+			if (!testFinal1.equals(wovenClass.getBundleWiring().getBundle()))
+				return;
+			if (!"substitutes.x.Ax".equals(wovenClass.getClassName()))
+				return;
+			List dynamicImports = wovenClass.getDynamicImports();
+			dynamicImports.add("*");
 		}, null);
 
 		try {
@@ -1382,15 +1379,13 @@ public class SystemBundleTests extends AbstractBundleTests {
 		long testID2 = test2.getBundleId();
 
 		final Bundle testFinal2 = test2;
-		reg = systemContext.registerService(WeavingHook.class, new WeavingHook() {
-			public void weave(WovenClass wovenClass) {
-				if (!testFinal2.equals(wovenClass.getBundleWiring().getBundle()))
-					return;
-				if (!"exporter.importer.test.Test1".equals(wovenClass.getClassName()))
-					return;
-				List dynamicImports = wovenClass.getDynamicImports();
-				dynamicImports.add("*");
-			}
+		reg = systemContext.registerService(WeavingHook.class, wovenClass -> {
+			if (!testFinal2.equals(wovenClass.getBundleWiring().getBundle()))
+				return;
+			if (!"exporter.importer.test.Test1".equals(wovenClass.getClassName()))
+				return;
+			List dynamicImports = wovenClass.getDynamicImports();
+			dynamicImports.add("*");
 		}, null);
 
 		try {
@@ -1453,26 +1448,22 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 		BundleContext systemContext = equinox.getBundleContext();
 
-		systemContext.registerService(ResolverHookFactory.class, new ResolverHookFactory() {
-			public ResolverHook begin(Collection triggers) {
-				return new ResolverHook() {
-					public void filterResolvable(Collection candidates) {
-						// nothing
-					}
+		systemContext.registerService(ResolverHookFactory.class, triggers -> new ResolverHook() {
+			public void filterResolvable(Collection candidates) {
+				// nothing
+			}
 
-					public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
-						// resolve all singletons
-						collisionCandidates.clear();
-					}
+			public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
+				// resolve all singletons
+				collisionCandidates.clear();
+			}
 
-					public void filterMatches(BundleRequirement requirement, Collection candidates) {
-						// nothing
-					}
+			public void filterMatches(BundleRequirement requirement, Collection candidates) {
+				// nothing
+			}
 
-					public void end() {
-						// nothing
-					}
-				};
+			public void end() {
+				// nothing
 			}
 		}, null);
 
@@ -1628,42 +1619,34 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 
 		final Bundle testFinal1 = test1;
-		ServiceRegistration reg = systemContext.registerService(WeavingHook.class, new WeavingHook() {
-			public void weave(WovenClass wovenClass) {
-				if (!testFinal1.equals(wovenClass.getBundleWiring().getBundle()))
-					return;
-				if (!"substitutes.x.Ax".equals(wovenClass.getClassName()))
-					return;
-				List dynamicImports = wovenClass.getDynamicImports();
-				dynamicImports.add("*");
-			}
+		ServiceRegistration reg = systemContext.registerService(WeavingHook.class, wovenClass -> {
+			if (!testFinal1.equals(wovenClass.getBundleWiring().getBundle()))
+				return;
+			if (!"substitutes.x.Ax".equals(wovenClass.getClassName()))
+				return;
+			List dynamicImports = wovenClass.getDynamicImports();
+			dynamicImports.add("*");
 		}, null);
 
-		ServiceRegistration<ResolverHookFactory> resolverHookReg = systemContext.registerService(ResolverHookFactory.class, new ResolverHookFactory() {
-			@Override
-			public ResolverHook begin(Collection<BundleRevision> triggers) {
-				// just trying to delay the resolve so that we get two threads trying to apply off the same snapshot
-				try {
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-					throw new RuntimeException(e);
-				}
-				return null;
+		ServiceRegistration<ResolverHookFactory> resolverHookReg = systemContext.registerService(ResolverHookFactory.class, triggers -> {
+			// just trying to delay the resolve so that we get two threads trying to apply off the same snapshot
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new RuntimeException(e);
 			}
+			return null;
 		}, null);
 
 		final Set<Throwable> errors = Collections.newSetFromMap(new ConcurrentHashMap<Throwable, Boolean>());
 		try {
-			Runnable dynamicLoadClass = new Runnable() {
-				@Override
-				public void run() {
-					try {
-						testFinal1.loadClass("substitutes.x.Ax");
-						testFinal1.loadClass("org.osgi.framework.hooks.bundle.FindHook");
-					} catch (Throwable t) {
-						errors.add(t);
-					}
+			Runnable dynamicLoadClass = () -> {
+				try {
+					testFinal1.loadClass("substitutes.x.Ax");
+					testFinal1.loadClass("org.osgi.framework.hooks.bundle.FindHook");
+				} catch (Throwable t) {
+					errors.add(t);
 				}
 			};
 			Thread t1 = new Thread(dynamicLoadClass, getName() + "-1");
@@ -1702,15 +1685,13 @@ public class SystemBundleTests extends AbstractBundleTests {
 		Bundle chainTestA = systemContext.installBundle(installer.getBundleLocation("chain.test.a")); //$NON-NLS-1$
 		Bundle chainTestB = systemContext.installBundle(installer.getBundleLocation("chain.test.b")); //$NON-NLS-1$
 		Bundle chainTestC = systemContext.installBundle(installer.getBundleLocation("chain.test.c")); //$NON-NLS-1$
-		systemContext.registerService(WeavingHook.class, new WeavingHook() {
-			public void weave(WovenClass wovenClass) {
-				if (!chainTestD.equals(wovenClass.getBundleWiring().getBundle()))
-					return;
-				if (!"chain.test.d.DMultipleChain1".equals(wovenClass.getClassName()))
-					return;
-				List dynamicImports = wovenClass.getDynamicImports();
-				dynamicImports.add("*");
-			}
+		systemContext.registerService(WeavingHook.class, wovenClass -> {
+			if (!chainTestD.equals(wovenClass.getBundleWiring().getBundle()))
+				return;
+			if (!"chain.test.d.DMultipleChain1".equals(wovenClass.getClassName()))
+				return;
+			List dynamicImports = wovenClass.getDynamicImports();
+			dynamicImports.add("*");
 		}, null);
 
 		equinox.start();
@@ -1726,12 +1707,9 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("D is not active.", Bundle.ACTIVE, chainTestD.getState());
 		// record STOPPING order
 		final List<Bundle> stoppingOrder = new ArrayList<>();
-		systemContext.addBundleListener(new SynchronousBundleListener() {
-			@Override
-			public void bundleChanged(BundleEvent event) {
-				if (event.getType() == BundleEvent.STOPPING) {
-					stoppingOrder.add(event.getBundle());
-				}
+		systemContext.addBundleListener((SynchronousBundleListener) event -> {
+			if (event.getType() == BundleEvent.STOPPING) {
+				stoppingOrder.add(event.getBundle());
 			}
 		});
 		stop(equinox);
@@ -2175,20 +2153,16 @@ public class SystemBundleTests extends AbstractBundleTests {
 		final AtomicInteger stoppingEvent = new AtomicInteger();
 		final AtomicInteger stoppedEvent = new AtomicInteger();
 
-		BundleListener systemBundleListener = new SynchronousBundleListener() {
-
-			@Override
-			public void bundleChanged(BundleEvent event) {
-				if (event.getBundle().getBundleId() == 0) {
-					switch (event.getType()) {
-						case BundleEvent.STOPPING :
-							stoppingEvent.incrementAndGet();
-							break;
-						case BundleEvent.STOPPED :
-							stoppedEvent.incrementAndGet();
-						default :
-							break;
-					}
+		SynchronousBundleListener systemBundleListener = event -> {
+			if (event.getBundle().getBundleId() == 0) {
+				switch (event.getType()) {
+					case BundleEvent.STOPPING :
+						stoppingEvent.incrementAndGet();
+						break;
+					case BundleEvent.STOPPED :
+						stoppedEvent.incrementAndGet();
+					default :
+						break;
 				}
 			}
 		};
@@ -2954,13 +2928,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			equinox.getBundleContext().addBundleListener(initialListener);
 			long startTime = System.currentTimeMillis();
 			final CountDownLatch waitForStartLevel = new CountDownLatch(1);
-			equinox.adapt(FrameworkStartLevel.class).setStartLevel(numBundles * 3, new FrameworkListener() {
-
-				@Override
-				public void frameworkEvent(FrameworkEvent event) {
-					waitForStartLevel.countDown();
-				}
-			});
+			equinox.adapt(FrameworkStartLevel.class).setStartLevel(numBundles * 3, event -> waitForStartLevel.countDown());
 			waitForStartLevel.await(20, TimeUnit.SECONDS);
 			System.out.println("Start time: " + (System.currentTimeMillis() - startTime));
 
@@ -3060,27 +3028,19 @@ public class SystemBundleTests extends AbstractBundleTests {
 			}
 
 			final Set<Thread> startingThreads = Collections.synchronizedSet(new HashSet<Thread>());
-			equinox.getBundleContext().addBundleListener(new SynchronousBundleListener() {
-				@Override
-				public void bundleChanged(BundleEvent event) {
-					if (event.getType() == BundleEvent.STARTING) {
-						try {
-							Thread.sleep(50);
-						} catch (InterruptedException e) {
-							// nothing
-						}
-						startingThreads.add(Thread.currentThread());
+			equinox.getBundleContext().addBundleListener((SynchronousBundleListener) event -> {
+				if (event.getType() == BundleEvent.STARTING) {
+					try {
+						Thread.sleep(50);
+					} catch (InterruptedException e) {
+						// nothing
 					}
+					startingThreads.add(Thread.currentThread());
 				}
 			});
 
 			final CountDownLatch waitForStartLevel = new CountDownLatch(1);
-			equinox.adapt(FrameworkStartLevel.class).setStartLevel(5, new FrameworkListener() {
-				@Override
-				public void frameworkEvent(FrameworkEvent event) {
-					waitForStartLevel.countDown();
-				}
-			});
+			equinox.adapt(FrameworkStartLevel.class).setStartLevel(5, event -> waitForStartLevel.countDown());
 			waitForStartLevel.await(10, TimeUnit.SECONDS);
 
 			assertEquals("Did not finish start level setting.", 0, waitForStartLevel.getCount());
@@ -3146,28 +3106,20 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 			final Set<Thread> startingThreads = Collections.synchronizedSet(new HashSet<Thread>());
 			final List<Bundle> startingBundles = Collections.synchronizedList(new ArrayList<Bundle>());
-			equinox.getBundleContext().addBundleListener(new SynchronousBundleListener() {
-				@Override
-				public void bundleChanged(BundleEvent event) {
-					if (event.getType() == BundleEvent.STARTING) {
-						try {
-							Thread.sleep(100);
-						} catch (InterruptedException e) {
-							// nothing
-						}
-						startingBundles.add(event.getBundle());
-						startingThreads.add(Thread.currentThread());
+			equinox.getBundleContext().addBundleListener((SynchronousBundleListener) event -> {
+				if (event.getType() == BundleEvent.STARTING) {
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						// nothing
 					}
+					startingBundles.add(event.getBundle());
+					startingThreads.add(Thread.currentThread());
 				}
 			});
 
 			final CountDownLatch waitForStartLevel = new CountDownLatch(1);
-			equinox.adapt(FrameworkStartLevel.class).setStartLevel(10, new FrameworkListener() {
-				@Override
-				public void frameworkEvent(FrameworkEvent event) {
-					waitForStartLevel.countDown();
-				}
-			});
+			equinox.adapt(FrameworkStartLevel.class).setStartLevel(10, event -> waitForStartLevel.countDown());
 			waitForStartLevel.await(20, TimeUnit.SECONDS);
 
 			assertEquals("Did not finish start level setting.", 0, waitForStartLevel.getCount());
@@ -3288,16 +3240,12 @@ public class SystemBundleTests extends AbstractBundleTests {
 		final List<Throwable> errors = new CopyOnWriteArrayList<>();
 		try {
 			for (final File testBundleFile : testBundles) {
-				executor.execute(new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							systemContext.installBundle("file:///" + testBundleFile.getAbsolutePath());
-						} catch (BundleException e) {
-							e.printStackTrace();
-							errors.add(e);
-						}
+				executor.execute(() -> {
+					try {
+						systemContext.installBundle("file:///" + testBundleFile.getAbsolutePath());
+					} catch (BundleException e) {
+						e.printStackTrace();
+						errors.add(e);
 					}
 				});
 			}
@@ -3361,14 +3309,11 @@ public class SystemBundleTests extends AbstractBundleTests {
 		ExecutorService executor = Executors.newFixedThreadPool(10);
 		try {
 			for (int i = 0; i < 10; i++) {
-				executor.execute(new Runnable() {
-					@Override
-					public void run() {
-						List<Bundle> shuffled = new ArrayList<>(bundles);
-						Collections.shuffle(shuffled);
-						for (Bundle bundle : shuffled) {
-							bundle.getEntry("does/not/exist");
-						}
+				executor.execute(() -> {
+					List<Bundle> shuffled = new ArrayList<>(bundles);
+					Collections.shuffle(shuffled);
+					for (Bundle bundle : shuffled) {
+						bundle.getEntry("does/not/exist");
 					}
 				});
 			}
@@ -3424,34 +3369,28 @@ public class SystemBundleTests extends AbstractBundleTests {
 		testBundle.start();
 
 		final List<FrameworkEvent> errorsAndWarnings = new CopyOnWriteArrayList<>();
-		FrameworkListener fwkListener = new FrameworkListener() {
-			@Override
-			public void frameworkEvent(FrameworkEvent event) {
-				int type = event.getType();
-				if (type == FrameworkEvent.ERROR || type == FrameworkEvent.WARNING) {
-					errorsAndWarnings.add(event);
-				}
+		FrameworkListener fwkListener = event -> {
+			int type = event.getType();
+			if (type == FrameworkEvent.ERROR || type == FrameworkEvent.WARNING) {
+				errorsAndWarnings.add(event);
 			}
 		};
 		systemContext.addFrameworkListener(fwkListener);
 
-		Runnable asyncTest = new Runnable() {
-			@Override
-			public void run() {
-				try {
-					assertNotNull("Entry not found.", testBundle.getEntry("dirA/fileA"));
-					assertNotNull("Entry not found.", testBundle.getEntry("dirA/dirB/fileB"));
-					assertNotNull("Entry not found.", testBundle.getEntry("dirA/dirC/fileC"));
-					assertNotNull("Entry not found.", testBundle.getEntry("dirA/dirC/"));
-					URL dirBURL = converter.toFileURL(testBundle.getEntry("dirA/dirB/"));
-					assertNotNull("Failed to convert to file URL", dirBURL);
-					URL dirAURL = converter.toFileURL(testBundle.getEntry("dirA/"));
-					assertNotNull("Failed to convert to file URL", dirAURL);
-					List<URL> allEntries = testBundle.adapt(BundleWiring.class).findEntries("/", "*", BundleWiring.FINDENTRIES_RECURSE);
-					assertEquals("Wrong number of entries: " + allEntries, 8, allEntries.size());
-				} catch (IOException e) {
-					throw new AssertionFailedError(e.getMessage());
-				}
+		Runnable asyncTest = () -> {
+			try {
+				assertNotNull("Entry not found.", testBundle.getEntry("dirA/fileA"));
+				assertNotNull("Entry not found.", testBundle.getEntry("dirA/dirB/fileB"));
+				assertNotNull("Entry not found.", testBundle.getEntry("dirA/dirC/fileC"));
+				assertNotNull("Entry not found.", testBundle.getEntry("dirA/dirC/"));
+				URL dirBURL = converter.toFileURL(testBundle.getEntry("dirA/dirB/"));
+				assertNotNull("Failed to convert to file URL", dirBURL);
+				URL dirAURL = converter.toFileURL(testBundle.getEntry("dirA/"));
+				assertNotNull("Failed to convert to file URL", dirAURL);
+				List<URL> allEntries = testBundle.adapt(BundleWiring.class).findEntries("/", "*", BundleWiring.FINDENTRIES_RECURSE);
+				assertEquals("Wrong number of entries: " + allEntries, 8, allEntries.size());
+			} catch (IOException e) {
+				throw new AssertionFailedError(e.getMessage());
 			}
 		};
 
@@ -3689,19 +3628,16 @@ public class SystemBundleTests extends AbstractBundleTests {
 		final List<Exception> errors = new CopyOnWriteArrayList<>();
 		try {
 			for (final File f : testBundles) {
-				executor.execute(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							String location = f.toURI().toURL().toExternalForm();
-							System.out.println("Installing: " + f.getName());
-							Bundle b = systemContext.installBundle(location);
-							b.start();
-							BundleWiring wiring = b.adapt(BundleWiring.class);
-							wiring.getClassLoader().loadClass(BundleContext.class.getName());
-						} catch (Exception e) {
-							errors.add(e);
-						}
+				executor.execute(() -> {
+					try {
+						String location = f.toURI().toURL().toExternalForm();
+						System.out.println("Installing: " + f.getName());
+						Bundle b = systemContext.installBundle(location);
+						b.start();
+						BundleWiring wiring = b.adapt(BundleWiring.class);
+						wiring.getClassLoader().loadClass(BundleContext.class.getName());
+					} catch (Exception e) {
+						errors.add(e);
 					}
 				});
 			}

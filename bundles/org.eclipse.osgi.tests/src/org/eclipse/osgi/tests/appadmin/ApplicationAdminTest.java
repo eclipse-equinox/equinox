@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2014 IBM Corporation and others.
+ * Copyright (c) 2007, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -330,17 +330,14 @@ public class ApplicationAdminTest extends OSGiTest {
 		}
 		assertNotNull("app handle is null", handle); //$NON-NLS-1$
 		final ApplicationHandle destroyHandle = handle;
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					Thread.sleep(1000);
-					destroyHandle.destroy();
-				} catch (InterruptedException e) {
-					// nothing
-				}
-
+		new Thread(() -> {
+			try {
+				Thread.sleep(1000);
+				destroyHandle.destroy();
+			} catch (InterruptedException e) {
+				// nothing
 			}
+
 		}).start();
 		String value = null;
 		try {
@@ -588,17 +585,14 @@ public class ApplicationAdminTest extends OSGiTest {
 		}
 		assertNotNull("app handle is null", handle); //$NON-NLS-1$
 		final ApplicationHandle destroyHandle = handle;
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					Thread.sleep(1000);
-					destroyHandle.destroy();
-				} catch (InterruptedException e) {
-					// nothing
-				}
-
+		new Thread(() -> {
+			try {
+				Thread.sleep(1000);
+				destroyHandle.destroy();
+			} catch (InterruptedException e) {
+				// nothing
 			}
+
 		}).start();
 		String value = null;
 		try {

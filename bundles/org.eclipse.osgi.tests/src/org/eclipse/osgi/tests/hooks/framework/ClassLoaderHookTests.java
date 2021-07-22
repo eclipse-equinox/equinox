@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2020 IBM Corporation and others.
+ * Copyright (c) 2013, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,9 +28,7 @@ import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.hooks.weaving.WeavingHook;
-import org.osgi.framework.hooks.weaving.WovenClass;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleRevision;
@@ -120,13 +118,9 @@ public class ClassLoaderHookTests extends AbstractFrameworkHookTests {
 	public void testRejectTransformationFromWeavingHook() throws Exception {
 		setRejectTransformation(true);
 		initAndStartFramework();
-		framework.getBundleContext().registerService(WeavingHook.class, new WeavingHook() {
-
-			@Override
-			public void weave(WovenClass wovenClass) {
-				wovenClass.setBytes(new byte[] {'b', 'a', 'd', 'b', 'y', 't', 'e', 's'});
-				wovenClass.getDynamicImports().add("badimport");
-			}
+		framework.getBundleContext().registerService(WeavingHook.class, wovenClass -> {
+			wovenClass.setBytes(new byte[] {'b', 'a', 'd', 'b', 'y', 't', 'e', 's'});
+			wovenClass.getDynamicImports().add("badimport");
 		}, null);
 		Bundle b = installBundle();
 		b.loadClass(TEST_CLASSNAME);
@@ -183,13 +177,9 @@ public class ClassLoaderHookTests extends AbstractFrameworkHookTests {
 
 	private void refreshBundles(Collection<Bundle> bundles) throws InterruptedException {
 		final CountDownLatch refreshSignal = new CountDownLatch(1);
-		framework.adapt(FrameworkWiring.class).refreshBundles(bundles, new FrameworkListener() {
-
-			@Override
-			public void frameworkEvent(FrameworkEvent event) {
-				if (event.getType() == FrameworkEvent.PACKAGES_REFRESHED) {
-					refreshSignal.countDown();
-				}
+		framework.adapt(FrameworkWiring.class).refreshBundles(bundles, event -> {
+			if (event.getType() == FrameworkEvent.PACKAGES_REFRESHED) {
+				refreshSignal.countDown();
 			}
 		});
 		refreshSignal.await(30, TimeUnit.SECONDS);

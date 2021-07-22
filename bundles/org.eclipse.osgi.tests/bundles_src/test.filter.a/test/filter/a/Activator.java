@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,11 +22,7 @@ public class Activator implements BundleActivator {
 
 	public void start(BundleContext context) throws Exception {
 		final boolean[] serviceChanged = {false};
-		ServiceListener listener = new ServiceListener() {
-			public void serviceChanged(ServiceEvent event) {
-				serviceChanged[0] = true;
-			}
-		};
+		ServiceListener listener = event -> serviceChanged[0] = true;
 		context.addServiceListener(listener, "(&(objectClass=java.lang.String)(test=*))");
 		final boolean[] modifiedService = {false};
 		ServiceTracker tracker = new ServiceTracker(context, FrameworkUtil.createFilter("(&(objectClass=java.lang.String)(test=*))"), new ServiceTrackerCustomizer() {

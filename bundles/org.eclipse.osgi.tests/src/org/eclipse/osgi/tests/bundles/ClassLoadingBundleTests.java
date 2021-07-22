@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2020 IBM Corporation and others.
+ * Copyright (c) 2006, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -51,11 +51,9 @@ import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.BundleListener;
 import org.osgi.framework.BundleReference;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
@@ -602,15 +600,12 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		final Bundle osgiE = installer.installBundle("osgi.lazystart.e"); //$NON-NLS-1$
 		assertTrue("osgi lazy start resolve", installer.resolveBundles(new Bundle[] {osgiD, osgiE})); //$NON-NLS-1$
 
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					osgiD.loadClass("osgi.lazystart.d.DTest");
-				} catch (ClassNotFoundException e) {
-					// should fail here
-					throw new RuntimeException(e);
-				}
+		Thread t = new Thread((Runnable) () -> {
+			try {
+				osgiD.loadClass("osgi.lazystart.d.DTest");
+			} catch (ClassNotFoundException e) {
+				// should fail here
+				throw new RuntimeException(e);
 			}
 		}, "Starting: " + osgiD);
 		t.start();
@@ -878,16 +873,13 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	public void testBug258659_01() throws Exception {
 		// install a bundle
 		Bundle osgiA = installer.installBundle("osgi.lazystart.a"); //$NON-NLS-1$
-		SynchronousBundleListener testLoadClassListener = new SynchronousBundleListener() {
-			public void bundleChanged(BundleEvent event) {
-				if (event.getType() == BundleEvent.LAZY_ACTIVATION)
-					try {
-						event.getBundle().loadClass("osgi.lazystart.a.ATest"); //$NON-NLS-1$
-					} catch (ClassNotFoundException e) {
-						simpleResults.addEvent(e);
-					}
-			}
-
+		SynchronousBundleListener testLoadClassListener = event -> {
+			if (event.getType() == BundleEvent.LAZY_ACTIVATION)
+				try {
+					event.getBundle().loadClass("osgi.lazystart.a.ATest"); //$NON-NLS-1$
+				} catch (ClassNotFoundException e) {
+					simpleResults.addEvent(e);
+				}
 		};
 		OSGiTestsActivator.getContext().addBundleListener(testLoadClassListener);
 		try {
@@ -905,16 +897,13 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		// install a bundle
 		Bundle osgiA = installer.installBundle("osgi.lazystart.a"); //$NON-NLS-1$
 		osgiA.start(Bundle.START_ACTIVATION_POLICY);
-		SynchronousBundleListener testLoadClassListener = new SynchronousBundleListener() {
-			public void bundleChanged(BundleEvent event) {
-				if (event.getType() == BundleEvent.LAZY_ACTIVATION)
-					try {
-						event.getBundle().loadClass("osgi.lazystart.a.ATest"); //$NON-NLS-1$
-					} catch (ClassNotFoundException e) {
-						simpleResults.addEvent(e);
-					}
-			}
-
+		SynchronousBundleListener testLoadClassListener = event -> {
+			if (event.getType() == BundleEvent.LAZY_ACTIVATION)
+				try {
+					event.getBundle().loadClass("osgi.lazystart.a.ATest"); //$NON-NLS-1$
+				} catch (ClassNotFoundException e) {
+					simpleResults.addEvent(e);
+				}
 		};
 		OSGiTestsActivator.getContext().addBundleListener(testLoadClassListener);
 		try {
@@ -931,16 +920,13 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	public void testBug258659_03() throws Exception {
 		// install a bundle
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
-		SynchronousBundleListener testLoadClassListener = new SynchronousBundleListener() {
-			public void bundleChanged(BundleEvent event) {
-				if (event.getType() == BundleEvent.STARTED)
-					try {
-						event.getBundle().stop();
-					} catch (BundleException e) {
-						simpleResults.addEvent(e);
-					}
-			}
-
+		SynchronousBundleListener testLoadClassListener = event -> {
+			if (event.getType() == BundleEvent.STARTED)
+				try {
+					event.getBundle().stop();
+				} catch (BundleException e) {
+					simpleResults.addEvent(e);
+				}
 		};
 		OSGiTestsActivator.getContext().addBundleListener(testLoadClassListener);
 		try {
@@ -959,16 +945,13 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		// install a bundle
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
 		test.start();
-		SynchronousBundleListener testLoadClassListener = new SynchronousBundleListener() {
-			public void bundleChanged(BundleEvent event) {
-				if (event.getType() == BundleEvent.STARTED)
-					try {
-						event.getBundle().stop();
-					} catch (BundleException e) {
-						simpleResults.addEvent(e);
-					}
-			}
-
+		SynchronousBundleListener testLoadClassListener = event -> {
+			if (event.getType() == BundleEvent.STARTED)
+				try {
+					event.getBundle().stop();
+				} catch (BundleException e) {
+					simpleResults.addEvent(e);
+				}
 		};
 		// clear the results from the initial start
 		simpleResults.getResults(0);
@@ -1935,25 +1918,21 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 	public void testBug348805() {
 		final boolean[] endCalled = {false};
-		ResolverHookFactory error = new ResolverHookFactory() {
-			public ResolverHook begin(Collection triggers) {
-				return new ResolverHook() {
-					public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
-						// Nothing
-					}
+		ResolverHookFactory error = triggers -> new ResolverHook() {
+			public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
+				// Nothing
+			}
 
-					public void filterResolvable(Collection candidates) {
-						throw new RuntimeException("Error");
-					}
+			public void filterResolvable(Collection candidates) {
+				throw new RuntimeException("Error");
+			}
 
-					public void filterMatches(BundleRequirement requirement, Collection candidates) {
-						// Nothing
-					}
+			public void filterMatches(BundleRequirement requirement, Collection candidates) {
+				// Nothing
+			}
 
-					public void end() {
-						endCalled[0] = true;
-					}
-				};
+			public void end() {
+				endCalled[0] = true;
 			}
 		};
 		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(ResolverHookFactory.class, error, null);
@@ -1975,25 +1954,21 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	}
 
 	public void testBug348806() {
-		ResolverHookFactory error = new ResolverHookFactory() {
-			public ResolverHook begin(Collection triggers) {
-				return new ResolverHook() {
-					public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
-						// Nothing
-					}
+		ResolverHookFactory error = triggers -> new ResolverHook() {
+			public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
+				// Nothing
+			}
 
-					public void filterResolvable(Collection candidates) {
-						// Nothing
-					}
+			public void filterResolvable(Collection candidates) {
+				// Nothing
+			}
 
-					public void filterMatches(BundleRequirement requirement, Collection candidates) {
-						// Nothing
-					}
+			public void filterMatches(BundleRequirement requirement, Collection candidates) {
+				// Nothing
+			}
 
-					public void end() {
-						throw new RuntimeException("Error");
-					}
-				};
+			public void end() {
+				throw new RuntimeException("Error");
 			}
 		};
 		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(ResolverHookFactory.class, error, null);
@@ -2015,31 +1990,25 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 	public void testBug370258_beginException() {
 		final boolean[] endCalled = {false};
-		ResolverHookFactory endHook = new ResolverHookFactory() {
-			public ResolverHook begin(Collection triggers) {
-				return new ResolverHook() {
-					public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
-						// Nothing
-					}
-
-					public void filterResolvable(Collection candidates) {
-						throw new RuntimeException("Error");
-					}
-
-					public void filterMatches(BundleRequirement requirement, Collection candidates) {
-						// Nothing
-					}
-
-					public void end() {
-						endCalled[0] = true;
-					}
-				};
+		ResolverHookFactory endHook = triggers -> new ResolverHook() {
+			public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
+				// Nothing
 			}
-		};
-		ResolverHookFactory error = new ResolverHookFactory() {
-			public ResolverHook begin(Collection triggers) {
+
+			public void filterResolvable(Collection candidates) {
 				throw new RuntimeException("Error");
 			}
+
+			public void filterMatches(BundleRequirement requirement, Collection candidates) {
+				// Nothing
+			}
+
+			public void end() {
+				endCalled[0] = true;
+			}
+		};
+		ResolverHookFactory error = triggers -> {
+			throw new RuntimeException("Error");
 		};
 
 		ServiceRegistration endReg = OSGiTestsActivator.getContext().registerService(ResolverHookFactory.class, endHook, null);
@@ -2064,46 +2033,38 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 	public void testBug370258_endException() {
 		final boolean[] endCalled = {false};
-		ResolverHookFactory endHook = new ResolverHookFactory() {
-			public ResolverHook begin(Collection triggers) {
-				return new ResolverHook() {
-					public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
-						// Nothing
-					}
+		ResolverHookFactory endHook = triggers -> new ResolverHook() {
+			public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
+				// Nothing
+			}
 
-					public void filterResolvable(Collection candidates) {
-						throw new RuntimeException("Error");
-					}
+			public void filterResolvable(Collection candidates) {
+				throw new RuntimeException("Error");
+			}
 
-					public void filterMatches(BundleRequirement requirement, Collection candidates) {
-						// Nothing
-					}
+			public void filterMatches(BundleRequirement requirement, Collection candidates) {
+				// Nothing
+			}
 
-					public void end() {
-						endCalled[0] = true;
-					}
-				};
+			public void end() {
+				endCalled[0] = true;
 			}
 		};
-		ResolverHookFactory error = new ResolverHookFactory() {
-			public ResolverHook begin(Collection triggers) {
-				return new ResolverHook() {
-					public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
-						// Nothing
-					}
+		ResolverHookFactory error = triggers -> new ResolverHook() {
+			public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
+				// Nothing
+			}
 
-					public void filterResolvable(Collection candidates) {
-						// Nothing
-					}
+			public void filterResolvable(Collection candidates) {
+				// Nothing
+			}
 
-					public void filterMatches(BundleRequirement requirement, Collection candidates) {
-						// Nothing
-					}
+			public void filterMatches(BundleRequirement requirement, Collection candidates) {
+				// Nothing
+			}
 
-					public void end() {
-						throw new RuntimeException("Error");
-					}
-				};
+			public void end() {
+				throw new RuntimeException("Error");
 			}
 		};
 
@@ -2183,49 +2144,38 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 		final CountDownLatch startingB = new CountDownLatch(1);
 		final CountDownLatch endedSecondThread = new CountDownLatch(1);
-		BundleListener delayB1 = new SynchronousBundleListener() {
-			@Override
-			public void bundleChanged(BundleEvent event) {
-				if (event.getBundle() == b1 && BundleEvent.STARTING == event.getType()) {
-					try {
-						startingB.countDown();
-						System.out.println(getName() + ": Delaying now ...");
-						Thread.sleep(15000);
-						System.out.println(getName() + ": Done delaying.");
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
-					}
+		SynchronousBundleListener delayB1 = event -> {
+			if (event.getBundle() == b1 && BundleEvent.STARTING == event.getType()) {
+				try {
+					startingB.countDown();
+					System.out.println(getName() + ": Delaying now ...");
+					Thread.sleep(15000);
+					System.out.println(getName() + ": Done delaying.");
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
 				}
 			}
 		};
 		getContext().addBundleListener(delayB1);
 		try {
-			new Thread(new Runnable() {
-
-				@Override
-				public void run() {
-					try {
-						System.out.println(getName() + ": Initial load test.");
-						a1.loadClass("test.bug490902.a.TestLoadA1").newInstance();
-					} catch (Throwable e) {
-						e.printStackTrace();
-					}
+			new Thread((Runnable) () -> {
+				try {
+					System.out.println(getName() + ": Initial load test.");
+					a1.loadClass("test.bug490902.a.TestLoadA1").newInstance();
+				} catch (Throwable e) {
+					e.printStackTrace();
 				}
 			}, "Initial load test thread.").start();
 
 			startingB.await();
-			Thread secondThread = new Thread(new Runnable() {
-
-				@Override
-				public void run() {
-					try {
-						System.out.println(getName() + ": Second load test.");
-						a1.loadClass("test.bug490902.a.TestLoadA1").newInstance();
-					} catch (Throwable e) {
-						e.printStackTrace();
-					} finally {
-						endedSecondThread.countDown();
-					}
+			Thread secondThread = new Thread((Runnable) () -> {
+				try {
+					System.out.println(getName() + ": Second load test.");
+					a1.loadClass("test.bug490902.a.TestLoadA1").newInstance();
+				} catch (Throwable e) {
+					e.printStackTrace();
+				} finally {
+					endedSecondThread.countDown();
 				}
 			}, "Second load test thread.");
 			secondThread.start();
@@ -2260,23 +2210,19 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 				if (!testThread.get()) {
 					return null;
 				}
-				WeavingHook hook = new WeavingHook() {
-
-					@Override
-					public void weave(WovenClass wovenClass) {
-						if (loadNewClassInWeave.get()) {
-							// Force a load of inner class
-							Runnable run = new Runnable() {
-								@Override
-								public void run() {
-									// nothing
-								}
-							};
-							run.run();
-							weavingHookClasses.add(run.getClass().getName());
-						}
-						called.add(wovenClass);
+				WeavingHook hook = wovenClass -> {
+					if (loadNewClassInWeave.get()) {
+						// Force a load of inner class (must not be a lambda)
+						Runnable run = new Runnable() {
+							@Override
+							public void run() {
+								// nothing
+							}
+						};
+						run.run();
+						weavingHookClasses.add(run.getClass().getName());
 					}
+					called.add(wovenClass);
 				};
 				weavingHookClasses.add(hook.getClass().getName());
 				return hook;
@@ -2297,7 +2243,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			// set flag to load inner class while weaving
 			loadNewClassInWeave.set(true);
 
-			// Force a load of inner class
+			// Force a load of inner class (must not be a lambda)
 			run = new Runnable() {
 				@Override
 				public void run() {
@@ -2434,12 +2380,9 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 		// add a framework event listener to find error message about invalud class loaders
 		final BlockingQueue<FrameworkEvent> events = new LinkedBlockingQueue<>();
-		getContext().addFrameworkListener(new FrameworkListener() {
-			@Override
-			public void frameworkEvent(FrameworkEvent event) {
-				if (event.getBundle() == requirer) {
-					events.add(event);
-				}
+		getContext().addFrameworkListener(event -> {
+			if (event.getBundle() == requirer) {
+				events.add(event);
 			}
 		});
 
@@ -2556,13 +2499,9 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 	void refreshBundles(Collection<Bundle> bundles) throws InterruptedException {
 		final CountDownLatch refreshSignal = new CountDownLatch(1);
-		getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION).adapt(FrameworkWiring.class).refreshBundles(bundles, new FrameworkListener() {
-
-			@Override
-			public void frameworkEvent(FrameworkEvent event) {
-				if (event.getType() == FrameworkEvent.PACKAGES_REFRESHED) {
-					refreshSignal.countDown();
-				}
+		getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION).adapt(FrameworkWiring.class).refreshBundles(bundles, event -> {
+			if (event.getType() == FrameworkEvent.PACKAGES_REFRESHED) {
+				refreshSignal.countDown();
 			}
 		});
 		refreshSignal.await(30, TimeUnit.SECONDS);

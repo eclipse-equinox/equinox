@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -264,33 +264,27 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 	}
 
 	public void testUninstallWhileResolving() throws BundleException {
-		ServiceRegistration<ResolverHookFactory> resolverHookReg = getContext().registerService(ResolverHookFactory.class, new ResolverHookFactory() {
+		ServiceRegistration<ResolverHookFactory> resolverHookReg = getContext().registerService(ResolverHookFactory.class, triggers -> new ResolverHook() {
 
 			@Override
-			public ResolverHook begin(Collection<BundleRevision> triggers) {
-				return new ResolverHook() {
+			public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
+				// Nothing
+			}
 
-					@Override
-					public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
-						// Nothing
-					}
+			@Override
+			public void filterResolvable(Collection<BundleRevision> candidates) {
+				// prevent all resolves
+				candidates.clear();
+			}
 
-					@Override
-					public void filterResolvable(Collection<BundleRevision> candidates) {
-						// prevent all resolves
-						candidates.clear();
-					}
+			@Override
+			public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
+				// nothing
+			}
 
-					@Override
-					public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
-						// nothing
-					}
-
-					@Override
-					public void end() {
-						// nothing
-					}
-				};
+			@Override
+			public void end() {
+				// nothing
 			}
 		}, null);
 		try {

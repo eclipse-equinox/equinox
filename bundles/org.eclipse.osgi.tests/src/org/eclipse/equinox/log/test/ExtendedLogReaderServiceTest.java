@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2015 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2012, 2021 Cognos Incorporated, IBM Corporation and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which
@@ -19,17 +19,13 @@ import java.util.Map;
 import org.eclipse.equinox.log.ExtendedLogEntry;
 import org.eclipse.equinox.log.ExtendedLogReaderService;
 import org.eclipse.equinox.log.ExtendedLogService;
-import org.eclipse.equinox.log.LogFilter;
 import org.eclipse.equinox.log.SynchronousLogListener;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogLevel;
-import org.osgi.service.log.LogListener;
 import org.osgi.service.log.LogService;
 import org.osgi.service.log.Logger;
 import org.osgi.service.log.admin.LoggerAdmin;
@@ -76,11 +72,7 @@ public class ExtendedLogReaderServiceTest {
 	@Test
 	public void testaddFilteredListener() throws Exception {
 		TestListener listener = new TestListener();
-		reader.addLogListener(listener, new LogFilter() {
-			public boolean isLoggable(Bundle b, String loggerName, int logLevel) {
-				return true;
-			}
-		});
+		reader.addLogListener(listener, (b, loggerName, logLevel) -> true);
 		log.log(LogService.LOG_INFO, "info");
 		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
 	}
@@ -100,20 +92,12 @@ public class ExtendedLogReaderServiceTest {
 	@Test
 	public void testaddFilteredListenerTwice() throws Exception {
 		TestListener listener = new TestListener();
-		reader.addLogListener(listener, new LogFilter() {
-			public boolean isLoggable(Bundle b, String loggerName, int logLevel) {
-				return false;
-			}
-		});
+		reader.addLogListener(listener, (b, loggerName, logLevel) -> false);
 
 		if (log.isLoggable(LogService.LOG_INFO))
 			fail();
 
-		reader.addLogListener(listener, new LogFilter() {
-			public boolean isLoggable(Bundle b, String loggerName, int logLevel) {
-				return true;
-			}
-		});
+		reader.addLogListener(listener, (b, loggerName, logLevel) -> true);
 		log.log(LogService.LOG_INFO, "info");
 		assertTrue(listener.getEntryX().getLevel() == LogService.LOG_INFO);
 	}
@@ -131,10 +115,8 @@ public class ExtendedLogReaderServiceTest {
 	@Test
 	public void testBadFilter() throws Exception {
 		TestListener listener = new TestListener();
-		reader.addLogListener(listener, new LogFilter() {
-			public boolean isLoggable(Bundle b, String loggerName, int logLevel) {
-				throw new RuntimeException("Expected error for testBadFilter.");
-			}
+		reader.addLogListener(listener, (b, loggerName, logLevel) -> {
+			throw new RuntimeException("Expected error for testBadFilter.");
 		});
 
 		if (log.isLoggable(LogService.LOG_INFO))
@@ -145,11 +127,9 @@ public class ExtendedLogReaderServiceTest {
 	public void testSynchronousLogListener() throws Exception {
 		final Thread loggerThread = Thread.currentThread();
 		called = false;
-		LogListener listener = new SynchronousLogListener() {
-			public void logged(LogEntry entry) {
-				assertTrue(Thread.currentThread() == loggerThread);
-				called = true;
-			}
+		SynchronousLogListener listener = entry -> {
+			assertTrue(Thread.currentThread() == loggerThread);
+			called = true;
 		};
 		reader.addLogListener(listener);
 		log.log(LogService.LOG_INFO, "info");

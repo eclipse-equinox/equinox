@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2020 IBM Corporation and others.
+ * Copyright (c) 2006, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -312,12 +312,7 @@ public class AbstractBundleTests extends CoreTest {
 		final Exception[] failureException = new BundleException[1];
 		final FrameworkEvent[] success = new FrameworkEvent[] { null };
 		final String uuid = getUUID(equinox);
-		Thread waitForUpdate = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				success[0] = waitForStop(equinox, uuid, false, 10000);
-			}
-		}, "test waitForStop thread"); //$NON-NLS-1$
+		Thread waitForUpdate = new Thread((Runnable) () -> success[0] = waitForStop(equinox, uuid, false, 10000), "test waitForStop thread"); //$NON-NLS-1$
 		waitForUpdate.start();
 
 		try {
