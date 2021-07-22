@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -30,7 +30,6 @@ import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.ModuleRevisionBuilder;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer.ConnectModules;
-import org.eclipse.osgi.internal.hookregistry.ActivatorHookFactory;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
 import org.eclipse.osgi.internal.hookregistry.HookConfigurator;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
@@ -160,28 +159,24 @@ public class ConnectHookConfigurator implements HookConfigurator {
 			}
 		});
 
-		hookRegistry.addActivatorHookFactory(new ActivatorHookFactory() {
-
-			@Override
-			public BundleActivator createActivator() {
-				final List<BundleActivator> activators = new ArrayList<>();
-				moduleConnector.newBundleActivator().ifPresent((a) -> activators.add(a));
-				return new BundleActivator() {
-					@Override
-					public void start(BundleContext context) throws Exception {
-						for (BundleActivator activator : activators) {
-							activator.start(context);
-						}
+		hookRegistry.addActivatorHookFactory(() -> {
+			final List<BundleActivator> activators = new ArrayList<>();
+			moduleConnector.newBundleActivator().ifPresent((a) -> activators.add(a));
+			return new BundleActivator() {
+				@Override
+				public void start(BundleContext context) throws Exception {
+					for (BundleActivator activator : activators) {
+						activator.start(context);
 					}
+				}
 
-					@Override
-					public void stop(BundleContext context) throws Exception {
-						for (BundleActivator activator : activators) {
-							activator.stop(context);
-						}
+				@Override
+				public void stop(BundleContext context) throws Exception {
+					for (BundleActivator activator : activators) {
+						activator.stop(context);
 					}
-				};
-			}
+				}
+			};
 		});
 	}
 }

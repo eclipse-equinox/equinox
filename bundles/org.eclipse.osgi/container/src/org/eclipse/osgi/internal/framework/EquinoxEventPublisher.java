@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2020 IBM Corporation and others.
+ * Copyright (c) 2012, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -137,12 +137,9 @@ public class EquinoxEventPublisher {
 		if (System.getSecurityManager() == null) {
 			publishBundleEventPrivileged(event);
 		} else {
-			AccessController.doPrivileged(new PrivilegedAction<Void>() {
-				@Override
-				public Void run() {
-					publishBundleEventPrivileged(event);
-					return null;
-				}
+			AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+				publishBundleEventPrivileged(event);
+				return null;
 			});
 		}
 	}
@@ -279,12 +276,9 @@ public class EquinoxEventPublisher {
 		if (System.getSecurityManager() == null) {
 			publishFrameworkEventPrivileged(event, listeners);
 		} else {
-			AccessController.doPrivileged(new PrivilegedAction<Void>() {
-				@Override
-				public Void run() {
-					publishFrameworkEventPrivileged(event, listeners);
-					return null;
-				}
+			AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+				publishFrameworkEventPrivileged(event, listeners);
+				return null;
 			});
 		}
 	}
@@ -425,13 +419,7 @@ public class EquinoxEventPublisher {
 	}
 
 	void flushFrameworkEvents() {
-		EventDispatcher<Object, Object, CountDownLatch> dispatcher = new EventDispatcher<Object, Object, CountDownLatch>() {
-			@Override
-			public void dispatchEvent(Object eventListener, Object listenerObject, int eventAction, CountDownLatch flushedSignal) {
-				// Signal that we have flushed all events
-				flushedSignal.countDown();
-			}
-		};
+		EventDispatcher<Object, Object, CountDownLatch> dispatcher = (eventListener, listenerObject, eventAction, flushedSignal) -> flushedSignal.countDown();
 
 		ListenerQueue<Object, Object, CountDownLatch> queue = newListenerQueue();
 		queue.queueListeners(Collections.<Object, Object> singletonMap(dispatcher, dispatcher).entrySet(), dispatcher);

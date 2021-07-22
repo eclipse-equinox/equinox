@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 IBM Corporation and others.
+ * Copyright (c) 2005, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -32,12 +32,7 @@ public class SystemPolicy implements IBuddyPolicy {
 	public static SystemPolicy getInstance(final byte type, final ClassLoader bootLoader) {
 		if (instances[type] == null) {
 			instances[type] = new SystemPolicy();
-			instances[type].classLoader = AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
-				@Override
-				public ClassLoader run() {
-					return createClassLoader(type, bootLoader);
-				}
-			});
+			instances[type].classLoader = AccessController.doPrivileged((PrivilegedAction<ClassLoader>) () -> createClassLoader(type, bootLoader));
 		}
 		return instances[type];
 	}

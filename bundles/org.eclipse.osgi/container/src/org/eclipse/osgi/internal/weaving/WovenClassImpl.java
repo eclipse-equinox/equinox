@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2020 IBM Corporation and others.
+ * Copyright (c) 2010, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -229,12 +229,9 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 			registry.notifyHooksPrivileged(WovenClassListener.class, "modified", context); //$NON-NLS-1$
 		else {
 			try {
-				AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
-					@Override
-					public Void run() {
-						registry.notifyHooksPrivileged(WovenClassListener.class, "modified", context); //$NON-NLS-1$
-						return null;
-					}
+				AccessController.doPrivileged((PrivilegedExceptionAction<Void>) () -> {
+					registry.notifyHooksPrivileged(WovenClassListener.class, "modified", context); //$NON-NLS-1$
+					return null;
 				});
 			} catch (PrivilegedActionException e) {
 				throw (RuntimeException) e.getException();
@@ -252,12 +249,9 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 				registry.notifyHooksPrivileged(WeavingHook.class, "weave", this); //$NON-NLS-1$
 			} else {
 				try {
-					AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
-						@Override
-						public Void run() {
-							registry.notifyHooksPrivileged(WeavingHook.class, "weave", WovenClassImpl.this); //$NON-NLS-1$
-							return null;
-						}
+					AccessController.doPrivileged((PrivilegedExceptionAction<Void>) () -> {
+						registry.notifyHooksPrivileged(WeavingHook.class, "weave", WovenClassImpl.this); //$NON-NLS-1$
+						return null;
 					});
 				} catch (PrivilegedActionException e) {
 					throw (RuntimeException) e.getException();

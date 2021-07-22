@@ -623,12 +623,7 @@ public class Storage {
 	private String getUpdateLocation(final Module module) {
 		if (System.getSecurityManager() == null)
 			return getUpdateLocation0(module);
-		return AccessController.doPrivileged(new PrivilegedAction<String>() {
-			@Override
-			public String run() {
-				return getUpdateLocation0(module);
-			}
-		});
+		return AccessController.doPrivileged((PrivilegedAction<String>) () -> getUpdateLocation0(module));
 	}
 
 	String getUpdateLocation0(Module module) {
@@ -649,12 +644,7 @@ public class Storage {
 			return LocationHelper.getConnection(createURL(spec));
 		}
 		try {
-			return AccessController.doPrivileged(new PrivilegedExceptionAction<URLConnection>() {
-				@Override
-				public URLConnection run() throws IOException {
-					return LocationHelper.getConnection(createURL(spec));
-				}
-			});
+			return AccessController.doPrivileged((PrivilegedExceptionAction<URLConnection>) () -> LocationHelper.getConnection(createURL(spec)));
 		} catch (PrivilegedActionException e) {
 			if (e.getException() instanceof IOException)
 				throw (IOException) e.getException();
@@ -1002,12 +992,7 @@ public class Storage {
 		if (System.getSecurityManager() == null)
 			return getContentFile0(staged, contentType, bundleID, generationID);
 		try {
-			return AccessController.doPrivileged(new PrivilegedExceptionAction<File>() {
-				@Override
-				public File run() throws BundleException {
-					return getContentFile0(staged, contentType, bundleID, generationID);
-				}
-			});
+			return AccessController.doPrivileged((PrivilegedExceptionAction<File>) () -> getContentFile0(staged, contentType, bundleID, generationID));
 		} catch (PrivilegedActionException e) {
 			if (e.getException() instanceof BundleException)
 				throw (BundleException) e.getException();
@@ -1113,12 +1098,7 @@ public class Storage {
 		if (System.getSecurityManager() == null)
 			return stageContent0(in, sourceURL);
 		try {
-			return AccessController.doPrivileged(new PrivilegedExceptionAction<File>() {
-				@Override
-				public File run() throws BundleException {
-					return stageContent0(in, sourceURL);
-				}
-			});
+			return AccessController.doPrivileged((PrivilegedExceptionAction<File>) () -> stageContent0(in, sourceURL));
 		} catch (PrivilegedActionException e) {
 			if (e.getException() instanceof BundleException)
 				throw (BundleException) e.getException();
@@ -1276,12 +1256,9 @@ public class Storage {
 			delete0(delete);
 		} else {
 			try {
-				AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
-					@Override
-					public Void run() throws IOException {
-						delete0(delete);
-						return null;
-					}
+				AccessController.doPrivileged((PrivilegedExceptionAction<Void>) () -> {
+					delete0(delete);
+					return null;
 				});
 			} catch (PrivilegedActionException e) {
 				if (e.getException() instanceof IOException)
@@ -1307,12 +1284,9 @@ public class Storage {
 			save0();
 		} else {
 			try {
-				AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
-					@Override
-					public Void run() throws IOException {
-						save0();
-						return null;
-					}
+				AccessController.doPrivileged((PrivilegedExceptionAction<Void>) () -> {
+					save0();
+					return null;
 				});
 			} catch (PrivilegedActionException e) {
 				if (e.getException() instanceof IOException)

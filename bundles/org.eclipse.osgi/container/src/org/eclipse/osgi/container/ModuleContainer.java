@@ -1390,19 +1390,16 @@ public final class ModuleContainer implements DebugOptionsListener {
 			return;
 		}
 		getAdaptor().refreshedSystemModule();
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
+		Thread t = new Thread(() -> {
+			try {
+				systemModule.lockStateChange(ModuleEvent.UNRESOLVED);
 				try {
-					systemModule.lockStateChange(ModuleEvent.UNRESOLVED);
-					try {
-						systemModule.stop();
-					} finally {
-						systemModule.unlockStateChange(ModuleEvent.UNRESOLVED);
-					}
-				} catch (BundleException e) {
-					e.printStackTrace();
+					systemModule.stop();
+				} finally {
+					systemModule.unlockStateChange(ModuleEvent.UNRESOLVED);
 				}
+			} catch (BundleException e) {
+				e.printStackTrace();
 			}
 		});
 		t.start();
@@ -1499,18 +1496,15 @@ public final class ModuleContainer implements DebugOptionsListener {
 		private Collection<Module> getModules(final Collection<Bundle> bundles) {
 			if (bundles == null)
 				return null;
-			return AccessController.doPrivileged(new PrivilegedAction<Collection<Module>>() {
-				@Override
-				public Collection<Module> run() {
-					Collection<Module> result = new ArrayList<>(bundles.size());
-					for (Bundle bundle : bundles) {
-						Module module = bundle.adapt(Module.class);
-						if (module == null)
-							throw new IllegalStateException("Could not adapt a bundle to a module. " + bundle); //$NON-NLS-1$
-						result.add(module);
-					}
-					return result;
+			return AccessController.doPrivileged((PrivilegedAction<Collection<Module>>) () -> {
+				Collection<Module> result = new ArrayList<>(bundles.size());
+				for (Bundle bundle : bundles) {
+					Module module = bundle.adapt(Module.class);
+					if (module == null)
+						throw new IllegalStateException("Could not adapt a bundle to a module. " + bundle); //$NON-NLS-1$
+					result.add(module);
 				}
+				return result;
 			});
 		}
 
@@ -1829,29 +1823,21 @@ public final class ModuleContainer implements DebugOptionsListener {
 			if (toStart.isEmpty()) {
 				return;
 			}
-			final Executor executor = inParallel ? adaptor.getStartLevelExecutor() : new Executor() {
-				@Override
-				public void execute(Runnable command) {
-					command.run();
-				}
-			};
+			final Executor executor = inParallel ? adaptor.getStartLevelExecutor() : command -> command.run();
 			final CountDownLatch done = new CountDownLatch(toStart.size());
 			for (final Module module : toStart) {
-				executor.execute(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							if (debugStartLevel) {
-								Debug.println("StartLevel: resuming bundle; " + ContainerStartLevel.this.toString(module) + "; with startLevel=" + toStartLevel); //$NON-NLS-1$ //$NON-NLS-2$
-							}
-							module.start(StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
-						} catch (BundleException e) {
-							adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
-						} catch (IllegalStateException e) {
-							// been uninstalled
-						} finally {
-							done.countDown();
+				executor.execute(() -> {
+					try {
+						if (debugStartLevel) {
+							Debug.println("StartLevel: resuming bundle; " + ContainerStartLevel.this.toString(module) + "; with startLevel=" + toStartLevel); //$NON-NLS-1$ //$NON-NLS-2$
 						}
+						module.start(StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
+					} catch (BundleException e1) {
+						adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e1);
+					} catch (IllegalStateException e2) {
+						// been uninstalled
+					} finally {
+						done.countDown();
 					}
 				});
 

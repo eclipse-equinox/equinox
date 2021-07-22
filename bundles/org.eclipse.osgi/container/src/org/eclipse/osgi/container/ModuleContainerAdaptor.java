@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -29,12 +29,7 @@ import org.osgi.framework.startlevel.FrameworkStartLevel;
  * @since 3.10
  */
 public abstract class ModuleContainerAdaptor {
-	private static Executor defaultExecutor = new Executor() {
-		@Override
-		public void execute(Runnable command) {
-			command.run();
-		}
-	};
+	private static Executor defaultExecutor = command -> command.run();
 
 	/**
 	 * Event types that may be {@link #publishContainerEvent(ContainerEvent, Module, Throwable, FrameworkListener...) published}

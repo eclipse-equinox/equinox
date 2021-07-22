@@ -1018,12 +1018,9 @@ public abstract class FilterImpl implements Filter {
 
 		private static void setAccessible(final AccessibleObject accessible) {
 			if (!accessible.isAccessible()) {
-				AccessController.doPrivileged(new PrivilegedAction<Void>() {
-					@Override
-					public Void run() {
-						accessible.setAccessible(true);
-						return null;
-					}
+				AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+					accessible.setAccessible(true);
+					return null;
 				});
 			}
 		}

@@ -840,21 +840,18 @@ public final class AdminPermission extends BasicPermission {
 		recurse.set(bundle);
 		try {
 			final Map<String, Object> map = new HashMap<>(4);
-			AccessController.doPrivileged(new PrivilegedAction<Void>() {
-				@Override
-				public Void run() {
-					map.put("id", Long.valueOf(bundle.getBundleId()));
-					map.put("location", bundle.getLocation());
-					String name = bundle.getSymbolicName();
-					if (name != null) {
-						map.put("name", name);
-					}
-					SignerProperty signer = new SignerProperty(bundle);
-					if (signer.isBundleSigned()) {
-						map.put("signer", signer);
-					}
-					return null;
+			AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+				map.put("id", Long.valueOf(bundle.getBundleId()));
+				map.put("location", bundle.getLocation());
+				String name = bundle.getSymbolicName();
+				if (name != null) {
+					map.put("name", name);
 				}
+				SignerProperty signer = new SignerProperty(bundle);
+				if (signer.isBundleSigned()) {
+					map.put("signer", signer);
+				}
+				return null;
 			});
 			return properties = map;
 		} finally {

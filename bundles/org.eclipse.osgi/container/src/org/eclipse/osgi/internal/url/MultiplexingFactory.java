@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2016 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2006, 2021 Cognos Incorporated, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -232,12 +232,7 @@ public abstract class MultiplexingFactory {
 
 	private boolean isSystemClass(final Class<?> clazz) {
 		// we want to ignore classes from the system
-		ClassLoader cl = AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
-			@Override
-			public ClassLoader run() {
-				return clazz.getClassLoader();
-			}
-		});
+		ClassLoader cl = AccessController.doPrivileged((PrivilegedAction<ClassLoader>) () -> clazz.getClassLoader());
 		return cl == null || systemLoaders.contains(cl);
 	}
 

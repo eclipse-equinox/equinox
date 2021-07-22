@@ -100,12 +100,9 @@ class OSGiFrameworkHooks {
 			if (System.getSecurityManager() == null) {
 				notifyCollisionHooksPriviledged(operationType, target, shrinkable);
 			} else {
-				AccessController.doPrivileged(new PrivilegedAction<Void>() {
-					@Override
-					public Void run() {
-						notifyCollisionHooksPriviledged(operationType, target, shrinkable);
-						return null;
-					}
+				AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+					notifyCollisionHooksPriviledged(operationType, target, shrinkable);
+					return null;
 				});
 			}
 		}
@@ -168,17 +165,14 @@ class OSGiFrameworkHooks {
 		}
 
 		private ServiceReferenceImpl<ResolverHookFactory>[] getHookReferences(final ServiceRegistry registry, final BundleContextImpl context) {
-			return AccessController.doPrivileged(new PrivilegedAction<ServiceReferenceImpl<ResolverHookFactory>[]>() {
-				@Override
-				public ServiceReferenceImpl<ResolverHookFactory>[] run() {
-					try {
-						@SuppressWarnings("unchecked")
-						ServiceReferenceImpl<ResolverHookFactory>[] result = (ServiceReferenceImpl<ResolverHookFactory>[]) registry.getServiceReferences(context, ResolverHookFactory.class.getName(), null, false);
-						return result;
-					} catch (InvalidSyntaxException e) {
-						// cannot happen; no filter
-						return null;
-					}
+			return AccessController.doPrivileged((PrivilegedAction<ServiceReferenceImpl<ResolverHookFactory>[]>) () -> {
+				try {
+					@SuppressWarnings("unchecked")
+					ServiceReferenceImpl<ResolverHookFactory>[] result = (ServiceReferenceImpl<ResolverHookFactory>[]) registry.getServiceReferences(context, ResolverHookFactory.class.getName(), null, false);
+					return result;
+				} catch (InvalidSyntaxException e) {
+					// cannot happen; no filter
+					return null;
 				}
 			});
 

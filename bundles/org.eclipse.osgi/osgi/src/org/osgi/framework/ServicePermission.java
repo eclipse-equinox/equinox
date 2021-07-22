@@ -559,21 +559,18 @@ public final class ServicePermission extends BasicPermission {
 		final Map<String, Object> props = new HashMap<>(4);
 		final Bundle bundle = service.getBundle();
 		if (bundle != null) {
-			AccessController.doPrivileged(new PrivilegedAction<Void>() {
-				@Override
-				public Void run() {
-					props.put("id", Long.valueOf(bundle.getBundleId()));
-					props.put("location", bundle.getLocation());
-					String name = bundle.getSymbolicName();
-					if (name != null) {
-						props.put("name", name);
-					}
-					SignerProperty signer = new SignerProperty(bundle);
-					if (signer.isBundleSigned()) {
-						props.put("signer", signer);
-					}
-					return null;
+			AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+				props.put("id", Long.valueOf(bundle.getBundleId()));
+				props.put("location", bundle.getLocation());
+				String name = bundle.getSymbolicName();
+				if (name != null) {
+					props.put("name", name);
 				}
+				SignerProperty signer = new SignerProperty(bundle);
+				if (signer.isBundleSigned()) {
+					props.put("signer", signer);
+				}
+				return null;
 			});
 		}
 		return properties = new Properties(props, service);

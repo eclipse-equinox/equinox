@@ -872,12 +872,9 @@ public class ServiceRegistry {
 		if (System.getSecurityManager() == null) {
 			publishServiceEventPrivileged(event);
 		} else {
-			AccessController.doPrivileged(new PrivilegedAction<Void>() {
-				@Override
-				public Void run() {
-					publishServiceEventPrivileged(event);
-					return null;
-				}
+			AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+				publishServiceEventPrivileged(event);
+				return null;
 			});
 		}
 	}
@@ -1180,12 +1177,7 @@ public class ServiceRegistry {
 	 * @return The name of the class that is not satisfied by the service object.
 	 */
 	static String checkServiceClass(final String[] clazzes, final Object serviceObject) {
-		ClassLoader cl = AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
-			@Override
-			public ClassLoader run() {
-				return serviceObject.getClass().getClassLoader();
-			}
-		});
+		ClassLoader cl = AccessController.doPrivileged((PrivilegedAction<ClassLoader>) () -> serviceObject.getClass().getClassLoader());
 		for (int i = 0, len = clazzes.length; i < len; i++) {
 			try {
 				Class<?> serviceClazz = cl == null ? Class.forName(clazzes[i]) : cl.loadClass(clazzes[i]);
@@ -1238,12 +1230,9 @@ public class ServiceRegistry {
 		if (System.getSecurityManager() == null) {
 			notifyFindHooksPrivileged(context, clazz, filterstring, allservices, result);
 		} else {
-			AccessController.doPrivileged(new PrivilegedAction<Void>() {
-				@Override
-				public Void run() {
-					notifyFindHooksPrivileged(context, clazz, filterstring, allservices, result);
-					return null;
-				}
+			AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+				notifyFindHooksPrivileged(context, clazz, filterstring, allservices, result);
+				return null;
 			});
 		}
 	}
@@ -1357,12 +1346,9 @@ public class ServiceRegistry {
 		if (System.getSecurityManager() == null) {
 			notifyNewListenerHookPrivileged(registration);
 		} else {
-			AccessController.doPrivileged(new PrivilegedAction<Void>() {
-				@Override
-				public Void run() {
-					notifyNewListenerHookPrivileged(registration);
-					return null;
-				}
+			AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+				notifyNewListenerHookPrivileged(registration);
+				return null;
 			});
 		}
 
@@ -1405,12 +1391,9 @@ public class ServiceRegistry {
 		if (System.getSecurityManager() == null) {
 			notifyListenerHooksPrivileged(listeners, added);
 		} else {
-			AccessController.doPrivileged(new PrivilegedAction<Void>() {
-				@Override
-				public Void run() {
-					notifyListenerHooksPrivileged(listeners, added);
-					return null;
-				}
+			AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+				notifyListenerHooksPrivileged(listeners, added);
+				return null;
 			});
 		}
 

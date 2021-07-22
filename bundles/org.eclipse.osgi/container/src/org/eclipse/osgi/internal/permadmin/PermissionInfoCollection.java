@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2020 IBM Corporation and others.
+ * Copyright (c) 2008, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -91,12 +91,9 @@ public final class PermissionInfoCollection extends PermissionCollection {
 			}
 			try {
 				final PermissionCollection targetCollection = collection;
-				AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-					@Override
-					public Object run() throws Exception {
-						addPermissions(bundlePermissions, targetCollection, permClass);
-						return null;
-					}
+				AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () -> {
+					addPermissions(bundlePermissions, targetCollection, permClass);
+					return null;
 				});
 
 			} catch (Exception e) {

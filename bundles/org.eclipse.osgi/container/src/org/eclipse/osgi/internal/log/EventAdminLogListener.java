@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2020 IBM Corporation
+ * Copyright (c) 2007, 2021 IBM Corporation
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -69,13 +69,10 @@ public class EventAdminLogListener implements SynchronousLogListener {
 	@Override
 	public void logged(final LogEntry entry) {
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
-				@Override
-				public Void run() throws Exception {
-					Object convertedEvent = convertEvent(entry);
-					postEvent.invoke(eventAdmin, convertedEvent);
-					return null;
-				}
+			AccessController.doPrivileged((PrivilegedExceptionAction<Void>) () -> {
+				Object convertedEvent = convertEvent(entry);
+				postEvent.invoke(eventAdmin, convertedEvent);
+				return null;
 			});
 		} catch (PrivilegedActionException e) {
 			Throwable cause = e.getCause();

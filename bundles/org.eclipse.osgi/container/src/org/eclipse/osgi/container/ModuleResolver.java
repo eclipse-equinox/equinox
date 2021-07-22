@@ -1279,13 +1279,7 @@ final class ModuleResolver {
 			if (dynamicAttachableFrags.isEmpty()) {
 				return Collections.emptyMap();
 			}
-			Collections.sort(dynamicAttachableFrags, new Comparator<ModuleRevision>() {
-				@Override
-				public int compare(ModuleRevision r1, ModuleRevision r2) {
-					// we only care about versions here
-					return -(r1.getVersion().compareTo(r2.getVersion()));
-				}
-			});
+			Collections.sort(dynamicAttachableFrags, (r1, r2) -> -(r1.getVersion().compareTo(r2.getVersion())));
 
 			Map<ModuleCapability, DynamicFragments> hostDynamicFragments = new HashMap<>();
 			// first find the hosts to dynamically attach to

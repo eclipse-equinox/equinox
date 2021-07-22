@@ -631,11 +631,7 @@ public class OpenHashMap<K, V> implements Serializable, Cloneable, SortedMap<K, 
 
     public Iterable<Map.Entry<K, V>> fast() {
         if (fast == null) {
-            fast = new Iterable<Entry<K, V>>() {
-                public Iterator<Entry<K, V>> iterator() {
-                    return new FastEntryIterator();
-                }
-            };
+            fast = () -> new FastEntryIterator();
         }
 
         return fast;

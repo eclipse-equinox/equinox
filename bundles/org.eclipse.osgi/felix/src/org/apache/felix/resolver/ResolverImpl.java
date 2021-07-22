@@ -409,13 +409,7 @@ public class ResolverImpl implements Resolver
             final ExecutorService executor =
                 System.getSecurityManager() != null ?
                     AccessController.doPrivileged(
-                        new PrivilegedAction<ExecutorService>()
-                        {
-                            public ExecutorService run()
-                            {
-                                return Executors.newFixedThreadPool(m_parallelism);
-                            }
-                        }, m_acc)
+                        (PrivilegedAction<ExecutorService>) () -> Executors.newFixedThreadPool(m_parallelism), m_acc)
                 :
                     Executors.newFixedThreadPool(m_parallelism);
             try
@@ -426,11 +420,9 @@ public class ResolverImpl implements Resolver
             {
                 if (System.getSecurityManager() != null)
                 {
-                    AccessController.doPrivileged(new PrivilegedAction<Void>(){
-                        public Void run() {
-                            executor.shutdownNow();
-                            return null;
-                        }
+                    AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+                        executor.shutdownNow();
+                        return null;
                     }, m_acc);
                 }
                 else
@@ -1202,27 +1194,15 @@ public class ResolverImpl implements Resolver
         {
             final Packages packages = new Packages(resource);
             allPackages.put(resource, packages);
-            executor.execute(new Runnable()
-            {
-                public void run()
-                {
-                    calculateExportedPackages(session, allCandidates, resource,
-                        packages.m_exportedPkgs, packages.m_substitePkgs);
-                }
-            });
+            executor.execute(() -> calculateExportedPackages(session, allCandidates, resource,
+                packages.m_exportedPkgs, packages.m_substitePkgs));
         }
         executor.await();
 
         // Parallel compute package lists
         for (final Resource resource : allWireCandidates.keySet())
         {
-            executor.execute(new Runnable()
-            {
-                public void run()
-                {
-                    getPackages(session, allCandidates, allWireCandidates, allPackages, resource, allPackages.get(resource));
-                }
-            });
+            executor.execute(() -> getPackages(session, allCandidates, allWireCandidates, allPackages, resource, allPackages.get(resource)));
         }
         executor.await();
 
@@ -1247,13 +1227,7 @@ public class ResolverImpl implements Resolver
             final Packages packages = entry.getValue();
             if (packages.m_sources.isEmpty())
             {
-                executor.execute(new Runnable()
-                {
-                    public void run()
-                    {
-                        getPackageSourcesInternal(session, allPackages, resource, packages);
-                    }
-                });
+                executor.execute(() -> getPackageSourcesInternal(session, allPackages, resource, packages));
             }
         }
         executor.await();
@@ -1261,13 +1235,7 @@ public class ResolverImpl implements Resolver
         // Parallel compute uses
         for (final Resource resource : allWireCandidates.keySet())
         {
-            executor.execute(new Runnable()
-            {
-                public void run()
-                {
-                    computeUses(session, allWireCandidates, allPackages, resource);
-                }
-            });
+            executor.execute(() -> computeUses(session, allWireCandidates, allPackages, resource));
         }
         executor.await();
 
@@ -2511,18 +2479,14 @@ public class ResolverImpl implements Resolver
 
         public void execute(final Runnable runnable)
         {
-            FutureTask<Void> task = new FutureTask<>(new Runnable()
-            {
-                public void run()
+            FutureTask<Void> task = new FutureTask<>(() -> {
+                try
                 {
-                    try
-                    {
-                        runnable.run();
-                    }
-                    catch (Throwable t)
-                    {
-                        throwable.compareAndSet(null, t);
-                    }
+                    runnable.run();
+                }
+                catch (Throwable t)
+                {
+                    throwable.compareAndSet(null, t);
                 }
             }, (Void) null);
             // must have a happens-first to add the task to awaiting

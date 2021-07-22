@@ -66,12 +66,7 @@ public class BundleLocationCondition {
 		String[] args = info.getArgs();
 		if (args.length != 1 && args.length != 2)
 			throw new IllegalArgumentException("Illegal number of args: " + args.length);
-		String bundleLocation = AccessController.doPrivileged(new PrivilegedAction<String>() {
-			@Override
-			public String run() {
-				return bundle.getLocation();
-			}
-		});
+		String bundleLocation = AccessController.doPrivileged((PrivilegedAction<String>) () -> bundle.getLocation());
 		Filter filter = null;
 		try {
 			filter = FrameworkUtil.createFilter("(location=" + escapeLocation(args[0]) + ")");

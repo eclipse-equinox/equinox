@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 IBM Corporation and others.
+ * Copyright (c) 2005, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -102,28 +102,25 @@ public class ZipBundleFile extends CloseableBundleFile<ZipEntry> {
 
 	@Override
 	protected Iterable<String> getPaths() {
-		return new Iterable<String>() {
-			@Override
-			public Iterator<String> iterator() {
-				final Enumeration<? extends ZipEntry> entries = zipFile.entries();
-				return new Iterator<String>() {
-					@Override
-					public boolean hasNext() {
-						return entries.hasMoreElements();
-					}
+		return () -> {
+			final Enumeration<? extends ZipEntry> entries = zipFile.entries();
+			return new Iterator<String>() {
+				@Override
+				public boolean hasNext() {
+					return entries.hasMoreElements();
+				}
 
-					@Override
-					public String next() {
-						ZipEntry entry = entries.nextElement();
-						return entry.getName();
-					}
+				@Override
+				public String next() {
+					ZipEntry entry = entries.nextElement();
+					return entry.getName();
+				}
 
-					@Override
-					public void remove() {
-						throw new UnsupportedOperationException();
-					}
-				};
-			}
+				@Override
+				public void remove() {
+					throw new UnsupportedOperationException();
+				}
+			};
 		};
 	}
 }

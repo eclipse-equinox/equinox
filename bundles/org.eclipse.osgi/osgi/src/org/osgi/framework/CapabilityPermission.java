@@ -504,21 +504,18 @@ public final class CapabilityPermission extends BasicPermission {
 		if (bundle == null) {
 			return properties = props;
 		}
-		AccessController.doPrivileged(new PrivilegedAction<Void>() {
-			@Override
-			public Void run() {
-				props.put("id", Long.valueOf(bundle.getBundleId()));
-				props.put("location", bundle.getLocation());
-				String name = bundle.getSymbolicName();
-				if (name != null) {
-					props.put("name", name);
-				}
-				SignerProperty signer = new SignerProperty(bundle);
-				if (signer.isBundleSigned()) {
-					props.put("signer", signer);
-				}
-				return null;
+		AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+			props.put("id", Long.valueOf(bundle.getBundleId()));
+			props.put("location", bundle.getLocation());
+			String name = bundle.getSymbolicName();
+			if (name != null) {
+				props.put("name", name);
 			}
+			SignerProperty signer = new SignerProperty(bundle);
+			if (signer.isBundleSigned()) {
+				props.put("signer", signer);
+			}
+			return null;
 		});
 		return properties = new Properties(props, attributes);
 	}

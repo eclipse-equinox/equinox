@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2013 IBM Corporation and others.
+ * Copyright (c) 2003, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -210,12 +210,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 	S factoryGetService() {
 		final S service;
 		try {
-			service = AccessController.doPrivileged(new PrivilegedAction<S>() {
-				@Override
-				public S run() {
-					return factory.getService(context.getBundleImpl(), registration);
-				}
-			});
+			service = AccessController.doPrivileged((PrivilegedAction<S>) () -> factory.getService(context.getBundleImpl(), registration));
 		} catch (Throwable t) {
 			if (debug.DEBUG_SERVICES) {
 				Debug.println(factory + ".getService() exception: " + t.getMessage()); //$NON-NLS-1$
@@ -259,12 +254,9 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 	/* @GuardedBy("this") */
 	void factoryUngetService(final S service) {
 		try {
-			AccessController.doPrivileged(new PrivilegedAction<Void>() {
-				@Override
-				public Void run() {
-					factory.ungetService(context.getBundleImpl(), registration, service);
-					return null;
-				}
+			AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+				factory.ungetService(context.getBundleImpl(), registration, service);
+				return null;
 			});
 		} catch (Throwable t) {
 			if (debug.DEBUG_SERVICES) {
