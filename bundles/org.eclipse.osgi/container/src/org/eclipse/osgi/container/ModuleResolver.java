@@ -1279,6 +1279,7 @@ final class ModuleResolver {
 			if (dynamicAttachableFrags.isEmpty()) {
 				return Collections.emptyMap();
 			}
+			// we only care about versions here
 			Collections.sort(dynamicAttachableFrags, (r1, r2) -> -(r1.getVersion().compareTo(r2.getVersion())));
 
 			Map<ModuleCapability, DynamicFragments> hostDynamicFragments = new HashMap<>();

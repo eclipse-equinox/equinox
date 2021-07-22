@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 IBM Corporation and others.
+ * Copyright (c) 2008, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -44,11 +44,8 @@ public class ServiceHookTests extends AbstractBundleTests {
 	public void testFindHook01() {
 		final String testMethodName = "testFindHook01"; //$NON-NLS-1$
 		// test the FindHook is called and can remove a reference from the results
-		Runnable runIt = new Runnable() {
-			@Override
-			public void run() {
-				// nothing
-			}
+		Runnable runIt = () -> {
+			// nothing
 		};
 		final BundleContext testContext = OSGiTestsActivator.getContext();
 		// register services
@@ -71,50 +68,48 @@ public class ServiceHookTests extends AbstractBundleTests {
 		props.put(Constants.SERVICE_DESCRIPTION, "find hook 1"); //$NON-NLS-1$
 		props.put(Constants.SERVICE_DESCRIPTION, "min value"); //$NON-NLS-1$
 		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
-		ServiceRegistration regHook1 = testContext.registerService(FindHook.class.getName(), new FindHook() {
-			public void find(BundleContext context, String name, String filter, boolean allServices, Collection references) {
-				try {
-					synchronized (hookCalled) {
-						if (!startTest[0])
-							return;
-						hookCalled[++hookCalled[0]] = 1;
-					}
-					assertEquals("wrong context in hook", testContext, context); //$NON-NLS-1$
-					assertEquals("wrong name in hook", Runnable.class.getName(), name); //$NON-NLS-1$
-					assertEquals("wrong filter in hook", "(name=" + testMethodName + ")", filter); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					assertEquals("wrong allservices in hook", false, allServices); //$NON-NLS-1$
-					assertEquals("wrong number of services in hook", 1, references.size()); //$NON-NLS-1$
-					Iterator iter = references.iterator();
-					while (iter.hasNext()) {
-						ServiceReference ref = (ServiceReference) iter.next();
-						if (ref.equals(reg1.getReference())) {
-							fail("service 1 is present"); //$NON-NLS-1$
-						}
-						if (ref.equals(reg2.getReference())) {
-							fail("service 2 is present"); //$NON-NLS-1$
-						}
-					}
-
-					try {
-						references.add(reg1.getReference());
-						fail("add to collection succeeded"); //$NON-NLS-1$
-					} catch (UnsupportedOperationException e) {
-						// should get an exception
-					} catch (Exception e) {
-						fail("incorrect exception", e); //$NON-NLS-1$
-					}
-					try {
-						references.addAll(Arrays.asList(new ServiceReference[] {reg1.getReference()}));
-						fail("addAll to collection succeeded"); //$NON-NLS-1$
-					} catch (UnsupportedOperationException e) {
-						// should get an exception
-					} catch (Exception e) {
-						fail("incorrect exception", e); //$NON-NLS-1$
-					}
-				} catch (AssertionFailedError a) {
-					hookErrors[0] = a;
-					return;
+		ServiceRegistration regHook1 = testContext.registerService(FindHook.class.getName(), (FindHook) (context, name, filter, allServices, references) -> {
+			try {
+				synchronized (hookCalled) {
+					if (!startTest[0])
+						return;
+					hookCalled[++hookCalled[0]] = 1;
 				}
+				assertEquals("wrong context in hook", testContext, context); //$NON-NLS-1$
+				assertEquals("wrong name in hook", Runnable.class.getName(), name); //$NON-NLS-1$
+				assertEquals("wrong filter in hook", "(name=" + testMethodName + ")", filter); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				assertEquals("wrong allservices in hook", false, allServices); //$NON-NLS-1$
+				assertEquals("wrong number of services in hook", 1, references.size()); //$NON-NLS-1$
+				Iterator iter = references.iterator();
+				while (iter.hasNext()) {
+					ServiceReference ref = (ServiceReference) iter.next();
+					if (ref.equals(reg1.getReference())) {
+						fail("service 1 is present"); //$NON-NLS-1$
+					}
+					if (ref.equals(reg2.getReference())) {
+						fail("service 2 is present"); //$NON-NLS-1$
+					}
+				}
+
+				try {
+					references.add(reg1.getReference());
+					fail("add to collection succeeded"); //$NON-NLS-1$
+				} catch (UnsupportedOperationException e1) {
+					// should get an exception
+				} catch (Exception e2) {
+					fail("incorrect exception", e2); //$NON-NLS-1$
+				}
+				try {
+					references.addAll((Collection<? extends ServiceReference<?>>) Arrays.asList(reg1.getReference()));
+					fail("addAll to collection succeeded"); //$NON-NLS-1$
+				} catch (UnsupportedOperationException e3) {
+					// should get an exception
+				} catch (Exception e4) {
+					fail("incorrect exception", e4); //$NON-NLS-1$
+				}
+			} catch (AssertionFailedError a) {
+				hookErrors[0] = a;
+				return;
 			}
 		}, props);
 
@@ -122,47 +117,45 @@ public class ServiceHookTests extends AbstractBundleTests {
 		props.put(Constants.SERVICE_DESCRIPTION, "find hook 2"); //$NON-NLS-1$
 		props.put(Constants.SERVICE_DESCRIPTION, "max value first"); //$NON-NLS-1$
 		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
-		ServiceRegistration regHook2 = testContext.registerService(FindHook.class.getName(), new FindHook() {
-			public void find(BundleContext context, String name, String filter, boolean allServices, Collection references) {
-				try {
-					synchronized (hookCalled) {
-						if (!startTest[0])
-							return;
-						hookCalled[++hookCalled[0]] = 2;
-					}
-					assertEquals("wrong context in hook", testContext, context); //$NON-NLS-1$
-					assertEquals("wrong name in hook", Runnable.class.getName(), name); //$NON-NLS-1$
-					assertEquals("wrong filter in hook", "(name=" + testMethodName + ")", filter); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					assertEquals("wrong allservices in hook", false, allServices); //$NON-NLS-1$
-					assertEquals("wrong number of services in hook", 3, references.size()); //$NON-NLS-1$
-					Iterator iter = references.iterator();
-					while (iter.hasNext()) {
-						ServiceReference ref = (ServiceReference) iter.next();
-						if (ref.equals(reg2.getReference())) {
-							iter.remove();
-						}
-					}
-
-					try {
-						references.add(reg2.getReference());
-						fail("add to collection succeeded"); //$NON-NLS-1$
-					} catch (UnsupportedOperationException e) {
-						// should get an exception
-					} catch (Exception e) {
-						fail("incorrect exception", e); //$NON-NLS-1$
-					}
-					try {
-						references.addAll(Arrays.asList(new ServiceReference[] {reg2.getReference()}));
-						fail("addAll to collection succeeded"); //$NON-NLS-1$
-					} catch (UnsupportedOperationException e) {
-						// should get an exception
-					} catch (Exception e) {
-						fail("incorrect exception", e); //$NON-NLS-1$
-					}
-				} catch (AssertionFailedError a) {
-					hookErrors[1] = a;
-					return;
+		ServiceRegistration regHook2 = testContext.registerService(FindHook.class.getName(), (FindHook) (context, name, filter, allServices, references) -> {
+			try {
+				synchronized (hookCalled) {
+					if (!startTest[0])
+						return;
+					hookCalled[++hookCalled[0]] = 2;
 				}
+				assertEquals("wrong context in hook", testContext, context); //$NON-NLS-1$
+				assertEquals("wrong name in hook", Runnable.class.getName(), name); //$NON-NLS-1$
+				assertEquals("wrong filter in hook", "(name=" + testMethodName + ")", filter); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				assertEquals("wrong allservices in hook", false, allServices); //$NON-NLS-1$
+				assertEquals("wrong number of services in hook", 3, references.size()); //$NON-NLS-1$
+				Iterator iter = references.iterator();
+				while (iter.hasNext()) {
+					ServiceReference ref = (ServiceReference) iter.next();
+					if (ref.equals(reg2.getReference())) {
+						iter.remove();
+					}
+				}
+
+				try {
+					references.add(reg2.getReference());
+					fail("add to collection succeeded"); //$NON-NLS-1$
+				} catch (UnsupportedOperationException e1) {
+					// should get an exception
+				} catch (Exception e2) {
+					fail("incorrect exception", e2); //$NON-NLS-1$
+				}
+				try {
+					references.addAll((Collection<? extends ServiceReference<?>>) Arrays.asList(reg2.getReference()));
+					fail("addAll to collection succeeded"); //$NON-NLS-1$
+				} catch (UnsupportedOperationException e3) {
+					// should get an exception
+				} catch (Exception e4) {
+					fail("incorrect exception", e4); //$NON-NLS-1$
+				}
+			} catch (AssertionFailedError a) {
+				hookErrors[1] = a;
+				return;
 			}
 		}, props);
 
@@ -170,100 +163,96 @@ public class ServiceHookTests extends AbstractBundleTests {
 		props.put(Constants.SERVICE_DESCRIPTION, "find hook 3"); //$NON-NLS-1$
 		props.put(Constants.SERVICE_DESCRIPTION, "max value second"); //$NON-NLS-1$
 		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
-		ServiceRegistration regHook3 = testContext.registerService(FindHook.class.getName(), new FindHook() {
-			public void find(BundleContext context, String name, String filter, boolean allServices, Collection references) {
-				try {
-					synchronized (hookCalled) {
-						if (!startTest[0])
-							return;
-						hookCalled[++hookCalled[0]] = 3;
-					}
-					assertEquals("wrong context in hook", testContext, context); //$NON-NLS-1$
-					assertEquals("wrong name in hook", Runnable.class.getName(), name); //$NON-NLS-1$
-					assertEquals("wrong filter in hook", "(name=" + testMethodName + ")", filter); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					assertEquals("wrong allservices in hook", false, allServices); //$NON-NLS-1$
-					assertEquals("wrong number of services in hook", 2, references.size()); //$NON-NLS-1$
-					Iterator iter = references.iterator();
-					while (iter.hasNext()) {
-						ServiceReference ref = (ServiceReference) iter.next();
-						if (ref.equals(reg2.getReference())) {
-							fail("service 2 is present"); //$NON-NLS-1$
-						}
-					}
-
-					try {
-						references.add(reg2.getReference());
-						fail("add to collection succeeded"); //$NON-NLS-1$
-					} catch (UnsupportedOperationException e) {
-						// should get an exception
-					} catch (Exception e) {
-						fail("incorrect exception", e); //$NON-NLS-1$
-					}
-					try {
-						references.addAll(Arrays.asList(new ServiceReference[] {reg2.getReference()}));
-						fail("addAll to collection succeeded"); //$NON-NLS-1$
-					} catch (UnsupportedOperationException e) {
-						// should get an exception
-					} catch (Exception e) {
-						fail("incorrect exception", e); //$NON-NLS-1$
-					}
-				} catch (AssertionFailedError a) {
-					hookErrors[2] = a;
-					return;
+		ServiceRegistration regHook3 = testContext.registerService(FindHook.class.getName(), (FindHook) (context, name, filter, allServices, references) -> {
+			try {
+				synchronized (hookCalled) {
+					if (!startTest[0])
+						return;
+					hookCalled[++hookCalled[0]] = 3;
 				}
-				// throw an exception from the hook to test that the next hooks are called.
-				throw new RuntimeException(testMethodName);
+				assertEquals("wrong context in hook", testContext, context); //$NON-NLS-1$
+				assertEquals("wrong name in hook", Runnable.class.getName(), name); //$NON-NLS-1$
+				assertEquals("wrong filter in hook", "(name=" + testMethodName + ")", filter); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				assertEquals("wrong allservices in hook", false, allServices); //$NON-NLS-1$
+				assertEquals("wrong number of services in hook", 2, references.size()); //$NON-NLS-1$
+				Iterator iter = references.iterator();
+				while (iter.hasNext()) {
+					ServiceReference ref = (ServiceReference) iter.next();
+					if (ref.equals(reg2.getReference())) {
+						fail("service 2 is present"); //$NON-NLS-1$
+					}
+				}
+
+				try {
+					references.add(reg2.getReference());
+					fail("add to collection succeeded"); //$NON-NLS-1$
+				} catch (UnsupportedOperationException e1) {
+					// should get an exception
+				} catch (Exception e2) {
+					fail("incorrect exception", e2); //$NON-NLS-1$
+				}
+				try {
+					references.addAll((Collection<? extends ServiceReference<?>>) Arrays.asList(reg2.getReference()));
+					fail("addAll to collection succeeded"); //$NON-NLS-1$
+				} catch (UnsupportedOperationException e3) {
+					// should get an exception
+				} catch (Exception e4) {
+					fail("incorrect exception", e4); //$NON-NLS-1$
+				}
+			} catch (AssertionFailedError a) {
+				hookErrors[2] = a;
+				return;
 			}
+			// throw an exception from the hook to test that the next hooks are called.
+			throw new RuntimeException(testMethodName);
 		}, props);
 
 		// register find hook 4
 		props.put(Constants.SERVICE_DESCRIPTION, "find hook 4"); //$NON-NLS-1$
 		props.put(Constants.SERVICE_DESCRIPTION, "max value third"); //$NON-NLS-1$
 		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
-		ServiceRegistration regHook4 = testContext.registerService(FindHook.class.getName(), new FindHook() {
-			public void find(BundleContext context, String name, String filter, boolean allServices, Collection references) {
-				try {
-					synchronized (hookCalled) {
-						if (!startTest[0])
-							return;
-						hookCalled[++hookCalled[0]] = 4;
-					}
-					assertEquals("wrong context in hook", testContext, context); //$NON-NLS-1$
-					assertEquals("wrong name in hook", Runnable.class.getName(), name); //$NON-NLS-1$
-					assertEquals("wrong filter in hook", "(name=" + testMethodName + ")", filter); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					assertEquals("wrong allservices in hook", false, allServices); //$NON-NLS-1$
-					assertEquals("wrong number of services in hook", 2, references.size()); //$NON-NLS-1$
-					Iterator iter = references.iterator();
-					while (iter.hasNext()) {
-						ServiceReference ref = (ServiceReference) iter.next();
-						if (ref.equals(reg1.getReference())) {
-							iter.remove();
-						}
-						if (ref.equals(reg2.getReference())) {
-							fail("service 2 is present"); //$NON-NLS-1$
-						}
-					}
-
-					try {
-						references.add(reg2.getReference());
-						fail("add to collection succeeded"); //$NON-NLS-1$
-					} catch (UnsupportedOperationException e) {
-						// should get an exception
-					} catch (Exception e) {
-						fail("incorrect exception", e); //$NON-NLS-1$
-					}
-					try {
-						references.addAll(Arrays.asList(new ServiceReference[] {reg2.getReference()}));
-						fail("addAll to collection succeeded"); //$NON-NLS-1$
-					} catch (UnsupportedOperationException e) {
-						// should get an exception
-					} catch (Exception e) {
-						fail("incorrect exception", e); //$NON-NLS-1$
-					}
-				} catch (AssertionFailedError a) {
-					hookErrors[3] = a;
-					return;
+		ServiceRegistration regHook4 = testContext.registerService(FindHook.class.getName(), (FindHook) (context, name, filter, allServices, references) -> {
+			try {
+				synchronized (hookCalled) {
+					if (!startTest[0])
+						return;
+					hookCalled[++hookCalled[0]] = 4;
 				}
+				assertEquals("wrong context in hook", testContext, context); //$NON-NLS-1$
+				assertEquals("wrong name in hook", Runnable.class.getName(), name); //$NON-NLS-1$
+				assertEquals("wrong filter in hook", "(name=" + testMethodName + ")", filter); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				assertEquals("wrong allservices in hook", false, allServices); //$NON-NLS-1$
+				assertEquals("wrong number of services in hook", 2, references.size()); //$NON-NLS-1$
+				Iterator iter = references.iterator();
+				while (iter.hasNext()) {
+					ServiceReference ref = (ServiceReference) iter.next();
+					if (ref.equals(reg1.getReference())) {
+						iter.remove();
+					}
+					if (ref.equals(reg2.getReference())) {
+						fail("service 2 is present"); //$NON-NLS-1$
+					}
+				}
+
+				try {
+					references.add(reg2.getReference());
+					fail("add to collection succeeded"); //$NON-NLS-1$
+				} catch (UnsupportedOperationException e1) {
+					// should get an exception
+				} catch (Exception e2) {
+					fail("incorrect exception", e2); //$NON-NLS-1$
+				}
+				try {
+					references.addAll((Collection<? extends ServiceReference<?>>) Arrays.asList(reg2.getReference()));
+					fail("addAll to collection succeeded"); //$NON-NLS-1$
+				} catch (UnsupportedOperationException e3) {
+					// should get an exception
+				} catch (Exception e4) {
+					fail("incorrect exception", e4); //$NON-NLS-1$
+				}
+			} catch (AssertionFailedError a) {
+				hookErrors[3] = a;
+				return;
 			}
 		}, props);
 
@@ -347,11 +336,8 @@ public class ServiceHookTests extends AbstractBundleTests {
 	public void testEventHook01() {
 		final String testMethodName = "testEventHook01"; //$NON-NLS-1$
 		// test the EventHook is called and can remove a reference from the results
-		Runnable runIt = new Runnable() {
-			@Override
-			public void run() {
-				// nothing
-			}
+		Runnable runIt = () -> {
+			// nothing
 		};
 		final BundleContext testContext = OSGiTestsActivator.getContext();
 
@@ -359,11 +345,9 @@ public class ServiceHookTests extends AbstractBundleTests {
 		final AssertionFailedError[] hookErrors = new AssertionFailedError[] {null};
 		final List events = new ArrayList();
 
-		final ServiceListener sl = new ServiceListener() {
-			public void serviceChanged(ServiceEvent event) {
-				synchronized (events) {
-					events.add(event);
-				}
+		final ServiceListener sl = event -> {
+			synchronized (events) {
+				events.add(event);
 			}
 		};
 
@@ -377,70 +361,66 @@ public class ServiceHookTests extends AbstractBundleTests {
 		}
 
 		final Filter filter = tmpFilter;
-		EventHook hook1 = new EventHook() {
-			public void event(ServiceEvent event, Collection contexts) {
-				try {
-					if (!filter.match(event.getServiceReference())) {
-						return;
-					}
-					synchronized (hookCalled) {
-						hookCalled[++hookCalled[0]] = 1;
-					}
-					assertTrue("does not contain test context", contexts.contains(testContext)); //$NON-NLS-1$
-
-					try {
-						contexts.add(testContext.getBundle(0).getBundleContext());
-						fail("add to collection succeeded"); //$NON-NLS-1$
-					} catch (UnsupportedOperationException e) {
-						// should get an exception
-					} catch (Exception e) {
-						fail("incorrect exception", e); //$NON-NLS-1$
-					}
-					try {
-						contexts.addAll(Arrays.asList(new BundleContext[] {testContext.getBundle(0).getBundleContext()}));
-						fail("addAll to collection succeeded"); //$NON-NLS-1$
-					} catch (UnsupportedOperationException e) {
-						// should get an exception
-					} catch (Exception e) {
-						fail("incorrect exception", e); //$NON-NLS-1$
-					}
-				} catch (AssertionFailedError a) {
-					hookErrors[0] = a;
+		EventHook hook1 = (event, contexts) -> {
+			try {
+				if (!filter.match(event.getServiceReference())) {
 					return;
 				}
+				synchronized (hookCalled) {
+					hookCalled[++hookCalled[0]] = 1;
+				}
+				assertTrue("does not contain test context", contexts.contains(testContext)); //$NON-NLS-1$
+
+				try {
+					contexts.add(testContext.getBundle(0).getBundleContext());
+					fail("add to collection succeeded"); //$NON-NLS-1$
+				} catch (UnsupportedOperationException e1) {
+					// should get an exception
+				} catch (Exception e2) {
+					fail("incorrect exception", e2); //$NON-NLS-1$
+				}
+				try {
+					contexts.addAll(Arrays.asList(new BundleContext[] {testContext.getBundle(0).getBundleContext()}));
+					fail("addAll to collection succeeded"); //$NON-NLS-1$
+				} catch (UnsupportedOperationException e3) {
+					// should get an exception
+				} catch (Exception e4) {
+					fail("incorrect exception", e4); //$NON-NLS-1$
+				}
+			} catch (AssertionFailedError a) {
+				hookErrors[0] = a;
+				return;
 			}
 		};
-		EventHook hook2 = new EventHook() {
-			public void event(ServiceEvent event, Collection contexts) {
-				try {
-					if (!filter.match(event.getServiceReference())) {
-						return;
-					}
-					synchronized (hookCalled) {
-						hookCalled[++hookCalled[0]] = 1;
-					}
-					assertTrue("does not contain test context", contexts.contains(testContext)); //$NON-NLS-1$
-					contexts.remove(testContext);
-					try {
-						contexts.add(testContext.getBundle(0).getBundleContext());
-						fail("add to collection succeeded"); //$NON-NLS-1$
-					} catch (UnsupportedOperationException e) {
-						// should get an exception
-					} catch (Exception e) {
-						fail("incorrect exception", e); //$NON-NLS-1$
-					}
-					try {
-						contexts.addAll(Arrays.asList(new BundleContext[] {testContext.getBundle(0).getBundleContext()}));
-						fail("addAll to collection succeeded"); //$NON-NLS-1$
-					} catch (UnsupportedOperationException e) {
-						// should get an exception
-					} catch (Exception e) {
-						fail("incorrect exception", e); //$NON-NLS-1$
-					}
-				} catch (AssertionFailedError a) {
-					hookErrors[0] = a;
+		EventHook hook2 = (event, contexts) -> {
+			try {
+				if (!filter.match(event.getServiceReference())) {
 					return;
 				}
+				synchronized (hookCalled) {
+					hookCalled[++hookCalled[0]] = 1;
+				}
+				assertTrue("does not contain test context", contexts.contains(testContext)); //$NON-NLS-1$
+				contexts.remove(testContext);
+				try {
+					contexts.add(testContext.getBundle(0).getBundleContext());
+					fail("add to collection succeeded"); //$NON-NLS-1$
+				} catch (UnsupportedOperationException e1) {
+					// should get an exception
+				} catch (Exception e2) {
+					fail("incorrect exception", e2); //$NON-NLS-1$
+				}
+				try {
+					contexts.addAll(Arrays.asList(new BundleContext[] {testContext.getBundle(0).getBundleContext()}));
+					fail("addAll to collection succeeded"); //$NON-NLS-1$
+				} catch (UnsupportedOperationException e3) {
+					// should get an exception
+				} catch (Exception e4) {
+					fail("incorrect exception", e4); //$NON-NLS-1$
+				}
+			} catch (AssertionFailedError a) {
+				hookErrors[0] = a;
+				return;
 			}
 		};
 
@@ -560,10 +540,8 @@ public class ServiceHookTests extends AbstractBundleTests {
 			assertEquals("removed called", 0, hookCalled[1]); //$NON-NLS-1$
 
 			int size = result.size();
-			ServiceListener testSL = new ServiceListener() {
-				public void serviceChanged(ServiceEvent event) {
-					// do nothing
-				}
+			ServiceListener testSL = event -> {
+				// do nothing
 			};
 			String filterString1 = "(foo=bar)"; //$NON-NLS-1$
 			testContext.addServiceListener(testSL, filterString1);
@@ -675,10 +653,8 @@ public class ServiceHookTests extends AbstractBundleTests {
 			assertEquals("removed called", 0, hookCalled[1]); //$NON-NLS-1$
 
 			int size = result.size();
-			ServiceListener testSL = new ServiceListener() {
-				public void serviceChanged(ServiceEvent event) {
-					// do nothing
-				}
+			ServiceListener testSL = event -> {
+				// do nothing
 			};
 			String filterString1 = "(" + Constants.OBJECTCLASS + "=bar)"; //$NON-NLS-1$ //$NON-NLS-2$
 			testContext.addServiceListener(testSL, filterString1);

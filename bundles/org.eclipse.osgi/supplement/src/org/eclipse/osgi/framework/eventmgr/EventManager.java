@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2016 IBM Corporation and others.
+ * Copyright (c) 2003, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -195,13 +195,7 @@ public class EventManager {
 		}
 		if (thread == null) {
 			/* if there is no thread, then create a new one */
-			thread = AccessController.doPrivileged(new PrivilegedAction<EventThread<K, V, E>>() {
-				@Override
-				public EventThread<K, V, E> run() {
-					EventThread<K, V, E> t = new EventThread<>(threadGroup, threadName);
-					return t;
-				}
-			});
+			thread = AccessController.doPrivileged((PrivilegedAction<EventThread<K, V, E>>) () -> new EventThread<>(threadGroup, threadName));
 			/* start the new thread */
 			thread.start();
 		}
