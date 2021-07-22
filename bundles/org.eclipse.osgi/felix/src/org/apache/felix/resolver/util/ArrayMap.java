@@ -132,7 +132,7 @@ public class ArrayMap<K, V> extends AbstractMap<K, V> {
             @Override
             public Iterator<Entry<K, V>> iterator() {
                 return new Iterator<Entry<K, V>>() {
-                    FastEntry<K, V> entry = new FastEntry<K, V>();
+                    FastEntry<K, V> entry = new FastEntry<>();
                     int index = 0;
 
                     public boolean hasNext() {

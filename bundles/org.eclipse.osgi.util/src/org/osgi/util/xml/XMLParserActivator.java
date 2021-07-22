@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2002, 2017). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2021). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,7 +191,7 @@ public class XMLParserActivator implements BundleActivator, ServiceFactory<Objec
 		if (parserUrl == null) {
 			return Collections.emptyList();
 		}
-		List<String> v = new ArrayList<String>(1);
+		List<String> v = new ArrayList<>(1);
 		String parserFactoryClassName = null;
 		InputStream is = parserUrl.openStream();
 		BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -234,7 +234,7 @@ public class XMLParserActivator implements BundleActivator, ServiceFactory<Objec
 			// this class will operate as a service factory and give each
 			// service requestor it's own SaxParserFactory
 			SAXParserFactory factory = (SAXParserFactory) getFactory(parserFactoryClassName);
-			Hashtable<String, Object> properties = new Hashtable<String, Object>(7);
+			Hashtable<String, Object> properties = new Hashtable<>(7);
 			// figure out the default properties of the parser
 			setDefaultSAXProperties(factory, properties, index);
 			// store the parser factory class name in the properties so that
@@ -333,7 +333,7 @@ public class XMLParserActivator implements BundleActivator, ServiceFactory<Objec
 			// this class will operate as a service factory and give each
 			// service requestor it's own DocumentBuilderFactory
 			DocumentBuilderFactory factory = (DocumentBuilderFactory) getFactory(parserFactoryClassName);
-			Hashtable<String, Object> properties = new Hashtable<String, Object>(7);
+			Hashtable<String, Object> properties = new Hashtable<>(7);
 			// figure out the default properties of the parser
 			setDefaultDOMProperties(factory, properties, index);
 			// store the parser factory class name in the properties so that

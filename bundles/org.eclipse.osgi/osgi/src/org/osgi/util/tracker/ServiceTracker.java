@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2017). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2021). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -782,7 +782,7 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 	 * @since 1.5
 	 */
 	public SortedMap<ServiceReference<S>, T> getTracked() {
-		SortedMap<ServiceReference<S>, T> map = new TreeMap<ServiceReference<S>, T>(Collections.reverseOrder());
+		SortedMap<ServiceReference<S>, T> map = new TreeMap<>(Collections.reverseOrder());
 		final Tracked t = tracked();
 		if (t == null) { /* if ServiceTracker is not open */
 			return map;

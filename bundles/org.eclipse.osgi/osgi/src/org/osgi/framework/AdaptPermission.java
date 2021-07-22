@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2010, 2017). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2010, 2021). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -437,7 +437,7 @@ public final class AdaptPermission extends BasicPermission {
 		if (result != null) {
 			return result;
 		}
-		final Map<String, Object> map = new HashMap<String, Object>(5);
+		final Map<String, Object> map = new HashMap<>(5);
 		map.put("adaptClass", getName());
 		if (bundle != null) {
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
@@ -491,7 +491,7 @@ final class AdaptPermissionCollection extends PermissionCollection {
 	 * Create an empty AdaptPermissions object.
 	 */
 	public AdaptPermissionCollection() {
-		permissions = new HashMap<String, AdaptPermission>();
+		permissions = new HashMap<>();
 		all_allowed = false;
 	}
 
@@ -597,7 +597,7 @@ final class AdaptPermissionCollection extends PermissionCollection {
 	 */
 	@Override
 	public synchronized Enumeration<Permission> elements() {
-		List<Permission> all = new ArrayList<Permission>(permissions.values());
+		List<Permission> all = new ArrayList<>(permissions.values());
 		return Collections.enumeration(all);
 	}
 

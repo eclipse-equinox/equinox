@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2002, 2016). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2021). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -466,7 +466,7 @@ final class WirePermissionCollection extends PermissionCollection {
 	 */
 	@Override
 	public Enumeration<Permission> elements() {
-		List<Permission> all = new ArrayList<Permission>(permissions.values());
+		List<Permission> all = new ArrayList<>(permissions.values());
 		return Collections.enumeration(all);
 	}
 }

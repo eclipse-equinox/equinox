@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2007, 2017). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2007, 2021). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -383,7 +383,7 @@ public class BundleTracker<T> implements BundleTrackerCustomizer<T> {
 	 * @since 1.5
 	 */
 	public Map<Bundle, T> getTracked() {
-		Map<Bundle, T> map = new HashMap<Bundle, T>();
+		Map<Bundle, T> map = new HashMap<>();
 		final Tracked t = tracked();
 		if (t == null) { /* if BundleTracker is not open */
 			return map;

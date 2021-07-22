@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2004, 2016). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2021). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ public class ConditionInfo {
 			}
 
 			/* type may be followed by args which are quoted and encoded */
-			List<String> argsList = new ArrayList<String>();
+			List<String> argsList = new ArrayList<>();
 			while (encoded[pos] == '"') {
 				pos++;
 				begin = pos;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2011, 2017). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2011, 2021). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -289,7 +289,7 @@ public abstract class ResolveContext {
 	 */
 	public List<Wire> getSubstitutionWires(Wiring wiring) {
 		// Keep track of the declared capability package names
-		Set<String> exportNames = new HashSet<String>();
+		Set<String> exportNames = new HashSet<>();
 
 		// Add packages declared as provided by the wiring host
 		for (Capability cap : wiring.getResource().getCapabilities(null)) {
@@ -316,7 +316,7 @@ public abstract class ResolveContext {
 
 		// collect the package wires that substitute one of the declared
 		// export package names
-		List<Wire> substitutionWires = new ArrayList<Wire>();
+		List<Wire> substitutionWires = new ArrayList<>();
 		for (Wire wire : wiring.getRequiredResourceWires(null)) {
 			if (PackageNamespace.PACKAGE_NAMESPACE
 					.equals(wire.getCapability().getNamespace())) {

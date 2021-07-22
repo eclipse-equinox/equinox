@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2017). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2021). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -220,7 +220,7 @@ public final class AdminPermission extends BasicPermission {
 	 * ThreadLocal used to determine if we have recursively called
 	 * getProperties.
 	 */
-	private static final ThreadLocal<Bundle>		recurse						= new ThreadLocal<Bundle>();
+	private static final ThreadLocal<Bundle>		recurse						= new ThreadLocal<>();
 
 	/**
 	 * Creates a new {@code AdminPermission} object that matches all bundles and
@@ -839,7 +839,7 @@ public final class AdminPermission extends BasicPermission {
 		}
 		recurse.set(bundle);
 		try {
-			final Map<String, Object> map = new HashMap<String, Object>(4);
+			final Map<String, Object> map = new HashMap<>(4);
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
 				@Override
 				public Void run() {
@@ -888,7 +888,7 @@ final class AdminPermissionCollection extends PermissionCollection {
 	 * 
 	 */
 	public AdminPermissionCollection() {
-		permissions = new HashMap<String, AdminPermission>();
+		permissions = new HashMap<>();
 	}
 
 	/**
@@ -991,7 +991,7 @@ final class AdminPermissionCollection extends PermissionCollection {
 	 */
 	@Override
 	public synchronized Enumeration<Permission> elements() {
-		List<Permission> all = new ArrayList<Permission>(permissions.values());
+		List<Permission> all = new ArrayList<>(permissions.values());
 		return Collections.enumeration(all);
 	}
 
@@ -999,7 +999,7 @@ final class AdminPermissionCollection extends PermissionCollection {
 	private static final ObjectStreamField[]	serialPersistentFields	= {new ObjectStreamField("permissions", Hashtable.class), new ObjectStreamField("all_allowed", Boolean.TYPE)};
 
 	private synchronized void writeObject(ObjectOutputStream out) throws IOException {
-		Hashtable<String, AdminPermission> hashtable = new Hashtable<String, AdminPermission>(permissions);
+		Hashtable<String, AdminPermission> hashtable = new Hashtable<>(permissions);
 		ObjectOutputStream.PutField pfields = out.putFields();
 		pfields.put("permissions", hashtable);
 		pfields.put("all_allowed", all_allowed);
@@ -1010,7 +1010,7 @@ final class AdminPermissionCollection extends PermissionCollection {
 		ObjectInputStream.GetField gfields = in.readFields();
 		@SuppressWarnings("unchecked")
 		Hashtable<String, AdminPermission> hashtable = (Hashtable<String, AdminPermission>) gfields.get("permissions", null);
-		permissions = new HashMap<String, AdminPermission>(hashtable);
+		permissions = new HashMap<>(hashtable);
 		all_allowed = gfields.get("all_allowed", false);
 	}
 }

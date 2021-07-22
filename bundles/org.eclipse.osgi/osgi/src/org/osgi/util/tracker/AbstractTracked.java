@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2007, 2013). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2007, 2021). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,10 +103,10 @@ abstract class AbstractTracked<S, T, R> {
 	 * AbstractTracked constructor.
 	 */
 	AbstractTracked() {
-		tracked = new HashMap<S, T>();
+		tracked = new HashMap<>();
 		trackingCount = 0;
-		adding = new ArrayList<S>(6);
-		initial = new LinkedList<S>();
+		adding = new ArrayList<>(6);
+		initial = new LinkedList<>();
 		closed = false;
 	}
 

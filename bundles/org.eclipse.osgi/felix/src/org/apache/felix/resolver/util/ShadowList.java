@@ -49,7 +49,7 @@ public class ShadowList extends CandidateSelector
 
     private ShadowList(List<Capability> unmodifiable, List<Capability> original, AtomicBoolean isUnmodifiable) {
         super(unmodifiable, isUnmodifiable);
-        m_original = new ArrayList<Capability>(original);
+        m_original = new ArrayList<>(original);
     }
 
     public ShadowList copy() {

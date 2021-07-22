@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2004, 2017). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2021). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -245,7 +245,7 @@ public final class ConfigurationPermission extends BasicPermission {
 		char[] chars = name.toCharArray();
 		StringBuilder sb = new StringBuilder(chars.length);
 
-		List<String> sub = new ArrayList<String>(10);
+		List<String> sub = new ArrayList<>(10);
 
 		for (int pos = 0; pos < chars.length; pos++) {
 			char c = chars[pos];
@@ -519,7 +519,7 @@ final class ConfigurationPermissionCollection extends PermissionCollection {
 	 *
 	 */
 	public ConfigurationPermissionCollection() {
-		permissions = new HashMap<String, ConfigurationPermission>();
+		permissions = new HashMap<>();
 		all_allowed = false;
 	}
 
@@ -619,7 +619,7 @@ final class ConfigurationPermissionCollection extends PermissionCollection {
 	 */
 	@Override
 	public synchronized Enumeration<Permission> elements() {
-		List<Permission> all = new ArrayList<Permission>(permissions.values());
+		List<Permission> all = new ArrayList<>(permissions.values());
 		return Collections.enumeration(all);
 	}
 
@@ -639,7 +639,7 @@ final class ConfigurationPermissionCollection extends PermissionCollection {
 		ObjectInputStream.GetField gfields = in.readFields();
 		boolean hasElement = gfields.get("hasElement", false);
 		if (hasElement) { // old format
-			permissions = new HashMap<String, ConfigurationPermission>();
+			permissions = new HashMap<>();
 			permissions.put("*", new ConfigurationPermission("*", ConfigurationPermission.CONFIGURE));
 			all_allowed = true;
 		} else {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2018). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2021). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -305,7 +305,7 @@ public abstract class ServletContextHelper {
 		if ((path != null) && (bundle != null)) {
 			final Enumeration<URL> e = bundle.findEntries(path, null, false);
 			if (e != null) {
-				final Set<String> result = new LinkedHashSet<String>();
+				final Set<String> result = new LinkedHashSet<>();
 				while (e.hasMoreElements()) {
 					result.add(e.nextElement().getPath());
 				}

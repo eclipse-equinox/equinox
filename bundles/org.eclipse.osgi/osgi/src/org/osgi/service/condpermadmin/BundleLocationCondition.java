@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2005, 2015). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2021). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public class BundleLocationCondition {
 			// this should never happen, but just in case
 			throw new RuntimeException("Invalid filter: " + e.getFilter(), e);
 		}
-		Dictionary<String, String> matchProps = new Hashtable<String, String>(2);
+		Dictionary<String, String> matchProps = new Hashtable<>(2);
 		matchProps.put("location", bundleLocation);
 		boolean negate = (args.length == 2) ? "!".equals(args[1]) : false;
 		return (negate ^ filter.match(matchProps)) ? Condition.TRUE : Condition.FALSE;

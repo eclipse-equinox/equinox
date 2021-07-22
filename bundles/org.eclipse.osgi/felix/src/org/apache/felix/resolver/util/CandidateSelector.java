@@ -32,7 +32,7 @@ public class CandidateSelector {
 
     public CandidateSelector(List<Capability> candidates, AtomicBoolean isUnmodifiable) {
         this.isUnmodifiable = isUnmodifiable;
-        this.unmodifiable = new ArrayList<Capability>(candidates);
+        this.unmodifiable = new ArrayList<>(candidates);
     }
 
     protected CandidateSelector(CandidateSelector candidateSelector) {

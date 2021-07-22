@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2019). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2021). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -538,7 +538,7 @@ public final class PackagePermission extends BasicPermission {
 		if (result != null) {
 			return result;
 		}
-		final Map<String, Object> map = new HashMap<String, Object>(5);
+		final Map<String, Object> map = new HashMap<>(5);
 		map.put("package.name", getName());
 		if (bundle != null) {
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
@@ -599,7 +599,7 @@ final class PackagePermissionCollection extends PermissionCollection {
 	 * Create an empty PackagePermissions object.
 	 */
 	public PackagePermissionCollection() {
-		permissions = new HashMap<String, PackagePermission>();
+		permissions = new HashMap<>();
 		all_allowed = false;
 	}
 
@@ -635,7 +635,7 @@ final class PackagePermissionCollection extends PermissionCollection {
 			if (f != null) {
 				pc = filterPermissions;
 				if (pc == null) {
-					filterPermissions = pc = new HashMap<String, PackagePermission>();
+					filterPermissions = pc = new HashMap<>();
 				}
 			} else {
 				pc = permissions;
@@ -751,7 +751,7 @@ final class PackagePermissionCollection extends PermissionCollection {
 	 */
 	@Override
 	public synchronized Enumeration<Permission> elements() {
-		List<Permission> all = new ArrayList<Permission>(permissions.values());
+		List<Permission> all = new ArrayList<>(permissions.values());
 		Map<String, PackagePermission> pc = filterPermissions;
 		if (pc != null) {
 			all.addAll(pc.values());
@@ -764,7 +764,7 @@ final class PackagePermissionCollection extends PermissionCollection {
 			new ObjectStreamField("filterPermissions", HashMap.class)	};
 
 	private synchronized void writeObject(ObjectOutputStream out) throws IOException {
-		Hashtable<String, PackagePermission> hashtable = new Hashtable<String, PackagePermission>(permissions);
+		Hashtable<String, PackagePermission> hashtable = new Hashtable<>(permissions);
 		ObjectOutputStream.PutField pfields = out.putFields();
 		pfields.put("permissions", hashtable);
 		pfields.put("all_allowed", all_allowed);
@@ -776,7 +776,7 @@ final class PackagePermissionCollection extends PermissionCollection {
 		ObjectInputStream.GetField gfields = in.readFields();
 		@SuppressWarnings("unchecked")
 		Hashtable<String, PackagePermission> hashtable = (Hashtable<String, PackagePermission>) gfields.get("permissions", null);
-		permissions = new HashMap<String, PackagePermission>(hashtable);
+		permissions = new HashMap<>(hashtable);
 		all_allowed = gfields.get("all_allowed", false);
 		@SuppressWarnings("unchecked")
 		HashMap<String, PackagePermission> fp = (HashMap<String, PackagePermission>) gfields.get("filterPermissions", null);

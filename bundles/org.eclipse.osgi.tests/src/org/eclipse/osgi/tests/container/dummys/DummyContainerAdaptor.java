@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2018 IBM Corporation and others.
+ * Copyright (c) 2012, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -57,7 +57,7 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 
 	public DummyContainerAdaptor(ModuleCollisionHook collisionHook, Map<String, String> configuration, ResolverHookFactory resolverHookFactory, DebugOptions debugOptions) {
 		this.collisionHook = collisionHook;
-		this.configuration = configuration == null ? new HashMap<String, String>() : configuration;
+		this.configuration = configuration == null ? new HashMap<>() : configuration;
 		this.resolverHookFactory = resolverHookFactory;
 		this.moduleDatabase = new DummyModuleDatabase(this);
 		this.debugOptions = debugOptions;

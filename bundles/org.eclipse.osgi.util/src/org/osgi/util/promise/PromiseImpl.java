@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2014, 2018). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2014, 2021). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -392,17 +392,17 @@ abstract class PromiseImpl<T> implements Promise<T> {
 			return impl.collect();
 		}
 		if (!promise.isDone()) {
-			return new Result<R>(new AssertionError("promise not resolved"));
+			return new Result<>(new AssertionError("promise not resolved"));
 		}
 		final boolean interrupted = Thread.interrupted();
 		try {
 			Throwable fail = promise.getFailure();
 			if (fail == null) {
-				return new Result<R>(promise.getValue());
+				return new Result<>(promise.getValue());
 			}
-			return new Result<R>(fail);
+			return new Result<>(fail);
 		} catch (Throwable e) {
-			return new Result<R>(e); // propagate new exception
+			return new Result<>(e); // propagate new exception
 		} finally {
 			if (interrupted) { // restore interrupt status
 				Thread.currentThread().interrupt();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2005, 2014). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2021). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -252,7 +252,7 @@ public class Event {
 		@Override
 		public Enumeration<Object> elements() {
 			Collection<Object> values = properties.values();
-			List<Object> result = new ArrayList<Object>(values.size() + 1);
+			List<Object> result = new ArrayList<>(values.size() + 1);
 			result.add(topic);
 			result.addAll(values);
 			return Collections.enumeration(result);
@@ -274,7 +274,7 @@ public class Event {
 		@Override
 		public Enumeration<String> keys() {
 			Collection<String> keys = properties.keySet();
-			List<String> result = new ArrayList<String>(keys.size() + 1);
+			List<String> result = new ArrayList<>(keys.size() + 1);
 			result.add(EVENT_TOPIC);
 			result.addAll(keys);
 			return Collections.enumeration(result);

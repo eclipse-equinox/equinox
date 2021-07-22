@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2014, 2018). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2014, 2021). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,12 +141,12 @@ final class DeferredPromiseImpl<T> extends PromiseImpl<T> {
 	Result<T> collect() {
 		// ensure latch open before reading state
 		if (!isDone()) {
-			return new Result<T>(new AssertionError("promise not resolved"));
+			return new Result<>(new AssertionError("promise not resolved"));
 		}
 		if (fail == null) {
-			return new Result<T>(value);
+			return new Result<>(value);
 		}
-		return new Result<T>(fail);
+		return new Result<>(fail);
 	}
 
 	@Override

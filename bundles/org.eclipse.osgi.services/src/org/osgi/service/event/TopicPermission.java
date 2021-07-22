@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2005, 2016). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2021). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -405,7 +405,7 @@ final class TopicPermissionCollection extends PermissionCollection {
 	 * 
 	 */
 	public TopicPermissionCollection() {
-		permissions = new HashMap<String, TopicPermission>();
+		permissions = new HashMap<>();
 		all_allowed = false;
 	}
 
@@ -523,7 +523,7 @@ final class TopicPermissionCollection extends PermissionCollection {
 	 */
 	@Override
 	public synchronized Enumeration<Permission> elements() {
-		List<Permission> all = new ArrayList<Permission>(permissions.values());
+		List<Permission> all = new ArrayList<>(permissions.values());
 		return Collections.enumeration(all);
 	}
 
@@ -531,7 +531,7 @@ final class TopicPermissionCollection extends PermissionCollection {
 	private static final ObjectStreamField[]	serialPersistentFields	= {new ObjectStreamField("permissions", Hashtable.class), new ObjectStreamField("all_allowed", Boolean.TYPE)};
 
 	private synchronized void writeObject(ObjectOutputStream out) throws IOException {
-		Hashtable<String, TopicPermission> hashtable = new Hashtable<String, TopicPermission>(permissions);
+		Hashtable<String, TopicPermission> hashtable = new Hashtable<>(permissions);
 		ObjectOutputStream.PutField pfields = out.putFields();
 		pfields.put("permissions", hashtable);
 		pfields.put("all_allowed", all_allowed);
@@ -542,7 +542,7 @@ final class TopicPermissionCollection extends PermissionCollection {
 		ObjectInputStream.GetField gfields = in.readFields();
 		@SuppressWarnings("unchecked")
 		Hashtable<String, TopicPermission> hashtable = (Hashtable<String, TopicPermission>) gfields.get("permissions", null);
-		permissions = new HashMap<String, TopicPermission>(hashtable);
+		permissions = new HashMap<>(hashtable);
 		all_allowed = gfields.get("all_allowed", false);
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2010, 2015). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2010, 2021). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class EventProperties implements Map<String, Object> {
 	 */
 	public EventProperties(Map<String, ?> properties) {
 		int size = (properties == null) ? 0 : properties.size();
-		Map<String, Object> p = new HashMap<String, Object>(size);
+		Map<String, Object> p = new HashMap<>(size);
 		if (size > 0) {
 			for (Object key : (Set<?>) properties.keySet()) {
 				if ((key instanceof String) && !EVENT_TOPIC.equals(key)) {
@@ -90,7 +90,7 @@ public class EventProperties implements Map<String, Object> {
 	 */
 	EventProperties(Dictionary<String, ?> properties) {
 		int size = (properties == null) ? 0 : properties.size();
-		Map<String, Object> p = new HashMap<String, Object>(size);
+		Map<String, Object> p = new HashMap<>(size);
 		if (size > 0) {
 			for (Enumeration<?> e = properties.keys(); e.hasMoreElements();) {
 				Object key = e.nextElement();

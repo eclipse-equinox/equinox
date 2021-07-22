@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2017). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2017, 2021). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ final class FailedPromiseImpl<T> extends PromiseImpl<T> {
 	 */
 	@Override
 	Result<T> collect() {
-		return new Result<T>(fail);
+		return new Result<>(fail);
 	}
 
 	@Override

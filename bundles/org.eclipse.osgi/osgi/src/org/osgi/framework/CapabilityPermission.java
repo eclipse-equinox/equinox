@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2019). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2021). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,7 +184,7 @@ public final class CapabilityPermission extends BasicPermission {
 		if (providingBundle == null) {
 			throw new IllegalArgumentException("bundle must not be null");
 		}
-		this.attributes = new HashMap<String, Object>(attributes);
+		this.attributes = new HashMap<>(attributes);
 		this.bundle = providingBundle;
 		if ((action_mask & ACTION_ALL) != ACTION_REQUIRE) {
 			throw new IllegalArgumentException("invalid action string");
@@ -499,7 +499,7 @@ public final class CapabilityPermission extends BasicPermission {
 		if (result != null) {
 			return result;
 		}
-		final Map<String, Object> props = new HashMap<String, Object>(5);
+		final Map<String, Object> props = new HashMap<>(5);
 		props.put("capability.namespace", getName());
 		if (bundle == null) {
 			return properties = props;
@@ -555,7 +555,7 @@ public final class CapabilityPermission extends BasicPermission {
 			if (entries != null) {
 				return entries;
 			}
-			Set<Map.Entry<String, Object>> all = new HashSet<Map.Entry<String, Object>>(attributes.size() + properties.size());
+			Set<Map.Entry<String, Object>> all = new HashSet<>(attributes.size() + properties.size());
 			all.addAll(attributes.entrySet());
 			all.addAll(properties.entrySet());
 			return entries = Collections.unmodifiableSet(all);
@@ -601,7 +601,7 @@ final class CapabilityPermissionCollection extends PermissionCollection {
 	 * Creates an empty CapabilityPermissionCollection object.
 	 */
 	public CapabilityPermissionCollection() {
-		permissions = new HashMap<String, CapabilityPermission>();
+		permissions = new HashMap<>();
 		all_allowed = false;
 	}
 
@@ -636,7 +636,7 @@ final class CapabilityPermissionCollection extends PermissionCollection {
 			if (f != null) {
 				pc = filterPermissions;
 				if (pc == null) {
-					filterPermissions = pc = new HashMap<String, CapabilityPermission>();
+					filterPermissions = pc = new HashMap<>();
 				}
 			} else {
 				pc = permissions;
@@ -752,7 +752,7 @@ final class CapabilityPermissionCollection extends PermissionCollection {
 	 */
 	@Override
 	public synchronized Enumeration<Permission> elements() {
-		List<Permission> all = new ArrayList<Permission>(permissions.values());
+		List<Permission> all = new ArrayList<>(permissions.values());
 		Map<String, CapabilityPermission> pc = filterPermissions;
 		if (pc != null) {
 			all.addAll(pc.values());

@@ -93,12 +93,12 @@ class Candidates
     {
         m_session = session;
         m_candidateSelectorsUnmodifiable = new AtomicBoolean(false);
-        m_dependentMap = new OpenHashMapSet<Capability, Requirement>();
+        m_dependentMap = new OpenHashMapSet<>();
         m_candidateMap = new OpenHashMapList();
-        m_allWrappedHosts = new HashMap<Resource, WrappedResource>();
-        m_populateResultCache = new OpenHashMap<Resource, PopulateResult>();
-        m_subtitutableMap = new OpenHashMap<Capability, Requirement>();
-        m_delta = new OpenHashMapSet<Requirement, Capability>(3);
+        m_allWrappedHosts = new HashMap<>();
+        m_populateResultCache = new OpenHashMap<>();
+        m_subtitutableMap = new OpenHashMap<>();
+        m_delta = new OpenHashMapSet<>(3);
     }
 
     public int getNbResources()
@@ -108,7 +108,7 @@ class Candidates
 
     public Map<Resource, Resource> getRootHosts()
     {
-        Map<Resource, Resource> hosts = new LinkedHashMap<Resource, Resource>();
+        Map<Resource, Resource> hosts = new LinkedHashMap<>();
         for (Resource res : m_session.getMandatoryResources())
         {
             addHost(res, hosts);
@@ -160,8 +160,8 @@ class Candidates
     public void populate(Collection<Resource> resources)
     {
         ResolveContext rc = m_session.getContext();
-        Set<Resource> toRemove = new HashSet<Resource>();
-        LinkedList<Resource> toPopulate = new LinkedList<Resource>(resources);
+        Set<Resource> toRemove = new HashSet<>();
+        LinkedList<Resource> toPopulate = new LinkedList<>(resources);
         while (!toPopulate.isEmpty())
         {
             Resource resource = toPopulate.getFirst();
@@ -170,8 +170,8 @@ class Candidates
             if (result == null)
             {
                 result = new PopulateResult();
-                result.candidates = new OpenHashMap<Requirement, List<Capability>>();
-                result.remaining = new ArrayList<Requirement>(resource.getRequirements(null));
+                result.candidates = new OpenHashMap<>();
+                result.remaining = new ArrayList<>(resource.getRequirements(null));
                 m_populateResultCache.put(resource, result);
             }
             if (result.success || result.error != null)
@@ -206,7 +206,7 @@ class Candidates
                 continue;
             }
             List<Capability> candidates = rc.findProviders(requirement);
-            LinkedList<Resource> newToPopulate = new LinkedList<Resource>();
+            LinkedList<Resource> newToPopulate = new LinkedList<>();
             ResolutionError thrown = processCandidates(newToPopulate, requirement, candidates);
              if (candidates.isEmpty() && !Util.isOptional(requirement))
             {
@@ -270,7 +270,7 @@ class Candidates
         OpenHashMap<String, List<Capability>> exportNames = new OpenHashMap<String, List<Capability>>() {
             @Override
             protected List<Capability> compute(String s) {
-                return new ArrayList<Capability>(1);
+                return new ArrayList<>(1);
             }
         };
         for (Capability packageExport : resource.getCapabilities(null))
@@ -322,7 +322,7 @@ class Candidates
 
     ResolutionError checkSubstitutes()
     {
-        OpenHashMap<Capability, Integer> substituteStatuses = new OpenHashMap<Capability, Integer>(m_subtitutableMap.size());
+        OpenHashMap<Capability, Integer> substituteStatuses = new OpenHashMap<>(m_subtitutableMap.size());
         for (Capability substitutable : m_subtitutableMap.keySet())
         {
             // initialize with unprocessed
@@ -451,7 +451,7 @@ class Candidates
         // Process the candidates, removing any candidates that
         // cannot resolve.
         // TODO: verify the two following statements
-        LinkedList<Resource> toPopulate = new LinkedList<Resource>();
+        LinkedList<Resource> toPopulate = new LinkedList<>();
         ResolutionError rethrow = processCandidates(toPopulate, m_session.getDynamicRequirement(), m_session.getDynamicCandidates());
 
         // Add the dynamic imports candidates.
@@ -509,7 +509,7 @@ class Candidates
             {
                 if (fragmentCands == null)
                 {
-                    fragmentCands = new HashSet<Capability>();
+                    fragmentCands = new HashSet<>();
                 }
                 fragmentCands.add(candCap);
             }
@@ -729,7 +729,7 @@ class Candidates
         // this is a special case where we need to completely replace the CandidateSelector
         // this method should never be called from normal Candidates permutations
         CandidateSelector candidates = m_candidateMap.get(req);
-        List<Capability> remaining = new ArrayList<Capability>(candidates.getRemainingCandidates());
+        List<Capability> remaining = new ArrayList<>(candidates.getRemainingCandidates());
         remaining.removeAll(caps);
         candidates = new CandidateSelector(remaining, m_candidateSelectorsUnmodifiable);
         m_candidateMap.put(req, candidates);
@@ -776,15 +776,15 @@ class Candidates
         //      requirements as well as replacing fragment capabilities
         //      with host's attached fragment capabilities.
         // Steps 1 and 2
-        List<WrappedResource> hostResources = new ArrayList<WrappedResource>();
-        List<Resource> unselectedFragments = new ArrayList<Resource>();
+        List<WrappedResource> hostResources = new ArrayList<>();
+        List<Resource> unselectedFragments = new ArrayList<>();
         for (Entry<Capability, Map<String, Map<Version, List<Requirement>>>> hostEntry : hostFragments.entrySet())
         {
             // Step 1
             Capability hostCap = hostEntry.getKey();
             Map<String, Map<Version, List<Requirement>>> fragments =
                 hostEntry.getValue();
-            List<Resource> selectedFragments = new ArrayList<Resource>();
+            List<Resource> selectedFragments = new ArrayList<>();
             for (Entry<String, Map<Version, List<Requirement>>> fragEntry
                 : fragments.entrySet())
             {
@@ -876,7 +876,7 @@ class Candidates
                     CopyOnWriteSet<Requirement> dependents = m_dependentMap.get(origCap);
                     if (dependents != null)
                     {
-                        dependents = new CopyOnWriteSet<Requirement>(dependents);
+                        dependents = new CopyOnWriteSet<>(dependents);
                         m_dependentMap.put(c, dependents);
                         for (Requirement r : dependents)
                         {
@@ -972,7 +972,7 @@ class Candidates
     private Map<Capability, Map<String, Map<Version, List<Requirement>>>> getHostFragments()
     {
         Map<Capability, Map<String, Map<Version, List<Requirement>>>> hostFragments =
-            new HashMap<Capability, Map<String, Map<Version, List<Requirement>>>>();
+            new HashMap<>();
         for (Entry<Requirement, CandidateSelector> entry : m_candidateMap.fast())
         {
             Requirement req = entry.getKey();
@@ -988,20 +988,20 @@ class Candidates
                     Map<String, Map<Version, List<Requirement>>> fragments = hostFragments.get(cap);
                     if (fragments == null)
                     {
-                        fragments = new HashMap<String, Map<Version, List<Requirement>>>();
+                        fragments = new HashMap<>();
                         hostFragments.put(cap, fragments);
                     }
                     Map<Version, List<Requirement>> fragmentVersions = fragments.get(resSymName);
                     if (fragmentVersions == null)
                     {
                         fragmentVersions =
-                            new TreeMap<Version, List<Requirement>>(Collections.reverseOrder());
+                            new TreeMap<>(Collections.reverseOrder());
                         fragments.put(resSymName, fragmentVersions);
                     }
                     List<Requirement> actual = fragmentVersions.get(resVersion);
                     if (actual == null)
                     {
-                        actual = new ArrayList<Requirement>();
+                        actual = new ArrayList<>();
                         if (resVersion == null)
                             resVersion = new Version(0, 0, 0);
                         fragmentVersions.put(resVersion, actual);
@@ -1030,7 +1030,7 @@ class Candidates
         result.success = false;
         result.error = ex;
         // Remove from dependents.
-        Set<Resource> unresolvedResources = new HashSet<Resource>();
+        Set<Resource> unresolvedResources = new HashSet<>();
         remove(resource, unresolvedResources);
         // Remove dependents that failed as a result of removing revision.
         while (!unresolvedResources.isEmpty())
@@ -1150,7 +1150,7 @@ class Candidates
     public void dump(ResolveContext rc)
     {
         // Create set of all revisions from requirements.
-        Set<Resource> resources = new CopyOnWriteSet<Resource>();
+        Set<Resource> resources = new CopyOnWriteSet<>();
         for (Entry<Requirement, CandidateSelector> entry
             : m_candidateMap.entrySet())
         {
