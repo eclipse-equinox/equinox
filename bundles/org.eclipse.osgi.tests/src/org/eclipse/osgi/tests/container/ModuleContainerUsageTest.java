@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 IBM Corporation and others.
+ * Copyright (c) 2020, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -186,7 +186,7 @@ public class ModuleContainerUsageTest extends AbstractTest {
 		Collection<BundleRequirement> eeBundleReqs = m.getCurrentRevision()
 				.getDeclaredRequirements(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE);
 
-		eeBundleReqs.stream().findFirst().ifPresent((r) -> {
+		eeBundleReqs.stream().findFirst().ifPresent(r -> {
 			// notice that we depend on the available EEs
 			// to be ordered from least to greatest
 			for (BundleCapability ee : availableEEs) {

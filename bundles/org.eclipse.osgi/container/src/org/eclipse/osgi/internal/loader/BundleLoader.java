@@ -74,7 +74,7 @@ public class BundleLoader extends ModuleLoader {
 	public final static String DEFAULT_PACKAGE = "."; //$NON-NLS-1$
 	public final static String JAVA_PACKAGE = "java."; //$NON-NLS-1$
 
-	public final static ClassContext CLASS_CONTEXT = AccessController.doPrivileged((PrivilegedAction<ClassContext>) () -> new ClassContext());
+	public final static ClassContext CLASS_CONTEXT = AccessController.doPrivileged((PrivilegedAction<ClassContext>) ClassContext::new);
 	public final static ClassLoader FW_CLASSLOADER = getClassLoader(EquinoxContainer.class);
 
 	private static final int PRE_CLASS = 1;

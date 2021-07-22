@@ -128,7 +128,7 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 		return () -> {
 			if (maxThreads == 1) {
 				// just do synchronous execution with current thread
-				return command -> command.run();
+				return Runnable::run;
 			}
 			// Always want to create core threads until max size
 			int coreThreads = maxThreads;

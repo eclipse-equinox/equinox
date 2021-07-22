@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2020 IBM Corporation and others.
+ * Copyright (c) 2003, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -805,7 +805,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		S getSafeService(BundleContextImpl user, ServiceConsumer consumer) {
 			try {
 				S hook = getService(user, consumer);
-				if (hookTypes.stream().filter((hookType) -> !hookType.isInstance(hook)).findFirst().isPresent()) {
+				if (hookTypes.stream().filter(hookType -> !hookType.isInstance(hook)).findFirst().isPresent()) {
 					// the hook impl is wired to a different hook package than the framework
 					if (hook != null) {
 						systemContext.ungetService(getReference());

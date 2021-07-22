@@ -61,9 +61,7 @@ public class GlobalPolicy implements IBuddyPolicy {
 	@Override
 	public URL loadResource(String name) {
 		return getExportingBundles(BundleLoader.getResourcePackageName(name)) //
-				.stream().findFirst().map(b -> {
-					return b.getResource(name);
-				}).orElse(null);
+				.stream().findFirst().map(b -> b.getResource(name)).orElse(null);
 	}
 
 	@Override

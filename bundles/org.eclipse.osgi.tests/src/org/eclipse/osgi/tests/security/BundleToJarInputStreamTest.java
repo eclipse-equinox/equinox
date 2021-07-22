@@ -91,7 +91,7 @@ public class BundleToJarInputStreamTest {
 			assertEquals("Expected manifest.", JarFile.MANIFEST_NAME, first.toUpperCase());
 			// If there are signature files, make sure they are before all other entries
 			AtomicReference<String> foundNonSignatureFile = new AtomicReference<>();
-			validpaths.forEachRemaining((s) -> {
+			validpaths.forEachRemaining(s -> {
 				if (isSignatureFile(s)) {
 					assertNull("Found non signature file before.", foundNonSignatureFile.get());
 				} else {

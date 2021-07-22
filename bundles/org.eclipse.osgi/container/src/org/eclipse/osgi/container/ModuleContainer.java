@@ -1823,7 +1823,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 			if (toStart.isEmpty()) {
 				return;
 			}
-			final Executor executor = inParallel ? adaptor.getStartLevelExecutor() : command -> command.run();
+			final Executor executor = inParallel ? adaptor.getStartLevelExecutor() : Runnable::run;
 			final CountDownLatch done = new CountDownLatch(toStart.size());
 			for (final Module module : toStart) {
 				executor.execute(() -> {

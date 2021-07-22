@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -331,7 +331,7 @@ public class ConnectTests extends AbstractBundleTests {
 	public void testConnectFactoryNoModules() {
 		TestCountingModuleConnector connector = new TestCountingModuleConnector();
 
-		doTestConnect(connector, Collections.emptyMap(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), f -> {
 			try {
 				f.start();
 				f.stop();
@@ -343,7 +343,7 @@ public class ConnectTests extends AbstractBundleTests {
 				sneakyThrow(t);
 			}
 		});
-		doTestConnect(connector, Collections.emptyMap(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), f -> {
 			try {
 				f.start();
 				f.stop();
@@ -378,7 +378,7 @@ public class ConnectTests extends AbstractBundleTests {
 			}
 		};
 
-		doTestConnect(activatorModuleConnector, Collections.emptyMap(), (f) -> {
+		doTestConnect(activatorModuleConnector, Collections.emptyMap(), f -> {
 			try {
 				f.start();
 				f.stop();
@@ -423,7 +423,7 @@ public class ConnectTests extends AbstractBundleTests {
 			}
 		};
 
-		doTestConnect(activatorModuleConnector, Collections.emptyMap(), (f) -> {
+		doTestConnect(activatorModuleConnector, Collections.emptyMap(), f -> {
 			try {
 				f.start();
 				ServiceReference<Condition> trueCondition = trueConditionStart.get();
@@ -459,7 +459,7 @@ public class ConnectTests extends AbstractBundleTests {
 		config.put("k1", "v1");
 		config.put("k2", "v2");
 
-		doTestConnect(initParamsModuleConnector, config, (f) -> {
+		doTestConnect(initParamsModuleConnector, config, f -> {
 			try {
 				f.init();
 				BundleContext bc = f.getBundleContext();
@@ -494,7 +494,7 @@ public class ConnectTests extends AbstractBundleTests {
 			connector.setModule(l, withManifest ? createSimpleManifestModule(l) : createSimpleHeadersModule(l));
 		}
 
-		doTestConnect(connector, Collections.emptyMap(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), f -> {
 			try {
 				f.init();
 				for (String l : locations) {
@@ -508,7 +508,7 @@ public class ConnectTests extends AbstractBundleTests {
 			}
 		});
 
-		doTestConnect(connector, Collections.emptyMap(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), f -> {
 			try {
 				f.init();
 				Bundle[] bundles = f.getBundleContext().getBundles();
@@ -527,7 +527,7 @@ public class ConnectTests extends AbstractBundleTests {
 
 		connector.setModule("b.2", null);
 		connector.setModule("b.3", BUNDLE_EXCEPTION);
-		doTestConnect(connector, Collections.emptyMap(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), f -> {
 			try {
 				f.init();
 				Bundle[] bundles = f.getBundleContext().getBundles();
@@ -590,7 +590,7 @@ public class ConnectTests extends AbstractBundleTests {
 			connector.setModule(id.toString(), createAdvancedModule(id, provideLoader));
 		}
 
-		doTestConnect(connector, Collections.emptyMap(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), f -> {
 			try {
 				f.start();
 				for (Integer id : ids) {
@@ -634,7 +634,7 @@ public class ConnectTests extends AbstractBundleTests {
 			connector.setModule(id.toString(), m);
 		}
 
-		doTestConnect(connector, Collections.emptyMap(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), f -> {
 			try {
 				f.start();
 				for (Integer id : ids) {
@@ -711,7 +711,7 @@ public class ConnectTests extends AbstractBundleTests {
 		TestConnectModule m = createSimpleHeadersModule(NAME1);
 		connector.setModule(NAME1, m);
 
-		doTestConnect(connector, Collections.emptyMap(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), f -> {
 			try {
 				f.start();
 				Bundle b = f.getBundleContext().installBundle(NAME1);
@@ -726,7 +726,7 @@ public class ConnectTests extends AbstractBundleTests {
 
 				FrameworkWiring fwkWiring = f.adapt(FrameworkWiring.class);
 				CountDownLatch refreshDone = new CountDownLatch(1);
-				fwkWiring.refreshBundles(Collections.singletonList(b), (e) -> refreshDone.countDown());
+				fwkWiring.refreshBundles(Collections.singletonList(b), e -> refreshDone.countDown());
 				refreshDone.await();
 
 				// should still be NAME1
@@ -766,7 +766,7 @@ public class ConnectTests extends AbstractBundleTests {
 		TestCountingModuleConnector connector = new TestCountingModuleConnector();
 		TestConnectModule m = withManifest ? createSimpleManifestModule(NAME1) : createSimpleHeadersModule(NAME1);
 		connector.setModule(NAME1, m);
-		doTestConnect(connector, Collections.emptyMap(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), f -> {
 			try {
 				f.start();
 				Bundle b = f.getBundleContext().installBundle(NAME1);
@@ -803,7 +803,7 @@ public class ConnectTests extends AbstractBundleTests {
 		TestCountingModuleConnector connector = new TestCountingModuleConnector();
 		TestConnectModule m = createSimpleHeadersModule(NAME);
 		connector.setModule(NAME, m);
-		doTestConnect(connector, Collections.emptyMap(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), f -> {
 			try {
 				f.start();
 				Bundle b = f.getBundleContext().installBundle(NAME);
@@ -817,7 +817,7 @@ public class ConnectTests extends AbstractBundleTests {
 		});
 
 		doTestConnect(connector, Collections.singletonMap(HookRegistry.PROP_HOOK_CONFIGURATORS_EXCLUDE,
-				"org.eclipse.equinox.weaving.hooks.WeavingHook"), (f) -> {
+				"org.eclipse.equinox.weaving.hooks.WeavingHook"), f -> {
 			try {
 				f.start();
 				Bundle b = f.getBundleContext().getBundle(NAME);
@@ -863,7 +863,7 @@ public class ConnectTests extends AbstractBundleTests {
 		TestConnectModule m = createSimpleHeadersModule(NAME1);
 		connector.setModule(NAME1, m);
 
-		doTestConnect(connector, Collections.emptyMap(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), f -> {
 			try {
 				f.start();
 				Bundle test = f.getBundleContext().installBundle(NAME1, in1);
@@ -918,7 +918,7 @@ public class ConnectTests extends AbstractBundleTests {
 		TestCountingModuleConnector connector = new TestCountingModuleConnector();
 		connector.setModule("javaExport", createJavaExportModule());
 
-		doTestConnect(connector, Collections.emptyMap(), (f) -> {
+		doTestConnect(connector, Collections.emptyMap(), f -> {
 			try {
 				f.start();
 				Bundle b = f.getBundleContext().installBundle("javaExport");
@@ -926,7 +926,7 @@ public class ConnectTests extends AbstractBundleTests {
 				assertTrue("No java export found.",
 						b.adapt(BundleWiring.class).getCapabilities(PackageNamespace.PACKAGE_NAMESPACE).stream()
 								.findFirst()
-								.map((c) -> "java.test.export"
+								.map(c -> "java.test.export"
 										.equals(c.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE)))
 								.orElse(false));
 			} catch (Throwable t) {

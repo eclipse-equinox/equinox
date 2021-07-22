@@ -68,7 +68,7 @@ public class SecureAction {
 	 * @return a privileged action object that can be used to construct a SecureAction object.
 	 */
 	public static PrivilegedAction<SecureAction> createSecureAction() {
-		return () -> new SecureAction();
+		return SecureAction::new;
 	}
 
 	/**
@@ -91,7 +91,7 @@ public class SecureAction {
 	public Properties getProperties() {
 		if (System.getSecurityManager() == null)
 			return System.getProperties();
-		return AccessController.doPrivileged((PrivilegedAction<Properties>) () -> System.getProperties(), controlContext);
+		return AccessController.doPrivileged((PrivilegedAction<Properties>) System::getProperties, controlContext);
 	}
 
 	/**
