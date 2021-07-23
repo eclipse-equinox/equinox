@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.equinox.registry;singleton:=true
-Bundle-Version: 3.10.200.qualifier
+Bundle-Version: 3.11.0.qualifier
 Bundle-Localization: plugin
 Export-Package: org.eclipse.core.internal.adapter;x-internal:=true,
  org.eclipse.core.internal.registry;x-friends:="org.eclipse.core.runtime",
@@ -31,5 +31,5 @@ Import-Package: javax.xml.parsers,
  org.xml.sax.helpers
 Eclipse-ExtensibleAPI: true
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Automatic-Module-Name: org.eclipse.equinox.registry
