@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.equinox.app; singleton:=true
-Bundle-Version: 1.5.100.qualifier
+Bundle-Version: 1.6.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Activator: org.eclipse.equinox.internal.app.Activator
 Bundle-Localization: plugin
@@ -28,5 +28,5 @@ Require-Bundle: org.eclipse.equinox.registry;bundle-version="[3.4.0,4.0.0)",
 Comment-DynamicImport: this is only used to allow late binding of the package
 DynamicImport-Package: org.osgi.service.event;version="1.0.0"
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Automatic-Module-Name: org.eclipse.equinox.app
