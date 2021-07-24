@@ -1280,7 +1280,7 @@ final class ModuleResolver {
 				return Collections.emptyMap();
 			}
 			// we only care about versions here
-			Collections.sort(dynamicAttachableFrags, (r1, r2) -> -(r1.getVersion().compareTo(r2.getVersion())));
+			Collections.sort(dynamicAttachableFrags, Comparator.comparing(ModuleRevision::getVersion).reversed());
 
 			Map<ModuleCapability, DynamicFragments> hostDynamicFragments = new HashMap<>();
 			// first find the hosts to dynamically attach to

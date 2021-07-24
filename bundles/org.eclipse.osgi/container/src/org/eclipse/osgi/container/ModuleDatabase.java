@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -574,7 +575,7 @@ public class ModuleDatabase {
 		if (modules.size() < 2)
 			return;
 		if (sortOptions == null || Sort.BY_ID.isContained(sortOptions) || sortOptions.length == 0) {
-			Collections.sort(modules, (m1, m2) -> m1.getId().compareTo(m2.getId()));
+			Collections.sort(modules, Comparator.comparing(Module::getId));
 			return;
 		}
 		// first sort by start-level

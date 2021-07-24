@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -197,7 +198,7 @@ public class PackageAdminImpl implements PackageAdmin {
 				sorted.add(b);
 			}
 		}
-		Collections.sort(sorted, (b1, b2) -> b2.getVersion().compareTo(b1.getVersion()));
+		Collections.sort(sorted, Comparator.comparing(Bundle::getVersion).reversed());
 
 		if (sorted.isEmpty()) {
 			return null;
