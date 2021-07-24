@@ -3820,19 +3820,8 @@ public class StateResolverTest extends AbstractStateTest {
 	public void testSelectionPolicy() throws BundleException {
 		State state = buildEmptyState();
 		Resolver resolver = state.getResolver();
-		resolver.setSelectionPolicy(new Comparator() {
-			@Override
-			public int compare(Object o1, Object o2) {
-				if (!(o1 instanceof BaseDescription) || !(o2 instanceof BaseDescription))
-					throw new IllegalArgumentException();
-				Version v1 = null;
-				Version v2 = null;
-				v1 = ((BaseDescription) o1).getVersion();
-				v2 = ((BaseDescription) o2).getVersion();
-				// only take version in to account and use lower versions over higher ones
-				return v1.compareTo(v2);
-			}
-		});
+		// only take version into account and use lower versions over higher ones
+		resolver.setSelectionPolicy(Comparator.comparing(BaseDescription::getVersion));
 		Hashtable manifest = new Hashtable();
 		long bundleID = 0;
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
