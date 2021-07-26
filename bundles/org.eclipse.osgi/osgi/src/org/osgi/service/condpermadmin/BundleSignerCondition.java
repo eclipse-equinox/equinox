@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2005, 2021). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2013). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ public class BundleSignerCondition {
 		Map<X509Certificate, List<X509Certificate>> signers = bundle.getSignerCertificates(Bundle.SIGNERS_TRUSTED);
 		boolean match = false;
 		for (List<X509Certificate> signerCerts : signers.values()) {
-			List<String> dnChain = new ArrayList<>(signerCerts.size());
+			List<String> dnChain = new ArrayList<String>(signerCerts.size());
 			for (X509Certificate signer : signerCerts) {
 				dnChain.add(signer.getSubjectDN().getName());
 			}

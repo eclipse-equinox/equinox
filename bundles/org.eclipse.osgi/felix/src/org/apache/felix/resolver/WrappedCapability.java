@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2012, 2021). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2012). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class WrappedCapability implements HostedCapability
             // This is done to work around issues with wrapper resources equality tests.
             // Note this is depends on the implementation details of the ResolveContext to actually
             // check the osgi.content capability.
-            Map<String, Object> augmentedDirs = new HashMap<>(m_cap.getAttributes());
+            Map<String, Object> augmentedDirs = new HashMap<String, Object>(m_cap.getAttributes());
             Object wrapperUrl = augmentedDirs.get("url");
             wrapperUrl = "wrapper:" + wrapperUrl;
             augmentedDirs.put("url", wrapperUrl);

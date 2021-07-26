@@ -99,7 +99,7 @@ public class Util
 
     public static List<Requirement> getDynamicRequirements(List<Requirement> reqs)
     {
-        List<Requirement> result = new ArrayList<>();
+        List<Requirement> result = new ArrayList<Requirement>();
         if (reqs != null)
         {
             for (Requirement req : reqs)

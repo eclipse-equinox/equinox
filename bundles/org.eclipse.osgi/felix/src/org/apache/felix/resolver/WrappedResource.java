@@ -38,7 +38,7 @@ class WrappedResource implements Resource
         m_fragments = fragments;
  
         // Wrap host capabilities.
-        List<Capability> caps = new ArrayList<>();
+        List<Capability> caps = new ArrayList<Capability>();
         for (Capability cap : m_host.getCapabilities(null))
         {
             caps.add(new WrappedCapability(this, cap));
@@ -58,7 +58,7 @@ class WrappedResource implements Resource
         m_cachedCapabilities = Collections.unmodifiableList(caps);
 
         // Wrap host requirements.
-        List<Requirement> reqs = new ArrayList<>();
+        List<Requirement> reqs = new ArrayList<Requirement>();
         for (Requirement req : m_host.getRequirements(null))
         {
             reqs.add(new WrappedRequirement(this, req));
@@ -98,7 +98,7 @@ class WrappedResource implements Resource
     public List<Capability> getCapabilities(String namespace)
     {
         if (namespace != null) {
-            List<Capability> filtered = new ArrayList<>();
+            List<Capability> filtered = new ArrayList<Capability>();
             for (Capability capability : m_cachedCapabilities) {
                 if (namespace.equals(capability.getNamespace())) {
                     filtered.add(capability);
@@ -112,7 +112,7 @@ class WrappedResource implements Resource
     public List<Requirement> getRequirements(String namespace)
     {
         if (namespace != null) {
-            List<Requirement> filtered = new ArrayList<>();
+            List<Requirement> filtered = new ArrayList<Requirement>();
             for (Requirement requirement : m_cachedRequirements) {
                 if (namespace.equals(requirement.getNamespace())) {
                     filtered.add(requirement);

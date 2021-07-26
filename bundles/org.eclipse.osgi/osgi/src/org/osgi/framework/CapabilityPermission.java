@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2021). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2019). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,7 +184,7 @@ public final class CapabilityPermission extends BasicPermission {
 		if (providingBundle == null) {
 			throw new IllegalArgumentException("bundle must not be null");
 		}
-		this.attributes = new HashMap<>(attributes);
+		this.attributes = new HashMap<String, Object>(attributes);
 		this.bundle = providingBundle;
 		if ((action_mask & ACTION_ALL) != ACTION_REQUIRE) {
 			throw new IllegalArgumentException("invalid action string");
@@ -499,23 +499,26 @@ public final class CapabilityPermission extends BasicPermission {
 		if (result != null) {
 			return result;
 		}
-		final Map<String, Object> props = new HashMap<>(5);
+		final Map<String, Object> props = new HashMap<String, Object>(5);
 		props.put("capability.namespace", getName());
 		if (bundle == null) {
 			return properties = props;
 		}
-		AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
-			props.put("id", Long.valueOf(bundle.getBundleId()));
-			props.put("location", bundle.getLocation());
-			String name = bundle.getSymbolicName();
-			if (name != null) {
-				props.put("name", name);
+		AccessController.doPrivileged(new PrivilegedAction<Void>() {
+			@Override
+			public Void run() {
+				props.put("id", Long.valueOf(bundle.getBundleId()));
+				props.put("location", bundle.getLocation());
+				String name = bundle.getSymbolicName();
+				if (name != null) {
+					props.put("name", name);
+				}
+				SignerProperty signer = new SignerProperty(bundle);
+				if (signer.isBundleSigned()) {
+					props.put("signer", signer);
+				}
+				return null;
 			}
-			SignerProperty signer = new SignerProperty(bundle);
-			if (signer.isBundleSigned()) {
-				props.put("signer", signer);
-			}
-			return null;
 		});
 		return properties = new Properties(props, attributes);
 	}
@@ -552,7 +555,7 @@ public final class CapabilityPermission extends BasicPermission {
 			if (entries != null) {
 				return entries;
 			}
-			Set<Map.Entry<String, Object>> all = new HashSet<>(attributes.size() + properties.size());
+			Set<Map.Entry<String, Object>> all = new HashSet<Map.Entry<String, Object>>(attributes.size() + properties.size());
 			all.addAll(attributes.entrySet());
 			all.addAll(properties.entrySet());
 			return entries = Collections.unmodifiableSet(all);
@@ -598,7 +601,7 @@ final class CapabilityPermissionCollection extends PermissionCollection {
 	 * Creates an empty CapabilityPermissionCollection object.
 	 */
 	public CapabilityPermissionCollection() {
-		permissions = new HashMap<>();
+		permissions = new HashMap<String, CapabilityPermission>();
 		all_allowed = false;
 	}
 
@@ -633,7 +636,7 @@ final class CapabilityPermissionCollection extends PermissionCollection {
 			if (f != null) {
 				pc = filterPermissions;
 				if (pc == null) {
-					filterPermissions = pc = new HashMap<>();
+					filterPermissions = pc = new HashMap<String, CapabilityPermission>();
 				}
 			} else {
 				pc = permissions;
@@ -749,7 +752,7 @@ final class CapabilityPermissionCollection extends PermissionCollection {
 	 */
 	@Override
 	public synchronized Enumeration<Permission> elements() {
-		List<Permission> all = new ArrayList<>(permissions.values());
+		List<Permission> all = new ArrayList<Permission>(permissions.values());
 		Map<String, CapabilityPermission> pc = filterPermissions;
 		if (pc != null) {
 			all.addAll(pc.values());

@@ -35,7 +35,7 @@ public class OpenHashMapSet<K, V> extends OpenHashMap<K, CopyOnWriteSet<V>> {
         Object[] values = copy.value;
         for (int i = values.length; i-- > 0;) {
             if (values[i] != null) {
-                values[i] = new CopyOnWriteSet<>((CopyOnWriteSet<V>) values[i]);
+                values[i] = new CopyOnWriteSet<V>((CopyOnWriteSet<V>) values[i]);
             }
         }
         return copy;
@@ -43,7 +43,7 @@ public class OpenHashMapSet<K, V> extends OpenHashMap<K, CopyOnWriteSet<V>> {
 
     @Override
     protected CopyOnWriteSet<V> compute(K key) {
-        return new CopyOnWriteSet<>();
+        return new CopyOnWriteSet<V>();
     }
 
 }

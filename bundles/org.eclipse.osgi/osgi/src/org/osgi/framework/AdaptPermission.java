@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2010, 2021). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2010, 2017). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -437,21 +437,24 @@ public final class AdaptPermission extends BasicPermission {
 		if (result != null) {
 			return result;
 		}
-		final Map<String, Object> map = new HashMap<>(5);
+		final Map<String, Object> map = new HashMap<String, Object>(5);
 		map.put("adaptClass", getName());
 		if (bundle != null) {
-			AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
-				map.put("id", Long.valueOf(bundle.getBundleId()));
-				map.put("location", bundle.getLocation());
-				String name = bundle.getSymbolicName();
-				if (name != null) {
-					map.put("name", name);
+			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+				@Override
+				public Void run() {
+					map.put("id", Long.valueOf(bundle.getBundleId()));
+					map.put("location", bundle.getLocation());
+					String name = bundle.getSymbolicName();
+					if (name != null) {
+						map.put("name", name);
+					}
+					SignerProperty signer = new SignerProperty(bundle);
+					if (signer.isBundleSigned()) {
+						map.put("signer", signer);
+					}
+					return null;
 				}
-				SignerProperty signer = new SignerProperty(bundle);
-				if (signer.isBundleSigned()) {
-					map.put("signer", signer);
-				}
-				return null;
 			});
 		}
 		return properties = map;
@@ -488,7 +491,7 @@ final class AdaptPermissionCollection extends PermissionCollection {
 	 * Create an empty AdaptPermissions object.
 	 */
 	public AdaptPermissionCollection() {
-		permissions = new HashMap<>();
+		permissions = new HashMap<String, AdaptPermission>();
 		all_allowed = false;
 	}
 
@@ -594,7 +597,7 @@ final class AdaptPermissionCollection extends PermissionCollection {
 	 */
 	@Override
 	public synchronized Enumeration<Permission> elements() {
-		List<Permission> all = new ArrayList<>(permissions.values());
+		List<Permission> all = new ArrayList<Permission>(permissions.values());
 		return Collections.enumeration(all);
 	}
 

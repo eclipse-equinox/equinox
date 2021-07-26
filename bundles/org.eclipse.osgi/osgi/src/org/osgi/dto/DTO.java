@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2012, 2021). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2012, 2020). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,8 @@ public abstract class DTO {
 	 */
 	@Override
 	public String toString() {
-		return appendValue(new StringBuilder(), new IdentityHashMap<>(), "#", this).toString();
+		return appendValue(new StringBuilder(),
+				new IdentityHashMap<Object,String>(), "#", this).toString();
 	}
 
 	/**

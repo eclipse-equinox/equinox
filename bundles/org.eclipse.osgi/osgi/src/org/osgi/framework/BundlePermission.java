@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2004, 2021). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2019). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -453,7 +453,7 @@ final class BundlePermissionCollection extends PermissionCollection {
 	 * 
 	 */
 	public BundlePermissionCollection() {
-		permissions = new HashMap<>();
+		permissions = new HashMap<String, BundlePermission>();
 		all_allowed = false;
 	}
 
@@ -568,7 +568,7 @@ final class BundlePermissionCollection extends PermissionCollection {
 	 */
 	@Override
 	public synchronized Enumeration<Permission> elements() {
-		List<Permission> all = new ArrayList<>(permissions.values());
+		List<Permission> all = new ArrayList<Permission>(permissions.values());
 		return Collections.enumeration(all);
 	}
 
@@ -576,7 +576,7 @@ final class BundlePermissionCollection extends PermissionCollection {
 	private static final ObjectStreamField[]	serialPersistentFields	= {new ObjectStreamField("permissions", Hashtable.class), new ObjectStreamField("all_allowed", Boolean.TYPE)};
 
 	private synchronized void writeObject(ObjectOutputStream out) throws IOException {
-		Hashtable<String, BundlePermission> hashtable = new Hashtable<>(permissions);
+		Hashtable<String, BundlePermission> hashtable = new Hashtable<String, BundlePermission>(permissions);
 		ObjectOutputStream.PutField pfields = out.putFields();
 		pfields.put("permissions", hashtable);
 		pfields.put("all_allowed", all_allowed);
@@ -587,7 +587,7 @@ final class BundlePermissionCollection extends PermissionCollection {
 		ObjectInputStream.GetField gfields = in.readFields();
 		@SuppressWarnings("unchecked")
 		Hashtable<String, BundlePermission> hashtable = (Hashtable<String, BundlePermission>) gfields.get("permissions", null);
-		permissions = new HashMap<>(hashtable);
+		permissions = new HashMap<String, BundlePermission>(hashtable);
 		all_allowed = gfields.get("all_allowed", false);
 	}
 }

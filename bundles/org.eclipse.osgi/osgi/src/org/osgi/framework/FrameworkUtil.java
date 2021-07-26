@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2005, 2021). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -373,7 +373,7 @@ public class FrameworkUtil {
 			if (pattern == null) {
 				throw new IllegalArgumentException("The pattern must not be null.");
 			}
-			List<Object> parsed = new ArrayList<>();
+			List<Object> parsed = new ArrayList<Object>();
 			final int length = pattern.length();
 			char c = ';'; // start with semi-colon to detect empty pattern
 			for (int startIndex = skipSpaces(pattern, 0); startIndex < length;) {
@@ -415,7 +415,7 @@ public class FrameworkUtil {
 				if (dn.equals(STAR_WILDCARD) || dn.equals(MINUS_WILDCARD)) {
 					continue;
 				}
-				List<Object> rdns = new ArrayList<>();
+				List<Object> rdns = new ArrayList<Object>();
 				if (dn.charAt(0) == '*') {
 					int index = skipSpaces(dn, 1);
 					if (dn.charAt(index) != ',') {
@@ -437,13 +437,13 @@ public class FrameworkUtil {
 			if (chain == null) {
 				throw new IllegalArgumentException("DN chain must not be null.");
 			}
-			List<Object> result = new ArrayList<>(chain.size());
+			List<Object> result = new ArrayList<Object>(chain.size());
 			// Now we parse is a list of strings, lets make List of rdn out
 			// of them
 			for (String dn : chain) {
 				dn = new X500Principal(dn).getName(X500Principal.CANONICAL);
 				// Now dn is a nice CANONICAL DN
-				List<Object> rdns = new ArrayList<>();
+				List<Object> rdns = new ArrayList<Object>();
 				parseDN(dn, rdns);
 				result.add(rdns);
 			}
@@ -475,7 +475,7 @@ public class FrameworkUtil {
 		private static void parseDN(String dn, List<Object> rdn) {
 			int startIndex = 0;
 			char c = '\0';
-			List<String> nameValues = new ArrayList<>();
+			List<String> nameValues = new ArrayList<String>();
 			while (startIndex < dn.length()) {
 				int endIndex;
 				for (endIndex = startIndex; endIndex < dn.length(); endIndex++) {
@@ -494,7 +494,7 @@ public class FrameworkUtil {
 				if (c != '+') {
 					rdn.add(nameValues);
 					if (endIndex != dn.length()) {
-						nameValues = new ArrayList<>();
+						nameValues = new ArrayList<String>();
 					} else {
 						nameValues = null;
 					}
