@@ -19,7 +19,7 @@ pipeline {
 		stage('get binaries') {
 			steps{
 				dir ('rt.equinox.binaries') {
-					checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CloneOption', timeout: 120]], submoduleCfg: [], userRemoteConfigs: [[url: 'git://git.eclipse.org/gitroot/equinox/rt.equinox.binaries.git']]])
+					checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CloneOption', timeout: 120]], submoduleCfg: [], userRemoteConfigs: [[url: 'https://git.eclipse.org/r/equinox/rt.equinox.binaries.git']]])
 				}
 			}
 		}
