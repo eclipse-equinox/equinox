@@ -23,6 +23,7 @@
 
 #include <windows.h>
 #include <commctrl.h>
+#include <wincodec.h>
 #include <process.h>
 #include <stdio.h>
 #include <string.h>
@@ -205,6 +206,82 @@ int reuseWorkbench(_TCHAR** filePath, int timeout) {
 	return 0;
 }
 
+HBITMAP loadImage(LPCWSTR pszFilename, int targetDpi) {
+	HRESULT hr = S_OK;
+	HBITMAP hBitmap = NULL;
+	IWICImagingFactory *pFactory = NULL;
+	IWICBitmapDecoder *pDecoder = NULL;
+	IWICBitmapFrameDecode *pFrame = NULL;
+	IWICFormatConverter *pConverter = NULL;
+	IWICBitmapScaler *pScaler = NULL;
+	IWICBitmapSource *pSource = NULL; /* borrowed, don't deref */
+
+	hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+	if (FAILED(hr)) return NULL;
+	hr = CoCreateInstance(&CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, &IID_IWICImagingFactory, &pFactory);
+	if (FAILED(hr)) goto done;
+
+	hr = IWICImagingFactory_CreateDecoderFromFilename(pFactory, pszFilename, NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pDecoder);
+	if (FAILED(hr)) goto done;
+	hr = IWICBitmapDecoder_GetFrame(pDecoder, 0, &pFrame);
+	if (FAILED(hr)) goto done;
+	pSource = (IWICBitmapSource *)pFrame;
+
+	/* Scale the image to the targetDpi, assuming that the source is always 96 dpi. */
+	UINT uiWidth = 0, uiHeight = 0;
+	hr = IWICBitmapSource_GetSize(pFrame, &uiWidth, &uiHeight);
+	if (FAILED(hr)) goto done;
+	if (targetDpi != 96) {
+		uiWidth = uiWidth * targetDpi / 96;
+		uiHeight = uiHeight * targetDpi / 96;
+		hr = IWICImagingFactory_CreateBitmapScaler(pFactory, &pScaler);
+		if (FAILED(hr)) goto done;
+		hr = IWICBitmapScaler_Initialize(pScaler, pSource, uiWidth, uiHeight, WICBitmapInterpolationModeCubic);
+		if (FAILED(hr)) goto done;
+		pSource = (IWICBitmapSource *)pScaler;
+	}
+
+	/* Convert the image to the 24-bit BGR format. */
+	WICPixelFormatGUID format;
+	hr = IWICBitmapSource_GetPixelFormat(pSource, &format);
+	if (FAILED(hr)) goto done;
+	if (!IsEqualGUID(&format, &GUID_WICPixelFormat24bppBGR)) {
+		hr = IWICImagingFactory_CreateFormatConverter(pFactory, &pConverter);
+		if (FAILED(hr)) goto done;
+		hr = IWICFormatConverter_Initialize(pConverter, pSource, &GUID_WICPixelFormat24bppBGR, WICBitmapDitherTypeNone, NULL, 0., WICBitmapPaletteTypeCustom);
+		if (FAILED(hr)) goto done;
+		pSource = (IWICBitmapSource *)pConverter;
+	}
+
+	/* Create a DIB and initialize it from the WIC source. */
+	BITMAPINFO bmi = {{
+		.biSize = sizeof(BITMAPINFOHEADER),
+		.biWidth = (LONG)uiWidth,
+		.biHeight = -(LONG)uiHeight,
+		.biPlanes = 1,
+		.biBitCount = 24,
+		.biCompression = BI_RGB,
+	}};
+	UINT uiStride = (uiWidth * 3 + 3) & ~3; /* rounded up to a multiple of 4 */
+	PVOID pvBits = NULL;
+	hBitmap = CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, &pvBits, NULL, 0);
+	if (!hBitmap) goto done;
+	hr = IWICBitmapSource_CopyPixels(pSource, NULL, uiStride, uiStride * uiHeight, pvBits);
+	if (FAILED(hr)) {
+		DeleteObject(hBitmap);
+		hBitmap = NULL;
+	}
+
+done:
+	if (pScaler) IUnknown_Release(pScaler);
+	if (pConverter) IUnknown_Release(pConverter);
+	if (pFrame) IUnknown_Release(pFrame);
+	if (pDecoder) IUnknown_Release(pDecoder);
+	if (pFactory) IUnknown_Release(pFactory);
+	CoUninitialize();
+	return hBitmap;
+}
+
 /* Show the Splash Window
  *
  * Open the bitmap, insert into the splash window and display it.
@@ -216,10 +293,9 @@ int showSplash( const _TCHAR* featureImage )
     HBITMAP hBitmap = 0;
     BITMAP  bmp;
     HDC     hDC;
-    int     depth;
     int     x, y;
     int     width, height;
-    int     dpiX, scaledWidth, scaledHeight;
+    int     dpiX;
 
 	if(splashing) {
 		/*splash screen is already showing, do nothing */
@@ -233,13 +309,11 @@ int showSplash( const _TCHAR* featureImage )
 	 */
 	initWindowSystem(0, NULL, 1);
 	
-    /* Load the bitmap for the feature. */
-    hDC = GetDC( NULL);
-    depth = GetDeviceCaps( hDC, BITSPIXEL ) * GetDeviceCaps( hDC, PLANES);
-
     /* fetch screen DPI and round it according to the swt.autoScale setting, 
     this implementation needs to be kept in sync with org.eclipse.swt.internal.DPIUtil#setDeviceZoom(int) */
+    hDC = GetDC( NULL);
 	dpiX = GetDeviceCaps ( hDC, LOGPIXELSX );
+	ReleaseDC(NULL, hDC);
 	switch (autoScaleValue) {
 		case AUTOSCALE_FALSE:
 			dpiX = 96;
@@ -261,30 +335,15 @@ int showSplash( const _TCHAR* featureImage )
 			break;
 	}
 
-    ReleaseDC(NULL, hDC);
-    if (featureImage != NULL)
-    	hBitmap = LoadImage(NULL, featureImage, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	/* Load the bitmap for the feature. */
+	if (featureImage != NULL)
+		hBitmap = loadImage(featureImage, dpiX);
 
     /* If the bitmap could not be found, return an error. */
     if (hBitmap == 0)
     	return ERROR_FILE_NOT_FOUND;
     
 	GetObject(hBitmap, sizeof(BITMAP), &bmp);
-
-	/* reload scaled up image when zoom > 100% */
-    if (dpiX > 96) {
-    	/* calculate scaled-up bounds */
-    	scaledWidth = dpiX * bmp.bmWidth / 96;
-        scaledHeight = dpiX * bmp.bmHeight / 96;
-
-		hBitmap = LoadImage(NULL, featureImage, IMAGE_BITMAP, scaledWidth, scaledHeight, LR_LOADFROMFILE);
-
-		/* If the bitmap could not be found, return an error. */
-		if (hBitmap == 0)
-			return ERROR_FILE_NOT_FOUND;
-
-		GetObject(hBitmap, sizeof(BITMAP), &bmp);
-    }
 
     /* figure out position */
     width = GetSystemMetrics (SM_CXSCREEN);

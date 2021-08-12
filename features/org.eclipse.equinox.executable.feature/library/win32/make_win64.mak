@@ -43,11 +43,11 @@ DLL_OBJS	= eclipse.obj  eclipseWin.obj  eclipseUtil.obj  eclipseJNI.obj eclipseS
 
 cdebug	= -Ox -DNDEBUG
 cvarsmt	= -D_MT -MT
-cflags	= $(cdebug) -DUNICODE -D_UNICODE /c -DUSE_ASSEMBLER -GS -DWIN64 -D_WIN64 $(cvarsmt) $(CFLAGS)
+cflags	= $(cdebug) -DUNICODE -D_UNICODE -DCOBJMACROS /c -DUSE_ASSEMBLER -GS -DWIN64 -D_WIN64 $(cvarsmt) $(CFLAGS)
 LIBS   = kernel32.lib user32.lib comctl32.lib libcmt.lib \
-	libvcruntime.lib libucrt.lib
+	libvcruntime.lib libucrt.lib ole32.lib windowscodecs.lib
 DLL_LIBS = kernel32.lib user32.lib comctl32.lib gdi32.lib Advapi32.lib libcmt.lib version.lib \
-	libvcruntime.lib libucrt.lib
+	libvcruntime.lib libucrt.lib ole32.lib windowscodecs.lib
 LFLAGS = /DYNAMICBASE /NXCOMPAT /HIGHENTROPYVA /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:windows -entry:wmainCRTStartup
 CONSOLEFLAGS = /DYNAMICBASE /NXCOMPAT /HIGHENTROPYVA /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:console -entry:wmainCRTStartup
 #DLL_LFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /PDB:NONE /RELEASE /NOLOGO -entry:_DllMainCRTStartup@12 -dll /BASE:0x72000000 /DLL
