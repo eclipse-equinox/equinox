@@ -160,7 +160,12 @@ public class Main {
 	private static final String OVERRIDE_VMARGS = "--launcher.overrideVmargs"; //$NON-NLS-1$
 	private static final String NL = "-nl"; //$NON-NLS-1$
 	private static final String ENDSPLASH = "-endsplash"; //$NON-NLS-1$
-	private static final String SPLASH_IMAGE = "splash.bmp"; //$NON-NLS-1$
+	private static final String[] SPLASH_IMAGES = {"splash.png", //$NON-NLS-1$
+			"splash.jpg", //$NON-NLS-1$
+			"splash.jpeg", //$NON-NLS-1$
+			"splash.gif", //$NON-NLS-1$
+			"splash.bmp", //$NON-NLS-1$
+	};
 	private static final String CLEAN = "-clean"; //$NON-NLS-1$
 	private static final String NOEXIT = "-noExit"; //$NON-NLS-1$
 	private static final String OS = "-os"; //$NON-NLS-1$
@@ -2335,8 +2340,8 @@ public class Main {
 	 * Build an array of path suffixes based on the given NL which is suitable
 	 * for splash path searching.  The returned array contains paths in order
 	 * from most specific to most generic. So, in the FR_fr locale, it will return
-	 * "nl/fr/FR/splash.bmp", then "nl/fr/splash.bmp", and finally "splash.bmp".
-	 * (we always search the root)
+	 * candidates in "nl/fr/FR/", then "nl/fr/", and finally in the root.
+	 * Candidate names are defined in SPLASH_IMAGES and include splash.png, splash.jpg, etc.
 	 */
 	private static String[] buildNLVariants(String locale) {
 		//build list of suffixes for loading resource bundles
@@ -2344,14 +2349,18 @@ public class Main {
 		ArrayList<String> result = new ArrayList<>(4);
 		int lastSeparator;
 		while (true) {
-			result.add("nl" + File.separatorChar + nl.replace('_', File.separatorChar) + File.separatorChar + SPLASH_IMAGE); //$NON-NLS-1$
+			for (String name : SPLASH_IMAGES) {
+				result.add("nl" + File.separatorChar + nl.replace('_', File.separatorChar) + File.separatorChar + name); //$NON-NLS-1$
+			}
 			lastSeparator = nl.lastIndexOf('_');
 			if (lastSeparator == -1)
 				break;
 			nl = nl.substring(0, lastSeparator);
 		}
 		//add the empty suffix last (most general)
-		result.add(SPLASH_IMAGE);
+		for (String name : SPLASH_IMAGES) {
+			result.add(name);
+		}
 		return result.toArray(new String[result.size()]);
 	}
 
