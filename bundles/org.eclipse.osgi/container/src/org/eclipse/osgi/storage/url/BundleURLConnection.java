@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2013 IBM Corporation and others.
+ * Copyright (c) 2004, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Hannes Wellmann - Bug 576644: Implement BundleReference for BundleURLConnection
  *******************************************************************************/
 
 package org.eclipse.osgi.storage.url;
@@ -18,16 +19,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import org.eclipse.osgi.container.Module;
+import org.eclipse.osgi.container.ModuleContainer;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.util.NLS;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleReference;
 
 /**
  * URLConnection for BundleClassLoader resources.
  */
-public class BundleURLConnection extends URLConnection {
+public class BundleURLConnection extends URLConnection implements BundleReference {
 	/** BundleEntry that the URL is associated. */
 	protected final BundleEntry bundleEntry;
+
+	private final ModuleContainer container;
 
 	/** InputStream for this URLConnection. */
 	protected InputStream in;
@@ -41,9 +48,10 @@ public class BundleURLConnection extends URLConnection {
 	 * @param url  URL for this URLConnection.
 	 * @param bundleEntry  BundleEntry that the URLConnection is associated.
 	 */
-	public BundleURLConnection(URL url, BundleEntry bundleEntry) {
+	public BundleURLConnection(URL url, ModuleContainer container, BundleEntry bundleEntry) {
 		super(url);
 
+		this.container = container;
 		this.bundleEntry = bundleEntry;
 		this.in = null;
 		this.contentType = null;
@@ -133,5 +141,13 @@ public class BundleURLConnection extends URLConnection {
 	 */
 	public URL getFileURL() {
 		return bundleEntry.getFileURL();
+	}
+
+	@Override
+	public Bundle getBundle() {
+		String host = url.getHost();
+		long bundleId = BundleResourceHandler.parseBundleIDFromURLHost(host);
+		Module module = container.getModule(bundleId);
+		return module != null ? module.getBundle() : null;
 	}
 }

@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Hannes Wellmann - Bug 576643: Clean up and unify Bundle resource classes
+ *     Hannes Wellmann - Bug 576644: Implement BundleReference for BundleURLConnection
  *******************************************************************************/
 
 package org.eclipse.osgi.storage.url;
@@ -155,7 +156,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 	@Override
 	protected URLConnection openConnection(URL url) throws IOException {
 		if (bundleEntry != null) { // if the bundleEntry is not null then return quick
-			return new BundleURLConnection(url, bundleEntry);
+			return new BundleURLConnection(url, container, bundleEntry);
 		}
 		String host = url.getHost();
 		if (host == null) {
@@ -178,7 +179,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 			// No admin security check was made better check now.
 			checkAuthorization(module);
 		}
-		return new BundleURLConnection(url, findBundleEntry(url, module));
+		return new BundleURLConnection(url, container, findBundleEntry(url, module));
 	}
 
 	/**
@@ -293,7 +294,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		return bundleId + BID_FWKID_SEPARATOR + container.hashCode();
 	}
 
-	private static long parseBundleIDFromURLHost(String host) {
+	static long parseBundleIDFromURLHost(String host) {
 		int dotIndex = host.indexOf(BID_FWKID_SEPARATOR);
 		return (dotIndex >= 0 && dotIndex < host.length() - 1) ? Long.parseLong(host.substring(0, dotIndex)) : Long.parseLong(host);
 	}

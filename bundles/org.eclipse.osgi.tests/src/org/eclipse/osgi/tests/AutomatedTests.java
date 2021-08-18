@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2013 IBM Corporation and others.
+ * Copyright (c) 2004, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -40,7 +40,7 @@ import org.junit.runners.Suite;
 		BundleContextFilterTests.class, FrameworkUtilFilterTests.class, AdminPermissionTests.class,
 		ServicePermissionTests.class, PackagePermissionTests.class,
 		org.eclipse.osgi.tests.securityadmin.AllSecurityAdminTests.class,
-		org.eclipse.osgi.tests.resource.AllTests.class })
+		org.eclipse.osgi.tests.resource.AllTests.class, org.eclipse.osgi.tests.url.AllTests.class })
 
 public class AutomatedTests {
 }
