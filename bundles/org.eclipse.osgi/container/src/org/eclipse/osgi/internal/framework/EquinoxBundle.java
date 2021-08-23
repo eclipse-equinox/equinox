@@ -921,17 +921,17 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			if (FrameworkWiringDTO.class.equals(adapterType)) {
 				readLock();
 				try {
-					Set<BundleWiring> allWirings = new HashSet<>();
+					Set<ModuleWiring> allWirings = new HashSet<>();
 					for (Module m : module.getContainer().getModules()) {
-						for (BundleRevision revision : m.getRevisions().getRevisions()) {
-							BundleWiring wiring = revision.getWiring();
+						for (ModuleRevision revision : m.getRevisions().getModuleRevisions()) {
+							ModuleWiring wiring = revision.getWiring();
 							if (wiring != null) {
 								allWirings.add(wiring);
 							}
 						}
 					}
 					for (ModuleRevision revision : module.getContainer().getRemovalPending()) {
-						BundleWiring wiring = revision.getWiring();
+						ModuleWiring wiring = revision.getWiring();
 						if (wiring != null) {
 							allWirings.add(wiring);
 						}

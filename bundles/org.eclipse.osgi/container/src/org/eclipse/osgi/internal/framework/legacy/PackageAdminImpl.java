@@ -23,7 +23,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.eclipse.osgi.container.ModuleCapability;
 import org.eclipse.osgi.container.ModuleContainer;
+import org.eclipse.osgi.container.ModuleWire;
 import org.eclipse.osgi.container.ModuleWiring;
 import org.eclipse.osgi.internal.container.Capabilities;
 import org.eclipse.osgi.internal.container.InternalUtils;
@@ -40,8 +42,6 @@ import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleRevisions;
-import org.osgi.framework.wiring.BundleWire;
-import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.resource.Namespace;
 import org.osgi.resource.Requirement;
@@ -69,11 +69,12 @@ public class PackageAdminImpl implements PackageAdmin {
 
 		Collection<ExportedPackage> allExports = new ArrayList<>();
 		for (BundleRevision revision : revisions) {
-			BundleWiring wiring = revision.getWiring();
+			ModuleWiring wiring = (ModuleWiring) revision.getWiring();
 			if (wiring != null) {
-				List<BundleCapability> providedPackages = wiring.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE);
+				List<ModuleCapability> providedPackages = wiring
+						.getModuleCapabilities(PackageNamespace.PACKAGE_NAMESPACE);
 				if (providedPackages != null) {
-					for (BundleCapability providedPackage : providedPackages) {
+					for (ModuleCapability providedPackage : providedPackages) {
 						allExports.add(new ExportedPackageImpl(providedPackage, wiring));
 					}
 				}
@@ -114,16 +115,16 @@ public class PackageAdminImpl implements PackageAdmin {
 		InternalUtils.filterCapabilityPermissions(packageCaps);
 		List<ExportedPackage> result = new ArrayList<>();
 		for (BundleCapability capability : packageCaps) {
-			BundleWiring wiring = capability.getRevision().getWiring();
+			ModuleWiring wiring = (ModuleWiring) capability.getRevision().getWiring();
 			if (wiring != null) {
-				Collection<BundleWiring> wirings = Collections.emptyList();
+				Collection<ModuleWiring> wirings = Collections.emptyList();
 				if ((capability.getRevision().getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
 					// This is a fragment, just get all the host wirings
-					List<BundleWire> hostWires = wiring.getRequiredWires(HostNamespace.HOST_NAMESPACE);
+					List<ModuleWire> hostWires = wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
 					if (hostWires != null && !hostWires.isEmpty()) {
 						wirings = new ArrayList<>(hostWires.size());
-						for (BundleWire hostWire : hostWires) {
-							BundleWiring hostWiring = hostWire.getProviderWiring();
+						for (ModuleWire hostWire : hostWires) {
+							ModuleWiring hostWiring = hostWire.getProviderWiring();
 							if (hostWiring != null) {
 								wirings.add(hostWiring);
 							}
@@ -133,11 +134,11 @@ public class PackageAdminImpl implements PackageAdmin {
 					// just a single host wiring
 					wirings = Collections.singletonList(wiring);
 				}
-				for (BundleWiring moduleWiring : wirings) {
+				for (ModuleWiring moduleWiring : wirings) {
 					Object pkgName = capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
 					if (pkgName instanceof String
-							&& !((ModuleWiring) moduleWiring).isSubstitutedPackage((String) pkgName)) {
-						result.add(new ExportedPackageImpl(capability, moduleWiring));
+							&& !moduleWiring.isSubstitutedPackage((String) pkgName)) {
+						result.add(new ExportedPackageImpl((ModuleCapability) capability, moduleWiring));
 					}
 				}
 			}
@@ -165,9 +166,9 @@ public class PackageAdminImpl implements PackageAdmin {
 		InternalUtils.filterCapabilityPermissions(bundleCaps);
 		Collection<RequiredBundle> result = new ArrayList<>();
 		for (BundleCapability capability : bundleCaps) {
-			BundleWiring wiring = capability.getRevision().getWiring();
+			ModuleWiring wiring = (ModuleWiring) capability.getRevision().getWiring();
 			if (wiring != null) {
-				result.add(new RequiredBundleImpl(capability, wiring));
+				result.add(new RequiredBundleImpl((ModuleCapability) capability, wiring));
 			}
 		}
 		return result.isEmpty() ? null : result.toArray(new RequiredBundle[result.size()]);
@@ -209,17 +210,17 @@ public class PackageAdminImpl implements PackageAdmin {
 
 	@Override
 	public Bundle[] getFragments(Bundle bundle) {
-		BundleWiring wiring = getWiring(bundle);
+		ModuleWiring wiring = getWiring(bundle);
 		if (wiring == null) {
 			return null;
 		}
-		List<BundleWire> hostWires = wiring.getProvidedWires(HostNamespace.HOST_NAMESPACE);
+		List<ModuleWire> hostWires = wiring.getProvidedModuleWires(HostNamespace.HOST_NAMESPACE);
 		if (hostWires == null) {
 			// we don't hold locks while checking the graph, just return if no longer valid
 			return null;
 		}
 		Collection<Bundle> fragments = new ArrayList<>(hostWires.size());
-		for (BundleWire wire : hostWires) {
+		for (ModuleWire wire : hostWires) {
 			Bundle fragment = wire.getRequirer().getBundle();
 			if (fragment != null) {
 				fragments.add(fragment);
@@ -230,17 +231,17 @@ public class PackageAdminImpl implements PackageAdmin {
 
 	@Override
 	public Bundle[] getHosts(Bundle bundle) {
-		BundleWiring wiring = getWiring(bundle);
+		ModuleWiring wiring = getWiring(bundle);
 		if (wiring == null) {
 			return null;
 		}
-		List<BundleWire> hostWires = wiring.getRequiredWires(HostNamespace.HOST_NAMESPACE);
+		List<ModuleWire> hostWires = wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
 		if (hostWires == null) {
 			// we don't hold locks while checking the graph, just return if no longer valid
 			return null;
 		}
 		Collection<Bundle> hosts = new ArrayList<>(hostWires.size());
-		for (BundleWire wire : hostWires) {
+		for (ModuleWire wire : hostWires) {
 			Bundle host = wire.getProvider().getBundle();
 			if (host != null) {
 				hosts.add(host);
@@ -249,12 +250,12 @@ public class PackageAdminImpl implements PackageAdmin {
 		return hosts.isEmpty() ? null : hosts.toArray(new Bundle[hosts.size()]);
 	}
 
-	private BundleWiring getWiring(Bundle bundle) {
+	private ModuleWiring getWiring(Bundle bundle) {
 		BundleRevision current = bundle.adapt(BundleRevision.class);
 		if (current == null) {
 			return null;
 		}
-		return current.getWiring();
+		return (ModuleWiring) current.getWiring();
 	}
 
 	@Override
@@ -281,10 +282,10 @@ public class PackageAdminImpl implements PackageAdmin {
 
 	static class ExportedPackageImpl implements ExportedPackage {
 
-		private final BundleCapability packageCapability;
-		private final BundleWiring providerWiring;
+		private final ModuleCapability packageCapability;
+		private final ModuleWiring providerWiring;
 
-		public ExportedPackageImpl(BundleCapability packageCapability, BundleWiring providerWiring) {
+		public ExportedPackageImpl(ModuleCapability packageCapability, ModuleWiring providerWiring) {
 			this.packageCapability = packageCapability;
 			this.providerWiring = providerWiring;
 		}
@@ -311,15 +312,16 @@ public class PackageAdminImpl implements PackageAdmin {
 			String packageName = getName();
 			addRequirers(importing, providerWiring, packageName);
 
-			List<BundleWire> providedPackages = providerWiring.getProvidedWires(PackageNamespace.PACKAGE_NAMESPACE);
+			List<ModuleWire> providedPackages = providerWiring
+					.getProvidedModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
 			if (providedPackages == null) {
 				// we don't hold locks while checking the graph, just return if no longer valid
 				return null;
 			}
-			for (BundleWire packageWire : providedPackages) {
+			for (ModuleWire packageWire : providedPackages) {
 				if (packageCapability.equals(packageWire.getCapability())) {
 					importing.add(packageWire.getRequirer().getBundle());
-					if (((ModuleWiring) packageWire.getRequirerWiring()).isSubstitutedPackage(packageName)) {
+					if (packageWire.getRequirerWiring().isSubstitutedPackage(packageName)) {
 						addRequirers(importing, packageWire.getRequirerWiring(), packageName);
 					}
 				}
@@ -327,13 +329,13 @@ public class PackageAdminImpl implements PackageAdmin {
 			return importing.toArray(new Bundle[importing.size()]);
 		}
 
-		private static void addRequirers(Set<Bundle> importing, BundleWiring wiring, String packageName) {
-			List<BundleWire> requirerWires = wiring.getProvidedWires(BundleNamespace.BUNDLE_NAMESPACE);
+		private static void addRequirers(Set<Bundle> importing, ModuleWiring wiring, String packageName) {
+			List<ModuleWire> requirerWires = wiring.getProvidedModuleWires(BundleNamespace.BUNDLE_NAMESPACE);
 			if (requirerWires == null) {
 				// we don't hold locks while checking the graph, just return if no longer isInUse
 				return;
 			}
-			for (BundleWire requireBundleWire : requirerWires) {
+			for (ModuleWire requireBundleWire : requirerWires) {
 				Bundle requirer = requireBundleWire.getRequirer().getBundle();
 				if (importing.contains(requirer)) {
 					continue;
@@ -342,19 +344,19 @@ public class PackageAdminImpl implements PackageAdmin {
 
 				// if reexported then need to add any requirers of the reexporter
 				String reExport = requireBundleWire.getRequirement().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE);
-				BundleWiring requirerWiring = requireBundleWire.getRequirerWiring();
+				ModuleWiring requirerWiring = requireBundleWire.getRequirerWiring();
 				if (BundleNamespace.VISIBILITY_REEXPORT.equals(reExport)) {
 					addRequirers(importing, requirerWiring, packageName);
 				}
 				// also need to add any importers of the same package as the wiring exports; case of aggregations
 				if (!requirerWiring.equals(wiring)) {
-					List<BundleWire> providedPackages = requirerWiring.getProvidedWires(PackageNamespace.PACKAGE_NAMESPACE);
+					List<ModuleWire> providedPackages = requirerWiring
+							.getProvidedModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
 					if (providedPackages != null) {
-						for (BundleWire packageWire : providedPackages) {
+						for (ModuleWire packageWire : providedPackages) {
 							if (packageName.equals(packageWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE))) {
 								importing.add(packageWire.getRequirer().getBundle());
-								if (((ModuleWiring) packageWire.getRequirerWiring())
-										.isSubstitutedPackage(packageName)) {
+								if (packageWire.getRequirerWiring().isSubstitutedPackage(packageName)) {
 									addRequirers(importing, packageWire.getRequirerWiring(), packageName);
 								}
 							}
@@ -391,10 +393,10 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	private static class RequiredBundleImpl implements RequiredBundle {
-		private final BundleCapability bundleCapability;
-		private final BundleWiring providerWiring;
+		private final ModuleCapability bundleCapability;
+		private final ModuleWiring providerWiring;
 
-		public RequiredBundleImpl(BundleCapability bundleCapability, BundleWiring providerWiring) {
+		public RequiredBundleImpl(ModuleCapability bundleCapability, ModuleWiring providerWiring) {
 			this.bundleCapability = bundleCapability;
 			this.providerWiring = providerWiring;
 		}
@@ -423,13 +425,13 @@ public class PackageAdminImpl implements PackageAdmin {
 			return requiring.toArray(new Bundle[requiring.size()]);
 		}
 
-		private static void addRequirers(Set<Bundle> requiring, BundleWiring providerWiring) {
-			List<BundleWire> requirerWires = providerWiring.getProvidedWires(BundleNamespace.BUNDLE_NAMESPACE);
+		private static void addRequirers(Set<Bundle> requiring, ModuleWiring providerWiring) {
+			List<ModuleWire> requirerWires = providerWiring.getProvidedModuleWires(BundleNamespace.BUNDLE_NAMESPACE);
 			if (requirerWires == null) {
 				// we don't hold locks while checking the graph, just return if no longer isInUse
 				return;
 			}
-			for (BundleWire requireBundleWire : requirerWires) {
+			for (ModuleWire requireBundleWire : requirerWires) {
 				Bundle requirer = requireBundleWire.getRequirer().getBundle();
 				if (requiring.contains(requirer)) {
 					continue;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -24,6 +24,10 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import org.eclipse.osgi.container.ModuleCapability;
+import org.eclipse.osgi.container.ModuleRequirement;
+import org.eclipse.osgi.container.ModuleWire;
+import org.eclipse.osgi.container.ModuleWiring;
 import org.osgi.dto.DTO;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -42,7 +46,6 @@ import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleRevisions;
-import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.framework.wiring.dto.BundleRevisionDTO;
 import org.osgi.framework.wiring.dto.BundleWireDTO;
@@ -145,7 +148,7 @@ public class DTOBuilder {
 		return dto;
 	}
 
-	private List<CapabilityRefDTO> getListCapabilityRefDTO(List<BundleCapability> caps) {
+	private List<CapabilityRefDTO> getListCapabilityRefDTO(List<ModuleCapability> caps) {
 		if (caps == null) {
 			return null;
 		}
@@ -190,18 +193,18 @@ public class DTOBuilder {
 		return dto;
 	}
 
-	private List<RequirementRefDTO> getListRequirementRefDTO(List<BundleRequirement> reqs) {
+	private List<RequirementRefDTO> getListRequirementRefDTO(List<ModuleRequirement> reqs) {
 		if (reqs == null) {
 			return null;
 		}
 		List<RequirementRefDTO> dtos = newList(reqs.size());
-		for (BundleRequirement req : reqs) {
+		for (ModuleRequirement req : reqs) {
 			dtos.add(getRequirementRefDTO(req));
 		}
 		return dtos;
 	}
 
-	private RequirementRefDTO getRequirementRefDTO(BundleRequirement req) {
+	private RequirementRefDTO getRequirementRefDTO(ModuleRequirement req) {
 		if (req == null) {
 			return null;
 		}
@@ -228,13 +231,13 @@ public class DTOBuilder {
 		if (revision == null) {
 			return null;
 		}
-		BundleWiringDTO dto = new DTOBuilder().getBundleWiringDTO(revision.getWiring());
+		BundleWiringDTO dto = new DTOBuilder().getBundleWiringDTO((ModuleWiring) revision.getWiring());
 		return dto;
 	}
 
-	public static FrameworkWiringDTO newFrameworkWiringDTO(Collection<BundleWiring> allWirings) {
+	public static FrameworkWiringDTO newFrameworkWiringDTO(Collection<ModuleWiring> allWirings) {
 		DTOBuilder builder = new DTOBuilder();
-		for (BundleWiring wiring : allWirings) {
+		for (ModuleWiring wiring : allWirings) {
 			builder.getBundleWiringNodeDTO(wiring);
 		}
 		FrameworkWiringDTO dto = new FrameworkWiringDTO();
@@ -243,7 +246,7 @@ public class DTOBuilder {
 		return dto;
 	}
 
-	private BundleWiringDTO getBundleWiringDTO(BundleWiring wiring) {
+	private BundleWiringDTO getBundleWiringDTO(ModuleWiring wiring) {
 		if (wiring == null) {
 			return null;
 		}
@@ -255,7 +258,7 @@ public class DTOBuilder {
 		return dto;
 	}
 
-	private int getWiringId(BundleWiring wiring) {
+	private int getWiringId(ModuleWiring wiring) {
 		BundleWiringDTO.NodeDTO dto = getBundleWiringNodeDTO(wiring);
 		if (dto == null) {
 			return 0;
@@ -263,7 +266,7 @@ public class DTOBuilder {
 		return dto.id;
 	}
 
-	private BundleWiringDTO.NodeDTO getBundleWiringNodeDTO(BundleWiring wiring) {
+	private BundleWiringDTO.NodeDTO getBundleWiringNodeDTO(ModuleWiring wiring) {
 		if (wiring == null) {
 			return null;
 		}
@@ -277,25 +280,25 @@ public class DTOBuilder {
 		dto.current = wiring.isCurrent();
 		dto.inUse = wiring.isInUse();
 		dto.resource = getResourceId(wiring.getRevision());
-		dto.capabilities = getListCapabilityRefDTO(wiring.getCapabilities(null));
-		dto.requirements = getListRequirementRefDTO(wiring.getRequirements(null));
-		dto.providedWires = getListBundleWireDTO(wiring.getProvidedWires(null));
-		dto.requiredWires = getListBundleWireDTO(wiring.getRequiredWires(null));
+		dto.capabilities = getListCapabilityRefDTO(wiring.getModuleCapabilities(null));
+		dto.requirements = getListRequirementRefDTO(wiring.getModuleRequirements(null));
+		dto.providedWires = getListBundleWireDTO(wiring.getProvidedModuleWires(null));
+		dto.requiredWires = getListBundleWireDTO(wiring.getRequiredModuleWires(null));
 		return dto;
 	}
 
-	private List<WireDTO> getListBundleWireDTO(List<BundleWire> wires) {
+	private List<WireDTO> getListBundleWireDTO(List<ModuleWire> wires) {
 		if (wires == null) {
 			return null;
 		}
 		List<WireDTO> dtos = newList(wires.size());
-		for (BundleWire wire : wires) {
+		for (ModuleWire wire : wires) {
 			dtos.add(getBundleWireDTO(wire));
 		}
 		return dtos;
 	}
 
-	private BundleWireDTO getBundleWireDTO(BundleWire wire) {
+	private BundleWireDTO getBundleWireDTO(ModuleWire wire) {
 		if (wire == null) {
 			return null;
 		}
@@ -317,7 +320,7 @@ public class DTOBuilder {
 		final int size = revs.size();
 		List<BundleWiringDTO> dtos = new ArrayList<>(size);
 		for (int i = 0; i < size; i++) {
-			BundleWiring wiring = revs.get(i).getWiring();
+			ModuleWiring wiring = (ModuleWiring) revs.get(i).getWiring();
 			if (wiring != null) {
 				dtos.add(new DTOBuilder().getBundleWiringDTO(wiring)); // use new DTOBuilder for each wiring dto
 			}

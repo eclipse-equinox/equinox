@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
 import org.eclipse.osgi.container.ModuleContainer;
+import org.eclipse.osgi.container.ModuleWiring;
 import org.eclipse.osgi.internal.container.Capabilities;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.osgi.framework.Bundle;
@@ -29,7 +30,6 @@ import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWire;
-import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.resource.Namespace;
 
@@ -88,8 +88,8 @@ public class GlobalPolicy implements IBuddyPolicy {
 		for (BundleCapability pkg : packages) {
 			if ((pkg.getRevision().getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
 				// use the hosts
-				BundleWiring wiring = pkg.getRevision().getWiring();
-				for (BundleWire hostWire : wiring.getRequiredWires(HostNamespace.HOST_NAMESPACE)) {
+				ModuleWiring wiring = (ModuleWiring) pkg.getRevision().getWiring();
+				for (BundleWire hostWire : wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE)) {
 					result.add(hostWire.getProvider().getBundle());
 				}
 			} else {

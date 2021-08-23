@@ -13,6 +13,14 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
+import static org.eclipse.osgi.internal.container.InternalUtils.asCopy;
+import static org.eclipse.osgi.internal.container.InternalUtils.asListBundleCapability;
+import static org.eclipse.osgi.internal.container.InternalUtils.asListBundleRequirement;
+import static org.eclipse.osgi.internal.container.InternalUtils.asListBundleWire;
+import static org.eclipse.osgi.internal.container.InternalUtils.asListCapability;
+import static org.eclipse.osgi.internal.container.InternalUtils.asListRequirement;
+import static org.eclipse.osgi.internal.container.InternalUtils.asListWire;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,7 +35,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
 import org.eclipse.osgi.internal.container.AtomicLazyInitializer;
-import org.eclipse.osgi.internal.container.InternalUtils;
 import org.eclipse.osgi.internal.container.NamespaceList;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
@@ -108,8 +115,9 @@ public final class ModuleWiring implements BundleWiring {
 	}
 
 	/**
-	 * Returns the same result as {@link #getCapabilities(String)} except
-	 * uses type ModuleCapability.
+	 * Returns the same result as {@link #getCapabilities(String)} except uses type
+	 * ModuleCapability and the returned list is unmodifiable.
+	 * 
 	 * @param namespace the namespace
 	 * @return the capabilities
 	 * @see #getCapabilities(String)
@@ -122,8 +130,9 @@ public final class ModuleWiring implements BundleWiring {
 	}
 
 	/**
-	 * Returns the same result as {@link #getRequirements(String)} except
-	 * uses type ModuleRequirement.
+	 * Returns the same result as {@link #getRequirements(String)} except uses type
+	 * ModuleRequirement and the returned list is unmodifiable.
+	 * 
 	 * @param namespace the namespace
 	 * @return the requirements
 	 * @see #getRequirements(String)
@@ -153,18 +162,19 @@ public final class ModuleWiring implements BundleWiring {
 
 	@Override
 	public List<BundleCapability> getCapabilities(String namespace) {
-		return InternalUtils.asListBundleCapability(getModuleCapabilities(namespace));
+		return asCopy(asListBundleCapability(getModuleCapabilities(namespace)));
 
 	}
 
 	@Override
 	public List<BundleRequirement> getRequirements(String namespace) {
-		return InternalUtils.asListBundleRequirement(getModuleRequirements(namespace));
+		return asCopy(asListBundleRequirement(getModuleRequirements(namespace)));
 	}
 
 	/**
-	 * Returns the same result as {@link #getProvidedWires(String)} except
-	 * uses type ModuleWire.
+	 * Returns the same result as {@link #getProvidedWires(String)} except uses type
+	 * ModuleWire and the returned list is unmodifiable.
+	 * 
 	 * @param namespace the namespace
 	 * @return the wires
 	 * @see #getProvidedWires(String)
@@ -178,8 +188,9 @@ public final class ModuleWiring implements BundleWiring {
 	}
 
 	/**
-	 * Returns the same result as {@link #getRequiredWires(String)} except
-	 * uses type ModuleWire.
+	 * Returns the same result as {@link #getRequiredWires(String)} except uses type
+	 * ModuleWire and the returned list is unmodifiable.
+	 * 
 	 * @param namespace the namespace
 	 * @return the wires
 	 * @see #getRequiredWires(String)
@@ -210,12 +221,12 @@ public final class ModuleWiring implements BundleWiring {
 
 	@Override
 	public List<BundleWire> getProvidedWires(String namespace) {
-		return InternalUtils.asListBundleWire(getWires(namespace, providedWires));
+		return asCopy(asListBundleWire(getWires(namespace, providedWires)));
 	}
 
 	@Override
 	public List<BundleWire> getRequiredWires(String namespace) {
-		return InternalUtils.asListBundleWire(getWires(namespace, requiredWires));
+		return asCopy(asListBundleWire(getWires(namespace, requiredWires)));
 	}
 
 	private List<ModuleWire> getWires(String namespace, NamespaceList<ModuleWire> wires) {
@@ -297,22 +308,22 @@ public final class ModuleWiring implements BundleWiring {
 
 	@Override
 	public List<Capability> getResourceCapabilities(String namespace) {
-		return InternalUtils.asListCapability(getCapabilities(namespace));
+		return asCopy(asListCapability(getModuleCapabilities(namespace)));
 	}
 
 	@Override
 	public List<Requirement> getResourceRequirements(String namespace) {
-		return InternalUtils.asListRequirement(getRequirements(namespace));
+		return asCopy(asListRequirement(getModuleRequirements(namespace)));
 	}
 
 	@Override
 	public List<Wire> getProvidedResourceWires(String namespace) {
-		return InternalUtils.asListWire(getWires(namespace, providedWires));
+		return asCopy(asListWire(getWires(namespace, providedWires)));
 	}
 
 	@Override
 	public List<Wire> getRequiredResourceWires(String namespace) {
-		return InternalUtils.asListWire(getWires(namespace, requiredWires));
+		return asCopy(asListWire(getWires(namespace, requiredWires)));
 	}
 
 	@Override
