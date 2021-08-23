@@ -15,11 +15,13 @@ package org.eclipse.osgi.internal.container;
 
 import java.security.Permission;
 import java.security.SecureRandom;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.RandomAccess;
 import java.util.UUID;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.osgi.framework.Bundle;
@@ -33,8 +35,71 @@ import org.osgi.framework.wiring.BundleCapability;
 
 public class InternalUtils {
 
+	/**
+	 * Returns a mutable wrapped around the given list, that creates a copy of the
+	 * given list only if the list is about to be modified.
+	 * <p>
+	 * This method assumes that the given List is immutable and a
+	 * {@link RandomAccess} list.
+	 * </p>
+	 * 
+	 * @param list the list to be copied.
+	 * @return an effectively mutable and lazy copy of the given list.
+	 */
 	public static <T> List<T> asCopy(List<? extends T> list) {
-		return new ArrayList<>(list);
+		if (!(list instanceof RandomAccess)) {
+			throw new IllegalArgumentException("Only RandomAccess lists are supported"); //$NON-NLS-1$
+		}
+		return new CopyOnFirstWriteList<>(list);
+	}
+
+	private static final class CopyOnFirstWriteList<T> extends AbstractList<T> implements RandomAccess {
+		private List<T> copy;
+		private boolean copied = false;
+
+		CopyOnFirstWriteList(List<? extends T> list) {
+			copy = asList(list);
+		}
+
+		@Override
+		public T get(int index) {
+			return copy.get(index);
+		}
+
+		@Override
+		public int size() {
+			return copy.size();
+		}
+
+		@Override
+		public void add(int index, T element) {
+			ensureCopied();
+			copy.add(index, element);
+			modCount++;
+		}
+
+		@Override
+		public T remove(int index) {
+			ensureCopied();
+			T removed = copy.remove(index);
+			modCount++;
+			return removed;
+		}
+
+		@Override
+		public T set(int index, T element) {
+			ensureCopied();
+			T set = copy.set(index, element);
+			modCount++;
+			return set;
+		}
+
+		private void ensureCopied() {
+			if (!copied) {
+				copy = new ArrayList<>(copy);
+				copied = true;
+			}
+		}
 	}
 
 	/**
