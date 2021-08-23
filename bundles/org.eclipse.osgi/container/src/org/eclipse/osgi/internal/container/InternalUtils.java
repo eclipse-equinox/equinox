@@ -30,118 +30,22 @@ import org.osgi.framework.namespace.BundleNamespace;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleCapability;
-import org.osgi.framework.wiring.BundleRequirement;
-import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.framework.wiring.BundleWire;
-import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.resource.Capability;
-import org.osgi.resource.Requirement;
-import org.osgi.resource.Resource;
-import org.osgi.resource.Wire;
 
 public class InternalUtils {
 
-	public static <T> List<T> asCopy(List<T> list) {
+	public static <T> List<T> asCopy(List<? extends T> list) {
 		return new ArrayList<>(list);
 	}
 
 	/**
-	 * Coerce the generic type of a list from List<BundleCapability>
-	 * to List<Capability>
+	 * Coerce the generic type of a list from List<? extends T> to List<T>
+	 * 
 	 * @param l List to be coerced.
 	 * @return l coerced to List<Capability>
 	 */
 	@SuppressWarnings("unchecked")
-	public static List<Capability> asListCapability(List<? extends Capability> l) {
-		return (List<Capability>) l;
-	}
-
-	/**
-	 * Coerce the generic type of a list from List<BundleRequirement>
-	 * to List<Requirement>
-	 * @param l List to be coerced.
-	 * @return l coerced to List<Requirement>
-	 */
-	@SuppressWarnings("unchecked")
-	public static List<Requirement> asListRequirement(List<? extends Requirement> l) {
-		return (List<Requirement>) l;
-	}
-
-	/**
-	 * Coerce the generic type of a list from List<? extends BundleCapability>
-	 * to List<BundleCapability>
-	 * @param l List to be coerced.
-	 * @return l coerced to List<BundleCapability>
-	 */
-	@SuppressWarnings("unchecked")
-	public static List<BundleCapability> asListBundleCapability(List<? extends BundleCapability> l) {
-		return (List<BundleCapability>) l;
-	}
-
-	/**
-	 * Coerce the generic type of a list from List<? extends BundleRequirement>
-	 * to List<BundleRequirement>
-	 * @param l List to be coerced.
-	 * @return l coerced to List<BundleRequirement>
-	 */
-	@SuppressWarnings("unchecked")
-	public static List<BundleRequirement> asListBundleRequirement(List<? extends BundleRequirement> l) {
-		return (List<BundleRequirement>) l;
-	}
-
-	/**
-	 * Coerce the generic type of a list from List<? extends BundleWire>
-	 * to List<BundleWire>
-	 * @param l List to be coerced.
-	 * @return l coerced to List<BundleWire>
-	 */
-	@SuppressWarnings("unchecked")
-	public static List<BundleWire> asListBundleWire(List<? extends BundleWire> l) {
-		return (List<BundleWire>) l;
-	}
-
-	/**
-	 * Coerce the generic type of a list from List<? extends BundleWire>
-	 * to List<BundleWire>
-	 * @param l List to be coerced.
-	 * @return l coerced to List<BundleWire>
-	 */
-	@SuppressWarnings("unchecked")
-	public static List<Wire> asListWire(List<? extends Wire> l) {
-		return (List<Wire>) l;
-	}
-
-	/**
-	 * Coerce the generic type of a list from List<? extends BundleRevision>
-	 * to List<BundleRevision>
-	 * @param l List to be coerced.
-	 * @return l coerced to List<BundleRevision>
-	 */
-	@SuppressWarnings("unchecked")
-	public static List<BundleRevision> asListBundleRevision(List<? extends BundleRevision> l) {
-		return (List<BundleRevision>) l;
-	}
-
-	/**
-	 * Coerce the generic type of a collection from Collection<? extends Resource>
-	 * to Collection<Resource>
-	 * @param c List to be coerced.
-	 * @return c coerced to Collection<Resource>
-	 */
-	@SuppressWarnings("unchecked")
-	public static Collection<Resource> asCollectionResource(Collection<? extends Resource> c) {
-		return (Collection<Resource>) c;
-	}
-
-	/**
-	 * Coerce the generic type of a collection from Collection<? extends BundleWiring>
-	 * to Collection<BundleWiring>
-	 * @param c List to be coerced.
-	 * @return c coerced to Collection<BundleWiring>
-	 */
-	@SuppressWarnings("unchecked")
-	public static Collection<BundleWiring> asCollectionBundleWiring(Collection<? extends BundleWiring> c) {
-		return (Collection<BundleWiring>) c;
+	public static <T> List<T> asList(List<? extends T> l) {
+		return (List<T>) l;
 	}
 
 	public static void filterCapabilityPermissions(Collection<? extends BundleCapability> capabilities) {

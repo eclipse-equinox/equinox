@@ -1490,7 +1490,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 		@Override
 		public Collection<BundleCapability> findProviders(Requirement requirement) {
-			return InternalUtils.asListBundleCapability(moduleDatabase.findCapabilities(requirement));
+			return InternalUtils.asList(moduleDatabase.findCapabilities(requirement));
 		}
 
 		private Collection<Module> getModules(final Collection<Bundle> bundles) {

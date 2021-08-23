@@ -606,7 +606,7 @@ final class ModuleResolver {
 			if (DEBUG_PROVIDERS || DEBUG_HOOKS) {
 				filteredMatches = new ArrayList<>(candidates);
 			}
-			hook.filterMatches((BundleRequirement) requirement, InternalUtils.asListBundleCapability(candidates));
+			hook.filterMatches((BundleRequirement) requirement, InternalUtils.asList(candidates));
 			if (DEBUG_PROVIDERS || DEBUG_HOOKS) {
 				filteredMatches.removeAll(candidates);
 				if (!filteredMatches.isEmpty()) {
@@ -643,7 +643,7 @@ final class ModuleResolver {
 			filterFailedToResolve(candidates);
 
 			Collections.sort(candidates, this);
-			return InternalUtils.asListCapability(candidates);
+			return InternalUtils.asList(candidates);
 		}
 
 		private void filterFailedToResolve(List<ModuleCapability> candidates) {
@@ -865,7 +865,7 @@ final class ModuleResolver {
 			threadResolving.set(Boolean.TRUE);
 			try {
 				try {
-					hook = adaptor.getResolverHookFactory().begin(InternalUtils.asListBundleRevision((List<? extends BundleRevision>) triggers));
+					hook = adaptor.getResolverHookFactory().begin(InternalUtils.asList((List<? extends BundleRevision>) triggers));
 				} catch (RuntimeException e) {
 					if (e.getCause() instanceof BundleException) {
 						BundleException be = (BundleException) e.getCause();
@@ -1322,7 +1322,7 @@ final class ModuleResolver {
 
 		private void filterResolvable() {
 			Collection<ModuleRevision> enabledCandidates = new ArrayList<>(unresolved);
-			hook.filterResolvable(InternalUtils.asListBundleRevision((List<? extends BundleRevision>) enabledCandidates));
+			hook.filterResolvable(InternalUtils.asList((List<? extends BundleRevision>) enabledCandidates));
 			// do this the hard way because the 'optimization' in removeAll hurts us
 			for (ModuleRevision enabledRevision : enabledCandidates) {
 				disabled.remove(enabledRevision);

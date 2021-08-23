@@ -98,12 +98,12 @@ public final class ModuleRevision implements BundleRevision {
 
 	@Override
 	public List<BundleCapability> getDeclaredCapabilities(String namespace) {
-		return InternalUtils.asListBundleCapability(getModuleCapabilities(namespace));
+		return InternalUtils.asList(getModuleCapabilities(namespace));
 	}
 
 	@Override
 	public List<BundleRequirement> getDeclaredRequirements(String namespace) {
-		return InternalUtils.asListBundleRequirement(getModuleRequirements(namespace));
+		return InternalUtils.asList(getModuleRequirements(namespace));
 	}
 
 	/**
@@ -138,12 +138,12 @@ public final class ModuleRevision implements BundleRevision {
 
 	@Override
 	public List<Capability> getCapabilities(String namespace) {
-		return InternalUtils.asListCapability(getDeclaredCapabilities(namespace));
+		return InternalUtils.asList(getDeclaredCapabilities(namespace));
 	}
 
 	@Override
 	public List<Requirement> getRequirements(String namespace) {
-		return InternalUtils.asListRequirement(getDeclaredRequirements(namespace));
+		return InternalUtils.asList(getDeclaredRequirements(namespace));
 	}
 
 	/**
