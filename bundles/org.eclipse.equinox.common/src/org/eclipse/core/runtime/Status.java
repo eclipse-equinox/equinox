@@ -461,8 +461,10 @@ public class Status implements IStatus {
 		buf.append(code);
 		buf.append(' ');
 		buf.append(message);
-		buf.append(' ');
-		buf.append(exception);
+		if (exception != null) {
+			buf.append(' ');
+			buf.append(exception);
+		}
 		return buf.toString();
 	}
 }
