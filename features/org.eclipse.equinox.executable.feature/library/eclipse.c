@@ -1442,8 +1442,13 @@ static _TCHAR* findSplash(_TCHAR* splashArg) {
 			prefix = ch + 1;
 		} else {
 			/* No separator, treat splashArg as the prefix and look in the plugins dir */
+#ifdef MACOSX
+			path = malloc( (_tcslen(programDir) + 20) * sizeof(_TCHAR));
+			_stprintf(path, _T_ECLIPSE("%s%c%s%s"), programDir, dirSeparator, _T_ECLIPSE("../Eclipse/"), _T_ECLIPSE("plugins"));
+#else
 			path = malloc( (_tcslen(programDir) + 9) * sizeof(_TCHAR));
 			_stprintf(path, _T_ECLIPSE("%s%c%s"), programDir, dirSeparator, _T_ECLIPSE("plugins"));
+#endif
 			prefix = splashArg;
 		}
 		dir = findFile(path, prefix);
@@ -1453,17 +1458,19 @@ static _TCHAR* findSplash(_TCHAR* splashArg) {
 	}
 
 	/* directory, look for splash image */
-	length = _tcslen(dir);
-	for (name = SPLASH_IMAGES; *name; name += _tcslen(name) + 1) {
-		ch = malloc((length + 1 + _tcslen(name) + 1) * sizeof(_TCHAR));
-		_stprintf(ch, _T_ECLIPSE("%s%c%s"), dir, dirSeparator, name);
-		if (_tstat(ch, &stats) == 0 && (stats.st_mode & S_IFREG)) {
-			free(dir);
-			return ch;
+	if (dir != NULL) {
+		length = _tcslen(dir);
+		for (name = SPLASH_IMAGES; *name; name += _tcslen(name) + 1) {
+			ch = malloc((length + 1 + _tcslen(name) + 1) * sizeof(_TCHAR));
+			_stprintf(ch, _T_ECLIPSE("%s%c%s"), dir, dirSeparator, name);
+			if (_tstat(ch, &stats) == 0 && (stats.st_mode & S_IFREG)) {
+				free(dir);
+				return ch;
+			}
+			free(ch);
 		}
-		free(ch);
+		free(dir);
 	}
-	free(dir);
 	return NULL;
 }
 
