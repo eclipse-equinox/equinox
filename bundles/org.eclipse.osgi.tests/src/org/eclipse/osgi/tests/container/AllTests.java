@@ -25,6 +25,7 @@ public class AllTests {
 		suite.addTest(new JUnit4TestAdapter(ModuleContainerUsageTest.class));
 		suite.addTest(new JUnit4TestAdapter(NamespaceListTest.class));
 		suite.addTest(new JUnit4TestAdapter(NamespaceListBuilderTest.class));
+		suite.addTest(new JUnit4TestAdapter(ModuleWiringTest.class));
 		return suite;
 	}
 }
