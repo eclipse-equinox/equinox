@@ -63,8 +63,6 @@ import org.osgi.framework.namespace.HostNamespace;
 public class ClasspathManager {
 	private static final FragmentClasspath[] emptyFragments = new FragmentClasspath[0];
 	private static final String[] DEFAULT_CLASSPATH = new String[] {"."}; //$NON-NLS-1$
-	@SuppressWarnings("unchecked")
-	private static final Enumeration<URL> EMPTY_ENUMERATION = Collections.enumeration(Collections.EMPTY_LIST);
 
 	private final Generation generation;
 	private final ModuleClassLoader classloader;
@@ -445,7 +443,7 @@ public class ClasspathManager {
 			ClasspathEntry[] hookEntries = hook.getClassPathEntries(resource, this);
 			if (hookEntries != null) {
 				findLocalResources(resource, hookEntries, m, classPathIndex, resources);
-				return resources.size() > 0 ? Collections.enumeration(resources) : EMPTY_ENUMERATION;
+				return resources.size() > 0 ? Collections.enumeration(resources) : Collections.emptyEnumeration();
 			}
 		}
 
@@ -459,7 +457,7 @@ public class ClasspathManager {
 
 		if (resources.size() > 0)
 			return Collections.enumeration(resources);
-		return EMPTY_ENUMERATION;
+		return Collections.emptyEnumeration();
 	}
 
 	private void findLocalResources(String resource, ClasspathEntry[] cpEntries, Module m, int[] classPathIndex, List<URL> resources) {
@@ -874,15 +872,11 @@ public class ClasspathManager {
 		for (FragmentClasspath fragmentClasspath : currentFragments)
 			generations.add(fragmentClasspath.getGeneration());
 
-		List<URL> result = Collections.emptyList();
 		// now search over all the bundle files
 		Enumeration<URL> eURLs = Storage.findEntries(generations, path, filePattern, options);
 		if (eURLs == null)
-			return result;
-		result = new ArrayList<>();
-		while (eURLs.hasMoreElements())
-			result.add(eURLs.nextElement());
-		return Collections.unmodifiableList(result);
+			return Collections.emptyList();
+		return Collections.unmodifiableList(Collections.list(eURLs));
 	}
 
 	/**

@@ -2629,23 +2629,7 @@ public class Main {
 
 				@Override
 				public Enumeration<Permission> elements() {
-					return new Enumeration<Permission>() {
-						int cur = 0;
-
-						@Override
-						public boolean hasMoreElements() {
-							return cur < 1;
-						}
-
-						@Override
-						public Permission nextElement() {
-							if (cur == 0) {
-								cur = 1;
-								return allPermission;
-							}
-							throw new NoSuchElementException();
-						}
-					};
+					return Collections.enumeration(Collections.singleton(allPermission));
 				}
 			};
 		}

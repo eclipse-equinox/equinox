@@ -12,8 +12,8 @@ package org.eclipse.equinox.log;
 
 import java.security.Permission;
 import java.security.PermissionCollection;
+import java.util.Collections;
 import java.util.Enumeration;
-import java.util.NoSuchElementException;
 
 /**
  * Stores a set of <code>LogPermission</code> permissions.
@@ -40,23 +40,7 @@ public final class LogPermissionCollection extends PermissionCollection {
 
 	@Override
 	public Enumeration<Permission> elements() {
-		return new Enumeration<Permission>() {
-			private boolean hasMore = (logPermission != null);
-
-		@Override
-			public boolean hasMoreElements() {
-				return hasMore;
-			}
-
-		@Override
-			public Permission nextElement() {
-				if (hasMore) {
-					hasMore = false;
-					return logPermission;
-				}
-				throw new NoSuchElementException();
-			}
-		};
+		return logPermission != null ? Collections.enumeration(Collections.singleton(logPermission)) : Collections.emptyEnumeration();
 	}
 
 	@Override

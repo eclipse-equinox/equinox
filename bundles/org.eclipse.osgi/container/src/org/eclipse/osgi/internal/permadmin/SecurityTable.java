@@ -16,6 +16,7 @@ package org.eclipse.osgi.internal.permadmin;
 
 import java.security.Permission;
 import java.security.PermissionCollection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -199,7 +200,7 @@ public class SecurityTable extends PermissionCollection {
 
 	@Override
 	public Enumeration<Permission> elements() {
-		return BundlePermissions.EMPTY_ENUMERATION;
+		return Collections.emptyEnumeration();
 	}
 
 	@Override

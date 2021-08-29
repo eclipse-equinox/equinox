@@ -22,6 +22,7 @@ import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,7 +71,7 @@ public final class PermissionInfoCollection extends PermissionCollection {
 	@Override
 	public Enumeration<Permission> elements() {
 		// TODO return an empty enumeration for now;
-		return BundlePermissions.EMPTY_ENUMERATION;
+		return Collections.emptyEnumeration();
 	}
 
 	@Override

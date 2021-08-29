@@ -56,12 +56,12 @@ public class DelegatingConnectClassLoader extends EquinoxClassLoader {
 	@Override
 	public Enumeration<URL> findLocalResources(String resource) {
 		if (connectClassLoader == null) {
-			return Collections.enumeration(Collections.emptyList());
+			return Collections.emptyEnumeration();
 		}
 		try {
 			return connectClassLoader.getResources(resource);
 		} catch (IOException e) {
-			return Collections.enumeration(Collections.emptyList());
+			return Collections.emptyEnumeration();
 		}
 	}
 }

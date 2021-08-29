@@ -254,10 +254,9 @@ public class ManifestLocalization {
 			this.localeString = locale;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public Enumeration<String> getKeys() {
-			return Collections.enumeration(Collections.EMPTY_LIST);
+			return Collections.emptyEnumeration();
 		}
 
 		@Override

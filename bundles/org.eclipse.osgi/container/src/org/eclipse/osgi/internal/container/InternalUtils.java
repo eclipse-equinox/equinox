@@ -18,6 +18,7 @@ import java.security.SecureRandom;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -196,4 +197,17 @@ public class InternalUtils {
 		return new UUID(mostSignificantBits, leastSignificantBits).toString();
 	}
 
+	public static <E> Enumeration<E> asEnumeration(Iterator<E> it) {
+		return new Enumeration<E>() {
+			@Override
+			public boolean hasMoreElements() {
+				return it.hasNext();
+			}
+
+			@Override
+			public E nextElement() {
+				return it.next();
+			}
+		};
+	}
 }

@@ -13,27 +13,16 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.permadmin;
 
-import java.security.*;
+import java.security.Permission;
+import java.security.PermissionCollection;
+import java.security.Permissions;
+import java.util.Collections;
 import java.util.Enumeration;
-import java.util.NoSuchElementException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.PackagePermission;
 
 public final class BundlePermissions extends PermissionCollection {
 	private static final long serialVersionUID = -5443618108312606612L;
-
-	// Note that this forces the Enumeration inner class to be loaded as soon as possible (see bug 119069)
-	static final Enumeration<Permission> EMPTY_ENUMERATION = new Enumeration<Permission>() {
-		@Override
-		public boolean hasMoreElements() {
-			return false;
-		}
-
-		@Override
-		public Permission nextElement() {
-			throw new NoSuchElementException();
-		}
-	};
 
 	private final Bundle bundle;
 	private final SecurityAdmin securityAdmin;
@@ -75,8 +64,7 @@ public final class BundlePermissions extends PermissionCollection {
 	public Enumeration<Permission> elements() {
 		// TODO return an empty enumeration for now;
 		// It does not seem possible to do this properly with multiple exports and conditional permissions.
-		// When looking to fix this be sure the Enumeration class is loaded as soon as possible (see bug 119069)
-		return EMPTY_ENUMERATION;
+		return Collections.emptyEnumeration();
 	}
 
 	@Override

@@ -169,8 +169,8 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 	@Override
 	public Enumeration<URL> getResources(String arg0) throws IOException {
 		//Shortcut cycle
-		if (startLoading(arg0) == false) {
-			return Collections.enumeration(Collections.emptyList());
+		if (!startLoading(arg0)) {
+			return Collections.emptyEnumeration();
 		}
 		try {
 			List<ClassLoader> toConsult = findClassLoaders();

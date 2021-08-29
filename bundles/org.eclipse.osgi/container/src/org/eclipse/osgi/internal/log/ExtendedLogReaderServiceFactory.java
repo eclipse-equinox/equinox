@@ -57,9 +57,6 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private static final Enumeration<LogEntry> EMPTY_ENUMERATION = Collections.enumeration(Collections.EMPTY_LIST);
-
 	static final LogFilter NULL_LOGGER_FILTER = (b, loggerName, logLevel) -> true;
 
 	private static final LogFilter[] ALWAYS_LOG = new LogFilter[0];
@@ -311,7 +308,7 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 
 	Enumeration<LogEntry> getLog() {
 		if (history == null) {
-			return EMPTY_ENUMERATION;
+			return Collections.emptyEnumeration();
 		}
 		synchronized (history) {
 			return Collections.enumeration(new ArrayList<>(history));

@@ -47,11 +47,12 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleCapability;
@@ -68,6 +69,7 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.FilePath;
 import org.eclipse.osgi.framework.util.ObjectPool;
 import org.eclipse.osgi.framework.util.SecureAction;
+import org.eclipse.osgi.internal.container.InternalUtils;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
@@ -1993,50 +1995,10 @@ public class Storage {
 		// return null if no entries found
 		if (pathList.size() == 0)
 			return null;
-		// create an enumeration to enumerate the pathList
-		final String[] pathArray = pathList.toArray(new String[pathList.size()]);
-		final Generation[] generationArray = generations.toArray(new Generation[generations.size()]);
-		return new Enumeration<URL>() {
-			private int curPathIndex = 0;
-			private int curDataIndex = 0;
-			private URL nextElement = null;
-
-			@Override
-			public boolean hasMoreElements() {
-				if (nextElement != null)
-					return true;
-				getNextElement();
-				return nextElement != null;
-			}
-
-			@Override
-			public URL nextElement() {
-				if (!hasMoreElements())
-					throw new NoSuchElementException();
-				URL result = nextElement;
-				// force the next element search
-				getNextElement();
-				return result;
-			}
-
-			private void getNextElement() {
-				nextElement = null;
-				if (curPathIndex >= pathArray.length)
-					// reached the end of the pathArray; no more elements
-					return;
-				while (nextElement == null && curPathIndex < pathArray.length) {
-					String curPath = pathArray[curPathIndex];
-					// search the generation until we have searched them all
-					while (nextElement == null && curDataIndex < generationArray.length)
-						nextElement = generationArray[curDataIndex++].getEntry(curPath);
-					// we have searched all datas then advance to the next path
-					if (curDataIndex >= generationArray.length) {
-						curPathIndex++;
-						curDataIndex = 0;
-					}
-				}
-			}
-		};
+		// create an enumeration to enumerate the pathList (generations must not change)
+		Stream<URL> entries = pathList.stream().flatMap(p -> generations.stream().map(g -> g.getEntry(p)))
+				.filter(Objects::nonNull);
+		return InternalUtils.asEnumeration(entries.iterator());
 	}
 
 	/**
@@ -2136,11 +2098,8 @@ public class Storage {
 	private static LinkedHashSet<String> listEntryPaths(BundleFile bundleFile, String path, Filter patternFilter, Hashtable<String, String> patternProps, int options, LinkedHashSet<String> pathList) {
 		if (pathList == null)
 			pathList = new LinkedHashSet<>();
-		Enumeration<String> entryPaths;
-		if ((options & BundleWiring.FINDENTRIES_RECURSE) != 0)
-			entryPaths = bundleFile.getEntryPaths(path, true);
-		else
-			entryPaths = bundleFile.getEntryPaths(path);
+		boolean recurse = (options & BundleWiring.FINDENTRIES_RECURSE) != 0;
+		Enumeration<String> entryPaths = bundleFile.getEntryPaths(path, recurse);
 		if (entryPaths == null)
 			return pathList;
 		while (entryPaths.hasMoreElements()) {

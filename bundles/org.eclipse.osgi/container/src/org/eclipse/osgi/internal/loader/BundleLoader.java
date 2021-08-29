@@ -86,10 +86,6 @@ public class BundleLoader extends ModuleLoader {
 
 	private static final Pattern PACKAGENAME_FILTER = Pattern.compile("\\(osgi.wiring.package\\s*=\\s*([^)]+)\\)"); //$NON-NLS-1$
 
-	// TODO needed instead of using Collections.emptyEnumertion until we no longer support Java 6
-	@SuppressWarnings("rawtypes")
-	private final static Enumeration EMPTY_ENUMERATION = Collections.enumeration(Collections.emptyList());
-
 	private final ModuleWiring wiring;
 	private final EquinoxContainer container;
 	private final Debug debug;
@@ -685,7 +681,7 @@ public class BundleLoader extends ModuleLoader {
 		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
 			name = name.substring(1); /* remove leading slash before search */
 		String pkgName = getResourcePackageName(name);
-		Enumeration<URL> result = emptyEnumeration();
+		Enumeration<URL> result = Collections.emptyEnumeration();
 		boolean bootDelegation = false;
 		// follow the OSGi delegation model
 		// First check the parent classloader for system resources, if it is a java resource.
@@ -839,23 +835,16 @@ public class BundleLoader extends ModuleLoader {
 
 	public static <E> Enumeration<E> compoundEnumerations(Enumeration<E> list1, Enumeration<E> list2) {
 		if (list2 == null || !list2.hasMoreElements())
-			return list1 == null ? BundleLoader.emptyEnumeration() : list1;
+			return list1 == null ? Collections.emptyEnumeration() : list1;
 		if (list1 == null || !list1.hasMoreElements())
-			return list2 == null ? BundleLoader.emptyEnumeration() : list2;
-		List<E> compoundResults = new ArrayList<>();
-		while (list1.hasMoreElements())
-			compoundResults.add(list1.nextElement());
+			return list2 == null ? Collections.emptyEnumeration() : list2;
+		List<E> compoundResults = Collections.list(list1);
 		while (list2.hasMoreElements()) {
 			E item = list2.nextElement();
 			if (!compoundResults.contains(item)) //don't add duplicates
 				compoundResults.add(item);
 		}
 		return Collections.enumeration(compoundResults);
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <E> Enumeration<E> emptyEnumeration() {
-		return EMPTY_ENUMERATION;
 	}
 
 	/**
