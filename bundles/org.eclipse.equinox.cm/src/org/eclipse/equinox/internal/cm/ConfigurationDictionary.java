@@ -68,19 +68,7 @@ public class ConfigurationDictionary extends Dictionary<String, Object> implemen
 
 	@Override
 	public Enumeration<Object> elements() {
-		return new Enumeration<Object>() {
-			final Iterator<Object> valuesIterator = configurationProperties.values().iterator();
-
-			@Override
-			public boolean hasMoreElements() {
-				return valuesIterator.hasNext();
-			}
-
-			@Override
-			public Object nextElement() {
-				return valuesIterator.next();
-			}
-		};
+		return Collections.enumeration(configurationProperties.values());
 	}
 
 	@Override
@@ -97,19 +85,7 @@ public class ConfigurationDictionary extends Dictionary<String, Object> implemen
 
 	@Override
 	public Enumeration<String> keys() {
-		return new Enumeration<String>() {
-			Iterator<String> keysIterator = configurationProperties.keySet().iterator();
-
-			@Override
-			public boolean hasMoreElements() {
-				return keysIterator.hasNext();
-			}
-
-			@Override
-			public String nextElement() {
-				return keysIterator.next();
-			}
-		};
+		return Collections.enumeration(configurationProperties.keySet());
 	}
 
 	@Override

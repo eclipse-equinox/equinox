@@ -17,6 +17,7 @@ package org.eclipse.equinox.internal.jsp.jasper;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
@@ -49,17 +50,7 @@ public class JspClassLoader extends URLClassLoader {
 
 		@Override
 		public Enumeration<URL> findResources(String name) {
-			return new Enumeration<URL>() {
-				@Override
-				public boolean hasMoreElements() {
-					return false;
-				}
-
-				@Override
-				public URL nextElement() {
-					return null;
-				}
-			};
+			return Collections.emptyEnumeration();
 		}
 
 		@Override

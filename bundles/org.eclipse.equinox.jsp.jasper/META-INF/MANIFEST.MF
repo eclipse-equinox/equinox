@@ -4,7 +4,7 @@ Bundle-Name: %bundleName
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-SymbolicName: org.eclipse.equinox.jsp.jasper
-Bundle-Version: 1.1.500.qualifier
+Bundle-Version: 1.1.600.qualifier
 Bundle-Activator: org.eclipse.equinox.internal.jsp.jasper.Activator
 Import-Package: javax.servlet;version="[2.4, 5.0)",
  javax.servlet.annotation;version="[2.6, 5.0)";resolution:=optional,
