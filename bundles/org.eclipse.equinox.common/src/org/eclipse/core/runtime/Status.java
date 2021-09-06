@@ -201,7 +201,7 @@ public class Status implements IStatus {
 	 * @param caller the relevant class to build unique identifier from
 	 * @param code the caller-specific status code, or <code>OK</code>
 	 * @param message a human-readable message, localized to the
-	 *    current locale
+	 *    current locale. If null or empty a message from the exception is interpolated.
 	 * @param exception a low-level exception, or <code>null</code> if not
 	 *    applicable
 	 *    
@@ -211,8 +211,18 @@ public class Status implements IStatus {
 		setSeverity(severity);
 		setPlugin(identifier(caller));
 		setCode(code);
-		setMessage(message);
+		setMessage(interpolateMessage(message, exception));
 		setException(exception);
+	}
+
+	private String interpolateMessage(String msg, Throwable e) {
+		if (msg == null && e != null) {
+			msg = e.getLocalizedMessage();
+			if (msg == null || msg.isEmpty()) { // null was the old NPE msg Style
+				msg = e.getClass().getSimpleName();
+			}
+		}
+		return msg;
 	}
 
 	/**
@@ -223,7 +233,7 @@ public class Status implements IStatus {
 	 * @param pluginId the unique identifier of the relevant plug-in
 	 * @param code the plug-in-specific status code, or <code>OK</code>
 	 * @param message a human-readable message, localized to the
-	 *    current locale
+	 *    current locale. If null or empty a message from the exception is interpolated.
 	 * @param exception a low-level exception, or <code>null</code> if not
 	 *    applicable 
 	 */
@@ -231,7 +241,7 @@ public class Status implements IStatus {
 		setSeverity(severity);
 		setPlugin(pluginId);
 		setCode(code);
-		setMessage(message);
+		setMessage(interpolateMessage(message, exception));
 		setException(exception);
 	}
 
@@ -243,7 +253,7 @@ public class Status implements IStatus {
 	 * <code>INFO</code>, <code>WARNING</code>,  or <code>CANCEL</code>
 	 * @param caller the relevant class to build unique identifier from
 	 * @param message a human-readable message, localized to the
-	 *    current locale
+	 *    current locale. If null or empty a message from the exception is interpolated.
 	 * @param exception a low-level exception, or <code>null</code> if not
 	 *    applicable
 	 *     
@@ -252,7 +262,7 @@ public class Status implements IStatus {
 	public Status(int severity, Class<?> caller, String message, Throwable exception) {
 		setSeverity(severity);
 		setPlugin(identifier(caller));
-		setMessage(message);
+		setMessage(interpolateMessage(message, exception));
 		setException(exception);
 		setCode(OK);
 	}
@@ -265,7 +275,7 @@ public class Status implements IStatus {
 	 * <code>INFO</code>, <code>WARNING</code>,  or <code>CANCEL</code>
 	 * @param pluginId the unique identifier of the relevant plug-in
 	 * @param message a human-readable message, localized to the
-	 *    current locale
+	 *    current locale. If null or empty a message from the exception is interpolated.
 	 * @param exception a low-level exception, or <code>null</code> if not
 	 *    applicable
 	 *     
@@ -274,7 +284,7 @@ public class Status implements IStatus {
 	public Status(int severity, String pluginId, String message, Throwable exception) {
 		setSeverity(severity);
 		setPlugin(pluginId);
-		setMessage(message);
+		setMessage(interpolateMessage(message, exception));
 		setException(exception);
 		setCode(OK);
 	}
