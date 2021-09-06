@@ -136,12 +136,8 @@ public class UICallbackProvider implements IUICallbacks {
 		if (!StorageUtils.showUI(null)) // container-independent operation
 			return null;
 
-		final Boolean[] result = new Boolean[1];
-		PlatformUI.getWorkbench().getDisplay().syncExec(() -> {
-			boolean reply = MessageDialog.openConfirm(StorageUtils.getShell(), SecUIMessages.generalDialogTitle, msg);
-			result[0] = Boolean.valueOf(reply);
-		});
-		return result[0];
+		return PlatformUI.getWorkbench().getDisplay().syncCall(
+				() -> MessageDialog.openConfirm(StorageUtils.getShell(), SecUIMessages.generalDialogTitle, msg));
 	}
 
 	@Override
