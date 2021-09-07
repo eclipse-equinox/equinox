@@ -17,12 +17,22 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
 import org.eclipse.osgi.tests.util.MapDictionary;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 
 public class ServiceRegistryTests extends AbstractBundleTests {
 	public static Test suite() {
@@ -529,6 +539,42 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		} finally {
 			if (reg != null)
 				reg.unregister();
+		}
+	}
+
+	public void testWrongServiceFactoryObject() throws InterruptedException {
+		AtomicReference<String> errorMsg = new AtomicReference<>();
+		CountDownLatch gotEvent = new CountDownLatch(1);
+		FrameworkListener fwkListener = (e) -> {
+			if (e.getType() == FrameworkEvent.ERROR && e.getThrowable() != null) {
+				errorMsg.set(e.getThrowable().getMessage());
+				gotEvent.countDown();
+			}
+		};
+		ServiceRegistration<Runnable> reg = OSGiTestsActivator.getContext().registerService(Runnable.class,
+				new ServiceFactory() {
+
+					@Override
+					public Object getService(Bundle bundle, ServiceRegistration registration) {
+						return "Wrong object!!";
+					}
+
+					@Override
+					public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
+					}
+
+				}, null);
+		OSGiTestsActivator.getContext().addFrameworkListener(fwkListener);
+		try {
+			ServiceReference<Runnable> ref = reg.getReference();
+			Runnable service = OSGiTestsActivator.getContext().getService(ref);
+			assertNull(service);
+			gotEvent.await(30, TimeUnit.SECONDS);
+			assertNotNull(errorMsg.get());
+			assertTrue("Wrong error message: " + errorMsg.get(), errorMsg.get().contains(String.class.getName()));
+		} finally {
+			OSGiTestsActivator.getContext().removeFrameworkListener(fwkListener);
+			reg.unregister();
 		}
 	}
 
