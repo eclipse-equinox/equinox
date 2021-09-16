@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.jar.JarFile;
+import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -51,10 +52,42 @@ public class BundleToJarInputStreamTest {
 			"signed_with_metadata", "signed_with_missing_digest", "signed_with_sf_corrupted", "signed", "signedJava16",
 			"test.bug252098", "unsigned");
 
+	static private final List<String> corruptedJarNames = Arrays.asList("signed_with_corrupt",
+			"signed_with_metadata_corrupt", "signed_with_sf_corrupted");
+
 	@Test
 	public void testInputStreamEquality() throws IOException {
 		for (String testJarName : testJarNames) {
 			compareContent(testJarName);
+		}
+	}
+
+	@Test
+	public void testSignedContentCorruption() throws Exception {
+		for (String testJarName : testJarNames) {
+			readJarContent(testJarName);
+		}
+	}
+
+	private void readJarContent(String testJarName) throws Exception {
+		File jar = getEntryFile(getTestJarPath(testJarName));
+		File extracted = extract(jar);
+		try {
+			verify(extracted);
+		} catch (Exception e) {
+			if (!corruptedJarNames.contains(testJarName)) {
+				throw e;
+			}
+		}
+	}
+
+	private void verify(File extracted) throws IOException {
+		BundleToJarInputStream inputToJar = new BundleToJarInputStream(new DirBundleFile(extracted, false));
+		try (JarInputStream jarInput = new JarInputStream(inputToJar)) {
+			for (ZipEntry extractedEntry = jarInput.getNextEntry(); extractedEntry != null; extractedEntry = jarInput
+					.getNextEntry()) {
+				getBytes(jarInput);
+			}
 		}
 	}
 
