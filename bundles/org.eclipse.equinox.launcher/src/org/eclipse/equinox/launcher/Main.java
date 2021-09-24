@@ -1970,7 +1970,7 @@ public class Main {
 				String launcher = System.getProperty(PROP_LAUNCHER);
 				if (launcher == null)
 					throw new IllegalStateException("Install location depends on launcher, but launcher is not defined"); //$NON-NLS-1$
-				installArea = installArea.replaceAll(LAUNCHER_DIR, new File(launcher).getParent());
+				installArea = installArea.replace(LAUNCHER_DIR, new File(launcher).getParent());
 			}
 			installLocation = buildURL(installArea, true);
 			if (installLocation == null)
