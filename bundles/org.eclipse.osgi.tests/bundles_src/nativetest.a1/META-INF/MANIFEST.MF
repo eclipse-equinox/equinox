@@ -50,4 +50,5 @@ Bundle-NativeCode: nativefile1.txt;
  processor=x86;
  processor=x86_64;
  processor=ppc;
+ processor=aarch64;
  osname=macosx
