@@ -27,6 +27,7 @@ public interface IAdapterFactoryExt {
 	 * @param force if <code>true</code> the plugin providing the 
 	 * factory will be loaded if necessary, otherwise no plugin activations
 	 * will occur.
+	 * @return the adapter factory, or <code>null</code>
 	 */
 	public IAdapterFactory loadFactory(boolean force);
 

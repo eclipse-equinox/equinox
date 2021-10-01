@@ -11,6 +11,20 @@
                type="org.eclipse.equinox.common.tests.adaptable.TestAdapter">
          </adapter>
       </factory>
+      <factory
+            adaptableType="org.eclipse.equinox.common.tests.adaptable.TestAdaptable"
+            class="org.eclipse.equinox.common.tests.adaptable.NullAdapter2Factory">
+         <adapter
+               type="org.eclipse.equinox.common.tests.adaptable.TestAdapter2">
+         </adapter>
+      </factory>
+      <factory
+            adaptableType="org.eclipse.equinox.common.tests.adaptable.TestAdaptable"
+            class="org.eclipse.equinox.common.tests.adaptable.TestAdapter2Factory">
+         <adapter
+               type="org.eclipse.equinox.common.tests.adaptable.TestAdapter2">
+         </adapter>
+      </factory>
    </extension> 
    <extension-point id="factoryLoaderTest" name="factoryLoaderTest" schema="schema/factoryLoaderTest.exsd"/>
    <extension point="org.eclipse.core.runtime.adapters">

@@ -287,4 +287,47 @@ public class IAdapterManagerTest {
 			manager.unregisterAdapters(fac, Private.class);
 		}
 	}
+
+	@Test
+	public void testContinueAfterNullAdapterFactory() {
+		class PrivateAdapter {
+		}
+		class PrivateAdaptable {
+		}
+		IAdapterFactory nullAdapterFactory = new IAdapterFactory() {
+			@Override
+			public Class<?>[] getAdapterList() {
+				return new Class<?>[] { PrivateAdapter.class };
+			}
+
+			@Override
+			public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
+				return null;
+			}
+		};
+		IAdapterFactory adapterFactory = new IAdapterFactory() {
+			@Override
+			public Class<?>[] getAdapterList() {
+				return new Class<?>[] { PrivateAdapter.class };
+			}
+
+			@Override
+			public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
+				return (T) new PrivateAdapter();
+			}
+		};
+		try {
+			manager.registerAdapters(nullAdapterFactory, PrivateAdaptable.class);
+			manager.registerAdapters(adapterFactory, PrivateAdaptable.class);
+			assertNotNull(manager.getAdapter(new PrivateAdaptable(), PrivateAdapter.class));
+		} catch (Exception ex) {
+			manager.unregisterAdapters(nullAdapterFactory);
+			manager.unregisterAdapters(adapterFactory);
+		}
+	}
+
+	@Test
+	public void testMultipleAdapterFactoriesFromExtensionPoint() {
+		assertNotNull(manager.getAdapter(new TestAdaptable(), TestAdapter2.class));
+	}
 }
