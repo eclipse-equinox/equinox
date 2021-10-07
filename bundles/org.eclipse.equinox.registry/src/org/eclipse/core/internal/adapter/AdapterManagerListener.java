@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.core.internal.adapter;
 
+import java.util.Iterator;
 import java.util.List;
 import org.eclipse.core.internal.runtime.AdapterManager;
 import org.eclipse.core.internal.runtime.IAdapterManagerProvider;
@@ -84,7 +85,14 @@ public final class AdapterManagerListener implements IRegistryEventListener, IAd
 		theAdapterManager.flushLookup();
 		for (IExtension extension : extensions) {
 			for (List<IAdapterFactory> adapterFactories : theAdapterManager.getFactories().values()) {
-				adapterFactories.removeIf(factory -> factory instanceof AdapterFactoryProxy && ((AdapterFactoryProxy) factory).originatesFrom(extension));
+				for (Iterator<IAdapterFactory> it2 = (adapterFactories).iterator(); it2.hasNext();) {
+					IAdapterFactory factory = it2.next();
+					if (!(factory instanceof AdapterFactoryProxy))
+						continue;
+					if (((AdapterFactoryProxy) factory).originatesFrom(extension)) {
+						it2.remove();
+					}
+				}
 			}
 		}
 	}
