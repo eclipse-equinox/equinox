@@ -17,22 +17,26 @@
 package org.eclipse.core.internal.runtime;
 
 import java.util.*;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import org.eclipse.core.runtime.*;
 
 /**
  * This class is the standard implementation of <code>IAdapterManager</code>. It provides
  * fast lookup of property values with the following semantics:
  * <ul>
- * <li>At most one factory will be invoked per property lookup
- * <li>If multiple installed factories provide the same adapter, only the first found in
- * the search order will be invoked.
+ * <li>If multiple installed factories provide the same adapter, iterate until one of the factories
+ * return a non-<code>null</code> value. Remaining factories won't be invoked.</li>
  * <li>The search order from a class with the definition <br>
- * <code>class X extends Y implements A, B</code><br> is as follows: <il>
+ * <code>class X extends Y implements A, B</code><br> is as follows:
+ * <ul>
  * <li>the target's class: X
  * <li>X's superclasses in order to <code>Object</code>
  * <li>a breadth-first traversal of each class's interfaces in the
  * order returned by <code>getInterfaces</code> (in the example, X's 
  * superinterfaces then Y's superinterfaces) </li>
+ * </ul>
  * </ul>
  * 
  * @see IAdapterFactory
@@ -46,7 +50,7 @@ public final class AdapterManager implements IAdapterManager {
 	 * map wrapper class.  The inner map is not synchronized, but it is immutable
 	 * so synchronization is not necessary.
 	 */
-	private Map<String, Map<String, IAdapterFactory>> adapterLookup;
+	private Map<String, Map<String, List<IAdapterFactory>>> adapterLookup;
 
 	/**
 	 * Cache of classes for a given type name. Avoids too many loadClass calls.
@@ -76,11 +80,31 @@ public final class AdapterManager implements IAdapterManager {
 	 * the adaptable class that the factory provides adapters for. Value is a <code>List</code>
 	 * of <code>IAdapterFactory</code>.
 	 */
-	private final HashMap<String, List<IAdapterFactory>> factories;
+	private final Map<String, List<IAdapterFactory>> factories;
 
 	private final ArrayList<IAdapterManagerProvider> lazyFactoryProviders;
 
 	private static final AdapterManager singleton = new AdapterManager();
+
+	private static final Comparator<? super IAdapterFactory> ACTIVE_FIRST = new Comparator<IAdapterFactory>() {
+
+		@Override
+		public int compare(IAdapterFactory o1, IAdapterFactory o2) {
+			boolean factory1Loaded = isFactoryLoaded(o1);
+			boolean factory2Loaded = isFactoryLoaded(o2);
+			if (factory1Loaded == factory2Loaded) {
+				return 0;
+			}
+			if (factory1Loaded && !factory2Loaded) {
+				return -1;
+			}
+			if (!factory1Loaded && factory2Loaded) {
+				return +1;
+			}
+			return 0;
+		}
+
+	};
 
 	public static AdapterManager getDefault() {
 		return singleton;
@@ -94,29 +118,29 @@ public final class AdapterManager implements IAdapterManager {
 		lazyFactoryProviders = new ArrayList<>(1);
 	}
 
+	private static boolean isFactoryLoaded(IAdapterFactory adapterFactory) {
+		return (!(adapterFactory instanceof IAdapterFactoryExt)) || ((IAdapterFactoryExt) adapterFactory).loadFactory(false) != null;
+	}
+
 	/**
 	 * Given a type name, add all of the factories that respond to those types into
 	 * the given table. Each entry will be keyed by the adapter class name (supplied in
 	 * IAdapterFactory.getAdapterList).
 	 */
-	private void addFactoriesFor(String typeName, Map<String, IAdapterFactory> table) {
-		List<IAdapterFactory> factoryList = getFactories().get(typeName);
+	private void addFactoriesFor(String adaptableTypeName, Map<String, List<IAdapterFactory>> table) {
+		List<IAdapterFactory> factoryList = getFactories().get(adaptableTypeName);
 		if (factoryList == null)
 			return;
 		for (IAdapterFactory factory : factoryList) {
 			if (factory instanceof IAdapterFactoryExt) {
 				String[] adapters = ((IAdapterFactoryExt) factory).getAdapterNames();
 				for (String adapter : adapters) {
-					if (table.get(adapter) == null) {
-						table.put(adapter, factory);
-					}
+					table.computeIfAbsent(adapter, any -> new ArrayList<>(1)).add(factory);
 				}
 			} else {
 				Class<?>[] adapters = factory.getAdapterList();
 				for (Class<?> adapter : adapters) {
-					String adapterName = adapter.getName();
-					if (table.get(adapterName) == null)
-						table.put(adapterName, factory);
+					table.computeIfAbsent(adapter.getName(), any -> new ArrayList<>(1)).add(factory);
 				}
 			}
 		}
@@ -198,23 +222,19 @@ public final class AdapterManager implements IAdapterManager {
 	 * with the factory object that can perform that transformation. Returns 
 	 * a table of adapter class name to factory object.
 	 */
-	private Map<String, IAdapterFactory> getFactories(Class<? extends Object> adaptable) {
+	private Map<String, List<IAdapterFactory>> getFactories(Class<? extends Object> adaptable) {
 		//cache reference to lookup to protect against concurrent flush
-		Map<String, Map<String, IAdapterFactory>> lookup = adapterLookup;
+		Map<String, Map<String, List<IAdapterFactory>>> lookup = adapterLookup;
 		if (lookup == null)
-			adapterLookup = lookup = Collections.synchronizedMap(new HashMap<String, Map<String, IAdapterFactory>>(30));
-		Map<String, IAdapterFactory> table = lookup.get(adaptable.getName());
-		if (table == null) {
+			adapterLookup = lookup = Collections.synchronizedMap(new HashMap<String, Map<String, List<IAdapterFactory>>>(30));
+		return lookup.computeIfAbsent(adaptable.getName(), adaptableType -> {
 			// calculate adapters for the class
-			table = new HashMap<>(4);
-			Class<?>[] classes = computeClassOrder(adaptable);
-			for (Class<?> cl : classes) {
+			Map<String, List<IAdapterFactory>> table = new HashMap<>(4);
+			for (Class<?> cl : computeClassOrder(adaptable)) {
 				addFactoriesFor(cl.getName(), table);
 			}
-			// cache the table
-			lookup.put(adaptable.getName(), table);
-		}
-		return table;
+			return table;
+		});
 	}
 
 	/**
@@ -224,19 +244,12 @@ public final class AdapterManager implements IAdapterManager {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> Class<? super T>[] computeClassOrder(Class<T> adaptable) {
-		Class<?>[] classes = null;
 		//cache reference to lookup to protect against concurrent flush
 		Map<Class<?>, Class<?>[]> lookup = classSearchOrderLookup;
-		if (lookup == null)
+		if (lookup == null) {
 			classSearchOrderLookup = lookup = Collections.synchronizedMap(new HashMap<Class<?>, Class<?>[]>());
-		else
-			classes = lookup.get(adaptable);
-		// compute class order only if it hasn't been cached before
-		if (classes == null) {
-			classes = doComputeClassOrder(adaptable);
-			lookup.put(adaptable, classes);
 		}
-		return (Class<? super T>[]) classes;
+		return (Class<? super T>[]) lookup.computeIfAbsent(adaptable, this::doComputeClassOrder);
 	}
 
 	/**
@@ -292,25 +305,35 @@ public final class AdapterManager implements IAdapterManager {
 	public <T> T getAdapter(Object adaptable, Class<T> adapterType) {
 		Assert.isNotNull(adaptable);
 		Assert.isNotNull(adapterType);
-		String adapterTypeName = adapterType.getName();
-		IAdapterFactory factory = getFactories(adaptable.getClass()).get(adapterTypeName);
-		T result = null;
-		if (factory != null) {
-			result = factory.getAdapter(adaptable, adapterType);
+		List<Entry<IAdapterFactory, Class<?>>> incorrectAdapters = new ArrayList<>();
+		T adapterObject = getFactories(adaptable.getClass()).getOrDefault(adapterType.getName(), Collections.emptyList()) //
+				.stream() //
+				.map(factory -> new SimpleEntry<>(factory, factory.getAdapter(adaptable, adapterType))) //
+				.filter(entry -> {
+					Object adapter = entry.getValue();
+					if (adapter == null) {
+						return false;
+					}
+					boolean res = adapterType.isInstance(adapter);
+					if (!res) {
+						IAdapterFactory factory = entry.getKey();
+						incorrectAdapters.add(new SimpleEntry<>(factory, adapter.getClass()));
+					}
+					return res;
+				}).map(Entry::getValue) //
+				.findFirst() //
+				.orElse(null);
+		if (adapterObject == null) {
+			if (!incorrectAdapters.isEmpty()) {
+				throw new AssertionFailedException(incorrectAdapters.stream().map(entry -> "Adapter factory " //$NON-NLS-1$
+						+ entry.getKey() + " returned " + entry.getValue().getName() //$NON-NLS-1$
+						+ " that is not an instance of " + adapterType.getName()).collect(Collectors.joining("\n"))); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			if (adapterType.isInstance(adaptable)) {
+				return (T) adaptable;
+			}
 		}
-		if (result == null && adapterType.isInstance(adaptable)) {
-			return (T) adaptable;
-		}
-		if (result == null || adapterType.isInstance(result)) {
-			return result;
-		}
-		// Here we have a result which does not match the expected type.
-		// Throwing an exception here allows us to identify the violating factory.
-		// If we don't do this, clients will just see CCE without any idea who
-		// supplied the wrong adapter
-		throw new AssertionFailedException("Adapter factory " //$NON-NLS-1$
-				+ factory + " returned " + result.getClass().getName() //$NON-NLS-1$
-				+ " that is not an instance of " + adapterTypeName); //$NON-NLS-1$
+		return adapterObject;
 	}
 
 	@Override
@@ -329,18 +352,22 @@ public final class AdapterManager implements IAdapterManager {
 	 * if no plugin activations are desired.
 	 */
 	private Object getAdapter(Object adaptable, String adapterType, boolean force) {
-		IAdapterFactory factory = getFactories(adaptable.getClass()).get(adapterType);
-		if (force && factory instanceof IAdapterFactoryExt)
-			factory = ((IAdapterFactoryExt) factory).loadFactory(true);
-		Object result = null;
-		if (factory != null) {
-			Class<?> clazz = classForName(factory, adapterType);
-			if (clazz != null)
-				result = factory.getAdapter(adaptable, clazz);
-		}
-		if (result == null && adaptable.getClass().getName().equals(adapterType))
-			return adaptable;
-		return result;
+		Assert.isNotNull(adaptable);
+		Assert.isNotNull(adapterType);
+		return getFactories(adaptable.getClass()).getOrDefault(adapterType, Collections.emptyList()) //
+				.stream() //
+				.sorted(ACTIVE_FIRST) // prefer factories from already active bundles to minimize activation and return earlier when possible
+				.map(factory -> force && factory instanceof IAdapterFactoryExt ? ((IAdapterFactoryExt) factory).loadFactory(true) : factory) //
+				.filter(Objects::nonNull).map(factory -> {
+					Class<?> adapterClass = classForName(factory, adapterType);
+					if (adapterClass == null) {
+						return null;
+					}
+					return factory.getAdapter(adaptable, adapterClass); //
+				}).filter(Objects::nonNull) //
+				.findFirst() //
+				.map(Object.class::cast) // casting to object seems necessary here; compiler issue?
+				.orElseGet(() -> adapterType.equals(adaptable.getClass().getName()) ? adaptable : null);
 	}
 
 	@Override
@@ -350,15 +377,14 @@ public final class AdapterManager implements IAdapterManager {
 
 	@Override
 	public int queryAdapter(Object adaptable, String adapterTypeName) {
-		IAdapterFactory factory = getFactories(adaptable.getClass()).get(adapterTypeName);
-		if (factory == null)
+		List<IAdapterFactory> eligibleFactories = getFactories(adaptable.getClass()).get(adapterTypeName);
+		if (eligibleFactories == null || eligibleFactories.isEmpty()) {
 			return NONE;
-		if (factory instanceof IAdapterFactoryExt) {
-			factory = ((IAdapterFactoryExt) factory).loadFactory(false); // don't force loading
-			if (factory == null)
-				return NOT_LOADED;
 		}
-		return LOADED;
+		if (eligibleFactories.stream().anyMatch(AdapterManager::isFactoryLoaded)) {
+			return LOADED;
+		}
+		return NOT_LOADED;
 	}
 
 	@Override
@@ -379,12 +405,7 @@ public final class AdapterManager implements IAdapterManager {
 	 * @see IAdapterManager#registerAdapters
 	 */
 	public void registerFactory(IAdapterFactory factory, String adaptableType) {
-		List<IAdapterFactory> list = factories.get(adaptableType);
-		if (list == null) {
-			list = new ArrayList<>(5);
-			factories.put(adaptableType, list);
-		}
-		list.add(factory);
+		factories.computeIfAbsent(adaptableType, any -> new ArrayList<>(5)).add(factory);
 	}
 
 	/*
@@ -431,9 +452,9 @@ public final class AdapterManager implements IAdapterManager {
 		}
 	}
 
-	public HashMap<String, List<IAdapterFactory>> getFactories() {
+	public Map<String, List<IAdapterFactory>> getFactories() {
 		synchronized (lazyFactoryProviders) {
-			while (lazyFactoryProviders.size() > 0) {
+			while (!lazyFactoryProviders.isEmpty()) {
 				IAdapterManagerProvider provider = lazyFactoryProviders.remove(0);
 				if (provider.addFactories(this))
 					flushLookup();

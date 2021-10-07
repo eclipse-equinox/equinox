@@ -287,4 +287,75 @@ public class IAdapterManagerTest {
 			manager.unregisterAdapters(fac, Private.class);
 		}
 	}
+
+	@Test
+	public void testContinueAfterNullAdapterFactory() {
+		class PrivateAdapter {
+		}
+		class PrivateAdaptable {
+		}
+		IAdapterFactory nullAdapterFactory = new IAdapterFactory() {
+			@Override
+			public Class<?>[] getAdapterList() {
+				return new Class<?>[] { PrivateAdapter.class };
+			}
+
+			@Override
+			public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
+				return null;
+			}
+		};
+		IAdapterFactory adapterFactory = new IAdapterFactory() {
+			@Override
+			public Class<?>[] getAdapterList() {
+				return new Class<?>[] { PrivateAdapter.class };
+			}
+
+			@Override
+			public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
+				return (T) new PrivateAdapter();
+			}
+		};
+		try {
+			manager.registerAdapters(nullAdapterFactory, PrivateAdaptable.class);
+			manager.registerAdapters(adapterFactory, PrivateAdaptable.class);
+			assertNotNull(manager.getAdapter(new PrivateAdaptable(), PrivateAdapter.class));
+		} catch (Exception ex) {
+			manager.unregisterAdapters(nullAdapterFactory);
+			manager.unregisterAdapters(adapterFactory);
+		}
+	}
+
+	@Test
+	public void testMultipleAdapterFactoriesFromExtensionPoint() {
+		assertNotNull(manager.getAdapter(new TestAdaptable(), TestAdapter2.class));
+	}
+
+	@Test
+	public void testNoAdapterForType() {
+		manager.queryAdapter(new Object() {
+		}, String.class.getName());
+		// verifies it doesn't fail with NPE or other exception
+	}
+
+	@Test
+	public void testGetAdapterForSpecializedNamedSubtype() {
+		IAdapterFactory factory = new IAdapterFactory() {
+			@Override
+			public Class<?>[] getAdapterList() {
+				return new Class<?>[] { C.class };
+			}
+
+			@Override
+			public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
+				return (T) new Y();
+			}
+		};
+		manager.registerAdapters(factory, Object.class);
+		try {
+			assertNotNull(manager.getAdapter(new Object(), C.class.getName()));
+		} finally {
+			manager.unregisterAdapters(factory);
+		}
+	}
 }
