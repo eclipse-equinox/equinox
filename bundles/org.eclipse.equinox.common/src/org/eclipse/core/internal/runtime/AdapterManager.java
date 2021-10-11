@@ -19,6 +19,8 @@ package org.eclipse.core.internal.runtime;
 import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import org.eclipse.core.runtime.*;
 
@@ -50,7 +52,7 @@ public final class AdapterManager implements IAdapterManager {
 	 * map wrapper class.  The inner map is not synchronized, but it is immutable
 	 * so synchronization is not necessary.
 	 */
-	private Map<String, Map<String, List<IAdapterFactory>>> adapterLookup;
+	private volatile Map<String, Map<String, List<IAdapterFactory>>> adapterLookup;
 
 	/**
 	 * Cache of classes for a given type name. Avoids too many loadClass calls.
@@ -114,7 +116,7 @@ public final class AdapterManager implements IAdapterManager {
 	 * Private constructor to block instance creation.
 	 */
 	private AdapterManager() {
-		factories = new HashMap<>(5);
+		factories = new ConcurrentHashMap<>();
 		lazyFactoryProviders = new ArrayList<>(1);
 	}
 
@@ -405,7 +407,7 @@ public final class AdapterManager implements IAdapterManager {
 	 * @see IAdapterManager#registerAdapters
 	 */
 	public void registerFactory(IAdapterFactory factory, String adaptableType) {
-		factories.computeIfAbsent(adaptableType, any -> new ArrayList<>(5)).add(factory);
+		factories.computeIfAbsent(adaptableType, any -> new CopyOnWriteArrayList<>()).add(factory);
 	}
 
 	/*
