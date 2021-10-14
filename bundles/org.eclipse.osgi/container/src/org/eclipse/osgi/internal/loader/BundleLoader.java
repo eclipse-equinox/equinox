@@ -1096,8 +1096,6 @@ public class BundleLoader extends ModuleLoader {
 		}
 
 		if (dynamicImports.size() > 0) {
-			addDynamicImportPackage(dynamicImports.toArray(new String[dynamicImports.size()]));
-
 			Map<String, String> dynamicImportMap = new HashMap<>();
 			dynamicImportMap.put(Constants.DYNAMICIMPORT_PACKAGE, importSpec.toString());
 
@@ -1107,7 +1105,10 @@ public class BundleLoader extends ModuleLoader {
 			} catch (BundleException e) {
 				throw new RuntimeException(e);
 			}
-
+			// Add the dynamic imports to the loader second to be sure the requirement
+			// gets added to the wiring first. This avoids issues if another
+			// thread tries to dynamic resolve before all is done here.
+			addDynamicImportPackage(dynamicImports.toArray(new String[dynamicImports.size()]));
 		}
 	}
 

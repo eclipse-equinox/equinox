@@ -422,14 +422,21 @@ public final class ModuleWiring implements BundleWiring {
 		}, NamespaceList.REQUIREMENT);
 
 		ModuleDatabase moduleDatabase = revision.getRevisions().getContainer().moduleDatabase;
-		moduleDatabase.writeLock();
-		try {
+		// Use the writeLockOperation to atomically update the revision timestamps
+		// This is necessary to make sure any in flight resolve operations are using the
+		// latest wiring data and avoids them overwriting the requirements incorrectly.
+		moduleDatabase.writeLockOperation(true, () -> {
 			NamespaceList.Builder<ModuleRequirement> requirmentsBuilder = requirements.createBuilder();
 			requirmentsBuilder.addAll(newRequirements);
 			requirements = requirmentsBuilder.build();
-		} finally {
-			moduleDatabase.writeUnlock();
-		}
+			// clear out miss cache when adding new dynamic imports.
+			dynamicMissRef.updateAndGet((s) -> {
+				if (s != null) {
+					s.clear();
+				}
+				return s;
+			});
+		});
 	}
 
 	void addDynamicPackageMiss(String packageName) {

@@ -1317,7 +1317,8 @@ final class ModuleResolver {
 		}
 
 		private Map<Resource, List<Wire>> resolveDynamic() throws ResolutionException {
-			return new ResolverImpl(new Logger(0), null).resolveDynamic(this, dynamicReq.getRevision().getWiring(), dynamicReq.getOriginal());
+			return new ResolverImpl(new Logger(0), null).resolveDynamic(this, wirings.get(dynamicReq.getResource()),
+					dynamicReq.getOriginal());
 		}
 
 		private void filterResolvable() {

@@ -545,6 +545,26 @@ public class ModuleDatabase {
 		}
 	}
 
+	
+	/**
+	 * Perform the specified operation while holding the write lock.
+	 * This will also increment the timestamps and optionally the
+	 * revisions timestamps.
+	 * <p>
+	 * A write operation protected by the {@link #writeLock() write} lock.
+	 * @param incrementRevision if true the revision timestamps will be incremented after successfully running the operation
+	 * @param op the operation to run while holding the write lock.
+	 */
+	final void writeLockOperation(boolean incrementRevision, Runnable op) {
+		writeLock();
+		try {
+			op.run();
+			incrementTimestamps(incrementRevision);
+		} finally {
+			writeUnlock();
+		}
+	}
+
 	/**
 	 * Returns a snapshot of all modules ordered by module ID.
 	 * <p>

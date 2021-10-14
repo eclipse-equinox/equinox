@@ -48,6 +48,9 @@ public class InternalUtils {
 	 * @return an effectively mutable and lazy copy of the given list.
 	 */
 	public static <T> List<T> asCopy(List<? extends T> list) {
+		if (list == null) {
+			return null;
+		}
 		if (!(list instanceof RandomAccess)) {
 			throw new IllegalArgumentException("Only RandomAccess lists are supported"); //$NON-NLS-1$
 		}
