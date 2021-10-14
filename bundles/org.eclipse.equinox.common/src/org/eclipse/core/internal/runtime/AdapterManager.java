@@ -88,26 +88,6 @@ public final class AdapterManager implements IAdapterManager {
 
 	private static final AdapterManager singleton = new AdapterManager();
 
-	private static final Comparator<? super IAdapterFactory> ACTIVE_FIRST = new Comparator<IAdapterFactory>() {
-
-		@Override
-		public int compare(IAdapterFactory o1, IAdapterFactory o2) {
-			boolean factory1Loaded = isFactoryLoaded(o1);
-			boolean factory2Loaded = isFactoryLoaded(o2);
-			if (factory1Loaded == factory2Loaded) {
-				return 0;
-			}
-			if (factory1Loaded && !factory2Loaded) {
-				return -1;
-			}
-			if (!factory1Loaded && factory2Loaded) {
-				return +1;
-			}
-			return 0;
-		}
-
-	};
-
 	public static AdapterManager getDefault() {
 		return singleton;
 	}
@@ -358,7 +338,6 @@ public final class AdapterManager implements IAdapterManager {
 		Assert.isNotNull(adapterType);
 		return getFactories(adaptable.getClass()).getOrDefault(adapterType, Collections.emptyList()) //
 				.stream() //
-				.sorted(ACTIVE_FIRST) // prefer factories from already active bundles to minimize activation and return earlier when possible
 				.map(factory -> force && factory instanceof IAdapterFactoryExt ? ((IAdapterFactoryExt) factory).loadFactory(true) : factory) //
 				.filter(Objects::nonNull).map(factory -> {
 					Class<?> adapterClass = classForName(factory, adapterType);
