@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2013 IBM Corporation and others.
+ * Copyright (c) 2004, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,12 +10,18 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Hannes Wellmann - Bug 576643: Clean up and unify Bundle resource classes
  *******************************************************************************/
 
 package org.eclipse.osgi.storage.url;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
+import java.util.Objects;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleContainer;
 import org.eclipse.osgi.internal.messages.Msg;
@@ -40,7 +46,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 	protected final ModuleContainer container;
 	protected BundleEntry bundleEntry;
 
-	public BundleResourceHandler(ModuleContainer container, BundleEntry bundleEntry) {
+	protected BundleResourceHandler(ModuleContainer container, BundleEntry bundleEntry) {
 		this.container = container;
 		this.bundleEntry = bundleEntry;
 	}
@@ -60,7 +66,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		if (start < end)
 			spec = str.substring(start, end);
 		end -= start;
-		//Default is to use path and bundleId from context
+		// Default is to use path and bundleId from context
 		String path = url.getPath();
 		String host = url.getHost();
 		int resIndex = url.getPort();
@@ -99,7 +105,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		}
 		if (path == null)
 			path = ""; //$NON-NLS-1$
-		//modify path if there's any relative references
+		// modify path if there's any relative references
 		// see RFC2396 Section 5.2
 		// Note: For ".." references above the root the approach taken is removing them from the resolved path
 		if (path.endsWith("/.") || path.endsWith("/..")) //$NON-NLS-1$ //$NON-NLS-2$
@@ -119,15 +125,15 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		// Check the permission of the caller to see if they
 		// are allowed access to the resource.
 		String authorized = SECURITY_UNCHECKED;
-		long bundleId = getBundleID(host);
+		long bundleId = parseBundleIDFromURLHost(host);
 		Module module = getModule(bundleId);
 		if (checkAuthorization(module))
 			authorized = SECURITY_CHECKED;
 		// Always force the use of the hash from the adaptor
-		host = Long.toString(bundleId) + BID_FWKID_SEPARATOR + Integer.toString(container.hashCode());
+		host = createURLHostForBundleID(container, bundleId);
 		// Setting the authority portion of the URL to SECURITY_ATHORIZED
 		// ensures that this URL was created by using this parseURL
-		// method.  The openConnection method will only open URLs
+		// method. The openConnection method will only open URLs
 		// that have the authority set to this.
 		setURL(url, url.getProtocol(), host, resIndex, authorized, null, path, null, url.getRef());
 	}
@@ -148,30 +154,31 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 	 */
 	@Override
 	protected URLConnection openConnection(URL url) throws IOException {
-		if (bundleEntry != null) // if the bundleEntry is not null then return quick
-			return (new BundleURLConnection(url, bundleEntry));
-
+		if (bundleEntry != null) { // if the bundleEntry is not null then return quick
+			return new BundleURLConnection(url, bundleEntry);
+		}
 		String host = url.getHost();
 		if (host == null) {
 			throw new IOException(NLS.bind(Msg.URL_NO_BUNDLE_ID, url.toExternalForm()));
 		}
 		long bundleID;
 		try {
-			bundleID = getBundleID(host);
+			bundleID = parseBundleIDFromURLHost(host);
 		} catch (NumberFormatException nfe) {
 			throw (MalformedURLException) new MalformedURLException(NLS.bind(Msg.URL_INVALID_BUNDLE_ID, host)).initCause(nfe);
 		}
 		Module module = getModule(bundleID);
-		if (module == null)
+		if (module == null) {
 			throw new IOException(NLS.bind(Msg.URL_NO_BUNDLE_FOUND, url.toExternalForm()));
+		}
 		// check to make sure that this URL was created using the
-		// parseURL method.  This ensures the security check was done
+		// parseURL method. This ensures the security check was done
 		// at URL construction.
 		if (!url.getAuthority().equals(SECURITY_CHECKED)) {
 			// No admin security check was made better check now.
 			checkAuthorization(module);
 		}
-		return (new BundleURLConnection(url, findBundleEntry(url, module)));
+		return new BundleURLConnection(url, findBundleEntry(url, module));
 	}
 
 	/**
@@ -197,26 +204,25 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		result.append("://"); //$NON-NLS-1$
 
 		String host = url.getHost();
-		if ((host != null) && (host.length() > 0))
+		if (host != null && host.length() > 0) {
 			result.append(host);
+		}
 		int index = url.getPort();
-		if (index > 0)
+		if (index > 0) {
 			result.append(':').append(index);
-
+		}
 		String path = url.getPath();
 		if (path != null) {
-			if ((path.length() > 0) && (path.charAt(0) != '/')) /* if name doesn't have a leading slash */
-			{
+			if (path.length() > 0 && path.charAt(0) != '/') { // if name doesn't have a leading slash
 				result.append("/"); //$NON-NLS-1$
 			}
-
 			result.append(path);
 		}
 		String ref = url.getRef();
-		if (ref != null && ref.length() > 0)
+		if (ref != null && ref.length() > 0) {
 			result.append('#').append(ref);
-
-		return (result.toString());
+		}
+		return result.toString();
 	}
 
 	@Override
@@ -252,11 +258,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 
 	@Override
 	protected boolean hostsEqual(URL url1, URL url2) {
-		String host1 = url1.getHost();
-		String host2 = url2.getHost();
-		if (host1 != null && host2 != null)
-			return host1.equalsIgnoreCase(host2);
-		return (host1 == null && host2 == null);
+		return equalsIgnoreCase(url1.getHost(), url2.getHost());
 	}
 
 	@Override
@@ -264,23 +266,10 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		// do a hashcode test to allow each handler to check the adaptor first
 		if (url1.hashCode() != url2.hashCode())
 			return false;
-		String p1 = url1.getProtocol();
-		String p2 = url2.getProtocol();
-		if (!((p1 == p2) || (p1 != null && p1.equalsIgnoreCase(p2))))
-			return false;
-
-		if (!hostsEqual(url1, url2))
-			return false;
-
-		if (url1.getPort() != url2.getPort())
-			return false;
-
-		String path1 = url1.getPath();
-		String path2 = url2.getPath();
-		if (!((path1 == path2) || (path1 != null && path1.equals(path2))))
-			return false;
-
-		return true;
+		return equalsIgnoreCase(url1.getProtocol(), url2.getProtocol())
+				&& hostsEqual(url1, url2)
+				&& url1.getPort() == url2.getPort()
+				&& Objects.equals(url1.getPath(), url2.getPath());
 		// note that the authority is not checked here because it can be different for two
 		// URLs depending on how they were constructed.
 	}
@@ -289,15 +278,23 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm == null)
 			return true;
-		Bundle bundle = module == null ? null : module.getBundle();
-		if (bundle == null)
+		Bundle moduleBundle = module == null ? null : module.getBundle();
+		if (moduleBundle == null)
 			return false;
-		sm.checkPermission(new AdminPermission(bundle, AdminPermission.RESOURCE));
+		sm.checkPermission(new AdminPermission(moduleBundle, AdminPermission.RESOURCE));
 		return true;
 	}
 
-	private long getBundleID(String host) {
-		int dotIndex = host.indexOf('.');
+	private static boolean equalsIgnoreCase(String s1, String s2) {
+		return s1 != null ? s1.equalsIgnoreCase(s2) : s2 == null;
+	}
+
+	public static String createURLHostForBundleID(ModuleContainer container, long bundleId) {
+		return bundleId + BID_FWKID_SEPARATOR + container.hashCode();
+	}
+
+	private static long parseBundleIDFromURLHost(String host) {
+		int dotIndex = host.indexOf(BID_FWKID_SEPARATOR);
 		return (dotIndex >= 0 && dotIndex < host.length() - 1) ? Long.parseLong(host.substring(0, dotIndex)) : Long.parseLong(host);
 	}
 }

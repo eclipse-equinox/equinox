@@ -25,7 +25,6 @@ import org.eclipse.osgi.util.NLS;
 /**
  * URLConnection for BundleClassLoader resources.
  */
-
 public class BundleURLConnection extends URLConnection {
 	/** BundleEntry that the URL is associated. */
 	protected final BundleEntry bundleEntry;
@@ -77,7 +76,7 @@ public class BundleURLConnection extends URLConnection {
 					try {
 						connect();
 					} catch (IOException e) {
-						return (null);
+						return null;
 					}
 				}
 				try {
@@ -88,18 +87,17 @@ public class BundleURLConnection extends URLConnection {
 				}
 			}
 		}
-
-		return (contentType);
+		return contentType;
 	}
 
 	@Override
 	public boolean getDoInput() {
-		return (true);
+		return true;
 	}
 
 	@Override
 	public boolean getDoOutput() {
-		return (false);
+		return false;
 	}
 
 	@Override
@@ -107,8 +105,7 @@ public class BundleURLConnection extends URLConnection {
 		if (!connected) {
 			connect();
 		}
-
-		return (in);
+		return in;
 	}
 
 	@Override
@@ -118,8 +115,7 @@ public class BundleURLConnection extends URLConnection {
 		if (lastModified == -1) {
 			return (0);
 		}
-
-		return (lastModified);
+		return lastModified;
 	}
 
 	/**

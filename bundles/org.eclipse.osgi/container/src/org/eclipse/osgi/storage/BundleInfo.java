@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Hannes Wellmann - Bug 576643: Clean up and unify Bundle resource classes
  *******************************************************************************/
 package org.eclipse.osgi.storage;
 
@@ -18,7 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.Collection;
@@ -31,7 +31,9 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.jar.JarFile;
 import org.eclipse.osgi.container.Module;
+import org.eclipse.osgi.container.ModuleContainer;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.container.ModuleRevisionBuilder;
@@ -60,7 +62,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.connect.ConnectModule;
 
 public final class BundleInfo {
-	public static final String OSGI_BUNDLE_MANIFEST = "META-INF/MANIFEST.MF"; //$NON-NLS-1$
+	public static final String OSGI_BUNDLE_MANIFEST = JarFile.MANIFEST_NAME;
 	public static final String MULTI_RELEASE_HEADER = "Multi-Release"; //$NON-NLS-1$
 	public static final String MULTI_RELEASE_VERSIONS = "META-INF/versions/"; //$NON-NLS-1$
 	public static final Collection<String> MULTI_RELEASE_FILTER_PREFIXES = Collections.singleton("META-INF/"); //$NON-NLS-1$
@@ -153,7 +155,7 @@ public final class BundleInfo {
 							// For MRJARs only replace Import-Package and Require-Capability if the versioned values are non-null
 							if (Boolean.parseBoolean(merged.get(MULTI_RELEASE_HEADER))) {
 								for (int i = getStorage().getRuntimeVersion().getMajor(); i > 8; i--) {
-									String versionManifest = "META-INF/versions/" + i + "/OSGI-INF/MANIFEST.MF"; //$NON-NLS-1$ //$NON-NLS-2$
+									String versionManifest = MULTI_RELEASE_VERSIONS + i + "/OSGI-INF/MANIFEST.MF"; //$NON-NLS-1$
 									BundleEntry versionEntry = getBundleFile().getEntry(versionManifest);
 									if (versionEntry != null) {
 										Map<String, String> versioned = ManifestElement.parseBundleManifest(versionEntry.getInputStream(), new CaseInsensitiveDictionaryMap<>());
@@ -171,10 +173,9 @@ public final class BundleInfo {
 								}
 							}
 							rawHeaders = Collections.unmodifiableMap(merged);
+						} catch (RuntimeException e) {
+							throw e;
 						} catch (Exception e) {
-							if (e instanceof RuntimeException) {
-								throw (RuntimeException) e;
-							}
 							throw new RuntimeException("Error occurred getting the bundle manifest.", e); //$NON-NLS-1$
 						}
 					}
@@ -263,7 +264,7 @@ public final class BundleInfo {
 			}
 			synchronized (this.genMonitor) {
 				this.content = content;
-				this.isDirectory = content == null ? false : Storage.secureAction.isDirectory(content);
+				this.isDirectory = content != null && Storage.secureAction.isDirectory(content);
 				this.contentType = contentType;
 				setLastModified(content);
 			}
@@ -276,7 +277,7 @@ public final class BundleInfo {
 				return;
 			}
 			if (isDirectory)
-				content = new File(content, "META-INF/MANIFEST.MF"); //$NON-NLS-1$
+				content = new File(content, OSGI_BUNDLE_MANIFEST); // $NON-NLS-1$
 			lastModified = Storage.secureAction.lastModified(content);
 		}
 
@@ -421,15 +422,14 @@ public final class BundleInfo {
 
 		public URL getEntry(String path) {
 			BundleEntry entry = getBundleFile().getEntry(path);
-			if (entry == null)
-				return null;
-			path = BundleFile.fixTrailingSlash(path, entry);
-			try {
-				//use the constant string for the protocol to prevent duplication
-				return Storage.secureAction.getURL(BundleResourceHandler.OSGI_ENTRY_URL_PROTOCOL, Long.toString(getBundleId()) + BundleResourceHandler.BID_FWKID_SEPARATOR + Integer.toString(getStorage().getModuleContainer().hashCode()), 0, path, new Handler(getStorage().getModuleContainer(), entry));
-			} catch (MalformedURLException e) {
+			if (entry == null) {
 				return null;
 			}
+			// use the constant string for the protocol to prevent duplication
+			String protocol = BundleResourceHandler.OSGI_ENTRY_URL_PROTOCOL;
+			ModuleContainer container = getStorage().getModuleContainer();
+			Handler handler = new Handler(container, entry);
+			return BundleFile.createURL(protocol, getBundleId(), container, entry, 0, path, handler);
 		}
 
 		public String findLibrary(String libname) {
@@ -500,8 +500,7 @@ public final class BundleInfo {
 			if (!lockedID) {
 				throw new BundleException("Failed to obtain id locks for generation.", BundleException.STATECHANGE_ERROR, new ThreadInfoReport(generationLocks.getLockInfo(nextGenerationId))); //$NON-NLS-1$
 			}
-			Generation newGeneration = new Generation(nextGenerationId++);
-			return newGeneration;
+			return new Generation(nextGenerationId++);
 		}
 	}
 
@@ -516,8 +515,7 @@ public final class BundleInfo {
 
 	Generation restoreGeneration(long generationId, File content, boolean isDirectory, Type contentType, boolean hasPackageInfo, Map<String, String> cached, long lastModified, boolean isMRJar) {
 		synchronized (this.infoMonitor) {
-			Generation restoredGeneration = new Generation(generationId, content, isDirectory, contentType, hasPackageInfo, cached, lastModified, isMRJar);
-			return restoredGeneration;
+			return new Generation(generationId, content, isDirectory, contentType, hasPackageInfo, cached, lastModified, isMRJar);
 		}
 	}
 
@@ -568,34 +566,27 @@ public final class BundleInfo {
 		if (manifest == null) {
 			return false;
 		}
-		BufferedReader br = null;
-		try {
-			br = new BufferedReader(new InputStreamReader(manifest.getInputStream()));
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(manifest.getInputStream()))) {
 			String line;
 			while ((line = br.readLine()) != null) {
 				if (line.length() < 20)
 					continue;
 				switch (line.charAt(0)) {
-					case 'S' :
-						if (line.charAt(1) == 'p')
-							if (line.startsWith("Specification-Title: ") || line.startsWith("Specification-Version: ") || line.startsWith("Specification-Vendor: ")) //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
-								return true;
-						break;
-					case 'I' :
-						if (line.startsWith("Implementation-Title: ") || line.startsWith("Implementation-Version: ") || line.startsWith("Implementation-Vendor: ")) //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
-							return true;
-						break;
+				case 'S':
+					if (line.charAt(1) == 'p' && (line.startsWith("Specification-Title: ") //$NON-NLS-1$
+							|| line.startsWith("Specification-Version: ") //$NON-NLS-1$
+							|| line.startsWith("Specification-Vendor: "))) //$NON-NLS-1$
+						return true;
+					break;
+				case 'I':
+					if (line.startsWith("Implementation-Title: ") || line.startsWith("Implementation-Version: ") //$NON-NLS-1$ //$NON-NLS-2$
+							|| line.startsWith("Implementation-Vendor: ")) //$NON-NLS-1$
+						return true;
+					break;
 				}
 			}
 		} catch (IOException ioe) {
 			// do nothing
-		} finally {
-			if (br != null)
-				try {
-					br.close();
-				} catch (IOException e) {
-					// do nothing
-				}
 		}
 		return false;
 	}

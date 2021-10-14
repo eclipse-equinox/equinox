@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2015 IBM Corporation and others.
+ * Copyright (c) 2004, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Hannes Wellmann - Bug 576643: Clean up and unify Bundle resource classes
  *******************************************************************************/
 
 package org.eclipse.osgi.storage.bundlefile;
@@ -18,9 +19,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLStreamHandler;
 import java.security.AccessController;
 import java.util.Enumeration;
 import org.eclipse.osgi.container.Module;
+import org.eclipse.osgi.container.ModuleContainer;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.storage.url.BundleResourceHandler;
 import org.eclipse.osgi.storage.url.bundleresource.Handler;
@@ -46,7 +49,7 @@ abstract public class BundleFile {
 	 * @param basefile The File object where this BundleFile is
 	 * persistently stored.
 	 */
-	public BundleFile(File basefile) {
+	protected BundleFile(File basefile) {
 		this.basefile = basefile;
 	}
 
@@ -151,14 +154,12 @@ abstract public class BundleFile {
 	 * @return a URL to access the contents of the specified entry
 	 */
 	protected URL createResourceURL(BundleEntry bundleEntry, Module hostModule, int index, String path) {
-		long hostBundleID = hostModule.getId();
-		path = fixTrailingSlash(path, bundleEntry);
-		try {
-			//use the constant string for the protocol to prevent duplication
-			return secureAction.getURL(BundleResourceHandler.OSGI_RESOURCE_URL_PROTOCOL, Long.toString(hostBundleID) + BundleResourceHandler.BID_FWKID_SEPARATOR + Integer.toString(hostModule.getContainer().hashCode()), index, path, new Handler(hostModule.getContainer(), bundleEntry));
-		} catch (MalformedURLException e) {
-			return null;
-		}
+		// use the constant string for the protocol to prevent duplication
+		String protocol = BundleResourceHandler.OSGI_RESOURCE_URL_PROTOCOL;
+		long bundleId = hostModule.getId();
+		ModuleContainer container = hostModule.getContainer();
+		Handler handler = new Handler(container, bundleEntry);
+		return createURL(protocol, bundleId, container, bundleEntry, index, path, handler);
 	}
 
 	/**
@@ -182,6 +183,17 @@ abstract public class BundleFile {
 		return String.valueOf(basefile);
 	}
 
+	public static URL createURL(String protocol, long bundleId, ModuleContainer container, BundleEntry entry, int index,
+			String path, URLStreamHandler handler) {
+		path = fixTrailingSlash(path, entry);
+		try {
+			String host = BundleResourceHandler.createURLHostForBundleID(container, bundleId);
+			return secureAction.getURL(protocol, host, index, path, handler);
+		} catch (MalformedURLException e) {
+			return null;
+		}
+	}
+
 	public static String fixTrailingSlash(String path, BundleEntry entry) {
 		if (path.length() == 0)
 			return "/"; //$NON-NLS-1$
@@ -200,5 +212,4 @@ abstract public class BundleFile {
 		}
 		return path;
 	}
-
 }
