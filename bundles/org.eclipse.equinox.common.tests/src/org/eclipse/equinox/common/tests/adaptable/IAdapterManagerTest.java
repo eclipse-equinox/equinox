@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 
 import org.eclipse.core.internal.runtime.AdapterManager;
+import org.eclipse.core.internal.runtime.IAdapterFactoryExt;
 import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.core.runtime.IAdapterManager;
@@ -39,7 +40,8 @@ import org.osgi.framework.FrameworkUtil;
  * Tests API on the IAdapterManager class.
  */
 public class IAdapterManagerTest {
-	// following classes are for testComputeClassOrder
+	// following classes are for testComputeClassOrder and other tests for
+	// non-trivial class hierarchies
 	interface C {
 	}
 
@@ -356,6 +358,176 @@ public class IAdapterManagerTest {
 			assertNotNull(manager.getAdapter(new Object(), C.class.getName()));
 		} finally {
 			manager.unregisterAdapters(factory);
+		}
+	}
+
+	public static class GenericToStringAdapterFactory implements IAdapterFactory, IAdapterFactoryExt {
+
+		public boolean loaded = true;
+		private Class<?> adaptableType;
+
+		public GenericToStringAdapterFactory(Class<?> adaptableType) {
+			this.adaptableType = adaptableType;
+		}
+
+		@Override
+		public IAdapterFactory loadFactory(boolean force) {
+			if (loaded || force) {
+				loaded = true;
+				return this;
+			}
+			return null;
+		}
+
+		@Override
+		public String[] getAdapterNames() {
+			return new String[] { String.class.getName() };
+		}
+
+		@Override
+		public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
+			assertTrue(adaptableType.isInstance(adaptableObject));
+			if (!loaded) {
+				return null;
+			}
+			if (adapterType == String.class) {
+				return adapterType.cast(adaptableObject.toString() + " adapted by " + this.getClass().getSimpleName());
+			}
+			return null;
+		}
+
+		@Override
+		public Class<?>[] getAdapterList() {
+			return new Class<?>[] { String.class };
+		}
+
+	}
+
+	public static class XToStringAdapterFactory extends GenericToStringAdapterFactory {
+
+		public XToStringAdapterFactory() {
+			super(X.class);
+		}
+	}
+
+	public static class YToStringAdapterFactory extends GenericToStringAdapterFactory {
+
+		public YToStringAdapterFactory() {
+			super(Y.class);
+		}
+	}
+
+	/**
+	 * Tests that the correct adapter is returned for class X extends Y
+	 */
+	@Test
+	public void testGetAdapterXY() {
+		X xAdaptable = new X();
+		Y yAdaptable = new Y();
+
+		XToStringAdapterFactory xFactory = new XToStringAdapterFactory();
+		YToStringAdapterFactory yFactory = new YToStringAdapterFactory();
+		manager.registerAdapters(xFactory, X.class);
+		manager.registerAdapters(yFactory, Y.class);
+		try {
+			assertTrue(((String) manager.loadAdapter(xAdaptable, "java.lang.String"))
+					.endsWith(" adapted by " + XToStringAdapterFactory.class.getSimpleName()));
+			assertTrue(((String) manager.loadAdapter(yAdaptable, "java.lang.String"))
+					.endsWith(" adapted by " + YToStringAdapterFactory.class.getSimpleName()));
+			assertTrue(((String) manager.getAdapter(xAdaptable, "java.lang.String"))
+					.endsWith(" adapted by " + XToStringAdapterFactory.class.getSimpleName()));
+			assertTrue(((String) manager.getAdapter(yAdaptable, "java.lang.String"))
+					.endsWith(" adapted by " + YToStringAdapterFactory.class.getSimpleName()));
+			assertTrue(manager.getAdapter(xAdaptable, String.class)
+					.endsWith(" adapted by " + XToStringAdapterFactory.class.getSimpleName()));
+			assertTrue(manager.getAdapter(yAdaptable, String.class)
+					.endsWith(" adapted by " + YToStringAdapterFactory.class.getSimpleName()));
+		} finally {
+			manager.unregisterAdapters(xFactory, TestAdaptable.class);
+			manager.unregisterAdapters(yFactory, TestAdaptable.class);
+		}
+	}
+
+	/**
+	 * Tests that the correct adapter is returned for class X extends Y when X
+	 * adapter is not loaded
+	 */
+	@Test
+	public void testGetAdapterXYNotLoaded() {
+		X xAdaptable = new X();
+		Y yAdaptable = new Y();
+
+		XToStringAdapterFactory xFactory = new XToStringAdapterFactory();
+		xFactory.loaded = false;
+		YToStringAdapterFactory yFactory = new YToStringAdapterFactory();
+		manager.registerAdapters(xFactory, X.class);
+		manager.registerAdapters(yFactory, Y.class);
+		try {
+			/*
+			 * Here, before the XToStringAdapterFactory is fully loaded, the adapter
+			 * registered to the super type (aka YToStringAdapterFactory) will be used to
+			 * adapt the X instance to string
+			 */
+			assertTrue(((String) manager.getAdapter(xAdaptable, "java.lang.String"))
+					.endsWith(" adapted by " + YToStringAdapterFactory.class.getSimpleName()));
+			assertTrue(((String) manager.getAdapter(yAdaptable, "java.lang.String"))
+					.endsWith(" adapted by " + YToStringAdapterFactory.class.getSimpleName()));
+			assertTrue(manager.getAdapter(xAdaptable, String.class)
+					.endsWith(" adapted by " + YToStringAdapterFactory.class.getSimpleName()));
+			assertTrue(manager.getAdapter(yAdaptable, String.class)
+					.endsWith(" adapted by " + YToStringAdapterFactory.class.getSimpleName()));
+
+			// now load the X adapter factory:
+			assertTrue(((String) manager.loadAdapter(xAdaptable, "java.lang.String"))
+					.endsWith(" adapted by " + XToStringAdapterFactory.class.getSimpleName()));
+
+			// and repeat making sure the X adapter factory is now used
+			assertTrue(((String) manager.getAdapter(xAdaptable, "java.lang.String"))
+					.endsWith(" adapted by " + XToStringAdapterFactory.class.getSimpleName()));
+			assertTrue(((String) manager.getAdapter(yAdaptable, "java.lang.String"))
+					.endsWith(" adapted by " + YToStringAdapterFactory.class.getSimpleName()));
+			assertTrue(manager.getAdapter(xAdaptable, String.class)
+					.endsWith(" adapted by " + XToStringAdapterFactory.class.getSimpleName()));
+			assertTrue(manager.getAdapter(yAdaptable, String.class)
+					.endsWith(" adapted by " + YToStringAdapterFactory.class.getSimpleName()));
+
+		} finally {
+			manager.unregisterAdapters(xFactory, TestAdaptable.class);
+			manager.unregisterAdapters(yFactory, TestAdaptable.class);
+		}
+	}
+
+	/**
+	 * Tests that the correct adapter is returned for class X extends Y when X
+	 * adapter is not loaded, but is loaded immediately
+	 */
+	@Test
+	public void testGetAdapterXYNotLoadedForceLoad() {
+		X xAdaptable = new X();
+		Y yAdaptable = new Y();
+
+		XToStringAdapterFactory xFactory = new XToStringAdapterFactory();
+		xFactory.loaded = false;
+		YToStringAdapterFactory yFactory = new YToStringAdapterFactory();
+		manager.registerAdapters(xFactory, X.class);
+		manager.registerAdapters(yFactory, Y.class);
+		try {
+			assertTrue(((String) manager.loadAdapter(xAdaptable, "java.lang.String"))
+					.endsWith(" adapted by " + XToStringAdapterFactory.class.getSimpleName()));
+			assertTrue(((String) manager.loadAdapter(yAdaptable, "java.lang.String"))
+					.endsWith(" adapted by " + YToStringAdapterFactory.class.getSimpleName()));
+			assertTrue(((String) manager.getAdapter(xAdaptable, "java.lang.String"))
+					.endsWith(" adapted by " + XToStringAdapterFactory.class.getSimpleName()));
+			assertTrue(((String) manager.getAdapter(yAdaptable, "java.lang.String"))
+					.endsWith(" adapted by " + YToStringAdapterFactory.class.getSimpleName()));
+			assertTrue(manager.getAdapter(xAdaptable, String.class)
+					.endsWith(" adapted by " + XToStringAdapterFactory.class.getSimpleName()));
+			assertTrue(manager.getAdapter(yAdaptable, String.class)
+					.endsWith(" adapted by " + YToStringAdapterFactory.class.getSimpleName()));
+
+		} finally {
+			manager.unregisterAdapters(xFactory, TestAdaptable.class);
+			manager.unregisterAdapters(yFactory, TestAdaptable.class);
 		}
 	}
 }
