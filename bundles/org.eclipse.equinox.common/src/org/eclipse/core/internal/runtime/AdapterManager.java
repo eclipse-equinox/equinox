@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,14 +13,14 @@
  *     David Green - fix factories with non-standard class loading (bug 200068) 
  *     Filip Hrbek - fix thread safety problem described in bug 305863
  *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
+ *     Christoph Läubrich - Bug 576660 - AdapterManager should use more modern concurrency primitives
  *******************************************************************************/
 package org.eclipse.core.internal.runtime;
 
 import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import org.eclipse.core.runtime.*;
 
@@ -48,11 +48,10 @@ public final class AdapterManager implements IAdapterManager {
 	/** 
 	 * Cache of adapters for a given adaptable class. Maps String  -> Map
 	 * (adaptable class name -> (adapter class name -> factory instance))
-	 * Thread safety note: The outer map is synchronized using a synchronized
-	 * map wrapper class.  The inner map is not synchronized, but it is immutable
-	 * so synchronization is not necessary.
+	 * <b>Thread safety note</b>: always use the compute methods to update the map 
+	 * and make sure the values (inner map) are never modified but replaced if necessary.
 	 */
-	private volatile Map<String, Map<String, List<IAdapterFactory>>> adapterLookup;
+	private final ConcurrentMap<String, Map<String, List<IAdapterFactory>>> adapterLookup = new ConcurrentHashMap<>();
 
 	/**
 	 * Cache of classes for a given type name. Avoids too many loadClass calls.
@@ -206,16 +205,13 @@ public final class AdapterManager implements IAdapterManager {
 	 */
 	private Map<String, List<IAdapterFactory>> getFactories(Class<? extends Object> adaptable) {
 		//cache reference to lookup to protect against concurrent flush
-		Map<String, Map<String, List<IAdapterFactory>>> lookup = adapterLookup;
-		if (lookup == null)
-			adapterLookup = lookup = Collections.synchronizedMap(new HashMap<String, Map<String, List<IAdapterFactory>>>(30));
-		return lookup.computeIfAbsent(adaptable.getName(), adaptableType -> {
+		return adapterLookup.computeIfAbsent(adaptable.getName(), adaptableType -> {
 			// calculate adapters for the class
 			Map<String, List<IAdapterFactory>> table = new HashMap<>(4);
 			for (Class<?> cl : computeClassOrder(adaptable)) {
 				addFactoriesFor(cl.getName(), table);
 			}
-			return table;
+			return Collections.unmodifiableMap(table);
 		});
 	}
 
@@ -277,7 +273,7 @@ public final class AdapterManager implements IAdapterManager {
 	 * </p>
 	 */
 	public synchronized void flushLookup() {
-		adapterLookup = null;
+		adapterLookup.clear();
 		classLookup = null;
 		classSearchOrderLookup = null;
 	}
