@@ -56,17 +56,10 @@ public final class AdapterManager implements IAdapterManager {
 	/**
 	 * Cache of classes for a given type name. Avoids too many loadClass calls.
 	 * (factory -> (type name -> Class)).
-	 * Thread safety note: Since this structure is a nested hash map, and both
-	 * the inner and outer maps are mutable, access to this entire structure is
-	 * controlled by the classLookupLock field.  Note the field can still be
-	 * nulled concurrently without holding the lock.
+	 * Thread safety note: always use the compute methods to update the map 
+	 * and make sure the values (inner map) are modified also this way.
 	 */
-	private Map<IAdapterFactory, Map<String, Class<?>>> classLookup;
-
-	/**
-	 * The lock object controlling access to the classLookup data structure.
-	 */
-	private final Object classLookupLock = new Object();
+	private final ConcurrentMap<IAdapterFactory, ConcurrentMap<String, Class<?>>> classLookup;
 
 	/**
 	 * Cache of class lookup order (Class -> Class[]). This avoids having to compute often, and
@@ -99,6 +92,7 @@ public final class AdapterManager implements IAdapterManager {
 		adapterLookup = new ConcurrentHashMap<>();
 		lazyFactoryProviders = new ConcurrentLinkedQueue<>();
 		factories = new ConcurrentHashMap<>();
+		classLookup = new ConcurrentHashMap<>();
 	}
 
 	private static boolean isFactoryLoaded(IAdapterFactory adapterFactory) {
@@ -129,69 +123,32 @@ public final class AdapterManager implements IAdapterManager {
 		}
 	}
 
-	private void cacheClassLookup(IAdapterFactory factory, Class<?> clazz) {
-		synchronized (classLookupLock) {
-			//cache reference to lookup to protect against concurrent flush
-			Map<IAdapterFactory, Map<String, Class<?>>> lookup = classLookup;
-			if (lookup == null)
-				classLookup = lookup = new HashMap<>(4);
-			Map<String, Class<?>> classes = lookup.get(factory);
-			if (classes == null) {
-				classes = new HashMap<>(4);
-				lookup.put(factory, classes);
-			}
-			classes.put(clazz.getName(), clazz);
-		}
-	}
-
-	private Class<?> cachedClassForName(IAdapterFactory factory, String typeName) {
-		synchronized (classLookupLock) {
-			Class<?> clazz = null;
-			//cache reference to lookup to protect against concurrent flush
-			Map<IAdapterFactory, Map<String, Class<?>>> lookup = classLookup;
-			if (lookup != null) {
-				Map<String, Class<?>> classes = lookup.get(factory);
-				if (classes != null) {
-					clazz = classes.get(typeName);
-				}
-			}
-			return clazz;
-		}
-	}
-
 	/**
-	 * Returns the class with the given fully qualified name, or null
-	 * if that class does not exist or belongs to a plug-in that has not
-	 * yet been loaded.
+	 * Queries an {@link IAdapterFactory} for a given type name to return a compatible class object
+	 * @param adapterFactory the {@link IAdapterFactory} to query for the given classname, must not be <code>null</code>
+	 * @param typeName the name of the desired class, must not be <code>null</code>
+	 * @return the class with the given fully qualified name, or <code>null</code> if that class does not exist
+	 * or belongs to a plug-in that has not yet been loaded. 
+	 * 
 	 */
-	private Class<?> classForName(IAdapterFactory factory, String typeName) {
-		Class<?> clazz = cachedClassForName(factory, typeName);
-		if (clazz == null) {
-			if (factory instanceof IAdapterFactoryExt)
-				factory = ((IAdapterFactoryExt) factory).loadFactory(false);
-			if (factory != null) {
+	private Class<?> classForName(IAdapterFactory adapterFactory, String typeName) {
+		return classLookup.computeIfAbsent(adapterFactory, factory -> new ConcurrentHashMap<>()).computeIfAbsent(typeName, type -> {
+			return loadFactory(adapterFactory, false).map(factory -> {
 				try {
-					clazz = factory.getClass().getClassLoader().loadClass(typeName);
+					return factory.getClass().getClassLoader().loadClass(typeName);
 				} catch (ClassNotFoundException e) {
 					// it is possible that the default bundle classloader is unaware of this class
 					// but the adaptor factory can load it in some other way. See bug 200068.
-					if (typeName == null)
-						return null;
 					Class<?>[] adapterList = factory.getAdapterList();
-					clazz = null;
 					for (Class<?> adapter : adapterList) {
 						if (typeName.equals(adapter.getName())) {
-							clazz = adapter;
-							break;
+							return adapter;
 						}
 					}
-					if (clazz == null)
-						return null; // class not yet loaded
 				}
-				cacheClassLookup(factory, clazz);
-			}
-		}
-		return clazz;
+				return null; // class not yet loaded
+			}).orElse(null); // factory not loaded yet
+		});
 	}
 
 	@Override
@@ -276,7 +233,7 @@ public final class AdapterManager implements IAdapterManager {
 	 */
 	public synchronized void flushLookup() {
 		adapterLookup.clear();
-		classLookup = null;
+		classLookup.clear();
 		classSearchOrderLookup.clear();
 	}
 
@@ -436,5 +393,18 @@ public final class AdapterManager implements IAdapterManager {
 			}
 		}
 		return factories;
+	}
+
+	/**
+	 * Try to laod the given factory according to the force parameter
+	 * @param factory the factory to load
+	 * @param force if loading should be forced
+	 * @return an {@link Optional} describing the loaded factory
+	 */
+	private static Optional<IAdapterFactory> loadFactory(IAdapterFactory factory, boolean force) {
+		if (factory instanceof IAdapterFactoryExt) {
+			return Optional.ofNullable(((IAdapterFactoryExt) factory).loadFactory(force));
+		}
+		return Optional.ofNullable(factory);
 	}
 }
