@@ -51,7 +51,7 @@ public final class AdapterManager implements IAdapterManager {
 	 * <b>Thread safety note</b>: always use the compute methods to update the map 
 	 * and make sure the values (inner map) are never modified but replaced if necessary.
 	 */
-	private final ConcurrentMap<String, Map<String, List<IAdapterFactory>>> adapterLookup = new ConcurrentHashMap<>();
+	private final ConcurrentMap<String, Map<String, List<IAdapterFactory>>> adapterLookup;
 
 	/**
 	 * Cache of classes for a given type name. Avoids too many loadClass calls.
@@ -83,7 +83,7 @@ public final class AdapterManager implements IAdapterManager {
 	 */
 	private final Map<String, List<IAdapterFactory>> factories;
 
-	private final ArrayList<IAdapterManagerProvider> lazyFactoryProviders;
+	private final Queue<IAdapterManagerProvider> lazyFactoryProviders;
 
 	private static final AdapterManager singleton = new AdapterManager();
 
@@ -95,8 +95,9 @@ public final class AdapterManager implements IAdapterManager {
 	 * Private constructor to block instance creation.
 	 */
 	private AdapterManager() {
+		adapterLookup = new ConcurrentHashMap<>();
+		lazyFactoryProviders = new ConcurrentLinkedQueue<>();
 		factories = new ConcurrentHashMap<>();
-		lazyFactoryProviders = new ArrayList<>(1);
 	}
 
 	private static boolean isFactoryLoaded(IAdapterFactory adapterFactory) {
@@ -413,28 +414,24 @@ public final class AdapterManager implements IAdapterManager {
 	 * invoked during platform shutdown.
 	 */
 	public synchronized void unregisterAllAdapters() {
+		lazyFactoryProviders.clear();
 		factories.clear();
 		flushLookup();
 	}
 
 	public void registerLazyFactoryProvider(IAdapterManagerProvider factoryProvider) {
-		synchronized (lazyFactoryProviders) {
-			lazyFactoryProviders.add(factoryProvider);
-		}
+		lazyFactoryProviders.add(factoryProvider);
 	}
 
 	public boolean unregisterLazyFactoryProvider(IAdapterManagerProvider factoryProvider) {
-		synchronized (lazyFactoryProviders) {
-			return lazyFactoryProviders.remove(factoryProvider);
-		}
+		return lazyFactoryProviders.remove(factoryProvider);
 	}
 
 	public Map<String, List<IAdapterFactory>> getFactories() {
-		synchronized (lazyFactoryProviders) {
-			while (!lazyFactoryProviders.isEmpty()) {
-				IAdapterManagerProvider provider = lazyFactoryProviders.remove(0);
-				if (provider.addFactories(this))
-					flushLookup();
+		IAdapterManagerProvider provider;
+		while ((provider = lazyFactoryProviders.poll()) != null) {
+			if (provider.addFactories(this)) {
+				flushLookup();
 			}
 		}
 		return factories;
