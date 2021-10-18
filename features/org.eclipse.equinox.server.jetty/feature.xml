@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.equinox.server.jetty"
       label="%featureName"
-      version="1.10.800.qualifier"
+      version="1.10.900.qualifier"
       provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
@@ -77,7 +77,7 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="org.eclipse.jetty.util.ajax"
          download-size="0"

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-SymbolicName: org.eclipse.equinox.ip
-Bundle-Version: 1.1.600.qualifier
+Bundle-Version: 1.1.700.qualifier
 Bundle-Vendor: %bundleVendor
 Bundle-Description: Provides implementation of the Intial Provisioning service
  defined by OSGi specification release 4.

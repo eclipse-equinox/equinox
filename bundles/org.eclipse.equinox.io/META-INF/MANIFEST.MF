@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-SymbolicName: org.eclipse.equinox.io
-Bundle-Version: 1.1.300.qualifier
+Bundle-Version: 1.1.400.qualifier
 Bundle-Vendor: %bundleVendor
 Bundle-Activator: org.eclipse.equinox.internal.io.impl.Activator
 Bundle-Description: This bundle contains service for creating connections. 

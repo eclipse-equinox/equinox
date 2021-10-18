@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.equinox.util
 Bundle-Name: %bundleName
-Bundle-Version: 1.1.300.qualifier
+Bundle-Version: 1.1.400.qualifier
 Bundle-Vendor: %bundleVendor
 Bundle-Activator: org.eclipse.equinox.internal.util.UtilActivator
 Bundle-Description: The Equinox Util Bundle contains services to facilitate bundle developers in their programming, and to lighten resource usage at runtime.

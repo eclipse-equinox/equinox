@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Vendor: %bundleVendor
-Bundle-Version: 1.2.100.qualifier
+Bundle-Version: 1.2.200.qualifier
 Bundle-Activator: org.eclipse.equinox.internal.useradmin.Activator
 Bundle-SymbolicName: org.eclipse.equinox.useradmin
 Import-Service: org.osgi.service.log.LogService

@@ -19,6 +19,6 @@
   </parent>
   <groupId>org.eclipse.equinox</groupId>
   <artifactId>org.eclipse.equinox.wireadmin</artifactId>
-  <version>1.0.800-SNAPSHOT</version>
+  <version>1.0.900-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 </project>

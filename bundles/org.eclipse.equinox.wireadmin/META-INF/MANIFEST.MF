@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-SymbolicName: org.eclipse.equinox.wireadmin
-Bundle-Version: 1.0.800.qualifier
+Bundle-Version: 1.0.900.qualifier
 Bundle-Vendor: %bundleVendor
 Bundle-Description: This bundle provides utility classes for Producer and Consumer services.
 Bundle-Activator: org.eclipse.equinox.internal.wireadmin.Activator
