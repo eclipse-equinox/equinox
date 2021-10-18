@@ -71,10 +71,10 @@ public final class AdapterManager implements IAdapterManager {
 	/**
 	 * Cache of class lookup order (Class -> Class[]). This avoids having to compute often, and
 	 * provides clients with quick lookup for instanceOf checks based on type name.
-	 * Thread safety note: The map is synchronized using a synchronized
-	 * map wrapper class.  The arrays within the map are immutable.
+	 * Thread safety note: always use the compute methods to update the map 
+	 * and make sure the values (Class array) are never modified but replaced if necessary.
 	 */
-	private Map<Class<?>, Class<?>[]> classSearchOrderLookup;
+	private final ConcurrentMap<Class<?>, Class<?>[]> classSearchOrderLookup;
 
 	/**
 	 * Map of factories, keyed by <code>String</code>, fully qualified class name of
@@ -95,6 +95,7 @@ public final class AdapterManager implements IAdapterManager {
 	 * Private constructor to block instance creation.
 	 */
 	private AdapterManager() {
+		classSearchOrderLookup = new ConcurrentHashMap<>();
 		adapterLookup = new ConcurrentHashMap<>();
 		lazyFactoryProviders = new ConcurrentLinkedQueue<>();
 		factories = new ConcurrentHashMap<>();
@@ -221,21 +222,21 @@ public final class AdapterManager implements IAdapterManager {
 	 * The search order is defined in this class' comment.
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	public <T> Class<? super T>[] computeClassOrder(Class<T> adaptable) {
-		//cache reference to lookup to protect against concurrent flush
-		Map<Class<?>, Class<?>[]> lookup = classSearchOrderLookup;
-		if (lookup == null) {
-			classSearchOrderLookup = lookup = Collections.synchronizedMap(new HashMap<Class<?>, Class<?>[]>());
-		}
-		return (Class<? super T>[]) lookup.computeIfAbsent(adaptable, this::doComputeClassOrder);
+		Class<? super T>[] classOrder = getClassOrder(adaptable);
+		return Arrays.copyOf(classOrder, classOrder.length);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> Class<? super T>[] getClassOrder(Class<T> adaptable) {
+		return (Class<? super T>[]) classSearchOrderLookup.computeIfAbsent(adaptable, AdapterManager::doComputeClassOrder);
 	}
 
 	/**
 	 * Computes the super-type search order starting with <code>adaptable</code>. 
 	 * The search order is defined in this class' comment.
 	 */
-	private Class<?>[] doComputeClassOrder(Class<?> adaptable) {
+	private static Class<?>[] doComputeClassOrder(Class<?> adaptable) {
 		List<Class<?>> classes = new ArrayList<>();
 		Class<?> clazz = adaptable;
 		Set<Class<?>> seen = new HashSet<>(4);
@@ -252,7 +253,7 @@ public final class AdapterManager implements IAdapterManager {
 		return classes.toArray(new Class[classes.size()]);
 	}
 
-	private void computeInterfaceOrder(Class<?>[] interfaces, Collection<Class<?>> classes, Set<Class<?>> seen) {
+	private static void computeInterfaceOrder(Class<?>[] interfaces, Collection<Class<?>> classes, Set<Class<?>> seen) {
 		List<Class<?>> newInterfaces = new ArrayList<>(interfaces.length);
 		for (Class<?> interfac : interfaces) {
 			if (seen.add(interfac)) {
@@ -276,7 +277,7 @@ public final class AdapterManager implements IAdapterManager {
 	public synchronized void flushLookup() {
 		adapterLookup.clear();
 		classLookup = null;
-		classSearchOrderLookup = null;
+		classSearchOrderLookup.clear();
 	}
 
 	@Override
