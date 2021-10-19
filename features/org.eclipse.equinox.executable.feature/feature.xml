@@ -11,6 +11,10 @@
       %description
    </description>
 
+   <copyright>
+      %copyright
+   </copyright>
+
    <license url="%licenseURL">
       %license
    </license>
@@ -61,7 +65,7 @@
          install-size="0"
          version="0.0.0"
          fragment="true"/>
-         
+
    <plugin
          id="org.eclipse.equinox.launcher.gtk.linux.aarch64"
          os="linux"
