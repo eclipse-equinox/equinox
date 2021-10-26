@@ -16,7 +16,11 @@ package org.eclipse.osgi.storage.bundlefile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.util.NLS;
 
@@ -30,6 +34,7 @@ public class DirBundleFile extends BundleFile {
 	private static final String POINTER_UPPER_DIRECTORY = "..";//$NON-NLS-1$
 
 	private final boolean enableStrictBundleEntryPath;
+	private final Map<File, Boolean> doesNotExistCache = new ConcurrentHashMap<>();
 
 	/**
 	 * Constructs a DirBundleFile
@@ -52,7 +57,12 @@ public class DirBundleFile extends BundleFile {
 	public File getFile(String path, boolean nativeCode) {
 		final boolean checkInBundle = path != null && path.indexOf(POINTER_UPPER_DIRECTORY) >= 0;
 		File file = new File(this.basefile, path);
+		File parentFile = file.getParentFile();
+		if (!parentExists(parentFile)) {
+			return null;
+		}
 		if (!BundleFile.secureAction.exists(file)) {
+			cacheIfParentExists(parentFile);
 			return null;
 		}
 
@@ -104,6 +114,16 @@ public class DirBundleFile extends BundleFile {
 		}
 
 		return file;
+	}
+
+
+	private void cacheIfParentExists(File parentFile) {
+		doesNotExistCache.computeIfAbsent(parentFile, secureAction::isDirectory);
+	}
+
+	private boolean parentExists(File parentFile) {
+		Boolean exists = doesNotExistCache.get(parentFile);
+		return exists == null || exists.booleanValue();
 	}
 
 	@Override
