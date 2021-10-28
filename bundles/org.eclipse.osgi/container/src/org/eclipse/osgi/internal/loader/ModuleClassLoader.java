@@ -163,24 +163,14 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	 */
 	@Override
 	protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-		if (getDebug().DEBUG_LOADER)
-			Debug.println("ModuleClassLoader[" + getBundleLoader() + "].loadClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
-		try {
-			// Just ask the delegate.  This could result in findLocalClass(name) being called.
-			Class<?> clazz = getBundleLoader().findClass(name);
-			// resolve the class if asked to.
-			if (resolve)
-				resolveClass(clazz);
-			return (clazz);
-		} catch (Error | ClassNotFoundException e) {
-			// If the class is not found do not try to look for it locally.
-			// The delegate would have already done that for us.
-			if (getDebug().DEBUG_LOADER) {
-				Debug.println("ModuleClassLoader[" + getBundleLoader() + "].loadClass(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				Debug.printStackTrace(e);
-			}
-			throw e;
+		// Just ask the delegate. This could result in findLocalClass(name) being
+		// called.
+		Class<?> clazz = getBundleLoader().findClass(name);
+		// resolve the class if asked to.
+		if (resolve) {
+			resolveClass(clazz);
 		}
+		return (clazz);
 	}
 
 	// preparing for Java 9

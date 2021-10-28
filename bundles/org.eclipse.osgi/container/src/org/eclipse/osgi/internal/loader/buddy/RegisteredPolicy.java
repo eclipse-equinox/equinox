@@ -15,7 +15,9 @@ package org.eclipse.osgi.internal.loader.buddy;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
 import org.eclipse.osgi.container.ModuleCapability;
 import org.eclipse.osgi.container.ModuleWiring;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
@@ -64,24 +66,21 @@ public class RegisteredPolicy extends DependentPolicy {
 
 	@Override
 	public Class<?> loadClass(String name) {
-		if (allDependents == null)
+		if (allDependents == null) {
 			return null;
-
-		Class<?> result = null;
+		}
 		int size = allDependents.size();
-		for (int i = 0; i < size && result == null; i++) {
+		for (int i = 0; i < size; i++) {
 			ModuleWiring searchWiring = allDependents.get(i);
 			BundleLoader searchLoader = (BundleLoader) searchWiring.getModuleLoader();
 			if (searchLoader != null) {
-				try {
-					result = searchLoader.findClass(name);
-				} catch (ClassNotFoundException e) {
-					//Nothing to do, just keep looking
-					continue;
+				Class<?> result = searchLoader.findClassNoParentNoException(name);
+				if (result != null) {
+					return result;
 				}
 			}
 		}
-		return result;
+		return null;
 	}
 
 	@Override

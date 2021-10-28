@@ -550,8 +550,8 @@ public class ClasspathManager {
 	 * Finally all the configured class loading hooks
 	 * {@link ClassLoaderHook#postFindLocalClass(String, Class, ClasspathManager)} methods are called.
 	 * @param classname the requested class name.
-	 * @return the requested class
-	 * @throws ClassNotFoundException if the class does not exist
+	 * @return the requested class or null if the class does not exist
+	 * @throws ClassNotFoundException if a ClassLoaderHook prevents the requested class from loading
 	 */
 	public Class<?> findLocalClass(String classname) throws ClassNotFoundException {
 		Class<?> result = null;
@@ -572,7 +572,7 @@ public class ClasspathManager {
 		}
 	}
 
-	private Class<?> findLocalClassImpl(String classname, List<ClassLoaderHook> hooks) throws ClassNotFoundException {
+	private Class<?> findLocalClassImpl(String classname, List<ClassLoaderHook> hooks) {
 		Class<?> result;
 
 		// look in hook specific entries if any
@@ -597,7 +597,7 @@ public class ClasspathManager {
 			}
 		}
 
-		throw new ClassNotFoundException(classname);
+		return null;
 	}
 
 	private Class<?> findLocalClassImpl(String classname, ClasspathEntry[] cpEntries, List<ClassLoaderHook> hooks) {

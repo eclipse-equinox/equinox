@@ -16,7 +16,9 @@ package org.eclipse.osgi.internal.loader.buddy;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import org.eclipse.osgi.container.ModuleWire;
 import org.eclipse.osgi.container.ModuleWiring;
 import org.eclipse.osgi.internal.loader.BundleLoader;
@@ -46,24 +48,22 @@ public class DependentPolicy implements IBuddyPolicy {
 
 	@Override
 	public Class<?> loadClass(String name) {
-		if (allDependents == null)
+		if (allDependents == null) {
 			return null;
-
-		Class<?> result = null;
+		}
 		//size may change, so we must check it every time
-		for (int i = 0; i < allDependents.size() && result == null; i++) {
+		for (int i = 0; i < allDependents.size(); i++) {
 			ModuleWiring searchWiring = allDependents.get(i);
 			BundleLoader searchLoader = (BundleLoader) searchWiring.getModuleLoader();
 			if (searchLoader != null) {
-				try {
-					result = searchLoader.findClass(name);
-				} catch (ClassNotFoundException e) {
-					if (result == null)
-						addDependent(i, searchWiring);
+				Class<?> result = searchLoader.findClassNoParentNoException(name);
+				if (result != null) {
+					return result;
 				}
+				addDependent(i, searchWiring);
 			}
 		}
-		return result;
+		return null;
 	}
 
 	private synchronized void addDependent(int i, ModuleWiring searchedWiring) {

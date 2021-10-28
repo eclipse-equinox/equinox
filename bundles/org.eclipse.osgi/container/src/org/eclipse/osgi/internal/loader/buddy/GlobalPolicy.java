@@ -21,15 +21,14 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
 import org.eclipse.osgi.container.ModuleContainer;
+import org.eclipse.osgi.container.ModuleWire;
 import org.eclipse.osgi.container.ModuleWiring;
 import org.eclipse.osgi.internal.container.Capabilities;
 import org.eclipse.osgi.internal.loader.BundleLoader;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.resource.Namespace;
 
@@ -49,28 +48,22 @@ public class GlobalPolicy implements IBuddyPolicy {
 	@Override
 	public Class<?> loadClass(String name) {
 		return getExportingBundles(BundleLoader.getPackageName(name)) //
-				.stream().findFirst().map(b -> {
-					try {
-						return b.loadClass(name);
-					} catch (ClassNotFoundException e) {
-						return null;
-					}
-				}).orElse(null);
+				.stream().findFirst().map(b -> b.findClassNoParentNoException(name)).orElse(null);
 	}
 
 	@Override
 	public URL loadResource(String name) {
 		return getExportingBundles(BundleLoader.getResourcePackageName(name)) //
-				.stream().findFirst().map(b -> b.getResource(name)).orElse(null);
+				.stream().findFirst().map(b -> b.findResource(name)).orElse(null);
 	}
 
 	@Override
 	public Enumeration<URL> loadResources(String name) {
 		Enumeration<URL> results = null;
-		Collection<Bundle> exporters = getExportingBundles(name);
-		for (Bundle exporter : exporters) {
+		Collection<BundleLoader> exporters = getExportingBundles(name);
+		for (BundleLoader exporter : exporters) {
 			try {
-				results = BundleLoader.compoundEnumerations(results, exporter.getResources(name));
+				results = BundleLoader.compoundEnumerations(results, exporter.findResources(name));
 			}catch (IOException e) {
 				//ignore IO problems and try next package
 			}
@@ -78,22 +71,26 @@ public class GlobalPolicy implements IBuddyPolicy {
 		return results;
 	}
 
-	private Collection<Bundle> getExportingBundles(String pkgName) {
-		Collection<Bundle> result = new ArrayList<>();
+	private Collection<BundleLoader> getExportingBundles(String pkgName) {
+		Collection<BundleLoader> result = new ArrayList<>();
 		String filter = "(" + PackageNamespace.PACKAGE_NAMESPACE + "=" + pkgName + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		Map<String, String> directives = Collections.singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter);
 		Map<String, Boolean> attributes = Collections.singletonMap(Capabilities.SYNTHETIC_REQUIREMENT, Boolean.TRUE);
 		Collection<BundleCapability> packages = frameworkWiring.findProviders(
 				ModuleContainer.createRequirement(PackageNamespace.PACKAGE_NAMESPACE, directives, attributes));
 		for (BundleCapability pkg : packages) {
-			if ((pkg.getRevision().getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
-				// use the hosts
-				ModuleWiring wiring = (ModuleWiring) pkg.getRevision().getWiring();
-				for (BundleWire hostWire : wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE)) {
-					result.add(hostWire.getProvider().getBundle());
+			ModuleWiring wiring = (ModuleWiring) pkg.getRevision().getWiring();
+			if (wiring != null) {
+				if ((pkg.getRevision().getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+					// use the hosts
+					if (wiring != null) {
+						for (ModuleWire hostWire : wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE)) {
+							result.add((BundleLoader) hostWire.getProviderWiring().getModuleLoader());
+						}
+					}
+				} else {
+					result.add((BundleLoader) wiring.getModuleLoader());
 				}
-			} else {
-				result.add(pkg.getRevision().getBundle());
 			}
 		}
 		return result;

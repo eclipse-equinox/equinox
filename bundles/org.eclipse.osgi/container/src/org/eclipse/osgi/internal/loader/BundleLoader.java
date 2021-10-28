@@ -400,8 +400,22 @@ public class BundleLoader extends ModuleLoader {
 	 * Finds the class for a bundle.  This method is used for delegation by the bundle's classloader.
 	 */
 	public Class<?> findClass(String name) throws ClassNotFoundException {
+		return findClass0(name, true);
+	}
 
-		if (parent != null && name.startsWith(JAVA_PACKAGE)) {
+	public Class<?> findClassNoParentNoException(String name) {
+		try {
+			return findClass0(name, false);
+		} catch (ClassNotFoundException e) {
+			// should rarely happen
+			// e.g. when a lazy activation fails to start a bundle
+			return null;
+		}
+	}
+
+	private Class<?> findClass0(String name, boolean parentAndGenerateException)
+			throws ClassNotFoundException {
+		if (parentAndGenerateException && parent != null && name.startsWith(JAVA_PACKAGE)) {
 			// 1) if startsWith "java." delegate to parent and terminate search
 			// we want to throw ClassNotFoundExceptions if a java.* class cannot be loaded from the parent.
 			return parent.loadClass(name);
@@ -413,7 +427,7 @@ public class BundleLoader extends ModuleLoader {
 		String pkgName = getPackageName(name);
 		boolean bootDelegation = false;
 		// follow the OSGi delegation model
-		if (parent != null && container.isBootDelegationPackage(pkgName)) {
+		if (parentAndGenerateException && parent != null && container.isBootDelegationPackage(pkgName)) {
 			// 2) if part of the bootdelegation list then delegate to parent and continue of failure
 			try {
 				return parent.loadClass(name);
@@ -425,8 +439,6 @@ public class BundleLoader extends ModuleLoader {
 		Class<?> result = null;
 		try {
 			result = (Class<?>) searchHooks(name, PRE_CLASS);
-		} catch (ClassNotFoundException e) {
-			throw e;
 		} catch (FileNotFoundException e) {
 			// will not happen
 		}
@@ -447,7 +459,7 @@ public class BundleLoader extends ModuleLoader {
 			}
 			if (result != null)
 				return result;
-			throw new ClassNotFoundException(name + " cannot be found by " + this); //$NON-NLS-1$
+			return generateException(name, parentAndGenerateException);
 		}
 		// 4) search the required bundles
 		source = findRequiredSource(pkgName, null);
@@ -470,16 +482,13 @@ public class BundleLoader extends ModuleLoader {
 				result = source.loadClass(name);
 				if (result != null)
 					return result;
-				// must throw CNFE if dynamic import source does not have the class
-				throw new ClassNotFoundException(name + " cannot be found by " + this); //$NON-NLS-1$
+				return generateException(name, parentAndGenerateException);
 			}
 		}
 
 		if (result == null)
 			try {
 				result = (Class<?>) searchHooks(name, POST_CLASS);
-			} catch (ClassNotFoundException e) {
-				throw e;
 			} catch (FileNotFoundException e) {
 				// will not happen
 			}
@@ -490,7 +499,7 @@ public class BundleLoader extends ModuleLoader {
 			return result;
 		// hack to support backwards compatibility for bootdelegation
 		// or last resort; do class context trick to work around VM bugs
-		if (parent != null && !bootDelegation
+		if (parentAndGenerateException && parent != null && !bootDelegation
 				&& ((container.getConfiguration().compatibilityBootDelegation) || isRequestFromVM())) {
 			// we don't need to continue if a CNFE is thrown here.
 			try {
@@ -499,7 +508,19 @@ public class BundleLoader extends ModuleLoader {
 				// we want to generate our own exception below
 			}
 		}
-		throw new ClassNotFoundException(name + " cannot be found by " + this); //$NON-NLS-1$
+		return generateException(name, parentAndGenerateException);
+	}
+
+	private Class<?> generateException(String name, boolean generate) throws ClassNotFoundException {
+		if (generate) {
+			ClassNotFoundException e = new ClassNotFoundException(name + " cannot be found by " + this); //$NON-NLS-1$
+			if (debug.DEBUG_LOADER) {
+				Debug.println("BundleLoader[" + this + "].loadClass(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				Debug.printStackTrace(e);
+			}
+			throw e;
+		}
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")
