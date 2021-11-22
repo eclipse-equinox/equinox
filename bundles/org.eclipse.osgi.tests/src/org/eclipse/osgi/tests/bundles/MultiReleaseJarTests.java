@@ -817,7 +817,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 
 	public void testMultiReleaseBundleDeletedRestart() throws Exception {
 		File copyMrJarBundle = OSGiTestsActivator.getContext().getDataFile("copy-" + mrJarBundle.getName());
-		StorageUtil.readFile(new FileInputStream(mrJarBundle), copyMrJarBundle);
+		StorageUtil.copy(mrJarBundle, copyMrJarBundle);
 
 		System.setProperty("java.specification.version", "9");
 

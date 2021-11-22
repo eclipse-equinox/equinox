@@ -10,7 +10,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *      Christoph Laeubrich - Bug 527175 - Storage#getSystemContent() should first make the file absolute
+ *     Christoph Laeubrich - Bug 527175 - Storage#getSystemContent() should first make the file absolute
+ *     Hannes Wellmann - Bug 577432 - Speed up and improve file processing in Storage
  *******************************************************************************/
 package org.eclipse.osgi.storage;
 
@@ -22,7 +23,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -30,6 +30,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -1122,10 +1123,8 @@ public class Storage {
 				if (inFile.isDirectory()) {
 					// need to delete the outFile because it is not a directory
 					outFile.delete();
-					StorageUtil.copyDir(inFile, outFile);
-				} else {
-					StorageUtil.readFile(in, outFile);
 				}
+				StorageUtil.copy(inFile, outFile);
 			} else {
 				StorageUtil.readFile(in, outFile);
 			}
@@ -1238,15 +1237,11 @@ public class Storage {
 			File delete = new File(target, DELETE_FLAG);
 			// and the directory is marked for delete
 			if (delete.exists()) {
-				// if rm fails to delete the directory and .delete was removed
-				if (!StorageUtil.rm(target, getConfiguration().getDebug().DEBUG_STORAGE) && !delete.exists()) {
-					try {
-						// recreate .delete
-						FileOutputStream out = new FileOutputStream(delete);
-						out.close();
-					} catch (IOException e) {
-						if (getConfiguration().getDebug().DEBUG_STORAGE)
-							Debug.println("Unable to write " + delete.getPath() + ": " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+				try {
+					deleteFlaggedDirectory(target);
+				} catch (IOException e) {
+					if (getConfiguration().getDebug().DEBUG_STORAGE) {
+						Debug.println("Unable to write " + delete.getPath() + ": " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				}
 			} else {
@@ -1257,11 +1252,11 @@ public class Storage {
 
 	void delete(final File delete) throws IOException {
 		if (System.getSecurityManager() == null) {
-			delete0(delete);
+			deleteFlaggedDirectory(delete);
 		} else {
 			try {
 				AccessController.doPrivileged((PrivilegedExceptionAction<Void>) () -> {
-					delete0(delete);
+					deleteFlaggedDirectory(delete);
 					return null;
 				});
 			} catch (PrivilegedActionException e) {
@@ -1272,11 +1267,9 @@ public class Storage {
 		}
 	}
 
-	void delete0(File delete) throws IOException {
+	private void deleteFlaggedDirectory(File delete) throws IOException {
 		if (!StorageUtil.rm(delete, getConfiguration().getDebug().DEBUG_STORAGE)) {
-			/* create .delete */
-			FileOutputStream out = new FileOutputStream(new File(delete, DELETE_FLAG));
-			out.close();
+			ensureDeleteFlagFileExists(delete.toPath());
 		}
 	}
 
@@ -2163,21 +2156,15 @@ public class Storage {
 			bundleTempDir.deleteOnExit();
 			// This is just a safeguard incase the VM is terminated unexpectantly, it also looks like deleteOnExit cannot really work because
 			// the VM likely will still have a lock on the lib file at the time of VM exit.
-			File deleteFlag = new File(libTempDir, DELETE_FLAG);
-			if (!deleteFlag.exists()) {
-				// need to create a delete flag to force removal the temp libraries
-				try {
-					FileOutputStream out = new FileOutputStream(deleteFlag);
-					out.close();
-				} catch (IOException e) {
-					// do nothing; that would mean we did not make the temp dir successfully
-				}
+			try { // need to create a delete flag to force removal the temp libraries
+				ensureDeleteFlagFileExists(libTempDir.toPath());
+			} catch (IOException e) {
+				// do nothing; that would mean we did not make the temp dir successfully
 			}
 		}
 		// copy the library file
 		try {
-			InputStream in = new FileInputStream(realLib);
-			StorageUtil.readFile(in, libTempFile);
+			StorageUtil.copy(realLib, libTempFile);
 			// set permissions if needed
 			setPermissions(libTempFile);
 			libTempFile.deleteOnExit(); // this probably will not work because the VM will probably have the lib locked at exit
@@ -2186,6 +2173,13 @@ public class Storage {
 		} catch (IOException e) {
 			equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, e.getMessage(), e);
 			return null;
+		}
+	}
+
+	private static void ensureDeleteFlagFileExists(Path directory) throws IOException {
+		Path deleteFlag = directory.resolve(DELETE_FLAG);
+		if (!Files.exists(deleteFlag) ) {
+			Files.createFile(deleteFlag);
 		}
 	}
 
