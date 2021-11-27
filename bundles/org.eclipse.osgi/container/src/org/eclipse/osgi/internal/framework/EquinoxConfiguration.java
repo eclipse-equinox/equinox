@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2020 IBM Corporation and others.
+ * Copyright (c) 2003, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Hannes Wellmann - Bug 577497 - Support version-specific entries in dev-classPath file
  *******************************************************************************/
 package org.eclipse.osgi.internal.framework;
 
@@ -40,7 +41,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -68,6 +68,7 @@ import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Version;
+import org.osgi.framework.wiring.BundleRevision;
 
 /**
  * Internal class.
@@ -96,6 +97,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String VARIABLE_DELIM_STRING = "$"; //$NON-NLS-1$
 	public static final char VARIABLE_DELIM_CHAR = '$';
 
+	private static final String DEV_FILE_ENTRY_VERSION_SEPARATOR = ";"; //$NON-NLS-1$
+
 	private final ConfigValues configValues;
 
 	private final Debug debug;
@@ -113,7 +116,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	private final File devLocation;
 	private final Object devMonitor = new Object();
 	private String[] devDefaultClasspath;
-	private Dictionary<String, String> devProperties = null;
+	private Map<String, String> devProperties = null;
 	// timestamp for the dev.properties file
 	private long devLastModified = 0;
 
@@ -882,25 +885,21 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	 * Updates the dev classpath if the file containing the entries have changed
 	 */
 	private void updateDevProperties() {
-		if (devLocation == null)
-			return;
-		synchronized (devMonitor) {
-			if (devLocation.lastModified() == devLastModified)
-				return;
-
+		if (devLocation != null && devLocation.lastModified() != devLastModified) {
 			try {
 				loadDevProperties(new FileInputStream(devLocation));
-			} catch (FileNotFoundException e) {
-				return;
+				devLastModified = devLocation.lastModified();
+			} catch (FileNotFoundException e) { // ignore and try again next time
 			}
-			devLastModified = devLocation.lastModified();
 		}
 	}
 
-	private static String[] getDevClassPath(String id, Dictionary<String, String> properties, String[] defaultClasspath) {
+	private static String[] getDevClassPath(BundleRevision bundle, Map<String, String> properties, String[] defaultClasspath) {
 		String[] result = null;
+		String id = bundle.getSymbolicName();
 		if (id != null && properties != null) {
-			String entry = properties.get(id);
+			String idVersion = id + DEV_FILE_ENTRY_VERSION_SEPARATOR + bundle.getVersion();
+			String entry = properties.getOrDefault(idVersion, properties.get(id)); // prefer idVersion value
 			if (entry != null)
 				result = getArrayFromList(entry);
 		}
@@ -911,28 +910,14 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	/**
 	 * Returns a list of classpath elements for the specified bundle symbolic name.
-	 * @param id a bundle symbolic name to get the development classpath for
-	 * @param properties a Dictionary of properties to use or <code>null</code> if
-	 * the default develoment classpath properties should be used
+	 * @param bundle a bundle revision to get the development classpath for
 	 * @return a list of development classpath elements
 	 */
-	public String[] getDevClassPath(String id, Dictionary<String, String> properties) {
-		if (properties == null) {
-			synchronized (devMonitor) {
-				updateDevProperties();
-				return getDevClassPath(id, devProperties, devDefaultClasspath);
-			}
+	public String[] getDevClassPath(BundleRevision bundle) {
+		synchronized (devMonitor) {
+			updateDevProperties();
+			return getDevClassPath(bundle, devProperties, devDefaultClasspath);
 		}
-		return getDevClassPath(id, properties, getArrayFromList(properties.get("*"))); //$NON-NLS-1$
-	}
-
-	/**
-	 * Returns a list of classpath elements for the specified bundle symbolic name.
-	 * @param id a bundle symbolic name to get the development classpath for
-	 * @return a list of development classpath elements
-	 */
-	public String[] getDevClassPath(String id) {
-		return getDevClassPath(id, null);
 	}
 
 	private static String[] getArrayFromList(String prop) {
@@ -944,24 +929,16 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	 */
 	private void loadDevProperties(InputStream input) {
 		Properties props = new Properties();
-		try {
-			props.load(input);
+		try (InputStream inputStream = input) {
+			props.load(inputStream);
 		} catch (IOException e) {
 			exceptions.put(e, FrameworkLogEntry.ERROR);
-		} finally {
-			if (input != null)
-				try {
-					input.close();
-				} catch (IOException e) {
-					// tried our best
-				}
 		}
-		@SuppressWarnings({"unchecked", "rawtypes"})
-		Dictionary<String, String> result = (Dictionary) props;
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		Map<String, String> result = (Map) props;
 		synchronized (devMonitor) {
 			devProperties = result;
-			if (devProperties != null)
-				devDefaultClasspath = getArrayFromList(devProperties.get("*")); //$NON-NLS-1$
+			devDefaultClasspath = getArrayFromList(devProperties.get("*")); //$NON-NLS-1$
 		}
 	}
 

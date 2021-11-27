@@ -49,11 +49,11 @@ public class DevClassLoadingHook extends ClassLoaderHook implements KeyedElement
 			return false;
 		}
 		// first check that we are in devmode for this sourcedata
-		String[] devClassPaths = !configuration.inDevelopmentMode() ? null : configuration.getDevClassPath(sourceGeneration.getRevision().getSymbolicName());
+		String[] devClassPaths = !configuration.inDevelopmentMode() ? null : configuration.getDevClassPath(sourceGeneration.getRevision());
 		if (devClassPaths == null || devClassPaths.length == 0)
 			return false; // not in dev mode return
 		// check that dev classpath entries have not already been added; we mark this in the first entry below
-		if (cpEntries.size() > 0 && cpEntries.get(0).getUserObject(KEY) != null)
+		if (!cpEntries.isEmpty() && cpEntries.get(0).getUserObject(KEY) != null)
 			return false; // this source has already had its dev classpath entries added.
 
 		// get the specified classpath from the Bundle-ClassPath header to check for dups
@@ -105,7 +105,7 @@ public class DevClassLoadingHook extends ClassLoaderHook implements KeyedElement
 		}
 		// mark the first entry of the list.
 		// This way we can quickly tell that dev classpath entries have been added to the list
-		if (result && cpEntries.size() > 0)
+		if (result && !cpEntries.isEmpty())
 			cpEntries.get(0).addUserObject(this);
 		return result;
 	}

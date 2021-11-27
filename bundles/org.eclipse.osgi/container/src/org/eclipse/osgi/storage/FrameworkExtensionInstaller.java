@@ -194,7 +194,7 @@ public class FrameworkExtensionInstaller {
 		if (configuration.inDevelopmentMode()) {
 			// must create a copy because paths could be unmodifiable
 			paths = new ArrayList<>(paths);
-			String[] devPaths = configuration.getDevClassPath(revision.getSymbolicName());
+			String[] devPaths = configuration.getDevClassPath(revision);
 			Collections.addAll(paths, devPaths);
 		}
 		List<File> results = new ArrayList<>(paths.size());
