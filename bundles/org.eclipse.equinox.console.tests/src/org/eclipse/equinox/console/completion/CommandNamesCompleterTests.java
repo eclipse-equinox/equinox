@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 SAP AG and others.
+ * Copyright (c) 2011, 2021 SAP AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,7 @@
 package org.eclipse.equinox.console.completion;
 
 import static org.junit.Assert.*;
-import static org.easymock.EasyMock.*;
+import static org.mockito.Mockito.*;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -42,19 +42,15 @@ public class CommandNamesCompleterTests {
 		commands.add("gogo:echo");
 		commands.add("gogo:set");
 		
-		CommandSession session = createMock(CommandSession.class);
-		expect(session.get(COMMANDS)).andReturn(commands).times(4);
-		replay(session);
+		CommandSession session = mock(CommandSession.class);
+		when(session.get(COMMANDS)).thenReturn(commands);
 		
-		Filter filter = createMock(Filter.class);
-		replay(filter);
+		Filter filter = mock(Filter.class);
 		
-		BundleContext context = createMock(BundleContext.class);
-//		expect(context.createFilter(String.format("(&(%s=*)(%s=*))", CommandProcessor.COMMAND_SCOPE, CommandProcessor.COMMAND_FUNCTION))).andReturn(filter);
-		expect(context.createFilter("(objectClass=org.eclipse.equinox.console.commands.CommandsTracker)")).andReturn(filter);
+		BundleContext context = mock(BundleContext.class);
+		when(context.createFilter("(objectClass=org.eclipse.equinox.console.commands.CommandsTracker)")).thenReturn(filter);
 		context.addServiceListener(isA(ServiceListener.class), isA(String.class));
-		expect(context.getServiceReferences("org.eclipse.equinox.console.commands.CommandsTracker", null)).andReturn(new ServiceReference[]{});
-		replay(context);
+		when(context.getServiceReferences("org.eclipse.equinox.console.commands.CommandsTracker", null)).thenReturn(new ServiceReference[]{});
 		
 		CommandNamesCompleter completer = new CommandNamesCompleter(context, session);
 		Map<String, Integer> candidates;
@@ -78,8 +74,6 @@ public class CommandNamesCompleterTests {
 		candidates = completer.getCandidates("head", 4);
 		assertNotNull("Candidates null", candidates);
 		assertEquals("Candidates not as expected", 0, candidates.size());
-		
-		verify(session);
 	}
 
 }

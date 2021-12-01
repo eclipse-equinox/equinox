@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 SAP AG and others.
+ * Copyright (c) 2011, 2021 SAP AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,14 +14,14 @@
 
 package org.eclipse.equinox.console.telnet;
 
-import static org.easymock.EasyMock.createMock;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 import org.eclipse.equinox.console.common.ConsoleInputStream;
 import org.eclipse.equinox.console.common.ConsoleOutputStream;
-import org.junit.Assert;
 import org.junit.Test;
 
 public class TelnetInputHandlerTests {
@@ -34,7 +34,7 @@ public class TelnetInputHandlerTests {
 		ConsoleInputStream in = new ConsoleInputStream();
 		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 		ConsoleOutputStream out = new ConsoleOutputStream(byteOut);
-		Callback callback = createMock(Callback.class);
+		Callback callback = mock(Callback.class);
 		TelnetInputHandler handler = new TelnetInputHandler(input, in, out, callback);
 		handler.start();
 
@@ -46,7 +46,7 @@ public class TelnetInputHandlerTests {
 		}
 
 		String res = byteOut.toString();
-		Assert.assertTrue("Wrong input. Expected abcde, read " + res, res.equals("abcde"));
+		assertEquals("Wrong input. Expected abcde, read " + res, "abcde", res);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 SAP AG and others.
+ * Copyright (c) 2011, 2021 SAP AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,7 @@
 package org.eclipse.equinox.console.completion;
 
 import static org.junit.Assert.*;
-import static org.easymock.EasyMock.*;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -64,16 +64,13 @@ public class CompletionHandlerTests {
 	
 	@Test
 	public void testGetCandidates() throws Exception {
-		Filter filter = createMock(Filter.class);
-		replay(filter);
-		
-		BundleContext context = createMock(BundleContext.class);
-		expect(context.getServiceReferences(Completer.class.getName(), null)).andReturn(null).anyTimes();
-		expect(context.createFilter("(objectClass=org.eclipse.equinox.console.commands.CommandsTracker)")).andReturn(filter).anyTimes();
+		Filter filter = mock(Filter.class);
+
+		BundleContext context = mock(BundleContext.class);
+		when(context.getServiceReferences(Completer.class.getName(), null)).thenReturn(null);
+		when(context.createFilter("(objectClass=org.eclipse.equinox.console.commands.CommandsTracker)")).thenReturn(filter);
 		context.addServiceListener(isA(ServiceListener.class), isA(String.class));
-		expectLastCall().anyTimes();
-		expect(context.getServiceReferences("org.eclipse.equinox.console.commands.CommandsTracker", null)).andReturn(new ServiceReference[]{}).anyTimes();
-		replay(context);
+		when(context.getServiceReferences("org.eclipse.equinox.console.commands.CommandsTracker", null)).thenReturn(new ServiceReference[]{});
 		
 		Set<String> variables = new HashSet<>();
 		variables.add("SCOPE");
@@ -89,10 +86,9 @@ public class CompletionHandlerTests {
 		commands.add("gogo:echo");
 		commands.add("gogo:set");
 		
-		CommandSession session = createMock(CommandSession.class);
-		expect(session.get(null)).andReturn(variables).anyTimes();
-		expect(session.get(COMMANDS)).andReturn(commands).anyTimes();
-		replay(session);
+		CommandSession session = mock(CommandSession.class);
+		when(session.get(null)).thenReturn(variables);
+		when(session.get(COMMANDS)).thenReturn(commands);
 		
 		CompletionHandler completer = new CompletionHandler(context, session);
 		Map<String, Integer> candidates;

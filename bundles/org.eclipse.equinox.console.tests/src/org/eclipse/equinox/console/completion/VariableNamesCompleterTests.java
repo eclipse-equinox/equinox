@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 SAP AG and others.
+ * Copyright (c) 2011, 2021 SAP AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,7 @@
 
 package org.eclipse.equinox.console.completion;
 
-import static org.easymock.EasyMock.*;
+import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
 import java.util.HashSet;
@@ -34,9 +34,8 @@ public class VariableNamesCompleterTests {
 		variables.add("ECHO_ON");
 		variables.add("ECHO");
 		
-		CommandSession session = createMock(CommandSession.class);
-		expect(session.get(null)).andReturn(variables).times(3);
-		replay(session);
+		CommandSession session = mock(CommandSession.class);
+		when(session.get(null)).thenReturn(variables);
 		
 		VariableNamesCompleter completer = new VariableNamesCompleter(session);
 		Map<String, Integer> candidates;
@@ -55,8 +54,5 @@ public class VariableNamesCompleterTests {
 		candidates = completer.getCandidates("AB", 2);
 		assertNotNull("Candidates null", candidates);
 		assertEquals("Candidates not as expected", 0, candidates.size());
-		
-		verify(session);
 	}
-
 }

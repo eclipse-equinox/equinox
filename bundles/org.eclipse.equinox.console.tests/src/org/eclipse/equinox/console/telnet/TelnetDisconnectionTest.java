@@ -1,5 +1,10 @@
 package org.eclipse.equinox.console.telnet;
 
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
@@ -9,10 +14,8 @@ import java.net.Socket;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
-import org.easymock.EasyMock;
 import org.eclipse.equinox.console.commands.DisconnectCommand;
 import org.eclipse.equinox.console.common.ConsoleInputStream;
-import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 
@@ -21,34 +24,27 @@ public class TelnetDisconnectionTest {
 	private InputStream in;
 
 	@Test
-	public void testTelneConnection() throws Exception {
+	public void testTelnetConnection() throws Exception {
 		TelnetConnection connection = null;
 
 		try (ServerSocket servSocket = new ServerSocket(0);
 				Socket socketClient = new Socket(HOST, servSocket.getLocalPort());
 				Socket socketServer = servSocket.accept();
-				CommandSession session = EasyMock.createMock(CommandSession.class)) {
+				CommandSession session = mock(CommandSession.class)) {
 
-			CommandProcessor processor = EasyMock.createMock(CommandProcessor.class);
+			CommandProcessor processor = mock(CommandProcessor.class);
 			connection = new TelnetConnection(socketServer, processor, null);
 
-			EasyMock.makeThreadSafe(session, true);
-			session.put((String) EasyMock.anyObject(), EasyMock.anyObject());
-			EasyMock.expectLastCall().times(3);
-			EasyMock.expect(session.get("CLOSEABLE")).andReturn(connection);
-			EasyMock.expect(session.execute((String) EasyMock.anyObject())).andReturn(null);
-			session.close();
-			EasyMock.expectLastCall();
-			EasyMock.replay(session);
+			when(session.get("CLOSEABLE")).thenReturn(connection);
+			when(session.execute(any(String.class))).thenReturn(null);
 
-			EasyMock.expect(processor.createSession((ConsoleInputStream) EasyMock.anyObject(),
-					(PrintStream) EasyMock.anyObject(), (PrintStream) EasyMock.anyObject())).andReturn(session);
-			EasyMock.replay(processor);
+			when(processor.createSession(any(ConsoleInputStream.class), any(PrintStream.class), any(PrintStream.class)))
+					.thenReturn(session);
 
 			connection.start();
 			Thread.sleep(60000);
 
-			BundleContext context = EasyMock.createMock(BundleContext.class);
+			BundleContext context = mock(BundleContext.class);
 			final DisconnectCommand command = new DisconnectCommand(context);
 
 			PipedOutputStream outputStream = new PipedOutputStream();
@@ -69,13 +65,11 @@ public class TelnetDisconnectionTest {
 			outputStream.flush();
 
 			Thread.sleep(3000);
-			Assert.assertTrue("Socket is not closed!", socketServer.isClosed());
+			assertTrue("Socket is not closed!", socketServer.isClosed());
 
 			connection.telnetNegotiationFinished();
 			Thread.sleep(5000);
-			EasyMock.verify(session, processor);
 		} finally {
-
 			System.setIn(in);
 		}
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 SAP AG and others.
+ * Copyright (c) 2011, 2021 SAP AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,7 @@
 package org.eclipse.equinox.console.command.adapter;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -24,7 +25,6 @@ import org.apache.felix.service.command.CommandSession;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.junit.Test;
-import org.easymock.EasyMock;
 
 public class CommandProviderAdapterTest {
 
@@ -39,7 +39,7 @@ public class CommandProviderAdapterTest {
 			}
 		}
 		CommandProviderAdapter providerAdapter = new CommandProviderAdapter(provider, m.toArray(new Method[0]));
-		CommandSession session = EasyMock.createMock(CommandSession.class);
+		CommandSession session = mock(CommandSession.class);
 		
 		String result = (String) providerAdapter.main(session, new Object[] {"test"});
 		assertEquals("Result should be test", "test", result);

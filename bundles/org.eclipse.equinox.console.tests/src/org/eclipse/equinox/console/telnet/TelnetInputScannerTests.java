@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 SAP AG and others.
+ * Copyright (c) 2011, 2021 SAP AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,17 @@
 
 package org.eclipse.equinox.console.telnet;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.equinox.console.common.ConsoleInputStream;
 import org.eclipse.equinox.console.common.ConsoleOutputStream;
 import org.eclipse.equinox.console.common.KEYS;
@@ -23,17 +34,7 @@ import org.eclipse.equinox.console.common.terminal.TerminalTypeMappings;
 import org.eclipse.equinox.console.common.terminal.VT100TerminalTypeMappings;
 import org.eclipse.equinox.console.common.terminal.VT220TerminalTypeMappings;
 import org.eclipse.equinox.console.common.terminal.VT320TerminalTypeMappings;
-import org.junit.Assert;
 import org.junit.Test;
-
-import static org.easymock.EasyMock.*;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 public class TelnetInputScannerTests {
 
@@ -66,7 +67,7 @@ public class TelnetInputScannerTests {
 		ConsoleInputStream in = new ConsoleInputStream();
 		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 		ConsoleOutputStream out = new ConsoleOutputStream(byteOut);
-		Callback callback = createMock(Callback.class);
+		Callback callback = mock(Callback.class);
 		TelnetInputScanner scanner = new TelnetInputScanner(in, out, callback);
 		try {
 			scanner.scan((byte) SE);
@@ -86,7 +87,7 @@ public class TelnetInputScannerTests {
 		}
 
 		String output = byteOut.toString();
-		Assert.assertTrue("Output incorrect. Expected abc, but read " + output, output.equals("abc"));
+		assertEquals("Output incorrect. Expected abc, but read " + output, "abc", output);
 	}
 
 	@Test
@@ -94,7 +95,7 @@ public class TelnetInputScannerTests {
 		ConsoleInputStream in = new ConsoleInputStream();
 		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 		ConsoleOutputStream out = new ConsoleOutputStream(byteOut);
-		Callback callback = createMock(Callback.class);
+		Callback callback = mock(Callback.class);
 		TelnetInputScanner scanner = new TelnetInputScanner(in, out, callback);
 
 		try {
@@ -108,7 +109,7 @@ public class TelnetInputScannerTests {
 		}
 
 		String output = byteOut.toString();
-		Assert.assertTrue("Output incorrect. Expected ab, but read " + output, output.equals("ab"));
+		assertTrue("Output incorrect. Expected ab, but read " + output, output.equals("ab"));
 	}
 
 	@Test
@@ -139,28 +140,28 @@ public class TelnetInputScannerTests {
 		out.flush();
 
 		int read = clientIn.read();
-		Assert.assertEquals("Unexpected input ", IAC, read);
+		assertEquals("Unexpected input ", IAC, read);
 		read = clientIn.read();
-		Assert.assertEquals("Unexpected input ", DO, read);
+		assertEquals("Unexpected input ", DO, read);
 		read = clientIn.read();
-		Assert.assertEquals("Unexpected input ", TTYPE, read);
+		assertEquals("Unexpected input ", TTYPE, read);
 
 		scanner.scan(IAC);
 		scanner.scan(WILL);
 		scanner.scan(TTYPE);
 
 		read = clientIn.read();
-		Assert.assertEquals("Unexpected input ", IAC, read);
+		assertEquals("Unexpected input ", IAC, read);
 		read = clientIn.read();
-		Assert.assertEquals("Unexpected input ", SB, read);
+		assertEquals("Unexpected input ", SB, read);
 		read = clientIn.read();
-		Assert.assertEquals("Unexpected input ", TTYPE, read);
+		assertEquals("Unexpected input ", TTYPE, read);
 		read = clientIn.read();
-		Assert.assertEquals("Unexpected input ", SEND, read);
+		assertEquals("Unexpected input ", SEND, read);
 		read = clientIn.read();
-		Assert.assertEquals("Unexpected input ", IAC, read);
+		assertEquals("Unexpected input ", IAC, read);
 		read = clientIn.read();
-		Assert.assertEquals("Unexpected input ", SE, read);
+		assertEquals("Unexpected input ", SE, read);
 
 		scanner.scan(IAC);
 		scanner.scan(SB);
@@ -175,17 +176,17 @@ public class TelnetInputScannerTests {
 		scanner.scan(SE);
 
 		read = clientIn.read();
-		Assert.assertEquals("Unexpected input ", IAC, read);
+		assertEquals("Unexpected input ", IAC, read);
 		read = clientIn.read();
-		Assert.assertEquals("Unexpected input ", SB, read);
+		assertEquals("Unexpected input ", SB, read);
 		read = clientIn.read();
-		Assert.assertEquals("Unexpected input ", TTYPE, read);
+		assertEquals("Unexpected input ", TTYPE, read);
 		read = clientIn.read();
-		Assert.assertEquals("Unexpected input ", SEND, read);
+		assertEquals("Unexpected input ", SEND, read);
 		read = clientIn.read();
-		Assert.assertEquals("Unexpected input ", IAC, read);
+		assertEquals("Unexpected input ", IAC, read);
 		read = clientIn.read();
-		Assert.assertEquals("Unexpected input ", SE, read);
+		assertEquals("Unexpected input ", SE, read);
 
 		scanner.scan(IAC);
 		scanner.scan(SB);
@@ -197,17 +198,17 @@ public class TelnetInputScannerTests {
 		scanner.scan(IAC);
 		scanner.scan(SE);
 
-		Assert.assertEquals("Incorrect BACKSPACE: ", mappings.getBackspace(), scanner.getBackspace());
-		Assert.assertEquals("Incorrect DELL: ", mappings.getDel(), scanner.getDel());
+		assertEquals("Incorrect BACKSPACE: ", mappings.getBackspace(), scanner.getBackspace());
+		assertEquals("Incorrect DELL: ", mappings.getDel(), scanner.getDel());
 
 		Map<String, KEYS> currentEscapesToKey = scanner.getCurrentEscapesToKey();
 		Map<String, KEYS> expectedEscapesToKey = mappings.getEscapesToKey();
 		for (String escape : expectedEscapesToKey.keySet()) {
 			KEYS key = expectedEscapesToKey.get(escape);
-			Assert.assertEquals("Incorrect " + key.name(), key, currentEscapesToKey.get(escape));
+			assertEquals("Incorrect " + key.name(), key, currentEscapesToKey.get(escape));
 		}
 
-		Assert.assertTrue("Callback not called ", testCallback.getState());
+		assertTrue("Callback not called ", testCallback.getState());
 	}
 
 	class TestCallback implements Callback {

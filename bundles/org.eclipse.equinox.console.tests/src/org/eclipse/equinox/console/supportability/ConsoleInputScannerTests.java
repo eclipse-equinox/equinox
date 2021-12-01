@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 SAP AG and others.
+ * Copyright (c) 2011, 2021 SAP AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,10 +14,7 @@
 
 package org.eclipse.equinox.console.supportability;
 
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
+import static org.mockito.Mockito.*;
 
 import org.apache.felix.service.command.CommandSession;
 import org.eclipse.equinox.console.common.ConsoleInputScanner;
@@ -187,15 +184,13 @@ public class ConsoleInputScannerTests {
 		res = byteOut.toString();
 		Assert.assertTrue("Error processing Ins; expected las, actual " + res.substring(res.length() - 4), res.endsWith("lasa"));
 
-		Filter filter = createMock(Filter.class);
-		replay(filter);
+		Filter filter = mock(Filter.class);
 		
-		BundleContext context = createMock(BundleContext.class);
-		expect(context.getServiceReferences(Completer.class.getName(), null)).andReturn(null).anyTimes();
-		expect(context.createFilter("(objectClass=org.eclipse.equinox.console.commands.CommandsTracker)")).andReturn(filter);
+		BundleContext context = mock(BundleContext.class);
+		when(context.getServiceReferences(Completer.class.getName(), null)).thenReturn(null);
+		when(context.createFilter("(objectClass=org.eclipse.equinox.console.commands.CommandsTracker)")).thenReturn(filter);
 		context.addServiceListener(isA(ServiceListener.class), isA(String.class));
-		expect(context.getServiceReferences("org.eclipse.equinox.console.commands.CommandsTracker", null)).andReturn(new ServiceReference[]{});
-		replay(context);
+		when(context.getServiceReferences("org.eclipse.equinox.console.commands.CommandsTracker", null)).thenReturn(new ServiceReference[]{});
 		
 		Set<String> commands = new HashSet<>();
 		commands.add("equinox:bundles");
@@ -204,9 +199,8 @@ public class ConsoleInputScannerTests {
 		commands.add("gogo:bundlelevel");
 		commands.add("equinox:headers");
 		
-		CommandSession session = createMock(CommandSession.class);
-		expect(session.get(COMMANDS)).andReturn(commands).anyTimes();
-		replay(session);
+		CommandSession session = mock(CommandSession.class);
+		when(session.get(COMMANDS)).thenReturn(commands);
 		
 		scanner.setContext(context);
 		scanner.setSession(session);

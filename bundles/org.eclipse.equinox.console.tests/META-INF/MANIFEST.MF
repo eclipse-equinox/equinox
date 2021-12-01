@@ -3,11 +3,13 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Console tests
 Bundle-Vendor: Eclipse.org - Equinox
 Bundle-SymbolicName: org.eclipse.equinox.console.tests
-Bundle-Version: 1.1.100.qualifier
+Bundle-Version: 1.2.0.qualifier
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: org.apache.sshd.client.future,
- org.easymock;version="2.4.0",
- org.junit;version="4.8.1"
+ org.junit;version="4.8.1",
+ org.mockito,
+ org.mockito.stubbing,
+ org.mockito.invocation
 Fragment-Host: org.eclipse.equinox.console
 Automatic-Module-Name: org.eclipse.equinox.console.tests

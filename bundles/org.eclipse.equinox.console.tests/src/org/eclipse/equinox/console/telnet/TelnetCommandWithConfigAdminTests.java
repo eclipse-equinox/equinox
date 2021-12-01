@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 SAP AG and others.
+ * Copyright (c) 2011, 2021 SAP AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,9 @@
 package org.eclipse.equinox.console.telnet;
 
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -24,7 +27,6 @@ import java.util.Hashtable;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
-import org.easymock.EasyMock;
 import org.eclipse.equinox.console.common.ConsoleInputStream;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
@@ -45,42 +47,25 @@ public class TelnetCommandWithConfigAdminTests {
 	
 	@Test
 	public void testTelnetCommandWithConfigAdminEnabledTelnet() throws Exception {
-		CommandSession session = EasyMock.createMock(CommandSession.class);
-		session.put((String)EasyMock.anyObject(), EasyMock.anyObject());
-		EasyMock.expectLastCall().times(3);
-		EasyMock.expect(session.execute((String)EasyMock.anyObject())).andReturn(new Object());
-		session.close();
-		EasyMock.expectLastCall();
-		EasyMock.replay(session);
+		CommandSession session = mock(CommandSession.class);
+		when(session.execute(any(String.class))).thenReturn(new Object());
 		
-		CommandProcessor processor = EasyMock.createMock(CommandProcessor.class);
-		EasyMock.expect(processor.createSession((ConsoleInputStream)EasyMock.anyObject(), (PrintStream)EasyMock.anyObject(), (PrintStream)EasyMock.anyObject())).andReturn(session);
-		EasyMock.replay(processor);
+		CommandProcessor processor = mock(CommandProcessor.class);
+		when(processor.createSession(any(ConsoleInputStream.class), any(PrintStream.class), any(PrintStream.class))).thenReturn(session);
 
-		final ServiceRegistration<?> registration = EasyMock.createMock(ServiceRegistration.class);
-		registration.setProperties((Dictionary<String, ?>)EasyMock.anyObject());
+		final ServiceRegistration<?> registration = mock(ServiceRegistration.class);
 
-		EasyMock.expectLastCall();
-		EasyMock.replay(registration);
 
-		BundleContext context = EasyMock.createMock(BundleContext.class);
-		EasyMock.expect(context.getProperty(USE_CONFIG_ADMIN_PROP)).andReturn(TRUE);
-		EasyMock.expect(
-				(ServiceRegistration) context.registerService(
-						(String)EasyMock.anyObject(), 
-						(ManagedService)EasyMock.anyObject(), 
-						(Dictionary<String, ?>)EasyMock.anyObject())
-			).andAnswer(() -> {
-				configurator = (ManagedService) EasyMock.getCurrentArguments()[1];
-				return registration;
-			});
-		EasyMock.expect(
-				context.registerService(
-						(String)EasyMock.anyObject(), 
-						(TelnetCommand)EasyMock.anyObject(), 
-						(Dictionary<String, ?>)EasyMock.anyObject())).andReturn(null);
-		EasyMock.replay(context);
-		
+		BundleContext context =mock(BundleContext.class);
+		when(context.getProperty(USE_CONFIG_ADMIN_PROP)).thenReturn(TRUE);
+		when(context.registerService(any(String.class), any(ManagedService.class), any(Dictionary.class)))
+				.thenAnswer(invocation -> {
+					configurator = (ManagedService) invocation.getArguments()[1];
+					return registration;
+				});
+		when(context.registerService(any(String.class), any(TelnetCommand.class), any(Dictionary.class)))
+				.thenReturn(null);
+
 		TelnetCommand command = new TelnetCommand(processor, context);
 		command.startService();
 		Dictionary<String, String> props = new Hashtable<>();
@@ -104,7 +89,6 @@ public class TelnetCommandWithConfigAdminTests {
 		} finally {
 			command.telnet(new String[] {STOP_COMMAND});
 		}
-		EasyMock.verify(context);
 	}
 	
 	@Test
@@ -118,42 +102,25 @@ public class TelnetCommandWithConfigAdminTests {
 	}
 	
 	private void disabledTelnet(boolean isDefault) throws Exception {
-		CommandSession session = EasyMock.createMock(CommandSession.class);
-		session.put((String)EasyMock.anyObject(), EasyMock.anyObject());
-		EasyMock.expectLastCall().times(4);
-		EasyMock.expect(session.execute((String)EasyMock.anyObject())).andReturn(new Object());
-		session.close();
-		EasyMock.expectLastCall();
-		EasyMock.replay(session);
+		CommandSession session = mock(CommandSession.class);
+		when(session.execute(any(String.class))).thenReturn(new Object());
 		
-		CommandProcessor processor = EasyMock.createMock(CommandProcessor.class);
-		EasyMock.expect(processor.createSession((ConsoleInputStream)EasyMock.anyObject(), (PrintStream)EasyMock.anyObject(), (PrintStream)EasyMock.anyObject())).andReturn(session);
-		EasyMock.replay(processor);
+		CommandProcessor processor = mock(CommandProcessor.class);
+		when(processor.createSession(any(ConsoleInputStream.class), any(PrintStream.class),
+				any(PrintStream.class))).thenReturn(session);
 
-		final ServiceRegistration<?> registration = EasyMock.createMock(ServiceRegistration.class);
-		registration.setProperties((Dictionary<String, ?>)EasyMock.anyObject());
+		final ServiceRegistration<?> registration = mock(ServiceRegistration.class);
 
-		EasyMock.expectLastCall();
-		EasyMock.replay(registration);
+		BundleContext context = mock(BundleContext.class);
+		when(context.getProperty(USE_CONFIG_ADMIN_PROP)).thenReturn(TRUE);
+		when(context.registerService(any(String.class), any(ManagedService.class), any(Dictionary.class)))
+				.thenAnswer(invocation -> {
+					configurator = (ManagedService) invocation.getArguments()[1];
+					return registration;
+				});
+		when(context.registerService(any(String.class), any(TelnetCommand.class), any(Dictionary.class)))
+				.thenReturn(null);
 
-		BundleContext context = EasyMock.createMock(BundleContext.class);
-		EasyMock.expect(context.getProperty(USE_CONFIG_ADMIN_PROP)).andReturn(TRUE);
-		EasyMock.expect(
-				(ServiceRegistration) context.registerService(
-						(String)EasyMock.anyObject(), 
-						(ManagedService)EasyMock.anyObject(), 
-						(Dictionary<String, ?>)EasyMock.anyObject())
-			).andAnswer(() -> {
-				configurator = (ManagedService) EasyMock.getCurrentArguments()[1];
-				return registration;
-			});
-		EasyMock.expect(
-				context.registerService(
-						(String)EasyMock.anyObject(), 
-						(TelnetCommand)EasyMock.anyObject(), 
-						(Dictionary<String, ?>)EasyMock.anyObject())).andReturn(null);
-		EasyMock.replay(context);
-		
 		TelnetCommand command = new TelnetCommand(processor, context);
 		command.startService();
 		Dictionary<String, String> props = new Hashtable<>();
@@ -176,7 +143,6 @@ public class TelnetCommandWithConfigAdminTests {
 				//this is expected
 			}
 		}
-		EasyMock.verify(context);
 	}
 	
 }
