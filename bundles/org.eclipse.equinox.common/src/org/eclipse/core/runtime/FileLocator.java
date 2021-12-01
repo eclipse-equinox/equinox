@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2018 IBM Corporation and others.
+ * Copyright (c) 2006, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,12 +12,14 @@
  *     IBM Corporation - initial API and implementation
  *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
  *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 483464
+ *     Hannes Wellmann - Bug 577574 - Speed-up and simplify getBundleFile() and add getBundleFileLocation
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
 import java.io.*;
 import java.net.URL;
 import java.util.Map;
+import java.util.Optional;
 import org.eclipse.core.internal.runtime.Activator;
 import org.eclipse.core.internal.runtime.FindSupport;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
@@ -284,9 +286,9 @@ public final class FileLocator {
 	}
 
 	/**
-	 * Returns a file for the contents of the specified bundle.  Depending 
-	 * on how the bundle is installed the returned file may be a directory or a jar file 
-	 * containing the bundle content.  
+	 * Returns a file for the contents of the specified bundle. Depending on how the
+	 * bundle is installed the returned file may be a directory or a jar file
+	 * containing the bundle content.
 	 * 
 	 * @param bundle the bundle
 	 * @return a file with the contents of the bundle
@@ -295,19 +297,26 @@ public final class FileLocator {
 	 * @since org.eclipse.equinox.common 3.4
 	 */
 	public static File getBundleFile(Bundle bundle) throws IOException {
-		URL rootEntry = bundle.getEntry("/"); //$NON-NLS-1$
-		rootEntry = resolve(rootEntry);
-		if ("file".equals(rootEntry.getProtocol())) //$NON-NLS-1$
-			return new File(rootEntry.getPath());
-		if ("jar".equals(rootEntry.getProtocol())) { //$NON-NLS-1$
-			String path = rootEntry.getPath();
-			if (path.startsWith("file:")) { //$NON-NLS-1$
-				// strip off the file: and the !/
-				path = path.substring(5, path.length() - 2);
-				return new File(path);
-			}
-		}
-		throw new IOException("Unknown protocol"); //$NON-NLS-1$
+		return getBundleFileLocation(bundle)
+				.orElseThrow(() -> new IOException("Unable to locate the bundle file: " + bundle)); //$NON-NLS-1$
+	}
+
+	/**
+	 * Returns an {@code Optional} {@link File}, that (if present) describes the
+	 * bundle's root location on the file system.
+	 * <p>
+	 * Depending on how the bundle is installed the returned file may be a directory
+	 * or a jar file containing the bundle content. In case the location cannot be
+	 * determined the returned {@code Optional} is empty, which is for example
+	 * usually the case for {@code CONNECT} bundles.
+	 * <p>
+	 * 
+	 * @param bundle the bundle
+	 * @return the optional file to the location of the bundle's root
+	 * @since 3.16
+	 */
+	public static Optional<File> getBundleFileLocation(Bundle bundle) {
+		return Optional.ofNullable(bundle.adapt(File.class));
 	}
 
 }

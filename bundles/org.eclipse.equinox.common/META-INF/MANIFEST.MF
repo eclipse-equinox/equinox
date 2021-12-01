@@ -19,18 +19,7 @@ Export-Package: org.eclipse.core.internal.boot;x-friends:="org.eclipse.core.reso
  org.eclipse.equinox.events;version="1.0.0"
 Bundle-Vendor: %providerName
 Bundle-Activator: org.eclipse.core.internal.runtime.Activator
-Import-Package: org.eclipse.equinox.log;version="[1.0,2.0)",
- org.eclipse.osgi.framework.log;version="[1.1, 2.0)",
- org.eclipse.osgi.service.datalocation,
- org.eclipse.osgi.service.debug,
- org.eclipse.osgi.service.localization,
- org.eclipse.osgi.service.urlconversion,
- org.eclipse.osgi.util,
- org.osgi.framework,
- org.osgi.service.log;version="[1.3.0, 2.0)",
- org.osgi.service.packageadmin,
- org.osgi.service.url,
- org.osgi.util.tracker
+Require-Bundle: org.eclipse.osgi;bundle-version="[3.17.200,4.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: org.eclipse.equinox.common
