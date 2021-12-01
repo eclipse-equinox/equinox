@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 SAP AG and others.
+ * Copyright (c) 2011, 2021 SAP AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,10 @@
  *******************************************************************************/
 
 package org.eclipse.equinox.console.ssh;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,7 +36,6 @@ import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.future.DefaultConnectFuture;
 import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.server.Environment;
-import org.easymock.EasyMock;
 import org.eclipse.equinox.console.common.ConsoleInputStream;
 import org.eclipse.equinox.console.storage.DigestUtil;
 import org.eclipse.equinox.console.storage.SecureUserStore;
@@ -74,32 +77,24 @@ public class SshCommandTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testSshCommand() throws Exception {
-		try (CommandSession session = EasyMock.createMock(CommandSession.class)) {
-			EasyMock.makeThreadSafe(session, true);
-			EasyMock.expect(session.put((String) EasyMock.anyObject(), EasyMock.anyObject())).andReturn(new Object());
-			EasyMock.expect(session.execute(GOGO_SHELL_COMMAND)).andReturn(null);
-			session.close();
-			EasyMock.expectLastCall();
-			EasyMock.replay(session);
+		try (CommandSession session = mock(CommandSession.class)) {
+			when(session.put(any(String.class), any())).thenReturn(new Object());
+			when(session.execute(GOGO_SHELL_COMMAND)).thenReturn(null);
 
-			CommandProcessor processor = EasyMock.createMock(CommandProcessor.class);
-			EasyMock.expect(processor.createSession((ConsoleInputStream) EasyMock.anyObject(),
-					(PrintStream) EasyMock.anyObject(), (PrintStream) EasyMock.anyObject())).andReturn(session);
-			EasyMock.replay(processor);
-			BundleContext context = EasyMock.createMock(BundleContext.class);
-			EasyMock.makeThreadSafe(context, true);
-			EasyMock.expect(context.getProperty(USE_CONFIG_ADMIN_PROP)).andReturn(FALSE);
-			EasyMock.expect(context.getProperty(DEFAULT_USER_STORAGE)).andReturn(TRUE).anyTimes();
-			EasyMock.expect(context.getProperty(SSH_PORT_PROP_NAME)).andReturn(Integer.toString(SSH_PORT));
-			EasyMock.expect(context.registerService((String) EasyMock.anyObject(), EasyMock.anyObject(),
-					(Dictionary<String, ?>) EasyMock.anyObject())).andReturn(null);
-			EasyMock.replay(context);
+			CommandProcessor processor = mock(CommandProcessor.class);
+			when(processor.createSession(any(ConsoleInputStream.class),
+					any(PrintStream.class), any(PrintStream.class))).thenReturn(session);
+			BundleContext context = mock(BundleContext.class);
+			when(context.getProperty(USE_CONFIG_ADMIN_PROP)).thenReturn(FALSE);
+			when(context.getProperty(DEFAULT_USER_STORAGE)).thenReturn(TRUE);
+			when(context.getProperty(SSH_PORT_PROP_NAME)).thenReturn(Integer.toString(SSH_PORT));
+			when(context.registerService(any(String.class), any(),
+					any(Dictionary.class))).thenReturn(null);
 
 			Map<String, String> environment = new HashMap<>();
 			environment.put(TERM_PROPERTY, XTERM);
-			Environment env = EasyMock.createMock(Environment.class);
-			EasyMock.expect(env.getEnv()).andReturn(environment);
-			EasyMock.replay(env);
+			Environment env = mock(Environment.class);
+			when(env.getEnv()).thenReturn(environment);
 
 			SshCommand command = new SshCommand(processor, context);
 			command.ssh(new String[] { START_COMMAND });
@@ -137,7 +132,6 @@ public class SshCommandTests {
 			}
 
 			command.ssh(new String[] { STOP_COMMAND });
-			return;
 		}
 	}
 

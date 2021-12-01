@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 SAP AG and others
+ * Copyright (c) 2011, 2021 SAP AG and others
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,10 @@
  *     Lazar Kirchev, SAP AG - initial API and implementation
  *******************************************************************************/
 package org.eclipse.equinox.console.ssh;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -33,8 +37,6 @@ import org.apache.sshd.client.future.DefaultConnectFuture;
 import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.common.RuntimeSshException;
 import org.apache.sshd.server.Environment;
-import org.easymock.EasyMock;
-import org.easymock.IAnswer;
 import org.eclipse.equinox.console.common.ConsoleInputStream;
 import org.eclipse.equinox.console.storage.DigestUtil;
 import org.eclipse.equinox.console.storage.SecureUserStore;
@@ -78,43 +80,29 @@ public class SshCommandWithConfigAdminTests {
 	@Test
 	public void testSshCommandWithConfigAdmin() throws Exception {
 
-		try (CommandSession session = EasyMock.createMock(CommandSession.class)) {
-			EasyMock.makeThreadSafe(session, true);
-			EasyMock.expect(session.put((String) EasyMock.anyObject(), EasyMock.anyObject()))
-					.andReturn(EasyMock.anyObject()).times(5);
-			EasyMock.expect(session.execute(GOGO_SHELL_COMMAND)).andReturn(null);
-			session.close();
-			EasyMock.expectLastCall();
-			EasyMock.replay(session);
+		try (CommandSession session = mock(CommandSession.class)) {
+			when(session.put(any(String.class), any())).thenReturn(any());
+			when(session.execute(GOGO_SHELL_COMMAND)).thenReturn(null);
 
-			CommandProcessor processor = EasyMock.createMock(CommandProcessor.class);
-			EasyMock.expect(processor.createSession((ConsoleInputStream) EasyMock.anyObject(),
-					(PrintStream) EasyMock.anyObject(), (PrintStream) EasyMock.anyObject())).andReturn(session);
-			EasyMock.replay(processor);
+			CommandProcessor processor = mock(CommandProcessor.class);
+			when(processor.createSession(any(ConsoleInputStream.class), any(PrintStream.class), any(PrintStream.class)))
+					.thenReturn(session);
 
-			final ServiceRegistration<?> registration = EasyMock.createMock(ServiceRegistration.class);
-			registration.setProperties((Dictionary<String, ?>) EasyMock.anyObject());
-			EasyMock.expectLastCall();
-			EasyMock.replay(registration);
+			final ServiceRegistration<?> registration = mock(ServiceRegistration.class);
+			registration.setProperties(any(Dictionary.class));
 
-			BundleContext context = EasyMock.createMock(BundleContext.class);
-			EasyMock.makeThreadSafe(context, true);
-			EasyMock.expect(context.getProperty(USE_CONFIG_ADMIN_PROP)).andReturn(TRUE);
-			EasyMock.expect(context.getProperty(DEFAULT_USER_STORAGE)).andReturn(TRUE).anyTimes();
-			EasyMock.expect((ServiceRegistration) context.registerService((String) EasyMock.anyObject(),
-					(ManagedService) EasyMock.anyObject(), (Dictionary<String, ?>) EasyMock.anyObject()))
-					.andAnswer((IAnswer<ServiceRegistration<?>>) () -> {
-						configurator = (ManagedService) EasyMock.getCurrentArguments()[1];
-						return registration;
-					});
-			EasyMock.expect(context.registerService((String) EasyMock.anyObject(), (SshCommand) EasyMock.anyObject(),
-					(Dictionary<String, ?>) EasyMock.anyObject())).andReturn(null);
-			EasyMock.replay(context);
+			BundleContext context = mock(BundleContext.class);
+			when(context.getProperty(USE_CONFIG_ADMIN_PROP)).thenReturn(TRUE);
+			when(context.getProperty(DEFAULT_USER_STORAGE)).thenReturn(TRUE);
+			when(context.registerService(any(String.class), any(ManagedService.class), any(Dictionary.class)))
+					.thenAnswer(invocation -> (ManagedService) invocation.getArguments()[1]);
+
+			when(context.registerService(any(String.class), any(SshCommand.class), any(Dictionary.class)))
+					.thenReturn(null);
 			Map<String, String> environment = new HashMap<>();
 			environment.put(TERM_PROPERTY, XTERM);
-			Environment env = EasyMock.createMock(Environment.class);
-			EasyMock.expect(env.getEnv()).andReturn(environment);
-			EasyMock.replay(env);
+			Environment env = mock(Environment.class);
+			when(env.getEnv()).thenReturn(environment);
 
 			SshCommand command = new SshCommand(processor, context);
 			Dictionary<String, Object> props = new Hashtable<>();
@@ -158,6 +146,7 @@ public class SshCommandWithConfigAdminTests {
 
 			command.ssh(new String[] { STOP_COMMAND });
 		}
+
 	}
 
 	@Test
@@ -172,41 +161,30 @@ public class SshCommandWithConfigAdminTests {
 
 	@SuppressWarnings("unchecked")
 	private void testDisabled(boolean isDefault) throws Exception {
-		try (CommandSession session = EasyMock.createMock(CommandSession.class)) {
-			EasyMock.expect(session.put((String) EasyMock.anyObject(), EasyMock.anyObject()))
-					.andReturn(EasyMock.anyObject()).times(4);
-			EasyMock.expect(session.execute(GOGO_SHELL_COMMAND)).andReturn(null);
-			session.close();
-			EasyMock.expectLastCall();
-			EasyMock.replay(session);
-			CommandProcessor processor = EasyMock.createMock(CommandProcessor.class);
-			EasyMock.expect(processor.createSession((ConsoleInputStream) EasyMock.anyObject(),
-					(PrintStream) EasyMock.anyObject(), (PrintStream) EasyMock.anyObject())).andReturn(session);
-			EasyMock.replay(processor);
+		try (CommandSession session = mock(CommandSession.class)) {
+			when(session.put(any(String.class), any())).thenReturn(any());
+			when(session.execute(GOGO_SHELL_COMMAND)).thenReturn(null);
+			CommandProcessor processor = mock(CommandProcessor.class);
+			when(processor.createSession(any(ConsoleInputStream.class), any(PrintStream.class), any(PrintStream.class)))
+					.thenReturn(session);
 
-			final ServiceRegistration<?> registration = EasyMock.createMock(ServiceRegistration.class);
-			registration.setProperties((Dictionary<String, ?>) EasyMock.anyObject());
-			EasyMock.expectLastCall();
-			EasyMock.replay(registration);
+			final ServiceRegistration<?> registration = mock(ServiceRegistration.class);
+			registration.setProperties(any(Dictionary.class));
 
-			BundleContext context = EasyMock.createMock(BundleContext.class);
-			EasyMock.expect(context.getProperty(USE_CONFIG_ADMIN_PROP)).andReturn(TRUE);
-			EasyMock.expect(context.getProperty(DEFAULT_USER_STORAGE)).andReturn(TRUE).anyTimes();
-			EasyMock.expect((ServiceRegistration) context.registerService((String) EasyMock.anyObject(),
-					(ManagedService) EasyMock.anyObject(), (Dictionary<String, ?>) EasyMock.anyObject()))
-					.andAnswer((IAnswer<ServiceRegistration<?>>) () -> {
-						configurator = (ManagedService) EasyMock.getCurrentArguments()[1];
-						return registration;
-					});
-			EasyMock.expect(context.registerService((String) EasyMock.anyObject(), (SshCommand) EasyMock.anyObject(),
-					(Dictionary<String, ?>) EasyMock.anyObject())).andReturn(null);
-			EasyMock.replay(context);
+			BundleContext context = mock(BundleContext.class);
+			when(context.getProperty(USE_CONFIG_ADMIN_PROP)).thenReturn(TRUE);
+			when(context.getProperty(DEFAULT_USER_STORAGE)).thenReturn(TRUE);
+			when(context.registerService(any(String.class), any(), any(Dictionary.class))).thenAnswer(invocation -> {
+				configurator = (ManagedService) invocation.getArguments()[1];
+				return registration;
+			});
+			when(context.registerService(any(String.class), any(SshCommand.class), any(Dictionary.class)))
+					.thenReturn(null);
 
 			Map<String, String> environment = new HashMap<>();
 			environment.put(TERM_PROPERTY, XTERM);
-			Environment env = EasyMock.createMock(Environment.class);
-			EasyMock.expect(env.getEnv()).andReturn(environment);
-			EasyMock.replay(env);
+			Environment env = mock(Environment.class);
+			when(env.getEnv()).thenReturn(environment);
 
 			SshCommand command = new SshCommand(processor, context);
 			Dictionary<String, Object> props = new Hashtable<>();
