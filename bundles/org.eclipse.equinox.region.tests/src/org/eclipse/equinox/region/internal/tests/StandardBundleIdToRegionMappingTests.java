@@ -18,8 +18,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
-import org.easymock.EasyMock;
 import org.eclipse.equinox.region.Region;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +38,7 @@ public class StandardBundleIdToRegionMappingTests {
 	@Before
 	public void setUp() throws Exception {
 		this.bundleIdToRegionMapping = RegionReflectionUtils.newStandardBundleIdToRegionMapping();
-		this.mockRegion = EasyMock.createMock(Region.class);
+		this.mockRegion = mock(Region.class);
 	}
 
 	@Test
@@ -57,7 +57,8 @@ public class StandardBundleIdToRegionMappingTests {
 	@Test(expected = BundleException.class)
 	public void testAssociateBundleAlreadyAssociatedWithOtherRegion() {
 		RegionReflectionUtils.associateBundleWithRegion(this.bundleIdToRegionMapping, TEST_BUNDLE_ID, mockRegion);
-		RegionReflectionUtils.associateBundleWithRegion(this.bundleIdToRegionMapping, TEST_BUNDLE_ID, EasyMock.createMock(Region.class));
+		RegionReflectionUtils.associateBundleWithRegion(this.bundleIdToRegionMapping, TEST_BUNDLE_ID,
+				mock(Region.class));
 	}
 
 	@Test
@@ -69,9 +70,11 @@ public class StandardBundleIdToRegionMappingTests {
 
 	@Test
 	public void testIsBundleAssociatedWithRegion() {
-		assertFalse(RegionReflectionUtils.isBundleAssociatedWithRegion(this.bundleIdToRegionMapping, TEST_BUNDLE_ID, mockRegion));
+		assertFalse(RegionReflectionUtils.isBundleAssociatedWithRegion(this.bundleIdToRegionMapping, TEST_BUNDLE_ID,
+				mockRegion));
 		RegionReflectionUtils.associateBundleWithRegion(this.bundleIdToRegionMapping, TEST_BUNDLE_ID, mockRegion);
-		assertFalse(RegionReflectionUtils.isBundleAssociatedWithRegion(this.bundleIdToRegionMapping, TEST_BUNDLE_ID, mockRegion));
+		assertFalse(RegionReflectionUtils.isBundleAssociatedWithRegion(this.bundleIdToRegionMapping, TEST_BUNDLE_ID,
+				mockRegion));
 	}
 
 	@Test
@@ -80,8 +83,10 @@ public class StandardBundleIdToRegionMappingTests {
 		RegionReflectionUtils.associateBundleWithRegion(this.bundleIdToRegionMapping, TEST_BUNDLE_ID, mockRegion);
 		RegionReflectionUtils.associateBundleWithRegion(this.bundleIdToRegionMapping, OTHER_TEST_BUNDLE_ID, mockRegion);
 		assertEquals(2, RegionReflectionUtils.getBundleIds(this.bundleIdToRegionMapping, mockRegion).size());
-		assertTrue(RegionReflectionUtils.getBundleIds(this.bundleIdToRegionMapping, mockRegion).contains(TEST_BUNDLE_ID));
-		assertTrue(RegionReflectionUtils.getBundleIds(this.bundleIdToRegionMapping, mockRegion).contains(OTHER_TEST_BUNDLE_ID));
+		assertTrue(
+				RegionReflectionUtils.getBundleIds(this.bundleIdToRegionMapping, mockRegion).contains(TEST_BUNDLE_ID));
+		assertTrue(RegionReflectionUtils.getBundleIds(this.bundleIdToRegionMapping, mockRegion)
+				.contains(OTHER_TEST_BUNDLE_ID));
 	}
 
 	@Test

@@ -19,14 +19,16 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.*;
-import org.easymock.EasyMock;
 import org.eclipse.equinox.region.*;
 import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
 import org.eclipse.virgo.teststubs.osgi.framework.StubBundle;
 import org.eclipse.virgo.teststubs.osgi.framework.StubBundleContext;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Test;
 import org.osgi.framework.*;
 
 public class StandardRegionDigraphTests {
@@ -43,8 +45,6 @@ public class StandardRegionDigraphTests {
 
 	private RegionFilter regionFilter2;
 
-	private Bundle mockBundle;
-
 	@Before
 	public void setUp() throws Exception {
 		StubBundle stubSystemBundle = new StubBundle(0L, "osgi.framework", new Version("0"), "loc");
@@ -52,19 +52,18 @@ public class StandardRegionDigraphTests {
 		stubBundleContext.addInstalledBundle(stubSystemBundle);
 		this.digraph = RegionReflectionUtils.newStandardRegionDigraph(stubBundleContext, new ThreadLocal<Region>());
 
-		this.mockRegion1 = EasyMock.createMock(Region.class);
-		EasyMock.expect(this.mockRegion1.getName()).andReturn("mockRegion1").anyTimes();
-		EasyMock.expect(this.mockRegion1.getRegionDigraph()).andReturn(this.digraph).anyTimes();
+		this.mockRegion1 = mock(Region.class);
+		when(this.mockRegion1.getName()).thenReturn("mockRegion1");
+		when(this.mockRegion1.getRegionDigraph()).thenReturn(this.digraph);
 
-		this.mockRegion2 = EasyMock.createMock(Region.class);
-		EasyMock.expect(this.mockRegion2.getName()).andReturn("mockRegion2").anyTimes();
-		EasyMock.expect(this.mockRegion2.getRegionDigraph()).andReturn(this.digraph).anyTimes();
+		this.mockRegion2 = mock(Region.class);
+		when(this.mockRegion2.getName()).thenReturn("mockRegion2");
+		when(this.mockRegion2.getRegionDigraph()).thenReturn(this.digraph);
 
-		this.mockRegion3 = EasyMock.createMock(Region.class);
-		EasyMock.expect(this.mockRegion3.getName()).andReturn("mockRegion3").anyTimes();
-		EasyMock.expect(this.mockRegion3.getRegionDigraph()).andReturn(this.digraph).anyTimes();
+		this.mockRegion3 = mock(Region.class);
+		when(this.mockRegion3.getName()).thenReturn("mockRegion3");
+		when(this.mockRegion3.getRegionDigraph()).thenReturn(this.digraph);
 
-		this.mockBundle = EasyMock.createMock(Bundle.class);
 	}
 
 	private void setDefaultFilters() {
@@ -72,28 +71,23 @@ public class StandardRegionDigraphTests {
 		this.regionFilter2 = digraph.createRegionFilterBuilder().build();
 	}
 
-	private void setAllowedFilters(String b1Name, Version b1Version, String b2Name, Version b2Version) throws InvalidSyntaxException {
-		String filter1 = "(&(" + RegionFilter.VISIBLE_BUNDLE_NAMESPACE + "=" + b1Name + ")(" + Constants.BUNDLE_VERSION_ATTRIBUTE + "=" + b1Version + "))";
-		regionFilter1 = digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, filter1).build();
+	private void setAllowedFilters(String b1Name, Version b1Version, String b2Name, Version b2Version)
+			throws InvalidSyntaxException {
+		String filter1 = "(&(" + RegionFilter.VISIBLE_BUNDLE_NAMESPACE + "=" + b1Name + ")("
+				+ Constants.BUNDLE_VERSION_ATTRIBUTE + "=" + b1Version + "))";
+		regionFilter1 = digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, filter1)
+				.build();
 
-		String filter2 = "(&(" + RegionFilter.VISIBLE_BUNDLE_NAMESPACE + "=" + b2Name + ")(" + Constants.BUNDLE_VERSION_ATTRIBUTE + "=" + b2Version + "))";
-		regionFilter2 = digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, filter2).build();
+		String filter2 = "(&(" + RegionFilter.VISIBLE_BUNDLE_NAMESPACE + "=" + b2Name + ")("
+				+ Constants.BUNDLE_VERSION_ATTRIBUTE + "=" + b2Version + "))";
+		regionFilter2 = digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, filter2)
+				.build();
 
-	}
-
-	private void replayMocks() {
-		EasyMock.replay(this.mockRegion1, this.mockRegion2, this.mockRegion3, this.mockBundle);
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		EasyMock.verify(this.mockRegion1, this.mockRegion2, this.mockRegion3, this.mockBundle);
 	}
 
 	@Test
 	public void testConnect() throws BundleException {
 		setDefaultFilters();
-		replayMocks();
 
 		this.digraph.connect(this.mockRegion1, this.regionFilter1, this.mockRegion2);
 	}
@@ -105,10 +99,8 @@ public class StandardRegionDigraphTests {
 		String b2Name = "b2";
 		Version b2Version = new Version("0");
 		setAllowedFilters(b1Name, b1Version, b2Name, b2Version);
-		EasyMock.expect(this.mockRegion1.getBundle(b1Name, b1Version)).andReturn(null).anyTimes();
-		EasyMock.expect(this.mockRegion1.getBundle(b2Name, b2Version)).andReturn(null).anyTimes();
-
-		replayMocks();
+		when(this.mockRegion1.getBundle(b1Name, b1Version)).thenReturn(null);
+		when(this.mockRegion1.getBundle(b2Name, b2Version)).thenReturn(null);
 
 		this.digraph.connect(this.mockRegion1, this.regionFilter1, this.mockRegion2);
 		this.digraph.connect(this.mockRegion1, this.regionFilter2, this.mockRegion3);
@@ -117,7 +109,6 @@ public class StandardRegionDigraphTests {
 	@Test(expected = BundleException.class)
 	public void testConnectLoop() throws BundleException {
 		setDefaultFilters();
-		replayMocks();
 
 		this.digraph.connect(this.mockRegion1, this.regionFilter1, this.mockRegion1);
 	}
@@ -125,7 +116,6 @@ public class StandardRegionDigraphTests {
 	@Test(expected = BundleException.class)
 	public void testDuplicateConnection() throws BundleException {
 		setDefaultFilters();
-		replayMocks();
 
 		this.digraph.connect(this.mockRegion1, this.regionFilter1, this.mockRegion2);
 		this.digraph.connect(this.mockRegion1, this.regionFilter2, this.mockRegion2);
@@ -134,7 +124,6 @@ public class StandardRegionDigraphTests {
 	@Test
 	public void testReplaceConnection() throws BundleException {
 		setDefaultFilters();
-		replayMocks();
 
 		RegionFilter existing;
 
@@ -154,7 +143,6 @@ public class StandardRegionDigraphTests {
 	@Test
 	public void testGetEdges() throws BundleException {
 		setDefaultFilters();
-		replayMocks();
 
 		this.digraph.connect(this.mockRegion1, this.regionFilter1, this.mockRegion2);
 		this.digraph.connect(this.mockRegion1, this.regionFilter2, this.mockRegion3);
@@ -193,7 +181,6 @@ public class StandardRegionDigraphTests {
 	@Test
 	public void testRemoveRegion() throws BundleException {
 		setDefaultFilters();
-		replayMocks();
 
 		this.digraph.connect(this.mockRegion1, this.regionFilter1, this.mockRegion2);
 		this.digraph.connect(this.mockRegion2, this.regionFilter2, this.mockRegion1);
@@ -207,7 +194,6 @@ public class StandardRegionDigraphTests {
 	@Test
 	public void testGetRegions() throws BundleException {
 		setDefaultFilters();
-		replayMocks();
 
 		this.digraph.connect(this.mockRegion1, this.regionFilter1, this.mockRegion2);
 		Set<Region> regions = this.digraph.getRegions();
@@ -223,7 +209,6 @@ public class StandardRegionDigraphTests {
 
 	@Test
 	public void testCopyRegion() throws BundleException, InvalidSyntaxException {
-		replayMocks(); // needed to allow teardown to succeed.
 		RegionDigraph testDigraph = RegionReflectionUtils.newStandardRegionDigraph();
 		long bundleId = 1;
 		Region a = testDigraph.createRegion(REGION_A);
@@ -269,7 +254,8 @@ public class StandardRegionDigraphTests {
 		testDigraph.replace(testCopy);
 		StandardRegionDigraphPeristenceTests.assertEquals(testDigraph, testCopy);
 
-		// test that we can continue to use the copy to replace as long as it is upto date with the last replace
+		// test that we can continue to use the copy to replace as long as it is upto
+		// date with the last replace
 		Region testAdd1 = testCopy.createRegion("testAdd1");
 		testCopy.connect(testAdd1, testCopy.createRegionFilterBuilder().allow("testAdd1", "(testAdd=x)").build(), a);
 		try {
@@ -307,7 +293,8 @@ public class StandardRegionDigraphTests {
 		testCopy = testDigraph.copy();
 		// add a new region to the original
 		Region testAdd2 = testDigraph.createRegion("testAdd2");
-		testDigraph.connect(testAdd2, testCopy.createRegionFilterBuilder().allow("testAdd2", "(testAdd=x)").build(), origA);
+		testDigraph.connect(testAdd2, testCopy.createRegionFilterBuilder().allow("testAdd2", "(testAdd=x)").build(),
+				origA);
 		try {
 			testDigraph.replace(testCopy);
 			fail("Digraph changed since copy.");
@@ -318,7 +305,8 @@ public class StandardRegionDigraphTests {
 		testCopy = testDigraph.copy();
 		// change a connection in the original
 		testDigraph.removeRegion(testAdd2);
-		testDigraph.connect(testAdd2, testCopy.createRegionFilterBuilder().allow("testAdd2", "(testAdd=y)").build(), origA);
+		testDigraph.connect(testAdd2, testCopy.createRegionFilterBuilder().allow("testAdd2", "(testAdd=y)").build(),
+				origA);
 		try {
 			testDigraph.replace(testCopy);
 			fail("Digraph changed since copy.");
@@ -329,7 +317,8 @@ public class StandardRegionDigraphTests {
 		testCopy = testDigraph.copy();
 		Region origB = testDigraph.getRegion(REGION_B);
 		// add a connection in the original
-		testDigraph.connect(testAdd2, testCopy.createRegionFilterBuilder().allow("testAdd2", "(testAdd=y)").build(), origB);
+		testDigraph.connect(testAdd2, testCopy.createRegionFilterBuilder().allow("testAdd2", "(testAdd=y)").build(),
+				origB);
 		try {
 			testDigraph.replace(testCopy);
 			fail("Digraph changed since copy.");
@@ -374,15 +363,16 @@ public class StandardRegionDigraphTests {
 
 	@Test
 	public void testVisitRegions() throws BundleException, InvalidSyntaxException {
-		replayMocks(); // needed to allow teardown to succeed.
 		RegionDigraph testDigraph = RegionReflectionUtils.newStandardRegionDigraph();
 		Region a = testDigraph.createRegion(REGION_A);
 		Region b = testDigraph.createRegion(REGION_B);
 		Region c = testDigraph.createRegion(REGION_C);
 		Region d = testDigraph.createRegion(REGION_D);
 
-		testDigraph.connect(a, testDigraph.createRegionFilterBuilder().allow("b", "(b=x)").allow("c", "(c=x)").allow("d", "(d=x)").build(), b);
-		testDigraph.connect(b, testDigraph.createRegionFilterBuilder().allow("c", "(c=x)").allow("d", "(d=x)").build(), c);
+		testDigraph.connect(a, testDigraph.createRegionFilterBuilder().allow("b", "(b=x)").allow("c", "(c=x)")
+				.allow("d", "(d=x)").build(), b);
+		testDigraph.connect(b, testDigraph.createRegionFilterBuilder().allow("c", "(c=x)").allow("d", "(d=x)").build(),
+				c);
 		testDigraph.connect(c, testDigraph.createRegionFilterBuilder().allow("d", "(d=x)").build(), d);
 
 		Map<String, String> attributes = new HashMap<String, String>();
@@ -426,7 +416,6 @@ public class StandardRegionDigraphTests {
 	@Test
 	public void testGetHooks() throws BundleException {
 		setDefaultFilters();
-		replayMocks();
 
 		assertNotNull("Resolver Hook is null", digraph.getResolverHookFactory());
 		assertNotNull("Bundle Event Hook is null", digraph.getBundleEventHook());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 VMware Inc.
+ * Copyright (c) 2011, 2021 VMware Inc. and others
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,15 +16,20 @@ package org.eclipse.equinox.region.internal.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.Iterator;
-import org.easymock.EasyMock;
 import org.eclipse.equinox.region.*;
 import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Test;
 import org.osgi.framework.*;
 
 public class BundleIdBasedRegionTests {
@@ -66,18 +71,18 @@ public class BundleIdBasedRegionTests {
 	@Before
 	public void setUp() throws Exception {
 		this.threadLocal = new ThreadLocal<Region>();
-		this.mockBundle = EasyMock.createMock(Bundle.class);
-		EasyMock.expect(this.mockBundle.getSymbolicName()).andReturn(BUNDLE_SYMBOLIC_NAME).anyTimes();
-		EasyMock.expect(this.mockBundle.getVersion()).andReturn(BUNDLE_VERSION).anyTimes();
-		EasyMock.expect(this.mockBundle.getBundleId()).andReturn(BUNDLE_ID).anyTimes();
+		this.mockBundle = mock(Bundle.class);
+		when(this.mockBundle.getSymbolicName()).thenReturn(BUNDLE_SYMBOLIC_NAME);
+		when(this.mockBundle.getVersion()).thenReturn(BUNDLE_VERSION);
+		when(this.mockBundle.getBundleId()).thenReturn(BUNDLE_ID);
 
-		this.mockBundleContext = EasyMock.createMock(BundleContext.class);
-		EasyMock.expect(this.mockBundleContext.getBundle(BUNDLE_ID)).andReturn(this.mockBundle).anyTimes();
+		this.mockBundleContext = mock(BundleContext.class);
+		when(this.mockBundleContext.getBundle(BUNDLE_ID)).thenReturn(this.mockBundle);
 
-		this.mockRegion = EasyMock.createMock(Region.class);
-		this.mockRegion2 = EasyMock.createMock(Region.class);
+		this.mockRegion = mock(Region.class);
+		this.mockRegion2 = mock(Region.class);
 
-		this.mockRegionFilter = EasyMock.createMock(RegionFilter.class);
+		this.mockRegionFilter = mock(RegionFilter.class);
 
 		this.regionIterator = new Iterator<Region>() {
 
@@ -96,19 +101,9 @@ public class BundleIdBasedRegionTests {
 				// nothing
 			}
 		};
-		this.mockGraph = EasyMock.createMock(RegionDigraph.class);
-		this.mockGraph.connect(EasyMock.isA(Region.class), EasyMock.eq(this.mockRegionFilter), EasyMock.eq(this.mockRegion));
-		EasyMock.expectLastCall().anyTimes();
+		this.mockGraph = mock(RegionDigraph.class);
+		this.mockGraph.connect(isA(Region.class), eq(this.mockRegionFilter), eq(this.mockRegion));
 		this.bundleIdToRegionMapping = RegionReflectionUtils.newStandardBundleIdToRegionMapping();
-	}
-
-	private void replayMocks() {
-		EasyMock.replay(this.mockBundleContext, this.mockBundle, this.mockRegion, this.mockRegion2, this.mockRegionFilter, this.mockGraph);
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		EasyMock.verify(this.mockBundleContext, this.mockBundle, this.mockRegion, this.mockRegion2, this.mockRegionFilter, this.mockGraph);
 	}
 
 	@Test
@@ -124,18 +119,18 @@ public class BundleIdBasedRegionTests {
 	}
 
 	private Region createBundleIdBasedRegion(String regionName) {
-		return RegionReflectionUtils.newBundleIdBasedRegion(regionName, this.mockGraph, this.bundleIdToRegionMapping, this.mockBundleContext, this.threadLocal);
+		return RegionReflectionUtils.newBundleIdBasedRegion(regionName, this.mockGraph, this.bundleIdToRegionMapping,
+				this.mockBundleContext, this.threadLocal);
 	}
 
 	private void defaultSetUp() {
-		EasyMock.expect(this.mockGraph.iterator()).andReturn(this.regionIterator).anyTimes();
-		EasyMock.expect(this.mockGraph.getEdges(EasyMock.isA(Region.class))).andReturn(new HashSet<FilteredRegion>()).anyTimes();
-		replayMocks();
+		when(this.mockGraph.iterator()).thenReturn(this.regionIterator);
+		when(this.mockGraph.getEdges(isA(Region.class))).thenReturn(new HashSet<>());
 	}
 
 	@Test
 	public void testAddBundle() throws BundleException {
-		EasyMock.expect(this.mockGraph.iterator()).andReturn(this.regionIterator).anyTimes();
+		when(this.mockGraph.iterator()).thenReturn(this.regionIterator);
 
 		HashSet<FilteredRegion> edges = new HashSet<FilteredRegion>();
 		edges.add(new FilteredRegion() {
@@ -151,8 +146,7 @@ public class BundleIdBasedRegionTests {
 				return mockRegionFilter;
 			}
 		});
-		EasyMock.expect(this.mockGraph.getEdges(EasyMock.isA(Region.class))).andReturn(edges).anyTimes();
-		replayMocks();
+		when(this.mockGraph.getEdges(isA(Region.class))).thenReturn(edges);
 
 		Region r = createDefaultBundleIdBasedRegion();
 		r.addBundle(this.mockBundle);
@@ -171,11 +165,10 @@ public class BundleIdBasedRegionTests {
 	public void testAddConflictingBundle() throws BundleException {
 		defaultSetUp();
 
-		Bundle mockBundle2 = EasyMock.createMock(Bundle.class);
-		EasyMock.expect(mockBundle2.getSymbolicName()).andReturn(BUNDLE_SYMBOLIC_NAME).anyTimes();
-		EasyMock.expect(mockBundle2.getVersion()).andReturn(BUNDLE_VERSION).anyTimes();
-		EasyMock.expect(mockBundle2.getBundleId()).andReturn(BUNDLE_ID_2).anyTimes();
-		EasyMock.replay(mockBundle2);
+		Bundle mockBundle2 = mock(Bundle.class);
+		when(mockBundle2.getSymbolicName()).thenReturn(BUNDLE_SYMBOLIC_NAME);
+		when(mockBundle2.getVersion()).thenReturn(BUNDLE_VERSION);
+		when(mockBundle2.getBundleId()).thenReturn(BUNDLE_ID_2);
 
 		Region r = createDefaultBundleIdBasedRegion();
 		r.addBundle(this.mockBundle);
@@ -207,10 +200,10 @@ public class BundleIdBasedRegionTests {
 			@Override
 			public Region next() {
 				switch (next--) {
-					case 2 :
-						return mockRegion;
-					default :
-						return mockRegion2;
+				case 2:
+					return mockRegion;
+				default:
+					return mockRegion2;
 				}
 			}
 
@@ -219,30 +212,14 @@ public class BundleIdBasedRegionTests {
 				// nothing
 			}
 		};
-		EasyMock.expect(this.mockGraph.iterator()).andReturn(this.regionIterator).anyTimes();
-		EasyMock.expect(this.mockGraph.getEdges(EasyMock.isA(Region.class))).andReturn(new HashSet<FilteredRegion>()).anyTimes();
-		EasyMock.expect(this.mockRegion.contains(EasyMock.eq(BUNDLE_ID))).andReturn(true).anyTimes();
-		EasyMock.expect(this.mockRegion2.contains(EasyMock.eq(BUNDLE_ID))).andReturn(false).anyTimes();
+		when(this.mockGraph.iterator()).thenReturn(this.regionIterator);
+		when(this.mockGraph.getEdges(isA(Region.class))).thenReturn(new HashSet<>());
+		when(this.mockRegion.contains(eq(BUNDLE_ID))).thenReturn(true);
+		when(this.mockRegion2.contains(eq(BUNDLE_ID))).thenReturn(false);
 		RegionReflectionUtils.associateBundleWithRegion(this.bundleIdToRegionMapping, BUNDLE_ID, mockRegion);
-
-		replayMocks();
 
 		Region r = createDefaultBundleIdBasedRegion();
 		return r;
-	}
-
-	@Test
-	public void testInstallBundleStringInputStream() {
-		defaultSetUp();
-
-		// TODO
-	}
-
-	@Test
-	public void testInstallBundleString() {
-		defaultSetUp();
-
-		// TODO
 	}
 
 	@Test
@@ -306,7 +283,7 @@ public class BundleIdBasedRegionTests {
 		Region r = createDefaultBundleIdBasedRegion();
 		Region s = createBundleIdBasedRegion(OTHER_REGION_NAME);
 		assertFalse(r.equals(s));
-		assertFalse(r.equals(null));
+		assertNotNull(r);
 	}
 
 	@Test

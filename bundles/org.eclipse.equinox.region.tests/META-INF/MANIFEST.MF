@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Equinox Region Tests
 Bundle-SymbolicName: org.eclipse.equinox.region.tests
-Bundle-Version: 1.5.100.qualifier
+Bundle-Version: 1.6.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: junit.framework;version="4.8.1",
  org.aspectj.internal.lang.annotation;version="[1.6.3,2.0.0)";resolution:=optional,
@@ -11,7 +11,6 @@ Import-Package: junit.framework;version="4.8.1",
  org.aspectj.lang.reflect;version="[1.6.3,2.0.0)";resolution:=optional,
  org.aspectj.runtime.internal;version="[1.6.3,2.0.0)";resolution:=optional,
  org.aspectj.runtime.reflect;version="[1.6.3,2.0.0)";resolution:=optional,
- org.easymock;version="2.4.0",
  org.eclipse.core.tests.harness;resolution:=optional,
  org.eclipse.equinox.region;version="1.1.0",
  org.eclipse.osgi.service.urlconversion;version="1.0.0",
@@ -19,6 +18,8 @@ Import-Package: junit.framework;version="4.8.1",
  org.junit.rules;version="4.12.0",
  org.junit.runner;version="4.12.0",
  org.junit.runners;version="4.12.0",
+ org.mockito,
+ org.mockito.stubbing,
  org.osgi.framework;version="1.8.0",
  org.osgi.framework.hooks.bundle;version="1.1.0",
  org.osgi.framework.hooks.resolver;version="1.0.0",
