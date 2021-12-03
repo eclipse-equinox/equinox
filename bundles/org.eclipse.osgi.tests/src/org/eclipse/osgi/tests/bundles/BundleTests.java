@@ -26,6 +26,7 @@ import org.junit.runners.Suite;
 		PersistedBundleTests.class, //
 		CascadeConfigTests.class, //
 		DiscardBundleTests.class, //
+		EquinoxBundleAdaptTests.class, //
 		LoggingTests.class, //
 		BundleResourceTests.class, //
 		BundleInstallUpdateTests.class, //

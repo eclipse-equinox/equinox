@@ -954,6 +954,10 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		if (SignedContent.class.equals(adapterType)) {
 			return (A) getSignedContent();
 		}
+		if (File.class.equals(adapterType)) {
+			Generation current = (Generation) module.getCurrentRevision().getRevisionInfo();
+			return (A) current.getContent();
+		}
 		return null;
 	}
 
