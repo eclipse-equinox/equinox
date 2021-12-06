@@ -21,7 +21,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
 	AdapterManagerDynamicTest.class,
 	IAdapterManagerServiceTest.class,
-	IAdapterManagerTest.class
+	IAdapterManagerTest.class,
+	AdaptersTest.class
 })
 public class AdaptableTests {
 	// intentionally left blank

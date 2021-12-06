@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,10 +11,14 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 478685, 478864, 479849
+ *     Christoph Läubrich - Bug 577645 - [Adapters] provide a method that returns an Optional for an adapted type
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
-import org.eclipse.core.internal.runtime.AdapterManager;
+import java.util.Objects;
+import java.util.Optional;
+import org.eclipse.core.internal.runtime.*;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * Provides a standard way to request adapters from adaptable objects
@@ -110,6 +114,35 @@ public class Adapters {
 	 */
 	public static <T> T adapt(Object sourceObject, Class<T> adapter) {
 		return adapt(sourceObject, adapter, true);
+	}
+
+	/**
+	 * If it is possible to adapt the given object to the given type, this returns
+	 * an optional holding the adapter, in all other cases it returns an empty
+	 * optional.
+	 * 
+	 * @param sourceObject object to adapt, if <code>null</code> then
+	 *                     {@link Optional#empty()} is returned
+	 * @param adapter      type to adapt to, must not be <code>null</code>
+	 * @param <T>          type to adapt to
+	 * @return an Optional representation of sourceObject that is assignable to the
+	 *         adapter type, or an empty Optional otherwise
+	 * @since 3.16
+	 */
+	public static <T> Optional<T> of(Object sourceObject, Class<T> adapter) {
+		if (sourceObject == null) {
+			return Optional.empty();
+		}
+		Objects.requireNonNull(adapter);
+		try {
+			return Optional.ofNullable(adapt(sourceObject, adapter));
+		} catch (AssertionFailedException e) {
+			RuntimeLog.log(Status.error(
+					NLS.bind(CommonMessages.adapters_internal_error_of, new Object[] {
+							sourceObject.getClass().getName(), adapter.getClass().getName(), e.getLocalizedMessage() }),
+					e));
+			return Optional.empty();
+		}
 	}
 
 	private static Object queryAdapterManager(Object sourceObject, String adapterId, boolean allowActivation) {
