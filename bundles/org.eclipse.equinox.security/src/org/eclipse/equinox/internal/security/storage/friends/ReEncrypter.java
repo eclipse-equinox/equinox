@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.storage.friends;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 import org.eclipse.equinox.internal.security.auth.AuthPlugin;
@@ -143,6 +144,16 @@ public class ReEncrypter {
 			container.setOption(IProviderHints.REQUIRED_MODULE_ID, originalProperty);
 		else
 			container.removeOption(IProviderHints.REQUIRED_MODULE_ID);
+
+		try {
+			// Ensure modified entries are persisted and avoid potential inconsistent state
+			root.flush();
+		} catch (IOException e) {
+			String msg = NLS.bind(SecAuthMessages.persistingError, root.name());
+			AuthPlugin.getDefault().logError(msg, e);
+			result = false;
+		}
+
 		return result;
 	}
 

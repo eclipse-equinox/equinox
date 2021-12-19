@@ -87,6 +87,7 @@ public class SecAuthMessages extends NLS {
 	public static String usingAlgorithm;
 	public static String decryptingError;
 	public static String encryptingError;
+	public static String persistingError;
 	public static String noDigest;
 	public static String failedCreateRecovery;
 	public static String initCancelled;
