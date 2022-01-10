@@ -50,6 +50,7 @@
                   <moduleInfoSource>
 open module org.eclipse.osgi {
 	requires java.xml;
+	requires static jdk.unsupported;
 
 	exports org.eclipse.equinox.log;
 	exports org.eclipse.osgi.container;
