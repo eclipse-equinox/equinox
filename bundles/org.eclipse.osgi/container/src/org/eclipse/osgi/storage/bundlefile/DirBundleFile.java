@@ -68,13 +68,8 @@ public class DirBundleFile extends BundleFile {
 
 		if (!enableStrictBundleEntryPath) {
 			// must do an extra check to make sure file is within the bundle (bug 320546)
-			if (checkInBundle) {
-				try {
-					if (!BundleFile.secureAction.getCanonicalPath(file).startsWith(BundleFile.secureAction.getCanonicalPath(basefile)))
-						return null;
-				} catch (IOException e) {
-					return null;
-				}
+			if (checkInBundle && !isInBundle(file)) {
+				return null;
 			}
 			return file;
 		}
@@ -105,9 +100,8 @@ public class DirBundleFile extends BundleFile {
 				}
 			}
 			// must do an extra check to make sure file is within the bundle (bug 320546)
-			if (checkInBundle) {
-				if (!canonicalFile.getPath().startsWith(basefile.getPath()))
-					return null;
+			if (checkInBundle && !isInBundle(file)) {
+				return null;
 			}
 		} catch (IOException e) {
 			return null;
@@ -116,6 +110,24 @@ public class DirBundleFile extends BundleFile {
 		return file;
 	}
 
+	boolean isInBundle(File file) {
+		try {
+			String canonicalizedRoot = BundleFile.secureAction.getCanonicalPath(basefile);
+			if (!canonicalizedRoot.endsWith(File.separator)) {
+				canonicalizedRoot += File.separator;
+			}
+			String canonicalizedChild = BundleFile.secureAction.getCanonicalPath(file);
+			if (BundleFile.secureAction.isDirectory(file) && !canonicalizedChild.endsWith(File.separator)) {
+				canonicalizedChild += File.separator;
+			}
+			if (!canonicalizedChild.startsWith(canonicalizedRoot)) {
+				return false;
+			}
+		} catch (IOException e) {
+			return false;
+		}
+		return true;
+	}
 
 	private void cacheIfParentExists(File parentFile) {
 		doesNotExistCache.computeIfAbsent(parentFile, secureAction::isDirectory);
