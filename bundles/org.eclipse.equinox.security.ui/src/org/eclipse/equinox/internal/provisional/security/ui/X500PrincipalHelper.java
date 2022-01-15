@@ -196,19 +196,22 @@ public class X500PrincipalHelper {
 
 		while (startIndex < dn.length()) {
 			int endIndex;
+			StringBuilder value = new StringBuilder();
 			for (endIndex = startIndex; endIndex < dn.length(); endIndex++) {
 				c = dn.charAt(endIndex);
 				if (c == ',' || c == '+')
 					break;
 				if (c == '\\') {
 					endIndex++; // skip the escaped char
+				} else {
+					value.append(c);
 				}
 			}
 
 			if (endIndex > dn.length())
 				throw new IllegalArgumentException("unterminated escape " + dn); //$NON-NLS-1$
 
-			nameValues.add(dn.substring(startIndex, endIndex));
+			nameValues.add(value.toString());
 
 			if (c != '+') {
 				rdnNameArray.add(nameValues);
