@@ -47,6 +47,16 @@ static FN_TABLE gtkFunctions[] = {
 	FN_TABLE_ENTRY(gtk_window_set_decorated, 1),
 	FN_TABLE_ENTRY(gtk_window_set_type_hint, 1),
 	FN_TABLE_ENTRY(gtk_window_set_position, 1),
+	FN_TABLE_ENTRY(gtk_dialog_new_with_buttons, 1),
+	FN_TABLE_ENTRY(gtk_window_set_resizable, 1),
+	FN_TABLE_ENTRY(gtk_window_set_default_size, 1),
+	FN_TABLE_ENTRY(gtk_scrolled_window_new, 1),
+	FN_TABLE_ENTRY(gtk_text_view_new, 1),
+	FN_TABLE_ENTRY(gtk_text_view_get_buffer, 1),
+	FN_TABLE_ENTRY(gtk_text_buffer_set_text, 1),
+	FN_TABLE_ENTRY(gtk_text_view_set_editable, 1),
+	FN_TABLE_ENTRY(gtk_dialog_get_content_area, 1),
+	FN_TABLE_ENTRY(gtk_box_pack_start, 1),
 	{ NULL, NULL }
 };
 /* functions from libgdk-3.so.0*/

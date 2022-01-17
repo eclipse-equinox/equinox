@@ -35,6 +35,17 @@ struct GTK_PTRS {
 	void		(*gtk_window_set_type_hint)	(GtkWindow*, int);
 	void		(*gtk_window_set_position)	(GtkWindow*, GtkWindowPosition);
 
+	GtkWidget*	(*gtk_dialog_new_with_buttons)	( const gchar*, GtkWindow*, GtkDialogFlags, const gchar* , ...);
+	void		(*gtk_window_set_resizable)	(GtkWindow*, gboolean);
+	void		(*gtk_window_set_default_size)	(GtkWindow*, gint, gint);
+	GtkWidget*	(*gtk_scrolled_window_new)	(GtkAdjustment*, GtkAdjustment*);
+	GtkWidget*	(*gtk_text_view_new)		();
+	GtkTextBuffer*	(*gtk_text_view_get_buffer)	(GtkTextView*);
+	void		(*gtk_text_buffer_set_text)	(GtkTextBuffer*, const gchar*, gint);
+	void		(*gtk_text_view_set_editable)	(GtkTextView*, gboolean);
+	GtkWidget*	(*gtk_dialog_get_content_area)	(GtkDialog *);
+	void		(*gtk_box_pack_start)		(GtkBox*, GtkWidget*, gboolean, gboolean, guint);
+
 	gulong 		(*g_signal_connect_data)	(gpointer, const gchar*, GCallback, gpointer, GClosureNotify, GConnectFlags);
 	gboolean	(*g_main_context_iteration)	(GMainContext*, gboolean);
 	void		(*g_object_unref)			(gpointer);

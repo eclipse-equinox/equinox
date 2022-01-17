@@ -55,10 +55,37 @@ void displayMessage(char* title, char* message)
     	return;
     }
 
-  	dialog = gtk.gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT,
-				   					GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-				   					"%s", message);
-  	gtk.gtk_window_set_title((GtkWindow*)dialog, title);
+    if (strlen(message) < 500) {
+        dialog = gtk.gtk_message_dialog_new(
+            NULL,// parent window
+            GTK_DIALOG_DESTROY_WITH_PARENT,
+            GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+            "%s", message);
+            gtk.gtk_window_set_title((GtkWindow*)dialog, title);
+    } else {
+        dialog = gtk.gtk_dialog_new_with_buttons(
+            title,
+            NULL, // parent window
+            (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
+            "Close", GTK_RESPONSE_CLOSE,
+            NULL);
+
+        gtk.gtk_window_set_resizable ((GtkWindow*) dialog, TRUE);
+        gtk.gtk_window_set_default_size((GtkWindow*) dialog, 400, 300);
+
+        GtkWidget* scrolled_window = gtk.gtk_scrolled_window_new (NULL, NULL);
+
+        GtkWidget* view = gtk.gtk_text_view_new ();
+        GtkTextBuffer* buffer = gtk.gtk_text_view_get_buffer ((GtkTextView*) view);
+
+        gtk.gtk_text_buffer_set_text (buffer, message, -1);
+        gtk.gtk_text_view_set_editable((GtkTextView*) view, FALSE);
+
+        GtkWidget* content_area = gtk.gtk_dialog_get_content_area ((GtkDialog*) dialog);
+        gtk.gtk_box_pack_start ((GtkBox*) content_area, scrolled_window, TRUE, TRUE, 0);
+        gtk.gtk_container_add ((GtkContainer*) scrolled_window, view);
+        gtk.gtk_widget_show_all (content_area);
+    }
   	gtk.gtk_dialog_run((GtkDialog*)dialog);
   	gtk.gtk_widget_destroy(dialog);
 }
