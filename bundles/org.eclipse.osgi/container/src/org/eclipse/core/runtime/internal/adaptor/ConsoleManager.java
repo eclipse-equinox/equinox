@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2013 IBM Corporation and others.
+ * Copyright (c) 2008, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,10 @@
 package org.eclipse.core.runtime.internal.adaptor;
 
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
 
 public class ConsoleManager {
 
@@ -34,13 +37,18 @@ public class ConsoleManager {
 			port = consolePropValue.substring(index + 1);
 		}
 		this.consolePort = port != null ? port.trim() : port;
-		String enabled = equinoxConfig.getConfiguration(PROP_CONSOLE_ENABLED, CONSOLE_BUNDLE);
-		this.context = context;
-		if (!"true".equals(enabled) || "none".equals(consolePort)) { //$NON-NLS-1$ //$NON-NLS-2$
-			this.consoleBundle = "false".equals(enabled) ? CONSOLE_BUNDLE : enabled; //$NON-NLS-1$
-			return;
+		String enabled = equinoxConfig.getConfiguration(PROP_CONSOLE_ENABLED, CONSOLE_BUNDLE).trim();
+		if ("true".equals(enabled) || "false".equals(enabled)) { //$NON-NLS-1$ //$NON-NLS-2$
+			// Note the osgi.console.enable.builtin property is a legacy setting that would
+			// enable the internal built-in console if set to true.
+			// There no longer is any built-in console in the framework.
+			// It makes no sense to support values true or false.
+			// If "true" or "false" is used then we just default to the
+			// equinox.console bundle.
+			enabled = CONSOLE_BUNDLE;
 		}
-		this.consoleBundle = "unknown"; //$NON-NLS-1$
+		this.consoleBundle = enabled;
+		this.context = context;
 	}
 
 	public static ConsoleManager startConsole(BundleContext context, EquinoxConfiguration equinoxConfig) {
