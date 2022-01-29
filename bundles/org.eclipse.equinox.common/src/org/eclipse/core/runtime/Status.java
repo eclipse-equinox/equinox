@@ -216,7 +216,7 @@ public class Status implements IStatus {
 	}
 
 	private String interpolateMessage(String msg, Throwable e) {
-		if (msg == null && e != null) {
+		if ((msg == null || msg.isEmpty()) && e != null) {
 			msg = e.getLocalizedMessage();
 			if (msg == null || msg.isEmpty()) { // null was the old NPE msg Style
 				msg = e.getClass().getSimpleName();
