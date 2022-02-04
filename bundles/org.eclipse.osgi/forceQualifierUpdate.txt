@@ -4,3 +4,4 @@ Bug 509973 - Comparator errors in I20170105-0320
 Bug 566471 - I20200828-0150 - Comparator Errors Found
 Bug 570893 - Comparator errors in I20210203-1800
 Bug 578141 - 4.23 I-Build: I20220110-1800 - Comparator Errors Found 
+Bug 578351 - Lambda generation order is unstable in ecj 
