@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2015 IBM Corporation and others.
+ * Copyright (c) 2003, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,18 +13,14 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.perf;
 
-import java.io.*;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.core.tests.harness.PerformanceTestRunner;
 import org.eclipse.osgi.service.resolver.State;
 
 public class StatePerformanceTest extends BasePerformanceTest {
-
-	public static Test suite() {
-		return new TestSuite(StatePerformanceTest.class);
-	}
 
 	public StatePerformanceTest(String name) {
 		super(name);

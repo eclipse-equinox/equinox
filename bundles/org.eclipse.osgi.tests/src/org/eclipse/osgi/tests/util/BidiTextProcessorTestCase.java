@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,7 @@
 
 package org.eclipse.osgi.tests.util;
 
+import junit.framework.Test;
 import org.eclipse.osgi.util.TextProcessor;
 
 /**
@@ -23,6 +24,10 @@ import org.eclipse.osgi.util.TextProcessor;
  *		 locale set.  Run class AllTests.
  */
 public class BidiTextProcessorTestCase extends TextProcessorTestCase {
+
+	public static Test suite() {
+		return new TextProcessorSessionTest("org.eclipse.osgi.tests", BidiTextProcessorTestCase.class, "iw");
+	}
 
 	// left to right marker
 	protected static final char LRM = '\u200e';

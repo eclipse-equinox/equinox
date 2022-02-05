@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 IBM Corporation and others.
+ * Copyright (c) 2018, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -23,8 +23,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.loader.BundleLoader;
@@ -40,12 +38,6 @@ import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleWiring;
 
 public class AddDynamicImportTests extends AbstractBundleTests {
-
-
-	public static Test suite() {
-		return new TestSuite(AddDynamicImportTests.class);
-	}
-
 
 	public void testAddDynamicImportMultipleTimes() throws Exception {
 		runTest((a, b) -> {

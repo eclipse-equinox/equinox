@@ -14,6 +14,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ ExtendedLogServiceTest.class, ExtendedLogReaderServiceTest.class })
+@Suite.SuiteClasses({ //
+		ExtendedLogServiceTest.class, //
+		ExtendedLogReaderServiceTest.class //
+})
 public class AllExtendedLogServiceTests {
 }

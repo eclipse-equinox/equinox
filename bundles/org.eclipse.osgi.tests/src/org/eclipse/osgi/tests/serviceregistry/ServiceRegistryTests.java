@@ -18,8 +18,6 @@ import java.util.Hashtable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
 import org.eclipse.osgi.tests.util.MapDictionary;
@@ -35,14 +33,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 public class ServiceRegistryTests extends AbstractBundleTests {
-	public static Test suite() {
-		TestSuite suite = new TestSuite(ServiceRegistryTests.class.getName());
-		suite.addTest(new TestSuite(ServiceRegistryTests.class));
-		suite.addTest(ServiceExceptionTests.suite());
-		suite.addTest(ServiceHookTests.suite());
-		suite.addTest(ServiceTrackerTests.suite());
-		return suite;
-	}
 
 	public void testServiceListener01() {
 		final String testMethodName = getName();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004 IBM Corporation and others.
+ * Copyright (c) 2004, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BundleDelta;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.State;
+import org.eclipse.osgi.service.resolver.StateDelta;
 import org.osgi.framework.BundleException;
 
 public class StateComparisonTest extends AbstractStateTest {
@@ -86,9 +87,5 @@ public class StateComparisonTest extends AbstractStateTest {
 		assertEquals("2.3", BundleDelta.UPDATED, update.getType());
 		delta = state2.compare(state1);
 		assertEquals("3.1", 0, delta.getChanges().length);
-	}
-
-	public static Test suite() {
-		return new TestSuite(StateComparisonTest.class);
 	}
 }

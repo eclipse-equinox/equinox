@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2020 IBM Corporation and others.
+ * Copyright (c) 2013, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,8 +20,6 @@ import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.BundleException;
@@ -58,10 +56,6 @@ public class DiscardBundleTests extends AbstractBundleTests {
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
-	}
-
-	public static Test suite() {
-		return new TestSuite(DiscardBundleTests.class);
 	}
 
 	public void testDiscardOsgiCheckConfigurationTrueOsgiDevSpecified() throws Exception {

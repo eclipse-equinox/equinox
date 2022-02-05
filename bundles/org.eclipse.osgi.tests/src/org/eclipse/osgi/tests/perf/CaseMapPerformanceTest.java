@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2015 IBM Corporation and others.
+ * Copyright (c) 2003, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,8 +15,6 @@ package org.eclipse.osgi.tests.perf;
 
 import java.util.HashMap;
 import java.util.Map;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.core.tests.harness.PerformanceTestRunner;
 import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
 import org.eclipse.osgi.framework.util.Headers;
@@ -32,10 +30,6 @@ public class CaseMapPerformanceTest extends OSGiTest {
 		for (int i = 0; i < 1000; i++) {
 			KEYS[i] = "Header-" + i + "-Key";
 		}
-	}
-
-	public static Test suite() {
-		return new TestSuite(CaseMapPerformanceTest.class);
 	}
 
 	public CaseMapPerformanceTest(String name) {

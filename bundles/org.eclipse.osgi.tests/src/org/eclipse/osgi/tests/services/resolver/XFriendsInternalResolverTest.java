@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,16 +13,16 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
-import java.util.*;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.*;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.State;
+import org.eclipse.osgi.service.resolver.StateHelper;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 
 public class XFriendsInternalResolverTest extends AbstractStateTest {
-	public static Test suite() {
-		return new TestSuite(XFriendsInternalResolverTest.class);
-	}
 
 	public XFriendsInternalResolverTest(String name) {
 		super(name);

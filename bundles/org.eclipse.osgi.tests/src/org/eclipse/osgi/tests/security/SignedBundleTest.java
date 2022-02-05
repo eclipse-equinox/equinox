@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2016 IBM Corporation and others.
+ * Copyright (c) 2007, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
 import org.eclipse.osgi.signedcontent.InvalidContentException;
 import org.eclipse.osgi.signedcontent.SignedContent;
@@ -87,10 +86,6 @@ public class SignedBundleTest extends BaseSecurityTest {
 		addDefaultSecurityBundles(suite);
 		suite.addTestSuite(SignedBundleTest.class);
 		return suite;
-	}
-
-	public static Test localSuite() {
-		return new TestSuite(SignedBundleTest.class, "Unit local tests for SignedContent");
 	}
 
 	protected void setUp() throws Exception {

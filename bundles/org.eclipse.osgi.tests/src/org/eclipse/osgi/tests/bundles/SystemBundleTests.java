@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2021 IBM Corporation and others.
+ * Copyright (c) 2008, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -68,8 +68,6 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import javax.net.SocketFactory;
 import junit.framework.AssertionFailedError;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.equinox.log.ExtendedLogReaderService;
 import org.eclipse.equinox.log.ExtendedLogService;
@@ -130,9 +128,6 @@ import org.osgi.service.url.URLConstants;
 import org.osgi.service.url.URLStreamHandlerService;
 
 public class SystemBundleTests extends AbstractBundleTests {
-	public static Test suite() {
-		return new TestSuite(SystemBundleTests.class);
-	}
 
 	public void testSystemBundle01() {
 		// simple test to create an embedded framework

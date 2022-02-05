@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,8 +17,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.osgi.launch.Equinox;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -39,10 +37,6 @@ public class ListenerTests extends AbstractBundleTests {
 	private List<Bundle> bundles;
 	private Equinox equinox;
 	private BundleContext bundleContext;
-
-	public static Test suite() {
-		return new TestSuite(ListenerTests.class);
-	}
 
 	public void setUp() throws Exception {
 		methodName = getName();

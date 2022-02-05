@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2016 IBM Corporation and others.
+ * Copyright (c) 2007, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,8 +16,6 @@ package org.eclipse.osgi.tests.bundles;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
@@ -26,9 +24,6 @@ import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
 
 public class ExtensionBundleTests extends AbstractBundleTests {
-	public static Test suite() {
-		return new TestSuite(ExtensionBundleTests.class);
-	}
 
 	public static List<String> events = new ArrayList<>();
 

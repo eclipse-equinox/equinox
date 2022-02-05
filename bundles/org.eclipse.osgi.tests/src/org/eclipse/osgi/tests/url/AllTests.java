@@ -17,6 +17,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ BundleURLConnectionTest.class })
+@Suite.SuiteClasses({ //
+		BundleURLConnectionTest.class //
+})
 public class AllTests {
 }

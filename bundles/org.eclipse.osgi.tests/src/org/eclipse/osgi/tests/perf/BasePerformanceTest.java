@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,18 +14,19 @@
 package org.eclipse.osgi.tests.perf;
 
 import java.util.Random;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.BundleSpecification;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.HostSpecification;
+import org.eclipse.osgi.service.resolver.ImportPackageSpecification;
+import org.eclipse.osgi.service.resolver.State;
+import org.eclipse.osgi.service.resolver.StateObjectFactory;
+import org.eclipse.osgi.service.resolver.VersionRange;
 import org.eclipse.osgi.tests.services.resolver.AbstractStateTest;
 import org.osgi.framework.Version;
 
 public class BasePerformanceTest extends AbstractStateTest {
 	private Random random;
-
-	public static Test suite() {
-		return new TestSuite(BasePerformanceTest.class);
-	}
 
 	public BasePerformanceTest(String name) {
 		super(name);

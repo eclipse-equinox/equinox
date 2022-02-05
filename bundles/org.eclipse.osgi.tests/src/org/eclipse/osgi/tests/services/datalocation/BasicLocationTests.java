@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2021 IBM Corporation and others.
+ * Copyright (c) 2004, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -23,8 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.equinox.log.SynchronousLogListener;
@@ -50,10 +48,6 @@ public class BasicLocationTests extends CoreTest {
 
 	public BasicLocationTests(String name) {
 		super(name);
-	}
-
-	public static Test suite() {
-		return new TestSuite(BasicLocationTests.class);
 	}
 
 	protected void setUp() throws Exception {

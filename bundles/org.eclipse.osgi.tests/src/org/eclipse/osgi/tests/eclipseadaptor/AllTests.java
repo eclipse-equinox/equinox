@@ -17,6 +17,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ EnvironmentInfoTest.class, FilePathTest.class, LocaleTransformationTest.class })
+@Suite.SuiteClasses({ //
+		EnvironmentInfoTest.class, //
+		FilePathTest.class, //
+		LocaleTransformationTest.class //
+})
 public class AllTests {
 }

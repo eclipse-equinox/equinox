@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2011 IBM Corporation and others.
+ * Copyright (c) 2003, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,16 +14,17 @@
 package org.eclipse.osgi.tests.services.resolver;
 
 import java.util.Hashtable;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BundleDelta;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.ImportPackageSpecification;
+import org.eclipse.osgi.service.resolver.State;
+import org.eclipse.osgi.service.resolver.StateDelta;
+import org.eclipse.osgi.service.resolver.VersionConstraint;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 public class SubstitutableExportsTest extends AbstractStateTest {
-	public static Test suite() {
-		return new TestSuite(SubstitutableExportsTest.class);
-	}
 
 	public SubstitutableExportsTest(String name) {
 		super(name);

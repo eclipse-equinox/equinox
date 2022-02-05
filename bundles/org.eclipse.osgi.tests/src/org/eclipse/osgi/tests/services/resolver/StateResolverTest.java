@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2018 IBM Corporation and others.
+ * Copyright (c) 2003, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -24,8 +24,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
 import org.eclipse.osgi.service.resolver.BaseDescription;
 import org.eclipse.osgi.service.resolver.BundleDelta;
@@ -54,9 +52,6 @@ import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.resource.Capability;
 
 public class StateResolverTest extends AbstractStateTest {
-	public static Test suite() {
-		return new TestSuite(StateResolverTest.class);
-	}
 
 	public StateResolverTest(String name) {
 		super(name);

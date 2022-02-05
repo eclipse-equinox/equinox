@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.util;
 
+import junit.framework.Test;
 import org.eclipse.osgi.util.TextProcessor;
 
 /**
@@ -21,6 +22,11 @@ import org.eclipse.osgi.util.TextProcessor;
  *
  */
 public class LatinTextProcessorTestCase extends TextProcessorTestCase {
+
+	public static Test suite() {
+		return new TextProcessorSessionTest("org.eclipse.osgi.tests", LatinTextProcessorTestCase.class, "en");
+	}
+
 	protected static String[] ALL_PATHS;
 	static {
 		// merge all test strings into one array for Latin locales

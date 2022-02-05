@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2022 IBM Corporation and others.
+ * Copyright (c) 2022, 2022 Hannes Wellmann and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -9,23 +9,19 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     IBM Corporation - initial API and implementation
+ *     Hannes Wellmann - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.tests.hooks.framework;
+package org.eclipse.osgi.tests.permissions;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ //
-		StorageHookTests.class, //
-		ClassLoaderHookTests.class, //
-		BundleFileWrapperFactoryHookTests.class, //
-		ContextFinderTests.class, //
-		DevClassPathWithExtensionTests.class, //
-		EmbeddedEquinoxWithURLInClassLoadTests.class, //
-		ActivatorOrderTest.class, //
-		DevClassPathDuplicateTests.class //
+		AdminPermissionTests.class, //
+		ServicePermissionTests.class, //
+		PackagePermissionTests.class //
 })
-public class AllFrameworkHookTests {
+public class AllTests {
+
 }

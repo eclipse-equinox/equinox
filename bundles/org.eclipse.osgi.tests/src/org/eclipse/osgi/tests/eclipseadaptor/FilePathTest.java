@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,18 +13,11 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.eclipseadaptor;
 
-import org.eclipse.osgi.framework.util.FilePath;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.osgi.framework.util.FilePath;
 import org.eclipse.osgi.tests.OSGiTest;
 
 public class FilePathTest extends OSGiTest {
-
-	public static Test suite() {
-		return new TestSuite(FilePathTest.class);
-	}
 
 	public FilePathTest(String name) {
 		super(name);

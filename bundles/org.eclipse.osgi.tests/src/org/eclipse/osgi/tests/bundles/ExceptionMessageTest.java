@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 IBM Corporation and others.
+ * Copyright (c) 2020, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,8 +19,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
@@ -32,9 +30,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.startlevel.BundleStartLevel;
 
 public class ExceptionMessageTest extends AbstractBundleTests {
-	public static Test suite() {
-		return new TestSuite(ExceptionMessageTest.class);
-	}
 
 	public void testTrasientStartLevelError() throws BundleException {
 		Bundle b = installer.installBundle("test");

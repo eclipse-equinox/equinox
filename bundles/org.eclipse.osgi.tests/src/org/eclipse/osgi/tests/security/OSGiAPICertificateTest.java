@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,6 @@ package org.eclipse.osgi.tests.security;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import junit.framework.TestSuite;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -62,10 +61,6 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 	private static ConditionInfo info10True = new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {dnChain08True});
 
 	private Collection<Bundle> installedBundles = new ArrayList<>();
-
-	public static TestSuite suite() {
-		return new TestSuite(OSGiAPICertificateTest.class);
-	}
 
 	private static String escapeStar(String dnChain) {
 		if (dnChain == null || dnChain.length() == 0)

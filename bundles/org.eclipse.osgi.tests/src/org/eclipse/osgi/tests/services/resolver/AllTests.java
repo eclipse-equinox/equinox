@@ -17,9 +17,17 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ SubstitutableExportsTest.class, DisabledInfoTest.class, PlatformAdminTest.class,
-		StateResolverTest.class, StateCycleTest.class, StateComparisonTest.class, VersionRangeTests.class,
-		R4ResolverTest.class, XFriendsInternalResolverTest.class, GenericCapabilityTest.class, OSGiCapabilityTest.class,
+@Suite.SuiteClasses({ SubstitutableExportsTest.class, //
+		DisabledInfoTest.class, //
+		PlatformAdminTest.class, //
+		StateResolverTest.class, //
+		StateCycleTest.class, //
+		StateComparisonTest.class, //
+		VersionRangeTests.class, //
+		R4ResolverTest.class, //
+		XFriendsInternalResolverTest.class, //
+		GenericCapabilityTest.class, //
+		OSGiCapabilityTest.class, //
 		DevModeTest.class })
 public class AllTests {
 }

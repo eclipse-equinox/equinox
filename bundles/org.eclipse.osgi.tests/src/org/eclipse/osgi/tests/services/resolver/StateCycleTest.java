@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2004, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,17 +14,13 @@
 package org.eclipse.osgi.tests.services.resolver;
 
 import java.util.Hashtable;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.State;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 public class StateCycleTest extends AbstractStateTest {
-
-	public static Test suite() {
-		return new TestSuite(StateCycleTest.class);
-	}
 
 	public StateCycleTest(String testName) {
 		super(testName);

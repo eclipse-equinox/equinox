@@ -17,7 +17,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ LocationAreaSessionTest.class, BasicLocationTests.class, SimpleTests.class,
-		FileManagerTests.class, StreamManagerTests.class })
+@Suite.SuiteClasses({ //
+		LocationAreaSessionTest.class, //
+		BasicLocationTests.class, //
+		SimpleTests.class, //
+		FileManagerTests.class, //
+		StreamManagerTests.class //
+})
 public class AllTests {
 }

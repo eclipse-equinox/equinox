@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 IBM Corporation and others.
+ * Copyright (c) 2011, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,21 +13,19 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.resource;
 
-import java.util.*;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.namespace.IdentityNamespace;
-import org.osgi.framework.wiring.*;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRequirement;
+import org.osgi.framework.wiring.FrameworkWiring;
 
 public class ResolverHookTests extends AbstractResourceTest {
-
-	public static Test suite() {
-		return new TestSuite(ResolverHookTests.class);
-	}
 
 	public ResolverHookTests(String name) {
 		super(name);

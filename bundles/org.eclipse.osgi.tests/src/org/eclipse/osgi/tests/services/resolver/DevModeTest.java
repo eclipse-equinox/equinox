@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 IBM Corporation and others.
+ * Copyright (c) 2007, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,8 +15,6 @@ package org.eclipse.osgi.tests.services.resolver;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.eclipse.osgi.service.resolver.State;
@@ -24,9 +22,6 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 public class DevModeTest extends AbstractStateTest {
-	public static Test suite() {
-		return new TestSuite(DevModeTest.class);
-	}
 
 	public DevModeTest(String name) {
 		super(name);

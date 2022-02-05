@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2021 IBM Corporation and others.
+ * Copyright (c) 2008, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,8 +20,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import junit.framework.AssertionFailedError;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
 import org.osgi.framework.BundleContext;
@@ -37,9 +35,6 @@ import org.osgi.framework.hooks.service.FindHook;
 import org.osgi.framework.hooks.service.ListenerHook;
 
 public class ServiceHookTests extends AbstractBundleTests {
-	public static Test suite() {
-		return new TestSuite(ServiceHookTests.class);
-	}
 
 	public void testFindHook01() {
 		final String testMethodName = "testFindHook01"; //$NON-NLS-1$

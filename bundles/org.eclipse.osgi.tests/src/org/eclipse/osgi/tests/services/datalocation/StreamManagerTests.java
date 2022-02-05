@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 IBM Corporation and others.
+ * Copyright (c) 2004, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,8 +22,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.storagemanager.ManagedOutputStream;
 import org.eclipse.osgi.storagemanager.StorageManager;
@@ -40,10 +38,6 @@ public class StreamManagerTests extends OSGiTest {
 	 */
 	public StreamManagerTests(String name) {
 		super(name);
-	}
-
-	public static Test suite() {
-		return new TestSuite(StreamManagerTests.class);
 	}
 
 	protected void setUp() throws Exception {

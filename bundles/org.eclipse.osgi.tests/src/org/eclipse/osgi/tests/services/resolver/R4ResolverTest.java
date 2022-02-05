@@ -51,13 +51,41 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ TestAttributes_001.class, TestBSN_001.class, TestCycle_001.class, TestCycle_002.class,
-		TestCycle_003.class, TestCycle_004.class, TestCycle_005.class, TestCycle_006.class, TestDynamic_001.class,
-		TestDynamic_002.class, TestDynamic_003.class, TestDynamic_004.class, TestDynamic_005.class,
-		TestDynamic_006.class, TestGenerated_001.class, TestGrouping_001.class, TestGrouping_002.class,
-		TestGrouping_003.class, TestGrouping_006.class, TestGrouping_008.class, TestOptional_001.class,
-		TestOptional_002.class, TestPropagation_001.class, TestPropagation_003.class, TestRFC79_001.class,
-		TestRFC79_002.class, TestRFC79_003.class, TestRFC79_004.class, TestRFC79_005.class, TestRFC79_006.class,
-		TestRFC79_007.class, TestVersion_001.class, TestVersion_002.class, TestVersion_003.class })
+@Suite.SuiteClasses({ //
+		TestAttributes_001.class, //
+		TestBSN_001.class, //
+		TestCycle_001.class, //
+		TestCycle_002.class, //
+		TestCycle_003.class, //
+		TestCycle_004.class, //
+		TestCycle_005.class, //
+		TestCycle_006.class, //
+		TestDynamic_001.class, //
+		TestDynamic_002.class, //
+		TestDynamic_003.class, //
+		TestDynamic_004.class, //
+		TestDynamic_005.class, //
+		TestDynamic_006.class, //
+		TestGenerated_001.class, //
+		TestGrouping_001.class, //
+		TestGrouping_002.class, //
+		TestGrouping_003.class, //
+		TestGrouping_006.class, //
+		TestGrouping_008.class, //
+		TestOptional_001.class, //
+		TestOptional_002.class, //
+		TestPropagation_001.class, //
+		TestPropagation_003.class, //
+		TestRFC79_001.class, //
+		TestRFC79_002.class, //
+		TestRFC79_003.class, //
+		TestRFC79_004.class, //
+		TestRFC79_005.class, //
+		TestRFC79_006.class, //
+		TestRFC79_007.class, //
+		TestVersion_001.class, //
+		TestVersion_002.class, //
+		TestVersion_003.class //
+})
 public class R4ResolverTest {
 }

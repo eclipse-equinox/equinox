@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2021 IBM Corporation and others.
+ * Copyright (c) 2008, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -27,8 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
@@ -67,10 +65,6 @@ public class SecurityManagerTests extends AbstractBundleTests {
 	private static final PermissionInfo importPackagePermission = new PermissionInfo(PackagePermission.class.getName(), "*", "import"); //$NON-NLS-1$ //$NON-NLS-2$
 	private static final PermissionInfo importFrameworkPackagePermission = new PermissionInfo(PackagePermission.class.getName(), "org.osgi.framework", "import"); //$NON-NLS-1$ //$NON-NLS-2$
 	private Policy previousPolicy;
-
-	public static Test suite() {
-		return new TestSuite(SecurityManagerTests.class);
-	}
 
 	@Override
 	protected void setUp() throws Exception {

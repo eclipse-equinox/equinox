@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,22 +13,23 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.State;
+import org.eclipse.osgi.service.resolver.StateObjectFactory;
+import org.eclipse.osgi.service.resolver.VersionConstraint;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 public class PlatformAdminTest extends AbstractStateTest {
 	private static final String GENERIC_REQUIRE = "Eclipse-GenericRequire"; //$NON-NLS-1$
 	private static final String GENERIC_CAPABILITY = "Eclipse-GenericCapability"; //$NON-NLS-1$
-
-	public static Test suite() {
-		return new TestSuite(PlatformAdminTest.class);
-	}
 
 	public PlatformAdminTest(String name) {
 		super(name);

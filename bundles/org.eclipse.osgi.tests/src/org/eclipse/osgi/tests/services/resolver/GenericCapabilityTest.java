@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2011 IBM Corporation and others.
+ * Copyright (c) 2003, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,19 +15,16 @@ package org.eclipse.osgi.tests.services.resolver;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.GenericDescription;
+import org.eclipse.osgi.service.resolver.GenericSpecification;
+import org.eclipse.osgi.service.resolver.State;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 public class GenericCapabilityTest extends AbstractStateTest {
 	static final String GENERIC_REQUIRE = "Eclipse-GenericRequire"; //$NON-NLS-1$
 	static final String GENERIC_CAPABILITY = "Eclipse-GenericCapability"; //$NON-NLS-1$
-
-	public static Test suite() {
-		return new TestSuite(GenericCapabilityTest.class);
-	}
 
 	public GenericCapabilityTest(String name) {
 		super(name);

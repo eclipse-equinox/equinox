@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2018 IBM Corporation and others.
+ * Copyright (c) 2015, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,14 +16,9 @@ package org.eclipse.osgi.tests.bundles;
 import java.awt.image.ImageProducer;
 import java.io.IOException;
 import java.net.URL;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.osgi.framework.Bundle;
 
 public class URLHandlerTests extends AbstractBundleTests {
-	public static Test suite() {
-		return new TestSuite(URLHandlerTests.class);
-	}
 
 	public void testURLHandlerUnregister() throws Exception {
 		Bundle test = installer.installBundle("test.protocol.handler"); //$NON-NLS-1$

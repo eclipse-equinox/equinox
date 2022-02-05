@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,14 +13,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.securityadmin;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({ //
+		SecurityAdminUnitTests.class, //
+		SecurityManagerTests.class //
+})
 public class AllSecurityAdminTests {
-	public static Test suite() {
-		TestSuite suite = new TestSuite(AllSecurityAdminTests.class.getName());
-		suite.addTest(SecurityAdminUnitTests.suite());
-		suite.addTest(SecurityManagerTests.suite());
-		return suite;
-	}
 }

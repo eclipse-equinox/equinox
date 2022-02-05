@@ -17,7 +17,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ StatePerformanceTest.class, StateUsesPerformanceTest.class })
+@Suite.SuiteClasses({ //
+		StatePerformanceTest.class, //
+		StateUsesPerformanceTest.class //
+})
 public class AllTests {
 	public static final String DEGRADATION_RESOLUTION = "Performance decrease caused by additional fuctionality required for ResovlerHooks in OSGi R4.3 specification. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=324753 for details.";
 }

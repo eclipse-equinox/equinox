@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,9 +15,9 @@ package org.eclipse.osgi.tests.services.resolver;
 
 import java.io.File;
 import java.io.IOException;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.DisabledInfo;
+import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -27,10 +27,6 @@ public class DisabledInfoTest extends AbstractStateTest {
 	private final String B2_LOCATION = "b2"; //$NON-NLS-1$
 	private final String B3_LOCATION = "b3"; //$NON-NLS-1$
 	private final String POLICY = "test.policy"; //$NON-NLS-1$
-
-	public static Test suite() {
-		return new TestSuite(DisabledInfoTest.class);
-	}
 
 	public DisabledInfoTest(String name) {
 		super(name);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2015 IBM Corporation and others.
+ * Copyright (c) 2008, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,16 +15,11 @@ package org.eclipse.osgi.tests.bundles;
 
 import java.io.IOException;
 import java.net.URL;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
 public class BundleExceptionTests extends AbstractBundleTests {
-	public static Test suite() {
-		return new TestSuite(BundleExceptionTests.class);
-	}
 
 	// test throwing exception from activator constructor
 	public void testInvalidBundleActivator01() throws BundleException {

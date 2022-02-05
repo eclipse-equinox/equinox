@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2015 IBM Corporation and others.
+ * Copyright (c) 2004, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.State;
 import org.osgi.framework.BundleException;
@@ -23,10 +21,6 @@ public class NewResolverTest extends AbstractStateTest {
 
 	public NewResolverTest(String testName) {
 		super(testName);
-	}
-
-	public static Test suite() {
-		return new TestSuite(NewResolverTest.class);
 	}
 
 	public void testSkeleton() {

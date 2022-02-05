@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,14 +13,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.appadmin;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({ //
+		ApplicationAdminTest.class, //
+		ApplicationRelaunchTest.class //
+})
 public class AllTests {
-	public static Test suite() {
-		TestSuite suite = new TestSuite(AllTests.class.getName());
-		suite.addTest(ApplicationAdminTest.suite());
-		suite.addTest(ApplicationRelaunchTest.suite());
-		return suite;
-	}
 }

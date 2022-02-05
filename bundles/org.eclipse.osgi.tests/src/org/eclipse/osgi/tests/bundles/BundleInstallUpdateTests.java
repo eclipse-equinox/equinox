@@ -26,8 +26,6 @@ import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
@@ -40,9 +38,6 @@ import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.wiring.BundleWiring;
 
 public class BundleInstallUpdateTests extends AbstractBundleTests {
-	public static Test suite() {
-		return new TestSuite(BundleInstallUpdateTests.class);
-	}
 
 	// test installing with location
 	public void testInstallWithLocation01() {

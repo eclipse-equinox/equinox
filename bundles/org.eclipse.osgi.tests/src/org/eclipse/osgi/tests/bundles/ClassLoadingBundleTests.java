@@ -43,8 +43,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import junit.framework.AssertionFailedError;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
@@ -75,9 +73,6 @@ import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 
 public class ClassLoadingBundleTests extends AbstractBundleTests {
-	public static Test suite() {
-		return new TestSuite(ClassLoadingBundleTests.class);
-	}
 
 	public void testSimple() throws Exception {
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2013 IBM Corporation and others.
+ * Copyright (c) 2010, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,8 +15,6 @@ package org.eclipse.osgi.tests.bundles;
 
 import java.net.URL;
 import java.util.Enumeration;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
@@ -38,10 +36,6 @@ public class BundleResourceTests extends CoreTest {
 
 	protected void tearDown() throws Exception {
 		installer.shutdown();
-	}
-
-	public static Test suite() {
-		return new TestSuite(BundleResourceTests.class);
 	}
 
 	public void testBug320546_01() throws Exception {

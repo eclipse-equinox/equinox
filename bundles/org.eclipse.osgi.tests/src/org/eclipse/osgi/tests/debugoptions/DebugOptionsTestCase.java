@@ -36,8 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.debug.FrameworkDebugTraceEntry;
@@ -49,9 +47,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 public class DebugOptionsTestCase extends CoreTest {
-	public static Test suite() {
-		return new TestSuite(DebugOptionsTestCase.class);
-	}
 
 	DebugOptions debugOptions;
 	ServiceReference ref;

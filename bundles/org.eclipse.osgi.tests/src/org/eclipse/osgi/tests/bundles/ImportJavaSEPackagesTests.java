@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 IBM Corporation and others.
+ * Copyright (c) 2018, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
@@ -40,10 +38,6 @@ public class ImportJavaSEPackagesTests extends AbstractBundleTests {
 	private static final String JAVA_LANG = "java.lang";
 	private static final String JAVA_UTIL = "java.util";
 	private static String originalSpecVersion;
-
-	public static Test suite() {
-		return new TestSuite(ImportJavaSEPackagesTests.class);
-	}
 
 	@Override
 	protected void setUp() throws Exception {

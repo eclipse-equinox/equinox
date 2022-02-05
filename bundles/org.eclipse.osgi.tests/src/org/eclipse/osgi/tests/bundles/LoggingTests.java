@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2021 IBM Corporation and others.
+ * Copyright (c) 2010, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,8 +18,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import junit.framework.AssertionFailedError;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.ILogListener;
@@ -48,10 +46,6 @@ import org.osgi.service.log.LogService;
 
 public class LoggingTests extends AbstractBundleTests {
 	static final String EQUINOX_LOGGER = "org.eclipse.equinox.logger";
-
-	public static Test suite() {
-		return new TestSuite(LoggingTests.class);
-	}
 
 	class LogServiceReference {
 		private final ServiceReference logRef;

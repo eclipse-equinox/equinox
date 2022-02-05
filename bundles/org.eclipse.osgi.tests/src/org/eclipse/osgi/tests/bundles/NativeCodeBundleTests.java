@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2015 IBM Corporation and others.
+ * Copyright (c) 2007, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.osgi.container.ModuleCapability;
 import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
@@ -26,9 +27,6 @@ import org.osgi.framework.namespace.NativeNamespace;
 import org.osgi.framework.wiring.BundleRevision;
 
 public class NativeCodeBundleTests extends AbstractBundleTests {
-	public static Test suite() {
-		return new TestSuite(NativeCodeBundleTests.class);
-	}
 
 	public void testNativeCode01() throws Exception {
 		Bundle nativetestA1 = installer.installBundle("nativetest.a1");

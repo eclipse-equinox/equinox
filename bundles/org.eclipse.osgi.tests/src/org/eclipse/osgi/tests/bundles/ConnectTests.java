@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2021 IBM Corporation and others.
+ * Copyright (c) 2019, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -46,9 +46,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-import junit.framework.Test;
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.eclipse.osgi.container.ModuleContainer;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.launch.EquinoxFactory;
@@ -79,10 +77,6 @@ import org.osgi.resource.Namespace;
 import org.osgi.service.condition.Condition;
 
 public class ConnectTests extends AbstractBundleTests {
-
-	public static Test suite() {
-		return new TestSuite(ConnectTests.class);
-	}
 
 	void cleanStorage() {
 		delete(getContext().getDataFile(getName()));

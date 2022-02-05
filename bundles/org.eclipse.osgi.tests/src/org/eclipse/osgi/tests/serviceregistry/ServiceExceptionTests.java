@@ -14,8 +14,6 @@
 package org.eclipse.osgi.tests.serviceregistry;
 
 import java.util.Hashtable;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
 import org.osgi.framework.Bundle;
@@ -28,9 +26,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 public class ServiceExceptionTests extends AbstractBundleTests {
-	public static Test suite() {
-		return new TestSuite(ServiceExceptionTests.class);
-	}
 
 	public void testServiceException01() {
 		final String testMethodName = "testServiceException01"; //$NON-NLS-1$

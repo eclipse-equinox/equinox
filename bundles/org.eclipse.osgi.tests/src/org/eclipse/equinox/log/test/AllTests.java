@@ -17,6 +17,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({AllLogServiceTests.class, AllExtendedLogServiceTests.class})
+@Suite.SuiteClasses({ //
+		AllLogServiceTests.class, //
+		AllExtendedLogServiceTests.class //
+})
 public class AllTests {
 }

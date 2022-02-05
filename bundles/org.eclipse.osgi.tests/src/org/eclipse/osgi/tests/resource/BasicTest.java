@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2021 IBM Corporation and others.
+ * Copyright (c) 2012, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,16 +13,25 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.resource;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.junit.Assert;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.framework.namespace.IdentityNamespace;
-import org.osgi.framework.wiring.*;
-import org.osgi.resource.*;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRequirement;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.resource.Capability;
+import org.osgi.resource.Namespace;
+import org.osgi.resource.Requirement;
+import org.osgi.resource.Resource;
+import org.osgi.resource.Wire;
 
 public class BasicTest extends AbstractResourceTest {
 	private interface CapabilityProvider {
@@ -71,10 +80,6 @@ public class BasicTest extends AbstractResourceTest {
 	private Bundle tb4;
 	private Bundle tf1;
 	private Bundle tf2;
-
-	public static Test suite() {
-		return new TestSuite(BasicTest.class);
-	}
 
 	public BasicTest(String name) {
 		super(name);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2015 IBM Corporation and others.
+ * Copyright (c) 2004, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,16 +13,15 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.configuration;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({ //
+		EclipseStarterConfigIniTest.class, //
+		EclipseStarterConfigurationAreaTest.class, //
+		ReadOnlyConfigurationAreaTest.class, //
+		MovableConfigurationAreaTest.class //
+})
 public class AllTests {
-	public static Test suite() {
-		TestSuite suite = new TestSuite(AllTests.class.getName());
-		suite.addTest(EclipseStarterConfigIniTest.suite());
-		suite.addTest(EclipseStarterConfigurationAreaTest.suite());
-		suite.addTest(ReadOnlyConfigurationAreaTest.suite());
-		suite.addTest(MovableConfigurationAreaTest.suite());
-		return suite;
-	}
 }

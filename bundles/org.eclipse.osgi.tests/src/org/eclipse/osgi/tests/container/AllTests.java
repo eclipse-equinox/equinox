@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2021 IBM Corporation and others.
+ * Copyright (c) 2013, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,19 +13,17 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.container;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({ //
+		TestModuleContainer.class, //
+		ResolutionReportTest.class, //
+		ModuleContainerUsageTest.class, //
+		NamespaceListTest.class, //
+		NamespaceListBuilderTest.class, //
+		ModuleWiringTest.class 
+})
 public class AllTests {
-	public static Test suite() {
-		TestSuite suite = new TestSuite(AllTests.class.getName());
-		suite.addTest(new JUnit4TestAdapter(TestModuleContainer.class));
-		suite.addTest(new JUnit4TestAdapter(ResolutionReportTest.class));
-		suite.addTest(new JUnit4TestAdapter(ModuleContainerUsageTest.class));
-		suite.addTest(new JUnit4TestAdapter(NamespaceListTest.class));
-		suite.addTest(new JUnit4TestAdapter(NamespaceListBuilderTest.class));
-		suite.addTest(new JUnit4TestAdapter(ModuleWiringTest.class));
-		return suite;
-	}
 }

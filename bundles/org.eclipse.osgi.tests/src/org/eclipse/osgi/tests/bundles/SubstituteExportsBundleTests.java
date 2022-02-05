@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,17 +13,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 public class SubstituteExportsBundleTests extends AbstractBundleTests {
-	public static Test suite() {
-		return new TestSuite(SubstituteExportsBundleTests.class);
-	}
 
 	public void testSubstituteExports01x() throws BundleException {
 		Bundle a = installer.installBundle("substitutes.a"); //$NON-NLS-1$

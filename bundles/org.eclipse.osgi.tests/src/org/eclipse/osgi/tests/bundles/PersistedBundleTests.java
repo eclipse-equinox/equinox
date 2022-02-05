@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,8 +14,6 @@
 package org.eclipse.osgi.tests.bundles;
 
 import java.util.Map;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.eclipse.osgi.launch.Equinox;
 
 /*
@@ -44,10 +42,6 @@ public class PersistedBundleTests extends AbstractBundleTests {
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
-	}
-
-	public static Test suite() {
-		return new TestSuite(PersistedBundleTests.class);
 	}
 
 	/*
