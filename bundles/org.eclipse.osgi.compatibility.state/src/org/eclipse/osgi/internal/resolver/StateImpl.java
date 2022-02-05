@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -775,6 +776,8 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	private static final Comparator<BundleDescription> BY_BUNDLE_ID = Comparator.comparingLong(BundleDescription::getBundleId);
+
 	BundleDescription[] getFragments(final BundleDescription host) {
 		final List<BundleDescription> fragments = new ArrayList<>();
 		synchronized (this.monitor) {
@@ -794,6 +797,7 @@ public abstract class StateImpl implements State {
 				}
 			}
 		}
+		fragments.sort(BY_BUNDLE_ID);
 		return fragments.toArray(new BundleDescription[fragments.size()]);
 	}
 
