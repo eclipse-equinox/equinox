@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2017 IBM Corporation and others.
+ * Copyright (c) 2008, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,57 +10,73 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Hannes Wellmann - Bug 578602 - Make FilterTests parametrized and simplify it
  *******************************************************************************/
 package org.eclipse.osgi.tests.filter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
-import junit.framework.AssertionFailedError;
+import java.util.Objects;
 import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
+import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.util.MapDictionary;
-import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-public abstract class FilterTests {
+@RunWith(Parameterized.class)
+public class FilterTests {
 
-	/**
-	 * Fail with cause t.
-	 *
-	 * @param message Failure message.
-	 * @param t       Cause of the failure.
-	 */
-	public static void fail(String message, Throwable t) {
-		AssertionFailedError e = new AssertionFailedError(message + ": " + t.getMessage());
-		e.initCause(t);
-		throw e;
+	@FunctionalInterface
+	private interface FilterFactory {
+		Filter createFilter(String filterString) throws InvalidSyntaxException;
 	}
+
+	@Parameters(name = "{0}")
+	public static Collection<Object[]> allFilterFactories() {
+		return Arrays.asList(
+				new Object[] { "BundleContextFilter", (FilterFactory) OSGiTestsActivator.getContext()::createFilter },
+				new Object[] { "FrameworkUtilFilter", (FilterFactory) FrameworkUtil::createFilter });
+	}
+
+	@Parameter(0)
+	public String name;
+	@Parameter(1)
+	public FilterFactory filterFactory;
+
 
 	static final int ISTRUE = 1;
 	static final int ISFALSE = 2;
 	static final int ISILLEGAL = 3;
 
-	public abstract Filter createFilter(String filterString) throws InvalidSyntaxException;
+	private Filter createFilter(String filterString) throws InvalidSyntaxException {
+		return filterFactory.createFilter(filterString);
+	}
 
-	private Dictionary getProperties() {
-		Dictionary props = new Hashtable();
+	private Dictionary<String, Object> getProperties() {
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put("room", "bedroom");
 		props.put("channel", new Object[] { Integer.valueOf(34), "101" });
 		props.put("status", "(on\\)*");
-		List vec = new ArrayList(10);
+		List<Object> vec = new ArrayList<>(10);
 		vec.add(Long.valueOf(150));
 		vec.add("100");
 		props.put("max record time", vec);
@@ -73,7 +89,7 @@ public abstract class FilterTests {
 		props.put("doublevalue", Double.valueOf(2.01));
 		props.put("charvalue", Character.valueOf('A'));
 		props.put("booleanvalue", Boolean.TRUE);
-		props.put("weirdvalue", new Hashtable());
+		props.put("weirdvalue", new Hashtable<>());
 		props.put("primintarrayvalue", new int[] { 1, 2, 3 });
 		props.put("primlongarrayvalue", new long[] { 1, 2, 3 });
 		props.put("primbytearrayvalue", new byte[] { (byte) 1, (byte) 2, (byte) 3 });
@@ -97,8 +113,8 @@ public abstract class FilterTests {
 	}
 
 	@Test
-	public void testFilter() {
-		Dictionary props = getProperties();
+	public void testFilter() throws InvalidSyntaxException {
+		Dictionary<String, Object> props = getProperties();
 		testFilter("(room=*)", props, ISTRUE);
 		testFilter("(room=bedroom)", props, ISTRUE);
 		testFilter("(room~= B E D R O O M )", props, ISTRUE);
@@ -157,8 +173,8 @@ public abstract class FilterTests {
 	}
 
 	@Test
-	public void testInvalidValues() {
-		Dictionary props = getProperties();
+	public void testInvalidValues() throws InvalidSyntaxException {
+		Dictionary<String, Object> props = getProperties();
 		testFilter("(intvalue=*)", props, ISTRUE);
 		testFilter("(intvalue=b)", props, ISFALSE);
 		testFilter("(intvalue=)", props, ISFALSE);
@@ -185,8 +201,8 @@ public abstract class FilterTests {
 	}
 
 	@Test
-	public void testIllegal() {
-		Dictionary props = getProperties();
+	public void testIllegal() throws InvalidSyntaxException {
+		Dictionary<String, Object> props = getProperties();
 		testFilter("", props, ISILLEGAL);
 		testFilter("()", props, ISILLEGAL);
 		testFilter("(=foo)", props, ISILLEGAL);
@@ -200,8 +216,8 @@ public abstract class FilterTests {
 	}
 
 	@Test
-	public void testScalarSubstring() {
-		Dictionary props = getProperties();
+	public void testScalarSubstring() throws InvalidSyntaxException {
+		Dictionary<String, Object> props = getProperties();
 		testFilter("(shortValue =100*) ", props, ISFALSE);
 		testFilter("(intValue =100*) ", props, ISFALSE);
 		testFilter("(longValue =100*) ", props, ISFALSE);
@@ -215,36 +231,25 @@ public abstract class FilterTests {
 	}
 
 	@Test
-	public void testNormalization() {
-		try {
-			Filter f1 = createFilter("( a = bedroom  )");
-			Filter f2 = createFilter(" (a= bedroom  ) ");
-			assertEquals("not equal", "(a= bedroom  )", f1.toString());
-			assertEquals("not equal", "(a= bedroom  )", f2.toString());
-			assertEquals("not equal", f1, f2);
-			assertEquals("not equal", f2, f1);
-			assertEquals("not equal", f1.hashCode(), f2.hashCode());
-		} catch (InvalidSyntaxException e) {
-			fail("unexpected invalid syntax", e);
-		}
-
+	public void testNormalization() throws InvalidSyntaxException {
+		Filter f1 = createFilter("( a = bedroom  )");
+		Filter f2 = createFilter(" (a= bedroom  ) ");
+		assertEquals("not equal", "(a= bedroom  )", f1.toString());
+		assertEquals("not equal", "(a= bedroom  )", f2.toString());
+		assertEquals("not equal", f1, f2);
+		assertEquals("not equal", f2, f1);
+		assertEquals("not equal", f1.hashCode(), f2.hashCode());
 	}
 
-	private void testFilter(String query, Dictionary props, int expect) {
-		final ServiceReference ref = new DictionaryServiceReference(props);
-		Filter f1;
-		try {
-			f1 = createFilter(query);
+	private void testFilter(String query, Dictionary<String, Object> props, int expect) throws InvalidSyntaxException {
 
-			if (expect == ISILLEGAL) {
-				Assert.fail("expected exception");
-			}
-		} catch (InvalidSyntaxException e) {
-			if (expect != ISILLEGAL) {
-				fail("exception", e);
-			}
+		if (expect == ISILLEGAL) {
+			assertThrows(InvalidSyntaxException.class, () -> createFilter(query));
 			return;
 		}
+
+		Filter f1 = createFilter(query);
+		ServiceReference<?> ref = new DictionaryServiceReference(props);
 
 		boolean val = f1.match(props);
 		assertEquals("wrong result", expect == ISTRUE, val);
@@ -253,13 +258,7 @@ public abstract class FilterTests {
 		assertEquals("wrong result", expect == ISTRUE, val);
 
 		String normalized = f1.toString();
-		Filter f2;
-		try {
-			f2 = createFilter(normalized);
-		} catch (InvalidSyntaxException e) {
-			fail("exception", e);
-			return;
-		}
+		Filter f2 = createFilter(normalized);
 
 		val = f2.match(props);
 		assertEquals("wrong result", expect == ISTRUE, val);
@@ -272,17 +271,12 @@ public abstract class FilterTests {
 	}
 
 	@Test
-	public void testComparable() {
-		Filter f1 = null;
+	public void testComparable() throws InvalidSyntaxException {
 		Object comp42 = new SampleComparable("42");
 		Object comp43 = new SampleComparable("43");
-		Hashtable hash = new Hashtable();
+		Dictionary<String, Object> hash = new Hashtable<>();
 
-		try {
-			f1 = createFilter("(comparable=42)");
-		} catch (InvalidSyntaxException e) {
-			fail("invalid syntax", e);
-		}
+		Filter f1 = createFilter("(comparable=42)");
 
 		hash.put("comparable", comp42);
 		assertTrue("does not match filter", f1.match(hash));
@@ -292,11 +286,7 @@ public abstract class FilterTests {
 		assertFalse("does match filter", f1.match(hash));
 		assertFalse("does match filter", f1.match(new DictionaryServiceReference(hash)));
 
-		try {
-			f1 = createFilter("(comparable<=42)");
-		} catch (InvalidSyntaxException e) {
-			fail("invalid syntax", e);
-		}
+		f1 = createFilter("(comparable<=42)");
 
 		hash.put("comparable", comp42);
 		assertTrue("does not match filter", f1.match(hash));
@@ -306,11 +296,7 @@ public abstract class FilterTests {
 		assertFalse("does match filter", f1.match(hash));
 		assertFalse("does match filter", f1.match(new DictionaryServiceReference(hash)));
 
-		try {
-			f1 = createFilter("(comparable>=42)");
-		} catch (InvalidSyntaxException e) {
-			fail("invalid syntax", e);
-		}
+		f1 = createFilter("(comparable>=42)");
 
 		hash.put("comparable", comp42);
 		assertTrue("does not match filter", f1.match(hash));
@@ -320,11 +306,7 @@ public abstract class FilterTests {
 		assertTrue("does not match filter", f1.match(hash));
 		assertTrue("does not match filter", f1.match(new DictionaryServiceReference(hash)));
 
-		try {
-			f1 = createFilter("(comparable=4*2)");
-		} catch (InvalidSyntaxException e) {
-			fail("invalid syntax", e);
-		}
+		f1 = createFilter("(comparable=4*2)");
 
 		hash.put("comparable", comp42);
 		assertFalse("does match filter", f1.match(hash));
@@ -332,17 +314,12 @@ public abstract class FilterTests {
 	}
 
 	@Test
-	public void testObject() {
-		Filter f1 = null;
+	public void testObject() throws InvalidSyntaxException {
 		Object obj42 = new SampleObject("42");
 		Object obj43 = new SampleObject("43");
-		Hashtable hash = new Hashtable();
+		Dictionary<String, Object> hash = new Hashtable<>();
 
-		try {
-			f1 = createFilter("(object=42)");
-		} catch (InvalidSyntaxException e) {
-			fail("invalid syntax", e);
-		}
+		Filter f1 = createFilter("(object=42)");
 
 		hash.put("object", obj42);
 		assertTrue("does not match filter", f1.match(hash));
@@ -352,11 +329,7 @@ public abstract class FilterTests {
 		assertFalse("does match filter", f1.match(hash));
 		assertFalse("does match filter", f1.match(new DictionaryServiceReference(hash)));
 
-		try {
-			f1 = createFilter("(object=4*2)");
-		} catch (InvalidSyntaxException e) {
-			fail("invalid syntax", e);
-		}
+		f1 = createFilter("(object=4*2)");
 
 		hash.put("object", obj42);
 		assertFalse("does match filter", f1.match(hash));
@@ -380,7 +353,17 @@ public abstract class FilterTests {
 		assertTrue(createFilter("(test.non.null=v1)").match(nullProps));
 	}
 
-	public static class SampleComparable implements Comparable {
+	// Equinox specific test to make sure we continue to use the Equinox FilterImpl
+	// from the FrameworkUtil createFilter method
+	@Test
+	public void testFrameworkUtilCreateFilter() throws InvalidSyntaxException {
+		Filter bundleContextFilter = OSGiTestsActivator.getContext().createFilter("(simplefilter=true)");
+		Filter frameworkUtilFilter = FrameworkUtil.createFilter("(simplefilter=true)");
+		assertTrue("Wrong Fitler impl type: " + frameworkUtilFilter.getClass().getName(),
+				bundleContextFilter.getClass().equals(frameworkUtilFilter.getClass()));
+	}
+
+	private static class SampleComparable implements Comparable<SampleComparable> {
 		private int value = -1;
 
 		public SampleComparable(String value) {
@@ -388,8 +371,8 @@ public abstract class FilterTests {
 		}
 
 		@Override
-		public int compareTo(Object o) {
-			return value - ((SampleComparable) o).value;
+		public int compareTo(SampleComparable o) {
+			return Integer.compare(value, o.value);
 		}
 
 		@Override
@@ -398,7 +381,7 @@ public abstract class FilterTests {
 		}
 	}
 
-	public static class SampleObject {
+	private static class SampleObject {
 		private int value = -1;
 
 		public SampleObject(String value) {
@@ -406,11 +389,13 @@ public abstract class FilterTests {
 		}
 
 		@Override
+		public int hashCode() {
+			return Objects.hash(value);
+		}
+
+		@Override
 		public boolean equals(Object o) {
-			if (o instanceof SampleObject) {
-				return value == ((SampleObject) o).value;
-			}
-			return false;
+			return (o instanceof SampleObject) && value == ((SampleObject) o).value;
 		}
 
 		@Override
@@ -419,74 +404,51 @@ public abstract class FilterTests {
 		}
 	}
 
-	private static class DictionaryServiceReference implements ServiceReference {
-		private final Dictionary dictionary;
-		private final String[] keys;
+	private static class DictionaryServiceReference implements ServiceReference<Object> {
+		private final Dictionary<String, ?> dictionary;
 
-		DictionaryServiceReference(Dictionary dictionary) {
-			if (dictionary == null) {
-				this.dictionary = null;
-				this.keys = new String[] {};
-				return;
-			}
-			this.dictionary = dictionary;
-			List keyList = new ArrayList(dictionary.size());
-			for (Enumeration e = dictionary.keys(); e.hasMoreElements();) {
-				Object k = e.nextElement();
-				if (k instanceof String) {
-					String key = (String) k;
-					for (Iterator i = keyList.iterator(); i.hasNext();) {
-						if (key.equalsIgnoreCase((String) i.next())) {
-							throw new IllegalArgumentException();
-						}
-					}
-					keyList.add(key);
-				}
-			}
-			this.keys = (String[]) keyList.toArray(new String[keyList.size()]);
+		DictionaryServiceReference(Dictionary<String, ?> dictionary) {
+			this.dictionary = new CaseInsensitiveDictionaryMap<>(dictionary == null ? new Hashtable<>() : dictionary);
 		}
 
+		@Override
 		public Object getProperty(String k) {
-			for (int i = 0, length = keys.length; i < length; i++) {
-				String key = keys[i];
-				if (key.equalsIgnoreCase(k)) {
-					return dictionary.get(key);
-				}
-			}
-			return null;
+			return dictionary.get(k);
 		}
 
+		@Override
 		public String[] getPropertyKeys() {
-			return keys.clone();
+			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public int compareTo(Object reference) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public Bundle getBundle() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public Bundle[] getUsingBundles() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public boolean isAssignableTo(Bundle bundle, String className) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public Dictionary getProperties() {
-			if (dictionary == null) {
-				return new CaseInsensitiveDictionaryMap();
-			}
-			return new CaseInsensitiveDictionaryMap(dictionary);
+		public Dictionary<String, Object> getProperties() {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public Object adapt(Class type) {
-			return null;
+			throw new UnsupportedOperationException();
 		}
 	}
 }

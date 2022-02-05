@@ -35,8 +35,7 @@ import org.junit.runners.Suite;
 		org.eclipse.osgi.tests.bundles.BundleTests.class, //
 		org.eclipse.osgi.tests.serviceregistry.AllTests.class, //
 		org.eclipse.osgi.tests.eventmgr.EventManagerTests.class, //
-		org.eclipse.osgi.tests.filter.BundleContextFilterTests.class, //
-		org.eclipse.osgi.tests.filter.FrameworkUtilFilterTests.class, //
+		org.eclipse.osgi.tests.filter.FilterTests.class, //
 		org.eclipse.osgi.tests.permissions.AllTests.class, //
 		org.eclipse.osgi.tests.securityadmin.AllSecurityAdminTests.class, //
 		org.eclipse.osgi.tests.resource.AllTests.class, //
