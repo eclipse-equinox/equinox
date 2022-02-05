@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2021 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2012, 2022 Cognos Incorporated, IBM Corporation and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which
@@ -149,7 +149,7 @@ public class ExtendedLogReaderServiceTest {
 
 		log.getLogger("test").log(logReference, LogService.LOG_INFO, "info", new Throwable("test"));
 		entry = listener.getEntryX();
-		assertTrue(entry.getBundle() == OSGiTestsActivator.getContext().getBundle());
+		assertTrue(entry.getBundle() == OSGiTestsActivator.getBundle());
 		assertTrue(entry.getMessage().equals("info"));
 		assertTrue(entry.getException().getMessage().equals("test"));
 		assertTrue(entry.getServiceReference() == logReference);

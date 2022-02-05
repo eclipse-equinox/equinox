@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,7 +18,14 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceException;
+import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 
 public class ServiceExceptionTests extends AbstractBundleTests {
 	public static Test suite() {
@@ -32,7 +39,7 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		Hashtable props = new Hashtable();
 		props.put("name", testMethodName); //$NON-NLS-1$
 		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), wrongObjectFactory, props);
-		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(OSGiTestsActivator.getContext().getBundle(), null, ServiceException.FACTORY_ERROR);
+		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(OSGiTestsActivator.getBundle(), null, ServiceException.FACTORY_ERROR);
 		OSGiTestsActivator.getContext().addFrameworkListener(listener);
 		try {
 			ServiceReference[] refs = null;
@@ -70,7 +77,7 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		Hashtable props = new Hashtable();
 		props.put("name", testMethodName); //$NON-NLS-1$
 		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), nullObjectFactory, props);
-		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(OSGiTestsActivator.getContext().getBundle(), null, ServiceException.FACTORY_ERROR);
+		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(OSGiTestsActivator.getBundle(), null, ServiceException.FACTORY_ERROR);
 		OSGiTestsActivator.getContext().addFrameworkListener(listener);
 		try {
 			ServiceReference[] refs = null;
@@ -109,7 +116,7 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		Hashtable props = new Hashtable();
 		props.put("name", testMethodName); //$NON-NLS-1$
 		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runtimeExceptionFactory, props);
-		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(OSGiTestsActivator.getContext().getBundle(), cause, ServiceException.FACTORY_EXCEPTION);
+		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(OSGiTestsActivator.getBundle(), cause, ServiceException.FACTORY_EXCEPTION);
 		OSGiTestsActivator.getContext().addFrameworkListener(listener);
 		try {
 			ServiceReference[] refs = null;
@@ -148,7 +155,7 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		Hashtable props = new Hashtable();
 		props.put("name", testMethodName); //$NON-NLS-1$
 		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), errorFactory, props);
-		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(OSGiTestsActivator.getContext().getBundle(), cause, ServiceException.FACTORY_EXCEPTION);
+		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(OSGiTestsActivator.getBundle(), cause, ServiceException.FACTORY_EXCEPTION);
 		OSGiTestsActivator.getContext().addFrameworkListener(listener);
 		try {
 			ServiceReference[] refs = null;

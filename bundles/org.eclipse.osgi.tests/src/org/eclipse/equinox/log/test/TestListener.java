@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2020, 2022 Cognos Incorporated, IBM Corporation and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which
@@ -26,7 +26,7 @@ public class TestListener implements LogListener {
 	}
 
 	public TestListener(String testBundleLoc) {
-		this.testBundleLoc = testBundleLoc == null ? OSGiTestsActivator.getContext().getBundle().getLocation() : testBundleLoc;
+		this.testBundleLoc = testBundleLoc == null ? OSGiTestsActivator.getBundle().getLocation() : testBundleLoc;
 	}
 
 	public synchronized void logged(LogEntry e) {

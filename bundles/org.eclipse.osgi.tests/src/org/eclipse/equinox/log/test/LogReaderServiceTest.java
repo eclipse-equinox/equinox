@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2021 IBM Corporation and others.
+ * Copyright (c) 2007, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -135,7 +135,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		long timeBeforeLog = System.currentTimeMillis();
 		log.log(logReference, LogService.LOG_INFO, "info", new Throwable("test")); //$NON-NLS-1$ //$NON-NLS-2$
 		LogEntry entry = listener.getEntryX();
-		assertTrue(entry.getBundle() == OSGiTestsActivator.getContext().getBundle());
+		assertTrue(entry.getBundle() == OSGiTestsActivator.getBundle());
 		assertTrue(entry.getMessage().equals("info")); //$NON-NLS-1$
 		assertTrue(entry.getException().getMessage().equals("test")); //$NON-NLS-1$
 		assertTrue(entry.getServiceReference() == logReference);

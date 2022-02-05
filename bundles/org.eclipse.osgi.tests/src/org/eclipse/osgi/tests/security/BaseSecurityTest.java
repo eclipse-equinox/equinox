@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -55,7 +55,7 @@ public class BaseSecurityTest extends CoreTest {
 	private static KeyStore supportStore;
 	static {
 		try {
-			URL supportUrl = OSGiTestsActivator.getContext().getBundle().getEntry("test_files/security/keystore.jks");
+			URL supportUrl = OSGiTestsActivator.getBundle().getEntry("test_files/security/keystore.jks");
 			supportStore = KeyStore.getInstance(TYPE_DEFAULT);
 			supportStore.load(supportUrl.openStream(), PASSWORD_DEFAULT);
 		} catch (Exception e) {
@@ -87,7 +87,7 @@ public class BaseSecurityTest extends CoreTest {
 
 	protected void registerEclipseTrustEngine() throws Exception {
 		// make a copy of cacerts file and use that at runtime
-		URL eclipseURL = OSGiTestsActivator.getContext().getBundle().getEntry("test_files/security/eclipse.jks");
+		URL eclipseURL = OSGiTestsActivator.getBundle().getEntry("test_files/security/eclipse.jks");
 		File tempEngine = OSGiTestsActivator.getContext().getDataFile("temp.jks");
 
 		copy(eclipseURL.openStream(), tempEngine);
@@ -142,7 +142,7 @@ public class BaseSecurityTest extends CoreTest {
 	}
 
 	protected Bundle installBundle(String bundlePath) {
-		URL bundleURL = OSGiTestsActivator.getContext().getBundle().getEntry(bundlePath);
+		URL bundleURL = OSGiTestsActivator.getBundle().getEntry(bundlePath);
 		assertNotNull("Bundle URL is null " + bundlePath, bundleURL);
 		try {
 			return OSGiTestsActivator.getContext().installBundle(bundlePath, bundleURL.openStream());
@@ -153,14 +153,14 @@ public class BaseSecurityTest extends CoreTest {
 	}
 
 	protected static File getEntryFile(String entryPath) throws IOException {
-		URL entryURL = OSGiTestsActivator.getContext().getBundle().getEntry(entryPath);
+		URL entryURL = OSGiTestsActivator.getBundle().getEntry(entryPath);
 		if (entryURL == null)
 			return null;
 		return new File(FileLocator.toFileURL(entryURL).toExternalForm().substring(5));
 	}
 
 	protected static File copyEntryFile(String entryPath) throws IOException {
-		URL entryURL = OSGiTestsActivator.getContext().getBundle().getEntry(entryPath);
+		URL entryURL = OSGiTestsActivator.getBundle().getEntry(entryPath);
 		if (entryURL == null)
 			return null;
 		File tempFolder = OSGiTestsActivator.getContext().getDataFile("temp");
@@ -176,7 +176,7 @@ public class BaseSecurityTest extends CoreTest {
 
 	protected static void setEclipseTrustEngine(ConfigurationSessionTestSuite suite) {
 		try {
-			URL eclipseURL = OSGiTestsActivator.getContext().getBundle().getEntry("test_files/security/eclipse.jks");
+			URL eclipseURL = OSGiTestsActivator.getBundle().getEntry("test_files/security/eclipse.jks");
 			File tempFile = File.createTempFile("keystore", ".jks");
 
 			copy(eclipseURL.openStream(), tempFile);

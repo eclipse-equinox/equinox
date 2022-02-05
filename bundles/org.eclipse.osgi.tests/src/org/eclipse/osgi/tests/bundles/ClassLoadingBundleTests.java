@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2021 IBM Corporation and others.
+ * Copyright (c) 2006, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -2101,7 +2101,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 	private void doTestArrayTypeLoad(String name) {
 		try {
-			Class arrayType = OSGiTestsActivator.getContext().getBundle().loadClass(name);
+			Class arrayType = OSGiTestsActivator.getBundle().loadClass(name);
 			assertNotNull("Null class", arrayType); //$NON-NLS-1$
 			assertTrue("Class is not an array: " + arrayType, arrayType.isArray()); //$NON-NLS-1$
 		} catch (ClassNotFoundException e) {

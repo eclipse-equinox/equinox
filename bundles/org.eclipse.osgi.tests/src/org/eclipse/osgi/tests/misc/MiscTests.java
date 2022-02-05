@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -29,7 +29,7 @@ import org.osgi.framework.wiring.BundleWiring;
 public class MiscTests {
 	@Test
 	public void testBug251427() {
-		Bundle testsBundle = OSGiTestsActivator.getContext().getBundle();
+		Bundle testsBundle = OSGiTestsActivator.getBundle();
 		assertNotNull("tests bundle is null", testsBundle); //$NON-NLS-1$
 		Bundle harnessBundle = Platform.getBundle("org.eclipse.core.tests.harness"); //$NON-NLS-1$
 		assertNotNull("harness bundle is null", harnessBundle); //$NON-NLS-1$

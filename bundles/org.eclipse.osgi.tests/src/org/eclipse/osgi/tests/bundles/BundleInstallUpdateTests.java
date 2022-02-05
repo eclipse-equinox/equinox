@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2021 IBM Corporation and others.
+ * Copyright (c) 2009, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -199,7 +199,7 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 	public void testBug290193() {
 		Bundle test = null;
 		try {
-			URL testBundle = OSGiTestsActivator.getContext().getBundle().getEntry("test_files/security/bundles/signed.jar");
+			URL testBundle = OSGiTestsActivator.getBundle().getEntry("test_files/security/bundles/signed.jar");
 			File testFile = OSGiTestsActivator.getContext().getDataFile("test with space/test.jar");
 			assertTrue(testFile.getParentFile().mkdirs());
 			readFile(testBundle.openStream(), testFile);

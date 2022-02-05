@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 IBM Corporation and others.
+ * Copyright (c) 2009, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -104,7 +104,7 @@ public class DebugOptionsTestCase extends CoreTest {
 	 */
 	public void testTracingEntry01() {
 
-		String bundleName = OSGiTestsActivator.getContext().getBundle().getSymbolicName();
+		String bundleName = OSGiTestsActivator.getBundle().getSymbolicName();
 		String optionPath = "/debug"; //$NON-NLS-1$
 		String message = "Test message"; //$NON-NLS-1$
 		FrameworkDebugTraceEntry traceEntry = new FrameworkDebugTraceEntry(bundleName, optionPath, message, null);
@@ -139,7 +139,7 @@ public class DebugOptionsTestCase extends CoreTest {
 
 	static class Runner2 {
 		public FrameworkDebugTraceEntry run() {
-			String bundleName = OSGiTestsActivator.getContext().getBundle().getSymbolicName();
+			String bundleName = OSGiTestsActivator.getBundle().getSymbolicName();
 			String optionPath = "/debug"; //$NON-NLS-1$
 			String message = "Test message"; //$NON-NLS-1$
 			String tracingClass = this.getClass().getName();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2019 IBM Corporation and others.
+ * Copyright (c) 2005, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -155,7 +155,7 @@ public class KeyStoreTrustEngineTest extends TestCase {
 	private static KeyStore supportStore;
 	static {
 		try {
-			URL supportUrl = OSGiTestsActivator.getContext().getBundle().getEntry("test_files/security/keystore.jks"); //$NON-NLS-1$
+			URL supportUrl = OSGiTestsActivator.getBundle().getEntry("test_files/security/keystore.jks"); //$NON-NLS-1$
 			supportStore = KeyStore.getInstance(TYPE_DEFAULT);
 			supportStore.load(supportUrl.openStream(), PASSWORD_DEFAULT);
 		} catch (Exception e) {
