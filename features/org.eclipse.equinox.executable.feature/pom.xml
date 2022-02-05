@@ -119,7 +119,7 @@
                     <!-- We need to get binary bits from binary repo -->
                     <!-- If local binaries had been built, copy will not overwrite
                       them -->
-                    <echo message="Copy eclipse binaries to launcher binaries"/>
+                    <echo message="Copy eclipse binaries to launcher binaries" level="info"/>
                     <copy todir="bin" verbose="true" includeEmptyDirs="false" failonerror="true">
                       <fileset dir="${rt.equinox.binaries.loc}/org.eclipse.equinox.executable/bin/">
                         <include name="cocoa/macosx/x86_64/**/*"/>
