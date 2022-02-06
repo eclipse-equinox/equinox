@@ -14,7 +14,15 @@
 package org.eclipse.osgi.tests.bundles;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -83,6 +91,8 @@ import org.eclipse.osgi.storage.url.reference.Handler;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.security.BaseSecurityTest;
 import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -126,6 +136,7 @@ import org.osgi.service.url.URLStreamHandlerService;
 
 public class SystemBundleTests extends AbstractBundleTests {
 
+	@Test
 	public void testSystemBundle01() throws BundleException, InvalidSyntaxException {
 		// simple test to create an embedded framework
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle01"); //$NON-NLS-1$
@@ -150,6 +161,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSystemBundle02() throws BundleException {
 		// create/start/stop/start/stop test
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle02"); //$NON-NLS-1$
@@ -169,6 +181,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSystemBundle03() throws BundleException {
 		// create/stop/ test
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle03"); //$NON-NLS-1$
@@ -188,6 +201,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSystemBundle04() throws BundleException {
 		// create/start/stop/start/stop test
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle04"); //$NON-NLS-1$
@@ -211,6 +225,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSystemBundle05_1() throws BundleException {
 		// create/install/start/stop test
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle05_1"); //$NON-NLS-1$
@@ -235,6 +250,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSystemBundle05_2() throws BundleException {
 		// create/install/start/stop/start/stop test
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle05_2"); //$NON-NLS-1$
@@ -271,6 +287,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 	}
 
+	@Test
 	public void testSystemBundle06() throws BundleException {
 		// create multiple instances test
 		File config1 = OSGiTestsActivator.getContext().getDataFile("testSystemBundle06_1"); //$NON-NLS-1$
@@ -312,6 +329,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox2.getState()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSystemBundle07() throws BundleException, InvalidSyntaxException {
 		// test init twice
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle07_01"); //$NON-NLS-1$
@@ -340,6 +358,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSystemBundle08() throws BundleException, InvalidSyntaxException {
 		// create/start/stop/start/stop test
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle08_1"); //$NON-NLS-1$
@@ -372,6 +391,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSystemBundle09() throws BundleException {
 		// test FrameworkUtil.createFilter
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle09"); //$NON-NLS-1$
@@ -387,6 +407,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSystemBundle10() throws Exception {
 		// create/start/update/stop test
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle10"); //$NON-NLS-1$
@@ -410,6 +431,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSystemBundle11() throws BundleException {
 		// test extra packages property
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle11"); //$NON-NLS-1$
@@ -438,6 +460,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSystemBundle12() throws Exception {
 		// Test stop FrameworkEvent
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle12"); //$NON-NLS-1$
@@ -458,6 +481,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong stopEvent", FrameworkEvent.STOPPED, stopEvent.getType()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSystemBundle13() throws BundleException {
 		// create/install/start/stop clean test
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle13"); //$NON-NLS-1$
@@ -510,6 +534,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSystemBundle14() throws BundleException {
 		// Test startlevel property
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle14"); //$NON-NLS-1$
@@ -531,6 +556,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong stopEvent", FrameworkEvent.STOPPED, stopEvent.getType()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSystemBundle16() throws Exception {
 		// test parent boot
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
@@ -540,6 +566,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		checkParentClassLoader(configuration);
 	}
 
+	@Test
 	public void testSystemBundle17() throws Exception {
 		// test parent app
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
@@ -549,6 +576,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		checkParentClassLoader(configuration);
 	}
 
+	@Test
 	public void testSystemBundle18() throws Exception {
 		// test parent ext
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
@@ -558,6 +586,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		checkParentClassLoader(configuration);
 	}
 
+	@Test
 	public void testSystemBundle19() throws Exception {
 		// test parent framework
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
@@ -589,6 +618,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		stop(equinox, FrameworkEvent.STOPPED);
 	}
 
+	@Test
 	public void testChangeEE() throws IOException, BundleException {
 		URL javaSE8Profile = OSGiTestsActivator.getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION).getEntry("JavaSE-1.8.profile");
 		URL javaSE9Profile = OSGiTestsActivator.getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION).getEntry("JavaSE-9.profile");
@@ -642,13 +672,16 @@ public class SystemBundleTests extends AbstractBundleTests {
 		stop(equinox);
 	}
 
+	@Test
 	public void testMRUBundleFileList() throws Exception {
 		doMRUBundleFileList(10);
 	}
 
-	//	public void testMRUBundleFileListExpectedToFail() {
-	//		doMRUBundleFileList(0);
-	//	}
+	@Test
+	@Ignore
+	public void testMRUBundleFileListExpectedToFail() throws Exception {
+		doMRUBundleFileList(0);
+	}
 
 	private void doMRUBundleFileList(int limit) throws Exception {
 		// create/start/stop/start/stop test
@@ -699,6 +732,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testURLExternalFormat01() throws BundleException {
 		// create multiple instances test
 		File config1 = OSGiTestsActivator.getContext().getDataFile("testURLExternalFormat01_1"); //$NON-NLS-1$
@@ -771,6 +805,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 	}
 
+	@Test
 	public void testURLMultiplexing01() throws Exception {
 		// create multiple instances of Equinox to test
 		File config1 = OSGiTestsActivator.getContext().getDataFile(getName() + "_1");
@@ -820,6 +855,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		System.getProperties().remove("test.url");
 	}
 
+	@Test
 	public void testUUID() throws BundleException {
 		File config1 = OSGiTestsActivator.getContext().getDataFile(getName() + "_1"); //$NON-NLS-1$
 		Map configuration1 = new HashMap();
@@ -893,6 +929,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testBug304213() throws Exception {
 		// test installing bundle with empty manifest
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
@@ -931,6 +968,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBug351083DevClassPath() throws InvalidSyntaxException, BundleException {
 		// create/start/stop/start/stop test
 		BundleInstaller testBundleInstaller = new BundleInstaller("test_files/devCPTests", OSGiTestsActivator.getContext());
@@ -956,6 +994,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testBug352275() throws BundleException {
 		// simple test to create an embedded framework
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
@@ -969,20 +1008,25 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
-	public void disabledTestBug351519RefreshEnabled() throws Exception {
+	@Test
+	@Ignore
+	public void tTestBug351519RefreshEnabled() throws Exception {
 		// TODO this is expected to fail. Not sure we should implement this
 		doTestBug351519Refresh(Boolean.TRUE);
 	}
 
+	@Test
 	public void testBug351519RefreshDisabled() throws Exception {
 		doTestBug351519Refresh(Boolean.FALSE);
 	}
 
+	@Test
 	public void testBug351519RefreshDefault() throws Exception {
 		// Note that for the unity framework this defaults to false
 		doTestBug351519Refresh(null);
 	}
 
+	@Test
 	public void testWeavingPersistence() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
@@ -1128,6 +1172,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBug375784() throws BundleException {
 		// Create a framework with osgi.context.bootdelegation=true configuration
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
@@ -1148,6 +1193,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBug258209_1() throws Exception {
 		// create a framework to test thread context class loaders
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
@@ -1202,6 +1248,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			Thread.sleep(500);
 	}
 
+	@Test
 	public void testBug413879() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
@@ -1261,7 +1308,9 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertTrue("Failed to resolve dynamic", errors.isEmpty());
 	}
 
-	public void testBug414070() throws BundleException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+	@Test
+	public void testBug414070()
+			throws BundleException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
@@ -1310,6 +1359,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertArrayEquals("Wrong stopping order", expectedOrder.toArray(), stoppingOrder.toArray());
 	}
 
+	@Test
 	public void testBug412228() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
@@ -1329,6 +1379,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertTrue("waitForStop time took too long: " + stopTime, stopTime <= 2000);
 	}
 
+	@Test
 	public void testBug432632() throws BundleException, IOException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		config.mkdirs();
@@ -1352,6 +1403,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		stop(equinox);
 	}
 
+	@Test
 	public void testDynamicSecurityManager() throws BundleException {
 		SecurityManager sm = System.getSecurityManager();
 		assertNull("SecurityManager must be null to test.", sm);
@@ -1387,6 +1439,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 	static final String nullTest = "null.test";
 
+	@Test
 	public void testNullConfigurationValue() throws BundleException {
 		System.setProperty(nullTest, "system");
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
@@ -1402,6 +1455,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.stop();
 	}
 
+	@Test
 	public void testNullConfigurationValueRequiredProperty() throws BundleException {
 		final String systemProcessor = System.getProperty(Constants.FRAMEWORK_PROCESSOR);
 		assertNotNull(systemProcessor);
@@ -1423,6 +1477,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testAllNullConfigurationValues() throws BundleException {
 		Collection<String> requiredProperties = Arrays.asList( // prevent bad formatting...
 				Constants.FRAMEWORK_EXECUTIONENVIRONMENT, //
@@ -1477,6 +1532,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.stop();
 	}
 
+	@Test
 	public void testNullConfigurationValueSystemProperties() throws BundleException {
 		System.setProperty(nullTest, "system");
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
@@ -1501,6 +1557,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.stop();
 	}
 
+	@Test
 	public void testBackedBySystemReplaceSystemProperties() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
@@ -1536,6 +1593,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.stop();
 	}
 
+	@Test
 	public void testLocalConfigReplaceSystemProperties() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
@@ -1573,6 +1631,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.stop();
 	}
 
+	@Test
 	public void testSystemNLFragment() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
@@ -1589,10 +1648,12 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.stop();
 	}
 
+	@Test
 	public void testNullConfiguration() {
 		new Equinox(null);
 	}
 
+	@Test
 	public void testNullStorageArea() throws BundleException {
 		File install = getContext().getDataFile(getName());
 		install.mkdirs();
@@ -1606,6 +1667,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testOSGiDevSetsCheckConfiguration() throws BundleException {
 		String originalCheckConfiguration = System.clearProperty(EquinoxConfiguration.PROP_CHECK_CONFIGURATION);
 		try {
@@ -1625,6 +1687,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testProvideOSGiEEandNative() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
@@ -1657,6 +1720,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.stop();
 	}
 
+	@Test
 	public void testBootDelegationConfigIni() throws Exception {
 		String compatBootDelegate = "osgi.compatibility.bootdelegation";
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
@@ -1694,6 +1758,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.stop();
 	}
 
+	@Test
 	public void testSystemBundleListener() throws BundleException, InterruptedException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		config.mkdirs();
@@ -1726,6 +1791,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong number of STOPPED events", 1, stoppedEvent.get());
 	}
 
+	@Test
 	public void testContextBootDelegation() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		config.mkdirs();
@@ -1741,6 +1807,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.stop();
 	}
 
+	@Test
 	public void testExtraSystemBundleHeaders() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		config.mkdirs();
@@ -1799,6 +1866,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		stop(equinox);
 	}
 
+	@Test
 	public void testSystemBundleLoader() {
 		Bundle systemBundle = OSGiTestsActivator.getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION);
 		BundleWiring wiring = systemBundle.adapt(BundleWiring.class);
@@ -1806,6 +1874,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertNotNull("No system bundle class loader.", cl);
 	}
 
+	@Test
 	public void testJavaProfile() throws Exception {
 		boolean isRunningJava9OrGreater = isJavaVersionGreaterThanOrEqualTo9();
 		String originalSpecVersion = System.getProperty("java.specification.version");
@@ -1984,6 +2053,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		return file;
 	}
 
+	@Test
 	public void testBug405919() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		config.mkdirs();
@@ -2034,6 +2104,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testInitialBundleUpdate() throws Exception {
 		// test installing bundle with empty manifest
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
@@ -2062,6 +2133,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testDaemonActiveThread() throws BundleException, InterruptedException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		config.mkdirs();
@@ -2093,6 +2165,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.stop();
 	}
 
+	@Test
 	public void testLazyTriggerOnLoadError() throws BundleException {
 		// create/start/stop/start/stop test
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
@@ -2132,14 +2205,17 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.stop();
 	}
 
+	@Test
 	public void testConfigPercentChar() throws BundleException, IOException {
 		doTestConfigSpecialChar('%');
 	}
 
+	@Test
 	public void testConfigSpaceChar() throws BundleException, IOException {
 		doTestConfigSpecialChar(' ');
 	}
 
+	@Test
 	public void testConfigPlusChar() throws BundleException, IOException {
 		doTestConfigSpecialChar('+');
 	}
@@ -2186,6 +2262,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong daemon type.", expectIsDeamon, found.isDaemon());
 	}
 
+	@Test
 	public void testWindowsAlias() throws BundleException {
 		String origOS = System.getProperty("os.name");
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
@@ -2204,6 +2281,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testOverrideEquinoxConfigAreaProp() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map configuration = new HashMap();
@@ -2226,6 +2304,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testLogOrderMultipleListeners() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map configuration = new HashMap();
@@ -2278,6 +2357,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testCaptureLogEntryLocation() throws BundleException, InterruptedException {
 		doTestCaptureLogEntryLocation(true);
 		doTestCaptureLogEntryLocation(false);
@@ -2317,6 +2397,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testSystemCapabilitiesBug522125() throws Exception {
 		String frameworkLocation = OSGiTestsActivator.getContext().getProperty(EquinoxConfiguration.PROP_FRAMEWORK);
 		URI uri = new URI(frameworkLocation);
@@ -2371,6 +2452,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		Assert.assertEquals("Wrong number of capabilities", capCount1, capCount2);
 	}
 
+	@Test
 	public void testStartLevelSorting() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map configuration = new HashMap();
@@ -2507,6 +2589,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testStartLevelSingleThread() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map configuration = new HashMap();
@@ -2547,18 +2630,22 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testStartLevelMultiThreadExplicit4() throws Exception {
 		doTestStartLevelMultiThread(4, false);
 	}
 
+	@Test
 	public void testStartLevelMultiThreadExplicit1() throws Exception {
 		doTestStartLevelMultiThread(1, false);
 	}
 
+	@Test
 	public void testStartLevelMultiThreadAvailableProcessors() throws Exception {
 		doTestStartLevelMultiThread(0, false);
 	}
 
+	@Test
 	public void testStartLevelRestrictMultiThreadExplicit4() throws Exception {
 		doTestStartLevelMultiThread(4, true);
 	}
@@ -2653,6 +2740,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testParallelActivationPersistence() throws IOException, BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, String> configuration = new HashMap();
@@ -2696,6 +2784,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testBundleIDLock() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
@@ -2738,6 +2827,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testMRUBundleFileListOverflow() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		final int numBundles = 5000;
@@ -2794,6 +2884,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertTrue("Test took too long: " + timeTaken, timeTaken < 30);
 	}
 
+	@Test
 	public void testZipBundleFileOpenLock() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		config.mkdirs();
@@ -2881,6 +2972,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testContextFinderGetResource() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map configuration = new HashMap();
@@ -2910,6 +3002,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testDynamicImportFromSystemBundle() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map configuration = new HashMap();
@@ -2948,6 +3041,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testDynamicImportPrivatePackage() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map configuration = new HashMap();
@@ -2982,6 +3076,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testCorruptStageInstallUpdate() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
 		final Equinox equinox = new Equinox(
@@ -3031,6 +3126,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 	// Note this is more of a performance test.  It has a timeout that will cause it to
 	// fail if it takes too long.
+	@Test
 	public void testMassiveParallelInstallStart() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
@@ -3084,6 +3180,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		stop(equinox);
 	}
 
+	@Test
 	public void testDeleteBundleFile() throws IOException, BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		Equinox equinox = new Equinox(

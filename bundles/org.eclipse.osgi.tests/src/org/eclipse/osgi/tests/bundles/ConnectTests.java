@@ -12,9 +12,13 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -53,6 +57,7 @@ import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.launch.EquinoxFactory;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.classes.Activator;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -323,6 +328,7 @@ public class ConnectTests extends AbstractBundleTests {
 
 	static final TestConnectModule BUNDLE_EXCEPTION = new TestConnectModule(null);
 
+	@Test
 	public void testConnectFactoryNoModules() {
 		TestCountingModuleConnector connector = new TestCountingModuleConnector();
 
@@ -351,6 +357,7 @@ public class ConnectTests extends AbstractBundleTests {
 		assertEquals("Wrong number of create activator called.", 3, connector.getCreateBundleActivatorCnt());
 	}
 
+	@Test
 	public void testConnectActivator() {
 		final AtomicInteger bundleActvatorStartCalled = new AtomicInteger();
 		final AtomicInteger bundleActvatorStopCalled = new AtomicInteger();
@@ -389,6 +396,7 @@ public class ConnectTests extends AbstractBundleTests {
 		assertEquals("Wrong number of stop called.", 2, bundleActvatorStopCalled.get());
 	}
 
+	@Test
 	public void testTrueCondition() {
 		final AtomicReference<ServiceReference<Condition>> trueConditionStart = new AtomicReference<>();
 		final AtomicReference<ServiceReference<Condition>> trueConditionStop = new AtomicReference<>();
@@ -437,6 +445,7 @@ public class ConnectTests extends AbstractBundleTests {
 		});
 	}
 
+	@Test
 	public void testConnectInit() {
 		final AtomicReference<File> initFile = new AtomicReference<>();
 		final AtomicReference<File> storeFile = new AtomicReference<>();
@@ -469,10 +478,12 @@ public class ConnectTests extends AbstractBundleTests {
 		assertThrows(UnsupportedOperationException.class, () -> initConfig.get().put("k3", "v3"));
 	}
 
+	@Test
 	public void testConnectContentHeaders() throws IOException {
 		doTestConnectContentSimple(false);
 	}
 
+	@Test
 	public void testConnectContentManifest() throws IOException {
 		doTestConnectContentSimple(true);
 	}
@@ -563,10 +574,12 @@ public class ConnectTests extends AbstractBundleTests {
 				locations.contains(c.getRevision().getBundle().getLocation())));
 	}
 
+	@Test
 	public void testConnectContentActivatorsWithFrameworkLoaders() {
 		doTestConnectContentActivators(false);
 	}
 
+	@Test
 	public void testConnectContentActivatorsWithProvidedLoaders() {
 		doTestConnectContentActivators(true);
 	}
@@ -604,10 +617,12 @@ public class ConnectTests extends AbstractBundleTests {
 		});
 	}
 
+	@Test
 	public void testConnectContentEntriesWithFrameworkLoaders() {
 		doTestConnectContentEntries(false);
 	}
 
+	@Test
 	public void testConnectContentEntriesWithProvidedLoaders() {
 		doTestConnectContentEntries(true);
 	}
@@ -692,6 +707,7 @@ public class ConnectTests extends AbstractBundleTests {
 		});
 	}
 
+	@Test
 	public void testOpenCloseUpdateConnectContent() {
 		final String NAME1 = "testUpdate.1";
 		final String NAME2 = "testUpdate.2";
@@ -741,6 +757,7 @@ public class ConnectTests extends AbstractBundleTests {
 		});
 	}
 
+	@Test
 	public void testConnectBundleHeaders() throws IOException {
 		doTestConnectBundleHeaders(false, false);
 		doTestConnectBundleHeaders(true, false);
@@ -783,6 +800,7 @@ public class ConnectTests extends AbstractBundleTests {
 		}, withSignedHook);
 	}
 
+	@Test
 	public void testGetConnectHeaders() throws Exception {
 		final String NAME = "bundle";
 		final AtomicReference<Dictionary<String, String>> headers1 = new AtomicReference<>();
@@ -831,6 +849,7 @@ public class ConnectTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testInstallUpdateWithInputStream() throws Exception {
 		dotestInstallUpdate(false, false);
 		dotestInstallUpdate(false, true);
@@ -875,6 +894,7 @@ public class ConnectTests extends AbstractBundleTests {
 		});
 	}
 
+	@Test
 	public void testSystemBundleContent() {
 		TestCountingModuleConnector connector = new TestCountingModuleConnector();
 		Bundle systemBundle = getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION);
@@ -902,6 +922,7 @@ public class ConnectTests extends AbstractBundleTests {
 		doTestConnect(connector, Collections.emptyMap(), test);
 	}
 
+	@Test
 	public void testJavaExportsConnect() {
 		TestCountingModuleConnector connector = new TestCountingModuleConnector();
 		connector.setModule("javaExport", createJavaExportModule());

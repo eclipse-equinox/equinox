@@ -13,14 +13,15 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
-
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.osgi.launch.Equinox;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -42,6 +43,7 @@ public class ListenerTests extends AbstractBundleTests {
 	private BundleContext bundleContext;
 
 	public void setUp() throws Exception {
+		super.setUp();
 		methodName = getName();
 		simpleResults = new TestResults();
 		bundles = new ArrayList<>();
@@ -60,6 +62,7 @@ public class ListenerTests extends AbstractBundleTests {
 	}
 
 	public void tearDown() throws Exception {
+		super.tearDown();
 		simpleResults = null;
 		for (Bundle b : bundles) {
 			if (b != null) {
@@ -70,6 +73,7 @@ public class ListenerTests extends AbstractBundleTests {
 		stopQuietly(equinox);
 	}
 
+	@Test
 	public void testBundleListenersOrder() throws Exception {
 
 		BundleListener[] expectedBundleListeners = new BundleListener[200];
@@ -115,6 +119,7 @@ public class ListenerTests extends AbstractBundleTests {
 
 	}
 
+	@Test
 	public void testFrameworkListenersOrder() throws Exception {
 		FrameworkListener[] expectedFrameworkListeners = new FrameworkListener[100];
 
@@ -141,6 +146,7 @@ public class ListenerTests extends AbstractBundleTests {
 		assertArrayEquals(expectedFrameworkListeners, actualFrameworkListeners);
 	}
 
+	@Test
 	public void testServiceListenersOrder() throws Exception {
 		ServiceListener[] expectedServiceListeners = new ServiceListener[100];
 

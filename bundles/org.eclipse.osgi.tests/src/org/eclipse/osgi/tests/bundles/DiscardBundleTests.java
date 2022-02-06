@@ -13,6 +13,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,6 +26,7 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.Test;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
@@ -46,13 +51,14 @@ public class DiscardBundleTests extends AbstractBundleTests {
 	private File root;
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 		root = OSGiTestsActivator.getContext().getDataFile(getName());
 		createBundleDirectory();
 		createBundleJar();
 	}
 
+	@Test
 	public void testDiscardOsgiCheckConfigurationTrueOsgiDevSpecified() throws Exception {
 		Map<String, Object> configuration = createConfiguration();
 		configuration.put(OSGI_CHECKCONFIGURATION, Boolean.TRUE.toString());
@@ -60,18 +66,21 @@ public class DiscardBundleTests extends AbstractBundleTests {
 		doTest(configuration, true);
 	}
 
+	@Test
 	public void testDiscardOsgiCheckConfigurationTrueOsgiDevUnspecified() throws Exception {
 		Map<String, Object> configuration = createConfiguration();
 		configuration.put(OSGI_CHECKCONFIGURATION, Boolean.TRUE.toString());
 		doTest(configuration, true);
 	}
 
+	@Test
 	public void testDiscardOsgiCheckConfigurationUnspecifiedOsgiDevSpecified() throws Exception {
 		Map<String, Object> configuration = createConfiguration();
 		configuration.put(OSGI_DEV, "");
 		doTest(configuration, true);
 	}
 
+	@Test
 	public void testNoDiscardOsgiCheckConfigurationFalseOsgiDevSpecified() throws Exception {
 		Map<String, Object> configuration = createConfiguration();
 		configuration.put(OSGI_CHECKCONFIGURATION, Boolean.FALSE.toString());
@@ -79,16 +88,19 @@ public class DiscardBundleTests extends AbstractBundleTests {
 		doTest(configuration, false);
 	}
 
+	@Test
 	public void testNoDiscardOsgiCheckConfigurationFalseOsgiDevUnspecified() throws Exception {
 		Map<String, Object> configuration = createConfiguration();
 		configuration.put(OSGI_CHECKCONFIGURATION, Boolean.FALSE.toString());
 		doTest(configuration, false);
 	}
 
+	@Test
 	public void testNoDiscardOsgiCheckConfigurationUnspecifiedOsgiDevUnspecified() throws Exception {
 		doTest(createConfiguration(), false);
 	}
 
+	@Test
 	public void testDiscardDeletedBundleFile() throws Exception {
 		doTestDiscardDeletedBundleFile(getDirectoryLocation());
 		doTestDiscardDeletedBundleFile(getJarLocation());

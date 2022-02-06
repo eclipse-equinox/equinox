@@ -13,6 +13,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
@@ -20,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
@@ -84,6 +89,7 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testBundleEvents01() throws Exception {
 		Bundle chainTest = installer.installBundle("chain.test"); //$NON-NLS-1$
 		Bundle chainTestA = installer.installBundle("chain.test.a"); //$NON-NLS-1$
@@ -113,6 +119,7 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testBundleEvents02() throws Exception {
 		Bundle chainTest = installer.installBundle("chain.test"); //$NON-NLS-1$
 		Bundle chainTestA = installer.installBundle("chain.test.a"); //$NON-NLS-1$
@@ -158,6 +165,7 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testBug259903() throws Exception {
 		Bundle bug259903a = installer.installBundle("test.bug259903.a"); //$NON-NLS-1$
 		Bundle bug259903b = installer.installBundle("test.bug259903.b"); //$NON-NLS-1$
@@ -173,6 +181,7 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 		compareResults(expectedEvents, actualEvents);
 	}
 
+	@Test
 	public void testBug287636() throws Exception {
 		Bundle bug287636a = installer.installBundle("test.bug287636.a1"); //$NON-NLS-1$
 		Bundle bug287636b = installer.installBundle("test.bug287636.b"); //$NON-NLS-1$
@@ -207,6 +216,7 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong version", new Version(1, 1, 0), eps[0].getVersion()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBug289719() throws Exception {
 		Bundle bug259903a = installer.installBundle("test.bug259903.a"); //$NON-NLS-1$
 		Bundle bug259903b = installer.installBundle("test.bug259903.b"); //$NON-NLS-1$
@@ -248,6 +258,7 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testBug415447() {
 		PackageAdmin pa = installer.getPackageAdmin();
 		Bundle[] systemBundles = pa.getBundles(Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null);
@@ -256,6 +267,7 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong system bundle found.", OSGiTestsActivator.getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION), systemBundles[0]);
 	}
 
+	@Test
 	public void testUninstallWhileResolving() throws BundleException {
 		ServiceRegistration<ResolverHookFactory> resolverHookReg = getContext().registerService(ResolverHookFactory.class, triggers -> new ResolverHook() {
 

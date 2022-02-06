@@ -13,7 +13,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.securityadmin;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.security.AllPermission;
 import java.security.CodeSource;
@@ -32,6 +38,7 @@ import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
 import org.junit.Assert;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -69,7 +76,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 	private Policy previousPolicy;
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		assertNull("Cannot test with security manager set", System.getSecurityManager());
 		previousPolicy = Policy.getPolicy();
 		final Permission allPermission = new AllPermission();
@@ -126,13 +133,14 @@ public class SecurityManagerTests extends AbstractBundleTests {
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
+	public void tearDown() throws Exception {
 		super.tearDown();
 		if (System.getSecurityManager() != null)
 			System.setSecurityManager(null);
 		Policy.setPolicy(previousPolicy);
 	}
 
+	@Test
 	public void testEnableSecurityManager01() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile("testEnableSecurityManager01"); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
@@ -153,6 +161,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testEnableSecurityManager02() throws BundleException {
 		// create/start/stop/start/stop test
 		File config = OSGiTestsActivator.getContext().getDataFile("testEnableSecurityManager02"); //$NON-NLS-1$
@@ -193,6 +202,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testEnableSecurityManager03() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile("testEnableSecurityManager03"); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
@@ -252,6 +262,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testEnableSecurityManager04() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile("testEnableSecurityManager04"); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
@@ -309,6 +320,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testEnableSecurityManager05() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
@@ -348,6 +360,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testLocalization01() throws BundleException {
 		// create/start/stop/start/stop test
 		File config = OSGiTestsActivator.getContext().getDataFile("testLocalization01"); //$NON-NLS-1$
@@ -394,6 +407,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBug254600() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile("testBug254600"); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
@@ -439,6 +453,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBug287750() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		Map<String, Object> configuration = new HashMap<>();
@@ -472,6 +487,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBug367614() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
@@ -521,6 +537,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testDynamicImportWithSecurity() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		Map<String, Object> configuration = new HashMap<>();
@@ -580,18 +597,22 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testJava12SecurityManagerAllow() {
 		doJava12SecurityManagerSetting("allow", false);
 	}
 
+	@Test
 	public void testJava12SecurityManagerDisallow() {
 		doJava12SecurityManagerSetting("disallow", false);
 	}
 
+	@Test
 	public void testJava12SecurityManagerDefault() {
 		doJava12SecurityManagerSetting("default", true);
 	}
 
+	@Test
 	public void testJava12SecurityManagerEmpty() {
 		doJava12SecurityManagerSetting("", true);
 	}

@@ -13,8 +13,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.serviceregistry;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,6 +29,7 @@ import java.util.List;
 import junit.framework.AssertionFailedError;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
+import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -38,6 +44,7 @@ import org.osgi.framework.hooks.service.ListenerHook;
 
 public class ServiceHookTests extends AbstractBundleTests {
 
+	@Test
 	public void testFindHook01() throws InvalidSyntaxException {
 		final String testMethodName = "testFindHook01"; //$NON-NLS-1$
 		// test the FindHook is called and can remove a reference from the results
@@ -254,6 +261,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testEventHook01() throws InvalidSyntaxException {
 		final String testMethodName = "testEventHook01"; //$NON-NLS-1$
 		// test the EventHook is called and can remove a reference from the results
@@ -398,6 +406,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testListenerHook01() throws InvalidSyntaxException {
 		final String testMethodName = "testListenerHook01"; //$NON-NLS-1$
 		// test the ListenerHook is called
@@ -491,6 +500,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testListenerHook02() throws InvalidSyntaxException {
 		final String testMethodName = "testListenerHook02"; //$NON-NLS-1$
 		// test the ListenerHook works with the FilteredServiceListener optimization in equinox

@@ -13,13 +13,17 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import static org.junit.Assert.assertTrue;
+
 import java.awt.image.ImageProducer;
 import java.io.IOException;
 import java.net.URL;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 
 public class URLHandlerTests extends AbstractBundleTests {
 
+	@Test
 	public void testURLHandlerUnregister() throws Exception {
 		Bundle test = installer.installBundle("test.protocol.handler"); //$NON-NLS-1$
 		test.start();
@@ -31,6 +35,7 @@ public class URLHandlerTests extends AbstractBundleTests {
 		testURL.openConnection().connect();
 	}
 
+	@Test
 	public void testImageProducer() throws IOException {
 		URL testImage = getClass().getResource("debug.gif");
 		Object content = testImage.getContent();

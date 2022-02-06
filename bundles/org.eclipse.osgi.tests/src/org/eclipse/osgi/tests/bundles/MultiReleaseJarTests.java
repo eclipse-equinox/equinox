@@ -13,7 +13,11 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -40,6 +44,7 @@ import java.util.jar.Manifest;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.storage.StorageUtil;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -60,14 +65,14 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 	private String originalSpecVersion;
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 		mrJarBundle = createMRJarBundle();
 		originalSpecVersion = System.getProperty("java.specification.version");
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
+	public void tearDown() throws Exception {
 		super.tearDown();
 		System.setProperty("java.specification.version", originalSpecVersion);
 	}
@@ -333,18 +338,22 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		return result;
 	}
 
+	@Test
 	public void testMultiRelease8ClassLoad() throws Exception {
 		doTestMultiReleaseClassLoad(8);
 	}
 
+	@Test
 	public void testMultiRelease9ClassLoad() throws Exception {
 		doTestMultiReleaseClassLoad(9);
 	}
 
+	@Test
 	public void testMultiRelease10ClassLoad() throws Exception {
 		doTestMultiReleaseClassLoad(10);
 	}
 
+	@Test
 	public void testMultiRelease11ClassLoad() throws Exception {
 		doTestMultiReleaseClassLoad(11);
 	}
@@ -409,18 +418,22 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testMultiRelease8GetResource() throws Exception {
 		doTestMultiReleaseGetResource(8);
 	}
 
+	@Test
 	public void testMultiRelease9GetResource() throws Exception {
 		doTestMultiReleaseGetResource(9);
 	}
 
+	@Test
 	public void testMultiRelease10GetResource() throws Exception {
 		doTestMultiReleaseGetResource(10);
 	}
 
+	@Test
 	public void testMultiRelease11GetResource() throws Exception {
 		doTestMultiReleaseGetResource(11);
 	}
@@ -515,18 +528,22 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testMultiRelease8GetResources() throws Exception {
 		doTestMultiReleaseGetResources(8);
 	}
 
+	@Test
 	public void testMultiRelease9GetResources() throws Exception {
 		doTestMultiReleaseGetResources(9);
 	}
 
+	@Test
 	public void testMultiRelease10GetResources() throws Exception {
 		doTestMultiReleaseGetResources(10);
 	}
 
+	@Test
 	public void testMultiRelease11GetResources() throws Exception {
 		doTestMultiReleaseGetResources(11);
 	}
@@ -592,18 +609,22 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		return readURL(urls.get(0));
 	}
 
+	@Test
 	public void testMultiRelease8ListResources() throws Exception {
 		doTestMultiReleaseListResources(8);
 	}
 
+	@Test
 	public void testMultiRelease9ListResources() throws Exception {
 		doTestMultiReleaseListResources(9);
 	}
 
+	@Test
 	public void testMultiRelease10ListResources() throws Exception {
 		doTestMultiReleaseListResources(10);
 	}
 
+	@Test
 	public void testMultiRelease11ListResources() throws Exception {
 		doTestMultiReleaseListResources(11);
 	}
@@ -681,18 +702,22 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		assertEquals("Wrong resource listing.", new HashSet<>(expected), new HashSet<>(found));
 	}
 
+	@Test
 	public void testMultiReleaseBundleManifest8() throws Exception {
 		doTestMultiReleaseBundleManifest(8);
 	}
 
+	@Test
 	public void testMultiReleaseBundleManifest9() throws Exception {
 		doTestMultiReleaseBundleManifest(9);
 	}
 
+	@Test
 	public void testMultiReleaseBundleManifest10() throws Exception {
 		doTestMultiReleaseBundleManifest(10);
 	}
 
+	@Test
 	public void testMultiReleaseBundleManifest11() throws Exception {
 		doTestMultiReleaseBundleManifest(11);
 	}
@@ -736,6 +761,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testMultiReleaseBundleManifestChangeRuntime() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, String> configMap = Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
@@ -812,6 +838,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testMultiReleaseBundleDeletedRestart() throws Exception {
 		File copyMrJarBundle = OSGiTestsActivator.getContext().getDataFile("copy-" + mrJarBundle.getName());
 		StorageUtil.copy(mrJarBundle, copyMrJarBundle);
@@ -843,6 +870,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testMultiReleasePreventMetaInfServiceVersions() throws Exception {
 		System.setProperty("java.specification.version", "9");
 
@@ -865,6 +893,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testMultiReleasePreventMetaInfResourceURLs() throws Exception {
 		System.setProperty("java.specification.version", "9");
 
@@ -888,6 +917,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testMultiReleasePreventMetaInfVersionListing() throws Exception {
 		System.setProperty("java.specification.version", "9");
 

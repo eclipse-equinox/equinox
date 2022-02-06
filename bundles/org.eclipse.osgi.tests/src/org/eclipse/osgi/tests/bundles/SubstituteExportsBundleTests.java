@@ -13,8 +13,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.service.packageadmin.ExportedPackage;
@@ -22,6 +26,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
 
 public class SubstituteExportsBundleTests extends AbstractBundleTests {
 
+	@Test
 	public void testSubstituteExports01x() throws Exception {
 		Bundle a = installer.installBundle("substitutes.a"); //$NON-NLS-1$
 		Bundle b = installer.installBundle("substitutes.b"); //$NON-NLS-1$
@@ -35,6 +40,7 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		assertEquals("class from d is wrong", ax, d.loadClass(className)); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstituteExports01y() throws Exception {
 		Bundle a = installer.installBundle("substitutes.a"); //$NON-NLS-1$
 		Bundle b = installer.installBundle("substitutes.b"); //$NON-NLS-1$
@@ -48,6 +54,7 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		assertEquals("class from d is wrong", ax, d.loadClass(className)); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstituteExports02() throws Exception {
 		Bundle a = installer.installBundle("substitutes.a"); //$NON-NLS-1$
 		Bundle b = installer.installBundle("substitutes.b"); //$NON-NLS-1$
@@ -61,6 +68,7 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		assertEquals("class from d is wrong", ax, f.loadClass(className)); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstituteExports03() throws Exception {
 		Bundle a = installer.installBundle("substitutes.a"); //$NON-NLS-1$
 		Bundle b = installer.installBundle("substitutes.b"); //$NON-NLS-1$
@@ -78,6 +86,7 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		assertEquals("class from d is wrong", ax, h.loadClass(className)); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstituteExports04() throws Exception {
 		Bundle a = installer.installBundle("substitutes.a"); //$NON-NLS-1$
 		installer.installBundle("substitutes.a.frag"); //$NON-NLS-1$
@@ -99,6 +108,7 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		assertEquals("class from d is wrong", aq, d.loadClass(className2)); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstituteExports05() throws Exception {
 		Bundle a = installer.installBundle("substitutes.a"); //$NON-NLS-1$
 		installer.installBundle("substitutes.a.frag"); //$NON-NLS-1$
@@ -126,6 +136,7 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		assertEquals("class from d is wrong", aq, h.loadClass(className2)); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstituteExports06() throws Exception {
 		Bundle iBundle = installer.installBundle("substitutes.i"); //$NON-NLS-1$
 		Bundle jBundle = installer.installBundle("substitutes.j"); //$NON-NLS-1$
@@ -192,6 +203,7 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testSubstituteExports07() throws Exception {
 		// same as previous split test but bundles are installed in opposite order to force the opposite classes to load
 		Bundle jBundle = installer.installBundle("substitutes.j"); //$NON-NLS-1$
@@ -258,6 +270,7 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testSubstituteExports08() throws BundleException {
 		Bundle a = installer.installBundle("substitutes.a"); //$NON-NLS-1$
 		Bundle b = installer.installBundle("substitutes.b"); //$NON-NLS-1$
@@ -267,6 +280,7 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		doRefreshTest(allBundles, a);
 	}
 
+	@Test
 	public void testSubstituteExports09() throws BundleException {
 		Bundle a = installer.installBundle("substitutes.a"); //$NON-NLS-1$
 		Bundle b = installer.installBundle("substitutes.b"); //$NON-NLS-1$
@@ -276,6 +290,7 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		doRefreshTest(allBundles, a);
 	}
 
+	@Test
 	public void testSubstituteExports10() throws BundleException {
 		Bundle a = installer.installBundle("substitutes.a"); //$NON-NLS-1$
 		Bundle b = installer.installBundle("substitutes.b"); //$NON-NLS-1$
@@ -287,6 +302,7 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		doRefreshTest(allBundles, a);
 	}
 
+	@Test
 	public void testSubstituteExports11() throws BundleException {
 		Bundle iBundle = installer.installBundle("substitutes.i"); //$NON-NLS-1$
 		Bundle jBundle = installer.installBundle("substitutes.j"); //$NON-NLS-1$
@@ -300,6 +316,7 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		doRefreshTest(allBundles, iBundle);
 	}
 
+	@Test
 	public void testSubstituteExports12() throws BundleException {
 		Bundle jBundle = installer.installBundle("substitutes.j"); //$NON-NLS-1$
 		Bundle iBundle = installer.installBundle("substitutes.i"); //$NON-NLS-1$
@@ -326,6 +343,7 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong number of bundles refreshed", allBundles.length, refreshed.length); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstituteExports13() throws BundleException {
 		Bundle a = installer.installBundle("substitutes.a"); //$NON-NLS-1$
 		Bundle b = installer.installBundle("substitutes.b"); //$NON-NLS-1$
@@ -359,6 +377,7 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testSubstituteExports14() throws BundleException {
 		Bundle iBundle = installer.installBundle("substitutes.i"); //$NON-NLS-1$
 		Bundle jBundle = installer.installBundle("substitutes.j"); //$NON-NLS-1$

@@ -13,9 +13,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.serviceregistry;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Hashtable;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
+import org.junit.Test;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -26,6 +30,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class ServiceTrackerTests extends AbstractBundleTests {
 
+	@Test
 	public void testServiceTracker01() throws InvalidSyntaxException {
 		final String testMethodName = getName();
 		// simple ServiceTracker test
@@ -100,6 +105,7 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testServiceTracker02() throws InvalidSyntaxException {
 		final String testMethodName = getName();
 		// simple ServiceTracker test
@@ -174,6 +180,7 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testServiceTracker03() throws InvalidSyntaxException {
 		final String testMethodName = getName();
 		// simple ServiceTracker test

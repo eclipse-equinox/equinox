@@ -14,6 +14,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -26,10 +30,13 @@ import java.util.jar.Attributes;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
-import junit.framework.TestCase;
 import org.eclipse.osgi.framework.util.ThreadInfoReport;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -38,7 +45,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.launch.Framework;
 
-public class AbstractBundleTests extends TestCase {
+public class AbstractBundleTests {
 	public static int BUNDLE_LISTENER = 0x01;
 	public static int SYNC_BUNDLE_LISTENER = 0x02;
 	public static int SIMPLE_RESULTS = 0x04;
@@ -79,28 +86,37 @@ public class AbstractBundleTests extends TestCase {
 		}
 	}
 
-	protected void setUp() throws Exception {
-		installer = new BundleInstaller(BUNDLES_ROOT, OSGiTestsActivator.getContext());
+	@Before
+	public void setUp() throws Exception {
+		installer = new BundleInstaller(BUNDLES_ROOT, getContext());
 		installer.refreshPackages(null);
 		listenerResults = new EventListenerTestResults();
-		OSGiTestsActivator.getContext().addBundleListener(listenerResults);
+		getContext().addBundleListener(listenerResults);
 		syncListenerResults = new SyncEventListenerTestResults();
-		OSGiTestsActivator.getContext().addBundleListener(syncListenerResults);
+		getContext().addBundleListener(syncListenerResults);
 		simpleResults = new TestResults();
 		frameworkListenerResults = new EventListenerTestResults();
-		OSGiTestsActivator.getContext().addFrameworkListener(frameworkListenerResults);
+		getContext().addFrameworkListener(frameworkListenerResults);
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		installer.shutdown();
 		installer = null;
-		OSGiTestsActivator.getContext().removeBundleListener(listenerResults);
-		OSGiTestsActivator.getContext().removeBundleListener(syncListenerResults);
-		OSGiTestsActivator.getContext().removeFrameworkListener(frameworkListenerResults);
+		getContext().removeBundleListener(listenerResults);
+		getContext().removeBundleListener(syncListenerResults);
+		getContext().removeFrameworkListener(frameworkListenerResults);
 		listenerResults = null;
 		syncListenerResults = null;
 		simpleResults = null;
 		frameworkListenerResults = null;
+	}
+
+	@Rule
+	public final TestName testName = new TestName();
+
+	protected String getName() {
+		return testName.getMethodName();
 	}
 
 	public BundleContext getContext() {
@@ -224,7 +240,7 @@ public class AbstractBundleTests extends TestCase {
 	}
 
 	protected Map<String, Object> createConfiguration() {
-		File file = OSGiTestsActivator.getContext().getDataFile(getName());
+		File file = getContext().getDataFile(getName());
 		Map<String, Object> result = new HashMap<>();
 		result.put(Constants.FRAMEWORK_STORAGE, file.getAbsolutePath());
 		return result;

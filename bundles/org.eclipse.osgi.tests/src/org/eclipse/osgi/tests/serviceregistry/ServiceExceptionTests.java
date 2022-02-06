@@ -13,10 +13,15 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.serviceregistry;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.util.Hashtable;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
 import org.junit.Assert;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
@@ -28,6 +33,7 @@ import org.osgi.framework.ServiceRegistration;
 
 public class ServiceExceptionTests extends AbstractBundleTests {
 
+	@Test
 	public void testServiceException01() throws InterruptedException, InvalidSyntaxException {
 		final String testMethodName = "testServiceException01"; //$NON-NLS-1$
 		// test a service factory which returns wrong object types
@@ -56,6 +62,7 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testServiceException02() throws InterruptedException, InvalidSyntaxException {
 		final String testMethodName = "testServiceException02"; //$NON-NLS-1$
 		// test a service factory which returns null objects
@@ -84,6 +91,7 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testServiceException03() throws InterruptedException, InvalidSyntaxException {
 		final String testMethodName = "testServiceException03"; //$NON-NLS-1$
 		// test a service factory which throws a RuntimeException
@@ -113,6 +121,7 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testServiceException04() throws InterruptedException, InvalidSyntaxException {
 		final String testMethodName = "testServiceException04"; //$NON-NLS-1$
 		// test a service factory which throws an Error

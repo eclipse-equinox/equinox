@@ -13,7 +13,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -25,6 +28,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -41,17 +45,18 @@ public class ImportJavaSEPackagesTests extends AbstractBundleTests {
 	private static String originalSpecVersion;
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 		originalSpecVersion = System.getProperty("java.specification.version");
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
+	public void tearDown() throws Exception {
 		super.tearDown();
 		System.setProperty("java.specification.version", originalSpecVersion);
 	}
 
+	@Test
 	public void testExportPackageCannotContainJavaPackages() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		Map<String, String> headers = new HashMap<>();
@@ -76,6 +81,7 @@ public class ImportJavaSEPackagesTests extends AbstractBundleTests {
 
 	}
 
+	@Test
 	public void testImportPackageCanContainJavaPackages() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		Map<String, String> headers = new HashMap<>();
@@ -100,6 +106,7 @@ public class ImportJavaSEPackagesTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testSystemPackages() throws Exception {
 		Map<Integer, Integer> packagesPerVersion = new HashMap<>();
 		packagesPerVersion.put(8, 63);

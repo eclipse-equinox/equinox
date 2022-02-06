@@ -13,6 +13,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -22,12 +28,14 @@ import java.util.Map;
 import org.eclipse.osgi.container.ModuleCapability;
 import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.namespace.NativeNamespace;
 import org.osgi.framework.wiring.BundleRevision;
 
 public class NativeCodeBundleTests extends AbstractBundleTests {
 
+	@Test
 	public void testNativeCode01() throws Exception {
 		Bundle nativetestA1 = installer.installBundle("nativetest.a1");
 		nativetestA1.start();
@@ -45,6 +53,7 @@ public class NativeCodeBundleTests extends AbstractBundleTests {
 		assertFalse("1.4", a1Results[0].equals(a2Results[0]));
 	}
 
+	@Test
 	public void testNativeCode02() throws Exception {
 		Bundle nativetestB1 = installer.installBundle("nativetest.b1");
 		nativetestB1.start();
@@ -62,6 +71,7 @@ public class NativeCodeBundleTests extends AbstractBundleTests {
 		assertFalse("1.4", b1Results[0].equals(b2Results[0]));
 	}
 
+	@Test
 	public void testNativeCode03() throws Exception {
 		setNativeAttribute("nativecodetest", "1");
 
@@ -74,6 +84,7 @@ public class NativeCodeBundleTests extends AbstractBundleTests {
 		assertEquals("1.1", "libs.test1", getContent((String) results[0]));
 	}
 
+	@Test
 	public void testNativeCode04() throws Exception {
 		setNativeAttribute("nativecodetest", "unresolved");
 		Bundle nativetestC = installer.installBundle("nativetest.c");
@@ -81,6 +92,7 @@ public class NativeCodeBundleTests extends AbstractBundleTests {
 		assertTrue("1.0", nativetestC.getState() == Bundle.INSTALLED);
 	}
 
+	@Test
 	public void testNativeCode05() throws Exception {
 		setNativeAttribute("nativecodetest", "2");
 		Bundle nativetestC = installer.installBundle("nativetest.c");
@@ -92,6 +104,7 @@ public class NativeCodeBundleTests extends AbstractBundleTests {
 		assertEquals("1.1", "libs.test3", getContent((String) results[0]));
 	}
 
+	@Test
 	public void testNativeCode06() throws Exception {
 		setNativeAttribute("nativecodetest", "3");
 		Bundle nativetestC = installer.installBundle("nativetest.c");
@@ -103,6 +116,7 @@ public class NativeCodeBundleTests extends AbstractBundleTests {
 		assertEquals("1.1", "libs.test2", getContent((String) results[0]));
 	}
 
+	@Test
 	public void testNativeCode07() throws Exception {
 		Bundle nativetestC = installer.installBundle("nativetest.d");
 		nativetestC.start();
@@ -113,6 +127,7 @@ public class NativeCodeBundleTests extends AbstractBundleTests {
 		assertNull("1.1", results[0]);
 	}
 
+	@Test
 	public void testNativeCode08() throws Exception {
 		setNativeAttribute("nativecodetest", "4");
 		Bundle nativetestC = installer.installBundle("nativetest.c");
@@ -125,6 +140,7 @@ public class NativeCodeBundleTests extends AbstractBundleTests {
 		assertNull("1.1", results[0]);
 	}
 
+	@Test
 	public void testNativeCode09() throws Exception {
 		setNativeAttribute("nativecodetest", "1");
 

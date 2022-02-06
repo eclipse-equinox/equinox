@@ -13,8 +13,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.util.Map;
 import org.eclipse.osgi.launch.Equinox;
+import org.junit.Test;
 
 /*
  * The framework must persist data according to the value of the
@@ -38,6 +42,7 @@ public class PersistedBundleTests extends AbstractBundleTests {
 	 * Test that a value of zero for eclipse.stateSaveDelayInterval results in
 	 * immediate persistence.
 	 */
+	@Test
 	public void testImmediatePersistence() throws Exception {
 		Map<String, Object> configuration = createConfiguration();
 		configuration.put(ECLIPSE_STATESAVEDELAYINTERVAL, IMMEDIATE_PERSISTENCE);
@@ -62,6 +67,7 @@ public class PersistedBundleTests extends AbstractBundleTests {
 	 * Test that a negative value for eclipse.stateSaveDelayInterval results in
 	 * no persistence.
 	 */
+	@Test
 	public void testNoPersistence() throws Exception {
 		Map<String, Object> configuration = createConfiguration();
 		configuration.put(ECLIPSE_STATESAVEDELAYINTERVAL, NO_PERSISTENCE);
@@ -95,6 +101,7 @@ public class PersistedBundleTests extends AbstractBundleTests {
 	 * Test that a positive value for eclipse.stateSaveDelayInterval results in
 	 * periodic persistence.
 	 */
+	@Test
 	public void testPeriodicPersistence() throws Exception {
 		// Specify periodic persistence in the configuration.
 		Map<String, Object> configuration = createConfiguration();

@@ -13,6 +13,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.serviceregistry;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.CountDownLatch;
@@ -21,6 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
 import org.eclipse.osgi.tests.util.MapDictionary;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
@@ -34,6 +41,7 @@ import org.osgi.framework.ServiceRegistration;
 
 public class ServiceRegistryTests extends AbstractBundleTests {
 
+	@Test
 	public void testServiceListener01() throws InvalidSyntaxException {
 		final String testMethodName = getName();
 		// simple ServiceListener test
@@ -122,6 +130,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testServiceListener02() throws InvalidSyntaxException {
 		final String testMethodName = getName();
 		// simple ServiceListener test
@@ -210,6 +219,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testServiceListener03() throws InvalidSyntaxException {
 		final String testMethodName = getName();
 		// simple ServiceListener test
@@ -332,6 +342,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testServiceOrdering01() {
 		final String testMethodName = getName();
 		// test that getServiceReference returns the proper service
@@ -367,6 +378,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testDuplicateObjectClass() {
 		ServiceRegistration reg = null;
 		try {
@@ -379,6 +391,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testServiceReferenceCompare01() {
 		final String testMethodName = getName();
 		// test that getServiceReference returns the proper service
@@ -432,6 +445,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testModifiedRanking() {
 		Runnable runIt = () -> {
 			// nothing
@@ -456,6 +470,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testInvalidRanking() throws InterruptedException {
 		final CountDownLatch warning = new CountDownLatch(1);
 		FrameworkListener warningListener = event -> {
@@ -482,6 +497,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		assertTrue("Timeout waiting for the warning.", warning.await(5, TimeUnit.SECONDS));
 	}
 
+	@Test
 	public void testNullValue() throws InvalidSyntaxException {
 		ServiceRegistration reg = null;
 		try {
@@ -499,6 +515,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testNullKey() throws InvalidSyntaxException {
 		ServiceRegistration reg = null;
 		try {
@@ -514,6 +531,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testWrongServiceFactoryObject() throws InterruptedException {
 		AtomicReference<String> errorMsg = new AtomicReference<>();
 		CountDownLatch gotEvent = new CountDownLatch(1);

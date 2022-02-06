@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.security;
 
-import junit.framework.TestCase;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -24,5 +23,5 @@ import org.junit.runners.Suite;
 		SignedBundleTest.class, //
 		OSGiAPICertificateTest.class //
 })
-public class SecurityTestSuite extends TestCase {
+public class SecurityTestSuite {
 }

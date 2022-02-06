@@ -13,7 +13,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,6 +36,7 @@ import java.util.concurrent.Callable;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -41,6 +47,7 @@ import org.osgi.framework.wiring.BundleWiring;
 public class BundleInstallUpdateTests extends AbstractBundleTests {
 
 	// test installing with location
+	@Test
 	public void testInstallWithLocation01() throws BundleException {
 		String location = installer.getBundleLocation("test"); //$NON-NLS-1$
 		Bundle test = installer.installBundleAtLocation(location);
@@ -48,6 +55,7 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 	}
 
 	// test installing with location and null stream
+	@Test
 	public void testInstallWithLocation02() throws BundleException {
 		String location = installer.getBundleLocation("test"); //$NON-NLS-1$
 		Bundle test = installer.installBundleAtLocation(location);
@@ -55,6 +63,7 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 	}
 
 	// test installing with location and non-null stream
+	@Test
 	public void testInstallWithStream03() throws Exception {
 		String location1 = installer.getBundleLocation("test"); //$NON-NLS-1$
 		String location2 = installer.getBundleLocation("test2"); //$NON-NLS-1$
@@ -63,6 +72,7 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 	}
 
 	// test update with null stream
+	@Test
 	public void testUpdateNoStream01() throws BundleException {
 		String location = installer.getBundleLocation("test"); //$NON-NLS-1$
 		Bundle test = installer.installBundleAtLocation(location);
@@ -72,6 +82,7 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 	}
 
 	// test update with null stream
+	@Test
 	public void testUpdateNoStream02() throws BundleException {
 		String location = installer.getBundleLocation("test"); //$NON-NLS-1$
 		Bundle test = installer.installBundleAtLocation(location);
@@ -81,6 +92,7 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 	}
 
 	// test update with null stream
+	@Test
 	public void testUpdateWithStream01() throws Exception {
 		String location1 = installer.getBundleLocation("test"); //$NON-NLS-1$
 		String location2 = installer.getBundleLocation("test2"); //$NON-NLS-1$
@@ -91,6 +103,7 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 	}
 
 	// test update with null stream
+	@Test
 	public void testUpdateWithStream02() throws Exception {
 		String location1 = installer.getBundleLocation("test"); //$NON-NLS-1$
 		String location2 = installer.getBundleLocation("test2"); //$NON-NLS-1$
@@ -108,6 +121,7 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 		assertTrue("Wrong bundle: " + tests[0], tests[0] == test); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBug290193() throws Exception {
 		URL testBundle = OSGiTestsActivator.getBundle().getEntry("test_files/security/bundles/signed.jar");
 		File testFile = OSGiTestsActivator.getContext().getDataFile("test with space/test.jar");
@@ -116,6 +130,7 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 		installer.installBundleAtLocation("reference:" + testFile.toURI().toString());
 	}
 
+	@Test
 	public void testCollisionHook() throws BundleException, IOException {
 		Bundle test1 = installer.installBundle("test");
 		installer.installBundle("test2");
@@ -146,33 +161,39 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testInstallWithInterruption() throws BundleException {
 		Thread.currentThread().interrupt();
 		installer.installBundle("test"); //$NON-NLS-1$
 		// TODO: check that the bundle is uninstalled
 	}
 
+	@Test
 	public void testPercentLocation() throws Exception {
 		doTestSpecialChars('%', false);
 		doTestSpecialChars('%', true);
 	}
 
+	@Test
 	public void testSpaceLocation() throws Exception {
 		doTestSpecialChars(' ', false);
 		doTestSpecialChars(' ', true);
 	}
 
+	@Test
 	public void testPlusLocation() throws Exception {
 		doTestSpecialChars('+', true);
 		doTestSpecialChars('+', false);
 	}
 
+	@Test
 	public void testOctothorpLocation() throws Exception {
 		doTestSpecialChars('#', true);
 		// # must be encoded for anything to pass
 		doTestSpecialChars('#', false, false, false);
 	}
 
+	@Test
 	public void testQuestionMarkLocation() throws Exception {
 		if (Platform.getOS().equals(Platform.OS_WIN32)) {
 			// Skip this test on windows
@@ -230,14 +251,17 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 		}
 	}
 
+	@Test
 	public void testPercentCharBundleEntry() throws IOException, BundleException {
 		doTestSpaceCharsBundleEntry('%');
 	}
 
+	@Test
 	public void testSpaceCharBundleEntry() throws IOException, BundleException {
 		doTestSpaceCharsBundleEntry(' ');
 	}
 
+	@Test
 	public void testPlusCharBundleEntry() throws IOException, BundleException {
 		doTestSpaceCharsBundleEntry('+');
 	}
@@ -277,6 +301,7 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 		throw new NoSuchMethodException(method);
 	}
 
+	@Test
 	public void testEscapeZipRoot() throws Exception {
 		String entry1 = "../../escapedZipRoot1.txt";
 		String entry2 = "dir1/../../../escapedZipRoot2.txt";

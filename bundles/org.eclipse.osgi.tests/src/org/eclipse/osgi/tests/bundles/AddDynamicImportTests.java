@@ -14,6 +14,7 @@
 package org.eclipse.osgi.tests.bundles;
 
 import static org.eclipse.osgi.util.ManifestElement.parseHeader;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import java.io.File;
@@ -35,6 +36,7 @@ import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.util.ManifestElement;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -43,6 +45,7 @@ import org.osgi.framework.wiring.BundleWiring;
 
 public class AddDynamicImportTests extends AbstractBundleTests {
 
+	@Test
 	public void testAddDynamicImportMultipleTimes() throws Exception {
 		ManifestElement[] packageImport = parseHeader(Constants.DYNAMICIMPORT_PACKAGE, "org.osgi.framework");
 		// test with three threads in parallel
@@ -69,6 +72,7 @@ public class AddDynamicImportTests extends AbstractBundleTests {
 		});
 	}
 
+	@Test
 	public void testAddDynamicImportWhileDynamicWiring() throws Exception {
 		ManifestElement[] packageImport = parseHeader(Constants.DYNAMICIMPORT_PACKAGE, "org.osgi.framework");
 		// test with five threads in parallel

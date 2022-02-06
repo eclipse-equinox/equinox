@@ -13,9 +13,14 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
@@ -27,6 +32,7 @@ public class ExtensionBundleTests extends AbstractBundleTests {
 
 	public static List<String> events = new ArrayList<>();
 
+	@Test
 	public void testFrameworkExtension01() throws Exception {
 		Bundle fwkext = installer.installBundle("ext.framework.a", false); //$NON-NLS-1$
 		Bundle importer = installer.installBundle("ext.framework.a.importer"); //$NON-NLS-1$
@@ -40,6 +46,7 @@ public class ExtensionBundleTests extends AbstractBundleTests {
 		assertEquals("1.2", "success", results[1]); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	@Test
 	public void testFrameworkExtension02() throws Exception {
 		Bundle fwkext = installer.installBundle("ext.framework.a", false); //$NON-NLS-1$
 		Bundle importer = installer.installBundle("ext.framework.a.requires"); //$NON-NLS-1$
@@ -53,6 +60,7 @@ public class ExtensionBundleTests extends AbstractBundleTests {
 		assertEquals("1.2", "success", results[1]); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	@Test
 	public void testExtClasspathExtension01() throws Exception {
 		Bundle fwkext = installer.installBundle("ext.extclasspath.a", false); //$NON-NLS-1$
 		Bundle importer = installer.installBundle("ext.extclasspath.a.importer"); //$NON-NLS-1$
@@ -66,6 +74,7 @@ public class ExtensionBundleTests extends AbstractBundleTests {
 		assertEquals("1.2", "success", results[1]); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	@Test
 	public void testExtensionBundleWithRequireCapabilityOsgiEeInstalls() throws BundleException {
 		Bundle b = installer.installBundle("ext.framework.osgiee.b", false);
 		assertTrue("Could not resolve bundle: " + b, installer.resolveBundles(new Bundle[] {b}));
@@ -79,6 +88,7 @@ public class ExtensionBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong provider for osgi.ee: " + eeWire.getProvider().getBundle(), 0, eeWire.getProvider().getBundle().getBundleId());
 	}
 
+	@Test
 	public void testActivatorOrder() throws Exception {
 		Bundle b = installer.installBundle("ext.framework.a", false);
 		Bundle bImp = installer.installBundle("ext.framework.a.importer");

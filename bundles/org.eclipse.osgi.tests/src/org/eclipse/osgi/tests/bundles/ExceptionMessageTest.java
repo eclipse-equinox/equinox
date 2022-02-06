@@ -14,6 +14,7 @@
 package org.eclipse.osgi.tests.bundles;
 
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -33,6 +35,7 @@ import org.osgi.framework.startlevel.BundleStartLevel;
 
 public class ExceptionMessageTest extends AbstractBundleTests {
 
+	@Test
 	public void testTrasientStartLevelError() throws BundleException {
 		Bundle b = installer.installBundle("test");
 		b.adapt(BundleStartLevel.class).setStartLevel(500);
@@ -40,6 +43,7 @@ public class ExceptionMessageTest extends AbstractBundleTests {
 		assertTrue("Wrong message: " + e.getMessage(), e.getMessage().endsWith(b.adapt(Module.class).toString()));
 	}
 
+	@Test
 	public void testUninstallModuleError() throws BundleException {
 		Bundle b = installer.installBundle("test");
 		BundleStartLevel bsl = b.adapt(BundleStartLevel.class);
@@ -48,6 +52,7 @@ public class ExceptionMessageTest extends AbstractBundleTests {
 		assertTrue("Wrong message: " + e.getMessage(), e.getMessage().endsWith(b.adapt(Module.class).toString()));
 	}
 
+	@Test
 	public void testUninstallContextError() throws BundleException {
 		Bundle b = installer.installBundle("test");
 		b.start();
@@ -57,6 +62,7 @@ public class ExceptionMessageTest extends AbstractBundleTests {
 		assertTrue("Wrong message: " + e.getMessage(), e.getMessage().endsWith(b.toString()));
 	}
 
+	@Test
 	public void testStartFragmentError() throws BundleException, IOException {
 		Map<String, String> headers = new HashMap<>();
 		headers.put(Constants.BUNDLE_SYMBOLICNAME, "fragment");
@@ -70,6 +76,7 @@ public class ExceptionMessageTest extends AbstractBundleTests {
 		assertTrue("Wrong message: " + e.getMessage(), e.getMessage().endsWith(b.adapt(Module.class).toString()));
 	}
 
+	@Test
 	public void testLoadActivatorError() throws IOException, BundleException {
 		Map<String, String> headers = new HashMap<>();
 		headers.put(Constants.BUNDLE_ACTIVATOR, "does.not.Exist");
@@ -82,6 +89,7 @@ public class ExceptionMessageTest extends AbstractBundleTests {
 		assertTrue("Wrong message: " + e.getMessage(), e.getMessage().endsWith(b.toString()));
 	}
 
+	@Test
 	public void testUnregisterSetPropsError() throws BundleException {
 		Bundle b = installer.installBundle("test");
 		b.start();
@@ -100,6 +108,7 @@ public class ExceptionMessageTest extends AbstractBundleTests {
 		assertTrue("Wrong message: " + e3.getMessage(), e3.getMessage().endsWith(reg.toString()));
 	}
 
+	@Test
 	public void testUnregisterTwiceError() throws BundleException {
 		Bundle b = installer.installBundle("test");
 		b.start();
