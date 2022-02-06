@@ -13,26 +13,27 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import static org.junit.Assert.assertThrows;
+
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.wiring.BundleWiring;
@@ -40,289 +41,139 @@ import org.osgi.framework.wiring.BundleWiring;
 public class BundleInstallUpdateTests extends AbstractBundleTests {
 
 	// test installing with location
-	public void testInstallWithLocation01() {
-		Bundle test = null;
-		try {
-			String location = installer.getBundleLocation("test"); //$NON-NLS-1$
-			test = OSGiTestsActivator.getContext().installBundle(location);
-			assertEquals("Wrong BSN", "test1", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (BundleException e) {
-			fail("Unexpected failure", e); //$NON-NLS-1$
-		} finally {
-			try {
-				if (test != null)
-					test.uninstall();
-			} catch (BundleException e) {
-				// nothing
-			}
-		}
+	public void testInstallWithLocation01() throws BundleException {
+		String location = installer.getBundleLocation("test"); //$NON-NLS-1$
+		Bundle test = installer.installBundleAtLocation(location);
+		assertEquals("Wrong BSN", "test1", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	// test installing with location and null stream
-	public void testInstallWithLocation02() {
-		Bundle test = null;
-		try {
-			String location = installer.getBundleLocation("test"); //$NON-NLS-1$
-			test = OSGiTestsActivator.getContext().installBundle(location, null);
-			assertEquals("Wrong BSN", "test1", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (BundleException e) {
-			fail("Unexpected failure", e); //$NON-NLS-1$
-		} finally {
-			try {
-				if (test != null)
-					test.uninstall();
-			} catch (BundleException e) {
-				// nothing
-			}
-		}
+	public void testInstallWithLocation02() throws BundleException {
+		String location = installer.getBundleLocation("test"); //$NON-NLS-1$
+		Bundle test = installer.installBundleAtLocation(location);
+		assertEquals("Wrong BSN", "test1", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	// test installing with location and non-null stream
-	public void testInstallWithStream03() {
-		Bundle test = null;
-		try {
-			String location1 = installer.getBundleLocation("test"); //$NON-NLS-1$
-			String location2 = installer.getBundleLocation("test2"); //$NON-NLS-1$
-			test = OSGiTestsActivator.getContext().installBundle(location1, new URL(location2).openStream());
-			assertEquals("Wrong BSN", "test2", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (Exception e) {
-			fail("Unexpected failure", e); //$NON-NLS-1$
-		} finally {
-			try {
-				if (test != null)
-					test.uninstall();
-			} catch (BundleException e) {
-				// nothing
-			}
-		}
+	public void testInstallWithStream03() throws Exception {
+		String location1 = installer.getBundleLocation("test"); //$NON-NLS-1$
+		String location2 = installer.getBundleLocation("test2"); //$NON-NLS-1$
+		Bundle test = installer.installBundleAtLocation(location1, new URL(location2).openStream());
+		assertEquals("Wrong BSN", "test2", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	// test update with null stream
-	public void testUpdateNoStream01() {
-		Bundle test = null;
-		try {
-			String location = installer.getBundleLocation("test"); //$NON-NLS-1$
-			test = OSGiTestsActivator.getContext().installBundle(location);
-			assertEquals("Wrong BSN", "test1", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
-			test.update();
-			assertEquals("Wrong BSN", "test1", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (BundleException e) {
-			fail("Unexpected failure", e); //$NON-NLS-1$
-		} finally {
-			try {
-				if (test != null)
-					test.uninstall();
-			} catch (BundleException e) {
-				// nothing
-			}
-		}
+	public void testUpdateNoStream01() throws BundleException {
+		String location = installer.getBundleLocation("test"); //$NON-NLS-1$
+		Bundle test = installer.installBundleAtLocation(location);
+		assertEquals("Wrong BSN", "test1", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
+		test.update();
+		assertEquals("Wrong BSN", "test1", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	// test update with null stream
-	public void testUpdateNoStream02() {
-		Bundle test = null;
-		try {
-			String location = installer.getBundleLocation("test"); //$NON-NLS-1$
-			test = OSGiTestsActivator.getContext().installBundle(location);
-			assertEquals("Wrong BSN", "test1", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
-			test.update(null);
-			assertEquals("Wrong BSN", "test1", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (BundleException e) {
-			fail("Unexpected failure", e); //$NON-NLS-1$
-		} finally {
-			try {
-				if (test != null)
-					test.uninstall();
-			} catch (BundleException e) {
-				// nothing
-			}
-		}
+	public void testUpdateNoStream02() throws BundleException {
+		String location = installer.getBundleLocation("test"); //$NON-NLS-1$
+		Bundle test = installer.installBundleAtLocation(location);
+		assertEquals("Wrong BSN", "test1", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
+		test.update(null);
+		assertEquals("Wrong BSN", "test1", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	// test update with null stream
-	public void testUpdateWithStream01() {
-		Bundle test = null;
-		try {
-			String location1 = installer.getBundleLocation("test"); //$NON-NLS-1$
-			String location2 = installer.getBundleLocation("test2"); //$NON-NLS-1$
-			test = OSGiTestsActivator.getContext().installBundle(location1);
-			assertEquals("Wrong BSN", "test1", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
-			test.update(new URL(location2).openStream());
-			assertEquals("Wrong BSN", "test2", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (Exception e) {
-			fail("Unexpected failure", e); //$NON-NLS-1$
-		} finally {
-			try {
-				if (test != null)
-					test.uninstall();
-			} catch (BundleException e) {
-				// nothing
-			}
-		}
+	public void testUpdateWithStream01() throws Exception {
+		String location1 = installer.getBundleLocation("test"); //$NON-NLS-1$
+		String location2 = installer.getBundleLocation("test2"); //$NON-NLS-1$
+		Bundle test = installer.installBundleAtLocation(location1);
+		assertEquals("Wrong BSN", "test1", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
+		test.update(new URL(location2).openStream());
+		assertEquals("Wrong BSN", "test2", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	// test update with null stream
-	public void testUpdateWithStream02() {
-		Bundle test = null;
-		try {
-			String location1 = installer.getBundleLocation("test"); //$NON-NLS-1$
-			String location2 = installer.getBundleLocation("test2"); //$NON-NLS-1$
-			test = OSGiTestsActivator.getContext().installBundle(location1);
-			Bundle b1 = installer.installBundle("chain.test"); //$NON-NLS-1$
-			assertEquals("Wrong BSN", "test1", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
-			test.update(new URL(location2).openStream());
-			assertEquals("Wrong BSN", "test2", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
-			// make sure b1 is still last bundle in bundles list
-			Bundle[] bundles = OSGiTestsActivator.getContext().getBundles();
-			assertTrue("Wrong bundle at the end: " + bundles[bundles.length - 1], bundles[bundles.length - 1] == b1); //$NON-NLS-1$
-			Bundle[] tests = installer.getPackageAdmin().getBundles(test.getSymbolicName(), null);
-			assertNotNull("null tests", tests); //$NON-NLS-1$
-			assertEquals("Wrong number", 1, tests.length); //$NON-NLS-1$
-			assertTrue("Wrong bundle: " + tests[0], tests[0] == test); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected failure", e); //$NON-NLS-1$
-		} finally {
-			try {
-				if (test != null)
-					test.uninstall();
-			} catch (BundleException e) {
-				// nothing
-			}
-		}
+	public void testUpdateWithStream02() throws Exception {
+		String location1 = installer.getBundleLocation("test"); //$NON-NLS-1$
+		String location2 = installer.getBundleLocation("test2"); //$NON-NLS-1$
+		Bundle test = installer.installBundleAtLocation(location1);
+		Bundle b1 = installer.installBundle("chain.test"); //$NON-NLS-1$
+		assertEquals("Wrong BSN", "test1", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
+		test.update(new URL(location2).openStream());
+		assertEquals("Wrong BSN", "test2", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
+		// make sure b1 is still last bundle in bundles list
+		Bundle[] bundles = OSGiTestsActivator.getContext().getBundles();
+		assertTrue("Wrong bundle at the end: " + bundles[bundles.length - 1], bundles[bundles.length - 1] == b1); //$NON-NLS-1$
+		Bundle[] tests = installer.getPackageAdmin().getBundles(test.getSymbolicName(), null);
+		assertNotNull("null tests", tests); //$NON-NLS-1$
+		assertEquals("Wrong number", 1, tests.length); //$NON-NLS-1$
+		assertTrue("Wrong bundle: " + tests[0], tests[0] == test); //$NON-NLS-1$
 	}
 
-	public void testBug290193() {
-		Bundle test = null;
-		try {
-			URL testBundle = OSGiTestsActivator.getBundle().getEntry("test_files/security/bundles/signed.jar");
-			File testFile = OSGiTestsActivator.getContext().getDataFile("test with space/test.jar");
-			assertTrue(testFile.getParentFile().mkdirs());
-			readFile(testBundle.openStream(), testFile);
-			test = OSGiTestsActivator.getContext().installBundle("reference:" + testFile.toURI().toString());
-		} catch (Exception e) {
-			fail("Unexpected failure", e); //$NON-NLS-1$
-		} finally {
-			try {
-				if (test != null)
-					test.uninstall();
-			} catch (BundleException e) {
-				// nothing
-			}
-		}
+	public void testBug290193() throws Exception {
+		URL testBundle = OSGiTestsActivator.getBundle().getEntry("test_files/security/bundles/signed.jar");
+		File testFile = OSGiTestsActivator.getContext().getDataFile("test with space/test.jar");
+		assertTrue(testFile.getParentFile().mkdirs());
+		Files.copy(testBundle.openStream(), testFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		installer.installBundleAtLocation("reference:" + testFile.toURI().toString());
 	}
 
-	public static void readFile(InputStream in, File file) throws IOException {
-		FileOutputStream fos = null;
-		try {
-			fos = new FileOutputStream(file);
-
-			byte buffer[] = new byte[1024];
-			int count;
-			while ((count = in.read(buffer, 0, buffer.length)) > 0) {
-				fos.write(buffer, 0, count);
-			}
-		} finally {
-			if (in != null) {
-				try {
-					in.close();
-				} catch (IOException ee) {
-					// nothing to do here
-				}
-			}
-
-			if (fos != null) {
-				try {
-					fos.close();
-				} catch (IOException ee) {
-					// nothing to do here
-				}
-			}
-		}
-	}
-
-	public void testCollisionHook() throws BundleException, MalformedURLException, IOException {
+	public void testCollisionHook() throws BundleException, IOException {
 		Bundle test1 = installer.installBundle("test");
 		installer.installBundle("test2");
-		try {
-			test1.update(new URL(installer.getBundleLocation("test2")).openStream());
-			fail("Expected to fail to update to another bsn/version that causes collision");
-		} catch (BundleException e) {
-			// expected;
-		}
-		Bundle junk = null;
-		try {
-			junk = OSGiTestsActivator.getContext().installBundle("junk", new URL(installer.getBundleLocation("test2")).openStream());
-			fail("Expected to fail to install duplication bsn/version that causes collision");
-		} catch (BundleException e) {
-			// expected;
-		} finally {
-			if (junk != null)
-				junk.uninstall();
-			junk = null;
+
+		URL testLocation = new URL(installer.getBundleLocation("test2"));
+		try (InputStream input = testLocation.openStream()) {
+			assertThrows("Expected to fail to update to another bsn/version that causes collision",
+					BundleException.class, () -> test1.update(input));
 		}
 
+		try (InputStream input = testLocation.openStream()) {
+			assertThrows("Expected to fail to install duplication bsn/version that causes collision",
+					BundleException.class, () -> installer.installBundleAtLocation("junk", input));
+		}
+		installer.uninstallBundle("junk");
+
 		CollisionHook hook = (operationType, target, collisionCandidates) -> collisionCandidates.clear();
-		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(CollisionHook.class, hook, null);
+		ServiceRegistration<?> reg = OSGiTestsActivator.getContext().registerService(CollisionHook.class, hook, null);
 		try {
-			try {
-				test1.update(new URL(installer.getBundleLocation("test2")).openStream());
-			} catch (BundleException e) {
-				fail("Expected to succeed in updating to a duplicate bsn/version", e);
+			try (InputStream input = testLocation.openStream()) {
+				test1.update(input);
 			}
-			try {
-				junk = OSGiTestsActivator.getContext().installBundle("junk", new URL(installer.getBundleLocation("test2")).openStream());
-			} catch (BundleException e) {
-				fail("Expected to succeed to install duplication bsn/version that causes collision", e);
-			} finally {
-				if (junk != null)
-					junk.uninstall();
-				junk = null;
+			try (InputStream input = testLocation.openStream()) {
+				installer.installBundleAtLocation("junk", input);
 			}
 		} finally {
 			reg.unregister();
 		}
 	}
 
-	public void testInstallWithInterruption() {
-		Bundle test = null;
+	public void testInstallWithInterruption() throws BundleException {
 		Thread.currentThread().interrupt();
-		try {
-			test = installer.installBundle("test"); //$NON-NLS-1$
-		} catch (BundleException e) {
-			fail("Unexpected failure", e); //$NON-NLS-1$
-		} finally {
-			Thread.interrupted();
-			try {
-				if (test != null)
-					test.uninstall();
-			} catch (BundleException e) {
-				// nothing
-			}
-		}
+		installer.installBundle("test"); //$NON-NLS-1$
+		// TODO: check that the bundle is uninstalled
 	}
 
-	public void testPercentLocation() {
+	public void testPercentLocation() throws Exception {
 		doTestSpecialChars('%', false);
 		doTestSpecialChars('%', true);
 	}
 
-	public void testSpaceLocation() {
+	public void testSpaceLocation() throws Exception {
 		doTestSpecialChars(' ', false);
 		doTestSpecialChars(' ', true);
 	}
 
-	public void testPlusLocation() {
+	public void testPlusLocation() throws Exception {
 		doTestSpecialChars('+', true);
 		doTestSpecialChars('+', false);
 	}
 
-	public void testOctothorpLocation() {
+	public void testOctothorpLocation() throws Exception {
 		doTestSpecialChars('#', true);
 		// # must be encoded for anything to pass
 		doTestSpecialChars('#', false, false, false);
 	}
 
-	public void testQuestionMarkLocation() {
+	public void testQuestionMarkLocation() throws Exception {
 		if (Platform.getOS().equals(Platform.OS_WIN32)) {
 			// Skip this test on windows
 			return;
@@ -333,26 +184,18 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 
 	}
 
-	private void doTestSpecialChars(char c, boolean encode) {
+	private void doTestSpecialChars(char c, boolean encode) throws Exception {
 		doTestSpecialChars(c, encode, true, true);
 	}
 
-	private void doTestSpecialChars(char c, boolean encode, boolean refPass, boolean filePass) {
+	private void doTestSpecialChars(char c, boolean encode, boolean refPass, boolean filePass) throws Exception {
 		File bundlesDirectory = OSGiTestsActivator.getContext().getDataFile("file_with_" + c + "_char");
 		bundlesDirectory.mkdirs();
 
-		File testBundleJarFile = null;
-		String testBundleJarFileURL = null;
-		File testBundleDirFile = null;
-		String testBundleDirFileURL = null;
-		try {
-			testBundleJarFile = SystemBundleTests.createBundle(bundlesDirectory, getName() + 1, false, false);
-			testBundleJarFileURL = encode ? testBundleJarFile.toURI().toString() : testBundleJarFile.toURL().toString();
-			testBundleDirFile = SystemBundleTests.createBundle(bundlesDirectory, getName() + 2, false, true);
-			testBundleDirFileURL = encode ? testBundleDirFile.toURI().toString() : testBundleDirFile.toURL().toString();
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
+		File testBundleJarFile = SystemBundleTests.createBundle(bundlesDirectory, getName() + 1, false, false);
+		String testBundleJarFileURL = (encode ? testBundleJarFile.toURI() : testBundleJarFile.toURL()).toString();
+		File testBundleDirFile = SystemBundleTests.createBundle(bundlesDirectory, getName() + 2, false, true);
+		String testBundleDirFileURL = (encode ? testBundleDirFile.toURI() : testBundleDirFile.toURL()).toString();
 
 		String refToJarURL = "reference:" + testBundleJarFileURL;
 		// Test with reference stream to jar bundle
@@ -371,23 +214,19 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 		testInstallSpecialCharBundle(testBundleDirFileURL, false, filePass);
 	}
 
-	void testInstallSpecialCharBundle(String location, boolean openStream, boolean expectSuccess) {
-		try {
-			Bundle b;
-			if (openStream) {
-				b = getContext().installBundle(location, new URL(location).openStream());
-			} else {
-				b = getContext().installBundle(location);
+	void testInstallSpecialCharBundle(String location, boolean openStream, boolean expectSuccess) throws Exception {
+		Callable<Void> testInstall = () -> {
+			try (InputStream input = openStream ? new URL(location).openStream() : null) {
+				Bundle b = installer.installBundleAtLocation(location, input);
+				b.start();
+				b.uninstall();
 			}
-			b.start();
-			b.uninstall();
-			if (!expectSuccess) {
-				fail("Should have failed for location: " + location);
-			}
-		} catch (Exception e) {
-			if (expectSuccess) {
-				fail("Should not have failed for location: " + location + " " + e.getMessage());
-			}
+			return null;
+		};
+		if (expectSuccess) {
+			testInstall.call();
+		} else {
+			assertThrows(Exception.class, testInstall::call);
 		}
 	}
 
@@ -438,7 +277,7 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 		throw new NoSuchMethodException(method);
 	}
 
-	public void testEscapeZipRoot() throws IOException, BundleException, InvalidSyntaxException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public void testEscapeZipRoot() throws Exception {
 		String entry1 = "../../escapedZipRoot1.txt";
 		String entry2 = "dir1/../../../escapedZipRoot2.txt";
 		String cp1 = "../../cp.jar";

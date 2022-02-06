@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2021 IBM Corporation and others.
+ * Copyright (c) 2006, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Hannes Wellmann - Bug 578606 - Leverage JUnit-4 methods and simplify tests
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
@@ -18,12 +19,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-import org.eclipse.core.tests.harness.CoreTest;
+import java.util.stream.Collectors;
+import junit.framework.TestCase;
 import org.eclipse.osgi.framework.util.ThreadInfoReport;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
@@ -35,7 +38,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.launch.Framework;
 
-public class AbstractBundleTests extends CoreTest {
+public class AbstractBundleTests extends TestCase {
 	public static int BUNDLE_LISTENER = 0x01;
 	public static int SYNC_BUNDLE_LISTENER = 0x02;
 	public static int SIMPLE_RESULTS = 0x04;
@@ -109,55 +112,30 @@ public class AbstractBundleTests extends CoreTest {
 		assertEquals("compareResults length" + expectedActual, expectedEvents.length, actualEvents.length);
 		for (int i = 0; i < expectedEvents.length; i++) {
 			String assertMsg = "compareResults: " + i + expectedActual;
-			assertEquals(assertMsg, expectedEvents[i], actualEvents[i]);
+			assertEqualEvent(assertMsg, expectedEvents[i], actualEvents[i]);
 		}
 	}
 
-	static public String toStringEventArray(Object[] events) {
-		StringBuilder sb = new StringBuilder();
-		boolean first = true;
-		sb.append('[');
-		for (Object event : events) {
-			if (first) {
-				first = false;
-			} else {
-				sb.append(", ");
-			}
-			sb.append(toString(event));
-		}
-		sb.append(']');
-		return sb.toString();
+	private static String toStringEventArray(Object[] events) {
+		return Arrays.stream(events).map(AbstractBundleTests::toString).collect(Collectors.joining(", ", "[", "]"));
 	}
 
-	static public void assertEquals(String message, Object expected, Object actual) {
+	protected static void assertEqualEvent(String message, Object expected, Object actual) {
 		if (expected == null && actual == null)
 			return;
-		if ((expected == null || actual == null) && expected != actual)
-			failNotEquals(message, toString(expected), toString(actual));
+		if ((expected == null || actual == null))
+			assertEquals(message, toString(expected), toString(actual));
 		if (isEqual(expected, actual))
 			return;
-		failNotEquals(message, toString(expected), toString(actual));
-	}
-
-	static public void assertEquals(String message, int[] expected, int[] actual) {
-		if (expected == null && actual == null)
-			return;
-		if ((expected == null || actual == null) && expected != actual)
-			failNotEquals(message, toString(expected), toString(actual));
-		if (expected.length != actual.length)
-			failNotEquals(message, toString(expected), toString(actual));
-		for (int i = 0; i < expected.length; i++)
-			if (expected[i] != actual[i])
-				failNotEquals(message, toString(expected), toString(actual));
+		assertEquals(message, toString(expected), toString(actual));
 	}
 
 	private static boolean isEqual(Object expected, Object actual) {
-		if (!expected.getClass().isAssignableFrom(actual.getClass()))
-			return false;
-		if (expected instanceof BundleEvent)
+		if (expected instanceof BundleEvent && actual instanceof BundleEvent) {
 			return isEqual((BundleEvent) expected, (BundleEvent) actual);
-		else if (expected instanceof FrameworkEvent)
+		} else if (expected instanceof FrameworkEvent && actual instanceof FrameworkEvent) {
 			return isEqual((FrameworkEvent) expected, (FrameworkEvent) actual);
+		}
 		return expected.equals(actual);
 	}
 
@@ -169,20 +147,7 @@ public class AbstractBundleTests extends CoreTest {
 		return expected.getSource() == actual.getSource() && expected.getType() == actual.getType();
 	}
 
-	private static String toString(int[] array) {
-		if (array == null)
-			return "null"; //$NON-NLS-1$
-		String result = "["; //$NON-NLS-1$
-		for (int i = 0; i < array.length; i++) {
-			if (i != 0)
-				result += ',';
-			result += array[i];
-		}
-		result += "]"; //$NON-NLS-1$
-		return result;
-	}
-
-	private static Object toString(Object object) {
+	private static String toString(Object object) {
 		if (object instanceof BundleEvent)
 			return toString((BundleEvent) object);
 		else if (object instanceof FrameworkEvent)
@@ -190,7 +155,7 @@ public class AbstractBundleTests extends CoreTest {
 		return object.toString();
 	}
 
-	private static Object toString(FrameworkEvent event) {
+	private static String toString(FrameworkEvent event) {
 		StringBuilder result = new StringBuilder("FrameworkEvent [");
 		switch (event.getType()) {
 			case FrameworkEvent.ERROR :
@@ -218,7 +183,7 @@ public class AbstractBundleTests extends CoreTest {
 		return result.toString();
 	}
 
-	private static Object toString(BundleEvent event) {
+	private static String toString(BundleEvent event) {
 		StringBuilder result = new StringBuilder("BundleEvent [");
 		switch (event.getType()) {
 			case BundleEvent.INSTALLED :
@@ -308,36 +273,19 @@ public class AbstractBundleTests extends CoreTest {
 		return stop(equinox, true, 10000);
 	}
 
-	static public FrameworkEvent update(final Framework equinox) {
-		final Exception[] failureException = new BundleException[1];
+	protected static FrameworkEvent update(final Framework equinox) throws BundleException, InterruptedException {
 		final FrameworkEvent[] success = new FrameworkEvent[] { null };
 		final String uuid = getUUID(equinox);
 		Thread waitForUpdate = new Thread(() -> success[0] = waitForStop(equinox, uuid, false, 10000), "test waitForStop thread"); //$NON-NLS-1$
 		waitForUpdate.start();
 
-		try {
-			// delay hack to allow waitForUpdate thread to block on waitForStop before we
-			// update.
-			Thread.sleep(200);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			fail("unexpected interuption", e);
-		}
+		// delay hack to allow waitForUpdate thread to block on waitForStop before we
+		// update.
+		Thread.sleep(200);
 
-		try {
-			equinox.update();
-		} catch (BundleException e) {
-			fail("Failed to update the framework", e); //$NON-NLS-1$
-		}
-		try {
-			waitForUpdate.join();
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			fail("unexpected interuption", e); //$NON-NLS-1$
-		}
-		if (failureException[0] != null) {
-			fail("Error occurred while waiting", failureException[0]); //$NON-NLS-1$
-		}
+		equinox.update();
+
+		waitForUpdate.join();
 		return success[0];
 	}
 
@@ -349,7 +297,7 @@ public class AbstractBundleTests extends CoreTest {
 			equinox.stop();
 		} catch (BundleException e) {
 			if (!quietly) {
-				fail("Unexpected error stopping framework", e); //$NON-NLS-1$
+				fail("Unexpected error stopping framework:" + e.getMessage()); //$NON-NLS-1$
 			}
 		}
 		return waitForStop(equinox, uuid, quietly, timeout);
@@ -358,7 +306,7 @@ public class AbstractBundleTests extends CoreTest {
 	protected static boolean delete(File file) {
 		if (file.exists()) {
 			if (file.isDirectory()) {
-				String list[] = file.list();
+				String[] list = file.list();
 				if (list != null) {
 					int len = list.length;
 					for (int i = 0; i < len; i++) {
@@ -389,7 +337,7 @@ public class AbstractBundleTests extends CoreTest {
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			if (!quietly) {
-				fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+				fail("Unexpected interrupted exception"); //$NON-NLS-1$
 			}
 		}
 		return null;

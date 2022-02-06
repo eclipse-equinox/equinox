@@ -16,6 +16,7 @@ package org.eclipse.osgi.tests.serviceregistry;
 import java.util.Hashtable;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
+import org.junit.Assert;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
@@ -27,7 +28,7 @@ import org.osgi.framework.ServiceRegistration;
 
 public class ServiceExceptionTests extends AbstractBundleTests {
 
-	public void testServiceException01() {
+	public void testServiceException01() throws InterruptedException, InvalidSyntaxException {
 		final String testMethodName = "testServiceException01"; //$NON-NLS-1$
 		// test a service factory which returns wrong object types
 		ServiceExceptionServiceFactory wrongObjectFactory = new ServiceExceptionServiceFactory("A String"); //$NON-NLS-1$
@@ -37,20 +38,10 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(OSGiTestsActivator.getBundle(), null, ServiceException.FACTORY_ERROR);
 		OSGiTestsActivator.getContext().addFrameworkListener(listener);
 		try {
-			ServiceReference[] refs = null;
-			try {
-				refs = OSGiTestsActivator.getContext().getServiceReferences(Runnable.class.getName(), "(name=" + testMethodName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-			} catch (InvalidSyntaxException e) {
-				fail("Unexpected syntax error", e); //$NON-NLS-1$
-			}
+			ServiceReference[] refs = OSGiTestsActivator.getContext().getServiceReferences(Runnable.class.getName(), "(name=" + testMethodName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			assertNotNull("service refs is null", refs); //$NON-NLS-1$
 			assertEquals("Wrong number of references", 1, refs.length); //$NON-NLS-1$
-			Runnable service = null;
-			try {
-				service = (Runnable) OSGiTestsActivator.getContext().getService(refs[0]);
-			} catch (ClassCastException e) {
-				fail("Unexpected cast exception", e); //$NON-NLS-1$
-			}
+			Runnable service = (Runnable) OSGiTestsActivator.getContext().getService(refs[0]);
 			assertNull("service is not null", service); //$NON-NLS-1$
 			listener.waitForEvent("Failed to fire ServiceException"); //$NON-NLS-1$
 			OSGiTestsActivator.getContext().ungetService(refs[0]);
@@ -65,7 +56,7 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		}
 	}
 
-	public void testServiceException02() {
+	public void testServiceException02() throws InterruptedException, InvalidSyntaxException {
 		final String testMethodName = "testServiceException02"; //$NON-NLS-1$
 		// test a service factory which returns null objects
 		ServiceExceptionServiceFactory nullObjectFactory = new ServiceExceptionServiceFactory(null);
@@ -75,20 +66,10 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(OSGiTestsActivator.getBundle(), null, ServiceException.FACTORY_ERROR);
 		OSGiTestsActivator.getContext().addFrameworkListener(listener);
 		try {
-			ServiceReference[] refs = null;
-			try {
-				refs = OSGiTestsActivator.getContext().getServiceReferences(Runnable.class.getName(), "(name=" + testMethodName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-			} catch (InvalidSyntaxException e) {
-				fail("Unexpected syntax error", e); //$NON-NLS-1$
-			}
+			ServiceReference[] refs = OSGiTestsActivator.getContext().getServiceReferences(Runnable.class.getName(), "(name=" + testMethodName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			assertNotNull("service refs is null", refs); //$NON-NLS-1$
 			assertEquals("Wrong number of references", 1, refs.length); //$NON-NLS-1$
-			Runnable service = null;
-			try {
-				service = (Runnable) OSGiTestsActivator.getContext().getService(refs[0]);
-			} catch (ClassCastException e) {
-				fail("Unexpected cast exception", e); //$NON-NLS-1$
-			}
+			Runnable service = (Runnable) OSGiTestsActivator.getContext().getService(refs[0]);
 			assertNull("service is not null", service); //$NON-NLS-1$
 			listener.waitForEvent("Failed to fire ServiceException"); //$NON-NLS-1$
 			OSGiTestsActivator.getContext().ungetService(refs[0]);
@@ -103,7 +84,7 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		}
 	}
 
-	public void testServiceException03() {
+	public void testServiceException03() throws InterruptedException, InvalidSyntaxException {
 		final String testMethodName = "testServiceException03"; //$NON-NLS-1$
 		// test a service factory which throws a RuntimeException
 		RuntimeException cause = new RuntimeException(testMethodName);
@@ -114,20 +95,10 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(OSGiTestsActivator.getBundle(), cause, ServiceException.FACTORY_EXCEPTION);
 		OSGiTestsActivator.getContext().addFrameworkListener(listener);
 		try {
-			ServiceReference[] refs = null;
-			try {
-				refs = OSGiTestsActivator.getContext().getServiceReferences(Runnable.class.getName(), "(name=" + testMethodName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-			} catch (InvalidSyntaxException e) {
-				fail("Unexpected syntax error", e); //$NON-NLS-1$
-			}
+			ServiceReference[] refs = OSGiTestsActivator.getContext().getServiceReferences(Runnable.class.getName(), "(name=" + testMethodName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			assertNotNull("service refs is null", refs); //$NON-NLS-1$
 			assertEquals("Wrong number of references", 1, refs.length); //$NON-NLS-1$
-			Runnable service = null;
-			try {
-				service = (Runnable) OSGiTestsActivator.getContext().getService(refs[0]);
-			} catch (ClassCastException e) {
-				fail("Unexpected cast exception", e); //$NON-NLS-1$
-			}
+			Runnable service = (Runnable) OSGiTestsActivator.getContext().getService(refs[0]);
 			assertNull("service is not null", service); //$NON-NLS-1$
 			listener.waitForEvent("Failed to fire ServiceException"); //$NON-NLS-1$
 			OSGiTestsActivator.getContext().ungetService(refs[0]);
@@ -142,7 +113,7 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		}
 	}
 
-	public void testServiceException04() {
+	public void testServiceException04() throws InterruptedException, InvalidSyntaxException {
 		final String testMethodName = "testServiceException04"; //$NON-NLS-1$
 		// test a service factory which throws an Error
 		Error cause = new Error(testMethodName);
@@ -153,20 +124,10 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(OSGiTestsActivator.getBundle(), cause, ServiceException.FACTORY_EXCEPTION);
 		OSGiTestsActivator.getContext().addFrameworkListener(listener);
 		try {
-			ServiceReference[] refs = null;
-			try {
-				refs = OSGiTestsActivator.getContext().getServiceReferences(Runnable.class.getName(), "(name=" + testMethodName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-			} catch (InvalidSyntaxException e) {
-				fail("Unexpected syntax error", e); //$NON-NLS-1$
-			}
+			ServiceReference[] refs = OSGiTestsActivator.getContext().getServiceReferences(Runnable.class.getName(), "(name=" + testMethodName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			assertNotNull("service refs is null", refs); //$NON-NLS-1$
 			assertEquals("Wrong number of references", 1, refs.length); //$NON-NLS-1$
-			Runnable service = null;
-			try {
-				service = (Runnable) OSGiTestsActivator.getContext().getService(refs[0]);
-			} catch (ClassCastException e) {
-				fail("Unexpected cast exception", e); //$NON-NLS-1$
-			}
+			Runnable service = (Runnable) OSGiTestsActivator.getContext().getService(refs[0]);
 			assertNull("service is not null", service); //$NON-NLS-1$
 			listener.waitForEvent("Failed to fire ServiceException"); //$NON-NLS-1$
 			OSGiTestsActivator.getContext().ungetService(refs[0]);
@@ -200,9 +161,9 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		public synchronized void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
 			try {
 				if (serviceOrThrowable instanceof RuntimeException)
-					fail("Unexpected call to ungetService: " + serviceOrThrowable); //$NON-NLS-1$
+					Assert.fail("Unexpected call to ungetService: " + serviceOrThrowable); //$NON-NLS-1$
 				if (serviceOrThrowable instanceof Error)
-					fail("Unexpected call to ungetService: " + serviceOrThrowable); //$NON-NLS-1$
+					Assert.fail("Unexpected call to ungetService: " + serviceOrThrowable); //$NON-NLS-1$
 			} catch (Error error) {
 				ungetFailure = error;
 			}
@@ -242,16 +203,13 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 			notifyAll();
 		}
 
-		public synchronized void waitForEvent(String failMessage) {
+		public synchronized void waitForEvent(String failMessage) throws InterruptedException {
 			if (waitForEvent) {
-				try {
-					wait(10000);
-				} catch (InterruptedException e) {
-					fail("unexpected interuption", e); //$NON-NLS-1$
-				}
+				wait(10000);
+
 				// still waiting for event; we now fail
 				if (waitForEvent)
-					fail(failMessage);
+					Assert.fail(failMessage);
 			}
 		}
 	}

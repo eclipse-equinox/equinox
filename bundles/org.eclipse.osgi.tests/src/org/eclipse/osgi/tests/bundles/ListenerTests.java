@@ -13,6 +13,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+
+import static org.junit.Assert.assertArrayEquals;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -108,7 +111,7 @@ public class ListenerTests extends AbstractBundleTests {
 
 		Object[] actualBundleListeners = simpleResults.getResults(200);
 
-		compareResults(expectedBundleListeners, actualBundleListeners);
+		assertArrayEquals(expectedBundleListeners, actualBundleListeners);
 
 	}
 
@@ -135,7 +138,7 @@ public class ListenerTests extends AbstractBundleTests {
 
 		Object[] actualFrameworkListeners = simpleResults.getResults(100);
 
-		compareResults(expectedFrameworkListeners, actualFrameworkListeners);
+		assertArrayEquals(expectedFrameworkListeners, actualFrameworkListeners);
 	}
 
 	public void testServiceListenersOrder() throws Exception {
@@ -163,7 +166,7 @@ public class ListenerTests extends AbstractBundleTests {
 
 		Object[] actualServiceListeners = simpleResults.getResults(100);
 
-		compareResults(expectedServiceListeners, actualServiceListeners);
+		assertArrayEquals(expectedServiceListeners, actualServiceListeners);
 
 		if (reg != null) {
 			reg.unregister();

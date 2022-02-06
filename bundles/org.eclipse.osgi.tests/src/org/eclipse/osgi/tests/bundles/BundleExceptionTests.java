@@ -13,7 +13,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
-import java.io.IOException;
+import static org.junit.Assert.assertThrows;
+
+import java.io.InputStream;
 import java.net.URL;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
@@ -24,60 +26,43 @@ public class BundleExceptionTests extends AbstractBundleTests {
 	// test throwing exception from activator constructor
 	public void testInvalidBundleActivator01() throws BundleException {
 		Bundle error1 = installer.installBundle("activator.error1"); //$NON-NLS-1$
-		try {
-			error1.start();
-			fail("Expected a start failure on invalid activator"); //$NON-NLS-1$
-		} catch (BundleException e) {
-			assertEquals("Expected activator error", BundleException.ACTIVATOR_ERROR, e.getType()); //$NON-NLS-1$
-		}
+
+		BundleException e = assertThrows(BundleException.class, error1::start);
+		assertEquals("Expected activator error", BundleException.ACTIVATOR_ERROR, e.getType());
 	}
 
 	// test throwing exception from activator start
 	public void testInvalidBundleActivator02() throws BundleException {
 		Bundle error1 = installer.installBundle("activator.error2"); //$NON-NLS-1$
-		try {
-			error1.start();
-			fail("Expected a start failure on invalid activator"); //$NON-NLS-1$
-		} catch (BundleException e) {
-			assertEquals("Expected activator error", BundleException.ACTIVATOR_ERROR, e.getType()); //$NON-NLS-1$
-		}
+
+		BundleException e = assertThrows(BundleException.class, error1::start);
+		assertEquals("Expected activator error", BundleException.ACTIVATOR_ERROR, e.getType());
 	}
 
 	// test throwing exception from activator stop
 	public void testInvalidBundleActivator03() throws BundleException {
 		Bundle error1 = installer.installBundle("activator.error3"); //$NON-NLS-1$
 		error1.start();
-		try {
-			error1.stop();
-			fail("Expected a stop failure on invalid activator"); //$NON-NLS-1$
-		} catch (BundleException e) {
-			assertEquals("Expected activator error", BundleException.ACTIVATOR_ERROR, e.getType()); //$NON-NLS-1$
-		}
+
+		BundleException e = assertThrows(BundleException.class, error1::stop);
+		assertEquals("Expected activator error", BundleException.ACTIVATOR_ERROR, e.getType()); //$NON-NLS-1$
 	}
 
 	// test throwing exception when installing duplicate bundles
 	public void testDuplicateError01() throws BundleException {
 		installer.installBundle("activator.error1"); //$NON-NLS-1$
-		try {
-			installer.installBundle("activator.error4"); //$NON-NLS-1$;
-			fail("Expected an install failure on duplicate bundle"); //$NON-NLS-1$
-		} catch (BundleException e) {
-			assertEquals("Expected duplicate error", BundleException.DUPLICATE_BUNDLE_ERROR, e.getType()); //$NON-NLS-1$
-		}
+
+		BundleException e = assertThrows(BundleException.class, () -> installer.installBundle("activator.error4"));
+		assertEquals("Expected duplicate error", BundleException.DUPLICATE_BUNDLE_ERROR, e.getType()); //$NON-NLS-1$
 	}
 
 	// test throwing exception when updating to a duplicate bundle
-	public void testDuplicateError02() throws BundleException {
+	public void testDuplicateError02() throws Exception {
 		installer.installBundle("activator.error1"); //$NON-NLS-1$
 		Bundle error2 = installer.installBundle("activator.error2"); //$NON-NLS-1$
-		try {
-			URL updateURL = new URL(installer.getBundleLocation("activator.error4")); //$NON-NLS-1$
-			error2.update(updateURL.openStream());
-			fail("Expected an update failure on duplicate bundle"); //$NON-NLS-1$
-		} catch (BundleException e) {
+		try (InputStream input = new URL(installer.getBundleLocation("activator.error4")).openStream()) {
+			BundleException e = assertThrows(BundleException.class, () -> error2.update(input));
 			assertEquals("Expected duplicate error", BundleException.DUPLICATE_BUNDLE_ERROR, e.getType()); //$NON-NLS-1$
-		} catch (IOException e) {
-			fail("Unexpected io exception updating", e); //$NON-NLS-1$
 		}
 	}
 
@@ -85,11 +70,7 @@ public class BundleExceptionTests extends AbstractBundleTests {
 	public void testUninstallSystemBundle() {
 		Bundle systemBundle = OSGiTestsActivator.getContext().getBundle(0);
 		assertNotNull("System Bundle is null!!", systemBundle); //$NON-NLS-1$
-		try {
-			systemBundle.uninstall();
-			fail("Expected error on uninstall of system bundle"); //$NON-NLS-1$
-		} catch (BundleException e) {
-			assertEquals("Expected invalid error", BundleException.INVALID_OPERATION, e.getType()); //$NON-NLS-1$
-		}
+		BundleException e = assertThrows(BundleException.class, systemBundle::uninstall);
+		assertEquals("Expected invalid error", BundleException.INVALID_OPERATION, e.getType()); //$NON-NLS-1$
 	}
 }

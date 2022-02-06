@@ -14,6 +14,7 @@
 package org.eclipse.osgi.tests.bundles;
 
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThrows;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -465,12 +466,7 @@ public class ConnectTests extends AbstractBundleTests {
 		TestCase.assertEquals("Wrong init store file.", storeFile.get(), initFile.get());
 		assertTrue("Did not find all init configs: " + initConfig.get(),
 				initConfig.get().entrySet().containsAll(config.entrySet()));
-		try {
-			initConfig.get().put("k3", "v3");
-			fail("Expected unmodifiable map");
-		} catch (UnsupportedOperationException e) {
-			// expected
-		}
+		assertThrows(UnsupportedOperationException.class, () -> initConfig.get().put("k3", "v3"));
 	}
 
 	public void testConnectContentHeaders() throws IOException {

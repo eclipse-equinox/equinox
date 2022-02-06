@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import static org.junit.Assert.assertThrows;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -675,7 +678,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 	private void listResources(String path, Collection<String> expected, Bundle mrBundle, int options) {
 		BundleWiring wiring = mrBundle.adapt(BundleWiring.class);
 		Collection<String> found = wiring.listResources(path, "*.txt", options);
-		assertEquals("Wrong resource listing.", expected.toArray(), found.toArray(), false);
+		assertEquals("Wrong resource listing.", new HashSet<>(expected), new HashSet<>(found));
 	}
 
 	public void testMultiReleaseBundleManifest8() throws Exception {
@@ -878,13 +881,8 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			URL existingResource = mrBundle.getResource("multi/release/test/testResourceAdd9.txt");
 			assertNotNull("Did not find Java 9 added resource.", existingResource);
 			URL metaInfResource = new URL(existingResource, "/META-INF/addedFor9.txt");
-			try {
-				metaInfResource.openStream().close();
-				fail("Expected error opening versioned META-INF resource.");
-			} catch (IOException e) {
-				// expected
-			}
-
+			assertThrows("Expected error opening versioned META-INF resource.", IOException.class,
+					() -> metaInfResource.openStream().close());
 		} finally {
 			stop(equinox);
 		}

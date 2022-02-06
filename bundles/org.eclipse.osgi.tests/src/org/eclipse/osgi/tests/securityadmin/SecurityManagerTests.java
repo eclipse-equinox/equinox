@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.securityadmin;
 
+import static org.junit.Assert.assertThrows;
 import java.io.File;
 import java.security.AllPermission;
 import java.security.CodeSource;
@@ -30,6 +31,7 @@ import java.util.NoSuchElementException;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
+import org.junit.Assert;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -68,35 +70,34 @@ public class SecurityManagerTests extends AbstractBundleTests {
 
 	@Override
 	protected void setUp() throws Exception {
-		if (System.getSecurityManager() != null)
-			fail("Cannot test with security manager set"); //$NON-NLS-1$
+		assertNull("Cannot test with security manager set", System.getSecurityManager());
 		previousPolicy = Policy.getPolicy();
 		final Permission allPermission = new AllPermission();
 		final PermissionCollection allPermissions = new PermissionCollection() {
 			private static final long serialVersionUID = 3258131349494708277L;
 
 			// A simple PermissionCollection that only has AllPermission
-		@Override
+			@Override
 			public void add(Permission permission) {
-				//no adding to this policy
+				// no adding to this policy
 			}
 
-		@Override
+			@Override
 			public boolean implies(Permission permission) {
 				return true;
 			}
 
-		@Override
+			@Override
 			public Enumeration elements() {
 				return new Enumeration() {
 					int cur = 0;
 
-			@Override
+					@Override
 					public boolean hasMoreElements() {
 						return cur < 1;
 					}
 
-			@Override
+					@Override
 					public Object nextElement() {
 						if (cur == 0) {
 							cur = 1;
@@ -110,12 +111,12 @@ public class SecurityManagerTests extends AbstractBundleTests {
 
 		Policy.setPolicy(new Policy() {
 
-		@Override
+			@Override
 			public PermissionCollection getPermissions(CodeSource codesource) {
 				return allPermissions;
 			}
 
-		@Override
+			@Override
 			public void refresh() {
 				// nothing
 			}
@@ -132,25 +133,19 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		Policy.setPolicy(previousPolicy);
 	}
 
-	public void testEnableSecurityManager01() {
+	public void testEnableSecurityManager01() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile("testEnableSecurityManager01"); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
 		Equinox equinox = new Equinox(configuration);
-		try {
-			equinox.init();
-		} catch (BundleException e) {
-			fail("Unexpected exception on init()", e); //$NON-NLS-1$
-		}
+		equinox.init();
+
 		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
-		try {
-			equinox.start();
-		} catch (BundleException e) {
-			fail("Failed to start the framework", e); //$NON-NLS-1$
-		}
+		equinox.start();
+
 		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
 		// put the framework back to the RESOLVED state
 		stop(equinox);
@@ -165,11 +160,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
 		Equinox equinox = new Equinox(configuration);
-		try {
-			equinox.init();
-		} catch (BundleException e) {
-			fail("Unexpected exception on init()", e); //$NON-NLS-1$
-		}
+		equinox.init();
 
 		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
@@ -194,8 +185,6 @@ public class SecurityManagerTests extends AbstractBundleTests {
 
 		try {
 			securityA.start();
-		} catch (BundleException e) {
-			fail("Failed to start securityA", e); //$NON-NLS-1$
 		} finally {
 			// put the framework back to the RESOLVED state
 			stop(equinox);
@@ -210,11 +199,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
 		Equinox equinox = new Equinox(configuration);
-		try {
-			equinox.init();
-		} catch (BundleException e) {
-			fail("Unexpected exception on init()", e); //$NON-NLS-1$
-		}
+		equinox.init();
 
 		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
@@ -251,7 +236,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 
 			securityA.uninstall();
 			securityA = systemContext.installBundle(locationSecurityA);
-			assertTrue(pa.resolveBundles(new Bundle[] {securityA}));
+			assertTrue(pa.resolveBundles(new Bundle[] { securityA }));
 			eps = pa.getExportedPackages(securityA);
 			assertNotNull("Did not find expected exports", eps); //$NON-NLS-1$
 			assertEquals("Wrong number of exports found", 1, eps.length); //$NON-NLS-1$
@@ -267,17 +252,13 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
 
-	public void testEnableSecurityManager04() throws BundleException {
+	public void testEnableSecurityManager04() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile("testEnableSecurityManager04"); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
 		Equinox equinox = new Equinox(configuration);
-		try {
-			equinox.init();
-		} catch (BundleException e) {
-			fail("Unexpected exception on init()", e); //$NON-NLS-1$
-		}
+		equinox.init();
 
 		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
@@ -306,7 +287,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		PackageAdmin pa = (PackageAdmin) systemContext.getService(systemContext.getServiceReference(PackageAdmin.class.getName()));
 
 		try {
-			assertTrue(pa.resolveBundles(new Bundle[] {linkA, linkAClient}));
+			assertTrue(pa.resolveBundles(new Bundle[] { linkA, linkAClient }));
 			// change import permission to fail filter match
 			filterPermission = new PermissionInfo(PackagePermission.class.getName(), "(&(name=fail.match)(package.name=test.link.*))", "import"); //$NON-NLS-1$ //$NON-NLS-2$
 			update = ca.newConditionalPermissionUpdate();
@@ -320,9 +301,6 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			Thread.sleep(2000);
 			assertEquals("linkA has wrong state", Bundle.RESOLVED, linkA.getState()); //$NON-NLS-1$
 			assertEquals("linkAClient has wrong state", Bundle.INSTALLED, linkAClient.getState()); //$NON-NLS-1$
-		} catch (InterruptedException e) {
-			// fail
-			fail("interrupted", e); //$NON-NLS-1$
 		} finally {
 			// put the framework back to the RESOLVED state
 			stop(equinox);
@@ -337,11 +315,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
 		Equinox equinox = new Equinox(configuration);
-		try {
-			equinox.init();
-		} catch (BundleException e) {
-			fail("Unexpected exception on init()", e); //$NON-NLS-1$
-		}
+		equinox.init();
 
 		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
@@ -365,7 +339,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 
 			linkA = systemContext.installBundle(locationLinkA);
 			linkAClient = systemContext.installBundle(locationLinkAClient);
-			assertTrue(pa.resolveBundles(new Bundle[] {linkA, linkAClient}));
+			assertTrue(pa.resolveBundles(new Bundle[] { linkA, linkAClient }));
 		} finally {
 			// put the framework back to the RESOLVED state
 			stop(equinox);
@@ -381,11 +355,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
 		Equinox equinox = new Equinox(configuration);
-		try {
-			equinox.init();
-		} catch (BundleException e) {
-			fail("Unexpected exception on init()", e); //$NON-NLS-1$
-		}
+		equinox.init();
 		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
@@ -416,8 +386,6 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			headers = securityA.getHeaders("en"); //$NON-NLS-1$
 			name = (String) headers.get(Constants.BUNDLE_NAME);
 			assertEquals("Wrong Bundle-Name", "default", name); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (BundleException e) {
-			fail("Failed to start securityA", e); //$NON-NLS-1$
 		} finally {
 			// put the framework back to the RESOLVED state
 			stop(equinox);
@@ -426,25 +394,17 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
 
-	public void testBug254600() {
+	public void testBug254600() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile("testBug254600"); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
 		Equinox equinox = new Equinox(configuration);
-		try {
-			equinox.init();
-		} catch (BundleException e) {
-			fail("Unexpected exception on init()", e); //$NON-NLS-1$
-		}
+		equinox.init();
 		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
-		try {
-			equinox.start();
-		} catch (BundleException e) {
-			fail("Failed to start the framework", e); //$NON-NLS-1$
-		}
+		equinox.start();
 		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
 
 		BundleContext systemContext = equinox.getBundleContext();
@@ -452,86 +412,53 @@ public class SecurityManagerTests extends AbstractBundleTests {
 
 		Bundle securityB = null;
 		long idB = -1;
-		try {
-			String locationSecurityA = installer.getBundleLocation("security.a"); //$NON-NLS-1$
-			String locationSecurityB = installer.getBundleLocation("security.b"); //$NON-NLS-1$
-			systemContext.installBundle(locationSecurityA);
-			securityB = systemContext.installBundle(locationSecurityB);
-			idB = securityB.getBundleId();
-		} catch (BundleException e) {
-			fail("Failed to install security test bundles", e); //$NON-NLS-1$
-		}
+		String locationSecurityA = installer.getBundleLocation("security.a"); //$NON-NLS-1$
+		String locationSecurityB = installer.getBundleLocation("security.b"); //$NON-NLS-1$
+		systemContext.installBundle(locationSecurityA);
+		securityB = systemContext.installBundle(locationSecurityB);
+		idB = securityB.getBundleId();
 
-		try {
-			securityB.start();
-			securityB.stop();
-		} catch (BundleException e) {
-			fail("Failed to start security.b bundle", e); //$NON-NLS-1$
-		}
+		securityB.start();
+		securityB.stop();
 
 		// put the framework back to the RESOLVED state
 		stop(equinox);
 
-		try {
-			equinox.start();
-		} catch (BundleException e) {
-			fail("Failed to start the framework", e); //$NON-NLS-1$
-		}
+		equinox.start();
 		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
 
 		systemContext = equinox.getBundleContext();
 		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
 		securityB = systemContext.getBundle(idB);
 
-		try {
-			securityB.start();
-			securityB.stop();
-		} catch (BundleException e) {
-			fail("Failed to start security.b bundle", e); //$NON-NLS-1$
-		}
+		securityB.start();
+		securityB.stop();
 
 		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
 
-	public void testBug287750() {
+	public void testBug287750() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		Map<String, Object> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
 		Equinox equinox = new Equinox(configuration);
-		try {
-			equinox.init();
-		} catch (BundleException e) {
-			fail("Unexpected exception on init()", e); //$NON-NLS-1$
-		}
+		equinox.init();
 		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
-		try {
-			equinox.start();
-		} catch (BundleException e) {
-			fail("Failed to start the framework", e); //$NON-NLS-1$
-		}
+		equinox.start();
 		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
 
 		BundleContext systemContext = equinox.getBundleContext();
 		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
 
 		Bundle testBundle = null;
-		try {
-			String locationTestBundle = installer.getBundleLocation("test.bug287750"); //$NON-NLS-1$
-			testBundle = systemContext.installBundle(locationTestBundle);
-		} catch (BundleException e) {
-			fail("Failed to install security test bundles", e); //$NON-NLS-1$
-		}
-
-		try {
-			testBundle.start();
-		} catch (BundleException e) {
-			fail("Failed to start security.b bundle", e); //$NON-NLS-1$
-		}
+		String locationTestBundle = installer.getBundleLocation("test.bug287750"); //$NON-NLS-1$
+		testBundle = systemContext.installBundle(locationTestBundle);
+		testBundle.start();
 		StartLevel sl = (StartLevel) systemContext.getService(systemContext.getServiceReference(StartLevel.class.getName()));
 		if (sl.getStartLevel() != 10)
 			try {
@@ -545,25 +472,17 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
 
-	public void testBug367614() {
+	public void testBug367614() throws BundleException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
 		Equinox equinox = new Equinox(configuration);
-		try {
-			equinox.init();
-		} catch (BundleException e) {
-			fail("Unexpected exception on init()", e); //$NON-NLS-1$
-		}
+		equinox.init();
 		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
-		try {
-			equinox.start();
-		} catch (BundleException e) {
-			fail("Failed to start the framework", e); //$NON-NLS-1$
-		}
+		equinox.start();
 		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
 
 		BundleContext systemContext = equinox.getBundleContext();
@@ -574,40 +493,28 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		rows.add(ca.newConditionalPermissionInfo("test", null, new PermissionInfo[] {allPackagePermission}, ConditionalPermissionInfo.ALLOW));
 		assertTrue("Cannot commit rows", update.commit()); //$NON-NLS-1$
 
-		update = ca.newConditionalPermissionUpdate();
-		rows = update.getConditionalPermissionInfos();
+		ConditionalPermissionUpdate update1 = ca.newConditionalPermissionUpdate();
+		rows = update1.getConditionalPermissionInfos();
 		rows.add(ca.newConditionalPermissionInfo("test", null, new PermissionInfo[] {allPackagePermission}, ConditionalPermissionInfo.ALLOW));
-		try {
-			update.commit();
-			fail("Expected failure to commit duplicate named rows");
-		} catch (Throwable t) {
-			assertTrue("Wrong exception: " + t, t instanceof IllegalStateException);
-			// expected failure
-		}
+
+		Throwable t1 = assertThrows(Throwable.class, () -> update1.commit());
+		assertTrue("Wrong exception: " + t1, t1 instanceof IllegalStateException);
 
 		// put the framework back to the RESOLVED state
 		stop(equinox);
 
 		// try again from a cached state
-		try {
-			equinox.start();
-		} catch (BundleException e) {
-			fail("Failed to start the framework", e); //$NON-NLS-1$
-		}
+		equinox.start();
 
 		systemContext = equinox.getBundleContext();
 		ca = (ConditionalPermissionAdmin) systemContext.getService(systemContext.getServiceReference(ConditionalPermissionAdmin.class.getName()));
 
-		update = ca.newConditionalPermissionUpdate();
-		rows = update.getConditionalPermissionInfos();
+		ConditionalPermissionUpdate update2 = ca.newConditionalPermissionUpdate();
+		rows = update2.getConditionalPermissionInfos();
 		rows.add(ca.newConditionalPermissionInfo("test", null, new PermissionInfo[] {allPackagePermission}, ConditionalPermissionInfo.ALLOW));
-		try {
-			update.commit();
-			fail("Expected failure to commit duplicate named rows");
-		} catch (Throwable t) {
-			assertTrue("Wrong exception: " + t, t instanceof IllegalStateException);
-			// expected failure
-		}
+
+		Throwable t2 = assertThrows(Throwable.class, () -> update2.commit());
+		assertTrue("Wrong exception: " + t2, t2 instanceof IllegalStateException);
 		// put the framework back to the RESOLVED state
 		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
@@ -620,11 +527,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
 		Equinox equinox = new Equinox(configuration);
-		try {
-			equinox.start();
-		} catch (BundleException e) {
-			fail("Failed to start the framework", e); //$NON-NLS-1$
-		}
+		equinox.start();
 
 		BundleContext systemContext = equinox.getBundleContext();
 
@@ -669,11 +572,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 
 		Bundle testDynamicImport = systemContext.installBundle(testDynamicImportLocation);
 
-		try {
-			testDynamicImport.start();
-		} catch (BundleException e) {
-			fail("Did not start test bundle successfully.", e);
-		}
+		testDynamicImport.start();
 
 		// put the framework back to the RESOLVED state
 		stop(equinox);
@@ -717,22 +616,22 @@ public class SecurityManagerTests extends AbstractBundleTests {
 				if (isSecurityManager && e.getCause() instanceof UnsupportedOperationException) {
 					FrameworkWiring wiring = getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION).adapt(FrameworkWiring.class);
 					Collection<BundleCapability> java12 = wiring.findProviders(new Requirement() {
-						
+
 						@Override
 						public Resource getResource() {
 							return null;
 						}
-						
+
 						@Override
 						public String getNamespace() {
 							return ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE;
 						}
-						
+
 						@Override
 						public Map<String, String> getDirectives() {
 							return Collections.singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, "(version=12)");
 						}
-						
+
 						@Override
 						public Map<String, Object> getAttributes() {
 							return Collections.emptyMap();
@@ -740,7 +639,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 					});
 					assertFalse("Only allowed UnsupportedOperationException on Java 12.", java12.isEmpty());
 				} else {
-					fail("Unexpected exception on init()", e); //$NON-NLS-1$
+					Assert.fail("Unexpected exception on init(): " + e.getMessage()); //$NON-NLS-1$
 				}
 			} finally {
 				stopQuietly(equinox);

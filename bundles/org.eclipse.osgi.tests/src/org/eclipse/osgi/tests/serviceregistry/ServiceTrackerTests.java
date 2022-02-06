@@ -16,6 +16,7 @@ package org.eclipse.osgi.tests.serviceregistry;
 import java.util.Hashtable;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
+import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -25,7 +26,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class ServiceTrackerTests extends AbstractBundleTests {
 
-	public void testServiceTracker01() {
+	public void testServiceTracker01() throws InvalidSyntaxException {
 		final String testMethodName = getName();
 		// simple ServiceTracker test
 		Runnable runIt = () -> {
@@ -51,11 +52,8 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 					results[2] = true;
 				}
 			};
-			try {
-				testTracker = new ServiceTracker(OSGiTestsActivator.getContext(), FrameworkUtil.createFilter("(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))"), testCustomizer); //$NON-NLS-1$ //$NON-NLS-2$
-			} catch (InvalidSyntaxException e) {
-				fail("filter error", e); //$NON-NLS-1$
-			}
+			Filter filter = FrameworkUtil.createFilter("(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))");
+			testTracker = new ServiceTracker(OSGiTestsActivator.getContext(), filter, testCustomizer);
 			testTracker.open();
 			assertTrue("Did not call addingService", results[0]); //$NON-NLS-1$
 			assertFalse("Did call modifiedService", results[1]); //$NON-NLS-1$
@@ -102,7 +100,7 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 		}
 	}
 
-	public void testServiceTracker02() {
+	public void testServiceTracker02() throws InvalidSyntaxException {
 		final String testMethodName = getName();
 		// simple ServiceTracker test
 		Runnable runIt = () -> {
@@ -128,11 +126,8 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 					results[2] = true;
 				}
 			};
-			try {
-				testTracker = new ServiceTracker(OSGiTestsActivator.getContext(), FrameworkUtil.createFilter("(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))"), testCustomizer); //$NON-NLS-1$ //$NON-NLS-2$
-			} catch (InvalidSyntaxException e) {
-				fail("filter error", e); //$NON-NLS-1$
-			}
+			Filter filter = FrameworkUtil.createFilter("(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))");
+			testTracker = new ServiceTracker(OSGiTestsActivator.getContext(), filter, testCustomizer);
 			testTracker.open();
 			assertFalse("Did call addingService", results[0]); //$NON-NLS-1$
 			assertFalse("Did call modifiedService", results[1]); //$NON-NLS-1$
@@ -179,7 +174,7 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 		}
 	}
 
-	public void testServiceTracker03() {
+	public void testServiceTracker03() throws InvalidSyntaxException {
 		final String testMethodName = getName();
 		// simple ServiceTracker test
 		Runnable runIt = () -> {
@@ -205,11 +200,8 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 					results[2] = true;
 				}
 			};
-			try {
-				testTracker = new ServiceTracker(OSGiTestsActivator.getContext(), FrameworkUtil.createFilter("(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))"), testCustomizer); //$NON-NLS-1$ //$NON-NLS-2$
-			} catch (InvalidSyntaxException e) {
-				fail("filter error", e); //$NON-NLS-1$
-			}
+			Filter filter = FrameworkUtil.createFilter("(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))");
+			testTracker = new ServiceTracker(OSGiTestsActivator.getContext(), filter, testCustomizer);
 			testTracker.open();
 			assertTrue("Did not call addingService", results[0]); //$NON-NLS-1$
 			assertFalse("Did call modifiedService", results[1]); //$NON-NLS-1$

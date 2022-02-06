@@ -13,36 +13,55 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-import java.security.*;
-import java.util.*;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 
+@SuppressWarnings("deprecation")
 public class BundleInstaller {
 	private BundleContext context;
 	private String rootLocation;
-	private HashMap bundles = new HashMap();
-	private ServiceTracker packageAdmin;
-	private ServiceTracker startlevel;
-	private ServiceTracker converter;
-	private ServiceTracker platformAdmin;
+	private Map<String, Bundle> bundles = new HashMap<>();
+	private ServiceTracker<?, PackageAdmin> packageAdmin;
+	private ServiceTracker<?, StartLevel> startlevel;
+	private ServiceTracker<?, URLConverter> converter;
+	private ServiceTracker<?, PlatformAdmin> platformAdmin;
 
 	public BundleInstaller(String bundlesRoot, BundleContext context) throws InvalidSyntaxException {
 		this.context = context;
 		rootLocation = bundlesRoot;
-		converter = new ServiceTracker(context, context.createFilter("(&(objectClass=" + URLConverter.class.getName() + ")(protocol=bundleentry))"), null);
+		converter = new ServiceTracker<>(context, context.createFilter("(&(objectClass=" + URLConverter.class.getName() + ")(protocol=bundleentry))"), null);
 		converter.open();
-		startlevel = new ServiceTracker(context, StartLevel.class.getName(), null);
+		startlevel = new ServiceTracker<>(context, StartLevel.class.getName(), null);
 		startlevel.open();
-		packageAdmin = new ServiceTracker(context, PackageAdmin.class.getName(), null);
+		packageAdmin = new ServiceTracker<>(context, PackageAdmin.class.getName(), null);
 		packageAdmin.open();
-		platformAdmin = new ServiceTracker(context, PlatformAdmin.class.getName(), null);
+		platformAdmin = new ServiceTracker<>(context, PlatformAdmin.class.getName(), null);
 		platformAdmin.open();
 	}
 
@@ -51,13 +70,29 @@ public class BundleInstaller {
 	}
 
 	synchronized public Bundle installBundle(String name, boolean track) throws BundleException {
+		String location = getBundleLocation(name);
+		return install(location, null, name, track);
+	}
+
+	public synchronized Bundle installBundleAtLocation(String location) throws BundleException {
+		return install(location, null, location, true);
+	}
+
+	public synchronized Bundle installBundleAtLocation(String location, InputStream input) throws BundleException {
+		return install(location, input, location, true);
+	}
+
+	private Bundle install(String location, InputStream input, String name, boolean track) throws BundleException {
 		if (bundles == null && track)
 			return null;
-		String location = getBundleLocation(name);
-		Bundle bundle = context.installBundle(location);
-		if (track)
-			bundles.put(name, bundle);
-		return bundle;
+		try (InputStream in = input) {
+			Bundle bundle = context.installBundle(location, input);
+			if (track)
+				bundles.put(name, bundle);
+			return bundle;
+		} catch (IOException e) { // ignore
+			throw new BundleException("Failed to close bundle's input stream", e);
+		}
 	}
 
 	public String getBundleLocation(final String name) throws BundleException {
@@ -78,7 +113,7 @@ public class BundleInstaller {
 		if (bundleURL == null)
 			throw new BundleException("Could not find bundle to install at: " + name);
 		try {
-			bundleURL = ((URLConverter) converter.getService()).resolve(bundleURL);
+			bundleURL = converter.getService().resolve(bundleURL);
 		} catch (IOException e) {
 			throw new BundleException("Converter error", e);
 		}
@@ -91,7 +126,7 @@ public class BundleInstaller {
 	synchronized public Bundle updateBundle(String fromName, String toName) throws BundleException {
 		if (bundles == null)
 			return null;
-		Bundle fromBundle = (Bundle) bundles.get(fromName);
+		Bundle fromBundle = bundles.get(fromName);
 		if (fromBundle == null)
 			throw new BundleException("The bundle to update does not exist!! " + fromName);
 		String bundleFileName = rootLocation + "/" + toName;
@@ -99,7 +134,7 @@ public class BundleInstaller {
 		if (bundleURL == null)
 			bundleURL = context.getBundle().getEntry(bundleFileName);
 		try {
-			bundleURL = ((URLConverter) converter.getService()).resolve(bundleURL);
+			bundleURL = converter.getService().resolve(bundleURL);
 		} catch (IOException e) {
 			throw new BundleException("Converter error", e);
 		}
@@ -119,7 +154,7 @@ public class BundleInstaller {
 	synchronized public Bundle uninstallBundle(String name) throws BundleException {
 		if (bundles == null)
 			return null;
-		Bundle bundle = (Bundle) bundles.remove(name);
+		Bundle bundle = bundles.remove(name);
 		if (bundle == null)
 			return null;
 		bundle.uninstall();
@@ -128,10 +163,9 @@ public class BundleInstaller {
 
 	synchronized public Bundle[] uninstallAllBundles() {
 		if (bundles == null)
-			return null;
-		ArrayList result = new ArrayList(bundles.size());
-		for (Iterator iter = bundles.values().iterator(); iter.hasNext();) {
-			Bundle bundle = (Bundle) iter.next();
+			return new Bundle[0];
+		List<Bundle> result = new ArrayList<>(bundles.size());
+		for (Bundle bundle : bundles.values()) {
 			try {
 				bundle.uninstall();
 			} catch (IllegalStateException e) {
@@ -143,12 +177,12 @@ public class BundleInstaller {
 			result.add(bundle);
 		}
 		bundles.clear();
-		return (Bundle[]) result.toArray(new Bundle[result.size()]);
+		return result.toArray(new Bundle[result.size()]);
 	}
 
-	synchronized public Bundle[] shutdown() {
+	synchronized public void shutdown() {
 		if (bundles == null)
-			return null;
+			return;
 		Bundle[] result = uninstallAllBundles();
 		refreshPackages(result);
 		packageAdmin.close();
@@ -156,65 +190,55 @@ public class BundleInstaller {
 		converter.close();
 		platformAdmin.close();
 		bundles = null;
-		return result;
 	}
 
 	synchronized public Bundle[] refreshPackages(Bundle[] refresh) {
 		if (bundles == null)
 			return null;
-		PackageAdmin pa = (PackageAdmin) packageAdmin.getService();
-		final boolean[] flag = new boolean[] {false};
+		PackageAdmin pa = packageAdmin.getService();
+		CountDownLatch flag = new CountDownLatch(1);
 		FrameworkListener listener = event -> {
-			if (event.getType() == FrameworkEvent.PACKAGES_REFRESHED)
-				synchronized (flag) {
-					flag[0] = true;
-					flag.notifyAll();
-				}
+			if (event.getType() == FrameworkEvent.PACKAGES_REFRESHED) {
+				flag.countDown();
+			}
 		};
 		context.addFrameworkListener(listener);
-		final HashSet refreshed = new HashSet();
+		final Set<Bundle> refreshed = new HashSet<>();
 		SynchronousBundleListener refreshBundleListener = event -> refreshed.add(event.getBundle());
 		context.addBundleListener(refreshBundleListener);
 		try {
 			pa.refreshPackages(refresh);
-			synchronized (flag) {
-				while (!flag[0]) {
-					try {
-						flag.wait(5000);
-					} catch (InterruptedException e) {
-						// do nothing
-					}
-				}
-			}
+			assertTrue("refreshPackages timed out", flag.await(30, TimeUnit.SECONDS));
+		} catch (InterruptedException e) { // do nothing
 		} finally {
 			context.removeFrameworkListener(listener);
 			context.removeBundleListener(refreshBundleListener);
 		}
-		return (Bundle[]) refreshed.toArray(new Bundle[refreshed.size()]);
+		return refreshed.toArray(new Bundle[refreshed.size()]);
 	}
 
 	synchronized public boolean resolveBundles(Bundle[] resolve) {
 		if (bundles == null)
 			return false;
-		PackageAdmin pa = (PackageAdmin) packageAdmin.getService();
+		PackageAdmin pa = packageAdmin.getService();
 		return pa.resolveBundles(resolve);
 	}
 
 	synchronized public Bundle getBundle(String name) {
 		if (bundles == null)
 			return null;
-		return (Bundle) bundles.get(name);
+		return bundles.get(name);
 	}
 
 	public StartLevel getStartLevel() {
-		return (StartLevel) startlevel.getService();
+		return startlevel.getService();
 	}
 
 	public PackageAdmin getPackageAdmin() {
-		return (PackageAdmin) packageAdmin.getService();
+		return packageAdmin.getService();
 	}
 
 	public PlatformAdmin getPlatformAdmin() {
-		return (PlatformAdmin) platformAdmin.getService();
+		return platformAdmin.getService();
 	}
 }

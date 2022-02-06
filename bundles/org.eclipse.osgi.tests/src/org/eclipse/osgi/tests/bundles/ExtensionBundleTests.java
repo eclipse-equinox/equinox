@@ -66,13 +66,8 @@ public class ExtensionBundleTests extends AbstractBundleTests {
 		assertEquals("1.2", "success", results[1]); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	public void testExtensionBundleWithRequireCapabilityOsgiEeInstalls() {
-		Bundle b = null;
-		try {
-			b = installer.installBundle("ext.framework.osgiee.b", false);
-		} catch (BundleException e) {
-			fail("Extension bundle with Require-Capability only in osgi.ee. namespace failed to install", e);
-		}
+	public void testExtensionBundleWithRequireCapabilityOsgiEeInstalls() throws BundleException {
+		Bundle b = installer.installBundle("ext.framework.osgiee.b", false);
 		assertTrue("Could not resolve bundle: " + b, installer.resolveBundles(new Bundle[] {b}));
 		BundleWiring wiring = b.adapt(BundleWiring.class);
 		assertNotNull("No wiring for bundle: " + b, wiring);

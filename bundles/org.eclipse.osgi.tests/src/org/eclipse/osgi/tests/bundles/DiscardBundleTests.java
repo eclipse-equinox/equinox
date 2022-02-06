@@ -53,11 +53,6 @@ public class DiscardBundleTests extends AbstractBundleTests {
 		createBundleJar();
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
-	}
-
 	public void testDiscardOsgiCheckConfigurationTrueOsgiDevSpecified() throws Exception {
 		Map<String, Object> configuration = createConfiguration();
 		configuration.put(OSGI_CHECKCONFIGURATION, Boolean.TRUE.toString());

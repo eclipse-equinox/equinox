@@ -34,7 +34,7 @@ import org.osgi.framework.ServiceRegistration;
 
 public class ServiceRegistryTests extends AbstractBundleTests {
 
-	public void testServiceListener01() {
+	public void testServiceListener01() throws InvalidSyntaxException {
 		final String testMethodName = getName();
 		// simple ServiceListener test
 		Runnable runIt = () -> {
@@ -57,11 +57,8 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 					break;
 			}
 		};
-		try {
-			OSGiTestsActivator.getContext().addServiceListener(testListener, "(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))"); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (InvalidSyntaxException e) {
-			fail("filter error", e); //$NON-NLS-1$
-		}
+		OSGiTestsActivator.getContext().addServiceListener(testListener, "(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))"); //$NON-NLS-1$ //$NON-NLS-2$
+
 		ServiceRegistration reg = null;
 		try {
 			// register service which matches
@@ -125,7 +122,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		}
 	}
 
-	public void testServiceListener02() {
+	public void testServiceListener02() throws InvalidSyntaxException {
 		final String testMethodName = getName();
 		// simple ServiceListener test
 		Runnable runIt = () -> {
@@ -148,11 +145,8 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 					break;
 			}
 		};
-		try {
-			OSGiTestsActivator.getContext().addServiceListener(testListener, "(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))"); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (InvalidSyntaxException e) {
-			fail("filter error", e); //$NON-NLS-1$
-		}
+		OSGiTestsActivator.getContext().addServiceListener(testListener, "(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))"); //$NON-NLS-1$ //$NON-NLS-2$
+
 		ServiceRegistration reg = null;
 		try {
 			// register service which does not match
@@ -216,7 +210,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		}
 	}
 
-	public void testServiceListener03() {
+	public void testServiceListener03() throws InvalidSyntaxException {
 		final String testMethodName = getName();
 		// simple ServiceListener test
 		Runnable runIt = () -> {
@@ -239,11 +233,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 					break;
 			}
 		};
-		try {
-			OSGiTestsActivator.getContext().addServiceListener(testListener, "(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))"); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (InvalidSyntaxException e) {
-			fail("filter error", e); //$NON-NLS-1$
-		}
+		OSGiTestsActivator.getContext().addServiceListener(testListener, "(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))"); //$NON-NLS-1$ //$NON-NLS-2$
 		ServiceRegistration reg1 = null;
 		ServiceRegistration reg2 = null;
 		try {
@@ -383,8 +373,6 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 			reg = OSGiTestsActivator.getContext().registerService(new String[] {Runnable.class.getName(), Object.class.getName(), Object.class.getName()}, (Runnable) () -> {
 				// nothing
 			}, null);
-		} catch (Throwable t) {
-			fail("Failed to register service with duplicate objectClass names", t); //$NON-NLS-1$
 		} finally {
 			if (reg != null)
 				reg.unregister();
@@ -468,7 +456,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		}
 	}
 
-	public void testInvalidRanking() {
+	public void testInvalidRanking() throws InterruptedException {
 		final CountDownLatch warning = new CountDownLatch(1);
 		FrameworkListener warningListener = event -> {
 			if (FrameworkEvent.WARNING == event.getType() && OSGiTestsActivator.getBundle().equals(event.getBundle())) {
@@ -491,13 +479,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 			}
 			OSGiTestsActivator.getContext().removeFrameworkListener(warningListener);
 		}
-
-		try {
-			assertTrue("Timeout waiting for the warning.", warning.await(5, TimeUnit.SECONDS));
-		} catch (InterruptedException e) {
-			fail("Interrupted.", e);
-		}
-
+		assertTrue("Timeout waiting for the warning.", warning.await(5, TimeUnit.SECONDS));
 	}
 
 	public void testNullValue() throws InvalidSyntaxException {

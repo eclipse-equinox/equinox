@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import static org.hamcrest.CoreMatchers.either;
+import static org.hamcrest.CoreMatchers.is;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -24,6 +26,7 @@ import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.service.resolver.VersionConstraint;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.hamcrest.MatcherAssert;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkEvent;
@@ -51,7 +54,7 @@ public class PlatformAdminBundleTests extends AbstractBundleTests {
 		assertNull("Should not find bundle.", testDesc);
 	}
 
-	public void testResolveRefresh() throws BundleException {
+	public void testResolveRefresh() throws Exception {
 		PlatformAdmin pa = installer.getPlatformAdmin();
 		State systemState = pa.getState(false);
 
@@ -59,7 +62,8 @@ public class PlatformAdminBundleTests extends AbstractBundleTests {
 		Bundle chainTestB = installer.installBundle("chain.test.b");
 		Bundle chainTestC = installer.installBundle("chain.test.c");
 		Bundle chainTestD = installer.installBundle("chain.test.d");
-		assertTrue("Could not resolve bundles.", getContext().getBundle(0).adapt(FrameworkWiring.class).resolveBundles(Arrays.asList(chainTestA, chainTestB, chainTestC, chainTestD)));
+		assertTrue("Could not resolve bundles.", getContext().getBundle(0).adapt(FrameworkWiring.class)
+				.resolveBundles(Arrays.asList(chainTestA, chainTestB, chainTestC, chainTestD)));
 
 		BundleDescription testADesc = systemState.getBundle(chainTestA.getBundleId());
 		BundleDescription testBDesc = systemState.getBundle(chainTestB.getBundleId());
@@ -76,17 +80,12 @@ public class PlatformAdminBundleTests extends AbstractBundleTests {
 		assertTrue("testCDesc is not resolved!!", testDDesc.isResolved());
 
 		chainTestD.uninstall();
-		installer.refreshPackages(new Bundle[] {chainTestD});
+		installer.refreshPackages(new Bundle[] { chainTestD });
 
 		if (testADesc.isResolved()) {
 			// This is a hack to wait some time to allow package admin event to be fired
 			// to all listeners.
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				fail("Test got interrupted.", e);
-			}
+			Thread.sleep(1000);
 		}
 
 		assertFalse("testADesc is resolved!!", testADesc.isResolved());
@@ -98,7 +97,7 @@ public class PlatformAdminBundleTests extends AbstractBundleTests {
 		Bundle chainTestA = installer.installBundle("chain.test.a");
 		Bundle chainTestB = installer.installBundle("chain.test.b");
 		Bundle chainTestC = installer.installBundle("chain.test.c");
-		Bundle[] allBundles = new Bundle[] {chainTestA, chainTestB, chainTestC};
+		Bundle[] allBundles = new Bundle[] { chainTestA, chainTestB, chainTestC };
 
 		PlatformAdmin pa = installer.getPlatformAdmin();
 		State systemState = pa.getState(false);
@@ -115,14 +114,17 @@ public class PlatformAdminBundleTests extends AbstractBundleTests {
 		assertFalse("testCDesc is resolved!!", testCDesc.isResolved());
 
 		// ok finally we can start testing!!
-		VersionConstraint[] unsatifiedLeaves = pa.getStateHelper().getUnsatisfiedLeaves(new BundleDescription[] {testADesc});
+		VersionConstraint[] unsatifiedLeaves = pa.getStateHelper()
+				.getUnsatisfiedLeaves(new BundleDescription[] { testADesc });
 		assertNotNull("Unsatified constraints is null!!", unsatifiedLeaves);
 		assertEquals("Wrong number of constraints!!", 2, unsatifiedLeaves.length);
 		for (int i = 0; i < unsatifiedLeaves.length; i++) {
-			assertTrue("Constraint type is not import package: " + unsatifiedLeaves[i], unsatifiedLeaves[i] instanceof ImportPackageSpecification);
+			assertTrue("Constraint type is not import package: " + unsatifiedLeaves[i],
+					unsatifiedLeaves[i] instanceof ImportPackageSpecification);
 			assertEquals("Package name is wrong: " + i, "chain.test.d", unsatifiedLeaves[i].getName());
-			if (unsatifiedLeaves[i].getBundle() != testBDesc && unsatifiedLeaves[i].getBundle() != testCDesc)
-				fail("Wrong bundle for the constraint: " + unsatifiedLeaves[i].getBundle());
+
+			MatcherAssert.assertThat("Wrong bundle for the constraint: " + unsatifiedLeaves[i].getBundle(),
+					unsatifiedLeaves[i].getBundle(), either(is(testBDesc)).or(is(testCDesc)));
 		}
 	}
 

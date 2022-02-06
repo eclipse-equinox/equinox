@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.log.test;
 
+import static org.junit.Assert.assertThrows;
+
 import java.io.File;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -58,10 +60,6 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 	LoggerContext rootLoggerContext;
 	Map<String, LogLevel> rootLogLevels;
 
-	public LogReaderServiceTest(String name) {
-		setName(name);
-	}
-
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -106,12 +104,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 	}
 
 	public void testaddNullListener() throws Exception {
-		try {
-			reader.addLogListener(null);
-		} catch (IllegalArgumentException t) {
-			return;
-		}
-		fail();
+		assertThrows(IllegalArgumentException.class, () -> reader.addLogListener(null));
 	}
 
 	public void testBadListener() throws Exception {
