@@ -94,9 +94,9 @@
       <repositoryList
           name="CBI+Orbit">
         <repository
-            url="http://download.eclipse.org/cbi/updates/license"/>
+            url="https://download.eclipse.org/cbi/updates/license"/>
         <repository
-            url="http://download.eclipse.org/tools/orbit/downloads/latest-R"/>
+            url="https://download.eclipse.org/tools/orbit/downloads/latest-R"/>
       </repositoryList>
     </targlet>
   </setupTask>
