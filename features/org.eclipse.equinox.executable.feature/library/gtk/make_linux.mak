@@ -160,7 +160,7 @@ Note:
    DEV_ECLIPSE environmental variable is not defined.
    You can download an integration build eclipse for testing and set DEV_ECLIPSE to point to it's folder
    as per output of 'pwd'. Note, without trailing forwardslash. Integration build can be downloaded here:
-   See: http://download.eclipse.org/eclipse/downloads/
+   See: https://download.eclipse.org/eclipse/downloads/
    That way you can automatically build and copy eclipse and eclipse_XXXX.so into the relevant folders for testing. 
    E.g: you can put something like the following into your .bashrc
    export DEV_ECLIPSE="/home/YOUR_USER/Downloads/eclipse-SDK-I20YYMMDD-XXXX-linux-gtk-x86_64/eclipse"
