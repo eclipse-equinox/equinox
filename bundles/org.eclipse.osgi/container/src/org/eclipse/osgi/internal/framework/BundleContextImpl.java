@@ -243,9 +243,12 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		if (System.getSecurityManager() == null) {
 			notifyFindHooksPriviledged(context, shrinkable);
 		} else {
-			AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
-				notifyFindHooksPriviledged(context, shrinkable);
-				return null;
+			AccessController.doPrivileged(new PrivilegedAction<Void>() {
+				@Override
+				public Void run() {
+					notifyFindHooksPriviledged(context, shrinkable);
+					return null;
+				}
 			});
 		}
 	}
@@ -799,19 +802,22 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 */
 	private void startActivator(final BundleActivator bundleActivator) throws BundleException {
 		try {
-			AccessController.doPrivileged((PrivilegedExceptionAction<Void>) () -> {
-				if (bundleActivator != null) {
-					// make sure the context class loader is set correctly
-					Object previousTCCL = setContextFinder();
-					/* Start the bundle synchronously */
-					try {
-						bundleActivator.start(BundleContextImpl.this);
-					} finally {
-						if (previousTCCL != Boolean.FALSE)
-							Thread.currentThread().setContextClassLoader((ClassLoader) previousTCCL);
+			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+				@Override
+				public Void run() throws Exception {
+					if (bundleActivator != null) {
+						// make sure the context class loader is set correctly
+						Object previousTCCL = setContextFinder();
+						/* Start the bundle synchronously */
+						try {
+							bundleActivator.start(BundleContextImpl.this);
+						} finally {
+							if (previousTCCL != Boolean.FALSE)
+								Thread.currentThread().setContextClassLoader((ClassLoader) previousTCCL);
+						}
 					}
+					return null;
 				}
-				return null;
 			});
 		} catch (Throwable t) {
 			if (t instanceof PrivilegedActionException) {
@@ -853,19 +859,22 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	protected void stop() throws BundleException {
 		try {
 			final BundleActivator bundleActivator = activator;
-			AccessController.doPrivileged((PrivilegedExceptionAction<Void>) () -> {
-				if (bundleActivator != null) {
-					// make sure the context class loader is set correctly
-					Object previousTCCL = setContextFinder();
-					try {
-						/* Stop the bundle synchronously */
-						bundleActivator.stop(BundleContextImpl.this);
-					} finally {
-						if (previousTCCL != Boolean.FALSE)
-							Thread.currentThread().setContextClassLoader((ClassLoader) previousTCCL);
+			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+				@Override
+				public Void run() throws Exception {
+					if (bundleActivator != null) {
+						// make sure the context class loader is set correctly
+						Object previousTCCL = setContextFinder();
+						try {
+							/* Stop the bundle synchronously */
+							bundleActivator.stop(BundleContextImpl.this);
+						} finally {
+							if (previousTCCL != Boolean.FALSE)
+								Thread.currentThread().setContextClassLoader((ClassLoader) previousTCCL);
+						}
 					}
+					return null;
 				}
-				return null;
 			});
 		} catch (Throwable t) {
 			if (t instanceof PrivilegedActionException) {

@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -45,9 +46,21 @@ import org.eclipse.osgi.container.ModuleWire;
  */
 public class NamespaceList<E> {
 
-	public final static Function<ModuleWire, String> WIRE = wire -> wire.getCapability().getNamespace();
-	public final static Function<ModuleCapability, String> CAPABILITY = ModuleCapability::getNamespace;
-	public final static Function<ModuleRequirement, String> REQUIREMENT = ModuleRequirement::getNamespace;
+	public final static Function<ModuleWire, String> WIRE = new Function<ModuleWire, String>() { 
+		public String apply(ModuleWire wire) {
+			return wire.getCapability().getNamespace();
+		}
+	};
+	public final static Function<ModuleCapability, String> CAPABILITY = new Function<ModuleCapability, String>() {
+		public String apply(ModuleCapability capability) {
+			return capability.getNamespace();
+		}
+	};
+	public final static Function<ModuleRequirement, String> REQUIREMENT = new Function<ModuleRequirement, String>() {
+		public String apply(ModuleRequirement requirement) {
+			return requirement.getNamespace();
+		}
+	};
 
 	/**
 	 * Returns an empty NamespaceList.
@@ -216,7 +229,9 @@ public class NamespaceList<E> {
 		public List<E> getNamespaceElements(String namespace) {
 			if (namespace == null) {
 				List<E> list = new ArrayList<>(size);
-				namespaceElements.values().forEach(list::addAll);
+				for (List<E> es : namespaceElements.values()) {
+					list.addAll(es);
+				}
 				return Collections.unmodifiableList(list);
 			}
 			List<E> namespaceList = namespaceElements.get(namespace);
@@ -243,11 +258,14 @@ public class NamespaceList<E> {
 		public <R> Builder<R> transformIntoCopy(Function<E, R> transformation, Function<R, String> newGetNamespace) {
 			Builder<R> transformedBuilder = new Builder<>(newGetNamespace, this.namespaceElements.size());
 			transformedBuilder.size = this.size;
-			this.namespaceElements.forEach((n, es) -> {
+                        for (Map.Entry<String, List<E>> entry : namespaceElements.entrySet()) {
+				List<E> es = entry.getValue();
 				List<R> transformedElements = new ArrayList<>(es.size());
-				es.forEach(e -> transformedElements.add(transformation.apply(e)));
-				transformedBuilder.namespaceElements.put(n, transformedElements);
-			});
+				for (E e : es) {
+					transformedElements.add(transformation.apply(e));
+				}
+				transformedBuilder.namespaceElements.put(entry.getKey(), transformedElements);
+			}
 			return transformedBuilder;
 		}
 
@@ -306,15 +324,20 @@ public class NamespaceList<E> {
 		}
 
 		private boolean addAll(Map<String, List<E>> perNamespaceElements) {
-			perNamespaceElements.forEach((n, es) -> {
-				getNamespaceList(n).addAll(es);
+			for (Map.Entry<String, List<E>> entry : perNamespaceElements.entrySet()) {
+				List<E> es = entry.getValue();
+				getNamespaceList(entry.getKey()).addAll(es);
 				this.size += es.size();
-			});
+			}
 			return true;
 		}
 
 		private List<E> getNamespaceList(String namespace) {
-			return namespaceElements.computeIfAbsent(namespace, n -> new ArrayList<>());
+			return namespaceElements.computeIfAbsent(namespace, new Function<String, List<E>>() {
+				public List<E> apply(String n) {
+					return new ArrayList<>();
+				}
+			});
 		}
 
 		/**
@@ -370,15 +393,21 @@ public class NamespaceList<E> {
 			}
 			prepareModification();
 
-			list.namespaces().forEach((namespace, elementsToAdd) -> {
+			for (Map.Entry<String, List<E>> entry : list.namespaces().entrySet()) {
+				String namespace = entry.getKey();
 				if (namespaceFilter.test(namespace)) {
 					List<E> targetList = getNamespaceList(namespace);
+					List<E> elementsToAdd = entry.getValue();
 					for (E toAdd : elementsToAdd) {
 						if (elementFilter.test(toAdd)) {
 							if (insertionMatcher == null) {
 								targetList.add(toAdd);
 							} else {
-								addAfterLastMatch(toAdd, targetList, e -> insertionMatcher.test(toAdd, e));
+								addAfterLastMatch(toAdd, targetList, new Predicate<E>() {
+									public boolean test(E e) {
+										return insertionMatcher.test(toAdd, e);
+									}
+								});
 							}
 							this.size++;
 						}
@@ -387,7 +416,7 @@ public class NamespaceList<E> {
 						namespaceElements.remove(namespace);
 					}
 				}
-			});
+			}
 		}
 
 		private void addAfterLastMatch(E e, List<E> list, Predicate<E> matcher) {
@@ -420,11 +449,13 @@ public class NamespaceList<E> {
 		}
 
 		private void removeNamespaceElement(String namespace, E element) {
-			namespaceElements.computeIfPresent(namespace, (n, es) -> {
-				if (es.remove(element)) {
-					this.size--;
+			namespaceElements.computeIfPresent(namespace, new BiFunction<String, List<E>, List<E>>() {
+				public List<E> apply (String n, List<E> es) {
+					if (es.remove(element)) {
+						Builder.this.size--;
+					}
+					return es.isEmpty() ? null : es;
 				}
-				return es.isEmpty() ? null : es;
 			});
 		}
 
@@ -452,12 +483,14 @@ public class NamespaceList<E> {
 		public void removeNamespaceIf(Predicate<String> filter) {
 			prepareModification();
 
-			namespaceElements.entrySet().removeIf(e -> {
-				if (filter.test(e.getKey())) {
-					this.size -= e.getValue().size();
-					return true;
+			namespaceElements.entrySet().removeIf(new Predicate<Map.Entry<String, List<E>>>() {
+				public boolean test(Map.Entry<String, List<E>> e) {
+					if (filter.test(e.getKey())) {
+						Builder.this.size -= e.getValue().size();
+						return true;
+					}
+					return false;
 				}
-				return false;
 			});
 		}
 
@@ -466,7 +499,11 @@ public class NamespaceList<E> {
 			prepareModification();
 
 			int s = size;
-			namespaceElements.values().removeIf(es -> removeElementsIf(es, filter) == null);
+			namespaceElements.values().removeIf(new Predicate<List<E>>() {
+				public boolean test(List<E> es) {
+					return removeElementsIf(es, filter) == null;
+				}
+			});
 			return size < s;
 		}
 
@@ -480,7 +517,11 @@ public class NamespaceList<E> {
 		public void removeElementsOfNamespaceIf(String namespace, Predicate<? super E> filter) {
 			prepareModification();
 
-			namespaceElements.computeIfPresent(namespace, (n, es) -> removeElementsIf(es, filter));
+			namespaceElements.computeIfPresent(namespace, new BiFunction<String, List<E>, List<E>>() {
+				public List<E> apply(String n, List<E> es) {
+					return removeElementsIf(es, filter);
+				}
+			});
 		}
 
 		private List<E> removeElementsIf(List<E> list, Predicate<? super E> filter) {
@@ -509,14 +550,18 @@ public class NamespaceList<E> {
 			}
 			if (lastBuildElements == null) {
 				lastBuildElements = new ArrayList<>(size);
-				namespaceElements.values().forEach(lastBuildElements::addAll);
+				for (List<E> es : namespaceElements.values()) {
+					lastBuildElements.addAll(es);
+				}
 				lastBuildElements = Collections.unmodifiableList(lastBuildElements);
 
 				int[] start = new int[] { 0 };
-				namespaceElements.replaceAll((n, es) -> {
-					int from = start[0];
-					int to = start[0] += es.size();
-					return lastBuildElements.subList(from, to);
+				namespaceElements.replaceAll(new BiFunction<String, List<E>, List<E>>() {
+					public List<E> apply(String n, List<E> es) {
+						int from = start[0];
+						int to = start[0] += es.size();
+						return lastBuildElements.subList(from, to);
+					}
 				});
 			}
 			return new NamespaceList<>(getNamespace, namespaceElements, lastBuildElements);
@@ -527,7 +572,11 @@ public class NamespaceList<E> {
 				// this builder was build before. Create a copy of the Map and their
 				// namespace-lists for subsequent modification
 				namespaceElements = new LinkedHashMap<>(namespaceElements);
-				namespaceElements.replaceAll((n, es) -> new ArrayList<>(es));
+				namespaceElements.replaceAll(new BiFunction<String, List<E>, List<E>>() {
+					public List<E> apply(String n, List<E> es) {
+						return new ArrayList<>(es);
+					}
+				});
 				lastBuildElements = null;
 			}
 		}

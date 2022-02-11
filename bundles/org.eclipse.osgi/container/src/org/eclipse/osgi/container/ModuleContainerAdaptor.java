@@ -29,7 +29,12 @@ import org.osgi.framework.startlevel.FrameworkStartLevel;
  * @since 3.10
  */
 public abstract class ModuleContainerAdaptor {
-	private static Executor defaultExecutor = Runnable::run;
+	private static Executor defaultExecutor = new Executor() {
+		@Override
+		public void execute(Runnable command) {
+			command.run();
+		}
+	};
 
 	/**
 	 * Event types that may be {@link #publishContainerEvent(ContainerEvent, Module, Throwable, FrameworkListener...) published}

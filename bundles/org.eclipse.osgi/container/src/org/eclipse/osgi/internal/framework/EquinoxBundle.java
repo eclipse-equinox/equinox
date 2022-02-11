@@ -219,11 +219,14 @@ public class EquinoxBundle implements Bundle, BundleReference {
 					if (Module.ACTIVE_SET.contains(getState())) {
 						// TODO this still has a chance of a race condition:
 						// multiple threads could get started if stop is called over and over
-						Thread t = new Thread(() -> {
-							try {
-								stop();
-							} catch (Throwable e) {
-								SystemBundle.this.getEquinoxContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error stopping the framework.", e); //$NON-NLS-1$
+						Thread t = new Thread(new Runnable() {
+							@Override
+							public void run() {
+								try {
+									stop();
+								} catch (Throwable e) {
+									SystemBundle.this.getEquinoxContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error stopping the framework.", e); //$NON-NLS-1$
+								}
 							}
 						}, "Framework stop - " + getEquinoxContainer().toString()); //$NON-NLS-1$
 						t.start();
@@ -240,11 +243,14 @@ public class EquinoxBundle implements Bundle, BundleReference {
 				lockStateChange(ModuleEvent.UPDATED);
 				try {
 					if (Module.ACTIVE_SET.contains(getState())) {
-						Thread t = new Thread(() -> {
-							try {
-								update();
-							} catch (Throwable e) {
-								SystemBundle.this.getEquinoxContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error updating the framework.", e); //$NON-NLS-1$
+						Thread t = new Thread(new Runnable() {
+							@Override
+							public void run() {
+								try {
+									update();
+								} catch (Throwable e) {
+									SystemBundle.this.getEquinoxContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error updating the framework.", e); //$NON-NLS-1$
+								}
 							}
 						}, "Framework update - " + getEquinoxContainer().toString()); //$NON-NLS-1$
 						t.start();
@@ -637,15 +643,18 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			String reportMessage = report.getResolutionReportMessage(module.getCurrentRevision());
 			equinoxContainer.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, this, new BundleException(reportMessage, BundleException.RESOLVE_ERROR));
 		}
-		return AccessController.doPrivileged((PrivilegedAction<ModuleClassLoader>) () -> {
-			ModuleWiring wiring = getModule().getCurrentRevision().getWiring();
-			if (wiring != null) {
-				ModuleLoader moduleLoader = wiring.getModuleLoader();
-				if (moduleLoader instanceof BundleLoader) {
-					return ((BundleLoader) moduleLoader).getModuleClassLoader();
+		return AccessController.doPrivileged(new PrivilegedAction<ModuleClassLoader>() {
+			@Override
+			public ModuleClassLoader run() {
+				ModuleWiring wiring = getModule().getCurrentRevision().getWiring();
+				if (wiring != null) {
+					ModuleLoader moduleLoader = wiring.getModuleLoader();
+					if (moduleLoader instanceof BundleLoader) {
+						return ((BundleLoader) moduleLoader).getModuleClassLoader();
+					}
 				}
+				return null;
 			}
-			return null;
 		});
 	}
 

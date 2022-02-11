@@ -74,7 +74,12 @@ public class BundleLoader extends ModuleLoader {
 	public final static String DEFAULT_PACKAGE = "."; //$NON-NLS-1$
 	public final static String JAVA_PACKAGE = "java."; //$NON-NLS-1$
 
-	public final static ClassContext CLASS_CONTEXT = AccessController.doPrivileged((PrivilegedAction<ClassContext>) ClassContext::new);
+	public final static ClassContext CLASS_CONTEXT = AccessController.doPrivileged(new PrivilegedAction<ClassContext>() {
+		@Override
+		public ClassContext run() {
+			return new ClassContext();
+		}
+	});
 	public final static ClassLoader FW_CLASSLOADER = getClassLoader(EquinoxContainer.class);
 
 	private static final int PRE_CLASS = 1;
@@ -257,8 +262,12 @@ public class BundleLoader extends ModuleLoader {
 			result = createClassLoaderPrivledged(parent, generation.getBundleInfo().getStorage().getConfiguration(), this, generation, hooks);
 		} else {
 			final ClassLoader cl = parent;
-			result = AccessController.doPrivileged((PrivilegedAction<ModuleClassLoader>)
-					() -> createClassLoaderPrivledged(cl, generation.getBundleInfo().getStorage().getConfiguration(), BundleLoader.this, generation, hooks));
+			result = AccessController.doPrivileged(new PrivilegedAction<ModuleClassLoader>() {
+				@Override
+				public ModuleClassLoader run() {
+					return createClassLoaderPrivledged(cl, generation.getBundleInfo().getStorage().getConfiguration(), BundleLoader.this, generation, hooks);
+				}
+			});
 		}
 
 		// Synchronize on classLoaderCreatedMonitor in order to ensure hooks are called before returning.
@@ -272,11 +281,15 @@ public class BundleLoader extends ModuleLoader {
 				// only send to hooks if this thread wins in creating the class loader.
 				final ModuleClassLoader cl = result;
 				// protect with doPriv to avoid bubbling up permission checks that hooks may require
-				AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-					for (ClassLoaderHook hook : hooks) {
-						hook.classLoaderCreated(cl);
+				AccessController.doPrivileged(new PrivilegedAction<Object>() {
+					@Override
+					public Object run() {
+						for (ClassLoaderHook hook : hooks) {
+							hook.classLoaderCreated(cl);
+						}
+						return null;
 					}
-					return null;
+
 				});
 				// finally set the class loader for use after calling hooks
 				classloader = classLoaderCreated;
@@ -601,7 +614,12 @@ public class BundleLoader extends ModuleLoader {
 	private static ClassLoader getClassLoader(final Class<?> clazz) {
 		if (System.getSecurityManager() == null)
 			return clazz.getClassLoader();
-		return AccessController.doPrivileged((PrivilegedAction<ClassLoader>) clazz::getClassLoader);
+		return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+			@Override
+			public ClassLoader run() {
+				return clazz.getClassLoader();
+			}
+		});
 	}
 
 	/**

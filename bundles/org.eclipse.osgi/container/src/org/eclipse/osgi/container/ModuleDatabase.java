@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+import java.util.function.BiFunction;
 import org.eclipse.osgi.container.Module.Settings;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ContainerEvent;
@@ -501,8 +502,12 @@ public class ModuleDatabase {
 		readLock();
 		try {
 			Map<ModuleRevision, ModuleWiring> clonedWirings = new HashMap<>(wirings);
-			clonedWirings.replaceAll((r, w) -> new ModuleWiring(r, w.getCapabilities(), w.getRequirements(),
-					w.getProvidedWires(), w.getRequiredWires(), w.getSubstitutedNames()));
+			clonedWirings.replaceAll(new BiFunction<ModuleRevision, ModuleWiring, ModuleWiring>() {
+				public ModuleWiring apply(ModuleRevision r, ModuleWiring w) {
+					return new ModuleWiring(r, w.getCapabilities(), w.getRequirements(), w.getProvidedWires(),
+							w.getRequiredWires(), w.getSubstitutedNames());
+				}
+			});
 			return clonedWirings;
 		} finally {
 			readUnlock();
@@ -595,7 +600,12 @@ public class ModuleDatabase {
 		if (modules.size() < 2)
 			return;
 		if (sortOptions == null || Sort.BY_ID.isContained(sortOptions) || sortOptions.length == 0) {
-			Collections.sort(modules, Comparator.comparing(Module::getId));
+			Collections.sort(modules, new Comparator<Module>() {
+				@Override
+				public int compare(Module m1, Module m2) {
+					return m1.getId().compareTo(m2.getId());
+				}
+			});
 			return;
 		}
 		// first sort by start-level

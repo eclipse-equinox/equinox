@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import org.eclipse.osgi.internal.container.NamespaceList;
 import org.eclipse.osgi.internal.container.NamespaceList.Builder;
 import org.eclipse.osgi.internal.framework.FilterImpl;
@@ -50,6 +51,11 @@ public final class ModuleRevisionBuilder {
 	 * Provides information about a capability or requirement
 	 */
 	public static class GenericInfo {
+		final static Function<GenericInfo, String> GETNAMESPACE = new Function<GenericInfo, String>() {
+			public String apply(GenericInfo info) {
+				return info.getNamespace();
+			}
+		};
 		final String namespace;
 		final Map<String, String> directives;
 		final Map<String, Object> attributes;
@@ -90,8 +96,8 @@ public final class ModuleRevisionBuilder {
 	private String symbolicName = null;
 	private Version version = Version.emptyVersion;
 	private int types = 0;
-	private final NamespaceList.Builder<GenericInfo> capabilityInfos = Builder.create(GenericInfo::getNamespace);
-	private final NamespaceList.Builder<GenericInfo> requirementInfos = Builder.create(GenericInfo::getNamespace);
+	private final NamespaceList.Builder<GenericInfo> capabilityInfos = Builder.create(GenericInfo.GETNAMESPACE);
+	private final NamespaceList.Builder<GenericInfo> requirementInfos = Builder.create(GenericInfo.GETNAMESPACE);
 	private long id = -1;
 
 	/**

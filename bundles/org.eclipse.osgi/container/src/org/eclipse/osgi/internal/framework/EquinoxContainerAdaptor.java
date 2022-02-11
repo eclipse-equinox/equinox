@@ -125,27 +125,38 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	private Callable<Executor> createLazyExecutorCreator(final String threadName, int threadCnt, final BlockingQueue<Runnable> queue) {
 		// use the number of processors when configured value is <=0
 		final int maxThreads = threadCnt <= 0 ? Runtime.getRuntime().availableProcessors() : threadCnt;
-		return () -> {
-			if (maxThreads == 1) {
-				// just do synchronous execution with current thread
-				return Runnable::run;
-			}
-			// Always want to create core threads until max size
-			int coreThreads = maxThreads;
-			// idle timeout; make it short to get rid of threads quickly after use
-			int idleTimeout = 10;
-			// try to name the threads with useful name
-			ThreadFactory threadFactory = r -> {
-				Thread t = new Thread(r, threadName);
-				t.setDaemon(true);
-				return t;
-			};
-			// use a rejection policy that simply runs the task in the current thread once the max pool size is reached
-			RejectedExecutionHandler rejectHandler = new ThreadPoolExecutor.CallerRunsPolicy();
+		return new Callable<Executor>() {
+			@Override
+			public Executor call() throws Exception {
+				if (maxThreads == 1) {
+					// just do synchronous execution with current thread
+					return new Executor() {
+						@Override
+						public void execute(Runnable command) {
+							command.run();
+						}
+					};
+				}
+				// Always want to create core threads until max size
+				int coreThreads = maxThreads;
+				// idle timeout; make it short to get rid of threads quickly after use
+				int idleTimeout = 10;
+				// try to name the threads with useful name
+				ThreadFactory threadFactory = new ThreadFactory() {
+					@Override
+					public Thread newThread(Runnable r) {
+						Thread t = new Thread(r, threadName);
+						t.setDaemon(true);
+						return t;
+					}
+				};
+				// use a rejection policy that simply runs the task in the current thread once the max pool size is reached
+				RejectedExecutionHandler rejectHandler = new ThreadPoolExecutor.CallerRunsPolicy();
 
-			ThreadPoolExecutor executor = new ThreadPoolExecutor(coreThreads, maxThreads, idleTimeout, TimeUnit.SECONDS, queue, threadFactory, rejectHandler);
-			executor.allowCoreThreadTimeOut(true);
-			return executor;
+				ThreadPoolExecutor executor = new ThreadPoolExecutor(coreThreads, maxThreads, idleTimeout, TimeUnit.SECONDS, queue, threadFactory, rejectHandler);
+				executor.allowCoreThreadTimeOut(true);
+				return executor;
+			}
 		};
 	}
 
