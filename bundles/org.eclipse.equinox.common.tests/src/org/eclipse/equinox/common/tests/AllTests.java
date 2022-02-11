@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests;
 
+import org.eclipse.core.runtime.tests.FileLocatorTest;
 import org.eclipse.equinox.common.tests.adaptable.AdaptableTests;
 import org.eclipse.equinox.common.tests.registry.RegistryTests;
 import org.eclipse.equinox.common.tests.registry.simple.SimpleRegistryTests;
@@ -27,7 +28,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	RuntimeTests.class,
 	AdaptableTests.class,
 	RegistryTests.class,
-	SimpleRegistryTests.class
+	SimpleRegistryTests.class,
+	FileLocatorTest.class
 })
 public class AllTests {
 	// intentionally left blank
