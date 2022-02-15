@@ -232,7 +232,12 @@ public abstract class MultiplexingFactory {
 
 	private boolean isSystemClass(final Class<?> clazz) {
 		// we want to ignore classes from the system
-		ClassLoader cl = AccessController.doPrivileged((PrivilegedAction<ClassLoader>) clazz::getClassLoader);
+		ClassLoader cl = AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+			@Override
+			public ClassLoader run() {
+				return clazz.getClassLoader();
+			}
+		});
 		return cl == null || systemLoaders.contains(cl);
 	}
 
