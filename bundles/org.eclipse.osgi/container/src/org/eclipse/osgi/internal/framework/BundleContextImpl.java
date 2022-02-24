@@ -257,8 +257,13 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		if (debug.DEBUG_HOOKS) {
 			Debug.println("notifyBundleFindHooks(" + allBundles + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		container.getServiceRegistry().notifyHooksPrivileged(FindHook.class, "find", //$NON-NLS-1$
-				(hook, hookRegistration) -> hook.find(context, allBundles));
+		ServiceRegistry sr = container.getServiceRegistry();
+		if (sr == null) {
+			allBundles.clear();
+		} else {
+			sr.notifyHooksPrivileged(FindHook.class, "find", //$NON-NLS-1$
+					(hook, hookRegistration) -> hook.find(context, allBundles));
+		}
 	}
 
 	@Override

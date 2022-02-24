@@ -3265,4 +3265,29 @@ public class SystemBundleTests extends AbstractBundleTests {
 		equinox.start();
 		stop(equinox);
 	}
+
+	@Test
+	public void testGetBundleAfterShutdown() throws BundleException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		Equinox equinox = new Equinox(Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath()));
+
+		equinox.start();
+		BundleContext systemContext = equinox.getBundleContext();
+		Bundle b = systemContext.installBundle(installer.getBundleLocation("substitutes.a")); //$NON-NLS-1$
+		b.start();
+		BundleContext testContext = b.getBundleContext();
+		long id = b.getBundleId();
+		assertEquals("Unexpected bundle", b, systemContext.getBundle(id));
+
+		stop(equinox);
+
+		// system bundle always sees bundles
+		assertEquals("Unexpected bundle", b, systemContext.getBundle(id));
+		assertEquals("Unexpected bundle count", 2, systemContext.getBundles().length);
+		// other bundles may get filtered by hooks,
+		// but since we cannot call hooks the framework just returns null
+		assertNull("Expected null bundle after stop.", testContext.getBundle(id));
+		assertEquals("Unexpected bundle count", 0, testContext.getBundles().length);
+	}
+
 }
