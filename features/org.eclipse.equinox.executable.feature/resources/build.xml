@@ -108,6 +108,14 @@
 		</copy>
 		<chmod perm="755" dir="${feature.base}/linux.gtk.x86_64/${collectingFolder}" includes="launcher" />
 	</target>
+	<target name="rootFileslinux_gtk_loongarch64">
+		<mkdir dir="${feature.base}/linux.gtk.loongarch64/${collectingFolder}"/>
+		<copy todir="${feature.base}/linux.gtk.loongarch64/${collectingFolder}" failonerror="true" overwrite="true">
+			<fileset dir="${basedir}/bin/gtk/linux/loongarch64" includes="**"			/>
+			<fileset dir="${basedir}/gtk_root" includes="**"			/>
+		</copy>
+		<chmod perm="755" dir="${feature.base}/linux.gtk.loongarch64/${collectingFolder}" includes="launcher" />
+	</target>
 	<target name="rootFileslinux_gtk_ia64">
 		<mkdir dir="${feature.base}/linux.gtk.ia64/${collectingFolder}"/>
 		<copy todir="${feature.base}/linux.gtk.ia64/${collectingFolder}" failonerror="true" overwrite="true">

@@ -76,6 +76,18 @@
 	<module>bundles/org.eclipse.equinox.launcher.gtk.linux.aarch64</module>
       </modules>
     </profile>
+    <profile>
+      <id>build-native-launchers-gtk.linux.loongarch64</id>
+      <activation>
+	<property>
+	  <name>native</name>
+	  <value>gtk.linux.loongarch64</value>
+        </property>
+      </activation>
+      <modules>
+	<module>bundles/org.eclipse.equinox.launcher.gtk.linux.loongarch64</module>
+      </modules>
+    </profile>
   </profiles>
 
   <modules>
