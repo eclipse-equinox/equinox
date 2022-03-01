@@ -272,7 +272,7 @@ public class ReliableFile {
 					InputStream tempIS = new FileInputStream(file);
 					try {
 						long fileSize = file.length();
-						if (fileSize < maxInputStreamBuffer) {
+						if (fileSize > 0 && fileSize < maxInputStreamBuffer) {
 							tempIS = new BufferedInputStream(tempIS, (int) fileSize);
 							// reuse the tempIS since it supports mark/reset
 							is = tempIS;

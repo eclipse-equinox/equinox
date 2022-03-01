@@ -38,6 +38,7 @@ import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.security.Permission;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -3212,6 +3213,55 @@ public class SystemBundleTests extends AbstractBundleTests {
 		} finally {
 			System.setSecurityManager(null);
 		}
+		equinox.start();
+		stop(equinox);
+	}
+
+	/*
+	 * Test for Bug 579032 - IllegalArgumentException in
+	 * ReliableFile.getInputStream()
+	 */
+	@Test
+	public void testCorruptedStorage() throws Exception {
+		String fileTablePrefix = ".fileTable.";
+		String osgiManagerFolder = "org.eclipse.osgi/.manager/";
+
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		Equinox equinox = new Equinox(Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath()));
+
+		equinox.start();
+		BundleContext systemContext = equinox.getBundleContext();
+		Bundle b = systemContext.installBundle(installer.getBundleLocation("substitutes.a")); //$NON-NLS-1$
+		b.start();
+		stop(equinox);
+
+		int latestStamp = 0;
+		File latestFileTable = null;
+
+		File managerFolder = new File(config, osgiManagerFolder);
+		File[] managerFolderChildren = managerFolder.listFiles();
+		for (File child : managerFolderChildren) {
+			String fileName = child.getName();
+			boolean isFileTable = fileName.startsWith(fileTablePrefix);
+			if (isFileTable) {
+				String stampString = fileName.substring(fileTablePrefix.length());
+				int stamp = Integer.valueOf(stampString);
+				if (latestStamp < stamp) {
+					latestFileTable = child;
+					latestStamp = stamp;
+				}
+			}
+		}
+
+		// find the latest filetable reliable file under the config File directory
+		// zero out the content length then restart equinox
+		assertNotNull("Found no .fileTable files at \"" + managerFolder + "\", files found in the directory: "
+				+ Arrays.toString(managerFolderChildren), latestFileTable);
+		Files.write(latestFileTable.toPath(), new byte[0], StandardOpenOption.TRUNCATE_EXISTING);
+		assertEquals("Expected file to have 0 length after truncating it: " + latestFileTable, 0,
+				Files.size(latestFileTable.toPath()));
+
+		equinox = new Equinox(Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath()));
 		equinox.start();
 		stop(equinox);
 	}
