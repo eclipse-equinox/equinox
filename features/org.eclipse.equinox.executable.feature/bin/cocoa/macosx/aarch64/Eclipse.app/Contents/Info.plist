@@ -8,7 +8,7 @@
 	<key>CFBundleExecutable</key>
 		<string>eclipse</string>
 	<key>CFBundleGetInfoString</key>
-		<string>Eclipse 4.23 for Mac OS X, Copyright IBM Corp. and others 2002, 2022. All rights reserved.</string>
+		<string>Eclipse 4.24 for Mac OS X, Copyright IBM Corp. and others 2002, 2022. All rights reserved.</string>
 	<key>CFBundleIconFile</key>
 		<string>Eclipse.icns</string>
 	<key>CFBundleIdentifier</key>
@@ -20,11 +20,11 @@
 	<key>CFBundlePackageType</key>
 		<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-		<string>4.23</string>
+		<string>4.24</string>
 	<key>CFBundleSignature</key>
 		<string>????</string>
 	<key>CFBundleVersion</key>
-		<string>4.23</string>
+		<string>4.24</string>
 	<key>NSHighResolutionCapable</key>
 		<true/>
 	<key>CFBundleDevelopmentRegion</key>
