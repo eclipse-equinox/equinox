@@ -34,20 +34,6 @@
     <plugins>
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-surefire-plugin</artifactId>
-        <version>${tycho.version}</version>
-        <configuration>
-          <argLine>-Xmx128m</argLine>
-          <dependencies>
-            <dependency>
-              <type>p2-installable-unit</type>
-              <artifactId>org.eclipse.equinox.event</artifactId>
-            </dependency>
-          </dependencies>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
         <artifactId>target-platform-configuration</artifactId>
         <version>${tycho.version}</version>
         <configuration>
@@ -59,27 +45,17 @@
                 <versionRange>0.0.0</versionRange>
               </requirement>
               <requirement>
-                <id>org.eclipse.jdt.junit.runtime</id>
-                <type>p2-installable-unit</type>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
                 <id>org.eclipse.jdt.junit4.runtime</id>
                 <type>p2-installable-unit</type>
                 <versionRange>0.0.0</versionRange>
               </requirement>
               <requirement>
+                <id>org.eclipse.jdt.junit5.runtime</id>
+                <type>p2-installable-unit</type>
+                <versionRange>0.0.0</versionRange>
+              </requirement>
+              <requirement>
                 <id>org.eclipse.pde.junit.runtime</id>
-                <type>p2-installable-unit</type>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
-                <id>org.junit.jupiter.api</id>
-                <type>p2-installable-unit</type>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
-                <id>org.apiguardian</id>
                 <type>p2-installable-unit</type>
                 <versionRange>0.0.0</versionRange>
               </requirement>
