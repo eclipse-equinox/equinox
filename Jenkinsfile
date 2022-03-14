@@ -11,15 +11,10 @@ pipeline {
 		jdk 'openjdk-jdk11-latest'
 	}
 	stages {
-		stage('initialize Gerrit review') {
-			steps {
-				gerritReview labels: [Verified: 0], message: "Build started $BUILD_URL"
-			}
-		}
 		stage('get binaries') {
 			steps{
 				dir ('rt.equinox.binaries') {
-					checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CloneOption', timeout: 120]], submoduleCfg: [], userRemoteConfigs: [[url: 'https://git.eclipse.org/r/equinox/rt.equinox.binaries.git']]])
+					checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CloneOption', timeout: 120]], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/eclipse-equinox/equinox.binaries.git']]])
 				}
 			}
 		}
@@ -40,12 +35,6 @@ pipeline {
 					junit '**/target/surefire-reports/TEST-*.xml'
 					publishIssues issues:[scanForIssues(tool: java()), scanForIssues(tool: mavenConsole())]
 				}
-				unstable {
-					gerritReview labels: [Verified: -1], message: "Build UNSTABLE (test failures) $BUILD_URL"
-				}
-				failure {
-					gerritReview labels: [Verified: -1], message: "Build FAILED $BUILD_URL"
-				}
 			}
 		}
 		stage('Check freeze period') {
@@ -61,16 +50,6 @@ pipeline {
 					sh './verifyFreezePeriod.sh'
 				}
 			}
-			post {
-				failure {
-					gerritReview labels: [Verified: -1], message: "Build and test are OK, but Eclipse project is currently in a code freeze period.\nPlease wait for end of code freeze period before merging.\n $BUILD_URL"
-				}
-			}
-		}
-	}
-	post {
-		success {
-			gerritReview labels: [Verified: 1], message: "Build Succcess $BUILD_URL"
 		}
 	}
 }
