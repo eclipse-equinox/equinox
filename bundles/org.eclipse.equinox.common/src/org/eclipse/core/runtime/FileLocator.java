@@ -295,7 +295,9 @@ public final class FileLocator {
 	 * @throws IOException if an error occurs during the resolution
 	 * 
 	 * @since org.eclipse.equinox.common 3.4
+	 * @deprecated use {@link #getBundleFileLocation(Bundle)} instead
 	 */
+	@Deprecated(since = "3.16.100")
 	public static File getBundleFile(Bundle bundle) throws IOException {
 		return getBundleFileLocation(bundle)
 				.orElseThrow(() -> new IOException("Unable to locate the bundle file: " + bundle)); //$NON-NLS-1$

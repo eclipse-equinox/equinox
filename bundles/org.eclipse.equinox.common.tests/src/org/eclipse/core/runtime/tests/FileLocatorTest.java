@@ -16,7 +16,6 @@ package org.eclipse.core.runtime.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -106,7 +105,6 @@ public class FileLocatorTest {
 
 		File file1 = FileLocator.getBundleFileLocation(bundle).get();
 		assertNotNull(file1);
-		assertSame(file1, FileLocator.getBundleFile(bundle));
 
 		URL fileURL = FileLocator
 				.toFileURL(context.getBundle().getEntry("Plugin_Testing/fileLocator/testFileLocatorGetRootFile"));
@@ -127,7 +125,6 @@ public class FileLocatorTest {
 
 		File file1 = FileLocator.getBundleFileLocation(bundle).get();
 		assertNotNull(file1);
-		assertSame(file1, FileLocator.getBundleFile(bundle));
 
 		URL fileURL = FileLocator
 				.toFileURL(context.getBundle().getEntry("Plugin_Testing/fileLocator/testFileLocatorGetRootFile.jar"));
