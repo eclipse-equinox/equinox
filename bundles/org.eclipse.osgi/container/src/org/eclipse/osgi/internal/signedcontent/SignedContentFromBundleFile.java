@@ -23,6 +23,7 @@ import java.security.Timestamp;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -308,8 +309,18 @@ public class SignedContentFromBundleFile implements SignedContent {
 	@Override
 	public void checkValidity(SignerInfo signerInfo)
 			throws CertificateExpiredException, CertificateNotYetValidException {
-		// TODO Auto-generated method stub
-
+		Date signingTime = getSigningTime(signerInfo);
+		Certificate[] certs = signerInfo.getCertificateChain();
+		for (Certificate cert : certs) {
+			if (!(cert instanceof X509Certificate)) {
+				continue;
+			}
+			if (signingTime == null) {
+				((X509Certificate) cert).checkValidity();
+			} else {
+				((X509Certificate) cert).checkValidity(signingTime);
+			}
+		}
 	}
 
 }
