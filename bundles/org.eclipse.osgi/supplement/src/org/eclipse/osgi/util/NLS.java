@@ -290,8 +290,8 @@ public abstract class NLS {
 		if (nl != null) {
 			if ("he".equals(nl)) { //$NON-NLS-1$
 				additional = "iw"; //$NON-NLS-1$
-			} else if (nl.startsWith("he" + '_')) { //$NON-NLS-1$
-				additional = "iw" + '_' + nl.substring(3); //$NON-NLS-1$
+			} else if (nl.startsWith("he_")) { //$NON-NLS-1$
+				additional = "iw_" + nl.substring(3); //$NON-NLS-1$
 			}
 		}
 
