@@ -118,29 +118,23 @@
       label="Bundles">
     <setupTask
         xsi:type="git:GitCloneTask"
-        id="git.clone.equinox.bundles"
-        remoteURI="equinox/rt.equinox.bundles">
+        id="github.clone.equinox.bundles"
+        remoteURI="eclipse-equinox/equinox.bundles">
       <annotation
           source="http://www.eclipse.org/oomph/setup/InducedChoices">
         <detail
             key="inherit">
-          <value>eclipse.git.gerrit.remoteURIs</value>
+          <value>github.remoteURIs</value>
         </detail>
         <detail
             key="label">
-          <value>Equinox Bundles Git or Gerrit Repository</value>
+          <value>Equinox Bundles Git Repository</value>
         </detail>
         <detail
             key="target">
           <value>remoteURI</value>
         </detail>
       </annotation>
-      <configSections
-          name="gerrit">
-        <properties
-            key="createchangeid"
-            value="true"/>
-      </configSections>
       <description>Equinox Bundles</description>
     </setupTask>
     <setupTask
@@ -152,7 +146,7 @@
         <requirement
             name="org.apache.sshd.core"/>
         <sourceLocator
-            rootFolder="${git.clone.equinox.bundles.location}"/>
+            rootFolder="${github.clone.equinox.bundles.location}"/>
       </targlet>
     </setupTask>
     <setupTask
@@ -173,29 +167,23 @@
       label="Framework">
     <setupTask
         xsi:type="git:GitCloneTask"
-        id="git.clone.equinox.framework"
-        remoteURI="equinox/rt.equinox.framework">
+        id="github.clone.equinox.framework"
+        remoteURI="eclipse-equinox/equinox.framework">
       <annotation
           source="http://www.eclipse.org/oomph/setup/InducedChoices">
         <detail
             key="inherit">
-          <value>eclipse.git.gerrit.remoteURIs</value>
+          <value>github.remoteURIs</value>
         </detail>
         <detail
             key="label">
-          <value>Equinox Framework Git or Gerrit Repository</value>
+          <value>Equinox Framework Git Repository</value>
         </detail>
         <detail
             key="target">
           <value>remoteURI</value>
         </detail>
       </annotation>
-      <configSections
-          name="gerrit">
-        <properties
-            key="createchangeid"
-            value="true"/>
-      </configSections>
       <description>Equinox Framework</description>
     </setupTask>
     <setupTask
@@ -205,7 +193,7 @@
         <requirement
             name="*"/>
         <sourceLocator
-            rootFolder="${git.clone.equinox.framework.location}"
+            rootFolder="${github.clone.equinox.framework.location}"
             locateNestedProjects="true"/>
       </targlet>
     </setupTask>
@@ -224,7 +212,7 @@
       <setupTask
           xsi:type="setup:EclipseIniTask"
           option="-Doomph.redirection.equinox"
-          value="=https://git.eclipse.org/c/equinox/rt.equinox.framework.git/plain/releng/org.eclipse.equinox.releng/Equinox.setup->${git.clone.equinox.framework.location|uri}/releng/org.eclipse.equinox.releng/Equinox.setup"
+          value="=https://raw.githubusercontent.com/eclipse-equinox/equinox.framework/master/releng/org.eclipse.equinox.releng/Equinox.setup->${github.clone.equinox.framework.location|uri}/releng/org.eclipse.equinox.releng/Equinox.setup"
           vm="true">
         <description>Set an Oomph redirection system property to redirect the logical location of this setup to its physical location in the Git clone.</description>
       </setupTask>
@@ -235,35 +223,29 @@
       label="P2">
     <setupTask
         xsi:type="git:GitCloneTask"
-        id="git.clone.equinox.p2"
-        remoteURI="equinox/rt.equinox.p2">
+        id="github.clone.equinox.p2"
+        remoteURI="eclipse-equinox/p2">
       <annotation
           source="http://www.eclipse.org/oomph/setup/InducedChoices">
         <detail
             key="inherit">
-          <value>eclipse.git.gerrit.remoteURIs</value>
+          <value>github.remoteURIs</value>
         </detail>
         <detail
             key="label">
-          <value>Equinox P2 Git or Gerrit Repository</value>
+          <value>Equinox P2 Git Repository</value>
         </detail>
         <detail
             key="target">
           <value>remoteURI</value>
         </detail>
       </annotation>
-      <configSections
-          name="gerrit">
-        <properties
-            key="createchangeid"
-            value="true"/>
-      </configSections>
       <description>Equinox P2</description>
     </setupTask>
     <setupTask
         xsi:type="setup:ResourceCreationTask"
         excludedTriggers="BOOTSTRAP"
-        targetURL="${git.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.jarprocessor/lib/jarprocessor-ant.jar"
+        targetURL="${github.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.jarprocessor/lib/jarprocessor-ant.jar"
         encoding="base64">
       <description>Create an empty jar as a placeholder for the jar that will eventually be created.  This ensures that PDE will add the jar to the classpath of projects needing the ant jar.</description>
       <content>
@@ -277,7 +259,7 @@
     <setupTask
         xsi:type="setup:ResourceCreationTask"
         excludedTriggers="BOOTSTRAP"
-        targetURL="${git.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.repository.tools/lib/repository-tools-ant.jar"
+        targetURL="${github.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.repository.tools/lib/repository-tools-ant.jar"
         encoding="base64">
       <description>Create an empty jar as a placeholder for the jar that will eventually be created.  This ensures that PDE will add the jar to the classpath of projects needing the ant jar.</description>
       <content>
@@ -291,8 +273,8 @@
     <setupTask
         xsi:type="setup:ResourceCopyTask"
         excludedTriggers="BOOTSTRAP"
-        sourceURL="${git.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.tests.verifier/src/org/eclipse/equinox/internal/p2/tests/verifier/EclipseAdaptorMessages.properties"
-        targetURL="${git.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.tests.verifier/bin/org/eclipse/equinox/internal/p2/tests/verifier/EclipseAdaptorMessages.properties">
+        sourceURL="${github.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.tests.verifier/src/org/eclipse/equinox/internal/p2/tests/verifier/EclipseAdaptorMessages.properties"
+        targetURL="${github.clone.equinox.p2.location|uri}/bundles/org.eclipse.equinox.p2.tests.verifier/bin/org/eclipse/equinox/internal/p2/tests/verifier/EclipseAdaptorMessages.properties">
       <description>Ensure that the bin folder of org.eclipse.equinox.p2.tests.verifier exists. This is to prevent the build path error from the following entry in the .classpath file: &lt;classpathentry exported=&quot;true&quot; kind=&quot;lib&quot; path=&quot;bin&quot; sourcepath=&quot;bin&quot;/></description>
     </setupTask>
     <setupTask
@@ -302,15 +284,15 @@
         <requirement
             name="*"/>
         <sourceLocator
-            rootFolder="${git.clone.equinox.p2.location/bundles}">
+            rootFolder="${github.clone.equinox.p2.location/bundles}">
           <excludedPath>bundles/org.eclipse.equinox.p2.testserver</excludedPath>
         </sourceLocator>
         <sourceLocator
-            rootFolder="${git.clone.equinox.p2.location/examples}"/>
+            rootFolder="${github.clone.equinox.p2.location/examples}"/>
         <sourceLocator
-            rootFolder="${git.clone.equinox.p2.location/features}"/>
+            rootFolder="${github.clone.equinox.p2.location/features}"/>
         <sourceLocator
-            rootFolder="${git.clone.equinox.p2.location/org.eclipse.equinox.p2.releng}"/>
+            rootFolder="${github.clone.equinox.p2.location/org.eclipse.equinox.p2.releng}"/>
       </targlet>
     </setupTask>
     <setupTask
@@ -356,6 +338,45 @@
         name="master"
         label="Master"/>
     <description>The Equinox P2 support</description>
+  </project>
+  <project name="binaries"
+      label="Binaries">
+    <setupTask
+        xsi:type="git:GitCloneTask"
+        id="github.clone.equinox.binaries"
+        remoteURI="eclipse-equinox/equinox.binaries">
+      <annotation
+          source="http://www.eclipse.org/oomph/setup/InducedChoices">
+        <detail
+            key="inherit">
+          <value>github.remoteURIs</value>
+        </detail>
+        <detail
+            key="label">
+          <value>Equinox Binaries Git Repository</value>
+        </detail>
+        <detail
+            key="target">
+          <value>remoteURI</value>
+        </detail>
+      </annotation>
+      <description>Equinox Binaries</description>
+    </setupTask>
+    <setupTask
+        xsi:type="setup.targlets:TargletTask">
+      <targlet
+          name="Equinox Binaries">
+        <requirement
+            name="*"/>
+        <sourceLocator
+            rootFolder="${github.clone.equinox.binaries.location}"
+            locateNestedProjects="true"/>
+      </targlet>
+    </setupTask>
+    <stream
+        name="master"
+        label="Master"/>
+    <description>The Equinox Binaries</description>
   </project>
   <logicalProjectContainer
       xsi:type="setup:ProjectCatalog"
