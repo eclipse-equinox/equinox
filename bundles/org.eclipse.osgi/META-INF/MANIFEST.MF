@@ -97,7 +97,8 @@ Provide-Capability: osgi.service; objectClass:List<String>="org.osgi.service.log
  osgi.service; objectClass:List<String>="org.eclipse.osgi.service.urlconversion.URLConverter"; uses:="org.eclipse.osgi.service.urlconversion",
  osgi.service; objectClass:List<String>="org.eclipse.osgi.service.localization.BundleLocalization"; uses:="org.eclipse.osgi.service.localization",
  osgi.service; objectClass:List<String>="org.eclipse.osgi.service.security.TrustEngine"; uses:="org.eclipse.osgi.service.security",
- osgi.service; objectClass:List<String>="org.eclipse.osgi.signedcontent.SignedContentFactory"; uses:="org.eclipse.osgi.signedcontent"
+ osgi.service; objectClass:List<String>="org.eclipse.osgi.signedcontent.SignedContentFactory"; uses:="org.eclipse.osgi.signedcontent",
+ osgi.service; objectClass:List<String>="org.osgi.service.condition.Condition"; osgi.condition.id="true"; uses:="org.osgi.service.condition"
 Bundle-Name: %systemBundle
 Bundle-SymbolicName: org.eclipse.osgi; singleton:=true
 Bundle-Activator: org.eclipse.osgi.internal.framework.SystemBundleActivator
