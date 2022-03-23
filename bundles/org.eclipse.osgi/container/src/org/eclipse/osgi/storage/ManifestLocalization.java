@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2017 IBM Corporation and others.
+ * Copyright (c) 2004, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -100,11 +100,32 @@ public class ManifestLocalization {
 		List<String> result = new ArrayList<>();
 		while (nl.length() > 0) {
 			result.add(nl);
+			String additional = getAdditionalSuffix(nl);
+			if (additional != null) {
+				result.add(additional);
+			}
 			int i = nl.lastIndexOf('_');
 			nl = (i < 0) ? "" : nl.substring(0, i); //$NON-NLS-1$
 		}
 		result.add(""); //$NON-NLS-1$
 		return result.toArray(new String[result.size()]);
+	}
+
+	/*
+	 * This is a fix due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=579215
+	 * Ideally, this needs to be removed once the Eclipse minimum support moves to
+	 * Java 17
+	 */
+	private static String getAdditionalSuffix(String nl) {
+		String additional = null;
+		if (nl != null) {
+			if ("he".equals(nl)) { //$NON-NLS-1$
+				additional = "iw"; //$NON-NLS-1$
+			} else if (nl.startsWith("he_")) { //$NON-NLS-1$
+				additional = "iw_" + nl.substring(3); //$NON-NLS-1$
+			}
+		}
+		return additional;
 	}
 
 	/*
