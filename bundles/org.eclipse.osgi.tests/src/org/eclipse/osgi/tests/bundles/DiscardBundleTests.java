@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import static org.eclipse.osgi.tests.bundles.SystemBundleTests.createBundle;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -20,6 +22,8 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.JarOutputStream;
@@ -27,6 +31,7 @@ import java.util.jar.Manifest;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.junit.Test;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
@@ -54,6 +59,7 @@ public class DiscardBundleTests extends AbstractBundleTests {
 	public void setUp() throws Exception {
 		super.setUp();
 		root = OSGiTestsActivator.getContext().getDataFile(getName());
+		root.mkdirs();
 		createBundleDirectory();
 		createBundleJar();
 	}
@@ -104,6 +110,70 @@ public class DiscardBundleTests extends AbstractBundleTests {
 	public void testDiscardDeletedBundleFile() throws Exception {
 		doTestDiscardDeletedBundleFile(getDirectoryLocation());
 		doTestDiscardDeletedBundleFile(getJarLocation());
+	}
+
+	@Test
+	public void testLimitResolutionAfterDiscard() throws Exception {
+		Map<String, Object> configuration = createConfiguration();
+		configuration.put(OSGI_CHECKCONFIGURATION, Boolean.TRUE.toString());
+		Equinox equinox = new Equinox(configuration);
+		initAndStart(equinox);
+		try {
+			// Install non extension bundles.
+			// If a discarded bundle causes on of these bundles to refresh then
+			// it should not be allowed to resolve.
+			File discard = createBundle(root, "discard",
+					Collections.singletonMap("Export-Package", "discard"));
+			String discardLocation = REFERENCE_PROTOCOL + discard.toURI();
+
+			// Optionally import the package from a discarded bundle
+			// This would would allow the bundle to resolve, but the framework is not yet
+			// initialized
+			// so it should be prevented from resolving when discarding what it imports.
+			File importDiscard = createBundle(root, "importDiscard",
+					Collections.singletonMap(Constants.IMPORT_PACKAGE, "discard; resolution:=optional"));
+			String importDiscardLocation = REFERENCE_PROTOCOL + importDiscard.toURI();
+
+			// Install extension bundles, these bundles should resolve even
+			// if what they require gets discarded.
+			Hashtable<String, String> extensionHeaders = new Hashtable<>();
+
+			extensionHeaders.put(Constants.FRAGMENT_HOST, Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
+			extensionHeaders.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+			extensionHeaders.put(Constants.BUNDLE_SYMBOLICNAME, "discardExtension");
+			extensionHeaders.put(Constants.EXPORT_PACKAGE, "discard.extension");
+			File discardExtension = createBundle(root, "discardExtension", extensionHeaders);
+			String discardExtensionLocation = REFERENCE_PROTOCOL + discardExtension.toURI();
+
+			extensionHeaders.remove(Constants.EXPORT_PACKAGE);
+			extensionHeaders.put(Constants.BUNDLE_SYMBOLICNAME, "importDiscardExtension");
+			extensionHeaders.put(Constants.IMPORT_PACKAGE, "discard.extesion; resolution:=optional");
+			File importDiscardExtension = createBundle(root, "importDiscardExtension",
+					extensionHeaders);
+			String importDiscardExtensionLocation = REFERENCE_PROTOCOL + importDiscardExtension.toURI();
+
+			equinox.getBundleContext().installBundle(discardLocation).start();
+			equinox.getBundleContext().installBundle(importDiscardLocation).start();
+			equinox.getBundleContext().installBundle(discardExtensionLocation);
+			equinox.getBundleContext().installBundle(importDiscardExtensionLocation);
+			assertEquals("Wrong number of bundles.", 5, equinox.getBundleContext().getBundles().length);
+
+			stop(equinox);
+			touchFile(discard);
+			touchFile(discardExtension);
+
+			equinox = new Equinox(configuration);
+			equinox.init();
+
+			assertDiscarded(discardLocation, equinox);
+			assertEquals("importDiscard should be in the installed state", Bundle.INSTALLED,
+					equinox.getBundleContext().getBundle(importDiscardLocation).getState());
+			assertEquals("importDiscardExtension should be in the resolved state", Bundle.RESOLVED,
+					equinox.getBundleContext().getBundle(importDiscardExtensionLocation).getState());
+			assertEquals("Wrong number of bundles.", 3, equinox.getBundleContext().getBundles().length);
+		} finally {
+			stopQuietly(equinox);
+		}
 	}
 
 	private void doTestDiscardDeletedBundleFile(File bundleFile) throws Exception {

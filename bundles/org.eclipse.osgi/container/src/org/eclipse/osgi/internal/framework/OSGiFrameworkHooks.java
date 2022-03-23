@@ -264,7 +264,9 @@ class OSGiFrameworkHooks {
 			}
 
 			private boolean isBootInit() {
-				return systemModule == null || !Module.RESOLVED_SET.contains(systemModule.getState()) || (systemModule.getState().equals(State.STARTING) && inInit);
+				State systemModuleState = systemModule == null ? State.UNINSTALLED : systemModule.getState();
+				return !Module.RESOLVED_SET.contains(systemModuleState) || systemModuleState.equals(State.RESOLVED)
+						|| (systemModuleState.equals(State.STARTING) && inInit);
 			}
 
 			@Override

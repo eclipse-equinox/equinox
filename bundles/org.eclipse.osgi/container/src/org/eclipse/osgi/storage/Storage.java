@@ -186,7 +186,8 @@ public class Storage {
 		storage.checkSystemBundle(cachedInfo);
 		storage.refreshStaleBundles();
 		storage.installExtensions();
-		// TODO hack to make sure all bundles are in UNINSTALLED state before system bundle init is called
+		// TODO hack to make sure all bundles are in UNINSTALLED state before system
+		// bundle init is called
 		storage.getModuleContainer().setInitialModuleStates();
 		return storage;
 	}
