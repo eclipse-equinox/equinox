@@ -176,7 +176,7 @@ class EclipseDebugTrace implements DebugTrace {
 
 		if (isDebuggingEnabled(optionPath)) {
 			final FrameworkDebugTraceEntry record = new FrameworkDebugTraceEntry(bundleSymbolicName, optionPath, null, traceClass);
-			setMessage(record, EclipseDebugTrace.MESSAGE_ENTER_METHOD_NO_PARAMS);
+			record.setMessage(createMessage(record, EclipseDebugTrace.MESSAGE_ENTER_METHOD_NO_PARAMS));
 			writeRecord(record);
 		}
 	}
@@ -201,7 +201,10 @@ class EclipseDebugTrace implements DebugTrace {
 	public void traceEntry(final String optionPath, final Object[] methodArguments) {
 
 		if (isDebuggingEnabled(optionPath)) {
-			final StringBuilder messageBuffer = new StringBuilder(EclipseDebugTrace.MESSAGE_ENTER_METHOD_WITH_PARAMS);
+			final FrameworkDebugTraceEntry record = new FrameworkDebugTraceEntry(bundleSymbolicName, optionPath, null,
+					traceClass);
+			final StringBuilder messageBuffer = new StringBuilder(
+					createMessage(record, EclipseDebugTrace.MESSAGE_ENTER_METHOD_WITH_PARAMS));
 			if (methodArguments != null) {
 				int i = 0;
 				while (i < methodArguments.length) {
@@ -217,8 +220,8 @@ class EclipseDebugTrace implements DebugTrace {
 				}
 				messageBuffer.append(")"); //$NON-NLS-1$
 			}
-			final FrameworkDebugTraceEntry record = new FrameworkDebugTraceEntry(bundleSymbolicName, optionPath, null, traceClass);
-			setMessage(record, messageBuffer.toString());
+
+			record.setMessage(messageBuffer.toString());
 			writeRecord(record);
 		}
 	}
@@ -232,7 +235,7 @@ class EclipseDebugTrace implements DebugTrace {
 
 		if (isDebuggingEnabled(optionPath)) {
 			final FrameworkDebugTraceEntry record = new FrameworkDebugTraceEntry(bundleSymbolicName, optionPath, null, traceClass);
-			setMessage(record, EclipseDebugTrace.MESSAGE_EXIT_METHOD_NO_RESULTS);
+			record.setMessage(createMessage(record, EclipseDebugTrace.MESSAGE_EXIT_METHOD_NO_RESULTS));
 			writeRecord(record);
 		}
 	}
@@ -245,14 +248,17 @@ class EclipseDebugTrace implements DebugTrace {
 	public void traceExit(final String optionPath, final Object result) {
 
 		if (isDebuggingEnabled(optionPath)) {
-			final StringBuilder messageBuffer = new StringBuilder(EclipseDebugTrace.MESSAGE_EXIT_METHOD_WITH_RESULTS);
+			final FrameworkDebugTraceEntry record = new FrameworkDebugTraceEntry(bundleSymbolicName, optionPath, null,
+					traceClass);
+			final StringBuilder messageBuffer = new StringBuilder(
+					createMessage(record, EclipseDebugTrace.MESSAGE_EXIT_METHOD_WITH_RESULTS));
 			if (result == null) {
 				messageBuffer.append(EclipseDebugTrace.NULL_VALUE);
 			} else {
 				messageBuffer.append(result.toString());
 			}
-			final FrameworkDebugTraceEntry record = new FrameworkDebugTraceEntry(bundleSymbolicName, optionPath, null, traceClass);
-			setMessage(record, messageBuffer.toString());
+
+			record.setMessage(messageBuffer.toString());
 			writeRecord(record);
 		}
 	}
@@ -286,14 +292,14 @@ class EclipseDebugTrace implements DebugTrace {
 	}
 
 	/**
-	 * Set the trace message for the specified record to include class and method information
-	 * if verbose debugging is disabled.
+	 * Creates the trace message for the specified record to include class and
+	 * method information if verbose debugging is disabled.
 	 *
-	 * @param record The {@link FrameworkDebugTraceEntry} containing the information to persist to the trace file.
+	 * @param record          The {@link FrameworkDebugTraceEntry} containing the
+	 *                        information to persist to the trace file.
 	 * @param originalMessage The original tracing message
 	 */
-	private final void setMessage(final FrameworkDebugTraceEntry record, final String originalMessage) {
-
+	private final String createMessage(final FrameworkDebugTraceEntry record, final String originalMessage) {
 		String argument = null;
 		if (!debugOptions.isVerbose()) {
 			final StringBuilder classMethodName = new StringBuilder(record.getClassName());
@@ -304,8 +310,8 @@ class EclipseDebugTrace implements DebugTrace {
 		} else {
 			argument = ""; //$NON-NLS-1$
 		}
-		String newMessage = MessageFormat.format(originalMessage, new Object[] {argument});
-		record.setMessage(newMessage);
+		return MessageFormat.format(originalMessage, new Object[] { argument });
+
 	}
 
 	/**
