@@ -46,7 +46,7 @@ import org.osgi.framework.BundleContext;
 
 public class BundleToJarInputStreamTest {
 
-	static private final List<String> testJarNames = Arrays.asList("multiply_signed", "SHA1withDSA", "SHA1withRSA",
+	static private final List<String> testJarNames = Arrays.asList("multiply_signed",
 			"SHA256withRSA", "SHA384withRSA", "SHA512withRSA", "signed_tsa", "signed_with_corrupt",
 			"signed_with_metadata_added", "signed_with_metadata_corrupt", "signed_with_metadata_removed",
 			"signed_with_metadata", "signed_with_missing_digest", "signed_with_sf_corrupted", "signed", "signedJava16",

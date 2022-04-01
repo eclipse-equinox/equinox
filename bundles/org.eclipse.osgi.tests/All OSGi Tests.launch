@@ -27,12 +27,14 @@
     <booleanAttribute key="org.eclipse.jdt.junit.KEEPRUNNING_ATTR" value="false"/>
     <stringAttribute key="org.eclipse.jdt.junit.TESTNAME" value=""/>
     <stringAttribute key="org.eclipse.jdt.junit.TEST_KIND" value="org.eclipse.jdt.junit.loader.junit4"/>
+    <booleanAttribute key="org.eclipse.jdt.launching.ATTR_ATTR_USE_ARGFILE" value="false"/>
+    <booleanAttribute key="org.eclipse.jdt.launching.ATTR_SHOW_CODEDETAILS_IN_EXCEPTION_MESSAGES" value="true"/>
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
     <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.eclipse.osgi.tests.AutomatedTests"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="org.eclipse.osgi.tests"/>
     <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-XX:MaxPermSize=256m -Dorg.eclipse.equinox.region.register.mbeans=false"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dorg.eclipse.equinox.region.register.mbeans=false"/>
     <stringAttribute key="pde.version" value="3.3"/>
     <stringAttribute key="product" value="org.eclipse.platform.ide"/>
     <booleanAttribute key="run_in_ui_thread" value="true"/>

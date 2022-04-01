@@ -869,8 +869,6 @@ public class SignedBundleTest extends BaseSecurityTest {
 	}
 
 	public void testBug378155() {
-		doTestBug378155("SHA1withDSA");
-		doTestBug378155("SHA1withRSA");
 		doTestBug378155("SHA256withRSA");
 		doTestBug378155("SHA384withRSA");
 		doTestBug378155("SHA512withRSA");
