@@ -338,6 +338,7 @@ public class EclipseStarter {
 		framework.start();
 
 		if (isForcedRestart()) {
+			waitForShutdown();
 			return context;
 		}
 		// set the framework start level to the ultimate value.  This will actually start things
