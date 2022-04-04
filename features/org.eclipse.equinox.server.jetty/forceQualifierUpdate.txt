@@ -48,3 +48,4 @@ Bug 574035 - Update to Jetty 10.0.4
 Bug 574035 - Update to Jetty 10.0.5-SNAPSHOT
 Bug 574035 - Update to Jetty 10.0.5
 Bug 575313 - Update to Jetty 10.0.6 
+Update to Jetty 10.0.9
