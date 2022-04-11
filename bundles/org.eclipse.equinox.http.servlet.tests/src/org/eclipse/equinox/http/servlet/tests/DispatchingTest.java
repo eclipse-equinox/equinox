@@ -52,6 +52,11 @@ import org.eclipse.equinox.http.servlet.tests.util.DispatchResultServlet;
 import org.eclipse.equinox.http.servlet.tests.util.EventHandler;
 import org.junit.Assert;
 import org.junit.Test;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
+import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.context.ServletContextHelper;
@@ -1407,14 +1412,16 @@ public class DispatchingTest extends BaseTest {
 
 		Map<String, List<String>> response = requestAdvisor.request("s1", null);
 
+		// On Java 18 the order changed on the client for headers with multiple values.
+		int multiValueIdx = new Version(18, 0 ,0).compareTo(getJavaVersion()) > 0 ? 0 : 1;
 		Assert.assertNotNull(response.get("Set-Cookie"));
-		Assert.assertEquals("foo=baz", response.get("Set-Cookie").get(0));
+		Assert.assertEquals("foo=baz", response.get("Set-Cookie").get(multiValueIdx));
 		Assert.assertNotNull(response.get("X-date"));
-		Assert.assertEquals(format.format(new Date(date2)), response.get("X-date").get(0));
+		Assert.assertEquals(format.format(new Date(date2)), response.get("X-date").get(multiValueIdx));
 		Assert.assertNotNull(response.get("X-colour"));
-		Assert.assertEquals("green", response.get("X-colour").get(0));
+		Assert.assertEquals("green", response.get("X-colour").get(multiValueIdx));
 		Assert.assertNotNull(response.get("X-size"));
-		Assert.assertEquals("30", response.get("X-size").get(0));
+		Assert.assertEquals("30", response.get("X-size").get(multiValueIdx));
 
 		String contentType = response.get("Content-Type").get(0);
 
@@ -1425,6 +1432,15 @@ public class DispatchingTest extends BaseTest {
 		Assert.assertEquals("dog", response.get("X-animal").get(0));
 	}
 
+	private Version getJavaVersion() {
+		Bundle system = getBundleContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION);
+		BundleWiring systemWiring = system.adapt(BundleWiring.class);
+		@SuppressWarnings("unchecked")
+		List<Version> versions = systemWiring.getCapabilities(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE). //
+				stream().filter(c -> c.getAttributes().get(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE).equals("JavaSE")) //
+				.findFirst().map(c -> (List<Version>) c.getAttributes().get(ExecutionEnvironmentNamespace.CAPABILITY_VERSION_ATTRIBUTE)).get();
+		return versions.get(versions.size() - 1);
+	}
 	// Bug 493583
 	@Test
 	public void test_streamed_response_outputstream() throws Exception {
