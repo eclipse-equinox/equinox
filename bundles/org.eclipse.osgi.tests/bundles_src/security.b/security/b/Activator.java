@@ -14,7 +14,9 @@
 
 package security.b;
 
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
 
@@ -25,8 +27,6 @@ public class Activator implements BundleActivator {
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
-		System.out.println("Starting bundle Test2!!"); //$NON-NLS-1$
-		System.out.println("Security manager: " + System.getSecurityManager()); //$NON-NLS-1$
 		this.bc = context;
 		doTestAction();
 	}
@@ -36,7 +36,6 @@ public class Activator implements BundleActivator {
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
-		System.out.println("Stopping bundle Test2!!"); //$NON-NLS-1$
 	}
 
 	private void doTestAction() {
