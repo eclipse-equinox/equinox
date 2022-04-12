@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2015 IBM Corporation and others.
+ * Copyright (c) 2004, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,10 +13,15 @@
  *     Julian Chen - fix for bug #92572, jclRM
  *     Jan-Ove Weichel (janove.weichel@vogella.com) - bug 474359
  *     InterSystems Corporation - bug 444188
+ *     Hannes Wellmann - Leverage Java-NIO to write preferences
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.*;
@@ -270,41 +275,36 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * puts in the file.
 	 */
 	protected static void write(Properties properties, IPath location) throws BackingStoreException {
-		// create the parent directories if they don't exist
-		File parentFile = location.toFile().getParentFile();
-		if (parentFile == null)
+		Path preferenceFile = location.toFile().toPath();
+		Path parentFile = preferenceFile.getParent();
+		if (parentFile == null) {
 			return;
-		parentFile.mkdirs();
-
-		OutputStream output = null;
+		}
 		try {
-			output = new SafeFileOutputStream(new File(location.toOSString()));
-			output.write(removeTimestampFromTable(properties).getBytes("UTF-8")); //$NON-NLS-1$
-			output.flush();
+			Files.createDirectories(parentFile);
+			String fileContent = removeTimestampFromTable(properties);
+			if (Files.exists(preferenceFile)) {
+				// Write new file content to a temporary file first to not loose the old content
+				// in case of a failure. If everything goes OK, it is moved to the right place.
+				Path tmp = preferenceFile.resolveSibling(preferenceFile.getFileName() + ".bak"); //$NON-NLS-1$
+				Files.writeString(tmp, fileContent, StandardCharsets.UTF_8);
+				Files.move(tmp, preferenceFile, StandardCopyOption.REPLACE_EXISTING);
+			} else {
+				Files.writeString(preferenceFile, fileContent, StandardCharsets.UTF_8);
+			}
 		} catch (IOException e) {
 			String message = NLS.bind(PrefsMessages.preferences_saveException, location);
 			log(new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, message, e));
 			throw new BackingStoreException(message, e);
-		} finally {
-			if (output != null)
-				try {
-					output.close();
-				} catch (IOException e) {
-					// ignore
-				}
 		}
 	}
 
 	protected static String removeTimestampFromTable(Properties properties) throws IOException {
 		// store the properties in a string and then skip the first line (date/timestamp)
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		try {
-			properties.store(output, null);
-		} finally {
-			output.close();
-		}
-		String string = output.toString("UTF-8"); //$NON-NLS-1$
-		String separator = System.getProperty("line.separator"); //$NON-NLS-1$
+		properties.store(output, null);
+		String string = output.toString(StandardCharsets.UTF_8);
+		String separator = System.lineSeparator();
 		return string.substring(string.indexOf(separator) + separator.length());
 	}
 
