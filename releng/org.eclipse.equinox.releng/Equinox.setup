@@ -14,6 +14,22 @@
     xsi:schemaLocation="http://www.eclipse.org/oomph/setup/git/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/Git.ecore http://www.eclipse.org/oomph/setup/jdt/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/JDT.ecore http://www.eclipse.org/oomph/predicates/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/Predicates.ecore http://www.eclipse.org/oomph/setup/targlets/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/SetupTarglets.ecore http://www.eclipse.org/oomph/setup/workingsets/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/SetupWorkingSets.ecore http://www.eclipse.org/oomph/workingsets/1.0 http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/models/WorkingSets.ecore"
     name="equinox"
     label="Equinox">
+  <annotation
+      source="http://www.eclipse.org/oomph/setup/BrandingInfo">
+    <detail
+        key="imageURI">
+      <value>https://www.eclipse.org/equinox/images/logo_small.png</value>
+    </detail>
+    <detail
+        key="siteURI">
+      <value>https://projects.eclipse.org/projects/eclipse.equinox</value>
+    </detail>
+  </annotation>
+  <annotation
+      source="http://www.eclipse.org/oomph/setup/ConfigurationReference">
+    <reference
+        href="EquinoxConfiguration.setup#/"/>
+  </annotation>
   <setupTask
       xsi:type="setup.p2:P2Task">
     <requirement
@@ -100,20 +116,6 @@
       </repositoryList>
     </targlet>
   </setupTask>
-  <setupTask
-      xsi:type="setup:CompoundTask"
-      name="Preferences">
-    <setupTask
-        xsi:type="setup:CompoundTask"
-        name="org.eclipse.egit.ui">
-      <setupTask
-          xsi:type="setup:PreferenceTask"
-          key="/instance/org.eclipse.egit.ui/commit_dialog_signed_off_by"
-          value="true">
-        <description>Insert Signed-off-by Footer</description>
-      </setupTask>
-    </setupTask>
-  </setupTask>
   <project name="bundles"
       label="Bundles">
     <setupTask
@@ -128,7 +130,7 @@
         </detail>
         <detail
             key="label">
-          <value>Equinox Bundles Git Repository</value>
+          <value>Equinox Bundles Github Repository</value>
         </detail>
         <detail
             key="target">
@@ -177,7 +179,7 @@
         </detail>
         <detail
             key="label">
-          <value>Equinox Framework Git Repository</value>
+          <value>Equinox Framework Github Repository</value>
         </detail>
         <detail
             key="target">
@@ -233,7 +235,7 @@
         </detail>
         <detail
             key="label">
-          <value>Equinox P2 Git Repository</value>
+          <value>Equinox P2 Github Repository</value>
         </detail>
         <detail
             key="target">
@@ -353,7 +355,7 @@
         </detail>
         <detail
             key="label">
-          <value>Equinox Binaries Git Repository</value>
+          <value>Equinox Binaries Github Repository</value>
         </detail>
         <detail
             key="target">
