@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.preferences.*;
@@ -264,7 +265,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 					childNode.firePreferenceEvent(key, oldValue, value);
 			}
 		}
-		PreferencesService.getDefault().shareStrings();
 	}
 
 	/*
@@ -378,17 +378,16 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		return result;
 	}
 
-
 	@Override
 	public void flush() throws BackingStoreException {
 		IEclipsePreferences toFlush = null;
 		synchronized (childAndPropertyLock) {
 			toFlush = internalFlush();
 		}
-		//if we aren't at the right level, then flush the appropriate node
-		if (toFlush != null)
+		// if we aren't at the right level, then flush the appropriate node
+		if (toFlush != null) {
 			toFlush.flush();
-		PreferencesService.getDefault().shareStrings();
+		}
 	}
 
 	/*
@@ -636,13 +635,21 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			// illegal state if this node has been removed
 			checkRemoved();
 			String oldValue = properties.get(key);
-			if (oldValue != null && oldValue.equals(newValue))
+			if (oldValue != null && oldValue.equals(newValue)) {
 				return oldValue;
-			if (DEBUG_PREFERENCE_SET)
+			} else if (DEBUG_PREFERENCE_SET) {
 				PrefsMessages.message("Setting preference: " + absolutePath() + '/' + key + '=' + newValue); //$NON-NLS-1$
-			properties = properties.put(key, newValue);
+			}
+			properties = properties.put(intern(key), intern(newValue));
 			return oldValue;
 		}
+	}
+
+	private static final Map<String, String> STRING_POOL = new ConcurrentHashMap<>();
+
+	private static String intern(String s) {
+		String cached = STRING_POOL.putIfAbsent(s, s);
+		return cached != null ? cached : s;
 	}
 
 	/*
@@ -1064,28 +1071,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		}
 		table.put(VERSION_KEY, VERSION_VALUE);
 		write(table, location);
-	}
-
-	/**
-	 * Traverses the preference hierarchy rooted at this node, and adds
-	 * all preference key and value strings to the provided pool.  If an added
-	 * string was already in the pool, all references will be replaced with the
-	 * canonical copy of the string.
-	 *
-	 * @param pool The pool to share strings in
-	 */
-	public void shareStrings(StringPool pool) {
-		//thread safety: copy reference in case of concurrent change
-		ImmutableMap temp;
-		synchronized (childAndPropertyLock) {
-			temp = properties;
-		}
-		temp.shareStrings(pool);
-		for (IEclipsePreferences child : getChildren(false)) {
-			if (child instanceof EclipsePreferences) {
-				((EclipsePreferences) child).shareStrings(pool);
-			}
-		}
 	}
 
 	/*
