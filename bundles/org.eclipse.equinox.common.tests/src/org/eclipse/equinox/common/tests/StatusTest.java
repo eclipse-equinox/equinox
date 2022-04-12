@@ -151,17 +151,20 @@ public class StatusTest extends CoreTest {
 		return installTestClassBundle(bc);
 	}
 
-	public static Bundle installTestClassBundle(BundleContext bc) throws IOException, BundleException {
+	public static synchronized Bundle installTestClassBundle(BundleContext bc) throws IOException, BundleException {
 		File noNameBSNFile = bc.getDataFile("noNameBSN.jar");
-		noNameBSNFile.delete();
-		URI noNameBSNJar = URI.create("jar:" + noNameBSNFile.toURI().toASCIIString());
+		if (!noNameBSNFile.isFile()) {
+			noNameBSNFile.delete();
+			URI noNameBSNJar = URI.create("jar:" + noNameBSNFile.toURI().toASCIIString());
 
-		try (FileSystem zipfs = FileSystems.newFileSystem(noNameBSNJar, Collections.singletonMap("create", "true"))) {
-			URL testClassURL = StatusTest.class.getResource("TestClass.class");
-			Path testClassPath = zipfs.getPath(testClassURL.getPath().substring(1));
-			// copy a file into the zip file
-			Files.createDirectories(testClassPath.getParent());
-			Files.copy(testClassURL.openStream(), testClassPath);
+			try (FileSystem zipfs = FileSystems.newFileSystem(noNameBSNJar,
+					Collections.singletonMap("create", "true"))) {
+				URL testClassURL = StatusTest.class.getResource("TestClass.class");
+				Path testClassPath = zipfs.getPath(testClassURL.getPath().substring(1));
+				// copy a file into the zip file
+				Files.createDirectories(testClassPath.getParent());
+				Files.copy(testClassURL.openStream(), testClassPath);
+			}
 		}
 		return bc.installBundle(noNameBSNFile.toURI().toASCIIString());
 	}
