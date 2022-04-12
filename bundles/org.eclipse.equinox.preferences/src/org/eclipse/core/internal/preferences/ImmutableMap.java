@@ -35,10 +35,10 @@ public abstract class ImmutableMap implements Cloneable {
 		/**
 		 * The table keys
 		 */
-		private String[] keyTable;
+		private final String[] keyTable;
 
-		private int threshold;
-		private String[] valueTable;
+		private final int threshold;
+		private final String[] valueTable;
 
 		ArrayMap(int size) {
 			this.elementSize = 0;
@@ -148,27 +148,6 @@ public abstract class ImmutableMap implements Cloneable {
 		}
 
 		@Override
-		public void shareStrings(StringPool set) {
-			// copy elements for thread safety
-			String[] array = keyTable;
-			if (array == null)
-				return;
-			for (int i = 0; i < array.length; i++) {
-				String o = array[i];
-				if (o != null)
-					array[i] = set.add(o);
-			}
-			array = valueTable;
-			if (array == null)
-				return;
-			for (int i = 0; i < array.length; i++) {
-				String o = array[i];
-				if (o != null)
-					array[i] = set.add(o);
-			}
-		}
-
-		@Override
 		public int size() {
 			return elementSize;
 		}
@@ -256,10 +235,6 @@ public abstract class ImmutableMap implements Cloneable {
 	 * @return A map with the given key removed
 	 */
 	public abstract ImmutableMap removeKey(String key);
-
-	public void shareStrings(StringPool set) {
-		// nothing to do
-	}
 
 	/**
 	 * Returns the number of keys in this map.

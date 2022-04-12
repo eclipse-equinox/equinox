@@ -33,10 +33,6 @@ import org.osgi.service.prefs.Preferences;
  * @since 3.0
  */
 public class PreferencesService implements IPreferencesService {
-	/**
-	 * The interval between passes over the preference tree to canonicalize strings.
-	 */
-	private static final long STRING_SHARING_INTERVAL = 300000;
 	private static final String MATCH_TYPE_PREFIX = "prefix"; //$NON-NLS-1$
 
 	// the order of search scopes when people don't have a specific order set
@@ -56,11 +52,6 @@ public class PreferencesService implements IPreferencesService {
 			.synchronizedMap(new HashMap<String, LookupOrder>());
 	private Object registryHelper = null;
 	private final Map<String, EclipsePreferences> defaultScopes = new HashMap<>();
-
-	/**
-	 * The last time analysis was done to remove duplicate strings
-	 */
-	private long lastStringSharing = 0;
 
 	/*
 	 * Create and return an IStatus object with ERROR severity and the given message
@@ -100,11 +91,6 @@ public class PreferencesService implements IPreferencesService {
 			} catch (BackingStoreException e) {
 				throw new CoreException(createStatusError(PrefsMessages.preferences_saveProblems, e));
 			}
-
-			// this typically causes a major change to the preference tree, so force string
-			// sharing
-			lastStringSharing = 0;
-			shareStrings();
 		} catch (BackingStoreException e) {
 			throw new CoreException(createStatusError(PrefsMessages.preferences_applyProblems, e));
 		}
@@ -211,13 +197,9 @@ public class PreferencesService implements IPreferencesService {
 			throw new CoreException(createStatusError(PrefsMessages.preferences_saveProblems, e));
 		}
 
-		if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
-			PrefsMessages.message(
-					"Current list of all settings: " + ((EclipsePreferences) getRootNode()).toDeepDebugString()); //$NON-NLS-1$
-		// this typically causes a major change to the preference tree, so force string
-		// sharing
-		lastStringSharing = 0;
-		shareStrings();
+		if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
+			PrefsMessages.message("Current list of all settings: " + ((EclipsePreferences) getRootNode()).toDeepDebugString()); //$NON-NLS-1$
+		}
 		return result;
 	}
 
@@ -957,20 +939,6 @@ public class PreferencesService implements IPreferencesService {
 		if (this.registryHelper != null && this.registryHelper != registryHelper)
 			((PreferenceServiceRegistryHelper) this.registryHelper).stop();
 		this.registryHelper = registryHelper;
-	}
-
-	/**
-	 * Shares all duplicate equal strings referenced by the preference service.
-	 */
-	void shareStrings() {
-		long now = System.currentTimeMillis();
-		if (now - lastStringSharing < STRING_SHARING_INTERVAL)
-			return;
-		StringPool pool = new StringPool();
-		root.shareStrings(pool);
-		if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
-			System.out.println("Preference string sharing saved: " + pool.getSavedStringCount()); //$NON-NLS-1$
-		lastStringSharing = now;
 	}
 
 	/*
