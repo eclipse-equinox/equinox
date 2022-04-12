@@ -413,12 +413,14 @@ public class BundleLoader extends ModuleLoader {
 	 * Finds the class for a bundle.  This method is used for delegation by the bundle's classloader.
 	 */
 	public Class<?> findClass(String name) throws ClassNotFoundException {
-		return findClass0(name, true);
+		return findClass0(name, true, true);
 	}
 
-	public Class<?> findClassNoParentNoException(String name) {
+	// useful outside of the framework to do no exception delegation
+	// but have it search parent for bootdelegation
+	public Class<?> findClassNoException(String name) {
 		try {
-			return findClass0(name, false);
+			return findClass0(name, true, false);
 		} catch (ClassNotFoundException e) {
 			// should rarely happen
 			// e.g. when a lazy activation fails to start a bundle
@@ -426,9 +428,19 @@ public class BundleLoader extends ModuleLoader {
 		}
 	}
 
-	private Class<?> findClass0(String name, boolean parentAndGenerateException)
+	public Class<?> findClassNoParentNoException(String name) {
+		try {
+			return findClass0(name, false, false);
+		} catch (ClassNotFoundException e) {
+			// should rarely happen
+			// e.g. when a lazy activation fails to start a bundle
+			return null;
+		}
+	}
+
+	private Class<?> findClass0(String name, boolean parentDelegation, boolean generateException)
 			throws ClassNotFoundException {
-		if (parentAndGenerateException && parent != null && name.startsWith(JAVA_PACKAGE)) {
+		if (parentDelegation && parent != null && name.startsWith(JAVA_PACKAGE)) {
 			// 1) if startsWith "java." delegate to parent and terminate search
 			// we want to throw ClassNotFoundExceptions if a java.* class cannot be loaded from the parent.
 			return parent.loadClass(name);
@@ -440,7 +452,7 @@ public class BundleLoader extends ModuleLoader {
 		String pkgName = getPackageName(name);
 		boolean bootDelegation = false;
 		// follow the OSGi delegation model
-		if (parentAndGenerateException && parent != null && container.isBootDelegationPackage(pkgName)) {
+		if (parentDelegation && parent != null && container.isBootDelegationPackage(pkgName)) {
 			// 2) if part of the bootdelegation list then delegate to parent and continue of failure
 			try {
 				return parent.loadClass(name);
@@ -472,7 +484,7 @@ public class BundleLoader extends ModuleLoader {
 			}
 			if (result != null)
 				return result;
-			return generateException(name, parentAndGenerateException);
+			return generateException(name, generateException);
 		}
 		// 4) search the required bundles
 		source = findRequiredSource(pkgName, null);
@@ -495,7 +507,7 @@ public class BundleLoader extends ModuleLoader {
 				result = source.loadClass(name);
 				if (result != null)
 					return result;
-				return generateException(name, parentAndGenerateException);
+				return generateException(name, generateException);
 			}
 		}
 
@@ -512,7 +524,7 @@ public class BundleLoader extends ModuleLoader {
 			return result;
 		// hack to support backwards compatibility for bootdelegation
 		// or last resort; do class context trick to work around VM bugs
-		if (parentAndGenerateException && parent != null && !bootDelegation
+		if (parentDelegation && parent != null && !bootDelegation
 				&& ((container.getConfiguration().compatibilityBootDelegation) || isRequestFromVM())) {
 			// we don't need to continue if a CNFE is thrown here.
 			try {
@@ -521,7 +533,7 @@ public class BundleLoader extends ModuleLoader {
 				// we want to generate our own exception below
 			}
 		}
-		return generateException(name, parentAndGenerateException);
+		return generateException(name, generateException);
 	}
 
 	private Class<?> generateException(String name, boolean generate) throws ClassNotFoundException {
