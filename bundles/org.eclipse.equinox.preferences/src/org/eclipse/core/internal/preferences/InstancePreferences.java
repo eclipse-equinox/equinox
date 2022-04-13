@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2015 IBM Corporation and others.
+ * Copyright (c) 2004, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -123,10 +123,8 @@ public class InstancePreferences extends EclipsePreferences {
 			PrefsMessages.message("Loading legacy preferences from " + prefFile); //$NON-NLS-1$
 
 		// load preferences from file
-		InputStream input = null;
 		Properties values = new Properties();
-		try {
-			input = new BufferedInputStream(new FileInputStream(prefFile));
+		try (InputStream input = new FileInputStream(prefFile)) {
 			values.load(input);
 		} catch (IOException e) {
 			// problems loading preference store - quietly ignore
@@ -138,18 +136,6 @@ public class InstancePreferences extends EclipsePreferences {
 			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
 				PrefsMessages.message("IllegalArgumentException encountered loading legacy preference file " + prefFile); //$NON-NLS-1$
 			return;
-		} finally {
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-					// ignore problems with close
-					if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
-						PrefsMessages.message("IOException encountered closing legacy preference file " + prefFile); //$NON-NLS-1$
-						e.printStackTrace();
-					}
-				}
-			}
 		}
 
 		// Store values in the preferences object
@@ -168,10 +154,10 @@ public class InstancePreferences extends EclipsePreferences {
 		}
 
 		// Delete the old file so we don't try and load it next time.
-		if (!prefFile.delete())
-			//Only print out message in failure case if we are debugging.
-			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
-				PrefsMessages.message("Unable to delete legacy preferences file: " + prefFile); //$NON-NLS-1$
+		if (!prefFile.delete() && EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
+			// Only print out message in failure case if we are debugging.
+			PrefsMessages.message("Unable to delete legacy preferences file: " + prefFile); //$NON-NLS-1$
+		}
 	}
 
 	@Override
@@ -209,8 +195,7 @@ public class InstancePreferences extends EclipsePreferences {
 			return;
 		try {
 			synchronized (this) {
-				String[] names = computeChildren(getBaseLocation());
-				for (String n : names) {
+				for (String n : computeChildren(getBaseLocation())) {
 					addChild(n, null);
 				}
 			}

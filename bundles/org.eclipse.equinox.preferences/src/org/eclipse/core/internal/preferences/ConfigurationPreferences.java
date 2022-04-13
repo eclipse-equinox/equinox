@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2015 IBM Corporation and others.
+ * Copyright (c) 2004, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -113,8 +113,7 @@ public class ConfigurationPreferences extends EclipsePreferences {
 			synchronized (this) {
 				if (baseLocation == null)
 					return;
-				String[] names = computeChildren(baseLocation);
-				for (String n : names) {
+				for (String n : computeChildren(baseLocation)) {
 					addChild(n, null);
 				}
 			}
