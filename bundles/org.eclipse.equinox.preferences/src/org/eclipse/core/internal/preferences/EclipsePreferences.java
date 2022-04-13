@@ -364,7 +364,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			return result;
 		try {
 			result.setLoading(true);
-			result.loadLegacy();
 			result.load();
 			result.loaded();
 			result.flush();
@@ -730,10 +729,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		} else {
 			descriptor.loaded(absolutePath());
 		}
-	}
-
-	protected void loadLegacy() {
-		// sub-classes to over-ride if necessary
 	}
 
 	public static void log(IStatus status) {
