@@ -613,15 +613,8 @@ class EclipseDebugTrace implements DebugTrace {
 	 * returned if the input string is <code>null</code>.
 	 */
 	private static String encodeText(final String inputString) {
-		if (inputString == null || inputString.indexOf(TRACE_ELEMENT_DELIMITER) < 0)
-			return inputString;
-		final StringBuilder tempBuffer = new StringBuilder(inputString);
-		int currentIndex = tempBuffer.indexOf(TRACE_ELEMENT_DELIMITER);
-		while (currentIndex >= 0) {
-			tempBuffer.replace(currentIndex, currentIndex + TRACE_ELEMENT_DELIMITER.length(), TRACE_ELEMENT_DELIMITER_ENCODED);
-			currentIndex = tempBuffer.indexOf(TRACE_ELEMENT_DELIMITER);
-		}
-		return tempBuffer.toString();
+		return inputString == null ? null
+				: inputString.replace(TRACE_ELEMENT_DELIMITER, TRACE_ELEMENT_DELIMITER_ENCODED);
 	}
 
 	/**
