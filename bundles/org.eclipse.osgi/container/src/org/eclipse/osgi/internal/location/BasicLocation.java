@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2016 IBM Corporation and others.
+ * Copyright (c) 2004, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,12 +10,15 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Christoph Läubrich - Issue #38 - Expose the url of a location as service properties
  *******************************************************************************/
 package org.eclipse.osgi.internal.location;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration.ConfigValues;
@@ -24,6 +27,8 @@ import org.eclipse.osgi.internal.log.EquinoxLogServices;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.util.NLS;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 
 /**
  * Internal class.
@@ -39,12 +44,14 @@ public class BasicLocation implements Location {
 	final private AtomicBoolean debug;
 	final private EquinoxContainer container;
 
-	private URL location = null;
+	private URL location;
 	private Location parent;
 
 	// locking related fields
 	private File lockFile;
 	private Locker locker;
+
+	private ServiceRegistration<?> serviceRegistration;
 
 	public BasicLocation(String property, URL defaultValue, boolean isReadOnly, String dataAreaPrefix, ConfigValues configValues, EquinoxContainer container, AtomicBoolean debug) {
 		this.property = property;
@@ -92,6 +99,10 @@ public class BasicLocation implements Location {
 		return location;
 	}
 
+	private synchronized URL getLocation() {
+		return location;
+	}
+
 	@Override
 	public synchronized boolean isSet() {
 		return location != null;
@@ -121,38 +132,54 @@ public class BasicLocation implements Location {
 
 	@Override
 	public synchronized boolean set(URL value, boolean lock, String lockFilePath) throws IllegalStateException, IOException {
-		if (location != null)
-			throw new IllegalStateException(Msg.ECLIPSE_CANNOT_CHANGE_LOCATION);
-		File file = null;
-		if (value.getProtocol().equalsIgnoreCase("file")) { //$NON-NLS-1$
-			try {
-				File f = LocationHelper.decodePath(new File(value.getPath()));
-				String basePath = f.getCanonicalPath();
-				value = LocationHelper.buildURL("file:" + basePath, true); //$NON-NLS-1$
-			} catch (IOException e) {
-				// do nothing just use the original value
-			}
-			if (lockFilePath != null && lockFilePath.length() > 0) {
-				File givenLockFile = new File(lockFilePath);
-				if (givenLockFile.isAbsolute()) {
-					file = givenLockFile;
-				} else {
-					file = new File(value.getPath(), lockFilePath);
+		synchronized (this) {
+			if (location != null)
+				throw new IllegalStateException(Msg.ECLIPSE_CANNOT_CHANGE_LOCATION);
+			File file = null;
+			if (value.getProtocol().equalsIgnoreCase("file")) { //$NON-NLS-1$
+				try {
+					File f = LocationHelper.decodePath(new File(value.getPath()));
+					String basePath = f.getCanonicalPath();
+					value = LocationHelper.buildURL("file:" + basePath, true); //$NON-NLS-1$
+				} catch (IOException e) {
+					// do nothing just use the original value
 				}
-			} else {
-				file = new File(value.getPath(), DEFAULT_LOCK_FILENAME);
+				if (lockFilePath != null && lockFilePath.length() > 0) {
+					File givenLockFile = new File(lockFilePath);
+					if (givenLockFile.isAbsolute()) {
+						file = givenLockFile;
+					} else {
+						file = new File(value.getPath(), lockFilePath);
+					}
+				} else {
+					file = new File(value.getPath(), DEFAULT_LOCK_FILENAME);
+				}
+			}
+			lock = lock && !isReadOnly;
+			if (lock) {
+				if (!lock(file, value))
+					return false;
+			}
+			lockFile = file;
+			location = value;
+			if (property != null) {
+				configValues.setConfiguration(property, location.toExternalForm());
 			}
 		}
-		lock = lock && !isReadOnly;
-		if (lock) {
-			if (!lock(file, value))
-				return false;
+		updateUrl(serviceRegistration);
+		return true;
+	}
+
+	private void updateUrl(ServiceRegistration<?> registration) {
+		if (registration != null) {
+			Dictionary<String, Object> properties = registration.getReference().getProperties();
+			properties.put(Location.SERVICE_PROPERTY_URL, getLocation().toExternalForm());
+			try {
+				registration.setProperties(properties);
+			} catch (IllegalStateException e) {
+				// can't update it then...
+			}
 		}
-		lockFile = file;
-		location = value;
-		if (property != null)
-			configValues.setConfiguration(property, location.toExternalForm());
-		return lock;
 	}
 
 	public synchronized void setParent(Location value) {
@@ -254,5 +281,27 @@ public class BasicLocation implements Location {
 		String spec = prefix + dataAreaPrefix + filename;
 		boolean trailingSlash = spec.length() > 0 && spec.charAt(spec.length() - 1) == '/';
 		return LocationHelper.buildURL(spec, trailingSlash);
+	}
+
+	public void register(BundleContext bundleContext) {
+		Dictionary<String, Object> locationProperties = new Hashtable<>(3);
+		locationProperties.put(Location.SERVICE_PROPERTY_TYPE, property);
+		URL url = getLocation();
+		URL defaultUrl = getDefault();
+		if (url != null) {
+			locationProperties.put(Location.SERVICE_PROPERTY_URL, url.toExternalForm());
+		}
+		if (defaultUrl != null) {
+			locationProperties.put(Location.SERVICE_PROPERTY_DEFAULT_URL, defaultUrl.toExternalForm());
+		}
+		ServiceRegistration<?> register = bundleContext.registerService(Location.class, this, locationProperties);
+		synchronized (this) {
+			serviceRegistration = register;
+		}
+		// just paranoid here... checking if between we have registered and where able
+		// to set the serviceRegistration the url has changed...
+		if (url != getLocation()) {
+			updateUrl(register);
+		}
 	}
 }

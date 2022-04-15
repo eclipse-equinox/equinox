@@ -22,7 +22,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.SortedMap;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.equinox.log.SynchronousLogListener;
@@ -391,6 +393,39 @@ public class BasicLocationTests extends CoreTest {
 			Location instanceLocation = locations.get(Location.INSTANCE_FILTER);
 			assertNull("User locatoin is not null.", userLocation.getURL());
 			assertNull("Instance location is not null.", instanceLocation.getURL());
+		} finally {
+			equinox.stop();
+		}
+	}
+
+	public void testSetUrl() throws Exception {
+		Map<String, String> fwkConfig = new HashMap<>();
+		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
+		fwkConfig.put(EquinoxLocations.PROP_INSTALL_AREA, "file:" + prefix + "/g");
+		fwkConfig.put(EquinoxLocations.PROP_INSTANCE_AREA, "@noDefault");
+		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "@noDefault");
+
+		Equinox equinox = new Equinox(fwkConfig);
+		equinox.init();
+		try {
+
+			BundleContext context = equinox.getBundleContext();
+			ServiceTracker<Location, Location> tracker = new ServiceTracker<>(context,
+					context.createFilter(Location.INSTANCE_FILTER), null);
+			tracker.open();
+			SortedMap<ServiceReference<Location>, Location> serviceMap = tracker.getTracked();
+			assertTrue("no service matching " + Location.INSTANCE_FILTER + " found!", serviceMap.size() == 1);
+			Entry<ServiceReference<Location>, Location> entry = serviceMap.entrySet().iterator().next();
+			Location location = entry.getValue();
+			assertNull("Instance location is not null.", location.getURL());
+			ServiceReference<Location> serviceReference = entry.getKey();
+			assertNull("Url property is set!", serviceReference.getProperty(Location.SERVICE_PROPERTY_URL));
+			File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testseturl");
+			location.set(testLocationFile.toURL(), false);
+			assertNotNull("Instance location is still null.", location.getURL());
+			assertEquals("Url not set to the service properties", location.getURL().toExternalForm(),
+					serviceReference.getProperty("url"));
+
 		} finally {
 			equinox.stop();
 		}

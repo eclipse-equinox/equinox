@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2016 IBM Corporation and others.
+ * Copyright (c) 2003, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Christoph Läubrich - Issue #38 - Expose the url of a location as service properties
  *******************************************************************************/
 
 package org.eclipse.osgi.internal.framework;
@@ -24,11 +25,11 @@ import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.framework.legacy.PackageAdminImpl;
 import org.eclipse.osgi.internal.framework.legacy.StartLevelImpl;
+import org.eclipse.osgi.internal.location.BasicLocation;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
 import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
 import org.eclipse.osgi.internal.permadmin.SecurityAdmin;
 import org.eclipse.osgi.internal.url.EquinoxFactoryManager;
-import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
@@ -188,32 +189,16 @@ public class SystemBundleActivator implements BundleActivator {
 	}
 
 	private void registerLocations(BundleContext bc, EquinoxLocations equinoxLocations) {
-		Dictionary<String, Object> locationProperties = new Hashtable<>(1);
-		Location location = equinoxLocations.getUserLocation();
-		if (location != null) {
-			locationProperties.put("type", EquinoxLocations.PROP_USER_AREA); //$NON-NLS-1$
-			register(bc, Location.class, location, locationProperties);
-		}
-		location = equinoxLocations.getInstanceLocation();
-		if (location != null) {
-			locationProperties.put("type", EquinoxLocations.PROP_INSTANCE_AREA); //$NON-NLS-1$
-			register(bc, Location.class, location, locationProperties);
-		}
-		location = equinoxLocations.getConfigurationLocation();
-		if (location != null) {
-			locationProperties.put("type", EquinoxLocations.PROP_CONFIG_AREA); //$NON-NLS-1$
-			register(bc, Location.class, location, locationProperties);
-		}
-		location = equinoxLocations.getInstallLocation();
-		if (location != null) {
-			locationProperties.put("type", EquinoxLocations.PROP_INSTALL_AREA); //$NON-NLS-1$
-			register(bc, Location.class, location, locationProperties);
-		}
+		registerLocation(bc, equinoxLocations.getUserLocation(), EquinoxLocations.PROP_USER_AREA);
+		registerLocation(bc, equinoxLocations.getInstanceLocation(), EquinoxLocations.PROP_INSTANCE_AREA);
+		registerLocation(bc, equinoxLocations.getConfigurationLocation(), EquinoxLocations.PROP_CONFIG_AREA);
+		registerLocation(bc, equinoxLocations.getInstallLocation(), EquinoxLocations.PROP_INSTALL_AREA);
+		registerLocation(bc, equinoxLocations.getEclipseHomeLocation(), EquinoxLocations.PROP_HOME_LOCATION_AREA);
+	}
 
-		location = equinoxLocations.getEclipseHomeLocation();
+	private void registerLocation(BundleContext bc, BasicLocation location, String type) {
 		if (location != null) {
-			locationProperties.put("type", EquinoxLocations.PROP_HOME_LOCATION_AREA); //$NON-NLS-1$
-			register(bc, Location.class, location, locationProperties);
+			location.register(bc);
 		}
 	}
 

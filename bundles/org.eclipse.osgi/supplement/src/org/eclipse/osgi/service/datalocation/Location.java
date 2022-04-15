@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Christoph Läubrich - Issue #38 - Expose the url of a location as service properties
  *******************************************************************************/
 package org.eclipse.osgi.service.datalocation;
 
@@ -27,6 +28,78 @@ import java.net.URL;
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface Location {
+	/**
+	 * Constant which defines the type value used for the eclipse home location
+	 * 
+	 * @since 3.18
+	 */
+	public static final String ECLIPSE_HOME_LOCATION_TYPE = "eclipse.home.location"; //$NON-NLS-1$
+
+	/**
+	 * Constant which defines the type value used for the user area
+	 * 
+	 * @since 3.18
+	 */
+	public static final String USER_AREA_TYPE = "osgi.user.area"; //$NON-NLS-1$
+
+	/**
+	 * Constant which defines the type value used for the configuration area
+	 * 
+	 * @since 3.18
+	 */
+	public static final String CONFIGURATION_AREA_TYPE = "osgi.configuration.area"; //$NON-NLS-1$
+
+	/**
+	 * Constant which defines the type value used for the install area
+	 * 
+	 * @since 3.18
+	 */
+	public static final String INSTALL_AREA_TYPE = "osgi.install.area"; //$NON-NLS-1$
+
+	/**
+	 * Constant which defines the type value used for the instance area
+	 * 
+	 * @since 3.18
+	 */
+	public static final String INSTANCE_AREA_TYPE = "osgi.instance.area"; //$NON-NLS-1$
+
+	/**
+	 * Constant which defines the service property used for a location to represent
+	 * its type
+	 * 
+	 * @see #ECLIPSE_HOME_LOCATION_TYPE
+	 * @see #ECLIPSE_HOME_FILTER
+	 * @see #USER_AREA_TYPE
+	 * @see #USER_FILTER
+	 * @see #CONFIGURATION_AREA_TYPE
+	 * @see #CONFIGURATION_FILTER
+	 * @see #INSTALL_AREA_TYPE
+	 * @see #INSTALL_FILTER
+	 * @see #INSTANCE_AREA_TYPE
+	 * @see #INSTANCE_FILTER
+	 * 
+	 * @since 3.18
+	 */
+	public static final String SERVICE_PROPERTY_TYPE = "type"; //$NON-NLS-1$
+
+	/**
+	 * Constant which defines the service property used for a location to represent
+	 * its url as a {@link String} (using {@link URL#toExternalForm()}), as long as
+	 * the location is not set, this property will be missing, allowing consumers to
+	 * track {@link Location}s that are (not) set yet.
+	 * 
+	 * @since 3.18
+	 */
+	public static final String SERVICE_PROPERTY_URL = "url"; //$NON-NLS-1$
+
+	/**
+	 * Constant which defines the service property used for a location to represent
+	 * its default url as a {@link String} (using {@link URL#toExternalForm()}), if
+	 * the location has no default url this property will be missing.
+	 * 
+	 * @since 3.18
+	 */
+	public static final String SERVICE_PROPERTY_DEFAULT_URL = "defaultUrl"; //$NON-NLS-1$
 
 	/**
 	 * Constant which defines the filter string for acquiring the service which
@@ -34,7 +107,7 @@ public interface Location {
 	 *
 	 * @since 3.2
 	 */
-	public static final String INSTANCE_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=osgi.instance.area))"; //$NON-NLS-1$ //$NON-NLS-2$
+	public static final String INSTANCE_FILTER = "(&(objectClass=" + Location.class.getName() + ")(" + SERVICE_PROPERTY_TYPE + "=" + INSTANCE_AREA_TYPE + "))"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
 	/**
 	 * Constant which defines the filter string for acquiring the service which
@@ -42,7 +115,7 @@ public interface Location {
 	 *
 	 * @since 3.2
 	 */
-	public static final String INSTALL_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=osgi.install.area))"; //$NON-NLS-1$ //$NON-NLS-2$
+	public static final String INSTALL_FILTER = "(&(objectClass=" + Location.class.getName() + ")(" + SERVICE_PROPERTY_TYPE + "=" + INSTALL_AREA_TYPE + "))"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
 	/**
 	 * Constant which defines the filter string for acquiring the service which
@@ -50,7 +123,7 @@ public interface Location {
 	 *
 	 * @since 3.2
 	 */
-	public static final String CONFIGURATION_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=osgi.configuration.area))"; //$NON-NLS-1$ //$NON-NLS-2$
+	public static final String CONFIGURATION_FILTER = "(&(objectClass=" + Location.class.getName() + ")(" + SERVICE_PROPERTY_TYPE + "=" + CONFIGURATION_AREA_TYPE + "))"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
 	/**
 	 * Constant which defines the filter string for acquiring the service which
@@ -58,7 +131,7 @@ public interface Location {
 	 *
 	 * @since 3.2
 	 */
-	public static final String USER_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=osgi.user.area))"; //$NON-NLS-1$ //$NON-NLS-2$
+	public static final String USER_FILTER = "(&(objectClass=" + Location.class.getName() + ")(" + SERVICE_PROPERTY_TYPE + "=" + USER_AREA_TYPE + "))"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
 	/**
 	 * Constant which defines the filter string for acquiring the service which
@@ -66,7 +139,7 @@ public interface Location {
 	 *
 	 * @since 3.4
 	 */
-	public static final String ECLIPSE_HOME_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=eclipse.home.location))"; //$NON-NLS-1$ //$NON-NLS-2$
+	public static final String ECLIPSE_HOME_FILTER = "(&(objectClass=" + Location.class.getName() + ")(" + SERVICE_PROPERTY_TYPE + "=" + ECLIPSE_HOME_LOCATION_TYPE + "))"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
 	/**
 	 * Returns <code>true</code> if this location allows a default value to be assigned

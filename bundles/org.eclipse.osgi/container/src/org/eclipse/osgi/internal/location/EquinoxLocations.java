@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2017 IBM Corporation and others.
+ * Copyright (c) 2004, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,10 +11,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Rapicorp, Inc - Support for Mac Layout (bug 431116)
+ *     Christoph Läubrich - Issue #38 - Expose the url of a location as service properties
  *******************************************************************************/
 package org.eclipse.osgi.internal.location;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
@@ -33,17 +36,17 @@ import org.osgi.framework.Constants;
  */
 public class EquinoxLocations {
 	public static final String READ_ONLY_AREA_SUFFIX = ".readOnly"; //$NON-NLS-1$
-	public static final String PROP_INSTALL_AREA = "osgi.install.area"; //$NON-NLS-1$
+	public static final String PROP_INSTALL_AREA = Location.INSTALL_AREA_TYPE;
 	public static final String PROP_CONFIG_AREA = "osgi.configuration.area"; //$NON-NLS-1$
 	public static final String PROP_CONFIG_AREA_DEFAULT = "osgi.configuration.area.default"; //$NON-NLS-1$
 	public static final String PROP_SHARED_CONFIG_AREA = "osgi.sharedConfiguration.area"; //$NON-NLS-1$
-	public static final String PROP_INSTANCE_AREA = "osgi.instance.area"; //$NON-NLS-1$
-	public static final String PROP_INSTANCE_AREA_DEFAULT = "osgi.instance.area.default"; //$NON-NLS-1$
-	public static final String PROP_USER_AREA = "osgi.user.area"; //$NON-NLS-1$
-	public static final String PROP_USER_AREA_DEFAULT = "osgi.user.area.default"; //$NON-NLS-1$
+	public static final String PROP_INSTANCE_AREA = Location.INSTANCE_AREA_TYPE;
+	public static final String PROP_INSTANCE_AREA_DEFAULT = PROP_INSTANCE_AREA + ".default"; //$NON-NLS-1$
+	public static final String PROP_USER_AREA = Location.USER_AREA_TYPE; // $NON-NLS-1$
+	public static final String PROP_USER_AREA_DEFAULT = PROP_USER_AREA + ".default"; //$NON-NLS-1$
 	public static final String PROP_USER_HOME = "user.home"; //$NON-NLS-1$
 	public static final String PROP_USER_DIR = "user.dir"; //$NON-NLS-1$
-	public static final String PROP_HOME_LOCATION_AREA = "eclipse.home.location"; //$NON-NLS-1$
+	public static final String PROP_HOME_LOCATION_AREA = Location.ECLIPSE_HOME_LOCATION_TYPE;
 	public static final String PROP_LAUNCHER = "eclipse.launcher"; //$NON-NLS-1$
 
 	// Constants for configuration location discovery
@@ -68,11 +71,11 @@ public class EquinoxLocations {
 	private final EquinoxContainer container;
 	private final AtomicBoolean debugLocations;
 
-	private final Location installLocation;
-	private final Location configurationLocation;
-	private final Location userLocation;
-	private final Location instanceLocation;
-	private final Location eclipseHomeLocation;
+	private final BasicLocation installLocation;
+	private final BasicLocation configurationLocation;
+	private final BasicLocation userLocation;
+	private final BasicLocation instanceLocation;
+	private final BasicLocation eclipseHomeLocation;
 
 	public EquinoxLocations(ConfigValues equinoxConfig, EquinoxContainer container, AtomicBoolean debugLocations, Map<Throwable, Integer> exceptions) {
 		this.equinoxConfig = equinoxConfig;
@@ -181,7 +184,8 @@ public class EquinoxLocations {
 	}
 
 	@SuppressWarnings("deprecation")
-	private Location buildLocation(String property, URL defaultLocation, String userDefaultAppendage, boolean readOnlyDefault, boolean computeReadOnly, String dataAreaPrefix) {
+	private BasicLocation buildLocation(String property, URL defaultLocation, String userDefaultAppendage,
+			boolean readOnlyDefault, boolean computeReadOnly, String dataAreaPrefix) {
 		String location = equinoxConfig.clearConfiguration(property);
 		// the user/product may specify a non-default readOnly setting
 		String userReadOnlySetting = equinoxConfig.getConfiguration(property + READ_ONLY_AREA_SUFFIX);
@@ -351,7 +355,7 @@ public class EquinoxLocations {
 	 * Returns the user Location object
 	 * @return the user Location object
 	 */
-	public Location getUserLocation() {
+	public BasicLocation getUserLocation() {
 		return userLocation;
 	}
 
@@ -359,7 +363,7 @@ public class EquinoxLocations {
 	 * Returns the configuration Location object
 	 * @return the configuration Location object
 	 */
-	public Location getConfigurationLocation() {
+	public BasicLocation getConfigurationLocation() {
 		return configurationLocation;
 	}
 
@@ -367,7 +371,7 @@ public class EquinoxLocations {
 	 * Returns the install Location object
 	 * @return the install Location object
 	 */
-	public Location getInstallLocation() {
+	public BasicLocation getInstallLocation() {
 		return installLocation;
 	}
 
@@ -375,11 +379,11 @@ public class EquinoxLocations {
 	 * Returns the instance Location object
 	 * @return the instance Location object
 	 */
-	public Location getInstanceLocation() {
+	public BasicLocation getInstanceLocation() {
 		return instanceLocation;
 	}
 
-	public Location getEclipseHomeLocation() {
+	public BasicLocation getEclipseHomeLocation() {
 		return eclipseHomeLocation;
 	}
 }
