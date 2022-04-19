@@ -4,4 +4,8 @@
 
 # maven
 /*/*/target/
-
+# files generated (temporary) by the tycho maven builds
+.polyglot.*
+.META-INF_*
+pom.tycho
+.tycho-consumer-pom.xml
