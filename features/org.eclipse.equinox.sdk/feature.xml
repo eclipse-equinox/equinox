@@ -35,8 +35,4 @@
          id="org.eclipse.equinox.executable"
          version="0.0.0"/>
 
-   <includes
-         id="org.eclipse.equinox.core.feature"
-         version="0.0.0"/>
-
 </feature>
