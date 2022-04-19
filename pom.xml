@@ -60,10 +60,6 @@
     <module>features/org.eclipse.equinox.server.p2</module>
     <module>features/org.eclipse.equinox.core.sdk</module>
 
-<!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=348045
-    <module>features/org.eclipse.equinox.server.servletbridge</module>
--->
-
     <module>features/org.eclipse.equinox.server.simple</module>
     <module>features/org.eclipse.equinox.serverside.sdk</module>
     <module>bundles/org.eclipse.equinox.bidi.tests</module>
@@ -94,16 +90,8 @@
     <module>bundles/org.eclipse.equinox.console.tests</module>
     <module>bundles/org.eclipse.equinox.coordinator</module>
     <module>bundles/org.eclipse.equinox.device</module>
-    <!-- Module is deprecated
-    <module>bundles/org.eclipse.equinox.ds</module>
-    -->
     <module>bundles/org.eclipse.equinox.event</module>
 
-    <!-- Module is deprecated
-         https://bugs.eclipse.org/bugs/show_bug.cgi?id=389050
-    <module>bundles/org.eclipse.equinox.http</module>
-    -->
-    
     <module>bundles/org.eclipse.equinox.http.jetty</module>
     <module>bundles/org.eclipse.equinox.http.registry</module>
     <module>bundles/org.eclipse.equinox.http.servlet</module>
@@ -116,11 +104,6 @@
     <module>bundles/org.eclipse.equinox.region</module>
     <module>bundles/org.eclipse.equinox.servletbridge</module>
 
-<!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=348045
-    <module>bundles/org.eclipse.equinox.servletbridge.extensionbundle</module>
--->
-
-    <module>bundles/org.eclipse.equinox.servletbridge.template</module>
     <module>bundles/org.eclipse.equinox.slf4j.stub</module>
     <module>bundles/org.eclipse.equinox.transforms.hook</module>
     <module>bundles/org.eclipse.equinox.transforms.xslt</module>
