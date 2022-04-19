@@ -27,7 +27,7 @@ static _TCHAR* gtkInitFail = _T_ECLIPSE("Unable to initialize GTK+\n");
 static _TCHAR* upgradeWarning1 = _T_ECLIPSE("\nPlease upgrade GTK+ to minimum version");
 static _TCHAR* upgradeWarning2 = _T_ECLIPSE("\nor use an older version of Eclipse.\nClick OK to Exit.");
 static int minGtkMajorVersion = 3;
-static int minGtkMinorVersion = 20;
+static int minGtkMinorVersion = 22;
 static int minGtkMicroVersion = 0;
 
 /* tables to help initialize the function pointers */
