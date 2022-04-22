@@ -27,10 +27,10 @@ import org.eclipse.equinox.region.*;
 import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
 import org.eclipse.virgo.teststubs.osgi.framework.StubBundle;
 import org.eclipse.virgo.teststubs.osgi.framework.StubBundleContext;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.osgi.framework.*;
 
+@Ignore
 public class StandardRegionDigraphTests {
 
 	private RegionDigraph digraph;

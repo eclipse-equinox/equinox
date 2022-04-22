@@ -26,6 +26,7 @@ import org.junit.*;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.EventHook;
 
+@Ignore
 public class RegionBundleEventHookTests {
 
 	private static final String BUNDLE_X = "X";
