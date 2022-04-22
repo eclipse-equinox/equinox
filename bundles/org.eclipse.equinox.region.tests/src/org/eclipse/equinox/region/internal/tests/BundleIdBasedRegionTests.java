@@ -28,10 +28,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import org.eclipse.equinox.region.*;
 import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.osgi.framework.*;
 
+@Ignore
 public class BundleIdBasedRegionTests {
 
 	private static final String OTHER_REGION_NAME = "other";

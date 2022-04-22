@@ -30,6 +30,7 @@ import org.osgi.framework.wiring.*;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 
+@Ignore
 public class RegionResolverHookTests {
 
 	private static final String PACKAGE_A = "package.a";
