@@ -21,25 +21,4 @@
   <artifactId>org.eclipse.equinox.http.servletbridge</artifactId>
   <version>1.2.100-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>target-platform-configuration</artifactId>
-        <configuration>
-          <filters>
-            <!--
-              Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=348045
-             -->
-            <filter>
-              <type>osgi-bundle</type>
-              <id>org.eclipse.equinox.servletbridge.extensionbundle</id>
-              <removeAll/>
-            </filter>
-          </filters>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>

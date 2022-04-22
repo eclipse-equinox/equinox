@@ -27,10 +27,12 @@ public class DSTestsActivator implements BundleActivator {
 	public DSTestsActivator() {
 		instance = this;
 	}
+	@Override
 	public void start(BundleContext context) throws Exception {
 		this.context = context;
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		this.context = null;
 	}
@@ -43,7 +45,6 @@ public class DSTestsActivator implements BundleActivator {
 		activateBundle("org.apache.felix.scr");
 		activateBundle("org.eclipse.equinox.cm");
 		activateBundle("org.eclipse.equinox.log");
-		activateBundle("org.eclipse.equinox.util");
 	}
 	
 	private static void activateBundle(String symbolicName) {
