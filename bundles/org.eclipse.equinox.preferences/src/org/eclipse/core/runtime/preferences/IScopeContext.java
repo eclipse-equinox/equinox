@@ -30,6 +30,34 @@ import org.eclipse.core.runtime.IPath;
 public interface IScopeContext {
 
 	/**
+	 * Property used when a scope context is registered as a service to distinguish
+	 * different scopes
+	 *
+	 * @since 3.9
+	 */
+	static String PROPERTY_TYPE = "type"; //$NON-NLS-1$
+
+	/**
+	 * Type of a scope context that provides access to a bundle scoped context where
+	 * {@link IScopeContext#getLocation()} returns the bundles state location, and
+	 * {@link IScopeContext#getNode(String)} returns the preferences for this
+	 * particular bundle. The bundle is always the one that <b>acquires</b> the
+	 * service and not that <b>calling</b> the methods!
+	 *
+	 * @since 3.9
+	 */
+	static String TYPE_BUNDLE = "bundle"; //$NON-NLS-1$
+
+	/**
+	 * A filter that could be used to acquire a bundle scoped context, see
+	 * {@link #TYPE_BUNDLE} for details.
+	 *
+	 * @since 3.9
+	 */
+	static String BUNDLE_SCOPE_FILTER = "(&(objectClass=org.eclipse.core.runtime.preferences.IScopeContext)(" //$NON-NLS-1$
+			+ PROPERTY_TYPE + "=" + TYPE_BUNDLE + "))"; //$NON-NLS-1$ //$NON-NLS-2$
+
+	/**
 	 * Return the name of the scope that this context is associated with.
 	 * Must not be <code>null</code>.
 	 *

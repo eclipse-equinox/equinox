@@ -13,8 +13,11 @@
  *******************************************************************************/
 package org.eclipse.equinox.preferences.tests;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.core.runtime.CoreException;
@@ -30,9 +33,19 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences.INodeChangeListe
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.NodeChangeEvent;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.osgi.service.datalocation.Location;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.prefs.BackingStoreException;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Test suite for class org.eclipse.core.internal.preferences.EclipsePreferences
@@ -41,6 +54,45 @@ import org.osgi.service.prefs.BackingStoreException;
  * eclipse.platform.runtime
  */
 public class EclipsePreferencesTest {
+	
+	@Rule
+	public TemporaryFolder folder = new TemporaryFolder();
+	
+	@Test
+	public void testBundleStateScope()
+			throws InvalidSyntaxException, IllegalStateException, MalformedURLException, IOException {
+		Bundle bundle = FrameworkUtil.getBundle(EclipsePreferencesTest.class);
+		assertNotNull(bundle);
+		BundleContext bundleContext = bundle.getBundleContext();
+		assertNotNull(bundleContext);
+		initLocation(bundleContext);
+		ServiceTracker<IScopeContext, IScopeContext> serviceTracker = new ServiceTracker<>(bundleContext,
+				IScopeContext.class, null);
+		serviceTracker.open();
+		try {
+			IScopeContext context = serviceTracker.getService();
+			assertEquals(InstanceScope.INSTANCE.getNode(bundle.getSymbolicName()), context.getNode(""));
+			assertEquals(Platform.getStateLocation(bundle), context.getLocation());
+		} finally {
+			serviceTracker.close();
+		}
+	}
+
+	private void initLocation(BundleContext bundleContext)
+			throws InvalidSyntaxException, IOException, MalformedURLException {
+		ServiceTracker<Location, Location> serviceTracker = new ServiceTracker<>(bundleContext,
+				bundleContext.createFilter(Location.INSTANCE_FILTER), null);
+		serviceTracker.open();
+		try {
+			Location location = serviceTracker.getService();
+			assertNotNull(location);
+			if (!location.isSet()) {
+				location.set(folder.getRoot().toURI().toURL(), false);
+			}
+		} finally {
+			serviceTracker.close();
+		}
+	}
 
 	/**
 	 * Concurrent access to listener collection should not lead to exceptions

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.equinox.preferences" version="2">
+    <resource path="src/org/eclipse/core/runtime/preferences/IScopeContext.java" type="org.eclipse.core.runtime.preferences.IScopeContext">
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.preferences.IScopeContext"/>
+                <message_argument value="BUNDLE_SCOPE_FILTER"/>
+            </message_arguments>
+        </filter>
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.preferences.IScopeContext"/>
+                <message_argument value="PROPERTY_TYPE"/>
+            </message_arguments>
+        </filter>
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.preferences.IScopeContext"/>
+                <message_argument value="TYPE_BUNDLE"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>

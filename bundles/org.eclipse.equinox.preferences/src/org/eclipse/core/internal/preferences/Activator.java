@@ -14,10 +14,13 @@
 package org.eclipse.core.internal.preferences;
 
 import java.util.Hashtable;
+import java.util.Map;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
@@ -59,6 +62,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Obje
 	 */
 	private ServiceRegistration<org.osgi.service.prefs.PreferencesService> osgiPreferencesService;
 
+	private ServiceTracker<?, ?> locationTracker;
+
 
 	@Override
 	public void start(BundleContext context) throws Exception {
@@ -75,6 +80,33 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Obje
 		// use the string for the class name here in case the registry isn't around
 		registryServiceTracker = new ServiceTracker<>(bundleContext, "org.eclipse.core.runtime.IExtensionRegistry", this); //$NON-NLS-1$
 		registryServiceTracker.open();
+		locationTracker = new ServiceTracker<>(context,
+				context.createFilter("(&" + Location.INSTANCE_FILTER + "(url=*))"), //$NON-NLS-1$//$NON-NLS-2$
+				new ServiceTrackerCustomizer<Location, ServiceRegistration<?>>() {
+
+					@Override
+					public ServiceRegistration<?> addingService(ServiceReference<Location> reference) {
+						Location location = context.getService(reference);
+						if (location != null) {
+							return context.registerService(IScopeContext.class, new BundleStateScopeServiceFactory(),
+									FrameworkUtil.asDictionary(
+											Map.of(IScopeContext.PROPERTY_TYPE, IScopeContext.TYPE_BUNDLE)));
+						}
+						return null;
+					}
+
+					@Override
+					public void modifiedService(ServiceReference<Location> reference, ServiceRegistration<?> service) {
+						// nothing to do here...
+					}
+
+					@Override
+					public void removedService(ServiceReference<Location> reference, ServiceRegistration<?> service) {
+						service.unregister();
+						context.ungetService(reference);
+					}
+				});
+		locationTracker.open();
 	}
 
 
@@ -92,6 +124,10 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Obje
 		if (osgiPreferencesService != null) {
 			osgiPreferencesService.unregister();
 			osgiPreferencesService = null;
+		}
+		if (locationTracker != null) {
+			locationTracker.close();
+			locationTracker = null;
 		}
 		bundleContext = null;
 	}
