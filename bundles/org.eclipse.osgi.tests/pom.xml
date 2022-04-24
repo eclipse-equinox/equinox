@@ -84,6 +84,11 @@
                 <type>eclipse-plugin</type>
                 <versionRange>0.0.0</versionRange>
               </requirement>
+              <requirement>
+                <id>org.eclipse.equinox.event</id>
+                <type>eclipse-plugin</type>
+                <versionRange>0.0.0</versionRange>
+              </requirement>
             </extraRequirements>
           </dependency-resolution>
         </configuration>
