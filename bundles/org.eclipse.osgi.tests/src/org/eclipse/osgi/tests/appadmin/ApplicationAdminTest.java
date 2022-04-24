@@ -48,8 +48,6 @@ public class ApplicationAdminTest extends OSGiTest {
 	public static final String simpleResults = "test.simpleResults"; //$NON-NLS-1$
 	public static final String[] tests = new String[] {"testSimpleApp", "testInvalidArgs", "testAsyncValue01", "testAsyncValue02", "testAsyncValue03", "testAsyncValue04", "testAsyncValue05", "testAsyncValue06", "testExitValue01", "testExitValue02", "testExitValue03", "testExitValue04", "testExitValue05", "testExitValue06", "testExitValue07", "testExitValue08", "testExitValue09", "testExitValue10", "testGlobalSingleton", "testCardinality01", "testCardinality02", "testMainThreaded01", "testMainThreaded02", "testHandleEvents01", "testDescriptorEvents01", "testPersistentLock01", "testPersistentLock02", "testPersistentLock03", "testPersistentSchedule01", "testPersistentSchedule02", "testPersistentSchedule03", "testPersistentSchedule04", "testPersistentSchedule05", "testPersistentSchedule06", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$//$NON-NLS-7$//$NON-NLS-8$//$NON-NLS-9$//$NON-NLS-10$//$NON-NLS-11$//$NON-NLS-12$//$NON-NLS-13$//$NON-NLS-14$//$NON-NLS-15$//$NON-NLS-16$//$NON-NLS-17$//$NON-NLS-18$//$NON-NLS-19$//$NON-NLS-20$//$NON-NLS-21$//$NON-NLS-22$//$NON-NLS-23$//$NON-NLS-24$//$NON-NLS-25$//$NON-NLS-26$//$NON-NLS-27$//$NON-NLS-28$//$NON-NLS-29$
 			"testPersistentSchedule07", "testPersistentSchedule08", "testFailedApplication01", "testDestroyBeforeStart01", "testDestroyBeforeStart02"};
-	private static final String PI_OSGI_SERVICES = "org.eclipse.osgi.services"; //$NON-NLS-1$
-
 	public static Test suite() {
 		TestSuite suite = new TestSuite(ApplicationAdminTest.class.getName());
 
@@ -58,7 +56,6 @@ public class ApplicationAdminTest extends OSGiTest {
 		for (String id : ids) {
 			appAdminSessionTest.addBundle(id);
 		}
-		appAdminSessionTest.addBundle(PI_OSGI_SERVICES);
 		appAdminSessionTest.addBundle(PI_OSGI_TESTS);
 		appAdminSessionTest.setApplicationId(testRunnerApp);
 		appAdminSessionTest.addBundle("org.osgi.util.function");
@@ -66,6 +63,7 @@ public class ApplicationAdminTest extends OSGiTest {
 		appAdminSessionTest.addBundle("org.osgi.util.position");
 		appAdminSessionTest.addBundle("org.osgi.util.promise");
 		appAdminSessionTest.addBundle("org.osgi.util.xml");
+		appAdminSessionTest.addBundle("org.osgi.service.event");
 
 		try {
 			appAdminSessionTest.getSetup().setSystemProperty("eclipse.application.registerDescriptors", "true"); //$NON-NLS-1$//$NON-NLS-2$

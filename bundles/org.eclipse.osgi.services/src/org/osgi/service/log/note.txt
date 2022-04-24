@@ -1,0 +1,5 @@
+This package used to contain the content of the org.osgi.service.log package, which is also provided the org.eclipse.osgi system-bundle.
+In order to avoid duplication the content of this package was deleted.
+For compatibility reasons the Export of this package has to stay (consumers could require this bundle and then use classes from this package).
+And if this package is exported in the MANIFEST.MF it must not be empty, otherwise PDE complains.
+This is why this note exists.
