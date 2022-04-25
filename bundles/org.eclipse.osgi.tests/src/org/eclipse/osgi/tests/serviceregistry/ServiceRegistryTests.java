@@ -18,9 +18,17 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -29,9 +37,11 @@ import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
 import org.eclipse.osgi.tests.util.MapDictionary;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceFactory;
@@ -566,6 +576,112 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 			OSGiTestsActivator.getContext().removeFrameworkListener(fwkListener);
 			reg.unregister();
 		}
+	}
+
+	static class TestObjectClassOptimizationService implements Runnable, Callable<Void> {
+		@Override
+		public Void call() throws Exception {
+			return null;
+		}
+
+		@Override
+		public void run() {
+
+		}
+	}
+
+	@Test
+	public void testFilterObjectClassOptimization() throws InvalidSyntaxException {
+		final String TEST_KEY = "test.key";
+		Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
+		BundleContext bc = OSGiTestsActivator.getContext();
+		try {
+			ServiceRegistration<?> allObjectClass_noServiceProp = registerFilteredService( //
+					bc, registrations, new TestObjectClassOptimizationService(), //
+					Collections.<String, Object>emptyMap(), //
+					Runnable.class, Callable.class, Object.class);
+			ServiceRegistration<?> allObjectClass_withServiceProp = registerFilteredService( //
+					bc, registrations, new TestObjectClassOptimizationService(), //
+					Collections.singletonMap(TEST_KEY, Boolean.TRUE), //
+					Runnable.class, Callable.class, Object.class);
+			ServiceRegistration<?> callableObjectClass_noServiceProp = registerFilteredService( //
+					bc, registrations, new TestObjectClassOptimizationService(), //
+					Collections.<String, Object>emptyMap(), //
+					Callable.class);
+			ServiceRegistration<?> callableObjectClass_withServiceProp = registerFilteredService( //
+					bc, registrations, new TestObjectClassOptimizationService(), //
+					Collections.singletonMap(TEST_KEY, Boolean.TRUE), //
+					Callable.class);
+
+			// NOT OPTIMIZED
+			validateFoundServices(bc, "(" + TEST_KEY + "=*)", //
+					allObjectClass_withServiceProp, callableObjectClass_withServiceProp);
+			// NOT OPTIMIZED
+			validateFoundServices(bc, "(|(objectClass=nothing.Service)(" + TEST_KEY + "=*))",
+					allObjectClass_withServiceProp, callableObjectClass_withServiceProp);
+			// OPTIMIZED
+			validateFoundServices(bc, "(objectClass=" + Runnable.class.getName() + ")", //
+					allObjectClass_withServiceProp, allObjectClass_noServiceProp);
+			// OPTIMIZED
+			validateFoundServices(bc, "(objectClass=" + Callable.class.getName() + ")", //
+					allObjectClass_noServiceProp, allObjectClass_withServiceProp, callableObjectClass_noServiceProp,
+					callableObjectClass_withServiceProp);
+			// OPTIMIZED
+			validateFoundServices(bc, "(&(objectClass=" + Callable.class.getName() + ")(" + TEST_KEY + "=*))", //
+					allObjectClass_withServiceProp, callableObjectClass_withServiceProp);
+			// NOT OPTIMIZED
+			validateFoundServices(bc, "(|(objectClass=" + Callable.class.getName() + ")(" + TEST_KEY + "=*))",
+					allObjectClass_withServiceProp, allObjectClass_noServiceProp, callableObjectClass_withServiceProp,
+					callableObjectClass_noServiceProp);
+			// NOTE that this filter is considered too complex and is not optimized
+			validateFoundServices(bc,
+					"(&(&(objectClass=" + Callable.class.getName() + ")(!(objectClass=" + Runnable.class.getName()
+							+ ")))(" + TEST_KEY + "=*))", //
+					callableObjectClass_withServiceProp);
+			// NOTE this filter is NOT considered too complex and optimizes lookup of
+			// Callable
+			validateFoundServices(bc,
+					"(&(objectClass=" + Callable.class.getName() + ")(!(objectClass=" + Runnable.class.getName()
+							+ ")))", //
+					callableObjectClass_withServiceProp, callableObjectClass_noServiceProp);
+			// NOTE this filter is NOT considered too complex and optimizes lookup of
+			// Callable
+			validateFoundServices(bc,
+					"(&(!(objectClass=" + Runnable.class.getName() + "))(objectClass=" + Callable.class.getName()
+							+ "))", //
+					callableObjectClass_withServiceProp, callableObjectClass_noServiceProp);
+		} finally {
+			registrations.forEach(ServiceRegistration::unregister);
+		}
+	}
+
+	private void validateFoundServices(BundleContext bc, String filter, ServiceRegistration<?>... expectedRegs)
+			throws InvalidSyntaxException {
+		ServiceReference<?>[] foundArray = bc.getServiceReferences((String) null, filter);
+		List<ServiceReference<?>> found = foundArray == null ? Collections.emptyList() : Arrays.asList(foundArray);
+		assertEquals("Wrong number of services found: " + found, expectedRegs.length, found.size());
+		for (ServiceRegistration<?> expected : expectedRegs) {
+			assertTrue("Wrong services found: " + found, found.contains(expected.getReference()));
+		}
+
+	}
+
+	private ServiceRegistration<?> registerFilteredService( //
+			BundleContext bc, //
+			Collection<ServiceRegistration<?>> registrations, //
+			TestObjectClassOptimizationService testObjectClassOptimizationService, //
+			Map<String, ?> props, Class<?>... clazzes) {
+		if (clazzes == null) {
+			fail();
+		}
+		String[] clazzNames = new String[clazzes.length];
+		for (int i = 0; i < clazzes.length; i++) {
+			clazzNames[i] = clazzes[i].getName();
+		}
+		ServiceRegistration<?> reg = bc.registerService(clazzNames, testObjectClassOptimizationService,
+				FrameworkUtil.asDictionary(props));
+		registrations.add(reg);
+		return reg;
 	}
 
 	private void clearResults(boolean[] results) {

@@ -36,6 +36,7 @@ import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
+import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.util.NLS;
@@ -1072,8 +1073,16 @@ public class ServiceRegistry {
 	private List<ServiceRegistrationImpl<?>> lookupServiceRegistrations(String clazz, Filter filter) {
 		List<ServiceRegistrationImpl<?>> result;
 		synchronized (this) {
-			if (clazz == null) { /* all services */
-				result = allPublishedServices;
+			if (clazz == null) {
+				if (filter instanceof FilterImpl) {
+					// check if we can determine the clazz from the filter
+					String filterObjectClazz = ((FilterImpl) filter).getRequiredObjectClass();
+					result = filterObjectClazz == null ? allPublishedServices
+							: publishedServicesByClass.get(filterObjectClazz);
+				} else {
+					// have to check all services
+					result = allPublishedServices;
+				}
 			} else {
 				/* services registered under the class name */
 				result = publishedServicesByClass.get(clazz);
