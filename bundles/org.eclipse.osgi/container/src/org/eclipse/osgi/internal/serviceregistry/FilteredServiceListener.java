@@ -69,7 +69,10 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 				this.filter = filterImpl;
 			} else {
 				this.objectClass = clazz.intern(); /*intern the name for future identity comparison */
-				this.filter = filterstring.equals(getObjectClassFilterString(this.objectClass)) ? null : filterImpl;
+				// a filter with no children and non-null requiredObjectClass is a simple
+				// filter;
+				// e.g. (objectClass=SomeService)
+				this.filter = filterImpl.getChildren().isEmpty() ? null : filterImpl;
 			}
 		}
 		this.removed = false;

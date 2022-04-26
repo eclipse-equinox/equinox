@@ -1077,6 +1077,11 @@ public class ServiceRegistry {
 				if (filter instanceof FilterImpl) {
 					// check if we can determine the clazz from the filter
 					String filterObjectClazz = ((FilterImpl) filter).getRequiredObjectClass();
+					if (filterObjectClazz != null && ((FilterImpl) filter).getChildren().isEmpty()) {
+						// this is a simple (objectClass=serviceClass) filter;
+						// no need to evaluate the filter
+						filter = null;
+					}
 					result = filterObjectClazz == null ? allPublishedServices
 							: publishedServicesByClass.get(filterObjectClazz);
 				} else {
