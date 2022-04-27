@@ -33,7 +33,6 @@ public class ApplicationRelaunchTest extends OSGiTest {
 	public static final String simpleResults = "test.simpleResults"; //$NON-NLS-1$
 	public static final String[] tests = new String[] { "testRelaunch" };
 	private static final String PI_OSGI_SERVICES = "org.eclipse.osgi.services"; //$NON-NLS-1$
-	private static final String PI_OSGI_UTIL = "org.eclipse.osgi.util";
 
 	public static Test suite() {
 		TestSuite suite = new TestSuite(ApplicationRelaunchTest.class.getName());
@@ -43,7 +42,6 @@ public class ApplicationRelaunchTest extends OSGiTest {
 		for (String id : ids) {
 			appAdminSessionTest.addBundle(id);
 		}
-		appAdminSessionTest.addBundle(PI_OSGI_UTIL);
 		appAdminSessionTest.addBundle(PI_OSGI_SERVICES);
 		appAdminSessionTest.addBundle(PI_OSGI_TESTS);
 		appAdminSessionTest.setApplicationId(testRunnerRelauncherApp);

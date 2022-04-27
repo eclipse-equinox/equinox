@@ -13,7 +13,11 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.appadmin;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
@@ -21,8 +25,16 @@ import org.eclipse.core.tests.session.SetupManager.SetupException;
 import org.eclipse.osgi.tests.OSGiTest;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.BundleInstaller;
-import org.osgi.framework.*;
-import org.osgi.service.application.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.application.ApplicationDescriptor;
+import org.osgi.service.application.ApplicationException;
+import org.osgi.service.application.ApplicationHandle;
+import org.osgi.service.application.ScheduledApplication;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -37,7 +49,6 @@ public class ApplicationAdminTest extends OSGiTest {
 	public static final String[] tests = new String[] {"testSimpleApp", "testInvalidArgs", "testAsyncValue01", "testAsyncValue02", "testAsyncValue03", "testAsyncValue04", "testAsyncValue05", "testAsyncValue06", "testExitValue01", "testExitValue02", "testExitValue03", "testExitValue04", "testExitValue05", "testExitValue06", "testExitValue07", "testExitValue08", "testExitValue09", "testExitValue10", "testGlobalSingleton", "testCardinality01", "testCardinality02", "testMainThreaded01", "testMainThreaded02", "testHandleEvents01", "testDescriptorEvents01", "testPersistentLock01", "testPersistentLock02", "testPersistentLock03", "testPersistentSchedule01", "testPersistentSchedule02", "testPersistentSchedule03", "testPersistentSchedule04", "testPersistentSchedule05", "testPersistentSchedule06", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$//$NON-NLS-7$//$NON-NLS-8$//$NON-NLS-9$//$NON-NLS-10$//$NON-NLS-11$//$NON-NLS-12$//$NON-NLS-13$//$NON-NLS-14$//$NON-NLS-15$//$NON-NLS-16$//$NON-NLS-17$//$NON-NLS-18$//$NON-NLS-19$//$NON-NLS-20$//$NON-NLS-21$//$NON-NLS-22$//$NON-NLS-23$//$NON-NLS-24$//$NON-NLS-25$//$NON-NLS-26$//$NON-NLS-27$//$NON-NLS-28$//$NON-NLS-29$
 			"testPersistentSchedule07", "testPersistentSchedule08", "testFailedApplication01", "testDestroyBeforeStart01", "testDestroyBeforeStart02"};
 	private static final String PI_OSGI_SERVICES = "org.eclipse.osgi.services"; //$NON-NLS-1$
-	private static final String PI_OSGI_UTIL = "org.eclipse.osgi.util";
 
 	public static Test suite() {
 		TestSuite suite = new TestSuite(ApplicationAdminTest.class.getName());
@@ -47,10 +58,15 @@ public class ApplicationAdminTest extends OSGiTest {
 		for (String id : ids) {
 			appAdminSessionTest.addBundle(id);
 		}
-		appAdminSessionTest.addBundle(PI_OSGI_UTIL);
 		appAdminSessionTest.addBundle(PI_OSGI_SERVICES);
 		appAdminSessionTest.addBundle(PI_OSGI_TESTS);
 		appAdminSessionTest.setApplicationId(testRunnerApp);
+		appAdminSessionTest.addBundle("org.osgi.util.function");
+		appAdminSessionTest.addBundle("org.osgi.util.measurement");
+		appAdminSessionTest.addBundle("org.osgi.util.position");
+		appAdminSessionTest.addBundle("org.osgi.util.promise");
+		appAdminSessionTest.addBundle("org.osgi.util.xml");
+
 		try {
 			appAdminSessionTest.getSetup().setSystemProperty("eclipse.application.registerDescriptors", "true"); //$NON-NLS-1$//$NON-NLS-2$
 		} catch (SetupException e) {
