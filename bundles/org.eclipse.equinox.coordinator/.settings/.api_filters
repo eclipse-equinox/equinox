@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.equinox.coordinator" version="2">
+    <resource path="META-INF/MANIFEST.MF">
+        <filter comment="Exported packages have been moved to other bundles" id="926941240">
+            <message_arguments>
+                <message_argument value="1.5.0"/>
+                <message_argument value="1.4.100"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>

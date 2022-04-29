@@ -19,20 +19,6 @@
   </parent>
   <groupId>org.eclipse.equinox</groupId>
   <artifactId>org.eclipse.equinox.coordinator</artifactId>
-  <version>1.4.100-SNAPSHOT</version>
+  <version>1.5.0-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-compiler-plugin</artifactId>
-        <version>${tycho.version}</version>
-        <configuration>
-          <compilerArgs>
-            <arg>-nowarn:[${project.basedir}/osgi]</arg>
-          </compilerArgs>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>
