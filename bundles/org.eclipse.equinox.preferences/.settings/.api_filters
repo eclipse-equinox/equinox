@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.equinox.preferences" version="2">
+    <resource path="META-INF/MANIFEST.MF">
+        <filter id="926941240">
+            <message_arguments>
+                <message_argument value="3.10.0"/>
+                <message_argument value="3.9.100"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="src/org/eclipse/core/runtime/preferences/IScopeContext.java" type="org.eclipse.core.runtime.preferences.IScopeContext">
         <filter id="403767336">
             <message_arguments>

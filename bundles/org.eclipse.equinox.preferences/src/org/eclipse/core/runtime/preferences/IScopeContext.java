@@ -33,7 +33,7 @@ public interface IScopeContext {
 	 * Property used when a scope context is registered as a service to distinguish
 	 * different scopes
 	 *
-	 * @since 3.9
+	 * @since 3.10
 	 */
 	static String PROPERTY_TYPE = "type"; //$NON-NLS-1$
 
@@ -44,7 +44,7 @@ public interface IScopeContext {
 	 * particular bundle. The bundle is always the one that <b>acquires</b> the
 	 * service and not that <b>calling</b> the methods!
 	 *
-	 * @since 3.9
+	 * @since 3.10
 	 */
 	static String TYPE_BUNDLE = "bundle"; //$NON-NLS-1$
 
@@ -52,7 +52,7 @@ public interface IScopeContext {
 	 * A filter that could be used to acquire a bundle scoped context, see
 	 * {@link #TYPE_BUNDLE} for details.
 	 *
-	 * @since 3.9
+	 * @since 3.10
 	 */
 	static String BUNDLE_SCOPE_FILTER = "(&(objectClass=org.eclipse.core.runtime.preferences.IScopeContext)(" //$NON-NLS-1$
 			+ PROPERTY_TYPE + "=" + TYPE_BUNDLE + "))"; //$NON-NLS-1$ //$NON-NLS-2$
