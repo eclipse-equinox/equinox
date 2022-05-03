@@ -118,6 +118,20 @@
          unpack="false"/>
 
    <plugin
+         id="org.osgi.service.prefs"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.osgi.service.prefs.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.equinox.useradmin"
          download-size="0"
          install-size="0"
