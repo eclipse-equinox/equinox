@@ -61,7 +61,6 @@
     <module>features/org.eclipse.equinox.core.sdk</module>
 
     <module>features/org.eclipse.equinox.server.simple</module>
-    <module>features/org.eclipse.equinox.serverside.sdk</module>
     <module>bundles/org.eclipse.equinox.bidi.tests</module>
     <module>bundles/org.eclipse.equinox.cm.test</module>
     <module>bundles/org.eclipse.equinox.common.tests</module>
