@@ -94,7 +94,11 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 					generation.getBundleInfo().getStorage().getAdaptor().publishContainerEvent(eventType, r.getRevisions().getModule(), e);
 				}
 			}
-			// TODO not sure if throwing a runtime exception is better
+			if (!(e instanceof IOException)) {
+				// throw any unexpected exceptions
+				EquinoxContainer.sneakyThrow(e);
+			}
+			// TODO For IOException, not sure if throwing a runtime exception is better
 			// throw new RuntimeException("Failed to open bundle file.", e);
 			return false;
 		}
