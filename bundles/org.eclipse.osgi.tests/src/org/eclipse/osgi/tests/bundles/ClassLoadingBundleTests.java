@@ -1617,6 +1617,70 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	}
 
 	@Test
+	public void testBuddyClassLoadingRegisteredListResources() throws Exception {
+		Bundle registeredA = installer.installBundle("buddy.registered.a");
+		installer.resolveBundles(new Bundle[] { registeredA });
+
+		Bundle registeredATest1 = installer.installBundle("buddy.registered.a.test1");
+		Bundle registeredATest2 = installer.installBundle("buddy.registered.a.test2");
+		installer.resolveBundles(new Bundle[] { registeredATest1, registeredATest2 });
+
+		Collection<String> result = registeredA.adapt(BundleWiring.class).listResources("resources", "*",
+				BundleWiring.LISTRESOURCES_RECURSE);
+		assertEquals("Wrong number of resources listed: " + result, 3, result.size());
+		assertTrue("resources/test.txt", result.contains("resources/test.txt"));
+		assertTrue("resources/test1.txt", result.contains("resources/test1.txt"));
+		assertTrue("resources/test2.txt", result.contains("resources/test2.txt"));
+
+		result = registeredA.adapt(BundleWiring.class).listResources("resources", "*",
+				BundleWiring.LISTRESOURCES_LOCAL | BundleWiring.LISTRESOURCES_RECURSE);
+		assertEquals("Wrong number of resources listed: " + result, 1, result.size());
+		assertTrue("resources/test.txt", result.contains("resources/test.txt"));
+
+		result = registeredA.adapt(BundleWiring.class).listResources("buddy/registered/a", "*.class",
+				BundleWiring.LISTRESOURCES_RECURSE);
+		assertEquals("Wrong number of resources listed: " + result, 2, result.size());
+		assertTrue("buddy/registered/a/test1/ATest.class", result.contains("buddy/registered/a/test1/ATest.class"));
+		assertTrue("buddy/registered/a/test2/ATest.class", result.contains("buddy/registered/a/test2/ATest.class"));
+
+		result = registeredA.adapt(BundleWiring.class).listResources("", this.getClass().getSimpleName() + ".class",
+				BundleWiring.LISTRESOURCES_RECURSE);
+		assertEquals("Wrong number of resources listed: " + result, 1, result.size());
+	}
+
+	@Test
+	public void testBuddyClassLoadingDependentListResources() throws Exception {
+		Bundle registeredA = installer.installBundle("buddy.dependent.a");
+		installer.resolveBundles(new Bundle[] { registeredA });
+
+		Bundle registeredATest1 = installer.installBundle("buddy.dependent.a.test1");
+		Bundle registeredATest2 = installer.installBundle("buddy.dependent.a.test2");
+		installer.resolveBundles(new Bundle[] { registeredATest1, registeredATest2 });
+
+		Collection<String> result = registeredA.adapt(BundleWiring.class).listResources("resources", "*",
+				BundleWiring.LISTRESOURCES_RECURSE);
+		assertEquals("Wrong number of resources listed: " + result, 3, result.size());
+		assertTrue("resources/test.txt", result.contains("resources/test.txt"));
+		assertTrue("resources/test1.txt", result.contains("resources/test1.txt"));
+		assertTrue("resources/test2.txt", result.contains("resources/test2.txt"));
+
+		result = registeredA.adapt(BundleWiring.class).listResources("resources", "*",
+				BundleWiring.LISTRESOURCES_LOCAL | BundleWiring.LISTRESOURCES_RECURSE);
+		assertEquals("Wrong number of resources listed: " + result, 1, result.size());
+		assertTrue("resources/test.txt", result.contains("resources/test.txt"));
+
+		result = registeredA.adapt(BundleWiring.class).listResources("buddy/dependent/a", "*.class",
+				BundleWiring.LISTRESOURCES_RECURSE);
+		assertEquals("Wrong number of resources listed: " + result, 2, result.size());
+		assertTrue("buddy/dependent/a/test1/ATest.class", result.contains("buddy/dependent/a/test1/ATest.class"));
+		assertTrue("buddy/dependent/a/test2/ATest.class", result.contains("buddy/dependent/a/test2/ATest.class"));
+
+		result = registeredA.adapt(BundleWiring.class).listResources("", this.getClass().getSimpleName() + ".class",
+				BundleWiring.LISTRESOURCES_RECURSE);
+		assertEquals("Wrong number of resources listed: " + result, 1, result.size());
+	}
+
+	@Test
 	public void testBuddyClassLoadingDependent1() throws Exception {
 		Bundle dependentA = installer.installBundle("buddy.dependent.a"); //$NON-NLS-1$
 		installer.resolveBundles(new Bundle[] {dependentA});

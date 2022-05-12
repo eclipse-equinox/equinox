@@ -19,6 +19,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Set;
 import org.eclipse.osgi.container.ModuleWire;
 import org.eclipse.osgi.container.ModuleWiring;
 import org.eclipse.osgi.internal.loader.BundleLoader;
@@ -113,6 +114,19 @@ public class DependentPolicy implements IBuddyPolicy {
 			}
 		}
 		return results;
+	}
+
+	@Override
+	public void addListResources(Set<String> results, String path, String filePattern, int options) {
+		if (allDependents == null) {
+			return;
+		}
+		// size may change, so we must check it every time
+		for (int i = 0; i < allDependents.size(); i++) {
+			ModuleWiring searchWiring = allDependents.get(i);
+			results.addAll(searchWiring.listResources(path, filePattern, options));
+			addDependent(i, searchWiring);
+		}
 	}
 
 	private void basicAddImmediateDependents(ModuleWiring wiring) {

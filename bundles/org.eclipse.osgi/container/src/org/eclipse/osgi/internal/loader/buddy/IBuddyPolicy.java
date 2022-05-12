@@ -15,6 +15,7 @@ package org.eclipse.osgi.internal.loader.buddy;
 
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.Set;
 
 public interface IBuddyPolicy {
 	public Class<?> loadClass(String name);
@@ -22,4 +23,8 @@ public interface IBuddyPolicy {
 	public URL loadResource(String name);
 
 	public Enumeration<URL> loadResources(String name);
+
+	default public void addListResources(Set<String> results, String path, String filePattern, int options) {
+		// nothing by default
+	}
 }

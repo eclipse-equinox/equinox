@@ -143,61 +143,88 @@ public class PolicyHandler implements SynchronousBundleListener {
 	}
 
 	public Class<?> doBuddyClassLoading(String name) {
-		if (startLoading(name) == false)
+		if (startLoading(name) == false) {
 			return null;
-
-		Class<?> result = null;
-		Object[] policiesSnapshot = policies;
-		int policyCount = (policiesSnapshot == null) ? 0 : policiesSnapshot.length;
-		for (int i = 0; i < policyCount && result == null; i++) {
-			IBuddyPolicy policy = getPolicyImplementation(policiesSnapshot, i);
-			if (policy != null)
-				result = policy.loadClass(name);
 		}
-		stopLoading(name);
-		return result;
+		try {
+			Class<?> result = null;
+			Object[] policiesSnapshot = policies;
+			int policyCount = (policiesSnapshot == null) ? 0 : policiesSnapshot.length;
+			for (int i = 0; i < policyCount && result == null; i++) {
+				IBuddyPolicy policy = getPolicyImplementation(policiesSnapshot, i);
+				if (policy != null)
+					result = policy.loadClass(name);
+			}
+			return result;
+		} finally {
+			stopLoading(name);
+		}
 	}
 
 	public URL doBuddyResourceLoading(String name) {
-		if (startLoading(name) == false)
+		if (startLoading(name) == false) {
 			return null;
-
-		URL result = null;
-		Object[] policiesSnapshot = policies;
-		int policyCount = (policiesSnapshot == null) ? 0 : policiesSnapshot.length;
-		for (int i = 0; i < policyCount && result == null; i++) {
-			IBuddyPolicy policy = getPolicyImplementation(policiesSnapshot, i);
-			if (policy != null)
-				result = policy.loadResource(name);
 		}
-		stopLoading(name);
-		return result;
+		try {
+			URL result = null;
+			Object[] policiesSnapshot = policies;
+			int policyCount = (policiesSnapshot == null) ? 0 : policiesSnapshot.length;
+			for (int i = 0; i < policyCount && result == null; i++) {
+				IBuddyPolicy policy = getPolicyImplementation(policiesSnapshot, i);
+				if (policy != null)
+					result = policy.loadResource(name);
+			}
+			return result;
+		} finally {
+			stopLoading(name);
+		}
 	}
 
 	public Enumeration<URL> doBuddyResourcesLoading(String name) {
-		if (startLoading(name) == false)
+		if (startLoading(name) == false) {
 			return null;
-
-		List<URL> results = null;
-		Object[] policiesSnapshot = policies;
-		int policyCount = (policiesSnapshot == null) ? 0 : policiesSnapshot.length;
-		for (int i = 0; i < policyCount; i++) {
-			IBuddyPolicy policy = getPolicyImplementation(policiesSnapshot, i);
-			if (policy == null)
-				continue;
-			Enumeration<URL> result = policy.loadResources(name);
-			if (result != null) {
-				if (results == null)
-					results = new ArrayList<>(policyCount);
-				while (result.hasMoreElements()) {
-					URL url = result.nextElement();
-					if (!results.contains(url)) //only add if not already added
-						results.add(url);
+		}
+		try {
+			List<URL> results = null;
+			Object[] policiesSnapshot = policies;
+			int policyCount = (policiesSnapshot == null) ? 0 : policiesSnapshot.length;
+			for (int i = 0; i < policyCount; i++) {
+				IBuddyPolicy policy = getPolicyImplementation(policiesSnapshot, i);
+				if (policy == null)
+					continue;
+				Enumeration<URL> result = policy.loadResources(name);
+				if (result != null) {
+					if (results == null)
+						results = new ArrayList<>(policyCount);
+					while (result.hasMoreElements()) {
+						URL url = result.nextElement();
+						if (!results.contains(url)) // only add if not already added
+							results.add(url);
+					}
 				}
 			}
+			return results == null || results.isEmpty() ? null : Collections.enumeration(results);
+		} finally {
+			stopLoading(name);
 		}
-		stopLoading(name);
-		return results == null || results.isEmpty() ? null : Collections.enumeration(results);
+	}
+
+	public void doBuddyListResourceLoading(Set<String> results, String path, String filePattern, int options) {
+		if (startLoading(path) == false) {
+			return;
+		}
+
+		try {
+			Object[] policiesSnapshot = policies;
+			int policyCount = (policiesSnapshot == null) ? 0 : policiesSnapshot.length;
+			for (int i = 0; i < policyCount; i++) {
+				IBuddyPolicy policy = getPolicyImplementation(policiesSnapshot, i);
+				if (policy != null)
+					policy.addListResources(results, path, filePattern, options);
+			}
+		} finally {
+			stopLoading(path);
+		}
 	}
 
 	private boolean startLoading(String name) {

@@ -18,6 +18,7 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.eclipse.osgi.container.ModuleCapability;
 import org.eclipse.osgi.container.ModuleWiring;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
@@ -119,5 +120,18 @@ public class RegisteredPolicy extends DependentPolicy {
 			}
 		}
 		return results;
+	}
+
+	@Override
+	public void addListResources(Set<String> results, String path, String filePattern, int options) {
+		if (allDependents == null) {
+			return;
+		}
+
+		int size = allDependents.size();
+		for (int i = 0; i < size; i++) {
+			ModuleWiring searchWiring = allDependents.get(i);
+			results.addAll(searchWiring.listResources(path, filePattern, options));
+		}
 	}
 }

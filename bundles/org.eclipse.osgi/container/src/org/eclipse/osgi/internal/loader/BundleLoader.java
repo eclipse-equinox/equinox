@@ -876,6 +876,10 @@ public class BundleLoader extends ModuleLoader {
 			if (!importedPackages.contains(resourcePkg) && !result.contains(resource))
 				result.add(resource);
 		}
+		// finally search the policy; but only if not localSearch
+		if (!localSearch && policy != null) {
+			policy.doBuddyListResourceLoading(result, path, filePattern, options);
+		}
 		return result;
 	}
 
