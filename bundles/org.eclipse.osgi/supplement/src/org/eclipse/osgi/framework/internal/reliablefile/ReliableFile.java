@@ -14,9 +14,23 @@
 
 package org.eclipse.osgi.framework.internal.reliablefile;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
@@ -93,6 +107,8 @@ public class ReliableFile {
 	private static File lastGenerationFile = null;
 	private static int[] lastGenerations = null;
 	private static final Object lastGenerationLock = new Object();
+	private static final int MAX_TEMP_NUM = 100000;
+	private static final AtomicInteger nextTemp = new AtomicInteger(1);
 
 	static {
 		String prop = System.getProperty(PROP_MAX_BUFFER);
@@ -351,7 +367,7 @@ public class ReliableFile {
 			throw new IOException("Output stream is already open"); //$NON_NLS-1$ //$NON-NLS-1$
 		String name = referenceFile.getName();
 		File parent = new File(referenceFile.getParent());
-		File tmpFile = File.createTempFile(name, tmpExt, parent);
+		File tmpFile = ReliableFile.createTempFile(name, tmpExt, parent);
 
 		if (!append) {
 			OutputStream os = new FileOutputStream(tmpFile);
@@ -679,6 +695,35 @@ public class ReliableFile {
 				lastGenerations = null;
 			}
 		}
+	}
+
+	/*
+	 * Implementation note: This implementation differs from File.createTempFile by
+	 * avoiding usage of SecureRandom to generate unique file names.
+	 * 
+	 * Any usage of this must be used in a context that is not sensitive to outside
+	 * guessing of the temporary file name.
+	 */
+	public static File createTempFile(String prefix, String suffix, File directory) throws IOException {
+		if (directory == null) {
+			throw new IllegalArgumentException("No directory specified."); //$NON-NLS-1$
+		}
+		if (prefix == null) {
+			throw new IllegalArgumentException("No prefix specified."); //$NON-NLS-1$
+		}
+		if (suffix == null) {
+			suffix = ".tmp"; //$NON-NLS-1$
+		}
+		for (int i = 0; i < MAX_TEMP_NUM; i++) {
+			File f = new File(directory, prefix + nextTemp.getAndUpdate(n -> {
+				int next = n + 1;
+				return next > MAX_TEMP_NUM ? 1 : next;
+			}) + suffix);
+			if (f.createNewFile()) {
+				return f;
+			}
+		}
+		throw new IOException("Maximum number of attempts reached to create a temporary file."); //$NON-NLS-1$
 	}
 
 	/**

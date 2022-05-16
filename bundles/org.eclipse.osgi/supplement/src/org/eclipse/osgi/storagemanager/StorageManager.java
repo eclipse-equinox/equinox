@@ -198,7 +198,7 @@ public final class StorageManager {
 	private void initializeInstanceFile() throws IOException {
 		if (instanceFile != null || readOnly)
 			return;
-		this.instanceFile = File.createTempFile(".tmp", ".instance", managerRoot); //$NON-NLS-1$//$NON-NLS-2$
+		this.instanceFile = ReliableFile.createTempFile(".tmp", ".instance", managerRoot); //$NON-NLS-1$//$NON-NLS-2$
 		this.instanceFile.deleteOnExit();
 		instanceLocker = LocationHelper.createLocker(instanceFile, lockMode, false);
 		instanceLocker.lock();
@@ -741,7 +741,7 @@ public final class StorageManager {
 	public File createTempFile(String file) throws IOException {
 		if (readOnly)
 			throw new IOException(Msg.fileManager_illegalInReadOnlyMode);
-		File tmpFile = File.createTempFile(file, ReliableFile.tmpExt, base);
+		File tmpFile = ReliableFile.createTempFile(file, ReliableFile.tmpExt, base);
 		// bug 350106: do not use deleteOnExit()  If clients really want that the
 		// they can call it themselves.
 		return tmpFile;

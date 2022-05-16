@@ -37,6 +37,7 @@ import org.eclipse.osgi.container.ModuleContainer;
 import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.container.ModuleRevisionBuilder;
+import org.eclipse.osgi.framework.internal.reliablefile.ReliableFile;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
 import org.eclipse.osgi.framework.util.ThreadInfoReport;
@@ -382,7 +383,7 @@ public final class BundleInfo {
 				throw new IOException(NLS.bind(Msg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, dir.getAbsolutePath()));
 			}
 			/* copy the entry to the cache */
-			File tempDest = File.createTempFile("staged", ".tmp", dir); //$NON-NLS-1$ //$NON-NLS-2$
+			File tempDest = ReliableFile.createTempFile("staged", ".tmp", dir); //$NON-NLS-1$ //$NON-NLS-2$
 			StorageUtil.readFile(in, tempDest);
 			if (destination.exists()) {
 				// maybe because some other thread already beat us there.

@@ -66,6 +66,7 @@ import org.eclipse.osgi.container.ModuleWire;
 import org.eclipse.osgi.container.ModuleWiring;
 import org.eclipse.osgi.container.builders.OSGiManifestBuilderFactory;
 import org.eclipse.osgi.container.namespaces.EclipsePlatformNamespace;
+import org.eclipse.osgi.framework.internal.reliablefile.ReliableFile;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.FilePath;
 import org.eclipse.osgi.framework.util.ObjectPool;
@@ -1115,7 +1116,7 @@ public class Storage {
 	File stageContent0(InputStream in, URL sourceURL) throws BundleException {
 		File outFile = null;
 		try {
-			outFile = File.createTempFile(BUNDLE_FILE_NAME, ".tmp", childRoot); //$NON-NLS-1$
+			outFile = ReliableFile.createTempFile(BUNDLE_FILE_NAME, ".tmp", childRoot); //$NON-NLS-1$
 			String protocol = sourceURL == null ? null : sourceURL.getProtocol();
 
 			if ("file".equals(protocol)) { //$NON-NLS-1$
