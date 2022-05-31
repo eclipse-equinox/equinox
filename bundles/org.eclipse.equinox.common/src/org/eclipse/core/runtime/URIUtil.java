@@ -71,6 +71,11 @@ public final class URIUtil {
 					result = new URI(toUnencodedString(result));
 				}
 			} else {
+				// Unless the path starts with four slashes, the first element of the path is
+				// interpreted as host ( probably related to Java bug 4723726)
+				if (path.startsWith(UNC_PREFIX)) {
+					path = ensureUNCPath(path);
+				}
 				path = path + '/' + extension;
 				result = new URI(base.getScheme(), base.getUserInfo(), base.getHost(), base.getPort(), path, base.getQuery(), base.getFragment());
 			}
