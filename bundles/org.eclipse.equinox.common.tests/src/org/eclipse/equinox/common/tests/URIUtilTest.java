@@ -13,9 +13,18 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests;
 
-import java.io.*;
-import java.net.*;
-import org.eclipse.core.runtime.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.URIUtil;
 import org.eclipse.core.tests.harness.CoreTest;
 import org.osgi.framework.FrameworkUtil;
 
@@ -550,6 +559,37 @@ public class URIUtilTest extends CoreTest {
 			URI expected = data[i][2];
 			URI actual = URIUtil.makeRelative(location, root);
 			assertEquals("2." + Integer.toString(i), expected, actual);
+		}
+	}
+
+	/**
+	 * Test UNC-Paths containing a $.
+	 */
+	public void testDollar() throws URISyntaxException {
+		var relative = "SomePath";
+		URI expectedResolved = new URI("file:////WSL$/Ubuntu/SomePath");
+		String[] uris = {
+				// @formatter:off
+				"file:////WSL$/Ubuntu",
+				"file:////WSL$/Ubuntu/",
+				"file://////WSL$/Ubuntu",
+				"file://////WSL$/Ubuntu/"
+				// @formatter:on
+		};
+
+		for (int i = 0; i < uris.length; i++) {
+			URI base = new URI(uris[i]);
+			URI resolved = URIUtil.append(base, relative);
+			assertEquals("1." + Integer.toString(i), expectedResolved, resolved);
+		}
+
+		var relative2 = "SomePath/";
+		URI expectedResolved2 = new URI("file:////WSL$/Ubuntu/SomePath/");
+
+		for (int i = 0; i < uris.length; i++) {
+			URI base = new URI(uris[i]);
+			URI resolved = URIUtil.append(base, relative2);
+			assertEquals("2." + Integer.toString(i), expectedResolved2, resolved);
 		}
 	}
 }
