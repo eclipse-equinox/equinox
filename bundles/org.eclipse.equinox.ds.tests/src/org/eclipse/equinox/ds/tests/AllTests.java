@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2009 by ProSyst Software GmbH
+ * Copyright (c) 1997-2022 by ProSyst Software GmbH
  * http://www.prosyst.com
  *
  * This program and the accompanying materials
@@ -18,8 +18,12 @@ import org.eclipse.equinox.ds.tests.tbc.DSTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+
 @RunWith(Suite.class)
-@SuiteClasses(DSTest.class)
+@SuiteClasses({ //
+	DSTest.class, //
+	LazyServiceComponentActivationDeadLockTest.class //
+})
 public class AllTests {
-	//intentionally left blank
+	// intentionally left blank
 }
