@@ -20,3 +20,10 @@ Export-Package: org.eclipse.equinox.ds.tests.tbc
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BundleShape: dir
 Automatic-Module-Name: org.eclipse.equinox.ds.tests
+Service-Component: OSGI-INF/org.eclipse.equinox.ds.tests.LazyServiceComponentActivationDeadLockTest$MavenImpl.xml,
+ OSGI-INF/org.eclipse.equinox.ds.tests.LazyServiceComponentActivationDeadLockTest$MavenModelManager$HeavyComponent.xml,
+ OSGI-INF/org.eclipse.equinox.ds.tests.LazyServiceComponentActivationDeadLockTest$MavenModelManager.xml,
+ OSGI-INF/org.eclipse.equinox.ds.tests.LazyServiceComponentActivationDeadLockTest$MavenProjectManager$HeavyComponent.xml,
+ OSGI-INF/org.eclipse.equinox.ds.tests.LazyServiceComponentActivationDeadLockTest$MavenProjectManager.xml,
+ OSGI-INF/org.eclipse.equinox.ds.tests.LazyServiceComponentActivationDeadLockTest$ProjectConfigurationManager.xml,
+ OSGI-INF/org.eclipse.equinox.ds.tests.LazyServiceComponentActivationDeadLockTest$RepositoryRegistry.xml
