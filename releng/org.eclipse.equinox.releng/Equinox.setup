@@ -31,11 +31,6 @@
         href="EquinoxConfiguration.setup#/"/>
   </annotation>
   <setupTask
-      xsi:type="setup.p2:P2Task">
-    <requirement
-        name="org.eclipse.pde.api.tools.ee.feature.feature.group"/>
-  </setupTask>
-  <setupTask
       xsi:type="setup:CompoundTask"
       name="refresh.enabled">
     <setupTask
