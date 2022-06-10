@@ -7,7 +7,6 @@
     xmlns:jdt="http://www.eclipse.org/oomph/setup/jdt/1.0"
     xmlns:predicates="http://www.eclipse.org/oomph/predicates/1.0"
     xmlns:setup="http://www.eclipse.org/oomph/setup/1.0"
-    xmlns:setup.p2="http://www.eclipse.org/oomph/setup/p2/1.0"
     xmlns:setup.targlets="http://www.eclipse.org/oomph/setup/targlets/1.0"
     xmlns:setup.workingsets="http://www.eclipse.org/oomph/setup/workingsets/1.0"
     xmlns:workingsets="http://www.eclipse.org/oomph/workingsets/1.0"
@@ -140,8 +139,6 @@
           name="Equinox Bundles">
         <requirement
             name="*"/>
-        <requirement
-            name="org.apache.sshd.core"/>
         <sourceLocator
             rootFolder="${github.clone.equinox.bundles.location}"/>
       </targlet>
