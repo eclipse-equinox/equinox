@@ -267,12 +267,14 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		PreferencesService.getDefault().shareStrings();
 	}
 
+	private final Object writeLock = new Object();
+
 	/*
 	 * Helper method to persist a Properties object to the filesystem. We use this
 	 * helper so we can remove the date/timestamp that Properties#store always
 	 * puts in the file.
 	 */
-	protected static void write(Properties properties, IPath location) throws BackingStoreException {
+	private void write(Properties props, IPath location) throws BackingStoreException {
 		Path preferenceFile = location.toFile().toPath();
 		Path parentFile = preferenceFile.getParent();
 		if (parentFile == null) {
@@ -280,15 +282,17 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		}
 		try {
 			Files.createDirectories(parentFile);
-			String fileContent = removeTimestampFromTable(properties);
-			if (Files.exists(preferenceFile)) {
-				// Write new file content to a temporary file first to not loose the old content
-				// in case of a failure. If everything goes OK, it is moved to the right place.
-				Path tmp = preferenceFile.resolveSibling(preferenceFile.getFileName() + BACKUP_FILE_EXTENSION);
-				Files.writeString(tmp, fileContent, StandardCharsets.UTF_8);
-				Files.move(tmp, preferenceFile, StandardCopyOption.REPLACE_EXISTING);
-			} else {
-				Files.writeString(preferenceFile, fileContent, StandardCharsets.UTF_8);
+			String fileContent = removeTimestampFromTable(props);
+			synchronized (writeLock) {
+				if (Files.exists(preferenceFile)) {
+					// Write new file content to a temporary file first to not loose the old content
+					// in case of a failure. If everything goes OK, it is moved to the right place.
+					Path tmp = preferenceFile.resolveSibling(preferenceFile.getFileName() + BACKUP_FILE_EXTENSION);
+					Files.writeString(tmp, fileContent, StandardCharsets.UTF_8);
+					Files.move(tmp, preferenceFile, StandardCopyOption.REPLACE_EXISTING);
+				} else {
+					Files.writeString(preferenceFile, fileContent, StandardCharsets.UTF_8);
+				}
 			}
 		} catch (IOException e) {
 			String message = NLS.bind(PrefsMessages.preferences_saveException, location);
