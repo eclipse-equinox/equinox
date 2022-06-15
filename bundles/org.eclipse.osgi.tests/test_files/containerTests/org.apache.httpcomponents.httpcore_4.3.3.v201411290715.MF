@@ -1,0 +1,46 @@
+Manifest-Version: 1.0
+Implementation-Vendor: The Apache Software Foundation
+X-Compile-Target-JDK: 1.5
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Built-By: oleg
+Bundle-Version: 4.3.3.v201411290715
+X-Compile-Source-JDK: 1.5
+Specification-Title: HttpComponents Apache HttpCore
+Specification-Version: 4.3.3
+Build-Jdk: 1.7.0_21
+Specification-Vendor: The Apache Software Foundation
+Bundle-ClassPath: .
+Created-By: Apache Maven 3.0.5
+Import-Package: javax.net,javax.net.ssl
+Bundle-DocURL: http://www.apache.org/
+Implementation-Vendor-Id: org.apache
+Bundle-SymbolicName: org.apache.httpcomponents.httpcore
+Eclipse-SourceReferences: scm:cvs:pserver:dev.eclipse.org:/cvsroot/too
+ ls:org.eclipse.orbit/org.apache.httpcomponents.httpcore;tag=v20141129
+ 0715
+Export-Package: org.apache.http;version="4.3.3";uses:="org.apache.http
+ .protocol,org.apache.http.params,org.apache.http.util",org.apache.htt
+ p.annotation;version="4.3.3",org.apache.http.concurrent;version="4.3.
+ 3",org.apache.http.config;version="4.3.3",org.apache.http.entity;vers
+ ion="4.3.3";uses:="org.apache.http",org.apache.http.impl;version="4.3
+ .3";x-internal:=true,org.apache.http.impl.entity;version="4.3.3";x-in
+ ternal:=true,org.apache.http.impl.io;version="4.3.3";x-internal:=true
+ ,org.apache.http.impl.pool;version="4.3.3";x-internal:=true,org.apach
+ e.http.io;version="4.3.3";uses:="org.apache.http.config,org.apache.ht
+ tp.util,org.apache.http",org.apache.http.message;version="4.3.3";uses
+ :="org.apache.http.params,org.apache.http.util,org.apache.http",org.a
+ pache.http.params;version="4.3.3";uses:="org.apache.http.config,org.a
+ pache.http",org.apache.http.pool;version="4.3.3";uses:="org.apache.ht
+ tp.concurrent",org.apache.http.protocol;version="4.3.3";uses:="org.ap
+ ache.http.params,org.apache.http",org.apache.http.util;version="4.3.3
+ ";uses:="org.apache.http"
+url: http://hc.apache.org/httpcomponents-core-ga
+Bundle-Description: %Bundle-Description
+Bundle-Vendor: %Bundle-Vendor
+Bundle-Name: %Bundle-Name
+Bundle-License: LICENSE.txt
+Archiver-Version: Plexus Archiver
+Implementation-Title: HttpComponents Apache HttpCore
+Implementation-Version: 4.3.3
+Bundle-ManifestVersion: 2
+

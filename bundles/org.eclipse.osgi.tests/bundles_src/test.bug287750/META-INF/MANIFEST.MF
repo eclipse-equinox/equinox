@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: test.bug287750
+Bundle-SymbolicName: test.bug287750
+Bundle-Version: 1.0.0
+Bundle-Activator: test.bug287750.Activator
+Import-Package: org.osgi.framework,
+ org.osgi.service.startlevel

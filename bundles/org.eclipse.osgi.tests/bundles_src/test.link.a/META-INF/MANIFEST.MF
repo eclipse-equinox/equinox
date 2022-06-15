@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name:  test.link.a
+Bundle-SymbolicName: test.link.a
+Bundle-Version: 1.0.0
+Export-Package: test.link.a; attr1="value1"; uses:="org.osgi.framework, test.link.a.params",
+ test.link.a.params; attr2="value2" 
+Import-Package: org.osgi.framework

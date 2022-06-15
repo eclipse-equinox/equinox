@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name:  ext.framework.a.importer
+Bundle-SymbolicName: ext.framework.a.importer
+Bundle-Version: 1.0.0
+Import-Package: org.osgi.framework,
+ ext.framework.a,
+ org.eclipse.osgi.tests.bundles
+Bundle-Activator: ext.framework.a.importer.Activator

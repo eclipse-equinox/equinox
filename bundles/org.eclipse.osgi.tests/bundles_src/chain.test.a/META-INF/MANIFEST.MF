@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Chain test b
+Bundle-SymbolicName: chain.test.a
+Bundle-Version: 1.0.0
+Bundle-Activator: chain.test.a.Activator
+Bundle-Localization: plugin
+Import-Package: org.eclipse.osgi.tests.bundles; resolution:="optional",
+ org.osgi.framework;version="1.3.0",
+ chain.test.b,
+ chain.test.c
+Export-Package: chain.test.a
+Bundle-ActivationPolicy: lazy

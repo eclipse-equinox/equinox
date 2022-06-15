@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name:  test.dynamic.privateimport
+Bundle-SymbolicName: test.dynamic.privateimport
+Bundle-Version: 1.0.0
+Bundle-Activator: test.dynamic.privateimport.Activator
+Import-Package: org.osgi.framework
+DynamicImport-Package: *

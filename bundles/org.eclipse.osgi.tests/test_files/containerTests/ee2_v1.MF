@@ -1,0 +1,5 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: ee2
+Bundle-Version: 1.0.0
+Fragment-Host: ee1
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7

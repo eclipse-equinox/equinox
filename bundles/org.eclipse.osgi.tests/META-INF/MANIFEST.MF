@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Core OSGi Tests
+Bundle-SymbolicName: org.eclipse.osgi.tests;singleton:=true
+Bundle-Version: 3.16.800.qualifier
+Bundle-Vendor: Eclipse.org
+Require-Bundle: 
+ org.eclipse.core.runtime,
+ org.eclipse.core.tests.harness,
+ org.eclipse.test.performance,
+ org.junit
+Bundle-ActivationPolicy: lazy
+Import-Package: org.osgi.service.event; resolution:="optional"
+Export-Package: org.eclipse.osgi.tests.bundles,
+ org.eclipse.osgi.tests.appadmin
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+DynamicImport-Package: ext.framework.b
+Eclipse-BundleShape: dir
+Automatic-Module-Name: org.eclipse.osgi.tests

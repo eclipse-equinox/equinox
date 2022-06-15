@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %osgiUtil
+Bundle-SymbolicName: org.eclipse.osgi.util
+Bundle-Version: 3.7.100.qualifier
+Bundle-Description: %osgiUtilDes
+Bundle-Vendor: %eclipse.org
+Bundle-Localization: plugin
+Bundle-DocUrl: http://www.eclipse.org
+Bundle-ContactAddress: www.eclipse.org
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Automatic-Module-Name: org.eclipse.osgi.util
+Require-Bundle: org.osgi.util.function;bundle-version="[1.2.0,1.3.0)";visibility:=reexport,
+ org.osgi.util.promise;bundle-version="[1.2.0,1.3.0)";visibility:=reexport,
+ org.osgi.util.measurement;bundle-version="[1.0.0,1.1.0)";visibility:=reexport,
+ org.osgi.util.position;bundle-version="[1.0.0,1.1.0)";visibility:=reexport,
+ org.osgi.util.xml;bundle-version="[1.0.0,1.1.0)";visibility:=reexport

@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: fragment test frag a
+Bundle-SymbolicName: fragment.test.attach.frag.b
+Bundle-Version: 1.0.0
+Bundle-Localization: plugin
+Fragment-Host: fragment.test.attach.host.a
+Bundle-ActivationPolicy: lazy
+Export-Package: fragment.test.attach.frag.b

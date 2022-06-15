@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name:  substitutes.a
+Bundle-SymbolicName: substitutes.a
+Bundle-Version: 1.0.0
+Export-Package: substitutes.x; substitutes.y; version=1.0
+Import-Package: substitutes.x; substitutes.y; version="[1.0, 2.0)"

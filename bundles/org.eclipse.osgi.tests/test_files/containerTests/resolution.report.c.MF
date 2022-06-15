@@ -1,0 +1,3 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: resolution.report.c
+Require-Capability: resolution.report.d

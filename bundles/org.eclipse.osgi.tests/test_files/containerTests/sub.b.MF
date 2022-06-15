@@ -1,0 +1,6 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: sub.b
+Bundle-Version: 1.0.0
+Export-Package: org.osgi.service.http;version=1.2.1;uses:=javax.servlet
+Import-Package: javax.servlet;resolution:=optional
+

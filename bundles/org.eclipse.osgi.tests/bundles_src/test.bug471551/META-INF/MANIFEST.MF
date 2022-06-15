@@ -1,0 +1,8 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: test.bug471551
+Bundle-Version: 1.0
+Import-Package: org.osgi.framework,
+ org.osgi.framework.wiring,
+ javax.xml.validation
+Bundle-Activator: test.bug471551.Activator
+

@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: fragment test host a
+Bundle-SymbolicName: fragment.test.attach.host.a.require
+Bundle-Version: 1.0.0
+Bundle-ActivationPolicy: lazy
+Require-Bundle: fragment.test.attach.host.a

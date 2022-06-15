@@ -1,0 +1,6 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: require.b3
+Bundle-Version: 1.0.0
+Export-Package: p2; uses:="p1"
+Require-Bundle: require.b4
+

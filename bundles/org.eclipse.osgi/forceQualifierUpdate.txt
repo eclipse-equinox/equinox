@@ -1,0 +1,8 @@
+# To force a version qualifier update add the bug here
+Bug 403352 - Update all parent versions to match our build stream
+Bug 509973 - Comparator errors in I20170105-0320
+Bug 566471 - I20200828-0150 - Comparator Errors Found
+Bug 570893 - Comparator errors in I20210203-1800
+Bug 578141 - 4.23 I-Build: I20220110-1800 - Comparator Errors Found 
+Bug 578351 - Lambda generation order is unstable in ecj
+https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/209 Comparator errors in I20220409-1220

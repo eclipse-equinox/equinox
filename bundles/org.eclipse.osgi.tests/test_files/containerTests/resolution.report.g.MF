@@ -1,0 +1,4 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: resolution.report.g
+Import-Package: resolution.report.e,
+ resolution.report.f

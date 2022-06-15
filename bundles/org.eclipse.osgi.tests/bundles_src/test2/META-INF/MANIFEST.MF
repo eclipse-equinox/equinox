@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: test2 bundle
+Bundle-SymbolicName: test2
+Bundle-Version: 1.0.0
+Bundle-Localization: plugin
+Import-Package: org.eclipse.osgi.tests.bundles,
+ org.osgi.framework;version="1.3.0"
+Bundle-ClassPath: ., stuff/
+Require-Bundle: test1

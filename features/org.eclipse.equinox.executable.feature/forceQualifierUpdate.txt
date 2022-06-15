@@ -1,0 +1,14 @@
+# To force a version qualifier update add the bug here
+Bug 403352 - Update all parent versions to match our build stream
+Bug 407109 - Launcher executable is missing from s390/s390x builds
+Bug 421439 - remove unsupported platforms from delta pack
+Bug 442290 - Add ppc64le support into 4.5 build
+Bug 444051 - Comparator error in I20140914-2000 build
+Bug 458346 - Unusual, hard to decipher error in I-build
+Bug 492013 - comparator error in I20160419-0800 related to launcher feature
+Bug 494151 - Eclipse crashes after displaying splash screen with java.lang.NoClassDefFoundError
+Bug 506597 - Build failure on I20161026-2000
+Bug 550714 - Comparator errors in I20190903-1110
+Bug 550674 - Specify hardened runtime for Mac app signing
+Bug 551174 - Comparator errors in 4.14 I build - I20190917-1800
+Bug 578952 - Add LoongArch64 Support

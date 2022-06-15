@@ -1,0 +1,41 @@
+Manifest-Version: 1.0
+Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt
+Bundle-SymbolicName: org.apache.commons.codec
+Archiver-Version: Plexus Archiver
+Built-By: genie.orbit
+Implementation-Vendor-Id: org.apache
+Specification-Title: Apache Commons Codec
+Bundle-DocURL: http://commons.apache.org/proper/commons-codec/
+Import-Package: org.apache.commons.codec;resolution:=optional;version=
+ "[1.9,2)",org.apache.commons.codec.binary;resolution:=optional;versio
+ n="[1.9,2)"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.6))"
+Export-Package: org.apache.commons.codec;version="1.9.0",org.apache.co
+ mmons.codec.binary;version="1.9.0";uses:="org.apache.commons.codec",o
+ rg.apache.commons.codec.digest;version="1.9.0",org.apache.commons.cod
+ ec.language;version="1.9.0";uses:="org.apache.commons.codec",org.apac
+ he.commons.codec.language.bm;version="1.9.0";uses:="org.apache.common
+ s.codec",org.apache.commons.codec.net;version="1.9.0";uses:="org.apac
+ he.commons.codec"
+Bundle-Name: %bundleName
+Bundle-Description: The Apache Commons Codec package contains simple e
+ ncoder and decoders for     various formats such as Base64 and Hexade
+ cimal.  In addition to these     widely used encoders and decoders, t
+ he codec package also maintains a     collection of phonetic encoding
+  utilities.
+Implementation-Title: Apache Commons Codec
+Implementation-Version: 1.9
+Bundle-ManifestVersion: 2
+Specification-Vendor: The Apache Software Foundation
+Bundle-Vendor: %bundleVendor
+Implementation-Vendor: The Apache Software Foundation
+Originally-Created-By: Apache Maven Bundle Plugin
+Bundle-Version: 1.9.0.v20170208-1614
+X-Compile-Target-JDK: 1.6
+Implementation-Build: tags/1.9-RC1@r1552874; 2013-12-20 22:56:50-0500
+X-Compile-Source-JDK: 1.6
+Created-By: Eclipse Bundle Recipe Maven Plug-in
+Build-Jdk: 1.8.0_121
+Specification-Version: 1.9
+
+

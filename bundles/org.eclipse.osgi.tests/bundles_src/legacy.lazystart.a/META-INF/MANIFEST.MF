@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Legacy test
+Bundle-SymbolicName: legacy.lazystart.a
+Bundle-Version: 1.0.0
+Bundle-Localization: plugin
+Import-Package: 
+ org.eclipse.osgi.tests.bundles,
+ org.osgi.framework;version="1.3.0"
+Eclipse-LazyStart: true
+Export-Package: legacy.lazystart.a
+Bundle-Activator: legacy.lazystart.a.Activator

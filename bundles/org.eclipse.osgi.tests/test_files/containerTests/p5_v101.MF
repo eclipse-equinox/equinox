@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: p5.osgi
+Bundle-Version: 1.0.1
+Provide-Capability: 
+ namespace.5; namespace.5=test; version:Version="1.0"; uses:="p6, p7"
+Import-Package: p6; p7; version="[1.0,1.1)"

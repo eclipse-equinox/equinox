@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: c3.equinox
+Bundle-Version: 1.0
+Eclipse-GenericRequire: 
+ *:namespace.1;
+  selection-filter="(&(rank>=300)(!(rank>=400))
+          (percent>=0.3)(!(percent>=0.4))
+          (test.version>=3.0)(!(test.version>=4.0))
+          (test.string~=abc))",
+ *:namespace.2;
+  selection-filter="(&(rank>=300)(!(rank>=400))
+          (percent>=0.3)(!(percent>=0.4))
+          (test.version>=3.0)(!(test.version>=4.0))
+          (test.string~=abc))",
+ *:namespace.3;
+  selection-filter="(&(rank>=300)(!(rank>=400))
+          (percent>=0.3)(!(percent>=0.4))
+          (test.version>=3.0)(!(test.version>=4.0))
+          (test.string~=abc))",
+ *:osgi.identity;
+  selection-filter="(&(osgi.identity=p3.*)(version=1.0)(type=osgi.bundle))"

@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: c4.osgi
+Bundle-Version: 1.2
+Require-Capability: 
+ namespace.5; filter:="(version=1.0)",
+ osgi.identity; filter:="(&(osgi.identity=p5.osgi)(version=1.0)(type=osgi.bundle))"
+DynamicImport-Package: p6, p7

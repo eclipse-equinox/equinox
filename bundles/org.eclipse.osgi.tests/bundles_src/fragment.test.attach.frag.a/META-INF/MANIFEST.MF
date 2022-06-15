@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: fragment test frag a
+Bundle-SymbolicName: fragment.test.attach.frag.a
+Bundle-Version: 1.0.0
+Bundle-Localization: plugin
+Fragment-Host: fragment.test.attach.host.a; multiple-hosts:=true
+Bundle-ActivationPolicy: lazy

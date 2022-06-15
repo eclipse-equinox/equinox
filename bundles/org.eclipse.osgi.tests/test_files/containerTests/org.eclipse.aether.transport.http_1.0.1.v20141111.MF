@@ -1,0 +1,40 @@
+Manifest-Version: 1.0
+Bundle-DocURL: http://www.eclipse.org/aether/aether-transport-http/
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Built-By: Benjamin
+Bundle-SymbolicName: org.eclipse.aether.transport.http
+Export-Package: org.eclipse.aether.transport.http;uses:="javax.inject,
+ org.eclipse.aether,org.eclipse.aether.repository,org.eclipse.aether.s
+ pi.connector.transport,org.eclipse.aether.spi.locator,org.eclipse.aet
+ her.spi.log,org.eclipse.aether.transfer";version="1.0.1.v20141111"
+Bundle-Version: 1.0.1.v20141111
+Bundle-Description: A transport implementation for repositories using 
+ http:// and https:// URLs.
+Build-Jdk: 1.7.0_71
+Bundle-Vendor: Eclipse Aether
+Bnd-LastModified: 1415716880576
+Bundle-License: http://www.eclipse.org/legal/epl-v10.html
+Bundle-Name: Aether Transport HTTP
+Tool: Bnd-2.1.0.20130426-122213
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven Bundle Plugin
+Import-Package: org.apache.http;version="[4.2.1,4.4)",org.apache.http.
+ auth;version="[4.2.1,4.4)",org.apache.http.auth.params;version="[4.2.
+ 1,4.4)",org.apache.http.client;version="[4.2.1,4.4)",org.apache.http.
+ client.methods;version="[4.2.1,4.4)",org.apache.http.client.utils;ver
+ sion="[4.2.1,4.4)",org.apache.http.conn;version="[4.2.1,4.4)",org.apa
+ che.http.conn.params;version="[4.2.1,4.4)",org.apache.http.conn.schem
+ e;version="[4.2.1,4.4)",org.apache.http.conn.ssl;version="[4.2.1,4.4)
+ ",org.apache.http.entity;version="[4.2.1,4.4)",org.apache.http.impl.a
+ uth;version="[4.2.1,4.4)",org.apache.http.impl.client;version="[4.2.1
+ ,4.4)",org.apache.http.impl.conn;version="[4.2.1,4.4)",org.apache.htt
+ p.impl.cookie;version="[4.2.1,4.4)",org.apache.http.params;version="[
+ 4.2.1,4.4)",org.apache.http.protocol;version="[4.2.1,4.4)",org.apache
+ .http.util;version="[4.2.1,4.4)",javax.inject;resolution:=optional,ja
+ vax.net,javax.net.ssl,org.eclipse.aether;version="[1.0,2)",org.eclips
+ e.aether.repository;version="[1.0,2)",org.eclipse.aether.spi.connecto
+ r.transport;version="[1.0,2)",org.eclipse.aether.spi.locator;version=
+ "[1.0,2)",org.eclipse.aether.spi.log;version="[1.0,2)",org.eclipse.ae
+ ther.transfer;version="[1.0,2)",org.eclipse.aether.util;version="[1.0
+ ,2)"
+Bundle-ManifestVersion: 2

@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name:  ext.extclasspath.a
+Bundle-SymbolicName: ext.extclasspath.a
+Bundle-Version: 1.0.0
+Fragment-Host: system.bundle; extension:=extclasspath
+Export-Package: ext.extclasspath.a

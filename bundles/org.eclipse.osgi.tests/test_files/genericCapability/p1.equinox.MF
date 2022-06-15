@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: p1.equinox
+Bundle-Version: 1.0
+Eclipse-GenericCapability: 
+ p1:namespace.1; rank:long="100"; percent:double="0.10"; test.version:version="1.0.0"; test.string="ABC",
+ p1:namespace.2; rank:long="100"; percent:double="0.10"; test.version:version="1.0.0"; test.string="ABC",
+ p1:namespace.3; rank:long="100"; percent:double="0.10"; test.version:version="1.0.0"; test.string="ABC"
+

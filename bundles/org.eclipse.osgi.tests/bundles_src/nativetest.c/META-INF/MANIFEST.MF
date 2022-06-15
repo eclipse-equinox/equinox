@@ -1,0 +1,35 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: NativeBundle Plug-in
+Bundle-SymbolicName: nativetest.c
+Bundle-Version: 1.0.0
+Bundle-Activator: nativetest.c.Activator
+Bundle-Localization: plugin
+Import-Package: org.osgi.framework;version="1.3.0",
+ org.eclipse.osgi.tests.bundles
+Bundle-NativeCode: 
+ libs/test1/nativecode.txt;
+  selection-filter="(nativecodetest=1)",
+ libs/test2/nativecode.txt;
+  selection-filter="(nativecodetest=1)",
+ libs/test3/nativecode.txt;
+  selection-filter="(nativecodetest=1)",
+ libs/test1/nativecode.txt;
+  selection-filter="(nativecodetest=2)",
+ libs/test2/nativecode.txt;
+  selection-filter="(nativecodetest=2)",
+ libs/test3/nativecode.txt;
+  osversion="0.0.1";
+  selection-filter="(nativecodetest=2)",
+ libs/test1/nativecode.txt;
+  selection-filter="(nativecodetest=3)",
+ libs/test2/nativecode.txt;
+  osversion="0.0.1";
+  language="en";
+  selection-filter="(nativecodetest=3)",
+ libs/test3/nativecode.txt;
+  osversion="0.0.1";
+  language="en";
+  selection-filter="(nativecodetest=3)",
+ libs/test4/nativecode.txt;
+  selection-filter="(nativecodetest=4)"

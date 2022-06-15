@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: X Plug-in
+Bundle-SymbolicName: test.bug235958.x
+Bundle-Version: 1.0.0
+Bundle-Activator: test.bug235958.x.internal.Activator
+Bundle-ActivationPolicy: lazy
+Import-Package: org.osgi.framework;version="1.3.0"
+Export-Package: test.bug235958.x; version=1.1
+Require-Bundle: test.bug235958.y

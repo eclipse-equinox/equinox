@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: test
+Bundle-SymbolicName: bundle.resource.test
+Bundle-Version: 1.0.0

@@ -1,0 +1,7 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: h1
+Bundle-Version: 1.1.0
+Export-Package: 
+ h1.a; version=1.0,
+ h1.b; version=1.0; uses:="h1.a"
+Import-Package: org.osgi.framework

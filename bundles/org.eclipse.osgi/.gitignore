@@ -1,0 +1,11 @@
+/bin/
+temp.folder
+/build.xml
+console.jar
+core.jar
+defaultAdaptor.jar
+eclipseAdaptor.jar
+resolver.jar
+/generated/
+.DS_Store
+/configuration/

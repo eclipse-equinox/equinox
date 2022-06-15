@@ -1,0 +1,5 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: require.b1
+Bundle-Version: 1.0.0
+Require-Bundle: require.b2, require.b3
+

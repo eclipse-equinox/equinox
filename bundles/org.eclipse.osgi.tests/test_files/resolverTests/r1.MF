@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: r1; singleton:=true; fragment-attachment:="resolve-time"; d1:=v1; d2:=v2; a1=v1; a2=v2
+Bundle-Version: 1.0
+Import-Package: 
+ importer.pkg1; version="1.0",
+ importer.pkg2; resolution:=optional,
+ importer.pkg3; resolution:=mandatory,
+ importer.pkg4; version="(1.0,2.0)",
+ importer.pkg5; version="[1.0,2.0)",
+ importer.pkg6; version="(1.0,2.0]",
+ importer.pkg7; version="[1.0,2.0]",
+ importer.pkg8; resolution:=optional; d1:=v1; d2:=v2; a1=v1; a2=v2
+Export-Package: 
+ exporter.pkg1; version="1.0",
+ exporter.pkg2; include:="C1,C2"; exclude:="C3,C4"; mandatory:="a1,a2"; uses:="importer.pkg1,importer.pkg2"; a1=v1; a2=v2,
+ exporter.pkg3; mandatory:="a1,a2"; d1:=v1; d2:=v2; a1=v1; a2=v2
+Require-Bundle: 
+ requirer.b1; visibility:=reexport; resolution:=optional,
+ requirer.b2; visibility:=private; resolution:=mandatory,
+ requirer.b3; bundle-version="1.0",
+ requirer.b4; bundle-version="(1.0,2.0)",
+ requirer.b5; bundle-version="[1.0,2.0)",
+ requirer.b6; bundle-version="(1.0,2.0]",
+ requirer.b7; bundle-version="[1.0,2.0]",
+ requirer.b8; resolution:=optional; d1:=v1; d2:=v2; a1=v1; a2=v2
+Require-Capability: 
+ require.c1; effective:=resolve; resolution:=optional; filter:=(a1=v1),
+ require.c2; resolution:=mandatory,
+ require.c3; resolution:=optional; d1:=v1; d2:=v2; a1=v1; a2=v2
+Provide-Capability: 
+ provide.c1; effective:=resolve; uses:="importer.pkg1,importer.pkg2"; a1=v1; a2=v2,
+ provide.c2; uses:="importer.pkg1,importer.pkg2"; d1:=v1; d2:=v2; a1=v1; a2=v2

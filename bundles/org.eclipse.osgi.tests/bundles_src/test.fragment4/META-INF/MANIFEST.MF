@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: test.fragment4
+Bundle-SymbolicName: test.fragment4
+Bundle-Version: 1.0.0
+Fragment-Host: test1

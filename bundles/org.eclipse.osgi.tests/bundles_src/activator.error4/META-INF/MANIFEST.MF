@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name:  activator.error1
+Bundle-SymbolicName: activator.error1
+Bundle-Version: 1.0.0

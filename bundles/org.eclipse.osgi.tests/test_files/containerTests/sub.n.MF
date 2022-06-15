@@ -1,0 +1,5 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: sub.n
+Bundle-Version: 1.0.0
+Import-Package: substituted; version="[1.0,1.1)"; resolution:=optional
+
