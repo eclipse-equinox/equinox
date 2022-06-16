@@ -68,9 +68,7 @@
     <stream
         href="index:/org.eclipse.setup#//@projectCatalogs[name='org.eclipse']/@projects[name='equinox']/@projects[name='binaries']/@streams[name='master']"/>
     <stream
-        href="index:/org.eclipse.setup#//@projectCatalogs[name='org.eclipse']/@projects[name='equinox']/@projects[name='bundles']/@streams[name='master']"/>
-    <stream
-        href="index:/org.eclipse.setup#//@projectCatalogs[name='org.eclipse']/@projects[name='equinox']/@projects[name='framework']/@streams[name='master']"/>
+        href="index:/org.eclipse.setup#//@projectCatalogs[name='org.eclipse']/@projects[name='equinox']/@projects[name='core']/@streams[name='master']"/>
     <stream
         href="index:/org.eclipse.setup#//@projectCatalogs[name='org.eclipse']/@projects[name='equinox']/@projects[name='p2']/@streams[name='master']"/>
     <description>The Equinox workspace provides the source code of the Equinox project.</description>
