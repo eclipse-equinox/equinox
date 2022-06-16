@@ -110,12 +110,12 @@
       </repositoryList>
     </targlet>
   </setupTask>
-  <project name="bundles"
-      label="Bundles">
+  <project name="core"
+      label="Core">
     <setupTask
         xsi:type="git:GitCloneTask"
-        id="github.clone.equinox.bundles"
-        remoteURI="eclipse-equinox/equinox.bundles">
+        id="github.clone.equinox.core"
+        remoteURI="eclipse-equinox/equinox">
       <annotation
           source="http://www.eclipse.org/oomph/setup/InducedChoices">
         <detail
@@ -124,80 +124,51 @@
         </detail>
         <detail
             key="label">
-          <value>Equinox Bundles Github Repository</value>
+          <value>Equinox Core Github Repository</value>
         </detail>
         <detail
             key="target">
           <value>remoteURI</value>
         </detail>
       </annotation>
-      <description>Equinox Bundles</description>
+      <description>Equinox Core</description>
     </setupTask>
     <setupTask
         xsi:type="setup.targlets:TargletTask">
       <targlet
-          name="Equinox Bundles">
+          name="Equinox Core">
         <requirement
             name="*"/>
         <sourceLocator
-            rootFolder="${github.clone.equinox.bundles.location}"/>
+            rootFolder="${github.clone.equinox.core.location}"/>
       </targlet>
     </setupTask>
     <setupTask
-        xsi:type="setup.workingsets:WorkingSetTask">
+        xsi:type="setup.workingsets:WorkingSetTask"
+        id="equinox.core.workingsets">
       <workingSet
-          name="Equinox Bundles">
+          name="Equinox Core">
         <predicate
-            xsi:type="predicates:RepositoryPredicate"
-            project="org.eclipse.equinox.common"/>
+            xsi:type="predicates:AndPredicate">
+          <operand
+              xsi:type="predicates:RepositoryPredicate"
+              project="org.eclipse.equinox.common"/>
+          <operand
+              xsi:type="workingsets:ExclusionPredicate"
+              excludedWorkingSet="//'equinox.core.workingsets'/@workingSets[name='Equinox%20Core%20Tests']"/>
+        </predicate>
       </workingSet>
-    </setupTask>
-    <stream
-        name="master"
-        label="Master"/>
-    <description>The Equinox Bundles support</description>
-  </project>
-  <project name="framework"
-      label="Framework">
-    <setupTask
-        xsi:type="git:GitCloneTask"
-        id="github.clone.equinox.framework"
-        remoteURI="eclipse-equinox/equinox.framework">
-      <annotation
-          source="http://www.eclipse.org/oomph/setup/InducedChoices">
-        <detail
-            key="inherit">
-          <value>github.remoteURIs</value>
-        </detail>
-        <detail
-            key="label">
-          <value>Equinox Framework Github Repository</value>
-        </detail>
-        <detail
-            key="target">
-          <value>remoteURI</value>
-        </detail>
-      </annotation>
-      <description>Equinox Framework</description>
-    </setupTask>
-    <setupTask
-        xsi:type="setup.targlets:TargletTask">
-      <targlet
-          name="Equinox Framework">
-        <requirement
-            name="*"/>
-        <sourceLocator
-            rootFolder="${github.clone.equinox.framework.location}"
-            locateNestedProjects="true"/>
-      </targlet>
-    </setupTask>
-    <setupTask
-        xsi:type="setup.workingsets:WorkingSetTask">
       <workingSet
-          name="Equinox Framework">
+          name="Equinox Core Tests">
         <predicate
-            xsi:type="predicates:RepositoryPredicate"
-            project="org.eclipse.osgi"/>
+            xsi:type="predicates:AndPredicate">
+          <operand
+              xsi:type="predicates:RepositoryPredicate"
+              project="org.eclipse.equinox.common.tests"/>
+          <operand
+              xsi:type="predicates:NamePredicate"
+              pattern=".*\.tests"/>
+        </predicate>
       </workingSet>
     </setupTask>
     <stream
@@ -206,12 +177,12 @@
       <setupTask
           xsi:type="setup:EclipseIniTask"
           option="-Doomph.redirection.equinox"
-          value="=https://raw.githubusercontent.com/eclipse-equinox/equinox.framework/master/releng/org.eclipse.equinox.releng/Equinox.setup->${github.clone.equinox.framework.location|uri}/releng/org.eclipse.equinox.releng/Equinox.setup"
+          value="=https://raw.githubusercontent.com/eclipse-equinox/equinox/master/releng/org.eclipse.equinox.releng/Equinox.setup->${github.clone.equinox.core.location|uri}/releng/org.eclipse.equinox.releng/Equinox.setup"
           vm="true">
         <description>Set an Oomph redirection system property to redirect the logical location of this setup to its physical location in the Git clone.</description>
       </setupTask>
     </stream>
-    <description>The Equinox Framework support</description>
+    <description>The Equinox Core support</description>
   </project>
   <project name="p2"
       label="P2">
