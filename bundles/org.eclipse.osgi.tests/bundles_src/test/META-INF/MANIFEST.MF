@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: test1 bundle
+Bundle-SymbolicName: test1
+Bundle-Version: 1.0.0
+Bundle-Activator: test1.Activator
+Bundle-Localization: plugin
+Import-Package: org.eclipse.osgi.tests.bundles,
+ org.osgi.framework;version="1.3.0"
+Bundle-ClassPath: ., stuff/
+Export-Package: data,
+ org.eclipse.osgi.tests.appadmin

@@ -1,0 +1,6 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: c
+Bundle-Version: 1.1.0
+Export-Package: 
+ c; version=1.1; uses:="d"
+Require-Bundle: d; bundle-version="[1.1,1.2)"; visibility:=reexport

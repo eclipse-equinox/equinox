@@ -1,0 +1,4 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: resolution.report.d
+Provide-Capability: resolution.report.d
+Require-Capability: does.not.exist

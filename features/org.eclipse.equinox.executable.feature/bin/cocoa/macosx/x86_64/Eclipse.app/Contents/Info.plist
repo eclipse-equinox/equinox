@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+
+<dict>
+	<key>NSRequiresAquaSystemAppearance</key>
+		<true/>
+	<key>CFBundleExecutable</key>
+		<string>eclipse</string>
+	<key>CFBundleGetInfoString</key>
+		<string>Eclipse 4.25 for Mac OS X, Copyright IBM Corp. and others 2002, 2022. All rights reserved.</string>
+	<key>CFBundleIconFile</key>
+		<string>Eclipse.icns</string>
+	<key>CFBundleIdentifier</key>
+		<string>org.eclipse.Eclipse</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+		<string>6.0</string>
+	<key>CFBundleName</key>
+		<string>Eclipse</string>
+	<key>CFBundlePackageType</key>
+		<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+		<string>4.25</string>
+	<key>CFBundleSignature</key>
+		<string>????</string>
+	<key>CFBundleVersion</key>
+		<string>4.25</string>
+	<key>NSHighResolutionCapable</key>
+		<true/>
+	<key>CFBundleDevelopmentRegion</key>
+		<string>English</string>		
+	<key>Eclipse</key>
+		<array>
+			<!-- To use a specific Java version (instead of the default) uncomment the following option and 
+				edit it to add a VM. Installed VMs can be found via $/usr/libexec/java_home -V
+				<string>-vm</string><string>/Library/Java/JavaVirtualMachines/jdk-11.jdk/Contents/Home/bin/java</string>
+			-->
+			<string>-keyring</string><string>~/.eclipse_keyring</string>
+		</array>
+</dict>
+
+</plist>
+

@@ -1,0 +1,5 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: c6
+Bundle-Version: 1.0.0
+Require-Bundle: c4
+Export-Package: c6

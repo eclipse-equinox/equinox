@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: client2.multiple.exports
+Bundle-SymbolicName: client2.multiple.exports
+Bundle-Version: 1.0.0
+Bundle-Activator: client2.multiple.exports.Activator
+Import-Package: host.multiple.exports; scope="private",
+ host.multiple.exports.onlyone,
+ org.eclipse.osgi.tests.bundles,
+ org.osgi.framework

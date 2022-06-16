@@ -1,0 +1,5 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: f1
+Bundle-Version: 1.0.0
+Import-Package: c1.a, c1.b
+Fragment-Host: h2

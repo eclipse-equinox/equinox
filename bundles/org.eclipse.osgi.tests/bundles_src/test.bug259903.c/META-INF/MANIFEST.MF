@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: test.bug259903.c
+Bundle-SymbolicName: test.bug259903.c
+Bundle-Version: 1.0.0
+Bundle-Activator: test.bug259903.c.Activator
+Import-Package: org.eclipse.osgi.tests.bundles,
+ org.osgi.framework,
+ test.bug259903.a,
+ test.bug259903.a.b,
+ test.bug259903.b

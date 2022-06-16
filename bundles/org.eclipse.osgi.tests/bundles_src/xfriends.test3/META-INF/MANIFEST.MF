@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: xfriends.test3
+Bundle-SymbolicName: xfriends.test3
+Bundle-Version: 1.0.0
+Bundle-Activator: xfriends.test3.Activator
+Require-Bundle: xfriends.test1
+Import-Package: org.osgi.framework,
+ org.eclipse.osgi.tests.bundles

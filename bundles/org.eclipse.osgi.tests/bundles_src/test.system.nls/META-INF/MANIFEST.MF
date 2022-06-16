@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name:  test.system.nls
+Bundle-SymbolicName: test.system.nls
+Bundle-Version: 1.0.0
+Fragment-Host: system.bundle
+

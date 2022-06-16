@@ -1,0 +1,6 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: sub.f
+Bundle-Version: 1.0.0
+Export-Package: bar; version="1.0.1"
+Import-Package: bar; foo
+

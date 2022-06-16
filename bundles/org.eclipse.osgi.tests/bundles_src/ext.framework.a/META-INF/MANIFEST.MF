@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name:  ext.framework.a
+Bundle-SymbolicName: ext.framework.a
+Bundle-Version: 1.0.0
+Fragment-Host: system.bundle; extension:=framework
+Export-Package: ext.framework.a
+Bundle-ClassPath: .

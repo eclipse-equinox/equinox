@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: uses.m.conflict2
+Bundle-Version: 1.0
+Export-Package: uses.conflict; conflict=2

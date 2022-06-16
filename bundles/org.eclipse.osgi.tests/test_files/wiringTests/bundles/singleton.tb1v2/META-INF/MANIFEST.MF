@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: singleton.tb1; singleton:=true
+Bundle-Version: 2.0.0

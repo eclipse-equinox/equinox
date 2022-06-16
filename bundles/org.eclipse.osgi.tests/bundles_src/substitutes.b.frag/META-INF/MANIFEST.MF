@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name:  substitutes.b.frag
+Bundle-SymbolicName: substitutes.b.frag
+Bundle-Version: 1.0.0
+Fragment-Host: substitutes.b
+Export-Package: substitutes.q; version=1.0
+Import-Package: substitutes.q; version="[1.0,2.0)"

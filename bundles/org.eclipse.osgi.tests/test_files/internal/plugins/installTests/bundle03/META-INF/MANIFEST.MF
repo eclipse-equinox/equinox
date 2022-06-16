@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: bundle03
+Bundle-Name: bundle03
+Bundle-Vendor: Eclipse.org

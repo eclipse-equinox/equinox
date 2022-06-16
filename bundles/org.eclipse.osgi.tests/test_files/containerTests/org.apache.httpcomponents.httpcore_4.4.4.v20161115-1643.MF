@@ -1,0 +1,54 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.apache.httpcomponents.httpcore
+Archiver-Version: Plexus Archiver
+Built-By: genie.orbit
+Implementation-Vendor-Id: org.apache
+Specification-Title: HttpComponents Apache HttpCore
+Import-Package: javax.net;resolution:=optional,javax.net.ssl;resolutio
+ n:=optional
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.6))"
+Export-Package: org.apache.http.impl;x-internal:=true;version="4.4.4";
+ uses:="org.apache.http,org.apache.http.config,org.apache.http.entity,
+ org.apache.http.impl.entity,org.apache.http.io,org.apache.http.params
+ ,org.apache.http.protocol",org.apache.http.impl.bootstrap;x-internal:
+ =true;version="4.4.4";uses:="javax.net,javax.net.ssl,org.apache.http,
+ org.apache.http.config,org.apache.http.impl,org.apache.http.protocol"
+ ,org.apache.http.impl.entity;x-internal:=true;version="4.4.4";uses:="
+ org.apache.http,org.apache.http.entity,org.apache.http.io",org.apache
+ .http.impl.io;x-internal:=true;version="4.4.4";uses:="org.apache.http
+ ,org.apache.http.config,org.apache.http.io,org.apache.http.message,or
+ g.apache.http.params,org.apache.http.util",org.apache.http.impl.pool;
+ x-internal:=true;version="4.4.4";uses:="javax.net,javax.net.ssl,org.a
+ pache.http,org.apache.http.config,org.apache.http.params,org.apache.h
+ ttp.pool",org.apache.http;version="4.4.4";uses:="org.apache.http.para
+ ms,org.apache.http.protocol,org.apache.http.util",org.apache.http.ann
+ otation;version="4.4.4",org.apache.http.concurrent;version="4.4.4",or
+ g.apache.http.config;version="4.4.4",org.apache.http.entity;version="
+ 4.4.4";uses:="org.apache.http",org.apache.http.io;version="4.4.4";use
+ s:="org.apache.http,org.apache.http.config,org.apache.http.util",org.
+ apache.http.message;version="4.4.4";uses:="org.apache.http,org.apache
+ .http.params,org.apache.http.util",org.apache.http.params;version="4.
+ 4.4";uses:="org.apache.http,org.apache.http.config",org.apache.http.p
+ ool;version="4.4.4";uses:="org.apache.http.concurrent",org.apache.htt
+ p.protocol;version="4.4.4";uses:="org.apache.http,org.apache.http.par
+ ams",org.apache.http.ssl;version="4.4.4";uses:="javax.net.ssl",org.ap
+ ache.http.util;version="4.4.4";uses:="org.apache.http"
+Bundle-Name: %bundleName
+Implementation-Title: HttpComponents Apache HttpCore
+Implementation-Version: 4.4.4
+Bundle-ManifestVersion: 2
+Specification-Vendor: The Apache Software Foundation
+Bundle-Vendor: %bundleVendor
+url: http://hc.apache.org/httpcomponents-core-ga
+Implementation-Vendor: The Apache Software Foundation
+Originally-Created-By: Apache Maven 3.0.5
+Bundle-Version: 4.4.4.v20161115-1643
+X-Compile-Target-JDK: 1.6
+Implementation-Build: tags/4.4.4-RC1/httpcore@r1710658; 2015-10-26 18:
+ 15:56+0100
+X-Compile-Source-JDK: 1.6
+Created-By: Eclipse Bundle Recipe Maven Plug-in
+Build-Jdk: 1.8.0_102
+Implementation-URL: http://hc.apache.org/httpcomponents-core-ga
+Specification-Version: 4.4.4
+

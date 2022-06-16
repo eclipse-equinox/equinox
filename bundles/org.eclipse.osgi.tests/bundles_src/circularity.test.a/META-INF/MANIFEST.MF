@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Circularity Test A
+Bundle-SymbolicName: circularity.test.a
+Bundle-Version: 1.0.0
+Bundle-Activator: circularity.test.a.Activator
+Bundle-Localization: plugin
+Import-Package: org.eclipse.osgi.tests.bundles,
+ org.osgi.framework;version="1.3.0"
+Export-Package: circularity.test.a
+Bundle-ActivationPolicy: lazy

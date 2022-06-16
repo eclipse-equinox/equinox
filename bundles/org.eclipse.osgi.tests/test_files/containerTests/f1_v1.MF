@@ -1,0 +1,6 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: f1
+Bundle-Version: 1.0.0
+Export-Package: 
+ f1.a; version=1.0;uses:="h1.a"
+Fragment-Host: h1

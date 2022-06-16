@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.osgi.framework"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.osgi.util.tracker"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.osgi.service.composite"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.osgi.service.packageadmin"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.osgi.service.startlevel"/>
+	<classpathentry kind="src" path="osgi/src"/>
+	<classpathentry kind="src" path="supplement/src"/>
+	<classpathentry kind="src" path="core/adaptor"/>
+	<classpathentry kind="src" path="core/framework"/>
+	<classpathentry kind="src" path="core/composite"/>
+	<classpathentry kind="src" path="resolver/src"/>
+	<classpathentry kind="src" path="defaultAdaptor/src"/>
+	<classpathentry kind="src" path="eclipseAdaptor/src"/>
+	<classpathentry kind="src" path="security/src"/>
+	<classpathentry kind="src" path="console/src"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

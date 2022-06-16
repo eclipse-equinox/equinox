@@ -1,0 +1,6 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: frag
+Bundle-Version: 1.0.0
+Fragment-Host: host
+Export-Package: frag
+

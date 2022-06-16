@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: frag.multiple.exports
+Bundle-SymbolicName: frag.multiple.exports
+Bundle-Version: 1.0.0
+Fragment-Host: host.multiple.exports
+Export-Package: host.multiple.exports; mandatory:="scope"; scope="private",
+ host.multiple.exports.onlyone;
+  version=1.0.0;
+  include:="Public*"; 
+  exclude:="PublicExclude*";
+  uses:="host.multiple.exports";
+  mantatory:="test1";
+  test1=value;
+  test2=value

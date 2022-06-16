@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: uses.j.dynamic
+Bundle-Version: 1.0
+Import-Package: uses1
+DynamicImport-Package: uses2
+

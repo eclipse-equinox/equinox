@@ -1,0 +1,6 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: test.bug449484
+Bundle-Version: 1.0
+Provide-Capability: osgi.ee; osgi.ee=test, osgi.native; osgi.native=test
+
+

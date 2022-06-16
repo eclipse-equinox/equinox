@@ -1,0 +1,2 @@
+Import-Package: pkg10
+Require-Capability: cap10

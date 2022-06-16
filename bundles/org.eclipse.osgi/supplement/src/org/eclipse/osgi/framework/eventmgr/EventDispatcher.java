@@ -1,0 +1,52 @@
+/*******************************************************************************
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+
+package org.eclipse.osgi.framework.eventmgr;
+
+/**
+ * The EventDispatcher interface contains the method that is called by the
+ * Event Manager to complete the event delivery to the event listener.
+ * <p>
+ * Clients may implement this interface.
+ * </p>
+ * @since 3.1
+ */
+public interface EventDispatcher<K, V, E> {
+	/**
+	 * This method is called once for each listener.
+	 * This method must cast the event listener object to the appropriate listener
+	 * class for the event type and call the appropriate listener method.
+	 *
+	 * <p>The method should properly log/handle any exceptions thrown by the called
+	 * listener. The EventManager will ignore any Throwable thrown by this method
+	 * in order to continue delivery of the event to the next listener.
+	 *
+	 * @param eventListener This is the key in the Map.Entry for the listener.
+	 * The implementation of this method must cast it to the appropriate listener
+	 * class for the event to be delivered and the appropriate listener method
+	 * must then be called.
+	 * @param listenerObject This is the value in the Map.Entry for the listener.
+	 * @param eventAction This value was passed to the ListenerQueue object via one of its
+	 * dispatchEvent* method calls. It can provide information (such
+	 * as which listener method to call) so that the EventDispatcher
+	 * can complete the delivery of the event to the listener.
+	 * @param eventObject This object was passed to the ListenerQueue object via one of its
+	 * dispatchEvent* method calls. This object was created by the event source and
+	 * is passed to this method. It should contain all the necessary information (such
+	 * as what event object to pass) so that this method
+	 * can complete the delivery of the event to the listener.
+	 * This is typically the actual event object.
+	 */
+	public void dispatchEvent(K eventListener, V listenerObject, int eventAction, E eventObject);
+}

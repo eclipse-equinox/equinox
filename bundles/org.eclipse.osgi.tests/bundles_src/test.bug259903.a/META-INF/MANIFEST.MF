@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: test.bug259903.a
+Bundle-SymbolicName: test.bug259903.a
+Bundle-Version: 1.0.0
+Export-Package: test.bug259903.a, test.bug259903.a.b

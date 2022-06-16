@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: fragment test host a
+Bundle-SymbolicName: fragment.test.attach.host.a
+Bundle-Version: 1.0.1
+Bundle-Activator: fragment.test.attach.host.a.Activator2
+Bundle-Localization: plugin
+Import-Package: org.eclipse.osgi.tests.bundles,
+ org.osgi.framework;version="1.3.0"
+Bundle-ActivationPolicy: lazy

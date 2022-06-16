@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2012, 2018 Eclipse Foundation and others.
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the Eclipse Distribution License v1.0
+  which accompanies this distribution, and is available at
+  http://www.eclipse.org/org/documents/edl-v10.php
+
+  Contributors:
+     Igor Fedorenko - initial implementation
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+<parent>
+    <groupId>org.eclipse.equinox</groupId>
+    <artifactId>parent</artifactId>
+    <version>4.25.0-SNAPSHOT</version>
+    <relativePath>../../</relativePath>
+</parent>
+  <groupId>org.eclipse.equinox.feature</groupId>
+  <artifactId>org.eclipse.equinox.executable</artifactId>
+  <version>3.8.1800-SNAPSHOT</version>
+  <packaging>eclipse-feature</packaging>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>repack</id>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <!-- note that here we reference previously declared dependency -->
+                <unzip src="${project.build.directory}/${project.build.finalName}.jar" dest="${project.build.directory}/tmp"/>
+                <copy file="resources/build.properties" todir="${project.build.directory}/tmp"/>
+                <copy file="resources/build.xml" todir="${project.build.directory}/tmp"/>
+                <zip basedir="${project.build.directory}/tmp" destfile="${project.build.directory}/${project.build.finalName}.jar"/>
+                <!-- now the modified jar is available -->
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>xml-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>generate-extra-iu</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>transform</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <transformationSets>
+            <transformationSet>
+              <dir>target</dir>
+              <includes>
+                <include>p2content.xml</include>
+              </includes>
+              <stylesheet>cp-content.xsl</stylesheet>
+            </transformationSet>
+          </transformationSets>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-extra-iu</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${basedir}/target/generated-resources/xml/xslt</directory>
+                  <includes>
+                    <include>p2content.xml</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>assemble-launchers</id>
+      <activation>
+        <property>
+          <!-- workaround. activeByDefault is disabled when another profile is
+            selected. -->
+          <name>!longnotexistingproperty</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy-executable-natives</id>
+                <phase>process-resources</phase>
+                <configuration>
+                  <target>
+                    <!-- We need to get binary bits from binary repo -->
+                    <!-- If local binaries had been built, copy will not overwrite
+                      them -->
+                    <echo message="Copy eclipse binaries to launcher binaries" level="info"/>
+                    <copy todir="bin" verbose="true" includeEmptyDirs="false" failonerror="true">
+                      <fileset dir="${rt.equinox.binaries.loc}/org.eclipse.equinox.executable/bin/">
+                        <include name="cocoa/macosx/x86_64/**/*"/>
+                        <include name="cocoa/macosx/aarch64/**/*"/>
+                        <include name="gtk/linux/ppc64le/**/*"/>
+                        <include name="gtk/linux/aarch64/**/*"/>
+                        <include name="gtk/linux/x86_64/**/*"/>
+                        <include name="win32/win32/x86_64/**/*"/>
+                      </fileset>
+                    </copy>
+                    <!-- rename eclipse launchers to "launcher" -->
+                    <move todir="bin" verbose="true">
+                      <fileset dir="bin"/>
+                      <regexpmapper from="^(.*[/\\])eclipse(.exe)?$" to="\1launcher\2"/>
+                    </move>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>

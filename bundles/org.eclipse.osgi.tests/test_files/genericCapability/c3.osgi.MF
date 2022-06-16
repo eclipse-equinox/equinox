@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: c3.osgi
+Bundle-Version: 1.0
+Require-Capability: 
+ namespace.1;
+  filter:="(&(rank>=300)(!(rank>=400))
+          (percent>=0.3)(!(percent>=0.4))
+          (test.version>=3.0)(!(test.version>=4.0))
+          (test.string~=abc))",
+ namespace.2;
+  filter:="(&(rank>=300)(!(rank>=400))
+          (percent>=0.3)(!(percent>=0.4))
+          (test.version>=3.0)(!(test.version>=4.0))
+          (test.string~=abc))",
+ namespace.3;
+  filter:="(&(rank>=300)(!(rank>=400))
+          (percent>=0.3)(!(percent>=0.4))
+          (test.version>=3.0)(!(test.version>=4.0))
+          (test.string~=abc))",
+ osgi.identity;
+  filter:="(&(osgi.identity=p3.*)(version=1.0)(type=osgi.bundle))",
+ not.effective;
+  filter:="(not.effective=true)";
+  effective:=active

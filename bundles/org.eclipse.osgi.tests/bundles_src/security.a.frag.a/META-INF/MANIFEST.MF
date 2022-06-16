@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name:  security.a.frag.a
+Bundle-SymbolicName: security.a.frag.a
+Fragment-Host: security.a
+Bundle-Version: 1.0.0

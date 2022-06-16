@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: uses.k.importer
+Bundle-Version: 1.0
+Require-Bundle: uses.l
+Import-Package: uses.conflict; conflict=1; resolution:=optional

@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: p1
+Bundle-Version: 1.0
+Export-Package: 
+ x; version="1.0"; uses:="x.sub",
+ x.sub; version="2.0",
+ x.extra

@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: ext.framework.b
+Bundle-SymbolicName: ext.framework.b
+Bundle-Version: 1.0.0
+Fragment-Host: system.bundle; extension:=framework
+Export-Package: ext.framework.b

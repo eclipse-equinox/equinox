@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: osgi test
+Bundle-SymbolicName: osgi.lazystart.c
+Bundle-Version: 1.0.0
+Bundle-Localization: plugin
+Import-Package: 
+ org.eclipse.osgi.tests.bundles,
+ org.osgi.framework;version="1.3.0"
+Bundle-ActivationPolicy: lazy; include:="osgi.lazystart.c"
+Export-Package: osgi.lazystart.c,
+ osgi.lazystart.c.excluded.a,
+ osgi.lazystart.c.excluded.b
+Bundle-Activator: osgi.lazystart.c.Activator

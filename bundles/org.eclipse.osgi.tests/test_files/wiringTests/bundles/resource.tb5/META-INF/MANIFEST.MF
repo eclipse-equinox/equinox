@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: resource.tb5
+Bundle-Version: 1.0.0
+Require-Capability: 
+ capability.1,
+ capability.1;b=a,
+ capability.1;b=a;bar=foo;filter:=(a=b),
+ capability.1;a=b;filter:=(a=c),
+ capability.2;bar=foo;y=x;filter:=(&(foo=bar));mandatory:="foo,x"
+

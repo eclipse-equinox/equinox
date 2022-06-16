@@ -1,0 +1,5 @@
+Bundle-SymbolicName: test.bug438904.frag
+Bundle-Version: 1.0
+Export-Package: test.bug438904.frag
+Fragment-Host: test.bug438904.host
+

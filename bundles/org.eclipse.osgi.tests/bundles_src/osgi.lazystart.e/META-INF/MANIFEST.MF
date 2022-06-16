@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: osgi test
+Bundle-SymbolicName: osgi.lazystart.e
+Bundle-Version: 1.0.0
+Bundle-Localization: plugin
+Import-Package: 
+ osgi.lazystart.d,
+ org.osgi.framework;version="1.3.0"
+Bundle-ActivationPolicy: lazy
+Bundle-Activator: osgi.lazystart.e.Activator

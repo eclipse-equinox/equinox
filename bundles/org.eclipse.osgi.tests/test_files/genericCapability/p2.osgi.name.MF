@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: p2.osgi
+Bundle-Version: 1.0
+Provide-Capability: 
+ namespace.1; rank:Long="200"; percent:Double="0.20"; test.version:Version="2.0.0"; test.string:String="ABC"; namespace.1="p2",
+ namespace.2; rank:Long="200"; percent:Double="0.20"; test.version:Version="2.0.0"; test.string:String="ABC"; namespace.2="p2",
+ namespace.3; rank:Long="200"; percent:Double="0.20"; test.version:Version="2.0.0"; test.string:String="ABC"; namespace.3="p2",
+ not.effective; not.effective=test; effective:=active
+

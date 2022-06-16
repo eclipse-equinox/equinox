@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<setup:Configuration
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:setup="http://www.eclipse.org/oomph/setup/1.0"
+    label="Equinox">
+  <annotation
+      source="http://www.eclipse.org/oomph/setup/BrandingInfo">
+    <detail
+        key="imageURI">
+      <value>https://www.eclipse.org/equinox/images/logo_small.png</value>
+    </detail>
+    <detail
+        key="badgeLabel">
+      <value>Equinox</value>
+    </detail>
+  </annotation>
+  <installation
+      name="equinox.installation"
+      label="Equinox Installation">
+    <setupTask
+        xsi:type="setup:VariableTask"
+        name="installation.id.default"
+        value="equinox"/>
+    <productVersion
+        href="index:/org.eclipse.setup#//@productCatalogs[name='org.eclipse.applications']/@products[name='eclipse.platform.sdk']/@versions[name='latest']"/>
+    <description>The Equinox installation provides the latest tools needed to work with the Eclipse Equinox's source code.</description>
+  </installation>
+  <workspace
+      name="equinox.workspace"
+      label="Equinox Workspace">
+    <setupTask
+        xsi:type="setup:VariableTask"
+        name="workspace.id.default"
+        value="equinox-ws"/>
+    <setupTask
+        xsi:type="setup:CompoundTask"
+        name="User Preferences">
+      <annotation
+          source="http://www.eclipse.org/oomph/setup/UserPreferences">
+        <detail
+            key="/instance/org.eclipse.oomph.setup.ui/showToolBarContributions">
+          <value>record</value>
+        </detail>
+      </annotation>
+      <setupTask
+          xsi:type="setup:CompoundTask"
+          name="org.eclipse.oomph.setup.ui">
+        <setupTask
+            xsi:type="setup:PreferenceTask"
+            key="/instance/org.eclipse.oomph.setup.ui/showToolBarContributions"
+            value="true"/>
+      </setupTask>
+      <setupTask
+          xsi:type="setup:CompoundTask"
+          name="org.eclipse.ui.ide">
+        <setupTask
+            xsi:type="setup:PreferenceTask"
+            key="/instance/org.eclipse.ui.ide/WORKSPACE_NAME"
+            value="Equinox"/>
+      </setupTask>
+    </setupTask>
+    <setupTask
+        xsi:type="setup:VariableTask"
+        name="eclipse.git.authentication.style"
+        defaultValue="anonymous"/>
+    <stream
+        href="index:/org.eclipse.setup#//@projectCatalogs[name='org.eclipse']/@projects[name='equinox']/@projects[name='binaries']/@streams[name='master']"/>
+    <stream
+        href="index:/org.eclipse.setup#//@projectCatalogs[name='org.eclipse']/@projects[name='equinox']/@projects[name='bundles']/@streams[name='master']"/>
+    <stream
+        href="index:/org.eclipse.setup#//@projectCatalogs[name='org.eclipse']/@projects[name='equinox']/@projects[name='framework']/@streams[name='master']"/>
+    <stream
+        href="index:/org.eclipse.setup#//@projectCatalogs[name='org.eclipse']/@projects[name='equinox']/@projects[name='p2']/@streams[name='master']"/>
+    <description>The Equinox workspace provides the source code of the Equinox project.</description>
+  </workspace>
+  <description>
+    &lt;p>
+    The &lt;a href=&quot;https://www.eclipse.org/equinox/&quot;/>Equinox&lt;/a> configuration provisions a dedicated development environment 
+    for the complete set of source projects of the &lt;a href=&quot;https://projects.eclipse.org/projects/eclipse.equinox&quot;>Equinox project&lt;/a>.
+    &lt;/p>
+    &lt;p>
+    All the source projects from &lt;a href=&quot;https://github.com/eclipse-equinox&quot;>Equinox's Github Repositories&lt;/a>
+    are available, organized into working sets, and ready for contribution.
+    &lt;/p>
+    &lt;/p>
+    Please &lt;a href=&quot;https://wiki.eclipse.org/Eclipse_Platform_SDK_Provisioning&quot;>read the analogous tutorial instructions&lt;/a> for the Eclipse Platform SDK's configuration for more details.
+    &lt;/p>
+  </description>
+</setup:Configuration>

@@ -1,0 +1,7 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: sub.e
+Bundle-Version: 1.0.0
+Export-Package: 
+ foo; version="1.0"; uses:="bar",
+ bar; version="1.0"
+

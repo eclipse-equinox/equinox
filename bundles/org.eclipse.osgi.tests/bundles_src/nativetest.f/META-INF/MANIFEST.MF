@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: NativeBundle Plug-in
+Bundle-SymbolicName: nativetest.f
+Bundle-Version: 1.0.0
+Bundle-Localization: plugin
+Bundle-NativeCode: 
+ libs/test1/nativecode.txt; osname="Windows NT (unknown)", *
