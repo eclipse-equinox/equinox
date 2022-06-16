@@ -12,6 +12,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     steps:
     - uses: actions/checkout@v3
       with:
@@ -27,7 +28,14 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: maven
+    - name: Cache local Maven repository
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2/repository
+        # re-cache on changes in the pom and target files
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml', '**/*.target') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
     - name: Build with Maven
       uses: GabrielBB/xvfb-action@v1
       with:
