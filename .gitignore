@@ -3,7 +3,7 @@
 .DS_Store
 
 # maven
-/*/*/target/
+target/
 # files generated (temporary) by the tycho maven builds
 .polyglot.*
 .META-INF_*
