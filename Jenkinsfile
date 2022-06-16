@@ -11,6 +11,13 @@ pipeline {
 		jdk 'openjdk-jdk17-latest'
 	}
 	stages {
+		stage('get binaries') {
+			steps{
+				dir ('rt.equinox.binaries') {
+					checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CloneOption', timeout: 120]], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/eclipse-equinox/equinox.binaries.git']]])
+				}
+			}
+		}
 		stage('Build') {
 			steps {
 				sh """

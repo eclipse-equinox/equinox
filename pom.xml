@@ -55,7 +55,6 @@
   </profiles>
 
   <modules>
-    <module>launcher-binary-parent</module>
     <module>bundles/org.eclipse.equinox.security.ui</module>
     <module>features/org.eclipse.equinox.compendium.sdk</module>
     <module>features/org.eclipse.equinox.core.feature</module>
