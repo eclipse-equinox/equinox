@@ -1,0 +1,2 @@
+-jpms-module-info: ${project.artifactId};access='OPEN'
+-jpms-module-info-options: java.management;ignore="true"
