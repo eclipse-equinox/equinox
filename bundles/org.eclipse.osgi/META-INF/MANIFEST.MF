@@ -98,14 +98,16 @@ Provide-Capability: osgi.service; objectClass:List<String>="org.osgi.service.log
  osgi.service; objectClass:List<String>="org.eclipse.osgi.service.localization.BundleLocalization"; uses:="org.eclipse.osgi.service.localization",
  osgi.service; objectClass:List<String>="org.eclipse.osgi.service.security.TrustEngine"; uses:="org.eclipse.osgi.service.security",
  osgi.service; objectClass:List<String>="org.eclipse.osgi.signedcontent.SignedContentFactory"; uses:="org.eclipse.osgi.signedcontent",
- osgi.service; objectClass:List<String>="org.osgi.service.condition.Condition"; osgi.condition.id="true"; uses:="org.osgi.service.condition"
+ osgi.service; objectClass:List<String>="org.osgi.service.condition.Condition"; osgi.condition.id="true"; uses:="org.osgi.service.condition",
+ osgi.serviceloader;osgi.serviceloader="org.osgi.framework.connect.ConnectFrameworkFactory";register:="org.eclipse.osgi.launch.EquinoxFactory",
+ osgi.serviceloader;osgi.serviceloader="org.osgi.framework.launch.FrameworkFactory";register:="org.eclipse.osgi.launch.EquinoxFactory"
 Bundle-Name: %systemBundle
 Bundle-SymbolicName: org.eclipse.osgi; singleton:=true
 Bundle-Activator: org.eclipse.osgi.internal.framework.SystemBundleActivator
 Bundle-Description: %systemBundle
 Bundle-Copyright: %copyright
 Bundle-Vendor: %eclipse.org
-Bundle-Version: 3.18.0.qualifier
+Bundle-Version: 3.18.100.qualifier
 Bundle-Localization: systembundle
 Bundle-DocUrl: http://www.eclipse.org
 Eclipse-ExtensibleAPI: true
