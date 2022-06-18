@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -16,75 +16,53 @@ package org.eclipse.equinox.cm.test;
 import static org.junit.Assert.*;
 
 import java.util.Dictionary;
-import java.util.Hashtable;
 import org.eclipse.equinox.log.ExtendedLogReaderService;
-import org.eclipse.equinox.log.LogFilter;
-import org.junit.*;
+import org.junit.Test;
 import org.osgi.framework.*;
-import org.osgi.service.cm.*;
-import org.osgi.service.log.*;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ManagedService;
+import org.osgi.service.log.LogLevel;
+import org.osgi.service.log.LogListener;
 
-public class ManagedServiceTest {
+public class ManagedServiceTest extends AbstractCMTest {
 
-	private ConfigurationAdmin cm;
-	private ServiceReference<ConfigurationAdmin> reference;
 	int updateCount = 0;
 	boolean locked = false;
 	Object lock = new Object();
-
-	@Before
-	public void setUp() throws Exception {
-		Activator.getBundle("org.eclipse.equinox.cm").start();
-		reference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class);
-		cm = Activator.getBundleContext().getService(reference);
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		Activator.getBundleContext().ungetService(reference);
-		Activator.getBundle("org.eclipse.equinox.cm").stop();
-	}
 
 	@Test
 	public void testSamePidManagedService() throws Exception {
 
 		Configuration config = cm.getConfiguration("test");
-		Dictionary<String, Object> props = new Hashtable<>();
-		props.put("testkey", "testvalue");
+		Dictionary<String, Object> props = dictionaryOf("testkey", "testvalue");
 		config.update(props);
 
 		updateCount = 0;
-		ManagedService ms = new ManagedService() {
-
-			public void updated(Dictionary<String, ?> properties) {
-				synchronized (lock) {
-					locked = false;
-					lock.notify();
-					updateCount++;
-				}
-
+		ManagedService ms = properties -> {
+			synchronized (lock) {
+				locked = false;
+				lock.notify();
+				updateCount++;
 			}
+
 		};
 
-		Dictionary<String, Object> dict = new Hashtable<>();
-		dict.put(Constants.SERVICE_PID, "test");
+		Dictionary<String, Object> dict = dictionaryOf(Constants.SERVICE_PID, "test");
 		ServiceRegistration<ManagedService> reg = null;
 		synchronized (lock) {
-			reg = Activator.getBundleContext().registerService(ManagedService.class, ms, dict);
+			reg = registerService(ManagedService.class, ms, dict);
 			locked = true;
 			lock.wait(5000);
-			if (locked)
-				fail("should have updated");
+			assertFalse("should have updated", locked);
 			assertEquals(1, updateCount);
 		}
 
 		ServiceRegistration<ManagedService> reg2 = null;
 		synchronized (lock) {
-			reg2 = Activator.getBundleContext().registerService(ManagedService.class, ms, dict);
+			reg2 = registerService(ManagedService.class, ms, dict);
 			locked = true;
 			lock.wait(5000);
-			if (locked)
-				fail("should have updated");
+			assertFalse("should have updated", locked);
 			assertEquals(2, updateCount);
 		}
 		reg.unregister();
@@ -95,34 +73,25 @@ public class ManagedServiceTest {
 	@Test
 	public void testBug374637() throws Exception {
 
-		ManagedService ms = new ManagedService() {
-
-			public void updated(Dictionary<String, ?> properties) {
-				// nothing
-			}
+		ManagedService ms = properties -> {
+			// nothing
 		};
 
-		ExtendedLogReaderService reader = Activator.getBundleContext().getService(Activator.getBundleContext().getServiceReference(ExtendedLogReaderService.class));
+		BundleContext ctx = getBundleContext();
+		ExtendedLogReaderService reader = ctx.getService(ctx.getServiceReference(ExtendedLogReaderService.class));
 		synchronized (lock) {
 			locked = false;
 		}
-		LogListener listener = new LogListener() {
-			public void logged(LogEntry entry) {
-				synchronized (lock) {
-					locked = true;
-					lock.notifyAll();
-				}
+		LogListener listener = entry -> {
+			synchronized (lock) {
+				locked = true;
+				lock.notifyAll();
 			}
 		};
-		reader.addLogListener(listener, new LogFilter() {
-			public boolean isLoggable(Bundle bundle, String loggerName, int logLevel) {
-				return logLevel == LogService.LOG_ERROR;
-			}
-		});
-		Dictionary<String, Object> dict = new Hashtable<>();
-		dict.put(Constants.SERVICE_PID, "test");
-		ServiceRegistration<ManagedService> reg1 = Activator.getBundleContext().registerService(ManagedService.class, ms, dict);
-		ServiceRegistration<ManagedService> reg2 = Activator.getBundleContext().registerService(ManagedService.class, ms, dict);
+		reader.addLogListener(listener, (bundle, name, level) -> level == LogLevel.ERROR.ordinal());
+		Dictionary<String, Object> dict = dictionaryOf(Constants.SERVICE_PID, "test");
+		ServiceRegistration<ManagedService> reg1 = registerService(ManagedService.class, ms, dict);
+		ServiceRegistration<ManagedService> reg2 = registerService(ManagedService.class, ms, dict);
 
 		reg1.unregister();
 		reg2.unregister();
@@ -137,42 +106,30 @@ public class ManagedServiceTest {
 	@Test
 	public void testGeneralManagedService() throws Exception {
 		updateCount = 0;
-		ManagedService ms = new ManagedService() {
-
-			public void updated(Dictionary<String, ?> properties) {
-				synchronized (lock) {
-					locked = false;
-					lock.notify();
-					updateCount++;
-				}
-
+		ManagedService ms = properties -> {
+			synchronized (lock) {
+				locked = false;
+				lock.notify();
+				updateCount++;
 			}
 		};
 
-		Dictionary<String, Object> dict = new Hashtable<>();
-		dict.put(Constants.SERVICE_PID, "test");
-
 		ServiceRegistration<ManagedService> reg = null;
 		synchronized (lock) {
-			reg = Activator.getBundleContext().registerService(ManagedService.class, ms, dict);
+			reg = registerService(ManagedService.class, ms, dictionaryOf(Constants.SERVICE_PID, "test"));
 			locked = true;
 			lock.wait(5000);
-			if (locked)
-				fail("should have updated");
+			assertFalse("should have updated", locked);
 			assertEquals(1, updateCount);
 		}
 
 		Configuration config = cm.getConfiguration("test");
 		assertNull(config.getProperties());
-		Dictionary<String, Object> props = new Hashtable<>();
-		props.put("testkey", "testvalue");
-
 		synchronized (lock) {
-			config.update(props);
+			config.update(dictionaryOf("testkey", "testvalue"));
 			locked = true;
 			lock.wait(5000);
-			if (locked)
-				fail("should have updated");
+			assertFalse("should have updated", locked);
 			assertEquals(2, updateCount);
 		}
 
@@ -182,8 +139,7 @@ public class ManagedServiceTest {
 			config.setBundleLocation("bogus");
 			locked = true;
 			lock.wait(5000);
-			if (locked)
-				fail("should have updated");
+			assertFalse("should have updated", locked);
 			assertEquals(3, updateCount);
 		}
 
@@ -200,14 +156,12 @@ public class ManagedServiceTest {
 			config.setBundleLocation(location);
 			locked = true;
 			lock.wait(5000);
-			if (locked)
-				fail("should have updated");
+			assertFalse("should have updated", locked);
 			assertEquals(4, updateCount);
 		}
 
-		dict.remove(Constants.SERVICE_PID);
 		synchronized (lock) {
-			reg.setProperties(dict);
+			reg.setProperties(emptyDictionary());
 			locked = true;
 			lock.wait(100);
 			assertTrue(locked);
@@ -216,8 +170,7 @@ public class ManagedServiceTest {
 		}
 
 		synchronized (lock) {
-			props.put("testkey", "testvalue2");
-			config.update(props);
+			config.update(dictionaryOf("testkey", "testvalue2"));
 			locked = true;
 			lock.wait(100);
 			assertTrue(locked);
@@ -227,13 +180,11 @@ public class ManagedServiceTest {
 
 		config.delete();
 		config = cm.getConfiguration("test2");
-		dict.put(Constants.SERVICE_PID, "test2");
 		synchronized (lock) {
-			reg.setProperties(dict);
+			reg.setProperties(dictionaryOf(Constants.SERVICE_PID, "test2"));
 			locked = true;
 			lock.wait(5000);
-			if (locked)
-				fail("should have updated");
+			assertFalse("should have updated", locked);
 			assertEquals(5, updateCount);
 		}
 
@@ -241,8 +192,7 @@ public class ManagedServiceTest {
 			config.delete();
 			locked = true;
 			lock.wait(5000);
-			if (locked)
-				fail("should have updated");
+			assertFalse("should have updated", locked);
 			assertEquals(6, updateCount);
 		}
 		reg.unregister();

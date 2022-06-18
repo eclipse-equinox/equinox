@@ -27,31 +27,4 @@
   <version>1.1.200-SNAPSHOT</version>
   <packaging>eclipse-test-plugin</packaging>
   
-  <build>
-  	<plugins>
-  		<plugin>
-  			<groupId>org.eclipse.tycho</groupId>
-  			<artifactId>tycho-surefire-plugin</artifactId>
-  			<version>${tycho.version}</version>
-  		</plugin>
-  
-  		<plugin>
-  			<groupId>org.eclipse.tycho</groupId>
-  			<artifactId>target-platform-configuration</artifactId>
-  			<version>${tycho.version}</version>
-  			<configuration>
-  				<dependency-resolution>
-  					<extraRequirements>
-  						<requirement>
-  							<type>eclipse-plugin</type>
-  							<id>org.eclipse.equinox.cm</id>
-  							<versionRange>0.0.0</versionRange>
-  						</requirement>
-  					</extraRequirements>
-  				</dependency-resolution>
-  			</configuration>
-  		</plugin>
-  
-  	</plugins>
-  </build>
 </project>
