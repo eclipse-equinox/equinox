@@ -101,6 +101,7 @@ Provide-Capability: osgi.service; objectClass:List<String>="org.osgi.service.log
  osgi.service; objectClass:List<String>="org.osgi.service.condition.Condition"; osgi.condition.id="true"; uses:="org.osgi.service.condition",
  osgi.serviceloader;osgi.serviceloader="org.osgi.framework.connect.ConnectFrameworkFactory";register:="org.eclipse.osgi.launch.EquinoxFactory",
  osgi.serviceloader;osgi.serviceloader="org.osgi.framework.launch.FrameworkFactory";register:="org.eclipse.osgi.launch.EquinoxFactory"
+Require-Capability: osgi.serviceloader;osgi.serviceloader=org.osgi.framework.connect.FrameworkUtilHelper;effective=module-info
 Bundle-Name: %systemBundle
 Bundle-SymbolicName: org.eclipse.osgi; singleton:=true
 Bundle-Activator: org.eclipse.osgi.internal.framework.SystemBundleActivator
