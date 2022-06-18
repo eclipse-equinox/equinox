@@ -29,13 +29,14 @@
     <!-- required by: org.eclipse.equinox.feature:org.eclipse.equinox.executable -->
     <!-- required by: org.eclipse.equinox.framework:launcher-binary-parent -->
     <rt.equinox.binaries.loc>../../../rt.equinox.binaries</rt.equinox.binaries.loc>
+    <target-platform.optionalDependencies>require</target-platform.optionalDependencies>
   </properties>
 
   <!-- 
     To build individual bundles, we specify a repository where to find parent pom, 
     in case it is not in local maven cache already
     and that parent pom also has fuller individual-bundle profile 
-    defined that is combined with this one. --> 
+    defined that is combined with this one. -->
   <profiles>
     <profile>
       <id>build-individual-bundles</id>
@@ -55,22 +56,15 @@
   </profiles>
 
   <modules>
+    <module>features</module>
     <module>bundles/org.eclipse.equinox.security.ui</module>
-    <module>features/org.eclipse.equinox.compendium.sdk</module>
-    <module>features/org.eclipse.equinox.core.feature</module>
-    <module>features/org.eclipse.equinox.sdk</module>
-    <module>features/org.eclipse.equinox.server.core</module>
-    <module>features/org.eclipse.equinox.server.jetty</module>
-    <module>features/org.eclipse.equinox.core.sdk</module>
-
-    <module>features/org.eclipse.equinox.server.simple</module>
     <module>bundles/org.eclipse.equinox.bidi.tests</module>
     <module>bundles/org.eclipse.equinox.cm.test</module>
     <module>bundles/org.eclipse.equinox.common.tests</module>
 
     <module>bundles/org.eclipse.equinox.ds.tests</module>
     <module>bundles/org.eclipse.equinox.preferences.tests</module>
-<!-- removed until the dependency on aspectj is removed. see bug 470000
+    <!-- removed until the dependency on aspectj is removed. see bug 470000
     <module>bundles/org.eclipse.equinox.region.tests</module>
 -->
     <module>bundles/org.eclipse.equinox.security.tests</module>
@@ -118,7 +112,7 @@
     <module>bundles/org.eclipse.osgi.services</module>
     <module>bundles/org.eclipse.osgi.util</module>
     <module>bundles/org.eclipse.osgi/supplement</module>
-    
+
     <module>bundles/org.eclipse.equinox.launcher</module>
     <module>bundles/org.eclipse.equinox.launcher.cocoa.macosx</module>
     <module>bundles/org.eclipse.equinox.launcher.cocoa.macosx.x86_64</module>
@@ -129,10 +123,8 @@
     <module>bundles/org.eclipse.equinox.launcher.win32.win32.x86_64</module>
 
     <module>bundles/org.eclipse.osgi.tests</module>
-
-    <module>features/org.eclipse.equinox.executable.feature</module>
   </modules>
-  
+
   <build>
     <plugins>
       <plugin>
@@ -162,14 +154,23 @@
       </plugin>
     </plugins>
     <pluginManagement>
-		<plugins>
-			<plugin>
-				<groupId>biz.aQute.bnd</groupId>
-				<artifactId>bnd-maven-plugin</artifactId>
-				<version>6.3.1</version>
-			</plugin>
-		</plugins>
-	</pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>biz.aQute.bnd</groupId>
+          <artifactId>bnd-maven-plugin</artifactId>
+          <version>6.3.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>target-platform-configuration</artifactId>
+          <configuration>
+            <dependency-resolution>
+              <optionalDependencies>${target-platform.optionalDependencies}</optionalDependencies>
+            </dependency-resolution>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
 </project>

@@ -13,8 +13,7 @@ Require-Bundle: org.eclipse.core.tests.harness;bundle-version="3.4.0",
  org.eclipse.equinox.registry;bundle-version="3.4.0",
  org.eclipse.equinox.preferences;bundle-version="3.2.200"
 Export-Package: org.eclipse.equinox.internal.security.tests;x-internal:=true,
- org.eclipse.equinox.internal.security.tests.storage;x-internal:=true,
- org.eclipse.equinox.security.tests;version="1.0.0"
+ org.eclipse.equinox.internal.security.tests.storage;x-internal:=true
 Bundle-ActivationPolicy: lazy
 Eclipse-BundleShape: dir
 Automatic-Module-Name: org.eclipse.equinox.security.tests
