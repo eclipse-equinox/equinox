@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -16,49 +16,30 @@ package org.eclipse.equinox.cm.test;
 import static org.junit.Assert.assertFalse;
 
 import java.util.Dictionary;
-import java.util.Hashtable;
-import org.junit.*;
-import org.osgi.framework.ServiceReference;
+import org.junit.Test;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.cm.*;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationListener;
 
-public class ConfigurationListenerTest {
+public class ConfigurationListenerTest extends AbstractCMTest {
 
-	private ConfigurationAdmin cm;
-	private ServiceReference<ConfigurationAdmin> reference;
 	boolean locked = false;
 	Object lock = new Object();
-
-	@Before
-	public void setUp() throws Exception {
-		Activator.getBundle("org.eclipse.equinox.cm").start();
-		reference = Activator.getBundleContext().getServiceReference(ConfigurationAdmin.class);
-		cm = Activator.getBundleContext().getService(reference);
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		Activator.getBundleContext().ungetService(reference);
-		Activator.getBundle("org.eclipse.equinox.cm").stop();
-	}
 
 	@Test
 	public void testListener() throws Exception {
 
 		Configuration config = cm.getConfiguration("test");
-		Dictionary<String, Object> props = new Hashtable<>();
-		props.put("testkey", "testvalue");
+		Dictionary<String, Object> props = dictionaryOf("testkey", "testvalue");
 		config.update(props);
 
-		ConfigurationListener listener = new ConfigurationListener() {
-			public void configurationEvent(ConfigurationEvent event) {
-				synchronized (lock) {
-					locked = false;
-					lock.notify();
-				}
+		ConfigurationListener listener = event -> {
+			synchronized (lock) {
+				locked = false;
+				lock.notify();
 			}
 		};
-		ServiceRegistration<ConfigurationListener> reg = Activator.getBundleContext().registerService(ConfigurationListener.class, listener, null);
+		ServiceRegistration<ConfigurationListener> reg = registerService(ConfigurationListener.class, listener, null);
 
 		synchronized (lock) {
 			config.update(props);
