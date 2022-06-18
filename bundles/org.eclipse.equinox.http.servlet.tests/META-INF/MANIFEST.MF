@@ -6,7 +6,9 @@ Bundle-SymbolicName: org.eclipse.equinox.http.servlet.tests
 Bundle-Version: 1.8.500.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BundleShape: dir
-Require-Bundle: org.junit;bundle-version="4.0"
+Require-Bundle: org.junit;bundle-version="4.0",
+ org.apache.felix.scr,
+ org.eclipse.equinox.http.jetty
 Import-Package: javax.servlet;version="2.6.0",
  javax.servlet.http;version="2.6.0",
  org.apache.commons.fileupload;version="1.2.2",

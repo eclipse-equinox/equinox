@@ -23,6 +23,7 @@
   <packaging>eclipse-plugin</packaging>
 
   <properties>
+    <!-- API Analysis only works when Platform filter match current environment, see Bug 564404 -->
     <skipAPIAnalysis>true</skipAPIAnalysis>
   </properties>
 
