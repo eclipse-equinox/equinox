@@ -37,11 +37,9 @@ public class ServletRegistration extends EndpointRegistration<ServletDTO> {
 	static {
 		ServiceLoader<MultipartSupportFactory> loader = ServiceLoader.load(MultipartSupportFactory.class);
 
-		Iterator<MultipartSupportFactory> iterator = loader.iterator();
-
-		while (iterator.hasNext()) {
+		for (MultipartSupportFactory element : loader) {
 			try {
-				factory = iterator.next();
+				factory = element;
 				break;
 			}
 			catch (Throwable t) {

@@ -1358,19 +1358,18 @@ public class ResolverImpl implements Resolver {
 		}
 		if (cycle.size() != cycleSize) {
 			//we removed an un-resolvable bundle; must re-resolve remaining cycle
-			for (int i = 0; i < cycle.size(); i++) {
-				ResolverBundle cycleBundle = cycle.get(i);
+			for (ResolverBundle cycleBundle : cycle) {
 				cycleBundle.clearWires();
 			}
 			List<ResolverBundle> innerCycle = new ArrayList<>(cycle.size());
-			for (int i = 0; i < cycle.size(); i++)
-				resolveBundle(cycle.get(i), innerCycle);
+			for (ResolverBundle element : cycle)
+				resolveBundle(element, innerCycle);
 			checkCycle(innerCycle);
 		} else {
-			for (int i = 0; i < cycle.size(); i++) {
+			for (ResolverBundle element : cycle) {
 				if (DEBUG || DEBUG_CYCLES)
-					ResolverImpl.log("Pushing " + cycle.get(i) + " to RESOLVED"); //$NON-NLS-1$ //$NON-NLS-2$
-				setBundleResolved(cycle.get(i));
+					ResolverImpl.log("Pushing " + element + " to RESOLVED"); //$NON-NLS-1$ //$NON-NLS-2$
+				setBundleResolved(element);
 			}
 		}
 	}

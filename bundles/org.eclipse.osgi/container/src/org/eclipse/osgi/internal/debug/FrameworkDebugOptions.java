@@ -20,8 +20,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
@@ -192,10 +192,8 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 		synchronized (lock) {
 			if (options != null) {
 				optionsArray = new String[options.size()];
-				final Iterator<Map.Entry<Object, Object>> entrySetIterator = options.entrySet().iterator();
 				int i = 0;
-				while (entrySetIterator.hasNext()) {
-					Map.Entry<Object, Object> entry = entrySetIterator.next();
+				for (Entry<Object, Object> entry : options.entrySet()) {
 					optionsArray[i] = ((String) entry.getKey()) + "=" + ((String) entry.getValue()); //$NON-NLS-1$
 					i++;
 				}
@@ -292,8 +290,8 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 			}
 			fireChangesTo = new HashSet<>();
 			// first check for removals
-			for (Iterator<Object> keys = options.keySet().iterator(); keys.hasNext();) {
-				String key = (String) keys.next();
+			for (Object object : options.keySet()) {
+				String key = (String) object;
 				if (!newOptions.containsKey(key)) {
 					String symbolicName = getSymbolicName(key);
 					if (symbolicName != null)
@@ -313,8 +311,8 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 			options = newOptions;
 		}
 		if (fireChangesTo != null)
-			for (Iterator<String> iChanges = fireChangesTo.iterator(); iChanges.hasNext();)
-				optionsChanged(iChanges.next());
+			for (String string : fireChangesTo)
+				optionsChanged(string);
 	}
 
 	/*

@@ -1134,10 +1134,10 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			// try up to the first non-number char
 			StringBuilder sb = new StringBuilder(value.length());
 			char[] chars = value.toCharArray();
-			for (int i = 0; i < chars.length; i++) {
-				if (!Character.isDigit(chars[i]))
+			for (char element : chars) {
+				if (!Character.isDigit(element))
 					break;
-				sb.append(chars[i]);
+				sb.append(element);
 			}
 			if (sb.length() > 0)
 				return Integer.parseInt(sb.toString());

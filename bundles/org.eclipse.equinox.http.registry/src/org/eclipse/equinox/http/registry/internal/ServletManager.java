@@ -71,8 +71,7 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 
 	public void added(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
-		for (int i = 0; i < elements.length; i++) {
-			IConfigurationElement serviceSelectorElement = elements[i];
+		for (IConfigurationElement serviceSelectorElement : elements) {
 			if (!SERVICESELECTOR.equals(serviceSelectorElement.getName()))
 				continue;
 
@@ -106,8 +105,7 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 			break;
 		}
 
-		for (int i = 0; i < elements.length; i++) {
-			IConfigurationElement servletElement = elements[i];
+		for (IConfigurationElement servletElement : elements) {
 			if (!SERVLET.equals(servletElement.getName()))
 				continue;
 
@@ -118,9 +116,9 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 
 			Dictionary<String, String> initparams = new Hashtable<>();
 			IConfigurationElement[] initParams = servletElement.getChildren(INIT_PARAM);
-			for (int j = 0; j < initParams.length; ++j) {
-				String paramName = initParams[j].getAttribute(PARAM_NAME);
-				String paramValue = initParams[j].getAttribute(PARAM_VALUE);
+			for (IConfigurationElement initParam : initParams) {
+				String paramName = initParam.getAttribute(PARAM_NAME);
+				String paramValue = initParam.getAttribute(PARAM_VALUE);
 				initparams.put(paramName, paramValue);
 			}
 
@@ -143,8 +141,7 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 
 	public void removed(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
-		for (int i = 0; i < elements.length; i++) {
-			IConfigurationElement servletElement = elements[i];
+		for (IConfigurationElement servletElement : elements) {
 			if (registered.remove(servletElement)) {
 				String alias = servletElement.getAttribute(ALIAS);
 				httpRegistryManager.removeContribution(alias);

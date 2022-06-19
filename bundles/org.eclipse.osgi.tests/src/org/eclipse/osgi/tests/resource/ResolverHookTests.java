@@ -15,7 +15,6 @@ package org.eclipse.osgi.tests.resource;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.hooks.resolver.ResolverHook;
@@ -44,8 +43,8 @@ public class ResolverHookTests extends AbstractResourceTest {
 					assertEquals("Wrong namespace", IdentityNamespace.IDENTITY_NAMESPACE, singleton.getNamespace());
 					assertEquals("Wrong singleton directive", "true", singleton.getDirectives().get(IdentityNamespace.CAPABILITY_SINGLETON_DIRECTIVE));
 					String symbolicName = (String) singleton.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE);
-					for (Iterator iCandidates = collisionCandidates.iterator(); iCandidates.hasNext();) {
-						BundleCapability candidate = (BundleCapability) iCandidates.next();
+					for (Object collisionCandidate : collisionCandidates) {
+						BundleCapability candidate = (BundleCapability) collisionCandidate;
 						assertEquals("Wrong namespace", IdentityNamespace.IDENTITY_NAMESPACE, candidate.getNamespace());
 						assertEquals("Wrong singleton directive", "true", candidate.getDirectives().get(IdentityNamespace.CAPABILITY_SINGLETON_DIRECTIVE));
 						assertEquals("Wrong symbolic name", symbolicName, (String) candidate.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE));

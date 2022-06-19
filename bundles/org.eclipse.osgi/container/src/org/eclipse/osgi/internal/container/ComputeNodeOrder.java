@@ -489,8 +489,8 @@ public class ComputeNodeOrder {
 		final Digraph g2 = new Digraph();
 		// add vertexes
 		List<Object> resortedVertexes = g1.idsByDFSFinishTime(false);
-		for (Iterator<Object> it = resortedVertexes.iterator(); it.hasNext();)
-			g2.addVertex(it.next());
+		for (Object object : resortedVertexes)
+			g2.addVertex(object);
 		// add edges
 		for (Object[] reference : references) {
 			g2.addEdge(reference[0], reference[1]);

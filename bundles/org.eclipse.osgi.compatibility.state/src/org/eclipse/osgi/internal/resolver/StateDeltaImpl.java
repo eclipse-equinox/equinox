@@ -41,8 +41,7 @@ final class StateDeltaImpl implements StateDelta {
 	public BundleDelta[] getChanges(int mask, boolean exact) {
 		synchronized (this.changes) {
 			List<BundleDelta> result = new ArrayList<>();
-			for (Iterator<BundleDelta> changesIter = changes.values().iterator(); changesIter.hasNext();) {
-				BundleDelta change = changesIter.next();
+			for (BundleDelta change : changes.values()) {
 				if (mask == change.getType() || (!exact && (change.getType() & mask) != 0))
 					result.add(change);
 			}

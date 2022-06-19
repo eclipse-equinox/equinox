@@ -16,7 +16,6 @@ package org.eclipse.osgi.tests.appadmin;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -683,8 +682,8 @@ public class ApplicationAdminTest extends OSGiTest {
 				fail("Unexpected ApplicationException", e); //$NON-NLS-1$
 			assertEquals("check error code", ApplicationException.APPLICATION_NOT_LAUNCHABLE, e.getErrorCode()); //$NON-NLS-1$
 		} finally {
-			for (Iterator handles = instances.iterator(); handles.hasNext();) {
-				((ApplicationHandle) handles.next()).destroy();
+			for (Object element : instances) {
+				((ApplicationHandle) element).destroy();
 			}
 		}
 		assertEquals("Did not launch the correct # of concurrent instances", instances.size(), cardinality + (hasMax ? 0 : 1)); //$NON-NLS-1$
@@ -709,8 +708,8 @@ public class ApplicationAdminTest extends OSGiTest {
 				fail("Unable to launch a main threaded application", e); //$NON-NLS-1$
 			assertEquals("check error code", ApplicationException.APPLICATION_NOT_LAUNCHABLE, e.getErrorCode()); //$NON-NLS-1$
 		} finally {
-			for (Iterator handles = instances.iterator(); handles.hasNext();) {
-				((ApplicationHandle) handles.next()).destroy();
+			for (Object element : instances) {
+				((ApplicationHandle) element).destroy();
 			}
 		}
 		assertEquals("Did not launch the correct # of main app instances", instances.size(), 1); //$NON-NLS-1$
@@ -855,8 +854,8 @@ public class ApplicationAdminTest extends OSGiTest {
 			args.put("test.arg1", Boolean.TRUE); //$NON-NLS-1$
 			args.put("test.arg2", Integer.valueOf(34)); //$NON-NLS-1$
 			args.put("test.arg3", Long.valueOf(34)); //$NON-NLS-1$
-			for (Iterator iEntries = args.entrySet().iterator(); iEntries.hasNext();) {
-				Map.Entry entry = (Map.Entry) iEntries.next();
+			for (Object element : args.entrySet()) {
+				Map.Entry entry = (Map.Entry) element;
 				assertEquals("key: " + entry.getKey(), entry.getValue(), results.get(entry.getKey())); //$NON-NLS-1$
 			}
 		} catch (InterruptedException e) {
@@ -918,8 +917,8 @@ public class ApplicationAdminTest extends OSGiTest {
 			args.put("test.arg1", Boolean.TRUE); //$NON-NLS-1$
 			args.put("test.arg2", Integer.valueOf(34)); //$NON-NLS-1$
 			args.put("test.arg3", Long.valueOf(34)); //$NON-NLS-1$
-			for (Iterator iEntries = args.entrySet().iterator(); iEntries.hasNext();) {
-				Map.Entry entry = (Map.Entry) iEntries.next();
+			for (Object element : args.entrySet()) {
+				Map.Entry entry = (Map.Entry) element;
 				assertEquals("key: " + entry.getKey(), entry.getValue(), results.get(entry.getKey())); //$NON-NLS-1$
 			}
 			// should not find the scheduled app anymore

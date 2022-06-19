@@ -15,7 +15,6 @@ package org.eclipse.osgi.tests.resource;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -427,13 +426,13 @@ public class BasicTest extends AbstractResourceTest {
 		// The type attribute contains the resource type.
 		assertType(type, (String) capability.getAttributes().get(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE));
 		Map attributes = capability.getAttributes();
-		for (Iterator iEntries = arbitraryAttrs.entrySet().iterator(); iEntries.hasNext();) {
-			Map.Entry entry = (Entry) iEntries.next();
+		for (Object element : arbitraryAttrs.entrySet()) {
+			Map.Entry entry = (Entry) element;
 			assertEquals("Wrong attribute: " + entry.getKey(), entry.getValue(), attributes.get(entry.getKey()));
 		}
 		Map directives = capability.getDirectives();
-		for (Iterator iEntries = arbitraryDirs.entrySet().iterator(); iEntries.hasNext();) {
-			Map.Entry entry = (Entry) iEntries.next();
+		for (Object element : arbitraryDirs.entrySet()) {
+			Map.Entry entry = (Entry) element;
 			assertEquals("Wrong directive: " + entry.getKey(), entry.getValue(), directives.get(entry.getKey()));
 		}
 	}

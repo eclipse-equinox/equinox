@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.osgi.service.urlconversion.URLConverter;
@@ -114,8 +113,8 @@ public class BundleInstaller {
 		if (bundles == null)
 			return;
 		if (bundles.containsValue(b)) {
-			for (Iterator it = bundles.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
+			for (Object element : bundles.entrySet()) {
+				Map.Entry entry = (Map.Entry) element;
 				if (entry.getValue().equals(b)) {
 					bundles.remove(entry.getKey());
 					break;
@@ -129,8 +128,8 @@ public class BundleInstaller {
 		if (bundles == null)
 			return null;
 		ArrayList result = new ArrayList(bundles.size());
-		for (Iterator iter = bundles.values().iterator(); iter.hasNext();) {
-			Bundle bundle = (Bundle) iter.next();
+		for (Object element : bundles.values()) {
+			Bundle bundle = (Bundle) element;
 			try {
 				bundle.uninstall();
 			} catch (IllegalStateException e) {

@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -2925,8 +2924,7 @@ public class DSTest {
       fail(message);
     }
     List tmp = new ArrayList(list2);
-    for (Iterator it = list1.iterator(); it.hasNext();) {
-      Object el = it.next();
+    for (Object el : list1) {
       if (!tmp.contains(el)) {
         fail(message);
       }

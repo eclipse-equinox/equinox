@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -229,14 +228,12 @@ public class BaseTest {
 		}
 		else if (Collection.class.isInstance(property)) {
 			List<String> list = new ArrayList<>();
-			for (@SuppressWarnings("rawtypes")
-				Iterator i = ((Collection)property).iterator(); i.hasNext();) {
+			for (Object o : ((Collection) property)) {
 
-				Object o = i.next();
-				if (String.class.isInstance(o)) {
-					list.add((String)o);
-				}
+			if (String.class.isInstance(o)) {
+				list.add((String)o);
 			}
+}
 			return list;
 		}
 		return Collections.emptyList();

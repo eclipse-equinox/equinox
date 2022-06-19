@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -402,8 +401,8 @@ public final class StateHelperImpl implements StateHelper {
 	}
 
 	private void buildReferences(BundleDescription description, List<BundleDescription> dependencies, List<Object[]> references) {
-		for (Iterator<BundleDescription> iter = dependencies.iterator(); iter.hasNext();)
-			addReference(description, iter.next(), references);
+		for (BundleDescription bundleDescription : dependencies)
+			addReference(description, bundleDescription, references);
 	}
 
 	private void addReference(BundleDescription description, BundleDescription reference, List<Object[]> references) {

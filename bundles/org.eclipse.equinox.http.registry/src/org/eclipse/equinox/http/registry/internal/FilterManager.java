@@ -70,8 +70,7 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 
 	public void added(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
-		for (int i = 0; i < elements.length; i++) {
-			IConfigurationElement serviceSelectorElement = elements[i];
+		for (IConfigurationElement serviceSelectorElement : elements) {
 			if (!SERVICESELECTOR.equals(serviceSelectorElement.getName()))
 				continue;
 
@@ -105,8 +104,7 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 			break;
 		}
 
-		for (int i = 0; i < elements.length; i++) {
-			IConfigurationElement filterElement = elements[i];
+		for (IConfigurationElement filterElement : elements) {
 			if (!FILTER.equals(filterElement.getName()))
 				continue;
 
@@ -117,9 +115,9 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 
 			Dictionary<String, String> initparams = new Hashtable<>();
 			IConfigurationElement[] initParams = filterElement.getChildren(INIT_PARAM);
-			for (int j = 0; j < initParams.length; ++j) {
-				String paramName = initParams[j].getAttribute(PARAM_NAME);
-				String paramValue = initParams[j].getAttribute(PARAM_VALUE);
+			for (IConfigurationElement initParam : initParams) {
+				String paramName = initParam.getAttribute(PARAM_NAME);
+				String paramValue = initParam.getAttribute(PARAM_VALUE);
 				initparams.put(paramName, paramValue);
 			}
 
@@ -142,8 +140,7 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 
 	public void removed(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
-		for (int i = 0; i < elements.length; i++) {
-			IConfigurationElement filterElement = elements[i];
+		for (IConfigurationElement filterElement : elements) {
 			Filter filter = registered.remove(filterElement);
 			if (filter != null)
 				httpRegistryManager.removeFilterContribution(filter);

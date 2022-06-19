@@ -14,7 +14,6 @@ package org.eclipse.osgi.internal.signedcontent;
 
 import java.security.cert.Certificate;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.signedcontent.SignedContentFromBundleFile.BaseSignerInfo;
@@ -85,8 +84,8 @@ public class TrustEngineListener {
 			}
 		}
 		// remove trust anchors from untrusted signers
-		for (Iterator<SignerInfo> untrusted = untrustedSigners.iterator(); untrusted.hasNext();)
-			((BaseSignerInfo) untrusted.next()).setTrustAnchor(null);
+		for (SignerInfo untrustedSigner : untrustedSigners)
+			((BaseSignerInfo) untrustedSigner).setTrustAnchor(null);
 		// re-establish trust
 		for (Bundle bundle : usingAnchor) {
 			SignedContentFromBundleFile signedContent = getSignedContent(bundle);

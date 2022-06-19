@@ -556,9 +556,8 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		synchronized (this.monitor) {
 			if (dependencies == null)
 				return;
-			Iterator<BundleDescription> iter = dependencies.iterator();
-			while (iter.hasNext()) {
-				((BundleDescriptionImpl) iter.next()).removeDependent(this);
+			for (BundleDescription element : dependencies) {
+				((BundleDescriptionImpl) element).removeDependent(this);
 			}
 			dependencies = null;
 		}
@@ -599,8 +598,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			if (dependencies == null)
 				return new ArrayList<>(0);
 			ArrayList<BundleDescription> required = new ArrayList<>(dependencies.size());
-			for (Iterator<BundleDescription> iter = dependencies.iterator(); iter.hasNext();) {
-				BundleDescription dep = iter.next();
+			for (BundleDescription dep : dependencies) {
 				if (dep != this && dep.getHost() == null)
 					required.add(dep);
 			}

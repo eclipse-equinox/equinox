@@ -325,15 +325,12 @@ public class Activator
 	}
 
 	private void processRegistrations() {
-		Iterator<Entry<ProxyServlet, Object>> iterator =
-			registrations.entrySet().iterator();
 		BundleContext currentContext = context;
 		if (currentContext == null) {
 			return;
 		}
 
-		while (iterator.hasNext()) {
-			Entry<ProxyServlet, Object> entry = iterator.next();
+		for (Entry<ProxyServlet, Object> entry : registrations.entrySet()) {
 			ProxyServlet proxyServlet = entry.getKey();
 			Object value = entry.getValue();
 

@@ -588,8 +588,8 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		expectedCapabilities.addAll(p1.getCapabilities("namespace.1"));
 		expectedCapabilities.addAll(p2.getCapabilities("namespace.1"));
 		expectedCapabilities.addAll(p3.getCapabilities("namespace.1"));
-		for (Iterator iWires = requiredWires.iterator(); iWires.hasNext();) {
-			BundleWire wire = (BundleWire) iWires.next();
+		for (Object requiredWire : requiredWires) {
+			BundleWire wire = (BundleWire) requiredWire;
 			expectedCapabilities.remove(wire.getCapability());
 		}
 		assertTrue("Unexpected capability wire: " + requiredWires, expectedCapabilities.isEmpty());

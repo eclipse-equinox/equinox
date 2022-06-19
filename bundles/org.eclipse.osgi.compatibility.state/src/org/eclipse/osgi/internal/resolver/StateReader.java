@@ -843,19 +843,16 @@ final class StateReader {
 			addDependencies(target, toLoad);
 			int skipBytes[] = getSkipBytes(toLoad);
 			// look for the lazy data of the toLoad list
-			for (int i = 0; i < skipBytes.length; i++)
-				readBundleDescriptionLazyData(in, skipBytes[i]);
+			for (int skipByte : skipBytes)
+				readBundleDescriptionLazyData(in, skipByte);
 		}
 	}
 
 	private void addDependencies(BundleDescriptionImpl target, List<BundleDescriptionImpl> toLoad) {
 		if (toLoad.contains(target) || target.isFullyLoaded())
 			return;
-		Iterator<BundleDescriptionImpl> load = toLoad.iterator();
 		int i = 0;
-		while (load.hasNext()) {
-			// insert the target into the list sorted by lazy data offsets
-			BundleDescriptionImpl bundle = load.next();
+		for (BundleDescriptionImpl bundle : toLoad) {
 			if (target.getLazyDataOffset() < bundle.getLazyDataOffset())
 				break;
 			i++;
@@ -865,8 +862,8 @@ final class StateReader {
 		else
 			toLoad.add(i, target);
 		List<BundleDescription> deps = target.getBundleDependencies();
-		for (Iterator<BundleDescription> iter = deps.iterator(); iter.hasNext();)
-			addDependencies((BundleDescriptionImpl) iter.next(), toLoad);
+		for (BundleDescription dep : deps)
+			addDependencies((BundleDescriptionImpl) dep, toLoad);
 	}
 
 	private int[] getSkipBytes(List<BundleDescriptionImpl> toLoad) {
