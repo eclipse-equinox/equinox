@@ -30,6 +30,7 @@ import org.eclipse.equinox.service.weaving.ICachingServiceFactory;
 import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
 import org.eclipse.equinox.service.weaving.IWeavingService;
 import org.eclipse.equinox.service.weaving.IWeavingServiceFactory;
+import org.eclipse.osgi.framework.util.Wirings;
 import org.eclipse.osgi.internal.loader.ModuleClassLoader;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.osgi.framework.Bundle;
@@ -39,7 +40,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -53,8 +53,6 @@ public class WeavingAdaptorFactory {
                     "org.eclipse.equinox.common" }); //$NON-NLS-1$
 
     private ServiceTracker<ICachingServiceFactory, ICachingServiceFactory> cachingServiceFactoryTracker;
-
-    private PackageAdmin packageAdminService;
 
     private StartLevel startLevelService;
 
@@ -111,9 +109,7 @@ public class WeavingAdaptorFactory {
         if (Debug.DEBUG_GENERAL) Debug.println(
                 "> WeavingAdaptorFactory.getHost() fragment=" + fragment); //$NON-NLS-1$
 
-        Bundle host = null;
-        if (packageAdminService != null)
-            host = packageAdminService.getHosts(fragment)[0];
+        Bundle host = Wirings.getHosts(fragment).get(0);
 
         if (Debug.DEBUG_GENERAL)
             Debug.println("< WeavingAdaptorFactory.getHost() " + host); //$NON-NLS-1$
@@ -158,7 +154,6 @@ public class WeavingAdaptorFactory {
                     + context);
         this.supplementerRegistry = supplementerRegistry;
 
-        initializePackageAdminService(context);
         initializeStartLevelService(context);
 
         // Service tracker for weaving service
@@ -234,22 +229,6 @@ public class WeavingAdaptorFactory {
         cachingServiceFactoryTracker.open();
         if (Debug.DEBUG_CACHE)
             Debug.println("> Opened service tracker for caching service."); //$NON-NLS-1$
-    }
-
-    private void initializePackageAdminService(final BundleContext context) {
-        if (Debug.DEBUG_GENERAL) Debug.println(
-                "> AdaptorFactory.initializePackageAdminService() context=" //$NON-NLS-1$
-                        + context);
-
-        final ServiceReference<PackageAdmin> ref = context
-                .getServiceReference(PackageAdmin.class);
-        if (ref != null) {
-            packageAdminService = context.getService(ref);
-        }
-
-        if (Debug.DEBUG_GENERAL)
-            Debug.println("< AdaptorFactory.initializePackageAdminService() " //$NON-NLS-1$
-                    + packageAdminService);
     }
 
     private void initializeStartLevelService(final BundleContext context) {

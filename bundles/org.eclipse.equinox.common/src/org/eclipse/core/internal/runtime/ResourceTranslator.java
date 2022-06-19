@@ -117,14 +117,7 @@ public class ResourceTranslator {
 	}
 
 	private static void addFragments(Bundle host, ArrayList<URL> classpath) {
-		Activator activator = Activator.getDefault();
-		if (activator == null)
-			return;
-		Bundle[] fragments = activator.getFragments(host);
-		if (fragments == null)
-			return;
-
-		for (Bundle fragment : fragments) {
+		for (Bundle fragment : Activator.getFragments(host)) {
 			addClasspathEntries(fragment, classpath);
 			addDevEntries(fragment, classpath);
 		}

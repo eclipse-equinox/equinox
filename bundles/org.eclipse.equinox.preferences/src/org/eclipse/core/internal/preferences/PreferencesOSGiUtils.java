@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 IBM Corporation and others.
+ * Copyright (c) 2005, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,14 @@
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
+import static java.util.function.Predicate.not;
+import static org.eclipse.osgi.framework.util.Wirings.inState;
+
 import org.eclipse.core.internal.preferences.exchange.ILegacyPreferences;
+import org.eclipse.osgi.framework.util.Wirings;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.osgi.framework.*;
-import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -29,7 +32,6 @@ import org.osgi.util.tracker.ServiceTracker;
 public class PreferencesOSGiUtils {
 	private ServiceTracker<?, ILegacyPreferences> initTracker;
 	private ServiceTracker<?, DebugOptions> debugTracker;
-	private ServiceTracker<?, PackageAdmin> bundleTracker;
 	private ServiceTracker<?, ?> configurationLocationTracker;
 	private ServiceTracker<?, ?> instanceLocationTracker;
 
@@ -60,9 +62,6 @@ public class PreferencesOSGiUtils {
 		debugTracker = new ServiceTracker<>(context, DebugOptions.class, null);
 		debugTracker.open();
 
-		bundleTracker = new ServiceTracker<>(context, PackageAdmin.class, null);
-		bundleTracker.open();
-
 		// locations
 
 		Filter filter = null;
@@ -91,10 +90,6 @@ public class PreferencesOSGiUtils {
 		if (debugTracker != null) {
 			debugTracker.close();
 			debugTracker = null;
-		}
-		if (bundleTracker != null) {
-			bundleTracker.close();
-			bundleTracker = null;
 		}
 		if (configurationLocationTracker != null) {
 			configurationLocationTracker.close();
@@ -130,24 +125,9 @@ public class PreferencesOSGiUtils {
 	}
 
 	public Bundle getBundle(String bundleName) {
-		if (bundleTracker == null) {
-			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
-				PrefsMessages.message("Bundle tracker is not set"); //$NON-NLS-1$
-			return null;
-		}
-		PackageAdmin packageAdmin = bundleTracker.getService();
-		if (packageAdmin == null)
-			return null;
-		Bundle[] bundles = packageAdmin.getBundles(bundleName, null);
-		if (bundles == null)
-			return null;
-		//Return the first bundle that is not installed or uninstalled
-		for (Bundle bundle : bundles) {
-			if ((bundle.getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0) {
-				return bundle;
-			}
-		}
-		return null;
+		return Wirings.getBundles(bundleName) //
+				.filter(not(inState(Bundle.INSTALLED, Bundle.UNINSTALLED))) //
+				.findFirst().orElse(null);
 	}
 
 	public Location getConfigurationLocation() {

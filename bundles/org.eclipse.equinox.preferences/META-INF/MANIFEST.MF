@@ -13,13 +13,12 @@ Export-Package: org.eclipse.core.internal.preferences;x-friends:="org.eclipse.co
  org.eclipse.core.internal.preferences.exchange;x-friends:="org.eclipse.core.runtime",
  org.eclipse.core.runtime.preferences;version="3.5.0"
 Bundle-ActivationPolicy: lazy; exclude:="org.eclipse.core.internal.preferences.exchange"
-Import-Package: org.eclipse.osgi.framework.log,
+Import-Package: org.eclipse.osgi.framework.util,
  org.eclipse.osgi.service.datalocation,
  org.eclipse.osgi.service.debug,
  org.eclipse.osgi.service.environment,
  org.eclipse.osgi.util,
  org.osgi.framework,
- org.osgi.service.packageadmin,
  org.osgi.util.tracker
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Automatic-Module-Name: org.eclipse.equinox.preferences

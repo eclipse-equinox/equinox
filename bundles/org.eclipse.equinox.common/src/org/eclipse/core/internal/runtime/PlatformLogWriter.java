@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2000, 2015 IBM Corporation and others.
+ *  Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  *  This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License 2.0
@@ -15,13 +15,14 @@
 package org.eclipse.core.internal.runtime;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.log.*;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.framework.util.Wirings;
 import org.osgi.framework.Bundle;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogService;
-import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
  * A log writer that writes log entries.  
@@ -32,12 +33,10 @@ import org.osgi.service.packageadmin.PackageAdmin;
 public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 	public static final String EQUINOX_LOGGER_NAME = "org.eclipse.equinox.logger"; //$NON-NLS-1$
 	private final ExtendedLogService logService;
-	private final PackageAdmin packageAdmin;
 	private final Bundle bundle;
 
-	public PlatformLogWriter(ExtendedLogService logService, PackageAdmin packageAdmin, Bundle bundle) {
+	public PlatformLogWriter(ExtendedLogService logService, Bundle bundle) {
 		this.logService = logService;
-		this.packageAdmin = packageAdmin;
 		this.bundle = bundle;
 	}
 
@@ -90,10 +89,11 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 
 	private Bundle getBundle(IStatus status) {
 		String pluginID = status.getPlugin();
-		if (pluginID == null)
+		if (pluginID == null) {
 			return bundle;
-		Bundle[] bundles = packageAdmin.getBundles(pluginID, null);
-		return bundles == null || bundles.length == 0 ? bundle : bundles[0];
+		}
+		Optional<Bundle> pluginBundle = Wirings.getBundle(pluginID);
+		return pluginBundle.orElse(bundle);
 	}
 
 	@Override

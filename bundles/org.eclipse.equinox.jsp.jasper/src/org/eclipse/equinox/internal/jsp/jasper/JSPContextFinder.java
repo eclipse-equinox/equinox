@@ -22,6 +22,8 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.osgi.framework.FrameworkUtil;
+
 // This class is a slightly augmented copy of org.eclipse.core.runtime.internal.adaptor.ContextFinder
 // in particular basicFindClassLoaders has been altered to use PackageAdmin to determine if a class originated from
 // a bundle and to skip over the various JspClassloader classes.
@@ -66,7 +68,7 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction<Ar
 					}
 				}
 				// stop at the framework classloader or the first bundle classloader
-				if (Activator.getBundle(stack[i]) != null)
+				if (FrameworkUtil.getBundle(stack[i]) != null)
 					break;
 			}
 		}

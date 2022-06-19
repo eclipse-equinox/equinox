@@ -25,6 +25,7 @@ import org.eclipse.core.internal.registry.*;
 import org.eclipse.core.internal.runtime.ResourceTranslator;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.spi.*;
+import org.eclipse.osgi.framework.util.Wirings;
 import org.eclipse.osgi.service.localization.LocaleProvider;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
@@ -183,7 +184,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	public Object createExecutableExtension(RegistryContributor contributor, String className, String overridenContributorName) throws CoreException {
 		Bundle contributingBundle;
 		if (overridenContributorName != null && !overridenContributorName.equals("")) //$NON-NLS-1$
-			contributingBundle = OSGIUtils.getDefault().getBundle(overridenContributorName);
+			contributingBundle = Wirings.getAtLeastResolvedBundle(overridenContributorName).orElse(null);
 		else
 			contributingBundle = getBundle(contributor.getId());
 

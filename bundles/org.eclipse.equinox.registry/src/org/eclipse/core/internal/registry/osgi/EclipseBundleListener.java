@@ -21,6 +21,7 @@ import org.eclipse.core.internal.registry.RegistryMessages;
 import org.eclipse.core.internal.runtime.ResourceTranslator;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.*;
+import org.eclipse.osgi.framework.util.Wirings;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -117,7 +118,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		if (bundle.getSymbolicName() == null)
 			return null;
 
-		boolean isFragment = OSGIUtils.getDefault().isFragment(bundle);
+		boolean isFragment = Wirings.isFragment(bundle);
 		String manifestName = isFragment ? FRAGMENT_MANIFEST : PLUGIN_MANIFEST;
 		URL extensionURL = bundle.getEntry(manifestName);
 		if (extensionURL == null)
@@ -135,17 +136,17 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 			return extensionURL;
 
 		// If the bundle is a fragment being added to a non singleton host, then it is not added
-		Bundle[] hosts = OSGIUtils.getDefault().getHosts(bundle);
-		if (hosts == null)
+		List<Bundle> hosts = Wirings.getHosts(bundle);
+		if (hosts.isEmpty())
 			return null; // should never happen?
 
-		if (isSingleton(hosts[0]))
+		if (isSingleton(hosts.get(0)))
 			return extensionURL;
 
 		if (report) {
 			// if the host is not a singleton we always report the error; even if the host has a generated manifest
-			String message = NLS.bind(RegistryMessages.parse_nonSingletonFragment, bundle.getSymbolicName(), hosts[0].getSymbolicName());
-			RuntimeLog.log(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, 0, message, null));
+			String message = NLS.bind(RegistryMessages.parse_nonSingletonFragment, bundle.getSymbolicName(), hosts.get(0).getSymbolicName());
+			RuntimeLog.log(Status.warning(message));
 		}
 		return null;
 	}
@@ -187,7 +188,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 	}
 
 	private void checkForNLSFragment(Bundle bundle) {
-		if (!OSGIUtils.getDefault().isFragment(bundle)) {
+		if (!Wirings.isFragment(bundle)) {
 			// only need to worry about fragments
 			synchronized (currentStateStamp) {
 				// mark this host as processed for the current state stamp.
@@ -195,11 +196,8 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 			}
 			return;
 		}
-		Bundle[] hosts = OSGIUtils.getDefault().getHosts(bundle);
-		if (hosts == null)
-			return;
 		// check to see if the hosts should be refreshed because the fragment contains NLS properties files.
-		for (Bundle host : hosts) {
+		for (Bundle host : Wirings.getHosts(bundle)) {
 			checkForNLSFiles(host, bundle);
 		}
 	}
@@ -213,20 +211,15 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 				return; // already processed this host
 		}
 
-		Bundle[] fragments = OSGIUtils.getDefault().getFragments(host);
+		List<Bundle> fragments = Wirings.getFragments(host);
 		boolean refresh = false;
 		// check host first
 		if (hasNLSFilesFor(host, fragment)) {
 			refresh = true;
 		} else {
 			// check the fragment provides NLS for other fragments of this host
-			for (int i = 0; i < fragments.length && !refresh; i++) {
-				if (fragment.equals(fragments[i]))
-					continue; // skip fragment that was just resolved; it will be added in by the caller
-				if (hasNLSFilesFor(fragments[i], fragment)) {
-					refresh = true;
-				}
-			}
+			// skip fragment that was just resolved; it will be added in by the caller
+			refresh = fragments.stream().anyMatch(f -> !f.equals(fragment) && hasNLSFilesFor(f, fragment));
 		}
 		if (refresh) {
 			// force the host and fragments to be removed and added back
@@ -284,8 +277,10 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 						String manifestVersion = (String) allHeaders.get(org.osgi.framework.Constants.BUNDLE_MANIFESTVERSION);
 						if (manifestVersion == null) {//the header was not defined for previous versions of the bundle
 							//3.0 bundles without a singleton attributes are still being accepted
-							if (OSGIUtils.getDefault().getBundle(symbolicNameElements[0].getValue()) == bundle)
+							String bsn = symbolicNameElements[0].getValue();
+							if (Wirings.getAtLeastResolvedBundle(bsn).orElse(null) == bundle) {
 								return true;
+							}
 						}
 						return false;
 					}

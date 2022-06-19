@@ -17,8 +17,7 @@ package org.eclipse.core.internal.runtime;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 import org.eclipse.core.runtime.*;
 import org.osgi.framework.Bundle;
 
@@ -243,13 +242,13 @@ public class FindSupport {
 		Activator activator = Activator.getDefault();
 		if (activator == null)
 			return null;
-		Bundle[] fragments = activator.getFragments(b);
-		if (fragments == null)
+		List<Bundle> fragments = Activator.getFragments(b);
+		if (fragments.isEmpty()) {
 			return null;
-
-		if (multiple != null)
-			multiple.ensureCapacity(fragments.length + 1);
-
+		}
+		if (multiple != null) {
+			multiple.ensureCapacity(fragments.size() + 1);
+		}
 		for (Bundle fragment : fragments) {
 			URL fileURL = fragment.getEntry(filePath.toString());
 			if (fileURL != null) {

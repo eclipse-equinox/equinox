@@ -15,12 +15,10 @@ package org.eclipse.core.internal.registry.osgi;
 
 import org.eclipse.core.internal.registry.RegistryMessages;
 import org.eclipse.core.internal.runtime.RuntimeLog;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.osgi.framework.*;
-import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -34,7 +32,7 @@ public class OSGIUtils {
 	private ServiceTracker<?, ?> bundleTracker = null;
 	private ServiceTracker<?, ?> configurationLocationTracker = null;
 
-	// OSGI system properties.  Copied from EclipseStarter
+	// OSGI system properties. Copied from EclipseStarter
 	public static final String PROP_CONFIG_AREA = "osgi.configuration.area"; //$NON-NLS-1$
 	public static final String PROP_INSTANCE_AREA = "osgi.instance.area"; //$NON-NLS-1$
 
@@ -55,15 +53,12 @@ public class OSGIUtils {
 	private void initServices() {
 		BundleContext context = Activator.getContext();
 		if (context == null) {
-			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, RegistryMessages.bundle_not_activated, null));
+			RuntimeLog.log(Status.error(RegistryMessages.bundle_not_activated));
 			return;
 		}
 
 		debugTracker = new ServiceTracker<>(context, DebugOptions.class.getName(), null);
 		debugTracker.open();
-
-		bundleTracker = new ServiceTracker<>(context, PackageAdmin.class.getName(), null);
-		bundleTracker.open();
 
 		// locations
 		final String FILTER_PREFIX = "(&(objectClass=org.eclipse.osgi.service.datalocation.Location)(type="; //$NON-NLS-1$
@@ -71,7 +66,7 @@ public class OSGIUtils {
 		try {
 			filter = context.createFilter(FILTER_PREFIX + PROP_CONFIG_AREA + "))"); //$NON-NLS-1$
 		} catch (InvalidSyntaxException e) {
-			// ignore this.  It should never happen as we have tested the above format.
+			// ignore this. It should never happen as we have tested the above format.
 		}
 		configurationLocationTracker = new ServiceTracker<>(context, filter, null);
 		configurationLocationTracker.open();
@@ -95,7 +90,7 @@ public class OSGIUtils {
 
 	public boolean getBooleanDebugOption(String option, boolean defaultValue) {
 		if (debugTracker == null) {
-			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, RegistryMessages.bundle_not_activated, null));
+			RuntimeLog.log(Status.error(RegistryMessages.bundle_not_activated));
 			return defaultValue;
 		}
 		DebugOptions options = (DebugOptions) debugTracker.getService();
@@ -105,51 +100,6 @@ public class OSGIUtils {
 				return value.equalsIgnoreCase("true"); //$NON-NLS-1$
 		}
 		return defaultValue;
-	}
-
-	public PackageAdmin getPackageAdmin() {
-		if (bundleTracker == null) {
-			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, RegistryMessages.bundle_not_activated, null));
-			return null;
-		}
-		return (PackageAdmin) bundleTracker.getService();
-	}
-
-	public Bundle getBundle(String bundleName) {
-		PackageAdmin packageAdmin = getPackageAdmin();
-		if (packageAdmin == null)
-			return null;
-		Bundle[] bundles = packageAdmin.getBundles(bundleName, null);
-		if (bundles == null)
-			return null;
-		//Return the first bundle that is not installed or uninstalled
-		for (Bundle bundle : bundles) {
-			if ((bundle.getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0) {
-				return bundle;
-			}
-		}
-		return null;
-	}
-
-	public Bundle[] getFragments(Bundle bundle) {
-		PackageAdmin packageAdmin = getPackageAdmin();
-		if (packageAdmin == null)
-			return null;
-		return packageAdmin.getFragments(bundle);
-	}
-
-	public boolean isFragment(Bundle bundle) {
-		PackageAdmin packageAdmin = getPackageAdmin();
-		if (packageAdmin == null)
-			return false;
-		return (packageAdmin.getBundleType(bundle) & PackageAdmin.BUNDLE_TYPE_FRAGMENT) > 0;
-	}
-
-	public Bundle[] getHosts(Bundle bundle) {
-		PackageAdmin packageAdmin = getPackageAdmin();
-		if (packageAdmin == null)
-			return null;
-		return packageAdmin.getHosts(bundle);
 	}
 
 	public Location getConfigurationLocation() {

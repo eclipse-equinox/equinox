@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,9 @@
  *******************************************************************************/
 package org.eclipse.equinox.http.registry.internal;
 
+import static java.util.function.Predicate.not;
+import static org.eclipse.osgi.framework.util.Wirings.inState;
+
 import java.lang.reflect.Method;
 import java.util.*;
 import javax.servlet.Filter;
@@ -20,9 +23,9 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.eclipse.core.runtime.IContributor;
 import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.osgi.framework.util.Wirings;
 import org.osgi.framework.*;
 import org.osgi.service.http.*;
-import org.osgi.service.packageadmin.PackageAdmin;
 
 public class HttpRegistryManager {
 
@@ -87,16 +90,14 @@ public class HttpRegistryManager {
 	private FilterManager filterManager;
 	private ResourceManager resourceManager;
 	private HttpService httpService;
-	private PackageAdmin packageAdmin;
 	private Map<String, HttpContextContribution> contexts = new HashMap<>();
 	private Map<String, FilterContribution> filters = new HashMap<>();
 	private Map<String, ServletContribution> servlets = new HashMap<>();
 	private Map<String, ResourcesContribution> resources = new HashMap<>();
 	private Set<String> registered = new HashSet<>();
 
-	public HttpRegistryManager(ServiceReference<?> reference, HttpService httpService, PackageAdmin packageAdmin, IExtensionRegistry registry) {
+	public HttpRegistryManager(ServiceReference<?> reference, HttpService httpService, IExtensionRegistry registry) {
 		this.httpService = httpService;
-		this.packageAdmin = packageAdmin;
 
 		httpContextManager = new HttpContextManager(this, registry);
 		filterManager = new FilterManager(this, reference, registry);
@@ -228,17 +229,11 @@ public class HttpRegistryManager {
 		return getBundle(contributor.getName());
 	}
 
-	public Bundle getBundle(String symbolicName) {
-		Bundle[] bundles = packageAdmin.getBundles(symbolicName, null);
-		if (bundles == null)
-			return null;
-		//Return the first bundle that is not installed or uninstalled
-		for (int i = 0; i < bundles.length; i++) {
-			if ((bundles[i].getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0) {
-				return bundles[i];
-			}
-		}
-		return null;
+	Bundle getBundle(String symbolicName) {
+		// Return the first bundle that is not installed or uninstalled
+		return Wirings.getBundles(symbolicName) //
+				.filter(not(inState(Bundle.INSTALLED, Bundle.UNINSTALLED))) //
+				.findFirst().orElse(null);
 	}
 
 	private void registerResources(ResourcesContribution contribution) {
