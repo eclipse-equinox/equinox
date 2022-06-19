@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -1391,8 +1390,8 @@ public class DebugOptionsTestCase extends CoreTest {
 			called = true;
 			if (checkValues == null)
 				return;
-			for (Iterator entries = checkValues.entrySet().iterator(); entries.hasNext();) {
-				Map.Entry entry = (Entry) entries.next();
+			for (Object element : checkValues.entrySet()) {
+				Map.Entry entry = (Entry) element;
 				String debugValue = options.getOption((String) entry.getKey());
 				String error = "Value is incorrect for key: " + entry.getKey() + " " + debugValue; //$NON-NLS-1$//$NON-NLS-2$
 				if (debugValue == null) {

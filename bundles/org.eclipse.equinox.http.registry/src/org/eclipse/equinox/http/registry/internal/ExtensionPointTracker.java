@@ -76,8 +76,8 @@ public class ExtensionPointTracker {
 			}
 		}
 		if (extensions != null) {
-			for (int i = 0; i < extensions.length; ++i) {
-				listener.added(extensions[i]);
+			for (IExtension extension : extensions) {
+				listener.added(extension);
 			}
 		}
 	}
@@ -93,8 +93,8 @@ public class ExtensionPointTracker {
 			extensions = this.getExtensions();
 			extensionCache.clear();
 		}
-		for (int i = 0; i < extensions.length; ++i) {
-			listener.removed(extensions[i]);
+		for (IExtension extension : extensions) {
+			listener.removed(extension);
 		}
 	}
 
@@ -119,8 +119,7 @@ public class ExtensionPointTracker {
 	class RegistryChangeListener implements IRegistryChangeListener {
 		public void registryChanged(IRegistryChangeEvent event) {
 			IExtensionDelta[] deltas = event.getExtensionDeltas(namespace, simpleIdentifier);
-			for (int i = 0; i < deltas.length; ++i) {
-				IExtensionDelta delta = deltas[i];
+			for (IExtensionDelta delta : deltas) {
 				IExtension extension = delta.getExtension();
 				switch (delta.getKind()) {
 					case IExtensionDelta.ADDED :

@@ -28,7 +28,6 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
@@ -147,8 +146,8 @@ public class SignedBundleHook implements ActivatorHookFactory, HookConfigurator,
 			systemTrustEngineReg = null;
 		}
 		if (osgiTrustEngineReg != null) {
-			for (Iterator<ServiceRegistration<?>> it = osgiTrustEngineReg.iterator(); it.hasNext();)
-				it.next().unregister();
+			for (ServiceRegistration<?> serviceRegistration : osgiTrustEngineReg)
+				serviceRegistration.unregister();
 			osgiTrustEngineReg = null;
 		}
 		if (trustEngineTracker != null) {

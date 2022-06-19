@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.osgi.service.resolver.BaseDescription;
@@ -257,8 +256,8 @@ class StateWriter {
 
 		List<BundleDescription> dependencies = ((BundleDescriptionImpl) bundle).getBundleDependencies();
 		out.writeInt(dependencies.size());
-		for (Iterator<BundleDescription> iter = dependencies.iterator(); iter.hasNext();)
-			writeBundleDescription(iter.next(), out, force);
+		for (BundleDescription bundleDescription : dependencies)
+			writeBundleDescription(bundleDescription, out, force);
 		// the rest is lazy loaded data
 	}
 
@@ -511,9 +510,7 @@ class StateWriter {
 			out.writeInt(0);
 		} else {
 			out.writeInt(source.size());
-			Iterator<String> iter = source.keySet().iterator();
-			while (iter.hasNext()) {
-				String key = iter.next();
+			for (String key : source.keySet()) {
 				Object value = source.get(key);
 				writeStringOrNull(key, out);
 				if (value instanceof String) {

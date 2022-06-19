@@ -16,7 +16,6 @@ package org.eclipse.osgi.internal.module;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 /*
@@ -74,9 +73,8 @@ public class MappedList<K, V> {
 		if (getSize() == 0)
 			return empty;
 		ArrayList<V> results = new ArrayList<>(getSize());
-		Iterator<List<V>> iter = internal.values().iterator();
-		while (iter.hasNext())
-			results.addAll(iter.next());
+		for (List<V> element : internal.values())
+			results.addAll(element);
 		return results;
 	}
 

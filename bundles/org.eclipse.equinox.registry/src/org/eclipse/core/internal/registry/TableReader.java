@@ -271,7 +271,7 @@ public class TableReader {
 		if (depth + 1 > maxDepth)
 			return ce;
 
-		for (int i = 0; i < children.length; i++) {
+		for (int child : children) {
 			ConfigurationElement tmp = loadConfigurationElementAndChildren(currentStream, extraIs, depth + 1, maxDepth, objectManager, namespaceOwnerId);
 			objectManager.add(tmp, holdObjects);
 		}

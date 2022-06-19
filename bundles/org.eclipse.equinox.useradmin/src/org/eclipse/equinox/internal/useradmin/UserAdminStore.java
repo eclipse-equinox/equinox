@@ -248,10 +248,10 @@ public class UserAdminStore {
 
 			String[] children = rootNode.node("").childrenNames(); //$NON-NLS-1$
 
-			for (int i = 0; i < children.length; i++) {
-				if (useradmin.getRole(children[i]) == null) //check to see if it is already loaded
+			for (String child : children) {
+				if (useradmin.getRole(child) == null) //check to see if it is already loaded
 				{ //(we may have had to load some roles out of
-					loadRole(rootNode.node(children[i]), null); // order due to dependencies) 
+					loadRole(rootNode.node(child), null); // order due to dependencies) 
 					//modified to solve defect 95982
 				}
 			}
@@ -278,12 +278,12 @@ public class UserAdminStore {
 
 		//load properties
 		Preferences propsTypesNode = propsNode.node(typesNode);
-		for (int i = 0; i < keys.length; i++) {
-			if (propsTypesNode.getBoolean(keys[i], true))
-				value = propsNode.get(keys[i], null);
+		for (String key : keys) {
+			if (propsTypesNode.getBoolean(key, true))
+				value = propsNode.get(key, null);
 			else
-				value = propsNode.getByteArray(keys[i], null);
-			properties.put(keys[i], value, false);
+				value = propsNode.getByteArray(key, null);
+			properties.put(key, value, false);
 		}
 
 		//load credentials
@@ -293,12 +293,12 @@ public class UserAdminStore {
 			Preferences credTypesNode = credNode.node(UserAdminStore.typesNode);
 			keys = credNode.keys();
 			UserAdminHashtable credentials = (UserAdminHashtable) ((User) role).getCredentials();
-			for (int i = 0; i < keys.length; i++) {
-				if (credTypesNode.getBoolean(keys[i], true))
-					credValue = credNode.get(keys[i], null);
+			for (String key : keys) {
+				if (credTypesNode.getBoolean(key, true))
+					credValue = credNode.get(key, null);
 				else
-					credValue = credNode.getByteArray(keys[i], null);
-				credentials.put(keys[i], credValue, false);
+					credValue = credNode.getByteArray(key, null);
+				credentials.put(key, credValue, false);
 			}
 		}
 
@@ -306,13 +306,13 @@ public class UserAdminStore {
 		if (type == org.osgi.service.useradmin.Role.GROUP) {
 			Preferences memberNode = node.node(membersNode);
 			keys = memberNode.keys();
-			for (int i = 0; i < keys.length; i++) {
-				value = memberNode.get(keys[i], null);
-				Role member = (Role) useradmin.getRole(keys[i]);
+			for (String key : keys) {
+				value = memberNode.get(key, null);
+				Role member = (Role) useradmin.getRole(key);
 				if (member == null) //then we have not loaded this one yet, so load it
 				{
-					loadRole(rootNode.node(keys[i]), null); // modified to solve defect 95982
-					member = (Role) useradmin.getRole(keys[i]);
+					loadRole(rootNode.node(key), null); // modified to solve defect 95982
+					member = (Role) useradmin.getRole(key);
 				}
 				if (value.equals(requiredString)) {
 					((Group) role).addRequiredMember(member, false);

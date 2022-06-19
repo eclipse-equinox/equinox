@@ -25,7 +25,6 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1475,9 +1474,7 @@ public class ModuleDatabase {
 				out.writeInt(0);
 			} else {
 				out.writeInt(source.size());
-				Iterator<String> iter = source.keySet().iterator();
-				while (iter.hasNext()) {
-					String key = iter.next();
+				for (String key : source.keySet()) {
 					Object value = source.get(key);
 					writeString(key, out, objectTable);
 					if (value instanceof String) {

@@ -113,9 +113,7 @@ public class AppCommands implements CommandProvider {
 		}
 
 		addHeader(Messages.console_help_app_commands_header, sb);
-		Iterator<Entry<String, String[]>> i = commandsHelp.entrySet().iterator();
-		while (i.hasNext()) {
-			Entry<String, String[]> entry = i.next();
+		for (Entry<String, String[]> entry : commandsHelp.entrySet()) {
 			String command = entry.getKey();
 			String[] attributes = entry.getValue();
 			addCommand(command, attributes, sb);

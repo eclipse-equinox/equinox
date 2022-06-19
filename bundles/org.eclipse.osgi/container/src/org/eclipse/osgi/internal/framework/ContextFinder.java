@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.eclipse.osgi.internal.loader.BundleLoader;
@@ -137,9 +136,9 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 
 		try {
 			List<ClassLoader> toConsult = findClassLoaders();
-			for (Iterator<ClassLoader> loaders = toConsult.iterator(); loaders.hasNext();)
+			for (ClassLoader classLoader : toConsult)
 				try {
-					return loaders.next().loadClass(arg0);
+					return classLoader.loadClass(arg0);
 				} catch (ClassNotFoundException e) {
 					// go to the next class loader
 				}
@@ -157,8 +156,8 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 			return null;
 		try {
 			List<ClassLoader> toConsult = findClassLoaders();
-			for (Iterator<ClassLoader> loaders = toConsult.iterator(); loaders.hasNext();) {
-				URL result = loaders.next().getResource(arg0);
+			for (ClassLoader classLoader : toConsult) {
+				URL result = classLoader.getResource(arg0);
 				if (result != null)
 					return result;
 				// go to the next class loader
@@ -178,8 +177,8 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 		try {
 			List<ClassLoader> toConsult = findClassLoaders();
 			Enumeration<URL> result = null;
-			for (Iterator<ClassLoader> loaders = toConsult.iterator(); loaders.hasNext();) {
-				result = loaders.next().getResources(arg0);
+			for (ClassLoader classLoader : toConsult) {
+				result = classLoader.getResources(arg0);
 				if (result != null && result.hasMoreElements()) {
 					// For context finder we do not compound results after this first loader that has resources
 					break;

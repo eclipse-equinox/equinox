@@ -64,8 +64,7 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 
 	public void added(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
-		for (int i = 0; i < elements.length; i++) {
-			IConfigurationElement serviceSelectorElement = elements[i];
+		for (IConfigurationElement serviceSelectorElement : elements) {
 			if (!SERVICESELECTOR.equals(serviceSelectorElement.getName()))
 				continue;
 
@@ -99,8 +98,7 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 			break;
 		}
 
-		for (int i = 0; i < elements.length; i++) {
-			IConfigurationElement resourceElement = elements[i];
+		for (IConfigurationElement resourceElement : elements) {
 			if (!RESOURCE.equals(resourceElement.getName()))
 				continue;
 
@@ -127,8 +125,7 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 
 	public void removed(IExtension extension) {
 		IConfigurationElement[] elements = extension.getConfigurationElements();
-		for (int i = 0; i < elements.length; i++) {
-			IConfigurationElement resourceElement = elements[i];
+		for (IConfigurationElement resourceElement : elements) {
 			if (registered.remove(resourceElement)) {
 				String alias = resourceElement.getAttribute(ALIAS);
 				httpRegistryManager.removeContribution(alias);

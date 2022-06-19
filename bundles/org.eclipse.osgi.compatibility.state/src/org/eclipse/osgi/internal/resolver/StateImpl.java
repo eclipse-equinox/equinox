@@ -26,7 +26,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -241,8 +240,7 @@ public abstract class StateImpl implements State {
 			List<DisabledInfo> infos = disabledBundles.remove(existing);
 			if (infos != null) {
 				List<DisabledInfo> newInfos = new ArrayList<>(infos.size());
-				for (Iterator<DisabledInfo> iInfos = infos.iterator(); iInfos.hasNext();) {
-					DisabledInfo info = iInfos.next();
+				for (DisabledInfo info : infos) {
 					newInfos.add(new DisabledInfo(info.getPolicyName(), info.getMessage(), newDescription));
 				}
 				disabledBundles.put(newDescription, newInfos);
@@ -358,8 +356,7 @@ public abstract class StateImpl implements State {
 			if (result != null)
 				return result;
 			// need to look in removal pending bundles;
-			for (Iterator<BundleDescription> iter = removalPendings.iterator(); iter.hasNext();) {
-				BundleDescription removedBundle = iter.next();
+			for (BundleDescription removedBundle : removalPendings) {
 				if (removedBundle.getBundleId() == id) // just return the first matching id
 					return removedBundle;
 			}
@@ -758,15 +755,13 @@ public abstract class StateImpl implements State {
 		fullyLoad();
 		synchronized (this.monitor) {
 			List<ExportPackageDescription> allExportedPackages = new ArrayList<>();
-			for (Iterator<BundleDescription> iter = resolvedBundles.values().iterator(); iter.hasNext();) {
-				BundleDescription bundle = iter.next();
+			for (BundleDescription bundle : resolvedBundles.values()) {
 				ExportPackageDescription[] bundlePackages = bundle.getSelectedExports();
 				if (bundlePackages == null)
 					continue;
 				Collections.addAll(allExportedPackages, bundlePackages);
 			}
-			for (Iterator<BundleDescription> iter = removalPendings.iterator(); iter.hasNext();) {
-				BundleDescription bundle = iter.next();
+			for (BundleDescription bundle : removalPendings) {
 				ExportPackageDescription[] bundlePackages = bundle.getSelectedExports();
 				if (bundlePackages == null)
 					continue;
@@ -825,8 +820,7 @@ public abstract class StateImpl implements State {
 
 	public BundleDescription getBundleByLocation(String location) {
 		synchronized (this.monitor) {
-			for (Iterator<BundleDescription> i = bundleDescriptions.values().iterator(); i.hasNext();) {
-				BundleDescription current = i.next();
+			for (BundleDescription current : bundleDescriptions.values()) {
 				if (location.equals(current.getLocation()))
 					return current;
 			}
@@ -1125,12 +1119,11 @@ public abstract class StateImpl implements State {
 	 */
 	private BundleDescription[] internalGetRemovalPending() {
 		synchronized (this.monitor) {
-			Iterator<BundleDescription> removed = removalPendings.iterator();
 			BundleDescription[] result = new BundleDescription[removalPendings.size()];
 			int i = 0;
-			while (removed.hasNext())
+			for (BundleDescription removalPending : removalPendings)
 				// we return the latest version of the description if it is still contained in the state (bug 287636)
-				result[i++] = getBundle(removed.next().getBundleId());
+				result[i++] = getBundle(removalPending.getBundleId());
 			return result;
 		}
 	}
@@ -1337,9 +1330,7 @@ public abstract class StateImpl implements State {
 				currentInfos.add(disabledInfo);
 				disabledBundles.put(disabledInfo.getBundle(), currentInfos);
 			} else {
-				Iterator<DisabledInfo> it = currentInfos.iterator();
-				while (it.hasNext()) {
-					DisabledInfo currentInfo = it.next();
+				for (DisabledInfo currentInfo : currentInfos) {
 					if (disabledInfo.getPolicyName().equals(currentInfo.getPolicyName())) {
 						currentInfos.remove(currentInfo);
 						break;
@@ -1369,9 +1360,7 @@ public abstract class StateImpl implements State {
 			List<DisabledInfo> currentInfos = disabledBundles.get(bundle);
 			if (currentInfos == null)
 				return null;
-			Iterator<DisabledInfo> it = currentInfos.iterator();
-			while (it.hasNext()) {
-				DisabledInfo currentInfo = it.next();
+			for (DisabledInfo currentInfo : currentInfos) {
 				if (currentInfo.getPolicyName().equals(policyName)) {
 					return currentInfo;
 				}
@@ -1393,8 +1382,8 @@ public abstract class StateImpl implements State {
 	DisabledInfo[] getDisabledInfos() {
 		List<DisabledInfo> results = new ArrayList<>();
 		synchronized (this.monitor) {
-			for (Iterator<List<DisabledInfo>> allDisabledInfos = disabledBundles.values().iterator(); allDisabledInfos.hasNext();)
-				results.addAll(allDisabledInfos.next());
+			for (List<DisabledInfo> list : disabledBundles.values())
+				results.addAll(list);
 		}
 		return results.toArray(new DisabledInfo[results.size()]);
 	}

@@ -1158,8 +1158,8 @@ public class ServiceRegistry {
 		if (sm == null) {
 			return;
 		}
-		for (int i = 0, len = names.length; i < len; i++) {
-			sm.checkPermission(new ServicePermission(names[i], ServicePermission.REGISTER));
+		for (String name : names) {
+			sm.checkPermission(new ServicePermission(name, ServicePermission.REGISTER));
 		}
 	}
 
@@ -1203,15 +1203,15 @@ public class ServiceRegistry {
 				return serviceObject.getClass().getClassLoader();
 			}
 		});
-		for (int i = 0, len = clazzes.length; i < len; i++) {
+		for (String element : clazzes) {
 			try {
-				Class<?> serviceClazz = cl == null ? Class.forName(clazzes[i]) : cl.loadClass(clazzes[i]);
+				Class<?> serviceClazz = cl == null ? Class.forName(element) : cl.loadClass(element);
 				if (!serviceClazz.isInstance(serviceObject))
-					return clazzes[i];
+					return element;
 			} catch (ClassNotFoundException e) {
 				//This check is rarely done
-				if (extensiveCheckServiceClass(clazzes[i], serviceObject.getClass()))
-					return clazzes[i];
+				if (extensiveCheckServiceClass(element, serviceObject.getClass()))
+					return element;
 			}
 		}
 		return null;
@@ -1221,8 +1221,8 @@ public class ServiceRegistry {
 		if (clazz.equals(serviceClazz.getName()))
 			return false;
 		Class<?>[] interfaces = serviceClazz.getInterfaces();
-		for (int i = 0, len = interfaces.length; i < len; i++)
-			if (!extensiveCheckServiceClass(clazz, interfaces[i]))
+		for (Class<?> element : interfaces)
+			if (!extensiveCheckServiceClass(clazz, element))
 				return false;
 		Class<?> superClazz = serviceClazz.getSuperclass();
 		if (superClazz != null)
@@ -1234,8 +1234,8 @@ public class ServiceRegistry {
 	static boolean isAssignableTo(BundleContextImpl context, String clazz, ServiceReferenceImpl<?> reference) {
 		Bundle bundle = context.getBundleImpl();
 		String[] clazzes = reference.getClasses();
-		for (int i = 0, len = clazzes.length; i < len; i++)
-			if (!reference.getRegistration().isAssignableTo(bundle, clazzes[i], clazzes[i] == clazz))
+		for (String element : clazzes)
+			if (!reference.getRegistration().isAssignableTo(bundle, element, element == clazz))
 				return false;
 		return true;
 	}
