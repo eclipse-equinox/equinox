@@ -2079,7 +2079,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			assertEquals("Number of capabilities differ", outerCaps.size(), innerCaps.size());
 			for (int i = 0; i < innerCaps.size(); i++) {
 				Capability innerCap = innerCaps.get(i);
-				Capability outerCap = innerCaps.get(i);
+				Capability outerCap = outerCaps.get(i);
 				assertEquals("Capability namespaces differ: " + outerCap.getNamespace(), outerCap.getNamespace(), innerCap.getNamespace());
 				String namespace = outerCap.getNamespace();
 				if (NativeNamespace.NATIVE_NAMESPACE.equals(namespace) || "eclipse.platform".equals(namespace)) {
@@ -2095,7 +2095,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			assertEquals("Number of requirements differ", outerReqs.size(), innerReqs.size());
 			for (int i = 0; i < innerReqs.size(); i++) {
 				Requirement innerReq = innerReqs.get(i);
-				Requirement outerReq = innerReqs.get(i);
+				Requirement outerReq = outerReqs.get(i);
 				assertEquals("Requirement namespaces differ: " + outerReq.getNamespace(), outerReq.getNamespace(), innerReq.getNamespace());
 				assertEquals("Requirement attributes differ: " + outerReq.getNamespace(), outerReq.getAttributes(), innerReq.getAttributes());
 				assertEquals("Requirement directives differ: " + outerReq.getNamespace(), outerReq.getDirectives(), innerReq.getDirectives());
