@@ -71,13 +71,9 @@ public final class URIUtil {
 					result = new URI(toUnencodedString(result));
 				}
 			} else {
-				// Unless the path starts with four slashes, the first element of the path is
-				// interpreted as host ( probably related to Java bug 4723726)
-				if (path.startsWith(UNC_PREFIX)) {
-					path = ensureUNCPath(path);
-				}
 				path = path + '/' + extension;
-				result = new URI(base.getScheme(), base.getUserInfo(), base.getHost(), base.getPort(), path, base.getQuery(), base.getFragment());
+				result = toURI(base.getScheme(), base.getUserInfo(), base.getHost(), base.getPort(), path,
+						base.getQuery(), base.getFragment());
 			}
 			result = result.normalize();
 			//Fix UNC paths that are incorrectly normalized by URI#resolve (see Java bug 4723726)
@@ -105,7 +101,20 @@ public final class URIUtil {
 	}
 
 	/**
-	 * Ensures the given path string starts with exactly four leading slashes.
+	 * Ensures that UNC-Paths have at least four leading slashes.
+	 * 
+	 * URI returns UNC-paths with two slashes, but needs four, when passing them as
+	 * path. See Java bug 4723726 or Eclipse bug 207103 for details
+	 */
+	private static String fixUNCPath(String path) {
+		// URI needs an UNC-Path with four slashes.
+		if (!path.startsWith(UNC_PREFIX) || path.startsWith(UNC_PREFIX, 2))
+			return path;
+		return ensureUNCPath(path);
+	}
+
+	/**
+	 * Ensures the given path string starts with at least four leading slashes.
 	 */
 	private static String ensureUNCPath(String path) {
 		int len = path.length();
@@ -139,8 +148,8 @@ public final class URIUtil {
 		String scheme = colon < 0 ? null : uriString.substring(0, colon);
 		String ssp = uriString.substring(colon + 1, hash);
 		String fragment = noHash ? null : uriString.substring(hash + 1);
-		//use java.io.File for constructing file: URIs
-		if (scheme != null && scheme.equals(SCHEME_FILE)) {
+		// use java.io.File for constructing file - unless UNC: URIs
+		if (scheme != null && scheme.equals(SCHEME_FILE) && !ssp.startsWith(UNC_PREFIX)) {
 			//handle relative URI string with scheme (produced by java.net.URL)
 			File file = new File(ssp);
 			if (file.isAbsolute())
@@ -151,7 +160,7 @@ public final class URIUtil {
 			if (!ssp.startsWith("/"))//$NON-NLS-1$
 				scheme = null;
 		}
-		return new URI(scheme, ssp, fragment);
+		return toURI(scheme, ssp, fragment);
 	}
 
 	/**
@@ -290,18 +299,105 @@ public final class URIUtil {
 			//ensure there is a leading slash to handle common malformed URLs such as file:c:/tmp
 			if (pathString.indexOf('/') != 0)
 				pathString = '/' + pathString;
-			else if (pathString.startsWith(UNC_PREFIX) && !pathString.startsWith(UNC_PREFIX, 2)) {
-				//URL encodes UNC path with two slashes, but URI uses four (see bug 207103)
-				pathString = ensureUNCPath(pathString);
-			}
-			return new URI(SCHEME_FILE, null, pathString, null);
+			return toURI(SCHEME_FILE, null, pathString, null);
 		}
 		try {
 			return new URI(url.toExternalForm());
 		} catch (URISyntaxException e) {
 			//try multi-argument URI constructor to perform encoding
-			return new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+			return toURI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(),
+					url.getQuery(), url.getRef());
 		}
+	}
+
+	/**
+	 * An UNC-safe factory the the URI-ctor
+	 * 
+	 * @param scheme   Scheme name
+	 * @param ssp      Scheme-specific part
+	 * @param fragment Fragment
+	 * @return The new URI from the given components
+	 * @throws URISyntaxException If the URI string constructed from the given
+	 *                            components violates RFC 2396
+	 * @see java.net.URI#URI(String, String, String)
+	 * @since 3.17
+	 */
+	public static URI toURI(String scheme, String ssp, String fragment) throws URISyntaxException {
+		if (scheme != null && !scheme.equals(SCHEME_FILE)) {
+			return new URI(scheme, ssp, fragment);
+		}
+		return new URI(scheme, fixUNCPath(ssp), fragment);
+	}
+
+	/**
+	 * An UNC-safe factory the the URI-ctor
+	 * 
+	 * @param scheme   Scheme name
+	 * @param userInfo User name and authorization information
+	 * @param host     Host name
+	 * @param port     Port number
+	 * @param path     Path
+	 * @param query    Query
+	 * @param fragment Fragment
+	 * @return The new hierarchical URI from the given components.
+	 * @throws URISyntaxException If both a scheme and a path are given but the path
+	 *                            is relative, if the URI string constructed from
+	 *                            the given components violates RFC 2396, or if the
+	 *                            authority component of the string is present but
+	 *                            cannot be parsed as a server-based authority
+	 * @see java.net.URI#URI(String, String, String, int, String, String, String)
+	 * @since 3.17
+	 */
+	public static URI toURI(String scheme, String userInfo, String host, int port, String path, String query, String fragment) throws URISyntaxException {
+		if (scheme != null && !scheme.equals(SCHEME_FILE)) {
+			return new URI(scheme, userInfo, host, port, path, query, fragment);
+		}
+		return new URI(scheme, userInfo, host, port, fixUNCPath(path), query, fragment);
+	}
+
+	/**
+	 * An UNC-safe factory the the URI-ctor
+	 * 
+	 * @param scheme   Scheme name
+	 * @param host     Host name
+	 * @param path     Path
+	 * @param fragment Fragment
+	 * @return The new hierarchical URI from the given components
+	 * @throws URISyntaxException If the URI string constructed from the given
+	 *                            components violates RFC 2396
+	 * @see java.net.URI#URI(String, String, String, String)
+	 * @since 3.17
+	 */
+	public static URI toURI(String scheme, String host, String path, String fragment) throws URISyntaxException {
+		if (scheme != null && !scheme.equals(SCHEME_FILE)) {
+			return new URI(scheme, host, path, fragment);
+		}
+		return new URI(scheme, host, fixUNCPath(path), fragment);
+	}
+
+	/**
+	 * An UNC-safe factory the the URI-ctor
+	 * 
+	 * @param scheme    Scheme name
+	 * @param authority Authority
+	 * @param path      Path
+	 * @param query     Query
+	 * @param fragment  Fragment
+	 * @return The new hierarchical URI from the given components
+	 * @throws URISyntaxException If both a scheme and a path are given but the path
+	 *                            is relative, if the URI string constructed from
+	 *                            the given components violates RFC 2396, or if the
+	 *                            authority component of the string is present but
+	 *                            cannot be parsed as a server-based authority
+	 * @see java.net.URI#URI(String, String, String, String, String)
+	 * @since 3.17
+	 */
+	public static URI toURI(String scheme, String authority, String path, String query, String fragment)
+			throws URISyntaxException {
+		if (scheme != null && !scheme.equals(SCHEME_FILE)) {
+			return new URI(scheme, authority, path, query, fragment);
+		}
+		return new URI(scheme, authority, fixUNCPath(path), query, fragment);
 	}
 
 	/**
