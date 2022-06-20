@@ -568,12 +568,20 @@ public class URIUtilTest extends CoreTest {
 	public void testDollar() throws URISyntaxException {
 		var relative = "SomePath";
 		URI expectedResolved = new URI("file:////WSL$/Ubuntu/SomePath");
-		String[] uris = {
+		final String[] uris = {
 				// @formatter:off
 				"file:////WSL$/Ubuntu",
 				"file:////WSL$/Ubuntu/",
 				"file://////WSL$/Ubuntu",
 				"file://////WSL$/Ubuntu/"
+				// @formatter:on
+		};
+		final String[] expected_four = {
+				// @formatter:off
+				"file:////WSL$/Ubuntu",
+				"file:////WSL$/Ubuntu/",
+				"file:////WSL$/Ubuntu",
+				"file:////WSL$/Ubuntu/"
 				// @formatter:on
 		};
 
@@ -591,5 +599,36 @@ public class URIUtilTest extends CoreTest {
 			URI resolved = URIUtil.append(base, relative2);
 			assertEquals("2." + Integer.toString(i), expectedResolved2, resolved);
 		}
+
+		for (int i = 0; i < uris.length; i++) {
+			URI resolved = URIUtil.fromString(uris[i]);
+			assertEquals("3." + Integer.toString(i), new URI(uris[i]), resolved);
+		}
+
+		for (int i = 0; i < uris.length; i++) {
+			URI test = new URI(uris[i]);
+			assertEquals("4." + Integer.toString(i), test,
+					URIUtil.toURI(test.getScheme(), test.getSchemeSpecificPart(), test.getFragment()));
+		}
+		for (int i = 0; i < uris.length; i++) {
+
+			URI test = new URI(uris[i]);
+			URI ref = new URI(expected_four[i]);
+			assertEquals("5." + Integer.toString(i), ref, URIUtil.toURI(test.getScheme(), test.getUserInfo(),
+					test.getHost(), test.getPort(), test.getPath(), test.getQuery(), test.getFragment()));
+		}
+		for (int i = 0; i < uris.length; i++) {
+			URI test = new URI(uris[i]);
+			URI ref = new URI(expected_four[i]);
+			assertEquals("6." + Integer.toString(i), ref,
+					URIUtil.toURI(test.getScheme(), test.getHost(), test.getPath(), test.getFragment()));
+		}
+		for (int i = 0; i < uris.length; i++) {
+			URI test = new URI(uris[i]);
+			URI ref = new URI(expected_four[i]);
+			assertEquals("7." + Integer.toString(i), ref, URIUtil.toURI(test.getScheme(), test.getAuthority(),
+					test.getPath(), test.getQuery(), test.getFragment()));
+		}
+
 	}
 }
