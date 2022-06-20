@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests;
 
+import static org.junit.Assert.assertThrows;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -566,9 +568,10 @@ public class URIUtilTest extends CoreTest {
 	 * Test UNC-Paths containing a $.
 	 */
 	public void testDollar() throws URISyntaxException {
-		var relative = "SomePath";
-		URI expectedResolved = new URI("file:////WSL$/Ubuntu/SomePath");
-		String[] uris = {
+		final var relative = "SomePath";
+		final String[] uris = {
+				// there must be four slashes because otherwise "WSL$" would be the host name
+				// and it is not allows to use $ in the host name
 				// @formatter:off
 				"file:////WSL$/Ubuntu",
 				"file:////WSL$/Ubuntu/",
@@ -577,19 +580,102 @@ public class URIUtilTest extends CoreTest {
 				// @formatter:on
 		};
 
-		for (int i = 0; i < uris.length; i++) {
-			URI base = new URI(uris[i]);
-			URI resolved = URIUtil.append(base, relative);
-			assertEquals("1." + Integer.toString(i), expectedResolved, resolved);
+
+		// Test that appending a segment without trailing slash works as expected
+		final URI expectedResolved1 = new URI("file:////WSL$/Ubuntu/SomePath");
+		for (String uri : uris) {
+			final URI base = new URI(uri);
+			final URI resolved = URIUtil.append(base, relative);
+			assertEquals("Appending " + relative + " to URI of " + uri + " faild", expectedResolved1, resolved);
 		}
 
-		var relative2 = "SomePath/";
-		URI expectedResolved2 = new URI("file:////WSL$/Ubuntu/SomePath/");
+		// Test that appending a segment with trailing slash works as expected
+		final var relative2 = "SomePath/";
+		final URI expectedResolved2 = new URI("file:////WSL$/Ubuntu/SomePath/");
+
+		for (String uri : uris) {
+			final URI base = new URI(uri);
+			final URI resolved = URIUtil.append(base, relative2);
+			assertEquals("Appending " + relative2 + " to URI of " + uri + "failed", expectedResolved2, resolved);
+		}
+
+		// Ensure that creating an URI from string works as expected, too
+		for (String uri : uris) {
+			new URI(uri.toString());
+			final URI resolved = URIUtil.fromString(uri);
+			assertEquals("Creating URI using fromString " + uri + " failed", new URI(uri), resolved);
+		}
+
+		final String[] expected3 = {
+				// @formatter:off
+				"file:////WSL$/Ubuntu",
+				"file:////WSL$/Ubuntu/",
+				"file:////WSL$/Ubuntu",
+				"file:////WSL$/Ubuntu/"
+				// @formatter:on
+		};
+
+		// The following two ctors actually work as expected
+		for (String uri : uris) {
+			final URI test = new URI(uri);
+			new URI(test.getScheme(), test.getSchemeSpecificPart(), test.getFragment());
+			assertEquals(
+					"Crating an URI using URIUtil from URI using Scheme, SchemeSpecificPart and Fragment failed for "
+							+ uri,
+					test,
+					URIUtil.toURI(test.getScheme(), test.getSchemeSpecificPart(), test.getFragment()));
+
+		}
 
 		for (int i = 0; i < uris.length; i++) {
-			URI base = new URI(uris[i]);
-			URI resolved = URIUtil.append(base, relative2);
-			assertEquals("2." + Integer.toString(i), expectedResolved2, resolved);
+			URI test = new URI(uris[i]);
+			URI ref = new URI(expected3[i]);
+
+			new URI(test.getScheme(), test.getAuthority(), test.getPath(), test.getQuery(), test.getFragment());
+			assertEquals(
+					"Crating an URI using URIUtil from URI using Scheme, Authority, Path, Query and Fragment failed for "
+							+ uris[i],
+					ref, URIUtil.toURI(test.getScheme(), test.getAuthority(), test.getPath(), test.getQuery(),
+							test.getFragment()));
+
 		}
+
+		// The other two ctors fail, if the URL contains a $
+		for (int i = 0; i < uris.length; i++) {
+			final URI test = new URI(uris[i]);
+			final URI ref = new URI(expected3[i]);
+			if (i < 2) {
+			assertThrows(
+					"Crating an URI from URI using Scheme, UserInfo, Host, Port, Path, Query and Fragment should fail for "
+							+ uris[i],
+					URISyntaxException.class, () -> {
+				new URI(test.getScheme(), test.getUserInfo(), test.getHost(), test.getPort(), test.getPath(),
+								test.getQuery(), test.getFragment());
+						});
+			}
+			assertEquals("Crating an URI using URIUtil from URI using Scheme, UserInfo, Host, Port, Path, Query and Fragment failed for "
+					+ uris[i], ref,
+					URIUtil.toURI(test.getScheme(), test.getUserInfo(), test.getHost(), test.getPort(), test.getPath(),
+							test.getQuery(), test.getFragment()));
+		}
+
+		for (int i = 0; i < uris.length; i++) {
+			final URI test = new URI(uris[i]);
+			final URI ref = new URI(expected3[i]);
+			if (i < 2) {
+			assertThrows("Crating an URI from URI using Scheme, Host, Path, and Fragment should fail for " + uris[i],
+					URISyntaxException.class, () -> {
+						new URI(test.getScheme(), test.getHost(), test.getPath(), test.getFragment());
+					});
+			}
+			assertEquals(
+					"Crating an URI using URIUtil from URI using Scheme, Host, Path, and Fragment failed for "
+							+ uris[i],
+					ref,
+					URIUtil.toURI(test.getScheme(), test.getHost(), test.getPath(), test.getFragment()));
+		}
+
+
+
 	}
 }
