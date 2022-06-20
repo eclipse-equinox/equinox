@@ -1,2 +1,2 @@
--jpms-module-info: ${project.artifactId};access='OPEN'
+-jpms-module-info: ${project.artifactId};access='OPEN';version=${versionmask;===;${version_cleanup;${project.version}}}
 -jpms-module-info-options: java.management;ignore="true"
