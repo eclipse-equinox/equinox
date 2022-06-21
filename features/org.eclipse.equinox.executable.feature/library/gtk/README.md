@@ -2,7 +2,7 @@
 
 # Building
 
-    ./bulid.sh
+    ./build.sh
     ./build.sh clean
 
 # Developer notes:

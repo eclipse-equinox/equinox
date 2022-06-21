@@ -149,7 +149,9 @@ clean:
 dev_build_install: all
 ifeq "$(origin DEV_ECLIPSE)" "environment"
 	$(info Copying $(EXEC) and $(DLL) into your development eclipse folder:)
+	mkdir -p ${DEV_ECLIPSE}/
 	cp $(EXEC) ${DEV_ECLIPSE}/
+	mkdir -p ${DEV_ECLIPSE}/plugins/org.eclipse.equinox.launcher.gtk.linux.x86_64/
 	cp $(DLL) ${DEV_ECLIPSE}/plugins/org.eclipse.equinox.launcher.gtk.linux.x86_64/
 else
 	$(error $(DEV_INSTALL_ERROR_MSG))
