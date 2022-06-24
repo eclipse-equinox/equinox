@@ -10,6 +10,7 @@ Import-Package: org.apache.sshd.client.future,
  org.junit;version="4.8.1",
  org.mockito,
  org.mockito.stubbing,
- org.mockito.invocation
+ org.mockito.invocation,
+ org.osgi.service.cm
 Fragment-Host: org.eclipse.equinox.console
 Automatic-Module-Name: org.eclipse.equinox.console.tests
