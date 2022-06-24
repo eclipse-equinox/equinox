@@ -551,11 +551,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	public void testLegacyLoadActivation() throws Exception {
 		// test that calling loadClass from a non-lazy start bundle does not activate the bundle
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
-		try {
-			test.loadClass("does.not.exist.Test"); //$NON-NLS-1$
-		} catch (ClassNotFoundException e) {
-			// expected
-		}
+		assertThrows(ClassNotFoundException.class, () -> test.loadClass("does.not.exist.Test")); //$NON-NLS-1$
 		Object[] expectedEvents = new Object[0];
 		Object[] actualEvents = simpleResults.getResults(0);
 		compareResults(expectedEvents, actualEvents);
@@ -563,11 +559,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		// test that calling loadClass from a lazy start bundle does not activates a bundle
 		// This is not disabled by default (bug 503742)
 		Bundle legacyA = installer.installBundle("legacy.lazystart.a"); //$NON-NLS-1$
-		try {
-			legacyA.loadClass("does.not.exist.Test"); //$NON-NLS-1$
-		} catch (ClassNotFoundException e) {
-			// expected
-		}
+		assertThrows(ClassNotFoundException.class, () -> legacyA.loadClass("does.not.exist.Test")); //$NON-NLS-1$
 		expectedEvents = new Object[0];
 		actualEvents = simpleResults.getResults(0);
 		compareResults(expectedEvents, actualEvents);
@@ -1173,13 +1165,11 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			return; // cannot really test this if this property is set
 		// make sure there is only one manifest found
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
-		Enumeration manifests = test.getResources("META-INF/MANIFEST.MF"); //$NON-NLS-1$
+		Enumeration<URL> manifests = test.getResources("META-INF/MANIFEST.MF"); //$NON-NLS-1$
 		assertNotNull("manifests", manifests); //$NON-NLS-1$
-		ArrayList manifestURLs = new ArrayList();
-		while (manifests.hasMoreElements())
-			manifestURLs.add(manifests.nextElement());
+		List<URL> manifestURLs = Collections.list(manifests);
 		assertEquals("manifest number", 1, manifestURLs.size()); //$NON-NLS-1$
-		URL manifest = (URL) manifestURLs.get(0);
+		URL manifest = manifestURLs.get(0);
 		int dotIndex = manifest.getHost().indexOf('.');
 		long bundleId = dotIndex >= 0 && dotIndex < manifest.getHost().length() - 1 ? Long.parseLong(manifest.getHost().substring(0, dotIndex)) : Long.parseLong(manifest.getHost());
 		assertEquals("host id", test.getBundleId(), bundleId); //$NON-NLS-1$
@@ -1196,13 +1186,11 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		BundleWiring wiring = test.adapt(BundleWiring.class);
 		ClassLoader bcl = wiring.getClassLoader();
 		URLClassLoader cl = new URLClassLoader(new URL[0], bcl);
-		Enumeration manifests = cl.getResources("META-INF/MANIFEST.MF"); //$NON-NLS-1$
+		Enumeration<URL> manifests = cl.getResources("META-INF/MANIFEST.MF"); //$NON-NLS-1$
 		assertNotNull("manifests", manifests); //$NON-NLS-1$
-		ArrayList manifestURLs = new ArrayList();
-		while (manifests.hasMoreElements())
-			manifestURLs.add(manifests.nextElement());
+		List<URL> manifestURLs = Collections.list(manifests);
 		assertEquals("manifest number", 1, manifestURLs.size()); //$NON-NLS-1$
-		URL manifest = (URL) manifestURLs.get(0);
+		URL manifest = manifestURLs.get(0);
 		assertEquals("wrong protocol", "bundleresource", manifest.getProtocol());
 		int dotIndex = manifest.getHost().indexOf('.');
 		long bundleId = dotIndex >= 0 && dotIndex < manifest.getHost().length() - 1 ? Long.parseLong(manifest.getHost().substring(0, dotIndex)) : Long.parseLong(manifest.getHost());
@@ -1214,14 +1202,12 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	public void testMultipleGetResources01() throws Exception {
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
 		// test that we can get multiple resources from a bundle
-		Enumeration resources = test.getResources("data/resource1"); //$NON-NLS-1$
+		Enumeration<URL> resources = test.getResources("data/resource1"); //$NON-NLS-1$
 		assertNotNull("resources", resources); //$NON-NLS-1$
-		ArrayList resourceURLs = new ArrayList();
-		while (resources.hasMoreElements())
-			resourceURLs.add(resources.nextElement());
+		List<URL> resourceURLs = Collections.list(resources);
 		assertEquals("resource number", 2, resourceURLs.size()); //$NON-NLS-1$
-		assertEquals("root resource", "root classpath", readURL((URL) resourceURLs.get(0))); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("stuff resource", "stuff classpath", readURL((URL) resourceURLs.get(1))); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("root resource", "root classpath", readURL(resourceURLs.get(0))); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("stuff resource", "stuff classpath", readURL(resourceURLs.get(1))); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	@Test
@@ -1233,14 +1219,12 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		BundleWiring wiring = test.adapt(BundleWiring.class);
 		ClassLoader bcl = wiring.getClassLoader();
 		URLClassLoader cl = new URLClassLoader(new URL[0], bcl);
-		Enumeration resources = cl.getResources("data/resource1"); //$NON-NLS-1$
+		Enumeration<URL> resources = cl.getResources("data/resource1"); //$NON-NLS-1$
 		assertNotNull("resources", resources); //$NON-NLS-1$
-		ArrayList resourceURLs = new ArrayList();
-		while (resources.hasMoreElements())
-			resourceURLs.add(resources.nextElement());
+		List<URL> resourceURLs = Collections.list(resources);
 		assertEquals("resource number", 2, resourceURLs.size()); //$NON-NLS-1$
-		assertEquals("root resource", "root classpath", readURL((URL) resourceURLs.get(0))); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("stuff resource", "stuff classpath", readURL((URL) resourceURLs.get(1))); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("root resource", "root classpath", readURL(resourceURLs.get(0))); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("stuff resource", "stuff classpath", readURL(resourceURLs.get(1))); //$NON-NLS-1$ //$NON-NLS-2$
 		cl.close();
 	}
 
@@ -1249,16 +1233,14 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		installer.installBundle("test"); //$NON-NLS-1$
 		Bundle test2 = installer.installBundle("test2"); //$NON-NLS-1$
 		// test that we can get multiple resources from a bundle
-		Enumeration resources = test2.getResources("data/resource1"); //$NON-NLS-1$
+		Enumeration<URL> resources = test2.getResources("data/resource1"); //$NON-NLS-1$
 		assertNotNull("resources", resources); //$NON-NLS-1$
-		ArrayList resourceURLs = new ArrayList();
-		while (resources.hasMoreElements())
-			resourceURLs.add(resources.nextElement());
+		List<URL> resourceURLs = Collections.list(resources);
 		assertEquals("resource number", 4, resourceURLs.size()); //$NON-NLS-1$
-		assertEquals("root resource", "root classpath", readURL((URL) resourceURLs.get(0))); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("stuff resource", "stuff classpath", readURL((URL) resourceURLs.get(1))); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("root resource", "root classpath test2", readURL((URL) resourceURLs.get(2))); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("stuff resource", "stuff classpath test2", readURL((URL) resourceURLs.get(3))); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("root resource", "root classpath", readURL(resourceURLs.get(0))); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("stuff resource", "stuff classpath", readURL(resourceURLs.get(1))); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("root resource", "root classpath test2", readURL(resourceURLs.get(2))); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("stuff resource", "stuff classpath test2", readURL(resourceURLs.get(3))); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	@Test
@@ -1267,16 +1249,14 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		Bundle test2 = installer.installBundle("test2"); //$NON-NLS-1$
 		// test that we can get multiple resources from a bundle
 		// test that using a context gives correct results for multiple resources (bug 261853)
-		Enumeration resources = test2.getResources("data/"); //$NON-NLS-1$
+		Enumeration<URL> resources = test2.getResources("data/"); //$NON-NLS-1$
 		assertNotNull("resources", resources); //$NON-NLS-1$
-		ArrayList resourceURLs = new ArrayList();
-		while (resources.hasMoreElements())
-			resourceURLs.add(resources.nextElement());
+		List<URL> resourceURLs = Collections.list(resources);
 		assertEquals("resource number", 4, resourceURLs.size()); //$NON-NLS-1$
-		assertEquals("root resource", "root classpath", readURL(new URL((URL) resourceURLs.get(0), "resource1"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		assertEquals("stuff resource", "stuff classpath", readURL(new URL((URL) resourceURLs.get(1), "resource1"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		assertEquals("root resource", "root classpath test2", readURL(new URL((URL) resourceURLs.get(2), "resource1"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		assertEquals("stuff resource", "stuff classpath test2", readURL(new URL((URL) resourceURLs.get(3), "resource1"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		assertEquals("root resource", "root classpath", readURL(new URL(resourceURLs.get(0), "resource1"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		assertEquals("stuff resource", "stuff classpath", readURL(new URL(resourceURLs.get(1), "resource1"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		assertEquals("root resource", "root classpath test2", readURL(new URL(resourceURLs.get(2), "resource1"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		assertEquals("stuff resource", "stuff classpath test2", readURL(new URL(resourceURLs.get(3), "resource1"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	@Test
@@ -1286,7 +1266,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 		assertTrue("Could not resolve test2 bundle", installer.resolveBundles(new Bundle[] {test2}));
 		BundleWiring test2Wiring = test2.adapt(BundleWiring.class);
-		Collection resources = test2Wiring.listResources("/", "*", 0);
+		Collection<String> resources = test2Wiring.listResources("/", "*", 0);
 		assertTrue("could not find resource", resources.contains("resource2"));
 		resources = test2Wiring.listResources("data/", "resource2", 0);
 		assertTrue("could not find resource", resources.contains("data/resource2"));
@@ -1379,18 +1359,24 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		BundleWiring hostWiring = host.adapt(BundleWiring.class);
 		assertNotNull("No host wiring", hostWiring);
 
-		List packageCapabilities = hostWiring.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE);
+		List<BundleCapability> packageCapabilities = hostWiring.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE);
 		assertEquals("Number host export capabilities", 4, packageCapabilities.size()); //$NON-NLS-1$
 
-		assertEquals("Check export name", "host.multiple.exports", ((BundleCapability) packageCapabilities.get(0)).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE)); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("Check include directive", "Public*", ((BundleCapability) packageCapabilities.get(0)).getDirectives().get(PackageNamespace.CAPABILITY_INCLUDE_DIRECTIVE)); //$NON-NLS-1$//$NON-NLS-2$
+		assertEquals("Check export name", "host.multiple.exports", //$NON-NLS-1$//$NON-NLS-2$
+				packageCapabilities.get(0).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		assertEquals("Check include directive", "Public*", //$NON-NLS-1$//$NON-NLS-2$
+				packageCapabilities.get(0).getDirectives().get(PackageNamespace.CAPABILITY_INCLUDE_DIRECTIVE));
 
-		assertEquals("Check export name", "host.multiple.exports.onlyone", ((BundleCapability) packageCapabilities.get(1)).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE)); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Check export name", "host.multiple.exports.onlyone", //$NON-NLS-1$ //$NON-NLS-2$
+				packageCapabilities.get(1).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
 
-		assertEquals("Check export name", "host.multiple.exports", ((BundleCapability) packageCapabilities.get(2)).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE)); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("Check scope attribute", "private", (String) ((BundleCapability) packageCapabilities.get(2)).getAttributes().get("scope")); //$NON-NLS-1$//$NON-NLS-2$
+		assertEquals("Check export name", "host.multiple.exports", //$NON-NLS-1$//$NON-NLS-2$
+				packageCapabilities.get(2).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+		assertEquals("Check scope attribute", "private", //$NON-NLS-1$//$NON-NLS-2$
+				packageCapabilities.get(2).getAttributes().get("scope"));
 
-		assertEquals("Check export name", "host.multiple.exports.onlyone", ((BundleCapability) packageCapabilities.get(3)).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE)); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Check export name", "host.multiple.exports.onlyone", //$NON-NLS-1$ //$NON-NLS-2$
+				packageCapabilities.get(3).getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
 	}
 
 	@Test
@@ -1553,11 +1539,11 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	public void testBuddyClassLoadingRegistered1() throws Exception {
 		Bundle registeredA = installer.installBundle("buddy.registered.a"); //$NON-NLS-1$
 		installer.resolveBundles(new Bundle[] {registeredA});
-		Enumeration testFiles = registeredA.getResources("resources/test.txt"); //$NON-NLS-1$
+		Enumeration<URL> testFiles = registeredA.getResources("resources/test.txt"); //$NON-NLS-1$
 		assertNotNull("testFiles", testFiles); //$NON-NLS-1$
-		ArrayList texts = new ArrayList();
+		ArrayList<String> texts = new ArrayList<>();
 		while (testFiles.hasMoreElements())
-			texts.add(readURL((URL) testFiles.nextElement()));
+			texts.add(readURL(testFiles.nextElement()));
 		assertEquals("test.txt number", 1, texts.size()); //$NON-NLS-1$
 		assertTrue("buddy.registered.a", texts.contains("buddy.registered.a")); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -1566,9 +1552,9 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		installer.resolveBundles(new Bundle[] {registeredATest1, registeredATest2});
 		testFiles = registeredA.getResources("resources/test.txt"); //$NON-NLS-1$
 		assertNotNull("testFiles", testFiles); //$NON-NLS-1$
-		texts = new ArrayList();
+		texts = new ArrayList<>();
 		while (testFiles.hasMoreElements())
-			texts.add(readURL((URL) testFiles.nextElement()));
+			texts.add(readURL(testFiles.nextElement()));
 
 		// The real test
 		assertEquals("test.txt number", 3, texts.size()); //$NON-NLS-1$
@@ -1684,11 +1670,11 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	public void testBuddyClassLoadingDependent1() throws Exception {
 		Bundle dependentA = installer.installBundle("buddy.dependent.a"); //$NON-NLS-1$
 		installer.resolveBundles(new Bundle[] {dependentA});
-		Enumeration testFiles = dependentA.getResources("resources/test.txt"); //$NON-NLS-1$
+		Enumeration<URL> testFiles = dependentA.getResources("resources/test.txt"); //$NON-NLS-1$
 		assertNotNull("testFiles", testFiles); //$NON-NLS-1$
-		ArrayList texts = new ArrayList();
+		ArrayList<String> texts = new ArrayList<>();
 		while (testFiles.hasMoreElements())
-			texts.add(readURL((URL) testFiles.nextElement()));
+			texts.add(readURL(testFiles.nextElement()));
 		assertEquals("test.txt number", 1, texts.size()); //$NON-NLS-1$
 		assertTrue("buddy.dependent.a", texts.contains("buddy.dependent.a")); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -1697,9 +1683,9 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		installer.resolveBundles(new Bundle[] {dependentATest1, dependentATest2});
 		testFiles = dependentA.getResources("resources/test.txt"); //$NON-NLS-1$
 		assertNotNull("testFiles", testFiles); //$NON-NLS-1$
-		texts = new ArrayList();
+		texts = new ArrayList<>();
 		while (testFiles.hasMoreElements())
-			texts.add(readURL((URL) testFiles.nextElement()));
+			texts.add(readURL(testFiles.nextElement()));
 		assertEquals("test.txt number", 3, texts.size()); //$NON-NLS-1$
 		assertTrue("buddy.dependent.a", texts.contains("buddy.dependent.a")); //$NON-NLS-1$//$NON-NLS-2$
 		assertTrue("buddy.dependent.a.test1", texts.contains("buddy.dependent.a.test1")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1750,11 +1736,8 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		Bundle invalidA = installer.installBundle("buddy.invalid.a"); //$NON-NLS-1$
 		installer.resolveBundles(new Bundle[] {invalidA});
 		invalidA.getResource("doesNotExist");
-		try {
-			invalidA.loadClass("does.not.Exist");
-		} catch (ClassNotFoundException e) {
-			// expected
-		}
+		assertThrows(ClassNotFoundException.class, () -> invalidA.loadClass("does.not.Exist")); //$NON-NLS-1$
+
 	}
 
 	@Test
@@ -1824,7 +1807,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	@Test
 	public void testBundleReference01() throws Exception {
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
-		Class clazz = test.loadClass("test1.Activator"); //$NON-NLS-1$
+		Class<?> clazz = test.loadClass("test1.Activator"); //$NON-NLS-1$
 		Bundle bundle = FrameworkUtil.getBundle(clazz);
 		assertEquals("Wrong bundle", test, bundle); //$NON-NLS-1$
 	}
@@ -1832,7 +1815,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	@Test
 	public void testBundleReference02() throws Exception {
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
-		Class clazz = test.loadClass("test1.Activator"); //$NON-NLS-1$
+		Class<?> clazz = test.loadClass("test1.Activator"); //$NON-NLS-1$
 		ClassLoader cl = clazz.getClassLoader();
 		assertTrue("ClassLoader is not of type BundleReference", cl instanceof BundleReference);
 		assertEquals("Wrong bundle", test, ((BundleReference) cl).getBundle()); //$NON-NLS-1$
@@ -1953,10 +1936,11 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 				endCalled[0] = true;
 			}
 		};
-		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(ResolverHookFactory.class, error, null);
+		ServiceRegistration<ResolverHookFactory> reg = OSGiTestsActivator.getContext()
+				.registerService(ResolverHookFactory.class, error, null);
 		try {
 			Bundle test = installer.installBundle("test"); //$NON-NLS-1$
-			BundleException e = assertThrows(BundleException.class, () -> test.start());
+			BundleException e = assertThrows(BundleException.class, test::start);
 			assertEquals("Wrong exception type.", BundleException.REJECTED_BY_HOOK, e.getType());
 		} finally {
 			reg.unregister();
@@ -1983,10 +1967,11 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 				throw new RuntimeException("Error");
 			}
 		};
-		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(ResolverHookFactory.class, error, null);
+		ServiceRegistration<ResolverHookFactory> reg = OSGiTestsActivator.getContext()
+				.registerService(ResolverHookFactory.class, error, null);
 		try {
 			Bundle test = installer.installBundle("test"); //$NON-NLS-1$
-			BundleException e = assertThrows(BundleException.class, () -> test.start());
+			BundleException e = assertThrows(BundleException.class, test::start);
 			assertEquals("Wrong exception type.", BundleException.REJECTED_BY_HOOK, e.getType());
 		} finally {
 			reg.unregister();
@@ -2017,11 +2002,13 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			throw new RuntimeException("Error");
 		};
 
-		ServiceRegistration endReg = OSGiTestsActivator.getContext().registerService(ResolverHookFactory.class, endHook, null);
-		ServiceRegistration errorReg = OSGiTestsActivator.getContext().registerService(ResolverHookFactory.class, error, null);
+		ServiceRegistration<ResolverHookFactory> endReg = OSGiTestsActivator.getContext()
+				.registerService(ResolverHookFactory.class, endHook, null);
+		ServiceRegistration<ResolverHookFactory> errorReg = OSGiTestsActivator.getContext()
+				.registerService(ResolverHookFactory.class, error, null);
 		try {
 			Bundle test = installer.installBundle("test"); //$NON-NLS-1$
-			BundleException e = assertThrows(BundleException.class, () -> test.start());
+			BundleException e = assertThrows(BundleException.class, test::start);
 			assertEquals("Wrong exception type.", BundleException.REJECTED_BY_HOOK, e.getType());
 		} finally {
 			errorReg.unregister();
@@ -2068,11 +2055,13 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			}
 		};
 
-		ServiceRegistration errorReg = OSGiTestsActivator.getContext().registerService(ResolverHookFactory.class, error, null);
-		ServiceRegistration endReg = OSGiTestsActivator.getContext().registerService(ResolverHookFactory.class, endHook, null);
+		ServiceRegistration<ResolverHookFactory> errorReg = OSGiTestsActivator.getContext()
+				.registerService(ResolverHookFactory.class, error, null);
+		ServiceRegistration<ResolverHookFactory> endReg = OSGiTestsActivator.getContext()
+				.registerService(ResolverHookFactory.class, endHook, null);
 		try {
 			Bundle test = installer.installBundle("test"); //$NON-NLS-1$
-			BundleException e = assertThrows(BundleException.class, () -> test.start());
+			BundleException e = assertThrows(BundleException.class, test::start);
 			assertEquals("Wrong exception type.", BundleException.REJECTED_BY_HOOK, e.getType());
 		} finally {
 			errorReg.unregister();
@@ -2283,7 +2272,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	}
 
 	@Test
-	public void testStaleLoaderNPE() throws BundleException, IOException, ClassNotFoundException, InterruptedException {
+	public void testStaleLoaderNPE() throws BundleException, IOException, InterruptedException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		config.mkdirs();
 
@@ -2437,10 +2426,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			host.start();
 			Enumeration<URL> eResources = host.getResources("META-INF/services/some.bundle.Factory");
 			assertNotNull("No resources found.", eResources);
-			List<URL> resources = new ArrayList<>();
-			while (eResources.hasMoreElements()) {
-				resources.add(eResources.nextElement());
-			}
+			List<URL> resources = Collections.list(eResources);
 			assertEquals("Wrong number of resources.", 2, resources.size());
 			assertEquals("Wrong content for resource 1", "testFactory1", readURL(resources.get(0)));
 			assertEquals("Wrong content for resource 2", "testFactory2", readURL(resources.get(1)));
