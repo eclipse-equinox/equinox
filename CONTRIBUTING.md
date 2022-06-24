@@ -19,15 +19,15 @@ more.
 
 The project maintains the following source code repositories
 
-* http://git.eclipse.org/c/equinox/rt.equinox.binaries.git
-* http://git.eclipse.org/c/equinox/rt.equinox.bundles.git
-* http://git.eclipse.org/c/equinox/rt.equinox.framework.git
-* http://git.eclipse.org/c/equinox/rt.equinox.p2.git
+* https://github.com/eclipse-equinox/equinox.binaries
+* https://github.com/eclipse-equinox/equinox
+* https://github.com/eclipse-equinox/p2
 
-This project uses Bugzilla to track ongoing development and issues.
+This project uses GitHub to track ongoing development and issues.
 
-* Search for issues: https://eclipse.org/bugs/buglist.cgi?product=Equinox
-* Create a new report: https://eclipse.org/bugs/enter_bug.cgi?product=Equinox
+* Search for issues: https://github.com/eclipse-equinox/equinox.binaries/issues
+* Search for historical issues: https://eclipse.org/bugs/buglist.cgi?product=Equinox
+* Create a new report: https://github.com/eclipse-equinox/equinox.binaries/issues/new
 
 Be sure to search for existing bugs before you create another one. Remember that
 contributions are always welcome!
