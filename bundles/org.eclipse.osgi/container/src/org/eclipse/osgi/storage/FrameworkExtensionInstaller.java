@@ -80,8 +80,6 @@ public class FrameworkExtensionInstaller {
 				result.setAccessible(true);
 			}
 			return result;
-		} catch (SecurityException e) {
-			// if we do not have the permissions then we will not find the method
 		} catch (NoSuchMethodException | RuntimeException e) {
 			// do nothing look in super class below
 			// have to avoid blowing up <clinit>

@@ -17,7 +17,6 @@ import java.lang.reflect.Method;
 import java.util.*;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
 import org.eclipse.core.runtime.IContributor;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.osgi.framework.*;
@@ -248,9 +247,6 @@ public class HttpRegistryManager {
 		try {
 			httpService.registerResources(contribution.alias, contribution.baseName, context);
 			registered.add(contribution.alias);
-		} catch (NamespaceException e) {
-			// TODO: should log this
-			e.printStackTrace();
 		} catch (Throwable t) {
 			// TODO: should log this
 			t.printStackTrace();
@@ -264,12 +260,6 @@ public class HttpRegistryManager {
 		try {
 			httpService.registerServlet(contribution.alias, contribution.servlet, contribution.initparams, context);
 			registered.add(contribution.alias);
-		} catch (NamespaceException e) {
-			// TODO: should log this
-			e.printStackTrace();
-		} catch (ServletException e) {
-			// TODO: should log this
-			e.printStackTrace();
 		} catch (Throwable t) {
 			// TODO: should log this
 			t.printStackTrace();

@@ -85,9 +85,7 @@ public class CertificateImportCertSelectPage extends WizardPage implements Liste
 				certList.add(certificate);
 			}
 
-		} catch (CertificateException e) {
-			setErrorMessage(e.getMessage());
-		} catch (FileNotFoundException e) {
+		} catch (CertificateException | FileNotFoundException e) {
 			setErrorMessage(e.getMessage());
 		}
 

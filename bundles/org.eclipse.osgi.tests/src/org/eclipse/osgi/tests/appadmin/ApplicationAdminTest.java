@@ -838,9 +838,7 @@ public class ApplicationAdminTest extends OSGiTest {
 			args.put("test.arg2", Integer.valueOf(34)); //$NON-NLS-1$
 			args.put("test.arg3", Long.valueOf(34)); //$NON-NLS-1$
 			app.schedule("schedule.1", args, "org/osgi/application/timer", "(minute=*)", true); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		} catch (InvalidSyntaxException e) {
-			fail("Failed to schedule an application", e); //$NON-NLS-1$
-		} catch (ApplicationException e) {
+		} catch (InvalidSyntaxException | ApplicationException e) {
 			fail("Failed to schedule an application", e); //$NON-NLS-1$
 		}
 	}
@@ -898,9 +896,7 @@ public class ApplicationAdminTest extends OSGiTest {
 			args.put("test.arg3", Long.valueOf(34)); //$NON-NLS-1$
 			// make it non-recurring
 			app.schedule("schedule.2", args, "org/osgi/application/timer", "(minute=*)", false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		} catch (InvalidSyntaxException e) {
-			fail("Failed to schedule an application", e); //$NON-NLS-1$
-		} catch (ApplicationException e) {
+		} catch (InvalidSyntaxException | ApplicationException e) {
 			fail("Failed to schedule an application", e); //$NON-NLS-1$
 		}
 	}
@@ -973,9 +969,7 @@ public class ApplicationAdminTest extends OSGiTest {
 		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".simpleApp"); //$NON-NLS-1$
 		try {
 			app.schedule("schedule.duplicate1", null, "org/osgi/application/timer", "(minute=*)", true); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		} catch (InvalidSyntaxException e) {
-			fail("Failed to schedule an application", e); //$NON-NLS-1$
-		} catch (ApplicationException e) {
+		} catch (InvalidSyntaxException | ApplicationException e) {
 			fail("Failed to schedule an application", e); //$NON-NLS-1$
 		}
 		try {
