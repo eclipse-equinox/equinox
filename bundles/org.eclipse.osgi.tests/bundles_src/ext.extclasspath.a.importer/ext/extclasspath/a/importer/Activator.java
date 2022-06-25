@@ -28,11 +28,8 @@ public class Activator implements BundleActivator {
 	}
 
 	private String getURLContent(URL resource) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(resource.openStream()));
-		try {
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(resource.openStream()))) {
 			return br.readLine();
-		} finally {
-			br.close();
 		}
 	}
 

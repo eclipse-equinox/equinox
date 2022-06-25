@@ -30,13 +30,8 @@ public class AbstractWhiteboardTestServlet extends HttpServlet {
 
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		PrintWriter writer = response.getWriter();
-
-		try {
+		try (PrintWriter writer = response.getWriter()) {
 			handleDoGet(request, writer);
-		}
-		finally {
-			writer.close();
 		}
 	}
 

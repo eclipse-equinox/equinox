@@ -77,16 +77,13 @@ public class BundleFileWrapperFactoryHookTests extends AbstractFrameworkHookTest
 	private String readURL(URL url) {
 		StringBuilder sb = new StringBuilder();
 		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
-			try {
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
 				for (String line = reader.readLine(); line != null;) {
 					sb.append(line);
 					line = reader.readLine();
 					if (line != null)
 						sb.append('\n');
 				}
-			} finally {
-				reader.close();
 			}
 		} catch (IOException e) {
 			fail("Unexpected exception reading url: " + url.toExternalForm(), e); //$NON-NLS-1$

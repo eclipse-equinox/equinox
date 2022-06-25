@@ -303,13 +303,8 @@ public class FrameworkLauncher {
 
 	private void writeJarFile(File jarFile, Manifest mf) {
 		try {
-			JarOutputStream jos = null;
-			try {
-				jos = new JarOutputStream(new FileOutputStream(jarFile), mf);
+			try (JarOutputStream jos = new JarOutputStream(new FileOutputStream(jarFile), mf)) {
 				jos.finish();
-			} finally {
-				if (jos != null)
-					jos.close();
 			}
 		} catch (IOException e) {
 			context.log("Error writing extension bundle", e); //$NON-NLS-1$
@@ -318,13 +313,8 @@ public class FrameworkLauncher {
 
 	private Manifest readJarFile(File jarFile) {
 		try {
-			JarInputStream jis = null;
-			try {
-				jis = new JarInputStream(new FileInputStream(jarFile));
+			try (JarInputStream jis = new JarInputStream(new FileInputStream(jarFile))) {
 				return jis.getManifest();
-			} finally {
-				if (jis != null)
-					jis.close();
 			}
 		} catch (IOException e) {
 			context.log("Error reading extension bundle", e); //$NON-NLS-1$

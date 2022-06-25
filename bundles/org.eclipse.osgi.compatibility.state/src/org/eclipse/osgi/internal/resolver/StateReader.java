@@ -837,9 +837,7 @@ final class StateReader {
 
 	void fullyLoad(BundleDescriptionImpl target) throws IOException {
 		setAccessedFlag(true);
-		DataInputStream in = null;
-		try {
-			in = openLazyFile();
+		try (DataInputStream in = openLazyFile()) {
 			// get the set of bundles that must be loaded according to dependencies
 			List<BundleDescriptionImpl> toLoad = new ArrayList<>();
 			addDependencies(target, toLoad);
@@ -847,9 +845,6 @@ final class StateReader {
 			// look for the lazy data of the toLoad list
 			for (int i = 0; i < skipBytes.length; i++)
 				readBundleDescriptionLazyData(in, skipBytes[i]);
-		} finally {
-			if (in != null)
-				in.close();
 		}
 	}
 

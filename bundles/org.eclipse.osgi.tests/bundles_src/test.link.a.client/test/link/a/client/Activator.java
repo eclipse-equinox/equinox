@@ -38,13 +38,10 @@ public class Activator implements BundleActivator {
 		URL resource = this.getClass().getResource("/test/link/a/resource.txt"); //$NON-NLS-1$
 		if (resource == null)
 			throw new RuntimeException("Did not find resource.txt"); //$NON-NLS-1$
-		BufferedReader reader = new BufferedReader(new InputStreamReader(resource.openStream()));
-		try {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.openStream()))) {
 			String content = reader.readLine();
 			if (!"Test content".equals(content)) //$NON-NLS-1$
 				throw new RuntimeException("Unexpected content in resource.txt: " + content); //$NON-NLS-1$
-		} finally {
-			reader.close();
 		}
 		// test resource that does not exist
 		URL notExist = this.getClass().getResource("/test/link/b/DoesNotExist.txt"); //$NON-NLS-1$

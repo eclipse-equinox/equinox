@@ -110,9 +110,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 			return;
 
 		Properties properties = new Properties();
-		InputStream is = null;
-		try {
-			is = StorageUtils.getInputStream(location);
+		try (InputStream is = StorageUtils.getInputStream(location)) {
 			if (is != null) {
 				properties.load(is);
 				timestamp = getLastModified();
@@ -122,9 +120,6 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 			AuthPlugin.getDefault().logError(msg, e);
 			location = null; // don't attempt to use it 
 			return;
-		} finally {
-			if (is != null)
-				is.close();
 		}
 
 		// In future new versions could be added
@@ -193,14 +188,9 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 		flush(properties, null);
 
 		// output
-		OutputStream stream = null;
-		try {
-			stream = StorageUtils.getOutputStream(location);
+		try (OutputStream stream = StorageUtils.getOutputStream(location)) {
 			properties.store(stream, description);
 			modified = false;
-		} finally {
-			if (stream != null)
-				stream.close();
 		}
 		timestamp = getLastModified();
 	}

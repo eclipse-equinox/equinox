@@ -66,11 +66,8 @@ public abstract class AbstractTestServlet extends HttpServlet {
 
 	@Override
 	protected final void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		PrintWriter writer = response.getWriter();
-		try {
+		try (PrintWriter writer = response.getWriter()) {
 			handleDoGet(request, writer);
-		} finally {
-			writer.close();
 		}
 	}
 

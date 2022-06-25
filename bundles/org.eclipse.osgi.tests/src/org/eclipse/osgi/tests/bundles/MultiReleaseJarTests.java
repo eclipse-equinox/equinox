@@ -520,11 +520,8 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		if (url == null) {
 			return RNF;
 		}
-		BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
-		try {
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))) {
 			return br.readLine();
-		} finally {
-			br.close();
 		}
 	}
 

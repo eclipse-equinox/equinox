@@ -168,11 +168,8 @@ public class StandardRegionDigraphPeristenceTests {
 	}
 
 	private void readDigraph(byte[] byteArray) throws IOException {
-		ByteArrayInputStream input = new ByteArrayInputStream(byteArray);
-		try {
+		try (ByteArrayInputStream input = new ByteArrayInputStream(byteArray)) {
 			persistence.load(input);
-		} finally {
-			input.close();
 		}
 	}
 
