@@ -59,7 +59,7 @@ public class StandardManageableRegion implements ManageableRegion {
 	@Override
 	public ManageableRegion[] getDependencies() {
 		Set<FilteredRegion> edges = this.regionDigraph.getEdges(this.region);
-		List<ManageableRegion> dependencies = new ArrayList<ManageableRegion>();
+		List<ManageableRegion> dependencies = new ArrayList<>();
 		for (FilteredRegion edge : edges) {
 			ManageableRegion manageableRegion = this.manageableRegionDigraph.getRegion(edge.getRegion().getName());
 			if (manageableRegion != null) {

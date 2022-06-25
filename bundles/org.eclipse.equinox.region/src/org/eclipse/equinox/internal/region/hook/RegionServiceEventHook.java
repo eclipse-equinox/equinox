@@ -46,7 +46,7 @@ public final class RegionServiceEventHook implements EventHook {
 	 */
 	public void event(ServiceEvent event, Collection<BundleContext> contexts) {
 		ServiceReference<?> eventService = event.getServiceReference();
-		Map<Region, Boolean> regionAccess = new HashMap<Region, Boolean>();
+		Map<Region, Boolean> regionAccess = new HashMap<>();
 		Iterator<BundleContext> i = contexts.iterator();
 		while (i.hasNext()) {
 			Bundle bundle = RegionBundleFindHook.getBundle(i.next());
@@ -78,7 +78,7 @@ public final class RegionServiceEventHook implements EventHook {
 	}
 
 	private Boolean isAccessible(Region region, ServiceReference<?> candidateServiceReference) {
-		Collection<ServiceReference<?>> candidates = new ArrayList<ServiceReference<?>>(1);
+		Collection<ServiceReference<?>> candidates = new ArrayList<>(1);
 		candidates.add(candidateServiceReference);
 		RegionServiceFindHook.find(region, candidates);
 		return !candidates.isEmpty();

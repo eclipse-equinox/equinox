@@ -41,7 +41,7 @@ public class CSVParser {
 	public static TransformTuple[] parse(URL transformMapURL, EquinoxLogServices logServices) throws IOException {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(transformMapURL.openStream()));
 		String currentLine = null;
-		List<TransformTuple> list = new ArrayList<TransformTuple>();
+		List<TransformTuple> list = new ArrayList<>();
 		while ((currentLine = reader.readLine()) != null) {
 			if (currentLine.startsWith("#")) { //$NON-NLS-1$
 				continue;

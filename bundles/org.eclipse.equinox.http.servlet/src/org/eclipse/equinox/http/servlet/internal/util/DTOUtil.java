@@ -58,8 +58,8 @@ public class DTOUtil {
 			throw new HttpWhiteboardFailureException("'errorPage' expects String, String[] or Collection<String>", DTOConstants.FAILURE_REASON_VALIDATION_FAILED); //$NON-NLS-1$
 		}
 
-		List<String> exceptions = new ArrayList<String>();
-		Set<Long> errorCodeSet = new LinkedHashSet<Long>();
+		List<String> exceptions = new ArrayList<>();
+		Set<Long> errorCodeSet = new LinkedHashSet<>();
 
 		for(String errorPage : errorPages) {
 			try {
@@ -471,14 +471,14 @@ public class DTOUtil {
 		if (initParams == null) {
 			return Collections.emptyMap();
 		}
-		return new HashMap<String, String>(initParams);
+		return new HashMap<>(initParams);
 	}
 
 	public static <V> Map<String, Object> copyGenericMap(Map<String, V> value) {
 		if ((value == null) || value.isEmpty()) {
 			return Collections.emptyMap();
 		}
-		HashMap<String, Object> result = new HashMap<String, Object>();
+		HashMap<String, Object> result = new HashMap<>();
 		for (Map.Entry<String, V> entry : value.entrySet()) {
 			result.put(entry.getKey(), mapValue(entry.getValue()));
 		}
@@ -580,15 +580,15 @@ public class DTOUtil {
 	}
 
 	private static <E> List<E> newList(int size) {
-		return new ArrayList<E>(size);
+		return new ArrayList<>(size);
 	}
 
 	private static <E> Set<E> newSet(int size) {
-		return new HashSet<E>(size);
+		return new HashSet<>(size);
 	}
 
 	private static <K, V> Map<K, V> newMap(int size) {
-		return new HashMap<K, V>(size);
+		return new HashMap<>(size);
 	}
 
 	private static String[] sort(String[] values) {

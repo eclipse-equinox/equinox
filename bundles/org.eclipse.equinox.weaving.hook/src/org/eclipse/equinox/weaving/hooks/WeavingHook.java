@@ -50,7 +50,7 @@ public class WeavingHook extends AbstractWeavingHook {
         if (Debug.DEBUG_GENERAL) Debug.println("- WeavingHook.<init>()");
 
         this.adaptorFactory = new WeavingAdaptorFactory();
-        this.adaptors = new HashMap<Long, IWeavingAdaptor>();
+        this.adaptors = new HashMap<>();
     }
 
     @Override

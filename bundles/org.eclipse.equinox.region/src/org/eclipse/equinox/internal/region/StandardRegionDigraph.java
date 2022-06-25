@@ -40,7 +40,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	// bundle id modifications of all regions in this digraph
 	private final Object monitor = new Object();
 
-	private final Map<String, Region> regions = new HashMap<String, Region>();
+	private final Map<String, Region> regions = new HashMap<>();
 
 	// Alien calls may be made to the following object while this.monitor is locked
 	// as this.monitor is higher in the lock hierarchy than this object's own monitor.
@@ -48,7 +48,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 
 	/* edges maps a given region to an immutable set of edges with their tail at the given region. To update
 	 * the edges for a region, the corresponding immutable set is replaced atomically. */
-	private final Map<Region, Set<FilteredRegion>> edges = new HashMap<Region, Set<FilteredRegion>>();
+	private final Map<Region, Set<FilteredRegion>> edges = new HashMap<>();
 
 	private final BundleContext bundleContext;
 
@@ -168,9 +168,9 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		synchronized (this.monitor) {
 			Set<FilteredRegion> connections = this.edges.get(tailRegion);
 			if (connections == null) {
-				connections = new HashSet<FilteredRegion>();
+				connections = new HashSet<>();
 			} else {
-				connections = new HashSet<FilteredRegion>(connections);
+				connections = new HashSet<>(connections);
 				for (FilteredRegion edge : connections) {
 					if (headRegion.equals(edge.getRegion())) {
 						if (replace) {
@@ -217,7 +217,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	@Override
 	public Iterator<Region> iterator() {
 		synchronized (this.monitor) {
-			Set<Region> snapshot = new HashSet<Region>(this.regions.size());
+			Set<Region> snapshot = new HashSet<>(this.regions.size());
 			snapshot.addAll(this.regions.values());
 			return snapshot.iterator();
 		}
@@ -305,7 +305,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 				Set<FilteredRegion> edgeSet = entry.getValue();
 				for (FilteredRegion edge : edgeSet) {
 					if (region.equals(edge.getRegion())) {
-						Set<FilteredRegion> mutableEdgeSet = new HashSet<FilteredRegion>(edgeSet);
+						Set<FilteredRegion> mutableEdgeSet = new HashSet<>(edgeSet);
 						mutableEdgeSet.remove(edge);
 						this.edges.put(r, Collections.unmodifiableSet(mutableEdgeSet));
 						break;
@@ -356,7 +356,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 
 	@Override
 	public Set<Region> getRegions() {
-		Set<Region> result = new HashSet<Region>();
+		Set<Region> result = new HashSet<>();
 		synchronized (this.monitor) {
 			result.addAll(this.regions.values());
 		}
@@ -385,7 +385,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	private Set<RegionLifecycleListener> getListeners() {
 		if (this.bundleContext == null)
 			return Collections.emptySet();
-		Set<RegionLifecycleListener> listeners = new HashSet<RegionLifecycleListener>();
+		Set<RegionLifecycleListener> listeners = new HashSet<>();
 		try {
 			Collection<ServiceReference<RegionLifecycleListener>> listenerServiceReferences = this.bundleContext.getServiceReferences(RegionLifecycleListener.class, null);
 			for (ServiceReference<RegionLifecycleListener> listenerServiceReference : listenerServiceReferences) {
@@ -415,7 +415,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	 */
 	Map<Region, Set<FilteredRegion>> getFilteredRegions() {
 		synchronized (this.monitor) {
-			return new HashMap<Region, Set<FilteredRegion>>(this.edges);
+			return new HashMap<>(this.edges);
 		}
 	}
 
@@ -458,12 +458,12 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		}
 
 		Map<Region, Set<FilteredRegion>> filteredRegions = replacement.getFilteredRegions();
-		final Set<Region> added = new HashSet<Region>();
+		final Set<Region> added = new HashSet<>();
 		synchronized (this.monitor) {
 			if (check && this.updateCount.get() != replacement.originUpdateCount) {
 				throw new BundleException("The origin update count has changed since the replacement copy was created.", BundleException.INVALID_OPERATION); //$NON-NLS-1$
 			}
-			Map<String, Region> nameToRegion = new HashMap<String, Region>(regions);
+			Map<String, Region> nameToRegion = new HashMap<>(regions);
 			this.regions.clear();
 			this.edges.clear();
 			this.bundleIdToRegionMapping.clear();

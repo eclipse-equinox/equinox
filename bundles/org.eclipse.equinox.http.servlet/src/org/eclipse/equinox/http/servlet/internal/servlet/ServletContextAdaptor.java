@@ -39,7 +39,7 @@ public class ServletContextAdaptor {
 	}
 
 	private static Map<Method, Method> createContextToHandlerMethods() {
-		Map<Method, Method> methods = new HashMap<Method, Method>();
+		Map<Method, Method> methods = new HashMap<>();
 		Method[] handlerMethods =
 			ServletContextAdaptor.class.getDeclaredMethods();
 
@@ -449,7 +449,7 @@ public class ServletContextAdaptor {
 	private final static String SIMPLE_NAME =
 		ServletContextAdaptor.class.getSimpleName();
 
-	private final static ThreadLocal<ServletContext> servletContextTL = new ThreadLocal<ServletContext>();
+	private final static ThreadLocal<ServletContext> servletContextTL = new ThreadLocal<>();
 
 	private final AccessControlContext acc;
 	private final Bundle bundle;

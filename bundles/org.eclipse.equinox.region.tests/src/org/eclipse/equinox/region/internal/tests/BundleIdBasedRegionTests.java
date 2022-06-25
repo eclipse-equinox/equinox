@@ -70,7 +70,7 @@ public class BundleIdBasedRegionTests {
 
 	@Before
 	public void setUp() throws Exception {
-		this.threadLocal = new ThreadLocal<Region>();
+		this.threadLocal = new ThreadLocal<>();
 		this.mockBundle = mock(Bundle.class);
 		when(this.mockBundle.getSymbolicName()).thenReturn(BUNDLE_SYMBOLIC_NAME);
 		when(this.mockBundle.getVersion()).thenReturn(BUNDLE_VERSION);
@@ -132,7 +132,7 @@ public class BundleIdBasedRegionTests {
 	public void testAddBundle() throws BundleException {
 		when(this.mockGraph.iterator()).thenReturn(this.regionIterator);
 
-		HashSet<FilteredRegion> edges = new HashSet<FilteredRegion>();
+		HashSet<FilteredRegion> edges = new HashSet<>();
 		edges.add(new FilteredRegion() {
 
 			@Override

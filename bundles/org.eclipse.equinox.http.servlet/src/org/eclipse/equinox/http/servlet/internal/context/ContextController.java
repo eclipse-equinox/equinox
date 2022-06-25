@@ -65,35 +65,35 @@ public class ContextController {
 		this.initParams = ServiceProperties.parseInitParams(
 			serviceReference, HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX, parentServletContext);
 
-		listenerServiceTracker = new ServiceTracker<EventListener, AtomicReference<ListenerRegistration>>(
+		listenerServiceTracker = new ServiceTracker<>(
 			trackingContext, httpServiceRuntime.getListenerFilter(),
 			new ContextListenerTrackerCustomizer(
 				trackingContext, httpServiceRuntime, this));
 
 		listenerServiceTracker.open();
 
-		filterServiceTracker = new ServiceTracker<Filter, AtomicReference<FilterRegistration>>(
+		filterServiceTracker = new ServiceTracker<>(
 			trackingContext, httpServiceRuntime.getFilterFilter(),
 			new ContextFilterTrackerCustomizer(
 				trackingContext, httpServiceRuntime, this));
 
 		filterServiceTracker.open();
 
-		errorPageServiceTracker =  new ServiceTracker<Servlet, AtomicReference<ErrorPageRegistration>>(
+		errorPageServiceTracker =  new ServiceTracker<>(
 			trackingContext, httpServiceRuntime.getErrorPageFilter(),
 			new ContextErrorPageTrackerCustomizer(
 				trackingContext, httpServiceRuntime, this));
 
 		errorPageServiceTracker.open();
 
-		servletServiceTracker =  new ServiceTracker<Servlet, AtomicReference<ServletRegistration>>(
+		servletServiceTracker =  new ServiceTracker<>(
 			trackingContext, httpServiceRuntime.getServletFilter(),
 			new ContextServletTrackerCustomizer(
 				trackingContext, httpServiceRuntime, this));
 
 		servletServiceTracker.open();
 
-		resourceServiceTracker = new ServiceTracker<Object, AtomicReference<ResourceRegistration>>(
+		resourceServiceTracker = new ServiceTracker<>(
 			trackingContext, httpServiceRuntime.getResourceFilter(),
 			new ContextResourceTrackerCustomizer(
 				trackingContext, httpServiceRuntime, this));
@@ -102,7 +102,7 @@ public class ContextController {
 	}
 
 	public ErrorPageRegistration addErrorPageRegistration(ServiceReference<Servlet> servletRef) {
-		ServiceHolder<Servlet> servletHolder = new ServiceHolder<Servlet>(consumingContext.getServiceObjects(servletRef));
+		ServiceHolder<Servlet> servletHolder = new ServiceHolder<>(consumingContext.getServiceObjects(servletRef));
 		Servlet servlet = servletHolder.get();
 		ErrorPageRegistration registration = null;
 		//boolean addedRegisteredObject = false;
@@ -172,7 +172,7 @@ public class ContextController {
 	}
 
 	public FilterRegistration addFilterRegistration(ServiceReference<Filter> filterRef) throws ServletException {
-		ServiceHolder<Filter> filterHolder = new ServiceHolder<Filter>(consumingContext.getServiceObjects(filterRef));
+		ServiceHolder<Filter> filterHolder = new ServiceHolder<>(consumingContext.getServiceObjects(filterRef));
 		Filter filter = filterHolder.get();
 		FilterRegistration registration = null;
 		boolean addedRegisteredObject = false;
@@ -284,7 +284,7 @@ public class ContextController {
 	}
 
 	public ListenerRegistration addListenerRegistration(ServiceReference<EventListener> listenerRef) throws ServletException {
-		ServiceHolder<EventListener> listenerHolder = new ServiceHolder<EventListener>(consumingContext.getServiceObjects(listenerRef));
+		ServiceHolder<EventListener> listenerHolder = new ServiceHolder<>(consumingContext.getServiceObjects(listenerRef));
 		EventListener listener = listenerHolder.get();
 		ListenerRegistration registration = null;
 		try {
@@ -397,7 +397,7 @@ public class ContextController {
 		ServletContext servletContext = createServletContext(
 			bundle, curServletContextHelper);
 		ResourceRegistration resourceRegistration = new ResourceRegistration(
-			resourceRef, new ServiceHolder<Servlet>(servlet, bundle, serviceId, serviceRanking, legacyTCCL),
+			resourceRef, new ServiceHolder<>(servlet, bundle, serviceId, serviceRanking, legacyTCCL),
 			resourceDTO, curServletContextHelper, this);
 		ServletConfig servletConfig = new ServletConfigImpl(
 			resourceRegistration.getName(), new HashMap<String, String>(),
@@ -420,7 +420,7 @@ public class ContextController {
 	}
 
 	public ServletRegistration addServletRegistration(ServiceReference<Servlet> servletRef) {
-		ServiceHolder<Servlet> servletHolder = new ServiceHolder<Servlet>(consumingContext.getServiceObjects(servletRef));
+		ServiceHolder<Servlet> servletHolder = new ServiceHolder<>(consumingContext.getServiceObjects(servletRef));
 		Servlet servlet = servletHolder.get();
 		ServletRegistration registration = null;
 		boolean addedRegisteredObject = false;
@@ -498,7 +498,7 @@ public class ContextController {
 	}
 
 	private void recordEndpointShadowing(EndpointRegistration<?> newRegistration) {
-		Set<EndpointRegistration<?>> shadowedRegs = new HashSet<EndpointRegistration<?>>();
+		Set<EndpointRegistration<?>> shadowedRegs = new HashSet<>();
 		for (EndpointRegistration<?> existingRegistration : endpointRegistrations) {
 			for (String newPattern : newRegistration.getPatterns()) {
 				for (String existingPattern : existingRegistration.getPatterns()) {
@@ -527,7 +527,7 @@ public class ContextController {
 	}
 
 	private void recordErrorPageShadowing(ErrorPageRegistration newRegistration) {
-		Set<ErrorPageRegistration> shadowedEPs = new HashSet<ErrorPageRegistration>();
+		Set<ErrorPageRegistration> shadowedEPs = new HashSet<>();
 		for (EndpointRegistration<?> existingRegistration : endpointRegistrations) {
 			if (!(existingRegistration instanceof ErrorPageRegistration)) {
 				continue;
@@ -748,7 +748,7 @@ public class ContextController {
 		}
 
 		List<FilterRegistration> matchingFilterRegistrations =
-			new ArrayList<FilterRegistration>();
+			new ArrayList<>();
 
 		collectFilters(
 			matchingFilterRegistrations, endpointRegistration.getName(), requestURI,
@@ -850,7 +850,7 @@ public class ContextController {
 
 		servletContextDTO.attributes = getDTOAttributes(servletContext);
 		servletContextDTO.contextPath = getContextPath();
-		servletContextDTO.initParams = new HashMap<String, String>(initParams);
+		servletContextDTO.initParams = new HashMap<>(initParams);
 		servletContextDTO.name = getContextName();
 		servletContextDTO.serviceId = getServiceId();
 
@@ -967,7 +967,7 @@ public class ContextController {
 			return;
 		}
 
-		List<FilterDTO> filterDTOs = new ArrayList<FilterDTO>();
+		List<FilterDTO> filterDTOs = new ArrayList<>();
 
 		for (FilterRegistration filterRegistration : matchedFilterRegistrations) {
 			if (Arrays.binarySearch(filterRegistration.getD().dispatcher, DispatcherType.REQUEST.toString()) > -1) {
@@ -1094,9 +1094,9 @@ public class ContextController {
 	private void collectEndpointDTOs(
 		ServletContextDTO servletContextDTO) {
 
-		List<ErrorPageDTO> errorPageDTOs = new ArrayList<ErrorPageDTO>();
-		List<ResourceDTO> resourceDTOs = new ArrayList<ResourceDTO>();
-		List<ServletDTO> servletDTOs = new ArrayList<ServletDTO>();
+		List<ErrorPageDTO> errorPageDTOs = new ArrayList<>();
+		List<ResourceDTO> resourceDTOs = new ArrayList<>();
+		List<ServletDTO> servletDTOs = new ArrayList<>();
 
 		for (EndpointRegistration<?> endpointRegistration : endpointRegistrations) {
 			if (endpointRegistration instanceof ResourceRegistration) {
@@ -1124,7 +1124,7 @@ public class ContextController {
 	private void collectFilterDTOs(
 		ServletContextDTO servletContextDTO) {
 
-		List<FilterDTO> filterDTOs = new ArrayList<FilterDTO>();
+		List<FilterDTO> filterDTOs = new ArrayList<>();
 
 		for (FilterRegistration filterRegistration : filterRegistrations) {
 			filterDTOs.add(DTOUtil.clone(filterRegistration.getD()));
@@ -1136,7 +1136,7 @@ public class ContextController {
 	private void collectListenerDTOs(
 		ServletContextDTO servletContextDTO) {
 
-		List<ListenerDTO> listenerDTOs = new ArrayList<ListenerDTO>();
+		List<ListenerDTO> listenerDTOs = new ArrayList<>();
 
 		for (ListenerRegistration listenerRegistration : listenerRegistrations) {
 			listenerDTOs.add(DTOUtil.clone(listenerRegistration.getD()));
@@ -1146,7 +1146,7 @@ public class ContextController {
 	}
 
 	private Map<String, Object> getDTOAttributes(ServletContext servletContext) {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 
 		for (Enumeration<String> names = servletContext.getAttributeNames();
 				names.hasMoreElements();) {
@@ -1165,7 +1165,7 @@ public class ContextController {
 		List<String> objectClassList = StringPlus.from(listenerReference.getProperty(Constants.OBJECTCLASS));
 
 		List<Class<? extends EventListener>> classes =
-			new ArrayList<Class<? extends EventListener>>();
+			new ArrayList<>();
 
 		if (objectClassList.contains(ServletContextListener.class.getName())) {
 			classes.add(ServletContextListener.class);
@@ -1456,13 +1456,13 @@ public class ContextController {
 	private final String contextPath;
 	private volatile String fullContextPath;
 	private final long contextServiceId;
-	private final Set<EndpointRegistration<?>> endpointRegistrations = new ConcurrentSkipListSet<EndpointRegistration<?>>();
+	private final Set<EndpointRegistration<?>> endpointRegistrations = new ConcurrentSkipListSet<>();
 	private final EventListeners eventListeners = new EventListeners();
-	private final Set<FilterRegistration> filterRegistrations = new ConcurrentSkipListSet<FilterRegistration>();
-	private final ConcurrentMap<String, HttpSessionAdaptor> activeSessions = new ConcurrentHashMap<String, HttpSessionAdaptor>();
+	private final Set<FilterRegistration> filterRegistrations = new ConcurrentSkipListSet<>();
+	private final ConcurrentMap<String, HttpSessionAdaptor> activeSessions = new ConcurrentHashMap<>();
 
 	private final HttpServiceRuntimeImpl httpServiceRuntime;
-	private final Set<ListenerRegistration> listenerRegistrations = new HashSet<ListenerRegistration>();
+	private final Set<ListenerRegistration> listenerRegistrations = new HashSet<>();
 	private final ProxyContext proxyContext;
 	private final ServiceReference<ServletContextHelper> serviceReference;
 	private final String servletContextHelperRefFilter;

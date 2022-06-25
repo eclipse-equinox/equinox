@@ -54,7 +54,7 @@ public final class RegionBundleEventHook implements EventHook {
 		if (event.getType() == BundleEvent.INSTALLED) {
 			bundleInstalled(eventBundle, event.getOrigin());
 		}
-		Map<Region, Boolean> regionAccess = new HashMap<Region, Boolean>();
+		Map<Region, Boolean> regionAccess = new HashMap<>();
 		Iterator<BundleContext> i = contexts.iterator();
 		while (i.hasNext()) {
 			Bundle bundle = RegionBundleFindHook.getBundle(i.next());
@@ -91,7 +91,7 @@ public final class RegionBundleEventHook implements EventHook {
 	}
 
 	private boolean isAccessible(Region region, Bundle candidateBundle) {
-		Collection<Bundle> candidates = new ArrayList<Bundle>(1);
+		Collection<Bundle> candidates = new ArrayList<>(1);
 		candidates.add(candidateBundle);
 		RegionBundleFindHook.find(region, candidates);
 		return !candidates.isEmpty();

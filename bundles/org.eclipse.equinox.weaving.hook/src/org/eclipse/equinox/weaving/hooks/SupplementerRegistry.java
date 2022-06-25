@@ -97,9 +97,9 @@ public class SupplementerRegistry implements ISupplementerRegistry {
     public SupplementerRegistry(final IAdaptorProvider adaptorProvider) {
         this.adaptorProvider = adaptorProvider;
 
-        this.supplementers = new HashMap<String, Supplementer>();
-        this.supplementersByBundle = new HashMap<Long, Supplementer[]>();
-        this.dontWeaveTheseBundles = new HashSet<String>();
+        this.supplementers = new HashMap<>();
+        this.supplementersByBundle = new HashMap<>();
+        this.dontWeaveTheseBundles = new HashSet<>();
 
         this.dontWeaveTheseBundles.add("org.eclipse.osgi");
         this.dontWeaveTheseBundles.add("org.eclipse.core.runtime");
@@ -213,7 +213,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
 
         if (supplementers.size() > 0
                 && !this.dontWeaveTheseBundles.contains(symbolicName)) {
-            result = new LinkedList<Supplementer>();
+            result = new LinkedList<>();
             for (Supplementer supplementer : supplementers.values()) {
                 if (isSupplementerMatching(symbolicName, imports, exports,
                         supplementer)) {
@@ -314,7 +314,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
             final Bundle[] supplementedBundles = supplementer
                     .getSupplementedBundles();
             if (supplementedBundles != null && supplementedBundles.length > 0) {
-                final List<Bundle> bundlesToRefresh = new ArrayList<Bundle>(
+                final List<Bundle> bundlesToRefresh = new ArrayList<>(
                         supplementedBundles.length);
                 for (final Bundle bundleToRefresh : supplementedBundles) {
                     if (this.adaptorProvider.getAdaptor(
@@ -332,7 +332,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
             // remove this supplementer from the list of supplementers per other bundle
             for (Bundle supplementedBundle : supplementedBundles) {
                 final long bundleId = supplementedBundle.getBundleId();
-                final List<Supplementer> supplementerList = new ArrayList<Supplementer>(
+                final List<Supplementer> supplementerList = new ArrayList<>(
                         Arrays.asList(
                                 this.supplementersByBundle.get(bundleId)));
                 supplementerList.remove(supplementer);
@@ -351,7 +351,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
     private void resupplementInstalledBundles(final Supplementer supplementer) {
         final Bundle[] installedBundles = context.getBundles();
 
-        final List<Bundle> bundlesToRefresh = new ArrayList<Bundle>();
+        final List<Bundle> bundlesToRefresh = new ArrayList<>();
 
         for (Bundle installedBundle : installedBundles) {
             try {
@@ -385,10 +385,10 @@ public class SupplementerRegistry implements ISupplementerRegistry {
                                 .get(bundle.getBundleId());
                         List<Supplementer> enhancedSupplementerList = null;
                         if (existingSupplementers != null) {
-                            enhancedSupplementerList = new ArrayList<Supplementer>(
+                            enhancedSupplementerList = new ArrayList<>(
                                     Arrays.asList(existingSupplementers));
                         } else {
-                            enhancedSupplementerList = new ArrayList<Supplementer>();
+                            enhancedSupplementerList = new ArrayList<>();
                         }
                         if (!enhancedSupplementerList.contains(supplementer)) {
                             enhancedSupplementerList.add(supplementer);

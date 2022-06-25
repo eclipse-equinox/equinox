@@ -42,7 +42,7 @@ public abstract class Component {
 		this.context = context;
 		BundleContext bc = context.getBundleContext();
 		Filter f = bc.createFilter("(&(objectClass=" + URLConverter.class.getName() + ")(protocol=bundleentry))");
-		tracker = new ServiceTracker<URLConverter, URLConverter>(bc, f, null);
+		tracker = new ServiceTracker<>(bc, f, null);
 		tracker.open();
 	}
 	

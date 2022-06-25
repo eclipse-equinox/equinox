@@ -45,7 +45,7 @@ public class WeavingAdaptor implements IWeavingAdaptor {
 
         @Override
         protected Set<Object> initialValue() {
-            return new HashSet<Object>();
+            return new HashSet<>();
         }
 
         public void put(final Object obj) {

@@ -55,7 +55,7 @@ public class Bug346127Test extends AbstractRegionSystemTest {
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		Hashtable<String, Object> properties = new Hashtable<String, Object>();
+		Hashtable<String, Object> properties = new Hashtable<>();
 		properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[] {"regiondigraphtest"});
 		getContext().registerService(URLStreamHandlerService.class.getName(), new AbstractURLStreamHandlerService() {
 			@Override

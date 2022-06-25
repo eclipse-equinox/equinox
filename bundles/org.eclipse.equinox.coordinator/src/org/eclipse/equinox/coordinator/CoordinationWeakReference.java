@@ -22,7 +22,7 @@ import org.osgi.service.coordinator.CoordinationException;
 import org.osgi.service.log.LogService;
 
 public class CoordinationWeakReference extends WeakReference<CoordinationReferent> {
-	private static final ReferenceQueue<CoordinationReferent> referenceQueue = new ReferenceQueue<CoordinationReferent>();
+	private static final ReferenceQueue<CoordinationReferent> referenceQueue = new ReferenceQueue<>();
 	
 	public static void processOrphanedCoordinations() {
 		CoordinationWeakReference r;

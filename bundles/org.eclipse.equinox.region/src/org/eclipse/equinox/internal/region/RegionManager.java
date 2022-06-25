@@ -39,13 +39,13 @@ public final class RegionManager implements BundleActivator {
 	private static final String REGION_DOMAIN_PROP = "org.eclipse.equinox.region.domain"; //$NON-NLS-1$
 	private static final String DIGRAPH_FILE = "digraph"; //$NON-NLS-1$
 	private static final String REGION_REGISTER_MBEANS = "org.eclipse.equinox.region.register.mbeans"; //$NON-NLS-1$
-	private static final Dictionary<String, Object> MAX_RANKING = new Hashtable<String, Object>(Collections.singletonMap(Constants.SERVICE_RANKING, Integer.MAX_VALUE));
+	private static final Dictionary<String, Object> MAX_RANKING = new Hashtable<>(Collections.singletonMap(Constants.SERVICE_RANKING, Integer.MAX_VALUE));
 
-	Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+	Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 
 	private BundleContext bundleContext;
 
-	private final ThreadLocal<Region> threadLocal = new ThreadLocal<Region>();
+	private final ThreadLocal<Region> threadLocal = new ThreadLocal<>();
 
 	private String domain;
 

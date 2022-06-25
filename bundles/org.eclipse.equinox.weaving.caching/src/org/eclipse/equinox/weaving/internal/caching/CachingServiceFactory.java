@@ -37,7 +37,7 @@ import org.osgi.framework.Version;
  */
 public class CachingServiceFactory implements ICachingServiceFactory {
 
-    private final Map<String, ICachingService> bundleCachingServices = new HashMap<String, ICachingService>();
+    private final Map<String, ICachingService> bundleCachingServices = new HashMap<>();
 
     private final BundleContext bundleContext;
 
@@ -55,7 +55,7 @@ public class CachingServiceFactory implements ICachingServiceFactory {
                     "Argument \"bundleContext\" must not be null!"); //$NON-NLS-1$
         }
         this.bundleContext = bundleContext;
-        this.cacheQueue = new ArrayBlockingQueue<CacheItem>(5000);
+        this.cacheQueue = new ArrayBlockingQueue<>(5000);
         this.cacheWriter = new CacheWriter(this.cacheQueue);
         this.cacheWriter.start();
 

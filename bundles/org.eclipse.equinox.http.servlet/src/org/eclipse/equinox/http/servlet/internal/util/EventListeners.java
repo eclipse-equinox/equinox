@@ -35,7 +35,7 @@ public class EventListeners {
 			return Collections.emptyList();
 		}
 
-		return new ListenerList<E>(list) ;
+		return new ListenerList<>(list) ;
 	}
 
 	public <E extends EventListener> void put(
@@ -49,7 +49,7 @@ public class EventListeners {
 
 		if (list == null) {
 			final List<ListenerRegistration> newList =
-				new CopyOnWriteArrayList<ListenerRegistration>();
+				new CopyOnWriteArrayList<>();
 
 			list = map.putIfAbsent(clazz, newList);
 
@@ -96,7 +96,7 @@ public class EventListeners {
 	}
 
 	private ConcurrentMap<Class<? extends EventListener>, List<ListenerRegistration>> map =
-		new ConcurrentHashMap<Class<? extends EventListener>, List<ListenerRegistration>>();
+		new ConcurrentHashMap<>();
 
 	class ListenerList<R extends EventListener> extends AbstractList<R> {
 

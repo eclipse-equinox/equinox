@@ -24,7 +24,7 @@ public class ValueTokenizer {
 	private static final char ESCAPE = '\\';
 
 	private final LogTracker logger;
-	private final List<String> values = new ArrayList<String>();
+	private final List<String> values = new ArrayList<>();
 
 	/*
 	 * Constructor of class ValueTokenizer

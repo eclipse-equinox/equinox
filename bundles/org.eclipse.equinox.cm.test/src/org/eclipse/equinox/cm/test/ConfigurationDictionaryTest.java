@@ -74,8 +74,8 @@ public class ConfigurationDictionaryTest {
 			dict.put("24", new short[] {1});
 			dict.put("25", new char[] {'a'});
 			dict.put("26", new boolean[] {true});
-			dict.put("27", new Vector<Object>());
-			Vector<Object> v = new Vector<Object>();
+			dict.put("27", new Vector<>());
+			Vector<Object> v = new Vector<>();
 			v.add(new String("x"));
 			v.add(Integer.valueOf(1));
 			v.add(Long.valueOf(1));
@@ -86,7 +86,7 @@ public class ConfigurationDictionaryTest {
 			v.add(Character.valueOf('a'));
 			v.add(Boolean.TRUE);
 			dict.put("28", v);
-			Collection<Object> c = new ArrayList<Object>();
+			Collection<Object> c = new ArrayList<>();
 			c.add(new String("x"));
 			c.add(Integer.valueOf(1));
 			c.add(Long.valueOf(1));
@@ -197,7 +197,7 @@ public class ConfigurationDictionaryTest {
 		config.update();
 		Dictionary<String, Object> dict = config.getProperties();
 		try {
-			Vector<Object> v = new Vector<Object>();
+			Vector<Object> v = new Vector<>();
 			v.add(new Object());
 			dict.put("x", v);
 		} catch (IllegalArgumentException e) {
@@ -214,7 +214,7 @@ public class ConfigurationDictionaryTest {
 		config.update();
 		Dictionary<String, Object> dict = config.getProperties();
 		try {
-			Collection<Object> c = new ArrayList<Object>();
+			Collection<Object> c = new ArrayList<>();
 			c.add(new Object());
 			dict.put("x", c);
 		} catch (IllegalArgumentException e) {

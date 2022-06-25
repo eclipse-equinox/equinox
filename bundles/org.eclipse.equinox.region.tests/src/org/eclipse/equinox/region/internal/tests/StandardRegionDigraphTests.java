@@ -328,7 +328,7 @@ public class StandardRegionDigraphTests {
 	}
 
 	static class TestRegionDigraphVisitor implements RegionDigraphVisitor {
-		final Collection<Region> visited = new ArrayList<Region>();
+		final Collection<Region> visited = new ArrayList<>();
 		final String namespace;
 		final Map<String, ?> attributes;
 
@@ -355,7 +355,7 @@ public class StandardRegionDigraphTests {
 		}
 
 		Collection<Region> clearVisited() {
-			Collection<Region> result = new ArrayList<Region>(visited);
+			Collection<Region> result = new ArrayList<>(visited);
 			visited.clear();
 			return result;
 		}
@@ -375,11 +375,11 @@ public class StandardRegionDigraphTests {
 				c);
 		testDigraph.connect(c, testDigraph.createRegionFilterBuilder().allow("d", "(d=x)").build(), d);
 
-		Map<String, String> attributes = new HashMap<String, String>();
+		Map<String, String> attributes = new HashMap<>();
 		attributes.put("d", "x");
 		TestRegionDigraphVisitor visitor = new TestRegionDigraphVisitor("d", attributes);
 
-		Collection<Region> expected = new ArrayList<Region>(Arrays.asList(a, b, c, d));
+		Collection<Region> expected = new ArrayList<>(Arrays.asList(a, b, c, d));
 		for (Region region : expected.toArray(new Region[0])) {
 			testDigraph.visitSubgraph(region, visitor);
 			Collection<Region> visited = visitor.clearVisited();
@@ -391,7 +391,7 @@ public class StandardRegionDigraphTests {
 		attributes.clear();
 		attributes.put("c", "x");
 		visitor = new TestRegionDigraphVisitor("c", attributes);
-		expected = new ArrayList<Region>(Arrays.asList(a, b, c));
+		expected = new ArrayList<>(Arrays.asList(a, b, c));
 		for (Region region : expected.toArray(new Region[0])) {
 			testDigraph.visitSubgraph(region, visitor);
 			Collection<Region> visited = visitor.clearVisited();
@@ -403,7 +403,7 @@ public class StandardRegionDigraphTests {
 		attributes.clear();
 		attributes.put("b", "x");
 		visitor = new TestRegionDigraphVisitor("b", attributes);
-		expected = new ArrayList<Region>(Arrays.asList(a, b));
+		expected = new ArrayList<>(Arrays.asList(a, b));
 		for (Region region : expected.toArray(new Region[0])) {
 			testDigraph.visitSubgraph(region, visitor);
 			Collection<Region> visited = visitor.clearVisited();

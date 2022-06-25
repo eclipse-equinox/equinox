@@ -93,7 +93,7 @@ public class MultipartSupportImpl implements MultipartSupport {
 			throw new ServletException("Not a multipart request!"); //$NON-NLS-1$
 		}
 
-		ArrayList<Part> parts = new ArrayList<Part>();
+		ArrayList<Part> parts = new ArrayList<>();
 
 		try {
 			for (Object item : upload.parseRequest(request)) {

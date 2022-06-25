@@ -209,11 +209,11 @@ public class DispatchTargets {
 
 	private static Map<String, String[]> queryStringToParameterMap(String queryString) {
 		if ((queryString == null) || (queryString.length() == 0)) {
-			return new LinkedHashMap<String, String[]>();
+			return new LinkedHashMap<>();
 		}
 
 		try {
-			Map<String, String[]> parameterMap = new LinkedHashMap<String, String[]>();
+			Map<String, String[]> parameterMap = new LinkedHashMap<>();
 			String[] parameters = queryString.split(Const.AMP);
 			for (String parameter : parameters) {
 				int index = parameter.indexOf('=');
@@ -236,7 +236,7 @@ public class DispatchTargets {
 	private static class RequestAttributeSetter implements Closeable {
 
 		private final ServletRequest servletRequest;
-		private final Map<String, Object> oldValues = new HashMap<String, Object>();
+		private final Map<String, Object> oldValues = new HashMap<>();
 
 		public RequestAttributeSetter(ServletRequest servletRequest) {
 			this.servletRequest = servletRequest;
@@ -274,7 +274,7 @@ public class DispatchTargets {
 	private final String requestURI;
 	private final String servletPath;
 	private final String servletName;
-	private final Map<String, Object> specialOverides = new ConcurrentHashMap<String, Object>();
+	private final Map<String, Object> specialOverides = new ConcurrentHashMap<>();
 	private String string;
 
 }

@@ -71,14 +71,14 @@ public class RegionServiceEventHookTests {
 	@Before
 	public void setUp() throws Exception {
 		this.bundleId = 1L;
-		this.regions = new HashMap<String, Region>();
-		this.bundles = new HashMap<String, Bundle>();
-		this.serviceReferences = new HashMap<String, ServiceReference<Object>>();
+		this.regions = new HashMap<>();
+		this.bundles = new HashMap<>();
+		this.serviceReferences = new HashMap<>();
 
 		StubBundle stubSystemBundle = new StubBundle(0L, "osgi.framework", new Version("0"), "loc");
 		StubBundleContext stubBundleContext = new StubBundleContext();
 		stubBundleContext.addInstalledBundle(stubSystemBundle);
-		this.threadLocal = new ThreadLocal<Region>();
+		this.threadLocal = new ThreadLocal<>();
 		this.digraph = RegionReflectionUtils.newStandardRegionDigraph(stubBundleContext, this.threadLocal);
 		this.serviceEventHook = RegionReflectionUtils.newRegionServiceEventHook(this.digraph);
 
@@ -224,7 +224,7 @@ public class RegionServiceEventHookTests {
 	@Test
 	public void testEventFromSystemBundle() {
 		Bundle systemBundle = new StubBundle(0L, "sys", BUNDLE_VERSION, "");
-		Collection<BundleContext> contexts = new ArrayList<BundleContext>(Arrays.asList(systemBundle.getBundleContext()));
+		Collection<BundleContext> contexts = new ArrayList<>(Arrays.asList(systemBundle.getBundleContext()));
 		this.serviceEventHook.event(serviceEvent(BUNDLE_A), contexts);
 		assertTrue(contexts.contains(systemBundle.getBundleContext()));
 	}
@@ -232,7 +232,7 @@ public class RegionServiceEventHookTests {
 	@Test
 	public void testEventFromBundleInNoRegion() {
 		Bundle stranger = createBundle("stranger");
-		Collection<BundleContext> contexts = new ArrayList<BundleContext>(Arrays.asList(stranger.getBundleContext()));
+		Collection<BundleContext> contexts = new ArrayList<>(Arrays.asList(stranger.getBundleContext()));
 		this.serviceEventHook.event(serviceEvent(BUNDLE_A), contexts);
 		assertTrue(contexts.isEmpty());
 	}
@@ -252,7 +252,7 @@ public class RegionServiceEventHookTests {
 	}
 
 	private RegionFilter createFilter(final String... referenceNames) throws InvalidSyntaxException {
-		Collection<String> filters = new ArrayList<String>(referenceNames.length);
+		Collection<String> filters = new ArrayList<>(referenceNames.length);
 		for (String referenceName : referenceNames) {
 			filters.add('(' + Constants.OBJECTCLASS + '=' + referenceName + ')');
 		}
@@ -273,18 +273,18 @@ public class RegionServiceEventHookTests {
 	}
 
 	private StubServiceReference<Object> createServiceReference(Bundle stubBundle, String referenceName) {
-		StubServiceRegistration<Object> stubServiceRegistration = new StubServiceRegistration<Object>((StubBundleContext) stubBundle.getBundleContext(), referenceName);
-		StubServiceReference<Object> stubServiceReference = new StubServiceReference<Object>(stubServiceRegistration);
+		StubServiceRegistration<Object> stubServiceRegistration = new StubServiceRegistration<>((StubBundleContext) stubBundle.getBundleContext(), referenceName);
+		StubServiceReference<Object> stubServiceReference = new StubServiceReference<>(stubServiceRegistration);
 		this.serviceReferences.put(referenceName, stubServiceReference);
 
-		StubServiceRegistration<Object> dupServiceRegistration = new StubServiceRegistration<Object>((StubBundleContext) stubBundle.getBundleContext(), DUPLICATE + stubBundle.getBundleId());
-		StubServiceReference<Object> dupServiceReference = new StubServiceReference<Object>(dupServiceRegistration);
+		StubServiceRegistration<Object> dupServiceRegistration = new StubServiceRegistration<>((StubBundleContext) stubBundle.getBundleContext(), DUPLICATE + stubBundle.getBundleId());
+		StubServiceReference<Object> dupServiceReference = new StubServiceReference<>(dupServiceRegistration);
 		this.serviceReferences.put(DUPLICATE + stubBundle.getBundleId(), dupServiceReference);
 		return stubServiceReference;
 	}
 
 	private Collection<BundleContext> bundleContexts(String... bundleSymbolicNames) {
-		Collection<BundleContext> contexts = new ArrayList<BundleContext>();
+		Collection<BundleContext> contexts = new ArrayList<>();
 		for (String symbolicName : bundleSymbolicNames) {
 			contexts.add(bundleContext(symbolicName));
 		}

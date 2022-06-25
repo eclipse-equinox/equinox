@@ -95,7 +95,7 @@ public final class RegionBundleFindHook implements FindHook {
 		}
 
 		private boolean isLifecycleAllowed(RegionFilter filter, Bundle bundle) {
-			HashMap<String, Object> attrs = new HashMap<String, Object>(4);
+			HashMap<String, Object> attrs = new HashMap<>(4);
 			String bsn = bundle.getSymbolicName();
 			if (bsn != null) {
 				attrs.put(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, bsn);
