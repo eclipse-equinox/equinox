@@ -27,7 +27,7 @@ public class BundleInstaller {
 	private final BundleContext context;
 	private final Bundle testBundle;
 	private String rootLocation;
-	private Map<String, Bundle> bundles = new HashMap<String, Bundle>();
+	private Map<String, Bundle> bundles = new HashMap<>();
 	private final ServiceTracker<URLConverter, URLConverter> converter;
 	private final FrameworkWiring frameworkWiring;
 
@@ -37,7 +37,7 @@ public class BundleInstaller {
 		context = systemBundle.getBundleContext();
 		frameworkWiring = systemBundle.adapt(FrameworkWiring.class);
 		rootLocation = bundlesRoot;
-		converter = new ServiceTracker<URLConverter, URLConverter>(context, context.createFilter("(&(objectClass=" + URLConverter.class.getName() + ")(protocol=bundleentry))"), null);
+		converter = new ServiceTracker<>(context, context.createFilter("(&(objectClass=" + URLConverter.class.getName() + ")(protocol=bundleentry))"), null);
 		converter.open();
 		this.testBundle = testBundle;
 	}
@@ -137,7 +137,7 @@ public class BundleInstaller {
 	synchronized public Bundle[] uninstallAllBundles() throws BundleException {
 		if (bundles == null)
 			return null;
-		List<Bundle> result = new ArrayList<Bundle>(bundles.size());
+		List<Bundle> result = new ArrayList<>(bundles.size());
 		for (Bundle bundle : bundles.values()) {
 			try {
 				bundle.uninstall();
@@ -173,7 +173,7 @@ public class BundleInstaller {
 					}
 			}
 		};
-		final Set<Bundle> refreshed = new HashSet<Bundle>();
+		final Set<Bundle> refreshed = new HashSet<>();
 		BundleListener refreshBundleListener = new SynchronousBundleListener() {
 			public void bundleChanged(BundleEvent event) {
 				refreshed.add(event.getBundle());

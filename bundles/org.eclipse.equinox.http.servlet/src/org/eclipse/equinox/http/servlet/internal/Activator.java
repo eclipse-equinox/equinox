@@ -49,7 +49,7 @@ public class Activator
 
 	private static volatile BundleContext context;
 	private static ConcurrentMap<ProxyServlet, Object> registrations =
-		new ConcurrentHashMap<ProxyServlet, Object>();
+		new ConcurrentHashMap<>();
 
 	private ServiceTracker<HttpServlet, HttpTuple> serviceTracker;
 
@@ -89,7 +89,7 @@ public class Activator
 
 		processRegistrations();
 
-		serviceTracker = new ServiceTracker<HttpServlet, HttpTuple>(
+		serviceTracker = new ServiceTracker<>(
 			bundleContext, HttpServlet.class, this);
 
 		serviceTracker.open();
@@ -122,7 +122,7 @@ public class Activator
 			ServletContext servletContext = servletConfig.getServletContext();
 
 			Dictionary<String, Object> serviceProperties =
-				new Hashtable<String, Object>(3);
+				new Hashtable<>(3);
 
 			Enumeration<String> initparameterNames =
 				servletConfig.getInitParameterNames();
@@ -155,7 +155,7 @@ public class Activator
 					httpServiceEndpoints);
 			}
 			else {
-				List<String> httpServiceEndpoints = new ArrayList<String>();
+				List<String> httpServiceEndpoints = new ArrayList<>();
 
 				String contextPath = servletContext.getContextPath();
 
@@ -232,7 +232,7 @@ public class Activator
 	private String[] getHttpServiceEndpoints(
 		Dictionary<String, Object> serviceProperties, ServletContext servletContext, String servletName) {
 
-		List<String> httpServiceEndpoints = new ArrayList<String>();
+		List<String> httpServiceEndpoints = new ArrayList<>();
 
 		String contextPath = (String)serviceProperties.get(Const.CONTEXT_PATH);
 

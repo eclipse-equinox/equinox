@@ -36,7 +36,7 @@ public class ProxyContext {
 	private static final String JAVAX_SERVLET_CONTEXT_TEMPDIR = "javax.servlet.context.tempdir"; //$NON-NLS-1$
 
 	private final ConcurrentMap<ContextController, ContextAttributes> attributesMap =
-		new ConcurrentHashMap<ContextController, ContextAttributes>();
+		new ConcurrentHashMap<>();
 	File proxyContextTempDir;
 	private ServletContext servletContext;
 
@@ -194,7 +194,7 @@ public class ProxyContext {
 		}
 
 		private final Map<String, Object> _map =
-			new ConcurrentHashMap<String, Object>();
+			new ConcurrentHashMap<>();
 	}
 
 }

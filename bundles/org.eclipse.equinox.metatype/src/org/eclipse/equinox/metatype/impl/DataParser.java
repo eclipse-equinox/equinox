@@ -162,7 +162,7 @@ public class DataParser {
 	private class AbstractHandler extends DefaultHandler {
 		protected ContentHandler _doc_handler;
 		protected boolean _isParsedDataValid = true;
-		protected Map<String, Map<String, String>> extensionAttributes = new HashMap<String, Map<String, String>>();
+		protected Map<String, Map<String, String>> extensionAttributes = new HashMap<>();
 		protected String elementId;
 		protected String elementName;
 
@@ -203,7 +203,7 @@ public class DataParser {
 					continue;
 				Map<String, String> value = extensionAttributes.get(key);
 				if (value == null) {
-					value = new HashMap<String, String>();
+					value = new HashMap<>();
 					extensionAttributes.put(key, value);
 				}
 				value.put(getName(attributes.getLocalName(i), attributes.getQName(i)), attributes.getValue(i));
@@ -321,8 +321,8 @@ public class DataParser {
 		// not the PID or FPID of this OCD.
 		String _refID;
 		ObjectClassDefinitionImpl _ocd;
-		List<AttributeDefinitionImpl> _ads = new ArrayList<AttributeDefinitionImpl>(7);
-		List<Icon> icons = new ArrayList<Icon>(5);
+		List<AttributeDefinitionImpl> _ads = new ArrayList<>(7);
+		List<Icon> icons = new ArrayList<>(5);
 
 		public OcdHandler(ContentHandler handler) {
 			super(handler);

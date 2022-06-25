@@ -41,8 +41,8 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	private final ExtendableHelper helper;
 
 	private volatile String[] _defaults = null;
-	private volatile ArrayList<String> _values = new ArrayList<String>(7);
-	private volatile ArrayList<String> _labels = new ArrayList<String>(7);
+	private volatile ArrayList<String> _values = new ArrayList<>(7);
+	private volatile ArrayList<String> _labels = new ArrayList<>(7);
 
 	/**
 	 * Constructor of class AttributeDefinitionImpl.

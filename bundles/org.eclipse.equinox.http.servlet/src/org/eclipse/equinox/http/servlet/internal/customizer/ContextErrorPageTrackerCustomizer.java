@@ -47,7 +47,7 @@ public class ContextErrorPageTrackerCustomizer
 	public AtomicReference<ErrorPageRegistration>
 		addingService(ServiceReference<Servlet> serviceReference) {
 
-		AtomicReference<ErrorPageRegistration> result = new AtomicReference<ErrorPageRegistration>();
+		AtomicReference<ErrorPageRegistration> result = new AtomicReference<>();
 		if (!httpServiceRuntime.matches(serviceReference)) {
 			return result;
 		}

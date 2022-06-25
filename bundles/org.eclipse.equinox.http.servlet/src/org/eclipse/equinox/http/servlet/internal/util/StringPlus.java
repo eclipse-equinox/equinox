@@ -35,7 +35,7 @@ public class StringPlus {
 			if (!collection.isEmpty() &&
 				String.class.isInstance(collection.iterator().next())) {
 
-				return new ArrayList<String>((Collection<String>)object);
+				return new ArrayList<>((Collection<String>)object);
 			}
 		}
 

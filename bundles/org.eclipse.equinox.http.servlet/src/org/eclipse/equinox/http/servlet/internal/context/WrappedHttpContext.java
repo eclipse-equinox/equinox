@@ -65,7 +65,7 @@ public class WrappedHttpContext extends DefaultServletContextHelper {
 			return null;
 		}
 
-		final Set<String> result = new HashSet<String>();
+		final Set<String> result = new HashSet<>();
 
 		while (enumeration.hasMoreElements()) {
 			result.add(enumeration.nextElement().getPath());

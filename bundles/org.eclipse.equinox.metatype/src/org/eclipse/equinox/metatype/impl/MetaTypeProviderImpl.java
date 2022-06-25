@@ -179,7 +179,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	public synchronized String[] getLocales() {
 		if (_locales != null)
 			return checkForDefault(_locales);
-		List<String> localizationFiles = new ArrayList<String>(7);
+		List<String> localizationFiles = new ArrayList<>(7);
 		// get all the localization resources for PIDS
 		for (ObjectClassDefinitionImpl ocd : _allPidOCDs.values()) {
 			String localization = ocd.getLocalization();
@@ -194,7 +194,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 		}
 		if (localizationFiles.size() == 0)
 			localizationFiles.add(getBundleLocalization(_bundle));
-		Vector<String> locales = new Vector<String>(7);
+		Vector<String> locales = new Vector<>(7);
 		for (String localizationFile : localizationFiles) {
 			int iSlash = localizationFile.lastIndexOf(DIRECTORY_SEP);
 			String baseDir;

@@ -34,7 +34,7 @@ public class TargetProperties implements PropertiesProvider, ComponentContextPro
 
     Object prop = properties.get("serial.num");
     if (prop != null) {
-      Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
+      Dictionary<String, Object> serviceProps = new Hashtable<>();
       serviceProps.put("serial.num", prop);
       sr = ctxt.getBundleContext().registerService(getClass().getName(), this, serviceProps);
     }

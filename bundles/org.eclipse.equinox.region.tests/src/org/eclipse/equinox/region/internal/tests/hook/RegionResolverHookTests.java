@@ -81,15 +81,15 @@ public class RegionResolverHookTests {
 	@Before
 	public void setUp() throws Exception {
 		this.bundleId = 1L;
-		this.regions = new HashMap<String, Region>();
-		this.bundles = new HashMap<String, Bundle>();
-		this.threadLocal = new ThreadLocal<Region>();
+		this.regions = new HashMap<>();
+		this.bundles = new HashMap<>();
+		this.threadLocal = new ThreadLocal<>();
 		StubBundle stubSystemBundle = new StubBundle(0L, "osgi.framework", new Version("0"), "loc");
 		StubBundleContext stubBundleContext = new StubBundleContext();
 		stubBundleContext.addInstalledBundle(stubSystemBundle);
 		this.digraph = RegionReflectionUtils.newStandardRegionDigraph(stubBundleContext, this.threadLocal);
 		this.resolverHook = RegionReflectionUtils.newRegionResolverHook(this.digraph);
-		this.candidates = new HashSet<BundleCapability>();
+		this.candidates = new HashSet<>();
 
 		// Create regions A, B, C, D containing bundles A, B, C, D, respectively.
 		createRegion(REGION_A, BUNDLE_A);
@@ -115,7 +115,7 @@ public class RegionResolverHookTests {
 
 	@Test
 	public void testNoRegionResolvable() {
-		Collection<BundleRevision> resolvable = new ArrayList<BundleRevision>(Collections.singleton(new StubBundleRevision(bundle(BUNDLE_X))));
+		Collection<BundleRevision> resolvable = new ArrayList<>(Collections.singleton(new StubBundleRevision(bundle(BUNDLE_X))));
 		this.resolverHook.filterResolvable(resolvable);
 		assertTrue("Resolvable is not empty" + resolvable, resolvable.isEmpty());
 	}
@@ -176,7 +176,7 @@ public class RegionResolverHookTests {
 
 	@Test
 	public void testResolveSingletonInSameRegions() {
-		List<BundleCapability> collisionCandidates = new ArrayList<BundleCapability>();
+		List<BundleCapability> collisionCandidates = new ArrayList<>();
 		collisionCandidates.add(bundleCapability(BUNDLE_B));
 		collisionCandidates.add(bundleCapability(BUNDLE_C));
 		collisionCandidates.add(bundleCapability(BUNDLE_D));
@@ -188,7 +188,7 @@ public class RegionResolverHookTests {
 	public void testResolveSingletonInDifferentRegions() throws BundleException {
 		region(REGION_A).addBundle(bundle(BUNDLE_X));
 		BundleCapability collision = bundleCapability(BUNDLE_X);
-		List<BundleCapability> collisionCandidates = new ArrayList<BundleCapability>();
+		List<BundleCapability> collisionCandidates = new ArrayList<>();
 		collisionCandidates.add(collision);
 		collisionCandidates.add(bundleCapability(BUNDLE_B));
 		collisionCandidates.add(bundleCapability(BUNDLE_C));
@@ -205,7 +205,7 @@ public class RegionResolverHookTests {
 		region(REGION_A).addBundle(bundle(BUNDLE_X));
 		BundleCapability collisionX = bundleCapability(BUNDLE_X);
 		BundleCapability collisionB = bundleCapability(BUNDLE_B);
-		List<BundleCapability> collisionCandidates = new ArrayList<BundleCapability>();
+		List<BundleCapability> collisionCandidates = new ArrayList<>();
 		collisionCandidates.add(collisionX);
 		collisionCandidates.add(collisionB);
 		collisionCandidates.add(bundleCapability(BUNDLE_C));
@@ -245,14 +245,14 @@ public class RegionResolverHookTests {
 		this.candidates.add(packageCapability(BUNDLE_C, PACKAGE_DUP));
 		this.candidates.add(packageCapability(BUNDLE_D, PACKAGE_DUP));
 
-		Collection<BundleCapability> testCandidates = new ArrayList<BundleCapability>(this.candidates);
+		Collection<BundleCapability> testCandidates = new ArrayList<>(this.candidates);
 		this.resolverHook.filterMatches(bundleRequirement(BUNDLE_A), testCandidates);
 		assertTrue(testCandidates.contains(packageCapability(BUNDLE_A, PACKAGE_DUP)));
 		assertFalse(testCandidates.contains(packageCapability(BUNDLE_B, PACKAGE_DUP)));
 		assertTrue(testCandidates.contains(packageCapability(BUNDLE_C, PACKAGE_DUP)));
 		assertTrue(testCandidates.contains(packageCapability(BUNDLE_D, PACKAGE_DUP)));
 
-		testCandidates = new ArrayList<BundleCapability>(this.candidates);
+		testCandidates = new ArrayList<>(this.candidates);
 		this.resolverHook.filterMatches(bundleRequirement(BUNDLE_B), testCandidates);
 		assertTrue(testCandidates.contains(packageCapability(BUNDLE_A, PACKAGE_DUP)));
 		assertTrue(testCandidates.contains(packageCapability(BUNDLE_B, PACKAGE_DUP)));
@@ -353,7 +353,7 @@ public class RegionResolverHookTests {
 	}
 
 	private RegionFilter createFilter(final String... packageNames) throws InvalidSyntaxException {
-		Collection<String> filters = new ArrayList<String>(packageNames.length);
+		Collection<String> filters = new ArrayList<>(packageNames.length);
 		for (String pkg : packageNames) {
 			filters.add('(' + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + '=' + pkg + ')');
 		}
@@ -403,12 +403,12 @@ public class RegionResolverHookTests {
 
 		@Override
 		public Map<String, String> getDirectives() {
-			return new HashMap<String, String>();
+			return new HashMap<>();
 		}
 
 		@Override
 		public Map<String, Object> getAttributes() {
-			HashMap<String, Object> attributes = new HashMap<String, Object>();
+			HashMap<String, Object> attributes = new HashMap<>();
 			attributes.put(BundleRevision.PACKAGE_NAMESPACE, this.packageName);
 			return attributes;
 		}
@@ -486,12 +486,12 @@ public class RegionResolverHookTests {
 
 		@Override
 		public Map<String, String> getDirectives() {
-			return new HashMap<String, String>();
+			return new HashMap<>();
 		}
 
 		@Override
 		public Map<String, Object> getAttributes() {
-			HashMap<String, Object> attributes = new HashMap<String, Object>();
+			HashMap<String, Object> attributes = new HashMap<>();
 			attributes.put(BundleRevision.BUNDLE_NAMESPACE, bundleSymbolicName);
 			return attributes;
 		}

@@ -46,7 +46,7 @@ public class ContextResourceTrackerCustomizer
 	public AtomicReference<ResourceRegistration> addingService(
 		ServiceReference<Object> serviceReference) {
 
-		AtomicReference<ResourceRegistration> result = new AtomicReference<ResourceRegistration>();
+		AtomicReference<ResourceRegistration> result = new AtomicReference<>();
 		if (!httpServiceRuntime.matches(serviceReference)) {
 			return result;
 		}

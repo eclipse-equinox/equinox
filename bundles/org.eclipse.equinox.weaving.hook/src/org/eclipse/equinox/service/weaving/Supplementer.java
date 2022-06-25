@@ -67,7 +67,7 @@ public class Supplementer {
         this.supplementBundle = supplementBundle;
         this.supplementImporter = supplementImporter;
         this.supplementExporter = supplementExporter;
-        this.supplementedBundles = new HashSet<Bundle>();
+        this.supplementedBundles = new HashSet<>();
     }
 
     /**

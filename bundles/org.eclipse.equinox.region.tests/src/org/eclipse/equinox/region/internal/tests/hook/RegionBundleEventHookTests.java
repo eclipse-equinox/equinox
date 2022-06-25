@@ -63,13 +63,13 @@ public class RegionBundleEventHookTests {
 	@Before
 	public void setUp() throws Exception {
 		this.bundleId = 1L;
-		this.regions = new HashMap<String, Region>();
-		this.bundles = new HashMap<String, Bundle>();
+		this.regions = new HashMap<>();
+		this.bundles = new HashMap<>();
 
 		StubBundle stubSystemBundle = new StubBundle(0L, "osgi.framework", new Version("0"), "loc");
 		StubBundleContext stubBundleContext = new StubBundleContext();
 		stubBundleContext.addInstalledBundle(stubSystemBundle);
-		this.threadLocal = new ThreadLocal<Region>();
+		this.threadLocal = new ThreadLocal<>();
 		this.digraph = RegionReflectionUtils.newStandardRegionDigraph(stubBundleContext, this.threadLocal);
 		this.bundleEventHook = RegionReflectionUtils.newRegionBundleEventHook(digraph, threadLocal, stubSystemBundle.getBundleId());
 
@@ -226,7 +226,7 @@ public class RegionBundleEventHookTests {
 	@Test
 	public void testEventFromSystemBundle() {
 		Bundle systemBundle = new StubBundle(0L, "sys", BUNDLE_VERSION, "");
-		Collection<BundleContext> contexts = new ArrayList<BundleContext>(Arrays.asList(systemBundle.getBundleContext()));
+		Collection<BundleContext> contexts = new ArrayList<>(Arrays.asList(systemBundle.getBundleContext()));
 		this.bundleEventHook.event(bundleEvent(BUNDLE_A), contexts);
 		assertTrue(contexts.contains(systemBundle.getBundleContext()));
 	}
@@ -234,7 +234,7 @@ public class RegionBundleEventHookTests {
 	@Test
 	public void testEventFromBundleInNoRegion() {
 		Bundle stranger = createBundle("stranger");
-		Collection<BundleContext> contexts = new ArrayList<BundleContext>(Arrays.asList(stranger.getBundleContext()));
+		Collection<BundleContext> contexts = new ArrayList<>(Arrays.asList(stranger.getBundleContext()));
 		this.bundleEventHook.event(bundleEvent(BUNDLE_A), contexts);
 		assertTrue(contexts.isEmpty());
 	}
@@ -267,7 +267,7 @@ public class RegionBundleEventHookTests {
 	}
 
 	private RegionFilter createFilter(boolean negate, String... bundleSymbolicNames) throws InvalidSyntaxException {
-		Collection<String> filters = new ArrayList<String>(bundleSymbolicNames.length);
+		Collection<String> filters = new ArrayList<>(bundleSymbolicNames.length);
 		for (String bundleSymbolicName : bundleSymbolicNames) {
 			filters.add('(' + RegionFilter.VISIBLE_BUNDLE_NAMESPACE + '=' + bundleSymbolicName + ')');
 		}
@@ -290,7 +290,7 @@ public class RegionBundleEventHookTests {
 	}
 
 	private Collection<BundleContext> bundleContexts(String... bundleSymbolicNames) {
-		Collection<BundleContext> contexts = new ArrayList<BundleContext>();
+		Collection<BundleContext> contexts = new ArrayList<>();
 		for (String symbolicName : bundleSymbolicNames) {
 			contexts.add(bundleContext(symbolicName));
 		}

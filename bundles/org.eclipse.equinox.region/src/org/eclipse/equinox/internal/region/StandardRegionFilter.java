@@ -42,9 +42,9 @@ public final class StandardRegionFilter implements RegionFilter {
 			throw new IllegalArgumentException("filters must not be null."); //$NON-NLS-1$
 		}
 		// must perform deep copy to avoid external changes
-		this.filters = new HashMap<String, Collection<Filter>>((int) ((filters.size() / 0.75) + 1));
+		this.filters = new HashMap<>((int) ((filters.size() / 0.75) + 1));
 		for (Map.Entry<String, Collection<Filter>> namespace : filters.entrySet()) {
-			Collection<Filter> namespaceFilters = new ArrayList<Filter>(namespace.getValue());
+			Collection<Filter> namespaceFilters = new ArrayList<>(namespace.getValue());
 			this.filters.put(namespace.getKey(), namespaceFilters);
 		}
 	}
@@ -54,7 +54,7 @@ public final class StandardRegionFilter implements RegionFilter {
 		if (bundle == null) {
 			return false;
 		}
-		HashMap<String, Object> attrs = new HashMap<String, Object>(4);
+		HashMap<String, Object> attrs = new HashMap<>(4);
 		String bsn = bundle.getSymbolicName();
 		if (bsn != null) {
 			attrs.put(VISIBLE_BUNDLE_NAMESPACE, bsn);
@@ -67,7 +67,7 @@ public final class StandardRegionFilter implements RegionFilter {
 
 	@Override
 	public boolean isAllowed(BundleRevision bundle) {
-		HashMap<String, Object> attrs = new HashMap<String, Object>(4);
+		HashMap<String, Object> attrs = new HashMap<>(4);
 		String bsn = bundle.getSymbolicName();
 		if (bsn != null) {
 			attrs.put(VISIBLE_BUNDLE_NAMESPACE, bsn);
@@ -184,7 +184,7 @@ public final class StandardRegionFilter implements RegionFilter {
 
 	@Override
 	public Map<String, Collection<String>> getSharingPolicy() {
-		Map<String, Collection<String>> result = new HashMap<String, Collection<String>>((int) ((filters.size() / 0.75) + 1));
+		Map<String, Collection<String>> result = new HashMap<>((int) ((filters.size() / 0.75) + 1));
 		for (Map.Entry<String, Collection<Filter>> namespace : filters.entrySet()) {
 			result.put(namespace.getKey(), getFilters(namespace.getValue()));
 		}
@@ -192,7 +192,7 @@ public final class StandardRegionFilter implements RegionFilter {
 	}
 
 	private static Collection<String> getFilters(Collection<Filter> filters) {
-		Collection<String> result = new ArrayList<String>(filters.size());
+		Collection<String> result = new ArrayList<>(filters.size());
 		for (Filter filter : filters) {
 			result.add(filter.toString());
 		}

@@ -81,7 +81,7 @@ public class StructuredTextTypesCollector implements IRegistryEventListener {
 			types.clear();
 
 		if (factories == null)
-			factories = new HashMap<String, IConfigurationElement>();
+			factories = new HashMap<>();
 		else
 			factories.clear();
 
@@ -141,7 +141,7 @@ public class StructuredTextTypesCollector implements IRegistryEventListener {
 	 *         to structured text type handler (value type: {@link StructuredTextTypeHandler}).
 	 */
 	public static Map<String, StructuredTextTypeHandler> getDefaultTypeHandlers() {
-		Map<String, StructuredTextTypeHandler> types = new LinkedHashMap<String, StructuredTextTypeHandler>();
+		Map<String, StructuredTextTypeHandler> types = new LinkedHashMap<>();
 
 		types.put(StructuredTextTypeHandlerFactory.COMMA_DELIMITED, new StructuredTextComma());
 		types.put(StructuredTextTypeHandlerFactory.EMAIL, new StructuredTextEmail());

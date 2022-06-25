@@ -61,7 +61,7 @@ public class CoordinationImpl {
 		totalTimeout = timeout;
 		this.coordinator = coordinator;
 		participants = Collections.synchronizedList(new ArrayList<Participant>());
-		variables = new HashMap<Class<?>, Object>();
+		variables = new HashMap<>();
 		// Not an escaping 'this' reference. It will not escape the thread calling the constructor.
 		referent = new CoordinationReferent(this);
 	}
@@ -182,7 +182,7 @@ public class CoordinationImpl {
 		Participant exceptionParticipant = null;
 		// No additional synchronization is needed here because the participant
 		// list will not be modified post termination.
-		List<Participant> participantsToNotify = new ArrayList<Participant>(this.participants);
+		List<Participant> participantsToNotify = new ArrayList<>(this.participants);
 		Collections.reverse(participantsToNotify);
 		for (Participant participant : participantsToNotify) {
 			try {
@@ -291,7 +291,7 @@ public class CoordinationImpl {
 		// Notify participants this coordination has failed.
 		// No additional synchronization is needed here because the participant
 		// list will not be modified post termination.
-		List<Participant> participantsToNotify = new ArrayList<Participant>(this.participants);
+		List<Participant> participantsToNotify = new ArrayList<>(this.participants);
 		Collections.reverse(participantsToNotify);
 		for (Participant participant : participantsToNotify) {
 			try {
@@ -338,7 +338,7 @@ public class CoordinationImpl {
 		coordinator.checkPermission(CoordinationPermission.INITIATE, name);
 		// Return a mutable snapshot.
 		synchronized (participants) {
-			return new ArrayList<Participant>(participants);
+			return new ArrayList<>(participants);
 		}
 	}
 

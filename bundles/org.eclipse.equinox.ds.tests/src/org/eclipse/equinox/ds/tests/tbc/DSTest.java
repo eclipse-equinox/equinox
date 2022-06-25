@@ -708,7 +708,7 @@ public class DSTest {
     newProps.put(ComponentConstants.COMPONENT_ID, Long.valueOf(-1));
     newProps.put("name", "test");
 
-    List<ComponentInstance> cis = new ArrayList<ComponentInstance>();
+    List<ComponentInstance> cis = new ArrayList<>();
     ComponentInstance ci = factory.newInstance(newProps);
     assertNotNull("newInstance() method shouldn't return null", ci);
     cis.add(ci);

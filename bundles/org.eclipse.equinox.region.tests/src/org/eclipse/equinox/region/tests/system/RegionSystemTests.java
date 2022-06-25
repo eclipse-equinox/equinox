@@ -53,7 +53,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		Region systemRegion = digraph.getRegion(0);
 		// create a disconnected test region
 		Region testRegion = digraph.createRegion(testName.getMethodName());
-		List<Bundle> bundles = new ArrayList<Bundle>();
+		List<Bundle> bundles = new ArrayList<>();
 		// Install all test bundles
 		Bundle pp1, cp2, sc1;
 		bundles.add(pp1 = bundleInstaller.installBundle(PP1, testRegion));
@@ -85,8 +85,8 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			bundle.start();
 		}
 		BundleContext context = getContext();
-		ServiceTracker<Boolean, Boolean> cp2Tracker = new ServiceTracker<Boolean, Boolean>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + cp2.getBundleId() + "))"), null);
-		ServiceTracker<Boolean, Boolean> sc1Tracker = new ServiceTracker<Boolean, Boolean>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + sc1.getBundleId() + "))"), null);
+		ServiceTracker<Boolean, Boolean> cp2Tracker = new ServiceTracker<>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + cp2.getBundleId() + "))"), null);
+		ServiceTracker<Boolean, Boolean> sc1Tracker = new ServiceTracker<>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + sc1.getBundleId() + "))"), null);
 
 		cp2Tracker.open();
 		sc1Tracker.open();
@@ -101,7 +101,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 	public void testSingleBundleRegions() throws BundleException, InvalidSyntaxException, InterruptedException {
 		// get the system region
 		Region systemRegion = digraph.getRegion(0);
-		Map<String, Bundle> bundles = new HashMap<String, Bundle>();
+		Map<String, Bundle> bundles = new HashMap<>();
 		// create a disconnected test region for each test bundle
 		for (String location : ALL) {
 			Region testRegion = digraph.createRegion(location);
@@ -149,8 +149,8 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			bundle.start();
 		}
 		BundleContext context = getContext();
-		ServiceTracker<Boolean, Boolean> cp2Tracker = new ServiceTracker<Boolean, Boolean>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + bundles.get(CP2).getBundleId() + "))"), null);
-		ServiceTracker<Boolean, Boolean> sc1Tracker = new ServiceTracker<Boolean, Boolean>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + bundles.get(SC1).getBundleId() + "))"), null);
+		ServiceTracker<Boolean, Boolean> cp2Tracker = new ServiceTracker<>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + bundles.get(CP2).getBundleId() + "))"), null);
+		ServiceTracker<Boolean, Boolean> sc1Tracker = new ServiceTracker<>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + bundles.get(SC1).getBundleId() + "))"), null);
 
 		cp2Tracker.open();
 		sc1Tracker.open();
@@ -282,7 +282,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		systemRegion.connectRegion(testRegion1, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build());
 		systemRegion.connectRegion(testRegion2, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build());
 
-		Map<String, Bundle> bundles = new HashMap<String, Bundle>();
+		Map<String, Bundle> bundles = new HashMap<>();
 		// add bundles to region1
 		bundles.put(PP1, bundleInstaller.installBundle(PP1, testRegion1));
 		bundles.put(SP2, bundleInstaller.installBundle(SP2, testRegion1));
@@ -330,8 +330,8 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			bundle.start();
 		}
 		BundleContext context = getContext();
-		ServiceTracker<Boolean, Boolean> cp2Tracker = new ServiceTracker<Boolean, Boolean>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + bundles.get(CP2).getBundleId() + "))"), null);
-		ServiceTracker<Boolean, Boolean> sc1Tracker = new ServiceTracker<Boolean, Boolean>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + bundles.get(SC1).getBundleId() + "))"), null);
+		ServiceTracker<Boolean, Boolean> cp2Tracker = new ServiceTracker<>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + bundles.get(CP2).getBundleId() + "))"), null);
+		ServiceTracker<Boolean, Boolean> sc1Tracker = new ServiceTracker<>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + bundles.get(SC1).getBundleId() + "))"), null);
 
 		cp2Tracker.open();
 		sc1Tracker.open();
@@ -492,7 +492,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 	public void testBundleCollisionDisconnectedRegions() throws BundleException, InvalidSyntaxException {
 		// get the system region
 		Region systemRegion = digraph.getRegion(0);
-		Collection<Bundle> bundles = new HashSet<Bundle>();
+		Collection<Bundle> bundles = new HashSet<>();
 		// create 4 disconnected test regions and install each bundle into each region
 		int numRegions = 4;
 		String regionName = "IsolatedRegion_";
@@ -751,7 +751,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 
 	@Test
 	public void testInvalidRegionName() {
-		Collection<String> invalidNames = new ArrayList<String>();
+		Collection<String> invalidNames = new ArrayList<>();
 		invalidNames.addAll(Arrays.asList(":", "bad:Name", ":bad::name:", ":badname", "badname:"));
 		invalidNames.addAll(Arrays.asList("=", "bad=Name", "=bad==name=", "=badname", "badname="));
 		invalidNames.addAll(Arrays.asList("\n", "bad\nName", "\nbad\n\nname\n", "\nbadname", "badname\n"));
@@ -776,7 +776,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 
 	@Test
 	public void testHigherRankedEventHookResolve() throws BundleException {
-		final List<BundleEvent> events = new CopyOnWriteArrayList<BundleEvent>();
+		final List<BundleEvent> events = new CopyOnWriteArrayList<>();
 		SynchronousBundleListener listener = new SynchronousBundleListener() {
 			@Override
 			public void bundleChanged(BundleEvent event) {
@@ -846,7 +846,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 	public void testReplaceConnection() throws BundleException, InvalidSyntaxException {
 		// get the system region
 		Region systemRegion = digraph.getRegion(0);
-		Map<String, Bundle> bundles = new HashMap<String, Bundle>();
+		Map<String, Bundle> bundles = new HashMap<>();
 		// create a disconnected test region for each test bundle
 		for (String location : new String[] {PP1, SP1}) {
 			Region testRegion = digraph.createRegion(location);

@@ -27,7 +27,7 @@ public final class StandardBundleIdToRegionMapping implements BundleIdToRegionMa
 	 * bundleToRegion maps a given bundle id to the region for which it belongs.
 	 * this is a global map for all regions in the digraph
 	 */
-	private final Map<Long, Region> bundleToRegion = new HashMap<Long, Region>();
+	private final Map<Long, Region> bundleToRegion = new HashMap<>();
 
 	/**
 	 * {@inheritDoc} 
@@ -68,7 +68,7 @@ public final class StandardBundleIdToRegionMapping implements BundleIdToRegionMa
 	 */
 	@Override
 	public Set<Long> getBundleIds(Region region) {
-		Set<Long> bundleIds = new HashSet<Long>();
+		Set<Long> bundleIds = new HashSet<>();
 		synchronized (this.monitor) {
 			for (Map.Entry<Long, Region> entry : this.bundleToRegion.entrySet()) {
 				if (entry.getValue() == region) {

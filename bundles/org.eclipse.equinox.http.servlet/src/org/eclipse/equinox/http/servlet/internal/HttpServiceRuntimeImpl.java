@@ -74,7 +74,7 @@ public class HttpServiceRuntimeImpl
 		this.listenerServiceFilter = createListenerFilter(consumingContext, parentServletContext);
 
 		this.parentServletContext = parentServletContext;
-		this.attributes = new UMDictionaryMap<String, Object>(attributes);
+		this.attributes = new UMDictionaryMap<>(attributes);
 		this.targetFilter = "(" + Activator.UNIQUE_SERVICE_ID + "=" + this.attributes.get(Activator.UNIQUE_SERVICE_ID) + ")";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		this.httpSessionTracker = new HttpSessionTracker(this);
 		this.invalidatorReg = trackingContext.registerService(HttpSessionInvalidator.class, this.httpSessionTracker, attributes);
@@ -96,18 +96,18 @@ public class HttpServiceRuntimeImpl
 		loggerFactoryTracker.open();
 
 		contextServiceTracker =
-			new ServiceTracker<ServletContextHelper, AtomicReference<ContextController>>(
+			new ServiceTracker<>(
 				trackingContext, ServletContextHelper.class, this);
 
 		preprocessorServiceTracker =
-			new ServiceTracker<Preprocessor, AtomicReference<PreprocessorRegistration>>(
+			new ServiceTracker<>(
 				trackingContext, Preprocessor.class, new PreprocessorCustomizer(this));
 
 		contextPathCustomizerHolder = new ContextPathCustomizerHolder(consumingContext, contextServiceTracker);
-		contextPathAdaptorTracker = new ServiceTracker<ContextPathCustomizer, ContextPathCustomizer>(
+		contextPathAdaptorTracker = new ServiceTracker<>(
 			consumingContext, ContextPathCustomizer.class, contextPathCustomizerHolder);
 
-		Hashtable<String, Object> defaultContextProps = new Hashtable<String, Object>();
+		Hashtable<String, Object> defaultContextProps = new Hashtable<>();
 		defaultContextProps.put(HTTP_WHITEBOARD_CONTEXT_NAME, HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME);
 		defaultContextProps.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
 		defaultContextProps.put(HTTP_WHITEBOARD_CONTEXT_PATH, Const.SLASH);
@@ -127,7 +127,7 @@ public class HttpServiceRuntimeImpl
 	public synchronized AtomicReference<ContextController> addingService(
 		ServiceReference<ServletContextHelper> serviceReference) {
 
-		AtomicReference<ContextController> result = new AtomicReference<ContextController>();
+		AtomicReference<ContextController> result = new AtomicReference<>();
 		if (!matches(serviceReference)) {
 			return result;
 		}
@@ -343,7 +343,7 @@ public class HttpServiceRuntimeImpl
 	private FailedErrorPageDTO[] getFailedErrorPageDTOs() {
 		Collection<FailedErrorPageDTO> fepDTOs = failedErrorPageDTOs.values();
 
-		List<FailedErrorPageDTO> copies = new ArrayList<FailedErrorPageDTO>();
+		List<FailedErrorPageDTO> copies = new ArrayList<>();
 
 		for (FailedErrorPageDTO failedErrorPageDTO : fepDTOs) {
 			copies.add(DTOUtil.clone(failedErrorPageDTO));
@@ -466,7 +466,7 @@ public class HttpServiceRuntimeImpl
 		int pos = requestURI.lastIndexOf('/');
 
 		do {
-			List<ContextController> contextControllers = new ArrayList<ContextController>();
+			List<ContextController> contextControllers = new ArrayList<>();
 
 			for (ContextController contextController : controllerMap.values()) {
 				if (contextController.getContextPath().equals(requestURI)) {
@@ -557,7 +557,7 @@ public class HttpServiceRuntimeImpl
 	private FailedFilterDTO[] getFailedFilterDTOs() {
 		Collection<FailedFilterDTO> ffDTOs = failedFilterDTOs.values();
 
-		List<FailedFilterDTO> copies = new ArrayList<FailedFilterDTO>();
+		List<FailedFilterDTO> copies = new ArrayList<>();
 
 		for (FailedFilterDTO failedFilterDTO : ffDTOs) {
 			copies.add(DTOUtil.clone(failedFilterDTO));
@@ -569,7 +569,7 @@ public class HttpServiceRuntimeImpl
 	private FailedListenerDTO[] getFailedListenerDTOs() {
 		Collection<FailedListenerDTO> flDTOs = failedListenerDTOs.values();
 
-		List<FailedListenerDTO> copies = new ArrayList<FailedListenerDTO>();
+		List<FailedListenerDTO> copies = new ArrayList<>();
 
 		for (FailedListenerDTO failedListenerDTO : flDTOs) {
 			copies.add(DTOUtil.clone(failedListenerDTO));
@@ -581,7 +581,7 @@ public class HttpServiceRuntimeImpl
 	private FailedResourceDTO[] getFailedResourceDTOs() {
 		Collection<FailedResourceDTO> frDTOs = failedResourceDTOs.values();
 
-		List<FailedResourceDTO> copies = new ArrayList<FailedResourceDTO>();
+		List<FailedResourceDTO> copies = new ArrayList<>();
 
 		for (FailedResourceDTO failedResourceDTO : frDTOs) {
 			copies.add(DTOUtil.clone(failedResourceDTO));
@@ -593,7 +593,7 @@ public class HttpServiceRuntimeImpl
 	private FailedServletContextDTO[] getFailedServletContextDTO() {
 		Collection<ExtendedFailedServletContextDTO> fscDTOs = failedServletContextDTOs.values();
 
-		List<FailedServletContextDTO> copies = new ArrayList<FailedServletContextDTO>();
+		List<FailedServletContextDTO> copies = new ArrayList<>();
 
 		for (FailedServletContextDTO failedServletContextDTO : fscDTOs) {
 			copies.add(DTOUtil.clone(failedServletContextDTO));
@@ -605,7 +605,7 @@ public class HttpServiceRuntimeImpl
 	private FailedServletDTO[] getFailedServletDTOs() {
 		Collection<FailedServletDTO> fsDTOs = failedServletDTOs.values();
 
-		List<FailedServletDTO> copies = new ArrayList<FailedServletDTO>();
+		List<FailedServletDTO> copies = new ArrayList<>();
 
 		for (FailedServletDTO failedServletDTO : fsDTOs) {
 			copies.add(DTOUtil.clone(failedServletDTO));
@@ -617,7 +617,7 @@ public class HttpServiceRuntimeImpl
 	private FailedPreprocessorDTO[] getFailedPreprocessorDTOs() {
 		Collection<FailedPreprocessorDTO> fpDTOs = failedPreprocessorDTOs.values();
 
-		List<FailedPreprocessorDTO> copies = new ArrayList<FailedPreprocessorDTO>();
+		List<FailedPreprocessorDTO> copies = new ArrayList<>();
 
 		for (FailedPreprocessorDTO failedPreprocessorDTO : fpDTOs) {
 			copies.add(DTOUtil.clone(failedPreprocessorDTO));
@@ -627,7 +627,7 @@ public class HttpServiceRuntimeImpl
 	}
 
 	public ServletContextDTO[] getServletContextDTOs() {
-		List<ServletContextDTO> servletContextDTOs = new ArrayList<ServletContextDTO>();
+		List<ServletContextDTO> servletContextDTOs = new ArrayList<>();
 
 		for (ContextController contextController : controllerMap.values()) {
 			servletContextDTOs.add(contextController.getServletContextDTO());
@@ -637,7 +637,7 @@ public class HttpServiceRuntimeImpl
 	}
 
 	public PreprocessorDTO[] getPreprocessorDTOs() {
-		List<PreprocessorDTO> pDTOs = new ArrayList<PreprocessorDTO>();
+		List<PreprocessorDTO> pDTOs = new ArrayList<>();
 
 		for (PreprocessorRegistration registration : preprocessorMap.values()) {
 			pDTOs.add(registration.getD());
@@ -687,7 +687,7 @@ public class HttpServiceRuntimeImpl
 			HttpServiceObjectRegistration objectRegistration = null;
 			ServiceRegistration<Filter> registration = null;
 			try {
-				Dictionary<String, Object> props = new Hashtable<String, Object>();
+				Dictionary<String, Object> props = new Hashtable<>();
 				props.put(HTTP_WHITEBOARD_TARGET, targetFilter);
 				props.put(HTTP_WHITEBOARD_FILTER_PATTERN, alias);
 				props.put(HTTP_WHITEBOARD_FILTER_NAME, filterName);
@@ -707,7 +707,7 @@ public class HttpServiceRuntimeImpl
 				objectRegistration = new HttpServiceObjectRegistration(filter, registration, httpContextHolder, bundle);
 				Set<HttpServiceObjectRegistration> objectRegistrations = bundleRegistrations.get(bundle);
 				if (objectRegistrations == null) {
-					objectRegistrations = new HashSet<HttpServiceObjectRegistration>();
+					objectRegistrations = new HashSet<>();
 					bundleRegistrations.put(bundle, objectRegistrations);
 				}
 				objectRegistrations.add(objectRegistration);
@@ -796,7 +796,7 @@ public class HttpServiceRuntimeImpl
 				if (existing != null) {
 					throw new PatternInUseException(alias);
 				}
-				Dictionary<String, Object> props = new Hashtable<String, Object>();
+				Dictionary<String, Object> props = new Hashtable<>();
 				props.put(HTTP_WHITEBOARD_TARGET, targetFilter);
 				props.put(HTTP_WHITEBOARD_RESOURCE_PATTERN, pattern);
 				props.put(HTTP_WHITEBOARD_RESOURCE_PREFIX, name);
@@ -809,14 +809,14 @@ public class HttpServiceRuntimeImpl
 
 				Set<HttpServiceObjectRegistration> objectRegistrations = bundleRegistrations.get(bundle);
 				if (objectRegistrations == null) {
-					objectRegistrations = new HashSet<HttpServiceObjectRegistration>();
+					objectRegistrations = new HashSet<>();
 					bundleRegistrations.put(bundle, objectRegistrations);
 				}
 				objectRegistrations.add(objectRegistration);
 
 				Map<String, String> aliasCustomizations = bundleAliasCustomizations.get(bundle);
 				if (aliasCustomizations == null) {
-					aliasCustomizations = new HashMap<String, String>();
+					aliasCustomizations = new HashMap<>();
 					bundleAliasCustomizations.put(bundle, aliasCustomizations);
 				}
 				aliasCustomizations.put(alias, fullAlias);
@@ -879,7 +879,7 @@ public class HttpServiceRuntimeImpl
 					servletName = String.valueOf(initparams.get(Const.SERVLET_NAME));
 				}
 
-				Dictionary<String, Object> props = new Hashtable<String, Object>();
+				Dictionary<String, Object> props = new Hashtable<>();
 				props.put(HTTP_WHITEBOARD_TARGET, targetFilter);
 				props.put(HTTP_WHITEBOARD_SERVLET_PATTERN, pattern);
 				props.put(HTTP_WHITEBOARD_SERVLET_NAME, servletName);
@@ -897,14 +897,14 @@ public class HttpServiceRuntimeImpl
 
 				Set<HttpServiceObjectRegistration> objectRegistrations = bundleRegistrations.get(bundle);
 				if (objectRegistrations == null) {
-					objectRegistrations = new HashSet<HttpServiceObjectRegistration>();
+					objectRegistrations = new HashSet<>();
 					bundleRegistrations.put(bundle, objectRegistrations);
 				}
 				objectRegistrations.add(objectRegistration);
 
 				Map<String, String> aliasCustomizations = bundleAliasCustomizations.get(bundle);
 				if (aliasCustomizations == null) {
-					aliasCustomizations = new HashMap<String, String>();
+					aliasCustomizations = new HashMap<>();
 					bundleAliasCustomizations.put(bundle, aliasCustomizations);
 				}
 				aliasCustomizations.put(alias, fullAlias);
@@ -1305,33 +1305,33 @@ public class HttpServiceRuntimeImpl
 
 	// BEGIN of old HttpService support
 	final ConcurrentMap<HttpContext, HttpContextHolder> legacyContextMap =
-		new ConcurrentHashMap<HttpContext, HttpContextHolder>();
+		new ConcurrentHashMap<>();
 	private final Map<Object, HttpServiceObjectRegistration> legacyMappings =
 		Collections.synchronizedMap(new HashMap<Object, HttpServiceObjectRegistration>());
 	private final Map<Bundle, Set<HttpServiceObjectRegistration>> bundleRegistrations =
-		new HashMap<Bundle, Set<HttpServiceObjectRegistration>>();
-	private final Map<Bundle, Map<String, String>> bundleAliasCustomizations = new HashMap<Bundle, Map<String,String>>();
+		new HashMap<>();
+	private final Map<Bundle, Map<String, String>> bundleAliasCustomizations = new HashMap<>();
 	// END of old HttpService support
 
 	private final ConcurrentMap<ServiceReference<ServletContextHelper>, ContextController> controllerMap =
-		new ConcurrentSkipListMap<ServiceReference<ServletContextHelper>, ContextController>(Collections.reverseOrder());
+		new ConcurrentSkipListMap<>(Collections.reverseOrder());
 	private final ConcurrentMap<ServiceReference<Preprocessor>, PreprocessorRegistration> preprocessorMap =
-		new ConcurrentSkipListMap<ServiceReference<Preprocessor>, PreprocessorRegistration>(Collections.reverseOrder());
+		new ConcurrentSkipListMap<>(Collections.reverseOrder());
 
 	final ConcurrentMap<ServiceReference<?>, FailedErrorPageDTO> failedErrorPageDTOs =
-		new ConcurrentHashMap<ServiceReference<?>, FailedErrorPageDTO>();
+		new ConcurrentHashMap<>();
 	final ConcurrentMap<ServiceReference<Filter>, FailedFilterDTO> failedFilterDTOs =
-		new ConcurrentHashMap<ServiceReference<Filter>, FailedFilterDTO>();
+		new ConcurrentHashMap<>();
 	final ConcurrentMap<ServiceReference<EventListener>, FailedListenerDTO> failedListenerDTOs =
-		new ConcurrentHashMap<ServiceReference<EventListener>, FailedListenerDTO>();
+		new ConcurrentHashMap<>();
 	final ConcurrentMap<ServiceReference<?>, FailedResourceDTO> failedResourceDTOs =
-		new ConcurrentHashMap<ServiceReference<?>, FailedResourceDTO>();
+		new ConcurrentHashMap<>();
 	final ConcurrentMap<ServiceReference<ServletContextHelper>, ExtendedFailedServletContextDTO> failedServletContextDTOs =
-		new ConcurrentHashMap<ServiceReference<ServletContextHelper>, ExtendedFailedServletContextDTO>();
+		new ConcurrentHashMap<>();
 	final ConcurrentMap<ServiceReference<?>, FailedServletDTO> failedServletDTOs =
-		new ConcurrentHashMap<ServiceReference<?>, FailedServletDTO>();
+		new ConcurrentHashMap<>();
 	final ConcurrentMap<ServiceReference<?>, FailedPreprocessorDTO> failedPreprocessorDTOs =
-		new ConcurrentHashMap<ServiceReference<?>, FailedPreprocessorDTO>();
+		new ConcurrentHashMap<>();
 
 	private final Set<Object> registeredObjects = Collections.newSetFromMap(new ConcurrentHashMap<Object, Boolean>());
 	private final ServiceTracker<LoggerFactory, Logger> loggerFactoryTracker;
@@ -1363,7 +1363,7 @@ public class HttpServiceRuntimeImpl
 	}
 
 	static class LegacyServiceObject {
-		final AtomicReference<Exception> error = new AtomicReference<Exception>(new ServletException("The init() method was never called.")); //$NON-NLS-1$
+		final AtomicReference<Exception> error = new AtomicReference<>(new ServletException("The init() method was never called.")); //$NON-NLS-1$
 		public void checkForError() {
 			Exception result = error.get();
 			if (result != null) {
@@ -1485,7 +1485,7 @@ public class HttpServiceRuntimeImpl
 		private final BundleContext context;
 		private final ServiceTracker<ServletContextHelper, AtomicReference<ContextController>> contextServiceTracker;
 		private final NavigableMap<ServiceReference<ContextPathCustomizer>, ContextPathCustomizer> pathCustomizers =
-			new TreeMap<ServiceReference<ContextPathCustomizer>, ContextPathCustomizer>(Collections.reverseOrder());
+			new TreeMap<>(Collections.reverseOrder());
 
 		public ContextPathCustomizerHolder(
 			BundleContext context,

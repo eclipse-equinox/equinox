@@ -73,17 +73,17 @@ public class RegionServiceFindHookTests {
 	@Before
 	public void setUp() throws Exception {
 		this.bundleId = 1L;
-		this.regions = new HashMap<String, Region>();
-		this.bundles = new HashMap<String, Bundle>();
-		this.serviceReferences = new HashMap<String, ServiceReference<Object>>();
+		this.regions = new HashMap<>();
+		this.bundles = new HashMap<>();
+		this.serviceReferences = new HashMap<>();
 
 		StubBundle stubSystemBundle = new StubBundle(0L, "osgi.framework", new Version("0"), "loc");
 		StubBundleContext stubBundleContext = new StubBundleContext();
 		stubBundleContext.addInstalledBundle(stubSystemBundle);
-		this.threadLocal = new ThreadLocal<Region>();
+		this.threadLocal = new ThreadLocal<>();
 		this.digraph = RegionReflectionUtils.newStandardRegionDigraph(stubBundleContext, this.threadLocal);
 		this.bundleFindHook = RegionReflectionUtils.newRegionServiceFindHook(this.digraph);
-		this.candidates = new HashSet<ServiceReference<?>>();
+		this.candidates = new HashSet<>();
 
 		// Create regions A, B, C, D containing bundles A, B, C, D, respectively.
 		createRegion(REGION_A, BUNDLE_A);
@@ -219,14 +219,14 @@ public class RegionServiceFindHookTests {
 		this.candidates.add(serviceReference(DUPLICATE + bundle(BUNDLE_C).getBundleId()));
 		this.candidates.add(serviceReference(DUPLICATE + bundle(BUNDLE_D).getBundleId()));
 
-		Collection<ServiceReference<?>> testCandidates = new ArrayList<ServiceReference<?>>(this.candidates);
+		Collection<ServiceReference<?>> testCandidates = new ArrayList<>(this.candidates);
 		this.bundleFindHook.find(bundleContext(BUNDLE_A), "", "", false, testCandidates);
 		assertTrue(testCandidates.contains(serviceReference(DUPLICATE + bundle(BUNDLE_A).getBundleId())));
 		assertFalse(testCandidates.contains(serviceReference(DUPLICATE + bundle(BUNDLE_B).getBundleId())));
 		assertTrue(testCandidates.contains(serviceReference(DUPLICATE + bundle(BUNDLE_C).getBundleId())));
 		assertTrue(testCandidates.contains(serviceReference(DUPLICATE + bundle(BUNDLE_D).getBundleId())));
 
-		testCandidates = new ArrayList<ServiceReference<?>>(this.candidates);
+		testCandidates = new ArrayList<>(this.candidates);
 		this.bundleFindHook.find(bundleContext(BUNDLE_A), "", "", false, testCandidates);
 		assertTrue(testCandidates.contains(serviceReference(DUPLICATE + bundle(BUNDLE_A).getBundleId())));
 		assertFalse(testCandidates.contains(serviceReference(DUPLICATE + bundle(BUNDLE_B).getBundleId())));
@@ -315,7 +315,7 @@ public class RegionServiceFindHookTests {
 	}
 
 	private RegionFilter createFilter(final String... referenceNames) throws InvalidSyntaxException {
-		Collection<String> filters = new ArrayList<String>(referenceNames.length);
+		Collection<String> filters = new ArrayList<>(referenceNames.length);
 		for (String referenceName : referenceNames) {
 			filters.add('(' + Constants.OBJECTCLASS + '=' + referenceName + ')');
 		}
@@ -336,12 +336,12 @@ public class RegionServiceFindHookTests {
 	}
 
 	private StubServiceReference<Object> createServiceReference(Bundle stubBundle, String referenceName) {
-		StubServiceRegistration<Object> stubServiceRegistration = new StubServiceRegistration<Object>((StubBundleContext) stubBundle.getBundleContext(), referenceName);
-		StubServiceReference<Object> stubServiceReference = new StubServiceReference<Object>(stubServiceRegistration);
+		StubServiceRegistration<Object> stubServiceRegistration = new StubServiceRegistration<>((StubBundleContext) stubBundle.getBundleContext(), referenceName);
+		StubServiceReference<Object> stubServiceReference = new StubServiceReference<>(stubServiceRegistration);
 		this.serviceReferences.put(referenceName, stubServiceReference);
 
-		StubServiceRegistration<Object> dupServiceRegistration = new StubServiceRegistration<Object>((StubBundleContext) stubBundle.getBundleContext(), DUPLICATE + stubBundle.getBundleId());
-		StubServiceReference<Object> dupServiceReference = new StubServiceReference<Object>(dupServiceRegistration);
+		StubServiceRegistration<Object> dupServiceRegistration = new StubServiceRegistration<>((StubBundleContext) stubBundle.getBundleContext(), DUPLICATE + stubBundle.getBundleId());
+		StubServiceReference<Object> dupServiceReference = new StubServiceReference<>(dupServiceRegistration);
 		this.serviceReferences.put(DUPLICATE + stubBundle.getBundleId(), dupServiceReference);
 		return stubServiceReference;
 	}

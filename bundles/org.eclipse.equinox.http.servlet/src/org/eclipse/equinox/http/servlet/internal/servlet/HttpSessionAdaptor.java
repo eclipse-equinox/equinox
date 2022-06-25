@@ -66,7 +66,7 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 	}
 
 	private Collection<String> getAttributeNames0() {
-		Collection<String> result = new ArrayList<String>();
+		Collection<String> result = new ArrayList<>();
 		Enumeration<String> containerSessionAttributes = session.getAttributeNames();
 		while(containerSessionAttributes.hasMoreElements()) {
 			String attribute = containerSessionAttributes.nextElement();

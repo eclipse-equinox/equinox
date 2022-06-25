@@ -76,7 +76,7 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 			ocd.addAttributeDefinition((AttributeDefinitionImpl) ad.clone(), false);
 		}
 		if (icons != null) {
-			ocd.setIcons(new ArrayList<Icon>(icons));
+			ocd.setIcons(new ArrayList<>(icons));
 		}
 		return ocd;
 	}

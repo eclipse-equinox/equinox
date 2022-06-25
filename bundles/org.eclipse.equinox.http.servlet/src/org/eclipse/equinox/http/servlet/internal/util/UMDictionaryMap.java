@@ -22,7 +22,7 @@ import java.util.*;
 public class UMDictionaryMap <K, V> implements Map<K, V> {
 
 	public UMDictionaryMap(Dictionary<K, V> dictionary) {
-		Map<K, V> map = new HashMap<K, V>();
+		Map<K, V> map = new HashMap<>();
 
 		if (dictionary != null) {
 			for (Enumeration<K> em = dictionary.keys(); em.hasMoreElements();) {

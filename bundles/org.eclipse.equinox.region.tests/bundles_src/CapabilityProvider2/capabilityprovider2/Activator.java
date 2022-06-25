@@ -23,11 +23,11 @@ public class Activator implements BundleActivator {
 
 	@Override
 	public void start(final BundleContext context) throws Exception {
-		new ServiceTracker<pkg1.a.A, pkg1.a.A>(context, pkg1.a.A.class, new ServiceTrackerCustomizer<pkg1.a.A, pkg1.a.A>() {
+		new ServiceTracker<>(context, pkg1.a.A.class, new ServiceTrackerCustomizer<pkg1.a.A, pkg1.a.A>() {
 
 			@Override
 			public pkg1.a.A addingService(ServiceReference<pkg1.a.A> reference) {
-				Dictionary<String, Object> props = new Hashtable<String, Object>();
+				Dictionary<String, Object> props = new Hashtable<>();
 				props.put("bundle.id", context.getBundle().getBundleId());
 				context.registerService(Boolean.class, Boolean.TRUE, props);
 				return null;

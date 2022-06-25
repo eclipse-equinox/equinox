@@ -47,7 +47,7 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 		if (_bundle.getState() != Bundle.ACTIVE)
 			return new String[0]; // return none if not active
 		MetaTypeProviderWrapper[] wrappers = getMetaTypeProviders();
-		ArrayList<String> results = new ArrayList<String>();
+		ArrayList<String> results = new ArrayList<>();
 		for (MetaTypeProviderWrapper wrapper : wrappers) {
 			// return only the correct type of pids (regular or factory)
 			if (factory == wrapper.factory) {
@@ -87,7 +87,7 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 		if (_bundle.getState() != Bundle.ACTIVE)
 			return new String[0]; // return none if not active
 		MetaTypeProviderWrapper[] wrappers = getMetaTypeProviders();
-		ArrayList<String> locales = new ArrayList<String>();
+		ArrayList<String> locales = new ArrayList<>();
 		// collect all the unique locales from all providers we found
 		for (MetaTypeProviderWrapper wrapper : wrappers) {
 			String[] wrappedLocales = wrapper.getLocales();
@@ -106,7 +106,7 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 		Map<ServiceReference<Object>, Object> services = _tracker.getTracked();
 		if (services.isEmpty())
 			return new MetaTypeProviderWrapper[0];
-		Set<MetaTypeProviderWrapper> result = new HashSet<MetaTypeProviderWrapper>();
+		Set<MetaTypeProviderWrapper> result = new HashSet<>();
 		for (Entry<ServiceReference<Object>, Object> entry : services.entrySet()) {
 			ServiceReference<Object> serviceReference = entry.getKey();
 			if (serviceReference.getBundle() == _bundle) {
@@ -233,7 +233,7 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 					AttributeDefinition[] ads = ocd.getAttributeDefinitions(filter);
 					if (ads == null || ads.length == 0)
 						return new EquinoxAttributeDefinition[0];
-					Collection<EquinoxAttributeDefinition> result = new ArrayList<EquinoxAttributeDefinition>(ads.length);
+					Collection<EquinoxAttributeDefinition> result = new ArrayList<>(ads.length);
 					for (final AttributeDefinition ad : ads) {
 						result.add(new EquinoxAttributeDefinition() {
 							public String getName() {

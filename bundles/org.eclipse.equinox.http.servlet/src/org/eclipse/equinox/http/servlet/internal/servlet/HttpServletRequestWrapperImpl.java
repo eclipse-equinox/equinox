@@ -33,12 +33,12 @@ import org.osgi.service.http.HttpContext;
 
 public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
-	private final Deque<DispatchTargets> dispatchTargets = new LinkedList<DispatchTargets>();
+	private final Deque<DispatchTargets> dispatchTargets = new LinkedList<>();
 	private final HttpServletRequest request;
 	private List<Part> parts;
 	private final Lock lock = new ReentrantLock();
 
-	private static final Set<String> dispatcherAttributes =	new HashSet<String>();
+	private static final Set<String> dispatcherAttributes =	new HashSet<>();
 
 	static {
 		dispatcherAttributes.add(RequestDispatcher.ERROR_EXCEPTION);
@@ -451,7 +451,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 	@Override
 	public Collection<Part> getParts() throws IOException, ServletException {
-		return new ArrayList<Part>(getParts0());
+		return new ArrayList<>(getParts0());
 	}
 
 	public AsyncContext startAsync() throws IllegalStateException {

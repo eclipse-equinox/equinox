@@ -49,7 +49,7 @@ public class ManagedServiceTest {
 	public void testSamePidManagedService() throws Exception {
 
 		Configuration config = cm.getConfiguration("test");
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 
@@ -66,7 +66,7 @@ public class ManagedServiceTest {
 			}
 		};
 
-		Dictionary<String, Object> dict = new Hashtable<String, Object>();
+		Dictionary<String, Object> dict = new Hashtable<>();
 		dict.put(Constants.SERVICE_PID, "test");
 		ServiceRegistration<ManagedService> reg = null;
 		synchronized (lock) {
@@ -119,7 +119,7 @@ public class ManagedServiceTest {
 				return logLevel == LogService.LOG_ERROR;
 			}
 		});
-		Dictionary<String, Object> dict = new Hashtable<String, Object>();
+		Dictionary<String, Object> dict = new Hashtable<>();
 		dict.put(Constants.SERVICE_PID, "test");
 		ServiceRegistration<ManagedService> reg1 = Activator.getBundleContext().registerService(ManagedService.class, ms, dict);
 		ServiceRegistration<ManagedService> reg2 = Activator.getBundleContext().registerService(ManagedService.class, ms, dict);
@@ -149,7 +149,7 @@ public class ManagedServiceTest {
 			}
 		};
 
-		Dictionary<String, Object> dict = new Hashtable<String, Object>();
+		Dictionary<String, Object> dict = new Hashtable<>();
 		dict.put(Constants.SERVICE_PID, "test");
 
 		ServiceRegistration<ManagedService> reg = null;
@@ -164,7 +164,7 @@ public class ManagedServiceTest {
 
 		Configuration config = cm.getConfiguration("test");
 		assertNull(config.getProperties());
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put("testkey", "testvalue");
 
 		synchronized (lock) {

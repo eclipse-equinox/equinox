@@ -126,7 +126,7 @@ final public class StructuredTextExpertFactory {
 		synchronized (sharedExperts) {
 			Map<StructuredTextEnvironment, IStructuredTextExpert> experts = sharedExperts.get(type);
 			if (experts == null) {
-				experts = new HashMap<StructuredTextEnvironment, IStructuredTextExpert>(); // environment -> expert
+				experts = new HashMap<>(); // environment -> expert
 				sharedExperts.put(type, experts);
 			}
 			expert = experts.get(environment);

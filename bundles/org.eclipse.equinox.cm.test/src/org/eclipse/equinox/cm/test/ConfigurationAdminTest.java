@@ -231,7 +231,7 @@ public class ConfigurationAdminTest {
 	public void testPersistentConfig() throws Exception {
 		Configuration config = cm.getConfiguration("test");
 		assertNull(config.getProperties());
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 		assertTrue(config.getPid().equals("test"));
@@ -251,7 +251,7 @@ public class ConfigurationAdminTest {
 	public void testPersistentFactoryConfig() throws Exception {
 		Configuration config = cm.createFactoryConfiguration("test");
 		assertNull(config.getProperties());
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 		assertTrue(config.getFactoryPid().equals("test"));
