@@ -271,9 +271,7 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 				EclipseScheduledApplication schedApp = new EclipseScheduledApplication(context, id, appPid, args, topic, eventFilter, recurring);
 				addScheduledApp(schedApp);
 			}
-		} catch (InvalidSyntaxException e) {
-			throw new IOException(e.getMessage());
-		} catch (NoClassDefFoundError | ClassNotFoundException e) {
+		} catch (InvalidSyntaxException | NoClassDefFoundError | ClassNotFoundException e) {
 			throw new IOException(e.getMessage());
 		}
 	}

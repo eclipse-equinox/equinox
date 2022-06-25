@@ -853,8 +853,6 @@ public class FrameworkLauncher {
 				in = location.openStream();
 				result.load(in);
 			}
-		} catch (MalformedURLException e) {
-			// no url to load from
 		} catch (IOException e) {
 			// its ok if there is no file
 		} finally {

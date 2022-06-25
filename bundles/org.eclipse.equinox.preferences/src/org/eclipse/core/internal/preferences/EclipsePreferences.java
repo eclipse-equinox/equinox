@@ -696,11 +696,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			if (DEBUG_PREFERENCE_GENERAL)
 				PrefsMessages.message("Preference file does not exist: " + location); //$NON-NLS-1$
 			return result;
-		} catch (IOException e) {
-			String message = NLS.bind(PrefsMessages.preferences_loadException, location);
-			log(new Status(IStatus.INFO, PrefsMessages.OWNER_NAME, IStatus.INFO, message, e));
-			throw new BackingStoreException(message, e);
-		} catch (IllegalArgumentException e) {
+		} catch (IOException | IllegalArgumentException e) {
 			String message = NLS.bind(PrefsMessages.preferences_loadException, location);
 			log(new Status(IStatus.INFO, PrefsMessages.OWNER_NAME, IStatus.INFO, message, e));
 			throw new BackingStoreException(message, e);

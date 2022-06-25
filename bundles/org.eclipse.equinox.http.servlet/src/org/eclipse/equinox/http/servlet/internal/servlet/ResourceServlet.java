@@ -163,12 +163,7 @@ public class ResourceServlet extends HttpServlet {
 								// of a message when we use a Writer we lose control of the exact byte count and
 								// defer the problem to the Servlet Engine's Writer implementation.
 							}
-						} catch (FileNotFoundException e) {
-							// FileNotFoundException may indicate the following scenarios
-							// - url is a directory
-							// - url is not accessible
-							sendError(resp, HttpServletResponse.SC_FORBIDDEN);
-						} catch (SecurityException e) {
+						} catch (FileNotFoundException | SecurityException e) {
 							// SecurityException may indicate the following scenarios
 							// - url is not accessible
 							sendError(resp, HttpServletResponse.SC_FORBIDDEN);
