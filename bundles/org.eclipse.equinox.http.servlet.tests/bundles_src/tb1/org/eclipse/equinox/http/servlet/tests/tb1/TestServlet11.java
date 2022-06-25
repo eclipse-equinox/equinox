@@ -39,21 +39,15 @@ public class TestServlet11 extends AbstractTestServlet {
 
 		ClassLoader classLoader = servletContext.getClassLoader();
 
-		InputStream in = classLoader.getResourceAsStream(
+		try (InputStream in = classLoader.getResourceAsStream(
 			"/org/eclipse/equinox/http/servlet/tests/tb1/resource1.txt");
-		OutputStream out = response.getOutputStream();
-
-		try {
+				OutputStream out = response.getOutputStream()) {
 			byte[] buffer = new byte[2048];
 			int bytesRead;
 
 			while ((bytesRead = in.read(buffer)) != -1) {
 				out.write(buffer, 0, bytesRead);
 			}
-		}
-		finally {
-			out.close();
-			in.close();
 		}
 	}
 

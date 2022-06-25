@@ -122,13 +122,10 @@ public class FileManagerTests extends OSGiTest {
 	}
 
 	void writeToFile(File file, String str) throws IOException {
-		FileOutputStream fos = new FileOutputStream(file);
-		try {
+		try (FileOutputStream fos = new FileOutputStream(file)) {
 			fos.write(str.getBytes());
 			fos.flush();
 			fos.getFD().sync();
-		} finally {
-			fos.close();
 		}
 	}
 

@@ -36,11 +36,8 @@ public class TestWBServlet extends HttpServlet {
 
 	@Override
 	protected final void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		PrintWriter writer = response.getWriter();
-		try {
+		try (PrintWriter writer = response.getWriter()) {
 			handleDoGet(request, writer);
-		} finally {
-			writer.close();
 		}
 	}
 

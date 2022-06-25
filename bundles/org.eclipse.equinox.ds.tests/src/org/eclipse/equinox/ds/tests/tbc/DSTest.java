@@ -3031,8 +3031,7 @@ public class DSTest {
 	  // The bundle is a JAR file and needs to be extracted and copied as a
 	  // directory to the data storage area of the test harness bundle.
 	  File file = context.getBundle().getDataFile(bundle);
-	  ZipInputStream in = new ZipInputStream(new URL(location).openStream());
-	  try {
+	  try (ZipInputStream in = new ZipInputStream(new URL(location).openStream())) {
 		  for (ZipEntry ze = in.getNextEntry(); ze != null; ze = in.getNextEntry()) {
 			  String name = ze.getName();
 			  // Is the entry a directory?
@@ -3057,19 +3056,12 @@ public class DSTest {
 			  // Now copy the contents of the file entry to the destination.
 			  byte[] bytes = new byte[1024];
 			  int read;
-			  FileOutputStream out = new FileOutputStream(destination);
-			  try {
+			  try (FileOutputStream out = new FileOutputStream(destination)) {
 				  while ((read = in.read(bytes)) != -1)
 					  out.write(bytes, 0, read);
 			  }
-			  finally {
-				  out.close();
-			  }
 			  in.closeEntry();
 		  }
-	  }
-	  finally {
-		  in.close();
 	  }
 	  // Add the "reference" protocol back when running from a server so the
 	  // framework sees the modified component.xml in the bundle data storage.
