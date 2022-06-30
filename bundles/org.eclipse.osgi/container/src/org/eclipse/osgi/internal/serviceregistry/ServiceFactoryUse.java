@@ -40,10 +40,10 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 	final ServiceFactory<S> factory;
 
 	/** Service object returned by ServiceFactory.getService() */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	private S cachedService;
 	/** true if we are calling the factory getService method. Used to detect recursion. */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	private boolean factoryInUse;
 
 	/**
@@ -85,17 +85,17 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 	 *
 	 * @return The service object.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	@Override
 	S getService() {
-		assert Thread.holdsLock(this);
+		assert getLock().isHeldByCurrentThread();
 		if (inUse()) {
 			incrementUse();
 			return cachedService;
 		}
 
 		if (debug.DEBUG_SERVICES) {
-			Debug.println('[' + Thread.currentThread().getName() + "] getService[Sfactory=" + registration.getBundle() //$NON-NLS-1$
+			Debug.println("[" + Thread.currentThread().getName() + "] getService[Sfactory=" + registration.getBundle() //$NON-NLS-1$ //$NON-NLS-2$
 					+ "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		// check for recursive call on this thread
@@ -141,10 +141,10 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 	 * </ol>
 	 * @return true if the service was ungotten; otherwise false.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	@Override
 	boolean ungetService() {
-		assert Thread.holdsLock(this);
+		assert getLock().isHeldByCurrentThread();
 		if (!inUse()) {
 			return false;
 		}
@@ -158,7 +158,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 		cachedService = null;
 
 		if (debug.DEBUG_SERVICES) {
-			Debug.println('[' + Thread.currentThread().getName() + "] ungetService[Sfactory=" + registration.getBundle() //$NON-NLS-1$
+			Debug.println("[" + Thread.currentThread().getName() + "] ungetService[Sfactory=" + registration.getBundle() //$NON-NLS-1$ //$NON-NLS-2$
 					+ "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		factoryUngetService(service);
@@ -174,7 +174,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 	 * is called to release the service object for the bundle.
 	 * </ol>
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	@Override
 	void release() {
 		super.release();
@@ -186,7 +186,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 		cachedService = null;
 
 		if (debug.DEBUG_SERVICES) {
-			Debug.println('[' + Thread.currentThread().getName() + "] releaseService[Sfactory=" //$NON-NLS-1$
+			Debug.println("[" + Thread.currentThread().getName() + "] releaseService[Sfactory=" //$NON-NLS-1$ //$NON-NLS-2$
 					+ registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		factoryUngetService(service);
@@ -197,7 +197,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 	 *
 	 * @return The service object.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	@Override
 	S getCachedService() {
 		return cachedService;
@@ -208,7 +208,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 	 *
 	 * @return The service returned by the factory or null if there was an error.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	S factoryGetService() {
 		final S service;
 		try {
@@ -262,7 +262,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 	 *
 	 *  @param service The service object to pass to the factory.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	void factoryUngetService(final S service) {
 		try {
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
