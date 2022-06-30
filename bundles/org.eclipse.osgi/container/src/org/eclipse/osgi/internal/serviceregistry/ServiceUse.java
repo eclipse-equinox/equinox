@@ -14,9 +14,14 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
+import java.time.Duration;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.messages.Msg;
@@ -43,10 +48,10 @@ public class ServiceUse<S> {
 	private int useCount;
 
 	/** lock for this service */
-	private ReentrantLockExt lock = new ReentrantLockExt();
+	private final ReentrantLock lock = new ReentrantLockExt();
 	public static final int DEADLOCK = 1001;
 
-	private int lockTimeout = 10;
+	private Duration lockTimeout = Duration.ofSeconds(10);
 
 	/**
 	 * Constructs a service use encapsulating the service object.
@@ -67,8 +72,17 @@ public class ServiceUse<S> {
 
 	<T> T callWithLock(Callable<T> callable) {
 		try {
-			if (lock.tryLock(getLockTimeout(), TimeUnit.SECONDS)) {
-				return callable.call();
+			if (lock.tryLock(getLockTimeout().toMillis(), TimeUnit.MILLISECONDS)) {
+				try {
+					return callable.call();
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt(); // To appease sonar
+					return null;
+				} catch (Exception e) {
+					throw new RuntimeException("Callable threw exception", e); //$NON-NLS-1$
+				} finally {
+					lock.unlock();
+				}
 			}
 			throw new ServiceException(
 					"Failed to acquire lock within try period, Lock, id:" + System.identityHashCode(lock) + ", " //$NON-NLS-1$ //$NON-NLS-2$
@@ -77,20 +91,14 @@ public class ServiceUse<S> {
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt(); // To appease sonar
 			return null;
-		} catch (Exception e) {
-			throw new RuntimeException("Callable threw exception", e); //$NON-NLS-1$
-		} finally {
-			if (lock.isHeldByCurrentThread()) {
-				lock.unlock();
-			}
 		}
 	}
 
-	int getLockTimeout() {
+	Duration getLockTimeout() {
 		return lockTimeout;
 	}
 
-	ReentrantLockExt getLock() {
+	ReentrantLock getLock() {
 		return lock;
 	}
 
@@ -235,5 +243,49 @@ public class ServiceUse<S> {
 	/* @GuardedBy("this") */
 	void resetUse() {
 		useCount = 0;
+	}
+
+	private static class ReentrantLockExt extends ReentrantLock {
+		private static final long serialVersionUID = 161034782199227436L;
+
+		public ReentrantLockExt() {
+			super();
+		}
+
+		public ReentrantLockExt(boolean fair) {
+			super(fair);
+		}
+
+		/**
+		 * Returns a string identifying this lock, as well as its lock state. The state,
+		 * in brackets, includes either the String {@code "Unlocked"} or the String
+		 * {@code "Locked by"} followed by the {@linkplain Thread#getName name} of the
+		 * owning thread.
+		 *
+		 * @return a string identifying this lock, as well as its lock state
+		 */
+		@SuppressWarnings("nls")
+		@Override
+		public String toString() {
+			Thread o = getOwner();
+
+			if (o != null) {
+				try {
+					ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+					ThreadInfo threadInfo = threadMXBean.getThreadInfo(o.getId(), Integer.MAX_VALUE);
+					StackTraceElement[] trace = threadInfo.getStackTrace();
+					StringBuilder sb = new StringBuilder("\"" + o.getName() + "\"" + (o.isDaemon() ? " daemon" : "")
+							+ " prio=" + o.getPriority() + " Id=" + o.getId() + " " + o.getState());
+
+					for (StackTraceElement traceElement : trace)
+						sb.append("\tat " + traceElement + "\n");
+
+					return super.toString() + "[Locked by thread " + o.getName() + "], Details:\n" + sb.toString();
+				} catch (Exception e) {
+					// do nothing and fall back to just the default, thread might be gone
+				}
+			}
+			return super.toString() + "[Unlocked]";
+		}
 	}
 }
