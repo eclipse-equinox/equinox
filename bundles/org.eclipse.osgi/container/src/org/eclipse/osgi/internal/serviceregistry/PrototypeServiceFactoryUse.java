@@ -36,7 +36,7 @@ import org.osgi.framework.ServiceRegistration;
  */
 public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	/** Service objects returned by PrototypeServiceFactory.getService() and their use count. */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	private final Map<S, AtomicInteger> serviceObjects;
 
 	/**
@@ -57,10 +57,10 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	 *
 	 * @return The service object.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	@Override
 	S newServiceObject() {
-		assert Thread.holdsLock(this);
+		assert getLock().isHeldByCurrentThread();
 		if (debug.DEBUG_SERVICES) {
 			Debug.println('[' + Thread.currentThread().getName() + "] getServiceObject[PSfactory=" //$NON-NLS-1$
 					+ registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -89,10 +89,10 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	 * @throws IllegalArgumentException If the specified service was not
 	 *         provided by this object.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	@Override
 	boolean releaseServiceObject(final S service) {
-		assert Thread.holdsLock(this);
+		assert getLock().isHeldByCurrentThread();
 		if ((service == null) || !serviceObjects.containsKey(service)) {
 			throw new IllegalArgumentException(Msg.SERVICE_OBJECTS_UNGET_ARGUMENT_EXCEPTION);
 		}
@@ -118,7 +118,7 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	 * is called to release the service object for the bundle.
 	 * </ol>
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	@Override
 	void release() {
 		super.release();
@@ -137,7 +137,7 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	 *
 	 * @return true if no services are being used and this service use can be discarded.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	@Override
 	boolean isEmpty() {
 		return super.isEmpty() && serviceObjects.isEmpty();

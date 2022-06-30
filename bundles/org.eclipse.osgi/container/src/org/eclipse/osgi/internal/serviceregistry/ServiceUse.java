@@ -18,13 +18,13 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.time.Duration;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Function;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.messages.Msg;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.ServiceException;
 
 /**
@@ -44,14 +44,25 @@ public class ServiceUse<S> {
 	final Debug debug;
 
 	/** bundle's use count for this service */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	private int useCount;
 
-	/** lock for this service */
-	private final ReentrantLock lock = new ReentrantLockExt();
+	/**
+	 * ReentrantLock for this service. Use the @{@link #getLock()} method to obtain
+	 * the lock.
+	 */
+	private final ReentrantLock lock = new ServiceUseLock();
+
+	/**
+	 * Custom ServiceException type to indicate a deadlock occurred during service
+	 * registration.
+	 */
 	public static final int DEADLOCK = 1001;
 
-	private Duration lockTimeout = Duration.ofSeconds(10);
+	/**
+	 * Lock timeout to allow for breaking deadlocks.
+	 */
+	private final Duration lockTimeout = Duration.ofSeconds(10);
 
 	/**
 	 * Constructs a service use encapsulating the service object.
@@ -66,40 +77,48 @@ public class ServiceUse<S> {
 		this.debug = context.getContainer().getConfiguration().getDebug();
 	}
 
-	void runWithLock(Runnable runnable) {
-		callWithLock(Executors.callable(runnable));
+	/**
+	 * The ReentrantLock for managing access to this ServiceUse.
+	 * 
+	 * @return A ReentrantLock.
+	 */
+	ReentrantLock getLock() {
+		return lock;
 	}
 
-	<T> T callWithLock(Callable<T> callable) {
+	/**
+	 * Run the specified Function while holding the {@link #getLock() lock} for this
+	 * ServiceUse.
+	 * 
+	 * @param callable A Function to execute. The function is passed this ServiceUse
+	 *                 object.
+	 * @return The return value of the specified Function.
+	 */
+	<T> T withLock(Function<ServiceUse<S>, T> callable) {
+		ReentrantLock useLock = getLock();
+		boolean interrupted = Thread.interrupted();
 		try {
-			if (lock.tryLock(getLockTimeout().toMillis(), TimeUnit.MILLISECONDS)) {
+			boolean locked;
+			try {
+				locked = useLock.tryLock(lockTimeout.toNanos(), TimeUnit.NANOSECONDS);
+			} catch (InterruptedException e) {
+				interrupted = true;
+				throw new ServiceException(NLS.bind(Msg.SERVICE_USE_LOCK_INTERRUPT, useLock), e);
+			}
+			if (locked) {
 				try {
-					return callable.call();
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt(); // To appease sonar
-					return null;
-				} catch (Exception e) {
-					throw new RuntimeException("Callable threw exception", e); //$NON-NLS-1$
+					return callable.apply(this);
 				} finally {
-					lock.unlock();
+					useLock.unlock();
 				}
 			}
 			throw new ServiceException(
-					"Failed to acquire lock within try period, Lock, id:" + System.identityHashCode(lock) + ", " //$NON-NLS-1$ //$NON-NLS-2$
-							+ lock.toString(),
-					DEADLOCK); // $NON-NLS-1$
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt(); // To appease sonar
-			return null;
+					NLS.bind(Msg.SERVICE_USE_LOCK_TIMEOUT, lockTimeout, useLock), DEADLOCK);
+		} finally {
+			if (interrupted) {
+				Thread.currentThread().interrupt();
+			}
 		}
-	}
-
-	Duration getLockTimeout() {
-		return lockTimeout;
-	}
-
-	ReentrantLock getLock() {
-		return lock;
 	}
 
 	/**
@@ -107,11 +126,11 @@ public class ServiceUse<S> {
 	 *
 	 * @return The service object.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	S getService() {
-		assert lock.isHeldByCurrentThread();
+		assert getLock().isHeldByCurrentThread();
 		if (debug.DEBUG_SERVICES) {
-			Debug.println('[' + Thread.currentThread().getName() + "] getService[factory=" + registration.getBundle() //$NON-NLS-1$
+			Debug.println("[" + Thread.currentThread().getName() + "] getService[factory=" + registration.getBundle() //$NON-NLS-1$ //$NON-NLS-2$
 					+ "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
@@ -127,14 +146,14 @@ public class ServiceUse<S> {
 	 *
 	 * @return true if the service was ungotten; otherwise false.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	boolean ungetService() {
-		assert lock.isHeldByCurrentThread();
+		assert getLock().isHeldByCurrentThread();
 		if (!inUse()) {
 			return false;
 		}
 		if (debug.DEBUG_SERVICES) {
-			Debug.println('[' + Thread.currentThread().getName() + "] ungetService[factory=" + registration.getBundle() //$NON-NLS-1$
+			Debug.println("[" + Thread.currentThread().getName() + "] ungetService[factory=" + registration.getBundle() //$NON-NLS-1$ //$NON-NLS-2$
 					+ "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		decrementUse();
@@ -146,7 +165,7 @@ public class ServiceUse<S> {
 	 *
 	 * @return The service object.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	S getCachedService() {
 		return registration.getServiceObject();
 	}
@@ -159,7 +178,7 @@ public class ServiceUse<S> {
 	 *
 	 * @return The service object.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	S newServiceObject() {
 		return getService();
 	}
@@ -175,13 +194,13 @@ public class ServiceUse<S> {
 	 * @throws IllegalArgumentException If the specified service was not
 	 *         provided by this object.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	boolean releaseServiceObject(final S service) {
 		if ((service == null) || (service != getCachedService())) {
 			throw new IllegalArgumentException(Msg.SERVICE_OBJECTS_UNGET_ARGUMENT_EXCEPTION);
 		}
 		if (debug.DEBUG_SERVICES) {
-			Debug.println('[' + Thread.currentThread().getName() + "] releaseServiceObject[factory=" //$NON-NLS-1$
+			Debug.println("[" + Thread.currentThread().getName() + "] releaseServiceObject[factory=" //$NON-NLS-1$ //$NON-NLS-2$
 					+ registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		return ungetService();
@@ -190,9 +209,9 @@ public class ServiceUse<S> {
 	/**
 	 * Release all uses of the service and reset the use count to zero.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	void release() {
-		assert lock.isHeldByCurrentThread();
+		assert getLock().isHeldByCurrentThread();
 		resetUse();
 	}
 
@@ -201,9 +220,9 @@ public class ServiceUse<S> {
 	 *
 	 * @return true if no services are being used and this service use can be discarded.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	boolean isEmpty() {
-		assert lock.isHeldByCurrentThread();
+		assert getLock().isHeldByCurrentThread();
 		return !inUse();
 	}
 
@@ -212,7 +231,7 @@ public class ServiceUse<S> {
 	 *
 	 * @return true if the use count is greater than zero.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	boolean inUse() {
 		return useCount > 0;
 	}
@@ -220,7 +239,7 @@ public class ServiceUse<S> {
 	/**
 	 * Incrementing the use count.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	void incrementUse() {
 		if (useCount == Integer.MAX_VALUE) {
 			throw new ServiceException(Msg.SERVICE_USE_OVERFLOW);
@@ -231,7 +250,7 @@ public class ServiceUse<S> {
 	/**
 	 * Decrementing the use count.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	void decrementUse() {
 		assert inUse();
 		useCount--;
@@ -240,52 +259,51 @@ public class ServiceUse<S> {
 	/**
 	 * Reset the use count to zero.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	void resetUse() {
 		useCount = 0;
 	}
 
-	private static class ReentrantLockExt extends ReentrantLock {
-		private static final long serialVersionUID = 161034782199227436L;
+	/**
+	 * ReentrantLock subclass with enhanced toString().
+	 */
+	static class ServiceUseLock extends ReentrantLock {
+		private static final long serialVersionUID = 1L;
 
-		public ReentrantLockExt() {
+		ServiceUseLock() {
 			super();
 		}
 
-		public ReentrantLockExt(boolean fair) {
-			super(fair);
-		}
-
 		/**
-		 * Returns a string identifying this lock, as well as its lock state. The state,
-		 * in brackets, includes either the String {@code "Unlocked"} or the String
-		 * {@code "Locked by"} followed by the {@linkplain Thread#getName name} of the
-		 * owning thread.
+		 * Returns a lock state description for this lock. This adds additional
+		 * information over the default implementation when the lock is held.
 		 *
-		 * @return a string identifying this lock, as well as its lock state
+		 * @return The lock state description.
 		 */
 		@SuppressWarnings("nls")
 		@Override
 		public String toString() {
 			Thread o = getOwner();
-
 			if (o != null) {
 				try {
 					ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
 					ThreadInfo threadInfo = threadMXBean.getThreadInfo(o.getId(), Integer.MAX_VALUE);
 					StackTraceElement[] trace = threadInfo.getStackTrace();
-					StringBuilder sb = new StringBuilder("\"" + o.getName() + "\"" + (o.isDaemon() ? " daemon" : "")
-							+ " prio=" + o.getPriority() + " Id=" + o.getId() + " " + o.getState());
-
-					for (StackTraceElement traceElement : trace)
-						sb.append("\tat " + traceElement + "\n");
-
-					return super.toString() + "[Locked by thread " + o.getName() + "], Details:\n" + sb.toString();
+					StringBuilder sb = new StringBuilder(super.toString()).append(", Details:\n");
+					if (o.isDaemon()) {
+						sb.append("daemon ");
+					}
+					sb.append("prio=").append(o.getPriority()).append(" id=").append(o.getId()).append(" ")
+							.append(o.getState());
+					for (StackTraceElement traceElement : trace) {
+						sb.append("\tat ").append(traceElement).append("\n");
+					}
+					return sb.toString();
 				} catch (Exception e) {
 					// do nothing and fall back to just the default, thread might be gone
 				}
 			}
-			return super.toString() + "[Unlocked]";
+			return super.toString();
 		}
 	}
 }
