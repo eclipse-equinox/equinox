@@ -36,11 +36,8 @@ import org.osgi.framework.ServiceRegistration;
  * @ThreadSafe
  */
 public class ServiceFactoryUse<S> extends ServiceUse<S> {
-	/** BundleContext associated with this service use */
-	final BundleContextImpl context;
 	/** ServiceFactory object  */
 	final ServiceFactory<S> factory;
-	final Debug debug;
 
 	/** Service object returned by ServiceFactory.getService() */
 	/* @GuardedBy("this") */
@@ -57,8 +54,6 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 	 */
 	ServiceFactoryUse(BundleContextImpl context, ServiceRegistrationImpl<S> registration) {
 		super(context, registration);
-		this.debug = context.getContainer().getConfiguration().getDebug();
-		this.context = context;
 		this.factoryInUse = false;
 		this.cachedService = null;
 		@SuppressWarnings("unchecked")
@@ -100,7 +95,8 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 		}
 
 		if (debug.DEBUG_SERVICES) {
-			Debug.println("getService[factory=" + registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			Debug.println('[' + Thread.currentThread().getName() + "] getService[Sfactory=" + registration.getBundle() //$NON-NLS-1$
+					+ "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		// check for recursive call on this thread
 		if (factoryInUse) {
@@ -162,7 +158,8 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 		cachedService = null;
 
 		if (debug.DEBUG_SERVICES) {
-			Debug.println("ungetService[factory=" + registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			Debug.println('[' + Thread.currentThread().getName() + "] ungetService[Sfactory=" + registration.getBundle() //$NON-NLS-1$
+					+ "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		factoryUngetService(service);
 		return true;
@@ -189,7 +186,8 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 		cachedService = null;
 
 		if (debug.DEBUG_SERVICES) {
-			Debug.println("releaseService[factory=" + registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			Debug.println('[' + Thread.currentThread().getName() + "] releaseService[Sfactory=" //$NON-NLS-1$
+					+ registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		factoryUngetService(service);
 	}
