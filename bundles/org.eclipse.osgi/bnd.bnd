@@ -1,61 +1,9 @@
 -jpms-module-info: ${project.artifactId};access='OPEN';version=${versionmask;===;${version_cleanup;${project.version}}}
 -jpms-module-info-options: jdk.unsupported;static="true",java.management;ignore="true"
 
-Export-Package: \
- org.eclipse.equinox.log, \
- org.eclipse.osgi.container, \
- org.eclipse.osgi.container.builders, \
- org.eclipse.osgi.container.namespaces, \
- org.eclipse.osgi.framework.console, \
- org.eclipse.osgi.framework.eventmgr, \
- org.eclipse.osgi.framework.internal.reliablefile, \
- org.eclipse.osgi.framework.log, \
- org.eclipse.osgi.framework.util, \
- org.eclipse.osgi.launch, \
- org.eclipse.osgi.report.resolution, \
- org.eclipse.osgi.service.datalocation, \
- org.eclipse.osgi.service.debug, \
- org.eclipse.osgi.service.environment, \
- org.eclipse.osgi.service.localization, \
- org.eclipse.osgi.service.pluginconversion, \
- org.eclipse.osgi.service.resolver, \
- org.eclipse.osgi.service.runnable, \
- org.eclipse.osgi.service.security, \
- org.eclipse.osgi.service.urlconversion, \
- org.eclipse.osgi.signedcontent, \
- org.eclipse.osgi.storagemanager, \
- org.eclipse.osgi.util, \
- org.osgi.dto, \
- org.osgi.framework, \
- org.osgi.framework.connect, \
- org.osgi.framework.dto, \
- org.osgi.framework.hooks.bundle, \
- org.osgi.framework.hooks.resolver, \
- org.osgi.framework.hooks.service, \
- org.osgi.framework.hooks.weaving, \
- org.osgi.framework.launch, \
- org.osgi.framework.namespace, \
- org.osgi.framework.startlevel, \
- org.osgi.framework.startlevel.dto, \
- org.osgi.framework.wiring, \
- org.osgi.framework.wiring.dto, \
- org.osgi.resource, \
- org.osgi.resource.dto, \
- org.osgi.service.condition, \
- org.osgi.service.condpermadmin, \
- org.osgi.service.log, \
- org.osgi.service.log.admin, \
- org.osgi.service.packageadmin, \
- org.osgi.service.permissionadmin, \
- org.osgi.service.resolver, \
- org.osgi.service.startlevel, \
- org.osgi.service.url, \
- org.osgi.util.tracker
-
-Provide-Capability: \
- osgi.serviceloader;osgi.serviceloader="org.osgi.framework.connect.ConnectFrameworkFactory";register:="org.eclipse.osgi.launch.EquinoxFactory", \
- osgi.serviceloader;osgi.serviceloader="org.osgi.framework.launch.FrameworkFactory";register:="org.eclipse.osgi.launch.EquinoxFactory"
+-include: ~META-INF/MANIFEST.MF
 
 Require-Capability: \
  osgi.serviceloader;osgi.serviceloader="org.osgi.framework.connect.FrameworkUtilHelper"
+ 
 
