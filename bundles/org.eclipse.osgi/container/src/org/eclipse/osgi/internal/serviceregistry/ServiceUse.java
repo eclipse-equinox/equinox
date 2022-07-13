@@ -17,16 +17,15 @@ package org.eclipse.osgi.internal.serviceregistry;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.time.Duration;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Function;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.ServiceException;
-
 /**
  * This class represents the use of a service by a bundle. One is created for each
  * service acquired by a bundle.
@@ -37,6 +36,13 @@ import org.osgi.framework.ServiceException;
  * @ThreadSafe
  */
 public class ServiceUse<S> {
+
+	/**
+	 * Custom ServiceException type to indicate a deadlock occurred during service
+	 * registration.
+	 */
+	public static final int DEADLOCK = 1001;
+
 	/** BundleContext associated with this service use */
 	final BundleContextImpl context;
 	/** ServiceDescription of the registered service */
@@ -48,21 +54,11 @@ public class ServiceUse<S> {
 	private int useCount;
 
 	/**
-	 * ReentrantLock for this service. Use the @{@link #getLock()} method to obtain
+	 * ServiceUseLock for this service use. Use the @{@link #lock()} method to lock
+	 * the lock and obtain a {@link ServiceUseUnlock} object which is used to unlock
 	 * the lock.
 	 */
-	private final ReentrantLock lock = new ServiceUseLock();
-
-	/**
-	 * Custom ServiceException type to indicate a deadlock occurred during service
-	 * registration.
-	 */
-	public static final int DEADLOCK = 1001;
-
-	/**
-	 * Lock timeout to allow for breaking deadlocks.
-	 */
-	private final Duration lockTimeout = Duration.ofSeconds(10);
+	private final ServiceUseLock lock = new ServiceUseLock();
 
 	/**
 	 * Constructs a service use encapsulating the service object.
@@ -71,54 +67,10 @@ public class ServiceUse<S> {
 	 * @param   registration ServiceRegistration of the service
 	 */
 	ServiceUse(BundleContextImpl context, ServiceRegistrationImpl<S> registration) {
-		this.context = context;
-		this.registration = registration;
 		this.useCount = 0;
+		this.registration = registration;
+		this.context = context;
 		this.debug = context.getContainer().getConfiguration().getDebug();
-	}
-
-	/**
-	 * The ReentrantLock for managing access to this ServiceUse.
-	 * 
-	 * @return A ReentrantLock.
-	 */
-	ReentrantLock getLock() {
-		return lock;
-	}
-
-	/**
-	 * Run the specified Function while holding the {@link #getLock() lock} for this
-	 * ServiceUse.
-	 * 
-	 * @param callable A Function to execute. The function is passed this ServiceUse
-	 *                 object.
-	 * @return The return value of the specified Function.
-	 */
-	<T> T withLock(Function<ServiceUse<S>, T> callable) {
-		ReentrantLock useLock = getLock();
-		boolean interrupted = Thread.interrupted();
-		try {
-			boolean locked;
-			try {
-				locked = useLock.tryLock(lockTimeout.toNanos(), TimeUnit.NANOSECONDS);
-			} catch (InterruptedException e) {
-				interrupted = true;
-				throw new ServiceException(NLS.bind(Msg.SERVICE_USE_LOCK_INTERRUPT, useLock), e);
-			}
-			if (locked) {
-				try {
-					return callable.apply(this);
-				} finally {
-					useLock.unlock();
-				}
-			}
-			throw new ServiceException(
-					NLS.bind(Msg.SERVICE_USE_LOCK_TIMEOUT, lockTimeout, useLock), DEADLOCK);
-		} finally {
-			if (interrupted) {
-				Thread.currentThread().interrupt();
-			}
-		}
 	}
 
 	/**
@@ -265,13 +217,118 @@ public class ServiceUse<S> {
 	}
 
 	/**
-	 * ReentrantLock subclass with enhanced toString().
+	 * The ServiceUseLock for managing access to this ServiceUse.
+	 * 
+	 * @return The ServiceUseLock for this ServiceUse.
 	 */
-	static class ServiceUseLock extends ReentrantLock {
+	ServiceUseLock getLock() {
+		return lock;
+	}
+
+	/**
+	 * Map of threads awaiting ServiceUseLocks. Used for deadlock detection.
+	 */
+	private static final ConcurrentMap<Thread, ServiceUseLock> AWAITED_LOCKS = new ConcurrentHashMap<>();
+
+	/**
+	 * Acquires the ServiceUseLock of this ServiceUse.
+	 * 
+	 * If this ServiceUse is locked by another thread then the current thread lies
+	 * dormant until the lock has been acquired.
+	 * 
+	 * @return The unlocker, which is {@link AutoCloseable}, to unlock the
+	 *         ServiceUseLock of this ServiceUse.
+	 * @throws ServiceException If a deadlock with another ServiceUseLock is
+	 *                          detected.
+	 */
+	ServiceUseUnlock lock() {
+		final ServiceUseLock useLock = getLock(); // local var to avoid multiple getfields
+		boolean clearAwaitingLock = false;
+		boolean interrupted = Thread.interrupted();
+		while (true) {
+			try {
+				if (useLock.tryLock(100_000_000L, TimeUnit.NANOSECONDS)) { // 100ms (but prevent conversion)
+					if (clearAwaitingLock) {
+						AWAITED_LOCKS.remove(Thread.currentThread());
+					}
+					if (interrupted) {
+						return useLock.new UnlockThenInterrupt();
+					}
+					return useLock;
+				}
+				AWAITED_LOCKS.put(Thread.currentThread(), useLock);
+				clearAwaitingLock = true;
+				// Check if the current thread is in the lock chain.
+				Thread owner = useLock.getOwner();
+				for (ServiceUseLock crossingLock; (owner != null) // lock could be released in the meantime
+						&& ((crossingLock = AWAITED_LOCKS.get(owner)) != null);) {
+					owner = crossingLock.getOwner();
+					if (owner == Thread.currentThread()) {
+						throw new ServiceException(NLS.bind(Msg.SERVICE_USE_DEADLOCK, useLock));
+					}
+				}
+				// Not (yet) a dead-lock. Lock was regularly hold by another thread. Try again.
+				// Race conditions are not an issue here. A deadlock is a static situation and
+				// if we closely missed the other thread putting its awaited lock it will be
+				// noticed in the next loop-pass.
+			} catch (InterruptedException e) {
+				interrupted = true;
+				// Clear interrupted status and try again to lock, just like a plain
+				// synchronized. Re-interrupted before returning to the caller after unlocking.
+			}
+		}
+	}
+
+	/**
+	 * Interface for unlocking a ServiceUse.
+	 * <p>
+	 * The interface extends {@link AutoCloseable} to allow for use in
+	 * try-with-resources statements.
+	 */
+	interface ServiceUseUnlock extends AutoCloseable {
+		/**
+		 * Unlock the lock.
+		 * <p>
+		 * This method is not idempotent and should be called only once for each lock
+		 * acquisition.
+		 */
+		public void close(); // no exception thrown
+	}
+
+	/**
+	 * ReentrantLock subclass that allows for {@link AutoCloseable} unlocking.
+	 * <p>
+	 * This lock is unlocked if the close method on {@link ServiceUseUnlock} is
+	 * invoked. ServiceUseUnlock objects can therefore can be used as a resource in
+	 * a try-with-resources statement.
+	 * <p>
+	 * Also exposes {@link #getOwner()} and has an enhanced {@link #toString()}.
+	 * 
+	 * @see ServiceUse#lock()
+	 */
+	static class ServiceUseLock extends ReentrantLock implements ServiceUseUnlock {
 		private static final long serialVersionUID = 1L;
 
 		ServiceUseLock() {
 			super();
+		}
+
+		/**
+		 * Unlock this lock.
+		 * 
+		 * <p>
+		 * The current thread's interrupt state is not changed.
+		 * 
+		 * @see #unlock()
+		 */
+		@Override
+		public void close() {
+			unlock();
+		}
+
+		@Override
+		protected Thread getOwner() {
+			return super.getOwner();
 		}
 
 		/**
@@ -304,6 +361,29 @@ public class ServiceUse<S> {
 				}
 			}
 			return super.toString();
+		}
+		
+		/**
+		 * Inner class for this ServiceUseLock which interrupts the thread after
+		 * unlocking the ServiceUseLock.
+		 */
+		class UnlockThenInterrupt implements ServiceUseUnlock {
+			UnlockThenInterrupt() {
+			}
+
+			/**
+			 * Unlock this lock and interrupt the thread.
+			 * 
+			 * @see #unlock()
+			 */
+			@Override
+			public void close() {
+				try {
+					unlock();
+				} finally {
+					Thread.currentThread().interrupt();
+				}
+			}
 		}
 	}
 }
