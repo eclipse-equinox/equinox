@@ -55,82 +55,9 @@
   </profiles>
 
   <modules>
-    <module>bundles/org.eclipse.equinox.security.ui</module>
-    <module>features/org.eclipse.equinox.compendium.sdk</module>
-    <module>features/org.eclipse.equinox.core.feature</module>
-    <module>features/org.eclipse.equinox.sdk</module>
-    <module>features/org.eclipse.equinox.server.core</module>
-    <module>features/org.eclipse.equinox.server.jetty</module>
-    <module>features/org.eclipse.equinox.core.sdk</module>
-
-    <module>features/org.eclipse.equinox.server.simple</module>
-    <module>bundles/org.eclipse.equinox.bidi.tests</module>
-    <module>bundles/org.eclipse.equinox.cm.test</module>
-    <module>bundles/org.eclipse.equinox.common.tests</module>
-
-    <module>bundles/org.eclipse.equinox.ds.tests</module>
-    <module>bundles/org.eclipse.equinox.preferences.tests</module>
-<!-- removed until the dependency on aspectj is removed. see bug 470000
-    <module>bundles/org.eclipse.equinox.region.tests</module>
--->
-    <module>bundles/org.eclipse.equinox.security.tests</module>
-    <module>bundles/org.eclipse.equinox.app</module>
-    <module>bundles/org.eclipse.equinox.preferences</module>
-    <module>bundles/org.eclipse.equinox.common</module>
-    <module>bundles/org.eclipse.equinox.registry</module>
-    <module>bundles/org.eclipse.equinox.concurrent</module>
-    <module>bundles/org.eclipse.equinox.security</module>
-    <module>bundles/org.eclipse.equinox.security.macosx</module>
-    <module>bundles/org.eclipse.equinox.security.win32.x86_64</module>
-    <module>bundles/org.eclipse.equinox.security.linux</module>
-    <module>bundles/org.eclipse.equinox.bidi</module>
-    <module>bundles/org.eclipse.equinox.cm</module>
-    <module>bundles/org.eclipse.equinox.console</module>
-    <module>bundles/org.eclipse.equinox.console.jaas.fragment</module>
-    <module>bundles/org.eclipse.equinox.console.ssh</module>
-    <module>bundles/org.eclipse.equinox.console.ssh.tests</module>
-    <module>bundles/org.eclipse.equinox.console.tests</module>
-    <module>bundles/org.eclipse.equinox.coordinator</module>
-    <module>bundles/org.eclipse.equinox.device</module>
-    <module>bundles/org.eclipse.equinox.event</module>
-
-    <module>bundles/org.eclipse.equinox.http.jetty</module>
-    <module>bundles/org.eclipse.equinox.http.registry</module>
-    <module>bundles/org.eclipse.equinox.http.servlet</module>
-    <module>bundles/org.eclipse.equinox.http.servlet.tests</module>
-    <module>bundles/org.eclipse.equinox.http.servletbridge</module>
-    <module>bundles/org.eclipse.equinox.jsp.jasper</module>
-    <module>bundles/org.eclipse.equinox.jsp.jasper.registry</module>
-    <module>bundles/org.eclipse.equinox.log.stream</module>
-    <module>bundles/org.eclipse.equinox.metatype</module>
-    <module>bundles/org.eclipse.equinox.region</module>
-    <module>bundles/org.eclipse.equinox.servletbridge</module>
-
-    <module>bundles/org.eclipse.equinox.slf4j.stub</module>
-    <module>bundles/org.eclipse.equinox.transforms.hook</module>
-    <module>bundles/org.eclipse.equinox.transforms.xslt</module>
-    <module>bundles/org.eclipse.equinox.useradmin</module>
-    <module>bundles/org.eclipse.equinox.weaving.caching</module>
-    <module>bundles/org.eclipse.equinox.weaving.caching.j9</module>
-    <module>bundles/org.eclipse.equinox.weaving.hook</module>
-    <module>bundles/org.eclipse.osgi</module>
-    <module>bundles/org.eclipse.osgi.compatibility.state</module>
-    <module>bundles/org.eclipse.osgi.services</module>
-    <module>bundles/org.eclipse.osgi.util</module>
-    <module>bundles/org.eclipse.osgi/supplement</module>
-    
-    <module>bundles/org.eclipse.equinox.launcher</module>
-    <module>bundles/org.eclipse.equinox.launcher.cocoa.macosx</module>
-    <module>bundles/org.eclipse.equinox.launcher.cocoa.macosx.x86_64</module>
-    <module>bundles/org.eclipse.equinox.launcher.cocoa.macosx.aarch64</module>
-    <module>bundles/org.eclipse.equinox.launcher.gtk.linux.aarch64</module>
-    <module>bundles/org.eclipse.equinox.launcher.gtk.linux.ppc64le</module>
-    <module>bundles/org.eclipse.equinox.launcher.gtk.linux.x86_64</module>
-    <module>bundles/org.eclipse.equinox.launcher.win32.win32.x86_64</module>
-
-    <module>bundles/org.eclipse.osgi.tests</module>
-
-    <module>features/org.eclipse.equinox.executable.feature</module>
+    <module>features</module>
+    <module>bundles</module>
+    <module>tests</module>
   </modules>
   
   <build>
