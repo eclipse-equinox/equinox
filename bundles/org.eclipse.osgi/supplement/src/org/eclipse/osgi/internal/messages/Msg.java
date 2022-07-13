@@ -44,8 +44,7 @@ public class Msg extends NLS {
 	public static String SERVICE_USE_OVERFLOW;
 
 	public static String SERVICE_OBJECTS_UNGET_ARGUMENT_EXCEPTION;
-	public static String SERVICE_USE_LOCK_INTERRUPT;
-	public static String SERVICE_USE_LOCK_TIMEOUT;
+	public static String SERVICE_USE_DEADLOCK;
 
 	public static String SystemModule_LockError;
 
