@@ -23,6 +23,7 @@ import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.loader.sources.PackageSource;
 import org.eclipse.osgi.internal.messages.Msg;
+import org.eclipse.osgi.internal.serviceregistry.ServiceUse.ServiceUseUnlock;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
@@ -512,8 +513,6 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 					+ ")"); //$NON-NLS-1$
 		}
 		/* Use a while loop to support retry if a call to a ServiceFactory fails */
-		@SuppressWarnings("unchecked")
-		final S retry = (S) new Object();
 		while (true) {
 			final ServiceUse<S> use;
 			final boolean added;
@@ -541,9 +540,9 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 			}
 
 			/* Obtain and return the service object */
-			S result = use.withLock(lockedUse -> {
+			try (ServiceUseUnlock locked = use.lock()) {
 				if (registry.debug.DEBUG_SERVICES) {
-					ReentrantLock useLock = lockedUse.getLock();
+					ReentrantLock useLock = use.getLock();
 					Debug.println("[" + Thread.currentThread().getName() + "] getServiceLock[" //$NON-NLS-1$ //$NON-NLS-2$
 							+ user.getBundleImpl() + "](" + this + "), id:" + System.identityHashCode(useLock) //$NON-NLS-1$ //$NON-NLS-2$
 							+ ". holdCount:" + useLock.getHoldCount() //$NON-NLS-1$
@@ -556,16 +555,16 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 				 */
 				synchronized (servicesInUse) {
 					user.checkValid();
-					if (servicesInUse.get(this) != lockedUse) {
+					if (servicesInUse.get(this) != use) {
 						if (registry.debug.DEBUG_SERVICES) {
 							Debug.println("[" + Thread.currentThread().getName() + "] getServiceContinue[" //$NON-NLS-1$ //$NON-NLS-2$
 									+ user.getBundleImpl() + "](" + this //$NON-NLS-1$
 									+ ")"); //$NON-NLS-1$
 						}
-						return retry; // signal retry
+						continue;
 					}
 				}
-				S serviceObject = consumer.getService(lockedUse);
+				S serviceObject = consumer.getService(use);
 				/*
 				 * if the service factory failed to return an object and we created the service
 				 * use, then remove the optimistically added ServiceUse.
@@ -579,12 +578,10 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 					}
 				}
 				return serviceObject;
-			});
-			if (result != retry) {
-				return result;
 			}
 		}
 	}
+
 
 	/**
 	 * Create a new ServiceObjects for the requesting bundle.
@@ -654,17 +651,16 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 			}
 		}
 
-		return use.withLock(lockedUse -> {
+		try (ServiceUseUnlock locked = use.lock()) {
 			if (registry.debug.DEBUG_SERVICES) {
-				ReentrantLock useLock = lockedUse.getLock();
+				ReentrantLock useLock = use.getLock();
 				Debug.println("[" + Thread.currentThread().getName() + "] ungetServiceLock[" + user.getBundleImpl() //$NON-NLS-1$ //$NON-NLS-2$
 						+ "](" + this + "), id:" + System.identityHashCode(useLock) + ", holdCount:" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						+ useLock.getHoldCount() 
-						+ ", queued:" + useLock.getQueueLength()); //$NON-NLS-1$
+						+ useLock.getHoldCount() + ", queued:" + useLock.getQueueLength()); //$NON-NLS-1$
 			}
 
-			boolean result = consumer.ungetService(lockedUse, serviceObject);
-			if (lockedUse.isEmpty()) { /* service use can be discarded */
+			boolean result = consumer.ungetService(use, serviceObject);
+			if (use.isEmpty()) { /* service use can be discarded */
 				synchronized (servicesInUse) {
 					synchronized (registrationLock) {
 						servicesInUse.remove(this);
@@ -672,9 +668,8 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 					}
 				}
 			}
-
 			return result;
-		});
+		}
 	}
 
 	/**
@@ -709,10 +704,9 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 				contextsUsing.remove(user);
 			}
 		}
-		use.withLock(lockedUse -> {
-			lockedUse.release();
-			return null;
-		});
+		try (ServiceUseUnlock locked = use.lock()) {
+			use.release();
+		}
 	}
 
 	/**
