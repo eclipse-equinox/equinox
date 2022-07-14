@@ -243,15 +243,12 @@ public class ServiceUse<S> {
 	 */
 	ServiceUseUnlock lock() {
 		boolean clearAwaitingLock = false;
+		boolean interrupted = Thread.interrupted();
 		try {
 			final ServiceUseLock useLock = getLock(); // local var to avoid multiple getfields
-			boolean interrupted = Thread.interrupted();
 			while (true) {
 				try {
 					if (useLock.tryLock(100_000_000L, TimeUnit.NANOSECONDS)) { // 100ms (but prevent conversion)
-						if (interrupted) {
-							return useLock.new UnlockThenInterrupt();
-						}
 						return useLock;
 					}
 					AWAITED_LOCKS.put(Thread.currentThread(), useLock);
@@ -274,12 +271,15 @@ public class ServiceUse<S> {
 				} catch (InterruptedException e) {
 					interrupted = true;
 					// Clear interrupted status and try again to lock, just like a plain
-					// synchronized. Re-interrupted before returning to the caller after unlocking.
+					// synchronized. Re-interrupted before returning to the caller.
 				}
 			}
 		} finally {
 			if (clearAwaitingLock) {
 				AWAITED_LOCKS.remove(Thread.currentThread());
+			}
+			if (interrupted) {
+				Thread.currentThread().interrupt();
 			}
 		}
 	}
@@ -320,9 +320,6 @@ public class ServiceUse<S> {
 
 		/**
 		 * Unlock this lock.
-		 * 
-		 * <p>
-		 * The current thread's interrupt state is not changed.
 		 * 
 		 * @see #unlock()
 		 */
@@ -366,29 +363,6 @@ public class ServiceUse<S> {
 				}
 			}
 			return super.toString();
-		}
-		
-		/**
-		 * Inner class for this ServiceUseLock which interrupts the thread after
-		 * unlocking the ServiceUseLock.
-		 */
-		class UnlockThenInterrupt implements ServiceUseUnlock {
-			UnlockThenInterrupt() {
-			}
-
-			/**
-			 * Unlock this lock and interrupt the thread.
-			 * 
-			 * @see #unlock()
-			 */
-			@Override
-			public void close() {
-				try {
-					unlock();
-				} finally {
-					Thread.currentThread().interrupt();
-				}
-			}
 		}
 	}
 }
