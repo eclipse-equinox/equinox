@@ -260,7 +260,9 @@ public class ServiceUse<S> {
 				clearAwaitingLock = true;
 				// Check if the current thread is in the lock chain.
 				Thread owner = useLock.getOwner();
-				for (ServiceUseLock crossingLock; (owner != null) // lock could be released in the meantime
+				int maxCycles = AWAITED_LOCKS.size();
+				for (ServiceUseLock crossingLock; (maxCycles-- > 0) // Prevent infinite loop
+						&& (owner != null) // lock could be released in the meantime
 						&& ((crossingLock = AWAITED_LOCKS.get(owner)) != null);) {
 					owner = crossingLock.getOwner();
 					if (owner == Thread.currentThread()) {
