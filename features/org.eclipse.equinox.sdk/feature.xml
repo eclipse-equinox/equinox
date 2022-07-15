@@ -48,14 +48,14 @@
          version="0.0.0"/>
 
    <plugin
-         id="javax.servlet.jsp"
+         id="javax.servlet.jsp-api"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="javax.servlet.jsp.source"
+         id="javax.servlet.jsp-api.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
