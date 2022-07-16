@@ -14,10 +14,15 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.osgi.internal.debug.Debug;
@@ -493,6 +498,8 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		return bundle;
 	}
 
+	private static final Random DEADLOCK_RETRY_DELAY = new Random();
+
 	/**
 	 * Get a service object for the using BundleContext.
 	 *
@@ -514,6 +521,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 					+ ")"); //$NON-NLS-1$
 		}
 		/* Use a while loop to support retry if a call to a ServiceFactory fails */
+		int deadLockRetry = 0;
 		while (true) {
 			final ServiceUse<S> use;
 			final boolean added;
@@ -579,10 +587,37 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 					}
 				}
 				return serviceObject;
+			} catch (ServiceException e) {
+				if ((e.getType() != ServiceUse.DEADLOCK || !isFirstCall()) && deadLockRetry < 10) {
+					throw e;
+				}
+				if (registry.debug.DEBUG_SERVICES) {
+					Debug.println("[" + Thread.currentThread().getName() + "] getServiceRetryAfterDeadlock[" //$NON-NLS-1$ //$NON-NLS-2$
+							+ user.getBundleImpl() + "](" + this //$NON-NLS-1$
+							+ ")"); //$NON-NLS-1$
+				}
+				try {
+					// Try again and again with some random delay to change the timings
+					Thread.sleep(DEADLOCK_RETRY_DELAY.nextInt(1000) * deadLockRetry++);
+				} catch (InterruptedException e1) { // ignore
+					Thread.currentThread().interrupt();
+				}
 			}
 		}
 	}
 
+	private static boolean isFirstCall() {
+		ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+		ThreadInfo threadInfo = threadMXBean.getThreadInfo(Thread.currentThread().getId(), Integer.MAX_VALUE);
+		StackTraceElement[] stackTrace = threadInfo.getStackTrace();
+		int callerFrameIndex = 4;
+		return Arrays.stream(stackTrace).skip(callerFrameIndex + 1L)
+				.noneMatch(f -> isSameMethod(f, stackTrace[callerFrameIndex]));
+	}
+
+	private static boolean isSameMethod(StackTraceElement f1, StackTraceElement f2) {
+		return f1.getClassName().equals(f2.getClassName()) && f1.getMethodName().equals(f2.getMethodName());
+	}
 
 	/**
 	 * Create a new ServiceObjects for the requesting bundle.
