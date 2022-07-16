@@ -241,7 +241,7 @@ public class ServiceUse<S> {
 	 * @throws ServiceException If a deadlock with another ServiceUseLock is
 	 *                          detected.
 	 */
-	ServiceUseUnlock lock() {
+	ServiceUseLock lock() {
 		boolean clearAwaitingLock = false;
 		boolean interrupted = Thread.interrupted();
 		try {
@@ -253,16 +253,8 @@ public class ServiceUse<S> {
 					}
 					AWAITED_LOCKS.put(Thread.currentThread(), useLock);
 					clearAwaitingLock = true;
-					// Check if the current thread is in the lock chain.
-					Thread owner = useLock.getOwner();
-					int maxCycles = AWAITED_LOCKS.size();
-					for (ServiceUseLock crossingLock; (maxCycles-- > 0) // Prevent infinite loop
-							&& (owner != null) // lock could be released in the meantime
-							&& ((crossingLock = AWAITED_LOCKS.get(owner)) != null);) {
-						owner = crossingLock.getOwner();
-						if (owner == Thread.currentThread()) {
-							throw new ServiceException(NLS.bind(Msg.SERVICE_USE_DEADLOCK, useLock));
-						}
+					if (isDeadLocked(useLock)) {
+						throw new ServiceException(NLS.bind(Msg.SERVICE_USE_DEADLOCK, useLock));
 					}
 					// Not (yet) a dead-lock. Lock was regularly hold by another thread. Try again.
 					// Race conditions are not an issue here. A deadlock is a static situation and
@@ -284,20 +276,18 @@ public class ServiceUse<S> {
 		}
 	}
 
-	/**
-	 * Interface for unlocking a ServiceUse.
-	 * <p>
-	 * The interface extends {@link AutoCloseable} to allow for use in
-	 * try-with-resources statements.
-	 */
-	interface ServiceUseUnlock extends AutoCloseable {
-		/**
-		 * Unlock the lock.
-		 * <p>
-		 * This method is not idempotent and should be called only once for each lock
-		 * acquisition.
-		 */
-		public void close(); // no exception thrown
+	private static boolean isDeadLocked(ServiceUseLock lock) {
+		// Check if current thread is in the cycle of mutually awaiting thead-lock pairs
+		int maxCycles = AWAITED_LOCKS.size();
+		for (int i = 0; i < maxCycles; i++) { // Prevent infinite loop
+			Thread owner = lock.getOwner();
+			if (owner == Thread.currentThread()) {
+				return true;
+			} else if (owner == null || (lock = AWAITED_LOCKS.get(owner)) == null) {
+				return false; // lock could be released in the meantime
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -311,15 +301,15 @@ public class ServiceUse<S> {
 	 * 
 	 * @see ServiceUse#lock()
 	 */
-	static class ServiceUseLock extends ReentrantLock implements ServiceUseUnlock {
+	static class ServiceUseLock extends ReentrantLock implements AutoCloseable {
 		private static final long serialVersionUID = 1L;
-
-		ServiceUseLock() {
-			super();
-		}
 
 		/**
 		 * Unlock this lock.
+		 * <p>
+		 * This method is not idempotent and should be called only once for each lock
+		 * acquisition.
+		 * </p>
 		 * 
 		 * @see #unlock()
 		 */
