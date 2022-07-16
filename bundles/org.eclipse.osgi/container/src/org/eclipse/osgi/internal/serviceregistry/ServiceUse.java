@@ -242,8 +242,8 @@ public class ServiceUse<S> {
 	 *                          detected.
 	 */
 	ServiceUseLock lock() {
-		boolean clearAwaitingLock = false;
-		boolean interrupted = Thread.interrupted();
+		Thread awaitingThread = null;
+		boolean interrupted = false;
 		try {
 			final ServiceUseLock useLock = getLock(); // local var to avoid multiple getfields
 			while (true) {
@@ -251,9 +251,9 @@ public class ServiceUse<S> {
 					if (useLock.tryLock(100_000_000L, TimeUnit.NANOSECONDS)) { // 100ms (but prevent conversion)
 						return useLock;
 					}
-					AWAITED_LOCKS.put(Thread.currentThread(), useLock);
-					clearAwaitingLock = true;
-					if (isDeadLocked(useLock)) {
+					awaitingThread = Thread.currentThread();
+					AWAITED_LOCKS.put(awaitingThread, useLock);
+					if (isDeadLocked(useLock, awaitingThread)) {
 						throw new ServiceException(NLS.bind(Msg.SERVICE_USE_DEADLOCK, useLock));
 					}
 					// Not (yet) a dead-lock. Lock was regularly hold by another thread. Try again.
@@ -267,8 +267,8 @@ public class ServiceUse<S> {
 				}
 			}
 		} finally {
-			if (clearAwaitingLock) {
-				AWAITED_LOCKS.remove(Thread.currentThread());
+			if (awaitingThread != null) {
+				AWAITED_LOCKS.remove(awaitingThread);
 			}
 			if (interrupted) {
 				Thread.currentThread().interrupt();
@@ -276,12 +276,12 @@ public class ServiceUse<S> {
 		}
 	}
 
-	private static boolean isDeadLocked(ServiceUseLock lock) {
+	private static boolean isDeadLocked(ServiceUseLock lock, Thread currentThread) {
 		// Check if current thread is in the cycle of mutually awaiting thead-lock pairs
 		int maxCycles = AWAITED_LOCKS.size();
 		for (int i = 0; i < maxCycles; i++) { // Prevent infinite loop
 			Thread owner = lock.getOwner();
-			if (owner == Thread.currentThread()) {
+			if (owner == currentThread) {
 				return true;
 			} else if (owner == null || (lock = AWAITED_LOCKS.get(owner)) == null) {
 				return false; // lock could be released in the meantime
