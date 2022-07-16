@@ -23,7 +23,7 @@ import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.loader.sources.PackageSource;
 import org.eclipse.osgi.internal.messages.Msg;
-import org.eclipse.osgi.internal.serviceregistry.ServiceUse.ServiceUseUnlock;
+import org.eclipse.osgi.internal.serviceregistry.ServiceUse.ServiceUseLock;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
@@ -540,7 +540,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 			}
 
 			/* Obtain and return the service object */
-			try (ServiceUseUnlock locked = use.lock()) {
+			try (ServiceUseLock locked = use.lock()) {
 				if (registry.debug.DEBUG_SERVICES) {
 					ReentrantLock useLock = use.getLock();
 					Debug.println("[" + Thread.currentThread().getName() + "] getServiceLock[" //$NON-NLS-1$ //$NON-NLS-2$
@@ -651,7 +651,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 			}
 		}
 
-		try (ServiceUseUnlock locked = use.lock()) {
+		try (ServiceUseLock locked = use.lock()) {
 			if (registry.debug.DEBUG_SERVICES) {
 				ReentrantLock useLock = use.getLock();
 				Debug.println("[" + Thread.currentThread().getName() + "] ungetServiceLock[" + user.getBundleImpl() //$NON-NLS-1$ //$NON-NLS-2$
@@ -704,7 +704,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 				contextsUsing.remove(user);
 			}
 		}
-		try (ServiceUseUnlock locked = use.lock()) {
+		try (ServiceUseLock locked = use.lock()) {
 			use.release();
 		}
 	}
