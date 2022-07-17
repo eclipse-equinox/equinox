@@ -21,7 +21,7 @@
 
   <groupId>org.eclipse.equinox</groupId>
   <artifactId>org.eclipse.equinox.supplement</artifactId>
-  <version>1.10.500-SNAPSHOT</version>
+  <version>1.10.600-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 
 </project>
