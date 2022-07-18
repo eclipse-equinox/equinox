@@ -52,18 +52,8 @@ public class ApplicationAdminTest extends OSGiTest {
 		TestSuite suite = new TestSuite(ApplicationAdminTest.class.getName());
 
 		ConfigurationSessionTestSuite appAdminSessionTest = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, ApplicationAdminTest.class.getName());
-		String[] ids = ConfigurationSessionTestSuite.MINIMAL_BUNDLE_SET;
-		for (String id : ids) {
-			appAdminSessionTest.addBundle(id);
-		}
-		appAdminSessionTest.addBundle(PI_OSGI_TESTS);
+		addRequiredOSGiTestsBundles(appAdminSessionTest);
 		appAdminSessionTest.setApplicationId(testRunnerApp);
-		appAdminSessionTest.addBundle("org.osgi.util.function");
-		appAdminSessionTest.addBundle("org.osgi.util.measurement");
-		appAdminSessionTest.addBundle("org.osgi.util.position");
-		appAdminSessionTest.addBundle("org.osgi.util.promise");
-		appAdminSessionTest.addBundle("org.osgi.util.xml");
-		appAdminSessionTest.addBundle("org.osgi.service.event");
 
 		try {
 			appAdminSessionTest.getSetup().setSystemProperty("eclipse.application.registerDescriptors", "true"); //$NON-NLS-1$//$NON-NLS-2$

@@ -16,9 +16,13 @@ package org.eclipse.osgi.tests.configuration;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import junit.framework.*;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.tests.harness.*;
+import org.eclipse.core.tests.harness.BundleTestingHelper;
+import org.eclipse.core.tests.harness.FileSystemComparator;
+import org.eclipse.core.tests.harness.FileSystemHelper;
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
 import org.eclipse.osgi.tests.OSGiTest;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
@@ -47,11 +51,7 @@ public class MovableConfigurationAreaTest extends OSGiTest {
 		TestSuite suite = new TestSuite(MovableConfigurationAreaTest.class.getName());
 
 		ConfigurationSessionTestSuite initialization = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, MovableConfigurationAreaTest.class.getName());
-		String[] ids = ConfigurationSessionTestSuite.MINIMAL_BUNDLE_SET;
-		for (String id : ids) {
-			initialization.addBundle(id);
-		}
-		initialization.addBundle(PI_OSGI_TESTS);
+		addRequiredOSGiTestsBundles(initialization);
 		initialization.setReadOnly(true);
 		// disable clean-up, we want to reuse the configuration
 		initialization.setCleanup(false);
@@ -74,9 +74,7 @@ public class MovableConfigurationAreaTest extends OSGiTest {
 
 		ConfigurationSessionTestSuite afterMoving = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, MovableConfigurationAreaTest.class.getName());
 		afterMoving.setConfigurationPath(destinationPath);
-		for (String id : ids) {
-			afterMoving.addBundle(id);
-		}
+		afterMoving.addMinimalBundleSet();
 		afterMoving.setReadOnly(true);
 		// make sure we don't allow priming for the first run
 		afterMoving.setPrime(false);

@@ -31,20 +31,13 @@ public class EclipseStarterConfigIniTest extends OSGiTest {
 		TestSuite suite = new TestSuite(EclipseStarterConfigIniTest.class.getName());
 
 		ConfigurationSessionTestSuite falseCompatBootDelegation = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, EclipseStarterConfigIniTest.class.getName());
-		String[] ids = ConfigurationSessionTestSuite.MINIMAL_BUNDLE_SET;
-		for (String id : ids) {
-			falseCompatBootDelegation.addBundle(id);
-		}
-		falseCompatBootDelegation.addBundle(PI_OSGI_TESTS);
+		addRequiredOSGiTestsBundles(falseCompatBootDelegation);
 		falseCompatBootDelegation.addTest(new EclipseStarterConfigIniTest("testFalseCompatBootDelegation"));
 		falseCompatBootDelegation.setConfigIniValue("osgi.compatibility.bootdelegation", "false");
 		suite.addTest(falseCompatBootDelegation);
 
 		ConfigurationSessionTestSuite defaultCompatBootDelegation = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, EclipseStarterConfigIniTest.class.getName());
-		for (String id : ids) {
-			defaultCompatBootDelegation.addBundle(id);
-		}
-		defaultCompatBootDelegation.addBundle(PI_OSGI_TESTS);
+		addRequiredOSGiTestsBundles(defaultCompatBootDelegation);
 		defaultCompatBootDelegation.addTest(new EclipseStarterConfigIniTest("testDefaultCompatBootDelegation"));
 		suite.addTest(defaultCompatBootDelegation);
 		return suite;

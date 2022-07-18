@@ -23,6 +23,7 @@ import org.eclipse.osgi.signedcontent.InvalidContentException;
 import org.eclipse.osgi.signedcontent.SignedContent;
 import org.eclipse.osgi.signedcontent.SignedContentEntry;
 import org.eclipse.osgi.signedcontent.SignerInfo;
+import org.eclipse.osgi.tests.OSGiTest;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -83,7 +84,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 
 	public static Test suite() {
 		ConfigurationSessionTestSuite suite = new ConfigurationSessionTestSuite(BUNDLE_SECURITY_TESTS, "Unit session tests for SignedContent");
-		addDefaultSecurityBundles(suite);
+		OSGiTest.addRequiredOSGiTestsBundles(suite);
 		suite.addTestSuite(SignedBundleTest.class);
 		return suite;
 	}

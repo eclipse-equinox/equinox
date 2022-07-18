@@ -37,13 +37,8 @@ public class ApplicationRelaunchTest extends OSGiTest {
 		TestSuite suite = new TestSuite(ApplicationRelaunchTest.class.getName());
 
 		ConfigurationSessionTestSuite appAdminSessionTest = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, ApplicationRelaunchTest.class.getName());
-		String[] ids = ConfigurationSessionTestSuite.MINIMAL_BUNDLE_SET;
-		for (String id : ids) {
-			appAdminSessionTest.addBundle(id);
-		}
-		appAdminSessionTest.addBundle(PI_OSGI_TESTS);
+		addRequiredOSGiTestsBundles(appAdminSessionTest);
 		appAdminSessionTest.setApplicationId(testRunnerRelauncherApp);
-		appAdminSessionTest.addBundle("org.osgi.service.event");
 
 		try {
 			appAdminSessionTest.getSetup().setSystemProperty("eclipse.application.registerDescriptors", "true"); //$NON-NLS-1$//$NON-NLS-2$

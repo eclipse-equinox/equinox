@@ -30,11 +30,7 @@ public class ReadOnlyConfigurationAreaTest extends OSGiTest {
 	public static Test suite() {
 		ConfigurationSessionTestSuite suite = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, ReadOnlyConfigurationAreaTest.class);
 		suite.setReadOnly(true);
-		String[] ids = ConfigurationSessionTestSuite.MINIMAL_BUNDLE_SET;
-		for (String id : ids) {
-			suite.addBundle(id);
-		}
-		suite.addBundle(PI_OSGI_TESTS);
+		addRequiredOSGiTestsBundles(suite);
 		return suite;
 	}
 

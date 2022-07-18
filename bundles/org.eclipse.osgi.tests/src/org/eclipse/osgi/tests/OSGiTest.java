@@ -14,6 +14,7 @@
 package org.eclipse.osgi.tests;
 
 import org.eclipse.core.tests.harness.CoreTest;
+import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -34,4 +35,16 @@ public class OSGiTest extends CoreTest {
 	public BundleContext getContext() {
 		return OSGiTestsActivator.getContext();
 	}
+
+	public static void addRequiredOSGiTestsBundles(ConfigurationSessionTestSuite suite) {
+		suite.addMinimalBundleSet();
+		suite.addThisBundle();
+		suite.addBundle(org.osgi.util.function.Function.class);
+		suite.addBundle(org.osgi.util.measurement.Measurement.class);
+		suite.addBundle(org.osgi.util.position.Position.class);
+		suite.addBundle(org.osgi.util.promise.Promise.class);
+		suite.addBundle(org.osgi.util.xml.XMLParserActivator.class);
+		suite.addBundle(org.osgi.service.event.Event.class);
+	}
+
 }

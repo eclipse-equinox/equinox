@@ -16,7 +16,9 @@ package org.eclipse.osgi.tests.services.datalocation;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import junit.framework.*;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
 import org.eclipse.core.tests.session.SetupManager.SetupException;
 import org.eclipse.osgi.internal.location.LocationHelper;
@@ -47,11 +49,7 @@ public class LocationAreaSessionTest extends OSGiTest {
 
 		// attempt to lock same location with a session
 		ConfigurationSessionTestSuite sessionLock = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, LocationAreaSessionTest.class.getName());
-		String[] ids = ConfigurationSessionTestSuite.MINIMAL_BUNDLE_SET;
-		for (String id : ids) {
-			sessionLock.addBundle(id);
-		}
-		sessionLock.addBundle(PI_OSGI_TESTS);
+		addRequiredOSGiTestsBundles(sessionLock);
 		try {
 			sessionLock.getSetup().setSystemProperty(TEST_LOCATION_DIR, testLocationLockDir);
 		} catch (SetupException e) {
@@ -70,10 +68,7 @@ public class LocationAreaSessionTest extends OSGiTest {
 
 		// attempt to lock the location with a session
 		sessionLock = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, LocationAreaSessionTest.class.getName());
-		for (String id : ids) {
-			sessionLock.addBundle(id);
-		}
-		sessionLock.addBundle(PI_OSGI_TESTS);
+		addRequiredOSGiTestsBundles(sessionLock);
 		try {
 			sessionLock.getSetup().setSystemProperty(TEST_LOCATION_DIR, testLocationLockDir);
 		} catch (SetupException e) {
@@ -95,11 +90,7 @@ public class LocationAreaSessionTest extends OSGiTest {
 
 		// attempt to lock same location with a session
 		sessionLock = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, LocationAreaSessionTest.class.getName());
-		ids = ConfigurationSessionTestSuite.MINIMAL_BUNDLE_SET;
-		for (String id : ids) {
-			sessionLock.addBundle(id);
-		}
-		sessionLock.addBundle(PI_OSGI_TESTS);
+		addRequiredOSGiTestsBundles(sessionLock);
 		try {
 			sessionLock.getSetup().setSystemProperty(TEST_LOCATION_DIR, testLocationLockDir);
 		} catch (SetupException e) {
@@ -120,10 +111,7 @@ public class LocationAreaSessionTest extends OSGiTest {
 
 		// attempt to lock the location with a session
 		sessionLock = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, LocationAreaSessionTest.class.getName());
-		for (String id : ids) {
-			sessionLock.addBundle(id);
-		}
-		sessionLock.addBundle(PI_OSGI_TESTS);
+		addRequiredOSGiTestsBundles(sessionLock);
 		try {
 			sessionLock.getSetup().setSystemProperty(TEST_LOCATION_DIR, testLocationLockDir);
 		} catch (SetupException e) {
