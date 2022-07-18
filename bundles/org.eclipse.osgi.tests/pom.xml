@@ -44,51 +44,6 @@
                 <type>p2-installable-unit</type>
                 <versionRange>0.0.0</versionRange>
               </requirement>
-              <requirement>
-                <id>org.eclipse.jdt.junit4.runtime</id>
-                <type>p2-installable-unit</type>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
-                <id>org.eclipse.jdt.junit5.runtime</id>
-                <type>p2-installable-unit</type>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
-                <id>org.eclipse.pde.junit.runtime</id>
-                <type>p2-installable-unit</type>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
-                <id>org.osgi.util.function</id>
-                <type>eclipse-plugin</type>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
-                <id>org.osgi.util.measurement</id>
-                <type>eclipse-plugin</type>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
-                <id>org.osgi.util.position</id>
-                <type>eclipse-plugin</type>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
-                <id>org.osgi.util.promise</id>
-                <type>eclipse-plugin</type>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
-                <id>org.osgi.util.xml</id>
-                <type>eclipse-plugin</type>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
-                <id>org.eclipse.equinox.event</id>
-                <type>eclipse-plugin</type>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
             </extraRequirements>
           </dependency-resolution>
         </configuration>

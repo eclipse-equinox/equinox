@@ -65,14 +65,6 @@ public class BaseSecurityTest extends CoreTest {
 
 	private ServiceRegistration trustReg = null;
 
-	protected static void addDefaultSecurityBundles(ConfigurationSessionTestSuite suite) {
-		String[] ids = ConfigurationSessionTestSuite.MINIMAL_BUNDLE_SET;
-		for (String id : ids) {
-			suite.addBundle(id);
-		}
-		suite.addBundle(BUNDLE_SECURITY_TESTS);
-	}
-
 	protected static Certificate getTestCertificate(String alias) throws KeyStoreException {
 		return supportStore.getCertificate(alias);
 	}

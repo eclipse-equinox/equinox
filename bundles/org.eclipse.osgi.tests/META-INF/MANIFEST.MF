@@ -6,11 +6,16 @@ Bundle-Version: 3.16.800.qualifier
 Bundle-Vendor: Eclipse.org
 Require-Bundle: 
  org.eclipse.core.runtime,
- org.eclipse.core.tests.harness,
+ org.eclipse.core.tests.harness;bundle-version="3.13.0",
  org.eclipse.test.performance,
  org.junit
 Bundle-ActivationPolicy: lazy
-Import-Package: org.osgi.service.event; resolution:="optional"
+Import-Package: org.osgi.service.event,
+ org.osgi.util.function,
+ org.osgi.util.measurement,
+ org.osgi.util.position,
+ org.osgi.util.promise,
+ org.osgi.util.xml
 Export-Package: org.eclipse.osgi.tests.bundles,
  org.eclipse.osgi.tests.appadmin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

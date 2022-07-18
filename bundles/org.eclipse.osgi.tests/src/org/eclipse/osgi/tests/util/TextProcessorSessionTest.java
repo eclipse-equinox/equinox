@@ -13,7 +13,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.util;
 
-import org.eclipse.core.tests.session.*;
+import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
+import org.eclipse.core.tests.session.Setup;
 import org.eclipse.core.tests.session.SetupManager.SetupException;
 import org.eclipse.osgi.tests.OSGiTest;
 
@@ -29,11 +30,7 @@ public class TextProcessorSessionTest extends ConfigurationSessionTestSuite {
 	public TextProcessorSessionTest(String pluginId, Class clazz, String language) {
 		super(pluginId, clazz);
 		lang = language;
-		String[] ids = ConfigurationSessionTestSuite.MINIMAL_BUNDLE_SET;
-		for (String id : ids) {
-			addBundle(id);
-		}
-		addBundle(OSGiTest.PI_OSGI_TESTS);
+		OSGiTest.addRequiredOSGiTestsBundles(this);
 	}
 
 	/* (non-Javadoc)
