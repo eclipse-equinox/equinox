@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.core.internal.registry.osgi;
 
+import java.util.Optional;
+import org.eclipse.osgi.framework.util.Wirings;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.osgi.framework.*;
@@ -75,10 +77,8 @@ public class EquinoxUtils {
 	public static boolean isActive(String bundleId) {
 		// the try-catch block should take care
 		try {
-			org.osgi.framework.Bundle bundle = OSGIUtils.getDefault().getBundle(bundleId);
-			if (bundle == null)
-				return false; // should never happen
-			return (bundle.getState() == Bundle.ACTIVE);
+			Optional<Bundle> bundle = Wirings.getAtLeastResolvedBundle(bundleId);
+			return bundle.isPresent() && bundle.get().getState() == Bundle.ACTIVE;
 		} catch (NoClassDefFoundError noClass) {
 			// expected if OSGi is not available; behave as if contributor is active
 			return true;

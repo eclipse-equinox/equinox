@@ -9,6 +9,7 @@ Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: org.apache.felix.service.command;version="[1.0,2.0)",
  org.eclipse.osgi.framework.console,
+ org.eclipse.osgi.framework.util,
  org.eclipse.osgi.report.resolution;version="[1.0,2.0)",
  org.eclipse.osgi.service.environment,
  org.eclipse.osgi.util,
@@ -22,7 +23,6 @@ Import-Package: org.apache.felix.service.command;version="[1.0,2.0)",
  org.osgi.service.condpermadmin,
  org.osgi.service.packageadmin,
  org.osgi.service.permissionadmin,
- org.osgi.service.startlevel,
  org.osgi.util.tracker
 Export-Package: org.eclipse.equinox.console.common,
  org.eclipse.equinox.console.common.terminal,

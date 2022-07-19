@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 IBM Corporation and others.
+ * Copyright (c) 2005, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -21,10 +21,10 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.spi.RegistryContributor;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.framework.util.Wirings;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.osgi.framework.*;
-import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -32,9 +32,6 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	public static final String PI_APP = "org.eclipse.equinox.app"; //$NON-NLS-1$
 	public static boolean DEBUG = false;
 	private volatile static BundleContext _context;
-	// PackageAdmin is a system service that never goes away as long 
-	// as the framework is active.  No need to track it!!
-	private volatile static PackageAdmin _packageAdmin;
 	private volatile static EclipseAppContainer container;
 	// tracks the FrameworkLog service
 	private volatile static ServiceTracker _frameworkLogTracker;
@@ -45,10 +42,6 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	@Override
 	public void start(BundleContext bc) {
 		_context = bc;
-		// doing simple get service here because we expect the PackageAdmin service to always be available
-		ServiceReference ref = bc.getServiceReference(PackageAdmin.class.getName());
-		if (ref != null)
-			_packageAdmin = (PackageAdmin) bc.getService(ref);
 		_frameworkLogTracker = new ServiceTracker(bc, FrameworkLog.class.getName(), null);
 		_frameworkLogTracker.open();
 		getDebugOptions(bc);
@@ -83,7 +76,6 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 			_frameworkLogTracker.close();
 			_frameworkLogTracker = null;
 		}
-		_packageAdmin = null; // we do not unget PackageAdmin here; let the framework do it for us
 		_context = null;
 	}
 
@@ -218,19 +210,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 				// try using the name of the contributor below
 			}
 		}
-		PackageAdmin packageAdmin = _packageAdmin;
-		if (packageAdmin == null)
-			return null;
-		Bundle[] bundles = packageAdmin.getBundles(contributor.getName(), null);
-		if (bundles == null)
-			return null;
-		//Return the first bundle that is not installed or uninstalled
-		for (Bundle bundle : bundles) {
-			if ((bundle.getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0) {
-				return bundle;
-			}
-		}
-		return null;
+		// Return the first bundle that is not installed or uninstalled
+		return Wirings.getAtLeastResolvedBundle(contributor.getName()).orElse(null);
 	}
 
 	static BundleContext getContext() {

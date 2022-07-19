@@ -13,8 +13,9 @@
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
-import org.eclipse.core.internal.registry.osgi.OSGIUtils;
+import java.util.List;
 import org.eclipse.core.runtime.spi.RegistryContributor;
+import org.eclipse.osgi.framework.util.Wirings;
 import org.osgi.framework.Bundle;
 
 /**
@@ -43,10 +44,10 @@ public final class ContributorFactoryOSGi {
 		String hostName = null;
 
 		// determine host properties, if any
-		if (OSGIUtils.getDefault().isFragment(contributor)) {
-			Bundle[] hosts = OSGIUtils.getDefault().getHosts(contributor);
-			if (hosts != null) {
-				Bundle hostBundle = hosts[0];
+		if (Wirings.isFragment(contributor)) {
+			List<Bundle> hosts = Wirings.getHosts(contributor);
+			if (!hosts.isEmpty()) {
+				Bundle hostBundle = hosts.get(0);
 				hostId = Long.toString(hostBundle.getBundleId());
 				hostName = hostBundle.getSymbolicName();
 			}
@@ -73,6 +74,6 @@ public final class ContributorFactoryOSGi {
 		if (!(contributor instanceof RegistryContributor))
 			return null;
 		String symbolicName = ((RegistryContributor) contributor).getActualName();
-		return OSGIUtils.getDefault().getBundle(symbolicName);
+		return Wirings.getAtLeastResolvedBundle(symbolicName).orElse(null);
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2017 IBM Corporation, SAP AG and others.
+ * Copyright (c) 2010, 2022 IBM Corporation, SAP AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -52,7 +52,6 @@ import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
-import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.permissionadmin.PermissionAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -126,8 +125,6 @@ public class Activator implements BundleActivator {
 	private ServiceTracker<PermissionAdmin, PermissionAdmin> permissionAdminTracker;
 	private FrameworkStartLevel frameworkStartLevel;
 	private FrameworkWiring frameworkWiring;
-	@SuppressWarnings("deprecation")
-	private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
 	private static boolean isFirstProcessor = true;
 	private static TelnetCommand telnetConnection = null;
 	
@@ -307,9 +304,6 @@ public class Activator implements BundleActivator {
 		permissionAdminTracker = new ServiceTracker<>(context, PermissionAdmin.class, null);
 		permissionAdminTracker.open();
 
-		packageAdminTracker = new ServiceTracker<>(context, PackageAdmin.class, null);
-		packageAdminTracker.open();
-		
 		equinoxCmdProvider = new EquinoxCommandProvider(context, this);
 		equinoxCmdProvider.startService();
 		
@@ -340,11 +334,6 @@ public class Activator implements BundleActivator {
 
 	public ConditionalPermissionAdmin getConditionalPermissionAdmin() {
 		return getServiceFromTracker(condPermAdminTracker, ConditionalPermissionAdmin.class);
-	}
-
-	@SuppressWarnings("deprecation")
-	public PackageAdmin getPackageAdmin() {
-		return getServiceFromTracker(packageAdminTracker, PackageAdmin.class);
 	}
 
 	private static <T> T getServiceFromTracker(ServiceTracker<?, T> tracker, Class<T> serviceClass) {

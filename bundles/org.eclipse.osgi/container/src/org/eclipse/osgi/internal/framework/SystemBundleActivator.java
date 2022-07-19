@@ -38,6 +38,7 @@ import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.eclipse.osgi.storage.BundleLocalizationImpl;
 import org.eclipse.osgi.storage.url.BundleResourceHandler;
 import org.eclipse.osgi.storage.url.BundleURLConverter;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -131,6 +132,8 @@ public class SystemBundleActivator implements BundleActivator {
 		props.put(DebugOptions.LISTENER_SYMBOLICNAME, EquinoxContainer.NAME);
 		register(bc, DebugOptionsListener.class, bundle.getEquinoxContainer().getConfiguration().getDebug(), props);
 		register(bc, DebugOptionsListener.class, bundle.getModule().getContainer(), props);
+
+		context = bc;
 	}
 
 	private void installSecurityManager(EquinoxConfiguration configuration) throws BundleException {
@@ -204,6 +207,8 @@ public class SystemBundleActivator implements BundleActivator {
 
 	@Override
 	public void stop(BundleContext bc) throws Exception {
+		context = null;
+
 		EquinoxBundle bundle = (EquinoxBundle) bc.getBundle();
 
 		bundle.getEquinoxContainer().getStorage().getExtensionInstaller().stopExtensionActivators(bc);
@@ -245,4 +250,12 @@ public class SystemBundleActivator implements BundleActivator {
 		properties.put(Constants.SERVICE_PID, context.getBundle().getBundleId() + "." + service.getClass().getName()); //$NON-NLS-1$
 		registrations.add(context.registerService(serviceClass, service, properties));
 	}
+
+	private static volatile BundleContext context;
+
+	public static Bundle getSystemBundle() {
+		BundleContext ctx = context;
+		return ctx != null ? ctx.getBundle() : null;
+	}
+
 }

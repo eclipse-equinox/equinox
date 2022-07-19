@@ -15,8 +15,8 @@ package org.eclipse.equinox.jsp.jasper.registry;
 
 import java.util.Hashtable;
 import org.eclipse.core.runtime.*;
-import org.eclipse.equinox.internal.jsp.jasper.registry.Activator;
 import org.eclipse.equinox.jsp.jasper.JspServlet;
+import org.eclipse.osgi.framework.util.Wirings;
 import org.osgi.framework.Bundle;
 
 /**
@@ -52,7 +52,8 @@ public class JSPFactory implements IExecutableExtensionFactory, IExecutableExten
 
 	@Override
 	public Object create() throws CoreException {
-		Bundle b = Activator.getBundle(config.getContributor().getName()); //check for null and illegal state exception
+		Bundle b = Wirings.getAtLeastResolvedBundle(config.getContributor().getName()).orElse(null);
+		// check for null and illegal state exception
 		String alias = config.getAttribute("alias"); //$NON-NLS-1$
 		if (alias != null && alias.indexOf("/*.") == alias.lastIndexOf('/')) { //$NON-NLS-1$
 			alias = alias.substring(0, alias.lastIndexOf('/'));

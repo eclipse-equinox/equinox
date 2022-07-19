@@ -22,6 +22,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 
+import org.eclipse.osgi.framework.util.Wirings;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 
@@ -62,11 +63,8 @@ public class JspClassLoader extends URLClassLoader {
 	public JspClassLoader(Bundle bundle) {
 		super(new URL[0], new BundleProxyClassLoader(bundle, new BundleProxyClassLoader(JASPERBUNDLE, new JSPContextFinder(EMPTY_CLASSLOADER))));
 		addBundleClassPathJars(bundle);
-		Bundle[] fragments = Activator.getFragments(bundle);
-		if (fragments != null) {
-			for (Bundle fragment : fragments) {
-				addBundleClassPathJars(fragment);
-			}
+		for (Bundle fragment : Wirings.getFragments(bundle)) {
+			addBundleClassPathJars(fragment);
 		}
 	}
 

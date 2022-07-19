@@ -13,11 +13,12 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.internal.adaptor;
 
+import java.util.Optional;
+import org.eclipse.osgi.framework.util.Wirings;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.ServiceReference;
 
 public class ConsoleManager {
 
@@ -52,27 +53,24 @@ public class ConsoleManager {
 	}
 
 	public static ConsoleManager startConsole(BundleContext context, EquinoxConfiguration equinoxConfig) {
-		ConsoleManager consoleManager = new ConsoleManager(context, equinoxConfig);
-		return consoleManager;
+		return new ConsoleManager(context, equinoxConfig);
 	}
 
-	@SuppressWarnings("deprecation")
 	public void checkForConsoleBundle() throws BundleException {
-		if ("none".equals(consolePort)) //$NON-NLS-1$
-			return;
-		// otherwise we need to check for the equinox console bundle and start it
-		ServiceReference<org.osgi.service.packageadmin.PackageAdmin> paRef = context.getServiceReference(org.osgi.service.packageadmin.PackageAdmin.class);
-		org.osgi.service.packageadmin.PackageAdmin pa = paRef == null ? null : context.getService(paRef);
-		Bundle[] consoles = pa.getBundles(consoleBundle, null);
-		if (consoles == null || consoles.length == 0) {
-			if (consolePort != null)
-				throw new BundleException("Could not find bundle: " + consoleBundle, BundleException.UNSUPPORTED_OPERATION); //$NON-NLS-1$
+		if ("none".equals(consolePort)) { //$NON-NLS-1$
 			return;
 		}
-		try {
-			consoles[0].start(Bundle.START_TRANSIENT);
-		} catch (BundleException e) {
-			throw new BundleException("Could not start bundle: " + consoleBundle, BundleException.UNSUPPORTED_OPERATION, e); //$NON-NLS-1$
+		// otherwise we need to check for the equinox console bundle and start it
+		Optional<Bundle> bundle = Wirings.getBundle(consoleBundle);
+		if (bundle.isPresent()) {
+			try {
+				bundle.get().start(Bundle.START_TRANSIENT);
+			} catch (BundleException e) {
+				throw new BundleException("Could not start bundle: " + consoleBundle, BundleException.UNSUPPORTED_OPERATION, e); //$NON-NLS-1$
+			}
+		} else if (consolePort != null) {
+			throw new BundleException("Could not find bundle: " + consoleBundle, BundleException.UNSUPPORTED_OPERATION); //$NON-NLS-1$
+
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2022 Cognos Incorporated, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,22 +22,17 @@ import org.eclipse.equinox.http.registry.HttpContextExtensionService;
 import org.osgi.framework.*;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
-import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class HttpServiceTracker extends ServiceTracker<HttpService, HttpService> {
 
-	private BundleContext context;
-	private PackageAdmin packageAdmin;
 	private IExtensionRegistry registry;
 
 	private ServiceRegistration<?> registration;
 	Map<ServiceReference<HttpService>, HttpRegistryManager> httpRegistryManagers = new HashMap<>();
 
-	public HttpServiceTracker(BundleContext context, PackageAdmin packageAdmin, IExtensionRegistry registry) {
+	public HttpServiceTracker(BundleContext context, IExtensionRegistry registry) {
 		super(context, HttpService.class, null);
-		this.context = context;
-		this.packageAdmin = packageAdmin;
 		this.registry = registry;
 	}
 
@@ -57,7 +52,7 @@ public class HttpServiceTracker extends ServiceTracker<HttpService, HttpService>
 		if (httpService == null)
 			return null;
 
-		HttpRegistryManager httpRegistryManager = new HttpRegistryManager(reference, httpService, packageAdmin, registry);
+		HttpRegistryManager httpRegistryManager = new HttpRegistryManager(reference, httpService, registry);
 		httpRegistryManager.start();
 		httpRegistryManagers.put(reference, httpRegistryManager);
 

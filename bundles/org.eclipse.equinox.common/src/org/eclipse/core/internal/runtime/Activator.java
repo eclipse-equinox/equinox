@@ -15,6 +15,9 @@
  *******************************************************************************/
 package org.eclipse.core.internal.runtime;
 
+import static java.util.function.Predicate.not;
+import static org.eclipse.osgi.framework.util.Wirings.inState;
+
 import java.net.URL;
 import java.util.*;
 import org.eclipse.core.internal.boot.PlatformURLBaseConnection;
@@ -23,6 +26,7 @@ import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.log.ExtendedLogReaderService;
 import org.eclipse.equinox.log.ExtendedLogService;
 import org.eclipse.osgi.framework.log.FrameworkLog;
+import org.eclipse.osgi.framework.util.Wirings;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
@@ -30,7 +34,6 @@ import org.eclipse.osgi.service.localization.BundleLocalization;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
-import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.url.URLConstants;
 import org.osgi.service.url.URLStreamHandlerService;
 import org.osgi.util.tracker.ServiceTracker;
@@ -55,7 +58,6 @@ public class Activator implements BundleActivator {
 	private final ServiceCaller<Location> instanceLocationTracker = new ServiceCaller<>(getClass(), Location.class, Location.INSTANCE_FILTER);
 	private final ServiceCaller<Location> configLocationTracker = new ServiceCaller<>(getClass(), Location.class, Location.CONFIGURATION_FILTER);
 	@SuppressWarnings("deprecation")
-	private final ServiceCaller<PackageAdmin> bundleTracker = new ServiceCaller<>(getClass(), PackageAdmin.class);
 	private final ServiceCaller<DebugOptions> debugTracker = new ServiceCaller<>(getClass(), DebugOptions.class);
 	private final ServiceCaller<FrameworkLog> logTracker = new ServiceCaller<>(getClass(), FrameworkLog.class);
 	private final ServiceCaller<BundleLocalization> localizationTracker = new ServiceCaller<>(getClass(), BundleLocalization.class);
@@ -93,15 +95,15 @@ public class Activator implements BundleActivator {
 	private PlatformLogWriter getPlatformWriter(BundleContext context) {
 		ServiceReference<ExtendedLogService> logRef = context.getServiceReference(ExtendedLogService.class);
 		ServiceReference<ExtendedLogReaderService> readerRef = context.getServiceReference(ExtendedLogReaderService.class);
-		ServiceReference<PackageAdmin> packageAdminRef = context.getServiceReference(PackageAdmin.class);
-		if (logRef == null || readerRef == null || packageAdminRef == null)
+		if (logRef == null || readerRef == null) {
 			return null;
+		}
 		ExtendedLogService logService = context.getService(logRef);
 		ExtendedLogReaderService readerService = context.getService(readerRef);
-		PackageAdmin packageAdmin = context.getService(packageAdminRef);
-		if (logService == null || readerService == null || packageAdmin == null)
+		if (logService == null || readerService == null) {
 			return null;
-		PlatformLogWriter writer = new PlatformLogWriter(logService, packageAdmin, context.getBundle());
+		}
+		PlatformLogWriter writer = new PlatformLogWriter(logService, context.getBundle());
 		readerService.addLogListener(writer, writer);
 		return writer;
 	}
@@ -136,40 +138,18 @@ public class Activator implements BundleActivator {
 
 	/**
 	 * Return the resolved bundle with the specified symbolic name.
-	 * 
-	 * @see PackageAdmin#getBundles(String, String)
 	 */
 	public Bundle getBundle(String symbolicName) {
-		PackageAdmin admin = getBundleAdmin();
-		if (admin == null)
-			return null;
-		Bundle[] bundles = admin.getBundles(symbolicName, null);
-		if (bundles == null)
-			return null;
-		//Return the first bundle that is not installed or uninstalled
-		for (Bundle bundle : bundles) {
-			if ((bundle.getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0) {
-				return bundle;
-			}
-		}
-		return null;
-	}
-
-	/*
-	 * Return the package admin service, if available.
-	 */
-	private PackageAdmin getBundleAdmin() {
-		return bundleTracker.current().orElse(null);
+		return Wirings.getBundles(symbolicName) //
+				.filter(not(inState(Bundle.INSTALLED, Bundle.UNINSTALLED))) //
+				.findFirst().orElse(null);
 	}
 
 	/*
 	 * Return an array of fragments for the given bundle host.
 	 */
-	public Bundle[] getFragments(Bundle host) {
-		PackageAdmin admin = getBundleAdmin();
-		if (admin == null)
-			return new Bundle[0];
-		return admin.getFragments(host);
+	public static List<Bundle> getFragments(Bundle host) {
+		return Wirings.getFragments(host);
 	}
 
 	/*
