@@ -46,7 +46,7 @@ public class ConfigurationListenerTest {
 	public void testListener() throws Exception {
 
 		Configuration config = cm.getConfiguration("test");
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 

@@ -113,7 +113,7 @@ public class HttpSessionTracker implements HttpSessionInvalidator {
 
 	private final ConcurrentMap<String, Set<HttpSessionAdaptor>>
 		httpSessionAdaptorsMap =
-			new ConcurrentHashMap<String, Set<HttpSessionAdaptor>>();
+			new ConcurrentHashMap<>();
 	private final HttpServiceRuntimeImpl httpServiceRuntime;
 
 }

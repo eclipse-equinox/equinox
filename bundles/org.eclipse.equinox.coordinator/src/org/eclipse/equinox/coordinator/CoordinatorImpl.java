@@ -47,7 +47,7 @@ public class CoordinatorImpl implements Coordinator {
 	}
 
 	// Coordination IDs must be unique across all using bundles.
-	private static final Map<Long, CoordinationImpl> idToCoordination = new HashMap<Long, CoordinationImpl>();
+	private static final Map<Long, CoordinationImpl> idToCoordination = new HashMap<>();
 	// Coordination participation must be tracked across all using bundles.
 	private static final Map<Participant, CoordinationImpl> participantToCoordination = Collections.synchronizedMap(new IdentityHashMap<Participant, CoordinationImpl>());
 
@@ -59,7 +59,7 @@ public class CoordinatorImpl implements Coordinator {
 	};
 
 	private static class WeakCoordinationStack {
-		private final LinkedList<CoordinationImpl> coordinations = new LinkedList<CoordinationImpl>();
+		private final LinkedList<CoordinationImpl> coordinations = new LinkedList<>();
 
 		public WeakCoordinationStack() {
 		}
@@ -103,7 +103,7 @@ public class CoordinatorImpl implements Coordinator {
 		this.bundle = bundle;
 		this.logTracker = logService;
 		this.timer = timer;
-		coordinations = new ArrayList<CoordinationImpl>();
+		coordinations = new ArrayList<>();
 		if (maxTimeout < 0)
 			throw new IllegalArgumentException(NLS.bind(Messages.InvalidTimeInterval, maxTimeout));
 		this.maxTimeout = maxTimeout;
@@ -193,7 +193,7 @@ public class CoordinatorImpl implements Coordinator {
 		CoordinationWeakReference.processOrphanedCoordinations();
 		ArrayList<Coordination> result;
 		synchronized (CoordinatorImpl.class) {
-			result = new ArrayList<Coordination>(idToCoordination.size());
+			result = new ArrayList<>(idToCoordination.size());
 			for (CoordinationImpl coordination : idToCoordination.values()) {
 				// Ideally, we're only interested in coordinations that have not terminated.
 				// It's okay, however, if the coordination terminates from this point forward.
@@ -285,7 +285,7 @@ public class CoordinatorImpl implements Coordinator {
 			shutdown = true;
 			// Make a copy so the removal of the coordination from the list during
 			// termination does not interfere with the iteration.
-			coords = new ArrayList<CoordinationImpl>(this.coordinations);
+			coords = new ArrayList<>(this.coordinations);
 		}
 		for (CoordinationImpl coordination : coords) {
 			coordination.fail(Coordination.RELEASED);

@@ -27,7 +27,7 @@ public class Activator implements BundleActivator {
 
 	public void start(BundleContext bundleContext) throws Exception {
 		factory = new CoordinatorServiceFactory(bundleContext);
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		@SuppressWarnings({"unchecked"})
 		// Use local variable to avoid suppressing unchecked warnings at method level.
 		ServiceRegistration<Coordinator> reg = (ServiceRegistration<Coordinator>) bundleContext.registerService(Coordinator.class.getName(), factory, properties);

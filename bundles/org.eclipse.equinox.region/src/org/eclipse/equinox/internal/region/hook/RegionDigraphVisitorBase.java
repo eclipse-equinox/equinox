@@ -29,8 +29,8 @@ abstract class RegionDigraphVisitorBase<C> implements RegionDigraphVisitor {
 
 	private final Collection<C> allCandidates;
 
-	private final Stack<Set<C>> allowedStack = new Stack<Set<C>>();
-	private final Stack<Collection<C>> filteredStack = new Stack<Collection<C>>();
+	private final Stack<Set<C>> allowedStack = new Stack<>();
+	private final Stack<Collection<C>> filteredStack = new Stack<>();
 
 	private final Object monitor;
 
@@ -38,7 +38,7 @@ abstract class RegionDigraphVisitorBase<C> implements RegionDigraphVisitor {
 
 	protected RegionDigraphVisitorBase(Collection<C> candidates) {
 		this.allCandidates = candidates;
-		this.allowed = new HashSet<C>();
+		this.allowed = new HashSet<>();
 		this.monitor = new Object();
 	}
 
@@ -63,7 +63,7 @@ abstract class RegionDigraphVisitorBase<C> implements RegionDigraphVisitor {
 	private void pushAllowed() {
 		synchronized (this.monitor) {
 			this.allowedStack.push(this.allowed);
-			this.allowed = new HashSet<C>();
+			this.allowed = new HashSet<>();
 		}
 	}
 
@@ -127,7 +127,7 @@ abstract class RegionDigraphVisitorBase<C> implements RegionDigraphVisitor {
 	@Override
 	public boolean preEdgeTraverse(RegionFilter regionFilter) {
 		// Find the candidates filtered by the previous edge
-		Collection<C> candidates = new ArrayList<C>(peekFiltered());
+		Collection<C> candidates = new ArrayList<>(peekFiltered());
 		// remove any candidates contained in the current region
 		candidates.removeAll(allowed);
 		// apply the filter across remaining candidates

@@ -392,11 +392,7 @@ public class DefaultPreferences extends EclipsePreferences {
 		} catch (FileNotFoundException e) {
 			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
 				PrefsMessages.message("Preference customization file not found: " + filename); //$NON-NLS-1$
-		} catch (IOException e) {
-			String message = NLS.bind(PrefsMessages.preferences_loadException, filename);
-			IStatus status = new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, message, e);
-			RuntimeLog.log(status);
-		} catch (IllegalArgumentException e) {
+		} catch (IOException | IllegalArgumentException e) {
 			String message = NLS.bind(PrefsMessages.preferences_loadException, filename);
 			IStatus status = new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, message, e);
 			RuntimeLog.log(status);

@@ -64,7 +64,7 @@ public class WeavingAdaptorFactory {
 
     private ServiceListener weavingServiceListener;
 
-    private final Map<Bundle, IWeavingService> weavingServices = new ConcurrentHashMap<Bundle, IWeavingService>();
+    private final Map<Bundle, IWeavingService> weavingServices = new ConcurrentHashMap<>();
 
     public WeavingAdaptorFactory() {
     }
@@ -162,7 +162,7 @@ public class WeavingAdaptorFactory {
         initializeStartLevelService(context);
 
         // Service tracker for weaving service
-        weavingServiceFactoryTracker = new ServiceTracker<IWeavingServiceFactory, IWeavingServiceFactory>(
+        weavingServiceFactoryTracker = new ServiceTracker<>(
                 context, IWeavingServiceFactory.class, null);
         weavingServiceFactoryTracker.open();
         if (Debug.DEBUG_WEAVE)
@@ -174,7 +174,7 @@ public class WeavingAdaptorFactory {
             @Override
             public void serviceChanged(final ServiceEvent event) {
                 if (event.getType() == ServiceEvent.REGISTERED) {
-                    final List<Bundle> bundlesToRefresh = new ArrayList<Bundle>();
+                    final List<Bundle> bundlesToRefresh = new ArrayList<>();
 
                     synchronized (weavingServices) {
                         final Iterator<Bundle> bundleEntries = weavingServices
@@ -197,7 +197,7 @@ public class WeavingAdaptorFactory {
                 if (event.getType() == ServiceEvent.UNREGISTERING
                         && startLevelService != null
                         && startLevelService.getStartLevel() > 0) {
-                    final List<Bundle> bundlesToRefresh = new ArrayList<Bundle>();
+                    final List<Bundle> bundlesToRefresh = new ArrayList<>();
 
                     synchronized (weavingServices) {
                         final Iterator<Bundle> bundleEntries = weavingServices
@@ -229,7 +229,7 @@ public class WeavingAdaptorFactory {
         }
 
         // Service tracker for caching service
-        cachingServiceFactoryTracker = new ServiceTracker<ICachingServiceFactory, ICachingServiceFactory>(
+        cachingServiceFactoryTracker = new ServiceTracker<>(
                 context, ICachingServiceFactory.class, null);
         cachingServiceFactoryTracker.open();
         if (Debug.DEBUG_CACHE)

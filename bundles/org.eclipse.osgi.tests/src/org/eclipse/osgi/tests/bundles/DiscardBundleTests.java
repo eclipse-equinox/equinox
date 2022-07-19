@@ -209,11 +209,8 @@ public class DiscardBundleTests extends AbstractBundleTests {
 		File file = new File(root, BUNDLE_DIR + '/' + BUNDLE_MANIFEST);
 		assertTrue("Could not make directories", file.getParentFile().mkdirs());
 		Manifest manifest = createBundleManifest();
-		FileOutputStream fos = new FileOutputStream(file);
-		try {
+		try (FileOutputStream fos = new FileOutputStream(file)) {
 			manifest.write(fos);
-		} finally {
-			fos.close();
 		}
 	}
 

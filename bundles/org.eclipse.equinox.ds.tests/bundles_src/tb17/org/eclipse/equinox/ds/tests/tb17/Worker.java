@@ -35,7 +35,7 @@ public class Worker implements PropertiesProvider, ComponentContextProvider {
 
     Object prop = properties.get(ComponentConstants.COMPONENT_NAME);
     if (prop != null) {
-      Dictionary<String, Object> serviceProps = new Hashtable<String, Object>();
+      Dictionary<String, Object> serviceProps = new Hashtable<>();
       serviceProps.put(ComponentConstants.COMPONENT_NAME, prop);
       sr = ctxt.getBundleContext().registerService(PropertiesProvider.class.getName(), this, serviceProps);
     }

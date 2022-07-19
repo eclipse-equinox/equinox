@@ -51,7 +51,7 @@ public class ConfigurationEventAdapterTest {
 	public void testConfigurationEvent() throws Exception {
 
 		Configuration config = cm.getConfiguration("test");
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 
@@ -65,7 +65,7 @@ public class ConfigurationEventAdapterTest {
 
 		};
 		String[] topics = new String[] {"org/osgi/service/cm/ConfigurationEvent/*"};
-		Dictionary<String, Object> handlerProps = new Hashtable<String, Object>();
+		Dictionary<String, Object> handlerProps = new Hashtable<>();
 
 		handlerProps.put(EventConstants.EVENT_TOPIC, topics);
 		ServiceRegistration<EventHandler> reg = Activator.getBundleContext().registerService(EventHandler.class, handler, handlerProps);
@@ -91,7 +91,7 @@ public class ConfigurationEventAdapterTest {
 	public void testConfigurationFactoryEvent() throws Exception {
 
 		Configuration config = cm.createFactoryConfiguration("test");
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 
@@ -105,7 +105,7 @@ public class ConfigurationEventAdapterTest {
 
 		};
 		String[] topics = new String[] {"org/osgi/service/cm/ConfigurationEvent/*"};
-		Dictionary<String, Object> handlerProps = new Hashtable<String, Object>();
+		Dictionary<String, Object> handlerProps = new Hashtable<>();
 		handlerProps.put(EventConstants.EVENT_TOPIC, topics);
 		ServiceRegistration<EventHandler> reg = Activator.getBundleContext().registerService(EventHandler.class, handler, handlerProps);
 

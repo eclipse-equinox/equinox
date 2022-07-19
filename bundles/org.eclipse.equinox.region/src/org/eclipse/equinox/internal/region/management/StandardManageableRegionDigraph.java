@@ -41,7 +41,7 @@ public final class StandardManageableRegionDigraph implements ManageableRegionDi
 
 	private final RegionObjectNameCreator regionObjectNameCreator;
 
-	private final Map<String, ManageableRegion> manageableRegions = new ConcurrentHashMap<String, ManageableRegion>();
+	private final Map<String, ManageableRegion> manageableRegions = new ConcurrentHashMap<>();
 
 	private final BundleContext bundleContext;
 
@@ -117,7 +117,7 @@ public final class StandardManageableRegionDigraph implements ManageableRegionDi
 		unregisterRegionLifecycleListener();
 		Collection<String> currentRegionNames;
 		synchronized (this.monitor) {
-			currentRegionNames = new ArrayList<String>(this.manageableRegions.keySet());
+			currentRegionNames = new ArrayList<>(this.manageableRegions.keySet());
 		}
 		for (String regionName : currentRegionNames) {
 			removeRegion(regionName);
@@ -152,7 +152,7 @@ public final class StandardManageableRegionDigraph implements ManageableRegionDi
 	 */
 	@Override
 	public ManageableRegion[] getRegions() {
-		List<ManageableRegion> regions = new ArrayList<ManageableRegion>();
+		List<ManageableRegion> regions = new ArrayList<>();
 		synchronized (this.monitor) {
 			for (ManageableRegion manageableRegion : this.manageableRegions.values()) {
 				regions.add(manageableRegion);

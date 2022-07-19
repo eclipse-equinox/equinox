@@ -38,7 +38,7 @@ public class ServiceProperties {
 	static public Map<String, String> parseInitParams(
 		ServiceReference<?> serviceReference, String prefix, ServletContext parentContext) {
 
-		Map<String, String> initParams = new HashMap<String, String>();
+		Map<String, String> initParams = new HashMap<>();
 
 		if (parentContext != null) {
 			// use the parent context init params;

@@ -892,9 +892,7 @@ public class PreferencesService implements IPreferencesService {
 		Properties properties = new Properties();
 		try {
 			properties.load(input);
-		} catch (IOException e) {
-			throw new CoreException(createStatusError(PrefsMessages.preferences_importProblems, e));
-		} catch (IllegalArgumentException e) {
+		} catch (IOException | IllegalArgumentException e) {
 			throw new CoreException(createStatusError(PrefsMessages.preferences_importProblems, e));
 		} finally {
 			try {
@@ -1113,9 +1111,7 @@ public class PreferencesService implements IPreferencesService {
 			prefs.accept(visitor);
 		} catch (FileNotFoundException e) {
 			// ignore...if the file does not exist then all is OK
-		} catch (CoreException e) {
-			result.add(createStatusError(PrefsMessages.preferences_validationException, e));
-		} catch (BackingStoreException e) {
+		} catch (CoreException | BackingStoreException e) {
 			result.add(createStatusError(PrefsMessages.preferences_validationException, e));
 		}
 		return result;

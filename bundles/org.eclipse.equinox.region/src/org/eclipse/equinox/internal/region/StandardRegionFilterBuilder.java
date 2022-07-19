@@ -26,7 +26,7 @@ public final class StandardRegionFilterBuilder implements RegionFilterBuilder {
 
 	private final Object monitor = new Object();
 
-	private final Map<String, Collection<Filter>> policy = new HashMap<String, Collection<Filter>>();
+	private final Map<String, Collection<Filter>> policy = new HashMap<>();
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -74,7 +74,7 @@ public final class StandardRegionFilterBuilder implements RegionFilterBuilder {
 		Collection<Filter> namespaceFilters = policy.get(namespace);
 		if (namespaceFilters == null) {
 			// use set to avoid duplicates
-			namespaceFilters = new LinkedHashSet<Filter>();
+			namespaceFilters = new LinkedHashSet<>();
 			policy.put(namespace, namespaceFilters);
 		}
 		return namespaceFilters;

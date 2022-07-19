@@ -96,7 +96,7 @@ public class MultipartSupportPart implements Part {
 	private class IteratorCollection extends AbstractList<String> {
 
 		public IteratorCollection(Iterator<String> iterator) {
-			this.collection = new ArrayList<String>();
+			this.collection = new ArrayList<>();
 			while (iterator.hasNext()) {
 				collection.add(iterator.next());
 			}

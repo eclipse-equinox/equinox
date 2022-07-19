@@ -58,11 +58,7 @@ public class BaseAsyncServlet extends BaseServlet {
 
 		@Override
 		public void run() {
-			PrintWriter writer = null;
-
-			try {
-				writer = asyncContext.getResponse().getWriter();
-
+			try (PrintWriter writer = asyncContext.getResponse().getWriter()) {
 				writer.print(Thread.currentThread().getName());
 				writer.print(" - ");
 				writer.print(content);
@@ -71,10 +67,6 @@ public class BaseAsyncServlet extends BaseServlet {
 				ioe.printStackTrace();
 			}
 			finally {
-				if (writer != null) {
-					writer.close();
-				}
-
 				asyncContext.complete();
 			}
 		}

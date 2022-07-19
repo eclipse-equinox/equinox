@@ -154,11 +154,8 @@ public class ServletRequestAdvisor extends Object {
 		httpsConn.connect();
 
 		assertEquals("Request to the url " + spec + " was not successful", 200 , httpsConn.getResponseCode());
-		InputStream stream = httpsConn.getInputStream();
-		try {
+		try (InputStream stream = httpsConn.getInputStream()) {
 			return drain(stream);
-		} finally {
-			stream.close();
 		}
 	}
 

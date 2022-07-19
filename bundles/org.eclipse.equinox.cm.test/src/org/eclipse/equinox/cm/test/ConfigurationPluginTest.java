@@ -45,7 +45,7 @@ public class ConfigurationPluginTest {
 	public void testPlugin() throws Exception {
 
 		Configuration config = cm.getConfiguration("test");
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 
@@ -67,7 +67,7 @@ public class ConfigurationPluginTest {
 			}
 		};
 
-		Dictionary<String, Object> dict = new Hashtable<String, Object>();
+		Dictionary<String, Object> dict = new Hashtable<>();
 		dict.put(Constants.SERVICE_PID, "test");
 		ServiceRegistration<ManagedService> reg = null;
 		synchronized (lock) {
@@ -89,7 +89,7 @@ public class ConfigurationPluginTest {
 	public void testPidSpecificPlugin() throws Exception {
 
 		Configuration config = cm.getConfiguration("test");
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 
@@ -99,7 +99,7 @@ public class ConfigurationPluginTest {
 				properties.put("plugin", "plugin1");
 			}
 		};
-		Dictionary<String, Object> pluginDict = new Hashtable<String, Object>();
+		Dictionary<String, Object> pluginDict = new Hashtable<>();
 		pluginDict.put(ConfigurationPlugin.CM_TARGET, new String[] {"test"});
 		ServiceRegistration<ConfigurationPlugin> pluginReg = Activator.getBundleContext().registerService(ConfigurationPlugin.class, plugin, pluginDict);
 
@@ -113,7 +113,7 @@ public class ConfigurationPluginTest {
 			}
 		};
 
-		Dictionary<String, Object> dict = new Hashtable<String, Object>();
+		Dictionary<String, Object> dict = new Hashtable<>();
 		dict.put(Constants.SERVICE_PID, "test");
 		ServiceRegistration<ManagedService> reg = null;
 		synchronized (lock) {
@@ -135,7 +135,7 @@ public class ConfigurationPluginTest {
 	public void testPidSpecificMissPlugin() throws Exception {
 
 		Configuration config = cm.getConfiguration("test");
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 
@@ -145,7 +145,7 @@ public class ConfigurationPluginTest {
 				properties.put("plugin", "plugin1");
 			}
 		};
-		Dictionary<String, Object> pluginDict = new Hashtable<String, Object>();
+		Dictionary<String, Object> pluginDict = new Hashtable<>();
 		pluginDict.put(ConfigurationPlugin.CM_TARGET, new String[] {"testXXX"});
 		ServiceRegistration<ConfigurationPlugin> pluginReg = Activator.getBundleContext().registerService(ConfigurationPlugin.class, plugin, pluginDict);
 
@@ -159,7 +159,7 @@ public class ConfigurationPluginTest {
 			}
 		};
 
-		Dictionary<String, Object> dict = new Hashtable<String, Object>();
+		Dictionary<String, Object> dict = new Hashtable<>();
 		dict.put(Constants.SERVICE_PID, "test");
 		ServiceRegistration<ManagedService> reg = null;
 		synchronized (lock) {
@@ -179,7 +179,7 @@ public class ConfigurationPluginTest {
 	public void testRankedPlugin() throws Exception {
 
 		Configuration config = cm.getConfiguration("test");
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 
@@ -189,7 +189,7 @@ public class ConfigurationPluginTest {
 				properties.put("plugin", "plugin1");
 			}
 		};
-		Dictionary<String, Object> pluginDict = new Hashtable<String, Object>();
+		Dictionary<String, Object> pluginDict = new Hashtable<>();
 		pluginDict.put(ConfigurationPlugin.CM_RANKING, Integer.valueOf(1));
 		ServiceRegistration<ConfigurationPlugin> pluginReg1 = Activator.getBundleContext().registerService(ConfigurationPlugin.class, plugin, pluginDict);
 
@@ -212,7 +212,7 @@ public class ConfigurationPluginTest {
 			}
 		};
 
-		Dictionary<String, Object> dict = new Hashtable<String, Object>();
+		Dictionary<String, Object> dict = new Hashtable<>();
 		dict.put(Constants.SERVICE_PID, "test");
 		ServiceRegistration<ManagedService> reg = null;
 		synchronized (lock) {
@@ -235,12 +235,12 @@ public class ConfigurationPluginTest {
 	public void testSameRankedPlugin() throws Exception {
 
 		Configuration config = cm.getConfiguration("test");
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put("testkey", "testvalue");
 		config.update(props);
-		final List<String> pluginsCalled = new ArrayList<String>();
+		final List<String> pluginsCalled = new ArrayList<>();
 
-		Hashtable<String, Object> pluginProps = new Hashtable<String, Object>();
+		Hashtable<String, Object> pluginProps = new Hashtable<>();
 		pluginProps.put(Constants.SERVICE_RANKING, Integer.valueOf(1));
 		ConfigurationPlugin plugin1 = new ConfigurationPlugin() {
 			public void modifyConfiguration(ServiceReference<?> serviceReference, Dictionary<String, Object> properties) {
@@ -276,7 +276,7 @@ public class ConfigurationPluginTest {
 			}
 		};
 
-		Dictionary<String, Object> dict = new Hashtable<String, Object>();
+		Dictionary<String, Object> dict = new Hashtable<>();
 		dict.put(Constants.SERVICE_PID, "test");
 		ServiceRegistration<ManagedService> reg = null;
 		synchronized (lock) {

@@ -47,7 +47,7 @@ public class ManagedServiceFactoryTest {
 	public void testSamePidManagedServiceFactory() throws Exception {
 
 		Configuration config = cm.createFactoryConfiguration("test");
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put("testkey", "testvalue");
 		config.update(props);
 
@@ -75,7 +75,7 @@ public class ManagedServiceFactoryTest {
 			}
 		};
 
-		Dictionary<String, Object> dict = new Hashtable<String, Object>();
+		Dictionary<String, Object> dict = new Hashtable<>();
 		dict.put(Constants.SERVICE_PID, "test");
 		ServiceRegistration<ManagedServiceFactory> reg = null;
 		synchronized (lock) {
@@ -127,7 +127,7 @@ public class ManagedServiceFactoryTest {
 			}
 		};
 
-		Dictionary<String, Object> dict = new Hashtable<String, Object>();
+		Dictionary<String, Object> dict = new Hashtable<>();
 		dict.put(Constants.SERVICE_PID, "test");
 
 		ServiceRegistration<ManagedServiceFactory> reg = null;
@@ -142,7 +142,7 @@ public class ManagedServiceFactoryTest {
 
 		Configuration config = cm.createFactoryConfiguration("test");
 		assertNull(config.getProperties());
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
+		Dictionary<String, Object> props = new Hashtable<>();
 		props.put("testkey", "testvalue");
 
 		synchronized (lock) {

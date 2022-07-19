@@ -44,7 +44,7 @@ public class WeavingLoaderDelegateHook extends ClassLoaderHook {
 
         @Override
         protected Set<String> initialValue() {
-            return new HashSet<String>();
+            return new HashSet<>();
         }
     };
 
@@ -52,7 +52,7 @@ public class WeavingLoaderDelegateHook extends ClassLoaderHook {
 
         @Override
         protected Set<String> initialValue() {
-            return new HashSet<String>();
+            return new HashSet<>();
         }
     };
 
@@ -60,7 +60,7 @@ public class WeavingLoaderDelegateHook extends ClassLoaderHook {
 
         @Override
         protected Set<String> initialValue() {
-            return new HashSet<String>();
+            return new HashSet<>();
         }
     };
 

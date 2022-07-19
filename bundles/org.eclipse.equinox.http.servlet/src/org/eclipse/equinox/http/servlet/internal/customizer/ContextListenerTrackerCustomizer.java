@@ -43,7 +43,7 @@ public class ContextListenerTrackerCustomizer
 	public AtomicReference<ListenerRegistration> addingService(
 		ServiceReference<EventListener> serviceReference) {
 
-		AtomicReference<ListenerRegistration> result = new AtomicReference<ListenerRegistration>();
+		AtomicReference<ListenerRegistration> result = new AtomicReference<>();
 		if (!httpServiceRuntime.matches(serviceReference)) {
 			return result;
 		}

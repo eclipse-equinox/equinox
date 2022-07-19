@@ -74,9 +74,7 @@ public class ExceptionHandlerTests {
 			Assert.assertEquals(true, eventReceived.getThrowable() instanceof NullPointerException);
 		} catch (MalformedURLException e) {
 			// Does not happen
-		} catch (BundleException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (BundleException | IOException e) {
 			e.printStackTrace();
 		}
 		OSGiTestsActivator.getContext().removeFrameworkListener(fwkListener);
@@ -104,9 +102,7 @@ public class ExceptionHandlerTests {
 			System.setProperty("eclipse.exitOnError", "true");
 		} catch (MalformedURLException e) {
 			// Does not happen
-		} catch (BundleException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (BundleException | IOException e) {
 			e.printStackTrace();
 		}
 		OSGiTestsActivator.getContext().removeFrameworkListener(fwkListener);

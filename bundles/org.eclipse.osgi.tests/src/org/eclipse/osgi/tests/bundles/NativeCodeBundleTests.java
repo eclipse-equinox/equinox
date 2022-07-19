@@ -154,11 +154,8 @@ public class NativeCodeBundleTests extends AbstractBundleTests {
 	}
 
 	private String getContent(String file) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-		try {
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
 			return br.readLine();
-		} finally {
-			br.close();
 		}
 	}
 

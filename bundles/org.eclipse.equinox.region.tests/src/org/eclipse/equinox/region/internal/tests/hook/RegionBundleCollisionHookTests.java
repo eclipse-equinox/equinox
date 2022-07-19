@@ -66,16 +66,16 @@ public class RegionBundleCollisionHookTests {
 	@Before
 	public void setUp() throws Exception {
 		this.bundleId = 1L;
-		this.regions = new HashMap<String, Region>();
-		this.bundles = new HashMap<String, Bundle>();
+		this.regions = new HashMap<>();
+		this.bundles = new HashMap<>();
 
 		StubBundle stubSystemBundle = new StubBundle(0L, "osgi.framework", new Version("0"), "loc");
 		StubBundleContext stubBundleContext = new StubBundleContext();
 		stubBundleContext.addInstalledBundle(stubSystemBundle);
-		this.threadLocal = new ThreadLocal<Region>();
+		this.threadLocal = new ThreadLocal<>();
 		this.digraph = RegionReflectionUtils.newStandardRegionDigraph(stubBundleContext, this.threadLocal);
 		this.collisionFindHook = RegionReflectionUtils.newRegionBundleCollisionHook(this.digraph, this.threadLocal);
-		this.candidates = new HashSet<Bundle>();
+		this.candidates = new HashSet<>();
 
 		// Create regions A, B, C, D containing bundles A, B, C, D, respectively.
 		createRegion(REGION_A, BUNDLE_A);
@@ -250,7 +250,7 @@ public class RegionBundleCollisionHookTests {
 	}
 
 	private RegionFilter createFilter(String... bundleSymbolicNames) throws InvalidSyntaxException {
-		Collection<String> filters = new ArrayList<String>(bundleSymbolicNames.length);
+		Collection<String> filters = new ArrayList<>(bundleSymbolicNames.length);
 		for (String bundleSymbolicName : bundleSymbolicNames) {
 			filters.add('(' + RegionFilter.VISIBLE_BUNDLE_NAMESPACE + '=' + bundleSymbolicName + ')');
 		}

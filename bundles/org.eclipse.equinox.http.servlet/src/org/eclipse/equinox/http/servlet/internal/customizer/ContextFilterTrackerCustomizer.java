@@ -43,7 +43,7 @@ public class ContextFilterTrackerCustomizer
 	public AtomicReference<FilterRegistration> addingService(
 		ServiceReference<Filter> serviceReference) {
 
-		AtomicReference<FilterRegistration> result = new AtomicReference<FilterRegistration>();
+		AtomicReference<FilterRegistration> result = new AtomicReference<>();
 		if (!httpServiceRuntime.matches(serviceReference)) {
 			return result;
 		}

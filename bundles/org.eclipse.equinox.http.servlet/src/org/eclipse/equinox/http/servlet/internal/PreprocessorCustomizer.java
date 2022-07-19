@@ -45,7 +45,7 @@ public class PreprocessorCustomizer
 	public AtomicReference<PreprocessorRegistration> addingService(
 		ServiceReference<Preprocessor> serviceReference) {
 
-		AtomicReference<PreprocessorRegistration> result = new AtomicReference<PreprocessorRegistration>();
+		AtomicReference<PreprocessorRegistration> result = new AtomicReference<>();
 		if (!httpServiceRuntime.matches(serviceReference)) {
 			return result;
 		}
@@ -117,7 +117,7 @@ public class PreprocessorCustomizer
 	private PreprocessorRegistration addPreprocessorRegistration(
 		ServiceReference<Preprocessor> preprocessorRef) throws ServletException {
 
-		ServiceHolder<Preprocessor> preprocessorHolder = new ServiceHolder<Preprocessor>(httpServiceRuntime.getConsumingContext().getServiceObjects(preprocessorRef));
+		ServiceHolder<Preprocessor> preprocessorHolder = new ServiceHolder<>(httpServiceRuntime.getConsumingContext().getServiceObjects(preprocessorRef));
 		Preprocessor preprocessor = preprocessorHolder.get();
 		PreprocessorRegistration registration = null;
 		boolean addedRegisteredObject = false;

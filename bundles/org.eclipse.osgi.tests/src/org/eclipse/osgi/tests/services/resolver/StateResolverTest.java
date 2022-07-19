@@ -3804,9 +3804,7 @@ public class StateResolverTest extends AbstractStateTest {
 			CaseInsensitiveDictionaryMap<String, String> headers = new CaseInsensitiveDictionaryMap<>();
 			ManifestElement.parseBundleManifest(url.openStream(), headers);
 			return headers.asUnmodifiableDictionary();
-		} catch (IOException e) {
-			fail("Unexpected error loading manifest: " + manifest, e);
-		} catch (BundleException e) {
+		} catch (IOException | BundleException e) {
 			fail("Unexpected error loading manifest: " + manifest, e);
 		}
 		return null;

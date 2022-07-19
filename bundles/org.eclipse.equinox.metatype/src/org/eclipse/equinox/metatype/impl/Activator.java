@@ -59,8 +59,8 @@ public class Activator implements BundleActivator {
 		Filter filter = context.createFilter(FILTER);
 		synchronized (this) {
 			lsTracker = logServiceTracker = new LogTracker(context, System.out);
-			mtpTracker = metaTypeProviderTracker = new ServiceTracker<Object, Object>(context, filter, null);
-			spfTracker = saxParserFactoryTracker = new ServiceTracker<SAXParserFactory, SAXParserFactory>(context, SAXParserFactory.class, new SAXParserFactoryTrackerCustomizer(context, lsTracker, mtpTracker));
+			mtpTracker = metaTypeProviderTracker = new ServiceTracker<>(context, filter, null);
+			spfTracker = saxParserFactoryTracker = new ServiceTracker<>(context, SAXParserFactory.class, new SAXParserFactoryTrackerCustomizer(context, lsTracker, mtpTracker));
 		}
 		// Do this first to make logging available as early as possible.
 		lsTracker.open();
@@ -218,8 +218,8 @@ public class Activator implements BundleActivator {
 		}
 
 		private void registerMetaTypeService() {
-			Dictionary<String, Object> properties = new Hashtable<String, Object>(7);
-			properties = new Hashtable<String, Object>(7);
+			Dictionary<String, Object> properties = new Hashtable<>(7);
+			properties = new Hashtable<>(7);
 			properties.put(Constants.SERVICE_VENDOR, "IBM"); //$NON-NLS-1$
 			properties.put(Constants.SERVICE_DESCRIPTION, MetaTypeMsg.SERVICE_DESCRIPTION);
 			properties.put(Constants.SERVICE_PID, SERVICE_PID);

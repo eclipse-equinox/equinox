@@ -56,7 +56,7 @@ final class SubgraphTraverser {
 	}
 
 	private Set<Region> extendPath(Region r, Set<Region> path) {
-		Set<Region> newPath = new HashSet<Region>(path);
+		Set<Region> newPath = new HashSet<>(path);
 		newPath.add(r);
 		return newPath;
 	}

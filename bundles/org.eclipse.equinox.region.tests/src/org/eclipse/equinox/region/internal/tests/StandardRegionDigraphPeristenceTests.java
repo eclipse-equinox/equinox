@@ -42,7 +42,7 @@ public class StandardRegionDigraphPeristenceTests {
 		StubBundle stubSystemBundle = new StubBundle(0L, "osgi.framework", new Version("0"), "loc");
 		systemBundleContext = (StubBundleContext) stubSystemBundle.getBundleContext();
 		systemBundleContext.addInstalledBundle(stubSystemBundle);
-		threadLocal = new ThreadLocal<Region>();
+		threadLocal = new ThreadLocal<>();
 		this.digraph = RegionReflectionUtils.newStandardRegionDigraph(systemBundleContext, threadLocal);
 		this.persistence = digraph.getRegionDigraphPersistence();
 		Region boot = digraph.createRegion(BOOT_REGION);
@@ -80,7 +80,7 @@ public class StandardRegionDigraphPeristenceTests {
 
 	@Test
 	public void testMultiConnection() throws BundleException, InvalidSyntaxException, IOException {
-		List<Region> tails = new ArrayList<Region>();
+		List<Region> tails = new ArrayList<>();
 		// create multiple connections between each region
 		for (Region head : digraph) {
 			for (Region tail : tails) {
@@ -94,7 +94,7 @@ public class StandardRegionDigraphPeristenceTests {
 
 	@Test
 	public void testMultiConnectionCycle() throws BundleException, InvalidSyntaxException, IOException {
-		List<Region> tails = new ArrayList<Region>();
+		List<Region> tails = new ArrayList<>();
 		for (Region region : digraph) {
 			tails.add(region);
 		}
@@ -168,11 +168,8 @@ public class StandardRegionDigraphPeristenceTests {
 	}
 
 	private void readDigraph(byte[] byteArray) throws IOException {
-		ByteArrayInputStream input = new ByteArrayInputStream(byteArray);
-		try {
+		try (ByteArrayInputStream input = new ByteArrayInputStream(byteArray)) {
 			persistence.load(input);
-		} finally {
-			input.close();
 		}
 	}
 
@@ -250,7 +247,7 @@ public class StandardRegionDigraphPeristenceTests {
 
 	static void assertEquals(Set<FilteredRegion> edges1, Set<FilteredRegion> edges2) {
 		Assert.assertEquals(edges1.size(), edges2.size());
-		Map<String, RegionFilter> edges2Map = new HashMap<String, RegionFilter>();
+		Map<String, RegionFilter> edges2Map = new HashMap<>();
 		for (FilteredRegion edge2 : edges2) {
 			edges2Map.put(edge2.getRegion().getName(), edge2.getFilter());
 		}

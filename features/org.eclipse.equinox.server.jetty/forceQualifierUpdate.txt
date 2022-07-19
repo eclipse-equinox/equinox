@@ -50,3 +50,4 @@ Bug 574035 - Update to Jetty 10.0.5
 Bug 575313 - Update to Jetty 10.0.6 
 Update to Jetty 10.0.9
 [Features] Leverage transitive inclusion and build source-features: https://github.com/eclipse-equinox/equinox.bundles/pull/20
+Update to Jetty 10.0.11

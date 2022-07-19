@@ -1,2 +1,9 @@
 -jpms-module-info: ${project.artifactId};access='OPEN';version=${versionmask;===;${version_cleanup;${project.version}}}
--jpms-module-info-options: java.management;ignore="true"
+-jpms-module-info-options: jdk.unsupported;static="true",java.management;ignore="true"
+
+-include: ~META-INF/MANIFEST.MF
+
+Require-Capability: \
+ osgi.serviceloader;osgi.serviceloader="org.osgi.framework.connect.FrameworkUtilHelper"
+ 
+

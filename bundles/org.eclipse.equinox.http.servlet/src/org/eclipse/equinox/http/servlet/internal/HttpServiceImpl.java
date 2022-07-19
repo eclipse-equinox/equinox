@@ -185,7 +185,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 
 		if (httpContextHolder == null) {
 			String legacyId= httpContext.getClass().getName().replaceAll("[^a-zA-Z_0-9\\-]", "_") + "-" + generateLegacyId(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			Dictionary<String, Object> props = new Hashtable<String, Object>();
+			Dictionary<String, Object> props = new Hashtable<>();
 			props.put(HTTP_WHITEBOARD_CONTEXT_NAME, legacyId);
 			props.put(HTTP_WHITEBOARD_CONTEXT_PATH, "/"); //$NON-NLS-1$
 			props.put(HTTP_WHITEBOARD_TARGET, httpServiceRuntime.getTargetFilter());
