@@ -28,6 +28,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.container.ModuleRevision;
 import org.eclipse.osgi.framework.eventmgr.CopyOnWriteIdentityMap;
@@ -38,6 +40,7 @@ import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.internal.messages.Msg;
+import org.eclipse.osgi.internal.serviceregistry.ServiceUse.ServiceUseLock;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
@@ -112,6 +115,11 @@ public class ServiceRegistry {
 	private final EquinoxContainer container;
 	private final BundleContextImpl systemBundleContext;
 	final Debug debug;
+
+	/**
+	 * Map of threads awaiting ServiceUseLocks. Used for deadlock detection.
+	 */
+	private final ConcurrentMap<Thread, ServiceUseLock> awaitedUseLocks = new ConcurrentHashMap<>();
 
 	/**
 	 * Initializes the internal data structures of this ServiceRegistry.
@@ -1446,5 +1454,9 @@ public class ServiceRegistry {
 
 	final EquinoxContainer getContainer() {
 		return container;
+	}
+
+	ConcurrentMap<Thread, ServiceUseLock> getAwaitedUseLocks() {
+		return awaitedUseLocks;
 	}
 }
