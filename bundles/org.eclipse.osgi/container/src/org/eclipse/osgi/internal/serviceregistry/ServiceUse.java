@@ -17,7 +17,6 @@ package org.eclipse.osgi.internal.serviceregistry;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -55,7 +54,7 @@ public class ServiceUse<S> {
 
 	/**
 	 * ServiceUseLock for this service use. Use the @{@link #lock()} method to lock
-	 * the lock and obtain a {@link ServiceUseUnlock} object which is used to unlock
+	 * the lock and obtain an {@link AutoCloseable} object which is used to unlock
 	 * the lock.
 	 */
 	private final ServiceUseLock lock = new ServiceUseLock();
@@ -218,17 +217,15 @@ public class ServiceUse<S> {
 
 	/**
 	 * The ServiceUseLock for managing access to this ServiceUse.
+	 * <p>
+	 * Use {@link #lock()} to lock the ServiceUseLock in a try-with-resources
+	 * statement.
 	 * 
 	 * @return The ServiceUseLock for this ServiceUse.
 	 */
 	ServiceUseLock getLock() {
 		return lock;
 	}
-
-	/**
-	 * Map of threads awaiting ServiceUseLocks. Used for deadlock detection.
-	 */
-	private static final ConcurrentMap<Thread, ServiceUseLock> AWAITED_LOCKS = new ConcurrentHashMap<>();
 
 	/**
 	 * Acquires the ServiceUseLock of this ServiceUse.
@@ -252,14 +249,7 @@ public class ServiceUse<S> {
 						return useLock;
 					}
 					awaitingThread = Thread.currentThread();
-					AWAITED_LOCKS.put(awaitingThread, useLock);
-					if (isDeadLocked(useLock, awaitingThread)) {
-						throw new ServiceException(NLS.bind(Msg.SERVICE_USE_DEADLOCK, useLock));
-					}
-					// Not (yet) a dead-lock. Lock was regularly hold by another thread. Try again.
-					// Race conditions are not an issue here. A deadlock is a static situation and
-					// if we closely missed the other thread putting its awaited lock it will be
-					// noticed in the next loop-pass.
+					checkDeadLock(awaitingThread, useLock);
 				} catch (InterruptedException e) {
 					interrupted = true;
 					// Clear interrupted status and try again to lock, just like a plain
@@ -268,7 +258,7 @@ public class ServiceUse<S> {
 			}
 		} finally {
 			if (awaitingThread != null) {
-				AWAITED_LOCKS.remove(awaitingThread);
+				registration.getAwaitedUseLocks().remove(awaitingThread);
 			}
 			if (interrupted) {
 				Thread.currentThread().interrupt();
@@ -276,18 +266,26 @@ public class ServiceUse<S> {
 		}
 	}
 
-	private static boolean isDeadLocked(ServiceUseLock lock, Thread currentThread) {
-		// Check if current thread is in the cycle of mutually awaiting thead-lock pairs
-		int maxCycles = AWAITED_LOCKS.size();
+	private void checkDeadLock(final Thread currentThread, final ServiceUseLock currentLock) {
+		final ConcurrentMap<Thread, ServiceUseLock> awaitedUseLocks = registration.getAwaitedUseLocks();
+		awaitedUseLocks.put(currentThread, currentLock);
+		// Check if current thread is in the cycle of mutually awaiting thread-lock
+		// pairs
+		ServiceUseLock useLock = currentLock;
+		int maxCycles = awaitedUseLocks.size();
 		for (int i = 0; i < maxCycles; i++) { // Prevent infinite loop
-			Thread owner = lock.getOwner();
+			Thread owner = useLock.getOwner();
 			if (owner == currentThread) {
-				return true;
-			} else if (owner == null || (lock = AWAITED_LOCKS.get(owner)) == null) {
-				return false; // lock could be released in the meantime
+				throw new ServiceException(NLS.bind(Msg.SERVICE_USE_DEADLOCK, currentLock), DEADLOCK);
+			}
+			if (owner == null || (useLock = awaitedUseLocks.get(owner)) == null) {
+				break; // lock could be released in the meantime
 			}
 		}
-		return false;
+		// Not (yet) a dead-lock. Lock was regularly hold by another thread.
+		// Race conditions are not an issue here. A deadlock is a static situation and
+		// if we closely missed the other thread putting its awaited lock it will be
+		// noticed in the next loop-pass.
 	}
 
 	/**

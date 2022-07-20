@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
@@ -848,5 +849,9 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 				return null;
 			}
 		}
+	}
+
+	ConcurrentMap<Thread, ServiceUseLock> getAwaitedUseLocks() {
+		return registry.getAwaitedUseLocks();
 	}
 }
