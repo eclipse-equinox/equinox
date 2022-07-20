@@ -28,7 +28,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
 @RunWith(Parameterized.class)
-public class AbstractStringMatcherTestBase {
+public abstract class AbstractStringMatcherTestBase {
 
 	/** Marker in test inputs for empty strings. */
 	private static final String EMPTY = "<empty>";
