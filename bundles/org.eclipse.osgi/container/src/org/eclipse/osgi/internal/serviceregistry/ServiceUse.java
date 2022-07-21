@@ -228,7 +228,7 @@ public class ServiceUse<S> {
 	}
 
 	/**
-	 * Acquires the ServiceUseLock of this ServiceUse.
+	 * Acquires the {@link ServiceUseLock} of this ServiceUse.
 	 * 
 	 * If this ServiceUse is locked by another thread then the current thread lies
 	 * dormant until the lock has been acquired.
@@ -269,11 +269,12 @@ public class ServiceUse<S> {
 	private void checkDeadLock(final Thread currentThread, final ServiceUseLock currentLock) {
 		final ConcurrentMap<Thread, ServiceUseLock> awaitedUseLocks = registration.getAwaitedUseLocks();
 		awaitedUseLocks.put(currentThread, currentLock);
-		// Check if current thread is in the cycle of mutually awaiting thread-lock
-		// pairs
 		ServiceUseLock useLock = currentLock;
-		int maxCycles = awaitedUseLocks.size();
-		for (int i = 0; i < maxCycles; i++) { // Prevent infinite loop
+		// Check if current thread is in the cycle of mutually awaiting thread-lock
+		// pairs, but prevent infinite loop if current thread awaits a dead-locked lock
+		// but is itself not in the cycle.
+		int maxLocks = awaitedUseLocks.size();
+		for (int i = 0; i < maxLocks; i++) {
 			Thread owner = useLock.getOwner();
 			if (owner == currentThread) {
 				throw new ServiceException(NLS.bind(Msg.SERVICE_USE_DEADLOCK, currentLock), DEADLOCK);
@@ -282,7 +283,7 @@ public class ServiceUse<S> {
 				break; // lock could be released in the meantime
 			}
 		}
-		// Not (yet) a dead-lock. Lock was regularly hold by another thread.
+		// Not (yet) a dead-lock. Lock was probably regularly hold by another thread.
 		// Race conditions are not an issue here. A deadlock is a static situation and
 		// if we closely missed the other thread putting its awaited lock it will be
 		// noticed in the next loop-pass.
@@ -291,9 +292,9 @@ public class ServiceUse<S> {
 	/**
 	 * ReentrantLock subclass that allows for {@link AutoCloseable} unlocking.
 	 * <p>
-	 * This lock is unlocked if the close method on {@link ServiceUseUnlock} is
-	 * invoked. ServiceUseUnlock objects can therefore can be used as a resource in
-	 * a try-with-resources statement.
+	 * This lock is unlocked if its {@code close()} method is invoked.
+	 * ServiceUseLock objects can therefore can be used as a resource in a
+	 * try-with-resources statement.
 	 * <p>
 	 * Also exposes {@link #getOwner()} and has an enhanced {@link #toString()}.
 	 * 
