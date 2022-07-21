@@ -71,9 +71,7 @@ public class PolicyOptionComp implements PropertiesProvider {
     }
 
     if (newProps != null) {
-      for (Object key : newProps.keySet()) {
-        result.put(key, newProps.get(key));
-      }
+    	newProps.forEach(result::put);
     }
 
     return result;

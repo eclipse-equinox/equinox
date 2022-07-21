@@ -853,6 +853,7 @@ final class StateReader {
 			return;
 		int i = 0;
 		for (BundleDescriptionImpl bundle : toLoad) {
+			// insert the target into the list sorted by lazy data offsets
 			if (target.getLazyDataOffset() < bundle.getLazyDataOffset())
 				break;
 			i++;
