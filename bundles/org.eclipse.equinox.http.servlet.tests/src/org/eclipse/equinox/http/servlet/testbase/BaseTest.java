@@ -228,12 +228,11 @@ public class BaseTest {
 		}
 		else if (Collection.class.isInstance(property)) {
 			List<String> list = new ArrayList<>();
-			for (Object o : ((Collection) property)) {
-
-			if (String.class.isInstance(o)) {
-				list.add((String)o);
+			for (Object o : ((Collection<?>) property)) {
+				if (o instanceof String) {
+					list.add((String) o);
+				}
 			}
-}
 			return list;
 		}
 		return Collections.emptyList();
