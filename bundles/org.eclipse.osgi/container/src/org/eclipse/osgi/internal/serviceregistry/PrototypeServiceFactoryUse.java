@@ -20,7 +20,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.messages.Msg;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.PrototypeServiceFactory;
+import org.osgi.framework.ServiceException;
+import org.osgi.framework.ServiceRegistration;
 
 /**
  * This class represents the use of a service by a bundle. One is created for each
@@ -33,7 +36,7 @@ import org.osgi.framework.*;
  */
 public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	/** Service objects returned by PrototypeServiceFactory.getService() and their use count. */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	private final Map<S, AtomicInteger> serviceObjects;
 
 	/**
@@ -54,12 +57,13 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	 *
 	 * @return The service object.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	@Override
 	S newServiceObject() {
-		assert Thread.holdsLock(this);
+		assert getLock().isHeldByCurrentThread();
 		if (debug.DEBUG_SERVICES) {
-			Debug.println("getServiceObject[factory=" + registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			Debug.println('[' + Thread.currentThread().getName() + "] getServiceObject[PSfactory=" //$NON-NLS-1$
+					+ registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		final S service = factoryGetService();
 		if (service == null) {
@@ -85,15 +89,17 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	 * @throws IllegalArgumentException If the specified service was not
 	 *         provided by this object.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	@Override
 	boolean releaseServiceObject(final S service) {
-		assert Thread.holdsLock(this);
+		assert getLock().isHeldByCurrentThread();
 		if ((service == null) || !serviceObjects.containsKey(service)) {
 			throw new IllegalArgumentException(Msg.SERVICE_OBJECTS_UNGET_ARGUMENT_EXCEPTION);
 		}
 		if (debug.DEBUG_SERVICES) {
-			Debug.println("ungetService[factory=" + registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			Debug.println(
+					'[' + Thread.currentThread().getName() + "] ungetService[PSfactory=" + registration.getBundle() //$NON-NLS-1$
+					+ "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		AtomicInteger useCount = serviceObjects.get(service);
 		if (useCount.decrementAndGet() < 1) {
@@ -112,13 +118,14 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	 * is called to release the service object for the bundle.
 	 * </ol>
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	@Override
 	void release() {
 		super.release();
 		for (S service : serviceObjects.keySet()) {
 			if (debug.DEBUG_SERVICES) {
-				Debug.println("releaseService[factory=" + registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				Debug.println('[' + Thread.currentThread().getName() + "] releaseService[PSfactory=" //$NON-NLS-1$
+						+ registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			factoryUngetService(service);
 		}
@@ -130,7 +137,7 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	 *
 	 * @return true if no services are being used and this service use can be discarded.
 	 */
-	/* @GuardedBy("this") */
+	/* @GuardedBy("getLock()") */
 	@Override
 	boolean isEmpty() {
 		return super.isEmpty() && serviceObjects.isEmpty();

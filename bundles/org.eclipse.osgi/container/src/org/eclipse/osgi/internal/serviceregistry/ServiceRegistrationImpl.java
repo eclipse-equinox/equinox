@@ -18,10 +18,13 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.loader.sources.PackageSource;
 import org.eclipse.osgi.internal.messages.Msg;
+import org.eclipse.osgi.internal.serviceregistry.ServiceUse.ServiceUseLock;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
@@ -507,19 +510,19 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		}
 
 		if (registry.debug.DEBUG_SERVICES) {
-			Debug.println("getService[" + user.getBundleImpl() + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			Debug.println("[" + Thread.currentThread().getName() + "] getService[" + user.getBundleImpl() + "](" + this //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					+ ")"); //$NON-NLS-1$
 		}
 		/* Use a while loop to support retry if a call to a ServiceFactory fails */
 		while (true) {
-			ServiceUse<S> use;
-			boolean added = false;
+			final ServiceUse<S> use;
+			final boolean added;
 			/* Obtain the ServiceUse object for this service by bundle user */
 			synchronized (servicesInUse) {
 				user.checkValid();
 				@SuppressWarnings("unchecked")
 				ServiceUse<S> u = (ServiceUse<S>) servicesInUse.get(this);
-				use = u;
-				if (use == null) {
+				if (u == null) {
 					/* if this is the first use of the service
 					 * optimistically record this service is being used. */
 					use = newServiceUse(user);
@@ -531,23 +534,42 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 						servicesInUse.put(this, use);
 						contextsUsing.add(user);
 					}
+				} else {
+					use = u;
+					added = false;
 				}
 			}
 
 			/* Obtain and return the service object */
-			synchronized (use) {
-				/* if another thread removed the ServiceUse, then
-				 * go back to the top and start again */
+			try (ServiceUseLock locked = use.lock()) {
+				if (registry.debug.DEBUG_SERVICES) {
+					ReentrantLock useLock = use.getLock();
+					Debug.println("[" + Thread.currentThread().getName() + "] getServiceLock[" //$NON-NLS-1$ //$NON-NLS-2$
+							+ user.getBundleImpl() + "](" + this + "), id:" + System.identityHashCode(useLock) //$NON-NLS-1$ //$NON-NLS-2$
+							+ ". holdCount:" + useLock.getHoldCount() //$NON-NLS-1$
+							+ ", queued:" + useLock.getQueueLength()); //$NON-NLS-1$
+				}
+
+				/*
+				 * if another thread removed the ServiceUse, then go back to the top and start
+				 * again
+				 */
 				synchronized (servicesInUse) {
 					user.checkValid();
 					if (servicesInUse.get(this) != use) {
+						if (registry.debug.DEBUG_SERVICES) {
+							Debug.println("[" + Thread.currentThread().getName() + "] getServiceContinue[" //$NON-NLS-1$ //$NON-NLS-2$
+									+ user.getBundleImpl() + "](" + this //$NON-NLS-1$
+									+ ")"); //$NON-NLS-1$
+						}
 						continue;
 					}
 				}
 				S serviceObject = consumer.getService(use);
-				/* if the service factory failed to return an object and
-				 * we created the service use, then remove the
-				 * optimistically added ServiceUse. */
+				/*
+				 * if the service factory failed to return an object and we created the service
+				 * use, then remove the optimistically added ServiceUse.
+				 */
 				if ((serviceObject == null) && added) {
 					synchronized (servicesInUse) {
 						synchronized (registrationLock) {
@@ -561,6 +583,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		}
 	}
 
+
 	/**
 	 * Create a new ServiceObjects for the requesting bundle.
 	 *
@@ -572,7 +595,8 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 			return null;
 		}
 		if (registry.debug.DEBUG_SERVICES) {
-			Debug.println("getServiceObjects[" + user.getBundleImpl() + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			Debug.println("[" + Thread.currentThread().getName() + "] getServiceObjects[" + user.getBundleImpl() + "](" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					+ this + ")"); //$NON-NLS-1$
 		}
 
 		return new ServiceObjectsImpl<>(user, this);
@@ -614,7 +638,8 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		}
 
 		if (registry.debug.DEBUG_SERVICES) {
-			Debug.println("ungetService[" + user.getBundleImpl() + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			Debug.println("[" + Thread.currentThread().getName() + "] ungetService[" + user.getBundleImpl() + "](" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					+ this + ")"); //$NON-NLS-1$
 		}
 
 		ServiceUse<S> use;
@@ -627,9 +652,15 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 			}
 		}
 
-		boolean result;
-		synchronized (use) {
-			result = consumer.ungetService(use, serviceObject);
+		try (ServiceUseLock locked = use.lock()) {
+			if (registry.debug.DEBUG_SERVICES) {
+				ReentrantLock useLock = use.getLock();
+				Debug.println("[" + Thread.currentThread().getName() + "] ungetServiceLock[" + user.getBundleImpl() //$NON-NLS-1$ //$NON-NLS-2$
+						+ "](" + this + "), id:" + System.identityHashCode(useLock) + ", holdCount:" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						+ useLock.getHoldCount() + ", queued:" + useLock.getQueueLength()); //$NON-NLS-1$
+			}
+
+			boolean result = consumer.ungetService(use, serviceObject);
 			if (use.isEmpty()) { /* service use can be discarded */
 				synchronized (servicesInUse) {
 					synchronized (registrationLock) {
@@ -638,8 +669,8 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 					}
 				}
 			}
+			return result;
 		}
-		return result;
 	}
 
 	/**
@@ -674,7 +705,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 				contextsUsing.remove(user);
 			}
 		}
-		synchronized (use) {
+		try (ServiceUseLock locked = use.lock()) {
 			use.release();
 		}
 	}
@@ -818,5 +849,9 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 				return null;
 			}
 		}
+	}
+
+	ConcurrentMap<Thread, ServiceUseLock> getAwaitedUseLocks() {
+		return registry.getAwaitedUseLocks();
 	}
 }
