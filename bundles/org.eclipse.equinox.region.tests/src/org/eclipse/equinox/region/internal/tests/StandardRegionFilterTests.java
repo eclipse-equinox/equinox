@@ -25,12 +25,12 @@ import java.util.*;
 import org.eclipse.equinox.region.RegionFilter;
 import org.eclipse.equinox.region.RegionFilterBuilder;
 import org.eclipse.virgo.teststubs.osgi.framework.*;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.osgi.framework.*;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
 
+@Ignore
 public class StandardRegionFilterTests {
 
 	private static final String BUNDLE_SYMBOLIC_NAME = "A";
