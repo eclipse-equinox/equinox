@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.3.0" name="org.eclipse.equinox.ds.tests.LazyServiceComponentActivationDeadLockTest$Component1">
+   <service>
+      <provide interface="org.eclipse.equinox.ds.tests.LazyServiceComponentActivationDeadLockTest$Component1"/>
+   </service>
+   <reference cardinality="1..1" field="a" interface="org.eclipse.equinox.ds.tests.LazyServiceComponentActivationDeadLockTest$Component2" name="a"/>
+   <reference cardinality="1..1" field="b" interface="org.eclipse.equinox.ds.tests.LazyServiceComponentActivationDeadLockTest$Component4" name="b"/>
+   <implementation class="org.eclipse.equinox.ds.tests.LazyServiceComponentActivationDeadLockTest$Component1"/>
+</scr:component>
