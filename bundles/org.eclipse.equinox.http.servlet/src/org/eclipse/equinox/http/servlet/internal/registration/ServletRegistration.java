@@ -37,13 +37,17 @@ public class ServletRegistration extends EndpointRegistration<ServletDTO> {
 	static {
 		ServiceLoader<MultipartSupportFactory> loader = ServiceLoader.load(MultipartSupportFactory.class);
 
-		for (MultipartSupportFactory element : loader) {
+		Iterator<MultipartSupportFactory> iterator = loader.iterator();
+
+		while (iterator.hasNext()) {
 			try {
-				factory = element;
+				// Note: we intentionally trigger next() inside the try/catch block
+				// to fail early if optional imports are missing
+				factory = iterator.next();
 				break;
 			}
 			catch (Throwable t) {
-				// ignore, it means our optional imports are missing.
+				// ignore ServiceConfigurationError, it means our optional imports are missing.
 			}
 		}
 	}
