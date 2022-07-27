@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,6 +58,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.connect.ConnectContent;
 import org.osgi.framework.connect.ConnectModule;
+import org.osgi.framework.connect.FrameworkUtilHelper;
 import org.osgi.framework.connect.ModuleConnector;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -154,6 +156,9 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 		final File fwkStore = new File(configUrl.getPath());
 		@SuppressWarnings({"rawtypes", "unchecked"})
 		Map<String, String> config = (Map) equinoxConfig.getInitialConfig();
+		if (moduleConnector instanceof FrameworkUtilHelper) {
+			ConnectFrameworkUtilHelper.add((FrameworkUtilHelper) moduleConnector);
+		}
 		moduleConnector.initialize(fwkStore, Collections.unmodifiableMap(config));
 	}
 
@@ -174,6 +179,13 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	}
 
 	public Bundle getBundle(Class<?> clazz) {
+		if (connectModules.moduleConnector instanceof FrameworkUtilHelper) {
+			FrameworkUtilHelper helper = (FrameworkUtilHelper) connectModules.moduleConnector;
+			Optional<Bundle> bundle = helper.getBundle(clazz);
+			if (bundle.isPresent()) {
+				return bundle.get();
+			}
+		}
 		Bundle b = FrameworkUtil.getBundle(clazz);
 		if (b != null) {
 			return b;
@@ -214,6 +226,10 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 	}
 
 	void init() {
+		if (connectModules.moduleConnector instanceof FrameworkUtilHelper) {
+			FrameworkUtilHelper helper = (FrameworkUtilHelper) connectModules.moduleConnector;
+			ConnectFrameworkUtilHelper.add(helper);
+		}
 		eventPublisher.init();
 		synchronized (this.monitor) {
 			serviceRegistry = new ServiceRegistry(this);
@@ -240,6 +256,12 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 		currentStorage.close();
 		// Must be done last since it will result in termination of the
 		// framework active thread.
+		if (connectModules.moduleConnector instanceof FrameworkUtilHelper) {
+			FrameworkUtilHelper helper = (FrameworkUtilHelper) connectModules.moduleConnector;
+			currentExecutor.execute(() -> {
+				ConnectFrameworkUtilHelper.remove(helper);
+			});
+		}
 		currentExecutor.shutdown();
 	}
 
