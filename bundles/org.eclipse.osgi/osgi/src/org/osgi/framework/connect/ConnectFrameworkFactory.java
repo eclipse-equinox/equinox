@@ -74,6 +74,6 @@ public interface ConnectFrameworkFactory {
 	 *             supports permissions.
 	 * @see ModuleConnector
 	 */
-	Framework newFramework(Map<String,String> configuration,
+	ConnectFramework newFramework(Map<String, String> configuration,
 			ModuleConnector moduleConnector);
 }
