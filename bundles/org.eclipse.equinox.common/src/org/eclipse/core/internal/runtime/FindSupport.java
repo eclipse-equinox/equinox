@@ -36,15 +36,17 @@ public class FindSupport {
 
 	private static String[] buildNLVariants(String nl) {
 		ArrayList<String> result = new ArrayList<>();
-		IPath base = new Path("nl"); //$NON-NLS-1$
+		if (nl != null) {
+			IPath base = new Path("nl"); //$NON-NLS-1$
 
-		IPath path = new Path(nl.replace('_', '/'));
-		while (path.segmentCount() > 0) {
-			result.add(base.append(path).toString());
-			// for backwards compatibility only, don't replace the slashes
-			if (path.segmentCount() > 1)
-				result.add(base.append(path.toString().replace('/', '_')).toString());
-			path = path.removeLastSegments(1);
+			IPath path = new Path(nl.replace('_', '/'));
+			while (path.segmentCount() > 0) {
+				result.add(base.append(path).toString());
+				// for backwards compatibility only, don't replace the slashes
+				if (path.segmentCount() > 1)
+					result.add(base.append(path.toString().replace('/', '_')).toString());
+				path = path.removeLastSegments(1);
+			}
 		}
 
 		return result.toArray(new String[result.size()]);
