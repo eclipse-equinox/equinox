@@ -168,6 +168,10 @@ final class ModuleResolver {
 	 * @throws ResolutionException
 	 */
 	ModuleResolutionReport resolveDelta(Collection<ModuleRevision> triggers, boolean triggersMandatory, Collection<ModuleRevision> unresolved, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDatabase moduleDatabase) {
+		if (!triggersMandatory) {
+			// we are just resolving all bundles optionally
+			triggers = unresolved;
+		}
 		ResolveProcess resolveProcess = new ResolveProcess(unresolved, triggers, triggersMandatory, wiringCopy, moduleDatabase);
 		return resolveProcess.resolve();
 	}
@@ -498,7 +502,6 @@ final class ModuleResolver {
 		 */
 		private final Collection<ModuleRevision> disabled;
 		private final Collection<ModuleRevision> triggers;
-		private final Collection<ModuleRevision> optionals;
 		private final boolean triggersMandatory;
 		final ModuleDatabase moduleDatabase;
 		final Map<ModuleRevision, ModuleWiring> wirings;
@@ -528,13 +531,6 @@ final class ModuleResolver {
 			this.disabled = new HashSet<>(unresolved);
 			this.triggers = new ArrayList<>(triggers);
 			this.triggersMandatory = triggersMandatory;
-			this.optionals = new LinkedHashSet<>(unresolved);
-			if (this.triggersMandatory) {
-				// do this the hard way because the 'optimization' in removeAll hurts us
-				for (ModuleRevision triggerRevision : triggers) {
-					this.optionals.remove(triggerRevision);
-				}
-			}
 			this.wirings = new HashMap<>(wirings);
 			this.previouslyResolved = new HashSet<>(wirings.keySet());
 			this.moduleDatabase = moduleDatabase;
@@ -548,7 +544,6 @@ final class ModuleResolver {
 			this.triggers = new ArrayList<>(1);
 			this.triggers.add(revision);
 			this.triggersMandatory = false;
-			this.optionals = new ArrayList<>(unresolved);
 			this.wirings = wirings;
 			this.previouslyResolved = new HashSet<>(wirings.keySet());
 			this.moduleDatabase = moduleDatabase;
@@ -882,8 +877,7 @@ final class ModuleResolver {
 				try {
 					filterResolvable();
 					selectSingletons();
-					// remove disabled from optional and triggers to prevent the resolver from resolving them
-					optionals.removeAll(disabled);
+					// remove disabled from triggers to prevent the resolver from resolving them
 					if (triggers.removeAll(disabled) && triggersMandatory) {
 						throw new ResolutionException(Msg.ModuleResolver_SingletonDisabledError + disabled);
 					}
@@ -898,15 +892,10 @@ final class ModuleResolver {
 							// so they no longer attempt to be resolved
 							Set<Resource> fragmentResources = dynamicAttachWirings.keySet();
 							triggers.removeAll(fragmentResources);
-							optionals.removeAll(fragmentResources);
 
 							result.putAll(dynamicAttachWirings);
 						}
-						if (triggersMandatory) {
-							resolveRevisionsInBatch(triggers, true, logger, result);
-						}
-
-						resolveRevisionsInBatch(optionals, false, logger, result);
+						resolveRevisionsInBatch(triggers, triggersMandatory, logger, result);
 					}
 				} catch (ResolutionException e) {
 					re = e;
@@ -1263,14 +1252,9 @@ final class ModuleResolver {
 			// It is also useful for things like NLS fragments that are installed later
 			// without the need to refresh the host.
 			List<ModuleRevision> dynamicAttachableFrags = new ArrayList<>();
-			if (triggersMandatory) {
-				for (ModuleRevision moduleRevision : triggers) {
-					if ((moduleRevision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
-						dynamicAttachableFrags.add(moduleRevision);
-					}
-				}
-			}
-			for (ModuleRevision moduleRevision : optionals) {
+			// We check all unresolved here, not just the triggers;
+			// This is to allow all the candidate fragments of a host to be considered
+			for (ModuleRevision moduleRevision : unresolved) {
 				if ((moduleRevision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
 					dynamicAttachableFrags.add(moduleRevision);
 				}

@@ -740,10 +740,16 @@ public class TestModuleContainer extends AbstractTest {
 		// throw away installed events
 		database.getModuleEvents();
 
+		// this will only resolve what is required by c7
 		c7.start();
 
 		List<DummyModuleEvent> actual = database.getModuleEvents();
-		List<DummyModuleEvent> expected = new ArrayList<>(Arrays.asList(new DummyModuleEvent(c1, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c2, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c3, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c5, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c7, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c7, ModuleEvent.STARTING, State.STARTING), new DummyModuleEvent(c7, ModuleEvent.STARTED, State.ACTIVE)));
+		List<DummyModuleEvent> expected = new ArrayList<>(Arrays.asList(//
+				new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED), //
+				new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED), //
+				new DummyModuleEvent(c7, ModuleEvent.RESOLVED, State.RESOLVED), //
+				new DummyModuleEvent(c7, ModuleEvent.STARTING, State.STARTING), //
+				new DummyModuleEvent(c7, ModuleEvent.STARTED, State.ACTIVE)));
 		assertEvents(expected, actual, false);
 	}
 
@@ -764,12 +770,28 @@ public class TestModuleContainer extends AbstractTest {
 		Module c6 = installDummyModule("c6_v1.MF", "c6_v1", container);
 		Module c7 = installDummyModule("c7_v1.MF", "c7_v1", container);
 
+		// Note that if the trigger is not mandatory then we resolve all unresolved
+		// bundles
+		container.resolve(Collections.singleton(c7), false);
 		c7.start();
+
 		// discard events
 		database.getModuleEvents();
 		container.refresh(Arrays.asList(c4));
 		List<DummyModuleEvent> actual = database.getModuleEvents();
-		List<DummyModuleEvent> expected = new ArrayList<>(Arrays.asList(new DummyModuleEvent(c7, ModuleEvent.STOPPING, State.STOPPING), new DummyModuleEvent(c7, ModuleEvent.STOPPED, State.RESOLVED), new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c5, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c5, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c7, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c7, ModuleEvent.STARTING, State.STARTING),
+
+		List<DummyModuleEvent> expected = new ArrayList<>(Arrays.asList( //
+				new DummyModuleEvent(c7, ModuleEvent.STOPPING, State.STOPPING), //
+				new DummyModuleEvent(c7, ModuleEvent.STOPPED, State.RESOLVED), //
+				new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), //
+				new DummyModuleEvent(c5, ModuleEvent.UNRESOLVED, State.INSTALLED), //
+				new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), //
+				new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED), //
+				new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED), //
+				new DummyModuleEvent(c5, ModuleEvent.RESOLVED, State.RESOLVED), //
+				new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED), //
+				new DummyModuleEvent(c7, ModuleEvent.RESOLVED, State.RESOLVED), //
+				new DummyModuleEvent(c7, ModuleEvent.STARTING, State.STARTING), //
 				new DummyModuleEvent(c7, ModuleEvent.STARTED, State.ACTIVE)));
 		assertEvents(expected, actual, false);
 	}
@@ -826,13 +848,25 @@ public class TestModuleContainer extends AbstractTest {
 		Assert.assertEquals("Wrong number of removal pending", 0, removalPending.size());
 
 		List<DummyModuleEvent> actual = database.getModuleEvents();
-		List<DummyModuleEvent> expected = new ArrayList<>(Arrays.asList(new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.UPDATED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED),
-
-				new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.UPDATED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED),
-
-				new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.UPDATED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.UPDATED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED),
-
-				new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED), new DummyModuleEvent(c7, ModuleEvent.RESOLVED, State.RESOLVED)));
+		List<DummyModuleEvent> expected = new ArrayList<>(Arrays.asList(//
+				new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), //
+				new DummyModuleEvent(c4, ModuleEvent.UPDATED, State.INSTALLED), //
+				new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED), //
+				new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), //
+				new DummyModuleEvent(c6, ModuleEvent.UPDATED, State.INSTALLED), //
+				new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED), //
+				new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), //
+				new DummyModuleEvent(c4, ModuleEvent.UPDATED, State.INSTALLED), //
+				new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), //
+				new DummyModuleEvent(c6, ModuleEvent.UPDATED, State.INSTALLED), //
+				new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED), //
+				new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED), //
+				new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), //
+				new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), //
+				new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED), //
+				new DummyModuleEvent(c4, ModuleEvent.RESOLVED, State.RESOLVED), //
+				new DummyModuleEvent(c6, ModuleEvent.RESOLVED, State.RESOLVED), //
+				new DummyModuleEvent(c7, ModuleEvent.RESOLVED, State.RESOLVED)));
 		assertEvents(expected, actual, false);
 
 		// uninstall c4
@@ -844,13 +878,17 @@ public class TestModuleContainer extends AbstractTest {
 
 		container.refresh(null);
 		actual = database.getModuleEvents();
-		expected = new ArrayList<>(Arrays.asList(new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.UNINSTALLED, State.UNINSTALLED), new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED)));
+		expected = new ArrayList<>(Arrays.asList(//
+				new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), //
+				new DummyModuleEvent(c4, ModuleEvent.UNINSTALLED, State.UNINSTALLED), //
+				new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), //
+				new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED)));
 		assertEvents(expected, actual, false);
 
 		// Test bug 411833
-		// install c4 again and resolve c6
+		// install c4 again and resolve c6 and c7
 		c4 = installDummyModule("c4_v1.MF", "c4_v1", container);
-		container.resolve(Arrays.asList(c6), true);
+		container.resolve(Arrays.asList(c6, c7), true);
 		// throw out installed and resolved events
 		database.getModuleEvents();
 
@@ -867,7 +905,11 @@ public class TestModuleContainer extends AbstractTest {
 
 		container.refresh(Collections.singletonList(c6));
 		actual = database.getModuleEvents();
-		expected = new ArrayList<>(Arrays.asList(new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c4, ModuleEvent.UNINSTALLED, State.UNINSTALLED), new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED)));
+		expected = new ArrayList<>(Arrays.asList(//
+				new DummyModuleEvent(c4, ModuleEvent.UNRESOLVED, State.INSTALLED), //
+				new DummyModuleEvent(c4, ModuleEvent.UNINSTALLED, State.UNINSTALLED), //
+				new DummyModuleEvent(c6, ModuleEvent.UNRESOLVED, State.INSTALLED), //
+				new DummyModuleEvent(c7, ModuleEvent.UNRESOLVED, State.INSTALLED)));
 		assertEvents(expected, actual, false);
 
 		removalPending = container.getRemovalPending();
@@ -3192,8 +3234,8 @@ public class TestModuleContainer extends AbstractTest {
 		systemFragManifest3.put(Constants.PROVIDE_CAPABILITY, "fragment.capability; fragment.capability=test3");
 		Module systemFrag3 = installDummyModule(systemFragManifest3, "systemFrag3", container);
 
-		ResolutionReport report = container.resolve(Arrays.asList(systemFrag3), true);
-		Assert.assertNotNull("Expected failure message", report.getResolutionException());
+		ResolutionReport report = container.resolve(Collections.emptyList(), false);
+		Assert.assertNotNull("Expected failure message", report.getEntries().get(systemFrag3.getCurrentRevision()));
 
 		List<ModuleWire> hostWires = systemBundle.getCurrentRevision().getWiring().getProvidedModuleWires(HostNamespace.HOST_NAMESPACE);
 		assertEquals("Wrong number of fragments.", 1, hostWires.size());

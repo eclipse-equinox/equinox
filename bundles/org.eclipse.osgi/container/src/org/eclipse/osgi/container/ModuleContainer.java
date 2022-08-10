@@ -518,8 +518,13 @@ public final class ModuleContainer implements DebugOptionsListener {
 	}
 
 	private ResolutionReport resolveAndApply(Collection<Module> triggers, boolean triggersMandatory, boolean restartTriggers, ResolutionLock.Permits resolutionPermits) {
-		if (triggers == null)
+		if (triggers == null) {
 			triggers = new ArrayList<>(0);
+		}
+		if (triggers.isEmpty()) {
+			// if there are no triggers then they cannot be mandatory
+			triggersMandatory = false;
+		}
 		Collection<ModuleRevision> triggerRevisions = new ArrayList<>(triggers.size());
 		Collection<ModuleRevision> unresolved = new ArrayList<>();
 		Map<ModuleRevision, ModuleWiring> wiringClone;
