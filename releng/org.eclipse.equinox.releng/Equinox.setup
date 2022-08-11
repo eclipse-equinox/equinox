@@ -31,11 +31,31 @@
   </annotation>
   <setupTask
       xsi:type="setup:CompoundTask"
-      name="refresh.enabled">
+      name="User Preferences">
     <setupTask
-        xsi:type="setup:PreferenceTask"
-        key="/instance/org.eclipse.core.resources/refresh.enabled"
-        value="true"/>
+        xsi:type="setup:CompoundTask"
+        name="org.eclipse.core.resources">
+      <setupTask
+          xsi:type="setup:PreferenceTask"
+          key="/instance/org.eclipse.core.resources/description.disableLinking"
+          value="false"/>
+      <setupTask
+          xsi:type="setup:PreferenceTask"
+          key="/instance/org.eclipse.core.resources/refresh.enabled"
+          value="true"/>
+    </setupTask>
+    <setupTask
+        xsi:type="setup:CompoundTask"
+        name="org.eclipse.ui.ide">
+      <setupTask
+          xsi:type="setup:PreferenceTask"
+          key="/instance/org.eclipse.ui.ide/IMPORT_FILES_AND_FOLDERS_MODE"
+          value="prompt"/>
+      <setupTask
+          xsi:type="setup:PreferenceTask"
+          key="/instance/org.eclipse.ui.ide/IMPORT_FILES_AND_FOLDERS_VIRTUAL_FOLDER_MODE"
+          value="prompt"/>
+    </setupTask>
   </setupTask>
   <setupTask
       xsi:type="setup:EclipseIniTask"
