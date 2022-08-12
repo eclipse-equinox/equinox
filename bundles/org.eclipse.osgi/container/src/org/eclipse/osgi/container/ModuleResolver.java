@@ -1255,7 +1255,8 @@ final class ModuleResolver {
 			// We check all unresolved here, not just the triggers;
 			// This is to allow all the candidate fragments of a host to be considered
 			for (ModuleRevision moduleRevision : unresolved) {
-				if ((moduleRevision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+				if ((moduleRevision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0
+						&& !disabled.contains(moduleRevision)) {
 					dynamicAttachableFrags.add(moduleRevision);
 				}
 			}

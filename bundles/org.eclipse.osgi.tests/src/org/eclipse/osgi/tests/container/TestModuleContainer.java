@@ -3412,8 +3412,77 @@ public class TestModuleContainer extends AbstractTest {
 		assertTrue("Wrong resolution message:" + resolutionMsg, resolutionMsg.contains("non.effective.cap"));
 	}
 
+	@Test
+	public void testSystemBundleFragmentDisableResolution() throws BundleException, IOException {
+		// install the system.bundle
+		Module systemBundle = createContainerWithSystemBundle(true, new ResolverHook() {
+			@Override
+			public void filterSingletonCollisions(BundleCapability singleton,
+					Collection<BundleCapability> collisionCandidates) {
+			}
+
+			@Override
+			public void filterResolvable(Collection<BundleRevision> candidates) {
+				for (Iterator<BundleRevision> iCands = candidates.iterator(); iCands.hasNext();) {
+					// filter all fragments to not be resolvable
+					if ((iCands.next().getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+						iCands.remove();
+					}
+				}
+			}
+			@Override
+			public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
+			}
+
+			@Override
+			public void end() {
+			}
+		});
+		ModuleContainer container = systemBundle.getContainer();
+
+		// install an system.bundle fragment that provides a capability
+		Map<String, String> systemFragManifest1 = new HashMap<>();
+		systemFragManifest1.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		systemFragManifest1.put(Constants.BUNDLE_SYMBOLICNAME, "systemFrag1");
+		systemFragManifest1.put(Constants.FRAGMENT_HOST, Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
+		systemFragManifest1.put(Constants.PROVIDE_CAPABILITY, "fragment.capability; fragment.capability=test");
+		Module systemFrag1 = installDummyModule(systemFragManifest1, "systemFrag1", container);
+
+		// install an system.bundle fragment that requires a fragment capability
+		Map<String, String> systemFragManifest2 = new HashMap<>();
+		systemFragManifest2.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		systemFragManifest2.put(Constants.BUNDLE_SYMBOLICNAME, "systemFrag2");
+		systemFragManifest2.put(Constants.FRAGMENT_HOST, Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
+		systemFragManifest2.put(Constants.REQUIRE_CAPABILITY,
+				"fragment.capability; filter:=\"(fragment.capability=test)\"");
+		Module systemFrag2 = installDummyModule(systemFragManifest2, "systemFrag2", container);
+
+		ResolutionReport report = container.resolve(Arrays.asList(systemFrag2), true);
+		Assert.assertNotNull("Should fail to resolve fragment", report.getResolutionException());
+		Assert.assertNotNull("Should fail to resolve fragment",
+				report.getEntries().get(systemFrag1.getCurrentRevision()));
+
+		assertEquals("Expected module not be resolved.", Module.State.INSTALLED, systemFrag2.getState());
+		assertEquals("Expected module not be resolved.", Module.State.INSTALLED, systemFrag1.getState());
+
+		report = container.resolve(Arrays.asList(systemFrag2), false);
+		Assert.assertNotNull("Should fail to resolve fragment",
+				report.getEntries().get(systemFrag2.getCurrentRevision()));
+		Assert.assertNotNull("Should fail to resolve fragment",
+				report.getEntries().get(systemFrag1.getCurrentRevision()));
+
+		assertEquals("Expected module not be resolved.", Module.State.INSTALLED, systemFrag2.getState());
+		assertEquals("Expected module not be resolved.", Module.State.INSTALLED, systemFrag1.getState());
+
+	}
+
 	private Module createContainerWithSystemBundle(boolean resolveSystemBundle) throws BundleException, IOException {
-		DummyContainerAdaptor adaptor = createDummyAdaptor();
+		return createContainerWithSystemBundle(resolveSystemBundle, null);
+	}
+
+	private Module createContainerWithSystemBundle(boolean resolveSystemBundle, ResolverHook hook)
+			throws BundleException, IOException {
+		DummyContainerAdaptor adaptor = hook != null ? createDummyAdaptor(hook) : createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 
 		// install the system.bundle
