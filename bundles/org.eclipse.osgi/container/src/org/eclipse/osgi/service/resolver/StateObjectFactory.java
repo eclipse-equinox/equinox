@@ -316,16 +316,17 @@ public interface StateObjectFactory {
 	public List<ImportPackageSpecification> createImportPackageSpecifications(String declaration);
 
 	/**
-	 * Used by the Resolver to dynamically create ExportPackageDescription objects during the resolution process.
-	 * The Resolver needs to create ExportPackageDescriptions dynamically for a host when a fragment.
-	 * exports a package<p>
+	 * Used by the Resolver to dynamically create ExportPackageDescription objects
+	 * during the resolution process. The Resolver needs to create
+	 * ExportPackageDescriptions dynamically for a host when a fragment exports a
+	 * package.
 	 *
 	 * @param packageName the package name
-	 * @param version the version of the package (may be <code>null</code>)
-	 * @param directives the directives for the package (may be <code>null</code>)
-	 * @param attributes the attributes for the package (may be <code>null</code>)
-	 * @param root whether the package is a root package
-	 * @param exporter the exporter of the package (may be <code>null</code>)
+	 * @param version     the version of the package (may be <code>null</code>)
+	 * @param directives  the directives for the package (may be <code>null</code>)
+	 * @param attributes  the attributes for the package (may be <code>null</code>)
+	 * @param root        whether the package is a root package
+	 * @param exporter    the exporter of the package (may be <code>null</code>)
 	 * @return the created package
 	 */
 	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, Map<String, ?> directives, Map<String, ?> attributes, boolean root, BundleDescription exporter);
