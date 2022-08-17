@@ -93,24 +93,27 @@ public final class FileLocator {
 	}
 
 	/**
-	 * Returns a URL for the given path in the given bundle.  Returns <code>null</code> if the URL
-	 * could not be computed or created.
+	 * Returns a URL for the given path in the given bundle. Returns
+	 * <code>null</code> if the URL could not be computed or created.
 	 * <p>
-	 * This method looks for the path in the given bundle and any attached fragments.
-	 * <code>null</code> is returned if no such entry is found.  Note that
+	 * This method looks for the path in the given bundle and any attached
+	 * fragments. <code>null</code> is returned if no such entry is found. Note that
 	 * there is no specific order to the fragments.
-	 * </p><p>
-	 * The following variables may also be used as entries in the provided path:</p>
+	 * </p>
+	 * <p>
+	 * The following variables may also be used as entries in the provided path:
+	 * </p>
 	 * <ul>
-	 *     <li>$nl$ - for language specific information</li>
-	 *     <li>$os$ - for operating system specific information</li>
-	 *     <li>$ws$ - for windowing system specific information</li>
+	 * <li>$nl$ - for language specific information</li>
+	 * <li>$os$ - for operating system specific information</li>
+	 * <li>$ws$ - for windowing system specific information</li>
 	 * </ul>
 	 * <p>
-	 * A path of "$nl$/about.properties" in an environment with a default
-	 * locale of en_CA will return a URL corresponding to the first location
-	 * about.properties is found according to the following order:
+	 * A path of "$nl$/about.properties" in an environment with a default locale of
+	 * en_CA will return a URL corresponding to the first location about.properties
+	 * is found according to the following order:
 	 * </p>
+	 * 
 	 * <pre>
 	 *     plugin root/nl/en/CA/about.properties
 	 *     fragment1 root/nl/en/CA/about.properties
@@ -125,14 +128,14 @@ public final class FileLocator {
 	 *     fragment2 root/about.properties
 	 *     ...
 	 * </pre>
-	 * <p>
-	 * @see FileLocator#find(Bundle, IPath, Map) for the option to override the current environment variables
-	 * </p>
+	 * 
+	 * @see FileLocator#find(Bundle, IPath, Map) for the option to override the
+	 *      current environment variables
 	 *
 	 * @param bundle the bundle in which to search
-	 * @param path file path relative to plug-in installation location
-	 * @return a URL for the given path or <code>null</code>.  The actual form
-	 * 	of the returned URL is not specified.
+	 * @param path   file path relative to plug-in installation location
+	 * @return a URL for the given path or <code>null</code>. The actual form of the
+	 *         returned URL is not specified.
 	 *
 	 * @since 3.10
 	 */
@@ -311,7 +314,7 @@ public final class FileLocator {
 	 * or a jar file containing the bundle content. In case the location cannot be
 	 * determined the returned {@code Optional} is empty, which is for example
 	 * usually the case for {@code CONNECT} bundles.
-	 * <p>
+	 * </p>
 	 * 
 	 * @param bundle the bundle
 	 * @return the optional file to the location of the bundle's root
