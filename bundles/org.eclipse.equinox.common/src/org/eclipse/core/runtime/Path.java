@@ -206,7 +206,7 @@ public class Path implements IPath, Cloneable {
 	public Path(String device, String path) {
 		if (RUNNING_ON_WINDOWS) {
 			//convert backslash to forward slash
-			path = path.indexOf('\\') == -1 ? path : path.replace('\\', SEPARATOR);
+			path = path.replace('\\', SEPARATOR);
 		}
 		initialize(device, path, RUNNING_ON_WINDOWS);
 	}
@@ -228,7 +228,7 @@ public class Path implements IPath, Cloneable {
 		String devicePart = null;
 		if (forWindows) {
 			//convert backslash to forward slash
-			fullPath = fullPath.indexOf('\\') == -1 ? fullPath : fullPath.replace('\\', SEPARATOR);
+			fullPath = fullPath.replace('\\', SEPARATOR);
 			//extract device
 			int i = fullPath.indexOf(DEVICE_SEPARATOR);
 			if (i != -1) {
