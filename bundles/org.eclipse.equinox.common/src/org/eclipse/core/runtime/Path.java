@@ -46,7 +46,6 @@ public final class Path implements IPath, Cloneable {
 	private static final int IS_FOR_WINDOWS = 8;
 
 	private static final int ALL_SEPARATORS = HAS_LEADING | IS_UNC | HAS_TRAILING;
-	private static final int ALL_FLAGS = HAS_LEADING | IS_UNC | HAS_TRAILING | IS_FOR_WINDOWS;
 
 	/** Constant value indicating if the current platform is Windows */
 	private static final boolean RUNNING_ON_WINDOWS = java.io.File.separatorChar == '\\';
@@ -59,9 +58,6 @@ public final class Path implements IPath, Cloneable {
 
 	/** Constant value containing the empty path with no device on the local file system. */
 	public static final Path EMPTY = new Path(EMPTY_STRING);
-
-	/** Mask for all bits that are involved in the hash code */
-	private static final int HASH_MASK = ~(HAS_TRAILING | IS_FOR_WINDOWS);
 
 	/** Constant root path string (<code>"/"</code>). */
 	private static final String ROOT_STRING = "/"; //$NON-NLS-1$
@@ -78,8 +74,11 @@ public final class Path implements IPath, Cloneable {
 	/** The path segments */
 	private final String[] segments;
 
+	/** cached hash code */
+	private int hash;
+
 	/** flags indicating separators (has leading, is UNC, has trailing, is for Windows) */
-	private final int flags;
+	private final byte flags;
 
 	/** 
 	 * Constructs a new path from the given string path.
@@ -254,7 +253,7 @@ public final class Path implements IPath, Cloneable {
 		}
 		this.device = devicePart;
 		this.segments = canonicalSegments;
-		this.flags = (flag & ALL_FLAGS) | (computeHashCode(devicePart, canonicalSegments) << 4);
+		this.flags = (byte) flag;
 	}
 
 	/* (Intentionally not included in javadoc)
@@ -269,8 +268,7 @@ public final class Path implements IPath, Cloneable {
 		// no segment validations are done for performance reasons	
 		this.segments = segments;
 		this.device = device;
-		//hash code is cached in all but the bottom four bits of the flags field
-		this.flags = (flag & ALL_FLAGS) | (computeHashCode(device, segments) << 4);
+		this.flags = (byte) flag;
 	}
 
 	/* (Intentionally not included in javadoc)
@@ -592,9 +590,10 @@ public final class Path implements IPath, Cloneable {
 		if (!(obj instanceof Path))
 			return false;
 		Path target = (Path) obj;
-		//check leading separators and hash code
-		if ((flags & HASH_MASK) != (target.flags & HASH_MASK))
+		// check leading separators
+		if ((flags & (HAS_LEADING | IS_UNC)) != (target.flags & (HAS_LEADING | IS_UNC))) {
 			return false;
+		}
 		String[] targetSegments = target.segments;
 		int i = segments.length;
 		//check segment count
@@ -640,7 +639,11 @@ public final class Path implements IPath, Cloneable {
 	 */
 	@Override
 	public int hashCode() {
-		return flags & HASH_MASK;
+		int h = hash;
+		if (h == 0) {
+			hash = h = computeHashCode(device, segments);
+		}
+		return h;
 	}
 
 	/* (Intentionally not included in javadoc)
@@ -667,7 +670,7 @@ public final class Path implements IPath, Cloneable {
 		}
 		this.device = deviceString;
 		this.segments = canonicalSegments;
-		this.flags = (flag & ALL_FLAGS) | (computeHashCode(deviceString, canonicalSegments) << 4);
+		this.flags = (byte) flag;
 	}
 
 	private static int computeFlags(String path, boolean forWindows) {
