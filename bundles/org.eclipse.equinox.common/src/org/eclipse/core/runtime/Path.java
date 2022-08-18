@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 20122 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -357,7 +357,7 @@ public class Path implements IPath, Cloneable {
 				collapseParentReferences();
 				//paths of length 0 have no trailing separator
 				if (segments.length == 0)
-					flags &= (HAS_LEADING | IS_UNC);
+					flags &= ~HAS_TRAILING;
 				//recompute hash because canonicalize affects hash
 				flags = (flags & ALL_FLAGS) | (computeHashCode() << 4);
 				return true;
