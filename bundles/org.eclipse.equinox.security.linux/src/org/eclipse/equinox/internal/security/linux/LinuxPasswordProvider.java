@@ -17,6 +17,8 @@ package org.eclipse.equinox.internal.security.linux;
 
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.crypto.spec.PBEKeySpec;
 
@@ -40,10 +42,16 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 	private static final int PASSWORD_LENGTH = 64;
 
 	private static final String SECRET_COLLECTION_DEFAULT = "default"; //$NON-NLS-1$
+	private static final Map<String, Object> LIB_LOAD_OPTIONS = new HashMap<>();
 
 	private SecretSchema fEquinoxSchema;
 	private LibSecret fLibSecret;
 	private LibGio fLibGio;
+
+	static {
+		// open flags = (RTLD_NODELETE | RTLD_GLOBAL | RTLD_LAZY)
+		LIB_LOAD_OPTIONS.put(Library.OPTION_OPEN_FLAGS, 0x1101);
+	}
 
 	public LinuxPasswordProvider() {
 		initEquinoxSchema();
@@ -84,7 +92,7 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 
 	private void unlockSecretService() {
 
-		fLibGio = Native.load("gio-2.0", LibGio.class); //$NON-NLS-1$
+		fLibGio = Native.load("gio-2.0", LibGio.class, LIB_LOAD_OPTIONS); //$NON-NLS-1$
 
 		PointerByReference gerror = new PointerByReference();
 		gerror.setValue(Pointer.NULL);
@@ -96,7 +104,7 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 			throw new SecurityException(message);
 		}
 
-		fLibSecret = Native.load("secret-1", LibSecret.class); //$NON-NLS-1$
+		fLibSecret = Native.load("secret-1", LibSecret.class, LIB_LOAD_OPTIONS); //$NON-NLS-1$
 		Pointer secretService = fLibSecret.secret_service_get_sync(SecretServiceFlags.SECRET_SERVICE_LOAD_COLLECTIONS,
 				Pointer.NULL, gerror);
 		if (gerror.getValue() != Pointer.NULL) {
