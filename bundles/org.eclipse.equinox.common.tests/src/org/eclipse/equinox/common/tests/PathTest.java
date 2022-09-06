@@ -120,6 +120,22 @@ public class PathTest extends CoreTest {
 		assertEquals("4.1.win", combo, win.removeTrailingSeparator().append(aftString));
 		// append path to root path uses optimized code
 		assertEquals("4.2.win", combo, Path.forWindows("/").append(win).append(aftString));
+		assertEquals("4.21.win", combo,
+				Path.forWindows("/").append(win).append("..").append("third").append(aftString));
+		assertEquals("4.2X.win", Path.forWindows("/").append("x"),
+				Path.forWindows("/").append("x").append("..").append("x"));
+		assertEquals("4.2XY/.win", Path.forWindows("\\").append("x/y"),
+				Path.forWindows("\\").append("x").append("y").append("../..").append("x/y"));
+		assertEquals("4.2XY\\.win", Path.forWindows("/").append("x\\y"),
+				Path.forWindows("/").append("x").append("y").append("..\\..").append("x\\y"));
+		assertEquals("4.22.win", combo,
+				Path.forWindows("/").append(win).append("..\\..").append("second\\third").append(aftString));
+		assertEquals("4.23.win", combo,
+				Path.forWindows("/").append(win).append("..\\..\\..").append("first\\second\\third").append(aftString));
+		assertEquals("4.24.win", combo,
+				Path.forWindows("/").append(win).append("..\\..\\..").append(win).append(aftString));
+		assertEquals("4.25.win", combo,
+				Path.forWindows("/").append(win).append("../../..").append(win).append(aftString));
 		assertEquals("4.3.win", combo, Path.forWindows("/").append(posix).append(aftString));
 		// append path to empty path uses optimized code
 		assertEquals("4.4.win", combo, Path.forWindows("").append(win).append(aftString).makeAbsolute());
