@@ -392,15 +392,15 @@ static _TCHAR** extractVMArgs(_TCHAR** launcherIniValues);
 #ifdef _WIN32
 static void     createConsole();
 static void		fixDLLSearchPath();
-static int 		isConsoleLauncher();
 #endif
-static int      consoleLauncher = 0;
+static int      isConsoleLauncher = 0;
 
 /* Record the arguments that were used to start the original executable */
-JNIEXPORT void setInitialArgs(int argc, _TCHAR** argv, _TCHAR* lib) {
+JNIEXPORT void setInitialArgs(int argc, _TCHAR** argv, _TCHAR* lib, int consoleLauncher) {
 	initialArgc = argc;
 	initialArgv = argv;
 	eclipseLibrary = lib;
+	isConsoleLauncher = consoleLauncher;
 }
 
 #ifdef MACOSX
@@ -571,9 +571,6 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
    	 */
     initWindowSystem( &argc, argv, !noSplash );
 #elif _WIN32
-    /* this must be before doing any console stuff, platforms other than win32 leave this set to 0 */
-    consoleLauncher = isConsoleLauncher();
-
     /*fix the DLL search path for security */
     fixDLLSearchPath();
 #endif
@@ -1017,7 +1014,7 @@ static _TCHAR** getConfigArgs() {
 	int configArgc = 0;
 	int ret = 0;
 
-	configFile = (iniFile != NULL) ? iniFile : getIniFile(program, consoleLauncher);
+	configFile = (iniFile != NULL) ? iniFile : getIniFile(program, isConsoleLauncher);
 	ret = readConfigFile(configFile, &configArgc, &configArgv);
 	if (ret == 0)
 		return configArgv;
@@ -1603,20 +1600,6 @@ static void createConsole() {
 	}
 }
 
-/* Determine if the launcher was the eclipsec.exe or not based on whether we have an attached console.
- * This will only be correct if called before createConsole.
- */
-static int isConsoleLauncher() {
-	HWND (WINAPI *GetConsoleWindow)();
-	void * handle = loadLibrary(_T_ECLIPSE("Kernel32.dll"));
-	if (handle != NULL) {
-		if ( (GetConsoleWindow = findSymbol(handle, _T_ECLIPSE("GetConsoleWindow"))) != NULL) {
-			return GetConsoleWindow() != NULL;
-		}
-	}
-	return 0;
-}
-
 static void fixDLLSearchPath() {
 #ifdef UNICODE
 	_TCHAR* functionName = _T_ECLIPSE("SetDllDirectoryW");
@@ -1648,7 +1631,7 @@ static int vmEEProps(_TCHAR * eeFile, _TCHAR ** msg) {
 			return LAUNCH_JNI;
 	}
 
-	if (eeConsole != NULL && (debug || needConsole || consoleLauncher) ) {
+	if (eeConsole != NULL && (debug || needConsole || isConsoleLauncher) ) {
 		javaVM = findSymlinkCommand(eeConsole, 0);
 		if (javaVM != NULL)
 			return LAUNCH_EXE;
@@ -1679,7 +1662,7 @@ static int determineVM(_TCHAR** msg) {
 	int type = 0;
 
 #ifdef _WIN32
-	if (debug || needConsole || consoleLauncher)
+	if (debug || needConsole || isConsoleLauncher)
 		defaultJava = consoleVM; /* windows will want java.exe for the console, not javaw.exe */
 #endif
 

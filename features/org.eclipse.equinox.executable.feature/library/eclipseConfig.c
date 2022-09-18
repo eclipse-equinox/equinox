@@ -38,18 +38,14 @@
 
 #endif
 
-int readIniFile(_TCHAR* program, int *argc, _TCHAR ***argv) 
+int readIniFile(_TCHAR* program, int *argc, _TCHAR ***argv, int consoleLauncher) 
 {
 	_TCHAR* config_file = NULL;
 	int result;
 	
 	if (program == NULL || argc == NULL || argv == NULL) return -1;
-	
-#if defined(_WIN32) && defined(_WIN32_CONSOLE)	
-	config_file = getIniFile(program, 1);
-#else
-	config_file = getIniFile(program, 0);
-#endif
+		
+	config_file = getIniFile(program, consoleLauncher);
 	
 	result = readConfigFile(config_file, argc, argv);
 	free(config_file);
