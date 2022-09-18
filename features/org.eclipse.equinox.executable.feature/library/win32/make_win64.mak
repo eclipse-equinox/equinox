@@ -38,6 +38,7 @@ PROGRAM_LIBRARY = eclipse_$(LIB_VERSION).dll
 
 # Define the object modules to be compiled and flags.
 MAIN_OBJS = eclipseMain.obj
+MAIN_CONSOLE_OBJS = eclipseMainConsole.obj
 COMMON_OBJS = eclipseConfig.obj eclipseCommon.obj   eclipseWinCommon.obj
 DLL_OBJS	= eclipse.obj  eclipseWin.obj  eclipseUtil.obj  eclipseJNI.obj eclipseShm.obj
 
@@ -67,6 +68,9 @@ all: $(EXEC) $(DLL) $(CONSOLE)
 eclipseMain.obj: ../eclipseUnicode.h ../eclipseCommon.h ../eclipseMain.c 
 	cl $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseMain.c
 
+eclipseMainConsole.obj: ../eclipseUnicode.h ../eclipseCommon.h ../eclipseMain.c 
+	cl $(DEBUG) $(wcflags) $(cvarsmt) -D_WIN32_CONSOLE /Fo$*.obj ../eclipseMain.c
+
 eclipseCommon.obj: ../eclipseCommon.h ../eclipseUnicode.h ../eclipseCommon.c
 	cl $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseCommon.c
 
@@ -94,11 +98,8 @@ eclipseShm.obj: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS) $(RES)
     link $(LFLAGS) -out:$(PROGRAM_OUTPUT) $(MAIN_OBJS) $(COMMON_OBJS) $(RES) $(LIBS)
 
-#the console version needs a flag set, should look for a better way to do this
-$(CONSOLE): $(MAIN_OBJS) $(COMMON_OBJS)
-	del -f eclipseConfig.obj aeclipseConfig.obj
-	cl $(DEBUG) $(wcflags) $(cvarsmt) -D_WIN32_CONSOLE /FoeclipseConfig.obj ../eclipseConfig.c
-    link $(CONSOLEFLAGS) -out:$(CONSOLE) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
+$(CONSOLE): $(MAIN_CONSOLE_OBJS) $(COMMON_OBJS)
+    link $(CONSOLEFLAGS) -out:$(CONSOLE) $(MAIN_CONSOLE_OBJS) $(COMMON_OBJS) $(LIBS)
 
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
     link $(DLL_LFLAGS) -out:$(PROGRAM_LIBRARY) $(DLL_OBJS) $(COMMON_OBJS) $(DLL_LIBS)
@@ -111,4 +112,4 @@ install: all
 	del -f $(EXEC) $(MAIN_OBJS) $(DLL_OBJS) $(COMMON_OBJS) $(RES)
    
 clean:
-	del $(EXEC) $(DLL) $(MAIN_OBJS) $(DLL_OBJS) $(COMMON_OBJS) $(RES)
+	del $(EXEC) $(DLL) $(MAIN_OBJS) $(MAIN_CONSOLE_OBJS) $(DLL_OBJS) $(COMMON_OBJS) $(RES)

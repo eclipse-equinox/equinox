@@ -33,7 +33,7 @@
  *
  * Returns 0 if success.
  */
-extern int readIniFile(_TCHAR* program, int *argc, _TCHAR ***argv);
+extern int readIniFile(_TCHAR* program, int *argc, _TCHAR ***argv, int consoleLauncher);
 
 /**
  * Return the path to the launcher ini file for the corresponding program 

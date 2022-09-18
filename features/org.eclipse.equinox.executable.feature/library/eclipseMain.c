@@ -56,7 +56,7 @@ administrative privileges.");
 
 /* this typedef must match the run method in eclipse.c */
 typedef int (*RunMethod)(int argc, _TCHAR* argv[], _TCHAR* vmArgs[]);
-typedef void (*SetInitialArgs)(int argc, _TCHAR*argv[], _TCHAR* library);
+typedef void (*SetInitialArgs)(int argc, _TCHAR*argv[], _TCHAR* library, int consoleLauncher);
 
 static _TCHAR*  name          = NULL;			/* program name */
 static _TCHAR** userVMarg     = NULL;     		/* user specific args for the Java VM */
@@ -120,6 +120,11 @@ int main( int argc, _TCHAR* argv[] )
 	_TCHAR*  ch;
 	_TCHAR** configArgv = NULL;
 	int 	 configArgc = 0;
+#if defined(_WIN32) && defined(_WIN32_CONSOLE)
+	int      consoleLauncher = 1;
+#else
+	int      consoleLauncher = 0;
+#endif
 	int      exitCode = 0;
 	int      ret = 0;
 	void *	 handle = 0;
@@ -152,7 +157,7 @@ int main( int argc, _TCHAR* argv[] )
     if (iniFile != NULL)
 		ret = readConfigFile(iniFile, &configArgc, &configArgv);
     else
-		ret = readIniFile(program, &configArgc, &configArgv);
+		ret = readIniFile(program, &configArgc, &configArgv, consoleLauncher);
 	if (ret == 0)
 	{
 		parseArgs (&configArgc, configArgv, 0);
@@ -206,7 +211,7 @@ int main( int argc, _TCHAR* argv[] )
 
 	setArgs = (SetInitialArgs)findSymbol(handle, SET_INITIAL_ARGS);
 	if(setArgs != NULL)
-		setArgs(initialArgc, initialArgv, eclipseLibrary);
+		setArgs(initialArgc, initialArgv, eclipseLibrary, consoleLauncher);
 	else {
 		if(!suppressErrors)
 			displayMessage(officialName, entryMsg);
