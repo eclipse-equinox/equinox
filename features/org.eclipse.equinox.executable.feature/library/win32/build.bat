@@ -46,14 +46,24 @@ IF "x.%MSVC_EDITION%"=="x." set "MSVC_EDITION=Community"
 @rem Specify VisualStudio Version: '2017' or newer '2019'
 IF "x.%MSVC_VERSION%"=="x." set "MSVC_VERSION=2019"
 
-GOTO X86_64
+GOTO WIN64
 
-:X86_64
+:WIN64
+IF "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
+	set defaultOSArch=x86_64
+	set BUILD_ARCH=x64
+) ELSE IF "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
+	set defaultOSArch=aarch64
+	set BUILD_ARCH=arm64
+) ELSE (
+	echo "ERROR: %PROCESSOR_ARCHITECTURE% builds are no longer supported."
+	EXIT /B 1
+)
+
 shift
-set defaultOSArch=x86_64
-set PROCESSOR_ARCHITECTURE=AMD64
 IF NOT EXIST "%MSVC_HOME%" set "MSVC_HOME=%ProgramFiles(x86)%\Microsoft Visual Studio\%MSVC_VERSION%\BuildTools"
 IF NOT EXIST "%MSVC_HOME%" set "MSVC_HOME=%ProgramFiles(x86)%\Microsoft Visual Studio\%MSVC_VERSION%\%MSVC_EDITION%"
+IF NOT EXIST "%MSVC_HOME%" set "MSVC_HOME=%ProgramFiles%\Microsoft Visual Studio\%MSVC_VERSION%\%MSVC_EDITION%"
 IF EXIST "%MSVC_HOME%" (
 	echo "Microsoft Visual Studio %MSVC_VERSION% dir: %MSVC_HOME%"
 ) ELSE (
@@ -62,14 +72,14 @@ IF EXIST "%MSVC_HOME%" (
 )
 IF NOT EXIST "%JAVA_HOME%" set "JAVA_HOME=%ProgramFiles%\AdoptOpenJDK\jdk-8.0.292.10-hotspot"
 IF EXIST "%JAVA_HOME%" (
-	echo "JAVA_HOME x64: %JAVA_HOME%"
+	echo "JAVA_HOME 64-bit: %JAVA_HOME%"
 ) ELSE (
-	echo "WARNING: x64 Java JDK not found. Please set JAVA_HOME to your JDK directory."
+	echo "WARNING: 64-bit Java JDK not found. Please set JAVA_HOME to your JDK directory."
 	echo "     Refer steps for SWT Windows native setup: https://www.eclipse.org/swt/swt_win_native.php"
 )
 set javaHome=%JAVA_HOME%
 set makefile=make_win64.mak
-call "%MSVC_HOME%\VC\Auxiliary\Build\vcvarsall.bat" x64
+call "%MSVC_HOME%\VC\Auxiliary\Build\vcvarsall.bat" %BUILD_ARCH%
 GOTO MAKE
 
 :MAKE 
