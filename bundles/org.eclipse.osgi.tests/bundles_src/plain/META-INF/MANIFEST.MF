@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Just the simplest bundle one could think of
+Bundle-SymbolicName: plain
+Bundle-Version: 1.0.0
+

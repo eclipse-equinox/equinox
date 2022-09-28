@@ -3290,4 +3290,16 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Unexpected bundle count", 0, testContext.getBundles().length);
 	}
 
+	@Test
+	public void testBundleInitallyResolved() throws BundleException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		Equinox equinox = new Equinox(Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath()));
+		equinox.start();
+		BundleContext systemContext = equinox.getBundleContext();
+		Bundle b = systemContext.installBundle(installer.getBundleLocation("plain")); //$NON-NLS-1$
+		assertEquals(Bundle.RESOLVED, b.getState());
+		b.start();
+		assertEquals(Bundle.ACTIVE, b.getState());
+	}
+
 }
