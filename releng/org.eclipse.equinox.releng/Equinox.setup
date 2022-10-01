@@ -269,15 +269,7 @@
         <requirement
             name="*"/>
         <sourceLocator
-            rootFolder="${github.clone.equinox.p2.location/bundles}">
-          <excludedPath>bundles/org.eclipse.equinox.p2.testserver</excludedPath>
-        </sourceLocator>
-        <sourceLocator
-            rootFolder="${github.clone.equinox.p2.location/examples}"/>
-        <sourceLocator
-            rootFolder="${github.clone.equinox.p2.location/features}"/>
-        <sourceLocator
-            rootFolder="${github.clone.equinox.p2.location/org.eclipse.equinox.p2.releng}"/>
+            rootFolder="${github.clone.equinox.p2.location}"/>
       </targlet>
     </setupTask>
     <setupTask
