@@ -1422,8 +1422,13 @@ public class DSTest {
     ServiceReference staticBreak2Ref = getServiceReference(STATIC_BREAKABLE + "2");
     Object staticBreak2 = getContext().getService(staticBreak2Ref);
     try {
-      assertEquals("The StaticCircuit2 component shouldn't have bound objects", 0, ((BoundTester) staticBreak2)
-          .getBoundObjectsCount());
+		BoundTester tester = (BoundTester) staticBreak2;
+		int count = tester.getBoundObjectsCount();
+		String bound = "";
+		for (int i = 0; i < count; i++) {
+			bound += "Ref " + i + " = " + tester.getBoundService(i);
+		}
+		assertEquals("The StaticCircuit2 component shouldn't have bound objects: " + bound, 0, count);
     } finally {
       getContext().ungetService(staticBreak2Ref);
     }
