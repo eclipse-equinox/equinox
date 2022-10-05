@@ -26,7 +26,7 @@ pipeline {
 					-Pbuild-individual-bundles -Pbree-libs -Papi-check \
 					-Dcompare-version-with-baselines.skip=false \
 					-Dproject.build.sourceEncoding=UTF-8 \
-					-Drt.equinox.binaries.loc=$WORKSPACE/rt.equinox.binaries 
+					-Drt.equinox.binaries.loc=$WORKSPACE/rt.equinox.binaries \
 					-DskipTests
 				"""
 			}
