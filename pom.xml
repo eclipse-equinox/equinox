@@ -81,7 +81,33 @@
 	      </plugin>
       </plugins>
       </build>
-    </profile>  
+    </profile> 
+    <profile>
+    	<id>javadoc</id>
+		<build>
+	    <plugins>
+		  <!-- Must use older version see https://issues.apache.org/jira/projects/MJAVADOC/issues/MJAVADOC-707 -->
+	      <plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-javadoc-plugin</artifactId>
+	        <version>3.0.1</version>
+	        <executions>
+	        <execution>
+	          <id>attach-javadocs</id>
+	          <phase>package</phase>
+	          <goals>
+	            <goal>jar</goal>
+	          </goals>
+	        </execution>
+	      </executions>
+	        <configuration>
+	        	<source>11</source>
+	        	<failOnError>false</failOnError>
+	        </configuration>
+	      </plugin>
+    	</plugins>
+    	</build>
+    </profile> 
   </profiles>
 
   <modules>
