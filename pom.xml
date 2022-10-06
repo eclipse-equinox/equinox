@@ -53,6 +53,90 @@
         </repository>
       </repositories>
     </profile>
+	<profile>
+		<id>javadoc</id>
+		<build>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<configuration>
+						<!-- Special code only for J9 -->
+						<excludePackageNames>org.eclipse.osgi.internal.cds</excludePackageNames>
+						<!-- should be place probably in the clobal config ? -->
+						<doclint>reference,html,syntax</doclint>
+						<links>
+							<link>https://docs.osgi.org/javadoc/osgi.core/8.0.0/</link>
+							<link>https://docs.osgi.org/javadoc/osgi.cmpn/8.0.0/</link>
+							<link>https://docs.osgi.org/javadoc/osgi.enterprise/7.0.0/</link>
+						</links>
+						<tags>
+							<tag>
+								<name>noimplement</name>
+								<placement>a</placement>
+								<head>Restriction:</head>
+							</tag>
+							<tag>
+								<name>noextend</name>
+								<placement>a</placement>
+								<head>Restriction:</head>
+							</tag>
+							<tag>
+								<name>noreference</name>
+								<placement>a</placement>
+								<head>Restriction:</head>
+							</tag>
+							<tag>
+								<name>noinstantiate</name>
+								<placement>a</placement>
+								<head>Restriction:</head>
+							</tag>
+							<tag>
+								<name>nooverride</name>
+								<placement>a</placement>
+								<head>Restriction:</head>
+							</tag>
+							<tag>
+								<name>TrackedGetter</name>
+								<placement>cm</placement>
+								<head>"TrackedGetter"</head>
+							</tag>
+							<tag>
+								<name>model</name>
+								<placement>X</placement>
+								<head>"EMF generated tag"</head>
+							</tag>
+							<tag>
+								<name>generated</name>
+								<placement>X</placement>
+								<head>"EMF generated tag"</head>
+							</tag>
+							<tag>
+								<name>ordered</name>
+								<placement>X</placement>
+								<head>"EMF generated tag"</head>
+							</tag>
+							<tag>
+								<name>Immutable</name>
+								<placement>t</placement>
+								<head></head>
+							</tag>
+							<tag>
+								<name>implNote</name>
+								<placement>a</placement>
+								<head><![CDATA[<em>Implementation Note:</em>]]></head>
+							</tag>
+							<tag>
+								<name>implSpec</name>
+								<placement>a</placement>
+								<head>Implementation Requirements:</head>
+							</tag>
+						</tags>
+					</configuration>
+				</plugin>
+			</plugins>
+		</build>
+	</profile>
   </profiles>
 
   <modules>
