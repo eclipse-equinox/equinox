@@ -30,6 +30,9 @@
     <!-- required by: org.eclipse.equinox.framework:launcher-binary-parent -->
     <rt.equinox.binaries.loc>../../../rt.equinox.binaries</rt.equinox.binaries.loc>
     <target-platform.optionalDependencies>require</target-platform.optionalDependencies>
+    <tycho.addMavenDescriptor>true</tycho.addMavenDescriptor>
+    <tycho.mapP2Dependencies>true</tycho.mapP2Dependencies>
+    <tycho.version>3.1.0-SNAPSHOT</tycho.version>
   </properties>
 
   <!-- 
@@ -53,6 +56,32 @@
         </repository>
       </repositories>
     </profile>
+    <profile>
+      <id>verify-maven</id>
+      <properties>
+          <tycho.verify.failOnError>true</tycho.verify.failOnError>
+      </properties>
+      <build>
+      <plugins>
+	      <plugin>
+	        <groupId>org.eclipse.tycho</groupId>
+	        <artifactId>tycho-packaging-plugin</artifactId>
+	        <executions>
+	          <execution>
+	            <id>validate-pom</id>
+	            <phase>verify</phase>
+	            <goals>
+	              <goal>verify-osgi-pom</goal>
+	            </goals>
+	            <configuration>
+	            	<failOnError>${tycho.verify.failOnError}</failOnError>
+	            </configuration>
+	          </execution>
+	        </executions>
+	      </plugin>
+      </plugins>
+      </build>
+    </profile>  
   </profiles>
 
   <modules>
