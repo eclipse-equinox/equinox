@@ -26,13 +26,12 @@ pipeline {
 					-Pbuild-individual-bundles -Pbree-libs -Papi-check \
 					-Dcompare-version-with-baselines.skip=false \
 					-Dproject.build.sourceEncoding=UTF-8 \
-					-Drt.equinox.binaries.loc=$WORKSPACE/rt.equinox.binaries 
+					-Drt.equinox.binaries.loc=$WORKSPACE/rt.equinox.binaries \
 					-DskipTests
 				"""
 			}
 			post {
 				always {
-					publishIssues issues:[scanForIssues(tool: java()), scanForIssues(tool: mavenConsole())]
 					discoverGitReferenceBuild referenceJob: 'equinox/master'
 					recordIssues publishAllIssues: true, tools: [java(), mavenConsole()]
 				}

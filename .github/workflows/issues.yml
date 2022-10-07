@@ -1,0 +1,26 @@
+name: Close inactive issues
+on:
+  schedule:
+    - cron: "30 1 * * *"
+
+jobs:
+  close-issues:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/stale@v4
+        with:
+          days-before-issue-stale: 180
+          stale-issue-label: "stale"
+          stale-issue-message: "This issue has been inactive for 180 days and is therefore labeled as stale.
+
+If this issue became irrelevant in the meantime please close it as completed.
+If it is still relevant and you think it should be fixed some possibilities are listed below.
+
+Please read https://github.com/eclipse-equinox/.github/blob/main/CONTRIBUTING.md#contributing-to-eclipse-equinox for ways to influence development.
+"
+          days-before-pr-stale: -1
+          days-before-pr-close: -1
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
