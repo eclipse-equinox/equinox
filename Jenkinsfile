@@ -33,7 +33,8 @@ pipeline {
 				always {
 					archiveArtifacts artifacts: '**/*.log, **/*.jar', allowEmptyArchive: true
 					junit '**/target/surefire-reports/TEST-*.xml'
-					publishIssues issues:[scanForIssues(tool: java()), scanForIssues(tool: mavenConsole())]
+					discoverGitReferenceBuild referenceJob: 'equinox/master'
+					recordIssues publishAllIssues: true, tools: [java(), mavenConsole()]
 				}
 			}
 		}
