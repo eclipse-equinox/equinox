@@ -29,7 +29,7 @@ public class SecurityConfigurationSection implements ISystemSummarySection {
 	public void write(PrintWriter writer) {
 
 		Provider[] providers = Security.getProviders();
-		writer.println("Providers (" + providers.length + "): ");//$NON-NLS-1$ //$NON-NLS-2$ 
+		writer.println("Providers (" + providers.length + "): ");//$NON-NLS-1$ //$NON-NLS-2$
 		writer.println();
 
 		for (int i = 0; i < providers.length; i++) {
@@ -38,10 +38,11 @@ public class SecurityConfigurationSection implements ISystemSummarySection {
 	}
 
 	private void appendProvider(PrintWriter writer, Provider provider, int index) {
-		writer.println(" Provider: " + provider.getName() + ", Version: " + provider.getVersion() + ", Class: " + provider.getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		writer.println(" Provider: " + provider.getName() + ", Version: " + provider.getVersionStr() + ", Class: " //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				+ provider.getClass().getName());
 		writer.println("  Description: " + provider.getInfo()); //$NON-NLS-1$
 		ProviderService[] services = getServices(provider);
-		writer.println("  Services (" + services.length + "):"); //$NON-NLS-1$  //$NON-NLS-2$
+		writer.println("  Services (" + services.length + "):"); //$NON-NLS-1$ //$NON-NLS-2$
 		for (int i = 0; i < services.length; i++) {
 			appendService(writer, services[i], i);
 		}
@@ -49,7 +50,8 @@ public class SecurityConfigurationSection implements ISystemSummarySection {
 	}
 
 	private void appendService(PrintWriter writer, ProviderService service, int index) {
-		writer.println("   Service: " + service.getType() + ", Algorithm: " + service.getAlgorithm() + ", Class: " + service.getClassName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		writer.println("   Service: " + service.getType() + ", Algorithm: " + service.getAlgorithm() + ", Class: " //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				+ service.getClassName());
 		List<String> aliases = service.getAliases();
 		if (null != aliases && (0 < aliases.size())) {
 			writer.print("    Aliases: "); //$NON-NLS-1$
@@ -75,7 +77,8 @@ public class SecurityConfigurationSection implements ISystemSummarySection {
 	private static ProviderService[] getServices(Provider provider) {
 
 		Hashtable<String, String> serviceList = new Hashtable<>();
-		Hashtable<String, Hashtable<String, String>> attributeMap = new Hashtable<>(); // "type" => "Hashtable of (attribute,value) pairs"
+		Hashtable<String, Hashtable<String, String>> attributeMap = new Hashtable<>(); // "type" => "Hashtable of
+																						// (attribute,value) pairs"
 		Hashtable<String, List<String>> aliasMap = new Hashtable<>(); // "type" => "Arraylist of aliases"
 		for (Entry<Object, Object> entry : provider.entrySet()) {
 			String key = (String) entry.getKey();
@@ -147,7 +150,8 @@ public class SecurityConfigurationSection implements ISystemSummarySection {
 		private final List<String> aliases;
 		private final Map<String, String> attributes;
 
-		public ProviderService(String type, String algorithm, String className, List<String> aliases, Map<String, String> attributes) {
+		public ProviderService(String type, String algorithm, String className, List<String> aliases,
+				Map<String, String> attributes) {
 			this.type = type;
 			this.algorithm = algorithm;
 			this.className = className;

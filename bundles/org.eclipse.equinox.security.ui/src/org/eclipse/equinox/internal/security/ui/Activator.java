@@ -20,7 +20,6 @@ import org.eclipse.equinox.internal.provisional.security.ui.AuthorizationManager
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.internal.provisional.service.security.AuthorizationEngine;
 import org.eclipse.osgi.service.debug.DebugOptions;
-import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.eclipse.osgi.service.security.TrustEngine;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -40,11 +39,10 @@ public class Activator extends AbstractUIPlugin {
 
 	private static final String PROP_DEFAULT_SERVICE = "org.eclipse.osgi"; //$NON-NLS-1$
 
-	//service trackers
+	// service trackers
 	private static ServiceTracker<?, TrustEngine> trustEngineTracker;
 	private static ServiceTracker<?, AuthorizationEngine> authzEngineTracker;
 	private static ServiceTracker<?, AuthorizationManager> authzManagerTracker;
-	private static ServiceTracker<?, PlatformAdmin> platformAdminTracker;
 	private static ServiceTracker<?, DebugOptions> debugTracker;
 
 	// The shared plug-in instance
@@ -55,8 +53,8 @@ public class Activator extends AbstractUIPlugin {
 	private ServiceRegistration<AuthorizationManager> defaultAuthzManagerReg;
 
 	// debug tracing
-	private static final String OPTION_DEBUG = "org.eclipse.equinox.security.ui/debug"; //$NON-NLS-1$;
-	private static final String OPTION_DEBUG_STORAGE = OPTION_DEBUG + "/storage"; //$NON-NLS-1$;
+	private static final String OPTION_DEBUG = "org.eclipse.equinox.security.ui/debug"; //$NON-NLS-1$ ;
+	private static final String OPTION_DEBUG_STORAGE = OPTION_DEBUG + "/storage"; //$NON-NLS-1$ ;
 
 	public Activator() {
 		super();
@@ -90,7 +88,8 @@ public class Activator extends AbstractUIPlugin {
 		Hashtable<String, Object> properties = new Hashtable<>(7);
 		properties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
 		properties.put(PROP_AUTHZ_MANAGER, PROP_DEFAULT_SERVICE);
-		defaultAuthzManagerReg = bundleContext.registerService(AuthorizationManager.class, new DefaultAuthorizationManager(), properties);
+		defaultAuthzManagerReg = bundleContext.registerService(AuthorizationManager.class,
+				new DefaultAuthorizationManager(), properties);
 	}
 
 	@Override
@@ -114,10 +113,6 @@ public class Activator extends AbstractUIPlugin {
 			authzManagerTracker = null;
 		}
 
-		if (platformAdminTracker != null) {
-			platformAdminTracker.close();
-			platformAdminTracker = null;
-		}
 		if (debugTracker != null) {
 			debugTracker.close();
 			debugTracker = null;
@@ -130,7 +125,8 @@ public class Activator extends AbstractUIPlugin {
 			Filter filter = null;
 			if (trustAuthorityProp != null)
 				try {
-					filter = FrameworkUtil.createFilter("(&(" + Constants.OBJECTCLASS + "=" + TrustEngine.class.getName() + ")(" + PROP_TRUST_ENGINE + "=" + trustAuthorityProp + "))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$//$NON-NLS-5$
+					filter = FrameworkUtil.createFilter("(&(" + Constants.OBJECTCLASS + "=" //$NON-NLS-1$ //$NON-NLS-2$
+							+ TrustEngine.class.getName() + ")(" + PROP_TRUST_ENGINE + "=" + trustAuthorityProp + "))"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 				} catch (InvalidSyntaxException e) {
 					e.printStackTrace();
 					// do nothing just use no filter TODO we may want to log something
@@ -150,14 +146,16 @@ public class Activator extends AbstractUIPlugin {
 			Filter filter = null;
 			if (implProp != null)
 				try {
-					filter = FrameworkUtil.createFilter("(&(" + Constants.OBJECTCLASS + "=" + AuthorizationEngine.class.getName() + ")(" + PROP_AUTHZ_ENGINE + "=" + implProp + "))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$//$NON-NLS-5$
+					filter = FrameworkUtil.createFilter("(&(" + Constants.OBJECTCLASS + "=" //$NON-NLS-1$ //$NON-NLS-2$
+							+ AuthorizationEngine.class.getName() + ")(" + PROP_AUTHZ_ENGINE + "=" + implProp + "))"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 				} catch (InvalidSyntaxException e) {
-					//TODO:log the error
+					// TODO:log the error
 				}
 			if (filter != null) {
 				authzEngineTracker = new ServiceTracker<>(Activator.getBundleContext(), filter, null);
 			} else {
-				authzEngineTracker = new ServiceTracker<>(Activator.getBundleContext(), AuthorizationEngine.class, null);
+				authzEngineTracker = new ServiceTracker<>(Activator.getBundleContext(), AuthorizationEngine.class,
+						null);
 			}
 			authzEngineTracker.open();
 		}
@@ -170,30 +168,25 @@ public class Activator extends AbstractUIPlugin {
 			Filter filter = null;
 			if (implProp != null)
 				try {
-					filter = FrameworkUtil.createFilter("(&(" + Constants.OBJECTCLASS + "=" + AuthorizationManager.class.getName() + ")(" + PROP_AUTHZ_MANAGER + "=" + implProp + "))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$//$NON-NLS-5$
+					filter = FrameworkUtil.createFilter("(&(" + Constants.OBJECTCLASS + "=" //$NON-NLS-1$ //$NON-NLS-2$
+							+ AuthorizationManager.class.getName() + ")(" + PROP_AUTHZ_MANAGER + "=" + implProp + "))"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 				} catch (InvalidSyntaxException e) {
-					//TODO:log the error
+					// TODO:log the error
 				}
 			if (filter != null) {
 				authzManagerTracker = new ServiceTracker<>(Activator.getBundleContext(), filter, null);
 			} else {
-				authzManagerTracker = new ServiceTracker<>(Activator.getBundleContext(), AuthorizationManager.class, null);
+				authzManagerTracker = new ServiceTracker<>(Activator.getBundleContext(), AuthorizationManager.class,
+						null);
 			}
 			authzManagerTracker.open();
 		}
 		return authzManagerTracker.getService();
 	}
 
-	public static PlatformAdmin getPlatformAdmin() {
-		if (platformAdminTracker == null) {
-			platformAdminTracker = new ServiceTracker<>(Activator.getBundleContext(), PlatformAdmin.class, null);
-			platformAdminTracker.open();
-		}
-		return platformAdminTracker.getService();
-	}
-
 	/**
 	 * Get the workbench image with the given path relative to ICON_PATH.
+	 * 
 	 * @param relativePath
 	 * @return ImageDescriptor
 	 */
@@ -203,6 +196,7 @@ public class Activator extends AbstractUIPlugin {
 
 	/**
 	 * Logs a message.
+	 * 
 	 * @param severity  Either IStatus.INFO, IStatus.WARNING or IStatus.ERROR.
 	 * @param key       The key of the translated message in the resource bundle.
 	 * @param args      The arguments to pass to <code>MessageFormat.format</code>
