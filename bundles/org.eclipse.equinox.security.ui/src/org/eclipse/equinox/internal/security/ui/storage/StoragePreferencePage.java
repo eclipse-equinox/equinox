@@ -16,9 +16,11 @@ package org.eclipse.equinox.internal.security.ui.storage;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.*;
 
 public class StoragePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
@@ -30,7 +32,7 @@ public class StoragePreferencePage extends PreferencePage implements IWorkbenchP
 	protected TabAdvanced advancedTab;
 
 	public StoragePreferencePage() {
-		//empty
+		// empty
 	}
 
 	@Override
@@ -41,7 +43,7 @@ public class StoragePreferencePage extends PreferencePage implements IWorkbenchP
 	@Override
 	protected Control createContents(Composite parent) {
 
-		final TabFolder folder = new TabFolder(parent, SWT.TOP);
+		final CTabFolder folder = new CTabFolder(parent, SWT.TOP);
 
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		gd.horizontalSpan = 1;

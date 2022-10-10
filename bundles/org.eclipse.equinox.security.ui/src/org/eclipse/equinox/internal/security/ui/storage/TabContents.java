@@ -25,7 +25,7 @@ import org.eclipse.equinox.internal.security.ui.storage.view.*;
 import org.eclipse.equinox.security.storage.*;
 import org.eclipse.jface.layout.*;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.*;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -44,10 +44,11 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		valuesView.setInput(selectedNode);
 	}
 
-	public TabContents(TabFolder folder, int index, final Shell shell) {
+	public TabContents(CTabFolder folder, int index, final Shell shell) {
 		this.shell = shell;
 
-		TabItem tab = new TabItem(folder, SWT.NONE, index);
+		CTabItem tab = new CTabItem(folder, SWT.NONE, index);
+		folder.setSelection(0);
 		tab.setText(SecUIMessages.tabContents);
 		Composite page = new Composite(folder, SWT.NONE);
 		tab.setControl(page);
@@ -68,7 +69,8 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 
 		new Label(rightPane, SWT.NONE).setText(SecUIMessages.keysTable);
 
-		Table tableOfValues = new Table(rightPane, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
+		Table tableOfValues = new Table(rightPane,
+				SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
 		tableOfValues.setLinesVisible(true);
 		tableOfValues.setHeaderVisible(true);
 		tableOfValues.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true));
@@ -94,17 +96,14 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 			validateSave(); // save could fail so re-check
 		}));
 
-		/* Removed for the time being. In future modify/show/export operations could be 
-		 * re-introduced with some special access token required to be entered by the user 
-		Button buttonExport = new Button(buttonBar, SWT.CENTER);
-		buttonExport.setText(SecUIMessages.exportButton);
-		setButtonSize(buttonExport, minButtonWidth);
-		buttonExport.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				export();
-			}
-		});
-		*/
+		/*
+		 * Removed for the time being. In future modify/show/export operations could be
+		 * re-introduced with some special access token required to be entered by the
+		 * user Button buttonExport = new Button(buttonBar, SWT.CENTER);
+		 * buttonExport.setText(SecUIMessages.exportButton); setButtonSize(buttonExport,
+		 * minButtonWidth); buttonExport.addSelectionListener(new SelectionAdapter() {
+		 * public void widgetSelected(SelectionEvent e) { export(); } });
+		 */
 
 		Button buttonDelete = new Button(buttonBar, SWT.PUSH);
 		buttonDelete.setText(SecUIMessages.deleteButton);
@@ -117,7 +116,7 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 			new Text(page, SWT.READ_ONLY).setText(new Path(location.getFile()).toOSString());
 		}
 
-		sashForm.setWeights(new int[] {30, 70});
+		sashForm.setWeights(new int[] { 30, 70 });
 
 		nodesView = new NodesView(nodeTree, this);
 		valuesView = new ValuesView(tableOfValues, this, shell);
@@ -206,7 +205,7 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		defaultStorage.clear();
 		defaultStorage.removeNode();
 
-		// clear it from the list of open storages, delete the file 
+		// clear it from the list of open storages, delete the file
 		InternalExchangeUtils.defaultStorageDelete();
 
 		if (nodesView != null)

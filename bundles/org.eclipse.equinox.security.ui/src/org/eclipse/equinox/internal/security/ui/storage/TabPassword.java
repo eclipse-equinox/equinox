@@ -27,6 +27,8 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -50,8 +52,9 @@ public class TabPassword {
 
 	protected boolean providerModified = false;
 
-	public TabPassword(TabFolder folder, int index, final Shell shell) {
-		TabItem tab = new TabItem(folder, SWT.NONE, index);
+	public TabPassword(CTabFolder folder, int index, final Shell shell) {
+		CTabItem tab = new CTabItem(folder, SWT.NONE, index);
+		folder.setSelection(0);
 		tab.setText(SecUIMessages.tabPassword);
 		Composite page = new Composite(folder, SWT.NONE);
 		page.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false));
@@ -204,7 +207,7 @@ public class TabPassword {
 		HashSet<String> disabledModules = getDisabledModules();
 		for (PasswordProviderDescription module : InternalExchangeUtils.passwordProvidersFind()) {
 			TableItem item = new TableItem(providerTable, SWT.NONE);
-			item.setText(new String[] {module.getName(), Integer.toString(module.getPriority())});
+			item.setText(new String[] { module.getName(), Integer.toString(module.getPriority()) });
 			item.setData(module);
 			if (disabledModules == null)
 				item.setChecked(true);
@@ -254,10 +257,11 @@ public class TabPassword {
 	}
 
 	protected HashSet<String> getDisabledModules() {
-		IScopeContext[] scopes = {ConfigurationScope.INSTANCE, DefaultScope.INSTANCE};
+		IScopeContext[] scopes = { ConfigurationScope.INSTANCE, DefaultScope.INSTANCE };
 		IPreferencesService preferencesService = Platform.getPreferencesService();
 		String defaultPreferenceValue = ""; //$NON-NLS-1$
-		String tmp = preferencesService.getString(PREFERENCES_PLUGIN, IStorageConstants.DISABLED_PROVIDERS_KEY, defaultPreferenceValue, scopes);
+		String tmp = preferencesService.getString(PREFERENCES_PLUGIN, IStorageConstants.DISABLED_PROVIDERS_KEY,
+				defaultPreferenceValue, scopes);
 		HashSet<String> disabledModules = splitModuleIds(tmp);
 		return disabledModules;
 	}
@@ -270,7 +274,8 @@ public class TabPassword {
 		TableItem[] items = providerTable.getItems();
 		for (TableItem item : items) {
 			String moduleId = getModuleId(item);
-			boolean enabled = defaultDisabledModules == null || moduleId == null || !defaultDisabledModules.contains(moduleId);
+			boolean enabled = defaultDisabledModules == null || moduleId == null
+					|| !defaultDisabledModules.contains(moduleId);
 			if (item.getChecked() != enabled) {
 				item.setChecked(enabled);
 				providerModified = true;

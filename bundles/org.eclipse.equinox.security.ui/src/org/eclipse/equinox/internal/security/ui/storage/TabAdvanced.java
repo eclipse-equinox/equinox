@@ -22,6 +22,8 @@ import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.LayoutConstants;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.*;
 import org.osgi.service.prefs.BackingStoreException;
@@ -36,9 +38,10 @@ public class TabAdvanced {
 	private IEclipsePreferences eclipseNode = null;
 	private String defaultCipherAlgorithm;
 
-	public TabAdvanced(TabFolder folder, int index, final Shell shell) {
+	public TabAdvanced(CTabFolder folder, int index, final Shell shell) {
 
-		TabItem tab = new TabItem(folder, SWT.NONE, index);
+		CTabItem tab = new CTabItem(folder, SWT.NONE, index);
+		folder.setSelection(0);
 		tab.setText(SecUIMessages.tabAdvanced);
 		Composite page = new Composite(folder, SWT.NONE);
 		tab.setControl(page);
