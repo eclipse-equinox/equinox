@@ -9,3 +9,4 @@ Bug 551174 - Comparator errors in 4.14 I build - I20190917-1800
 Bug 544571 - Update felix SCR to 2.0.16
 4.19 I-Build: I20210204-0900 - BUILD FAILED
 [Features] Leverage transitive inclusion and build source-features: https://github.com/eclipse-equinox/equinox.bundles/pull/20
+Touch for https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/pull/624
