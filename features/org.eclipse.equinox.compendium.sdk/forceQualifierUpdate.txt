@@ -9,3 +9,4 @@ Bug 529719 - Update felix SCR to 2.0.14
 Touch feature for I20180903-0800 failure due to new felix.scr qualifier.
 Bug 544571 - Update felix SCR to 2.0.16
 Update Felix SCR to 2.2.0 - (https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/pull/282)
+Update Felix SCR to 2.2.4
