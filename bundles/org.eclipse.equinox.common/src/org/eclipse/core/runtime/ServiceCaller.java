@@ -11,14 +11,19 @@
  * Contributors:
  *     Alex Blewitt - initial API and implementation
  *     Alexander Fedorov (ArSysOp) - documentation improvements
+ *     Hannes Wellmann - Add ServiceUsageScope and use() methods
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
+import java.lang.StackWalker.Option;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+import org.eclipse.core.internal.runtime.CommonMessages;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -33,19 +38,38 @@ import org.osgi.util.tracker.ServiceTracker;
  * </ul>
  * <p>
  * For single invocations of a service the static method
- * {@link ServiceCaller#callOnce(Class, Class, Consumer)} can be used. This
- * method will wrap a call to the consumer of the service with the necessary
- * OSGi service registry calls to ensure the service exists and will do the
- * proper get and release service operations surround the calls to the service.
- * By wrapping a call around the service we can ensure that it is correctly
- * released after use.
+ * {@link #callOnce(Class, Class, Consumer)} or {@link #use(Class)} can be used.
+ * The former method will wrap a call to the consumer of the service with the
+ * necessary OSGi service registry calls to ensure the service exists and will
+ * do the proper get and release service operations surround the calls to the
+ * service. The latter method returns a {@link AutoCloseable auto-closable}
+ * {@link ServiceUsageScope} that is intended to be used within a
+ * try-with-resources block and gets the service-instances when requested the
+ * first time and releases all obtained services when being closed. Both methods
+ * ensure that the service is correctly released after use. In contrast to
+ * {@code callOnce()} the {@code use()} methods and the returned
+ * {@link ServiceUsageScope} allow to return values obtained from a service in
+ * an simple way, to propagate checked exceptions thrown during the interaction
+ * with the service and allow to obtain all instances of the specified Service
+ * type.
  * </p>
  * <p>
  * Single invocation example:
  * </p>
+ * Using {@code callOnce()}:
  * 
  * <pre>
- * ServiceCaller.callOnce(MyClass.class, ILog.class, (logger) -&gt; logger.info("All systems go!"));
+ * ServiceCaller.callOnce(MyClass.class, ILog.class, logger -&gt; logger.info("All systems go!"));
+ * </pre>
+ * 
+ * Using {@code use()}:
+ * 
+ * <pre>
+ * try (var service = ServiceCaller.use(ILog.class)) {
+ * 	logger.first().orElseThrow().info("All systems go!");
+ * Or
+ * 	logger.all().forEach(l -&gt; l.info("Status message to each ILog impl."));
+ * }
  * </pre>
  * <p>
  * Note that it is generally more efficient to use a long-running service
@@ -97,6 +121,298 @@ import org.osgi.util.tracker.ServiceTracker;
  * @since 3.13
  */
 public class ServiceCaller<S> {
+
+	private static final StackWalker STACK_WALKER = StackWalker.getInstance(Option.RETAIN_CLASS_REFERENCE);
+
+	/**
+	 * Returns a {@link ServiceUsageScope} that provides all services of the given
+	 * type available in the caller-class' bundle-context.
+	 * 
+	 * @param <S>     the type of service
+	 * @param service the services' type
+	 * @return a {@code ServiceUsageScope} for all services available in the
+	 *         caller's bundle-context
+	 * @since 3.19
+	 * 
+	 */
+	public static <S> ServiceUsageScope<S> use(Class<S> service) {
+		Class<?> callerClass = STACK_WALKER.getCallerClass();
+		return use(service, null, getBundleContext(callerClass));
+	}
+
+	/**
+	 * Returns a {@link ServiceUsageScope} that provides all services of the given
+	 * type available in the caller-class' bundle-context, that match the given
+	 * filter.
+	 * 
+	 * @param <S>     the type of service
+	 * @param service the services' type
+	 * @param filter  the filter all provided service must match
+	 * @return a {@code ServiceUsageScope} for all services available in the
+	 *         caller's bundle-context, that match the filter
+	 * @since 3.19
+	 */
+	public static <S> ServiceUsageScope<S> use(Class<S> service, Filter filter) {
+		Class<?> callerClass = STACK_WALKER.getCallerClass();
+		return use(service, filter, getBundleContext(callerClass));
+	}
+
+	private static BundleContext getBundleContext(Class<?> caller) {
+		Bundle bundle = FrameworkUtil.getBundle(caller);
+		if (bundle == null) {
+			throw new IllegalStateException(NLS.bind(CommonMessages.serviceCaller_bundleUnavailable, caller));
+		}
+		BundleContext ctx = bundle.getBundleContext();
+		if (ctx == null) {
+			throw new IllegalStateException(NLS.bind(CommonMessages.serviceCaller_bundleUnavailable, bundle));
+		}
+		return ctx;
+	}
+
+	/**
+	 * Returns a {@link ServiceUsageScope} that provides all services of the given
+	 * type available in the given {@link BundleContext}.
+	 * 
+	 * @param <S>     the type of service
+	 * @param service the services' type
+	 * @param context the bundle-context in which services are looked-up
+	 * @return a {@code ServiceUsageScope} for all services available in the context
+	 * @since 3.19
+	 */
+	public static <S> ServiceUsageScope<S> use(Class<S> service, BundleContext context) {
+		return new ServiceUsageScope<>(service, null, context);
+	}
+
+	/**
+	 * Returns a {@link ServiceUsageScope} that provides all services of the given
+	 * type available in the given {@link BundleContext}, that match the given
+	 * filter.
+	 * 
+	 * @param <S>     the type of service
+	 * @param service the services' type
+	 * @param filter  the filter all provided service must match
+	 * @param context the bundle-context in which services are looked-up
+	 * @return a {@code ServiceUsageScope} for all services available in the
+	 *         caller's bundle-context, that match the filter
+	 * @since 3.19
+	 */
+	public static <S> ServiceUsageScope<S> use(Class<S> service, Filter filter, BundleContext context) {
+		return new ServiceUsageScope<>(service, filter, context);
+	}
+
+	/**
+	 * A scope that provides access to the (optionally filtered) set of services of
+	 * a type available in a context.
+	 * <p>
+	 * The {@link BundleContext#getServiceReferences(String, String) service
+	 * references are obtained} upon creation, while the actual service objects are
+	 * only {@link BundleContext#getService(ServiceReference) get} lazy on the first
+	 * request (i.e. when {@link #first()} is called or the service object is
+	 * consumed by the Stream returned by {@link #all()}). Services unregistered in
+	 * the meantime are discarded and newly registered services are not considered.
+	 * </p>
+	 * <p>
+	 * All {@code get} service objects are cached for subsequent requests and are
+	 * {@link BundleContext#ungetService(ServiceReference) unget} only when this
+	 * scope is {@link ServiceUsageScope#close() closed}.
+	 * </p>
+	 * <p>
+	 * Instances of this class are not thread-safe.
+	 * <p>
+	 * 
+	 * @param <S> the type of services provided by this scope
+	 * @since 3.19
+	 */
+	public static final class ServiceUsageScope<S> implements AutoCloseable {
+		@SuppressWarnings("rawtypes")
+		private static final ServiceReference[] NO_REFERENCES = new ServiceReference[0];
+		@SuppressWarnings("rawtypes")
+		private static final ServiceInstance[] NO_INSTANCES = new ServiceInstance[0];
+
+		private final BundleContext context;
+		private final ServiceReference<S>[] references;
+		private final ServiceInstance<S>[] instances;
+
+		private Optional<S> first;
+
+		@SuppressWarnings("unchecked")
+		ServiceUsageScope(Class<S> service, Filter filter, BundleContext ctx) {
+			this.context = Objects.requireNonNull(ctx);
+			String filterStr = filter != null ? filter.toString() : null;
+			ServiceReference<S>[] refs;
+			try {
+				refs = (ServiceReference<S>[]) ctx.getServiceReferences(service.getName(), filterStr);
+			} catch (InvalidSyntaxException e) {
+				throw new AssertionError("Illegal filter object passed", e); //$NON-NLS-1$
+			}
+			if (refs == null) {
+				this.references = NO_REFERENCES;
+				this.instances = NO_INSTANCES;
+				this.first = Optional.empty();
+			} else {
+				Arrays.sort(refs, Comparator.reverseOrder());
+				this.references = refs;
+				this.instances = new ServiceInstance[references.length];
+			}
+		}
+
+		/**
+		 * Returns an optional holding the service object ranked highest or an empty
+		 * optional if none is available.
+		 * <p>
+		 * The service object is {@link BundleContext#getService get} on the first
+		 * invocation and cached for subsequent invocations of this method.
+		 * </p>
+		 * 
+		 * @return the optional first instance of this scope's service
+		 */
+		public Optional<S> first() {
+			if (first == null) {
+				first = all().findFirst();
+			}
+			return first;
+		}
+
+		/**
+		 * Returns a sorted {@code Stream} of all service objects available in this
+		 * {@code ServiceUsageScope}.
+		 * <p>
+		 * The stream is sorted in descending order with respect to the
+		 * {@link ServiceReference#compareTo(Object) instance's ServiceReference}, which
+		 * places higher ranked services in the beginning of the stream.
+		 * </p>
+		 * 
+		 * Service objects are {@link BundleContext#getService(ServiceReference) get}
+		 * upon the first execution of the terminal operation for an element and then
+		 * cached for subsequent invocations of this method.
+		 * 
+		 * @return a sorted stream of service objects
+		 */
+		public Stream<S> all() {
+			if (references.length == 0) {
+				return Stream.empty();
+			}
+			return allInstances().map(ServiceInstance::getService);
+		}
+
+		/**
+		 * Returns a sorted {@code Stream} of all {@link ServiceInstance
+		 * ServiceInstances} available in this {@code ServiceUsageScope}.
+		 * <p>
+		 * The stream is sorted in descending order with respect to the
+		 * {@link ServiceReference#compareTo(Object) instance's ServiceReference}, which
+		 * places higher ranked services in the beginning of the stream.
+		 * </p>
+		 * 
+		 * Service objects are {@link BundleContext#getService(ServiceReference) get}
+		 * upon the first execution of the terminal operation for an element and then
+		 * cached for subsequent invocations of this method.
+		 * 
+		 * @return a sorted stream of service objects
+		 */
+		public Stream<ServiceInstance<S>> allInstances() {
+			if (references.length == 0) {
+				return Stream.empty();
+			}
+			return IntStream.range(0, references.length).mapToObj(i -> {
+				if (instances[i] == null) {
+					S s = context.getService(references[i]);
+					instances[i] = s != null ? new ServiceInstance<>(s, references[i]) : null;
+				}
+				return instances[i];
+			}).filter(Objects::nonNull).sorted();
+		}
+
+		/**
+		 * Closes this scope and {@link BundleContext#ungetService(ServiceReference)
+		 * ungets} all service objects get and cached in this scope. This method is
+		 * invoked automatically on objects managed by the {@code try}-with-resources
+		 * statement.
+		 */
+		@Override
+		public void close() { // do not throw (checked) exception
+			// TODO: prevent future usages?! Null context or references?
+			RuntimeException exception = null;
+			for (ServiceReference<S> serviceReference : references) {
+				if (serviceReference != null) {
+					try {
+						context.ungetService(serviceReference);
+					} catch (RuntimeException e) {
+						if (exception == null) {
+							exception = new IllegalStateException();
+						}
+						exception.addSuppressed(e);
+					}
+				}
+			}
+			if (exception != null) {
+				throw exception;
+			}
+		}
+	}
+
+	/**
+	 * Representation of a service object and the properties it was registered with.
+	 * 
+	 * @param <S> the service's type of this instance
+	 * @since 3.19
+	 */
+	public static final class ServiceInstance<S> {
+		private final S instance;
+		private final ServiceReference<S> reference;
+
+		ServiceInstance(S instance, ServiceReference<S> reference) {
+			this.instance = instance;
+			this.reference = reference;
+		}
+
+		/**
+		 * Returns the actual service object.
+		 * 
+		 * @return the service object
+		 */
+		public S getService() {
+			return instance;
+		}
+
+		/**
+		 * Returns a copy of the properties of the service referenced by this
+		 * {@code ServiceInstance} object.
+		 * 
+		 * @return Returns a copy of the properties of the service referenced by this
+		 *         {@code ServiceInstance} object
+		 * @see ServiceReference#getProperties()
+		 */
+		public Dictionary<String, Object> getProperties() {
+			return reference.getProperties();
+		}
+
+		/**
+		 * Returns the property value to which the specified property key is mapped in
+		 * the properties Dictionary object of the service referenced by this
+		 * {@code ServiceInstance} object.
+		 * 
+		 * @param key The property key
+		 * @return The property value to which the key is mapped; {@code null} if there
+		 *         is no property named after the key
+		 * @see ServiceReference#getProperty(String)
+		 */
+		public Object getProperty(String key) {
+			return reference.getProperty(key);
+		}
+
+		/**
+		 * Returns the set of keys in the properties {@code Dictionary} object of the
+		 * service referenced by this {@code ServiceInstance} object.
+		 * 
+		 * @return The Set of property keys
+		 * @see ServiceReference#getPropertyKeys()
+		 */
+		public Set<String> getPropertyKeys() {
+			return Set.of(reference.getPropertyKeys());
+		}
+	}
+
 	/**
 	 * Calls an OSGi service by dynamically looking it up and passing it to the
 	 * given consumer.
