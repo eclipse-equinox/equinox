@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 IBM Corporation and others.
+ * Copyright (c) 2020, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,23 +25,24 @@ import org.osgi.util.tracker.ServiceTracker;
  * {@code ServiceCaller} provides functional methods for invoking OSGi services
  * in two different ways
  * <ul>
- * <li> Single invocations which happen only once or very rarely. 
- * In this case, maintaining a cache of the service is not worth the overhead.</li>
- * <li> Multiple invocations that happen often and rapidly. In this case, maintaining
- * a cache of the service is worth the overhead.</li>
+ * <li>Single invocations which happen only once or very rarely. In this case,
+ * maintaining a cache of the service is not worth the overhead.</li>
+ * <li>Multiple invocations that happen often and rapidly. In this case,
+ * maintaining a cache of the service is worth the overhead.</li>
  * </ul>
  * <p>
  * For single invocations of a service the static method
- * {@link ServiceCaller#callOnce(Class, Class, Consumer)} can be used.
- * This method will wrap a call to the consumer of the service with
- * the necessary OSGi service registry calls to ensure the service
- * exists and will do the proper get and release service operations
- * surround the calls to the service. By wrapping a call around the
- * service we can ensure that it is correctly released after use.
+ * {@link ServiceCaller#callOnce(Class, Class, Consumer)} can be used. This
+ * method will wrap a call to the consumer of the service with the necessary
+ * OSGi service registry calls to ensure the service exists and will do the
+ * proper get and release service operations surround the calls to the service.
+ * By wrapping a call around the service we can ensure that it is correctly
+ * released after use.
  * </p>
  * <p>
  * Single invocation example:
  * </p>
+ * 
  * <pre>
  * ServiceCaller.callOnce(MyClass.class, ILog.class, (logger) -&gt; logger.info("All systems go!"));
  * </pre>
@@ -56,51 +57,59 @@ import org.osgi.util.tracker.ServiceTracker;
  * This allows boilerplate code to be reduced at call sites, which would
  * otherwise have to do something like:
  * </p>
+ * 
  * <pre>
  * Bundle bundle = FrameworkUtil.getBundle(BadExample.class);
  * BundleContext context = bundle == null ? null : bundle.getBundleContext();
  * ServiceReference&lt;Service&gt; reference = context == null ? null : context.getServiceReference(serviceType);
  * try {
- *   Service service = reference == null ? null : context.getService(reference);
- *   if (service != null)
- *     consumer.accept(service);
+ * 	Service service = reference == null ? null : context.getService(reference);
+ * 	if (service != null)
+ * 		consumer.accept(service);
  * } finally {
- *   context.ungetService(reference);
+ * 	context.ungetService(reference);
  * }
  * </pre>
  * <p>
- * For cases where a service is used much more often a {@code ServiceCaller} instance
- * can be used to cache and track the available service. This may be useful for cases
- * that cannot use declarative services and that want to avoid using something like
- * a {@link ServiceTracker} that does not easily allow for lazy instantiation of the service
- * instance.  For example, if logging is used more often then something like the following
- * could be used:
+ * For cases where a service is used much more often a {@code ServiceCaller}
+ * instance can be used to cache and track the available service. This may be
+ * useful for cases that cannot use declarative services and that want to avoid
+ * using something like a {@link ServiceTracker} that does not easily allow for
+ * lazy instantiation of the service instance. For example, if logging is used
+ * more often then something like the following could be used:
  * </p>
+ * 
  * <pre>
  * static final ServiceCaller&lt;ILog&gt; log = new ServiceCaller(MyClass.class, ILog.class);
+ * 
  * static void info(String msg) {
- *   log.call(logger -&gt; logger.info(msg));
+ * 	log.call(logger -&gt; logger.info(msg));
  * }
  * </pre>
  * <p>
- * Note that this class is intended for simple service usage patterns only.  More advanced cases 
- * should use other mechanisms such as the {@link ServiceTracker} or declarative services.
+ * Note that this class is intended for simple service usage patterns only. More
+ * advanced cases should use other mechanisms such as the {@link ServiceTracker}
+ * or declarative services.
  * </p>
- * @param <Service> the service type for this caller
+ * 
+ * @param <S> the service type for this caller
  * @since 3.13
  */
-public class ServiceCaller<Service> {
+public class ServiceCaller<S> {
 	/**
-	 * Calls an OSGi service by dynamically looking it up and passing it to the given consumer.
+	 * Calls an OSGi service by dynamically looking it up and passing it to the
+	 * given consumer.
 	 * <p>
-	 * If not running under OSGi, the caller bundle is not active or the service is not available, return false.
-	 * If the service is found, call the service and return true.
+	 * If not running under OSGi, the caller bundle is not active or the service is
+	 * not available, return false. If the service is found, call the service and
+	 * return true.
 	 * </p>
 	 * <p>
-	 * Any runtime exception thrown by the consumer is rethrown by this method.
-	 * If the consumer throws a checked exception, it can be propagated using a <em>sneakyThrow</em>
-	 * inside a try/catch block:
+	 * Any runtime exception thrown by the consumer is rethrown by this method. If
+	 * the consumer throws a checked exception, it can be propagated using a
+	 * <em>sneakyThrow</em> inside a try/catch block:
 	 * </p>
+	 * 
 	 * <pre>
 	 * callOnce(MyClass.class, Callable.class, (callable) -&gt; {
 	 *   try {
@@ -115,32 +124,43 @@ public class ServiceCaller<Service> {
 	 *   throw (E) e;
 	 * }
 	 * </pre>
-	 * @param caller a class from the bundle that will use service
+	 * 
+	 * @param caller      a class from the bundle that will use service
 	 * @param serviceType the OSGi service type to look up
-	 * @param consumer the consumer of the OSGi service
-	 * @param <Service> the OSGi service type to look up
-	 * @return true if the OSGi service was located and called successfully, false otherwise
+	 * @param consumer    the consumer of the OSGi service
+	 * @param <S>         the OSGi service type to look up
+	 * @return true if the OSGi service was located and called successfully, false
+	 *         otherwise
 	 * @throws NullPointerException if any of the parameters are null
 	 */
-	public static <Service> boolean callOnce(Class<?> caller, Class<Service> serviceType, Consumer<Service> consumer) {
-		return new ServiceCaller<>(caller, serviceType).getCallUnget(consumer);
+	public static <S> boolean callOnce(Class<?> caller, Class<S> serviceType, Consumer<S> consumer) {
+		return callOnce(caller, serviceType, null, consumer);
 	}
 
 	/**
 	 * As {@link #callOnce(Class, Class, Consumer)} with an additional OSGi filter.
-	 * @param caller a class from the bundle that will use service
+	 * 
+	 * @param caller      a class from the bundle that will use service
 	 * @param serviceType the OSGi service type to look up
-	 * @param consumer the consumer of the OSGi service
-	 * @param filter an OSGi filter to restrict the services found
-	 * @param <Service> the OSGi service type to look up
-	 * @return true if the OSGi service was located and called successfully, false otherwise
+	 * @param consumer    the consumer of the OSGi service
+	 * @param filter      an OSGi filter to restrict the services found
+	 * @param <S>         the OSGi service type to look up
+	 * @return true if the OSGi service was located and called successfully, false
+	 *         otherwise
 	 * @throws NullPointerException if any of the parameters are null
 	 */
-	public static <Service> boolean callOnce(Class<?> caller, Class<Service> serviceType, String filter, Consumer<Service> consumer) {
-		return new ServiceCaller<>(caller, serviceType, filter).getCallUnget(consumer);
+	public static <S> boolean callOnce(Class<?> caller, Class<S> serviceType, String filter, Consumer<S> consumer) {
+		return new ServiceCaller<>(caller, serviceType, filter).getCurrent().map(r -> {
+			try {
+				consumer.accept(r.instance);
+				return Boolean.TRUE;
+			} finally {
+				r.unget();
+			}
+		}).orElse(Boolean.FALSE);
 	}
 
-	static int getRank(ServiceReference<?> ref) {
+	private static int getRank(ServiceReference<?> ref) {
 		Object rank = ref.getProperty(Constants.SERVICE_RANKING);
 		if (rank instanceof Integer) {
 			return ((Integer) rank).intValue();
@@ -148,13 +168,13 @@ public class ServiceCaller<Service> {
 		return 0;
 	}
 
-	class ReferenceAndService implements SynchronousBundleListener, ServiceListener {
+	private class ReferenceAndService implements SynchronousBundleListener, ServiceListener {
 		final BundleContext context;
-		final ServiceReference<Service> ref;
-		final Service instance;
+		final ServiceReference<S> ref;
+		final S instance;
 		final int rank;
 
-		public ReferenceAndService(final BundleContext context, ServiceReference<Service> ref, Service instance) {
+		public ReferenceAndService(final BundleContext context, ServiceReference<S> ref, S instance) {
 			this.context = context;
 			this.ref = ref;
 			this.instance = instance;
@@ -179,23 +199,19 @@ public class ServiceCaller<Service> {
 
 		@Override
 		public void serviceChanged(ServiceEvent e) {
-			if (e.getServiceReference().equals(ref)) {
-				if (e.getType() == ServiceEvent.UNREGISTERING) {
-					unget();
-				} else if (filter != null && e.getType() == ServiceEvent.MODIFIED_ENDMATCH) {
-					unget();
-				} else if (e.getType() == ServiceEvent.MODIFIED) {
-					if (getRank(ref) != rank) {
-						// rank changed; untrack to force a new ReferenceAndService with new rank
-						unget();
-					}
-				}
-			} else if (e.getType() == ServiceEvent.MODIFIED) {
-				if (getRank(e.getServiceReference()) > rank) {
-					// Another service with higher rank is available
-					unget();
-				}
+			if (requiresUnget(e)) {
+				unget();
 			}
+		}
+
+		private boolean requiresUnget(ServiceEvent e) {
+			if (e.getServiceReference().equals(ref)) {
+				return (e.getType() == ServiceEvent.UNREGISTERING)
+						|| (filter != null && e.getType() == ServiceEvent.MODIFIED_ENDMATCH)
+						|| (e.getType() == ServiceEvent.MODIFIED && getRank(ref) != rank);
+				// if rank changed: untrack to force a new ReferenceAndService with new rank
+			}
+			return e.getType() == ServiceEvent.MODIFIED && getRank(e.getServiceReference()) > rank;
 		}
 
 		// must hold monitor on ServiceCaller.this when calling track
@@ -213,7 +229,8 @@ public class ServiceCaller<Service> {
 					unget();
 				}
 				if (getRank(ref) != rank) {
-					// ranking has changed; unget to force reget in case the ranking is not the highest
+					// ranking has changed; unget to force reget in case the ranking is not the
+					// highest
 					unget();
 				}
 			} catch (InvalidSyntaxException e) {
@@ -248,29 +265,32 @@ public class ServiceCaller<Service> {
 		}
 	}
 
-	final Bundle bundle;
-	final Class<Service> serviceType;
-	final String filter;
-	volatile ReferenceAndService service = null;
+	private final Bundle bundle;
+	private final Class<S> serviceType;
+	private final String filter;
+	private volatile ReferenceAndService service = null;
 
 	/**
-	 * Creates a {@code ServiceCaller} instance for invoking an OSGi
-	 * service many times with a consumer function.
-	 * @param caller a class from the bundle that will consume the service
+	 * Creates a {@code ServiceCaller} instance for invoking an OSGi service many
+	 * times with a consumer function.
+	 * 
+	 * @param caller      a class from the bundle that will consume the service
 	 * @param serviceType the OSGi service type to look up
 	 */
-	public ServiceCaller(Class<?> caller, Class<Service> serviceType) {
+	public ServiceCaller(Class<?> caller, Class<S> serviceType) {
 		this(caller, serviceType, null);
 	}
 
 	/**
-	 * Creates a {@code ServiceCaller} instance for invoking an OSGi
-	 * service many times with a consumer function.
-	 * @param caller a class from the bundle that will consume the service
+	 * Creates a {@code ServiceCaller} instance for invoking an OSGi service many
+	 * times with a consumer function.
+	 * 
+	 * @param caller      a class from the bundle that will consume the service
 	 * @param serviceType the OSGi service type to look up
-	 * @param filter the service filter used to look up the service.  May be {@code null}.
+	 * @param filter      the service filter used to look up the service. May be
+	 *                    {@code null}.
 	 */
-	public ServiceCaller(Class<?> caller, Class<Service> serviceType, String filter) {
+	public ServiceCaller(Class<?> caller, Class<S> serviceType, String filter) {
 		this.serviceType = Objects.requireNonNull(serviceType);
 		this.bundle = Objects.requireNonNull(FrameworkUtil.getBundle(Objects.requireNonNull(caller)));
 		this.filter = filter;
@@ -283,17 +303,6 @@ public class ServiceCaller<Service> {
 		}
 	}
 
-	private boolean getCallUnget(Consumer<Service> consumer) {
-		return getCurrent().map((r) -> {
-			try {
-				consumer.accept(r.instance);
-				return Boolean.TRUE;
-			} finally {
-				r.unget();
-			}
-		}).orElse(Boolean.FALSE);
-	}
-
 	private BundleContext getContext() {
 		if (System.getSecurityManager() != null) {
 			return AccessController.doPrivileged((PrivilegedAction<BundleContext>) () -> bundle.getBundleContext());
@@ -302,27 +311,31 @@ public class ServiceCaller<Service> {
 	}
 
 	/**
-	 * Calls an OSGi service by dynamically looking it up and passing it to the given consumer.
-	 * If not running under OSGi, the caller bundle is not active or the service is not available, return false.
-	 * Any runtime exception thrown by the consumer is rethrown by this method.
-	 * (For handling checked exceptions, see {@link #callOnce(Class, Class, Consumer)} for a solution.)
-	 * Subsequent calls to this method will attempt to reuse the previously acquired service instance until one
-	 * of the following occurs:
+	 * Calls an OSGi service by dynamically looking it up and passing it to the
+	 * given consumer. If not running under OSGi, the caller bundle is not active or
+	 * the service is not available, return false. Any runtime exception thrown by
+	 * the consumer is rethrown by this method. (For handling checked exceptions,
+	 * see {@link #callOnce(Class, Class, Consumer)} for a solution.) Subsequent
+	 * calls to this method will attempt to reuse the previously acquired service
+	 * instance until one of the following occurs:
 	 * <ul>
 	 * <li>The {@link #unget()} method is called.</li>
 	 * <li>The service is unregistered.</li>
-	 * <li>The service properties change such that this {@code ServiceCaller} filter no longer matches.
+	 * <li>The service properties change such that this {@code ServiceCaller} filter
+	 * no longer matches.
 	 * <li>The caller bundle is stopped.</li>
 	 * <li>The service rankings have changed.</li>
 	 * </ul>
 	 * 
-	 * After one of these conditions occur subsequent calls to this method will try to acquire the
-	 * another service instance.
+	 * After one of these conditions occur subsequent calls to this method will try
+	 * to acquire the another service instance.
+	 * 
 	 * @param consumer the consumer of the OSGi service
-	 * @return true if the OSGi service was located and called successfully, false otherwise
+	 * @return true if the OSGi service was located and called successfully, false
+	 *         otherwise
 	 */
-	public boolean call(Consumer<Service> consumer) {
-		return trackCurrent().map((r) -> {
+	public boolean call(Consumer<S> consumer) {
+		return trackCurrent().map(r -> {
 			consumer.accept(r.instance);
 			return Boolean.TRUE;
 		}).orElse(Boolean.FALSE);
@@ -330,10 +343,12 @@ public class ServiceCaller<Service> {
 
 	/**
 	 * Return the currently available service.
-	 * @return the currently available service or empty if the service cannot be found.
+	 * 
+	 * @return the currently available service or empty if the service cannot be
+	 *         found.
 	 */
-	public Optional<Service> current() {
-		return trackCurrent().map((r) -> r.instance);
+	public Optional<S> current() {
+		return trackCurrent().map(r -> r.instance);
 	}
 
 	private Optional<ReferenceAndService> trackCurrent() {
@@ -341,7 +356,7 @@ public class ServiceCaller<Service> {
 		if (current != null) {
 			return Optional.of(current);
 		}
-		return getCurrent().flatMap((r) -> {
+		return getCurrent().flatMap(r -> {
 			synchronized (ServiceCaller.this) {
 				if (service != null) {
 					// another thread beat us
@@ -357,13 +372,13 @@ public class ServiceCaller<Service> {
 
 	private Optional<ReferenceAndService> getCurrent() {
 		BundleContext context = getContext();
-		return getServiceReference(context).map((r) -> {
-			Service current = context.getService(r);
+		return getServiceReference(context).map(r -> {
+			S current = context.getService(r);
 			return current == null ? null : new ReferenceAndService(context, r, current);
 		});
 	}
 
-	private Optional<ServiceReference<Service>> getServiceReference(BundleContext context) {
+	private Optional<ServiceReference<S>> getServiceReference(BundleContext context) {
 		if (context == null) {
 			return Optional.empty();
 		}
@@ -379,10 +394,9 @@ public class ServiceCaller<Service> {
 	}
 
 	/**
-	 * Releases the cached service object, if it exists.
-	 * Another invocation of {@link #call(Consumer)} will
-	 * lazily get the service instance again and cache the new
-	 * instance if found.
+	 * Releases the cached service object, if it exists. Another invocation of
+	 * {@link #call(Consumer)} will lazily get the service instance again and cache
+	 * the new instance if found.
 	 */
 	public void unget() {
 		ReferenceAndService current = service;
