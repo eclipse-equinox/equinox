@@ -3,13 +3,13 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-Vendor: %bundleVendor
 Bundle-SymbolicName: org.eclipse.equinox.log.stream
-Bundle-Version: 1.1.0.qualifier
+Bundle-Version: 1.1.100.qualifier
 Bundle-Activator: org.eclipse.equinox.internal.log.stream.LogStreamManager
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Localization: plugin
 Import-Package: org.osgi.framework;version="[1.9.0,2.0.0)",
  org.osgi.service.log;version="[1.4.0,2.0.0)",
  org.osgi.service.log.stream;version="[1.0.0,1.1.0)",
- org.osgi.util.pushstream;version="[1.0.0,1.1.0)",
+ org.osgi.util.pushstream;version="[1.0.0,2.0.0)",
  org.osgi.util.tracker;version="[1.5.0,2.0.0)"
 Automatic-Module-Name: org.eclipse.equinox.log.stream
