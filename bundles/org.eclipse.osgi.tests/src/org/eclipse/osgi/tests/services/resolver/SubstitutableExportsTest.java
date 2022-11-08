@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
+import static org.junit.Assert.assertArrayEquals;
+
 import java.util.Hashtable;
 import org.eclipse.osgi.service.resolver.BundleDelta;
 import org.eclipse.osgi.service.resolver.BundleDescription;
@@ -1323,12 +1325,12 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 
 		ExportPackageDescription[] aExports = a.getSelectedExports();
 		ExportPackageDescription[] aSubtitutes = new ExportPackageDescription[] {aExports[0], aExports[1]};
-		assertEquals("aVisible not correct", aExports, a.getExportPackages()); //$NON-NLS-1$
-		assertEquals("bVisible not correct", aSubtitutes, bVisible); //$NON-NLS-1$
-		assertEquals("cVisible not correct", aSubtitutes, cVisible); //$NON-NLS-1$
-		assertEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
-		assertEquals("eVisible not correct", aSubtitutes, eVisible); //$NON-NLS-1$
-		assertEquals("fVisible not correct", aSubtitutes, fVisible); //$NON-NLS-1$
+		assertArrayEquals("aVisible not correct", aExports, a.getExportPackages()); //$NON-NLS-1$
+		assertArrayEquals("bVisible not correct", aSubtitutes, bVisible); //$NON-NLS-1$
+		assertArrayEquals("cVisible not correct", aSubtitutes, cVisible); //$NON-NLS-1$
+		assertArrayEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
+		assertArrayEquals("eVisible not correct", aSubtitutes, eVisible); //$NON-NLS-1$
+		assertArrayEquals("fVisible not correct", aSubtitutes, fVisible); //$NON-NLS-1$
 	}
 
 	public void testSubstitutableExports002() throws BundleException {
@@ -1375,12 +1377,12 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("gVisible wrong number", 0, gVisible.length); //$NON-NLS-1$
 
 		ExportPackageDescription[] aExports = a.getSelectedExports();
-		assertEquals("aVisible not correct", aExports, a.getExportPackages()); //$NON-NLS-1$
-		assertEquals("bVisible not correct", aExports, bVisible); //$NON-NLS-1$
-		assertEquals("cVisible not correct", aExports, cVisible); //$NON-NLS-1$
-		assertEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
-		assertEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
-		assertEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
+		assertArrayEquals("aVisible not correct", aExports, a.getExportPackages()); //$NON-NLS-1$
+		assertArrayEquals("bVisible not correct", aExports, bVisible); //$NON-NLS-1$
+		assertArrayEquals("cVisible not correct", aExports, cVisible); //$NON-NLS-1$
+		assertArrayEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
+		assertArrayEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
+		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
 	}
 
 	public void testSubstitutableExports003() throws BundleException {
@@ -1507,14 +1509,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("a has wrong number of exports", 3, aExports.length); //$NON-NLS-1$
 		ExportPackageDescription[] aDeclaredExports = a.getExportPackages();
 		ExportPackageDescription[] aFragExports = new ExportPackageDescription[] {aExports[2]};
-		assertEquals("bVisible not correct", aDeclaredExports, bVisible); //$NON-NLS-1$
-		assertEquals("bFragVisible not correct", aFragExports, bFragVisible); //$NON-NLS-1$
-		assertEquals("cVisible not correct", aDeclaredExports, cVisible); //$NON-NLS-1$
-		assertEquals("cFragVisible not correct", aFragExports, cFragVisible); //$NON-NLS-1$
+		assertArrayEquals("bVisible not correct", aDeclaredExports, bVisible); //$NON-NLS-1$
+		assertArrayEquals("bFragVisible not correct", aFragExports, bFragVisible); //$NON-NLS-1$
+		assertArrayEquals("cVisible not correct", aDeclaredExports, cVisible); //$NON-NLS-1$
+		assertArrayEquals("cFragVisible not correct", aFragExports, cFragVisible); //$NON-NLS-1$
 
-		assertEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
-		assertEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
-		assertEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
+		assertArrayEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
+		assertArrayEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
+		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
 	}
 
 	public void testSubstitutableExports005() throws BundleException {
@@ -1581,14 +1583,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("a has wrong number of exports", 3, aExports.length); //$NON-NLS-1$
 		ExportPackageDescription[] aDeclaredExports = a.getExportPackages();
 		ExportPackageDescription[] aFragExports = new ExportPackageDescription[] {aExports[2]};
-		assertEquals("bVisible not correct", aDeclaredExports, bVisible); //$NON-NLS-1$
-		assertEquals("bFragVisible not correct", aFragExports, bFragVisible); //$NON-NLS-1$
-		assertEquals("cVisible not correct", aDeclaredExports, cVisible); //$NON-NLS-1$
-		assertEquals("cFragVisible not correct", aFragExports, cFragVisible); //$NON-NLS-1$
+		assertArrayEquals("bVisible not correct", aDeclaredExports, bVisible); //$NON-NLS-1$
+		assertArrayEquals("bFragVisible not correct", aFragExports, bFragVisible); //$NON-NLS-1$
+		assertArrayEquals("cVisible not correct", aDeclaredExports, cVisible); //$NON-NLS-1$
+		assertArrayEquals("cFragVisible not correct", aFragExports, cFragVisible); //$NON-NLS-1$
 
-		assertEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
-		assertEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
-		assertEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
+		assertArrayEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
+		assertArrayEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
+		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
 	}
 
 	public void testSubstitutableExports006() throws BundleException {
@@ -1669,22 +1671,22 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		System.arraycopy(aDeclaredExports, 0, bcExpectedVisible, 0, aDeclaredExports.length);
 		bcExpectedVisible[2] = g.getSelectedExports()[0];
 		ExportPackageDescription[] aFragExports = new ExportPackageDescription[] {aExports[2]};
-		assertEquals("aVisible not correct", g.getSelectedExports(), aVisible); //$NON-NLS-1$
-		assertEquals("bVisible not correct", bcExpectedVisible, bVisible); //$NON-NLS-1$
-		assertEquals("bFragVisible not correct", aFragExports, bFragVisible); //$NON-NLS-1$
-		assertEquals("cVisible not correct", bcExpectedVisible, cVisible); //$NON-NLS-1$
-		assertEquals("cFragVisible not correct", aFragExports, cFragVisible); //$NON-NLS-1$
+		assertArrayEquals("aVisible not correct", g.getSelectedExports(), aVisible); //$NON-NLS-1$
+		assertArrayEquals("bVisible not correct", bcExpectedVisible, bVisible); //$NON-NLS-1$
+		assertArrayEquals("bFragVisible not correct", aFragExports, bFragVisible); //$NON-NLS-1$
+		assertArrayEquals("cVisible not correct", bcExpectedVisible, cVisible); //$NON-NLS-1$
+		assertArrayEquals("cFragVisible not correct", aFragExports, cFragVisible); //$NON-NLS-1$
 
-		assertEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
-		assertEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
-		assertEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
+		assertArrayEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
+		assertArrayEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
+		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
 
 		ExportPackageDescription[] gExports = g.getSelectedExports();
 		assertEquals("g has wrong number of exports", 1, gExports.length); //$NON-NLS-1$
 		ExportPackageDescription[] expectedHIVisible = new ExportPackageDescription[] {gExports[0], aExports[0], aExports[1], aExports[2]};
-		assertEquals("gVisible not correct", aExports, gVisible); //$NON-NLS-1$
-		assertEquals("hVisible not correct", expectedHIVisible, hVisible); //$NON-NLS-1$
-		assertEquals("iVisible not correct", expectedHIVisible, iVisible); //$NON-NLS-1$
+		assertArrayEquals("gVisible not correct", aExports, gVisible); //$NON-NLS-1$
+		assertArrayEquals("hVisible not correct", expectedHIVisible, hVisible); //$NON-NLS-1$
+		assertArrayEquals("iVisible not correct", expectedHIVisible, iVisible); //$NON-NLS-1$
 	}
 
 	public void testSubstitutableExports007() throws BundleException {
@@ -1742,14 +1744,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("iVisible wrong number", 2, iVisible.length); //$NON-NLS-1$
 
 		ExportPackageDescription[] aExports = a.getSelectedExports();
-		assertEquals("bVisible not correct", aExports, bVisible); //$NON-NLS-1$
-		assertEquals("cVisible not correct", aExports, cVisible); //$NON-NLS-1$
-		assertEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
-		assertEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
-		assertEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
-		assertEquals("gVisible not correct", aExports, gVisible); //$NON-NLS-1$
-		assertEquals("hVisible not correct", aExports, hVisible); //$NON-NLS-1$
-		assertEquals("iVisible not correct", aExports, iVisible); //$NON-NLS-1$
+		assertArrayEquals("bVisible not correct", aExports, bVisible); //$NON-NLS-1$
+		assertArrayEquals("cVisible not correct", aExports, cVisible); //$NON-NLS-1$
+		assertArrayEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
+		assertArrayEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
+		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
+		assertArrayEquals("gVisible not correct", aExports, gVisible); //$NON-NLS-1$
+		assertArrayEquals("hVisible not correct", aExports, hVisible); //$NON-NLS-1$
+		assertArrayEquals("iVisible not correct", aExports, iVisible); //$NON-NLS-1$
 	}
 
 	public void testSubstitutableExports008() throws BundleException {
@@ -1812,14 +1814,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("jVisible wrong number", 0, jVisible.length); //$NON-NLS-1$
 
 		ExportPackageDescription[] aExports = a.getSelectedExports();
-		assertEquals("bVisible not correct", aExports, bVisible); //$NON-NLS-1$
-		assertEquals("cVisible not correct", aExports, cVisible); //$NON-NLS-1$
-		assertEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
-		assertEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
-		assertEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
-		assertEquals("gVisible not correct", aExports, gVisible); //$NON-NLS-1$
-		assertEquals("hVisible not correct", aExports, hVisible); //$NON-NLS-1$
-		assertEquals("iVisible not correct", aExports, iVisible); //$NON-NLS-1$
+		assertArrayEquals("bVisible not correct", aExports, bVisible); //$NON-NLS-1$
+		assertArrayEquals("cVisible not correct", aExports, cVisible); //$NON-NLS-1$
+		assertArrayEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
+		assertArrayEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
+		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
+		assertArrayEquals("gVisible not correct", aExports, gVisible); //$NON-NLS-1$
+		assertArrayEquals("hVisible not correct", aExports, hVisible); //$NON-NLS-1$
+		assertArrayEquals("iVisible not correct", aExports, iVisible); //$NON-NLS-1$
 	}
 
 	public void testSubstitutableExports009() throws BundleException {
@@ -1885,16 +1887,16 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		ExportPackageDescription[] jExports = j.getSelectedExports();
 		assertEquals("aExports count wrong", 1, jExports.length); //$NON-NLS-1$
 		ExportPackageDescription[] bcExpected = new ExportPackageDescription[] {aExports[0], aExports[1], jExports[0]};
-		assertEquals("aVisible not correct", jExports, aVisible); //$NON-NLS-1$
-		assertEquals("bVisible not correct", bcExpected, bVisible); //$NON-NLS-1$
-		assertEquals("cVisible not correct", bcExpected, cVisible); //$NON-NLS-1$
-		assertEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
-		assertEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
-		assertEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
-		assertEquals("gVisible not correct", aExports, gVisible); //$NON-NLS-1$
-		assertEquals("hVisible not correct", aExports, hVisible); //$NON-NLS-1$
-		assertEquals("iVisible not correct", aExports, iVisible); //$NON-NLS-1$
-		assertEquals("jVisible not correct", aExports, jVisible); //$NON-NLS-1$
+		assertArrayEquals("aVisible not correct", jExports, aVisible); //$NON-NLS-1$
+		assertArrayEquals("bVisible not correct", bcExpected, bVisible); //$NON-NLS-1$
+		assertArrayEquals("cVisible not correct", bcExpected, cVisible); //$NON-NLS-1$
+		assertArrayEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
+		assertArrayEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
+		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
+		assertArrayEquals("gVisible not correct", aExports, gVisible); //$NON-NLS-1$
+		assertArrayEquals("hVisible not correct", aExports, hVisible); //$NON-NLS-1$
+		assertArrayEquals("iVisible not correct", aExports, iVisible); //$NON-NLS-1$
+		assertArrayEquals("jVisible not correct", aExports, jVisible); //$NON-NLS-1$
 	}
 
 	public void testSubstitutableExports010() throws BundleException {
@@ -2389,11 +2391,11 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		ExportPackageDescription[] aExports = a.getSelectedExports();
 		assertEquals("a has wrong number of exports", 2, aExports.length); //$NON-NLS-1$
 
-		assertEquals("bVisible not correct", aExports, bVisible); //$NON-NLS-1$
-		assertEquals("cVisible not correct", aExports, cVisible); //$NON-NLS-1$
-		assertEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
-		assertEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
-		assertEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
+		assertArrayEquals("bVisible not correct", aExports, bVisible); //$NON-NLS-1$
+		assertArrayEquals("cVisible not correct", aExports, cVisible); //$NON-NLS-1$
+		assertArrayEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
+		assertArrayEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
+		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
 	}
 
 	public void testSubstitutableExports020() throws BundleException {
@@ -2466,15 +2468,15 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 
 		ExportPackageDescription[] aDeclaredExports = a.getExportPackages();
 		ExportPackageDescription[] aFragExpected = new ExportPackageDescription[] {aExports[2], q.getExportPackages()[0]};
-		assertEquals("aFragVisible not correct", q.getSelectedExports(), aFragVisible); //$NON-NLS-1$
-		assertEquals("bVisible not correct", aDeclaredExports, bVisible); //$NON-NLS-1$
-		assertEquals("bFragVisible not correct", aFragExpected, bFragVisible); //$NON-NLS-1$
-		assertEquals("cVisible not correct", aDeclaredExports, cVisible); //$NON-NLS-1$
-		assertEquals("cFragVisible not correct", aFragExpected, cFragVisible); //$NON-NLS-1$
+		assertArrayEquals("aFragVisible not correct", q.getSelectedExports(), aFragVisible); //$NON-NLS-1$
+		assertArrayEquals("bVisible not correct", aDeclaredExports, bVisible); //$NON-NLS-1$
+		assertArrayEquals("bFragVisible not correct", aFragExpected, bFragVisible); //$NON-NLS-1$
+		assertArrayEquals("cVisible not correct", aDeclaredExports, cVisible); //$NON-NLS-1$
+		assertArrayEquals("cFragVisible not correct", aFragExpected, cFragVisible); //$NON-NLS-1$
 
-		assertEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
-		assertEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
-		assertEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
+		assertArrayEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
+		assertArrayEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
+		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
 	}
 
 	public void testSubstitutableExports021() throws BundleException {
@@ -2515,9 +2517,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("fVisible wrong number", 2, fVisible.length); //$NON-NLS-1$
 
 		ExportPackageDescription[] bExports = b.getSelectedExports();
-		assertEquals("cVisible not correct", bExports, cVisible); //$NON-NLS-1$
-		assertEquals("eVisible not correct", bExports, eVisible); //$NON-NLS-1$
-		assertEquals("fVisible not correct", bExports, fVisible); //$NON-NLS-1$
+		assertArrayEquals("cVisible not correct", bExports, cVisible); //$NON-NLS-1$
+		assertArrayEquals("eVisible not correct", bExports, eVisible); //$NON-NLS-1$
+		assertArrayEquals("fVisible not correct", bExports, fVisible); //$NON-NLS-1$
 	}
 
 	public void testSubstitutableExports022() throws BundleException {
@@ -2579,10 +2581,10 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("jVisible wrong number", 4, jVisible.length); //$NON-NLS-1$
 
 		ExportPackageDescription[] aExports = a.getSelectedExports();
-		assertEquals("aVisible not correct", aExports, a.getExportPackages()); //$NON-NLS-1$
-		assertEquals("bVisible not correct", aExports, bVisible); //$NON-NLS-1$
-		assertEquals("cVisible not correct", aExports, cVisible); //$NON-NLS-1$
-		assertEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
+		assertArrayEquals("aVisible not correct", aExports, a.getExportPackages()); //$NON-NLS-1$
+		assertArrayEquals("bVisible not correct", aExports, bVisible); //$NON-NLS-1$
+		assertArrayEquals("cVisible not correct", aExports, cVisible); //$NON-NLS-1$
+		assertArrayEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
 
 		ExportPackageDescription[] aExported = a.getSelectedExports();
 		ExportPackageDescription[] dExported = d.getSelectedExports();
@@ -2681,12 +2683,12 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("aExports wrong number", 2, aExports.length); //$NON-NLS-1$
 		ExportPackageDescription[] bcExpected = new ExportPackageDescription[] {aExports[0], aExports[1], l.getSelectedExports()[0]};
 		ExportPackageDescription[] aExpected = new ExportPackageDescription[] {l.getSelectedExports()[0]};
-		assertEquals("aVisible not correct", aExpected, aVisible); //$NON-NLS-1$
-		assertEquals("bVisible not correct", bcExpected, bVisible); //$NON-NLS-1$
-		assertEquals("cVisible not correct", bcExpected, cVisible); //$NON-NLS-1$
+		assertArrayEquals("aVisible not correct", aExpected, aVisible); //$NON-NLS-1$
+		assertArrayEquals("bVisible not correct", bcExpected, bVisible); //$NON-NLS-1$
+		assertArrayEquals("cVisible not correct", bcExpected, cVisible); //$NON-NLS-1$
 
 		ExportPackageDescription[] dExpected = new ExportPackageDescription[] {l.getSelectedExports()[1], aExports[0], aExports[1]};
-		assertEquals("dVisible not correct", dExpected, dVisible); //$NON-NLS-1$
+		assertArrayEquals("dVisible not correct", dExpected, dVisible); //$NON-NLS-1$
 
 		ExportPackageDescription[] aExported = a.getSelectedExports();
 		ExportPackageDescription[] dExported = d.getSelectedExports();
@@ -2759,12 +2761,12 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("fVisible wrong number", 2, fVisible.length); //$NON-NLS-1$
 
 		ExportPackageDescription[] aExports = a.getSelectedExports();
-		assertEquals("aVisible not correct", aExports, a.getExportPackages()); //$NON-NLS-1$
-		assertEquals("bVisible not correct", aExports, bVisible); //$NON-NLS-1$
-		assertEquals("cVisible not correct", aExports, cVisible); //$NON-NLS-1$
-		assertEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
-		assertEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
-		assertEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
+		assertArrayEquals("aVisible not correct", aExports, a.getExportPackages()); //$NON-NLS-1$
+		assertArrayEquals("bVisible not correct", aExports, bVisible); //$NON-NLS-1$
+		assertArrayEquals("cVisible not correct", aExports, cVisible); //$NON-NLS-1$
+		assertArrayEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
+		assertArrayEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
+		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
 
 		VersionConstraint[] unsatisfied = state.getStateHelper().getUnsatisfiedConstraints(a);
 		assertEquals("Should not have any unresolvable constraints", 0, unsatisfied.length);
@@ -2829,13 +2831,13 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("hVisible wrong number", 2, hVisible.length); //$NON-NLS-1$
 
 		ExportPackageDescription[] aExports = a.getSelectedExports();
-		assertEquals("aVisible not correct", aExports, a.getExportPackages()); //$NON-NLS-1$
-		assertEquals("bVisible not correct", aExports, bVisible); //$NON-NLS-1$
-		assertEquals("cVisible not correct", aExports, cVisible); //$NON-NLS-1$
-		assertEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
-		assertEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
-		assertEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
-		assertEquals("hVisible not correct", aExports, hVisible); //$NON-NLS-1$
+		assertArrayEquals("aVisible not correct", aExports, a.getExportPackages()); //$NON-NLS-1$
+		assertArrayEquals("bVisible not correct", aExports, bVisible); //$NON-NLS-1$
+		assertArrayEquals("cVisible not correct", aExports, cVisible); //$NON-NLS-1$
+		assertArrayEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
+		assertArrayEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
+		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
+		assertArrayEquals("hVisible not correct", aExports, hVisible); //$NON-NLS-1$
 
 		ExportPackageDescription[] hExported = h.getSelectedExports();
 		assertEquals("Expected one export", 1, hExported.length);
