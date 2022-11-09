@@ -35,17 +35,23 @@ public class Activator implements BundleActivator {
 	private static final String ORG_OSGI_SERVICE_HTTP_PORT = "org.osgi.service.http.port"; //$NON-NLS-1$
 	private static final String ORG_OSGI_SERVICE_HTTP_PORT_SECURE = "org.osgi.service.http.port.secure"; //$NON-NLS-1$
 
-	// controls whether start() should automatically start an Http Service based on BundleContext properties (default is false)
-	// Note: only used if the bundle is explicitly started (e.g. not "lazy" activated)
+	// controls whether start() should automatically start an Http Service based on
+	// BundleContext properties (default is false)
+	// Note: only used if the bundle is explicitly started (e.g. not "lazy"
+	// activated)
 	private static final String AUTOSTART = "org.eclipse.equinox.http.jetty.autostart"; //$NON-NLS-1$
 
-	// Jetty will use a basic stderr logger if no other logging mechanism is provided.
-	// This setting can be used to over-ride the stderr logger threshold(and only this default logger)
-	// Valid values are in increasing threshold: "debug", "info", "warn", "error", and "off"
+	// Jetty will use a basic stderr logger if no other logging mechanism is
+	// provided.
+	// This setting can be used to over-ride the stderr logger threshold(and only
+	// this default logger)
+	// Valid values are in increasing threshold: "debug", "info", "warn", "error",
+	// and "off"
 	// (default threshold is "warn")
 	private static final String LOG_STDERR_THRESHOLD = "org.eclipse.equinox.http.jetty.log.stderr.threshold"; //$NON-NLS-1$
 
-	// The staticServerManager is use by the start and stopServer methods and must be accessed in a static synchronized block
+	// The staticServerManager is use by the start and stopServer methods and must
+	// be accessed in a static synchronized block
 	// to ensure it is correctly handled in terms of the bundle life-cycle.
 	private static HttpServerManager staticServerManager;
 
@@ -76,7 +82,8 @@ public class Activator implements BundleActivator {
 		if (context.getBundle().adapt(BundleStartLevel.class).isActivationPolicyUsed()) {
 			// checking for lazy capability; NOTE this is equinox specific
 			// but we fall back to header lookup for other frameworks
-			List<BundleCapability> moduleData = context.getBundle().adapt(BundleRevision.class).getDeclaredCapabilities("equinox.module.data"); //$NON-NLS-1$
+			List<BundleCapability> moduleData = context.getBundle().adapt(BundleRevision.class)
+					.getDeclaredCapabilities("equinox.module.data"); //$NON-NLS-1$
 			String activationPolicy = null;
 			if (moduleData.isEmpty()) {
 				activationPolicy = context.getBundle().getHeaders("").get(Constants.BUNDLE_ACTIVATIONPOLICY); //$NON-NLS-1$
@@ -188,12 +195,14 @@ public class Activator implements BundleActivator {
 			defaultSettings.put(JettyConstants.CONTEXT_PATH, contextpath);
 
 		// Session Inactive Interval (timeout)
-		String sessionInactiveInterval = Details.getStringProp(context, JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL, null);
+		String sessionInactiveInterval = Details.getStringProp(context, JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL,
+				null);
 		if (sessionInactiveInterval != null) {
 			try {
-				defaultSettings.put(JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL, Integer.valueOf(sessionInactiveInterval));
+				defaultSettings.put(JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL,
+						Integer.valueOf(sessionInactiveInterval));
 			} catch (NumberFormatException e) {
-				//(log this) ignore
+				// (log this) ignore
 			}
 		}
 
@@ -203,7 +212,7 @@ public class Activator implements BundleActivator {
 			try {
 				defaultSettings.put(JettyConstants.HOUSEKEEPER_INTERVAL, Long.valueOf(houseKeeperInterval));
 			} catch (NumberFormatException e) {
-				//(log this) ignore
+				// (log this) ignore
 			}
 		}
 
@@ -220,19 +229,19 @@ public class Activator implements BundleActivator {
 		return defaultSettings;
 	}
 
-	public synchronized static void startServer(String pid, Dictionary<String, ?> settings) throws Exception {
+	public static synchronized void startServer(String pid, Dictionary<String, ?> settings) throws Exception {
 		if (staticServerManager == null)
 			throw new IllegalStateException("Inactive"); //$NON-NLS-1$
 
 		staticServerManager.updated(pid, settings);
 	}
 
-	public synchronized static void stopServer(String pid) throws Exception {
+	public static synchronized void stopServer(String pid) throws Exception {
 		if (staticServerManager != null)
 			staticServerManager.deleted(pid);
 	}
 
-	private synchronized static void setStaticServerManager(HttpServerManager httpServerManager) {
+	private static synchronized void setStaticServerManager(HttpServerManager httpServerManager) {
 		staticServerManager = httpServerManager;
 	}
 }
