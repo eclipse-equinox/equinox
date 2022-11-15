@@ -110,6 +110,6 @@ public class VersionHashMap<V extends VersionSupplier> extends MappedList<String
 		int versionCompare = -(vs1.getVersion().compareTo(vs2.getVersion()));
 		if (versionCompare != 0)
 			return versionCompare;
-		return vs1.getBundleDescription().getBundleId() <= vs2.getBundleDescription().getBundleId() ? -1 : 1;
+		return Long.compare(vs1.getBundleDescription().getBundleId(), vs2.getBundleDescription().getBundleId());
 	}
 }
