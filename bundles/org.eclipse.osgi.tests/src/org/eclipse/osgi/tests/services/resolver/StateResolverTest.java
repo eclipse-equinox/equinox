@@ -4969,6 +4969,96 @@ public class StateResolverTest extends AbstractStateTest {
 		StateObjectFactory.defaultFactory.writeState(state, stateCache);
 		state = StateObjectFactory.defaultFactory.readState(stateCache);
 	}
+
+	/**
+	 * Test for provoking a flaw in VersionHashMap.compare(...) when sorting the VersionSupplier:
+	 * Comparison method violates its general contracts.
+	 * Not easy to preproduce, as it depends heavily on the internal sort algorithm, TimSort, and
+	 * therefore trimmed real life data is used for this test.
+	 */
+	 public void testIssue156() throws BundleException, IOException, Exception {
+		State state = buildEmptyState();
+		int bundleID = 0;
+		Hashtable manifest = new Hashtable();
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b1"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.PROVIDE_CAPABILITY, "osgi.service;objectClass=\"jsS,ovbphRSS\",osgi.service;objectClass=\"dnveaAFP\",osgi.service;objectClass=\"dnvmaCU\",osgi.service;objectClass=\"dnvmaVSUU\",osgi.service;objectClass=\"dnvnaaN,ovbnINL\",osgi.service;objectClass=\"dnvnaaR,ovbcgscIJS\",osgi.service;objectClass=\"dnvtaTBSP\",osgi.service;objectClass=\"dnvwaIWS,ovbcgscIJS\",osgi.service;objectClass=\"jsS,ovbphRSS\",osgi.service;objectClass=\"ooseEH\",osgi.service;objectClass=\"dngdaDDS,ovbpIDDS\",osgi.service;objectClass=\"dnggaGF,dnggaIM\",osgi.service;objectClass=\"jsS,ovbphRSS\"");
+		BundleDescription b1 = state.getFactory().createBundleDescription( state, manifest, (String) manifest.get( Constants.BUNDLE_SYMBOLICNAME ) + manifest.get( Constants.BUNDLE_VERSION ), bundleID++ );
+		state.addBundle(b1);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.PROVIDE_CAPABILITY,"osgi.service;objectClass=\"dnvsidDPUS,ovbsISISDP\",osgi.service;objectClass=\"dnvsidHDPUS,ovbsISISDP\",osgi.service;objectClass=\"dnggaIM,dnggarGRF\",osgi.service;objectClass=\"dnvecaCFSS\"");
+		BundleDescription b2 = state.getFactory().createBundleDescription( state, manifest, (String) manifest.get( Constants.BUNDLE_SYMBOLICNAME ) + manifest.get( Constants.BUNDLE_VERSION ), bundleID++ );
+		state.addBundle( b2 );
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b3"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.PROVIDE_CAPABILITY, "osgi.service;objectClass=\"dnggaAUB,ovbaIUL\",osgi.service;objectClass=\"dnggvinEP\",osgi.service;objectClass=\"dnggvinFP\",osgi.service;objectClass=\"dngsaNS\",osgi.service;objectClass=\"dnveaAFP\",osgi.service;objectClass=\"dnvmaCU\",osgi.service;objectClass=\"dnvnaaN,ovbnINL\",osgi.service;objectClass=\"dnvnaaR,ovbcgscIJS\",osgi.service;objectClass=\"dnvtaTBSP\",osgi.service;objectClass=\"jsS,ovbphRSS\",osgi.service;objectClass=\"ooseEH\",osgi.service;objectClass=\"ovbppIFF\",osgi.service;objectClass=\"ovbppIPF\",osgi.service;objectClass=\"ovbppIRHF\",osgi.service;objectClass=\"ovbunINP\",osgi.service;objectClass=\"ovesev1sIBP\",osgi.service;objectClass=\"ovesgv3sIGS\",osgi.service;objectClass=\"ovesgv4sIGS\"");
+		BundleDescription b3 = state.getFactory().createBundleDescription( state, manifest, (String) manifest.get( Constants.BUNDLE_SYMBOLICNAME ) + manifest.get( Constants.BUNDLE_VERSION ), bundleID++ );
+		state.addBundle( b3 );
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b4"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.PROVIDE_CAPABILITY, "osgi.service;objectClass=\"dngpaEP\",osgi.service;objectClass=\"dngpaGOS\",osgi.service;objectClass=\"dngpaOJS\",osgi.service;objectClass=\"dngpaPDS\",osgi.service;objectClass=\"ovbcgIPISI\",osgi.service;objectClass=\"ovbcgIPISO\",osgi.service;objectClass=\"ovbciIMA\",osgi.service;objectClass=\"ovbciIMR\",osgi.service;objectClass=\"ovbjIEF\",osgi.service;objectClass=\"ovbrIRL\"");
+		manifest.put(Constants.REQUIRE_CAPABILITY, "osgi.service;filter:=\"(objectClass=dngsarRS)\"");
+		BundleDescription b4 = state.getFactory().createBundleDescription( state, manifest, (String) manifest.get( Constants.BUNDLE_SYMBOLICNAME ) + manifest.get( Constants.BUNDLE_VERSION ), bundleID++ );
+		state.addBundle( b4 );
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b5"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.PROVIDE_CAPABILITY, "osgi.service;objectClass=\"dngpaXGAIDG\",osgi.service;objectClass=\"ovbcsIAS,ovbcICL\",osgi.service;objectClass=\"ovbppIRHF\",osgi.service;objectClass=\"dngpraRF\",osgi.service;objectClass=\"ovbrIRL\",osgi.service;objectClass=\"jsS,ovbphRSS\",osgi.service;objectClass=\"ovbcIM2PCF\",osgi.service;objectClass=\"ovbcsITS\"");
+		BundleDescription b5 = state.getFactory().createBundleDescription( state, manifest, (String) manifest.get( Constants.BUNDLE_SYMBOLICNAME ) + manifest.get( Constants.BUNDLE_VERSION ), bundleID++ );
+		state.addBundle( b5 );
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b6"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.PROVIDE_CAPABILITY, "osgi.service;objectClass=\"dngpsaPSGSIDS\",osgi.service;objectClass=\"dngpsiPSGSDS\",osgi.service;objectClass=\"dngpsidWEV,dnvsidDPUS,ovbsISISDP\",osgi.service;objectClass=\"dngpsgsrdtWAOSVU,dnvsrdEDP\",osgi.service;objectClass=\"dnvsSP,ovbsIASWP,ovbsISP\",osgi.service;objectClass=\"dnvsidDPUS,ovbsISISDP\",osgi.service;objectClass=\"dnvsrRDP,ovbrsusIRDP\",osgi.service;objectClass=\"dnvsrRTP,ovbrsusIRTP\",osgi.service;objectClass=\"dnvsrRWP,ovbrsusIRWP\",osgi.service;objectClass=\"dnvsrdTP\",osgi.service;objectClass=\"dnvsrdWDP\",osgi.service;objectClass=\"jsS,ovbphRSS\"");
+		BundleDescription b6 = state.getFactory().createBundleDescription( state, manifest, (String) manifest.get( Constants.BUNDLE_SYMBOLICNAME ) + manifest.get( Constants.BUNDLE_VERSION ), bundleID++ );
+		state.addBundle( b6 );
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b7"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.PROVIDE_CAPABILITY, "osgi.service;objectClass=\"dncrRD\",osgi.service;objectClass=\"dnvmaEARU\",osgi.service;objectClass=\"dnpsgvEP\",osgi.service;objectClass=\"dnpsgvsPSGPDPr\",osgi.service;objectClass=\"dnpsgvsSC,dnvsaIIP\",osgi.service;objectClass=\"dnveaAFP\",osgi.service;objectClass=\"dnvmaCU\",osgi.service;objectClass=\"dnvmaVSUU\",osgi.service;objectClass=\"dnvnaaN,ovbnINL\",osgi.service;objectClass=\"dnvnaaR,ovbcgscIJS\",osgi.service;objectClass=\"dnvtaTBSP\"");
+		manifest.put( Constants.REQUIRE_CAPABILITY, "osgi.service;filter:=\"(objectClass=ovbesIEAS)\"" );
+		BundleDescription b7 = state.getFactory().createBundleDescription( state, manifest, (String) manifest.get( Constants.BUNDLE_SYMBOLICNAME ) + manifest.get( Constants.BUNDLE_VERSION ), bundleID++ );
+		state.addBundle( b7 );
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b8"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.PROVIDE_CAPABILITY, "osgi.service;objectClass=\"jsS\",osgi.service;objectClass=\"ovbcICL,ovbea.IEN\",osgi.service;objectClass=\"ovbeaIEF,ovbrIRM\",osgi.service;objectClass=\"ovbeaIIP\",osgi.service;objectClass=\"ovbeiECDS\"");
+		BundleDescription b8 = state.getFactory().createBundleDescription( state, manifest, (String) manifest.get( Constants.BUNDLE_SYMBOLICNAME ) + manifest.get( Constants.BUNDLE_VERSION ), bundleID++ );
+		state.addBundle( b8 );
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "org.eclipse.osgi"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "3.17.100.v20211104-173"); //$NON-NLS-1$
+		manifest.put(Constants.PROVIDE_CAPABILITY, "osgi.service;objectClass=\"ooslLRS,oeelELRS\",osgi.service;objectClass=\"ooslLF,ooslLS,oeelELS\",osgi.service;objectClass=\"ooslaLA\",osgi.service;objectClass=\"oeoflFL\",osgi.service;objectClass=\"oeosdL\",osgi.service;objectClass=\"oeosdL\",osgi.service;objectClass=\"oeosdL\",osgi.service;objectClass=\"oeosdL\",osgi.service;objectClass=\"oeosdL\",osgi.service;objectClass=\"oeoseEI\",osgi.service;objectClass=\"oospPA\",osgi.service;objectClass=\"oossSL\",osgi.service;objectClass=\"oospPA\",osgi.service;objectClass=\"ooscCPA\",osgi.service;objectClass=\"oosrR\",osgi.service;objectClass=\"oeosdDO\",osgi.service;objectClass=\"oeosuURLC\",osgi.service;objectClass=\"oeoslBL\",osgi.service;objectClass=\"oeossTE\",osgi.service;objectClass=\"oeosSCF\"");
+		BundleDescription b9 = state.getFactory().createBundleDescription( state, manifest, (String) manifest.get( Constants.BUNDLE_SYMBOLICNAME ) + manifest.get( Constants.BUNDLE_VERSION ), bundleID++ );
+		state.addBundle( b9 );
+		
+		// throws an IllegalArgumentException("Comparison method violates its general contract!")
+		state.resolve( false );
+	}
+
 }
 //testFragmentUpdateNoVersionChanged()
 //testFragmentUpdateVersionChanged()
