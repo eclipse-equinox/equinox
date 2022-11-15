@@ -73,7 +73,9 @@ public class StorageUtil {
 	 * @exception IOException
 	 */
 	public static void readFile(InputStream in, File file) throws IOException {
-		Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		try (InputStream stream = in) {
+			Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		}
 	}
 
 	/**
