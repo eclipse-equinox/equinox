@@ -1115,7 +1115,7 @@ public class Storage {
 
 	File stageContent0(InputStream in, URL sourceURL) throws BundleException {
 		File outFile = null;
-		try {
+		try (InputStream stream = in) {
 			outFile = ReliableFile.createTempFile(BUNDLE_FILE_NAME, ".tmp", childRoot); //$NON-NLS-1$
 			String protocol = sourceURL == null ? null : sourceURL.getProtocol();
 
