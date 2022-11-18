@@ -1,5 +1,5 @@
 -jpms-module-info: ${project.artifactId};access='OPEN';version=${versionmask;===;${version_cleanup;${project.version}}}
--jpms-module-info-options: jdk.unsupported;static="true",java.management;ignore="true"
+-jpms-module-info-options: jdk.unsupported;static="true",java.management;ignore="true",openj9.sharedclasses;static="true"
 
 -include: ~META-INF/MANIFEST.MF
 
