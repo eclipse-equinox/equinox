@@ -62,14 +62,14 @@
          unpack="false"/>
 
    <plugin
-         id="javax.el"
+         id="javax.el-api"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="javax.el.source"
+         id="javax.el-api.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
