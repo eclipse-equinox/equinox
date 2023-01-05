@@ -64,7 +64,7 @@ public class BundleURLConnection extends URLConnection implements BundleReferenc
 				in = bundleEntry.getInputStream();
 				connected = true;
 			} else {
-				throw new IOException(NLS.bind(Msg.RESOURCE_NOT_FOUND_EXCEPTION, url));
+				throw new IOException(NLS.bind(Msg.RESOURCE_NOT_FOUND_EXCEPTION, getURL()));
 			}
 		}
 	}
@@ -132,7 +132,7 @@ public class BundleURLConnection extends URLConnection implements BundleReferenc
 	 */
 	public URL getLocalURL() {
 		URL local = bundleEntry.getLocalURL();
-		return local == null ? url : local;
+		return local == null ? getURL() : local;
 	}
 
 	/**
@@ -146,7 +146,7 @@ public class BundleURLConnection extends URLConnection implements BundleReferenc
 
 	@Override
 	public Bundle getBundle() {
-		String host = url.getHost();
+		String host = getURL().getHost();
 		long bundleId = BundleResourceHandler.parseBundleIDFromURLHost(host);
 		Module module = container.getModule(bundleId);
 		return module != null ? module.getBundle() : null;

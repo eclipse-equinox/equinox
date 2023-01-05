@@ -78,7 +78,7 @@ public class ConnectBundleFile extends CloseableBundleFile<ConnectEntry> {
 
 		@Override
 		public URL getLocalURL() {
-			return ConnectBundleFile.this.getClassLoader().map(cl -> cl.getResource(getName())).orElseGet(() -> null);
+			return ConnectBundleFile.this.getClassLoader().map(cl -> cl.getResource(getName())).orElse(null);
 		}
 	}
 
