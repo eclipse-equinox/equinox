@@ -78,8 +78,7 @@ public class ConnectBundleFile extends CloseableBundleFile<ConnectEntry> {
 
 		@Override
 		public URL getLocalURL() {
-			// TODO Not sure what to do here
-			throw new UnsupportedOperationException();
+			return ConnectBundleFile.this.getClassLoader().map(cl -> cl.getResource(getName())).orElseGet(() -> null);
 		}
 	}
 
