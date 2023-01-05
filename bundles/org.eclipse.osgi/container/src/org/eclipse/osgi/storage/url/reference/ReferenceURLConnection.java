@@ -46,11 +46,11 @@ public class ReferenceURLConnection extends URLConnection {
 			// TODO assumes that reference URLs are always based on file: URLs.
 			// There are not solid usecases to the contrary. Yet.
 			// Construct the ref File carefully so as to preserve UNC paths etc.
-			String path = url.getPath();
+			String path = getURL().getPath();
 			if (!path.startsWith("file:")) { //$NON-NLS-1$
 				throw new IOException(NLS.bind(Msg.ADAPTOR_URL_CREATE_EXCEPTION, path));
 			}
-			path = url.getPath().substring(5);
+			path = path.substring(5);
 			File file = new File(path);
 
 			if (!file.isAbsolute()) {
