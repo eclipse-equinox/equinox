@@ -131,7 +131,8 @@ public class BundleURLConnection extends URLConnection implements BundleReferenc
 	 * @return the local URL using a common local protocol
 	 */
 	public URL getLocalURL() {
-		return bundleEntry.getLocalURL();
+		URL local = bundleEntry.getLocalURL();
+		return local == null ? url : local;
 	}
 
 	/**

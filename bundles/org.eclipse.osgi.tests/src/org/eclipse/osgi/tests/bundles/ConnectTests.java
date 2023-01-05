@@ -55,6 +55,7 @@ import junit.framework.TestCase;
 import org.eclipse.osgi.container.ModuleContainer;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.launch.EquinoxFactory;
+import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.classes.Activator;
 import org.junit.Test;
@@ -627,7 +628,7 @@ public class ConnectTests extends AbstractBundleTests {
 		doTestConnectContentEntries(true);
 	}
 
-	void doTestConnectContentEntries(boolean provideLoader) {
+	void doTestConnectContentEntries(final boolean provideLoader) {
 		TestCountingModuleConnector connector = new TestCountingModuleConnector();
 		final List<Integer> ids = Arrays.asList(1, 2, 3);
 		final Map<Integer, TestConnectModule> modules = new HashMap<>();
@@ -700,6 +701,18 @@ public class ConnectTests extends AbstractBundleTests {
 					found = b.findEntries('/' + txtPathDir, "*.txt", false);
 					checkEntry(txtConnectEntry.get(), found.nextElement(), id);
 					assertFalse("More entries found.", found.hasMoreElements());
+
+					// check the asLocalURL with the converter, note that there should only be one
+					// converter here
+					URLConverter converter = f.getBundleContext()
+							.getService(f.getBundleContext().getServiceReference(URLConverter.class));
+					URL connectEntry = b.getEntry(txtPath);
+					URL resolvedEntry = converter.resolve(connectEntry);
+					if (provideLoader) {
+						assertNotEquals("Should not be equal", connectEntry, resolvedEntry);
+					} else {
+						assertEquals("Should be equal", connectEntry, resolvedEntry);
+					}
 				}
 			} catch (Throwable t) {
 				sneakyThrow(t);
