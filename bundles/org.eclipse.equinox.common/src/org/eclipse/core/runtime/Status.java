@@ -60,23 +60,23 @@ public class Status implements IStatus {
 	 * <li>or <code>OK</code> (0)</li>
 	 * </ul>
 	 */
-	private int severity = OK;
+	private volatile int severity = OK;
 
 	/** Unique identifier of plug-in.
 	 */
-	private String pluginId;
+	private volatile String pluginId;
 
 	/** Plug-in-specific status code.
 	 */
-	private int code;
+	private volatile int code;
 
 	/** Message, localized to the current locale.
 	 */
-	private String message;
+	private volatile String message;
 
 	/** Wrapped exception, or <code>null</code> if none.
 	 */
-	private Throwable exception = null;
+	private volatile Throwable exception = null;
 
 	/** Constant to avoid generating garbage.
 	 */
