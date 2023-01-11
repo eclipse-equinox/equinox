@@ -14,3 +14,4 @@ Bug 572853 - Comparator errors in 4.20 I20210414-1800 build
 Bug 574602 - Eclipse 4.21 prerequisites: Orbit
 Bug 578120 - Update to latest Orbit - bouncycastle and mina sshd updates
 Use sshd from Maven
+https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/pull/798
