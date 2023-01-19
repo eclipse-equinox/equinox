@@ -49,5 +49,13 @@ jobs:
       with:
         name: test-results
         if-no-files-found: error
-        path: '**/target/surefire-reports/*.xml'
-
+        path: '**/target/*-reports/*.xml'
+  event_file:
+    name: "Upload Event File"
+    runs-on: ubuntu-latest
+    steps:
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: Event File
+        path: ${{ github.event_path }}
