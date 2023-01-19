@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<target>
+    <locations>
+        <location includeDependencyDepth="none" includeDependencyScopes="compile" label="OSGI TCK Artifacts" missingManifest="error" type="Maven">
+            <dependencies>
+                <dependency>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.test.cases.event</artifactId>
+                    <version>8.1.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.test.cases.cm</artifactId>
+                    <version>8.1.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.test.cases.device</artifactId>
+                    <version>8.1.0</version>
+                    <type>jar</type>
+                </dependency>
+                <!-- TODO currently missing on central see https://github.com/osgi/osgi/issues/557
+                <dependency>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.test.cases.log</artifactId>
+                    <version>8.1.0</version>
+                    <type>jar</type>
+                </dependency>
+                -->
+                <dependency>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.test.cases.metatype</artifactId>
+                    <version>8.1.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.test.cases.prefs</artifactId>
+                    <version>8.1.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.test.cases.useradmin</artifactId>
+                    <version>8.1.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+				  <groupId>org.osgi</groupId>
+				  <artifactId>org.osgi.test.cases.coordinator</artifactId>
+				  <version>8.1.0</version>
+				</dependency>
+            </dependencies>
+        </location>
+    </locations>
+</target>

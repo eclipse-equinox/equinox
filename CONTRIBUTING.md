@@ -32,6 +32,13 @@ This project uses GitHub to track ongoing development and issues.
 Be sure to search for existing bugs before you create another one. Remember that
 contributions are always welcome!
 
+### Running the Technology Compatibility Kit (TCK)
+
+To run a TCK on a bundle you just need to go to the directory (e.g. `bundles/org.eclipse.equinox.cm`) 
+and run:
+
+`mvn clean verify -Pbuild-individual-bundles -Pbree-libs -Ptck`
+
 ## Eclipse Contributor Agreement
 
 Before your contribution can be accepted by the project team contributors must
