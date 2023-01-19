@@ -50,6 +50,38 @@ jobs:
         name: test-results
         if-no-files-found: error
         path: '**/target/*-reports/*.xml'
+  tck:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    - name: Run OSGi TCKs
+      run: >- 
+        mvn
+        -U
+        --batch-mode
+        --global-toolchains ${{ github.workspace }}/.github/workflows/toolchains.xml
+        --threads 1C
+        -Pbuild-individual-bundles
+        -Pbree-libs
+        -Ptck
+        -Dskip-default-modules=true
+        -Dproject.build.sourceEncoding=UTF-8
+        -Dtycho.resolver.classic=false
+        -fae
+        clean verify
+    - name: Upload TCK Results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: tck-results
+        if-no-files-found: error
+        path: '**/target/tck-results/TEST-*.xml'
   event_file:
     name: "Upload Event File"
     runs-on: ubuntu-latest
