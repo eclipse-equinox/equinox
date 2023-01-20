@@ -40,3 +40,78 @@ jobs:
           junit_files: "artifacts/**/*-reports/*.xml"
           event_name:  ${{ github.event.workflow_run.event }}
           event_file:  artifacts/Event File/event.json
+  tck-results:
+    name: TCK Test Results for ${{ matrix.tck.name }}
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion != 'skipped' && github.ref == 'refs/heads/master'
+    permissions:
+      checks: write
+      pull-requests: write
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        tck: 
+          - { name: cm,          pattern: "TEST-org.osgi.test.cases.cm-*.xml"}
+          - { name: coordinator, pattern: "TEST-org.osgi.test.cases.coordinator-*.xml" }
+          - { name: device,      pattern: "TEST-org.osgi.test.cases.device-*.xml" }
+          - { name: event,       pattern: "TEST-org.osgi.test.cases.event-*.xml" }
+          - { name: metatype,    pattern: "TEST-org.osgi.test.cases.metatype-*.xml" }
+          - { name: preferences, pattern: "TEST-org.osgi.test.cases.prefs-*.xml" }
+          - { name: useradmin,   pattern: "TEST-org.osgi.test.cases.useradmin-*.xml" }
+    steps:  
+      - name: Download and Extract Unit Test Results
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: |
+           mkdir -p artifacts && cd artifacts
+
+           artifacts_url=${{ github.event.workflow_run.artifacts_url }}
+
+           gh api "$artifacts_url" -q '.artifacts[] | [.name, .archive_download_url] | @tsv' | while read artifact
+           do
+             IFS=$'\t' read name url <<< "$artifact"
+             gh api $url > "$name.zip"
+             unzip -d "$name" "$name.zip"
+           done
+
+      - name: Parse TCK Results of ${{ matrix.tck.name }}
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        id: test-results
+        if: always()
+        with:
+          commit:       ${{ github.event.workflow_run.head_sha }}
+          junit_files:  artifacts/**/tck-results/${{ matrix.tck.pattern }}
+          comment_mode: off
+          check_name:   ${{ matrix.tck.name }} TCK
+          event_name:   ${{ github.event.workflow_run.event }}
+          event_file:   artifacts/Event File/event.json
+      - name: Set badge color of ${{ matrix.tck.name }}
+        shell: bash
+        run: |
+           case ${{ fromJSON( steps.test-results.outputs.json ).conclusion }} in
+           success)
+           echo "BADGE_COLOR=31c653" >> $GITHUB_ENV
+           ;;
+           failure)
+           echo "BADGE_COLOR=800000" >> $GITHUB_ENV
+           ;;
+           neutral)
+           echo "BADGE_COLOR=696969" >> $GITHUB_ENV
+           ;;
+           esac
+      - name: Create badge of ${{ matrix.tck.name }}
+        uses: emibcn/badge-action@d6f51ff11b5c3382b3b88689ae2d6db22d9737d1
+        with:
+          label: TCK
+          status: '${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests }} tests, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests_succ }} passed, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests_fail }} failed }}'
+          color: ${{ env.BADGE_COLOR }}
+          path: tck-badge-${{ matrix.tck.name }}.svg
+      - name: Upload badge of ${{ matrix.tck.name }} to Gist
+        if: github.ref == 'refs/heads/master'
+        uses: andymckay/append-gist-action@1fbfbbce708a39bd45846f0955ed5521f2099c6d
+        with:
+          token: ${{ secrets.GIST_TOKEN }}
+          gistURL: https://gist.github.com/eclipse-equinox-bot/d941fe2a4992a018d88e778b48ee3135
+          file: tck-badge-${{ matrix.tck.name }}.svg
+          
