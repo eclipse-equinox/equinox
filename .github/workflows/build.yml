@@ -73,7 +73,7 @@ jobs:
         -Dskip-default-modules=true
         -Dproject.build.sourceEncoding=UTF-8
         -Dtycho.resolver.classic=false
-        -fae
+        -fn
         clean verify
     - name: Upload TCK Results
       uses: actions/upload-artifact@v3

@@ -43,7 +43,7 @@ jobs:
   tck-results:
     name: TCK Test Results for ${{ matrix.tck.name }}
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion != 'skipped' && github.ref == 'refs/heads/master'
+    if: github.event.workflow_run.conclusion != 'skipped'
     permissions:
       checks: write
       pull-requests: write
@@ -52,13 +52,13 @@ jobs:
       fail-fast: false
       matrix:
         tck: 
-          - { name: cm,          pattern: "TEST-org.osgi.test.cases.cm-*.xml"}
-          - { name: coordinator, pattern: "TEST-org.osgi.test.cases.coordinator-*.xml" }
-          - { name: device,      pattern: "TEST-org.osgi.test.cases.device-*.xml" }
-          - { name: event,       pattern: "TEST-org.osgi.test.cases.event-*.xml" }
-          - { name: metatype,    pattern: "TEST-org.osgi.test.cases.metatype-*.xml" }
-          - { name: preferences, pattern: "TEST-org.osgi.test.cases.prefs-*.xml" }
-          - { name: useradmin,   pattern: "TEST-org.osgi.test.cases.useradmin-*.xml" }
+          - { name: device,      chapter: '103', label: 'Device Access',       suffix: ' Specification',         pattern: "TEST-org.osgi.test.cases.device-*.xml" }
+          - { name: cm,          chapter: '104', label: 'Configuration Admin', suffix: ' Service Specification', pattern: "TEST-org.osgi.test.cases.cm-*.xml"}
+          - { name: metatype,    chapter: '105', label: 'Metatype',            suffix: ' Service Specification', pattern: "TEST-org.osgi.test.cases.metatype-*.xml" }
+          - { name: preferences, chapter: '106', label: 'Preferences',         suffix: 'Service Specification',  pattern: "TEST-org.osgi.test.cases.prefs-*.xml" }
+          - { name: useradmin,   chapter: '107', label: 'User Admin',          suffix: ' Service Specification', pattern: "TEST-org.osgi.test.cases.useradmin-*.xml" }
+          - { name: event,       chapter: '113', label: 'Event Admin',         suffix: ' Service Specification', pattern: "TEST-org.osgi.test.cases.event-*.xml" }
+          - { name: coordinator, chapter: '130', label: 'Coordinator',         suffix: ' Service Specification', pattern: "TEST-org.osgi.test.cases.coordinator-*.xml" }
     steps:  
       - name: Download and Extract Unit Test Results
         env:
@@ -83,7 +83,7 @@ jobs:
           commit:       ${{ github.event.workflow_run.head_sha }}
           junit_files:  artifacts/**/tck-results/${{ matrix.tck.pattern }}
           comment_mode: off
-          check_name:   ${{ matrix.tck.name }} TCK
+          check_name:   ${{ matrix.tck.label }} TCK
           event_name:   ${{ github.event.workflow_run.event }}
           event_file:   artifacts/Event File/event.json
       - name: Set badge color of ${{ matrix.tck.name }}
@@ -103,7 +103,7 @@ jobs:
       - name: Create badge of ${{ matrix.tck.name }}
         uses: emibcn/badge-action@d6f51ff11b5c3382b3b88689ae2d6db22d9737d1
         with:
-          label: TCK
+          label: ${{ matrix.tck.chapter }} - ${{ matrix.tck.label }} ${{ matrix.tck.suffix }}
           status: '${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests }} tests, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests_succ }} passed, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests_fail }} failed'
           color: ${{ env.BADGE_COLOR }}
           path: tck-badge-${{ matrix.tck.name }}.svg
