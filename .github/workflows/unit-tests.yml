@@ -103,8 +103,9 @@ jobs:
       - name: Create badge of ${{ matrix.tck.name }}
         uses: emibcn/badge-action@d6f51ff11b5c3382b3b88689ae2d6db22d9737d1
         with:
-          label: ${{ matrix.tck.chapter }} - ${{ matrix.tck.label }} ${{ matrix.tck.suffix }}
-          status: '${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests }} tests, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests_succ }} passed, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests_fail }} failed'
+          # label: ${{ matrix.tck.chapter }} - ${{ matrix.tck.label }} ${{ matrix.tck.suffix }}
+          label:  '${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests }} tests'
+          status: '${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests_succ }} passed, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests_fail }} failed'
           color: ${{ env.BADGE_COLOR }}
           path: tck-badge-${{ matrix.tck.name }}.svg
       - name: Upload badge of ${{ matrix.tck.name }} to Gist
