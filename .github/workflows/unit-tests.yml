@@ -52,6 +52,10 @@ jobs:
       fail-fast: false
       matrix:
         tck: 
+          - { name: framework,   chapter:  '10', label: 'Framework',           suffix: ' API',                   pattern: "TEST-org.osgi.test.cases.framework-*.xml" }
+          - { name: url,         chapter:  '52', label: 'URL Handlers',        suffix: ' Service Specification', pattern: "TEST-org.osgi.test.cases.url-*.xml" }
+          - { name: resolver,    chapter:  '59', label: 'Resolver',            suffix: ' Service Specification', pattern: "TEST-org.osgi.test.cases.resolver-*.xml" }
+          - { name: log,         chapter: '101', label: 'Log',                 suffix: ' Service Specification', pattern: "TEST-org.osgi.test.cases.log-*.xml" }
           - { name: device,      chapter: '103', label: 'Device Access',       suffix: ' Specification',         pattern: "TEST-org.osgi.test.cases.device-*.xml" }
           - { name: cm,          chapter: '104', label: 'Configuration Admin', suffix: ' Service Specification', pattern: "TEST-org.osgi.test.cases.cm-*.xml"}
           - { name: metatype,    chapter: '105', label: 'Metatype',            suffix: ' Service Specification', pattern: "TEST-org.osgi.test.cases.metatype-*.xml" }
@@ -59,6 +63,8 @@ jobs:
           - { name: useradmin,   chapter: '107', label: 'User Admin',          suffix: ' Service Specification', pattern: "TEST-org.osgi.test.cases.useradmin-*.xml" }
           - { name: event,       chapter: '113', label: 'Event Admin',         suffix: ' Service Specification', pattern: "TEST-org.osgi.test.cases.event-*.xml" }
           - { name: coordinator, chapter: '130', label: 'Coordinator',         suffix: ' Service Specification', pattern: "TEST-org.osgi.test.cases.coordinator-*.xml" }
+          - { name: tracker,     chapter: '701', label: 'Tracker',             suffix: ' Specification',         pattern: "TEST-org.osgi.test.cases.tracker-*.xml" }
+          
     steps:  
       - name: Download and Extract Unit Test Results
         env:

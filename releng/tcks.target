@@ -5,13 +5,13 @@
             <dependencies>
                 <dependency>
                     <groupId>org.osgi</groupId>
-                    <artifactId>org.osgi.test.cases.event</artifactId>
+                    <artifactId>org.osgi.test.cases.cm</artifactId>
                     <version>8.1.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.osgi</groupId>
-                    <artifactId>org.osgi.test.cases.cm</artifactId>
+                    <artifactId>org.osgi.test.cases.coordinator</artifactId>
                     <version>8.1.0</version>
                     <type>jar</type>
                 </dependency>
@@ -21,14 +21,24 @@
                     <version>8.1.0</version>
                     <type>jar</type>
                 </dependency>
-                <!-- TODO currently missing on central see https://github.com/osgi/osgi/issues/557
                 <dependency>
                     <groupId>org.osgi</groupId>
-                    <artifactId>org.osgi.test.cases.log</artifactId>
+                    <artifactId>org.osgi.test.cases.event</artifactId>
                     <version>8.1.0</version>
                     <type>jar</type>
                 </dependency>
-                -->
+                <dependency>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.test.cases.framework</artifactId>
+                    <version>8.0.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.test.cases.log</artifactId>
+                    <version>8.0.0</version>
+                    <type>jar</type>
+                </dependency>
                 <dependency>
                     <groupId>org.osgi</groupId>
                     <artifactId>org.osgi.test.cases.metatype</artifactId>
@@ -43,15 +53,38 @@
                 </dependency>
                 <dependency>
                     <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.test.cases.resolver</artifactId>
+                    <version>8.0.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.test.cases.tracker</artifactId>
+                    <version>8.0.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.test.cases.url</artifactId>
+                    <version>8.0.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.osgi</groupId>
                     <artifactId>org.osgi.test.cases.useradmin</artifactId>
                     <version>8.1.0</version>
                     <type>jar</type>
                 </dependency>
+            </dependencies>
+        </location>
+        <location includeDependencyDepth="none" label="TCK Dependencies" missingManifest="generate" type="Maven">
+            <dependencies>
                 <dependency>
-				  <groupId>org.osgi</groupId>
-				  <artifactId>org.osgi.test.cases.coordinator</artifactId>
-				  <version>8.1.0</version>
-				</dependency>
+                    <groupId>org.apache.bcel</groupId>
+                    <artifactId>bcel</artifactId>
+                    <version>5.2</version>
+                    <type>jar</type>
+                </dependency>
             </dependencies>
         </location>
     </locations>

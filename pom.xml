@@ -144,6 +144,7 @@
 			<tck.engine>org.junit.vintage.engine,junit-jupiter-engine</tck.engine>
 			<tck.tester>biz.aQute.tester.junit-platform</tck.tester>
 			<tck.security>false</tck.security>
+			<tck.skip>false</tck.skip>
 		</properties>
 		<build>
 			<plugins>
@@ -171,6 +172,7 @@
 								<bundles>
 									${tck.artifact}
 								</bundles>
+								<skipTests>${tck.skip}</skipTests>
 								<tester>${tck.tester}</tester>
 								<engine>${tck.engine}</engine>
 								<trace>false</trace>
@@ -190,8 +192,10 @@
 			</plugins>
 		</build>
 		<modules>
-			<module>bundles/org.eclipse.equinox.cm</module>
+			<module>bundles/org.eclipse.osgi</module>
+			<module>bundles/org.eclipse.osgi.tck</module>
 			<module>bundles/org.eclipse.equinox.coordinator</module>
+			<module>bundles/org.eclipse.equinox.cm</module>
 			<module>bundles/org.eclipse.equinox.useradmin</module>
 			<module>bundles/org.eclipse.equinox.preferences</module>
 			<module>bundles/org.eclipse.equinox.metatype</module>
