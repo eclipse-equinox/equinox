@@ -14,6 +14,7 @@
 package org.eclipse.core.runtime;
 
 import java.io.File;
+import java.util.Optional;
 import org.eclipse.core.internal.registry.ExtensionRegistry;
 import org.eclipse.core.internal.registry.RegistryProviderFactory;
 import org.eclipse.core.internal.registry.osgi.RegistryStrategyOSGI;
@@ -27,6 +28,7 @@ import org.eclipse.core.runtime.spi.RegistryStrategy;
  * </p><ul>
  * <li>{@link #createRegistry(RegistryStrategy, Object, Object)}</li>
  * <li>{@link #getRegistry()}</li>
+ * <li>{@link #registry()}</li>
  * <li>{@link #setDefaultRegistryProvider(IRegistryProvider)}</li>
  * </ul><p>
  * This class is not intended to be subclassed or instantiated.
@@ -73,6 +75,18 @@ public final class RegistryFactory {
 		if (defaultRegistryProvider == null)
 			return null;
 		return defaultRegistryProvider.getRegistry();
+	}
+
+	/**
+	 * Returns an optional describing the default extension registry specified by
+	 * the registry provider. Returns an empty optional if the provider has not been
+	 * set or if the registry has not been created.
+	 *
+	 * @return the optional extension registry
+	 * @since 3.12
+	 */
+	public static Optional<IExtensionRegistry> registry() {
+		return Optional.ofNullable(getRegistry());
 	}
 
 	/**
