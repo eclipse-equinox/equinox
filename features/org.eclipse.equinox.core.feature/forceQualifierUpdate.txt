@@ -11,3 +11,4 @@ Bug 544571 - Update felix SCR to 2.0.16
 [Features] Leverage transitive inclusion and build source-features: https://github.com/eclipse-equinox/equinox.bundles/pull/20
 Touch for https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/pull/624
 https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/pull/798
+Touch for https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/pull/832
