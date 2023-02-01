@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation and others.
+ * Copyright (c) 2020, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  * 
  * Contributors:
  *     Alex Blewitt - initial API and implementation
+ *     Alexander Fedorov (ArSysOp) - documentation improvements
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -131,7 +132,9 @@ public class ServiceCaller<S> {
 	 * @param <S>         the OSGi service type to look up
 	 * @return true if the OSGi service was located and called successfully, false
 	 *         otherwise
-	 * @throws NullPointerException if any of the parameters are null
+	 * @throws NullPointerException  if any of the parameters are {@code null}
+	 * @throws IllegalStateException if the bundle associated with the caller class
+	 *                               cannot be determined
 	 */
 	public static <S> boolean callOnce(Class<?> caller, Class<S> serviceType, Consumer<S> consumer) {
 		return callOnce(caller, serviceType, null, consumer);
@@ -147,7 +150,9 @@ public class ServiceCaller<S> {
 	 * @param <S>         the OSGi service type to look up
 	 * @return true if the OSGi service was located and called successfully, false
 	 *         otherwise
-	 * @throws NullPointerException if any of the parameters are null
+	 * @throws NullPointerException  if any of the parameters are {@code null}
+	 * @throws IllegalStateException if the bundle associated with the caller class
+	 *                               cannot be determined
 	 */
 	public static <S> boolean callOnce(Class<?> caller, Class<S> serviceType, String filter, Consumer<S> consumer) {
 		return new ServiceCaller<>(caller, serviceType, filter).getCurrent().map(r -> {
@@ -276,6 +281,9 @@ public class ServiceCaller<S> {
 	 * 
 	 * @param caller      a class from the bundle that will consume the service
 	 * @param serviceType the OSGi service type to look up
+	 * @throws NullPointerException  if any of the parameters are {@code null}
+	 * @throws IllegalStateException if the bundle associated with the caller class
+	 *                               cannot be determined
 	 */
 	public ServiceCaller(Class<?> caller, Class<S> serviceType) {
 		this(caller, serviceType, null);
@@ -289,10 +297,14 @@ public class ServiceCaller<S> {
 	 * @param serviceType the OSGi service type to look up
 	 * @param filter      the service filter used to look up the service. May be
 	 *                    {@code null}.
+	 * @throws NullPointerException  if any of the parameters are {@code null}
+	 * @throws IllegalStateException if the bundle associated with the caller class
+	 *                               cannot be determined
 	 */
 	public ServiceCaller(Class<?> caller, Class<S> serviceType, String filter) {
 		this.serviceType = Objects.requireNonNull(serviceType);
-		this.bundle = Objects.requireNonNull(FrameworkUtil.getBundle(Objects.requireNonNull(caller)));
+		this.bundle = Optional.of(Objects.requireNonNull(caller)).map(FrameworkUtil::getBundle)
+				.orElseThrow(IllegalStateException::new);
 		this.filter = filter;
 		if (filter != null) {
 			try {
