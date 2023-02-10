@@ -15,13 +15,16 @@ package org.eclipse.equinox.internal.event;
 
 import org.eclipse.equinox.internal.event.mapper.EventRedeliverer;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.*;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
+@Component(name = "org.eclipse.equinox.event", service = EventAdmin.class)
 public class EventComponent implements EventAdmin {
 	private EventRedeliverer eventRedeliverer;
 	private EventAdminImpl eventAdmin;
 
+	@Activate
 	void activate(BundleContext context) {
 		eventAdmin = new EventAdminImpl(context);
 		eventAdmin.start();
@@ -29,6 +32,7 @@ public class EventComponent implements EventAdmin {
 		eventRedeliverer.open();
 	}
 
+	@Deactivate
 	void deactivate(BundleContext context) {
 		eventRedeliverer.close();
 		eventAdmin.stop();
