@@ -39,6 +39,14 @@
         </configuration>
       </plugin>
       <plugin>
+	    <groupId>org.eclipse.tycho</groupId>
+	    <artifactId>tycho-packaging-plugin</artifactId>
+	     <configuration>
+			<!-- equinox uses very specially crafted manifest headers -->
+			<deriveHeaderFromSource>false</deriveHeaderFromSource>
+		 </configuration>
+	  </plugin>
+      <plugin>
        <!--Unless next tycho release we need to explicitly enable this here, once 2.7.4 or 3.x is out we can switch to full pomless here! -->
        <groupId>biz.aQute.bnd</groupId>
         <artifactId>bnd-maven-plugin</artifactId>
