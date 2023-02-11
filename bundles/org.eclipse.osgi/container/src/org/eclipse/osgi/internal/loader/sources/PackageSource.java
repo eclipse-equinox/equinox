@@ -87,7 +87,7 @@ public abstract class PackageSource {
 		builder.append(id).append(" -> "); //$NON-NLS-1$
 		SingleSourcePackage[] suppliers = getSuppliers();
 		if (suppliers == null) {
-			return builder.append(String.valueOf(null)).toString();
+			return builder.append("null").toString(); //$NON-NLS-1$
 		}
 		builder.append('[');
 		for (int i = 0; i < suppliers.length; i++) {
