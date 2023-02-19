@@ -331,7 +331,8 @@ public final class OSGiManifestBuilderFactory {
 			String versionAttr = (String) attributes.remove(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
 			@SuppressWarnings("deprecation")
 			String specVersionAttr = (String) attributes.remove(Constants.PACKAGE_SPECIFICATION_VERSION);
-			Version version = versionAttr == null ? (specVersionAttr == null ? Version.emptyVersion : Version.parseVersion(specVersionAttr)) : Version.parseVersion(versionAttr);
+			Version version = versionAttr == null ? parsePackageVersion(packageNames, specVersionAttr)
+					: parsePackageVersion(packageNames, versionAttr);
 			attributes.put(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE, version);
 			if (symbolicName != null) {
 				attributes.put(PackageNamespace.CAPABILITY_BUNDLE_SYMBOLICNAME_ATTRIBUTE, symbolicName);
@@ -343,6 +344,16 @@ public final class OSGiManifestBuilderFactory {
 				builder.addCapability(PackageNamespace.PACKAGE_NAMESPACE, directives, packageAttrs);
 				exportedPackages.add(packageAttrs);
 			}
+		}
+	}
+
+	private static Version parsePackageVersion(String[] packageNames, String versionSpec) throws BundleException {
+		try {
+			return versionSpec == null ? Version.emptyVersion : Version.parseVersion(versionSpec);
+		} catch (IllegalArgumentException e) {
+			throw new BundleException(
+					"Invalid value for version specified for package(s) " + Arrays.toString(packageNames), //$NON-NLS-1$
+					BundleException.MANIFEST_ERROR, e);
 		}
 	}
 

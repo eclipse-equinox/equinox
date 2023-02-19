@@ -2221,6 +2221,29 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
+	public void testBadPackageVersion() throws IOException {
+		Map<String, String> testManifest = new HashMap<>();
+		testManifest.put(Constants.BUNDLE_SYMBOLICNAME, "test");
+		testManifest.put(Constants.BUNDLE_VERSION, "1.0");
+
+		testManifest.put(Constants.EXPORT_PACKAGE, "test.pkg; version=2.a.4");
+		checkManifestPackageVersion(testManifest);
+
+		testManifest.put(Constants.EXPORT_PACKAGE, "test.pkg; specification-version=2.b.4");
+		checkManifestPackageVersion(testManifest);
+	}
+
+	private void checkManifestPackageVersion(Map<String, String> testManifest) {
+		try {
+			OSGiManifestBuilderFactory.createBuilder(testManifest);
+			fail("Expected a BundleException");
+		} catch (BundleException e) {
+			assertEquals("Wrong exception type.", BundleException.MANIFEST_ERROR, e.getType());
+			assertEquals("Wrong cause type.", IllegalArgumentException.class, e.getCause().getClass());
+		}
+	}
+
+	@Test
 	public void testNativeWithFilterChars() throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
