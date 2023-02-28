@@ -1042,4 +1042,32 @@ public class PathTest extends CoreTest {
 		anyPath = new Path("//one/two/three/");
 		assertEquals("5.4", new Path("//"), anyPath.uptoSegment(0));
 	}
+
+	public void testToPath() {
+
+		//Case 1, absolute path with no trailing separator
+		IPath anyPath = new Path("/first/second/third");
+
+		assertNotNull("1.0", anyPath.toPath());
+		assertEquals("1.1", java.nio.file.Path.of("/first/second/third"), anyPath.toPath());
+
+		// Case 2, absolute path with trailing separator
+		anyPath = new Path("/first/second/third/");
+
+		assertNotNull("2.0", anyPath.toPath());
+		assertEquals("2.1", java.nio.file.Path.of("/first/second/third/"), anyPath.toPath());
+
+		// Case 3, relative path with no trailing separator
+		anyPath = new Path("first/second/third");
+
+		assertNotNull("3.0", anyPath.toPath());
+		assertEquals("3.1", java.nio.file.Path.of("first/second/third"), anyPath.toPath());
+
+		// Case 4, relative path with trailing separator
+		anyPath = new Path("first/second/third/");
+
+		assertNotNull("4.0", anyPath.toPath());
+		assertEquals("4.1", java.nio.file.Path.of("first/second/third/"), anyPath.toPath());
+
+	}
 }
