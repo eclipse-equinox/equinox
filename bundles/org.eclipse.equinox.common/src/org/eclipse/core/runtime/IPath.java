@@ -461,6 +461,16 @@ public interface IPath extends Cloneable {
 	public java.io.File toFile();
 
 	/**
+	 * Returns a <code>java.nio.file.Path</code> corresponding to this path.
+	 *
+	 * @return the path corresponding to this path
+	 * @since 3.18
+	 */
+	default java.nio.file.Path toPath() {
+		return java.nio.file.Path.of(toOSString());
+	}
+
+	/**
 	 * Returns a string representation of this path which uses the
 	 * platform-dependent path separator defined by <code>java.io.File</code>.
 	 * This method is like <code>toString()</code> except that the
