@@ -467,7 +467,7 @@ public interface IPath extends Cloneable {
 	 * @since 3.18
 	 */
 	default java.nio.file.Path toPath() {
-		return toFile().toPath();
+		return java.nio.file.Path.of(toOSString());
 	}
 
 	/**

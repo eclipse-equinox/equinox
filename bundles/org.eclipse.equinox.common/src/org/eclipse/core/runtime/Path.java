@@ -1116,14 +1116,6 @@ public final class Path implements IPath, Cloneable {
 	public File toFile() {
 		return new File(toOSString());
 	}
-	
-	/* (Intentionally not included in javadoc)
-	 * @see IPath#toPath()
-	 */
-	@Override
-	public java.nio.file.Path toPath() {
-		return java.nio.file.Path.of(toOSString());
-	}
 
 	/* (Intentionally not included in javadoc)
 	 * @see IPath#toOSString()
