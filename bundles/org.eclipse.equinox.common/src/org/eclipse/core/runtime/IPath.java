@@ -464,6 +464,7 @@ public interface IPath extends Cloneable {
 	 * Returns a <code>java.nio.file.Path</code> corresponding to this path.
 	 *
 	 * @return the path corresponding to this path
+	 * @since 3.18
 	 */
 	default java.nio.file.Path toPath() {
 		return toFile().toPath();
