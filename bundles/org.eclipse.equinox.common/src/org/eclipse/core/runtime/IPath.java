@@ -11,7 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Patrick Tasse - Add extra constructor to Path class (bug 454959)
- *     Hannes Wellmann - Add static IPath factory methods
+ *     Hannes Wellmann - Add static IPath factory methods and add methods to create an IPath from a io.File/nio.Path
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -115,6 +115,28 @@ public interface IPath extends Cloneable {
 	 */
 	public static IPath forWindows(String windowsPath) {
 		return new Path(windowsPath, true);
+	}
+
+	/**
+	 * Constructs a new {@code IPath} from the given {@code File}.
+	 *
+	 * @param file the java.io.File object
+	 * @return the IPath representing the given File object
+	 * @since 3.18
+	 */
+	public static IPath fromFile(java.io.File file) {
+		return fromOSString(file.toString());
+	}
+
+	/**
+	 * Constructs a new {@code IPath} from the given {@code java.nio.file.Path}.
+	 *
+	 * @param path the java.nio.file.Path object
+	 * @return the IPath representing the given Path object
+	 * @since 3.18
+	 */
+	public static IPath fromPath(java.nio.file.Path path) {
+		return fromOSString(path.toString());
 	}
 
 	/**

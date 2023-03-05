@@ -16,6 +16,7 @@ package org.eclipse.equinox.common.tests;
 
 import static org.junit.Assert.assertNotEquals;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -401,6 +402,34 @@ public class PathTest extends CoreTest {
 		assertEquals("3.10.posix", "a:b\\c", posix2.segment(0));
 		assertEquals("3.11.posix", posix1, posix2);
 		assertEquals("3.12.posix", isLocalPosix, posix2.isValidSegment(":"));
+	}
+
+	public void testFromFile() {
+		List<String> segments = List.of("first", "first/second/third");
+		for (String segment : segments) {
+			File file0 = new File(segment);
+			assertEquals(file0, IPath.fromFile(file0).toFile());
+			File file1 = new File(segment + "/");
+			assertEquals(file1, IPath.fromFile(file1).toFile());
+			File file2 = new File("/" + segment);
+			assertEquals(file2, IPath.fromFile(file2).toFile());
+			File file3 = new File("/" + segment + "/");
+			assertEquals(file3, IPath.fromFile(file3).toFile());
+		}
+	}
+
+	public void testFromPath() {
+		List<String> segments = List.of("first", "first/second/third");
+		for (String segment : segments) {
+			java.nio.file.Path path0 = java.nio.file.Path.of(segment);
+			assertEquals(path0, IPath.fromPath(path0).toPath());
+			java.nio.file.Path path1 = java.nio.file.Path.of(segment + "/");
+			assertEquals(path1, IPath.fromPath(path1).toPath());
+			java.nio.file.Path path2 = java.nio.file.Path.of("/" + segment);
+			assertEquals(path2, IPath.fromPath(path2).toPath());
+			java.nio.file.Path path3 = java.nio.file.Path.of("/" + segment + "/");
+			assertEquals(path3, IPath.fromPath(path3).toPath());
+		}
 	}
 
 	public void testGetFileExtension() {
