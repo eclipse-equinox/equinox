@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -80,34 +80,47 @@ public final class Path implements IPath, Cloneable {
 	/** flags indicating separators (has leading, is UNC, has trailing, is for Windows) */
 	private final byte flags;
 
-	/** 
-	 * Constructs a new path from the given string path.
-	 * The string path must represent a valid file system path
-	 * on the local file system. 
-	 * The path is canonicalized and double slashes are removed
-	 * except at the beginning. (to handle UNC paths). All forward
-	 * slashes ('/') are treated as segment delimiters, and any
-	 * segment and device delimiters for the local file system are
-	 * also respected.
+	/**
+	 * Constructs a new path from the given string path. The string path must
+	 * represent a valid file system path on the local file system. The path is
+	 * canonicalized and double slashes are removed except at the beginning. (to
+	 * handle UNC paths). All forward slashes ('/') are treated as segment
+	 * delimiters, and any segment and device delimiters for the local file system
+	 * are also respected.
+	 * <p>
+	 * Instead of calling this method it is recommended to call
+	 * {@link IPath#fromOSString(String)} instead.
+	 * </p>
 	 *
-	 * @param pathString the portable string path
+	 * @param pathString the operating-system specific string path
+	 * @return the IPath representing the given OS specific string path
 	 * @see IPath#toPortableString()
+	 * @see IPath#fromOSString(String)
 	 * @since 3.1
 	 */
 	public static IPath fromOSString(String pathString) {
-		return new Path(pathString);
+		return IPath.fromOSString(pathString);
 	}
 
-	/** 
-	 * Constructs a new path from the given path string.
-	 * The path string must have been produced by a previous
-	 * call to <code>IPath.toPortableString</code>.
+	/**
+	 * Constructs a new path from the given path string. The path string must have
+	 * been produced by a previous call to <code>IPath.toPortableString</code>.
+	 * <p>
+	 * Instead of calling this method it is recommended to call
+	 * {@link IPath#fromPortableString(String)} instead.
+	 * </p>
 	 *
 	 * @param pathString the portable path string
+	 * @return the IPath representing the given portable string path
 	 * @see IPath#toPortableString()
+	 * @see IPath#fromPortableString(String)
 	 * @since 3.1
 	 */
 	public static IPath fromPortableString(String pathString) {
+		return IPath.fromPortableString(pathString);
+	}
+
+	static IPath parsePortableString(String pathString) {
 		int firstMatch = pathString.indexOf(DEVICE_SEPARATOR) + 1;
 		//no extra work required if no device characters
 		if (firstMatch <= 0)
@@ -126,45 +139,57 @@ public final class Path implements IPath, Cloneable {
 		char[] chars = pathString.toCharArray();
 		int readOffset = 0, writeOffset = 0, length = chars.length;
 		while (readOffset < length) {
-			if (chars[readOffset] == DEVICE_SEPARATOR)
-				if (++readOffset >= length)
-					break;
+			if (chars[readOffset] == DEVICE_SEPARATOR && ++readOffset >= length) {
+				break;
+			}
 			chars[writeOffset++] = chars[readOffset++];
 		}
 		return new Path(devicePart, new String(chars, 0, writeOffset), RUNNING_ON_WINDOWS);
 	}
 
 	/**
-	 * Constructs a new POSIX path from the given string path. The string path
-	 * must represent a valid file system path on a POSIX file system. The path
-	 * is canonicalized and double slashes are removed except at the beginning
-	 * (to handle UNC paths). All forward slashes ('/') are treated as segment
-	 * delimiters. This factory method should be used if the string path is for
-	 * a POSIX file system.
-	 *
+	 * Constructs a new POSIX path from the given string path. The string path must
+	 * represent a valid file system path on a POSIX file system. The path is
+	 * canonicalized and double slashes are removed except at the beginning (to
+	 * handle UNC paths). All forward slashes ('/') are treated as segment
+	 * delimiters. This factory method should be used if the string path is for a
+	 * POSIX file system.
+	 * <p>
+	 * Instead of calling this method it is recommended to call
+	 * {@link IPath#forPosix(String)} instead.
+	 * </p>
+	 * 
 	 * @param fullPath the string path
+	 * @return the IPath representing the given POSIX string path
 	 * @see #isValidPosixPath(String)
+	 * @see IPath#forPosix(String)
 	 * @since 3.7
 	 */
 	public static Path forPosix(String fullPath) {
-		return new Path(fullPath, false);
+		return (Path) IPath.forPosix(fullPath);
 	}
 
 	/**
 	 * Constructs a new Windows path from the given string path. The string path
-	 * must represent a valid file system path on the Windows file system. The
-	 * path is canonicalized and double slashes are removed except at the
-	 * beginning (to handle UNC paths). All forward slashes ('/') are treated as
-	 * segment delimiters, and any segment ('\') and device (':') delimiters for
-	 * the Windows file system are also respected. This factory method should be
-	 * used if the string path is for the Windows file system.
-	 *
+	 * must represent a valid file system path on the Windows file system. The path
+	 * is canonicalized and double slashes are removed except at the beginning (to
+	 * handle UNC paths). All forward slashes ('/') are treated as segment
+	 * delimiters, and any segment ('\') and device (':') delimiters for the Windows
+	 * file system are also respected. This factory method should be used if the
+	 * string path is for the Windows file system.
+	 * <p>
+	 * Instead of calling this method it is recommended to call
+	 * {@link IPath#forWindows(String)} instead.
+	 * </p>
+	 * 
 	 * @param fullPath the string path
+	 * @return the IPath representing the given Windows string path
 	 * @see #isValidWindowsPath(String)
+	 * @see IPath#forWindows(String)
 	 * @since 3.7
 	 */
 	public static Path forWindows(String fullPath) {
-		return new Path(fullPath, true);
+		return (Path) IPath.forWindows(fullPath);
 	}
 
 	/** 
@@ -224,7 +249,7 @@ public final class Path implements IPath, Cloneable {
 	 * @param forWindows true if the string path is for the Windows file system
 	 * @since 3.7
 	 */
-	private Path(String fullPath, boolean forWindows) {
+	Path(String fullPath, boolean forWindows) {
 		String devicePart = null;
 		if (forWindows) {
 			//convert backslash to forward slash
