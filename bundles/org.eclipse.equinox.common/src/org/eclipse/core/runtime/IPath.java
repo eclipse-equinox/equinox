@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Patrick Tasse - Add extra constructor to Path class (bug 454959)
+ *     Hannes Wellmann - Add static IPath factory methods
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -53,6 +54,68 @@ public interface IPath extends Cloneable {
 	 * Device separator character constant ":" used in paths.
 	 */
 	public static final char DEVICE_SEPARATOR = ':';
+
+	/**
+	 * Constructs a new path from the given string path. The string path must
+	 * represent a valid file system path on the local file system. The path is
+	 * canonicalized and double slashes are removed except at the beginning. (to
+	 * handle UNC paths). All forward slashes ('/') are treated as segment
+	 * delimiters, and any segment and device delimiters for the local file system
+	 * are also respected.
+	 *
+	 * @param osPath the operating-system specific string path
+	 * @return the IPath representing the given OS specific string path
+	 * @since 3.18
+	 */
+	public static IPath fromOSString(String osPath) {
+		return new Path(osPath);
+	}
+
+	/**
+	 * Constructs a new path from the given path string. The path string must have
+	 * been produced by a previous call to <code>IPath.toPortableString</code>.
+	 *
+	 * @param portablePath the portable path string
+	 * @return the IPath representing the given portable string path
+	 * @see IPath#toPortableString()
+	 * @since 3.18
+	 */
+	public static IPath fromPortableString(String portablePath) {
+		return Path.parsePortableString(portablePath);
+	}
+
+	/**
+	 * Constructs a new POSIX path from the given string path. The string path must
+	 * represent a valid file system path on a POSIX file system. The path is
+	 * canonicalized and double slashes are removed except at the beginning (to
+	 * handle UNC paths). All forward slashes ('/') are treated as segment
+	 * delimiters. This factory method should be used if the string path is for a
+	 * POSIX file system.
+	 *
+	 * @param posixPath the string path
+	 * @return the IPath representing the given POSIX string path
+	 * @since 3.18
+	 */
+	public static IPath forPosix(String posixPath) {
+		return new Path(posixPath, false);
+	}
+
+	/**
+	 * Constructs a new Windows path from the given string path. The string path
+	 * must represent a valid file system path on the Windows file system. The path
+	 * is canonicalized and double slashes are removed except at the beginning (to
+	 * handle UNC paths). All forward slashes ('/') are treated as segment
+	 * delimiters, and any segment ('\') and device (':') delimiters for the Windows
+	 * file system are also respected. This factory method should be used if the
+	 * string path is for the Windows file system.
+	 *
+	 * @param windowsPath the string path
+	 * @return the IPath representing the given Windows string path
+	 * @since 3.18
+	 */
+	public static IPath forWindows(String windowsPath) {
+		return new Path(windowsPath, true);
+	}
 
 	/**
 	 * Returns a new path which is the same as this path but with
