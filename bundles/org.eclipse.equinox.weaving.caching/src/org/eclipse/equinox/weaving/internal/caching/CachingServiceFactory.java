@@ -11,6 +11,7 @@
  * Contributors:
  *     Heiko Seeberger - initial implementation
  *     Martin Lippert - further improvements and optimizations
+ *     Stefan Winkler - fixed concurrency issues
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.internal.caching;
@@ -20,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.eclipse.equinox.service.weaving.ICachingService;
 import org.eclipse.equinox.service.weaving.ICachingServiceFactory;
@@ -46,6 +49,16 @@ public class CachingServiceFactory implements ICachingServiceFactory {
 	private final CacheWriter cacheWriter;
 
 	/**
+	 * A map for items that are currently contained in the {@link #cacheWriterQueue}
+	 */
+	private final ConcurrentMap<CacheItemKey, byte[]> itemsInCacheQueue;
+
+	/**
+	 * the lock manager to protect against concurrent file system access
+	 */
+	private final ClassnameLockManager lockManager = new ClassnameLockManager();
+
+	/**
 	 * @param bundleContext Must not be null!
 	 * @throws IllegalArgumentException if given bundleContext is null.
 	 */
@@ -54,8 +67,9 @@ public class CachingServiceFactory implements ICachingServiceFactory {
 			throw new IllegalArgumentException("Argument \"bundleContext\" must not be null!"); //$NON-NLS-1$
 		}
 		this.bundleContext = bundleContext;
-		this.cacheQueue = new ArrayBlockingQueue<>(5000);
-		this.cacheWriter = new CacheWriter(this.cacheQueue);
+		this.cacheQueue = new ArrayBlockingQueue<>(IBundleConstants.QUEUE_CAPACITY);
+		this.itemsInCacheQueue = new ConcurrentHashMap<>();
+		this.cacheWriter = new CacheWriter(this.cacheQueue, this.itemsInCacheQueue, this.lockManager);
 		this.cacheWriter.start();
 
 		this.bundleContext.addBundleListener(new SynchronousBundleListener() {
@@ -88,7 +102,8 @@ public class CachingServiceFactory implements ICachingServiceFactory {
 		if (bundleCachingService == null) {
 
 			if (key != null && key.length() > 0) {
-				bundleCachingService = new BundleCachingService(bundleContext, bundle, key, this.cacheQueue);
+				bundleCachingService = new BundleCachingService(bundleContext, bundle, key, this.cacheQueue,
+						this.itemsInCacheQueue, this.lockManager);
 			} else {
 				bundleCachingService = new UnchangedCachingService();
 			}
