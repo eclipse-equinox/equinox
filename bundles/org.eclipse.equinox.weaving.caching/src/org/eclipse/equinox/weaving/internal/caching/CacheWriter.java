@@ -11,6 +11,7 @@
  * Contributors:
  *     Martin Lippert - initial implementation
  *     Martin Lippert - caching of generated classes
+ *     Stefan Winkler - fixed concurrency issues
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.internal.caching;
@@ -32,31 +33,42 @@ import java.util.concurrent.BlockingQueue;
  * @author Martin Lippert
  */
 public class CacheWriter {
+	/**
+	 * A map for items that are currently contained in the {@link #cacheWriterQueue}
+	 */
+	private final Map<CacheItemKey, byte[]> itemsInQueue;
+
+	/**
+	 * the lock manager to protect against concurrent file system access
+	 */
+	private final ClassnameLockManager lockManager;
 
 	private final Thread writerThread;
 
 	/**
 	 * Create a new cache writer for the given queue of cache items
 	 *
-	 * @param cacheQueue The blocking queue that delivers the cache items to store
-	 *                   to this cache writer
+	 * @param cacheQueue   The blocking queue that delivers the cache items to store
+	 *                     to this cache writer
+	 * @param itemsInQueue The lookup map for items currently in the queue
+	 * @param lockManager  the lock manager to protect against concurrent file
+	 *                     system access
 	 */
-	public CacheWriter(final BlockingQueue<CacheItem> cacheQueue) {
-		this.writerThread = new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					while (true) {
-						final CacheItem item = cacheQueue.take();
-						try {
-							store(item);
-						} catch (final IOException ioe) {
-							// storing in cache failed, do nothing
-						}
+	public CacheWriter(final BlockingQueue<CacheItem> cacheQueue, final Map<CacheItemKey, byte[]> itemsInQueue,
+			final ClassnameLockManager lockManager) {
+		this.itemsInQueue = itemsInQueue;
+		this.lockManager = lockManager;
+		this.writerThread = new Thread(() -> {
+			try {
+				while (true) {
+					final CacheItem item = cacheQueue.take();
+					try {
+						store(item);
+					} catch (final IOException ioe) {
+						// storing in cache failed, do nothing
 					}
-				} catch (final InterruptedException e) {
 				}
+			} catch (final InterruptedException e) {
 			}
 		});
 		this.writerThread.setPriority(Thread.MIN_PRIORITY);
@@ -86,50 +98,39 @@ public class CacheWriter {
 	 * @throws IOException if an error occurs while writing to the cache
 	 */
 	protected void store(final CacheItem item) throws IOException {
-
 		// write out generated classes first
 		final Map<String, byte[]> generatedClasses = item.getGeneratedClasses();
 		if (generatedClasses != null) {
 			for (final Entry<String, byte[]> entry : generatedClasses.entrySet()) {
 				final String className = entry.getKey();
 				final byte[] classBytes = entry.getValue();
-				storeSingleClass(className, classBytes, item.getDirectory());
+				// write the class to the cache in a locked operation to prevent concurrent
+				// reads of incompletely written files
+				lockManager.executeWrite(className, () -> storeSingleClass(className, classBytes, item.getDirectory()));
 			}
 		}
 
 		// write out the woven class
-		storeSingleClass(item.getName(), item.getCachedBytes(), item.getDirectory());
+		lockManager.executeWrite(item.getName(),
+				() -> storeSingleClass(item.getName(), item.getCachedBytes(), item.getDirectory()));
 	}
 
 	private void storeSingleClass(final String className, final byte[] classBytes, final String cacheDirectory)
 			throws FileNotFoundException, IOException {
-		DataOutputStream outCache = null;
-		FileOutputStream fosCache = null;
-		try {
-			final File directory = new File(cacheDirectory);
-			if (!directory.exists()) {
-				directory.mkdirs();
-			}
-
-			fosCache = new FileOutputStream(new File(directory, className));
-			outCache = new DataOutputStream(new BufferedOutputStream(fosCache));
-
-			outCache.write(classBytes);
-		} finally {
-			if (outCache != null) {
-				try {
-					outCache.flush();
-					fosCache.getFD().sync();
-				} catch (final IOException e) {
-					// do nothing, we tried
-				}
-				try {
-					outCache.close();
-				} catch (final IOException e) {
-					// do nothing
-				}
-			}
+		final File directory = new File(cacheDirectory);
+		if (!directory.exists()) {
+			directory.mkdirs();
 		}
-	}
 
+		try (FileOutputStream fosCache = new FileOutputStream(new File(directory, className));
+				DataOutputStream outCache = new DataOutputStream(new BufferedOutputStream(fosCache))) {
+			outCache.write(classBytes);
+			outCache.flush();
+			fosCache.getFD().sync();
+		}
+
+		// after writing the file, remove the item from the itemsInQueue lookup map as
+		// well
+		itemsInQueue.remove(new CacheItemKey(cacheDirectory, className));
+	}
 }

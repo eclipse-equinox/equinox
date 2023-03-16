@@ -12,6 +12,7 @@
  *     Heiko Seeberger - initial implementation
  *     Martin Lippert - asynchronous cache writing
  *     Martin Lippert - caching of generated classes
+ *     Stefan Winkler - fixed concurrency issues
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.internal.caching;
@@ -25,6 +26,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 
 import org.eclipse.equinox.service.weaving.CacheEntry;
@@ -50,9 +52,25 @@ public class BundleCachingService implements ICachingService {
 
 	private File cacheDirectory;
 
+	/**
+	 * Cache and reuse the {@link #cacheDirectory} string representation instead of
+	 * calling {@link File#getAbsolutePath()} multiple times.
+	 */
+	private String cacheDirectoryString;
+
 	private final String cacheKey;
 
 	private final BlockingQueue<CacheItem> cacheWriterQueue;
+
+	/**
+	 * A map for items that are currently contained in the {@link #cacheWriterQueue}
+	 */
+	private final Map<CacheItemKey, byte[]> itemsInQueue;
+
+	/**
+	 * the lock manager to protect against concurrent file system access
+	 */
+	private final ClassnameLockManager lockManager;
 
 	/**
 	 * @param bundleContext    Must not be null!
@@ -60,11 +78,14 @@ public class BundleCachingService implements ICachingService {
 	 * @param key              Must not be null!
 	 * @param cacheWriterQueue The queue for items to be written to the cache, must
 	 *                         not be null
+	 * @param itemsInQueue     lookup map for the items in the CacheWriter queue
+	 * @param lockManager      the lock manager to protect against concurrent file
+	 *                         system access
 	 * @throws IllegalArgumentException if given bundleContext or bundle is null.
 	 */
 	public BundleCachingService(final BundleContext bundleContext, final Bundle bundle, final String key,
-			final BlockingQueue<CacheItem> cacheWriterQueue) {
-
+			final BlockingQueue<CacheItem> cacheWriterQueue, final Map<CacheItemKey, byte[]> itemsInQueue,
+			final ClassnameLockManager lockManager) {
 		if (bundleContext == null) {
 			throw new IllegalArgumentException("Argument \"bundleContext\" must not be null!"); //$NON-NLS-1$
 		}
@@ -78,11 +99,14 @@ public class BundleCachingService implements ICachingService {
 		this.bundle = bundle;
 		this.cacheKey = hashNamespace(key);
 		this.cacheWriterQueue = cacheWriterQueue;
+		this.itemsInQueue = itemsInQueue;
+		this.lockManager = lockManager;
 
 		final File dataFile = bundleContext.getDataFile(cacheKey);
 		if (dataFile != null) {
 			final String bundleCacheDir = bundle.getBundleId() + "-" + bundle.getLastModified(); //$NON-NLS-1$
 			cacheDirectory = new File(dataFile, bundleCacheDir);
+			cacheDirectoryString = cacheDirectory.getAbsolutePath();
 		} else {
 			Log.error("Cannot initialize cache!", null); //$NON-NLS-1$
 		}
@@ -91,6 +115,7 @@ public class BundleCachingService implements ICachingService {
 	/**
 	 * @see org.eclipse.equinox.service.weaving.ICachingService#canCacheGeneratedClasses()
 	 */
+	@Override
 	public boolean canCacheGeneratedClasses() {
 		return true;
 	}
@@ -99,6 +124,7 @@ public class BundleCachingService implements ICachingService {
 	 * @see org.eclipse.equinox.service.weaving.ICachingService#findStoredClass(java.lang.String,
 	 *      java.net.URL, java.lang.String)
 	 */
+	@Override
 	public CacheEntry findStoredClass(final String namespace, final URL sourceFileURL, final String name) {
 
 		if (name == null) {
@@ -109,8 +135,15 @@ public class BundleCachingService implements ICachingService {
 		boolean isCached = false;
 
 		if (cacheDirectory != null) {
-			final File cachedBytecodeFile = new File(cacheDirectory, name);
-			storedClass = read(name, cachedBytecodeFile);
+			final String directoryString = cacheDirectory.getAbsolutePath();
+			// first check whether the class is currently in the CacheWriter queue, and if
+			// so, take it from there
+			storedClass = itemsInQueue.get(new CacheItemKey(directoryString, name));
+			if (storedClass == null) {
+				// else, read it from disk
+				final File cachedBytecodeFile = new File(cacheDirectory, name);
+				storedClass = lockManager.executeRead(name, () -> read(name, cachedBytecodeFile));
+			}
 			isCached = storedClass != null;
 		}
 
@@ -126,7 +159,7 @@ public class BundleCachingService implements ICachingService {
 
 	/**
 	 * Hash the shared class namespace using MD5
-	 * 
+	 *
 	 * @param keyToHash
 	 * @return the MD5 version of the input string
 	 */
@@ -158,13 +191,10 @@ public class BundleCachingService implements ICachingService {
 	private byte[] read(final String name, final File file) {
 		int length = (int) file.length();
 
-		InputStream in = null;
-		try {
+		try (InputStream in = new FileInputStream(file)) {
 			byte[] classbytes = new byte[length];
 			int bytesread = 0;
 			int readcount;
-
-			in = new FileInputStream(file);
 
 			if (length > 0) {
 				classbytes = new byte[length];
@@ -198,21 +228,13 @@ public class BundleCachingService implements ICachingService {
 			Log.debug(MessageFormat.format("for [{0}]: Cannot read [1] from cache!", bundle //$NON-NLS-1$
 					.getSymbolicName(), name));
 			return null;
-		} finally {
-			if (in != null) {
-				try {
-					in.close();
-				} catch (final IOException e) {
-					Log.error(MessageFormat.format("for [{0}]: Cannot close cache file for [1]!", //$NON-NLS-1$
-							bundle.getSymbolicName(), name), e);
-				}
-			}
 		}
 	}
 
 	/**
 	 * Writes the remaining cache to disk.
 	 */
+	@Override
 	public void stop() {
 	}
 
@@ -220,6 +242,7 @@ public class BundleCachingService implements ICachingService {
 	 * @see org.eclipse.equinox.service.weaving.ICachingService#storeClass(java.lang.String,
 	 *      java.net.URL, java.lang.Class, byte[])
 	 */
+	@Override
 	public boolean storeClass(final String namespace, final URL sourceFileURL, final Class<?> clazz,
 			final byte[] classbytes) {
 		if (clazz == null) {
@@ -232,22 +255,34 @@ public class BundleCachingService implements ICachingService {
 			return false;
 		}
 
-		final CacheItem item = new CacheItem(classbytes, cacheDirectory.getAbsolutePath(), clazz.getName());
+		final String className = clazz.getName();
+		final CacheItem item = new CacheItem(classbytes, cacheDirectoryString, className);
 
-		return this.cacheWriterQueue.offer(item);
+		final boolean queued = this.cacheWriterQueue.offer(item);
+		if (queued) {
+			itemsInQueue.put(new CacheItemKey(cacheDirectoryString, className), classbytes);
+		}
+		return queued;
 	}
 
 	/**
 	 * @see org.eclipse.equinox.service.weaving.ICachingService#storeClassAndGeneratedClasses(java.lang.String,
 	 *      java.net.URL, java.lang.Class, byte[], java.util.Map)
 	 */
+	@Override
 	public boolean storeClassAndGeneratedClasses(final String namespace, final URL sourceFileUrl, final Class<?> clazz,
 			final byte[] classbytes, final Map<String, byte[]> generatedClasses) {
+		final String className = clazz.getName();
+		final CacheItem item = new CacheItem(classbytes, cacheDirectoryString, className, generatedClasses);
 
-		final CacheItem item = new CacheItem(classbytes, cacheDirectory.getAbsolutePath(), clazz.getName(),
-				generatedClasses);
-
-		return this.cacheWriterQueue.offer(item);
+		final boolean queued = this.cacheWriterQueue.offer(item);
+		if (queued) {
+			itemsInQueue.put(new CacheItemKey(cacheDirectoryString, className), classbytes);
+			for (final Entry<String, byte[]> generatedClass : generatedClasses.entrySet()) {
+				itemsInQueue.put(new CacheItemKey(cacheDirectoryString, generatedClass.getKey()),
+						generatedClass.getValue());
+			}
+		}
+		return queued;
 	}
-
 }
