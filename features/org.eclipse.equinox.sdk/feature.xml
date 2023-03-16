@@ -104,14 +104,14 @@
          unpack="false"/>
 
    <plugin
-         id="org.apache.jasper.glassfish"
+         id="org.glassfish.web.javax.servlet.jsp"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.apache.jasper.glassfish.source"
+         id="org.glassfish.web.javax.servlet.jsp.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
