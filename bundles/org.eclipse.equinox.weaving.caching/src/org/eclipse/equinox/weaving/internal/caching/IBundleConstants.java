@@ -16,14 +16,14 @@
 package org.eclipse.equinox.weaving.internal.caching;
 
 /**
- * Constants for org.aspectj.osgi.service.caching".
+ * Constants for org.eclipse.equinox.weaving.caching.
  *
  * @author Heiko Seeberger
  */
 public interface IBundleConstants {
 
 	/**
-	 * The symbolic name for this bundle: "org.aspectj.osgi.service.caching".
+	 * The symbolic name for this bundle: "org.eclipse.equinox.weaving.caching".
 	 */
 	public static final String BUNDLE_SYMBOLIC_NAME = "org.eclipse.equinox.weaving.caching"; //$NON-NLS-1$
 
