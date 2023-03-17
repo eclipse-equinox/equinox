@@ -39,12 +39,12 @@ public final class CacheItemKey {
 	 * Create an instance of the {@link CacheItemKey} for the given directory and
 	 * class name
 	 *
-	 * @param dir The String representation of the target cache directory
-	 * @param n   The class name
+	 * @param dir  The String representation of the target cache directory
+	 * @param name The class name
 	 */
-	public CacheItemKey(final String dir, final String n) {
-		directory = dir;
-		name = n;
+	public CacheItemKey(final String dir, final String name) {
+		this.directory = dir;
+		this.name = name;
 	}
 
 	@Override
