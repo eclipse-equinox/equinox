@@ -38,7 +38,7 @@ import org.osgi.framework.wiring.BundleWiring;
 public class BundleNativeCodeTests extends AbstractBundleTests {
 
 	@Test
-	public void testBundleNativeHostOnlyOneMatch() throws Exception {
+	public void testMultipleBundleNativeHostOnlyOneMatch() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		config.mkdirs();
 
@@ -63,7 +63,25 @@ public class BundleNativeCodeTests extends AbstractBundleTests {
 	}
 
 	@Test
-	public void testBundleNativeHostWithFragmentsOneMatch() throws Exception {
+	public void testSingleBundleNativeHostOneMatch() throws Exception {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		config.mkdirs();
+
+		Map<String, String> hostHeaders = new HashMap<>();
+		hostHeaders.put(BUNDLE_MANIFESTVERSION, "2");
+		hostHeaders.put(BUNDLE_SYMBOLICNAME, getName() + ".host");
+		hostHeaders.put(BUNDLE_NATIVECODE, "nativeCode1.txt; selection-filter=\"(library.match=1)\","
+				// make native code optional
+				+ "*");
+
+		File hostBundleFile = SystemBundleTests.createBundle(config, hostHeaders.get(BUNDLE_SYMBOLICNAME), hostHeaders,
+				Collections.singletonMap("nativeCode1.txt", "nativeCode1.txt"));
+
+		doTestNativeCode(config, "1", "nativeCode1.txt", hostBundleFile);
+	}
+
+	@Test
+	public void testMultipleBundleNativeHostWithFragmentsOneMatch() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		config.mkdirs();
 
@@ -104,11 +122,40 @@ public class BundleNativeCodeTests extends AbstractBundleTests {
 		doTestNativeCode(config, "4", "nativeCode4.txt", hostBundleFile, frag1BundleFile);
 		doTestNativeCode(config, "5", "nativeCode5.txt", hostBundleFile, frag1BundleFile);
 		doTestNativeCode(config, "6", "nativeCode6.txt", hostBundleFile, frag1BundleFile);
-
 	}
 
 	@Test
-	public void testBundleNativeHostWithFragmentsMultipleMatch() throws Exception {
+	public void testSingleBundleNativeHostWithFragmentsOneMatch() throws Exception {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		config.mkdirs();
+
+		Map<String, String> hostHeaders = new HashMap<>();
+		hostHeaders.put(BUNDLE_MANIFESTVERSION, "2");
+		hostHeaders.put(BUNDLE_SYMBOLICNAME, getName() + ".host");
+		hostHeaders.put(BUNDLE_NATIVECODE, "nativeCode1.txt; selection-filter=\"(library.match=1)\","
+				// make native code optional
+				+ "*");
+
+		File hostBundleFile = SystemBundleTests.createBundle(config, hostHeaders.get(BUNDLE_SYMBOLICNAME), hostHeaders,
+				Collections.singletonMap("nativeCode1.txt", "nativeCode1.txt"));
+
+		Map<String, String> frag1Headers = new HashMap<>();
+		frag1Headers.put(BUNDLE_MANIFESTVERSION, "2");
+		frag1Headers.put(BUNDLE_SYMBOLICNAME, getName() + ".frag1");
+		frag1Headers.put(FRAGMENT_HOST, getName() + ".host");
+		frag1Headers.put(BUNDLE_NATIVECODE, "nativeCode4.txt; selection-filter=\"(library.match=4)\","
+				// make native code optional
+				+ "*");
+
+		File frag1BundleFile = SystemBundleTests.createBundle(config, frag1Headers.get(BUNDLE_SYMBOLICNAME),
+				frag1Headers, Collections.singletonMap("nativeCode4.txt", "nativeCode4.txt"));
+
+		doTestNativeCode(config, "1", "nativeCode1.txt", hostBundleFile, frag1BundleFile);
+		doTestNativeCode(config, "4", "nativeCode4.txt", hostBundleFile, frag1BundleFile);
+	}
+
+	@Test
+	public void testMultipleBundleNativeHostWithFragmentsMultipleMatch() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		config.mkdirs();
 
@@ -149,6 +196,36 @@ public class BundleNativeCodeTests extends AbstractBundleTests {
 		doTestNativeCode(config, "1", "nativeCode4.txt", hostBundleFile, frag1BundleFile);
 		doTestNativeCode(config, "2", "nativeCode5.txt", hostBundleFile, frag1BundleFile);
 		doTestNativeCode(config, "3", "nativeCode6.txt", hostBundleFile, frag1BundleFile);
+	}
+
+	@Test
+	public void testSingleBundleNativeHostWithFragmentsMultipleMatch() throws Exception {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		config.mkdirs();
+
+		Map<String, String> hostHeaders = new HashMap<>();
+		hostHeaders.put(BUNDLE_MANIFESTVERSION, "2");
+		hostHeaders.put(BUNDLE_SYMBOLICNAME, getName() + ".host");
+		hostHeaders.put(BUNDLE_NATIVECODE, "nativeCode1.txt; selection-filter=\"(library.match=1)\","
+				// make native code optional
+				+ "*");
+
+		File hostBundleFile = SystemBundleTests.createBundle(config, hostHeaders.get(BUNDLE_SYMBOLICNAME), hostHeaders,
+				Collections.singletonMap("nativeCode1.txt", "nativeCode1.txt"));
+
+		Map<String, String> frag1Headers = new HashMap<>();
+		frag1Headers.put(BUNDLE_MANIFESTVERSION, "2");
+		frag1Headers.put(BUNDLE_SYMBOLICNAME, getName() + ".frag1");
+		frag1Headers.put(FRAGMENT_HOST, getName() + ".host");
+		frag1Headers.put(BUNDLE_NATIVECODE, "nativeCode4.txt; selection-filter=\"(library.match=1)\","
+				// make native code optional
+				+ "*");
+
+		File frag1BundleFile = SystemBundleTests.createBundle(config, frag1Headers.get(BUNDLE_SYMBOLICNAME),
+				frag1Headers, Collections.singletonMap("nativeCode4.txt", "nativeCode4.txt"));
+
+		doTestNativeCode(config, "1", "nativeCode1.txt", hostBundleFile, frag1BundleFile);
+		doTestNativeCode(config, "1", "nativeCode4.txt", hostBundleFile, frag1BundleFile);
 	}
 
 	private void doTestNativeCode(File config, String libraryMatchValue, String nativeCodeName, File hostBundleFile,
