@@ -39,7 +39,8 @@ import org.junit.runners.Suite;
 		NativeCodeBundleTests.class, //
 		PlatformAdminBundleTests.class, //
 		ListenerTests.class, //
-		AddDynamicImportTests.class //
+		AddDynamicImportTests.class, //
+		BundleNativeCodeTests.class //
 })
 public class BundleTests {
 }
