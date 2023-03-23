@@ -33,3 +33,4 @@ s390x                                  # IBM System 390 (64-bit)
 v850e                                   # NEC V850E
 x86-64 amd64 em64t x86_64               # 64 bit x86 architecture
 loongarch64 LoongArch64                 # 64 bit loongarch architecture
+riscv64                                 # 64 bite riscv architecture

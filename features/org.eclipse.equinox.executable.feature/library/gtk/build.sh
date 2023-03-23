@@ -112,6 +112,11 @@ case $defaultOS in
 				defaultJava=DEFAULT_JAVA_EXEC
 				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
+			"riscv64")
+				defaultOSArch="riscv64"
+				defaultJava=DEFAULT_JAVA_EXEC
+				OUTPUT_DIR="$EXEC_DIR/contributed/$defaultWS/$defaultOS/$defaultOSArch"
+				;;
 			*)
 				echo "*** Unknown MODEL <${MODEL}>"
 				;;
