@@ -188,7 +188,8 @@ public class NativeCodeFinder {
 		for (ModuleWire moduleWire : nativeCode) {
 			if (moduleWire.getRequirement().getRevision().equals(revision)) {
 				@SuppressWarnings("unchecked")
-				List<String> result = (List<String>) nativeCode.get(0).getRequirement().getAttributes().get(REQUIREMENT_NATIVE_PATHS_ATTRIBUTE);
+				List<String> result = (List<String>) moduleWire.getRequirement().getAttributes()
+						.get(REQUIREMENT_NATIVE_PATHS_ATTRIBUTE);
 				if (result != null)
 					return result;
 				// this must be a multi-clause Bundle-NativeCode header, need to check for the correct one in the index
@@ -204,7 +205,8 @@ public class NativeCodeFinder {
 					}
 					if (index != -1) {
 						@SuppressWarnings("unchecked")
-						List<String> indexResult = (List<String>) nativeCode.get(0).getRequirement().getAttributes().get(REQUIREMENT_NATIVE_PATHS_ATTRIBUTE + '.' + index);
+						List<String> indexResult = (List<String>) moduleWire.getRequirement().getAttributes()
+								.get(REQUIREMENT_NATIVE_PATHS_ATTRIBUTE + '.' + index);
 						if (indexResult != null)
 							return indexResult;
 					}
