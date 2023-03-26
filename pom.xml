@@ -28,7 +28,7 @@
     <!-- location of rt.equinox.binaries project -->
     <!-- required by: org.eclipse.equinox.feature:org.eclipse.equinox.executable -->
     <!-- required by: org.eclipse.equinox.framework:launcher-binary-parent -->
-    <rt.equinox.binaries.loc>../../../rt.equinox.binaries</rt.equinox.binaries.loc>
+    <rt.equinox.binaries.loc>../../../equinox.binaries</rt.equinox.binaries.loc>
     <target-platform.optionalDependencies>require</target-platform.optionalDependencies>
   </properties>
 
