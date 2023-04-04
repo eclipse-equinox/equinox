@@ -1,0 +1,20 @@
+Bundle-Name: %bundleName
+Bundle-Version: 1.6.300.qualifier
+Bundle-SymbolicName: org.eclipse.equinox.event
+Bundle-Vendor: %bundleVendor
+Bundle-Localization: plugin
+Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: org.eclipse.equinox.event
+Export-Package: org.eclipse.equinox.internal.event;x-internal:=true, \
+				org.eclipse.equinox.internal.event.mapper;x-internal:=true
+
+-dsannotations-options: version;maximum=1.3
+-runee: JavaSE-1.8
+-includeresource: plugin.properties,\
+               about.html
+               
+-buildpath: org.eclipse.osgi, \
+			org.osgi.service.event
+		
+# pomless configuration options
+pom.model.property.tck.artifact = org.osgi.test.cases.event

@@ -30,6 +30,7 @@
     <!-- required by: org.eclipse.equinox.framework:launcher-binary-parent -->
     <rt.equinox.binaries.loc>../../../rt.equinox.binaries</rt.equinox.binaries.loc>
     <target-platform.optionalDependencies>require</target-platform.optionalDependencies>
+    <tycho.version>4.0.4-SNAPSHOT</tycho.version>
   </properties>
 
   <!-- 
