@@ -50,6 +50,40 @@ jobs:
         name: test-results
         if-no-files-found: error
         path: '**/target/*-reports/*.xml'
+  build-launcher-win64:
+    runs-on: windows-2019
+    env:
+      PROGRAM_OUTPUT: eclipse.exe
+      PROGRAM_LIBRARY: eclipse.dll
+      DEFAULT_OS: win32
+      DEFAULT_OS_ARCH: x86_64
+      DEFAULT_WS: win32
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 1
+    - name: Set up JDK 8
+      uses: actions/setup-java@v3
+      with:
+        java-version: '8'
+        distribution: 'temurin'
+    - name: Visual Studio shell
+      uses: egor-tensin/vs-shell@v2
+      with:
+        arch: x64
+    - name: Build
+      working-directory: features/org.eclipse.equinox.executable.feature/library/win32
+      run: nmake -f make_win64.mak
+      shell: pwsh
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      if: success()
+      with:
+        name: Windows launcher artifacts
+        path: |
+          features/org.eclipse.equinox.executable.feature/library/win32/eclipse*.exe
+          features/org.eclipse.equinox.executable.feature/library/win32/eclipse*.dll
+        if-no-files-found: error
   tck:
     runs-on: ubuntu-latest
     steps:
