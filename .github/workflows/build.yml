@@ -49,7 +49,7 @@ jobs:
         if-no-files-found: error
         path: '**/target/*-reports/*.xml'
   build-launcher-win64:
-    runs-on: windows-2019
+    runs-on: windows-latest
     env:
       PROGRAM_OUTPUT: eclipse.exe
       PROGRAM_LIBRARY: eclipse.dll
@@ -66,9 +66,9 @@ jobs:
         java-version: '8'
         distribution: 'temurin'
     - name: Visual Studio shell
-      uses: egor-tensin/vs-shell@v2
+      uses: microsoft/setup-msbuild@v1
       with:
-        arch: x64
+        msbuild-architecture: x64
     - name: Build
       working-directory: features/org.eclipse.equinox.executable.feature/library/win32
       run: nmake -f make_win64.mak
