@@ -35,8 +35,6 @@ jobs:
         mvn
         --batch-mode
         --global-toolchains ${{ github.workspace }}/.github/workflows/toolchains.xml
-        --threads 1C
-        -Pbuild-individual-bundles
         -Pbree-libs
         -Papi-check
         -Dcompare-version-with-baselines.skip=false
