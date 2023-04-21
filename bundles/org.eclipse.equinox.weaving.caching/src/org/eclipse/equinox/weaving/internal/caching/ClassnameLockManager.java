@@ -119,6 +119,11 @@ public class ClassnameLockManager {
 			return resultingEntry;
 		});
 
+		// now activate the lock - this must happen outside of the compute() because
+		// otherwise we would end up in a deadlock with the classnameLocks
+		// ConcurrentHashMap lock in releaseLock()
+		lockWrapper[0].lock();
+
 		// return the acquired lock
 		return lockWrapper[0];
 	}
