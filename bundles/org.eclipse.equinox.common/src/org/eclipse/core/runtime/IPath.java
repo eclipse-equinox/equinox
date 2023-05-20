@@ -56,6 +56,22 @@ public interface IPath extends Cloneable {
 	public static final char DEVICE_SEPARATOR = ':';
 
 	/**
+	 * Constant value containing the empty path with no device on the local file
+	 * system.
+	 * 
+	 * @since 3.18
+	 */
+	public static final IPath EMPTY = fromOSString(""); //$NON-NLS-1$
+
+	/**
+	 * Constant value containing the root path with no device on the local file
+	 * system.
+	 * 
+	 * @since 3.18
+	 */
+	public static final IPath ROOT = fromOSString("/"); //$NON-NLS-1$
+
+	/**
 	 * Constructs a new path from the given string path. The string path must
 	 * represent a valid file system path on the local file system. The path is
 	 * canonicalized and double slashes are removed except at the beginning. (to
