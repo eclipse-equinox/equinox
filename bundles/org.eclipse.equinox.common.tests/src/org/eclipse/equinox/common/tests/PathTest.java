@@ -50,8 +50,8 @@ public class PathTest extends CoreTest {
 		assertEquals("1.1", with, without.addTrailingSeparator());
 		assertEquals("1.2", without, without.addTrailingSeparator());
 
-		assertSame("2.0", Path.ROOT, Path.ROOT.addTrailingSeparator());
-		assertEquals("2.1", Path.ROOT, Path.EMPTY.addTrailingSeparator());
+		assertSame("2.0", IPath.ROOT, IPath.ROOT.addTrailingSeparator());
+		assertEquals("2.1", IPath.ROOT, IPath.EMPTY.addTrailingSeparator());
 
 		with = new Path("//first/second/third/");
 		without = new Path("//first/second/third");
@@ -60,8 +60,8 @@ public class PathTest extends CoreTest {
 		assertEquals("3.1", with, without.addTrailingSeparator());
 		assertEquals("3.2", without, without.addTrailingSeparator());
 
-		assertSame("4.0", Path.ROOT, Path.ROOT.addTrailingSeparator());
-		assertEquals("4.1", Path.ROOT, Path.EMPTY.addTrailingSeparator());
+		assertSame("4.0", IPath.ROOT, IPath.ROOT.addTrailingSeparator());
+		assertEquals("4.1", IPath.ROOT, IPath.EMPTY.addTrailingSeparator());
 
 		with = new Path("c:/first/second/third/");
 		without = new Path("c:/first/second/third");
@@ -70,8 +70,8 @@ public class PathTest extends CoreTest {
 		assertEquals("5.1", with, without.addTrailingSeparator());
 		assertEquals("5.2", without, without.addTrailingSeparator());
 
-		assertSame("6.0", Path.ROOT, Path.ROOT.addTrailingSeparator());
-		assertEquals("6.1", Path.ROOT, Path.EMPTY.addTrailingSeparator());
+		assertSame("6.0", IPath.ROOT, IPath.ROOT.addTrailingSeparator());
+		assertEquals("6.1", IPath.ROOT, IPath.EMPTY.addTrailingSeparator());
 	}
 
 	public void testAppend() {
@@ -85,21 +85,21 @@ public class PathTest extends CoreTest {
 
 		assertEquals("1.0", combo, fore.append(aft));
 		assertEquals("1.1", combo, fore.removeTrailingSeparator().append(aft));
-		assertEquals("1.2", combo, Path.ROOT.append(fore).append(aft));
+		assertEquals("1.2", combo, IPath.ROOT.append(fore).append(aft));
 		assertFalse("1.3", fore.append(aft).hasTrailingSeparator());
-		assertFalse("1.4", Path.ROOT.append(fore).append(aft).hasTrailingSeparator());
+		assertFalse("1.4", IPath.ROOT.append(fore).append(aft).hasTrailingSeparator());
 		assertFalse("1.5", fore.removeTrailingSeparator().append(aft).hasTrailingSeparator());
 		// append empty and root path together
-		assertEquals("1.6", Path.EMPTY, Path.EMPTY.append(Path.EMPTY));
-		assertEquals("1.7", Path.EMPTY, Path.EMPTY.append(Path.ROOT));
-		assertEquals("1.8", Path.ROOT, Path.ROOT.append(Path.EMPTY));
-		assertEquals("1.9", Path.ROOT, Path.ROOT.append(Path.ROOT));
+		assertEquals("1.6", IPath.EMPTY, IPath.EMPTY.append(IPath.EMPTY));
+		assertEquals("1.7", IPath.EMPTY, IPath.EMPTY.append(IPath.ROOT));
+		assertEquals("1.8", IPath.ROOT, IPath.ROOT.append(IPath.EMPTY));
+		assertEquals("1.9", IPath.ROOT, IPath.ROOT.append(IPath.ROOT));
 
 		assertEquals("2.0", combo, fore.append(aftString));
 		assertEquals("2.1", combo, fore.removeTrailingSeparator().append(aftString));
-		assertEquals("2.2", combo, Path.ROOT.append(fore).append(aftString));
+		assertEquals("2.2", combo, IPath.ROOT.append(fore).append(aftString));
 		assertTrue("2.3", !fore.append(aftString).hasTrailingSeparator());
-		assertTrue("2.4", !Path.ROOT.append(fore).append(aftString).hasTrailingSeparator());
+		assertTrue("2.4", !IPath.ROOT.append(fore).append(aftString).hasTrailingSeparator());
 		assertTrue("2.5", !fore.removeTrailingSeparator().append(aftString).hasTrailingSeparator());
 
 		//ensure append preserves correct trailing separator
@@ -145,8 +145,8 @@ public class PathTest extends CoreTest {
 		assertEquals("4.4.win", combo, IPath.forWindows("").append(win).append(aftString).makeAbsolute());
 		assertEquals("4.5.win", combo, IPath.forWindows("").append(posix).append(aftString).makeAbsolute());
 
-		assertEquals("5.0", new Path("/foo"), Path.ROOT.append("../foo"));
-		assertEquals("5.1", new Path("/foo"), Path.ROOT.append("./foo"));
+		assertEquals("5.0", new Path("/foo"), IPath.ROOT.append("../foo"));
+		assertEquals("5.1", new Path("/foo"), IPath.ROOT.append("./foo"));
 		assertEquals("5.2", new Path("c:/foo/xyz"), new Path("c:/foo/bar").append("../xyz"));
 		assertEquals("5.3", new Path("c:/foo/bar/xyz"), new Path("c:/foo/bar").append("./xyz"));
 
@@ -179,11 +179,11 @@ public class PathTest extends CoreTest {
 		assertEquals("7.0", new Path("/foo/bar"), new Path("/foo").append("//bar"));
 		assertEquals("7.1", new Path("/foo/bar/test"), new Path("/foo").append("bar//test"));
 		assertEquals("7.2", new Path("//foo/bar"), new Path("//foo").append("bar"));
-		assertEquals("7.3", new Path("/bar"), Path.ROOT.append("//bar"));
+		assertEquals("7.3", new Path("/bar"), IPath.ROOT.append("//bar"));
 
 		//append empty path does nothing
-		assertEquals("8.0", fore, fore.append(Path.ROOT));
-		assertEquals("8.1", fore, fore.append(Path.EMPTY));
+		assertEquals("8.0", fore, fore.append(IPath.ROOT));
+		assertEquals("8.1", fore, fore.append(IPath.EMPTY));
 		assertEquals("8.2", fore, fore.append(new Path("//")));
 		assertEquals("8.3", fore, fore.append(new Path("/")));
 		assertEquals("8.4", fore, fore.append(new Path("")));
@@ -240,8 +240,8 @@ public class PathTest extends CoreTest {
 
 	public void testSegmentCount() {
 
-		assertEquals("1.0", 0, Path.ROOT.segmentCount());
-		assertEquals("1.1", 0, Path.EMPTY.segmentCount());
+		assertEquals("1.0", 0, IPath.ROOT.segmentCount());
+		assertEquals("1.1", 0, IPath.EMPTY.segmentCount());
 
 		assertEquals("2.0", 1, new Path("/first").segmentCount());
 		assertEquals("2.1", 1, new Path("/first/").segmentCount());
@@ -291,7 +291,7 @@ public class PathTest extends CoreTest {
 		anyPath = new Path("c:/a/b/c");
 		assertEquals("1.2", anyPath, anyPath.clone());
 
-		assertEquals("1.3", Path.ROOT, Path.ROOT.clone());
+		assertEquals("1.3", IPath.ROOT, IPath.ROOT.clone());
 	}
 
 	public void testConstructors() {
@@ -308,8 +308,8 @@ public class PathTest extends CoreTest {
 
 		IPath anyPath = new Path("/first/second/third");
 
-		assertEquals("2.0", Path.EMPTY, new Path(""));
-		assertEquals("2.1", Path.ROOT, new Path("/"));
+		assertEquals("2.0", IPath.EMPTY, new Path(""));
+		assertEquals("2.1", IPath.ROOT, new Path("/"));
 		assertEquals("2.2", anyPath, anyPath);
 
 		//should handle slash before the device (see bug 84697)
@@ -338,8 +338,8 @@ public class PathTest extends CoreTest {
 
 	public void testFirstSegment() {
 
-		assertNull("1.0", Path.ROOT.segment(0));
-		assertNull("1.1", Path.EMPTY.segment(0));
+		assertNull("1.0", IPath.ROOT.segment(0));
+		assertNull("1.1", IPath.EMPTY.segment(0));
 
 		assertEquals("2.0", "a", new Path("/a/b/c").segment(0));
 		assertEquals("2.1", "a", new Path("a").segment(0));
@@ -437,8 +437,8 @@ public class PathTest extends CoreTest {
 		IPath anyPath = new Path("index.html");
 		assertEquals("1.0", anyPath.getFileExtension(), "html");
 
-		assertNull("2.0", Path.ROOT.getFileExtension());
-		assertNull("2.1", Path.EMPTY.getFileExtension());
+		assertNull("2.0", IPath.ROOT.getFileExtension());
+		assertNull("2.1", IPath.EMPTY.getFileExtension());
 		assertNull("2.2", new Path("index").getFileExtension());
 		assertNull("2.3", new Path("/a/b/c.txt/").getFileExtension());
 
@@ -460,8 +460,8 @@ public class PathTest extends CoreTest {
 
 		// negative
 		assertTrue("2.0", !new Path("first/second/third").hasTrailingSeparator());
-		assertTrue("2.1", !Path.ROOT.hasTrailingSeparator());
-		assertTrue("2.2", !Path.EMPTY.hasTrailingSeparator());
+		assertTrue("2.1", !IPath.ROOT.hasTrailingSeparator());
+		assertTrue("2.2", !IPath.EMPTY.hasTrailingSeparator());
 		assertTrue("2.3", !new Path("//first/second/third").hasTrailingSeparator());
 		assertTrue("2.4", !new Path("c:/first/second/third").hasTrailingSeparator());
 		assertTrue("2.5", !new Path("c:first/second/third").hasTrailingSeparator());
@@ -473,8 +473,8 @@ public class PathTest extends CoreTest {
 		assertTrue("3.3", !new Path("/first/").append("..").hasTrailingSeparator());
 		assertTrue("3.4", !new Path("/first/").append(new Path("..")).hasTrailingSeparator());
 		assertTrue("3.5", !new Path("/first/../").hasTrailingSeparator());
-		assertTrue("3.6", !Path.ROOT.addTrailingSeparator().hasTrailingSeparator());
-		assertTrue("3.7", !Path.EMPTY.addTrailingSeparator().hasTrailingSeparator());
+		assertTrue("3.6", !IPath.ROOT.addTrailingSeparator().hasTrailingSeparator());
+		assertTrue("3.7", !IPath.EMPTY.addTrailingSeparator().hasTrailingSeparator());
 
 	}
 
@@ -482,14 +482,14 @@ public class PathTest extends CoreTest {
 
 		// positive
 		assertTrue("1.0", new Path("/first/second/third").isAbsolute());
-		assertTrue("1.1", Path.ROOT.isAbsolute());
+		assertTrue("1.1", IPath.ROOT.isAbsolute());
 		assertTrue("1.2", new Path("//first/second/third").isAbsolute());
 		assertTrue("1.3.win", IPath.forWindows("c:/first/second/third").isAbsolute());
 		assertTrue("1.4.posix", IPath.forPosix("/c:first/second/third").isAbsolute());
 
 		// negative
 		assertTrue("2.0", !new Path("first/second/third").isAbsolute());
-		assertTrue("2.1", !Path.EMPTY.isAbsolute());
+		assertTrue("2.1", !IPath.EMPTY.isAbsolute());
 		assertTrue("2.2", !new Path("c:first/second/third").isAbsolute());
 
 		// unc
@@ -504,7 +504,7 @@ public class PathTest extends CoreTest {
 	public void testIsEmpty() {
 
 		// positive
-		assertTrue("1.0", Path.EMPTY.isEmpty());
+		assertTrue("1.0", IPath.EMPTY.isEmpty());
 		assertTrue("1.1", new Path("//").isEmpty());
 		assertTrue("1.2", new Path("").isEmpty());
 		assertTrue("1.3.win", IPath.forWindows("c:").isEmpty());
@@ -513,7 +513,7 @@ public class PathTest extends CoreTest {
 
 		// negative
 		assertTrue("2.0", !new Path("first/second/third").isEmpty());
-		assertTrue("2.1", !Path.ROOT.isEmpty());
+		assertTrue("2.1", !IPath.ROOT.isEmpty());
 		assertTrue("2.2", !new Path("//a").isEmpty());
 		assertTrue("2.3", !new Path("c:/").isEmpty());
 	}
@@ -530,22 +530,22 @@ public class PathTest extends CoreTest {
 
 		assertTrue("2.0", prefix.addTrailingSeparator().isPrefixOf(path));
 
-		assertTrue("3.0", Path.ROOT.isPrefixOf(path));
-		assertTrue("3.1", Path.EMPTY.isPrefixOf(path));
-		assertTrue("3.2", !path.isPrefixOf(Path.ROOT));
-		assertTrue("3.3", !path.isPrefixOf(Path.EMPTY));
+		assertTrue("3.0", IPath.ROOT.isPrefixOf(path));
+		assertTrue("3.1", IPath.EMPTY.isPrefixOf(path));
+		assertTrue("3.2", !path.isPrefixOf(IPath.ROOT));
+		assertTrue("3.3", !path.isPrefixOf(IPath.EMPTY));
 	}
 
 	public void testIsRoot() {
 
 		// negative
 		assertTrue("1.0", !new Path("/first/second").isRoot());
-		assertTrue("1.1", !Path.EMPTY.isRoot());
+		assertTrue("1.1", !IPath.EMPTY.isRoot());
 		assertTrue("1.2", !new Path("//").isRoot());
 		assertTrue("1.3", !new Path("///").isRoot());
 
 		// positive
-		assertTrue("2.0", Path.ROOT.isRoot());
+		assertTrue("2.0", IPath.ROOT.isRoot());
 		assertTrue("2.1", new Path("/").isRoot());
 		assertTrue("2.2.win", IPath.forWindows("/").isRoot());
 		assertTrue("2.3.posix", IPath.forPosix("/").isRoot());
@@ -554,8 +554,8 @@ public class PathTest extends CoreTest {
 	public void testIsUNC() {
 
 		// negative
-		assertTrue("1.0", !Path.ROOT.isUNC());
-		assertTrue("1.1", !Path.EMPTY.isUNC());
+		assertTrue("1.0", !IPath.ROOT.isUNC());
+		assertTrue("1.1", !IPath.EMPTY.isUNC());
 
 		assertTrue("2.0", !new Path("a").isUNC());
 		assertTrue("2.1", !new Path("a/b").isUNC());
@@ -582,7 +582,7 @@ public class PathTest extends CoreTest {
 	}
 
 	public void testIsValidPath() {
-		IPath test = Path.ROOT;
+		IPath test = IPath.ROOT;
 		// positive
 		assertTrue("1.0", test.isValidPath("/first/second/third"));
 		assertTrue("1.1", test.isValidPath(""));
@@ -608,7 +608,7 @@ public class PathTest extends CoreTest {
 	}
 
 	public void testIsValidSegment() {
-		IPath test = Path.ROOT;
+		IPath test = IPath.ROOT;
 		// positive
 		assertTrue("1.0", test.isValidSegment("a"));
 
@@ -630,8 +630,8 @@ public class PathTest extends CoreTest {
 
 		// path constants and Path(String) always on local platform
 		boolean isLocalPosix = java.io.File.separatorChar == '/';
-		assertEquals("5.1", isLocalPosix, Path.EMPTY.isValidSegment(":"));
-		assertEquals("5.2", isLocalPosix, Path.ROOT.isValidSegment(":"));
+		assertEquals("5.1", isLocalPosix, IPath.EMPTY.isValidSegment(":"));
+		assertEquals("5.2", isLocalPosix, IPath.ROOT.isValidSegment(":"));
 		assertEquals("5.3", isLocalPosix, new Path("").isValidSegment(":"));
 	}
 
@@ -644,8 +644,8 @@ public class PathTest extends CoreTest {
 		assertEquals("2.2", "second", new Path("first/second").lastSegment());
 		assertEquals("2.3", "second", new Path("first/second/").lastSegment());
 
-		assertNull("3.0", Path.EMPTY.lastSegment());
-		assertNull("3.1", Path.ROOT.lastSegment());
+		assertNull("3.0", IPath.EMPTY.lastSegment());
+		assertNull("3.1", IPath.ROOT.lastSegment());
 		assertNull("3.2", new Path("//").lastSegment());
 
 		assertEquals("4.0", "second", new Path("//first/second/").lastSegment());
@@ -664,7 +664,7 @@ public class PathTest extends CoreTest {
 
 		anyPath = new Path("").makeAbsolute();
 		assertTrue("2.0", anyPath.isAbsolute());
-		assertEquals("2.1", Path.ROOT, anyPath);
+		assertEquals("2.1", IPath.ROOT, anyPath);
 	}
 
 	public void testMakeRelative() {
@@ -672,7 +672,7 @@ public class PathTest extends CoreTest {
 		assertTrue("1.0", !anyPath.isAbsolute());
 		assertEquals("1.1", new Path("first/second/third"), anyPath);
 
-		anyPath = Path.ROOT.makeRelative();
+		anyPath = IPath.ROOT.makeRelative();
 		assertTrue("2.0", !anyPath.isAbsolute());
 		assertEquals("2.1", new Path(""), anyPath);
 	}
@@ -734,15 +734,15 @@ public class PathTest extends CoreTest {
 	}
 
 	public void testMakeUNC() {
-		ArrayList<Path> inputs = new ArrayList<>();
-		ArrayList<String> expected = new ArrayList<>();
-		ArrayList<String> expectedNon = new ArrayList<>();
+		List<IPath> inputs = new ArrayList<>();
+		List<String> expected = new ArrayList<>();
+		List<String> expectedNon = new ArrayList<>();
 
-		inputs.add(Path.ROOT);
+		inputs.add(IPath.ROOT);
 		expected.add("//");
 		expectedNon.add("/");
 
-		inputs.add(Path.EMPTY);
+		inputs.add(IPath.EMPTY);
 		expected.add("//");
 		expectedNon.add("");
 
@@ -827,13 +827,13 @@ public class PathTest extends CoreTest {
 	public void testRemoveFirstSegments() {
 		assertEquals("1.0", new Path("second"), new Path("/first/second").removeFirstSegments(1));
 		assertEquals("1.1", new Path("second/third/"), new Path("/first/second/third/").removeFirstSegments(1));
-		assertEquals("1.2", Path.EMPTY, new Path("first").removeFirstSegments(1));
-		assertEquals("1.3", Path.EMPTY, new Path("/first/").removeFirstSegments(1));
+		assertEquals("1.2", IPath.EMPTY, new Path("first").removeFirstSegments(1));
+		assertEquals("1.3", IPath.EMPTY, new Path("/first/").removeFirstSegments(1));
 		assertEquals("1.4", new Path("second"), new Path("first/second").removeFirstSegments(1));
-		assertEquals("1.5", Path.EMPTY, new Path("").removeFirstSegments(1));
-		assertEquals("1.6", Path.EMPTY, Path.ROOT.removeFirstSegments(1));
-		assertEquals("1.7", Path.EMPTY, new Path("/first/second/").removeFirstSegments(2));
-		assertEquals("1.8", Path.EMPTY, new Path("/first/second/").removeFirstSegments(3));
+		assertEquals("1.5", IPath.EMPTY, new Path("").removeFirstSegments(1));
+		assertEquals("1.6", IPath.EMPTY, IPath.ROOT.removeFirstSegments(1));
+		assertEquals("1.7", IPath.EMPTY, new Path("/first/second/").removeFirstSegments(2));
+		assertEquals("1.8", IPath.EMPTY, new Path("/first/second/").removeFirstSegments(3));
 		assertEquals("1.9", new Path("third/fourth"), new Path("/first/second/third/fourth").removeFirstSegments(2));
 
 		assertEquals("2.0.win", IPath.forWindows("c:second"), IPath.forWindows("c:/first/second").removeFirstSegments(1));
@@ -851,10 +851,10 @@ public class PathTest extends CoreTest {
 
 		assertEquals("3.0", new Path("second"), new Path("//first/second").removeFirstSegments(1));
 		assertEquals("3.1", new Path("second/third/"), new Path("//first/second/third/").removeFirstSegments(1));
-		assertEquals("3.2", Path.EMPTY, new Path("//first/").removeFirstSegments(1));
-		assertEquals("3.3", Path.EMPTY, new Path("//").removeFirstSegments(1));
-		assertEquals("3.4", Path.EMPTY, new Path("//first/second/").removeFirstSegments(2));
-		assertEquals("3.5", Path.EMPTY, new Path("//first/second/").removeFirstSegments(3));
+		assertEquals("3.2", IPath.EMPTY, new Path("//first/").removeFirstSegments(1));
+		assertEquals("3.3", IPath.EMPTY, new Path("//").removeFirstSegments(1));
+		assertEquals("3.4", IPath.EMPTY, new Path("//first/second/").removeFirstSegments(2));
+		assertEquals("3.5", IPath.EMPTY, new Path("//first/second/").removeFirstSegments(3));
 		assertEquals("3.6", new Path("third/fourth"), new Path("//first/second/third/fourth").removeFirstSegments(2));
 	}
 
@@ -870,12 +870,12 @@ public class PathTest extends CoreTest {
 		assertEquals("2.2", new Path("c:/first/second/"), new Path("c:/first/second/third/").removeLastSegments(1));
 		assertEquals("2.3", new Path("c:first/second/"), new Path("c:first/second/third/").removeLastSegments(1));
 
-		assertEquals("3.0", Path.EMPTY, new Path("first").removeLastSegments(1));
-		assertEquals("3.1", Path.ROOT, new Path("/first/").removeLastSegments(1));
+		assertEquals("3.0", IPath.EMPTY, new Path("first").removeLastSegments(1));
+		assertEquals("3.1", IPath.ROOT, new Path("/first/").removeLastSegments(1));
 		assertEquals("3.2", new Path("first"), new Path("first/second").removeLastSegments(1));
 
-		assertEquals("4.0", Path.EMPTY, new Path("").removeLastSegments(1));
-		assertEquals("4.1", Path.ROOT, Path.ROOT.removeLastSegments(1));
+		assertEquals("4.0", IPath.EMPTY, new Path("").removeLastSegments(1));
+		assertEquals("4.1", IPath.ROOT, IPath.ROOT.removeLastSegments(1));
 		assertEquals("4.2", new Path("//"), new Path("//").removeLastSegments(1));
 	}
 
@@ -892,8 +892,8 @@ public class PathTest extends CoreTest {
 		assertTrue("1.3", !without.hasTrailingSeparator());
 		assertEquals("1.4", without.toString(), with.removeTrailingSeparator().toString());
 
-		assertSame("2.0", Path.ROOT, Path.ROOT.removeTrailingSeparator());
-		assertEquals("2.1", Path.EMPTY, new Path("").removeTrailingSeparator());
+		assertSame("2.0", IPath.ROOT, IPath.ROOT.removeTrailingSeparator());
+		assertEquals("2.1", IPath.EMPTY, new Path("").removeTrailingSeparator());
 
 		assertEquals("3.0", new Path("//"), new Path("//").removeTrailingSeparator());
 		assertEquals("3.1", new Path("//a"), new Path("//a").removeTrailingSeparator());
@@ -951,13 +951,13 @@ public class PathTest extends CoreTest {
 		assertEquals("4.1", "first", segs[0]);
 
 		// Case Five(a): no segments
-		anyPath = Path.EMPTY;
+		anyPath = IPath.EMPTY;
 		segs = anyPath.segments();
 
 		assertEquals("5.0", 0, segs.length);
 
 		// Case Five(b): no segments
-		anyPath = Path.ROOT;
+		anyPath = IPath.ROOT;
 		segs = anyPath.segments();
 
 		assertEquals("6.0", 0, segs.length);
@@ -978,8 +978,8 @@ public class PathTest extends CoreTest {
 		IPath anyPath = new Path("/first/second/third");
 		assertEquals("1.0", "/first/second/third", anyPath.toString());
 
-		assertEquals("1.1", "/", Path.ROOT.toString());
-		assertEquals("1.2", "", Path.EMPTY.toString());
+		assertEquals("1.1", "/", IPath.ROOT.toString());
+		assertEquals("1.2", "", IPath.EMPTY.toString());
 	}
 
 	public void testHash() {
@@ -1034,7 +1034,7 @@ public class PathTest extends CoreTest {
 		//Case 1, absolute path with no trailing separator
 		IPath anyPath = new Path("/first/second/third");
 
-		assertEquals("1.0", Path.ROOT, anyPath.uptoSegment(0));
+		assertEquals("1.0", IPath.ROOT, anyPath.uptoSegment(0));
 		assertEquals("1.1", new Path("/first"), anyPath.uptoSegment(1));
 		assertEquals("1.2", new Path("/first/second"), anyPath.uptoSegment(2));
 		assertEquals("1.3", new Path("/first/second/third"), anyPath.uptoSegment(3));
@@ -1043,7 +1043,7 @@ public class PathTest extends CoreTest {
 		//Case 2, absolute path with trailing separator
 		anyPath = new Path("/first/second/third/");
 
-		assertEquals("2.0", Path.ROOT, anyPath.uptoSegment(0));
+		assertEquals("2.0", IPath.ROOT, anyPath.uptoSegment(0));
 		assertEquals("2.1", new Path("/first/"), anyPath.uptoSegment(1));
 		assertEquals("2.2", new Path("/first/second/"), anyPath.uptoSegment(2));
 		assertEquals("2.3", new Path("/first/second/third/"), anyPath.uptoSegment(3));
@@ -1052,7 +1052,7 @@ public class PathTest extends CoreTest {
 		//Case 3, relative path with no trailing separator
 		anyPath = new Path("first/second/third");
 
-		assertEquals("3.0", Path.EMPTY, anyPath.uptoSegment(0));
+		assertEquals("3.0", IPath.EMPTY, anyPath.uptoSegment(0));
 		assertEquals("3.1", new Path("first"), anyPath.uptoSegment(1));
 		assertEquals("3.2", new Path("first/second"), anyPath.uptoSegment(2));
 		assertEquals("3.3", new Path("first/second/third"), anyPath.uptoSegment(3));
@@ -1061,7 +1061,7 @@ public class PathTest extends CoreTest {
 		//Case 4, relative path with trailing separator
 		anyPath = new Path("first/second/third/");
 
-		assertEquals("4.0", Path.EMPTY, anyPath.uptoSegment(0));
+		assertEquals("4.0", IPath.EMPTY, anyPath.uptoSegment(0));
 		assertEquals("4.1", new Path("first/"), anyPath.uptoSegment(1));
 		assertEquals("4.2", new Path("first/second/"), anyPath.uptoSegment(2));
 		assertEquals("4.3", new Path("first/second/third/"), anyPath.uptoSegment(3));

@@ -47,23 +47,41 @@ public final class Path implements IPath, Cloneable {
 
 	private static final int ALL_SEPARATORS = HAS_LEADING | IS_UNC | HAS_TRAILING;
 
-	/** Constant value indicating if the current platform is Windows */
-	private static final boolean RUNNING_ON_WINDOWS = java.io.File.separatorChar == '\\';
+	/**
+	 * Carrier that ensures that the contained constants are always initialized,
+	 * regardless of if the Path class or IPath interface is initialized fist.
+	 */
+	private static class Constants {
+		/** Constant value indicating if the current platform is Windows */
+		static final boolean RUNNING_ON_WINDOWS = java.io.File.separatorChar == '\\';
 
-	/** Constant empty string value. */
-	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
+		/** Constant value indicating no segments */
+		static final String[] NO_SEGMENTS = new String[0];
+	}
 
-	/** Constant value indicating no segments */
-	private static final String[] NO_SEGMENTS = new String[0];
+	/**
+	 * Constant value containing the empty path with no device on the local file
+	 * system.
+	 * <p>
+	 * Instead of referencing this constants it is recommended to use
+	 * {@link IPath#EMPTY} instead.
+	 * </p>
+	 * 
+	 * @see IPath#EMPTY
+	 */
+	public static final Path EMPTY = (Path) IPath.EMPTY;
 
-	/** Constant value containing the empty path with no device on the local file system. */
-	public static final Path EMPTY = new Path(EMPTY_STRING);
-
-	/** Constant root path string (<code>"/"</code>). */
-	private static final String ROOT_STRING = "/"; //$NON-NLS-1$
-
-	/** Constant value containing the root path with no device on the local file system. */
-	public static final Path ROOT = new Path(ROOT_STRING);
+	/**
+	 * Constant value containing the root path with no device on the local file
+	 * system.
+	 * <p>
+	 * Instead of referencing this constants it is recommended to use
+	 * {@link IPath#ROOT} instead.
+	 * </p>
+	 * 
+	 * @see IPath#ROOT
+	 */
+	public static final Path ROOT = (Path) IPath.ROOT;
 
 	/** The device id string. May be null if there is no device. */
 	private final String device;
@@ -124,7 +142,7 @@ public final class Path implements IPath, Cloneable {
 		int firstMatch = pathString.indexOf(DEVICE_SEPARATOR) + 1;
 		//no extra work required if no device characters
 		if (firstMatch <= 0)
-			return new Path(null, pathString, RUNNING_ON_WINDOWS);
+			return new Path(null, pathString, Constants.RUNNING_ON_WINDOWS);
 		//if we find a single colon, then the path has a device
 		String devicePart = null;
 		int pathLength = pathString.length();
@@ -134,7 +152,7 @@ public final class Path implements IPath, Cloneable {
 		}
 		//optimize for no colon literals
 		if (pathString.indexOf(DEVICE_SEPARATOR) == -1)
-			return new Path(devicePart, pathString, RUNNING_ON_WINDOWS);
+			return new Path(devicePart, pathString, Constants.RUNNING_ON_WINDOWS);
 		//contract colon literals
 		char[] chars = pathString.toCharArray();
 		int readOffset = 0, writeOffset = 0, length = chars.length;
@@ -144,7 +162,7 @@ public final class Path implements IPath, Cloneable {
 			}
 			chars[writeOffset++] = chars[readOffset++];
 		}
-		return new Path(devicePart, new String(chars, 0, writeOffset), RUNNING_ON_WINDOWS);
+		return new Path(devicePart, new String(chars, 0, writeOffset), Constants.RUNNING_ON_WINDOWS);
 	}
 
 	/**
@@ -207,7 +225,7 @@ public final class Path implements IPath, Cloneable {
 	 * @see #isValidPath(String)
 	 */
 	public Path(String fullPath) {
-		this(fullPath, RUNNING_ON_WINDOWS);
+		this(fullPath, Constants.RUNNING_ON_WINDOWS);
 	}
 
 	/** 
@@ -225,7 +243,7 @@ public final class Path implements IPath, Cloneable {
 	 * @see #setDevice(String)
 	 */
 	public Path(String device, String path) {
-		this(device, backslashToForward(path, RUNNING_ON_WINDOWS), RUNNING_ON_WINDOWS);
+		this(device, backslashToForward(path, Constants.RUNNING_ON_WINDOWS), Constants.RUNNING_ON_WINDOWS);
 	}
 
 	private static String backslashToForward(String path, boolean forWindows) {
@@ -565,7 +583,7 @@ public final class Path implements IPath, Cloneable {
 		// performance sensitive --- avoid creating garbage
 		int segmentCount = computeSegmentCount(path);
 		if (segmentCount == 0)
-			return NO_SEGMENTS;
+			return Constants.NO_SEGMENTS;
 		String[] newSegments = new String[segmentCount];
 		int len = path.length();
 		// check for initial slash
@@ -1051,7 +1069,7 @@ public final class Path implements IPath, Cloneable {
 		if (count == 0)
 			return this;
 		if (count >= segments.length) {
-			return new Path(device, NO_SEGMENTS, flags & IS_FOR_WINDOWS);
+			return new Path(device, Constants.NO_SEGMENTS, flags & IS_FOR_WINDOWS);
 		}
 		Assert.isLegal(count > 0);
 		int newSize = segments.length - count;
@@ -1071,7 +1089,7 @@ public final class Path implements IPath, Cloneable {
 			return this;
 		if (count >= segments.length) {
 			//result will have no trailing separator
-			return new Path(device, NO_SEGMENTS, flags & (HAS_LEADING | IS_UNC | IS_FOR_WINDOWS));
+			return new Path(device, Constants.NO_SEGMENTS, flags & (HAS_LEADING | IS_UNC | IS_FOR_WINDOWS));
 		}
 		Assert.isLegal(count > 0);
 		int newSize = segments.length - count;
@@ -1151,7 +1169,7 @@ public final class Path implements IPath, Cloneable {
 		//it uses the OS file separator instead of the path separator
 		int resultSize = computeLength();
 		if (resultSize <= 0)
-			return EMPTY_STRING;
+			return ""; //$NON-NLS-1$
 		char FILE_SEPARATOR = File.separatorChar;
 		char[] result = new char[resultSize];
 		int offset = 0;
@@ -1190,7 +1208,7 @@ public final class Path implements IPath, Cloneable {
 	public String toPortableString() {
 		int resultSize = computeLength();
 		if (resultSize <= 0)
-			return EMPTY_STRING;
+			return ""; //$NON-NLS-1$
 		StringBuilder result = new StringBuilder(resultSize);
 		if (device != null)
 			result.append(device);
@@ -1218,7 +1236,7 @@ public final class Path implements IPath, Cloneable {
 	public String toString() {
 		int resultSize = computeLength();
 		if (resultSize <= 0)
-			return EMPTY_STRING;
+			return ""; //$NON-NLS-1$
 		char[] result = new char[resultSize];
 		int offset = 0;
 		if (device != null) {
@@ -1255,7 +1273,7 @@ public final class Path implements IPath, Cloneable {
 	@Override
 	public IPath uptoSegment(int count) {
 		if (count == 0)
-			return new Path(device, NO_SEGMENTS, flags & (HAS_LEADING | IS_UNC | IS_FOR_WINDOWS));
+			return new Path(device, Constants.NO_SEGMENTS, flags & (HAS_LEADING | IS_UNC | IS_FOR_WINDOWS));
 		if (count >= segments.length)
 			return this;
 		Assert.isTrue(count > 0, "Invalid parameter to Path.uptoSegment"); //$NON-NLS-1$
