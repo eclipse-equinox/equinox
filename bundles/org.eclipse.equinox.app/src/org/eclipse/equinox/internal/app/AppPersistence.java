@@ -187,9 +187,9 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 		}
 		if (nextScheduledID == Integer.MAX_VALUE)
 			nextScheduledID = 0;
-		String result = Integer.valueOf(nextScheduledID++).toString();
+		String result = Integer.toString(nextScheduledID++);
 		while (scheduledApps.get(result) != null && nextScheduledID < Integer.MAX_VALUE)
-			result = Integer.valueOf(nextScheduledID++).toString();
+			result = Integer.toString(nextScheduledID++);
 		if (nextScheduledID == Integer.MAX_VALUE)
 			throw new ApplicationException(ApplicationException.APPLICATION_DUPLICATE_SCHEDULE_ID, "Maximum number of scheduled applications reached"); //$NON-NLS-1$
 		return result;
