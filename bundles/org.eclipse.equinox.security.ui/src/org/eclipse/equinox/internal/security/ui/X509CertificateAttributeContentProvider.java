@@ -99,7 +99,7 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 
 			X509Certificate theCert = (X509Certificate) newInput;
 
-			X509CertificateAttribute ver = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_VERSION, Integer.valueOf(theCert.getVersion()).toString());
+			X509CertificateAttribute ver = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_VERSION, Integer.toString(theCert.getVersion()));
 			elements.add(ver);
 
 			X509CertificateAttribute serialNum = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_SERIAL_NUM, theCert.getSerialNumber().toString());

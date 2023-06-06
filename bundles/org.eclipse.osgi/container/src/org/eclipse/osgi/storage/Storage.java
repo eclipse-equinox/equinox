@@ -2142,9 +2142,9 @@ public class Storage {
 		//
 		// This bit of code attempts to do that by using the bundle ID as an ID for the temp dir along with an incrementing ID
 		// in cases where the temp dir may already exist.
-		Long bundleID = Long.valueOf(generation.getBundleInfo().getBundleId());
+		long bundleID = generation.getBundleInfo().getBundleId();
 		for (int i = 0; i < Integer.MAX_VALUE; i++) {
-			bundleTempDir = new File(libTempDir, bundleID.toString() + "_" + Integer.valueOf(i).toString()); //$NON-NLS-1$
+			bundleTempDir = new File(libTempDir, bundleID + "_" + i); //$NON-NLS-1$
 			libTempFile = new File(bundleTempDir, libName);
 			if (bundleTempDir.exists()) {
 				if (libTempFile.exists())
