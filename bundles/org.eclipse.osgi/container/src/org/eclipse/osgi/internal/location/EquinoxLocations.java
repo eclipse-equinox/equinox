@@ -304,8 +304,8 @@ public class EquinoxLocations {
 		File eclipseProduct = new File(installDir, PRODUCT_SITE_MARKER);
 		if (eclipseProduct.exists()) {
 			Properties props = new Properties();
-			try {
-				props.load(new FileInputStream(eclipseProduct));
+			try (FileInputStream productStream = new FileInputStream(eclipseProduct)) {
+				props.load(productStream);
 				String appId = props.getProperty(PRODUCT_SITE_ID);
 				if (appId == null || appId.trim().length() == 0)
 					appId = ECLIPSE;

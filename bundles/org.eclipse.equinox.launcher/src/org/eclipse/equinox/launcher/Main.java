@@ -508,39 +508,31 @@ public class Main {
 		if (frag.isDirectory())
 			return searchFor("eclipse", fragment); //$NON-NLS-1$;
 
-		ZipFile fragmentJar = null;
-		try {
-			fragmentJar = new ZipFile(frag);
+		try (ZipFile fragmentJar = new ZipFile(frag)) {
+			Enumeration<? extends ZipEntry> entries = fragmentJar.entries();
+			String entry = null;
+			while (entries.hasMoreElements()) {
+				ZipEntry zipEntry = entries.nextElement();
+				if (zipEntry.getName().startsWith("eclipse_")) { //$NON-NLS-1$
+					entry = zipEntry.getName();
+					break;
+				}
+			}
+			if (entry != null) {
+				String lib = extractFromJAR(fragment, entry);
+				if (!getOS().equals("win32")) { //$NON-NLS-1$
+					try {
+						Runtime.getRuntime().exec(new String[] {"chmod", "755", lib}).waitFor(); //$NON-NLS-1$ //$NON-NLS-2$
+					} catch (Throwable e) {
+						//ignore
+					}
+				}
+				return lib;
+			}
 		} catch (IOException e) {
 			log("Exception opening JAR file: " + fragment); //$NON-NLS-1$
 			log(e);
 			return null;
-		}
-
-		Enumeration<? extends ZipEntry> entries = fragmentJar.entries();
-		String entry = null;
-		while (entries.hasMoreElements()) {
-			ZipEntry zipEntry = entries.nextElement();
-			if (zipEntry.getName().startsWith("eclipse_")) { //$NON-NLS-1$
-				entry = zipEntry.getName();
-				try {
-					fragmentJar.close();
-				} catch (IOException e) {
-					//ignore
-				}
-				break;
-			}
-		}
-		if (entry != null) {
-			String lib = extractFromJAR(fragment, entry);
-			if (!getOS().equals("win32")) { //$NON-NLS-1$
-				try {
-					Runtime.getRuntime().exec(new String[] {"chmod", "755", lib}).waitFor(); //$NON-NLS-1$ //$NON-NLS-2$
-				} catch (Throwable e) {
-					//ignore
-				}
-			}
-			return lib;
 		}
 		return null;
 	}
@@ -1342,8 +1334,8 @@ public class Main {
 		File eclipseProduct = new File(installDir, PRODUCT_SITE_MARKER);
 		if (eclipseProduct.exists()) {
 			Properties props = new Properties();
-			try {
-				props.load(new FileInputStream(eclipseProduct));
+			try (FileInputStream inStream = new FileInputStream(eclipseProduct)) {
+				props.load(inStream);
 				String appId = props.getProperty(PRODUCT_SITE_ID);
 				if (appId == null || appId.trim().length() == 0)
 					appId = ECLIPSE;

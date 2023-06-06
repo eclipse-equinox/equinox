@@ -367,33 +367,24 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 			File oldOutFile = this.outFile;
 			this.outFile = newOutFile;
 			this.writer = newWriter;
-			boolean copyFailed = false;
 			if (append && oldOutFile != null && oldOutFile.isFile()) {
-				Reader fileIn = null;
-				try {
-					openFile();
-					fileIn = new InputStreamReader(ExtendedLogServiceFactory.secureAction.getFileInputStream(oldOutFile), StandardCharsets.UTF_8);
+				openFile();
+				try (Reader fileIn = new InputStreamReader(
+						ExtendedLogServiceFactory.secureAction.getFileInputStream(oldOutFile),
+						StandardCharsets.UTF_8)) {
 					copyReader(fileIn, this.writer);
+					// delete the old file if copying didn't fail
+					oldOutFile.delete();
 				} catch (IOException e) {
-					copyFailed = true;
 					e.printStackTrace();
 				} finally {
-					if (fileIn != null) {
-						try {
-							fileIn.close();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-						// delete the old file if copying didn't fail
-						if (!copyFailed)
-							oldOutFile.delete();
-					}
 					closeFile();
 				}
 			}
 		}
 	}
 
+	/* XXX from JDK >=9 better use: reader.transferTo(this.aWriter); */
 	private void copyReader(Reader reader, Writer aWriter) throws IOException {
 		char buffer[] = new char[1024];
 		int count;

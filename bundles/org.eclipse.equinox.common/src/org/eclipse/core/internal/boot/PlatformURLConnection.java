@@ -47,7 +47,6 @@ public abstract class PlatformURLConnection extends URLConnection {
 	private static String filePrefix;
 
 	// constants	
-	private static final int BUF_SIZE = 32768;
 	private static final Object NOT_FOUND = new Object(); // marker
 	private static final String CACHE_PROP = ".cache.properties"; //$NON-NLS-1$
 	private static final String CACHE_LOCATION_PROP = "location"; //$NON-NLS-1$
@@ -148,7 +147,6 @@ public abstract class PlatformURLConnection extends URLConnection {
 			src = new URL(tmp);
 		} else
 			src = resolvedURL;
-		InputStream srcis = null;
 
 		// cache target
 		String tgt;
@@ -163,13 +161,10 @@ public abstract class PlatformURLConnection extends URLConnection {
 			tgt = tmp;
 		} else
 			tgt = cachedURL.getFile();
-		File tgtFile = null;
-		FileOutputStream tgtos = null;
-
 		boolean error = false;
 		long total = 0;
 
-		try {
+		try (InputStream srcis = src.openStream()) {
 			if (DEBUG && DEBUG_CACHE_COPY) {
 				if (isJar)
 					debug("Caching jar as " + tgt); //$NON-NLS-1$
@@ -177,26 +172,12 @@ public abstract class PlatformURLConnection extends URLConnection {
 					debug("Caching as " + tgt); //$NON-NLS-1$
 			}
 
-			srcis = src.openStream();
-			byte[] buf = new byte[BUF_SIZE];
-			int count = srcis.read(buf);
-
-			tgtFile = new File(tgt);
-			tgtos = new FileOutputStream(tgtFile);
-
-			while (count != -1) {
-				total += count;
-				tgtos.write(buf, 0, count);
-				count = srcis.read(buf);
+			File tgtFile = new File(tgt);
+			try (FileOutputStream tgtos = new FileOutputStream(tgtFile)) {
+				srcis.transferTo(tgtos);
+				tgtos.flush();
+				tgtos.getFD().sync();
 			}
-
-			srcis.close();
-			srcis = null;
-			tgtos.flush();
-			tgtos.getFD().sync();
-			tgtos.close();
-			tgtos = null;
-
 			// add cache entry
 			cacheIndex.put(key, tgt);
 			isInCache = true;
@@ -210,10 +191,6 @@ public abstract class PlatformURLConnection extends URLConnection {
 		} finally {
 			if (!error && DEBUG && DEBUG_CACHE_COPY)
 				debug(total + " bytes copied"); //$NON-NLS-1$
-			if (srcis != null)
-				srcis.close();
-			if (tgtos != null)
-				tgtos.close();
 		}
 	}
 

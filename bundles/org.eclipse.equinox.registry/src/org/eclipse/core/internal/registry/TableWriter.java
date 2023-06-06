@@ -156,42 +156,42 @@ public class TableWriter {
 	}
 
 	private void saveContributions(KeyedHashSet[] contributions) throws IOException {
-		FileOutputStream fosNamespace = new FileOutputStream(contributionsFile);
-		DataOutputStream outputNamespace = new DataOutputStream(new BufferedOutputStream(fosNamespace));
-		KeyedElement[] newElements = contributions[0].elements();
-		KeyedElement[] formerElements = contributions[1].elements();
+		try (FileOutputStream fosNamespace = new FileOutputStream(contributionsFile);
+				DataOutputStream outputNamespace = new DataOutputStream(new BufferedOutputStream(fosNamespace))) {
+			KeyedElement[] newElements = contributions[0].elements();
+			KeyedElement[] formerElements = contributions[1].elements();
 
-		// get count of contributions that will be cached
-		int cacheSize = 0;
-		for (KeyedElement newElement : newElements) {
-			if (((Contribution) newElement).shouldPersist()) {
-				cacheSize++;
+			// get count of contributions that will be cached
+			int cacheSize = 0;
+			for (KeyedElement newElement : newElements) {
+				if (((Contribution) newElement).shouldPersist()) {
+					cacheSize++;
+				}
 			}
-		}
-		for (KeyedElement formerElement : formerElements) {
-			if (((Contribution) formerElement).shouldPersist()) {
-				cacheSize++;
+			for (KeyedElement formerElement : formerElements) {
+				if (((Contribution) formerElement).shouldPersist()) {
+					cacheSize++;
+				}
 			}
-		}
-		outputNamespace.writeInt(cacheSize);
+			outputNamespace.writeInt(cacheSize);
 
-		for (KeyedElement newElement : newElements) {
-			Contribution element = (Contribution) newElement;
-			if (element.shouldPersist()) {
-				writeStringOrNull(element.getContributorId(), outputNamespace);
-				saveArray(filterContributionChildren(element), outputNamespace);
+			for (KeyedElement newElement : newElements) {
+				Contribution element = (Contribution) newElement;
+				if (element.shouldPersist()) {
+					writeStringOrNull(element.getContributorId(), outputNamespace);
+					saveArray(filterContributionChildren(element), outputNamespace);
+				}
 			}
-		}
-		for (KeyedElement formerElement : formerElements) {
-			Contribution element = (Contribution) formerElement;
-			if (element.shouldPersist()) {
-				writeStringOrNull(element.getContributorId(), outputNamespace);
-				saveArray(filterContributionChildren(element), outputNamespace);
+			for (KeyedElement formerElement : formerElements) {
+				Contribution element = (Contribution) formerElement;
+				if (element.shouldPersist()) {
+					writeStringOrNull(element.getContributorId(), outputNamespace);
+					saveArray(filterContributionChildren(element), outputNamespace);
+				}
 			}
+			outputNamespace.flush();
+			fosNamespace.getFD().sync();
 		}
-		outputNamespace.flush();
-		fosNamespace.getFD().sync();
-		outputNamespace.close();
 	}
 
 	// Contribution has raw children in a unique format that combines extensions and extension points.
@@ -208,65 +208,70 @@ public class TableWriter {
 	}
 
 	private void saveNamespaces(KeyedHashSet namespacesIndex) throws IOException {
-		FileOutputStream fosNamespace = new FileOutputStream(namespacesFile);
-		DataOutputStream outputNamespace = new DataOutputStream(new BufferedOutputStream(fosNamespace));
-		KeyedElement[] elements = namespacesIndex.elements();
+		try (FileOutputStream fosNamespace = new FileOutputStream(namespacesFile);
+				DataOutputStream outputNamespace = new DataOutputStream(new BufferedOutputStream(fosNamespace))) {
+			KeyedElement[] elements = namespacesIndex.elements();
 
-		KeyedElement[] cachedElements = new KeyedElement[elements.length];
-		int cacheSize = 0;
-		for (KeyedElement e : elements) {
-			RegistryIndexElement element = (RegistryIndexElement) e;
-			int[] extensionPoints = filter(element.getExtensionPoints());
-			int[] extensions = filter(element.getExtensions());
-			if (extensionPoints.length == 0 && extensions.length == 0)
-				continue;
-			RegistryIndexElement cachedElement = new RegistryIndexElement((String) element.getKey(), extensionPoints, extensions);
-			cachedElements[cacheSize] = cachedElement;
-			cacheSize++;
-		}
+			KeyedElement[] cachedElements = new KeyedElement[elements.length];
+			int cacheSize = 0;
+			for (KeyedElement e : elements) {
+				RegistryIndexElement element = (RegistryIndexElement) e;
+				int[] extensionPoints = filter(element.getExtensionPoints());
+				int[] extensions = filter(element.getExtensions());
+				if (extensionPoints.length == 0 && extensions.length == 0)
+					continue;
+				RegistryIndexElement cachedElement = new RegistryIndexElement((String) element.getKey(),
+						extensionPoints, extensions);
+				cachedElements[cacheSize] = cachedElement;
+				cacheSize++;
+			}
 
-		outputNamespace.writeInt(cacheSize);
-		for (int i = 0; i < cacheSize; i++) {
-			RegistryIndexElement element = (RegistryIndexElement) cachedElements[i];
-			writeStringOrNull((String) element.getKey(), outputNamespace);
-			saveArray(element.getExtensionPoints(), outputNamespace); // it was pre-filtered as we counted the number of elements
-			saveArray(element.getExtensions(), outputNamespace); // it was pre-filtered as we counted the number of elements
+			outputNamespace.writeInt(cacheSize);
+			for (int i = 0; i < cacheSize; i++) {
+				RegistryIndexElement element = (RegistryIndexElement) cachedElements[i];
+				writeStringOrNull((String) element.getKey(), outputNamespace);
+				saveArray(element.getExtensionPoints(), outputNamespace); // it was pre-filtered as we counted the
+																			// number of
+																			// elements
+				saveArray(element.getExtensions(), outputNamespace); // it was pre-filtered as we counted the number of
+																		// elements
+			}
+			outputNamespace.flush();
+			fosNamespace.getFD().sync();
 		}
-		outputNamespace.flush();
-		fosNamespace.getFD().sync();
-		outputNamespace.close();
 	}
 
 	private void saveContributors(HashMap<?, ?> contributors) throws IOException {
-		FileOutputStream fosContributors = new FileOutputStream(contributorsFile);
-		DataOutputStream outputContributors = new DataOutputStream(new BufferedOutputStream(fosContributors));
+		try (FileOutputStream fosContributors = new FileOutputStream(contributorsFile);
+				DataOutputStream outputContributors = new DataOutputStream(new BufferedOutputStream(fosContributors))) {
 
-		Collection<?> entries = contributors.values();
-		outputContributors.writeInt(entries.size());
+			Collection<?> entries = contributors.values();
+			outputContributors.writeInt(entries.size());
 
-		for (Object entry : entries) {
-			RegistryContributor contributor = (RegistryContributor) entry;
-			writeStringOrNull(contributor.getActualId(), outputContributors);
-			writeStringOrNull(contributor.getActualName(), outputContributors);
-			writeStringOrNull(contributor.getId(), outputContributors);
-			writeStringOrNull(contributor.getName(), outputContributors);
+			for (Object entry : entries) {
+				RegistryContributor contributor = (RegistryContributor) entry;
+				writeStringOrNull(contributor.getActualId(), outputContributors);
+				writeStringOrNull(contributor.getActualName(), outputContributors);
+				writeStringOrNull(contributor.getId(), outputContributors);
+				writeStringOrNull(contributor.getName(), outputContributors);
+			}
+
+			outputContributors.flush();
+			fosContributors.getFD().sync();
+			outputContributors.close();
 		}
-
-		outputContributors.flush();
-		fosContributors.getFD().sync();
-		outputContributors.close();
 	}
 
 	private void saveTables(long registryTimeStamp) throws IOException {
-		FileOutputStream fosTable = new FileOutputStream(tableFile);
-		DataOutputStream outputTable = new DataOutputStream(new BufferedOutputStream(fosTable));
-		writeCacheHeader(outputTable, registryTimeStamp);
-		outputTable.writeInt(objectManager.getNextId());
-		offsets.save(outputTable);
-		objectManager.getExtensionPoints().save(outputTable, objectManager); // uses writer to filter contents
-		outputTable.flush();
-		fosTable.getFD().sync();
-		outputTable.close();
+		try (FileOutputStream fosTable = new FileOutputStream(tableFile);
+				DataOutputStream outputTable = new DataOutputStream(new BufferedOutputStream(fosTable))) {
+			writeCacheHeader(outputTable, registryTimeStamp);
+			outputTable.writeInt(objectManager.getNextId());
+			offsets.save(outputTable);
+			objectManager.getExtensionPoints().save(outputTable, objectManager); // uses writer to filter contents
+			outputTable.flush();
+			fosTable.getFD().sync();
+		}
 	}
 
 	private void writeCacheHeader(DataOutputStream output, long registryTimeStamp) throws IOException {
@@ -444,21 +449,23 @@ public class TableWriter {
 			if (filteredValue.length != 0)
 				filteredOrphans.put(entry.getKey(), filteredValue);
 		}
-		FileOutputStream fosOrphan = new FileOutputStream(orphansFile);
-		DataOutputStream outputOrphan = new DataOutputStream(new BufferedOutputStream(fosOrphan));
-		outputOrphan.writeInt(filteredOrphans.size());
-		Set<Entry<String, int[]>> elements = filteredOrphans.entrySet();
-		for (Entry<String, int[]> entry : elements) {
-			outputOrphan.writeUTF(entry.getKey());
-			saveArray(entry.getValue(), outputOrphan);
+		try (FileOutputStream fosOrphan = new FileOutputStream(orphansFile);
+				DataOutputStream outputOrphan = new DataOutputStream(new BufferedOutputStream(fosOrphan))) {
+			outputOrphan.writeInt(filteredOrphans.size());
+			Set<Entry<String, int[]>> elements = filteredOrphans.entrySet();
+			for (Entry<String, int[]> entry : elements) {
+				outputOrphan.writeUTF(entry.getKey());
+				saveArray(entry.getValue(), outputOrphan);
+			}
+			for (Entry<String, int[]> entry : elements) {
+				mainOutput.writeInt(entry.getValue().length);
+				saveExtensions(
+						(IExtension[]) objectManager.getHandles(entry.getValue(), RegistryObjectManager.EXTENSION),
+						mainOutput);
+			}
+			outputOrphan.flush();
+			fosOrphan.getFD().sync();
 		}
-		for (Entry<String, int[]> entry : elements) {
-			mainOutput.writeInt(entry.getValue().length);
-			saveExtensions((IExtension[]) objectManager.getHandles(entry.getValue(), RegistryObjectManager.EXTENSION), mainOutput);
-		}
-		outputOrphan.flush();
-		fosOrphan.getFD().sync();
-		outputOrphan.close();
 	}
 
 	private void log(Status status) {
