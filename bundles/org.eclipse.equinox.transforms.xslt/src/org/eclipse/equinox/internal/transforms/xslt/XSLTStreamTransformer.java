@@ -144,8 +144,7 @@ public class XSLTStreamTransformer {
 		if (templates != null)
 			return templates;
 
-		try {
-			InputStream xsltStream = transformerURL.openStream();
+		try (InputStream xsltStream = transformerURL.openStream()) {
 			TransformerFactory tFactory = null;
 			try {
 				tFactory = TransformerFactory.newInstance();

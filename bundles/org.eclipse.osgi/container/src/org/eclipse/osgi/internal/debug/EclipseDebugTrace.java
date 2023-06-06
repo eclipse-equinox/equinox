@@ -504,16 +504,10 @@ class EclipseDebugTrace implements DebugTrace {
 
 		String result = null;
 		if (error != null) {
-			PrintStream throwableStream = null;
-			try {
-				ByteArrayOutputStream throwableByteOutputStream = new ByteArrayOutputStream();
-				throwableStream = new PrintStream(throwableByteOutputStream, false);
+			ByteArrayOutputStream throwableByteOutputStream = new ByteArrayOutputStream();
+			try (PrintStream throwableStream = new PrintStream(throwableByteOutputStream, false)) {
 				error.printStackTrace(throwableStream);
 				result = encodeText(throwableByteOutputStream.toString());
-			} finally {
-				if (throwableStream != null) {
-					throwableStream.close();
-				}
 			}
 		}
 		return result;

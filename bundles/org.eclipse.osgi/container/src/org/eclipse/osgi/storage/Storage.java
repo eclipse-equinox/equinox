@@ -1740,29 +1740,13 @@ public class Storage {
 
 			result = new Properties();
 			vmProfile = JAVASE + embeddedProfileName + javaSpecVersion;
-			InputStream profileIn = null;
-			if (vmProfile != null) {
-				// look for a profile in the system bundle based on the vm profile
-				String javaProfile = vmProfile + PROFILE_EXT;
-				profileIn = findInSystemBundle(systemGeneration, javaProfile);
-				if (profileIn == null)
-					profileIn = getNextBestProfile(systemGeneration, JAVASE, runtimeVersion, embeddedProfileName);
-			}
-			if (profileIn == null)
-				// the profile url is still null then use the min profile the framework can use
-				profileIn = findInSystemBundle(systemGeneration, "JavaSE-1.8.profile"); //$NON-NLS-1$
-			if (profileIn != null) {
-				try {
-					result.load(new BufferedInputStream(profileIn));
-				} catch (IOException e) {
-					// TODO consider logging ...
-				} finally {
-					try {
-						profileIn.close();
-					} catch (IOException ee) {
-						// do nothing
-					}
+			try (InputStream profileIn = createProfileStream(systemGeneration, vmProfile, embeddedProfileName)) {
+				if (profileIn != null) {
+					result.load(profileIn);
 				}
+			} catch (IOException e) {
+				// ignore
+				// TODO consider logging ...
 			}
 		} finally {
 			// set the profile name if it does not provide one
@@ -1778,35 +1762,49 @@ public class Storage {
 		return result;
 	}
 
+	private InputStream createProfileStream(Generation systemGeneration, String vmProfile,
+			String embeddedProfileName) {
+		InputStream profileIn = null;
+		if (vmProfile != null) {
+			// look for a profile in the system bundle based on the vm profile
+			String javaProfile = vmProfile + PROFILE_EXT;
+			profileIn = findInSystemBundle(systemGeneration, javaProfile);
+			if (profileIn == null) {
+				profileIn = getNextBestProfile(systemGeneration, JAVASE, runtimeVersion, embeddedProfileName);
+			}
+		}
+		if (profileIn == null) {
+			// the profile url is still null then use the min profile the framework can use
+			profileIn = findInSystemBundle(systemGeneration, "JavaSE-1.8.profile"); //$NON-NLS-1$
+		}
+		return profileIn;
+	}
+
 	private Properties readConfiguredJavaProfile(Generation systemGeneration) {
 		// check for the java profile property for a url
 		String propJavaProfile = equinoxContainer.getConfiguration().getConfiguration(EquinoxConfiguration.PROP_OSGI_JAVA_PROFILE);
 		if (propJavaProfile != null) {
-			InputStream profileIn = null;
-			try {
-				// we assume a URL
-				profileIn = new URL(propJavaProfile).openStream();
-			} catch (IOException e) {
-				// try using a relative path in the system bundle
-				profileIn = findInSystemBundle(systemGeneration, propJavaProfile);
-			}
-			if (profileIn != null) {
-				Properties result = new Properties();
-				try {
-					result.load(new BufferedInputStream(profileIn));
-				} catch (IOException e) {
-					// consider logging
-				} finally {
-					try {
-						profileIn.close();
-					} catch (IOException e) {
-						// nothing to do
-					}
+			try (InputStream profileIn = createPropStream(systemGeneration, propJavaProfile)){
+				if (profileIn != null) {
+					Properties result = new Properties();
+					result.load(profileIn);
+					return result;
 				}
-				return result;
+			} catch (IOException e) {
+				// consider logging
 			}
 		}
 		return null;
+	}
+
+	private InputStream createPropStream(Generation systemGeneration, String propJavaProfile) {
+		try {
+			// we assume a URL
+			return new URL(propJavaProfile).openStream();
+		} catch (IOException e) {
+			// try using a relative path in the system bundle
+			return findInSystemBundle(systemGeneration, propJavaProfile);
+		}
 	}
 
 	@SuppressWarnings("deprecation")

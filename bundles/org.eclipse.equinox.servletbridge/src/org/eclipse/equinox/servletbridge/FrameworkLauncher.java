@@ -20,6 +20,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.security.*;
 import java.util.*;
 import java.util.jar.*;
@@ -776,25 +778,11 @@ public class FrameworkLauncher {
 		} else {
 			try {
 				if (target.createNewFile()) {
-					InputStream is = null;
-					OutputStream os = null;
-					try {
-						is = context.getResourceAsStream(resourcePath);
-						if (is == null)
+					try (InputStream  is = context.getResourceAsStream(resourcePath)){
+						if (is == null) {
 							return;
-						os = new FileOutputStream(target);
-						byte[] buffer = new byte[8192];
-						int bytesRead = is.read(buffer);
-						while (bytesRead != -1) {
-							os.write(buffer, 0, bytesRead);
-							bytesRead = is.read(buffer);
 						}
-					} finally {
-						if (is != null)
-							is.close();
-
-						if (os != null)
-							os.close();
+						Files.copy(is, target.toPath(), StandardCopyOption.REPLACE_EXISTING);
 					}
 				}
 			} catch (IOException e) {

@@ -39,41 +39,44 @@ public class CSVParser {
 	 * @throws IOException thrown if there are issues parsing the file
 	 */
 	public static TransformTuple[] parse(URL transformMapURL, EquinoxLogServices logServices) throws IOException {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(transformMapURL.openStream()));
-		String currentLine = null;
 		List<TransformTuple> list = new ArrayList<>();
-		while ((currentLine = reader.readLine()) != null) {
-			if (currentLine.startsWith("#")) { //$NON-NLS-1$
-				continue;
-			}
-			currentLine = currentLine.trim();
-			if (currentLine.length() == 0)
-				continue;
-			StringTokenizer toker = new StringTokenizer(currentLine, ","); //$NON-NLS-1$
-			try {
-				String bundlePatternString = toker.nextToken().trim();
-				String pathPatternString = toker.nextToken().trim();
-				String transformPath = toker.nextToken().trim();
-				try {
-					Pattern bundlePattern = Pattern.compile(bundlePatternString);
-					Pattern pathPattern = Pattern.compile(pathPatternString);
-					URL transformerURL = new URL(transformMapURL, transformPath);
-					try {
-						transformerURL.openStream();
-						TransformTuple tuple = new TransformTuple();
-						tuple.bundlePattern = bundlePattern;
-						tuple.pathPattern = pathPattern;
-						tuple.transformerUrl = transformerURL;
-						list.add(tuple);
-					} catch (IOException e) {
-						logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Could not add transform :" + transformerURL.toString(), e); //$NON-NLS-1$
-					}
-				} catch (PatternSyntaxException e) {
-					logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Could not add compile transform matching regular expression", e); //$NON-NLS-1$
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(transformMapURL.openStream()))) {
+			String currentLine = null;
+			while ((currentLine = reader.readLine()) != null) {
+				if (currentLine.startsWith("#")) { //$NON-NLS-1$
+					continue;
 				}
+				currentLine = currentLine.trim();
+				if (currentLine.length() == 0)
+					continue;
+				StringTokenizer toker = new StringTokenizer(currentLine, ","); //$NON-NLS-1$
+				try {
+					String bundlePatternString = toker.nextToken().trim();
+					String pathPatternString = toker.nextToken().trim();
+					String transformPath = toker.nextToken().trim();
+					try {
+						Pattern bundlePattern = Pattern.compile(bundlePatternString);
+						Pattern pathPattern = Pattern.compile(pathPatternString);
+						URL transformerURL = new URL(transformMapURL, transformPath);
+						try (InputStream exitsCheck = transformerURL.openStream()) {
+							TransformTuple tuple = new TransformTuple();
+							tuple.bundlePattern = bundlePattern;
+							tuple.pathPattern = pathPattern;
+							tuple.transformerUrl = transformerURL;
+							list.add(tuple);
+						} catch (IOException e) {
+							logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR,
+									"Could not add transform :" + transformerURL.toString(), e); //$NON-NLS-1$
+						}
+					} catch (PatternSyntaxException e) {
+						logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR,
+								"Could not add compile transform matching regular expression", e); //$NON-NLS-1$
+					}
 
-			} catch (NoSuchElementException e) {
-				logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Could not parse transform file record :" + currentLine, e); //$NON-NLS-1$
+				} catch (NoSuchElementException e) {
+					logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR,
+							"Could not parse transform file record :" + currentLine, e); //$NON-NLS-1$
+				}
 			}
 		}
 		return list.toArray(new TransformTuple[list.size()]);
