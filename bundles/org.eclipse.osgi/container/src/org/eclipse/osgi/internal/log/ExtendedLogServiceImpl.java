@@ -26,7 +26,7 @@ public class ExtendedLogServiceImpl implements ExtendedLogService {
 	private final ExtendedLogServiceFactory factory;
 	private volatile Bundle bundle;
 	private final Map<Class<? extends org.osgi.service.log.Logger>, Map<String, LoggerImpl>> loggerCache = new HashMap<>();
-	private final String LOG_SERVICE = "LogService"; //$NON-NLS-1$
+	private static final String LOG_SERVICE = "LogService"; //$NON-NLS-1$
 
 	public ExtendedLogServiceImpl(ExtendedLogServiceFactory factory, Bundle bundle) {
 		this.factory = factory;
