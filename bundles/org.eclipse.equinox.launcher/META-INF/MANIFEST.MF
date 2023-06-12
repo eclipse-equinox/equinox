@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.equinox.launcher;singleton:=true
-Bundle-Version: 1.6.400.qualifier
+Bundle-Version: 1.6.500.qualifier
 Main-Class: org.eclipse.equinox.launcher.Main
 Bundle-ClassPath: .
 Bundle-Vendor: %providerName
