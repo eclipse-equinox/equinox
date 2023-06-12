@@ -46,7 +46,7 @@ public class Activator implements BundleActivator {
 	/**
 	 * Table to keep track of all the URL converter services.
 	 */
-	private static Map<String, ServiceTracker<Object, URLConverter>> urlTrackers = new HashMap<>();
+	private static final Map<String, ServiceTracker<Object, URLConverter>> urlTrackers = new HashMap<>();
 	private static BundleContext bundleContext;
 	private static Activator singleton;
 	private ServiceRegistration<URLConverter> platformURLConverterService = null;
@@ -249,7 +249,7 @@ public class Activator implements BundleActivator {
 				for (ServiceTracker<Object, URLConverter> tracker : urlTrackers.values()) {
 					tracker.close();
 				}
-				urlTrackers = new HashMap<>();
+				urlTrackers.clear();
 			}
 		}
 	}
