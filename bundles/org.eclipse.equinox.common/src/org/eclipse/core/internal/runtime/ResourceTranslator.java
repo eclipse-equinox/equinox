@@ -70,7 +70,7 @@ public class ResourceTranslator {
 			Locale locale = (language == null) ? Locale.getDefault() : new Locale(language);
 			return ResourceBundle.getBundle("plugin", locale, createTempClassloader(bundle)); //$NON-NLS-1$
 		}
-		return Activator.getDefault().getLocalization(bundle, language);
+		return Activator.getLocalization(bundle, language);
 	}
 
 	public static String[] getResourceString(Bundle bundle, String[] nonTranslated, String locale) {
