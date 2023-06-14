@@ -15,8 +15,8 @@ package org.eclipse.equinox.internal.security.ui.storage;
 
 import java.io.*;
 import java.net.URL;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.equinox.internal.security.storage.friends.IDeleteListener;
 import org.eclipse.equinox.internal.security.storage.friends.InternalExchangeUtils;
 import org.eclipse.equinox.internal.security.ui.Activator;
@@ -114,10 +114,10 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		URL location = InternalExchangeUtils.defaultStorageLocation();
 		if (location != null) {
 			new Label(page, SWT.NONE).setText(SecUIMessages.locationButton);
-			new Text(page, SWT.READ_ONLY).setText(new Path(location.getFile()).toOSString());
+			new Text(page, SWT.READ_ONLY).setText(IPath.fromOSString(location.getFile()).toOSString());
 		}
 
-		sashForm.setWeights(new int[] {30, 70});
+		sashForm.setWeights(new int[] { 30, 70 });
 
 		nodesView = new NodesView(nodeTree, this);
 		valuesView = new ValuesView(tableOfValues, this, shell);

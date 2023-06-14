@@ -27,7 +27,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -54,7 +53,7 @@ public class FileLocatorTest {
 				"Plugin_Testing/fileLocator/testFileLocator.nl");
 		BundleTestingHelper.refreshPackages(getContext(), new Bundle[] { fragment });
 
-		IPath path = new Path(searchLocation);
+		IPath path = IPath.fromOSString(searchLocation);
 		Map<String, String> map = new HashMap<>(1);
 		map.put("$nl$", nl);
 

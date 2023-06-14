@@ -15,7 +15,6 @@ package org.eclipse.core.internal.preferences;
 
 import java.util.*;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.preferences.*;
 
 /**
@@ -45,7 +44,7 @@ public class BundleDefaultPreferences extends EclipsePreferences {
 	private BundleDefaultPreferences(EclipsePreferences parent, String name) {
 		super(parent, name);
 		// cache the segment count
-		IPath path = new Path(absolutePath());
+		IPath path = IPath.fromOSString(absolutePath());
 		segmentCount = path.segmentCount();
 		if (segmentCount < 2)
 			return;
