@@ -25,7 +25,6 @@ import java.net.URL;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.URIUtil;
 import org.eclipse.core.tests.harness.CoreTest;
 import org.osgi.framework.FrameworkUtil;
@@ -59,12 +58,13 @@ public class URIUtilTest extends CoreTest {
 	 * Tests for {@link URIUtil#toJarURI(URI, IPath)}.
 	 */
 	public void testToJARURI() {
-		URL locationURL = FileLocator.find(FrameworkUtil.getBundle(getClass()), new Path("Plugin_Testing/uriutil/test.jar"), null);
+		URL locationURL = FileLocator.find(FrameworkUtil.getBundle(getClass()),
+				IPath.fromOSString("Plugin_Testing/uriutil/test.jar"), null);
 		try {
 			locationURL = FileLocator.resolve(locationURL);
 			URI location = URIUtil.toURI(locationURL);
 			final String suffix = "test/1029/test.txt";
-			URI jar = URIUtil.toJarURI(location, new Path(suffix));
+			URI jar = URIUtil.toJarURI(location, IPath.fromOSString(suffix));
 			InputStream is = jar.toURL().openStream();
 			is.close();
 
@@ -111,7 +111,7 @@ public class URIUtilTest extends CoreTest {
 		} else {
 			assertTrue("2.1", result.getAbsolutePath().startsWith("\\\\"));
 		}
-		assertTrue("2.2", new Path(result.toString()).isUNC());
+		assertTrue("2.2", IPath.fromOSString(result.toString()).isUNC());
 	}
 
 	/**

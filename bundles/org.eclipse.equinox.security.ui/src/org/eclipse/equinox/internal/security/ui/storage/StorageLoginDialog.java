@@ -16,8 +16,8 @@ package org.eclipse.equinox.internal.security.ui.storage;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import javax.crypto.spec.PBEKeySpec;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.equinox.internal.security.ui.Activator;
 import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.equinox.security.storage.EncodingUtils;
@@ -164,7 +164,7 @@ public class StorageLoginDialog extends TitleAreaDialog {
 			locationGroup.setLayout(new GridLayout());
 
 			Label locationLabel = new Label(locationGroup, SWT.WRAP);
-			locationLabel.setText(new Path(location).toOSString());
+			locationLabel.setText(IPath.fromOSString(location).toOSString());
 		}
 
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -213,7 +213,7 @@ public class StorageLoginDialog extends TitleAreaDialog {
 			internalPassword = EncodingUtils.encodeBase64(digested);
 		} catch (NoSuchAlgorithmException e) {
 			// just use the text as is
-			Activator.log(IStatus.WARNING, SecUIMessages.noDigestPassword, new Object[] {DIGEST_ALGORITHM}, e);
+			Activator.log(IStatus.WARNING, SecUIMessages.noDigestPassword, new Object[] { DIGEST_ALGORITHM }, e);
 			internalPassword = password.getText();
 		}
 		generatedPassword = new PBEKeySpec(internalPassword.toCharArray());

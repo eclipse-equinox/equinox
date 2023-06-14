@@ -17,7 +17,6 @@ import java.net.URL;
 import org.eclipse.core.internal.preferences.AbstractScope;
 import org.eclipse.core.internal.preferences.PreferencesOSGiUtils;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.osgi.service.datalocation.Location;
 
 /**
@@ -86,7 +85,7 @@ public final class ConfigurationScope extends AbstractScope {
 		if (!location.isReadOnly()) {
 			URL url = location.getURL();
 			if (url != null) {
-				result = new Path(url.getFile());
+				result = IPath.fromOSString(url.getFile());
 				if (result.isEmpty())
 					result = null;
 			}
