@@ -61,7 +61,7 @@ public interface IPath extends Cloneable {
 	 * 
 	 * @since 3.18
 	 */
-	public static final IPath EMPTY = fromOSString(""); //$NON-NLS-1$
+	public static final IPath EMPTY = Path.Constants.empty();
 
 	/**
 	 * Constant value containing the root path with no device on the local file
@@ -69,7 +69,7 @@ public interface IPath extends Cloneable {
 	 * 
 	 * @since 3.18
 	 */
-	public static final IPath ROOT = fromOSString("/"); //$NON-NLS-1$
+	public static final IPath ROOT = Path.Constants.root();
 
 	/**
 	 * Constructs a new path from the given string path. The string path must
