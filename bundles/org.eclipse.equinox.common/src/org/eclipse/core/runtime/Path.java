@@ -51,12 +51,38 @@ public final class Path implements IPath, Cloneable {
 	 * Carrier that ensures that the contained constants are always initialized,
 	 * regardless of if the Path class or IPath interface is initialized fist.
 	 */
-	private static class Constants {
+	static class Constants {
 		/** Constant value indicating if the current platform is Windows */
 		static final boolean RUNNING_ON_WINDOWS = java.io.File.separatorChar == '\\';
 
 		/** Constant value indicating no segments */
 		static final String[] NO_SEGMENTS = new String[0];
+
+		/**
+		 * We have cycle : Path implements IPath and IPath uses Path object instances in
+		 * interface constants.
+		 * 
+		 * Constants and methods below are needed to resolve init order issues between
+		 * IPath and Path classes - depending on which is loaded first, constants
+		 * defined in one of the classes and pointing to other one will see not
+		 * initialized state. See https://github.com/eclipse-equinox/equinox/pull/279
+		 */
+		private static Path empty = new Path(""); //$NON-NLS-1$
+		private static Path root = new Path("/"); //$NON-NLS-1$
+
+		static synchronized Path empty() {
+			if (empty == null) {
+				empty = new Path(""); //$NON-NLS-1$
+			}
+			return empty;
+		}
+
+		static synchronized Path root() {
+			if (root == null) {
+				root = new Path("/"); //$NON-NLS-1$
+			}
+			return root;
+		}
 	}
 
 	/**
@@ -69,7 +95,7 @@ public final class Path implements IPath, Cloneable {
 	 * 
 	 * @see IPath#EMPTY
 	 */
-	public static final Path EMPTY = (Path) IPath.EMPTY;
+	public static final Path EMPTY = Constants.empty();
 
 	/**
 	 * Constant value containing the root path with no device on the local file
@@ -81,7 +107,8 @@ public final class Path implements IPath, Cloneable {
 	 * 
 	 * @see IPath#ROOT
 	 */
-	public static final Path ROOT = (Path) IPath.ROOT;
+	public static final Path ROOT = Constants.root();
+
 
 	/** The device id string. May be null if there is no device. */
 	private final String device;
