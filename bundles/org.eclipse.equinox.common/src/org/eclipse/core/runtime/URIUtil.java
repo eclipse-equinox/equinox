@@ -181,9 +181,10 @@ public final class URIUtil {
 	 */
 	public static String lastSegment(URI location) {
 		String path = location.getPath();
-		if (path == null)
-			return new Path(location.getSchemeSpecificPart()).lastSegment();
-		return new Path(path).lastSegment();
+		if (path == null) {
+			path = location.getSchemeSpecificPart();
+		}
+		return IPath.fromOSString(path).lastSegment();
 	}
 
 	/**
@@ -276,7 +277,7 @@ public final class URIUtil {
 	public static URI toJarURI(URI uri, IPath entryPath) {
 		try {
 			if (entryPath == null)
-				entryPath = Path.EMPTY;
+				entryPath = IPath.EMPTY;
 			//must deconstruct the input URI to obtain unencoded strings, and then pass to URI constructor that will encode the entry path
 			return new URI(SCHEME_JAR, uri.getScheme() + ':' + uri.getSchemeSpecificPart() + JAR_SUFFIX + entryPath.toString(), null);
 		} catch (URISyntaxException e) {
@@ -464,8 +465,8 @@ public final class URIUtil {
 		if (!SCHEME_FILE.equals(original.getScheme()) || !SCHEME_FILE.equals(baseURI.getScheme()))
 			return baseURI.relativize(original);
 
-		IPath originalPath = new Path(original.getSchemeSpecificPart());
-		IPath basePath = new Path(baseURI.getSchemeSpecificPart());
+		IPath originalPath = IPath.fromOSString(original.getSchemeSpecificPart());
+		IPath basePath = IPath.fromOSString(baseURI.getSchemeSpecificPart());
 
 		// make sure we have an absolute path to start
 		if (!basePath.isAbsolute())
