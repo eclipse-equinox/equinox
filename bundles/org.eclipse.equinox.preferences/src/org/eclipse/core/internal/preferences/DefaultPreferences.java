@@ -39,7 +39,7 @@ public class DefaultPreferences extends EclipsePreferences {
 	private static Set<String> loadedNodes = Collections.synchronizedSet(new HashSet<String>());
 	private static final String KEY_PREFIX = "%"; //$NON-NLS-1$
 	private static final String KEY_DOUBLE_PREFIX = "%%"; //$NON-NLS-1$
-	private static final IPath NL_DIR = new Path("$nl$"); //$NON-NLS-1$
+	private static final IPath NL_DIR = IPath.fromOSString("$nl$"); //$NON-NLS-1$
 
 	private static final String PROPERTIES_FILE_EXTENSION = "properties"; //$NON-NLS-1$
 	private static Properties productCustomization;
@@ -93,7 +93,7 @@ public class DefaultPreferences extends EclipsePreferences {
 		Bundle bundle = PreferencesOSGiUtils.getDefault().getBundle(name());
 		if (bundle == null)
 			return;
-		URL url = FileLocator.find(bundle, new Path(IPreferencesConstants.PREFERENCES_DEFAULT_OVERRIDE_FILE_NAME), null);
+		URL url = FileLocator.find(bundle, IPath.fromOSString(IPreferencesConstants.PREFERENCES_DEFAULT_OVERRIDE_FILE_NAME), null);
 		if (url == null) {
 			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
 				PrefsMessages.message("Preference default override file not found for bundle: " + bundle.getSymbolicName()); //$NON-NLS-1$
@@ -140,7 +140,7 @@ public class DefaultPreferences extends EclipsePreferences {
 			if (name().equals(localQualifier)) {
 				value = translatePreference(value, translations);
 				if (EclipsePreferences.DEBUG_PREFERENCE_SET)
-					PrefsMessages.message("Setting default preference: " + (new Path(absolutePath()).append(childPath).append(key)) + '=' + value); //$NON-NLS-1$
+					PrefsMessages.message("Setting default preference: " + (IPath.fromOSString(absolutePath()).append(childPath).append(key)) + '=' + value); //$NON-NLS-1$
 				((EclipsePreferences) internalNode(childPath.toString(), false, null)).internalPut(key, value);
 			}
 		}
@@ -158,7 +158,7 @@ public class DefaultPreferences extends EclipsePreferences {
 			if (props.getProperty(fullKey) == null)
 				continue;
 			// remove last segment which stands for key
-			IPath nodePath = new Path(fullKey).removeLastSegments(1);
+			IPath nodePath = IPath.fromOSString(fullKey).removeLastSegments(1);
 			if (path.isPrefixOf(nodePath))
 				return true;
 		}
@@ -176,7 +176,7 @@ public class DefaultPreferences extends EclipsePreferences {
 		// if the node does not exist, maybe it has not been loaded yet
 		initializeCustomizations();
 		// scope based path is a path relative to the "/default" node; this is the path that appears in customizations
-		IPath scopeBasedPath = new Path(absolutePath() + PATH_SEPARATOR + path).removeFirstSegments(1);
+		IPath scopeBasedPath = IPath.fromOSString(absolutePath() + PATH_SEPARATOR + path).removeFirstSegments(1);
 		return containsNode(productCustomization, scopeBasedPath) || containsNode(commandLineCustomization, scopeBasedPath);
 	}
 

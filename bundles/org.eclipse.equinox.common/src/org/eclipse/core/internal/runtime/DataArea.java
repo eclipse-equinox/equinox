@@ -67,7 +67,7 @@ public class DataArea {
 			// TODO assume the URL is a file: 
 			// Use the new File technique to ensure that the resultant string is 
 			// in the right format (e.g., leading / removed from /c:/foo etc)
-			location = new Path(new File(url.getFile()).toString());
+			location = IPath.fromOSString(new File(url.getFile()).toString());
 			initializeLocation();
 		} catch (CoreException e) {
 			throw new IllegalStateException(e.getMessage());
@@ -96,7 +96,7 @@ public class DataArea {
 		if (log != null) {
 			java.io.File file = log.getFile();
 			if (file != null)
-				return new Path(file.getAbsolutePath());
+				return IPath.fromOSString(file.getAbsolutePath());
 		}
 		if (location == null)
 			throw new IllegalStateException(CommonMessages.meta_instanceDataUnspecified);
@@ -113,7 +113,7 @@ public class DataArea {
 		if (file == null) {
 			return null;
 		}
-		return new Path(file.getAbsolutePath());
+		return IPath.fromOSString(file.getAbsolutePath());
 	}
 
 	/**
@@ -159,7 +159,7 @@ public class DataArea {
 		}
 		//try infer the device if there isn't one (windows)
 		if (location.getDevice() == null)
-			location = new Path(location.toFile().getAbsolutePath());
+			location = IPath.fromOSString(location.toFile().getAbsolutePath());
 		createLocation();
 		initialized = true;
 	}
