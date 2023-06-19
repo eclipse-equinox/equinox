@@ -490,7 +490,7 @@ class EclipseDebugTrace implements DebugTrace {
 	 * @return A formatted time stamp based on the {@link EclipseDebugTrace#TRACE_FILE_DATE_FORMATTER} formatter
 	 */
 	private final String getFormattedDate(long timestamp) {
-		return EclipseDebugTrace.TRACE_FILE_DATE_FORMATTER.format(Instant.ofEpochMilli(timestamp));
+		return TRACE_FILE_DATE_FORMATTER.format(Instant.ofEpochMilli(timestamp));
 	}
 
 	/**
