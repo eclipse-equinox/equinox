@@ -25,8 +25,9 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.service.debug.DebugTrace;
@@ -61,7 +62,8 @@ class EclipseDebugTrace implements DebugTrace {
 	/** The date attribute written to the header of the trace file to show when this file was created */
 	private final static String TRACE_FILE_DATE = "Time of creation: "; //$NON-NLS-1$
 	/** Trace date formatter using the pattern: yyyy-MM-dd HH:mm:ss.SSS  */
-	private final static SimpleDateFormat TRACE_FILE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); //$NON-NLS-1$
+	private final static DateTimeFormatter TRACE_FILE_DATE_FORMATTER = DateTimeFormatter
+			.ofPattern("yyyy-MM-dd HH:mm:ss.SSS").withZone(ZoneId.systemDefault()); //$NON-NLS-1$
 	/** The comment character used by the trace file */
 	private final static String TRACE_COMMENT = "#"; //$NON-NLS-1$
 	/** The delimiter used to separate trace elements such as the time stamp, message, etc */
@@ -488,8 +490,7 @@ class EclipseDebugTrace implements DebugTrace {
 	 * @return A formatted time stamp based on the {@link EclipseDebugTrace#TRACE_FILE_DATE_FORMATTER} formatter
 	 */
 	private final String getFormattedDate(long timestamp) {
-
-		return EclipseDebugTrace.TRACE_FILE_DATE_FORMATTER.format(new Date(timestamp));
+		return TRACE_FILE_DATE_FORMATTER.format(Instant.ofEpochMilli(timestamp));
 	}
 
 	/**
