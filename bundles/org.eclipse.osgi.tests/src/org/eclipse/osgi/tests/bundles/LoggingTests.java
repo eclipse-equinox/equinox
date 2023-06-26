@@ -198,7 +198,7 @@ public class LoggingTests extends AbstractBundleTests {
 		TestILogListener iLogListener2 = new TestILogListener(new ArrayList(context));
 		TestLogListener logListener = new TestLogListener(new ArrayList(context));
 
-		ILog testLog = Platform.getLog(testBundle);
+		ILog testLog = ILog.of(testBundle);
 		testLog.addLogListener(iLogListener1);
 		Platform.addLogListener(iLogListener2);
 		logRef.readerService.addLogListener(logListener, logListener);
@@ -253,7 +253,7 @@ public class LoggingTests extends AbstractBundleTests {
 		TestILogListener iLogListener2 = new TestILogListener(new ArrayList(context));
 		TestLogListener logListener = new TestLogListener(new ArrayList(context));
 
-		ILog testLog = Platform.getLog(testBundle);
+		ILog testLog = ILog.of(testBundle);
 		testLog.addLogListener(iLogListener1);
 		Platform.addLogListener(iLogListener2);
 		logRef.readerService.addLogListener(logListener, logListener);
@@ -293,7 +293,7 @@ public class LoggingTests extends AbstractBundleTests {
 		TestILogListener iLogListener2 = new TestILogListener(new ArrayList(context));
 		TestLogListener logListener = new TestLogListener(new ArrayList(context));
 
-		ILog testLog = Platform.getLog(testBundle);
+		ILog testLog = ILog.of(testBundle);
 		testLog.addLogListener(iLogListener1);
 		Platform.addLogListener(iLogListener2);
 		logRef.readerService.addLogListener(logListener, logListener);
@@ -333,7 +333,7 @@ public class LoggingTests extends AbstractBundleTests {
 		TestILogListener iLogListener2 = new TestILogListener(new ArrayList(context));
 		TestLogListener logListener = new TestLogListener(new ArrayList(context));
 
-		ILog testLog = Platform.getLog(testBundle);
+		ILog testLog = ILog.of(testBundle);
 		testLog.addLogListener(iLogListener1);
 		Platform.addLogListener(iLogListener2);
 		logRef.readerService.addLogListener(logListener, logListener);
@@ -454,13 +454,13 @@ public class LoggingTests extends AbstractBundleTests {
 		final Bundle testBundle = installer.installBundle("test.logging.a"); //$NON-NLS-1$
 		testBundle.start();
 		LogServiceReference logRef = getLogService(getContext());
-		ILogListener recurseLog = (status, plugin) -> Platform.getLog(testBundle).log(status);
+		ILogListener recurseLog = (status, plugin) -> ILog.of(testBundle).log(status);
 		Platform.addLogListener(recurseLog);
 		try {
 			logRef.fwkLog.log(new FrameworkLogEntry(getContext().getBundle().getSymbolicName(), FrameworkLogEntry.ERROR, 0, "Test message", 0, null, null));
 
 			// prime the log so we don't have to create it in the logging call
-			Platform.getLog(testBundle);
+			ILog.of(testBundle);
 
 			logRef.fwkLog.log(new FrameworkLogEntry(getContext().getBundle().getSymbolicName(), FrameworkLogEntry.ERROR, 0, "Test message", 0, null, null));
 		} finally {
