@@ -419,7 +419,7 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 			try {
 				node.get("password1", "default");
 			} catch (StorageException e) {
-				assertEquals(StorageException.DECRYPTION_ERROR, e.getErrorCode());
+				assertEquals(StorageException.INTERNAL_ERROR, e.getErrorCode());
 				exception = true;
 			}
 			assertTrue(exception);
@@ -428,7 +428,7 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 			try {
 				node.get("password2", "default");
 			} catch (StorageException e) {
-				assertEquals(StorageException.DECRYPTION_ERROR, e.getErrorCode());
+				assertEquals(StorageException.INTERNAL_ERROR, e.getErrorCode());
 				exception = true;
 			}
 			assertTrue(exception);
@@ -452,7 +452,7 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 			try {
 				node.get("password", "default");
 			} catch (StorageException e) {
-				assertEquals(StorageException.DECRYPTION_ERROR, e.getErrorCode());
+				assertEquals(StorageException.INTERNAL_ERROR, e.getErrorCode());
 				exception = true;
 			}
 			assertTrue(exception);
