@@ -31,12 +31,12 @@ public interface IStorageConstants {
 	/**
 	 * Default cipher algorithm to use in secure storage
 	 */
-	public String DEFAULT_CIPHER = "PBEWithMD5AndDES"; //$NON-NLS-1$
+	public String DEFAULT_CIPHER = "PBEWithHmacSHA512AndAES_256"; //$NON-NLS-1$
 
 	/**
 	 * Default key factory algorithm to use in secure storage
 	 */
-	public String DEFAULT_KEY_FACTORY = "PBEWithMD5AndDES"; //$NON-NLS-1$
+	public String DEFAULT_KEY_FACTORY = "PBEWithHmacSHA512AndAES_256"; //$NON-NLS-1$
 
 	/**
 	 * Preference contains list of disabled password provider modules
