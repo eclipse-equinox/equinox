@@ -3,3 +3,4 @@ Bug 403352 - Update all parent versions to match our build stream
 Bug 462431 - New certificate conflict
 Bug 529356 - Build failure in I20180102-2215
 Bug 566471 - I20200828-0150 - Comparator Errors Found
+Bug 527899 [9] Implement JEP 280: Indify String Concatenation #1139
