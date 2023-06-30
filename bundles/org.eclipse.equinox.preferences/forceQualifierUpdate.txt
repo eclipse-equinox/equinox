@@ -2,3 +2,4 @@
 Bug 403352 - Update all parent versions to match our build stream
 Bug 509973 - Comparator errors in I20170105-0320
 Incorrect org.osgi.service.prefs dependency in org.eclipse.equinox.preferences-3.10.0 #54
+Bug 527899 [9] Implement JEP 280: Indify String Concatenation #1139
