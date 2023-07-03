@@ -1,5 +1,5 @@
 Bundle-Name: %bundleName
-Bundle-Version: 1.6.200.qualifier
+Bundle-Version: 1.6.300.qualifier
 Bundle-SymbolicName: org.eclipse.equinox.event
 Bundle-Vendor: %bundleVendor
 Bundle-Localization: plugin
