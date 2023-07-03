@@ -15,4 +15,6 @@ Export-Package: org.eclipse.equinox.internal.event;x-internal:=true, \
                
 -buildpath: org.eclipse.osgi, \
 			org.osgi.service.event
-			
+		
+# pomless configuration options
+pom.model.property.tck.artifact = org.osgi.test.cases.event
