@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.eclipse.equinox.spi
+Bundle-Version: 1.0.0.qualifier
+Fragment-Host: system.bundle;extension:=framework
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+ExtensionBundle-Activator: org.eclipse.equinox.spi.internal.ServiceLoaderMediatorHookConfigurator$Activator
+Bundle-Name: %bundleName
+Bundle-Vendor: %bundleVendor
+Automatic-Module-Name: org.eclipse.equinox.spi
+Bundle-Localization: fragment
+Provide-Capability: 
+ osgi.extender;osgi.extender="osgi.serviceloader.registrar";version:Version="1.0",
+ osgi.extender;osgi.extender="osgi.serviceloader.processor";version:Version="1.0"

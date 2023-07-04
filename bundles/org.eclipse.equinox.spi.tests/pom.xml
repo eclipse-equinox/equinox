@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2026, 2026 Hannes Wellmann and others.
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the Eclipse Distribution License v1.0
+  which accompanies this distribution, and is available at
+  https://www.eclipse.org/org/documents/edl-v10
+ 
+  Contributors:
+     Hannes Wellmann - initial implementation
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.eclipse.equinox</groupId>
+		<artifactId>parent</artifactId>
+		<version>4.41.0-SNAPSHOT</version>
+		<relativePath>../../</relativePath>
+	</parent>
+	<groupId>org.eclipse.platform</groupId>
+	<artifactId>org.eclipse.equinox.spi.tests</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>eclipse-test-plugin</packaging>
+
+	<properties>
+		<skipAPIAnalysis>true</skipAPIAnalysis>
+		<surefire.testArgLine>-Dosgi.framework.extensions=reference:file:${org.eclipse.platform:org.eclipse.equinox.spi:eclipse-plugin}</surefire.testArgLine>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<configuration>
+					<dependency-resolution>
+						<extraRequirements>
+							<requirement>
+								<id>org.eclipse.equinox.spi</id>
+								<type>eclipse-plugin</type>
+								<versionRange>0.0.0</versionRange>
+							</requirement>
+						</extraRequirements>
+					</dependency-resolution>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<!-- Generate properties containing the location of the just built org.eclipse.equinox.spi jar-->
+					<execution>
+						<goals>
+							<goal>properties</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
