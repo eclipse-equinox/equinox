@@ -15,21 +15,22 @@
 package org.eclipse.osgi.internal.url;
 
 import java.lang.reflect.Method;
-import java.net.*;
+import java.net.URL;
+import java.net.URLStreamHandler;
+import java.net.URLStreamHandlerFactory;
 import java.security.AccessController;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
-import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.storage.url.BundleResourceHandler;
-import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.url.URLConstants;
-import org.osgi.service.url.URLStreamHandlerService;
-import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * This class contains the URL stream handler factory for the OSGi framework.
@@ -40,10 +41,8 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 	public static final String PROTOCOL_REFERENCE = "reference"; //$NON-NLS-1$
 	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 
-	private ServiceTracker<URLStreamHandlerService, URLStreamHandlerService> handlerTracker;
-
 	private static final List<Class<?>> ignoredClasses = Arrays.asList(new Class<?>[] {MultiplexingURLStreamHandler.class, URLStreamHandlerFactoryImpl.class, URL.class});
-	private Map<String, URLStreamHandler> proxies;
+	private Map<String, URLStreamHandlerProxy> proxies;
 	private URLStreamHandlerFactory parentFactory;
 	private ThreadLocal<List<String>> creatingProtocols = new ThreadLocal<>();
 
@@ -54,10 +53,7 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 	 */
 	public URLStreamHandlerFactoryImpl(BundleContext context, EquinoxContainer container) {
 		super(context, container);
-
-		proxies = new Hashtable<>(15);
-		handlerTracker = new ServiceTracker<>(context, URLSTREAMHANDLERCLASS, null);
-		handlerTracker.open();
+		proxies = new ConcurrentHashMap<>();
 	}
 
 	private Class<?> getBuiltIn(String protocol, String builtInHandlers) {
@@ -154,35 +150,13 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 		if (frameworkHandler != null) {
 			return frameworkHandler;
 		}
-
 		//Now we check the service registry
-		//first check to see if the handler is in the cache
-		URLStreamHandlerProxy handler = (URLStreamHandlerProxy) proxies.get(protocol);
-		if (handler != null)
-			return (handler);
-		//look through the service registry for a URLStramHandler registered for this protocol
-		ServiceReference<URLStreamHandlerService>[] serviceReferences = handlerTracker.getServiceReferences();
-		if (serviceReferences == null)
-			return null;
-		for (ServiceReference<URLStreamHandlerService> serviceReference : serviceReferences) {
-			Object prop = serviceReference.getProperty(URLConstants.URL_HANDLER_PROTOCOL);
-			if (prop instanceof String)
-				prop = new String[] {(String) prop}; // TODO should this be a warning?
-			if (!(prop instanceof String[])) {
-				String message = NLS.bind(Msg.URL_HANDLER_INCORRECT_TYPE, new Object[]{URLConstants.URL_HANDLER_PROTOCOL, URLSTREAMHANDLERCLASS, serviceReference.getBundle()});
-				container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, message, null);
-				continue;
-			}
-			String[] protocols = (String[]) prop;
-			for (String candidateProtocol : protocols) {
-				if (candidateProtocol.equals(protocol)) {
-					handler = new URLStreamHandlerProxy(protocol, serviceReference, context);
-					proxies.put(protocol, handler);
-					return (handler);
-				}
-			}
+		URLStreamHandlerProxy handler = proxies.computeIfAbsent(protocol, p -> new URLStreamHandlerProxy(p, context));
+		if (handler.isActive()) {
+			return handler;
 		}
 		return null;
+
 	}
 
 	protected URLStreamHandler findAuthorizedURLStreamHandler(String protocol) {
