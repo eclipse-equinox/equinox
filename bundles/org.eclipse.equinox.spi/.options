@@ -1,0 +1,4 @@
+#### Debugging options for org.eclipse.equinox.spi
+
+# Prints out registration debug information
+org.eclipse.equinox.spi/debug/registrations = false
