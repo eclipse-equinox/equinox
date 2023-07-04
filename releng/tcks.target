@@ -53,6 +53,12 @@
                 </dependency>
                 <dependency>
                     <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.test.cases.serviceloader</artifactId>
+                    <version>8.1.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.osgi</groupId>
                     <artifactId>org.osgi.test.cases.tracker</artifactId>
                     <version>8.0.0</version>
                     <type>jar</type>

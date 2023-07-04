@@ -186,6 +186,7 @@
 			<module>bundles/org.eclipse.equinox.preferences</module>
 			<module>bundles/org.eclipse.equinox.metatype</module>
 			<module>bundles/org.eclipse.equinox.event</module>
+			<module>bundles/org.eclipse.equinox.spi</module>
 		</modules>
 	</profile>
     <profile>
@@ -248,6 +249,8 @@
 		    <module>bundles/org.eclipse.equinox.weaving.caching</module>
 		    <module>bundles/org.eclipse.equinox.weaving.caching.j9</module>
 		    <module>bundles/org.eclipse.equinox.weaving.hook</module>
+			<module>bundles/org.eclipse.equinox.spi</module>
+			<module>bundles/org.eclipse.equinox.spi.tests</module>
 		    <module>bundles/org.eclipse.osgi</module>
 		    <module>bundles/org.eclipse.osgi.compatibility.state</module>
 		    <module>bundles/org.eclipse.osgi.util</module>
