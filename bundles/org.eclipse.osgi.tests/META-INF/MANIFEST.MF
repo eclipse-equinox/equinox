@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.eclipse.osgi.tests;singleton:=true
 Bundle-Version: 3.18.500.qualifier
 Bundle-Vendor: Eclipse.org
 Require-Bundle: 
- org.eclipse.core.runtime;bundle-version="[3.28.0,4.0.0)",
+ org.eclipse.core.runtime;bundle-version="[3.29.0,4.0.0)",
  org.eclipse.core.tests.harness;bundle-version="3.13.0",
  org.eclipse.test.performance,
  org.junit
