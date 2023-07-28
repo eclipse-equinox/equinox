@@ -14,8 +14,11 @@
 package org.eclipse.osgi.internal.framework;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.wiring.BundleWiring;
 
 class XMLParsingServiceFactory implements ServiceFactory<Object> {
@@ -55,9 +58,27 @@ class XMLParsingServiceFactory implements ServiceFactory<Object> {
 	}
 
 	private Object createService() {
-		if (isSax)
-			return SAXParserFactory.newInstance();
-		return DocumentBuilderFactory.newInstance();
+		if (isSax) {
+			SAXParserFactory factory = SAXParserFactory.newInstance();
+			try {
+				// ignore DOCTYPE:
+				factory.setFeature("http://xml.org/sax/features/external-general-entities", false); //$NON-NLS-1$
+				factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false); //$NON-NLS-1$
+				factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false); //$NON-NLS-1$
+			} catch (Exception e) {
+				throw new IllegalStateException(e);
+			}
+			return factory;
+		}
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		try {
+			// completely disable external entities declarations:
+			factory.setFeature("http://xml.org/sax/features/external-general-entities", false); //$NON-NLS-1$
+			factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false); //$NON-NLS-1$
+		} catch (ParserConfigurationException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+		return factory;
 	}
 
 	@Override

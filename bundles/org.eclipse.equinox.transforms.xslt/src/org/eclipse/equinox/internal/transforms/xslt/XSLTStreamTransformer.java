@@ -19,6 +19,7 @@ import java.lang.ref.SoftReference;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import javax.xml.XMLConstants;
 import javax.xml.transform.*;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
@@ -113,17 +114,14 @@ public class XSLTStreamTransformer {
 	public InputStream getInputStream(InputStream inputStream, URL transformerUrl) throws IOException {
 		Templates template = getTemplate(transformerUrl);
 		if (template != null) {
-
-			Transformer transformer = null;
 			try {
-				transformer = template.newTransformer();
+				Transformer transformer = template.newTransformer();
 				XSLTPipe pipe = new XSLTPipe(inputStream, transformer);
 				return pipe.getPipedInputStream();
 			} catch (TransformerConfigurationException e) {
 				log(FrameworkEvent.ERROR, "Could not perform transform.", e); //$NON-NLS-1$
 			}
 		}
-
 		return null;
 	}
 
@@ -148,6 +146,8 @@ public class XSLTStreamTransformer {
 			TransformerFactory tFactory = null;
 			try {
 				tFactory = TransformerFactory.newInstance();
+				tFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, ""); //$NON-NLS-1$
+				tFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, ""); //$NON-NLS-1$
 
 				InputSource inputSource = new InputSource(xsltStream);
 				XMLReader reader = XMLReaderFactory.createXMLReader();

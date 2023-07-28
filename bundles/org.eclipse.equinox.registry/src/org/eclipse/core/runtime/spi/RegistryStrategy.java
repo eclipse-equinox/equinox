@@ -382,8 +382,15 @@ public class RegistryStrategy {
 	 * @see org.eclipse.core.runtime.IExtensionRegistry#addContribution(java.io.InputStream, IContributor, boolean, String, ResourceBundle, Object)
 	 */
 	public SAXParserFactory getXMLParser() {
-		if (theXMLParserFactory == null)
+		if (theXMLParserFactory == null) {
 			theXMLParserFactory = SAXParserFactory.newInstance();
+			try {
+				// force org.xml.sax.SAXParseException for any DOCTYPE:
+				theXMLParserFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true); //$NON-NLS-1$
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
 		return theXMLParserFactory;
 	}
 
