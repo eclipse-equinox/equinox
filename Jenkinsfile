@@ -31,7 +31,7 @@ pipeline {
 			}
 			post {
 				always {
-					archiveArtifacts artifacts: '**/*.log, **/*.jar', allowEmptyArchive: true
+					archiveArtifacts artifacts: '**/*.log, **/*.jar, **/repository/target/repository-deploy.zip', allowEmptyArchive: true
 					junit '**/target/surefire-reports/TEST-*.xml'
 					discoverGitReferenceBuild referenceJob: 'equinox/master'
 					recordIssues publishAllIssues: true, tools: [java(), mavenConsole(), javaDoc()]
