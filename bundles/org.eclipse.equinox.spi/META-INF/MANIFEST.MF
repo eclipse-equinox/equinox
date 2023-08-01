@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Eclipse Equinox Service Loader Mediator Implemenation
+Bundle-SymbolicName: org.eclipse.equinox.spi
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Eclipse.org - Equinox
+Fragment-Host: org.eclipse.osgi;bundle-version="[3.18,4)"
+Automatic-Module-Name: org.eclipse.equinox.spi
+Bundle-RequiredExecutionEnvironment: JavaSE-9
