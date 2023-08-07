@@ -14,7 +14,6 @@
 
 package org.eclipse.equinox.weaving.internal.caching;
 
-import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
@@ -76,11 +75,8 @@ public class ClassnameLockManager {
 	public interface WriteOperation {
 		/**
 		 * The logic to write a class file to the cache.
-		 *
-		 * @throws IOException in case of a file system error in the logic, this can be
-		 *                     propagated to the caller.
 		 */
-		void write() throws IOException;
+		void write();
 	}
 
 	/**
@@ -110,7 +106,7 @@ public class ClassnameLockManager {
 			// existingEntry == null means there is no lock for the given classname, so we
 			// create one.
 			final LockWithCount resultingEntry = existingEntry != null ? existingEntry : new LockWithCount();
-			// ge the lock that we need (read or write, depending on the parameter).
+			// get the lock that we need (read or write, depending on the parameter).
 			lockWrapper[0] = writeLock ? resultingEntry.lock.writeLock() : resultingEntry.lock.readLock();
 			// increment the lock counter
 			resultingEntry.count.incrementAndGet();
@@ -150,11 +146,8 @@ public class ClassnameLockManager {
 	 *
 	 * @param classname      the classname defining the scope of the lock to acquire
 	 * @param writeOperation the operation to execute
-	 *
-	 * @throws IOException any exception thrown by the writeOperation will be
-	 *                     propagated to the caller
 	 */
-	public void executeWrite(final String classname, final WriteOperation writeOperation) throws IOException {
+	public void executeWrite(final String classname, final WriteOperation writeOperation) {
 		final Lock lock = acquireLock(classname, true);
 		try {
 			writeOperation.write();
