@@ -140,9 +140,11 @@ public class BundleCachingService implements ICachingService {
 			// so, take it from there
 			storedClass = itemsInQueue.get(new CacheItemKey(directoryString, name));
 			if (storedClass == null) {
-				// else, read it from disk
+				// else, read it from disk (if it exists)
 				final File cachedBytecodeFile = new File(cacheDirectory, name);
-				storedClass = lockManager.executeRead(name, () -> read(name, cachedBytecodeFile));
+				if (cachedBytecodeFile.exists()) {
+					storedClass = lockManager.executeRead(name, () -> read(name, cachedBytecodeFile));
+				}
 			}
 			isCached = storedClass != null;
 		}

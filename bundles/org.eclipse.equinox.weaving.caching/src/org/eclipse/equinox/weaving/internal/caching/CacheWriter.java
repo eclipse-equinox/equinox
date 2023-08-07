@@ -19,9 +19,9 @@ package org.eclipse.equinox.weaving.internal.caching;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
@@ -33,6 +33,12 @@ import java.util.concurrent.BlockingQueue;
  * @author Martin Lippert
  */
 public class CacheWriter {
+	/**
+	 * A timeout value in milliseconds to wait for the writer thread to finish after
+	 * signalling the interrupt.
+	 */
+	private static final long JOIN_TIMEOUT = 5000L;
+
 	/**
 	 * A map for items that are currently contained in the {@link #cacheWriterQueue}
 	 */
@@ -62,13 +68,10 @@ public class CacheWriter {
 			try {
 				while (true) {
 					final CacheItem item = cacheQueue.take();
-					try {
-						store(item);
-					} catch (final IOException ioe) {
-						// storing in cache failed, do nothing
-					}
+					store(item);
 				}
 			} catch (final InterruptedException e) {
+				Thread.currentThread().interrupt();
 			}
 		});
 		this.writerThread.setPriority(Thread.MIN_PRIORITY);
@@ -86,6 +89,13 @@ public class CacheWriter {
 	 */
 	public void stop() {
 		this.writerThread.interrupt();
+		// wait for the writer thread to finish, so we don't System.exit() in the middle of writing...
+		try {
+			this.writerThread.join(JOIN_TIMEOUT);
+		} catch (InterruptedException e) {
+			Log.error("Interrupted while joining the writerThread", e);
+			Thread.currentThread().interrupt();
+		}
 	}
 
 	/**
@@ -97,7 +107,7 @@ public class CacheWriter {
 	 * @param item the cache item to store to disc
 	 * @throws IOException if an error occurs while writing to the cache
 	 */
-	protected void store(final CacheItem item) throws IOException {
+	protected void store(final CacheItem item) {
 		// write out generated classes first
 		final Map<String, byte[]> generatedClasses = item.getGeneratedClasses();
 		if (generatedClasses != null) {
@@ -115,22 +125,44 @@ public class CacheWriter {
 				() -> storeSingleClass(item.getName(), item.getCachedBytes(), item.getDirectory()));
 	}
 
-	private void storeSingleClass(final String className, final byte[] classBytes, final String cacheDirectory)
-			throws FileNotFoundException, IOException {
+	private void storeSingleClass(final String className, final byte[] classBytes, final String cacheDirectory) {
 		final File directory = new File(cacheDirectory);
 		if (!directory.exists()) {
 			directory.mkdirs();
 		}
 
-		try (FileOutputStream fosCache = new FileOutputStream(new File(directory, className));
+		final File outputFile = new File(directory, className);
+		boolean success = true;
+		try (FileOutputStream fosCache = new FileOutputStream(outputFile);
 				DataOutputStream outCache = new DataOutputStream(new BufferedOutputStream(fosCache))) {
 			outCache.write(classBytes);
 			outCache.flush();
 			fosCache.getFD().sync();
+		} catch (IOException e) {
+			Log.error("Failed to store class " + className + " in cache", e);
+			success = false;
+		}
+
+		// if there was an error during writing the file, or if an interrupt happened,
+		// we have a risk of having written an incomplete file. To be sure, we check
+		// the length of the file on disk. If it does not match, we delete the file 
+		// again.
+		if ((!success || Thread.currentThread().isInterrupted()) && outputFile.exists()
+				&& outputFile.length() != classBytes.length) {
+			Log.debug("File " + outputFile.getAbsolutePath() + " was not completely written to disk. Removing it.");
+			try {
+				Files.delete(outputFile.toPath());
+			} catch (IOException e) {
+				Log.error("File " + outputFile.getAbsolutePath() + " is corrupted but could not be deleted.", e);
+				// last resort: try to delete the file when the VM terminates
+				outputFile.deleteOnExit();
+			}
 		}
 
 		// after writing the file, remove the item from the itemsInQueue lookup map as
-		// well
+		// well - we do this even the writing was unsuccessful to keep the queue and the
+		// itemsInQueue in sync. It will do no further harm, just the file is not cached and will be woven and
+		// cached again next time.
 		itemsInQueue.remove(new CacheItemKey(cacheDirectory, className));
 	}
 }
