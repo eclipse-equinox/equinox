@@ -120,6 +120,7 @@ public class JspServlet extends HttpServlet {
 		try {
 			Thread.currentThread().setContextClassLoader(jspLoader);
 			jspServlet.init(new ServletConfigAdaptor(config));
+			new org.apache.jasper.servlet.JasperInitializer().onStartup(Collections.emptySet(), getServletContext());
 
 			// If a SecurityManager is set we need to override the permissions collection set in Jasper's JSPRuntimeContext
 			if (System.getSecurityManager() != null) {

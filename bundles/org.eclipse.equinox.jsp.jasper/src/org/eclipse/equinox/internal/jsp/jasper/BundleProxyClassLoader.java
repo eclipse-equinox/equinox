@@ -24,6 +24,7 @@ import org.osgi.framework.Bundle;
  * A BundleProxyClassLoader wraps a bundle and uses the various Bundle methods to produce a ClassLoader. 
  */
 public class BundleProxyClassLoader extends ClassLoader {
+	private final Bundle activatorBundle = Activator.getBundle(Activator.class);
 	private Bundle bundle;
 	private ClassLoader parent;
 
@@ -49,6 +50,14 @@ public class BundleProxyClassLoader extends ClassLoader {
 
 	@Override
 	public Class<?> findClass(String name) throws ClassNotFoundException {
+		try {
+			if (name.startsWith("com.sun.el")) { //$NON-NLS-1$
+				return activatorBundle.loadClass(name);
+			}
+		} catch (ClassNotFoundException ex) {
+			//$FALL-THROUGH$
+		}
+
 		return bundle.loadClass(name);
 	}
 
