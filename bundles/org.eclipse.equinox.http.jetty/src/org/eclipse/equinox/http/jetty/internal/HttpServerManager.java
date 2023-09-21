@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2021 IBM Corporation and others.
+ * Copyright (c) 2007, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,14 +20,30 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionIdListener;
+import javax.servlet.http.HttpSessionListener;
+
 import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.eclipse.equinox.http.jetty.JettyCustomizer;
 import org.eclipse.equinox.http.servlet.HttpServiceServlet;
 import org.eclipse.jetty.http.UriCompliance;
-import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.session.HouseKeeper;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -75,7 +91,8 @@ public class HttpServerManager implements ManagedServiceFactory {
 	@Override
 	public synchronized void updated(String pid, Dictionary<String, ?> dictionary) throws ConfigurationException {
 		deleted(pid);
-		Server server = new Server(new QueuedThreadPool(Details.getInt(dictionary, JettyConstants.HTTP_MAXTHREADS, 200), Details.getInt(dictionary, JettyConstants.HTTP_MINTHREADS, 8)));
+		Server server = new Server(new QueuedThreadPool(Details.getInt(dictionary, JettyConstants.HTTP_MAXTHREADS, 200),
+				Details.getInt(dictionary, JettyConstants.HTTP_MINTHREADS, 8)));
 
 		JettyCustomizer customizer = createJettyCustomizer(dictionary);
 
@@ -156,28 +173,33 @@ public class HttpServerManager implements ManagedServiceFactory {
 			SessionHandler sessionManager = httpContext.getSessionHandler();
 			sessionManager.addEventListener((HttpSessionIdListener) holder.getServlet());
 			HouseKeeper houseKeeper = server.getSessionIdManager().getSessionHouseKeeper();
-			houseKeeper.setIntervalSec(Details.getLong(dictionary, JettyConstants.HOUSEKEEPER_INTERVAL, houseKeeper.getIntervalSec()));
+			houseKeeper.setIntervalSec(
+					Details.getLong(dictionary, JettyConstants.HOUSEKEEPER_INTERVAL, houseKeeper.getIntervalSec()));
 		} catch (Exception e) {
 			throw new ConfigurationException(pid, e.getMessage(), e);
 		}
 		servers.put(pid, server);
 	}
 
-	private ServerConnector createHttpsConnector(@SuppressWarnings("rawtypes") Dictionary dictionary, Server server, HttpConfiguration http_config) {
+	private ServerConnector createHttpsConnector(@SuppressWarnings("rawtypes") Dictionary dictionary, Server server,
+			HttpConfiguration http_config) {
 		ServerConnector httpsConnector = null;
 		if (Details.getBoolean(dictionary, JettyConstants.HTTPS_ENABLED, false)) {
 			// SSL Context Factory for HTTPS and SPDY
 			SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
-			//sslContextFactory.setKeyStore(KeyS)
+			// sslContextFactory.setKeyStore(KeyS)
 
-			//Not sure if the next tree are properly migrated from jetty 8...
+			// Not sure if the next tree are properly migrated from jetty 8...
 			sslContextFactory.setKeyStorePath(Details.getString(dictionary, JettyConstants.SSL_KEYSTORE, null));
 			sslContextFactory.setKeyStorePassword(Details.getString(dictionary, JettyConstants.SSL_PASSWORD, null));
-			sslContextFactory.setKeyManagerPassword(Details.getString(dictionary, JettyConstants.SSL_KEYPASSWORD, null));
+			sslContextFactory
+					.setKeyManagerPassword(Details.getString(dictionary, JettyConstants.SSL_KEYPASSWORD, null));
 			sslContextFactory.setKeyStoreType(Details.getString(dictionary, JettyConstants.SSL_KEYSTORETYPE, "JKS")); //$NON-NLS-1$
 			sslContextFactory.setProtocol(Details.getString(dictionary, JettyConstants.SSL_PROTOCOL, "TLS")); //$NON-NLS-1$
-			sslContextFactory.setWantClientAuth(Details.getBoolean(dictionary, JettyConstants.SSL_WANTCLIENTAUTH, false));
-			sslContextFactory.setNeedClientAuth(Details.getBoolean(dictionary, JettyConstants.SSL_NEEDCLIENTAUTH, false));
+			sslContextFactory
+					.setWantClientAuth(Details.getBoolean(dictionary, JettyConstants.SSL_WANTCLIENTAUTH, false));
+			sslContextFactory
+					.setNeedClientAuth(Details.getBoolean(dictionary, JettyConstants.SSL_NEEDCLIENTAUTH, false));
 
 			// HTTPS Configuration
 			HttpConfiguration https_config = new HttpConfiguration(http_config);
@@ -185,14 +207,16 @@ public class HttpServerManager implements ManagedServiceFactory {
 			https_config.setUriCompliance(UriCompliance.LEGACY);
 
 			// HTTPS connector
-			httpsConnector = new ServerConnector(server, new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(https_config)); //$NON-NLS-1$
+			httpsConnector = new ServerConnector(server, new SslConnectionFactory(sslContextFactory, "http/1.1"), //$NON-NLS-1$
+					new HttpConnectionFactory(https_config));
 			httpsConnector.setPort(Details.getInt(dictionary, JettyConstants.HTTPS_PORT, 443));
 			httpsConnector.setHost(Details.getString(dictionary, JettyConstants.HTTPS_HOST, null));
 		}
 		return httpsConnector;
 	}
 
-	private ServerConnector createHttpConnector(@SuppressWarnings("rawtypes") Dictionary dictionary, Server server, HttpConfiguration http_config) {
+	private ServerConnector createHttpConnector(@SuppressWarnings("rawtypes") Dictionary dictionary, Server server,
+			HttpConfiguration http_config) {
 		ServerConnector httpConnector = null;
 		if (Details.getBoolean(dictionary, JettyConstants.HTTP_ENABLED, true)) {
 			// HTTP Configuration
@@ -200,7 +224,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 				http_config.setSecureScheme("https"); //$NON-NLS-1$
 				http_config.setSecurePort(Details.getInt(dictionary, JettyConstants.HTTPS_PORT, 443));
 			}
-			http_config.setUriCompliance(UriCompliance.LEGACY);;
+			http_config.setUriCompliance(UriCompliance.LEGACY);
 			// HTTP connector
 			httpConnector = new ServerConnector(server, new HttpConnectionFactory(http_config));
 			httpConnector.setPort(Details.getInt(dictionary, JettyConstants.HTTP_PORT, 80));
@@ -250,7 +274,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 	}
 
 	public static class InternalHttpServiceServlet implements HttpSessionListener, HttpSessionIdListener, Servlet {
-		//		private static final long serialVersionUID = 7477982882399972088L;
+		// private static final long serialVersionUID = 7477982882399972088L;
 		private final Servlet httpServiceServlet = new HttpServiceServlet();
 		private ClassLoader contextLoader;
 		private final Method sessionDestroyed;
@@ -260,12 +284,12 @@ public class HttpServerManager implements ManagedServiceFactory {
 			Class<?> clazz = httpServiceServlet.getClass();
 
 			try {
-				sessionDestroyed = clazz.getMethod("sessionDestroyed", new Class<?>[] {String.class}); //$NON-NLS-1$
+				sessionDestroyed = clazz.getMethod("sessionDestroyed", new Class<?>[] { String.class }); //$NON-NLS-1$
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			}
 			try {
-				sessionIdChanged = clazz.getMethod("sessionIdChanged", new Class<?>[] {String.class}); //$NON-NLS-1$
+				sessionIdChanged = clazz.getMethod("sessionIdChanged", new Class<?>[] { String.class }); //$NON-NLS-1$
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			}
