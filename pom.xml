@@ -185,6 +185,7 @@
 		    <module>bundles/org.eclipse.equinox.device</module>
 		    <module>bundles/org.eclipse.equinox.event</module>
 		
+		    <module>bundles/org.eclipse.equinox.http.service.api</module>
 		    <module>bundles/org.eclipse.equinox.http.jetty</module>
 		    <module>bundles/org.eclipse.equinox.http.registry</module>
 		    <module>bundles/org.eclipse.equinox.http.servlet</module>
