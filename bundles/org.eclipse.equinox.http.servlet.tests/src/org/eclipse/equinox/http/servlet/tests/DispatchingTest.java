@@ -51,6 +51,7 @@ import org.eclipse.equinox.http.servlet.tests.util.BaseServlet;
 import org.eclipse.equinox.http.servlet.tests.util.DispatchResultServlet;
 import org.eclipse.equinox.http.servlet.tests.util.EventHandler;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -65,6 +66,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 public class DispatchingTest extends BaseTest {
 
 	@Test
+	@Ignore("https://github.com/eclipse/jetty.project/issues/10617")
 	public void test_crossContextDispatch1() throws Exception {
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;

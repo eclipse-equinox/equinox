@@ -17,9 +17,15 @@
 package org.eclipse.equinox.http.jetty.internal;
 
 import java.io.File;
-import java.util.*;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.List;
+
 import org.eclipse.equinox.http.jetty.JettyConstants;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
@@ -48,7 +54,6 @@ public class Activator implements BundleActivator {
 	// Valid values are in increasing threshold: "debug", "info", "warn", "error",
 	// and "off"
 	// (default threshold is "warn")
-	private static final String LOG_STDERR_THRESHOLD = "org.eclipse.equinox.http.jetty.log.stderr.threshold"; //$NON-NLS-1$
 
 	// The staticServerManager is use by the start and stopServer methods and must
 	// be accessed in a static synchronized block
@@ -62,7 +67,6 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		File jettyWorkDir = new File(context.getDataFile(""), JETTY_WORK_DIR); //$NON-NLS-1$
 		jettyWorkDir.mkdir();
-		EquinoxStdErrLog.setThresholdLogger(context.getProperty(LOG_STDERR_THRESHOLD));
 		httpServerManager = new HttpServerManager(jettyWorkDir);
 
 		boolean autostart = Details.getBoolean(context, AUTOSTART, false);

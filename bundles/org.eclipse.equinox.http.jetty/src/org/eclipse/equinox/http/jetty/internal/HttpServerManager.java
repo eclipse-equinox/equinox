@@ -37,6 +37,9 @@ import javax.servlet.http.HttpSessionListener;
 import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.eclipse.equinox.http.jetty.JettyCustomizer;
 import org.eclipse.equinox.http.servlet.HttpServiceServlet;
+import org.eclipse.jetty.ee8.nested.SessionHandler;
+import org.eclipse.jetty.ee8.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee8.servlet.ServletHolder;
 import org.eclipse.jetty.http.UriCompliance;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -44,10 +47,8 @@ import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
-import org.eclipse.jetty.server.session.HouseKeeper;
-import org.eclipse.jetty.server.session.SessionHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.session.DefaultSessionIdManager;
+import org.eclipse.jetty.session.HouseKeeper;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.osgi.framework.Constants;
@@ -169,12 +170,19 @@ public class HttpServerManager implements ManagedServiceFactory {
 			httpContext = (ServletContextHandler) customizer.customizeContext(httpContext, dictionary);
 
 		try {
+			DefaultSessionIdManager idMgr = new DefaultSessionIdManager(server);
+			server.addBean(idMgr, true);
+
+			HouseKeeper houseKeeper = new HouseKeeper();
+			houseKeeper.setSessionIdManager(idMgr);
+			// set the frequency of scavenge cycles
+			houseKeeper.setIntervalSec(
+					Details.getLong(dictionary, JettyConstants.HOUSEKEEPER_INTERVAL, houseKeeper.getIntervalSec()));
+			idMgr.setSessionHouseKeeper(houseKeeper);
 			server.start();
 			SessionHandler sessionManager = httpContext.getSessionHandler();
 			sessionManager.addEventListener((HttpSessionIdListener) holder.getServlet());
-			HouseKeeper houseKeeper = server.getSessionIdManager().getSessionHouseKeeper();
-			houseKeeper.setIntervalSec(
-					Details.getLong(dictionary, JettyConstants.HOUSEKEEPER_INTERVAL, houseKeeper.getIntervalSec()));
+
 		} catch (Exception e) {
 			throw new ConfigurationException(pid, e.getMessage(), e);
 		}
