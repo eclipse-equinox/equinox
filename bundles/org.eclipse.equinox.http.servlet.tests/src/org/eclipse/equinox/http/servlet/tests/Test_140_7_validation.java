@@ -22,7 +22,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletContextListener;
 
 import org.eclipse.equinox.http.servlet.testbase.BaseTest;
@@ -44,7 +43,7 @@ public class Test_140_7_validation extends BaseTest {
 		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
 		ServiceRegistration<?> sr = context.registerService(
-				ServletContextListener.class, new MockSCL(new AtomicReference<ServletContext>()), properties);
+				ServletContextListener.class, new MockSCL(new AtomicReference<>()), properties);
 		registrations.add(sr);
 
 		ListenerDTO listenerDTO = getListenerDTOByServiceId(DEFAULT, getServiceId(sr));

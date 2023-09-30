@@ -38,7 +38,7 @@ public class TestFilter1 extends AbstractTestServlet {
 	public void activate(ComponentContext componentContext) throws ServletException, NamespaceException {
 		ExtendedHttpService service = (ExtendedHttpService)getHttpService();
 		service.registerServlet(regexAlias(), this, null, null);
-		service.registerFilter(regexAlias(), f1, new Hashtable<String, String>(), null);
+		service.registerFilter(regexAlias(), f1, new Hashtable<>(), null);
 	}
 
 	@Override
