@@ -158,12 +158,7 @@ public class ServletContextAdaptor {
 
 		try {
 			mimeType = AccessController.doPrivileged(
-				new PrivilegedExceptionAction<String>() {
-					@Override
-					public String run() throws Exception {
-						return servletContextHelper.getMimeType(name);
-					}
-				}, acc
+				(PrivilegedExceptionAction<String>) () -> servletContextHelper.getMimeType(name), acc
 			);
 		}
 		catch (PrivilegedActionException e) {
@@ -187,12 +182,7 @@ public class ServletContextAdaptor {
 	public String getRealPath(final String path) {
 		try {
 			return AccessController.doPrivileged(
-				new PrivilegedExceptionAction<String>() {
-					@Override
-					public String run() throws Exception {
-						return servletContextHelper.getRealPath(path);
-					}
-				}, acc
+				(PrivilegedExceptionAction<String>) () -> servletContextHelper.getRealPath(path), acc
 			);
 		}
 		catch (PrivilegedActionException e) {
@@ -224,12 +214,7 @@ public class ServletContextAdaptor {
 	public URL getResource(final String name) {
 		try {
 			return AccessController.doPrivileged(
-				new PrivilegedExceptionAction<URL>() {
-					@Override
-					public URL run() throws Exception {
-						return servletContextHelper.getResource(name);
-					}
-				}, acc
+				(PrivilegedExceptionAction<URL>) () -> servletContextHelper.getResource(name), acc
 			);
 		}
 		catch (PrivilegedActionException e) {
@@ -263,12 +248,7 @@ public class ServletContextAdaptor {
 
 		try {
 			return AccessController.doPrivileged(
-				new PrivilegedExceptionAction<Set<String>>() {
-					@Override
-					public Set<String> run() throws Exception {
-						return servletContextHelper.getResourcePaths(name);
-					}
-				}, acc
+				(PrivilegedExceptionAction<Set<String>>) () -> servletContextHelper.getResourcePaths(name), acc
 			);
 		}
 		catch (PrivilegedActionException e) {

@@ -72,12 +72,9 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 		
 		final HttpContextHolder httpContextHolder = getHttpContextHolder(httpContext);
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
-				@Override
-				public Void run() {
-					httpServiceRuntime.registerHttpServiceFilter(bundle, alias, filter, initparams, httpContextHolder);
-					return null;
-				}
+			AccessController.doPrivileged((PrivilegedExceptionAction<Void>) () -> {
+				httpServiceRuntime.registerHttpServiceFilter(bundle, alias, filter, initparams, httpContextHolder);
+				return null;
 			});
 		}
 		catch (PrivilegedActionException e) {
@@ -105,12 +102,9 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 		checkShutdown();
 		final HttpContextHolder httpContextHolder = getHttpContextHolder(httpContext);
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
-				@Override
-				public Void run() throws NamespaceException {
-					httpServiceRuntime.registerHttpServiceResources(bundle, alias, name, httpContextHolder);
-					return null;
-				}
+			AccessController.doPrivileged((PrivilegedExceptionAction<Void>) () -> {
+				httpServiceRuntime.registerHttpServiceResources(bundle, alias, name, httpContextHolder);
+				return null;
 			});
 		} catch (PrivilegedActionException e) {
 			Throw.unchecked(e.getException());

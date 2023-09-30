@@ -70,107 +70,103 @@ public class ResourceServlet extends HttpServlet {
 
 	private void writeResource(final HttpServletRequest req, final HttpServletResponse resp, final String resourcePath, final URL resourceURL) throws IOException {
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction<Boolean>() {
+			AccessController.doPrivileged((PrivilegedExceptionAction<Boolean>) () -> {
+				URLConnection connection = resourceURL.openConnection();
+				long lastModified = connection.getLastModified();
+				int contentLength = connection.getContentLength();
 
-				@Override
-				public Boolean run() throws Exception {
-					URLConnection connection = resourceURL.openConnection();
-					long lastModified = connection.getLastModified();
-					int contentLength = connection.getContentLength();
+				String etag = null;
+				if (lastModified != -1 && contentLength != -1)
+					etag = "W/\"" + contentLength + "-" + lastModified + "\""; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 
-					String etag = null;
-					if (lastModified != -1 && contentLength != -1)
-						etag = "W/\"" + contentLength + "-" + lastModified + "\""; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-
-					// Check for cache revalidation.
-					// We should prefer ETag validation as the guarantees are stronger and all HTTP 1.1 clients should be using it
-					String ifNoneMatch = req.getHeader(IF_NONE_MATCH);
-					if (ifNoneMatch != null && etag != null && ifNoneMatch.indexOf(etag) != -1) {
-						resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-						return Boolean.TRUE;
-					}
-
-					long ifModifiedSince = req.getDateHeader(IF_MODIFIED_SINCE);
-					// for purposes of comparison we add 999 to ifModifiedSince since the fidelity
-					// of the IMS header generally doesn't include milli-seconds
-					if (ifModifiedSince > -1 && lastModified > 0 && lastModified <= (ifModifiedSince + 999)) {
-						resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-						return Boolean.TRUE;
-					}
-
-					String rangeHeader = req.getHeader(RANGE);
-					Range range = null;
-					if (rangeHeader != null) {
-						range = Range.createFromRangeHeader(rangeHeader);
-						range.completeLength = contentLength;
-						range.updateBytePos();
-
-						if (!range.isValid()) {
-							resp.setHeader(ACCEPT_RANGES, RANGE_UNIT_BYTES);
-							resp.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
-							return Boolean.TRUE;
-						}
-					}
-
-					// return the full contents regularly
-					if (contentLength != -1)
-						resp.setContentLength(contentLength);
-
-					String filename = new File(resourcePath).getName();
-					String contentType = servletContextHelper.getMimeType(filename);
-					if (contentType == null)
-						contentType = getServletConfig().getServletContext().getMimeType(filename);
-
-					if (contentType != null)
-						resp.setContentType(contentType);
-
-					if (lastModified > 0)
-						resp.setDateHeader(LAST_MODIFIED, lastModified);
-
-					if (etag != null)
-						resp.setHeader(ETAG, etag);
-
-					if (range == null &&
-						(servletContextHelper instanceof RangeAwareServletContextHelper) &&
-						((RangeAwareServletContextHelper)servletContextHelper).rangeableContentType(contentType, req.getHeader("User-Agent"))) { //$NON-NLS-1$
-
-						range = new Range();
-						range.firstBytePos = 0;
-						range.completeLength = contentLength;
-						range.updateBytePos();
-					}
-
-					if (range != null) {
-						resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-						resp.setHeader(ACCEPT_RANGES, RANGE_UNIT_BYTES);
-						resp.setContentLength(range.contentLength());
-						resp.setHeader(CONTENT_RANGE, RANGE_UNIT_BYTES + " " + range.firstBytePos + "-" + range.lastBytePos + "/" + range.completeLength); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
-
-					if (contentLength != 0) {
-						// open the input stream
-						try (InputStream is = connection.getInputStream()) {
-							// write the resource
-							try {
-								OutputStream os = resp.getOutputStream();
-								int writtenContentLength = writeResourceToOutputStream(is, os, range);
-								if (contentLength == -1 || contentLength != writtenContentLength)
-									resp.setContentLength(writtenContentLength);
-							} catch (IllegalStateException e) { // can occur if the response output is already open as a Writer
-								Writer writer = resp.getWriter();
-								writeResourceToWriter(is, writer, range);
-								// Since ContentLength is a measure of the number of bytes contained in the body
-								// of a message when we use a Writer we lose control of the exact byte count and
-								// defer the problem to the Servlet Engine's Writer implementation.
-							}
-						} catch (FileNotFoundException | SecurityException e) {
-							// SecurityException may indicate the following scenarios
-							// - url is not accessible
-							sendError(resp, HttpServletResponse.SC_FORBIDDEN);
-						}
-					}
+				// Check for cache revalidation.
+				// We should prefer ETag validation as the guarantees are stronger and all HTTP 1.1 clients should be using it
+				String ifNoneMatch = req.getHeader(IF_NONE_MATCH);
+				if (ifNoneMatch != null && etag != null && ifNoneMatch.indexOf(etag) != -1) {
+					resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 					return Boolean.TRUE;
 				}
+
+				long ifModifiedSince = req.getDateHeader(IF_MODIFIED_SINCE);
+				// for purposes of comparison we add 999 to ifModifiedSince since the fidelity
+				// of the IMS header generally doesn't include milli-seconds
+				if (ifModifiedSince > -1 && lastModified > 0 && lastModified <= (ifModifiedSince + 999)) {
+					resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+					return Boolean.TRUE;
+				}
+
+				String rangeHeader = req.getHeader(RANGE);
+				Range range = null;
+				if (rangeHeader != null) {
+					range = Range.createFromRangeHeader(rangeHeader);
+					range.completeLength = contentLength;
+					range.updateBytePos();
+
+					if (!range.isValid()) {
+						resp.setHeader(ACCEPT_RANGES, RANGE_UNIT_BYTES);
+						resp.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+						return Boolean.TRUE;
+					}
+				}
+
+				// return the full contents regularly
+				if (contentLength != -1)
+					resp.setContentLength(contentLength);
+
+				String filename = new File(resourcePath).getName();
+				String contentType = servletContextHelper.getMimeType(filename);
+				if (contentType == null)
+					contentType = getServletConfig().getServletContext().getMimeType(filename);
+
+				if (contentType != null)
+					resp.setContentType(contentType);
+
+				if (lastModified > 0)
+					resp.setDateHeader(LAST_MODIFIED, lastModified);
+
+				if (etag != null)
+					resp.setHeader(ETAG, etag);
+
+				if (range == null &&
+					(servletContextHelper instanceof RangeAwareServletContextHelper) &&
+					((RangeAwareServletContextHelper)servletContextHelper).rangeableContentType(contentType, req.getHeader("User-Agent"))) { //$NON-NLS-1$
+
+					range = new Range();
+					range.firstBytePos = 0;
+					range.completeLength = contentLength;
+					range.updateBytePos();
+				}
+
+				if (range != null) {
+					resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+					resp.setHeader(ACCEPT_RANGES, RANGE_UNIT_BYTES);
+					resp.setContentLength(range.contentLength());
+					resp.setHeader(CONTENT_RANGE, RANGE_UNIT_BYTES + " " + range.firstBytePos + "-" + range.lastBytePos + "/" + range.completeLength); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				}
+
+				if (contentLength != 0) {
+					// open the input stream
+					try (InputStream is = connection.getInputStream()) {
+						// write the resource
+						try {
+							OutputStream os = resp.getOutputStream();
+							int writtenContentLength = writeResourceToOutputStream(is, os, range);
+							if (contentLength == -1 || contentLength != writtenContentLength)
+								resp.setContentLength(writtenContentLength);
+						} catch (IllegalStateException e) { // can occur if the response output is already open as a Writer
+							Writer writer = resp.getWriter();
+							writeResourceToWriter(is, writer, range);
+							// Since ContentLength is a measure of the number of bytes contained in the body
+							// of a message when we use a Writer we lose control of the exact byte count and
+							// defer the problem to the Servlet Engine's Writer implementation.
+						}
+					} catch (FileNotFoundException | SecurityException e) {
+						// SecurityException may indicate the following scenarios
+						// - url is not accessible
+						sendError(resp, HttpServletResponse.SC_FORBIDDEN);
+					}
+				}
+				return Boolean.TRUE;
 			}, acc);
 		} catch (PrivilegedActionException e) {
 			throw (IOException) e.getException();
