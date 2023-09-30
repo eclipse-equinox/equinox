@@ -318,6 +318,23 @@ public class PathTest {
 		assertEquals("3.0.win", "D:/foo/abc.txt", IPath.forWindows("/D:/foo/abc.txt").toString());
 		// fullPath = new java.io.File("D:/").toURL().getPath()
 		assertEquals("3.1.win", "D:/", IPath.forWindows("/D:/").toString());
+
+		final String verylongpath = "C:/dev/verylongpath/00112233445566778899aabbccddeeff/00112233445566778899aabbccddeeff/00112233445566778899aabbccddeeff/"
+				+ "00112233445566778899aabbccddeeff/00112233445566778899aabbccddeeff/00112233445566778899aabbccddeeff/root/lib/gcc/arm-none-eabi/7.3.1/include-fixed";
+		anyPath = IPath.forWindows(verylongpath);
+		assertEquals("3.2.1.win", "C:", anyPath.getDevice());
+		assertEquals("3.2.2.win", "dev", anyPath.segment(0));
+		assertEquals("3.2.3.win", verylongpath, anyPath.toString());
+
+		anyPath = IPath.forWindows("//?/" + verylongpath);
+		assertEquals("3.3.1.win", "C:", anyPath.getDevice());
+		assertEquals("3.3.2.win", "dev", anyPath.segment(0));
+		assertEquals("3.3.3.win", verylongpath, anyPath.toString());
+
+		anyPath = IPath.forWindows("\\\\?\\" + verylongpath.replace('/', '\\'));
+		assertEquals("3.4.1.win", "C:", anyPath.getDevice());
+		assertEquals("3.4.2.win", "dev", anyPath.segment(0));
+		assertEquals("3.4.3.win", verylongpath, anyPath.toString());
 	}
 
 	@Test

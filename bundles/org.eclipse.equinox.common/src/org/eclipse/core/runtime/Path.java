@@ -310,8 +310,15 @@ public final class Path implements IPath, Cloneable {
 			// extract device
 			int i = fullPath.indexOf(DEVICE_SEPARATOR);
 			if (i != -1) {
-				// remove leading slash from device part to handle output of URL.getFile()
-				int start = fullPath.charAt(0) == SEPARATOR ? 1 : 0;
+				int start = 0;
+				if (fullPath.startsWith("//?/")) { //$NON-NLS-1$
+					// Paths prefixed with "//?/" are local paths. For details:
+					// https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#win32-file-namespaces
+					start = 4;
+				} else if (fullPath.charAt(0) == SEPARATOR) {
+					// remove leading slash from device part to handle output of URL.getFile()
+					start = 1;
+				}
 				devicePart = fullPath.substring(start, i + 1);
 				fullPath = fullPath.substring(i + 1, fullPath.length());
 			}
