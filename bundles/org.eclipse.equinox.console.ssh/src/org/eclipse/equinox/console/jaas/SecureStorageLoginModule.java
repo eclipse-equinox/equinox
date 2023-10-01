@@ -32,19 +32,19 @@ import org.eclipse.equinox.console.storage.SecureUserStore;
 
 /**
  * This class implements a JAAS LoginModule, which performs username/password
- * based authentication. It reads the user data from the store. 
+ * based authentication. It reads the user data from the store.
  *
  */
 public class SecureStorageLoginModule implements LoginModule {
-	
+
 	private volatile Subject subject;
 	private volatile CallbackHandler callbackHandler;
 	private volatile UserPrincipal userPrincipal;
 	private volatile boolean isSuccess;
 
 	@Override
-	public void initialize(Subject subject, CallbackHandler callbackHandler,
-			Map<String, ?> sharedState, Map<String, ?> options) {
+	public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState,
+			Map<String, ?> options) {
 		this.subject = subject;
 		this.callbackHandler = callbackHandler;
 	}
@@ -54,22 +54,22 @@ public class SecureStorageLoginModule implements LoginModule {
 		NameCallback nameCallback = new NameCallback("username: ");
 		PasswordCallback passwordCallback = new PasswordCallback("password: ", false);
 		try {
-			callbackHandler.handle(new Callback[]{nameCallback, passwordCallback});
+			callbackHandler.handle(new Callback[] { nameCallback, passwordCallback });
 		} catch (IOException | UnsupportedCallbackException e) {
 			throw new FailedLoginException("Cannot get username and password");
 		}
-		
+
 		String username = nameCallback.getName();
 		char[] password = passwordCallback.getPassword();
-		
+
 		userPrincipal = getUserInfo(username);
-		
+
 		try {
 			isSuccess = userPrincipal.authenticate(DigestUtil.encrypt(new String(password)).toCharArray());
 		} catch (Exception e) {
 			throw new FailedLoginException("Wrong credentials");
 		}
-		
+
 		if (isSuccess == true) {
 			return isSuccess;
 		} else {
@@ -110,32 +110,32 @@ public class SecureStorageLoginModule implements LoginModule {
 		userPrincipal = null;
 		return true;
 	}
-	
+
 	private UserPrincipal getUserInfo(String username) throws FailedLoginException {
 		try {
 			if (!SecureUserStore.existsUser(username)) {
 				throw new FailedLoginException("Wrong credentials");
 			}
-			
+
 			String password = SecureUserStore.getPassword(username);
 			if (password == null) {
 				throw new FailedLoginException("Corrupted user");
 			}
-			
+
 			String roles = SecureUserStore.getRoles(username);
 			if (roles == null) {
 				roles = "";
 			}
-			
+
 			UserPrincipal userPrincipal = new UserPrincipal(username, password);
 			for (String role : roles.split(",")) {
 				userPrincipal.addRole(new RolePrincipal(role));
 			}
-			
+
 			return userPrincipal;
 		} catch (Exception e) {
 			throw new FailedLoginException(e.getMessage());
 		}
 	}
-	
+
 }

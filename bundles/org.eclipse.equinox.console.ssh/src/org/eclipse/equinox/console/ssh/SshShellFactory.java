@@ -25,7 +25,7 @@ import org.apache.sshd.server.shell.ShellFactory;
 import org.osgi.framework.BundleContext;
 
 /**
- *  Shell factory used by the SSH server to create a SSH shell
+ * Shell factory used by the SSH server to create a SSH shell
  *
  */
 public class SshShellFactory implements ShellFactory {
@@ -46,14 +46,14 @@ public class SshShellFactory implements ShellFactory {
 		return shell;
 	}
 
-	public synchronized void addCommandProcessor (CommandProcessor processor) {
+	public synchronized void addCommandProcessor(CommandProcessor processor) {
 		processors.add(processor);
 		for (SshShell shell : shells) {
 			shell.addCommandProcessor(processor);
 		}
 	}
 
-	public synchronized void removeCommandProcessor (CommandProcessor processor) {
+	public synchronized void removeCommandProcessor(CommandProcessor processor) {
 		processors.remove(processor);
 		for (SshShell shell : shells) {
 			shell.removeCommandProcessor(processor);
@@ -61,7 +61,7 @@ public class SshShellFactory implements ShellFactory {
 	}
 
 	public void exit() {
-		for(SshShell shell : shells) {
+		for (SshShell shell : shells) {
 			shell.onExit();
 		}
 	}
