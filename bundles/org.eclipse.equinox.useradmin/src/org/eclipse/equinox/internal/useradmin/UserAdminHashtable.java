@@ -34,7 +34,7 @@ public class UserAdminHashtable extends Hashtable<String, Object> {
 	protected UserAdmin userAdmin;
 	protected UserAdminStore userAdminStore;
 
-	//TODO - split this into two classes so we don't have to do this
+	// TODO - split this into two classes so we don't have to do this
 	protected static final int CREDENTIALS = 0;
 	protected static final int PROPERTIES = 1;
 
@@ -46,8 +46,9 @@ public class UserAdminHashtable extends Hashtable<String, Object> {
 	}
 
 	/*
-	 *  We want to generate an event every time we put something into the hashtable, except
-	 *  upon initialization where role data is being read from persistent store.
+	 * We want to generate an event every time we put something into the hashtable,
+	 * except upon initialization where role data is being read from persistent
+	 * store.
 	 */
 	protected synchronized Object put(String key, Object value, boolean generateEvent) {
 
@@ -79,12 +80,12 @@ public class UserAdminHashtable extends Hashtable<String, Object> {
 		}
 
 		switch (propertyType) {
-			case PROPERTIES :
-				userAdmin.checkChangePropertyPermission(name);
-				break;
-			case CREDENTIALS :
-				userAdmin.checkChangeCredentialPermission(name);
-				break;
+		case PROPERTIES:
+			userAdmin.checkChangePropertyPermission(name);
+			break;
+		case CREDENTIALS:
+			userAdmin.checkChangeCredentialPermission(name);
+			break;
 		}
 
 		return put(name, value, true);
@@ -99,24 +100,24 @@ public class UserAdminHashtable extends Hashtable<String, Object> {
 		String name = (String) key;
 
 		switch (propertyType) {
-			case PROPERTIES :
-				userAdmin.checkChangePropertyPermission(name);
-				try {
-					userAdminStore.removeProperty(role, name);
-				} catch (BackingStoreException ex) {
-					return (null);
-				}
-				userAdmin.eventProducer.generateEvent(UserAdminEvent.ROLE_CHANGED, role);
-				break;
-			case CREDENTIALS :
-				userAdmin.checkChangeCredentialPermission(name);
-				try {
-					userAdminStore.removeCredential(role, name);
-				} catch (BackingStoreException ex) {
-					return (null);
-				}
-				userAdmin.eventProducer.generateEvent(UserAdminEvent.ROLE_CHANGED, role);
-				break;
+		case PROPERTIES:
+			userAdmin.checkChangePropertyPermission(name);
+			try {
+				userAdminStore.removeProperty(role, name);
+			} catch (BackingStoreException ex) {
+				return (null);
+			}
+			userAdmin.eventProducer.generateEvent(UserAdminEvent.ROLE_CHANGED, role);
+			break;
+		case CREDENTIALS:
+			userAdmin.checkChangeCredentialPermission(name);
+			try {
+				userAdminStore.removeCredential(role, name);
+			} catch (BackingStoreException ex) {
+				return (null);
+			}
+			userAdmin.eventProducer.generateEvent(UserAdminEvent.ROLE_CHANGED, role);
+			break;
 		}
 
 		return super.remove(name);
@@ -130,32 +131,32 @@ public class UserAdminHashtable extends Hashtable<String, Object> {
 			String name = e.nextElement();
 
 			switch (propertyType) {
-				case PROPERTIES :
-					userAdmin.checkChangePropertyPermission(name);
-					break;
-				case CREDENTIALS :
-					userAdmin.checkChangeCredentialPermission(name);
-					break;
+			case PROPERTIES:
+				userAdmin.checkChangePropertyPermission(name);
+				break;
+			case CREDENTIALS:
+				userAdmin.checkChangeCredentialPermission(name);
+				break;
 			}
 		}
 
 		switch (propertyType) {
-			case PROPERTIES :
-				try {
-					userAdminStore.clearProperties(role);
-				} catch (BackingStoreException ex) {
-					return;
-				}
-				userAdmin.eventProducer.generateEvent(UserAdminEvent.ROLE_CHANGED, role);
-				break;
-			case CREDENTIALS :
-				try {
-					userAdminStore.clearCredentials(role);
-				} catch (BackingStoreException ex) {
-					return;
-				}
-				userAdmin.eventProducer.generateEvent(UserAdminEvent.ROLE_CHANGED, role);
-				break;
+		case PROPERTIES:
+			try {
+				userAdminStore.clearProperties(role);
+			} catch (BackingStoreException ex) {
+				return;
+			}
+			userAdmin.eventProducer.generateEvent(UserAdminEvent.ROLE_CHANGED, role);
+			break;
+		case CREDENTIALS:
+			try {
+				userAdminStore.clearCredentials(role);
+			} catch (BackingStoreException ex) {
+				return;
+			}
+			userAdmin.eventProducer.generateEvent(UserAdminEvent.ROLE_CHANGED, role);
+			break;
 		}
 
 		super.clear();

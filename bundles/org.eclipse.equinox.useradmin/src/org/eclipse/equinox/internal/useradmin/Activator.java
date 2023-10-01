@@ -19,13 +19,14 @@ import org.osgi.service.prefs.PreferencesService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-/**  This is the bundle activator for the UserAdmin bundle.
+/**
+ * This is the bundle activator for the UserAdmin bundle.
  */
 
 public class Activator implements BundleActivator, ServiceFactory, ServiceTrackerCustomizer {
 	/*
 	 * ----------------------------------------------------------------------
-	 *      BundleActivator Interface implementation
+	 * BundleActivator Interface implementation
 	 * ----------------------------------------------------------------------
 	 */
 	private static final String EVENT_ADMIN_CLASS = "org.osgi.service.event.EventAdmin"; //$NON-NLS-1$
@@ -38,7 +39,7 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 	protected UserAdminEventAdapter eventAdapter;
 
 	public Activator() {
-		//a public constructor is required for a BundleActivator
+		// a public constructor is required for a BundleActivator
 	}
 
 	/**
@@ -88,7 +89,7 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 
 	@Override
 	public void ungetService(Bundle bundle, ServiceRegistration registration_, Object service) {
-		//do nothing
+		// do nothing
 	}
 
 	@Override
@@ -102,7 +103,7 @@ public class Activator implements BundleActivator, ServiceFactory, ServiceTracke
 			}
 			return prefs;
 		}
-		return null; //we don't want to track a service we are not using
+		return null; // we don't want to track a service we are not using
 	}
 
 	@Override

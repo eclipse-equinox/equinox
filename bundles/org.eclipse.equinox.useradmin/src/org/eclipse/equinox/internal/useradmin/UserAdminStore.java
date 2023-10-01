@@ -106,7 +106,8 @@ public class UserAdminStore {
 		}
 	}
 
-	protected void addProperty(final org.osgi.service.useradmin.Role role, final String key, final Object value) throws BackingStoreException {
+	protected void addProperty(final org.osgi.service.useradmin.Role role, final String key, final Object value)
+			throws BackingStoreException {
 		try {
 			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
 				Preferences propertyNode = rootNode.node(role.getName() + "/" + propertiesNode); //$NON-NLS-1$
@@ -114,7 +115,7 @@ public class UserAdminStore {
 				if (value instanceof String) {
 					propertyNode.put(key, (String) value);
 					propertyTypesNode.putBoolean(key, true);
-				} else //must be a byte array, then
+				} else // must be a byte array, then
 				{
 					propertyNode.putByteArray(key, (byte[]) value);
 					propertyTypesNode.putBoolean(key, false);
@@ -128,7 +129,8 @@ public class UserAdminStore {
 		}
 	}
 
-	protected void removeProperty(final org.osgi.service.useradmin.Role role, final String key) throws BackingStoreException {
+	protected void removeProperty(final org.osgi.service.useradmin.Role role, final String key)
+			throws BackingStoreException {
 		try {
 			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
 				Preferences propertyNode = rootNode.node(role.getName() + "/" + propertiesNode); //$NON-NLS-1$
@@ -160,7 +162,8 @@ public class UserAdminStore {
 		}
 	}
 
-	protected void addCredential(final org.osgi.service.useradmin.Role role, final String key, final Object value) throws BackingStoreException {
+	protected void addCredential(final org.osgi.service.useradmin.Role role, final String key, final Object value)
+			throws BackingStoreException {
 
 		try {
 			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
@@ -169,7 +172,7 @@ public class UserAdminStore {
 				if (value instanceof String) {
 					credentialNode.put(key, (String) value);
 					credentialTypesNode.putBoolean(key, true);
-				} else //assume it is a byte array
+				} else // assume it is a byte array
 				{
 					credentialNode.putByteArray(key, (byte[]) value);
 					credentialTypesNode.putBoolean(key, false);
@@ -178,13 +181,15 @@ public class UserAdminStore {
 				return (null);
 			});
 		} catch (PrivilegedActionException ex) {
-			log.log(LogService.LOG_ERROR, NLS.bind(UserAdminMsg.Backing_Store_Write_Exception, new Object[] {NLS.bind(UserAdminMsg.adding_Credential_to__15, role.getName())}), ex);
+			log.log(LogService.LOG_ERROR, NLS.bind(UserAdminMsg.Backing_Store_Write_Exception,
+					new Object[] { NLS.bind(UserAdminMsg.adding_Credential_to__15, role.getName()) }), ex);
 			throw ((BackingStoreException) ex.getException());
 		}
 
 	}
 
-	protected void removeCredential(final org.osgi.service.useradmin.Role role, final String key) throws BackingStoreException {
+	protected void removeCredential(final org.osgi.service.useradmin.Role role, final String key)
+			throws BackingStoreException {
 		try {
 			AccessController.doPrivileged((PrivilegedExceptionAction) () -> {
 				Preferences credentialNode = rootNode.node(role.getName() + "/" + credentialsNode); //$NON-NLS-1$
@@ -209,7 +214,10 @@ public class UserAdminStore {
 				return (null);
 			});
 		} catch (PrivilegedActionException ex) {
-			log.log(LogService.LOG_ERROR, NLS.bind(UserAdminMsg.Backing_Store_Write_Exception, new Object[] {NLS.bind(UserAdminMsg.adding_member__18, role.getName(), group.getName())}), ex);
+			log.log(LogService.LOG_ERROR,
+					NLS.bind(UserAdminMsg.Backing_Store_Write_Exception,
+							new Object[] { NLS.bind(UserAdminMsg.adding_member__18, role.getName(), group.getName()) }),
+					ex);
 			throw ((BackingStoreException) ex.getException());
 		}
 	}
@@ -223,7 +231,8 @@ public class UserAdminStore {
 				return (null);
 			});
 		} catch (PrivilegedActionException ex) {
-			log.log(LogService.LOG_ERROR, NLS.bind(UserAdminMsg.Backing_Store_Write_Exception, new Object[] {NLS.bind(UserAdminMsg.adding_required_member__21, role.getName(), group.getName())}), ex);
+			log.log(LogService.LOG_ERROR, NLS.bind(UserAdminMsg.Backing_Store_Write_Exception, new Object[] {
+					NLS.bind(UserAdminMsg.adding_required_member__21, role.getName(), group.getName()) }), ex);
 			throw ((BackingStoreException) ex.getException());
 		}
 	}
@@ -237,7 +246,8 @@ public class UserAdminStore {
 				return (null);
 			});
 		} catch (PrivilegedActionException ex) {
-			log.log(LogService.LOG_ERROR, NLS.bind(UserAdminMsg.Backing_Store_Write_Exception, new Object[] {NLS.bind(UserAdminMsg.removing_member__24, role.getName(), group.getName())}), ex);
+			log.log(LogService.LOG_ERROR, NLS.bind(UserAdminMsg.Backing_Store_Write_Exception,
+					new Object[] { NLS.bind(UserAdminMsg.removing_member__24, role.getName(), group.getName()) }), ex);
 			throw ((BackingStoreException) ex.getException());
 		}
 	}
@@ -249,10 +259,10 @@ public class UserAdminStore {
 			String[] children = rootNode.node("").childrenNames(); //$NON-NLS-1$
 
 			for (String child : children) {
-				if (useradmin.getRole(child) == null) //check to see if it is already loaded
-				{ //(we may have had to load some roles out of
-					loadRole(rootNode.node(child), null); // order due to dependencies) 
-					//modified to solve defect 95982
+				if (useradmin.getRole(child) == null) // check to see if it is already loaded
+				{ // (we may have had to load some roles out of
+					loadRole(rootNode.node(child), null); // order due to dependencies)
+					// modified to solve defect 95982
 				}
 			}
 		}
@@ -263,7 +273,8 @@ public class UserAdminStore {
 		int type = node.getInt(typeString, Integer.MIN_VALUE);
 
 		if (type == Integer.MIN_VALUE) {
-			String errorString = NLS.bind(UserAdminMsg.Backing_Store_Read_Exception, new Object[] {NLS.bind(UserAdminMsg.Unable_to_load_role__27, node.name())});
+			String errorString = NLS.bind(UserAdminMsg.Backing_Store_Read_Exception,
+					new Object[] { NLS.bind(UserAdminMsg.Unable_to_load_role__27, node.name()) });
 			BackingStoreException ex = new BackingStoreException(errorString);
 			log.log(LogService.LOG_ERROR, errorString, ex);
 			throw (ex);
@@ -276,7 +287,7 @@ public class UserAdminStore {
 		UserAdminHashtable properties = (UserAdminHashtable) role.getProperties();
 		Object value;
 
-		//load properties
+		// load properties
 		Preferences propsTypesNode = propsNode.node(typesNode);
 		for (String key : keys) {
 			if (propsTypesNode.getBoolean(key, true))
@@ -286,7 +297,7 @@ public class UserAdminStore {
 			properties.put(key, value, false);
 		}
 
-		//load credentials
+		// load credentials
 		if (type == org.osgi.service.useradmin.Role.USER || type == org.osgi.service.useradmin.Role.GROUP) {
 			Object credValue;
 			Preferences credNode = node.node(credentialsNode);
@@ -302,14 +313,14 @@ public class UserAdminStore {
 			}
 		}
 
-		//load group members
+		// load group members
 		if (type == org.osgi.service.useradmin.Role.GROUP) {
 			Preferences memberNode = node.node(membersNode);
 			keys = memberNode.keys();
 			for (String key : keys) {
 				value = memberNode.get(key, null);
 				Role member = (Role) useradmin.getRole(key);
-				if (member == null) //then we have not loaded this one yet, so load it
+				if (member == null) // then we have not loaded this one yet, so load it
 				{
 					loadRole(rootNode.node(key), null); // modified to solve defect 95982
 					member = (Role) useradmin.getRole(key);
@@ -336,7 +347,7 @@ public class UserAdminStore {
 	private void createAnonRole() throws BackingStoreException {
 		Role role = null;
 		if (!rootNode.nodeExists(Role.anyoneString)) {
-			//If the user.anyone role is not present, create it
+			// If the user.anyone role is not present, create it
 			role = (Role) useradmin.createRole(Role.anyoneString, org.osgi.service.useradmin.Role.ROLE, true);
 		}
 		/* modified to solve defect 95982 */
