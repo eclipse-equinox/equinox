@@ -23,74 +23,73 @@ import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 
 public class CachedClassBundleEntry extends BundleEntry {
 
-    private final IWeavingAdaptor adaptor;
+	private final IWeavingAdaptor adaptor;
 
-    private final URL bundleFileURL;
+	private final URL bundleFileURL;
 
-    private final byte[] bytes;
+	private final byte[] bytes;
 
-    private final BundleEntry delegate;
+	private final BundleEntry delegate;
 
-    private final String name;
+	private final String name;
 
-    public CachedClassBundleEntry(final IWeavingAdaptor aspectjAdaptor,
-            final BundleEntry delegate, final String name, final byte[] bytes,
-            final URL url) {
-        this.adaptor = aspectjAdaptor;
-        this.bundleFileURL = url;
-        this.delegate = delegate;
-        this.name = name;
-        this.bytes = bytes;
-    }
+	public CachedClassBundleEntry(final IWeavingAdaptor aspectjAdaptor, final BundleEntry delegate, final String name,
+			final byte[] bytes, final URL url) {
+		this.adaptor = aspectjAdaptor;
+		this.bundleFileURL = url;
+		this.delegate = delegate;
+		this.name = name;
+		this.bytes = bytes;
+	}
 
-    public boolean dontWeave() {
-        return true;
-    }
+	public boolean dontWeave() {
+		return true;
+	}
 
-    public IWeavingAdaptor getAdaptor() {
-        return adaptor;
-    }
+	public IWeavingAdaptor getAdaptor() {
+		return adaptor;
+	}
 
-    public URL getBundleFileURL() {
-        return bundleFileURL;
-    }
+	public URL getBundleFileURL() {
+		return bundleFileURL;
+	}
 
-    @Override
-    public byte[] getBytes() throws IOException {
-        return bytes;
-    }
+	@Override
+	public byte[] getBytes() throws IOException {
+		return bytes;
+	}
 
-    @Override
-    public URL getFileURL() {
-        return null;
-    }
+	@Override
+	public URL getFileURL() {
+		return null;
+	}
 
-    @Override
-    public InputStream getInputStream() throws IOException {
-        if (delegate == null) {
-            System.err.println("error in: " + name);
-        }
-        return delegate.getInputStream();
-    }
+	@Override
+	public InputStream getInputStream() throws IOException {
+		if (delegate == null) {
+			System.err.println("error in: " + name);
+		}
+		return delegate.getInputStream();
+	}
 
-    @Override
-    public URL getLocalURL() {
-        return null;
-    }
+	@Override
+	public URL getLocalURL() {
+		return null;
+	}
 
-    @Override
-    public String getName() {
-        return name;
-    }
+	@Override
+	public String getName() {
+		return name;
+	}
 
-    @Override
-    public long getSize() {
-        return bytes.length;
-    }
+	@Override
+	public long getSize() {
+		return bytes.length;
+	}
 
-    @Override
-    public long getTime() {
-        return 0;
-    }
+	@Override
+	public long getTime() {
+		return 0;
+	}
 
 }

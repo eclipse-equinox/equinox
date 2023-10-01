@@ -26,67 +26,67 @@ import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 
 public class WeavingBundleEntry extends BundleEntry {
 
-    private final IWeavingAdaptor adaptor;
+	private final IWeavingAdaptor adaptor;
 
-    private final URL bundleFileURL;
+	private final URL bundleFileURL;
 
-    private final BundleEntry delegate;
+	private final BundleEntry delegate;
 
-    private final boolean dontWeave;
+	private final boolean dontWeave;
 
-    public WeavingBundleEntry(final IWeavingAdaptor aspectjAdaptor,
-            final BundleEntry delegate, final URL url, final boolean dontWeave) {
-        this.adaptor = aspectjAdaptor;
-        this.bundleFileURL = url;
-        this.delegate = delegate;
-        this.dontWeave = dontWeave;
-    }
+	public WeavingBundleEntry(final IWeavingAdaptor aspectjAdaptor, final BundleEntry delegate, final URL url,
+			final boolean dontWeave) {
+		this.adaptor = aspectjAdaptor;
+		this.bundleFileURL = url;
+		this.delegate = delegate;
+		this.dontWeave = dontWeave;
+	}
 
-    public boolean dontWeave() {
-        return dontWeave;
-    }
+	public boolean dontWeave() {
+		return dontWeave;
+	}
 
-    public IWeavingAdaptor getAdaptor() {
-        return adaptor;
-    }
+	public IWeavingAdaptor getAdaptor() {
+		return adaptor;
+	}
 
-    public URL getBundleFileURL() {
-        return bundleFileURL;
-    }
+	public URL getBundleFileURL() {
+		return bundleFileURL;
+	}
 
-    @Override
-    public byte[] getBytes() throws IOException {
-        return delegate.getBytes();
-    }
+	@Override
+	public byte[] getBytes() throws IOException {
+		return delegate.getBytes();
+	}
 
-    @Override
-    public URL getFileURL() {
-        return delegate.getFileURL();
-    }
+	@Override
+	public URL getFileURL() {
+		return delegate.getFileURL();
+	}
 
-    @Override
-    public InputStream getInputStream() throws IOException {
-        return delegate.getInputStream();
-    }
+	@Override
+	public InputStream getInputStream() throws IOException {
+		return delegate.getInputStream();
+	}
 
-    @Override
-    public URL getLocalURL() {
-        return delegate.getLocalURL();
-    }
+	@Override
+	public URL getLocalURL() {
+		return delegate.getLocalURL();
+	}
 
-    @Override
-    public String getName() {
-        return delegate.getName();
-    }
+	@Override
+	public String getName() {
+		return delegate.getName();
+	}
 
-    @Override
-    public long getSize() {
-        return delegate.getSize();
-    }
+	@Override
+	public long getSize() {
+		return delegate.getSize();
+	}
 
-    @Override
-    public long getTime() {
-        return delegate.getTime();
-    }
+	@Override
+	public long getTime() {
+		return delegate.getTime();
+	}
 
 }

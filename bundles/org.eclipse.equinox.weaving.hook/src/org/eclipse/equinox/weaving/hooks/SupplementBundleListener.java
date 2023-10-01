@@ -21,20 +21,19 @@ import org.osgi.framework.SynchronousBundleListener;
 
 public class SupplementBundleListener implements SynchronousBundleListener {
 
-    private final ISupplementerRegistry supplementerRegistry;
+	private final ISupplementerRegistry supplementerRegistry;
 
-    public SupplementBundleListener(
-            final ISupplementerRegistry supplementerRegistry) {
-        this.supplementerRegistry = supplementerRegistry;
-    }
+	public SupplementBundleListener(final ISupplementerRegistry supplementerRegistry) {
+		this.supplementerRegistry = supplementerRegistry;
+	}
 
-    public void bundleChanged(final BundleEvent event) {
-        final Bundle bundle = event.getBundle();
-        if (event.getType() == BundleEvent.RESOLVED) {
-            supplementerRegistry.addBundle(bundle);
-        } else if (event.getType() == BundleEvent.UNRESOLVED) {
-            supplementerRegistry.removeBundle(bundle);
-        }
-    }
+	public void bundleChanged(final BundleEvent event) {
+		final Bundle bundle = event.getBundle();
+		if (event.getType() == BundleEvent.RESOLVED) {
+			supplementerRegistry.addBundle(bundle);
+		} else if (event.getType() == BundleEvent.UNRESOLVED) {
+			supplementerRegistry.removeBundle(bundle);
+		}
+	}
 
 }
