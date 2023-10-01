@@ -45,7 +45,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Pack
 		Bundle[] bundles = packageAdmin.getBundles(symbolicName, null);
 		if (bundles == null)
 			return null;
-		//Return the first bundle that is not installed or uninstalled
+		// Return the first bundle that is not installed or uninstalled
 		for (Bundle bundle : bundles) {
 			if ((bundle.getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0) {
 				return bundle;
