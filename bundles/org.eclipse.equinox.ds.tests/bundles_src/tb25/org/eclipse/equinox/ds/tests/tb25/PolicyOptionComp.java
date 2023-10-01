@@ -26,71 +26,71 @@ import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 
 public class PolicyOptionComp implements PropertiesProvider {
-  private static final String RANK_MISSING_VALUE = "property.is.missing";
+	private static final String RANK_MISSING_VALUE = "property.is.missing";
 
-  private ComponentContext    ctxt;
-  private Map                 newProps;
+	private ComponentContext ctxt;
+	private Map newProps;
 
-  protected void activate(ComponentContext ctxt) {
-    this.ctxt = ctxt;
-  }
+	protected void activate(ComponentContext ctxt) {
+		this.ctxt = ctxt;
+	}
 
-  protected void deactivate(ComponentContext ctxt) {
+	protected void deactivate(ComponentContext ctxt) {
 
-  }
+	}
 
-  public void bind01(PropertiesProvider service, Map properties) {
-    registerMethodCall("bind01", properties);
-  }
+	public void bind01(PropertiesProvider service, Map properties) {
+		registerMethodCall("bind01", properties);
+	}
 
-  public void bind11(PropertiesProvider service, Map properties) {
-    registerMethodCall("bind11", properties);
-  }
+	public void bind11(PropertiesProvider service, Map properties) {
+		registerMethodCall("bind11", properties);
+	}
 
-  public void bind0n(PropertiesProvider service, Map properties) {
-    registerMethodCall("bind0n", properties);
-  }
+	public void bind0n(PropertiesProvider service, Map properties) {
+		registerMethodCall("bind0n", properties);
+	}
 
-  public void bind1n(PropertiesProvider service, Map properties) {
-    registerMethodCall("bind1n", properties);
-  }
+	public void bind1n(PropertiesProvider service, Map properties) {
+		registerMethodCall("bind1n", properties);
+	}
 
-  public synchronized Dictionary getProperties() {
-    if (ctxt == null) {
-      return null;
-    }
+	public synchronized Dictionary getProperties() {
+		if (ctxt == null) {
+			return null;
+		}
 
-    Dictionary result = new Hashtable();
+		Dictionary result = new Hashtable();
 
-    Dictionary ctxtProps = ctxt.getProperties();
-    if (ctxtProps != null) {
-      for (Enumeration en = ctxtProps.keys(); en.hasMoreElements();) {
-        Object key = en.nextElement();
-        result.put(key, ctxtProps.get(key));
-      }
-    }
+		Dictionary ctxtProps = ctxt.getProperties();
+		if (ctxtProps != null) {
+			for (Enumeration en = ctxtProps.keys(); en.hasMoreElements();) {
+				Object key = en.nextElement();
+				result.put(key, ctxtProps.get(key));
+			}
+		}
 
-    if (newProps != null) {
-    	newProps.forEach(result::put);
-    }
+		if (newProps != null) {
+			newProps.forEach(result::put);
+		}
 
-    return result;
-  }
+		return result;
+	}
 
-  private synchronized void registerMethodCall(String name, Map properties) {
-    if (newProps == null) {
-      newProps = new Hashtable();
-    }
-    Object rankValue = null;
-    if (properties != null) {
-      newProps.putAll(properties);
-      rankValue = properties.get(Constants.SERVICE_RANKING);
-    }
-    List list = (List) newProps.get(name);
-    if (list == null) {
-      list = new ArrayList();
-      newProps.put(name, list);
-    }
-    list.add(rankValue != null ? rankValue : RANK_MISSING_VALUE);
-  }
+	private synchronized void registerMethodCall(String name, Map properties) {
+		if (newProps == null) {
+			newProps = new Hashtable();
+		}
+		Object rankValue = null;
+		if (properties != null) {
+			newProps.putAll(properties);
+			rankValue = properties.get(Constants.SERVICE_RANKING);
+		}
+		List list = (List) newProps.get(name);
+		if (list == null) {
+			list = new ArrayList();
+			newProps.put(name, list);
+		}
+		list.add(rankValue != null ? rankValue : RANK_MISSING_VALUE);
+	}
 }

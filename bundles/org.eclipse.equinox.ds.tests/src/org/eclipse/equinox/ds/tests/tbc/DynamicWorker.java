@@ -18,8 +18,8 @@ import java.util.Dictionary;
 
 public class DynamicWorker implements PropertiesProvider {
 
-  public Dictionary getProperties() {
-    return null;
-  }
+	public Dictionary getProperties() {
+		return null;
+	}
 
 }

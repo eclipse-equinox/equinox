@@ -18,6 +18,6 @@ import org.osgi.framework.BundleContext;
 
 public interface BundleContextProvider extends PropertiesProvider {
 
-  public BundleContext getBundleContext();
-  
+	public BundleContext getBundleContext();
+
 }

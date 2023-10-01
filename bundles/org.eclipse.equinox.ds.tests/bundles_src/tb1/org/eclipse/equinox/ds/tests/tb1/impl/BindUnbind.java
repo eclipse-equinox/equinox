@@ -20,37 +20,36 @@ import java.util.Vector;
 import org.eclipse.equinox.ds.tests.tbc.BoundTester;
 import org.osgi.framework.ServiceReference;
 
-
 public class BindUnbind implements BoundTester {
 
-  private Vector boundObjects = new Vector();
-  
-  public void bindSAComp(ServiceReference sr) {
-    if (boundObjects.contains(sr)) {
-    } else {
-      boundObjects.addElement(sr);
-    }
-  }
-  
-  public void unbindSAComp(ServiceReference sr) {
-    if (boundObjects.contains(sr)) {
-      boundObjects.removeElement(sr);
-    }
-  }
-  
-  public Dictionary getProperties() {
-    return null;
-  }
+	private Vector boundObjects = new Vector();
 
-  public int getBoundObjectsCount() {
-    return boundObjects.size();
-  }
+	public void bindSAComp(ServiceReference sr) {
+		if (boundObjects.contains(sr)) {
+		} else {
+			boundObjects.addElement(sr);
+		}
+	}
 
-  public ServiceReference getBoundServiceRef(int index) {
-    return (ServiceReference) boundObjects.elementAt(index);
-  }
+	public void unbindSAComp(ServiceReference sr) {
+		if (boundObjects.contains(sr)) {
+			boundObjects.removeElement(sr);
+		}
+	}
 
-  public Object getBoundService(int index) {
-    return null;
-  }
+	public Dictionary getProperties() {
+		return null;
+	}
+
+	public int getBoundObjectsCount() {
+		return boundObjects.size();
+	}
+
+	public ServiceReference getBoundServiceRef(int index) {
+		return (ServiceReference) boundObjects.elementAt(index);
+	}
+
+	public Object getBoundService(int index) {
+		return null;
+	}
 }

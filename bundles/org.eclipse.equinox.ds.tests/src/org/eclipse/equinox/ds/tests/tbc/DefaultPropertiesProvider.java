@@ -18,14 +18,14 @@ import java.util.Dictionary;
 
 public class DefaultPropertiesProvider implements PropertiesProvider {
 
-  private Dictionary properties;
+	private Dictionary properties;
 
-  public DefaultPropertiesProvider(Dictionary properties) {
-    this.properties = properties;
-  }
+	public DefaultPropertiesProvider(Dictionary properties) {
+		this.properties = properties;
+	}
 
-  public Dictionary getProperties() {
-    return properties;
-  }
+	public Dictionary getProperties() {
+		return properties;
+	}
 
 }

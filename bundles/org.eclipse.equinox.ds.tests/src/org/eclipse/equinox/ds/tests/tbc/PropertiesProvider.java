@@ -18,6 +18,6 @@ import java.util.Dictionary;
 
 public interface PropertiesProvider {
 
-  public Dictionary getProperties();
-  
+	public Dictionary getProperties();
+
 }

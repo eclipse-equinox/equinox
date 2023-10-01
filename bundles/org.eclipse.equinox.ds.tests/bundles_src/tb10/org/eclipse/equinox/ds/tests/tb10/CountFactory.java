@@ -21,25 +21,24 @@ import java.util.List;
 import org.eclipse.equinox.ds.tests.tbc.BoundCountProvider;
 import org.osgi.framework.ServiceReference;
 
-
 public class CountFactory implements BoundCountProvider {
 
-  private List boundServices = new ArrayList();
-  
-  public int getBoundServiceCount(String service) {
-    return boundServices.size();
-  }
-  
-  public void bindService(ServiceReference ref) {
-    boundServices.add(ref);
-  }
-  
-  public void unbindService(ServiceReference ref) {
-    boundServices.remove(ref);
-  }
-  
-  public Dictionary getProperties() {
-    return null;
-  }
+	private List boundServices = new ArrayList();
+
+	public int getBoundServiceCount(String service) {
+		return boundServices.size();
+	}
+
+	public void bindService(ServiceReference ref) {
+		boundServices.add(ref);
+	}
+
+	public void unbindService(ServiceReference ref) {
+		boundServices.remove(ref);
+	}
+
+	public Dictionary getProperties() {
+		return null;
+	}
 
 }

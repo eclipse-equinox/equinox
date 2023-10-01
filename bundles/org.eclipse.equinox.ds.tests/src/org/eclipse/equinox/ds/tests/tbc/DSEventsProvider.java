@@ -15,6 +15,7 @@
 package org.eclipse.equinox.ds.tests.tbc;
 
 public interface DSEventsProvider extends PropertiesProvider {
-  public DSEvent[] getEvents();
-  public void resetEvents();
+	public DSEvent[] getEvents();
+
+	public void resetEvents();
 }

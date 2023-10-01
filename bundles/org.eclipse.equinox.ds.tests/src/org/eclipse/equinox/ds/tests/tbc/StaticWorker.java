@@ -18,8 +18,8 @@ import java.util.Dictionary;
 
 public class StaticWorker implements PropertiesProvider {
 
-  public Dictionary getProperties() {
-    return null;
-  }
+	public Dictionary getProperties() {
+		return null;
+	}
 
 }

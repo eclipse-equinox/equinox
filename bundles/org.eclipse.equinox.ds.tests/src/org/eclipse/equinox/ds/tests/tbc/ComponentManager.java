@@ -16,5 +16,5 @@ package org.eclipse.equinox.ds.tests.tbc;
 
 public interface ComponentManager extends PropertiesProvider {
 
-  public void enableComponent(String name, boolean flag);
+	public void enableComponent(String name, boolean flag);
 }

@@ -34,17 +34,16 @@ public class BindRegistrator implements ComponentContextProvider {
 		properties = getProperties(ctxt.getProperties());
 		setDataBits(ACTIVATE);
 	}
-	
-  Properties getProperties(Dictionary dict) {
-    Properties result = new Properties();
-    Enumeration keys = dict.keys();
-    while (keys.hasMoreElements()) {
-      Object key = keys.nextElement();
-      result.put(key, dict.get(key));
-    }
-    return result;
-  }
 
+	Properties getProperties(Dictionary dict) {
+		Properties result = new Properties();
+		Enumeration keys = dict.keys();
+		while (keys.hasMoreElements()) {
+			Object key = keys.nextElement();
+			result.put(key, dict.get(key));
+		}
+		return result;
+	}
 
 	protected void deactivate(ComponentContext ctxt) {
 		setDataBits(DEACTIVATE);
@@ -54,14 +53,14 @@ public class BindRegistrator implements ComponentContextProvider {
 		setDataBits(BIND);
 		throw new RuntimeException("Test method throwException(ComponentContext) is called!");
 	}
-	
+
 	protected void bind_ex(ServiceReference sr) {
-    throw new RuntimeException("Test method bind_ex(ServiceReference) is called!");
-  }
+		throw new RuntimeException("Test method bind_ex(ServiceReference) is called!");
+	}
 
 	protected void unbind(ServiceReference sr) {
-    setDataBits(UNBIND);
-  }
+		setDataBits(UNBIND);
+	}
 
 	public Dictionary getProperties() {
 		return properties;

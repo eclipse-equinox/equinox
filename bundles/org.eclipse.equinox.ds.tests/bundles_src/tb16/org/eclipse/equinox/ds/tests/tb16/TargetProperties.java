@@ -22,36 +22,35 @@ import org.eclipse.equinox.ds.tests.tbc.ComponentContextProvider;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 
-
 public class TargetProperties implements PropertiesProvider, ComponentContextProvider {
-  private Dictionary properties;
-  private ComponentContext ctxt;
-  private ServiceRegistration sr;
+	private Dictionary properties;
+	private ComponentContext ctxt;
+	private ServiceRegistration sr;
 
-  protected void activate(ComponentContext ctxt) {
-    this.ctxt = ctxt;
-    properties = ctxt.getProperties();
+	protected void activate(ComponentContext ctxt) {
+		this.ctxt = ctxt;
+		properties = ctxt.getProperties();
 
-    Object prop = properties.get("serial.num");
-    if (prop != null) {
-      Dictionary<String, Object> serviceProps = new Hashtable<>();
-      serviceProps.put("serial.num", prop);
-      sr = ctxt.getBundleContext().registerService(getClass().getName(), this, serviceProps);
-    }
-  }
+		Object prop = properties.get("serial.num");
+		if (prop != null) {
+			Dictionary<String, Object> serviceProps = new Hashtable<>();
+			serviceProps.put("serial.num", prop);
+			sr = ctxt.getBundleContext().registerService(getClass().getName(), this, serviceProps);
+		}
+	}
 
-  protected void deactivate(ComponentContext ctxt) {
-    if (sr != null) {
-      sr.unregister();
-      sr = null;
-    }
-  }
+	protected void deactivate(ComponentContext ctxt) {
+		if (sr != null) {
+			sr.unregister();
+			sr = null;
+		}
+	}
 
-  public Dictionary getProperties() {
-    return properties;
-  }
+	public Dictionary getProperties() {
+		return properties;
+	}
 
-  public ComponentContext getComponentContext() {
-    return ctxt;
-  }
+	public ComponentContext getComponentContext() {
+		return ctxt;
+	}
 }

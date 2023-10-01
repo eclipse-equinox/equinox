@@ -21,21 +21,21 @@ import org.eclipse.equinox.ds.tests.tbc.ComponentContextProvider;
 import org.osgi.service.component.ComponentContext;
 
 public class DynamicFactory implements DynamicService, ComponentContextProvider {
-  private ComponentContext ctxt;
-  
-  public void activate(ComponentContext componentContext) {
-    this.ctxt = componentContext;
-  }
+	private ComponentContext ctxt;
 
-  public void doNothing() {
-  }
+	public void activate(ComponentContext componentContext) {
+		this.ctxt = componentContext;
+	}
 
-  public ComponentContext getComponentContext() {
-    return ctxt;
-  }
+	public void doNothing() {
+	}
 
-  public Dictionary getProperties() {
-    return null;
-  }
+	public ComponentContext getComponentContext() {
+		return ctxt;
+	}
+
+	public Dictionary getProperties() {
+		return null;
+	}
 
 }

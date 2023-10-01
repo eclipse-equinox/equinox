@@ -16,28 +16,28 @@ package org.eclipse.equinox.ds.tests.tbc;
 
 public class TestHelper {
 
-  private static boolean activatedStandAlone = false;
-  private static boolean activatedServiceProvider = false;
-  
-  public static void reset() {
-    activatedStandAlone = false;
-    activatedServiceProvider = false;
-  }
+	private static boolean activatedStandAlone = false;
+	private static boolean activatedServiceProvider = false;
 
-  public static boolean isActivatedServiceProvider() {
-    return activatedServiceProvider;
-  }
+	public static void reset() {
+		activatedStandAlone = false;
+		activatedServiceProvider = false;
+	}
 
-  public static void setActivatedServiceProvider(boolean activatedServiceProvider) {
-    TestHelper.activatedServiceProvider = activatedServiceProvider;
-  }
+	public static boolean isActivatedServiceProvider() {
+		return activatedServiceProvider;
+	}
 
-  public static boolean isActivatedStandAlone() {
-    return activatedStandAlone;
-  }
+	public static void setActivatedServiceProvider(boolean activatedServiceProvider) {
+		TestHelper.activatedServiceProvider = activatedServiceProvider;
+	}
 
-  public static void setActivatedStandAlone(boolean activatedStandAlone) {
-    TestHelper.activatedStandAlone = activatedStandAlone;
-  }
-  
+	public static boolean isActivatedStandAlone() {
+		return activatedStandAlone;
+	}
+
+	public static void setActivatedStandAlone(boolean activatedStandAlone) {
+		TestHelper.activatedStandAlone = activatedStandAlone;
+	}
+
 }

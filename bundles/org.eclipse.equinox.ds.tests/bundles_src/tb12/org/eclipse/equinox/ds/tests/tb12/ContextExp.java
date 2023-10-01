@@ -19,26 +19,25 @@ import java.util.Dictionary;
 import org.eclipse.equinox.ds.tests.tbc.ComponentContextProvider;
 import org.osgi.service.component.ComponentContext;
 
-
 public class ContextExp implements ComponentContextProvider {
-  private ComponentContext ctxt;
-  Dictionary properties;
+	private ComponentContext ctxt;
+	Dictionary properties;
 
-  protected void activate(ComponentContext ctxt) {
-    this.ctxt = ctxt;
-    properties = ctxt.getProperties();
-  }
+	protected void activate(ComponentContext ctxt) {
+		this.ctxt = ctxt;
+		properties = ctxt.getProperties();
+	}
 
-  protected void deactivate(ComponentContext ctxt) {
+	protected void deactivate(ComponentContext ctxt) {
 
-  }
-  
-  public ComponentContext getComponentContext() {
-    return ctxt;
-  }
+	}
 
-  public Dictionary getProperties() {
-    return properties;
-  }
+	public ComponentContext getComponentContext() {
+		return ctxt;
+	}
+
+	public Dictionary getProperties() {
+		return properties;
+	}
 
 }

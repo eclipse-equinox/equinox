@@ -16,5 +16,5 @@
 package org.eclipse.equinox.ds.tests.tb4;
 
 public interface DynamicService {
-  public void doNothing();
+	public void doNothing();
 }

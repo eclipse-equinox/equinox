@@ -36,7 +36,9 @@ public class BundleInstaller {
 	public BundleInstaller(String bundlesRoot, BundleContext context) throws InvalidSyntaxException {
 		this.context = context;
 		rootLocation = bundlesRoot;
-		converter = new ServiceTracker<>(context, context.createFilter("(&(objectClass=" + URLConverter.class.getName() + ")(protocol=bundleentry))"), null);
+		converter = new ServiceTracker<>(context,
+				context.createFilter("(&(objectClass=" + URLConverter.class.getName() + ")(protocol=bundleentry))"),
+				null);
 		converter.open();
 	}
 

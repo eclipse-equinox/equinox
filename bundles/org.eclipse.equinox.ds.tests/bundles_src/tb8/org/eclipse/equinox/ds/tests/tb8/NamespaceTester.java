@@ -18,22 +18,22 @@ import org.eclipse.equinox.ds.tests.tbc.NamespaceProvider;
 import org.osgi.service.component.ComponentContext;
 
 public class NamespaceTester implements NamespaceProvider {
-  private int nsid = -1;
-  private final static String NSID_PROP = "component.nsid";
-  
-  protected void activate(ComponentContext ctxt) {
-    Object prop = ctxt.getProperties().get(NSID_PROP);
-    if (!(prop instanceof Integer)) {
-      return;
-    }
-    nsid = ((Integer)prop).intValue();
-  }
-  
-  protected void deactivate(ComponentContext ctxt) {
+	private int nsid = -1;
+	private final static String NSID_PROP = "component.nsid";
 
-  }
-  
-  public int getComponentNSID() {
-    return nsid;
-  }
+	protected void activate(ComponentContext ctxt) {
+		Object prop = ctxt.getProperties().get(NSID_PROP);
+		if (!(prop instanceof Integer)) {
+			return;
+		}
+		nsid = ((Integer) prop).intValue();
+	}
+
+	protected void deactivate(ComponentContext ctxt) {
+
+	}
+
+	public int getComponentNSID() {
+		return nsid;
+	}
 }

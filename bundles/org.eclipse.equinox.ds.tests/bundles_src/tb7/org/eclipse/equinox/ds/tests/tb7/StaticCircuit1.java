@@ -16,13 +16,14 @@ package org.eclipse.equinox.ds.tests.tb7;
 
 public class StaticCircuit1 {
 	private StaticCircuit2 mate = null;
-	  public void bind(StaticCircuit2 mate) {
-		    this.mate = mate;
-		  }
 
-		  public void unbind(StaticCircuit2 mate) {
-		    if (this.mate == mate) {
-		      this.mate = null;
-		    }
-		  }
+	public void bind(StaticCircuit2 mate) {
+		this.mate = mate;
+	}
+
+	public void unbind(StaticCircuit2 mate) {
+		if (this.mate == mate) {
+			this.mate = null;
+		}
+	}
 }

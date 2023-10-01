@@ -15,5 +15,5 @@
 package org.eclipse.equinox.ds.tests.tbc;
 
 public interface NamespaceProvider {
-  public int getComponentNSID();
+	public int getComponentNSID();
 }

@@ -18,6 +18,6 @@ import org.osgi.service.component.ComponentContext;
 
 public interface ComponentContextProvider extends PropertiesProvider {
 
-  public ComponentContext getComponentContext();
-  
+	public ComponentContext getComponentContext();
+
 }

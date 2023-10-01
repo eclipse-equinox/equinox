@@ -16,6 +16,6 @@ package org.eclipse.equinox.ds.tests.tbc;
 
 public interface BoundCountProvider extends PropertiesProvider {
 
-  public int getBoundServiceCount(String service);
-  
+	public int getBoundServiceCount(String service);
+
 }

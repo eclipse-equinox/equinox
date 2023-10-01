@@ -24,60 +24,58 @@ import org.eclipse.equinox.ds.tests.tbc.DSEvent;
 import org.eclipse.equinox.ds.tests.tbc.DSEventsProvider;
 import org.osgi.service.component.ComponentContext;
 
-
 public class BoundReplacer implements DSEventsProvider, BoundMainProvider, ComponentContextProvider {
 
+	private Hashtable boundServices = new Hashtable();
+	private Vector boundServiceEvents = new Vector();
+	private ComponentContext ctxt;
 
-  private Hashtable boundServices = new Hashtable();
-  private Vector boundServiceEvents = new Vector();
-  private ComponentContext ctxt;
-  
-  public void activate(ComponentContext ctxt) {
-    this.ctxt = ctxt;
-  }
-  
-  public void deactivate(ComponentContext ctxt) {
-    this.ctxt = null;
-  }
-  
-  public void bindDynamicService(DynamicService dynService) {
-    boundServiceEvents.addElement(new DSEvent(DSEvent.ACT_BOUND, dynService));
-    boundServices.put(BoundMainProvider.DYNAMIC_SERVICE, dynService);
-  }
-  
-  public void unbindDynamicService(DynamicService dynService) {
-    boundServiceEvents.addElement(new DSEvent(DSEvent.ACT_UNBOUND, dynService));
-  }
-  
-  public void bindNamedService(NamedService namedService) {
-    boundServiceEvents.addElement(new DSEvent(DSEvent.ACT_BOUND, namedService));
-    boundServices.put(BoundMainProvider.NAMED_SERVICE, namedService);
-  }
-  
-  public void unbindNamedService(NamedService namedService) {
-    boundServiceEvents.addElement(new DSEvent(DSEvent.ACT_UNBOUND, namedService));
-  }
+	public void activate(ComponentContext ctxt) {
+		this.ctxt = ctxt;
+	}
 
-  public Dictionary getProperties() {
-    return null;
-  }
+	public void deactivate(ComponentContext ctxt) {
+		this.ctxt = null;
+	}
 
-  public DSEvent[] getEvents() {
-    DSEvent[] events = new DSEvent[boundServiceEvents.size()];
-    boundServiceEvents.copyInto(events);
-    return events;                                    
-  }
+	public void bindDynamicService(DynamicService dynService) {
+		boundServiceEvents.addElement(new DSEvent(DSEvent.ACT_BOUND, dynService));
+		boundServices.put(BoundMainProvider.DYNAMIC_SERVICE, dynService);
+	}
 
-  public Object getBoundService(String serviceName) {
-    return boundServices.get(serviceName);
-  }
+	public void unbindDynamicService(DynamicService dynService) {
+		boundServiceEvents.addElement(new DSEvent(DSEvent.ACT_UNBOUND, dynService));
+	}
 
-  public void resetEvents() {
-    boundServiceEvents.removeAllElements();
-  }
+	public void bindNamedService(NamedService namedService) {
+		boundServiceEvents.addElement(new DSEvent(DSEvent.ACT_BOUND, namedService));
+		boundServices.put(BoundMainProvider.NAMED_SERVICE, namedService);
+	}
 
-  public ComponentContext getComponentContext() {
-    return ctxt;
-  }
-  
+	public void unbindNamedService(NamedService namedService) {
+		boundServiceEvents.addElement(new DSEvent(DSEvent.ACT_UNBOUND, namedService));
+	}
+
+	public Dictionary getProperties() {
+		return null;
+	}
+
+	public DSEvent[] getEvents() {
+		DSEvent[] events = new DSEvent[boundServiceEvents.size()];
+		boundServiceEvents.copyInto(events);
+		return events;
+	}
+
+	public Object getBoundService(String serviceName) {
+		return boundServices.get(serviceName);
+	}
+
+	public void resetEvents() {
+		boundServiceEvents.removeAllElements();
+	}
+
+	public ComponentContext getComponentContext() {
+		return ctxt;
+	}
+
 }
