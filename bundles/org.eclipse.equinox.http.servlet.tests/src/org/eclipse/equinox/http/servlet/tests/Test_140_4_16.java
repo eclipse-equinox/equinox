@@ -45,8 +45,7 @@ public class Test_140_4_16 extends BaseTest {
 		Servlet servlet = new HttpServlet() {
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response)
-					throws IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 				invoked.set(true);
 
@@ -61,7 +60,8 @@ public class Test_140_4_16 extends BaseTest {
 		};
 
 		Dictionary<String, Object> properties = new Hashtable<>();
-		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, new String[] {"/a", "/fee/fi/foo/fum"});
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN,
+				new String[] { "/a", "/fee/fi/foo/fum" });
 		registrations.add(context.registerService(Servlet.class, servlet, properties));
 
 		assertEquals(":/a:", requestAdvisor.request("a"));

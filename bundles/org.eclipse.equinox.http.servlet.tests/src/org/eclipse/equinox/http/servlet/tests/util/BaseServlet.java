@@ -41,9 +41,8 @@ public class BaseServlet extends HttpServlet {
 
 	@SuppressWarnings("unused")
 	@Override
-	protected void service(
-			HttpServletRequest request, HttpServletResponse response)
-		throws ServletException, IOException {
+	protected void service(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 
 		request.setAttribute(ATTRIBUTE, content);
 		request.setAttribute(ATTRIBUTE, "replaced");
@@ -53,11 +52,9 @@ public class BaseServlet extends HttpServlet {
 
 		if (servletContext.getAttribute(ATTRIBUTE) == null) {
 			servletContext.setAttribute(ATTRIBUTE, content);
-		}
-		else if (servletContext.getAttribute(ATTRIBUTE).equals(content)) {
+		} else if (servletContext.getAttribute(ATTRIBUTE).equals(content)) {
 			servletContext.setAttribute(ATTRIBUTE, "replaced");
-		}
-		else {
+		} else {
 			servletContext.removeAttribute(ATTRIBUTE);
 		}
 
@@ -65,11 +62,9 @@ public class BaseServlet extends HttpServlet {
 
 		if (session.getAttribute(ATTRIBUTE) == null) {
 			session.setAttribute(ATTRIBUTE, content);
-		}
-		else if (session.getAttribute(ATTRIBUTE).equals(content)) {
+		} else if (session.getAttribute(ATTRIBUTE).equals(content)) {
 			session.setAttribute(ATTRIBUTE, "replaced");
-		}
-		else {
+		} else {
 			session.removeAttribute(ATTRIBUTE);
 		}
 

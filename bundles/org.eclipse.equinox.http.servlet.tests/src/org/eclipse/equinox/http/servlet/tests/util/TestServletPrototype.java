@@ -54,24 +54,26 @@ public class TestServletPrototype extends HttpServlet {
 
 		try {
 			handleDoGet(request, response, writer);
-		}
-		finally {
-			//writer.close();
+		} finally {
+			// writer.close();
 		}
 	}
 
 	class Factory implements PrototypeServiceFactory<Servlet> {
 		final AtomicReference<ServiceRegistration<Servlet>> registration = new AtomicReference<>();
+
 		@Override
 		public Servlet getService(Bundle bundle, ServiceRegistration<Servlet> registration) {
-			String name = (String) registration.getReference().getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME);
+			String name = (String) registration.getReference()
+					.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME);
 			lastGetName.set(name);
 			return new TestWBServlet();
 		}
 
 		@Override
 		public void ungetService(Bundle bundle, ServiceRegistration<Servlet> registration, Servlet service) {
-			String name = (String) registration.getReference().getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME);
+			String name = (String) registration.getReference()
+					.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME);
 			lastUngetName.set(name);
 		}
 
@@ -96,7 +98,8 @@ public class TestServletPrototype extends HttpServlet {
 
 	}
 
-	protected void handleDoGet(HttpServletRequest request, HttpServletResponse response, PrintWriter writer) throws IOException {
+	protected void handleDoGet(HttpServletRequest request, HttpServletResponse response, PrintWriter writer)
+			throws IOException {
 		String pathInfo = request.getPathInfo();
 		if ("/lastGet".equals(pathInfo)) {
 			writer.print(lastGetName.getAndSet(null));

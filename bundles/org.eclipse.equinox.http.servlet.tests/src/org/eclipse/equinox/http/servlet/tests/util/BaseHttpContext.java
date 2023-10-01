@@ -27,16 +27,14 @@ public class BaseHttpContext implements HttpContext {
 	private final String resourceRoot;
 	private final Bundle bundle;
 
-	public BaseHttpContext(boolean handleSecurity, String resourceRoot,
-			Bundle bundle) {
+	public BaseHttpContext(boolean handleSecurity, String resourceRoot, Bundle bundle) {
 		this.handleSecurity = handleSecurity;
 		this.resourceRoot = resourceRoot;
 		this.bundle = bundle;
 	}
 
 	@Override
-	public boolean handleSecurity(HttpServletRequest request,
-			HttpServletResponse response) {
+	public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) {
 		return handleSecurity;
 	}
 

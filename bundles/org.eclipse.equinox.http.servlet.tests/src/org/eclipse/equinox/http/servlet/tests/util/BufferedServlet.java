@@ -27,11 +27,9 @@ public class BufferedServlet extends HttpServlet {
 	static final char[] value = String.format("%01023d", 1).toCharArray();
 
 	@Override
-	protected void service(
-			HttpServletRequest request, HttpServletResponse response)
-		throws IOException {
+	protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-		response.setContentType( "text/html" );
+		response.setContentType("text/html");
 		response.setBufferSize(value.length);
 
 		PrintWriter writer = response.getWriter();

@@ -68,7 +68,8 @@ public class Test_140_4_1_22to23 extends BaseTest {
 
 		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "b");
-		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, HttpServletResponse.SC_BAD_GATEWAY + "");
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE,
+				HttpServletResponse.SC_BAD_GATEWAY + "");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/b");
 		registrations.add(getBundleContext().registerService(Servlet.class, new BServlet(), properties));
 

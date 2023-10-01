@@ -48,21 +48,21 @@ import org.eclipse.equinox.http.servlet.testbase.BaseTest;
 import org.junit.Test;
 
 public class TestUploadWithParameter extends BaseTest {
-	
+
 	@Test
 	public void testUploadWithParameter() throws Exception {
 		final CountDownLatch receivedLatch = new CountDownLatch(1);
 		final HashMap<String, Object> contents = new HashMap<>();
 		final HashMap<String, String> contentsByKey = new HashMap<>();
 		setupUploadWithParameterServlet(receivedLatch, contents, contentsByKey);
-		
+
 		postContentWithParameter(getClass().getResource("resource1.txt"), 201);
 		assertTrue(receivedLatch.await(5, TimeUnit.SECONDS));
 		assertEquals(2, contents.size());
 		assertEquals("Test", contents.get("single"));
 		assertNotNull(contents.get("multi"));
 		assertTrue(contents.get("multi") instanceof List);
-		
+
 		@SuppressWarnings("unchecked")
 		List<String> multi = (List<String>) contents.get("multi");
 		assertEquals(3, multi.size());
@@ -74,32 +74,35 @@ public class TestUploadWithParameter extends BaseTest {
 		assertEquals("Test", contentsByKey.get("single"));
 		assertEquals("One", contentsByKey.get("multi"));
 	}
-	
-	private void setupUploadWithParameterServlet(CountDownLatch receivedLatch, Map<String, Object> contents, Map<String, String> contentsByKey) {
-		final Dictionary<String,Object> servletProps = new Hashtable<>();
+
+	private void setupUploadWithParameterServlet(CountDownLatch receivedLatch, Map<String, Object> contents,
+			Map<String, String> contentsByKey) {
+		final Dictionary<String, Object> servletProps = new Hashtable<>();
 		servletProps.put(HTTP_WHITEBOARD_SERVLET_PATTERN, "/post");
 		servletProps.put(HTTP_WHITEBOARD_SERVLET_MULTIPART_ENABLED, Boolean.TRUE);
 		servletProps.put(HTTP_WHITEBOARD_SERVLET_MULTIPART_MAXFILESIZE, 1024L);
-		
+
 		@SuppressWarnings("serial")
 		final Servlet uploadServlet = new HttpServlet() {
 			@Override
 			protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 					throws IOException, ServletException {
-				
+
 				try {
 					// check if the multi values are sent as post parameter in the multipart request
 					ArrayList<String> collected = new ArrayList<>();
 					for (Part supportPart : req.getParts()) {
 						if (supportPart.getName().equals("multi")) {
-							try (BufferedReader reader = new BufferedReader(new InputStreamReader(supportPart.getInputStream()))) {
+							try (BufferedReader reader = new BufferedReader(
+									new InputStreamReader(supportPart.getInputStream()))) {
 								List<String> collect = reader.lines().collect(Collectors.toList());
 								if (collect != null && !collect.isEmpty()) {
 									collected.addAll(collect);
 								}
 							}
 						} else if (supportPart.getName().equals("single")) {
-							try (BufferedReader reader = new BufferedReader(new InputStreamReader(supportPart.getInputStream()))) {
+							try (BufferedReader reader = new BufferedReader(
+									new InputStreamReader(supportPart.getInputStream()))) {
 								contents.put("single", reader.readLine());
 							}
 						}
@@ -107,25 +110,26 @@ public class TestUploadWithParameter extends BaseTest {
 					if (!collected.isEmpty()) {
 						contents.put("multi", collected);
 					}
-					
-					try (BufferedReader reader = new BufferedReader(new InputStreamReader(req.getPart("single").getInputStream()))) {
+
+					try (BufferedReader reader = new BufferedReader(
+							new InputStreamReader(req.getPart("single").getInputStream()))) {
 						contentsByKey.put("single", reader.readLine());
 					}
-					try (BufferedReader reader = new BufferedReader(new InputStreamReader(req.getPart("multi").getInputStream()))) {
+					try (BufferedReader reader = new BufferedReader(
+							new InputStreamReader(req.getPart("multi").getInputStream()))) {
 						contentsByKey.put("multi", reader.readLine());
 					}
-					
+
 					resp.setStatus(201);
 				} finally {
 					receivedLatch.countDown();
 				}
-				
+
 			}
 		};
-		
+
 		long before = this.getHttpRuntimeChangeCount();
-		registrations.add(getBundleContext().registerService(
-				Servlet.class.getName(), uploadServlet, servletProps));
+		registrations.add(getBundleContext().registerService(Servlet.class.getName(), uploadServlet, servletProps));
 		this.waitForRegistration(before);
 	}
 

@@ -61,7 +61,8 @@ public class Test_140_2_6_getResourcePaths extends BaseTest {
 
 		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
-		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(osgi.http.whiteboard.context.name=context1)");
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(osgi.http.whiteboard.context.name=context1)");
 		registrations.add(context.registerService(ServletContextListener.class, new MockSCL(sc1), properties));
 
 		ServletContext servletContext = sc1.get();

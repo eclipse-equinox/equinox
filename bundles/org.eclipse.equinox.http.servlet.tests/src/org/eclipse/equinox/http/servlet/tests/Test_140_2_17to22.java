@@ -61,7 +61,8 @@ public class Test_140_2_17to22 extends BaseTest {
 
 		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
-		ServiceRegistration<ServletContextListener> serviceRegistration = context.registerService(ServletContextListener.class, new MockSCL(sc1), properties);
+		ServiceRegistration<ServletContextListener> serviceRegistration = context
+				.registerService(ServletContextListener.class, new MockSCL(sc1), properties);
 		registrations.add(serviceRegistration);
 
 		assertNull(sc1.get());

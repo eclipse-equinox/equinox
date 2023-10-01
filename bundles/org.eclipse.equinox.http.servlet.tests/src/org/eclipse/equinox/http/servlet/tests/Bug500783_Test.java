@@ -63,24 +63,20 @@ public class Bug500783_Test extends BaseTest {
 					}
 				}
 				in.close();
-				StringBuffer sb = new StringBuffer()
-				.append(contentLength);
+				StringBuffer sb = new StringBuffer().append(contentLength);
 
 				for (Entry<String, String[]> entry : req.getParameterMap().entrySet()) {
-					sb.append("|")
-					.append(entry.getKey())
-					.append("=")
-					.append(Arrays.toString(entry.getValue()));
+					sb.append("|").append(entry.getKey()).append("=").append(Arrays.toString(entry.getValue()));
 				}
 
-				sb.append("|")
-				.append(bytesRead);
+				sb.append("|").append(bytesRead);
 				Writer out = resp.getWriter();
 				Reader rdr = new StringReader(sb.toString());
 
 				while (true) {
 					int ch = rdr.read();
-					if (ch == -1) break;
+					if (ch == -1)
+						break;
 					out.write(ch);
 				}
 				out.close();

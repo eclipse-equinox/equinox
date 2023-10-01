@@ -27,9 +27,7 @@ public class DispatchResultServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	protected void service(
-		HttpServletRequest request, HttpServletResponse response)
-		throws IOException {
+	protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 		StringWriter writer = new StringWriter();
 
@@ -54,8 +52,7 @@ public class DispatchResultServlet extends HttpServlet {
 			writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI)));
 			writer.write("|");
 			writer.write(String.valueOf(request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH)));
-		}
-		else if (request.getDispatcherType() == DispatcherType.FORWARD) {
+		} else if (request.getDispatcherType() == DispatcherType.FORWARD) {
 			writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_CONTEXT_PATH)));
 			writer.write("|");
 			writer.write(String.valueOf(request.getAttribute(RequestDispatcher.FORWARD_PATH_INFO)));
@@ -69,8 +66,7 @@ public class DispatchResultServlet extends HttpServlet {
 
 		try {
 			response.getWriter().write(writer.toString());
-		}
-		catch (IllegalStateException ise) {
+		} catch (IllegalStateException ise) {
 			response.getOutputStream().write(writer.toString().getBytes(StandardCharsets.UTF_8));
 		}
 

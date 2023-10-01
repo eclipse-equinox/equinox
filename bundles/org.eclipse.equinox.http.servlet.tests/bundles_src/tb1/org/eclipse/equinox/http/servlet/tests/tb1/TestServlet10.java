@@ -32,13 +32,12 @@ public class TestServlet10 extends AbstractTestServlet {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	protected void service(HttpServletRequest request, HttpServletResponse response)
-		throws IOException {
+	protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 		ServletContext servletContext = getServletContext();
 
-		try (InputStream in = servletContext.getResourceAsStream(
-			"/org/eclipse/equinox/http/servlet/tests/tb1/resource1.txt");
+		try (InputStream in = servletContext
+				.getResourceAsStream("/org/eclipse/equinox/http/servlet/tests/tb1/resource1.txt");
 				OutputStream out = response.getOutputStream()) {
 			byte[] buffer = new byte[2048];
 			int bytesRead;

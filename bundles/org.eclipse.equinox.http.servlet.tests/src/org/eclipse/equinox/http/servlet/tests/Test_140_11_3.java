@@ -31,8 +31,8 @@ import org.osgi.service.http.runtime.HttpServiceRuntime;
 
 public class Test_140_11_3 extends BaseTest {
 
-	public static final String	SERVICE_NAMESPACE					= "osgi.service";
-	public static final String	CAPABILITY_OBJECTCLASS_ATTRIBUTE	= "objectClass";
+	public static final String SERVICE_NAMESPACE = "osgi.service";
+	public static final String CAPABILITY_OBJECTCLASS_ATTRIBUTE = "objectClass";
 
 	@Test
 	public void test_140_11_3() {

@@ -72,8 +72,7 @@ public class DispatchingTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response)
-					throws IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 				StringWriter writer = new StringWriter();
 
@@ -91,11 +90,13 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
 		String response = requestAdvisor.request("a/s1/d");
@@ -118,16 +119,19 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		String response = requestAdvisor.request("a/s1/d?p=1");
@@ -150,9 +154,8 @@ public class DispatchingTest extends BaseTest {
 		TestFilter filter = new TestFilter() {
 
 			@Override
-			public void doFilter(
-					ServletRequest request, ServletResponse response, FilterChain chain)
-				throws IOException, ServletException {
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+					throws IOException, ServletException {
 
 				response.getWriter().write('b');
 
@@ -166,22 +169,27 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		props = new Hashtable<>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, new String[] {DispatcherType.REQUEST.toString()});
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER,
+				new String[] { DispatcherType.REQUEST.toString() });
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*");
 		registrations.add(getBundleContext().registerService(Filter.class, filter, props));
 
@@ -206,9 +214,8 @@ public class DispatchingTest extends BaseTest {
 		TestFilter filter = new TestFilter() {
 
 			@Override
-			public void doFilter(
-					ServletRequest request, ServletResponse response, FilterChain chain)
-				throws IOException, ServletException {
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+					throws IOException, ServletException {
 
 				response.getWriter().write('b');
 
@@ -222,22 +229,27 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		props = new Hashtable<>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, new String[] {DispatcherType.FORWARD.toString(),DispatcherType.REQUEST.toString()});
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER,
+				new String[] { DispatcherType.FORWARD.toString(), DispatcherType.REQUEST.toString() });
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*");
 		registrations.add(getBundleContext().registerService(Filter.class, filter, props));
 
@@ -272,21 +284,25 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/c1");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s3/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		String response = requestAdvisor.request("c1/s1/i1?p1=1");
@@ -329,26 +345,31 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/c1");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s3/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet3, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s4/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		String response = requestAdvisor.request("c1/s1/i1?p1=1");
@@ -362,9 +383,8 @@ public class DispatchingTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void doGet(
-				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
 
 				ServletContext servletContext = getServletContext();
 
@@ -377,9 +397,7 @@ public class DispatchingTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void doGet(
-				HttpServletRequest req, HttpServletResponse resp)
-				throws IOException {
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
 				PrintWriter writer = resp.getWriter();
 				writer.write(String.valueOf(req.getQueryString()));
@@ -395,17 +413,20 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/c1");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "s1");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, sA, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "s2");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, sB, props));
 
@@ -420,9 +441,8 @@ public class DispatchingTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void doGet(
-				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
 
 				ServletContext servletContext = getServletContext();
 
@@ -435,17 +455,20 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/c1");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "s1");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, sA, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "s2");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
@@ -460,9 +483,8 @@ public class DispatchingTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void doGet(
-				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
 
 				RequestDispatcher requestDispatcher = req.getRequestDispatcher("/Servlet13B/a?p=3&p=4");
 
@@ -473,14 +495,12 @@ public class DispatchingTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void doGet(
-				HttpServletRequest req, HttpServletResponse resp)
-				throws IOException {
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
 				PrintWriter writer = resp.getWriter();
 				writer.write(req.getQueryString());
 				writer.write("|");
-				writer.write((String)req.getAttribute(RequestDispatcher.FORWARD_QUERY_STRING));
+				writer.write((String) req.getAttribute(RequestDispatcher.FORWARD_QUERY_STRING));
 				writer.write("|");
 				writer.write(req.getParameter("p"));
 				writer.write("|");
@@ -518,16 +538,19 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		String response = requestAdvisor.request("a/s1/d?p=1");
@@ -550,9 +573,8 @@ public class DispatchingTest extends BaseTest {
 		TestFilter filter = new TestFilter() {
 
 			@Override
-			public void doFilter(
-					ServletRequest request, ServletResponse response, FilterChain chain)
-				throws IOException, ServletException {
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+					throws IOException, ServletException {
 
 				write(response.getOutputStream(), "b");
 
@@ -566,22 +588,27 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		props = new Hashtable<>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, new String[] {DispatcherType.REQUEST.toString()});
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER,
+				new String[] { DispatcherType.REQUEST.toString() });
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*");
 		registrations.add(getBundleContext().registerService(Filter.class, filter, props));
 
@@ -606,9 +633,8 @@ public class DispatchingTest extends BaseTest {
 		TestFilter filter = new TestFilter() {
 
 			@Override
-			public void doFilter(
-					ServletRequest request, ServletResponse response, FilterChain chain)
-				throws IOException, ServletException {
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+					throws IOException, ServletException {
 
 				write(response.getOutputStream(), "b");
 
@@ -622,22 +648,27 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		props = new Hashtable<>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, new String[] {DispatcherType.FORWARD.toString(),DispatcherType.REQUEST.toString()});
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER,
+				new String[] { DispatcherType.FORWARD.toString(), DispatcherType.REQUEST.toString() });
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*");
 		registrations.add(getBundleContext().registerService(Filter.class, filter, props));
 
@@ -654,10 +685,9 @@ public class DispatchingTest extends BaseTest {
 
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
+					throws ServletException, IOException {
 
-				RequestDispatcher requestDispatcher =
-					request.getRequestDispatcher("/S8/target");
+				RequestDispatcher requestDispatcher = request.getRequestDispatcher("/S8/target");
 
 				requestDispatcher.include(request, response);
 			}
@@ -668,8 +698,7 @@ public class DispatchingTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response)
-				throws IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 				response.getWriter().print("s8target");
 			}
@@ -701,16 +730,19 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		String response = requestAdvisor.request("a/s1/d?p=1");
@@ -733,9 +765,8 @@ public class DispatchingTest extends BaseTest {
 		TestFilter filter = new TestFilter() {
 
 			@Override
-			public void doFilter(
-					ServletRequest request, ServletResponse response, FilterChain chain)
-				throws IOException, ServletException {
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+					throws IOException, ServletException {
 
 				response.getWriter().write('b');
 
@@ -749,22 +780,27 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		props = new Hashtable<>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, new String[] {DispatcherType.REQUEST.toString()});
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER,
+				new String[] { DispatcherType.REQUEST.toString() });
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*");
 		registrations.add(getBundleContext().registerService(Filter.class, filter, props));
 
@@ -789,9 +825,8 @@ public class DispatchingTest extends BaseTest {
 		TestFilter filter = new TestFilter() {
 
 			@Override
-			public void doFilter(
-					ServletRequest request, ServletResponse response, FilterChain chain)
-				throws IOException, ServletException {
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+					throws IOException, ServletException {
 
 				response.getWriter().write('b');
 
@@ -805,22 +840,27 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		props = new Hashtable<>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, new String[] {DispatcherType.INCLUDE.toString(), DispatcherType.REQUEST.toString()});
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER,
+				new String[] { DispatcherType.INCLUDE.toString(), DispatcherType.REQUEST.toString() });
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*");
 		registrations.add(getBundleContext().registerService(Filter.class, filter, props));
 
@@ -855,21 +895,25 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/c1");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s3/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		String response = requestAdvisor.request("c1/s1/i1?p1=1");
@@ -912,26 +956,31 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/c1");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet2, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s3/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet3, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s4/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		String response = requestAdvisor.request("c1/s1/i1?p1=1");
@@ -945,9 +994,8 @@ public class DispatchingTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void doGet(
-				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
 
 				ServletContext servletContext = getServletContext();
 
@@ -960,9 +1008,7 @@ public class DispatchingTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void doGet(
-				HttpServletRequest req, HttpServletResponse resp)
-				throws IOException {
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
 				PrintWriter writer = resp.getWriter();
 				writer.write(req.getQueryString());
@@ -978,17 +1024,20 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/c1");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "s1");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, sA, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "s2");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, sB, props));
 
@@ -1003,9 +1052,8 @@ public class DispatchingTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void doGet(
-				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
 
 				ServletContext servletContext = getServletContext();
 
@@ -1018,17 +1066,20 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "c1");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/c1");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "s1");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, sA, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "s2");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=c1)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
@@ -1043,9 +1094,8 @@ public class DispatchingTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void doGet(
-				HttpServletRequest req, HttpServletResponse resp)
-				throws ServletException, IOException {
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
 
 				RequestDispatcher requestDispatcher = req.getRequestDispatcher("/Servlet13B/a?p=3&p=4");
 
@@ -1056,14 +1106,12 @@ public class DispatchingTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void doGet(
-				HttpServletRequest req, HttpServletResponse resp)
-				throws IOException {
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
 				PrintWriter writer = resp.getWriter();
 				writer.write(req.getQueryString());
 				writer.write("|");
-				writer.write((String)req.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING));
+				writer.write((String) req.getAttribute(RequestDispatcher.INCLUDE_QUERY_STRING));
 				writer.write("|");
 				writer.write(req.getParameter("p"));
 				writer.write("|");
@@ -1101,16 +1149,19 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		String response = requestAdvisor.request("a/s1/d?p=1");
@@ -1133,9 +1184,8 @@ public class DispatchingTest extends BaseTest {
 		TestFilter filter = new TestFilter() {
 
 			@Override
-			public void doFilter(
-					ServletRequest request, ServletResponse response, FilterChain chain)
-				throws IOException, ServletException {
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+					throws IOException, ServletException {
 
 				write(response.getOutputStream(), "b");
 
@@ -1149,22 +1199,27 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		props = new Hashtable<>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, new String[] {DispatcherType.REQUEST.toString()});
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER,
+				new String[] { DispatcherType.REQUEST.toString() });
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*");
 		registrations.add(getBundleContext().registerService(Filter.class, filter, props));
 
@@ -1189,9 +1244,8 @@ public class DispatchingTest extends BaseTest {
 		TestFilter filter = new TestFilter() {
 
 			@Override
-			public void doFilter(
-					ServletRequest request, ServletResponse response, FilterChain chain)
-				throws IOException, ServletException {
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+					throws IOException, ServletException {
 
 				write(response.getOutputStream(), "b");
 
@@ -1205,22 +1259,27 @@ public class DispatchingTest extends BaseTest {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
-		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {}, props));
+		registrations.add(getBundleContext().registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s1/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, servlet1, props));
 
 		props = new Hashtable<>();
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/s2/*");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		registrations.add(getBundleContext().registerService(Servlet.class, new DispatchResultServlet(), props));
 
 		props = new Hashtable<>();
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=a)");
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
-		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, new String[] {DispatcherType.INCLUDE.toString(), DispatcherType.REQUEST.toString()});
+		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER,
+				new String[] { DispatcherType.INCLUDE.toString(), DispatcherType.REQUEST.toString() });
 		props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*");
 		registrations.add(getBundleContext().registerService(Filter.class, filter, props));
 
@@ -1236,9 +1295,7 @@ public class DispatchingTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void doGet(
-				final HttpServletRequest req, final HttpServletResponse resp)
-				throws IOException {
+			protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 
 				final AtomicReference<String[]> results = new AtomicReference<>();
 
@@ -1260,8 +1317,7 @@ public class DispatchingTest extends BaseTest {
 
 				try {
 					thread.join();
-				}
-				catch (InterruptedException ie) {
+				} catch (InterruptedException ie) {
 					throw new IOException(ie);
 				}
 
@@ -1288,8 +1344,8 @@ public class DispatchingTest extends BaseTest {
 	public void test_headers_include() throws Exception {
 		SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
 		format.setTimeZone(TimeZone.getTimeZone("GMT"));
-		final long date1 = System.currentTimeMillis() - (1000*60*60*24*365*30);
-		final long date2 = System.currentTimeMillis() - (1000*60*60*24*365*40);
+		final long date1 = System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 365 * 30);
+		final long date2 = System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 365 * 40);
 
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;
@@ -1298,7 +1354,7 @@ public class DispatchingTest extends BaseTest {
 			protected void service(HttpServletRequest request, HttpServletResponse response)
 					throws ServletException, IOException {
 
-				response.addCookie(new Cookie("foo","bar"));
+				response.addCookie(new Cookie("foo", "bar"));
 				response.addDateHeader("X-date", date1);
 				response.addHeader("X-colour", "blue");
 				response.addIntHeader("X-size", 20);
@@ -1318,7 +1374,7 @@ public class DispatchingTest extends BaseTest {
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response) {
 
-				response.addCookie(new Cookie("foo","baz"));
+				response.addCookie(new Cookie("foo", "baz"));
 				response.addDateHeader("X-date", date2);
 				response.addHeader("X-colour", "green");
 				response.addIntHeader("X-size", 30);
@@ -1362,8 +1418,8 @@ public class DispatchingTest extends BaseTest {
 	public void test_headers_forward() throws Exception {
 		SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
 		format.setTimeZone(TimeZone.getTimeZone("GMT"));
-		final long date1 = System.currentTimeMillis() - (1000*60*60*24*365*30);
-		final long date2 = System.currentTimeMillis() - (1000*60*60*24*365*40);
+		final long date1 = System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 365 * 30);
+		final long date2 = System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 365 * 40);
 
 		Servlet servlet1 = new BaseServlet() {
 			private static final long serialVersionUID = 1L;
@@ -1372,7 +1428,7 @@ public class DispatchingTest extends BaseTest {
 			protected void service(HttpServletRequest request, HttpServletResponse response)
 					throws ServletException, IOException {
 
-				response.addCookie(new Cookie("foo","bar"));
+				response.addCookie(new Cookie("foo", "bar"));
 				response.addDateHeader("X-date", date1);
 				response.addHeader("X-colour", "blue");
 				response.addIntHeader("X-size", 20);
@@ -1392,7 +1448,7 @@ public class DispatchingTest extends BaseTest {
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response) {
 
-				response.addCookie(new Cookie("foo","baz"));
+				response.addCookie(new Cookie("foo", "baz"));
 				response.addDateHeader("X-date", date2);
 				response.addHeader("X-colour", "green");
 				response.addIntHeader("X-size", 30);
@@ -1415,7 +1471,7 @@ public class DispatchingTest extends BaseTest {
 		Map<String, List<String>> response = requestAdvisor.request("s1", null);
 
 		// On Java 18 the order changed on the client for headers with multiple values.
-		int multiValueIdx = new Version(18, 0 ,0).compareTo(getJavaVersion()) > 0 ? 0 : 1;
+		int multiValueIdx = new Version(18, 0, 0).compareTo(getJavaVersion()) > 0 ? 0 : 1;
 		Assert.assertNotNull(response.get("Set-Cookie"));
 		Assert.assertEquals("foo=baz", response.get("Set-Cookie").get(multiValueIdx));
 		Assert.assertNotNull(response.get("X-date"));
@@ -1438,11 +1494,17 @@ public class DispatchingTest extends BaseTest {
 		Bundle system = getBundleContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION);
 		BundleWiring systemWiring = system.adapt(BundleWiring.class);
 		@SuppressWarnings("unchecked")
-		List<Version> versions = systemWiring.getCapabilities(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE). //
-				stream().filter(c -> c.getAttributes().get(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE).equals("JavaSE")) //
-				.findFirst().map(c -> (List<Version>) c.getAttributes().get(ExecutionEnvironmentNamespace.CAPABILITY_VERSION_ATTRIBUTE)).get();
+		List<Version> versions = systemWiring
+				.getCapabilities(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE). //
+				stream()
+				.filter(c -> c.getAttributes().get(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE)
+						.equals("JavaSE")) //
+				.findFirst().map(c -> (List<Version>) c.getAttributes()
+						.get(ExecutionEnvironmentNamespace.CAPABILITY_VERSION_ATTRIBUTE))
+				.get();
 		return versions.get(versions.size() - 1);
 	}
+
 	// Bug 493583
 	@Test
 	public void test_streamed_response_outputstream() throws Exception {
@@ -1453,7 +1515,7 @@ public class DispatchingTest extends BaseTest {
 
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
+					throws ServletException, IOException {
 
 				response.setContentType("text/event-stream");
 				response.setCharacterEncoding("UTF-8");
@@ -1462,8 +1524,7 @@ public class DispatchingTest extends BaseTest {
 					for (int i = 1; i <= 10; ++i) {
 						try {
 							Thread.sleep(interval);
-						}
-						catch (InterruptedException e) {
+						} catch (InterruptedException e) {
 							throw new ServletException(e);
 						}
 
@@ -1514,8 +1575,8 @@ public class DispatchingTest extends BaseTest {
 		handler.close();
 
 		Assert.assertTrue(
-			"The interval between events was too short. It means that the response was not properly streamed.",
-			result.get());
+				"The interval between events was too short. It means that the response was not properly streamed.",
+				result.get());
 		Assert.assertEquals(10, counter.get());
 	}
 
@@ -1529,7 +1590,7 @@ public class DispatchingTest extends BaseTest {
 
 			@Override
 			protected void service(HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
+					throws ServletException, IOException {
 
 				response.setContentType("text/event-stream");
 				response.setCharacterEncoding("UTF-8");
@@ -1538,8 +1599,7 @@ public class DispatchingTest extends BaseTest {
 					for (int i = 1; i <= 10; ++i) {
 						try {
 							Thread.sleep(interval);
-						}
-						catch (InterruptedException e) {
+						} catch (InterruptedException e) {
 							throw new ServletException(e);
 						}
 
@@ -1590,8 +1650,8 @@ public class DispatchingTest extends BaseTest {
 		handler.close();
 
 		Assert.assertTrue(
-			"The interval between events was too short. It means that the response was not properly streamed.",
-			result.get());
+				"The interval between events was too short. It means that the response was not properly streamed.",
+				result.get());
 		Assert.assertEquals(10, counter.get());
 	}
 
@@ -1601,9 +1661,7 @@ public class DispatchingTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void doGet(
-				final HttpServletRequest req, final HttpServletResponse resp)
-				throws IOException {
+			protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 
 				String requestURI = req.getRequestURI();
 
@@ -1630,9 +1688,7 @@ public class DispatchingTest extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void doGet(
-				final HttpServletRequest req, final HttpServletResponse resp)
-				throws IOException {
+			protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 
 				String requestURI = req.getRequestURI();
 

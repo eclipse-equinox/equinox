@@ -13,7 +13,8 @@ import org.osgi.service.http.context.ServletContextHelper;
 public class TestServletContextHelper1 extends ServletContextHelper {
 
 	public void activate(ComponentContext componentContext) {
-		delegate = new ServletContextHelper(componentContext.getBundleContext().getBundle()) {};
+		delegate = new ServletContextHelper(componentContext.getBundleContext().getBundle()) {
+		};
 	}
 
 	@Override

@@ -38,7 +38,8 @@ public class Test_table_140_6_HTTP_WHITEBOARD_RESOURCE_validation extends BaseTe
 
 		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN, 34l);
-		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX, "/org/eclipse/equinox/http/servlet/tests");
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX,
+				"/org/eclipse/equinox/http/servlet/tests");
 		ServiceRegistration<Object> sr = context.registerService(Object.class, new Object(), properties);
 		registrations.add(sr);
 
@@ -55,23 +56,22 @@ public class Test_table_140_6_HTTP_WHITEBOARD_RESOURCE_validation extends BaseTe
 		assertEquals(DTOConstants.FAILURE_REASON_VALIDATION_FAILED, failedResourceDTO.failureReason);
 
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN, "/*");
-		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX, new String[] {"/a", "/b"});
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX, new String[] { "/a", "/b" });
 		sr.setProperties(properties);
 
 		failedResourceDTO = getFailedResourceDTOByServiceId(getServiceId(sr));
 		assertNotNull(failedResourceDTO);
 		assertEquals(DTOConstants.FAILURE_REASON_VALIDATION_FAILED, failedResourceDTO.failureReason);
 
-		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN, new String[] {"/a", "/b"});
-		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX, "/org/eclipse/equinox/http/servlet/tests/index.txt");
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN, new String[] { "/a", "/b" });
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX,
+				"/org/eclipse/equinox/http/servlet/tests/index.txt");
 		sr.setProperties(properties);
 
 		failedResourceDTO = getFailedResourceDTOByServiceId(getServiceId(sr));
 		assertNull(failedResourceDTO);
 
-		ResourceDTO resourceDTO = getResourceDTOByServiceId(
-				DEFAULT,
-				getServiceId(sr));
+		ResourceDTO resourceDTO = getResourceDTOByServiceId(DEFAULT, getServiceId(sr));
 		assertNotNull(resourceDTO);
 		assertEquals(2, resourceDTO.patterns.length);
 	}

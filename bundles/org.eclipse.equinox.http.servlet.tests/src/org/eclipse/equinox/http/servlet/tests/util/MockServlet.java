@@ -25,7 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 public class MockServlet extends HttpServlet {
 
 	@Override
-	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void service(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		if (content != null) {
 			response.getWriter().write(content);
 		}
@@ -54,8 +55,7 @@ public class MockServlet extends HttpServlet {
 	}
 
 	public MockServlet exception(Exception exception) {
-		if (!(exception instanceof ServletException) &&
-				!(exception instanceof IOException)) {
+		if (!(exception instanceof ServletException) && !(exception instanceof IOException)) {
 			this.exception = new ServletException(exception);
 		}
 
@@ -64,9 +64,9 @@ public class MockServlet extends HttpServlet {
 		return this;
 	}
 
-	private Integer	code;
-	private String	content;
-	private String	errorMessage;
+	private Integer code;
+	private String content;
+	private String errorMessage;
 	private Exception exception;
 
 }

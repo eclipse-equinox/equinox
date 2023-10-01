@@ -32,10 +32,12 @@ public class TestServlet3 extends AbstractTestServlet {
 
 	@Override
 	protected void handleDoGet(HttpServletRequest request, PrintWriter writer) throws ServletException, IOException {
-		String expected = "Equinox";  //$NON-NLS-1$
+		String expected = "Equinox"; //$NON-NLS-1$
 		try {
-			// Not a terribly useful test, but previous test assumed we could call setComment on a SessionCookieConfig
-			// after ServletContext initialization.  This is not allowed by the servlet specification.
+			// Not a terribly useful test, but previous test assumed we could call
+			// setComment on a SessionCookieConfig
+			// after ServletContext initialization. This is not allowed by the servlet
+			// specification.
 			// Just verifying that an ISE is thrown now.
 			setSessionCookieConfigComment(expected);
 			writer.print(AbstractTestServlet.STATUS_ERROR);
@@ -43,10 +45,10 @@ public class TestServlet3 extends AbstractTestServlet {
 			super.handleDoGet(request, writer);
 		}
 	}
-	
+
 	private void setSessionCookieConfigComment(String comment) {
 		ServletContext context = getServletContext();
-		SessionCookieConfig cookieConfig = context.getSessionCookieConfig();  // This is a Servlet 3.0 API.
+		SessionCookieConfig cookieConfig = context.getSessionCookieConfig(); // This is a Servlet 3.0 API.
 		cookieConfig.setComment(comment);
 	}
 }

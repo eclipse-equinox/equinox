@@ -31,8 +31,8 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 public class TestHttpServiceAndNamedServlet extends BaseTest {
 
 	/**
-	 * Registration of named servlet with http service (allowed) and named
-	 * servlet and pattern with http service (not allowed)
+	 * Registration of named servlet with http service (allowed) and named servlet
+	 * and pattern with http service (not allowed)
 	 */
 	@Test
 	public void testHttpServiceAndNamedServlet() throws Exception {
@@ -40,35 +40,24 @@ public class TestHttpServiceAndNamedServlet extends BaseTest {
 		try {
 			final String name1 = "testname1";
 			final String name2 = "testname2";
-			Dictionary<String,Object> properties = new Hashtable<>();
-			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME,
-					name1);
-			properties.put(
-					HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
-					"(" + HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY
-							+ "=*)");
+			Dictionary<String, Object> properties = new Hashtable<>();
+			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, name1);
+			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+					"(" + HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY + "=*)");
 			long before = getHttpRuntimeChangeCount();
-			registrations.add(getBundleContext().registerService(
-					Servlet.class, new MockServlet(), properties));
+			registrations.add(getBundleContext().registerService(Servlet.class, new MockServlet(), properties));
 			before = waitForRegistration(before);
 
 			properties = new Hashtable<>();
-			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME,
-					name2);
-			properties.put(
-					HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN,
-					"/" + name2);
-			properties.put(
-					HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
-					"(" + HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY
-							+ "=*)");
-			registrations.add(getBundleContext().registerService(
-					Servlet.class, new MockServlet(), properties));
+			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, name2);
+			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/" + name2);
+			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+					"(" + HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY + "=*)");
+			registrations.add(getBundleContext().registerService(Servlet.class, new MockServlet(), properties));
 			before = waitForRegistration(before);
 
 			assertNull(getFailedServletDTOByName(name1));
-			assertNotNull("" + getHttpServiceRuntime().getRuntimeDTO(),
-					getFailedServletDTOByName(name2));
+			assertNotNull("" + getHttpServiceRuntime().getRuntimeDTO(), getFailedServletDTOByName(name2));
 
 			final ServletContextDTO scDTO = getServletContextDTOForDummyServlet();
 			assertNotNull(getServletDTOByName(scDTO.name, name1));

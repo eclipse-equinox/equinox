@@ -38,8 +38,10 @@ public class Test_140_6_20to21_commonProperties extends BaseTest {
 
 		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN, "/other.txt");
-		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX, "/org/eclipse/equinox/http/servlet/tests/index.txt");
-		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(osgi.http.whiteboard.context.name=foo)");
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX,
+				"/org/eclipse/equinox/http/servlet/tests/index.txt");
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"(osgi.http.whiteboard.context.name=foo)");
 		ServiceRegistration<Object> sr = context.registerService(Object.class, new Object(), properties);
 		registrations.add(sr);
 
@@ -47,9 +49,7 @@ public class Test_140_6_20to21_commonProperties extends BaseTest {
 		assertNotNull(failedResourceDTO);
 		assertEquals(DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING, failedResourceDTO.failureReason);
 
-		ResourceDTO resourceDTO = getResourceDTOByServiceId(
-				DEFAULT,
-				getServiceId(sr));
+		ResourceDTO resourceDTO = getResourceDTOByServiceId(DEFAULT, getServiceId(sr));
 		assertNull(resourceDTO);
 		assertEquals("404", requestAdvisor.request("other.txt", null).get("responseCode").get(0));
 
@@ -60,9 +60,7 @@ public class Test_140_6_20to21_commonProperties extends BaseTest {
 		failedResourceDTO = getFailedResourceDTOByServiceId(getServiceId(sr));
 		assertNull(failedResourceDTO);
 
-		resourceDTO = getResourceDTOByServiceId(
-				DEFAULT,
-				getServiceId(sr));
+		resourceDTO = getResourceDTOByServiceId(DEFAULT, getServiceId(sr));
 		assertNull(resourceDTO);
 		assertEquals("404", requestAdvisor.request("other.txt", null).get("responseCode").get(0));
 	}
