@@ -17,10 +17,10 @@ package org.eclipse.equinox.console.common.terminal;
 import org.eclipse.equinox.console.common.KEYS;
 
 public class SCOTerminalTypeMappings extends TerminalTypeMappings {
-	
+
 	public SCOTerminalTypeMappings() {
 		super();
-		
+
 		BACKSPACE = -1;
 		DEL = 127;
 	}

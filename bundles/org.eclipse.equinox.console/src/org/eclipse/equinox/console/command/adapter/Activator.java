@@ -69,6 +69,7 @@ public class Activator implements BundleActivator {
 		private final GogoRequirement identityRequirement;
 		private final GogoRequirement implRequirement;
 		private final boolean required;
+
 		GOGO(String bsn, String implName, boolean required) {
 			this.identityRequirement = new GogoRequirement(IdentityNamespace.IDENTITY_NAMESPACE, bsn);
 			this.implRequirement = new GogoRequirement("org.apache.felix.gogo", implName);
@@ -93,10 +94,12 @@ public class Activator implements BundleActivator {
 		class GogoRequirement implements Requirement {
 			private final String namespace;
 			private final String filter;
+
 			GogoRequirement(String namespace, String value) {
 				this.namespace = namespace;
-				this.filter = "("+ getNamespace() + "=" + value + ")";
+				this.filter = "(" + getNamespace() + "=" + value + ")";
 			}
+
 			@Override
 			public String getNamespace() {
 				return namespace;
@@ -122,6 +125,7 @@ public class Activator implements BundleActivator {
 			}
 		}
 	}
+
 	private ServiceTracker<ConditionalPermissionAdmin, ConditionalPermissionAdmin> condPermAdminTracker;
 	private ServiceTracker<PermissionAdmin, PermissionAdmin> permissionAdminTracker;
 	private FrameworkStartLevel frameworkStartLevel;
@@ -130,15 +134,15 @@ public class Activator implements BundleActivator {
 	private ServiceTracker<PackageAdmin, PackageAdmin> packageAdminTracker;
 	private static boolean isFirstProcessor = true;
 	private static TelnetCommand telnetConnection = null;
-	
+
 	private ServiceTracker<CommandProcessor, ServiceTracker<ConsoleSession, CommandSession>> commandProcessorTracker;
 	// Tracker for Equinox CommandProviders
 	private ServiceTracker<CommandProvider, List<ServiceRegistration<?>>> commandProviderTracker;
-	
+
 	private EquinoxCommandProvider equinoxCmdProvider;
 
-	public static class ProcessorCustomizer implements
-			ServiceTrackerCustomizer<CommandProcessor, ServiceTracker<ConsoleSession, CommandSession>> {
+	public static class ProcessorCustomizer
+			implements ServiceTrackerCustomizer<CommandProcessor, ServiceTracker<ConsoleSession, CommandSession>> {
 
 		private final BundleContext context;
 
@@ -152,7 +156,7 @@ public class Activator implements BundleActivator {
 			CommandProcessor processor = context.getService(reference);
 			if (processor == null)
 				return null;
-			
+
 			if (isFirstProcessor) {
 				isFirstProcessor = false;
 				telnetConnection = new TelnetCommand(processor, context);
@@ -160,43 +164,40 @@ public class Activator implements BundleActivator {
 			} else {
 				telnetConnection.addCommandProcessor(processor);
 			}
-			
-			ServiceTracker<ConsoleSession, CommandSession> tracker = new ServiceTracker<>(context, ConsoleSession.class, new SessionCustomizer(context, processor));
+
+			ServiceTracker<ConsoleSession, CommandSession> tracker = new ServiceTracker<>(context, ConsoleSession.class,
+					new SessionCustomizer(context, processor));
 			tracker.open();
 			return tracker;
 		}
 
 		@Override
-		public void modifiedService(
-			ServiceReference<CommandProcessor> reference,
-			ServiceTracker<ConsoleSession, CommandSession> service) {
+		public void modifiedService(ServiceReference<CommandProcessor> reference,
+				ServiceTracker<ConsoleSession, CommandSession> service) {
 			// nothing
 		}
 
 		@Override
-		public void removedService(
-			ServiceReference<CommandProcessor> reference,
-			ServiceTracker<ConsoleSession, CommandSession> tracker) {
+		public void removedService(ServiceReference<CommandProcessor> reference,
+				ServiceTracker<ConsoleSession, CommandSession> tracker) {
 			tracker.close();
 			CommandProcessor processor = context.getService(reference);
 			telnetConnection.removeCommandProcessor(processor);
-		}	
+		}
 	}
 
 	// Provides support for Equinox ConsoleSessions
-	public static class SessionCustomizer implements
-			ServiceTrackerCustomizer<ConsoleSession, CommandSession> {
+	public static class SessionCustomizer implements ServiceTrackerCustomizer<ConsoleSession, CommandSession> {
 		private final BundleContext context;
 		final CommandProcessor processor;
-		
+
 		public SessionCustomizer(BundleContext context, CommandProcessor processor) {
 			this.context = context;
 			this.processor = processor;
 		}
 
 		@Override
-		public CommandSession addingService(
-				ServiceReference<ConsoleSession> reference) {
+		public CommandSession addingService(ServiceReference<ConsoleSession> reference) {
 			final ConsoleSession equinoxSession = context.getService(reference);
 			if (equinoxSession == null)
 				return null;
@@ -209,11 +210,9 @@ public class Activator implements BundleActivator {
 						gogoSession.put("SCOPE", "equinox:*");
 						gogoSession.put("prompt", "osgi> ");
 						gogoSession.execute("gosh --login --noshutdown");
-					}
-					catch (Exception e) {
+					} catch (Exception e) {
 						e.printStackTrace();
-					}
-					finally {
+					} finally {
 						gogoSession.close();
 						equinoxSession.close();
 					}
@@ -223,23 +222,22 @@ public class Activator implements BundleActivator {
 		}
 
 		@Override
-		public void modifiedService(ServiceReference<ConsoleSession> reference,
-				CommandSession service) {
+		public void modifiedService(ServiceReference<ConsoleSession> reference, CommandSession service) {
 			// nothing
 		}
 
 		@Override
-		public void removedService(ServiceReference<ConsoleSession> reference,
-				CommandSession session) {
+		public void removedService(ServiceReference<ConsoleSession> reference, CommandSession session) {
 			session.close();
 		}
 	}
 
-	// All commands, provided by an Equinox CommandProvider, are registered as provided by a CommandProviderAdapter.
-	public class CommandCustomizer implements
-			ServiceTrackerCustomizer<CommandProvider, List<ServiceRegistration<?>>> {
+	// All commands, provided by an Equinox CommandProvider, are registered as
+	// provided by a CommandProviderAdapter.
+	public class CommandCustomizer implements ServiceTrackerCustomizer<CommandProvider, List<ServiceRegistration<?>>> {
 
 		private BundleContext context;
+
 		public CommandCustomizer(BundleContext context) {
 			this.context = context;
 		}
@@ -259,9 +257,10 @@ public class Activator implements BundleActivator {
 					Dictionary<String, Object> attributes = getAttributes(commandMethods);
 					Object serviceRanking = reference.getProperty(Constants.SERVICE_RANKING);
 					if (serviceRanking != null) {
-					    attributes.put(Constants.SERVICE_RANKING, serviceRanking);
+						attributes.put(Constants.SERVICE_RANKING, serviceRanking);
 					}
-					registrations.add(context.registerService(Object.class, new CommandProviderAdapter(command, commandMethods), attributes));
+					registrations.add(context.registerService(Object.class,
+							new CommandProviderAdapter(command, commandMethods), attributes));
 					return registrations;
 				} else {
 					context.ungetService(reference);
@@ -273,14 +272,14 @@ public class Activator implements BundleActivator {
 			}
 		}
 
-
 		@Override
 		public void modifiedService(ServiceReference<CommandProvider> reference, List<ServiceRegistration<?>> service) {
 			// Nothing to do.
 		}
 
 		@Override
-		public void removedService(ServiceReference<CommandProvider> reference, List<ServiceRegistration<?>> registrations) {
+		public void removedService(ServiceReference<CommandProvider> reference,
+				List<ServiceRegistration<?>> registrations) {
 			for (ServiceRegistration<?> serviceRegistration : registrations) {
 				serviceRegistration.unregister();
 			}
@@ -297,9 +296,10 @@ public class Activator implements BundleActivator {
 
 		commandProviderTracker = new ServiceTracker<>(context, CommandProvider.class, new CommandCustomizer(context));
 		commandProviderTracker.open();
-		commandProcessorTracker = new ServiceTracker<>(context, CommandProcessor.class, new ProcessorCustomizer(context));
+		commandProcessorTracker = new ServiceTracker<>(context, CommandProcessor.class,
+				new ProcessorCustomizer(context));
 		commandProcessorTracker.open();
-		
+
 		condPermAdminTracker = new ServiceTracker<>(context, ConditionalPermissionAdmin.class, null);
 		condPermAdminTracker.open();
 
@@ -309,19 +309,19 @@ public class Activator implements BundleActivator {
 
 		packageAdminTracker = new ServiceTracker<>(context, PackageAdmin.class, null);
 		packageAdminTracker.open();
-		
+
 		equinoxCmdProvider = new EquinoxCommandProvider(context, this);
 		equinoxCmdProvider.startService();
-		
-		HelpCommand helpCommand = new HelpCommand(context); 
+
+		HelpCommand helpCommand = new HelpCommand(context);
 		helpCommand.startService();
-		
+
 		ManCommand manCommand = new ManCommand(context);
 		manCommand.startService();
-		
+
 		DisconnectCommand disconnectCommand = new DisconnectCommand(context);
 		disconnectCommand.startService();
-		
+
 		CommandsTracker commandsTracker = new CommandsTracker(context);
 		context.registerService(CommandsTracker.class.getName(), commandsTracker, null);
 
@@ -361,11 +361,10 @@ public class Activator implements BundleActivator {
 		Class<?> c = command.getClass();
 		Method[] methods = c.getDeclaredMethods();
 		for (Method method : methods) {
-			if (method.getName().startsWith("_")
-					&& method.getModifiers() == Modifier.PUBLIC && !method.getName().equals("_help")) {
+			if (method.getName().startsWith("_") && method.getModifiers() == Modifier.PUBLIC
+					&& !method.getName().equals("_help")) {
 				Type[] types = method.getGenericParameterTypes();
-				if (types.length == 1
-						&& types[0].equals(CommandInterpreter.class)) {
+				if (types.length == 1 && types[0].equals(CommandInterpreter.class)) {
 					names.add(method);
 				}
 			}
@@ -395,7 +394,7 @@ public class Activator implements BundleActivator {
 		}
 
 		try {
-			telnetConnection.telnet(new String[]{"stop"});
+			telnetConnection.telnet(new String[] { "stop" });
 		} catch (Exception e) {
 			// expected if the telnet server is not started
 		}

@@ -30,16 +30,16 @@ import org.osgi.framework.Version;
  */
 public class EquinoxCommandsConverter implements Converter {
 	BundleContext context;
-	
+
 	public EquinoxCommandsConverter(BundleContext context) {
 		this.context = context;
 	}
-	
+
 	@Override
 	public Object convert(Class<?> desiredType, Object in) throws Exception {
-		if(desiredType == Bundle[].class) {
+		if (desiredType == Bundle[].class) {
 			if (in instanceof String) {
-				if("*".equals(in)) {
+				if ("*".equals(in)) {
 					return context.getBundles();
 				}
 			} else if (in instanceof List<?>) {
@@ -48,7 +48,7 @@ public class EquinoxCommandsConverter implements Converter {
 					try {
 						ArrayList<Bundle> bundles = new ArrayList<>();
 						for (Object arg : args) {
-							long id = Long.parseLong((String)arg);
+							long id = Long.parseLong((String) arg);
 							bundles.add(context.getBundle(id));
 						}
 						return bundles.toArray(new Bundle[0]);
@@ -58,15 +58,15 @@ public class EquinoxCommandsConverter implements Converter {
 				}
 			}
 		}
-		
-		if(desiredType == Bundle.class) {
+
+		if (desiredType == Bundle.class) {
 			Bundle bundle = null;
 			if (in instanceof Long) {
 				long id = ((Long) in).longValue();
 				bundle = context.getBundle(id);
 				return bundle;
 			}
-			
+
 			try {
 				long id = Long.parseLong((String) in);
 				bundle = context.getBundle(id);
@@ -78,7 +78,7 @@ public class EquinoxCommandsConverter implements Converter {
 
 				// check for @ -- this may separate either the version string, or be part of the
 				// location
-				int ix = symbolicName.indexOf('@'); //$NON-NLS-1$
+				int ix = symbolicName.indexOf('@'); // $NON-NLS-1$
 				if (ix != -1) {
 					if ((ix + 1) != symbolicName.length()) {
 						try {
@@ -86,17 +86,21 @@ public class EquinoxCommandsConverter implements Converter {
 							version = Version.parseVersion(symbolicName.substring(ix + 1, symbolicName.length()));
 							symbolicName = symbolicName.substring(0, ix);
 						} catch (IllegalArgumentException e) {
-							// version doesn't parse, assume token is symbolic name without version, or location
+							// version doesn't parse, assume token is symbolic name without version, or
+							// location
 						}
 					}
 				}
 
 				Bundle[] bundles = context.getBundles();
 				for (Bundle b : bundles) {
-					
-					// if symbolicName matches, then matches if there is no version specific on command, or the version matches
+
+					// if symbolicName matches, then matches if there is no version specific on
+					// command, or the version matches
 					// if there is no version specified on command, pick first matching bundle
-					if ((symbolicName.equals(b.getSymbolicName()) && (version == null || version.equals(b.getVersion()))) || ((String)in).equals(b.getLocation())) {
+					if ((symbolicName.equals(b.getSymbolicName())
+							&& (version == null || version.equals(b.getVersion())))
+							|| ((String) in).equals(b.getLocation())) {
 						bundle = b;
 						break;
 					}
@@ -104,27 +108,27 @@ public class EquinoxCommandsConverter implements Converter {
 			}
 			return bundle;
 		}
-		
+
 		if (desiredType == URL.class) {
 			URL url = null;
 			try {
 				url = new URL((String) in);
 			} catch (Exception e) {
-				//do nothing
+				// do nothing
 			}
 			return url;
 		}
-		
+
 		return null;
 	}
-	
+
 	private boolean checkStringElements(List<?> list) {
 		for (Object element : list) {
 			if (!(element instanceof String)) {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -134,34 +138,34 @@ public class EquinoxCommandsConverter implements Converter {
 			Dictionary<?, ?> dic = (Dictionary<?, ?>) target;
 			return printDictionary(dic);
 		}
-		
+
 		if (target instanceof List<?>) {
 			List<?> list = (List<?>) target;
 			if (checkDictionaryElements(list)) {
 				StringBuilder builder = new StringBuilder();
-				for(Object dic : list) {
+				for (Object dic : list) {
 					builder.append("Bundle headers:\r\n");
-					builder.append(printDictionary((Dictionary<?, ?>)dic));
+					builder.append(printDictionary((Dictionary<?, ?>) dic));
 					builder.append("\r\n");
 					builder.append("\r\n");
 				}
 				return builder.toString();
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	private boolean checkDictionaryElements(List<?> list) {
 		for (Object element : list) {
 			if (!(element instanceof Dictionary<?, ?>)) {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	private String printDictionary(Dictionary<?, ?> dic) {
 		int count = dic.size();
 		String[] keys = new String[count];
@@ -171,7 +175,7 @@ public class EquinoxCommandsConverter implements Converter {
 			keys[i++] = (String) keysEnum.nextElement();
 		}
 		Util.sortByString(keys);
-		
+
 		StringBuilder builder = new StringBuilder();
 		for (i = 0; i < count; i++) {
 			builder.append(" ").append(keys[i]).append(" = ").append(dic.get(keys[i])); //$NON-NLS-1$//$NON-NLS-2$

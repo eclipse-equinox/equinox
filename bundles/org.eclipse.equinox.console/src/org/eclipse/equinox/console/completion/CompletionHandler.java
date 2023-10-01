@@ -27,38 +27,38 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 /**
- * This class aggregates the different types of completers - variable, command and
- * file completers. It also searches for registered custom completers and if available
- * uses them too. It call all completers and finally returns the completion candidates
- * returned from all of them.
+ * This class aggregates the different types of completers - variable, command
+ * and file completers. It also searches for registered custom completers and if
+ * available uses them too. It call all completers and finally returns the
+ * completion candidates returned from all of them.
  *
  */
 public class CompletionHandler {
-	
-	private	BundleContext context;
+
+	private BundleContext context;
 	private CommandSession session;
 	Set<Completer> completers;
 	private static final String FILE = "file";
 	private static final char VARIABLE_PREFIX = '$';
-	
+
 	public CompletionHandler(BundleContext context, CommandSession session) {
 		this.context = context;
 		this.session = session;
 		completers = new HashSet<>();
 	}
-	
+
 	public Map<String, Integer> getCandidates(byte[] buf, int cursor) {
 		String currentInput = new String(buf);
 		String currentToken = CommandLineParser.getCurrentToken(currentInput, cursor);
-		if (currentToken ==  null){
+		if (currentToken == null) {
 			return new HashMap<>();
 		}
 		if (currentToken.contains(FILE) == true) {
 			completers.add(new FileNamesCompleter());
-		}else{
-			if ((cursor - currentToken.length() > 0) && (buf[cursor - currentToken.length() - 1] == VARIABLE_PREFIX)){
+		} else {
+			if ((cursor - currentToken.length() > 0) && (buf[cursor - currentToken.length() - 1] == VARIABLE_PREFIX)) {
 				completers.add(new VariableNamesCompleter(session));
-			}else {
+			} else {
 				completers.add(new CommandNamesCompleter(context, session));
 				completers.add(new FileNamesCompleter());
 			}
@@ -68,19 +68,20 @@ public class CompletionHandler {
 		for (Completer completer : completers) {
 			candidates.putAll(completer.getCandidates(currentInput, cursor));
 		}
-		
+
 		return candidates;
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	private void lookupCustomCompleters (){
+	private void lookupCustomCompleters() {
 		ServiceReference<Completer>[] completersRefs = null;
 		try {
-			completersRefs = (ServiceReference<Completer>[]) context.getServiceReferences(Completer.class.getName(), null);
+			completersRefs = (ServiceReference<Completer>[]) context.getServiceReferences(Completer.class.getName(),
+					null);
 		} catch (InvalidSyntaxException e) {
 			// do nothing
 		}
-		
+
 		if (completersRefs != null) {
 			for (ServiceReference<Completer> ref : completersRefs) {
 				Completer completer = context.getService(ref);

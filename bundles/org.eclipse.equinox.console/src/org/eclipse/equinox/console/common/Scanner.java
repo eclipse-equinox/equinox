@@ -28,14 +28,15 @@ import org.eclipse.equinox.console.common.terminal.VT220TerminalTypeMappings;
 import org.eclipse.equinox.console.common.terminal.VT320TerminalTypeMappings;
 
 /**
- * A common superclass for content processor for the telnet protocol and for command line editing (processing delete,
- * backspace, arrows, command history, etc.).
+ * A common superclass for content processor for the telnet protocol and for
+ * command line editing (processing delete, backspace, arrows, command history,
+ * etc.).
  */
 public abstract class Scanner {
 
 	private byte BACKSPACE;
 	private byte DEL;
-	protected static final byte BS = 8;  
+	protected static final byte BS = 8;
 	protected static final byte LF = 10;
 	protected static final byte CR = 13;
 	protected static final byte ESC = 27;
@@ -50,11 +51,11 @@ public abstract class Scanner {
 	protected Map<String, KEYS> currentEscapesToKey;
 	protected final Map<String, TerminalTypeMappings> supportedEscapeSequences;
 	protected String[] escapes;
-	
+
 	public Scanner(ConsoleInputStream toShell, OutputStream toTelnet) {
 		this.toShell = toShell;
 		this.toTelnet = toTelnet;
-		supportedEscapeSequences = new HashMap<> ();
+		supportedEscapeSequences = new HashMap<>();
 		supportedEscapeSequences.put("ANSI", new ANSITerminalTypeMappings());
 		supportedEscapeSequences.put("VT100", new VT100TerminalTypeMappings());
 		VT220TerminalTypeMappings vtMappings = new VT220TerminalTypeMappings();
@@ -69,7 +70,7 @@ public abstract class Scanner {
 	public void toggleEchoEnabled(boolean isEnabled) {
 		isEchoEnabled = isEnabled;
 	}
-	
+
 	protected void echo(int b) throws IOException {
 		if (isEchoEnabled) {
 			toTelnet.write(b);

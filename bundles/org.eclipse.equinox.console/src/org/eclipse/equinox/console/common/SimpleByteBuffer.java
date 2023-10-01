@@ -15,9 +15,9 @@
 package org.eclipse.equinox.console.common;
 
 /**
- * This is a helper class, which buffers one line of input. It provides
- * for simple line editing - insertion, deletion, left and right movement, deletion through the
- * backspace key.
+ * This is a helper class, which buffers one line of input. It provides for
+ * simple line editing - insertion, deletion, left and right movement, deletion
+ * through the backspace key.
  */
 public class SimpleByteBuffer {
 

@@ -105,11 +105,11 @@ public class ConsoleMsg extends NLS {
 	public static String STARTLEVEL_NO_STARTLEVEL_OR_BUNDLE_GIVEN;
 	public static String STARTLEVEL_INITIAL_BUNDLE_STARTLEVEL;
 	public static String STARTLEVEL_POSITIVE_INTEGER;
-	
+
 	public static String THREADS_THREAD_DOES_NOT_EXIST;
 	public static String THREADS_THREAD_STOPPED_BY_CONSOLE;
 	public static String THREADS_UNRECOGNIZED_ACTION;
-	
+
 	public static final String CONSOLE_HELP_EXIT_COMMAND_DESCRIPTION = "exit immediately (System.exit)";
 	public static final String CONSOLE_HELP_LAUNCH_COMMAND_DESCRIPTION = "start the OSGi Framework";
 	public static final String CONSOLE_HELP_SHUTDOWN_COMMAND_DESCRIPTION = "shutdown the OSGi Framework";
@@ -175,11 +175,11 @@ public class ConsoleMsg extends NLS {
 	public static final String CONSOLE_HELP_GETPROP_COMMAND_ARGUMENT_DESCRIPTION = "name of system property to dispaly";
 	public static final String CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION = "Displays unsatisfied constraints for the specified bundle(s)";
 	public static final String CONSOLE_HELP_DIAG_COMMAND_ARGUMENT_DESCRIPTION = "IDs of bundle(s), for which to display unsatisfied constraints";
-	public static final String CONSOLE_HELP_ENABLE_COMMAND_DESCRIPTION="Enable the specified bundle(s)";
-	public static final String CONSOLE_HELP_ENABLE_COMMAND_ARGUMENT_DESCRIPTION="IDs of bundle(s) to enable";
-	public static final String CONSOLE_HELP_DISABLE_COMMAND_DESCRIPTION="Disable the specified bundle(s)";
-	public static final String CONSOLE_HELP_DISABLE_COMMAND_ARGUMENT_DESCRIPTION="IDs of bundle(s) to disable";
-	public static final String CONSOLE_HELP_LD_COMMAND_DESCRIPTION="List disabled bundles in the system";
+	public static final String CONSOLE_HELP_ENABLE_COMMAND_DESCRIPTION = "Enable the specified bundle(s)";
+	public static final String CONSOLE_HELP_ENABLE_COMMAND_ARGUMENT_DESCRIPTION = "IDs of bundle(s) to enable";
+	public static final String CONSOLE_HELP_DISABLE_COMMAND_DESCRIPTION = "Disable the specified bundle(s)";
+	public static final String CONSOLE_HELP_DISABLE_COMMAND_ARGUMENT_DESCRIPTION = "IDs of bundle(s) to disable";
+	public static final String CONSOLE_HELP_LD_COMMAND_DESCRIPTION = "List disabled bundles in the system";
 
 	static {
 		// initialize resource bundles

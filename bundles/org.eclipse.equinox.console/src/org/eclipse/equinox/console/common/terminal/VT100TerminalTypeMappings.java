@@ -17,7 +17,7 @@ package org.eclipse.equinox.console.common.terminal;
 import org.eclipse.equinox.console.common.KEYS;
 
 public class VT100TerminalTypeMappings extends TerminalTypeMappings {
-	
+
 	public VT100TerminalTypeMappings() {
 		super();
 		BACKSPACE = 127;

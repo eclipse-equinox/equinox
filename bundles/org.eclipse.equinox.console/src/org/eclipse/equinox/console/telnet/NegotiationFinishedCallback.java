@@ -13,20 +13,23 @@
  *******************************************************************************/
 
 package org.eclipse.equinox.console.telnet;
+
 /**
- * A callback through which the TelnetInputScanner notifies the TelnetConnectionManger
- * that the terminal type negotiation with the client has finished. This is importednt, because
- * the TelnetConnectionManager should start the CommandSession after the negotiation is finished.
- * This is necessary, because the user input should be interpreted with the correct terminal type.
+ * A callback through which the TelnetInputScanner notifies the
+ * TelnetConnectionManger that the terminal type negotiation with the client has
+ * finished. This is importednt, because the TelnetConnectionManager should
+ * start the CommandSession after the negotiation is finished. This is
+ * necessary, because the user input should be interpreted with the correct
+ * terminal type.
  */
 public class NegotiationFinishedCallback implements Callback {
-	
+
 	private TelnetConnection telnetConnection;
-	
+
 	public NegotiationFinishedCallback(TelnetConnection telnetConnection) {
 		this.telnetConnection = telnetConnection;
 	}
-	
+
 	@Override
 	public void finished() {
 		telnetConnection.telnetNegotiationFinished();

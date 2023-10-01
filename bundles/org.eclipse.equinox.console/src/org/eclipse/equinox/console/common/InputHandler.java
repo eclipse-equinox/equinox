@@ -19,9 +19,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * This class represents a generic handler of content, read from some input stream. It reads from the
- * stream, and passes what is read to a processor, which performs some actions on the content,
- * eventually writing to an output stream. This handler should be customized with a concrete content processor.
+ * This class represents a generic handler of content, read from some input
+ * stream. It reads from the stream, and passes what is read to a processor,
+ * which performs some actions on the content, eventually writing to an output
+ * stream. This handler should be customized with a concrete content processor.
  */
 public abstract class InputHandler extends Thread {
 
@@ -64,7 +65,7 @@ public abstract class InputHandler extends Thread {
 			}
 		}
 	}
-	
+
 	public Scanner getScanner() {
 		return inputScanner;
 	}

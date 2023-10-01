@@ -32,8 +32,8 @@ import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.osgi.framework.Bundle;
 
 /**
- * A CommandInterpreter to be passed to the legacy Equinox commands,
- * executed by the CommandProviderAdapter.
+ * A CommandInterpreter to be passed to the legacy Equinox commands, executed by
+ * the CommandProviderAdapter.
  *
  */
 public class CustomCommandInterpreter implements CommandInterpreter {
@@ -44,32 +44,32 @@ public class CustomCommandInterpreter implements CommandInterpreter {
 	private final Iterator<Object> arguments;
 	private final CommandSession commandSession;
 	/**
-	 * The maximum number of lines to print without user prompt.
-	 * 0 means no user prompt is required, the window is scrollable.
+	 * The maximum number of lines to print without user prompt. 0 means no user
+	 * prompt is required, the window is scrollable.
 	 */
 	protected static int maxLineCount;
 
-	/** The number of lines printed without user prompt.*/
+	/** The number of lines printed without user prompt. */
 	protected int currentLineCount;
-	
+
 	public CustomCommandInterpreter(CommandSession commandSession, List<Object> args) {
 		this.commandSession = commandSession;
 		arguments = args.iterator();
 	}
-	
+
 	@Override
-public Object execute(String cmd) {
+	public Object execute(String cmd) {
 		try {
 			return commandSession.execute(cmd);
 		} catch (RuntimeException e) {
 			throw e;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
-		} 
+		}
 	}
 
 	@Override
-public String nextArgument() {
+	public String nextArgument() {
 		if (arguments.hasNext()) {
 			Object next = arguments.next();
 			return next == null ? null : next.toString();
@@ -83,26 +83,27 @@ public String nextArgument() {
 	 * @param o the object to be printed
 	 */
 	@Override
-public void print(Object o) {
-			check4More();
-			out.print(o);
-			out.flush();    
+	public void print(Object o) {
+		check4More();
+		out.print(o);
+		out.flush();
 	}
 
 	/**
 	 * Prints a empty line to the outputstream
 	 */
 	@Override
-public void println() {
+	public void println() {
 		println(""); //$NON-NLS-1$
 	}
 
 	/**
 	 * Print a stack trace including nested exceptions.
+	 * 
 	 * @param t The offending exception
 	 */
 	@Override
-public void printStackTrace(Throwable t) {
+	public void printStackTrace(Throwable t) {
 		t.printStackTrace(out);
 
 		Method[] methods = t.getClass().getMethods();
@@ -113,7 +114,8 @@ public void printStackTrace(Throwable t) {
 		for (int i = 0; i < size; i++) {
 			Method method = methods[i];
 
-			if (Modifier.isPublic(method.getModifiers()) && method.getName().startsWith("get") && throwable.isAssignableFrom(method.getReturnType()) && (method.getParameterTypes().length == 0)) { //$NON-NLS-1$
+			if (Modifier.isPublic(method.getModifiers()) && method.getName().startsWith("get") //$NON-NLS-1$
+					&& throwable.isAssignableFrom(method.getReturnType()) && (method.getParameterTypes().length == 0)) {
 				try {
 					Throwable nested = (Throwable) method.invoke(t, (Object) null);
 
@@ -130,16 +132,16 @@ public void printStackTrace(Throwable t) {
 	/**
 	 * Prints an object to the output medium (appended with newline character).
 	 * <p>
-	 * If running on the target environment, the user is prompted with '--more'
-	 * if more than the configured number of lines have been printed without user prompt.
-	 * This enables the user of the program to have control over scrolling.
+	 * If running on the target environment, the user is prompted with '--more' if
+	 * more than the configured number of lines have been printed without user
+	 * prompt. This enables the user of the program to have control over scrolling.
 	 * <p>
 	 * For this to work properly you should not embed "\n" etc. into the string.
 	 *
 	 * @param o the object to be printed
 	 */
 	@Override
-public void println(Object o) {
+	public void println(Object o) {
 		if (o == null) {
 			return;
 		}
@@ -150,7 +152,7 @@ public void println(Object o) {
 			currentLineCount += o.toString().length() / 80;
 		}
 	}
-	
+
 	/**
 	 * Prints a string to the output medium (appended with newline character).
 	 * <p>
@@ -165,11 +167,11 @@ public void println(Object o) {
 	/**
 	 * Prints the given dictionary sorted by keys.
 	 *
-	 * @param dic the dictionary to print
+	 * @param dic   the dictionary to print
 	 * @param title the header to print above the key/value pairs
 	 */
 	@Override
-public void printDictionary(Dictionary<?,?> dic, String title) {
+	public void printDictionary(Dictionary<?, ?> dic, String title) {
 		if (dic == null)
 			return;
 
@@ -194,11 +196,11 @@ public void printDictionary(Dictionary<?,?> dic, String title) {
 	/**
 	 * Prints the given bundle resource if it exists
 	 *
-	 * @param bundle  the bundle containing the resource
-	 * @param resource  the resource to print
+	 * @param bundle   the bundle containing the resource
+	 * @param resource the resource to print
 	 */
 	@Override
-public void printBundleResource(Bundle bundle, String resource) {
+	public void printBundleResource(Bundle bundle, String resource) {
 		URL entry = null;
 		entry = bundle.getEntry(resource);
 		if (entry != null) {
@@ -214,23 +216,23 @@ public void printBundleResource(Bundle bundle, String resource) {
 				System.err.println(e);
 			}
 		} else {
-			println("CONSOLE_RESOURCE ["+resource+"] NOT_IN_BUNDLE " + bundle);
+			println("CONSOLE_RESOURCE [" + resource + "] NOT_IN_BUNDLE " + bundle);
 		}
 	}
-	
+
 	/**
-	 * Answers the number of lines output to the console
-	 * window should scroll without user interaction.
+	 * Answers the number of lines output to the console window should scroll
+	 * without user interaction.
 	 *
-	 * @return  The number of lines to scroll.
+	 * @return The number of lines to scroll.
 	 */
 	private int getMaximumLinesToScroll() {
 		return maxLineCount;
 	}
 
 	/**
-	 *  Displays the more... prompt if the max line count has been reached 
-	 *  and waits for the operator to hit enter.
+	 * Displays the more... prompt if the max line count has been reached and waits
+	 * for the operator to hit enter.
 	 *
 	 */
 	private void check4More() {
@@ -244,7 +246,7 @@ public void printBundleResource(Bundle bundle, String resource) {
 				} catch (IOException e) {
 					e.printStackTrace();
 				} // wait for user entry
-				resetLineCount(); //Reset the line counter for the 'more' prompt
+				resetLineCount(); // Reset the line counter for the 'more' prompt
 			}
 		}
 	}
@@ -255,10 +257,10 @@ public void printBundleResource(Bundle bundle, String resource) {
 	private void resetLineCount() {
 		currentLineCount = 0;
 	}
-	
+
 	/**
-	 Answer a string (may be as many lines as you like) with help
-	 texts that explain the command.
+	 * Answer a string (may be as many lines as you like) with help texts that
+	 * explain the command.
 	 */
 	public String getHelp() {
 		StringBuilder help = new StringBuilder(256);

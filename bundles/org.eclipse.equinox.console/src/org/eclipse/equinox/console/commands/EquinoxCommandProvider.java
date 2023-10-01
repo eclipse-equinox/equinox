@@ -83,52 +83,89 @@ import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.permissionadmin.PermissionAdmin;
 
 /**
- * This class provides methods to execute commands from the command line.  It registers
- * itself as a service so it can be invoked by a CommandProcessor.
+ * This class provides methods to execute commands from the command line. It
+ * registers itself as a service so it can be invoked by a CommandProcessor.
  *
  * The commands provided by this class are:
- ---Controlling the OSGi framework---
- close - shutdown and exit
- exit - exit immediately (System.exit)
- gc - perform a garbage collection
- init - uninstall all bundles
- launch - start the Service Management Framework
- setprop <key>=<value> - set the OSGI property
- shutdown - shutdown the Service Management Framework
- ---Controlliing Bundles---
- install <url> {s[tart]} - install and optionally start bundle from the given URL
- refresh (<id>|<location>) - refresh the packages of the specified bundles
- start (<id>|<location>) - start the specified bundle(s)
- stop (<id>|<location>) - stop the specified bundle(s)
- uninstall (<id>|<location>) - uninstall the specified bundle(s)
- update (<id>|<location>|<*>) - update the specified bundle(s)
- ---Displaying Status---
- bundle (<id>|<location>) - display details for the specified bundle(s)
- bundles - display details for all installed bundles
- headers (<id>|<location>) - print bundle headers
- packages {<pkgname>|<id>|<location>} - display imported/exported package details
- props - display System properties
- services {filter} - display registered service details. Examples for [filter]: (objectClass=com.xyz.Person); (&(objectClass=com.xyz.Person)(|(sn=Jensen)(cn=Babs J*))); passing only com.xyz.Person is a shortcut for (objectClass=com.xyz.Person). The filter syntax specification is available at http://www.ietf.org/rfc/rfc1960.txt
- ss - display installed bundles (short status)
- status - display installed bundles and registered services
- threads - display threads and thread groups
- ---Extras---
- exec <command> - execute a command in a separate process and wait
- fork <command> - execute a command in a separate process
- getprop <name> -  Displays the system properties with the given name, or all of them.
- requiredBundles [<bsn>] - lists required bundles having the specified symbolic name or all if no bsn is specified
- classSpaces [<bsn>] - lists required bundles having the specified symbolic name or all if no bsn is specified
- ---Controlling StartLevel---
- sl {(<id>|<location>)} - display the start level for the specified bundle, or for the framework if no bundle specified
- setfwsl <start level> - set the framework start level
- setbsl <start level> (<id>|<location>) - set the start level for the bundle(s)
- setibsl <start level> - set the initial bundle start level
- ---Eclipse Runtime commands---
- diag - Displays unsatisfied constraints for the specified bundle(s)
- enableBundle - Enable the specified bundle(s)
- disableBundle - Disable the specified bundle(s)
- disabledBundles - List disabled bundles in the system
-*/
+ * <p>
+ * ---Controlling the OSGi framework---
+ * </p>
+ * <ul>
+ * <li>close - shutdown and exit</li>
+ * <li>exit - exit immediately (System.exit)</li>
+ * <li>gc - perform a garbage collection</li>
+ * <li>init - uninstall all bundles</li>
+ * <li>launch - start the Service Management Framework</li>
+ * <li>setprop <key>=<value> - set the OSGI property</li>
+ * <li>shutdown - shutdown the Service Management Framework</li>
+ * </ul>
+ * <p>
+ * ---Controlliing Bundles---
+ * </p>
+ * <ul>
+ * <li>install <url> {s[tart]} - install and optionally start bundle from the
+ * given URL</li>
+ * <li>refresh (<id>|<location>) - refresh the packages of the specified
+ * bundles</li>
+ * <li>start (<id>|<location>) - start the specified bundle(s)</li>
+ * <li>stop (<id>|<location>) - stop the specified bundle(s)</li>
+ * <li>uninstall (<id>|<location>) - uninstall the specified bundle(s)</li>
+ * <li>update (<id>|<location>|<*>) - update the specified bundle(s)</li>
+ * </ul>
+ * <p>
+ * ---Displaying Status---
+ * </p>
+ * <ul>
+ * <li>bundle (<id>|<location>) - display details for the specified
+ * bundle(s)</li>
+ * <li>bundles - display details for all installed bundles</li>
+ * <li>headers (<id>|<location>) - print bundle headers</li>
+ * <li>packages {<pkgname>|<id>|<location>} - display imported/exported package
+ * details</li>
+ * <li>props - display System properties</li>
+ * <li>services {filter} - display registered service details. Examples for
+ * [filter]: (objectClass=com.xyz.Person);
+ * (&(objectClass=com.xyz.Person)(|(sn=Jensen)(cn=Babs J*))); passing only
+ * com.xyz.Person is a shortcut for (objectClass=com.xyz.Person). The filter
+ * syntax specification is available at http://www.ietf.org/rfc/rfc1960.txt</li>
+ * <li>ss - display installed bundles (short status)</li>
+ * <li>status - display installed bundles and registered services</li>
+ * <li>threads - display threads and thread groups</li>
+ * </ul>
+ * <p>
+ * ---Extras---
+ * </p>
+ * <ul>
+ * <li>exec <command> - execute a command in a separate process and wait</li>
+ * <li>fork <command> - execute a command in a separate process</li>
+ * <li>getprop <name> - Displays the system properties with the given name, or
+ * all of them.</li>
+ * <li>requiredBundles [<bsn>] - lists required bundles having the specified
+ * symbolic name or all if no bsn is specified</li>
+ * <li>classSpaces [<bsn>] - lists required bundles having the specified
+ * symbolic name or all if no bsn is specified</li>
+ * </ul>
+ * <p>
+ * ---Controlling StartLevel---
+ * </p>
+ * <ul>
+ * <li>sl {(<id>|<location>)} - display the start level for the specified
+ * bundle, or for the framework if no bundle specified</li>
+ * <li>setfwsl <start level> - set the framework start level</li>
+ * <li>setbsl <start level> (<id>|<location>) - set the start level for the
+ * bundle(s)</li>
+ * <li>setibsl <start level> - set the initial bundle start level</li>
+ * </ul>
+ * <p>
+ * ---Eclipse Runtime commands---
+ * </p>
+ * <ul>
+ * <li>diag - Displays unsatisfied constraints for the specified bundle(s)</li>
+ * <li>enableBundle - Enable the specified bundle(s)</li>
+ * <li>disableBundle - Disable the specified bundle(s)</li>
+ * <li>disabledBundles - List disabled bundles in the system</li>
+ * </ul>
+ */
 
 public class EquinoxCommandProvider implements SynchronousBundleListener {
 
@@ -147,20 +184,19 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	private Activator activator;
 
 	/** commands provided by this command provider */
-	private static final String[] functions = new String[] {"exit", "shutdown", "sta", "start", "sto", "stop", "i",
-		"install", "up", "up", "up", "update", "update", "update", "un", "uninstall", "s", "status", "se", "services",
-		"p", "p", "packages", "packages", "bundles", "b", "bundle", "gc", "init", "close", "r", "refresh", "exec",
-		"fork", "h", "headers", "pr", "props", "setp", "setprop", "ss", "t", "threads", "sl", "setfwsl", "setbsl",
-		"setibsl", "requiredBundles", "classSpaces", "profilelog", "getPackages", "getprop", "diag", "enableBundle",
-		"disableBundle", "disabledBundles"};
-
+	private static final String[] functions = new String[] { "exit", "shutdown", "sta", "start", "sto", "stop", "i",
+			"install", "up", "up", "up", "update", "update", "update", "un", "uninstall", "s", "status", "se",
+			"services", "p", "p", "packages", "packages", "bundles", "b", "bundle", "gc", "init", "close", "r",
+			"refresh", "exec", "fork", "h", "headers", "pr", "props", "setp", "setprop", "ss", "t", "threads", "sl",
+			"setfwsl", "setbsl", "setibsl", "requiredBundles", "classSpaces", "profilelog", "getPackages", "getprop",
+			"diag", "enableBundle", "disableBundle", "disabledBundles" };
 
 	/**
-	 *  Constructor.
+	 * Constructor.
 	 *
-	 *  start() must be called after creating this object.
+	 * start() must be called after creating this object.
 	 *
-	 *  @param framework The current instance of the framework
+	 * @param framework The current instance of the framework
 	 */
 	public EquinoxCommandProvider(BundleContext context, Activator activator) {
 		this.context = context;
@@ -168,10 +204,10 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 *  Starts this CommandProvider.
+	 * Starts this CommandProvider.
 	 *
-	 *  Registers this object as a service providing commands
-	 *  Adds this object as a SynchronousBundleListener.
+	 * Registers this object as a service providing commands Adds this object as a
+	 * SynchronousBundleListener.
 	 */
 	public void startService() {
 		EquinoxCommandsConverter converter = new EquinoxCommandsConverter(context);
@@ -198,7 +234,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 *  Handle the exit command.  Exit immediately (System.exit)
+	 * Handle the exit command. Exit immediately (System.exit)
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_EXIT_COMMAND_DESCRIPTION)
 	public void exit(CommandSession session) throws Exception {
@@ -209,7 +245,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 *  Handle the shutdown command.  Shutdown the OSGi framework.
+	 * Handle the shutdown command. Shutdown the OSGi framework.
 	 *
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_SHUTDOWN_COMMAND_DESCRIPTION)
@@ -218,22 +254,24 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 *  Handle the start command's abbreviation.  Invoke start()
+	 * Handle the start command's abbreviation. Invoke start()
 	 *
-	 *  @param bundles bundle(s) to be started
+	 * @param bundles bundle(s) to be started
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_START_COMMAND_DESCRIPTION)
-	public void sta(@Descriptor(ConsoleMsg.CONSOLE_HELP_START_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles) throws Exception {
+	public void sta(@Descriptor(ConsoleMsg.CONSOLE_HELP_START_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles)
+			throws Exception {
 		start(bundles);
 	}
 
 	/**
-	 *  Handle the start command.  Start the specified bundle(s).
+	 * Handle the start command. Start the specified bundle(s).
 	 *
-	 *  @param bundles bundle(s) to be started
+	 * @param bundles bundle(s) to be started
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_START_COMMAND_DESCRIPTION)
-	public void start(@Descriptor(ConsoleMsg.CONSOLE_HELP_START_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles) throws Exception {
+	public void start(@Descriptor(ConsoleMsg.CONSOLE_HELP_START_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles)
+			throws Exception {
 		if (bundles == null) {
 			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
 			return;
@@ -244,28 +282,30 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			return;
 		}
 
-		for(Bundle bundle : bundles) {
-				bundle.start();
+		for (Bundle bundle : bundles) {
+			bundle.start();
 		}
 	}
 
 	/**
-	 *  Handle the stop command's abbreviation.  Invoke stop()
+	 * Handle the stop command's abbreviation. Invoke stop()
 	 *
-	 *  @param bundles bundle(s) to be stopped.
+	 * @param bundles bundle(s) to be stopped.
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_STOP_COMMAND_DESCRIPTION)
-	public void sto(@Descriptor(ConsoleMsg.CONSOLE_HELP_STOP_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles) throws Exception {
+	public void sto(@Descriptor(ConsoleMsg.CONSOLE_HELP_STOP_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles)
+			throws Exception {
 		stop(bundles);
 	}
 
 	/**
-	 *  Handle the stop command.  Stop the specified bundle(s).
+	 * Handle the stop command. Stop the specified bundle(s).
 	 *
-	 *  @param bundles bundle(s) to be stopped.
+	 * @param bundles bundle(s) to be stopped.
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_STOP_COMMAND_DESCRIPTION)
-	public void stop(@Descriptor(ConsoleMsg.CONSOLE_HELP_STOP_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles) throws Exception {
+	public void stop(@Descriptor(ConsoleMsg.CONSOLE_HELP_STOP_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles)
+			throws Exception {
 		if (bundles == null) {
 			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
 			return;
@@ -276,37 +316,36 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			return;
 		}
 
-		for(Bundle bundle : bundles) {
-				bundle.stop();
+		for (Bundle bundle : bundles) {
+			bundle.stop();
 		}
 	}
 
 	/**
-	 *  Handle the install command's abbreviation.  Invoke install()
+	 * Handle the install command's abbreviation. Invoke install()
 	 *
-	 *	@param shouldStart if the bundle should be start after installation
-	 *  @param url location of the bundle to be installed
+	 * @param shouldStart if the bundle should be start after installation
+	 * @param url         location of the bundle to be installed
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_INSTALL_COMMAND_DESCRIPTION)
 	public void i(
-			@Descriptor(ConsoleMsg.CONSOLE_HELP_INSTALL_START_OPTION_DESCRIPTION)
-			@Parameter(absentValue = "false", presentValue = "true", names = { "-start" })
-			boolean shouldStart,
+			@Descriptor(ConsoleMsg.CONSOLE_HELP_INSTALL_START_OPTION_DESCRIPTION) @Parameter(absentValue = "false", presentValue = "true", names = {
+					"-start" }) boolean shouldStart,
 			@Descriptor(ConsoleMsg.CONSOLE_HELP_INSTALL_START_ARGUMENT_DESCRIPTION) String url) throws Exception {
 		install(shouldStart, url);
 	}
 
 	/**
-	 *  Handle the install command.  Install and optionally start bundle from the given URL
+	 * Handle the install command. Install and optionally start bundle from the
+	 * given URL
 	 *
-	 *  @param shouldStart if the bundle should be start after installation
-	 *  @param url location of the bundle to be installed
+	 * @param shouldStart if the bundle should be start after installation
+	 * @param url         location of the bundle to be installed
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_INSTALL_COMMAND_DESCRIPTION)
 	public Bundle install(
-			@Descriptor(ConsoleMsg.CONSOLE_HELP_INSTALL_START_OPTION_DESCRIPTION)
-			@Parameter(absentValue = "false", presentValue = "true", names = { "-start" })
-			boolean shouldStart,
+			@Descriptor(ConsoleMsg.CONSOLE_HELP_INSTALL_START_OPTION_DESCRIPTION) @Parameter(absentValue = "false", presentValue = "true", names = {
+					"-start" }) boolean shouldStart,
 			@Descriptor(ConsoleMsg.CONSOLE_HELP_INSTALL_START_ARGUMENT_DESCRIPTION) String url) throws Exception {
 		if (url == null) {
 			System.out.println(ConsoleMsg.CONSOLE_NOTHING_TO_INSTALL_ERROR);
@@ -323,103 +362,105 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 *  Handle the update command's abbreviation.  Invoke update()
+	 * Handle the update command's abbreviation. Invoke update()
 	 *
-	 *  @param bundles bundle(s) to be updated
+	 * @param bundles bundle(s) to be updated
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_COMMAND_DESCRIPTION)
-	public void up(@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles) throws Exception {
+	public void up(@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles)
+			throws Exception {
 		update(bundles);
 	}
 
 	/**
-	 *  Handle the update command's abbreviation.  Invoke update()
+	 * Handle the update command's abbreviation. Invoke update()
 	 *
-	 *  @param bundle bundle to be updated
-	 *  @param source location to get the new bundle's content
+	 * @param bundle bundle to be updated
+	 * @param source location to get the new bundle's content
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_SOURCE_COMMAND_DESCRIPTION)
-	public void up(
-			@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_SOURCE_COMMAND_BUNDLE_ARGUMENT_DESCRIPTION)
-			Bundle bundle,
-			@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_SOURCE_COMMAND_URL_ARGUMENT_DESCRIPTION)
-			URL source) throws Exception {
+	public void up(@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_SOURCE_COMMAND_BUNDLE_ARGUMENT_DESCRIPTION) Bundle bundle,
+			@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_SOURCE_COMMAND_URL_ARGUMENT_DESCRIPTION) URL source)
+			throws Exception {
 		update(bundle, source);
 	}
 
 	/**
-	 *  Handle the update command.  Update the specified bundle(s).
+	 * Handle the update command. Update the specified bundle(s).
 	 *
-	 *  @param bundles bundle(s) to be updated
+	 * @param bundles bundle(s) to be updated
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_COMMAND_DESCRIPTION)
-	public void update(@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles) throws Exception {
+	public void update(@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles)
+			throws Exception {
 		if (bundles == null) {
 			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
 			return;
 		}
 
-		if(bundles.length == 0) {
-			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
-			return;
-		}
-
-		for(Bundle bundle : bundles) {
-			bundle.update();
-		}
-	}
-
-	/**
-	 *  Handle the update command.  Update the specified bundle with the specified content.
-	 *
-	 *  @param bundle bundle to be updated
-	 *  @param source location to get the new bundle's content
-	 */
-	@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_SOURCE_COMMAND_DESCRIPTION)
-	public void update(
-			@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_SOURCE_COMMAND_BUNDLE_ARGUMENT_DESCRIPTION)
-			Bundle bundle,
-			@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_SOURCE_COMMAND_URL_ARGUMENT_DESCRIPTION)
-			URL source) throws Exception {
-		bundle.update(source.openStream());
-	}
-
-	/**
-	 *  Handle the uninstall command's abbreviation.  Invoke uninstall()
-	 *
-	 *  @param bundles bundle(s) to uninstall
-	 */
-	@Descriptor(ConsoleMsg.CONSOLE_HELP_UNINSTALL_COMMAND_DESCRIPTION)
-	public void un(@Descriptor(ConsoleMsg.CONSOLE_HELP_UNINSTALL_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles) throws Exception {
-		uninstall(bundles);
-	}
-
-	/**
-	 *  Handle the uninstall command.  Uninstall the specified bundle(s).
-	 *
-	 *  @param bundles bundle(s) to uninstall
-	 */
-	@Descriptor(ConsoleMsg.CONSOLE_HELP_UNINSTALL_COMMAND_DESCRIPTION)
-	public void uninstall(@Descriptor(ConsoleMsg.CONSOLE_HELP_UNINSTALL_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles) throws Exception {
-		if(bundles == null) {
-			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
-			return;
-		}
-
-		if(bundles.length == 0) {
+		if (bundles.length == 0) {
 			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
 			return;
 		}
 
 		for (Bundle bundle : bundles) {
-				bundle.uninstall();
+			bundle.update();
 		}
 	}
 
-	private int getStatesFromConstants(String states) throws IllegalArgumentException{
+	/**
+	 * Handle the update command. Update the specified bundle with the specified
+	 * content.
+	 *
+	 * @param bundle bundle to be updated
+	 * @param source location to get the new bundle's content
+	 */
+	@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_SOURCE_COMMAND_DESCRIPTION)
+	public void update(
+			@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_SOURCE_COMMAND_BUNDLE_ARGUMENT_DESCRIPTION) Bundle bundle,
+			@Descriptor(ConsoleMsg.CONSOLE_HELP_UPDATE_SOURCE_COMMAND_URL_ARGUMENT_DESCRIPTION) URL source)
+			throws Exception {
+		bundle.update(source.openStream());
+	}
+
+	/**
+	 * Handle the uninstall command's abbreviation. Invoke uninstall()
+	 *
+	 * @param bundles bundle(s) to uninstall
+	 */
+	@Descriptor(ConsoleMsg.CONSOLE_HELP_UNINSTALL_COMMAND_DESCRIPTION)
+	public void un(@Descriptor(ConsoleMsg.CONSOLE_HELP_UNINSTALL_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles)
+			throws Exception {
+		uninstall(bundles);
+	}
+
+	/**
+	 * Handle the uninstall command. Uninstall the specified bundle(s).
+	 *
+	 * @param bundles bundle(s) to uninstall
+	 */
+	@Descriptor(ConsoleMsg.CONSOLE_HELP_UNINSTALL_COMMAND_DESCRIPTION)
+	public void uninstall(@Descriptor(ConsoleMsg.CONSOLE_HELP_UNINSTALL_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles)
+			throws Exception {
+		if (bundles == null) {
+			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
+			return;
+		}
+
+		if (bundles.length == 0) {
+			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
+			return;
+		}
+
+		for (Bundle bundle : bundles) {
+			bundle.uninstall();
+		}
+	}
+
+	private int getStatesFromConstants(String states) throws IllegalArgumentException {
 		int stateFilter = -1;
-		if(!states.equals("")) {
-			StringTokenizer tokens = new StringTokenizer(states, ","); //$NON-NLS-1
+		if (!states.equals("")) {
+			StringTokenizer tokens = new StringTokenizer(states, ","); // $NON-NLS-1
 			while (tokens.hasMoreElements()) {
 				String desiredState = (String) tokens.nextElement();
 				Field match = null;
@@ -438,22 +479,24 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 *  Handle the status command's abbreviation.  Invoke status()
+	 * Handle the status command's abbreviation. Invoke status()
 	 *
-	 *  @param arguments
+	 * @param arguments
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_STATUS_COMMAND_DESCRIPTION)
-	public void s(@Descriptor(ConsoleMsg.CONSOLE_HELP_STATUS_ARGUMENT_DESCRIPTION) String... arguments) throws Exception {
+	public void s(@Descriptor(ConsoleMsg.CONSOLE_HELP_STATUS_ARGUMENT_DESCRIPTION) String... arguments)
+			throws Exception {
 		status(arguments);
 	}
 
 	/**
-	 *  Handle the status command.  Display installed bundles and registered services.
+	 * Handle the status command. Display installed bundles and registered services.
 	 *
-	 *  @param arguments
+	 * @param arguments
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_STATUS_COMMAND_DESCRIPTION)
-	public void status(@Descriptor(ConsoleMsg.CONSOLE_HELP_STATUS_ARGUMENT_DESCRIPTION) String... arguments) throws Exception {
+	public void status(@Descriptor(ConsoleMsg.CONSOLE_HELP_STATUS_ARGUMENT_DESCRIPTION) String... arguments)
+			throws Exception {
 		if (context.getBundle(0).getState() == Bundle.ACTIVE) {
 			System.out.println(ConsoleMsg.CONSOLE_FRAMEWORK_IS_LAUNCHED_MESSAGE);
 		} else {
@@ -464,11 +507,11 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		String states = "";
 		String[] bsnSegments = null;
 
-		if(arguments != null && arguments.length > 0) {
-			if(arguments[0].equals("-s")) {
+		if (arguments != null && arguments.length > 0) {
+			if (arguments[0].equals("-s")) {
 				if (arguments.length > 1) {
 					states = arguments[1];
-					if(arguments.length > 2) {
+					if (arguments.length > 2) {
 						bsnSegments = new String[arguments.length - 2];
 						System.arraycopy(arguments, 2, bsnSegments, 0, bsnSegments.length);
 					}
@@ -513,29 +556,31 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		ServiceReference<?>[] services = context.getServiceReferences((String) null, (String) null);
 		if (services != null) {
 			System.out.println(ConsoleMsg.CONSOLE_REGISTERED_SERVICES_MESSAGE);
-			for(ServiceReference<?> service : services) {
+			for (ServiceReference<?> service : services) {
 				System.out.println(service);
 			}
 		}
 	}
 
 	/**
-	 *  Handle the services command's abbreviation.  Invoke services()
+	 * Handle the services command's abbreviation. Invoke services()
 	 *
-	 *  @param filters filters for services
+	 * @param filters filters for services
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_SERVICES_COMMAND_DESCRIPTION)
-	public void se(@Descriptor(ConsoleMsg.CONSOLE_HELP_FILTER_ARGUMENT_DESCRIPTION)String... filters) throws Exception {
+	public void se(@Descriptor(ConsoleMsg.CONSOLE_HELP_FILTER_ARGUMENT_DESCRIPTION) String... filters)
+			throws Exception {
 		services(filters);
 	}
 
 	/**
-	 *  Handle the services command.  Display registered service details.
+	 * Handle the services command. Display registered service details.
 	 *
-	 *  @param filters filters for services
+	 * @param filters filters for services
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_SERVICES_COMMAND_DESCRIPTION)
-	public void services(@Descriptor(ConsoleMsg.CONSOLE_HELP_FILTER_ARGUMENT_DESCRIPTION)String... filters) throws Exception {
+	public void services(@Descriptor(ConsoleMsg.CONSOLE_HELP_FILTER_ARGUMENT_DESCRIPTION) String... filters)
+			throws Exception {
 		String filter = null;
 		if (filters != null && filters.length > 0) {
 			StringBuilder buf = new StringBuilder();
@@ -558,8 +603,10 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		if (filter != null) {
 			filter = filter.trim();
 		}
-		// If the filter is invalid and does not start with a bracket, probably the argument was the name of an interface.
-		// Try to construct an object class filter with this argument, and if still invalid - throw the original InvalidSyntaxException
+		// If the filter is invalid and does not start with a bracket, probably the
+		// argument was the name of an interface.
+		// Try to construct an object class filter with this argument, and if still
+		// invalid - throw the original InvalidSyntaxException
 		if (originalException != null && !filter.startsWith("(") && !filter.contains(" ")) { //$NON-NLS-1$ //$NON-NLS-2$
 			try {
 				filter = "(" + Constants.OBJECTCLASS + "=" + filter + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -601,36 +648,39 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 *  Handle the packages command's abbreviation.  Invoke packages()
+	 * Handle the packages command's abbreviation. Invoke packages()
 	 *
-	 *  @param bundle bundle for which to display package details
+	 * @param bundle bundle for which to display package details
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_PACKAGES_COMMAND_DESCRIPTION)
-	public void p(@Descriptor(ConsoleMsg.CONSOLE_HELP_PACKAGES_BUNDLE_ARGUMENT_DESCRIPTION)Bundle... bundle) throws Exception {
+	public void p(@Descriptor(ConsoleMsg.CONSOLE_HELP_PACKAGES_BUNDLE_ARGUMENT_DESCRIPTION) Bundle... bundle)
+			throws Exception {
 		packages(bundle);
 	}
 
 	/**
-	 *  Handle the packages command's abbreviation.  Invoke packages()
+	 * Handle the packages command's abbreviation. Invoke packages()
 	 *
-	 *  @param packageName package for which to display details
+	 * @param packageName package for which to display details
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_PACKAGES_COMMAND_DESCRIPTION)
-	public void p(@Descriptor(ConsoleMsg.CONSOLE_HELP_PACKAGES_PACKAGE_ARGUMENT_DESCRIPTION)String packageName) throws Exception {
+	public void p(@Descriptor(ConsoleMsg.CONSOLE_HELP_PACKAGES_PACKAGE_ARGUMENT_DESCRIPTION) String packageName)
+			throws Exception {
 		packages(packageName);
 	}
 
 	/**
-	 *  Handle the packages command.  Display imported/exported packages details.
+	 * Handle the packages command. Display imported/exported packages details.
 	 *
-	 *  @param bundle bundle for which to display package details
+	 * @param bundle bundle for which to display package details
 	 */
 	@SuppressWarnings("deprecation")
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_PACKAGES_COMMAND_DESCRIPTION)
-	public void packages(@Descriptor(ConsoleMsg.CONSOLE_HELP_PACKAGES_BUNDLE_ARGUMENT_DESCRIPTION)Bundle... bundle) throws Exception {
-		if(activator.getPackageAdmin() != null) {
+	public void packages(@Descriptor(ConsoleMsg.CONSOLE_HELP_PACKAGES_BUNDLE_ARGUMENT_DESCRIPTION) Bundle... bundle)
+			throws Exception {
+		if (activator.getPackageAdmin() != null) {
 			ExportedPackage[] exportedPackages;
-			if(bundle != null && bundle.length > 0) {
+			if (bundle != null && bundle.length > 0) {
 				exportedPackages = activator.getPackageAdmin().getExportedPackages(bundle[0]);
 			} else {
 				exportedPackages = activator.getPackageAdmin().getExportedPackages((Bundle) null);
@@ -642,14 +692,15 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 *  Handle the packages command.  Display imported/exported packages details.
+	 * Handle the packages command. Display imported/exported packages details.
 	 *
-	 *  @param packageName package for which to display details
+	 * @param packageName package for which to display details
 	 **/
 	@SuppressWarnings("deprecation")
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_PACKAGES_COMMAND_DESCRIPTION)
-	public void packages(@Descriptor(ConsoleMsg.CONSOLE_HELP_PACKAGES_PACKAGE_ARGUMENT_DESCRIPTION)String packageName) throws Exception {
-		if(activator.getPackageAdmin() != null) {
+	public void packages(@Descriptor(ConsoleMsg.CONSOLE_HELP_PACKAGES_PACKAGE_ARGUMENT_DESCRIPTION) String packageName)
+			throws Exception {
+		if (activator.getPackageAdmin() != null) {
 			ExportedPackage[] exportedPackages = activator.getPackageAdmin().getExportedPackages(packageName);
 			getPackages(exportedPackages);
 		} else {
@@ -692,20 +743,21 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 *  Handle the bundles command.  Display details for all installed bundles.
+	 * Handle the bundles command. Display details for all installed bundles.
 	 *
-	 *  @param arguments
+	 * @param arguments
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_BUNDLES_COMMAND_DESCRIPTION)
-	public void bundles(@Descriptor(ConsoleMsg.CONSOLE_HELP_STATUS_ARGUMENT_DESCRIPTION) String... arguments) throws Exception {
+	public void bundles(@Descriptor(ConsoleMsg.CONSOLE_HELP_STATUS_ARGUMENT_DESCRIPTION) String... arguments)
+			throws Exception {
 		String states = "";
 		String[] bsnSegments = null;
 
-		if(arguments != null && arguments.length > 0) {
-			if(arguments[0].equals("-s")) {
+		if (arguments != null && arguments.length > 0) {
+			if (arguments[0].equals("-s")) {
 				if (arguments.length > 1) {
 					states = arguments[1];
-					if(arguments.length > 2) {
+					if (arguments.length > 2) {
 						bsnSegments = new String[arguments.length - 2];
 						System.arraycopy(arguments, 2, bsnSegments, 0, bsnSegments.length);
 					}
@@ -776,22 +828,24 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 *  Handle the bundle command's abbreviation.  Invoke bundle()
+	 * Handle the bundle command's abbreviation. Invoke bundle()
 	 *
-	 *  @param bundles bundle(s) to display details for
+	 * @param bundles bundle(s) to display details for
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_BUNDLE_COMMAND_DESCRIPTION)
-	public void b(@Descriptor(ConsoleMsg.CONSOLE_HELP_IDLOCATION_ARGUMENT_DESCRIPTION)Bundle[] bundles) throws Exception {
+	public void b(@Descriptor(ConsoleMsg.CONSOLE_HELP_IDLOCATION_ARGUMENT_DESCRIPTION) Bundle[] bundles)
+			throws Exception {
 		bundle(bundles);
 	}
 
 	/**
-	 *  Handle the bundle command.  Display details for the specified bundle(s).
+	 * Handle the bundle command. Display details for the specified bundle(s).
 	 *
-	 *  @param bundles bundle(s) to display details for
+	 * @param bundles bundle(s) to display details for
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_BUNDLE_COMMAND_DESCRIPTION)
-	public void bundle(@Descriptor(ConsoleMsg.CONSOLE_HELP_IDLOCATION_ARGUMENT_DESCRIPTION)Bundle[] bundles) throws Exception {
+	public void bundle(@Descriptor(ConsoleMsg.CONSOLE_HELP_IDLOCATION_ARGUMENT_DESCRIPTION) Bundle[] bundles)
+			throws Exception {
 		if (bundles.length == 0) {
 			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
 			return;
@@ -850,7 +904,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			}
 			boolean title = true;
 			List<BundleCapability> exports = wiring.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE);
-			if ( exports.isEmpty()) {
+			if (exports.isEmpty()) {
 				System.out.print("  "); //$NON-NLS-1$
 				System.out.println(ConsoleMsg.CONSOLE_NO_EXPORTED_PACKAGES_MESSAGE);
 			} else {
@@ -941,8 +995,8 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		}
 	}
 
-	private List<BundleRequirement> getUnresolvedImports(
-			Map<String, Set<PackageSource>> packages, BundleWiring wiring) {
+	private List<BundleRequirement> getUnresolvedImports(Map<String, Set<PackageSource>> packages,
+			BundleWiring wiring) {
 
 		// TODO need to get this information
 		return Collections.emptyList();
@@ -956,7 +1010,8 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 					System.out.println(ConsoleMsg.CONSOLE_IMPORTED_PACKAGES_MESSAGE);
 					title = false;
 				}
-				printCapability("    ", packageSource.getCapability(), packageSource.getWire(), PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
+				printCapability("    ", packageSource.getCapability(), packageSource.getWire(),
+						PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
 			}
 		}
 		return title;
@@ -1004,7 +1059,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 *  Handle the gc command.  Perform a garbage collection.
+	 * Handle the gc command. Perform a garbage collection.
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_GC_COMMAND_DESCRIPTION)
 	public void gc() throws Exception {
@@ -1032,7 +1087,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 *  Handle the init command.  Uninstall all bundles.
+	 * Handle the init command. Uninstall all bundles.
 	 *
 	 */
 	@SuppressWarnings("deprecation")
@@ -1079,13 +1134,14 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		}
 		// clear the permissions from conditional permission admin
 		if (securityAdmin != null)
-			for (Enumeration<ConditionalPermissionInfo> infos = condPermAdmin.getConditionalPermissionInfos(); infos.hasMoreElements();)
+			for (Enumeration<ConditionalPermissionInfo> infos = condPermAdmin.getConditionalPermissionInfos(); infos
+					.hasMoreElements();)
 				infos.nextElement().delete();
 	}
 
 	/**
-	 *  Handle the close command.  Shutdown and exit.
-
+	 * Handle the close command. Shutdown and exit.
+	 * 
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_CLOSE_COMMAND_DESCRIPTION)
 	public void close(CommandSession session) throws Exception {
@@ -1095,32 +1151,33 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 *  Handle the refresh command's abbreviation.  Invoke refresh()
+	 * Handle the refresh command's abbreviation. Invoke refresh()
 	 *
-	 *  @param bundles bundle(s) to be refreshed
+	 * @param bundles bundle(s) to be refreshed
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_REFRESH_COMMAND_DESCRIPTION)
 	public void r(
-			@Descriptor(ConsoleMsg.CONSOLE_HELP_REFRESH_ALL_OPTION_DESCRIPTION)
-			@Parameter(absentValue = "false", presentValue = "true", names = { "-all" })
-			boolean shouldRefreshAll,
-			@Descriptor(ConsoleMsg.CONSOLE_HELP_REFRESH_COMMAND_ARGUMENT_DESCRIPTION) Bundle... bundles) throws Exception {
+			@Descriptor(ConsoleMsg.CONSOLE_HELP_REFRESH_ALL_OPTION_DESCRIPTION) @Parameter(absentValue = "false", presentValue = "true", names = {
+					"-all" }) boolean shouldRefreshAll,
+			@Descriptor(ConsoleMsg.CONSOLE_HELP_REFRESH_COMMAND_ARGUMENT_DESCRIPTION) Bundle... bundles)
+			throws Exception {
 		refresh(shouldRefreshAll, bundles);
 	}
 
 	/**
-	 *  Handle the refresh command.  Refresh the packages of the specified bundles.
+	 * Handle the refresh command. Refresh the packages of the specified bundles.
 	 *
-	 *  @param bundles bundle(s) to be refreshed
+	 * @param bundles bundle(s) to be refreshed
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_REFRESH_COMMAND_DESCRIPTION)
 	public void refresh(
-			@Descriptor(ConsoleMsg.CONSOLE_HELP_REFRESH_ALL_OPTION_DESCRIPTION)
-			@Parameter(absentValue = "false", presentValue = "true", names = { "-all" })
-			boolean shouldRefreshAll,
-			@Descriptor(ConsoleMsg.CONSOLE_HELP_REFRESH_COMMAND_ARGUMENT_DESCRIPTION) Bundle... bundles) throws Exception {
-		FrameworkWiring frameworkWiring = context.getBundle(Constants.SYSTEM_BUNDLE_LOCATION).adapt(FrameworkWiring.class);
-		if(bundles != null && bundles.length > 0) {
+			@Descriptor(ConsoleMsg.CONSOLE_HELP_REFRESH_ALL_OPTION_DESCRIPTION) @Parameter(absentValue = "false", presentValue = "true", names = {
+					"-all" }) boolean shouldRefreshAll,
+			@Descriptor(ConsoleMsg.CONSOLE_HELP_REFRESH_COMMAND_ARGUMENT_DESCRIPTION) Bundle... bundles)
+			throws Exception {
+		FrameworkWiring frameworkWiring = context.getBundle(Constants.SYSTEM_BUNDLE_LOCATION)
+				.adapt(FrameworkWiring.class);
+		if (bundles != null && bundles.length > 0) {
 			frameworkWiring.refreshBundles(Arrays.asList(bundles));
 		} else if (shouldRefreshAll == true) {
 			frameworkWiring.refreshBundles(Arrays.asList(context.getBundles()));
@@ -1130,13 +1187,14 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 * Executes the given system command in a separate system process
-	 * and waits for it to finish.
+	 * Executes the given system command in a separate system process and waits for
+	 * it to finish.
 	 *
 	 * @param command command to be executed
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_EXEC_COMMAND_DESCRIPTION)
-	public void exec(@Descriptor(ConsoleMsg.CONSOLE_HELP_EXEC_COMMAND_ARGUMENT_DESCRIPTION) String command) throws Exception {
+	public void exec(@Descriptor(ConsoleMsg.CONSOLE_HELP_EXEC_COMMAND_ARGUMENT_DESCRIPTION) String command)
+			throws Exception {
 		if (command == null) {
 			System.out.println(ConsoleMsg.CONSOLE_NO_COMMAND_SPECIFIED_ERROR);
 			return;
@@ -1150,13 +1208,14 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 * Executes the given system command in a separate system process.  It does
-	 * not wait for a result.
+	 * Executes the given system command in a separate system process. It does not
+	 * wait for a result.
 	 *
 	 * @param command command to be executed
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_FORK_COMMAND_DESCRIPTION)
-	public void fork(@Descriptor(ConsoleMsg.CONSOLE_HELP_FORK_COMMAND_ARGUMENT_DESCRIPTION) String command) throws Exception {
+	public void fork(@Descriptor(ConsoleMsg.CONSOLE_HELP_FORK_COMMAND_ARGUMENT_DESCRIPTION) String command)
+			throws Exception {
 		if (command == null) {
 			System.out.println(ConsoleMsg.CONSOLE_NO_COMMAND_SPECIFIED_ERROR);
 			return;
@@ -1167,29 +1226,32 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 * Handle the headers command's abbreviation.  Invoke headers()
+	 * Handle the headers command's abbreviation. Invoke headers()
 	 *
 	 * @param bundles bundle(s) whose headers to display
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_HEADERS_COMMAND_DESCRIPTION)
-	public List<Dictionary<String, String>> h(@Descriptor(ConsoleMsg.CONSOLE_HELP_HEADERS_COMMAND_ARGUMENT_DESCRIPTION) Bundle... bundles) throws Exception {
+	public List<Dictionary<String, String>> h(
+			@Descriptor(ConsoleMsg.CONSOLE_HELP_HEADERS_COMMAND_ARGUMENT_DESCRIPTION) Bundle... bundles)
+			throws Exception {
 		return headers(bundles);
 	}
 
 	/**
-	 * Handle the headers command.  Display headers for the specified bundle(s).
+	 * Handle the headers command. Display headers for the specified bundle(s).
 	 *
 	 * @param bundles bundle(s) whose headers to display
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_HEADERS_COMMAND_DESCRIPTION)
-	public List<Dictionary<String, String>> headers(@Descriptor(ConsoleMsg.CONSOLE_HELP_HEADERS_COMMAND_ARGUMENT_DESCRIPTION) Bundle... bundles) throws Exception {
+	public List<Dictionary<String, String>> headers(
+			@Descriptor(ConsoleMsg.CONSOLE_HELP_HEADERS_COMMAND_ARGUMENT_DESCRIPTION) Bundle... bundles)
+			throws Exception {
 		ArrayList<Dictionary<String, String>> headers = new ArrayList<>();
 
 		if (bundles == null || bundles.length == 0) {
 			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
 			return headers;
 		}
-
 
 		for (Bundle bundle : bundles) {
 			headers.add(bundle.getHeaders());
@@ -1198,16 +1260,16 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 * Handles the props command's abbreviation.  Invokes props()
+	 * Handles the props command's abbreviation. Invokes props()
 	 *
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_PROPS_COMMAND_DESCRIPTION)
 	public Dictionary<?, ?> pr() throws Exception {
-		 return props();
+		return props();
 	}
 
 	/**
-	 * Handles the _props command.  Prints the system properties sorted.
+	 * Handles the _props command. Prints the system properties sorted.
 	 *
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_PROPS_COMMAND_DESCRIPTION)
@@ -1217,35 +1279,38 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 * Handles the setprop command's abbreviation.  Invokes setprop()
+	 * Handles the setprop command's abbreviation. Invokes setprop()
 	 *
 	 * @param arguments key=value pairs for the new properties
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_SETPROP_COMMAND_DESCRIPTION)
-	public void setp(@Descriptor(ConsoleMsg.CONSOLE_HELP_SETPROP_COMMAND_ARGUMENTS_DESCRIPTION) String[] arguments) throws Exception {
+	public void setp(@Descriptor(ConsoleMsg.CONSOLE_HELP_SETPROP_COMMAND_ARGUMENTS_DESCRIPTION) String[] arguments)
+			throws Exception {
 		setprop(arguments);
 	}
 
 	/**
-	 * Handles the setprop command.  Sets the CDS property in the given argument.
+	 * Handles the setprop command. Sets the CDS property in the given argument.
 	 *
 	 * @param arguments key=value pairs for the new properties
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_SETPROP_COMMAND_DESCRIPTION)
-	public void setprop(@Descriptor(ConsoleMsg.CONSOLE_HELP_SETPROP_COMMAND_ARGUMENTS_DESCRIPTION) String[] arguments) throws Exception {
+	public void setprop(@Descriptor(ConsoleMsg.CONSOLE_HELP_SETPROP_COMMAND_ARGUMENTS_DESCRIPTION) String[] arguments)
+			throws Exception {
 		if (arguments == null) {
 			System.out.println(ConsoleMsg.CONSOLE_NO_PARAMETERS_SPECIFIED_TITLE);
 			props();
 		} else {
 			ServiceReference<EnvironmentInfo> envInfoRef = context.getServiceReference(EnvironmentInfo.class);
 			if (envInfoRef != null) {
-				// EnvironmentInfo is used because FrameworkProperties cannot be directly accessed outside of the system bundle
+				// EnvironmentInfo is used because FrameworkProperties cannot be directly
+				// accessed outside of the system bundle
 				EnvironmentInfo envInfo = context.getService(envInfoRef);
 				if (envInfo != null) {
 					System.out.println(ConsoleMsg.CONSOLE_SETTING_PROPERTIES_TITLE);
-					for(String argument : arguments) {
+					for (String argument : arguments) {
 						int index = argument.indexOf('=');
-						if(index > -1) {
+						if (index > -1) {
 							String key = argument.substring(0, index);
 							String value = argument.substring(index + 1, argument.length());
 							envInfo.setProperty(key, value);
@@ -1261,13 +1326,13 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 * Prints the short version of the status.
-	 * For the long version use "status".
+	 * Prints the short version of the status. For the long version use "status".
 	 *
 	 * @param arguments
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_SS_COMMAND_DESCRIPTION)
-	public void ss(@Descriptor(ConsoleMsg.CONSOLE_HELP_STATUS_ARGUMENT_DESCRIPTION) String... arguments) throws Exception {
+	public void ss(@Descriptor(ConsoleMsg.CONSOLE_HELP_STATUS_ARGUMENT_DESCRIPTION) String... arguments)
+			throws Exception {
 		if (context.getBundle(0).getState() == Bundle.ACTIVE) {
 			System.out.println(ConsoleMsg.CONSOLE_FRAMEWORK_IS_LAUNCHED_MESSAGE);
 		} else {
@@ -1278,11 +1343,11 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		String states = "";
 		String[] bsnSegments = null;
 
-		if(arguments != null && arguments.length > 0) {
-			if(arguments[0].equals("-s")) {
+		if (arguments != null && arguments.length > 0) {
+			if (arguments[0].equals("-s")) {
 				if (arguments.length > 1) {
 					states = arguments[1];
-					if(arguments.length > 2) {
+					if (arguments.length > 2) {
 						bsnSegments = new String[arguments.length - 2];
 						System.arraycopy(arguments, 2, bsnSegments, 0, bsnSegments.length);
 					}
@@ -1326,7 +1391,8 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 				if (revision != null && wiring != null) {
 					if ((revision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
 						for (BundleWire hostWire : wiring.getRequiredWires(HostNamespace.HOST_NAMESPACE)) {
-							System.out.println("\t            Master=" + hostWire.getProvider().getBundle().getBundleId()); //$NON-NLS-1$
+							System.out.println(
+									"\t            Master=" + hostWire.getProvider().getBundle().getBundleId()); //$NON-NLS-1$
 						}
 					} else {
 						List<BundleWire> fragWires = wiring.getProvidedWires(HostNamespace.HOST_NAMESPACE);
@@ -1334,7 +1400,8 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 							System.out.print("\t            Fragments="); //$NON-NLS-1$
 							Iterator<BundleWire> itr = fragWires.iterator();
 							System.out.print(itr.next().getRequirer().getBundle().getBundleId());
-							itr.forEachRemaining(w -> System.out.print(", " + w.getRequirer().getBundle().getBundleId()));
+							itr.forEachRemaining(
+									w -> System.out.print(", " + w.getRequirer().getBundle().getBundleId()));
 							System.out.println();
 						}
 					}
@@ -1347,14 +1414,15 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		if ((toFilter.getState() & searchedState) == 0) {
 			return false;
 		}
-		if (searchedName != null && searchedName.length > 0 && toFilter.getSymbolicName() != null && !toFilter.getSymbolicName().contains(searchedName[0])) {
+		if (searchedName != null && searchedName.length > 0 && toFilter.getSymbolicName() != null
+				&& !toFilter.getSymbolicName().contains(searchedName[0])) {
 			return false;
 		}
 		return true;
 	}
 
 	/**
-	 * Handles the threads command abbreviation.  Invokes threads().
+	 * Handles the threads command abbreviation. Invokes threads().
 	 *
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_DESCRIPTION)
@@ -1363,12 +1431,16 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ACTION_DESCRIPTION)
-	public void t(@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_ACTION_DESCRIPTION) String action, @Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THREAD_DESCRIPTION) String thread) throws Exception {
+	public void t(@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_ACTION_DESCRIPTION) String action,
+			@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THREAD_DESCRIPTION) String thread) throws Exception {
 		t(action, thread, null);
 	}
 
 	@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ACTION_THROWABLE_DESCRIPTION)
-	public void t(@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_ACTION_DESCRIPTION) String action, @Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THREAD_DESCRIPTION) String thread, @Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THROWABLE_DESCRIPTION) Class<? extends Throwable> throwable) throws Exception {
+	public void t(@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_ACTION_DESCRIPTION) String action,
+			@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THREAD_DESCRIPTION) String thread,
+			@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THROWABLE_DESCRIPTION) Class<? extends Throwable> throwable)
+			throws Exception {
 		threads(action, thread, throwable);
 	}
 
@@ -1378,17 +1450,21 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ACTION_DESCRIPTION)
-	public void threads(@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_ACTION_DESCRIPTION) String action, @Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THREAD_DESCRIPTION) String thread) throws Exception {
+	public void threads(@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_ACTION_DESCRIPTION) String action,
+			@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THREAD_DESCRIPTION) String thread) throws Exception {
 		threads(action, thread, null);
 	}
 
 	/**
-	 * Prints the information about the currently running threads
-	 * in the embedded system.
+	 * Prints the information about the currently running threads in the embedded
+	 * system.
 	 *
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ACTION_THROWABLE_DESCRIPTION)
-	public void threads(@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_ACTION_DESCRIPTION) String action, @Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THREAD_DESCRIPTION) String thread, @Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THROWABLE_DESCRIPTION) Class<? extends Throwable> throwable) throws Exception {
+	public void threads(@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_ACTION_DESCRIPTION) String action,
+			@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THREAD_DESCRIPTION) String thread,
+			@Descriptor(ConsoleMsg.CONSOLE_THREADS_COMMAND_ARG_THROWABLE_DESCRIPTION) Class<? extends Throwable> throwable)
+			throws Exception {
 
 		ThreadGroup[] threadGroups = getThreadGroups();
 		Util.sortByString(threadGroups);
@@ -1429,8 +1505,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 					// Otherwise use the default constructor.
 					try {
 						toThrow = throwable.getConstructor(String.class).newInstance(message);
-					}
-					catch (Exception e) {
+					} catch (Exception e) {
 						toThrow = throwable.getDeclaredConstructor().newInstance();
 					}
 				}
@@ -1439,7 +1514,8 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 				// Set the stack trace to that of the target thread.
 				toThrow.setStackTrace(t.getStackTrace());
 				// Stop the thread using the specified throwable.
-				// Thread#stop(Throwable) doesn't work any more in JDK 8 and is removed in Java 11. Try stop0:
+				// Thread#stop(Throwable) doesn't work any more in JDK 8 and is removed in Java
+				// 11. Try stop0:
 				Method stop0 = Thread.class.getDeclaredMethod("stop0", Object.class);
 				stop0.setAccessible(true);
 				stop0.invoke(t, toThrow);
@@ -1458,12 +1534,16 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		System.out.println(ConsoleMsg.CONSOLE_THREADGROUP_TITLE);
 		for (ThreadGroup threadGroup : threadGroups) {
 			tg = threadGroup;
-			int all = tg.activeCount(); //tg.allThreadsCount();
-			int local = tg.enumerate(new Thread[all], false); //tg.threadsCount();
+			int all = tg.activeCount(); // tg.allThreadsCount();
+			int local = tg.enumerate(new Thread[all], false); // tg.threadsCount();
 			ThreadGroup p = tg.getParent();
 			String parent = (p == null) ? "-none-" : p.getName(); //$NON-NLS-1$
 			sb.setLength(0);
-			sb.append(Util.toString(simpleClassName(tg), 18)).append(" ").append(Util.toString(tg.getName(), 21)).append(" ").append(Util.toString(parent, 16)).append(Util.toString(Integer.valueOf(tg.getMaxPriority()), 3)).append(Util.toString(Integer.valueOf(local), 4)).append("/").append(Util.toString(String.valueOf(all), 6)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			sb.append(Util.toString(simpleClassName(tg), 18)).append(" ").append(Util.toString(tg.getName(), 21)) //$NON-NLS-1$
+					.append(" ").append(Util.toString(parent, 16)) //$NON-NLS-1$
+					.append(Util.toString(Integer.valueOf(tg.getMaxPriority()), 3))
+					.append(Util.toString(Integer.valueOf(local), 4)).append("/") //$NON-NLS-1$
+					.append(Util.toString(String.valueOf(all), 6));
 			System.out.println(sb.toString());
 		}
 		System.out.print(newline);
@@ -1472,7 +1552,9 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			Thread t = threads[j];
 			if (t != null) {
 				sb.setLength(0);
-				sb.append(Util.toString(simpleClassName(t), 18)).append(" ").append(Util.toString(t.getName(), 21)).append(" ").append(Util.toString(t.getThreadGroup().getName(), 16)).append(Util.toString(Integer.valueOf(t.getPriority()), 3)); //$NON-NLS-1$ //$NON-NLS-2$
+				sb.append(Util.toString(simpleClassName(t), 18)).append(" ").append(Util.toString(t.getName(), 21)) //$NON-NLS-1$
+						.append(" ").append(Util.toString(t.getThreadGroup().getName(), 16)) //$NON-NLS-1$
+						.append(Util.toString(Integer.valueOf(t.getPriority()), 3));
 				if (t.isDaemon())
 					sb.append(" [daemon]"); //$NON-NLS-1$
 				System.out.println(sb.toString());
@@ -1483,17 +1565,20 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	/**
 	 * Handles the sl (startlevel) command.
 	 *
-	 * @param bundle bundle to display startlevel for; if no bundle is specified, the framework startlevel is displayed
+	 * @param bundle bundle to display startlevel for; if no bundle is specified,
+	 *               the framework startlevel is displayed
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_SL_COMMAND_DESCRIPTION)
-	public void sl(@Descriptor(ConsoleMsg.CONSOLE_HELP_SL_COMMAND_ARGUMENT_DESCRIPTION) Bundle... bundle) throws Exception {
+	public void sl(@Descriptor(ConsoleMsg.CONSOLE_HELP_SL_COMMAND_ARGUMENT_DESCRIPTION) Bundle... bundle)
+			throws Exception {
 		int value = 0;
 		if (bundle == null || bundle.length == 0) { // must want framework startlevel
 			value = activator.getStartLevel().getStartLevel();
 			System.out.println(NLS.bind(ConsoleMsg.STARTLEVEL_FRAMEWORK_ACTIVE_STARTLEVEL, String.valueOf(value)));
 		} else { // must want bundle startlevel
 			value = bundle[0].adapt(BundleStartLevel.class).getStartLevel();
-			System.out.println(NLS.bind(ConsoleMsg.STARTLEVEL_BUNDLE_STARTLEVEL, Long.valueOf(bundle[0].getBundleId()), Integer.valueOf(value)));
+			System.out.println(NLS.bind(ConsoleMsg.STARTLEVEL_BUNDLE_STARTLEVEL, Long.valueOf(bundle[0].getBundleId()),
+					Integer.valueOf(value)));
 		}
 	}
 
@@ -1503,25 +1588,26 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	 * @param newSL new value for the framewrok start level
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_SETFWSL_COMMAND_DESCRIPTION)
-	public void setfwsl(@Descriptor(ConsoleMsg.CONSOLE_HELP_SETFWSL_COMMAND_ARGUMENT_DESCRIPTION) int newSL) throws Exception {
-			try {
-				activator.getStartLevel().setStartLevel(newSL);
-				System.out.println(NLS.bind(ConsoleMsg.STARTLEVEL_FRAMEWORK_ACTIVE_STARTLEVEL, String.valueOf(newSL)));
-			} catch (IllegalArgumentException e) {
-				System.out.println(e.getMessage());
-			}
+	public void setfwsl(@Descriptor(ConsoleMsg.CONSOLE_HELP_SETFWSL_COMMAND_ARGUMENT_DESCRIPTION) int newSL)
+			throws Exception {
+		try {
+			activator.getStartLevel().setStartLevel(newSL);
+			System.out.println(NLS.bind(ConsoleMsg.STARTLEVEL_FRAMEWORK_ACTIVE_STARTLEVEL, String.valueOf(newSL)));
+		} catch (IllegalArgumentException e) {
+			System.out.println(e.getMessage());
+		}
 	}
 
 	/**
 	 * Handles the setbsl (set bundle startlevel) command.
 	 *
-	 * @param newSL new value for bundle start level
+	 * @param newSL   new value for bundle start level
 	 * @param bundles bundles whose start value will be changed
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_SETBSL_COMMAND_DESCRIPTION)
-	public void setbsl(
-			@Descriptor(ConsoleMsg.CONSOLE_HELP_SETFWSL_COMMAND_ARGUMENT_DESCRIPTION)int newSL,
-			@Descriptor(ConsoleMsg.CONSOLE_HELP_SETBSL_COMMAND_ARGUMENT_DESCRIPTION) Bundle... bundles) throws Exception {
+	public void setbsl(@Descriptor(ConsoleMsg.CONSOLE_HELP_SETFWSL_COMMAND_ARGUMENT_DESCRIPTION) int newSL,
+			@Descriptor(ConsoleMsg.CONSOLE_HELP_SETBSL_COMMAND_ARGUMENT_DESCRIPTION) Bundle... bundles)
+			throws Exception {
 		if (bundles == null) {
 			System.out.println(ConsoleMsg.STARTLEVEL_NO_STARTLEVEL_OR_BUNDLE_GIVEN);
 			return;
@@ -1529,7 +1615,8 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		for (Bundle bundle : bundles) {
 			try {
 				bundle.adapt(BundleStartLevel.class).setStartLevel(newSL);
-				System.out.println(NLS.bind(ConsoleMsg.STARTLEVEL_BUNDLE_STARTLEVEL, Long.valueOf(bundle.getBundleId()), Integer.valueOf(newSL)));
+				System.out.println(NLS.bind(ConsoleMsg.STARTLEVEL_BUNDLE_STARTLEVEL, Long.valueOf(bundle.getBundleId()),
+						Integer.valueOf(newSL)));
 			} catch (IllegalArgumentException e) {
 				System.out.println(e.getMessage());
 			}
@@ -1542,7 +1629,8 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	 * @param newInitialSL new value for initial start level
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_SETIBSL_COMMAND_DESCRIPTION)
-	public void setibsl(@Descriptor(ConsoleMsg.CONSOLE_HELP_SETFWSL_COMMAND_ARGUMENT_DESCRIPTION) int newInitialSL) throws Exception {
+	public void setibsl(@Descriptor(ConsoleMsg.CONSOLE_HELP_SETFWSL_COMMAND_ARGUMENT_DESCRIPTION) int newInitialSL)
+			throws Exception {
 		try {
 			activator.getStartLevel().setInitialBundleStartLevel(newInitialSL);
 			System.out.println(NLS.bind(ConsoleMsg.STARTLEVEL_INITIAL_BUNDLE_STARTLEVEL, String.valueOf(newInitialSL)));
@@ -1552,30 +1640,34 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 * Lists required bundles having the specified symbolic name or all if no bsn is specified
+	 * Lists required bundles having the specified symbolic name or all if no bsn is
+	 * specified
 	 *
 	 * @param symbolicName
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_REQUIRED_BUNDLES_COMMAND_DESCRIPTION)
-	public void requiredBundles(@Descriptor(ConsoleMsg.CONSOLE_HELP_REQUIRED_BUNDLES_COMMAND_ARGUMENT_DESCRIPTION) String... symbolicName) {
+	public void requiredBundles(
+			@Descriptor(ConsoleMsg.CONSOLE_HELP_REQUIRED_BUNDLES_COMMAND_ARGUMENT_DESCRIPTION) String... symbolicName) {
 		classSpaces(symbolicName);
 	}
 
 	/**
-	 * Lists required bundles having the specified symbolic name or all if no bsn is specified
+	 * Lists required bundles having the specified symbolic name or all if no bsn is
+	 * specified
 	 *
 	 * @param symbolicName
 	 */
 	@SuppressWarnings("deprecation")
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_REQUIRED_BUNDLES_COMMAND_DESCRIPTION)
-	public void classSpaces(@Descriptor(ConsoleMsg.CONSOLE_HELP_REQUIRED_BUNDLES_COMMAND_ARGUMENT_DESCRIPTION) String... symbolicName) {
+	public void classSpaces(
+			@Descriptor(ConsoleMsg.CONSOLE_HELP_REQUIRED_BUNDLES_COMMAND_ARGUMENT_DESCRIPTION) String... symbolicName) {
 		PackageAdmin packageAdmin = activator.getPackageAdmin();
 		if (packageAdmin == null) {
 			System.out.println(ConsoleMsg.CONSOLE_NO_EXPORTED_PACKAGES_NO_PACKAGE_ADMIN_MESSAGE);
 			return;
 		}
 		String[] names;
-		if(symbolicName == null || symbolicName.length == 0) {
+		if (symbolicName == null || symbolicName.length == 0) {
 			names = null;
 		} else {
 			names = symbolicName;
@@ -1604,7 +1696,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 					System.out.print("<"); //$NON-NLS-1$
 					System.out.print(ConsoleMsg.CONSOLE_STALE_MESSAGE);
 					System.out.println(">"); //$NON-NLS-1$
-				} else if (!wiring.isCurrent()){
+				} else if (!wiring.isCurrent()) {
 					System.out.print("<"); //$NON-NLS-1$
 					System.out.print(ConsoleMsg.CONSOLE_REMOVAL_PENDING_MESSAGE);
 					System.out.println(">"); //$NON-NLS-1$
@@ -1629,18 +1721,21 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_PROFILELOG_COMMAND_DESCRIPTION)
 	public void profilelog() throws Exception {
-		Class<?> profileClass = BundleContext.class.getClassLoader().loadClass("org.eclipse.osgi.internal.profile.Profile");
+		Class<?> profileClass = BundleContext.class.getClassLoader()
+				.loadClass("org.eclipse.osgi.internal.profile.Profile");
 		Method getProfileLog = profileClass.getMethod("getProfileLog", (Class<?>[]) null);
 		System.out.println(getProfileLog.invoke(null, (Object[]) null));
 	}
 
 	/**
 	 * Lists all packages visible from the specified bundle
+	 * 
 	 * @param bundle bundle to list visible packages
 	 */
 
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_VISIBLE_PACKAGES_COMMAND_DESCRIPTION)
-	public void getPackages(@Descriptor(ConsoleMsg.CONSOLE_HELP_VISIBLE_PACKAGES_COMMAND_ARGUMENTS_DESCRIPTION) Bundle bundle) {
+	public void getPackages(
+			@Descriptor(ConsoleMsg.CONSOLE_HELP_VISIBLE_PACKAGES_COMMAND_ARGUMENTS_DESCRIPTION) Bundle bundle) {
 		BundleRevision revision = bundle.adapt(BundleRevision.class);
 		if (revision == null) {
 			System.out.println("Bundle is uninstalled.");
@@ -1661,7 +1756,8 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		Map<String, Set<PackageSource>> packages = getPackagesInternal(wiring);
 		for (Set<PackageSource> packageSources : packages.values()) {
 			for (PackageSource packageSource : packageSources) {
-				printCapability("  ", packageSource.getCapability(), packageSource.getWire(), PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
+				printCapability("  ", packageSource.getCapability(), packageSource.getWire(),
+						PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
 			}
 		}
 	}
@@ -1686,7 +1782,8 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		@Override
 		public boolean equals(Object o) {
 			if (o instanceof PackageSource) {
-				return Objects.equals(cap, ((PackageSource) o).cap) && Objects.equals(wire.getProvider(), ((PackageSource) o).wire.getProvider());
+				return Objects.equals(cap, ((PackageSource) o).cap)
+						&& Objects.equals(wire.getProvider(), ((PackageSource) o).wire.getProvider());
 			}
 			return false;
 		}
@@ -1696,10 +1793,13 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			return cap.hashCode() ^ wire.getProvider().hashCode();
 		}
 	}
+
 	private Map<String, Set<PackageSource>> getPackagesInternal(BundleWiring wiring) {
 		return getPackagesInternal0(wiring, null);
 	}
-	private Map<String, Set<PackageSource>> getPackagesInternal0(BundleWiring wiring, Map<BundleWiring, Map<String, Set<PackageSource>>> allSources) {
+
+	private Map<String, Set<PackageSource>> getPackagesInternal0(BundleWiring wiring,
+			Map<BundleWiring, Map<String, Set<PackageSource>>> allSources) {
 		if (allSources == null) {
 			allSources = new HashMap<>();
 		}
@@ -1714,7 +1814,8 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		List<BundleWire> packageWires = wiring.getRequiredWires(PackageNamespace.PACKAGE_NAMESPACE);
 		Set<String> importedPackageNames = new HashSet<>();
 		for (BundleWire packageWire : packageWires) {
-			String packageName = (String) packageWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
+			String packageName = (String) packageWire.getCapability().getAttributes()
+					.get(PackageNamespace.PACKAGE_NAMESPACE);
 			importedPackageNames.add(packageName);
 			addAggregatePackageSource(packageWire.getCapability(), packageName, packageWire, packages, allSources);
 		}
@@ -1727,7 +1828,8 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		return packages;
 	}
 
-	private void addAggregatePackageSource(BundleCapability packageCap, String packageName, BundleWire wire, Map<String, Set<PackageSource>> packages, Map<BundleWiring, Map<String, Set<PackageSource>>> allSources) {
+	private void addAggregatePackageSource(BundleCapability packageCap, String packageName, BundleWire wire,
+			Map<String, Set<PackageSource>> packages, Map<BundleWiring, Map<String, Set<PackageSource>>> allSources) {
 		Set<PackageSource> packageSources = packages.get(packageName);
 		if (packageSources == null) {
 			packageSources = new LinkedHashSet<>();
@@ -1741,7 +1843,8 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		}
 	}
 
-	private void getRequiredBundlePackages(BundleWire requiredWire, Set<String> importedPackageNames, Map<String, Set<PackageSource>> packages, Map<BundleWiring, Map<String, Set<PackageSource>>> allSources) {
+	private void getRequiredBundlePackages(BundleWire requiredWire, Set<String> importedPackageNames,
+			Map<String, Set<PackageSource>> packages, Map<BundleWiring, Map<String, Set<PackageSource>>> allSources) {
 		BundleWiring providerWiring = requiredWire.getProviderWiring();
 		for (BundleCapability packageCapability : providerWiring.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
 			String packageName = (String) packageCapability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
@@ -1753,18 +1856,22 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 		// get the declared packages
 		Set<String> declaredPackageNames = new HashSet<>();
-		for (BundleCapability declaredPackage : providerWiring.getRevision().getDeclaredCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
+		for (BundleCapability declaredPackage : providerWiring.getRevision()
+				.getDeclaredCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
 			declaredPackageNames.add((String) declaredPackage.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
 		}
 		// and from attached fragments
 		for (BundleWire fragmentWire : providerWiring.getProvidedWires(HostNamespace.HOST_NAMESPACE)) {
-			for (BundleCapability declaredPackage : fragmentWire.getRequirer().getDeclaredCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
-				declaredPackageNames.add((String) declaredPackage.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+			for (BundleCapability declaredPackage : fragmentWire.getRequirer()
+					.getDeclaredCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
+				declaredPackageNames
+						.add((String) declaredPackage.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
 			}
 		}
 
 		for (BundleWire packageWire : providerWiring.getRequiredWires(PackageNamespace.PACKAGE_NAMESPACE)) {
-			String packageName = (String) packageWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
+			String packageName = (String) packageWire.getCapability().getAttributes()
+					.get(PackageNamespace.PACKAGE_NAMESPACE);
 			if (!importedPackageNames.contains(packageName) && declaredPackageNames.contains(packageName)) {
 				// if the package is a declared capability AND the wiring imports the package
 				// then it is substituted
@@ -1774,7 +1881,8 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 		// now get packages from re-exported requires of the required bundle
 		for (BundleWire providerBundleWire : providerWiring.getRequiredWires(BundleNamespace.BUNDLE_NAMESPACE)) {
-			String visibilityDirective = providerBundleWire.getRequirement().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE);
+			String visibilityDirective = providerBundleWire.getRequirement().getDirectives()
+					.get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE);
 			if (BundleNamespace.VISIBILITY_REEXPORT.equals(visibilityDirective)) {
 				getRequiredBundlePackages(providerBundleWire, importedPackageNames, packages, allSources);
 			}
@@ -1782,11 +1890,12 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 *  Given a string containing a startlevel value, validate it and convert it to an int
+	 * Given a string containing a startlevel value, validate it and convert it to
+	 * an int
 	 *
-	 *  @param intp A CommandInterpreter object used for printing out error messages
-	 *  @param value A string containing a potential startlevel
-	 *  @return The start level or an int <0 if it was invalid
+	 * @param intp  A CommandInterpreter object used for printing out error messages
+	 * @param value A string containing a potential startlevel
+	 * @return The start level or an int <0 if it was invalid
 	 */
 	protected int getStartLevelFromToken(String value) {
 		int retval = -1;
@@ -1802,46 +1911,46 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	/**
-	 *  Given a bundle, return the string describing that bundle's state.
+	 * Given a bundle, return the string describing that bundle's state.
 	 *
-	 *  @param bundle A bundle to return the state of
-	 *  @return A String describing the state
+	 * @param bundle A bundle to return the state of
+	 * @return A String describing the state
 	 */
 	protected String getStateName(Bundle bundle) {
 		int state = bundle.getState();
 		switch (state) {
-			case Bundle.UNINSTALLED :
-				return "UNINSTALLED "; //$NON-NLS-1$
+		case Bundle.UNINSTALLED:
+			return "UNINSTALLED "; //$NON-NLS-1$
 
-			case Bundle.INSTALLED :
-				return "INSTALLED   "; //$NON-NLS-1$
+		case Bundle.INSTALLED:
+			return "INSTALLED   "; //$NON-NLS-1$
 
-			case Bundle.RESOLVED :
-				return "RESOLVED    "; //$NON-NLS-1$
+		case Bundle.RESOLVED:
+			return "RESOLVED    "; //$NON-NLS-1$
 
-			case Bundle.STARTING :
-				synchronized (lazyActivation) {
-					if (lazyActivation.contains(bundle)) {
-						return "<<LAZY>>    "; //$NON-NLS-1$
-					}
-					return "STARTING    "; //$NON-NLS-1$
+		case Bundle.STARTING:
+			synchronized (lazyActivation) {
+				if (lazyActivation.contains(bundle)) {
+					return "<<LAZY>>    "; //$NON-NLS-1$
 				}
+				return "STARTING    "; //$NON-NLS-1$
+			}
 
-			case Bundle.STOPPING :
-				return "STOPPING    "; //$NON-NLS-1$
+		case Bundle.STOPPING:
+			return "STOPPING    "; //$NON-NLS-1$
 
-			case Bundle.ACTIVE :
-				return "ACTIVE      "; //$NON-NLS-1$
+		case Bundle.ACTIVE:
+			return "ACTIVE      "; //$NON-NLS-1$
 
-			default :
-				return Integer.toHexString(state);
+		default:
+			return Integer.toHexString(state);
 		}
 	}
 
 	/**
 	 * Answers all thread groups in the system.
 	 *
-	 * @return	An array of all thread groups.
+	 * @return An array of all thread groups.
 	 */
 	protected ThreadGroup[] getThreadGroups() {
 		ThreadGroup tg = getTopThreadGroup();
@@ -1859,10 +1968,10 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	/**
 	 * Answers the top level group of the current thread.
 	 * <p>
-	 * It is the 'system' or 'main' thread group under
-	 * which all 'user' thread groups are allocated.
+	 * It is the 'system' or 'main' thread group under which all 'user' thread
+	 * groups are allocated.
 	 *
-	 * @return	The parent of all user thread groups.
+	 * @return The parent of all user thread groups.
 	 */
 	protected ThreadGroup getTopThreadGroup() {
 		ThreadGroup topGroup = Thread.currentThread().getThreadGroup();
@@ -1878,7 +1987,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	 * Returns the simple class name of an object.
 	 *
 	 * @param o The object for which a class name is requested
-	 * @return	The simple class name.
+	 * @return The simple class name.
 	 */
 	public String simpleClassName(Object o) {
 		java.util.StringTokenizer t = new java.util.StringTokenizer(o.getClass().getName(), "."); //$NON-NLS-1$
@@ -1890,7 +1999,8 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_GETPROP_COMMAND_DESCRIPTION)
-	public void getprop(@Descriptor(ConsoleMsg.CONSOLE_HELP_GETPROP_COMMAND_ARGUMENT_DESCRIPTION) String... propName) throws Exception {
+	public void getprop(@Descriptor(ConsoleMsg.CONSOLE_HELP_GETPROP_COMMAND_ARGUMENT_DESCRIPTION) String... propName)
+			throws Exception {
 		Properties allProperties = System.getProperties();
 		Iterator<?> propertyNames = new TreeSet<>(allProperties.keySet()).iterator();
 		while (propertyNames.hasNext()) {
@@ -1902,7 +2012,8 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	}
 
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION)
-	public void diag(@Descriptor(ConsoleMsg.CONSOLE_HELP_DIAG_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles) throws Exception {
+	public void diag(@Descriptor(ConsoleMsg.CONSOLE_HELP_DIAG_COMMAND_ARGUMENT_DESCRIPTION) Bundle[] bundles)
+			throws Exception {
 		if (bundles.length == 0) {
 			List<Bundle> unresolved = new ArrayList<>();
 			Bundle[] allBundles = context.getBundles();
@@ -1929,7 +2040,8 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 	private ResolutionReport getResolutionReport(Bundle[] bundles) {
 		DiagReportListener reportListener = new DiagReportListener(bundles);
-		ServiceRegistration<ResolverHookFactory> hookReg = context.registerService(ResolverHookFactory.class, reportListener, null);
+		ServiceRegistration<ResolverHookFactory> hookReg = context.registerService(ResolverHookFactory.class,
+				reportListener, null);
 		try {
 			Bundle systemBundle = context.getBundle(Constants.SYSTEM_BUNDLE_LOCATION);
 			FrameworkWiring frameworkWiring = systemBundle.adapt(FrameworkWiring.class);
@@ -1942,6 +2054,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 	private static class DiagReportListener implements ResolverHookFactory {
 		private final Collection<BundleRevision> targetTriggers = new ArrayList<>();
+
 		public DiagReportListener(Bundle[] bundles) {
 			for (Bundle bundle : bundles) {
 				BundleRevision revision = bundle.adapt(BundleRevision.class);
@@ -1951,7 +2064,9 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			}
 
 		}
+
 		volatile ResolutionReport report = null;
+
 		class DiagResolverHook implements ResolverHook, ResolutionReport.Listener {
 
 			@Override
@@ -1971,8 +2086,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			}
 
 			@Override
-			public void filterMatches(BundleRequirement requirement,
-					Collection<BundleCapability> candidates) {
+			public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
 				// nothing
 			}
 
@@ -1982,6 +2096,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			}
 
 		}
+
 		@Override
 		public ResolverHook begin(Collection<BundleRevision> triggers) {
 			if (triggers.containsAll(targetTriggers)) {
@@ -1989,6 +2104,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			}
 			return null;
 		}
+
 		ResolutionReport getReport() {
 			return report;
 		}
@@ -2003,15 +2119,15 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		Bundle bundle = event.getBundle();
 		synchronized (lazyActivation) {
 			switch (type) {
-				case BundleEvent.LAZY_ACTIVATION :
-					if (!lazyActivation.contains(bundle)) {
-						lazyActivation.add(bundle);
-					}
-					break;
+			case BundleEvent.LAZY_ACTIVATION:
+				if (!lazyActivation.contains(bundle)) {
+					lazyActivation.add(bundle);
+				}
+				break;
 
-				default :
-					lazyActivation.remove(bundle);
-					break;
+			default:
+				lazyActivation.remove(bundle);
+				break;
 			}
 		}
 
@@ -2039,4 +2155,3 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		return false;
 	}
 }
-

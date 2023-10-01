@@ -25,7 +25,8 @@ public interface Completer {
 	 * 
 	 * @param buffer text to be completed
 	 * @param cursor current position in the text
-	 * @return map of candidate completions, and on which position in the buffer starts the completion
+	 * @return map of candidate completions, and on which position in the buffer
+	 *         starts the completion
 	 */
 	public Map<String, Integer> getCandidates(String buffer, int cursor);
 }
