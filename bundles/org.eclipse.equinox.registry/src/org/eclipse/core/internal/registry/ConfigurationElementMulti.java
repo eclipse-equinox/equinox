@@ -14,8 +14,8 @@
 package org.eclipse.core.internal.registry;
 
 /**
- * An object which represents the user-defined contents of an extension
- * in a plug-in manifest.
+ * An object which represents the user-defined contents of an extension in a
+ * plug-in manifest.
  */
 public class ConfigurationElementMulti extends ConfigurationElement {
 
@@ -28,15 +28,18 @@ public class ConfigurationElementMulti extends ConfigurationElement {
 		super(registry, persist);
 	}
 
-	protected ConfigurationElementMulti(int self, String contributorId, String name, String[] propertiesAndValue, int[] children, int extraDataOffset, int parent, byte parentType, ExtensionRegistry registry, boolean persist) {
-		super(self, contributorId, name, propertiesAndValue, children, extraDataOffset, parent, parentType, registry, persist);
+	protected ConfigurationElementMulti(int self, String contributorId, String name, String[] propertiesAndValue,
+			int[] children, int extraDataOffset, int parent, byte parentType, ExtensionRegistry registry,
+			boolean persist) {
+		super(self, contributorId, name, propertiesAndValue, children, extraDataOffset, parent, parentType, registry,
+				persist);
 	}
 
 	@Override
 	String getAttribute(String attrName, String locale) {
 		if (propertiesAndValue.length <= 1)
 			return null;
-		//round down to an even size
+		// round down to an even size
 		int size = propertiesAndValue.length - (propertiesAndValue.length % 2);
 		int index = -1;
 		for (int i = 0, j = 0; i < size; i += 2, j++) {

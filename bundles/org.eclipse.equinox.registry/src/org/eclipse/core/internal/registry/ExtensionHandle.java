@@ -14,9 +14,9 @@
 package org.eclipse.core.internal.registry;
 
 /**
- * The code (minus the getDeclaringPluginDescriptor() was moved into
- * the  BaseExtensionPointHandle to avoid duplicating code in the
- * compatibility fragment.
+ * The code (minus the getDeclaringPluginDescriptor() was moved into the
+ * BaseExtensionPointHandle to avoid duplicating code in the compatibility
+ * fragment.
  *
  * Modifications to the code should be done in the BaseExtensionHandle.
  *

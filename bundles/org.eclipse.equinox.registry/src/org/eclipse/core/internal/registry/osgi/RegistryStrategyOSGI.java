@@ -32,14 +32,20 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * The registry strategy that can be used in OSGi world. It provides the following functionality:
- * <p><ul>
+ * The registry strategy that can be used in OSGi world. It provides the
+ * following functionality:
+ * <p>
+ * <ul>
  * <li>Translation is done with ResourceTranslator</li>
- * <li>Registry is filled with information stored in plugin.xml / fragment.xml of OSGi bundles</li>
+ * <li>Registry is filled with information stored in plugin.xml / fragment.xml
+ * of OSGi bundles</li>
  * <li>Uses bunlde-based class loading to create executable extensions</li>
- * <li>Performs registry validation based on the time stamps of the plugin.xml / fragment.xml files</li>
+ * <li>Performs registry validation based on the time stamps of the plugin.xml /
+ * fragment.xml files</li>
  * <li>XML parser is obtained via an OSGi service</li>
- *  </ul></p>
+ * </ul>
+ * </p>
+ * 
  * @see RegistryFactory#setDefaultRegistryProvider(IRegistryProvider)
  * @since org.eclipse.equinox.registry 3.2
  */
@@ -72,23 +78,26 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	private ServiceTracker<?, ?> localeTracker = null;
 
 	/**
-	 * Value of the query "should we track contributions timestamps" is cached
-	 * in this variable
+	 * Value of the query "should we track contributions timestamps" is cached in
+	 * this variable
 	 */
 	private boolean trackTimestamp;
 
 	/**
-	 * @param theStorageDir - array of file system directories to store cache files; might be null
-	 * @param cacheReadOnly - array of read only attributes. True: cache at this location is read
-	 * only; false: cache is read/write
-	 * @param key - control key for the registry (should be the same key as used in
-	 * the RegistryManager#createExtensionRegistry() of this registry
+	 * @param theStorageDir - array of file system directories to store cache files;
+	 *                      might be null
+	 * @param cacheReadOnly - array of read only attributes. True: cache at this
+	 *                      location is read only; false: cache is read/write
+	 * @param key           - control key for the registry (should be the same key
+	 *                      as used in the RegistryManager#createExtensionRegistry()
+	 *                      of this registry
 	 */
 	public RegistryStrategyOSGI(File[] theStorageDir, boolean[] cacheReadOnly, Object key) {
 		super(theStorageDir, cacheReadOnly);
 		token = key;
 
-		// Only do timestamp calculations if osgi.checkConfiguration is set to "true" (typically,
+		// Only do timestamp calculations if osgi.checkConfiguration is set to "true"
+		// (typically,
 		// this implies -dev mode)
 		BundleContext context = Activator.getContext();
 		if (context != null)
@@ -97,16 +106,24 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 			trackTimestamp = false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#translate(java.lang.String, java.util.ResourceBundle)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.core.runtime.spi.RegistryStrategy#translate(java.lang.String,
+	 * java.util.ResourceBundle)
 	 */
 	@Override
 	public final String translate(String key, ResourceBundle resources) {
 		return ResourceTranslator.getResourceString(null, key, resources);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#translate(java.lang.String[], org.eclipse.core.runtime.IContributor, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.core.runtime.spi.RegistryStrategy#translate(java.lang.String[],
+	 * org.eclipse.core.runtime.IContributor, java.lang.String)
 	 */
 	@Override
 	public String[] translate(String[] nonTranslated, IContributor contributor, String locale) {
@@ -114,7 +131,8 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////
-	// Use OSGi bundles for namespace resolution (contributors: plugins and fragments)
+	// Use OSGi bundles for namespace resolution (contributors: plugins and
+	//////////////////////////////////////////////////////////////////////////////////////// fragments)
 
 	/**
 	 * The default load factor for the bundle cache.
@@ -122,8 +140,8 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	private static float DEFAULT_BUNDLECACHE_LOADFACTOR = 0.75f;
 
 	/**
-	 * The expected bundle cache size (calculated as a number of bundles divided
-	 * by the DEFAULT_BUNDLECACHE_LOADFACTOR). The bundle cache will be resized
+	 * The expected bundle cache size (calculated as a number of bundles divided by
+	 * the DEFAULT_BUNDLECACHE_LOADFACTOR). The bundle cache will be resized
 	 * automatically is this number is exceeded.
 	 */
 	private static int DEFAULT_BUNDLECACHE_SIZE = 200;
@@ -132,11 +150,12 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	 * For performance, we cache mapping of IDs to Bundles.
 	 *
 	 * We don't expect mapping to change during the runtime. (Or, in the OSGI terms,
-	 * we don't expect bundle IDs to be reused during the Eclipse run.)
-	 * The Bundle object is stored as a weak reference to facilitate GC
-	 * in case the bundle was uninstalled during the Eclipse run.
+	 * we don't expect bundle IDs to be reused during the Eclipse run.) The Bundle
+	 * object is stored as a weak reference to facilitate GC in case the bundle was
+	 * uninstalled during the Eclipse run.
 	 */
-	private final ReferenceMap bundleMap = new ReferenceMap(ReferenceMap.SOFT, DEFAULT_BUNDLECACHE_SIZE, DEFAULT_BUNDLECACHE_LOADFACTOR);
+	private final ReferenceMap bundleMap = new ReferenceMap(ReferenceMap.SOFT, DEFAULT_BUNDLECACHE_SIZE,
+			DEFAULT_BUNDLECACHE_LOADFACTOR);
 
 	private final ReadWriteLock bundleMapLock = new ReentrantReadWriteLock();
 
@@ -162,7 +181,8 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		}
 		if (bundle != null)
 			return bundle;
-		// note: we accept that two concurrent threads end up here for the same id, because they will anyway resolve the same mapping
+		// note: we accept that two concurrent threads end up here for the same id,
+		// because they will anyway resolve the same mapping
 		bundle = Activator.getContext().getBundle(OSGiId);
 		bundleMapLock.writeLock().lock();
 		try {
@@ -176,11 +196,17 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Executable extensions: bundle-based class loading
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#createExecutableExtension(org.eclipse.core.runtime.spi.RegistryContributor, java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.core.runtime.spi.RegistryStrategy#createExecutableExtension(org.
+	 * eclipse.core.runtime.spi.RegistryContributor, java.lang.String,
+	 * java.lang.String)
 	 */
 	@Override
-	public Object createExecutableExtension(RegistryContributor contributor, String className, String overridenContributorName) throws CoreException {
+	public Object createExecutableExtension(RegistryContributor contributor, String className,
+			String overridenContributorName) throws CoreException {
 		Bundle contributingBundle;
 		if (overridenContributorName != null && !overridenContributorName.equals("")) //$NON-NLS-1$
 			contributingBundle = OSGIUtils.getDefault().getBundle(overridenContributorName);
@@ -188,14 +214,17 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 			contributingBundle = getBundle(contributor.getId());
 
 		if (contributingBundle == null)
-			throwException(NLS.bind(RegistryMessages.plugin_loadClassError, "UNKNOWN BUNDLE", className), new InvalidRegistryObjectException()); //$NON-NLS-1$
+			throwException(NLS.bind(RegistryMessages.plugin_loadClassError, "UNKNOWN BUNDLE", className), //$NON-NLS-1$
+					new InvalidRegistryObjectException());
 
 		// load the requested class from this bundle
 		Class<?> classInstance = null;
 		try {
 			classInstance = contributingBundle.loadClass(className);
 		} catch (Exception | LinkageError e1) {
-			throwException(NLS.bind(RegistryMessages.plugin_loadClassError, contributingBundle.getSymbolicName(), className), e1);
+			throwException(
+					NLS.bind(RegistryMessages.plugin_loadClassError, contributingBundle.getSymbolicName(), className),
+					e1);
 		}
 
 		// create a new instance
@@ -203,25 +232,33 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		try {
 			result = classInstance.getDeclaredConstructor().newInstance();
 		} catch (Exception | LinkageError e) {
-			throwException(NLS.bind(RegistryMessages.plugin_instantiateClassError, contributingBundle.getSymbolicName(), className), e);
+			throwException(NLS.bind(RegistryMessages.plugin_instantiateClassError, contributingBundle.getSymbolicName(),
+					className), e);
 		}
 		return result;
 	}
 
 	private void throwException(String message, Throwable exception) throws CoreException {
-		throw new CoreException(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, IRegistryConstants.PLUGIN_ERROR, message, exception));
+		throw new CoreException(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, IRegistryConstants.PLUGIN_ERROR,
+				message, exception));
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////
-	// Start / stop extra processing: adding bundle listener; fill registry if not filled from cache
+	// Start / stop extra processing: adding bundle listener; fill registry if not
+	///////////////////////////////////////////////////////////////////////////////////// filled
+	///////////////////////////////////////////////////////////////////////////////////// from
+	///////////////////////////////////////////////////////////////////////////////////// cache
 
 	/**
 	 * Listening to the bundle events.
 	 */
 	private EclipseBundleListener pluginBundleListener = null;
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#onStart(org.eclipse.core.runtime.IExtensionRegistry, boolean)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#onStart(org.eclipse.core.
+	 * runtime.IExtensionRegistry, boolean)
 	 */
 	@Override
 	public void onStart(IExtensionRegistry registry, boolean loadedFromCache) {
@@ -236,15 +273,19 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		// populate the registry with all the currently installed bundles.
 		// There is a small window here while processBundles is being
 		// called where the pluginBundleListener may receive a BundleEvent
-		// to add/remove a bundle from the registry.  This is ok since
+		// to add/remove a bundle from the registry. This is ok since
 		// the registry is a synchronized object and will not add the
 		// same bundle twice.
 		if (!loadedFromCache)
 			pluginBundleListener.processBundles(Activator.getContext().getBundles());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#onStop(org.eclipse.core.runtime.IExtensionRegistry)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.core.runtime.spi.RegistryStrategy#onStop(org.eclipse.core.runtime
+	 * .IExtensionRegistry)
 	 */
 	@Override
 	public void onStop(IExtensionRegistry registry) {
@@ -264,7 +305,9 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Cache strategy
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#cacheUse()
 	 */
 	@Override
@@ -272,16 +315,22 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		return !"true".equals(RegistryProperties.getProperty(IRegistryConstants.PROP_NO_REGISTRY_CACHE)); //$NON-NLS-1$
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#cacheLazyLoading()
 	 */
 	@Override
 	public boolean cacheLazyLoading() {
-		return !("true".equalsIgnoreCase(RegistryProperties.getProperty(IRegistryConstants.PROP_NO_LAZY_CACHE_LOADING))); //$NON-NLS-1$
+		return !("true" //$NON-NLS-1$
+				.equalsIgnoreCase(RegistryProperties.getProperty(IRegistryConstants.PROP_NO_LAZY_CACHE_LOADING)));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#getContributionsTimestamp()
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.core.runtime.spi.RegistryStrategy#getContributionsTimestamp()
 	 */
 	@Override
 	public long getContributionsTimestamp() {
@@ -318,7 +367,9 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#getXMLParser()
 	 */
 	@Override
@@ -330,7 +381,9 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		return (SAXParserFactory) xmlTracker.getService();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#getLocale()
 	 */
 	@Override

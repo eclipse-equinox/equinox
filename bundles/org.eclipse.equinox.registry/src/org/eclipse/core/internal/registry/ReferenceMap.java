@@ -25,43 +25,42 @@ package org.eclipse.core.internal.registry;
 import java.lang.ref.*;
 
 /**
- *  Hashtable-based map with integer keys that allows values to be removed
- *  by the garbage  collector.<P>
+ * Hashtable-based map with integer keys that allows values to be removed by the
+ * garbage collector.
+ * <P>
  *
- *  When you construct a <Code>ReferenceMap</Code>, you can
- *  specify what kind of references are used to store the
- *  map's values.  If non-hard references are
- *  used, then the garbage collector can remove mappings
- *  if a value becomes unreachable, or if the
- *  JVM's memory is running low.  For information on how
- *  the different reference types behave, see
- *  {@link Reference}.<P>
+ * When you construct a <Code>ReferenceMap</Code>, you can specify what kind of
+ * references are used to store the map's values. If non-hard references are
+ * used, then the garbage collector can remove mappings if a value becomes
+ * unreachable, or if the JVM's memory is running low. For information on how
+ * the different reference types behave, see {@link Reference}.
+ * <P>
  *
- *  The algorithms used are basically the same as those
- *  in {@link java.util.HashMap}.  In particular, you
- *  can specify a load factor and capacity to suit your
- *  needs.
+ * The algorithms used are basically the same as those in
+ * {@link java.util.HashMap}. In particular, you can specify a load factor and
+ * capacity to suit your needs.
  *
- *  This map does <I>not</I> allow null values.  Attempting to add a null
- *  value to the map will raise a <Code>NullPointerException</Code>.<P>
+ * This map does <I>not</I> allow null values. Attempting to add a null value to
+ * the map will raise a <Code>NullPointerException</Code>.
+ * <P>
  *
- *  This data structure is not synchronized.
+ * This data structure is not synchronized.
  *
- *  @see java.lang.ref.Reference
+ * @see java.lang.ref.Reference
  */
 public class ReferenceMap {
 
 	/**
-	 * IEntry implementation that acts as a hard reference.
-	 * The value of a hard reference entry is never garbage
-	 * collected until it is explicitly removed from the map.
+	 * IEntry implementation that acts as a hard reference. The value of a hard
+	 * reference entry is never garbage collected until it is explicitly removed
+	 * from the map.
 	 */
 	private static class HardRef implements IEntry {
 
 		private final int key;
 		private IEntry next;
 		/**
-		 * Reference value.  Note this can never be null.
+		 * Reference value. Note this can never be null.
 		 */
 		private final Object value;
 
@@ -98,33 +97,35 @@ public class ReferenceMap {
 	}
 
 	/**
-	 * The common interface for all elements in the map.  Both
-	 * hard and soft map values conform to this interface.
+	 * The common interface for all elements in the map. Both hard and soft map
+	 * values conform to this interface.
 	 */
 	private static interface IEntry {
 		/**
 		 * Returns the integer key for this entry.
+		 * 
 		 * @return The integer key
 		 */
 		public int getKey();
 
 		/**
-		 * Returns the next entry in the linked list of entries
-		 * with the same hash value, or <code>null</code>
-		 * if there is no next entry.
+		 * Returns the next entry in the linked list of entries with the same hash
+		 * value, or <code>null</code> if there is no next entry.
+		 * 
 		 * @return The next entry, or <code>null</code>.
 		 */
 		public IEntry getNext();
 
 		/**
 		 * Returns the value of this entry.
+		 * 
 		 * @return The entry value.
 		 */
 		public Object getValue();
 
 		/**
-		 * Sets the next entry in the linked list of map entries
-		 * with the same hash value.
+		 * Sets the next entry in the linked list of map entries with the same hash
+		 * value.
 		 *
 		 * @param next The next entry, or <code>null</code>.
 		 */
@@ -132,8 +133,8 @@ public class ReferenceMap {
 	}
 
 	/**
-	 * Augments a normal soft reference with additional information
-	 * required to implement the IEntry interface.
+	 * Augments a normal soft reference with additional information required to
+	 * implement the IEntry interface.
 	 */
 	private static class SoftRef extends SoftReference<Object> implements IEntry {
 		private final int key;
@@ -170,62 +171,62 @@ public class ReferenceMap {
 	}
 
 	/**
-	 *  Constant indicating that hard references should be used.
+	 * Constant indicating that hard references should be used.
 	 */
 	final public static int HARD = 0;
 
 	/**
-	 *  Constant indiciating that soft references should be used.
+	 * Constant indiciating that soft references should be used.
 	 */
 	final public static int SOFT = 1;
 
 	/**
-	 *  The threshold variable is calculated by multiplying
-	 *  table.length and loadFactor.
-	 *  Note: I originally marked this field as final, but then this class
-	 *   didn't compile under JDK1.2.2.
-	 *  @serial
+	 * The threshold variable is calculated by multiplying table.length and
+	 * loadFactor. Note: I originally marked this field as final, but then this
+	 * class didn't compile under JDK1.2.2.
+	 * 
+	 * @serial
 	 */
 	private final float loadFactor;
 
 	/**
-	 *  ReferenceQueue used to eliminate stale mappings.
+	 * ReferenceQueue used to eliminate stale mappings.
 	 */
 	private transient ReferenceQueue<Object> queue = new ReferenceQueue<>();
 
 	/**
-	 *  Number of mappings in this map.
+	 * Number of mappings in this map.
 	 */
 	private transient int size;
 
 	/**
-	 *  The hash table.  Its length is always a power of two.
+	 * The hash table. Its length is always a power of two.
 	 */
 	private transient IEntry[] table;
 
 	/**
-	 *  When size reaches threshold, the map is resized.
-	 *  @see #resize()
+	 * When size reaches threshold, the map is resized.
+	 * 
+	 * @see #resize()
 	 */
 	private transient int threshold;
 
 	/**
-	 *  The reference type for values.  Must be HARD or SOFT
-	 *  Note: I originally marked this field as final, but then this class
-	 *   didn't compile under JDK1.2.2.
-	 *  @serial
+	 * The reference type for values. Must be HARD or SOFT Note: I originally marked
+	 * this field as final, but then this class didn't compile under JDK1.2.2.
+	 * 
+	 * @serial
 	 */
 	int valueType;
 
 	/**
-	 *  Constructs a new <Code>ReferenceMap</Code> with the
-	 *  specified reference type, load factor and initial
-	 *  capacity.
+	 * Constructs a new <Code>ReferenceMap</Code> with the specified reference type,
+	 * load factor and initial capacity.
 	 *
-	 *  @param referenceType  the type of reference to use for values;
-	 *   must be {@link #HARD} or {@link #SOFT}
-	 *  @param capacity  the initial capacity for the map
-	 *  @param loadFactor  the load factor for the map
+	 * @param referenceType the type of reference to use for values; must be
+	 *                      {@link #HARD} or {@link #SOFT}
+	 * @param capacity      the initial capacity for the map
+	 * @param loadFactor    the load factor for the map
 	 */
 	public ReferenceMap(int referenceType, int capacity, float loadFactor) {
 		super();
@@ -248,8 +249,9 @@ public class ReferenceMap {
 	}
 
 	/**
-	 * @param key The key to remove
-	 * @param cleanup true if doing map maintenance; false if it is a real request to remove
+	 * @param key     The key to remove
+	 * @param cleanup true if doing map maintenance; false if it is a real request
+	 *                to remove
 	 * @return The removed map value
 	 */
 	private Object doRemove(int key, boolean cleanup) {
@@ -277,10 +279,10 @@ public class ReferenceMap {
 	}
 
 	/**
-	 *  Returns the value associated with the given key, if any.
+	 * Returns the value associated with the given key, if any.
 	 *
-	 *  @return the value associated with the given key, or <Code>null</Code>
-	 *   if the key maps to no value
+	 * @return the value associated with the given key, or <Code>null</Code> if the
+	 *         key maps to no value
 	 */
 	public Object get(int key) {
 		for (IEntry entry = table[indexFor(key)]; entry != null; entry = entry.getNext())
@@ -295,8 +297,7 @@ public class ReferenceMap {
 	}
 
 	/**
-	 *  Converts the given hash code into an index into the
-	 *  hash table.
+	 * Converts the given hash code into an index into the hash table.
 	 */
 	private int indexFor(int hash) {
 		// mix the bits to avoid bucket collisions...
@@ -312,34 +313,34 @@ public class ReferenceMap {
 	/**
 	 * Constructs a new table entry for the given data
 	 *
-	 * @param key The entry key
+	 * @param key   The entry key
 	 * @param value The entry value
-	 * @param next The next value in the entry's collision chain
+	 * @param next  The next value in the entry's collision chain
 	 * @return The new table entry
 	 */
 	private IEntry newEntry(int key, Object value, IEntry next) {
 		switch (valueType) {
-			case HARD :
-				return new HardRef(key, value, next);
-			case SOFT :
-				return new SoftRef(key, value, next, queue);
-			default :
-				throw new Error();
+		case HARD:
+			return new HardRef(key, value, next);
+		case SOFT:
+			return new SoftRef(key, value, next, queue);
+		default:
+			throw new Error();
 		}
 	}
 
 	/**
-	 *  Purges stale mappings from this map.<P>
+	 * Purges stale mappings from this map.
+	 * <P>
 	 *
-	 *  Ordinarily, stale mappings are only removed during
-	 *  a write operation; typically a write operation will
-	 *  occur often enough that you'll never need to manually
-	 *  invoke this method.<P>
+	 * Ordinarily, stale mappings are only removed during a write operation;
+	 * typically a write operation will occur often enough that you'll never need to
+	 * manually invoke this method.
+	 * <P>
 	 *
-	 *  Note that this method is not synchronized!  Special
-	 *  care must be taken if, for instance, you want stale
-	 *  mappings to be removed on a periodic basis by some
-	 *  background thread.
+	 * Note that this method is not synchronized! Special care must be taken if, for
+	 * instance, you want stale mappings to be removed on a periodic basis by some
+	 * background thread.
 	 */
 	private void purge() {
 		Reference<?> ref = queue.poll();
@@ -351,13 +352,13 @@ public class ReferenceMap {
 	}
 
 	/**
-	 *  Associates the given key with the given value.<P>
-	 *  Neither the key nor the value may be null.
+	 * Associates the given key with the given value.
+	 * <P>
+	 * Neither the key nor the value may be null.
 	 *
-	 *  @param key  the key of the mapping
-	 *  @param value  the value of the mapping
-	 *  @throws NullPointerException if either the key or value
-	 *   is null
+	 * @param key   the key of the mapping
+	 * @param value the value of the mapping
+	 * @throws NullPointerException if either the key or value is null
 	 */
 	public void put(int key, Object value) {
 		if (value == null)
@@ -385,11 +386,11 @@ public class ReferenceMap {
 	}
 
 	/**
-	 *  Removes the key and its associated value from this map.
+	 * Removes the key and its associated value from this map.
 	 *
-	 *  @param key  the key to remove
-	 *  @return the value associated with that key, or null if
-	 *   the key was not in the map
+	 * @param key the key to remove
+	 * @return the value associated with that key, or null if the key was not in the
+	 *         map
 	 */
 	public Object remove(int key) {
 		purge();
@@ -397,10 +398,9 @@ public class ReferenceMap {
 	}
 
 	/**
-	 *  Resizes this hash table by doubling its capacity.
-	 *  This is an expensive operation, as entries must
-	 *  be copied from the old smaller table to the new
-	 *  bigger table.
+	 * Resizes this hash table by doubling its capacity. This is an expensive
+	 * operation, as entries must be copied from the old smaller table to the new
+	 * bigger table.
 	 */
 	private void resize() {
 		IEntry[] old = table;

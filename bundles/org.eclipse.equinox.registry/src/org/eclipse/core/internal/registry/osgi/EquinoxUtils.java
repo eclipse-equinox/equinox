@@ -18,9 +18,9 @@ import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.osgi.framework.*;
 
 /**
- * The class contains a set of Equinox-specific helper methods. The methods were isolated
- * into separate class to prevent an attempt to load Equinox classes in a generic OSGi
- * environment.
+ * The class contains a set of Equinox-specific helper methods. The methods were
+ * isolated into separate class to prevent an attempt to load Equinox classes in
+ * a generic OSGi environment.
  *
  * This class uses OSGi services.
  *
@@ -62,7 +62,8 @@ public class EquinoxUtils {
 			// refer to the CommandProvider by name here so that even if VM
 			// decides to pre-fetch all referred classes the expection will occur
 			// inside the exception holder
-			return context.registerService("org.eclipse.osgi.framework.console.CommandProvider", new RegistryCommandProvider(), null); //$NON-NLS-1$
+			return context.registerService("org.eclipse.osgi.framework.console.CommandProvider", //$NON-NLS-1$
+					new RegistryCommandProvider(), null);
 		} catch (NoClassDefFoundError noClass) {
 			// expected if CommandProvider is not available
 		}

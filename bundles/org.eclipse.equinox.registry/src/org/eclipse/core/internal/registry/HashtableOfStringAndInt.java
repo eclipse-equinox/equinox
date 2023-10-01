@@ -46,18 +46,18 @@ public final class HashtableOfStringAndInt implements Cloneable {
 	@Override
 	public Object clone() throws CloneNotSupportedException {
 		throw new CloneNotSupportedException();
-		//		HashtableOfStringAndInt result = (HashtableOfStringAndInt) super.clone();
-		//		result.elementSize = this.elementSize;
-		//		result.threshold = this.threshold;
+		// HashtableOfStringAndInt result = (HashtableOfStringAndInt) super.clone();
+		// result.elementSize = this.elementSize;
+		// result.threshold = this.threshold;
 		//
-		//		int length = this.keyTable.length;
-		//		result.keyTable = new char[length][];
-		//		System.arraycopy(this.keyTable, 0, result.keyTable, 0, length);
+		// int length = this.keyTable.length;
+		// result.keyTable = new char[length][];
+		// System.arraycopy(this.keyTable, 0, result.keyTable, 0, length);
 		//
-		//		length = this.valueTable.length;
-		//		result.valueTable = new Object[length];
-		//		System.arraycopy(this.valueTable, 0, result.valueTable, 0, length);
-		//		return result;
+		// length = this.valueTable.length;
+		// result.valueTable = new Object[length];
+		// System.arraycopy(this.valueTable, 0, result.valueTable, 0, length);
+		// return result;
 	}
 
 	public boolean containsKey(String key) {

@@ -26,13 +26,12 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
 /**
- * A listener for bundle events.  When a bundles come and go we look to see
- * if there are any extensions or extension points and update the registry accordingly.
- * Using a Synchronous listener here is important. If the
- * bundle activator code tries to access the registry to get its extension
- * points, we need to ensure that they are in the registry before the
- * bundle start is called. By listening sync we are able to ensure that
- * happens.
+ * A listener for bundle events. When a bundles come and go we look to see if
+ * there are any extensions or extension points and update the registry
+ * accordingly. Using a Synchronous listener here is important. If the bundle
+ * activator code tries to access the registry to get its extension points, we
+ * need to ensure that they are in the registry before the bundle start is
+ * called. By listening sync we are able to ensure that happens.
  */
 public class EclipseBundleListener implements SynchronousBundleListener {
 	private static final String PLUGIN_MANIFEST = "plugin.xml"; //$NON-NLS-1$
@@ -42,7 +41,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 	private final RegistryStrategyOSGI strategy;
 	private final Object token;
 	private final HashMap<String, Long> dynamicAddStateStamps = new HashMap<>();
-	private final long currentStateStamp[] = new long[] {0};
+	private final long currentStateStamp[] = new long[] { 0 };
 
 	public EclipseBundleListener(ExtensionRegistry registry, Object key, RegistryStrategyOSGI strategy) {
 		this.registry = registry;
@@ -52,39 +51,40 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 
 	@Override
 	public void bundleChanged(BundleEvent event) {
-		/* Only should listen for RESOLVED and UNRESOLVED events.
+		/*
+		 * Only should listen for RESOLVED and UNRESOLVED events.
 		 *
-		 * When a bundle is updated the Framework will publish an UNRESOLVED and
-		 * then a RESOLVED event which should cause the bundle to be removed
-		 * and then added back into the registry.
+		 * When a bundle is updated the Framework will publish an UNRESOLVED and then a
+		 * RESOLVED event which should cause the bundle to be removed and then added
+		 * back into the registry.
 		 *
-		 * When a bundle is uninstalled the Framework should publish an UNRESOLVED
-		 * event and then an UNINSTALLED event so the bundle will have been removed
-		 * by the UNRESOLVED event before the UNINSTALLED event is published.
+		 * When a bundle is uninstalled the Framework should publish an UNRESOLVED event
+		 * and then an UNINSTALLED event so the bundle will have been removed by the
+		 * UNRESOLVED event before the UNINSTALLED event is published.
 		 *
 		 * When a bundle is refreshed from PackageAdmin an UNRESOLVED event will be
-		 * published which will remove the bundle from the registry.  If the bundle
-		 * can be RESOLVED after a refresh then a RESOLVED event will be published
-		 * which will add the bundle back.  This is required because the classloader
-		 * will have been refreshed for the bundle so all extensions and extension
-		 * points for the bundle must be refreshed.
+		 * published which will remove the bundle from the registry. If the bundle can
+		 * be RESOLVED after a refresh then a RESOLVED event will be published which
+		 * will add the bundle back. This is required because the classloader will have
+		 * been refreshed for the bundle so all extensions and extension points for the
+		 * bundle must be refreshed.
 		 */
 		Bundle bundle = event.getBundle();
 		switch (event.getType()) {
-			case BundleEvent.RESOLVED :
-				synchronized (currentStateStamp) {
-					long newStateStamp = registry.computeState();
-					if (currentStateStamp[0] != newStateStamp) {
-						// new state stamp; clear the dynamicaddStateStamps
-						currentStateStamp[0] = newStateStamp;
-						dynamicAddStateStamps.clear();
-					}
+		case BundleEvent.RESOLVED:
+			synchronized (currentStateStamp) {
+				long newStateStamp = registry.computeState();
+				if (currentStateStamp[0] != newStateStamp) {
+					// new state stamp; clear the dynamicaddStateStamps
+					currentStateStamp[0] = newStateStamp;
+					dynamicAddStateStamps.clear();
 				}
-				addBundle(bundle, true);
-				break;
-			case BundleEvent.UNRESOLVED :
-				removeBundle(bundle);
-				break;
+			}
+			addBundle(bundle, true);
+			break;
+		case BundleEvent.UNRESOLVED:
+			removeBundle(bundle);
+			break;
 		}
 	}
 
@@ -134,7 +134,8 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		if (!isFragment)
 			return extensionURL;
 
-		// If the bundle is a fragment being added to a non singleton host, then it is not added
+		// If the bundle is a fragment being added to a non singleton host, then it is
+		// not added
 		Bundle[] hosts = OSGIUtils.getDefault().getHosts(bundle);
 		if (hosts == null)
 			return null; // should never happen?
@@ -143,8 +144,10 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 			return extensionURL;
 
 		if (report) {
-			// if the host is not a singleton we always report the error; even if the host has a generated manifest
-			String message = NLS.bind(RegistryMessages.parse_nonSingletonFragment, bundle.getSymbolicName(), hosts[0].getSymbolicName());
+			// if the host is not a singleton we always report the error; even if the host
+			// has a generated manifest
+			String message = NLS.bind(RegistryMessages.parse_nonSingletonFragment, bundle.getSymbolicName(),
+					hosts[0].getSymbolicName());
 			RuntimeLog.log(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, 0, message, null));
 		}
 		return null;
@@ -178,7 +181,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		try {
 			translationBundle = ResourceTranslator.getResourceBundle(bundle);
 		} catch (MissingResourceException e) {
-			//Ignore the exception
+			// Ignore the exception
 		}
 		long timestamp = 0;
 		if (strategy.checkContributionsTimestamp())
@@ -198,7 +201,8 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		Bundle[] hosts = OSGIUtils.getDefault().getHosts(bundle);
 		if (hosts == null)
 			return;
-		// check to see if the hosts should be refreshed because the fragment contains NLS properties files.
+		// check to see if the hosts should be refreshed because the fragment contains
+		// NLS properties files.
 		for (Bundle host : hosts) {
 			checkForNLSFiles(host, bundle);
 		}
@@ -256,7 +260,9 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 			// localization may be empty in which case we should check the default
 			localization = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
 		// we do a simple check to make sure the default nls path exists in the target;
-		// this is for performance reasons, but I'm not sure it is valid because a target could ship without the default nls properties file but this seems very unlikely
+		// this is for performance reasons, but I'm not sure it is valid because a
+		// target could ship without the default nls properties file but this seems very
+		// unlikely
 		URL baseNLS = target.getEntry(localization + ".properties"); //$NON-NLS-1$
 		if (baseNLS == null)
 			return false;
@@ -274,16 +280,18 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		String symbolicNameHeader = (String) allHeaders.get(Constants.BUNDLE_SYMBOLICNAME);
 		try {
 			if (symbolicNameHeader != null) {
-				ManifestElement[] symbolicNameElements = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameHeader);
+				ManifestElement[] symbolicNameElements = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME,
+						symbolicNameHeader);
 				if (symbolicNameElements.length > 0) {
 					String singleton = symbolicNameElements[0].getDirective(Constants.SINGLETON_DIRECTIVE);
 					if (singleton == null)
 						singleton = symbolicNameElements[0].getAttribute(Constants.SINGLETON_DIRECTIVE);
 
 					if (!"true".equalsIgnoreCase(singleton)) { //$NON-NLS-1$
-						String manifestVersion = (String) allHeaders.get(org.osgi.framework.Constants.BUNDLE_MANIFESTVERSION);
-						if (manifestVersion == null) {//the header was not defined for previous versions of the bundle
-							//3.0 bundles without a singleton attributes are still being accepted
+						String manifestVersion = (String) allHeaders
+								.get(org.osgi.framework.Constants.BUNDLE_MANIFESTVERSION);
+						if (manifestVersion == null) {// the header was not defined for previous versions of the bundle
+							// 3.0 bundles without a singleton attributes are still being accepted
 							if (OSGIUtils.getDefault().getBundle(symbolicNameElements[0].getValue()) == bundle)
 								return true;
 						}
@@ -292,7 +300,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 				}
 			}
 		} catch (BundleException e1) {
-			//This can't happen because the fwk would have rejected the bundle
+			// This can't happen because the fwk would have rejected the bundle
 		}
 		return true;
 	}

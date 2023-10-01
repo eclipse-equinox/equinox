@@ -34,7 +34,7 @@ public class OSGIUtils {
 	private ServiceTracker<?, ?> bundleTracker = null;
 	private ServiceTracker<?, ?> configurationLocationTracker = null;
 
-	// OSGI system properties.  Copied from EclipseStarter
+	// OSGI system properties. Copied from EclipseStarter
 	public static final String PROP_CONFIG_AREA = "osgi.configuration.area"; //$NON-NLS-1$
 	public static final String PROP_INSTANCE_AREA = "osgi.instance.area"; //$NON-NLS-1$
 
@@ -55,7 +55,8 @@ public class OSGIUtils {
 	private void initServices() {
 		BundleContext context = Activator.getContext();
 		if (context == null) {
-			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, RegistryMessages.bundle_not_activated, null));
+			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0,
+					RegistryMessages.bundle_not_activated, null));
 			return;
 		}
 
@@ -71,7 +72,7 @@ public class OSGIUtils {
 		try {
 			filter = context.createFilter(FILTER_PREFIX + PROP_CONFIG_AREA + "))"); //$NON-NLS-1$
 		} catch (InvalidSyntaxException e) {
-			// ignore this.  It should never happen as we have tested the above format.
+			// ignore this. It should never happen as we have tested the above format.
 		}
 		configurationLocationTracker = new ServiceTracker<>(context, filter, null);
 		configurationLocationTracker.open();
@@ -95,7 +96,8 @@ public class OSGIUtils {
 
 	public boolean getBooleanDebugOption(String option, boolean defaultValue) {
 		if (debugTracker == null) {
-			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, RegistryMessages.bundle_not_activated, null));
+			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0,
+					RegistryMessages.bundle_not_activated, null));
 			return defaultValue;
 		}
 		DebugOptions options = (DebugOptions) debugTracker.getService();
@@ -109,7 +111,8 @@ public class OSGIUtils {
 
 	public PackageAdmin getPackageAdmin() {
 		if (bundleTracker == null) {
-			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, RegistryMessages.bundle_not_activated, null));
+			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0,
+					RegistryMessages.bundle_not_activated, null));
 			return null;
 		}
 		return (PackageAdmin) bundleTracker.getService();
@@ -122,7 +125,7 @@ public class OSGIUtils {
 		Bundle[] bundles = packageAdmin.getBundles(bundleName, null);
 		if (bundles == null)
 			return null;
-		//Return the first bundle that is not installed or uninstalled
+		// Return the first bundle that is not installed or uninstalled
 		for (Bundle bundle : bundles) {
 			if ((bundle.getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0) {
 				return bundle;

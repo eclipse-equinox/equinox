@@ -19,8 +19,8 @@ import org.eclipse.core.runtime.IExtensionDelta;
 import org.eclipse.core.runtime.IRegistryChangeEvent;
 
 /**
- * A registry change event implementation. A filter can be specified. In that case, only
- * deltas for the selected host will be available to clients.
+ * A registry change event implementation. A filter can be specified. In that
+ * case, only deltas for the selected host will be available to clients.
  */
 public final class RegistryChangeEvent implements IRegistryChangeEvent {
 	private final String filter;
@@ -35,7 +35,7 @@ public final class RegistryChangeEvent implements IRegistryChangeEvent {
 		// if there is a filter, return only the delta for the selected plug-in
 		if (filter != null) {
 			RegistryDelta singleDelta = getHostDelta(filter);
-			return singleDelta == null ? new RegistryDelta[0] : new RegistryDelta[] {singleDelta};
+			return singleDelta == null ? new RegistryDelta[0] : new RegistryDelta[] { singleDelta };
 		}
 		// there is no filter - return all deltas
 		return deltas.values().toArray(new RegistryDelta[deltas.size()]);

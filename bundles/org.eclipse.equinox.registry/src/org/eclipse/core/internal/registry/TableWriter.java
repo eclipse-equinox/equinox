@@ -85,7 +85,8 @@ public class TableWriter {
 			try {
 				saveExtensionRegistry(timestamp);
 			} catch (IOException io) {
-				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, RegistryMessages.meta_registryCacheWriteProblems, io));
+				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError,
+						RegistryMessages.meta_registryCacheWriteProblems, io));
 				return false;
 			}
 		} finally {
@@ -105,10 +106,11 @@ public class TableWriter {
 				try {
 					mainFileOutput.close();
 				} catch (IOException e1) {
-					//Ignore
+					// Ignore
 				}
 
-			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, RegistryMessages.meta_unableToCreateCache, e));
+			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError,
+					RegistryMessages.meta_unableToCreateCache, e));
 			return false;
 		}
 		return true;
@@ -124,7 +126,8 @@ public class TableWriter {
 				mainOutput.close();
 			}
 		} catch (IOException e) {
-			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, RegistryMessages.meta_registryCacheWriteProblems, e));
+			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError,
+					RegistryMessages.meta_registryCacheWriteProblems, e));
 			e.printStackTrace();
 		}
 		try {
@@ -136,7 +139,8 @@ public class TableWriter {
 				extraOutput.close();
 			}
 		} catch (IOException e) {
-			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, RegistryMessages.meta_registryCacheWriteProblems, e));
+			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError,
+					RegistryMessages.meta_registryCacheWriteProblems, e));
 			e.printStackTrace();
 		}
 	}
@@ -151,8 +155,9 @@ public class TableWriter {
 		saveContributions(objectManager.getContributions());
 		saveContributors(objectManager.getContributors());
 		saveNamespaces(objectManager.getNamespacesIndex());
-		closeFiles(); //Close the files here so we can write the appropriate size information in the table file.
-		saveTables(timestamp); //Write the table last so if that is something went wrong we can know
+		closeFiles(); // Close the files here so we can write the appropriate size information in the
+						// table file.
+		saveTables(timestamp); // Write the table last so if that is something went wrong we can know
 	}
 
 	private void saveContributions(KeyedHashSet[] contributions) throws IOException {
@@ -194,8 +199,10 @@ public class TableWriter {
 		}
 	}
 
-	// Contribution has raw children in a unique format that combines extensions and extension points.
-	// To filter, need to dis-assmeble, filter, and then re-assemble its raw children
+	// Contribution has raw children in a unique format that combines extensions and
+	// extension points.
+	// To filter, need to dis-assmeble, filter, and then re-assemble its raw
+	// children
 	private int[] filterContributionChildren(Contribution element) {
 		int[] extensionPoints = filter(element.getExtensionPoints());
 		int[] extensions = filter(element.getExtensions());
@@ -304,9 +311,9 @@ public class TableWriter {
 	private void saveExtensionPoint(ExtensionPointHandle xpt) throws IOException {
 		if (!xpt.shouldPersist())
 			return;
-		//save the file position
+		// save the file position
 		offsets.put(xpt.getId(), mainOutput.size());
-		//save the extensionPoint
+		// save the extensionPoint
 		mainOutput.writeInt(xpt.getId());
 		saveArray(filter(xpt.getObject().getRawChildren()), mainOutput);
 		mainOutput.writeInt(getExtraDataPosition());
@@ -343,8 +350,9 @@ public class TableWriter {
 		}
 	}
 
-	//Save Configuration elements depth first
-	private void saveConfigurationElement(ConfigurationElementHandle element, DataOutputStream outputStream, DataOutputStream extraOutputStream, int depth) throws IOException {
+	// Save Configuration elements depth first
+	private void saveConfigurationElement(ConfigurationElementHandle element, DataOutputStream outputStream,
+			DataOutputStream extraOutputStream, int depth) throws IOException {
 		if (!element.shouldPersist())
 			return;
 		DataOutputStream currentOutput = outputStream;
@@ -362,7 +370,7 @@ public class TableWriter {
 		currentOutput.writeByte(actualCe.parentType);
 		currentOutput.writeInt(depth > 1 ? extraOutputStream.size() : -1);
 		writeStringArray(actualCe.getPropertiesAndValue(), currentOutput);
-		//save the children
+		// save the children
 		saveArray(filter(actualCe.getRawChildren()), currentOutput);
 
 		if (actualCe instanceof ConfigurationElementMulti) {

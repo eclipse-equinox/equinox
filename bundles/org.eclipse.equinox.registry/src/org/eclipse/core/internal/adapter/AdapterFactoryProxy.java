@@ -41,15 +41,15 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 	private Optional<IAdapterFactory> factory;
 	private Callable<IAdapterFactory> factoryLoader;
 	/**
-	 * Store Id of the declaring extension. We might need it in case
-	 * the owner goes away (in this case element becomes invalid).
+	 * Store Id of the declaring extension. We might need it in case the owner goes
+	 * away (in this case element becomes invalid).
 	 */
 	private String ownerId;
 	private int internalOwnerId = -1;
 
 	/**
-	 * Creates a new factory proxy based on the given configuration element.
-	 * Returns the new proxy, or null if the element could not be created.
+	 * Creates a new factory proxy based on the given configuration element. Returns
+	 * the new proxy, or null if the element could not be created.
 	 */
 	public static AdapterFactoryProxy createProxy(IConfigurationElement element) {
 		AdapterFactoryProxy result = new AdapterFactoryProxy();
@@ -130,11 +130,11 @@ class AdapterFactoryProxy implements IAdapterFactory, IAdapterFactoryExt {
 	}
 
 	/**
-	 * Loads the real adapter factory, but only if its associated plug-in is
-	 * already loaded. Returns the real factory if it was successfully loaded.
-	 * @param force if <code>true</code> the plugin providing the
-	 * factory will be loaded if necessary, otherwise no plugin activations
-	 * will occur.
+	 * Loads the real adapter factory, but only if its associated plug-in is already
+	 * loaded. Returns the real factory if it was successfully loaded.
+	 * 
+	 * @param force if <code>true</code> the plugin providing the factory will be
+	 *              loaded if necessary, otherwise no plugin activations will occur.
 	 */
 	@Override
 	public synchronized IAdapterFactory loadFactory(boolean force) {

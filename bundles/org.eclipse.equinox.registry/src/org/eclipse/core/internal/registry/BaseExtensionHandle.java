@@ -16,8 +16,9 @@ package org.eclipse.core.internal.registry;
 import org.eclipse.core.runtime.*;
 
 /**
- * This is the copy of the ExtensionHandle minus the getDeclaringPluginDescriptor()
- * method that was moved into compatibility plugin.
+ * This is the copy of the ExtensionHandle minus the
+ * getDeclaringPluginDescriptor() method that was moved into compatibility
+ * plugin.
  *
  * This class should not be used directly. Use ExtensionHandle instead.
  *
@@ -88,7 +89,8 @@ public class BaseExtensionHandle extends Handle implements IExtension {
 
 	@Override
 	public IConfigurationElement[] getConfigurationElements() {
-		return (IConfigurationElement[]) objectManager.getHandles(getExtension().getRawChildren(), RegistryObjectManager.CONFIGURATION_ELEMENT);
+		return (IConfigurationElement[]) objectManager.getHandles(getExtension().getRawChildren(),
+				RegistryObjectManager.CONFIGURATION_ELEMENT);
 	}
 
 	@Override

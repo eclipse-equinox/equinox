@@ -21,15 +21,16 @@ import org.eclipse.core.runtime.IExtensionPoint;
  * The class stores extensions and extensions points that have been actually
  * modified by a registry operation.
  *
- * For performance, modified extensions and extension points are stored in two forms:
- * - organized in buckets by IDs of extension points (for listeners on specific ext.point)
- * - aggregated in one list (for global listeners)
+ * For performance, modified extensions and extension points are stored in two
+ * forms: - organized in buckets by IDs of extension points (for listeners on
+ * specific ext.point) - aggregated in one list (for global listeners)
  */
 public class CombinedEventDelta {
 
 	final private boolean addition; // true: objects were added; false: objects were removed
 
-	// the object manager from which all the objects contained in this delta will be found
+	// the object manager from which all the objects contained in this delta will be
+	// found
 	private IObjectManager objectManager;
 
 	// an empty array trail used to reduce re-allocations

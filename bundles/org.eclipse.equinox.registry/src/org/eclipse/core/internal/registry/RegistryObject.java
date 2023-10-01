@@ -18,9 +18,9 @@ package org.eclipse.core.internal.registry;
  * in a plug-in manifest.
  */
 public abstract class RegistryObject implements KeyedElement {
-	//Object identifier
+	// Object identifier
 	private int objectId = RegistryObjectManager.UNKNOWN;
-	//The children of the element
+	// The children of the element
 	protected int[] children = RegistryObjectManager.EMPTY_INT_ARRAY;
 
 	// The field combines offset, persistence flag, and no offset flag
@@ -35,7 +35,7 @@ public abstract class RegistryObject implements KeyedElement {
 	static final int PERSIST_MASK = 0x40000000; // only taking bit #30
 	static final int OFFSET_MASK = 0x3FFFFFFF; // all bits but #30, #31
 
-	//The registry that owns this object
+	// The registry that owns this object
 	protected ExtensionRegistry registry;
 
 	protected RegistryObject(ExtensionRegistry registry, boolean persist) {
@@ -47,7 +47,7 @@ public abstract class RegistryObject implements KeyedElement {
 		children = values;
 	}
 
-	//This can not return null. It returns the singleton empty array or an array
+	// This can not return null. It returns the singleton empty array or an array
 	protected int[] getRawChildren() {
 		return children;
 	}
@@ -60,7 +60,7 @@ public abstract class RegistryObject implements KeyedElement {
 		return objectId;
 	}
 
-	//Implementation of the KeyedElement interface
+	// Implementation of the KeyedElement interface
 	@Override
 	public int getKeyHashCode() {
 		return objectId;

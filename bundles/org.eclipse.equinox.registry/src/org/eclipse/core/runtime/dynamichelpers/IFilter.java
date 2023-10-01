@@ -21,19 +21,21 @@ import org.eclipse.core.runtime.IExtensionPoint;
  * <p>
  * This interface may be implemented by clients, however factory methods are
  * available on IExtensionTracker.
- * </p><p>
+ * </p>
+ * <p>
  * This interface can be used without OSGi running.
  * </p>
+ * 
  * @since 3.1
  */
 public interface IFilter {
 	/**
-	 * Return <code>true</code> if the given object matches the criteria
-	 * for this filter.
+	 * Return <code>true</code> if the given object matches the criteria for this
+	 * filter.
 	 *
 	 * @param target the object to match
-	 * @return <code>true</code> if the target matches this filter
-	 * 	and <code>false</code> otherwise
+	 * @return <code>true</code> if the target matches this filter and
+	 *         <code>false</code> otherwise
 	 */
 	public boolean matches(IExtensionPoint target);
 }

@@ -16,8 +16,8 @@ package org.eclipse.core.internal.registry;
 import java.io.*;
 
 /**
- * This table stores file offsets for cached registry objects.
- * Entries are never added when this table resides in memory. Entries could be removed.
+ * This table stores file offsets for cached registry objects. Entries are never
+ * added when this table resides in memory. Entries could be removed.
  */
 public final class OffsetTable {
 
@@ -36,12 +36,14 @@ public final class OffsetTable {
 	}
 
 	public void removeKey(int key) {
-		if (key < valueTable.length) // registry elements added in the running session will have IDs outside of the valid offset range
+		if (key < valueTable.length) // registry elements added in the running session will have IDs outside of the
+										// valid offset range
 			valueTable[key] = Integer.MIN_VALUE;
 	}
 
 	public void put(int key, int value) {
-		if (key >= valueTable.length) { // this should not happen in the expected use cases as we know the max size in advance
+		if (key >= valueTable.length) { // this should not happen in the expected use cases as we know the max size in
+										// advance
 			int[] newTable = new int[(int) (key * GROWTH_FACTOR)];
 			System.arraycopy(valueTable, 0, newTable, 0, valueTable.length);
 			valueTable = newTable;
