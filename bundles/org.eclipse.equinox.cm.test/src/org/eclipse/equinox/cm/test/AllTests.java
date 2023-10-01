@@ -18,7 +18,9 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ConfigurationAdminTest.class, ManagedServiceFactoryTest.class, ManagedServiceTest.class, ConfigurationDictionaryTest.class, ConfigurationPluginTest.class, ConfigurationListenerTest.class, ConfigurationEventAdapterTest.class})
+@SuiteClasses({ ConfigurationAdminTest.class, ManagedServiceFactoryTest.class, ManagedServiceTest.class,
+		ConfigurationDictionaryTest.class, ConfigurationPluginTest.class, ConfigurationListenerTest.class,
+		ConfigurationEventAdapterTest.class })
 public class AllTests {
 	// see @SuitClasses
 }
