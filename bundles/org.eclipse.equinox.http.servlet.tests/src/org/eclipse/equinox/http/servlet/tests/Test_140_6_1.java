@@ -67,7 +67,7 @@ public class Test_140_6_1 extends BaseTest {
 				DEFAULT,
 				getServiceId(sr));
 		assertNotNull(resourceDTO);
-		assertEquals("a", requestAdvisor.request("index.txt"));
+		assertEquals("a\n", requestAdvisor.request("index.txt"));
 
 		failedResourceDTO = getFailedResourceDTOByServiceId(getServiceId(sr));
 		assertNull(failedResourceDTO);

@@ -1890,7 +1890,7 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void test_Resource1() throws Exception {
-		String expected = "a";
+		String expected = "a\n";
 		String actual;
 		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
@@ -1904,7 +1904,7 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void test_Resource2() throws Exception {
-		String expected = "cbdadbc";
+		String expected = "cbda\ndbc";
 		String actual;
 		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
@@ -1918,7 +1918,7 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void test_Resource3() throws Exception {
-		String expected = "a";
+		String expected = "a\n";
 		String actual;
 		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
@@ -1932,7 +1932,7 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void test_Resource4() throws Exception {
-		String expected = "dcbabcd";
+		String expected = "dcba\nbcd";
 		String actual;
 		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
@@ -1946,7 +1946,7 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void test_Resource5() throws Exception {
-		String expected = "dcbabcd";
+		String expected = "dcba\nbcd";
 		String actual;
 		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
@@ -1965,7 +1965,7 @@ public class ServletTest extends BaseTest {
 		extendedHttpService.registerResources("/testalias", "/org/eclipse/equinox/http/servlet/tests", null);
 
 		String actual = requestAdvisor.request("testalias/resource2.txt");
-		assertEquals("Wrong value.", "test", actual);
+		assertEquals("Wrong value.", "test\n", actual);
 	}
 
 	@Test
@@ -1975,7 +1975,7 @@ public class ServletTest extends BaseTest {
 		extendedHttpService.registerResources("/", "/org/eclipse/equinox/http/servlet/tests", null);
 
 		String actual = requestAdvisor.request("resource2.txt");
-		assertEquals("Wrong value.", "test", actual);
+		assertEquals("Wrong value.", "test\n", actual);
 	}
 
 	@Test
@@ -2218,7 +2218,7 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void test_Servlet10() throws Exception {
-		String expected = "a";
+		String expected = "a\n";
 		String actual;
 		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
@@ -2232,7 +2232,7 @@ public class ServletTest extends BaseTest {
 
 	@Test
 	public void test_Servlet11() throws Exception {
-		String expected = "a";
+		String expected = "a\n";
 		String actual;
 		Bundle bundle = installBundle(TEST_BUNDLE_1);
 		try {
@@ -2396,7 +2396,7 @@ public class ServletTest extends BaseTest {
 		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
 
 		assertEquals("200", result.get("responseCode").get(0));
-		assertEquals("resource1.txt|text/plain|25", result.get("responseBody").get(0));
+		assertEquals("resource1.txt|text/plain|26", result.get("responseBody").get(0));
 	}
 
 	@Test
@@ -2471,7 +2471,7 @@ public class ServletTest extends BaseTest {
 		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
 
 		assertEquals("200", result.get("responseCode").get(0));
-		assertEquals("resource1.txt|text/plain|25|0", result.get("responseBody").get(0));
+		assertEquals("resource1.txt|text/plain|26|0", result.get("responseBody").get(0));
 	}
 
 	@Test
@@ -2520,7 +2520,7 @@ public class ServletTest extends BaseTest {
 		Map<String, List<String>> result = requestAdvisor.upload("Servlet16/do", map);
 
 		assertEquals("200", result.get("responseCode").get(0));
-		assertEquals("resource1.txt|text/plain|25|1", result.get("responseBody").get(0));
+		assertEquals("resource1.txt|text/plain|26|1", result.get("responseBody").get(0));
 	}
 
 	@Test
@@ -3096,9 +3096,9 @@ public class ServletTest extends BaseTest {
 			getHttpService().registerResources("/" + HTTP_CONTEXT_TEST_ROOT + "/1", "", ctx1);
 			getHttpService().registerResources("/" + HTTP_CONTEXT_TEST_ROOT + "/2", "", ctx2);
 			actual = requestAdvisor.request(HTTP_CONTEXT_TEST_ROOT + "/1/test");
-			assertEquals("1", actual);
+			assertEquals("1\n", actual);
 			actual = requestAdvisor.request(HTTP_CONTEXT_TEST_ROOT + "/2/test");
-			assertEquals("2", actual);
+			assertEquals("2\n", actual);
 		}
 		finally {
 			try {
@@ -4476,7 +4476,7 @@ public class ServletTest extends BaseTest {
 			bundle.start();
 
 			String actual = requestAdvisor.requestHttps("TestServlet10");
-			assertEquals("Expected output not found", "a", actual);
+			assertEquals("Expected output not found", "a\n", actual);
 		} finally {
 			uninstallBundle(bundle);
 			stopJettyWithSSL();
