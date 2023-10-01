@@ -27,11 +27,11 @@ public class ExtensionPointTracker {
 
 	private static final Listener NULL_LISTENER = new Listener() {
 		public void added(IExtension extension) {
-			//empty 
+			// empty
 		}
 
 		public void removed(IExtension extension) {
-			//empty
+			// empty
 		}
 	};
 
@@ -122,17 +122,17 @@ public class ExtensionPointTracker {
 			for (IExtensionDelta delta : deltas) {
 				IExtension extension = delta.getExtension();
 				switch (delta.getKind()) {
-					case IExtensionDelta.ADDED :
-						if (addExtension(extension)) {
-							listener.added(extension);
-						}
-						break;
-					case IExtensionDelta.REMOVED :
-						if (removeExtension(extension)) {
-							listener.removed(extension);
-						}
-					default :
-						break;
+				case IExtensionDelta.ADDED:
+					if (addExtension(extension)) {
+						listener.added(extension);
+					}
+					break;
+				case IExtensionDelta.REMOVED:
+					if (removeExtension(extension)) {
+						listener.removed(extension);
+					}
+				default:
+					break;
 				}
 			}
 		}

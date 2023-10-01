@@ -48,7 +48,8 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 
 	private ServiceReference<?> reference;
 
-	public ResourceManager(HttpRegistryManager httpRegistryManager, ServiceReference<?> reference, IExtensionRegistry registry) {
+	public ResourceManager(HttpRegistryManager httpRegistryManager, ServiceReference<?> reference,
+			IExtensionRegistry registry) {
 		this.httpRegistryManager = httpRegistryManager;
 		this.reference = reference;
 		tracker = new ExtensionPointTracker(registry, RESOURCES_EXTENSION_POINT, this);
@@ -72,7 +73,8 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 			String clazz = serviceSelectorElement.getAttribute(CLASS);
 			if (clazz != null) {
 				try {
-					serviceSelector = (org.osgi.framework.Filter) serviceSelectorElement.createExecutableExtension(CLASS);
+					serviceSelector = (org.osgi.framework.Filter) serviceSelectorElement
+							.createExecutableExtension(CLASS);
 				} catch (CoreException e) {
 					// log it.
 					e.printStackTrace();
@@ -118,7 +120,8 @@ public class ResourceManager implements ExtensionPointTracker.Listener {
 			if (httpContextId != null && httpContextId.indexOf('.') == -1)
 				httpContextId = resourceElement.getNamespaceIdentifier() + "." + httpContextId; //$NON-NLS-1$
 
-			if (httpRegistryManager.addResourcesContribution(alias, baseName, httpContextId, extension.getContributor()))
+			if (httpRegistryManager.addResourcesContribution(alias, baseName, httpContextId,
+					extension.getContributor()))
 				registered.add(resourceElement);
 		}
 	}
