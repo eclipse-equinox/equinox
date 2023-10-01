@@ -21,8 +21,12 @@ import java.lang.reflect.Method;
 import java.net.URL;
 
 /**
- * A proxy stream transformer is a transformer instance that relies on reflection to obtain the "getInputStream" method from an underlying object.  
- * This class is useful due to the restrictions in the builder that prevent transformer providers from directly implementing {@link StreamTransformer} due to visibility and builder issues related to referring to classes within fragments.
+ * A proxy stream transformer is a transformer instance that relies on
+ * reflection to obtain the "getInputStream" method from an underlying object.
+ * This class is useful due to the restrictions in the builder that prevent
+ * transformer providers from directly implementing {@link StreamTransformer}
+ * due to visibility and builder issues related to referring to classes within
+ * fragments.
  */
 public class ProxyStreamTransformer extends StreamTransformer {
 
@@ -31,13 +35,17 @@ public class ProxyStreamTransformer extends StreamTransformer {
 
 	/**
 	 * Create a new proxy transformer based on the given object.
+	 * 
 	 * @param object the object to proxy
-	 * @throws SecurityException thrown if there is an issue utilizing the reflection methods
-	 * @throws NoSuchMethodException thrown if the provided object does not have a "getInputStream" method that takes an {@link InputStream} and an {@link URL}
+	 * @throws SecurityException     thrown if there is an issue utilizing the
+	 *                               reflection methods
+	 * @throws NoSuchMethodException thrown if the provided object does not have a
+	 *                               "getInputStream" method that takes an
+	 *                               {@link InputStream} and an {@link URL}
 	 */
 	public ProxyStreamTransformer(Object object) throws SecurityException, NoSuchMethodException {
 		this.object = object;
-		method = object.getClass().getMethod("getInputStream", new Class[] {InputStream.class, URL.class}); //$NON-NLS-1$
+		method = object.getClass().getMethod("getInputStream", new Class[] { InputStream.class, URL.class }); //$NON-NLS-1$
 		Class<?> returnType = method.getReturnType();
 		if (!returnType.equals(InputStream.class))
 			throw new NoSuchMethodException();
@@ -47,7 +55,7 @@ public class ProxyStreamTransformer extends StreamTransformer {
 	@Override
 	public InputStream getInputStream(InputStream inputStream, URL transformerUrl) throws IOException {
 		try {
-			return (InputStream) method.invoke(object, new Object[] {inputStream, transformerUrl});
+			return (InputStream) method.invoke(object, new Object[] { inputStream, transformerUrl });
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new IOException(e.getMessage());
 		} catch (InvocationTargetException e) {
@@ -59,7 +67,8 @@ public class ProxyStreamTransformer extends StreamTransformer {
 
 	/**
 	 * Get the object that is being proxied.
-	 * @return the object.  Never <code>null</code>.
+	 * 
+	 * @return the object. Never <code>null</code>.
 	 */
 	public Object getTransformer() {
 		return object;

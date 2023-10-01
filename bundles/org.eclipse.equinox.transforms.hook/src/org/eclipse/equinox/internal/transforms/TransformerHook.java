@@ -23,9 +23,11 @@ import org.eclipse.osgi.storage.bundlefile.BundleFileWrapper;
 import org.osgi.framework.*;
 
 /**
- * The framework extension that is capable of applying transforms to bundle content.
+ * The framework extension that is capable of applying transforms to bundle
+ * content.
  */
-public class TransformerHook implements BundleFileWrapperFactoryHook, HookConfigurator, ActivatorHookFactory, BundleActivator {
+public class TransformerHook
+		implements BundleFileWrapperFactoryHook, HookConfigurator, ActivatorHookFactory, BundleActivator {
 	private volatile TransformerList transformers;
 	private volatile TransformInstanceListData templates;
 	private EquinoxLogServices logServices;

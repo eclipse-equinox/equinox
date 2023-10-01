@@ -24,16 +24,22 @@ import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.log.EquinoxLogServices;
 
 /**
- * This class is used by the transformer hook to parse urls provided by transform developers that specifies the particular transforms that should be utilized for a particular transformer.  
- * TODO: factor this out into a new type of service the transformer uses.  Then there could be CSV transforms, programatic transforms, etc.
+ * This class is used by the transformer hook to parse urls provided by
+ * transform developers that specifies the particular transforms that should be
+ * utilized for a particular transformer. TODO: factor this out into a new type
+ * of service the transformer uses. Then there could be CSV transforms,
+ * programatic transforms, etc.
  */
 public class CSVParser {
 
 	/**
-	 * Parse the given url as a CSV file containing transform tuples.  The tuples have the form:
+	 * Parse the given url as a CSV file containing transform tuples. The tuples
+	 * have the form:
+	 * 
 	 * <pre>
 	 * bundleRegex,pathRegex,transformerResource
-	 * </pre> 
+	 * </pre>
+	 * 
 	 * @param transformMapURL the map url
 	 * @return an array of tuples derived from the contents of the file
 	 * @throws IOException thrown if there are issues parsing the file
