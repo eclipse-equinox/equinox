@@ -34,8 +34,8 @@ public class ResolverHookTests extends AbstractResourceTest {
 
 	@Test
 	public void testSingletonIdentity() throws Exception {
-		final RuntimeException error[] = {null};
-		final boolean called[] = {false};
+		final RuntimeException error[] = { null };
+		final boolean called[] = { false };
 		ResolverHookFactory resolverHookFactory = triggers -> new ResolverHook() {
 
 			public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
@@ -44,13 +44,16 @@ public class ResolverHookTests extends AbstractResourceTest {
 				called[0] = true;
 				try {
 					assertEquals("Wrong namespace", IdentityNamespace.IDENTITY_NAMESPACE, singleton.getNamespace());
-					assertEquals("Wrong singleton directive", "true", singleton.getDirectives().get(IdentityNamespace.CAPABILITY_SINGLETON_DIRECTIVE));
+					assertEquals("Wrong singleton directive", "true",
+							singleton.getDirectives().get(IdentityNamespace.CAPABILITY_SINGLETON_DIRECTIVE));
 					String symbolicName = (String) singleton.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE);
 					for (Object collisionCandidate : collisionCandidates) {
 						BundleCapability candidate = (BundleCapability) collisionCandidate;
 						assertEquals("Wrong namespace", IdentityNamespace.IDENTITY_NAMESPACE, candidate.getNamespace());
-						assertEquals("Wrong singleton directive", "true", candidate.getDirectives().get(IdentityNamespace.CAPABILITY_SINGLETON_DIRECTIVE));
-						assertEquals("Wrong symbolic name", symbolicName, (String) candidate.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE));
+						assertEquals("Wrong singleton directive", "true",
+								candidate.getDirectives().get(IdentityNamespace.CAPABILITY_SINGLETON_DIRECTIVE));
+						assertEquals("Wrong symbolic name", symbolicName,
+								(String) candidate.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE));
 					}
 				} catch (RuntimeException e) {
 					error[0] = e;
@@ -70,12 +73,14 @@ public class ResolverHookTests extends AbstractResourceTest {
 			}
 		};
 
-		ServiceRegistration hookReg = getContext().registerService(ResolverHookFactory.class, resolverHookFactory, null);
+		ServiceRegistration hookReg = getContext().registerService(ResolverHookFactory.class, resolverHookFactory,
+				null);
 
 		try {
 			Bundle tb1v1 = installer.installBundle("singleton.tb1v1");
 			Bundle tb1v2 = installer.installBundle("singleton.tb1v2");
-			assertFalse(getContext().getBundle(0).adapt(FrameworkWiring.class).resolveBundles(Arrays.asList(new Bundle[] {tb1v1, tb1v2})));
+			assertFalse(getContext().getBundle(0).adapt(FrameworkWiring.class)
+					.resolveBundles(Arrays.asList(new Bundle[] { tb1v1, tb1v2 })));
 			assertTrue("ResolverHook was not called", called[0]);
 			if (error[0] != null)
 				throw error[0];

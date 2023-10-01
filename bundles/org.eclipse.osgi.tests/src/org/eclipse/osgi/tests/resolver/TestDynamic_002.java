@@ -40,17 +40,16 @@ public class TestDynamic_002 extends AbstractStateTest {
 		bundle_1 = create_bundle_1(sof);
 		bundle_2 = create_bundle_2(sof);
 		bundle_3 = create_bundle_3(sof);
-		//***************************************************
+		// ***************************************************
 		// stage a
 		// expect to pass =true
-		//***************************************************
+		// ***************************************************
 		addBundlesToState_a(state);
-		//***************************************************
+		// ***************************************************
 		try {
 			state.resolve();
 		} catch (Throwable t) {
-			fail("unexpected exception class=" + t.getClass().getName()
-					+ " message=" + t.getMessage());
+			fail("unexpected exception class=" + t.getClass().getName() + " message=" + t.getMessage());
 			return;
 		}
 		checkBundlesResolved_a();
@@ -61,7 +60,6 @@ public class TestDynamic_002 extends AbstractStateTest {
 		assertNull("Package [r] is wired when it should not be ", exp);
 
 	} // end of method
-
 
 	public void checkWiringState_1() {
 		ExportPackageDescription[] exports = bundle_1.getResolvedImports();
@@ -86,13 +84,11 @@ public class TestDynamic_002 extends AbstractStateTest {
 	public void checkWiringState_3() {
 	} // end method
 
-
 	public void checkWiring_a() {
 		checkWiringState_1();
 		checkWiringState_2();
 		checkWiringState_3();
 	} // end method
-
 
 	public void addBundlesToState_a(State state) {
 		boolean added = false;
@@ -104,13 +100,11 @@ public class TestDynamic_002 extends AbstractStateTest {
 		assertTrue("failed to add bundle ", added);
 	} // end method
 
-
 	public void checkBundlesResolved_a() {
 		assertTrue("unexpected bundle resolution state", bundle_1.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_2.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_3.isResolved());
 	} // end method
-
 
 	public BundleDescription create_bundle_1(StateObjectFactory sof) {
 		java.util.Dictionary dictionary_1 = new java.util.Properties();

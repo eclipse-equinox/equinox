@@ -88,7 +88,7 @@ public class NativeCodeBundleTests extends AbstractBundleTests {
 	public void testNativeCode04() throws Exception {
 		setNativeAttribute("nativecodetest", "unresolved");
 		Bundle nativetestC = installer.installBundle("nativetest.c");
-		installer.resolveBundles(new Bundle[] {nativetestC});
+		installer.resolveBundles(new Bundle[] { nativetestC });
 		assertTrue("1.0", nativetestC.getState() == Bundle.INSTALLED);
 	}
 
@@ -162,7 +162,8 @@ public class NativeCodeBundleTests extends AbstractBundleTests {
 	private void setNativeAttribute(String key, String value) {
 		Bundle systemBundle = OSGiTestsActivator.getContext().getBundle(0);
 		ModuleRevision systemRevision = (ModuleRevision) systemBundle.adapt(BundleRevision.class);
-		ModuleCapability nativeCapability = systemRevision.getModuleCapabilities(NativeNamespace.NATIVE_NAMESPACE).get(0);
+		ModuleCapability nativeCapability = systemRevision.getModuleCapabilities(NativeNamespace.NATIVE_NAMESPACE)
+				.get(0);
 		Map attrs = new HashMap(nativeCapability.getAttributes());
 		attrs.put(key, value);
 		nativeCapability.setTransientAttrs(attrs);

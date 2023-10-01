@@ -16,6 +16,7 @@ package osgi.lazystart;
 import org.eclipse.osgi.tests.bundles.ITestRunner;
 import osgi.lazystart.b.excluded.a.BAExcluded;
 import osgi.lazystart.b.excluded.b.BBExcluded;
+
 public class LazyExclude1 implements ITestRunner {
 
 	@Override

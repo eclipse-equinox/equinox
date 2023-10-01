@@ -41,23 +41,21 @@ public class TestRFC79_003 extends AbstractStateTest {
 		bundle_2 = create_bundle_2(sof);
 		bundle_3 = create_bundle_3(sof);
 		bundle_4 = create_bundle_4(sof);
-		//***************************************************
+		// ***************************************************
 		// stage a
 		// expect to pass =true
-		//***************************************************
+		// ***************************************************
 		addBundlesToState_a(state);
-		//***************************************************
+		// ***************************************************
 		try {
 			state.resolve();
 		} catch (Throwable t) {
-			fail("unexpected exception class=" + t.getClass().getName()
-					+ " message=" + t.getMessage());
+			fail("unexpected exception class=" + t.getClass().getName() + " message=" + t.getMessage());
 			return;
 		}
 		checkBundlesResolved_a();
 		checkWiring_a();
 	} // end of method
-
 
 	public void checkWiringState_1() {
 		ExportPackageDescription[] exports = bundle_1.getResolvedImports();
@@ -121,15 +119,12 @@ public class TestRFC79_003 extends AbstractStateTest {
 		} // end for
 	} // end method
 
-
-
 	public void checkWiring_a() {
 		checkWiringState_1();
 		checkWiringState_2();
 		checkWiringState_3();
 		checkWiringState_4();
 	} // end method
-
 
 	public void addBundlesToState_a(State state) {
 		boolean added = false;
@@ -143,14 +138,12 @@ public class TestRFC79_003 extends AbstractStateTest {
 		assertTrue("failed to add bundle ", added);
 	} // end method
 
-
 	public void checkBundlesResolved_a() {
 		assertTrue("unexpected bundle resolution state", bundle_1.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_2.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_3.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_4.isResolved());
 	} // end method
-
 
 	public BundleDescription create_bundle_1(StateObjectFactory sof) {
 		java.util.Dictionary dictionary_1 = new java.util.Properties();
@@ -187,7 +180,8 @@ public class TestRFC79_003 extends AbstractStateTest {
 		BundleDescription bundle = null;
 		dictionary_3.put("Bundle-ManifestVersion", "2");
 		dictionary_3.put("Bundle-SymbolicName", "C");
-		dictionary_3.put("Import-Package", "javax.servlet; version=2.1.0, org.foo.impl; version=\"[1.0.0, 1.0.0]\"; bundle-symbolic-name=A");
+		dictionary_3.put("Import-Package",
+				"javax.servlet; version=2.1.0, org.foo.impl; version=\"[1.0.0, 1.0.0]\"; bundle-symbolic-name=A");
 		try {
 			bundle = sof.createBundleDescription(dictionary_3, "bundle_3", 3);
 		} catch (BundleException be) {
@@ -209,6 +203,5 @@ public class TestRFC79_003 extends AbstractStateTest {
 		}
 		return bundle;
 	} // end of method
-
 
 } // end of testcase

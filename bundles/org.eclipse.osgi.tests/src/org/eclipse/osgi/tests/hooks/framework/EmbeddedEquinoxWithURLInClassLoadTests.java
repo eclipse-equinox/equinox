@@ -60,9 +60,11 @@ public class EmbeddedEquinoxWithURLInClassLoadTests extends AbstractFrameworkHoo
 	@Test
 	public void testEmbeddedURLHandler() throws Exception {
 		initAndStart(framework);
-		Bundle testHandler = framework.getBundleContext().installBundle(bundleInstaller.getBundleLocation("test.protocol.handler"));
+		Bundle testHandler = framework.getBundleContext()
+				.installBundle(bundleInstaller.getBundleLocation("test.protocol.handler"));
 		testHandler.start();
-		Bundle testHandlerUser = framework.getBundleContext().installBundle(bundleInstaller.getBundleLocation("test.protocol.handler.user"));
+		Bundle testHandlerUser = framework.getBundleContext()
+				.installBundle(bundleInstaller.getBundleLocation("test.protocol.handler.user"));
 		testHandlerUser.start();
 		try {
 			URL testingURL = new URL("testing1://test");

@@ -191,7 +191,8 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 
 	@Test
 	public void testLogServiceEventDebug() throws Exception {
-		ServiceRegistration registration = OSGiTestsActivator.getContext().registerService(Object.class.getName(), new Object(), null);
+		ServiceRegistration registration = OSGiTestsActivator.getContext().registerService(Object.class.getName(),
+				new Object(), null);
 
 		TestListener listener = new TestListener();
 		reader.addLogListener(listener);
@@ -214,7 +215,7 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 			}
 		};
 		reader.addLogListener(listener);
-		installer.refreshPackages(new Bundle[] {testBundle});
+		installer.refreshPackages(new Bundle[] { testBundle });
 
 		countDown.await(5, TimeUnit.SECONDS);
 
@@ -224,7 +225,8 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		assertEquals("Wrong level.", LogLevel.INFO, entry.getLogLevel());
 		assertTrue("Wrong context: " + entry.getContext(), entry.getContext() instanceof FrameworkEvent);
 		assertEquals("Wrong bundle.", getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION), entry.getBundle());
-		assertEquals("Wrong logger name.", "Events.Framework." + entry.getBundle().getSymbolicName(), entry.getLoggerName());
+		assertEquals("Wrong logger name.", "Events.Framework." + entry.getBundle().getSymbolicName(),
+				entry.getLoggerName());
 	}
 
 	@Test
@@ -240,12 +242,15 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		};
 		reader.addLogListener(listener);
 
-		//publishing an event with ERROR
-		b.adapt(Module.class).getContainer().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, b.adapt(Module.class), new Exception());
-		//publishing an event with WARNING
-		b.adapt(Module.class).getContainer().getAdaptor().publishContainerEvent(ContainerEvent.WARNING, b.adapt(Module.class), new Exception());
-		//publishing an event with INFO
-		b.adapt(Module.class).getContainer().getAdaptor().publishContainerEvent(ContainerEvent.INFO, b.adapt(Module.class), new Exception());
+		// publishing an event with ERROR
+		b.adapt(Module.class).getContainer().getAdaptor().publishContainerEvent(ContainerEvent.ERROR,
+				b.adapt(Module.class), new Exception());
+		// publishing an event with WARNING
+		b.adapt(Module.class).getContainer().getAdaptor().publishContainerEvent(ContainerEvent.WARNING,
+				b.adapt(Module.class), new Exception());
+		// publishing an event with INFO
+		b.adapt(Module.class).getContainer().getAdaptor().publishContainerEvent(ContainerEvent.INFO,
+				b.adapt(Module.class), new Exception());
 
 		countDown.await(2, TimeUnit.SECONDS);
 		assertEquals("Wrong number of events", 3, events.size());
@@ -265,8 +270,10 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		equinox.start();
 
 		try {
-			LogService testLog = equinox.getBundleContext().getService(equinox.getBundleContext().getServiceReference(LogService.class));
-			LogReaderService testReader = equinox.getBundleContext().getService(equinox.getBundleContext().getServiceReference(LogReaderService.class));
+			LogService testLog = equinox.getBundleContext()
+					.getService(equinox.getBundleContext().getServiceReference(LogService.class));
+			LogReaderService testReader = equinox.getBundleContext()
+					.getService(equinox.getBundleContext().getServiceReference(LogReaderService.class));
 			assertEquals("Expecting no logs.", 0, countLogEntries(testReader.getLog(), 0));
 			// log 9 things
 			for (int i = 0; i < 9; i++) {
@@ -299,8 +306,10 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		equinox.start();
 
 		try {
-			LogService testLog = equinox.getBundleContext().getService(equinox.getBundleContext().getServiceReference(LogService.class));
-			LogReaderService testReader = equinox.getBundleContext().getService(equinox.getBundleContext().getServiceReference(LogReaderService.class));
+			LogService testLog = equinox.getBundleContext()
+					.getService(equinox.getBundleContext().getServiceReference(LogService.class));
+			LogReaderService testReader = equinox.getBundleContext()
+					.getService(equinox.getBundleContext().getServiceReference(LogReaderService.class));
 			assertEquals("Expecting no logs.", 0, countLogEntries(testReader.getLog(), 0));
 			// log 9 things
 			for (int i = 0; i < 9; i++) {
@@ -336,7 +345,8 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 			bundle.start();
 			Logger logger = log.getLogger(bundle, loggerName, Logger.class);
 			assertNotNull("Logger cannot be null", logger);
-			//Bundle is installed and a logger is associated with that bundle before setting the log level
+			// Bundle is installed and a logger is associated with that bundle before
+			// setting the log level
 			setAndAssertLogLevel(bundle.getSymbolicName(), loggerName);
 
 			TestListener listener = new TestListener(bundle.getLocation());
@@ -360,7 +370,8 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		try {
 			bundle = installer.installBundle("test.logging.a");
 			bundle.start();
-			//Bundle is installed but a logger is not associated with the bundle before setting the log level
+			// Bundle is installed but a logger is not associated with the bundle before
+			// setting the log level
 			setAndAssertLogLevel(bundle.getSymbolicName(), loggerName);
 			Logger logger = log.getLogger(bundle, loggerName, Logger.class);
 			assertNotNull("Logger cannot be null", logger);
@@ -382,7 +393,8 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 	public void testLoggerContextSetLogLevelsWithoutBundleAndLogger() throws Exception {
 		Bundle bundle = null;
 		String loggerName = "test.logger";
-		//Bundle is not installed and also the logger is not associated with the bundle before setting the log level
+		// Bundle is not installed and also the logger is not associated with the bundle
+		// before setting the log level
 		setAndAssertLogLevel("test.logging.a", loggerName);
 		try {
 			bundle = installer.installBundle("test.logging.a");
@@ -412,7 +424,8 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 		assertEquals("Wrong effective level", LogLevel.TRACE, loggerContext.getEffectiveLogLevel(loggerName));
 	}
 
-	private void doLogging(Bundle bundle, Logger logger, TestListener listener, LogLevel logLevel, String message) throws Exception {
+	private void doLogging(Bundle bundle, Logger logger, TestListener listener, LogLevel logLevel, String message)
+			throws Exception {
 		logToLogger(logger, message, logLevel);
 		ExtendedLogEntry logEntry = listener.getEntryX();
 		assertEquals("Wrong message logged", message, logEntry.getMessage());
@@ -423,26 +436,26 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 
 	private void logToLogger(Logger logger, String message, LogLevel logLevel) {
 		switch (logLevel) {
-			case AUDIT :
-				logger.audit(message);
-				break;
-			case ERROR :
-				logger.error(message);
-				break;
-			case WARN :
-				logger.warn(message);
-				break;
-			case INFO :
-				logger.info(message);
-				break;
-			case DEBUG :
-				logger.debug(message);
-				break;
-			case TRACE :
-				logger.trace(message);
-				break;
-			default :
-				fail("Unknown Log level");
+		case AUDIT:
+			logger.audit(message);
+			break;
+		case ERROR:
+			logger.error(message);
+			break;
+		case WARN:
+			logger.warn(message);
+			break;
+		case INFO:
+			logger.info(message);
+			break;
+		case DEBUG:
+			logger.debug(message);
+			break;
+		case TRACE:
+			logger.trace(message);
+			break;
+		default:
+			fail("Unknown Log level");
 		}
 	}
 
@@ -478,7 +491,8 @@ public class LogReaderServiceTest extends AbstractBundleTests {
 
 	}
 
-	private void assertBundleEventLog(String message, Bundle bundle, TestListener listener) throws InterruptedException {
+	private void assertBundleEventLog(String message, Bundle bundle, TestListener listener)
+			throws InterruptedException {
 		LogEntry logEntry = listener.getEntryX();
 		assertEquals("Wrong message.", message, logEntry.getMessage());
 		assertEquals("Wrong bundle.", bundle, logEntry.getBundle());

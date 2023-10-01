@@ -32,16 +32,14 @@ public class NewResolverTest extends AbstractStateTest {
 	public void testBasicScenario1() throws BundleException {
 		State state = buildEmptyState();
 
-		final String MAN_A = "Bundle-SymbolicName: A\n" +
-		                     "Export-Package: servlet; specification-version=2.1";
-		BundleDescription bA = state.getFactory().createBundleDescription(parseManifest(MAN_A),
-																		"org.eclipse.basic1A", 0);
+		final String MAN_A = "Bundle-SymbolicName: A\n" + "Export-Package: servlet; specification-version=2.1";
+		BundleDescription bA = state.getFactory().createBundleDescription(parseManifest(MAN_A), "org.eclipse.basic1A",
+				0);
 		state.addBundle(bA);
 
-		final String MAN_B = "Bundle-SymbolicName: B\n" +
-        					 "Import-Package: servlet; specification-version=2.1";
-		BundleDescription bB = state.getFactory().createBundleDescription(parseManifest(MAN_B),
-													"org.eclipse.basic1B", 1);
+		final String MAN_B = "Bundle-SymbolicName: B\n" + "Import-Package: servlet; specification-version=2.1";
+		BundleDescription bB = state.getFactory().createBundleDescription(parseManifest(MAN_B), "org.eclipse.basic1B",
+				1);
 		state.addBundle(bB);
 
 		state.resolve();
@@ -55,5 +53,3 @@ public class NewResolverTest extends AbstractStateTest {
 		assertFullyResolved("0.4", b1);
 	}
 }
-
-

@@ -39,7 +39,8 @@ public class ObjectPoolTestCase {
 		// Tests ObjectPool with strings only
 		List objects = new ArrayList();
 		int num = 2000;
-		// new objects are added to the object pool; interning should add the object to the pool and return the same object
+		// new objects are added to the object pool; interning should add the object to
+		// the pool and return the same object
 		for (int i = 0; i < num; i++) {
 			String test1 = getName() + "_" + i; //$NON-NLS-1$
 			String test2 = ObjectPool.intern(test1);
@@ -47,7 +48,8 @@ public class ObjectPoolTestCase {
 			objects.add(test2);
 		}
 		doGC();
-		// after doing a GC the interned objects should still be in the pool; interning a duplicate should return the objects that were added above
+		// after doing a GC the interned objects should still be in the pool; interning
+		// a duplicate should return the objects that were added above
 		for (int i = 0; i < num; i++) {
 			String test1 = getName() + "_" + i; //$NON-NLS-1$
 			String test2 = ObjectPool.intern(test1);
@@ -57,7 +59,8 @@ public class ObjectPoolTestCase {
 		// clear the hard references to the interned objects
 		objects.clear();
 		doGC();
-		// after doing a GC the interned objects should have been removed from the object pool
+		// after doing a GC the interned objects should have been removed from the
+		// object pool
 		for (int i = 0; i < num; i++) {
 			String test1 = getName() + "_" + i; //$NON-NLS-1$
 			String test2 = ObjectPool.intern(test1);
@@ -75,7 +78,8 @@ public class ObjectPoolTestCase {
 		List strings = new ArrayList();
 		List versions = new ArrayList();
 		int num = 2000;
-		// new objects are added to the object pool; interning should add the object to the pool and return the same object
+		// new objects are added to the object pool; interning should add the object to
+		// the pool and return the same object
 		for (int i = 0; i < num; i++) {
 			String testString1 = getName() + "_" + i; //$NON-NLS-1$
 			String testString2 = ObjectPool.intern(testString1);
@@ -87,7 +91,8 @@ public class ObjectPoolTestCase {
 			versions.add(testVersion2);
 		}
 		doGC();
-		// after doing a GC the interned objects should still be in the pool; interning a duplicate should return the objects that were added above
+		// after doing a GC the interned objects should still be in the pool; interning
+		// a duplicate should return the objects that were added above
 		for (int i = 0; i < num; i++) {
 			String testString1 = getName() + "_" + i; //$NON-NLS-1$
 			String testString2 = ObjectPool.intern(testString1);
@@ -101,7 +106,8 @@ public class ObjectPoolTestCase {
 		// clear the hard references to the interned objects
 		strings.clear();
 		versions.clear();
-		// after doing a GC the interned objects should have been removed from the object pool
+		// after doing a GC the interned objects should have been removed from the
+		// object pool
 		doGC();
 		for (int i = 0; i < num; i++) {
 			String testString1 = getName() + "_" + i; //$NON-NLS-1$
@@ -120,7 +126,8 @@ public class ObjectPoolTestCase {
 	}
 
 	private static void doGC() {
-		// We go through great effort to force the VM to throw our weakly referenced objects away.
+		// We go through great effort to force the VM to throw our weakly referenced
+		// objects away.
 		System.gc();
 		System.runFinalization();
 		System.gc();

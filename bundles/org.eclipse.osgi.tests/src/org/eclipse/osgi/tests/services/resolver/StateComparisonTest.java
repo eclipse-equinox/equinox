@@ -34,7 +34,8 @@ public class StateComparisonTest extends AbstractStateTest {
 		delta = state2.compare(state1);
 		assertEquals("1.1", 0, delta.getChanges().length);
 		String A_MANIFEST = "Bundle-SymbolicName: org.eclipse.a\nBundle-Version: 1.0\n";
-		BundleDescription bundleA = state2.getFactory().createBundleDescription(parseManifest(A_MANIFEST), "org.eclipse.a", -1);
+		BundleDescription bundleA = state2.getFactory().createBundleDescription(parseManifest(A_MANIFEST),
+				"org.eclipse.a", -1);
 		assertTrue("2.0", state2.addBundle(bundleA));
 		delta = state1.compare(state2);
 		assertEquals("2.1", 1, delta.getChanges().length);
@@ -81,7 +82,8 @@ public class StateComparisonTest extends AbstractStateTest {
 		assertEquals("1.1", 0, delta.getChanges().length);
 		assertNotNull("1.9", state1.getBundleByLocation("org.eclipse.b1"));
 		String A_MANIFEST = "Bundle-SymbolicName: org.eclipse.b1\nBundle-Version: 2.0\n";
-		BundleDescription bundle1 = state1.getFactory().createBundleDescription(parseManifest(A_MANIFEST), "org.eclipse.b1", 1);
+		BundleDescription bundle1 = state1.getFactory().createBundleDescription(parseManifest(A_MANIFEST),
+				"org.eclipse.b1", 1);
 		assertTrue("2.0", state1.updateBundle(bundle1));
 		delta = state1.compare(state2);
 		assertEquals("2.1", 1, delta.getChanges().length);

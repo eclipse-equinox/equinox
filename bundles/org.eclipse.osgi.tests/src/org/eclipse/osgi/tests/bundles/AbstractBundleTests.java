@@ -124,7 +124,8 @@ public class AbstractBundleTests {
 	}
 
 	static public void compareResults(Object[] expectedEvents, Object[] actualEvents) {
-		String expectedActual = " -- EXPECTED:" + toStringEventArray(expectedEvents) + " ACTUAL:" + toStringEventArray(actualEvents);
+		String expectedActual = " -- EXPECTED:" + toStringEventArray(expectedEvents) + " ACTUAL:"
+				+ toStringEventArray(actualEvents);
 		assertEquals("compareResults length" + expectedActual, expectedEvents.length, actualEvents.length);
 		for (int i = 0; i < expectedEvents.length; i++) {
 			String assertMsg = "compareResults: " + i + expectedActual;
@@ -174,26 +175,26 @@ public class AbstractBundleTests {
 	private static String toString(FrameworkEvent event) {
 		StringBuilder result = new StringBuilder("FrameworkEvent [");
 		switch (event.getType()) {
-			case FrameworkEvent.ERROR :
-				result.append("ERROR");
-				break;
-			case FrameworkEvent.INFO :
-				result.append("INFO");
-				break;
-			case FrameworkEvent.PACKAGES_REFRESHED :
-				result.append("PACKAGES_REFRESHED");
-				break;
-			case FrameworkEvent.STARTED :
-				result.append("STARTED");
-				break;
-			case FrameworkEvent.STARTLEVEL_CHANGED :
-				result.append("STARTLEVEL_CHANGED");
-				break;
-			case FrameworkEvent.WARNING :
-				result.append("WARNING");
-				break;
-			default :
-				break;
+		case FrameworkEvent.ERROR:
+			result.append("ERROR");
+			break;
+		case FrameworkEvent.INFO:
+			result.append("INFO");
+			break;
+		case FrameworkEvent.PACKAGES_REFRESHED:
+			result.append("PACKAGES_REFRESHED");
+			break;
+		case FrameworkEvent.STARTED:
+			result.append("STARTED");
+			break;
+		case FrameworkEvent.STARTLEVEL_CHANGED:
+			result.append("STARTLEVEL_CHANGED");
+			break;
+		case FrameworkEvent.WARNING:
+			result.append("WARNING");
+			break;
+		default:
+			break;
 		}
 		result.append("] ").append(event.getSource());
 		return result.toString();
@@ -202,38 +203,38 @@ public class AbstractBundleTests {
 	private static String toString(BundleEvent event) {
 		StringBuilder result = new StringBuilder("BundleEvent [");
 		switch (event.getType()) {
-			case BundleEvent.INSTALLED :
-				result.append("INSTALLED");
-				break;
-			case BundleEvent.LAZY_ACTIVATION :
-				result.append("LAZY_ACTIVATION");
-				break;
-			case BundleEvent.RESOLVED :
-				result.append("RESOLVED");
-				break;
-			case BundleEvent.STARTED :
-				result.append("STARTED");
-				break;
-			case BundleEvent.STARTING :
-				result.append("STARTING");
-				break;
-			case BundleEvent.STOPPED :
-				result.append("STOPPED");
-				break;
-			case BundleEvent.STOPPING :
-				result.append("STOPPING");
-				break;
-			case BundleEvent.UNINSTALLED :
-				result.append("UNINSTALLED");
-				break;
-			case BundleEvent.UNRESOLVED :
-				result.append("UNRESOLVED");
-				break;
-			case BundleEvent.UPDATED :
-				result.append("UPDATED");
-				break;
-			default :
-				break;
+		case BundleEvent.INSTALLED:
+			result.append("INSTALLED");
+			break;
+		case BundleEvent.LAZY_ACTIVATION:
+			result.append("LAZY_ACTIVATION");
+			break;
+		case BundleEvent.RESOLVED:
+			result.append("RESOLVED");
+			break;
+		case BundleEvent.STARTED:
+			result.append("STARTED");
+			break;
+		case BundleEvent.STARTING:
+			result.append("STARTING");
+			break;
+		case BundleEvent.STOPPED:
+			result.append("STOPPED");
+			break;
+		case BundleEvent.STOPPING:
+			result.append("STOPPING");
+			break;
+		case BundleEvent.UNINSTALLED:
+			result.append("UNINSTALLED");
+			break;
+		case BundleEvent.UNRESOLVED:
+			result.append("UNRESOLVED");
+			break;
+		case BundleEvent.UPDATED:
+			result.append("UPDATED");
+			break;
+		default:
+			break;
 		}
 		result.append("] ").append(event.getSource());
 		return result.toString();
@@ -292,7 +293,8 @@ public class AbstractBundleTests {
 	protected static FrameworkEvent update(final Framework equinox) throws BundleException, InterruptedException {
 		final FrameworkEvent[] success = new FrameworkEvent[] { null };
 		final String uuid = getUUID(equinox);
-		Thread waitForUpdate = new Thread(() -> success[0] = waitForStop(equinox, uuid, false, 10000), "test waitForStop thread"); //$NON-NLS-1$
+		Thread waitForUpdate = new Thread(() -> success[0] = waitForStop(equinox, uuid, false, 10000),
+				"test waitForStop thread"); //$NON-NLS-1$
 		waitForUpdate.start();
 
 		// delay hack to allow waitForUpdate thread to block on waitForStop before we

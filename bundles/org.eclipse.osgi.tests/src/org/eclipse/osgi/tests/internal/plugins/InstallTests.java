@@ -37,12 +37,15 @@ public class InstallTests {
 
 	@Test
 	public void testInstallNoVersionManifest01() throws BundleException, IOException {
-		// Note that this test case has changed since the removing of plugin.xml conversion
+		// Note that this test case has changed since the removing of plugin.xml
+		// conversion
 		// Before this tested that a plugin.xml with no version specified would fail.
-		// It is valid for a bundle to omit Bundle-Version header (and default to version 0.0.0
+		// It is valid for a bundle to omit Bundle-Version header (and default to
+		// version 0.0.0
 		Bundle installed = null;
 		try {
-			installed = BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle03"); //$NON-NLS-1$
+			installed = BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(),
+					OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle03"); //$NON-NLS-1$
 			// success - should allow manifests with no version.
 		} finally {
 			if (installed != null)
@@ -58,7 +61,9 @@ public class InstallTests {
 	public void testInstallInvalidManifest02() throws IOException, BundleException {
 		Bundle installed = null;
 		try {
-			installed = BundleTestingHelper.installBundle("testInstallInvalidManifest02", OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle11"); //$NON-NLS-1$ //$NON-NLS-2$
+			installed = BundleTestingHelper.installBundle("testInstallInvalidManifest02", //$NON-NLS-1$
+					OSGiTestsActivator.getContext(),
+					OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle11"); //$NON-NLS-1$
 			// should have failed with BundleException
 			fail("Expected a failure with no Bundle-SymbolicName header"); //$NON-NLS-1$
 		} catch (BundleException be) {
@@ -78,7 +83,9 @@ public class InstallTests {
 	public void testInstallInvalidManifest03() throws IOException, BundleException {
 		Bundle installed = null;
 		try {
-			installed = BundleTestingHelper.installBundle("testInstallInvalidManifest03", OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle12"); //$NON-NLS-1$ //$NON-NLS-2$
+			installed = BundleTestingHelper.installBundle("testInstallInvalidManifest03", //$NON-NLS-1$
+					OSGiTestsActivator.getContext(),
+					OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle12"); //$NON-NLS-1$
 			// should have failed with BundleException
 			fail("Expected a failure with duplicate directives"); //$NON-NLS-1$
 		} catch (BundleException be) {
@@ -92,13 +99,16 @@ public class InstallTests {
 	}
 
 	/**
-	 * Test invalid manifest; use attributes bundle-version and bundle-symbolic-name in Export-Package
+	 * Test invalid manifest; use attributes bundle-version and bundle-symbolic-name
+	 * in Export-Package
 	 */
 	@Test
 	public void testInstallInvalidManifest04() throws IOException, BundleException {
 		Bundle installed = null;
 		try {
-			installed = BundleTestingHelper.installBundle("testInstallInvalidManifest04", OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle13"); //$NON-NLS-1$ //$NON-NLS-2$
+			installed = BundleTestingHelper.installBundle("testInstallInvalidManifest04", //$NON-NLS-1$
+					OSGiTestsActivator.getContext(),
+					OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle13"); //$NON-NLS-1$
 			// should have failed with BundleException
 			fail("Expected a failure with duplicate attributes"); //$NON-NLS-1$
 		} catch (BundleException be) {
@@ -118,7 +128,9 @@ public class InstallTests {
 	public void testInstallInvalidManifest05() throws IOException, BundleException {
 		Bundle installed = null;
 		try {
-			installed = BundleTestingHelper.installBundle("testInstallInvalidManifest05", OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle14"); //$NON-NLS-1$ //$NON-NLS-2$
+			installed = BundleTestingHelper.installBundle("testInstallInvalidManifest05", //$NON-NLS-1$
+					OSGiTestsActivator.getContext(),
+					OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle14"); //$NON-NLS-1$
 			// should have failed with BundleException
 			fail("Expected a failure with duplicate imports"); //$NON-NLS-1$
 		} catch (BundleException be) {
@@ -200,7 +212,8 @@ public class InstallTests {
 	public void testUnsupportedOperation01() throws IOException, BundleException {
 		Bundle installed = null;
 		try {
-			installed = BundleTestingHelper.installBundle("testUnsupportedOperation01", OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle18"); //$NON-NLS-1$ //$NON-NLS-2$
+			installed = BundleTestingHelper.installBundle("testUnsupportedOperation01", OSGiTestsActivator.getContext(), //$NON-NLS-1$
+					OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle18"); //$NON-NLS-1$
 			// should have failed with BundleException
 			fail("Expected an unsupported operation exception"); //$NON-NLS-1$
 		} catch (BundleException be) {
@@ -216,7 +229,8 @@ public class InstallTests {
 	@Test
 	public void testInstallLocationWithSpaces() throws BundleException, IOException {
 		Bundle installed = null;
-		installed = BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle 01"); //$NON-NLS-1$
+		installed = BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(),
+				OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle 01"); //$NON-NLS-1$
 		try {
 			assertEquals("1.0", "bundle01", installed.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
 			assertEquals("1.1", Bundle.INSTALLED, installed.getState()); //$NON-NLS-1$
@@ -229,7 +243,8 @@ public class InstallTests {
 	@Test
 	public void testInstallLocationWithUnderscores() throws BundleException, IOException {
 		Bundle installed = null;
-		installed = BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle02_1.0.0"); //$NON-NLS-1$
+		installed = BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(),
+				OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle02_1.0.0"); //$NON-NLS-1$
 		try {
 			assertEquals("1.0", "bundle02", installed.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
 			assertEquals("1.1", Bundle.INSTALLED, installed.getState()); //$NON-NLS-1$
@@ -244,14 +259,16 @@ public class InstallTests {
 	@Test
 	public void testInstallBundleWithExtensionPointOnly() throws BundleException, IOException {
 		Bundle installed = null;
-		installed = BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle04"); //$NON-NLS-1$
+		installed = BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(),
+				OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle04"); //$NON-NLS-1$
 		try {
 			assertEquals("1.0", "bundle04", installed.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
 			assertEquals("1.1", Bundle.INSTALLED, installed.getState()); //$NON-NLS-1$
 			assertEquals("1.2", "1.3.7", installed.getHeaders().get(Constants.BUNDLE_VERSION)); //$NON-NLS-1$ //$NON-NLS-2$
 			String symbolicNameString = installed.getHeaders().get(Constants.BUNDLE_SYMBOLICNAME);
 			assertNotNull("1.3", symbolicNameString); //$NON-NLS-1$
-			ManifestElement[] symbolicNameHeader = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameString);
+			ManifestElement[] symbolicNameHeader = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME,
+					symbolicNameString);
 			assertEquals("1.4", 1, symbolicNameHeader.length); //$NON-NLS-1$
 			assertEquals("1.5", "true", symbolicNameHeader[0].getDirective(Constants.SINGLETON_DIRECTIVE)); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -265,14 +282,16 @@ public class InstallTests {
 	@Test
 	public void testInstallBundleWithExtensionOnly() throws BundleException, IOException {
 		Bundle installed = null;
-		installed = BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle05"); //$NON-NLS-1$
+		installed = BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(),
+				OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle05"); //$NON-NLS-1$
 		try {
 			assertEquals("1.0", "bundle05", installed.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
 			assertEquals("1.1", Bundle.INSTALLED, installed.getState()); //$NON-NLS-1$
 			assertEquals("1.2", "1.3.8", installed.getHeaders().get(Constants.BUNDLE_VERSION)); //$NON-NLS-1$ //$NON-NLS-2$
 			String symbolicNameString = installed.getHeaders().get(Constants.BUNDLE_SYMBOLICNAME);
 			assertNotNull("1.3", symbolicNameString); //$NON-NLS-1$
-			ManifestElement[] symbolicNameHeader = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameString);
+			ManifestElement[] symbolicNameHeader = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME,
+					symbolicNameString);
 			assertEquals("1.4", 1, symbolicNameHeader.length); //$NON-NLS-1$
 			assertEquals("1.5", "true", symbolicNameHeader[0].getDirective(Constants.SINGLETON_DIRECTIVE)); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -282,18 +301,23 @@ public class InstallTests {
 		}
 	}
 
-	/** Ensures we see a bundle with only extension and extension point as a singleton */
+	/**
+	 * Ensures we see a bundle with only extension and extension point as a
+	 * singleton
+	 */
 	@Test
 	public void testInstallBundleWithExtensionAndExtensionPoint() throws BundleException, IOException {
 		Bundle installed = null;
-		installed = BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle06"); //$NON-NLS-1$
+		installed = BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(),
+				OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle06"); //$NON-NLS-1$
 		try {
 			assertEquals("1.0", "bundle06", installed.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
 			assertEquals("1.1", Bundle.INSTALLED, installed.getState()); //$NON-NLS-1$
 			assertEquals("1.2", "1.3.9", installed.getHeaders().get(Constants.BUNDLE_VERSION)); //$NON-NLS-1$ //$NON-NLS-2$
 			String symbolicNameString = installed.getHeaders().get(Constants.BUNDLE_SYMBOLICNAME);
 			assertNotNull("1.3", symbolicNameString); //$NON-NLS-1$
-			ManifestElement[] symbolicNameHeader = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameString);
+			ManifestElement[] symbolicNameHeader = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME,
+					symbolicNameString);
 			assertEquals("1.4", 1, symbolicNameHeader.length); //$NON-NLS-1$
 			assertEquals("1.5", "true", symbolicNameHeader[0].getDirective(Constants.SINGLETON_DIRECTIVE)); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -306,11 +330,15 @@ public class InstallTests {
 	/** Ensures two versions of a non-singleton bundle are accepted */
 	@Test
 	public void testInstall2NonSingletonBundles() throws BundleException, IOException {
-		Bundle installed1 = org.eclipse.core.tests.harness.BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle07"); //$NON-NLS-1$
-		ServiceReference packageAdminSR = OSGiTestsActivator.getContext().getServiceReference(PackageAdmin.class.getName());
+		Bundle installed1 = org.eclipse.core.tests.harness.BundleTestingHelper.installBundle(
+				OSGiTestsActivator.getContext(),
+				OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle07"); //$NON-NLS-1$
+		ServiceReference packageAdminSR = OSGiTestsActivator.getContext()
+				.getServiceReference(PackageAdmin.class.getName());
 		PackageAdmin packageAdmin = (PackageAdmin) OSGiTestsActivator.getContext().getService(packageAdminSR);
 		packageAdmin.resolveBundles(null);
-		Bundle installed2 = BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle07b"); //$NON-NLS-1$
+		Bundle installed2 = BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(),
+				OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle07b"); //$NON-NLS-1$
 		packageAdmin.resolveBundles(null);
 		OSGiTestsActivator.getContext().ungetService(packageAdminSR);
 		try {
@@ -330,11 +358,14 @@ public class InstallTests {
 	/** Ensures two versions of a singleton bundle are accepted */
 	@Test
 	public void testInstall2SingletonBundles() throws BundleException, IOException {
-		Bundle installed1 = BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle08"); //$NON-NLS-1$
-		ServiceReference packageAdminSR = OSGiTestsActivator.getContext().getServiceReference(PackageAdmin.class.getName());
+		Bundle installed1 = BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(),
+				OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle08"); //$NON-NLS-1$
+		ServiceReference packageAdminSR = OSGiTestsActivator.getContext()
+				.getServiceReference(PackageAdmin.class.getName());
 		PackageAdmin packageAdmin = (PackageAdmin) OSGiTestsActivator.getContext().getService(packageAdminSR);
 		packageAdmin.resolveBundles(null);
-		Bundle installed2 = BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle08b"); //$NON-NLS-1$
+		Bundle installed2 = BundleTestingHelper.installBundle(OSGiTestsActivator.getContext(),
+				OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/installTests/bundle08b"); //$NON-NLS-1$
 		packageAdmin.resolveBundles(null);
 		OSGiTestsActivator.getContext().ungetService(packageAdminSR);
 		try {

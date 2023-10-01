@@ -54,7 +54,8 @@ public class Activator implements BundleActivator {
 		checkPackage(fPkg, "main", "1.0", "equinox.f", "MAIN", "10.0", "equinox.f");
 	}
 
-	private void checkPackage(Package pkg, String specTitle, String specVersion, String specVendor, String implTitle, String implVersion, String implVendor) {
+	private void checkPackage(Package pkg, String specTitle, String specVersion, String specVendor, String implTitle,
+			String implVersion, String implVendor) {
 		assertEquals(specTitle, pkg.getSpecificationTitle());
 		assertEquals(specVersion, pkg.getSpecificationVersion());
 		assertEquals(specVendor, pkg.getSpecificationVendor());

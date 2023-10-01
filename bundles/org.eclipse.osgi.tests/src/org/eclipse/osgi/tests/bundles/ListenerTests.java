@@ -94,7 +94,7 @@ public class ListenerTests extends AbstractBundleTests {
 			j = j + 2;
 		}
 
-		//synchronous listener will be called first
+		// synchronous listener will be called first
 		i = 0;
 		for (Bundle b : bundles) {
 			BundleListener bundleListener = createSynchronousBundleListener();

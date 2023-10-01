@@ -54,7 +54,9 @@ public class ContextFinderTests extends AbstractFrameworkHookTests {
 	@Test
 	public void testContextClassLoaderNullLocal() throws InvalidSyntaxException, IOException {
 		BundleContext bc = framework.getBundleContext();
-		ClassLoader contextFinder = bc.getService(bc.getServiceReferences(ClassLoader.class, "(equinox.classloader.type=contextClassLoader)").iterator().next());
+		ClassLoader contextFinder = bc
+				.getService(bc.getServiceReferences(ClassLoader.class, "(equinox.classloader.type=contextClassLoader)")
+						.iterator().next());
 		Enumeration<URL> result = contextFinder.getResources("does/not/exist.txt");
 		assertNotNull("Null result.", result);
 		assertFalse("Found unexpected result", result.hasMoreElements());

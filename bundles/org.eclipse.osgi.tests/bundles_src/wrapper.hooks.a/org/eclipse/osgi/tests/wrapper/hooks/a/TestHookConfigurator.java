@@ -22,50 +22,51 @@ import org.eclipse.osgi.storage.bundlefile.*;
 public class TestHookConfigurator implements HookConfigurator {
 	public void addHooks(HookRegistry hookRegistry) {
 
-		BundleFileWrapperFactoryHook modifyContent = (bundleFile, generation, base) -> new BundleFileWrapper(bundleFile) {
+		BundleFileWrapperFactoryHook modifyContent = (bundleFile, generation,
+				base) -> new BundleFileWrapper(bundleFile) {
 
-			@Override
-			public BundleEntry getEntry(String path) {
-				final BundleEntry original = super.getEntry(path);
-				final byte[] content = "CUSTOM_CONTENT".getBytes();
-				if ("data/resource1".equals(path)) {
-					return new BundleEntry() {
+					@Override
+					public BundleEntry getEntry(String path) {
+						final BundleEntry original = super.getEntry(path);
+						final byte[] content = "CUSTOM_CONTENT".getBytes();
+						if ("data/resource1".equals(path)) {
+							return new BundleEntry() {
 
-						@Override
-						public long getTime() {
-							return original.getTime();
+								@Override
+								public long getTime() {
+									return original.getTime();
+								}
+
+								@Override
+								public long getSize() {
+									return content.length;
+								}
+
+								@Override
+								public String getName() {
+									return original.getName();
+								}
+
+								@Override
+								public URL getLocalURL() {
+									return original.getLocalURL();
+								}
+
+								@Override
+								public InputStream getInputStream() throws IOException {
+									return new ByteArrayInputStream(content);
+								}
+
+								@Override
+								public URL getFileURL() {
+									return original.getFileURL();
+								}
+							};
 						}
+						return original;
+					}
 
-						@Override
-						public long getSize() {
-							return content.length;
-						}
-
-						@Override
-						public String getName() {
-							return original.getName();
-						}
-
-						@Override
-						public URL getLocalURL() {
-							return original.getLocalURL();
-						}
-
-						@Override
-						public InputStream getInputStream() throws IOException {
-							return new ByteArrayInputStream(content);
-						}
-
-						@Override
-						public URL getFileURL() {
-							return original.getFileURL();
-						}
-					};
-				}
-				return original;
-			}
-
-		};
+				};
 		BundleFileWrapperFactoryHook noop = (bundleFile, generation, base) -> new BundleFileWrapper(bundleFile) {
 			// Do nothing to test multiple wrappers
 		};
@@ -75,34 +76,36 @@ public class TestHookConfigurator implements HookConfigurator {
 		// add a hook that modifies content
 		hookRegistry.addBundleFileWrapperFactoryHook(modifyContent);
 
-		hookRegistry.addBundleFileWrapperFactoryHook((bundleFile, generation, base) -> new BundleFileWrapper(bundleFile) {
-			@Override
-			public URL getResourceURL(String path, Module hostModule, int index) {
-				// just making sure the wrapper getResourceURL is never called
-				throw new RuntimeException("Should not be called");
-			}
+		hookRegistry
+				.addBundleFileWrapperFactoryHook((bundleFile, generation, base) -> new BundleFileWrapper(bundleFile) {
+					@Override
+					public URL getResourceURL(String path, Module hostModule, int index) {
+						// just making sure the wrapper getResourceURL is never called
+						throw new RuntimeException("Should not be called");
+					}
 
-			@Override
-			protected URL createResourceURL(BundleEntry bundleEntry, Module hostModule, int index, String path) {
-				final URL url = super.createResourceURL(bundleEntry, hostModule, index, path);
-				if (url == null) {
-					return null;
-				}
-				try {
-					return new URL("custom", "custom", 0, path, new URLStreamHandler() {
-
-						@Override
-						protected URLConnection openConnection(URL u) throws IOException {
-							// TODO Auto-generated method stub
-							return url.openConnection();
+					@Override
+					protected URL createResourceURL(BundleEntry bundleEntry, Module hostModule, int index,
+							String path) {
+						final URL url = super.createResourceURL(bundleEntry, hostModule, index, path);
+						if (url == null) {
+							return null;
 						}
-					});
-				} catch (MalformedURLException e) {
-					throw new RuntimeException(e);
-				}
-			}
+						try {
+							return new URL("custom", "custom", 0, path, new URLStreamHandler() {
 
-		});
+								@Override
+								protected URLConnection openConnection(URL u) throws IOException {
+									// TODO Auto-generated method stub
+									return url.openConnection();
+								}
+							});
+						} catch (MalformedURLException e) {
+							throw new RuntimeException(e);
+						}
+					}
+
+				});
 
 		// And add no-op after
 		hookRegistry.addBundleFileWrapperFactoryHook(noop);

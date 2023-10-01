@@ -63,8 +63,8 @@ public class PersistedBundleTests extends AbstractBundleTests {
 	}
 
 	/*
-	 * Test that a negative value for eclipse.stateSaveDelayInterval results in
-	 * no persistence.
+	 * Test that a negative value for eclipse.stateSaveDelayInterval results in no
+	 * persistence.
 	 */
 	@Test
 	public void testNoPersistence() throws Exception {

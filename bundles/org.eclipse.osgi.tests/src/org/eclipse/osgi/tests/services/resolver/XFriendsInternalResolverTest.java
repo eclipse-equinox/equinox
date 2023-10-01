@@ -29,10 +29,11 @@ import org.osgi.framework.Constants;
 public class XFriendsInternalResolverTest extends AbstractStateTest {
 
 	/**
-	 * Tests the x-friends directive.  A bundle should not be allowed to import a package which
-	 * declares an x-friends directive and the importer is not a friend.  When a bundle requires
-	 * anther bundle which exports packages which declare an x-friends directive it should not
-	 * have access to the packages unless the requiring bundle is a friend.
+	 * Tests the x-friends directive. A bundle should not be allowed to import a
+	 * package which declares an x-friends directive and the importer is not a
+	 * friend. When a bundle requires anther bundle which exports packages which
+	 * declare an x-friends directive it should not have access to the packages
+	 * unless the requiring bundle is a friend.
 	 */
 	@Test
 	public void testXFriends() throws BundleException {
@@ -45,60 +46,57 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.exporter");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.EXPORT_PACKAGE,
-				"test.exporter.foo1; x-friends:=\"test.importer1, test.requirer1\"," +
-				"test.exporter.foo2; x-friends:=\"test.importer2, test.requirer2\"," +
-				"test.exporter.bar1; x-friends:=\"test.importer1, test.requirer1\"," +
-				"test.exporter.bar2; x-friends:=\"test.importer2, test.requirer2\"");
-		BundleDescription testExporter = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+				"test.exporter.foo1; x-friends:=\"test.importer1, test.requirer1\","
+						+ "test.exporter.foo2; x-friends:=\"test.importer2, test.requirer2\","
+						+ "test.exporter.bar1; x-friends:=\"test.importer1, test.requirer1\","
+						+ "test.exporter.bar2; x-friends:=\"test.importer2, test.requirer2\"");
+		BundleDescription testExporter = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.importer1");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
-		manifest.put(Constants.IMPORT_PACKAGE,
-				"test.exporter.foo1," +
-				"test.exporter.bar1," +
-				"test.exporter.foo2; resolution:=optional," +
-				"test.exporter.bar2; resolution:=optional");
-		BundleDescription testImporter1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest.put(Constants.IMPORT_PACKAGE, "test.exporter.foo1," + "test.exporter.bar1,"
+				+ "test.exporter.foo2; resolution:=optional," + "test.exporter.bar2; resolution:=optional");
+		BundleDescription testImporter1 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.importer2");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
-		manifest.put(Constants.IMPORT_PACKAGE,
-				"test.exporter.foo1; resolution:=optional," +
-				"test.exporter.bar1; resolution:=optional," +
-				"test.exporter.foo2," +
-				"test.exporter.bar2");
-		BundleDescription testImporter2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest.put(Constants.IMPORT_PACKAGE, "test.exporter.foo1; resolution:=optional,"
+				+ "test.exporter.bar1; resolution:=optional," + "test.exporter.foo2," + "test.exporter.bar2");
+		BundleDescription testImporter2 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.importer3");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
-		manifest.put(Constants.IMPORT_PACKAGE,
-				"test.exporter.foo1," +
-				"test.exporter.bar1," +
-				"test.exporter.foo2; resolution:=optional," +
-				"test.exporter.bar2; resolution:=optional");
-		BundleDescription testImporter3 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest.put(Constants.IMPORT_PACKAGE, "test.exporter.foo1," + "test.exporter.bar1,"
+				+ "test.exporter.foo2; resolution:=optional," + "test.exporter.bar2; resolution:=optional");
+		BundleDescription testImporter3 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.requirer1");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.REQUIRE_BUNDLE, "test.exporter");
-		BundleDescription testRequirer1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription testRequirer1 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.requirer2");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.REQUIRE_BUNDLE, "test.exporter");
-		BundleDescription testRequirer2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription testRequirer2 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
-		Dictionary[] props = new Dictionary[] {new Hashtable()};
+		Dictionary[] props = new Dictionary[] { new Hashtable() };
 		props[0].put("osgi.resolverMode", "strict");
 
 		state.setPlatformProperties(props);
@@ -118,8 +116,8 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		assertTrue("1.4", testRequirer1.isResolved());
 		assertTrue("1.5", testRequirer2.isResolved());
 
-		String[] validPackages1 = {"test.exporter.foo1", "test.exporter.bar1"};
-		String[] validPackages2 = {"test.exporter.foo2", "test.exporter.bar2"};
+		String[] validPackages1 = { "test.exporter.foo1", "test.exporter.bar1" };
+		String[] validPackages2 = { "test.exporter.foo2", "test.exporter.bar2" };
 		// make sure the importers only got the packages they are really friends to
 		ExportPackageDescription[] imported1 = testImporter1.getResolvedImports();
 		assertTrue("2.0", imported1 != null && imported1.length == 2); // should only have 2 resolved imports
@@ -153,7 +151,8 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a.base");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "a.split.pkg; a.base=split; mandatory:=a.base");
-		BundleDescription aBase = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription aBase = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -161,7 +160,8 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.REQUIRE_BUNDLE, "a.base");
 		manifest.put(Constants.EXPORT_PACKAGE, "a.split.pkg");
-		BundleDescription aExtra = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription aExtra = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -169,7 +169,8 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.REQUIRE_BUNDLE, "a.extra");
 		manifest.put(Constants.EXPORT_PACKAGE, "test.base.exporter.require");
-		BundleDescription b= state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		state.addBundle(aBase);
 		state.addBundle(aExtra);
@@ -202,9 +203,9 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.base.exporter");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
-		manifest.put(Constants.EXPORT_PACKAGE,
-				"test.base; base.exporter=split; mandatory:=base.exporter");
-		BundleDescription baseExporter = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest.put(Constants.EXPORT_PACKAGE, "test.base; base.exporter=split; mandatory:=base.exporter");
+		BundleDescription baseExporter = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -213,25 +214,25 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		manifest.put(Constants.REQUIRE_BUNDLE, "test.base.exporter");
 		manifest.put(Constants.EXPORT_PACKAGE,
 				"test.base; base.exporter.require=split; mandatory:=base.exporter.require");
-		BundleDescription baseExporterRequire = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription baseExporterRequire = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.base.exporter.require2");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
-		manifest.put(Constants.REQUIRE_BUNDLE,
-				"test.base.exporter.require");
+		manifest.put(Constants.REQUIRE_BUNDLE, "test.base.exporter.require");
 		manifest.put(Constants.EXPORT_PACKAGE, "test.base.exporter.require");
-		BundleDescription baseExporterRequire2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
-
+		BundleDescription baseExporterRequire2 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.base.importer");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
-		manifest.put(Constants.REQUIRE_BUNDLE,
-				"test.base.exporter.require");
-		BundleDescription baseImporter = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest.put(Constants.REQUIRE_BUNDLE, "test.base.exporter.require");
+		BundleDescription baseImporter = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -239,16 +240,18 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.REQUIRE_BUNDLE, "test.base.exporter.require2");
 		manifest.put(Constants.EXPORT_PACKAGE, "test.base");
-		BundleDescription baseImporter2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription baseImporter2 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "test.base.importer3");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.IMPORT_PACKAGE, "test.base; bundle-symbolic-name=test.base.importer2");
-		BundleDescription baseImporter3 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription baseImporter3 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
-		Dictionary[] props = new Dictionary[] {new Hashtable()};
+		Dictionary[] props = new Dictionary[] { new Hashtable() };
 		props[0].put("osgi.resolverMode", "strict");
 
 		state.setPlatformProperties(props);
@@ -300,14 +303,16 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "E");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "test.base; E=split; mandatory:=E");
-		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.REQUIRE_BUNDLE, "E");
-		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -315,31 +320,36 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.REQUIRE_BUNDLE, "D");
 		manifest.put(Constants.EXPORT_PACKAGE, "test.base; D=split; mandatory:=D");
-		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
-		manifest.put(Constants.REQUIRE_BUNDLE, "F; " + Constants.VISIBILITY_DIRECTIVE + ":=" + Constants.VISIBILITY_REEXPORT );
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest.put(Constants.REQUIRE_BUNDLE,
+				"F; " + Constants.VISIBILITY_DIRECTIVE + ":=" + Constants.VISIBILITY_REEXPORT);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "F");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "test.base; F=split; mandatory:=F");
-		BundleDescription f = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription f = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
-		manifest.put(Constants.REQUIRE_BUNDLE, "B; " + Constants.VISIBILITY_DIRECTIVE + ":=" + Constants.VISIBILITY_REEXPORT +
-																	",C");
-		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest.put(Constants.REQUIRE_BUNDLE,
+				"B; " + Constants.VISIBILITY_DIRECTIVE + ":=" + Constants.VISIBILITY_REEXPORT + ",C");
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
-		Dictionary[] props = new Dictionary[] {new Hashtable()};
+		Dictionary[] props = new Dictionary[] { new Hashtable() };
 		props[0].put("osgi.resolverMode", "strict");
 
 		state.setPlatformProperties(props);
@@ -381,4 +391,3 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		return false;
 	}
 }
-

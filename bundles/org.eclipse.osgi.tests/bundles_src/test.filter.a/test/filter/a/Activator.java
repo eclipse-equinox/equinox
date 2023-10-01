@@ -21,26 +21,28 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 public class Activator implements BundleActivator {
 
 	public void start(BundleContext context) throws Exception {
-		final boolean[] serviceChanged = {false};
+		final boolean[] serviceChanged = { false };
 		ServiceListener listener = event -> serviceChanged[0] = true;
 		context.addServiceListener(listener, "(&(objectClass=java.lang.String)(test=*))");
-		final boolean[] modifiedService = {false};
-		ServiceTracker tracker = new ServiceTracker(context, FrameworkUtil.createFilter("(&(objectClass=java.lang.String)(test=*))"), new ServiceTrackerCustomizer() {
+		final boolean[] modifiedService = { false };
+		ServiceTracker tracker = new ServiceTracker(context,
+				FrameworkUtil.createFilter("(&(objectClass=java.lang.String)(test=*))"),
+				new ServiceTrackerCustomizer() {
 
-			public Object addingService(ServiceReference reference) {
-				return reference;
-			}
+					public Object addingService(ServiceReference reference) {
+						return reference;
+					}
 
-			public void modifiedService(ServiceReference reference, Object service) {
-				modifiedService[0] = true;
-			}
+					public void modifiedService(ServiceReference reference, Object service) {
+						modifiedService[0] = true;
+					}
 
-			public void removedService(ServiceReference reference, Object service) {
-				// TODO Auto-generated method stub
+					public void removedService(ServiceReference reference, Object service) {
+						// TODO Auto-generated method stub
 
-			}
+					}
 
-		});
+				});
 		tracker.open();
 		Hashtable props = new Hashtable();
 		props.put("test", "value1");
@@ -54,7 +56,7 @@ public class Activator implements BundleActivator {
 	}
 
 	public void stop(BundleContext context) throws Exception {
-		//nothing; framework will clean up our listeners
+		// nothing; framework will clean up our listeners
 	}
 
 }

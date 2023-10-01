@@ -79,8 +79,11 @@ public class PlatformAdminTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		manifest.put(Constants.BUNDLE_NATIVECODE, "libwrapper-linux-x86-32.so; wrapper-linux-x86-32; osname=linux; processor=x86");
-		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
+		manifest.put(Constants.BUNDLE_NATIVECODE,
+				"libwrapper-linux-x86-32.so; wrapper-linux-x86-32; osname=linux; processor=x86");
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION),
+				id++);
 		BundleDescription aPrime = state.getFactory().createBundleDescription(a);
 		assertEquals("Copy is not equal", a, aPrime);
 	}
@@ -100,7 +103,9 @@ public class PlatformAdminTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		BundleDescription a = systemState.getFactory().createBundleDescription(systemState, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
+		BundleDescription a = systemState.getFactory().createBundleDescription(systemState, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION),
+				id++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -109,7 +114,9 @@ public class PlatformAdminTest extends AbstractStateTest {
 		manifest.put(Constants.EXPORT_PACKAGE, "b, c");
 		manifest.put(Constants.REQUIRE_BUNDLE, "a");
 		manifest.put(Constants.IMPORT_PACKAGE, "afrag2");
-		BundleDescription b = systemState.getFactory().createBundleDescription(systemState, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
+		BundleDescription b = systemState.getFactory().createBundleDescription(systemState, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION),
+				id++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -118,7 +125,9 @@ public class PlatformAdminTest extends AbstractStateTest {
 		manifest.put(Constants.EXPORT_PACKAGE, "afrag2");
 		manifest.put(Constants.FRAGMENT_HOST, "a");
 		manifest.put(Constants.IMPORT_PACKAGE, "c");
-		BundleDescription afrag2 = systemState.getFactory().createBundleDescription(systemState, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
+		BundleDescription afrag2 = systemState.getFactory().createBundleDescription(systemState, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION),
+				id++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -126,7 +135,9 @@ public class PlatformAdminTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.FRAGMENT_HOST, "a");
 		manifest.put(Constants.IMPORT_PACKAGE, "b");
-		BundleDescription afrag1 = systemState.getFactory().createBundleDescription(systemState, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
+		BundleDescription afrag1 = systemState.getFactory().createBundleDescription(systemState, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION),
+				id++);
 
 		systemState.addBundle(afrag1);
 		systemState.addBundle(afrag2);
@@ -161,14 +172,18 @@ public class PlatformAdminTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		BundleDescription a1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
+		BundleDescription a1 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION),
+				id++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.REQUIRE_BUNDLE, "a; bundle-version=\"[1.0.0, 2.0.0)\"");
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION),
+				id++);
 
 		state.addBundle(a1);
 		state.addBundle(b);
@@ -181,7 +196,9 @@ public class PlatformAdminTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a");
 		manifest.put(Constants.BUNDLE_VERSION, "2.0.0");
-		BundleDescription a2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), a1.getBundleId());
+		BundleDescription a2 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION),
+				a1.getBundleId());
 		state.updateBundle(a2);
 
 		state.resolve(true);
@@ -203,14 +220,18 @@ public class PlatformAdminTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		BundleDescription a1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
+		BundleDescription a1 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION),
+				id++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.FRAGMENT_HOST, "a; bundle-version=\"[1.0.0, 2.0.0)\"");
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION),
+				id++);
 
 		state.addBundle(a1);
 		state.addBundle(b);
@@ -223,7 +244,9 @@ public class PlatformAdminTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a");
 		manifest.put(Constants.BUNDLE_VERSION, "2.0.0");
-		BundleDescription a2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), a1.getBundleId());
+		BundleDescription a2 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION),
+				a1.getBundleId());
 		state.updateBundle(a2);
 
 		state.resolve(true);
@@ -246,14 +269,18 @@ public class PlatformAdminTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "a; version=1.0");
-		BundleDescription a1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
+		BundleDescription a1 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION),
+				id++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.IMPORT_PACKAGE, "a; version=\"[1.0.0, 2.0.0)\"");
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION),
+				id++);
 
 		state.addBundle(a1);
 		state.addBundle(b);
@@ -267,7 +294,9 @@ public class PlatformAdminTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a");
 		manifest.put(Constants.BUNDLE_VERSION, "2.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "a; version=2.0");
-		BundleDescription a2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), a1.getBundleId());
+		BundleDescription a2 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION),
+				a1.getBundleId());
 		state.updateBundle(a2);
 
 		state.resolve(true);
@@ -282,7 +311,7 @@ public class PlatformAdminTest extends AbstractStateTest {
 	@Test
 	public void testBug241128_04() throws BundleException {
 		State state = buildEmptyState();
-		Dictionary[] props = new Dictionary[] {new Hashtable()};
+		Dictionary[] props = new Dictionary[] { new Hashtable() };
 		props[0].put("osgi.os", "win32");
 		props[0].put("osgi.arch", "x86");
 		state.setPlatformProperties(props);
@@ -295,7 +324,9 @@ public class PlatformAdminTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.BUNDLE_NATIVECODE, "Bundle-NativeCode: nativefile1.txt;processor=x86;osname=win32");
-		BundleDescription a1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
+		BundleDescription a1 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION),
+				id++);
 
 		state.addBundle(a1);
 		state.resolve(true);
@@ -307,7 +338,9 @@ public class PlatformAdminTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a");
 		manifest.put(Constants.BUNDLE_VERSION, "2.0.0");
 		manifest.put(Constants.BUNDLE_NATIVECODE, "Bundle-NativeCode: nativefile1.txt;processor=linux;osname=gtk");
-		BundleDescription a2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), a1.getBundleId());
+		BundleDescription a2 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION),
+				a1.getBundleId());
 		state.updateBundle(a2);
 
 		state.resolve(true);
@@ -333,14 +366,16 @@ public class PlatformAdminTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapablity");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(GENERIC_CAPABILITY, "foo; version=\"1.3.1\"; attr1=\"value1\"; attr2=\"value2\"");
-		BundleDescription genCap1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription genCap1 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericRequire");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(GENERIC_REQUIRE, "foo; selection-filter=\"(version>=1.3.0)\"");
-		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		state.addBundle(genCap1);
 		state.addBundle(genReq);
@@ -355,7 +390,8 @@ public class PlatformAdminTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapablity");
 		manifest.put(Constants.BUNDLE_VERSION, "2.0.0");
 		manifest.put(GENERIC_CAPABILITY, "foo; version=\"1.0\"; attr1=\"value1\"; attr2=\"value2\"");
-		BundleDescription genCap2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), genCap1.getBundleId());
+		BundleDescription genCap2 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), genCap1.getBundleId());
 
 		state.updateBundle(genCap2);
 

@@ -38,12 +38,12 @@ public class TestCycle_002 extends AbstractStateTest {
 		bundle_1 = create_bundle_1(sof);
 		bundle_2 = create_bundle_2(sof);
 		bundle_3 = create_bundle_3(sof);
-		//***************************************************
+		// ***************************************************
 		// stage a
 		// expect to pass =true
-		//***************************************************
+		// ***************************************************
 		addBundlesToState_a(state);
-		//***************************************************
+		// ***************************************************
 		try {
 			state.resolve();
 		} catch (Throwable t) {

@@ -85,7 +85,6 @@ public class BasicTest extends AbstractResourceTest {
 	private Bundle tf1;
 	private Bundle tf2;
 
-
 	@Test
 	public void testRequirementMatches() throws Exception {
 		Bundle tb5 = installer.installBundle("resource.tb5");
@@ -94,7 +93,8 @@ public class BasicTest extends AbstractResourceTest {
 		List requirements = requirer.getRequirements(capability1.getNamespace());
 		assertRequirements(requirements, 3);
 		Requirement requirement1 = (Requirement) requirements.get(0);
-		// Match requirement with just a namespace (no filter, attributes, or directives).
+		// Match requirement with just a namespace (no filter, attributes, or
+		// directives).
 		assertRequirementMatches(requirement1, capability1);
 		Capability capability2 = createCapability2();
 		// Different namespaces should not match.
@@ -102,13 +102,15 @@ public class BasicTest extends AbstractResourceTest {
 		Requirement requirement2 = (Requirement) requirements.get(1);
 		// Make sure the expected attributes are present.
 		assertAttribute(requirement2, "b", "a");
-		// Match requirement with namespace and attributes. Requirement attributes have no impact on matching.
+		// Match requirement with namespace and attributes. Requirement attributes have
+		// no impact on matching.
 		assertRequirementMatches(requirement2, capability1);
 		Requirement requirement3 = (Requirement) requirements.get(2);
 		assertAttribute(requirement3, "b", "a");
 		assertAttribute(requirement3, "bar", "foo");
 		assertFilterDirective(requirement3);
-		// Match requirement with namespace, attributes, and filter (no other directives).
+		// Match requirement with namespace, attributes, and filter (no other
+		// directives).
 		assertRequirementMatches(requirement3, capability1);
 		Requirement requirement4 = (Requirement) requirements.get(3);
 		assertAttribute(requirement4, "a", "b");
@@ -122,7 +124,8 @@ public class BasicTest extends AbstractResourceTest {
 		assertAttribute(requirement5, "y", "x");
 		assertFilterDirective(requirement5);
 		assertDirective(requirement5, "mandatory", "foo,x");
-		// Mandatory directive should have no impact on generic capabilities or requirements.
+		// Mandatory directive should have no impact on generic capabilities or
+		// requirements.
 		assertRequirementMatches(requirement5, capability2);
 	}
 
@@ -150,16 +153,11 @@ public class BasicTest extends AbstractResourceTest {
 	}
 
 	/*
-	 * TB1
-	 * Requirements:
-	 * 		None
-	 * Capabilities:
-	 * 		osgi.identity;osgi.identity=resource.tb1;version=1.0.0;type=osgi.bundle
-	 * 		osgi.wiring.host;osgi.wiring.host=resource.tb1;version=1.0.0
-	 * Wires:
-	 * 		osgi.identity <-> TB3
-	 * 		osgi.wiring.host <-> TF1
-	 * 		TB4 <-> osgi.identity (via TF1)
+	 * TB1 Requirements: None Capabilities:
+	 * osgi.identity;osgi.identity=resource.tb1;version=1.0.0;type=osgi.bundle
+	 * osgi.wiring.host;osgi.wiring.host=resource.tb1;version=1.0.0 Wires:
+	 * osgi.identity <-> TB3 osgi.wiring.host <-> TF1 TB4 <-> osgi.identity (via
+	 * TF1)
 	 */
 	private void assertTb1() {
 		// Get the revision for TB1.
@@ -209,13 +207,7 @@ public class BasicTest extends AbstractResourceTest {
 	}
 
 	/*
-	 * TB2
-	 * Requirements:
-	 * 		None
-	 * Capabilities:
-	 * 		None
-	 * Wires:
-	 * 		None
+	 * TB2 Requirements: None Capabilities: None Wires: None
 	 */
 	private void assertTb2() {
 		final BundleRevision revision = tb2.adapt(BundleRevision.class);
@@ -227,16 +219,13 @@ public class BasicTest extends AbstractResourceTest {
 	}
 
 	/*
-	 * TB3
-	 * Requirements:
-	 * 		osgi.identity;osgi.identity=resource.tb1;version=1.0.0;type=osgi.bundle
-	 * 		osgi.identity;osgi.identity=resource.tf1;version=1.0.0;type=osgi.fragment
+	 * TB3 Requirements:
+	 * osgi.identity;osgi.identity=resource.tb1;version=1.0.0;type=osgi.bundle
+	 * osgi.identity;osgi.identity=resource.tf1;version=1.0.0;type=osgi.fragment
 	 * Capabilities:
-	 * 		osgi.identity;osgi.identity=resource.tb3;version=1.0.0;type=osgi.bundle
-	 * 		osgi.wiring.host;osgi.wiring.host=resource.tb3;version=1.0.0
-	 * Wires:
-	 * 		TB1 <-> osgi.identity
-	 * 		TF1 <-> osgi.identity
+	 * osgi.identity;osgi.identity=resource.tb3;version=1.0.0;type=osgi.bundle
+	 * osgi.wiring.host;osgi.wiring.host=resource.tb3;version=1.0.0 Wires: TB1 <->
+	 * osgi.identity TF1 <-> osgi.identity
 	 */
 	private void assertTb3() {
 		// Get the revision for TB3.
@@ -278,14 +267,10 @@ public class BasicTest extends AbstractResourceTest {
 	}
 
 	/*
-	 * TB4
-	 * Requirements:
-	 * 		None
-	 * Capabilities:
-	 * 		osgi.identity;osgi.identity=resource.tb4;version=1.0.0;type=osgi.bundle
-	 * 		osgi.wiring.host;osgi.wiring.host=resource.tb4;version=1.0.0
-	 * Wires:
-	 * 		osgi.identity <-> TB1 (via TF1)
+	 * TB4 Requirements: None Capabilities:
+	 * osgi.identity;osgi.identity=resource.tb4;version=1.0.0;type=osgi.bundle
+	 * osgi.wiring.host;osgi.wiring.host=resource.tb4;version=1.0.0 Wires:
+	 * osgi.identity <-> TB1 (via TF1)
 	 */
 	private void assertTb4() {
 		// Get the revision for TB4.
@@ -314,7 +299,8 @@ public class BasicTest extends AbstractResourceTest {
 		assertWires(wires, 1);
 		// Check the osgi.identity wire between TB4 and TB1 (via TF1).
 		Wire wire = (Wire) wires.get(0);
-		// The requirer will be TB1's revision since fragment requirements are merged into the host...
+		// The requirer will be TB1's revision since fragment requirements are merged
+		// into the host...
 		BundleRevision requirer = tb1.adapt(BundleRevision.class);
 		// ...but the requirement will come from the fragment.
 		Requirement requirement = getIdentityRequirement(tf1.adapt(BundleRevision.class), 0);
@@ -322,15 +308,12 @@ public class BasicTest extends AbstractResourceTest {
 	}
 
 	/*
-	 * TF1
-	 * Requirements:
-	 * 		osgi.wiring.host;osgi.wiring.host=resource.tb1;version=1.0.0
-	 * 		osgi.identity;osgi.identity=resource.tb4;version=1.0.0;type=osgi.bundle
+	 * TF1 Requirements:
+	 * osgi.wiring.host;osgi.wiring.host=resource.tb1;version=1.0.0
+	 * osgi.identity;osgi.identity=resource.tb4;version=1.0.0;type=osgi.bundle
 	 * Capabilities:
-	 * 		osgi.identity;osgi.identity=resource.tf1;version=1.0.0;type=osgi.fragment
-	 * Wires:
-	 * 		TB1 <-> osgi.wiring.host
-	 * 		osgi.identity <-> TB3
+	 * osgi.identity;osgi.identity=resource.tf1;version=1.0.0;type=osgi.fragment
+	 * Wires: TB1 <-> osgi.wiring.host osgi.identity <-> TB3
 	 */
 	private void assertTf1() {
 		// Get the revision for TF1.
@@ -365,13 +348,10 @@ public class BasicTest extends AbstractResourceTest {
 	}
 
 	/*
-	 * TF2
-	 * Requirements:
-	 * 		osgi.wiring.host;osgi.wiring.host=resource.tb1;version=1.0.0
-	 * Capabilities:
-	 * 		osgi.identity;osgi.identity=resource.tf2;version=1.0.0;type=osgi.fragment
-	 * Wires:
-	 * 		TB1 <-> osgi.wiring.host
+	 * TF2 Requirements:
+	 * osgi.wiring.host;osgi.wiring.host=resource.tb1;version=1.0.0 Capabilities:
+	 * osgi.identity;osgi.identity=resource.tf2;version=1.0.0;type=osgi.fragment
+	 * Wires: TB1 <-> osgi.wiring.host
 	 */
 	private void assertTf2() {
 		// Get the revision for TF2.
@@ -415,17 +395,20 @@ public class BasicTest extends AbstractResourceTest {
 	}
 
 	private void assertFilterDirective(Requirement requirement) {
-		assertNotNull("Missing filter directive", requirement.getDirectives().get(Namespace.REQUIREMENT_FILTER_DIRECTIVE));
+		assertNotNull("Missing filter directive",
+				requirement.getDirectives().get(Namespace.REQUIREMENT_FILTER_DIRECTIVE));
 	}
 
-	private void assertIdentityCapability(Capability capability, String symbolicName, Version version, String type, Map arbitraryAttrs, Map arbitraryDirs) {
+	private void assertIdentityCapability(Capability capability, String symbolicName, Version version, String type,
+			Map arbitraryAttrs, Map arbitraryDirs) {
 		assertEquals("Wrong namespace", IdentityNamespace.IDENTITY_NAMESPACE, capability.getNamespace());
 		assertEquals("Wrong number of attributes", 3 + arbitraryAttrs.size(), capability.getAttributes().size());
 		// The osgi.identity attribute contains the symbolic name of the resource.
 		assertSymbolicName(symbolicName, (String) capability.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE));
 		// The version attribute must be of type Version.
 		// The version attribute contains the version of the resource.
-		assertVersion(version, (Version) capability.getAttributes().get(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE));
+		assertVersion(version,
+				(Version) capability.getAttributes().get(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE));
 		// The type attribute must be of type String.
 		// The type attribute contains the resource type.
 		assertType(type, (String) capability.getAttributes().get(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE));
@@ -441,7 +424,8 @@ public class BasicTest extends AbstractResourceTest {
 		}
 	}
 
-	private void assertIdentityWire(Wire wire, Capability capability, Resource provider, Requirement requirement, Resource requirer) {
+	private void assertIdentityWire(Wire wire, Capability capability, Resource provider, Requirement requirement,
+			Resource requirer) {
 		assertEquals("Wrong capability", capability, wire.getCapability());
 		assertEquals("Wrong provider", provider, wire.getProvider());
 		assertEquals("Wrong requirement", requirement, wire.getRequirement());
@@ -458,13 +442,15 @@ public class BasicTest extends AbstractResourceTest {
 	private void assertNotRequirementMatches(Requirement requirement, Capability capability) {
 		if (!(requirement instanceof BundleRequirement) || !(capability instanceof BundleCapability))
 			return;
-		assertFalse("Requirement matches capability", ((BundleRequirement) requirement).matches((BundleCapability) capability));
+		assertFalse("Requirement matches capability",
+				((BundleRequirement) requirement).matches((BundleCapability) capability));
 	}
 
 	private void assertRequirementMatches(Requirement requirement, Capability capability) {
 		if (!(requirement instanceof BundleRequirement) || !(capability instanceof BundleCapability))
 			return;
-		assertTrue("Requirement does not match capability", ((BundleRequirement) requirement).matches((BundleCapability) capability));
+		assertTrue("Requirement does not match capability",
+				((BundleRequirement) requirement).matches((BundleCapability) capability));
 	}
 
 	private void assertRequirements(List requirements, int index) {
@@ -543,6 +529,7 @@ public class BasicTest extends AbstractResourceTest {
 	}
 
 	private String getType(BundleRevision revision) {
-		return (revision.getTypes() & BundleRevision.TYPE_FRAGMENT) == 0 ? IdentityNamespace.TYPE_BUNDLE : IdentityNamespace.TYPE_FRAGMENT;
+		return (revision.getTypes() & BundleRevision.TYPE_FRAGMENT) == 0 ? IdentityNamespace.TYPE_BUNDLE
+				: IdentityNamespace.TYPE_FRAGMENT;
 	}
 }

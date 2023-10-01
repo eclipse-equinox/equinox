@@ -50,16 +50,26 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 	private static String dnChain07TrueEscaped = escapeStar(dnChain07True);
 	private static String dnChain08TrueEscaped = escapeStar(dnChain08True);
 
-	private static ConditionInfo info01True = new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {"-"}); //$NON-NLS-1$
-	private static ConditionInfo info02False = new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {"-", "!"}); //$NON-NLS-1$ //$NON-NLS-2$
-	private static ConditionInfo info03True = new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {dnChain01True});
-	private static ConditionInfo info04True = new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {dnChain02True});
-	private static ConditionInfo info05True = new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {dnChain03True});
-	private static ConditionInfo info06False = new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {dnChain04False});
-	private static ConditionInfo info07False = new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {dnChain05False});
-	private static ConditionInfo info08True = new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {dnChain06True});
-	private static ConditionInfo info09True = new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {dnChain07True});
-	private static ConditionInfo info10True = new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {dnChain08True});
+	private static ConditionInfo info01True = new ConditionInfo(BundleSignerCondition.class.getName(),
+			new String[] { "-" }); //$NON-NLS-1$
+	private static ConditionInfo info02False = new ConditionInfo(BundleSignerCondition.class.getName(),
+			new String[] { "-", "!" }); //$NON-NLS-1$ //$NON-NLS-2$
+	private static ConditionInfo info03True = new ConditionInfo(BundleSignerCondition.class.getName(),
+			new String[] { dnChain01True });
+	private static ConditionInfo info04True = new ConditionInfo(BundleSignerCondition.class.getName(),
+			new String[] { dnChain02True });
+	private static ConditionInfo info05True = new ConditionInfo(BundleSignerCondition.class.getName(),
+			new String[] { dnChain03True });
+	private static ConditionInfo info06False = new ConditionInfo(BundleSignerCondition.class.getName(),
+			new String[] { dnChain04False });
+	private static ConditionInfo info07False = new ConditionInfo(BundleSignerCondition.class.getName(),
+			new String[] { dnChain05False });
+	private static ConditionInfo info08True = new ConditionInfo(BundleSignerCondition.class.getName(),
+			new String[] { dnChain06True });
+	private static ConditionInfo info09True = new ConditionInfo(BundleSignerCondition.class.getName(),
+			new String[] { dnChain07True });
+	private static ConditionInfo info10True = new ConditionInfo(BundleSignerCondition.class.getName(),
+			new String[] { dnChain08True });
 
 	private Collection<Bundle> installedBundles = new ArrayList<>();
 

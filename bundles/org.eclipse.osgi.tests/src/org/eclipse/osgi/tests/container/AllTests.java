@@ -23,7 +23,6 @@ import org.junit.runners.Suite;
 		ModuleContainerUsageTest.class, //
 		NamespaceListTest.class, //
 		NamespaceListBuilderTest.class, //
-		ModuleWiringTest.class 
-})
+		ModuleWiringTest.class })
 public class AllTests {
 }

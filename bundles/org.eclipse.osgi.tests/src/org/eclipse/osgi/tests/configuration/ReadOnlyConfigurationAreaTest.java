@@ -31,7 +31,8 @@ import org.osgi.framework.BundleException;
 public class ReadOnlyConfigurationAreaTest extends TestCase {
 
 	public static Test suite() {
-		ConfigurationSessionTestSuite suite = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, ReadOnlyConfigurationAreaTest.class);
+		ConfigurationSessionTestSuite suite = new ConfigurationSessionTestSuite(PI_OSGI_TESTS,
+				ReadOnlyConfigurationAreaTest.class);
 		suite.setReadOnly(true);
 		addRequiredOSGiTestsBundles(suite);
 		return suite;
@@ -72,15 +73,17 @@ public class ReadOnlyConfigurationAreaTest extends TestCase {
 	}
 
 	/**
-	 * Tries to install a plug-in that has no manifest. Should fail because by default the manifest generation area
-	 * is under the configuration area (which is read-only here)
+	 * Tries to install a plug-in that has no manifest. Should fail because by
+	 * default the manifest generation area is under the configuration area (which
+	 * is read-only here)
 	 */
 	public void test2ndSession() throws BundleException, IOException {
 		// try to install plug-in
 		// ensure it is not installed
 		Bundle installed = null;
 		try {
-			installed = BundleTestingHelper.installBundle(getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle02");
+			installed = BundleTestingHelper.installBundle(getContext(),
+					OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle02");
 			// should have failed with BundleException, does not have a bundle manifest
 			fail("1.0");
 		} catch (BundleException be) {
@@ -101,15 +104,17 @@ public class ReadOnlyConfigurationAreaTest extends TestCase {
 	}
 
 	/**
-	 * Tries to install a plug-in that has manifest. Should fail because by default the manifest generation area
-	 * is under the configuration area (which is read-only here)
+	 * Tries to install a plug-in that has manifest. Should fail because by default
+	 * the manifest generation area is under the configuration area (which is
+	 * read-only here)
 	 */
 	public void test3rdSession() throws BundleException, IOException {
 		// install plug-in
 		// ensure it is not installed
 		Bundle installed = null;
 		try {
-			installed = BundleTestingHelper.installBundle(getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle03");
+			installed = BundleTestingHelper.installBundle(getContext(),
+					OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle03");
 			// should have failed - cannot install a bundle in read-only mode
 			fail("1.0");
 		} catch (BundleException be) {

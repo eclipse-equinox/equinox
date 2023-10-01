@@ -20,7 +20,8 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		System.out.println("test.tccl: start");
 		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
-		ClassLoader serviceTCCL = (ClassLoader) context.getService(context.getServiceReferences(ClassLoader.class.getName(), "(equinox.classloader.type=contextClassLoader)")[0]); //$NON-NLS-1$
+		ClassLoader serviceTCCL = (ClassLoader) context.getService(context
+				.getServiceReferences(ClassLoader.class.getName(), "(equinox.classloader.type=contextClassLoader)")[0]); //$NON-NLS-1$
 		if (tccl != serviceTCCL) {
 			BundleException e = new BundleException("Wrong thread context class loader found"); //$NON-NLS-1$
 			e.printStackTrace();
@@ -31,7 +32,8 @@ public class Activator implements BundleActivator {
 	public void stop(BundleContext context) throws Exception {
 		System.out.println("test.tccl: stop");
 		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
-		ClassLoader serviceTCCL = (ClassLoader) context.getService(context.getServiceReferences(ClassLoader.class.getName(), "(equinox.classloader.type=contextClassLoader)")[0]); //$NON-NLS-1$
+		ClassLoader serviceTCCL = (ClassLoader) context.getService(context
+				.getServiceReferences(ClassLoader.class.getName(), "(equinox.classloader.type=contextClassLoader)")[0]); //$NON-NLS-1$
 		if (tccl != serviceTCCL) {
 			BundleException e = new BundleException("Wrong thread context class loader found"); //$NON-NLS-1$
 			e.printStackTrace();

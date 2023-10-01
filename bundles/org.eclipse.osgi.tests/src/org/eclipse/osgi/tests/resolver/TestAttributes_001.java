@@ -43,12 +43,12 @@ public class TestAttributes_001 extends AbstractStateTest {
 		bundle_3 = create_bundle_3(sof);
 		bundle_4 = create_bundle_4(sof);
 		bundle_5 = create_bundle_5(sof);
-		//***************************************************
+		// ***************************************************
 		// stage a
 		// expect to pass =true
-		//***************************************************
+		// ***************************************************
 		addBundlesToState_a(state);
-		//***************************************************
+		// ***************************************************
 		try {
 			state.resolve();
 		} catch (Throwable t) {

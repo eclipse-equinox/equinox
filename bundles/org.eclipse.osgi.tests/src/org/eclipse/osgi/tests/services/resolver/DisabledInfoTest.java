@@ -193,14 +193,20 @@ public class DisabledInfoTest extends AbstractStateTest {
 
 	private State buildTestState() throws BundleException {
 		State state = buildEmptyState();
-		final String B1_MANIFEST = "Bundle-ManifestVersion: 1\n" + "Bundle-SymbolicName: b1\n" + "Bundle-Version: 1.0\n" + "Import-Package: b2"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-		BundleDescription b1 = state.getFactory().createBundleDescription(state, parseManifest(B1_MANIFEST), B1_LOCATION, 1);
+		final String B1_MANIFEST = "Bundle-ManifestVersion: 1\n" + "Bundle-SymbolicName: b1\n" + "Bundle-Version: 1.0\n" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				+ "Import-Package: b2"; //$NON-NLS-1$
+		BundleDescription b1 = state.getFactory().createBundleDescription(state, parseManifest(B1_MANIFEST),
+				B1_LOCATION, 1);
 		state.addBundle(b1);
-		final String B2_MANIFEST = "Bundle-ManifestVersion: 1\n" + "Bundle-SymbolicName: b2\n" + "Bundle-Version: 1.0\n" + "Export-Package: b2\n" + "Import-Package: b3"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		BundleDescription b2 = state.getFactory().createBundleDescription(state, parseManifest(B2_MANIFEST), B2_LOCATION, 2);
+		final String B2_MANIFEST = "Bundle-ManifestVersion: 1\n" + "Bundle-SymbolicName: b2\n" + "Bundle-Version: 1.0\n" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				+ "Export-Package: b2\n" + "Import-Package: b3"; //$NON-NLS-1$ //$NON-NLS-2$
+		BundleDescription b2 = state.getFactory().createBundleDescription(state, parseManifest(B2_MANIFEST),
+				B2_LOCATION, 2);
 		state.addBundle(b2);
-		final String B3_MANIFEST = "Bundle-ManifestVersion: 1\n" + "Bundle-SymbolicName: b3\n" + "Bundle-Version: 1.0\n" + "Export-Package: b3; version=1.0"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-		BundleDescription b3 = state.getFactory().createBundleDescription(state, parseManifest(B3_MANIFEST), B3_LOCATION, 3);
+		final String B3_MANIFEST = "Bundle-ManifestVersion: 1\n" + "Bundle-SymbolicName: b3\n" + "Bundle-Version: 1.0\n" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				+ "Export-Package: b3; version=1.0"; //$NON-NLS-1$
+		BundleDescription b3 = state.getFactory().createBundleDescription(state, parseManifest(B3_MANIFEST),
+				B3_LOCATION, 3);
 		state.addBundle(b3);
 		return state;
 	}
