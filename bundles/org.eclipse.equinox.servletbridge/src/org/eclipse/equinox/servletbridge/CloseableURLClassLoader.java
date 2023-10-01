@@ -40,7 +40,8 @@ public class CloseableURLClassLoader extends URLClassLoader {
 	static {
 		boolean registeredAsParallel;
 		try {
-			Method parallelCapableMetod = ClassLoader.class.getDeclaredMethod("registerAsParallelCapable", (Class[]) null); //$NON-NLS-1$
+			Method parallelCapableMetod = ClassLoader.class.getDeclaredMethod("registerAsParallelCapable", //$NON-NLS-1$
+					(Class[]) null);
 			parallelCapableMetod.setAccessible(true);
 			registeredAsParallel = ((Boolean) parallelCapableMetod.invoke(null, (Object[]) null)).booleanValue();
 		} catch (Throwable e) {
@@ -96,8 +97,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		}
 
 		/**
-		 * @throws IOException
-		 * Documented to avoid warning
+		 * @throws IOException Documented to avoid warning
 		 */
 		@Override
 		public JarFile getJarFile() throws IOException {
@@ -173,7 +173,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 	}
 
 	/**
-	 * @param urls the URLs from which to load classes and resources
+	 * @param urls   the URLs from which to load classes and resources
 	 * @param parent the parent class loader used for delegation
 	 * @see URLClassLoader
 	 */
@@ -182,14 +182,16 @@ public class CloseableURLClassLoader extends URLClassLoader {
 	}
 
 	/**
-	 * @param urls the URLs from which to load classes and resources
-	 * @param parent the parent class loader used for delegation
-	 * @param verifyJars flag to determine if jar file verification should be performed
+	 * @param urls       the URLs from which to load classes and resources
+	 * @param parent     the parent class loader used for delegation
+	 * @param verifyJars flag to determine if jar file verification should be
+	 *                   performed
 	 * @see URLClassLoader
 	 */
 	public CloseableURLClassLoader(URL[] urls, ClassLoader parent, boolean verifyJars) {
 		super(excludeFileJarURLS(urls), parent);
-		this.registeredAsParallel = CLOSEABLE_REGISTERED_AS_PARALLEL && this.getClass() == CloseableURLClassLoader.class;
+		this.registeredAsParallel = CLOSEABLE_REGISTERED_AS_PARALLEL
+				&& this.getClass() == CloseableURLClassLoader.class;
 		this.context = AccessController.getContext();
 		this.verifyJars = verifyJars;
 		for (URL url : urls) {
@@ -202,7 +204,8 @@ public class CloseableURLClassLoader extends URLClassLoader {
 
 	// @GuardedBy("loaders")
 	private boolean safeAddLoader(URL url) {
-		//assume all illegal characters have been properly encoded, so use URI class to unencode
+		// assume all illegal characters have been properly encoded, so use URI class to
+		// unencode
 		try {
 			File file = new File(toURI(url));
 			if (file.exists()) {
@@ -224,13 +227,15 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		if (!SCHEME_FILE.equals(url.getProtocol())) {
 			throw new IllegalArgumentException("bad prototcol: " + url.getProtocol()); //$NON-NLS-1$
 		}
-		//URL behaves differently across platforms so for file: URLs we parse from string form
+		// URL behaves differently across platforms so for file: URLs we parse from
+		// string form
 		String pathString = url.toExternalForm().substring(5);
-		//ensure there is a leading slash to handle common malformed URLs such as file:c:/tmp
+		// ensure there is a leading slash to handle common malformed URLs such as
+		// file:c:/tmp
 		if (pathString.indexOf('/') != 0)
 			pathString = '/' + pathString;
 		else if (pathString.startsWith(UNC_PREFIX) && !pathString.startsWith(UNC_PREFIX, 2)) {
-			//URL encodes UNC path with two slashes, but URI uses four (see bug 207103)
+			// URL encodes UNC path with two slashes, but URI uses four (see bug 207103)
 			pathString = ensureUNCPath(pathString);
 		}
 		return new URI(SCHEME_FILE, null, pathString, null);
@@ -243,7 +248,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		int len = path.length();
 		StringBuilder result = new StringBuilder(len);
 		for (int i = 0; i < 4; i++) {
-			//	if we have hit the first non-slash character, add another leading slash
+			// if we have hit the first non-slash character, add another leading slash
 			if (i >= len || result.length() > 0 || path.charAt(i) != '/')
 				result.append('/');
 		}
@@ -362,7 +367,8 @@ public class CloseableURLClassLoader extends URLClassLoader {
 			// previously sealed case
 			if (!pkg.isSealed(jarFileURL)) {
 				// this URL does not seal; ERROR
-				throw new SecurityException("The package '" + packageName + "' was previously loaded and is already sealed."); //$NON-NLS-1$ //$NON-NLS-2$
+				throw new SecurityException(
+						"The package '" + packageName + "' was previously loaded and is already sealed."); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		} else {
 			// previously unsealed case
@@ -378,8 +384,10 @@ public class CloseableURLClassLoader extends URLClassLoader {
 					sealed = mainAttributes.getValue(Name.SEALED);
 			}
 			if (Boolean.valueOf(sealed).booleanValue()) {
-				// this manifest attempts to seal when package defined previously unsealed; ERROR
-				throw new SecurityException("The package '" + packageName + "' was previously loaded unsealed. Cannot seal package."); //$NON-NLS-1$ //$NON-NLS-2$
+				// this manifest attempts to seal when package defined previously unsealed;
+				// ERROR
+				throw new SecurityException(
+						"The package '" + packageName + "' was previously loaded unsealed. Cannot seal package."); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 	}
@@ -432,8 +440,9 @@ public class CloseableURLClassLoader extends URLClassLoader {
 	}
 
 	/**
-	 * The "close" method is called when the class loader is no longer needed and we should close any open resources.
-	 * In particular this method will close the jar files associated with this class loader.
+	 * The "close" method is called when the class loader is no longer needed and we
+	 * should close any open resources. In particular this method will close the jar
+	 * files associated with this class loader.
 	 */
 	@Override
 	public void close() {
