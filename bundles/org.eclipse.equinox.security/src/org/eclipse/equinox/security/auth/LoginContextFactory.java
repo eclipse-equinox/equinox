@@ -18,26 +18,28 @@ import javax.security.auth.callback.CallbackHandler;
 import org.eclipse.equinox.internal.security.auth.SecureContext;
 
 /**
- * The LoginContextFactory class is the entry point for the login support for the platform.
- * Use it to create login contexts.
+ * The LoginContextFactory class is the entry point for the login support for
+ * the platform. Use it to create login contexts.
  * <p>
  * This class is not intended to be instantiated or extended by clients.
  * </p>
+ * 
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
 final public class LoginContextFactory {
 
 	/**
-	 * Creates application-specific security context. The security context then can be used
-	 * to perform login, logout, and obtain Subject information.
+	 * Creates application-specific security context. The security context then can
+	 * be used to perform login, logout, and obtain Subject information.
 	 * <p>
-	 * Due to the way default Java Configuration is initialized, this context should be
-	 * created first. If standard JAAS files are used with the standard configuration,
-	 * the initialization will fail unless this context created first, prior to
-	 * any calls to {@link #createContext(String)}.
+	 * Due to the way default Java Configuration is initialized, this context should
+	 * be created first. If standard JAAS files are used with the standard
+	 * configuration, the initialization will fail unless this context created
+	 * first, prior to any calls to {@link #createContext(String)}.
 	 * </p>
+	 * 
 	 * @param configName the name of login configuration to use
-	 * @param configFile points to the standard JAAS configuration file 
+	 * @param configFile points to the standard JAAS configuration file
 	 * @return new security context
 	 */
 	public static ILoginContext createContext(String configName, URL configFile) {
@@ -45,17 +47,18 @@ final public class LoginContextFactory {
 	}
 
 	/**
-	 * Creates application-specific security context. The security context then can be used
-	 * to perform login, logout, and obtain Subject information.
+	 * Creates application-specific security context. The security context then can
+	 * be used to perform login, logout, and obtain Subject information.
 	 * <p>
-	 * Due to the way default Java Configuration is initialized, this context should be
-	 * created first. If standard JAAS files are used with the standard configuration,
-	 * the initialization will fail unless this context created first, prior to
-	 * any calls to {@link #createContext(String)}.
+	 * Due to the way default Java Configuration is initialized, this context should
+	 * be created first. If standard JAAS files are used with the standard
+	 * configuration, the initialization will fail unless this context created
+	 * first, prior to any calls to {@link #createContext(String)}.
 	 * </p>
+	 * 
 	 * @param configName the name of login configuration to use
-	 * @param configFile points to the standard JAAS configuration file 
-	 * @param handler optional callback handler, might be <code>null</code>
+	 * @param configFile points to the standard JAAS configuration file
+	 * @param handler    optional callback handler, might be <code>null</code>
 	 * @return new security context
 	 */
 	public static ILoginContext createContext(String configName, URL configFile, CallbackHandler handler) {
@@ -63,8 +66,9 @@ final public class LoginContextFactory {
 	}
 
 	/**
-	 * Creates application-specific security context. The security context then can be used
-	 * to perform login, logout, and obtain Subject information.
+	 * Creates application-specific security context. The security context then can
+	 * be used to perform login, logout, and obtain Subject information.
+	 * 
 	 * @param configName the name of login configuration to use
 	 * @return new security context
 	 */

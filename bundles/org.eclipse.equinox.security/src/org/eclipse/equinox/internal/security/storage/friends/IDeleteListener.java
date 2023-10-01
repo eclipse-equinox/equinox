@@ -14,8 +14,8 @@
 package org.eclipse.equinox.internal.security.storage.friends;
 
 /**
- * Classes that wish to be notified when secure storage is deleted need to implement
- * this interface and register with InternalExchangeUtils.
+ * Classes that wish to be notified when secure storage is deleted need to
+ * implement this interface and register with InternalExchangeUtils.
  */
 public interface IDeleteListener {
 

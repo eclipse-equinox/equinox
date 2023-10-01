@@ -16,8 +16,8 @@ package org.eclipse.equinox.internal.security.storage;
 import org.eclipse.core.runtime.IPath;
 
 /**
- * If the key contains a slash character then we must use a double-slash to indicate 
- * the end of the path/the beginning of the key.
+ * If the key contains a slash character then we must use a double-slash to
+ * indicate the end of the path/the beginning of the key.
  */
 public class PersistedPath {
 
@@ -61,7 +61,7 @@ public class PersistedPath {
 		// check to see if we have an indicator which tells us where the path ends
 		int index = fullPath.indexOf(DOUBLE_SLASH);
 		if (index == -1) {
-			// we don't have a double-slash telling us where the path ends 
+			// we don't have a double-slash telling us where the path ends
 			// so the path is up to the last slash character
 			int lastIndex = fullPath.lastIndexOf(IPath.SEPARATOR);
 			if (lastIndex == -1) {
@@ -78,13 +78,13 @@ public class PersistedPath {
 			key = fullPath.substring(index + 2);
 		}
 
-		// XXX is this needed? 
+		// XXX is this needed?
 		// adjust if we have an absolute path
-		//		if (path != null)
-		//			if (path.length() == 0)
-		//				path = null;
-		//			else if (path.charAt(0) == IPath.SEPARATOR)
-		//				path = path.substring(1);
+		// if (path != null)
+		// if (path.length() == 0)
+		// path = null;
+		// else if (path.charAt(0) == IPath.SEPARATOR)
+		// path = path.substring(1);
 	}
 
 }

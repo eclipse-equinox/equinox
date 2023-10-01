@@ -20,24 +20,27 @@ import org.eclipse.equinox.internal.security.credentials.EquinoxPrivateCredentia
 import org.eclipse.equinox.internal.security.credentials.EquinoxPublicCredential;
 
 /**
- * This factory can be used by login modules to create Equinox public and private 
- * credentials. It is expected that as a result of successful login credentials
- * are added to the {@link Subject}.  
- * <p>  
+ * This factory can be used by login modules to create Equinox public and
+ * private credentials. It is expected that as a result of successful login
+ * credentials are added to the {@link Subject}.
+ * <p>
  * This class is not intended to be instantiated or extended by clients.
- * </p> 
+ * </p>
+ * 
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
 final public class CredentialsFactory {
 
 	/**
-	 * Login modules can use this method to create new public credentials as a result 
-	 * of the login process. 
-	 * @see Subject#getPublicCredentials() 
-	 * @param name user's name
+	 * Login modules can use this method to create new public credentials as a
+	 * result of the login process.
+	 * 
+	 * @see Subject#getPublicCredentials()
+	 * @param name        user's name
 	 * @param primaryRole user's primary role, <code>null</code> if not available
-	 * @param providerID the ID of the creator of this public credential; if provider was
-	 * described as an extension, use the extension ID
+	 * @param providerID  the ID of the creator of this public credential; if
+	 *                    provider was described as an extension, use the extension
+	 *                    ID
 	 * @return new public credential
 	 */
 	static public IPublicCredential publicCredential(String name, Principal primaryRole, String providerID) {
@@ -45,13 +48,15 @@ final public class CredentialsFactory {
 	}
 
 	/**
-	 * Login modules can use this method to create new public credentials as a result 
-	 * of the login process. 
-	 * @see Subject#getPublicCredentials() 
-	 * @param name user's name
-	 * @param roles user's roles, <code>null</code> if not available
-	 * @param providerID the ID of the creator of this public credential; if provider was
-	 * described as an extension, use the extension ID
+	 * Login modules can use this method to create new public credentials as a
+	 * result of the login process.
+	 * 
+	 * @see Subject#getPublicCredentials()
+	 * @param name       user's name
+	 * @param roles      user's roles, <code>null</code> if not available
+	 * @param providerID the ID of the creator of this public credential; if
+	 *                   provider was described as an extension, use the extension
+	 *                   ID
 	 * @return new public credential
 	 */
 	static public IPublicCredential publicCredential(String name, Principal[] roles, String providerID) {
@@ -60,10 +65,12 @@ final public class CredentialsFactory {
 
 	/**
 	 * Login modules can use this method to create new private credentials.
-	 * @see Subject#getPrivateCredentials() 
+	 * 
+	 * @see Subject#getPrivateCredentials()
 	 * @param privateKey the private key to be stored in this credential
-	 * @param providerID the ID of the creator of this private credential; if provider was
-	 * described as an extension, use the extension ID
+	 * @param providerID the ID of the creator of this private credential; if
+	 *                   provider was described as an extension, use the extension
+	 *                   ID
 	 * @return new private credential
 	 */
 	static public IPrivateCredential privateCredential(PBEKeySpec privateKey, String providerID) {

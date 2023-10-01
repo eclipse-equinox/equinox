@@ -54,7 +54,8 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 		public String description;
 		public List<String> hints;
 
-		public ExtStorageModule(String id, String obsoleteID, IConfigurationElement element, int priority, String name, String description, List<String> hints) {
+		public ExtStorageModule(String id, String obsoleteID, IConfigurationElement element, int priority, String name,
+				String description, List<String> hints) {
 			super();
 			this.element = element;
 			this.moduleID = id;
@@ -149,14 +150,16 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 			Object clazz;
 			try {
 				clazz = element.createExecutableExtension(CLASS_NAME);
-				// Bug 537833 - on some systems, the password provider does not work (e.g. Linux with KDE desktop) so these
+				// Bug 537833 - on some systems, the password provider does not work (e.g. Linux
+				// with KDE desktop) so these
 				// providers will request validation
 				if (clazz instanceof IValidatingPasswordProvider && !((IValidatingPasswordProvider) clazz).isValid())
 					continue;
 			} catch (CoreException e) {
 				continue;
 			}
-			allAvailableModules.add(new ExtStorageModule(moduleID, obsoletes, element, priority, name, description, suppliedHints));
+			allAvailableModules.add(
+					new ExtStorageModule(moduleID, obsoletes, element, priority, name, description, suppliedHints));
 		}
 
 		Collections.sort(allAvailableModules, (o1, o2) -> {
@@ -188,13 +191,15 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 			try {
 				clazz = module.element.createExecutableExtension(CLASS_NAME);
 			} catch (CoreException e) {
-				reportError(SecAuthMessages.instantiationFailed, module.element.getAttribute(CLASS_NAME), module.element, e);
+				reportError(SecAuthMessages.instantiationFailed, module.element.getAttribute(CLASS_NAME),
+						module.element, e);
 				continue;
 			}
 			if (!(clazz instanceof PasswordProvider))
 				continue;
 
-			PasswordProviderModuleExt result = new PasswordProviderModuleExt((PasswordProvider) clazz, module.moduleID, module.obsoleteID);
+			PasswordProviderModuleExt result = new PasswordProviderModuleExt((PasswordProvider) clazz, module.moduleID,
+					module.obsoleteID);
 
 			// cache the result
 			synchronized (modules) {
@@ -222,7 +227,7 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	// Synch local cache with the registry 
+	// Synch local cache with the registry
 	@Override
 	public void added(IExtension[] extensions) {
 		clearCaches();
@@ -244,7 +249,8 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 	}
 
 	/**
-	 * Clear whole cache as priorities might have changed after new modules were added.
+	 * Clear whole cache as priorities might have changed after new modules were
+	 * added.
 	 */
 	public void clearCaches() {
 		synchronized (modules) {
@@ -264,10 +270,11 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 	}
 
 	protected HashSet<String> getDisabledModules() {
-		IScopeContext[] scopes = {ConfigurationScope.INSTANCE, DefaultScope.INSTANCE};
+		IScopeContext[] scopes = { ConfigurationScope.INSTANCE, DefaultScope.INSTANCE };
 		String defaultPreferenceValue = ""; //$NON-NLS-1$
 		IPreferencesService preferencesService = getPreferencesService();
-		String tmp = preferencesService.getString(AuthPlugin.PI_AUTH, IStorageConstants.DISABLED_PROVIDERS_KEY, defaultPreferenceValue, scopes);
+		String tmp = preferencesService.getString(AuthPlugin.PI_AUTH, IStorageConstants.DISABLED_PROVIDERS_KEY,
+				defaultPreferenceValue, scopes);
 		if (tmp == null || tmp.length() == 0)
 			return null;
 		HashSet<String> disabledModules = new HashSet<>();

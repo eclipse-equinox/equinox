@@ -17,13 +17,14 @@ package org.eclipse.equinox.internal.security.storage;
  * This is an implementation of Base64 encoding allowing byte sequences to be
  * converted into strings - safe to be stored in basic Java structures.
  * <p>
- * This Base64 encoding does not insert end-of-line characters
- * (but can properly decode strings with EOLs inserted).
+ * This Base64 encoding does not insert end-of-line characters (but can properly
+ * decode strings with EOLs inserted).
  * </p>
  */
 public class Base64 {
 
-	final static private char[] encodeTable = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray(); //$NON-NLS-1$
+	final static private char[] encodeTable = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/" //$NON-NLS-1$
+			.toCharArray();
 
 	final static private byte BASE64_PADDING = 126;
 	final static private byte BASE64_INVALID = 127;

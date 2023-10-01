@@ -214,7 +214,8 @@ public class SecurePreferences {
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Basic put() and get()
 
-	public void put(String key, String value, boolean encrypt, SecurePreferencesContainer container) throws StorageException {
+	public void put(String key, String value, boolean encrypt, SecurePreferencesContainer container)
+			throws StorageException {
 		if (key == null)
 			throw new NullPointerException();
 		checkRemoved();
@@ -243,7 +244,8 @@ public class SecurePreferences {
 		}
 
 		// value must not be null at this point
-		CryptoData encryptedValue = getRoot().getCipher().encrypt(getRoot().getPassword(null, container, true), StorageUtils.getBytes(value));
+		CryptoData encryptedValue = getRoot().getCipher().encrypt(getRoot().getPassword(null, container, true),
+				StorageUtils.getBytes(value));
 		internalPut(key, encryptedValue.toString());
 		markModified();
 	}
@@ -364,12 +366,11 @@ public class SecurePreferences {
 	}
 
 	/**
-	 * In additions to standard Preferences descriptions of paths, the following 
-	 * conditions apply:
-	 * Path can contains ASCII characters between 32 and 126 (alphanumerics and printable
-	 * characters). 
-	 * Path can not contain two or more consecutive forward slashes ('/').
-	 * Path can not end with a trailing forward slash. 
+	 * In additions to standard Preferences descriptions of paths, the following
+	 * conditions apply: Path can contains ASCII characters between 32 and 126
+	 * (alphanumerics and printable characters). Path can not contain two or more
+	 * consecutive forward slashes ('/'). Path can not end with a trailing forward
+	 * slash.
 	 */
 	private boolean isValid(String path) {
 		if (path == null || path.length() == 0)
@@ -390,14 +391,16 @@ public class SecurePreferences {
 	/////////////////////////////////////////////////////////////////////////////////
 	// Variations of get() / put() methods adapted to different data types
 
-	public boolean getBoolean(String key, boolean defaultValue, SecurePreferencesContainer container) throws StorageException {
+	public boolean getBoolean(String key, boolean defaultValue, SecurePreferencesContainer container)
+			throws StorageException {
 		if (!hasKey(key))
 			return defaultValue;
 		String value = get(key, null, container);
 		return value == null ? defaultValue : TRUE.equalsIgnoreCase(value);
 	}
 
-	public void putBoolean(String key, boolean value, boolean encrypt, SecurePreferencesContainer container) throws StorageException {
+	public void putBoolean(String key, boolean value, boolean encrypt, SecurePreferencesContainer container)
+			throws StorageException {
 		put(key, value ? TRUE : FALSE, encrypt, container);
 	}
 
@@ -414,7 +417,8 @@ public class SecurePreferences {
 		}
 	}
 
-	public void putInt(String key, int value, boolean encrypt, SecurePreferencesContainer container) throws StorageException {
+	public void putInt(String key, int value, boolean encrypt, SecurePreferencesContainer container)
+			throws StorageException {
 		put(key, Integer.toString(value), encrypt, container);
 	}
 
@@ -431,11 +435,13 @@ public class SecurePreferences {
 		}
 	}
 
-	public void putLong(String key, long value, boolean encrypt, SecurePreferencesContainer container) throws StorageException {
+	public void putLong(String key, long value, boolean encrypt, SecurePreferencesContainer container)
+			throws StorageException {
 		put(key, Long.toString(value), encrypt, container);
 	}
 
-	public float getFloat(String key, float defaultValue, SecurePreferencesContainer container) throws StorageException {
+	public float getFloat(String key, float defaultValue, SecurePreferencesContainer container)
+			throws StorageException {
 		if (!hasKey(key))
 			return defaultValue;
 		String value = get(key, null, container);
@@ -448,11 +454,13 @@ public class SecurePreferences {
 		}
 	}
 
-	public void putFloat(String key, float value, boolean encrypt, SecurePreferencesContainer container) throws StorageException {
+	public void putFloat(String key, float value, boolean encrypt, SecurePreferencesContainer container)
+			throws StorageException {
 		put(key, Float.toString(value), encrypt, container);
 	}
 
-	public double getDouble(String key, double defaultValue, SecurePreferencesContainer container) throws StorageException {
+	public double getDouble(String key, double defaultValue, SecurePreferencesContainer container)
+			throws StorageException {
 		if (!hasKey(key))
 			return defaultValue;
 		String value = get(key, null, container);
@@ -465,18 +473,21 @@ public class SecurePreferences {
 		}
 	}
 
-	public void putDouble(String key, double value, boolean encrypt, SecurePreferencesContainer container) throws StorageException {
+	public void putDouble(String key, double value, boolean encrypt, SecurePreferencesContainer container)
+			throws StorageException {
 		put(key, Double.toString(value), encrypt, container);
 	}
 
-	public byte[] getByteArray(String key, byte[] defaultValue, SecurePreferencesContainer container) throws StorageException {
+	public byte[] getByteArray(String key, byte[] defaultValue, SecurePreferencesContainer container)
+			throws StorageException {
 		if (!hasKey(key))
 			return defaultValue;
 		String value = get(key, null, container);
 		return Base64.decode(value);
 	}
 
-	public void putByteArray(String key, byte[] value, boolean encrypt, SecurePreferencesContainer container) throws StorageException {
+	public void putByteArray(String key, byte[] value, boolean encrypt, SecurePreferencesContainer container)
+			throws StorageException {
 		put(key, Base64.encode(value), encrypt, container);
 	}
 

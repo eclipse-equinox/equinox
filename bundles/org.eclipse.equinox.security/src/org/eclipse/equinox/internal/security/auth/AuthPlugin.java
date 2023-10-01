@@ -48,8 +48,8 @@ public class AuthPlugin implements BundleActivator {
 	public static boolean DEBUG_LOGIN_FRAMEWORK = false;
 
 	/*
-	 * Returns the singleton for this Activator. Callers should be aware that
-	 * this will return null if the bundle is not active.
+	 * Returns the singleton for this Activator. Callers should be aware that this
+	 * will return null if the bundle is not active.
 	 */
 	public static AuthPlugin getDefault() {
 		return singleton;
@@ -68,7 +68,8 @@ public class AuthPlugin implements BundleActivator {
 		if (DEBUG)
 			DEBUG_LOGIN_FRAMEWORK = getBooleanOption(PI_AUTH + "/debug/loginFramework", false); //$NON-NLS-1$
 
-		// SecurePlatformInternal is started lazily when first SecureContext is created (this reduces 
+		// SecurePlatformInternal is started lazily when first SecureContext is created
+		// (this reduces
 		// time spend in the bundle activator).
 	}
 
@@ -159,7 +160,8 @@ public class AuthPlugin implements BundleActivator {
 	 * in the bundle dependency stack is really sub-optimal.
 	 * 
 	 * In particular, logging with RuntimeLog on shutdown doesn't work as Platform
-	 * shuts down (removing listeners from RuntimeLog) before this bundle shuts down.
+	 * shuts down (removing listeners from RuntimeLog) before this bundle shuts
+	 * down.
 	 * 
 	 * As such, until there is improved logging, the errors that occur on shutdown
 	 * should use this method. However, errors occuring during normal operations

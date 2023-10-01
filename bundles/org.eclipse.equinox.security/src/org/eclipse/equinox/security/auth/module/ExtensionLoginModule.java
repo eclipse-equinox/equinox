@@ -21,21 +21,25 @@ import javax.security.auth.spi.LoginModule;
 import org.eclipse.equinox.internal.security.auth.ext.loader.ExtLoginModuleLoader;
 
 /**
- * This class allows login modules specified via <code>loginModule</code> extension point
- * to be included in the login configurations.
+ * This class allows login modules specified via <code>loginModule</code>
+ * extension point to be included in the login configurations.
  * <p>
- * To include your login module in a login configuration, specify this class as a login module 
- * using its qualified Java name. Options specified for such entry should contain an option named 
- * <code>extensionId</code> set to the qualified ID of the extension describing your login module.
- * </p><p>
+ * To include your login module in a login configuration, specify this class as
+ * a login module using its qualified Java name. Options specified for such
+ * entry should contain an option named <code>extensionId</code> set to the
+ * qualified ID of the extension describing your login module.
+ * </p>
+ * <p>
  * This class should not be extended or instantiated directly.
  * </p>
+ * 
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
 final public class ExtensionLoginModule implements LoginModule {
 
 	/**
-	 * The key for the option that specifies an extension describing the actual login module 
+	 * The key for the option that specifies an extension describing the actual
+	 * login module
 	 */
 	static final public String OPTION_MODULE_POINT = "extensionId"; //$NON-NLS-1$
 
@@ -49,7 +53,8 @@ final public class ExtensionLoginModule implements LoginModule {
 	}
 
 	@Override
-	public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
+	public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState,
+			Map<String, ?> options) {
 		target = ExtLoginModuleLoader.load(options);
 		target.initialize(subject, callbackHandler, sharedState, options);
 	}

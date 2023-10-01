@@ -32,8 +32,8 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.util.NLS;
 
 /**
- * Root secure preference node. In addition to usual things it stores location, modified
- * status, encryption algorithm, and performs save and load. 
+ * Root secure preference node. In addition to usual things it stores location,
+ * modified status, encryption algorithm, and performs save and load.
  */
 public class SecurePreferencesRoot extends SecurePreferences implements IStorageConstants {
 
@@ -80,7 +80,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 
 	private JavaEncryption cipher = new JavaEncryption();
 
-	private Map<String, PasswordExt> passwordCache = new HashMap<>(5); // cached passwords: module ID -> PasswordExt 
+	private Map<String, PasswordExt> passwordCache = new HashMap<>(5); // cached passwords: module ID -> PasswordExt
 
 	public SecurePreferencesRoot(URL location) throws IOException {
 		super(null, null);
@@ -118,7 +118,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 		} catch (IllegalArgumentException e) {
 			String msg = NLS.bind(SecAuthMessages.badStorageURL, location.toString());
 			AuthPlugin.getDefault().logError(msg, e);
-			location = null; // don't attempt to use it 
+			location = null; // don't attempt to use it
 			return;
 		}
 
@@ -168,7 +168,8 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 			if (callback != null) {
 				Boolean response = callback.ask(SecAuthMessages.fileModifiedMsg);
 				if (response == null)
-					AuthPlugin.getDefault().frameworkLogError(SecAuthMessages.fileModifiedNote, FrameworkLogEntry.WARNING, null);
+					AuthPlugin.getDefault().frameworkLogError(SecAuthMessages.fileModifiedNote,
+							FrameworkLogEntry.WARNING, null);
 				else if (!response.booleanValue())
 					return; // by default go ahead with save
 			}
@@ -196,18 +197,20 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 	}
 
 	/**
-	 * Provides password for a new entry using:
-	 * 1) default password, if any
-	 * 2a) if options specify usage of specific module, that module is polled to produce password
-	 * 2b) otherwise, password provider with highest priority is used to produce password
+	 * Provides password for a new entry using: 1) default password, if any 2a) if
+	 * options specify usage of specific module, that module is polled to produce
+	 * password 2b) otherwise, password provider with highest priority is used to
+	 * produce password
 	 */
-	public PasswordExt getPassword(String moduleID, IPreferencesContainer container, boolean encryption) throws StorageException {
+	public PasswordExt getPassword(String moduleID, IPreferencesContainer container, boolean encryption)
+			throws StorageException {
 		if (encryption) { // provides password for a new entry
 			PasswordExt defaultPassword = getDefaultPassword(container);
 			if (defaultPassword != null)
 				return defaultPassword;
 			moduleID = getDefaultModuleID(container);
-		} else { // provides password for previously encrypted entry using its specified password provider module
+		} else { // provides password for previously encrypted entry using its specified password
+					// provider module
 			if (moduleID == null)
 				throw new StorageException(StorageException.NO_SECURE_MODULE, SecAuthMessages.invalidEntryFormat);
 			if (DEFAULT_PASSWORD_ID.equals(moduleID)) { // was default password used?
@@ -240,7 +243,8 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 					return passwordCache.get(key);
 			}
 
-			// if this is (a headless run or JUnit) and prompt hint is not set up, set it to "false"
+			// if this is (a headless run or JUnit) and prompt hint is not set up, set it to
+			// "false"
 			boolean supressPrompts = !CallbacksProvider.getDefault().runningUI() || InternalExchangeUtils.isJUnitApp();
 			if (supressPrompts && container != null && !container.hasOption(IProviderHints.PROMPT_USER)) {
 				((SecurePreferencesContainer) container).setOption(IProviderHints.PROMPT_USER, Boolean.FALSE);
@@ -391,8 +395,8 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 	}
 
 	/**
-	 * Generates random string to be stored for password verification. String format:
-	 * <random1>\t<random2>\t<random2>\t<random1>
+	 * Generates random string to be stored for password verification. String
+	 * format: <random1>\t<random2>\t<random2>\t<random1>
 	 */
 	private String createTestString() {
 		SecureRandom rand = new SecureRandom();
@@ -415,12 +419,12 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 
 	/**
 	 * Checks if the string is the hard-coded original password verification sample
-	 * or a string generated according to the rules in {@link #createTestString()}.  
+	 * or a string generated according to the rules in {@link #createTestString()}.
 	 */
 	private boolean verifyTestString(String test) {
 		if (test == null || test.length() == 0)
 			return false;
-		// backward compatibility: check if it is the original hard-coded string 
+		// backward compatibility: check if it is the original hard-coded string
 		if (PASSWORD_VERIFICATION_SAMPLE.equals(test))
 			return true;
 		String[] parts = test.split("\t"); //$NON-NLS-1$
@@ -435,24 +439,24 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 				return false;
 			try {
 				switch (i) {
-					case 0 :
-						num1 = Long.decode(parts[i]).longValue();
-						break;
-					case 1 :
-						num2 = Long.decode(parts[i]).longValue();
-						break;
-					case 2 : {
-						long tmp = Long.decode(parts[i]).longValue();
-						if (tmp != num2)
-							return false;
-						break;
-					}
-					case 3 : {
-						long tmp = Long.decode(parts[i]).longValue();
-						if (tmp != num1)
-							return false;
-						break;
-					}
+				case 0:
+					num1 = Long.decode(parts[i]).longValue();
+					break;
+				case 1:
+					num2 = Long.decode(parts[i]).longValue();
+					break;
+				case 2: {
+					long tmp = Long.decode(parts[i]).longValue();
+					if (tmp != num2)
+						return false;
+					break;
+				}
+				case 3: {
+					long tmp = Long.decode(parts[i]).longValue();
+					if (tmp != num1)
+						return false;
+					break;
+				}
 				}
 			} catch (NumberFormatException e) {
 				return false;

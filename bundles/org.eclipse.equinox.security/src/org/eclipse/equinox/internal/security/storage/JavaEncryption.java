@@ -32,10 +32,9 @@ import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.osgi.util.NLS;
 
 /**
- * Note that algorithm detection skips aliases:
- *    Alg.Alias.Cipher.ABC
- * only a few aliases are useful and it will be harder to separate human-readable
- * aliases from internal ones.
+ * Note that algorithm detection skips aliases: Alg.Alias.Cipher.ABC only a few
+ * aliases are useful and it will be harder to separate human-readable aliases
+ * from internal ones.
  *
  */
 public class JavaEncryption {
@@ -101,7 +100,8 @@ public class JavaEncryption {
 		if (cipherAlgorithm != null && keyFactoryAlgorithm != null) {
 			if (roundtrip(cipherAlgorithm, keyFactoryAlgorithm))
 				return;
-			// this is a bad situation - JVM cipher no longer available. Both log and throw an exception
+			// this is a bad situation - JVM cipher no longer available. Both log and throw
+			// an exception
 			String msg = NLS.bind(SecAuthMessages.noAlgorithm, cipherAlgorithm);
 			StorageException e = new StorageException(StorageException.INTERNAL_ERROR, msg);
 			AuthPlugin.getDefault().logError(msg, e);
@@ -110,7 +110,8 @@ public class JavaEncryption {
 		if (cipherAlgorithm == null || keyFactoryAlgorithm == null) {
 			IEclipsePreferences eclipseNode = ConfigurationScope.INSTANCE.getNode(AuthPlugin.PI_AUTH);
 			cipherAlgorithm = eclipseNode.get(IStorageConstants.CIPHER_KEY, IStorageConstants.DEFAULT_CIPHER);
-			keyFactoryAlgorithm = eclipseNode.get(IStorageConstants.KEY_FACTORY_KEY, IStorageConstants.DEFAULT_KEY_FACTORY);
+			keyFactoryAlgorithm = eclipseNode.get(IStorageConstants.KEY_FACTORY_KEY,
+					IStorageConstants.DEFAULT_KEY_FACTORY);
 		}
 		if (roundtrip(cipherAlgorithm, keyFactoryAlgorithm))
 			return;
@@ -147,7 +148,7 @@ public class JavaEncryption {
 			c.init(Cipher.ENCRYPT_MODE, key, entropy);
 			byte[] iv = null;
 
-			//check if IV is required by PBE algorithm
+			// check if IV is required by PBE algorithm
 			AlgorithmParameterSpec paramSpec;
 			try {
 				paramSpec = c.getParameters().getParameterSpec(PBEParameterSpec.class).getParameterSpec();
@@ -155,12 +156,13 @@ public class JavaEncryption {
 					iv = c.getIV();
 				}
 			} catch (InvalidParameterSpecException e) {
-				/*do nothing*/
+				/* do nothing */
 			}
 
 			byte[] result = c.doFinal(clearText);
 			return new CryptoData(passwordExt.getModuleID(), salt, result, iv);
-		} catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {
+		} catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException
+				| BadPaddingException e) {
 			handle(e, StorageException.ENCRYPTION_ERROR);
 			return null;
 		} catch (InvalidKeySpecException | NoSuchPaddingException | NoSuchAlgorithmException e) {
@@ -169,12 +171,14 @@ public class JavaEncryption {
 		}
 	}
 
-	public byte[] decrypt(PasswordExt passwordExt, CryptoData encryptedData) throws StorageException, IllegalStateException, IllegalBlockSizeException, BadPaddingException {
+	public byte[] decrypt(PasswordExt passwordExt, CryptoData encryptedData)
+			throws StorageException, IllegalStateException, IllegalBlockSizeException, BadPaddingException {
 		init();
 		return internalDecrypt(passwordExt, encryptedData);
 	}
 
-	private byte[] internalDecrypt(PasswordExt passwordExt, CryptoData encryptedData) throws StorageException, IllegalStateException, IllegalBlockSizeException, BadPaddingException {
+	private byte[] internalDecrypt(PasswordExt passwordExt, CryptoData encryptedData)
+			throws StorageException, IllegalStateException, IllegalBlockSizeException, BadPaddingException {
 		try {
 			SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(keyFactoryAlgorithm);
 			SecretKey key = keyFactory.generateSecret(passwordExt.getPassword());
@@ -196,7 +200,8 @@ public class JavaEncryption {
 
 			byte[] result = c.doFinal(encryptedData.getData());
 			return result;
-		} catch (InvalidAlgorithmParameterException | InvalidKeyException | InvalidKeySpecException | NoSuchPaddingException | NoSuchAlgorithmException e) {
+		} catch (InvalidAlgorithmParameterException | InvalidKeyException | InvalidKeySpecException
+				| NoSuchPaddingException | NoSuchAlgorithmException e) {
 			handle(e, StorageException.INTERNAL_ERROR);
 			return null;
 		}
@@ -213,8 +218,7 @@ public class JavaEncryption {
 	// Algorithm detection
 
 	/**
-	 * Result: Map:
-	 *    <String>cipher -> <String>keyFactory
+	 * Result: Map: <String>cipher -> <String>keyFactory
 	 */
 	public HashMap<String, String> detect() {
 		IUICallbacks callback = CallbacksProvider.getDefault().getCallback();

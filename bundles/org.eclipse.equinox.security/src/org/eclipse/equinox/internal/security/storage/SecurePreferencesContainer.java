@@ -24,17 +24,21 @@ import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
  * but a few notes on implementation design.
  * 
  * For a URL we get one secure preference tree that contains data. The top node
- * of that tree has a "root" type, it has special properties - the location, status,
- * and knowledge as to how persist the tree. 
+ * of that tree has a "root" type, it has special properties - the location,
+ * status, and knowledge as to how persist the tree.
  * 
- * On the user side - let's say we have the following preferences open via factory:
+ * On the user side - let's say we have the following preferences open via
+ * factory:
+ * 
  * <pre>
  * UserPreferences1 (Options1, URL1)
  * UserPreferences2 (Options2, URL1)
  * UserPreferences3 (Options3, URL2)
  * UserPreferences4 (Options4, URL2)
  * </pre>
- * When we'll have 2 actual "back end" secure preferences tree with data: 
+ * 
+ * When we'll have 2 actual "back end" secure preferences tree with data:
+ * 
  * <pre>
  * [UserPreferences1] -> [Options1] + 
  *                                    \
@@ -48,23 +52,28 @@ import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
  *                                    /
  * [UserPreferences4] -> [Options4] +
  * </pre>
- * The user-facing nodes are actually a (node + options for this container). User-facing 
- * nodes are called wrappers as they primarily wrap secure preferences nodes. 
  * 
- * Containers are used to combine all wrappers created for the set of options. This way
- * users don't have to specify options on each get...() / put...() method. 
+ * The user-facing nodes are actually a (node + options for this container).
+ * User-facing nodes are called wrappers as they primarily wrap secure
+ * preferences nodes.
  * 
- * Additionally, containers cache wrappers so that navigation on preferences tree won't
- * create new wrappers every time process navigates from one node on the tree to another.
+ * Containers are used to combine all wrappers created for the set of options.
+ * This way users don't have to specify options on each get...() / put...()
+ * method.
+ * 
+ * Additionally, containers cache wrappers so that navigation on preferences
+ * tree won't create new wrappers every time process navigates from one node on
+ * the tree to another.
  * 
  * Password provider modules:
  * 
- * Note that only a single instance of each password provider is ever created. However,
- * those instances are passed options as arguments.
+ * Note that only a single instance of each password provider is ever created.
+ * However, those instances are passed options as arguments.
  */
 public class SecurePreferencesContainer implements IPreferencesContainer {
 
-	private Map<SecurePreferences, SecurePreferencesWrapper> wrappers = new HashMap<>(); // node -> SecurePreferencesWrapper
+	private Map<SecurePreferences, SecurePreferencesWrapper> wrappers = new HashMap<>(); // node ->
+																							// SecurePreferencesWrapper
 
 	final private Map<Object, Object> options;
 	final private SecurePreferencesRoot root;
@@ -110,7 +119,7 @@ public class SecurePreferencesContainer implements IPreferencesContainer {
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////
-	// Handling of options 
+	// Handling of options
 
 	@Override
 	public boolean hasOption(Object key) {

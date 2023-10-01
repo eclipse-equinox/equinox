@@ -40,7 +40,7 @@ public class SecureContext implements ILoginContext {
 		configName = configugationName;
 		SecurePlatformInternal platform = SecurePlatformInternal.getInstance();
 		if (configFile != null)
-			platform.addConfigURL(configFile); // this call MUST be done before start()		
+			platform.addConfigURL(configFile); // this call MUST be done before start()
 		platform.start();
 		this.handler = handler;
 	}

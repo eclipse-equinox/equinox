@@ -50,21 +50,23 @@ public class SecurePlatformInternal {
 	}
 
 	/**
-	 * Java docs specify that if multiple config files are passed in, they will be merged into one file.
-	 * Hence, aside from implementation details, no priority information is specified by the order
-	 * of config files. In this implementation we add customer's config file to the end of the list.
+	 * Java docs specify that if multiple config files are passed in, they will be
+	 * merged into one file. Hence, aside from implementation details, no priority
+	 * information is specified by the order of config files. In this implementation
+	 * we add customer's config file to the end of the list.
 	 * 
-	 * This method substitutes default login configuration:
-	 * Configuration Inquiries -> ConfigurationFederator ->
-	 * 		1) Extension Point supplied config providers;
-	 * 		2) default Java config provider ("login.configuration.provider")
+	 * This method substitutes default login configuration: Configuration Inquiries
+	 * -> ConfigurationFederator -> 1) Extension Point supplied config providers; 2)
+	 * default Java config provider ("login.configuration.provider")
 	 */
 	public void start() {
 		if (running)
 			return;
 
-		// Kludge for the bug 215828 "JAAS and server-side Eclipse": for the time being configuration 
-		// substitution is turned off if running on a server. It is likely possible to work around 
+		// Kludge for the bug 215828 "JAAS and server-side Eclipse": for the time being
+		// configuration
+		// substitution is turned off if running on a server. It is likely possible to
+		// work around
 		// configuration substitution using Java 5 methods, but not Java 1.4
 		BundleContext context = AuthPlugin.getDefault().getBundleContext();
 		String vmType = context.getProperty(VM_PROPERTY);
@@ -108,7 +110,8 @@ public class SecurePlatformInternal {
 				continue;
 			String path;
 			try {
-				// in case URL is contained in a JARed bundle, this will extract it into a file system
+				// in case URL is contained in a JARed bundle, this will extract it into a file
+				// system
 				path = FileLocator.toFileURL(url).toExternalForm();
 			} catch (IOException e) {
 				path = url.toExternalForm();

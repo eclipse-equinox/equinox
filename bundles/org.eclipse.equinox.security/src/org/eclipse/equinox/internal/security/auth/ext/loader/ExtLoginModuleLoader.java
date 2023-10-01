@@ -22,9 +22,9 @@ import org.eclipse.equinox.security.auth.module.ExtensionLoginModule;
 import org.eclipse.osgi.util.NLS;
 
 /**
- * Expected usage pattern: this method is called infrequently (a few times per life cycle;
- * most likely once). As such, no internal caches are maintained and it simply goes
- * to the registry and retrieves information when asked.
+ * Expected usage pattern: this method is called infrequently (a few times per
+ * life cycle; most likely once). As such, no internal caches are maintained and
+ * it simply goes to the registry and retrieves information when asked.
  */
 public class ExtLoginModuleLoader {
 
@@ -71,10 +71,11 @@ public class ExtLoginModuleLoader {
 		try {
 			LoginModule module = (LoginModule) element.createExecutableExtension(ATTR_MODULE_CLASS);
 			return module;
-			// future expandability: description is stored in the attribute "description" 
+			// future expandability: description is stored in the attribute "description"
 		} catch (CoreException e) {
 			String supplier = element.getContributor().getName();
-			String message = NLS.bind(SecAuthMessages.instantiationFailed, element.getAttribute(ATTR_MODULE_CLASS), supplier);
+			String message = NLS.bind(SecAuthMessages.instantiationFailed, element.getAttribute(ATTR_MODULE_CLASS),
+					supplier);
 			AuthPlugin.getDefault().logError(message, e);
 			return null;
 		}

@@ -17,6 +17,7 @@ public interface IValidatingPasswordProvider {
 
 	/**
 	 * Return if password provider is valid for current system
+	 * 
 	 * @return true if valid, false otherwise
 	 */
 	public boolean isValid();

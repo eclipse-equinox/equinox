@@ -26,7 +26,7 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.util.NLS;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class SecurePreferencesMapper {
 
 	/**
@@ -46,7 +46,8 @@ public class SecurePreferencesMapper {
 
 	static private ISecurePreferences defaultPreferences = null;
 
-	static private Map<String, SecurePreferencesRoot> preferences = new HashMap<>(); // URL.toString() -> SecurePreferencesRoot
+	static private Map<String, SecurePreferencesRoot> preferences = new HashMap<>(); // URL.toString() ->
+																						// SecurePreferencesRoot
 
 	final public static String USER_HOME = "user.home"; //$NON-NLS-1$
 
@@ -107,7 +108,8 @@ public class SecurePreferencesMapper {
 			// at this time we only accept file URLs; check URL type right away
 			throw new IOException(NLS.bind(SecAuthMessages.loginFileURL, location.toString()));
 
-		// 3) see if there is already SecurePreferencesRoot at that location; if not open a new one
+		// 3) see if there is already SecurePreferencesRoot at that location; if not
+		// open a new one
 		String key = location.toString();
 		SecurePreferencesRoot root;
 		if (preferences.containsKey(key))

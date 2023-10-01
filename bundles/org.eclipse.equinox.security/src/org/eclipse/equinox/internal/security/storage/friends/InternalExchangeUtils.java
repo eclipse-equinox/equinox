@@ -25,8 +25,8 @@ import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
 import org.osgi.framework.BundleContext;
 
 /**
- * Collection of utilities that gives friends additional access into
- * internals of the secure storage.
+ * Collection of utilities that gives friends additional access into internals
+ * of the secure storage.
  */
 public class InternalExchangeUtils {
 
@@ -36,9 +36,9 @@ public class InternalExchangeUtils {
 	static private final String JUNIT_APPS2 = "org.eclipse.test."; //$NON-NLS-1$
 
 	/**
-	 * Detects ciphers supplied by the current JVM that can be used with
-	 * the secure storage. Returns Map of pairs: supported cipher algorithm to 
-	 * a supported key factory algorithm.
+	 * Detects ciphers supplied by the current JVM that can be used with the secure
+	 * storage. Returns Map of pairs: supported cipher algorithm to a supported key
+	 * factory algorithm.
 	 */
 	static public Map<String, String> ciphersDetectAvailable() {
 		return new JavaEncryption().detect();
@@ -48,28 +48,33 @@ public class InternalExchangeUtils {
 	 * Gathers list of available password providers. Note: this method does not try
 	 * to instantiate providers, hence, providers listed as available by this method
 	 * might fail on instantiation and not be available for the actual use.
+	 * 
 	 * @return available password providers as described in extensions
 	 */
 	static public List<PasswordProviderDescription> passwordProvidersFind() {
 		List<ExtStorageModule> availableModules = PasswordProviderSelector.getInstance().findAvailableModules(null);
 		List<PasswordProviderDescription> result = new ArrayList<>(availableModules.size());
 		for (ExtStorageModule module : availableModules) {
-			result.add(new PasswordProviderDescription(module.name, module.moduleID, module.priority, module.description, module.hints));
+			result.add(new PasswordProviderDescription(module.name, module.moduleID, module.priority,
+					module.description, module.hints));
 		}
 		return result;
 	}
 
 	/**
-	 * Gathers list of available password providers with specified id. Note: this method does not try
-	 * to instantiate providers, hence, providers listed as available by this method
-	 * might fail on instantiation and not be available for the actual use.
+	 * Gathers list of available password providers with specified id. Note: this
+	 * method does not try to instantiate providers, hence, providers listed as
+	 * available by this method might fail on instantiation and not be available for
+	 * the actual use.
+	 * 
 	 * @return available password providers as described in extensions
 	 */
 	static public List<PasswordProviderDescription> passwordProvidersFind(String id) {
 		List<ExtStorageModule> availableModules = PasswordProviderSelector.getInstance().findAvailableModules(id);
 		List<PasswordProviderDescription> result = new ArrayList<>(availableModules.size());
 		for (ExtStorageModule module : availableModules) {
-			result.add(new PasswordProviderDescription(module.name, module.moduleID, module.priority, module.description, module.hints));
+			result.add(new PasswordProviderDescription(module.name, module.moduleID, module.priority,
+					module.description, module.hints));
 		}
 		return result;
 	}
@@ -87,6 +92,7 @@ public class InternalExchangeUtils {
 
 	/**
 	 * Returns location of default storage
+	 * 
 	 * @return location of the default storage, might be null
 	 */
 	static public URL defaultStorageLocation() {
@@ -140,7 +146,8 @@ public class InternalExchangeUtils {
 	}
 
 	/**
-	 * This is a bit of a strange code that tries to determine if we are running in a JUnit
+	 * This is a bit of a strange code that tries to determine if we are running in
+	 * a JUnit
 	 */
 	static public boolean isJUnitApp() {
 		BundleContext context = AuthPlugin.getDefault().getBundleContext();

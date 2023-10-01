@@ -17,31 +17,37 @@ import java.security.Principal;
 import javax.security.auth.Subject;
 
 /**
- * This interface describes public credentials added by the Equinox login modules.
+ * This interface describes public credentials added by the Equinox login
+ * modules.
  * <p>
  * This interface should not be extended by clients.
  * </p>
+ * 
  * @see Subject#getPublicCredentials()
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IPublicCredential extends Principal {
 
 	/**
-	 * Returns user's primary role, if set. Might return <code>null</code> if 
+	 * Returns user's primary role, if set. Might return <code>null</code> if
 	 * primary role is not set.
-	 * @return user's primary role. Returns <code>null</code> if there is no primary role.
+	 * 
+	 * @return user's primary role. Returns <code>null</code> if there is no primary
+	 *         role.
 	 */
 	public Principal getPrimaryRole();
 
 	/**
 	 * Returns user's roles. Might return <code>null</code> if there are no roles.
+	 * 
 	 * @return user's roles. Returns <code>null</code> if there are no roles.
 	 */
 	public Principal[] getRoles();
 
 	/**
-	 * ID of the provider of this public credential. 
-	 * @return provider ID 
+	 * ID of the provider of this public credential.
+	 * 
+	 * @return provider ID
 	 */
 	public String getProviderID();
 }
