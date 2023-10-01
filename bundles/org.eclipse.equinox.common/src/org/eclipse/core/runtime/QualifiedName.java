@@ -14,34 +14,35 @@
 package org.eclipse.core.runtime;
 
 /**
- * Qualified names are two-part names: qualifier and local name.
- * The qualifier must be in URI form (see RFC2396).  
- * Note however that the qualifier may be <code>null</code> if
- * the default name space is being used.  The empty string is not 
- * a valid local name.
+ * Qualified names are two-part names: qualifier and local name. The qualifier
+ * must be in URI form (see RFC2396). Note however that the qualifier may be
+ * <code>null</code> if the default name space is being used. The empty string
+ * is not a valid local name.
  * <p>
  * This class can be used without OSGi running.
- * </p><p>
+ * </p>
+ * <p>
  * This class is not intended to be subclassed by clients.
  * </p>
  */
 public final class QualifiedName {
 
 	/** Qualifier part (potentially <code>null</code>). */
-	/*package*/
+	/* package */
 	String qualifier = null;
 
 	/** Local name part. */
-	/*package*/
+	/* package */
 	String localName = null;
 
 	/**
-	 * Creates and returns a new qualified name with the given qualifier
-	 * and local name.  The local name must not be the empty string.
-	 * The qualifier may be <code>null</code>.
+	 * Creates and returns a new qualified name with the given qualifier and local
+	 * name. The local name must not be the empty string. The qualifier may be
+	 * <code>null</code>.
 	 * <p>
 	 * Clients may instantiate.
 	 * </p>
+	 * 
 	 * @param qualifier the qualifier string, or <code>null</code>
 	 * @param localName the local name string
 	 */
@@ -54,14 +55,14 @@ public final class QualifiedName {
 	/**
 	 * Returns whether this qualified name is equivalent to the given object.
 	 * <p>
-	 * Qualified names are equal if and only if they have the same
-	 * qualified parts and local parts.
-	 * Qualified names are not equal to objects other than qualified names.
+	 * Qualified names are equal if and only if they have the same qualified parts
+	 * and local parts. Qualified names are not equal to objects other than
+	 * qualified names.
 	 * </p>
 	 *
 	 * @param obj the object to compare to
-	 * @return <code>true</code> if these are equivalent qualified
-	 *    names, and <code>false</code> otherwise
+	 * @return <code>true</code> if these are equivalent qualified names, and
+	 *         <code>false</code> otherwise
 	 */
 	@Override
 	public boolean equals(Object obj) {
@@ -92,8 +93,8 @@ public final class QualifiedName {
 	}
 
 	/**
-	 * Returns the qualifier part for this qualified name, or <code>null</code>
-	 * if none.
+	 * Returns the qualifier part for this qualified name, or <code>null</code> if
+	 * none.
 	 *
 	 * @return the qualifier string, or <code>null</code>
 	 */
@@ -101,8 +102,9 @@ public final class QualifiedName {
 		return qualifier;
 	}
 
-	/* (Intentionally omitted from javadoc)
-	 * Implements the method <code>Object.hashCode</code>.
+	/*
+	 * (Intentionally omitted from javadoc) Implements the method
+	 * <code>Object.hashCode</code>.
 	 * 
 	 * Returns the hash code for this qualified name.
 	 */
@@ -112,8 +114,7 @@ public final class QualifiedName {
 	}
 
 	/**
-	 * Converts this qualified name into a string, suitable for 
-	 * debug purposes only.
+	 * Converts this qualified name into a string, suitable for debug purposes only.
 	 */
 	@Override
 	public String toString() {

@@ -19,16 +19,17 @@ import org.eclipse.core.internal.runtime.LocalizationUtils;
 import org.osgi.framework.FrameworkUtil;
 
 /**
- * A concrete status implementation, suitable either for 
- * instantiating or subclassing.
+ * A concrete status implementation, suitable either for instantiating or
+ * subclassing.
  * <p>
  * This class can be used without OSGi running.
  * </p>
  * <p>
- * For performance critical code, such as when {@link Status} objects are not created
- * for logging or error handling, there may be a small performance penalty when using
- * static methods or constructors that automatically determine the plug-in id from
- * the provided {@link Class} or by using {@link StackWalker}.
+ * For performance critical code, such as when {@link Status} objects are not
+ * created for logging or error handling, there may be a small performance
+ * penalty when using static methods or constructors that automatically
+ * determine the plug-in id from the provided {@link Class} or by using
+ * {@link StackWalker}.
  * </p>
  */
 public class Status implements IStatus {
@@ -62,36 +63,39 @@ public class Status implements IStatus {
 	 */
 	private volatile int severity = OK;
 
-	/** Unique identifier of plug-in.
+	/**
+	 * Unique identifier of plug-in.
 	 */
 	private volatile String pluginId;
 
-	/** Plug-in-specific status code.
+	/**
+	 * Plug-in-specific status code.
 	 */
 	private volatile int code;
 
-	/** Message, localized to the current locale.
+	/**
+	 * Message, localized to the current locale.
 	 */
 	private volatile String message;
 
-	/** Wrapped exception, or <code>null</code> if none.
+	/**
+	 * Wrapped exception, or <code>null</code> if none.
 	 */
 	private volatile Throwable exception = null;
 
-	/** Constant to avoid generating garbage.
+	/**
+	 * Constant to avoid generating garbage.
 	 */
 	private static final IStatus[] theEmptyStatusArray = new IStatus[0];
 
 	private static StackWalker walker = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
 
 	/**
-	 * Construct a new status object with severity {@link IStatus#INFO},
-	 * code {@link IStatus#OK}, and pluginId determined automatically
-	 * from the calling class using {@link StackWalker}.
-	 * The created status has no children.
+	 * Construct a new status object with severity {@link IStatus#INFO}, code
+	 * {@link IStatus#OK}, and pluginId determined automatically from the calling
+	 * class using {@link StackWalker}. The created status has no children.
 	 *
-	 * @param message a human-readable message, localized to the
-	 *    current locale
+	 * @param message a human-readable message, localized to the current locale
 	 * @return the newly created status
 	 * @since 3.15
 	 */
@@ -106,13 +110,11 @@ public class Status implements IStatus {
 	}
 
 	/**
-	 * Construct a new status object with severity {@link IStatus#WARNING},
-	 * code {@link IStatus#OK}, and pluginId determined automatically
-	 * from the calling class using {@link StackWalker}.
-	 * The created status has no children.
+	 * Construct a new status object with severity {@link IStatus#WARNING}, code
+	 * {@link IStatus#OK}, and pluginId determined automatically from the calling
+	 * class using {@link StackWalker}. The created status has no children.
 	 *
-	 * @param message a human-readable message, localized to the
-	 *    current locale
+	 * @param message a human-readable message, localized to the current locale
 	 * @return the newly created status
 	 * @since 3.15
 	 */
@@ -127,15 +129,13 @@ public class Status implements IStatus {
 	}
 
 	/**
-	 * Construct a new status object with severity {@link IStatus#WARNING},
-	 * code {@link IStatus#OK}, and pluginId determined automatically
-	 * from the calling class using {@link StackWalker}.
-	 * The created status has no children.
+	 * Construct a new status object with severity {@link IStatus#WARNING}, code
+	 * {@link IStatus#OK}, and pluginId determined automatically from the calling
+	 * class using {@link StackWalker}. The created status has no children.
 	 *
-	 * @param message a human-readable message, localized to the
-	 *    current locale
+	 * @param message   a human-readable message, localized to the current locale
 	 * @param exception a low-level exception, or <code>null</code> if not
-	 *    applicable
+	 *                  applicable
 	 * @return the newly created status
 	 * @since 3.15
 	 */
@@ -150,13 +150,11 @@ public class Status implements IStatus {
 	}
 
 	/**
-	 * Construct a new status object with severity {@link IStatus#ERROR},
-	 * code {@link IStatus#OK}, and pluginId determined automatically
-	 * from the calling class using {@link StackWalker}.
-	 * The created status has no children.
+	 * Construct a new status object with severity {@link IStatus#ERROR}, code
+	 * {@link IStatus#OK}, and pluginId determined automatically from the calling
+	 * class using {@link StackWalker}. The created status has no children.
 	 *
-	 * @param message a human-readable message, localized to the
-	 *    current locale
+	 * @param message a human-readable message, localized to the current locale
 	 * @return the newly created status
 	 * @since 3.15
 	 */
@@ -171,15 +169,13 @@ public class Status implements IStatus {
 	}
 
 	/**
-	 * Construct a new status object with severity {@link IStatus#ERROR},
-	 * code {@link IStatus#OK}, and pluginId determined automatically
-	 * from the calling class using {@link StackWalker}.
-	 * The created status has no children.
+	 * Construct a new status object with severity {@link IStatus#ERROR}, code
+	 * {@link IStatus#OK}, and pluginId determined automatically from the calling
+	 * class using {@link StackWalker}. The created status has no children.
 	 *
-	 * @param message a human-readable message, localized to the
-	 *    current locale
+	 * @param message   a human-readable message, localized to the current locale
 	 * @param exception a low-level exception, or <code>null</code> if not
-	 *    applicable
+	 *                  applicable
 	 * @return the newly created status
 	 * @since 3.15
 	 */
@@ -194,17 +190,19 @@ public class Status implements IStatus {
 	}
 
 	/**
-	 * Creates a new status object.  The created status has no children.
+	 * Creates a new status object. The created status has no children.
 	 *
-	 * @param severity the severity; one of <code>OK</code>, <code>ERROR</code>, 
-	 * <code>INFO</code>, <code>WARNING</code>,  or <code>CANCEL</code>
-	 * @param caller the relevant class to build unique identifier from
-	 * @param code the caller-specific status code, or <code>OK</code>
-	 * @param message a human-readable message, localized to the
-	 *    current locale. If null or empty a message from the exception is interpolated.
+	 * @param severity  the severity; one of <code>OK</code>, <code>ERROR</code>,
+	 *                  <code>INFO</code>, <code>WARNING</code>, or
+	 *                  <code>CANCEL</code>
+	 * @param caller    the relevant class to build unique identifier from
+	 * @param code      the caller-specific status code, or <code>OK</code>
+	 * @param message   a human-readable message, localized to the current locale.
+	 *                  If null or empty a message from the exception is
+	 *                  interpolated.
 	 * @param exception a low-level exception, or <code>null</code> if not
-	 *    applicable
-	 *    
+	 *                  applicable
+	 * 
 	 * @since 3.12
 	 */
 	public Status(int severity, Class<?> caller, int code, String message, Throwable exception) {
@@ -226,16 +224,18 @@ public class Status implements IStatus {
 	}
 
 	/**
-	 * Creates a new status object.  The created status has no children.
+	 * Creates a new status object. The created status has no children.
 	 *
-	 * @param severity the severity; one of <code>OK</code>, <code>ERROR</code>, 
-	 * <code>INFO</code>, <code>WARNING</code>,  or <code>CANCEL</code>
-	 * @param pluginId the unique identifier of the relevant plug-in
-	 * @param code the plug-in-specific status code, or <code>OK</code>
-	 * @param message a human-readable message, localized to the
-	 *    current locale. If null or empty a message from the exception is interpolated.
+	 * @param severity  the severity; one of <code>OK</code>, <code>ERROR</code>,
+	 *                  <code>INFO</code>, <code>WARNING</code>, or
+	 *                  <code>CANCEL</code>
+	 * @param pluginId  the unique identifier of the relevant plug-in
+	 * @param code      the plug-in-specific status code, or <code>OK</code>
+	 * @param message   a human-readable message, localized to the current locale.
+	 *                  If null or empty a message from the exception is
+	 *                  interpolated.
 	 * @param exception a low-level exception, or <code>null</code> if not
-	 *    applicable 
+	 *                  applicable
 	 */
 	public Status(int severity, String pluginId, int code, String message, Throwable exception) {
 		setSeverity(severity);
@@ -246,17 +246,19 @@ public class Status implements IStatus {
 	}
 
 	/**
-	 * Simplified constructor of a new status object; assumes that code is <code>OK</code>.
-	 * The created status has no children.
+	 * Simplified constructor of a new status object; assumes that code is
+	 * <code>OK</code>. The created status has no children.
 	 *
-	 * @param severity the severity; one of <code>OK</code>, <code>ERROR</code>, 
-	 * <code>INFO</code>, <code>WARNING</code>,  or <code>CANCEL</code>
-	 * @param caller the relevant class to build unique identifier from
-	 * @param message a human-readable message, localized to the
-	 *    current locale. If null or empty a message from the exception is interpolated.
+	 * @param severity  the severity; one of <code>OK</code>, <code>ERROR</code>,
+	 *                  <code>INFO</code>, <code>WARNING</code>, or
+	 *                  <code>CANCEL</code>
+	 * @param caller    the relevant class to build unique identifier from
+	 * @param message   a human-readable message, localized to the current locale.
+	 *                  If null or empty a message from the exception is
+	 *                  interpolated.
 	 * @param exception a low-level exception, or <code>null</code> if not
-	 *    applicable
-	 *     
+	 *                  applicable
+	 * 
 	 * @since 3.12
 	 */
 	public Status(int severity, Class<?> caller, String message, Throwable exception) {
@@ -268,17 +270,19 @@ public class Status implements IStatus {
 	}
 
 	/**
-	 * Simplified constructor of a new status object; assumes that code is <code>OK</code>.
-	 * The created status has no children.
+	 * Simplified constructor of a new status object; assumes that code is
+	 * <code>OK</code>. The created status has no children.
 	 *
-	 * @param severity the severity; one of <code>OK</code>, <code>ERROR</code>, 
-	 * <code>INFO</code>, <code>WARNING</code>,  or <code>CANCEL</code>
-	 * @param pluginId the unique identifier of the relevant plug-in
-	 * @param message a human-readable message, localized to the
-	 *    current locale. If null or empty a message from the exception is interpolated.
+	 * @param severity  the severity; one of <code>OK</code>, <code>ERROR</code>,
+	 *                  <code>INFO</code>, <code>WARNING</code>, or
+	 *                  <code>CANCEL</code>
+	 * @param pluginId  the unique identifier of the relevant plug-in
+	 * @param message   a human-readable message, localized to the current locale.
+	 *                  If null or empty a message from the exception is
+	 *                  interpolated.
 	 * @param exception a low-level exception, or <code>null</code> if not
-	 *    applicable
-	 *     
+	 *                  applicable
+	 * 
 	 * @since org.eclipse.equinox.common 3.3
 	 */
 	public Status(int severity, String pluginId, String message, Throwable exception) {
@@ -290,15 +294,16 @@ public class Status implements IStatus {
 	}
 
 	/**
-	 * Simplified constructor of a new status object; assumes that code is <code>OK</code> and
-	 * exception is <code>null</code>. The created status has no children.
+	 * Simplified constructor of a new status object; assumes that code is
+	 * <code>OK</code> and exception is <code>null</code>. The created status has no
+	 * children.
 	 *
-	 * @param severity the severity; one of <code>OK</code>, <code>ERROR</code>, 
-	 * <code>INFO</code>, <code>WARNING</code>,  or <code>CANCEL</code>
-	 * @param caller the relevant class to build unique identifier from
-	 * @param message a human-readable message, localized to the
-	 *    current locale
-	 *    
+	 * @param severity the severity; one of <code>OK</code>, <code>ERROR</code>,
+	 *                 <code>INFO</code>, <code>WARNING</code>, or
+	 *                 <code>CANCEL</code>
+	 * @param caller   the relevant class to build unique identifier from
+	 * @param message  a human-readable message, localized to the current locale
+	 * 
 	 * @since 3.12
 	 */
 	public Status(int severity, Class<?> caller, String message) {
@@ -310,15 +315,16 @@ public class Status implements IStatus {
 	}
 
 	/**
-	 * Simplified constructor of a new status object; assumes that code is <code>OK</code> and
-	 * exception is <code>null</code>. The created status has no children.
+	 * Simplified constructor of a new status object; assumes that code is
+	 * <code>OK</code> and exception is <code>null</code>. The created status has no
+	 * children.
 	 *
-	 * @param severity the severity; one of <code>OK</code>, <code>ERROR</code>, 
-	 * <code>INFO</code>, <code>WARNING</code>,  or <code>CANCEL</code>
+	 * @param severity the severity; one of <code>OK</code>, <code>ERROR</code>,
+	 *                 <code>INFO</code>, <code>WARNING</code>, or
+	 *                 <code>CANCEL</code>
 	 * @param pluginId the unique identifier of the relevant plug-in
-	 * @param message a human-readable message, localized to the
-	 *    current locale
-	 *    
+	 * @param message  a human-readable message, localized to the current locale
+	 * 
 	 * @since org.eclipse.equinox.common 3.3
 	 */
 	public Status(int severity, String pluginId, String message) {
@@ -330,7 +336,8 @@ public class Status implements IStatus {
 	}
 
 	/**
-	 * Extracts an identifier from the given class: either bundle symbolic name or class name, never returns <code>null</code>
+	 * Extracts an identifier from the given class: either bundle symbolic name or
+	 * class name, never returns <code>null</code>
 	 * 
 	 * @param caller the relevant class to build unique identifier from
 	 * @return identifier extracted for the given class
@@ -402,18 +409,16 @@ public class Status implements IStatus {
 	 * Sets the exception.
 	 *
 	 * @param exception a low-level exception, or <code>null</code> if not
-	 *    applicable 
+	 *                  applicable
 	 */
 	protected void setException(Throwable exception) {
 		this.exception = exception;
 	}
 
 	/**
-	 * Sets the message. If null is passed, message is set to an empty
-	 * string.
+	 * Sets the message. If null is passed, message is set to an empty string.
 	 *
-	 * @param message a human-readable message, localized to the
-	 *    current locale
+	 * @param message a human-readable message, localized to the current locale
 	 */
 	protected void setMessage(String message) {
 		if (message == null)
@@ -435,17 +440,19 @@ public class Status implements IStatus {
 	/**
 	 * Sets the severity.
 	 *
-	 * @param severity the severity; one of <code>OK</code>, <code>ERROR</code>, 
-	 * <code>INFO</code>, <code>WARNING</code>,  or <code>CANCEL</code>
+	 * @param severity the severity; one of <code>OK</code>, <code>ERROR</code>,
+	 *                 <code>INFO</code>, <code>WARNING</code>, or
+	 *                 <code>CANCEL</code>
 	 */
 	protected void setSeverity(int severity) {
-		Assert.isLegal(severity == OK || severity == ERROR || severity == WARNING || severity == INFO || severity == CANCEL);
+		Assert.isLegal(
+				severity == OK || severity == ERROR || severity == WARNING || severity == INFO || severity == CANCEL);
 		this.severity = severity;
 	}
 
 	/**
-	 * Returns a string representation of the status, suitable 
-	 * for debugging purposes only.
+	 * Returns a string representation of the status, suitable for debugging
+	 * purposes only.
 	 */
 	@Override
 	public String toString() {

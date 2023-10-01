@@ -34,7 +34,7 @@ public abstract class PlatformURLConnection extends URLConnection {
 	private boolean isInCache = false;
 	private boolean isJar = false;
 
-	//	protected URL url;				// declared in super (platform: URL)
+	// protected URL url; // declared in super (platform: URL)
 	private URL resolvedURL = null; // resolved file URL (e.g. http: URL)
 	private URL cachedURL = null; // file URL in cache (file: URL)
 
@@ -46,7 +46,7 @@ public abstract class PlatformURLConnection extends URLConnection {
 	private static String indexName;
 	private static String filePrefix;
 
-	// constants	
+	// constants
 	private static final Object NOT_FOUND = new Object(); // marker
 	private static final String CACHE_PROP = ".cache.properties"; //$NON-NLS-1$
 	private static final String CACHE_LOCATION_PROP = "location"; //$NON-NLS-1$
@@ -56,10 +56,10 @@ public abstract class PlatformURLConnection extends URLConnection {
 	private static final String CACHE_DIR = ".eclipse-" + PlatformURLHandler.PROTOCOL + File.separator; //$NON-NLS-1$
 
 	// debug tracing
-	private static final String OPTION_DEBUG = "org.eclipse.core.runtime/url/debug"; //$NON-NLS-1$;
-	private static final String OPTION_DEBUG_CONNECT = OPTION_DEBUG + "/connect"; //$NON-NLS-1$;
-	private static final String OPTION_DEBUG_CACHE_LOOKUP = OPTION_DEBUG + "/cachelookup"; //$NON-NLS-1$;
-	private static final String OPTION_DEBUG_CACHE_COPY = OPTION_DEBUG + "/cachecopy"; //$NON-NLS-1$;
+	private static final String OPTION_DEBUG = "org.eclipse.core.runtime/url/debug"; //$NON-NLS-1$ ;
+	private static final String OPTION_DEBUG_CONNECT = OPTION_DEBUG + "/connect"; //$NON-NLS-1$ ;
+	private static final String OPTION_DEBUG_CACHE_LOOKUP = OPTION_DEBUG + "/cachelookup"; //$NON-NLS-1$ ;
+	private static final String OPTION_DEBUG_CACHE_COPY = OPTION_DEBUG + "/cachecopy"; //$NON-NLS-1$ ;
 
 	public final static boolean DEBUG;
 	public final static boolean DEBUG_CONNECT;
@@ -117,8 +117,8 @@ public abstract class PlatformURLConnection extends URLConnection {
 			debug("Connected as " + connection.getURL()); //$NON-NLS-1$
 	}
 
-	//TODO consider refactoring this method... it is too long
-	//TODO avoid cryptic identifiers such as ix, tgt, tmp, srcis, tgtos...
+	// TODO consider refactoring this method... it is too long
+	// TODO avoid cryptic identifiers such as ix, tgt, tmp, srcis, tgtos...
 	private void copyToCache() throws IOException {
 
 		if (isInCache | cachedURL == null)
@@ -217,12 +217,13 @@ public abstract class PlatformURLConnection extends URLConnection {
 		connect(true); // connect and force caching if necessary
 		URL u = connection.getURL();
 		String up = u.getProtocol();
-		if (!up.equals(PlatformURLHandler.FILE) && !up.equals(PlatformURLHandler.JAR) && !up.startsWith(PlatformURLHandler.BUNDLE))
+		if (!up.equals(PlatformURLHandler.FILE) && !up.equals(PlatformURLHandler.JAR)
+				&& !up.startsWith(PlatformURLHandler.BUNDLE))
 			throw new IOException(NLS.bind(CommonMessages.url_noaccess, up));
 		return u;
 	}
 
-	//TODO consider refactoring this method... it is too long
+	// TODO consider refactoring this method... it is too long
 	private URL getURLInCache() throws IOException {
 
 		if (!allowCaching())
@@ -266,7 +267,8 @@ public abstract class PlatformURLConnection extends URLConnection {
 			if (isJar) {
 				if (DEBUG && DEBUG_CACHE_LOOKUP)
 					debug("Jar located in cache as " + tmp); //$NON-NLS-1$
-				tmp = PlatformURLHandler.FILE + PlatformURLHandler.PROTOCOL_SEPARATOR + tmp + PlatformURLHandler.JAR_SEPARATOR + jarEntry;
+				tmp = PlatformURLHandler.FILE + PlatformURLHandler.PROTOCOL_SEPARATOR + tmp
+						+ PlatformURLHandler.JAR_SEPARATOR + jarEntry;
 				cachedURL = new URL(PlatformURLHandler.JAR, null, -1, tmp);
 			} else {
 				if (DEBUG && DEBUG_CACHE_LOOKUP)
@@ -281,7 +283,8 @@ public abstract class PlatformURLConnection extends URLConnection {
 			tmp = cacheLocation + filePrefix + (new java.util.Date()).getTime() + "_" + tmp; //$NON-NLS-1$
 			tmp = tmp.replace(File.separatorChar, '/');
 			if (isJar) {
-				tmp = PlatformURLHandler.FILE + PlatformURLHandler.PROTOCOL_SEPARATOR + tmp + PlatformURLHandler.JAR_SEPARATOR + jarEntry;
+				tmp = PlatformURLHandler.FILE + PlatformURLHandler.PROTOCOL_SEPARATOR + tmp
+						+ PlatformURLHandler.JAR_SEPARATOR + jarEntry;
 				cachedURL = new URL(PlatformURLHandler.JAR, null, -1, tmp);
 			} else
 				cachedURL = new URL(PlatformURLHandler.FILE, null, -1, tmp);
@@ -293,10 +296,12 @@ public abstract class PlatformURLConnection extends URLConnection {
 
 	/*
 	 * to be implemented by subclass
+	 * 
 	 * @return URL resolved URL
 	 */
 	protected URL resolve() throws IOException {
-		// TODO throw UnsupportedOperationException instead - this is a bug in subclass, not an actual failure
+		// TODO throw UnsupportedOperationException instead - this is a bug in subclass,
+		// not an actual failure
 		throw new IOException();
 	}
 
@@ -325,7 +330,7 @@ public abstract class PlatformURLConnection extends URLConnection {
 			bsn = spec.substring(0, underScore);
 			break;
 		}
-		return new Object[] {bsn, version};
+		return new Object[] { bsn, version };
 	}
 
 	void setResolvedURL(URL url) throws IOException {
@@ -373,7 +378,7 @@ public abstract class PlatformURLConnection extends URLConnection {
 				if (value == NOT_FOUND)
 					cacheIndex.remove(key);
 			}
-			//if the cache index is empty we don't need to save it
+			// if the cache index is empty we don't need to save it
 			if (cacheIndex.size() == 0)
 				return;
 			try {
@@ -393,7 +398,7 @@ public abstract class PlatformURLConnection extends URLConnection {
 		}
 	}
 
-	//TODO consider splitting this method into two or more steps - it is too long 
+	// TODO consider splitting this method into two or more steps - it is too long
 	static void startup(String location, String os, String ws, String nl) {
 		verifyLocation(location); // check for platform location, ignore errors
 		String cacheProps = location.trim();
@@ -405,7 +410,7 @@ public abstract class PlatformURLConnection extends URLConnection {
 		FileInputStream fis;
 
 		if (cachePropFile.exists()) {
-			// load existing properties	
+			// load existing properties
 			try {
 				props = new Properties();
 				fis = new FileInputStream(cachePropFile);

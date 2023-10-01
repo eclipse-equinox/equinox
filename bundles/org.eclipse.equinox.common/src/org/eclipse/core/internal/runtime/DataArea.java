@@ -27,8 +27,8 @@ import org.osgi.framework.Bundle;
  * This class can only be used if OSGi plugin is available
  */
 public class DataArea {
-	private static final String OPTION_DEBUG = "org.eclipse.equinox.common/debug"; //$NON-NLS-1$;
-	private static final String REQUIRES_EXPLICIT_INIT = "osgi.dataAreaRequiresExplicitInit"; //$NON-NLS-1$;
+	private static final String OPTION_DEBUG = "org.eclipse.equinox.common/debug"; //$NON-NLS-1$ ;
+	private static final String REQUIRES_EXPLICIT_INIT = "osgi.dataAreaRequiresExplicitInit"; //$NON-NLS-1$ ;
 
 	/* package */static final String F_META_AREA = ".metadata"; //$NON-NLS-1$
 	/* package */static final String F_PLUGIN_DATA = ".plugins"; //$NON-NLS-1$
@@ -36,11 +36,12 @@ public class DataArea {
 	/* package */static final String F_TRACE = "trace.log"; //$NON-NLS-1$
 
 	/**
-	 * Internal name of the preference storage file (value <code>"pref_store.ini"</code>) in this plug-in's (read-write) state area.
+	 * Internal name of the preference storage file (value
+	 * <code>"pref_store.ini"</code>) in this plug-in's (read-write) state area.
 	 */
 	/* package */static final String PREFERENCES_FILE_NAME = "pref_store.ini"; //$NON-NLS-1$
 
-	private IPath location; //The location of the instance data
+	private IPath location; // The location of the instance data
 	private boolean initialized = false;
 
 	protected synchronized void assertLocationInitialized() throws IllegalStateException {
@@ -55,17 +56,19 @@ public class DataArea {
 
 		boolean explicitInitRequired = Boolean.valueOf(Activator.getContext().getProperty(REQUIRES_EXPLICIT_INIT));
 		if (explicitInitRequired && !service.isSet()) {
-			// See bug 514333: don't allow clients to initialize instance location if the instance area is not explicitly defined yet
+			// See bug 514333: don't allow clients to initialize instance location if the
+			// instance area is not explicitly defined yet
 			throw new IllegalStateException(CommonMessages.meta_instanceDataUnspecified);
 		}
 
 		try {
-			// This will try to init url either from the specified location value or from service default
+			// This will try to init url either from the specified location value or from
+			// service default
 			URL url = service.getURL();
 			if (url == null)
 				throw new IllegalStateException(CommonMessages.meta_instanceDataUnspecified);
-			// TODO assume the URL is a file: 
-			// Use the new File technique to ensure that the resultant string is 
+			// TODO assume the URL is a file:
+			// Use the new File technique to ensure that the resultant string is
 			// in the right format (e.g., leading / removed from /c:/foo etc)
 			location = IPath.fromOSString(new File(url.getFile()).toString());
 			initializeLocation();
@@ -85,11 +88,11 @@ public class DataArea {
 	}
 
 	/**
-	 * Returns the local file system path of the log file, or the default log location
-	 * if the log is not in the local file system.
+	 * Returns the local file system path of the log file, or the default log
+	 * location if the log is not in the local file system.
 	 */
 	public IPath getLogLocation() throws IllegalStateException {
-		//make sure the log location is initialized if the instance location is known
+		// make sure the log location is initialized if the instance location is known
 		if (isInstanceLocationSet())
 			assertLocationInitialized();
 		FrameworkLog log = Activator.getDefault().getFrameworkLog();
@@ -117,7 +120,8 @@ public class DataArea {
 	}
 
 	/**
-	 * Returns true if the instance location has been set, and <code>false</code> otherwise.
+	 * Returns true if the instance location has been set, and <code>false</code>
+	 * otherwise.
 	 */
 	private boolean isInstanceLocationSet() {
 		Activator activator = Activator.getDefault();
@@ -130,7 +134,8 @@ public class DataArea {
 	}
 
 	/**
-	 * Returns the read/write location in which the given bundle can manage private state.
+	 * Returns the read/write location in which the given bundle can manage private
+	 * state.
 	 */
 	public IPath getStateLocation(Bundle bundle) throws IllegalStateException {
 		assertLocationInitialized();
@@ -154,10 +159,11 @@ public class DataArea {
 		if (location.toFile().exists()) {
 			if (!location.toFile().isDirectory()) {
 				String message = NLS.bind(CommonMessages.meta_notDir, location);
-				throw new CoreException(new Status(IStatus.ERROR, IRuntimeConstants.PI_RUNTIME, IRuntimeConstants.FAILED_WRITE_METADATA, message, null));
+				throw new CoreException(new Status(IStatus.ERROR, IRuntimeConstants.PI_RUNTIME,
+						IRuntimeConstants.FAILED_WRITE_METADATA, message, null));
 			}
 		}
-		//try infer the device if there isn't one (windows)
+		// try infer the device if there isn't one (windows)
 		if (location.getDevice() == null)
 			location = IPath.fromOSString(location.toFile().getAbsolutePath());
 		createLocation();
@@ -165,17 +171,19 @@ public class DataArea {
 	}
 
 	private void createLocation() throws CoreException {
-		// append on the metadata location so that the whole structure is created.  
+		// append on the metadata location so that the whole structure is created.
 		File file = location.append(F_META_AREA).toFile();
 		try {
 			file.mkdirs();
 		} catch (Exception e) {
 			String message = NLS.bind(CommonMessages.meta_couldNotCreate, file.getAbsolutePath());
-			throw new CoreException(new Status(IStatus.ERROR, IRuntimeConstants.PI_RUNTIME, IRuntimeConstants.FAILED_WRITE_METADATA, message, e));
+			throw new CoreException(new Status(IStatus.ERROR, IRuntimeConstants.PI_RUNTIME,
+					IRuntimeConstants.FAILED_WRITE_METADATA, message, e));
 		}
 		if (!file.canWrite()) {
 			String message = NLS.bind(CommonMessages.meta_readonly, file.getAbsolutePath());
-			throw new CoreException(new Status(IStatus.ERROR, IRuntimeConstants.PI_RUNTIME, IRuntimeConstants.FAILED_WRITE_METADATA, message, null));
+			throw new CoreException(new Status(IStatus.ERROR, IRuntimeConstants.PI_RUNTIME,
+					IRuntimeConstants.FAILED_WRITE_METADATA, message, null));
 		}
 		// set the log file location now that we created the data area
 		IPath logPath = location.append(F_META_AREA).append(F_LOG);
@@ -186,7 +194,8 @@ public class DataArea {
 				if (log != null)
 					log.setFile(logPath.toFile(), true);
 				else if (debug())
-					System.out.println("ERROR: Unable to acquire log service. Application will proceed, but logging will be disabled."); //$NON-NLS-1$
+					System.out.println(
+							"ERROR: Unable to acquire log service. Application will proceed, but logging will be disabled."); //$NON-NLS-1$
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -200,7 +209,8 @@ public class DataArea {
 			if (debugOptions != null) {
 				debugOptions.setFile(tracePath.toFile());
 			} else {
-				System.out.println("ERROR: Unable to acquire debug service. Application will proceed, but debugging will be disabled."); //$NON-NLS-1$
+				System.out.println(
+						"ERROR: Unable to acquire debug service. Application will proceed, but debugging will be disabled."); //$NON-NLS-1$
 			}
 		}
 	}

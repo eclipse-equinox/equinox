@@ -17,16 +17,17 @@ package org.eclipse.core.runtime;
 import org.eclipse.core.internal.runtime.AdapterManager;
 
 /**
- * An abstract superclass implementing the <code>IAdaptable</code>
- * interface. <code>getAdapter</code> invocations are directed
- * to the platform's adapter manager.
+ * An abstract superclass implementing the <code>IAdaptable</code> interface.
+ * <code>getAdapter</code> invocations are directed to the platform's adapter
+ * manager.
  * <p>
- * Note: In situations where it would be awkward to subclass this
- * class, the same effect can be achieved simply by implementing
- * the {@link IAdaptable} interface and explicitly forwarding
- * the <code>getAdapter</code> request to an implementation
- * of the {@link IAdapterManager} service. The method would look like:
+ * Note: In situations where it would be awkward to subclass this class, the
+ * same effect can be achieved simply by implementing the {@link IAdaptable}
+ * interface and explicitly forwarding the <code>getAdapter</code> request to an
+ * implementation of the {@link IAdapterManager} service. The method would look
+ * like:
  * </p>
+ * 
  * <pre>
  *     public &lt;T&gt; T getAdapter(Class&lt;T&gt; adapter) {
  *         IAdapterManager manager = ...;//lookup the IAdapterManager service         
@@ -35,7 +36,8 @@ import org.eclipse.core.internal.runtime.AdapterManager;
  * </pre>
  * <p>
  * This class can be used without OSGi running.
- * </p><p>
+ * </p>
+ * <p>
  * Clients may subclass.
  * </p>
  *
@@ -51,16 +53,15 @@ public abstract class PlatformObject implements IAdaptable {
 	}
 
 	/**
-	 * Returns an object which is an instance of the given class
-	 * associated with this object. Returns <code>null</code> if
-	 * no such object can be found.
+	 * Returns an object which is an instance of the given class associated with
+	 * this object. Returns <code>null</code> if no such object can be found.
 	 * <p>
-	 * This implementation of the method declared by <code>IAdaptable</code>
-	 * passes the request along to the platform's adapter manager; roughly
+	 * This implementation of the method declared by <code>IAdaptable</code> passes
+	 * the request along to the platform's adapter manager; roughly
 	 * <code>Platform.getAdapterManager().getAdapter(this, adapter)</code>.
-	 * Subclasses may override this method (however, if they do so, they
-	 * should invoke the method on their superclass to ensure that the
-	 * Platform's adapter manager is consulted).
+	 * Subclasses may override this method (however, if they do so, they should
+	 * invoke the method on their superclass to ensure that the Platform's adapter
+	 * manager is consulted).
 	 * </p>
 	 *
 	 * @param adapter the class to adapt to

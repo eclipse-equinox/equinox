@@ -128,12 +128,12 @@ public final class StringMatcher {
 	 * If invoking the StringMatcher with string literals in Java, don't forget
 	 * escape characters are represented by "\\".
 	 * </p>
-	 * <p
-	 * An empty pattern matches only an empty text, unless {@link #usePrefixMatch()}
-	 * is used, in which case it always matches.
+	 * <p An empty pattern matches only an empty text, unless
+	 * {@link #usePrefixMatch()} is used, in which case it always matches.
 	 * </p>
 	 *
-	 * @param pattern         the pattern to match text against, must not be {@code null}
+	 * @param pattern         the pattern to match text against, must not be
+	 *                        {@code null}
 	 * @param ignoreCase      if true, case is ignored
 	 * @param ignoreWildCards if true, wild cards and their escape sequences are
 	 *                        ignored (everything is taken literally).
@@ -356,7 +356,7 @@ public final class StringMatcher {
 	 * Returns the single segment for a matcher ignoring wildcards.
 	 */
 	private void parseNoWildCards() {
-		fSegments = new String[] {fPattern};
+		fSegments = new String[] { fPattern };
 		fBound = fLength;
 	}
 
@@ -375,39 +375,39 @@ public final class StringMatcher {
 		while (pos < fLength) {
 			char c = fPattern.charAt(pos++);
 			switch (c) {
-				case '\\' :
-					if (pos >= fLength) {
-						// Lone backslash at the end is taken literally
-						buf.append(c);
-					} else {
-						char next = fPattern.charAt(pos++);
-						if (next == '*' || next == '?' || next == '\\') {
-							// It _is_ an escape sequence
-							buf.append(next);
-						} else {
-							// Not an escape sequence, just insert literally
-							buf.append(c);
-							buf.append(next);
-						}
-					}
-					break;
-				case '*' :
-					if (buf.length() > 0) {
-						// Create a new segment
-						temp.add(buf.toString());
-						fBound += buf.length();
-						buf.setLength(0);
-					}
-					if (pos >= fLength) {
-						fHasTrailingStar = true;
-					}
-					break;
-				case '?' :
-					// Append special character representing single match wildcard
-					buf.append(fSingleWildCard);
-					break;
-				default :
+			case '\\':
+				if (pos >= fLength) {
+					// Lone backslash at the end is taken literally
 					buf.append(c);
+				} else {
+					char next = fPattern.charAt(pos++);
+					if (next == '*' || next == '?' || next == '\\') {
+						// It _is_ an escape sequence
+						buf.append(next);
+					} else {
+						// Not an escape sequence, just insert literally
+						buf.append(c);
+						buf.append(next);
+					}
+				}
+				break;
+			case '*':
+				if (buf.length() > 0) {
+					// Create a new segment
+					temp.add(buf.toString());
+					fBound += buf.length();
+					buf.setLength(0);
+				}
+				if (pos >= fLength) {
+					fHasTrailingStar = true;
+				}
+				break;
+			case '?':
+				// Append special character representing single match wildcard
+				buf.append(fSingleWildCard);
+				break;
+			default:
+				buf.append(c);
 			}
 		}
 

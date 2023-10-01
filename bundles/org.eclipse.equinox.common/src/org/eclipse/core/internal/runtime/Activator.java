@@ -41,7 +41,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * This class can only be used if OSGi plugin is available.
  */
 public class Activator implements BundleActivator {
-	public static final String PLUGIN_ID = "org.eclipse.equinox.common"; //$NON-NLS-1$ 
+	public static final String PLUGIN_ID = "org.eclipse.equinox.common"; //$NON-NLS-1$
 
 	/**
 	 * Table to keep track of all the URL converter services.
@@ -51,22 +51,26 @@ public class Activator implements BundleActivator {
 	private static Activator singleton;
 	private ServiceRegistration<URLConverter> platformURLConverterService = null;
 	private ServiceRegistration<IAdapterManager> adapterManagerService = null;
-	private final ServiceCaller<Location> installLocationTracker = new ServiceCaller<>(getClass(), Location.class, Location.INSTALL_FILTER);
-	private final ServiceCaller<Location> instanceLocationTracker = new ServiceCaller<>(getClass(), Location.class, Location.INSTANCE_FILTER);
-	private final ServiceCaller<Location> configLocationTracker = new ServiceCaller<>(getClass(), Location.class, Location.CONFIGURATION_FILTER);
+	private final ServiceCaller<Location> installLocationTracker = new ServiceCaller<>(getClass(), Location.class,
+			Location.INSTALL_FILTER);
+	private final ServiceCaller<Location> instanceLocationTracker = new ServiceCaller<>(getClass(), Location.class,
+			Location.INSTANCE_FILTER);
+	private final ServiceCaller<Location> configLocationTracker = new ServiceCaller<>(getClass(), Location.class,
+			Location.CONFIGURATION_FILTER);
 	@SuppressWarnings("deprecation")
 	private final ServiceCaller<PackageAdmin> bundleTracker = new ServiceCaller<>(getClass(), PackageAdmin.class);
 	private final ServiceCaller<DebugOptions> debugTracker = new ServiceCaller<>(getClass(), DebugOptions.class);
 	private final ServiceCaller<FrameworkLog> logTracker = new ServiceCaller<>(getClass(), FrameworkLog.class);
-	private final ServiceCaller<BundleLocalization> localizationTracker = new ServiceCaller<>(getClass(), BundleLocalization.class);
+	private final ServiceCaller<BundleLocalization> localizationTracker = new ServiceCaller<>(getClass(),
+			BundleLocalization.class);
 
 	private ServiceRegistration<DebugOptionsListener> debugRegistration;
 
 	private ServiceTracker<IAdapterFactory, ?> adapterFactoryTracker;
 
 	/*
-	 * Returns the singleton for this Activator. Callers should be aware that
-	 * this will return null if the bundle is not active.
+	 * Returns the singleton for this Activator. Callers should be aware that this
+	 * will return null if the bundle is not active.
 	 */
 	public static Activator getDefault() {
 		return singleton;
@@ -80,19 +84,23 @@ public class Activator implements BundleActivator {
 		RuntimeLog.setLogWriter(getPlatformWriter(context));
 		Dictionary<String, Object> urlProperties = new Hashtable<>();
 		urlProperties.put("protocol", "platform"); //$NON-NLS-1$ //$NON-NLS-2$
-		platformURLConverterService = context.registerService(URLConverter.class, new PlatformURLConverter(), urlProperties);
+		platformURLConverterService = context.registerService(URLConverter.class, new PlatformURLConverter(),
+				urlProperties);
 		adapterManagerService = context.registerService(IAdapterManager.class, AdapterManager.getDefault(), null);
 		installPlatformURLSupport();
 		Hashtable<String, String> properties = new Hashtable<>(2);
 		properties.put(DebugOptions.LISTENER_SYMBOLICNAME, PLUGIN_ID);
-		debugRegistration = context.registerService(DebugOptionsListener.class, TracingOptions.DEBUG_OPTIONS_LISTENER, properties);
-		adapterFactoryTracker = new ServiceTracker<>(context, IAdapterFactory.class, new AdapterFactoryBridge(bundleContext));
+		debugRegistration = context.registerService(DebugOptionsListener.class, TracingOptions.DEBUG_OPTIONS_LISTENER,
+				properties);
+		adapterFactoryTracker = new ServiceTracker<>(context, IAdapterFactory.class,
+				new AdapterFactoryBridge(bundleContext));
 		adapterFactoryTracker.open();
 	}
 
 	private PlatformLogWriter getPlatformWriter(BundleContext context) {
 		ServiceReference<ExtendedLogService> logRef = context.getServiceReference(ExtendedLogService.class);
-		ServiceReference<ExtendedLogReaderService> readerRef = context.getServiceReference(ExtendedLogReaderService.class);
+		ServiceReference<ExtendedLogReaderService> readerRef = context
+				.getServiceReference(ExtendedLogReaderService.class);
 		ServiceReference<PackageAdmin> packageAdminRef = context.getServiceReference(PackageAdmin.class);
 		if (logRef == null || readerRef == null || packageAdminRef == null)
 			return null;
@@ -146,7 +154,7 @@ public class Activator implements BundleActivator {
 		Bundle[] bundles = admin.getBundles(symbolicName, null);
 		if (bundles == null)
 			return null;
-		//Return the first bundle that is not installed or uninstalled
+		// Return the first bundle that is not installed or uninstalled
 		for (Bundle bundle : bundles) {
 			if ((bundle.getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0) {
 				return bundle;
@@ -193,9 +201,11 @@ public class Activator implements BundleActivator {
 	}
 
 	/**
-	 * Returns the resource bundle responsible for location of the given bundle
-	 * in the given locale. Does not return null.
-	 * @throws MissingResourceException If the corresponding resource could not be found
+	 * Returns the resource bundle responsible for location of the given bundle in
+	 * the given locale. Does not return null.
+	 * 
+	 * @throws MissingResourceException If the corresponding resource could not be
+	 *                                  found
 	 */
 	public static ResourceBundle getLocalization(Bundle bundle, String locale) throws MissingResourceException {
 		Activator activator = Activator.getDefault();
@@ -208,7 +218,8 @@ public class Activator implements BundleActivator {
 		if (location != null)
 			result = location.getLocalization(bundle, locale);
 		if (result == null)
-			throw new MissingResourceException(NLS.bind(CommonMessages.activator_resourceBundleNotFound, locale), bundle.getSymbolicName(), ""); //$NON-NLS-1$
+			throw new MissingResourceException(NLS.bind(CommonMessages.activator_resourceBundleNotFound, locale),
+					bundle.getSymbolicName(), ""); //$NON-NLS-1$
 		return result;
 	}
 
@@ -257,8 +268,7 @@ public class Activator implements BundleActivator {
 	}
 
 	/*
-	 * Return the URL Converter for the given URL. Return null if we can't
-	 * find one.
+	 * Return the URL Converter for the given URL. Return null if we can't find one.
 	 */
 	public static URLConverter getURLConverter(URL url) {
 		BundleContext ctx = getContext();
@@ -301,7 +311,7 @@ public class Activator implements BundleActivator {
 			PlatformURLBaseConnection.startup(service.getURL());
 
 		Hashtable<String, String[]> properties = new Hashtable<>(1);
-		properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[] {PlatformURLHandler.PROTOCOL});
+		properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[] { PlatformURLHandler.PROTOCOL });
 		getContext().registerService(URLStreamHandlerService.class.getName(), new PlatformURLHandler(), properties);
 	}
 

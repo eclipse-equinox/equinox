@@ -15,12 +15,14 @@
 package org.eclipse.core.runtime;
 
 /**
- * An abstract wrapper around a progress monitor which,
- * unless overridden, forwards <code>IProgressMonitor</code>
- * and <code>IProgressMonitorWithBlocking</code> methods to the wrapped progress monitor.
+ * An abstract wrapper around a progress monitor which, unless overridden,
+ * forwards <code>IProgressMonitor</code> and
+ * <code>IProgressMonitorWithBlocking</code> methods to the wrapped progress
+ * monitor.
  * <p>
  * This class can be used without OSGi running.
- * </p><p>
+ * </p>
+ * <p>
  * Clients may subclass.
  * </p>
  */
@@ -29,7 +31,7 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 	/** The wrapped progress monitor. */
 	private IProgressMonitor progressMonitor;
 
-	/** 
+	/**
 	 * Creates a new wrapper around the given monitor.
 	 *
 	 * @param monitor the progress monitor to forward to
@@ -39,10 +41,9 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 		progressMonitor = monitor;
 	}
 
-	/** 
-	 * This implementation of a <code>IProgressMonitor</code>
-	 * method forwards to the wrapped progress monitor.
-	 * Clients may override this method to do additional
+	/**
+	 * This implementation of a <code>IProgressMonitor</code> method forwards to the
+	 * wrapped progress monitor. Clients may override this method to do additional
 	 * processing.
 	 *
 	 * @see IProgressMonitor#beginTask(String, int)
@@ -53,10 +54,9 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 	}
 
 	/**
-	 * This implementation of a <code>IProgressMonitorWithBlocking</code>
-	 * method forwards to the wrapped progress monitor.
-	 * Clients may override this method to do additional
-	 * processing.
+	 * This implementation of a <code>IProgressMonitorWithBlocking</code> method
+	 * forwards to the wrapped progress monitor. Clients may override this method to
+	 * do additional processing.
 	 *
 	 * @see IProgressMonitorWithBlocking#clearBlocked()
 	 * @since 3.0
@@ -67,9 +67,8 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 	}
 
 	/**
-	 * This implementation of a <code>IProgressMonitor</code>
-	 * method forwards to the wrapped progress monitor.
-	 * Clients may override this method to do additional
+	 * This implementation of a <code>IProgressMonitor</code> method forwards to the
+	 * wrapped progress monitor. Clients may override this method to do additional
 	 * processing.
 	 *
 	 * @see IProgressMonitor#done()
@@ -89,9 +88,8 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 	}
 
 	/**
-	 * This implementation of a <code>IProgressMonitor</code>
-	 * method forwards to the wrapped progress monitor.
-	 * Clients may override this method to do additional
+	 * This implementation of a <code>IProgressMonitor</code> method forwards to the
+	 * wrapped progress monitor. Clients may override this method to do additional
 	 * processing.
 	 *
 	 * @see IProgressMonitor#internalWorked(double)
@@ -102,9 +100,8 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 	}
 
 	/**
-	 * This implementation of a <code>IProgressMonitor</code>
-	 * method forwards to the wrapped progress monitor.
-	 * Clients may override this method to do additional
+	 * This implementation of a <code>IProgressMonitor</code> method forwards to the
+	 * wrapped progress monitor. Clients may override this method to do additional
 	 * processing.
 	 *
 	 * @see IProgressMonitor#isCanceled()
@@ -115,10 +112,9 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 	}
 
 	/**
-	 * This implementation of a <code>IProgressMonitorWithBlocking</code>
-	 * method forwards to the wrapped progress monitor.
-	 * Clients may override this method to do additional
-	 * processing.
+	 * This implementation of a <code>IProgressMonitorWithBlocking</code> method
+	 * forwards to the wrapped progress monitor. Clients may override this method to
+	 * do additional processing.
 	 *
 	 * @see IProgressMonitorWithBlocking#setBlocked(IStatus)
 	 * @since 3.0
@@ -129,9 +125,8 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 	}
 
 	/**
-	 * This implementation of a <code>IProgressMonitor</code>
-	 * method forwards to the wrapped progress monitor.
-	 * Clients may override this method to do additional
+	 * This implementation of a <code>IProgressMonitor</code> method forwards to the
+	 * wrapped progress monitor. Clients may override this method to do additional
 	 * processing.
 	 *
 	 * @see IProgressMonitor#setCanceled(boolean)
@@ -142,9 +137,8 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 	}
 
 	/**
-	 * This implementation of a <code>IProgressMonitor</code>
-	 * method forwards to the wrapped progress monitor.
-	 * Clients may override this method to do additional
+	 * This implementation of a <code>IProgressMonitor</code> method forwards to the
+	 * wrapped progress monitor. Clients may override this method to do additional
 	 * processing.
 	 *
 	 * @see IProgressMonitor#setTaskName(String)
@@ -155,9 +149,8 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 	}
 
 	/**
-	 * This implementation of a <code>IProgressMonitor</code>
-	 * method forwards to the wrapped progress monitor.
-	 * Clients may override this method to do additional
+	 * This implementation of a <code>IProgressMonitor</code> method forwards to the
+	 * wrapped progress monitor. Clients may override this method to do additional
 	 * processing.
 	 *
 	 * @see IProgressMonitor#subTask(String)
@@ -168,9 +161,8 @@ public abstract class ProgressMonitorWrapper implements IProgressMonitor, IProgr
 	}
 
 	/**
-	 * This implementation of a <code>IProgressMonitor</code>
-	 * method forwards to the wrapped progress monitor.
-	 * Clients may override this method to do additional
+	 * This implementation of a <code>IProgressMonitor</code> method forwards to the
+	 * wrapped progress monitor. Clients may override this method to do additional
 	 * processing.
 	 *
 	 * @see IProgressMonitor#worked(int)

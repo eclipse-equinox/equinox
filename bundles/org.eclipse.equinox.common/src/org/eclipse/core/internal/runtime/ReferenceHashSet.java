@@ -17,8 +17,9 @@ package org.eclipse.core.internal.runtime;
 import java.lang.ref.*;
 
 /**
- * A hashset whose values can be garbage collected.
- * This API is EXPERIMENTAL and provided as early access.
+ * A hashset whose values can be garbage collected. This API is EXPERIMENTAL and
+ * provided as early access.
+ * 
  * @since 3.1
  */
 public class ReferenceHashSet<T> {
@@ -59,7 +60,7 @@ public class ReferenceHashSet<T> {
 		public String toString() {
 			Object referent = super.get();
 			if (referent == null)
-				return "[hashCode=" + this.hashCode + "] <referent was garbage collected>"; //$NON-NLS-1$  //$NON-NLS-2$
+				return "[hashCode=" + this.hashCode + "] <referent was garbage collected>"; //$NON-NLS-1$ //$NON-NLS-2$
 			return "[hashCode=" + this.hashCode + "] " + referent; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
@@ -93,7 +94,7 @@ public class ReferenceHashSet<T> {
 		public String toString() {
 			Object referent = super.get();
 			if (referent == null)
-				return "[hashCode=" + this.hashCode + "] <referent was garbage collected>"; //$NON-NLS-1$  //$NON-NLS-2$
+				return "[hashCode=" + this.hashCode + "] <referent was garbage collected>"; //$NON-NLS-1$ //$NON-NLS-2$
 			return "[hashCode=" + this.hashCode + "] " + referent; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
@@ -161,21 +162,21 @@ public class ReferenceHashSet<T> {
 
 	private HashedReference<T> toReference(int type, T referent) {
 		switch (type) {
-			case HARD :
-				return new StrongReference<>(referent, referenceQueue);
-			case SOFT :
-				return new HashableSoftReference<>(referent, referenceQueue);
-			case WEAK :
-				return new HashableWeakReference<>(referent, referenceQueue);
-			default :
-				throw new Error();
+		case HARD:
+			return new StrongReference<>(referent, referenceQueue);
+		case SOFT:
+			return new HashableSoftReference<>(referent, referenceQueue);
+		case WEAK:
+			return new HashableWeakReference<>(referent, referenceQueue);
+		default:
+			throw new Error();
 		}
 	}
 
 	/*
-	 * Adds the given object to this set. If an object that is equals to the
-	 * given object already exists, do nothing. Returns the existing object or
-	 * the new object if not found.
+	 * Adds the given object to this set. If an object that is equals to the given
+	 * object already exists, do nothing. Returns the existing object or the new
+	 * object if not found.
 	 */
 	public T add(T obj, int referenceType) {
 		cleanupGarbageCollectedValues();
@@ -230,7 +231,8 @@ public class ReferenceHashSet<T> {
 					// same hash
 					int sameHash = index;
 					int current;
-					while ((currentValue = this.values[current = (sameHash + 1) % valuesLength]) != null && currentValue.hashCode() == hashCode)
+					while ((currentValue = this.values[current = (sameHash + 1) % valuesLength]) != null
+							&& currentValue.hashCode() == hashCode)
 						sameHash = current;
 					this.values[index] = this.values[sameHash];
 					this.values[sameHash] = null;
@@ -247,8 +249,8 @@ public class ReferenceHashSet<T> {
 	}
 
 	/*
-	 * Return the object that is in this set and that is equals to the given
-	 * object. Return null if not found.
+	 * Return the object that is in this set and that is equals to the given object.
+	 * Return null if not found.
 	 */
 	public T get(T obj) {
 		cleanupGarbageCollectedValues();
@@ -266,7 +268,8 @@ public class ReferenceHashSet<T> {
 	}
 
 	private void rehash() {
-		ReferenceHashSet<T> newHashSet = new ReferenceHashSet<>(this.elementSize * 2); // double the number of expected elements
+		ReferenceHashSet<T> newHashSet = new ReferenceHashSet<>(this.elementSize * 2); // double the number of expected
+																						// elements
 		newHashSet.referenceQueue = this.referenceQueue;
 		HashedReference<T> currentValue;
 		for (HashedReference<T> value : this.values)

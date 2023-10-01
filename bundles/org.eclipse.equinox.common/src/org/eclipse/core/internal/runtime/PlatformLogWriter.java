@@ -24,10 +24,10 @@ import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
- * A log writer that writes log entries.  
+ * A log writer that writes log entries.
  * <p>
- * Note that this class just provides a bridge from the old ILog interface
- * to the new extended log service
+ * Note that this class just provides a bridge from the old ILog interface to
+ * the new extended log service
  */
 public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 	public static final String EQUINOX_LOGGER_NAME = "org.eclipse.equinox.logger"; //$NON-NLS-1$
@@ -49,17 +49,17 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 
 	public static int getLevel(IStatus status) {
 		switch (status.getSeverity()) {
-			case IStatus.ERROR :
-				return LogService.LOG_ERROR;
-			case IStatus.WARNING :
-				return LogService.LOG_WARNING;
-			case IStatus.INFO :
-				return LogService.LOG_INFO;
-			case IStatus.OK :
-				return LogService.LOG_DEBUG;
-			case IStatus.CANCEL :
-			default :
-				return 32; // unknown
+		case IStatus.ERROR:
+			return LogService.LOG_ERROR;
+		case IStatus.WARNING:
+			return LogService.LOG_WARNING;
+		case IStatus.INFO:
+			return LogService.LOG_INFO;
+		case IStatus.OK:
+			return LogService.LOG_DEBUG;
+		case IStatus.CANCEL:
+		default:
+			return 32; // unknown
 		}
 	}
 
@@ -68,7 +68,7 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 		ArrayList<FrameworkLogEntry> childlist = new ArrayList<>();
 
 		int stackCode = t instanceof CoreException ? 1 : 0;
-		// ensure a substatus inside a CoreException is properly logged 
+		// ensure a substatus inside a CoreException is properly logged
 		if (stackCode == 1) {
 			IStatus coreStatus = ((CoreException) t).getStatus();
 			if (coreStatus != null) {
@@ -83,9 +83,11 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 			}
 		}
 
-		FrameworkLogEntry[] children = childlist.size() == 0 ? null : childlist.toArray(new FrameworkLogEntry[childlist.size()]);
+		FrameworkLogEntry[] children = childlist.size() == 0 ? null
+				: childlist.toArray(new FrameworkLogEntry[childlist.size()]);
 
-		return new FrameworkLogEntry(status, status.getPlugin(), status.getSeverity(), status.getCode(), status.getMessage(), stackCode, t, children);
+		return new FrameworkLogEntry(status, status.getPlugin(), status.getSeverity(), status.getCode(),
+				status.getMessage(), stackCode, t, children);
 	}
 
 	private Bundle getBundle(IStatus status) {
@@ -128,33 +130,36 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 			IStatus[] statusChildren = new Status[children.length];
 			for (int i = 0; i < statusChildren.length; i++)
 				statusChildren[i] = convertToStatus(children[i]);
-			return new MultiStatus(entry.getEntry(), entry.getBundleCode(), statusChildren, entry.getMessage(), entry.getThrowable());
+			return new MultiStatus(entry.getEntry(), entry.getBundleCode(), statusChildren, entry.getMessage(),
+					entry.getThrowable());
 		}
-		return new Status(entry.getSeverity(), entry.getEntry(), entry.getBundleCode(), entry.getMessage(), entry.getThrowable());
+		return new Status(entry.getSeverity(), entry.getEntry(), entry.getBundleCode(), entry.getMessage(),
+				entry.getThrowable());
 	}
 
 	private static IStatus convertRawEntryToStatus(LogEntry logEntry) {
 		int severity;
 		switch (logEntry.getLogLevel()) {
-			case ERROR :
-				severity = IStatus.ERROR;
-				break;
-			case WARN :
-				severity = IStatus.WARNING;
-				break;
-			case INFO :
-				severity = IStatus.INFO;
-				break;
-			case DEBUG :
-			case TRACE :
-			case AUDIT :
-				severity = IStatus.OK;
-				break;
-			default :
-				severity = -1;
-				break;
+		case ERROR:
+			severity = IStatus.ERROR;
+			break;
+		case WARN:
+			severity = IStatus.WARNING;
+			break;
+		case INFO:
+			severity = IStatus.INFO;
+			break;
+		case DEBUG:
+		case TRACE:
+		case AUDIT:
+			severity = IStatus.OK;
+			break;
+		default:
+			severity = -1;
+			break;
 		}
 		Bundle bundle = logEntry.getBundle();
-		return new Status(severity, bundle == null ? null : bundle.getSymbolicName(), logEntry.getMessage(), logEntry.getException());
+		return new Status(severity, bundle == null ? null : bundle.getSymbolicName(), logEntry.getMessage(),
+				logEntry.getException());
 	}
 }

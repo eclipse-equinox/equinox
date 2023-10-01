@@ -21,8 +21,8 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 
 /**
- * Platform URL support
- * platform:/plugin/pluginId/		maps to pluginDescriptor.getInstallURLInternal()
+ * Platform URL support platform:/plugin/pluginId/ maps to
+ * pluginDescriptor.getInstallURLInternal()
  */
 public class PlatformURLPluginConnection extends PlatformURLConnection {
 
@@ -42,10 +42,9 @@ public class PlatformURLPluginConnection extends PlatformURLConnection {
 	}
 
 	/*
-	 * spec - /plugin/com.example/META-INF/MANIFEST.MF
-	 * originalURL - used only for exception messages
-	 * result[0] - Bundle (e.g. com.example)
-	 * result[1] - String (path) (e.g. META-INF/MANIFEST.MF)
+	 * spec - /plugin/com.example/META-INF/MANIFEST.MF originalURL - used only for
+	 * exception messages result[0] - Bundle (e.g. com.example) result[1] - String
+	 * (path) (e.g. META-INF/MANIFEST.MF)
 	 */
 	public static Object[] parse(String spec, URL originalURL) throws IOException {
 		Object[] result = new Object[2];
@@ -80,7 +79,8 @@ public class PlatformURLPluginConnection extends PlatformURLConnection {
 		result = b.getResource(path);
 		if (result != null)
 			return result;
-		// if the result is null then force the creation of a URL that will throw FileNotFoundExceptions
+		// if the result is null then force the creation of a URL that will throw
+		// FileNotFoundExceptions
 		return new URL(b.getEntry("/"), path); //$NON-NLS-1$
 	}
 

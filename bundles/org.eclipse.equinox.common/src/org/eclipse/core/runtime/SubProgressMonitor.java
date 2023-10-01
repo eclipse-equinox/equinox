@@ -15,53 +15,60 @@
 package org.eclipse.core.runtime;
 
 /**
- * A progress monitor that uses a given amount of work ticks from a parent monitor. Code that 
- * currently uses this utility should be rewritten to use {@link SubMonitor} instead.
- * Consider the following example:
+ * A progress monitor that uses a given amount of work ticks from a parent
+ * monitor. Code that currently uses this utility should be rewritten to use
+ * {@link SubMonitor} instead. Consider the following example:
+ * 
  * <pre>
- *     void someMethod(IProgressMonitor pm) {
- *        pm.beginTask("Main Task", 100);
- *        SubProgressMonitor subMonitor1= new SubProgressMonitor(pm, 60);
- *        try {
- *           doSomeWork(subMonitor1);
- *        } finally {
- *           subMonitor1.done();
- *        }
- *        SubProgressMonitor subMonitor2= new SubProgressMonitor(pm, 40);
- *        try {
- *           doSomeMoreWork(subMonitor2);
- *        } finally {
- *           subMonitor2.done();
- *        }
- *     }
+ * void someMethod(IProgressMonitor pm) {
+ * 	pm.beginTask("Main Task", 100);
+ * 	SubProgressMonitor subMonitor1 = new SubProgressMonitor(pm, 60);
+ * 	try {
+ * 		doSomeWork(subMonitor1);
+ * 	} finally {
+ * 		subMonitor1.done();
+ * 	}
+ * 	SubProgressMonitor subMonitor2 = new SubProgressMonitor(pm, 40);
+ * 	try {
+ * 		doSomeMoreWork(subMonitor2);
+ * 	} finally {
+ * 		subMonitor2.done();
+ * 	}
+ * }
  * </pre>
  * <p>
  * The above code should be refactored to this:
+ * 
  * <pre>
- *     void someMethod(IProgressMonitor pm) {
- *        SubMonitor subMonitor = SubMonitor.convert(pm, "Main Task", 100);
- *        doSomeWork(subMonitor.split(60));
- *        doSomeMoreWork(subMonitor.split(40));
- *     }
+ * void someMethod(IProgressMonitor pm) {
+ * 	SubMonitor subMonitor = SubMonitor.convert(pm, "Main Task", 100);
+ * 	doSomeWork(subMonitor.split(60));
+ * 	doSomeMoreWork(subMonitor.split(40));
+ * }
  * </pre>
  * <p>
- * The process for converting code which used SubProgressMonitor into SubMonitor is:
+ * The process for converting code which used SubProgressMonitor into SubMonitor
+ * is:
  * <ul>
- * <li>Calls to {@link IProgressMonitor#beginTask} on the root monitor should be replaced by a call
- * to {@link SubMonitor#convert}. Keep the returned SubMonitor around as a local variable and refer
- * to it instead of the root monitor for the remainder of the method.</li>
- * <li>All calls to {@link #SubProgressMonitor(IProgressMonitor, int)} should be replaced by calls to
- * {@link SubMonitor#split(int)}.</li>
- * <li>If a SubProgressMonitor is constructed using the SUPPRESS_SUBTASK_LABEL flag, replace it with the
- * two-argument version of {@link SubMonitor#split(int, int)} using {@link SubMonitor#SUPPRESS_SUBTASK}
+ * <li>Calls to {@link IProgressMonitor#beginTask} on the root monitor should be
+ * replaced by a call to {@link SubMonitor#convert}. Keep the returned
+ * SubMonitor around as a local variable and refer to it instead of the root
+ * monitor for the remainder of the method.</li>
+ * <li>All calls to {@link #SubProgressMonitor(IProgressMonitor, int)} should be
+ * replaced by calls to {@link SubMonitor#split(int)}.</li>
+ * <li>If a SubProgressMonitor is constructed using the SUPPRESS_SUBTASK_LABEL
+ * flag, replace it with the two-argument version of
+ * {@link SubMonitor#split(int, int)} using {@link SubMonitor#SUPPRESS_SUBTASK}
  * as the second argument.</li>
- * <li>It is not necessary to call done on an instance of {@link SubMonitor}.</li> 
+ * <li>It is not necessary to call done on an instance of
+ * {@link SubMonitor}.</li>
  * </ul>
  * <p>
  * Please see the {@link SubMonitor} documentation for further examples.
  * <p>
  * This class can be used without OSGi running.
- * </p><p>
+ * </p>
+ * <p>
  * This class may be instantiated or subclassed by clients.
  * </p>
  * 
@@ -71,15 +78,15 @@ package org.eclipse.core.runtime;
 public class SubProgressMonitor extends ProgressMonitorWrapper {
 
 	/**
-	 * Style constant indicating that calls to <code>subTask</code>
-	 * should not have any effect. This is equivalent to {@link SubMonitor#SUPPRESS_SUBTASK}
+	 * Style constant indicating that calls to <code>subTask</code> should not have
+	 * any effect. This is equivalent to {@link SubMonitor#SUPPRESS_SUBTASK}
 	 *
 	 * @see #SubProgressMonitor(IProgressMonitor,int,int)
 	 */
 	public static final int SUPPRESS_SUBTASK_LABEL = 1 << 1;
 	/**
-	 * Style constant indicating that the main task label 
-	 * should be prepended to the subtask label.
+	 * Style constant indicating that the main task label should be prepended to the
+	 * subtask label.
 	 *
 	 * @see #SubProgressMonitor(IProgressMonitor,int,int)
 	 */
@@ -95,31 +102,27 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 	private String mainTaskLabel;
 
 	/**
-	 * Creates a new sub-progress monitor for the given monitor. The sub 
-	 * progress monitor uses the given number of work ticks from its 
-	 * parent monitor.
+	 * Creates a new sub-progress monitor for the given monitor. The sub progress
+	 * monitor uses the given number of work ticks from its parent monitor.
 	 *
 	 * @param monitor the parent progress monitor
-	 * @param ticks the number of work ticks allocated from the
-	 *    parent monitor
+	 * @param ticks   the number of work ticks allocated from the parent monitor
 	 */
 	public SubProgressMonitor(IProgressMonitor monitor, int ticks) {
 		this(monitor, ticks, 0);
 	}
 
 	/**
-	 * Creates a new sub-progress monitor for the given monitor. The sub 
-	 * progress monitor uses the given number of work ticks from its 
-	 * parent monitor.
+	 * Creates a new sub-progress monitor for the given monitor. The sub progress
+	 * monitor uses the given number of work ticks from its parent monitor.
 	 *
 	 * @param monitor the parent progress monitor
-	 * @param ticks the number of work ticks allocated from the
-	 *    parent monitor
-	 * @param style one of
-	 *    <ul>
-	 *    <li> <code>SUPPRESS_SUBTASK_LABEL</code> </li>
-	 *    <li> <code>PREPEND_MAIN_LABEL_TO_SUBTASK</code> </li>
-	 *    </ul>
+	 * @param ticks   the number of work ticks allocated from the parent monitor
+	 * @param style   one of
+	 *                <ul>
+	 *                <li><code>SUPPRESS_SUBTASK_LABEL</code></li>
+	 *                <li><code>PREPEND_MAIN_LABEL_TO_SUBTASK</code></li>
+	 *                </ul>
 	 * @see #SUPPRESS_SUBTASK_LABEL
 	 * @see #PREPEND_MAIN_LABEL_TO_SUBTASK
 	 */
@@ -131,12 +134,12 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 
 	/**
 	 *
-	 * Starts a new main task. Since this progress monitor is a sub
-	 * progress monitor, the given name will NOT be used to update
-	 * the progress bar's main task label. That means the given 
-	 * string will be ignored. If style <code>PREPEND_MAIN_LABEL_TO_SUBTASK
-	 * </code> is specified, then the given string will be prepended to
-	 * every string passed to <code>subTask(String)</code>.
+	 * Starts a new main task. Since this progress monitor is a sub progress
+	 * monitor, the given name will NOT be used to update the progress bar's main
+	 * task label. That means the given string will be ignored. If style
+	 * <code>PREPEND_MAIN_LABEL_TO_SUBTASK
+	 * </code> is specified, then the given string will be prepended to every string
+	 * passed to <code>subTask(String)</code>.
 	 */
 	@Override
 	public void beginTask(String name, int totalWork) {
@@ -145,9 +148,9 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 		if (nestedBeginTasks > 1) {
 			return;
 		}
-		// be safe:  if the argument would cause math errors (zero or 
-		// negative), just use 0 as the scale.  This disables progress for
-		// this submonitor. 
+		// be safe: if the argument would cause math errors (zero or
+		// negative), just use 0 as the scale. This disables progress for
+		// this submonitor.
 		scale = totalWork <= 0 ? 0 : (double) parentTicks / (double) totalWork;
 		if ((style & PREPEND_MAIN_LABEL_TO_SUBTASK) != 0) {
 			mainTaskLabel = name;
@@ -164,7 +167,7 @@ public class SubProgressMonitor extends ProgressMonitorWrapper {
 		double remaining = parentTicks - sentToParent;
 		if (remaining > 0)
 			super.internalWorked(remaining);
-		//clear the sub task if there was one
+		// clear the sub task if there was one
 		if (hasSubTask)
 			subTask(""); //$NON-NLS-1$
 		sentToParent = 0;

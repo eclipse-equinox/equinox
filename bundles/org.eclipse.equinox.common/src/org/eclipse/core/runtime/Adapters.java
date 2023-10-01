@@ -29,28 +29,27 @@ import org.eclipse.osgi.util.NLS;
  */
 public class Adapters {
 	/**
-	 * If it is possible to adapt the given object to the given type, this
-	 * returns the adapter. Performs the following checks:
+	 * If it is possible to adapt the given object to the given type, this returns
+	 * the adapter. Performs the following checks:
 	 * 
 	 * <ol>
-	 * <li>Returns <code>sourceObject</code> if it is an instance of the
-	 * adapter type.</li>
+	 * <li>Returns <code>sourceObject</code> if it is an instance of the adapter
+	 * type.</li>
 	 * <li>If sourceObject implements IAdaptable, it is queried for adapters.</li>
 	 * <li>Finally, the adapter manager is consulted for adapters</li>
 	 * </ol>
 	 * 
 	 * Otherwise returns null.
 	 * 
-	 * @param <T> class type to adapt to
-	 * @param sourceObject
-	 *            object to adapt, can be null
-	 * @param adapter
-	 *            type to adapt to
-	 * @param allowActivation
-	 *            if true, plug-ins may be activated if necessary to provide the requested adapter.
-	 *            if false, the method will return null if an adapter cannot be provided from activated plug-ins.
-	 * @return a representation of sourceObject that is assignable to the
-	 *         adapter type, or null if no such representation exists
+	 * @param <T>             class type to adapt to
+	 * @param sourceObject    object to adapt, can be null
+	 * @param adapter         type to adapt to
+	 * @param allowActivation if true, plug-ins may be activated if necessary to
+	 *                        provide the requested adapter. if false, the method
+	 *                        will return null if an adapter cannot be provided from
+	 *                        activated plug-ins.
+	 * @return a representation of sourceObject that is assignable to the adapter
+	 *         type, or null if no such representation exists
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T adapt(Object sourceObject, Class<T> adapter, boolean allowActivation) {
@@ -68,14 +67,16 @@ public class Adapters {
 			if (result != null) {
 				// Sanity-check
 				if (!adapter.isInstance(result)) {
-					throw new AssertionFailedException(adaptable.getClass().getName() + ".getAdapter(" + adapter.getName() + ".class) returned " //$NON-NLS-1$//$NON-NLS-2$
-							+ result.getClass().getName() + " that is not an instance the requested type"); //$NON-NLS-1$
+					throw new AssertionFailedException(
+							adaptable.getClass().getName() + ".getAdapter(" + adapter.getName() + ".class) returned " //$NON-NLS-1$//$NON-NLS-2$
+									+ result.getClass().getName() + " that is not an instance the requested type"); //$NON-NLS-1$
 				}
 				return (T) result;
 			}
 		}
 
-		// If the source object is a platform object then it's already tried calling AdapterManager.getAdapter,
+		// If the source object is a platform object then it's already tried calling
+		// AdapterManager.getAdapter,
 		// so there's no need to try it again.
 		if ((sourceObject instanceof PlatformObject) && !allowActivation) {
 			return null;
@@ -97,20 +98,18 @@ public class Adapters {
 	}
 
 	/**
-	 * If it is possible to adapt the given object to the given type, this
-	 * returns the adapter.
+	 * If it is possible to adapt the given object to the given type, this returns
+	 * the adapter.
 	 * <p>
 	 * Convenience method for calling <code>adapt(Object, Class, true)</code>.
 	 * <p>
 	 * See {@link #adapt(Object, Class, boolean)}.
 	 * 
-	 * @param <T> class type to adapt to
-	 * @param sourceObject
-	 *            object to adapt, can be null
-	 * @param adapter
-	 *            type to adapt to
-	 * @return a representation of sourceObject that is assignable to the
-	 *         adapter type, or null if no such representation exists
+	 * @param <T>          class type to adapt to
+	 * @param sourceObject object to adapt, can be null
+	 * @param adapter      type to adapt to
+	 * @return a representation of sourceObject that is assignable to the adapter
+	 *         type, or null if no such representation exists
 	 */
 	public static <T> T adapt(Object sourceObject, Class<T> adapter) {
 		return adapt(sourceObject, adapter, true);

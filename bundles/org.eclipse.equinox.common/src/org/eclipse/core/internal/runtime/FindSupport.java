@@ -32,7 +32,8 @@ public class FindSupport {
 	public static final String PROP_WS = "osgi.ws"; //$NON-NLS-1$
 	public static final String PROP_ARCH = "osgi.arch"; //$NON-NLS-1$
 
-	private static String[] NL_JAR_VARIANTS = buildNLVariants(Activator.getContext() == null ? System.getProperty(PROP_NL) : Activator.getContext().getProperty(PROP_NL));
+	private static String[] NL_JAR_VARIANTS = buildNLVariants(
+			Activator.getContext() == null ? System.getProperty(PROP_NL) : Activator.getContext().getProperty(PROP_NL));
 
 	private static String[] buildNLVariants(String nl) {
 		ArrayList<String> result = new ArrayList<>();
@@ -53,14 +54,14 @@ public class FindSupport {
 	}
 
 	/**
-	 * See doc on {@link FileLocator#find(Bundle, IPath, Map)} 
+	 * See doc on {@link FileLocator#find(Bundle, IPath, Map)}
 	 */
 	public static URL find(Bundle bundle, IPath path) {
 		return find(bundle, path, null);
 	}
 
 	/**
-	 * See doc on {@link FileLocator#find(Bundle, IPath, Map)} 
+	 * See doc on {@link FileLocator#find(Bundle, IPath, Map)}
 	 */
 	public static URL find(Bundle b, IPath path, Map<String, String> override) {
 		return find(b, path, override, null);
@@ -90,9 +91,9 @@ public class FindSupport {
 
 		// Check for the empty or root case first
 		if (path.isEmpty() || path.isRoot()) {
-			// Watch for the root case.  It will produce a new
+			// Watch for the root case. It will produce a new
 			// URL which is only the root directory (and not the
-			// root of this plugin).	
+			// root of this plugin).
 			result = findInPlugin(b, IPath.EMPTY, multiple);
 			if (result == null || multiple != null)
 				result = findInFragments(b, IPath.EMPTY, multiple);
@@ -187,7 +188,7 @@ public class FindSupport {
 			ws = Activator.getContext().getProperty(PROP_WS);
 		IPath filePath = IPath.fromOSString("ws").append(ws).append(path); //$NON-NLS-1$
 		// We know that there is only one segment to the ws path
-		// e.g. ws/win32	
+		// e.g. ws/win32
 		URL result = findInPlugin(b, filePath, multiple);
 		if (result != null && multiple == null)
 			return result;
@@ -264,7 +265,7 @@ public class FindSupport {
 	}
 
 	/**
-	 * See doc on {@link FileLocator#openStream(Bundle, IPath, boolean)} 
+	 * See doc on {@link FileLocator#openStream(Bundle, IPath, boolean)}
 	 */
 	public static final InputStream openStream(Bundle bundle, IPath file, boolean substituteArgs) throws IOException {
 		URL url = null;
@@ -281,7 +282,7 @@ public class FindSupport {
 	}
 
 	/**
-	 * See doc on {@link FileLocator#find(URL)} 
+	 * See doc on {@link FileLocator#find(URL)}
 	 */
 	public static URL find(URL url) {
 		// if !platform/plugin | fragment URL return
