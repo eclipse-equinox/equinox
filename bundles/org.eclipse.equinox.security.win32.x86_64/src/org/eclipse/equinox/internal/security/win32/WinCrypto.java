@@ -40,7 +40,7 @@ public class WinCrypto extends PasswordProvider {
 	static {
 		System.loadLibrary("jnicrypt64");
 	}
-	
+
 	private final static String WIN_PROVIDER_NODE = "/org.eclipse.equinox.secure.storage/windows64";
 	private final static String PASSWORD_KEY = "encryptedPassword";
 
@@ -56,14 +56,15 @@ public class WinCrypto extends PasswordProvider {
 			encryptedPassword = getEncryptedPassword(container);
 		else
 			encryptedPassword = null;
-		
+
 		if (encryptedPassword != null) {
 			byte[] decryptedPassword = windecrypt(encryptedPassword);
 			if (decryptedPassword != null) {
 				String password = new String(decryptedPassword);
 				return new PBEKeySpec(password.toCharArray());
 			} else {
-				StorageException e = new StorageException(StorageException.ENCRYPTION_ERROR, WinCryptoMessages.decryptPasswordFailed);
+				StorageException e = new StorageException(StorageException.ENCRYPTION_ERROR,
+						WinCryptoMessages.decryptPasswordFailed);
 				AuthPlugin.getDefault().logError(WinCryptoMessages.decryptPasswordFailed, e);
 				return null;
 			}
@@ -71,7 +72,7 @@ public class WinCrypto extends PasswordProvider {
 
 		// add info message in the log
 		AuthPlugin.getDefault().logMessage(WinCryptoMessages.newPasswordGenerated);
-		
+
 		byte[] rawPassword = new byte[PASSWORD_LENGTH];
 		SecureRandom random = new SecureRandom();
 		random.setSeed(System.currentTimeMillis());
@@ -85,7 +86,7 @@ public class WinCrypto extends PasswordProvider {
 
 	private byte[] getEncryptedPassword(IPreferencesContainer container) {
 		ISecurePreferences node = container.getPreferences().node(WIN_PROVIDER_NODE);
-		String passwordHint; 
+		String passwordHint;
 		try {
 			passwordHint = node.get(PASSWORD_KEY, null);
 		} catch (StorageException e) { // should never happen in this scenario
@@ -97,10 +98,11 @@ public class WinCrypto extends PasswordProvider {
 		return Base64.decode(passwordHint);
 	}
 
-	private boolean savePassword(String password, IPreferencesContainer container){
+	private boolean savePassword(String password, IPreferencesContainer container) {
 		byte[] data = winencrypt(password.getBytes());
 		if (data == null) { // this is bad. Something wrong with OS or JNI.
-			StorageException e = new StorageException(StorageException.ENCRYPTION_ERROR, WinCryptoMessages.encryptPasswordFailed);
+			StorageException e = new StorageException(StorageException.ENCRYPTION_ERROR,
+					WinCryptoMessages.encryptPasswordFailed);
 			AuthPlugin.getDefault().logError(WinCryptoMessages.encryptPasswordFailed, e);
 			return false;
 		}
@@ -125,7 +127,8 @@ public class WinCrypto extends PasswordProvider {
 	public boolean retryOnError(Exception e, IPreferencesContainer container) {
 		// It would be rather dangerous to allow this password to be changed
 		// as it would permanently trash all entries in the secure storage.
-		// Rather applications using get...() should handle exceptions and offer to overwrite 
+		// Rather applications using get...() should handle exceptions and offer to
+		// overwrite
 		// data on an entry-by-entry scale.
 		return false;
 	}
