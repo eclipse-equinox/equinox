@@ -71,7 +71,8 @@ public class RegionBundleEventHookTests {
 		stubBundleContext.addInstalledBundle(stubSystemBundle);
 		this.threadLocal = new ThreadLocal<>();
 		this.digraph = RegionReflectionUtils.newStandardRegionDigraph(stubBundleContext, this.threadLocal);
-		this.bundleEventHook = RegionReflectionUtils.newRegionBundleEventHook(digraph, threadLocal, stubSystemBundle.getBundleId());
+		this.bundleEventHook = RegionReflectionUtils.newRegionBundleEventHook(digraph, threadLocal,
+				stubSystemBundle.getBundleId());
 
 		// Create regions A, B, C, D containing bundles A, B, C, D, respectively.
 		createRegion(REGION_A, BUNDLE_A);
@@ -243,12 +244,14 @@ public class RegionBundleEventHookTests {
 	public void testDefaultRegion() {
 		this.digraph.setDefaultRegion(null);
 		Bundle x = createBundle("installed.X");
-		this.bundleEventHook.event(new BundleEvent(BundleEvent.INSTALLED, x, bundle(BUNDLE_A)), Collections.<BundleContext> emptyList());
+		this.bundleEventHook.event(new BundleEvent(BundleEvent.INSTALLED, x, bundle(BUNDLE_A)),
+				Collections.<BundleContext>emptyList());
 		assertTrue(this.digraph.getRegion(x).equals(region(REGION_A)));
 
 		this.digraph.setDefaultRegion(region(REGION_B));
 		Bundle y = createBundle("installed.Y");
-		this.bundleEventHook.event(new BundleEvent(BundleEvent.INSTALLED, y, bundle(BUNDLE_A)), Collections.<BundleContext> emptyList());
+		this.bundleEventHook.event(new BundleEvent(BundleEvent.INSTALLED, y, bundle(BUNDLE_A)),
+				Collections.<BundleContext>emptyList());
 		assertTrue(this.digraph.getRegion(y).equals(region(REGION_B)));
 	}
 
@@ -277,14 +280,17 @@ public class RegionBundleEventHookTests {
 		}
 
 		if (negate) {
-			String negateFilter = "(!(|" + "(" + RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE + "=" + RegionFilter.VISIBLE_BUNDLE_NAMESPACE + ")" + "(" + RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE + "=" + RegionFilter.VISIBLE_BUNDLE_LIFECYCLE_NAMESPACE + ")" + "))";
+			String negateFilter = "(!(|" + "(" + RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE + "="
+					+ RegionFilter.VISIBLE_BUNDLE_NAMESPACE + ")" + "(" + RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE
+					+ "=" + RegionFilter.VISIBLE_BUNDLE_LIFECYCLE_NAMESPACE + ")" + "))";
 			builder.allow(RegionFilter.VISIBLE_ALL_NAMESPACE, negateFilter);
 		}
 		return builder.build();
 	}
 
 	private Bundle createBundle(String bundleSymbolicName) {
-		Bundle stubBundle = new StubBundle(this.bundleId++, bundleSymbolicName, BUNDLE_VERSION, "loc:" + bundleSymbolicName);
+		Bundle stubBundle = new StubBundle(this.bundleId++, bundleSymbolicName, BUNDLE_VERSION,
+				"loc:" + bundleSymbolicName);
 		this.bundles.put(bundleSymbolicName, stubBundle);
 		return stubBundle;
 	}

@@ -260,24 +260,29 @@ public class RegionServiceEventHookTests {
 		for (String filter : filters) {
 			builder.allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, filter);
 		}
-		String negateFilter = "(!(|" + "(" + RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE + "=" + RegionFilter.VISIBLE_SERVICE_NAMESPACE + ")" + "(" + RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE + "=" + RegionFilter.VISIBLE_BUNDLE_NAMESPACE + ")" + "))";
+		String negateFilter = "(!(|" + "(" + RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE + "="
+				+ RegionFilter.VISIBLE_SERVICE_NAMESPACE + ")" + "(" + RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE
+				+ "=" + RegionFilter.VISIBLE_BUNDLE_NAMESPACE + ")" + "))";
 		builder.allow(RegionFilter.VISIBLE_ALL_NAMESPACE, negateFilter);
 		return builder.build();
 	}
 
 	private Bundle createBundle(String bundleSymbolicName) {
-		Bundle stubBundle = new StubBundle(this.bundleId++, bundleSymbolicName, BUNDLE_VERSION, "loc:" + bundleSymbolicName);
+		Bundle stubBundle = new StubBundle(this.bundleId++, bundleSymbolicName, BUNDLE_VERSION,
+				"loc:" + bundleSymbolicName);
 		this.bundles.put(bundleSymbolicName, stubBundle);
 		createServiceReference(stubBundle, bundleSymbolicName);
 		return stubBundle;
 	}
 
 	private StubServiceReference<Object> createServiceReference(Bundle stubBundle, String referenceName) {
-		StubServiceRegistration<Object> stubServiceRegistration = new StubServiceRegistration<>((StubBundleContext) stubBundle.getBundleContext(), referenceName);
+		StubServiceRegistration<Object> stubServiceRegistration = new StubServiceRegistration<>(
+				(StubBundleContext) stubBundle.getBundleContext(), referenceName);
 		StubServiceReference<Object> stubServiceReference = new StubServiceReference<>(stubServiceRegistration);
 		this.serviceReferences.put(referenceName, stubServiceReference);
 
-		StubServiceRegistration<Object> dupServiceRegistration = new StubServiceRegistration<>((StubBundleContext) stubBundle.getBundleContext(), DUPLICATE + stubBundle.getBundleId());
+		StubServiceRegistration<Object> dupServiceRegistration = new StubServiceRegistration<>(
+				(StubBundleContext) stubBundle.getBundleContext(), DUPLICATE + stubBundle.getBundleId());
 		StubServiceReference<Object> dupServiceReference = new StubServiceReference<>(dupServiceRegistration);
 		this.serviceReferences.put(DUPLICATE + stubBundle.getBundleId(), dupServiceReference);
 		return stubServiceReference;

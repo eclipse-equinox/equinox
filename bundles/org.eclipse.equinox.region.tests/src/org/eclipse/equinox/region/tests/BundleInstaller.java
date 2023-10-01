@@ -37,7 +37,9 @@ public class BundleInstaller {
 		context = systemBundle.getBundleContext();
 		frameworkWiring = systemBundle.adapt(FrameworkWiring.class);
 		rootLocation = bundlesRoot;
-		converter = new ServiceTracker<>(context, context.createFilter("(&(objectClass=" + URLConverter.class.getName() + ")(protocol=bundleentry))"), null);
+		converter = new ServiceTracker<>(context,
+				context.createFilter("(&(objectClass=" + URLConverter.class.getName() + ")(protocol=bundleentry))"),
+				null);
 		converter.open();
 		this.testBundle = testBundle;
 	}
@@ -163,7 +165,7 @@ public class BundleInstaller {
 	synchronized public Bundle[] refreshPackages(Bundle[] refresh) {
 		if (refresh == null)
 			return null;
-		final boolean[] flag = new boolean[] {false};
+		final boolean[] flag = new boolean[] { false };
 		FrameworkListener listener = new FrameworkListener() {
 			public void frameworkEvent(FrameworkEvent event) {
 				if (event.getType() == FrameworkEvent.PACKAGES_REFRESHED)

@@ -22,7 +22,10 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({RegionBundleCollisionHookTests.class, RegionBundleEventHookTests.class, RegionBundleFindHookTests.class, RegionResolverHookTests.class, RegionServiceEventHookTests.class, RegionServiceFindHookTests.class, BundleIdBasedRegionTests.class, StandardRegionDigraphPeristenceTests.class, StandardRegionDigraphTests.class, StandardRegionFilterTests.class, RegionSystemTests.class, Bug346127Test.class
+@SuiteClasses({ RegionBundleCollisionHookTests.class, RegionBundleEventHookTests.class, RegionBundleFindHookTests.class,
+		RegionResolverHookTests.class, RegionServiceEventHookTests.class, RegionServiceFindHookTests.class,
+		BundleIdBasedRegionTests.class, StandardRegionDigraphPeristenceTests.class, StandardRegionDigraphTests.class,
+		StandardRegionFilterTests.class, RegionSystemTests.class, Bug346127Test.class
 
 })
 public class AllTests {

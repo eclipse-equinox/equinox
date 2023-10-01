@@ -115,7 +115,8 @@ public class RegionResolverHookTests {
 
 	@Test
 	public void testNoRegionResolvable() {
-		Collection<BundleRevision> resolvable = new ArrayList<>(Collections.singleton(new StubBundleRevision(bundle(BUNDLE_X))));
+		Collection<BundleRevision> resolvable = new ArrayList<>(
+				Collections.singleton(new StubBundleRevision(bundle(BUNDLE_X))));
 		this.resolverHook.filterResolvable(resolvable);
 		assertTrue("Resolvable is not empty" + resolvable, resolvable.isEmpty());
 	}
@@ -364,14 +365,18 @@ public class RegionResolverHookTests {
 		return builder.build();
 	}
 
-	private RegionFilter createBundleFilter(String bundleSymbolicName, Version bundleVersion) throws InvalidSyntaxException {
-		String bundleFilter = "(&(" + RegionFilter.VISIBLE_BUNDLE_NAMESPACE + '=' + bundleSymbolicName + ')' + '(' + Constants.BUNDLE_VERSION_ATTRIBUTE + ">=" + (bundleVersion == null ? "0" : bundleVersion.toString()) + "))";
+	private RegionFilter createBundleFilter(String bundleSymbolicName, Version bundleVersion)
+			throws InvalidSyntaxException {
+		String bundleFilter = "(&(" + RegionFilter.VISIBLE_BUNDLE_NAMESPACE + '=' + bundleSymbolicName + ')' + '('
+				+ Constants.BUNDLE_VERSION_ATTRIBUTE + ">=" + (bundleVersion == null ? "0" : bundleVersion.toString())
+				+ "))";
 		RegionFilterBuilder builder = digraph.createRegionFilterBuilder();
 		return builder.allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, bundleFilter).build();
 	}
 
 	private Bundle createBundle(String bundleSymbolicName) {
-		Bundle stubBundle = new StubBundle(this.bundleId++, bundleSymbolicName, BUNDLE_VERSION, "loc:" + bundleSymbolicName);
+		Bundle stubBundle = new StubBundle(this.bundleId++, bundleSymbolicName, BUNDLE_VERSION,
+				"loc:" + bundleSymbolicName);
 		this.bundles.put(bundleSymbolicName, stubBundle);
 		return stubBundle;
 	}
@@ -622,13 +627,13 @@ public class RegionResolverHookTests {
 			throw new UnsupportedOperationException();
 		}
 
-		@SuppressWarnings({"cast", "unchecked", "rawtypes"})
+		@SuppressWarnings({ "cast", "unchecked", "rawtypes" })
 		@Override
 		public List<Capability> getCapabilities(String namespace) {
 			return (List<Capability>) (List) getDeclaredCapabilities(namespace);
 		}
 
-		@SuppressWarnings({"cast", "unchecked", "rawtypes"})
+		@SuppressWarnings({ "cast", "unchecked", "rawtypes" })
 		@Override
 		public List<Requirement> getRequirements(String namespace) {
 			return (List<Requirement>) (List) getDeclaredRequirements(namespace);

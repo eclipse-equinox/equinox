@@ -30,10 +30,10 @@ import org.osgi.service.url.*;
 
 /**
  * Region Digraph should not impose a policy of always using reference: URLs.
- * This policy is further exasperated by the fact that reference: URLs only
- * work if the embedded URL uses the file: protocol. It should be up to the
- * client to decide which protocol to use. Digraph should support any URL for
- * which there is a compatible URL Handler.
+ * This policy is further exasperated by the fact that reference: URLs only work
+ * if the embedded URL uses the file: protocol. It should be up to the client to
+ * decide which protocol to use. Digraph should support any URL for which there
+ * is a compatible URL Handler.
  */
 public class Bug346127Test extends AbstractRegionSystemTest {
 
@@ -56,7 +56,7 @@ public class Bug346127Test extends AbstractRegionSystemTest {
 	public void setUp() throws Exception {
 		super.setUp();
 		Hashtable<String, Object> properties = new Hashtable<>();
-		properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[] {"regiondigraphtest"});
+		properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[] { "regiondigraphtest" });
 		getContext().registerService(URLStreamHandlerService.class.getName(), new AbstractURLStreamHandlerService() {
 			@Override
 			public URLConnection openConnection(URL u) {
