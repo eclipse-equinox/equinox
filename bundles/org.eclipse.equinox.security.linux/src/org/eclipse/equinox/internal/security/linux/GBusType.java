@@ -16,6 +16,6 @@ package org.eclipse.equinox.internal.security.linux;
 public class GBusType {
 	public final static int G_BUS_TYPE_STARTER = -1;
 	public final static int G_BUS_TYPE_NONE = 0;
-	public final static int G_BUS_TYPE_SYSTEM  = 1;
+	public final static int G_BUS_TYPE_SYSTEM = 1;
 	public final static int G_BUS_TYPE_SESSION = 2;
 }

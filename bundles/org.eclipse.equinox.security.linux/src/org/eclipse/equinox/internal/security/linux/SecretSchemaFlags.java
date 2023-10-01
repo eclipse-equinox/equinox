@@ -14,6 +14,6 @@
 package org.eclipse.equinox.internal.security.linux;
 
 public class SecretSchemaFlags {
-    public static int SECRET_SCHEMA_NONE = 0;
-    public static int SECRET_SCHEMA_DONT_MATCH_NAME = (1 << 1);
+	public static int SECRET_SCHEMA_NONE = 0;
+	public static int SECRET_SCHEMA_DONT_MATCH_NAME = (1 << 1);
 }

@@ -14,7 +14,7 @@
 package org.eclipse.equinox.internal.security.linux;
 
 public class SecretSchemaAttributeType {
-    public static int SECRET_SCHEMA_ATTRIBUTE_STRING = 0;
-    public static int SECRET_SCHEMA_ATTRIBUTE_INTEGER = 1;
-    public static int SECRET_SCHEMA_ATTRIBUTE_BOOLEAN = 2;
+	public static int SECRET_SCHEMA_ATTRIBUTE_STRING = 0;
+	public static int SECRET_SCHEMA_ATTRIBUTE_INTEGER = 1;
+	public static int SECRET_SCHEMA_ATTRIBUTE_BOOLEAN = 2;
 }
