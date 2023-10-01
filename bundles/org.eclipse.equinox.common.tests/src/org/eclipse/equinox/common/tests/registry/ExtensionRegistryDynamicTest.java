@@ -38,9 +38,11 @@ public class ExtensionRegistryDynamicTest {
 		listener.register();
 		try {
 			BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
-			bundle01 = BundleTestingHelper.installBundle("0.1", bundleContext, "Plugin_Testing/registryEvents/bundle01");
-			bundle02 = BundleTestingHelper.installBundle("0.2", bundleContext, "Plugin_Testing/registryEvents/bundle02");
-			BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] {bundle01, bundle02});
+			bundle01 = BundleTestingHelper.installBundle("0.1", bundleContext,
+					"Plugin_Testing/registryEvents/bundle01");
+			bundle02 = BundleTestingHelper.installBundle("0.2", bundleContext,
+					"Plugin_Testing/registryEvents/bundle02");
+			BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] { bundle01, bundle02 });
 			IExtensionRegistry registry = RegistryFactory.getRegistry();
 			IExtensionPoint extPoint = registry.getExtensionPoint("bundle01.xp1");
 			IExtension[] extensions = extPoint.getExtensions();
@@ -69,11 +71,13 @@ public class ExtensionRegistryDynamicTest {
 		listener.register();
 		try {
 			BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
-			bundle01 = BundleTestingHelper.installBundle("0.1", bundleContext, "Plugin_Testing/registryEvents/bundle01");
-			bundle02 = BundleTestingHelper.installBundle("0.2", bundleContext, "Plugin_Testing/registryEvents/bundle02");
-			BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] {bundle01, bundle02});
+			bundle01 = BundleTestingHelper.installBundle("0.1", bundleContext,
+					"Plugin_Testing/registryEvents/bundle01");
+			bundle02 = BundleTestingHelper.installBundle("0.2", bundleContext,
+					"Plugin_Testing/registryEvents/bundle02");
+			BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] { bundle01, bundle02 });
 			assertEquals("0.5", IExtensionDelta.ADDED, listener.eventTypeReceived(20000));
-			BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] {bundle02});
+			BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] { bundle02 });
 			assertEquals("1.2", IExtensionDelta.REMOVED, listener.eventTypeReceived(10000));
 			assertEquals("2.2", IExtensionDelta.ADDED, listener.eventTypeReceived(10000));
 		} finally {
@@ -102,9 +106,11 @@ public class ExtensionRegistryDynamicTest {
 		TestRegistryChangeListener lastListener = null;
 		try {
 			BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
-			bundle01 = BundleTestingHelper.installBundle("0.1", bundleContext, "Plugin_Testing/registryEvents/bundle01");
-			bundle02 = BundleTestingHelper.installBundle("0.2", bundleContext, "Plugin_Testing/registryEvents/bundle02");
-			BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] {bundle01, bundle02});
+			bundle01 = BundleTestingHelper.installBundle("0.1", bundleContext,
+					"Plugin_Testing/registryEvents/bundle01");
+			bundle02 = BundleTestingHelper.installBundle("0.2", bundleContext,
+					"Plugin_Testing/registryEvents/bundle02");
+			BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] { bundle01, bundle02 });
 			assertEquals("0.5", IExtensionDelta.ADDED, listener.eventTypeReceived(20000));
 
 			ExtensionTracker tracker = new ExtensionTracker();
@@ -129,7 +135,8 @@ public class ExtensionRegistryDynamicTest {
 			}, ExtensionTracker.createExtensionPointFilter(extPoint));
 
 			lastListener = new TestRegistryChangeListener("bundle01", "xp1", "bundle02", "ext1");
-			// this relies on implementation details: listeners are called in the order they are registered
+			// this relies on implementation details: listeners are called in the order they
+			// are registered
 			lastListener.register();
 
 			bundle02.uninstall();

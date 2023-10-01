@@ -21,9 +21,8 @@ import org.eclipse.core.tests.harness.CoreTest;
  */
 public class ProgressMonitorWrapperTest extends CoreTest {
 	/**
-	 * Need a zero argument constructor to satisfy the test harness.
-	 * This constructor should not do any real work nor should it be
-	 * called by user code.
+	 * Need a zero argument constructor to satisfy the test harness. This
+	 * constructor should not do any real work nor should it be called by user code.
 	 */
 	public ProgressMonitorWrapperTest() {
 		super(null);
@@ -40,7 +39,8 @@ public class ProgressMonitorWrapperTest extends CoreTest {
 	public void testProgressMonitorWrapper() {
 		NullProgressMonitor nullMonitor = new NullProgressMonitor();
 		SubProgressMonitor wrapped = new SubProgressMonitor(nullMonitor, 10);
-		ProgressMonitorWrapper wrapper = new ProgressMonitorWrapper(wrapped) {};
+		ProgressMonitorWrapper wrapper = new ProgressMonitorWrapper(wrapped) {
+		};
 
 		assertSame("1.0", nullMonitor, wrapped.getWrappedProgressMonitor());
 		assertSame("1.1", wrapped, wrapper.getWrappedProgressMonitor());

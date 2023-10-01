@@ -27,6 +27,6 @@ public class TestAdapterFactory extends Assert implements IAdapterFactory {
 
 	@Override
 	public Class<?>[] getAdapterList() {
-		return new Class[] {TestAdapter.class};
+		return new Class[] { TestAdapter.class };
 	}
 }

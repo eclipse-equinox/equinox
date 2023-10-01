@@ -21,7 +21,6 @@ import static org.junit.Assert.assertTrue;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.junit.Test;
 
-
 public class SliceProgressMonitorTest {
 
 	@Test

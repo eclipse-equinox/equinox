@@ -53,7 +53,6 @@ public class TokenAccessTest {
 		// and stopped with a good token - should be no exception
 		registry.stop(tokenGood);
 
-
 		// and stopped with a bad token - should be an exception
 		assertThrows(IllegalArgumentException.class, () -> {// registry created with a good token
 			IExtensionRegistry registry1 = RegistryFactory.createRegistry(null, tokenGood, null);

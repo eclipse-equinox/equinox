@@ -28,6 +28,7 @@ import org.junit.Test;
 
 /**
  * Test simultaneous work of two extension registries.
+ * 
  * @since 3.2
  */
 public class DirectExtensionCreateTwoRegistriesTest extends BaseExtensionRegistryRun {
@@ -38,7 +39,6 @@ public class DirectExtensionCreateTwoRegistriesTest extends BaseExtensionRegistr
 
 	private IExtensionRegistry theDeviceRegistryA;
 	private IExtensionRegistry theDeviceRegistryB;
-
 
 	@Override
 	@Before
@@ -82,21 +82,27 @@ public class DirectExtensionCreateTwoRegistriesTest extends BaseExtensionRegistr
 
 	private void checkEmptyRegistries(String namespace) {
 		// see what's in the registry A:
-		IExtensionPoint extensionPoint = theDeviceRegistryA.getExtensionPoint(qualifiedName(namespace, extensionPointId));
-		IExtensionPoint extensionPointAlt = theDeviceRegistryA.getExtensionPoint(qualifiedName(namespace, extensionPointAltId));
+		IExtensionPoint extensionPoint = theDeviceRegistryA
+				.getExtensionPoint(qualifiedName(namespace, extensionPointId));
+		IExtensionPoint extensionPointAlt = theDeviceRegistryA
+				.getExtensionPoint(qualifiedName(namespace, extensionPointAltId));
 		assertNull(extensionPoint);
 		assertNull(extensionPointAlt);
 	}
 
 	private void fillRegistries(IContributor contributor) {
-		assertTrue(((ExtensionRegistry) theDeviceRegistryA).addExtensionPoint(extensionPointId, contributor, false, "LabelA", extensionPointSchemaRef, userToken)); //$NON-NLS-1$
-		assertTrue(((ExtensionRegistry) theDeviceRegistryB).addExtensionPoint(extensionPointAltId, contributor, false, "LabelB", extensionPointSchemaRef, userToken)); //$NON-NLS-1$
+		assertTrue(((ExtensionRegistry) theDeviceRegistryA).addExtensionPoint(extensionPointId, contributor, false,
+				"LabelA", extensionPointSchemaRef, userToken)); //$NON-NLS-1$
+		assertTrue(((ExtensionRegistry) theDeviceRegistryB).addExtensionPoint(extensionPointAltId, contributor, false,
+				"LabelB", extensionPointSchemaRef, userToken)); //$NON-NLS-1$
 	}
 
 	private void checkRegistries(String namespace) {
 		// see what's in the registry A:
-		IExtensionPoint extensionPoint = theDeviceRegistryA.getExtensionPoint(qualifiedName(namespace, extensionPointId));
-		IExtensionPoint extensionPointAlt = theDeviceRegistryA.getExtensionPoint(qualifiedName(namespace, extensionPointAltId));
+		IExtensionPoint extensionPoint = theDeviceRegistryA
+				.getExtensionPoint(qualifiedName(namespace, extensionPointId));
+		IExtensionPoint extensionPointAlt = theDeviceRegistryA
+				.getExtensionPoint(qualifiedName(namespace, extensionPointAltId));
 		assertNotNull(extensionPoint);
 		assertNull(extensionPointAlt);
 

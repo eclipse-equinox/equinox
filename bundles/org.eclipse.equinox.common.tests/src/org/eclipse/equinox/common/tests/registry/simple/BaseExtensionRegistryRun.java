@@ -76,8 +76,8 @@ public class BaseExtensionRegistryRun {
 		IPath userDataPath = getStateLocation();
 		userDataPath = userDataPath.append(subDir);
 
-		File[] registryLocations = new File[] {new File(userDataPath.toOSString())};
-		boolean[] readOnly = new boolean[] {false};
+		File[] registryLocations = new File[] { new File(userDataPath.toOSString()) };
+		boolean[] readOnly = new boolean[] { false };
 		RegistryStrategy registryStrategy = new RegistryStrategy(registryLocations, readOnly);
 		return RegistryFactory.createRegistry(registryStrategy, masterToken, userToken);
 	}
@@ -96,8 +96,9 @@ public class BaseExtensionRegistryRun {
 
 	protected void processXMLContribution(IContributor nonBundleContributor, URL url, boolean persist)
 			throws IOException {
-			InputStream is = url.openStream();
-			simpleRegistry.addContribution(is, nonBundleContributor, persist, url.getFile(), null, persist ? masterToken : userToken);
+		InputStream is = url.openStream();
+		simpleRegistry.addContribution(is, nonBundleContributor, persist, url.getFile(), null,
+				persist ? masterToken : userToken);
 	}
 
 	protected String qualifiedName(String namespace, String simpleName) {

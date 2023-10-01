@@ -35,6 +35,7 @@ public class PlatformLogWriterTest extends CoreTest {
 	public static class TestILogListener implements ILogListener {
 		final AtomicReference<CountDownLatch> expected = new AtomicReference<>();
 		final List<IStatus> statuses = new CopyOnWriteArrayList<>();
+
 		@Override
 		public void logging(IStatus status, String plugin) {
 			CountDownLatch current = expected.get();
@@ -43,6 +44,7 @@ public class PlatformLogWriterTest extends CoreTest {
 			}
 			statuses.add(status);
 		}
+
 		List<IStatus> getAllExpectedStatus() throws InterruptedException {
 			CountDownLatch current = expected.get();
 			if (current != null) {
@@ -67,7 +69,6 @@ public class PlatformLogWriterTest extends CoreTest {
 
 	LogService logService;
 	final TestILogListener listener = new TestILogListener();
-	
 
 	@Override
 	protected void setUp() {
@@ -99,7 +100,6 @@ public class PlatformLogWriterTest extends CoreTest {
 		assertStatus(allStatus.get(3), "info", IStatus.INFO);
 		assertStatus(allStatus.get(4), "debug", IStatus.OK);
 		assertStatus(allStatus.get(5), "trace", IStatus.OK);
-
 
 	}
 

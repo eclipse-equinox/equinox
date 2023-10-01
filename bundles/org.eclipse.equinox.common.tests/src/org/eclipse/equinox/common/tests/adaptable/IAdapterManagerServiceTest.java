@@ -107,8 +107,7 @@ public class IAdapterManagerServiceTest {
 				new ServiceFactory<IAdapterFactory>() {
 
 					@Override
-					public IAdapterFactory getService(Bundle bundle,
-							ServiceRegistration<IAdapterFactory> r) {
+					public IAdapterFactory getService(Bundle bundle, ServiceRegistration<IAdapterFactory> r) {
 						created.set(true);
 						return new TestAdapterFactory2(TestAdapter2::new);
 					}

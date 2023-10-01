@@ -25,8 +25,8 @@ public class TestProgressMonitor implements IProgressMonitor {
 	private double totalWork;
 
 	/**
-	 * Records the number of times worked or internalWorked was called with
-	 * an argument of 0.
+	 * Records the number of times worked or internalWorked was called with an
+	 * argument of 0.
 	 */
 	private int redundantWorkCalls;
 
@@ -37,8 +37,8 @@ public class TestProgressMonitor implements IProgressMonitor {
 	private int redundantSetTaskCalls;
 
 	/**
-	 * Records the number of times subTask was called without changing the
-	 * existing task name
+	 * Records the number of times subTask was called without changing the existing
+	 * task name
 	 */
 	private int redundantSubTaskCalls;
 
@@ -99,8 +99,8 @@ public class TestProgressMonitor implements IProgressMonitor {
 	}
 
 	/**
-	 * Returns the number of times beginTask() was called. For a correctly written job,
-	 * this should equal 1 on completion.
+	 * Returns the number of times beginTask() was called. For a correctly written
+	 * job, this should equal 1 on completion.
 	 *
 	 * @return the number of calls to beginTask
 	 */
@@ -119,21 +119,19 @@ public class TestProgressMonitor implements IProgressMonitor {
 	}
 
 	/**
-	 * Returns the number of times worked was called as a no-op.
-	 * That is, it counts the number of times worked() or internalWorked() had
-	 * ever been called with a value of 0. This should return 0 for an
-	 * optimally-written job.
+	 * Returns the number of times worked was called as a no-op. That is, it counts
+	 * the number of times worked() or internalWorked() had ever been called with a
+	 * value of 0. This should return 0 for an optimally-written job.
 	 *
-	 * @return true iff redundant calls were ever made to *worked() on this
-	 * monitor.
+	 * @return true iff redundant calls were ever made to *worked() on this monitor.
 	 */
 	public int getRedundantWorkCalls() {
 		return redundantWorkCalls;
 	}
 
 	/**
-	 * Returns the number of calls to isCancelled(). Optimally-written
-	 * jobs may call this an unbounded number of times.
+	 * Returns the number of calls to isCancelled(). Optimally-written jobs may call
+	 * this an unbounded number of times.
 	 *
 	 * @return the number of calls to isCancelled().
 	 */
@@ -159,9 +157,9 @@ public class TestProgressMonitor implements IProgressMonitor {
 	 * Returns the number of calls to work() and internalWorked(). For the top-level
 	 * progress monitor in an optimally-written job, this should be at least 100 and
 	 * no more than 1000. A job that reports work less often than this will seem to
-	 * have jumpy progress, and a job that reports work more often than this is reporting
-	 * progress that won't be visible to the user and is wasting time in progress monitoring
-	 * code.
+	 * have jumpy progress, and a job that reports work more often than this is
+	 * reporting progress that won't be visible to the user and is wasting time in
+	 * progress monitoring code.
 	 *
 	 * @return the number of calls to worked(int) or internalWorked(double)
 	 */
@@ -171,8 +169,8 @@ public class TestProgressMonitor implements IProgressMonitor {
 
 	/**
 	 * Returns the number of calls to internalWorked. For an optimally-written job,
-	 * this should be 0, since integer work is faster and has no chance
-	 * of floating-point rounding errors.
+	 * this should be 0, since integer work is faster and has no chance of
+	 * floating-point rounding errors.
 	 *
 	 * @return the number of calls to internalWorked
 	 */
@@ -200,8 +198,8 @@ public class TestProgressMonitor implements IProgressMonitor {
 	}
 
 	/**
-	 * Returns the total work reported on this monitor. For an optimally-written job,
-	 * this should be +/- a small epsilon to account for floating point error.
+	 * Returns the total work reported on this monitor. For an optimally-written
+	 * job, this should be +/- a small epsilon to account for floating point error.
 	 *
 	 * @return the total work reported on this job
 	 */
@@ -271,25 +269,31 @@ public class TestProgressMonitor implements IProgressMonitor {
 	}
 
 	/**
-	 * <p>Asserts that the progress reported on this monitor was optimal. That is,
+	 * <p>
+	 * Asserts that the progress reported on this monitor was optimal. That is,
 	 * there were no redundant method calls, and progress was reported in between
-	 * 100 and 1000 increments.</p>
+	 * 100 and 1000 increments.
+	 * </p>
 	 */
 	public void assertOptimal() {
 		Assert.assertEquals("The progress monitor did not reach 100%", expectedWork, getTotalWork(), 0.01d);
 		Assert.assertTrue("This monitor reported progress with less than 1% accuracy", getWorkCalls() >= 100);
-		Assert.assertTrue("This monitor reported progress with more than 0.1% accuracy (the job spent too much time reporting redundant progress)", getWorkCalls() <= 1000);
+		Assert.assertTrue(
+				"This monitor reported progress with more than 0.1% accuracy (the job spent too much time reporting redundant progress)",
+				getWorkCalls() <= 1000);
 		Assert.assertEquals("Null work was reported on this monitor", 0, getRedundantWorkCalls());
 
 		if (expectedWork >= 1000) {
-			// Only check for internalWorked usage if there were enough ticks allocated on this progress
+			// Only check for internalWorked usage if there were enough ticks allocated on
+			// this progress
 			// monitor that worked(int) could have been used
 			Assert.assertEquals("internalWorked was being used instead of worked()", 0, getDoubleWorkedCalls());
 		}
 
 		Assert.assertEquals("Redundant calls were made to setTaskName", 0, getRedundantSetTaskCalls());
 		Assert.assertEquals("Redundant calls were made to subTask", 0, getRedundantSubTaskCalls());
-		Assert.assertEquals("The number of calls to done should match the number of calls to beginTask", getBeginTaskCalls(), getDoneCalls());
+		Assert.assertEquals("The number of calls to done should match the number of calls to beginTask",
+				getBeginTaskCalls(), getDoneCalls());
 		Assert.assertEquals("beginTask should be called exactly once", getBeginTaskCalls(), 1);
 	}
 

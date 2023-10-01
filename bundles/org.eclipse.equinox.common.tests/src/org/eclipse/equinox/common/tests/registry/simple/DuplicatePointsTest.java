@@ -32,28 +32,30 @@ import org.eclipse.equinox.common.tests.registry.simple.utils.HiddenLogRegistryS
 import org.junit.Test;
 
 /**
- * Tests addition of extensions and extension points with duplicate IDs.
- * The duplicate extension points should be ignored.
- * The duplicate extensions should be added.
- * The rest of the XML contribution should not be affected.
+ * Tests addition of extensions and extension points with duplicate IDs. The
+ * duplicate extension points should be ignored. The duplicate extensions should
+ * be added. The rest of the XML contribution should not be affected.
  *
  * @since 3.2
  */
 public class DuplicatePointsTest extends BaseExtensionRegistryRun {
 
-	private final static String errMsg1 = "Error:  Ignored duplicate extension point \"testDuplicates.duplicateExtensionPoint\" supplied by \"2\"." + "Warning:  Extensions supplied by \"2\" and \"1\" have the same Id: \"testDuplicates.duplicateExtension\".";
-	private final static String errMsg2 = "Error:  Ignored duplicate extension point \"testSame.duplicateExtensionPointSame\" supplied by \"3\"." + "Warning:  Extensions supplied by \"3\" and \"3\" have the same Id: \"testSame.duplicateExtensionSame\".";
+	private final static String errMsg1 = "Error:  Ignored duplicate extension point \"testDuplicates.duplicateExtensionPoint\" supplied by \"2\"."
+			+ "Warning:  Extensions supplied by \"2\" and \"1\" have the same Id: \"testDuplicates.duplicateExtension\".";
+	private final static String errMsg2 = "Error:  Ignored duplicate extension point \"testSame.duplicateExtensionPointSame\" supplied by \"3\"."
+			+ "Warning:  Extensions supplied by \"3\" and \"3\" have the same Id: \"testSame.duplicateExtensionSame\".";
 
 	/**
 	 * Use registry strategy with modified logging
+	 * 
 	 * @return - open extension registry
 	 */
 	@Override
 	protected IExtensionRegistry startRegistry() {
 		// use plugin's metadata directory to save cache data
 		IPath userDataPath = getStateLocation();
-		File[] registryLocations = new File[] {new File(userDataPath.toOSString())};
-		boolean[] readOnly = new boolean[] {false};
+		File[] registryLocations = new File[] { new File(userDataPath.toOSString()) };
+		boolean[] readOnly = new boolean[] { false };
 		RegistryStrategy registryStrategy = new HiddenLogRegistryStrategy(registryLocations, readOnly);
 		return RegistryFactory.createRegistry(registryStrategy, masterToken, userToken);
 	}

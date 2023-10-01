@@ -19,8 +19,9 @@ import org.eclipse.core.runtime.spi.RegistryContributor;
 import org.eclipse.core.runtime.spi.RegistryStrategy;
 
 /**
- * Registry strategy that uses class loader from this bundle to process executable
- * extensions.
+ * Registry strategy that uses class loader from this bundle to process
+ * executable extensions.
+ * 
  * @since 3.2
  */
 public class ExeExtensionStrategy extends RegistryStrategy {
@@ -30,7 +31,8 @@ public class ExeExtensionStrategy extends RegistryStrategy {
 	}
 
 	@Override
-	public Object createExecutableExtension(RegistryContributor defaultContributor, String className, String requestedContributorName) {
+	public Object createExecutableExtension(RegistryContributor defaultContributor, String className,
+			String requestedContributorName) {
 		Class<?> classInstance = null;
 		try {
 			classInstance = Class.forName(className);

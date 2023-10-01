@@ -75,7 +75,8 @@ public class StatusTest extends CoreTest {
 		status1 = new Status(status1Severity, status1PluginId, status1Code, status1Message, status1Exception);
 		status2 = new Status(status2Severity, status2PluginId, status2Code, status2Message, status2Exception);
 
-		multistatus1 = new MultiStatus(multistatus1PluginId, multistatus1Code, multistatus1Children, multistatus1Message, multistatus1Exception);
+		multistatus1 = new MultiStatus(multistatus1PluginId, multistatus1Code, multistatus1Children,
+				multistatus1Message, multistatus1Exception);
 		multistatus2 = new MultiStatus(" ", 45, new Status[0], "", null);
 		multistatus2.add(status1);
 		multistatus2.add(status1);

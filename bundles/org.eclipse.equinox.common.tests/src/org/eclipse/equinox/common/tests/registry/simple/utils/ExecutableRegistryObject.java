@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.*;
 
 /**
  * Test class for the executable extensions.
+ * 
  * @since 3.2
  */
 public class ExecutableRegistryObject implements IExecutableExtensionFactory {
@@ -30,7 +31,8 @@ public class ExecutableRegistryObject implements IExecutableExtensionFactory {
 	@Override
 	public Object create() throws CoreException {
 		if (createCalled) {
-			Status status = new Status(IStatus.ERROR, "org.eclipse.core.tests.runtime", 0, "Duplicate executable extension call.", null); //$NON-NLS-1$ //$NON-NLS-2$
+			Status status = new Status(IStatus.ERROR, "org.eclipse.core.tests.runtime", 0, //$NON-NLS-1$
+					"Duplicate executable extension call.", null); //$NON-NLS-1$
 			throw new CoreException(status);
 		}
 		createCalled = true;

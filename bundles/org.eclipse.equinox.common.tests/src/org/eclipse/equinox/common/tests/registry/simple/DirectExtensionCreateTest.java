@@ -31,8 +31,8 @@ import org.junit.Test;
  * Tests programmatic creation of extension and extension point by using direct
  * methods on the ExtensionRegistry.
  *
- * Note that in present those methods are internal, but might be exposed as
- * APIs in the future.
+ * Note that in present those methods are internal, but might be exposed as APIs
+ * in the future.
  *
  * @since 3.2
  */
@@ -48,13 +48,13 @@ public class DirectExtensionCreateTest extends BaseExtensionRegistryRun {
 		/**********************************************************************************************
 		 * Add extension point:
 		 *
-		 * <extension-point id="DirectExtPoint"
-		 * 		name="Direct Extension Point"
-		 * 		schema="schema/ExtensionPointTest.exsd"/>
+		 * <extension-point id="DirectExtPoint" name="Direct Extension Point" schema=
+		 * "schema/ExtensionPointTest.exsd"/>
 		 *
 		 *********************************************************************************************/
 
-		((ExtensionRegistry) simpleRegistry).addExtensionPoint(extensionPointId, contributor, false, extensionPointLabel, extensionPointSchemaRef, userToken);
+		((ExtensionRegistry) simpleRegistry).addExtensionPoint(extensionPointId, contributor, false,
+				extensionPointLabel, extensionPointSchemaRef, userToken);
 
 		String namespace = contributor.getName();
 		IExtensionPoint extensionPoint = simpleRegistry.getExtensionPoint(qualifiedName(namespace, extensionPointId));
@@ -65,21 +65,21 @@ public class DirectExtensionCreateTest extends BaseExtensionRegistryRun {
 		// add second contribution in the same namespace
 		String extensionPointAltId = "DirectExtPointAlt"; //$NON-NLS-1$
 		String extensionPointAltLabel = "Second direct extension point"; //$NON-NLS-1$
-		assertTrue(((ExtensionRegistry) simpleRegistry).addExtensionPoint(extensionPointAltId, contributor, false, extensionPointAltLabel, extensionPointSchemaRef, userToken));
+		assertTrue(((ExtensionRegistry) simpleRegistry).addExtensionPoint(extensionPointAltId, contributor, false,
+				extensionPointAltLabel, extensionPointSchemaRef, userToken));
 
-		IExtensionPoint extensionPointAlt = simpleRegistry.getExtensionPoint(qualifiedName(namespace, extensionPointAltId));
+		IExtensionPoint extensionPointAlt = simpleRegistry
+				.getExtensionPoint(qualifiedName(namespace, extensionPointAltId));
 		assertNotNull(extensionPointAlt);
 		assertTrue(extensionPointSchemaRef.equals(extensionPointAlt.getSchemaReference()));
 		assertTrue(extensionPointAltLabel.equals(extensionPointAlt.getLabel()));
 
 		/**********************************************************************************************
 		 * Add extension:
-		 * <extension id="DirectExtensionID" name="Direct Extension" point="DirectExtPoint">
-		 * 		<StorageDevice deviceURL="theShienneMountain">
-		 * 			<BackupDevice backupURL="SkyLab"/>
-		 * 			<BackupDevice backupURL="OceanFloor"/>
-		 * 		</StorageDevice>
-		 * </extension>
+		 * <extension id="DirectExtensionID" name="Direct Extension" point=
+		 * "DirectExtPoint"> <StorageDevice deviceURL="theShienneMountain">
+		 * <BackupDevice backupURL="SkyLab"/> <BackupDevice backupURL="OceanFloor"/>
+		 * </StorageDevice> </extension>
 		 *********************************************************************************************/
 		String extensionId = "DirectExtensionID"; //$NON-NLS-1$
 		String extensionLabel = "Direct Extension"; //$NON-NLS-1$
@@ -89,24 +89,33 @@ public class DirectExtensionCreateTest extends BaseExtensionRegistryRun {
 		String propValueChildDesc1 = "SkyLab"; //$NON-NLS-1$
 		String propValueChildDesc2 = "OceanFloor"; //$NON-NLS-1$
 
-		ConfigurationElementAttribute propChildDesc1 = new ConfigurationElementAttribute(propNameChildDesc, propValueChildDesc1);
-		ConfigurationElementDescription childDesc1 = new ConfigurationElementDescription(nameChildDesc, propChildDesc1, null, null);
+		ConfigurationElementAttribute propChildDesc1 = new ConfigurationElementAttribute(propNameChildDesc,
+				propValueChildDesc1);
+		ConfigurationElementDescription childDesc1 = new ConfigurationElementDescription(nameChildDesc, propChildDesc1,
+				null, null);
 
-		ConfigurationElementAttribute propChildDesc2 = new ConfigurationElementAttribute(propNameChildDesc, propValueChildDesc2);
-		ConfigurationElementDescription childDesc2 = new ConfigurationElementDescription(nameChildDesc, propChildDesc2, null, null);
+		ConfigurationElementAttribute propChildDesc2 = new ConfigurationElementAttribute(propNameChildDesc,
+				propValueChildDesc2);
+		ConfigurationElementDescription childDesc2 = new ConfigurationElementDescription(nameChildDesc, propChildDesc2,
+				null, null);
 
 		String extensionName = "StorageDevice"; //$NON-NLS-1$
 		String extensionProrName1 = "deviceURL"; //$NON-NLS-1$
 		String extensionPropValue1 = "theShienneMountain"; //$NON-NLS-1$
 		String extensionProrName2 = "primary"; //$NON-NLS-1$
 		String extensionPropValue2 = "true"; //$NON-NLS-1$
-		ConfigurationElementAttribute prop1 = new ConfigurationElementAttribute(extensionProrName1, extensionPropValue1);
-		ConfigurationElementAttribute prop2 = new ConfigurationElementAttribute(extensionProrName2, extensionPropValue2);
+		ConfigurationElementAttribute prop1 = new ConfigurationElementAttribute(extensionProrName1,
+				extensionPropValue1);
+		ConfigurationElementAttribute prop2 = new ConfigurationElementAttribute(extensionProrName2,
+				extensionPropValue2);
 		String extensionValue = "SomeValue"; //$NON-NLS-1$
 
-		ConfigurationElementDescription description = new ConfigurationElementDescription(extensionName, new ConfigurationElementAttribute[] {prop1, prop2}, extensionValue, new ConfigurationElementDescription[] {childDesc1, childDesc2});
+		ConfigurationElementDescription description = new ConfigurationElementDescription(extensionName,
+				new ConfigurationElementAttribute[] { prop1, prop2 }, extensionValue,
+				new ConfigurationElementDescription[] { childDesc1, childDesc2 });
 
-		assertTrue(((ExtensionRegistry) simpleRegistry).addExtension(extensionId, contributor, false, extensionLabel, extensionPointId, description, userToken));
+		assertTrue(((ExtensionRegistry) simpleRegistry).addExtension(extensionId, contributor, false, extensionLabel,
+				extensionPointId, description, userToken));
 
 		IExtension[] namespaceExtensions = simpleRegistry.getExtensions(namespace);
 		assertNotNull(namespaceExtensions);
