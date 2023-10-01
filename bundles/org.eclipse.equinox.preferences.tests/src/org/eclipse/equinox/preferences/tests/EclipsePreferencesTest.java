@@ -54,10 +54,10 @@ import org.osgi.util.tracker.ServiceTracker;
  * eclipse.platform.runtime
  */
 public class EclipsePreferencesTest {
-	
+
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
-	
+
 	@Test
 	public void testBundleStateScope()
 			throws InvalidSyntaxException, IllegalStateException, MalformedURLException, IOException {
