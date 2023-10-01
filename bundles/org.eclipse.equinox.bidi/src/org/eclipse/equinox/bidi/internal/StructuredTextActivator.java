@@ -54,14 +54,16 @@ public class StructuredTextActivator implements BundleActivator {
 	}
 
 	/**
-	 * Returns the value of the specified property. If OSGi is not running or the key is not found in
-	 * the Framework properties, the system properties are then searched.
+	 * Returns the value of the specified property. If OSGi is not running or the
+	 * key is not found in the Framework properties, the system properties are then
+	 * searched.
 	 * <p>
 	 * This method can be used without OSGi running.
 	 * </p>
 	 *
 	 * @param key the name of the requested property
-	 * @return the value of the requested property, or {@code null} if the property is undefined
+	 * @return the value of the requested property, or {@code null} if the property
+	 *         is undefined
 	 */
 	public static String getProperty(String key) {
 		if (instance != null)
@@ -102,7 +104,8 @@ public class StructuredTextActivator implements BundleActivator {
 		if (instance != null) {
 			FrameworkLog frameworkLog = instance.getFrameworkLog();
 			if (frameworkLog != null) {
-				frameworkLog.log(new FrameworkLogEntry("org.eclipse.equinox.bidi", FrameworkLogEntry.ERROR, 1, message, 0, e, null)); //$NON-NLS-1$
+				frameworkLog.log(new FrameworkLogEntry("org.eclipse.equinox.bidi", FrameworkLogEntry.ERROR, 1, message, //$NON-NLS-1$
+						0, e, null));
 				return;
 			}
 		}

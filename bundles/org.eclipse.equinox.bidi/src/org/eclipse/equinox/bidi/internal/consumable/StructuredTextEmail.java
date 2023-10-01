@@ -18,7 +18,7 @@ import org.eclipse.equinox.bidi.custom.StructuredTextCharTypes;
 import org.eclipse.equinox.bidi.internal.StructuredTextDelimsEsc;
 
 /**
- *  Handler adapted to processing e-mail addresses.
+ * Handler adapted to processing e-mail addresses.
  */
 public class StructuredTextEmail extends StructuredTextDelimsEsc {
 	static final byte L = Character.DIRECTIONALITY_LEFT_TO_RIGHT;
@@ -35,15 +35,15 @@ public class StructuredTextEmail extends StructuredTextDelimsEsc {
 	}
 
 	/**
-	 *  @return {@link IStructuredTextExpert#DIR_RTL DIR_RTL} if the following
-	 *          conditions are satisfied:
-	 *          <ul>
-	 *            <li>The current locale (as expressed by the environment
-	 *                language) is Arabic.</li>
-	 *            <li>The domain part of the email address contains
-	 *                at least one RTL character.</li>
-	 *          </ul>
-	 *          Otherwise, returns {@link IStructuredTextExpert#DIR_LTR DIR_LTR}.
+	 * @return {@link IStructuredTextExpert#DIR_RTL DIR_RTL} if the following
+	 *         conditions are satisfied:
+	 *         <ul>
+	 *         <li>The current locale (as expressed by the environment language) is
+	 *         Arabic.</li>
+	 *         <li>The domain part of the email address contains at least one RTL
+	 *         character.</li>
+	 *         </ul>
+	 *         Otherwise, returns {@link IStructuredTextExpert#DIR_LTR DIR_LTR}.
 	 */
 	@Override
 	public int getDirection(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes) {
@@ -63,7 +63,7 @@ public class StructuredTextEmail extends StructuredTextDelimsEsc {
 	}
 
 	/**
-	 *  @return 2 as number of special cases handled by this handler.
+	 * @return 2 as number of special cases handled by this handler.
 	 */
 	@Override
 	public int getSpecialsCount(IStructuredTextExpert expert) {
@@ -71,7 +71,7 @@ public class StructuredTextEmail extends StructuredTextDelimsEsc {
 	}
 
 	/**
-	 *  @return parentheses and quotation marks as delimiters.
+	 * @return parentheses and quotation marks as delimiters.
 	 */
 	@Override
 	protected String getDelimiters() {

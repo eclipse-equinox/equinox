@@ -16,7 +16,7 @@ package org.eclipse.equinox.bidi.internal.consumable;
 import org.eclipse.equinox.bidi.custom.StructuredTextTypeHandler;
 
 /**
- *  Handler adapted to processing directory and file paths.
+ * Handler adapted to processing directory and file paths.
  */
 public class StructuredTextFile extends StructuredTextTypeHandler {
 

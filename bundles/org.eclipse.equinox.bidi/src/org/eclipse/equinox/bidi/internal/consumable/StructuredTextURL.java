@@ -16,7 +16,7 @@ package org.eclipse.equinox.bidi.internal.consumable;
 import org.eclipse.equinox.bidi.custom.StructuredTextTypeHandler;
 
 /**
- *  Handler adapted to processing URLs.
+ * Handler adapted to processing URLs.
  */
 public class StructuredTextURL extends StructuredTextTypeHandler {
 	public StructuredTextURL() {

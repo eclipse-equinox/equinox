@@ -26,12 +26,12 @@ public class StructuredTextImpl implements IStructuredTextExpert {
 	// In the following lines, B, L, R and AL represent bidi categories
 	// as defined in the Unicode Bidirectional Algorithm
 	// ( http://www.unicode.org/reports/tr9/ ).
-	// B  represents the category Block Separator.
-	// L  represents the category Left to Right character.
-	// R  represents the category Right to Left character.
+	// B represents the category Block Separator.
+	// L represents the category Left to Right character.
+	// R represents the category Right to Left character.
 	// AL represents the category Arabic Letter.
 	// AN represents the category Arabic Number.
-	// EN  represents the category European Number.
+	// EN represents the category European Number.
 	static final byte B = Character.DIRECTIONALITY_PARAGRAPH_SEPARATOR;
 	static final byte L = Character.DIRECTIONALITY_LEFT_TO_RIGHT;
 	static final byte R = Character.DIRECTIONALITY_RIGHT_TO_LEFT;
@@ -44,8 +44,8 @@ public class StructuredTextImpl implements IStructuredTextExpert {
 	static final char LRE = 0x202A;
 	static final char RLE = 0x202B;
 	static final char PDF = 0x202C;
-	static final char[] MARKS = {LRM, RLM};
-	static final char[] EMBEDS = {LRE, RLE};
+	static final char[] MARKS = { LRM, RLM };
+	static final char[] EMBEDS = { LRE, RLE };
 	static final int PREFIX_LENGTH = 2;
 	static final int SUFFIX_LENGTH = 2;
 	static final int FIXES_LENGTH = PREFIX_LENGTH + SUFFIX_LENGTH;
@@ -72,10 +72,11 @@ public class StructuredTextImpl implements IStructuredTextExpert {
 	 * Constructor used in {@link StructuredTextExpertFactory}.
 	 * 
 	 * @param structuredTextHandler the structured text handler used by this expert.
-	 * @param environment the environment associated with this expert.
-	 * @param shared flag which is true if the expert is stateful.
+	 * @param environment           the environment associated with this expert.
+	 * @param shared                flag which is true if the expert is stateful.
 	 */
-	public StructuredTextImpl(StructuredTextTypeHandler structuredTextHandler, StructuredTextEnvironment environment, boolean shared) {
+	public StructuredTextImpl(StructuredTextTypeHandler structuredTextHandler, StructuredTextEnvironment environment,
+			boolean shared) {
 		this.handler = structuredTextHandler;
 		this.environment = environment;
 		sharedExpert = shared;
@@ -113,7 +114,8 @@ public class StructuredTextImpl implements IStructuredTextExpert {
 		return state;
 	}
 
-	long computeNextLocation(String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets, int[] locations, int curPos) {
+	long computeNextLocation(String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets,
+			int[] locations, int curPos) {
 		String separators = handler.getSeparators(this);
 		int separCount = separators.length();
 		int specialsCount = handler.getSpecialsCount(this);
@@ -152,9 +154,11 @@ public class StructuredTextImpl implements IStructuredTextExpert {
 	}
 
 	/**
-	 * @see StructuredTextTypeHandler#processSeparator StructuredTextTypeHandler.processSeparator
+	 * @see StructuredTextTypeHandler#processSeparator
+	 *      StructuredTextTypeHandler.processSeparator
 	 */
-	static public void processSeparator(String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets, int separLocation) {
+	static public void processSeparator(String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets,
+			int separLocation) {
 		int len = text.length();
 		int direction = charTypes.getDirection();
 		if (direction == DIR_RTL) {
@@ -213,45 +217,42 @@ public class StructuredTextImpl implements IStructuredTextExpert {
 	}
 
 	/**
-	 * When the orientation is <code>ORIENT_LTR</code> and the
-	 * structured text has a RTL base direction,
-	 * {@link IStructuredTextExpert#leanToFullText leanToFullText}
-	 * adds RLE+RLM at the head of the <i>full</i> text and RLM+PDF at its
-	 * end.
+	 * When the orientation is <code>ORIENT_LTR</code> and the structured text has a
+	 * RTL base direction, {@link IStructuredTextExpert#leanToFullText
+	 * leanToFullText} adds RLE+RLM at the head of the <i>full</i> text and RLM+PDF
+	 * at its end.
 	 * <p>
-	 * When the orientation is <code>ORIENT_RTL</code> and the
-	 * structured text has a LTR base direction,
-	 * {@link IStructuredTextExpert#leanToFullText leanToFullText}
-	 * adds LRE+LRM at the head of the <i>full</i> text and LRM+PDF at its
-	 * end.
+	 * When the orientation is <code>ORIENT_RTL</code> and the structured text has a
+	 * LTR base direction, {@link IStructuredTextExpert#leanToFullText
+	 * leanToFullText} adds LRE+LRM at the head of the <i>full</i> text and LRM+PDF
+	 * at its end.
 	 * <p>
 	 * When the orientation is <code>ORIENT_CONTEXTUAL_LTR</code> or
-	 * <code>ORIENT_CONTEXTUAL_RTL</code> and the data content would resolve
-	 * to a RTL orientation while the structured text has a LTR base
-	 * direction, {@link IStructuredTextExpert#leanToFullText leanToFullText}
-	 * adds LRM at the head of the <i>full</i> text.
+	 * <code>ORIENT_CONTEXTUAL_RTL</code> and the data content would resolve to a
+	 * RTL orientation while the structured text has a LTR base direction,
+	 * {@link IStructuredTextExpert#leanToFullText leanToFullText} adds LRM at the
+	 * head of the <i>full</i> text.
 	 * <p>
 	 * When the orientation is <code>ORIENT_CONTEXTUAL_LTR</code> or
-	 * <code>ORIENT_CONTEXTUAL_RTL</code> and the data content would resolve
-	 * to a LTR orientation while the structured text has a RTL base
-	 * direction, {@link IStructuredTextExpert#leanToFullText leanToFullText}
-	 * adds RLM at the head of the <i>full</i> text.
+	 * <code>ORIENT_CONTEXTUAL_RTL</code> and the data content would resolve to a
+	 * LTR orientation while the structured text has a RTL base direction,
+	 * {@link IStructuredTextExpert#leanToFullText leanToFullText} adds RLM at the
+	 * head of the <i>full</i> text.
 	 * <p>
-	 * When the orientation is <code>ORIENT_UNKNOWN</code> and the
-	 * structured text has a LTR base direction,
-	 * {@link IStructuredTextExpert#leanToFullText leanToFullText}
-	 * adds LRE+LRM at the head of the <i>full</i> text and LRM+PDF at its
-	 * end.
+	 * When the orientation is <code>ORIENT_UNKNOWN</code> and the structured text
+	 * has a LTR base direction, {@link IStructuredTextExpert#leanToFullText
+	 * leanToFullText} adds LRE+LRM at the head of the <i>full</i> text and LRM+PDF
+	 * at its end.
 	 * <p>
-	 * When the orientation is <code>ORIENT_UNKNOWN</code> and the
-	 * structured text has a RTL base direction,
-	 * {@link IStructuredTextExpert#leanToFullText leanToFullText}
-	 * adds RLE+RLM at the head of the <i>full</i> text and RLM+PDF at its
-	 * end.
+	 * When the orientation is <code>ORIENT_UNKNOWN</code> and the structured text
+	 * has a RTL base direction, {@link IStructuredTextExpert#leanToFullText
+	 * leanToFullText} adds RLE+RLM at the head of the <i>full</i> text and RLM+PDF
+	 * at its end.
 	 * <p>
 	 * When the orientation is <code>ORIENT_IGNORE</code>,
-	 * {@link IStructuredTextExpert#leanToFullText leanToFullText} does not add any directional
-	 * formatting characters as either prefix or suffix of the <i>full</i> text.
+	 * {@link IStructuredTextExpert#leanToFullText leanToFullText} does not add any
+	 * directional formatting characters as either prefix or suffix of the
+	 * <i>full</i> text.
 	 * <p>
 	 */
 	@Override
@@ -316,7 +317,8 @@ public class StructuredTextImpl implements IStructuredTextExpert {
 			while (true) {
 				// location of next token to handle
 				int nextLocation;
-				// index of next token to handle (if < separCount, this is a separator; otherwise a special case
+				// index of next token to handle (if < separCount, this is a separator;
+				// otherwise a special case
 				int idxLocation;
 				long res = computeNextLocation(text, charTypes, offsets, locations, curPos);
 				nextLocation = (int) (res & 0x00000000FFFFFFFF); /* low word */
@@ -448,8 +450,10 @@ public class StructuredTextImpl implements IStructuredTextExpert {
 			// we should never get here (extra char which is not a Mark)
 			throw new IllegalStateException("Internal error: extra character not a Mark."); //$NON-NLS-1$
 		}
-		if (idxFull < lenFull) /* full2 ended before full - this should never happen since
-								              we removed all marks and PDFs at the end of full */
+		if (idxFull < lenFull) /*
+								 * full2 ended before full - this should never happen since we removed all marks
+								 * and PDFs at the end of full
+								 */
 			throw new IllegalStateException("Internal error: unexpected EOL."); //$NON-NLS-1$
 
 		lean = new String(newChars, 0, newCharsPos);
@@ -546,7 +550,7 @@ public class StructuredTextImpl implements IStructuredTextExpert {
 				// When the orientation is RTL, we need to add EMBED at the
 				// start of the text and PDF at its end.
 				// However, because of a bug in Windows' handling of LRE/RLE/PDF,
-				// we add LRM or RLM (according to the direction) after the 
+				// we add LRM or RLM (according to the direction) after the
 				// LRE/RLE and again before the PDF.
 				char curEmbed = EMBEDS[direction];
 				fullChars[0] = curEmbed;

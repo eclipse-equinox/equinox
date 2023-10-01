@@ -14,9 +14,8 @@
 package org.eclipse.equinox.bidi.custom;
 
 /**
- * Provides various services related to managing the array of
- * offsets where directional formatting characters should be inserted
- * in a source string.
+ * Provides various services related to managing the array of offsets where
+ * directional formatting characters should be inserted in a source string.
  */
 public class StructuredTextOffsets {
 
@@ -26,7 +25,7 @@ public class StructuredTextOffsets {
 	private static final byte AN = Character.DIRECTIONALITY_ARABIC_NUMBER;
 	private static final byte EN = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
 
-	private static final byte[] STRONGS = {L, R};
+	private static final byte[] STRONGS = { L, R };
 
 	private static final int OFFSET_SIZE = 20;
 
@@ -36,13 +35,13 @@ public class StructuredTextOffsets {
 	private int prefixLength;
 
 	/**
-	 *  Default constructor
+	 * Default constructor
 	 */
 	public StructuredTextOffsets() {
 	}
 
 	/**
-	 *  @return the stored prefix length
+	 * @return the stored prefix length
 	 */
 	public int getPrefixLength() {
 		return prefixLength;
@@ -76,7 +75,7 @@ public class StructuredTextOffsets {
 	/**
 	 * Gets the value of a specified entry in the offsets array.
 	 * 
-	 * @param  index the index of the entry of interest.
+	 * @param index the index of the entry of interest.
 	 * 
 	 * @return the value of the specified entry.
 	 */
@@ -85,13 +84,12 @@ public class StructuredTextOffsets {
 	}
 
 	/**
-	 * Inserts an offset value in the offset array so that the array 
-	 * stays in ascending order.
+	 * Inserts an offset value in the offset array so that the array stays in
+	 * ascending order.
 	 * 
-	 * @param  charTypes an object whose methods can be useful to the 
-	 *         handler.
-	 *         
-	 * @param  offset the value to insert.
+	 * @param charTypes an object whose methods can be useful to the handler.
+	 * 
+	 * @param offset    the value to insert.
 	 */
 	public void insertOffset(StructuredTextCharTypes charTypes, int offset) {
 		if (count >= offsets.length) {
@@ -123,7 +121,7 @@ public class StructuredTextOffsets {
 
 		byte charType = charTypes.getBidiTypeAt(offset);
 		// if the current char is a strong one or a digit, we change the
-		//   charType of the previous char to account for the inserted mark.
+		// charType of the previous char to account for the inserted mark.
 		if (charType == L || charType == R || charType == AL || charType == EN || charType == AN)
 			index = offset - 1;
 		else

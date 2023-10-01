@@ -17,23 +17,25 @@ import java.util.Locale;
 import org.eclipse.equinox.bidi.internal.StructuredTextActivator;
 
 /**
- *  Describes the environment within which structured text strings are 
- *  processed. It includes:
- *  <ul>
- *  <li>locale,</li>
- *  <li>desired orientation,</li>
- *  <li>text mirroring attributes.</li>
- *  </ul>
+ * Describes the environment within which structured text strings are processed.
+ * It includes:
+ * <ul>
+ * <li>locale,</li>
+ * <li>desired orientation,</li>
+ * <li>text mirroring attributes.</li>
+ * </ul>
  */
 public class StructuredTextEnvironment {
 
 	/**
-	 * Specifies that a GUI component should display text Left-To-Right (value is 0).
+	 * Specifies that a GUI component should display text Left-To-Right (value is
+	 * 0).
 	 */
 	public static final int ORIENT_LTR = 0;
 
 	/**
-	 * Specifies that a GUI component should display text Right-To-Left (value is 1).
+	 * Specifies that a GUI component should display text Right-To-Left (value is
+	 * 1).
 	 */
 	public static final int ORIENT_RTL = 1;
 
@@ -56,19 +58,19 @@ public class StructuredTextEnvironment {
 	public static final int ORIENT_CONTEXTUAL_RTL = ORIENT_CONTEXTUAL | ORIENT_RTL;
 
 	/**
-	 * Used when the orientation of a GUI component is not known (value is 4). 
+	 * Used when the orientation of a GUI component is not known (value is 4).
 	 */
 	public static final int ORIENT_UNKNOWN = 1 << 2;
 
 	/**
-	 * Used to specify that no directional formatting characters 
-	 * should be added as prefix or suffix (value is 8).
+	 * Used to specify that no directional formatting characters should be added as
+	 * prefix or suffix (value is 8).
 	 */
 	public static final int ORIENT_IGNORE = 1 << 3;
 
 	/**
-	 * Pre-defined {@link StructuredTextEnvironment} instance which uses default locale,
-	 * non-mirrored environment, and a Left-to-Right presentation component.
+	 * Pre-defined {@link StructuredTextEnvironment} instance which uses default
+	 * locale, non-mirrored environment, and a Left-to-Right presentation component.
 	 */
 	public static final StructuredTextEnvironment DEFAULT = new StructuredTextEnvironment(null, false, ORIENT_LTR);
 
@@ -79,38 +81,36 @@ public class StructuredTextEnvironment {
 	final private String language;
 
 	/**
-	 * Flag specifying that structured text processed under this environment
-	 * should assume that the GUI is mirrored (globally going from right to left).
+	 * Flag specifying that structured text processed under this environment should
+	 * assume that the GUI is mirrored (globally going from right to left).
 	 */
 	final private boolean mirrored;
 
 	/**
-	 * Specify the orientation (a.k.a. base direction) of the GUI
-	 * component in which the <i>full</i> structured text will
-	 * be displayed.
+	 * Specify the orientation (a.k.a. base direction) of the GUI component in which
+	 * the <i>full</i> structured text will be displayed.
 	 */
 	final private int orientation;
 
 	/**
-	 * Cached value that determines if the Bidi processing is needed 
-	 * in this environment.
+	 * Cached value that determines if the Bidi processing is needed in this
+	 * environment.
 	 */
 	private Boolean processingNeeded;
 
 	/**
 	 * Creates an instance of a structured text environment.
 	 *
-	 * @param lang the language of the environment, encoded as specified
-	 * in ISO-639. Might be <code>null</code>, in which case the default
-	 * locale is used.
-	 * @param mirrored specifies if the environment is mirrored.
-	 * @param orientation the orientation of the GUI component, one of the values: 
-	 *         {@link #ORIENT_LTR ORIENT_LTR},
-	 *         {@link #ORIENT_LTR ORIENT_RTL},
-	 *         {@link #ORIENT_CONTEXTUAL_LTR ORIENT_CONTEXTUAL_LTR},
-	 *         {@link #ORIENT_CONTEXTUAL_RTL ORIENT_CONTEXTUAL_RTL},
-	 *         {@link #ORIENT_UNKNOWN ORIENT_UNKNOWN}, or
-	 *         {@link #ORIENT_IGNORE ORIENT_IGNORE}.
+	 * @param lang        the language of the environment, encoded as specified in
+	 *                    ISO-639. Might be <code>null</code>, in which case the
+	 *                    default locale is used.
+	 * @param mirrored    specifies if the environment is mirrored.
+	 * @param orientation the orientation of the GUI component, one of the values:
+	 *                    {@link #ORIENT_LTR ORIENT_LTR}, {@link #ORIENT_LTR
+	 *                    ORIENT_RTL}, {@link #ORIENT_CONTEXTUAL_LTR
+	 *                    ORIENT_CONTEXTUAL_LTR}, {@link #ORIENT_CONTEXTUAL_RTL
+	 *                    ORIENT_CONTEXTUAL_RTL}, {@link #ORIENT_UNKNOWN
+	 *                    ORIENT_UNKNOWN}, or {@link #ORIENT_IGNORE ORIENT_IGNORE}.
 	 */
 	public StructuredTextEnvironment(String lang, boolean mirrored, int orientation) {
 		if (lang != null) {
@@ -119,7 +119,9 @@ public class StructuredTextEnvironment {
 			else
 				language = lang;
 		} else {
-			Locale defaultLocale = StructuredTextActivator.getInstance() != null ? StructuredTextActivator.getInstance().getDefaultLocale() : Locale.getDefault();
+			Locale defaultLocale = StructuredTextActivator.getInstance() != null
+					? StructuredTextActivator.getInstance().getDefaultLocale()
+					: Locale.getDefault();
 			language = defaultLocale.getLanguage();
 		}
 		this.mirrored = mirrored;
@@ -127,8 +129,7 @@ public class StructuredTextEnvironment {
 	}
 
 	/**
-	 * Returns a 2-letters code representing a language as defined by
-	 * ISO-639.
+	 * Returns a 2-letters code representing a language as defined by ISO-639.
 	 * 
 	 * @return language of the environment
 	 */
@@ -137,20 +138,19 @@ public class StructuredTextEnvironment {
 	}
 
 	/**
-	 * Returns a flag indicating that structured text processed
-	 * within this environment should assume that the GUI is mirrored
-	 * (globally going from right to left).
+	 * Returns a flag indicating that structured text processed within this
+	 * environment should assume that the GUI is mirrored (globally going from right
+	 * to left).
 	 * 
-	 * @return <code>true</code> if environment is mirrored 
+	 * @return <code>true</code> if environment is mirrored
 	 */
 	public boolean getMirrored() {
 		return mirrored;
 	}
 
-	/** 
-	 * Returns the orientation (a.k.a. base direction) of the GUI
-	 * component in which the <i>full</i> structured text
-	 * will be displayed.
+	/**
+	 * Returns the orientation (a.k.a. base direction) of the GUI component in which
+	 * the <i>full</i> structured text will be displayed.
 	 * <p>
 	 * The orientation value is one of the following:
 	 * </p>
@@ -168,13 +168,13 @@ public class StructuredTextEnvironment {
 	}
 
 	/**
-	 * Checks if bidi processing is needed in this environment. The result 
-	 * depends on the operating system (must be supported by this package)
-	 * and on the language supplied when constructing the instance (it
-	 * must be a language using a bidirectional script).
+	 * Checks if bidi processing is needed in this environment. The result depends
+	 * on the operating system (must be supported by this package) and on the
+	 * language supplied when constructing the instance (it must be a language using
+	 * a bidirectional script).
 	 * <p>
-	 * Note: This API is rarely used any more. E.g. in Eclipse/JFace,
-	 * bidi support is typically controlled by the application via
+	 * Note: This API is rarely used any more. E.g. in Eclipse/JFace, bidi support
+	 * is typically controlled by the application via
 	 * {@code org.eclipse.jface.util.BidiUtils#setBidiSupport(boolean)}.
 	 * </p>
 	 * 
@@ -184,12 +184,14 @@ public class StructuredTextEnvironment {
 	 */
 	public boolean isProcessingNeeded() {
 		if (processingNeeded == null) {
-			String osName = StructuredTextActivator.getProperty("os.name"); //$NON-NLS-1$/
+			String osName = StructuredTextActivator.getProperty("os.name"); //$NON-NLS-1$ /
 			if (osName != null)
 				osName = osName.toLowerCase();
-			boolean supportedOS = osName.startsWith("windows") || osName.startsWith("linux") || osName.startsWith("mac"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			boolean supportedOS = osName.startsWith("windows") || osName.startsWith("linux") //$NON-NLS-1$ //$NON-NLS-2$
+					|| osName.startsWith("mac"); //$NON-NLS-1$
 			if (supportedOS) {
-				// Check whether the current language uses a bidi script (Arabic, Hebrew, Farsi or Urdu)
+				// Check whether the current language uses a bidi script (Arabic, Hebrew, Farsi
+				// or Urdu)
 				boolean isBidi = "iw".equals(language) || //$NON-NLS-1$
 						"he".equals(language) || //$NON-NLS-1$
 						"ar".equals(language) || //$NON-NLS-1$
@@ -206,8 +208,8 @@ public class StructuredTextEnvironment {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * Computes the hashCode based on the values supplied when constructing 
-	 * the instance and on the result of {@link #isProcessingNeeded()}.
+	 * Computes the hashCode based on the values supplied when constructing the
+	 * instance and on the result of {@link #isProcessingNeeded()}.
 	 * 
 	 * @return the hash code.
 	 */
@@ -225,8 +227,8 @@ public class StructuredTextEnvironment {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * Compare 2 environment instances and returns true if both instances
-	 * were constructed with the same arguments.
+	 * Compare 2 environment instances and returns true if both instances were
+	 * constructed with the same arguments.
 	 * 
 	 * @return true if the 2 instances can be used interchangeably.
 	 */
