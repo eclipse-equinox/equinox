@@ -18,8 +18,10 @@ import org.osgi.framework.ServiceReference;
 
 public interface BoundTester extends PropertiesProvider {
 
-  public int getBoundObjectsCount();
-  public ServiceReference getBoundServiceRef(int index);
-  public Object getBoundService(int index);
-  
+	public int getBoundObjectsCount();
+
+	public ServiceReference getBoundServiceRef(int index);
+
+	public Object getBoundService(int index);
+
 }

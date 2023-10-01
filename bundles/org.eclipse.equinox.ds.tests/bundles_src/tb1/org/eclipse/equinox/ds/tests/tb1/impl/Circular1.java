@@ -16,9 +16,9 @@ package org.eclipse.equinox.ds.tests.tb1.impl;
 
 public class Circular1 {
 
-  
-  public void bindComp2(Circular2 sr) {
-  }
-  public void unbindComp2(Circular2 sr) {
-  }
+	public void bindComp2(Circular2 sr) {
+	}
+
+	public void unbindComp2(Circular2 sr) {
+	}
 }

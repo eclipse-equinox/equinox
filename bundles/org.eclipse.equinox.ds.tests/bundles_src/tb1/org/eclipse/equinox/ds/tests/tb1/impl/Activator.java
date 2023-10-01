@@ -19,22 +19,22 @@ import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
 
-  private BundleContext ctx;
-  private static Activator instance;
-  
-  public Activator() {
-    Activator.instance = this;
-  }
-  
-  public void start(BundleContext context) throws Exception {
-    this.ctx = context;
-  }
+	private BundleContext ctx;
+	private static Activator instance;
 
-  public void stop(BundleContext context) throws Exception {
-    this.ctx = null;
-  }
+	public Activator() {
+		Activator.instance = this;
+	}
 
-  public static BundleContext getContext() {
-    return instance.ctx; 
-  }
+	public void start(BundleContext context) throws Exception {
+		this.ctx = context;
+	}
+
+	public void stop(BundleContext context) throws Exception {
+		this.ctx = null;
+	}
+
+	public static BundleContext getContext() {
+		return instance.ctx;
+	}
 }

@@ -19,24 +19,24 @@ import java.util.Dictionary;
 import org.eclipse.equinox.ds.tests.tbc.ComponentContextProvider;
 import org.osgi.service.component.ComponentContext;
 
-
 public class GiveMeContext implements ComponentContextProvider {
 
-  private ComponentContext ctxt;
-  
-  public void activate(ComponentContext ctxt) {
-    this.ctxt = ctxt;
-  }
-  public void deactivate(ComponentContext ctxt) {
-    this.ctxt = null;
-  }
-  
-  public ComponentContext getComponentContext() {
-    return ctxt;
-  }
+	private ComponentContext ctxt;
 
-  public Dictionary getProperties() {
-    return null;
-  }
+	public void activate(ComponentContext ctxt) {
+		this.ctxt = ctxt;
+	}
+
+	public void deactivate(ComponentContext ctxt) {
+		this.ctxt = null;
+	}
+
+	public ComponentContext getComponentContext() {
+		return ctxt;
+	}
+
+	public Dictionary getProperties() {
+		return null;
+	}
 
 }

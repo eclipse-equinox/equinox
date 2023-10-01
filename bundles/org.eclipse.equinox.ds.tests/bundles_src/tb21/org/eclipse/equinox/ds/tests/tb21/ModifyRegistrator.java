@@ -39,17 +39,16 @@ public class ModifyRegistrator implements ComponentContextProvider {
 		properties = getProperties(ctxt.getProperties());
 		setDataBits(ACTIVATE);
 	}
-	
-  Properties getProperties(Dictionary dict) {
-    Properties result = new Properties();
-    Enumeration keys = dict.keys();
-    while (keys.hasMoreElements()) {
-      Object key = keys.nextElement();
-      result.put(key, dict.get(key));
-    }
-    return result;
-  }
 
+	Properties getProperties(Dictionary dict) {
+		Properties result = new Properties();
+		Enumeration keys = dict.keys();
+		while (keys.hasMoreElements()) {
+			Object key = keys.nextElement();
+			result.put(key, dict.get(key));
+		}
+		return result;
+	}
 
 	protected void deactivate(ComponentContext ctxt) {
 		setDataBits(DEACTIVATE);
@@ -80,8 +79,8 @@ public class ModifyRegistrator implements ComponentContextProvider {
 	}
 
 	protected void throwException(ComponentContext ctxt) {
-    throw new RuntimeException("Test method throwException(ComponentContext) is called!");
-  }
+		throw new RuntimeException("Test method throwException(ComponentContext) is called!");
+	}
 
 	public Dictionary getProperties() {
 		return properties;

@@ -19,15 +19,14 @@ import java.util.Dictionary;
 import org.eclipse.equinox.ds.tests.tbc.ComponentContextProvider;
 import org.osgi.service.component.ComponentContext;
 
-
 public class ContextExp implements ComponentContextProvider {
 
-  public ComponentContext getComponentContext() {
-    return null;
-  }
+	public ComponentContext getComponentContext() {
+		return null;
+	}
 
-  public Dictionary getProperties() {
-    return null;
-  }
+	public Dictionary getProperties() {
+		return null;
+	}
 
 }

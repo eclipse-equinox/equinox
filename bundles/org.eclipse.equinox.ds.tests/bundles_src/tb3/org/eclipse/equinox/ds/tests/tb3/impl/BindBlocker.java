@@ -17,18 +17,17 @@ package org.eclipse.equinox.ds.tests.tb3.impl;
 import org.osgi.framework.ServiceReference;
 
 public class BindBlocker {
-  
-  // the time the bind method will block
-  private int timeout = 60000;
-  
-  
-  public void setLogger(ServiceReference log) {
-    try {
-      Thread.sleep(timeout);
-    } catch (InterruptedException ignore) { 
-    }
-  }
 
-  public void unsetLogger(ServiceReference log) {
-  }
+	// the time the bind method will block
+	private int timeout = 60000;
+
+	public void setLogger(ServiceReference log) {
+		try {
+			Thread.sleep(timeout);
+		} catch (InterruptedException ignore) {
+		}
+	}
+
+	public void unsetLogger(ServiceReference log) {
+	}
 }

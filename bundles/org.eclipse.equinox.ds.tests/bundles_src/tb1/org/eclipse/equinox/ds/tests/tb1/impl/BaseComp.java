@@ -19,22 +19,20 @@ import java.util.Dictionary;
 import org.eclipse.equinox.ds.tests.tbc.ComponentContextProvider;
 import org.osgi.service.component.ComponentContext;
 
-
 public class BaseComp implements ComponentContextProvider {
 
-  private ComponentContext ctxt;
-  
-  
-  public void activate(ComponentContext ctxt) {
-    this.ctxt = ctxt;
-  }
-  
-  public ComponentContext getComponentContext() {
-    return ctxt;
-  }
+	private ComponentContext ctxt;
 
-  public Dictionary getProperties() {
-    return null;
-  }
+	public void activate(ComponentContext ctxt) {
+		this.ctxt = ctxt;
+	}
+
+	public ComponentContext getComponentContext() {
+		return ctxt;
+	}
+
+	public Dictionary getProperties() {
+		return null;
+	}
 
 }

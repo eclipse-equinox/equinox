@@ -20,25 +20,24 @@ import org.eclipse.equinox.ds.tests.tbc.PropertiesProvider;
 import org.eclipse.equinox.ds.tests.tbc.ComponentContextProvider;
 import org.osgi.service.component.ComponentContext;
 
-
 public class Optional implements PropertiesProvider, ComponentContextProvider {
-  private Dictionary properties;
-  private ComponentContext ctxt;
+	private Dictionary properties;
+	private ComponentContext ctxt;
 
-  protected void activate(ComponentContext ctxt) {
-    this.ctxt = ctxt;
-    properties = ctxt.getProperties();
-  }
+	protected void activate(ComponentContext ctxt) {
+		this.ctxt = ctxt;
+		properties = ctxt.getProperties();
+	}
 
-  protected void deactivate(ComponentContext ctxt) {
+	protected void deactivate(ComponentContext ctxt) {
 
-  }
+	}
 
-  public Dictionary getProperties() {
-    return properties;
-  }
+	public Dictionary getProperties() {
+		return properties;
+	}
 
-  public ComponentContext getComponentContext() {
-    return ctxt;
-  }
+	public ComponentContext getComponentContext() {
+		return ctxt;
+	}
 }

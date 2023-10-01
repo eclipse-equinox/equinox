@@ -21,31 +21,32 @@ import org.osgi.framework.ServiceReference;
 
 public class StaticCircuit2 implements BoundTester {
 
-  private StaticCircuit1 mate;
-  public int getBoundObjectsCount() {
-    return (mate != null ? 1 : 0);
-  }
+	private StaticCircuit1 mate;
 
-  public Object getBoundService(int index) {
-    return mate;
-  }
+	public int getBoundObjectsCount() {
+		return (mate != null ? 1 : 0);
+	}
 
-  public ServiceReference getBoundServiceRef(int index) {
-    return null;
-  }
+	public Object getBoundService(int index) {
+		return mate;
+	}
 
-  public Dictionary getProperties() {
-    return null;
-  }
-  
-  public void bind(StaticCircuit1 mate) {
-    this.mate = mate;
-  }
+	public ServiceReference getBoundServiceRef(int index) {
+		return null;
+	}
 
-  public void unbind(StaticCircuit1 mate) {
-    if (this.mate == mate) {
-      this.mate = null;
-    }
-  }
+	public Dictionary getProperties() {
+		return null;
+	}
+
+	public void bind(StaticCircuit1 mate) {
+		this.mate = mate;
+	}
+
+	public void unbind(StaticCircuit1 mate) {
+		if (this.mate == mate) {
+			this.mate = null;
+		}
+	}
 
 }

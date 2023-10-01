@@ -19,7 +19,7 @@ public class Component2 extends Component {
 	public String getName() {
 		return getClass().getName();
 	}
-	
+
 	public void update() throws Exception {
 		replaceCurrentComponentXmlWith("component1.xml");
 	}

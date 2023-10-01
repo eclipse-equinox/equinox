@@ -16,8 +16,9 @@ package org.eclipse.equinox.ds.tests.tbc;
 
 public interface BoundMainProvider extends PropertiesProvider {
 
-  public static final String DYNAMIC_SERVICE = "DynamicWorker";
-  public static final String NAMED_SERVICE = "NamedService";
-  public static final String STATIC_SERVICE = "StaticWorker";
-  public Object getBoundService(String serviceName);
+	public static final String DYNAMIC_SERVICE = "DynamicWorker";
+	public static final String NAMED_SERVICE = "NamedService";
+	public static final String STATIC_SERVICE = "StaticWorker";
+
+	public Object getBoundService(String serviceName);
 }

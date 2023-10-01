@@ -21,8 +21,8 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({ //
-	DSTest.class, //
-	LazyServiceComponentActivationDeadLockTest.class //
+		DSTest.class, //
+		LazyServiceComponentActivationDeadLockTest.class //
 })
 public class AllTests {
 	// intentionally left blank

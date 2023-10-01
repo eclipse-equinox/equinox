@@ -16,5 +16,5 @@
 package org.eclipse.equinox.ds.tests.tb4;
 
 public interface NamedService {
-  public String getName();
+	public String getName();
 }

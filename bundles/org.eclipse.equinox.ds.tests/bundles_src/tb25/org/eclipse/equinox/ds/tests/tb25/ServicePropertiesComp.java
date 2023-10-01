@@ -23,62 +23,62 @@ import org.eclipse.equinox.ds.tests.tbc.PropertiesProvider;
 import org.osgi.service.component.ComponentContext;
 
 public class ServicePropertiesComp implements PropertiesProvider {
-  private ComponentContext ctxt;
-  private Map              newProps;
+	private ComponentContext ctxt;
+	private Map newProps;
 
-  protected void activate(ComponentContext ctxt) {
-    this.ctxt = ctxt;
-  }
+	protected void activate(ComponentContext ctxt) {
+		this.ctxt = ctxt;
+	}
 
-  protected void deactivate(ComponentContext ctxt) {
+	protected void deactivate(ComponentContext ctxt) {
 
-  }
+	}
 
-  public void bindDynamicRef(PropertiesProvider service, Map properties) {
-  }
+	public void bindDynamicRef(PropertiesProvider service, Map properties) {
+	}
 
-  public void bindStaticRef(PropertiesProvider service, Map properties) {
-  }
+	public void bindStaticRef(PropertiesProvider service, Map properties) {
+	}
 
-  public synchronized void serviceUpdatedStatic(PropertiesProvider service, Map properties) {
-    if (newProps == null) {
-      newProps = new Hashtable();
-    }
-    if (properties != null) {
-      newProps.putAll(properties);
-    }
-    newProps.put("serviceUpdatedStatic", Boolean.TRUE);
-  }
+	public synchronized void serviceUpdatedStatic(PropertiesProvider service, Map properties) {
+		if (newProps == null) {
+			newProps = new Hashtable();
+		}
+		if (properties != null) {
+			newProps.putAll(properties);
+		}
+		newProps.put("serviceUpdatedStatic", Boolean.TRUE);
+	}
 
-  public synchronized void serviceUpdatedDynamic(PropertiesProvider service, Map properties) {
-    if (newProps == null) {
-      newProps = new Hashtable();
-    }
-    if (properties != null) {
-      newProps.putAll(properties);
-    }
-    newProps.put("serviceUpdatedDynamic", Boolean.TRUE);
-  }
+	public synchronized void serviceUpdatedDynamic(PropertiesProvider service, Map properties) {
+		if (newProps == null) {
+			newProps = new Hashtable();
+		}
+		if (properties != null) {
+			newProps.putAll(properties);
+		}
+		newProps.put("serviceUpdatedDynamic", Boolean.TRUE);
+	}
 
-  public synchronized Dictionary getProperties() {
-    if (ctxt == null) {
-      return null;
-    }
+	public synchronized Dictionary getProperties() {
+		if (ctxt == null) {
+			return null;
+		}
 
-    Dictionary result = new Hashtable();
+		Dictionary result = new Hashtable();
 
-    Dictionary ctxtProps = ctxt.getProperties();
-    if (ctxtProps != null) {
-      for (Enumeration en = ctxtProps.keys(); en.hasMoreElements();) {
-        Object key = en.nextElement();
-        result.put(key, ctxtProps.get(key));
-      }
-    }
+		Dictionary ctxtProps = ctxt.getProperties();
+		if (ctxtProps != null) {
+			for (Enumeration en = ctxtProps.keys(); en.hasMoreElements();) {
+				Object key = en.nextElement();
+				result.put(key, ctxtProps.get(key));
+			}
+		}
 
-    if (newProps != null) {
-      newProps.forEach(result::put); 
-    }
+		if (newProps != null) {
+			newProps.forEach(result::put);
+		}
 
-    return result;
-  }
+		return result;
+	}
 }

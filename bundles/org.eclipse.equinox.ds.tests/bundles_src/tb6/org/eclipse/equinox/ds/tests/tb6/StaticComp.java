@@ -27,78 +27,92 @@ import org.osgi.service.component.ComponentContext;
 
 public class StaticComp implements DSEventsProvider, BoundTester, ComponentContextProvider {
 
-  private ComponentContext ctxt;
-  private Vector componentEvents = new Vector();
-  private ReferencedComp rc;
+	private ComponentContext ctxt;
+	private Vector componentEvents = new Vector();
+	private ReferencedComp rc;
 
-  public void activate(ComponentContext ctxt) {
-    this.ctxt = ctxt;
-    componentEvents.addElement(new DSEvent(DSEvent.ACT_ACTIVATE, null));
-  }
-  
-  public void deactivate(ComponentContext ctxt) {
-    this.ctxt = null;
-    componentEvents.addElement(new DSEvent(DSEvent.ACT_DEACTIVATE, null));
-  }
-  
-  public void bind(ReferencedComp rc) {
-    this.rc = rc;
-    componentEvents.addElement(new DSEvent(DSEvent.ACT_BOUND, rc));
-  }
-  
-  public void unbind(ReferencedComp rc) {
-    if (this.rc == rc) {
-      this.rc = null;
-      componentEvents.addElement(new DSEvent(DSEvent.ACT_UNBOUND, rc));
-    }
-  }
-  
-  public DSEvent[] getEvents() {
-    DSEvent[] events = new DSEvent[componentEvents.size()];
-    componentEvents.copyInto(events);
-    return events;
-  }
+	public void activate(ComponentContext ctxt) {
+		this.ctxt = ctxt;
+		componentEvents.addElement(new DSEvent(DSEvent.ACT_ACTIVATE, null));
+	}
 
-  /* (non-Javadoc)
-   * @see org.eclipse.equinox.ds.tests.tbc.DSEventsProvider#resetComponentEvents()
-   */
-  public void resetEvents() {
-    componentEvents.removeAllElements();
-  }
+	public void deactivate(ComponentContext ctxt) {
+		this.ctxt = null;
+		componentEvents.addElement(new DSEvent(DSEvent.ACT_DEACTIVATE, null));
+	}
 
-  /* (non-Javadoc)
-   * @see org.eclipse.equinox.ds.tests.tbc.PropertiesProvider#getProperties()
-   */
-  public Dictionary getProperties() {
-    return null;
-  }
+	public void bind(ReferencedComp rc) {
+		this.rc = rc;
+		componentEvents.addElement(new DSEvent(DSEvent.ACT_BOUND, rc));
+	}
 
-  /* (non-Javadoc)
-   * @see org.eclipse.equinox.ds.tests.tbc.BoundTester#getBoundObject(int)
-   */
-  public ServiceReference getBoundServiceRef(int index) {
-    return null;
-  }
+	public void unbind(ReferencedComp rc) {
+		if (this.rc == rc) {
+			this.rc = null;
+			componentEvents.addElement(new DSEvent(DSEvent.ACT_UNBOUND, rc));
+		}
+	}
 
-  /* (non-Javadoc)
-   * @see org.eclipse.equinox.ds.tests.tbc.BoundTester#getBoundObjectsCount()
-   */
-  public int getBoundObjectsCount() {
-    return (this.rc != null ? 1 : 0);
-  }
+	public DSEvent[] getEvents() {
+		DSEvent[] events = new DSEvent[componentEvents.size()];
+		componentEvents.copyInto(events);
+		return events;
+	}
 
-  /* (non-Javadoc)
-   * @see org.eclipse.equinox.ds.tests.tbc.BoundTester#getBoundService(int)
-   */
-  public Object getBoundService(int index) {
-    return this.rc;
-  }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.equinox.ds.tests.tbc.DSEventsProvider#resetComponentEvents()
+	 */
+	public void resetEvents() {
+		componentEvents.removeAllElements();
+	}
 
-  /* (non-Javadoc)
-   * @see org.eclipse.equinox.ds.tests.tbc.ComponentContextProvider#getComponentContext()
-   */
-  public ComponentContext getComponentContext() {
-    return ctxt;
-  }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.equinox.ds.tests.tbc.PropertiesProvider#getProperties()
+	 */
+	public Dictionary getProperties() {
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.equinox.ds.tests.tbc.BoundTester#getBoundObject(int)
+	 */
+	public ServiceReference getBoundServiceRef(int index) {
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.equinox.ds.tests.tbc.BoundTester#getBoundObjectsCount()
+	 */
+	public int getBoundObjectsCount() {
+		return (this.rc != null ? 1 : 0);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.equinox.ds.tests.tbc.BoundTester#getBoundService(int)
+	 */
+	public Object getBoundService(int index) {
+		return this.rc;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.equinox.ds.tests.tbc.ComponentContextProvider#getComponentContext
+	 * ()
+	 */
+	public ComponentContext getComponentContext() {
+		return ctxt;
+	}
 
 }

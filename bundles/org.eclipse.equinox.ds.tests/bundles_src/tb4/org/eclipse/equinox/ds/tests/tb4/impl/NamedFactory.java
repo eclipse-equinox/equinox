@@ -21,35 +21,35 @@ import org.eclipse.equinox.ds.tests.tbc.ComponentContextProvider;
 import org.osgi.service.component.ComponentContext;
 
 public class NamedFactory implements NamedService, ComponentContextProvider {
-  private String name = "name not init";
-  private ComponentContext ctxt;
-  
-  public void activate(ComponentContext componentContext) {
-    this.ctxt = componentContext;
-    name = (String) componentContext.getProperties().get("name");
-    if( name == null ) {
-      this.name = "name not set";
-    }
-  }
-  
-  // it is absolutely legal to have activate without having deactivate!
-  //public void deactivate(ComponentContext cc) {}
+	private String name = "name not init";
+	private ComponentContext ctxt;
 
-  public String getName() {
-    return name;
-  }
-  
-  @Override
-  public String toString() {
-    return name;
-  }
-  
-  public ComponentContext getComponentContext() {
-    return ctxt;
-  }
+	public void activate(ComponentContext componentContext) {
+		this.ctxt = componentContext;
+		name = (String) componentContext.getProperties().get("name");
+		if (name == null) {
+			this.name = "name not set";
+		}
+	}
 
-  public Dictionary getProperties() {
-    return ctxt.getProperties();
-  }
+	// it is absolutely legal to have activate without having deactivate!
+	// public void deactivate(ComponentContext cc) {}
+
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public String toString() {
+		return name;
+	}
+
+	public ComponentContext getComponentContext() {
+		return ctxt;
+	}
+
+	public Dictionary getProperties() {
+		return ctxt.getProperties();
+	}
 
 }

@@ -25,60 +25,58 @@ import org.eclipse.equinox.ds.tests.tbc.DynamicWorker;
 import org.eclipse.equinox.ds.tests.tbc.StaticWorker;
 import org.osgi.service.component.ComponentContext;
 
-
 public class AdvancedBounder implements DSEventsProvider, BoundMainProvider, ComponentContextProvider {
 
+	private Hashtable boundServices = new Hashtable();
+	private Vector boundServiceEvents = new Vector();
+	private ComponentContext ctxt;
 
-  private Hashtable boundServices = new Hashtable();
-  private Vector boundServiceEvents = new Vector();
-  private ComponentContext ctxt;
-  
-  public void activate(ComponentContext ctxt) {
-    this.ctxt = ctxt;
-  }
-  
-  public void deactivate(ComponentContext ctxt) {
-    this.ctxt = null;
-  }
-  
-  public void bindDynamicService(DynamicWorker dynService) {
-    boundServiceEvents.addElement(new DSEvent(DSEvent.ACT_BOUND, dynService));
-    boundServices.put(BoundMainProvider.DYNAMIC_SERVICE, dynService);
-  }
-  
-  public void unbindDynamicService(DynamicWorker dynService) {
-    boundServiceEvents.addElement(new DSEvent(DSEvent.ACT_UNBOUND, dynService));
-  }
-  
-  public void bindStaticService(StaticWorker staticService) {
-    boundServiceEvents.addElement(new DSEvent(DSEvent.ACT_BOUND, staticService));
-    boundServices.put(BoundMainProvider.STATIC_SERVICE, staticService);
-  }
-  
-  public void unbindStaticService(StaticWorker staticService) {
-    boundServiceEvents.addElement(new DSEvent(DSEvent.ACT_UNBOUND, staticService));
-  }
+	public void activate(ComponentContext ctxt) {
+		this.ctxt = ctxt;
+	}
 
-  public Dictionary getProperties() {
-    return null;
-  }
+	public void deactivate(ComponentContext ctxt) {
+		this.ctxt = null;
+	}
 
-  public DSEvent[] getEvents() {
-    DSEvent[] events = new DSEvent[boundServiceEvents.size()];
-    boundServiceEvents.copyInto(events);
-    return events;
-  }
+	public void bindDynamicService(DynamicWorker dynService) {
+		boundServiceEvents.addElement(new DSEvent(DSEvent.ACT_BOUND, dynService));
+		boundServices.put(BoundMainProvider.DYNAMIC_SERVICE, dynService);
+	}
 
-  public Object getBoundService(String serviceName) {
-    return boundServices.get(serviceName);
-  }
+	public void unbindDynamicService(DynamicWorker dynService) {
+		boundServiceEvents.addElement(new DSEvent(DSEvent.ACT_UNBOUND, dynService));
+	}
 
-  public void resetEvents() {
-    boundServiceEvents.removeAllElements();
-  }
+	public void bindStaticService(StaticWorker staticService) {
+		boundServiceEvents.addElement(new DSEvent(DSEvent.ACT_BOUND, staticService));
+		boundServices.put(BoundMainProvider.STATIC_SERVICE, staticService);
+	}
 
-  public ComponentContext getComponentContext() {
-    return ctxt;
-  }
-  
+	public void unbindStaticService(StaticWorker staticService) {
+		boundServiceEvents.addElement(new DSEvent(DSEvent.ACT_UNBOUND, staticService));
+	}
+
+	public Dictionary getProperties() {
+		return null;
+	}
+
+	public DSEvent[] getEvents() {
+		DSEvent[] events = new DSEvent[boundServiceEvents.size()];
+		boundServiceEvents.copyInto(events);
+		return events;
+	}
+
+	public Object getBoundService(String serviceName) {
+		return boundServices.get(serviceName);
+	}
+
+	public void resetEvents() {
+		boundServiceEvents.removeAllElements();
+	}
+
+	public ComponentContext getComponentContext() {
+		return ctxt;
+	}
+
 }

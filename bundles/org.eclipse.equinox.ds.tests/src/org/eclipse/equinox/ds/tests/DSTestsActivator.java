@@ -23,10 +23,11 @@ public class DSTestsActivator implements BundleActivator {
 
 	private static DSTestsActivator instance;
 	private BundleContext context;
-	
+
 	public DSTestsActivator() {
 		instance = this;
 	}
+
 	@Override
 	public void start(BundleContext context) throws Exception {
 		this.context = context;
@@ -40,13 +41,13 @@ public class DSTestsActivator implements BundleActivator {
 	public static BundleContext getContext() {
 		return instance != null ? instance.context : null;
 	}
-	
+
 	public static void activateSCR() {
 		activateBundle("org.apache.felix.scr");
 		activateBundle("org.eclipse.equinox.cm");
 		activateBundle("org.eclipse.equinox.log");
 	}
-	
+
 	private static void activateBundle(String symbolicName) {
 		if (instance != null) {
 			Bundle[] bundles = instance.context.getBundles();
@@ -55,7 +56,7 @@ public class DSTestsActivator implements BundleActivator {
 					if (bundle.getState() != Bundle.ACTIVE) {
 						try {
 							bundle.start(Bundle.START_TRANSIENT);
-						}catch (BundleException e) {
+						} catch (BundleException e) {
 							e.printStackTrace();
 						}
 					}

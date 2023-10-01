@@ -20,24 +20,27 @@ import org.eclipse.equinox.ds.tests.tbc.BundleContextProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
-
 public class AnotherComponent implements BundleContextProvider {
 
-  private ComponentContext ctxt;
-  public void activate(ComponentContext ctxt) {
-    this.ctxt = ctxt;
-  }
-  public void deactivate(ComponentContext ctxt) {
-    this.ctxt = null;
-  }
-  
-  public ComponentContext getContext() {
-    return ctxt;
-  }
-  public BundleContext getBundleContext() {
-    return Activator.getContext();
-  }
-  public Dictionary getProperties() {
-    return null;
-  }
+	private ComponentContext ctxt;
+
+	public void activate(ComponentContext ctxt) {
+		this.ctxt = ctxt;
+	}
+
+	public void deactivate(ComponentContext ctxt) {
+		this.ctxt = null;
+	}
+
+	public ComponentContext getContext() {
+		return ctxt;
+	}
+
+	public BundleContext getBundleContext() {
+		return Activator.getContext();
+	}
+
+	public Dictionary getProperties() {
+		return null;
+	}
 }
