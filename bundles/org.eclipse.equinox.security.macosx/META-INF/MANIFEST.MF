@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %fragmentName
 Bundle-SymbolicName: org.eclipse.equinox.security.macosx;singleton:=true
-Bundle-Version: 1.102.0.qualifier
+Bundle-Version: 1.102.100.qualifier
 Bundle-Vendor: %providerName
 Fragment-Host: org.eclipse.equinox.security;bundle-version="[1.0.0,2.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
