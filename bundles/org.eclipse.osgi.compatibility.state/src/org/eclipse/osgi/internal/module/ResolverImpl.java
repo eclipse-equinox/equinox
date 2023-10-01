@@ -592,8 +592,8 @@ public class ResolverImpl implements Resolver {
 		// when in develoment mode we need to reRefresh hosts  of unresolved fragments that add new constraints
 		// and reRefresh and unresolved bundles that have dependents
 		Set<BundleDescription> additionalRefresh = new HashSet<>();
-		ResolverBundle[] allUnresolved  = unresolvedBundles.toArray(new ResolverBundle[unresolvedBundles.size()]);
-		for (ResolverBundle unresolved : allUnresolved ) {
+		ResolverBundle[] allUnresolved = unresolvedBundles.toArray(new ResolverBundle[unresolvedBundles.size()]);
+		for (ResolverBundle unresolved : allUnresolved) {
 			addUnresolvedWithDependents(unresolved, additionalRefresh);
 			addHostsFromFragmentConstraints(unresolved, additionalRefresh);
 		}

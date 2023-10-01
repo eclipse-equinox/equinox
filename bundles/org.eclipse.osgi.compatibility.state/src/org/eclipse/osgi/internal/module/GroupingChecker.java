@@ -420,7 +420,7 @@ public class GroupingChecker {
 
 		// TODO this is a behavioral change; before we only required 1 supplier to match; now roots must be subsets
 		private boolean subSet(ResolverExport[] superSet, ResolverExport[] subSet) {
-			for (ResolverExport  subexport : subSet) {
+			for (ResolverExport subexport : subSet) {
 				boolean found = false;
 				for (ResolverExport superexport : superSet) {
 					// compare by exporter in case the bundle exports the package multiple times
