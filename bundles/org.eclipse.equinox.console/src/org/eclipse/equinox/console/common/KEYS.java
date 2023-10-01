@@ -18,17 +18,5 @@ package org.eclipse.equinox.console.common;
  * The supported escape sequences.
  */
 public enum KEYS {
-	UP, 
-	DOWN,
-	RIGHT,
-	LEFT,
-	CENTER,
-	HOME,
-	END,
-	PGUP,
-	PGDN,
-	INS,
-	DEL,
-	UNFINISHED,
-	UNKNOWN
+	UP, DOWN, RIGHT, LEFT, CENTER, HOME, END, PGUP, PGDN, INS, DEL, UNFINISHED, UNKNOWN
 }

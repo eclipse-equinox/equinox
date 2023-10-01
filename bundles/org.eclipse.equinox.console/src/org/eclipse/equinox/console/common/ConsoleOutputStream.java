@@ -18,8 +18,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * This class wraps the actual output stream (e.g., a socket output stream) and is responsible for
- * buffering and flushing the characters to the actual output stream.
+ * This class wraps the actual output stream (e.g., a socket output stream) and
+ * is responsible for buffering and flushing the characters to the actual output
+ * stream.
  */
 public class ConsoleOutputStream extends OutputStream {
 
@@ -40,8 +41,8 @@ public class ConsoleOutputStream extends OutputStream {
 	private int pos;
 
 	/**
-	 * Initiates with instance of the output stream to which it will send data. Here it writes to
-	 * a socket output stream.
+	 * Initiates with instance of the output stream to which it will send data. Here
+	 * it writes to a socket output stream.
 	 *
 	 * @param out OutputStream for console output
 	 */
@@ -103,7 +104,7 @@ public class ConsoleOutputStream extends OutputStream {
 			} finally {
 				pos = 0;
 			}
-			
+
 		}
 	}
 
@@ -133,7 +134,8 @@ public class ConsoleOutputStream extends OutputStream {
 	}
 
 	/**
-	 * Substitutes the output stream. The old one is stored so that it can be restored later.
+	 * Substitutes the output stream. The old one is stored so that it can be
+	 * restored later.
 	 *
 	 * @param newOut new output stream to use.
 	 */

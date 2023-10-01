@@ -34,7 +34,8 @@ import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 
 /**
- * This class provides help for the legacy equinox commands, which are adapted to Gogo commands. 
+ * This class provides help for the legacy equinox commands, which are adapted
+ * to Gogo commands.
  */
 public class HelpCommand {
 	private BundleContext context;
@@ -42,16 +43,16 @@ public class HelpCommand {
 	private ServiceTracker<CommandProvider, Set<CommandProvider>> commandProvidersTracker;
 	private ServiceTracker<CommandsTracker, CommandsTracker> commandsTrackerTracker;
 	private static final String COMMANDS = ".commands";
-	
+
 	public class CommandProviderCustomizer implements ServiceTrackerCustomizer<CommandProvider, Set<CommandProvider>> {
 		private BundleContext context;
+
 		public CommandProviderCustomizer(BundleContext context) {
 			this.context = context;
 		}
-		
+
 		@Override
-		public Set<CommandProvider> addingService(
-				ServiceReference<CommandProvider> reference) {
+		public Set<CommandProvider> addingService(ServiceReference<CommandProvider> reference) {
 			if (reference.getProperty("osgi.command.function") != null) {
 				// must be a gogo function already; don' track
 				return null;
@@ -63,46 +64,46 @@ public class HelpCommand {
 		}
 
 		@Override
-		public void modifiedService(
-				ServiceReference<CommandProvider> reference,
-				Set<CommandProvider> service) {
+		public void modifiedService(ServiceReference<CommandProvider> reference, Set<CommandProvider> service) {
 			// nothing to do
 		}
 
 		@Override
-		public void removedService(ServiceReference<CommandProvider> reference,
-				Set<CommandProvider> providers) {
+		public void removedService(ServiceReference<CommandProvider> reference, Set<CommandProvider> providers) {
 			CommandProvider provider = context.getService(reference);
 			providers.remove(provider);
 		}
-		
+
 	}
-	
+
 	public HelpCommand(BundleContext context) {
 		this.context = context;
 		legacyCommandProviders = new HashSet<>();
-		commandProvidersTracker = new ServiceTracker<>(context, CommandProvider.class, new CommandProviderCustomizer(context));
+		commandProvidersTracker = new ServiceTracker<>(context, CommandProvider.class,
+				new CommandProviderCustomizer(context));
 		commandProvidersTracker.open();
 		commandsTrackerTracker = new ServiceTracker<>(context, CommandsTracker.class, null);
 		commandsTrackerTracker.open();
 	}
-	
+
 	public void startService() {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
 		props.put(CommandProcessor.COMMAND_SCOPE, "equinox");
-		props.put(CommandProcessor.COMMAND_FUNCTION, new String[] {"help"});
+		props.put(CommandProcessor.COMMAND_FUNCTION, new String[] { "help" });
 		context.registerService(HelpCommand.class.getName(), this, props);
 	}
-	
+
 	/**
-	 * Provides help for the available commands. Prints the names, descriptions and parameters of all registered commands.
+	 * Provides help for the available commands. Prints the names, descriptions and
+	 * parameters of all registered commands.
 	 * 
-	 * If -scope <command_scope> is passed to the command, help is printed only for the commands with the specified scope. 
+	 * If -scope <command_scope> is passed to the command, help is printed only for
+	 * the commands with the specified scope.
 	 * 
 	 * If a command name is passed as argument to the help command, then the help
 	 * message only for the particular command is displayed (if such is defined).
-	 *  
+	 * 
 	 * @param session
 	 * @param args
 	 * @throws Exception
@@ -110,7 +111,7 @@ public class HelpCommand {
 	public void help(final CommandSession session, String... args) throws Exception {
 		String command = null;
 		String scope = null;
-		
+
 		if (args.length > 0) {
 			if (args[0].equals("-scope")) {
 				if (args.length < 2) {
@@ -123,14 +124,13 @@ public class HelpCommand {
 				command = args[0];
 			}
 		}
-		
+
 		if (command != null) {
 			printLegacyCommandHelp(session, command);
 			printGogoCommandHelp(session, command);
 			return;
 		}
 
-		
 		if ((scope == null) || "equinox".equals(scope)) {
 			printAllLegacyCommandsHelp();
 		}
@@ -158,11 +158,11 @@ public class HelpCommand {
 		if (commandsTracker != null) {
 			commandNames = commandsTracker.getCommands();
 		}
-		
+
 		if (commandNames == null || commandNames.isEmpty()) {
 			commandNames = (Set<String>) session.get(COMMANDS);
 		}
-		
+
 		try {
 			for (String commandName : commandNames) {
 				if (scope != null && !commandName.startsWith(scope + ":")) {
@@ -190,7 +190,7 @@ public class HelpCommand {
 						System.out.println(provider.getHelp());
 						break;
 					}
-					
+
 					if (retval != null && retval instanceof String) {
 						System.out.println(retval);
 					}
@@ -199,7 +199,7 @@ public class HelpCommand {
 			}
 		}
 	}
-		
+
 	private boolean checkStarted(String symbolicName) {
 		Bundle[] bundles = context.getBundles();
 		for (Bundle bundle : bundles) {
@@ -207,10 +207,10 @@ public class HelpCommand {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	private void handleCommandNotFound() {
 		if (checkStarted("org.apache.felix.gogo.command")) {
 			System.out.println("Cannot find felix:help command");
@@ -218,5 +218,5 @@ public class HelpCommand {
 			System.out.println("Cannot find felix:help command; bundle org.apache.felix.gogo.command is not started");
 		}
 	}
-	
+
 }

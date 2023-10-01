@@ -28,12 +28,12 @@ public class StringsCompleter implements Completer {
 
 	private Set<String> strings;
 	private boolean isCaseSensitive;
-	
+
 	public StringsCompleter(Set<String> strings, boolean isCaseSensitive) {
 		this.strings = strings;
 		this.isCaseSensitive = isCaseSensitive;
 	}
-	
+
 	@Override
 	public Map<String, Integer> getCandidates(String buffer, int cursor) {
 		String currentToken = CommandLineParser.getCurrentToken(buffer, cursor);
@@ -43,20 +43,20 @@ public class StringsCompleter implements Completer {
 		if (!isCaseSensitive) {
 			currentToken = currentToken.toLowerCase();
 		}
-		
+
 		int startIndex = cursor - currentToken.length();
-		
+
 		// if currentToken is empty string, then there is nothing to complete
 		// the only exception is if the previous character is $, which signifies
-		// that a variable name is expected; in this case all strings will be 
+		// that a variable name is expected; in this case all strings will be
 		// returned as candidates
-		if(currentToken.equals("") && buffer.charAt(startIndex - 1) != '$') {
+		if (currentToken.equals("") && buffer.charAt(startIndex - 1) != '$') {
 			return new HashMap<>();
 		}
-		
+
 		Map<String, Integer> result = new HashMap<>();
 
-		for(String candidate : strings) {
+		for (String candidate : strings) {
 			if (isCaseSensitive) {
 				if (candidate.startsWith(currentToken)) {
 					result.put(candidate, startIndex);
@@ -67,7 +67,7 @@ public class StringsCompleter implements Completer {
 				}
 			}
 		}
-		
+
 		return result;
 	}
 

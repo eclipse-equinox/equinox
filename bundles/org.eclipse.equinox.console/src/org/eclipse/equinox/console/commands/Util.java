@@ -19,28 +19,27 @@ package org.eclipse.equinox.console.commands;
  */
 public class Util {
 	/**
-	 * Performs a quicksort of the given objects
-	 * by their string representation in ascending order.
-	 * <p> 
+	 * Performs a quicksort of the given objects by their string representation in
+	 * ascending order.
+	 * <p>
 	 *
-	 * @param array	The array of objects to sort
+	 * @param array The array of objects to sort
 	 */
 	public static void sortByString(Object[] array) {
 		qSortByString(array, 0, array.length - 1);
 	}
 
 	/**
-	 * Sorts the array of objects by their string representation
-	 * in ascending order.
+	 * Sorts the array of objects by their string representation in ascending order.
 	 * <p>
 	 * This is a version of C.A.R Hoare's Quick Sort algorithm.
 	 *
-	 * @param array	the	array of objects to sort
-	 * @param start	the start index to begin sorting
-	 * @param stop		the end index to stop sorting
+	 * @param array the array of objects to sort
+	 * @param start the start index to begin sorting
+	 * @param stop  the end index to stop sorting
 	 * 
-	 * @exception	ArrayIndexOutOfBoundsException when <code>start < 0</code>
-	 *				or <code>end >= array.length</code>
+	 * @exception ArrayIndexOutOfBoundsException when <code>start < 0</code> or
+	 *                                           <code>end >= array.length</code>
 	 */
 	public static void qSortByString(Object[] array, int start, int stop) {
 		if (start >= stop)
@@ -55,7 +54,8 @@ public class Util {
 
 		// loop through the array until indices cross
 		while (left <= right) {
-			// find the first element that is smaller than the partition element from the left
+			// find the first element that is smaller than the partition element from the
+			// left
 			while ((left < stop) && (String.valueOf(array[left]).compareTo(mid) < 0)) {
 				++left;
 			}
@@ -72,11 +72,13 @@ public class Util {
 				--right;
 			}
 		}
-		// sort the left partition, if the right index has not reached the left side of array
+		// sort the left partition, if the right index has not reached the left side of
+		// array
 		if (start < right) {
 			qSortByString(array, start, right);
 		}
-		// sort the right partition, if the left index has not reached the right side of array
+		// sort the right partition, if the left index has not reached the right side of
+		// array
 		if (left < stop) {
 			qSortByString(array, left, stop);
 		}
@@ -85,15 +87,17 @@ public class Util {
 	/**
 	 * Sorts the specified range in the array in ascending order.
 	 *
-	 * @param		array	the Object array to be sorted
-	 * @param		start	the start index to sort
-	 * @param		end		the last + 1 index to sort
+	 * @param array the Object array to be sorted
+	 * @param start the start index to sort
+	 * @param end   the last + 1 index to sort
 	 *
-	 * @exception	ClassCastException when an element in the array does not
-	 *				implement Comparable or elements cannot be compared to each other
-	 * @exception	IllegalArgumentException when <code>start > end</code>
-	 * @exception	ArrayIndexOutOfBoundsException when <code>start < 0</code>
-	 *				or <code>end > array.size()</code>
+	 * @exception ClassCastException             when an element in the array does
+	 *                                           not implement Comparable or
+	 *                                           elements cannot be compared to each
+	 *                                           other
+	 * @exception IllegalArgumentException       when <code>start > end</code>
+	 * @exception ArrayIndexOutOfBoundsException when <code>start < 0</code> or
+	 *                                           <code>end > array.size()</code>
 	 */
 	@SuppressWarnings("unchecked")
 	public static void sort(Object[] array, int start, int end) {
@@ -125,15 +129,17 @@ public class Util {
 	/**
 	 * Sorts the specified range in the array in descending order.
 	 *
-	 * @param		array	the Object array to be sorted
-	 * @param		start	the start index to sort
-	 * @param		end		the last + 1 index to sort
+	 * @param array the Object array to be sorted
+	 * @param start the start index to sort
+	 * @param end   the last + 1 index to sort
 	 *
-	 * @exception	ClassCastException when an element in the array does not
-	 *				implement Comparable or elements cannot be compared to each other
-	 * @exception	IllegalArgumentException when <code>start > end</code>
-	 * @exception	ArrayIndexOutOfBoundsException when <code>start < 0</code>
-	 *				or <code>end > array.size()</code>
+	 * @exception ClassCastException             when an element in the array does
+	 *                                           not implement Comparable or
+	 *                                           elements cannot be compared to each
+	 *                                           other
+	 * @exception IllegalArgumentException       when <code>start > end</code>
+	 * @exception ArrayIndexOutOfBoundsException when <code>start < 0</code> or
+	 *                                           <code>end > array.size()</code>
 	 */
 	public static void dsort(Object[] array, int start, int end) {
 		// first sort in ascending order
@@ -143,9 +149,9 @@ public class Util {
 	}
 
 	/**
-	 *  Reverse the elements in the array.
-	 *  
-	 * @param		array	the Object array to be reversed
+	 * Reverse the elements in the array.
+	 * 
+	 * @param array the Object array to be reversed
 	 */
 	public static void swap(Object[] array) {
 		int start = 0;
@@ -158,17 +164,14 @@ public class Util {
 	}
 
 	/**
-	 * Returns a string representation of the object
-	 * in the given length.
-	 * If the string representation of the given object
-	 * is longer then it is truncated.
-	 * If it is shorter then it is padded with the blanks
-	 * to the given total length.
-	 * If the given object is a number then the padding
-	 * is done on the left, otherwise on the right.
+	 * Returns a string representation of the object in the given length. If the
+	 * string representation of the given object is longer then it is truncated. If
+	 * it is shorter then it is padded with the blanks to the given total length. If
+	 * the given object is a number then the padding is done on the left, otherwise
+	 * on the right.
 	 *
-	 * @param	object	the object to convert
-	 * @param	length	the length the output string
+	 * @param object the object to convert
+	 * @param length the length the output string
 	 */
 	public static String toString(Object object, int length) {
 		boolean onLeft = object instanceof Number;
@@ -176,17 +179,15 @@ public class Util {
 	}
 
 	/**
-	 * Returns a string representation of the object
-	 * in the given length.
-	 * If the string representation of the given object
-	 * is longer then it is truncated.
-	 * If it is shorter then it is padded to the left or right
-	 * with the given character to the given total length.
+	 * Returns a string representation of the object in the given length. If the
+	 * string representation of the given object is longer then it is truncated. If
+	 * it is shorter then it is padded to the left or right with the given character
+	 * to the given total length.
 	 *
-	 * @param	object	the object to convert
-	 * @param	length	the length the output string
-	 * @param	pad		the pad character
-	 * @param	onLeft	if <code>true</code> pad on the left, otherwise an the right
+	 * @param object the object to convert
+	 * @param length the length the output string
+	 * @param pad    the pad character
+	 * @param onLeft if <code>true</code> pad on the left, otherwise an the right
 	 */
 	public static String toString(Object object, int length, char pad, boolean onLeft) {
 		String input = String.valueOf(object);

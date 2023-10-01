@@ -20,15 +20,15 @@ import java.util.Map;
 import org.eclipse.equinox.console.common.KEYS;
 
 /**
- * This is the base class for all supported terminal types. 
- * It contains the escape sequences, common for all mappings. 
+ * This is the base class for all supported terminal types. It contains the
+ * escape sequences, common for all mappings.
  */
 public abstract class TerminalTypeMappings {
 	protected Map<String, KEYS> escapesToKey;
 	protected String[] escapes;
 	protected byte BACKSPACE;
 	protected byte DEL;
-	
+
 	public TerminalTypeMappings() {
 		escapesToKey = new HashMap<>();
 		escapesToKey.put("[A", KEYS.UP); //$NON-NLS-1$
@@ -39,11 +39,11 @@ public abstract class TerminalTypeMappings {
 		setKeypadMappings();
 		createEscapes();
 	}
-	
+
 	public Map<String, KEYS> getEscapesToKey() {
 		return escapesToKey;
 	}
-	
+
 	public String[] getEscapes() {
 		if (escapes != null) {
 			String[] copy = new String[escapes.length];
@@ -53,17 +53,17 @@ public abstract class TerminalTypeMappings {
 			return null;
 		}
 	}
-	
+
 	public byte getBackspace() {
 		return BACKSPACE;
 	}
-	
+
 	public byte getDel() {
 		return DEL;
 	}
-	
+
 	public abstract void setKeypadMappings();
-	
+
 	private void createEscapes() {
 		escapes = new String[escapesToKey.size()];
 		Object[] temp = escapesToKey.keySet().toArray();

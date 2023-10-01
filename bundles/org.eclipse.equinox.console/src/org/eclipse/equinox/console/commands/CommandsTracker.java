@@ -28,25 +28,26 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 public class CommandsTracker {
 	private Set<String> commandNames;
 	private ServiceTracker<Object, Set<String>> commandsTracker = null;
-	private static final Object lock = new Object(); 
-	
+	private static final Object lock = new Object();
+
 	public CommandsTracker(BundleContext bundleContext) {
 		commandNames = Collections.synchronizedSet(new HashSet<String>());
 		try {
-			Filter filter = bundleContext.createFilter(String.format("(&(%s=*)(%s=*))", CommandProcessor.COMMAND_SCOPE, CommandProcessor.COMMAND_FUNCTION));
+			Filter filter = bundleContext.createFilter(String.format("(&(%s=*)(%s=*))", CommandProcessor.COMMAND_SCOPE,
+					CommandProcessor.COMMAND_FUNCTION));
 			commandsTracker = new ServiceTracker<>(bundleContext, filter, new CommandsTrackerCustomizer());
 			commandsTracker.open();
 		} catch (InvalidSyntaxException e) {
-			//do nothing;
+			// do nothing;
 		}
 	}
-	
+
 	public Set<String> getCommands() {
 		synchronized (lock) {
 			return new HashSet<>(commandNames);
 		}
 	}
-	
+
 	class CommandsTrackerCustomizer implements ServiceTrackerCustomizer<Object, Set<String>> {
 		@Override
 		public Set<String> addingService(ServiceReference<Object> reference) {
@@ -88,6 +89,6 @@ public class CommandsTracker {
 				}
 			}
 		}
-		
+
 	}
 }

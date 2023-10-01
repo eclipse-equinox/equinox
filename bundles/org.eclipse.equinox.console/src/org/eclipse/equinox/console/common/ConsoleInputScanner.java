@@ -25,9 +25,10 @@ import org.eclipse.equinox.console.completion.CompletionHandler;
 import org.osgi.framework.BundleContext;
 
 /**
- * This class performs the processing of the input special characters,
- * and updates respectively what is displayed in the output. It handles
- * escape sequences, delete, backspace, arrows, insert, home, end, pageup, pagedown, tab completion.
+ * This class performs the processing of the input special characters, and
+ * updates respectively what is displayed in the output. It handles escape
+ * sequences, delete, backspace, arrows, insert, home, end, pageup, pagedown,
+ * tab completion.
  */
 public class ConsoleInputScanner extends Scanner {
 
@@ -35,7 +36,8 @@ public class ConsoleInputScanner extends Scanner {
 	private boolean isCR = false;
 	private boolean replace = false;
 	private boolean isCompletionMode = false;
-	// shows if command history should be saved - it is turned off in cases when passwords are to be entered
+	// shows if command history should be saved - it is turned off in cases when
+	// passwords are to be entered
 	private boolean isHistoryEnabled = true;
 
 	private final HistoryHolder history;
@@ -50,19 +52,19 @@ public class ConsoleInputScanner extends Scanner {
 		history = new HistoryHolder();
 		buffer = new SimpleByteBuffer();
 	}
-	
+
 	public void toggleHistoryEnabled(boolean isEnabled) {
 		isHistoryEnabled = isEnabled;
 	}
-	
+
 	public void setSession(CommandSession session) {
-		this.session = session; 
+		this.session = session;
 	}
 
 	public void setContext(BundleContext context) {
 		this.context = context;
 	}
-	
+
 	@Override
 	public void scan(int b) throws IOException {
 		b &= 0xFF;
@@ -72,7 +74,7 @@ public class ConsoleInputScanner extends Scanner {
 				return;
 			}
 		}
-		
+
 		if (b != TAB) {
 			if (isCompletionMode == true) {
 				isCompletionMode = false;
@@ -80,13 +82,13 @@ public class ConsoleInputScanner extends Scanner {
 				originalCursorPos = 0;
 			}
 		}
-		
+
 		if (isEsc) {
 			scanEsc(b);
 		} else {
 			if (b == getBackspace()) {
 				backSpace();
-			} else if(b == TAB) {
+			} else if (b == TAB) {
 				if (isCompletionMode == false) {
 					isCompletionMode = true;
 					processTab();
@@ -167,13 +169,14 @@ public class ConsoleInputScanner extends Scanner {
 			}
 		}
 	}
-	
+
 	protected void processTab() throws IOException {
 		CompletionHandler completionHandler = new CompletionHandler(context, session);
-		Map<String, Integer> completionCandidates = completionHandler.getCandidates(buffer.copyCurrentData(), buffer.getPos());
-		
-		if (completionCandidates.size() == 1) {	
-			completeSingleCandidate(completionCandidates);   
+		Map<String, Integer> completionCandidates = completionHandler.getCandidates(buffer.copyCurrentData(),
+				buffer.getPos());
+
+		if (completionCandidates.size() == 1) {
+			completeSingleCandidate(completionCandidates);
 			isCompletionMode = false;
 			return;
 		}
@@ -187,84 +190,85 @@ public class ConsoleInputScanner extends Scanner {
 		printNewLine();
 		printPrompt();
 	}
-	
-	protected void processCandidates(Map<String, Integer> completionCandidates) throws IOException{
+
+	protected void processCandidates(Map<String, Integer> completionCandidates) throws IOException {
 		Set<String> candidatesNamesSet = completionCandidates.keySet();
 		String[] candidatesNames = (candidatesNamesSet.toArray(new String[0]));
 		originalCursorPos = buffer.getPos();
 		String[] candidateSuffixes = new String[candidatesNames.length];
 		for (int i = 0; i < candidatesNames.length; i++) {
 			String candidateName = candidatesNames[i];
-			candidateSuffixes[i] = getCandidateSuffix(candidateName, completionCandidates.get(candidateName), originalCursorPos);
+			candidateSuffixes[i] = getCandidateSuffix(candidateName, completionCandidates.get(candidateName),
+					originalCursorPos);
 			for (byte symbol : candidateName.getBytes()) {
 				echo(symbol);
 			}
 			printNewLine();
 		}
-		
+
 		String commonPrefix = getCommonPrefix(candidateSuffixes);
 		candidates = new Candidates(removeCommonPrefix(candidateSuffixes, commonPrefix));
 		printString(commonPrefix, false);
 		originalCursorPos = buffer.getPos();
 	}
-	
+
 	protected void processNextTab() throws IOException {
 		if (candidates == null) {
 			return;
 		}
-		
+
 		while (originalCursorPos < buffer.getPos()) {
 			backSpace();
 		}
-		
+
 		String candidate = candidates.getCurrent();
-		if(!candidate.equals("")) {
+		if (!candidate.equals("")) {
 			printString(candidate, true);
 		}
 	}
-	
+
 	protected void printCandidate(String candidate, int startIndex, int completionIndex) throws IOException {
 		String suffix = getCandidateSuffix(candidate, startIndex, completionIndex);
-		if(suffix.equals("")) {
+		if (suffix.equals("")) {
 			return;
 		}
 		printString(suffix, true);
 	}
-	
+
 	protected void printString(String st, boolean isEcho) throws IOException {
 		for (byte symbol : st.getBytes()) {
 			buffer.insert(symbol);
-			if (isEcho){
+			if (isEcho) {
 				echo(symbol);
 			}
 		}
 		flush();
 	}
-	
+
 	protected String getCommonPrefix(String[] names) {
 		if (names.length == 0) {
 			return "";
 		}
-		
+
 		if (names.length == 1) {
 			return names[0];
 		}
-		
+
 		StringBuilder builder = new StringBuilder();
 		char[] name = names[0].toCharArray();
-		for(char c : name) {
+		for (char c : name) {
 			String prefix = builder.append(c).toString();
-			for (int i = 1; i < names.length; i ++) {
+			for (int i = 1; i < names.length; i++) {
 				if (!names[i].startsWith(prefix)) {
 					return prefix.substring(0, prefix.length() - 1);
 				}
 			}
 		}
-		
+
 		return builder.toString();
 	}
-	
-	protected String[] removeCommonPrefix(String [] names, String commonPrefix){
+
+	protected String[] removeCommonPrefix(String[] names, String commonPrefix) {
 		ArrayList<String> result = new ArrayList<>();
 		for (String name : names) {
 			String nameWithoutPrefix = name.substring(commonPrefix.length());
@@ -275,7 +279,7 @@ public class ConsoleInputScanner extends Scanner {
 		result.add("");
 		return result.toArray(new String[0]);
 	}
-	
+
 	protected String getCandidateSuffix(String candidate, int startIndex, int completionIndex) {
 		int partialLength = completionIndex - startIndex;
 		if (partialLength >= candidate.length()) {
@@ -283,33 +287,33 @@ public class ConsoleInputScanner extends Scanner {
 		}
 		return candidate.substring(partialLength);
 	}
-	
+
 	protected void completeSingleCandidate(Map<String, Integer> completionCandidates) throws IOException {
 		Set<String> keys = completionCandidates.keySet();
 		String key = (keys.toArray(new String[0]))[0];
 		int startIndex = completionCandidates.get(key);
-		printCandidate(key, startIndex, buffer.getPos()); 
+		printCandidate(key, startIndex, buffer.getPos());
 	}
-	
+
 	protected void printCompletionError() throws IOException {
 		byte[] curr = buffer.getCurrentData();
 		if (isHistoryEnabled == true) {
 			history.add(curr);
 		}
-		
+
 		String errorMessage = "No completion available";
 		for (byte symbol : errorMessage.getBytes()) {
 			echo(symbol);
 		}
 	}
-	
-	protected void printNewLine() throws IOException{
+
+	protected void printNewLine() throws IOException {
 		echo(CR);
 		echo(LF);
 		flush();
 	}
-	
-	protected void printPrompt() throws IOException{
+
+	protected void printPrompt() throws IOException {
 		echo('o');
 		echo('s');
 		echo('g');
@@ -351,43 +355,43 @@ public class ConsoleInputScanner extends Scanner {
 		}
 		isEsc = false;
 		switch (key) {
-			case UP:
-				processUpArrow();
-				break;
-			case DOWN:
-				processDownArrow();
-				break;
-			case RIGHT:
-				processRightArrow();
-				break;
-			case LEFT:
-				processLeftArrow();
-				break;
-			case HOME:
-				processHome();
-				break;
-			case END:
-				processEnd();
-				break;
-			case PGUP:
-				processPgUp();
-				break;
-			case PGDN:
-				processPgDn();
-				break;
-			case INS:
-				processIns();
-				break;
-			case DEL:
-				delete();
-				break;
-			default: //CENTER
-				break;
+		case UP:
+			processUpArrow();
+			break;
+		case DOWN:
+			processDownArrow();
+			break;
+		case RIGHT:
+			processRightArrow();
+			break;
+		case LEFT:
+			processLeftArrow();
+			break;
+		case HOME:
+			processHome();
+			break;
+		case END:
+			processEnd();
+			break;
+		case PGUP:
+			processPgUp();
+			break;
+		case PGDN:
+			processPgDn();
+			break;
+		case INS:
+			processIns();
+			break;
+		case DEL:
+			delete();
+			break;
+		default: // CENTER
+			break;
 		}
 	}
 
-	private static final byte[] INVERSE_ON = {ESC, '[', '7', 'm'};
-	private static final byte[] INVERSE_OFF = {ESC, '[', '2', '7', 'm'};
+	private static final byte[] INVERSE_ON = { ESC, '[', '7', 'm' };
+	private static final byte[] INVERSE_OFF = { ESC, '[', '2', '7', 'm' };
 
 	private void echo(byte[] data) throws IOException {
 		for (byte b : data) {
@@ -404,7 +408,7 @@ public class ConsoleInputScanner extends Scanner {
 		try {
 			Thread.sleep(300);
 		} catch (InterruptedException e) {
-			//do not care $JL-EXC$
+			// do not care $JL-EXC$
 		}
 		echo(INVERSE_OFF);
 		echo(BS);
@@ -483,20 +487,20 @@ public class ConsoleInputScanner extends Scanner {
 		echoBuff();
 		flush();
 	}
-	
+
 	private static class Candidates {
 		private String[] candidates;
 		private int currentCandidateIndex = 0;
-		
+
 		public Candidates(String[] candidates) {
 			this.candidates = candidates.clone();
 		}
-		
+
 		public String getCurrent() {
 			if (currentCandidateIndex >= candidates.length) {
 				currentCandidateIndex = 0;
 			}
-			
+
 			return candidates[currentCandidateIndex++];
 		}
 	}

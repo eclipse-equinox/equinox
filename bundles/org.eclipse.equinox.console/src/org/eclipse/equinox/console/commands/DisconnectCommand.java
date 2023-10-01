@@ -33,25 +33,25 @@ import org.osgi.framework.BundleContext;
 public class DisconnectCommand {
 	private static final String DISCONNECT_MESSAGE = "Disconnect from console? (y/n; default=y) ";
 	private static final String DISCONNECT_CONFIRMATION_Y = "y";
-	
+
 	private BundleContext context;
-	
+
 	public DisconnectCommand(BundleContext context) {
 		this.context = context;
 	}
-	
+
 	public void startService() {
 		Dictionary<String, Object> props = new Hashtable<>();
 		props.put(CommandProcessor.COMMAND_SCOPE, "equinox");
-		props.put(CommandProcessor.COMMAND_FUNCTION, new String[] {"disconnect"});
+		props.put(CommandProcessor.COMMAND_FUNCTION, new String[] { "disconnect" });
 		context.registerService(DisconnectCommand.class.getName(), this, props);
 	}
-	
+
 	public void disconnect(CommandSession session) {
 		PrintStream consoleStream = session.getConsole();
 		consoleStream.print(DISCONNECT_MESSAGE);
 		consoleStream.flush();
-		
+
 		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 		String reply = null;
 		try {
@@ -59,10 +59,10 @@ public class DisconnectCommand {
 		} catch (IOException e) {
 			consoleStream.println("Error while reading confirmation");
 		}
-		
+
 		if (reply != null) {
 			if (reply.toLowerCase().startsWith(DISCONNECT_CONFIRMATION_Y) || reply.length() == 0) {
-				Closeable closable = (Closeable)session.get(TelnetConnection.CLOSEABLE);
+				Closeable closable = (Closeable) session.get(TelnetConnection.CLOSEABLE);
 				if (closable != null) {
 					try {
 						closable.close();
@@ -71,7 +71,7 @@ public class DisconnectCommand {
 					}
 					return;
 				}
-				
+
 				session.close();
 			}
 		}

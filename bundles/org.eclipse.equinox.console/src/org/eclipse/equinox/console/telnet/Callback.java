@@ -15,6 +15,6 @@
 package org.eclipse.equinox.console.telnet;
 
 public interface Callback {
-	
+
 	public void finished();
 }

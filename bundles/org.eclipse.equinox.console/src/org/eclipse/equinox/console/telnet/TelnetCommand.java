@@ -33,7 +33,7 @@ import org.osgi.service.cm.ManagedService;
  *
  */
 public class TelnetCommand {
-	
+
 	private String defaultHost = null;
 	private int defaultPort;
 	private List<CommandProcessor> processors = new ArrayList<>();
@@ -43,7 +43,7 @@ public class TelnetCommand {
 	private TelnetServer telnetServer = null;
 	private ServiceRegistration<?> configuratorRegistration;
 	private boolean isEnabled = false;
-	
+
 	private static final String HOST = "host";
 	private static final String PORT = "port";
 	private static final String USE_CONFIG_ADMIN_PROP = "osgi.console.useConfigAdmin";
@@ -52,8 +52,7 @@ public class TelnetCommand {
 	private static final String ENABLED = "enabled";
 	private final Object lock = new Object();
 
-	public TelnetCommand(CommandProcessor processor, BundleContext context)
-	{
+	public TelnetCommand(CommandProcessor processor, BundleContext context) {
 		processors.add(processor);
 		this.context = context;
 		if ("true".equals(context.getProperty(USE_CONFIG_ADMIN_PROP))) {
@@ -61,7 +60,8 @@ public class TelnetCommand {
 			telnetProperties.put(Constants.SERVICE_PID, TELNET_PID);
 			try {
 				synchronized (lock) {
-					configuratorRegistration = context.registerService(ManagedService.class.getName(), new TelnetConfigurator(), telnetProperties);
+					configuratorRegistration = context.registerService(ManagedService.class.getName(),
+							new TelnetConfigurator(), telnetProperties);
 				}
 			} catch (NoClassDefFoundError e) {
 				System.out.println("Configuration Admin not available!");
@@ -71,34 +71,34 @@ public class TelnetCommand {
 			parseHostAndPort();
 		}
 	}
-	
+
 	private void parseHostAndPort() {
 		String telnetPort = null;
 		String consolePropValue = context.getProperty(CONSOLE_PROP);
-		if(consolePropValue != null) {
+		if (consolePropValue != null) {
 			int index = consolePropValue.lastIndexOf(':');
 			if (index > -1) {
 				defaultHost = consolePropValue.substring(0, index);
 			}
 			telnetPort = consolePropValue.substring(index + 1);
 			isEnabled = true;
-		} 
+		}
 		if (telnetPort != null && !"".equals(telnetPort)) {
 			try {
 				defaultPort = Integer.parseInt(telnetPort);
 			} catch (NumberFormatException e) {
 				// do nothing
 			}
-		} 
+		}
 	}
-	
+
 	public synchronized void startService() {
 		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put("osgi.command.scope", "equinox");
-		properties.put("osgi.command.function", new String[] {"telnet"});
+		properties.put("osgi.command.function", new String[] { "telnet" });
 		if ((port > 0 || defaultPort > 0) && isEnabled == true) {
-			try{
-				telnet(new String[]{"start"});
+			try {
+				telnet(new String[] { "start" });
 			} catch (Exception e) {
 				System.out.println("Cannot start telnet. Reason: " + e.getMessage());
 				e.printStackTrace();
@@ -108,17 +108,16 @@ public class TelnetCommand {
 	}
 
 	@Descriptor("start/stop a telnet server")
-	public synchronized void telnet(String[] arguments) throws Exception
-	{
+	public synchronized void telnet(String[] arguments) throws Exception {
 		String command = null;
 		int newPort = 0;
 		String newHost = null;
-		
-		for(int i = 0; i < arguments.length; i++) {
-			if("-?".equals(arguments[i]) || "-help".equals(arguments[i])) {
+
+		for (int i = 0; i < arguments.length; i++) {
+			if ("-?".equals(arguments[i]) || "-help".equals(arguments[i])) {
 				printHelp();
 				return;
-			} else if("start".equals(arguments[i])) {
+			} else if ("start".equals(arguments[i])) {
 				command = "start";
 			} else if ("stop".equals(arguments[i])) {
 				command = "stop";
@@ -132,21 +131,21 @@ public class TelnetCommand {
 				throw new Exception("Unrecognized telnet command/option " + arguments[i]);
 			}
 		}
-		
+
 		if (command == null) {
 			throw new Exception("No telnet command specified");
 		}
-		
+
 		if (newPort != 0) {
 			port = newPort;
 		} else if (port == 0) {
 			port = defaultPort;
 		}
-		
+
 		if (port == 0) {
 			throw new Exception("No telnet port specified");
 		}
-		
+
 		if (newHost != null) {
 			host = newHost;
 		} else {
@@ -157,40 +156,40 @@ public class TelnetCommand {
 			if (telnetServer != null) {
 				throw new IllegalStateException("telnet is already running on port " + port);
 			}
-			
+
 			try {
 				telnetServer = new TelnetServer(context, processors, host, port);
 			} catch (BindException e) {
 				throw new Exception("Port " + port + " already in use");
 			}
-			
+
 			telnetServer.setName("equinox telnet");
-			telnetServer.start();    
+			telnetServer.start();
 		} else if ("stop".equals(command)) {
 			if (telnetServer == null) {
 				System.out.println("telnet is not running.");
 				return;
 			}
-			
+
 			telnetServer.stopTelnetServer();
 			telnetServer = null;
-		} 
+		}
 	}
-	
+
 	public synchronized void addCommandProcessor(CommandProcessor processor) {
 		processors.add(processor);
 		if (telnetServer != null) {
 			telnetServer.addCommandProcessor(processor);
 		}
 	}
-	
+
 	public synchronized void removeCommandProcessor(CommandProcessor processor) {
 		processors.remove(processor);
 		if (telnetServer != null) {
 			telnetServer.removeCommandProcessor(processor);
 		}
 	}
-	
+
 	private void printHelp() {
 		StringBuilder help = new StringBuilder();
 		help.append("telnet - start simple telnet server");
@@ -213,11 +212,12 @@ public class TelnetCommand {
 		help.append("-?, -help");
 		help.append("\t");
 		help.append("show help");
-		System.out.println(help.toString());          
+		System.out.println(help.toString());
 	}
-	
+
 	class TelnetConfigurator implements ManagedService {
 		private Dictionary<String, Object> properties;
+
 		@Override
 		public synchronized void updated(Dictionary<String, ?> props) throws ConfigurationException {
 			if (props != null) {
@@ -228,26 +228,26 @@ public class TelnetCommand {
 			} else {
 				return;
 			}
-			
-			defaultPort = Integer.parseInt(((String)properties.get(PORT)));
-			defaultHost = (String)properties.get(HOST);
+
+			defaultPort = Integer.parseInt(((String) properties.get(PORT)));
+			defaultHost = (String) properties.get(HOST);
 			if (properties.get(ENABLED) == null) {
 				isEnabled = false;
 			} else {
-				isEnabled = Boolean.parseBoolean((String)properties.get(ENABLED));
+				isEnabled = Boolean.parseBoolean((String) properties.get(ENABLED));
 			}
 			synchronized (lock) {
 				configuratorRegistration.setProperties(properties);
 			}
 			if (telnetServer == null && isEnabled == true) {
 				try {
-					telnet(new String[]{"start"});
+					telnet(new String[] { "start" });
 				} catch (Exception e) {
 					System.out.println("Cannot start telnet: " + e.getMessage());
 					e.printStackTrace();
 				}
 			}
 		}
-		
+
 	}
 }
