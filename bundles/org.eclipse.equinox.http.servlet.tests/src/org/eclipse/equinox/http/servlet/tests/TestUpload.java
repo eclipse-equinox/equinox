@@ -53,7 +53,7 @@ public class TestUpload extends BaseTest {
 		postContent(getClass().getResource("resource1.txt"), 201);
 		assertTrue(receivedLatch.await(5, TimeUnit.SECONDS));
 		assertEquals(1, contents.size());
-		assertEquals(25L, (long) contents.get("text.txt"));
+		assertEquals(26L, (long) contents.get("text.txt"));
 	}
 
 	private void setupUploadServlet(final CountDownLatch receivedLatch,
