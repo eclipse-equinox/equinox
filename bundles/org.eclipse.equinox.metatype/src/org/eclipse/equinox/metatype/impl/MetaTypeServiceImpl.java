@@ -42,7 +42,8 @@ public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousB
 	/**
 	 * Constructor of class MetaTypeServiceImpl.
 	 */
-	public MetaTypeServiceImpl(SAXParserFactory parserFactory, LogTracker logger, ServiceTracker<Object, Object> metaTypeProviderTracker) {
+	public MetaTypeServiceImpl(SAXParserFactory parserFactory, LogTracker logger,
+			ServiceTracker<Object, Object> metaTypeProviderTracker) {
 		this._parserFactory = parserFactory;
 		this.logger = logger;
 		this.metaTypeProviderTracker = metaTypeProviderTracker;
@@ -51,7 +52,9 @@ public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousB
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.osgi.service.metatype.MetaTypeService#getMetaTypeInformation(org.osgi.framework.Bundle)
+	 * @see
+	 * org.osgi.service.metatype.MetaTypeService#getMetaTypeInformation(org.osgi.
+	 * framework.Bundle)
 	 */
 	@Override
 	public EquinoxMetaTypeInformation getMetaTypeInformation(Bundle bundle) {
@@ -69,20 +72,22 @@ public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousB
 		synchronized (_mtps) {
 			if (_mtps.containsKey(bID))
 				return _mtps.get(bID);
-			EquinoxMetaTypeInformation mti = AccessController.doPrivileged(new PrivilegedAction<EquinoxMetaTypeInformation>() {
-				@Override
-				public EquinoxMetaTypeInformation run() {
-					MetaTypeInformationImpl impl = null;
-					try {
-						impl = new MetaTypeInformationImpl(b, newParser(), loggerTemp);
-					} catch (Exception e) {
-						loggerTemp.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.METADATA_PARSE_ERROR, b.getBundleId(), b.getSymbolicName()), e);
-					}
-					if (impl == null || !impl._isThereMeta)
-						return new MetaTypeProviderTracker(b, loggerTemp, tracker);
-					return impl;
-				}
-			});
+			EquinoxMetaTypeInformation mti = AccessController
+					.doPrivileged(new PrivilegedAction<EquinoxMetaTypeInformation>() {
+						@Override
+						public EquinoxMetaTypeInformation run() {
+							MetaTypeInformationImpl impl = null;
+							try {
+								impl = new MetaTypeInformationImpl(b, newParser(), loggerTemp);
+							} catch (Exception e) {
+								loggerTemp.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.METADATA_PARSE_ERROR,
+										b.getBundleId(), b.getSymbolicName()), e);
+							}
+							if (impl == null || !impl._isThereMeta)
+								return new MetaTypeProviderTracker(b, loggerTemp, tracker);
+							return impl;
+						}
+					});
 			_mtps.put(bID, mti);
 			return mti;
 		}
@@ -94,12 +99,14 @@ public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousB
 		// Always want a non-validating parser.
 		_parserFactory.setValidating(false);
 		try {
-			// If the factory is already namespace aware, we know it can create namespace aware parsers
+			// If the factory is already namespace aware, we know it can create namespace
+			// aware parsers
 			// because that was checked in the service tracker.
 			if (namespaceAware) {
 				return _parserFactory.newSAXParser();
 			}
-			// If the factory is not already namespace aware, it may or may not be able to create
+			// If the factory is not already namespace aware, it may or may not be able to
+			// create
 			// namespace aware parsers.
 			_parserFactory.setNamespaceAware(true);
 			try {
@@ -119,7 +126,8 @@ public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousB
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.osgi.framework.BundleListener#bundleChanged(org.osgi.framework.BundleEvent)
+	 * @see org.osgi.framework.BundleListener#bundleChanged(org.osgi.framework.
+	 * BundleEvent)
 	 */
 	public void bundleChanged(BundleEvent event) {
 
@@ -127,17 +135,17 @@ public class MetaTypeServiceImpl implements EquinoxMetaTypeService, SynchronousB
 		Long bID = Long.valueOf(event.getBundle().getBundleId());
 
 		switch (type) {
-			case BundleEvent.UPDATED :
-			case BundleEvent.UNINSTALLED :
-				_mtps.remove(bID);
-				break;
-			case BundleEvent.INSTALLED :
-			case BundleEvent.RESOLVED :
-			case BundleEvent.STARTED :
-			case BundleEvent.STOPPED :
-			case BundleEvent.UNRESOLVED :
-			default :
-				break;
+		case BundleEvent.UPDATED:
+		case BundleEvent.UNINSTALLED:
+			_mtps.remove(bID);
+			break;
+		case BundleEvent.INSTALLED:
+		case BundleEvent.RESOLVED:
+		case BundleEvent.STARTED:
+		case BundleEvent.STOPPED:
+		case BundleEvent.UNRESOLVED:
+		default:
+			break;
 		}
 	}
 

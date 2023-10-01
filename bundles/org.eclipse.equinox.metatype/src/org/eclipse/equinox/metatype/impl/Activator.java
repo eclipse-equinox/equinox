@@ -30,24 +30,26 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  */
 public class Activator implements BundleActivator {
 	/*
-	 * The following filter guarantees only services meeting the following
-	 * criteria will be tracked.
+	 * The following filter guarantees only services meeting the following criteria
+	 * will be tracked.
 	 * 
-	 * (1) A ManagedService or ManagedServiceFactory registered with a
-	 * SERVICE_PID property. May also be registered as a MetaTypeProvider.
-	 * (2) A MetaTypeProvider registered with a METATYPE_PID or
-	 * METATYPE_FACTORY_PID property.
+	 * (1) A ManagedService or ManagedServiceFactory registered with a SERVICE_PID
+	 * property. May also be registered as a MetaTypeProvider. (2) A
+	 * MetaTypeProvider registered with a METATYPE_PID or METATYPE_FACTORY_PID
+	 * property.
 	 * 
 	 * Note that it's still necessary to inspect a ManagedService or
 	 * ManagedServiceFactory to ensure it also implements MetaTypeProvider.
 	 */
-	private static final String FILTER = "(|(&(" + Constants.OBJECTCLASS + '=' + ManagedService.class.getName() + "*)(" + Constants.SERVICE_PID + "=*))(&(" + Constants.OBJECTCLASS + '=' + MetaTypeProvider.class.getName() + ")(|(" + MetaTypeProvider.METATYPE_PID + "=*)(" + MetaTypeProvider.METATYPE_FACTORY_PID + "=*))))"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+	private static final String FILTER = "(|(&(" + Constants.OBJECTCLASS + '=' + ManagedService.class.getName() + "*)(" //$NON-NLS-1$ //$NON-NLS-2$
+			+ Constants.SERVICE_PID + "=*))(&(" + Constants.OBJECTCLASS + '=' + MetaTypeProvider.class.getName() //$NON-NLS-1$
+			+ ")(|(" + MetaTypeProvider.METATYPE_PID + "=*)(" + MetaTypeProvider.METATYPE_FACTORY_PID + "=*))))"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	private static final String SERVICE_PID = "org.osgi.impl.service.metatype.MetaTypeService"; //$NON-NLS-1$
 
 	private LogTracker logServiceTracker;
 	// Could be ManagedService, ManagedServiceFactory, or MetaTypeProvider.
 	// The tracker tracks all services regardless of bundle. Services are
-	// filtered by bundle later in the MetaTypeProviderTracker class. It may 
+	// filtered by bundle later in the MetaTypeProviderTracker class. It may
 	// therefore be shared among multiple instances of that class.
 	private ServiceTracker<Object, Object> metaTypeProviderTracker;
 	private ServiceTracker<SAXParserFactory, SAXParserFactory> saxParserFactoryTracker;
@@ -60,7 +62,8 @@ public class Activator implements BundleActivator {
 		synchronized (this) {
 			lsTracker = logServiceTracker = new LogTracker(context, System.out);
 			mtpTracker = metaTypeProviderTracker = new ServiceTracker<>(context, filter, null);
-			spfTracker = saxParserFactoryTracker = new ServiceTracker<>(context, SAXParserFactory.class, new SAXParserFactoryTrackerCustomizer(context, lsTracker, mtpTracker));
+			spfTracker = saxParserFactoryTracker = new ServiceTracker<>(context, SAXParserFactory.class,
+					new SAXParserFactoryTrackerCustomizer(context, lsTracker, mtpTracker));
 		}
 		// Do this first to make logging available as early as possible.
 		lsTracker.open();
@@ -95,7 +98,8 @@ public class Activator implements BundleActivator {
 		return saxParserFactoryTracker;
 	}
 
-	private class SAXParserFactoryTrackerCustomizer implements ServiceTrackerCustomizer<SAXParserFactory, SAXParserFactory> {
+	private class SAXParserFactoryTrackerCustomizer
+			implements ServiceTrackerCustomizer<SAXParserFactory, SAXParserFactory> {
 		private final BundleContext bundleCtx;
 		private final LogTracker logService;
 		private final ServiceTracker<Object, Object> mtpTracker;
@@ -104,7 +108,8 @@ public class Activator implements BundleActivator {
 		private ServiceRegistration<?> metaTypeServiceRegistration;
 		private SAXParserFactory saxParserFactory;
 
-		public SAXParserFactoryTrackerCustomizer(BundleContext bundleContext, LogTracker logService, ServiceTracker<Object, Object> metaTypeProviderTracker) {
+		public SAXParserFactoryTrackerCustomizer(BundleContext bundleContext, LogTracker logService,
+				ServiceTracker<Object, Object> metaTypeProviderTracker) {
 			this.bundleCtx = bundleContext;
 			this.logService = logService;
 			this.mtpTracker = metaTypeProviderTracker;
@@ -126,9 +131,12 @@ public class Activator implements BundleActivator {
 				// Nothing to do case. Current factory is explicitly namespace aware.
 				else if (saxParserFactory.isNamespaceAware()) {
 					return parserFactory;
-				} else if (parserFactory.isNamespaceAware() || // Previous factory not set for namespace awareness but the new one is case.
-				// Now the fun case. Neither factory is set for namespace awareness. Need to see if we're currently using 
-				// a factory incapable of creating namespace aware parsers and, if so, if it can be replaced with the new one.
+				} else if (parserFactory.isNamespaceAware() || // Previous factory not set for namespace awareness but
+																// the new one is case.
+				// Now the fun case. Neither factory is set for namespace awareness. Need to see
+				// if we're currently using
+				// a factory incapable of creating namespace aware parsers and, if so, if it can
+				// be replaced with the new one.
 						(!supportsNamespaceAwareness(saxParserFactory) && supportsNamespaceAwareness(parserFactory))) {
 					oldFactory = saxParserFactory;
 					saxParserFactory = parserFactory;
@@ -140,7 +148,8 @@ public class Activator implements BundleActivator {
 			return parserFactory;
 		}
 
-		private void swapFactories(SAXParserFactory oldFactory, SAXParserFactory newFactory, ServiceRegistration<?> registration, MetaTypeServiceImpl service) {
+		private void swapFactories(SAXParserFactory oldFactory, SAXParserFactory newFactory,
+				ServiceRegistration<?> registration, MetaTypeServiceImpl service) {
 			if (oldFactory == null) {
 				registerMetaTypeService();
 				return;
@@ -158,7 +167,8 @@ public class Activator implements BundleActivator {
 			MetaTypeServiceImpl service = null;
 			synchronized (this) {
 				if (object == saxParserFactory) {
-					// This means the SAXParserFactory was used to start the MetaTypeService and we need to reset.
+					// This means the SAXParserFactory was used to start the MetaTypeService and we
+					// need to reset.
 					saxParserFactory = null;
 					registration = metaTypeServiceRegistration;
 					service = metaTypeService;
@@ -170,9 +180,11 @@ public class Activator implements BundleActivator {
 				// See if another factory is available
 				SAXParserFactory factory = findBestPossibleFactory();
 				// If the factory is null, either the bundle is stopping or there are no
-				// available services. Either way, we don't want to register the MetaType service.
+				// available services. Either way, we don't want to register the MetaType
+				// service.
 				if (factory != null) {
-					// We have another parser so let's restart the MetaType service if it hasn't been already.
+					// We have another parser so let's restart the MetaType service if it hasn't
+					// been already.
 					boolean register = false;
 					synchronized (this) {
 						// If not null, something else beat us to the punch.
@@ -233,7 +245,9 @@ public class Activator implements BundleActivator {
 			} catch (IOException e) {
 				logService.log(LogTracker.LOG_WARNING, "Error loading cached metatype info.", e); //$NON-NLS-1$
 			}
-			ServiceRegistration<?> registration = bundleCtx.registerService(new String[] {MetaTypeService.class.getName(), EquinoxMetaTypeService.class.getName()}, service, properties);
+			ServiceRegistration<?> registration = bundleCtx.registerService(
+					new String[] { MetaTypeService.class.getName(), EquinoxMetaTypeService.class.getName() }, service,
+					properties);
 			synchronized (this) {
 				metaTypeServiceRegistration = registration;
 			}

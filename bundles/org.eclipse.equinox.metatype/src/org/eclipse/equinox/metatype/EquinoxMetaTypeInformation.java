@@ -21,8 +21,8 @@ import org.osgi.service.metatype.MetaTypeInformation;
  */
 public interface EquinoxMetaTypeInformation extends MetaTypeInformation {
 	/**
-	 * Returns {@link Extendable extendable} versions of {@link 
-	 * EquinoxObjectClassDefinition object class definitions}.
+	 * Returns {@link Extendable extendable} versions of
+	 * {@link EquinoxObjectClassDefinition object class definitions}.
 	 */
 	EquinoxObjectClassDefinition getObjectClassDefinition(String id, String locale);
 }
