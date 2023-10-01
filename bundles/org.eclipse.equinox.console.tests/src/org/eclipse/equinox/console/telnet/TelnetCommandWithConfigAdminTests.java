@@ -33,7 +33,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ManagedService;
 
-
 public class TelnetCommandWithConfigAdminTests {
 	private static final int TEST_CONTENT = 100;
 	private static final String STOP_COMMAND = "stop";
@@ -44,19 +43,19 @@ public class TelnetCommandWithConfigAdminTests {
 	private static final String TRUE = "true";
 	private static final String FALSE = "false";
 	private ManagedService configurator;
-	
+
 	@Test
 	public void testTelnetCommandWithConfigAdminEnabledTelnet() throws Exception {
 		CommandSession session = mock(CommandSession.class);
 		when(session.execute(any(String.class))).thenReturn(new Object());
-		
+
 		CommandProcessor processor = mock(CommandProcessor.class);
-		when(processor.createSession(any(ConsoleInputStream.class), any(PrintStream.class), any(PrintStream.class))).thenReturn(session);
+		when(processor.createSession(any(ConsoleInputStream.class), any(PrintStream.class), any(PrintStream.class)))
+				.thenReturn(session);
 
 		final ServiceRegistration<?> registration = mock(ServiceRegistration.class);
 
-
-		BundleContext context =mock(BundleContext.class);
+		BundleContext context = mock(BundleContext.class);
 		when(context.getProperty(USE_CONFIG_ADMIN_PROP)).thenReturn(TRUE);
 		when(context.registerService(any(String.class), any(ManagedService.class), any(Dictionary.class)))
 				.thenAnswer(invocation -> {
@@ -73,8 +72,8 @@ public class TelnetCommandWithConfigAdminTests {
 		props.put("host", HOST);
 		props.put("enabled", TRUE);
 		configurator.updated(props);
-		
-		try (Socket socketClient = new Socket(HOST, Integer.parseInt(TELNET_PORT));){
+
+		try (Socket socketClient = new Socket(HOST, Integer.parseInt(TELNET_PORT));) {
 			OutputStream outClient = socketClient.getOutputStream();
 			outClient.write(TEST_CONTENT);
 			outClient.write('\n');
@@ -87,27 +86,27 @@ public class TelnetCommandWithConfigAdminTests {
 				// do nothing
 			}
 		} finally {
-			command.telnet(new String[] {STOP_COMMAND});
+			command.telnet(new String[] { STOP_COMMAND });
 		}
 	}
-	
+
 	@Test
 	public void testTelnetCommandWithConfigAdminDisabledTelnet() throws Exception {
 		disabledTelnet(false);
 	}
-	
+
 	@Test
 	public void testTelnetCommandWithConfigAdminDisabledTelnetByDefault() throws Exception {
 		disabledTelnet(true);
 	}
-	
+
 	private void disabledTelnet(boolean isDefault) throws Exception {
 		CommandSession session = mock(CommandSession.class);
 		when(session.execute(any(String.class))).thenReturn(new Object());
-		
+
 		CommandProcessor processor = mock(CommandProcessor.class);
-		when(processor.createSession(any(ConsoleInputStream.class), any(PrintStream.class),
-				any(PrintStream.class))).thenReturn(session);
+		when(processor.createSession(any(ConsoleInputStream.class), any(PrintStream.class), any(PrintStream.class)))
+				.thenReturn(session);
 
 		final ServiceRegistration<?> registration = mock(ServiceRegistration.class);
 
@@ -130,19 +129,19 @@ public class TelnetCommandWithConfigAdminTests {
 			props.put("enabled", FALSE);
 		}
 		configurator.updated(props);
-		
-		try (Socket socketClient = new Socket(HOST, Integer.parseInt(TELNET_PORT))){
-			
+
+		try (Socket socketClient = new Socket(HOST, Integer.parseInt(TELNET_PORT))) {
+
 			fail("It should not be possible to open a socket to " + HOST + ":" + TELNET_PORT);
 		} catch (IOException e) {
 			// this is ok, there should be an exception
 		} finally {
 			try {
-				command.telnet(new String[] {STOP_COMMAND});
+				command.telnet(new String[] { STOP_COMMAND });
 			} catch (IllegalStateException e) {
-				//this is expected
+				// this is expected
 			}
 		}
 	}
-	
+
 }

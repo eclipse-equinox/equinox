@@ -29,7 +29,7 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 
 public class CommandNamesCompleterTests {
-	
+
 	private static final String COMMANDS = ".commands";
 
 	@Test
@@ -41,36 +41,38 @@ public class CommandNamesCompleterTests {
 		commands.add("gogo:lb");
 		commands.add("gogo:echo");
 		commands.add("gogo:set");
-		
+
 		CommandSession session = mock(CommandSession.class);
 		when(session.get(COMMANDS)).thenReturn(commands);
-		
+
 		Filter filter = mock(Filter.class);
-		
+
 		BundleContext context = mock(BundleContext.class);
-		when(context.createFilter("(objectClass=org.eclipse.equinox.console.commands.CommandsTracker)")).thenReturn(filter);
+		when(context.createFilter("(objectClass=org.eclipse.equinox.console.commands.CommandsTracker)"))
+				.thenReturn(filter);
 		context.addServiceListener(isA(ServiceListener.class), isA(String.class));
-		when(context.getServiceReferences("org.eclipse.equinox.console.commands.CommandsTracker", null)).thenReturn(new ServiceReference[]{});
-		
+		when(context.getServiceReferences("org.eclipse.equinox.console.commands.CommandsTracker", null))
+				.thenReturn(new ServiceReference[] {});
+
 		CommandNamesCompleter completer = new CommandNamesCompleter(context, session);
 		Map<String, Integer> candidates;
-		
+
 		candidates = completer.getCandidates("se", 2);
 		assertNotNull("Candidates null", candidates);
 		assertEquals("Candidates not as expected", 2, candidates.size());
 		assertNotNull("set should be in the resultset, but it is not", candidates.get("set"));
 		assertNotNull("setprop should be in the resultset, but it is not", candidates.get("setprop"));
-		
+
 		candidates = completer.getCandidates("equinox:bun", "equinox:bun".length());
 		assertNotNull("Candidates null", candidates);
 		assertEquals("Candidates not as expected", 1, candidates.size());
 		assertNotNull("equinox:bundles should be in the resultset, but it is not", candidates.get("equinox:bundles"));
-		
+
 		candidates = completer.getCandidates("ec", 2);
 		assertNotNull("Candidates null", candidates);
 		assertEquals("Candidates not as expected", 1, candidates.size());
 		assertNotNull("echo should be in the resultset, but it is not", candidates.get("echo"));
-		
+
 		candidates = completer.getCandidates("head", 4);
 		assertNotNull("Candidates null", candidates);
 		assertEquals("Candidates not as expected", 0, candidates.size());

@@ -33,24 +33,24 @@ public class VariableNamesCompleterTests {
 		variables.add("PROMPT");
 		variables.add("ECHO_ON");
 		variables.add("ECHO");
-		
+
 		CommandSession session = mock(CommandSession.class);
 		when(session.get(null)).thenReturn(variables);
-		
+
 		VariableNamesCompleter completer = new VariableNamesCompleter(session);
 		Map<String, Integer> candidates;
-		
+
 		candidates = completer.getCandidates("SC", 2);
 		assertNotNull("Candidates null", candidates);
 		assertEquals("Candidates not as expected", 1, candidates.size());
 		assertNotNull("SCOPE should be in the resultset, but it is not", candidates.get("SCOPE"));
-		
+
 		candidates = completer.getCandidates("EC", 2);
 		assertNotNull("Candidates null", candidates);
 		assertEquals("Candidates not as expected", 2, candidates.size());
 		assertNotNull("ECHO_ON should be in the resultset, but it is not", candidates.get("ECHO_ON"));
 		assertNotNull("ECHO should be in the resultset, but it is not", candidates.get("ECHO"));
-		
+
 		candidates = completer.getCandidates("AB", 2);
 		assertNotNull("Candidates null", candidates);
 		assertEquals("Candidates not as expected", 0, candidates.size());

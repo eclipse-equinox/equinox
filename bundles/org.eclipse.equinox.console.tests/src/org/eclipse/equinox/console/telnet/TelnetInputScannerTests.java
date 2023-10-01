@@ -41,19 +41,19 @@ public class TelnetInputScannerTests {
 	private static final int IAC = 255;
 
 	private static final int DO = 253;
-	
+
 	private static final int DO_NOT = 254;
 
 	private static final int TTYPE = 24;
 
 	private static final int WILL = 251;
-	
+
 	private static final int WILL_NOT = 252;
 
 	private static final int SB = 250;
 
 	private static final int SE = 240;
-	
+
 	private static final int EL = 248;
 
 	private static final int SEND = 1;

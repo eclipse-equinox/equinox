@@ -47,8 +47,7 @@ public class TelnetConnectionTests {
 			when(session.execute(any(String.class))).thenReturn(null);
 
 			CommandProcessor processor = mock(CommandProcessor.class);
-			when(processor.createSession(any(ConsoleInputStream.class), any(PrintStream.class),
-					any(PrintStream.class)))
+			when(processor.createSession(any(ConsoleInputStream.class), any(PrintStream.class), any(PrintStream.class)))
 					.thenReturn(session);
 
 			try (TelnetConnection connection = new TelnetConnection(socketServer, processor, null)) {

@@ -30,7 +30,7 @@ import org.junit.Test;
 import org.osgi.framework.BundleContext;
 
 public class TelnetCommandTests {
-	
+
 	private static final int TEST_CONTENT = 100;
 	private static final String TELNET_PORT_PROP_NAME = "osgi.console";
 	private static final String USE_CONFIG_ADMIN_PROP = "osgi.console.useConfigAdmin";
@@ -39,38 +39,39 @@ public class TelnetCommandTests {
 	private static final String FALSE = "false";
 	private static final int TELNET_PORT = 2223;
 	private static final long WAIT_TIME = 5000;
-	
+
 	@Test
 	public void testTelnetCommand() throws Exception {
 		try (CommandSession session = mock(CommandSession.class)) {
-		when(session.execute(any(String.class))).thenReturn(new Object());
-		
-		CommandProcessor processor = mock(CommandProcessor.class);
-		when(processor.createSession(any(ConsoleInputStream.class), any(PrintStream.class), any(PrintStream.class))).thenReturn(session);
-		
-		BundleContext context = mock(BundleContext.class);
-		when(context.getProperty(USE_CONFIG_ADMIN_PROP)).thenReturn(FALSE);
-		when(context.getProperty(TELNET_PORT_PROP_NAME)).thenReturn(Integer.toString(TELNET_PORT));
-		when(context.registerService(any(String.class), any(), any(Dictionary.class))).thenReturn(null);
-		
-		TelnetCommand command = new TelnetCommand(processor, context);
-		command.startService();
-		
-		try (Socket socketClient = new Socket(HOST, TELNET_PORT);){
-			OutputStream outClient = socketClient.getOutputStream();
-			outClient.write(TEST_CONTENT);
-			outClient.write('\n');
-			outClient.flush();
+			when(session.execute(any(String.class))).thenReturn(new Object());
 
-			// wait for the accept thread to finish execution
-			try {
-				Thread.sleep(WAIT_TIME);
-			} catch (InterruptedException ie) {
-				// do nothing
+			CommandProcessor processor = mock(CommandProcessor.class);
+			when(processor.createSession(any(ConsoleInputStream.class), any(PrintStream.class), any(PrintStream.class)))
+					.thenReturn(session);
+
+			BundleContext context = mock(BundleContext.class);
+			when(context.getProperty(USE_CONFIG_ADMIN_PROP)).thenReturn(FALSE);
+			when(context.getProperty(TELNET_PORT_PROP_NAME)).thenReturn(Integer.toString(TELNET_PORT));
+			when(context.registerService(any(String.class), any(), any(Dictionary.class))).thenReturn(null);
+
+			TelnetCommand command = new TelnetCommand(processor, context);
+			command.startService();
+
+			try (Socket socketClient = new Socket(HOST, TELNET_PORT);) {
+				OutputStream outClient = socketClient.getOutputStream();
+				outClient.write(TEST_CONTENT);
+				outClient.write('\n');
+				outClient.flush();
+
+				// wait for the accept thread to finish execution
+				try {
+					Thread.sleep(WAIT_TIME);
+				} catch (InterruptedException ie) {
+					// do nothing
+				}
+			} finally {
+				command.telnet(new String[] { STOP_COMMAND });
 			}
-		} finally {
-			command.telnet(new String[] {STOP_COMMAND});
-		}
 		}
 	}
 }

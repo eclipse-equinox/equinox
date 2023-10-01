@@ -35,10 +35,12 @@ public class SimpleByteBufferTests {
 		byte[] expected = new byte[] { 'a', 'b', 'c', 'd' };
 
 		Assert.assertTrue("Data not as expected: expected length " + expected.length + ", actual length " + data.length,
-			data.length == expected.length);
+				data.length == expected.length);
 
 		for (int i = 0; i < data.length; i++) {
-			Assert.assertEquals("Incorrect data read. Position " + i + ", expected " + expected[i] + ", read " + data[i], expected[i], data[i]);
+			Assert.assertEquals(
+					"Incorrect data read. Position " + i + ", expected " + expected[i] + ", read " + data[i],
+					expected[i], data[i]);
 		}
 
 		buffer.insert('a');
@@ -89,10 +91,12 @@ public class SimpleByteBufferTests {
 		byte[] data = buffer.copyCurrentData();
 
 		Assert.assertTrue("Data not as expected: expected length " + expected.length + ", actual length " + data.length,
-			data.length == expected.length);
+				data.length == expected.length);
 
 		for (int i = 0; i < data.length; i++) {
-			Assert.assertEquals("Incorrect data read. Position " + i + ", expected " + expected[i] + ", read " + data[i], expected[i], data[i]);
+			Assert.assertEquals(
+					"Incorrect data read. Position " + i + ", expected " + expected[i] + ", read " + data[i],
+					expected[i], data[i]);
 		}
 	}
 
