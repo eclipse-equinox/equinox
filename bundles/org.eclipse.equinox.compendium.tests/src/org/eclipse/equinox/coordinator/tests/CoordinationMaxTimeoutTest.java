@@ -155,12 +155,14 @@ public class CoordinationMaxTimeoutTest extends CoordinatorTest {
 		System.setProperty(PROPERTY_NAME, String.valueOf(TIMEOUT));
 		assertSystemProperty(PROPERTY_NAME, String.valueOf(TIMEOUT));
 		assertFrameworkProperty(PROPERTY_NAME, String.valueOf(TIMEOUT));
-		// The above system property initialization must occur before calling super.setUp().
+		// The above system property initialization must occur before calling
+		// super.setUp().
 		super.setUp();
 	}
 
 	private void assertFrameworkProperty(String name, String value) {
-		assertEquals("Wrong value for framework property " + name, value, Activator.getBundleContext().getProperty(name)); //$NON-NLS-1$
+		assertEquals("Wrong value for framework property " + name, value, //$NON-NLS-1$
+				Activator.getBundleContext().getProperty(name));
 	}
 
 	private void assertSystemProperty(String name, String value) {

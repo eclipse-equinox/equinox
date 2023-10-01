@@ -88,8 +88,8 @@ public class AttributeTypePasswordTest extends AbstractTest {
 	}
 
 	/*
-	 * Ensures the PASSWORD type is treated the same as the STRING type.
-	 * PASSWORD length should be no less than min.
+	 * Ensures the PASSWORD type is treated the same as the STRING type. PASSWORD
+	 * length should be no less than min.
 	 */
 	@Test
 	public void testAttributeTypePassword4() {
@@ -109,8 +109,8 @@ public class AttributeTypePasswordTest extends AbstractTest {
 	}
 
 	/*
-	 * Ensures the PASSWORD type is treated the same as the STRING type.
-	 * PASSWORD length should be no greater than max.
+	 * Ensures the PASSWORD type is treated the same as the STRING type. PASSWORD
+	 * length should be no greater than max.
 	 */
 	@Test
 	public void testAttributeTypePassword5() {
@@ -130,8 +130,8 @@ public class AttributeTypePasswordTest extends AbstractTest {
 	}
 
 	/*
-	 * Ensures the PASSWORD type is treated the same as the STRING type.
-	 * PASSWORD length should be no less than min and no greater than max.
+	 * Ensures the PASSWORD type is treated the same as the STRING type. PASSWORD
+	 * length should be no less than min and no greater than max.
 	 */
 	@Test
 	public void testAttributeTypePassword6() {

@@ -119,7 +119,7 @@ public class Bug332161Test extends AbstractTest {
 		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		String defaultValue = getFirstDefaultValue(ad.getDefaultValue());
 		Assert.assertNotNull("Default value not found", defaultValue); //$NON-NLS-1$
-		Assert.assertEquals("Wrong default value", "\r", defaultValue); //$NON-NLS-1$  //$NON-NLS-2$
+		Assert.assertEquals("Wrong default value", "\r", defaultValue); //$NON-NLS-1$ //$NON-NLS-2$
 		validateChar1Options(ad.getOptionLabels(), ad.getOptionValues());
 		assertValidationPass("\\ ", ad); //$NON-NLS-1$
 		assertValidationPass("\\\u0020", ad); //$NON-NLS-1$
@@ -149,14 +149,14 @@ public class Bug332161Test extends AbstractTest {
 		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		String defaultValue = getFirstDefaultValue(ad.getDefaultValue());
 		Assert.assertNotNull("Default value not found", defaultValue); //$NON-NLS-1$
-		Assert.assertEquals("Wrong default value", "\r\n", defaultValue); //$NON-NLS-1$  //$NON-NLS-2$
+		Assert.assertEquals("Wrong default value", "\r\n", defaultValue); //$NON-NLS-1$ //$NON-NLS-2$
 		assertValidationPass("\\\r\\\n", ad); //$NON-NLS-1$
 	}
 
 	/*
-	 * Tests a String type with a default value consisting of multiple tokens
-	 * with a mixture of whitespace (significant and not significant), escapes,
-	 * and non-whitespace characters.
+	 * Tests a String type with a default value consisting of multiple tokens with a
+	 * mixture of whitespace (significant and not significant), escapes, and
+	 * non-whitespace characters.
 	 */
 	@Test
 	public void test3() {
@@ -170,7 +170,7 @@ public class Bug332161Test extends AbstractTest {
 		Assert.assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
 		String[] defaultValue = ad.getDefaultValue();
 		Assert.assertNotNull("Default value not found", defaultValue); //$NON-NLS-1$
-		String[] expectedValue = new String[] {"\\ Hello, world!", //$NON-NLS-1$
+		String[] expectedValue = new String[] { "\\ Hello, world!", //$NON-NLS-1$
 				"\"Goodbye, cruel world ...\" \r\n", //$NON-NLS-1$
 				"To Be,\r\nOr not to be\u0009\u0009" //$NON-NLS-1$
 		};
@@ -279,8 +279,8 @@ public class Bug332161Test extends AbstractTest {
 	}
 
 	/*
-	 * Test that empty string is a valid default and option value when
-	 * cardinality is zero.
+	 * Test that empty string is a valid default and option value when cardinality
+	 * is zero.
 	 */
 	@Test
 	public void test8() {
@@ -303,10 +303,9 @@ public class Bug332161Test extends AbstractTest {
 	}
 
 	/*
-	 * Test that empty string is an invalid default and option value when type
-	 * is other than String. Also test that getOptionLabels() and
-	 * getOptionValues() returns null if options were specified but all were
-	 * invalid and removed.
+	 * Test that empty string is an invalid default and option value when type is
+	 * other than String. Also test that getOptionLabels() and getOptionValues()
+	 * returns null if options were specified but all were invalid and removed.
 	 */
 	@Test
 	public void test9() {
@@ -325,8 +324,8 @@ public class Bug332161Test extends AbstractTest {
 	}
 
 	/*
-	 * Test that empty string is a valid default and option value when
-	 * cardinality is other than zero.
+	 * Test that empty string is a valid default and option value when cardinality
+	 * is other than zero.
 	 */
 	@Test
 	public void test10() {

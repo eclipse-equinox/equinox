@@ -18,7 +18,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({UserTest.class, GroupTest.class, UserAdminEventAdapterTest.class})
+@SuiteClasses({ UserTest.class, GroupTest.class, UserAdminEventAdapterTest.class })
 public class AllTests {
 	// See @SuiteClasses
 }

@@ -29,7 +29,8 @@ public abstract class AbstractTest {
 	protected EquinoxMetaTypeService metatype;
 	protected ServiceReference<EquinoxMetaTypeService> metaTypeReference;
 
-	protected void assertAttributeDefinition(AttributeDefinition ad, int cardinality, String[] defaultValue, String description, String id, String name, String[] optionLabels, String[] optionValues, int type) {
+	protected void assertAttributeDefinition(AttributeDefinition ad, int cardinality, String[] defaultValue,
+			String description, String id, String name, String[] optionLabels, String[] optionValues, int type) {
 		Assert.assertEquals("Wrong cardinality", cardinality, ad.getCardinality()); //$NON-NLS-1$
 		assertEquals("Wrong default value", defaultValue, ad.getDefaultValue()); //$NON-NLS-1$
 		Assert.assertEquals("Wrong description", description, ad.getDescription()); //$NON-NLS-1$

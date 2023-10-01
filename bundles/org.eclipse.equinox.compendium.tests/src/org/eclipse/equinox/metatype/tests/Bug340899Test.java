@@ -25,9 +25,9 @@ public class Bug340899Test extends AbstractTest {
 	private static final String ocd1name = "OCD1 Name"; //$NON-NLS-1$
 
 	/*
-	 * When not overridden by either the <MetaData> localization attribute or
-	 * the Bundle-Localization manifest header, the default property file base
-	 * name of 'OSGI-INF/l10n/bundle' should be used.
+	 * When not overridden by either the <MetaData> localization attribute or the
+	 * Bundle-Localization manifest header, the default property file base name of
+	 * 'OSGI-INF/l10n/bundle' should be used.
 	 */
 	@Test
 	public void test1() throws Exception {
@@ -41,9 +41,9 @@ public class Bug340899Test extends AbstractTest {
 	}
 
 	/*
-	 * When not overridden by the <MetaData> localization attribute, the 
-	 * property file base name declared within the Bundle-Localization manifest
-	 * header should override the default base name.
+	 * When not overridden by the <MetaData> localization attribute, the property
+	 * file base name declared within the Bundle-Localization manifest header should
+	 * override the default base name.
 	 */
 	@Test
 	public void test2() throws Exception {
@@ -57,9 +57,9 @@ public class Bug340899Test extends AbstractTest {
 	}
 
 	/*
-	 * When specified, the property file base name declared within the 
-	 * <MetaData> localization attribute should override the 
-	 * Bundle-Localization manifest header and the default base name.
+	 * When specified, the property file base name declared within the <MetaData>
+	 * localization attribute should override the Bundle-Localization manifest
+	 * header and the default base name.
 	 */
 	@Test
 	public void test3() throws Exception {

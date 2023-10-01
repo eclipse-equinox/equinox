@@ -29,9 +29,9 @@ public class SameOcdPidFactoryPidTest extends AbstractTest {
 	}
 
 	/*
-	 * Ensures the same OCD referred to by two Designate elements, one using
-	 * the factoryPid attribute and the other only the pid attribute, is
-	 * accessible via both getPids() and getFactoryPids().
+	 * Ensures the same OCD referred to by two Designate elements, one using the
+	 * factoryPid attribute and the other only the pid attribute, is accessible via
+	 * both getPids() and getFactoryPids().
 	 */
 	@Test
 	public void test1() {
