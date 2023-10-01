@@ -27,8 +27,8 @@ import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * This class represents the use of a service by a bundle. One is created for each
- * service acquired by a bundle.
+ * This class represents the use of a service by a bundle. One is created for
+ * each service acquired by a bundle.
  *
  * <p>
  * This class manages a service factory.
@@ -36,21 +36,24 @@ import org.osgi.framework.ServiceRegistration;
  * @ThreadSafe
  */
 public class ServiceFactoryUse<S> extends ServiceUse<S> {
-	/** ServiceFactory object  */
+	/** ServiceFactory object */
 	final ServiceFactory<S> factory;
 
 	/** Service object returned by ServiceFactory.getService() */
 	/* @GuardedBy("getLock()") */
 	private S cachedService;
-	/** true if we are calling the factory getService method. Used to detect recursion. */
+	/**
+	 * true if we are calling the factory getService method. Used to detect
+	 * recursion.
+	 */
 	/* @GuardedBy("getLock()") */
 	private boolean factoryInUse;
 
 	/**
 	 * Constructs a service use encapsulating the service factory.
 	 *
-	 * @param   context bundle getting the service
-	 * @param   registration ServiceRegistration of the service
+	 * @param context      bundle getting the service
+	 * @param registration ServiceRegistration of the service
 	 */
 	ServiceFactoryUse(BundleContextImpl context, ServiceRegistrationImpl<S> registration) {
 		super(context, registration);
@@ -64,22 +67,20 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 	/**
 	 * Get a service's service object and increment the use count.
 	 *
-	 * <p>The following steps are followed to get the service object:
+	 * <p>
+	 * The following steps are followed to get the service object:
 	 * <ol>
 	 * <li>The use count is incremented by one.
-	 * <li>If the use count is now one,
-	 * the {@link ServiceFactory#getService(Bundle, ServiceRegistration)} method
-	 * is called to create a service object for the context bundle.
-	 * This service object is cached.
-	 * While the use count is greater than zero,
-	 * subsequent calls to get the service object
-	 * will return the cached service object.
-	 * <br>If the service object returned by the {@link ServiceFactory}
-	 * is not an <code>instanceof</code>
-	 * all the classes named when the service was registered or
-	 * the {@link ServiceFactory} throws an exception,
-	 * <code>null</code> is returned and a
-	 * {@link FrameworkEvent} of type {@link FrameworkEvent#ERROR} is broadcast.
+	 * <li>If the use count is now one, the
+	 * {@link ServiceFactory#getService(Bundle, ServiceRegistration)} method is
+	 * called to create a service object for the context bundle. This service object
+	 * is cached. While the use count is greater than zero, subsequent calls to get
+	 * the service object will return the cached service object. <br>
+	 * If the service object returned by the {@link ServiceFactory} is not an
+	 * <code>instanceof</code> all the classes named when the service was registered
+	 * or the {@link ServiceFactory} throws an exception, <code>null</code> is
+	 * returned and a {@link FrameworkEvent} of type {@link FrameworkEvent#ERROR} is
+	 * broadcast.
 	 * <li>The service object is returned.
 	 * </ol>
 	 *
@@ -104,8 +105,11 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 				Debug.println(factory + ".getService() recursively called."); //$NON-NLS-1$
 			}
 
-			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_RECURSION, factory.getClass().getName(), "getService"), ServiceException.FACTORY_RECURSION); //$NON-NLS-1$
-			context.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.WARNING, registration.getBundle(), se);
+			ServiceException se = new ServiceException(
+					NLS.bind(Msg.SERVICE_FACTORY_RECURSION, factory.getClass().getName(), "getService"), //$NON-NLS-1$
+					ServiceException.FACTORY_RECURSION);
+			context.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.WARNING,
+					registration.getBundle(), se);
 			return null;
 		}
 		factoryInUse = true;
@@ -131,14 +135,17 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 	 * <p>
 	 * Decrements the use count if the service was being used.
 	 *
-	 * <p>The following steps are followed to unget the service object:
+	 * <p>
+	 * The following steps are followed to unget the service object:
 	 * <ol>
 	 * <li>If the use count is zero, return.
 	 * <li>The use count is decremented by one.
 	 * <li>If the use count is non zero, return.
-	 * <li>The {@link ServiceFactory#ungetService(Bundle, ServiceRegistration, Object)} method
-	 * is called to release the service object for the context bundle.
+	 * <li>The
+	 * {@link ServiceFactory#ungetService(Bundle, ServiceRegistration, Object)}
+	 * method is called to release the service object for the context bundle.
 	 * </ol>
+	 * 
 	 * @return true if the service was ungotten; otherwise false.
 	 */
 	/* @GuardedBy("getLock()") */
@@ -170,8 +177,9 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 	 *
 	 * <ol>
 	 * <li>The bundle's use count for this service is set to zero.
-	 * <li>The {@link ServiceFactory#ungetService(Bundle, ServiceRegistration, Object)} method
-	 * is called to release the service object for the bundle.
+	 * <li>The
+	 * {@link ServiceFactory#ungetService(Bundle, ServiceRegistration, Object)}
+	 * method is called to release the service object for the bundle.
 	 * </ol>
 	 */
 	/* @GuardedBy("getLock()") */
@@ -204,7 +212,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 	}
 
 	/**
-	 *  Call the service factory to get the service.
+	 * Call the service factory to get the service.
 	 *
 	 * @return The service returned by the factory or null if there was an error.
 	 */
@@ -225,8 +233,11 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 			}
 			// allow the adaptor to handle this unexpected error
 			context.getContainer().handleRuntimeError(t);
-			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "getService"), ServiceException.FACTORY_EXCEPTION, t); //$NON-NLS-1$
-			context.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
+			ServiceException se = new ServiceException(
+					NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "getService"), //$NON-NLS-1$
+					ServiceException.FACTORY_EXCEPTION, t);
+			context.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR,
+					registration.getBundle(), se);
 			return null;
 		}
 
@@ -235,8 +246,11 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 				Debug.println(factory + ".getService() returned null."); //$NON-NLS-1$
 			}
 
-			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_OBJECT_NULL_EXCEPTION, factory.getClass().getName()), ServiceException.FACTORY_ERROR);
-			context.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.WARNING, registration.getBundle(), se);
+			ServiceException se = new ServiceException(
+					NLS.bind(Msg.SERVICE_OBJECT_NULL_EXCEPTION, factory.getClass().getName()),
+					ServiceException.FACTORY_ERROR);
+			context.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.WARNING,
+					registration.getBundle(), se);
 			return null;
 		}
 
@@ -246,21 +260,20 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 			if (debug.DEBUG_SERVICES) {
 				Debug.println("Service object is not an instanceof " + invalidService); //$NON-NLS-1$
 			}
-			ServiceException se = new ServiceException(
-					NLS.bind(Msg.SERVICE_FACTORY_NOT_INSTANCEOF_CLASS_EXCEPTION,
-							new Object[] { factory.getClass().getName(), service.getClass().getName(),
-									invalidService }),
+			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_NOT_INSTANCEOF_CLASS_EXCEPTION,
+					new Object[] { factory.getClass().getName(), service.getClass().getName(), invalidService }),
 					ServiceException.FACTORY_ERROR);
-			context.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
+			context.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR,
+					registration.getBundle(), se);
 			return null;
 		}
 		return service;
 	}
 
 	/**
-	 *  Call the service factory to unget the service.
+	 * Call the service factory to unget the service.
 	 *
-	 *  @param service The service object to pass to the factory.
+	 * @param service The service object to pass to the factory.
 	 */
 	/* @GuardedBy("getLock()") */
 	void factoryUngetService(final S service) {
@@ -278,8 +291,11 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 				Debug.printStackTrace(t);
 			}
 
-			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "ungetService"), ServiceException.FACTORY_EXCEPTION, t); //$NON-NLS-1$
-			context.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
+			ServiceException se = new ServiceException(
+					NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "ungetService"), //$NON-NLS-1$
+					ServiceException.FACTORY_EXCEPTION, t);
+			context.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR,
+					registration.getBundle(), se);
 		}
 	}
 }

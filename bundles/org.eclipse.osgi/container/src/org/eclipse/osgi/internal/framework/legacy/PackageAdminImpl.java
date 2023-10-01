@@ -110,7 +110,8 @@ public class PackageAdminImpl implements PackageAdmin {
 		String filter = "(" + PackageNamespace.PACKAGE_NAMESPACE + "=" + (name == null ? "*" : name) + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$
 		Map<String, String> directives = Collections.singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter);
 		Map<String, Boolean> attributes = Collections.singletonMap(Capabilities.SYNTHETIC_REQUIREMENT, Boolean.TRUE);
-		Requirement packageReq = ModuleContainer.createRequirement(PackageNamespace.PACKAGE_NAMESPACE, directives, attributes);
+		Requirement packageReq = ModuleContainer.createRequirement(PackageNamespace.PACKAGE_NAMESPACE, directives,
+				attributes);
 		Collection<BundleCapability> packageCaps = frameworkWiring.findProviders(packageReq);
 		InternalUtils.filterCapabilityPermissions(packageCaps);
 		List<ExportedPackage> result = new ArrayList<>();
@@ -136,8 +137,7 @@ public class PackageAdminImpl implements PackageAdmin {
 				}
 				for (ModuleWiring moduleWiring : wirings) {
 					Object pkgName = capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
-					if (pkgName instanceof String
-							&& !moduleWiring.isSubstitutedPackage((String) pkgName)) {
+					if (pkgName instanceof String && !moduleWiring.isSubstitutedPackage((String) pkgName)) {
 						result.add(new ExportedPackageImpl((ModuleCapability) capability, moduleWiring));
 					}
 				}
@@ -158,10 +158,12 @@ public class PackageAdminImpl implements PackageAdmin {
 
 	@Override
 	public RequiredBundle[] getRequiredBundles(String symbolicName) {
-		String filter = "(" + BundleNamespace.BUNDLE_NAMESPACE + "=" + (symbolicName == null ? "*" : symbolicName) + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$
+		String filter = "(" + BundleNamespace.BUNDLE_NAMESPACE + "=" + (symbolicName == null ? "*" : symbolicName) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				+ ")"; //$NON-NLS-1$
 		Map<String, String> directives = Collections.singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter);
 		Map<String, Boolean> attributes = Collections.singletonMap(Capabilities.SYNTHETIC_REQUIREMENT, Boolean.TRUE);
-		Requirement bundleReq = ModuleContainer.createRequirement(BundleNamespace.BUNDLE_NAMESPACE, directives, attributes);
+		Requirement bundleReq = ModuleContainer.createRequirement(BundleNamespace.BUNDLE_NAMESPACE, directives,
+				attributes);
 		Collection<BundleCapability> bundleCaps = frameworkWiring.findProviders(bundleReq);
 		InternalUtils.filterCapabilityPermissions(bundleCaps);
 		Collection<RequiredBundle> result = new ArrayList<>();
@@ -184,8 +186,11 @@ public class PackageAdminImpl implements PackageAdmin {
 			symbolicName = EquinoxContainer.NAME;
 		}
 		VersionRange range = versionRange == null ? null : new VersionRange(versionRange);
-		String filter = (range != null ? "(&" : "") + "(" + IdentityNamespace.IDENTITY_NAMESPACE + "=" + symbolicName + ")" + (range != null ? range.toFilterString(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE) + ")" : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
-		Requirement identityReq = ModuleContainer.createRequirement(IdentityNamespace.IDENTITY_NAMESPACE, Collections.singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter), Collections.emptyMap());
+		String filter = (range != null ? "(&" : "") + "(" + IdentityNamespace.IDENTITY_NAMESPACE + "=" + symbolicName //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				+ ")" //$NON-NLS-1$
+				+ (range != null ? range.toFilterString(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE) + ")" : ""); //$NON-NLS-1$ //$NON-NLS-2$
+		Requirement identityReq = ModuleContainer.createRequirement(IdentityNamespace.IDENTITY_NAMESPACE,
+				Collections.singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter), Collections.emptyMap());
 		Collection<BundleCapability> identityCaps = frameworkWiring.findProviders(identityReq);
 
 		if (identityCaps.isEmpty()) {
@@ -332,7 +337,8 @@ public class PackageAdminImpl implements PackageAdmin {
 		private static void addRequirers(Set<Bundle> importing, ModuleWiring wiring, String packageName) {
 			List<ModuleWire> requirerWires = wiring.getProvidedModuleWires(BundleNamespace.BUNDLE_NAMESPACE);
 			if (requirerWires == null) {
-				// we don't hold locks while checking the graph, just return if no longer isInUse
+				// we don't hold locks while checking the graph, just return if no longer
+				// isInUse
 				return;
 			}
 			for (ModuleWire requireBundleWire : requirerWires) {
@@ -343,18 +349,21 @@ public class PackageAdminImpl implements PackageAdmin {
 				importing.add(requirer);
 
 				// if reexported then need to add any requirers of the reexporter
-				String reExport = requireBundleWire.getRequirement().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE);
+				String reExport = requireBundleWire.getRequirement().getDirectives()
+						.get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE);
 				ModuleWiring requirerWiring = requireBundleWire.getRequirerWiring();
 				if (BundleNamespace.VISIBILITY_REEXPORT.equals(reExport)) {
 					addRequirers(importing, requirerWiring, packageName);
 				}
-				// also need to add any importers of the same package as the wiring exports; case of aggregations
+				// also need to add any importers of the same package as the wiring exports;
+				// case of aggregations
 				if (!requirerWiring.equals(wiring)) {
 					List<ModuleWire> providedPackages = requirerWiring
 							.getProvidedModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
 					if (providedPackages != null) {
 						for (ModuleWire packageWire : providedPackages) {
-							if (packageName.equals(packageWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE))) {
+							if (packageName.equals(packageWire.getCapability().getAttributes()
+									.get(PackageNamespace.PACKAGE_NAMESPACE))) {
 								importing.add(packageWire.getRequirer().getBundle());
 								if (packageWire.getRequirerWiring().isSubstitutedPackage(packageName)) {
 									addRequirers(importing, packageWire.getRequirerWiring(), packageName);
@@ -366,7 +375,6 @@ public class PackageAdminImpl implements PackageAdmin {
 			}
 		}
 
-
 		/**
 		 * @deprecated
 		 */
@@ -377,7 +385,8 @@ public class PackageAdminImpl implements PackageAdmin {
 
 		@Override
 		public Version getVersion() {
-			Version version = (Version) packageCapability.getAttributes().get(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
+			Version version = (Version) packageCapability.getAttributes()
+					.get(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
 			return version == null ? Version.emptyVersion : version;
 		}
 
@@ -428,7 +437,8 @@ public class PackageAdminImpl implements PackageAdmin {
 		private static void addRequirers(Set<Bundle> requiring, ModuleWiring providerWiring) {
 			List<ModuleWire> requirerWires = providerWiring.getProvidedModuleWires(BundleNamespace.BUNDLE_NAMESPACE);
 			if (requirerWires == null) {
-				// we don't hold locks while checking the graph, just return if no longer isInUse
+				// we don't hold locks while checking the graph, just return if no longer
+				// isInUse
 				return;
 			}
 			for (ModuleWire requireBundleWire : requirerWires) {
@@ -437,7 +447,8 @@ public class PackageAdminImpl implements PackageAdmin {
 					continue;
 				}
 				requiring.add(requirer);
-				String reExport = requireBundleWire.getRequirement().getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE);
+				String reExport = requireBundleWire.getRequirement().getDirectives()
+						.get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE);
 				if (BundleNamespace.VISIBILITY_REEXPORT.equals(reExport)) {
 					addRequirers(requiring, requireBundleWire.getRequirerWiring());
 				}
@@ -446,7 +457,8 @@ public class PackageAdminImpl implements PackageAdmin {
 
 		@Override
 		public Version getVersion() {
-			Version version = (Version) bundleCapability.getAttributes().get(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
+			Version version = (Version) bundleCapability.getAttributes()
+					.get(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
 			return version == null ? Version.emptyVersion : version;
 		}
 

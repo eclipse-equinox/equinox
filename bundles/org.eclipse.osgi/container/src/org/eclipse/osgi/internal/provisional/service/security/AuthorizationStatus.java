@@ -24,14 +24,14 @@ package org.eclipse.osgi.internal.provisional.service.security;
 public class AuthorizationStatus {
 
 	/**
-	 * This code means that the system is functioning normally - no bundles
-	 * are currently experiencing authorization problems.
+	 * This code means that the system is functioning normally - no bundles are
+	 * currently experiencing authorization problems.
 	 */
 	public static final int OK = 0x00;
 
 	/**
-	 * This code means that there are bundles in the system that are being
-	 * disabled due to authorization constraints.
+	 * This code means that there are bundles in the system that are being disabled
+	 * due to authorization constraints.
 	 */
 	public static final int ERROR = 0x01;
 

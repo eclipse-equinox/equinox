@@ -53,7 +53,8 @@ public class BasicLocation implements Location {
 
 	private ServiceRegistration<?> serviceRegistration;
 
-	public BasicLocation(String property, URL defaultValue, boolean isReadOnly, String dataAreaPrefix, ConfigValues configValues, EquinoxContainer container, AtomicBoolean debug) {
+	public BasicLocation(String property, URL defaultValue, boolean isReadOnly, String dataAreaPrefix,
+			ConfigValues configValues, EquinoxContainer container, AtomicBoolean debug) {
 		this.property = property;
 		this.defaultValue = defaultValue;
 		this.isReadOnly = isReadOnly;
@@ -91,7 +92,9 @@ public class BasicLocation implements Location {
 				EquinoxLogServices logServices = container.getLogServices();
 				// Note that logServices can be null if we are very early in the startup.
 				if (logServices != null) {
-					logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.INFO, "Called Location.getURL() when it has not been set for: \"" + property + "\"", new RuntimeException("Call stack for Location.getURL()")); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+					logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.INFO,
+							"Called Location.getURL() when it has not been set for: \"" + property + "\"", //$NON-NLS-1$//$NON-NLS-2$
+							new RuntimeException("Call stack for Location.getURL()")); //$NON-NLS-1$
 				}
 			}
 			setURL(defaultValue, false);
@@ -131,7 +134,8 @@ public class BasicLocation implements Location {
 	}
 
 	@Override
-	public synchronized boolean set(URL value, boolean lock, String lockFilePath) throws IllegalStateException, IOException {
+	public synchronized boolean set(URL value, boolean lock, String lockFilePath)
+			throws IllegalStateException, IOException {
 		synchronized (this) {
 			if (location != null)
 				throw new IllegalStateException(Msg.ECLIPSE_CANNOT_CHANGE_LOCATION);
@@ -262,7 +266,8 @@ public class BasicLocation implements Location {
 
 	@Override
 	public Location createLocation(Location parentLocation, URL defaultLocation, boolean readonly) {
-		BasicLocation result = new BasicLocation(null, defaultLocation, readonly, dataAreaPrefix, configValues, container, debug);
+		BasicLocation result = new BasicLocation(null, defaultLocation, readonly, dataAreaPrefix, configValues,
+				container, debug);
 		result.setParent(parentLocation);
 		return result;
 	}

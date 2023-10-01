@@ -83,7 +83,8 @@ class ConfigAdminListener implements ServiceTrackerCustomizer<Object, ServiceReg
 		}
 	}
 
-	private ServiceRegistration<?> registerProxyConfigListener(ServiceReference<?> configRef, Class<?> listenerClass) throws ClassNotFoundException, NoSuchMethodException {
+	private ServiceRegistration<?> registerProxyConfigListener(ServiceReference<?> configRef, Class<?> listenerClass)
+			throws ClassNotFoundException, NoSuchMethodException {
 		LoggerContextConfiguration loggerConfiguration = new LoggerContextConfiguration(listenerClass, configRef);
 		return loggerConfiguration.register();
 	}
@@ -123,8 +124,9 @@ class ConfigAdminListener implements ServiceTrackerCustomizer<Object, ServiceReg
 		private final Method getEventReference;
 		private final Method getEventType;
 
-		public LoggerContextConfiguration(Class<?> listenerClass, ServiceReference<?> ref) throws ClassNotFoundException, NoSuchMethodException {
-			listenerProxy = Proxy.newProxyInstance(listenerClass.getClassLoader(), new Class[] {listenerClass}, this);
+		public LoggerContextConfiguration(Class<?> listenerClass, ServiceReference<?> ref)
+				throws ClassNotFoundException, NoSuchMethodException {
+			listenerProxy = Proxy.newProxyInstance(listenerClass.getClassLoader(), new Class[] { listenerClass }, this);
 			configAdminRef = ref;
 			ClassLoader cl = listenerClass.getClassLoader();
 
@@ -134,7 +136,8 @@ class ConfigAdminListener implements ServiceTrackerCustomizer<Object, ServiceReg
 			getConfigPid = configClass.getMethod(METHOD_CONFIG_GET_PID);
 
 			configAdminClass = cl.loadClass(CLASS_CONFIG_ADMIN);
-			getConfiguration = configAdminClass.getMethod(METHOD_CONFIG_ADMIN_GET_CONFIGURATION, String.class, String.class);
+			getConfiguration = configAdminClass.getMethod(METHOD_CONFIG_ADMIN_GET_CONFIGURATION, String.class,
+					String.class);
 			listConfigurations = configAdminClass.getMethod(METHOD_CONFIG_ADMIN_LIST_CONFIGURATIONS, String.class);
 
 			configEventClass = cl.loadClass(CLASS_CONFIG_EVENT);
@@ -154,7 +157,8 @@ class ConfigAdminListener implements ServiceTrackerCustomizer<Object, ServiceReg
 				// seems the bundle has stopped!
 				return null;
 			}
-			ServiceRegistration<?> registration = configContext.registerService(CLASS_SYNC_CONFIG_LISTENER, listenerProxy, null);
+			ServiceRegistration<?> registration = configContext.registerService(CLASS_SYNC_CONFIG_LISTENER,
+					listenerProxy, null);
 
 			try {
 				Object[] configs = (Object[]) listConfigurations.invoke(configAdmin, PID_FILTER);
@@ -167,7 +171,8 @@ class ConfigAdminListener implements ServiceTrackerCustomizer<Object, ServiceReg
 						String pid = (String) getConfigPid.invoke(config);
 						String contextName = getContextName(pid);
 						@SuppressWarnings("unchecked")
-						Dictionary<String, Object> configDictionary = (Dictionary<String, Object>) getConfigProperties.invoke(config);
+						Dictionary<String, Object> configDictionary = (Dictionary<String, Object>) getConfigProperties
+								.invoke(config);
 						if (configDictionary != null) {
 							setLogLevels(contextName, getLogLevels(configDictionary));
 						}
@@ -181,7 +186,8 @@ class ConfigAdminListener implements ServiceTrackerCustomizer<Object, ServiceReg
 
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] event) throws Throwable {
-			// There is only one method on ConfigurationListener, no need to check the method type
+			// There is only one method on ConfigurationListener, no need to check the
+			// method type
 			// ConfigurationListener::configurationEvent(ConfigurationEvent)
 			if (!configAdminRef.equals(getReference(event))) {
 				// ignore other config admin events

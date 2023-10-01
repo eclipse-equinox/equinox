@@ -42,7 +42,8 @@ class EquinoxLogFactory implements ServiceFactory<FrameworkLog> {
 
 	FrameworkLog createFrameworkLog(Bundle bundle, EquinoxLogWriter eclipseWriter) {
 		final EquinoxLogWriter logWriter = eclipseWriter == null ? defaultWriter : eclipseWriter;
-		final Logger logger = bundle == null ? logManager.getSystemBundleLog().getLogger(eclipseWriter.getLoggerName()) : logManager.getSystemBundleLog().getLogger(bundle, logWriter.getLoggerName());
+		final Logger logger = bundle == null ? logManager.getSystemBundleLog().getLogger(eclipseWriter.getLoggerName())
+				: logManager.getSystemBundleLog().getLogger(bundle, logWriter.getLoggerName());
 		return new FrameworkLog() {
 
 			@Override
@@ -72,17 +73,17 @@ class EquinoxLogFactory implements ServiceFactory<FrameworkLog> {
 				String entry = b.getSymbolicName() == null ? b.getLocation() : b.getSymbolicName();
 				int severity;
 				switch (frameworkEvent.getType()) {
-					case FrameworkEvent.INFO :
-						severity = FrameworkLogEntry.INFO;
-						break;
-					case FrameworkEvent.ERROR :
-						severity = FrameworkLogEntry.ERROR;
-						break;
-					case FrameworkEvent.WARNING :
-						severity = FrameworkLogEntry.WARNING;
-						break;
-					default :
-						severity = FrameworkLogEntry.OK;
+				case FrameworkEvent.INFO:
+					severity = FrameworkLogEntry.INFO;
+					break;
+				case FrameworkEvent.ERROR:
+					severity = FrameworkLogEntry.ERROR;
+					break;
+				case FrameworkEvent.WARNING:
+					severity = FrameworkLogEntry.WARNING;
+					break;
+				default:
+					severity = FrameworkLogEntry.OK;
 				}
 				FrameworkLogEntry logEntry = new FrameworkLogEntry(entry, severity, 0, "", 0, t, null); //$NON-NLS-1$
 				log(logEntry);
@@ -108,17 +109,17 @@ class EquinoxLogFactory implements ServiceFactory<FrameworkLog> {
 	@SuppressWarnings("deprecation")
 	static int convertLevel(FrameworkLogEntry logEntry) {
 		switch (logEntry.getSeverity()) {
-			case FrameworkLogEntry.ERROR :
-				return LogService.LOG_ERROR;
-			case FrameworkLogEntry.WARNING :
-				return LogService.LOG_WARNING;
-			case FrameworkLogEntry.INFO :
-				return LogService.LOG_INFO;
-			case FrameworkLogEntry.OK :
-				return LogService.LOG_DEBUG;
-			case FrameworkLogEntry.CANCEL :
-			default :
-				return 32; // unknown
+		case FrameworkLogEntry.ERROR:
+			return LogService.LOG_ERROR;
+		case FrameworkLogEntry.WARNING:
+			return LogService.LOG_WARNING;
+		case FrameworkLogEntry.INFO:
+			return LogService.LOG_INFO;
+		case FrameworkLogEntry.OK:
+			return LogService.LOG_DEBUG;
+		case FrameworkLogEntry.CANCEL:
+		default:
+			return 32; // unknown
 		}
 	}
 }

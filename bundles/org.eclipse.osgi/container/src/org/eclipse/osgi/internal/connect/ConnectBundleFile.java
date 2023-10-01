@@ -84,7 +84,8 @@ public class ConnectBundleFile extends CloseableBundleFile<ConnectEntry> {
 
 	private final ConnectContent content;
 
-	public ConnectBundleFile(ConnectModule module, File basefile, BundleInfo.Generation generation, MRUBundleFileList mruList, Debug debug) throws IOException {
+	public ConnectBundleFile(ConnectModule module, File basefile, BundleInfo.Generation generation,
+			MRUBundleFileList mruList, Debug debug) throws IOException {
 		super(basefile, generation, mruList, debug);
 		this.content = module.getContent();
 	}

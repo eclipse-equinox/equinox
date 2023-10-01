@@ -26,8 +26,8 @@ import org.osgi.framework.ServiceException;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * This class represents the use of a service by a bundle. One is created for each
- * service acquired by a bundle.
+ * This class represents the use of a service by a bundle. One is created for
+ * each service acquired by a bundle.
  *
  * <p>
  * This class manages a prototype service factory.
@@ -35,15 +35,18 @@ import org.osgi.framework.ServiceRegistration;
  * @ThreadSafe
  */
 public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
-	/** Service objects returned by PrototypeServiceFactory.getService() and their use count. */
+	/**
+	 * Service objects returned by PrototypeServiceFactory.getService() and their
+	 * use count.
+	 */
 	/* @GuardedBy("getLock()") */
 	private final Map<S, AtomicInteger> serviceObjects;
 
 	/**
 	 * Constructs a service use encapsulating the service object.
 	 *
-	 * @param   context bundle getting the service
-	 * @param   registration ServiceRegistration of the service
+	 * @param context      bundle getting the service
+	 * @param registration ServiceRegistration of the service
 	 */
 	PrototypeServiceFactoryUse(BundleContextImpl context, ServiceRegistrationImpl<S> registration) {
 		super(context, registration);
@@ -86,8 +89,8 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	 *
 	 * @param service The service object to release.
 	 * @return true if the service was released; otherwise false.
-	 * @throws IllegalArgumentException If the specified service was not
-	 *         provided by this object.
+	 * @throws IllegalArgumentException If the specified service was not provided by
+	 *                                  this object.
 	 */
 	/* @GuardedBy("getLock()") */
 	@Override
@@ -99,7 +102,7 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 		if (debug.DEBUG_SERVICES) {
 			Debug.println(
 					'[' + Thread.currentThread().getName() + "] ungetService[PSfactory=" + registration.getBundle() //$NON-NLS-1$
-					+ "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							+ "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		AtomicInteger useCount = serviceObjects.get(service);
 		if (useCount.decrementAndGet() < 1) {
@@ -114,8 +117,9 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	 *
 	 * <ol>
 	 * <li>The bundle's use count for this service is set to zero.
-	 * <li>The {@link PrototypeServiceFactory#ungetService(Bundle, ServiceRegistration, Object)} method
-	 * is called to release the service object for the bundle.
+	 * <li>The
+	 * {@link PrototypeServiceFactory#ungetService(Bundle, ServiceRegistration, Object)}
+	 * method is called to release the service object for the bundle.
 	 * </ol>
 	 */
 	/* @GuardedBy("getLock()") */
@@ -135,7 +139,8 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	/**
 	 * Is this service use using any services?
 	 *
-	 * @return true if no services are being used and this service use can be discarded.
+	 * @return true if no services are being used and this service use can be
+	 *         discarded.
 	 */
 	/* @GuardedBy("getLock()") */
 	@Override

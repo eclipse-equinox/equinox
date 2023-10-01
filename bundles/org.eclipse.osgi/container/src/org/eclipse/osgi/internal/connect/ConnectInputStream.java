@@ -36,7 +36,8 @@ public class ConnectInputStream extends InputStream implements ContentProvider {
 	private ConnectInputStream() {
 	}
 
-	/* This method should not be called.
+	/*
+	 * This method should not be called.
 	 */
 	@Override
 	public int read() throws IOException {

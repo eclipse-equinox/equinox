@@ -61,7 +61,7 @@ public class SecurityTable extends PermissionCollection {
 			return ABSTAIN;
 		}
 
-		//can't short-circuit early, so try cache
+		// can't short-circuit early, so try cache
 		Integer result = evaluationCache.get(evaluationCacheKey);
 		boolean hasMutable = false;
 		if (result != null) {
@@ -70,14 +70,14 @@ public class SecurityTable extends PermissionCollection {
 				return result;
 			}
 		}
-		//cache miss or has mutable rows
+		// cache miss or has mutable rows
 		boolean postponed = false;
 		Decision[] results = new Decision[rows.length];
 		int immediateDecisionIdx = -1;
 		// evaluate each row
 		for (int i = 0; i < rows.length && immediateDecisionIdx == -1; i++) {
 			if (result == null) {
-				//check all conditions for any that are mutable, this will turn off the cache
+				// check all conditions for any that are mutable, this will turn off the cache
 				hasMutable |= checkMutable(bundlePermissions, evaluationCacheKey, rows[i]);
 			}
 			try {
@@ -104,7 +104,8 @@ public class SecurityTable extends PermissionCollection {
 			// no need to process the rest of the rows
 			immediateDecisionIdx = i;
 		}
-		Integer immediateDecision = handlePostponedConditions(evaluationCacheKey, hasMutable, postponed, results, immediateDecisionIdx);
+		Integer immediateDecision = handlePostponedConditions(evaluationCacheKey, hasMutable, postponed, results,
+				immediateDecisionIdx);
 		if (immediateDecision != null)
 			return immediateDecision;
 		int finalDecision = postponed ? POSTPONED : ABSTAIN;
@@ -114,7 +115,8 @@ public class SecurityTable extends PermissionCollection {
 		return finalDecision;
 	}
 
-	private boolean checkMutable(BundlePermissions bundlePermissions, EvaluationCacheKey evaluationCacheKey, SecurityRow row) {
+	private boolean checkMutable(BundlePermissions bundlePermissions, EvaluationCacheKey evaluationCacheKey,
+			SecurityRow row) {
 		Condition[] conditions = row.getConditions(bundlePermissions);
 		if (conditions != null) {
 			for (Condition condition : conditions) {
@@ -127,11 +129,13 @@ public class SecurityTable extends PermissionCollection {
 		return false;
 	}
 
-	private Integer handlePostponedConditions(EvaluationCacheKey evaluationCacheKey, boolean hasMutable, boolean postponed, Decision[] results, int immediateDecisionIdx) {
+	private Integer handlePostponedConditions(EvaluationCacheKey evaluationCacheKey, boolean hasMutable,
+			boolean postponed, Decision[] results, int immediateDecisionIdx) {
 		if (postponed) {
 			int immediateDecision = immediateDecisionIdx < 0 ? DENIED : results[immediateDecisionIdx].decision;
 			// iterate over all postponed conditions;
-			// if they all provide the same decision as the immediate decision then return the immediate decision
+			// if they all provide the same decision as the immediate decision then return
+			// the immediate decision
 			boolean allSameDecision = true;
 			int i = immediateDecisionIdx < 0 ? results.length - 1 : immediateDecisionIdx - 1;
 			for (; i >= 0 && allSameDecision; i--) {
@@ -139,7 +143,8 @@ public class SecurityTable extends PermissionCollection {
 					if ((results[i].decision & immediateDecision) == 0)
 						allSameDecision = false;
 					else
-						results[i] = SecurityRow.DECISION_ABSTAIN; // we can clear postpones with the same decision as the immediate
+						results[i] = SecurityRow.DECISION_ABSTAIN; // we can clear postpones with the same decision as
+																	// the immediate
 				}
 			}
 			if (allSameDecision) {
@@ -149,12 +154,14 @@ public class SecurityTable extends PermissionCollection {
 				return immediateDecision;
 			}
 
-			// we now are forced to postpone; we need to also remember the postponed decisions and
+			// we now are forced to postpone; we need to also remember the postponed
+			// decisions and
 			// the immediate decision if there is one.
 			EquinoxSecurityManager equinoxManager = securityAdmin.getSupportedSecurityManager();
 			if (equinoxManager == null) {
 				// TODO this is really an error condition.
-				// This should never happen.  We checked for a supported manager when the row was postponed
+				// This should never happen. We checked for a supported manager when the row was
+				// postponed
 				if (!hasMutable) {
 					evaluationCache.put(evaluationCacheKey, ABSTAIN);
 				}

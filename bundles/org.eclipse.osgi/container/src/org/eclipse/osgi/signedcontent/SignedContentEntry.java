@@ -21,32 +21,38 @@ import java.io.IOException;
  * A <code>SignedContentEntry</code> represents a content entry which may be
  * signed.
  * <p>
- * A <code>SignedContentEntry</code> object is intended to provide information about
- * the signers of the content entry, and cannot be used to access the actual data of the entry.
+ * A <code>SignedContentEntry</code> object is intended to provide information
+ * about the signers of the content entry, and cannot be used to access the
+ * actual data of the entry.
  * </p>
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
+ * 
  * @since 3.4
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface SignedContentEntry {
 	/**
 	 * Returns the name of the entry.
+	 * 
 	 * @return the name of the entry.
 	 */
 	public String getName();
 
 	/**
-	 * Returns the signer infos for this <code>SignedContentEntry</code>.  If the entry
-	 * is not signed then an empty array is returned.
+	 * Returns the signer infos for this <code>SignedContentEntry</code>. If the
+	 * entry is not signed then an empty array is returned.
+	 * 
 	 * @return the signer infos for this <code>SignedContentEntry</code>
 	 */
 	public SignerInfo[] getSignerInfos();
 
 	/**
-	 * Returns true if the entry is signed; false otherwise.  This is a convenience method
-	 * equivalent to calling <code>{@link #getSignerInfos()}.length &gt; 0</code>
+	 * Returns true if the entry is signed; false otherwise. This is a convenience
+	 * method equivalent to calling
+	 * <code>{@link #getSignerInfos()}.length &gt; 0</code>
+	 * 
 	 * @return true if the content is signed
 	 */
 	public boolean isSigned();
@@ -55,7 +61,9 @@ public interface SignedContentEntry {
 	// TODO: what does this mean in the face of multiple signers
 	/**
 	 * Verifies the content of this this entry is valid.
-	 * @throws IOException if an error occurred reading the entry content
+	 * 
+	 * @throws IOException             if an error occurred reading the entry
+	 *                                 content
 	 * @throws InvalidContentException if the entry content is not valid
 	 */
 	public void verify() throws IOException, InvalidContentException;

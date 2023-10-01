@@ -48,12 +48,14 @@ public class Capabilities {
 
 		NamespaceSet(String name) {
 			this.name = name;
-			this.matchMandatory = PackageNamespace.PACKAGE_NAMESPACE.equals(name) || BundleNamespace.BUNDLE_NAMESPACE.equals(name) || HostNamespace.HOST_NAMESPACE.equals(name);
+			this.matchMandatory = PackageNamespace.PACKAGE_NAMESPACE.equals(name)
+					|| BundleNamespace.BUNDLE_NAMESPACE.equals(name) || HostNamespace.HOST_NAMESPACE.equals(name);
 		}
 
 		void addCapability(ModuleCapability capability) {
 			if (!name.equals(capability.getNamespace())) {
-				throw new IllegalArgumentException("Invalid namespace: " + capability.getNamespace() + ": expecting: " + name); //$NON-NLS-1$ //$NON-NLS-2$
+				throw new IllegalArgumentException(
+						"Invalid namespace: " + capability.getNamespace() + ": expecting: " + name); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			all.add(capability);
 			// by convention we index by the namespace attribute
@@ -91,7 +93,8 @@ public class Capabilities {
 
 		void removeCapability(ModuleCapability capability) {
 			if (!name.equals(capability.getNamespace())) {
-				throw new IllegalArgumentException("Invalid namespace: " + capability.getNamespace() + ": expecting: " + name); //$NON-NLS-1$//$NON-NLS-2$
+				throw new IllegalArgumentException(
+						"Invalid namespace: " + capability.getNamespace() + ": expecting: " + name); //$NON-NLS-1$//$NON-NLS-2$
 			}
 			all.remove(capability);
 			// by convention we index by the namespace attribute
@@ -127,7 +130,8 @@ public class Capabilities {
 
 		List<ModuleCapability> findCapabilities(Requirement requirement) {
 			if (!name.equals(requirement.getNamespace())) {
-				throw new IllegalArgumentException("Invalid namespace: " + requirement.getNamespace() + ": expecting: " + name); //$NON-NLS-1$//$NON-NLS-2$
+				throw new IllegalArgumentException(
+						"Invalid namespace: " + requirement.getNamespace() + ": expecting: " + name); //$NON-NLS-1$//$NON-NLS-2$
 			}
 			FilterImpl f = null;
 			String filterSpec = requirement.getDirectives().get(Namespace.REQUIREMENT_FILTER_DIRECTIVE);
@@ -220,11 +224,13 @@ public class Capabilities {
 
 	/**
 	 * Adds the {@link ModuleRevision#getModuleCapabilities(String) capabilities}
-	 * provided by the specified revision to this database.  These capabilities must
+	 * provided by the specified revision to this database. These capabilities must
 	 * become available for lookup with the {@link #findCapabilities(Requirement)}
 	 * method.
+	 * 
 	 * @param revision the revision which has capabilities to add
-	 * @return a collection of package names added for the osgi.wiring.package namespace
+	 * @return a collection of package names added for the osgi.wiring.package
+	 *         namespace
 	 */
 	public Collection<String> addCapabilities(ModuleRevision revision) {
 		Collection<String> packageNames = null;
@@ -252,7 +258,7 @@ public class Capabilities {
 
 	/**
 	 * Removes the {@link ModuleRevision#getModuleCapabilities(String) capabilities}
-	 * provided by the specified revision from this database.  These capabilities
+	 * provided by the specified revision from this database. These capabilities
 	 * must no longer be available for lookup with the
 	 * {@link #findCapabilities(Requirement)} method.
 	 */
@@ -266,8 +272,9 @@ public class Capabilities {
 	}
 
 	/**
-	 * Returns a mutable snapshot of capabilities that are candidates for
-	 * satisfying the specified requirement.
+	 * Returns a mutable snapshot of capabilities that are candidates for satisfying
+	 * the specified requirement.
+	 * 
 	 * @param requirement the requirement
 	 * @return the candidates for the requirement
 	 */

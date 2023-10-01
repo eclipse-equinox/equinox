@@ -54,10 +54,12 @@ public class WeavingHookConfigurator extends ClassLoaderHook {
 	}
 
 	@Override
-	public byte[] processClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
+	public byte[] processClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry,
+			ClasspathManager manager) {
 		ServiceRegistry registry = getRegistry();
 		if (registry == null)
-			return null; // no registry somehow we are loading classes before the registry has been created
+			return null; // no registry somehow we are loading classes before the registry has been
+							// created
 		ModuleClassLoader classLoader = manager.getClassLoader();
 		BundleLoader loader = classLoader.getBundleLoader();
 		// create a woven class object and add it to the thread local stack
@@ -80,7 +82,8 @@ public class WeavingHookConfigurator extends ClassLoaderHook {
 				return wovenClass.callHooks();
 			} catch (Throwable t) {
 				ServiceRegistration<?> errorHook = wovenClass.getErrorHook();
-				Bundle errorBundle = errorHook != null ? errorHook.getReference().getBundle() : manager.getGeneration().getRevision().getBundle();
+				Bundle errorBundle = errorHook != null ? errorHook.getReference().getBundle()
+						: manager.getGeneration().getRevision().getBundle();
 				container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, errorBundle, t);
 				// fail hard with a class loading error
 				ClassFormatError error = new ClassFormatError("Unexpected error from weaving hook."); //$NON-NLS-1$
@@ -94,8 +97,10 @@ public class WeavingHookConfigurator extends ClassLoaderHook {
 	}
 
 	@Override
-	public void recordClassDefine(String name, Class<?> clazz, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
-		// here we assume the stack contans a woven class with the same name as the class we are defining.
+	public void recordClassDefine(String name, Class<?> clazz, byte[] classbytes, ClasspathEntry classpathEntry,
+			BundleEntry entry, ClasspathManager manager) {
+		// here we assume the stack contans a woven class with the same name as the
+		// class we are defining.
 		WovenClassContext context = wovenClassContext.get();
 		if (context == null || context.wovenClassStack.size() == 0)
 			return;

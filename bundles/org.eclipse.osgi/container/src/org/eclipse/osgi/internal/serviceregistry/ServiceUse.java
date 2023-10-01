@@ -26,9 +26,10 @@ import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.ServiceException;
+
 /**
- * This class represents the use of a service by a bundle. One is created for each
- * service acquired by a bundle.
+ * This class represents the use of a service by a bundle. One is created for
+ * each service acquired by a bundle.
  *
  * <p>
  * This class manages a singleton service.
@@ -63,8 +64,8 @@ public class ServiceUse<S> {
 	/**
 	 * Constructs a service use encapsulating the service object.
 	 *
-	 * @param   context bundle getting the service
-	 * @param   registration ServiceRegistration of the service
+	 * @param context      bundle getting the service
+	 * @param registration ServiceRegistration of the service
 	 */
 	ServiceUse(BundleContextImpl context, ServiceRegistrationImpl<S> registration) {
 		this.useCount = 0;
@@ -143,8 +144,8 @@ public class ServiceUse<S> {
 	 *
 	 * @param service The service object to release.
 	 * @return true if the service was released; otherwise false.
-	 * @throws IllegalArgumentException If the specified service was not
-	 *         provided by this object.
+	 * @throws IllegalArgumentException If the specified service was not provided by
+	 *                                  this object.
 	 */
 	/* @GuardedBy("getLock()") */
 	boolean releaseServiceObject(final S service) {
@@ -170,7 +171,8 @@ public class ServiceUse<S> {
 	/**
 	 * Is this service use using any services?
 	 *
-	 * @return true if no services are being used and this service use can be discarded.
+	 * @return true if no services are being used and this service use can be
+	 *         discarded.
 	 */
 	/* @GuardedBy("getLock()") */
 	boolean isEmpty() {

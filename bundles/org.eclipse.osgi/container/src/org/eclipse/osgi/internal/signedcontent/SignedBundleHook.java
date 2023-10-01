@@ -62,8 +62,9 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 public class SignedBundleHook implements ActivatorHookFactory, HookConfigurator, SignedContentFactory {
 	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 
-	//TODO: comes from configuration!;
-	private final static String CACERTS_PATH = System.getProperty("java.home") + File.separatorChar + "lib" + File.separatorChar + "security" + File.separatorChar + "cacerts"; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$
+	// TODO: comes from configuration!;
+	private final static String CACERTS_PATH = System.getProperty("java.home") + File.separatorChar + "lib" //$NON-NLS-1$//$NON-NLS-2$
+			+ File.separatorChar + "security" + File.separatorChar + "cacerts"; //$NON-NLS-1$//$NON-NLS-2$
 	private final static String CACERTS_TYPE = "JKS"; //$NON-NLS-1$
 	private final static String OSGI_KEYSTORE = "osgi.framework.keystore"; //$NON-NLS-1$
 	private int supportSignedBundles;
@@ -99,14 +100,17 @@ public class SignedBundleHook implements ActivatorHookFactory, HookConfigurator,
 	void frameworkStart(BundleContext bc) {
 		this.context = bc;
 		if ((supportSignedBundles & EquinoxConfiguration.SIGNED_CONTENT_VERIFY_TRUST) != 0)
-			// initialize the trust engine listener only if trust is being established with a trust engine
+			// initialize the trust engine listener only if trust is being established with
+			// a trust engine
 			trustEngineListener = new TrustEngineListener(context, this);
 		// always register the trust engine
 		Dictionary<String, Object> trustEngineProps = new Hashtable<>(7);
 		trustEngineProps.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
 		trustEngineProps.put(SignedContentConstants.TRUST_ENGINE, SignedContentConstants.DEFAULT_TRUST_ENGINE);
-		KeyStoreTrustEngine systemTrustEngine = new KeyStoreTrustEngine(CACERTS_PATH, CACERTS_TYPE, null, "System", this); //$NON-NLS-1$
-		systemTrustEngineReg = context.registerService(TrustEngine.class.getName(), systemTrustEngine, trustEngineProps);
+		KeyStoreTrustEngine systemTrustEngine = new KeyStoreTrustEngine(CACERTS_PATH, CACERTS_TYPE, null, "System", //$NON-NLS-1$
+				this);
+		systemTrustEngineReg = context.registerService(TrustEngine.class.getName(), systemTrustEngine,
+				trustEngineProps);
 		String osgiTrustPath = context.getProperty(OSGI_KEYSTORE);
 		if (osgiTrustPath != null) {
 			try {
@@ -115,7 +119,8 @@ public class SignedBundleHook implements ActivatorHookFactory, HookConfigurator,
 					trustEngineProps.put(SignedContentConstants.TRUST_ENGINE, OSGI_KEYSTORE);
 					String path = url.getPath();
 					osgiTrustEngineReg = new ArrayList<>(1);
-					osgiTrustEngineReg.add(context.registerService(TrustEngine.class.getName(), new KeyStoreTrustEngine(path, CACERTS_TYPE, null, OSGI_KEYSTORE, this), trustEngineProps));
+					osgiTrustEngineReg.add(context.registerService(TrustEngine.class.getName(),
+							new KeyStoreTrustEngine(path, CACERTS_TYPE, null, OSGI_KEYSTORE, this), trustEngineProps));
 				}
 			} catch (MalformedURLException e) {
 				log("Invalid setting for " + OSGI_KEYSTORE, FrameworkLogEntry.WARNING, e); //$NON-NLS-1$
@@ -128,7 +133,9 @@ public class SignedBundleHook implements ActivatorHookFactory, HookConfigurator,
 				osgiTrustEngineReg = new ArrayList<>(1);
 				while (st.hasMoreTokens()) {
 					String trustRepoPath = st.nextToken();
-					osgiTrustEngineReg.add(context.registerService(TrustEngine.class.getName(), new KeyStoreTrustEngine(trustRepoPath, CACERTS_TYPE, null, OSGI_KEYSTORE, this), trustEngineProps));
+					osgiTrustEngineReg.add(context.registerService(TrustEngine.class.getName(),
+							new KeyStoreTrustEngine(trustRepoPath, CACERTS_TYPE, null, OSGI_KEYSTORE, this),
+							trustEngineProps));
 				}
 			}
 		}
@@ -165,7 +172,8 @@ public class SignedBundleHook implements ActivatorHookFactory, HookConfigurator,
 	}
 
 	@Override
-	public SignedContent getSignedContent(File content) throws IOException, InvalidKeyException, SignatureException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
+	public SignedContent getSignedContent(File content) throws IOException, InvalidKeyException, SignatureException,
+			CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
 		SignedContentFromBundleFile signedContent = new SignedContentFromBundleFile(content,
 				container.getConfiguration().getDebug());
 		determineTrust(signedContent, EquinoxConfiguration.SIGNED_CONTENT_VERIFY_TRUST);
@@ -173,7 +181,8 @@ public class SignedBundleHook implements ActivatorHookFactory, HookConfigurator,
 	}
 
 	@Override
-	public SignedContent getSignedContent(Bundle bundle) throws IOException, InvalidKeyException, SignatureException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
+	public SignedContent getSignedContent(Bundle bundle) throws IOException, InvalidKeyException, SignatureException,
+			CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
 		Generation generation = (Generation) ((EquinoxBundle) bundle).getModule().getCurrentRevision()
 				.getRevisionInfo();
 		SignedContentFromBundleFile signedContent = new SignedContentFromBundleFile(generation.getBundleFile());
@@ -194,14 +203,16 @@ public class SignedBundleHook implements ActivatorHookFactory, HookConfigurator,
 			Filter filter = null;
 			if (trustEngineNameProp != null)
 				try {
-					filter = context.createFilter("(&(" + Constants.OBJECTCLASS + "=" + TrustEngine.class.getName() + ")(" + SignedContentConstants.TRUST_ENGINE + "=" + trustEngineNameProp + "))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$//$NON-NLS-5$
+					filter = context.createFilter("(&(" + Constants.OBJECTCLASS + "=" + TrustEngine.class.getName() //$NON-NLS-1$ //$NON-NLS-2$
+							+ ")(" + SignedContentConstants.TRUST_ENGINE + "=" + trustEngineNameProp + "))"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 				} catch (InvalidSyntaxException e) {
 					log("Invalid trust engine filter", FrameworkLogEntry.WARNING, e); //$NON-NLS-1$
 				}
 			if (filter != null) {
 				trustEngineTracker = new ServiceTracker<>(context, filter, new TrustEngineCustomizer());
 			} else
-				trustEngineTracker = new ServiceTracker<>(context, TrustEngine.class.getName(), new TrustEngineCustomizer());
+				trustEngineTracker = new ServiceTracker<>(context, TrustEngine.class.getName(),
+						new TrustEngineCustomizer());
 			trustEngineTracker.open();
 		}
 		Object[] services = trustEngineTracker.getServices();
@@ -267,19 +278,20 @@ public class SignedBundleHook implements ActivatorHookFactory, HookConfigurator,
 
 	private Certificate findTrustAnchor(Certificate[] certs, TrustEngine[] engines, int supportFlags) {
 		if ((supportFlags & EquinoxConfiguration.SIGNED_CONTENT_VERIFY_TRUST) == 0)
-			// we are not searching the engines; in this case we just assume the root cert is trusted
+			// we are not searching the engines; in this case we just assume the root cert
+			// is trusted
 			return certs != null && certs.length > 0 ? certs[certs.length - 1] : null;
-			for (TrustEngine engine : engines) {
-				try {
-					Certificate anchor = engine.findTrustAnchor(certs);
-					if (anchor != null)
-						// found an anchor
-						return anchor;
-				} catch (IOException e) {
-					// log the exception and continue
-					log("TrustEngine failure: " + engine.getName(), FrameworkLogEntry.WARNING, e); //$NON-NLS-1$
-				}
+		for (TrustEngine engine : engines) {
+			try {
+				Certificate anchor = engine.findTrustAnchor(certs);
+				if (anchor != null)
+					// found an anchor
+					return anchor;
+			} catch (IOException e) {
+				// log the exception and continue
+				log("TrustEngine failure: " + engine.getName(), FrameworkLogEntry.WARNING, e); //$NON-NLS-1$
 			}
-			return null;
+		}
+		return null;
 	}
 }

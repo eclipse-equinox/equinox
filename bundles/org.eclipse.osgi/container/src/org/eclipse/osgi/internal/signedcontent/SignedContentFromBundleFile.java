@@ -47,6 +47,7 @@ import org.eclipse.osgi.storage.bundlefile.ZipBundleFile;
 public class SignedContentFromBundleFile implements SignedContent {
 	static abstract class BaseSignerInfo implements SignerInfo {
 		private volatile Certificate trustAnchor = null;
+
 		@Override
 		public Certificate getTrustAnchor() {
 			return trustAnchor;

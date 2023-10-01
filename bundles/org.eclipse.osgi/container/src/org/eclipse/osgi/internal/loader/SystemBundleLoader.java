@@ -28,8 +28,8 @@ import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.osgi.framework.BundleException;
 
 /**
- * The System Bundle's BundleLoader.  This BundleLoader is used by ImportClassLoaders
- * to load a resource that is exported by the System Bundle.
+ * The System Bundle's BundleLoader. This BundleLoader is used by
+ * ImportClassLoaders to load a resource that is exported by the System Bundle.
  */
 public class SystemBundleLoader extends BundleLoader {
 	public static final String EQUINOX_EE = "x-equinox-ee"; //$NON-NLS-1$
@@ -39,12 +39,14 @@ public class SystemBundleLoader extends BundleLoader {
 	public SystemBundleLoader(ModuleWiring wiring, EquinoxContainer container, ClassLoader frameworkLoader) {
 		super(wiring, container, frameworkLoader.getParent());
 		this.classLoader = frameworkLoader;
-		this.moduleClassLoader = new SystemModuleClassLoader(classLoader.getParent(), container.getConfiguration(), this, (Generation) wiring.getRevision().getRevisionInfo());
+		this.moduleClassLoader = new SystemModuleClassLoader(classLoader.getParent(), container.getConfiguration(),
+				this, (Generation) wiring.getRevision().getRevisionInfo());
 	}
 
 	/**
 	 * The ClassLoader that loads OSGi framework classes is used to find the class.
-	 * This method never gets called because there is no BundleClassLoader for the framework.
+	 * This method never gets called because there is no BundleClassLoader for the
+	 * framework.
 	 */
 	@Override
 	public Class<?> findClass(String name) throws ClassNotFoundException {
@@ -68,7 +70,8 @@ public class SystemBundleLoader extends BundleLoader {
 	}
 
 	/**
-	 * The ClassLoader that loads OSGi framework classes is used to find the resource.
+	 * The ClassLoader that loads OSGi framework classes is used to find the
+	 * resource.
 	 */
 	@Override
 	public URL findLocalResource(String name) {
@@ -76,7 +79,8 @@ public class SystemBundleLoader extends BundleLoader {
 	}
 
 	/**
-	 * The ClassLoader that loads OSGi framework classes is used to find the resource.
+	 * The ClassLoader that loads OSGi framework classes is used to find the
+	 * resource.
 	 */
 	@Override
 	public Enumeration<URL> findLocalResources(String name) {
@@ -89,8 +93,9 @@ public class SystemBundleLoader extends BundleLoader {
 	}
 
 	/**
-	 * The ClassLoader that loads OSGi framework classes is used to find the resource.
-	 * This method never gets called because there is no ModuleClassLoader for the framework.
+	 * The ClassLoader that loads OSGi framework classes is used to find the
+	 * resource. This method never gets called because there is no ModuleClassLoader
+	 * for the framework.
 	 */
 	@Override
 	public URL findResource(String name) {
@@ -98,8 +103,9 @@ public class SystemBundleLoader extends BundleLoader {
 	}
 
 	/**
-	 * The ClassLoader that loads OSGi framework classes is used to find the resource.
-	 * This method never gets called because there is no ModuleClassLoader for the framework.
+	 * The ClassLoader that loads OSGi framework classes is used to find the
+	 * resource. This method never gets called because there is no ModuleClassLoader
+	 * for the framework.
 	 */
 	@Override
 	public Enumeration<URL> findResources(String name) throws IOException {
@@ -123,7 +129,8 @@ public class SystemBundleLoader extends BundleLoader {
 
 	class SystemModuleClassLoader extends EquinoxClassLoader {
 
-		public SystemModuleClassLoader(ClassLoader parent, EquinoxConfiguration configuration, BundleLoader delegate, Generation generation) {
+		public SystemModuleClassLoader(ClassLoader parent, EquinoxConfiguration configuration, BundleLoader delegate,
+				Generation generation) {
 			super(parent, configuration, delegate, generation);
 		}
 
@@ -136,7 +143,8 @@ public class SystemBundleLoader extends BundleLoader {
 		public void loadFragments(Collection<ModuleRevision> fragments) {
 			Module systemModule = getWiring().getRevision().getRevisions().getModule();
 			try {
-				this.getGeneration().getBundleInfo().getStorage().getExtensionInstaller().addExtensionContent(fragments, systemModule);
+				this.getGeneration().getBundleInfo().getStorage().getExtensionInstaller().addExtensionContent(fragments,
+						systemModule);
 			} catch (BundleException e) {
 				systemModule.getContainer().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, systemModule, e);
 			}

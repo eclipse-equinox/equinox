@@ -35,8 +35,8 @@ public class BundleFileWrapper extends BundleFile {
 	private final BundleFile bundleFile;
 
 	/**
-	 * Creates a new <code>BundleFileWrapper</code> instance wrapping the
-	 * given {@link BundleFile bundle file}.
+	 * Creates a new <code>BundleFileWrapper</code> instance wrapping the given
+	 * {@link BundleFile bundle file}.
 	 *
 	 * @param bundleFile - The bundle file to wrap.
 	 * @throws NullPointerException - If the bundle file is <code>null</code>.

@@ -36,8 +36,11 @@ import org.eclipse.osgi.storage.Storage.StorageException;
 import org.eclipse.osgi.util.NLS;
 
 /**
- * A BundleFile that manages the number of open bundle files by using the MRUBundleFileList
- * @param <E> a type specified by extending classes to call {@link #getInputStream(Object)}
+ * A BundleFile that manages the number of open bundle files by using the
+ * MRUBundleFileList
+ * 
+ * @param <E> a type specified by extending classes to call
+ *            {@link #getInputStream(Object)}
  */
 public abstract class CloseableBundleFile<E> extends BundleFile {
 
@@ -60,7 +63,8 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 
 	private int referenceCount = 0;
 
-	public CloseableBundleFile(File basefile, BundleInfo.Generation generation, MRUBundleFileList mruList, Debug debug) {
+	public CloseableBundleFile(File basefile, BundleInfo.Generation generation, MRUBundleFileList mruList,
+			Debug debug) {
 		super(basefile);
 		this.debug = debug;
 		this.generation = generation;
@@ -70,6 +74,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 
 	/**
 	 * Checks if the bundle file is open
+	 * 
 	 * @return true if the bundle file is open and locked
 	 */
 	protected boolean lockOpen() {
@@ -84,14 +89,16 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 				ModuleRevision r = generation.getRevision();
 				if (r != null) {
 					ContainerEvent eventType = ContainerEvent.ERROR;
-					// If the revision has been removed from the list of revisions then it has been deleted
+					// If the revision has been removed from the list of revisions then it has been
+					// deleted
 					// because the bundle has been uninstalled or updated
 					if (e instanceof IOException && !r.getRevisions().getModuleRevisions().contains(r)) {
 						// instead of filling the log with errors about missing files from
 						// uninstalled/updated bundles just give it an info level
 						eventType = ContainerEvent.INFO;
 					}
-					generation.getBundleInfo().getStorage().getAdaptor().publishContainerEvent(eventType, r.getRevisions().getModule(), e);
+					generation.getBundleInfo().getStorage().getAdaptor().publishContainerEvent(eventType,
+							r.getRevisions().getModule(), e);
 				}
 			}
 			if (!(e instanceof IOException)) {
@@ -149,16 +156,18 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 
 	/**
 	 * Opens the bundle file
+	 * 
 	 * @throws IOException if an error occurs
 	 */
 	protected abstract void doOpen() throws IOException;
 
 	/**
 	 * Extracts a directory and all sub content to disk
+	 * 
 	 * @param dirName the directory name to extract
-	 * @return the File used to extract the content to.  A value
-	 * of <code>null</code> is returned if the directory to extract does
-	 * not exist or if content extraction is not supported.
+	 * @return the File used to extract the content to. A value of <code>null</code>
+	 *         is returned if the directory to extract does not exist or if content
+	 *         extraction is not supported.
 	 */
 	File extractDirectory(String dirName) {
 		if (!lockOpen()) {
@@ -212,7 +221,8 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 							if (!nested.isDirectory()) {
 								if (debug.DEBUG_BUNDLE_FILE)
 									Debug.println("Unable to create directory: " + nested.getPath()); //$NON-NLS-1$
-								throw new IOException(NLS.bind(Msg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, nested.getAbsolutePath()));
+								throw new IOException(
+										NLS.bind(Msg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, nested.getAbsolutePath()));
 							}
 							extractDirectory(bEntry.getName());
 						} else {
@@ -228,7 +238,9 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 			} catch (IOException | StorageException e) {
 				if (debug.DEBUG_BUNDLE_FILE)
 					Debug.printStackTrace(e);
-				generation.getBundleInfo().getStorage().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Unable to extract content: " + generation.getRevision() + ": " + entry, e); //$NON-NLS-1$ //$NON-NLS-2$
+				generation.getBundleInfo().getStorage().getLogServices().log(EquinoxContainer.NAME,
+						FrameworkLogEntry.ERROR,
+						"Unable to extract content: " + generation.getRevision() + ": " + entry, e); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		} finally {
 			releaseOpen();
@@ -282,6 +294,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 
 	/**
 	 * Finds the bundle entry for the specified path
+	 * 
 	 * @param path the path of the entry to find
 	 * @return the entry or {@code null} if no entry exists
 	 */
@@ -344,16 +357,20 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 			if (!closed) {
 				if (referenceCount > 0 && isMruListClosing()) {
 					// there are some opened streams to this BundleFile still;
-					// wait for them all to close because this is being closed by the MRUBundleFileList
+					// wait for them all to close because this is being closed by the
+					// MRUBundleFileList
 					try {
 						refCondition.await(1000, TimeUnit.MICROSECONDS); // timeout after 1 second
 					} catch (InterruptedException e) {
 						// do nothing for now ...
 					}
 					if (referenceCount != 0 || closed)
-						// either another thread closed the bundle file or we timed waiting for all the reference inputstreams to close
-						// If the referenceCount did not reach zero then this bundle file will remain open until the
-						// bundle file is closed explicitly (i.e. bundle is updated/uninstalled or framework is shutdown)
+						// either another thread closed the bundle file or we timed waiting for all the
+						// reference inputstreams to close
+						// If the referenceCount did not reach zero then this bundle file will remain
+						// open until the
+						// bundle file is closed explicitly (i.e. bundle is updated/uninstalled or
+						// framework is shutdown)
 						return;
 
 				}
@@ -372,6 +389,7 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 
 	/**
 	 * Closes the bundle file
+	 * 
 	 * @throws IOException if an error occurs closing
 	 */
 	protected abstract void doClose() throws IOException;
@@ -446,14 +464,13 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 	}
 
 	/**
-	 * Gets the input stream for the specified entry.
-	 * This method will ensure the bundle file is open,
-	 * call {@link #doGetInputStream(Object)} to get the
-	 * actual input stream, then if the bundle file limit
-	 * is enabled it will wrapper the input stream in a
-	 * special input stream that keeps track of active
-	 * input streams to prevent the bundle file from being
-	 * closed until the stream is closed (or a timeout happens).
+	 * Gets the input stream for the specified entry. This method will ensure the
+	 * bundle file is open, call {@link #doGetInputStream(Object)} to get the actual
+	 * input stream, then if the bundle file limit is enabled it will wrapper the
+	 * input stream in a special input stream that keeps track of active input
+	 * streams to prevent the bundle file from being closed until the stream is
+	 * closed (or a timeout happens).
+	 * 
 	 * @param entry the entry to get the input stream for
 	 * @return the input stream for the entry
 	 */
@@ -474,8 +491,9 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 
 	/**
 	 * Gets the input stream for the specified entry.
-	 * @param entry the entry to get the input stream for.  The type is specified by the
-	 * extending class.
+	 * 
+	 * @param entry the entry to get the input stream for. The type is specified by
+	 *              the extending class.
 	 * @return the input steam for the entry
 	 * @throws IOException if an error occurs
 	 */

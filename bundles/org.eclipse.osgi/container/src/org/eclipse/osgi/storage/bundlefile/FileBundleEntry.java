@@ -19,8 +19,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * A BundleEntry represented by a File object.  The FileBundleEntry class is
- * used for bundles that are installed as extracted zips on a file system.
+ * A BundleEntry represented by a File object. The FileBundleEntry class is used
+ * for bundles that are installed as extracted zips on a file system.
  */
 public class FileBundleEntry extends BundleEntry {
 	/**
@@ -34,6 +34,7 @@ public class FileBundleEntry extends BundleEntry {
 
 	/**
 	 * Constructs the BundleEntry using a File.
+	 * 
 	 * @param file BundleFile object this entry is a member of
 	 * @param name the name of this BundleEntry
 	 */
@@ -81,8 +82,9 @@ public class FileBundleEntry extends BundleEntry {
 
 	/**
 	 * Get the modification time for this BundleEntry.
-	 * <p>If the modification time has not been set,
-	 * this method will return <code>-1</code>.
+	 * <p>
+	 * If the modification time has not been set, this method will return
+	 * <code>-1</code>.
 	 *
 	 * @return last modification time.
 	 */

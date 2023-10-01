@@ -96,7 +96,6 @@ public class SystemBundleActivator implements BundleActivator {
 		register(bc, PermissionAdmin.class, sa, null);
 		register(bc, ConditionalPermissionAdmin.class, sa, null);
 
-
 		props.clear();
 		props.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
 		register(bc, Resolver.class, new ResolverImpl(new Logger(0), null), false, props);
@@ -111,15 +110,19 @@ public class SystemBundleActivator implements BundleActivator {
 		}
 
 		props.clear();
-		props.put("protocol", new String[] {BundleResourceHandler.OSGI_ENTRY_URL_PROTOCOL, BundleResourceHandler.OSGI_RESOURCE_URL_PROTOCOL}); //$NON-NLS-1$
+		props.put("protocol", new String[] { BundleResourceHandler.OSGI_ENTRY_URL_PROTOCOL, //$NON-NLS-1$
+				BundleResourceHandler.OSGI_RESOURCE_URL_PROTOCOL });
 		register(bc, URLConverter.class, new BundleURLConverter(), props);
 
 		register(bc, BundleLocalization.class, new BundleLocalizationImpl(), null);
 
-		boolean setTccl = "true".equals(bundle.getEquinoxContainer().getConfiguration().getConfiguration("eclipse.parsers.setTCCL", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		boolean setTccl = "true".equals( //$NON-NLS-1$
+				bundle.getEquinoxContainer().getConfiguration().getConfiguration("eclipse.parsers.setTCCL", "true")); //$NON-NLS-1$ //$NON-NLS-2$
 		try {
-			register(bc, "javax.xml.parsers.SAXParserFactory", new XMLParsingServiceFactory(true, setTccl), false, null); //$NON-NLS-1$
-			register(bc, "javax.xml.parsers.DocumentBuilderFactory", new XMLParsingServiceFactory(false, setTccl), false, null); //$NON-NLS-1$
+			register(bc, "javax.xml.parsers.SAXParserFactory", new XMLParsingServiceFactory(true, setTccl), false, //$NON-NLS-1$
+					null);
+			register(bc, "javax.xml.parsers.DocumentBuilderFactory", new XMLParsingServiceFactory(false, setTccl), //$NON-NLS-1$
+					false, null);
 		} catch (NoClassDefFoundError e) {
 			// ignore; on a platform with no javax.xml (Java 8 SE compact1 profile)
 		}
@@ -208,7 +211,8 @@ public class SystemBundleActivator implements BundleActivator {
 
 		bundle.getEquinoxContainer().getStorage().getExtensionInstaller().stopExtensionActivators(bc);
 
-		FrameworkDebugOptions dbgOptions = (FrameworkDebugOptions) bundle.getEquinoxContainer().getConfiguration().getDebugOptions();
+		FrameworkDebugOptions dbgOptions = (FrameworkDebugOptions) bundle.getEquinoxContainer().getConfiguration()
+				.getDebugOptions();
 		dbgOptions.stop(bc);
 
 		urlFactoryManager.uninstallHandlerFactories();
@@ -228,15 +232,18 @@ public class SystemBundleActivator implements BundleActivator {
 		setSecurityManagner = null;
 	}
 
-	private void register(BundleContext context, Class<?> serviceClass, Object service, Dictionary<String, Object> properties) {
+	private void register(BundleContext context, Class<?> serviceClass, Object service,
+			Dictionary<String, Object> properties) {
 		register(context, serviceClass.getName(), service, true, properties);
 	}
 
-	private void register(BundleContext context, Class<?> serviceClass, Object service, boolean setRanking, Dictionary<String, Object> properties) {
+	private void register(BundleContext context, Class<?> serviceClass, Object service, boolean setRanking,
+			Dictionary<String, Object> properties) {
 		register(context, serviceClass.getName(), service, setRanking, properties);
 	}
 
-	private void register(BundleContext context, String serviceClass, Object service, boolean setRanking, Dictionary<String, Object> properties) {
+	private void register(BundleContext context, String serviceClass, Object service, boolean setRanking,
+			Dictionary<String, Object> properties) {
 		if (properties == null)
 			properties = new Hashtable<>();
 		if (setRanking) {

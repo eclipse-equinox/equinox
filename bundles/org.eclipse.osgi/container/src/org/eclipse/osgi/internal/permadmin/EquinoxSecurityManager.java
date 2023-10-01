@@ -27,7 +27,8 @@ import org.osgi.service.condpermadmin.Condition;
 public class EquinoxSecurityManager extends SecurityManager {
 	/*
 	 * This is super goofy, but we need to make sure that the CheckContext and
-	 * CheckPermissionAction classes load early. Otherwise, we run into problems later.
+	 * CheckPermissionAction classes load early. Otherwise, we run into problems
+	 * later.
 	 */
 	static {
 		Class<?> c;
@@ -93,13 +94,14 @@ public class EquinoxSecurityManager extends SecurityManager {
 	}
 
 	/**
-	 * Gets the AccessControlContext currently being evaluated by
-	 * the SecurityManager.
+	 * Gets the AccessControlContext currently being evaluated by the
+	 * SecurityManager.
 	 *
-	 * @return the AccessControlContext currently being evaluated by the SecurityManager, or
-	 * null if no AccessControlContext is being evaluated. Note: this method will
-	 * return null if the permission check is being done directly on the AccessControlContext
-	 * rather than the SecurityManager.
+	 * @return the AccessControlContext currently being evaluated by the
+	 *         SecurityManager, or null if no AccessControlContext is being
+	 *         evaluated. Note: this method will return null if the permission check
+	 *         is being done directly on the AccessControlContext rather than the
+	 *         SecurityManager.
 	 */
 	public AccessControlContext getContextToBeChecked() {
 		CheckContext cc = localCheckContext.get();
@@ -123,7 +125,8 @@ public class EquinoxSecurityManager extends SecurityManager {
 			List<Decision[]> conditionSets = cc.depthCondSets.get(cc.getDepth());
 			if (conditionSets == null)
 				return;
-			// TODO the spec seems impossible to implement just doing the simple thing for now
+			// TODO the spec seems impossible to implement just doing the simple thing for
+			// now
 			Map<Class<? extends Condition>, Dictionary<Object, Object>> conditionDictionaries = new HashMap<>();
 			for (Decision[] domainDecisions : conditionSets) {
 				boolean grant = false;
@@ -160,7 +163,8 @@ public class EquinoxSecurityManager extends SecurityManager {
 		}
 	}
 
-	private int getPostponedDecision(Decision decision, Map<Class<? extends Condition>, Dictionary<Object, Object>> conditionDictionaries, CheckContext cc) {
+	private int getPostponedDecision(Decision decision,
+			Map<Class<? extends Condition>, Dictionary<Object, Object>> conditionDictionaries, CheckContext cc) {
 		Condition[] postponed = decision.postponed;
 		for (Condition postponedCond : postponed) {
 			Dictionary<Object, Object> condContext = conditionDictionaries.get(postponedCond.getClass());
@@ -178,7 +182,7 @@ public class EquinoxSecurityManager extends SecurityManager {
 			try {
 				// must call isMutable before calling isSatisfied according to the specification
 				boolean mutable = postponedCond.isMutable();
-				boolean isSatisfied = postponedCond.isSatisfied(new Condition[]{postponedCond}, condContext);
+				boolean isSatisfied = postponedCond.isSatisfied(new Condition[] { postponedCond }, condContext);
 				decision.handleImmutable(postponedCond, isSatisfied, mutable);
 				if (!isSatisfied)
 					return SecurityTable.ABSTAIN;

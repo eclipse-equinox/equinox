@@ -21,10 +21,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class is used to optimize finding provided-packages for a bundle.
- * If the package cannot be found in a list of required bundles then this class
- * is used to cache a null package source so that the search does not need to
- * be done again.
+ * This class is used to optimize finding provided-packages for a bundle. If the
+ * package cannot be found in a list of required bundles then this class is used
+ * to cache a null package source so that the search does not need to be done
+ * again.
  */
 public class NullPackageSource extends PackageSource {
 	static Map<String, NullPackageSource> sources = new HashMap<>();

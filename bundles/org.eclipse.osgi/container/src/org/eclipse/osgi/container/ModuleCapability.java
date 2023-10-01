@@ -21,6 +21,7 @@ import org.osgi.framework.wiring.BundleCapability;
 
 /**
  * An implementation of {@link BundleCapability}.
+ * 
  * @since 3.10
  */
 public final class ModuleCapability implements BundleCapability {
@@ -30,7 +31,8 @@ public final class ModuleCapability implements BundleCapability {
 	private final Map<String, Object> transientAttrs;
 	private final ModuleRevision revision;
 
-	ModuleCapability(String namespace, Map<String, String> directives, Map<String, Object> attributes, ModuleRevision revision) {
+	ModuleCapability(String namespace, Map<String, String> directives, Map<String, Object> attributes,
+			ModuleRevision revision) {
 		this.namespace = namespace;
 		this.directives = directives;
 		this.attributes = attributes;
@@ -75,7 +77,8 @@ public final class ModuleCapability implements BundleCapability {
 			throw new UnsupportedOperationException(namespace + ": namespace does not support transient attributes."); //$NON-NLS-1$
 		}
 		if (!(getResource().getRevisions().getModule() instanceof SystemModule)) {
-			throw new UnsupportedOperationException("Only allowed to set transient attributes for the system module: " + getResource()); //$NON-NLS-1$
+			throw new UnsupportedOperationException(
+					"Only allowed to set transient attributes for the system module: " + getResource()); //$NON-NLS-1$
 		}
 		this.transientAttrs.clear();
 		this.transientAttrs.putAll(transientAttrs);

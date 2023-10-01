@@ -33,8 +33,8 @@ import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.resource.Namespace;
 
 /**
- * Global policy is an implementation of a buddy policy. It is responsible
- * for looking up a class within the global set of exported classes. If multiple
+ * Global policy is an implementation of a buddy policy. It is responsible for
+ * looking up a class within the global set of exported classes. If multiple
  * version of the same package are exported in the system, the exported package
  * with the highest version will be returned.
  */
@@ -64,8 +64,8 @@ public class GlobalPolicy implements IBuddyPolicy {
 		for (BundleLoader exporter : exporters) {
 			try {
 				results = BundleLoader.compoundEnumerations(results, exporter.findResources(name));
-			}catch (IOException e) {
-				//ignore IO problems and try next package
+			} catch (IOException e) {
+				// ignore IO problems and try next package
 			}
 		}
 		return results;

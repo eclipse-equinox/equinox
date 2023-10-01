@@ -14,16 +14,20 @@
 package org.eclipse.osgi.service.resolver;
 
 /**
- * A disabled info represents a policy decision to disable a bundle which exists in a {@link State}.
- * Bundles may be disabled by adding disabled info with the {@link State#addDisabledInfo(DisabledInfo)}
- * method and enabled by removing disabled info with the {@link State#removeDisabledInfo(DisabledInfo)} method.
- * A bundle is not considered to be enabled unless there are no disabled info objects for the bundle.
+ * A disabled info represents a policy decision to disable a bundle which exists
+ * in a {@link State}. Bundles may be disabled by adding disabled info with the
+ * {@link State#addDisabledInfo(DisabledInfo)} method and enabled by removing
+ * disabled info with the {@link State#removeDisabledInfo(DisabledInfo)} method.
+ * A bundle is not considered to be enabled unless there are no disabled info
+ * objects for the bundle.
  * <p>
- * While resolving the bundle if the {@link Resolver} encounters a {@link BundleDescription} which
- * has disabled info returned by {@link State#getDisabledInfos(BundleDescription)} then the bundle
- * must not be allowed to resolve and a ResolverError of type {@link ResolverError#DISABLED_BUNDLE}
- * must be added to the state.
+ * While resolving the bundle if the {@link Resolver} encounters a
+ * {@link BundleDescription} which has disabled info returned by
+ * {@link State#getDisabledInfos(BundleDescription)} then the bundle must not be
+ * allowed to resolve and a ResolverError of type
+ * {@link ResolverError#DISABLED_BUNDLE} must be added to the state.
  * </p>
+ * 
  * @see State
  * @since 3.4
  */
@@ -34,9 +38,10 @@ public final class DisabledInfo {
 
 	/**
 	 * DisabledInfo constructor.
+	 * 
 	 * @param policyName the name of the policy
-	 * @param message the message, may be <code>null</code>
-	 * @param bundle the bundle
+	 * @param message    the message, may be <code>null</code>
+	 * @param bundle     the bundle
 	 */
 	public DisabledInfo(String policyName, String message, BundleDescription bundle) {
 		if (policyName == null || bundle == null)
@@ -48,6 +53,7 @@ public final class DisabledInfo {
 
 	/**
 	 * Returns the name of the policy which disabled the bundle.
+	 * 
 	 * @return the name of the policy
 	 */
 	public String getPolicyName() {
@@ -56,6 +62,7 @@ public final class DisabledInfo {
 
 	/**
 	 * Returns the message describing the reason the bundle is disabled.
+	 * 
 	 * @return the message
 	 */
 	public String getMessage() {
@@ -64,6 +71,7 @@ public final class DisabledInfo {
 
 	/**
 	 * Returns the bundle which is disabled
+	 * 
 	 * @return the bundle which is disabled
 	 */
 	public BundleDescription getBundle() {

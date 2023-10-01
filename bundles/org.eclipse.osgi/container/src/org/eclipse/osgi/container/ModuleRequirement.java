@@ -26,9 +26,10 @@ import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.resource.Namespace;
 
 /**
- * An implementation of {@link BundleRequirement}.  This requirement implements
+ * An implementation of {@link BundleRequirement}. This requirement implements
  * the matches method according to the OSGi specification which includes
  * implementing the mandatory directive for the osgi.wiring.* namespaces.
+ * 
  * @since 3.10
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -38,7 +39,8 @@ public class ModuleRequirement implements BundleRequirement {
 	private final Map<String, Object> attributes;
 	private final ModuleRevision revision;
 
-	ModuleRequirement(String namespace, Map<String, String> directives, Map<String, ?> attributes, ModuleRevision revision) {
+	ModuleRequirement(String namespace, Map<String, String> directives, Map<String, ?> attributes,
+			ModuleRevision revision) {
 		this.namespace = namespace;
 		this.directives = ModuleRevisionBuilder.unmodifiableMap(directives);
 		this.attributes = ModuleRevisionBuilder.unmodifiableMap(attributes);
@@ -63,7 +65,8 @@ public class ModuleRequirement implements BundleRequirement {
 				return false;
 			}
 		}
-		boolean matchMandatory = PackageNamespace.PACKAGE_NAMESPACE.equals(namespace) || BundleNamespace.BUNDLE_NAMESPACE.equals(namespace) || HostNamespace.HOST_NAMESPACE.equals(namespace);
+		boolean matchMandatory = PackageNamespace.PACKAGE_NAMESPACE.equals(namespace)
+				|| BundleNamespace.BUNDLE_NAMESPACE.equals(namespace) || HostNamespace.HOST_NAMESPACE.equals(namespace);
 		return Capabilities.matches(f, capability, matchMandatory);
 	}
 
@@ -98,7 +101,8 @@ public class ModuleRequirement implements BundleRequirement {
 		if (!PackageNamespace.PACKAGE_NAMESPACE.equals(namespace)) {
 			return null;
 		}
-		if (!PackageNamespace.RESOLUTION_DYNAMIC.equals(directives.get(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
+		if (!PackageNamespace.RESOLUTION_DYNAMIC
+				.equals(directives.get(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
 			// not dynamic
 			return null;
 		}
@@ -119,10 +123,12 @@ public class ModuleRequirement implements BundleRequirement {
 		String specificPackageFilter = null;
 		if ("*".equals(filterPackageName)) { //$NON-NLS-1$
 			// matches all
-			specificPackageFilter = dynamicFilter.replace(PACKAGENAME_FILTER_COMPONENT + filterPackageName, PACKAGENAME_FILTER_COMPONENT + dynamicPkgName);
+			specificPackageFilter = dynamicFilter.replace(PACKAGENAME_FILTER_COMPONENT + filterPackageName,
+					PACKAGENAME_FILTER_COMPONENT + dynamicPkgName);
 		} else if (filterPackageName.endsWith(".*")) { //$NON-NLS-1$
 			if (dynamicPkgName.startsWith(filterPackageName.substring(0, filterPackageName.length() - 1))) {
-				specificPackageFilter = dynamicFilter.replace(PACKAGENAME_FILTER_COMPONENT + filterPackageName, PACKAGENAME_FILTER_COMPONENT + dynamicPkgName);
+				specificPackageFilter = dynamicFilter.replace(PACKAGENAME_FILTER_COMPONENT + filterPackageName,
+						PACKAGENAME_FILTER_COMPONENT + dynamicPkgName);
 			}
 		} else if (dynamicPkgName.equals(filterPackageName)) {
 			specificPackageFilter = dynamicFilter;

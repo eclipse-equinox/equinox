@@ -18,6 +18,7 @@ import org.osgi.framework.Version;
 
 /**
  * A description of a generic capability.
+ * 
  * @since 3.2
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -29,40 +30,38 @@ public interface GenericDescription extends BaseDescription {
 
 	/**
 	 * Returns the arbitrary attributes for this description
+	 * 
 	 * @return the arbitrary attributes for this description
 	 */
 	public Dictionary<String, Object> getAttributes();
 
 	/**
 	 * Returns the type of generic description capability
+	 * 
 	 * @return the type of generic description capability
 	 */
 	public String getType();
 
 	/**
-	 * This method is deprecated.  Capabilities do not always have a
-	 * name associated with them.  All matching attributes associated
-	 * with a capability are available in the attributes of a
-	 * capability.  This method will return the value of the
-	 * attribute with the same key as this capabilities type.
-	 * If this attribute's value is not a String then null is
-	 * returned.
-	 * @deprecated matching should only be done against a capability's
-	 * attributes.
+	 * This method is deprecated. Capabilities do not always have a name associated
+	 * with them. All matching attributes associated with a capability are available
+	 * in the attributes of a capability. This method will return the value of the
+	 * attribute with the same key as this capabilities type. If this attribute's
+	 * value is not a String then null is returned.
+	 * 
+	 * @deprecated matching should only be done against a capability's attributes.
 	 */
 	@Override
 	public String getName();
 
 	/**
-	 * This method is deprecated.  Capabilities do not always have a
-	 * version associated with them. All matching attributes associated
-	 * with a capability are available in the attributes of a
-	 * capability.  This method will return the value of the
-	 * attribute with the key <code>"version"</code>.
-	 * If this attribute's value is not a {@link Version} then null is
-	 * returned.
-	 * @deprecated matching should only be done against a capability's
-	 * attributes.
+	 * This method is deprecated. Capabilities do not always have a version
+	 * associated with them. All matching attributes associated with a capability
+	 * are available in the attributes of a capability. This method will return the
+	 * value of the attribute with the key <code>"version"</code>. If this
+	 * attribute's value is not a {@link Version} then null is returned.
+	 * 
+	 * @deprecated matching should only be done against a capability's attributes.
 	 */
 	@Override
 	public Version getVersion();

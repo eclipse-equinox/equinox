@@ -25,8 +25,9 @@ public class AtomicLazyInitializer<V> {
 	private final AtomicReference<V> holder = new AtomicReference<>();
 
 	/**
-	 * Gets the current value.  If the value has not been initialized then
+	 * Gets the current value. If the value has not been initialized then
 	 * {@code null} is returned;
+	 * 
 	 * @return the current value
 	 */
 	public final V get() {
@@ -34,10 +35,14 @@ public class AtomicLazyInitializer<V> {
 	}
 
 	/**
-	 * Atomically gets the current initialized value.  If the current value is {@code null}
-	 * then the supplied initializer is called to create the value returned.
-	 * @param initializer the initializer to call if the current value is {@code null}
-	 * @return the initialized value.  May return {@code null} if initializer returns null.
+	 * Atomically gets the current initialized value. If the current value is
+	 * {@code null} then the supplied initializer is called to create the value
+	 * returned.
+	 * 
+	 * @param initializer the initializer to call if the current value is
+	 *                    {@code null}
+	 * @return the initialized value. May return {@code null} if initializer returns
+	 *         null.
 	 */
 	public final V getInitialized(Callable<V> initializer) {
 		V result = holder.get();
@@ -61,7 +66,9 @@ public class AtomicLazyInitializer<V> {
 	}
 
 	/**
-	 * Gets the current value and clears the value for future calls to this lazy initializer.
+	 * Gets the current value and clears the value for future calls to this lazy
+	 * initializer.
+	 * 
 	 * @return the current value
 	 */
 	public final V getAndClear() {

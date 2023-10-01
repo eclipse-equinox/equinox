@@ -17,8 +17,9 @@ package org.eclipse.osgi.storage.bundlefile;
 import org.eclipse.osgi.internal.hookregistry.BundleFileWrapperFactoryHook;
 
 /**
- * Used to chain the BundleFile objects returned from {@link BundleFileWrapperFactoryHook}.
- * This class is useful for traversing the chain of wrapped bundle files.
+ * Used to chain the BundleFile objects returned from
+ * {@link BundleFileWrapperFactoryHook}. This class is useful for traversing the
+ * chain of wrapped bundle files.
  */
 public class BundleFileWrapperChain extends BundleFileWrapper {
 	private final BundleFile wrapped;
@@ -37,6 +38,7 @@ public class BundleFileWrapperChain extends BundleFileWrapper {
 
 	/**
 	 * The BundleFile that is wrapped
+	 * 
 	 * @return the BunldeFile that is wrapped
 	 */
 	public BundleFile getWrapped() {
@@ -44,8 +46,9 @@ public class BundleFileWrapperChain extends BundleFileWrapper {
 	}
 
 	/**
-	 * The next WrapperBundleFile in the chain.  A <code>null</code> value
-	 * is returned if this is the end of the chain.
+	 * The next WrapperBundleFile in the chain. A <code>null</code> value is
+	 * returned if this is the end of the chain.
+	 * 
 	 * @return the next WrapperBundleFile
 	 */
 	public BundleFileWrapperChain getNext() {
@@ -53,9 +56,10 @@ public class BundleFileWrapperChain extends BundleFileWrapper {
 	}
 
 	/**
-	 * Returns the first bundle file wrapped in this chain which
-	 * also is an instance of the specified type.
-	 * @param <T> The type being searched for
+	 * Returns the first bundle file wrapped in this chain which also is an instance
+	 * of the specified type.
+	 * 
+	 * @param <T>  The type being searched for
 	 * @param type the class of the type being searched for
 	 * @return the found bundle file that is an instance of the specified type
 	 */

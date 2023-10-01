@@ -72,29 +72,30 @@ class OSGiFrameworkHooks {
 		@Override
 		public void filterCollisions(int operationType, Module target, Collection<Module> collisionCandidates) {
 			switch (container.getConfiguration().BSN_VERSION) {
-				case EquinoxConfiguration.BSN_VERSION_SINGLE : {
-					return;
+			case EquinoxConfiguration.BSN_VERSION_SINGLE: {
+				return;
+			}
+			case EquinoxConfiguration.BSN_VERSION_MULTIPLE: {
+				collisionCandidates.clear();
+				return;
+			}
+			case EquinoxConfiguration.BSN_VERSION_MANAGED: {
+				Bundle targetBundle = target.getBundle();
+				ArrayMap<Bundle, Module> candidateBundles = new ArrayMap<>(collisionCandidates.size());
+				for (Module module : collisionCandidates) {
+					candidateBundles.put(module.getBundle(), module);
 				}
-				case EquinoxConfiguration.BSN_VERSION_MULTIPLE : {
-					collisionCandidates.clear();
-					return;
-				}
-				case EquinoxConfiguration.BSN_VERSION_MANAGED : {
-					Bundle targetBundle = target.getBundle();
-					ArrayMap<Bundle, Module> candidateBundles = new ArrayMap<>(collisionCandidates.size());
-					for (Module module : collisionCandidates) {
-						candidateBundles.put(module.getBundle(), module);
-					}
-					notifyCollisionHooks(operationType, targetBundle, candidateBundles);
-					collisionCandidates.retainAll(candidateBundles.getValues());
-					return;
-				}
-				default :
-					throw new IllegalStateException("Bad configuration: " + container.getConfiguration().BSN_VERSION); //$NON-NLS-1$
+				notifyCollisionHooks(operationType, targetBundle, candidateBundles);
+				collisionCandidates.retainAll(candidateBundles.getValues());
+				return;
+			}
+			default:
+				throw new IllegalStateException("Bad configuration: " + container.getConfiguration().BSN_VERSION); //$NON-NLS-1$
 			}
 		}
 
-		private void notifyCollisionHooks(final int operationType, final Bundle target, Collection<Bundle> collisionCandidates) {
+		private void notifyCollisionHooks(final int operationType, final Bundle target,
+				Collection<Bundle> collisionCandidates) {
 			// Note that collision hook results are honored for the system bundle.
 			final Collection<Bundle> shrinkable = new ShrinkableCollection<>(collisionCandidates);
 			if (System.getSecurityManager() == null) {
@@ -107,9 +108,11 @@ class OSGiFrameworkHooks {
 			}
 		}
 
-		void notifyCollisionHooksPriviledged(final int operationType, final Bundle target, final Collection<Bundle> collisionCandidates) {
+		void notifyCollisionHooksPriviledged(final int operationType, final Bundle target,
+				final Collection<Bundle> collisionCandidates) {
 			if (debug.DEBUG_HOOKS) {
-				Debug.println("notifyCollisionHooks(" + operationType + ", " + target + ", " + collisionCandidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				Debug.println(
+						"notifyCollisionHooks(" + operationType + ", " + target + ", " + collisionCandidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
 			ServiceRegistry registry = container.getServiceRegistry();
 			if (registry != null) {
@@ -120,9 +123,10 @@ class OSGiFrameworkHooks {
 	}
 
 	/**
-	 * This class encapsulates the delegation to ResolverHooks that are registered with the service
-	 * registry.  This way the resolver implementation only has to call out to a single hook
-	 * which does all the necessary service registry lookups.
+	 * This class encapsulates the delegation to ResolverHooks that are registered
+	 * with the service registry. This way the resolver implementation only has to
+	 * call out to a single hook which does all the necessary service registry
+	 * lookups.
 	 *
 	 * This class is not thread safe and expects external synchronization.
 	 */
@@ -130,7 +134,8 @@ class OSGiFrameworkHooks {
 		// need a tuple to hold the service reference and hook object
 		// do not use a map for performance reasons; no need to hash based on a key.
 		static class HookReference {
-			public HookReference(ServiceReferenceImpl<ResolverHookFactory> reference, ResolverHook hook, BundleContextImpl context) {
+			public HookReference(ServiceReferenceImpl<ResolverHookFactory> reference, ResolverHook hook,
+					BundleContextImpl context) {
 				this.reference = reference;
 				this.hook = hook;
 				this.context = context;
@@ -162,11 +167,13 @@ class OSGiFrameworkHooks {
 			throw new RuntimeException(message, new BundleException(message, BundleException.REJECTED_BY_HOOK, t));
 		}
 
-		private ServiceReferenceImpl<ResolverHookFactory>[] getHookReferences(final ServiceRegistry registry, final BundleContextImpl context) {
+		private ServiceReferenceImpl<ResolverHookFactory>[] getHookReferences(final ServiceRegistry registry,
+				final BundleContextImpl context) {
 			return AccessController.doPrivileged((PrivilegedAction<ServiceReferenceImpl<ResolverHookFactory>[]>) () -> {
 				try {
 					@SuppressWarnings("unchecked")
-					ServiceReferenceImpl<ResolverHookFactory>[] result = (ServiceReferenceImpl<ResolverHookFactory>[]) registry.getServiceReferences(context, ResolverHookFactory.class.getName(), null, false);
+					ServiceReferenceImpl<ResolverHookFactory>[] result = (ServiceReferenceImpl<ResolverHookFactory>[]) registry
+							.getServiceReferences(context, ResolverHookFactory.class.getName(), null, false);
 					return result;
 				} catch (InvalidSyntaxException e) {
 					// cannot happen; no filter
@@ -188,11 +195,11 @@ class OSGiFrameworkHooks {
 				return new CoreResolverHook(Collections.emptyList(), systemModule);
 			}
 
-			BundleContextImpl context = (BundleContextImpl) EquinoxContainer.secureAction.getContext(systemModule.getBundle());
+			BundleContextImpl context = (BundleContextImpl) EquinoxContainer.secureAction
+					.getContext(systemModule.getBundle());
 
 			ServiceReferenceImpl<ResolverHookFactory>[] refs = getHookReferences(registry, context);
-			List<HookReference> hookRefs = refs == null ? Collections.emptyList()
-					: new ArrayList<>(refs.length);
+			List<HookReference> hookRefs = refs == null ? Collections.emptyList() : new ArrayList<>(refs.length);
 			if (refs != null) {
 				for (ServiceReferenceImpl<ResolverHookFactory> hookRef : refs) {
 					ResolverHookFactory factory = EquinoxContainer.secureAction.getService(hookRef, context);
@@ -233,7 +240,8 @@ class OSGiFrameworkHooks {
 					Debug.println("ResolverHook.filterResolvable(" + candidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				if (isBootInit()) {
-					// only allow the system bundle and its fragments resolve during boot up and init
+					// only allow the system bundle and its fragments resolve during boot up and
+					// init
 					for (Iterator<BundleRevision> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
 						BundleRevision revision = iCandidates.next();
 						if ((revision.getTypes() & BundleRevision.TYPE_FRAGMENT) == 0) {
@@ -242,7 +250,8 @@ class OSGiFrameworkHooks {
 								iCandidates.remove();
 							}
 						}
-						// just leave all fragments.  Only the ones that are system bundle fragments will resolve
+						// just leave all fragments. Only the ones that are system bundle fragments will
+						// resolve
 						// since we removed all the other possible hosts.
 					}
 				}
@@ -269,9 +278,11 @@ class OSGiFrameworkHooks {
 			}
 
 			@Override
-			public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
+			public void filterSingletonCollisions(BundleCapability singleton,
+					Collection<BundleCapability> collisionCandidates) {
 				if (debug.DEBUG_HOOKS) {
-					Debug.println("ResolverHook.filterSingletonCollisions(" + singleton + ", " + collisionCandidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					Debug.println(
+							"ResolverHook.filterSingletonCollisions(" + singleton + ", " + collisionCandidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 				if (hooks.isEmpty())
 					return;
@@ -322,7 +333,8 @@ class OSGiFrameworkHooks {
 					Throwable endError = null;
 					HookReference endBadHook = null;
 					for (HookReference hookRef : hooks) {
-						// We do not remove unregistered services here because we are going to remove all of them at the end
+						// We do not remove unregistered services here because we are going to remove
+						// all of them at the end
 						if (hookRef.reference.getBundle() == null) {
 							if (missingHook == null)
 								missingHook = hookRef;

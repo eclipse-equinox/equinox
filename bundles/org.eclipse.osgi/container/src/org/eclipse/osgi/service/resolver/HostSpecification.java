@@ -14,24 +14,29 @@
 package org.eclipse.osgi.service.resolver;
 
 /**
- * A representation of one host bundle constraint as seen in a
- * bundle manifest and managed by a state and resolver.
+ * A representation of one host bundle constraint as seen in a bundle manifest
+ * and managed by a state and resolver.
  * <p>
- * This interface is not intended to be implemented by clients.  The
+ * This interface is not intended to be implemented by clients. The
  * {@link StateObjectFactory} should be used to construct instances.
  * </p>
+ * 
  * @since 3.1
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface HostSpecification extends VersionConstraint {
 	/**
-	 * Returns the list of host BundleDescriptions that satisfy this HostSpecification
-	 * @return the list of host BundleDescriptions that satisfy this HostSpecification
+	 * Returns the list of host BundleDescriptions that satisfy this
+	 * HostSpecification
+	 * 
+	 * @return the list of host BundleDescriptions that satisfy this
+	 *         HostSpecification
 	 */
 	public BundleDescription[] getHosts();
 
 	/**
 	 * Returns if this HostSpecification is allowed to have multiple hosts
+	 * 
 	 * @return true if this HostSpecification is allowed to have multiple hosts
 	 */
 	public boolean isMultiHost();

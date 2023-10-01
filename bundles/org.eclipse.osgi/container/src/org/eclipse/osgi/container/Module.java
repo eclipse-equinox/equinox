@@ -34,8 +34,9 @@ import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.service.resolver.ResolutionException;
 
 /**
- * A module represents a set of revisions installed in a
- * module {@link ModuleContainer container}.
+ * A module represents a set of revisions installed in a module
+ * {@link ModuleContainer container}.
+ * 
  * @since 3.10
  */
 public abstract class Module implements BundleReference, BundleStartLevel, Comparable<Module> {
@@ -44,13 +45,13 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 */
 	public static enum StartOptions {
 		/**
-		 * The module start operation is transient and the persistent
-		 * autostart or activation policy setting of the module is not modified.
+		 * The module start operation is transient and the persistent autostart or
+		 * activation policy setting of the module is not modified.
 		 */
 		TRANSIENT,
 		/**
-		 * The module start operation must activate the module according to the module's declared
-		 * activation policy.
+		 * The module start operation must activate the module according to the module's
+		 * declared activation policy.
 		 */
 		USE_ACTIVATION_POLICY,
 		/**
@@ -59,13 +60,13 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		 */
 		TRANSIENT_RESUME,
 		/**
-		 * The module start operation is transient and will only happen if {@link Settings#AUTO_START auto start}
-		 * setting is persistent.
+		 * The module start operation is transient and will only happen if
+		 * {@link Settings#AUTO_START auto start} setting is persistent.
 		 */
 		TRANSIENT_IF_AUTO_START,
 		/**
-		 * The module start operation that indicates the module is being started because of a
-		 * lazy start trigger class load.
+		 * The module start operation that indicates the module is being started because
+		 * of a lazy start trigger class load.
 		 */
 		LAZY_TRIGGER;
 
@@ -87,8 +88,8 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 */
 	public static enum StopOptions {
 		/**
-		 * The module stop operation is transient and the persistent
-		 * autostart setting of the module is not modified.
+		 * The module stop operation is transient and the persistent autostart setting
+		 * of the module is not modified.
 		 */
 		TRANSIENT;
 
@@ -106,7 +107,8 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	/**
-	 * An enumeration of the possible {@link Module#getState() states} a module may be in.
+	 * An enumeration of the possible {@link Module#getState() states} a module may
+	 * be in.
 	 */
 	public static enum State {
 		/**
@@ -118,8 +120,8 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		 */
 		RESOLVED,
 		/**
-		 * The module is waiting for a {@link StartOptions#LAZY_TRIGGER trigger}
-		 * class load to proceed with starting.
+		 * The module is waiting for a {@link StartOptions#LAZY_TRIGGER trigger} class
+		 * load to proceed with starting.
 		 */
 		LAZY_STARTING,
 		/**
@@ -154,6 +156,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		USE_ACTIVATION_POLICY,
 		/**
 		 * The module has been set for parallel activation from start-level
+		 * 
 		 * @since 3.15
 		 */
 		PARALLEL_ACTIVATION
@@ -162,11 +165,13 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	/**
 	 * A set of {@link State states} that indicate a module is active.
 	 */
-	public static final EnumSet<State> ACTIVE_SET = EnumSet.of(State.STARTING, State.LAZY_STARTING, State.ACTIVE, State.STOPPING);
+	public static final EnumSet<State> ACTIVE_SET = EnumSet.of(State.STARTING, State.LAZY_STARTING, State.ACTIVE,
+			State.STOPPING);
 	/**
 	 * A set of {@link State states} that indicate a module is resolved.
 	 */
-	public static final EnumSet<State> RESOLVED_SET = EnumSet.of(State.RESOLVED, State.STARTING, State.LAZY_STARTING, State.ACTIVE, State.STOPPING);
+	public static final EnumSet<State> RESOLVED_SET = EnumSet.of(State.RESOLVED, State.STARTING, State.LAZY_STARTING,
+			State.ACTIVE, State.STOPPING);
 
 	private final Long id;
 	private final String location;
@@ -180,12 +185,13 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	private volatile long lastModified;
 
 	/**
-	 * Constructs a new module with the specified id, location and
-	 * container.
-	 * @param id the new module id
-	 * @param location the new module location
-	 * @param container the container for the new module
-	 * @param settings the persisted settings.  May be {@code null} if there are no settings.
+	 * Constructs a new module with the specified id, location and container.
+	 * 
+	 * @param id         the new module id
+	 * @param location   the new module location
+	 * @param container  the container for the new module
+	 * @param settings   the persisted settings. May be {@code null} if there are no
+	 *                   settings.
 	 * @param startlevel the persisted start level or initial start level.
 	 */
 	public Module(Long id, String location, ModuleContainer container, EnumSet<Settings> settings, int startlevel) {
@@ -198,13 +204,16 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	/**
 	 * Returns the module id.
+	 * 
 	 * @return the module id.
 	 */
 	public final Long getId() {
 		return id;
 	}
 
-	/** Returns the module location
+	/**
+	 * Returns the module location
+	 * 
 	 * @return the module location
 	 */
 	public final String getLocation() {
@@ -213,6 +222,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	/**
 	 * Returns the {@link ModuleRevisions} associated with this module.
+	 * 
 	 * @return the {@link ModuleRevisions} associated with this module
 	 */
 	public final ModuleRevisions getRevisions() {
@@ -221,6 +231,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	/**
 	 * Returns the module container this module is contained in.
+	 * 
 	 * @return the module container.
 	 */
 	public final ModuleContainer getContainer() {
@@ -228,9 +239,12 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	/**
-	 * Returns the current {@link ModuleRevision revision} associated with this module.
-	 * If the module is uninstalled then the last current revision is returned.
-	 * @return the current {@link ModuleRevision revision} associated with this module.
+	 * Returns the current {@link ModuleRevision revision} associated with this
+	 * module. If the module is uninstalled then the last current revision is
+	 * returned.
+	 * 
+	 * @return the current {@link ModuleRevision revision} associated with this
+	 *         module.
 	 */
 	public final ModuleRevision getCurrentRevision() {
 		return revisions.getCurrentRevision();
@@ -238,6 +252,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	/**
 	 * Returns the current {@link State state} of this module.
+	 * 
 	 * @return the current state of this module.
 	 */
 	public final State getState() {
@@ -276,10 +291,12 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	/**
-	 * Returns the time when this module was last modified.  A module is considered
+	 * Returns the time when this module was last modified. A module is considered
 	 * to be modified when it is installed, updated or uninstalled.
 	 * <p>
-	 * The time value is a the number of milliseconds since January 1, 1970, 00:00:00 UTC.
+	 * The time value is a the number of milliseconds since January 1, 1970,
+	 * 00:00:00 UTC.
+	 * 
 	 * @return the time when this bundle was last modified.
 	 */
 	public final long getLastModified() {
@@ -291,42 +308,46 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	private static final EnumSet<ModuleEvent> VALID_RESOLVED_TRANSITION = EnumSet.of(ModuleEvent.STARTED);
-	private static final EnumSet<ModuleEvent> VALID_STOPPED_TRANSITION = EnumSet.of(ModuleEvent.UPDATED, ModuleEvent.UNRESOLVED, ModuleEvent.UNINSTALLED);
+	private static final EnumSet<ModuleEvent> VALID_STOPPED_TRANSITION = EnumSet.of(ModuleEvent.UPDATED,
+			ModuleEvent.UNRESOLVED, ModuleEvent.UNINSTALLED);
 
 	/**
-	 * Acquires the module lock for state changes by the current thread for the specified
-	 * transition event.  Certain transition events locks may be nested within other
-	 * transition event locks.  For example, a resolved transition event lock may be
-	 * nested within a started transition event lock.  A stopped transition lock
-	 * may be nested within an updated, unresolved or uninstalled transition lock.
+	 * Acquires the module lock for state changes by the current thread for the
+	 * specified transition event. Certain transition events locks may be nested
+	 * within other transition event locks. For example, a resolved transition event
+	 * lock may be nested within a started transition event lock. A stopped
+	 * transition lock may be nested within an updated, unresolved or uninstalled
+	 * transition lock.
+	 * 
 	 * @param transitionEvent the transition event to acquire the lock for.
 	 */
 	protected final void lockStateChange(ModuleEvent transitionEvent) throws BundleException {
 		boolean previousInterruption = Thread.interrupted();
 		boolean invalid = false;
 		try {
-			boolean acquired = stateChangeLock.tryLock(revisions.getContainer().getModuleLockTimeout(), TimeUnit.SECONDS);
+			boolean acquired = stateChangeLock.tryLock(revisions.getContainer().getModuleLockTimeout(),
+					TimeUnit.SECONDS);
 			Set<ModuleEvent> currentTransition = Collections.emptySet();
 			if (acquired) {
 				boolean isValidTransition = true;
 				switch (transitionEvent) {
-					case STARTED :
-					case UPDATED :
-					case UNINSTALLED :
-					case UNRESOLVED :
-						// These states must be initiating transition states
-						// no other transition state is allowed when these are kicked off
-						isValidTransition = stateTransitionEvents.isEmpty();
-						break;
-					case RESOLVED :
-						isValidTransition = VALID_RESOLVED_TRANSITION.containsAll(stateTransitionEvents);
-						break;
-					case STOPPED :
-						isValidTransition = VALID_STOPPED_TRANSITION.containsAll(stateTransitionEvents);
-						break;
-					default :
-						isValidTransition = false;
-						break;
+				case STARTED:
+				case UPDATED:
+				case UNINSTALLED:
+				case UNRESOLVED:
+					// These states must be initiating transition states
+					// no other transition state is allowed when these are kicked off
+					isValidTransition = stateTransitionEvents.isEmpty();
+					break;
+				case RESOLVED:
+					isValidTransition = VALID_RESOLVED_TRANSITION.containsAll(stateTransitionEvents);
+					break;
+				case STOPPED:
+					isValidTransition = VALID_STOPPED_TRANSITION.containsAll(stateTransitionEvents);
+					break;
+				default:
+					isValidTransition = false;
+					break;
 				}
 				if (!isValidTransition) {
 					currentTransition = EnumSet.copyOf(stateTransitionEvents);
@@ -341,15 +362,19 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			}
 			Throwable cause;
 			if (invalid) {
-				cause = new IllegalStateException(NLS.bind(Msg.Module_LockStateError, transitionEvent, currentTransition));
+				cause = new IllegalStateException(
+						NLS.bind(Msg.Module_LockStateError, transitionEvent, currentTransition));
 			} else {
-				cause = new TimeoutException(NLS.bind(Msg.Module_LockTimeout, revisions.getContainer().getModuleLockTimeout())).initCause(new ThreadInfoReport(stateChangeLock.toString()));
+				cause = new TimeoutException(
+						NLS.bind(Msg.Module_LockTimeout, revisions.getContainer().getModuleLockTimeout()))
+						.initCause(new ThreadInfoReport(stateChangeLock.toString()));
 			}
 			String exceptonInfo = toString() + ' ' + transitionEvent + ' ' + currentTransition;
 			throw new BundleException(Msg.Module_LockError + exceptonInfo, BundleException.STATECHANGE_ERROR, cause);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new BundleException(Msg.Module_LockError + toString() + ' ' + transitionEvent, BundleException.STATECHANGE_ERROR, e);
+			throw new BundleException(Msg.Module_LockError + toString() + ' ' + transitionEvent,
+					BundleException.STATECHANGE_ERROR, e);
 		} finally {
 			if (previousInterruption) {
 				Thread.currentThread().interrupt();
@@ -362,22 +387,27 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 */
 	protected final void unlockStateChange(ModuleEvent transitionEvent) {
 		if (stateChangeLock.getHoldCount() == 0 || !stateTransitionEvents.contains(transitionEvent))
-			throw new IllegalMonitorStateException("Current thread does not hold the state change lock for: " + transitionEvent); //$NON-NLS-1$
+			throw new IllegalMonitorStateException(
+					"Current thread does not hold the state change lock for: " + transitionEvent); //$NON-NLS-1$
 		stateTransitionEvents.remove(transitionEvent);
 		stateChangeLock.unlock();
 	}
 
 	/**
-	 * Returns true if the current thread holds the state change lock for the specified transition event.
-	 * @return true if the current thread holds the state change lock for the specified transition event.
+	 * Returns true if the current thread holds the state change lock for the
+	 * specified transition event.
+	 * 
+	 * @return true if the current thread holds the state change lock for the
+	 *         specified transition event.
 	 */
 	public final boolean holdsTransitionEventLock(ModuleEvent transitionEvent) {
 		return stateChangeLock.getHoldCount() > 0 && stateTransitionEvents.contains(transitionEvent);
 	}
 
 	/**
-	 * Returns the thread that currently owns the state change lock for this module, or
-	 * <code>null</code> if not owned.
+	 * Returns the thread that currently owns the state change lock for this module,
+	 * or <code>null</code> if not owned.
+	 * 
 	 * @return the owner, or <code>null</code> if not owned.
 	 */
 	public final Thread getStateChangeOwner() {
@@ -386,6 +416,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	/**
 	 * Starts this module
+	 * 
 	 * @param options the options for starting
 	 * @throws BundleException if an errors occurs while starting
 	 */
@@ -417,14 +448,16 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			lockedStarted = true;
 			checkValid();
 			if (StartOptions.TRANSIENT_IF_AUTO_START.isContained(options) && !settings.contains(Settings.AUTO_START)) {
-				// Do nothing; this is a request to start only if the module is set for auto start
+				// Do nothing; this is a request to start only if the module is set for auto
+				// start
 				return;
 			}
 			checkFragment();
 			persistStartOptions(options);
 			if (getStartLevel() > container.getStartLevel()) {
 				if (StartOptions.TRANSIENT.isContained(options)) {
-					// it is an error to attempt to transient start a bundle without its start level met
+					// it is an error to attempt to transient start a bundle without its start level
+					// met
 					throw new BundleException(Msg.Module_Transient_StartError + ' ' + this,
 							BundleException.START_TRANSIENT_ERROR);
 				}
@@ -481,9 +514,11 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 			if (!EnumSet.of(ModuleEvent.STARTED, ModuleEvent.LAZY_ACTIVATION, ModuleEvent.STOPPED).contains(event))
 				throw new IllegalStateException("Wrong event type: " + event); //$NON-NLS-1$
 			publishEvent(event);
-			// only print bundleTime information if we actually fired an event for this bundle
+			// only print bundleTime information if we actually fired an event for this
+			// bundle
 			if (container.DEBUG_BUNDLE_START_TIME) {
-				Debug.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime) + " ms for total start time event " + event + " - " + this); //$NON-NLS-1$ //$NON-NLS-2$
+				Debug.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime)
+						+ " ms for total start time event " + event + " - " + this); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 
@@ -498,6 +533,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	/**
 	 * Stops this module.
+	 * 
 	 * @param options options for stopping
 	 * @throws BundleException if an error occurs while stopping
 	 */
@@ -582,7 +618,8 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 		} else {
 			if (isLazyActivate(options) && !isTriggerSet()) {
 				if (State.LAZY_STARTING.equals(getState())) {
-					// a sync listener must have tried to start this module again with the lazy option
+					// a sync listener must have tried to start this module again with the lazy
+					// option
 					return null; // no event to publish; nothing to do
 				}
 				// set the lazy starting state and return lazy activation event for firing
@@ -642,8 +679,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	/**
-	 * Performs any work associated with starting a module.  For example,
-	 * loading and calling start on an activator.
+	 * Performs any work associated with starting a module. For example, loading and
+	 * calling start on an activator.
+	 * 
 	 * @throws BundleException if there was an exception starting the module
 	 */
 	protected void startWorker() throws BundleException {
@@ -667,8 +705,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	/**
-	 * Performs any work associated with stopping a module.  For example,
-	 * calling stop on an activator.
+	 * Performs any work associated with stopping a module. For example, calling
+	 * stop on an activator.
+	 * 
 	 * @throws BundleException if there was an exception stopping the module
 	 */
 	protected void stopWorker() throws BundleException {
@@ -681,7 +720,8 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	private void persistStartOptions(StartOptions... options) {
-		if (StartOptions.TRANSIENT.isContained(options) || StartOptions.TRANSIENT_RESUME.isContained(options) || StartOptions.LAZY_TRIGGER.isContained(options)) {
+		if (StartOptions.TRANSIENT.isContained(options) || StartOptions.TRANSIENT_RESUME.isContained(options)
+				|| StartOptions.LAZY_TRIGGER.isContained(options)) {
 			return;
 		}
 
@@ -703,9 +743,11 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	/**
-	 * Set if this module should be activated in parallel with other modules that have
-	 * the same {@link #getStartLevel() start level}.
-	 * @param parallelActivation true if the module should be started in parallel; false otherwise
+	 * Set if this module should be activated in parallel with other modules that
+	 * have the same {@link #getStartLevel() start level}.
+	 * 
+	 * @param parallelActivation true if the module should be started in parallel;
+	 *                           false otherwise
 	 * @since 3.15
 	 */
 	public void setParallelActivation(boolean parallelActivation) {
@@ -718,8 +760,9 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	}
 
 	/**
-	 * Returns if this module should be activated in parallel with other modules that have
-	 * the same {@link #getStartLevel() start level}.
+	 * Returns if this module should be activated in parallel with other modules
+	 * that have the same {@link #getStartLevel() start level}.
+	 * 
 	 * @return true if the module should be started in parallel; false otherwise
 	 * @since 3.15
 	 */
@@ -730,6 +773,7 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	/**
 	 * The container is done with the revision and it has been completely removed.
 	 * This method allows the resources behind the revision to be cleaned up.
+	 * 
 	 * @param revision the revision to clean up
 	 */
 	abstract protected void cleanup(ModuleRevision revision);
