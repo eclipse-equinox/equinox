@@ -30,18 +30,20 @@ public class StructuredTextSomeMoreTest extends StructuredTextTestBase {
 	private class TestHandler1 extends StructuredTextTypeHandler {
 
 		public TestHandler1() {
-			//empty constructor
+			// empty constructor
 		}
 
 		public int getSpecialsCount(IStructuredTextExpert expert) {
 			return 1;
 		}
 
-		public int indexOfSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets, int caseNumber, int fromIndex) {
+		public int indexOfSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes,
+				StructuredTextOffsets offsets, int caseNumber, int fromIndex) {
 			return fromIndex;
 		}
 
-		public int processSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets, int caseNumber, int separLocation) {
+		public int processSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes,
+				StructuredTextOffsets offsets, int caseNumber, int separLocation) {
 			int len = text.length();
 			for (int i = len - 1; i >= 0; i--) {
 				StructuredTextTypeHandler.insertMark(text, charTypes, offsets, i);
@@ -54,7 +56,7 @@ public class StructuredTextSomeMoreTest extends StructuredTextTestBase {
 	private class TestHandler2 extends StructuredTextTypeHandler {
 
 		public TestHandler2() {
-			//empty constructor
+			// empty constructor
 		}
 
 		public int getSpecialsCount(IStructuredTextExpert expert) {
@@ -65,20 +67,23 @@ public class StructuredTextSomeMoreTest extends StructuredTextTestBase {
 	private class TestHandler3 extends StructuredTextTypeHandler {
 
 		public TestHandler3() {
-			//empty constructor
+			// empty constructor
 		}
 
 		public int getSpecialsCount(IStructuredTextExpert expert) {
 			return 1;
 		}
 
-		public int indexOfSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets, int caseNumber, int fromIndex) {
+		public int indexOfSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes,
+				StructuredTextOffsets offsets, int caseNumber, int fromIndex) {
 			return fromIndex;
 		}
 	}
 
-	final static StructuredTextEnvironment env1 = new StructuredTextEnvironment("en_US", false, StructuredTextEnvironment.ORIENT_LTR);
-	final static StructuredTextEnvironment env2 = new StructuredTextEnvironment("he", false, StructuredTextEnvironment.ORIENT_LTR);
+	final static StructuredTextEnvironment env1 = new StructuredTextEnvironment("en_US", false,
+			StructuredTextEnvironment.ORIENT_LTR);
+	final static StructuredTextEnvironment env2 = new StructuredTextEnvironment("he", false,
+			StructuredTextEnvironment.ORIENT_LTR);
 
 	@Test
 	public void testSomeMore() {
