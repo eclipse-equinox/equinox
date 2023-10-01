@@ -45,28 +45,39 @@ import org.osgi.framework.Bundle;
 
 /**
  * <p>
- * JSPServlet wraps the Apache Jasper Servlet making it appropriate for running in an OSGi environment under the Http Service.
- * The Jasper JSPServlet makes use of the Thread Context Classloader to support compile and runtime of JSPs and to accommodate running
- * in an OSGi environment, a Bundle is used to provide the similar context normally provided by the webapp.
+ * JSPServlet wraps the Apache Jasper Servlet making it appropriate for running
+ * in an OSGi environment under the Http Service. The Jasper JSPServlet makes
+ * use of the Thread Context Classloader to support compile and runtime of JSPs
+ * and to accommodate running in an OSGi environment, a Bundle is used to
+ * provide the similar context normally provided by the webapp.
  * </p>
  * <p>
- *  The Jasper Servlet will search the ServletContext to find JSPs, tag library descriptors, and additional information in the web.xml
- *  as per the JSP 2.0 specification. In addition to the ServletContext this implementation will search the bundle (but not attached
- *  fragments) for matching resources in a manner consistent with the Http Service's notion of a resource. By using alias and bundleResourcePath the JSP lookup should be in 
- *  line with the resource mapping specified in {102.4} of the OSGi HttpService.
- *  </p>
- *  <p>
- *  TLD discovery is slightly different, to clarify it occurs in one of three ways:
- *  </p>
- *  <ol>
- *  <li> declarations found in /WEB-INF/web.xml (found either on the bundleResourcePath in the bundle or in the ServletContext)</li>
- *  <li> tld files found under /WEB-INF (found either on the bundleResourcePath in the bundle or in the ServletContext)</li>
- *  <li> tld files found in jars on the Bundle-Classpath (see org.eclipse.equinox.internal.jsp.jasper.JSPClassLoader)</li>
- *  </ol>
- *  <p>
- *  Other than the setting and resetting of the thread context classloader and additional resource lookups in the bundle the JSPServlet
- *  is behaviourally consistent with the JSP 2.0 specification and regular Jasper operation.
- *  </p>
+ * The Jasper Servlet will search the ServletContext to find JSPs, tag library
+ * descriptors, and additional information in the web.xml as per the JSP 2.0
+ * specification. In addition to the ServletContext this implementation will
+ * search the bundle (but not attached fragments) for matching resources in a
+ * manner consistent with the Http Service's notion of a resource. By using
+ * alias and bundleResourcePath the JSP lookup should be in line with the
+ * resource mapping specified in {102.4} of the OSGi HttpService.
+ * </p>
+ * <p>
+ * TLD discovery is slightly different, to clarify it occurs in one of three
+ * ways:
+ * </p>
+ * <ol>
+ * <li>declarations found in /WEB-INF/web.xml (found either on the
+ * bundleResourcePath in the bundle or in the ServletContext)</li>
+ * <li>tld files found under /WEB-INF (found either on the bundleResourcePath in
+ * the bundle or in the ServletContext)</li>
+ * <li>tld files found in jars on the Bundle-Classpath (see
+ * org.eclipse.equinox.internal.jsp.jasper.JSPClassLoader)</li>
+ * </ol>
+ * <p>
+ * Other than the setting and resetting of the thread context classloader and
+ * additional resource lookups in the bundle the JSPServlet is behaviourally
+ * consistent with the JSP 2.0 specification and regular Jasper operation.
+ * </p>
+ * 
  * @noextend This class is not intended to be subclassed by clients.
  */
 
@@ -105,7 +116,8 @@ public class JspServlet extends HttpServlet {
 
 	public JspServlet(Bundle bundle, String bundleResourcePath, String alias) {
 		this.bundle = bundle;
-		this.bundleResourcePath = (bundleResourcePath == null || bundleResourcePath.equals("/")) ? "" : bundleResourcePath; //$NON-NLS-1$ //$NON-NLS-2$
+		this.bundleResourcePath = (bundleResourcePath == null || bundleResourcePath.equals("/")) ? "" //$NON-NLS-1$ //$NON-NLS-2$
+				: bundleResourcePath;
 		this.alias = (alias == null || alias.equals("/")) ? null : alias; //$NON-NLS-1$
 		jspLoader = new JspClassLoader(bundle);
 	}
@@ -122,17 +134,20 @@ public class JspServlet extends HttpServlet {
 			jspServlet.init(new ServletConfigAdaptor(config));
 			new org.apache.jasper.servlet.JasperInitializer().onStartup(Collections.emptySet(), getServletContext());
 
-			// If a SecurityManager is set we need to override the permissions collection set in Jasper's JSPRuntimeContext
+			// If a SecurityManager is set we need to override the permissions collection
+			// set in Jasper's JSPRuntimeContext
 			if (System.getSecurityManager() != null) {
 				try {
 					Field jspRuntimeContextField = jspServlet.getClass().getDeclaredField("rctxt"); //$NON-NLS-1$
 					jspRuntimeContextField.setAccessible(true);
 					Object jspRuntimeContext = jspRuntimeContextField.get(jspServlet);
-					Field permissionCollectionField = jspRuntimeContext.getClass().getDeclaredField("permissionCollection"); //$NON-NLS-1$
+					Field permissionCollectionField = jspRuntimeContext.getClass()
+							.getDeclaredField("permissionCollection"); //$NON-NLS-1$
 					permissionCollectionField.setAccessible(true);
 					permissionCollectionField.set(jspRuntimeContext, new BundlePermissionCollection(bundle));
 				} catch (Exception e) {
-					throw new ServletException("Cannot initialize JSPServlet. Failed to set JSPRuntimeContext permission collection."); //$NON-NLS-1$
+					throw new ServletException(
+							"Cannot initialize JSPServlet. Failed to set JSPRuntimeContext permission collection."); //$NON-NLS-1$
 				}
 			}
 		} finally {
@@ -245,7 +260,7 @@ public class JspServlet extends HttpServlet {
 		public ServletContext createServletContext() {
 			Class<?> clazz = getClass();
 			ClassLoader classLoader = clazz.getClassLoader();
-			Class<?>[] interfaces = new Class[] {ServletContext.class};
+			Class<?>[] interfaces = new Class[] { ServletContext.class };
 			InvocationHandler handler = createInvocationHandler();
 			return (ServletContext) Proxy.newProxyInstance(classLoader, interfaces, handler);
 		}
@@ -287,19 +302,19 @@ public class JspServlet extends HttpServlet {
 			for (int i = 0; i < name.length(); i++) {
 				char c = name.charAt(i);
 				switch (c) {
-					case '*' :
-					case '\\' :
-						// we need to escape '*' and '\'
-						if (buffer == null) {
-							buffer = new StringBuffer(name.length() + 16);
-							buffer.append(name.substring(0, i));
-						}
-						buffer.append('\\').append(c);
-						break;
-					default :
-						if (buffer != null)
-							buffer.append(c);
-						break;
+				case '*':
+				case '\\':
+					// we need to escape '*' and '\'
+					if (buffer == null) {
+						buffer = new StringBuffer(name.length() + 16);
+						buffer.append(name.substring(0, i));
+					}
+					buffer.append('\\').append(c);
+					break;
+				default:
+					if (buffer != null)
+						buffer.append(c);
+					break;
 				}
 			}
 			return (buffer == null) ? name : buffer.toString();

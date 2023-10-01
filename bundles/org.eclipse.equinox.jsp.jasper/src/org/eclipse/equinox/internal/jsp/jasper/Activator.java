@@ -33,8 +33,9 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Pack
 
 	@Override
 	public void start(BundleContext context) throws Exception {
-		//disable the JSR99 compiler that does not work in OSGi;
-		//This will convince jasper to use the JDTCompiler that invokes ecj (see JSP-21 on the glassfish bug-tracker)
+		// disable the JSR99 compiler that does not work in OSGi;
+		// This will convince jasper to use the JDTCompiler that invokes ecj (see JSP-21
+		// on the glassfish bug-tracker)
 		System.setProperty("org.apache.jasper.compiler.disablejsr199", Boolean.TRUE.toString()); //$NON-NLS-1$
 		this.bundleContext = context;
 		thisBundle = context.getBundle();

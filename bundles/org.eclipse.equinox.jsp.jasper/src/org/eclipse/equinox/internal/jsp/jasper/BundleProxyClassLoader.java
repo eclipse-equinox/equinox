@@ -21,7 +21,8 @@ import java.util.Enumeration;
 import org.osgi.framework.Bundle;
 
 /**
- * A BundleProxyClassLoader wraps a bundle and uses the various Bundle methods to produce a ClassLoader. 
+ * A BundleProxyClassLoader wraps a bundle and uses the various Bundle methods
+ * to produce a ClassLoader.
  */
 public class BundleProxyClassLoader extends ClassLoader {
 	private final Bundle activatorBundle = Activator.getBundle(Activator.class);

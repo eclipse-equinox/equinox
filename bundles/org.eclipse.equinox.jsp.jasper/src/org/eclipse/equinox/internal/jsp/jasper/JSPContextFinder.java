@@ -33,8 +33,10 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction<Ar
 		}
 	}
 
-	//This is used to detect cycle that could be caused while delegating the loading to other classloaders
-	//It keeps track on a thread basis of the set of requested classes and resources
+	// This is used to detect cycle that could be caused while delegating the
+	// loading to other classloaders
+	// It keeps track on a thread basis of the set of requested classes and
+	// resources
 	private static ThreadLocal<Set<String>> cycleDetector = new ThreadLocal<>();
 	static Finder contextFinder;
 	static {
@@ -48,10 +50,11 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction<Ar
 		super(contextClassLoader);
 	}
 
-	// Return a list of all classloaders on the stack that are neither the 
-	// JSPContextFinder classloader nor the boot classloader.  The last classloader
+	// Return a list of all classloaders on the stack that are neither the
+	// JSPContextFinder classloader nor the boot classloader. The last classloader
 	// in the list is either a bundle classloader or the framework's classloader
-	// We assume that the bootclassloader never uses the context classloader to find classes in itself.
+	// We assume that the bootclassloader never uses the context classloader to find
+	// classes in itself.
 	ArrayList<ClassLoader> basicFindClassLoaders() {
 		Class<?>[] stack = contextFinder.getClassContext();
 		ArrayList<ClassLoader> result = new ArrayList<>(1);
@@ -74,11 +77,13 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction<Ar
 	}
 
 	private boolean checkClass(Class<?> clazz) {
-		return clazz != JSPContextFinder.class && clazz != BundleProxyClassLoader.class && clazz != JspClassLoader.class;
+		return clazz != JSPContextFinder.class && clazz != BundleProxyClassLoader.class
+				&& clazz != JspClassLoader.class;
 	}
 
-	// ensures that a classloader does not have the JSPContextFinder as part of the 
-	// parent hierachy.  A classloader which has the JSPContextFinder as a parent must
+	// ensures that a classloader does not have the JSPContextFinder as part of the
+	// parent hierachy. A classloader which has the JSPContextFinder as a parent
+	// must
 	// not be used as a delegate, otherwise we endup in endless recursion.
 	private boolean checkClassLoader(ClassLoader classloader) {
 		if (classloader == null || classloader == getParent())
@@ -100,8 +105,8 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction<Ar
 		return basicFindClassLoaders();
 	}
 
-	//Return whether the request for loading "name" should proceed.
-	//False is returned when a cycle is being detected 
+	// Return whether the request for loading "name" should proceed.
+	// False is returned when a cycle is being detected
 	private boolean startLoading(String name) {
 		Set<String> classesAndResources = cycleDetector.get();
 		if (classesAndResources != null && classesAndResources.contains(name))
@@ -121,7 +126,7 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction<Ar
 
 	@Override
 	protected Class<?> loadClass(String arg0, boolean arg1) throws ClassNotFoundException {
-		//Shortcut cycle
+		// Shortcut cycle
 		if (startLoading(arg0) == false)
 			throw new ClassNotFoundException(arg0);
 
@@ -140,7 +145,7 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction<Ar
 
 	@Override
 	public URL getResource(String arg0) {
-		//Shortcut cycle
+		// Shortcut cycle
 		if (startLoading(arg0) == false)
 			return null;
 		try {
@@ -158,7 +163,7 @@ public class JSPContextFinder extends ClassLoader implements PrivilegedAction<Ar
 
 	@Override
 	protected Enumeration<URL> findResources(String arg0) throws IOException {
-		//Shortcut cycle
+		// Shortcut cycle
 		if (startLoading(arg0) == false)
 			return null;
 		try {
