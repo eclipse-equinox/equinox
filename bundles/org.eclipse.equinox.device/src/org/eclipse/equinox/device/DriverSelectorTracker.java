@@ -37,7 +37,7 @@ public class DriverSelectorTracker extends ServiceTracker {
 	 * Create the DriverTracker.
 	 *
 	 * @param manager DeviceManager object.
-	 * @param device DeviceTracker we are working for.
+	 * @param device  DeviceTracker we are working for.
 	 */
 	public DriverSelectorTracker(Activator manager) {
 		super(manager.context, clazz, null);
@@ -55,7 +55,7 @@ public class DriverSelectorTracker extends ServiceTracker {
 	/**
 	 * Select the matching driver.
 	 *
-	 * @param device Device service being matched.
+	 * @param device  Device service being matched.
 	 * @param matches Array of the successful matches from Driver services.
 	 * @return ServiceReference to best matched Driver or null of their is no match.
 	 */
@@ -64,7 +64,7 @@ public class DriverSelectorTracker extends ServiceTracker {
 			log.log(device, LogService.LOG_DEBUG, "DriverSelector select called"); //$NON-NLS-1$
 		}
 
-		//This should give us the highest ranking DriverSelector (if available)
+		// This should give us the highest ranking DriverSelector (if available)
 		ServiceReference selector = getServiceReference();
 
 		if (selector != null) {
@@ -118,12 +118,12 @@ public class DriverSelectorTracker extends ServiceTracker {
 	}
 
 	/**
-	 * Select the service with the highest service.ranking. Break ties
-	 * buy selecting the lowest service.id.
+	 * Select the service with the highest service.ranking. Break ties buy selecting
+	 * the lowest service.id.
 	 *
 	 */
 	public ServiceReference breakTie(ServiceReference ref1, ServiceReference ref2) {
-		//first we check service rankings
+		// first we check service rankings
 		Object property = ref1.getProperty(org.osgi.framework.Constants.SERVICE_RANKING);
 
 		int ref1Ranking = (property instanceof Integer) ? ((Integer) property).intValue() : 0;
@@ -138,7 +138,7 @@ public class DriverSelectorTracker extends ServiceTracker {
 			return ref2;
 		} else // The rankings must match here
 		{
-			//we now check service ids
+			// we now check service ids
 			long ref1ID = ((Long) (ref1.getProperty(org.osgi.framework.Constants.SERVICE_ID))).longValue();
 
 			long ref2ID = ((Long) (ref2.getProperty(org.osgi.framework.Constants.SERVICE_ID))).longValue();

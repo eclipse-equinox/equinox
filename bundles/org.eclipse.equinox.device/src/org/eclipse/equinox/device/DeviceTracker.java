@@ -21,8 +21,7 @@ import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * DeviceTracker class. This class has the logic for refining a
- * Device service.
+ * DeviceTracker class. This class has the logic for refining a Device service.
  *
  */
 public class DeviceTracker extends ServiceTracker {
@@ -48,7 +47,7 @@ public class DeviceTracker extends ServiceTracker {
 	 * Create a DeviceTracker from a ServiceReference.
 	 *
 	 * @param manager DeviceManager object
-	 * @param device ServiceReference to the Device service.
+	 * @param device  ServiceReference to the Device service.
 	 */
 	public DeviceTracker(Activator manager, ServiceReference device) {
 		super(manager.context, device, null);
@@ -84,18 +83,16 @@ public class DeviceTracker extends ServiceTracker {
 	/**
 	 * A service is being added to the ServiceTracker.
 	 *
-	 * <p>This method is called before a service which matched
-	 * the search parameters of the ServiceTracker is
-	 * added to the ServiceTracker. This method should return the
-	 * service object to be tracked for this ServiceReference.
-	 * The returned service object is stored in the ServiceTracker
-	 * and is available from the getService and getServices
-	 * methods.
+	 * <p>
+	 * This method is called before a service which matched the search parameters of
+	 * the ServiceTracker is added to the ServiceTracker. This method should return
+	 * the service object to be tracked for this ServiceReference. The returned
+	 * service object is stored in the ServiceTracker and is available from the
+	 * getService and getServices methods.
 	 *
 	 * @param reference Reference to service being added to the ServiceTracker.
-	 * @return The service object to be tracked for the
-	 * ServiceReference or <tt>null</tt> if the ServiceReference should not
-	 * be tracked.
+	 * @return The service object to be tracked for the ServiceReference or
+	 *         <tt>null</tt> if the ServiceReference should not be tracked.
 	 */
 	public Object addingService(ServiceReference reference) {
 		if (Activator.DEBUG) {
@@ -114,11 +111,12 @@ public class DeviceTracker extends ServiceTracker {
 	/**
 	 * A service tracked by the ServiceTracker has been modified.
 	 *
-	 * <p>This method is called when a service being tracked
-	 * by the ServiceTracker has had it properties modified.
+	 * <p>
+	 * This method is called when a service being tracked by the ServiceTracker has
+	 * had it properties modified.
 	 *
 	 * @param reference Reference to service that has been modified.
-	 * @param service The service object for the modified service.
+	 * @param service   The service object for the modified service.
 	 */
 	public void modifiedService(ServiceReference reference, Object service) {
 		properties = new Properties(reference);
@@ -127,11 +125,12 @@ public class DeviceTracker extends ServiceTracker {
 	/**
 	 * A service tracked by the ServiceTracker is being removed.
 	 *
-	 * <p>This method is called after a service is no longer being tracked
-	 * by the ServiceTracker.
+	 * <p>
+	 * This method is called after a service is no longer being tracked by the
+	 * ServiceTracker.
 	 *
 	 * @param reference Reference to service that has been removed.
-	 * @param service The service object for the removed service.
+	 * @param service   The service object for the removed service.
 	 */
 	public void removedService(ServiceReference reference, Object service) {
 		if (running) {
@@ -182,13 +181,12 @@ public class DeviceTracker extends ServiceTracker {
 	/**
 	 * Determine if the device service tracked by this object is idle.
 	 *
-	 * OSGi SP R2 Section 8.2.2 defines in idle device service as:
-	 * "A Device service is not used by any other bundle according to the Framework;
-	 * it is called an idle Device service."
+	 * OSGi SP R2 Section 8.2.2 defines in idle device service as: "A Device service
+	 * is not used by any other bundle according to the Framework; it is called an
+	 * idle Device service."
 	 *
-	 * This method defines it as:
-	 *  A Device service is not used by any DRIVER bundle according to the Framework;
-	 *  it is called an idle Device service.
+	 * This method defines it as: A Device service is not used by any DRIVER bundle
+	 * according to the Framework; it is called an idle Device service.
 	 *
 	 * Thus if a non-driver bundle uses a device service, it is still considered
 	 * idle by this method.
@@ -225,12 +223,13 @@ public class DeviceTracker extends ServiceTracker {
 	}
 
 	/**
-	 * Called by the device manager after it has failed to attach
-	 * any driver to the device.
+	 * Called by the device manager after it has failed to attach any driver to the
+	 * device.
 	 * <p>
-	 * If the device can be configured in alternate ways, the driver
-	 * may respond by unregistering the device service and registering
-	 * a different device service instead.</p>
+	 * If the device can be configured in alternate ways, the driver may respond by
+	 * unregistering the device service and registering a different device service
+	 * instead.
+	 * </p>
 	 */
 
 	public void noDriverFound() {
@@ -239,8 +238,8 @@ public class DeviceTracker extends ServiceTracker {
 		Object service = contxt.getService(device);
 
 		try {
-			//It is possible that this is a Free Format Device that does not
-			//implement Device
+			// It is possible that this is a Free Format Device that does not
+			// implement Device
 			if (service instanceof Device) {
 				log.log(device, LogService.LOG_INFO, DeviceMsg.Device_noDriverFound_called);
 
@@ -320,7 +319,7 @@ public class DeviceTracker extends ServiceTracker {
 		/**
 		 * Override put to disable it. This Dictionary is readonly once built.
 		 *
-		 * @param key header name.
+		 * @param key   header name.
 		 * @param value header value.
 		 * @throws UnsupportedOperationException
 		 */

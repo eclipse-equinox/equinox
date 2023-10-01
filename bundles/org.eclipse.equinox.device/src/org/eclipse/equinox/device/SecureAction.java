@@ -24,8 +24,8 @@ public class SecureAction {
 	private AccessControlContext controlContext;
 
 	/**
-	 * Constructs a new SecureAction object.  The constructed SecureAction object 
-	 * uses the caller's AccessControlContext to perform security checks 
+	 * Constructs a new SecureAction object. The constructed SecureAction object
+	 * uses the caller's AccessControlContext to perform security checks
 	 */
 	public SecureAction() {
 		// save the control context to be used.
@@ -33,10 +33,11 @@ public class SecureAction {
 	}
 
 	/**
-	 * Creates a new Thread from a Runnable.  Same as calling
-	 * new Thread(target,name).
+	 * Creates a new Thread from a Runnable. Same as calling new
+	 * Thread(target,name).
+	 * 
 	 * @param target the Runnable to create the Thread from.
-	 * @param name The name of the Thread.
+	 * @param name   The name of the Thread.
 	 * @return The new Thread
 	 */
 	public Thread createThread(final Runnable target, final String name) {
