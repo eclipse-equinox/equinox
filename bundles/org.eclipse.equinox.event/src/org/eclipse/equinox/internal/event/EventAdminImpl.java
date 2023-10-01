@@ -76,13 +76,12 @@ public class EventAdminImpl implements EventAdmin {
 	}
 
 	/**
-	 * Internal main method for sendEvent() and postEvent(). Dispatching an
-	 * event to EventHandler. All exceptions are logged except when dealing with
-	 * LogEntry.
+	 * Internal main method for sendEvent() and postEvent(). Dispatching an event to
+	 * EventHandler. All exceptions are logged except when dealing with LogEntry.
 	 * 
-	 * @param event to be delivered
-	 * @param isAsync must be set to true for synchronous event delivery, false
-	 *        for asynchronous delivery.
+	 * @param event   to be delivered
+	 * @param isAsync must be set to true for synchronous event delivery, false for
+	 *                asynchronous delivery.
 	 */
 	private void dispatchEvent(Event event, boolean isAsync) {
 		// keep a local copy in case we are stopped in the middle of dispatching
@@ -93,7 +92,8 @@ public class EventAdminImpl implements EventAdmin {
 		}
 		if (event == null) {
 			log.log(LogService.LOG_ERROR, EventAdminMsg.EVENT_NULL_EVENT);
-			// continue from here will result in an NPE below; the spec for EventAdmin does not allow for null here
+			// continue from here will result in an NPE below; the spec for EventAdmin does
+			// not allow for null here
 			throw new NullPointerException(EventAdminMsg.EVENT_NULL_EVENT);
 		}
 
@@ -138,7 +138,8 @@ public class EventAdminImpl implements EventAdmin {
 	 * Checks if the caller bundle has right PUBLISH TopicPermision.
 	 * 
 	 * @param topic
-	 * @throws SecurityException if the caller does not have the right to PUBLISH TopicPermission
+	 * @throws SecurityException if the caller does not have the right to PUBLISH
+	 *                           TopicPermission
 	 */
 	private void checkTopicPermissionPublish(String topic) throws SecurityException {
 		SecurityManager sm = System.getSecurityManager();

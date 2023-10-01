@@ -38,8 +38,7 @@ public class EventRedeliverer implements FrameworkListener, BundleListener, AllS
 	}
 
 	/**
-	 * register event listeners which are
-	 * necessary to obtain events to be mapped
+	 * register event listeners which are necessary to obtain events to be mapped
 	 */
 	public void open() {
 		// add legacy event listener for framework level event

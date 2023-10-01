@@ -41,17 +41,17 @@ public class ServiceEventAdapter extends EventAdapter {
 	public Event convert() {
 		String typename = null;
 		switch (event.getType()) {
-			case ServiceEvent.REGISTERED :
-				typename = REGISTERED;
-				break;
-			case ServiceEvent.MODIFIED :
-				typename = MODIFIED;
-				break;
-			case ServiceEvent.UNREGISTERING :
-				typename = UNREGISTERING;
-				break;
-			default :
-				return null;
+		case ServiceEvent.REGISTERED:
+			typename = REGISTERED;
+			break;
+		case ServiceEvent.MODIFIED:
+			typename = MODIFIED;
+			break;
+		case ServiceEvent.UNREGISTERING:
+			typename = UNREGISTERING;
+			break;
+		default:
+			return null;
 		}
 		String topic = HEADER + Constants.TOPIC_SEPARATOR + typename;
 		Map<String, Object> properties = new HashMap<>();

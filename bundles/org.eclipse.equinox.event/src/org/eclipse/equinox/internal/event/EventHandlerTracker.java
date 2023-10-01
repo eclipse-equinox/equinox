@@ -23,10 +23,11 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 
-public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandlerWrapper> implements EventDispatcher<EventHandlerWrapper, Permission, Event> {
+public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandlerWrapper>
+		implements EventDispatcher<EventHandlerWrapper, Permission, Event> {
 
 	private final LogTracker log;
-	//* List<EventHandlerWrapper> of all handlers with topic of "*"
+	// * List<EventHandlerWrapper> of all handlers with topic of "*"
 	private final List<EventHandlerWrapper> globalWildcard;
 	// Map<String,List<EventHandlerWrapper>> key is topic prefix of partial wildcard
 	private final Map<String, List<EventHandlerWrapper>> partialWildcard;
@@ -74,8 +75,8 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 	}
 
 	/**
-	 * Place the wrapper into the appropriate buckets.
-	 * This is a performance optimization for event delivery.
+	 * Place the wrapper into the appropriate buckets. This is a performance
+	 * optimization for event delivery.
 	 * 
 	 * @param wrapper The wrapper to place in buckets.
 	 * @GuardedBy this
@@ -151,8 +152,8 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 	}
 
 	/**
-	 * Return the set of handlers which subscribe to the event topic.
-	 * A set is used to ensure a handler is not called for an event more than once.
+	 * Return the set of handlers which subscribe to the event topic. A set is used
+	 * to ensure a handler is not called for an event more than once.
 	 * 
 	 * @param topic
 	 * @return a set of handlers
@@ -173,7 +174,8 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 				if (wrappers != null) {
 					handlers.addAll(wrappers);
 				}
-				// Strip the last level from the topic. For example, org/osgi/framework becomes org/osgi.
+				// Strip the last level from the topic. For example, org/osgi/framework becomes
+				// org/osgi.
 				// Wildcard topics are inserted into the map with the "/*" stripped off.
 				index = subTopic.lastIndexOf('/');
 			}
@@ -199,7 +201,8 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 	 *      java.lang.Object, int, java.lang.Object)
 	 */
 	@Override
-	public void dispatchEvent(EventHandlerWrapper eventListener, Permission listenerObject, int eventAction, Event eventObject) {
+	public void dispatchEvent(EventHandlerWrapper eventListener, Permission listenerObject, int eventAction,
+			Event eventObject) {
 		eventListener.handleEvent(eventObject, listenerObject);
 	}
 }
