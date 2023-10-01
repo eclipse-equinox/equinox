@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-Vendor: %providerName
 Bundle-SymbolicName: org.eclipse.equinox.http.servletbridge;singleton:=true
-Bundle-Version: 1.2.200.qualifier
+Bundle-Version: 1.2.300.qualifier
 Bundle-Activator: org.eclipse.equinox.http.servletbridge.internal.Activator
 Bundle-Localization: plugin
 Import-Package: javax.servlet;version="2.3",
