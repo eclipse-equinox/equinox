@@ -82,7 +82,8 @@ public final class StandardRegionFilter implements RegionFilter {
 	 * Determines whether this filter allows the bundle with the given attributes
 	 * 
 	 * @param bundleAttributes the bundle attributes
-	 * @return <code>true</code> if the bundle is allowed and <code>false</code>otherwise
+	 * @return <code>true</code> if the bundle is allowed and
+	 *         <code>false</code>otherwise
 	 */
 	private boolean isBundleAllowed(Map<String, ?> bundleAttributes) {
 		return isAllowed(VISIBLE_BUNDLE_NAMESPACE, bundleAttributes);
@@ -130,7 +131,8 @@ public final class StandardRegionFilter implements RegionFilter {
 	}
 
 	@SuppressWarnings("deprecation")
-	static final String[] serviceNamespaces = new String[] {VISIBLE_OSGI_SERVICE_NAMESPACE, VISIBLE_SERVICE_NAMESPACE};
+	static final String[] serviceNamespaces = new String[] { VISIBLE_OSGI_SERVICE_NAMESPACE,
+			VISIBLE_SERVICE_NAMESPACE };
 
 	private boolean matchAll(final String namespace, final Map<String, ?> attributes) {
 		Collection<Filter> allMatching = filters.get(VISIBLE_ALL_NAMESPACE);
@@ -142,7 +144,8 @@ public final class StandardRegionFilter implements RegionFilter {
 			@Override
 			public Object get(Object key) {
 				if (RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE.equals(key)) {
-					if (VISIBLE_SERVICE_NAMESPACE.equals(namespace) || VISIBLE_OSGI_SERVICE_NAMESPACE.equals(namespace)) {
+					if (VISIBLE_SERVICE_NAMESPACE.equals(namespace)
+							|| VISIBLE_OSGI_SERVICE_NAMESPACE.equals(namespace)) {
 						return serviceNamespaces;
 					}
 					return namespace;
@@ -167,7 +170,8 @@ public final class StandardRegionFilter implements RegionFilter {
 			@Override
 			public Object get(Object key) {
 				if (RegionFilter.VISIBLE_ALL_NAMESPACE_ATTRIBUTE.equals(key)) {
-					if (VISIBLE_SERVICE_NAMESPACE.equals(namespace) || VISIBLE_OSGI_SERVICE_NAMESPACE.equals(namespace)) {
+					if (VISIBLE_SERVICE_NAMESPACE.equals(namespace)
+							|| VISIBLE_OSGI_SERVICE_NAMESPACE.equals(namespace)) {
 						return serviceNamespaces;
 					}
 					return namespace;

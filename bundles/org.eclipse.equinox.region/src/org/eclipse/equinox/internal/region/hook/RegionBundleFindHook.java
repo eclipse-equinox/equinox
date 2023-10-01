@@ -21,7 +21,8 @@ import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.FindHook;
 
 /**
- * {@link RegionBundleFindHook} manages the visibility of bundles across regions according to the {@link RegionDigraph}.
+ * {@link RegionBundleFindHook} manages the visibility of bundles across regions
+ * according to the {@link RegionDigraph}.
  * <p />
  * 
  * <strong>Concurrent Semantics</strong><br />

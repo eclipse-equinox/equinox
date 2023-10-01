@@ -20,8 +20,8 @@ import org.osgi.framework.*;
 import org.osgi.framework.hooks.service.FindHook;
 
 /**
- * {@link RegionServiceFindHook} manages the visibility of services across regions according to the
- * {@link RegionDigraph}.
+ * {@link RegionServiceFindHook} manages the visibility of services across
+ * regions according to the {@link RegionDigraph}.
  * <p />
  * 
  * <strong>Concurrent Semantics</strong><br />
@@ -38,7 +38,8 @@ public final class RegionServiceFindHook implements FindHook {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void find(BundleContext context, String name, String filter, boolean allServices, Collection<ServiceReference<?>> references) {
+	public void find(BundleContext context, String name, String filter, boolean allServices,
+			Collection<ServiceReference<?>> references) {
 		Bundle finderBundle = RegionBundleFindHook.getBundle(context);
 		if (finderBundle == null) {
 			// invalid finder bundle; clear out result

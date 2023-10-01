@@ -18,7 +18,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleRevision;
 
 /**
- * Isolates all equinox specific code to a specific class to allow the equinox packages to be optional.
+ * Isolates all equinox specific code to a specific class to allow the equinox
+ * packages to be optional.
  */
 public class EquinoxStateHelper {
 	static final Worker equinoxSupport;
@@ -44,12 +45,14 @@ public class EquinoxStateHelper {
 	}
 
 	public static final long getBundleId(BundleRevision revision) {
-		// For testability, use the bundle revision's bundle before casting to BundleDescription.
+		// For testability, use the bundle revision's bundle before casting to
+		// BundleDescription.
 		Bundle bundle = revision.getBundle();
 		if (bundle != null) {
 			return bundle.getBundleId();
 		}
-		// Note that this bit of code is never useful at runtime since the framework never uses BundleDescriptions.
+		// Note that this bit of code is never useful at runtime since the framework
+		// never uses BundleDescriptions.
 		// It is only useful if the region hooks are used with the old Equinox State API
 		Long result = equinoxSupport == null ? null : equinoxSupport.getBundleId(revision);
 		if (result == null)

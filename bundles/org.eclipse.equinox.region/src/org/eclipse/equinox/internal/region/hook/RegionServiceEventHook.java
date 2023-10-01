@@ -21,12 +21,12 @@ import org.osgi.framework.*;
 import org.osgi.framework.hooks.service.EventHook;
 
 /**
- * {@link RegionServiceEventHook} manages the visibility of service events across regions according to the
- * {@link RegionDigraph}.
+ * {@link RegionServiceEventHook} manages the visibility of service events
+ * across regions according to the {@link RegionDigraph}.
  * <p>
- * The current implementation avoids traversing the graph multiple times from the same region.
- * This is necessary to optimize the case where many bundles with service listeners
- * are contained in the same region.
+ * The current implementation avoids traversing the graph multiple times from
+ * the same region. This is necessary to optimize the case where many bundles
+ * with service listeners are contained in the same region.
  * <p />
  * 
  * <strong>Concurrent Semantics</strong><br />

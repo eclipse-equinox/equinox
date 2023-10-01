@@ -24,8 +24,8 @@ import org.osgi.framework.hooks.bundle.*;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 
 /**
- * Creates and manages the {@link RegionDigraph} associated
- * with the running framework.
+ * Creates and manages the {@link RegionDigraph} associated with the running
+ * framework.
  * <p />
  * 
  * <strong>Concurrent Semantics</strong><br />
@@ -39,7 +39,8 @@ public final class RegionManager implements BundleActivator {
 	private static final String REGION_DOMAIN_PROP = "org.eclipse.equinox.region.domain"; //$NON-NLS-1$
 	private static final String DIGRAPH_FILE = "digraph"; //$NON-NLS-1$
 	private static final String REGION_REGISTER_MBEANS = "org.eclipse.equinox.region.register.mbeans"; //$NON-NLS-1$
-	private static final Dictionary<String, Object> MAX_RANKING = new Hashtable<>(Collections.singletonMap(Constants.SERVICE_RANKING, Integer.MAX_VALUE));
+	private static final Dictionary<String, Object> MAX_RANKING = new Hashtable<>(
+			Collections.singletonMap(Constants.SERVICE_RANKING, Integer.MAX_VALUE));
 
 	Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
 
@@ -102,8 +103,10 @@ public final class RegionManager implements BundleActivator {
 			return createRegionDigraph();
 		}
 		try (InputStream in = new BufferedInputStream(new FileInputStream(digraphFile))) {
-			// TODO need to validate bundle IDs to make sure they are consistent with current bundles
-			return StandardRegionDigraphPersistence.readRegionDigraph(new DataInputStream(in), this.bundleContext, this.threadLocal);
+			// TODO need to validate bundle IDs to make sure they are consistent with
+			// current bundles
+			return StandardRegionDigraphPersistence.readRegionDigraph(new DataInputStream(in), this.bundleContext,
+					this.threadLocal);
 		}
 	}
 
@@ -117,7 +120,8 @@ public final class RegionManager implements BundleActivator {
 	}
 
 	private void saveDigraph() throws IOException {
-		try (OutputStream out = new BufferedOutputStream(new FileOutputStream(bundleContext.getDataFile(DIGRAPH_FILE)))) {
+		try (OutputStream out = new BufferedOutputStream(
+				new FileOutputStream(bundleContext.getDataFile(DIGRAPH_FILE)))) {
 			digraph.getRegionDigraphPersistence().save(digraph, out);
 		}
 	}
@@ -126,7 +130,8 @@ public final class RegionManager implements BundleActivator {
 		if ("false".equals(this.bundleContext.getProperty(REGION_REGISTER_MBEANS))) { //$NON-NLS-1$
 			return null;
 		}
-		StandardManageableRegionDigraph standardManageableRegionDigraph = new StandardManageableRegionDigraph(regionDigraph, this.domain, this.bundleContext);
+		StandardManageableRegionDigraph standardManageableRegionDigraph = new StandardManageableRegionDigraph(
+				regionDigraph, this.domain, this.bundleContext);
 		standardManageableRegionDigraph.registerMBean();
 		return standardManageableRegionDigraph;
 	}

@@ -15,7 +15,8 @@
 package org.eclipse.equinox.region;
 
 /**
- * {@link RegionDigraphVisitor} is used to traverse a subgraph of a {@link RegionDigraph}.
+ * {@link RegionDigraphVisitor} is used to traverse a subgraph of a
+ * {@link RegionDigraph}.
  * <p />
  * 
  * <strong>Concurrent Semantics</strong><br />
@@ -28,23 +29,26 @@ public interface RegionDigraphVisitor {
 	 * Visits the given region and determines whether or not to continue traversing.
 	 * 
 	 * @param region the region to visit
-	 * @return <code>true</code> if the traversal is to continue and <code>false</code> otherwise
+	 * @return <code>true</code> if the traversal is to continue and
+	 *         <code>false</code> otherwise
 	 */
 	boolean visit(Region region);
 
 	/**
-	 * Prepares to traverse an edge with the given {@link RegionFilter} and determines whether or not to traverse the
-	 * edge.
+	 * Prepares to traverse an edge with the given {@link RegionFilter} and
+	 * determines whether or not to traverse the edge.
 	 * 
 	 * @param regionFilter the {@link RegionFilter} of the edge to be traversed
-	 * @return <code>true</code> if the edge is to be traversed and <code>false</code> otherwise
+	 * @return <code>true</code> if the edge is to be traversed and
+	 *         <code>false</code> otherwise
 	 */
 	boolean preEdgeTraverse(RegionFilter regionFilter);
 
 	/**
 	 * This is called after traversing an edge with the given {@link RegionFilter}.
 	 * 
-	 * @param regionFilter the {@link RegionFilter} of the edge that has just been traversed
+	 * @param regionFilter the {@link RegionFilter} of the edge that has just been
+	 *                     traversed
 	 */
 	void postEdgeTraverse(RegionFilter regionFilter);
 

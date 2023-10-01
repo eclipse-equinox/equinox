@@ -25,8 +25,9 @@ import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
 import org.osgi.framework.*;
 
 /**
- * {@link BundleIdBasedRegion} is an implementation of {@link Region} which keeps a track of the bundles in the region
- * by recording their bundle identifiers.
+ * {@link BundleIdBasedRegion} is an implementation of {@link Region} which
+ * keeps a track of the bundles in the region by recording their bundle
+ * identifiers.
  * <p />
  * 
  * <strong>Concurrent Semantics</strong><br />
@@ -48,7 +49,9 @@ public final class BundleIdBasedRegion implements Region {
 
 	private final ThreadLocal<Region> threadLocal;
 
-	public BundleIdBasedRegion(String regionName, RegionDigraph regionDigraph, BundleIdToRegionMapping bundleIdToRegionMapping, BundleContext bundleContext, ThreadLocal<Region> threadLocal) {
+	public BundleIdBasedRegion(String regionName, RegionDigraph regionDigraph,
+			BundleIdToRegionMapping bundleIdToRegionMapping, BundleContext bundleContext,
+			ThreadLocal<Region> threadLocal) {
 		BundleIdBasedRegion.validateName(regionName);
 		if (regionDigraph == null)
 			throw new IllegalArgumentException("The region digraph must not be null"); //$NON-NLS-1$
@@ -110,7 +113,8 @@ public final class BundleIdBasedRegion implements Region {
 
 	private Bundle installBundle0(String location, InputStream input, boolean appendRegionName) throws BundleException {
 		if (this.bundleContext == null)
-			throw new BundleException("This region is not connected to an OSGi Framework.", BundleException.INVALID_OPERATION); //$NON-NLS-1$
+			throw new BundleException("This region is not connected to an OSGi Framework.", //$NON-NLS-1$
+					BundleException.INVALID_OPERATION);
 		setRegionThreadLocal();
 		try {
 			input = checkFileProtocol(location, input);
@@ -164,7 +168,8 @@ public final class BundleIdBasedRegion implements Region {
 		Set<Long> bundleIds = getBundleIds();
 		for (long bundleId : bundleIds) {
 			Bundle bundle = bundleContext.getBundle(bundleId);
-			if (bundle != null && symbolicName.equals(bundle.getSymbolicName()) && version.equals(bundle.getVersion())) {
+			if (bundle != null && symbolicName.equals(bundle.getSymbolicName())
+					&& version.equals(bundle.getVersion())) {
 				return bundle;
 			}
 		}

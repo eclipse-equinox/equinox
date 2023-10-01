@@ -24,7 +24,8 @@ import org.osgi.framework.hooks.bundle.*;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 
 /**
- * {@link StandardRegionDigraph} is the default implementation of {@link RegionDigraph}.
+ * {@link StandardRegionDigraph} is the default implementation of
+ * {@link RegionDigraph}.
  * <p />
  * 
  * <strong>Concurrent Semantics</strong><br />
@@ -34,20 +35,26 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
  */
 public final class StandardRegionDigraph implements BundleIdToRegionMapping, RegionDigraph {
 
-	private static final Set<FilteredRegion> EMPTY_EDGE_SET = Collections.unmodifiableSet(new HashSet<FilteredRegion>());
+	private static final Set<FilteredRegion> EMPTY_EDGE_SET = Collections
+			.unmodifiableSet(new HashSet<FilteredRegion>());
 
-	// This monitor guards the modifications and read operations on the digraph as well as 
+	// This monitor guards the modifications and read operations on the digraph as
+	// well as
 	// bundle id modifications of all regions in this digraph
 	private final Object monitor = new Object();
 
 	private final Map<String, Region> regions = new HashMap<>();
 
 	// Alien calls may be made to the following object while this.monitor is locked
-	// as this.monitor is higher in the lock hierarchy than this object's own monitor.
+	// as this.monitor is higher in the lock hierarchy than this object's own
+	// monitor.
 	private final BundleIdToRegionMapping bundleIdToRegionMapping;
 
-	/* edges maps a given region to an immutable set of edges with their tail at the given region. To update
-	 * the edges for a region, the corresponding immutable set is replaced atomically. */
+	/*
+	 * edges maps a given region to an immutable set of edges with their tail at the
+	 * given region. To update the edges for a region, the corresponding immutable
+	 * set is replaced atomically.
+	 */
 	private final Map<Region, Set<FilteredRegion>> edges = new HashMap<>();
 
 	private final BundleContext bundleContext;
@@ -79,7 +86,8 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		this(bundleContext, threadLocal, null);
 	}
 
-	private StandardRegionDigraph(BundleContext bundleContext, ThreadLocal<Region> threadLocal, StandardRegionDigraph origin) throws BundleException {
+	private StandardRegionDigraph(BundleContext bundleContext, ThreadLocal<Region> threadLocal,
+			StandardRegionDigraph origin) throws BundleException {
 		this.subgraphTraverser = new SubgraphTraverser();
 		this.bundleIdToRegionMapping = new StandardBundleIdToRegionMapping();
 		this.bundleContext = bundleContext;
@@ -89,8 +97,10 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		// do not escape the digraph to other threads on construction.
 		this.resolverHookFactory = new RegionResolverHookFactory(this);
 
-		this.bundleFindHook = new RegionBundleFindHook(this, bundleContext == null ? 0 : bundleContext.getBundle().getBundleId());
-		this.bundleEventHook = new RegionBundleEventHook(this, this.threadLocal, bundleContext == null ? 0 : bundleContext.getBundle().getBundleId());
+		this.bundleFindHook = new RegionBundleFindHook(this,
+				bundleContext == null ? 0 : bundleContext.getBundle().getBundleId());
+		this.bundleEventHook = new RegionBundleEventHook(this, this.threadLocal,
+				bundleContext == null ? 0 : bundleContext.getBundle().getBundleId());
 		this.bundleCollisionHook = new RegionBundleCollisionHook(this, this.threadLocal);
 
 		this.serviceFindHook = new RegionServiceFindHook(this);
@@ -119,7 +129,8 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		Region region = new BundleIdBasedRegion(regionName, this, this, this.bundleContext, this.threadLocal);
 		synchronized (this.monitor) {
 			if (getRegion(regionName) != null) {
-				throw new BundleException("Region '" + regionName + "' already exists", BundleException.UNSUPPORTED_OPERATION); //$NON-NLS-1$ //$NON-NLS-2$
+				throw new BundleException("Region '" + regionName + "' already exists", //$NON-NLS-1$ //$NON-NLS-2$
+						BundleException.UNSUPPORTED_OPERATION);
 			}
 			this.regions.put(region.getName(), region);
 			this.edges.put(region, EMPTY_EDGE_SET);
@@ -143,11 +154,13 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	 * {@inheritDoc}
 	 */
 	@Override
-	public RegionFilter replaceConnection(Region tailRegion, RegionFilter filter, Region headRegion) throws BundleException {
+	public RegionFilter replaceConnection(Region tailRegion, RegionFilter filter, Region headRegion)
+			throws BundleException {
 		return createConnection(tailRegion, filter, headRegion, true);
 	}
 
-	private RegionFilter createConnection(Region tailRegion, RegionFilter filter, Region headRegion, boolean replace) throws BundleException {
+	private RegionFilter createConnection(Region tailRegion, RegionFilter filter, Region headRegion, boolean replace)
+			throws BundleException {
 		if (tailRegion == null)
 			throw new IllegalArgumentException("The tailRegion must not be null."); //$NON-NLS-1$
 		if (!replace && filter == null)
@@ -155,7 +168,8 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		if (headRegion == null)
 			throw new IllegalArgumentException("The headRegion must not be null."); //$NON-NLS-1$
 		if (headRegion.equals(tailRegion)) {
-			throw new BundleException("Cannot connect region '" + headRegion + "' to itself", BundleException.UNSUPPORTED_OPERATION); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new BundleException("Cannot connect region '" + headRegion + "' to itself", //$NON-NLS-1$ //$NON-NLS-2$
+					BundleException.UNSUPPORTED_OPERATION);
 		}
 		if (tailRegion.getRegionDigraph() != this)
 			throw new IllegalArgumentException("The tailRegion does not belong to this digraph."); //$NON-NLS-1$
@@ -176,7 +190,9 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 						if (replace) {
 							existing = edge;
 						} else {
-							throw new BundleException("Region '" + tailRegion + "' is already connected to region '" + headRegion, BundleException.UNSUPPORTED_OPERATION); //$NON-NLS-1$ //$NON-NLS-2$
+							throw new BundleException(
+									"Region '" + tailRegion + "' is already connected to region '" + headRegion, //$NON-NLS-1$ //$NON-NLS-2$
+									BundleException.UNSUPPORTED_OPERATION);
 						}
 					}
 				}
@@ -208,7 +224,8 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	}
 
 	private void checkFilterDoesNotAllowExistingBundle(Region tailRegion, RegionFilter filter) {
-		// TODO: enumerate the bundles in the region and check the filter does not allow any of them
+		// TODO: enumerate the bundles in the region and check the filter does not allow
+		// any of them
 	}
 
 	/**
@@ -387,9 +404,11 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 			return Collections.emptySet();
 		Set<RegionLifecycleListener> listeners = new HashSet<>();
 		try {
-			Collection<ServiceReference<RegionLifecycleListener>> listenerServiceReferences = this.bundleContext.getServiceReferences(RegionLifecycleListener.class, null);
+			Collection<ServiceReference<RegionLifecycleListener>> listenerServiceReferences = this.bundleContext
+					.getServiceReferences(RegionLifecycleListener.class, null);
 			for (ServiceReference<RegionLifecycleListener> listenerServiceReference : listenerServiceReferences) {
-				RegionLifecycleListener regionLifecycleListener = this.bundleContext.getService(listenerServiceReference);
+				RegionLifecycleListener regionLifecycleListener = this.bundleContext
+						.getService(listenerServiceReference);
 				if (regionLifecycleListener != null) {
 					listeners.add(regionLifecycleListener);
 				}
@@ -419,7 +438,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		}
 	}
 
-	/** 
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -427,7 +446,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		return new StandardRegionDigraphPersistence();
 	}
 
-	/** 
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -435,7 +454,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		return new StandardRegionDigraph(this);
 	}
 
-	/** 
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -445,7 +464,8 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 
 	private void replace(RegionDigraph digraph, boolean check) throws BundleException {
 		if (!(digraph instanceof StandardRegionDigraph))
-			throw new IllegalArgumentException("Only digraphs of type '" + StandardRegionDigraph.class.getName() + "' are allowed: " + digraph.getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new IllegalArgumentException("Only digraphs of type '" + StandardRegionDigraph.class.getName() //$NON-NLS-1$
+					+ "' are allowed: " + digraph.getClass().getName()); //$NON-NLS-1$
 		StandardRegionDigraph replacement = (StandardRegionDigraph) digraph;
 		if (check && replacement.origin != this)
 			throw new IllegalArgumentException("The replacement digraph is not a copy of this digraph."); //$NON-NLS-1$
@@ -461,7 +481,8 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		final Set<Region> added = new HashSet<>();
 		synchronized (this.monitor) {
 			if (check && this.updateCount.get() != replacement.originUpdateCount) {
-				throw new BundleException("The origin update count has changed since the replacement copy was created.", BundleException.INVALID_OPERATION); //$NON-NLS-1$
+				throw new BundleException("The origin update count has changed since the replacement copy was created.", //$NON-NLS-1$
+						BundleException.INVALID_OPERATION);
 			}
 			Map<String, Region> nameToRegion = new HashMap<>(regions);
 			this.regions.clear();
@@ -501,7 +522,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		}
 	}
 
-	/** 
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -513,7 +534,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		return bundleCollisionHook;
 	}
 
-	/** 
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -521,7 +542,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		return bundleEventHook;
 	}
 
-	/** 
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -529,7 +550,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		return bundleFindHook;
 	}
 
-	/** 
+	/**
 	 * {@inheritDoc}
 	 */
 	@SuppressWarnings("deprecation")
@@ -538,7 +559,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		return serviceEventHook;
 	}
 
-	/** 
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -546,7 +567,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		return serviceFindHook;
 	}
 
-	/** 
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -559,7 +580,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		}
 	}
 
-	/** 
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -567,7 +588,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		return this.defaultRegion;
 	}
 
-	/** 
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -581,7 +602,8 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 
 	private void checkRegionExists(Region region) {
 		if (this.regions.get(region.getName()) == null) {
-			throw new IllegalStateException("Operation not allowed on region " + region.getName() + " which is not part of a digraph"); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new IllegalStateException(
+					"Operation not allowed on region " + region.getName() + " which is not part of a digraph"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
@@ -592,7 +614,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 
 	}
 
-	/** 
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -604,7 +626,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		}
 	}
 
-	/** 
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -614,7 +636,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		}
 	}
 
-	/** 
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -624,7 +646,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		}
 	}
 
-	/** 
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -635,7 +657,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		}
 	}
 
-	/** 
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override

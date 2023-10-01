@@ -21,7 +21,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 
 /**
- * {@link RegionBundleCollisionHook} manages the collision policy of duplicate bundles.
+ * {@link RegionBundleCollisionHook} manages the collision policy of duplicate
+ * bundles.
  * 
  * <strong>Concurrent Semantics</strong><br />
  * Thread safe.
@@ -39,8 +40,9 @@ public final class RegionBundleCollisionHook implements CollisionHook {
 
 	private Region getInstallRegion(Bundle originBundle) {
 		/*
-		 * BundleIdBasedRegion sets thread local to install bundles into arbitrary regions. If this is not set, the
-		 * bundle inherits the region of the origin bundle.
+		 * BundleIdBasedRegion sets thread local to install bundles into arbitrary
+		 * regions. If this is not set, the bundle inherits the region of the origin
+		 * bundle.
 		 */
 		Region installRegion = this.threadLocal.get();
 		if (installRegion != null) {
@@ -67,22 +69,25 @@ public final class RegionBundleCollisionHook implements CollisionHook {
 		Collection<Bundle> collisions = fromTarget.getAllowed();
 
 		if (collisions.isEmpty()) {
-			// must do a sanity check to make sure the newly installed/updated bundle 
+			// must do a sanity check to make sure the newly installed/updated bundle
 			// does not collide from the perspective of the collision candidate regions
 			for (Bundle collisionCandidate : collisionCandidates) {
 				Region candidateRegion = regionDigraph.getRegion(collisionCandidate);
 				if (candidateRegion == null) {
-					// we assume the candidate has been uninstalled; do not consider the candidate as a collision
+					// we assume the candidate has been uninstalled; do not consider the candidate
+					// as a collision
 					continue;
 				}
 				// we know the collision candidates all have the BSN/Version that collide.
 				// we use the collision candidate and pretend it is part of the target region
 				// to see if we can see it from the candidateRegion
-				VisitorFromCandidate fromCandidate = new VisitorFromCandidate(Arrays.asList(collisionCandidate), targetRegion);
+				VisitorFromCandidate fromCandidate = new VisitorFromCandidate(Arrays.asList(collisionCandidate),
+						targetRegion);
 				candidateRegion.visitSubgraph(fromCandidate);
 				collisions = fromCandidate.getAllowed();
 				if (!collisions.isEmpty()) {
-					// we can break at the first one since it only takes one to fail the install/update
+					// we can break at the first one since it only takes one to fail the
+					// install/update
 					break;
 				}
 			}

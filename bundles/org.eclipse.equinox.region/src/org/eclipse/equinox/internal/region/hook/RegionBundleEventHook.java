@@ -21,11 +21,12 @@ import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.EventHook;
 
 /**
- * {@link RegionBundleEventHook} manages the visibility of bundle events across regions according to the
- * {@link RegionDigraph}.
+ * {@link RegionBundleEventHook} manages the visibility of bundle events across
+ * regions according to the {@link RegionDigraph}.
  * <p>
- * The current implementation delegates to {@link RegionBundleFindHook}. This is likely to perform adequately because of
- * the low frequency of bundle events and the typically small number of bundle listeners.
+ * The current implementation delegates to {@link RegionBundleFindHook}. This is
+ * likely to perform adequately because of the low frequency of bundle events
+ * and the typically small number of bundle listeners.
  * <p />
  * 
  * <strong>Concurrent Semantics</strong><br />
@@ -99,8 +100,9 @@ public final class RegionBundleEventHook implements EventHook {
 
 	private void bundleInstalled(Bundle eventBundle, Bundle originBundle) {
 		/*
-		 * BundleIdBasedRegion sets thread local to install bundles into arbitrary regions. If this is not set, the
-		 * bundle inherits the region of the origin bundle.
+		 * BundleIdBasedRegion sets thread local to install bundles into arbitrary
+		 * regions. If this is not set, the bundle inherits the region of the origin
+		 * bundle.
 		 */
 		Region installRegion = this.threadLocal.get();
 		if (installRegion != null) {

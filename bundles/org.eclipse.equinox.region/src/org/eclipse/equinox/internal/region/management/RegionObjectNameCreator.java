@@ -19,7 +19,8 @@ import javax.management.ObjectName;
 import org.eclipse.equinox.region.management.ManageableRegion;
 
 /**
- * {@link RegionObjectNameCreator} is responsible for creating {@link ObjectName}s for {@link ManageableRegion}s.
+ * {@link RegionObjectNameCreator} is responsible for creating
+ * {@link ObjectName}s for {@link ManageableRegion}s.
  * <p />
  * 
  * <strong>Concurrent Semantics</strong><br />
@@ -43,7 +44,8 @@ final class RegionObjectNameCreator {
 			return new ObjectName(name);
 		} catch (MalformedObjectNameException e) {
 			e.printStackTrace();
-			throw new IllegalArgumentException("Invalid region name '" + regionName + "' resulting in an invalid object name '" + name + "'", e); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+			throw new IllegalArgumentException(
+					"Invalid region name '" + regionName + "' resulting in an invalid object name '" + name + "'", e); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		}
 	}
 

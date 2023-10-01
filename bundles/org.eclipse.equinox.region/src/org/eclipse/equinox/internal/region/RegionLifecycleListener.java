@@ -17,8 +17,8 @@ package org.eclipse.equinox.internal.region;
 import org.eclipse.equinox.region.Region;
 
 /**
- * {@link RegionLifecycleListener} is a service interface to listen for regions being added to and deleted from the
- * region digraph.
+ * {@link RegionLifecycleListener} is a service interface to listen for regions
+ * being added to and deleted from the region digraph.
  * <p />
  * Note that this is an internal interface and is not intended for external use.
  * <p />
