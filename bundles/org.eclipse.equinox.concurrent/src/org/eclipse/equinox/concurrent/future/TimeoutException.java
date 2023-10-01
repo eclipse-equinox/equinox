@@ -15,6 +15,7 @@ package org.eclipse.equinox.concurrent.future;
 
 /**
  * Timeout exception thrown when timeout occurs
+ * 
  * @since 1.1
  */
 public class TimeoutException extends Exception {

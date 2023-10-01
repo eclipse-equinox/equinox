@@ -18,6 +18,7 @@ package org.eclipse.equinox.concurrent.future;
  * A runner that can execute {@link IProgressRunnable}s safely. Running an
  * {@link IProgressRunnable} safely means not throwing any {@link Exception}
  * possibly thrown by the given {@link IProgressRunnable}.
+ * 
  * @since 1.1
  * 
  */

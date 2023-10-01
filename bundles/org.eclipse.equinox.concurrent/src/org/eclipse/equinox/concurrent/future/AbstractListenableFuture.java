@@ -17,10 +17,8 @@ package org.eclipse.equinox.concurrent.future;
  * @since 1.1
  */
 @SuppressWarnings("rawtypes")
-public abstract class AbstractListenableFuture extends AbstractFuture implements
-		IListenableFuture {
+public abstract class AbstractListenableFuture extends AbstractFuture implements IListenableFuture {
 
-	public abstract void addListener(IProgressRunnable progressRunnable,
-			IExecutor executor);
+	public abstract void addListener(IProgressRunnable progressRunnable, IExecutor executor);
 
 }

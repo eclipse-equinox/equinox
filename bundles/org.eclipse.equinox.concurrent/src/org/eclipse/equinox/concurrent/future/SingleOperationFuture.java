@@ -24,10 +24,10 @@ import org.eclipse.core.runtime.*;
  * that they should/must be very careful with respect to overriding the
  * synchronized methods in this class.
  * </p>
+ * 
  * @since 1.1
  */
-public class SingleOperationFuture<ResultType> extends
-		AbstractFuture<ResultType> {
+public class SingleOperationFuture<ResultType> extends AbstractFuture<ResultType> {
 	private static final String PLUGIN_ID = "org.eclipse.equinox.concurrent";
 
 	private ResultType resultValue = null;
@@ -42,12 +42,10 @@ public class SingleOperationFuture<ResultType> extends
 	public SingleOperationFuture(IProgressMonitor progressMonitor) {
 		super();
 		this.progressMonitor = new FutureProgressMonitor(
-				(progressMonitor == null) ? new NullProgressMonitor()
-						: progressMonitor);
+				(progressMonitor == null) ? new NullProgressMonitor() : progressMonitor);
 	}
 
-	public synchronized ResultType get() throws InterruptedException,
-			OperationCanceledException {
+	public synchronized ResultType get() throws InterruptedException, OperationCanceledException {
 		throwIfCanceled();
 		while (!isDone())
 			wait();
@@ -56,8 +54,7 @@ public class SingleOperationFuture<ResultType> extends
 	}
 
 	public synchronized ResultType get(long waitTimeInMillis)
-			throws InterruptedException, TimeoutException,
-			OperationCanceledException {
+			throws InterruptedException, TimeoutException, OperationCanceledException {
 		// If waitTime out of bounds then throw illegal argument exception
 		if (waitTimeInMillis < 0)
 			throw new IllegalArgumentException("waitTimeInMillis must be => 0"); //$NON-NLS-1$
@@ -81,8 +78,7 @@ public class SingleOperationFuture<ResultType> extends
 			throwIfCanceled();
 			if (isDone())
 				return resultValue;
-			waitTime = waitTimeInMillis
-					- (System.currentTimeMillis() - startTime);
+			waitTime = waitTimeInMillis - (System.currentTimeMillis() - startTime);
 			if (waitTime <= 0)
 				throw createTimeoutException(waitTimeInMillis);
 		}
@@ -93,8 +89,8 @@ public class SingleOperationFuture<ResultType> extends
 	}
 
 	/**
-	 * This method is not intended to be called by clients. Rather it should
-	 * only be used by {@link IExecutor}s.
+	 * This method is not intended to be called by clients. Rather it should only be
+	 * used by {@link IExecutor}s.
 	 * 
 	 * @noreference
 	 */
@@ -111,8 +107,7 @@ public class SingleOperationFuture<ResultType> extends
 
 				public void run() throws Exception {
 					@SuppressWarnings("unchecked")
-					ResultType result = (ResultType) runnable
-							.run(getProgressMonitor());
+					ResultType result = (ResultType) runnable.run(getProgressMonitor());
 					synchronized (SingleOperationFuture.this) {
 						if (!isCanceled())
 							set(result);
@@ -137,16 +132,14 @@ public class SingleOperationFuture<ResultType> extends
 			return false;
 		if (isCanceled())
 			return false;
-		setStatus(new Status(IStatus.CANCEL, PLUGIN_ID, IStatus.CANCEL,
-				"Operation canceled", null)); //$NON-NLS-1$ //$NON-NLS-2$
+		setStatus(new Status(IStatus.CANCEL, PLUGIN_ID, IStatus.CANCEL, "Operation canceled", null)); //$NON-NLS-1$ //$NON-NLS-2$
 		getProgressMonitor().setCanceled(true);
 		notifyAll();
 		return true;
 	}
 
 	protected synchronized void setException(Throwable ex) {
-		setStatus(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR,
-				"Exception during operation", ex)); //$NON-NLS-1$ //$NON-NLS-2$
+		setStatus(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, "Exception during operation", ex)); //$NON-NLS-1$ //$NON-NLS-2$
 		notifyAll();
 	}
 
@@ -161,10 +154,10 @@ public class SingleOperationFuture<ResultType> extends
 	}
 
 	private TimeoutException createTimeoutException(long timeout) {
-		setStatus(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR,
-				"Operation timeout after " + timeout + "ms", null)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		timeoutException = new TimeoutException(
-				"Single operation timeout", timeout); //$NON-NLS-1$
+		setStatus(
+				new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, "Operation timeout after " + timeout + "ms", null)); //$NON-NLS-1$ //$NON-NLS-2$
+																															// //$NON-NLS-3$
+		timeoutException = new TimeoutException("Single operation timeout", timeout); //$NON-NLS-1$
 		return timeoutException;
 	}
 
