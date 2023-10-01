@@ -55,7 +55,8 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 
 	private ServiceReference<?> reference;
 
-	public ServletManager(HttpRegistryManager httpRegistryManager, ServiceReference<?> reference, IExtensionRegistry registry) {
+	public ServletManager(HttpRegistryManager httpRegistryManager, ServiceReference<?> reference,
+			IExtensionRegistry registry) {
 		this.httpRegistryManager = httpRegistryManager;
 		this.reference = reference;
 		tracker = new ExtensionPointTracker(registry, SERVLETS_EXTENSION_POINT, this);
@@ -79,7 +80,8 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 			String clazz = serviceSelectorElement.getAttribute(CLASS);
 			if (clazz != null) {
 				try {
-					serviceSelector = (org.osgi.framework.Filter) serviceSelectorElement.createExecutableExtension(CLASS);
+					serviceSelector = (org.osgi.framework.Filter) serviceSelectorElement
+							.createExecutableExtension(CLASS);
 				} catch (CoreException e) {
 					// log it.
 					e.printStackTrace();
@@ -134,7 +136,8 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 			if (httpContextId != null && httpContextId.indexOf('.') == -1)
 				httpContextId = servletElement.getNamespaceIdentifier() + "." + httpContextId; //$NON-NLS-1$
 
-			if (httpRegistryManager.addServletContribution(alias, wrapper, initparams, httpContextId, extension.getContributor()))
+			if (httpRegistryManager.addServletContribution(alias, wrapper, initparams, httpContextId,
+					extension.getContributor()))
 				registered.add(servletElement);
 		}
 	}

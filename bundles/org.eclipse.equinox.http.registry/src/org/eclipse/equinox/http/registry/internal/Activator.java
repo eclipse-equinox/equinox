@@ -21,7 +21,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 
 	private ServiceTracker httpServiceTracker;

@@ -130,19 +130,19 @@ public class DefaultRegistryHttpContext implements HttpContext {
 			for (int i = 0; i < name.length(); i++) {
 				char c = name.charAt(i);
 				switch (c) {
-					case '*' :
-					case '\\' :
-						// we need to escape '*' and '\'
-						if (buffer == null) {
-							buffer = new StringBuffer(name.length() + 16);
-							buffer.append(name.substring(0, i));
-						}
-						buffer.append('\\').append(c);
-						break;
-					default :
-						if (buffer != null)
-							buffer.append(c);
-						break;
+				case '*':
+				case '\\':
+					// we need to escape '*' and '\'
+					if (buffer == null) {
+						buffer = new StringBuffer(name.length() + 16);
+						buffer.append(name.substring(0, i));
+					}
+					buffer.append('\\').append(c);
+					break;
+				default:
+					if (buffer != null)
+						buffer.append(c);
+					break;
 				}
 			}
 			return (buffer == null) ? name : buffer.toString();

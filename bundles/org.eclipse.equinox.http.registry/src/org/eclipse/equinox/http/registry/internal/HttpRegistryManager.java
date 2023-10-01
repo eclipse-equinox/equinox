@@ -46,7 +46,8 @@ public class HttpRegistryManager {
 		String httpContextId;
 		IContributor contributor;
 
-		public ServletContribution(String alias, Servlet servlet, Dictionary<?, ?> initparams, String httpContextId, IContributor contributor) {
+		public ServletContribution(String alias, Servlet servlet, Dictionary<?, ?> initparams, String httpContextId,
+				IContributor contributor) {
 			this.alias = alias;
 			this.servlet = servlet;
 			this.initparams = initparams;
@@ -62,7 +63,8 @@ public class HttpRegistryManager {
 		String httpContextId;
 		IContributor contributor;
 
-		public FilterContribution(String alias, javax.servlet.Filter filter, Dictionary<?, ?> initparams, String httpContextId, IContributor contributor) {
+		public FilterContribution(String alias, javax.servlet.Filter filter, Dictionary<?, ?> initparams,
+				String httpContextId, IContributor contributor) {
 			this.alias = alias;
 			this.filter = filter;
 			this.initparams = initparams;
@@ -93,7 +95,8 @@ public class HttpRegistryManager {
 	private Map<String, ResourcesContribution> resources = new HashMap<>();
 	private Set<String> registered = new HashSet<>();
 
-	public HttpRegistryManager(ServiceReference<?> reference, HttpService httpService, PackageAdmin packageAdmin, IExtensionRegistry registry) {
+	public HttpRegistryManager(ServiceReference<?> reference, HttpService httpService, PackageAdmin packageAdmin,
+			IExtensionRegistry registry) {
 		this.httpService = httpService;
 		this.packageAdmin = packageAdmin;
 
@@ -117,9 +120,11 @@ public class HttpRegistryManager {
 		httpContextManager.stop();
 	}
 
-	public synchronized boolean addResourcesContribution(String alias, String baseName, String httpContextId, IContributor contributor) {
+	public synchronized boolean addResourcesContribution(String alias, String baseName, String httpContextId,
+			IContributor contributor) {
 		if (resources.containsKey(alias) || servlets.containsKey(alias)) {
-			System.err.println("ERROR: Duplicate alias. Failed to register resource for [alias=\"" + alias + "\", contributor=\"" + contributor + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			System.err.println("ERROR: Duplicate alias. Failed to register resource for [alias=\"" + alias //$NON-NLS-1$
+					+ "\", contributor=\"" + contributor + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$
 			return false;
 		}
 
@@ -131,13 +136,16 @@ public class HttpRegistryManager {
 		return true;
 	}
 
-	public synchronized boolean addServletContribution(String alias, Servlet servlet, Dictionary<?, ?> initparams, String httpContextId, IContributor contributor) {
+	public synchronized boolean addServletContribution(String alias, Servlet servlet, Dictionary<?, ?> initparams,
+			String httpContextId, IContributor contributor) {
 		if (resources.containsKey(alias) || servlets.containsKey(alias)) {
-			System.err.println("ERROR: Duplicate alias. Failed to register servlet for [alias=\"" + alias + "\", contributor=\"" + contributor + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			System.err.println("ERROR: Duplicate alias. Failed to register servlet for [alias=\"" + alias //$NON-NLS-1$
+					+ "\", contributor=\"" + contributor + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$
 			return false;
 		}
 
-		ServletContribution contribution = new ServletContribution(alias, servlet, initparams, httpContextId, contributor);
+		ServletContribution contribution = new ServletContribution(alias, servlet, initparams, httpContextId,
+				contributor);
 		servlets.put(alias, contribution);
 		if (httpContextId == null || contexts.containsKey(httpContextId))
 			registerServlet(contribution);
@@ -151,7 +159,8 @@ public class HttpRegistryManager {
 		unregister(alias);
 	}
 
-	public synchronized boolean addFilterContribution(String alias, javax.servlet.Filter filter, Dictionary<?, ?> initparams, String httpContextId, IContributor contributor) {
+	public synchronized boolean addFilterContribution(String alias, javax.servlet.Filter filter,
+			Dictionary<?, ?> initparams, String httpContextId, IContributor contributor) {
 		FilterContribution contribution = new FilterContribution(alias, filter, initparams, httpContextId, contributor);
 		return registerFilter(contribution);
 	}
@@ -174,9 +183,11 @@ public class HttpRegistryManager {
 		return contribution.context;
 	}
 
-	public synchronized boolean addHttpContextContribution(String httpContextId, HttpContext context, IContributor contributor) {
+	public synchronized boolean addHttpContextContribution(String httpContextId, HttpContext context,
+			IContributor contributor) {
 		if (contexts.containsKey(httpContextId)) {
-			System.err.println("ERROR: Duplicate HttpContextId. Failed to register HttpContext for [httpContextId=\"" + httpContextId + "\", contributor=\"" + contributor + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			System.err.println("ERROR: Duplicate HttpContextId. Failed to register HttpContext for [httpContextId=\"" //$NON-NLS-1$
+					+ httpContextId + "\", contributor=\"" + contributor + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$
 			return false;
 		}
 
@@ -231,7 +242,7 @@ public class HttpRegistryManager {
 		Bundle[] bundles = packageAdmin.getBundles(symbolicName, null);
 		if (bundles == null)
 			return null;
-		//Return the first bundle that is not installed or uninstalled
+		// Return the first bundle that is not installed or uninstalled
 		for (Bundle bundle : bundles) {
 			if ((bundle.getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0) {
 				return bundle;
@@ -285,14 +296,18 @@ public class HttpRegistryManager {
 		Method registerFilterMethod = null;
 		try {
 			// First, try the Equinox http service method
-			registerFilterMethod = httpService.getClass().getMethod("registerFilter", new Class[] {String.class, Filter.class, Dictionary.class, HttpContext.class}); //$NON-NLS-1$
-			registerFilterMethod.invoke(httpService, new Object[] {contribution.alias, contribution.filter, contribution.initparams, context});
+			registerFilterMethod = httpService.getClass().getMethod("registerFilter", //$NON-NLS-1$
+					new Class[] { String.class, Filter.class, Dictionary.class, HttpContext.class });
+			registerFilterMethod.invoke(httpService,
+					new Object[] { contribution.alias, contribution.filter, contribution.initparams, context });
 			return true;
 		} catch (NoSuchMethodException e) {
 			// Give the pax-web HttpService impl a try
 			try {
-				registerFilterMethod = httpService.getClass().getMethod("registerFilter", new Class[] {Filter.class, String[].class, String[].class, Dictionary.class, HttpContext.class}); //$NON-NLS-1$
-				registerFilterMethod.invoke(httpService, new Object[] {contribution.filter, new String[] {contribution.alias}, null, contribution.initparams, context});
+				registerFilterMethod = httpService.getClass().getMethod("registerFilter", new Class[] { Filter.class, //$NON-NLS-1$
+						String[].class, String[].class, Dictionary.class, HttpContext.class });
+				registerFilterMethod.invoke(httpService, new Object[] { contribution.filter,
+						new String[] { contribution.alias }, null, contribution.initparams, context });
 				return true;
 			} catch (Throwable t) {
 				// TODO: should log this
@@ -309,8 +324,9 @@ public class HttpRegistryManager {
 
 	private void unregisterFilter(Filter filter) {
 		try {
-			Method unregisterFilterMethod = httpService.getClass().getMethod("unregisterFilter", new Class[] {Filter.class}); //$NON-NLS-1$
-			unregisterFilterMethod.invoke(httpService, new Object[] {filter});
+			Method unregisterFilterMethod = httpService.getClass().getMethod("unregisterFilter", //$NON-NLS-1$
+					new Class[] { Filter.class });
+			unregisterFilterMethod.invoke(httpService, new Object[] { filter });
 		} catch (NoSuchMethodException t) {
 			// TODO: should log this
 			// for now ignore

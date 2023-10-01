@@ -54,7 +54,8 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 
 	private ServiceReference<?> reference;
 
-	public FilterManager(HttpRegistryManager httpRegistryManager, ServiceReference<?> reference, IExtensionRegistry registry) {
+	public FilterManager(HttpRegistryManager httpRegistryManager, ServiceReference<?> reference,
+			IExtensionRegistry registry) {
 		this.httpRegistryManager = httpRegistryManager;
 		this.reference = reference;
 		tracker = new ExtensionPointTracker(registry, FILTERS_EXTENSION_POINT, this);
@@ -78,7 +79,8 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 			String clazz = serviceSelectorElement.getAttribute(CLASS);
 			if (clazz != null) {
 				try {
-					serviceSelector = (org.osgi.framework.Filter) serviceSelectorElement.createExecutableExtension(CLASS);
+					serviceSelector = (org.osgi.framework.Filter) serviceSelectorElement
+							.createExecutableExtension(CLASS);
 				} catch (CoreException e) {
 					// log it.
 					e.printStackTrace();
@@ -133,7 +135,8 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 			if (httpContextId != null && httpContextId.indexOf('.') == -1)
 				httpContextId = filterElement.getNamespaceIdentifier() + "." + httpContextId; //$NON-NLS-1$
 
-			if (httpRegistryManager.addFilterContribution(alias, wrapper, initparams, httpContextId, extension.getContributor()))
+			if (httpRegistryManager.addFilterContribution(alias, wrapper, initparams, httpContextId,
+					extension.getContributor()))
 				registered.put(filterElement, wrapper);
 		}
 	}
@@ -168,7 +171,8 @@ public class FilterManager implements ExtensionPointTracker.Listener {
 				initializeDelegate();
 		}
 
-		public void doFilter(ServletRequest arg0, ServletResponse arg1, FilterChain chain) throws ServletException, IOException {
+		public void doFilter(ServletRequest arg0, ServletResponse arg1, FilterChain chain)
+				throws ServletException, IOException {
 			initializeDelegate();
 			delegate.doFilter(arg0, arg1, chain);
 		}

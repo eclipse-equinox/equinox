@@ -43,7 +43,8 @@ public class HttpServiceTracker extends ServiceTracker<HttpService, HttpService>
 
 	public void open() {
 		super.open();
-		registration = context.registerService(HttpContextExtensionService.class.getName(), new HttpContextExtensionServiceFactory(), null);
+		registration = context.registerService(HttpContextExtensionService.class.getName(),
+				new HttpContextExtensionServiceFactory(), null);
 	}
 
 	public void close() {
@@ -57,7 +58,8 @@ public class HttpServiceTracker extends ServiceTracker<HttpService, HttpService>
 		if (httpService == null)
 			return null;
 
-		HttpRegistryManager httpRegistryManager = new HttpRegistryManager(reference, httpService, packageAdmin, registry);
+		HttpRegistryManager httpRegistryManager = new HttpRegistryManager(reference, httpService, packageAdmin,
+				registry);
 		httpRegistryManager.start();
 		httpRegistryManagers.put(reference, httpRegistryManager);
 
@@ -78,11 +80,13 @@ public class HttpServiceTracker extends ServiceTracker<HttpService, HttpService>
 
 	public class HttpContextExtensionServiceFactory implements ServiceFactory<HttpContextExtensionService> {
 
-		public HttpContextExtensionService getService(Bundle bundle, ServiceRegistration<HttpContextExtensionService> registration) {
+		public HttpContextExtensionService getService(Bundle bundle,
+				ServiceRegistration<HttpContextExtensionService> registration) {
 			return new HttpContextExtensionServiceImpl(bundle);
 		}
 
-		public void ungetService(Bundle bundle, ServiceRegistration<HttpContextExtensionService> registration, HttpContextExtensionService service) {
+		public void ungetService(Bundle bundle, ServiceRegistration<HttpContextExtensionService> registration,
+				HttpContextExtensionService service) {
 			// do nothing
 		}
 	}
