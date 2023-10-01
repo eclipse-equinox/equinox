@@ -69,7 +69,7 @@ public class PreferencesOSGiUtils {
 		try {
 			filter = context.createFilter(Location.CONFIGURATION_FILTER);
 		} catch (InvalidSyntaxException e) {
-			// ignore this.  It should never happen as we have tested the above format.
+			// ignore this. It should never happen as we have tested the above format.
 		}
 		configurationLocationTracker = new ServiceTracker<>(context, filter, null);
 		configurationLocationTracker.open();
@@ -77,7 +77,7 @@ public class PreferencesOSGiUtils {
 		try {
 			filter = context.createFilter(Location.INSTANCE_FILTER);
 		} catch (InvalidSyntaxException e) {
-			// ignore this.  It should never happen as we have tested the above format.
+			// ignore this. It should never happen as we have tested the above format.
 		}
 		instanceLocationTracker = new ServiceTracker<>(context, filter, null);
 		instanceLocationTracker.open();
@@ -141,7 +141,7 @@ public class PreferencesOSGiUtils {
 		Bundle[] bundles = packageAdmin.getBundles(bundleName, null);
 		if (bundles == null)
 			return null;
-		//Return the first bundle that is not installed or uninstalled
+		// Return the first bundle that is not installed or uninstalled
 		for (Bundle bundle : bundles) {
 			if ((bundle.getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0) {
 				return bundle;

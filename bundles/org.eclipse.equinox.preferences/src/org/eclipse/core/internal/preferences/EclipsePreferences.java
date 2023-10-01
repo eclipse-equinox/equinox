@@ -31,15 +31,15 @@ import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 
 /**
- * Represents a node in the Eclipse preference node hierarchy. This class
- * is used as a default implementation/super class for those nodes which
- * belong to scopes which are contributed by the Platform.
+ * Represents a node in the Eclipse preference node hierarchy. This class is
+ * used as a default implementation/super class for those nodes which belong to
+ * scopes which are contributed by the Platform.
  *
  * Implementation notes:
  *
- *  - For thread safety, we always synchronize on <tt>writeLock</tt> when writing
- * the children or properties fields.  Must ensure we don't synchronize when calling
- * client code such as listeners.
+ * - For thread safety, we always synchronize on <tt>writeLock</tt> when writing
+ * the children or properties fields. Must ensure we don't synchronize when
+ * calling client code such as listeners.
  *
  * @since 3.0
  */
@@ -67,7 +67,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	protected boolean dirty = false;
 	protected boolean loading = false;
 	protected final String name;
-	// the parent of an EclipsePreference node is always an EclipsePreference node. (or null)
+	// the parent of an EclipsePreference node is always an EclipsePreference node.
+	// (or null)
 	protected final EclipsePreferences parent;
 	protected boolean removed = false;
 	private final ListenerList<INodeChangeListener> nodeChangeListeners = new ListenerList<>();
@@ -81,7 +82,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	protected static final String debugPluginName = "org.eclipse.equinox.preferences"; //$NON-NLS-1$
 
 	static {
-		DEBUG_PREFERENCE_GENERAL = PreferencesOSGiUtils.getDefault().getBooleanDebugOption(debugPluginName + "/general", false); //$NON-NLS-1$
+		DEBUG_PREFERENCE_GENERAL = PreferencesOSGiUtils.getDefault().getBooleanDebugOption(debugPluginName + "/general", //$NON-NLS-1$
+				false);
 		DEBUG_PREFERENCE_SET = PreferencesOSGiUtils.getDefault().getBooleanDebugOption(debugPluginName + "/set", false); //$NON-NLS-1$
 		DEBUG_PREFERENCE_GET = PreferencesOSGiUtils.getDefault().getBooleanDebugOption(debugPluginName + "/get", false); //$NON-NLS-1$
 	}
@@ -96,7 +98,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		this.name = name;
 		this.cachedPath = null; // make sure the cached path is cleared after setting the parent
 	}
-
 
 	@Override
 	public String absolutePath() {
@@ -126,7 +127,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	protected IEclipsePreferences addChild(String childName, IEclipsePreferences child) {
-		//Thread safety: synchronize method to protect modification of children field
+		// Thread safety: synchronize method to protect modification of children field
 		synchronized (childAndPropertyLock) {
 			if (children == null)
 				children = Collections.synchronizedMap(new HashMap<String, Object>());
@@ -135,7 +136,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		}
 	}
 
-
 	@Override
 	public void addNodeChangeListener(INodeChangeListener listener) {
 		checkRemoved();
@@ -143,7 +143,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		if (DEBUG_PREFERENCE_GENERAL)
 			PrefsMessages.message("Added preference node change listener: " + listener + " to: " + absolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
-
 
 	@Override
 	public void addPreferenceChangeListener(IPreferenceChangeListener listener) {
@@ -161,14 +160,13 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	/*
-	 * Convenience method for throwing an exception when methods
-	 * are called on a removed node.
+	 * Convenience method for throwing an exception when methods are called on a
+	 * removed node.
 	 */
 	protected void checkRemoved() {
 		if (removed)
 			throw new IllegalStateException(NLS.bind(PrefsMessages.preferences_removedNode, name));
 	}
-
 
 	@Override
 	public String[] childrenNames() throws BackingStoreException {
@@ -194,7 +192,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		}
 	}
 
-
 	@Override
 	public void clear() {
 		// illegal state if this node has been removed
@@ -205,7 +202,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		synchronized (childAndPropertyLock) {
 			keys = properties.keys();
 		}
-		//don't synchronize remove call because it calls listeners
+		// don't synchronize remove call because it calls listeners
 		for (String key : keys) {
 			remove(key);
 		}
@@ -233,12 +230,12 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	protected IPath computeLocation(IPath root, String qualifier) {
-		return root == null ? null : root.append(DEFAULT_PREFERENCES_DIRNAME).append(qualifier).addFileExtension(PREFS_FILE_EXTENSION);
+		return root == null ? null
+				: root.append(DEFAULT_PREFERENCES_DIRNAME).append(qualifier).addFileExtension(PREFS_FILE_EXTENSION);
 	}
 
 	/*
-	 * Version 1 (current version)
-	 * path/key=value
+	 * Version 1 (current version) path/key=value
 	 */
 	protected static void convertFromProperties(EclipsePreferences node, Properties table, boolean notify) {
 		String version = table.getProperty(VERSION_KEY);
@@ -256,7 +253,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 				String key = splitPath[1];
 				if (DEBUG_PREFERENCE_SET)
 					PrefsMessages.message("Setting preference: " + path + '/' + key + '=' + value); //$NON-NLS-1$
-				//use internal methods to avoid notifying listeners
+				// use internal methods to avoid notifying listeners
 				EclipsePreferences childNode = (EclipsePreferences) node.internalNode(path, false, null);
 				String oldValue = childNode.internalPut(key, value);
 				// notify listeners if applicable
@@ -271,8 +268,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 
 	/*
 	 * Helper method to persist a Properties object to the filesystem. We use this
-	 * helper so we can remove the date/timestamp that Properties#store always
-	 * puts in the file.
+	 * helper so we can remove the date/timestamp that Properties#store always puts
+	 * in the file.
 	 */
 	private void write(Properties props, IPath location) throws BackingStoreException {
 		Path preferenceFile = location.toFile().toPath();
@@ -302,7 +299,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	protected static String removeTimestampFromTable(Properties properties) throws IOException {
-		// store the properties in a string and then skip the first line (date/timestamp)
+		// store the properties in a string and then skip the first line
+		// (date/timestamp)
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		properties.store(output, null);
 		String string = output.toString(StandardCharsets.UTF_8);
@@ -311,13 +309,13 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	/*
-	 * Helper method to convert this node to a Properties file suitable
-	 * for persistence.
+	 * Helper method to convert this node to a Properties file suitable for
+	 * persistence.
 	 */
 	protected Properties convertToProperties(Properties result, String prefix) throws BackingStoreException {
 		// add the key/value pairs from this node
 		boolean addSeparator = prefix.length() != 0;
-		//thread safety: copy reference in case of concurrent change
+		// thread safety: copy reference in case of concurrent change
 		ImmutableMap temp;
 		synchronized (childAndPropertyLock) {
 			temp = properties;
@@ -335,7 +333,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		}
 		return result;
 	}
-
 
 	@Override
 	public IEclipsePreferences create(IEclipsePreferences nodeParent, String nodeName) {
@@ -373,7 +370,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			result.flush();
 		} catch (BackingStoreException e) {
 			IPath location = result.getLocation();
-			String message = NLS.bind(PrefsMessages.preferences_loadException, location == null ? EMPTY_STRING : location.toString());
+			String message = NLS.bind(PrefsMessages.preferences_loadException,
+					location == null ? EMPTY_STRING : location.toString());
 			IStatus status = new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, message, e);
 			RuntimeLog.log(status);
 		} finally {
@@ -382,14 +380,13 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		return result;
 	}
 
-
 	@Override
 	public void flush() throws BackingStoreException {
 		IEclipsePreferences toFlush = null;
 		synchronized (childAndPropertyLock) {
 			toFlush = internalFlush();
 		}
-		//if we aren't at the right level, then flush the appropriate node
+		// if we aren't at the right level, then flush the appropriate node
 		if (toFlush != null)
 			toFlush.flush();
 		PreferencesService.getDefault().shareStrings();
@@ -399,9 +396,9 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * Do the real flushing in a non-synchronized internal method so sub-classes
 	 * (mainly ProjectPreferences and ProfilePreferences) don't cause deadlocks.
 	 *
-	 * If this node is not responsible for persistence (a load level), then this method
-	 * returns the node that should be flushed. Returns null if this method performed
-	 * the flush.
+	 * If this node is not responsible for persistence (a load level), then this
+	 * method returns the node that should be flushed. Returns null if this method
+	 * performed the flush.
 	 */
 	protected IEclipsePreferences internalFlush() throws BackingStoreException {
 		// illegal state if this node has been removed
@@ -425,19 +422,18 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		// any work to do?
 		if (!dirty)
 			return null;
-		//remove dirty bit before saving, to ensure that concurrent
-		//changes during save mark the store as dirty
+		// remove dirty bit before saving, to ensure that concurrent
+		// changes during save mark the store as dirty
 		dirty = false;
 		try {
 			save();
 		} catch (BackingStoreException e) {
-			//mark it dirty again because the save failed
+			// mark it dirty again because the save failed
 			dirty = true;
 			throw e;
 		}
 		return null;
 	}
-
 
 	@Override
 	public String get(String key, String defaultValue) {
@@ -445,13 +441,11 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		return value == null ? defaultValue : value;
 	}
 
-
 	@Override
 	public boolean getBoolean(String key, boolean defaultValue) {
 		String value = internalGet(key);
 		return value == null ? defaultValue : TRUE.equalsIgnoreCase(value);
 	}
-
 
 	@Override
 	public byte[] getByteArray(String key, byte[] defaultValue) {
@@ -460,8 +454,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	/*
-	 * Return a boolean value indicating whether or not a child with the given
-	 * name is known to this node.
+	 * Return a boolean value indicating whether or not a child with the given name
+	 * is known to this node.
 	 */
 	protected boolean childExists(String childName) {
 		synchronized (childAndPropertyLock) {
@@ -472,8 +466,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	/**
-	 * Thread safe way to obtain a child for a given key. Returns the child
-	 * that matches the given key, or null if there is no matching child.
+	 * Thread safe way to obtain a child for a given key. Returns the child that
+	 * matches the given key, or null if there is no matching child.
 	 */
 	protected IEclipsePreferences getChild(String key, Object context, boolean create) {
 		synchronized (childAndPropertyLock) {
@@ -506,7 +500,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		return result;
 	}
 
-
 	@Override
 	public double getDouble(String key, double defaultValue) {
 		String value = internalGet(key);
@@ -520,7 +513,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		return result;
 	}
 
-
 	@Override
 	public float getFloat(String key, float defaultValue) {
 		String value = internalGet(key);
@@ -533,7 +525,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			}
 		return result;
 	}
-
 
 	@Override
 	public int getInt(String key, int defaultValue) {
@@ -559,7 +550,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		return null;
 	}
 
-
 	@Override
 	public long getLong(String key, long defaultValue) {
 		String value = internalGet(key);
@@ -580,8 +570,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	/**
-	 * Returns the existing value at the given key, or null if
-	 * no such value exists.
+	 * Returns the existing value at the given key, or null if no such value exists.
 	 */
 	protected String internalGet(String key) {
 		// throw NPE if key is null
@@ -632,8 +621,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 
 	/**
 	 * Stores the given (key,value) pair, performing lazy initialization of the
-	 * properties field if necessary. Returns the old value for the given key,
-	 * or null if no value existed.
+	 * properties field if necessary. Returns the old value for the given key, or
+	 * null if no value existed.
 	 */
 	protected String internalPut(String key, String newValue) {
 		synchronized (childAndPropertyLock) {
@@ -656,7 +645,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		return descriptor == null ? true : descriptor.isAlreadyLoaded(node.absolutePath());
 	}
 
-
 	@Override
 	public String[] keys() {
 		// illegal state if this node has been removed
@@ -667,11 +655,11 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	/**
-	 * Loads the preference node. This method returns silently if the node does not exist
-	 * in the backing store (for example non-existent project).
+	 * Loads the preference node. This method returns silently if the node does not
+	 * exist in the backing store (for example non-existent project).
 	 *
 	 * @throws BackingStoreException if the node exists in the backing store but it
-	 * could not be loaded
+	 *                               could not be loaded
 	 */
 	protected void load() throws BackingStoreException {
 		if (descriptor == null) {
@@ -712,7 +700,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		return new FileInputStream(target);
 	}
 
-
 	protected void load(IPath location) throws BackingStoreException {
 		if (location == null) {
 			if (DEBUG_PREFERENCE_GENERAL)
@@ -747,12 +734,10 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		return dirty;
 	}
 
-
 	@Override
 	public String name() {
 		return name;
 	}
-
 
 	@Override
 	public Preferences node(String pathName) {
@@ -780,7 +765,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			SafeRunner.run(job);
 		}
 	}
-
 
 	@Override
 	public boolean nodeExists(String path) throws BackingStoreException {
@@ -814,7 +798,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		return child.nodeExists(path.substring(index + 1));
 	}
 
-
 	@Override
 	public Preferences parent() {
 		// illegal state if this node has been removed
@@ -845,7 +828,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		}
 	}
 
-
 	@Override
 	public void put(String key, String newValue) {
 		if (key == null || newValue == null)
@@ -856,7 +838,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			firePreferenceEvent(key, oldValue, newValue);
 		}
 	}
-
 
 	@Override
 	public void putBoolean(String key, boolean value) {
@@ -870,7 +851,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		}
 	}
 
-
 	@Override
 	public void putByteArray(String key, byte[] value) {
 		if (key == null || value == null)
@@ -882,7 +862,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			firePreferenceEvent(key, oldValue, newValue);
 		}
 	}
-
 
 	@Override
 	public void putDouble(String key, double value) {
@@ -896,7 +875,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		}
 	}
 
-
 	@Override
 	public void putFloat(String key, float value) {
 		if (key == null)
@@ -908,7 +886,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			firePreferenceEvent(key, oldValue, newValue);
 		}
 	}
-
 
 	@Override
 	public void putInt(String key, int value) {
@@ -922,7 +899,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		}
 	}
 
-
 	@Override
 	public void putLong(String key, long value) {
 		if (key == null)
@@ -934,7 +910,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			firePreferenceEvent(key, oldValue, newValue);
 		}
 	}
-
 
 	@Override
 	public void remove(String key) {
@@ -950,7 +925,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		makeDirty();
 		firePreferenceEvent(key, oldValue, null);
 	}
-
 
 	@Override
 	public void removeNode() throws BackingStoreException {
@@ -972,7 +946,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		for (IEclipsePreferences childNode : getChildren(false)) {
 			try {
 				childNode.removeNode();
-			}catch (IllegalStateException e) {
+			} catch (IllegalStateException e) {
 				// ignore since we only get this exception if we have already
 				// been removed. no work to do.
 			}
@@ -1008,7 +982,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		return null;
 	}
 
-
 	@Override
 	public void removeNodeChangeListener(INodeChangeListener listener) {
 		checkRemoved();
@@ -1019,7 +992,6 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			PrefsMessages.message("Removed preference node change listener: " + listener + " from: " + absolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-
 	@Override
 	public void removePreferenceChangeListener(IPreferenceChangeListener listener) {
 		checkRemoved();
@@ -1027,15 +999,16 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			return;
 		preferenceChangeListeners.remove(listener);
 		if (DEBUG_PREFERENCE_GENERAL)
-			PrefsMessages.message("Removed preference property change listener: " + listener + " from: " + absolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
+			PrefsMessages
+					.message("Removed preference property change listener: " + listener + " from: " + absolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
-	 * Saves the preference node. This method returns silently if the node does not exist
-	 * in the backing store (for example non-existent project)
+	 * Saves the preference node. This method returns silently if the node does not
+	 * exist in the backing store (for example non-existent project)
 	 *
 	 * @throws BackingStoreException if the node exists in the backing store but it
-	 * could not be saved
+	 *                               could not be saved
 	 */
 	protected void save() throws BackingStoreException {
 		if (descriptor == null) {
@@ -1067,15 +1040,15 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	/**
-	 * Traverses the preference hierarchy rooted at this node, and adds
-	 * all preference key and value strings to the provided pool.  If an added
-	 * string was already in the pool, all references will be replaced with the
-	 * canonical copy of the string.
+	 * Traverses the preference hierarchy rooted at this node, and adds all
+	 * preference key and value strings to the provided pool. If an added string was
+	 * already in the pool, all references will be replaced with the canonical copy
+	 * of the string.
 	 *
 	 * @param pool The pool to share strings in
 	 */
 	public void shareStrings(StringPool pool) {
-		//thread safety: copy reference in case of concurrent change
+		// thread safety: copy reference in case of concurrent change
 		ImmutableMap temp;
 		synchronized (childAndPropertyLock) {
 			temp = properties;
@@ -1091,8 +1064,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * Encode the given path and key combo to a form which is suitable for
 	 * persisting or using when searching. If the key contains a slash character
-	 * then we must use a double-slash to indicate the end of the
-	 * path/the beginning of the key.
+	 * then we must use a double-slash to indicate the end of the path/the beginning
+	 * of the key.
 	 */
 	public static String encodePath(String path, String key) {
 		String result;
@@ -1112,8 +1085,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	/*
-	 * Return the segment from the given path or null.
-	 * "segment" parameter is 0-based.
+	 * Return the segment from the given path or null. "segment" parameter is
+	 * 0-based.
 	 */
 	public static String getSegment(String path, int segment) {
 		int start = path.indexOf(IPath.SEPARATOR) == 0 ? 1 : 0;
@@ -1149,11 +1122,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	/*
-	 * Return a 2 element String array.
-	 * 	element 0 - the path
-	 * 	element 1 - the key
-	 * The path may be null.
-	 * The key is never null.
+	 * Return a 2 element String array. element 0 - the path element 1 - the key The
+	 * path may be null. The key is never null.
 	 */
 	public static String[] decodePath(String fullPath) {
 		String key = null;
@@ -1185,10 +1155,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			else if (path.charAt(0) == IPath.SEPARATOR)
 				path = path.substring(1);
 
-		return new String[] {path, key};
+		return new String[] { path, key };
 	}
-
-
 
 	@Override
 	public void sync() throws BackingStoreException {

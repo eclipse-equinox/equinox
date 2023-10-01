@@ -18,12 +18,12 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.preferences.*;
 
 /**
- * This class represents a preference node in the "bundle_defaults" scope. This scope is
- * used to represent default values which are set by the bundle in either its preference
- * initializer or in a file included with the bundle.
+ * This class represents a preference node in the "bundle_defaults" scope. This
+ * scope is used to represent default values which are set by the bundle in
+ * either its preference initializer or in a file included with the bundle.
  *
- * This differs from the regular default scope because it does not contain values set
- * by the product preference customization or the command-line.
+ * This differs from the regular default scope because it does not contain
+ * values set by the product preference customization or the command-line.
  *
  * @since 3.3
  */
@@ -59,7 +59,6 @@ public class BundleDefaultPreferences extends EclipsePreferences {
 			return;
 	}
 
-
 	@Override
 	protected IEclipsePreferences getLoadLevel() {
 		if (loadLevel == null) {
@@ -76,18 +75,15 @@ public class BundleDefaultPreferences extends EclipsePreferences {
 		return loadLevel;
 	}
 
-
 	@Override
 	protected boolean isAlreadyLoaded(IEclipsePreferences node) {
 		return loadedNodes.contains(node.name());
 	}
 
-
 	@Override
 	protected void loaded() {
 		loadedNodes.add(name());
 	}
-
 
 	@Override
 	protected void load() {
@@ -99,7 +95,6 @@ public class BundleDefaultPreferences extends EclipsePreferences {
 			PreferencesService.getDefault().getRootNode().node(DefaultScope.SCOPE).node(relativePath);
 		}
 	}
-
 
 	@Override
 	protected EclipsePreferences internalCreate(EclipsePreferences nodeParent, String nodeName, Object context) {

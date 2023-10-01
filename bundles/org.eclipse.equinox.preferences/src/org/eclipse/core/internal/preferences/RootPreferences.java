@@ -30,7 +30,6 @@ public class RootPreferences extends EclipsePreferences {
 		super(null, ""); //$NON-NLS-1$
 	}
 
-
 	@Override
 	public void flush() throws BackingStoreException {
 		// flush all children
@@ -39,7 +38,7 @@ public class RootPreferences extends EclipsePreferences {
 		for (String n : names) {
 			try {
 				node(n).flush();
-			}catch (BackingStoreException e) {
+			} catch (BackingStoreException e) {
 				// store the first exception we get and still try and flush
 				// the rest of the children.
 				if (exception == null)
@@ -50,7 +49,6 @@ public class RootPreferences extends EclipsePreferences {
 			throw exception;
 	}
 
-
 	protected synchronized IEclipsePreferences getChild(String key, Object context) {
 		if (children == null)
 			return null;
@@ -59,15 +57,14 @@ public class RootPreferences extends EclipsePreferences {
 			return null;
 		if (value instanceof IEclipsePreferences)
 			return (IEclipsePreferences) value;
-		//lazy initialization
+		// lazy initialization
 		IEclipsePreferences child = PreferencesService.getDefault().createNode(key);
 		addChild(key, child);
 		return child;
 	}
 
-
 	protected synchronized IEclipsePreferences[] getChildren() {
-		//must perform lazy initialization of child nodes
+		// must perform lazy initialization of child nodes
 		String[] childNames = new String[0];
 		try {
 			childNames = childrenNames();
@@ -80,7 +77,6 @@ public class RootPreferences extends EclipsePreferences {
 			childNodes[i] = getChild(childNames[i], null);
 		return childNodes;
 	}
-
 
 	@Override
 	public Preferences node(String path) {
@@ -108,7 +104,6 @@ public class RootPreferences extends EclipsePreferences {
 		return child.node(endIndex == -1 ? "" : path.substring(endIndex + 1)); //$NON-NLS-1$
 	}
 
-
 	@Override
 	public void sync() throws BackingStoreException {
 		// sync all children
@@ -117,7 +112,7 @@ public class RootPreferences extends EclipsePreferences {
 		for (String n : names) {
 			try {
 				node(n).sync();
-			}catch (BackingStoreException e) {
+			} catch (BackingStoreException e) {
 				// store the first exception we get and still try and sync
 				// the rest of the children.
 				if (exception == null)

@@ -24,23 +24,23 @@ import org.osgi.service.prefs.PreferencesService;
  * </p>
  *
  * <p>
- * Note: Eclipse preferences are accessible through the OSGi Preferences API and vice
- *  versa.
+ * Note: Eclipse preferences are accessible through the OSGi Preferences API and
+ * vice versa.
  * </p>
  */
 public class OSGiPreferencesServiceImpl implements PreferencesService {
 
 	/**
-	 * Adaptor that implements OSGi Preferences interface on top of EclipsePreferences.
-	 * Creates a "local root" since OSGi preferences have lots of roots but eclipse
-	 * only has one.
+	 * Adaptor that implements OSGi Preferences interface on top of
+	 * EclipsePreferences. Creates a "local root" since OSGi preferences have lots
+	 * of roots but eclipse only has one.
 	 */
 	private static final class OSGiLocalRootPreferences implements Preferences {
 
-		//The "local" root of this preference tree (not the real Eclipse root)
+		// The "local" root of this preference tree (not the real Eclipse root)
 		private Preferences root;
 
-		//the node this node is wrappering
+		// the node this node is wrappering
 		private Preferences wrapped;
 
 		private OSGiLocalRootPreferences(Preferences root) {
@@ -53,18 +53,18 @@ public class OSGiPreferencesServiceImpl implements PreferencesService {
 		}
 
 		/**
-		 * If pathName is absolute make it "absolute" with respect to this root.
-		 * If pathName is relative, just return it
+		 * If pathName is absolute make it "absolute" with respect to this root. If
+		 * pathName is relative, just return it
 		 */
 		private String fixPath(String pathName) {
 			if (pathName.startsWith("/")) { //$NON-NLS-1$
 				if (pathName.equals("/")) { //$NON-NLS-1$
 					return root.absolutePath();
 				}
-				//fix absolute path
+				// fix absolute path
 				return root.absolutePath().concat(pathName);
 			}
-			//pass-through relative path
+			// pass-through relative path
 			return pathName;
 		}
 
@@ -86,10 +86,10 @@ public class OSGiPreferencesServiceImpl implements PreferencesService {
 
 		/**
 		 * <p>
-		 * Override getByteArray(String key, byte [] defaultValue) to be more strict when
-		 * decoding byte values.  EclipsePreferences implementation pads bytes if they are not 4
-		 * bytes long, but the OSGi TCK expects this function to return null if the length of
-		 * the byte array is not an even multiple of 4.
+		 * Override getByteArray(String key, byte [] defaultValue) to be more strict
+		 * when decoding byte values. EclipsePreferences implementation pads bytes if
+		 * they are not 4 bytes long, but the OSGi TCK expects this function to return
+		 * null if the length of the byte array is not an even multiple of 4.
 		 * </p>
 		 * <p>
 		 * Also catches any decoding exceptions and returns the default value instead of
@@ -106,7 +106,7 @@ public class OSGiPreferencesServiceImpl implements PreferencesService {
 					try {
 						byteArray = Base64.decode(encodedBytes);
 					} catch (Exception e) {
-						//do not raise exception - return defaultValue
+						// do not raise exception - return defaultValue
 					}
 				}
 			}
@@ -121,7 +121,7 @@ public class OSGiPreferencesServiceImpl implements PreferencesService {
 						throw new IllegalStateException();
 					}
 				} catch (BackingStoreException e) {
-					//best effort
+					// best effort
 				}
 				return null;
 			}
@@ -149,7 +149,7 @@ public class OSGiPreferencesServiceImpl implements PreferencesService {
 			return wrapped.name();
 		}
 
-		//delegate to wrapped preference
+		// delegate to wrapped preference
 		@Override
 		public void put(String key, String value) {
 			wrapped.put(key, value);
@@ -250,7 +250,7 @@ public class OSGiPreferencesServiceImpl implements PreferencesService {
 			wrapped.sync();
 		}
 
-	} //end static inner class OSGiLocalRootPreferences
+	} // end static inner class OSGiLocalRootPreferences
 
 	private IEclipsePreferences bundlePreferences;
 
@@ -274,7 +274,7 @@ public class OSGiPreferencesServiceImpl implements PreferencesService {
 		try {
 			users = bundlePreferences.node("user").childrenNames(); //$NON-NLS-1$
 		} catch (BackingStoreException e) {
-			//best effort
+			// best effort
 		}
 		return users == null ? new String[0] : users;
 	}

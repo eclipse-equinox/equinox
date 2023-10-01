@@ -13,17 +13,16 @@
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
-
 /**
  * Hash table of {String --> String}.
  *
- * This map handles collisions using linear probing.  When elements are
- * removed, the entire table is rehashed.  Thus this map has good space
- * characteristics, good insertion and iteration performance, but slower
- * removal performance than a HashMap.
+ * This map handles collisions using linear probing. When elements are removed,
+ * the entire table is rehashed. Thus this map has good space characteristics,
+ * good insertion and iteration performance, but slower removal performance than
+ * a HashMap.
  * <p>
- * This map is thread safe because it is immutable.  All methods that modify
- * the map create and return a new map, rather than modifying the receiver.
+ * This map is thread safe because it is immutable. All methods that modify the
+ * map create and return a new map, rather than modifying the receiver.
  */
 public abstract class ImmutableMap implements Cloneable {
 	static class ArrayMap extends ImmutableMap {
@@ -43,7 +42,7 @@ public abstract class ImmutableMap implements Cloneable {
 
 		ArrayMap(int size) {
 			this.elementSize = 0;
-			//table size must always be a power of two
+			// table size must always be a power of two
 			int tableLen = 1;
 			while (tableLen < size)
 				tableLen *= 2;
@@ -66,9 +65,9 @@ public abstract class ImmutableMap implements Cloneable {
 		}
 
 		/**
-		 * This method destructively adds the key/value pair to the table.
-		 * The caller must ensure the table has an empty slot before calling
-		 * this method.
+		 * This method destructively adds the key/value pair to the table. The caller
+		 * must ensure the table has an empty slot before calling this method.
+		 * 
 		 * @param key
 		 * @param value
 		 */
@@ -111,7 +110,7 @@ public abstract class ImmutableMap implements Cloneable {
 			ArrayMap result;
 			final int oldLen = keyTable.length;
 			if (elementSize + 1 > threshold) {
-				//rehash case
+				// rehash case
 				String currentKey;
 				result = new ArrayMap(oldLen * 2);
 				for (int i = oldLen; --i >= 0;)
@@ -136,7 +135,7 @@ public abstract class ImmutableMap implements Cloneable {
 				if (currentKey.equals(key)) {
 					if (elementSize <= 1)
 						return EMPTY;
-					//return a new map that includes all keys except the current one
+					// return a new map that includes all keys except the current one
 					ImmutableMap result = createMap((int) (elementSize / LOAD_FACTOR));
 					for (int i = 0; i < index; i++)
 						if ((currentKey = keyTable[i]) != null)
@@ -151,10 +150,9 @@ public abstract class ImmutableMap implements Cloneable {
 			return this;
 		}
 
-
 		@Override
 		public void shareStrings(StringPool set) {
-			//copy elements for thread safety
+			// copy elements for thread safety
 			String[] array = keyTable;
 			if (array == null)
 				return;
@@ -193,7 +191,7 @@ public abstract class ImmutableMap implements Cloneable {
 
 		@Override
 		protected void internalPut(String key, String value) {
-			throw new IllegalStateException();//cannot put elements in the empty map
+			throw new IllegalStateException();// cannot put elements in the empty map
 		}
 
 		@Override
@@ -215,16 +213,17 @@ public abstract class ImmutableMap implements Cloneable {
 	}
 
 	/**
-	 * The empty hash map.  Since instances are immutable, the empty map
-	 * can be a singleton, with accessor methods optimized for the empty map case.
+	 * The empty hash map. Since instances are immutable, the empty map can be a
+	 * singleton, with accessor methods optimized for the empty map case.
 	 */
 	public static final ImmutableMap EMPTY = new EmptyMap();
 
 	protected static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 	/**
-	 * Returns the value associated with this key in the map, or
-	 * <code>null</code> if the key is not present in the map.
+	 * Returns the value associated with this key in the map, or <code>null</code>
+	 * if the key is not present in the map.
+	 * 
 	 * @param key
 	 * @return The value associated with this key, or <code>null</code>
 	 */
@@ -237,8 +236,8 @@ public abstract class ImmutableMap implements Cloneable {
 	}
 
 	/**
-	 * Destructively adds a key/value pair to this map. The caller must ensure
-	 * there is enough room in this map to proceed.
+	 * Destructively adds a key/value pair to this map. The caller must ensure there
+	 * is enough room in this map to proceed.
 	 *
 	 * @param key
 	 * @param value
@@ -251,8 +250,8 @@ public abstract class ImmutableMap implements Cloneable {
 	public abstract String[] keys();
 
 	/**
-	 * Returns a new map that is equal to this one, except with the given
-	 * key/value pair added.
+	 * Returns a new map that is equal to this one, except with the given key/value
+	 * pair added.
 	 *
 	 * @param key
 	 * @param value
@@ -261,13 +260,12 @@ public abstract class ImmutableMap implements Cloneable {
 	public abstract ImmutableMap put(String key, String value);
 
 	/**
-	 * Returns a map that is equal to this one, except without the given
-	 * key.
+	 * Returns a map that is equal to this one, except without the given key.
+	 * 
 	 * @param key
 	 * @return A map with the given key removed
 	 */
 	public abstract ImmutableMap removeKey(String key);
-
 
 	public void shareStrings(StringPool set) {
 		// nothing to do
@@ -275,6 +273,7 @@ public abstract class ImmutableMap implements Cloneable {
 
 	/**
 	 * Returns the number of keys in this map.
+	 * 
 	 * @return the number of keys in this map.
 	 */
 	public abstract int size();

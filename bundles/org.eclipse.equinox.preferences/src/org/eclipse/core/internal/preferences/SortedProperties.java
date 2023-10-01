@@ -17,18 +17,21 @@ package org.eclipse.core.internal.preferences;
 import java.util.*;
 
 /**
- * A {@link Properties} class whose entries are sorted by key; can <strong>only</strong> be used in limited scenarios
- * like storing properties to a file.
+ * A {@link Properties} class whose entries are sorted by key; can
+ * <strong>only</strong> be used in limited scenarios like storing properties to
+ * a file.
  * <p>
- * <b>Implementation note</b>: The implementations of the {@link #keys()} and {@link #entrySet()} methods
- * violate the contracts of {@link Properties#keySet()} and {@link Properties#entrySet()}, because the returned sets
- * are <em>not</em> backed by this map.
- * Overriding both methods is necessary to support Oracle and IBM VMS, see
+ * <b>Implementation note</b>: The implementations of the {@link #keys()} and
+ * {@link #entrySet()} methods violate the contracts of
+ * {@link Properties#keySet()} and {@link Properties#entrySet()}, because the
+ * returned sets are <em>not</em> backed by this map. Overriding both methods is
+ * necessary to support Oracle and IBM VMS, see
  * <a href="https://bugs.eclipse.org/325000">bug 325000</a>.
  * </p>
  */
 public class SortedProperties extends Properties {
-	// Warning: This class is referenced by our friend org.eclipse.core.internal.resources.ProjectPreferences
+	// Warning: This class is referenced by our friend
+	// org.eclipse.core.internal.resources.ProjectPreferences
 
 	private static final long serialVersionUID = 1L;
 
@@ -43,11 +46,12 @@ public class SortedProperties extends Properties {
 
 	@Override
 	public Set<Map.Entry<Object, Object>> entrySet() {
-		TreeSet<Map.Entry<Object, Object>> set = new TreeSet<>((Map.Entry<Object, Object> e1, Map.Entry<Object, Object> e2) -> {
-			String s1 = (String) e1.getKey();
-			String s2 = (String) e2.getKey();
-			return s1.compareTo(s2);
-		});
+		TreeSet<Map.Entry<Object, Object>> set = new TreeSet<>(
+				(Map.Entry<Object, Object> e1, Map.Entry<Object, Object> e2) -> {
+					String s1 = (String) e1.getKey();
+					String s2 = (String) e2.getKey();
+					return s1.compareTo(s2);
+				});
 		for (Map.Entry<Object, Object> entry : super.entrySet()) {
 			set.add(entry);
 		}

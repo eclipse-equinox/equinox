@@ -109,8 +109,8 @@ public class InstancePreferences extends EclipsePreferences {
 	}
 
 	/*
-	 * Initialize the children for the root of this node. Store the names as
-	 * keys in the children table so we can lazily load them later.
+	 * Initialize the children for the root of this node. Store the names as keys in
+	 * the children table so we can lazily load them later.
 	 */
 	protected void initializeChildren() {
 		if (initialized || parent == null)

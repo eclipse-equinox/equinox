@@ -42,8 +42,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Obje
 	private static final String PROP_CUSTOMIZATION = "eclipse.pluginCustomization"; //$NON-NLS-1$
 
 	/**
-	 * Track the registry service - only register preference service if the registry is
-	 * available
+	 * Track the registry service - only register preference service if the registry
+	 * is available
 	 */
 	private ServiceTracker<?, ?> registryServiceTracker;
 
@@ -64,21 +64,24 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Obje
 
 	private ServiceTracker<?, ?> locationTracker;
 
-
 	@Override
 	public void start(BundleContext context) throws Exception {
 		bundleContext = context;
-		// Open the services first before processing the command-line args, order is important! (Bug 150288)
+		// Open the services first before processing the command-line args, order is
+		// important! (Bug 150288)
 		PreferencesOSGiUtils.getDefault().openServices();
 		processCommandLine();
 
 		boolean shouldRegister = !"false".equalsIgnoreCase(context.getProperty(PROP_REGISTER_PERF_SERVICE)); //$NON-NLS-1$
 		if (shouldRegister) {
-			preferencesService = bundleContext.registerService(IPreferencesService.class, PreferencesService.getDefault(), new Hashtable<String, Object>());
-			osgiPreferencesService = bundleContext.registerService(org.osgi.service.prefs.PreferencesService.class, new OSGiPreferencesServiceManager(bundleContext), null);
+			preferencesService = bundleContext.registerService(IPreferencesService.class,
+					PreferencesService.getDefault(), new Hashtable<String, Object>());
+			osgiPreferencesService = bundleContext.registerService(org.osgi.service.prefs.PreferencesService.class,
+					new OSGiPreferencesServiceManager(bundleContext), null);
 		}
 		// use the string for the class name here in case the registry isn't around
-		registryServiceTracker = new ServiceTracker<>(bundleContext, "org.eclipse.core.runtime.IExtensionRegistry", this); //$NON-NLS-1$
+		registryServiceTracker = new ServiceTracker<>(bundleContext, "org.eclipse.core.runtime.IExtensionRegistry", //$NON-NLS-1$
+				this);
 		registryServiceTracker.open();
 		locationTracker = new ServiceTracker<>(context,
 				context.createFilter("(&" + Location.INSTANCE_FILTER + "(url=*))"), //$NON-NLS-1$//$NON-NLS-2$
@@ -109,7 +112,6 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Obje
 		locationTracker.open();
 	}
 
-
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		PreferencesOSGiUtils.getDefault().closeServices();
@@ -136,11 +138,11 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Obje
 		return bundleContext;
 	}
 
-
 	@Override
 	public synchronized Object addingService(ServiceReference<Object> reference) {
 		Object service = bundleContext.getService(reference);
-		// this check is important as it avoids early loading of PreferenceServiceRegistryHelper and allows
+		// this check is important as it avoids early loading of
+		// PreferenceServiceRegistryHelper and allows
 		// this bundle to operate with out necessarily resolving against the registry
 		if (service != null) {
 			try {
@@ -151,23 +153,25 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Obje
 			} catch (NoClassDefFoundError error) {
 				// Normally this catch would not be needed since we should never see the
 				// IExtensionRegistry service without resolving against registry.
-				// However, the check is very lenient with split packages and this can happen when
-				// the preferences bundle is already resolved at the time the registry bundle is installed.
-				// For this case we ignore the error. When refreshed the bundle will be rewired correctly.
-				// null is returned because we don't want to track this particular service reference.
+				// However, the check is very lenient with split packages and this can happen
+				// when
+				// the preferences bundle is already resolved at the time the registry bundle is
+				// installed.
+				// For this case we ignore the error. When refreshed the bundle will be rewired
+				// correctly.
+				// null is returned because we don't want to track this particular service
+				// reference.
 				return null;
 			}
 		}
-		//return the registry service so we track it
+		// return the registry service so we track it
 		return service;
 	}
-
 
 	@Override
 	public void modifiedService(ServiceReference<Object> reference, Object service) {
 		// nothing to do
 	}
-
 
 	@Override
 	public synchronized void removedService(ServiceReference<Object> reference, Object service) {
@@ -176,7 +180,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Obje
 	}
 
 	/**
-	 * Look for the plug-in customization file in the system properties and command-line args.
+	 * Look for the plug-in customization file in the system properties and
+	 * command-line args.
 	 */
 	private void processCommandLine() {
 		// check the value of the system property first because its quicker.
@@ -187,7 +192,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Obje
 			return;
 		}
 
-		ServiceTracker<?, EnvironmentInfo> environmentTracker = new ServiceTracker<>(bundleContext, EnvironmentInfo.class, null);
+		ServiceTracker<?, EnvironmentInfo> environmentTracker = new ServiceTracker<>(bundleContext,
+				EnvironmentInfo.class, null);
 		environmentTracker.open();
 		EnvironmentInfo environmentInfo = environmentTracker.getService();
 		environmentTracker.close();

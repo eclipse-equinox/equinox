@@ -18,7 +18,8 @@ import org.eclipse.core.internal.preferences.PrefsMessages;
 import org.eclipse.osgi.util.NLS;
 
 /**
- * The preference store implementation that uses OSGi preference node as an enclosed storage.
+ * The preference store implementation that uses OSGi preference node as an
+ * enclosed storage.
  *
  * @see IEclipsePreferences
  *

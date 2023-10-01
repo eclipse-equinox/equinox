@@ -74,8 +74,8 @@ public class PrefsMessages extends NLS {
 	}
 
 	/**
-	 * Print a debug message to the console.
-	 * Pre-pend the message with the current date and the name of the current thread.
+	 * Print a debug message to the console. Pre-pend the message with the current
+	 * date and the name of the current thread.
 	 */
 	public static void message(String message) {
 		StringBuilder buffer = new StringBuilder();

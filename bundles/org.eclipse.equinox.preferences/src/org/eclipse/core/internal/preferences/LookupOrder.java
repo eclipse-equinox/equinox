@@ -14,8 +14,7 @@
 package org.eclipse.core.internal.preferences;
 
 /**
- * Object used to store the look-up order for preference
- * scope searching.
+ * Object used to store the look-up order for preference scope searching.
  *
  * @since 3.0
  */

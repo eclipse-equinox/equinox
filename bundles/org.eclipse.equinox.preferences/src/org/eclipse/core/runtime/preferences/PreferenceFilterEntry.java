@@ -15,8 +15,8 @@
 package org.eclipse.core.runtime.preferences;
 
 /**
- * Class which represents and preference filter entry to be used during preference
- * import/export (for example).
+ * Class which represents and preference filter entry to be used during
+ * preference import/export (for example).
  *
  * @since 3.1
  * @see org.eclipse.core.runtime.preferences.IPreferenceFilter
@@ -27,8 +27,8 @@ public final class PreferenceFilterEntry {
 	private String matchType;
 
 	/**
-	 * Constructor for the class. Create a new preference filter entry with the given
-	 * key. The key must <em>not</em> be <code>null</code> or empty.
+	 * Constructor for the class. Create a new preference filter entry with the
+	 * given key. The key must <em>not</em> be <code>null</code> or empty.
 	 *
 	 * @param key the name of the preference key
 	 */
@@ -40,16 +40,18 @@ public final class PreferenceFilterEntry {
 	}
 
 	/**
-	 * Constructor for the class. Create a new preference filter entry with the given
-	 * key and match type. The key must <em>not</em> be <code>null</code> or empty.
+	 * Constructor for the class. Create a new preference filter entry with the
+	 * given key and match type. The key must <em>not</em> be <code>null</code> or
+	 * empty.
 	 * <p>
-	 * Setting matchType to "prefix" treats the key as if it were a regular expression
-	 * with an asterisk at the end. If matchType is <code>null</code>, the key must be
-	 * an exact match.
+	 * Setting matchType to "prefix" treats the key as if it were a regular
+	 * expression with an asterisk at the end. If matchType is <code>null</code>,
+	 * the key must be an exact match.
 	 * </p>
-	 * @param key the name of the preference key
-	 * @param matchType specifies key match type, may be <code>null</code> to indicate
-	 * that exact match is required
+	 * 
+	 * @param key       the name of the preference key
+	 * @param matchType specifies key match type, may be <code>null</code> to
+	 *                  indicate that exact match is required
 	 * @since 3.3
 	 */
 	public PreferenceFilterEntry(String key, String matchType) {
@@ -58,9 +60,8 @@ public final class PreferenceFilterEntry {
 	}
 
 	/**
-	 * Return the name of the preference key for this filter entry.
-	 * It will <em>not</em> return <code>null</code> or the
-	 * empty string.
+	 * Return the name of the preference key for this filter entry. It will
+	 * <em>not</em> return <code>null</code> or the empty string.
 	 *
 	 * @return the name of the preference key
 	 */
@@ -71,8 +72,9 @@ public final class PreferenceFilterEntry {
 	/**
 	 * Return the match type specified for this filter. May return <code>null</code>
 	 * to indicate that exact match is used.
+	 * 
 	 * @return matchType the match type, might be <code>null</code> indicating that
-	 * exact match is used
+	 *         exact match is used
 	 * @since 3.3
 	 */
 	public String getMatchType() {
