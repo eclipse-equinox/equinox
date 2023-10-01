@@ -22,7 +22,8 @@ import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 
 /**
- * This class is capable of providing a transformed version of an entry contained within a base bundle entity.
+ * This class is capable of providing a transformed version of an entry
+ * contained within a base bundle entity.
  */
 public class TransformedBundleEntry extends BundleEntry {
 
@@ -32,9 +33,11 @@ public class TransformedBundleEntry extends BundleEntry {
 	private TransformedBundleFile bundleFile;
 
 	/**
-	 * Create a wrapped bundle entry.  Calls to obtain the content of this entry will be resolved via the provided input stream rather than the original. 
-	 * @param bundleFile the host bundle file
-	 * @param original the original entry
+	 * Create a wrapped bundle entry. Calls to obtain the content of this entry will
+	 * be resolved via the provided input stream rather than the original.
+	 * 
+	 * @param bundleFile    the host bundle file
+	 * @param original      the original entry
 	 * @param wrappedStream the override stream
 	 */
 	public TransformedBundleEntry(TransformedBundleFile bundleFile, BundleEntry original, InputStream wrappedStream) {
@@ -69,8 +72,9 @@ public class TransformedBundleEntry extends BundleEntry {
 	}
 
 	/**
-	 * Obtaining the size means inspecting the transformed stream.  
-	 * If this stream does not support marks the stream is drained and a copy is retained for later use.
+	 * Obtaining the size means inspecting the transformed stream. If this stream
+	 * does not support marks the stream is drained and a copy is retained for later
+	 * use.
 	 */
 	public long getSize() {
 		ByteArrayOutputStream tempBuffer = new ByteArrayOutputStream(1024);
@@ -90,8 +94,11 @@ public class TransformedBundleEntry extends BundleEntry {
 				stream = new ByteArrayInputStream(tempBuffer.toByteArray());
 			}
 		} catch (IOException e) {
-			bundleFile.getGeneration().getBundleInfo().getStorage().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Problem calculating size of stream for file.  Stream may now be corrupted : " //$NON-NLS-1$
-					+ getName(), e);
+			bundleFile.getGeneration().getBundleInfo().getStorage().getLogServices().log(EquinoxContainer.NAME,
+					FrameworkLogEntry.ERROR,
+					"Problem calculating size of stream for file.  Stream may now be corrupted : " //$NON-NLS-1$
+							+ getName(),
+					e);
 		}
 		return tempBuffer.size();
 

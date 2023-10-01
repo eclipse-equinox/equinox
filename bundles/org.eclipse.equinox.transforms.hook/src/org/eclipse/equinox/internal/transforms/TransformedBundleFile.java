@@ -28,8 +28,10 @@ import org.eclipse.osgi.storage.bundlefile.*;
 import org.osgi.framework.Bundle;
 
 /**
- * This class is capable of providing transformed versions of entries contained within a base bundle file.
- * For requests that transform bundle contents into local resources (such as file URLs) the transformed state of the bundle is written to the configuration area.
+ * This class is capable of providing transformed versions of entries contained
+ * within a base bundle file. For requests that transform bundle contents into
+ * local resources (such as file URLs) the transformed state of the bundle is
+ * written to the configuration area.
  */
 public class TransformedBundleFile extends BundleFileWrapper {
 
@@ -39,11 +41,13 @@ public class TransformedBundleFile extends BundleFileWrapper {
 	private final Debug debug;
 
 	/**
-	 * Create a wrapped bundle file.  
-	 * Requests into this file will be compared to the list of known transformers and transformer templates and if there's a match the transformed entity is returned instead of the original.
+	 * Create a wrapped bundle file. Requests into this file will be compared to the
+	 * list of known transformers and transformer templates and if there's a match
+	 * the transformed entity is returned instead of the original.
+	 * 
 	 * @param transformerHook the transformer hook
-	 * @param data the original data
-	 * @param delegate the original file
+	 * @param data            the original data
+	 * @param delegate        the original file
 	 */
 	public TransformedBundleFile(TransformerHook transformerHook, Generation generation, BundleFile delegate) {
 		super(delegate);
@@ -81,13 +85,11 @@ public class TransformedBundleFile extends BundleFileWrapper {
 	}
 
 	/**
-	 * Return the input stream that results from applying the given transformer
-	 * URL to the provided input stream.
+	 * Return the input stream that results from applying the given transformer URL
+	 * to the provided input stream.
 	 * 
-	 * @param inputStream
-	 *            the stream to transform
-	 * @param bundle
-	 *            the resource representing the transformer
+	 * @param inputStream the stream to transform
+	 * @param bundle      the resource representing the transformer
 	 * @return the transformed stream
 	 */
 	protected InputStream getInputStream(InputStream inputStream, Bundle bundle, String path) {
@@ -108,8 +110,10 @@ public class TransformedBundleFile extends BundleFileWrapper {
 					try {
 						return transformer.getInputStream(inputStream, transformTuple.transformerUrl);
 					} catch (IOException e) {
-						generation.getBundleInfo().getStorage().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Problem obtaining transformed stream from transformer : " //$NON-NLS-1$
-								+ transformer.getClass().getName(), e);
+						generation.getBundleInfo().getStorage().getLogServices().log(EquinoxContainer.NAME,
+								FrameworkLogEntry.ERROR, "Problem obtaining transformed stream from transformer : " //$NON-NLS-1$
+										+ transformer.getClass().getName(),
+								e);
 
 					}
 				}
@@ -132,8 +136,8 @@ public class TransformedBundleFile extends BundleFileWrapper {
 	}
 
 	/**
-	 * This file is a copy of {@link ZipBundleFile#getFile(String, boolean)}
-	 * with modifications.
+	 * This file is a copy of {@link ZipBundleFile#getFile(String, boolean)} with
+	 * modifications.
 	 */
 	public File getFile(String path, boolean nativeCode) {
 		File originalFile = delegate.getFile(path, nativeCode);
@@ -190,12 +194,12 @@ public class TransformedBundleFile extends BundleFileWrapper {
 	}
 
 	/**
-	 * Answers whether the resource at the given path or any of its children has
-	 * a transform associated with it.
+	 * Answers whether the resource at the given path or any of its children has a
+	 * transform associated with it.
 	 * 
 	 * @param path
-	 * @return whether the resource at the given path or any of its children has
-	 * a transform associated with it.
+	 * @return whether the resource at the given path or any of its children has a
+	 *         transform associated with it.
 	 */
 	private boolean hasTransforms(String path) {
 		if (!transformerHook.hasTransformers())
@@ -206,13 +210,12 @@ public class TransformedBundleFile extends BundleFileWrapper {
 	/**
 	 * Extracts a directory and all sub content to disk
 	 * 
-	 * @param dirName
-	 *            the directory name to extract
-	 * @return the File used to extract the content to. A value of
-	 *         <code>null</code> is returned if the directory to extract does
-	 *         not exist or if content extraction is not supported.
+	 * @param dirName the directory name to extract
+	 * @return the File used to extract the content to. A value of <code>null</code>
+	 *         is returned if the directory to extract does not exist or if content
+	 *         extraction is not supported.
 	 * 
-	 * This method is derived from ZipBundleFile#extractDirectory(String).
+	 *         This method is derived from ZipBundleFile#extractDirectory(String).
 	 */
 	protected synchronized File extractDirectory(String dirName) {
 		Enumeration<String> entries = delegate.getEntryPaths(dirName);

@@ -19,15 +19,19 @@ import java.io.InputStream;
 import java.net.URL;
 
 /**
- * This class represents the fundamental building block of the transformer system.  
- * Implementations of this class are capable of transforming an input stream based on a given transformer url.
- * The meaning and content of this URL are unspecified - it is the transformers responsibility to interpret these as need be.
+ * This class represents the fundamental building block of the transformer
+ * system. Implementations of this class are capable of transforming an input
+ * stream based on a given transformer url. The meaning and content of this URL
+ * are unspecified - it is the transformers responsibility to interpret these as
+ * need be.
  */
 public abstract class StreamTransformer {
 	/**
 	 * Provided a transformed version of the provided input stream.
-	 * @param inputStream the original stream
-	 * @param transformerUrl an url that may be used by the transformer in determining the proper transform to invoke.
+	 * 
+	 * @param inputStream    the original stream
+	 * @param transformerUrl an url that may be used by the transformer in
+	 *                       determining the proper transform to invoke.
 	 * @return the transformed stream
 	 * @throws IOException thrown if there is an issue invoking the transform
 	 */

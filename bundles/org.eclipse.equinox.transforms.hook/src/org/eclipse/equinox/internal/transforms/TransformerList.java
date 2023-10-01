@@ -27,7 +27,8 @@ import org.osgi.util.tracker.ServiceTracker;
 public class TransformerList extends ServiceTracker<Object, Object> {
 
 	/**
-	 * The stale state of this list.  Set to true every time a new matching service instance is detected.
+	 * The stale state of this list. Set to true every time a new matching service
+	 * instance is detected.
 	 */
 	private volatile boolean stale = true;
 
@@ -39,8 +40,10 @@ public class TransformerList extends ServiceTracker<Object, Object> {
 
 	/**
 	 * Create a new instance of this list.
+	 * 
 	 * @param context the context to track
-	 * @throws InvalidSyntaxException thrown if there's an issue listening for changes to the given transformer type
+	 * @throws InvalidSyntaxException thrown if there's an issue listening for
+	 *                                changes to the given transformer type
 	 */
 	public TransformerList(BundleContext context, EquinoxLogServices logServices) throws InvalidSyntaxException {
 		super(context, context.createFilter("(&(objectClass=" //$NON-NLS-1$
@@ -51,10 +54,12 @@ public class TransformerList extends ServiceTracker<Object, Object> {
 	}
 
 	/**
-	 * Return the transformer of the given type being monitored by this list.
-	 * If the list is stale it will first be rebuilt.
+	 * Return the transformer of the given type being monitored by this list. If the
+	 * list is stale it will first be rebuilt.
+	 * 
 	 * @param type the type of transformer
-	 * @return the transformer or null if no transformer of the given type is available.
+	 * @return the transformer or null if no transformer of the given type is
+	 *         available.
 	 */
 	public synchronized StreamTransformer getTransformer(String type) {
 		if (stale) {
@@ -71,7 +76,8 @@ public class TransformerList extends ServiceTracker<Object, Object> {
 	}
 
 	/**
-	 * Consults the bundle context for services of the transformer type and builds the internal cache.
+	 * Consults the bundle context for services of the transformer type and builds
+	 * the internal cache.
 	 */
 	private void rebuildTransformersMap() {
 		transformers.clear();

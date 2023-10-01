@@ -22,7 +22,8 @@ import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * Class that represents a dynamic list of TransformTuples that have been registered against a particular transform type.
+ * Class that represents a dynamic list of TransformTuples that have been
+ * registered against a particular transform type.
  */
 public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 	/**
@@ -30,7 +31,8 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 	 */
 	private static final String[] EMPTY_TYPES = new String[0];
 	/**
-	 * Stale state of the transform list. Set to true whenever one of the ServiceTrackerCustomization methods are invoked.
+	 * Stale state of the transform list. Set to true whenever one of the
+	 * ServiceTrackerCustomization methods are invoked.
 	 */
 	private volatile boolean stale = true;
 
@@ -45,18 +47,23 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 	private List<TransformTuple> rawTuples = new ArrayList<>();
 
 	/**
-	 * Map from bundle ID -> boolean representing whether or not a given bundle currently has any transforms registered against it.
+	 * Map from bundle ID -> boolean representing whether or not a given bundle
+	 * currently has any transforms registered against it.
 	 */
 	private Map<String, Boolean> bundleIdToTransformPresence = new HashMap<>();
 	private final EquinoxLogServices logServices;
 
 	/**
-	 * Create a new transform list bound to the given context. If new transforms are registered against the given context the contents of this list will change.
-	 * @param context the bundle context
+	 * Create a new transform list bound to the given context. If new transforms are
+	 * registered against the given context the contents of this list will change.
+	 * 
+	 * @param context     the bundle context
 	 * @param logServices
-	 * @throws InvalidSyntaxException thrown if there's an issue listening for changes to the given transformer type
+	 * @throws InvalidSyntaxException thrown if there's an issue listening for
+	 *                                changes to the given transformer type
 	 */
-	public TransformInstanceListData(BundleContext context, EquinoxLogServices logServices) throws InvalidSyntaxException {
+	public TransformInstanceListData(BundleContext context, EquinoxLogServices logServices)
+			throws InvalidSyntaxException {
 		super(context, context.createFilter("(&(objectClass=" //$NON-NLS-1$
 				+ URL.class.getName() + ")(" + TransformTuple.TRANSFORMER_TYPE //$NON-NLS-1$
 				+ "=*))"), null); //$NON-NLS-1$
@@ -65,7 +72,9 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 	}
 
 	/**
-	 * Return the transforms types currently held by this list. If a change has been detected since the last request this list will be rebuilt.
+	 * Return the transforms types currently held by this list. If a change has been
+	 * detected since the last request this list will be rebuilt.
+	 * 
 	 * @return the transforms types currently held by this list
 	 */
 	public synchronized String[] getTransformTypes() {
@@ -78,7 +87,9 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 	}
 
 	/**
-	 * Return the transforms of a particular type currently held by this list. If a change has been detected since the last request this list will be rebuilt.
+	 * Return the transforms of a particular type currently held by this list. If a
+	 * change has been detected since the last request this list will be rebuilt.
+	 * 
 	 * @return the transforms currently held by this list
 	 */
 	public synchronized TransformTuple[] getTransformsFor(String type) {
@@ -89,7 +100,10 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 	}
 
 	/**
-	 * Return whether or not there are any transforms who's bundle pattern matches the ID of the provided bundle. Only transforms with a present transform handler are considered during the invocation of this method.
+	 * Return whether or not there are any transforms who's bundle pattern matches
+	 * the ID of the provided bundle. Only transforms with a present transform
+	 * handler are considered during the invocation of this method.
+	 * 
 	 * @param bundle the bundle to test
 	 * @return the presence of associated transforms.
 	 */
@@ -115,7 +129,8 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 	}
 
 	/**
-	 * Consults the bundle context for services of the transformer type type and builds the internal cache.
+	 * Consults the bundle context for services of the transformer type type and
+	 * builds the internal cache.
 	 */
 	private void rebuildTransformMap() {
 		transformerToTuple.clear();
