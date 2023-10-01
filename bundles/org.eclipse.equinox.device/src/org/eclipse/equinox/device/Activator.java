@@ -23,8 +23,8 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * DeviceManager bundle. This bundle implements the OSGi Device Access 1.1
  * specification.
  *
- * This implementation does not include the optimizations in section
- * 8.7.4 of the OSGi SP R2 spec.
+ * This implementation does not include the optimizations in section 8.7.4 of
+ * the OSGi SP R2 spec.
  *
  */
 public class Activator implements BundleActivator, ServiceTrackerCustomizer, FrameworkListener, Runnable {
@@ -113,12 +113,17 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 		log = new LogTracker(context, System.err);
 
 		try {
-			deviceFilter = context.createFilter("(|(" + org.osgi.framework.Constants.OBJECTCLASS + "=" + DeviceTracker.clazz + ////-1$ ////-2$ //$NON-NLS-1$ //$NON-NLS-2$
-					")(" + org.osgi.service.device.Constants.DEVICE_CATEGORY + "=*))"); //$NON-NLS-1$ //$NON-NLS-2$
+			deviceFilter = context
+					.createFilter("(|(" + org.osgi.framework.Constants.OBJECTCLASS + "=" + DeviceTracker.clazz + //// -1$ //$NON-NLS-1$ //$NON-NLS-2$
+																													//// ////-2$
+							")(" + org.osgi.service.device.Constants.DEVICE_CATEGORY + "=*))"); //$NON-NLS-1$ //$NON-NLS-2$
 
-			driverFilter = context.createFilter("(" + org.osgi.framework.Constants.OBJECTCLASS + "=" + DriverTracker.clazz + ")"); ////-1$ ////-2$ ////-3$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			driverFilter = context
+					.createFilter("(" + org.osgi.framework.Constants.OBJECTCLASS + "=" + DriverTracker.clazz + ")"); //// -1$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+																														//// ////-2$
+																														//// ////-3$
 		} catch (InvalidSyntaxException e) {
-			log.log(LogService.LOG_ERROR, NLS.bind(DeviceMsg.Unable_to_create_Filter_for_DeviceManager, e)); ////-1$
+			log.log(LogService.LOG_ERROR, NLS.bind(DeviceMsg.Unable_to_create_Filter_for_DeviceManager, e)); //// -1$
 			throw e;
 		}
 
@@ -130,13 +135,14 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 			try {
 				updatewait = Long.parseLong(prop) * 1000L;
 			} catch (NumberFormatException e) {
-				//do nothing
+				// do nothing
 			}
 		}
 
 		Bundle systemBundle = context.getBundle(0);
 
-		if ((systemBundle != null) && ((systemBundle.getState() & Bundle.STARTING) != 0)) { /* if the system bundle is starting */
+		if ((systemBundle != null)
+				&& ((systemBundle.getState() & Bundle.STARTING) != 0)) { /* if the system bundle is starting */
 			context.addFrameworkListener(this);
 		} else {
 			startDeviceManager();
@@ -152,17 +158,17 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	 */
 	public void frameworkEvent(FrameworkEvent event) {
 		switch (event.getType()) {
-			case FrameworkEvent.STARTED : {
-				context.removeFrameworkListener(this);
+		case FrameworkEvent.STARTED: {
+			context.removeFrameworkListener(this);
 
-				try {
-					startDeviceManager();
-				} catch (Throwable t) {
-					log.log(LogService.LOG_ERROR, NLS.bind(DeviceMsg.DeviceManager_has_thrown_an_error, t)); ////-1$
-				}
-
-				break;
+			try {
+				startDeviceManager();
+			} catch (Throwable t) {
+				log.log(LogService.LOG_ERROR, NLS.bind(DeviceMsg.DeviceManager_has_thrown_an_error, t)); //// -1$
 			}
+
+			break;
+		}
 		}
 	}
 
@@ -215,7 +221,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 						try {
 							t.wait(0);
 						} catch (InterruptedException e) {
-							//	do nothing
+							// do nothing
 						}
 					}
 				}
@@ -253,18 +259,16 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	/**
 	 * A service is being added to the ServiceTracker.
 	 *
-	 * <p>This method is called before a service which matched
-	 * the search parameters of the ServiceTracker is
-	 * added to the ServiceTracker. This method should return the
-	 * service object to be tracked for this ServiceReference.
-	 * The returned service object is stored in the ServiceTracker
-	 * and is available from the getService and getServices
-	 * methods.
+	 * <p>
+	 * This method is called before a service which matched the search parameters of
+	 * the ServiceTracker is added to the ServiceTracker. This method should return
+	 * the service object to be tracked for this ServiceReference. The returned
+	 * service object is stored in the ServiceTracker and is available from the
+	 * getService and getServices methods.
 	 *
 	 * @param reference Reference to service being added to the ServiceTracker.
-	 * @return The service object to be tracked for the
-	 * ServiceReference or <tt>null</tt> if the ServiceReference should not
-	 * be tracked.
+	 * @return The service object to be tracked for the ServiceReference or
+	 *         <tt>null</tt> if the ServiceReference should not be tracked.
 	 */
 	public Object addingService(ServiceReference reference) {
 		if (Activator.DEBUG) {
@@ -279,11 +283,12 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	/**
 	 * A service tracked by the ServiceTracker has been modified.
 	 *
-	 * <p>This method is called when a service being tracked
-	 * by the ServiceTracker has had it properties modified.
+	 * <p>
+	 * This method is called when a service being tracked by the ServiceTracker has
+	 * had it properties modified.
 	 *
 	 * @param reference Reference to service that has been modified.
-	 * @param service The service object for the modified service.
+	 * @param service   The service object for the modified service.
 	 */
 	public void modifiedService(ServiceReference reference, Object service) {
 		// do nothing
@@ -292,19 +297,21 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	/**
 	 * A service tracked by the ServiceTracker is being removed.
 	 *
-	 * <p>This method is called after a service is no longer being tracked
-	 * by the ServiceTracker.
+	 * <p>
+	 * This method is called after a service is no longer being tracked by the
+	 * ServiceTracker.
 	 *
 	 * @param reference Reference to service that has been removed.
-	 * @param object The service object for the removed service.
+	 * @param object    The service object for the removed service.
 	 */
 	public void removedService(ServiceReference reference, Object object) {
 		if (Activator.DEBUG) {
 			log.log(reference, LogService.LOG_DEBUG, "DeviceManager device service unregistered"); //$NON-NLS-1$
 		}
 
-		/* We do not implement optional driver reclamation.
-		 * Thus we take no specific action upon Device service unregistration .
+		/*
+		 * We do not implement optional driver reclamation. Thus we take no specific
+		 * action upon Device service unregistration .
 		 */
 	}
 
@@ -329,8 +336,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	/**
 	 * Main thread for DeviceManager.
 	 *
-	 * Attempt to refine all Device services that are not in use
-	 * by a driver bundle.
+	 * Attempt to refine all Device services that are not in use by a driver bundle.
 	 */
 	public void run() {
 		while (running) {
@@ -345,14 +351,13 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 			try {
 				device.refine();
 			} catch (Throwable t) {
-				log.log(LogService.LOG_ERROR, NLS.bind(DeviceMsg.DeviceManager_has_thrown_an_error, t)); ////-1$
+				log.log(LogService.LOG_ERROR, NLS.bind(DeviceMsg.DeviceManager_has_thrown_an_error, t)); //// -1$
 			}
 		}
 	}
 
 	/**
-	 * Queue the object to be processed on the work thread.
-	 * The thread is notified.
+	 * Queue the object to be processed on the work thread. The thread is notified.
 	 *
 	 * @param device Work item.
 	 */
@@ -379,8 +384,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	}
 
 	/**
-	 * Dequeue an object from the work thread.
-	 * If the queue is empty, this method blocks.
+	 * Dequeue an object from the work thread. If the queue is empty, this method
+	 * blocks.
 	 *
 	 * @return Dequeue object from the work thread.
 	 * @throws InterruptedException If the queue has been stopped.
@@ -388,17 +393,17 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	private synchronized DeviceTracker dequeue() throws InterruptedException {
 		while (running && (head == null)) {
 			// TODO need to determine if this code is needed (bug 261197)
-			/* This should be included per Section 8.7.7 of the OSGi SP R2
-			 * spec, but it causes the OSGi SP R2 Test Suite to fail.
-			 * We should turn this on for R3.
-			
-			 if (driverServiceRegistered)
+			/*
+			 * This should be included per Section 8.7.7 of the OSGi SP R2 spec, but it
+			 * causes the OSGi SP R2 Test Suite to fail. We should turn this on for R3.
+			 * 
+			 * if (driverServiceRegistered)
 			 */
-			//			if (false) {
-			//				driverServiceRegistered = false;
+			// if (false) {
+			// driverServiceRegistered = false;
 			//
-			//				refineIdleDevices();
-			//			} else {
+			// refineIdleDevices();
+			// } else {
 			locators.uninstallDriverBundles();
 
 			try {
@@ -410,7 +415,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 			} catch (InterruptedException e) {
 				// do nothing
 			}
-			//			}
+			// }
 		}
 
 		if (!running) /* if we are stopping */

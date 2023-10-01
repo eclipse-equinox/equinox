@@ -41,19 +41,23 @@ public class DriverTracker extends ServiceTracker {
 	/** DeviceManager object. */
 	protected Activator manager;
 
-	/** Dictionary mapping Driver ID String =>
-	 *  Hashtable (Device ServiceReference => cached Match objects) */
+	/**
+	 * Dictionary mapping Driver ID String => Hashtable (Device ServiceReference =>
+	 * cached Match objects)
+	 */
 	protected Hashtable<String, Hashtable<ServiceReference, Match>> matches;
 
-	/** Dictionary mapping Driver ID String =>
-	 *  Hashtable (Device ServiceReference => cached referral String) */
+	/**
+	 * Dictionary mapping Driver ID String => Hashtable (Device ServiceReference =>
+	 * cached referral String)
+	 */
 	protected Hashtable<String, Hashtable<ServiceReference, String>> referrals;
 
 	/**
 	 * Create the DriverTracker.
 	 *
 	 * @param manager DeviceManager object.
-	 * @param device DeviceTracker we are working for.
+	 * @param device  DeviceTracker we are working for.
 	 */
 	public DriverTracker(Activator manager) {
 		super(manager.context, clazz, null);
@@ -75,18 +79,16 @@ public class DriverTracker extends ServiceTracker {
 	/**
 	 * A service is being added to the ServiceTracker.
 	 *
-	 * <p>This method is called before a service which matched
-	 * the search parameters of the ServiceTracker is
-	 * added to the ServiceTracker. This method should return the
-	 * service object to be tracked for this ServiceReference.
-	 * The returned service object is stored in the ServiceTracker
-	 * and is available from the getService and getServices
-	 * methods.
+	 * <p>
+	 * This method is called before a service which matched the search parameters of
+	 * the ServiceTracker is added to the ServiceTracker. This method should return
+	 * the service object to be tracked for this ServiceReference. The returned
+	 * service object is stored in the ServiceTracker and is available from the
+	 * getService and getServices methods.
 	 *
 	 * @param reference Reference to service being added to the ServiceTracker.
-	 * @return The service object to be tracked for the
-	 * ServiceReference or <tt>null</tt> if the ServiceReference should not
-	 * be tracked.
+	 * @return The service object to be tracked for the ServiceReference or
+	 *         <tt>null</tt> if the ServiceReference should not be tracked.
 	 */
 	public Object addingService(ServiceReference reference) {
 		if (Activator.DEBUG) {
@@ -96,7 +98,8 @@ public class DriverTracker extends ServiceTracker {
 		String driver_id = getDriverID(reference);
 
 		if (drivers.get(driver_id) != null) {
-			log.log(reference, LogService.LOG_WARNING, NLS.bind(DeviceMsg.Multiple_Driver_services_with_the_same_DRIVER_ID, driver_id));
+			log.log(reference, LogService.LOG_WARNING,
+					NLS.bind(DeviceMsg.Multiple_Driver_services_with_the_same_DRIVER_ID, driver_id));
 
 			return (null); /* don't track this driver */
 		}
@@ -106,14 +109,13 @@ public class DriverTracker extends ServiceTracker {
 
 		manager.driverServiceRegistered = true;
 
-		/* OSGi SPR2 Device Access 1.1
-		 * Section 8.4.3 - When a new Driver service is registered,
-		 * the Device Attachment Algorithm must be applied to all
-		 * idle Device services.
+		/*
+		 * OSGi SPR2 Device Access 1.1 Section 8.4.3 - When a new Driver service is
+		 * registered, the Device Attachment Algorithm must be applied to all idle
+		 * Device services.
 		 *
-		 * We do not refine idle Devices when the manager has not fully
-		 * started or the Driver service is from a bundle just installed
-		 * by the devicemanager.
+		 * We do not refine idle Devices when the manager has not fully started or the
+		 * Driver service is from a bundle just installed by the devicemanager.
 		 */
 		Bundle bundle = reference.getBundle();
 
@@ -127,11 +129,12 @@ public class DriverTracker extends ServiceTracker {
 	/**
 	 * A service tracked by the ServiceTracker has been modified.
 	 *
-	 * <p>This method is called when a service being tracked
-	 * by the ServiceTracker has had it properties modified.
+	 * <p>
+	 * This method is called when a service being tracked by the ServiceTracker has
+	 * had it properties modified.
 	 *
 	 * @param reference Reference to service that has been modified.
-	 * @param service The service object for the modified service.
+	 * @param service   The service object for the modified service.
 	 */
 	public void modifiedService(ServiceReference reference, Object service) {
 		if (Activator.DEBUG) {
@@ -152,11 +155,12 @@ public class DriverTracker extends ServiceTracker {
 	/**
 	 * A service tracked by the ServiceTracker is being removed.
 	 *
-	 * <p>This method is called after a service is no longer being tracked
-	 * by the ServiceTracker.
+	 * <p>
+	 * This method is called after a service is no longer being tracked by the
+	 * ServiceTracker.
 	 *
 	 * @param reference Reference to service that has been removed.
-	 * @param service The service object for the removed service.
+	 * @param service   The service object for the removed service.
 	 */
 	public void removedService(ServiceReference reference, Object service) {
 		if (Activator.DEBUG) {
@@ -172,14 +176,13 @@ public class DriverTracker extends ServiceTracker {
 
 		context.ungetService(reference);
 
-		/* OSGi SPR2 Device Access 1.1
-		 * Section 8.4.4 - When a Driver service is unregistered,
-		 * the Device Attachment Algorithm must be applied to all
-		 * idle Device services.
+		/*
+		 * OSGi SPR2 Device Access 1.1 Section 8.4.4 - When a Driver service is
+		 * unregistered, the Device Attachment Algorithm must be applied to all idle
+		 * Device services.
 		 *
-		 * We do not refine idle Devices when the manager has not fully
-		 * started or the Driver service is from a bundle just installed
-		 * by the devicemanager.
+		 * We do not refine idle Devices when the manager has not fully started or the
+		 * Driver service is from a bundle just installed by the devicemanager.
 		 */
 
 		Bundle bundle = reference.getBundle();
@@ -196,11 +199,11 @@ public class DriverTracker extends ServiceTracker {
 	/**
 	 * Return the DRIVER_ID string for a ServiceReference.
 	 *
-	 * Per Section 8.4.3 of the OSGi SP R2 spec,
-	 * "A Driver service registration must have a DRIVER_ID property"
+	 * Per Section 8.4.3 of the OSGi SP R2 spec, "A Driver service registration must
+	 * have a DRIVER_ID property"
 	 *
-	 * This method is somewhat more lenient. If no DRIVER_ID property
-	 * is set, it will use the Bundle's location instead.
+	 * This method is somewhat more lenient. If no DRIVER_ID property is set, it
+	 * will use the Bundle's location instead.
 	 *
 	 * @param reference Reference to driver service.
 	 * @return DRIVER_ID string.
@@ -210,7 +213,8 @@ public class DriverTracker extends ServiceTracker {
 
 		if (driver_id == null) {
 			log.log(reference, LogService.LOG_WARNING, DeviceMsg.Driver_service_has_no_DRIVER_ID);
-			driver_id = AccessController.doPrivileged((PrivilegedAction<String>) () -> reference.getBundle().getLocation());
+			driver_id = AccessController
+					.doPrivileged((PrivilegedAction<String>) () -> reference.getBundle().getLocation());
 		}
 
 		return (driver_id);
@@ -329,8 +333,8 @@ public class DriverTracker extends ServiceTracker {
 	}
 
 	/**
-	 * Attempt to attach the driver to the device. If the driver
-	 * refers, add the referred driver to the driver list.
+	 * Attempt to attach the driver to the device. If the driver refers, add the
+	 * referred driver to the driver list.
 	 *
 	 * @param driver Driver to attach
 	 * @param device Device to be attached
@@ -365,7 +369,8 @@ public class DriverTracker extends ServiceTracker {
 			}
 
 			if (referral == null) {
-				log.log(device, LogService.LOG_INFO, NLS.bind(DeviceMsg.Device_attached_by_DRIVER_ID, drivers.get(driver)));
+				log.log(device, LogService.LOG_INFO,
+						NLS.bind(DeviceMsg.Device_attached_by_DRIVER_ID, drivers.get(driver)));
 
 				manager.locators.usingDriverBundle(driver.getBundle());
 
@@ -450,7 +455,7 @@ public class DriverTracker extends ServiceTracker {
 					}
 				}
 			} catch (InterruptedException e) {
-				//do nothing
+				// do nothing
 			}
 
 			contxt.removeServiceListener(this);
@@ -462,7 +467,8 @@ public class DriverTracker extends ServiceTracker {
 		}
 
 		public void serviceChanged(ServiceEvent event) {
-			if ((event.getType() == ServiceEvent.REGISTERED) && bundle.equals(event.getServiceReference().getBundle())) {
+			if ((event.getType() == ServiceEvent.REGISTERED)
+					&& bundle.equals(event.getServiceReference().getBundle())) {
 				contxt.removeServiceListener(this);
 
 				running = false; /* cancel */
