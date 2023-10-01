@@ -22,19 +22,21 @@ import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * ManagedServiceFactoryTracker tracks... ManagedServiceFactory(s) and notifies them about related configuration changes
+ * ManagedServiceFactoryTracker tracks... ManagedServiceFactory(s) and notifies
+ * them about related configuration changes
  */
 class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory, ManagedServiceFactory> {
 
 	final ConfigurationAdminFactory configurationAdminFactory;
 	private final ConfigurationStore configurationStore;
 
-	/** @GuardedBy targets*/
+	/** @GuardedBy targets */
 	private final TargetMap targets = new TargetMap();
 
 	private final SerializedTaskQueue queue = new SerializedTaskQueue("ManagedServiceFactory Update Queue"); //$NON-NLS-1$
 
-	public ManagedServiceFactoryTracker(ConfigurationAdminFactory configurationAdminFactory, ConfigurationStore configurationStore, BundleContext context) {
+	public ManagedServiceFactoryTracker(ConfigurationAdminFactory configurationAdminFactory,
+			ConfigurationStore configurationStore, BundleContext context) {
 		super(context, ManagedServiceFactory.class.getName(), null);
 		this.configurationAdminFactory = configurationAdminFactory;
 		this.configurationStore = configurationStore;
@@ -74,7 +76,8 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 				ManagedServiceFactory serviceFactory = getService(ref);
 				if (hasLocPermission && serviceFactory != null) {
 					if (isMultiple || config.bind(ConfigurationAdminImpl.getLocation(ref.getBundle()))) {
-						Dictionary<String, Object> properties = configurationAdminFactory.modifyConfiguration(ref, config);
+						Dictionary<String, Object> properties = configurationAdminFactory.modifyConfiguration(ref,
+								config);
 						asynchUpdated(serviceFactory, config.getPid(), properties);
 					}
 				}
@@ -119,10 +122,12 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 					if (delete) {
 						asynchDeleted(serviceFactory, config.getPid());
 					} else if (update) {
-						Dictionary<String, Object> properties = configurationAdminFactory.modifyConfiguration(ref, config);
+						Dictionary<String, Object> properties = configurationAdminFactory.modifyConfiguration(ref,
+								config);
 						asynchUpdated(serviceFactory, config.getPid(), properties);
 					}
-					// do not break on !isMultiple since we need to check if the other refs apply no matter what
+					// do not break on !isMultiple since we need to check if the other refs apply no
+					// matter what
 				}
 			}
 		}
@@ -198,7 +203,8 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 		updateManagedServiceFactory(qualifiedPidLists, reference, service);
 	}
 
-	private void updateManagedServiceFactory(List<List<String>> qualifiedPidLists, ServiceReference<ManagedServiceFactory> reference, ManagedServiceFactory serviceFactory) {
+	private void updateManagedServiceFactory(List<List<String>> qualifiedPidLists,
+			ServiceReference<ManagedServiceFactory> reference, ManagedServiceFactory serviceFactory) {
 		for (List<String> qualifiedPids : qualifiedPidLists) {
 			qualifiedPids: for (String qualifiedPid : qualifiedPids) {
 				ConfigurationImpl[] configs = configurationStore.getFactoryConfigurations(qualifiedPid);
@@ -213,14 +219,20 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 						} else {
 							String location = config.getLocation();
 							boolean shouldBind = location == null || !location.startsWith("?"); //$NON-NLS-1$
-							boolean hasLocPermission = configurationAdminFactory.checkTargetPermission(location, reference);
+							boolean hasLocPermission = configurationAdminFactory.checkTargetPermission(location,
+									reference);
 							if (hasLocPermission) {
-								if (shouldBind && config.bind(ConfigurationAdminImpl.getLocation(reference.getBundle())) || !shouldBind) {
-									Dictionary<String, Object> properties = configurationAdminFactory.modifyConfiguration(reference, config);
+								if (shouldBind && config.bind(ConfigurationAdminImpl.getLocation(reference.getBundle()))
+										|| !shouldBind) {
+									Dictionary<String, Object> properties = configurationAdminFactory
+											.modifyConfiguration(reference, config);
 									asynchUpdated(serviceFactory, config.getPid(), properties);
 									foundConfig = true;
 								} else {
-									configurationAdminFactory.log(LogService.LOG_WARNING, "Configuration for " + Constants.SERVICE_PID + "=" + config.getPid() + " could not be bound to " + ConfigurationAdminImpl.getLocation(reference.getBundle())); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+									configurationAdminFactory.log(LogService.LOG_WARNING,
+											"Configuration for " + Constants.SERVICE_PID + "=" + config.getPid() //$NON-NLS-1$//$NON-NLS-2$
+													+ " could not be bound to " //$NON-NLS-1$
+													+ ConfigurationAdminImpl.getLocation(reference.getBundle()));
 								}
 							}
 						}
@@ -273,7 +285,8 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 		});
 	}
 
-	private void asynchUpdated(final ManagedServiceFactory service, final String pid, final Dictionary<String, Object> properties) {
+	private void asynchUpdated(final ManagedServiceFactory service, final String pid,
+			final Dictionary<String, Object> properties) {
 		if (properties == null) {
 			return;
 		}
@@ -283,7 +296,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 				try {
 					service.updated(pid, properties);
 				} catch (ConfigurationException e) {
-					// we might consider doing more for ConfigurationExceptions 
+					// we might consider doing more for ConfigurationExceptions
 					Throwable cause = e.getCause();
 					configurationAdminFactory.log(LogService.LOG_ERROR, e.getMessage(), cause != null ? cause : e);
 				} catch (Throwable t) {

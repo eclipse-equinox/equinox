@@ -23,9 +23,10 @@ import org.osgi.framework.*;
 import org.osgi.service.cm.*;
 
 /**
- * ConfigurationImpl provides the Configuration implementation.
- * The lock and unlock methods are used for synchronization. Operations outside of
- * ConfigurationImpl that expect to have control of the lock should call checkLocked
+ * ConfigurationImpl provides the Configuration implementation. The lock and
+ * unlock methods are used for synchronization. Operations outside of
+ * ConfigurationImpl that expect to have control of the lock should call
+ * checkLocked
  */
 class ConfigurationImpl implements Configuration {
 	final static String LOCATION_BOUND = "org.eclipse.equinox.cm.location.bound"; //$NON-NLS-1$
@@ -37,23 +38,24 @@ class ConfigurationImpl implements Configuration {
 	private final ConfigurationStore configurationStore;
 	private final String factoryPid;
 	private final String pid;
-	/** @GuardedBy lock*/
+	/** @GuardedBy lock */
 	private String bundleLocation;
-	/** @GuardedBy lock*/
+	/** @GuardedBy lock */
 	private ConfigurationDictionary dictionary;
-	/** @GuardedBy lock*/
+	/** @GuardedBy lock */
 	private boolean deleted = false;
-	/** @GuardedBy lock*/
+	/** @GuardedBy lock */
 	private boolean bound = false;
-	/** @GuardedBy lock*/
+	/** @GuardedBy lock */
 	private long changeCount;
-	/** @GuardedBy lock*/
+	/** @GuardedBy lock */
 	private Object storageToken;
-	/** @GuardedBy lock*/
+	/** @GuardedBy lock */
 	private boolean readOnly = false;
 	private final ReentrantLock lock = new ReentrantLock();
 
-	public ConfigurationImpl(ConfigurationAdminFactory configurationAdminFactory, ConfigurationStore configurationStore, String factoryPid, String pid, String bundleLocation, boolean bind) {
+	public ConfigurationImpl(ConfigurationAdminFactory configurationAdminFactory, ConfigurationStore configurationStore,
+			String factoryPid, String pid, String bundleLocation, boolean bind) {
 		this.configurationAdminFactory = configurationAdminFactory;
 		this.configurationStore = configurationStore;
 		this.factoryPid = factoryPid;
@@ -63,7 +65,8 @@ class ConfigurationImpl implements Configuration {
 		this.bound = bind;
 	}
 
-	public ConfigurationImpl(ConfigurationAdminFactory configurationAdminFactory, ConfigurationStore configurationStore, Dictionary<String, ?> dictionary, Object storageToken) {
+	public ConfigurationImpl(ConfigurationAdminFactory configurationAdminFactory, ConfigurationStore configurationStore,
+			Dictionary<String, ?> dictionary, Object storageToken) {
 		this.configurationAdminFactory = configurationAdminFactory;
 		this.configurationStore = configurationStore;
 		pid = (String) dictionary.get(Constants.SERVICE_PID);
@@ -134,7 +137,7 @@ class ConfigurationImpl implements Configuration {
 				try {
 					save();
 				} catch (IOException e) {
-					// TODO What should we do here?  throw a runtime exception or log?
+					// TODO What should we do here? throw a runtime exception or log?
 					e.printStackTrace();
 				}
 				configurationAdminFactory.notifyLocationChanged(this, callerLocation, factoryPid != null);
@@ -264,7 +267,8 @@ class ConfigurationImpl implements Configuration {
 		}
 	}
 
-	static void fileAutoProperties(Dictionary<String, Object> dictionary, ConfigurationImpl config, boolean includeLoc, boolean includeStorageKey) {
+	static void fileAutoProperties(Dictionary<String, Object> dictionary, ConfigurationImpl config, boolean includeLoc,
+			boolean includeStorageKey) {
 		dictionary.put(Constants.SERVICE_PID, config.getPid(false));
 		String factoryPid = config.getFactoryPid(false);
 		if (factoryPid != null) {
@@ -305,7 +309,7 @@ class ConfigurationImpl implements Configuration {
 			try {
 				save();
 			} catch (IOException e) {
-				// TODO What should we do here?  throw a runtime exception or log?
+				// TODO What should we do here? throw a runtime exception or log?
 				e.printStackTrace();
 			}
 			configurationAdminFactory.notifyLocationChanged(this, oldLocation, factoryPid != null);

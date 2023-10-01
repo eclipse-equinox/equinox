@@ -21,14 +21,16 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationPermission;
 
 /**
- * ConfigurationAdminFactory provides a Configuration Admin ServiceFactory but more significantly
- * launches the whole implementation.
+ * ConfigurationAdminFactory provides a Configuration Admin ServiceFactory but
+ * more significantly launches the whole implementation.
  */
 
 public class ConfigurationAdminFactory implements ServiceFactory<ConfigurationAdmin>, BundleListener {
 
-	static private final Permission allConfigurationPermission = new ConfigurationPermission("*", ConfigurationPermission.CONFIGURE); //$NON-NLS-1$
-	static private final Permission allAttributePermission = new ConfigurationPermission("*", ConfigurationPermission.ATTRIBUTE); //$NON-NLS-1$
+	static private final Permission allConfigurationPermission = new ConfigurationPermission("*", //$NON-NLS-1$
+			ConfigurationPermission.CONFIGURE);
+	static private final Permission allAttributePermission = new ConfigurationPermission("*", //$NON-NLS-1$
+			ConfigurationPermission.ATTRIBUTE);
 	private final EventDispatcher eventDispatcher;
 	private final PluginManager pluginManager;
 	private final LogTracker log;
@@ -67,7 +69,8 @@ public class ConfigurationAdminFactory implements ServiceFactory<ConfigurationAd
 	}
 
 	@Override
-	public void ungetService(Bundle bundle, ServiceRegistration<ConfigurationAdmin> registration, ConfigurationAdmin service) {
+	public void ungetService(Bundle bundle, ServiceRegistration<ConfigurationAdmin> registration,
+			ConfigurationAdmin service) {
 		// do nothing
 	}
 

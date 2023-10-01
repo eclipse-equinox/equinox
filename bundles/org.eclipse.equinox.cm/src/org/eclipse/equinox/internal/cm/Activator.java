@@ -18,10 +18,11 @@ import org.osgi.framework.*;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
- * Activator start the ConfigurationAdminFactory but also handles passing in the Service
- * Registration needed by Asynch threads. Asynch threads are controlled by ConfigurationAdminFactory
- * start and stop. It requires some care to handle pending events as the service is registered before
- * activating the threads. (see EventDispatcher)
+ * Activator start the ConfigurationAdminFactory but also handles passing in the
+ * Service Registration needed by Asynch threads. Asynch threads are controlled
+ * by ConfigurationAdminFactory start and stop. It requires some care to handle
+ * pending events as the service is registered before activating the threads.
+ * (see EventDispatcher)
  */
 public class Activator implements BundleActivator {
 	private static final String EVENT_ADMIN_CLASS = "org.osgi.service.event.EventAdmin"; //$NON-NLS-1$

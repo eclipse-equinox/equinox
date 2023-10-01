@@ -21,19 +21,21 @@ import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * ManagedServiceTracker tracks... ManagedServices and notifies them about related configuration changes
+ * ManagedServiceTracker tracks... ManagedServices and notifies them about
+ * related configuration changes
  */
 class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedService> {
 
 	final ConfigurationAdminFactory configurationAdminFactory;
 	private final ConfigurationStore configurationStore;
 
-	/** @GuardedBy targets*/
+	/** @GuardedBy targets */
 	private final TargetMap targets = new TargetMap();
 
 	private final SerializedTaskQueue queue = new SerializedTaskQueue("ManagedService Update Queue"); //$NON-NLS-1$
 
-	public ManagedServiceTracker(ConfigurationAdminFactory configurationAdminFactory, ConfigurationStore configurationStore, BundleContext context) {
+	public ManagedServiceTracker(ConfigurationAdminFactory configurationAdminFactory,
+			ConfigurationStore configurationStore, BundleContext context) {
 		super(context, ManagedService.class.getName(), null);
 		this.configurationAdminFactory = configurationAdminFactory;
 		this.configurationStore = configurationStore;
@@ -78,7 +80,8 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 				ManagedService service = getService(ref);
 				if (hasLocPermission && service != null) {
 					if (isMultiple || config.bind(ConfigurationAdminImpl.getLocation(ref.getBundle()))) {
-						Dictionary<String, Object> properties = configurationAdminFactory.modifyConfiguration(ref, config);
+						Dictionary<String, Object> properties = configurationAdminFactory.modifyConfiguration(ref,
+								config);
 						asynchUpdated(service, properties);
 					}
 				}
@@ -128,10 +131,12 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 						}
 						updateManagedService(qualifiedPidLists, ref, service);
 					} else if (update) {
-						Dictionary<String, Object> properties = configurationAdminFactory.modifyConfiguration(ref, config);
+						Dictionary<String, Object> properties = configurationAdminFactory.modifyConfiguration(ref,
+								config);
 						asynchUpdated(service, properties);
 					}
-					// do not break on !isMultiple since we need to check if the other refs apply no matter what
+					// do not break on !isMultiple since we need to check if the other refs apply no
+					// matter what
 				}
 			}
 		}
@@ -207,7 +212,8 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 		updateManagedService(qualifiedPidLists, reference, service);
 	}
 
-	private void updateManagedService(List<List<String>> qualifiedPidLists, ServiceReference<ManagedService> reference, ManagedService service) {
+	private void updateManagedService(List<List<String>> qualifiedPidLists, ServiceReference<ManagedService> reference,
+			ManagedService service) {
 		for (List<String> qualifiedPids : qualifiedPidLists) {
 			boolean foundConfig = false;
 			qualifiedPids: for (String qualifiedPid : qualifiedPids) {
@@ -217,19 +223,28 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 						config.lock();
 						if (!config.isDeleted()) {
 							if (config.getFactoryPid() != null) {
-								configurationAdminFactory.log(LogService.LOG_WARNING, "Configuration for " + Constants.SERVICE_PID + "=" + qualifiedPid + " should only be used by a " + ManagedServiceFactory.class.getName()); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+								configurationAdminFactory.log(LogService.LOG_WARNING,
+										"Configuration for " + Constants.SERVICE_PID + "=" + qualifiedPid //$NON-NLS-1$//$NON-NLS-2$
+												+ " should only be used by a " + ManagedServiceFactory.class.getName()); //$NON-NLS-1$
 							}
 							String location = config.getLocation();
 							boolean shouldBind = location == null || !location.startsWith("?"); //$NON-NLS-1$
-							boolean hasLocPermission = configurationAdminFactory.checkTargetPermission(location, reference);
+							boolean hasLocPermission = configurationAdminFactory.checkTargetPermission(location,
+									reference);
 							if (hasLocPermission) {
-								if ((shouldBind && config.bind(ConfigurationAdminImpl.getLocation(reference.getBundle()))) || !shouldBind) {
-									Dictionary<String, Object> properties = configurationAdminFactory.modifyConfiguration(reference, config);
+								if ((shouldBind
+										&& config.bind(ConfigurationAdminImpl.getLocation(reference.getBundle())))
+										|| !shouldBind) {
+									Dictionary<String, Object> properties = configurationAdminFactory
+											.modifyConfiguration(reference, config);
 									asynchUpdated(service, properties);
 									foundConfig = true;
 									break qualifiedPids;
 								}
-								configurationAdminFactory.log(LogService.LOG_WARNING, "Configuration for " + Constants.SERVICE_PID + "=" + qualifiedPid + " could not be bound to " + ConfigurationAdminImpl.getLocation(reference.getBundle())); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+								configurationAdminFactory.log(LogService.LOG_WARNING,
+										"Configuration for " + Constants.SERVICE_PID + "=" + qualifiedPid //$NON-NLS-1$//$NON-NLS-2$
+												+ " could not be bound to " //$NON-NLS-1$
+												+ ConfigurationAdminImpl.getLocation(reference.getBundle()));
 							}
 						}
 					} finally {

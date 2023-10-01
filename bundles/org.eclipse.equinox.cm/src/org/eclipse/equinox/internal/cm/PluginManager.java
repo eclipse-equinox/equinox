@@ -21,7 +21,7 @@ import org.osgi.service.cm.ConfigurationPlugin;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * PluginManager tracks and allows customization via ConfigurationPlugin  
+ * PluginManager tracks and allows customization via ConfigurationPlugin
  */
 public class PluginManager {
 	private final PluginTracker pluginTracker;
@@ -38,7 +38,8 @@ public class PluginManager {
 		pluginTracker.close();
 	}
 
-	public Dictionary<String, Object> modifyConfiguration(ServiceReference<?> managedReference, ConfigurationImpl config) {
+	public Dictionary<String, Object> modifyConfiguration(ServiceReference<?> managedReference,
+			ConfigurationImpl config) {
 		Dictionary<String, Object> properties = config.getProperties();
 		if (properties == null)
 			return null;
@@ -94,26 +95,29 @@ public class PluginManager {
 
 	private static class PluginTracker extends ServiceTracker<ConfigurationPlugin, ConfigurationPlugin> {
 
-		private TreeSet<ServiceReference<ConfigurationPlugin>> serviceReferences = new TreeSet<>(new Comparator<ServiceReference<ConfigurationPlugin>>() {
-			@Override
-			public int compare(ServiceReference<ConfigurationPlugin> s1, ServiceReference<ConfigurationPlugin> s2) {
+		private TreeSet<ServiceReference<ConfigurationPlugin>> serviceReferences = new TreeSet<>(
+				new Comparator<ServiceReference<ConfigurationPlugin>>() {
+					@Override
+					public int compare(ServiceReference<ConfigurationPlugin> s1,
+							ServiceReference<ConfigurationPlugin> s2) {
 
-				int rankCompare = getRank(s1).compareTo(getRank(s2));
-				if (rankCompare != 0) {
-					return rankCompare;
-				}
-				// we reverse the order which means services with higher service.ranking properties are called first
-				return -(s1.compareTo(s2));
-			}
-		});
+						int rankCompare = getRank(s1).compareTo(getRank(s2));
+						if (rankCompare != 0) {
+							return rankCompare;
+						}
+						// we reverse the order which means services with higher service.ranking
+						// properties are called first
+						return -(s1.compareTo(s2));
+					}
+				});
 
 		public PluginTracker(BundleContext context) {
 			super(context, ConfigurationPlugin.class.getName(), null);
 		}
 
-		/* NOTE: this method alters the contract of the overriden method.
-		 * Rather than returning null if no references are present, it
-		 * returns an empty array.
+		/*
+		 * NOTE: this method alters the contract of the overriden method. Rather than
+		 * returning null if no references are present, it returns an empty array.
 		 */
 		@Override
 		public ServiceReference<ConfigurationPlugin>[] getServiceReferences() {
