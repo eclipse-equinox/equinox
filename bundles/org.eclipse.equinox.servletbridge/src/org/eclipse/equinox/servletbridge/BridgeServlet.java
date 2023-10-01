@@ -22,11 +22,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
 /**
- * The BridgeServlet provides a means to bridge the servlet and OSGi 
- * runtimes. This class has 3 main responsibilities:
- * 1) Control the lifecycle of the associated FrameworkLauncher in line with its own lifecycle
- * 2) Provide a servlet "hook" that allows all servlet requests to be delegated to the registered servlet
- * 3) Provide means to manually control the framework lifecycle
+ * The BridgeServlet provides a means to bridge the servlet and OSGi runtimes.
+ * This class has 3 main responsibilities: 1) Control the lifecycle of the
+ * associated FrameworkLauncher in line with its own lifecycle 2) Provide a
+ * servlet "hook" that allows all servlet requests to be delegated to the
+ * registered servlet 3) Provide means to manually control the framework
+ * lifecycle
  */
 public class BridgeServlet extends HttpServlet {
 
@@ -42,8 +43,9 @@ public class BridgeServlet extends HttpServlet {
 	private boolean enableFrameworkControls;
 
 	/**
-	 * init() is called by the Servlet Container and used to instantiate the frameworkLauncher which MUST be an instance of FrameworkLauncher.
-	 * After instantiating the framework init, deploy, and start are called.
+	 * init() is called by the Servlet Container and used to instantiate the
+	 * frameworkLauncher which MUST be an instance of FrameworkLauncher. After
+	 * instantiating the framework init, deploy, and start are called.
 	 */
 	@Override
 	public void init() throws ServletException {
@@ -51,7 +53,8 @@ public class BridgeServlet extends HttpServlet {
 
 		enableFrameworkControls = Boolean.valueOf(getServletConfig().getInitParameter("enableFrameworkControls")); //$NON-NLS-1$
 
-		// Use with caution!! Some classes MUST be initialized with the web-app class loader 
+		// Use with caution!! Some classes MUST be initialized with the web-app class
+		// loader
 		String frameworkPreloads = getServletConfig().getInitParameter("_contextPreloads"); //$NON-NLS-1$
 		if (frameworkPreloads != null) {
 			StringTokenizer st = new StringTokenizer(frameworkPreloads, ","); //$NON-NLS-1$
@@ -69,7 +72,8 @@ public class BridgeServlet extends HttpServlet {
 		}
 
 		// Forces load of the SSLSocketFactory on the web-app context class loader
-		boolean initSSLSocketFactory = Optional.ofNullable(getServletConfig().getInitParameter("_initSSLSocketFactory")).map(Boolean::valueOf).orElse(true); //$NON-NLS-1$
+		boolean initSSLSocketFactory = Optional.ofNullable(getServletConfig().getInitParameter("_initSSLSocketFactory")) //$NON-NLS-1$
+				.map(Boolean::valueOf).orElse(true);
 		if (initSSLSocketFactory) {
 			try {
 				Class<?> clazz = this.getClass().getClassLoader().loadClass("javax.net.ssl.SSLSocketFactory"); //$NON-NLS-1$
@@ -84,7 +88,8 @@ public class BridgeServlet extends HttpServlet {
 		String frameworkLauncherClassParameter = getServletConfig().getInitParameter("frameworkLauncherClass"); //$NON-NLS-1$
 		if (frameworkLauncherClassParameter != null) {
 			try {
-				Class<?> frameworkLauncherClass = this.getClass().getClassLoader().loadClass(frameworkLauncherClassParameter);
+				Class<?> frameworkLauncherClass = this.getClass().getClassLoader()
+						.loadClass(frameworkLauncherClassParameter);
 				framework = (FrameworkLauncher) frameworkLauncherClass.getDeclaredConstructor().newInstance();
 			} catch (Exception e) {
 				throw new ServletException(e);
@@ -107,7 +112,8 @@ public class BridgeServlet extends HttpServlet {
 	}
 
 	/**
-	 * destroy() is called by the Servlet Container and used to first stop and then destroy the framework.
+	 * destroy() is called by the Servlet Container and used to first stop and then
+	 * destroy the framework.
 	 */
 	@Override
 	public void destroy() {
@@ -118,9 +124,10 @@ public class BridgeServlet extends HttpServlet {
 	}
 
 	/**
-	 * service is called by the Servlet Container and will first determine if the request is a
-	 * framework control and will otherwise try to delegate to the registered servlet delegate
-	 *  
+	 * service is called by the Servlet Container and will first determine if the
+	 * request is a framework control and will otherwise try to delegate to the
+	 * registered servlet delegate
+	 * 
 	 */
 	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -175,12 +182,12 @@ public class BridgeServlet extends HttpServlet {
 	}
 
 	/**
-	 * serviceFrameworkControls currently supports the following commands (identified by the request's pathinfo)
-	 * sp_deploy - Copies the contents of the Equinox application to the install area 
-	 * sp_undeploy - Removes the copy of the Equinox application from the install area
-	 * sp_redeploy - Resets the platform (e.g. stops, undeploys, deploys, starts)
-	 * sp_start - Starts a deployed platform
-	 * sp_stop - Stops the platform 
+	 * serviceFrameworkControls currently supports the following commands
+	 * (identified by the request's pathinfo) sp_deploy - Copies the contents of the
+	 * Equinox application to the install area sp_undeploy - Removes the copy of the
+	 * Equinox application from the install area sp_redeploy - Resets the platform
+	 * (e.g. stops, undeploys, deploys, starts) sp_start - Starts a deployed
+	 * platform sp_stop - Stops the platform
 	 */
 	@SuppressWarnings("resource")
 	private boolean serviceFrameworkControls(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -241,10 +248,11 @@ public class BridgeServlet extends HttpServlet {
 	}
 
 	/**
-	 * registerServletDelegate is the hook method called from inside the OSGi runtime to register
-	 * a servlet for which all future servlet calls will be delegated. If not null and no delegate
-	 * is currently registered, init(ServletConfig) will be called on the servletDelegate before
-	 * returning.
+	 * registerServletDelegate is the hook method called from inside the OSGi
+	 * runtime to register a servlet for which all future servlet calls will be
+	 * delegated. If not null and no delegate is currently registered,
+	 * init(ServletConfig) will be called on the servletDelegate before returning.
+	 * 
 	 * @param servletDelegate - the servlet to register for delegation
 	 */
 	public static synchronized void registerServletDelegate(HttpServlet servletDelegate) {
@@ -271,9 +279,12 @@ public class BridgeServlet extends HttpServlet {
 	}
 
 	/**
-	 * unregisterServletDelegate is the hook method called from inside the OSGi runtime to unregister a delegate.
-	 * If the servletDelegate matches the current registered delegate destroy() is called on the servletDelegate.
-	 * destroy() will not be called until the delegate is finished servicing any previous requests.
+	 * unregisterServletDelegate is the hook method called from inside the OSGi
+	 * runtime to unregister a delegate. If the servletDelegate matches the current
+	 * registered delegate destroy() is called on the servletDelegate. destroy()
+	 * will not be called until the delegate is finished servicing any previous
+	 * requests.
+	 * 
 	 * @param servletDelegate - the servlet to unregister
 	 */
 	public static synchronized void unregisterServletDelegate(HttpServlet servletDelegate) {
