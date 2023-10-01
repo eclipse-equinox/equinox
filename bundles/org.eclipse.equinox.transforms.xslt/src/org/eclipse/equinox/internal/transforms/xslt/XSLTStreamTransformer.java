@@ -32,14 +32,17 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
- * Implements the XSLT stream transformer. 
- * This class is capable of taking a source stream and an URL and applying the contents of the URL as a XSLT transform to the contents of the stream.
+ * Implements the XSLT stream transformer. This class is capable of taking a
+ * source stream and an URL and applying the contents of the URL as a XSLT
+ * transform to the contents of the stream.
  */
 public class XSLTStreamTransformer {
 
 	/**
-	 * Subclass of Pipe that is able to apply XSLT Transformers to the original input stream.  
-	 * All handling of XML is done with validation and entity resolution disabled to improve performance and prevent undesired network access.
+	 * Subclass of Pipe that is able to apply XSLT Transformers to the original
+	 * input stream. All handling of XML is done with validation and entity
+	 * resolution disabled to improve performance and prevent undesired network
+	 * access.
 	 */
 	class XSLTPipe extends Pipe {
 		private Transformer transformer;
@@ -73,7 +76,8 @@ public class XSLTStreamTransformer {
 	}
 
 	/**
-	 * The dummy entity resolver which returns empty content for all external entity requests.
+	 * The dummy entity resolver which returns empty content for all external entity
+	 * requests.
 	 */
 	protected EntityResolver resolver = new EntityResolver() {
 		@Override
@@ -89,16 +93,16 @@ public class XSLTStreamTransformer {
 	private ServiceTracker<FrameworkLog, FrameworkLog> logTracker;
 
 	/**
-	 * A map containing compiled XSLT transformations.  
-	 * These transforms are held by soft references so that we don't bloat memory for this purpose.  
-	 * After startup these transforms are of little use.
+	 * A map containing compiled XSLT transformations. These transforms are held by
+	 * soft references so that we don't bloat memory for this purpose. After startup
+	 * these transforms are of little use.
 	 */
 	private static final Map<URL, SoftReference<Templates>> templateMap = new HashMap<>();
 
 	/**
 	 * Create a new instance of this transformer.
 	 * 
-	 * @param logTracker the log service 
+	 * @param logTracker the log service
 	 */
 	public XSLTStreamTransformer(ServiceTracker<FrameworkLog, FrameworkLog> logTracker) {
 		this.logTracker = logTracker;
@@ -106,10 +110,13 @@ public class XSLTStreamTransformer {
 
 	/**
 	 * Implements the StreamTransformer.getInput(InputStream, URL) method.
-	 * @param inputStream the original stream
-	 * @param transformerUrl the transformer URL.  This should be an URL pointing to an XSLT transform.
+	 * 
+	 * @param inputStream    the original stream
+	 * @param transformerUrl the transformer URL. This should be an URL pointing to
+	 *                       an XSLT transform.
 	 * @return the transformed input stream
-	 * @throws IOException thrown if there is an issue reading from the original stream or applying the transform.
+	 * @throws IOException thrown if there is an issue reading from the original
+	 *                     stream or applying the transform.
 	 */
 	public InputStream getInputStream(InputStream inputStream, URL transformerUrl) throws IOException {
 		Templates template = getTemplate(transformerUrl);
@@ -126,8 +133,9 @@ public class XSLTStreamTransformer {
 	}
 
 	/**
-	 * Get a cached template for the provided XSLT template URL.  
-	 * If the cached entry for this URL does not exist it will be created.
+	 * Get a cached template for the provided XSLT template URL. If the cached entry
+	 * for this URL does not exist it will be created.
+	 * 
 	 * @param transformerURL the XSLT template URL.
 	 * @return the template
 	 */

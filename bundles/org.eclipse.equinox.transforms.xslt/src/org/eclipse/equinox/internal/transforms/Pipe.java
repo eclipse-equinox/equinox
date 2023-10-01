@@ -17,8 +17,9 @@ package org.eclipse.equinox.internal.transforms;
 import java.io.*;
 
 /**
- * This class facilitates the moving of data from one input stream to another.  
- * Subclasses may customize the behavior of this move by overriding the {@link #pipeInput(InputStream, OutputStream)} method.
+ * This class facilitates the moving of data from one input stream to another.
+ * Subclasses may customize the behavior of this move by overriding the
+ * {@link #pipeInput(InputStream, OutputStream)} method.
  */
 public class Pipe {
 
@@ -28,17 +29,21 @@ public class Pipe {
 
 	/**
 	 * Create a new Pipe based on the provided input stream.
+	 * 
 	 * @param original the original stream.
 	 * @throws IOException thrown if there is an issue establishing the pipe.
 	 */
 	public Pipe(InputStream original) throws IOException {
 		this.input = original;
 
-		// The following streams do the majority of the work.  
+		// The following streams do the majority of the work.
 		// The first operation on the input stream will provoke a new thread to start.
-		// This thread will invoke pipeInput and push the data from the original input stream to the output stream.
-		// The output stream is tied to this input stream via PipedI/OStream properties so the data is available to callers on the input stream.
-		// Any IOException thrown from within the thread will be caught and rethrown to callers of methods on this stream.
+		// This thread will invoke pipeInput and push the data from the original input
+		// stream to the output stream.
+		// The output stream is tied to this input stream via PipedI/OStream properties
+		// so the data is available to callers on the input stream.
+		// Any IOException thrown from within the thread will be caught and rethrown to
+		// callers of methods on this stream.
 		this.pipedInputStream = new PipedInputStream() {
 			protected IOException failure;
 			private boolean started = false;
@@ -110,7 +115,9 @@ public class Pipe {
 	}
 
 	/**
-	 * Get the stream that has resulted from piping the original input stream through {@link #pipeInput(InputStream, OutputStream)}.
+	 * Get the stream that has resulted from piping the original input stream
+	 * through {@link #pipeInput(InputStream, OutputStream)}.
+	 * 
 	 * @return the new stream.
 	 */
 	public InputStream getPipedInputStream() {
@@ -118,12 +125,14 @@ public class Pipe {
 	}
 
 	/**
-	 * Pipe the input stream to the output stream.
-	 * The default implementation of this method does a simple copy operations.  
-	 * Subclasses may elaborate on this behavior.
+	 * Pipe the input stream to the output stream. The default implementation of
+	 * this method does a simple copy operations. Subclasses may elaborate on this
+	 * behavior.
+	 * 
 	 * @param original the original stream
-	 * @param result the result stream
-	 * @throws IOException thrown if there is an issue reading from the input stream or writing to the output stream.
+	 * @param result   the result stream
+	 * @throws IOException thrown if there is an issue reading from the input stream
+	 *                     or writing to the output stream.
 	 */
 	protected void pipeInput(InputStream original, OutputStream result) throws IOException {
 		byte[] buffer = new byte[2048];
