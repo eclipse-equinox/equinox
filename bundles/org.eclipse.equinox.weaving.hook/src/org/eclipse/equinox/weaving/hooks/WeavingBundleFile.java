@@ -36,69 +36,62 @@ import org.eclipse.osgi.storage.bundlefile.BundleFile;
  */
 public class WeavingBundleFile extends AbstractWeavingBundleFile {
 
-    private final URL url;
+	private final URL url;
 
-    /**
-     * Create a new wrapper for a bundle file
-     * 
-     * @param adaptorProvider A provider that allows this wrapper to gain access
-     *            to the adaptor of this bundle
-     * @param bundleFile The wrapped bundle file
-     * @throws IOException
-     */
-    public WeavingBundleFile(final BundleAdaptorProvider adaptorProvider,
-            final BundleFile bundleFile) {
-        super(adaptorProvider, bundleFile);
-        try {
-            this.url = delegate.getBaseFile().toURL();
-        } catch (final MalformedURLException e) {
-            throw new RuntimeException(
-                    "Unexpected error getting bundle file URL.", e);
-        }
-    }
+	/**
+	 * Create a new wrapper for a bundle file
+	 * 
+	 * @param adaptorProvider A provider that allows this wrapper to gain access to
+	 *                        the adaptor of this bundle
+	 * @param bundleFile      The wrapped bundle file
+	 * @throws IOException
+	 */
+	public WeavingBundleFile(final BundleAdaptorProvider adaptorProvider, final BundleFile bundleFile) {
+		super(adaptorProvider, bundleFile);
+		try {
+			this.url = delegate.getBaseFile().toURL();
+		} catch (final MalformedURLException e) {
+			throw new RuntimeException("Unexpected error getting bundle file URL.", e);
+		}
+	}
 
-    @Override
-    public BundleEntry getEntry(final String path) {
-        if (Debug.DEBUG_BUNDLE)
-            Debug.println("> AspectJBundleFile.getEntry() path=" + path
-                    + ", url=" + url);
-        BundleEntry entry = delegate.getEntry(path);
+	@Override
+	public BundleEntry getEntry(final String path) {
+		if (Debug.DEBUG_BUNDLE)
+			Debug.println("> AspectJBundleFile.getEntry() path=" + path + ", url=" + url);
+		BundleEntry entry = delegate.getEntry(path);
 
-        if (path.endsWith(".class") && entry != null) {
-            final int offset = path.lastIndexOf('.');
-            final String name = path.substring(0, offset).replace('/', '.');
-            final IWeavingAdaptor adaptor = getAdaptor();
-            if (adaptor != null) {
-                final CacheEntry cacheEntry = adaptor.findClass(name, url);
-                if (cacheEntry == null) {
-                    entry = new WeavingBundleEntry(adaptor, entry, url, false);
-                    if (Debug.DEBUG_BUNDLE)
-                        Debug.println("- AspectJBundleFile.getEntry() path="
-                                + path + ", entry=" + entry);
-                } else if (cacheEntry.getCachedBytes() != null) {
-                    entry = new CachedClassBundleEntry(adaptor, entry, path,
-                            cacheEntry.getCachedBytes(), url);
-                } else {
-                    entry = new WeavingBundleEntry(adaptor, entry, url,
-                            cacheEntry.dontWeave());
-                }
-            }
-        } else if (path.endsWith(".class") && entry == null) {
-            final int offset = path.lastIndexOf('.');
-            final String name = path.substring(0, offset).replace('/', '.');
-            final IWeavingAdaptor adaptor = getAdaptor();
-            if (adaptor != null) {
-                final CacheEntry cacheEntry = adaptor.findClass(name, url);
-                if (cacheEntry != null && cacheEntry.getCachedBytes() != null) {
-                    entry = new CachedGeneratedClassBundleEntry(adaptor, path,
-                            cacheEntry.getCachedBytes(), url);
-                }
-            }
-        }
+		if (path.endsWith(".class") && entry != null) {
+			final int offset = path.lastIndexOf('.');
+			final String name = path.substring(0, offset).replace('/', '.');
+			final IWeavingAdaptor adaptor = getAdaptor();
+			if (adaptor != null) {
+				final CacheEntry cacheEntry = adaptor.findClass(name, url);
+				if (cacheEntry == null) {
+					entry = new WeavingBundleEntry(adaptor, entry, url, false);
+					if (Debug.DEBUG_BUNDLE)
+						Debug.println("- AspectJBundleFile.getEntry() path=" + path + ", entry=" + entry);
+				} else if (cacheEntry.getCachedBytes() != null) {
+					entry = new CachedClassBundleEntry(adaptor, entry, path, cacheEntry.getCachedBytes(), url);
+				} else {
+					entry = new WeavingBundleEntry(adaptor, entry, url, cacheEntry.dontWeave());
+				}
+			}
+		} else if (path.endsWith(".class") && entry == null) {
+			final int offset = path.lastIndexOf('.');
+			final String name = path.substring(0, offset).replace('/', '.');
+			final IWeavingAdaptor adaptor = getAdaptor();
+			if (adaptor != null) {
+				final CacheEntry cacheEntry = adaptor.findClass(name, url);
+				if (cacheEntry != null && cacheEntry.getCachedBytes() != null) {
+					entry = new CachedGeneratedClassBundleEntry(adaptor, path, cacheEntry.getCachedBytes(), url);
+				}
+			}
+		}
 
-        if (Debug.DEBUG_BUNDLE)
-            Debug.println("< AspectJBundleFile.getEntry() entry=" + entry);
-        return entry;
-    }
+		if (Debug.DEBUG_BUNDLE)
+			Debug.println("< AspectJBundleFile.getEntry() entry=" + entry);
+		return entry;
+	}
 
 }

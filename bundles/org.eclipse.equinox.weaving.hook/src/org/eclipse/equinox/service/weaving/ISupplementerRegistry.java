@@ -23,33 +23,32 @@ import org.osgi.service.packageadmin.PackageAdmin;
 
 public interface ISupplementerRegistry {
 
-    public void addBundle(final Bundle bundle);
+	public void addBundle(final Bundle bundle);
 
-    public void addSupplementedBundle(final Bundle bundle);
+	public void addSupplementedBundle(final Bundle bundle);
 
-    public void addSupplementer(final Bundle bundle, final boolean updateBundles);
+	public void addSupplementer(final Bundle bundle, final boolean updateBundles);
 
-    public List<Supplementer> getMatchingSupplementers(
-            final String symbolicName, final ManifestElement[] imports,
-            final ManifestElement[] exports);
+	public List<Supplementer> getMatchingSupplementers(final String symbolicName, final ManifestElement[] imports,
+			final ManifestElement[] exports);
 
-    public PackageAdmin getPackageAdmin();
+	public PackageAdmin getPackageAdmin();
 
-    public Supplementer[] getSupplementers(final Bundle bundle);
+	public Supplementer[] getSupplementers(final Bundle bundle);
 
-    public Supplementer[] getSupplementers(final long bundleID);
+	public Supplementer[] getSupplementers(final long bundleID);
 
-    /**
-     * Refreshes the given bundles
-     * 
-     * @param bundles The bundles to refresh
-     */
-    public void refreshBundles(final Bundle[] bundles);
+	/**
+	 * Refreshes the given bundles
+	 * 
+	 * @param bundles The bundles to refresh
+	 */
+	public void refreshBundles(final Bundle[] bundles);
 
-    public void removeBundle(final Bundle bundle);
+	public void removeBundle(final Bundle bundle);
 
-    public void setBundleContext(final BundleContext context);
+	public void setBundleContext(final BundleContext context);
 
-    public void setPackageAdmin(final PackageAdmin packageAdmin);
+	public void setPackageAdmin(final PackageAdmin packageAdmin);
 
 }

@@ -21,15 +21,14 @@ import org.eclipse.equinox.service.weaving.CacheEntry;
 
 public interface IWeavingAdaptor {
 
-    public CacheEntry findClass(String name, URL sourceFileURL);
+	public CacheEntry findClass(String name, URL sourceFileURL);
 
-    public void initialize();
+	public void initialize();
 
-    public boolean isInitialized();
+	public boolean isInitialized();
 
-    public boolean storeClass(String name, URL sourceFileURL, Class<?> clazz,
-            byte[] classbytes);
+	public boolean storeClass(String name, URL sourceFileURL, Class<?> clazz, byte[] classbytes);
 
-    public byte[] weaveClass(String name, byte[] bytes);
+	public byte[] weaveClass(String name, byte[] bytes);
 
 }
