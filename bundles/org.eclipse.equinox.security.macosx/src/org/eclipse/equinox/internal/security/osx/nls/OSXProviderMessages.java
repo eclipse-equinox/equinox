@@ -21,7 +21,7 @@ public class OSXProviderMessages extends NLS {
 
 	public static String getPasswordError;
 	public static String setPasswordError;
-	
+
 	static {
 		// load message values from bundle file
 		reloadMessages();
