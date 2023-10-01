@@ -24,9 +24,9 @@ import org.eclipse.equinox.security.storage.provider.IProviderHints;
 import org.junit.Test;
 
 /**
- * This is a semi-manual test; expected to be run with modules requiring
- * UI interactions. Set configuration before executing this so that desired
- * storage module is selected.
+ * This is a semi-manual test; expected to be run with modules requiring UI
+ * interactions. Set configuration before executing this so that desired storage
+ * module is selected.
  */
 public class ManualTest {
 
@@ -59,35 +59,37 @@ public class ManualTest {
 				}
 			}
 
+			// @formatter:off
 			/*
 			 * In theory, all those ciphers support "Raw" key factory format - the SecretKeyFactory
 			 * algorithm should be really irrelevant. That said, Blowfish would not work with JavaCrypt
 			 * - so need to manually test all and exclude those that we know not supported
 			 * (or provide a roundtrip test - if it fails, exclude the value)
-		[keyFactory] PBKDF2WithHmacSHA1
-		[keyFactory] DES
-		[keyFactory] DESede
-		[keyFactory] PBE
-		[keyFactory] PBEWithSHA1AndRC2_40
-		[keyFactory] PBEWithSHA1AndDESede
-		[keyFactory] PBEWithMD5AndTripleDES
-		[keyFactory] PBEWithMD5AndDES
-		[cypher] DES
-		[cypher] Blowfish
-		[cypher] RC2
-		[cypher] AES
-		[cypher] DESede
-		[cypher] PBEWithMD5AndDES
-		[cypher] PBEWithMD5AndTripleDES
-		[cypher] ARCFOUR
-		[cypher] RSA
-		[cypher] AESWrap
-		[cypher] PBEWithSHA1AndRC2_40
-		[cypher] PBEWithSHA1AndDESede
-		[cypher] DESedeWrap
-		http://java.sun.com/javase/6/docs/technotes/guides/security/StandardNames.html#SecretKeyFactory
-		http://java.sun.com/j2se/1.4.2/docs/guide/security/jce/JCERefGuide.html#AppA
+			 * [keyFactory] PBKDF2WithHmacSHA1
+			 * [keyFactory] DES
+			 * [keyFactory] DESede
+			 * [keyFactory] PBE
+			 * [keyFactory] PBEWithSHA1AndRC2_40
+			 * [keyFactory] PBEWithSHA1AndDESede
+			 * [keyFactory] PBEWithMD5AndTripleDES
+			 * [keyFactory] PBEWithMD5AndDES
+			 * [cypher] DES
+			 * [cypher] Blowfish
+			 * [cypher] RC2
+			 * [cypher] AES
+			 * [cypher] DESede
+			 * [cypher] PBEWithMD5AndDES
+			 * [cypher] PBEWithMD5AndTripleDES
+			 * [cypher] ARCFOUR
+			 * [cypher] RSA
+			 * [cypher] AESWrap
+			 * [cypher] PBEWithSHA1AndRC2_40
+			 * [cypher] PBEWithSHA1AndDESede
+			 * [cypher] DESedeWrap
+			 * http://java.sun.com/javase/6/docs/technotes/guides/security/StandardNames.html#SecretKeyFactory
+			 * http://java.sun.com/j2se/1.4.2/docs/guide/security/jce/JCERefGuide.html#AppA
 			 */
+			 // @formatter:on
 		}
 	}
 

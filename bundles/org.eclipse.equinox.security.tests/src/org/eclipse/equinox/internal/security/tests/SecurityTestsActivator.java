@@ -31,8 +31,8 @@ public class SecurityTestsActivator implements BundleActivator {
 	private BundleContext bundleContext;
 
 	/*
-	 * Returns the singleton for this Activator. Callers should be aware that
-	 * this will return nulCooll if the bundle is not active.
+	 * Returns the singleton for this Activator. Callers should be aware that this
+	 * will return nulCooll if the bundle is not active.
 	 */
 	public static SecurityTestsActivator getDefault() {
 		return singleton;
