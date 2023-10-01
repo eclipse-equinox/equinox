@@ -22,11 +22,10 @@ import org.eclipse.equinox.console.common.ConsoleOutputStream;
 import org.junit.Assert;
 import org.junit.Test;
 
-
 public class SshInputScannerTests {
-	
+
 	private static final byte ESC = 27;
-	
+
 	@Test
 	public void testScan() throws Exception {
 		ConsoleInputStream in = new ConsoleInputStream();

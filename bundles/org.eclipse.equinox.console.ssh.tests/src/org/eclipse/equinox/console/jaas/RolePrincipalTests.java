@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class RolePrincipalTests {
-	
+
 	private static final String ROLE_NAME = "administrator";
 
 	@Test
@@ -39,7 +39,7 @@ public class RolePrincipalTests {
 		RolePrincipal role = new RolePrincipal(ROLE_NAME);
 		RolePrincipal sameRole = new RolePrincipal(ROLE_NAME);
 		RolePrincipal emptyRole = new RolePrincipal(null);
-		
+
 		assertTrue("Roles should be equal", role.equals(role));
 		assertTrue("Roles should be equal", role.equals(sameRole));
 		assertFalse("Roles should not be equal", role.equals(emptyRole));
