@@ -19,23 +19,10 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @SuppressWarnings("deprecation")
 @RunWith(Suite.class)
-@SuiteClasses({
-	CoreExceptionTest.class,
-	ServiceCallerTest.class,
-	OperationCanceledExceptionTest.class,
-	PathTest.class,
-	PluginVersionIdentifierTest.class,
-	ProgressMonitorWrapperTest.class,
-	QualifiedNameTest.class,
-	SafeRunnerTest.class,
-	StatusTest.class,
-	SubMonitorSmallTicksTest.class,
-	SubMonitorTest.class,
-	SubProgressTest.class,
-	URIUtilTest.class,
-	URLTest.class,
-	PlatformLogWriterTest.class
-})
+@SuiteClasses({ CoreExceptionTest.class, ServiceCallerTest.class, OperationCanceledExceptionTest.class, PathTest.class,
+		PluginVersionIdentifierTest.class, ProgressMonitorWrapperTest.class, QualifiedNameTest.class,
+		SafeRunnerTest.class, StatusTest.class, SubMonitorSmallTicksTest.class, SubMonitorTest.class,
+		SubProgressTest.class, URIUtilTest.class, URLTest.class, PlatformLogWriterTest.class })
 public class RuntimeTests {
 	// intentionally left blank
 }

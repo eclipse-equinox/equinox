@@ -18,17 +18,9 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({
-	XMLExtensionCreateTest.class,
-	DirectExtensionCreateTest.class,
-	XMLExecutableExtensionTest.class,
-	DirectExtensionCreateTwoRegistriesTest.class,
-	TokenAccessTest.class,
-	XMLExtensionCreateEclipseTest.class,
-	DirectExtensionRemoveTest.class,
-	MergeContributionTest.class,
-	DuplicatePointsTest.class
-})
+@SuiteClasses({ XMLExtensionCreateTest.class, DirectExtensionCreateTest.class, XMLExecutableExtensionTest.class,
+		DirectExtensionCreateTwoRegistriesTest.class, TokenAccessTest.class, XMLExtensionCreateEclipseTest.class,
+		DirectExtensionRemoveTest.class, MergeContributionTest.class, DuplicatePointsTest.class })
 public class SimpleRegistryTests {
 	// intentionally left blank
 }

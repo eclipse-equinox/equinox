@@ -34,22 +34,32 @@ import org.junit.rules.TestName;
 public class SubProgressTest {
 
 	/**
-	 * <p>Depth of the chain chain of progress monitors. In all of the tests, we create
+	 * <p>
+	 * Depth of the chain chain of progress monitors. In all of the tests, we create
 	 * a nested chain of progress monitors rathar than a single monitor, to test its
 	 * scalability under recursion. We pick a number representing a moderately deep
-	 * recursion, but is still small enough that it could correspond to a real call stack
-	 * without causing overflow.</p>
+	 * recursion, but is still small enough that it could correspond to a real call
+	 * stack without causing overflow.
+	 * </p>
 	 *
-	 * <p>Note: changing this constant will invalidate comparisons with old performance data.</p>
+	 * <p>
+	 * Note: changing this constant will invalidate comparisons with old performance
+	 * data.
+	 * </p>
 	 */
 	public static final int CHAIN_DEPTH = 100;
 	/**
-	 * <p>Number of calls to worked() within each test. This was chosen to be significantly larger
-	 * than 1000 to test how well the monitor can optimize unnecessary resolution
-	 * in reported progress, but small enough that the test completes in a reasonable
-	 * amount of time.</p>
+	 * <p>
+	 * Number of calls to worked() within each test. This was chosen to be
+	 * significantly larger than 1000 to test how well the monitor can optimize
+	 * unnecessary resolution in reported progress, but small enough that the test
+	 * completes in a reasonable amount of time.
+	 * </p>
 	 *
-	 * <p>Note: changing this constant will invalidate comparisons with old performance data.</p>
+	 * <p>
+	 * Note: changing this constant will invalidate comparisons with old performance
+	 * data.
+	 * </p>
 	 */
 	public static final int PROGRESS_SIZE = 100000;
 
@@ -58,35 +68,41 @@ public class SubProgressTest {
 
 	/**
 	 * Tests the style bits in SubProgressMonitor
+	 * 
 	 * @deprecated to suppress deprecation warnings
 	 */
 	@Deprecated
 	@Test
 	public void testStyles() {
 
-		int[] styles = new int[] {0, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK | SubProgressMonitor.SUPPRESS_SUBTASK_LABEL};
+		int[] styles = new int[] { 0, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK,
+				SubProgressMonitor.SUPPRESS_SUBTASK_LABEL,
+				SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK | SubProgressMonitor.SUPPRESS_SUBTASK_LABEL };
 
 		HashMap<String, String[]> expected = new HashMap<>();
-		expected.put("style 0 below style 2", new String[] {"setTaskName0", "", "setTaskName1"});
-		expected.put("style 2 below style 0", new String[] {"setTaskName1", "beginTask1 ", "setTaskName1"});
-		expected.put("style 6 below style 0", new String[] {"setTaskName1", "beginTask1 ", "setTaskName1"});
-		expected.put("style 2 below style 4", new String[] {"setTaskName1", "beginTask0 beginTask1 ", "setTaskName1"});
-		expected.put("style 0 below style 0", new String[] {"setTaskName0", "subTask1", "setTaskName1"});
-		expected.put("style 6 as top-level monitor", new String[] {"", "", "setTaskName0"});
-		expected.put("style 6 below style 2", new String[] {"setTaskName1", "", "setTaskName1"});
-		expected.put("style 6 below style 6", new String[] {"setTaskName1", "", "setTaskName1"});
-		expected.put("style 0 below style 6", new String[] {"setTaskName0", "", "setTaskName1"});
-		expected.put("style 4 below style 2", new String[] {"setTaskName1", "", "setTaskName1"});
-		expected.put("style 0 as top-level monitor", new String[] {"", "subTask0", "setTaskName0"});
-		expected.put("style 0 below style 4", new String[] {"setTaskName0", "beginTask0 subTask1", "setTaskName1"});
-		expected.put("style 4 below style 0", new String[] {"setTaskName1", "beginTask1 subTask1", "setTaskName1"});
-		expected.put("style 4 as top-level monitor", new String[] {"", "beginTask0 subTask0", "setTaskName0"});
-		expected.put("style 2 below style 6", new String[] {"setTaskName1", "", "setTaskName1"});
-		expected.put("style 4 below style 6", new String[] {"setTaskName1", "", "setTaskName1"});
-		expected.put("style 2 below style 2", new String[] {"setTaskName1", "", "setTaskName1"});
-		expected.put("style 2 as top-level monitor", new String[] {"", "", "setTaskName0"});
-		expected.put("style 6 below style 4", new String[] {"setTaskName1", "beginTask0 beginTask1 ", "setTaskName1"});
-		expected.put("style 4 below style 4", new String[] {"setTaskName1", "beginTask0 beginTask1 subTask1", "setTaskName1"});
+		expected.put("style 0 below style 2", new String[] { "setTaskName0", "", "setTaskName1" });
+		expected.put("style 2 below style 0", new String[] { "setTaskName1", "beginTask1 ", "setTaskName1" });
+		expected.put("style 6 below style 0", new String[] { "setTaskName1", "beginTask1 ", "setTaskName1" });
+		expected.put("style 2 below style 4",
+				new String[] { "setTaskName1", "beginTask0 beginTask1 ", "setTaskName1" });
+		expected.put("style 0 below style 0", new String[] { "setTaskName0", "subTask1", "setTaskName1" });
+		expected.put("style 6 as top-level monitor", new String[] { "", "", "setTaskName0" });
+		expected.put("style 6 below style 2", new String[] { "setTaskName1", "", "setTaskName1" });
+		expected.put("style 6 below style 6", new String[] { "setTaskName1", "", "setTaskName1" });
+		expected.put("style 0 below style 6", new String[] { "setTaskName0", "", "setTaskName1" });
+		expected.put("style 4 below style 2", new String[] { "setTaskName1", "", "setTaskName1" });
+		expected.put("style 0 as top-level monitor", new String[] { "", "subTask0", "setTaskName0" });
+		expected.put("style 0 below style 4", new String[] { "setTaskName0", "beginTask0 subTask1", "setTaskName1" });
+		expected.put("style 4 below style 0", new String[] { "setTaskName1", "beginTask1 subTask1", "setTaskName1" });
+		expected.put("style 4 as top-level monitor", new String[] { "", "beginTask0 subTask0", "setTaskName0" });
+		expected.put("style 2 below style 6", new String[] { "setTaskName1", "", "setTaskName1" });
+		expected.put("style 4 below style 6", new String[] { "setTaskName1", "", "setTaskName1" });
+		expected.put("style 2 below style 2", new String[] { "setTaskName1", "", "setTaskName1" });
+		expected.put("style 2 as top-level monitor", new String[] { "", "", "setTaskName0" });
+		expected.put("style 6 below style 4",
+				new String[] { "setTaskName1", "beginTask0 beginTask1 ", "setTaskName1" });
+		expected.put("style 4 below style 4",
+				new String[] { "setTaskName1", "beginTask0 beginTask1 subTask1", "setTaskName1" });
 		HashMap<String, String[]> results = new HashMap<>();
 
 		for (int style : styles) {
@@ -106,7 +122,8 @@ public class SubProgressTest {
 			child.done();
 		}
 
-		// Output the code for the observed results, in case one of them has changed intentionally
+		// Output the code for the observed results, in case one of them has changed
+		// intentionally
 		for (Map.Entry<String, String[]> entry : results.entrySet()) {
 			String[] expectedResult = expected.get(entry.getKey());
 			String[] value = entry.getValue();
@@ -129,6 +146,7 @@ public class SubProgressTest {
 	/**
 	 * Tests SubProgressMonitor nesting when using the default constructor. (Tests
 	 * parents in floating point mode)
+	 * 
 	 * @deprecated to suppress deprecation warnings
 	 */
 	@Deprecated
@@ -177,8 +195,9 @@ public class SubProgressTest {
 	}
 
 	/**
-	 * Tests SubProgressMonitor nesting when using the default constructor. Tests constructors
-	 * in int mode.
+	 * Tests SubProgressMonitor nesting when using the default constructor. Tests
+	 * constructors in int mode.
+	 * 
 	 * @deprecated to suppress deprecation warnings
 	 */
 	@Deprecated
@@ -226,7 +245,9 @@ public class SubProgressTest {
 	}
 
 	/**
-	 * Tests the automatic cleanup when progress monitors are created via their constructor
+	 * Tests the automatic cleanup when progress monitors are created via their
+	 * constructor
+	 * 
 	 * @deprecated to suppress deprecation warnings
 	 */
 	@Deprecated
@@ -253,7 +274,8 @@ public class SubProgressTest {
 		monitor2.worked(500);
 		assertEquals(300.0, top.getTotalWork(), 0.01d);
 
-		// Create a monitor that will leak - monitors won't be auto-completed until their done methods are
+		// Create a monitor that will leak - monitors won't be auto-completed until
+		// their done methods are
 		// called
 		SubProgressMonitor monitor3 = new SubProgressMonitor(mon, 300);
 		assertEquals("Monitor2 should not have been cleaned up yet", 300.0, top.getTotalWork(), 0.01d);
@@ -315,8 +337,10 @@ public class SubProgressTest {
 		TestProgressMonitor monitor = new TestProgressMonitor();
 		createChildrenUnderParent(monitor, SubProgressTest.PROGRESS_SIZE);
 
-		// We don't actually expect the progress to be optimal in this case since the progress monitor wouldn't
-		// know what it was rooted under and would have had to report more progress than necessary... but we
+		// We don't actually expect the progress to be optimal in this case since the
+		// progress monitor wouldn't
+		// know what it was rooted under and would have had to report more progress than
+		// necessary... but we
 		// should be able to check that there was no redundancy.
 
 		assertEquals(0, monitor.getRedundantWorkCalls());
@@ -324,10 +348,11 @@ public class SubProgressTest {
 	}
 
 	/**
-	 * Creates and destroys the given number of child progress monitors under the given parent.
+	 * Creates and destroys the given number of child progress monitors under the
+	 * given parent.
 	 *
-	 * @param monitor monitor to create children under. The caller must call done on this monitor
-	 * if necessary.
+	 * @param monitor      monitor to create children under. The caller must call
+	 *                     done on this monitor if necessary.
 	 * @param progressSize total number of children to create.
 	 *
 	 * @deprecated to suppress deprecation warnings

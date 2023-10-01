@@ -18,15 +18,8 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({
-	ContributorsTest.class,
-	ExtensionRegistryDynamicTest.class,
-	ExtensionRegistryStaticTest.class,
-	InputErrorTest.class,
-	MultiLanguageTest.class,
-	NamespaceTest.class,
-	RegistryListenerTest.class
-})
+@SuiteClasses({ ContributorsTest.class, ExtensionRegistryDynamicTest.class, ExtensionRegistryStaticTest.class,
+		InputErrorTest.class, MultiLanguageTest.class, NamespaceTest.class, RegistryListenerTest.class })
 public class RegistryTests {
 	// intentionally left blank
 }

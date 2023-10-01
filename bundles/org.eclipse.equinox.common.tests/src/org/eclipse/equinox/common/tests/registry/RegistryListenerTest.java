@@ -32,6 +32,7 @@ import org.osgi.framework.FrameworkUtil;
 
 /**
  * Tests "new" registry event listener.
+ * 
  * @since 3.4
  */
 public class RegistryListenerTest {
@@ -55,10 +56,12 @@ public class RegistryListenerTest {
 		WaitingRegistryListener listener = new WaitingRegistryListener();
 		listener.register("bundle01.xp1");
 		try {
-			bundle01 = BundleTestingHelper.installBundle("0.1", fBundleContext, "Plugin_Testing/registryListener/bundle01");
-			bundle02 = BundleTestingHelper.installBundle("0.2", fBundleContext, "Plugin_Testing/registryListener/bundle02");
+			bundle01 = BundleTestingHelper.installBundle("0.1", fBundleContext,
+					"Plugin_Testing/registryListener/bundle01");
+			bundle02 = BundleTestingHelper.installBundle("0.2", fBundleContext,
+					"Plugin_Testing/registryListener/bundle02");
 
-			Bundle[] testBundles = new Bundle[] {bundle01, bundle02};
+			Bundle[] testBundles = new Bundle[] { bundle01, bundle02 };
 			BundleTestingHelper.refreshPackages(fBundleContext, testBundles);
 
 			String[] extPointIDs = listener.extPointsReceived(2 * MAX_TIME_PER_BUNDLE);
@@ -114,10 +117,12 @@ public class RegistryListenerTest {
 		WaitingRegistryListener listener = new WaitingRegistryListener();
 		listener.register("bundle01.xp1");
 		try {
-			bundle02 = BundleTestingHelper.installBundle("0.2", fBundleContext, "Plugin_Testing/registryEvents/bundle02");
-			bundle01 = BundleTestingHelper.installBundle("0.1", fBundleContext, "Plugin_Testing/registryEvents/bundle01");
+			bundle02 = BundleTestingHelper.installBundle("0.2", fBundleContext,
+					"Plugin_Testing/registryEvents/bundle02");
+			bundle01 = BundleTestingHelper.installBundle("0.1", fBundleContext,
+					"Plugin_Testing/registryEvents/bundle01");
 
-			Bundle[] testBundles = new Bundle[] {bundle01, bundle02};
+			Bundle[] testBundles = new Bundle[] { bundle01, bundle02 };
 			BundleTestingHelper.refreshPackages(fBundleContext, testBundles);
 
 			String[] extPointIDs = listener.extPointsReceived(2 * MAX_TIME_PER_BUNDLE);
@@ -164,8 +169,8 @@ public class RegistryListenerTest {
 	}
 
 	/**
-	 * Tests modifications to multiple extensions and extension points
-	 * Three listeners are tested: global; on xp1 (two extensions); on xp2 (no extensions)
+	 * Tests modifications to multiple extensions and extension points Three
+	 * listeners are tested: global; on xp1 (two extensions); on xp2 (no extensions)
 	 */
 	@Test
 	public void testMultiplePoints() throws IOException, BundleException {
@@ -177,9 +182,10 @@ public class RegistryListenerTest {
 		WaitingRegistryListener listener2 = new WaitingRegistryListener();
 		listener2.register("bundleMultiple.xp2");
 		try {
-			bundle = BundleTestingHelper.installBundle("0.1", fBundleContext, "Plugin_Testing/registryListener/bundleMultiple");
+			bundle = BundleTestingHelper.installBundle("0.1", fBundleContext,
+					"Plugin_Testing/registryListener/bundleMultiple");
 
-			Bundle[] testBundles = new Bundle[] {bundle};
+			Bundle[] testBundles = new Bundle[] { bundle };
 			BundleTestingHelper.refreshPackages(fBundleContext, testBundles);
 
 			// test additions on global listener
@@ -252,13 +258,14 @@ public class RegistryListenerTest {
 		RegistryFactory.getRegistry().addListener(listener, "bundleMultiple.xp1");
 		RegistryFactory.getRegistry().addListener(listener, "bundleMultiple.xp1");
 		try {
-			bundle = BundleTestingHelper.installBundle("0.1", fBundleContext, "Plugin_Testing/registryListener/bundleMultiple");
+			bundle = BundleTestingHelper.installBundle("0.1", fBundleContext,
+					"Plugin_Testing/registryListener/bundleMultiple");
 
-			Bundle[] testBundles = new Bundle[] {bundle};
+			Bundle[] testBundles = new Bundle[] { bundle };
 			BundleTestingHelper.refreshPackages(fBundleContext, testBundles);
 
-			// 1st registration: extension point; extension		=> 2 callbacks
-			// 2nd registration should be ignored: extension	=> 0 callbacks
+			// 1st registration: extension point; extension => 2 callbacks
+			// 2nd registration should be ignored: extension => 0 callbacks
 			// total: 2 callbacks
 			assertEquals(2, listener.waitFor(2, MAX_TIME_PER_BUNDLE));
 

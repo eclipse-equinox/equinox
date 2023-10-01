@@ -37,10 +37,11 @@ public class NamespaceTest {
 
 	@Test
 	public void testNamespaceBasic() throws IOException, BundleException {
-		//test the addition of an extension point
+		// test the addition of an extension point
 		BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
-		Bundle bundle01 = BundleTestingHelper.installBundle("Plugin", bundleContext, "Plugin_Testing/registry/testNamespace/1");
-		BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] {bundle01});
+		Bundle bundle01 = BundleTestingHelper.installBundle("Plugin", bundleContext,
+				"Plugin_Testing/registry/testNamespace/1");
+		BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] { bundle01 });
 
 		// Extension point and extension should be present
 		IExtensionPoint extpt = RegistryFactory.getRegistry().getExtensionPoint("org.abc.xptNS1");
@@ -79,7 +80,7 @@ public class NamespaceTest {
 
 		// remove the first bundle
 		bundle01.uninstall();
-		BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] {bundle01});
+		BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] { bundle01 });
 	}
 
 	@Test
@@ -87,8 +88,9 @@ public class NamespaceTest {
 
 		// add another bundle
 		BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
-		Bundle anotherNamespaceBundle = BundleTestingHelper.installBundle("Plugin", bundleContext, "Plugin_Testing/registry/testNamespace/2");
-		BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] {anotherNamespaceBundle});
+		Bundle anotherNamespaceBundle = BundleTestingHelper.installBundle("Plugin", bundleContext,
+				"Plugin_Testing/registry/testNamespace/2");
+		BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] { anotherNamespaceBundle });
 
 		// all elements from the first bundle should be gone
 		IExtensionPoint extpt_removed = RegistryFactory.getRegistry().getExtensionPoint("org.abc.xptNS1");
@@ -112,7 +114,7 @@ public class NamespaceTest {
 
 		// remove the second bundle
 		anotherNamespaceBundle.uninstall();
-		BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] {anotherNamespaceBundle});
+		BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] { anotherNamespaceBundle });
 	}
 
 }

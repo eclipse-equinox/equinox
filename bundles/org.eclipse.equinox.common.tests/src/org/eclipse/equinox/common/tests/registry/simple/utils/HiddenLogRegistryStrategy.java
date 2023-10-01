@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.spi.RegistryStrategy;
 
 /**
  * Registry strategy that keeps log output in an accessible string.
+ * 
  * @since 3.2
  */
 public class HiddenLogRegistryStrategy extends RegistryStrategy {
@@ -47,15 +48,15 @@ public class HiddenLogRegistryStrategy extends RegistryStrategy {
 
 		String statusMsg;
 		switch (severity) {
-			case IStatus.ERROR :
-				statusMsg = RegistryMessages.log_error;
-				break;
-			case IStatus.WARNING :
-				statusMsg = RegistryMessages.log_warning;
-				break;
-			default :
-				statusMsg = RegistryMessages.log_log;
-				break;
+		case IStatus.ERROR:
+			statusMsg = RegistryMessages.log_error;
+			break;
+		case IStatus.WARNING:
+			statusMsg = RegistryMessages.log_warning;
+			break;
+		default:
+			statusMsg = RegistryMessages.log_log;
+			break;
 		}
 		statusMsg += message;
 

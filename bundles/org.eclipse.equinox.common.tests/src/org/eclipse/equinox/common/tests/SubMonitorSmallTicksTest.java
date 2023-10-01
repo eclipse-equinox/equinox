@@ -19,8 +19,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Ensures that creating a SubMonitor with a small number of
- * ticks will not prevent it from reporting accurate progress.
+ * Ensures that creating a SubMonitor with a small number of ticks will not
+ * prevent it from reporting accurate progress.
  */
 public class SubMonitorSmallTicksTest {
 

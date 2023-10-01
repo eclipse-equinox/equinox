@@ -279,8 +279,7 @@ public class IAdapterManagerTest {
 		};
 		try {
 			manager.registerAdapters(fac, Private.class);
-			AssertionFailedException e = assertThrows(
-					AssertionFailedException.class,
+			AssertionFailedException e = assertThrows(AssertionFailedException.class,
 					() -> manager.getAdapter(new Private(), Private.class));
 			assertTrue(e.getMessage().contains(fac.getClass().getName()));
 			assertTrue(e.getMessage().contains(Boolean.class.getName()));

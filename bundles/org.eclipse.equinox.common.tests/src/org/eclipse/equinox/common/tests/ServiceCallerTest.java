@@ -59,6 +59,7 @@ public class ServiceCallerTest extends CoreTest {
 			return result == null ? 0 : result.get();
 		}
 	}
+
 	/**
 	 * Need a zero argument constructor to satisfy the test harness. This
 	 * constructor should not do any real work nor should it be called by user code.

@@ -19,8 +19,10 @@ import java.util.List;
 import org.eclipse.core.runtime.*;
 
 /**
- * Allows test cases to wait for event notification so they can make assertions on the event.
- * Similar to org.eclipse.core.tests.harness.TestRegistryChangeListener.
+ * Allows test cases to wait for event notification so they can make assertions
+ * on the event. Similar to
+ * org.eclipse.core.tests.harness.TestRegistryChangeListener.
+ * 
  * @since 3.2
  */
 public class SimpleRegistryListener implements IRegistryChangeListener {
@@ -34,11 +36,12 @@ public class SimpleRegistryListener implements IRegistryChangeListener {
 	}
 
 	/**
-	 * Returns the first event that is received, blocking for at most <code>timeout</code> milliseconds.
-	 * Returns <code>null</code> if a event was not received for the time allowed.
+	 * Returns the first event that is received, blocking for at most
+	 * <code>timeout</code> milliseconds. Returns <code>null</code> if a event was
+	 * not received for the time allowed.
 	 *
-	 * @param timeout the maximum time to wait in milliseconds. If zero, this method will
-	 * block until an event is received
+	 * @param timeout the maximum time to wait in milliseconds. If zero, this method
+	 *                will block until an event is received
 	 * @return the first event received, or <code>null</code> if none was received
 	 */
 	public synchronized IRegistryChangeEvent getEvent(long timeout) {

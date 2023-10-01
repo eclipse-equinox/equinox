@@ -51,7 +51,8 @@ public class PluginVersionIdentifierTest extends CoreTest {
 	// should test the hashcode() method that is currently missing.
 	public void testEqual() {
 
-		assertTrue("1.0", new PluginVersionIdentifier(123, 456, 789).equals(new PluginVersionIdentifier("123.456.789")));
+		assertTrue("1.0",
+				new PluginVersionIdentifier(123, 456, 789).equals(new PluginVersionIdentifier("123.456.789")));
 		assertTrue("1.1", !new PluginVersionIdentifier(123, 456, 789).equals(new PluginVersionIdentifier("123.456")));
 
 	}

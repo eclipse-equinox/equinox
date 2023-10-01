@@ -30,9 +30,9 @@ import org.eclipse.equinox.common.tests.registry.simple.utils.SimpleRegistryList
 import org.junit.Test;
 
 /**
- * Tests addition of extension point and the extension to the registry via
- * XML contribution. Makes sure that items are actually added; checks
- * listener notification; reloads registry from cache and re-checks the data.
+ * Tests addition of extension point and the extension to the registry via XML
+ * contribution. Makes sure that items are actually added; checks listener
+ * notification; reloads registry from cache and re-checks the data.
  *
  * @since 3.2
  */
@@ -67,7 +67,8 @@ public class XMLExtensionCreateTest extends BaseExtensionRegistryRun {
 	}
 
 	private void checkRegistry(String namespace) {
-		IExtensionPoint extensionPoint = simpleRegistry.getExtensionPoint(qualifiedName(namespace, "XMLDirectExtPoint")); //$NON-NLS-1$
+		IExtensionPoint extensionPoint = simpleRegistry
+				.getExtensionPoint(qualifiedName(namespace, "XMLDirectExtPoint")); //$NON-NLS-1$
 		assertNotNull(extensionPoint);
 		IExtension[] namespaceExtensions = simpleRegistry.getExtensions(namespace);
 		assertNotNull(namespaceExtensions);

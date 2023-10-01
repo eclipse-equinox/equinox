@@ -21,9 +21,8 @@ import org.eclipse.core.tests.harness.CoreTest;
  */
 public class OperationCanceledExceptionTest extends CoreTest {
 	/**
-	 * Need a zero argument constructor to satisfy the test harness.
-	 * This constructor should not do any real work nor should it be
-	 * called by user code.
+	 * Need a zero argument constructor to satisfy the test harness. This
+	 * constructor should not do any real work nor should it be called by user code.
 	 */
 	public OperationCanceledExceptionTest() {
 		super(null);
