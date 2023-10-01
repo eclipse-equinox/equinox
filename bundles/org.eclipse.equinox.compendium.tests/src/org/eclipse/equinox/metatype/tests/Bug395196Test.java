@@ -58,7 +58,8 @@ public class Bug395196Test extends AbstractTest {
 	private void getMetaTypeObjects() {
 		mti = metatype.getMetaTypeInformation(bundle);
 		Assert.assertNotNull("Metatype information not found", mti); //$NON-NLS-1$
-		ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1.testRejectDefaultValueWhenNotAnOption", null); //$NON-NLS-1$
+		ocd = mti.getObjectClassDefinition(
+				"org.eclipse.equinox.metatype.tests.tb1.testRejectDefaultValueWhenNotAnOption", null); //$NON-NLS-1$
 		Assert.assertNotNull("Object class definition not found", ocd); //$NON-NLS-1$
 		ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
 		Assert.assertNotNull("Attribute definitions not found", ads); //$NON-NLS-1$

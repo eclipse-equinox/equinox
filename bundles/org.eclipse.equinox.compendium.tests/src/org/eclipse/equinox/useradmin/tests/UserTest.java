@@ -152,11 +152,11 @@ public class UserTest {
 		assertTrue(user.getType() == Role.USER);
 		user.getProperties().put("test1", "valu"); //$NON-NLS-1$ //$NON-NLS-2$
 		user.getProperties().put("test2", "xxxyyyzzz"); //$NON-NLS-1$ //$NON-NLS-2$
-		user.getProperties().put("test3", new byte[] {1, 2, 3}); //$NON-NLS-1$
+		user.getProperties().put("test3", new byte[] { 1, 2, 3 }); //$NON-NLS-1$
 
 		user.getCredentials().put("test1", "valu"); //$NON-NLS-1$ //$NON-NLS-2$
 		user.getCredentials().put("test2", "xxxyyyzzz"); //$NON-NLS-1$ //$NON-NLS-2$
-		user.getCredentials().put("test3", new byte[] {1, 2, 3}); //$NON-NLS-1$
+		user.getCredentials().put("test3", new byte[] { 1, 2, 3 }); //$NON-NLS-1$
 	}
 
 	private void removeUser2() {

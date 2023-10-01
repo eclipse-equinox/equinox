@@ -60,11 +60,12 @@ public class UserAdminEventAdapterTest {
 			}
 
 		};
-		String[] topics = new String[] {"org/osgi/service/useradmin/UserAdmin/*"}; //$NON-NLS-1$
+		String[] topics = new String[] { "org/osgi/service/useradmin/UserAdmin/*" }; //$NON-NLS-1$
 		Dictionary<String, Object> handlerProps = new Hashtable<String, Object>();
 
 		handlerProps.put(EventConstants.EVENT_TOPIC, topics);
-		ServiceRegistration<EventHandler> reg = Activator.getBundleContext().registerService(EventHandler.class, handler, handlerProps);
+		ServiceRegistration<EventHandler> reg = Activator.getBundleContext().registerService(EventHandler.class,
+				handler, handlerProps);
 
 		synchronized (lock) {
 			userAdmin.createRole("testRole", Role.USER); //$NON-NLS-1$

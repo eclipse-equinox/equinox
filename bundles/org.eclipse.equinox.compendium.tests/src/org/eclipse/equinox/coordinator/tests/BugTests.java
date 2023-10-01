@@ -40,16 +40,16 @@ public class BugTests extends CoordinatorTest {
 			// Force garbage collection.
 			System.gc();
 		assertNull("The enclosing coordination never became weakly reachable", reference.get()); //$NON-NLS-1$
-		// For some reason, this delay is necessary to force the failure 
+		// For some reason, this delay is necessary to force the failure
 		// condition to occur when running "normally". The failure will occur
-		// without this delay when running in debug mode with or without 
+		// without this delay when running in debug mode with or without
 		// breakpoints.
 		Thread.sleep(1000);
 		try {
 			// End the enclosed coordination.
 			c2.end();
 		} catch (CoordinationException e) {
-			// A CoordinationException of type ALREADY_ENDED is expected since 
+			// A CoordinationException of type ALREADY_ENDED is expected since
 			// the coordination was failed.
 			assertEquals("Wrong type", CoordinationException.ALREADY_ENDED, e.getType()); //$NON-NLS-1$
 		} catch (NullPointerException e) {

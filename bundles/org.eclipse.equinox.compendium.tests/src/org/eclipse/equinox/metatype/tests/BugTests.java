@@ -65,7 +65,8 @@ public class BugTests extends AbstractTest {
 	}
 
 	/*
-	 * StringIndexOutOfBoundsException when description or name attributes are an empty string
+	 * StringIndexOutOfBoundsException when description or name attributes are an
+	 * empty string
 	 */
 	@Test
 	public void test341963() throws Exception {

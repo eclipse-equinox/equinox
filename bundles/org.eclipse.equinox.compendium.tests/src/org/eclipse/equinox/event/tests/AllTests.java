@@ -20,5 +20,5 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses(EventAdminTest.class)
 public class AllTests {
-	//see @SuiteClasses
+	// see @SuiteClasses
 }

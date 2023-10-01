@@ -18,7 +18,8 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({org.eclipse.equinox.coordinator.tests.AllTests.class, org.eclipse.equinox.event.tests.AllTests.class, org.eclipse.equinox.metatype.tests.AllTests.class, org.eclipse.equinox.useradmin.tests.AllTests.class})
+@SuiteClasses({ org.eclipse.equinox.coordinator.tests.AllTests.class, org.eclipse.equinox.event.tests.AllTests.class,
+		org.eclipse.equinox.metatype.tests.AllTests.class, org.eclipse.equinox.useradmin.tests.AllTests.class })
 public class AllTests {
-	//see @SuiteClasses
+	// see @SuiteClasses
 }
