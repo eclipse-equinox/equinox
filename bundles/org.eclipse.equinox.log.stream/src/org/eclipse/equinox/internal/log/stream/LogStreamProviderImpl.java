@@ -40,19 +40,21 @@ public class LogStreamProviderImpl implements LogStreamProvider {
 	private final ReentrantReadWriteLock historyLock = new ReentrantReadWriteLock();
 	private final ExecutorService executor;
 
-	public LogStreamProviderImpl(ServiceTracker<LogReaderService, AtomicReference<LogReaderService>> logReaderService, ExecutorService executor) {
+	public LogStreamProviderImpl(ServiceTracker<LogReaderService, AtomicReference<LogReaderService>> logReaderService,
+			ExecutorService executor) {
 		this.logReaderService = logReaderService;
 		this.executor = executor;
 	}
 
-	/* Create a PushStream of {@link LogEntry} objects.
-	 * The returned PushStream is 
-	 * Buffered with a buffer large enough to contain the history, if included.
-	 * Have the QueuePolicyOption.DISCARD_OLDEST queue policy option.
-	 * Use a shared executor.
-	 * Have a parallelism of one.
-	 * (non-Javadoc)
-	 * @see org.osgi.service.log.stream.LogStreamProvider#createStream(org.osgi.service.log.stream.LogStreamProvider.Options[])
+	/*
+	 * Create a PushStream of {@link LogEntry} objects. The returned PushStream is
+	 * Buffered with a buffer large enough to contain the history, if included. Have
+	 * the QueuePolicyOption.DISCARD_OLDEST queue policy option. Use a shared
+	 * executor. Have a parallelism of one. (non-Javadoc)
+	 * 
+	 * @see
+	 * org.osgi.service.log.stream.LogStreamProvider#createStream(org.osgi.service.
+	 * log.stream.LogStreamProvider.Options[])
 	 */
 	@Override
 	public PushStream<LogEntry> createStream(Options... options) {
@@ -65,14 +67,17 @@ public class LogStreamProviderImpl implements LogStreamProvider {
 			}
 		}
 
-		// A write lock is acquired in order to add logEntrySource into the Set of logEntrySources.
+		// A write lock is acquired in order to add logEntrySource into the Set of
+		// logEntrySources.
 		historyLock.writeLock().lock();
 		try {
 			LogEntrySource logEntrySource = new LogEntrySource(withHistory);
-			PushStreamBuilder<LogEntry, BlockingQueue<PushEvent<? extends LogEntry>>> streamBuilder = pushStreamProvider.buildStream(logEntrySource);
-			//creating a buffered push stream
+			PushStreamBuilder<LogEntry, BlockingQueue<PushEvent<? extends LogEntry>>> streamBuilder = pushStreamProvider
+					.buildStream(logEntrySource);
+			// creating a buffered push stream
 			LinkedBlockingQueue<PushEvent<? extends LogEntry>> historyQueue = new LinkedBlockingQueue<>();
-			PushStream<LogEntry> logStream = streamBuilder.withBuffer(historyQueue).withExecutor(executor).withParallelism(1).withQueuePolicy(QueuePolicyOption.DISCARD_OLDEST).build();
+			PushStream<LogEntry> logStream = streamBuilder.withBuffer(historyQueue).withExecutor(executor)
+					.withParallelism(1).withQueuePolicy(QueuePolicyOption.DISCARD_OLDEST).build();
 			logEntrySource.setLogStream(logStream);
 			// Adding to sources makes the source start listening for new entries
 			logEntrySources.add(logEntrySource);
@@ -83,7 +88,8 @@ public class LogStreamProviderImpl implements LogStreamProvider {
 	}
 
 	/*
-	 * Send the incoming log entries to the logEntrySource.logged(entry) for the consumer to accept it.
+	 * Send the incoming log entries to the logEntrySource.logged(entry) for the
+	 * consumer to accept it.
 	 */
 	public void logged(LogEntry entry) {
 		historyLock.readLock().lock();

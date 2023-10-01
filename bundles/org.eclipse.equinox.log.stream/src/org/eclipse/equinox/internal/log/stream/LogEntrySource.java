@@ -47,11 +47,14 @@ public class LogEntrySource implements PushEventSource<LogEntry> {
 		this.logStream = logStream;
 	}
 
-	/* Open method isused to connect to the source and begin receiving a stream of events.
-	 * It returns an AutoCloseable which can be used to close the event stream. 
-	 * If the close method is called on this object then the stream is terminated by sending a close event.
-	 * (non-Javadoc)
-	 * @see org.osgi.util.pushstream.PushEventSource#open(org.osgi.util.pushstream.PushEventConsumer)
+	/*
+	 * Open method isused to connect to the source and begin receiving a stream of
+	 * events. It returns an AutoCloseable which can be used to close the event
+	 * stream. If the close method is called on this object then the stream is
+	 * terminated by sending a close event. (non-Javadoc)
+	 * 
+	 * @see org.osgi.util.pushstream.PushEventSource#open(org.osgi.util.pushstream.
+	 * PushEventConsumer)
 	 */
 
 	@Override
@@ -63,8 +66,9 @@ public class LogEntrySource implements PushEventSource<LogEntry> {
 			throw new IllegalStateException("Cannot add the same consumer multiple times"); //$NON-NLS-1$
 		}
 
-		/*when history is not equal to null then we acquire a lock to provide the full history 
-		 * to the consumer first before any other new entries
+		/*
+		 * when history is not equal to null then we acquire a lock to provide the full
+		 * history to the consumer first before any other new entries
 		 */
 		if (withHistory != null) {
 			historyLock.lock();
@@ -79,7 +83,7 @@ public class LogEntrySource implements PushEventSource<LogEntry> {
 							historyList.add(e.nextElement());
 						}
 					}
-					//Logging the history in the order of their appearance
+					// Logging the history in the order of their appearance
 					if (historyList != null) {
 						while (!historyList.isEmpty()) {
 							LogEntry logEntry = historyList.removeLast();
@@ -110,10 +114,14 @@ public class LogEntrySource implements PushEventSource<LogEntry> {
 			historyLock.lock();
 		}
 
-		/*consumer accepts the incoming log entries and returns a back pressure. 
-		 * A return of zero indicates that event delivery may continue immediately. 
-		 * A positive return value indicates that the source should delay sending any further events for the requested number of milliseconds. 
-		 * A return value of -1 indicates that no further events should be sent and that the stream can be closed.
+		/*
+		 * consumer accepts the incoming log entries and returns a back pressure. A
+		 * return of zero indicates that event delivery may continue immediately. A
+		 * positive return value indicates that the source should delay sending any
+		 * further events for the requested number of milliseconds. A return value of -1
+		 * indicates that no further events should be sent and that the stream can be
+		 * closed.
+		 * 
 		 * @see org.osgi.util.pushstream.PushEventConsumer<T>
 		 */
 		try {

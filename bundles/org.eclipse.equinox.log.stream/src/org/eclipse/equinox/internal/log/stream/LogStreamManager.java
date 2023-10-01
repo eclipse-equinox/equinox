@@ -32,7 +32,8 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * and each log entry to the LogStreamProviderFactory.
  * 
  */
-public class LogStreamManager implements BundleActivator, ServiceTrackerCustomizer<LogReaderService, AtomicReference<LogReaderService>>, LogListener {
+public class LogStreamManager implements BundleActivator,
+		ServiceTrackerCustomizer<LogReaderService, AtomicReference<LogReaderService>>, LogListener {
 	private ServiceRegistration<LogStreamProvider> logStreamServiceRegistration;
 	private LogStreamProviderFactory logStreamProviderFactory;
 	private ServiceTracker<LogReaderService, AtomicReference<LogReaderService>> logReaderService;
@@ -41,7 +42,9 @@ public class LogStreamManager implements BundleActivator, ServiceTrackerCustomiz
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
+	 * 
+	 * @see
+	 * org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
 	@Override
 	public void start(BundleContext bc) throws Exception {
@@ -54,7 +57,9 @@ public class LogStreamManager implements BundleActivator, ServiceTrackerCustomiz
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+	 * 
+	 * @see
+	 * org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
 	public void stop(BundleContext bundleContext) throws Exception {
@@ -66,7 +71,9 @@ public class LogStreamManager implements BundleActivator, ServiceTrackerCustomiz
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
+	 * 
+	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.
+	 * framework.ServiceReference)
 	 */
 
 	@Override
@@ -78,13 +85,17 @@ public class LogStreamManager implements BundleActivator, ServiceTrackerCustomiz
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
+	 * 
+	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.
+	 * framework.ServiceReference, java.lang.Object)
 	 */
 	@Override
-	public void modifiedService(ServiceReference<LogReaderService> modifiedServiceRef, AtomicReference<LogReaderService> modifiedTracked) {
+	public void modifiedService(ServiceReference<LogReaderService> modifiedServiceRef,
+			AtomicReference<LogReaderService> modifiedTracked) {
 		eventProducerLock.lock();
 		try {
-			// Check if the currently used reader service is lower ranked that the modified serviceRef
+			// Check if the currently used reader service is lower ranked that the modified
+			// serviceRef
 			ServiceReference<LogReaderService> currentServiceRef = logReaderService.getServiceReference();
 			if (currentServiceRef == null || modifiedServiceRef.compareTo(currentServiceRef) > 0) {
 				// The modified service reference is higher ranked than the currently used one;
@@ -97,7 +108,8 @@ public class LogStreamManager implements BundleActivator, ServiceTrackerCustomiz
 					}
 					// remove our listener from the currently used service
 					if (currentServiceRef != null) {
-						AtomicReference<LogReaderService> currentTracked = logReaderService.getService(currentServiceRef);
+						AtomicReference<LogReaderService> currentTracked = logReaderService
+								.getService(currentServiceRef);
 						if (currentTracked != null) {
 							LogReaderService currentLogReader = currentTracked.get();
 							if (currentLogReader != null) {
@@ -121,10 +133,13 @@ public class LogStreamManager implements BundleActivator, ServiceTrackerCustomiz
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
+	 * 
+	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.
+	 * framework.ServiceReference, java.lang.Object)
 	 */
 	@Override
-	public void removedService(ServiceReference<LogReaderService> removedRef, AtomicReference<LogReaderService> removedTracked) {
+	public void removedService(ServiceReference<LogReaderService> removedRef,
+			AtomicReference<LogReaderService> removedTracked) {
 		eventProducerLock.lock();
 		try {
 			LogReaderService removedLogReader = removedTracked.get();
@@ -153,8 +168,10 @@ public class LogStreamManager implements BundleActivator, ServiceTrackerCustomiz
 		}
 	}
 
-	/* It is used to post each log entry to the LogStreamProviderFactory
+	/*
+	 * It is used to post each log entry to the LogStreamProviderFactory
 	 * (non-Javadoc)
+	 * 
 	 * @see org.osgi.service.log.LogListener#logged(org.osgi.service.log.LogEntry)
 	 */
 
