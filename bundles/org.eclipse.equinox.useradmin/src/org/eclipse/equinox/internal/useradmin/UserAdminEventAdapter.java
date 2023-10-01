@@ -79,17 +79,17 @@ public class UserAdminEventAdapter implements UserAdminListener {
 		if (eventAdmin != null) {
 			String typename = null;
 			switch (event.getType()) {
-				case UserAdminEvent.ROLE_CREATED :
-					typename = ROLE_CREATED;
-					break;
-				case UserAdminEvent.ROLE_CHANGED :
-					typename = ROLE_CHANGED;
-					break;
-				case UserAdminEvent.ROLE_REMOVED :
-					typename = ROLE_REMOVED;
-					break;
-				default :
-					return;
+			case UserAdminEvent.ROLE_CREATED:
+				typename = ROLE_CREATED;
+				break;
+			case UserAdminEvent.ROLE_CHANGED:
+				typename = ROLE_CHANGED;
+				break;
+			case UserAdminEvent.ROLE_REMOVED:
+				typename = ROLE_REMOVED;
+				break;
+			default:
+				return;
 			}
 			String topic = TOPIC + TOPIC_SEPARATOR + typename;
 			Hashtable<String, Object> properties = new Hashtable<>();

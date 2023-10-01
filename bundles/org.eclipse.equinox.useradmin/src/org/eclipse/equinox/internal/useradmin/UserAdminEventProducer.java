@@ -74,18 +74,19 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 	/**
 	 * A service is being added to the <tt>ServiceTracker</tt> object.
 	 *
-	 * <p>This method is called before a service which matched
-	 * the search parameters of the <tt>ServiceTracker</tt> object is
-	 * added to it. This method should return the
-	 * service object to be tracked for this <tt>ServiceReference</tt> object.
+	 * <p>
+	 * This method is called before a service which matched the search parameters of
+	 * the <tt>ServiceTracker</tt> object is added to it. This method should return
+	 * the service object to be tracked for this <tt>ServiceReference</tt> object.
 	 * The returned service object is stored in the <tt>ServiceTracker</tt> object
 	 * and is available from the <tt>getService</tt> and <tt>getServices</tt>
 	 * methods.
 	 *
-	 * @param reference Reference to service being added to the <tt>ServiceTracker</tt> object.
-	 * @return The service object to be tracked for the
-	 * <tt>ServiceReference</tt> object or <tt>null</tt> if the <tt>ServiceReference</tt> object should not
-	 * be tracked.
+	 * @param reference Reference to service being added to the
+	 *                  <tt>ServiceTracker</tt> object.
+	 * @return The service object to be tracked for the <tt>ServiceReference</tt>
+	 *         object or <tt>null</tt> if the <tt>ServiceReference</tt> object
+	 *         should not be tracked.
 	 */
 	@Override
 	public Object addingService(ServiceReference reference) {
@@ -99,11 +100,12 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 	/**
 	 * A service tracked by the <tt>ServiceTracker</tt> object has been removed.
 	 *
-	 * <p>This method is called after a service is no longer being tracked
-	 * by the <tt>ServiceTracker</tt> object.
+	 * <p>
+	 * This method is called after a service is no longer being tracked by the
+	 * <tt>ServiceTracker</tt> object.
 	 *
 	 * @param reference Reference to service that has been removed.
-	 * @param service The service object for the removed service.
+	 * @param service   The service object for the removed service.
 	 */
 	@Override
 	public void removedService(ServiceReference reference, Object service) {
@@ -113,24 +115,27 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 	}
 
 	/**
-	 * This method is the call back that is called once for each listener.
-	 * This method must cast the EventListener object to the appropriate listener
-	 * class for the event type and call the appropriate listener method.
+	 * This method is the call back that is called once for each listener. This
+	 * method must cast the EventListener object to the appropriate listener class
+	 * for the event type and call the appropriate listener method.
 	 *
-	 * @param listener This listener must be cast to the appropriate listener
-	 * class for the events created by this source and the appropriate listener method
-	 * must then be called.
+	 * @param listener       This listener must be cast to the appropriate listener
+	 *                       class for the events created by this source and the
+	 *                       appropriate listener method must then be called.
 	 * @param listenerObject This is the optional object that was passed to
-	 * ListenerList.addListener when the listener was added to the ListenerList.
-	 * @param eventAction This value was passed to the EventQueue object via one of its
-	 * dispatchEvent* method calls. It can provide information (such
-	 * as which listener method to call) so that this method
-	 * can complete the delivery of the event to the listener.
-	 * @param eventObject This object was passed to the EventQueue object via one of its
-	 * dispatchEvent* method calls. This object was created by the event source and
-	 * is passed to this method. It should contain all the necessary information (such
-	 * as what event object to pass) so that this method
-	 * can complete the delivery of the event to the listener.
+	 *                       ListenerList.addListener when the listener was added to
+	 *                       the ListenerList.
+	 * @param eventAction    This value was passed to the EventQueue object via one
+	 *                       of its dispatchEvent* method calls. It can provide
+	 *                       information (such as which listener method to call) so
+	 *                       that this method can complete the delivery of the event
+	 *                       to the listener.
+	 * @param eventObject    This object was passed to the EventQueue object via one
+	 *                       of its dispatchEvent* method calls. This object was
+	 *                       created by the event source and is passed to this
+	 *                       method. It should contain all the necessary information
+	 *                       (such as what event object to pass) so that this method
+	 *                       can complete the delivery of the event to the listener.
 	 */
 	@Override
 	public void dispatchEvent(Object listener, Object listenerObject, int eventAction, Object eventObject) {

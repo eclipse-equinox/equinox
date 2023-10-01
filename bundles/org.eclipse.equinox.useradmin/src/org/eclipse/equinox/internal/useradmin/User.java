@@ -21,9 +21,8 @@ import org.osgi.service.useradmin.UserAdminPermission;
 /**
  * A User managed by a {@link UserAdmin} service.
  * <p>
- * In this context, the term &quot;user&quot; is not limited to just
- * human beings.
- * Instead, it refers to any entity that may have any number of
+ * In this context, the term &quot;user&quot; is not limited to just human
+ * beings. Instead, it refers to any entity that may have any number of
  * credentials associated with it that it may use to authenticate itself.
  * <p>
  * In general, User objects are associated with a specific {@link UserAdmin}
@@ -34,8 +33,8 @@ import org.osgi.service.useradmin.UserAdminPermission;
  * associated with it. Specific {@link UserAdminPermission}s are required to
  * read or change a User's credentials.
  * <p>
- * Credentials are Dictionary objects and have semantics that are similar
- * to the properties in Role.
+ * Credentials are Dictionary objects and have semantics that are similar to the
+ * properties in Role.
  */
 
 public class User extends Role implements org.osgi.service.useradmin.User {
@@ -49,24 +48,23 @@ public class User extends Role implements org.osgi.service.useradmin.User {
 	}
 
 	/**
-	 * Returns a Dictionary of the credentials of this User. Any changes
-	 * to the returned Dictionary will change the credentials of this User.
-	 * This will cause a UserAdminEvent of type
-	 * {@link UserAdminEvent#ROLE_CHANGED} to be broadcast to any
-	 * UserAdminListeners.
+	 * Returns a Dictionary of the credentials of this User. Any changes to the
+	 * returned Dictionary will change the credentials of this User. This will cause
+	 * a UserAdminEvent of type {@link UserAdminEvent#ROLE_CHANGED} to be broadcast
+	 * to any UserAdminListeners.
 	 * <p>
-	 * Only objects of type String may be used as credential keys, and only
-	 * objects of type <code>String</code> or of type <code>byte[]</code>
-	 * may be used as credential values. Any other types will cause an exception
-	 * of type <code>IllegalArgumentException</code> to be raised.
+	 * Only objects of type String may be used as credential keys, and only objects
+	 * of type <code>String</code> or of type <code>byte[]</code> may be used as
+	 * credential values. Any other types will cause an exception of type
+	 * <code>IllegalArgumentException</code> to be raised.
 	 * <p>
-	 * In order to retrieve a credential from the returned Dictionary,
-	 * a {@link UserAdminPermission} named after the credential name (or
-	 * a prefix of it) with action <code>getCredential</code> is required.
+	 * In order to retrieve a credential from the returned Dictionary, a
+	 * {@link UserAdminPermission} named after the credential name (or a prefix of
+	 * it) with action <code>getCredential</code> is required.
 	 * <p>
-	 * In order to add or remove a credential from the returned Dictionary,
-	 * a {@link UserAdminPermission} named after the credential name (or
-	 * a prefix of it) with action <code>changeCredential</code> is required.
+	 * In order to add or remove a credential from the returned Dictionary, a
+	 * {@link UserAdminPermission} named after the credential name (or a prefix of
+	 * it) with action <code>changeCredential</code> is required.
 	 *
 	 * @return Dictionary containing the credentials of this User.
 	 */
@@ -78,22 +76,23 @@ public class User extends Role implements org.osgi.service.useradmin.User {
 	}
 
 	/**
-	 * Checks to see if this User has a credential with the specified key
-	 * set to the specified value.
+	 * Checks to see if this User has a credential with the specified key set to the
+	 * specified value.
 	 * <p>
 	 * If the specified credential value is not of type <tt>String</tt> or
-	 * <tt>byte[]</tt>, it is ignored, that is, <tt>false</tt> is returned
-	 * (as opposed to an <tt>IllegalArgumentException</tt> being raised).
+	 * <tt>byte[]</tt>, it is ignored, that is, <tt>false</tt> is returned (as
+	 * opposed to an <tt>IllegalArgumentException</tt> being raised).
 	 *
-	 * @param key The credential key.
+	 * @param key   The credential key.
 	 * @param value The credential value.
 	 *
 	 * @return <code>true</code> if this user has the specified credential;
-	 * <code>false</code> otherwise.
+	 *         <code>false</code> otherwise.
 	 *
-	 * @throws SecurityException If a security manager exists and the caller
-	 * does not have the <tt>UserAdminPermission</tt> named after the credential
-	 * key (or a prefix of it) with action <code>getCredential</code>.
+	 * @throws SecurityException If a security manager exists and the caller does
+	 *                           not have the <tt>UserAdminPermission</tt> named
+	 *                           after the credential key (or a prefix of it) with
+	 *                           action <code>getCredential</code>.
 	 */
 	@Override
 	public boolean hasCredential(String key, Object value) {
@@ -121,7 +120,7 @@ public class User extends Role implements org.osgi.service.useradmin.User {
 				return (true);
 			}
 		}
-		return (false); //if checkValue is null	
+		return (false); // if checkValue is null
 	}
 
 	/**
@@ -135,11 +134,11 @@ public class User extends Role implements org.osgi.service.useradmin.User {
 		return org.osgi.service.useradmin.Role.USER;
 	}
 
-	//A user always implies itself
+	// A user always implies itself
 	@Override
 	protected boolean isImpliedBy(Role role, Vector<String> checkLoop) {
 		if (checkLoop.contains(name)) {
-			//we have a circular dependency
+			// we have a circular dependency
 			return (false);
 		}
 		checkLoop.addElement(name);

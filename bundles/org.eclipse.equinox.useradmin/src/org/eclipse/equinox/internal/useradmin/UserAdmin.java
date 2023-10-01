@@ -22,26 +22,26 @@ import org.osgi.service.useradmin.UserAdminEvent;
 import org.osgi.service.useradmin.UserAdminPermission;
 
 /**
- * This interface is used to manage a database of named roles, which can
- * be used for authentication and authorization purposes.
+ * This interface is used to manage a database of named roles, which can be used
+ * for authentication and authorization purposes.
  * <p>
- * This version of UserAdmin defines two types of roles: "User" and
- * "Group". Each type of role is represented by an "int" constant and an
- * interface. The range of positive integers is reserved for new types of
- * roles that may be added in the future. When defining proprietary role
- * types, negative constant values must be used.
+ * This version of UserAdmin defines two types of roles: "User" and "Group".
+ * Each type of role is represented by an "int" constant and an interface. The
+ * range of positive integers is reserved for new types of roles that may be
+ * added in the future. When defining proprietary role types, negative constant
+ * values must be used.
  * <p>
  * Every role has a name and a type.
  * <p>
- * A {@link User} role can be configured with credentials (e.g., a password)
- * and properties (e.g., a street address, phone number, etc.).
+ * A {@link User} role can be configured with credentials (e.g., a password) and
+ * properties (e.g., a street address, phone number, etc.).
  * <p>
  * A {@link Group} role represents an aggregation of {@link User} and
- * {@link Group} roles. In
- * other words, the members of a Group role are roles themselves.
+ * {@link Group} roles. In other words, the members of a Group role are roles
+ * themselves.
  * <p>
- * Every UserAdmin manages and maintains its own
- * namespace of roles, in which each role has a unique name.
+ * Every UserAdmin manages and maintains its own namespace of roles, in which
+ * each role has a unique name.
  */
 
 public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
@@ -63,7 +63,7 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 
 		log = new LogTracker(context, System.out);
 		alive = true;
-		//This handles user admin persistence
+		// This handles user admin persistence
 		try {
 			userAdminStore = new UserAdminStore(preferencesService, this, log);
 			userAdminStore.init();
@@ -84,21 +84,23 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 	/**
 	 * Creates a role with the given name and of the given type.
 	 *
-	 * <p> If a role was created, a UserAdminEvent of type
-	 * {@link UserAdminEvent#ROLE_CREATED} is broadcast to any
-	 * UserAdminListener.
+	 * <p>
+	 * If a role was created, a UserAdminEvent of type
+	 * {@link UserAdminEvent#ROLE_CREATED} is broadcast to any UserAdminListener.
 	 *
 	 * @param name The name of the role to create.
-	 * @param type The type of the role to create. Must be either
-	 * {@link Role#USER} or {@link Role#GROUP}.
+	 * @param type The type of the role to create. Must be either {@link Role#USER}
+	 *             or {@link Role#GROUP}.
 	 *
-	 * @return The newly created role, or <code>null</code> if a role with
-	 * the given name already exists.
+	 * @return The newly created role, or <code>null</code> if a role with the given
+	 *         name already exists.
 	 *
 	 * @throws IllegalArgumentException if <tt>type</tt> is invalid.
 	 *
-	 * @throws SecurityException If a security manager exists and the caller
-	 * does not have the <tt>UserAdminPermission</tt> with name <tt>admin</tt>.
+	 * @throws SecurityException        If a security manager exists and the caller
+	 *                                  does not have the
+	 *                                  <tt>UserAdminPermission</tt> with name
+	 *                                  <tt>admin</tt>.
 	 */
 	@Override
 	public org.osgi.service.useradmin.Role createRole(String name, int type) {
@@ -110,7 +112,7 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 		if ((type != org.osgi.service.useradmin.Role.GROUP) && (type != org.osgi.service.useradmin.Role.USER)) {
 			throw (new IllegalArgumentException(UserAdminMsg.CREATE_INVALID_TYPE_ROLE_EXCEPTION));
 		}
-		//if the role already exists, return null
+		// if the role already exists, return null
 		if (getRole(name) != null) {
 			return (null);
 		}
@@ -128,7 +130,7 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 			newRole = new User(name, this);
 		} else if (type == org.osgi.service.useradmin.Role.GROUP) {
 			newRole = new Group(name, this);
-		} else //unknown type
+		} else // unknown type
 		{
 			return (null);
 		}
@@ -152,24 +154,25 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 	/**
 	 * Removes the role with the given name from this UserAdmin.
 	 *
-	 * <p> If the role was removed, a UserAdminEvent of type
-	 * {@link UserAdminEvent#ROLE_REMOVED} is broadcast to any
-	 * UserAdminListener.
+	 * <p>
+	 * If the role was removed, a UserAdminEvent of type
+	 * {@link UserAdminEvent#ROLE_REMOVED} is broadcast to any UserAdminListener.
 	 *
 	 * @param name The name of the role to remove.
 	 *
 	 * @return <code>true</code> If a role with the given name is present in this
-	 * UserAdmin and could be removed, otherwise <code>false</code>.
+	 *         UserAdmin and could be removed, otherwise <code>false</code>.
 	 *
-	 * @throws SecurityException If a security manager exists and the caller
-	 * does not have the <tt>UserAdminPermission</tt> with name <tt>admin</tt>.
+	 * @throws SecurityException If a security manager exists and the caller does
+	 *                           not have the <tt>UserAdminPermission</tt> with name
+	 *                           <tt>admin</tt>.
 	 */
 	@Override
 	public boolean removeRole(String name) {
 		checkAlive();
 		checkAdminPermission();
 		if (name.equals(Role.anyoneString)) {
-			//silently ignore
+			// silently ignore
 			return (true);
 		}
 		synchronized (this) {
@@ -196,8 +199,8 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 	 *
 	 * @param name The name of the role to get.
 	 *
-	 * @return The requested role, or <code>null</code> if this UserAdmin does
-	 * not have a role with the given name.
+	 * @return The requested role, or <code>null</code> if this UserAdmin does not
+	 *         have a role with the given name.
 	 */
 	@Override
 	public org.osgi.service.useradmin.Role getRole(String name) {
@@ -218,17 +221,16 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 	}
 
 	/**
-	 * Gets the roles managed by this UserAdmin that have properties matching
-	 * the specified LDAP filter criteria. See
-	 * <code>org.osgi.framework.Filter</code> or IETF RFC 2254 for a
-	 * description of the filter syntax. If a <code>null</code> filter is
-	 * specified, all roles managed by this UserAdmin are returned.
+	 * Gets the roles managed by this UserAdmin that have properties matching the
+	 * specified LDAP filter criteria. See <code>org.osgi.framework.Filter</code> or
+	 * IETF RFC 2254 for a description of the filter syntax. If a <code>null</code>
+	 * filter is specified, all roles managed by this UserAdmin are returned.
 	 *
 	 * @param filterString The filter criteria to match.
 	 *
-	 * @return The roles managed by this UserAdmin whose properties
-	 * match the specified filter criteria, or all roles if a
-	 * <code>null</code> filter is specified.
+	 * @return The roles managed by this UserAdmin whose properties match the
+	 *         specified filter criteria, or all roles if a <code>null</code> filter
+	 *         is specified.
 	 *
 	 */
 	@Override
@@ -239,10 +241,10 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 			if (filterString == null) {
 				returnedRoles = roles;
 			} else {
-				Filter filter = context.createFilter(filterString); //We do this first so an
-				//InvalidSyntaxException will be
-				//thrown even if there are no roles
-				//present.
+				Filter filter = context.createFilter(filterString); // We do this first so an
+				// InvalidSyntaxException will be
+				// thrown even if there are no roles
+				// present.
 				returnedRoles = new Vector<>();
 				for (int i = 0; i < roles.size(); i++) {
 					Role role = roles.elementAt(i);
@@ -263,16 +265,15 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 
 	/**
 	 * Gets the user with the given property key-value pair from the UserAdmin
-	 * database. This is a convenience method for retrieving a user based on
-	 * a property for which every user is supposed to have a unique value
-	 * (within the scope of this UserAdmin), such as a user's
-	 * X.500 distinguished name.
+	 * database. This is a convenience method for retrieving a user based on a
+	 * property for which every user is supposed to have a unique value (within the
+	 * scope of this UserAdmin), such as a user's X.500 distinguished name.
 	 *
-	 * @param key The property key to look for.
+	 * @param key   The property key to look for.
 	 * @param value The property value to compare with.
 	 *
-	 * @return A matching user, if <em>exactly</em> one is found. If zero or
-	 * more than one matching users are found, <code>null</code> is returned.
+	 * @return A matching user, if <em>exactly</em> one is found. If zero or more
+	 *         than one matching users are found, <code>null</code> is returned.
 	 */
 	@Override
 	public org.osgi.service.useradmin.User getUser(String key, String value) {
@@ -292,7 +293,7 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 				keyValue = (String) props.get(key);
 				if (keyValue != null && keyValue.equals(value)) {
 					if (foundUser != null) {
-						return (null); //we found more than one match	
+						return (null); // we found more than one match
 					}
 					foundUser = user;
 				}
@@ -302,12 +303,12 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 	}
 
 	/**
-	 * Creates an Authorization object that encapsulates the specified user
-	 * and the roles it possesses. The <code>null</code> user is interpreted
-	 * as the anonymous user.
+	 * Creates an Authorization object that encapsulates the specified user and the
+	 * roles it possesses. The <code>null</code> user is interpreted as the
+	 * anonymous user.
 	 *
 	 * @param user The user to create an Authorization object for, or
-	 * <code>null</code> for the anonymous user.
+	 *             <code>null</code> for the anonymous user.
 	 *
 	 * @return the Authorization object for the specified user.
 	 */
@@ -338,21 +339,24 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 	public void checkGetCredentialPermission(String credential) {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null) {
-			sm.checkPermission(new org.osgi.service.useradmin.UserAdminPermission(credential, org.osgi.service.useradmin.UserAdminPermission.GET_CREDENTIAL));
+			sm.checkPermission(new org.osgi.service.useradmin.UserAdminPermission(credential,
+					org.osgi.service.useradmin.UserAdminPermission.GET_CREDENTIAL));
 		}
 	}
 
 	public void checkChangeCredentialPermission(String credential) {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null) {
-			sm.checkPermission(new org.osgi.service.useradmin.UserAdminPermission(credential, org.osgi.service.useradmin.UserAdminPermission.CHANGE_CREDENTIAL));
+			sm.checkPermission(new org.osgi.service.useradmin.UserAdminPermission(credential,
+					org.osgi.service.useradmin.UserAdminPermission.CHANGE_CREDENTIAL));
 		}
 	}
 
 	public void checkChangePropertyPermission(String property) {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null) {
-			sm.checkPermission(new org.osgi.service.useradmin.UserAdminPermission(property, org.osgi.service.useradmin.UserAdminPermission.CHANGE_PROPERTY));
+			sm.checkPermission(new org.osgi.service.useradmin.UserAdminPermission(property,
+					org.osgi.service.useradmin.UserAdminPermission.CHANGE_PROPERTY));
 		}
 	}
 

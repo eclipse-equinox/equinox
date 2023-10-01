@@ -16,13 +16,13 @@ package org.eclipse.equinox.internal.useradmin;
 import java.util.Vector;
 
 /**
- * This interface encapsulates an authorization context on which bundles
- * can base authorization decisions where appropriate.
+ * This interface encapsulates an authorization context on which bundles can
+ * base authorization decisions where appropriate.
  * <p>
- * Bundles associate the privilege to access restricted resources or
- * operations with roles. Before granting access to a restricted resource
- * or operation, a bundle will check if the Authorization object passed
- * to it possesses the required role, by calling its hasRole method.
+ * Bundles associate the privilege to access restricted resources or operations
+ * with roles. Before granting access to a restricted resource or operation, a
+ * bundle will check if the Authorization object passed to it possesses the
+ * required role, by calling its hasRole method.
  * <p>
  * Authorization contexts are instantiated by calling
  * {@link UserAdmin#getAuthorization}
@@ -30,37 +30,34 @@ import java.util.Vector;
  * <font size="+1">Trusting Authorization objects.</font>
  * <p>
  * There are no restrictions regarding the creation of Authorization objects.
- * Hence, a service must only accept Authorization objects from bundles that 
- * has been authorized to use the service using code based (or Java 2) 
- * permissions.
+ * Hence, a service must only accept Authorization objects from bundles that has
+ * been authorized to use the service using code based (or Java 2) permissions.
  * <p>
- * In some cases it is useful to use ServicePermissions to do the code based 
- * access control. A service basing user access control on Authorization
- * objects passed to it, will then require that a calling bundle has the
- * ServicePermission to get the service in question. This is the most
- * convenient way. The framework will do the code based permission check
- * when the calling bundle attempts to get the service from the service
- * registry.
+ * In some cases it is useful to use ServicePermissions to do the code based
+ * access control. A service basing user access control on Authorization objects
+ * passed to it, will then require that a calling bundle has the
+ * ServicePermission to get the service in question. This is the most convenient
+ * way. The framework will do the code based permission check when the calling
+ * bundle attempts to get the service from the service registry.
  * <p>
- * Example: A servlet using a service on a user's behalf. The bundle with the 
+ * Example: A servlet using a service on a user's behalf. The bundle with the
  * servlet must be given the ServicePermission to get the Service.
  * <p>
- * However, in some cases the code based permission checks need to be more 
- * fine-grained. A service might allow all bundles to get it, but 
- * require certain code based permissions for some of its methods.
+ * However, in some cases the code based permission checks need to be more
+ * fine-grained. A service might allow all bundles to get it, but require
+ * certain code based permissions for some of its methods.
  * <p>
- * Example: A servlet using a service on a user's behalf, where some 
- * service functionality is open to anyone, and some is restricted by code
- * based permissions. When a restricted method is called 
- * (e.g., one handing over
- * an Authorization object), the service explicitly checks that the calling 
- * bundle has permission to make the call. 
+ * Example: A servlet using a service on a user's behalf, where some service
+ * functionality is open to anyone, and some is restricted by code based
+ * permissions. When a restricted method is called (e.g., one handing over an
+ * Authorization object), the service explicitly checks that the calling bundle
+ * has permission to make the call.
  */
 public class Authorization implements org.osgi.service.useradmin.Authorization {
 
 	protected UserAdmin useradmin;
 	protected Role user;
-	protected String name; //user to distinguish between the anonymous user and user.anyone
+	protected String name; // user to distinguish between the anonymous user and user.anyone
 
 	protected Authorization(User user, UserAdmin useradmin) {
 		this.useradmin = useradmin;
@@ -68,19 +65,19 @@ public class Authorization implements org.osgi.service.useradmin.Authorization {
 			this.user = user;
 			name = user.getName();
 		} else {
-			//anonymous user
+			// anonymous user
 			this.user = (Role) useradmin.getRole(Role.anyoneString);
 			name = null;
 		}
 	}
 
 	/**
-	 * Gets the name of the {@link User} that this Authorization
-	 * context was created for.
+	 * Gets the name of the {@link User} that this Authorization context was created
+	 * for.
 	 * 
-	 * @return The name of the {@link User} that this Authorization
-	 * context was created for, or <code>null</code> if no user was specified
-	 * when this Authorization context was created.
+	 * @return The name of the {@link User} that this Authorization context was
+	 *         created for, or <code>null</code> if no user was specified when this
+	 *         Authorization context was created.
 	 */
 	@Override
 	public String getName() {
@@ -89,19 +86,19 @@ public class Authorization implements org.osgi.service.useradmin.Authorization {
 	}
 
 	/**
-	 * Checks if the role with the specified name is implied by this 
-	 * Authorization context.
+	 * Checks if the role with the specified name is implied by this Authorization
+	 * context.
 	 * <p>
-	
-	 * Bundles must define globally unique role names that are associated with
-	 * the privilege of accessing restricted resources or operations.
-	 * System administrators will grant users access to these resources, by
-	 * creating a {@link Group} for each role and adding {@link User}s to it.
+	 * 
+	 * Bundles must define globally unique role names that are associated with the
+	 * privilege of accessing restricted resources or operations. System
+	 * administrators will grant users access to these resources, by creating a
+	 * {@link Group} for each role and adding {@link User}s to it.
 	 *
 	 * @param name_ The name of the role to check for.
 	 *
-	 * @return <code>true</code> if this Authorization context implies the
-	 * specified role, otherwise <code>false</code>.
+	 * @return <code>true</code> if this Authorization context implies the specified
+	 *         role, otherwise <code>false</code>.
 	 */
 	@Override
 	public boolean hasRole(String name_) {
@@ -118,16 +115,16 @@ public class Authorization implements org.osgi.service.useradmin.Authorization {
 	/**
 	 * Gets the names of all roles encapsulated by this Authorization context.
 	 *
-	 * @return The names of all roles encapsulated by this Authorization 
-	 * context, or <code>null</code> if no roles are in the context.
+	 * @return The names of all roles encapsulated by this Authorization context, or
+	 *         <code>null</code> if no roles are in the context.
 	 */
 	@Override
 	public String[] getRoles() {
 		useradmin.checkAlive();
 
-		// go through all of the roles and find out which ones are implied by this 
+		// go through all of the roles and find out which ones are implied by this
 		// authorization context.
-		synchronized (useradmin) //we don't want anything changing while we get the list
+		synchronized (useradmin) // we don't want anything changing while we get the list
 		{
 			int length = useradmin.roles.size();
 			Vector<String> result = new Vector<>(length);
@@ -135,7 +132,7 @@ public class Authorization implements org.osgi.service.useradmin.Authorization {
 				Role role = useradmin.roles.elementAt(i);
 				if (role.isImpliedBy(user, new Vector<>())) {
 					String roleName = role.getName();
-					//exclude user.anyone from the list
+					// exclude user.anyone from the list
 					if (!roleName.equals(Role.anyoneString)) {
 						result.addElement(roleName);
 					}
