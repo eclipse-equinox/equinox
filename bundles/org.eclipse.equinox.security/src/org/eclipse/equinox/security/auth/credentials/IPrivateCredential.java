@@ -17,10 +17,12 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.security.auth.Subject;
 
 /**
- * This interface describes private credentials added by the Equinox login modules.
+ * This interface describes private credentials added by the Equinox login
+ * modules.
  * <p>
  * This interface should not be extended by clients.
  * </p>
+ * 
  * @see Subject#getPrivateCredentials()
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -28,13 +30,15 @@ public interface IPrivateCredential {
 
 	/**
 	 * Returns private key stored in this credential
+	 * 
 	 * @return private key
 	 */
 	public PBEKeySpec getPrivateKey();
 
 	/**
-	 * ID of the provider of this private credential. 
-	 * @return provider ID 
+	 * ID of the provider of this private credential.
+	 * 
+	 * @return provider ID
 	 */
 	public String getProviderID();
 

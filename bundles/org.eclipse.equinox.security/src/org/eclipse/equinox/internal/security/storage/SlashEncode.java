@@ -15,15 +15,16 @@ package org.eclipse.equinox.internal.security.storage;
 
 /**
  * Utility class to encode forward slash characters so that strings containing
- * forward slashes can be used as node names with secure preferences. It is
- * the responsibility of the consumer to manually encode such strings before
+ * forward slashes can be used as node names with secure preferences. It is the
+ * responsibility of the consumer to manually encode such strings before
  * attempting to obtain corresponding nodes from secure preferences.
  * <p>
- * Internally, the class uses a subset of JIT encoding. The forward slashes 
- * and backward slashes are encoded.
- * </p><p>
+ * Internally, the class uses a subset of JIT encoding. The forward slashes and
+ * backward slashes are encoded.
+ * </p>
+ * <p>
  * This class is not intended to be instantiated or subclassed by users.
- * </p>  
+ * </p>
  */
 final public class SlashEncode {
 

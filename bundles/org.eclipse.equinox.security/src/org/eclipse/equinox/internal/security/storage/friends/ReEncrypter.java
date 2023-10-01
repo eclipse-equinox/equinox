@@ -26,7 +26,7 @@ import org.eclipse.equinox.security.storage.provider.IProviderHints;
 import org.eclipse.osgi.util.NLS;
 
 /**
- * The class will re-encrypt the whole preferences tree (any node on the tree 
+ * The class will re-encrypt the whole preferences tree (any node on the tree
  * can be passed in as a starting point).
  */
 public class ReEncrypter {
@@ -53,7 +53,7 @@ public class ReEncrypter {
 	final private String moduleID;
 	private boolean processedOK = true;
 
-	private ArrayList<TmpElement> elements = new ArrayList<>(); // List<TmpElement> 
+	private ArrayList<TmpElement> elements = new ArrayList<>(); // List<TmpElement>
 
 	public ReEncrypter(ISecurePreferences prefs, String moduleID) {
 		this.moduleID = moduleID;
@@ -61,8 +61,8 @@ public class ReEncrypter {
 	}
 
 	/**
-	 * The method will decrypt all data that can be decrypted into a local 
-	 * memory structure.
+	 * The method will decrypt all data that can be decrypted into a local memory
+	 * structure.
 	 */
 	public boolean decrypt() {
 		decrypt(root);
@@ -103,11 +103,12 @@ public class ReEncrypter {
 	}
 
 	/**
-	 * The method try to create new password. 
+	 * The method try to create new password.
 	 * <p>
-	 * <strong>Note</strong> that after the successful completion of this method the secure storage has
-	 * new verification string and previously decoded values <b>must</b> be added via encrypt() method 
-	 * or they will become unavailable via conventional APIs.
+	 * <strong>Note</strong> that after the successful completion of this method the
+	 * secure storage has new verification string and previously decoded values
+	 * <b>must</b> be added via encrypt() method or they will become unavailable via
+	 * conventional APIs.
 	 * </p>
 	 */
 	public boolean switchToNewPassword() {
@@ -115,13 +116,15 @@ public class ReEncrypter {
 	}
 
 	/**
-	 * The method will encrypt all data from the memory structure created by decrypt using current 
-	 * passwords and providers. The original encrypted data will be overwritten.
+	 * The method will encrypt all data from the memory structure created by decrypt
+	 * using current passwords and providers. The original encrypted data will be
+	 * overwritten.
 	 */
 	public boolean encrypt() {
 		boolean result = true;
 
-		// we'll directly inject here a requirement to use the specified module to encrypt data
+		// we'll directly inject here a requirement to use the specified module to
+		// encrypt data
 		SecurePreferencesContainer container = ((SecurePreferencesWrapper) root).getContainer();
 		Object originalProperty = container.getOption(IProviderHints.REQUIRED_MODULE_ID);
 		container.setOption(IProviderHints.REQUIRED_MODULE_ID, moduleID);

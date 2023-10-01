@@ -14,10 +14,11 @@
 package org.eclipse.equinox.security.storage;
 
 /**
- * This class describes an exception that could be produced by the secure 
+ * This class describes an exception that could be produced by the secure
  * preferences. Depending on the error code, callers might be able to mitigate
- * the originating problems and re-try the operation (for instance, if incorrect 
- * password was provided or in case a required storage module was not available).
+ * the originating problems and re-try the operation (for instance, if incorrect
+ * password was provided or in case a required storage module was not
+ * available).
  * <p>
  * This class is not intended to be instantiated or extended by clients.
  * </p>
@@ -38,9 +39,9 @@ final public class StorageException extends Exception {
 
 	/**
 	 * Error occurred during the encryption process.
-	 * <p> 
-	 * Such error might have being created by using inappropriate key, for instance, using key 
-	 * that is too strong for the cryptographic policy in JVM.
+	 * <p>
+	 * Such error might have being created by using inappropriate key, for instance,
+	 * using key that is too strong for the cryptographic policy in JVM.
 	 * </p>
 	 */
 	final public static int ENCRYPTION_ERROR = 2;

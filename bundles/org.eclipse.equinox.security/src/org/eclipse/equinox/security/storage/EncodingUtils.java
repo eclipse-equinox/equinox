@@ -25,13 +25,15 @@ import org.eclipse.equinox.internal.security.storage.SlashEncode;
 final public class EncodingUtils {
 
 	/**
-	 * Encode strings containing forward slashes so that they can be used as node names 
-	 * with secure preferences. It is the responsibility of the consumer to manually encode 
-	 * such strings before attempting to obtain corresponding nodes from secure preferences.
+	 * Encode strings containing forward slashes so that they can be used as node
+	 * names with secure preferences. It is the responsibility of the consumer to
+	 * manually encode such strings before attempting to obtain corresponding nodes
+	 * from secure preferences.
 	 * <p>
-	 * Internally, the class uses a subset of JIT encoding. The forward slashes 
-	 * and backward slashes are encoded.
+	 * Internally, the class uses a subset of JIT encoding. The forward slashes and
+	 * backward slashes are encoded.
 	 * </p>
+	 * 
 	 * @see #decodeSlashes(String)
 	 * @param nodeName string to be encoded
 	 * @return encoded string, <code>null</code> if argument was <code>null</code>
@@ -41,7 +43,9 @@ final public class EncodingUtils {
 	}
 
 	/**
-	 * Decode strings previously encoded with the {@link #encodeSlashes(String)} method.
+	 * Decode strings previously encoded with the {@link #encodeSlashes(String)}
+	 * method.
+	 * 
 	 * @param nodeName string to be decoded
 	 * @return decoded string, <code>null</code> if argument was <code>null</code>
 	 */
@@ -50,8 +54,9 @@ final public class EncodingUtils {
 	}
 
 	/**
-	 * Provides Base64 encoding of the data. This Base64 encoding does not insert 
+	 * Provides Base64 encoding of the data. This Base64 encoding does not insert
 	 * end-of-line characters (but can properly decode strings with EOLs inserted).
+	 * 
 	 * @param bytes data to be encoded
 	 * @return data encoded as Base64 string
 	 */
@@ -61,6 +66,7 @@ final public class EncodingUtils {
 
 	/**
 	 * Provides decoding of Base64-encoded string
+	 * 
 	 * @param string data encoded as Base64
 	 * @return decoded data
 	 */

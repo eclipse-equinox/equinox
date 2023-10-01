@@ -71,7 +71,8 @@ public class PasswordManagement {
 		// create password from mixing and boiling answers
 		String internalPassword = mashPassword(challengeResponse[1]);
 
-		PasswordExt internalPasswordExt = new PasswordExt(new PBEKeySpec(internalPassword.toCharArray()), RECOVERY_PSEUDO_ID);
+		PasswordExt internalPasswordExt = new PasswordExt(new PBEKeySpec(internalPassword.toCharArray()),
+				RECOVERY_PSEUDO_ID);
 		PasswordExt password;
 		try {
 			password = root.getPassword(moduleID, container, false);
@@ -126,7 +127,8 @@ public class PasswordManagement {
 		String internalPassword = mashPassword(answers); // create recovery password from answers
 
 		SecurePreferences node = recoveryNode(root, moduleID);
-		PasswordExt internalPasswordExt = new PasswordExt(new PBEKeySpec(internalPassword.toCharArray()), RECOVERY_PSEUDO_ID);
+		PasswordExt internalPasswordExt = new PasswordExt(new PBEKeySpec(internalPassword.toCharArray()),
+				RECOVERY_PSEUDO_ID);
 		try {
 			CryptoData encryptedData = new CryptoData(node.internalGet(PASSWORD_RECOVERY_KEY));
 			byte[] data = root.getCipher().decrypt(internalPasswordExt, encryptedData);
@@ -141,14 +143,14 @@ public class PasswordManagement {
 	}
 
 	/**
-	 * Produces password from a list of answers:
-	 * - all answers are put into one string
-	 * - characters from alternating ends of the string are taken to form "mashed up" recovery 
-	 * password
-	 * - the secure digest of the "mashed up" string is created
+	 * Produces password from a list of answers: - all answers are put into one
+	 * string - characters from alternating ends of the string are taken to form
+	 * "mashed up" recovery password - the secure digest of the "mashed up" string
+	 * is created
 	 * 
-	 * This procedure should improve quality of the recovery password - even if answers 
-	 * are dictionary words, digested "mashed up" password should be of a reasonable good quality 
+	 * This procedure should improve quality of the recovery password - even if
+	 * answers are dictionary words, digested "mashed up" password should be of a
+	 * reasonable good quality
 	 */
 	static private String mashPassword(String[] answers) {
 		// form a string composing answers
@@ -173,7 +175,8 @@ public class PasswordManagement {
 			byte[] digested = digest.digest(StorageUtils.getBytes(mix.toString()));
 			internalPassword = EncodingUtils.encodeBase64(digested);
 		} catch (NoSuchAlgorithmException e) {
-			// just use the text as is; it is nicer to use digest but in this case no big deal
+			// just use the text as is; it is nicer to use digest but in this case no big
+			// deal
 			String msg = NLS.bind(SecAuthMessages.noDigest, DIGEST_ALGORITHM);
 			AuthPlugin.getDefault().logMessage(msg);
 			internalPassword = mix.toString();

@@ -22,8 +22,10 @@ import org.eclipse.osgi.util.NLS;
 public class ConfigurationFederator extends Configuration {
 
 	// TODO this usage needs to be changed. We should retrieve federatedConfigs
-	// from the "ConfigurationFactory" every time we are asked; the "ConfigurationFactory"
-	// shoudl keep a cache that corresponds to what's in the registry and update it on registry 
+	// from the "ConfigurationFactory" every time we are asked; the
+	// "ConfigurationFactory"
+	// shoudl keep a cache that corresponds to what's in the registry and update it
+	// on registry
 	// events
 	private Configuration[] federatedConfigs = null;
 
@@ -42,7 +44,8 @@ public class ConfigurationFederator extends Configuration {
 		if (returnValue != null)
 			return returnValue;
 
-		// Note: adding default config provider last; extension-point based configs are queried first
+		// Note: adding default config provider last; extension-point based configs are
+		// queried first
 		Configuration[] configs = getFederatedConfigs();
 		Configuration[] allConfigs = configs;
 		if (defaultConfiguration != null) {

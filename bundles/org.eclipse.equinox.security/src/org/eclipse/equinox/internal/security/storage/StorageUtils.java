@@ -23,16 +23,16 @@ import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
 /**
  * PLEASE READ BEFORE CHANGING THIS FILE
  * 
- * At present most of the methods expect only file URLs. The API methods
- * take URLs for possible future expansion, and there is some code below
- * that would work with some other URL types, but the only supported URL
- * types at this time are file URLs. Also note that URL paths should not
- * be encoded (spaces should be spaces, not "%x20"). 
- *  
+ * At present most of the methods expect only file URLs. The API methods take
+ * URLs for possible future expansion, and there is some code below that would
+ * work with some other URL types, but the only supported URL types at this time
+ * are file URLs. Also note that URL paths should not be encoded (spaces should
+ * be spaces, not "%x20").
+ * 
  * On encoding: Java documentation recommends using File.toURI().toURL().
- * However, in this process non-alphanumeric characters (including spaces)
- * get encoded and can not be used with the rest of Eclipse methods that
- * expect non-encoded strings.
+ * However, in this process non-alphanumeric characters (including spaces) get
+ * encoded and can not be used with the rest of Eclipse methods that expect
+ * non-encoded strings.
  */
 public class StorageUtils {
 
@@ -42,15 +42,14 @@ public class StorageUtils {
 	final private static String propertiesFileName = ".eclipse/org.eclipse.equinox.security/secure_storage"; //$NON-NLS-1$
 
 	/**
-	 * Default locations:
-	 * 1) user.home
-	 * 2) Eclipse config location
+	 * Default locations: 1) user.home 2) Eclipse config location
 	 */
 	static public URL getDefaultLocation() throws IOException {
 		String userHome = System.getProperty("user.home"); //$NON-NLS-1$
 		if (userHome != null) {
 			File file = new File(userHome, propertiesFileName);
-			// NOTE: Don't use File.toURI().toURL() as it will escape space characters and such.
+			// NOTE: Don't use File.toURI().toURL() as it will escape space characters and
+			// such.
 			// The escaped sequence will fail later when we try to open a stream on it.
 			return file.toURL();
 		}
@@ -75,8 +74,8 @@ public class StorageUtils {
 			}
 			return new FileOutputStream(file);
 		}
-		// note that code below does not work for File URLs - "by design" Java 
-		// does not support creating output streams on file URLs. Code below should work 
+		// note that code below does not work for File URLs - "by design" Java
+		// does not support creating output streams on file URLs. Code below should work
 		// for HTTP URLs; no idea as to the other types of URLs
 		URLConnection connection = url.openConnection();
 		connection.setDoOutput(true);
@@ -89,7 +88,7 @@ public class StorageUtils {
 		try {
 			return url.openStream();
 		} catch (FileNotFoundException e) {
-			return null; // this is all right, means new file 
+			return null; // this is all right, means new file
 		}
 	}
 
@@ -114,9 +113,10 @@ public class StorageUtils {
 	}
 
 	/**
-	 * The {@link String#getBytes()} truncates non-ASCII chars. As a result 
-	 * new String(string.getBytes()) is not the same as the original string. Moreover,
-	 * the default Java encoding can be changed via system variables or startup conditions.
+	 * The {@link String#getBytes()} truncates non-ASCII chars. As a result new
+	 * String(string.getBytes()) is not the same as the original string. Moreover,
+	 * the default Java encoding can be changed via system variables or startup
+	 * conditions.
 	 */
 	static public byte[] getBytes(String string) {
 		if (string == null)
@@ -125,11 +125,11 @@ public class StorageUtils {
 	}
 
 	/**
-	 * The new String(byte[]) method uses default system encoding which
-	 * might not properly process non-ASCII characters. 
+	 * The new String(byte[]) method uses default system encoding which might not
+	 * properly process non-ASCII characters.
 	 * 
-	 * Pairing {@link #getBytes(String)} and {@link #getString(byte[])} methods allows round trip 
-	 * of non-ASCII characters. 
+	 * Pairing {@link #getBytes(String)} and {@link #getString(byte[])} methods
+	 * allows round trip of non-ASCII characters.
 	 */
 	static public String getString(byte[] bytes) {
 		if (bytes == null)
