@@ -63,8 +63,8 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	private String location;
 
 	/*
-	 * Bundles must be discarded if a storage hook throws an
-	 * IllegalStateException during validation.
+	 * Bundles must be discarded if a storage hook throws an IllegalStateException
+	 * during validation.
 	 */
 	@Test
 	public void testBundleDiscardedWhenClasspathStorageHookInvalidates() throws Exception {
@@ -90,8 +90,8 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	}
 
 	/*
-	 * A storage hook with the wrong factory class should cause bundle
-	 * installation to fail.
+	 * A storage hook with the wrong factory class should cause bundle installation
+	 * to fail.
 	 */
 	@Test
 	public void testWrongStorageHookFactoryClassOnBundleInstall() throws Exception {
@@ -107,8 +107,8 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	}
 
 	/*
-	 * A storage hook with the wrong factory class should cause bundle update
-	 * to fail.
+	 * A storage hook with the wrong factory class should cause bundle update to
+	 * fail.
 	 */
 	@Test
 	public void testWrongStorageHookFactoryClassOnBundleUpdate() throws Exception {
@@ -125,8 +125,8 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	}
 
 	/*
-	 * A storage hook with the wrong factory class should cause a framework
-	 * restart with persisted bundles to fail.
+	 * A storage hook with the wrong factory class should cause a framework restart
+	 * with persisted bundles to fail.
 	 */
 	@Test
 	public void testWrongStorageHookFactoryClassOnFrameworkRestart() throws Exception {
@@ -149,7 +149,8 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		setFactoryHookFailLoad(true);
 		restartFramework();
 		assertBundleDiscarded();
-		// install a bundle without reference to test that the staging area is created correctly after clean
+		// install a bundle without reference to test that the staging area is created
+		// correctly after clean
 		File bundlesBase = new File(OSGiTestsActivator.getContext().getDataFile(testName.getMethodName()), "bundles");
 		bundlesBase.mkdirs();
 		framework.getBundleContext().installBundle(
@@ -249,7 +250,8 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		b.uninstall();
 		installBundle();
 		b = framework.getBundleContext().getBundle(location);
-		BundleCapability bundleCap = b.adapt(BundleRevision.class).getDeclaredCapabilities(BundleNamespace.BUNDLE_NAMESPACE).iterator().next();
+		BundleCapability bundleCap = b.adapt(BundleRevision.class)
+				.getDeclaredCapabilities(BundleNamespace.BUNDLE_NAMESPACE).iterator().next();
 		assertEquals("Wrong attribute value", "testAttribute", bundleCap.getAttributes().get("matching.attribute"));
 		assertEquals("Wrong attribute value", "testDirective", bundleCap.getDirectives().get("matching.directive"));
 	}
@@ -260,17 +262,21 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		initAndStartFramework();
 		Class<?> frameworkUtilClass = classLoader.loadClass("org.osgi.framework.FrameworkUtil");
 		Bundle b = (Bundle) frameworkUtilClass.getMethod("getBundle", Class.class).invoke(null, String.class);
-		assertEquals("Wrong bundle found.", framework.getBundleContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION), b);
-		PackageAdmin packageAdmin = framework.getBundleContext().getService(framework.getBundleContext().getServiceReference(PackageAdmin.class));
+		assertEquals("Wrong bundle found.", framework.getBundleContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION),
+				b);
+		PackageAdmin packageAdmin = framework.getBundleContext()
+				.getService(framework.getBundleContext().getServiceReference(PackageAdmin.class));
 		b = packageAdmin.getBundle(String.class);
-		assertEquals("Wrong bundle found.", framework.getBundleContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION), b);
+		assertEquals("Wrong bundle found.", framework.getBundleContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION),
+				b);
 	}
 
 	@Test
 	public void testHandleContent() throws Exception {
 		initAndStartFramework();
 
-		// install with an empty stream, the hook will replace it will content to a real bundle
+		// install with an empty stream, the hook will replace it will content to a real
+		// bundle
 		setFactoryClassHandleContent(true);
 		Bundle b = framework.getBundleContext().installBundle("testBundle", new ByteArrayInputStream(new byte[0]));
 		assertEquals("Wrong symbolicName", "testHandleContentConnection", b.getSymbolicName());
@@ -281,17 +287,20 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		assertEquals("Wrong symbolicName", "testHandleContentConnection", b.getSymbolicName());
 		b.uninstall();
 
-		// tell the hook to no longer handle content, the default behavior of the framework will be used
+		// tell the hook to no longer handle content, the default behavior of the
+		// framework will be used
 		setFactoryClassHandleContent(false);
 		b = installBundle();
 		assertEquals("Wrong symbolicName", "test1", b.getSymbolicName());
 
-		// tell the hook to handle content again, update will update to the content supplied from the hook
+		// tell the hook to handle content again, update will update to the content
+		// supplied from the hook
 		setFactoryClassHandleContent(true);
 		b.update(new ByteArrayInputStream(new byte[0]));
 		assertEquals("Wrong symbolicName", "testHandleContentConnection", b.getSymbolicName());
 
-		// tell the hook to no longer handle content, update will go back to using content derived from the original location
+		// tell the hook to no longer handle content, update will go back to using
+		// content derived from the original location
 		setFactoryClassHandleContent(false);
 		b.update();
 		assertEquals("Wrong symbolicName", "test1", b.getSymbolicName());
@@ -319,7 +328,8 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		assertNotNull("Expected to have a bundle after install.", b);
 		stop(framework);
 
-		// create new framework to make sure null storage hook works from persistence also.
+		// create new framework to make sure null storage hook works from persistence
+		// also.
 		framework = createFramework(configuration);
 		framework.init();
 
@@ -364,21 +374,25 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 
 	private void assertCreateStorageHookCalled() throws Exception {
 		Class<?> clazz = classLoader.loadClass(HOOK_CONFIGURATOR_CLASS);
-		assertTrue("Storage hook factory createStorageHook not called by framework", clazz.getField(HOOK_CONFIGURATOR_FIELD_CREATE_STORAGE_HOOK_CALLED).getBoolean(null));
+		assertTrue("Storage hook factory createStorageHook not called by framework",
+				clazz.getField(HOOK_CONFIGURATOR_FIELD_CREATE_STORAGE_HOOK_CALLED).getBoolean(null));
 	}
 
 	private void assertThrowable(Throwable t) {
-		assertTrue("Unexpected exception", t != null && (t instanceof IllegalStateException) && t.getMessage().startsWith("The factory class "));
+		assertTrue("Unexpected exception",
+				t != null && (t instanceof IllegalStateException) && t.getMessage().startsWith("The factory class "));
 	}
 
 	private void assertStorageHookValidateCalled() throws Exception {
 		Class<?> clazz = classLoader.loadClass(HOOK_CONFIGURATOR_CLASS);
-		assertTrue("Storage hook validate not called by framework", clazz.getField(HOOK_CONFIGURATOR_FIELD_VALIDATE_CALLED).getBoolean(null));
+		assertTrue("Storage hook validate not called by framework",
+				clazz.getField(HOOK_CONFIGURATOR_FIELD_VALIDATE_CALLED).getBoolean(null));
 	}
 
 	private void assertStorageHookDeletingGenerationCalled() throws Exception {
 		Class<?> clazz = classLoader.loadClass(HOOK_CONFIGURATOR_CLASS);
-		assertTrue("Storage hook deletingGeneration not called by framework", clazz.getField(HOOK_CONFIGURATOR_FIELD_DELETING_CALLED).getBoolean(null));
+		assertTrue("Storage hook deletingGeneration not called by framework",
+				clazz.getField(HOOK_CONFIGURATOR_FIELD_DELETING_CALLED).getBoolean(null));
 	}
 
 	private void initAndStartFramework() throws Exception {

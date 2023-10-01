@@ -40,7 +40,7 @@ import org.osgi.framework.ServiceRegistration;
 
 public class BaseSecurityTest extends TestCase {
 
-	private static char[] PASSWORD_DEFAULT = {'c', 'h', 'a', 'n', 'g', 'e', 'i', 't'};
+	private static char[] PASSWORD_DEFAULT = { 'c', 'h', 'a', 'n', 'g', 'e', 'i', 't' };
 	private static String TYPE_DEFAULT = "JKS";
 
 	protected static final String BUNDLE_SECURITY_TESTS = "org.eclipse.osgi.tests"; //$NON-NLS-1$
@@ -85,7 +85,8 @@ public class BaseSecurityTest extends TestCase {
 
 		copy(eclipseURL.openStream(), tempEngine);
 
-		KeyStoreTrustEngine dummyTE = new KeyStoreTrustEngine(tempEngine.getAbsolutePath(), "JKS", "changeit".toCharArray(), "temp.jks", null);
+		KeyStoreTrustEngine dummyTE = new KeyStoreTrustEngine(tempEngine.getAbsolutePath(), "JKS",
+				"changeit".toCharArray(), "temp.jks", null);
 		Hashtable properties = new Hashtable(7);
 		properties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
 
@@ -98,7 +99,7 @@ public class BaseSecurityTest extends TestCase {
 	}
 
 	public static void copy(InputStream in, File dst) throws IOException {
-		//		InputStream in = new FileInputStream(src);
+		// InputStream in = new FileInputStream(src);
 		OutputStream out = new FileOutputStream(dst);
 
 		byte[] buf = new byte[1024];
@@ -111,7 +112,8 @@ public class BaseSecurityTest extends TestCase {
 	}
 
 	protected SignedContentFactory getSignedContentFactory() {
-		ServiceReference ref = OSGiTestsActivator.getContext().getServiceReference(SignedContentFactory.class.getName());
+		ServiceReference ref = OSGiTestsActivator.getContext()
+				.getServiceReference(SignedContentFactory.class.getName());
 		assertNotNull("No SignedContentFactory service", ref);
 		SignedContentFactory factory = (SignedContentFactory) OSGiTestsActivator.getContext().getService(ref);
 		OSGiTestsActivator.getContext().ungetService(ref);
@@ -169,7 +171,7 @@ public class BaseSecurityTest extends TestCase {
 
 			copy(eclipseURL.openStream(), tempFile);
 
-			suite.getSetup().setSystemProperty("osgi.framework.keystore", tempFile.toURL().toExternalForm()); //$NON-NLS-1$//$NON-NLS-2$
+			suite.getSetup().setSystemProperty("osgi.framework.keystore", tempFile.toURL().toExternalForm()); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

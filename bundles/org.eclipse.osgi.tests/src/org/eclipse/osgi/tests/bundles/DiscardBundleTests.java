@@ -122,8 +122,7 @@ public class DiscardBundleTests extends AbstractBundleTests {
 			// Install non extension bundles.
 			// If a discarded bundle causes on of these bundles to refresh then
 			// it should not be allowed to resolve.
-			File discard = createBundle(root, "discard",
-					Collections.singletonMap("Export-Package", "discard"));
+			File discard = createBundle(root, "discard", Collections.singletonMap("Export-Package", "discard"));
 			String discardLocation = REFERENCE_PROTOCOL + discard.toURI();
 
 			// Optionally import the package from a discarded bundle
@@ -148,8 +147,7 @@ public class DiscardBundleTests extends AbstractBundleTests {
 			extensionHeaders.remove(Constants.EXPORT_PACKAGE);
 			extensionHeaders.put(Constants.BUNDLE_SYMBOLICNAME, "importDiscardExtension");
 			extensionHeaders.put(Constants.IMPORT_PACKAGE, "discard.extesion; resolution:=optional");
-			File importDiscardExtension = createBundle(root, "importDiscardExtension",
-					extensionHeaders);
+			File importDiscardExtension = createBundle(root, "importDiscardExtension", extensionHeaders);
 			String importDiscardExtensionLocation = REFERENCE_PROTOCOL + importDiscardExtension.toURI();
 
 			equinox.getBundleContext().installBundle(discardLocation).start();

@@ -21,7 +21,8 @@ public class Activator implements BundleActivator {
 
 	public void start(BundleContext context) throws Exception {
 		try {
-			AbstractBundleTests.simpleResults.addEvent(Class.forName("xfriends.test1.onlyforfriends.TestFriends").getName()); //$NON-NLS-1$
+			AbstractBundleTests.simpleResults
+					.addEvent(Class.forName("xfriends.test1.onlyforfriends.TestFriends").getName()); //$NON-NLS-1$
 		} catch (Throwable t) {
 			AbstractBundleTests.simpleResults.addEvent(t);
 		}

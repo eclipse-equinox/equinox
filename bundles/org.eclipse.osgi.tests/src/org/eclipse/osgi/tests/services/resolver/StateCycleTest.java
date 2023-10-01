@@ -168,7 +168,8 @@ public class StateCycleTest extends AbstractStateTest {
 
 	@Test
 	public void test185285() throws BundleException {
-		// if two versions of the same bundle export and import two different packages at the same version
+		// if two versions of the same bundle export and import two different packages
+		// at the same version
 		// then we should resolve both sets of imports to the first bundle installed.
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -178,7 +179,8 @@ public class StateCycleTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "foo; version=\"1.0.0\", bar; version=\"1.0.0\"");
 		manifest.put(Constants.IMPORT_PACKAGE, "foo, bar");
-		BundleDescription a_100 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription a_100 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -186,7 +188,8 @@ public class StateCycleTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.1");
 		manifest.put(Constants.EXPORT_PACKAGE, "foo; version=\"1.0.0\", bar; version=\"1.0.0\"");
 		manifest.put(Constants.IMPORT_PACKAGE, "foo, bar");
-		BundleDescription a_101 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription a_101 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		state.addBundle(a_100);
 		state.addBundle(a_101);

@@ -24,8 +24,9 @@ public class TextProcessorSessionTest extends ConfigurationSessionTestSuite {
 
 	/**
 	 * Create a session test for the given class.
+	 * 
 	 * @param pluginId tests plugin id
-	 * @param clazz the test class to run
+	 * @param clazz    the test class to run
 	 * @param language the language to run the tests under (the -nl parameter value)
 	 */
 	public TextProcessorSessionTest(String pluginId, Class clazz, String language) {
@@ -34,7 +35,9 @@ public class TextProcessorSessionTest extends ConfigurationSessionTestSuite {
 		addRequiredOSGiTestsBundles(this);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.core.tests.session.SessionTestSuite#newSetup()
 	 */
 	protected Setup newSetup() throws SetupException {

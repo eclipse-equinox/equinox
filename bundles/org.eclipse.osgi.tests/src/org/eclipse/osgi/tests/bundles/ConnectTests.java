@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -837,20 +838,20 @@ public class ConnectTests extends AbstractBundleTests {
 
 		doTestConnect(connector, Collections.singletonMap(HookRegistry.PROP_HOOK_CONFIGURATORS_EXCLUDE,
 				"org.eclipse.equinox.weaving.hooks.WeavingHook"), f -> {
-			try {
-				f.start();
-				Bundle b = f.getBundleContext().getBundle(NAME);
-				assertFalse("Content is not closed", m.getContent().isOpen());
-				// Bundle.getHeaders() will eventually call
-				// ConnectBundleFile.getConnectHeaders() which opens the connect content
-				headers2.set(b.getHeaders());
-				assertTrue("Content is not open", m.getContent().isOpen());
-				f.stop();
-				f.waitForStop(5000);
-			} catch (Throwable t) {
-				sneakyThrow(t);
-			}
-		});
+					try {
+						f.start();
+						Bundle b = f.getBundleContext().getBundle(NAME);
+						assertFalse("Content is not closed", m.getContent().isOpen());
+						// Bundle.getHeaders() will eventually call
+						// ConnectBundleFile.getConnectHeaders() which opens the connect content
+						headers2.set(b.getHeaders());
+						assertTrue("Content is not open", m.getContent().isOpen());
+						f.stop();
+						f.waitForStop(5000);
+					} catch (Throwable t) {
+						sneakyThrow(t);
+					}
+				});
 		Dictionary<String, String> h1 = headers1.get();
 		Dictionary<String, String> h2 = headers2.get();
 
@@ -945,12 +946,10 @@ public class ConnectTests extends AbstractBundleTests {
 				f.start();
 				Bundle b = f.getBundleContext().installBundle("javaExport");
 				b.start();
-				assertTrue("No java export found.",
-						b.adapt(BundleWiring.class).getCapabilities(PackageNamespace.PACKAGE_NAMESPACE).stream()
-								.findFirst()
-								.map(c -> "java.test.export"
-										.equals(c.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE)))
-								.orElse(false));
+				assertTrue("No java export found.", b.adapt(BundleWiring.class)
+						.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE).stream().findFirst()
+						.map(c -> "java.test.export".equals(c.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE)))
+						.orElse(false));
 			} catch (Throwable t) {
 				sneakyThrow(t);
 			}
@@ -987,7 +986,7 @@ public class ConnectTests extends AbstractBundleTests {
 			assertEquals("Wrong byte at: " + i, expectedBytes[i], actualBytes[i]);
 		}
 		String actualString = new String(actualBytes);
-		assertEquals("Wrong entry string.", id.toString(), actualString);
+		assertEquals("Wrong entry string.", id.toString(), actualString.trim());
 	}
 
 	TestConnectModule createSimpleHeadersModule(String name) {

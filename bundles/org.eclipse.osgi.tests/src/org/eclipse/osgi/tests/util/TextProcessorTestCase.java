@@ -39,11 +39,16 @@ public abstract class TextProcessorTestCase extends TestCase {
 	// paths
 	protected static String PATH_1 = "d:\\test\\" + HEBREW_STRING_1 + "\\segment";
 	protected static String PATH_2 = "\\test\\" + HEBREW_STRING_1 + "\\segment";
-	protected static String PATH_3 = "d:\\" + HEBREW_STRING_2 + " abcdef-" + HEBREW_STRING_3 + "\\xyz\\abcdef\\" + HEBREW_STRING_4;
-	protected static String PATH_4 = "\\" + HEBREW_STRING_2 + " abcdef-" + HEBREW_STRING_3 + "\\xyz\\abcdef\\" + HEBREW_STRING_4;
-	protected static String PATH_5 = "d:\\" + HEBREW_STRING_2 + " abcdef-" + HEBREW_STRING_3 + "\\xyz\\abcdef\\" + HEBREW_STRING_4 + "\\" + HEBREW_STRING_5 + ".java";
-	protected static String PATH_6 = "d:\\" + HEBREW_STRING_2 + " abcdef-" + HEBREW_STRING_3 + "\\xyz\\abcdef\\" + HEBREW_STRING_4 + "\\" + HEBREW_STRING_5 + "." + HEBREW_STRING_6;
-	protected static String PATH_7 = "d:\\" + HEBREW_STRING_2 + " abcdef-" + HEBREW_STRING_3 + "\\xyz\\abcdef\\" + HEBREW_STRING_4 + "\\Test.java";
+	protected static String PATH_3 = "d:\\" + HEBREW_STRING_2 + " abcdef-" + HEBREW_STRING_3 + "\\xyz\\abcdef\\"
+			+ HEBREW_STRING_4;
+	protected static String PATH_4 = "\\" + HEBREW_STRING_2 + " abcdef-" + HEBREW_STRING_3 + "\\xyz\\abcdef\\"
+			+ HEBREW_STRING_4;
+	protected static String PATH_5 = "d:\\" + HEBREW_STRING_2 + " abcdef-" + HEBREW_STRING_3 + "\\xyz\\abcdef\\"
+			+ HEBREW_STRING_4 + "\\" + HEBREW_STRING_5 + ".java";
+	protected static String PATH_6 = "d:\\" + HEBREW_STRING_2 + " abcdef-" + HEBREW_STRING_3 + "\\xyz\\abcdef\\"
+			+ HEBREW_STRING_4 + "\\" + HEBREW_STRING_5 + "." + HEBREW_STRING_6;
+	protected static String PATH_7 = "d:\\" + HEBREW_STRING_2 + " abcdef-" + HEBREW_STRING_3 + "\\xyz\\abcdef\\"
+			+ HEBREW_STRING_4 + "\\Test.java";
 	protected static String PATH_8 = "\\test\\jkl" + HEBREW_STRING_1 + "\\segment";
 	protected static String PATH_9 = "\\test\\" + HEBREW_STRING_1 + "jkl\\segment";
 	protected static String PATH_10 = "d:\\t\\" + HEBREW_STRING_7 + "\\segment";
@@ -61,13 +66,17 @@ public abstract class TextProcessorTestCase extends TestCase {
 	protected static String STRING_8 = "==>";
 	protected static String STRING_9 = "d:\\myFolder\\" + HEBREW_STRING_5 + "\\" + HEBREW_STRING_6 + ".java";
 	protected static String STRING_10 = "d:\\myFolder\\" + HEBREW_STRING_2 + "\\123/" + HEBREW_STRING_3 + ".java";
-	protected static String STRING_11 = "d:\\myFolder\\" + HEBREW_STRING_2 + "\\123/" + HEBREW_STRING_3 + "." + HEBREW_STRING_5;
-	protected static String STRING_12 = "d:\\myFolder\\" + HEBREW_STRING_2 + "\\123" + HEBREW_STRING_3 + "." + HEBREW_STRING_6;
+	protected static String STRING_11 = "d:\\myFolder\\" + HEBREW_STRING_2 + "\\123/" + HEBREW_STRING_3 + "."
+			+ HEBREW_STRING_5;
+	protected static String STRING_12 = "d:\\myFolder\\" + HEBREW_STRING_2 + "\\123" + HEBREW_STRING_3 + "."
+			+ HEBREW_STRING_6;
 	protected static String STRING_13 = "d:\\myFolder\\" + HEBREW_STRING_2 + "\\123/myfile." + HEBREW_STRING_6;
 	protected static String STRING_14 = "d:\\myFolder\\" + HEBREW_STRING_2 + "\\123myfile." + HEBREW_STRING_6;
-	protected static String STRING_15= "d:\\myFolder\\" + HEBREW_STRING_2 + "12-=\\<>?34" + HEBREW_STRING_6 + ".java";
-	protected static String STRING_16 = HEBREW_STRING_2 + "/" + HEBREW_STRING_6 + "/" + HEBREW_STRING_4 + "." + HEBREW_STRING_5;
-	protected static String STRING_17 = HEBREW_STRING_7 + "/" + HEBREW_STRING_8 + "/" + HEBREW_STRING_9 + "/" + HEBREW_STRING_10 + "/" +HEBREW_STRING_11 + "/" + HEBREW_STRING_12 + "/" + HEBREW_STRING_13;
+	protected static String STRING_15 = "d:\\myFolder\\" + HEBREW_STRING_2 + "12-=\\<>?34" + HEBREW_STRING_6 + ".java";
+	protected static String STRING_16 = HEBREW_STRING_2 + "/" + HEBREW_STRING_6 + "/" + HEBREW_STRING_4 + "."
+			+ HEBREW_STRING_5;
+	protected static String STRING_17 = HEBREW_STRING_7 + "/" + HEBREW_STRING_8 + "/" + HEBREW_STRING_9 + "/"
+			+ HEBREW_STRING_10 + "/" + HEBREW_STRING_11 + "/" + HEBREW_STRING_12 + "/" + HEBREW_STRING_13;
 	protected static String STRING_18 = "_" + HEBREW_STRING_2 + " mixed text starts and ends with neutral.";
 	protected static String STRING_19 = "english and " + HEBREW_STRING_2 + " text starts with LTR ends with neutral _";
 
@@ -78,16 +87,14 @@ public abstract class TextProcessorTestCase extends TestCase {
 
 	protected static String EMPTY_STRING = "";
 
-	protected static String[] TEST_DEFAULT_PATHS = { PATH_1, PATH_2, PATH_3,
-			PATH_4, PATH_5, PATH_6, PATH_7, PATH_8, PATH_9 };
+	protected static String[] TEST_DEFAULT_PATHS = { PATH_1, PATH_2, PATH_3, PATH_4, PATH_5, PATH_6, PATH_7, PATH_8,
+			PATH_9 };
 
-	protected static String[] TEST_ADDITIONAL_STRINGS = { STRING_1, STRING_2,
-			STRING_3, STRING_4, STRING_5, STRING_6, STRING_7, STRING_8,
-			STRING_9, STRING_10, STRING_11, STRING_12, STRING_13, STRING_14,
-			STRING_15, STRING_16, STRING_17, STRING_18, STRING_19 };
+	protected static String[] TEST_ADDITIONAL_STRINGS = { STRING_1, STRING_2, STRING_3, STRING_4, STRING_5, STRING_6,
+			STRING_7, STRING_8, STRING_9, STRING_10, STRING_11, STRING_12, STRING_13, STRING_14, STRING_15, STRING_16,
+			STRING_17, STRING_18, STRING_19 };
 
-	protected static String[] TEST_STAR_PATHS = { OTHER_STRING_1,
-			OTHER_STRING_2 };
+	protected static String[] TEST_STAR_PATHS = { OTHER_STRING_1, OTHER_STRING_2 };
 
 	protected static String[] TEST_EQUALS_PATHS = { OTHER_STRING_3 };
 
@@ -98,7 +105,7 @@ public abstract class TextProcessorTestCase extends TestCase {
 		super(name);
 	}
 
-	protected void verifyResult(String testName, String expected, String result){
+	protected void verifyResult(String testName, String expected, String result) {
 		assertTrue(testName + " result string is not the same as string passed in.", result.equals(expected));
 	}
 

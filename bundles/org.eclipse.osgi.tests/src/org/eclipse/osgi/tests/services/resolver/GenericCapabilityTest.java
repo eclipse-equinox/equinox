@@ -49,7 +49,8 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		capabililty.append(" aSet:set=\"a,b,c,d\";");
 		capabililty.append(" aString:string=\"someString\"");
 		manifest.put(GENERIC_CAPABILITY, capabililty.toString());
-		BundleDescription genCap = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription genCap = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -59,9 +60,11 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		required.append("genericCapability:osgi.identity; selection-filter=\"(version=1.0)\",");
 		required.append("foo; selection-filter=\"(version>=1.3.0)\",");
 		required.append("bar:bartype; selection-filter=\"(attr1=value1)\",");
-		required.append("test.types:testtype; selection-filter=\"(&(aVersion>=2.0.0)(aLong>=5555)(aDouble>=1.00)(aUri=file:/test)(aSet=c)(aString=someString))\"");
+		required.append(
+				"test.types:testtype; selection-filter=\"(&(aVersion>=2.0.0)(aLong>=5555)(aDouble>=1.00)(aUri=file:/test)(aSet=c)(aString=someString))\"");
 		manifest.put(GENERIC_REQUIRE, required.toString());
-		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		state.addBundle(genCap);
 		state.addBundle(genReq);
@@ -100,7 +103,8 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		capabililty.append(" aSet:set=\"a,b,c,d\";");
 		capabililty.append(" aString:string=\"someString\"");
 		manifest.put(GENERIC_CAPABILITY, capabililty.toString());
-		BundleDescription genCap = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription genCap = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -110,9 +114,11 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		required.append("genericCapability:osgi.identity; selection-filter=\"(version>=1.0)\",");
 		required.append("foo; selection-filter=\"(version>=1.3.0)\",");
 		required.append("bar:bartype; selection-filter=\"(attr1=value1)\",");
-		required.append("test.types:testtype; selection-filter=\"(&(aVersion>=2.0.0)(aLong>=5555)(aDouble>=1.00)(aUri=file:/test)(aSet=c)(aString=someString))\"");
+		required.append(
+				"test.types:testtype; selection-filter=\"(&(aVersion>=2.0.0)(aLong>=5555)(aDouble>=1.00)(aUri=file:/test)(aSet=c)(aString=someString))\"");
 		manifest.put(GENERIC_REQUIRE, required.toString());
-		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		state.addBundle(genCap);
 		state.addBundle(genReq);
@@ -146,10 +152,11 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		capabililty.append(" aSet:set=\"a,b,c,d\";");
 		capabililty.append(" aString:string=\"someString\"");
 		manifest.put(GENERIC_CAPABILITY, capabililty.toString());
-		BundleDescription genCap2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), genCap.getBundleId());
+		BundleDescription genCap2 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), genCap.getBundleId());
 
 		state.updateBundle(genCap2);
-		state.resolve(new BundleDescription[] {genCap2});
+		state.resolve(new BundleDescription[] { genCap2 });
 
 		assertTrue("3.0", genCap2.isResolved());
 		assertTrue("3.1", genReq.isResolved());
@@ -185,7 +192,8 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		capabililty.append(" aSet:set=\"a,b,c,d\";");
 		capabililty.append(" aString:string=\"someString\"");
 		manifest.put(GENERIC_CAPABILITY, capabililty.toString());
-		BundleDescription genCap = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription genCap = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -195,9 +203,11 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		required.append("genericCapability:osgi.identity; selection-filter=\"(version>=1.0)\",");
 		required.append("foo; selection-filter=\"(version>=1.3.0)\",");
 		required.append("bar:bartype; selection-filter=\"(attr1=value1)\",");
-		required.append("test.types:testtype; selection-filter=\"(&(aVersion>=2.0.0)(aLong>=5555)(aDouble>=1.00)(aUri=file:/test)(aSet=c)(aString=someString))\"");
+		required.append(
+				"test.types:testtype; selection-filter=\"(&(aVersion>=2.0.0)(aLong>=5555)(aDouble>=1.00)(aUri=file:/test)(aSet=c)(aString=someString))\"");
 		manifest.put(GENERIC_REQUIRE, required.toString());
-		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		state.addBundle(genCap);
 		state.addBundle(genReq);
@@ -216,7 +226,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		assertTrue("2.4", genSpecs[3].isResolved());
 		assertEquals("2.4.1", genSpecs[3].getSupplier(), genCap.getGenericCapabilities()[3]);
 
-		state.resolve(new BundleDescription[] {genCap});
+		state.resolve(new BundleDescription[] { genCap });
 
 		assertTrue("3.0", genCap.isResolved());
 		assertTrue("3.1", genReq.isResolved());
@@ -253,7 +263,8 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		capabililty.append(" aSet:set=\"a,b,c,d\";");
 		capabililty.append(" aString:string=\"someString\"");
 		manifest.put(GENERIC_CAPABILITY, capabililty.toString());
-		BundleDescription genCap = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription genCap = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapability.frag1");
@@ -262,7 +273,8 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		capabililty = new StringBuilder();
 		capabililty.append("fragmentStuff");
 		manifest.put(GENERIC_CAPABILITY, capabililty.toString());
-		BundleDescription genCapFrag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription genCapFrag = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -272,11 +284,14 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		required.append("genericCapability:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.bundle))\",");
 		required.append("foo; selection-filter=\"(version>=1.3.0)\",");
 		required.append("bar:bartype; selection-filter=\"(attr1=value1)\",");
-		required.append("test.types:testtype; selection-filter=\"(&(aVersion>=2.0.0)(aLong>=5555)(aDouble>=1.00)(aUri=file:/test)(aSet=c)(aString=someString))\",");
+		required.append(
+				"test.types:testtype; selection-filter=\"(&(aVersion>=2.0.0)(aLong>=5555)(aDouble>=1.00)(aUri=file:/test)(aSet=c)(aString=someString))\",");
 		required.append("fragmentStuff,");
-		required.append("genericCapability.frag1:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.fragment))\"");
+		required.append(
+				"genericCapability.frag1:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.fragment))\"");
 		manifest.put(GENERIC_REQUIRE, required.toString());
-		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		state.addBundle(genCap);
 		state.addBundle(genCapFrag);
@@ -317,13 +332,15 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.FRAGMENT_HOST, "org.eclipse.equinox.generic.host;bundle-version=\"1.0.0\"");
 		manifest.put("Eclipse-GenericCapability", "frag.a");
-		BundleDescription genFragA = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription genFragA = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "org.eclipse.equinox.generic.host");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		BundleDescription genHost = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription genHost = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -331,12 +348,16 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.FRAGMENT_HOST, "org.eclipse.equinox.generic.host;bundle-version=\"1.0.0\"");
 		StringBuilder required = new StringBuilder();
-		required.append("org.eclipse.equinox.generic.host:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.bundle))\",");
+		required.append(
+				"org.eclipse.equinox.generic.host:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.bundle))\",");
 		required.append("frag.a,");
-		required.append("org.eclipse.equinox.generic.frag.a:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.fragment))\",");
-		required.append("org.eclipse.equinox.generic.frag.b:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.fragment))\"");
+		required.append(
+				"org.eclipse.equinox.generic.frag.a:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.fragment))\",");
+		required.append(
+				"org.eclipse.equinox.generic.frag.b:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.fragment))\"");
 		manifest.put(GENERIC_REQUIRE, required.toString());
-		BundleDescription genFragB = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription genFragB = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		state.addBundle(genHost);
 		state.addBundle(genFragA);
@@ -381,7 +402,8 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.EXPORT_SERVICE, "org.osgi.service.log.LogService; version=1.2");
 		manifest.put("TJW-Export", "my.great.stuff; aLong:long=5150; aDouble:double=3.14; aVersion:version=1.2.0");
-		BundleDescription genCap = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription genCap = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -389,8 +411,10 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.IMPORT_SERVICE, "org.osgi.service.log.LogService; selection-filter=(version>=1.0.0)");
 		manifest.put("TJW-Import", "my.great.stuff; selection-filter=(&(aLong<=10000)(aLong>=5000))");
-		manifest.put(GENERIC_REQUIRE, "genericCapability:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.bundle))\"");
-		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest.put(GENERIC_REQUIRE,
+				"genericCapability:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.bundle))\"");
+		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		state.addBundle(genCap);
 		state.addBundle(genReq);
@@ -430,7 +454,8 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		capabililty.append("test.real.multiple:thisismultiple; version=1.0,");
 		capabililty.append("test.real.multiple:thisismultiple; version=2.0");
 		manifest.put(GENERIC_CAPABILITY, capabililty.toString());
-		BundleDescription genCap = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription genCap = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -440,12 +465,14 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		required.append("genericCapability:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.bundle))\",");
 		required.append("foo; selection-filter=\"(version>=1.3.0)\",");
 		required.append("bar:bartype; selection-filter=\"(attr1=value1)\",");
-		required.append("test.types:testtype; selection-filter=\"(&(aVersion>=2.0.0)(aLong>=5555)(aDouble>=1.00)(aUri=file:/test)(aSet=c)(aString=someString))\",");
+		required.append(
+				"test.types:testtype; selection-filter=\"(&(aVersion>=2.0.0)(aLong>=5555)(aDouble>=1.00)(aUri=file:/test)(aSet=c)(aString=someString))\",");
 		required.append("test.optional:thisisoptional; optional=true,");
 		required.append("test.real.optional:thisisoptional; optional=true,");
 		required.append("test.real.multiple:thisismultiple; multiple=true");
 		manifest.put(GENERIC_REQUIRE, required.toString());
-		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		state.addBundle(genCap);
 		state.addBundle(genReq);
@@ -496,7 +523,8 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		StringBuilder required = new StringBuilder();
 		required.append("foo:cycle; selection-filter=\"(version>=1.3.0)\"");
 		manifest.put(GENERIC_REQUIRE, required.toString());
-		BundleDescription genCap = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription genCap = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapability.frag1");
@@ -505,7 +533,8 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		capabililty = new StringBuilder();
 		capabililty.append("fragmentStuff");
 		manifest.put(GENERIC_CAPABILITY, capabililty.toString());
-		BundleDescription genCapFrag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription genCapFrag = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -517,10 +546,12 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		required = new StringBuilder();
 		required.append("foo; selection-filter=\"(version>=1.3.0)\",");
 		required.append("bar:bartype; selection-filter=\"(attr1=value1)\",");
-		required.append("test.types:testtype; selection-filter=\"(&(aVersion>=2.0.0)(aLong>=5555)(aDouble>=1.00)(aUri=file:/test)(aSet=c)(aString=someString))\",");
+		required.append(
+				"test.types:testtype; selection-filter=\"(&(aVersion>=2.0.0)(aLong>=5555)(aDouble>=1.00)(aUri=file:/test)(aSet=c)(aString=someString))\",");
 		required.append("fragmentStuff");
 		manifest.put(GENERIC_REQUIRE, required.toString());
-		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		state.addBundle(genCap);
 		state.addBundle(genCapFrag);

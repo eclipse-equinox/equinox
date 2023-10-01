@@ -42,7 +42,8 @@ public class TestCondition implements Condition {
 
 	static public Condition getCondition(final Bundle bundle, ConditionInfo info) {
 		if (!TestCondition.class.getName().equals(info.getType()))
-			throw new IllegalArgumentException("ConditionInfo must be of type \"" + TestCondition.class.getName() + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new IllegalArgumentException(
+					"ConditionInfo must be of type \"" + TestCondition.class.getName() + "\""); //$NON-NLS-1$ //$NON-NLS-2$
 		String[] args = info.getArgs();
 		if (args.length != 4)
 			throw new IllegalArgumentException("Illegal number of args: " + args.length); //$NON-NLS-1$
@@ -109,7 +110,9 @@ public class TestCondition implements Condition {
 		if (!(o instanceof TestCondition))
 			return false;
 		TestCondition otherCondition = (TestCondition) o;
-		return id.equals(otherCondition.id) && postponed == otherCondition.postponed && satisfied == otherCondition.satisfied && mutable == otherCondition.mutable && bundle == otherCondition.bundle;
+		return id.equals(otherCondition.id) && postponed == otherCondition.postponed
+				&& satisfied == otherCondition.satisfied && mutable == otherCondition.mutable
+				&& bundle == otherCondition.bundle;
 	}
 
 	public void setMutable(boolean mutable) {

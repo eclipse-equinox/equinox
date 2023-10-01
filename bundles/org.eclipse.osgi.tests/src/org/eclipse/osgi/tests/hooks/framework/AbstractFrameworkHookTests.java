@@ -83,7 +83,8 @@ public abstract class AbstractFrameworkHookTests {
 					throw new RuntimeException(e);
 				}
 			}
-			if (name.startsWith("org.eclipse") || name.startsWith("org.osgi.framework.FrameworkUtil") || name.equals(FrameworkUtilHelper.class.getName())) {
+			if (name.startsWith("org.eclipse") || name.startsWith("org.osgi.framework.FrameworkUtil")
+					|| name.equals(FrameworkUtilHelper.class.getName())) {
 				Class<?> result = findLoadedClass(name);
 				if (result == null)
 					result = findClass(name);
@@ -116,7 +117,8 @@ public abstract class AbstractFrameworkHookTests {
 	}
 
 	protected Framework createFramework(Map<String, String> configuration) throws Exception {
-		FrameworkFactory factory = (FrameworkFactory) classLoader.loadClass(EquinoxFactory.class.getName()).newInstance();
+		FrameworkFactory factory = (FrameworkFactory) classLoader.loadClass(EquinoxFactory.class.getName())
+				.newInstance();
 		Framework framework = factory.newFramework(configuration);
 		return framework;
 	}
@@ -153,9 +155,9 @@ public abstract class AbstractFrameworkHookTests {
 		String osgiFramework = context.getProperty(EclipseStarter.PROP_FRAMEWORK);
 		URL[] urls;
 		if ("folder".equals(context.getProperty(EclipseStarter.PROP_FRAMEWORK_SHAPE)))
-			urls = new URL[] {new URL(osgiFramework), new URL(osgiFramework + "bin/")};
+			urls = new URL[] { new URL(osgiFramework), new URL(osgiFramework + "bin/") };
 		else
-			urls = new URL[] {new URL(osgiFramework)};
+			urls = new URL[] { new URL(osgiFramework) };
 		classLoader = new BasicURLClassLoader(urls, getClass().getClassLoader(), testURL);
 	}
 }

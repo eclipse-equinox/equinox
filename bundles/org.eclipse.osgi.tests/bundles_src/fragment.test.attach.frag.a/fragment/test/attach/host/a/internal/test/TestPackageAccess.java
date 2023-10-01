@@ -15,7 +15,7 @@ package fragment.test.attach.host.a.internal.test;
 
 import org.eclipse.osgi.tests.bundles.ITestRunner;
 
-public class TestPackageAccess implements ITestRunner{
+public class TestPackageAccess implements ITestRunner {
 
 	@Override
 	public Object testIt() throws Exception {

@@ -45,7 +45,8 @@ public class ActivatorOrderTest extends AbstractFrameworkHookTests {
 		File file = OSGiTestsActivator.getContext().getDataFile(testName.getMethodName());
 		HashMap<String, String> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, file.getAbsolutePath());
-		configuration.put(HookRegistry.PROP_HOOK_CONFIGURATORS, HOOK_CONFIGURATOR_CLASS1 + "," + HOOK_CONFIGURATOR_CLASS2 + "," + HOOK_CONFIGURATOR_CLASS3);
+		configuration.put(HookRegistry.PROP_HOOK_CONFIGURATORS,
+				HOOK_CONFIGURATOR_CLASS1 + "," + HOOK_CONFIGURATOR_CLASS2 + "," + HOOK_CONFIGURATOR_CLASS3);
 
 		framework = createFramework(configuration);
 	}
@@ -60,7 +61,8 @@ public class ActivatorOrderTest extends AbstractFrameworkHookTests {
 		Class<?> clazz3 = classLoader.loadClass(HOOK_CONFIGURATOR_CLASS3);
 		clazz3.getField("events").set(null, actualEvents);
 
-		List<String> expectedEvents = Arrays.asList("HOOK1 STARTED", "HOOK2 STARTED", "HOOK3 STARTED", "HOOK3 STOPPED", "HOOK2 STOPPED", "HOOK1 STOPPED");
+		List<String> expectedEvents = Arrays.asList("HOOK1 STARTED", "HOOK2 STARTED", "HOOK3 STARTED", "HOOK3 STOPPED",
+				"HOOK2 STOPPED", "HOOK1 STOPPED");
 
 		initAndStart(framework);
 		stop(framework);

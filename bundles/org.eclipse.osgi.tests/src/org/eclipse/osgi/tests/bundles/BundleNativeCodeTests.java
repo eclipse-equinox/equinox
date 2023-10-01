@@ -229,8 +229,7 @@ public class BundleNativeCodeTests extends AbstractBundleTests {
 	}
 
 	private void doTestNativeCode(File config, String libraryMatchValue, String nativeCodeName, File hostBundleFile,
-			File... fragmentBundleFiles)
-			throws Exception {
+			File... fragmentBundleFiles) throws Exception {
 		Map<String, String> fwkConfig = new HashMap<>();
 		fwkConfig.put(FRAMEWORK_STORAGE, config.getAbsolutePath());
 		fwkConfig.put(FRAMEWORK_STORAGE_CLEAN, FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);

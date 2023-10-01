@@ -67,35 +67,45 @@ public class StateUsesPerformanceTest extends BasePerformanceTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "a");
-		state.addBundle(state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), id++));
+		state.addBundle(state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				id++));
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A");
 		manifest.put(Constants.BUNDLE_VERSION, "2.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "a");
-		state.addBundle(state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), id++));
+		state.addBundle(state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				id++));
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A");
 		manifest.put(Constants.BUNDLE_VERSION, "3.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "a");
-		state.addBundle(state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), id++));
+		state.addBundle(state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				id++));
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A");
 		manifest.put(Constants.BUNDLE_VERSION, "4.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "a");
-		state.addBundle(state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), id++));
+		state.addBundle(state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				id++));
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A");
 		manifest.put(Constants.BUNDLE_VERSION, "5.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "a");
-		state.addBundle(state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), id++));
+		state.addBundle(state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				id++));
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -103,7 +113,9 @@ public class StateUsesPerformanceTest extends BasePerformanceTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "b; uses:=a");
 		manifest.put(Constants.REQUIRE_BUNDLE, "A; bundle-version=\"[1.0.0,2.0.0)\"; visibility:=reexport");
-		state.addBundle(state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), id++));
+		state.addBundle(state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				id++));
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -111,7 +123,9 @@ public class StateUsesPerformanceTest extends BasePerformanceTest {
 		manifest.put(Constants.BUNDLE_VERSION, "2.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "b; uses:=a");
 		manifest.put(Constants.REQUIRE_BUNDLE, "A; bundle-version=\"[1.0.0,2.0.0)\"; visibility:=reexport");
-		state.addBundle(state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), id++));
+		state.addBundle(state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				id++));
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -119,7 +133,9 @@ public class StateUsesPerformanceTest extends BasePerformanceTest {
 		manifest.put(Constants.BUNDLE_VERSION, "3.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "b; uses:=a");
 		manifest.put(Constants.REQUIRE_BUNDLE, "A; bundle-version=\"[1.0.0,2.0.0)\"; visibility:=reexport");
-		state.addBundle(state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), id++));
+		state.addBundle(state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				id++));
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -127,7 +143,9 @@ public class StateUsesPerformanceTest extends BasePerformanceTest {
 		manifest.put(Constants.BUNDLE_VERSION, "4.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "b; uses:=a");
 		manifest.put(Constants.REQUIRE_BUNDLE, "A; bundle-version=\"[1.0.0,2.0.0)\"; visibility:=reexport");
-		state.addBundle(state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), id++));
+		state.addBundle(state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				id++));
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -135,7 +153,9 @@ public class StateUsesPerformanceTest extends BasePerformanceTest {
 		manifest.put(Constants.BUNDLE_VERSION, "5.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "b; uses:=a");
 		manifest.put(Constants.REQUIRE_BUNDLE, "A; bundle-version=\"[1.0.0,2.0.0)\"; visibility:=reexport");
-		state.addBundle(state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), id++));
+		state.addBundle(state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				id++));
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -143,7 +163,9 @@ public class StateUsesPerformanceTest extends BasePerformanceTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "c; uses:=a");
 		manifest.put(Constants.REQUIRE_BUNDLE, "A; bundle-version=\"[2.0.0,3.0.0)\"; visibility:=reexport");
-		state.addBundle(state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), id++));
+		state.addBundle(state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				id++));
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -151,7 +173,9 @@ public class StateUsesPerformanceTest extends BasePerformanceTest {
 		manifest.put(Constants.BUNDLE_VERSION, "2.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "c; uses:=a");
 		manifest.put(Constants.REQUIRE_BUNDLE, "A; bundle-version=\"[2.0.0,3.0.0)\"; visibility:=reexport");
-		state.addBundle(state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), id++));
+		state.addBundle(state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				id++));
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -159,7 +183,9 @@ public class StateUsesPerformanceTest extends BasePerformanceTest {
 		manifest.put(Constants.BUNDLE_VERSION, "3.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "c; uses:=a");
 		manifest.put(Constants.REQUIRE_BUNDLE, "A; bundle-version=\"[2.0.0,3.0.0)\"; visibility:=reexport");
-		state.addBundle(state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), id++));
+		state.addBundle(state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				id++));
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -167,7 +193,9 @@ public class StateUsesPerformanceTest extends BasePerformanceTest {
 		manifest.put(Constants.BUNDLE_VERSION, "4.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "c; uses:=a");
 		manifest.put(Constants.REQUIRE_BUNDLE, "A; bundle-version=\"[2.0.0,3.0.0)\"; visibility:=reexport");
-		state.addBundle(state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), id++));
+		state.addBundle(state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				id++));
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -175,7 +203,9 @@ public class StateUsesPerformanceTest extends BasePerformanceTest {
 		manifest.put(Constants.BUNDLE_VERSION, "5.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "c; uses:=a");
 		manifest.put(Constants.REQUIRE_BUNDLE, "A; bundle-version=\"[2.0.0,3.0.0)\"; visibility:=reexport");
-		state.addBundle(state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), id++));
+		state.addBundle(state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				id++));
 
 		manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -183,7 +213,9 @@ public class StateUsesPerformanceTest extends BasePerformanceTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "f; uses:=b");
 		manifest.put(Constants.REQUIRE_BUNDLE, "A, B, C");
-		state.addBundle(state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), id++));
+		state.addBundle(state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				id++));
 
 	}
 }

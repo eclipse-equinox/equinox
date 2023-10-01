@@ -37,7 +37,8 @@ public class Activator implements BundleActivator {
 			try {
 				new URL(url.getProtocol(), url.getHost(), url.getFile());
 			} catch (MalformedURLException e2) {
-				// unexpected; the handler does not get involved and we have a multiplexor cached
+				// unexpected; the handler does not get involved and we have a multiplexor
+				// cached
 				throw new RuntimeException("Could not create URL from parts: " + url);
 			}
 			url.toExternalForm();

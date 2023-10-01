@@ -41,17 +41,16 @@ public class TestDynamic_004 extends AbstractStateTest {
 		bundle_2 = create_bundle_2(sof);
 		bundle_3 = create_bundle_3(sof);
 		bundle_4 = create_bundle_4(sof);
-		//***************************************************
+		// ***************************************************
 		// stage a
 		// expect to pass =true
-		//***************************************************
+		// ***************************************************
 		addBundlesToState_a(state);
-		//***************************************************
+		// ***************************************************
 		try {
 			state.resolve();
 		} catch (Throwable t) {
-			fail("unexpected exception class=" + t.getClass().getName()
-					+ " message=" + t.getMessage());
+			fail("unexpected exception class=" + t.getClass().getName() + " message=" + t.getMessage());
 			return;
 		}
 		checkBundlesResolved_a();
@@ -63,7 +62,6 @@ public class TestDynamic_004 extends AbstractStateTest {
 		assertEquals("Package [q] is wired incorrectly ", exp.getExporter(), bundle_3);
 
 	} // end of method
-
 
 	public void checkWiringState_1() {
 		ExportPackageDescription[] exports = bundle_1.getResolvedImports();
@@ -99,14 +97,12 @@ public class TestDynamic_004 extends AbstractStateTest {
 	public void checkWiringState_4() {
 	} // end method
 
-
 	public void checkWiring_a() {
 		checkWiringState_1();
 		checkWiringState_2();
 		checkWiringState_3();
 		checkWiringState_4();
 	} // end method
-
 
 	public void addBundlesToState_a(State state) {
 		boolean added = false;
@@ -120,14 +116,12 @@ public class TestDynamic_004 extends AbstractStateTest {
 		assertTrue("failed to add bundle ", added);
 	} // end method
 
-
 	public void checkBundlesResolved_a() {
 		assertTrue("unexpected bundle resolution state", bundle_1.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_2.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_3.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_4.isResolved());
 	} // end method
-
 
 	public BundleDescription create_bundle_1(StateObjectFactory sof) {
 		java.util.Dictionary dictionary_1 = new java.util.Properties();

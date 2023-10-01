@@ -49,7 +49,8 @@ public class LocationAreaSessionTest extends TestCase {
 		});
 
 		// attempt to lock same location with a session
-		ConfigurationSessionTestSuite sessionLock = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, LocationAreaSessionTest.class.getName());
+		ConfigurationSessionTestSuite sessionLock = new ConfigurationSessionTestSuite(PI_OSGI_TESTS,
+				LocationAreaSessionTest.class.getName());
 		addRequiredOSGiTestsBundles(sessionLock);
 		try {
 			sessionLock.getSetup().setSystemProperty(TEST_LOCATION_DIR, testLocationLockDir);
@@ -147,7 +148,8 @@ public class LocationAreaSessionTest extends TestCase {
 		assertNotNull("The testLocationDir is not set", testLocationDir);
 		ServiceReference[] refs = OSGiTestsActivator.getContext().getServiceReferences(Location.class.getName(),
 				"(type=osgi.configuration.area)");
-		// this is test code so we are not very careful; just assume there is at lease one service.  Do not copy and paste this code!!!
+		// this is test code so we are not very careful; just assume there is at lease
+		// one service. Do not copy and paste this code!!!
 		Location configLocation = (Location) OSGiTestsActivator.getContext().getService(refs[0]);
 		Location testLocation = null;
 		try {

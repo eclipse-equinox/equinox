@@ -43,23 +43,21 @@ public class TestRFC79_002 extends AbstractStateTest {
 		bundle_3 = create_bundle_3(sof);
 		bundle_4 = create_bundle_4(sof);
 		bundle_5 = create_bundle_5(sof);
-		//***************************************************
+		// ***************************************************
 		// stage a
 		// expect to pass =true
-		//***************************************************
+		// ***************************************************
 		addBundlesToState_a(state);
-		//***************************************************
+		// ***************************************************
 		try {
 			state.resolve();
 		} catch (Throwable t) {
-			fail("unexpected exception class=" + t.getClass().getName()
-					+ " message=" + t.getMessage());
+			fail("unexpected exception class=" + t.getClass().getName() + " message=" + t.getMessage());
 			return;
 		}
 		checkBundlesResolved_a();
 		checkWiring_a();
 	} // end of method
-
 
 	public void checkWiringState_1() {
 		ExportPackageDescription[] exports = bundle_1.getResolvedImports();
@@ -137,7 +135,6 @@ public class TestRFC79_002 extends AbstractStateTest {
 		} // end for
 	} // end method
 
-
 	public void checkWiring_a() {
 		checkWiringState_1();
 		checkWiringState_2();
@@ -145,7 +142,6 @@ public class TestRFC79_002 extends AbstractStateTest {
 		checkWiringState_4();
 		checkWiringState_5();
 	} // end method
-
 
 	public void addBundlesToState_a(State state) {
 		boolean added = false;
@@ -161,7 +157,6 @@ public class TestRFC79_002 extends AbstractStateTest {
 		assertTrue("failed to add bundle ", added);
 	} // end method
 
-
 	public void checkBundlesResolved_a() {
 		assertTrue("unexpected bundle resolution state", bundle_1.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_2.isResolved());
@@ -169,7 +164,6 @@ public class TestRFC79_002 extends AbstractStateTest {
 		assertTrue("unexpected bundle resolution state", bundle_4.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_5.isResolved());
 	} // end method
-
 
 	public BundleDescription create_bundle_1(StateObjectFactory sof) {
 		java.util.Dictionary dictionary_1 = new java.util.Properties();

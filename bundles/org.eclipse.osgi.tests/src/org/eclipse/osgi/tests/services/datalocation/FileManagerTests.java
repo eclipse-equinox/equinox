@@ -92,21 +92,21 @@ public class FileManagerTests {
 			manager1.add(fileName);
 			fail("add succedded");
 		} catch (IOException e) {
-			//good
+			// good
 		}
 
 		try {
 			manager1.lookup(fileName, true);
 			fail("lookup succedded");
 		} catch (IOException e) {
-			//good
+			// good
 		}
 
 		try {
 			manager1.createTempFile(fileName);
 			fail("create temp file succedded");
 		} catch (IOException e) {
-			//good
+			// good
 		}
 		files = testDir.list();
 		assertEquals(files.length, 0);
@@ -355,7 +355,8 @@ public class FileManagerTests {
 	@Test
 	public void testMultipleFileManagers() throws IOException {
 		// This test relies on a file lock to fail if the same process already
-		// holds a file lock. This is true on Win32 but not on Linux/Mac unless using Java 6.
+		// holds a file lock. This is true on Win32 but not on Linux/Mac unless using
+		// Java 6.
 		// So run this test for windows only.
 		String ee = System.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
 		if (!"win32".equalsIgnoreCase(System.getProperty("osgi.os")) && ee.indexOf("JavaSE-1.6") == -1)
@@ -445,7 +446,7 @@ public class FileManagerTests {
 				manager1.open(true); // wait for lock
 				fail("open with lock succedded");
 			} catch (IOException e) {
-				//good
+				// good
 			}
 
 			manager1.open(false); // don't wait, should work
@@ -453,9 +454,9 @@ public class FileManagerTests {
 				manager1.add(fileName);
 				fail("add succedded");
 			} catch (IOException e) {
-				//good
+				// good
 			}
-			//sanity check, file should not be managed
+			// sanity check, file should not be managed
 			assertNull(manager1.lookup(fileName, false));
 			manager1.close();
 			manager1 = null;
@@ -481,7 +482,7 @@ public class FileManagerTests {
 			// create version (1)
 			File tmpFile = manager1.createTempFile(fileName);
 			writeToFile(tmpFile, "File exists #1");
-			manager1.update(new String[] {fileName}, new String[] {tmpFile.getName()});
+			manager1.update(new String[] { fileName }, new String[] { tmpFile.getName() });
 			// sanity check
 			assertTrue(file1.toString(), file1.exists());
 			assertFalse(file2.toString(), file2.exists());
@@ -490,7 +491,7 @@ public class FileManagerTests {
 			// do it again, now version (2)
 			tmpFile = manager1.createTempFile(fileName);
 			writeToFile(tmpFile, "File exists #2");
-			manager1.update(new String[] {fileName}, new String[] {tmpFile.getName()});
+			manager1.update(new String[] { fileName }, new String[] { tmpFile.getName() });
 			// sanity check
 			assertTrue(file1.toString(), file1.exists());
 			assertTrue(file2.toString(), file2.exists());
@@ -499,19 +500,21 @@ public class FileManagerTests {
 			// do it again, now version (3)
 			tmpFile = manager1.createTempFile(fileName);
 			writeToFile(tmpFile, "File exists #3");
-			manager1.update(new String[] {fileName}, new String[] {tmpFile.getName()});
+			manager1.update(new String[] { fileName }, new String[] { tmpFile.getName() });
 			// sanity check
 			assertTrue(file1.toString(), file1.exists());
 			assertTrue(file2.toString(), file2.exists());
 			assertTrue(file3.toString(), file3.exists());
 
 			// This test relies on a file lock to fail if the same process already
-			// holds a file lock. This is true on Win32 but not on Linux/Mac unless using Java 6.
+			// holds a file lock. This is true on Win32 but not on Linux/Mac unless using
+			// Java 6.
 			// So run this test for windows only or Java 6 or higher.
 			String ee = System.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
 			if ("win32".equalsIgnoreCase(System.getProperty("osgi.os")) || ee.indexOf("JavaSE-1.6") != -1) {
 				// this is a Windows-only test or JavaSE-1.6 or higher test
-				// Check to see that a new manager does not delete on open/close while manager1 is open
+				// Check to see that a new manager does not delete on open/close while manager1
+				// is open
 				manager2 = new StorageManager(base, null);
 				manager2.open(true);
 				manager2.close();
@@ -564,7 +567,7 @@ public class FileManagerTests {
 			// create version (1)
 			File tmpFile = manager1.createTempFile(fileName);
 			writeToFile(tmpFile, "File exists #1");
-			manager1.update(new String[] {fileName}, new String[] {tmpFile.getName()});
+			manager1.update(new String[] { fileName }, new String[] { tmpFile.getName() });
 			// sanity check
 			assertTrue(file1.toString(), file1.exists());
 			assertFalse(file2.toString(), file2.exists());
@@ -573,7 +576,7 @@ public class FileManagerTests {
 			// do it again, now version (2)
 			tmpFile = manager1.createTempFile(fileName);
 			writeToFile(tmpFile, "File exists #2");
-			manager1.update(new String[] {fileName}, new String[] {tmpFile.getName()});
+			manager1.update(new String[] { fileName }, new String[] { tmpFile.getName() });
 			// sanity check
 			assertFalse(file1.toString(), file1.exists());
 			assertTrue(file2.toString(), file2.exists());
@@ -582,7 +585,7 @@ public class FileManagerTests {
 			// do it again, now version (3)
 			tmpFile = manager1.createTempFile(fileName);
 			writeToFile(tmpFile, "File exists #3");
-			manager1.update(new String[] {fileName}, new String[] {tmpFile.getName()});
+			manager1.update(new String[] { fileName }, new String[] { tmpFile.getName() });
 			// sanity check
 			assertFalse(file1.toString(), file1.exists());
 			assertFalse(file2.toString(), file2.exists());

@@ -135,7 +135,7 @@ public class StreamManagerTests {
 			manager1.close();
 			manager1 = null;
 
-			//now, open new manager, verify file contents are #2
+			// now, open new manager, verify file contents are #2
 			System.setProperty("osgi.useReliableFiles", "true"); // force reliable files
 			manager2 = new StorageManager(base, null);
 			manager2.open(true);
@@ -148,9 +148,9 @@ public class StreamManagerTests {
 			// need to sleep, FAT32 doesn't have too fine granularity in timestamps
 			try {
 				Thread.sleep(5000);
-			} catch (InterruptedException e) {/*ignore*/
+			} catch (InterruptedException e) {/* ignore */
 			}
-			//now, corrupt version 2 of the file
+			// now, corrupt version 2 of the file
 			RandomAccessFile raf = new RandomAccessFile(file2, "rw");
 			raf.seek(20);
 			raf.write('0'); // change 'O' to '0'
@@ -160,14 +160,14 @@ public class StreamManagerTests {
 			manager1 = new StorageManager(base, null);
 			manager1.open(true);
 
-			//request any valid stream available
+			// request any valid stream available
 			is = manager1.getInputStream(fileName);
 			assertNotNull(is);
 			assertEquals(contents1, getInputStreamContents(is));
 
-			//now request only the primary file
+			// now request only the primary file
 			try {
-				InputStream[] isSet = manager1.getInputStreamSet(new String[] {fileName});
+				InputStream[] isSet = manager1.getInputStreamSet(new String[] { fileName });
 				for (InputStream set : isSet) {
 					if (set != null) {
 						set.close();
@@ -175,10 +175,10 @@ public class StreamManagerTests {
 				}
 				fail("getInputStreamSet was successful");
 			} catch (IOException e) {
-				//good
+				// good
 			}
 
-			//now, corrupt version 1 of the file
+			// now, corrupt version 1 of the file
 			raf = new RandomAccessFile(file1, "rw");
 			raf.seek(20);
 			raf.write('0'); // change 'O' to '0'
@@ -189,7 +189,7 @@ public class StreamManagerTests {
 				is = manager1.getInputStream(fileName);
 				fail("get input stream succedded");
 			} catch (IOException e) {
-				//good
+				// good
 			}
 			manager1.close();
 			manager1 = null;
@@ -453,22 +453,23 @@ public class StreamManagerTests {
 		System.setProperty("osgi.useReliableFiles", reliable ? "true" : "false"); // force reliable files
 		manager1 = new StorageManager(mgrDir, null);
 		manager1.open(true);
-		ManagedOutputStream[] outs = manager1.getOutputStreamSet(new String[] {fileName1, fileName2, fileName3, fileName4});
+		ManagedOutputStream[] outs = manager1
+				.getOutputStreamSet(new String[] { fileName1, fileName2, fileName3, fileName4 });
 		assertNotNull(outs);
 
 		outs[0].write(contents1.getBytes());
 		outs[1].write(contents2.getBytes());
 		outs[2].write(contents2.getBytes());
 		outs[3].write(contents1.getBytes());
-		//sanity check
+		// sanity check
 		list = mgrDir.list();
 		assertEquals(5, list.length);
 		outs[2].close();
 		outs[1].abort();
-		outs[0].close(); //noop
-		outs[3].close(); //noop
-		outs[2].close(); //noop
-		outs[1].close(); //noop
+		outs[0].close(); // noop
+		outs[3].close(); // noop
+		outs[2].close(); // noop
+		outs[1].close(); // noop
 		list = mgrDir.list();
 		assertEquals(1, list.length);
 		assertNull(manager1.lookup(fileName1, false));
@@ -482,7 +483,7 @@ public class StreamManagerTests {
 		System.setProperty("osgi.useReliableFiles", reliable ? "true" : "false"); // force reliable files
 		manager2 = new StorageManager(mgrDir, null);
 		manager2.open(true);
-		//create version 1
+		// create version 1
 		assertNull(manager2.lookup(fileName1, false));
 		assertNull(manager2.lookup(fileName2, false));
 		assertNull(manager2.lookup(fileName3, false));

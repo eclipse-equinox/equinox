@@ -40,7 +40,8 @@ public class ApplicationRelaunchTest extends TestCase {
 	public static Test suite() {
 		TestSuite suite = new TestSuite(ApplicationRelaunchTest.class.getName());
 
-		ConfigurationSessionTestSuite appAdminSessionTest = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, ApplicationRelaunchTest.class.getName());
+		ConfigurationSessionTestSuite appAdminSessionTest = new ConfigurationSessionTestSuite(PI_OSGI_TESTS,
+				ApplicationRelaunchTest.class.getName());
 		addRequiredOSGiTestsBundles(appAdminSessionTest);
 		appAdminSessionTest.setApplicationId(testRunnerRelauncherApp);
 

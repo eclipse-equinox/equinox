@@ -16,6 +16,6 @@ package chain.test.b;
 import chain.test.c.CMultipleChain2;
 import chain.test.d.DMultipleChain1;
 
-public interface BMultiChain2 extends CMultipleChain2, DMultipleChain1{
+public interface BMultiChain2 extends CMultipleChain2, DMultipleChain1 {
 //
 }

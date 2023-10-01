@@ -30,51 +30,44 @@ import org.osgi.framework.Bundle;
 public class SignedBundleTest extends BaseSecurityTest {
 
 	/*
-	private static Test[] s_tests = {
-	// positive tests
-	new SignedBundleTest("testSignedContent01", "unsigned", new String[] {}) {
-		public void runTest() {
-			testSignedContent01();
-		}
-	}, new SignedBundleTest("SignedContent positive test: signed jar, 1 trusted signer", "signed", new String[] {"ca1_leafa"}) {
-		public void runTest() {
-			testSignedContent02();
-		}
-	}
-	, new SignedBundleTest("SignedContent positive test: signed jar, 2 trusted signers", "multiply_signed", new String[] {"ca1_leafa", "ca1_leafb"}) {(non-Javadoc)
-	  @see junit.framework.TestCase#runTest()
-	 	public void runTest() {
-			testSignedContent03();
-		}
-	}};
-	*/
+	 * private static Test[] s_tests = { // positive tests new
+	 * SignedBundleTest("testSignedContent01", "unsigned", new String[] {}) { public
+	 * void runTest() { testSignedContent01(); } }, new
+	 * SignedBundleTest("SignedContent positive test: signed jar, 1 trusted signer",
+	 * "signed", new String[] {"ca1_leafa"}) { public void runTest() {
+	 * testSignedContent02(); } } , new
+	 * SignedBundleTest("SignedContent positive test: signed jar, 2 trusted signers"
+	 * , "multiply_signed", new String[] {"ca1_leafa", "ca1_leafb"}) {(non-Javadoc)
+	 * 
+	 * @see junit.framework.TestCase#runTest() public void runTest() {
+	 * testSignedContent03(); } }};
+	 */
 
 	/*
-	//positive tests
-	signer1	signer2	valid
-	n/a		n/a		n/a		= positive, unsigned				('unsigned.jar')
-	yes		n/a		yes		= positive, 1 signer				('signed.jar','ca1_leafa')
-	yes		yes		yes		= positive, 2 signers				('multiply_signed.jar','ca1_leafa,'ca1_leafb')
+	 * //positive tests signer1 signer2 valid n/a n/a n/a = positive, unsigned
+	 * ('unsigned.jar') yes n/a yes = positive, 1 signer ('signed.jar','ca1_leafa')
+	 * yes yes yes = positive, 2 signers
+	 * ('multiply_signed.jar','ca1_leafa,'ca1_leafb')
+	 * 
+	 * //negative = untrusted tests no n/a yes = negative, 1 signer, 1 untrusted
+	 * ('signed.jar') no no yes = negative, 2 signers, 2 untrusted
+	 * ('multiply_signed.jar') yes no yes = negative, 2 signers, 1 untrusted
+	 * ('multiply_signed.jar', 'ca1_leafa')
+	 * 
+	 * //negative = validity tests yes n/a no = negative, 1 signer, 1 corrupt
+	 * ('signed_with_corrupt.jar','ca1_leafa') yes yes no = negative, 2 signers, 2
+	 * corrupt
+	 * 
+	 * //TODO: OSGi-specific partial signer cases //TODO: TSA tests (w/TSA signer
+	 * trusted, untrusted, etc) //TODO: More? NESTED JARS?
+	 */
 
-	//negative = untrusted tests
-	no		n/a		yes		= negative, 1 signer, 1 untrusted	('signed.jar')
-	no		no		yes		= negative, 2 signers, 2 untrusted  ('multiply_signed.jar')
-	yes		no		yes		= negative, 2 signers, 1 untrusted	('multiply_signed.jar', 'ca1_leafa')
-
-	//negative = validity tests
-	yes		n/a		no		= negative, 1 signer, 1 corrupt		('signed_with_corrupt.jar','ca1_leafa')
-	yes		yes		no		= negative, 2 signers, 2 corrupt
-
-	//TODO: OSGi-specific partial signer cases
-	//TODO: TSA tests (w/TSA signer trusted, untrusted, etc)
-	//TODO: More? NESTED JARS?
-	*/
-
-	//private String jarName;
-	//private String[] aliases;
+	// private String jarName;
+	// private String[] aliases;
 
 	public static Test suite() {
-		ConfigurationSessionTestSuite suite = new ConfigurationSessionTestSuite(BUNDLE_SECURITY_TESTS, "Unit session tests for SignedContent");
+		ConfigurationSessionTestSuite suite = new ConfigurationSessionTestSuite(BUNDLE_SECURITY_TESTS,
+				"Unit session tests for SignedContent");
 		addRequiredOSGiTestsBundles(suite);
 		suite.addTestSuite(SignedBundleTest.class);
 		return suite;
@@ -83,18 +76,16 @@ public class SignedBundleTest extends BaseSecurityTest {
 	protected void setUp() throws Exception {
 		registerEclipseTrustEngine();
 		/*
-				TrustEngine engine = getTrustEngine();
-
-				if (supportStore == null) {
-					fail("Could not open keystore with test certificates!");
-				}
-
-				// get the certs from the support store and add
-				for (int i = 0; i < aliases.length; i++) {
-					Certificate cert = supportStore.getCertificate(aliases[i]);
-					engine.addTrustAnchor(cert, aliases[i]);
-				}
-		*/
+		 * TrustEngine engine = getTrustEngine();
+		 * 
+		 * if (supportStore == null) {
+		 * fail("Could not open keystore with test certificates!"); }
+		 * 
+		 * // get the certs from the support store and add for (int i = 0; i <
+		 * aliases.length; i++) { Certificate cert =
+		 * supportStore.getCertificate(aliases[i]); engine.addTrustAnchor(cert,
+		 * aliases[i]); }
+		 */
 	}
 
 	@Override
@@ -102,14 +93,14 @@ public class SignedBundleTest extends BaseSecurityTest {
 		super.tearDown();
 	}
 
-	//	SignedContent positive test: unsigned jar
+	// SignedContent positive test: unsigned jar
 	public void testSignedContent01() throws Exception {
 
 		Bundle testBundle = null;
 		try {
 			testBundle = installBundle(getTestJarPath("unsigned"));
 			assertNotNull("Test bundle not installed!", testBundle);
-			//getTrustEngine().addTrustAnchor(anchor, alias);
+			// getTrustEngine().addTrustAnchor(anchor, alias);
 
 			// get the signed content for the bundle
 			SignedContent signedContent = getSignedContentFactory().getSignedContent(testBundle);
@@ -120,7 +111,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		}
 	}
 
-	//SignedContent positive test: signed jar, 1 trusted signer
+	// SignedContent positive test: signed jar, 1 trusted signer
 	public void testSignedContent02() throws Exception {
 
 		Bundle testBundle = null;
@@ -159,7 +150,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		}
 	}
 
-	//SignedContent positive test: signed jar, 2 trusted signers
+	// SignedContent positive test: signed jar, 2 trusted signers
 	public void testSignedContent03() throws Exception {
 
 		Bundle testBundle = null;
@@ -203,7 +194,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		}
 	}
 
-	//SignedContent negative, 1 signer, 1 untrusted
+	// SignedContent negative, 1 signer, 1 untrusted
 	public void testSignedContent04() throws Exception {
 		Bundle testBundle = null;
 		try {
@@ -228,7 +219,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		}
 	}
 
-	//SignedContent negative, 2 signers, 2 untrusted
+	// SignedContent negative, 2 signers, 2 untrusted
 	public void testSignedContent05() throws Exception {
 		Bundle testBundle = null;
 		try {
@@ -253,7 +244,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		}
 	}
 
-	//SignedContent negative, 2 signers, 1 untrusted
+	// SignedContent negative, 2 signers, 1 untrusted
 	public void testSignedContent06() throws Exception {
 		Bundle testBundle = null;
 		try {
@@ -276,7 +267,8 @@ public class SignedBundleTest extends BaseSecurityTest {
 				Certificate[] certs = info.getCertificateChain();
 				if (info.isTrusted()) {
 					X509Certificate x509Cert = (X509Certificate) certs[0];
-					assertTrue("CA1 LeafA signer is not trusted", x509Cert.getSubjectDN().getName().indexOf("CA1 LeafA") >= 0);
+					assertTrue("CA1 LeafA signer is not trusted",
+							x509Cert.getSubjectDN().getName().indexOf("CA1 LeafA") >= 0);
 				}
 			}
 		} finally {
@@ -340,7 +332,8 @@ public class SignedBundleTest extends BaseSecurityTest {
 		} catch (LinkageError error) {
 			// will happen if not running with runtime checks
 			if ("all".equals(System.getProperty("osgi.signedcontent.support"))) {
-				// if signed content support is enabled then the cause is an InvalidContentException
+				// if signed content support is enabled then the cause is an
+				// InvalidContentException
 				Throwable t = error.getCause();
 				assertTrue("Cause is the wrong type: " + t, t instanceof InvalidContentException);
 			}
@@ -373,7 +366,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		}
 	}
 
-	//	SignedContent positive test: unsigned jar
+	// SignedContent positive test: unsigned jar
 	public void testSignedContent09() throws Exception {
 		File unsignedFile = getEntryFile(getTestJarPath("unsigned"));
 
@@ -386,7 +379,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		assertFalse("Content is signed!!", signedContent.isSigned());
 	}
 
-	//SignedContent positive test: signed jar, 1 trusted signer
+	// SignedContent positive test: signed jar, 1 trusted signer
 	public void testSignedContent10() throws Exception {
 		File signedFile = getEntryFile(getTestJarPath("signed"));
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa");
@@ -418,7 +411,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		}
 	}
 
-	//SignedContent positive test: signed jar, 2 trusted signers
+	// SignedContent positive test: signed jar, 2 trusted signers
 	public void testSignedContent11() throws Exception {
 		File multipleSigned = getEntryFile(getTestJarPath("multiply_signed"));
 		this.getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa");
@@ -454,7 +447,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		}
 	}
 
-	//SignedContent negative, 1 signer, 1 untrusted
+	// SignedContent negative, 1 signer, 1 untrusted
 	public void testSignedContent12() throws Exception {
 		File signedFile = getEntryFile(getTestJarPath("signed"));
 		// get the signed content for the bundle
@@ -473,7 +466,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		}
 	}
 
-	//SignedContent negative, 2 signers, 2 untrusted
+	// SignedContent negative, 2 signers, 2 untrusted
 	public void testSignedContent13() throws Exception {
 		File multipleSigned = getEntryFile(getTestJarPath("multiply_signed"));
 
@@ -493,7 +486,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		}
 	}
 
-	//SignedContent negative, 2 signers, 1 untrusted
+	// SignedContent negative, 2 signers, 1 untrusted
 	public void testSignedContent14() throws Exception {
 		File multipleSigned = getEntryFile(getTestJarPath("multiply_signed"));
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa");
@@ -573,7 +566,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		assertNotNull("Signing time is null!", signedContent.getSigningTime(infos[0]));
 	}
 
-	//SignedContent positive test: signed jar, 1 trusted signer
+	// SignedContent positive test: signed jar, 1 trusted signer
 	public void testBug225090_01() throws Exception {
 		File signedFile = copyEntryFile(getTestJarPath("signed"));
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa");
@@ -607,12 +600,12 @@ public class SignedBundleTest extends BaseSecurityTest {
 		assertFalse("File should not exist", signedFile.exists());
 	}
 
-	//	SignedContent positive test: unsigned jar
+	// SignedContent positive test: unsigned jar
 	public void testBug225090_02() throws Exception {
 		File unsignedFile = copyEntryFile(getTestJarPath("unsigned"));
 
 		assertNotNull("Could not find unsigned file!", unsignedFile);
-		//getTrustEngine().addTrustAnchor(anchor, alias);
+		// getTrustEngine().addTrustAnchor(anchor, alias);
 
 		// get the signed content for the bundle
 		SignedContent signedContent = getSignedContentFactory().getSignedContent(unsignedFile);
@@ -634,7 +627,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		File signedFile = copyEntryFile(getTestJarPath("signed_with_metadata"));
 
 		assertNotNull("Could not find signed file!", signedFile);
-		//getTrustEngine().addTrustAnchor(anchor, alias);
+		// getTrustEngine().addTrustAnchor(anchor, alias);
 
 		// get the signed content for the bundle
 		SignedContent signedContent = getSignedContentFactory().getSignedContent(signedFile);
@@ -657,7 +650,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		File signedFile = copyEntryFile(getTestJarPath("signed_with_metadata_added"));
 
 		assertNotNull("Could not find signed file!", signedFile);
-		//getTrustEngine().addTrustAnchor(anchor, alias);
+		// getTrustEngine().addTrustAnchor(anchor, alias);
 
 		// get the signed content for the bundle
 		SignedContent signedContent = getSignedContentFactory().getSignedContent(signedFile);
@@ -680,7 +673,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		File signedFile = copyEntryFile(getTestJarPath("signed_with_metadata_corrupt"));
 
 		assertNotNull("Could not find signed file!", signedFile);
-		//getTrustEngine().addTrustAnchor(anchor, alias);
+		// getTrustEngine().addTrustAnchor(anchor, alias);
 
 		// get the signed content for the bundle
 		SignedContent signedContent = getSignedContentFactory().getSignedContent(signedFile);
@@ -692,7 +685,8 @@ public class SignedBundleTest extends BaseSecurityTest {
 		for (SignedContentEntry entry : entries) {
 			try {
 				entry.verify();
-				assertFalse("Wrong entry is validated: " + entry.getName(), "META-INF/test/test1.file".equals(entry.getName()));
+				assertFalse("Wrong entry is validated: " + entry.getName(),
+						"META-INF/test/test1.file".equals(entry.getName()));
 				SignerInfo[] entryInfos = entry.getSignerInfos();
 				assertNotNull("SignerInfo is null", entryInfos);
 				assertEquals("wrong number of entry signers", 1, entryInfos.length);
@@ -712,7 +706,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		File signedFile = copyEntryFile(getTestJarPath("signed_with_metadata_removed"));
 
 		assertNotNull("Could not find signed file!", signedFile);
-		//getTrustEngine().addTrustAnchor(anchor, alias);
+		// getTrustEngine().addTrustAnchor(anchor, alias);
 
 		// get the signed content for the bundle
 		SignedContent signedContent = getSignedContentFactory().getSignedContent(signedFile);
@@ -735,7 +729,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		File signedFile = copyEntryFile(getTestJarPath("signed_with_sf_corrupted"));
 
 		assertNotNull("Could not find signed file!", signedFile);
-		//getTrustEngine().addTrustAnchor(anchor, alias);
+		// getTrustEngine().addTrustAnchor(anchor, alias);
 
 		// get the signed content for the bundle
 		try {

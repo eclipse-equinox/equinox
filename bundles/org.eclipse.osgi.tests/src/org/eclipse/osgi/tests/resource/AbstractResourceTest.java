@@ -23,7 +23,8 @@ public abstract class AbstractResourceTest {
 
 	@Before
 	public void setUp() throws Exception {
-		installer = new BundleInstaller(OSGiTestsActivator.TEST_FILES_ROOT + "wiringTests/bundles", OSGiTestsActivator.getContext()); //$NON-NLS-1$
+		installer = new BundleInstaller(OSGiTestsActivator.TEST_FILES_ROOT + "wiringTests/bundles", //$NON-NLS-1$
+				OSGiTestsActivator.getContext());
 	}
 
 	@After

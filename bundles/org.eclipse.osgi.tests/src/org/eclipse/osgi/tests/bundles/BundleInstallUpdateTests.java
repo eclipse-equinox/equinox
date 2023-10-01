@@ -333,7 +333,8 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 		findLibrary.setAccessible(true);
 		assertNull("Found library.", findLibrary.invoke(cl, "nativeCode"));
 
-		URLConverter bundleURLConverter = getContext().getService(getContext().getServiceReferences(URLConverter.class, "(protocol=bundleentry)").iterator().next());
+		URLConverter bundleURLConverter = getContext().getService(
+				getContext().getServiceReferences(URLConverter.class, "(protocol=bundleentry)").iterator().next());
 
 		URL dir1 = bundleURLConverter.toFileURL(testBundle.getEntry("dir1/"));
 		File dir1File = new File(dir1.toExternalForm().substring(5));

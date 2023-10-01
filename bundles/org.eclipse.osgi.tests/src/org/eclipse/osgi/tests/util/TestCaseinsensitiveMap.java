@@ -65,7 +65,7 @@ public class TestCaseinsensitiveMap {
 			Constants.PROVIDE_CAPABILITY //
 	};
 
-	String[] OTHER_KEY_NAMES = new String[] {"test.key0", //
+	String[] OTHER_KEY_NAMES = new String[] { "test.key0", //
 			"test.key1", //
 			"test.key2", //
 			"test.key3", //

@@ -16,6 +16,7 @@ package legacy.lazystart;
 import org.eclipse.osgi.tests.bundles.ITestRunner;
 import legacy.lazystart.b.excluded.a.BAExcluded;
 import legacy.lazystart.b.excluded.b.BBExcluded;
+
 public class TrueExceptionLegacy1 implements ITestRunner {
 
 	@Override

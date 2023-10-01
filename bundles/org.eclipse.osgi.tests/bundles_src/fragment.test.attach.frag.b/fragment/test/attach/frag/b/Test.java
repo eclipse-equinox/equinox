@@ -13,7 +13,6 @@
  *******************************************************************************/
 package fragment.test.attach.frag.b;
 
-
 public class Test {
 
 }

@@ -51,11 +51,13 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 		this(collisionHook, configuration, new DummyResolverHookFactory());
 	}
 
-	public DummyContainerAdaptor(ModuleCollisionHook collisionHook, Map<String, String> configuration, ResolverHookFactory resolverHookFactory) {
+	public DummyContainerAdaptor(ModuleCollisionHook collisionHook, Map<String, String> configuration,
+			ResolverHookFactory resolverHookFactory) {
 		this(collisionHook, configuration, resolverHookFactory, null);
 	}
 
-	public DummyContainerAdaptor(ModuleCollisionHook collisionHook, Map<String, String> configuration, ResolverHookFactory resolverHookFactory, DebugOptions debugOptions) {
+	public DummyContainerAdaptor(ModuleCollisionHook collisionHook, Map<String, String> configuration,
+			ResolverHookFactory resolverHookFactory, DebugOptions debugOptions) {
 		this.collisionHook = collisionHook;
 		this.configuration = configuration == null ? new HashMap<>() : configuration;
 		this.resolverHookFactory = resolverHookFactory;
@@ -79,7 +81,8 @@ public class DummyContainerAdaptor extends ModuleContainerAdaptor {
 	}
 
 	@Override
-	public void publishContainerEvent(ContainerEvent type, Module module, Throwable error, FrameworkListener... listeners) {
+	public void publishContainerEvent(ContainerEvent type, Module module, Throwable error,
+			FrameworkListener... listeners) {
 		moduleDatabase.addEvent(new DummyContainerEvent(type, module, error, listeners));
 
 	}

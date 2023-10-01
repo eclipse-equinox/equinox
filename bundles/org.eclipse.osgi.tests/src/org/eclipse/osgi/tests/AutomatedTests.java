@@ -17,8 +17,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({
-		org.eclipse.osgi.tests.container.AllTests.class, //
+@Suite.SuiteClasses({ org.eclipse.osgi.tests.container.AllTests.class, //
 		org.eclipse.osgi.tests.hooks.framework.AllFrameworkHookTests.class, //
 		org.eclipse.osgi.tests.internal.plugins.InstallTests.class, //
 		org.eclipse.osgi.tests.eclipseadaptor.AllTests.class, //
@@ -39,7 +38,6 @@ import org.junit.runners.Suite;
 		org.eclipse.osgi.tests.permissions.AllTests.class, //
 		org.eclipse.osgi.tests.securityadmin.AllSecurityAdminTests.class, //
 		org.eclipse.osgi.tests.resource.AllTests.class, //
-		org.eclipse.osgi.tests.url.AllTests.class 
-		})
+		org.eclipse.osgi.tests.url.AllTests.class })
 public class AutomatedTests {
 }

@@ -40,11 +40,14 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		ServiceExceptionServiceFactory wrongObjectFactory = new ServiceExceptionServiceFactory("A String"); //$NON-NLS-1$
 		Hashtable props = new Hashtable();
 		props.put("name", testMethodName); //$NON-NLS-1$
-		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), wrongObjectFactory, props);
-		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(OSGiTestsActivator.getBundle(), null, ServiceException.FACTORY_ERROR);
+		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(),
+				wrongObjectFactory, props);
+		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(
+				OSGiTestsActivator.getBundle(), null, ServiceException.FACTORY_ERROR);
 		OSGiTestsActivator.getContext().addFrameworkListener(listener);
 		try {
-			ServiceReference[] refs = OSGiTestsActivator.getContext().getServiceReferences(Runnable.class.getName(), "(name=" + testMethodName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			ServiceReference[] refs = OSGiTestsActivator.getContext().getServiceReferences(Runnable.class.getName(),
+					"(name=" + testMethodName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			assertNotNull("service refs is null", refs); //$NON-NLS-1$
 			assertEquals("Wrong number of references", 1, refs.length); //$NON-NLS-1$
 			Runnable service = (Runnable) OSGiTestsActivator.getContext().getService(refs[0]);
@@ -69,11 +72,14 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		ServiceExceptionServiceFactory nullObjectFactory = new ServiceExceptionServiceFactory(null);
 		Hashtable props = new Hashtable();
 		props.put("name", testMethodName); //$NON-NLS-1$
-		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), nullObjectFactory, props);
-		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(OSGiTestsActivator.getBundle(), null, ServiceException.FACTORY_ERROR);
+		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(),
+				nullObjectFactory, props);
+		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(
+				OSGiTestsActivator.getBundle(), null, ServiceException.FACTORY_ERROR);
 		OSGiTestsActivator.getContext().addFrameworkListener(listener);
 		try {
-			ServiceReference[] refs = OSGiTestsActivator.getContext().getServiceReferences(Runnable.class.getName(), "(name=" + testMethodName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			ServiceReference[] refs = OSGiTestsActivator.getContext().getServiceReferences(Runnable.class.getName(),
+					"(name=" + testMethodName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			assertNotNull("service refs is null", refs); //$NON-NLS-1$
 			assertEquals("Wrong number of references", 1, refs.length); //$NON-NLS-1$
 			Runnable service = (Runnable) OSGiTestsActivator.getContext().getService(refs[0]);
@@ -99,11 +105,14 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		ServiceExceptionServiceFactory runtimeExceptionFactory = new ServiceExceptionServiceFactory(cause);
 		Hashtable props = new Hashtable();
 		props.put("name", testMethodName); //$NON-NLS-1$
-		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runtimeExceptionFactory, props);
-		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(OSGiTestsActivator.getBundle(), cause, ServiceException.FACTORY_EXCEPTION);
+		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(),
+				runtimeExceptionFactory, props);
+		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(
+				OSGiTestsActivator.getBundle(), cause, ServiceException.FACTORY_EXCEPTION);
 		OSGiTestsActivator.getContext().addFrameworkListener(listener);
 		try {
-			ServiceReference[] refs = OSGiTestsActivator.getContext().getServiceReferences(Runnable.class.getName(), "(name=" + testMethodName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			ServiceReference[] refs = OSGiTestsActivator.getContext().getServiceReferences(Runnable.class.getName(),
+					"(name=" + testMethodName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			assertNotNull("service refs is null", refs); //$NON-NLS-1$
 			assertEquals("Wrong number of references", 1, refs.length); //$NON-NLS-1$
 			Runnable service = (Runnable) OSGiTestsActivator.getContext().getService(refs[0]);
@@ -129,11 +138,14 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 		ServiceExceptionServiceFactory errorFactory = new ServiceExceptionServiceFactory(cause);
 		Hashtable props = new Hashtable();
 		props.put("name", testMethodName); //$NON-NLS-1$
-		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), errorFactory, props);
-		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(OSGiTestsActivator.getBundle(), cause, ServiceException.FACTORY_EXCEPTION);
+		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(),
+				errorFactory, props);
+		ServiceExceptionFrameworkListener listener = new ServiceExceptionFrameworkListener(
+				OSGiTestsActivator.getBundle(), cause, ServiceException.FACTORY_EXCEPTION);
 		OSGiTestsActivator.getContext().addFrameworkListener(listener);
 		try {
-			ServiceReference[] refs = OSGiTestsActivator.getContext().getServiceReferences(Runnable.class.getName(), "(name=" + testMethodName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			ServiceReference[] refs = OSGiTestsActivator.getContext().getServiceReferences(Runnable.class.getName(),
+					"(name=" + testMethodName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			assertNotNull("service refs is null", refs); //$NON-NLS-1$
 			assertEquals("Wrong number of references", 1, refs.length); //$NON-NLS-1$
 			Runnable service = (Runnable) OSGiTestsActivator.getContext().getService(refs[0]);

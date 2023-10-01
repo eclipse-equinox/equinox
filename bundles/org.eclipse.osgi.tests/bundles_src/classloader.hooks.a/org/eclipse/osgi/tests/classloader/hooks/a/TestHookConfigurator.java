@@ -42,14 +42,16 @@ public class TestHookConfigurator implements HookConfigurator {
 		hookRegistry.addClassLoaderHook(new ClassLoaderHook() {
 
 			@Override
-			public boolean rejectTransformation(String name, byte[] transformedBytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
+			public boolean rejectTransformation(String name, byte[] transformedBytes, ClasspathEntry classpathEntry,
+					BundleEntry entry, ClasspathManager manager) {
 				return Boolean.getBoolean(REJECT_PROP);
 			}
 
 			@Override
-			public byte[] processClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
+			public byte[] processClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry,
+					ClasspathManager manager) {
 				if (Boolean.getBoolean(BAD_TRANSFORM_PROP)) {
-					return new byte[] {'b', 'a', 'd', 'b', 'y', 't', 'e', 's'};
+					return new byte[] { 'b', 'a', 'd', 'b', 'y', 't', 'e', 's' };
 				}
 				if (Boolean.getBoolean(RECURSION_LOAD)) {
 					if (isProcessClassRecursionSupported() && doingRecursionLoad.get()) {

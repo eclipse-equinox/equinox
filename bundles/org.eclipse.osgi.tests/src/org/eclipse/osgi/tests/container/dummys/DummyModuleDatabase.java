@@ -119,7 +119,8 @@ public class DummyModuleDatabase extends ModuleDatabase {
 		public final Throwable error;
 		public final FrameworkListener[] listeners;
 
-		public DummyContainerEvent(ContainerEvent type, Module module, Throwable error, FrameworkListener... listeners) {
+		public DummyContainerEvent(ContainerEvent type, Module module, Throwable error,
+				FrameworkListener... listeners) {
 			this.type = type;
 			this.module = module;
 			this.error = error;

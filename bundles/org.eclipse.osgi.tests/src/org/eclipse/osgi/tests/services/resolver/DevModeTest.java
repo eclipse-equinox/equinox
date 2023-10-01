@@ -29,7 +29,7 @@ public class DevModeTest extends AbstractStateTest {
 
 	private State buildDevModeState() {
 		State state = buildEmptyState();
-		Dictionary[] props = new Dictionary[] {new Hashtable()};
+		Dictionary[] props = new Dictionary[] { new Hashtable() };
 		props[0].put("osgi.resolverMode", "development");
 		state.setPlatformProperties(props);
 		return state;
@@ -49,35 +49,50 @@ public class DevModeTest extends AbstractStateTest {
 		manifest.put(Constants.EXPORT_PACKAGE, "a");
 		manifest.put(Constants.IMPORT_PACKAGE, "x, d");
 		manifest.put(Constants.REQUIRE_BUNDLE, "X, E");
-		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.REQUIRE_BUNDLE, "A");
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.REQUIRE_BUNDLE, "A");
-		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "d");
-		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "E");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "e");
-		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		state.addBundle(a);
 		state.addBundle(b);
@@ -123,21 +138,30 @@ public class DevModeTest extends AbstractStateTest {
 		manifest.put(Constants.EXPORT_PACKAGE, "a");
 		manifest.put(Constants.IMPORT_PACKAGE, "x");
 		manifest.put(Constants.REQUIRE_BUNDLE, "X");
-		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.REQUIRE_BUNDLE, "A");
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.REQUIRE_BUNDLE, "A");
-		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		state.addBundle(a);
 		state.addBundle(b);
@@ -171,7 +195,10 @@ public class DevModeTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "a");
 		manifest.put(Constants.IMPORT_PACKAGE, "c");
-		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
@@ -179,21 +206,30 @@ public class DevModeTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.FRAGMENT_HOST, "A");
 		manifest.put(Constants.EXPORT_PACKAGE, "a.frag");
-		BundleDescription aFrag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription aFrag = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.IMPORT_PACKAGE, "a, a.frag");
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "c");
-		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		state.addBundle(a);
 		state.addBundle(aFrag);
@@ -240,28 +276,40 @@ public class DevModeTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A; singleton:=true");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "a");
-		BundleDescription a1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription a1 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A; singleton:=true");
 		manifest.put(Constants.BUNDLE_VERSION, "2.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "a");
-		BundleDescription a2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription a2 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.REQUIRE_BUNDLE, "A; bundle-version=2.0");
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.REQUIRE_BUNDLE, "A; bundle-version=\"[1.0,2.0)\"");
-		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		state.addBundle(a1);
 		state.addBundle(a2);
@@ -296,28 +344,40 @@ public class DevModeTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "a");
 		manifest.put(Constants.IMPORT_PACKAGE, "x");
-		BundleDescription a1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription a1 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A; singleton:=true");
 		manifest.put(Constants.BUNDLE_VERSION, "2.0");
 		manifest.put(Constants.EXPORT_PACKAGE, "a");
-		BundleDescription a2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription a2 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.REQUIRE_BUNDLE, "A; bundle-version=2.0");
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.REQUIRE_BUNDLE, "A; bundle-version=\"[1.0,2.0)\"");
-		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		state.addBundle(a1);
 		state.addBundle(a2);
@@ -351,8 +411,12 @@ public class DevModeTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A; singleton:=true");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
-		manifest.put(Constants.REQUIRE_CAPABILITY, "osgi.service; filter:=\"(objectClass=foo.Bar)\";\n" + "  effective:=\"active\"");
-		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		manifest.put(Constants.REQUIRE_CAPABILITY,
+				"osgi.service; filter:=\"(objectClass=foo.Bar)\";\n" + "  effective:=\"active\"");
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		state.addBundle(a);
 		state.resolve();
@@ -365,7 +429,10 @@ public class DevModeTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B; singleton:=true");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
 		manifest.put(Constants.PROVIDE_CAPABILITY, "osgi.service; objectClass:List<String>=\"foo.Bar\"");
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_"
+						+ (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		state.addBundle(b);
 		state.resolve();

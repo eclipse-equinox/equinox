@@ -50,12 +50,21 @@ public class ApplicationAdminTest extends TestCase {
 	public static final String MODIFIED = "modified"; //$NON-NLS-1$
 	public static final String REMOVED = "removed"; //$NON-NLS-1$
 	public static final String simpleResults = "test.simpleResults"; //$NON-NLS-1$
-	public static final String[] tests = new String[] {"testSimpleApp", "testInvalidArgs", "testAsyncValue01", "testAsyncValue02", "testAsyncValue03", "testAsyncValue04", "testAsyncValue05", "testAsyncValue06", "testExitValue01", "testExitValue02", "testExitValue03", "testExitValue04", "testExitValue05", "testExitValue06", "testExitValue07", "testExitValue08", "testExitValue09", "testExitValue10", "testGlobalSingleton", "testCardinality01", "testCardinality02", "testMainThreaded01", "testMainThreaded02", "testHandleEvents01", "testDescriptorEvents01", "testPersistentLock01", "testPersistentLock02", "testPersistentLock03", "testPersistentSchedule01", "testPersistentSchedule02", "testPersistentSchedule03", "testPersistentSchedule04", "testPersistentSchedule05", "testPersistentSchedule06", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$//$NON-NLS-7$//$NON-NLS-8$//$NON-NLS-9$//$NON-NLS-10$//$NON-NLS-11$//$NON-NLS-12$//$NON-NLS-13$//$NON-NLS-14$//$NON-NLS-15$//$NON-NLS-16$//$NON-NLS-17$//$NON-NLS-18$//$NON-NLS-19$//$NON-NLS-20$//$NON-NLS-21$//$NON-NLS-22$//$NON-NLS-23$//$NON-NLS-24$//$NON-NLS-25$//$NON-NLS-26$//$NON-NLS-27$//$NON-NLS-28$//$NON-NLS-29$
-			"testPersistentSchedule07", "testPersistentSchedule08", "testFailedApplication01", "testDestroyBeforeStart01", "testDestroyBeforeStart02"};
+	public static final String[] tests = new String[] { "testSimpleApp", "testInvalidArgs", "testAsyncValue01", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+			"testAsyncValue02", "testAsyncValue03", "testAsyncValue04", "testAsyncValue05", "testAsyncValue06", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			"testExitValue01", "testExitValue02", "testExitValue03", "testExitValue04", "testExitValue05", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			"testExitValue06", "testExitValue07", "testExitValue08", "testExitValue09", "testExitValue10", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			"testGlobalSingleton", "testCardinality01", "testCardinality02", "testMainThreaded01", "testMainThreaded02", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			"testHandleEvents01", "testDescriptorEvents01", "testPersistentLock01", "testPersistentLock02", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
+			"testPersistentLock03", "testPersistentSchedule01", "testPersistentSchedule02", "testPersistentSchedule03", //$NON-NLS-1$//$NON-NLS-2$
+			"testPersistentSchedule04", "testPersistentSchedule05", "testPersistentSchedule06", "testPersistentSchedule07", "testPersistentSchedule08", "testFailedApplication01",
+			"testDestroyBeforeStart01", "testDestroyBeforeStart02" };
+
 	public static Test suite() {
 		TestSuite suite = new TestSuite(ApplicationAdminTest.class.getName());
 
-		ConfigurationSessionTestSuite appAdminSessionTest = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, ApplicationAdminTest.class.getName());
+		ConfigurationSessionTestSuite appAdminSessionTest = new ConfigurationSessionTestSuite(PI_OSGI_TESTS,
+				ApplicationAdminTest.class.getName());
 		addRequiredOSGiTestsBundles(appAdminSessionTest);
 		appAdminSessionTest.setApplicationId(testRunnerApp);
 
@@ -82,7 +91,8 @@ public class ApplicationAdminTest extends TestCase {
 			assertNotNull("BundleContext is null!!", context); //$NON-NLS-1$
 			Class appDescClass = ApplicationDescriptor.class;
 			assertNotNull("ApplicationDescriptor.class is null!!", appDescClass); //$NON-NLS-1$
-			ServiceReference[] refs = context.getServiceReferences(appDescClass.getName(), "(" + ApplicationDescriptor.APPLICATION_PID + "=" + appName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			ServiceReference[] refs = context.getServiceReferences(appDescClass.getName(),
+					"(" + ApplicationDescriptor.APPLICATION_PID + "=" + appName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			if (refs == null || refs.length == 0) {
 				refs = getContext().getServiceReferences(ApplicationDescriptor.class.getName(), null);
 				String availableApps = ""; //$NON-NLS-1$
@@ -133,7 +143,8 @@ public class ApplicationAdminTest extends TestCase {
 		assertEquals("Check application result", SUCCESS, result); //$NON-NLS-1$
 	}
 
-	private void doInvalidScheduleArgs(ApplicationDescriptor app, String id, Map invalidArgs, String topic, String eventFilter, boolean recurring, boolean invalidKeys, boolean invalidValues) {
+	private void doInvalidScheduleArgs(ApplicationDescriptor app, String id, Map invalidArgs, String topic,
+			String eventFilter, boolean recurring, boolean invalidKeys, boolean invalidValues) {
 		ScheduledApplication sched = null;
 		try {
 			sched = app.schedule(id, invalidArgs, topic, eventFilter, recurring);
@@ -163,18 +174,22 @@ public class ApplicationAdminTest extends TestCase {
 		args.put("test.arg1", Boolean.TRUE); //$NON-NLS-1$
 		args.put("test.arg2", Integer.valueOf(34)); //$NON-NLS-1$
 		args.put("test.arg3", Long.valueOf(34)); //$NON-NLS-1$
-		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				false);
 
 		args.put("test.arg4", this); //$NON-NLS-1$
-		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, true); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				true);
 
 		Collection list = new ArrayList();
 		args.put("test.arg4", list); //$NON-NLS-1$
-		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				false);
 
 		list.add(this);
 		args.put("test.arg4", list); //$NON-NLS-1$
-		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, true); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				true);
 
 		list.clear();
 		list.add("test"); //$NON-NLS-1$
@@ -186,7 +201,8 @@ public class ApplicationAdminTest extends TestCase {
 		list.add(Short.valueOf((short) 1));
 		list.add(Character.valueOf((char) 0));
 		list.add(Boolean.TRUE);
-		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				false);
 
 		args.put("test.arg5", new String[0]); //$NON-NLS-1$
 		args.put("test.arg6", new int[0]); //$NON-NLS-1$
@@ -197,7 +213,8 @@ public class ApplicationAdminTest extends TestCase {
 		args.put("test.arg11", new short[0]); //$NON-NLS-1$
 		args.put("test.arg12", new char[0]); //$NON-NLS-1$
 		args.put("test.arg12", new boolean[0]); //$NON-NLS-1$
-		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				false);
 
 		args.put("test.arg13", "test"); //$NON-NLS-1$ //$NON-NLS-2$
 		args.put("test.arg14", Integer.valueOf(0)); //$NON-NLS-1$
@@ -208,15 +225,18 @@ public class ApplicationAdminTest extends TestCase {
 		args.put("test.arg19", Short.valueOf((short) 1)); //$NON-NLS-1$
 		args.put("test.arg20", Character.valueOf((char) 0)); //$NON-NLS-1$
 		args.put("test.arg21", Boolean.TRUE); //$NON-NLS-1$
-		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				false);
 
 		Map testMap = new HashMap();
 		args.put("test.arg22", testMap); //$NON-NLS-1$
-		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, true); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				true);
 
 		args.clear();
 		args.put(Long.valueOf(0), "test"); //$NON-NLS-1$
-		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, true, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, true, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				false);
 	}
 
 	public void testExitValue01() {
@@ -240,7 +260,8 @@ public class ApplicationAdminTest extends TestCase {
 	}
 
 	public void testExitValue02() {
-		// getExitValue test when called from a service listener during service unregistration
+		// getExitValue test when called from a service listener during service
+		// unregistration
 		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".exitValueApp"); //$NON-NLS-1$
 		final Object[] result = new Object[1];
 		ServiceTrackerCustomizer trackerCustomizer = new ServiceTrackerCustomizer() {
@@ -262,7 +283,10 @@ public class ApplicationAdminTest extends TestCase {
 		};
 		ServiceTracker tracker = null;
 		try {
-			tracker = new ServiceTracker(getContext(), FrameworkUtil.createFilter("(&(objectClass=" + ApplicationHandle.class.getName() + ")(" + ApplicationHandle.APPLICATION_DESCRIPTOR + "=" + app.getApplicationId() + "))"), trackerCustomizer); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			tracker = new ServiceTracker(getContext(),
+					FrameworkUtil.createFilter("(&(objectClass=" + ApplicationHandle.class.getName() + ")(" //$NON-NLS-1$ //$NON-NLS-2$
+							+ ApplicationHandle.APPLICATION_DESCRIPTOR + "=" + app.getApplicationId() + "))"), //$NON-NLS-1$ //$NON-NLS-2$
+					trackerCustomizer);
 		} catch (InvalidSyntaxException e) {
 			fail("unexpected syntax exception for tracker", e); //$NON-NLS-1$
 		}
@@ -286,7 +310,8 @@ public class ApplicationAdminTest extends TestCase {
 	}
 
 	public void testExitValue03() {
-		// getExitValue test when called from a service listener during service property modified (STOPPING)
+		// getExitValue test when called from a service listener during service property
+		// modified (STOPPING)
 		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".exitValueApp"); //$NON-NLS-1$
 		final Object[] result = new Object[1];
 		ServiceTrackerCustomizer trackerCustomizer = new ServiceTrackerCustomizer() {
@@ -295,7 +320,8 @@ public class ApplicationAdminTest extends TestCase {
 			}
 
 			public void modifiedService(ServiceReference reference, Object service) {
-				if (!"org.eclipse.equinox.app.stopped".equals(reference.getProperty(ApplicationHandle.APPLICATION_STATE))) //$NON-NLS-1$
+				if (!"org.eclipse.equinox.app.stopped" //$NON-NLS-1$
+						.equals(reference.getProperty(ApplicationHandle.APPLICATION_STATE)))
 					return;
 				try {
 					result[0] = ((ApplicationHandle) service).getExitValue(10000);
@@ -310,7 +336,10 @@ public class ApplicationAdminTest extends TestCase {
 		};
 		ServiceTracker tracker = null;
 		try {
-			tracker = new ServiceTracker(getContext(), FrameworkUtil.createFilter("(&(objectClass=" + ApplicationHandle.class.getName() + ")(" + ApplicationHandle.APPLICATION_DESCRIPTOR + "=" + app.getApplicationId() + "))"), trackerCustomizer); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			tracker = new ServiceTracker(getContext(),
+					FrameworkUtil.createFilter("(&(objectClass=" + ApplicationHandle.class.getName() + ")(" //$NON-NLS-1$ //$NON-NLS-2$
+							+ ApplicationHandle.APPLICATION_DESCRIPTOR + "=" + app.getApplicationId() + "))"), //$NON-NLS-1$ //$NON-NLS-2$
+					trackerCustomizer);
 		} catch (InvalidSyntaxException e) {
 			fail("unexpected syntax exception for tracker", e); //$NON-NLS-1$
 		}
@@ -385,7 +414,8 @@ public class ApplicationAdminTest extends TestCase {
 	}
 
 	public void testExitValue06() {
-		// getExitValue test; expecting an ApplicationException because the exit value is not available
+		// getExitValue test; expecting an ApplicationException because the exit value
+		// is not available
 		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".exitValueApp"); //$NON-NLS-1$
 		ApplicationHandle handle = null;
 		try {
@@ -398,14 +428,15 @@ public class ApplicationAdminTest extends TestCase {
 			handle.getExitValue(100);
 			fail("Expected an ApplicationException for exit value not available"); //$NON-NLS-1$
 		} catch (ApplicationException e) {
-			assertEquals("Unexpected error type", ApplicationException.APPLICATION_EXITVALUE_NOT_AVAILABLE, e.getErrorCode()); //$NON-NLS-1$
+			assertEquals("Unexpected error type", ApplicationException.APPLICATION_EXITVALUE_NOT_AVAILABLE, //$NON-NLS-1$
+					e.getErrorCode());
 		} catch (InterruptedException e) {
 			fail("Unexpected interrupted exception waiting for exit value", e); //$NON-NLS-1$
 		}
 	}
 
 	public void testExitValue07() {
-		//getExitValue test; called with timeout 0
+		// getExitValue test; called with timeout 0
 		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".exitValueApp"); //$NON-NLS-1$
 		ApplicationHandle handle = null;
 		try {
@@ -428,7 +459,7 @@ public class ApplicationAdminTest extends TestCase {
 	}
 
 	public void testExitValue08() {
-		//getExitValue test; called with timeout -1
+		// getExitValue test; called with timeout -1
 		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".exitValueApp"); //$NON-NLS-1$
 		ApplicationHandle handle = null;
 		try {
@@ -443,14 +474,15 @@ public class ApplicationAdminTest extends TestCase {
 			handle.getExitValue(-1);
 			fail("Expected an ApplicationException for exit value not available"); //$NON-NLS-1$
 		} catch (ApplicationException e) {
-			assertEquals("Unexpected error type", ApplicationException.APPLICATION_EXITVALUE_NOT_AVAILABLE, e.getErrorCode()); //$NON-NLS-1$
+			assertEquals("Unexpected error type", ApplicationException.APPLICATION_EXITVALUE_NOT_AVAILABLE, //$NON-NLS-1$
+					e.getErrorCode());
 		} catch (InterruptedException e) {
 			fail("Unexpected interrupted exception waiting for exit value", e); //$NON-NLS-1$
 		}
 	}
 
 	public void testExitValue09() {
-		//getExitValue test; application returns null
+		// getExitValue test; application returns null
 		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".exitValueApp"); //$NON-NLS-1$
 		ApplicationHandle handle = null;
 
@@ -473,7 +505,7 @@ public class ApplicationAdminTest extends TestCase {
 	}
 
 	public void testExitValue10() {
-		//getExitValue test; called with timeout 0 after the result is available
+		// getExitValue test; called with timeout 0 after the result is available
 		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".exitValueApp"); //$NON-NLS-1$
 		ApplicationHandle handle = null;
 		try {
@@ -495,7 +527,8 @@ public class ApplicationAdminTest extends TestCase {
 		assertEquals("exit value is incorrect", ExitValueApp.exitValue, value); //$NON-NLS-1$
 
 		try {
-			// app exited now get the result with -1 timeout; we know the value is ready from above
+			// app exited now get the result with -1 timeout; we know the value is ready
+			// from above
 			value = (String) handle.getExitValue(-1);
 		} catch (Exception e) {
 			fail("unexpected exception waiting for exit value", e); //$NON-NLS-1$
@@ -505,7 +538,7 @@ public class ApplicationAdminTest extends TestCase {
 	}
 
 	public void testAsyncValue01() {
-		//setValue test; called with timeout 0 after the result is available
+		// setValue test; called with timeout 0 after the result is available
 		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".exitValueApp"); //$NON-NLS-1$
 		Map args = new HashMap();
 		args.put(ExitValueApp.returnAsyncResult, Boolean.TRUE);
@@ -529,7 +562,8 @@ public class ApplicationAdminTest extends TestCase {
 		assertEquals("exit value is incorrect", ExitValueApp.exitValue, value); //$NON-NLS-1$
 
 		try {
-			// app exited now get the result with -1 timeout; we know the value is ready from above
+			// app exited now get the result with -1 timeout; we know the value is ready
+			// from above
 			value = (String) handle.getExitValue(-1);
 		} catch (Exception e) {
 			fail("unexpected exception waiting for exit value", e); //$NON-NLS-1$
@@ -539,7 +573,7 @@ public class ApplicationAdminTest extends TestCase {
 	}
 
 	public void testAsyncValue02() {
-		//setValue test; called with timeout -1
+		// setValue test; called with timeout -1
 		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".exitValueApp"); //$NON-NLS-1$
 		ApplicationHandle handle = null;
 		Map args = new HashMap();
@@ -556,14 +590,15 @@ public class ApplicationAdminTest extends TestCase {
 			handle.getExitValue(-1);
 			fail("Expected an ApplicationException for exit value not available"); //$NON-NLS-1$
 		} catch (ApplicationException e) {
-			assertEquals("Unexpected error type", ApplicationException.APPLICATION_EXITVALUE_NOT_AVAILABLE, e.getErrorCode()); //$NON-NLS-1$
+			assertEquals("Unexpected error type", ApplicationException.APPLICATION_EXITVALUE_NOT_AVAILABLE, //$NON-NLS-1$
+					e.getErrorCode());
 		} catch (InterruptedException e) {
 			fail("Unexpected interrupted exception waiting for exit value", e); //$NON-NLS-1$
 		}
 	}
 
 	public void testAsyncValue03() {
-		//setValue test; application returns null
+		// setValue test; application returns null
 		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".exitValueApp"); //$NON-NLS-1$
 		ApplicationHandle handle = null;
 
@@ -697,7 +732,8 @@ public class ApplicationAdminTest extends TestCase {
 				((ApplicationHandle) element).destroy();
 			}
 		}
-		assertEquals("Did not launch the correct # of concurrent instances", instances.size(), cardinality + (hasMax ? 0 : 1)); //$NON-NLS-1$
+		assertEquals("Did not launch the correct # of concurrent instances", instances.size(), //$NON-NLS-1$
+				cardinality + (hasMax ? 0 : 1));
 	}
 
 	public void testCardinality01() {
@@ -737,7 +773,10 @@ public class ApplicationAdminTest extends TestCase {
 	public void testHandleEvents01() throws InvalidSyntaxException {
 		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".simpleApp"); //$NON-NLS-1$
 		ApplicationHandleTracker handleTracker = new ApplicationHandleTracker(getContext());
-		ServiceTracker tracker = new ServiceTracker(getContext(), FrameworkUtil.createFilter("(&(objectClass=" + ApplicationHandle.class.getName() + ")(" + ApplicationHandle.APPLICATION_DESCRIPTOR + "=" + app.getApplicationId() + "))"), handleTracker); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		ServiceTracker tracker = new ServiceTracker(getContext(),
+				FrameworkUtil.createFilter("(&(objectClass=" + ApplicationHandle.class.getName() + ")(" //$NON-NLS-1$ //$NON-NLS-2$
+						+ ApplicationHandle.APPLICATION_DESCRIPTOR + "=" + app.getApplicationId() + "))"), //$NON-NLS-1$ //$NON-NLS-2$
+				handleTracker);
 		tracker.open();
 		try {
 			ApplicationHandle handle = app.launch(null);
@@ -745,7 +784,12 @@ public class ApplicationAdminTest extends TestCase {
 			handle.destroy();
 			handleTracker.waitForEvent(handle.getInstanceId(), REMOVED);
 			String[][] events = handleTracker.getEvents();
-			String[][] expected = new String[][] {new String[] {handle.getInstanceId(), "org.eclipse.equinox.app.starting"}, new String[] {handle.getInstanceId(), ApplicationHandle.RUNNING}, new String[] {handle.getInstanceId(), ApplicationHandle.STOPPING}, new String[] {handle.getInstanceId(), "org.eclipse.equinox.app.stopped"}, new String[] {handle.getInstanceId(), "removed"}}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String[][] expected = new String[][] {
+					new String[] { handle.getInstanceId(), "org.eclipse.equinox.app.starting" }, //$NON-NLS-1$
+					new String[] { handle.getInstanceId(), ApplicationHandle.RUNNING },
+					new String[] { handle.getInstanceId(), ApplicationHandle.STOPPING },
+					new String[] { handle.getInstanceId(), "org.eclipse.equinox.app.stopped" }, //$NON-NLS-1$
+					new String[] { handle.getInstanceId(), "removed" } }; //$NON-NLS-1$
 			assertEquals("Check expected # events", expected.length, events.length); //$NON-NLS-1$
 			for (int i = 0; i < events.length; i++) {
 				assertEquals("Check expected event id for #" + i, expected[i][0], events[i][0]); //$NON-NLS-1$
@@ -761,17 +805,22 @@ public class ApplicationAdminTest extends TestCase {
 	public void testDescriptorEvents01() throws InvalidSyntaxException, BundleException {
 		BundleInstaller bundleInstaller = null;
 		try {
-			bundleInstaller = new BundleInstaller(OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/appAdminTests", getContext()); //$NON-NLS-1$
+			bundleInstaller = new BundleInstaller(OSGiTestsActivator.TEST_FILES_ROOT + "internal/plugins/appAdminTests", //$NON-NLS-1$
+					getContext());
 		} catch (InvalidSyntaxException e) {
 			fail("Failed to create bundle installer", e); //$NON-NLS-1$
 		}
 		String testAppPID = "appadmin.test01.simpleApp"; //$NON-NLS-1$
 		ApplicationDescriptorTracker descriptionTracker = new ApplicationDescriptorTracker(getContext());
-		ServiceTracker tracker = new ServiceTracker(getContext(), FrameworkUtil.createFilter("(&(objectClass=" + ApplicationDescriptor.class.getName() + ")(" + ApplicationDescriptor.APPLICATION_PID + "=" + testAppPID + "))"), descriptionTracker); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		ServiceTracker tracker = new ServiceTracker(getContext(),
+				FrameworkUtil.createFilter("(&(objectClass=" + ApplicationDescriptor.class.getName() + ")(" //$NON-NLS-1$ //$NON-NLS-2$
+						+ ApplicationDescriptor.APPLICATION_PID + "=" + testAppPID + "))"), //$NON-NLS-1$ //$NON-NLS-2$
+				descriptionTracker);
 		tracker.open();
 		try {
 			Bundle test01 = bundleInstaller.installBundle("appadmin.test01"); //$NON-NLS-1$
-			assertTrue("Check if test bundle is resolved: " + test01.getSymbolicName(), bundleInstaller.resolveBundles(new Bundle[] {test01})); //$NON-NLS-1$
+			assertTrue("Check if test bundle is resolved: " + test01.getSymbolicName(), //$NON-NLS-1$
+					bundleInstaller.resolveBundles(new Bundle[] { test01 }));
 			descriptionTracker.waitForEvent(testAppPID, ADDED, Boolean.FALSE, Boolean.TRUE);
 			ApplicationDescriptor app = getApplication(testAppPID);
 			app.lock();
@@ -846,7 +895,11 @@ public class ApplicationAdminTest extends TestCase {
 	public void testPersistentSchedule02() throws InvalidSyntaxException {
 		ScheduledApplication scheduledApp = getScheduleApplication("schedule.1", true); //$NON-NLS-1$
 		ApplicationHandleTracker handleTracker = new ApplicationHandleTracker(getContext());
-		ServiceTracker tracker = new ServiceTracker(getContext(), FrameworkUtil.createFilter("(&(objectClass=" + ApplicationHandle.class.getName() + ")(" + ApplicationHandle.APPLICATION_DESCRIPTOR + "=" + scheduledApp.getApplicationDescriptor().getApplicationId() + "))"), handleTracker); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		ServiceTracker tracker = new ServiceTracker(getContext(),
+				FrameworkUtil.createFilter("(&(objectClass=" + ApplicationHandle.class.getName() + ")(" //$NON-NLS-1$ //$NON-NLS-2$
+						+ ApplicationHandle.APPLICATION_DESCRIPTOR + "=" //$NON-NLS-1$
+						+ scheduledApp.getApplicationDescriptor().getApplicationId() + "))"), //$NON-NLS-1$
+				handleTracker);
 		tracker.open();
 		try {
 			ApplicationHandle handle = (ApplicationHandle) tracker.waitForService(61000);
@@ -904,7 +957,11 @@ public class ApplicationAdminTest extends TestCase {
 	public void testPersistentSchedule05() throws InvalidSyntaxException {
 		ScheduledApplication scheduledApp = getScheduleApplication("schedule.2", true); //$NON-NLS-1$
 		ApplicationHandleTracker handleTracker = new ApplicationHandleTracker(getContext());
-		ServiceTracker tracker = new ServiceTracker(getContext(), FrameworkUtil.createFilter("(&(objectClass=" + ApplicationHandle.class.getName() + ")(" + ApplicationHandle.APPLICATION_DESCRIPTOR + "=" + scheduledApp.getApplicationDescriptor().getApplicationId() + "))"), handleTracker); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		ServiceTracker tracker = new ServiceTracker(getContext(),
+				FrameworkUtil.createFilter("(&(objectClass=" + ApplicationHandle.class.getName() + ")(" //$NON-NLS-1$ //$NON-NLS-2$
+						+ ApplicationHandle.APPLICATION_DESCRIPTOR + "=" //$NON-NLS-1$
+						+ scheduledApp.getApplicationDescriptor().getApplicationId() + "))"), //$NON-NLS-1$
+				handleTracker);
 		tracker.open();
 		ApplicationHandle badHandle = null;
 		try {
@@ -933,11 +990,13 @@ public class ApplicationAdminTest extends TestCase {
 				assertEquals("key: " + entry.getKey(), entry.getValue(), results.get(entry.getKey())); //$NON-NLS-1$
 			}
 			// should not find the scheduled app anymore
-			// sleeping here to allow for the scheduled app to disappear; could use service events instead
+			// sleeping here to allow for the scheduled app to disappear; could use service
+			// events instead
 			Thread.sleep(1000);
 			scheduledApp = getScheduleApplication("schedule.2", false); //$NON-NLS-1$
 			if (scheduledApp != null) {
-				// TODO disabling the failure here.  Just print the error message for now (bug 372848)
+				// TODO disabling the failure here. Just print the error message for now (bug
+				// 372848)
 				System.out.println("Scheduled application should not be found: " + scheduledApp.getScheduleId()); //$NON-NLS-1$
 				// try sleeping some more to see if it helps
 				Thread.sleep(5000);
@@ -985,7 +1044,8 @@ public class ApplicationAdminTest extends TestCase {
 	public void testPersistentSchedule08() {
 		ScheduledApplication scheduledApp = getScheduleApplication("schedule.duplicate1", true); //$NON-NLS-1$
 		try {
-			scheduledApp.getApplicationDescriptor().schedule("schedule.duplicate1", null, "org/osgi/application/timer", "(minute=*)", true); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			scheduledApp.getApplicationDescriptor().schedule("schedule.duplicate1", null, "org/osgi/application/timer", //$NON-NLS-1$ //$NON-NLS-2$
+					"(minute=*)", true); //$NON-NLS-1$
 			fail("should not be able to create a duplicate scheduled application id"); //$NON-NLS-1$
 		} catch (InvalidSyntaxException e) {
 			fail("Failed to schedule an application", e); //$NON-NLS-1$
@@ -999,13 +1059,20 @@ public class ApplicationAdminTest extends TestCase {
 	public void testFailedApplication01() throws InvalidSyntaxException {
 		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".failedApp"); //$NON-NLS-1$
 		ApplicationHandleTracker handleTracker = new ApplicationHandleTracker(getContext());
-		ServiceTracker tracker = new ServiceTracker(getContext(), FrameworkUtil.createFilter("(&(objectClass=" + ApplicationHandle.class.getName() + ")(" + ApplicationHandle.APPLICATION_DESCRIPTOR + "=" + app.getApplicationId() + "))"), handleTracker); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		ServiceTracker tracker = new ServiceTracker(getContext(),
+				FrameworkUtil.createFilter("(&(objectClass=" + ApplicationHandle.class.getName() + ")(" //$NON-NLS-1$ //$NON-NLS-2$
+						+ ApplicationHandle.APPLICATION_DESCRIPTOR + "=" + app.getApplicationId() + "))"), //$NON-NLS-1$ //$NON-NLS-2$
+				handleTracker);
 		tracker.open();
 		try {
 			ApplicationHandle handle = app.launch(null);
 			handleTracker.waitForEvent(handle.getInstanceId(), REMOVED);
 			String[][] events = handleTracker.getEvents();
-			String[][] expected = new String[][] {new String[] {handle.getInstanceId(), "org.eclipse.equinox.app.starting"}, new String[] {handle.getInstanceId(), ApplicationHandle.STOPPING}, new String[] {handle.getInstanceId(), "org.eclipse.equinox.app.stopped"}, new String[] {handle.getInstanceId(), "removed"}}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String[][] expected = new String[][] {
+					new String[] { handle.getInstanceId(), "org.eclipse.equinox.app.starting" }, //$NON-NLS-1$
+					new String[] { handle.getInstanceId(), ApplicationHandle.STOPPING },
+					new String[] { handle.getInstanceId(), "org.eclipse.equinox.app.stopped" }, //$NON-NLS-1$
+					new String[] { handle.getInstanceId(), "removed" } }; //$NON-NLS-1$
 			assertEquals("Check expected # events", expected.length, events.length); //$NON-NLS-1$
 			for (int i = 0; i < events.length; i++) {
 				assertEquals("Check expected event id for #" + i, expected[i][0], events[i][0]); //$NON-NLS-1$
@@ -1037,7 +1104,10 @@ public class ApplicationAdminTest extends TestCase {
 				// nothing
 			}
 		};
-		ServiceTracker tracker = new ServiceTracker(getContext(), FrameworkUtil.createFilter("(&(objectClass=" + ApplicationHandle.class.getName() + ")(" + ApplicationHandle.APPLICATION_DESCRIPTOR + "=" + app.getApplicationId() + "))"), trackerCustomizer); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		ServiceTracker tracker = new ServiceTracker(getContext(),
+				FrameworkUtil.createFilter("(&(objectClass=" + ApplicationHandle.class.getName() + ")(" //$NON-NLS-1$ //$NON-NLS-2$
+						+ ApplicationHandle.APPLICATION_DESCRIPTOR + "=" + app.getApplicationId() + "))"), //$NON-NLS-1$ //$NON-NLS-2$
+				trackerCustomizer);
 		tracker.open();
 		try {
 			ApplicationHandle handle = app.launch(args);
@@ -1070,7 +1140,10 @@ public class ApplicationAdminTest extends TestCase {
 				// nothing
 			}
 		};
-		ServiceTracker tracker = new ServiceTracker(getContext(), FrameworkUtil.createFilter("(&(objectClass=" + ApplicationHandle.class.getName() + ")(" + ApplicationHandle.APPLICATION_DESCRIPTOR + "=" + app.getApplicationId() + "))"), trackerCustomizer); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		ServiceTracker tracker = new ServiceTracker(getContext(),
+				FrameworkUtil.createFilter("(&(objectClass=" + ApplicationHandle.class.getName() + ")(" //$NON-NLS-1$ //$NON-NLS-2$
+						+ ApplicationHandle.APPLICATION_DESCRIPTOR + "=" + app.getApplicationId() + "))"), //$NON-NLS-1$ //$NON-NLS-2$
+				trackerCustomizer);
 		tracker.open();
 		try {
 			ApplicationHandle handle = app.launch(args);
@@ -1090,7 +1163,8 @@ public class ApplicationAdminTest extends TestCase {
 			assertNotNull("BundleContext is null!!", context); //$NON-NLS-1$
 			Class schedAppClass = ScheduledApplication.class;
 			assertNotNull("ScheduledApplication.class is null!!", schedAppClass); //$NON-NLS-1$
-			ServiceReference[] refs = getContext().getServiceReferences(schedAppClass.getName(), "(" + ScheduledApplication.SCHEDULE_ID + "=" + scheduleID + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			ServiceReference[] refs = getContext().getServiceReferences(schedAppClass.getName(),
+					"(" + ScheduledApplication.SCHEDULE_ID + "=" + scheduleID + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			if (refs == null || refs.length == 0) {
 				if (!failOnMissing)
 					return null;
@@ -1128,7 +1202,7 @@ public class ApplicationAdminTest extends TestCase {
 		public synchronized Object addingService(ServiceReference reference) {
 			String instance = (String) reference.getProperty(ApplicationHandle.APPLICATION_PID);
 			String state = (String) reference.getProperty(ApplicationHandle.APPLICATION_STATE);
-			events.add(new String[] {instance, state});
+			events.add(new String[] { instance, state });
 			Object result = bc.getService(reference);
 			notifyAll();
 			return result;
@@ -1137,17 +1211,18 @@ public class ApplicationAdminTest extends TestCase {
 		public synchronized void modifiedService(ServiceReference reference, Object service) {
 			String instance = (String) reference.getProperty(ApplicationHandle.APPLICATION_PID);
 			String state = (String) reference.getProperty(ApplicationHandle.APPLICATION_STATE);
-			events.add(new String[] {instance, state});
+			events.add(new String[] { instance, state });
 			notifyAll();
 		}
 
 		public synchronized void removedService(ServiceReference reference, Object service) {
 			String instance = (String) reference.getProperty(ApplicationHandle.APPLICATION_PID);
-			events.add(new String[] {instance, REMOVED});
+			events.add(new String[] { instance, REMOVED });
 			notifyAll();
 		}
 
-		// Note that this method assumes you call it before the event actually gets posted.
+		// Note that this method assumes you call it before the event actually gets
+		// posted.
 		// It only looks at the last event that was saved.
 		public synchronized void waitForEvent(String instance, String state) {
 			long delay = 5000;
@@ -1169,7 +1244,8 @@ public class ApplicationAdminTest extends TestCase {
 					StringBuilder eventsBuffer = new StringBuilder();
 					eventsBuffer.append("\nFound the following events: \n"); //$NON-NLS-1$
 					for (Object[] foundEvent : foundEvents) {
-						eventsBuffer.append(" handle event: ").append(foundEvent[0]).append(" ").append(foundEvent[1]).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						eventsBuffer.append(" handle event: ").append(foundEvent[0]).append(" ").append(foundEvent[1]) //$NON-NLS-1$ //$NON-NLS-2$
+								.append("\n"); //$NON-NLS-1$
 					}
 					foundEventsMsg = eventsBuffer.toString();
 				} else {
@@ -1205,7 +1281,7 @@ public class ApplicationAdminTest extends TestCase {
 			String pid = (String) reference.getProperty(ApplicationDescriptor.APPLICATION_PID);
 			Boolean locked = (Boolean) reference.getProperty(ApplicationDescriptor.APPLICATION_LOCKED);
 			Boolean launchable = (Boolean) reference.getProperty(ApplicationDescriptor.APPLICATION_LAUNCHABLE);
-			events.add(new Object[] {pid, ADDED, locked, launchable});
+			events.add(new Object[] { pid, ADDED, locked, launchable });
 			Object result = bc.getService(reference);
 			notifyAll();
 			return result;
@@ -1215,7 +1291,7 @@ public class ApplicationAdminTest extends TestCase {
 			String pid = (String) reference.getProperty(ApplicationDescriptor.APPLICATION_PID);
 			Boolean locked = (Boolean) reference.getProperty(ApplicationDescriptor.APPLICATION_LOCKED);
 			Boolean launchable = (Boolean) reference.getProperty(ApplicationDescriptor.APPLICATION_LAUNCHABLE);
-			events.add(new Object[] {pid, MODIFIED, locked, launchable});
+			events.add(new Object[] { pid, MODIFIED, locked, launchable });
 			notifyAll();
 		}
 
@@ -1223,11 +1299,12 @@ public class ApplicationAdminTest extends TestCase {
 			String pid = (String) reference.getProperty(ApplicationDescriptor.APPLICATION_PID);
 			Boolean locked = (Boolean) reference.getProperty(ApplicationDescriptor.APPLICATION_LOCKED);
 			Boolean launchable = (Boolean) reference.getProperty(ApplicationDescriptor.APPLICATION_LAUNCHABLE);
-			events.add(new Object[] {pid, REMOVED, locked, launchable});
+			events.add(new Object[] { pid, REMOVED, locked, launchable });
 			notifyAll();
 		}
 
-		// Note that this method assumes you call it before the event actually gets posted.
+		// Note that this method assumes you call it before the event actually gets
+		// posted.
 		// It only looks at the last event that was saved.
 		public synchronized void waitForEvent(String pid, String type, Boolean locked, Boolean launchable) {
 			long delay = 5000;
@@ -1249,13 +1326,16 @@ public class ApplicationAdminTest extends TestCase {
 					StringBuilder eventsBuffer = new StringBuilder();
 					eventsBuffer.append("\nFound the following events: \n"); //$NON-NLS-1$
 					for (Object[] foundEvent : foundEvents) {
-						eventsBuffer.append(" descriptor event: ").append(foundEvent[0]).append(" ").append(foundEvent[1]).append(" ").append(foundEvent[2]).append(" ").append(foundEvent[3]).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+						eventsBuffer.append(" descriptor event: ").append(foundEvent[0]).append(" ") //$NON-NLS-1$ //$NON-NLS-2$
+								.append(foundEvent[1]).append(" ").append(foundEvent[2]).append(" ") //$NON-NLS-1$ //$NON-NLS-2$
+								.append(foundEvent[3]).append("\n"); //$NON-NLS-1$
 					}
 					foundEventsMsg = eventsBuffer.toString();
 				} else {
 					foundEventsMsg = "\nNo events recorded"; //$NON-NLS-1$
 				}
-				fail("failed waiting for descriptor event: " + pid + " " + type + " " + locked + " " + launchable + foundEventsMsg); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				fail("failed waiting for descriptor event: " + pid + " " + type + " " + locked + " " + launchable //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+						+ foundEventsMsg);
 			}
 		}
 

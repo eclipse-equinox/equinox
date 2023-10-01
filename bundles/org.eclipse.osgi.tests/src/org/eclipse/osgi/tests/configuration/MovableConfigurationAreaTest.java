@@ -35,7 +35,8 @@ import org.osgi.framework.BundleException;
 public class MovableConfigurationAreaTest extends TestCase {
 
 	static void doMove(final IPath sourcePath, final IPath destinationPath) {
-		assertTrue("Failed moving " + sourcePath + " to " + destinationPath, sourcePath.toFile().renameTo(destinationPath.toFile()));
+		assertTrue("Failed moving " + sourcePath + " to " + destinationPath,
+				sourcePath.toFile().renameTo(destinationPath.toFile()));
 	}
 
 	static void doTakeSnapshot(final IPath destinationPath) {
@@ -53,7 +54,8 @@ public class MovableConfigurationAreaTest extends TestCase {
 	public static Test suite() {
 		TestSuite suite = new TestSuite(MovableConfigurationAreaTest.class.getName());
 
-		ConfigurationSessionTestSuite initialization = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, MovableConfigurationAreaTest.class.getName());
+		ConfigurationSessionTestSuite initialization = new ConfigurationSessionTestSuite(PI_OSGI_TESTS,
+				MovableConfigurationAreaTest.class.getName());
 		addRequiredOSGiTestsBundles(initialization);
 		initialization.setReadOnly(true);
 		// disable clean-up, we want to reuse the configuration
@@ -75,7 +77,8 @@ public class MovableConfigurationAreaTest extends TestCase {
 			}
 		});
 
-		ConfigurationSessionTestSuite afterMoving = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, MovableConfigurationAreaTest.class.getName());
+		ConfigurationSessionTestSuite afterMoving = new ConfigurationSessionTestSuite(PI_OSGI_TESTS,
+				MovableConfigurationAreaTest.class.getName());
 		afterMoving.setConfigurationPath(destinationPath);
 		afterMoving.addMinimalBundleSet();
 		afterMoving.setReadOnly(true);
@@ -92,15 +95,17 @@ public class MovableConfigurationAreaTest extends TestCase {
 	}
 
 	/**
-	 * Tries to install a plug-in that has no manifest. Should fail because by default the manifest generation area
-	 * is under the configuration area (which is read-only here)
+	 * Tries to install a plug-in that has no manifest. Should fail because by
+	 * default the manifest generation area is under the configuration area (which
+	 * is read-only here)
 	 */
 	public void testAfterMoving() throws MalformedURLException, IOException, BundleException {
 		// try to install plug-in
 		// ensure it is not installed
 		Bundle installed = null;
 		try {
-			installed = BundleTestingHelper.installBundle(getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle02");
+			installed = BundleTestingHelper.installBundle(getContext(),
+					OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle02");
 			// should have failed with BundleException, does not have a bundle manifest
 			fail("1.0");
 		} catch (BundleException be) {

@@ -68,8 +68,10 @@ public class BasicLocationTests {
 	public void setUp() throws Exception {
 		prefix = OS.isWindows() ? "c:" : "";
 
-		configLocationTracker = new ServiceTracker<>(OSGiTestsActivator.getContext(), OSGiTestsActivator.getContext().createFilter(Location.CONFIGURATION_FILTER), null);
-		instanceLocationTracker = new ServiceTracker<>(OSGiTestsActivator.getContext(), OSGiTestsActivator.getContext().createFilter(Location.INSTANCE_FILTER), null);
+		configLocationTracker = new ServiceTracker<>(OSGiTestsActivator.getContext(),
+				OSGiTestsActivator.getContext().createFilter(Location.CONFIGURATION_FILTER), null);
+		instanceLocationTracker = new ServiceTracker<>(OSGiTestsActivator.getContext(),
+				OSGiTestsActivator.getContext().createFilter(Location.INSTANCE_FILTER), null);
 
 		configLocationTracker.open();
 		instanceLocationTracker.open();
@@ -96,9 +98,11 @@ public class BasicLocationTests {
 			assertEquals(scheme, url.getProtocol());
 		if (!url.getProtocol().equals("file"))
 			return;
-		assertTrue(url.toExternalForm() + " should " + (trailing ? "" : "not") + " have a trailing slash", url.getFile().endsWith("/") == trailing);
+		assertTrue(url.toExternalForm() + " should " + (trailing ? "" : "not") + " have a trailing slash",
+				url.getFile().endsWith("/") == trailing);
 		if (OS.isWindows())
-			assertTrue(url.toExternalForm() + " should " + (leading ? "" : "not") + " have a leading slash", url.getFile().startsWith("/") == leading);
+			assertTrue(url.toExternalForm() + " should " + (leading ? "" : "not") + " have a leading slash",
+					url.getFile().startsWith("/") == leading);
 	}
 
 	private void fail(String message, Throwable exception) {
@@ -254,13 +258,15 @@ public class BasicLocationTests {
 		if (namespace.startsWith("/")) {
 			namespace = namespace.substring(1);
 		}
-		assertTrue("Data area is not the expected value: " + dataArea.toExternalForm(), dataArea.toExternalForm().endsWith(dataAreaPrefix + namespace));
+		assertTrue("Data area is not the expected value: " + dataArea.toExternalForm(),
+				dataArea.toExternalForm().endsWith(dataAreaPrefix + namespace));
 	}
 
 	@Test
 	public void testSetLocationWithEmptyLockFile() {
 		Location configLocation = configLocationTracker.getService();
-		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testSetLocationWithEmptyLockFile"); //$NON-NLS-1$
+		File testLocationFile = OSGiTestsActivator.getContext()
+				.getDataFile("testLocations/testSetLocationWithEmptyLockFile"); //$NON-NLS-1$
 		Location testLocation = configLocation.createLocation(null, null, false);
 		try {
 			testLocation.set(testLocationFile.toURL(), true, ""); //$NON-NLS-1$
@@ -281,7 +287,8 @@ public class BasicLocationTests {
 	@Test
 	public void testSetLocationWithRelLockFile() {
 		Location configLocation = configLocationTracker.getService();
-		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testSetLocationWithRelLockFile"); //$NON-NLS-1$
+		File testLocationFile = OSGiTestsActivator.getContext()
+				.getDataFile("testLocations/testSetLocationWithRelLockFile"); //$NON-NLS-1$
 		Location testLocation = configLocation.createLocation(null, null, false);
 		try {
 			testLocation.set(testLocationFile.toURL(), true, ".mocklock"); //$NON-NLS-1$
@@ -301,7 +308,8 @@ public class BasicLocationTests {
 	@Test
 	public void testSetLocationWithAbsLockFile() {
 		Location configLocation = configLocationTracker.getService();
-		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testSetLocationWithAbsLockFile"); //$NON-NLS-1$
+		File testLocationFile = OSGiTestsActivator.getContext()
+				.getDataFile("testLocations/testSetLocationWithAbsLockFile"); //$NON-NLS-1$
 		File testLocationLockFile = OSGiTestsActivator.getContext().getDataFile("testLocations/mock.lock"); //$NON-NLS-1$
 		assertTrue(testLocationLockFile.isAbsolute());
 		Location testLocation = configLocation.createLocation(null, null, false);
@@ -349,7 +357,8 @@ public class BasicLocationTests {
 		return locations;
 	}
 
-	private static void addLocation(BundleContext context, String filter, Map<String, Location> locations) throws InvalidSyntaxException {
+	private static void addLocation(BundleContext context, String filter, Map<String, Location> locations)
+			throws InvalidSyntaxException {
 		Collection<ServiceReference<Location>> locationRefs = context.getServiceReferences(Location.class, filter);
 		if (!locationRefs.isEmpty()) {
 			locations.put(filter, context.getService(locationRefs.iterator().next()));
@@ -395,7 +404,8 @@ public class BasicLocationTests {
 			Map<String, Location> locations = getLocations(equinox);
 			assertNull("User location should be null", locations.get(Location.USER_FILTER));
 			assertNull("Instance location should be null", locations.get(Location.INSTANCE_FILTER));
-			// TODO assertNull("Configuration location should be null", locations.get(Location.CONFIGURATION_FILTER));
+			// TODO assertNull("Configuration location should be null",
+			// locations.get(Location.CONFIGURATION_FILTER));
 		} finally {
 			equinox.stop();
 		}
@@ -556,6 +566,7 @@ public class BasicLocationTests {
 	}
 
 	private LogReaderService getLogReaderService(Equinox equinox) {
-		return equinox.getBundleContext().getService(equinox.getBundleContext().getServiceReference(LogReaderService.class));
+		return equinox.getBundleContext()
+				.getService(equinox.getBundleContext().getServiceReference(LogReaderService.class));
 	}
 }

@@ -29,7 +29,8 @@ public class LatinTextProcessorTestCase extends TextProcessorTestCase {
 	protected static String[] ALL_PATHS;
 	static {
 		// merge all test strings into one array for Latin locales
-		int size = TEST_DEFAULT_PATHS.length + TEST_STAR_PATHS.length + TEST_EQUALS_PATHS.length + TEST_ADDITIONAL_STRINGS.length;
+		int size = TEST_DEFAULT_PATHS.length + TEST_STAR_PATHS.length + TEST_EQUALS_PATHS.length
+				+ TEST_ADDITIONAL_STRINGS.length;
 		ALL_PATHS = new String[size];
 		int idx = 0;
 		for (String testDefaultPath : TEST_DEFAULT_PATHS) {
@@ -67,7 +68,7 @@ public class LatinTextProcessorTestCase extends TextProcessorTestCase {
 		}
 	}
 
-	public void testLatinPathsDeprocess(){
+	public void testLatinPathsDeprocess() {
 		// test all strings using process(String) method
 		for (int i = 0; i < ALL_PATHS.length; i++) {
 			String result = TextProcessor.process(ALL_PATHS[i]);
@@ -126,7 +127,8 @@ public class LatinTextProcessorTestCase extends TextProcessorTestCase {
 
 	public void testEmptyStringParams() {
 		verifyResult("TextProcessor.process(String) for empty string ", TextProcessor.process(""), EMPTY_STRING);
-		verifyResult("TextProcessor.process(String, String) for empty strings ", TextProcessor.process("", ""), EMPTY_STRING);
+		verifyResult("TextProcessor.process(String, String) for empty strings ", TextProcessor.process("", ""),
+				EMPTY_STRING);
 	}
 
 	public void testEmptyStringParamsDeprocess() {

@@ -68,8 +68,10 @@ public class DebugOptionsTestCase {
 	Dictionary props = null;
 	TestDebugOptionsListener listener = null;
 	ServiceRegistration reg = null;
-	private final static String TRACE_ELEMENT_DELIMITER = "|"; //$NON-NLS-1$ // this value needs to match EclipseDebugTrace#TRACE_ELEMENT_DELIMITER
-	private final static String TRACE_ELEMENT_DELIMITER_ENCODED = "&#124;"; //$NON-NLS-1$ // this value needs to match EclipseDebugTrace#TRACE_ELEMENT_DELIMITER_ENCODED
+	private final static String TRACE_ELEMENT_DELIMITER = "|"; //$NON-NLS-1$ // this value needs to match
+																// EclipseDebugTrace#TRACE_ELEMENT_DELIMITER
+	private final static String TRACE_ELEMENT_DELIMITER_ENCODED = "&#124;"; //$NON-NLS-1$ // this value needs to match
+																			// EclipseDebugTrace#TRACE_ELEMENT_DELIMITER_ENCODED
 	private final static SimpleDateFormat TRACE_FILE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); //$NON-NLS-1$
 	private final static String LINE_SEPARATOR;
 	private boolean verboseDebug = true; // default is true
@@ -112,12 +114,13 @@ public class DebugOptionsTestCase {
 	}
 
 	/**
-	 * Test that a new {@link FrameworkDebugTraceEntry} object created without a trace class
-	 * has 'org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase' as the class name and
-	 * 'testTracingEntry01' as the method name that it determined as the caller of it.
+	 * Test that a new {@link FrameworkDebugTraceEntry} object created without a
+	 * trace class has 'org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase' as
+	 * the class name and 'testTracingEntry01' as the method name that it determined
+	 * as the caller of it.
 	 *
-	 * This test mimics the tracing framework to ensure that the correct class name and method name
-	 * are returned and written to the trace file.
+	 * This test mimics the tracing framework to ensure that the correct class name
+	 * and method name are returned and written to the trace file.
 	 */
 	@Test
 	public void testTracingEntry01() {
@@ -128,17 +131,19 @@ public class DebugOptionsTestCase {
 		FrameworkDebugTraceEntry traceEntry = new FrameworkDebugTraceEntry(bundleName, optionPath, message, null);
 		String correctClassName = "org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase"; //$NON-NLS-1$
 		String correctMethodName = "testTracingEntry01"; //$NON-NLS-1$
-		assertEquals("The class calling the trace API does not match the expected value.", correctClassName, traceEntry.getClassName()); //$NON-NLS-1$
-		assertEquals("The method calling the trace API does not match the expected value.", correctMethodName, traceEntry.getMethodName()); //$NON-NLS-1$
+		assertEquals("The class calling the trace API does not match the expected value.", correctClassName, //$NON-NLS-1$
+				traceEntry.getClassName());
+		assertEquals("The method calling the trace API does not match the expected value.", correctMethodName, //$NON-NLS-1$
+				traceEntry.getMethodName());
 	}
 
 	/**
-	 * Test that a new {@link FrameworkDebugTraceEntry} object created with a trace class
-	 * of 'org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase' has the correct class name and
-	 * method name of the caller.
+	 * Test that a new {@link FrameworkDebugTraceEntry} object created with a trace
+	 * class of 'org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase' has the
+	 * correct class name and method name of the caller.
 	 *
-	 * This test mimics the tracing framework to ensure that the correct class name and method name
-	 * are returned and written to the trace file.
+	 * This test mimics the tracing framework to ensure that the correct class name
+	 * and method name are returned and written to the trace file.
 	 */
 	@Test
 	public void testTracingEntry02() {
@@ -146,8 +151,10 @@ public class DebugOptionsTestCase {
 		String correctClassName = Runner1.class.getName();
 		String correctMethodName = "run"; //$NON-NLS-1$
 		FrameworkDebugTraceEntry traceEntry = new Runner1().run();
-		assertEquals("The class calling the trace API does not match the expected value.", correctClassName, traceEntry.getClassName()); //$NON-NLS-1$
-		assertEquals("The method calling the trace API does not match the expected value.", correctMethodName, traceEntry.getMethodName()); //$NON-NLS-1$
+		assertEquals("The class calling the trace API does not match the expected value.", correctClassName, //$NON-NLS-1$
+				traceEntry.getClassName());
+		assertEquals("The method calling the trace API does not match the expected value.", correctMethodName, //$NON-NLS-1$
+				traceEntry.getMethodName());
 	}
 
 	static class Runner1 {
@@ -204,7 +211,8 @@ public class DebugOptionsTestCase {
 		TestDebugOptionsListener anotherListener = new TestDebugOptionsListener();
 		Dictionary anotherProps = new Hashtable();
 		anotherProps.put(DebugOptions.LISTENER_SYMBOLICNAME, "anotherListener"); //$NON-NLS-1$
-		ServiceRegistration anotherReg = OSGiTestsActivator.getContext().registerService(DebugOptionsListener.class.getName(), anotherListener, anotherProps);
+		ServiceRegistration anotherReg = OSGiTestsActivator.getContext()
+				.registerService(DebugOptionsListener.class.getName(), anotherListener, anotherProps);
 		assertTrue("Not called", anotherListener.gotCalled()); //$NON-NLS-1$
 
 		debugOptions.setDebugEnabled(true);
@@ -287,7 +295,8 @@ public class DebugOptionsTestCase {
 		// create the new set of options
 		debugOptions.setOptions(newOptions);
 		// make sure the listener got called
-		assertTrue("Listener did not get called when setting batch options when tracing is enabled", listener.gotCalled()); //$NON-NLS-1$
+		assertTrue("Listener did not get called when setting batch options when tracing is enabled", //$NON-NLS-1$
+				listener.gotCalled());
 		// get all of the options
 		Map/* <String, String> */ currentOptions = debugOptions.getOptions();
 		// make sure the Map object returned is not the same Map object that was set
@@ -296,11 +305,14 @@ public class DebugOptionsTestCase {
 		assertEquals("The amount of options retrieved is not correct", newOptions.size(), currentOptions.size());
 		// make sure the values are correct
 		String actualValue = (String) currentOptions.get(key1);
-		assertEquals("The original option for key1 does not match the retrieved option when tracing is enabled", "ok1", actualValue);
+		assertEquals("The original option for key1 does not match the retrieved option when tracing is enabled", "ok1",
+				actualValue);
 		actualValue = (String) currentOptions.get(key2);
-		assertEquals("The original option for key1 does not match the retrieved option when tracing is enabled", "ok2", actualValue);
+		assertEquals("The original option for key1 does not match the retrieved option when tracing is enabled", "ok2",
+				actualValue);
 		actualValue = (String) currentOptions.get(key3);
-		assertEquals("The original option for key1 does not match the retrieved option when tracing is enabled", "ok3", actualValue);
+		assertEquals("The original option for key1 does not match the retrieved option when tracing is enabled", "ok3",
+				actualValue);
 		// add a new batch of options
 		String key4 = getName() + "/debug/disableCheck4";
 		String key5 = getName() + "/debug/disableCheck5";
@@ -313,7 +325,8 @@ public class DebugOptionsTestCase {
 		// create the new set of options
 		debugOptions.setOptions(newOptions2);
 		// make sure the listener got called
-		assertTrue("Listener did not get called when setting batch options when tracing is enabled", listener.gotCalled()); //$NON-NLS-1$
+		assertTrue("Listener did not get called when setting batch options when tracing is enabled", //$NON-NLS-1$
+				listener.gotCalled());
 		// make sure the Map object returned is not the same Map object that was set
 		Map currentOptions2 = debugOptions.getOptions();
 		assertNotSame("The Map object set is the exact same Map object returned", newOptions, currentOptions2);
@@ -328,11 +341,14 @@ public class DebugOptionsTestCase {
 		assertNull("The original option for key3 is in the returned options (it should not be there)", actualValue);
 		// make sure the new values are correct
 		actualValue = (String) currentOptions2.get(key4);
-		assertEquals("The new option for key4 does not match the retrieved option when tracing is enabled", "ok4", actualValue);
+		assertEquals("The new option for key4 does not match the retrieved option when tracing is enabled", "ok4",
+				actualValue);
 		actualValue = (String) currentOptions2.get(key5);
-		assertEquals("The new option for key5 does not match the retrieved option when tracing is enabled", "ok5", actualValue);
+		assertEquals("The new option for key5 does not match the retrieved option when tracing is enabled", "ok5",
+				actualValue);
 		actualValue = (String) currentOptions2.get(key6);
-		assertEquals("The new option for key6 does not match the retrieved option when tracing is enabled", "ok6", actualValue);
+		assertEquals("The new option for key6 does not match the retrieved option when tracing is enabled", "ok6",
+				actualValue);
 	}
 
 	@Test
@@ -382,27 +398,34 @@ public class DebugOptionsTestCase {
 		// create the new set of options
 		debugOptions.setOptions(newOptions);
 		// make sure the listener got called
-		assertTrue("Listener did not get called when setting batch options when tracing is enabled", listener.gotCalled()); //$NON-NLS-1$
+		assertTrue("Listener did not get called when setting batch options when tracing is enabled", //$NON-NLS-1$
+				listener.gotCalled());
 		// disable tracing
 		debugOptions.setDebugEnabled(false);
-		// get all of the options (should be the disabled option set - which should contain only the recently set options)
+		// get all of the options (should be the disabled option set - which should
+		// contain only the recently set options)
 		Map currentOptions = debugOptions.getOptions();
 		// make sure the Map returned is not the same Map object that was set
-		assertNotSame("The Map object retrieved is the exact same Map object returned when tracing is disabled.", newOptions, currentOptions);
+		assertNotSame("The Map object retrieved is the exact same Map object returned when tracing is disabled.",
+				newOptions, currentOptions);
 		// make sure the size is correct (it should be the same as the original Map)
-		assertEquals("The amount of options retrieved is not the same after tracing is disabled", newOptions.size(), currentOptions.size());
+		assertEquals("The amount of options retrieved is not the same after tracing is disabled", newOptions.size(),
+				currentOptions.size());
 		// make sure the values are correct - check key1
 		String actualValue = (String) currentOptions.get(key1);
 		assertNotNull("The value for key1 is null", actualValue);
-		assertEquals("The original option for key1 does not match the retrieved option when tracing is disabled", "ok1", actualValue);
+		assertEquals("The original option for key1 does not match the retrieved option when tracing is disabled", "ok1",
+				actualValue);
 		// check key2
 		actualValue = (String) currentOptions.get(key2);
 		assertNotNull("The value for key2 is null", actualValue);
-		assertEquals("The original option for key2 does not match the retrieved option when tracing is disabled", "ok2", actualValue);
+		assertEquals("The original option for key2 does not match the retrieved option when tracing is disabled", "ok2",
+				actualValue);
 		// check key3
 		actualValue = (String) currentOptions.get(key3);
 		assertNotNull("The value for key3 is null", actualValue);
-		assertEquals("The original option for key3 does not match the retrieved option when tracing is disabled", "ok3", actualValue);
+		assertEquals("The original option for key3 does not match the retrieved option when tracing is disabled", "ok3",
+				actualValue);
 		// add a new batch of options when tracing is disabled
 		String key4 = getName() + "/debug/disableCheck4";
 		String key5 = getName() + "/debug/disableCheck5";
@@ -430,12 +453,16 @@ public class DebugOptionsTestCase {
 		assertNull("The original option for key3 is in the returned options (it should not be there)", actualValue);
 		// make sure the new values are correct
 		actualValue = (String) currentOptions2.get(key4);
-		assertEquals("The new option for key4 does not match the retrieved option when tracing is disabled", "ok4", actualValue);
+		assertEquals("The new option for key4 does not match the retrieved option when tracing is disabled", "ok4",
+				actualValue);
 		actualValue = (String) currentOptions2.get(key5);
-		assertEquals("The new option for key5 does not match the retrieved option when tracing is disabled", "ok5", actualValue);
+		assertEquals("The new option for key5 does not match the retrieved option when tracing is disabled", "ok5",
+				actualValue);
 		actualValue = (String) currentOptions2.get(key6);
-		assertEquals("The new option for key6 does not match the retrieved option when tracing is disabled", "ok6", actualValue);
-		// testing of options when tracing is re-enabled is done in testSetOptionsWhenDisabled so it is not needed here
+		assertEquals("The new option for key6 does not match the retrieved option when tracing is disabled", "ok6",
+				actualValue);
+		// testing of options when tracing is re-enabled is done in
+		// testSetOptionsWhenDisabled so it is not needed here
 	}
 
 	@Test
@@ -457,11 +484,13 @@ public class DebugOptionsTestCase {
 		// check for the value
 		actualValue = debugOptions.getOption(testKey, "not ok");
 		assertEquals("The 'default' value supplied was not returned when tracing is disabled.", "not ok", actualValue);
-		// try setting the value to "ok" (this should be a no-op and return the 'default' value)
+		// try setting the value to "ok" (this should be a no-op and return the
+		// 'default' value)
 		debugOptions.setOption(testKey, "ok");
 		actualValue = debugOptions.getOption(testKey, "not ok");
 		assertEquals("The 'default' value supplied was not returned when tracing is disabled.", "not ok", actualValue);
-		// remove the option and check for the value (it should still exist after re-enabling tracing)
+		// remove the option and check for the value (it should still exist after
+		// re-enabling tracing)
 		debugOptions.removeOption(testKey);
 		// re-enable tracing
 		debugOptions.setDebugEnabled(true);
@@ -482,11 +511,14 @@ public class DebugOptionsTestCase {
 		debugOptions.setOption(testKey, "test");
 		// check to make sure the value returned is correct
 		String actualValue = debugOptions.getOption(testKey, "default");
-		assertEquals("The correct option value was not returned from the debug option: " + testKey, "test", actualValue);
-		// remove the option and check for the value (it should not exist so the default value should be returned)
+		assertEquals("The correct option value was not returned from the debug option: " + testKey, "test",
+				actualValue);
+		// remove the option and check for the value (it should not exist so the default
+		// value should be returned)
 		debugOptions.removeOption(testKey);
 		actualValue = debugOptions.getOption(testKey, "default");
-		assertEquals("The 'default' value supplied was not returned when the key does not exist in the DebugOptions.", "default", actualValue);
+		assertEquals("The 'default' value supplied was not returned when the key does not exist in the DebugOptions.",
+				"default", actualValue);
 	}
 
 	@Test
@@ -505,11 +537,14 @@ public class DebugOptionsTestCase {
 		// set the value of this key so that a NumberFormatException will occur
 		debugOptions.setOption(testKey, "test");
 		actualValue = debugOptions.getIntegerOption(testKey, 0);
-		assertEquals("The 'default' value supplied was not returned when a NumberFormatException occurs.", 0, actualValue);
-		// remove the option and check for the value (it should not exist so the default value should be returned)
+		assertEquals("The 'default' value supplied was not returned when a NumberFormatException occurs.", 0,
+				actualValue);
+		// remove the option and check for the value (it should not exist so the default
+		// value should be returned)
 		debugOptions.removeOption(testKey);
 		actualValue = debugOptions.getIntegerOption(testKey, 0);
-		assertEquals("The 'default' value supplied was not returned when the key does not exist in the DebugOptions.", 0, actualValue);
+		assertEquals("The 'default' value supplied was not returned when the key does not exist in the DebugOptions.",
+				0, actualValue);
 	}
 
 	@Test
@@ -552,7 +587,8 @@ public class DebugOptionsTestCase {
 	@Test
 	public void testVerboseDebugging() throws IOException {
 
-		// TODO: Convert this back to {@link DebugOptions} once is/setVerbose becomes API
+		// TODO: Convert this back to {@link DebugOptions} once is/setVerbose becomes
+		// API
 		FrameworkDebugOptions fwDebugOptions = (FrameworkDebugOptions) debugOptions;
 		if (!debugOptions.isDebugEnabled()) {
 			debugOptions.setDebugEnabled(true);
@@ -571,7 +607,7 @@ public class DebugOptionsTestCase {
 			debugTrace.trace("/debug", "testing 3"); //$NON-NLS-1$ //$NON-NLS-2$
 			debugTrace.traceEntry("/debug"); //$NON-NLS-1$ //$NON-NLS-2$
 			debugTrace.traceEntry("/debug", "arg"); //$NON-NLS-1$ //$NON-NLS-2$
-			debugTrace.traceEntry("/debug", new String[] {"arg1", "arg2"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			debugTrace.traceEntry("/debug", new String[] { "arg1", "arg2" }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			debugTrace.traceExit("/debug"); //$NON-NLS-1$
 			debugTrace.traceExit("/debug", "returnValue"); //$NON-NLS-1$ //$NON-NLS-2$
 			traceOutput = readTraceFile(traceFile); // Note: this call will also delete the trace file
@@ -580,7 +616,8 @@ public class DebugOptionsTestCase {
 		}
 		// make sure all 3 entries exist
 		assertEquals("Wrong number of trace entries", 8, traceOutput.length); //$NON-NLS-1$
-		// validate the trace("/debug", "testing 1", new Exception(exceptionMessage1)) call when verbose tracing is disabled
+		// validate the trace("/debug", "testing 1", new Exception(exceptionMessage1))
+		// call when verbose tracing is disabled
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[0].getThreadName()); //$NON-NLS-1$
 		assertNull("A bundle was found when it should be null", traceOutput[0].getBundleSymbolicName()); //$NON-NLS-1$
 		assertNull("A class name was found when it should be null", traceOutput[0].getClassName()); //$NON-NLS-1$
@@ -591,9 +628,11 @@ public class DebugOptionsTestCase {
 		expectedThrowableText1.append(exceptionMessage1);
 		expectedThrowableText1.append(DebugOptionsTestCase.LINE_SEPARATOR);
 		expectedThrowableText1.append(DebugOptionsTestCase.TAB_CHARACTER);
-		expectedThrowableText1.append("at org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase.testVerboseDebugging(DebugOptionsTestCase.java:"); //$NON-NLS-1$
+		expectedThrowableText1.append(
+				"at org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase.testVerboseDebugging(DebugOptionsTestCase.java:"); //$NON-NLS-1$
 		if (!traceOutput[0].getThrowableText().startsWith(expectedThrowableText1.toString())) {
-			final StringBuilder errorMessage = new StringBuilder("The expected throwable text does not start with the actual throwable text."); //$NON-NLS-1$
+			final StringBuilder errorMessage = new StringBuilder(
+					"The expected throwable text does not start with the actual throwable text."); //$NON-NLS-1$
 			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
 			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
 			errorMessage.append("Expected"); //$NON-NLS-1$
@@ -610,11 +649,13 @@ public class DebugOptionsTestCase {
 			errorMessage.append(traceOutput[0].getThrowableText());
 			fail(errorMessage.toString());
 		}
-		// validate the trace("/debug", "testing 2") call when verbose tracing is re-enabled
+		// validate the trace("/debug", "testing 2") call when verbose tracing is
+		// re-enabled
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[1].getThreadName()); //$NON-NLS-1$
 		assertEquals("Bundle name is incorrect", getName(), traceOutput[1].getBundleSymbolicName()); //$NON-NLS-1$
 		assertEquals("option-path value is incorrect", "/debug", traceOutput[1].getOptionPath()); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), traceOutput[1].getClassName()); //$NON-NLS-1$
+		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), //$NON-NLS-1$
+				traceOutput[1].getClassName());
 		assertEquals("method name value is incorrect", "testVerboseDebugging", traceOutput[1].getMethodName()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("trace message is incorrect", "testing 2", traceOutput[1].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertNull("The throwable text was found when it should be null", traceOutput[1].getThrowableText());
@@ -627,15 +668,26 @@ public class DebugOptionsTestCase {
 		assertEquals("trace message is incorrect", "testing 3", traceOutput[2].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertNull("The throwable text was found when it should be null", traceOutput[2].getThrowableText());
 		// validate the traceEntry("/debug") call when verbose is disabled
-		assertEquals("trace message is incorrect", "Entering method org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase#testVerboseDebugging with no parameters", traceOutput[3].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("trace message is incorrect", //$NON-NLS-1$
+				"Entering method org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase#testVerboseDebugging with no parameters", //$NON-NLS-1$
+				traceOutput[3].getMessage());
 		// validate the traceEntry("/debug", "arg") call when verbose is disabled
-		assertEquals("trace message is incorrect", "Entering method org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase#testVerboseDebugging with parameters: (arg)", traceOutput[4].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
-		// validate the traceEntry("/debug", new String[] {"arg1", "arg2"}) call when verbose is disabled
-		assertEquals("trace message is incorrect", "Entering method org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase#testVerboseDebugging with parameters: (arg1 arg2)", traceOutput[5].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("trace message is incorrect", //$NON-NLS-1$
+				"Entering method org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase#testVerboseDebugging with parameters: (arg)", //$NON-NLS-1$
+				traceOutput[4].getMessage());
+		// validate the traceEntry("/debug", new String[] {"arg1", "arg2"}) call when
+		// verbose is disabled
+		assertEquals("trace message is incorrect", //$NON-NLS-1$
+				"Entering method org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase#testVerboseDebugging with parameters: (arg1 arg2)", //$NON-NLS-1$
+				traceOutput[5].getMessage());
 		// validate the traceExit("/debug") call when verbose is disabled
-		assertEquals("trace message is incorrect", "Exiting method org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase#testVerboseDebugging with a void return", traceOutput[6].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("trace message is incorrect", //$NON-NLS-1$
+				"Exiting method org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase#testVerboseDebugging with a void return", //$NON-NLS-1$
+				traceOutput[6].getMessage());
 		// validate the traceExit("/debug", "returnValue") call when verbose is disabled
-		assertEquals("trace message is incorrect", "Exiting method org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase#testVerboseDebugging with result: returnValue", traceOutput[7].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("trace message is incorrect", //$NON-NLS-1$
+				"Exiting method org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase#testVerboseDebugging with result: returnValue", //$NON-NLS-1$
+				traceOutput[7].getMessage());
 		// make sure the file is deleted
 		traceFile.delete();
 		// reset verbose debugging to the default (true)
@@ -663,7 +715,8 @@ public class DebugOptionsTestCase {
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[0].getThreadName()); //$NON-NLS-1$
 		assertEquals("Bundle name is incorrect", getName(), traceOutput[0].getBundleSymbolicName()); //$NON-NLS-1$
 		assertEquals("option-path value is incorrect", "/debug", traceOutput[0].getOptionPath()); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), traceOutput[0].getClassName()); //$NON-NLS-1$
+		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), //$NON-NLS-1$
+				traceOutput[0].getClassName());
 		assertEquals("method name value is incorrect", "testTraceFile01", traceOutput[0].getMethodName()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("trace message is incorrect", "testing 1", traceOutput[0].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertNull("throwable should be null", traceOutput[0].getThrowableText()); //$NON-NLS-1$
@@ -671,7 +724,8 @@ public class DebugOptionsTestCase {
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[1].getThreadName()); //$NON-NLS-1$
 		assertEquals("Bundle name is incorrect", getName(), traceOutput[1].getBundleSymbolicName()); //$NON-NLS-1$
 		assertEquals("option-path value is incorrect", "/debug", traceOutput[1].getOptionPath()); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), traceOutput[1].getClassName()); //$NON-NLS-1$
+		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), //$NON-NLS-1$
+				traceOutput[1].getClassName());
 		assertEquals("method name value is incorrect", "testTraceFile01", traceOutput[1].getMethodName()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("trace message is incorrect", "testing 3", traceOutput[1].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertNull("throwable should be null", traceOutput[1].getThrowableText()); //$NON-NLS-1$
@@ -704,18 +758,21 @@ public class DebugOptionsTestCase {
 		expectedThrowableText1.append(exceptionMessage1);
 		expectedThrowableText1.append(DebugOptionsTestCase.LINE_SEPARATOR);
 		expectedThrowableText1.append(DebugOptionsTestCase.TAB_CHARACTER);
-		expectedThrowableText1.append("at org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase.testTraceFile02(DebugOptionsTestCase.java:"); //$NON-NLS-1$
+		expectedThrowableText1.append(
+				"at org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase.testTraceFile02(DebugOptionsTestCase.java:"); //$NON-NLS-1$
 
 		assertEquals("Wrong number of trace entries", 2, traceOutput.length); //$NON-NLS-1$
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[0].getThreadName()); //$NON-NLS-1$
 		assertEquals("Bundle name is incorrect", getName(), traceOutput[0].getBundleSymbolicName()); //$NON-NLS-1$
 		assertEquals("option-path value is incorrect", "/debug", traceOutput[0].getOptionPath()); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), traceOutput[0].getClassName()); //$NON-NLS-1$
+		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), //$NON-NLS-1$
+				traceOutput[0].getClassName());
 		assertEquals("method name value is incorrect", "testTraceFile02", traceOutput[0].getMethodName()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("trace message is incorrect", "testing 1", traceOutput[0].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertNotNull("throwable text should not be null", traceOutput[0].getThrowableText()); //$NON-NLS-1$
 		if (!traceOutput[0].getThrowableText().startsWith(expectedThrowableText1.toString())) {
-			final StringBuilder errorMessage = new StringBuilder("The expected throwable text does not start with the actual throwable text."); //$NON-NLS-1$
+			final StringBuilder errorMessage = new StringBuilder(
+					"The expected throwable text does not start with the actual throwable text."); //$NON-NLS-1$
 			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
 			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
 			errorMessage.append("Expected"); //$NON-NLS-1$
@@ -739,17 +796,20 @@ public class DebugOptionsTestCase {
 		expectedThrowableText2.append(exceptionMessage3);
 		expectedThrowableText2.append(DebugOptionsTestCase.LINE_SEPARATOR);
 		expectedThrowableText2.append(DebugOptionsTestCase.TAB_CHARACTER);
-		expectedThrowableText2.append("at org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase.testTraceFile02(DebugOptionsTestCase.java:"); //$NON-NLS-1$
+		expectedThrowableText2.append(
+				"at org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase.testTraceFile02(DebugOptionsTestCase.java:"); //$NON-NLS-1$
 
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[1].getThreadName()); //$NON-NLS-1$
 		assertEquals("Bundle name is incorrect", getName(), traceOutput[1].getBundleSymbolicName()); //$NON-NLS-1$
 		assertEquals("option-path value is incorrect", "/debug", traceOutput[1].getOptionPath()); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), traceOutput[1].getClassName()); //$NON-NLS-1$
+		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), //$NON-NLS-1$
+				traceOutput[1].getClassName());
 		assertEquals("method name value is incorrect", "testTraceFile02", traceOutput[1].getMethodName()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("trace message is incorrect", "testing 3", traceOutput[1].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertNotNull("throwable text should not be null", traceOutput[1].getThrowableText()); //$NON-NLS-1$
 		if (!traceOutput[1].getThrowableText().startsWith(expectedThrowableText2.toString())) {
-			final StringBuilder errorMessage = new StringBuilder("The expected throwable text does not start with the actual throwable text."); //$NON-NLS-1$
+			final StringBuilder errorMessage = new StringBuilder(
+					"The expected throwable text does not start with the actual throwable text."); //$NON-NLS-1$
 			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
 			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
 			errorMessage.append("Expected"); //$NON-NLS-1$
@@ -792,7 +852,8 @@ public class DebugOptionsTestCase {
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[0].getThreadName()); //$NON-NLS-1$
 		assertEquals("Bundle name is incorrect", getName(), traceOutput[0].getBundleSymbolicName()); //$NON-NLS-1$
 		assertEquals("option-path value is incorrect", "/debug", traceOutput[0].getOptionPath()); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), traceOutput[0].getClassName()); //$NON-NLS-1$
+		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), //$NON-NLS-1$
+				traceOutput[0].getClassName());
 		assertEquals("method name value is incorrect", "testTraceFile03", traceOutput[0].getMethodName()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertTrue("Trace message is not a stack dump", traceOutput[0].getMessage().startsWith("Thread Stack dump: ")); //$NON-NLS-1$ //$NON-NLS-2$
 		assertNull("throwable should be null", traceOutput[0].getThrowableText()); //$NON-NLS-1$
@@ -800,7 +861,8 @@ public class DebugOptionsTestCase {
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[1].getThreadName()); //$NON-NLS-1$
 		assertEquals("Bundle name is incorrect", getName(), traceOutput[1].getBundleSymbolicName()); //$NON-NLS-1$
 		assertEquals("option-path value is incorrect", "/debug", traceOutput[1].getOptionPath()); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), traceOutput[1].getClassName()); //$NON-NLS-1$
+		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), //$NON-NLS-1$
+				traceOutput[1].getClassName());
 		assertEquals("method name value is incorrect", "testTraceFile03", traceOutput[1].getMethodName()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertTrue("Trace message is not a stack dump", traceOutput[1].getMessage().startsWith("Thread Stack dump: ")); //$NON-NLS-1$ //$NON-NLS-2$
 		assertNull("throwable should be null", traceOutput[1].getThrowableText()); //$NON-NLS-1$
@@ -829,7 +891,8 @@ public class DebugOptionsTestCase {
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[0].getThreadName()); //$NON-NLS-1$
 		assertEquals("Bundle name is incorrect", getName(), traceOutput[0].getBundleSymbolicName()); //$NON-NLS-1$
 		assertEquals("option-path value is incorrect", "/debug", traceOutput[0].getOptionPath()); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), traceOutput[0].getClassName()); //$NON-NLS-1$
+		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), //$NON-NLS-1$
+				traceOutput[0].getClassName());
 		assertEquals("method name value is incorrect", "testTraceFile04", traceOutput[0].getMethodName()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("Trace message is not correct", "Entering method with no parameters", traceOutput[0].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertNull("throwable should be null", traceOutput[0].getThrowableText()); //$NON-NLS-1$
@@ -837,7 +900,8 @@ public class DebugOptionsTestCase {
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[1].getThreadName()); //$NON-NLS-1$
 		assertEquals("Bundle name is incorrect", getName(), traceOutput[1].getBundleSymbolicName()); //$NON-NLS-1$
 		assertEquals("option-path value is incorrect", "/debug", traceOutput[1].getOptionPath()); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), traceOutput[1].getClassName()); //$NON-NLS-1$
+		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), //$NON-NLS-1$
+				traceOutput[1].getClassName());
 		assertEquals("method name value is incorrect", "testTraceFile04", traceOutput[1].getMethodName()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("Trace message is not correct", "Entering method with no parameters", traceOutput[1].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertNull("throwable should be null", traceOutput[1].getThrowableText()); //$NON-NLS-1$
@@ -866,17 +930,21 @@ public class DebugOptionsTestCase {
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[0].getThreadName()); //$NON-NLS-1$
 		assertEquals("Bundle name is incorrect", getName(), traceOutput[0].getBundleSymbolicName()); //$NON-NLS-1$
 		assertEquals("option-path value is incorrect", "/debug", traceOutput[0].getOptionPath()); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), traceOutput[0].getClassName()); //$NON-NLS-1$
+		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), //$NON-NLS-1$
+				traceOutput[0].getClassName());
 		assertEquals("method name value is incorrect", "testTraceFile05", traceOutput[0].getMethodName()); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("Trace message is not correct", "Entering method with parameters: (arg1)", traceOutput[0].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Trace message is not correct", "Entering method with parameters: (arg1)", //$NON-NLS-1$ //$NON-NLS-2$
+				traceOutput[0].getMessage());
 		assertNull("throwable should be null", traceOutput[0].getThrowableText()); //$NON-NLS-1$
 		assertEquals("Wrong number of trace entries for trace without an exception", 2, traceOutput.length); //$NON-NLS-1$
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[1].getThreadName()); //$NON-NLS-1$
 		assertEquals("Bundle name is incorrect", getName(), traceOutput[1].getBundleSymbolicName()); //$NON-NLS-1$
 		assertEquals("option-path value is incorrect", "/debug", traceOutput[1].getOptionPath()); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), traceOutput[1].getClassName()); //$NON-NLS-1$
+		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), //$NON-NLS-1$
+				traceOutput[1].getClassName());
 		assertEquals("method name value is incorrect", "testTraceFile05", traceOutput[1].getMethodName()); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("Trace message is not correct", "Entering method with parameters: (arg3)", traceOutput[1].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Trace message is not correct", "Entering method with parameters: (arg3)", //$NON-NLS-1$ //$NON-NLS-2$
+				traceOutput[1].getMessage());
 		assertNull("throwable should be null", traceOutput[1].getThrowableText()); //$NON-NLS-1$
 		// delete the trace file
 		traceFile.delete();
@@ -892,9 +960,9 @@ public class DebugOptionsTestCase {
 		TestDebugTrace debugTrace = this.createDebugTrace(traceFile);
 		TraceEntry[] traceOutput = null;
 		try {
-			debugTrace.traceEntry("/debug", new String[] {"arg1", "arg2"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			debugTrace.traceEntry("/notset", new String[] {"arg3", "arg4"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			debugTrace.traceEntry("/debug", new String[] {"arg5", "arg6"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			debugTrace.traceEntry("/debug", new String[] { "arg1", "arg2" }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			debugTrace.traceEntry("/notset", new String[] { "arg3", "arg4" }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			debugTrace.traceEntry("/debug", new String[] { "arg5", "arg6" }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			traceOutput = readTraceFile(traceFile); // Note: this call will also delete the trace file
 		} catch (InvalidTraceEntry invalidEx) {
 			failWithInvalidTrace("DebugTrace.traceEntry(option, methodArgument[])", invalidEx);
@@ -903,17 +971,21 @@ public class DebugOptionsTestCase {
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[0].getThreadName()); //$NON-NLS-1$
 		assertEquals("Bundle name is incorrect", getName(), traceOutput[0].getBundleSymbolicName()); //$NON-NLS-1$
 		assertEquals("option-path value is incorrect", "/debug", traceOutput[0].getOptionPath()); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), traceOutput[0].getClassName()); //$NON-NLS-1$
+		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), //$NON-NLS-1$
+				traceOutput[0].getClassName());
 		assertEquals("method name value is incorrect", "testTraceFile06", traceOutput[0].getMethodName()); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("Trace message is not correct", "Entering method with parameters: (arg1 arg2)", traceOutput[0].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Trace message is not correct", "Entering method with parameters: (arg1 arg2)", //$NON-NLS-1$ //$NON-NLS-2$
+				traceOutput[0].getMessage());
 		assertNull("throwable should be null", traceOutput[0].getThrowableText()); //$NON-NLS-1$
 		assertEquals("Wrong number of trace entries for trace without an exception", 2, traceOutput.length); //$NON-NLS-1$
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[1].getThreadName()); //$NON-NLS-1$
 		assertEquals("Bundle name is incorrect", getName(), traceOutput[1].getBundleSymbolicName()); //$NON-NLS-1$
 		assertEquals("option-path value is incorrect", "/debug", traceOutput[1].getOptionPath()); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), traceOutput[1].getClassName()); //$NON-NLS-1$
+		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), //$NON-NLS-1$
+				traceOutput[1].getClassName());
 		assertEquals("method name value is incorrect", "testTraceFile06", traceOutput[1].getMethodName()); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("Trace message is not correct", "Entering method with parameters: (arg5 arg6)", traceOutput[1].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Trace message is not correct", "Entering method with parameters: (arg5 arg6)", //$NON-NLS-1$ //$NON-NLS-2$
+				traceOutput[1].getMessage());
 		assertNull("throwable should be null", traceOutput[1].getThrowableText()); //$NON-NLS-1$
 		// delete the trace file
 		traceFile.delete();
@@ -981,7 +1053,8 @@ public class DebugOptionsTestCase {
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[0].getThreadName()); //$NON-NLS-1$
 		assertEquals("Bundle name is incorrect", getName(), traceOutput[0].getBundleSymbolicName()); //$NON-NLS-1$
 		assertEquals("option-path value is incorrect", "/debug", traceOutput[0].getOptionPath()); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), traceOutput[0].getClassName()); //$NON-NLS-1$
+		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), //$NON-NLS-1$
+				traceOutput[0].getClassName());
 		assertEquals("method name value is incorrect", "testTraceFile07", traceOutput[0].getMethodName()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("Trace message is not correct", "Exiting method with a void return", traceOutput[0].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertNull("throwable should be null", traceOutput[0].getThrowableText()); //$NON-NLS-1$
@@ -989,7 +1062,8 @@ public class DebugOptionsTestCase {
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[1].getThreadName()); //$NON-NLS-1$
 		assertEquals("Bundle name is incorrect", getName(), traceOutput[1].getBundleSymbolicName()); //$NON-NLS-1$
 		assertEquals("option-path value is incorrect", "/debug", traceOutput[1].getOptionPath()); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), traceOutput[1].getClassName()); //$NON-NLS-1$
+		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), //$NON-NLS-1$
+				traceOutput[1].getClassName());
 		assertEquals("method name value is incorrect", "testTraceFile07", traceOutput[1].getMethodName()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("Trace message is not correct", "Exiting method with a void return", traceOutput[1].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertNull("throwable should be null", traceOutput[1].getThrowableText()); //$NON-NLS-1$
@@ -1018,17 +1092,21 @@ public class DebugOptionsTestCase {
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[0].getThreadName()); //$NON-NLS-1$
 		assertEquals("Bundle name is incorrect", getName(), traceOutput[0].getBundleSymbolicName()); //$NON-NLS-1$
 		assertEquals("option-path value is incorrect", "/debug", traceOutput[0].getOptionPath()); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), traceOutput[0].getClassName()); //$NON-NLS-1$
+		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), //$NON-NLS-1$
+				traceOutput[0].getClassName());
 		assertEquals("method name value is incorrect", "testTraceFile08", traceOutput[0].getMethodName()); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("Trace message is not correct", "Exiting method with result: returnValue1", traceOutput[0].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Trace message is not correct", "Exiting method with result: returnValue1", //$NON-NLS-1$ //$NON-NLS-2$
+				traceOutput[0].getMessage());
 		assertNull("throwable should be null", traceOutput[0].getThrowableText()); //$NON-NLS-1$
 		assertEquals("Wrong number of trace entries for trace without an exception", 2, traceOutput.length); //$NON-NLS-1$
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[1].getThreadName()); //$NON-NLS-1$
 		assertEquals("Bundle name is incorrect", getName(), traceOutput[1].getBundleSymbolicName()); //$NON-NLS-1$
 		assertEquals("option-path value is incorrect", "/debug", traceOutput[1].getOptionPath()); //$NON-NLS-1$//$NON-NLS-2$
-		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), traceOutput[1].getClassName()); //$NON-NLS-1$
+		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), //$NON-NLS-1$
+				traceOutput[1].getClassName());
 		assertEquals("method name value is incorrect", "testTraceFile08", traceOutput[1].getMethodName()); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("Trace message is not correct", "Exiting method with result: returnValue3", traceOutput[1].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Trace message is not correct", "Exiting method with result: returnValue3", //$NON-NLS-1$ //$NON-NLS-2$
+				traceOutput[1].getMessage());
 		assertNull("throwable should be null", traceOutput[1].getThrowableText()); //$NON-NLS-1$
 		// delete the trace file
 		traceFile.delete();
@@ -1116,7 +1194,8 @@ public class DebugOptionsTestCase {
 		final StringBuilder tempBuffer = new StringBuilder(inputString);
 		int currentIndex = tempBuffer.indexOf(TRACE_ELEMENT_DELIMITER_ENCODED);
 		while (currentIndex >= 0) {
-			tempBuffer.replace(currentIndex, currentIndex + TRACE_ELEMENT_DELIMITER_ENCODED.length(), TRACE_ELEMENT_DELIMITER);
+			tempBuffer.replace(currentIndex, currentIndex + TRACE_ELEMENT_DELIMITER_ENCODED.length(),
+					TRACE_ELEMENT_DELIMITER);
 			currentIndex = tempBuffer.indexOf(TRACE_ELEMENT_DELIMITER_ENCODED);
 		}
 		return tempBuffer.toString();
@@ -1128,7 +1207,8 @@ public class DebugOptionsTestCase {
 		List traceEntries = new ArrayList();
 		this.verboseDebug = true; // default is true
 		try {
-			traceReader = new BufferedReader(new InputStreamReader(new FileInputStream(traceFile), StandardCharsets.UTF_8));
+			traceReader = new BufferedReader(
+					new InputStreamReader(new FileInputStream(traceFile), StandardCharsets.UTF_8));
 			TraceEntry entry = null;
 			while ((entry = this.readMessage(traceReader)) != null) {
 				traceEntries.add(entry);
@@ -1188,7 +1268,8 @@ public class DebugOptionsTestCase {
 					// third entry - bundle symbolic name
 					symbolicName = this.readEntry(traceReader);
 					if ((symbolicName == null) || (symbolicName.length() == 0)) {
-						throw new InvalidTraceEntry("The bundle symbolic name in a trace entry is null or empty", symbolicName); //$NON-NLS-1$
+						throw new InvalidTraceEntry("The bundle symbolic name in a trace entry is null or empty", //$NON-NLS-1$
+								symbolicName);
 					}
 					// fourth entry - option path
 					optionPath = this.readEntry(traceReader);
@@ -1208,13 +1289,15 @@ public class DebugOptionsTestCase {
 					// seventh entry - line number
 					final String lineNumberString = this.readEntry(traceReader);
 					if ((lineNumberString == null) || (lineNumberString.length() == 0)) {
-						throw new InvalidTraceEntry("The line number in a trace entry is null or empty", lineNumberString); //$NON-NLS-1$
+						throw new InvalidTraceEntry("The line number in a trace entry is null or empty", //$NON-NLS-1$
+								lineNumberString);
 					}
 					lineNumber = Integer.valueOf(lineNumberString).intValue();
 				}
-				// eighth entry - message  (valid if verbose debugging is off)
+				// eighth entry - message (valid if verbose debugging is off)
 				final String message = this.readEntry(traceReader);
-				// read in the next character. if it is \r or \n then the throwable was not supplied  (valid if verbose debugging is off)
+				// read in the next character. if it is \r or \n then the throwable was not
+				// supplied (valid if verbose debugging is off)
 				traceReader.mark(1);
 				inputChar = (char) traceReader.read();
 				String throwable = null;
@@ -1227,7 +1310,8 @@ public class DebugOptionsTestCase {
 					}
 				}
 				// create the entry
-				result = new TraceEntry(threadName, timestamp, symbolicName, optionPath, className, methodName, lineNumber, message, throwable);
+				result = new TraceEntry(threadName, timestamp, symbolicName, optionPath, className, methodName,
+						lineNumber, message, throwable);
 				break; // no point in reading any more information since the TraceEntry is created
 			}
 			// read the next character
@@ -1257,7 +1341,10 @@ public class DebugOptionsTestCase {
 	}
 
 	static public class TraceEntry {
-		/** If a bundles symbolic name is not specified then the default value of /debug can be used */
+		/**
+		 * If a bundles symbolic name is not specified then the default value of /debug
+		 * can be used
+		 */
 		public final static String DEFAULT_OPTION_PATH = "/debug"; //$NON-NLS-1$
 
 		/**
@@ -1305,7 +1392,9 @@ public class DebugOptionsTestCase {
 		 */
 		private final String throwableText;
 
-		public TraceEntry(final String traceThreadName, final long traceTimestamp, final String traceBundleName, final String traceOptionPath, final String traceClassName, final String traceMethodName, final int traceLineNumber, final String traceMessage) {
+		public TraceEntry(final String traceThreadName, final long traceTimestamp, final String traceBundleName,
+				final String traceOptionPath, final String traceClassName, final String traceMethodName,
+				final int traceLineNumber, final String traceMessage) {
 
 			this.threadName = traceThreadName;
 			this.bundleSymbolicName = traceBundleName;
@@ -1318,7 +1407,9 @@ public class DebugOptionsTestCase {
 			this.throwableText = null;
 		}
 
-		public TraceEntry(final String traceThreadName, final long traceTimestamp, final String traceBundleName, final String traceOptionPath, final String traceClassName, final String traceMethodName, final int traceLineNumber, final String traceMessage, final String traceThrowable) {
+		public TraceEntry(final String traceThreadName, final long traceTimestamp, final String traceBundleName,
+				final String traceOptionPath, final String traceClassName, final String traceMethodName,
+				final int traceLineNumber, final String traceMessage, final String traceThrowable) {
 
 			this.threadName = traceThreadName;
 			this.bundleSymbolicName = traceBundleName;
