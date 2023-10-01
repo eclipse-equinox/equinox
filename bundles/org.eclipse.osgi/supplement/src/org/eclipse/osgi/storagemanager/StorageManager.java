@@ -277,7 +277,7 @@ public final class StorageManager {
 					int generation = Integer.parseInt(file.substring(len));
 					if (generation > oldestGeneration)
 						oldestGeneration = generation;
-				}catch (NumberFormatException e) {
+				} catch (NumberFormatException e) {
 					continue;
 				}
 			}

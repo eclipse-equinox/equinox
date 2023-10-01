@@ -218,7 +218,7 @@ public class ReliableFile {
 					try {
 						int id = Integer.parseInt(candidateFile.substring(prefixLen));
 						list.add(Integer.valueOf(id));
-					}catch (NumberFormatException e) {/*ignore*/
+					} catch (NumberFormatException e) {/*ignore*/
 					}
 				}
 			}
@@ -561,7 +561,7 @@ public class ReliableFile {
 				try {
 					Integer.parseInt(candidateFile.substring(prefixLen));
 					return true;
-				}catch (NumberFormatException e) {/*ignore*/
+				} catch (NumberFormatException e) {/*ignore*/
 				}
 			}
 		}
