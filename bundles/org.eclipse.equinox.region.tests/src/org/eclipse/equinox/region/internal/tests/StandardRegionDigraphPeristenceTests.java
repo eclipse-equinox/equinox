@@ -122,7 +122,8 @@ public class StandardRegionDigraphPeristenceTests {
 		Assert.assertEquals(b, p);
 		// TODO seems testing this will require a reference handler to be present
 		// b = boot.installBundle("file:dynamic.add.a.2");
-		// boot.addBundle(b); // needed because we don't have a bundle hook to add it for us
+		// boot.addBundle(b); // needed because we don't have a bundle hook to add it
+		// for us
 
 		RegionDigraph copy = copy(digraph);
 		Region bootCopy = copy.getRegion(BOOT_REGION);
@@ -210,9 +211,12 @@ public class StandardRegionDigraphPeristenceTests {
 		RegionFilterBuilder builder = digraph.createRegionFilterBuilder();
 		for (String param : input) {
 			builder.allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(bundle-symbolic-name=" + param + ")");
-			builder.allow(RegionFilter.VISIBLE_HOST_NAMESPACE, "(" + RegionFilter.VISIBLE_HOST_NAMESPACE + "=" + param + ")");
-			builder.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=" + param + ")");
-			builder.allow(RegionFilter.VISIBLE_REQUIRE_NAMESPACE, "(" + RegionFilter.VISIBLE_REQUIRE_NAMESPACE + "=" + param + ")");
+			builder.allow(RegionFilter.VISIBLE_HOST_NAMESPACE,
+					"(" + RegionFilter.VISIBLE_HOST_NAMESPACE + "=" + param + ")");
+			builder.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE,
+					"(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=" + param + ")");
+			builder.allow(RegionFilter.VISIBLE_REQUIRE_NAMESPACE,
+					"(" + RegionFilter.VISIBLE_REQUIRE_NAMESPACE + "=" + param + ")");
 			builder.allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(" + Constants.OBJECTCLASS + "=" + param + ")");
 		}
 		return builder.build();

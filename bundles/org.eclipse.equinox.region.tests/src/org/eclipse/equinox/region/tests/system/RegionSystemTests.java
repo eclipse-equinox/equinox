@@ -75,9 +75,14 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		bundles.add(bundleInstaller.installBundle(CC1, testRegion));
 
 		// Import the system bundle from the systemRegion
-		digraph.connect(testRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build(), systemRegion);
+		digraph.connect(testRegion,
+				digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build(),
+				systemRegion);
 		// must import Boolean services into systemRegion to test
-		digraph.connect(systemRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build(), testRegion);
+		digraph.connect(systemRegion,
+				digraph.createRegionFilterBuilder()
+						.allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build(),
+				testRegion);
 
 		bundleInstaller.resolveBundles(bundles.toArray(new Bundle[bundles.size()]));
 		for (Bundle bundle : bundles) {
@@ -85,8 +90,10 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			bundle.start();
 		}
 		BundleContext context = getContext();
-		ServiceTracker<Boolean, Boolean> cp2Tracker = new ServiceTracker<>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + cp2.getBundleId() + "))"), null);
-		ServiceTracker<Boolean, Boolean> sc1Tracker = new ServiceTracker<>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + sc1.getBundleId() + "))"), null);
+		ServiceTracker<Boolean, Boolean> cp2Tracker = new ServiceTracker<>(context,
+				context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + cp2.getBundleId() + "))"), null);
+		ServiceTracker<Boolean, Boolean> sc1Tracker = new ServiceTracker<>(context,
+				context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + sc1.getBundleId() + "))"), null);
 
 		cp2Tracker.open();
 		sc1Tracker.open();
@@ -107,9 +114,14 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			Region testRegion = digraph.createRegion(location);
 			bundles.put(location, bundleInstaller.installBundle(location, testRegion));
 			// Import the system bundle from the systemRegion
-			digraph.connect(testRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build(), systemRegion);
+			digraph.connect(testRegion,
+					digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build(),
+					systemRegion);
 			// must import Boolean services into systemRegion to test
-			digraph.connect(systemRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build(), testRegion);
+			digraph.connect(systemRegion,
+					digraph.createRegionFilterBuilder()
+							.allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build(),
+					testRegion);
 		}
 
 		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
@@ -125,23 +137,59 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 
 		// now make the necessary connections
 		// SP1
-		digraph.connect(digraph.getRegion(SP1), digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg1.*)").build(), digraph.getRegion(PP1));
+		digraph.connect(digraph.getRegion(SP1),
+				digraph.createRegionFilterBuilder()
+						.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE,
+								"(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg1.*)")
+						.build(),
+				digraph.getRegion(PP1));
 		// PP2
-		digraph.connect(digraph.getRegion(PP2), digraph.createRegionFilterBuilder().allow(CP1, "(name=" + CP1 + ")").build(), digraph.getRegion(CP1));
+		digraph.connect(digraph.getRegion(PP2),
+				digraph.createRegionFilterBuilder().allow(CP1, "(name=" + CP1 + ")").build(), digraph.getRegion(CP1));
 		// SP2
-		digraph.connect(digraph.getRegion(SP2), digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg2.*)").build(), digraph.getRegion(PP2));
+		digraph.connect(digraph.getRegion(SP2),
+				digraph.createRegionFilterBuilder()
+						.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE,
+								"(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg2.*)")
+						.build(),
+				digraph.getRegion(PP2));
 		// CP2
-		digraph.connect(digraph.getRegion(CP2), digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg1.*)").build(), digraph.getRegion(PP1));
-		digraph.connect(digraph.getRegion(CP2), digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(" + Constants.OBJECTCLASS + "=pkg1.*)").build(), digraph.getRegion(SP1));
+		digraph.connect(digraph.getRegion(CP2),
+				digraph.createRegionFilterBuilder()
+						.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE,
+								"(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg1.*)")
+						.build(),
+				digraph.getRegion(PP1));
+		digraph.connect(digraph.getRegion(CP2), digraph.createRegionFilterBuilder()
+				.allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(" + Constants.OBJECTCLASS + "=pkg1.*)").build(),
+				digraph.getRegion(SP1));
 		// PC1
-		digraph.connect(digraph.getRegion(PC1), digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg2.*)").build(), digraph.getRegion(PP2));
+		digraph.connect(digraph.getRegion(PC1),
+				digraph.createRegionFilterBuilder()
+						.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE,
+								"(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg2.*)")
+						.build(),
+				digraph.getRegion(PP2));
 		// BC1
-		digraph.connect(digraph.getRegion(BC1), digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_REQUIRE_NAMESPACE, "(" + RegionFilter.VISIBLE_REQUIRE_NAMESPACE + "=" + PP2 + ")").build(), digraph.getRegion(PP2));
+		digraph.connect(digraph.getRegion(BC1),
+				digraph.createRegionFilterBuilder()
+						.allow(RegionFilter.VISIBLE_REQUIRE_NAMESPACE,
+								"(" + RegionFilter.VISIBLE_REQUIRE_NAMESPACE + "=" + PP2 + ")")
+						.build(),
+				digraph.getRegion(PP2));
 		// SC1
-		digraph.connect(digraph.getRegion(SC1), digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg2.*)").build(), digraph.getRegion(PP2));
-		digraph.connect(digraph.getRegion(SC1), digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(" + Constants.OBJECTCLASS + "=pkg2.*)").build(), digraph.getRegion(SP2));
+		digraph.connect(digraph.getRegion(SC1),
+				digraph.createRegionFilterBuilder()
+						.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE,
+								"(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg2.*)")
+						.build(),
+				digraph.getRegion(PP2));
+		digraph.connect(digraph.getRegion(SC1), digraph.createRegionFilterBuilder()
+				.allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(" + Constants.OBJECTCLASS + "=pkg2.*)").build(),
+				digraph.getRegion(SP2));
 		// CC1
-		digraph.connect(digraph.getRegion(CC1), digraph.createRegionFilterBuilder().allow(CP2, "(name=" + CP2 + ")").build(), digraph.getRegion(CP2));
+		digraph.connect(digraph.getRegion(CC1),
+				digraph.createRegionFilterBuilder().allow(CP2, "(name=" + CP2 + ")").build(), digraph.getRegion(CP2));
 
 		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
 		for (Bundle bundle : bundles.values()) {
@@ -149,8 +197,10 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			bundle.start();
 		}
 		BundleContext context = getContext();
-		ServiceTracker<Boolean, Boolean> cp2Tracker = new ServiceTracker<>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + bundles.get(CP2).getBundleId() + "))"), null);
-		ServiceTracker<Boolean, Boolean> sc1Tracker = new ServiceTracker<>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + bundles.get(SC1).getBundleId() + "))"), null);
+		ServiceTracker<Boolean, Boolean> cp2Tracker = new ServiceTracker<>(context, context.createFilter(
+				"(&(objectClass=java.lang.Boolean)(bundle.id=" + bundles.get(CP2).getBundleId() + "))"), null);
+		ServiceTracker<Boolean, Boolean> sc1Tracker = new ServiceTracker<>(context, context.createFilter(
+				"(&(objectClass=java.lang.Boolean)(bundle.id=" + bundles.get(SC1).getBundleId() + "))"), null);
 
 		cp2Tracker.open();
 		sc1Tracker.open();
@@ -161,96 +211,106 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		sc1Tracker.close();
 	}
 
-	//	public void testPersistence() throws BundleException, InvalidSyntaxException {
-	//		// get the system region
-	//		Region systemRegion = digraph.getRegion(0);
-	//		Map<String, Bundle> bundles = new HashMap<String, Bundle>();
-	//		// create a disconnected test region for each test bundle
-	//		for (String location : ALL) {
-	//			Region testRegion = digraph.createRegion(location);
-	//			bundles.put(location, bundleInstaller.installBundle(location, testRegion));
-	//			// Import the system bundle from the systemRegion
-	//			digraph.connect(testRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build(), systemRegion);
-	//			// must import Boolean services into systemRegion to test
-	//			digraph.connect(systemRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build(), testRegion);
-	//		}
+	// public void testPersistence() throws BundleException, InvalidSyntaxException
+	// {
+	// // get the system region
+	// Region systemRegion = digraph.getRegion(0);
+	// Map<String, Bundle> bundles = new HashMap<String, Bundle>();
+	// // create a disconnected test region for each test bundle
+	// for (String location : ALL) {
+	// Region testRegion = digraph.createRegion(location);
+	// bundles.put(location, bundleInstaller.installBundle(location, testRegion));
+	// // Import the system bundle from the systemRegion
+	// digraph.connect(testRegion,
+	// digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE,
+	// "(id=0)").build(), systemRegion);
+	// // must import Boolean services into systemRegion to test
+	// digraph.connect(systemRegion,
+	// digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE,
+	// "(objectClass=java.lang.Boolean)").build(), testRegion);
+	// }
 	//
-	//		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
-	//		assertEquals(PP1, Bundle.RESOLVED, bundles.get(PP1).getState());
-	//		assertEquals(SP1, Bundle.INSTALLED, bundles.get(SP1).getState());
-	//		assertEquals(CP1, Bundle.RESOLVED, bundles.get(CP1).getState());
-	//		assertEquals(PP2, Bundle.INSTALLED, bundles.get(PP2).getState());
-	//		assertEquals(SP2, Bundle.INSTALLED, bundles.get(SP2).getState());
-	//		assertEquals(CP2, Bundle.INSTALLED, bundles.get(CP2).getState());
-	//		assertEquals(BC1, Bundle.INSTALLED, bundles.get(BC1).getState());
-	//		assertEquals(SC1, Bundle.INSTALLED, bundles.get(SC1).getState());
-	//		assertEquals(CC1, Bundle.INSTALLED, bundles.get(CC1).getState());
+	// bundleInstaller.resolveBundles(bundles.values().toArray(new
+	// Bundle[bundles.size()]));
+	// assertEquals(PP1, Bundle.RESOLVED, bundles.get(PP1).getState());
+	// assertEquals(SP1, Bundle.INSTALLED, bundles.get(SP1).getState());
+	// assertEquals(CP1, Bundle.RESOLVED, bundles.get(CP1).getState());
+	// assertEquals(PP2, Bundle.INSTALLED, bundles.get(PP2).getState());
+	// assertEquals(SP2, Bundle.INSTALLED, bundles.get(SP2).getState());
+	// assertEquals(CP2, Bundle.INSTALLED, bundles.get(CP2).getState());
+	// assertEquals(BC1, Bundle.INSTALLED, bundles.get(BC1).getState());
+	// assertEquals(SC1, Bundle.INSTALLED, bundles.get(SC1).getState());
+	// assertEquals(CC1, Bundle.INSTALLED, bundles.get(CC1).getState());
 	//
-	//		regionBundle.stop();
-	//		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
-	//		assertEquals(PP1, Bundle.RESOLVED, bundles.get(PP1).getState());
-	//		assertEquals(SP1, Bundle.RESOLVED, bundles.get(SP1).getState());
-	//		assertEquals(CP1, Bundle.RESOLVED, bundles.get(CP1).getState());
-	//		assertEquals(PP2, Bundle.RESOLVED, bundles.get(PP2).getState());
-	//		assertEquals(SP2, Bundle.RESOLVED, bundles.get(SP2).getState());
-	//		assertEquals(CP2, Bundle.RESOLVED, bundles.get(CP2).getState());
-	//		assertEquals(BC1, Bundle.RESOLVED, bundles.get(BC1).getState());
-	//		assertEquals(SC1, Bundle.RESOLVED, bundles.get(SC1).getState());
-	//		assertEquals(CC1, Bundle.RESOLVED, bundles.get(CC1).getState());
+	// regionBundle.stop();
+	// bundleInstaller.resolveBundles(bundles.values().toArray(new
+	// Bundle[bundles.size()]));
+	// assertEquals(PP1, Bundle.RESOLVED, bundles.get(PP1).getState());
+	// assertEquals(SP1, Bundle.RESOLVED, bundles.get(SP1).getState());
+	// assertEquals(CP1, Bundle.RESOLVED, bundles.get(CP1).getState());
+	// assertEquals(PP2, Bundle.RESOLVED, bundles.get(PP2).getState());
+	// assertEquals(SP2, Bundle.RESOLVED, bundles.get(SP2).getState());
+	// assertEquals(CP2, Bundle.RESOLVED, bundles.get(CP2).getState());
+	// assertEquals(BC1, Bundle.RESOLVED, bundles.get(BC1).getState());
+	// assertEquals(SC1, Bundle.RESOLVED, bundles.get(SC1).getState());
+	// assertEquals(CC1, Bundle.RESOLVED, bundles.get(CC1).getState());
 	//
-	//		startRegionBundle();
+	// startRegionBundle();
 	//
-	//		bundleInstaller.refreshPackages(bundles.values().toArray(new Bundle[bundles.size()]));
-	//		assertEquals(PP1, Bundle.RESOLVED, bundles.get(PP1).getState());
-	//		assertEquals(SP1, Bundle.INSTALLED, bundles.get(SP1).getState());
-	//		assertEquals(CP1, Bundle.RESOLVED, bundles.get(CP1).getState());
-	//		assertEquals(PP2, Bundle.INSTALLED, bundles.get(PP2).getState());
-	//		assertEquals(SP2, Bundle.INSTALLED, bundles.get(SP2).getState());
-	//		assertEquals(CP2, Bundle.INSTALLED, bundles.get(CP2).getState());
-	//		assertEquals(BC1, Bundle.INSTALLED, bundles.get(BC1).getState());
-	//		assertEquals(SC1, Bundle.INSTALLED, bundles.get(SC1).getState());
-	//		assertEquals(CC1, Bundle.INSTALLED, bundles.get(CC1).getState());
-	//	}
+	// bundleInstaller.refreshPackages(bundles.values().toArray(new
+	// Bundle[bundles.size()]));
+	// assertEquals(PP1, Bundle.RESOLVED, bundles.get(PP1).getState());
+	// assertEquals(SP1, Bundle.INSTALLED, bundles.get(SP1).getState());
+	// assertEquals(CP1, Bundle.RESOLVED, bundles.get(CP1).getState());
+	// assertEquals(PP2, Bundle.INSTALLED, bundles.get(PP2).getState());
+	// assertEquals(SP2, Bundle.INSTALLED, bundles.get(SP2).getState());
+	// assertEquals(CP2, Bundle.INSTALLED, bundles.get(CP2).getState());
+	// assertEquals(BC1, Bundle.INSTALLED, bundles.get(BC1).getState());
+	// assertEquals(SC1, Bundle.INSTALLED, bundles.get(SC1).getState());
+	// assertEquals(CC1, Bundle.INSTALLED, bundles.get(CC1).getState());
+	// }
 	//
-	//	public void testPersistenceBug343020() throws BundleException, InvalidSyntaxException {
-	//		// get the system region
-	//		Region systemRegion = digraph.getRegion(0);
-	//		// create a test region
-	//		Region testRegion = digraph.createRegion(getName());
+	// public void testPersistenceBug343020() throws BundleException,
+	// InvalidSyntaxException {
+	// // get the system region
+	// Region systemRegion = digraph.getRegion(0);
+	// // create a test region
+	// Region testRegion = digraph.createRegion(getName());
 	//
-	//		RegionFilterBuilder builder = digraph.createRegionFilterBuilder();
-	//		// Import the system bundle from the systemRegion
-	//		builder.allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)");
-	//		// import PP1
-	//		builder.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg1.*)");
-	//		digraph.connect(testRegion, builder.build(), systemRegion);
-	//		// install CP2
-	//		Bundle cp2 = bundleInstaller.installBundle(CP2, testRegion);
+	// RegionFilterBuilder builder = digraph.createRegionFilterBuilder();
+	// // Import the system bundle from the systemRegion
+	// builder.allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)");
+	// // import PP1
+	// builder.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" +
+	// RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg1.*)");
+	// digraph.connect(testRegion, builder.build(), systemRegion);
+	// // install CP2
+	// Bundle cp2 = bundleInstaller.installBundle(CP2, testRegion);
 	//
-	//		bundleInstaller.resolveBundles(new Bundle[] {cp2});
-	//		assertEquals("Wrong state for pc1.", Bundle.INSTALLED, cp2.getState());
+	// bundleInstaller.resolveBundles(new Bundle[] {cp2});
+	// assertEquals("Wrong state for pc1.", Bundle.INSTALLED, cp2.getState());
 	//
-	//		regionBundle.stop();
+	// regionBundle.stop();
 	//
-	//		// install PP1 there is no region alive
-	//		bundleInstaller.installBundle(PP1);
+	// // install PP1 there is no region alive
+	// bundleInstaller.installBundle(PP1);
 	//
-	//		// start region bundle and confirm we can resolve cp2 now
-	//		startRegionBundle();
+	// // start region bundle and confirm we can resolve cp2 now
+	// startRegionBundle();
 	//
-	//		bundleInstaller.refreshPackages(new Bundle[] {cp2});
-	//		assertEquals("Wrong state for pc1.", Bundle.RESOLVED, cp2.getState());
+	// bundleInstaller.refreshPackages(new Bundle[] {cp2});
+	// assertEquals("Wrong state for pc1.", Bundle.RESOLVED, cp2.getState());
 	//
-	//		// stop region bundle to test uninstalling bundles while stopped
-	//		regionBundle.stop();
-	//		cp2.uninstall();
+	// // stop region bundle to test uninstalling bundles while stopped
+	// regionBundle.stop();
+	// cp2.uninstall();
 	//
-	//		startRegionBundle();
-	//		testRegion = digraph.getRegion(getName());
-	//		assertNotNull("No test region found.", testRegion);
-	//		Set<Long> testIds = testRegion.getBundleIds();
-	//		assertEquals("Wrong number of test ids.", 0, testIds.size());
-	//	}
+	// startRegionBundle();
+	// testRegion = digraph.getRegion(getName());
+	// assertNotNull("No test region found.", testRegion);
+	// Set<Long> testIds = testRegion.getBundleIds();
+	// assertEquals("Wrong number of test ids.", 0, testIds.size());
+	// }
 
 	@Test
 	public void testCyclicRegions0() throws BundleException, InvalidSyntaxException, InterruptedException {
@@ -276,11 +336,15 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		Region testRegion1 = digraph.createRegion(regionName1);
 		Region testRegion2 = digraph.createRegion(regionName2);
 		// connect to the system bundle
-		testRegion1.connectRegion(systemRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build());
-		testRegion2.connectRegion(systemRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build());
+		testRegion1.connectRegion(systemRegion,
+				digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build());
+		testRegion2.connectRegion(systemRegion,
+				digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build());
 		// must import Boolean services into systemRegion to test
-		systemRegion.connectRegion(testRegion1, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build());
-		systemRegion.connectRegion(testRegion2, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build());
+		systemRegion.connectRegion(testRegion1, digraph.createRegionFilterBuilder()
+				.allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build());
+		systemRegion.connectRegion(testRegion2, digraph.createRegionFilterBuilder()
+				.allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build());
 
 		Map<String, Bundle> bundles = new HashMap<>();
 		// add bundles to region1
@@ -299,21 +363,25 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 
 		RegionFilterBuilder testRegionFilter1 = digraph.createRegionFilterBuilder();
 		// SP2 -> PP2
-		testRegionFilter1.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg2.*)");
+		testRegionFilter1.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE,
+				"(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg2.*)");
 		// CP2 -> SP1
 		testRegionFilter1.allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(" + Constants.OBJECTCLASS + "=pkg1.*)");
 		// PC1 -> PP2
 		// this is not needed because we already import pkg2.* above
-		//testRegionFilter1.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg2.*)");
+		// testRegionFilter1.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" +
+		// RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg2.*)");
 		// BC1 -> PP2
-		testRegionFilter1.allow(RegionFilter.VISIBLE_REQUIRE_NAMESPACE, "(" + RegionFilter.VISIBLE_REQUIRE_NAMESPACE + "=" + PP2 + ")");
+		testRegionFilter1.allow(RegionFilter.VISIBLE_REQUIRE_NAMESPACE,
+				"(" + RegionFilter.VISIBLE_REQUIRE_NAMESPACE + "=" + PP2 + ")");
 
 		RegionFilterBuilder testRegionFilter2 = digraph.createRegionFilterBuilder();
-		//SP1 -> PP1
-		testRegionFilter2.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg1.*)");
-		//SC1 -> SP2
+		// SP1 -> PP1
+		testRegionFilter2.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE,
+				"(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg1.*)");
+		// SC1 -> SP2
 		testRegionFilter2.allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(" + Constants.OBJECTCLASS + "=pkg2.*)");
-		//CC1 -> CP2
+		// CC1 -> CP2
 		testRegionFilter2.allow(CP2, "(name=" + CP2 + ")");
 
 		Region r1, r2 = null;
@@ -330,8 +398,10 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			bundle.start();
 		}
 		BundleContext context = getContext();
-		ServiceTracker<Boolean, Boolean> cp2Tracker = new ServiceTracker<>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + bundles.get(CP2).getBundleId() + "))"), null);
-		ServiceTracker<Boolean, Boolean> sc1Tracker = new ServiceTracker<>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + bundles.get(SC1).getBundleId() + "))"), null);
+		ServiceTracker<Boolean, Boolean> cp2Tracker = new ServiceTracker<>(context, context.createFilter(
+				"(&(objectClass=java.lang.Boolean)(bundle.id=" + bundles.get(CP2).getBundleId() + "))"), null);
+		ServiceTracker<Boolean, Boolean> sc1Tracker = new ServiceTracker<>(context, context.createFilter(
+				"(&(objectClass=java.lang.Boolean)(bundle.id=" + bundles.get(SC1).getBundleId() + "))"), null);
 
 		cp2Tracker.open();
 		sc1Tracker.open();
@@ -350,7 +420,8 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 				return new ResolverHook() {
 
 					@Override
-					public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
+					public void filterSingletonCollisions(BundleCapability singleton,
+							Collection<BundleCapability> collisionCandidates) {
 						// nothing;
 					}
 
@@ -383,58 +454,60 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		// first install into the same region; higher version 2 should resolve
 		Bundle singleton1 = bundleInstaller.installBundle(SINGLETON1, region1);
 		Bundle singleton2 = bundleInstaller.installBundle(SINGLETON2, region1);
-		assertFalse(bundleInstaller.resolveBundles(new Bundle[] {singleton1, singleton2}));
+		assertFalse(bundleInstaller.resolveBundles(new Bundle[] { singleton1, singleton2 }));
 		assertEquals("singleton1", Bundle.INSTALLED, singleton1.getState());
 		assertEquals("singleton2", Bundle.RESOLVED, singleton2.getState());
 
 		// now install into different regions; both 1 and 2 should resolve
 		singleton2.uninstall();
 		singleton2 = bundleInstaller.installBundle(SINGLETON2, region2);
-		assertTrue(bundleInstaller.resolveBundles(new Bundle[] {singleton1, singleton2}));
+		assertTrue(bundleInstaller.resolveBundles(new Bundle[] { singleton1, singleton2 }));
 		assertEquals("singleton1", Bundle.RESOLVED, singleton1.getState());
 		assertEquals("singleton2", Bundle.RESOLVED, singleton2.getState());
 
 		ServiceRegistration<ResolverHookFactory> disableHook = disableAllResolves();
 		try {
 			// now refresh to get us to an unresolved state again
-			bundleInstaller.refreshPackages(new Bundle[] {singleton1, singleton2});
+			bundleInstaller.refreshPackages(new Bundle[] { singleton1, singleton2 });
 			// connect region2 -> region1
-			region2.connectRegion(region1, digraph.createRegionFilterBuilder().allowAll(RegionFilter.VISIBLE_BUNDLE_NAMESPACE).build());
+			region2.connectRegion(region1,
+					digraph.createRegionFilterBuilder().allowAll(RegionFilter.VISIBLE_BUNDLE_NAMESPACE).build());
 			// enable resolving again
 			disableHook.unregister();
 			disableHook = null;
 
-			assertFalse(bundleInstaller.resolveBundles(new Bundle[] {singleton1, singleton2}));
-			assertTrue("One and only singleton bundle should be resolved", (singleton1.getState() == Bundle.RESOLVED) ^ (singleton2.getState() == Bundle.RESOLVED));
+			assertFalse(bundleInstaller.resolveBundles(new Bundle[] { singleton1, singleton2 }));
+			assertTrue("One and only singleton bundle should be resolved",
+					(singleton1.getState() == Bundle.RESOLVED) ^ (singleton2.getState() == Bundle.RESOLVED));
 
 			singleton2.uninstall();
 			disableHook = disableAllResolves();
 			// now refresh to get us to an unresolved state again
-			bundleInstaller.refreshPackages(new Bundle[] {singleton1, singleton2});
+			bundleInstaller.refreshPackages(new Bundle[] { singleton1, singleton2 });
 			// enable resolving again
 			disableHook.unregister();
 			disableHook = null;
 
 			// make sure singleton1 is resolved first
-			assertTrue(bundleInstaller.resolveBundles(new Bundle[] {singleton1}));
+			assertTrue(bundleInstaller.resolveBundles(new Bundle[] { singleton1 }));
 			assertEquals("singleton1", Bundle.RESOLVED, singleton1.getState());
 			singleton2 = bundleInstaller.installBundle(SINGLETON2, region2);
-			assertFalse(bundleInstaller.resolveBundles(new Bundle[] {singleton2}));
+			assertFalse(bundleInstaller.resolveBundles(new Bundle[] { singleton2 }));
 			assertEquals("singleton2", Bundle.INSTALLED, singleton2.getState());
 
 			singleton1.uninstall();
 			disableHook = disableAllResolves();
 			// now refresh to get us to an unresolved state again
-			bundleInstaller.refreshPackages(new Bundle[] {singleton1, singleton2});
+			bundleInstaller.refreshPackages(new Bundle[] { singleton1, singleton2 });
 			// enable resolving again
 			disableHook.unregister();
 			disableHook = null;
 
 			// make sure singleton2 is resolved first
-			assertTrue(bundleInstaller.resolveBundles(new Bundle[] {singleton2}));
+			assertTrue(bundleInstaller.resolveBundles(new Bundle[] { singleton2 }));
 			assertEquals("singleton2", Bundle.RESOLVED, singleton2.getState());
 			singleton1 = bundleInstaller.installBundle(SINGLETON1, region1);
-			assertFalse(bundleInstaller.resolveBundles(new Bundle[] {singleton1}));
+			assertFalse(bundleInstaller.resolveBundles(new Bundle[] { singleton1 }));
 			assertEquals("singleton1", Bundle.INSTALLED, singleton1.getState());
 		} finally {
 			if (disableHook != null)
@@ -445,7 +518,8 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 	private static final String REGION_DOMAIN_PROP = "org.eclipse.equinox.region.domain";
 
 	@Test
-	public void testMbeans() throws MalformedObjectNameException, BundleException, InstanceNotFoundException, ReflectionException, MBeanException, AttributeNotFoundException {
+	public void testMbeans() throws MalformedObjectNameException, BundleException, InstanceNotFoundException,
+			ReflectionException, MBeanException, AttributeNotFoundException {
 		MBeanServer server = ManagementFactory.getPlatformMBeanServer();
 		ObjectName digraphName = new ObjectName(REGION_DOMAIN_PROP + ":type=RegionDigraph,*");
 		ObjectName regionNameAllQuery = new ObjectName(REGION_DOMAIN_PROP + ":type=Region,name=*,*");
@@ -462,17 +536,22 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		regions = server.queryMBeans(null, regionNameAllQuery);
 		assertEquals("Wrong number of regions", 3, regions.size());
 
-		Set<ObjectInstance> pp1Query = server.queryMBeans(null, new ObjectName(REGION_DOMAIN_PROP + ":type=Region,name=" + PP1 + ",*"));
+		Set<ObjectInstance> pp1Query = server.queryMBeans(null,
+				new ObjectName(REGION_DOMAIN_PROP + ":type=Region,name=" + PP1 + ",*"));
 		assertEquals("Expected only one instance of: " + PP1, 1, pp1Query.size());
-		Set<ObjectInstance> sp1Query = server.queryMBeans(null, new ObjectName(REGION_DOMAIN_PROP + ":type=Region,name=" + SP1 + ",*"));
+		Set<ObjectInstance> sp1Query = server.queryMBeans(null,
+				new ObjectName(REGION_DOMAIN_PROP + ":type=Region,name=" + SP1 + ",*"));
 		assertEquals("Expected only one instance of: " + SP1, 1, sp1Query.size());
-		ObjectName pp1Name = (ObjectName) server.invoke(digraphs.iterator().next().getObjectName(), "getRegion", new Object[] {PP1}, new String[] {String.class.getName()});
+		ObjectName pp1Name = (ObjectName) server.invoke(digraphs.iterator().next().getObjectName(), "getRegion",
+				new Object[] { PP1 }, new String[] { String.class.getName() });
 		assertEquals(PP1 + " regions not equal.", pp1Query.iterator().next().getObjectName(), pp1Name);
-		ObjectName sp1Name = (ObjectName) server.invoke(digraphs.iterator().next().getObjectName(), "getRegion", new Object[] {SP1}, new String[] {String.class.getName()});
+		ObjectName sp1Name = (ObjectName) server.invoke(digraphs.iterator().next().getObjectName(), "getRegion",
+				new Object[] { SP1 }, new String[] { String.class.getName() });
 		assertEquals(SP1 + " regions not equal.", sp1Query.iterator().next().getObjectName(), sp1Name);
 
 		// test non existing region
-		ObjectName shouldNotExistName = (ObjectName) server.invoke(digraphs.iterator().next().getObjectName(), "getRegion", new Object[] {"ShouldNotExist"}, new String[] {String.class.getName()});
+		ObjectName shouldNotExistName = (ObjectName) server.invoke(digraphs.iterator().next().getObjectName(),
+				"getRegion", new Object[] { "ShouldNotExist" }, new String[] { String.class.getName() });
 		assertNull("Should not exist", shouldNotExistName);
 
 		long[] bundleIds = (long[]) server.getAttribute(pp1Name, "BundleIds");
@@ -499,9 +578,14 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		for (int i = 0; i < numRegions; i++) {
 			Region region = digraph.createRegion(regionName + i);
 			// Import the system bundle from the systemRegion
-			digraph.connect(region, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build(), systemRegion);
+			digraph.connect(region,
+					digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build(),
+					systemRegion);
 			// must import Boolean services into systemRegion to test
-			digraph.connect(systemRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build(), region);
+			digraph.connect(systemRegion,
+					digraph.createRegionFilterBuilder()
+							.allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build(),
+					region);
 			for (String location : ALL) {
 				Bundle b = bundleInstaller.installBundle(location, region);
 				bundles.add(b);
@@ -509,7 +593,8 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		}
 
 		assertEquals("Wrong number of bundles installed", numRegions * ALL.size(), bundles.size());
-		assertTrue("Could not resolve bundles.", bundleInstaller.resolveBundles(bundles.toArray(new Bundle[bundles.size()])));
+		assertTrue("Could not resolve bundles.",
+				bundleInstaller.resolveBundles(bundles.toArray(new Bundle[bundles.size()])));
 
 		// test install of duplicates
 		for (int i = 0; i < numRegions; i++) {
@@ -517,7 +602,8 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			for (String name : ALL) {
 				String location = bundleInstaller.getBundleLocation(name);
 				try {
-					Bundle b = region.installBundle(testName.getMethodName() + "_expectToFail", new URL(location).openStream());
+					Bundle b = region.installBundle(testName.getMethodName() + "_expectToFail",
+							new URL(location).openStream());
 					b.uninstall();
 					fail("Expected a bundle exception on duplicate bundle installation: " + name);
 				} catch (BundleException e) {
@@ -563,22 +649,25 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		Region region1 = digraph.createRegion(testName.getMethodName() + 1);
 		Region region2 = digraph.createRegion(testName.getMethodName() + 2);
 		Region region3 = digraph.createRegion(testName.getMethodName() + 3);
-		// install the same bundle into the first two regions.  Should be no collision
+		// install the same bundle into the first two regions. Should be no collision
 		bundleInstaller.installBundle(PP1, region1);
 		bundleInstaller.installBundle(PP1, region2);
 
-		ServiceRegistration<CollisionHook> collisionHookREg = getContext().registerService(CollisionHook.class, new CollisionHook() {
-			@Override
-			public void filterCollisions(int operationType, Bundle target, Collection<Bundle> collisionCandidates) {
-				for (Bundle bundle : collisionCandidates) {
-					try {
-						bundle.uninstall();
-					} catch (BundleException e) {
-						e.printStackTrace();
+		ServiceRegistration<CollisionHook> collisionHookREg = getContext().registerService(CollisionHook.class,
+				new CollisionHook() {
+					@Override
+					public void filterCollisions(int operationType, Bundle target,
+							Collection<Bundle> collisionCandidates) {
+						for (Bundle bundle : collisionCandidates) {
+							try {
+								bundle.uninstall();
+							} catch (BundleException e) {
+								e.printStackTrace();
+							}
+						}
 					}
-				}
-			}
-		}, new Hashtable<String, Object>(Collections.singletonMap(Constants.SERVICE_RANKING, Integer.MAX_VALUE)));
+				},
+				new Hashtable<String, Object>(Collections.singletonMap(Constants.SERVICE_RANKING, Integer.MAX_VALUE)));
 		try {
 			bundleInstaller.installBundle(PP1, region3);
 		} finally {
@@ -596,9 +685,14 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		for (int i = 0; i < numRegions; i++) {
 			Region region = digraph.createRegion(regionName + i);
 			// Import the system bundle from the systemRegion
-			digraph.connect(region, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build(), systemRegion);
+			digraph.connect(region,
+					digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build(),
+					systemRegion);
 			// must import Boolean services into systemRegion to test
-			digraph.connect(systemRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build(), region);
+			digraph.connect(systemRegion,
+					digraph.createRegionFilterBuilder()
+							.allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build(),
+					region);
 		}
 
 		Region region0 = digraph.getRegion(regionName + 0);
@@ -618,13 +712,17 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		bundleInstaller.installBundle(SP1, region1);
 		bundleInstaller.installBundle(CP1, region2);
 
-		// Should not be able to install SP1 into region0 because that would collide with SP1->region1->region0
+		// Should not be able to install SP1 into region0 because that would collide
+		// with SP1->region1->region0
 		assertInstallFail(SP1, region0);
-		// Should not be able to install PP1 into region1 because that would collide with region1->region0->PP1
+		// Should not be able to install PP1 into region1 because that would collide
+		// with region1->region0->PP1
 		assertInstallFail(PP1, region1);
-		// Should not be able to install PP1 into region2 because that would collide with region2->region1->region0->PP1
+		// Should not be able to install PP1 into region2 because that would collide
+		// with region2->region1->region0->PP1
 		assertInstallFail(PP1, region2);
-		// Should not be able to install CP1 into region0 because that would collide with CP1->region2->region1->region0
+		// Should not be able to install CP1 into region0 because that would collide
+		// with CP1->region2->region1->region0
 		assertInstallFail(CP1, region0);
 	}
 
@@ -690,7 +788,8 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		digraph.removeRegion(pp1Region);
 		assertNull("Region still associated with bundle id", digraph.getRegion(TEST_BUNDLE_ID));
 
-		// Adding a bundle to a removed region should not change the digraph and should error
+		// Adding a bundle to a removed region should not change the digraph and should
+		// error
 		try {
 			pp1Region.addBundle(TEST_BUNDLE_ID);
 			fail("Added a bundle to a region which was not part of a digraph");
@@ -702,7 +801,8 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		Region pp2Region = digraph.createRegion(PP2);
 		pp2Region.addBundle(TEST_BUNDLE_ID);
 
-		// removing a bundle from a removed region should not change the digraph and should error
+		// removing a bundle from a removed region should not change the digraph and
+		// should error
 		try {
 			pp1Region.removeBundle(TEST_BUNDLE_ID);
 			fail("Removed a bundle via a region which was not part of a digraph");
@@ -784,13 +884,15 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			}
 		};
 		getContext().addBundleListener(listener);
-		// register a higher ranked bundle EventHook that causes a bundle to resolve while processing INSTALLED events
+		// register a higher ranked bundle EventHook that causes a bundle to resolve
+		// while processing INSTALLED events
 		ServiceRegistration<EventHook> bundleEventHook = getContext().registerService(EventHook.class, new EventHook() {
 			@Override
 			public void event(BundleEvent event, Collection<BundleContext> contexts) {
 				// force resolution if event is INSTALLED
 				if (event.getType() == BundleEvent.INSTALLED) {
-					getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION).adapt(FrameworkWiring.class).resolveBundles(Collections.singleton(event.getBundle()));
+					getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION).adapt(FrameworkWiring.class)
+							.resolveBundles(Collections.singleton(event.getBundle()));
 				}
 			}
 		}, new Hashtable<String, Object>(Collections.singletonMap(Constants.SERVICE_RANKING, Integer.MAX_VALUE)));
@@ -804,8 +906,10 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			bundleEventHook.unregister();
 		}
 
-		// Had to change the expected order to be out of order now since region hooks are always first
-		for (int eventType : new int[] {BundleEvent.RESOLVED, BundleEvent.INSTALLED, BundleEvent.STARTING, BundleEvent.STARTED}) {
+		// Had to change the expected order to be out of order now since region hooks
+		// are always first
+		for (int eventType : new int[] { BundleEvent.RESOLVED, BundleEvent.INSTALLED, BundleEvent.STARTING,
+				BundleEvent.STARTED }) {
 			if (events.isEmpty()) {
 				fail("No events left, expecting event: " + eventType);
 			}
@@ -817,7 +921,8 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 
 	@Test
 	public void testHigherRankedEventHookUninstall() throws BundleException {
-		// register a higher ranked bundle EventHook that causes a bundle to resolve while processing INSTALLED events
+		// register a higher ranked bundle EventHook that causes a bundle to resolve
+		// while processing INSTALLED events
 		ServiceRegistration<EventHook> bundleEventHook = getContext().registerService(EventHook.class, new EventHook() {
 			@Override
 			public void event(BundleEvent event, Collection<BundleContext> contexts) {
@@ -848,13 +953,18 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		Region systemRegion = digraph.getRegion(0);
 		Map<String, Bundle> bundles = new HashMap<>();
 		// create a disconnected test region for each test bundle
-		for (String location : new String[] {PP1, SP1}) {
+		for (String location : new String[] { PP1, SP1 }) {
 			Region testRegion = digraph.createRegion(location);
 			bundles.put(location, bundleInstaller.installBundle(location, testRegion));
 			// Import the system bundle from the systemRegion
-			digraph.connect(testRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build(), systemRegion);
+			digraph.connect(testRegion,
+					digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build(),
+					systemRegion);
 			// must import Boolean services into systemRegion to test
-			digraph.connect(systemRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build(), testRegion);
+			digraph.connect(systemRegion,
+					digraph.createRegionFilterBuilder()
+							.allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build(),
+					testRegion);
 		}
 
 		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
@@ -862,13 +972,17 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		assertEquals(SP1, Bundle.INSTALLED, bundles.get(SP1).getState());
 
 		// now make a connection that does not let the necessary package through
-		RegionFilter badRegionFilter = digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=bad)").build();
+		RegionFilter badRegionFilter = digraph.createRegionFilterBuilder()
+				.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=bad)")
+				.build();
 
 		Set<FilteredRegion> edges = digraph.getRegion(SP1).getEdges();
 		assertEquals("Wrong number of edges.", 1, edges.size());
 
-		// use replace and verify a new edge is added if the connection did not exist already
-		assertNull("Found existing connection.", digraph.replaceConnection(digraph.getRegion(SP1), badRegionFilter, digraph.getRegion(PP1)));
+		// use replace and verify a new edge is added if the connection did not exist
+		// already
+		assertNull("Found existing connection.",
+				digraph.replaceConnection(digraph.getRegion(SP1), badRegionFilter, digraph.getRegion(PP1)));
 		edges = digraph.getRegion(SP1).getEdges();
 		assertEquals("Wrong number of edges.", 2, edges.size());
 
@@ -878,8 +992,12 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		assertEquals(SP1, Bundle.INSTALLED, bundles.get(SP1).getState());
 
 		// reconnect to let the package though
-		RegionFilter goodRegionFilter = digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg1.*)").build();
-		RegionFilter existingFilter = digraph.replaceConnection(digraph.getRegion(SP1), goodRegionFilter, digraph.getRegion(PP1));
+		RegionFilter goodRegionFilter = digraph.createRegionFilterBuilder()
+				.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE,
+						"(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg1.*)")
+				.build();
+		RegionFilter existingFilter = digraph.replaceConnection(digraph.getRegion(SP1), goodRegionFilter,
+				digraph.getRegion(PP1));
 		assertEquals("Wrong existing filter found.", badRegionFilter, existingFilter);
 
 		// number of edges must remain 2 since we use reconnect

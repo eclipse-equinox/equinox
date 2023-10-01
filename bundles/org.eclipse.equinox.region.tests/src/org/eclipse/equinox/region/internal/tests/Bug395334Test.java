@@ -24,7 +24,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.wiring.BundleRevision;
 
 /**
- * The StandardRegionFilter.isAllowed(BundleRevision) method must match against 
+ * The StandardRegionFilter.isAllowed(BundleRevision) method must match against
  * the bundle-symbolic-name attribute as per the RegionFilter API.
  */
 public class Bug395334Test extends AbstractRegionSystemTest {
@@ -34,6 +34,7 @@ public class Bug395334Test extends AbstractRegionSystemTest {
 		filterBuilder.allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(bundle-symbolic-name=org.eclipse.osgi)");
 		RegionFilter filter = filterBuilder.build();
 		Bundle systemBundle = getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION);
-		assertTrue("The bundle revision should be allowed by the filter", filter.isAllowed(systemBundle.adapt(BundleRevision.class)));
+		assertTrue("The bundle revision should be allowed by the filter",
+				filter.isAllowed(systemBundle.adapt(BundleRevision.class)));
 	}
 }
