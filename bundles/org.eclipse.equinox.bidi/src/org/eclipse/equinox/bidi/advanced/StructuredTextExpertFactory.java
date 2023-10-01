@@ -21,38 +21,39 @@ import org.eclipse.equinox.bidi.custom.StructuredTextTypeHandler;
 import org.eclipse.equinox.bidi.internal.StructuredTextImpl;
 
 /**
- * Obtains IStructuredTextExpert instances.
- * An {@link IStructuredTextExpert} instance (called in short an "expert") provides
- * the advanced methods to process a certain type of structured text, and 
- * is thus related to a specific 
- * {@link StructuredTextTypeHandler structured text type handler}.
- * There are two kinds of experts:
+ * Obtains IStructuredTextExpert instances. An {@link IStructuredTextExpert}
+ * instance (called in short an "expert") provides the advanced methods to
+ * process a certain type of structured text, and is thus related to a specific
+ * {@link StructuredTextTypeHandler structured text type handler}. There are two
+ * kinds of experts:
  * <ul>
- *   <li>stateful, obtained by calling {@link #getStatefulExpert}.</li>
- *   <li>not stateful, obtained by calling {@link #getExpert}.</li>
- * </ul>  
- * <p>Only the stateful kind can remember the state established by a call to
- * a text processing method and transmit it as initial state in the next call
- * to a text processing method.
- * <p>In other words, the methods 
- * {@link IStructuredTextExpert#getState()},
- * {@link IStructuredTextExpert#setState} and
- * {@link IStructuredTextExpert#clearState()} of 
- * {@link IStructuredTextExpert} are inoperative for experts which are not stateful.
+ * <li>stateful, obtained by calling {@link #getStatefulExpert}.</li>
+ * <li>not stateful, obtained by calling {@link #getExpert}.</li>
+ * </ul>
  * <p>
- * Using a stateful expert is more resource intensive, thus not stateful
- * experts should be used when feasible. 
+ * Only the stateful kind can remember the state established by a call to a text
+ * processing method and transmit it as initial state in the next call to a text
+ * processing method.
+ * <p>
+ * In other words, the methods {@link IStructuredTextExpert#getState()},
+ * {@link IStructuredTextExpert#setState} and
+ * {@link IStructuredTextExpert#clearState()} of {@link IStructuredTextExpert}
+ * are inoperative for experts which are not stateful.
+ * <p>
+ * Using a stateful expert is more resource intensive, thus not stateful experts
+ * should be used when feasible.
  */
 final public class StructuredTextExpertFactory {
 
 	/**
-	 * The default set of separators used to segment a string: dot, colon, slash, backslash.
+	 * The default set of separators used to segment a string: dot, colon, slash,
+	 * backslash.
 	 */
 	private static final String defaultSeparators = StructuredTextProcessor.getDefaultSeparators();
 
-	static private Map<String, IStructuredTextExpert> sharedDefaultExperts = new HashMap<>(); // String type -> expert
+	static private Map<String, IStructuredTextExpert> sharedDefaultExperts = new HashMap<>();
 
-	static private Map<String, Map<StructuredTextEnvironment, IStructuredTextExpert>> sharedExperts = new HashMap<>(); // String type -> map of { environment -> expert }
+	static private Map<String, Map<StructuredTextEnvironment, IStructuredTextExpert>> sharedExperts = new HashMap<>();
 
 	static private IStructuredTextExpert defaultExpert;
 
@@ -62,8 +63,9 @@ final public class StructuredTextExpertFactory {
 
 	/**
 	 * Obtains a IStructuredTextExpert instance for processing structured text with
-	 *  a default type handler segmenting the text according to default separators.
-	 *  This expert instance does not handle states.
+	 * a default type handler segmenting the text according to default separators.
+	 * This expert instance does not handle states.
+	 * 
 	 * @return the IStructuredTextExpert instance.
 	 * @see StructuredTextProcessor#getDefaultSeparators()
 	 */
@@ -77,15 +79,15 @@ final public class StructuredTextExpertFactory {
 
 	/**
 	 * Obtains a IStructuredTextExpert instance for processing structured text with
-	 *  the specified type handler. 
-	 *  This expert instance does not handle states.
+	 * the specified type handler. This expert instance does not handle states.
 	 * 
-	 * @param type the identifier for the required type handler. This identifier 
-	 *             may be one of those listed in {@link StructuredTextTypeHandlerFactory}
-	 *             or it may be have been registered by a plug-in.
+	 * @param type the identifier for the required type handler. This identifier may
+	 *             be one of those listed in
+	 *             {@link StructuredTextTypeHandlerFactory} or it may be have been
+	 *             registered by a plug-in.
 	 * @return the IStructuredTextExpert instance.
 	 * @throws IllegalArgumentException if <code>type</code> is not a known type
-	 *         identifier.
+	 *                                  identifier.
 	 */
 	static public IStructuredTextExpert getExpert(String type) {
 		IStructuredTextExpert expert;
@@ -104,20 +106,21 @@ final public class StructuredTextExpertFactory {
 
 	/**
 	 * Obtains a IStructuredTextExpert instance for processing structured text with
-	 *  the specified type handler and the specified environment.
-	 *  This expert instance does not handle states.
+	 * the specified type handler and the specified environment. This expert
+	 * instance does not handle states.
 	 * 
-	 * @param type the identifier for the required type handler. This identifier 
-	 *             may be one of those listed in {@link StructuredTextTypeHandlerFactory}
-	 *             or it may be have been registered by a plug-in.
-	 * @param  environment the current environment, which may affect the behavior of
-	 *         the expert. This parameter may be specified as
-	 *         <code>null</code>, in which case the
-	 *         {@link StructuredTextEnvironment#DEFAULT}
-	 *         environment should be assumed.
+	 * @param type        the identifier for the required type handler. This
+	 *                    identifier may be one of those listed in
+	 *                    {@link StructuredTextTypeHandlerFactory} or it may be have
+	 *                    been registered by a plug-in.
+	 * @param environment the current environment, which may affect the behavior of
+	 *                    the expert. This parameter may be specified as
+	 *                    <code>null</code>, in which case the
+	 *                    {@link StructuredTextEnvironment#DEFAULT} environment
+	 *                    should be assumed.
 	 * @return the IStructuredTextExpert instance.
 	 * @throws IllegalArgumentException if <code>type</code> is not a known type
-	 *         identifier.
+	 *                                  identifier.
 	 */
 	static public IStructuredTextExpert getExpert(String type, StructuredTextEnvironment environment) {
 		IStructuredTextExpert expert;
@@ -143,15 +146,15 @@ final public class StructuredTextExpertFactory {
 
 	/**
 	 * Obtains a IStructuredTextExpert instance for processing structured text with
-	 *  the specified type handler.
-	 *  This expert instance can handle states.
+	 * the specified type handler. This expert instance can handle states.
 	 * 
-	 * @param type the identifier for the required type handler. This identifier 
-	 *             may be one of those listed in {@link StructuredTextTypeHandlerFactory}
-	 *             or it may be have been registered by a plug-in.
+	 * @param type the identifier for the required type handler. This identifier may
+	 *             be one of those listed in
+	 *             {@link StructuredTextTypeHandlerFactory} or it may be have been
+	 *             registered by a plug-in.
 	 * @return the IStructuredTextExpert instance.
 	 * @throws IllegalArgumentException if <code>type</code> is not a known type
-	 *         identifier.
+	 *                                  identifier.
 	 */
 	static public IStructuredTextExpert getStatefulExpert(String type) {
 		return getStatefulExpert(type, StructuredTextEnvironment.DEFAULT);
@@ -159,20 +162,21 @@ final public class StructuredTextExpertFactory {
 
 	/**
 	 * Obtains a IStructuredTextExpert instance for processing structured text with
-	 *  the specified type handler and the specified environment.
-	 *  This expert instance can handle states.
+	 * the specified type handler and the specified environment. This expert
+	 * instance can handle states.
 	 * 
-	 * @param type the identifier for the required type handler. This identifier 
-	 *             may be one of those listed in {@link StructuredTextTypeHandlerFactory}
-	 *             or it may be have been registered by a plug-in.
-	 * @param  environment the current environment, which may affect the behavior of
-	 *         the expert. This parameter may be specified as
-	 *         <code>null</code>, in which case the
-	 *         {@link StructuredTextEnvironment#DEFAULT}
-	 *         environment should be assumed.
+	 * @param type        the identifier for the required type handler. This
+	 *                    identifier may be one of those listed in
+	 *                    {@link StructuredTextTypeHandlerFactory} or it may be have
+	 *                    been registered by a plug-in.
+	 * @param environment the current environment, which may affect the behavior of
+	 *                    the expert. This parameter may be specified as
+	 *                    <code>null</code>, in which case the
+	 *                    {@link StructuredTextEnvironment#DEFAULT} environment
+	 *                    should be assumed.
 	 * @return the IStructuredTextExpert instance.
 	 * @throws IllegalArgumentException if <code>type</code> is not a known type
-	 *         identifier.
+	 *                                  identifier.
 	 */
 	static public IStructuredTextExpert getStatefulExpert(String type, StructuredTextEnvironment environment) {
 		StructuredTextTypeHandler handler = StructuredTextTypeHandlerFactory.getHandler(type);
@@ -183,21 +187,23 @@ final public class StructuredTextExpertFactory {
 
 	/**
 	 * Obtains a IStructuredTextExpert instance for processing structured text with
-	 *  the specified type handler and the specified environment.
-	 *  This expert instance can handle states.
+	 * the specified type handler and the specified environment. This expert
+	 * instance can handle states.
 	 * 
-	 * @param handler the type handler instance. It may have been obtained using 
-	 *             {@link StructuredTextTypeHandlerFactory#getHandler(String)} or
-	 *             by instantiating a type handler.
-	 * @param  environment the current environment, which may affect the behavior of
-	 *         the expert. This parameter may be specified as
-	 *         <code>null</code>, in which case the
-	 *         {@link StructuredTextEnvironment#DEFAULT}
-	 *         environment should be assumed.
+	 * @param handler     the type handler instance. It may have been obtained using
+	 *                    {@link StructuredTextTypeHandlerFactory#getHandler(String)}
+	 *                    or by instantiating a type handler.
+	 * @param environment the current environment, which may affect the behavior of
+	 *                    the expert. This parameter may be specified as
+	 *                    <code>null</code>, in which case the
+	 *                    {@link StructuredTextEnvironment#DEFAULT} environment
+	 *                    should be assumed.
 	 * @return the IStructuredTextExpert instance
-	 * @throws IllegalArgumentException if the <code>handler</code> is <code>null</code>
+	 * @throws IllegalArgumentException if the <code>handler</code> is
+	 *                                  <code>null</code>
 	 */
-	static public IStructuredTextExpert getStatefulExpert(StructuredTextTypeHandler handler, StructuredTextEnvironment environment) {
+	static public IStructuredTextExpert getStatefulExpert(StructuredTextTypeHandler handler,
+			StructuredTextEnvironment environment) {
 		if (handler == null)
 			throw new IllegalArgumentException("handler must not be null"); //$NON-NLS-1$
 		if (environment == null)

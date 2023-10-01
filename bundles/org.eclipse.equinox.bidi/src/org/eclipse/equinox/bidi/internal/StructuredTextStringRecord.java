@@ -17,19 +17,21 @@ import java.lang.ref.SoftReference;
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 
 /**
- * Records strings which contain structured text. Several static
- * methods in this class allow to record such strings in a pool, and to find if
- * a given string is member of the pool.
+ * Records strings which contain structured text. Several static methods in this
+ * class allow to record such strings in a pool, and to find if a given string
+ * is member of the pool.
  * <p>
  * Instances of this class are the records which are members of the pool.
- * </p><p>
- * The pool is managed as a cyclic list. When the pool is full,
- * each new element overrides the oldest element in the list.
- * </p><p>
- * A string may be itself entirely a structured text, or it may contain
- * segments each of which is a structured text of a given type. Each such
- * segment is identified by its starting and ending offsets within the
- * string, and by the handler which is appropriate to handle it.
+ * </p>
+ * <p>
+ * The pool is managed as a cyclic list. When the pool is full, each new element
+ * overrides the oldest element in the list.
+ * </p>
+ * <p>
+ * A string may be itself entirely a structured text, or it may contain segments
+ * each of which is a structured text of a given type. Each such segment is
+ * identified by its starting and ending offsets within the string, and by the
+ * handler which is appropriate to handle it.
  */
 public class StructuredTextStringRecord {
 	/**
@@ -78,39 +80,43 @@ public class StructuredTextStringRecord {
 	}
 
 	/**
-	 * Records a string in the pool. The caller must specify the number
-	 * of segments in the record (at least 1), and the handler, starting
-	 * and ending offsets for the first segment.
+	 * Records a string in the pool. The caller must specify the number of segments
+	 * in the record (at least 1), and the handler, starting and ending offsets for
+	 * the first segment.
 	 *
-	 * @param  string the string to record.
-	 * @param  segmentCount number of segments allowed in this string.
-	 *         This number must be >= 1.
-	 * @param  handlerID identifier for the handler appropriate to handle 
-	 *         the type of structured text present in the first segment.
-	 *         It may be one of the predefined identifiers in 
-	 *         {@link StructuredTextTypeHandlerFactory}, or it may be an identifier
-	 *         for a type handler created by a plug-in or by the application.
-	 * @param  start offset in the string of the starting character of the first
-	 *         segment. It must be >= 0 and less than the length of the string.
-	 * @param  limit offset of the character following the first segment. It
-	 *         must be greater than the <code>start</code> argument and
-	 *         not greater than the length of the string.
+	 * @param string       the string to record.
+	 * @param segmentCount number of segments allowed in this string. This number
+	 *                     must be >= 1.
+	 * @param handlerID    identifier for the handler appropriate to handle the type
+	 *                     of structured text present in the first segment. It may
+	 *                     be one of the predefined identifiers in
+	 *                     {@link StructuredTextTypeHandlerFactory}, or it may be an
+	 *                     identifier for a type handler created by a plug-in or by
+	 *                     the application.
+	 * @param start        offset in the string of the starting character of the
+	 *                     first segment. It must be >= 0 and less than the length
+	 *                     of the string.
+	 * @param limit        offset of the character following the first segment. It
+	 *                     must be greater than the <code>start</code> argument and
+	 *                     not greater than the length of the string.
 	 *
-	 * @return an instance of StructuredTextRecordString which represents this record.
-	 *         This instance may be used to specify additional segments with
+	 * @return an instance of StructuredTextRecordString which represents this
+	 *         record. This instance may be used to specify additional segments with
 	 *         {@link #addSegment addSegment}.
 	 *
-	 * @throws IllegalArgumentException if <code>string</code> is null or
-	 *         if <code>segmentCount</code> is less than 1.
-	 * @throws IllegalArgumentException if <code>handlerID</code> is null,
-	 *         or if <code>start</code> or <code>limit</code> have invalid
-	 *         values.
-	 * @throws IllegalStateException if the current segment exceeds the
-	 *         number of segments specified by <code>segmentCount</code>
-	 *         in the call to {@link #addRecord addRecord} which created
-	 *         the StructuredTextStringRecord instance.
+	 * @throws IllegalArgumentException if <code>string</code> is null or if
+	 *                                  <code>segmentCount</code> is less than 1.
+	 * @throws IllegalArgumentException if <code>handlerID</code> is null, or if
+	 *                                  <code>start</code> or <code>limit</code>
+	 *                                  have invalid values.
+	 * @throws IllegalStateException    if the current segment exceeds the number of
+	 *                                  segments specified by
+	 *                                  <code>segmentCount</code> in the call to
+	 *                                  {@link #addRecord addRecord} which created
+	 *                                  the StructuredTextStringRecord instance.
 	 */
-	public static StructuredTextStringRecord addRecord(String string, int segmentCount, String handlerID, int start, int limit) {
+	public static StructuredTextStringRecord addRecord(String string, int segmentCount, String handlerID, int start,
+			int limit) {
 		if (string == null)
 			throw new IllegalArgumentException("The string argument must not be null!"); //$NON-NLS-1$
 		if (segmentCount < 1)
@@ -147,32 +153,37 @@ public class StructuredTextStringRecord {
 	/**
 	 * Adds a second or further segment to a record.
 	 *
-	 * @param  handlerID identifier for the handler appropriate to handle 
-	 *         the type of structured text present in the first segment.
-	 *         It may be one of the predefined identifiers in 
-	 *         {@link StructuredTextTypeHandlerFactory}, or it may be an identifier
-	 *         for a type handler created by a plug-in or by the application.
-	 * @param  start offset in the string of the starting character of the
-	 *         segment. It must be >= 0 and less than the length of the string.
-	 * @param  limit offset of the character following the segment. It must be
-	 *         greater than the <code>start</code> argument and not greater
-	 *         than the length of the string.
+	 * @param handlerID identifier for the handler appropriate to handle the type of
+	 *                  structured text present in the first segment. It may be one
+	 *                  of the predefined identifiers in
+	 *                  {@link StructuredTextTypeHandlerFactory}, or it may be an
+	 *                  identifier for a type handler created by a plug-in or by the
+	 *                  application.
+	 * @param start     offset in the string of the starting character of the
+	 *                  segment. It must be >= 0 and less than the length of the
+	 *                  string.
+	 * @param limit     offset of the character following the segment. It must be
+	 *                  greater than the <code>start</code> argument and not greater
+	 *                  than the length of the string.
 	 *
-	 * @throws IllegalArgumentException if <code>handlerID</code> is null,
-	 *         or if <code>start</code> or <code>limit</code> have invalid
-	 *         values.
-	 * @throws IllegalStateException if the current segment exceeds the
-	 *         number of segments specified by <code>segmentCount</code>
-	 *         in the call to {@link #addRecord addRecord} which created
-	 *         the StructuredTextStringRecord instance.
+	 * @throws IllegalArgumentException if <code>handlerID</code> is null, or if
+	 *                                  <code>start</code> or <code>limit</code>
+	 *                                  have invalid values.
+	 * @throws IllegalStateException    if the current segment exceeds the number of
+	 *                                  segments specified by
+	 *                                  <code>segmentCount</code> in the call to
+	 *                                  {@link #addRecord addRecord} which created
+	 *                                  the StructuredTextStringRecord instance.
 	 */
 	public void addSegment(String handlerID, int start, int limit) {
 		if (handlerID == null)
 			throw new IllegalArgumentException("The handlerID argument must not be null!"); //$NON-NLS-1$
 		if (start < 0 || start >= string.length())
-			throw new IllegalArgumentException("The start position must be at least 0 and less than the length of the string!"); //$NON-NLS-1$
+			throw new IllegalArgumentException(
+					"The start position must be at least 0 and less than the length of the string!"); //$NON-NLS-1$
 		if (limit <= start || limit > string.length())
-			throw new IllegalArgumentException("The limit position must be greater than the start position but no greater than the length of the string!"); //$NON-NLS-1$
+			throw new IllegalArgumentException(
+					"The limit position must be greater than the start position but no greater than the length of the string!"); //$NON-NLS-1$
 		if (usedSegmentCount >= totalSegmentCount)
 			throw new IllegalStateException("All segments of the record are already used!"); //$NON-NLS-1$
 		handlers[usedSegmentCount] = handlerID;
@@ -184,19 +195,16 @@ public class StructuredTextStringRecord {
 	/**
 	 * Checks if a string is recorded and retrieves its record.
 	 *
-	 * @param  string the string to check.
+	 * @param string the string to check.
 	 *
 	 * @return <code>null</code> if the string is not recorded in the pool;
-	 *         otherwise, return the <code>StructuredTextStringRecord</code> instance 
-	 *         which records this string.<br>
-	 *         Once a record has been found, the number of its segments can
-	 *         be retrieved using {@link #getSegmentCount getSegmentCount},
-	 *         its handler ID can
-	 *         be retrieved using {@link #getHandler getHandler},
-	 *         its starting offset can
-	 *         be retrieved using {@link #getStart getStart},
-	 *         its ending offset can
-	 *         be retrieved using {@link #getLimit getLimit},
+	 *         otherwise, return the <code>StructuredTextStringRecord</code>
+	 *         instance which records this string.<br>
+	 *         Once a record has been found, the number of its segments can be
+	 *         retrieved using {@link #getSegmentCount getSegmentCount}, its handler
+	 *         ID can be retrieved using {@link #getHandler getHandler}, its
+	 *         starting offset can be retrieved using {@link #getStart getStart},
+	 *         its ending offset can be retrieved using {@link #getLimit getLimit},
 	 */
 	public static StructuredTextStringRecord getRecord(String string) {
 		if (last < 0) // no records at all
@@ -240,22 +248,22 @@ public class StructuredTextStringRecord {
 
 	private void checkSegmentNumber(int segmentNumber) {
 		if (segmentNumber >= usedSegmentCount)
-			throw new IllegalArgumentException("The segment number " + segmentNumber + " is greater than the total number of segments = " + usedSegmentCount + "!"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			throw new IllegalArgumentException("The segment number " + segmentNumber //$NON-NLS-1$
+					+ " is greater than the total number of segments = " + usedSegmentCount + "!"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
 	 * Retrieves the handler ID of a given segment.
 	 *
-	 * @param  segmentNumber number of the segment about which information
-	 *         is required. It must be >= 0 and less than the number of
-	 *         segments returned  by {@link #getSegmentCount}.
+	 * @param segmentNumber number of the segment about which information is
+	 *                      required. It must be >= 0 and less than the number of
+	 *                      segments returned by {@link #getSegmentCount}.
 	 *
-	 * @return the handler ID of the handler appropriate to 
-	 *         process the structured text in the segment
-	 *         specified by <code>segmentNumber</code>.
+	 * @return the handler ID of the handler appropriate to process the structured
+	 *         text in the segment specified by <code>segmentNumber</code>.
 	 *
-	 * @throws IllegalArgumentException if <code>segmentNumber</code>
-	 *         has an invalid value.
+	 * @throws IllegalArgumentException if <code>segmentNumber</code> has an invalid
+	 *                                  value.
 	 */
 	public String getHandler(int segmentNumber) {
 		checkSegmentNumber(segmentNumber);
@@ -265,15 +273,15 @@ public class StructuredTextStringRecord {
 	/**
 	 * Retrieves the starting offset of a given segment.
 	 *
-	 * @param  segmentNumber number of the segment about which information
-	 *         is required. It must be >= 0 and less than the number of
-	 *         segments returned  by {@link #getSegmentCount}.
+	 * @param segmentNumber number of the segment about which information is
+	 *                      required. It must be >= 0 and less than the number of
+	 *                      segments returned by {@link #getSegmentCount}.
 	 *
-	 * @return the starting offset within the string of the segment
-	 *         specified by <code>segmentNumber</code>.
+	 * @return the starting offset within the string of the segment specified by
+	 *         <code>segmentNumber</code>.
 	 *
-	 * @throws IllegalArgumentException if <code>segmentNumber</code>
-	 *         has an invalid value.
+	 * @throws IllegalArgumentException if <code>segmentNumber</code> has an invalid
+	 *                                  value.
 	 */
 	public int getStart(int segmentNumber) {
 		checkSegmentNumber(segmentNumber);
@@ -283,15 +291,15 @@ public class StructuredTextStringRecord {
 	/**
 	 * Retrieves the ending offset of a given segment.
 	 *
-	 * @param  segmentNumber number of the segment about which information
-	 *         is required. It must be >= 0 and less than the number of
-	 *         segments returned  by {@link #getSegmentCount}.
+	 * @param segmentNumber number of the segment about which information is
+	 *                      required. It must be >= 0 and less than the number of
+	 *                      segments returned by {@link #getSegmentCount}.
 	 *
-	 * @return the offset of the position following the segment
-	 *         specified by <code>segmentNumber</code>.
+	 * @return the offset of the position following the segment specified by
+	 *         <code>segmentNumber</code>.
 	 *
-	 * @throws IllegalArgumentException if <code>segmentNumber</code>
-	 *         has an invalid value.
+	 * @throws IllegalArgumentException if <code>segmentNumber</code> has an invalid
+	 *                                  value.
 	 */
 	public int getLimit(int segmentNumber) {
 		checkSegmentNumber(segmentNumber);
