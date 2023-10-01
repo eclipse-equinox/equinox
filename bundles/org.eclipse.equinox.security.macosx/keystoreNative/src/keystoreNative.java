@@ -1,3 +1,4 @@
+
 /*******************************************************************************
  * Copyright (c) 2008 IBM Corporation and others.
  *
@@ -25,9 +26,10 @@ public class keystoreNative {
 	}
 
 	private native String getPassword(String serviceName, String accountName);
+
 	private native void setPassword(String serviceName, String accountName, String password);
 
-	public static void main (String args[]) {
+	public static void main(String args[]) {
 		// insert code here...
 		System.out.println("Started application");
 		System.out.println("java.library.path = " + System.getProperty("java.library.path"));
@@ -35,11 +37,10 @@ public class keystoreNative {
 		String password = "abby" + System.currentTimeMillis();
 		System.out.println("Trying to set password to: " + password);
 		try {
-		newjni.setPassword("org.eclipse.sdk", "kim", password);
-		String result = newjni.getPassword("org.eclipse.sdk", "kim");
-		System.out.println("Finished application. Answer is " + result);
-		}
-		catch (SecurityException e) {
+			newjni.setPassword("org.eclipse.sdk", "kim", password);
+			String result = newjni.getPassword("org.eclipse.sdk", "kim");
+			System.out.println("Finished application. Answer is " + result);
+		} catch (SecurityException e) {
 			e.printStackTrace();
 		}
 	}
