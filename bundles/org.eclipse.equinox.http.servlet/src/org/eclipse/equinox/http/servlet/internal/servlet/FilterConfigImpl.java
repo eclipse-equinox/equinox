@@ -24,16 +24,13 @@ public class FilterConfigImpl implements FilterConfig {
 	private final String filterName;
 	private final ServletContext servletContext;
 
-	public FilterConfigImpl(
-		String name, Map<String, String> initparams,
-		ServletContext servletContext) {
+	public FilterConfigImpl(String name, Map<String, String> initparams, ServletContext servletContext) {
 
 		this.filterName = name;
 
 		if (initparams != null) {
 			this.initparams = initparams;
-		}
-		else {
+		} else {
 			this.initparams = Collections.emptyMap();
 		}
 

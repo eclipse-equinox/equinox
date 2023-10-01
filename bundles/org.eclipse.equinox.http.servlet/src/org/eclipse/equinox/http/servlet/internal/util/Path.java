@@ -26,8 +26,7 @@ public class Path {
 		if (semi != -1) {
 			if (index > semi) {
 				path = path.substring(0, semi) + path.substring(index, path.length());
-			}
-			else if (index == -1) {
+			} else if (index == -1) {
 				path = path.substring(0, semi);
 			}
 		}
@@ -35,8 +34,7 @@ public class Path {
 		if (index == -1) {
 			_requestURI = path;
 			_queryString = null;
-		}
-		else {
+		} else {
 			_requestURI = path.substring(0, index);
 			_queryString = path.substring(index + 1);
 		}
@@ -45,8 +43,7 @@ public class Path {
 
 		if ((index == -1) || (index < _requestURI.lastIndexOf('/'))) {
 			_extension = null;
-		}
-		else {
+		} else {
 			_extension = _requestURI.substring(index + 1);
 		}
 	}

@@ -29,19 +29,16 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 /**
  * @author Raymond Augé
  */
-public class ContextFilterTrackerCustomizer
-	extends RegistrationServiceTrackerCustomizer<Filter, FilterRegistration> {
+public class ContextFilterTrackerCustomizer extends RegistrationServiceTrackerCustomizer<Filter, FilterRegistration> {
 
-	public ContextFilterTrackerCustomizer(
-		BundleContext bundleContext, HttpServiceRuntimeImpl httpServiceRuntime,
-		ContextController contextController) {
+	public ContextFilterTrackerCustomizer(BundleContext bundleContext, HttpServiceRuntimeImpl httpServiceRuntime,
+			ContextController contextController) {
 
 		super(bundleContext, httpServiceRuntime, contextController);
 	}
 
 	@Override
-	public AtomicReference<FilterRegistration> addingService(
-		ServiceReference<Filter> serviceReference) {
+	public AtomicReference<FilterRegistration> addingService(ServiceReference<Filter> serviceReference) {
 
 		AtomicReference<FilterRegistration> result = new AtomicReference<>();
 		if (!httpServiceRuntime.matches(serviceReference)) {
@@ -53,11 +50,11 @@ public class ContextFilterTrackerCustomizer
 
 			if (!contextController.matches(serviceReference)) {
 				// Only the default context will perform the "does anyone match" checks.
-				if (httpServiceRuntime.isDefaultContext(contextController) &&
-					!httpServiceRuntime.matchesAnyContext(serviceReference)) {
+				if (httpServiceRuntime.isDefaultContext(contextController)
+						&& !httpServiceRuntime.matchesAnyContext(serviceReference)) {
 
-					throw new HttpWhiteboardFailureException(
-						"Doesn't match any contexts. " + serviceReference, DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING); //$NON-NLS-1$
+					throw new HttpWhiteboardFailureException("Doesn't match any contexts. " + serviceReference, //$NON-NLS-1$
+							DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING);
 				}
 
 				return result;
@@ -66,18 +63,15 @@ public class ContextFilterTrackerCustomizer
 			httpServiceRuntime.removeFailedFilterDTO(serviceReference);
 
 			result.set(contextController.addFilterRegistration(serviceReference));
-		}
-		catch (HttpWhiteboardFailureException hwfe) {
+		} catch (HttpWhiteboardFailureException hwfe) {
 			httpServiceRuntime.debug(hwfe.getMessage(), hwfe);
 
 			recordFailed(serviceReference, hwfe.getFailureReason());
-		}
-		catch (Throwable t) {
+		} catch (Throwable t) {
 			httpServiceRuntime.error(t.getMessage(), t);
 
 			recordFailed(serviceReference, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
-		}
-		finally {
+		} finally {
 			httpServiceRuntime.incrementServiceChangecount();
 		}
 
@@ -89,27 +83,31 @@ public class ContextFilterTrackerCustomizer
 		contextController.getHttpServiceRuntime().removeFailedFilterDTO(serviceReference);
 	}
 
-	private void recordFailed(
-		ServiceReference<Filter> serviceReference, int failureReason) {
+	private void recordFailed(ServiceReference<Filter> serviceReference, int failureReason) {
 
 		FailedFilterDTO failedFilterDTO = new FailedFilterDTO();
 
 		failedFilterDTO.asyncSupported = BooleanPlus.from(
-			serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_ASYNC_SUPPORTED), false);
-		failedFilterDTO.dispatcher = StringPlus.from(
-			serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER)).toArray(new String[0]);
+				serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_ASYNC_SUPPORTED), false);
+		failedFilterDTO.dispatcher = StringPlus
+				.from(serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER))
+				.toArray(new String[0]);
 		failedFilterDTO.failureReason = failureReason;
-		failedFilterDTO.initParams = ServiceProperties.parseInitParams(
-			serviceReference, HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX);
-		failedFilterDTO.name = (String)serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME);
-		failedFilterDTO.patterns = StringPlus.from(
-			serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN)).toArray(new String[0]);
-		failedFilterDTO.regexs = StringPlus.from(
-			serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX)).toArray(new String[0]);
-		failedFilterDTO.serviceId = (Long)serviceReference.getProperty(Constants.SERVICE_ID);
+		failedFilterDTO.initParams = ServiceProperties.parseInitParams(serviceReference,
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX);
+		failedFilterDTO.name = (String) serviceReference
+				.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME);
+		failedFilterDTO.patterns = StringPlus
+				.from(serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN))
+				.toArray(new String[0]);
+		failedFilterDTO.regexs = StringPlus
+				.from(serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_REGEX))
+				.toArray(new String[0]);
+		failedFilterDTO.serviceId = (Long) serviceReference.getProperty(Constants.SERVICE_ID);
 		failedFilterDTO.servletContextId = contextController.getServiceId();
-		failedFilterDTO.servletNames = StringPlus.from(
-			serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_SERVLET)).toArray(new String[0]);
+		failedFilterDTO.servletNames = StringPlus
+				.from(serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_SERVLET))
+				.toArray(new String[0]);
 
 		contextController.getHttpServiceRuntime().recordFailedFilterDTO(serviceReference, failedFilterDTO);
 	}

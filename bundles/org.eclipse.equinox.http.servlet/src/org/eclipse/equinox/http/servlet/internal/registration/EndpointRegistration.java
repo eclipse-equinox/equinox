@@ -29,17 +29,16 @@ import org.osgi.service.http.context.ServletContextHelper;
 /**
  * @author Raymond Augé
  */
-public abstract class EndpointRegistration<D extends DTO>
-	extends MatchableRegistration<Servlet, D> implements Comparable<EndpointRegistration<?>>{
+public abstract class EndpointRegistration<D extends DTO> extends MatchableRegistration<Servlet, D>
+		implements Comparable<EndpointRegistration<?>> {
 
 	protected final ServiceHolder<Servlet> servletHolder;
-	private final ServletContextHelper servletContextHelper; //The context used during the registration of the servlet
+	private final ServletContextHelper servletContextHelper; // The context used during the registration of the servlet
 	private final ContextController contextController;
 	private final ClassLoader classLoader;
 
-	public EndpointRegistration(
-		ServiceHolder<Servlet> servletHolder, D d, ServletContextHelper servletContextHelper,
-		ContextController contextController) {
+	public EndpointRegistration(ServiceHolder<Servlet> servletHolder, D d, ServletContextHelper servletContextHelper,
+			ContextController contextController) {
 
 		super(servletHolder.get(), d);
 		this.servletHolder = servletHolder;
@@ -66,8 +65,7 @@ public abstract class EndpointRegistration<D extends DTO>
 
 			super.destroy();
 			getT().destroy();
-		}
-		finally {
+		} finally {
 			destroyContextAttributes();
 			Thread.currentThread().setContextClassLoader(original);
 			servletHolder.release();
@@ -80,7 +78,7 @@ public abstract class EndpointRegistration<D extends DTO>
 			return false;
 		}
 
-		EndpointRegistration<?> endpointRegistration = (EndpointRegistration<?>)obj;
+		EndpointRegistration<?> endpointRegistration = (EndpointRegistration<?>) obj;
 
 		return getD().equals(endpointRegistration.getD());
 	}
@@ -90,15 +88,14 @@ public abstract class EndpointRegistration<D extends DTO>
 		return getD().hashCode();
 	}
 
-	//Delegate the init call to the actual servlet
+	// Delegate the init call to the actual servlet
 	public void init(ServletConfig servletConfig) throws ServletException {
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(classLoader);
 
 			getT().init(servletConfig);
-		}
-		finally {
+		} finally {
 			Thread.currentThread().setContextClassLoader(original);
 		}
 	}
@@ -120,9 +117,7 @@ public abstract class EndpointRegistration<D extends DTO>
 	public abstract ServiceReference<?> getServiceReference();
 
 	@Override
-	public String match(
-		String name, String servletPath, String pathInfo, String extension,
-		Match match) {
+	public String match(String name, String servletPath, String pathInfo, String extension, Match match) {
 
 		if (match == Match.ERROR) {
 			return null;
@@ -151,7 +146,7 @@ public abstract class EndpointRegistration<D extends DTO>
 		return null;
 	}
 
-	//Delegate the handling of the request to the actual servlet
+	// Delegate the handling of the request to the actual servlet
 	public void service(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
@@ -192,8 +187,7 @@ public abstract class EndpointRegistration<D extends DTO>
 		return toString;
 	}
 
-	private static final String SIMPLE_NAME =
-		EndpointRegistration.class.getSimpleName();
+	private static final String SIMPLE_NAME = EndpointRegistration.class.getSimpleName();
 
 	private String _toString;
 }

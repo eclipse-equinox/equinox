@@ -17,8 +17,7 @@ import javax.servlet.ServletContext;
 import org.apache.commons.fileupload.FileUploadException;
 import org.osgi.service.http.runtime.dto.ServletDTO;
 
-public class MultipartSupportFactoryImpl
-	implements MultipartSupportFactory {
+public class MultipartSupportFactoryImpl implements MultipartSupportFactory {
 
 	public static final Class<?> FAIL_EARLY = FileUploadException.class;
 

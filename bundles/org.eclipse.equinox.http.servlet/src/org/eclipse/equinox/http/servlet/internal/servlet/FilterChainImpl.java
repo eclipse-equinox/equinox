@@ -30,9 +30,8 @@ public class FilterChainImpl implements FilterChain {
 	private final int filterCount;
 	private int filterIndex = 0;
 
-	public FilterChainImpl(
-		List<FilterRegistration> matchingFilterRegistrations,
-		EndpointRegistration<?> registration, DispatcherType dispatcherType) {
+	public FilterChainImpl(List<FilterRegistration> matchingFilterRegistrations, EndpointRegistration<?> registration,
+			DispatcherType dispatcherType) {
 
 		this.matchingFilterRegistrations = matchingFilterRegistrations;
 		this.dispatcherType = dispatcherType;

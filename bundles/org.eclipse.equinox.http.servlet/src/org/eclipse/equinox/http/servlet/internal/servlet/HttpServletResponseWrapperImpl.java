@@ -77,7 +77,7 @@ public class HttpServletResponseWrapperImpl extends HttpServletResponseWrapper {
 	@Override
 	public void flushBuffer() throws IOException {
 		if (status != -1) {
-			HttpServletResponse wrappedResponse = (HttpServletResponse)this.getResponse();
+			HttpServletResponse wrappedResponse = (HttpServletResponse) this.getResponse();
 			wrappedResponse.sendError(status, getMessage());
 		}
 		super.flushBuffer();
@@ -91,15 +91,14 @@ public class HttpServletResponseWrapperImpl extends HttpServletResponseWrapper {
 		this.completed = completed;
 	}
 
-	public static HttpServletResponseWrapperImpl findHttpRuntimeResponse(
-		HttpServletResponse response) {
+	public static HttpServletResponseWrapperImpl findHttpRuntimeResponse(HttpServletResponse response) {
 
 		while (response instanceof HttpServletResponseWrapper) {
 			if (response instanceof HttpServletResponseWrapperImpl) {
-				return (HttpServletResponseWrapperImpl)response;
+				return (HttpServletResponseWrapperImpl) response;
 			}
 
-			response = (HttpServletResponse)((HttpServletResponseWrapper)response).getResponse();
+			response = (HttpServletResponse) ((HttpServletResponseWrapper) response).getResponse();
 		}
 
 		return null;
@@ -125,7 +124,8 @@ public class HttpServletResponseWrapperImpl extends HttpServletResponseWrapper {
 		@Override
 		public void flush() throws IOException {
 			if (getInternalStatus() != -1) {
-				HttpServletResponse wrappedResponse = (HttpServletResponse) HttpServletResponseWrapperImpl.this.getResponse();
+				HttpServletResponse wrappedResponse = (HttpServletResponse) HttpServletResponseWrapperImpl.this
+						.getResponse();
 				wrappedResponse.sendError(getInternalStatus(), getMessage());
 			}
 			originalOutputStream.flush();

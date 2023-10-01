@@ -30,15 +30,14 @@ import org.osgi.service.http.whiteboard.Preprocessor;
  * @author Raymond Augé
  */
 public class PreprocessorRegistration extends Registration<Preprocessor, PreprocessorDTO>
-	implements Comparable<PreprocessorRegistration> {
+		implements Comparable<PreprocessorRegistration> {
 
 	private final ServiceHolder<Preprocessor> preprocessorHolder;
 	private final ClassLoader classLoader;
 	private final HttpServiceRuntimeImpl httpServiceRuntime;
 
-	public PreprocessorRegistration(
-		ServiceHolder<Preprocessor> preprocessorHolder, PreprocessorDTO preprocessorDTO,
-		HttpServiceRuntimeImpl httpServiceRuntime) {
+	public PreprocessorRegistration(ServiceHolder<Preprocessor> preprocessorHolder, PreprocessorDTO preprocessorDTO,
+			HttpServiceRuntimeImpl httpServiceRuntime) {
 
 		super(preprocessorHolder.get(), preprocessorDTO);
 		this.preprocessorHolder = preprocessorHolder;
@@ -53,17 +52,14 @@ public class PreprocessorRegistration extends Registration<Preprocessor, Preproc
 		return thisRef.compareTo(otherRef);
 	}
 
-	public void doFilter(
-		HttpServletRequest request, HttpServletResponse response,
-		FilterChain chain)
+	public void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(classLoader);
 			getT().doFilter(request, response, chain);
-		}
-		finally {
+		} finally {
 			Thread.currentThread().setContextClassLoader(original);
 		}
 	}
@@ -77,8 +73,7 @@ public class PreprocessorRegistration extends Registration<Preprocessor, Preproc
 			preprocessorHolder.getBundle().getBundleContext().ungetService(preprocessorHolder.getServiceReference());
 			super.destroy();
 			getT().destroy();
-		}
-		finally {
+		} finally {
 			Thread.currentThread().setContextClassLoader(original);
 			preprocessorHolder.release();
 		}
@@ -95,8 +90,7 @@ public class PreprocessorRegistration extends Registration<Preprocessor, Preproc
 			Thread.currentThread().setContextClassLoader(classLoader);
 
 			getT().init(filterConfig);
-		}
-		finally {
+		} finally {
 			Thread.currentThread().setContextClassLoader(original);
 		}
 	}

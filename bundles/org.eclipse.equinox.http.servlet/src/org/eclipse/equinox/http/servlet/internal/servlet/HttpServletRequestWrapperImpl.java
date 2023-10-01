@@ -38,7 +38,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	private List<Part> parts;
 	private final Lock lock = new ReentrantLock();
 
-	private static final Set<String> dispatcherAttributes =	new HashSet<>();
+	private static final Set<String> dispatcherAttributes = new HashSet<>();
 
 	static {
 		dispatcherAttributes.add(RequestDispatcher.ERROR_EXCEPTION);
@@ -61,15 +61,14 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 	private static final Object NULL_PLACEHOLDER = new Object();
 
-	public static HttpServletRequestWrapperImpl findHttpRuntimeRequest(
-		HttpServletRequest request) {
+	public static HttpServletRequestWrapperImpl findHttpRuntimeRequest(HttpServletRequest request) {
 
 		while (request instanceof HttpServletRequestWrapper) {
 			if (request instanceof HttpServletRequestWrapperImpl) {
-				return (HttpServletRequestWrapperImpl)request;
+				return (HttpServletRequestWrapperImpl) request;
 			}
 
-			request = (HttpServletRequest)((HttpServletRequestWrapper)request).getRequest();
+			request = (HttpServletRequest) ((HttpServletRequestWrapper) request).getRequest();
 		}
 
 		return null;
@@ -82,7 +81,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 	@Override
 	public String changeSessionId() {
-		HttpSessionAdaptor httpSessionAdaptor = (HttpSessionAdaptor)getSession(false);
+		HttpSessionAdaptor httpSessionAdaptor = (HttpSessionAdaptor) getSession(false);
 
 		if (httpSessionAdaptor == null) {
 			throw new IllegalStateException("No session"); //$NON-NLS-1$
@@ -118,8 +117,8 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	public String getPathInfo() {
 		DispatchTargets currentDispatchTargets = dispatchTargets.peek();
 
-		if ((currentDispatchTargets.getServletName() != null) ||
-			(currentDispatchTargets.getDispatcherType() == DispatcherType.INCLUDE)) {
+		if ((currentDispatchTargets.getServletName() != null)
+				|| (currentDispatchTargets.getDispatcherType() == DispatcherType.INCLUDE)) {
 			return this.dispatchTargets.getLast().getPathInfo();
 		}
 		return currentDispatchTargets.getPathInfo();
@@ -153,8 +152,8 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	public String getQueryString() {
 		DispatchTargets currentDispatchTargets = dispatchTargets.peek();
 
-		if ((currentDispatchTargets.getServletName() != null) ||
-			(currentDispatchTargets.getDispatcherType() == DispatcherType.INCLUDE)) {
+		if ((currentDispatchTargets.getServletName() != null)
+				|| (currentDispatchTargets.getDispatcherType() == DispatcherType.INCLUDE)) {
 			return request.getQueryString();
 		}
 		return currentDispatchTargets.getQueryString();
@@ -164,8 +163,8 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	public String getRequestURI() {
 		DispatchTargets currentDispatchTargets = dispatchTargets.peek();
 
-		if ((currentDispatchTargets.getServletName() != null) ||
-			(currentDispatchTargets.getDispatcherType() == DispatcherType.INCLUDE)) {
+		if ((currentDispatchTargets.getServletName() != null)
+				|| (currentDispatchTargets.getDispatcherType() == DispatcherType.INCLUDE)) {
 			return request.getRequestURI();
 		}
 		return currentDispatchTargets.getRequestURI();
@@ -178,8 +177,8 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	public String getServletPath() {
 		DispatchTargets currentDispatchTargets = dispatchTargets.peek();
 
-		if ((currentDispatchTargets.getServletName() != null) ||
-			(currentDispatchTargets.getDispatcherType() == DispatcherType.INCLUDE)) {
+		if ((currentDispatchTargets.getServletName() != null)
+				|| (currentDispatchTargets.getDispatcherType() == DispatcherType.INCLUDE)) {
 			return this.dispatchTargets.getLast().getServletPath();
 		}
 		if (currentDispatchTargets.getServletPath().equals(Const.SLASH)) {
@@ -196,9 +195,8 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		DispatchTargets current = dispatchTargets.peek();
 		DispatcherType dispatcherType = current.getDispatcherType();
 
-		if ((dispatcherType == DispatcherType.ASYNC) ||
-			(dispatcherType == DispatcherType.REQUEST) ||
-			!attributeName.startsWith("javax.servlet.")) { //$NON-NLS-1$
+		if ((dispatcherType == DispatcherType.ASYNC) || (dispatcherType == DispatcherType.REQUEST)
+				|| !attributeName.startsWith("javax.servlet.")) { //$NON-NLS-1$
 
 			return request.getAttribute(attributeName);
 		}
@@ -207,13 +205,11 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		Map<String, Object> specialOverides = current.getSpecialOverides();
 
 		if (dispatcherType == DispatcherType.ERROR) {
-			if (dispatcherAttributes.contains(attributeName) &&
-				!attributeName.startsWith("javax.servlet.error.")) { //$NON-NLS-1$
+			if (dispatcherAttributes.contains(attributeName) && !attributeName.startsWith("javax.servlet.error.")) { //$NON-NLS-1$
 
 				return null;
 			}
-		}
-		else if (dispatcherType == DispatcherType.INCLUDE) {
+		} else if (dispatcherType == DispatcherType.INCLUDE) {
 			if (hasServletName && attributeName.startsWith("javax.servlet.include")) { //$NON-NLS-1$
 				return null;
 			}
@@ -223,8 +219,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 				if (NULL_PLACEHOLDER.equals(specialOveride)) {
 					return null;
-				}
-				else if (specialOveride != null) {
+				} else if (specialOveride != null) {
 					return specialOveride;
 				}
 
@@ -237,25 +232,20 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 			if (attributeName.equals(RequestDispatcher.INCLUDE_CONTEXT_PATH)) {
 				return current.getContextController().getFullContextPath();
-			}
-			else if (attributeName.equals(RequestDispatcher.INCLUDE_PATH_INFO)) {
+			} else if (attributeName.equals(RequestDispatcher.INCLUDE_PATH_INFO)) {
 				return current.getPathInfo();
-			}
-			else if (attributeName.equals(RequestDispatcher.INCLUDE_QUERY_STRING)) {
+			} else if (attributeName.equals(RequestDispatcher.INCLUDE_QUERY_STRING)) {
 				return current.getQueryString();
-			}
-			else if (attributeName.equals(RequestDispatcher.INCLUDE_REQUEST_URI)) {
+			} else if (attributeName.equals(RequestDispatcher.INCLUDE_REQUEST_URI)) {
 				return current.getRequestURI();
-			}
-			else if (attributeName.equals(RequestDispatcher.INCLUDE_SERVLET_PATH)) {
+			} else if (attributeName.equals(RequestDispatcher.INCLUDE_SERVLET_PATH)) {
 				return current.getServletPath();
 			}
 
 			if (dispatcherAttributes.contains(attributeName)) {
 				return null;
 			}
-		}
-		else if (dispatcherType == DispatcherType.FORWARD) {
+		} else if (dispatcherType == DispatcherType.FORWARD) {
 			if (hasServletName && attributeName.startsWith("javax.servlet.forward")) { //$NON-NLS-1$
 				return null;
 			}
@@ -265,8 +255,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 				if (NULL_PLACEHOLDER.equals(specialOveride)) {
 					return null;
-				}
-				else if (specialOveride != null) {
+				} else if (specialOveride != null) {
 					return specialOveride;
 				}
 			}
@@ -275,17 +264,13 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 			if (attributeName.equals(RequestDispatcher.FORWARD_CONTEXT_PATH)) {
 				return original.getContextController().getFullContextPath();
-			}
-			else if (attributeName.equals(RequestDispatcher.FORWARD_PATH_INFO)) {
+			} else if (attributeName.equals(RequestDispatcher.FORWARD_PATH_INFO)) {
 				return original.getPathInfo();
-			}
-			else if (attributeName.equals(RequestDispatcher.FORWARD_QUERY_STRING)) {
+			} else if (attributeName.equals(RequestDispatcher.FORWARD_QUERY_STRING)) {
 				return original.getQueryString();
-			}
-			else if (attributeName.equals(RequestDispatcher.FORWARD_REQUEST_URI)) {
+			} else if (attributeName.equals(RequestDispatcher.FORWARD_REQUEST_URI)) {
 				return original.getRequestURI();
-			}
-			else if (attributeName.equals(RequestDispatcher.FORWARD_SERVLET_PATH)) {
+			} else if (attributeName.equals(RequestDispatcher.FORWARD_SERVLET_PATH)) {
 				return original.getServletPath();
 			}
 
@@ -300,8 +285,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 	public RequestDispatcher getRequestDispatcher(String path) {
 		DispatchTargets currentDispatchTarget = dispatchTargets.peek();
 
-		ContextController contextController =
-			currentDispatchTarget.getContextController();
+		ContextController contextController = currentDispatchTarget.getContextController();
 
 		// support relative paths
 		if (!path.startsWith(Const.SLASH)) {
@@ -344,8 +328,8 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		if (session != null) {
 			DispatchTargets currentDispatchTarget = dispatchTargets.peek();
 
-			return currentDispatchTarget.getContextController().getSessionAdaptor(
-				session, currentDispatchTarget.getServletRegistration().getT().getServletConfig().getServletContext());
+			return currentDispatchTarget.getContextController().getSessionAdaptor(session,
+					currentDispatchTarget.getServletRegistration().getT().getServletConfig().getServletContext());
 		}
 
 		return null;
@@ -375,20 +359,17 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 		EventListeners eventListeners = currentDispatchTarget.getContextController().getEventListeners();
 
-		List<ServletRequestAttributeListener> listeners = eventListeners.get(
-			ServletRequestAttributeListener.class);
+		List<ServletRequestAttributeListener> listeners = eventListeners.get(ServletRequestAttributeListener.class);
 
 		if (listeners.isEmpty()) {
 			return;
 		}
 
-		ServletRequestAttributeEvent servletRequestAttributeEvent =
-			new ServletRequestAttributeEvent(
+		ServletRequestAttributeEvent servletRequestAttributeEvent = new ServletRequestAttributeEvent(
 				currentDispatchTarget.getServletRegistration().getServletContext(), this, name, null);
 
 		for (ServletRequestAttributeListener servletRequestAttributeListener : listeners) {
-			servletRequestAttributeListener.attributeRemoved(
-				servletRequestAttributeEvent);
+			servletRequestAttributeListener.attributeRemoved(servletRequestAttributeEvent);
 		}
 	}
 
@@ -400,8 +381,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 			if (value == null) {
 				current.getSpecialOverides().put(name, NULL_PLACEHOLDER);
-			}
-			else {
+			} else {
 				current.getSpecialOverides().put(name, value);
 			}
 		}
@@ -412,25 +392,20 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 
 		EventListeners eventListeners = currentDispatchTarget.getContextController().getEventListeners();
 
-		List<ServletRequestAttributeListener> listeners = eventListeners.get(
-			ServletRequestAttributeListener.class);
+		List<ServletRequestAttributeListener> listeners = eventListeners.get(ServletRequestAttributeListener.class);
 
 		if (listeners.isEmpty()) {
 			return;
 		}
 
-		ServletRequestAttributeEvent servletRequestAttributeEvent =
-			new ServletRequestAttributeEvent(
+		ServletRequestAttributeEvent servletRequestAttributeEvent = new ServletRequestAttributeEvent(
 				currentDispatchTarget.getServletRegistration().getServletContext(), this, name, value);
 
 		for (ServletRequestAttributeListener servletRequestAttributeListener : listeners) {
 			if (added) {
-				servletRequestAttributeListener.attributeAdded(
-					servletRequestAttributeEvent);
-			}
-			else {
-				servletRequestAttributeListener.attributeReplaced(
-					servletRequestAttributeEvent);
+				servletRequestAttributeListener.attributeAdded(servletRequestAttributeEvent);
+			} else {
+				servletRequestAttributeListener.attributeReplaced(servletRequestAttributeEvent);
 			}
 		}
 	}
@@ -445,7 +420,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 				}
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -458,7 +433,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		EndpointRegistration<?> endpointRegistration = dispatchTargets.peek().getServletRegistration();
 
 		if (endpointRegistration instanceof ServletRegistration) {
-			ServletRegistration servletRegistration = (ServletRegistration)endpointRegistration;
+			ServletRegistration servletRegistration = (ServletRegistration) endpointRegistration;
 
 			if (servletRegistration.getD().asyncSupported) {
 				return request.startAsync();
@@ -483,8 +458,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 			}
 
 			return parts = servletRegistration.parseRequest(this);
-		}
-		finally {
+		} finally {
 			lock.unlock();
 		}
 	}
@@ -493,7 +467,7 @@ public class HttpServletRequestWrapperImpl extends HttpServletRequestWrapper {
 		EndpointRegistration<?> servletRegistration = dispatchTargets.peek().getServletRegistration();
 
 		if (servletRegistration instanceof org.eclipse.equinox.http.servlet.internal.registration.ServletRegistration) {
-			return (org.eclipse.equinox.http.servlet.internal.registration.ServletRegistration)servletRegistration;
+			return (org.eclipse.equinox.http.servlet.internal.registration.ServletRegistration) servletRegistration;
 		}
 
 		return null;

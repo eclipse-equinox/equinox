@@ -33,22 +33,16 @@ import org.eclipse.equinox.http.servlet.internal.util.Params;
  */
 public class DispatchTargets {
 
-	public DispatchTargets(
-		ContextController contextController,
-		EndpointRegistration<?> endpointRegistration, String servletName,
-		String requestURI, String servletPath, String pathInfo, String queryString) {
+	public DispatchTargets(ContextController contextController, EndpointRegistration<?> endpointRegistration,
+			String servletName, String requestURI, String servletPath, String pathInfo, String queryString) {
 
-		this(
-			contextController, endpointRegistration,
-			Collections.<FilterRegistration>emptyList(), servletName, requestURI,
-			servletPath, pathInfo, queryString);
+		this(contextController, endpointRegistration, Collections.<FilterRegistration>emptyList(), servletName,
+				requestURI, servletPath, pathInfo, queryString);
 	}
 
-	public DispatchTargets(
-		ContextController contextController,
-		EndpointRegistration<?> endpointRegistration,
-		List<FilterRegistration> matchingFilterRegistrations, String servletName,
-		String requestURI, String servletPath, String pathInfo, String queryString) {
+	public DispatchTargets(ContextController contextController, EndpointRegistration<?> endpointRegistration,
+			List<FilterRegistration> matchingFilterRegistrations, String servletName, String requestURI,
+			String servletPath, String pathInfo, String queryString) {
 
 		this.contextController = contextController;
 		this.endpointRegistration = endpointRegistration;
@@ -64,15 +58,14 @@ public class DispatchTargets {
 		currentRequest = request;
 	}
 
-	public void doDispatch(
-			HttpServletRequest originalRequest, HttpServletResponse response,
-			String path, DispatcherType requestedDispatcherType)
-		throws ServletException, IOException {
+	public void doDispatch(HttpServletRequest originalRequest, HttpServletResponse response, String path,
+			DispatcherType requestedDispatcherType) throws ServletException, IOException {
 
 		setDispatcherType(requestedDispatcherType);
 
 		HttpServletRequest request = originalRequest;
-		HttpServletRequestWrapperImpl requestWrapper = HttpServletRequestWrapperImpl.findHttpRuntimeRequest(originalRequest);
+		HttpServletRequestWrapperImpl requestWrapper = HttpServletRequestWrapperImpl
+				.findHttpRuntimeRequest(originalRequest);
 		HttpServletResponseWrapper responseWrapper = HttpServletResponseWrapperImpl.findHttpRuntimeResponse(response);
 
 		boolean includeWrapperAdded = false;
@@ -84,8 +77,7 @@ public class DispatchTargets {
 				setter.setAttribute(RequestDispatcher.INCLUDE_QUERY_STRING, getQueryString());
 				setter.setAttribute(RequestDispatcher.INCLUDE_REQUEST_URI, getRequestURI());
 				setter.setAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH, getServletPath());
-			}
-			else if (dispatcherType == DispatcherType.FORWARD) {
+			} else if (dispatcherType == DispatcherType.FORWARD) {
 				response.resetBuffer();
 
 				setter.setAttribute(RequestDispatcher.FORWARD_CONTEXT_PATH, originalRequest.getContextPath());
@@ -107,20 +99,24 @@ public class DispatchTargets {
 
 			requestWrapper.push(this);
 
-			if ((dispatcherType == DispatcherType.INCLUDE) && !(responseWrapper.getResponse() instanceof IncludeDispatchResponseWrapper)) {
+			if ((dispatcherType == DispatcherType.INCLUDE)
+					&& !(responseWrapper.getResponse() instanceof IncludeDispatchResponseWrapper)) {
 				// add the include wrapper to avoid header and status writes
-				responseWrapper.setResponse(new IncludeDispatchResponseWrapper((HttpServletResponse)responseWrapper.getResponse()));
+				responseWrapper.setResponse(
+						new IncludeDispatchResponseWrapper((HttpServletResponse) responseWrapper.getResponse()));
 				includeWrapperAdded = true;
 			}
 
 			ResponseStateHandler responseStateHandler = new ResponseStateHandler(request, response, this);
 
 			responseStateHandler.processRequest();
-		}
-		finally {
-			if ((dispatcherType == DispatcherType.INCLUDE) && (responseWrapper.getResponse() instanceof IncludeDispatchResponseWrapper) && includeWrapperAdded) {
+		} finally {
+			if ((dispatcherType == DispatcherType.INCLUDE)
+					&& (responseWrapper.getResponse() instanceof IncludeDispatchResponseWrapper)
+					&& includeWrapperAdded) {
 				// remove the include wrapper we added
-				responseWrapper.setResponse(((IncludeDispatchResponseWrapper)responseWrapper.getResponse()).getResponse());
+				responseWrapper
+						.setResponse(((IncludeDispatchResponseWrapper) responseWrapper.getResponse()).getResponse());
 			}
 
 			requestWrapper.pop();
@@ -199,7 +195,8 @@ public class DispatchTargets {
 		String value = string;
 
 		if (value == null) {
-			value = SIMPLE_NAME + '[' + contextController.getFullContextPath() + requestURI + (queryString != null ? '?' + queryString : "") + ", " + endpointRegistration.toString() + ']'; //$NON-NLS-1$ //$NON-NLS-2$
+			value = SIMPLE_NAME + '[' + contextController.getFullContextPath() + requestURI
+					+ (queryString != null ? '?' + queryString : "") + ", " + endpointRegistration.toString() + ']'; //$NON-NLS-1$ //$NON-NLS-2$
 
 			string = value;
 		}
@@ -217,18 +214,21 @@ public class DispatchTargets {
 			String[] parameters = queryString.split(Const.AMP);
 			for (String parameter : parameters) {
 				int index = parameter.indexOf('=');
-				String name = (index > 0) ? URLDecoder.decode(parameter.substring(0, index), StandardCharsets.UTF_8.name()) : parameter;
+				String name = (index > 0)
+						? URLDecoder.decode(parameter.substring(0, index), StandardCharsets.UTF_8.name())
+						: parameter;
 				String[] values = parameterMap.get(name);
 				if (values == null) {
 					values = new String[0];
 				}
-				String value = ((index > 0) && (parameter.length() > index + 1)) ? URLDecoder.decode(parameter.substring(index + 1), StandardCharsets.UTF_8.name()) : ""; //$NON-NLS-1$
+				String value = ((index > 0) && (parameter.length() > index + 1))
+						? URLDecoder.decode(parameter.substring(index + 1), StandardCharsets.UTF_8.name())
+						: ""; //$NON-NLS-1$
 				values = Params.append(values, value);
 				parameterMap.put(name, values);
 			}
 			return parameterMap;
-		}
-		catch (UnsupportedEncodingException unsupportedEncodingException) {
+		} catch (UnsupportedEncodingException unsupportedEncodingException) {
 			throw new RuntimeException(unsupportedEncodingException);
 		}
 	}
@@ -253,8 +253,7 @@ public class DispatchTargets {
 			for (Map.Entry<String, Object> oldValue : oldValues.entrySet()) {
 				if (oldValue.getValue() == null) {
 					servletRequest.removeAttribute(oldValue.getKey());
-				}
-				else {
+				} else {
 					servletRequest.setAttribute(oldValue.getKey(), oldValue.getValue());
 				}
 			}

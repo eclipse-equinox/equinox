@@ -45,28 +45,25 @@ public class ServletRegistration extends EndpointRegistration<ServletDTO> {
 				// to fail early if optional imports are missing
 				factory = iterator.next();
 				break;
-			}
-			catch (Throwable t) {
+			} catch (Throwable t) {
 				// ignore ServiceConfigurationError, it means our optional imports are missing.
 			}
 		}
 	}
 
-	public ServletRegistration(
-		ServiceHolder<Servlet> servletHolder, ServletDTO servletDTO,
-		ServletContextHelper servletContextHelper,
-		ContextController contextController, ServletContext servletContext) {
+	public ServletRegistration(ServiceHolder<Servlet> servletHolder, ServletDTO servletDTO,
+			ServletContextHelper servletContextHelper, ContextController contextController,
+			ServletContext servletContext) {
 
 		super(servletHolder, servletDTO, servletContextHelper, contextController);
 
 		if (servletDTO.multipartEnabled) {
 			if (factory == null) {
 				throw new IllegalStateException(
-					"Multipart support not enabled due to missing, optional commons-fileupload dependency!"); //$NON-NLS-1$
+						"Multipart support not enabled due to missing, optional commons-fileupload dependency!"); //$NON-NLS-1$
 			}
 			multipartSupport = factory.newInstance(servletDTO, servletContext);
-		}
-		else {
+		} else {
 			multipartSupport = null;
 		}
 	}

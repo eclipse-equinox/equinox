@@ -28,8 +28,7 @@ public class ServiceReferenceMap extends AbstractMap<String, Object> {
 		entries = new HashSet<>(propertyKeys.length);
 
 		for (String key : propertyKeys) {
-			Map.Entry<String,Object> entry = new ReferenceEntry(
-				key, serviceReference.getProperty(key));
+			Map.Entry<String, Object> entry = new ReferenceEntry(key, serviceReference.getProperty(key));
 
 			entries.add(entry);
 		}

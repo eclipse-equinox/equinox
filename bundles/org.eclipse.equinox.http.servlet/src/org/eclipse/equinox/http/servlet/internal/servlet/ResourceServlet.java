@@ -68,7 +68,8 @@ public class ResourceServlet extends HttpServlet {
 		}
 	}
 
-	private void writeResource(final HttpServletRequest req, final HttpServletResponse resp, final String resourcePath, final URL resourceURL) throws IOException {
+	private void writeResource(final HttpServletRequest req, final HttpServletResponse resp, final String resourcePath,
+			final URL resourceURL) throws IOException {
 		try {
 			AccessController.doPrivileged((PrivilegedExceptionAction<Boolean>) () -> {
 				URLConnection connection = resourceURL.openConnection();
@@ -80,7 +81,8 @@ public class ResourceServlet extends HttpServlet {
 					etag = "W/\"" + contentLength + "-" + lastModified + "\""; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 
 				// Check for cache revalidation.
-				// We should prefer ETag validation as the guarantees are stronger and all HTTP 1.1 clients should be using it
+				// We should prefer ETag validation as the guarantees are stronger and all HTTP
+				// 1.1 clients should be using it
 				String ifNoneMatch = req.getHeader(IF_NONE_MATCH);
 				if (ifNoneMatch != null && etag != null && ifNoneMatch.indexOf(etag) != -1) {
 					resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
@@ -127,9 +129,9 @@ public class ResourceServlet extends HttpServlet {
 				if (etag != null)
 					resp.setHeader(ETAG, etag);
 
-				if (range == null &&
-					(servletContextHelper instanceof RangeAwareServletContextHelper) &&
-					((RangeAwareServletContextHelper)servletContextHelper).rangeableContentType(contentType, req.getHeader("User-Agent"))) { //$NON-NLS-1$
+				if (range == null && (servletContextHelper instanceof RangeAwareServletContextHelper)
+						&& ((RangeAwareServletContextHelper) servletContextHelper).rangeableContentType(contentType,
+								req.getHeader("User-Agent"))) { //$NON-NLS-1$
 
 					range = new Range();
 					range.firstBytePos = 0;
@@ -141,7 +143,8 @@ public class ResourceServlet extends HttpServlet {
 					resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
 					resp.setHeader(ACCEPT_RANGES, RANGE_UNIT_BYTES);
 					resp.setContentLength(range.contentLength());
-					resp.setHeader(CONTENT_RANGE, RANGE_UNIT_BYTES + " " + range.firstBytePos + "-" + range.lastBytePos + "/" + range.completeLength); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					resp.setHeader(CONTENT_RANGE, RANGE_UNIT_BYTES + " " + range.firstBytePos + "-" + range.lastBytePos //$NON-NLS-1$ //$NON-NLS-2$
+							+ "/" + range.completeLength); //$NON-NLS-1$
 				}
 
 				if (contentLength != 0) {
@@ -153,7 +156,8 @@ public class ResourceServlet extends HttpServlet {
 							int writtenContentLength = writeResourceToOutputStream(is, os, range);
 							if (contentLength == -1 || contentLength != writtenContentLength)
 								resp.setContentLength(writtenContentLength);
-						} catch (IllegalStateException e) { // can occur if the response output is already open as a Writer
+						} catch (IllegalStateException e) { // can occur if the response output is already open as a
+															// Writer
 							Writer writer = resp.getWriter();
 							writeResourceToWriter(is, writer, range);
 							// Since ContentLength is a measure of the number of bytes contained in the body
@@ -196,8 +200,10 @@ public class ResourceServlet extends HttpServlet {
 		byte[] buffer = new byte[8192];
 		int bytesRead = is.read(buffer);
 		int writtenContentLength = 0;
-		while (bytesRead != -1 && (range == null || range.lastBytePos == Range.NOT_SET || writtenContentLength < range.lastBytePos)) {
-			if (range != null && range.lastBytePos != Range.NOT_SET && (bytesRead + writtenContentLength) > range.lastBytePos) {
+		while (bytesRead != -1
+				&& (range == null || range.lastBytePos == Range.NOT_SET || writtenContentLength < range.lastBytePos)) {
+			if (range != null && range.lastBytePos != Range.NOT_SET
+					&& (bytesRead + writtenContentLength) > range.lastBytePos) {
 				bytesRead = range.contentLength() - writtenContentLength;
 			}
 			os.write(buffer, 0, bytesRead);
@@ -220,8 +226,10 @@ public class ResourceServlet extends HttpServlet {
 			char[] buffer = new char[8192];
 			int charsRead = reader.read(buffer);
 			int writtenContentLength = 0;
-			while (charsRead != -1 && (range == null || range.lastBytePos == Range.NOT_SET || writtenContentLength < range.lastBytePos)) {
-				if (range != null && range.lastBytePos != Range.NOT_SET && (charsRead + writtenContentLength) > range.lastBytePos) {
+			while (charsRead != -1 && (range == null || range.lastBytePos == Range.NOT_SET
+					|| writtenContentLength < range.lastBytePos)) {
+				if (range != null && range.lastBytePos != Range.NOT_SET
+						&& (charsRead + writtenContentLength) > range.lastBytePos) {
 					charsRead = range.contentLength() - writtenContentLength;
 				}
 				writer.write(buffer, 0, charsRead);

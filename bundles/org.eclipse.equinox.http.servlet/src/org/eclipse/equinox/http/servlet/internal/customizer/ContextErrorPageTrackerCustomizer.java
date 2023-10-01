@@ -34,18 +34,16 @@ import org.osgi.service.http.runtime.dto.DTOConstants;
  * @author Raymond Augé
  */
 public class ContextErrorPageTrackerCustomizer
-	extends RegistrationServiceTrackerCustomizer<Servlet, ErrorPageRegistration>{
+		extends RegistrationServiceTrackerCustomizer<Servlet, ErrorPageRegistration> {
 
-	public ContextErrorPageTrackerCustomizer(
-		BundleContext bundleContext, HttpServiceRuntimeImpl httpServiceRuntime,
-		ContextController contextController) {
+	public ContextErrorPageTrackerCustomizer(BundleContext bundleContext, HttpServiceRuntimeImpl httpServiceRuntime,
+			ContextController contextController) {
 
 		super(bundleContext, httpServiceRuntime, contextController);
 	}
 
 	@Override
-	public AtomicReference<ErrorPageRegistration>
-		addingService(ServiceReference<Servlet> serviceReference) {
+	public AtomicReference<ErrorPageRegistration> addingService(ServiceReference<Servlet> serviceReference) {
 
 		AtomicReference<ErrorPageRegistration> result = new AtomicReference<>();
 		if (!httpServiceRuntime.matches(serviceReference)) {
@@ -57,41 +55,41 @@ public class ContextErrorPageTrackerCustomizer
 
 			if (!contextController.matches(serviceReference)) {
 				// Only the default context will perform the "does anyone match" checks.
-				if (httpServiceRuntime.isDefaultContext(contextController) &&
-					!httpServiceRuntime.matchesAnyContext(serviceReference)) {
+				if (httpServiceRuntime.isDefaultContext(contextController)
+						&& !httpServiceRuntime.matchesAnyContext(serviceReference)) {
 
-					throw new HttpWhiteboardFailureException(
-						"Doesn't match any contexts. " + serviceReference, DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING); //$NON-NLS-1$
+					throw new HttpWhiteboardFailureException("Doesn't match any contexts. " + serviceReference, //$NON-NLS-1$
+							DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING);
 				}
 
 				return result;
-			}
-			else if (contextController.isLegacyContext() &&
-					(serviceReference.getProperty(Const.EQUINOX_LEGACY_TCCL_PROP) == null) &&  // IS a whiteboard service
-					(serviceReference.getProperty(HTTP_WHITEBOARD_CONTEXT_SELECT) != null) &&
-					(((String)serviceReference.getProperty(HTTP_WHITEBOARD_CONTEXT_SELECT))).contains(HTTP_SERVICE_CONTEXT_PROPERTY.concat(Const.EQUAL)) &&
-					(serviceReference.getProperty(HTTP_WHITEBOARD_SERVLET_PATTERN) != null)) {
+			} else if (contextController.isLegacyContext()
+					&& (serviceReference.getProperty(Const.EQUINOX_LEGACY_TCCL_PROP) == null) && // IS a whiteboard
+																									// service
+					(serviceReference.getProperty(HTTP_WHITEBOARD_CONTEXT_SELECT) != null)
+					&& (((String) serviceReference.getProperty(HTTP_WHITEBOARD_CONTEXT_SELECT)))
+							.contains(HTTP_SERVICE_CONTEXT_PROPERTY.concat(Const.EQUAL))
+					&& (serviceReference.getProperty(HTTP_WHITEBOARD_SERVLET_PATTERN) != null)) {
 
-				// don't allow whiteboard Servlets that specifically attempt to bind to a legacy context
+				// don't allow whiteboard Servlets that specifically attempt to bind to a legacy
+				// context
 				throw new HttpWhiteboardFailureException(
-					"Whiteboard ErrorPages with pattern cannot bind to legacy contexts. " + serviceReference, DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING); //$NON-NLS-1$
+						"Whiteboard ErrorPages with pattern cannot bind to legacy contexts. " + serviceReference, //$NON-NLS-1$
+						DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING);
 			}
 
 			httpServiceRuntime.removeFailedErrorPageDTO(serviceReference);
 
 			result.set(contextController.addErrorPageRegistration(serviceReference));
-		}
-		catch (HttpWhiteboardFailureException hwfe) {
+		} catch (HttpWhiteboardFailureException hwfe) {
 			httpServiceRuntime.debug(hwfe.getMessage(), hwfe);
 
 			recordFailed(serviceReference, hwfe.getFailureReason());
-		}
-		catch (Throwable t) {
+		} catch (Throwable t) {
 			httpServiceRuntime.error(t.getMessage(), t);
 
 			recordFailed(serviceReference, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
-		}
-		finally {
+		} finally {
 			httpServiceRuntime.incrementServiceChangecount();
 		}
 
@@ -104,7 +102,8 @@ public class ContextErrorPageTrackerCustomizer
 	}
 
 	void recordFailed(ServiceReference<?> servletReference, int failureReason) {
-		ExtendedErrorPageDTO errorPageDTO = DTOUtil.assembleErrorPageDTO(servletReference, contextController.getServiceId(), false);
+		ExtendedErrorPageDTO errorPageDTO = DTOUtil.assembleErrorPageDTO(servletReference,
+				contextController.getServiceId(), false);
 
 		contextController.recordFailedErrorPageDTO(servletReference, errorPageDTO, failureReason);
 	}

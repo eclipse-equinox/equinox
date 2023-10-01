@@ -21,19 +21,15 @@ import org.osgi.dto.DTO;
 /**
  * @author Raymond Augé
  */
-public abstract class MatchableRegistration<T, D extends DTO>
-	extends Registration<T, D> {
+public abstract class MatchableRegistration<T, D extends DTO> extends Registration<T, D> {
 
 	public MatchableRegistration(T t, D d) {
 		super(t, d);
 	}
 
-	public abstract String match(
-		String name, String servletPath, String pathInfo, String extension,
-		Match match);
+	public abstract String match(String name, String servletPath, String pathInfo, String extension, Match match);
 
-	private boolean isPathWildcardMatch(
-		String pattern, String servletPath) {
+	private boolean isPathWildcardMatch(String pattern, String servletPath) {
 
 		int cpl = pattern.length() - 2;
 
@@ -50,15 +46,13 @@ public abstract class MatchableRegistration<T, D extends DTO>
 		return false;
 	}
 
-	final protected boolean doMatch(
-			String pattern, String servletPath, String pathInfo,
-			String extension, Match match)
-		throws IllegalArgumentException {
+	final protected boolean doMatch(String pattern, String servletPath, String pathInfo, String extension, Match match)
+			throws IllegalArgumentException {
 		if (match == Match.EXACT) {
 			return pattern.equals(servletPath);
 		}
 		if ((match == Match.CONTEXT_ROOT) && Const.BLANK.equals(pattern)) {
-			return  Const.BLANK.equals(servletPath) && Const.SLASH.equals(pathInfo);
+			return Const.BLANK.equals(servletPath) && Const.SLASH.equals(pathInfo);
 		}
 		if ((match == Match.DEFAULT_SERVLET) && Const.SLASH.equals(pattern)) {
 			return !servletPath.isEmpty() && pathInfo == null;
@@ -73,8 +67,7 @@ public abstract class MatchableRegistration<T, D extends DTO>
 				return true;
 			}
 
-			if ((match == Match.REGEX) && isPathWildcardMatch(
-					pattern, servletPath)) {
+			if ((match == Match.REGEX) && isPathWildcardMatch(pattern, servletPath)) {
 
 				return true;
 			}

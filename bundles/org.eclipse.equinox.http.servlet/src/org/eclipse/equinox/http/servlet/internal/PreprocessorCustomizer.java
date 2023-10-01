@@ -35,15 +35,14 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * @author Raymond Augé
  */
 public class PreprocessorCustomizer
-	implements ServiceTrackerCustomizer<Preprocessor, AtomicReference<PreprocessorRegistration>> {
+		implements ServiceTrackerCustomizer<Preprocessor, AtomicReference<PreprocessorRegistration>> {
 
 	public PreprocessorCustomizer(HttpServiceRuntimeImpl httpServiceRuntime) {
 		this.httpServiceRuntime = httpServiceRuntime;
 	}
 
 	@Override
-	public AtomicReference<PreprocessorRegistration> addingService(
-		ServiceReference<Preprocessor> serviceReference) {
+	public AtomicReference<PreprocessorRegistration> addingService(ServiceReference<Preprocessor> serviceReference) {
 
 		AtomicReference<PreprocessorRegistration> result = new AtomicReference<>();
 		if (!httpServiceRuntime.matches(serviceReference)) {
@@ -54,18 +53,15 @@ public class PreprocessorCustomizer
 			removeFailed(serviceReference);
 
 			result.set(addPreprocessorRegistration(serviceReference));
-		}
-		catch (HttpWhiteboardFailureException hwfe) {
+		} catch (HttpWhiteboardFailureException hwfe) {
 			httpServiceRuntime.debug(hwfe.getMessage(), hwfe);
 
 			recordFailed(serviceReference, hwfe.getFailureReason());
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			httpServiceRuntime.error(e.getMessage(), e);
 
 			recordFailed(serviceReference, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
-		}
-		finally {
+		} finally {
 			httpServiceRuntime.incrementServiceChangecount();
 		}
 
@@ -73,8 +69,8 @@ public class PreprocessorCustomizer
 	}
 
 	@Override
-	public void modifiedService(
-		ServiceReference<Preprocessor> serviceReference, AtomicReference<PreprocessorRegistration> reference) {
+	public void modifiedService(ServiceReference<Preprocessor> serviceReference,
+			AtomicReference<PreprocessorRegistration> reference) {
 
 		removedService(serviceReference, reference);
 		AtomicReference<PreprocessorRegistration> added = addingService(serviceReference);
@@ -82,8 +78,8 @@ public class PreprocessorCustomizer
 	}
 
 	@Override
-	public void removedService(
-		ServiceReference<Preprocessor> serviceReference, AtomicReference<PreprocessorRegistration> reference) {
+	public void removedService(ServiceReference<Preprocessor> serviceReference,
+			AtomicReference<PreprocessorRegistration> reference) {
 		try {
 			PreprocessorRegistration registration = reference.get();
 			if (registration != null) {
@@ -91,8 +87,7 @@ public class PreprocessorCustomizer
 			}
 
 			removeFailed(serviceReference);
-		}
-		finally {
+		} finally {
 			httpServiceRuntime.incrementServiceChangecount();
 		}
 	}
@@ -101,23 +96,23 @@ public class PreprocessorCustomizer
 		httpServiceRuntime.removeFailedPreprocessorDTO(serviceReference);
 	}
 
-	private void recordFailed(
-		ServiceReference<Preprocessor> serviceReference, int failureReason) {
+	private void recordFailed(ServiceReference<Preprocessor> serviceReference, int failureReason) {
 
 		FailedPreprocessorDTO failedPreprocessorDTO = new FailedPreprocessorDTO();
 
 		failedPreprocessorDTO.failureReason = failureReason;
-		failedPreprocessorDTO.initParams = ServiceProperties.parseInitParams(
-			serviceReference, HTTP_WHITEBOARD_PREPROCESSOR_INIT_PARAM_PREFIX);
-		failedPreprocessorDTO.serviceId = (Long)serviceReference.getProperty(Constants.SERVICE_ID);
+		failedPreprocessorDTO.initParams = ServiceProperties.parseInitParams(serviceReference,
+				HTTP_WHITEBOARD_PREPROCESSOR_INIT_PARAM_PREFIX);
+		failedPreprocessorDTO.serviceId = (Long) serviceReference.getProperty(Constants.SERVICE_ID);
 
 		httpServiceRuntime.recordFailedPreprocessorDTO(serviceReference, failedPreprocessorDTO);
 	}
 
-	private PreprocessorRegistration addPreprocessorRegistration(
-		ServiceReference<Preprocessor> preprocessorRef) throws ServletException {
+	private PreprocessorRegistration addPreprocessorRegistration(ServiceReference<Preprocessor> preprocessorRef)
+			throws ServletException {
 
-		ServiceHolder<Preprocessor> preprocessorHolder = new ServiceHolder<>(httpServiceRuntime.getConsumingContext().getServiceObjects(preprocessorRef));
+		ServiceHolder<Preprocessor> preprocessorHolder = new ServiceHolder<>(
+				httpServiceRuntime.getConsumingContext().getServiceObjects(preprocessorRef));
 		Preprocessor preprocessor = preprocessorHolder.get();
 		PreprocessorRegistration registration = null;
 		boolean addedRegisteredObject = false;
@@ -127,7 +122,10 @@ public class PreprocessorCustomizer
 			}
 			addedRegisteredObject = httpServiceRuntime.getRegisteredObjects().add(preprocessor);
 			if (!addedRegisteredObject) {
-				throw new HttpWhiteboardFailureException("Multiple registration of instance detected. Prototype scope is recommended: " + preprocessorRef, DTOConstants.FAILURE_REASON_SERVICE_IN_USE); //$NON-NLS-1$
+				throw new HttpWhiteboardFailureException(
+						"Multiple registration of instance detected. Prototype scope is recommended: " //$NON-NLS-1$
+								+ preprocessorRef,
+						DTOConstants.FAILURE_REASON_SERVICE_IN_USE);
 			}
 			registration = doAddPreprocessorRegistration(preprocessorHolder, preprocessorRef);
 		} finally {
@@ -141,26 +139,24 @@ public class PreprocessorCustomizer
 		return registration;
 	}
 
-	private PreprocessorRegistration doAddPreprocessorRegistration(
-		ServiceHolder<Preprocessor> preprocessorHolder,
-		ServiceReference<Preprocessor> preprocessorRef) throws ServletException {
+	private PreprocessorRegistration doAddPreprocessorRegistration(ServiceHolder<Preprocessor> preprocessorHolder,
+			ServiceReference<Preprocessor> preprocessorRef) throws ServletException {
 
 		PreprocessorDTO preprocessorDTO = new PreprocessorDTO();
 
-		preprocessorDTO.initParams = ServiceProperties.parseInitParams(
-			preprocessorRef, HTTP_WHITEBOARD_PREPROCESSOR_INIT_PARAM_PREFIX);
+		preprocessorDTO.initParams = ServiceProperties.parseInitParams(preprocessorRef,
+				HTTP_WHITEBOARD_PREPROCESSOR_INIT_PARAM_PREFIX);
 		preprocessorDTO.serviceId = preprocessorHolder.getServiceId();
 
-		PreprocessorRegistration newRegistration = new PreprocessorRegistration(
-			preprocessorHolder, preprocessorDTO, httpServiceRuntime);
-		FilterConfig filterConfig = new FilterConfigImpl(
-			preprocessorHolder.get().getClass().getCanonicalName(),
-			preprocessorDTO.initParams,
-			httpServiceRuntime.getParentServletContext());
+		PreprocessorRegistration newRegistration = new PreprocessorRegistration(preprocessorHolder, preprocessorDTO,
+				httpServiceRuntime);
+		FilterConfig filterConfig = new FilterConfigImpl(preprocessorHolder.get().getClass().getCanonicalName(),
+				preprocessorDTO.initParams, httpServiceRuntime.getParentServletContext());
 
 		newRegistration.init(filterConfig);
 
-		httpServiceRuntime.getPreprocessorRegistrations().put(preprocessorHolder.getServiceReference(), newRegistration);
+		httpServiceRuntime.getPreprocessorRegistrations().put(preprocessorHolder.getServiceReference(),
+				newRegistration);
 
 		return newRegistration;
 	}

@@ -20,17 +20,13 @@ import org.osgi.service.http.context.ServletContextHelper;
 
 public class DefaultServletContextHelperFactory implements ServiceFactory<ServletContextHelper> {
 	@Override
-	public ServletContextHelper getService(
-		Bundle bundle,
-		ServiceRegistration<ServletContextHelper> registration) {
+	public ServletContextHelper getService(Bundle bundle, ServiceRegistration<ServletContextHelper> registration) {
 		return new DefaultServletContextHelper(bundle);
 	}
 
 	@Override
-	public void ungetService(
-		Bundle bundle,
-		ServiceRegistration<ServletContextHelper> registration,
-		ServletContextHelper service) {
+	public void ungetService(Bundle bundle, ServiceRegistration<ServletContextHelper> registration,
+			ServletContextHelper service) {
 		// do nothing
 	}
 }

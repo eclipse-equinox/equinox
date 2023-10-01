@@ -33,18 +33,16 @@ import org.osgi.service.http.runtime.dto.ServletDTO;
  * @author Raymond Augé
  */
 public class ContextServletTrackerCustomizer
-	extends RegistrationServiceTrackerCustomizer<Servlet, ServletRegistration> {
+		extends RegistrationServiceTrackerCustomizer<Servlet, ServletRegistration> {
 
-	public ContextServletTrackerCustomizer(
-		BundleContext bundleContext, HttpServiceRuntimeImpl httpServiceRuntime,
-		ContextController contextController) {
+	public ContextServletTrackerCustomizer(BundleContext bundleContext, HttpServiceRuntimeImpl httpServiceRuntime,
+			ContextController contextController) {
 
 		super(bundleContext, httpServiceRuntime, contextController);
 	}
 
 	@Override
-	public AtomicReference<ServletRegistration> addingService(
-		ServiceReference<Servlet> serviceReference) {
+	public AtomicReference<ServletRegistration> addingService(ServiceReference<Servlet> serviceReference) {
 
 		AtomicReference<ServletRegistration> result = new AtomicReference<>();
 		if (!httpServiceRuntime.matches(serviceReference)) {
@@ -56,41 +54,41 @@ public class ContextServletTrackerCustomizer
 
 			if (!contextController.matches(serviceReference)) {
 				// Only the default context will perform the "does anyone match" checks.
-				if (httpServiceRuntime.isDefaultContext(contextController) &&
-					!httpServiceRuntime.matchesAnyContext(serviceReference)) {
+				if (httpServiceRuntime.isDefaultContext(contextController)
+						&& !httpServiceRuntime.matchesAnyContext(serviceReference)) {
 
-					throw new HttpWhiteboardFailureException(
-						"Doesn't match any contexts. " + serviceReference, DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING); //$NON-NLS-1$
+					throw new HttpWhiteboardFailureException("Doesn't match any contexts. " + serviceReference, //$NON-NLS-1$
+							DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING);
 				}
 
 				return result;
-			}
-			else if (contextController.isLegacyContext() &&
-					(serviceReference.getProperty(Const.EQUINOX_LEGACY_TCCL_PROP) == null) &&  // IS a whiteboard service
-					(serviceReference.getProperty(HTTP_WHITEBOARD_CONTEXT_SELECT) != null) &&
-					(((String)serviceReference.getProperty(HTTP_WHITEBOARD_CONTEXT_SELECT))).contains(HTTP_SERVICE_CONTEXT_PROPERTY.concat(Const.EQUAL)) &&
-					(serviceReference.getProperty(HTTP_WHITEBOARD_SERVLET_PATTERN) != null)) {
+			} else if (contextController.isLegacyContext()
+					&& (serviceReference.getProperty(Const.EQUINOX_LEGACY_TCCL_PROP) == null) && // IS a whiteboard
+																									// service
+					(serviceReference.getProperty(HTTP_WHITEBOARD_CONTEXT_SELECT) != null)
+					&& (((String) serviceReference.getProperty(HTTP_WHITEBOARD_CONTEXT_SELECT)))
+							.contains(HTTP_SERVICE_CONTEXT_PROPERTY.concat(Const.EQUAL))
+					&& (serviceReference.getProperty(HTTP_WHITEBOARD_SERVLET_PATTERN) != null)) {
 
-				// don't allow whiteboard Servlets that specifically attempt to bind to a legacy context
+				// don't allow whiteboard Servlets that specifically attempt to bind to a legacy
+				// context
 				throw new HttpWhiteboardFailureException(
-					"Whiteboard Servlets with pattern cannot bind to legacy contexts. " + serviceReference, DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING); //$NON-NLS-1$
+						"Whiteboard Servlets with pattern cannot bind to legacy contexts. " + serviceReference, //$NON-NLS-1$
+						DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING);
 			}
 
 			httpServiceRuntime.removeFailedServletDTO(serviceReference);
 
 			result.set(contextController.addServletRegistration(serviceReference));
-		}
-		catch (HttpWhiteboardFailureException hwfe) {
+		} catch (HttpWhiteboardFailureException hwfe) {
 			httpServiceRuntime.debug(hwfe.getMessage(), hwfe);
 
 			recordFailed(serviceReference, hwfe.getFailureReason());
-		}
-		catch (Throwable t) {
+		} catch (Throwable t) {
 			httpServiceRuntime.error(t.getMessage(), t);
 
 			recordFailed(serviceReference, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
-		}
-		finally {
+		} finally {
 			httpServiceRuntime.incrementServiceChangecount();
 		}
 

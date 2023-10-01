@@ -30,9 +30,8 @@ public class PreprocessorChainImpl implements FilterChain {
 	private final int filterCount;
 	private int filterIndex = 0;
 
-	public PreprocessorChainImpl(
-		List<PreprocessorRegistration> preprocessors,
-		String alias, DispatcherType dispatcherType, ProxyServlet proxyServlet) {
+	public PreprocessorChainImpl(List<PreprocessorRegistration> preprocessors, String alias,
+			DispatcherType dispatcherType, ProxyServlet proxyServlet) {
 
 		this.preprocessors = preprocessors;
 		this.alias = alias;
@@ -45,14 +44,12 @@ public class PreprocessorChainImpl implements FilterChain {
 		if (filterIndex < filterCount) {
 			PreprocessorRegistration registration = preprocessors.get(filterIndex++);
 
-			registration.doFilter(
-				(HttpServletRequest) request, (HttpServletResponse) response, this);
+			registration.doFilter((HttpServletRequest) request, (HttpServletResponse) response, this);
 
 			return;
 		}
 
-		proxyServlet.dispatch(
-			(HttpServletRequest) request, (HttpServletResponse) response, alias, dispatcherType);
+		proxyServlet.dispatch((HttpServletRequest) request, (HttpServletResponse) response, alias, dispatcherType);
 	}
 
 }

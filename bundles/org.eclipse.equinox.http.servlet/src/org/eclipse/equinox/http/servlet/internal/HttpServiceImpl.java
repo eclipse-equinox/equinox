@@ -37,12 +37,12 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 
 	private static AtomicLong legacyIdGenerator = new AtomicLong(0);
 
-	final Bundle bundle; //The bundle associated with this instance of http service
+	final Bundle bundle; // The bundle associated with this instance of http service
 	final HttpServiceRuntimeImpl httpServiceRuntime;
-	private volatile boolean shutdown = false; // We prevent use of this instance if HttpServiceFactory.ungetService has called unregisterAliases.
+	private volatile boolean shutdown = false; // We prevent use of this instance if HttpServiceFactory.ungetService has
+												// called unregisterAliases.
 
-	public HttpServiceImpl(
-		Bundle bundle, HttpServiceRuntimeImpl httpServiceRuntime) {
+	public HttpServiceImpl(Bundle bundle, HttpServiceRuntimeImpl httpServiceRuntime) {
 
 		this.bundle = bundle;
 		this.httpServiceRuntime = httpServiceRuntime;
@@ -59,25 +59,22 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 
 	/**
 	 * @throws ServletException
-	 * @see ExtendedHttpService#registerFilter(String, Filter, Dictionary, HttpContext)
+	 * @see ExtendedHttpService#registerFilter(String, Filter, Dictionary,
+	 *      HttpContext)
 	 */
 	@Override
-	public synchronized void registerFilter(
-			final String alias, final Filter filter,
-			final Dictionary<String, String> initparams,
-			HttpContext httpContext)
-		throws ServletException {
+	public synchronized void registerFilter(final String alias, final Filter filter,
+			final Dictionary<String, String> initparams, HttpContext httpContext) throws ServletException {
 
 		checkShutdown();
-		
+
 		final HttpContextHolder httpContextHolder = getHttpContextHolder(httpContext);
 		try {
 			AccessController.doPrivileged((PrivilegedExceptionAction<Void>) () -> {
 				httpServiceRuntime.registerHttpServiceFilter(bundle, alias, filter, initparams, httpContextHolder);
 				return null;
 			});
-		}
-		catch (PrivilegedActionException e) {
+		} catch (PrivilegedActionException e) {
 			Throw.unchecked(e.getException());
 		}
 
@@ -95,9 +92,8 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	 * @throws NamespaceException
 	 * @see HttpService#registerResources(String, String, HttpContext)
 	 */
-	public synchronized void registerResources(
-			final String alias, final String name, HttpContext httpContext)
-		throws NamespaceException {
+	public synchronized void registerResources(final String alias, final String name, HttpContext httpContext)
+			throws NamespaceException {
 
 		checkShutdown();
 		final HttpContextHolder httpContextHolder = getHttpContextHolder(httpContext);
@@ -117,10 +113,8 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	 * @throws NamespaceException
 	 * @see HttpService#registerServlet(String, Servlet, Dictionary, HttpContext)
 	 */
-	public synchronized void registerServlet(
-			final String alias, final Servlet servlet,
-			final Dictionary<?, ?> initparams, HttpContext httpContext)
-		throws ServletException, NamespaceException {
+	public synchronized void registerServlet(final String alias, final Servlet servlet,
+			final Dictionary<?, ?> initparams, HttpContext httpContext) throws ServletException, NamespaceException {
 
 		checkShutdown();
 		final HttpContextHolder httpContextHolder = getHttpContextHolder(httpContext);
@@ -128,7 +122,8 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 			AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
 				@Override
 				public Void run() throws NamespaceException, ServletException {
-					httpServiceRuntime.registerHttpServiceServlet(bundle, alias, servlet, initparams, httpContextHolder);
+					httpServiceRuntime.registerHttpServiceServlet(bundle, alias, servlet, initparams,
+							httpContextHolder);
 					return null;
 				}
 			});
@@ -156,7 +151,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 		httpServiceRuntime.unregisterHttpServiceFilter(bundle, filter);
 	}
 
-	//Clean up method
+	// Clean up method
 	synchronized void shutdown() {
 		httpServiceRuntime.unregisterHttpServiceObjects(bundle);
 
@@ -165,8 +160,7 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 
 	private void checkShutdown() {
 		if (shutdown) {
-			throw new IllegalStateException(
-				"Service instance is already shutdown"); //$NON-NLS-1$
+			throw new IllegalStateException("Service instance is already shutdown"); //$NON-NLS-1$
 		}
 	}
 
@@ -178,7 +172,8 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 		HttpContextHolder httpContextHolder = httpServiceRuntime.legacyContextMap.get(httpContext);
 
 		if (httpContextHolder == null) {
-			String legacyId= httpContext.getClass().getName().replaceAll("[^a-zA-Z_0-9\\-]", "_") + "-" + generateLegacyId(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String legacyId = httpContext.getClass().getName().replaceAll("[^a-zA-Z_0-9\\-]", "_") + "-" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					+ generateLegacyId();
 			Dictionary<String, Object> props = new Hashtable<>();
 			props.put(HTTP_WHITEBOARD_CONTEXT_NAME, legacyId);
 			props.put(HTTP_WHITEBOARD_CONTEXT_PATH, "/"); //$NON-NLS-1$
@@ -188,7 +183,9 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 			props.put(Const.EQUINOX_LEGACY_HTTP_CONTEXT_INITIATING_ID, bundle.getBundleId());
 
 			@SuppressWarnings("unchecked")
-			ServiceRegistration<DefaultServletContextHelper> registration = (ServiceRegistration<DefaultServletContextHelper>)bundle.getBundleContext().registerService(ServletContextHelper.class.getName(), new WrappedHttpContext(httpContext, bundle), props);
+			ServiceRegistration<DefaultServletContextHelper> registration = (ServiceRegistration<DefaultServletContextHelper>) bundle
+					.getBundleContext().registerService(ServletContextHelper.class.getName(),
+							new WrappedHttpContext(httpContext, bundle), props);
 			httpContextHolder = new HttpContextHolder(httpContext, registration);
 			httpContextHolder.incrementUseCount();
 
