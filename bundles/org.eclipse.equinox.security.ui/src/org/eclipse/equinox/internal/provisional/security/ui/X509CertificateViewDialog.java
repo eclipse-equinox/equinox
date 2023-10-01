@@ -60,7 +60,8 @@ public class X509CertificateViewDialog extends TitleAreaDialog {
 		Composite composite = (Composite) super.createDialogArea(parent);
 
 		TabFolder tabFolder = new TabFolder(composite, SWT.BORDER);
-		GridData bdata = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL | GridData.GRAB_VERTICAL);
+		GridData bdata = new GridData(
+				GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL | GridData.GRAB_VERTICAL);
 		tabFolder.setLayoutData(bdata);
 
 		createBasicTab(tabFolder);
@@ -177,7 +178,8 @@ public class X509CertificateViewDialog extends TitleAreaDialog {
 		basicTab.setControl(basicTabComposite);
 	}
 
-	protected static void configureLayout(Control c, int horizontalSpan, int verticalSpan, int horizontalIndent, int vertIndent) {
+	protected static void configureLayout(Control c, int horizontalSpan, int verticalSpan, int horizontalIndent,
+			int vertIndent) {
 		GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_CENTER);
 
 		gd.horizontalSpan = horizontalSpan;

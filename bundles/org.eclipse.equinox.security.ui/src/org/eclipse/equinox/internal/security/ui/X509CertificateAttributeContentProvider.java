@@ -26,13 +26,15 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.osgi.util.NLS;
 
 /**
- * X509CertificateAttributeContentProvider
- *  Structured content provided for an <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/security/cert/X509Certificate.html">X509Certificate </a>
- *  object. 
- *  <p>
- *  Currently this only supports the attributes exposed directly by X509Certificate.  Some commonly used extensions
- *  may not be displayed.  Contributions and enhancements are welcomed.
- *    
+ * X509CertificateAttributeContentProvider Structured content provided for an
+ * <a href=
+ * "http://java.sun.com/j2se/1.4.2/docs/api/java/security/cert/X509Certificate.html">X509Certificate
+ * </a> object.
+ * <p>
+ * Currently this only supports the attributes exposed directly by
+ * X509Certificate. Some commonly used extensions may not be displayed.
+ * Contributions and enhancements are welcomed.
+ * 
  */
 public class X509CertificateAttributeContentProvider implements IStructuredContentProvider {
 
@@ -52,8 +54,11 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 
 	private static final DateFormat _df = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.FULL);
 
-	// TODO - This is a bit ugly but gets the job done... Maybe this should be a class of it's own ??
-	private static String keyUsageStrings[] = {LABEL_KEYUSAGE_DIGITALSIGNATURE, LABEL_KEYUSAGE_NONREPUDIATION, LABEL_KEYUSAGE_KEYENCIPHERMENT, LABEL_KEYUSAGE_DATAENCIPHERMENT, LABEL_KEYUSAGE_KEYAGREEMENT, LABEL_KEYUSAGE_CERTSIGN, LABEL_KEYUSAGE_CRLSIGN, LABEL_KEYUSAGE_ENCIPHERONLY, LABEL_KEYUSAGE_DECIPHERONLY};
+	// TODO - This is a bit ugly but gets the job done... Maybe this should be a
+	// class of it's own ??
+	private static String keyUsageStrings[] = { LABEL_KEYUSAGE_DIGITALSIGNATURE, LABEL_KEYUSAGE_NONREPUDIATION,
+			LABEL_KEYUSAGE_KEYENCIPHERMENT, LABEL_KEYUSAGE_DATAENCIPHERMENT, LABEL_KEYUSAGE_KEYAGREEMENT,
+			LABEL_KEYUSAGE_CERTSIGN, LABEL_KEYUSAGE_CRLSIGN, LABEL_KEYUSAGE_ENCIPHERONLY, LABEL_KEYUSAGE_DECIPHERONLY };
 
 	public X509CertificateAttributeContentProvider() {
 		super();
@@ -94,65 +99,78 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 		viewer = aViewer;
 		clear(false); // clear the viewer.
 
-		//  Be safe ... check the input
+		// Be safe ... check the input
 		if (newInput instanceof X509Certificate) {
 
 			X509Certificate theCert = (X509Certificate) newInput;
 
-			X509CertificateAttribute ver = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_VERSION, Integer.toString(theCert.getVersion()));
+			X509CertificateAttribute ver = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_VERSION,
+					Integer.toString(theCert.getVersion()));
 			elements.add(ver);
 
-			X509CertificateAttribute serialNum = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_SERIAL_NUM, theCert.getSerialNumber().toString());
+			X509CertificateAttribute serialNum = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_SERIAL_NUM,
+					theCert.getSerialNumber().toString());
 			elements.add(serialNum);
 
-			X509CertificateAttribute validFrom = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_VALID_FROM, _df.format(theCert.getNotBefore()), theCert.getNotBefore());
+			X509CertificateAttribute validFrom = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_VALID_FROM,
+					_df.format(theCert.getNotBefore()), theCert.getNotBefore());
 			elements.add(validFrom);
 
-			X509CertificateAttribute validTo = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_VALID_TO, _df.format(theCert.getNotAfter()), theCert.getNotAfter());
+			X509CertificateAttribute validTo = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_VALID_TO,
+					_df.format(theCert.getNotAfter()), theCert.getNotAfter());
 			elements.add(validTo);
 
-			X509CertificateAttribute issuedBy = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_ISSUED_BY, theCert.getIssuerX500Principal().getName(), theCert.getIssuerX500Principal());
+			X509CertificateAttribute issuedBy = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_ISSUED_BY,
+					theCert.getIssuerX500Principal().getName(), theCert.getIssuerX500Principal());
 			elements.add(issuedBy);
 
-			X509CertificateAttribute IssuedToItem = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_ISSUED_TO, theCert.getSubjectX500Principal().getName(), theCert.getSubjectX500Principal());
+			X509CertificateAttribute IssuedToItem = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_ISSUED_TO,
+					theCert.getSubjectX500Principal().getName(), theCert.getSubjectX500Principal());
 			elements.add(IssuedToItem);
 
-			X509CertificateAttribute sigAlgoItem = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_SIG_ALGO, theCert.getSigAlgName());
+			X509CertificateAttribute sigAlgoItem = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_SIG_ALGO,
+					theCert.getSigAlgName());
 			elements.add(sigAlgoItem);
 
 			boolean keyUsagesArray[] = theCert.getKeyUsage();
 			StringBuilder keyUsages = new StringBuilder();
 			//
-			//  Only set the string field, If we got some data
+			// Only set the string field, If we got some data
 			if (keyUsagesArray != null && keyUsagesArray.length > 0) {
 				for (int i = 0; i < keyUsagesArray.length; i++) {
 					if (keyUsagesArray[i])
 						keyUsages.append(keyUsageStrings[i] + listDelim);
 				}
 
-				X509CertificateAttribute keyUsage = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_KEY_USAGE, (keyUsages.toString()).substring(0, keyUsages.length() - 2), theCert.getKeyUsage());
+				X509CertificateAttribute keyUsage = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_KEY_USAGE,
+						(keyUsages.toString()).substring(0, keyUsages.length() - 2), theCert.getKeyUsage());
 				elements.add(keyUsage);
 			}
 
 			/*
-			 * Thumbprint is not actually "in" the certificate.  It is computed on the fly...
+			 * Thumbprint is not actually "in" the certificate. It is computed on the fly...
 			 */
-			X509CertificateAttribute thumbPrintItem = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_THMBPRINT, getThumbprint(theCert, "SHA1")); //$NON-NLS-1$
+			X509CertificateAttribute thumbPrintItem = new X509CertificateAttribute(
+					SecurityUIMsg.CERTPROP_X509_THMBPRINT, getThumbprint(theCert, "SHA1")); //$NON-NLS-1$
 			elements.add(thumbPrintItem);
 
 			PublicKey pubKey = theCert.getPublicKey();
-			X509CertificateAttribute pubKeyInfoItem = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_THMBPRINTX509_PUBKEY_INFO, getHex(pubKey.getEncoded()));
+			X509CertificateAttribute pubKeyInfoItem = new X509CertificateAttribute(
+					SecurityUIMsg.CERTPROP_X509_THMBPRINTX509_PUBKEY_INFO, getHex(pubKey.getEncoded()));
 			elements.add(pubKeyInfoItem);
 
 			try {
 				Collection<List<?>> subAltNamesVctr = theCert.getSubjectAlternativeNames();
 
-				//				StringBuffer bfrSubAltNames = new StringBuffer();
+				// StringBuffer bfrSubAltNames = new StringBuffer();
 				if (subAltNamesVctr != null && subAltNamesVctr.size() > 0) {
 					// TODO - Make alt names into a displayable list...
 
 					// For now just display that they exist..
-					X509CertificateAttribute subAltItem = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_SUB_ALT_NAMES, "Has Subject Alternate Names" /*bfrSubAltNames.toString()*/, theCert.getSubjectAlternativeNames()); //$NON-NLS-1$
+					X509CertificateAttribute subAltItem = new X509CertificateAttribute(
+							SecurityUIMsg.CERTPROP_X509_SUB_ALT_NAMES,
+							"Has Subject Alternate Names" /* bfrSubAltNames.toString() */, //$NON-NLS-1$
+							theCert.getSubjectAlternativeNames());
 					elements.add(subAltItem);
 				}
 			} catch (CertificateParsingException e1) {
@@ -169,13 +187,18 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 				basicCnstrntsBfr.append(SecurityUIMsg.LABEL_NAMECONSTRAINTS_ISCA + listDelim);
 				if (basicCnstrnts == Integer.MAX_VALUE) {
 					// MAX_VALUE means "no limit to the allowed length of the certification path."
-					basicCnstrntsBfr.append(NLS.bind(SecurityUIMsg.LABEL_NAMECONSTRAINTS_PATHLENGTH, new Object[] {SecurityUIMsg.LABEL_NAMECONSTRAINTS_PATHLENGTH_UNLIMITED}) + listDelim);
+					basicCnstrntsBfr.append(NLS.bind(SecurityUIMsg.LABEL_NAMECONSTRAINTS_PATHLENGTH,
+							new Object[] { SecurityUIMsg.LABEL_NAMECONSTRAINTS_PATHLENGTH_UNLIMITED }) + listDelim);
 				} else {
-					basicCnstrntsBfr.append(NLS.bind(SecurityUIMsg.LABEL_NAMECONSTRAINTS_PATHLENGTH, new Object[] {basicConstraint}) + listDelim);
+					basicCnstrntsBfr.append(
+							NLS.bind(SecurityUIMsg.LABEL_NAMECONSTRAINTS_PATHLENGTH, new Object[] { basicConstraint })
+									+ listDelim);
 				}
 			}
 
-			X509CertificateAttribute basicConstraints = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_BASIC_CNSTRNTS, (basicCnstrntsBfr.toString()).substring(0, basicCnstrntsBfr.length() - 2), basicConstraint);
+			X509CertificateAttribute basicConstraints = new X509CertificateAttribute(
+					SecurityUIMsg.CERTPROP_X509_BASIC_CNSTRNTS,
+					(basicCnstrntsBfr.toString()).substring(0, basicCnstrntsBfr.length() - 2), basicConstraint);
 			elements.add(basicConstraints);
 
 			List<String> exKeyUsg;
@@ -187,7 +210,10 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 						exKeyUsgBfr.append((string) + listDelim);
 					}
 
-					X509CertificateAttribute exKeyUsgProp = new X509CertificateAttribute(SecurityUIMsg.CERTPROP_X509_EXKEY_USAGE, (exKeyUsgBfr.toString()).substring(0, exKeyUsgBfr.length() - 2), theCert.getExtendedKeyUsage());
+					X509CertificateAttribute exKeyUsgProp = new X509CertificateAttribute(
+							SecurityUIMsg.CERTPROP_X509_EXKEY_USAGE,
+							(exKeyUsgBfr.toString()).substring(0, exKeyUsgBfr.length() - 2),
+							theCert.getExtendedKeyUsage());
 					elements.add(exKeyUsgProp);
 				}
 

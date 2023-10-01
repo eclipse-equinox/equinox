@@ -25,14 +25,13 @@ import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.IWorkbenchWindow;
 
 /**
- * This contribution item is used to create a visual cue that informs the
- * user of bundles disabled in the system for signature validation reasons.
+ * This contribution item is used to create a visual cue that informs the user
+ * of bundles disabled in the system for signature validation reasons.
  * 
- * It has the following functions:
- * - Two levels of severity, represented by two distinct graphical icons
- * - Visual notification when new user attention is required (e.g. throbbing)
- * - An informational message when the user hovers over the icon
- * - A right-click menu for contributing security related actions
+ * It has the following functions: - Two levels of severity, represented by two
+ * distinct graphical icons - Visual notification when new user attention is
+ * required (e.g. throbbing) - An informational message when the user hovers
+ * over the icon - A right-click menu for contributing security related actions
  * 
  * @since 3.4
  */
@@ -64,7 +63,7 @@ public class SecurityStatusControl extends ControlContribution {
 	 * Creates the contribution item.
 	 * 
 	 * @param window the window
-	 * @param id the id
+	 * @param id     the id
 	 */
 	public SecurityStatusControl(IWorkbenchWindow window, String id) {
 		super(id);
@@ -133,20 +132,20 @@ public class SecurityStatusControl extends ControlContribution {
 			IStatus status = iconState.getStatus();
 			ImageDescriptor imgDesc = null;
 			switch (status.getSeverity()) {
-				case IStatus.OK :
-					imgDesc = Activator.getImageDescriptor(IMAGE_PATH_OK);
-					break;
+			case IStatus.OK:
+				imgDesc = Activator.getImageDescriptor(IMAGE_PATH_OK);
+				break;
 
-				case IStatus.ERROR :
-					imgDesc = Activator.getImageDescriptor(IMAGE_PATH_ERROR);
-					break;
+			case IStatus.ERROR:
+				imgDesc = Activator.getImageDescriptor(IMAGE_PATH_ERROR);
+				break;
 
-				default :
-					imgDesc = Activator.getImageDescriptor(IMAGE_PATH_UNKNOWN);
-					break;
+			default:
+				imgDesc = Activator.getImageDescriptor(IMAGE_PATH_UNKNOWN);
+				break;
 			}
 			returnValue = imgDesc.createImage();
-			//TODO: decorate for needsAttention
+			// TODO: decorate for needsAttention
 		} else {
 			ImageDescriptor imgDesc = Activator.getImageDescriptor(IMAGE_PATH_DISABLED);
 			returnValue = imgDesc.createImage();

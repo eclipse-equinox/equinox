@@ -68,7 +68,8 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 
 		new Label(rightPane, SWT.NONE).setText(SecUIMessages.keysTable);
 
-		Table tableOfValues = new Table(rightPane, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
+		Table tableOfValues = new Table(rightPane,
+				SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
 		tableOfValues.setLinesVisible(true);
 		tableOfValues.setHeaderVisible(true);
 		tableOfValues.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true));
@@ -208,7 +209,7 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		defaultStorage.clear();
 		defaultStorage.removeNode();
 
-		// clear it from the list of open storages, delete the file 
+		// clear it from the list of open storages, delete the file
 		InternalExchangeUtils.defaultStorageDelete();
 
 		if (nodesView != null)

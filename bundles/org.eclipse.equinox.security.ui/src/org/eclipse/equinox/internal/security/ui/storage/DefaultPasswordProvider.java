@@ -24,8 +24,8 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.ui.PlatformUI;
 
 /**
- * This password provider prompts user for the password. This provider uses the same password for
- * all secure preferences.
+ * This password provider prompts user for the password. This provider uses the
+ * same password for all secure preferences.
  */
 public class DefaultPasswordProvider extends PasswordProvider {
 
@@ -64,7 +64,8 @@ public class DefaultPasswordProvider extends PasswordProvider {
 
 		final Boolean[] result = new Boolean[1];
 		PlatformUI.getWorkbench().getDisplay().syncExec(() -> {
-			boolean reply = MessageDialog.openConfirm(StorageUtils.getShell(), SecUIMessages.exceptionTitle, SecUIMessages.exceptionDecode);
+			boolean reply = MessageDialog.openConfirm(StorageUtils.getShell(), SecUIMessages.exceptionTitle,
+					SecUIMessages.exceptionDecode);
 			result[0] = Boolean.valueOf(reply);
 		});
 		return result[0].booleanValue();

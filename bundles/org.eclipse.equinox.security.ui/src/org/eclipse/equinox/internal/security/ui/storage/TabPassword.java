@@ -204,7 +204,7 @@ public class TabPassword {
 		HashSet<String> disabledModules = getDisabledModules();
 		for (PasswordProviderDescription module : InternalExchangeUtils.passwordProvidersFind()) {
 			TableItem item = new TableItem(providerTable, SWT.NONE);
-			item.setText(new String[] {module.getName(), Integer.toString(module.getPriority())});
+			item.setText(new String[] { module.getName(), Integer.toString(module.getPriority()) });
 			item.setData(module);
 			if (disabledModules == null)
 				item.setChecked(true);
@@ -254,10 +254,11 @@ public class TabPassword {
 	}
 
 	protected HashSet<String> getDisabledModules() {
-		IScopeContext[] scopes = {ConfigurationScope.INSTANCE, DefaultScope.INSTANCE};
+		IScopeContext[] scopes = { ConfigurationScope.INSTANCE, DefaultScope.INSTANCE };
 		IPreferencesService preferencesService = Platform.getPreferencesService();
 		String defaultPreferenceValue = ""; //$NON-NLS-1$
-		String tmp = preferencesService.getString(PREFERENCES_PLUGIN, IStorageConstants.DISABLED_PROVIDERS_KEY, defaultPreferenceValue, scopes);
+		String tmp = preferencesService.getString(PREFERENCES_PLUGIN, IStorageConstants.DISABLED_PROVIDERS_KEY,
+				defaultPreferenceValue, scopes);
 		HashSet<String> disabledModules = splitModuleIds(tmp);
 		return disabledModules;
 	}
@@ -270,7 +271,8 @@ public class TabPassword {
 		TableItem[] items = providerTable.getItems();
 		for (TableItem item : items) {
 			String moduleId = getModuleId(item);
-			boolean enabled = defaultDisabledModules == null || moduleId == null || !defaultDisabledModules.contains(moduleId);
+			boolean enabled = defaultDisabledModules == null || moduleId == null
+					|| !defaultDisabledModules.contains(moduleId);
 			if (item.getChecked() != enabled) {
 				item.setChecked(enabled);
 				providerModified = true;

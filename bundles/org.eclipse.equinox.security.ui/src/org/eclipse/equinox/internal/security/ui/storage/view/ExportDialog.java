@@ -34,9 +34,10 @@ public class ExportDialog extends TitleAreaDialog {
 
 	private static final String HELP_ID = Activator.PLUGIN_ID + ".ExportDialog"; //$NON-NLS-1$
 
-	private static final ImageDescriptor dlgImageDescriptor = ImageDescriptor.createFromFile(ExportDialog.class, "/icons/storage/export_secure_wiz.png"); //$NON-NLS-1$
+	private static final ImageDescriptor dlgImageDescriptor = ImageDescriptor.createFromFile(ExportDialog.class,
+			"/icons/storage/export_secure_wiz.png"); //$NON-NLS-1$
 
-	protected final static String[] exportExtensions = new String[] {".txt"}; //$NON-NLS-1$
+	protected final static String[] exportExtensions = new String[] { ".txt" }; //$NON-NLS-1$
 
 	protected static final String EXPORT_FILE = "org.eclipse.equinox.security.ui.exportfile"; //$NON-NLS-1$
 
