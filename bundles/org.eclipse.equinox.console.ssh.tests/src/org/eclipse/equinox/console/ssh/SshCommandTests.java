@@ -82,14 +82,13 @@ public class SshCommandTests {
 			when(session.execute(GOGO_SHELL_COMMAND)).thenReturn(null);
 
 			CommandProcessor processor = mock(CommandProcessor.class);
-			when(processor.createSession(any(ConsoleInputStream.class),
-					any(PrintStream.class), any(PrintStream.class))).thenReturn(session);
+			when(processor.createSession(any(ConsoleInputStream.class), any(PrintStream.class), any(PrintStream.class)))
+					.thenReturn(session);
 			BundleContext context = mock(BundleContext.class);
 			when(context.getProperty(USE_CONFIG_ADMIN_PROP)).thenReturn(FALSE);
 			when(context.getProperty(DEFAULT_USER_STORAGE)).thenReturn(TRUE);
 			when(context.getProperty(SSH_PORT_PROP_NAME)).thenReturn(Integer.toString(SSH_PORT));
-			when(context.registerService(any(String.class), any(),
-					any(Dictionary.class))).thenReturn(null);
+			when(context.registerService(any(String.class), any(), any(Dictionary.class))).thenReturn(null);
 
 			Map<String, String> environment = new HashMap<>();
 			environment.put(TERM_PROPERTY, XTERM);

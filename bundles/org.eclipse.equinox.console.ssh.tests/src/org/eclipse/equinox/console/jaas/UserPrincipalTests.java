@@ -31,16 +31,16 @@ public class UserPrincipalTests {
 	private static final String WRONG_PASS = "wrong_pass";
 	private static final String ROLE = "administrator";
 	private static final String OTHERROLE = "otherrole";
-	
+
 	@Test
 	public void testHashCode() {
 		UserPrincipal user = new UserPrincipal(USERNAME, PASSWORD);
-		RolePrincipal role = new RolePrincipal(ROLE); 
+		RolePrincipal role = new RolePrincipal(ROLE);
 		user.addRole(role);
-		
+
 		int expectedHash = 73 + USERNAME.hashCode();
-		expectedHash = 73*expectedHash + PASSWORD.hashCode();
-		expectedHash = 73*expectedHash + role.hashCode();
+		expectedHash = 73 * expectedHash + PASSWORD.hashCode();
+		expectedHash = 73 * expectedHash + role.hashCode();
 		assertEquals("User hash code not as expected", expectedHash, user.hashCode());
 	}
 
@@ -60,7 +60,7 @@ public class UserPrincipalTests {
 	@Test
 	public void testGetRoles() {
 		UserPrincipal user = new UserPrincipal(USERNAME, PASSWORD);
-		RolePrincipal role = new RolePrincipal(ROLE); 
+		RolePrincipal role = new RolePrincipal(ROLE);
 		user.addRole(role);
 		Set<RolePrincipal> roles = user.getRoles();
 		assertEquals("There should be one role", 1, roles.size());
@@ -70,21 +70,21 @@ public class UserPrincipalTests {
 	@Test
 	public void testEqualsObject() {
 		UserPrincipal user = new UserPrincipal(USERNAME, PASSWORD);
-		RolePrincipal role = new RolePrincipal(ROLE); 
+		RolePrincipal role = new RolePrincipal(ROLE);
 		user.addRole(role);
-		
+
 		UserPrincipal sameUser = new UserPrincipal(USERNAME, PASSWORD);
 		RolePrincipal sameRole = new RolePrincipal(ROLE);
 		sameUser.addRole(sameRole);
-		
+
 		UserPrincipal otherUser = new UserPrincipal(OTHERUSER, OTHERPASSWORD);
 		RolePrincipal otherRole = new RolePrincipal(OTHERROLE);
 		otherUser.addRole(otherRole);
-		
-		UserPrincipal userOtherRole	 = new UserPrincipal(USERNAME, PASSWORD);
+
+		UserPrincipal userOtherRole = new UserPrincipal(USERNAME, PASSWORD);
 		RolePrincipal otherRolePrincipal = new RolePrincipal(OTHERROLE);
 		userOtherRole.addRole(otherRolePrincipal);
-		
+
 		assertTrue("User should be equal to itself", user.equals(user));
 		assertTrue("Users should be equal", user.equals(sameUser));
 		assertFalse("Users should not be equal", user.equals(otherUser));
@@ -95,7 +95,7 @@ public class UserPrincipalTests {
 	public void testDestroy() {
 		UserPrincipal user = new UserPrincipal(USERNAME, PASSWORD);
 		UserPrincipal same = new UserPrincipal(USERNAME, PASSWORD);
-		
+
 		user.destroy();
 		assertFalse("Users should not be equal", user.equals(same));
 	}

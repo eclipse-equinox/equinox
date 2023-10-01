@@ -23,7 +23,6 @@ import org.eclipse.equinox.console.common.ConsoleOutputStream;
 import org.junit.Assert;
 import org.junit.Test;
 
-
 public class SshInputHandlerTests {
 
 	private static final long WAIT_TIME = 10000;
