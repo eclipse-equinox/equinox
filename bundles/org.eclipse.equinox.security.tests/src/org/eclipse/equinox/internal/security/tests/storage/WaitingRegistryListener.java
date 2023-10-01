@@ -18,10 +18,10 @@ import java.util.List;
 import org.eclipse.core.runtime.*;
 
 /**
- * Allows test cases to wait for the extension registry notifications.  
- * This listener checks navigability to related elements from extensions.
- * @since 3.4
- * Copied from runtime tests
+ * Allows test cases to wait for the extension registry notifications. This
+ * listener checks navigability to related elements from extensions.
+ * 
+ * @since 3.4 Copied from runtime tests
  */
 public class WaitingRegistryListener extends org.junit.Assert implements IRegistryEventListener {
 

@@ -88,7 +88,8 @@ public class StorageAbstractTest {
 
 	/**
 	 * Might consider switching to configuration location.
-	 * @throws MalformedURLException 
+	 * 
+	 * @throws MalformedURLException
 	 */
 	@SuppressWarnings("deprecation")
 	protected URL getStorageLocation() throws MalformedURLException {

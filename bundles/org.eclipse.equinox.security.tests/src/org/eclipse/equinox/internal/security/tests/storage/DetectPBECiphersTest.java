@@ -29,11 +29,13 @@ import org.junit.Test;
  *
  * This test is only interested in PBE Ciphers for the secure storage.
  *
- * !IMPORTANT! It can only pass if crypto.policy is set to 'unlimited'  !IMPORTANT!
+ * !IMPORTANT! It can only pass if crypto.policy is set to 'unlimited'
+ * !IMPORTANT!
  *
- * The test "rebuilds" the logic of searching for keyFactories and matching PBE ciphers.
- * For these ciphers the "roundtrip" has to be successful, otherwise the SecureStorage
- * implementation does not use the cipher correctly and it cannot be used.
+ * The test "rebuilds" the logic of searching for keyFactories and matching PBE
+ * ciphers. For these ciphers the "roundtrip" has to be successful, otherwise
+ * the SecureStorage implementation does not use the cipher correctly and it
+ * cannot be used.
  */
 public class DetectPBECiphersTest {
 
@@ -42,16 +44,18 @@ public class DetectPBECiphersTest {
 		int cipherJVMCount = 0;
 		Set<String> keyFactories = new HashSet<>();
 		Provider[] providers = Security.getProviders();
-		for (Provider p : providers) { //find all key factories
+		for (Provider p : providers) { // find all key factories
 			for (Provider.Service service : p.getServices()) {
-				if (service.getType().equals("SecretKeyFactory") && service.getAlgorithm().indexOf(' ') == -1) {// skips properties like "[Cipher.ABC SupportedPaddings]")
+				// skip properties like "[Cipher.ABC SupportedPaddings]")
+				if (service.getType().equals("SecretKeyFactory") && service.getAlgorithm().indexOf(' ') == -1) {
 					keyFactories.add(service.getAlgorithm());
 				}
 			}
 		}
-		for (Provider p : providers) { //find all ciphers matching a key factory and start with PBE
+		for (Provider p : providers) { // find all ciphers matching a key factory and start with PBE
 			for (Provider.Service service : p.getServices()) {
-				if (service.getType().equals("Cipher") && service.getAlgorithm().startsWith("PBE") && keyFactories.contains(service.getAlgorithm())) {
+				if (service.getType().equals("Cipher") && service.getAlgorithm().startsWith("PBE")
+						&& keyFactories.contains(service.getAlgorithm())) {
 					cipherJVMCount++;
 				}
 			}

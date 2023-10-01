@@ -30,8 +30,8 @@ import org.junit.Test;
 import org.osgi.framework.*;
 
 /**
- * In those tests listener is used to synchronize with the asynchronous registry processing
- * when bundle is added / removed.
+ * In those tests listener is used to synchronize with the asynchronous registry
+ * processing when bundle is added / removed.
  */
 public class DynamicPreferencesTest extends StorageAbstractTest {
 
@@ -98,7 +98,7 @@ public class DynamicPreferencesTest extends StorageAbstractTest {
 			// check original elements - should be able to read fine
 			check(preferences);
 		} finally {
-			// in case of exception in the process 
+			// in case of exception in the process
 			if (bundle02 != null)
 				bundle02.uninstall();
 			if (bundle01 != null)
@@ -156,7 +156,7 @@ public class DynamicPreferencesTest extends StorageAbstractTest {
 				check(preferences);
 			}
 		} finally {
-			// in case of exception in the process 
+			// in case of exception in the process
 			if (bundle02 != null)
 				bundle02.uninstall();
 			if (bundle01 != null)
@@ -177,14 +177,14 @@ public class DynamicPreferencesTest extends StorageAbstractTest {
 	}
 
 	protected Map<String, Object> getOptions() {
-		// Don't specify default password for those tests; they need to have 
-		// password providers 
+		// Don't specify default password for those tests; they need to have
+		// password providers
 		return getOptions(null);
 	}
 
 	/**
-	 * Synchronizes to ensure bundle XML contribution has been processed
-	 * before method returns.
+	 * Synchronizes to ensure bundle XML contribution has been processed before
+	 * method returns.
 	 */
 	protected Bundle installBundle(String bundlePath) throws MalformedURLException, BundleException, IOException {
 		BundleContext bundleContext = SecurityTestsActivator.getDefault().getBundleContext();
@@ -194,7 +194,7 @@ public class DynamicPreferencesTest extends StorageAbstractTest {
 
 		try {
 			bundle = BundleTestingHelper.installBundle("0.1", bundleContext, TEST_FILES_ROOT + bundlePath);
-			BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] {bundle});
+			BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] { bundle });
 			// synchronization: listener should receive 1 group of events
 			assertTrue(listener.waitFor(1, MAX_TIME_PER_BUNDLE) == 1);
 		} finally {
@@ -204,8 +204,8 @@ public class DynamicPreferencesTest extends StorageAbstractTest {
 	}
 
 	/**
-	 * Synchronizes to ensure bundle XML contribution has been processed
-	 * before method returns.
+	 * Synchronizes to ensure bundle XML contribution has been processed before
+	 * method returns.
 	 */
 	protected boolean uninstallBundle(Bundle bundle) throws BundleException {
 		WaitingRegistryListener listener = new WaitingRegistryListener();
@@ -220,7 +220,7 @@ public class DynamicPreferencesTest extends StorageAbstractTest {
 			return true;
 		} finally {
 			listener.unregister();
-			// in case of exception in the process 
+			// in case of exception in the process
 			if (bundle != null)
 				bundle.uninstall();
 		}
