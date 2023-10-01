@@ -40,13 +40,13 @@ public class LogStreamProviderFactory implements ServiceFactory<LogStreamProvide
 		return t;
 	});
 
-	public LogStreamProviderFactory(ServiceTracker<LogReaderService, AtomicReference<LogReaderService>> logReaderService) {
+	public LogStreamProviderFactory(
+			ServiceTracker<LogReaderService, AtomicReference<LogReaderService>> logReaderService) {
 		this.logReaderService = logReaderService;
 	}
 
-	/*Reader of providers map
-	 *	1) for each provider
-	 *		- post entry to provider
+	/*
+	 * Reader of providers map 1) for each provider - post entry to provider
 	 */
 	public void postLogEntry(LogEntry entry) {
 		eventProducerLock.readLock().lock();
@@ -60,12 +60,12 @@ public class LogStreamProviderFactory implements ServiceFactory<LogStreamProvide
 
 	}
 
-	/* Writer to providers map
-	 * 1) create new LogStreamProviderImpl
-	 * 2) put new instance in map
-	 * 3) return new instance
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.ServiceFactory#getService(org.osgi.framework.Bundle, org.osgi.framework.ServiceRegistration)
+	/*
+	 * Writer to providers map 1) create new LogStreamProviderImpl 2) put new
+	 * instance in map 3) return new instance (non-Javadoc)
+	 * 
+	 * @see org.osgi.framework.ServiceFactory#getService(org.osgi.framework.Bundle,
+	 * org.osgi.framework.ServiceRegistration)
 	 */
 
 	@Override
@@ -80,14 +80,19 @@ public class LogStreamProviderFactory implements ServiceFactory<LogStreamProvide
 		}
 	}
 
-	/* 1) Remove the logStreamProviderImpl instance associated with the bundle
-	 * 2) close all existing LogStreams from the provider, outside the write lock
+	/*
+	 * 1) Remove the logStreamProviderImpl instance associated with the bundle 2)
+	 * close all existing LogStreams from the provider, outside the write lock
 	 * (non-Javadoc)
-	 * @see org.osgi.framework.ServiceFactory#ungetService(org.osgi.framework.Bundle, org.osgi.framework.ServiceRegistration, java.lang.Object)
+	 * 
+	 * @see
+	 * org.osgi.framework.ServiceFactory#ungetService(org.osgi.framework.Bundle,
+	 * org.osgi.framework.ServiceRegistration, java.lang.Object)
 	 */
 
 	@Override
-	public void ungetService(Bundle bundle, ServiceRegistration<LogStreamProvider> registration, LogStreamProvider service) {
+	public void ungetService(Bundle bundle, ServiceRegistration<LogStreamProvider> registration,
+			LogStreamProvider service) {
 
 		LogStreamProviderImpl logStreamProviderImpl;
 
