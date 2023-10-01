@@ -22,8 +22,8 @@ import org.osgi.service.event.*;
 import org.osgi.service.log.LogService;
 
 /**
- * A wrapper for EventHandlers. This class caches property values and 
- * performs final checks before calling the wrapped handler.
+ * A wrapper for EventHandlers. This class caches property values and performs
+ * final checks before calling the wrapped handler.
  *
  */
 public class EventHandlerWrapper {
@@ -35,11 +35,11 @@ public class EventHandlerWrapper {
 	private Filter filter;
 
 	/**
-	 * Create an EventHandlerWrapper. 
-	
+	 * Create an EventHandlerWrapper.
+	 * 
 	 * @param reference Reference to the EventHandler
-	 * @param context Bundle Context of the Event Admin bundle
-	 * @param log LogService object for logging
+	 * @param context   Bundle Context of the Event Admin bundle
+	 * @param log       LogService object for logging
 	 */
 	public EventHandlerWrapper(ServiceReference<EventHandler> reference, BundleContext context, LogTracker log) {
 		this.reference = reference;
@@ -50,7 +50,8 @@ public class EventHandlerWrapper {
 	/**
 	 * Cache values from service properties
 	 * 
-	 * @return true if the handler should be called; false if the handler should not be called
+	 * @return true if the handler should be called; false if the handler should not
+	 *         be called
 	 */
 	public synchronized boolean init() {
 		topics = null;
@@ -59,7 +60,7 @@ public class EventHandlerWrapper {
 		// Get topic names
 		Object o = reference.getProperty(EventConstants.EVENT_TOPIC);
 		if (o instanceof String) {
-			topics = new String[] {(String) o};
+			topics = new String[] { (String) o };
 		} else if (o instanceof String[]) {
 			topics = (String[]) o;
 		} else if (o instanceof Collection) {
@@ -117,7 +118,8 @@ public class EventHandlerWrapper {
 	}
 
 	/**
-	 * Return the wrapped handler. 
+	 * Return the wrapped handler.
+	 * 
 	 * @return The wrapped handler.
 	 */
 	private EventHandler getHandler() {
@@ -172,10 +174,11 @@ public class EventHandlerWrapper {
 	}
 
 	/**
-	 * Dispatch event to handler. Perform final tests before actually calling the handler.
+	 * Dispatch event to handler. Perform final tests before actually calling the
+	 * handler.
 	 * 
 	 * @param event The event to dispatch
-	 * @param perm The permission to be checked
+	 * @param perm  The permission to be checked
 	 */
 	public void handleEvent(Event event, Permission perm) {
 		Bundle bundle = reference.getBundle();
@@ -212,7 +215,8 @@ public class EventHandlerWrapper {
 				t = new LogTopicException(t);
 			}
 			// log/handle any Throwable thrown by the listener
-			log.log(LogService.LOG_ERROR, NLS.bind(EventAdminMsg.EVENT_DISPATCH_HANDLER_EXCEPTION, event, handlerService), t);
+			log.log(LogService.LOG_ERROR,
+					NLS.bind(EventAdminMsg.EVENT_DISPATCH_HANDLER_EXCEPTION, event, handlerService), t);
 		}
 	}
 

@@ -42,20 +42,20 @@ public class FrameworkEventAdapter extends EventAdapter {
 	public Event convert() {
 		String typename = null;
 		switch (event.getType()) {
-			case FrameworkEvent.ERROR :
-				typename = ERROR;
-				break;
-			case FrameworkEvent.PACKAGES_REFRESHED :
-				typename = PACKAGES_REFRESHED;
-				break;
-			case FrameworkEvent.STARTED :
-				typename = STARTED;
-				break;
-			case FrameworkEvent.STARTLEVEL_CHANGED :
-				typename = STARTLEVEL_CHANGED;
-				break;
-			default :
-				return null;
+		case FrameworkEvent.ERROR:
+			typename = ERROR;
+			break;
+		case FrameworkEvent.PACKAGES_REFRESHED:
+			typename = PACKAGES_REFRESHED;
+			break;
+		case FrameworkEvent.STARTED:
+			typename = STARTED;
+			break;
+		case FrameworkEvent.STARTLEVEL_CHANGED:
+			typename = STARTLEVEL_CHANGED;
+			break;
+		default:
+			return null;
 		}
 		String topic = HEADER + Constants.TOPIC_SEPARATOR + typename;
 		Map<String, Object> properties = new HashMap<>();

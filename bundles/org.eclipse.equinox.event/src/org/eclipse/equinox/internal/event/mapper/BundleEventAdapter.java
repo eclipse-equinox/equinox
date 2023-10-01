@@ -44,30 +44,30 @@ public class BundleEventAdapter extends EventAdapter {
 	public Event convert() {
 		String typename = null;
 		switch (event.getType()) {
-			case BundleEvent.INSTALLED :
-				typename = INSTALLED;
-				break;
-			case BundleEvent.STOPPED :
-				typename = STOPPED;
-				break;
-			case BundleEvent.STARTED :
-				typename = STARTED;
-				break;
-			case BundleEvent.UPDATED :
-				typename = UPDATED;
-				break;
-			case BundleEvent.UNINSTALLED :
-				typename = UNINSTALLED;
-				break;
-			case BundleEvent.RESOLVED :
-				typename = RESOLVED;
-				break;
-			case BundleEvent.UNRESOLVED :
-				typename = UNRESOLVED;
-				break;
-			default :
-				// unknown events must be send as their decimal value
-				typename = Integer.toString(event.getType());
+		case BundleEvent.INSTALLED:
+			typename = INSTALLED;
+			break;
+		case BundleEvent.STOPPED:
+			typename = STOPPED;
+			break;
+		case BundleEvent.STARTED:
+			typename = STARTED;
+			break;
+		case BundleEvent.UPDATED:
+			typename = UPDATED;
+			break;
+		case BundleEvent.UNINSTALLED:
+			typename = UNINSTALLED;
+			break;
+		case BundleEvent.RESOLVED:
+			typename = RESOLVED;
+			break;
+		case BundleEvent.UNRESOLVED:
+			typename = UNRESOLVED;
+			break;
+		default:
+			// unknown events must be send as their decimal value
+			typename = Integer.toString(event.getType());
 		}
 		String topic = HEADER + Constants.TOPIC_SEPARATOR + typename;
 		Map<String, Object> properties = new HashMap<>();
