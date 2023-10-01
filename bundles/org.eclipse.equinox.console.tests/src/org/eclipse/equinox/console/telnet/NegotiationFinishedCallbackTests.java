@@ -18,11 +18,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class NegotiationFinishedCallbackTests {
-	
+
 	@Test
 	public void finishTest() throws Exception {
 		TelnetConnection telnetConnection = null;
-		telnetConnection = new TelnetConnection (null, null, null);
+		telnetConnection = new TelnetConnection(null, null, null);
 		NegotiationFinishedCallback callback = new NegotiationFinishedCallback(telnetConnection);
 		callback.finished();
 		Assert.assertTrue("Finished not called on console session", telnetConnection.isTelnetNegotiationFinished);

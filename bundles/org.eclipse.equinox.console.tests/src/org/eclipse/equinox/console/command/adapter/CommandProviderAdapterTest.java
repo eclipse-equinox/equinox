@@ -40,11 +40,11 @@ public class CommandProviderAdapterTest {
 		}
 		CommandProviderAdapter providerAdapter = new CommandProviderAdapter(provider, m.toArray(new Method[0]));
 		CommandSession session = mock(CommandSession.class);
-		
-		String result = (String) providerAdapter.main(session, new Object[] {"test"});
+
+		String result = (String) providerAdapter.main(session, new Object[] { "test" });
 		assertEquals("Result should be test", "test", result);
-		
-		result = (String) providerAdapter.main(session, new Object[] {"echo", "hello"});
+
+		result = (String) providerAdapter.main(session, new Object[] { "echo", "hello" });
 		assertEquals("Result should be hello", "hello", result);
 	}
 
@@ -52,15 +52,15 @@ public class CommandProviderAdapterTest {
 		public String _test(CommandInterpreter i) {
 			return "test";
 		}
-		
+
 		public String _echo(CommandInterpreter i) {
 			return i.nextArgument();
 		}
-		
+
 		@Override
 		public String getHelp() {
 			return "this is a test command provider";
 		}
-		
+
 	}
 }

@@ -53,9 +53,9 @@ public class ConsoleInputScannerTests {
 	private static final int ESC = 27;
 
 	private static int DELL;
-	
+
 	private static int TAB = 9;
-	
+
 	private static final String COMMANDS = ".commands";
 
 	@Test
@@ -107,24 +107,29 @@ public class ConsoleInputScannerTests {
 		add(scanner, keysToEscapes.get(KEYS.UP));
 		add(scanner, keysToEscapes.get(KEYS.UP));
 		String res = byteOut.toString();
-		Assert.assertTrue("Error processing up arrow; expected test, actual " + res.substring(res.length() - 4), res.endsWith("test"));
+		Assert.assertTrue("Error processing up arrow; expected test, actual " + res.substring(res.length() - 4),
+				res.endsWith("test"));
 
 		add(scanner, keysToEscapes.get(KEYS.DOWN));
 		res = byteOut.toString();
-		Assert.assertTrue("Error processing down arrow; expected last, actual " + res.substring(res.length() - 4), res.endsWith("last"));
+		Assert.assertTrue("Error processing down arrow; expected last, actual " + res.substring(res.length() - 4),
+				res.endsWith("last"));
 
 		add(scanner, keysToEscapes.get(KEYS.PGUP));
 		res = byteOut.toString();
-		Assert.assertTrue("Error processing PageUp; expected abcde, actual " + res.substring(res.length() - 4), res.endsWith("abcde"));
+		Assert.assertTrue("Error processing PageUp; expected abcde, actual " + res.substring(res.length() - 4),
+				res.endsWith("abcde"));
 
 		add(scanner, keysToEscapes.get(KEYS.PGDN));
 		res = byteOut.toString();
-		Assert.assertTrue("Error processing PageDown; expected last, actual " + res.substring(res.length() - 4), res.endsWith("last"));
+		Assert.assertTrue("Error processing PageDown; expected last, actual " + res.substring(res.length() - 4),
+				res.endsWith("last"));
 
 		if (BS > 0) {
 			scanner.scan(BS);
 			res = byteOut.toString();
-			Assert.assertTrue("Error processing backspace; expected las, actual " + res.substring(res.length() - 3), res.endsWith("las"));
+			Assert.assertTrue("Error processing backspace; expected las, actual " + res.substring(res.length() - 3),
+					res.endsWith("las"));
 			scanner.scan('t');
 		}
 
@@ -132,7 +137,8 @@ public class ConsoleInputScannerTests {
 			add(scanner, keysToEscapes.get(KEYS.LEFT));
 			scanner.scan(DELL);
 			res = byteOut.toString();
-			Assert.assertTrue("Error processing del; expected las, actual " + res.substring(res.length() - 3), res.endsWith("las"));
+			Assert.assertTrue("Error processing del; expected las, actual " + res.substring(res.length() - 3),
+					res.endsWith("las"));
 			scanner.scan('t');
 		}
 
@@ -145,14 +151,16 @@ public class ConsoleInputScannerTests {
 			add(scanner, keysToEscapes.get(KEYS.DEL));
 		}
 		res = byteOut.toString();
-		Assert.assertTrue("Error processing arrows; expected las, actual " + res.substring(res.length() - 3), res.endsWith("las"));
+		Assert.assertTrue("Error processing arrows; expected las, actual " + res.substring(res.length() - 3),
+				res.endsWith("las"));
 		scanner.scan('t');
 
 		if (keysToEscapes.get(KEYS.DEL) != null) {
 			add(scanner, keysToEscapes.get(KEYS.LEFT));
 			add(scanner, keysToEscapes.get(KEYS.DEL));
 			res = byteOut.toString();
-			Assert.assertTrue("Error processing delete; expected las, actual " + res.substring(res.length() - 3), res.endsWith("las"));
+			Assert.assertTrue("Error processing delete; expected las, actual " + res.substring(res.length() - 3),
+					res.endsWith("las"));
 			scanner.scan('t');
 		}
 
@@ -175,36 +183,40 @@ public class ConsoleInputScannerTests {
 			add(scanner, keysToEscapes.get(KEYS.DEL));
 		}
 		res = byteOut.toString();
-		Assert.assertTrue("Error processing End; expected las, actual " + res.substring(res.length() - 3), res.endsWith("las"));
+		Assert.assertTrue("Error processing End; expected las, actual " + res.substring(res.length() - 3),
+				res.endsWith("las"));
 		scanner.scan('t');
 
 		add(scanner, keysToEscapes.get(KEYS.LEFT));
 		add(scanner, keysToEscapes.get(KEYS.INS));
 		scanner.scan('a');
 		res = byteOut.toString();
-		Assert.assertTrue("Error processing Ins; expected las, actual " + res.substring(res.length() - 4), res.endsWith("lasa"));
+		Assert.assertTrue("Error processing Ins; expected las, actual " + res.substring(res.length() - 4),
+				res.endsWith("lasa"));
 
 		Filter filter = mock(Filter.class);
-		
+
 		BundleContext context = mock(BundleContext.class);
 		when(context.getServiceReferences(Completer.class.getName(), null)).thenReturn(null);
-		when(context.createFilter("(objectClass=org.eclipse.equinox.console.commands.CommandsTracker)")).thenReturn(filter);
+		when(context.createFilter("(objectClass=org.eclipse.equinox.console.commands.CommandsTracker)"))
+				.thenReturn(filter);
 		context.addServiceListener(isA(ServiceListener.class), isA(String.class));
-		when(context.getServiceReferences("org.eclipse.equinox.console.commands.CommandsTracker", null)).thenReturn(new ServiceReference[]{});
-		
+		when(context.getServiceReferences("org.eclipse.equinox.console.commands.CommandsTracker", null))
+				.thenReturn(new ServiceReference[] {});
+
 		Set<String> commands = new HashSet<>();
 		commands.add("equinox:bundles");
 		commands.add("equinox:bundle");
 		commands.add("gogo:bundlebylocation");
 		commands.add("gogo:bundlelevel");
 		commands.add("equinox:headers");
-		
+
 		CommandSession session = mock(CommandSession.class);
 		when(session.get(COMMANDS)).thenReturn(commands);
-		
+
 		scanner.setContext(context);
 		scanner.setSession(session);
-		
+
 		scanner.scan(CR);
 		scanner.scan(LF);
 		scanner.scan('b');
@@ -215,8 +227,10 @@ public class ConsoleInputScannerTests {
 		Assert.assertTrue("Expected completion suggestion is not contained in the output", res.contains("bundles\r\n"));
 		Assert.assertTrue("Expected completion suggestion is not contained in the output", res.contains("bundle\r\n"));
 		Assert.assertTrue("bun should be completed to bundle", res.endsWith("bundle"));
-		Assert.assertTrue("Expected completion suggestion is not contained in the output", res.contains("bundlebylocation\r\n"));
-		Assert.assertTrue("Expected completion suggestion is not contained in the output", res.contains("bundlelevel\r\n"));
+		Assert.assertTrue("Expected completion suggestion is not contained in the output",
+				res.contains("bundlebylocation\r\n"));
+		Assert.assertTrue("Expected completion suggestion is not contained in the output",
+				res.contains("bundlelevel\r\n"));
 		Assert.assertFalse("Not expected completion suggestion", res.contains("headers\r\n"));
 	}
 
@@ -253,12 +267,15 @@ public class ConsoleInputScannerTests {
 	}
 
 	private void checkInpusStream(ConsoleInputStream in, byte[] expected) throws Exception {
-		// the actual number of bytes in the stream is two more than the bytes in the array, because of the CR and LF
+		// the actual number of bytes in the stream is two more than the bytes in the
+		// array, because of the CR and LF
 		// symbols, added after the array
 		byte[] read = new byte[expected.length + 1];
 		in.read(read, 0, read.length);
 		for (int i = 0; i < expected.length; i++) {
-			Assert.assertEquals("Incorrect char read. Position " + i + ", expected " + expected[i] + ", read " + read[i], expected[i], read[i]);
+			Assert.assertEquals(
+					"Incorrect char read. Position " + i + ", expected " + expected[i] + ", read " + read[i],
+					expected[i], read[i]);
 		}
 	}
 

@@ -32,7 +32,6 @@ import org.apache.felix.service.command.CommandSession;
 import org.eclipse.equinox.console.common.ConsoleInputStream;
 import org.junit.Test;
 
-
 public class TelnetServerTests {
 
 	private static final String HOST = "localhost";
@@ -80,8 +79,8 @@ public class TelnetServerTests {
 			when(session.execute(anyString())).thenReturn(new Object());
 
 			CommandProcessor processor = mock(CommandProcessor.class);
-			when(processor.createSession(any(ConsoleInputStream.class),
-					any(PrintStream.class), any(PrintStream.class))).thenReturn(session);
+			when(processor.createSession(any(ConsoleInputStream.class), any(PrintStream.class), any(PrintStream.class)))
+					.thenReturn(session);
 
 			List<CommandProcessor> processors = new ArrayList<>();
 			processors.add(processor);
