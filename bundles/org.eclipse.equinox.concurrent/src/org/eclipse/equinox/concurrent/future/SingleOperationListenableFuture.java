@@ -28,11 +28,11 @@ import org.eclipse.core.runtime.SafeRunner;
  * that they should/must be very careful with respect to overriding the
  * synchronized methods in this class.
  * </p>
+ * 
  * @since 1.1
  */
-public class SingleOperationListenableFuture<ResultType> extends
-		SingleOperationFuture<ResultType> implements
-		IListenableFuture<ResultType> {
+public class SingleOperationListenableFuture<ResultType> extends SingleOperationFuture<ResultType>
+		implements IListenableFuture<ResultType> {
 
 	private IProgressRunnable<ResultType> progressRunnable;
 	private IProgressMonitor progressMonitor;
@@ -46,8 +46,7 @@ public class SingleOperationListenableFuture<ResultType> extends
 		super(progressMonitor);
 	}
 
-	public void addListener(IExecutor executor,
-			IProgressRunnable<ResultType> progressRunnable,
+	public void addListener(IExecutor executor, IProgressRunnable<ResultType> progressRunnable,
 			IProgressMonitor monitor) {
 		Assert.isNotNull(executor);
 		Assert.isNotNull(progressRunnable);
@@ -78,8 +77,7 @@ public class SingleOperationListenableFuture<ResultType> extends
 
 				public void run() throws Exception {
 					@SuppressWarnings("unchecked")
-					ResultType result = (ResultType) runnable
-							.run(getProgressMonitor());
+					ResultType result = (ResultType) runnable.run(getProgressMonitor());
 					synchronized (SingleOperationListenableFuture.this) {
 						if (!isCanceled())
 							set(result);

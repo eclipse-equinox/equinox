@@ -34,8 +34,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * @see ThreadsExecutor
  * @since 1.1
  */
-public class ImmediateExecutor extends AbstractExecutor implements IExecutor,
-		IRunnableExecutor {
+public class ImmediateExecutor extends AbstractExecutor implements IExecutor, IRunnableExecutor {
 
 	@SuppressWarnings("rawtypes")
 	protected AbstractFuture<?> createFuture(IProgressMonitor monitor) {
@@ -43,8 +42,7 @@ public class ImmediateExecutor extends AbstractExecutor implements IExecutor,
 	}
 
 	@SuppressWarnings("unchecked")
-	public <ResultType> IFuture<ResultType> execute(
-			IProgressRunnable<? extends ResultType> runnable,
+	public <ResultType> IFuture<ResultType> execute(IProgressRunnable<? extends ResultType> runnable,
 			IProgressMonitor monitor) {
 		Assert.isNotNull(runnable);
 		@SuppressWarnings("rawtypes")

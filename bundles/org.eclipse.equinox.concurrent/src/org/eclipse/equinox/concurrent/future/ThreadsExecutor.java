@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * <p>
  * Subclasses may extend the behavior of this ThreadsExecutor.
  * </p>
+ * 
  * @since 1.1
  */
 public class ThreadsExecutor extends AbstractExecutor {
@@ -47,15 +48,12 @@ public class ThreadsExecutor extends AbstractExecutor {
 	 * Create a runnable given an {@link IProgressRunnable} and an
 	 * {@link ISafeProgressRunner} to run the runnable.
 	 * 
-	 * @param runner
-	 *            the safe progress runner to run the runnable
-	 * @param progressRunnable
-	 *            the runnable to run.
-	 * @return Runnable that when run will use the safe progress runner to run
-	 *         the progressRunnable
+	 * @param runner           the safe progress runner to run the runnable
+	 * @param progressRunnable the runnable to run.
+	 * @return Runnable that when run will use the safe progress runner to run the
+	 *         progressRunnable
 	 */
-	protected Runnable createRunnable(final ISafeProgressRunner runner,
-			final IProgressRunnable<?> progressRunnable) {
+	protected Runnable createRunnable(final ISafeProgressRunner runner, final IProgressRunnable<?> progressRunnable) {
 		return new Runnable() {
 			public void run() {
 				runner.runWithProgress(progressRunnable);
@@ -64,12 +62,11 @@ public class ThreadsExecutor extends AbstractExecutor {
 	}
 
 	/**
-	 * Configure the given thread prior to starting it. Subclasses may override
-	 * as appropriate to configure the given thread appropriately. The default
+	 * Configure the given thread prior to starting it. Subclasses may override as
+	 * appropriate to configure the given thread appropriately. The default
 	 * implementation calls {@link Thread#setDaemon(boolean)}.
 	 * 
-	 * @param thread
-	 *            the thread to configure
+	 * @param thread the thread to configure
 	 */
 	protected void configureThreadForExecution(Thread thread) {
 		// By default, we'll make the thread a daemon thread
@@ -79,9 +76,8 @@ public class ThreadsExecutor extends AbstractExecutor {
 	/**
 	 * Create an {@link AbstractFuture} with the given IProgressMonitor.
 	 * 
-	 * @param monitor
-	 *            a progress monitor to associate with the future. May be
-	 *            <code>null</code>.
+	 * @param monitor a progress monitor to associate with the future. May be
+	 *                <code>null</code>.
 	 */
 	@SuppressWarnings("rawtypes")
 	protected AbstractFuture<?> createFuture(IProgressMonitor monitor) {
@@ -89,15 +85,13 @@ public class ThreadsExecutor extends AbstractExecutor {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public synchronized <ResultType> IFuture<ResultType> execute(
-			IProgressRunnable<? extends ResultType> runnable,
+	public synchronized <ResultType> IFuture<ResultType> execute(IProgressRunnable<? extends ResultType> runnable,
 			IProgressMonitor monitor) throws IllegalThreadStateException {
 		Assert.isNotNull(runnable);
 		// Now create future
 		AbstractFuture sof = createFuture(monitor);
 		// Create the thread for this operation
-		Thread thread = new Thread(createRunnable(sof, runnable),
-				createThreadName(runnable));
+		Thread thread = new Thread(createRunnable(sof, runnable), createThreadName(runnable));
 		configureThreadForExecution(thread);
 		// start thread
 		thread.start();
