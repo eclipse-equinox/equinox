@@ -21,8 +21,8 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 
 /**
- * Platform URL support
- * platform:/fragment/fragmentId/		maps to fragmentDescriptor.getInstallURLInternal()
+ * Platform URL support platform:/fragment/fragmentId/ maps to
+ * fragmentDescriptor.getInstallURLInternal()
  */
 public class PlatformURLFragmentConnection extends PlatformURLConnection {
 

@@ -14,20 +14,22 @@
 package org.eclipse.core.runtime;
 
 /**
- * <code>Assert</code> is useful for for embedding runtime sanity checks
- * in code. The predicate methods all test a condition and throw some
- * type of unchecked exception if the condition does not hold.
+ * <code>Assert</code> is useful for for embedding runtime sanity checks in
+ * code. The predicate methods all test a condition and throw some type of
+ * unchecked exception if the condition does not hold.
  * <p>
- * Assertion failure exceptions, like most runtime exceptions, are
- * thrown when something is misbehaving. Assertion failures are invariably
- * unspecified behavior; consequently, clients should never rely on
- * these being thrown (and certainly should not be catching them
- * specifically).
- * </p><p>
+ * Assertion failure exceptions, like most runtime exceptions, are thrown when
+ * something is misbehaving. Assertion failures are invariably unspecified
+ * behavior; consequently, clients should never rely on these being thrown (and
+ * certainly should not be catching them specifically).
+ * </p>
+ * <p>
  * This class can be used without OSGi running.
- * </p><p>
+ * </p>
+ * <p>
  * This class is not intended to be instantiated or sub-classed by clients.
  * </p>
+ * 
  * @since org.eclipse.equinox.common 3.2
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
@@ -37,28 +39,28 @@ public final class Assert {
 		// not allowed
 	}
 
-	/** Asserts that an argument is legal. If the given boolean is
-	 * not <code>true</code>, an <code>IllegalArgumentException</code>
-	 * is thrown.
+	/**
+	 * Asserts that an argument is legal. If the given boolean is not
+	 * <code>true</code>, an <code>IllegalArgumentException</code> is thrown.
 	 *
 	 * @param expression the outcome of the check
-	 * @return <code>true</code> if the check passes (does not return
-	 *    if the check fails)
+	 * @return <code>true</code> if the check passes (does not return if the check
+	 *         fails)
 	 * @exception IllegalArgumentException if the legality test failed
 	 */
 	public static boolean isLegal(boolean expression) {
 		return isLegal(expression, ""); //$NON-NLS-1$
 	}
 
-	/** Asserts that an argument is legal. If the given boolean is
-	 * not <code>true</code>, an <code>IllegalArgumentException</code>
-	 * is thrown.
-	 * The given message is included in that exception, to aid debugging.
+	/**
+	 * Asserts that an argument is legal. If the given boolean is not
+	 * <code>true</code>, an <code>IllegalArgumentException</code> is thrown. The
+	 * given message is included in that exception, to aid debugging.
 	 *
 	 * @param expression the outcome of the check
-	 * @param message the message to include in the exception
-	 * @return <code>true</code> if the check passes (does not return
-	 *    if the check fails)
+	 * @param message    the message to include in the exception
+	 * @return <code>true</code> if the check passes (does not return if the check
+	 *         fails)
 	 * @exception IllegalArgumentException if the legality test failed
 	 */
 	public static boolean isLegal(boolean expression, String message) {
@@ -67,8 +69,9 @@ public final class Assert {
 		return expression;
 	}
 
-	/** Asserts that the given object is not <code>null</code>. If this
-	 * is not the case, some kind of unchecked exception is thrown.
+	/**
+	 * Asserts that the given object is not <code>null</code>. If this is not the
+	 * case, some kind of unchecked exception is thrown.
 	 * 
 	 * @param object the value to test
 	 */
@@ -76,11 +79,12 @@ public final class Assert {
 		isNotNull(object, ""); //$NON-NLS-1$
 	}
 
-	/** Asserts that the given object is not <code>null</code>. If this
-	 * is not the case, some kind of unchecked exception is thrown.
-	 * The given message is included in that exception, to aid debugging.
+	/**
+	 * Asserts that the given object is not <code>null</code>. If this is not the
+	 * case, some kind of unchecked exception is thrown. The given message is
+	 * included in that exception, to aid debugging.
 	 *
-	 * @param object the value to test
+	 * @param object  the value to test
 	 * @param message the message to include in the exception
 	 */
 	public static void isNotNull(Object object, String message) {
@@ -88,25 +92,27 @@ public final class Assert {
 			throw new AssertionFailedException("null argument:" + message); //$NON-NLS-1$
 	}
 
-	/** Asserts that the given boolean is <code>true</code>. If this
-	 * is not the case, some kind of unchecked exception is thrown.
+	/**
+	 * Asserts that the given boolean is <code>true</code>. If this is not the case,
+	 * some kind of unchecked exception is thrown.
 	 *
 	 * @param expression the outcome of the check
-	 * @return <code>true</code> if the check passes (does not return
-	 *    if the check fails)
+	 * @return <code>true</code> if the check passes (does not return if the check
+	 *         fails)
 	 */
 	public static boolean isTrue(boolean expression) {
 		return isTrue(expression, ""); //$NON-NLS-1$
 	}
 
-	/** Asserts that the given boolean is <code>true</code>. If this
-	 * is not the case, some kind of unchecked exception is thrown.
-	 * The given message is included in that exception, to aid debugging.
+	/**
+	 * Asserts that the given boolean is <code>true</code>. If this is not the case,
+	 * some kind of unchecked exception is thrown. The given message is included in
+	 * that exception, to aid debugging.
 	 *
 	 * @param expression the outcome of the check
-	 * @param message the message to include in the exception
-	 * @return <code>true</code> if the check passes (does not return
-	 *    if the check fails)
+	 * @param message    the message to include in the exception
+	 * @return <code>true</code> if the check passes (does not return if the check
+	 *         fails)
 	 */
 	public static boolean isTrue(boolean expression, String message) {
 		if (!expression)

@@ -26,8 +26,8 @@ import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.osgi.framework.Bundle;
 
 /**
- * This class contains a collection of helper methods for finding files in bundles.
- * This class can only be used if the OSGi plugin is available.
+ * This class contains a collection of helper methods for finding files in
+ * bundles. This class can only be used if the OSGi plugin is available.
  * 
  * @since org.eclipse.equinox.common 3.2
  * @noinstantiate This class is not intended to be instantiated by clients.
@@ -39,24 +39,27 @@ public final class FileLocator {
 	}
 
 	/**
-	 * Returns a URL for the given path in the given bundle.  Returns <code>null</code> if the URL
-	 * could not be computed or created. 
+	 * Returns a URL for the given path in the given bundle. Returns
+	 * <code>null</code> if the URL could not be computed or created.
 	 * <p>
-	 * This method looks for the path in the given bundle and any attached fragments.  
-	 * <code>null</code> is returned if no such entry is found.  Note that
+	 * This method looks for the path in the given bundle and any attached
+	 * fragments. <code>null</code> is returned if no such entry is found. Note that
 	 * there is no specific order to the fragments.
-	 * </p><p>
-	 * The following variables may also be used as entries in the provided path:</p>
+	 * </p>
+	 * <p>
+	 * The following variables may also be used as entries in the provided path:
+	 * </p>
 	 * <ul>
-	 *     <li>$nl$ - for language specific information</li>
-	 *     <li>$os$ - for operating system specific information</li>
-	 *     <li>$ws$ - for windowing system specific information</li>
+	 * <li>$nl$ - for language specific information</li>
+	 * <li>$os$ - for operating system specific information</li>
+	 * <li>$ws$ - for windowing system specific information</li>
 	 * </ul>
 	 * <p>
-	 * A path of "$nl$/about.properties" in an environment with a default 
-	 * locale of en_CA will return a URL corresponding to the first location
-	 * about.properties is found according to the following order:
+	 * A path of "$nl$/about.properties" in an environment with a default locale of
+	 * en_CA will return a URL corresponding to the first location about.properties
+	 * is found according to the following order:
 	 * </p>
+	 * 
 	 * <pre>
 	 *     plugin root/nl/en/CA/about.properties
 	 *     fragment1 root/nl/en/CA/about.properties
@@ -72,21 +75,20 @@ public final class FileLocator {
 	 *     ...
 	 * </pre>
 	 * <p>
-	 * The current environment variable values can be overridden using 
-	 * the override map argument or <code>null</code> can be specified
-	 * if this is not desired.
+	 * The current environment variable values can be overridden using the override
+	 * map argument or <code>null</code> can be specified if this is not desired.
 	 * </p>
 	 * 
-	 * @param bundle the bundle in which to search
-	 * @param path file path relative to plug-in installation location
-	 * @param override map of override substitution arguments to be used for
-	 * 	any $arg$ path elements. The map keys correspond to the substitution
-	 * 	arguments (eg. "$nl$" or "$os$"). The resulting
-	 * 	values must be of type java.lang.String. If the map is <code>null</code>,
-	 * 	or does not contain the required substitution argument, the default
-	 * 	is used.
-	 * @return a URL for the given path or <code>null</code>.  The actual form
-	 * 	of the returned URL is not specified.
+	 * @param bundle   the bundle in which to search
+	 * @param path     file path relative to plug-in installation location
+	 * @param override map of override substitution arguments to be used for any
+	 *                 $arg$ path elements. The map keys correspond to the
+	 *                 substitution arguments (eg. "$nl$" or "$os$"). The resulting
+	 *                 values must be of type java.lang.String. If the map is
+	 *                 <code>null</code>, or does not contain the required
+	 *                 substitution argument, the default is used.
+	 * @return a URL for the given path or <code>null</code>. The actual form of the
+	 *         returned URL is not specified.
 	 */
 	public static URL find(Bundle bundle, IPath path, Map<String, String> override) {
 		return FindSupport.find(bundle, path, override);
@@ -144,20 +146,20 @@ public final class FileLocator {
 	}
 
 	/**
-	 * This method is the same as {@link #find(Bundle, IPath, Map)} except multiple entries
-	 * can be returned if more than one entry matches the path in the host and 
-	 * any of its fragments.
+	 * This method is the same as {@link #find(Bundle, IPath, Map)} except multiple
+	 * entries can be returned if more than one entry matches the path in the host
+	 * and any of its fragments.
 	 * 
-	 * @param bundle the bundle in which to search
-	 * @param path file path relative to plug-in installation location
-	 * @param override map of override substitution arguments to be used for
-	 * 	any $arg$ path elements. The map keys correspond to the substitution
-	 * 	arguments (eg. "$nl$" or "$os$"). The resulting
-	 * 	values must be of type java.lang.String. If the map is <code>null</code>,
-	 * 	or does not contain the required substitution argument, the default
-	 * 	is used.
-	 * @return an array of entries which match the given path.  An empty 
-	 * array is returned if no matches are found.
+	 * @param bundle   the bundle in which to search
+	 * @param path     file path relative to plug-in installation location
+	 * @param override map of override substitution arguments to be used for any
+	 *                 $arg$ path elements. The map keys correspond to the
+	 *                 substitution arguments (eg. "$nl$" or "$os$"). The resulting
+	 *                 values must be of type java.lang.String. If the map is
+	 *                 <code>null</code>, or does not contain the required
+	 *                 substitution argument, the default is used.
+	 * @return an array of entries which match the given path. An empty array is
+	 *         returned if no matches are found.
 	 * 
 	 * @since org.eclipse.equinox.common 3.3
 	 */
@@ -167,25 +169,30 @@ public final class FileLocator {
 
 	/**
 	 * Returns the URL of a resource inside a bundle corresponding to the given URL.
-	 * Returns <code>null</code> if the URL could not be computed or created. 
+	 * Returns <code>null</code> if the URL could not be computed or created.
 	 * <p>
-	 * This method looks for a bundle resource described by the given input URL,
-	 * and returns the URL of the first resource found in the bundle or any attached
-	 * fragments.  <code>null</code> is returned if no such entry is found.  Note that
+	 * This method looks for a bundle resource described by the given input URL, and
+	 * returns the URL of the first resource found in the bundle or any attached
+	 * fragments. <code>null</code> is returned if no such entry is found. Note that
 	 * there is no specific order to the fragments.
-	 * </p><p>
-	 * The following variables may also be used as segments in the path of the provided URL:
+	 * </p>
+	 * <p>
+	 * The following variables may also be used as segments in the path of the
+	 * provided URL:
 	 * </p>
 	 * <ul>
-	 *     <li>$nl$ - for language specific information</li>
-	 *     <li>$os$ - for operating system specific information</li>
-	 *     <li>$ws$ - for windowing system specific information</li>
+	 * <li>$nl$ - for language specific information</li>
+	 * <li>$os$ - for operating system specific information</li>
+	 * <li>$ws$ - for windowing system specific information</li>
 	 * </ul>
 	 * <p>
-	 * For example, a URL of "platform:/plugin/org.eclipse.core.runtime/$nl$/about.properties" in an 
-	 * environment with a default locale of en_CA will return a URL corresponding to 
-	 * the first location about.properties is found according to the following order:
+	 * For example, a URL of
+	 * "platform:/plugin/org.eclipse.core.runtime/$nl$/about.properties" in an
+	 * environment with a default locale of en_CA will return a URL corresponding to
+	 * the first location about.properties is found according to the following
+	 * order:
 	 * </p>
+	 * 
 	 * <pre>
 	 *     plugin root/nl/en/CA/about.properties
 	 *     fragment1 root/nl/en/CA/about.properties
@@ -202,9 +209,10 @@ public final class FileLocator {
 	 * </pre>
 	 * 
 	 * @param url The location of a bundle entry that potentially includes the above
-	 * environment variables
-	 * @return The URL of the bundle entry matching the input URL, or <code>null</code>
-	 * if no matching entry could be found. The actual form of the returned URL is not specified.
+	 *            environment variables
+	 * @return The URL of the bundle entry matching the input URL, or
+	 *         <code>null</code> if no matching entry could be found. The actual
+	 *         form of the returned URL is not specified.
 	 * @since org.eclipse.equinox.common 3.5
 	 */
 	public static URL find(URL url) {
@@ -212,13 +220,14 @@ public final class FileLocator {
 	}
 
 	/**
-	 * This is a convenience method, fully equivalent to {@link #findEntries(Bundle, IPath, Map)},
-	 * with a value of <code>null</code> for the map argument.
+	 * This is a convenience method, fully equivalent to
+	 * {@link #findEntries(Bundle, IPath, Map)}, with a value of <code>null</code>
+	 * for the map argument.
 	 * 
 	 * @param bundle the bundle in which to search
-	 * @param path file path relative to plug-in installation location
-	 * @return an array of entries which match the given path.  An empty 
-	 * array is returned if no matches are found.
+	 * @param path   file path relative to plug-in installation location
+	 * @return an array of entries which match the given path. An empty array is
+	 *         returned if no matches are found.
 	 * 
 	 * @since org.eclipse.equinox.common 3.3
 	 */
@@ -227,20 +236,21 @@ public final class FileLocator {
 	}
 
 	/**
-	 * Returns an input stream for the specified file. The file path
-	 * must be specified relative to this plug-in's installation location.
-	 * Optionally, the path specified may contain $arg$ path elements that can 
-	 * be used as substitution arguments.  If this option is used then the $arg$ 
-	 * path elements are processed in the same way as {@link #find(Bundle, IPath, Map)}.
+	 * Returns an input stream for the specified file. The file path must be
+	 * specified relative to this plug-in's installation location. Optionally, the
+	 * path specified may contain $arg$ path elements that can be used as
+	 * substitution arguments. If this option is used then the $arg$ path elements
+	 * are processed in the same way as {@link #find(Bundle, IPath, Map)}.
 	 * <p>
 	 * The caller must close the returned stream when done.
 	 * </p>
 	 *
-	 * @param bundle the bundle in which to search
-	 * @param file path relative to plug-in installation location
-	 * @param substituteArgs <code>true</code> to process substitution arguments, 
-	 * and <code>false</code> for the file exactly as specified without processing any
-	 * substitution arguments.
+	 * @param bundle         the bundle in which to search
+	 * @param file           path relative to plug-in installation location
+	 * @param substituteArgs <code>true</code> to process substitution arguments,
+	 *                       and <code>false</code> for the file exactly as
+	 *                       specified without processing any substitution
+	 *                       arguments.
 	 * @return an input stream
 	 * @exception IOException if the given path cannot be found in this plug-in
 	 */
@@ -249,16 +259,17 @@ public final class FileLocator {
 	}
 
 	/**
-	 * Converts a URL that uses a user-defined protocol into a URL that uses the file
-	 * protocol. The contents of the URL may be extracted into a cache on the file-system
-	 * in order to get a file URL. 
+	 * Converts a URL that uses a user-defined protocol into a URL that uses the
+	 * file protocol. The contents of the URL may be extracted into a cache on the
+	 * file-system in order to get a file URL.
 	 * <p>
-	 * If the protocol for the given URL is not recognized by this converter, the original
-	 * URL is returned as-is.
+	 * If the protocol for the given URL is not recognized by this converter, the
+	 * original URL is returned as-is.
 	 * </p>
+	 * 
 	 * @param url the original URL
-	 * @return the converted file URL or the original URL passed in if it is 
-	 * 	not recognized by this converter
+	 * @return the converted file URL or the original URL passed in if it is not
+	 *         recognized by this converter
 	 * @throws IOException if an error occurs during the conversion
 	 */
 	public static URL toFileURL(URL url) throws IOException {
@@ -271,15 +282,17 @@ public final class FileLocator {
 	 * protocol which is native to the Java class library (file, jar, http, etc).
 	 * <p>
 	 * Note however that users of this API should not assume too much about the
-	 * results of this method.  While it may consistently return a file: URL in certain
-	 * installation configurations, others may result in jar: or http: URLs.
+	 * results of this method. While it may consistently return a file: URL in
+	 * certain installation configurations, others may result in jar: or http: URLs.
 	 * </p>
 	 * <p>
 	 * If the protocol is not recognized by this converter, then the original URL is
 	 * returned as-is.
 	 * </p>
+	 * 
 	 * @param url the original URL
-	 * @return the resolved URL or the original if the protocol is unknown to this converter
+	 * @return the resolved URL or the original if the protocol is unknown to this
+	 *         converter
 	 * @exception IOException if unable to resolve URL
 	 * @throws IOException if an error occurs during the resolution
 	 */

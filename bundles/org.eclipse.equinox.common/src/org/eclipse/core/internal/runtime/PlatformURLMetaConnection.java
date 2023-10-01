@@ -65,7 +65,7 @@ public class PlatformURLMetaConnection extends PlatformURLConnection {
 
 	@Override
 	public OutputStream getOutputStream() throws IOException {
-		//This is not optimal but connection is a private instance variable in super.
+		// This is not optimal but connection is a private instance variable in super.
 		URL resolved = getResolvedURL();
 		if (resolved != null) {
 			String fileString = resolved.getFile();

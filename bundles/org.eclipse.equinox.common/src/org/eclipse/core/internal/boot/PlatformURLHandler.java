@@ -47,7 +47,7 @@ public class PlatformURLHandler extends AbstractURLStreamHandlerService {
 	@Override
 	public URLConnection openConnection(URL url) throws IOException {
 		// Note: openConnection() method is made public (rather than protected)
-		//       to enable request delegation from proxy handlers
+		// to enable request delegation from proxy handlers
 		String spec = url.getFile().trim();
 		if (spec.startsWith("/")) //$NON-NLS-1$
 			spec = spec.substring(1);
@@ -62,7 +62,7 @@ public class PlatformURLHandler extends AbstractURLStreamHandlerService {
 
 		PlatformURLConnection connection = null;
 		try {
-			connection = (PlatformURLConnection) construct.newInstance(new Object[] {url});
+			connection = (PlatformURLConnection) construct.newInstance(new Object[] { url });
 		} catch (Exception e) {
 			throw new IOException(NLS.bind(CommonMessages.url_createConnection, e.getMessage()));
 		}
@@ -72,10 +72,10 @@ public class PlatformURLHandler extends AbstractURLStreamHandlerService {
 
 	public static void register(String type, Class<?> connectionClass) {
 		try {
-			Constructor<?> c = connectionClass.getConstructor(new Class[] {URL.class});
+			Constructor<?> c = connectionClass.getConstructor(new Class[] { URL.class });
 			connectionType.put(type, c);
 		} catch (NoSuchMethodException e) {
-			//don't register connection classes that don't conform to the spec
+			// don't register connection classes that don't conform to the spec
 		}
 	}
 

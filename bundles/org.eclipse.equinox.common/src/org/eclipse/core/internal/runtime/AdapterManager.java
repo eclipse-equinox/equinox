@@ -25,19 +25,21 @@ import java.util.stream.Collectors;
 import org.eclipse.core.runtime.*;
 
 /**
- * This class is the standard implementation of <code>IAdapterManager</code>. It provides
- * fast lookup of property values with the following semantics:
+ * This class is the standard implementation of <code>IAdapterManager</code>. It
+ * provides fast lookup of property values with the following semantics:
  * <ul>
- * <li>If multiple installed factories provide the same adapter, iterate until one of the factories
- * return a non-<code>null</code> value. Remaining factories won't be invoked.</li>
+ * <li>If multiple installed factories provide the same adapter, iterate until
+ * one of the factories return a non-<code>null</code> value. Remaining
+ * factories won't be invoked.</li>
  * <li>The search order from a class with the definition <br>
- * <code>class X extends Y implements A, B</code><br> is as follows:
+ * <code>class X extends Y implements A, B</code><br>
+ * is as follows:
  * <ul>
  * <li>the target's class: X
  * <li>X's superclasses in order to <code>Object</code>
- * <li>a breadth-first traversal of each class's interfaces in the
- * order returned by <code>getInterfaces</code> (in the example, X's 
- * superinterfaces then Y's superinterfaces) </li>
+ * <li>a breadth-first traversal of each class's interfaces in the order
+ * returned by <code>getInterfaces</code> (in the example, X's superinterfaces
+ * then Y's superinterfaces)</li>
  * </ul>
  * </ul>
  * 
@@ -45,34 +47,35 @@ import org.eclipse.core.runtime.*;
  * @see IAdapterManager
  */
 public final class AdapterManager implements IAdapterManager {
-	/** 
-	 * Cache of adapters for a given adaptable class. Maps String  -> Map
-	 * (adaptable class name -> (adapter class name -> factory instance))
-	 * <b>Thread safety note</b>: always use the compute methods to update the map 
-	 * and make sure the values (inner map) are never modified but replaced if necessary.
+	/**
+	 * Cache of adapters for a given adaptable class. Maps String -> Map (adaptable
+	 * class name -> (adapter class name -> factory instance)) <b>Thread safety
+	 * note</b>: always use the compute methods to update the map and make sure the
+	 * values (inner map) are never modified but replaced if necessary.
 	 */
 	private final ConcurrentMap<String, Map<String, List<IAdapterFactory>>> adapterLookup;
 
 	/**
 	 * Cache of classes for a given type name. Avoids too many loadClass calls.
-	 * (factory -> (type name -> Class)).
-	 * Thread safety note: always use the compute methods to update the map 
-	 * and make sure the values (inner map) are modified also this way.
+	 * (factory -> (type name -> Class)). Thread safety note: always use the compute
+	 * methods to update the map and make sure the values (inner map) are modified
+	 * also this way.
 	 */
 	private final ConcurrentMap<IAdapterFactory, ConcurrentMap<String, Class<?>>> classLookup;
 
 	/**
-	 * Cache of class lookup order (Class -> Class[]). This avoids having to compute often, and
-	 * provides clients with quick lookup for instanceOf checks based on type name.
-	 * Thread safety note: always use the compute methods to update the map 
-	 * and make sure the values (Class array) are never modified but replaced if necessary.
+	 * Cache of class lookup order (Class -> Class[]). This avoids having to compute
+	 * often, and provides clients with quick lookup for instanceOf checks based on
+	 * type name. Thread safety note: always use the compute methods to update the
+	 * map and make sure the values (Class array) are never modified but replaced if
+	 * necessary.
 	 */
 	private final ConcurrentMap<Class<?>, Class<?>[]> classSearchOrderLookup;
 
 	/**
 	 * Map of factories, keyed by <code>String</code>, fully qualified class name of
-	 * the adaptable class that the factory provides adapters for. Value is a <code>List</code>
-	 * of <code>IAdapterFactory</code>.
+	 * the adaptable class that the factory provides adapters for. Value is a
+	 * <code>List</code> of <code>IAdapterFactory</code>.
 	 */
 	private final Map<String, List<IAdapterFactory>> factories;
 
@@ -96,13 +99,14 @@ public final class AdapterManager implements IAdapterManager {
 	}
 
 	private static boolean isFactoryLoaded(IAdapterFactory adapterFactory) {
-		return (!(adapterFactory instanceof IAdapterFactoryExt)) || ((IAdapterFactoryExt) adapterFactory).loadFactory(false) != null;
+		return (!(adapterFactory instanceof IAdapterFactoryExt))
+				|| ((IAdapterFactoryExt) adapterFactory).loadFactory(false) != null;
 	}
 
 	/**
 	 * Given a type name, add all of the factories that respond to those types into
-	 * the given table. Each entry will be keyed by the adapter class name (supplied in
-	 * IAdapterFactory.getAdapterList).
+	 * the given table. Each entry will be keyed by the adapter class name (supplied
+	 * in IAdapterFactory.getAdapterList).
 	 */
 	private void addFactoriesFor(String adaptableTypeName, Map<String, List<IAdapterFactory>> table) {
 		List<IAdapterFactory> factoryList = getFactories().get(adaptableTypeName);
@@ -124,31 +128,37 @@ public final class AdapterManager implements IAdapterManager {
 	}
 
 	/**
-	 * Queries an {@link IAdapterFactory} for a given type name to return a compatible class object
-	 * @param adapterFactory the {@link IAdapterFactory} to query for the given classname, must not be <code>null</code>
-	 * @param typeName the name of the desired class, must not be <code>null</code>
-	 * @return the class with the given fully qualified name, or <code>null</code> if that class does not exist
-	 * or belongs to a plug-in that has not yet been loaded. 
+	 * Queries an {@link IAdapterFactory} for a given type name to return a
+	 * compatible class object
+	 * 
+	 * @param adapterFactory the {@link IAdapterFactory} to query for the given
+	 *                       classname, must not be <code>null</code>
+	 * @param typeName       the name of the desired class, must not be
+	 *                       <code>null</code>
+	 * @return the class with the given fully qualified name, or <code>null</code>
+	 *         if that class does not exist or belongs to a plug-in that has not yet
+	 *         been loaded.
 	 * 
 	 */
 	private Class<?> classForName(IAdapterFactory adapterFactory, String typeName) {
-		return classLookup.computeIfAbsent(adapterFactory, factory -> new ConcurrentHashMap<>()).computeIfAbsent(typeName, type -> {
-			return loadFactory(adapterFactory, false).map(factory -> {
-				try {
-					return factory.getClass().getClassLoader().loadClass(typeName);
-				} catch (ClassNotFoundException e) {
-					// it is possible that the default bundle classloader is unaware of this class
-					// but the adaptor factory can load it in some other way. See bug 200068.
-					Class<?>[] adapterList = factory.getAdapterList();
-					for (Class<?> adapter : adapterList) {
-						if (typeName.equals(adapter.getName())) {
-							return adapter;
+		return classLookup.computeIfAbsent(adapterFactory, factory -> new ConcurrentHashMap<>())
+				.computeIfAbsent(typeName, type -> {
+					return loadFactory(adapterFactory, false).map(factory -> {
+						try {
+							return factory.getClass().getClassLoader().loadClass(typeName);
+						} catch (ClassNotFoundException e) {
+							// it is possible that the default bundle classloader is unaware of this class
+							// but the adaptor factory can load it in some other way. See bug 200068.
+							Class<?>[] adapterList = factory.getAdapterList();
+							for (Class<?> adapter : adapterList) {
+								if (typeName.equals(adapter.getName())) {
+									return adapter;
+								}
+							}
 						}
-					}
-				}
-				return null; // class not yet loaded
-			}).orElse(null); // factory not loaded yet
-		});
+						return null; // class not yet loaded
+					}).orElse(null); // factory not loaded yet
+				});
 	}
 
 	@Override
@@ -158,12 +168,12 @@ public final class AdapterManager implements IAdapterManager {
 	}
 
 	/**
-	 * Computes the adapters that the provided class can adapt to, along
-	 * with the factory object that can perform that transformation. Returns 
-	 * a table of adapter class name to factory object.
+	 * Computes the adapters that the provided class can adapt to, along with the
+	 * factory object that can perform that transformation. Returns a table of
+	 * adapter class name to factory object.
 	 */
 	private Map<String, List<IAdapterFactory>> getFactories(Class<? extends Object> adaptable) {
-		//cache reference to lookup to protect against concurrent flush
+		// cache reference to lookup to protect against concurrent flush
 		return adapterLookup.computeIfAbsent(adaptable.getName(), adaptableType -> {
 			// calculate adapters for the class
 			Map<String, List<IAdapterFactory>> table = new HashMap<>(4);
@@ -175,8 +185,8 @@ public final class AdapterManager implements IAdapterManager {
 	}
 
 	/**
-	 * Returns the super-type search order starting with <code>adaptable</code>. 
-	 * The search order is defined in this class' comment.
+	 * Returns the super-type search order starting with <code>adaptable</code>. The
+	 * search order is defined in this class' comment.
 	 */
 	@Override
 	public <T> Class<? super T>[] computeClassOrder(Class<T> adaptable) {
@@ -186,23 +196,24 @@ public final class AdapterManager implements IAdapterManager {
 
 	@SuppressWarnings("unchecked")
 	private <T> Class<? super T>[] getClassOrder(Class<T> adaptable) {
-		return (Class<? super T>[]) classSearchOrderLookup.computeIfAbsent(adaptable, AdapterManager::doComputeClassOrder);
+		return (Class<? super T>[]) classSearchOrderLookup.computeIfAbsent(adaptable,
+				AdapterManager::doComputeClassOrder);
 	}
 
 	/**
-	 * Computes the super-type search order starting with <code>adaptable</code>. 
+	 * Computes the super-type search order starting with <code>adaptable</code>.
 	 * The search order is defined in this class' comment.
 	 */
 	private static Class<?>[] doComputeClassOrder(Class<?> adaptable) {
 		List<Class<?>> classes = new ArrayList<>();
 		Class<?> clazz = adaptable;
 		Set<Class<?>> seen = new HashSet<>(4);
-		//first traverse class hierarchy
+		// first traverse class hierarchy
 		while (clazz != null) {
 			classes.add(clazz);
 			clazz = clazz.getSuperclass();
 		}
-		//now traverse interface hierarchy for each class
+		// now traverse interface hierarchy for each class
 		Class<?>[] classHierarchy = classes.toArray(new Class[classes.size()]);
 		for (Class<?> cl : classHierarchy) {
 			computeInterfaceOrder(cl.getInterfaces(), classes, seen);
@@ -214,7 +225,7 @@ public final class AdapterManager implements IAdapterManager {
 		List<Class<?>> newInterfaces = new ArrayList<>(interfaces.length);
 		for (Class<?> interfac : interfaces) {
 			if (seen.add(interfac)) {
-				//note we cannot recurse here without changing the resulting interface order
+				// note we cannot recurse here without changing the resulting interface order
 				classes.add(interfac);
 				newInterfaces.add(interfac);
 			}
@@ -224,11 +235,11 @@ public final class AdapterManager implements IAdapterManager {
 	}
 
 	/**
-	 * Flushes the cache of adapter search paths. This is generally required whenever an
-	 * adapter is added or removed.
+	 * Flushes the cache of adapter search paths. This is generally required
+	 * whenever an adapter is added or removed.
 	 * <p>
-	 * It is likely easier to just toss the whole cache rather than trying to be smart
-	 * and remove only those entries affected.
+	 * It is likely easier to just toss the whole cache rather than trying to be
+	 * smart and remove only those entries affected.
 	 * </p>
 	 */
 	public synchronized void flushLookup() {
@@ -243,7 +254,8 @@ public final class AdapterManager implements IAdapterManager {
 		Assert.isNotNull(adaptable);
 		Assert.isNotNull(adapterType);
 		List<Entry<IAdapterFactory, Class<?>>> incorrectAdapters = new ArrayList<>();
-		T adapterObject = getFactories(adaptable.getClass()).getOrDefault(adapterType.getName(), Collections.emptyList()) //
+		T adapterObject = getFactories(adaptable.getClass())
+				.getOrDefault(adapterType.getName(), Collections.emptyList()) //
 				.stream() //
 				.map(factory -> new SimpleEntry<>(factory, factory.getAdapter(adaptable, adapterType))) //
 				.filter(entry -> {
@@ -282,18 +294,21 @@ public final class AdapterManager implements IAdapterManager {
 
 	/**
 	 * Returns an adapter of the given type for the provided adapter.
-	 * @param adaptable the object to adapt
+	 * 
+	 * @param adaptable   the object to adapt
 	 * @param adapterType the type to adapt the object to
-	 * @param force <code>true</code> if the plug-in providing the
-	 * factory should be activated if necessary. <code>false</code>
-	 * if no plugin activations are desired.
+	 * @param force       <code>true</code> if the plug-in providing the factory
+	 *                    should be activated if necessary. <code>false</code> if no
+	 *                    plugin activations are desired.
 	 */
 	private Object getAdapter(Object adaptable, String adapterType, boolean force) {
 		Assert.isNotNull(adaptable);
 		Assert.isNotNull(adapterType);
 		return getFactories(adaptable.getClass()).getOrDefault(adapterType, Collections.emptyList()) //
 				.stream() //
-				.map(factory -> force && factory instanceof IAdapterFactoryExt ? ((IAdapterFactoryExt) factory).loadFactory(true) : factory) //
+				.map(factory -> force && factory instanceof IAdapterFactoryExt
+						? ((IAdapterFactoryExt) factory).loadFactory(true)
+						: factory) //
 				.filter(Objects::nonNull).map(factory -> {
 					Class<?> adapterClass = classForName(factory, adapterType);
 					if (adapterClass == null) {
@@ -367,9 +382,8 @@ public final class AdapterManager implements IAdapterManager {
 	}
 
 	/*
-	 * Shuts down the adapter manager by removing all factories
-	 * and removing the registry change listener. Should only be
-	 * invoked during platform shutdown.
+	 * Shuts down the adapter manager by removing all factories and removing the
+	 * registry change listener. Should only be invoked during platform shutdown.
 	 */
 	public synchronized void unregisterAllAdapters() {
 		lazyFactoryProviders.clear();
@@ -397,8 +411,9 @@ public final class AdapterManager implements IAdapterManager {
 
 	/**
 	 * Try to laod the given factory according to the force parameter
+	 * 
 	 * @param factory the factory to load
-	 * @param force if loading should be forced
+	 * @param force   if loading should be forced
 	 * @return an {@link Optional} describing the loaded factory
 	 */
 	private static Optional<IAdapterFactory> loadFactory(IAdapterFactory factory, boolean force) {

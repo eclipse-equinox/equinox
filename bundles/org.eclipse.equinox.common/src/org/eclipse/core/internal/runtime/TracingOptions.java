@@ -9,7 +9,8 @@ public class TracingOptions {
 		public void optionsChanged(DebugOptions options) {
 			debug = options.getBooleanOption(Activator.PLUGIN_ID + "/debug", false); //$NON-NLS-1$
 
-			debugProgressMonitors = debug && options.getBooleanOption(Activator.PLUGIN_ID + "/progress_monitors", false); //$NON-NLS-1$
+			debugProgressMonitors = debug
+					&& options.getBooleanOption(Activator.PLUGIN_ID + "/progress_monitors", false); //$NON-NLS-1$
 		}
 	};
 

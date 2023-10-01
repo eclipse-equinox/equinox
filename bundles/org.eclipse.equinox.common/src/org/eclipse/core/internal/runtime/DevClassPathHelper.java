@@ -30,8 +30,10 @@ public class DevClassPathHelper {
 	static protected Properties devProperties = null;
 
 	static {
-		// Check the osgi.dev property to see if dev classpath entries have been defined.
-		String osgiDev = Activator.getContext() == null ? System.getProperty(PROP_DEV) : Activator.getContext().getProperty(PROP_DEV);
+		// Check the osgi.dev property to see if dev classpath entries have been
+		// defined.
+		String osgiDev = Activator.getContext() == null ? System.getProperty(PROP_DEV)
+				: Activator.getContext().getProperty(PROP_DEV);
 		if (osgiDev != null) {
 			try {
 				inDevelopmentMode = true;
@@ -58,7 +60,8 @@ public class DevClassPathHelper {
 	}
 
 	/**
-	 * Returns the result of converting a list of comma-separated tokens into an array
+	 * Returns the result of converting a list of comma-separated tokens into an
+	 * array
 	 * 
 	 * @return the array of string tokens
 	 * @param prop the initial comma-separated string

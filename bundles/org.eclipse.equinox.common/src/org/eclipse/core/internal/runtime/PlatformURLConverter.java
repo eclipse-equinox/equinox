@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 
 /**
- * Class which implements the URLConverter service. Manages conversion of a 
+ * Class which implements the URLConverter service. Manages conversion of a
  * platform: URL to one with a more well known protocol.
  * 
  * @since 3.2

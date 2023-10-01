@@ -61,7 +61,7 @@ public class PlatformURLConfigConnection extends PlatformURLConnection {
 		// try to find in the parent configuration
 		URL parentURL = new URL(parentConfig.getURL(), path);
 		if (FILE_PROTOCOL.equals(parentURL.getProtocol())) {
-			// we only support cascaded file: URLs			
+			// we only support cascaded file: URLs
 			File parentFile = new File(parentURL.getPath());
 			if (parentFile.exists()) {
 				// parent has the location
@@ -82,9 +82,11 @@ public class PlatformURLConfigConnection extends PlatformURLConnection {
 
 	@Override
 	public OutputStream getOutputStream() throws IOException {
-		if (parentConfiguration || Activator.getDefault() == null || Activator.getDefault().getConfigurationLocation().isReadOnly())
+		if (parentConfiguration || Activator.getDefault() == null
+				|| Activator.getDefault().getConfigurationLocation().isReadOnly())
 			throw new UnknownServiceException(NLS.bind(CommonMessages.url_noOutput, url));
-		//This is not optimal but connection is a private instance variable in the super-class.
+		// This is not optimal but connection is a private instance variable in the
+		// super-class.
 		URL resolved = getResolvedURL();
 		if (resolved != null) {
 			String fileString = resolved.getFile();

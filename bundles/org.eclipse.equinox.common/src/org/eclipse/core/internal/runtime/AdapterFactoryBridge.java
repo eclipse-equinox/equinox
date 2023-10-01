@@ -21,10 +21,12 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
- * Acts as abridge between {@link IAdapterManager} services registered in the OSGi-Service-Registry and AdapterManager
+ * Acts as abridge between {@link IAdapterManager} services registered in the
+ * OSGi-Service-Registry and AdapterManager
  *
  */
-public class AdapterFactoryBridge implements ServiceTrackerCustomizer<IAdapterFactory, AdapterFactoryBridge.LazyAdapterFactory> {
+public class AdapterFactoryBridge
+		implements ServiceTrackerCustomizer<IAdapterFactory, AdapterFactoryBridge.LazyAdapterFactory> {
 	private BundleContext bundleContext;
 
 	public AdapterFactoryBridge(BundleContext bundleContext) {
@@ -54,7 +56,7 @@ public class AdapterFactoryBridge implements ServiceTrackerCustomizer<IAdapterFa
 		if (property instanceof String) {
 			String string = (String) property;
 			if (string.length() > 0) {
-				return new String[] {string};
+				return new String[] { string };
 			}
 		} else if (property instanceof String[]) {
 			return (String[]) property;
@@ -138,11 +140,13 @@ public class AdapterFactoryBridge implements ServiceTrackerCustomizer<IAdapterFa
 
 	}
 
-	private static final class LazyAdapterFactoryExtServiceProxy extends LazyAdapterFactory implements IAdapterFactoryExt {
+	private static final class LazyAdapterFactoryExtServiceProxy extends LazyAdapterFactory
+			implements IAdapterFactoryExt {
 
 		volatile String[] adapterNames;
 
-		LazyAdapterFactoryExtServiceProxy(String[] adapterNames, ServiceReference<IAdapterFactory> reference, BundleContext bundleContext) {
+		LazyAdapterFactoryExtServiceProxy(String[] adapterNames, ServiceReference<IAdapterFactory> reference,
+				BundleContext bundleContext) {
 			super(reference, bundleContext);
 			this.adapterNames = adapterNames;
 		}

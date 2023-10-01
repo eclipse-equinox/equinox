@@ -14,10 +14,11 @@
 package org.eclipse.core.internal.runtime;
 
 /**
- * The class contains a set of utilities working platform metadata area.
- * This class can only be used if OSGi plugin is available.
+ * The class contains a set of utilities working platform metadata area. This
+ * class can only be used if OSGi plugin is available.
  * 
  * Copied from InternalPlatform as of August 30, 2005.
+ * 
  * @since org.eclipse.equinox.common 3.2
  */
 public class MetaDataKeeper {
@@ -25,8 +26,9 @@ public class MetaDataKeeper {
 	private static DataArea metaArea = null;
 
 	/**
-	 * Returns the object which defines the location and organization
-	 * of the platform's meta area.
+	 * Returns the object which defines the location and organization of the
+	 * platform's meta area.
+	 * 
 	 * @return non null
 	 */
 	public static synchronized DataArea getMetaArea() {

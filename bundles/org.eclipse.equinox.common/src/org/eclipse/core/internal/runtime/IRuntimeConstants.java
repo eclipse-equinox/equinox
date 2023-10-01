@@ -16,8 +16,9 @@ package org.eclipse.core.internal.runtime;
 public interface IRuntimeConstants {
 
 	/**
-	 * The unique identifier constant (value "<code>org.eclipse.core.runtime</code>")
-	 * of the Core Runtime (pseudo-) plug-in.
+	 * The unique identifier constant (value
+	 * "<code>org.eclipse.core.runtime</code>") of the Core Runtime (pseudo-)
+	 * plug-in.
 	 */
 	public static final String PI_RUNTIME = "org.eclipse.core.runtime"; //$NON-NLS-1$
 
@@ -27,13 +28,14 @@ public interface IRuntimeConstants {
 	public static final String PI_COMMON = "org.eclipse.equinox.common"; //$NON-NLS-1$
 
 	/**
-	 * Status code constant (value 2) indicating an error occurred while running a plug-in.
+	 * Status code constant (value 2) indicating an error occurred while running a
+	 * plug-in.
 	 */
 	public static final int PLUGIN_ERROR = 2;
 
 	/**
-	 * Status code constant (value 5) indicating the platform could not write
-	 * some of its metadata.
+	 * Status code constant (value 5) indicating the platform could not write some
+	 * of its metadata.
 	 */
 	public static final int FAILED_WRITE_METADATA = 5;
 

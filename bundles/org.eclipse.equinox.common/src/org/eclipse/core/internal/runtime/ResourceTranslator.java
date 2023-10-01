@@ -25,7 +25,7 @@ import org.osgi.framework.*;
  */
 public class ResourceTranslator {
 	private static final String KEY_PREFIX = "%"; //$NON-NLS-1$
-	private static final String KEY_DOUBLE_PREFIX = "%%"; //$NON-NLS-1$	
+	private static final String KEY_DOUBLE_PREFIX = "%%"; //$NON-NLS-1$
 
 	public static String getResourceString(Bundle bundle, String value) {
 		return getResourceString(bundle, value, null);
@@ -56,7 +56,7 @@ public class ResourceTranslator {
 		try {
 			return resourceBundle.getString(key.substring(1));
 		} catch (MissingResourceException e) {
-			//this will avoid requiring a bundle access on the next lookup
+			// this will avoid requiring a bundle access on the next lookup
 			return dflt;
 		}
 	}
@@ -92,11 +92,13 @@ public class ResourceTranslator {
 
 	private static boolean hasRuntime21(Bundle b) {
 		try {
-			ManifestElement[] prereqs = ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE, b.getHeaders("").get(Constants.REQUIRE_BUNDLE)); //$NON-NLS-1$
+			ManifestElement[] prereqs = ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE,
+					b.getHeaders("").get(Constants.REQUIRE_BUNDLE)); //$NON-NLS-1$
 			if (prereqs == null)
 				return false;
 			for (ManifestElement prereq : prereqs) {
-				if ("2.1".equals(prereq.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE)) && "org.eclipse.core.runtime".equals(prereq.getValue())) {//$NON-NLS-1$//$NON-NLS-2$
+				if ("2.1".equals(prereq.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE)) //$NON-NLS-1$
+						&& "org.eclipse.core.runtime".equals(prereq.getValue())) {//$NON-NLS-1$
 					return true;
 				}
 			}
@@ -133,7 +135,8 @@ public class ResourceTranslator {
 	private static void addClasspathEntries(Bundle b, ArrayList<URL> classpath) {
 		ManifestElement[] classpathElements;
 		try {
-			classpathElements = ManifestElement.parseHeader(Constants.BUNDLE_CLASSPATH, b.getHeaders("").get(Constants.BUNDLE_CLASSPATH)); //$NON-NLS-1$
+			classpathElements = ManifestElement.parseHeader(Constants.BUNDLE_CLASSPATH,
+					b.getHeaders("").get(Constants.BUNDLE_CLASSPATH)); //$NON-NLS-1$
 			if (classpathElements == null)
 				return;
 			for (ManifestElement classpathElement : classpathElements) {
@@ -142,7 +145,7 @@ public class ResourceTranslator {
 					classpath.add(classpathEntry);
 			}
 		} catch (BundleException e) {
-			//ignore
+			// ignore
 		}
 	}
 

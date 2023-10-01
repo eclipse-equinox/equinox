@@ -14,7 +14,9 @@
 package org.eclipse.core.runtime;
 
 /**
- * default implementation of a {@link SlicedProgressMonitor} that synchronizes on the given monitor to report work
+ * default implementation of a {@link SlicedProgressMonitor} that synchronizes
+ * on the given monitor to report work
+ * 
  * @since 3.14
  */
 public class SlicedProgressMonitor implements IProgressMonitor {

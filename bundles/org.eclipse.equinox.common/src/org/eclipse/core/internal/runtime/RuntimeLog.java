@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import org.eclipse.core.runtime.*;
 
 /**
- * NOT API!!!  This log infrastructure was split from the InternalPlatform.
+ * NOT API!!! This log infrastructure was split from the InternalPlatform.
  * 
  * @since org.eclipse.equinox.common 3.2
  */
@@ -28,10 +28,9 @@ public final class RuntimeLog {
 	private static ArrayList<ILogListener> logListeners = new ArrayList<>(5);
 
 	/**
-	 * Keep the messages until the first log listener is registered.
-	 * Once first log listeners is registred, it is going to receive
-	 * all status messages accumulated during the period when no log
-	 * listener was available.
+	 * Keep the messages until the first log listener is registered. Once first log
+	 * listeners is registred, it is going to receive all status messages
+	 * accumulated during the period when no log listener was available.
 	 */
 	private static ArrayList<IStatus> queuedMessages = new ArrayList<>(5);
 
@@ -104,7 +103,7 @@ public final class RuntimeLog {
 			for (ILogListener listener : listeners) {
 				try {
 					listener.logging(status, IRuntimeConstants.PI_RUNTIME);
-				}catch (Exception | LinkageError e) {
+				} catch (Exception | LinkageError e) {
 					handleException(e);
 				}
 			}
@@ -113,13 +112,14 @@ public final class RuntimeLog {
 
 	private static void handleException(Throwable e) {
 		if (!(e instanceof OperationCanceledException)) {
-			// Got a error while logging. Don't try to log again, just put it into stderr 
+			// Got a error while logging. Don't try to log again, just put it into stderr
 			e.printStackTrace();
 		}
 	}
 
 	/**
 	 * Helps determine if the logging mechanism is ready for logging.
+	 * 
 	 * @return true the logging mechanism is ready for logging.
 	 */
 	public static boolean isEmpty() {
@@ -130,6 +130,7 @@ public final class RuntimeLog {
 
 	/**
 	 * Determines if there are any listeners
+	 * 
 	 * @return true if there is at least one listener.
 	 */
 	public static boolean hasListeners() {
@@ -160,7 +161,7 @@ public final class RuntimeLog {
 		for (ILogListener listener : listeners) {
 			try {
 				listener.logging(status, IRuntimeConstants.PI_RUNTIME);
-			}catch (Exception | LinkageError e) {
+			} catch (Exception | LinkageError e) {
 				handleException(e);
 			}
 		}
