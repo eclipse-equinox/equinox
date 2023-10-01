@@ -43,7 +43,7 @@ public class CoordinatorServiceFactory implements ServiceFactory<Coordinator> {
 		timer.cancel();
 		logTracker.close();
 	}
-	
+
 	private long getMaxTimeout() {
 		String prop = bundleContext.getProperty("org.eclipse.equinox.coordinator.timeout"); //$NON-NLS-1$
 		// Intentionally letting the possible NumberFormatException propagate.
