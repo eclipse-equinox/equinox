@@ -16,11 +16,12 @@ package org.eclipse.equinox.bidi.internal.tests;
 import org.eclipse.equinox.bidi.internal.StructuredTextSingle;
 
 /**
- *  Handler adapted to processing property file statements.
- *  It expects the following string format:
- *  <pre>
- *    name=value
- *  </pre>
+ * Handler adapted to processing property file statements. It expects the
+ * following string format:
+ * 
+ * <pre>
+ * name = value
+ * </pre>
  */
 public class StructuredTextProperty extends StructuredTextSingle {
 

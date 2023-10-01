@@ -18,8 +18,8 @@ import org.eclipse.equinox.bidi.custom.StructuredTextCharTypes;
 import org.eclipse.equinox.bidi.custom.StructuredTextTypeHandler;
 
 /**
- *  Handler adapted to processing arithmetic expressions with
- *  a possible right-to-left base direction.
+ * Handler adapted to processing arithmetic expressions with a possible
+ * right-to-left base direction.
  */
 public class StructuredTextMath extends StructuredTextTypeHandler {
 	static final byte L = Character.DIRECTIONALITY_LEFT_TO_RIGHT;
@@ -36,16 +36,16 @@ public class StructuredTextMath extends StructuredTextTypeHandler {
 	}
 
 	/**
-	 *  @return {@link IStructuredTextExpert#DIR_RTL DIR_RTL} if the following
-	 *          conditions are satisfied:
-	 *          <ul>
-	 *            <li>The current locale (as expressed by the environment
-	 *                language) is Arabic.</li>
-	 *            <li>The first strong character is an Arabic letter.</li>
-	 *            <li>If there is no strong character in the text, there is
-	 *                at least one Arabic-Indic digit in the text.</li>
-	 *          </ul>
-	 *          Otherwise, returns {@link IStructuredTextExpert#DIR_LTR DIR_LTR}.
+	 * @return {@link IStructuredTextExpert#DIR_RTL DIR_RTL} if the following
+	 *         conditions are satisfied:
+	 *         <ul>
+	 *         <li>The current locale (as expressed by the environment language) is
+	 *         Arabic.</li>
+	 *         <li>The first strong character is an Arabic letter.</li>
+	 *         <li>If there is no strong character in the text, there is at least
+	 *         one Arabic-Indic digit in the text.</li>
+	 *         </ul>
+	 *         Otherwise, returns {@link IStructuredTextExpert#DIR_LTR DIR_LTR}.
 	 */
 	public int getDirection(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes) {
 		String language = expert.getEnvironment().getLanguage();

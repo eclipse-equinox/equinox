@@ -28,8 +28,10 @@ public class StructuredTextExtensionsTest extends StructuredTextTestBase {
 	private static final String SYSTEM_USER = "system";
 
 	private StructuredTextEnvironment env = StructuredTextEnvironment.DEFAULT;
-	private StructuredTextEnvironment envArabic = new StructuredTextEnvironment("ar", false, StructuredTextEnvironment.ORIENT_LTR);
-	private StructuredTextEnvironment envHebrew = new StructuredTextEnvironment("he", false, StructuredTextEnvironment.ORIENT_LTR);
+	private StructuredTextEnvironment envArabic = new StructuredTextEnvironment("ar", false,
+			StructuredTextEnvironment.ORIENT_LTR);
+	private StructuredTextEnvironment envHebrew = new StructuredTextEnvironment("he", false,
+			StructuredTextEnvironment.ORIENT_LTR);
 
 	private IStructuredTextExpert expert;
 

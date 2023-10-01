@@ -19,7 +19,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({StructuredTextExtensibilityTest.class, StructuredTextMethodsTest.class, StructuredTextFullToLeanTest.class, StructuredTextExtensionsTest.class, StructuredTextMathTest.class, StructuredTextSomeMoreTest.class, StructuredTextProcessorTest.class, StructuredTextStringRecordTest.class})
+@Suite.SuiteClasses({ StructuredTextExtensibilityTest.class, StructuredTextMethodsTest.class,
+		StructuredTextFullToLeanTest.class, StructuredTextExtensionsTest.class, StructuredTextMathTest.class,
+		StructuredTextSomeMoreTest.class, StructuredTextProcessorTest.class, StructuredTextStringRecordTest.class })
 public class StructuredTextTestSuite {
-	//intentionally left blank
+	// intentionally left blank
 }

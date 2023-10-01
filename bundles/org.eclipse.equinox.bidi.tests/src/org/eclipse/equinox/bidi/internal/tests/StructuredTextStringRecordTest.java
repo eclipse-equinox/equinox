@@ -23,7 +23,7 @@ import org.eclipse.equinox.bidi.internal.StructuredTextStringRecord;
 import org.junit.Test;
 
 /**
- *	Tests the StringRecord class	
+ * Tests the StringRecord class
  */
 public class StructuredTextStringRecordTest extends StructuredTextTestBase {
 	@Test

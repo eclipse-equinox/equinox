@@ -54,7 +54,8 @@ public class StructuredTextProcessorTest extends StructuredTextTestBase {
 	private void doTest1(String data, String result) {
 		Locale.setDefault(Locale.ENGLISH);
 		String full = StructuredTextProcessor.process(toUT16(data));
-		// Since https://bugs.eclipse.org/467836 , processing also works in non-bidi locales:
+		// Since https://bugs.eclipse.org/467836 , processing also works in non-bidi
+		// locales:
 		assertEquals("Util #1 full EN - ", result, toPseudo(full));
 		Locale.setDefault(new Locale(HEBREW2));
 		full = StructuredTextProcessor.process(toUT16(data));
@@ -93,14 +94,16 @@ public class StructuredTextProcessorTest extends StructuredTextTestBase {
 	}
 
 	private void doTest3(String msg, String data, String result, String resLean) {
-		String full = StructuredTextProcessor.processTyped(toUT16(data), StructuredTextTypeHandlerFactory.COMMA_DELIMITED);
+		String full = StructuredTextProcessor.processTyped(toUT16(data),
+				StructuredTextTypeHandlerFactory.COMMA_DELIMITED);
 		assertEquals(msg + "full", result, toPseudo(full));
 		String lean = StructuredTextProcessor.deprocessTyped(full, StructuredTextTypeHandlerFactory.COMMA_DELIMITED);
 		assertEquals(msg + "lean", resLean, toPseudo(lean));
 	}
 
 	private void doTest4(String msg, String data, int[] offsets, int direction, int affixLength, String result) {
-		String txt = msg + "text=" + data + "\n    offsets=" + array_display(offsets) + "\n    direction=" + direction + "\n    affixLength=" + affixLength;
+		String txt = msg + "text=" + data + "\n    offsets=" + array_display(offsets) + "\n    direction=" + direction
+				+ "\n    affixLength=" + affixLength;
 		String lean = toUT16(data);
 		IStructuredTextExpert expert = StructuredTextExpertFactory.getExpert();
 		String full = expert.insertMarks(lean, offsets, direction, affixLength);
@@ -123,12 +126,12 @@ public class StructuredTextProcessorTest extends StructuredTextTestBase {
 		doTest3("Util #3.2 - ", "", "");
 		doTest3("Util #3.3 - ", ">@DEF@^", ">@DEF@^", "DEF");
 		// Test insertMarks()
-		doTest4("Util #4.1 - ", "ABCDEFG", new int[] {3, 6}, 0, 0, "ABC@DEF@G");
-		doTest4("Util #4.2 - ", "ABCDEFG", new int[] {3, 6}, 0, 2, ">@ABC@DEF@G@^");
-		doTest4("Util #4.3 - ", "ABCDEFG", new int[] {3, 6}, 1, 0, "ABC&DEF&G");
-		doTest4("Util #4.4 - ", "ABCDEFG", new int[] {3, 6}, 1, 2, "<&ABC&DEF&G&^");
-		doTest4("Util #4.5 - ", "", new int[] {3, 6}, 0, 0, "");
-		doTest4("Util #4.6 - ", "", new int[] {3, 6}, 0, 2, "");
+		doTest4("Util #4.1 - ", "ABCDEFG", new int[] { 3, 6 }, 0, 0, "ABC@DEF@G");
+		doTest4("Util #4.2 - ", "ABCDEFG", new int[] { 3, 6 }, 0, 2, ">@ABC@DEF@G@^");
+		doTest4("Util #4.3 - ", "ABCDEFG", new int[] { 3, 6 }, 1, 0, "ABC&DEF&G");
+		doTest4("Util #4.4 - ", "ABCDEFG", new int[] { 3, 6 }, 1, 2, "<&ABC&DEF&G&^");
+		doTest4("Util #4.5 - ", "", new int[] { 3, 6 }, 0, 0, "");
+		doTest4("Util #4.6 - ", "", new int[] { 3, 6 }, 0, 2, "");
 		doTest4("Util #4.7 - ", "ABCDEFG", null, 1, 0, "ABCDEFG");
 		doTest4("Util #4.8 - ", "ABCDEFG", null, 1, 2, "<&ABCDEFG&^");
 	}

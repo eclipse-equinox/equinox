@@ -31,12 +31,18 @@ public class StructuredTextMethodsTest extends StructuredTextTestBase {
 
 	private final static int LTR = IStructuredTextExpert.DIR_LTR;
 	private final static int RTL = IStructuredTextExpert.DIR_RTL;
-	private final static StructuredTextEnvironment envLTR = new StructuredTextEnvironment(null, false, StructuredTextEnvironment.ORIENT_LTR);
-	private final static StructuredTextEnvironment envRTL = new StructuredTextEnvironment(null, false, StructuredTextEnvironment.ORIENT_RTL);
-	private final static StructuredTextEnvironment envRTLMIR = new StructuredTextEnvironment(null, true, StructuredTextEnvironment.ORIENT_RTL);
-	private final static StructuredTextEnvironment envIGN = new StructuredTextEnvironment(null, false, StructuredTextEnvironment.ORIENT_IGNORE);
-	private final static StructuredTextEnvironment envCLR = new StructuredTextEnvironment(null, false, StructuredTextEnvironment.ORIENT_CONTEXTUAL_LTR);
-	private final static StructuredTextEnvironment envCRL = new StructuredTextEnvironment(null, false, StructuredTextEnvironment.ORIENT_CONTEXTUAL_RTL);
+	private final static StructuredTextEnvironment envLTR = new StructuredTextEnvironment(null, false,
+			StructuredTextEnvironment.ORIENT_LTR);
+	private final static StructuredTextEnvironment envRTL = new StructuredTextEnvironment(null, false,
+			StructuredTextEnvironment.ORIENT_RTL);
+	private final static StructuredTextEnvironment envRTLMIR = new StructuredTextEnvironment(null, true,
+			StructuredTextEnvironment.ORIENT_RTL);
+	private final static StructuredTextEnvironment envIGN = new StructuredTextEnvironment(null, false,
+			StructuredTextEnvironment.ORIENT_IGNORE);
+	private final static StructuredTextEnvironment envCLR = new StructuredTextEnvironment(null, false,
+			StructuredTextEnvironment.ORIENT_CONTEXTUAL_LTR);
+	private final static StructuredTextEnvironment envCRL = new StructuredTextEnvironment(null, false,
+			StructuredTextEnvironment.ORIENT_CONTEXTUAL_RTL);
 	private final static StructuredTextEnvironment envERR = new StructuredTextEnvironment(null, false, 9999);
 	private final static TestHandlerMyComma testMyCommaLL = new TestHandlerMyComma(LTR, LTR);
 	private final static TestHandlerMyComma testMyCommaRR = new TestHandlerMyComma(RTL, RTL);
@@ -96,7 +102,8 @@ public class StructuredTextMethodsTest extends StructuredTextTestBase {
 
 	private void doTestState() {
 		String data, lean, full, model;
-		IStructuredTextExpert expert = StructuredTextExpertFactory.getStatefulExpert(StructuredTextTypeHandlerFactory.JAVA);
+		IStructuredTextExpert expert = StructuredTextExpertFactory
+				.getStatefulExpert(StructuredTextTypeHandlerFactory.JAVA);
 
 		data = "A=B+C;/* D=E+F;";
 		lean = toUT16(data);
@@ -137,7 +144,8 @@ public class StructuredTextMethodsTest extends StructuredTextTestBase {
 		assertEquals("orient #4", StructuredTextEnvironment.ORIENT_UNKNOWN, orient);
 	}
 
-	private void doTestOrient(StructuredTextTypeHandler handler, String label, String data, String resLTR, String resRTL, String resCon) {
+	private void doTestOrient(StructuredTextTypeHandler handler, String label, String data, String resLTR,
+			String resRTL, String resCon) {
 		String full, lean;
 
 		IStructuredTextExpert expertLTR = StructuredTextExpertFactory.getStatefulExpert(handler, envLTR);
@@ -160,7 +168,8 @@ public class StructuredTextMethodsTest extends StructuredTextTestBase {
 
 	private void doTestLeanOffsets() {
 		String lean, data, label;
-		IStructuredTextExpert expert = StructuredTextExpertFactory.getStatefulExpert(StructuredTextTypeHandlerFactory.JAVA);
+		IStructuredTextExpert expert = StructuredTextExpertFactory
+				.getStatefulExpert(StructuredTextTypeHandlerFactory.JAVA);
 
 		int[] offsets;
 		int[] model;
@@ -168,13 +177,13 @@ public class StructuredTextMethodsTest extends StructuredTextTestBase {
 		data = "A=B+C;/* D=E+F;";
 		lean = toUT16(data);
 		offsets = expert.leanBidiCharOffsets(lean);
-		model = new int[] {1, 3, 5};
+		model = new int[] { 1, 3, 5 };
 		label = "leanBidiCharOffsets() #1 ";
 		assertEquals(label, array_display(model), array_display(offsets));
 		data = "A=B+C;*/ D=E+F;";
 		lean = toUT16(data);
 		offsets = expert.leanBidiCharOffsets(lean);
-		model = new int[] {6, 10, 12};
+		model = new int[] { 6, 10, 12 };
 		label = "leanBidiCharOffsets() #2 ";
 		assertEquals(label, array_display(model), array_display(offsets));
 	}
@@ -182,9 +191,12 @@ public class StructuredTextMethodsTest extends StructuredTextTestBase {
 	private void doTestFullOffsets(String label, String data, int[] resLTR, int[] resRTL, int[] resCon) {
 		String full, lean, msg;
 		int[] offsets;
-		IStructuredTextExpert expertLTR = StructuredTextExpertFactory.getExpert(StructuredTextTypeHandlerFactory.COMMA_DELIMITED, envLTR);
-		IStructuredTextExpert expertRTL = StructuredTextExpertFactory.getExpert(StructuredTextTypeHandlerFactory.COMMA_DELIMITED, envRTL);
-		IStructuredTextExpert expertCLR = StructuredTextExpertFactory.getExpert(StructuredTextTypeHandlerFactory.COMMA_DELIMITED, envCLR);
+		IStructuredTextExpert expertLTR = StructuredTextExpertFactory
+				.getExpert(StructuredTextTypeHandlerFactory.COMMA_DELIMITED, envLTR);
+		IStructuredTextExpert expertRTL = StructuredTextExpertFactory
+				.getExpert(StructuredTextTypeHandlerFactory.COMMA_DELIMITED, envRTL);
+		IStructuredTextExpert expertCLR = StructuredTextExpertFactory
+				.getExpert(StructuredTextTypeHandlerFactory.COMMA_DELIMITED, envCLR);
 
 		lean = toUT16(data);
 		full = expertLTR.leanToFullText(lean);
@@ -233,7 +245,8 @@ public class StructuredTextMethodsTest extends StructuredTextTestBase {
 
 		assertEquals("TestDirection #10 full", "ABC@,DEF@,HOST,com", toPseudo(full));
 
-		StructuredTextEnvironment environment = new StructuredTextEnvironment(null, true, StructuredTextEnvironment.ORIENT_LTR);
+		StructuredTextEnvironment environment = new StructuredTextEnvironment(null, true,
+				StructuredTextEnvironment.ORIENT_LTR);
 		IStructuredTextExpert expert = StructuredTextExpertFactory.getStatefulExpert(testMyCommaRL, environment);
 		dirA = expert.getTextDirection(toUT16("###"));
 		dirH = expert.getTextDirection(toUT16("ABC"));
@@ -293,7 +306,8 @@ public class StructuredTextMethodsTest extends StructuredTextTestBase {
 
 		doTestOrientation();
 
-		StructuredTextTypeHandler commaHandler = StructuredTextTypeHandlerFactory.getHandler(StructuredTextTypeHandlerFactory.COMMA_DELIMITED);
+		StructuredTextTypeHandler commaHandler = StructuredTextTypeHandlerFactory
+				.getHandler(StructuredTextTypeHandlerFactory.COMMA_DELIMITED);
 		doTestOrient(commaHandler, "Methods #1 ", "", "", "", "");
 		doTestOrient(commaHandler, "Methods #2 ", "abc", "abc", ">@abc@^", "abc");
 		doTestOrient(commaHandler, "Methods #3 ", "ABC", "ABC", ">@ABC@^", "@ABC");
@@ -308,13 +322,15 @@ public class StructuredTextMethodsTest extends StructuredTextTestBase {
 
 		doTestLeanOffsets();
 
-		doTestFullOffsets("TestFullOffsets ", "BCD,EF,G", new int[] {3, 7}, new int[] {0, 1, 5, 9, 12, 13}, new int[] {0, 4, 8});
+		doTestFullOffsets("TestFullOffsets ", "BCD,EF,G", new int[] { 3, 7 }, new int[] { 0, 1, 5, 9, 12, 13 },
+				new int[] { 0, 4, 8 });
 
 		doTestMirrored();
 
 		doTestDirection();
 
-		IStructuredTextExpert expert = StructuredTextExpertFactory.getExpert(StructuredTextTypeHandlerFactory.COMMA_DELIMITED);
+		IStructuredTextExpert expert = StructuredTextExpertFactory
+				.getExpert(StructuredTextTypeHandlerFactory.COMMA_DELIMITED);
 		String data = "A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z";
 		String lean = toUT16(data);
 		String full = expert.leanToFullText(lean);
