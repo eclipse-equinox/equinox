@@ -46,14 +46,20 @@ public class BundleLoaderSources {
 
 	boolean forceSourceCreation(ModuleCapability packageCapability) {
 		Map<String, String> directives = packageCapability.getDirectives();
-		return directives.get(PackageNamespace.CAPABILITY_INCLUDE_DIRECTIVE) != null || directives.get(PackageNamespace.CAPABILITY_EXCLUDE_DIRECTIVE) != null;
+		return directives.get(PackageNamespace.CAPABILITY_INCLUDE_DIRECTIVE) != null
+				|| directives.get(PackageNamespace.CAPABILITY_EXCLUDE_DIRECTIVE) != null;
 	}
 
-	// creates a PackageSource from an ExportPackageDescription.  This is called when initializing
-	// a BundleLoader to ensure that the proper PackageSource gets created and used for
-	// filtered and reexport packages.  The storeSource flag is used by initialize to indicate
-	// that the source for special case package sources (filtered or re-exported should be stored
-	// in the cache.  if this flag is set then a normal SinglePackageSource will not be created
+	// creates a PackageSource from an ExportPackageDescription. This is called when
+	// initializing
+	// a BundleLoader to ensure that the proper PackageSource gets created and used
+	// for
+	// filtered and reexport packages. The storeSource flag is used by initialize to
+	// indicate
+	// that the source for special case package sources (filtered or re-exported
+	// should be stored
+	// in the cache. if this flag is set then a normal SinglePackageSource will not
+	// be created
 	// (i.e. it will be created lazily)
 	public PackageSource createPackageSource(ModuleCapability packageCapability, boolean storeSource) {
 		PackageSource pkgSource = null;
@@ -74,7 +80,8 @@ public class BundleLoaderSources {
 				}
 			}
 		} else {
-			// we are not storing the special case sources, but pkgSource == null this means this
+			// we are not storing the special case sources, but pkgSource == null this means
+			// this
 			// is a normal package source; get it and return it.
 			if (pkgSource == null) {
 				pkgSource = getPackageSource(name);

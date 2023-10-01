@@ -72,7 +72,8 @@ public class LockSet<T> {
 				}
 				lock.incrementUseCount();
 			}
-			// all interested threads have the lock object and the use count is the number of such threads
+			// all interested threads have the lock object and the use count is the number
+			// of such threads
 			boolean acquired = false;
 			try {
 				acquired = lock.tryLock(time, unit);
@@ -80,7 +81,8 @@ public class LockSet<T> {
 			} finally {
 				if (!acquired) {
 					synchronized (locks) {
-						// If, after failing to acquire the lock, no other thread is using the lock, discard it.
+						// If, after failing to acquire the lock, no other thread is using the lock,
+						// discard it.
 						if (lock.decremementUseCount() == 0) {
 							locks.remove(t);
 						}

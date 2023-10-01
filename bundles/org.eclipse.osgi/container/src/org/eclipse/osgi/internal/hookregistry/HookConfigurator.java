@@ -16,11 +16,13 @@ package org.eclipse.osgi.internal.hookregistry;
 
 /**
  * A hook configurator is used to add hooks to the hook registry.
+ * 
  * @see HookRegistry
  */
 public interface HookConfigurator {
 	/**
 	 * Adds hooks to the specified hook registry.
+	 * 
 	 * @param hookRegistry the hook registry used to add hooks
 	 */
 	public void addHooks(HookRegistry hookRegistry);

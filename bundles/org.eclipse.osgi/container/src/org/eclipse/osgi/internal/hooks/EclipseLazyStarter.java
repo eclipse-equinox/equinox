@@ -51,7 +51,8 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 	// used to store exceptions that occurred while activating a bundle
 	// keyed by ClasspathManager->Exception
 	// WeakHashMap is used to prevent pinning the ClasspathManager objects.
-	private final Map<ClasspathManager, ClassNotFoundException> errors = Collections.synchronizedMap(new WeakHashMap<ClasspathManager, ClassNotFoundException>());
+	private final Map<ClasspathManager, ClassNotFoundException> errors = Collections
+			.synchronizedMap(new WeakHashMap<ClasspathManager, ClassNotFoundException>());
 
 	private final EquinoxContainer container;
 
@@ -67,10 +68,12 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 		ModuleRevision revision = manager.getGeneration().getRevision();
 		Module module = revision.getRevisions().getModule();
 		// If the bundle is active, uninstalled or stopping then the bundle has already
-		// been initialized (though it may have been destroyed) so just return the class.
+		// been initialized (though it may have been destroyed) so just return the
+		// class.
 		if (alreadyActive.contains(module.getState()))
 			return;
-		// The bundle is not active and does not require activation, just return the class
+		// The bundle is not active and does not require activation, just return the
+		// class
 		if (!shouldActivateFor(name, module, revision, manager))
 			return;
 		Deque<ClasspathManager> stack = activationStack.get();
@@ -87,7 +90,8 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 	}
 
 	@Override
-	public void postFindLocalClass(String name, Class<?> clazz, ClasspathManager manager) throws ClassNotFoundException {
+	public void postFindLocalClass(String name, Class<?> clazz, ClasspathManager manager)
+			throws ClassNotFoundException {
 		if (initiatingClassName.get() != name)
 			return;
 		initiatingClassName.set(null);
@@ -109,7 +113,8 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 
 			// The bundle must be started.
 			// Note that another thread may already be starting this bundle;
-			// In this case we will timeout after a default of 5 seconds and record the BundleException
+			// In this case we will timeout after a default of 5 seconds and record the
+			// BundleException
 			long startTime = System.currentTimeMillis();
 			Module m = managerElement.getGeneration().getRevision().getRevisions().getModule();
 			try {
@@ -118,23 +123,28 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 			} catch (BundleException e) {
 				Bundle bundle = managerElement.getGeneration().getRevision().getBundle();
 				if (e.getType() == BundleException.STATECHANGE_ERROR) {
-					String message = NLS.bind(Msg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP, new Object[] {Thread.currentThread(), name, m.getStateChangeOwner(), bundle, Long.valueOf(System.currentTimeMillis() - startTime)});
+					String message = NLS.bind(Msg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP,
+							new Object[] { Thread.currentThread(), name, m.getStateChangeOwner(), bundle,
+									Long.valueOf(System.currentTimeMillis() - startTime) });
 					container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, message, e);
 					continue;
 				}
-				String message = NLS.bind(Msg.ECLIPSE_CLASSLOADER_ACTIVATION, bundle.getSymbolicName(), Long.toString(bundle.getBundleId()));
+				String message = NLS.bind(Msg.ECLIPSE_CLASSLOADER_ACTIVATION, bundle.getSymbolicName(),
+						Long.toString(bundle.getBundleId()));
 				ClassNotFoundException error = new ClassNotFoundException(message, e);
 				errors.put(managerElement, error);
 				if (container.getConfiguration().throwErrorOnFailedStart) {
 					container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, message, e, null);
 					throw error;
 				}
-				container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(message, e));
+				container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundle,
+						new BundleException(message, e));
 			}
 		}
 	}
 
-	private boolean shouldActivateFor(String className, Module module, ModuleRevision revision, ClasspathManager manager) throws ClassNotFoundException {
+	private boolean shouldActivateFor(String className, Module module, ModuleRevision revision,
+			ClasspathManager manager) throws ClassNotFoundException {
 		State state = module.getState();
 		if (!State.LAZY_STARTING.equals(state)) {
 			if (State.STARTING.equals(state) && manager.getClassLoader().getBundleLoader().isTriggerSet()) {
@@ -149,11 +159,15 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 					if (error != null)
 						throw error;
 				}
-				// The module is persistently started and has the lazy activation policy but has not entered the LAZY_STARTING state
+				// The module is persistently started and has the lazy activation policy but has
+				// not entered the LAZY_STARTING state
 				// There are 2 cases where this can happen
-				// 1) The start-level thread has not gotten to transitioning the bundle to LAZY_STARTING yet
-				// 2) The bundle is marked for eager activation and the start-level thread has not activated it yet
-				// In both cases we need to fire the lazy start trigger to activate the bundle if the start-level is met
+				// 1) The start-level thread has not gotten to transitioning the bundle to
+				// LAZY_STARTING yet
+				// 2) The bundle is marked for eager activation and the start-level thread has
+				// not activated it yet
+				// In both cases we need to fire the lazy start trigger to activate the bundle
+				// if the start-level is met
 				return module.isPersistentlyStarted() && isLazyStartable(className, revision);
 			}
 			return false;
@@ -166,16 +180,19 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 		if (!revision.hasLazyActivatePolicy()) {
 			return false;
 		}
-		List<ModuleCapability> moduleDatas = revision.getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
+		List<ModuleCapability> moduleDatas = revision
+				.getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
 		if (moduleDatas.isEmpty()) {
 			return false;
 		}
 
 		Map<String, Object> moduleDataAttrs = moduleDatas.get(0).getAttributes();
 		@SuppressWarnings("unchecked")
-		List<String> excludes = (List<String>) moduleDataAttrs.get(EquinoxModuleDataNamespace.CAPABILITY_LAZY_EXCLUDE_ATTRIBUTE);
+		List<String> excludes = (List<String>) moduleDataAttrs
+				.get(EquinoxModuleDataNamespace.CAPABILITY_LAZY_EXCLUDE_ATTRIBUTE);
 		@SuppressWarnings("unchecked")
-		List<String> includes = (List<String>) moduleDataAttrs.get(EquinoxModuleDataNamespace.CAPABILITY_LAZY_INCLUDE_ATTRIBUTE);
+		List<String> includes = (List<String>) moduleDataAttrs
+				.get(EquinoxModuleDataNamespace.CAPABILITY_LAZY_INCLUDE_ATTRIBUTE);
 		// no exceptions, it is easy to figure it out
 		if (excludes == null && includes == null)
 			return true;
@@ -185,7 +202,8 @@ public class EclipseLazyStarter extends ClassLoaderHook {
 		if (dotPosition == -1)
 			return true;
 		String packageName = className.substring(0, dotPosition);
-		return ((includes == null || includes.contains(packageName)) && (excludes == null || !excludes.contains(packageName)));
+		return ((includes == null || includes.contains(packageName))
+				&& (excludes == null || !excludes.contains(packageName)));
 	}
 
 	@Override

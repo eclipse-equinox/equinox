@@ -32,15 +32,15 @@ import org.osgi.resource.Namespace;
 public class EclipsePlatformNamespace extends Namespace {
 
 	/**
-	 * Namespace name for the eclipse platform.  Unlike typical name spaces
-	 * this namespace is not intended to be used as an attribute.
+	 * Namespace name for the eclipse platform. Unlike typical name spaces this
+	 * namespace is not intended to be used as an attribute.
 	 */
 	public static final String ECLIPSE_PLATFORM_NAMESPACE = "eclipse.platform"; //$NON-NLS-1$
 
 	/**
-	 * Manifest header identifying the eclipse platform for the
-	 * bundle. The framework may run this bundle if filter
-	 * specified by this header matches the running eclipse platform.
+	 * Manifest header identifying the eclipse platform for the bundle. The
+	 * framework may run this bundle if filter specified by this header matches the
+	 * running eclipse platform.
 	 */
 	public static final String ECLIPSE_PLATFORM_FILTER_HEADER = "Eclipse-PlatformFilter"; //$NON-NLS-1$
 }

@@ -52,12 +52,13 @@ public class ZipBundleFile extends CloseableBundleFile<ZipEntry> {
 	}
 
 	/**
-	* Returns a ZipEntry for the bundle file. Must be called while holding the open lock.
-	* This method does not ensure that the ZipFile is opened. Callers may need to call getZipfile() prior to calling this
-	* method.
-	* @param path the path to an entry
-	* @return a ZipEntry or null if the entry does not exist
-	*/
+	 * Returns a ZipEntry for the bundle file. Must be called while holding the open
+	 * lock. This method does not ensure that the ZipFile is opened. Callers may
+	 * need to call getZipfile() prior to calling this method.
+	 * 
+	 * @param path the path to an entry
+	 * @return a ZipEntry or null if the entry does not exist
+	 */
 	private ZipEntry getZipEntry(String path) {
 		if (path.length() > 0 && path.charAt(0) == '/')
 			path = path.substring(1);

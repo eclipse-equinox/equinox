@@ -22,19 +22,22 @@ import org.eclipse.osgi.storage.BundleInfo.Generation;
 import org.osgi.framework.Bundle;
 
 /**
- * The implementation of the service that gets ResourceBundle objects from a given
- * bundle with a given locale.
+ * The implementation of the service that gets ResourceBundle objects from a
+ * given bundle with a given locale.
  *
- * <p>Internal class.</p>
+ * <p>
+ * Internal class.
+ * </p>
  */
 
 public class BundleLocalizationImpl implements BundleLocalization {
 	/**
-	 * The getLocalization method gets a ResourceBundle object for the given
-	 * locale and bundle.
+	 * The getLocalization method gets a ResourceBundle object for the given locale
+	 * and bundle.
 	 *
 	 * @return A <code>ResourceBundle</code> object for the given bundle and locale.
-	 * If null is passed for the locale parameter, the default locale is used.
+	 *         If null is passed for the locale parameter, the default locale is
+	 *         used.
 	 */
 	@Override
 	public ResourceBundle getLocalization(Bundle bundle, String locale) {

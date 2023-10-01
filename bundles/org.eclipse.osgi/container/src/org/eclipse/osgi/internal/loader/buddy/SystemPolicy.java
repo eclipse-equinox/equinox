@@ -32,13 +32,14 @@ public class SystemPolicy implements IBuddyPolicy {
 	public static SystemPolicy getInstance(final byte type, final ClassLoader bootLoader) {
 		if (instances[type] == null) {
 			instances[type] = new SystemPolicy();
-			instances[type].classLoader = AccessController.doPrivileged((PrivilegedAction<ClassLoader>) () -> createClassLoader(type, bootLoader));
+			instances[type].classLoader = AccessController
+					.doPrivileged((PrivilegedAction<ClassLoader>) () -> createClassLoader(type, bootLoader));
 		}
 		return instances[type];
 	}
 
 	public SystemPolicy() {
-		//Nothing to do
+		// Nothing to do
 	}
 
 	public SystemPolicy(ClassLoader parent) {
@@ -47,18 +48,18 @@ public class SystemPolicy implements IBuddyPolicy {
 
 	static ClassLoader createClassLoader(byte type, ClassLoader bootLoader) {
 		switch (type) {
-			case APP :
-				if (ClassLoader.getSystemClassLoader() != null)
-					return ClassLoader.getSystemClassLoader();
-				return bootLoader;
+		case APP:
+			if (ClassLoader.getSystemClassLoader() != null)
+				return ClassLoader.getSystemClassLoader();
+			return bootLoader;
 
-			case BOOT :
-				return bootLoader;
+		case BOOT:
+			return bootLoader;
 
-			case EXT :
-				if (ClassLoader.getSystemClassLoader() != null)
-					return ClassLoader.getSystemClassLoader().getParent();
-				return bootLoader;
+		case EXT:
+			if (ClassLoader.getSystemClassLoader() != null)
+				return ClassLoader.getSystemClassLoader().getParent();
+			return bootLoader;
 		}
 		return null;
 	}

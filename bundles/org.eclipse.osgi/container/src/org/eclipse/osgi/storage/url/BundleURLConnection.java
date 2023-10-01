@@ -45,8 +45,8 @@ public class BundleURLConnection extends URLConnection implements BundleReferenc
 	/**
 	 * Constructor for a BundleClassLoader resource URLConnection.
 	 *
-	 * @param url  URL for this URLConnection.
-	 * @param bundleEntry  BundleEntry that the URLConnection is associated.
+	 * @param url         URL for this URLConnection.
+	 * @param bundleEntry BundleEntry that the URLConnection is associated.
 	 */
 	public BundleURLConnection(URL url, ModuleContainer container, BundleEntry bundleEntry) {
 		super(url);
@@ -128,6 +128,7 @@ public class BundleURLConnection extends URLConnection implements BundleReferenc
 
 	/**
 	 * Converts the URL to a common local URL protocol (i.e file: or jar: protocol)
+	 * 
 	 * @return the local URL using a common local protocol
 	 */
 	public URL getLocalURL() {
@@ -136,8 +137,10 @@ public class BundleURLConnection extends URLConnection implements BundleReferenc
 	}
 
 	/**
-	 * Converts the URL to a URL that uses the file: protocol.  The content of this
-	 * URL may be downloaded or extracted onto the local filesystem to create a file URL.
+	 * Converts the URL to a URL that uses the file: protocol. The content of this
+	 * URL may be downloaded or extracted onto the local filesystem to create a file
+	 * URL.
+	 * 
 	 * @return the local URL that uses the file: protocol
 	 */
 	public URL getFileURL() {

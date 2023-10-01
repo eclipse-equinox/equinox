@@ -117,12 +117,22 @@ public class EquinoxBundle implements Bundle, BundleReference {
 					return null;
 
 				String sKey = (String) key;
-				if (Constants.EXPORT_PACKAGE.equalsIgnoreCase(sKey) || Constants.PROVIDE_CAPABILITY.equalsIgnoreCase(sKey)) {
-					String systemProvideHeader = getEquinoxContainer().getConfiguration().getConfiguration(EquinoxConfiguration.PROP_SYSTEM_PROVIDE_HEADER, EquinoxConfiguration.SYSTEM_PROVIDE_HEADER_SYSTEM_EXTRA);
-					boolean useSystemExtra = systemProvideHeader.equals(EquinoxConfiguration.SYSTEM_PROVIDE_HEADER_SYSTEM_EXTRA);
-					boolean useSystem = systemProvideHeader.equals(EquinoxConfiguration.SYSTEM_PROVIDE_HEADER_SYSTEM) || useSystemExtra;
-					String systemProp = useSystem ? (Constants.EXPORT_PACKAGE.equalsIgnoreCase(sKey) ? Constants.FRAMEWORK_SYSTEMPACKAGES : Constants.FRAMEWORK_SYSTEMCAPABILITIES) : null;
-					String systemExtraProp = useSystemExtra ? (Constants.EXPORT_PACKAGE.equalsIgnoreCase(sKey) ? Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA : Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA) : null;
+				if (Constants.EXPORT_PACKAGE.equalsIgnoreCase(sKey)
+						|| Constants.PROVIDE_CAPABILITY.equalsIgnoreCase(sKey)) {
+					String systemProvideHeader = getEquinoxContainer().getConfiguration().getConfiguration(
+							EquinoxConfiguration.PROP_SYSTEM_PROVIDE_HEADER,
+							EquinoxConfiguration.SYSTEM_PROVIDE_HEADER_SYSTEM_EXTRA);
+					boolean useSystemExtra = systemProvideHeader
+							.equals(EquinoxConfiguration.SYSTEM_PROVIDE_HEADER_SYSTEM_EXTRA);
+					boolean useSystem = systemProvideHeader.equals(EquinoxConfiguration.SYSTEM_PROVIDE_HEADER_SYSTEM)
+							|| useSystemExtra;
+					String systemProp = useSystem
+							? (Constants.EXPORT_PACKAGE.equalsIgnoreCase(sKey) ? Constants.FRAMEWORK_SYSTEMPACKAGES
+									: Constants.FRAMEWORK_SYSTEMCAPABILITIES)
+							: null;
+					String systemExtraProp = useSystemExtra ? (Constants.EXPORT_PACKAGE.equalsIgnoreCase(sKey)
+							? Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA
+							: Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA) : null;
 					return getExtra(sKey, systemProp, systemExtraProp);
 				}
 
@@ -130,8 +140,12 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			}
 
 			private String getExtra(String header, String systemProp, String systemExtraProp) {
-				String systemValue = systemProp != null ? getEquinoxContainer().getConfiguration().getConfiguration(systemProp) : null;
-				String systemExtraValue = systemExtraProp != null ? getEquinoxContainer().getConfiguration().getConfiguration(systemExtraProp) : null;
+				String systemValue = systemProp != null
+						? getEquinoxContainer().getConfiguration().getConfiguration(systemProp)
+						: null;
+				String systemExtraValue = systemExtraProp != null
+						? getEquinoxContainer().getConfiguration().getConfiguration(systemExtraProp)
+						: null;
 				if (systemValue == null)
 					systemValue = systemExtraValue;
 				else if (systemExtraValue != null && systemExtraValue.trim().length() > 0)
@@ -225,7 +239,8 @@ public class EquinoxBundle implements Bundle, BundleReference {
 								try {
 									stop();
 								} catch (Throwable e) {
-									SystemBundle.this.getEquinoxContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error stopping the framework.", e); //$NON-NLS-1$
+									SystemBundle.this.getEquinoxContainer().getLogServices().log(EquinoxContainer.NAME,
+											FrameworkLogEntry.ERROR, "Error stopping the framework.", e); //$NON-NLS-1$
 								}
 							}
 						}, "Framework stop - " + getEquinoxContainer().toString()); //$NON-NLS-1$
@@ -249,7 +264,8 @@ public class EquinoxBundle implements Bundle, BundleReference {
 								try {
 									update();
 								} catch (Throwable e) {
-									SystemBundle.this.getEquinoxContainer().getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error updating the framework.", e); //$NON-NLS-1$
+									SystemBundle.this.getEquinoxContainer().getLogServices().log(EquinoxContainer.NAME,
+											FrameworkLogEntry.ERROR, "Error updating the framework.", e); //$NON-NLS-1$
 								}
 							}
 						}, "Framework update - " + getEquinoxContainer().toString()); //$NON-NLS-1$
@@ -376,7 +392,8 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			stopWorker0();
 		}
 
-		public EquinoxModule(Long id, String location, ModuleContainer container, EnumSet<Settings> settings, int startlevel) {
+		public EquinoxModule(Long id, String location, ModuleContainer container, EnumSet<Settings> settings,
+				int startlevel) {
 			super(id, location, container, settings, startlevel);
 		}
 
@@ -401,7 +418,8 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		this.module = createSystemModule(moduleContainer);
 	}
 
-	public EquinoxBundle(Long id, String location, ModuleContainer moduleContainer, EnumSet<Settings> settings, int startlevel, EquinoxContainer equinoxContainer) {
+	public EquinoxBundle(Long id, String location, ModuleContainer moduleContainer, EnumSet<Settings> settings,
+			int startlevel, EquinoxContainer equinoxContainer) {
 		this.equinoxContainer = equinoxContainer;
 		this.module = new EquinoxModule(id, location, moduleContainer, settings, startlevel);
 	}
@@ -419,21 +437,21 @@ public class EquinoxBundle implements Bundle, BundleReference {
 	@Override
 	public int getState() {
 		switch (module.getState()) {
-			case INSTALLED :
-				return Bundle.INSTALLED;
-			case RESOLVED :
-				return Bundle.RESOLVED;
-			case STARTING :
-			case LAZY_STARTING :
-				return Bundle.STARTING;
-			case ACTIVE :
-				return Bundle.ACTIVE;
-			case STOPPING :
-				return Bundle.STOPPING;
-			case UNINSTALLED :
-				return Bundle.UNINSTALLED;
-			default :
-				throw new IllegalStateException("No valid bundle state for module state: " + module.getState()); //$NON-NLS-1$
+		case INSTALLED:
+			return Bundle.INSTALLED;
+		case RESOLVED:
+			return Bundle.RESOLVED;
+		case STARTING:
+		case LAZY_STARTING:
+			return Bundle.STARTING;
+		case ACTIVE:
+			return Bundle.ACTIVE;
+		case STOPPING:
+			return Bundle.STOPPING;
+		case UNINSTALLED:
+			return Bundle.UNINSTALLED;
+		default:
+			throw new IllegalStateException("No valid bundle state for module state: " + module.getState()); //$NON-NLS-1$
 		}
 	}
 
@@ -476,7 +494,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		if ((options & Bundle.STOP_TRANSIENT) == 0) {
 			return new StopOptions[0];
 		}
-		return new StopOptions[] {StopOptions.TRANSIENT};
+		return new StopOptions[] { StopOptions.TRANSIENT };
 	}
 
 	@Override
@@ -498,7 +516,8 @@ public class EquinoxBundle implements Bundle, BundleReference {
 
 	@Override
 	public void uninstall() throws BundleException {
-		// be sure to prime the headers with default local; calling priv method to avoid permission check
+		// be sure to prime the headers with default local; calling priv method to avoid
+		// permission check
 		privGetHeaders(null);
 		Storage storage = equinoxContainer.getStorage();
 		storage.getModuleContainer().uninstall(module);
@@ -554,11 +573,12 @@ public class EquinoxBundle implements Bundle, BundleReference {
 				SecurityManager sm = System.getSecurityManager();
 				if (sm instanceof EquinoxSecurityManager) {
 					/*
-					 * If the FrameworkSecurityManager is active, we need to do checks the "right" way.
-					 * We can exploit our knowledge that the security context of FrameworkSecurityManager
-					 * is an AccessControlContext to invoke it properly with the ProtectionDomain.
+					 * If the FrameworkSecurityManager is active, we need to do checks the "right"
+					 * way. We can exploit our knowledge that the security context of
+					 * FrameworkSecurityManager is an AccessControlContext to invoke it properly
+					 * with the ProtectionDomain.
 					 */
-					AccessControlContext acc = new AccessControlContext(new ProtectionDomain[] {domain});
+					AccessControlContext acc = new AccessControlContext(new ProtectionDomain[] { domain });
 					try {
 						sm.checkPermission((Permission) permission, acc);
 						return true;
@@ -590,7 +610,8 @@ public class EquinoxBundle implements Bundle, BundleReference {
 			return classLoader.getResource(name);
 		}
 
-		return new ClasspathManager((Generation) module.getCurrentRevision().getRevisionInfo(), null).findLocalResource(name);
+		return new ClasspathManager((Generation) module.getCurrentRevision().getRevisionInfo(), null)
+				.findLocalResource(name);
 	}
 
 	@Override
@@ -629,7 +650,8 @@ public class EquinoxBundle implements Bundle, BundleReference {
 				try {
 					module.start(StartOptions.LAZY_TRIGGER);
 				} catch (BundleException e1) {
-					equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, e.getMessage(), e);
+					equinoxContainer.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING,
+							e.getMessage(), e);
 				}
 			}
 			throw e;
@@ -641,7 +663,8 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		ResolutionReport report = resolve();
 		if (logResolveError && !Module.RESOLVED_SET.contains(module.getState())) {
 			String reportMessage = report.getResolutionReportMessage(module.getCurrentRevision());
-			equinoxContainer.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, this, new BundleException(reportMessage, BundleException.RESOLVE_ERROR));
+			equinoxContainer.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, this,
+					new BundleException(reportMessage, BundleException.RESOLVE_ERROR));
 		}
 		return AccessController.doPrivileged(new PrivilegedAction<ModuleClassLoader>() {
 			@Override
@@ -674,7 +697,8 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		if (classLoader != null) {
 			result = classLoader.getResources(name);
 		} else {
-			result = new ClasspathManager((Generation) module.getCurrentRevision().getRevisionInfo(), null).findLocalResources(name);
+			result = new ClasspathManager((Generation) module.getCurrentRevision().getRevisionInfo(), null)
+					.findLocalResources(name);
 		}
 		return result != null && result.hasMoreElements() ? result : null;
 	}
@@ -795,7 +819,7 @@ public class EquinoxBundle implements Bundle, BundleReference {
 		if (AccessControlContext.class.equals(adapterType)) {
 			Generation current = (Generation) module.getCurrentRevision().getRevisionInfo();
 			ProtectionDomain domain = current.getDomain();
-			return (A) (domain == null ? null : new AccessControlContext(new ProtectionDomain[] {domain}));
+			return (A) (domain == null ? null : new AccessControlContext(new ProtectionDomain[] { domain }));
 		}
 
 		if (BundleContext.class.equals(adapterType)) {
@@ -895,7 +919,8 @@ public class EquinoxBundle implements Bundle, BundleReference {
 				return null;
 			}
 			BundleContextImpl current = getBundleContextImpl();
-			ServiceReference<?>[] references = (current == null) ? null : equinoxContainer.getServiceRegistry().getRegisteredServices(current);
+			ServiceReference<?>[] references = (current == null) ? null
+					: equinoxContainer.getServiceRegistry().getRegisteredServices(current);
 			return (A) DTOBuilder.newArrayServiceReferenceDTO(references);
 		}
 

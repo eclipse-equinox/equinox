@@ -76,13 +76,15 @@ public class ManifestLocalization {
 			return rawHeaders;
 		}
 		ResourceBundle localeProperties = getResourceBundle(localeString, isDefaultLocale);
-		CaseInsensitiveDictionaryMap<String, String> localeHeaders = new CaseInsensitiveDictionaryMap<>(this.rawHeaders);
+		CaseInsensitiveDictionaryMap<String, String> localeHeaders = new CaseInsensitiveDictionaryMap<>(
+				this.rawHeaders);
 		for (Entry<String, String> entry : localeHeaders.entrySet()) {
 			String value = entry.getValue();
 			if (value.startsWith("%") && (value.length() > 1)) { //$NON-NLS-1$
 				String propertiesKey = value.substring(1);
 				try {
-					value = localeProperties == null ? propertiesKey : (String) localeProperties.getObject(propertiesKey);
+					value = localeProperties == null ? propertiesKey
+							: (String) localeProperties.getObject(propertiesKey);
 				} catch (MissingResourceException ex) {
 					value = propertiesKey;
 				}
@@ -144,8 +146,10 @@ public class ManifestLocalization {
 	}
 
 	private BundleResourceBundle lookupResourceBundle(String localeString) {
-		// get the localization header as late as possible to avoid accessing the raw headers
-		// getting the first value from the raw headers forces the manifest to be parsed (bug 332039)
+		// get the localization header as late as possible to avoid accessing the raw
+		// headers
+		// getting the first value from the raw headers forces the manifest to be parsed
+		// (bug 332039)
 		String localizationHeader = rawHeaders.get(Constants.BUNDLE_LOCALIZATION);
 		if (localizationHeader == null)
 			localizationHeader = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
@@ -155,14 +159,18 @@ public class ManifestLocalization {
 			return result.isEmpty() ? null : result;
 
 		// Collect all the necessary inputstreams to create the resource bundle without
-		// holding any locks.  Finding resources and inputstreams from the wirings requires a
-		// read lock on the module database.  We must not hold the cache lock while doing this;
-		// otherwise out of order locks will be possible when the resolver needs to clear the cache
+		// holding any locks. Finding resources and inputstreams from the wirings
+		// requires a
+		// read lock on the module database. We must not hold the cache lock while doing
+		// this;
+		// otherwise out of order locks will be possible when the resolver needs to
+		// clear the cache
 		String[] nlVarients = buildNLVariants(localeString);
 		InputStream[] nlStreams = new InputStream[nlVarients.length];
 		for (int i = nlVarients.length - 1; i >= 0; i--) {
 
-			URL url = findResource(localizationHeader + (nlVarients[i].equals("") ? nlVarients[i] : '_' + nlVarients[i]) + ".properties"); //$NON-NLS-1$ //$NON-NLS-2$
+			URL url = findResource(localizationHeader + (nlVarients[i].equals("") ? nlVarients[i] : '_' + nlVarients[i]) //$NON-NLS-1$
+					+ ".properties"); //$NON-NLS-1$
 			if (url != null) {
 				try {
 					nlStreams[i] = url.openStream();
@@ -189,7 +197,7 @@ public class ManifestLocalization {
 							try {
 								varientStream.close();
 							} catch (IOException e3) {
-								//Ignore exception
+								// Ignore exception
 							}
 						}
 					}

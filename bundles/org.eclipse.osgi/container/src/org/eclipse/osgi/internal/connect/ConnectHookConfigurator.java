@@ -81,12 +81,14 @@ public class ConnectHookConfigurator implements HookConfigurator {
 					public void validate() throws IllegalStateException {
 						// make sure we have the module still from the factory
 						if (hasModule && m == null) {
-							throw new IllegalStateException("Connect Factory no longer has the module at locataion: " + generation.getBundleInfo().getLocation()); //$NON-NLS-1$
+							throw new IllegalStateException("Connect Factory no longer has the module at locataion: " //$NON-NLS-1$
+									+ generation.getBundleInfo().getLocation());
 						}
 					}
 
 					@Override
-					public ModuleRevisionBuilder adaptModuleRevisionBuilder(ModuleEvent operation, Module origin, ModuleRevisionBuilder builder) {
+					public ModuleRevisionBuilder adaptModuleRevisionBuilder(ModuleEvent operation, Module origin,
+							ModuleRevisionBuilder builder) {
 						if (m != null) {
 							CONNECT_TAG_NAMESPACES.stream().map(builder::getCapabilities).flatMap(List::stream)
 									.forEach(c -> c.getAttributes().compute(IdentityNamespace.CAPABILITY_TAGS_ATTRIBUTE,
@@ -139,7 +141,8 @@ public class ConnectHookConfigurator implements HookConfigurator {
 
 		hookRegistry.addClassLoaderHook(new ClassLoaderHook() {
 			@Override
-			public ModuleClassLoader createClassLoader(ClassLoader parent, EquinoxConfiguration configuration, BundleLoader delegate, Generation generation) {
+			public ModuleClassLoader createClassLoader(ClassLoader parent, EquinoxConfiguration configuration,
+					BundleLoader delegate, Generation generation) {
 				ConnectModule m = connectModules.getConnectModule(generation.getBundleInfo().getLocation());
 				if (m != null) {
 					BundleFile bundlefile = generation.getBundleFile();
@@ -152,7 +155,8 @@ public class ConnectHookConfigurator implements HookConfigurator {
 					}
 					if (bundlefile instanceof ConnectBundleFile) {
 						return ((ConnectBundleFile) bundlefile).getClassLoader().map(
-								l -> new DelegatingConnectClassLoader(parent, configuration, delegate, generation, l)).orElse(null);
+								l -> new DelegatingConnectClassLoader(parent, configuration, delegate, generation, l))
+								.orElse(null);
 					}
 				}
 				return null;

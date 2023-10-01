@@ -21,24 +21,30 @@ import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.eclipse.osgi.util.NLS;
 
 /**
- * The service implementation that allows bundleresource or bundleentry
- * URLs to be converted to native file URLs on the local file system.
+ * The service implementation that allows bundleresource or bundleentry URLs to
+ * be converted to native file URLs on the local file system.
  *
- * <p>Internal class.</p>
+ * <p>
+ * Internal class.
+ * </p>
  */
 public class BundleURLConverter implements URLConverter {
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.osgi.service.urlconversion.URLConverter#toFileURL(java.net.URL)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.osgi.service.urlconversion.URLConverter#toFileURL(java.net.URL)
 	 */
 	@Override
 	public URL toFileURL(URL url) throws IOException {
 		URLConnection connection = url.openConnection();
 		if (connection instanceof BundleURLConnection) {
 			URL result = ((BundleURLConnection) connection).getFileURL();
-			/* If we got a connection then we know the resource exists in
-			 * the bundle but if connection.getFileURL returned null then there
-			 * was a problem extracting the file to disk. See bug 259241.
+			/*
+			 * If we got a connection then we know the resource exists in the bundle but if
+			 * connection.getFileURL returned null then there was a problem extracting the
+			 * file to disk. See bug 259241.
 			 **/
 			if (result == null)
 				throw new IOException(NLS.bind(Msg.ECLIPSE_PLUGIN_EXTRACTION_PROBLEM, url));
@@ -47,8 +53,11 @@ public class BundleURLConverter implements URLConverter {
 		return url;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.osgi.service.urlconversion.URLConverter#resolve(java.net.URL)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.osgi.service.urlconversion.URLConverter#resolve(java.net.URL)
 	 */
 	@Override
 	public URL resolve(URL url) throws IOException {

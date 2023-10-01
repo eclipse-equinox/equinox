@@ -86,6 +86,7 @@ import org.osgi.service.resolver.ResolutionException;
 
 /**
  * A container for installing, updating, uninstalling and resolve modules.
+ * 
  * @since 3.10
  */
 public final class ModuleContainer implements DebugOptionsListener {
@@ -122,8 +123,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 	final ModuleContainerAdaptor adaptor;
 
 	/**
-	 * The module resolver which implements the ResolverContext and handles calling the
-	 * resolver service.
+	 * The module resolver which implements the ResolverContext and handles calling
+	 * the resolver service.
 	 */
 	private final ModuleResolver moduleResolver;
 
@@ -143,7 +144,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * Constructs a new container with the specified adaptor, module database.
-	 * @param adaptor the adaptor for the container
+	 * 
+	 * @param adaptor        the adaptor for the container
 	 * @param moduledataBase the module database
 	 */
 	public ModuleContainer(ModuleContainerAdaptor adaptor, ModuleDatabase moduledataBase) {
@@ -176,11 +178,13 @@ public final class ModuleContainer implements DebugOptionsListener {
 			autoStartOnResolveProp = Boolean.toString(true);
 		}
 		this.autoStartOnResolve = Boolean.parseBoolean(autoStartOnResolveProp);
-		this.restrictParallelStart = Boolean.parseBoolean(adaptor.getProperty(EquinoxConfiguration.PROP_EQUINOX_START_LEVEL_RESTRICT_PARALLEL));
+		this.restrictParallelStart = Boolean
+				.parseBoolean(adaptor.getProperty(EquinoxConfiguration.PROP_EQUINOX_START_LEVEL_RESTRICT_PARALLEL));
 	}
 
 	/**
 	 * Returns the adaptor for this container
+	 * 
 	 * @return the adaptor for this container
 	 */
 	public ModuleContainerAdaptor getAdaptor() {
@@ -189,6 +193,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * Returns the list of currently installed modules sorted by module id.
+	 * 
 	 * @return the list of currently installed modules sorted by module id.
 	 */
 	public List<Module> getModules() {
@@ -196,34 +201,41 @@ public final class ModuleContainer implements DebugOptionsListener {
 	}
 
 	/**
-	 * Returns the module installed with the specified id, or null if no
-	 * such module is installed.
+	 * Returns the module installed with the specified id, or null if no such module
+	 * is installed.
+	 * 
 	 * @param id the id of the module
-	 * @return the module with the specified id, or null of no such module is installed.
+	 * @return the module with the specified id, or null of no such module is
+	 *         installed.
 	 */
 	public Module getModule(long id) {
 		return moduleDatabase.getModule(id);
 	}
 
 	/**
-	 * Returns the module installed with the specified location, or null if no
-	 * such module is installed.
+	 * Returns the module installed with the specified location, or null if no such
+	 * module is installed.
+	 * 
 	 * @param location the location of the module
-	 * @return the module with the specified location, or null of no such module is installed.
+	 * @return the module with the specified location, or null of no such module is
+	 *         installed.
 	 */
 	public Module getModule(String location) {
 		return moduleDatabase.getModule(location);
 	}
 
 	/**
-	 * Creates a synthetic requirement that is not associated with any module revision.
-	 * This is useful for calling {@link FrameworkWiring#findProviders(Requirement)}.
-	 * @param namespace the requirement namespace
+	 * Creates a synthetic requirement that is not associated with any module
+	 * revision. This is useful for calling
+	 * {@link FrameworkWiring#findProviders(Requirement)}.
+	 * 
+	 * @param namespace  the requirement namespace
 	 * @param directives the requirement directives
 	 * @param attributes the requirement attributes
 	 * @return a synthetic requirement
 	 */
-	public static Requirement createRequirement(String namespace, Map<String, String> directives, Map<String, ?> attributes) {
+	public static Requirement createRequirement(String namespace, Map<String, String> directives,
+			Map<String, ?> attributes) {
 		return new ModuleRequirement(namespace, directives, attributes, null);
 	}
 
@@ -257,8 +269,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 	 * Generates a human readable string representation of the the given
 	 * requirement, mapping the namespace to well-known header names.
 	 * 
-	 * @param requirement the {@link Requirement} for which a string representation is
-	 *                    desired
+	 * @param requirement the {@link Requirement} for which a string representation
+	 *                    is desired
 	 * @since 3.19
 	 */
 	public static String toString(Requirement requirement) {
@@ -334,24 +346,27 @@ public final class ModuleContainer implements DebugOptionsListener {
 	}
 
 	/**
-	 * Installs a new module using the specified location.  The specified
-	 * builder is used to create a new {@link ModuleRevision revision}
-	 * which will become the {@link Module#getCurrentRevision() current}
-	 * revision of the new module.
+	 * Installs a new module using the specified location. The specified builder is
+	 * used to create a new {@link ModuleRevision revision} which will become the
+	 * {@link Module#getCurrentRevision() current} revision of the new module.
 	 * <p>
-	 * If a module already exists with the specified location then the
-	 * existing module is returned and the builder is not used.
-	 * @param origin the module performing the install, may be {@code null}.
-	 * @param location The location identifier of the module to install.
-	 * @param builder the builder used to create the revision to install.
-	 * @param revisionInfo the revision info for the new revision, may be {@code null}.
-	 * @return a new module or a existing module if one exists at the
-	 *     specified location.
+	 * If a module already exists with the specified location then the existing
+	 * module is returned and the builder is not used.
+	 * 
+	 * @param origin       the module performing the install, may be {@code null}.
+	 * @param location     The location identifier of the module to install.
+	 * @param builder      the builder used to create the revision to install.
+	 * @param revisionInfo the revision info for the new revision, may be
+	 *                     {@code null}.
+	 * @return a new module or a existing module if one exists at the specified
+	 *         location.
 	 * @throws BundleException if some error occurs installing the module
 	 */
-	public Module install(Module origin, String location, ModuleRevisionBuilder builder, Object revisionInfo) throws BundleException {
+	public Module install(Module origin, String location, ModuleRevisionBuilder builder, Object revisionInfo)
+			throws BundleException {
 		long id = builder.getId();
-		ModuleRevisionBuilder adaptBuilder = getAdaptor().adaptModuleRevisionBuilder(ModuleEvent.INSTALLED, origin, builder, revisionInfo);
+		ModuleRevisionBuilder adaptBuilder = getAdaptor().adaptModuleRevisionBuilder(ModuleEvent.INSTALLED, origin,
+				builder, revisionInfo);
 		if (adaptBuilder != null) {
 			// be sure to restore the id from the original builder
 			adaptBuilder.setInternalId(id);
@@ -366,14 +381,18 @@ public final class ModuleContainer implements DebugOptionsListener {
 				locationLocked = locationLocks.tryLock(location, 5, TimeUnit.SECONDS);
 				nameLocked = name != null && nameLocks.tryLock(name, 5, TimeUnit.SECONDS);
 				if (!locationLocked) {
-					throw new BundleException("Failed to obtain location lock for installation: " + location, BundleException.STATECHANGE_ERROR, new ThreadInfoReport(locationLocks.getLockInfo(location))); //$NON-NLS-1$
+					throw new BundleException("Failed to obtain location lock for installation: " + location, //$NON-NLS-1$
+							BundleException.STATECHANGE_ERROR,
+							new ThreadInfoReport(locationLocks.getLockInfo(location)));
 				}
 				if (name != null && !nameLocked) {
-					throw new BundleException("Failed to obtain symbolic name lock for installation: " + name, BundleException.STATECHANGE_ERROR, new ThreadInfoReport(nameLocks.getLockInfo(name))); //$NON-NLS-1$
+					throw new BundleException("Failed to obtain symbolic name lock for installation: " + name, //$NON-NLS-1$
+							BundleException.STATECHANGE_ERROR, new ThreadInfoReport(nameLocks.getLockInfo(name)));
 				}
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
-				throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR, e); //$NON-NLS-1$
+				throw new BundleException("Failed to obtain id locks for installation.", //$NON-NLS-1$
+						BundleException.STATECHANGE_ERROR, e);
 			}
 
 			Module existingLocation = null;
@@ -382,16 +401,19 @@ public final class ModuleContainer implements DebugOptionsListener {
 			try {
 				existingLocation = moduleDatabase.getModule(location);
 				if (existingLocation == null) {
-					// Collect existing current revisions with the same name and version as the revision we want to install
+					// Collect existing current revisions with the same name and version as the
+					// revision we want to install
 					// This is to perform the collision check below
-					List<ModuleCapability> sameIdentity = moduleDatabase.findCapabilities(getIdentityRequirement(name, builder.getVersion()));
+					List<ModuleCapability> sameIdentity = moduleDatabase
+							.findCapabilities(getIdentityRequirement(name, builder.getVersion()));
 					if (!sameIdentity.isEmpty()) {
 						collisionCandidates = new ArrayList<>(1);
 						for (ModuleCapability identity : sameIdentity) {
 							ModuleRevision equinoxRevision = identity.getRevision();
 							if (!equinoxRevision.isCurrent())
 								continue; // only pay attention to current revisions
-							// need to prevent duplicates here; this is in case a revisions object contains multiple revision objects.
+							// need to prevent duplicates here; this is in case a revisions object contains
+							// multiple revision objects.
 							if (!collisionCandidates.contains(equinoxRevision.getRevisions().getModule()))
 								collisionCandidates.add(equinoxRevision.getRevisions().getModule());
 						}
@@ -407,18 +429,24 @@ public final class ModuleContainer implements DebugOptionsListener {
 					BundleContext context = bundle == null ? null : bundle.getBundleContext();
 					if (context != null && context.getBundle(existingLocation.getId()) == null) {
 						Bundle b = existingLocation.getBundle();
-						throw new BundleException(NLS.bind(Msg.ModuleContainer_NameCollisionWithLocation, new Object[] {b.getSymbolicName(), b.getVersion(), location}), BundleException.REJECTED_BY_HOOK);
+						throw new BundleException(
+								NLS.bind(Msg.ModuleContainer_NameCollisionWithLocation,
+										new Object[] { b.getSymbolicName(), b.getVersion(), location }),
+								BundleException.REJECTED_BY_HOOK);
 					}
 				}
 				return existingLocation;
 			}
-			// Check that the bundle does not collide with other bundles with the same name and version
+			// Check that the bundle does not collide with other bundles with the same name
+			// and version
 			// This is from the perspective of the origin bundle
 			if (origin != null && !collisionCandidates.isEmpty()) {
-				adaptor.getModuleCollisionHook().filterCollisions(ModuleCollisionHook.INSTALLING, origin, collisionCandidates);
+				adaptor.getModuleCollisionHook().filterCollisions(ModuleCollisionHook.INSTALLING, origin,
+						collisionCandidates);
 			}
 			if (!collisionCandidates.isEmpty()) {
-				throw new BundleException(NLS.bind(Msg.ModuleContainer_NameCollision, name, builder.getVersion()), BundleException.DUPLICATE_BUNDLE_ERROR);
+				throw new BundleException(NLS.bind(Msg.ModuleContainer_NameCollision, name, builder.getVersion()),
+						BundleException.DUPLICATE_BUNDLE_ERROR);
 			}
 
 			Module result = moduleDatabase.install(location, builder, revisionInfo);
@@ -435,18 +463,20 @@ public final class ModuleContainer implements DebugOptionsListener {
 	}
 
 	/**
-	 * Updates the specified module with a new revision.  The specified
-	 * builder is used to create a new {@link ModuleRevision revision}
-	 * which will become the {@link Module#getCurrentRevision() current}
-	 * revision of the new module.
-	 * @param module the module to update
-	 * @param builder the builder used to create the revision for the update.
-	 * @param revisionInfo the revision info for the new revision, may be {@code null}.
+	 * Updates the specified module with a new revision. The specified builder is
+	 * used to create a new {@link ModuleRevision revision} which will become the
+	 * {@link Module#getCurrentRevision() current} revision of the new module.
+	 * 
+	 * @param module       the module to update
+	 * @param builder      the builder used to create the revision for the update.
+	 * @param revisionInfo the revision info for the new revision, may be
+	 *                     {@code null}.
 	 * @throws BundleException if some error occurs updating the module
 	 */
 	public void update(Module module, ModuleRevisionBuilder builder, Object revisionInfo) throws BundleException {
 		long id = builder.getId();
-		ModuleRevisionBuilder adaptBuilder = getAdaptor().adaptModuleRevisionBuilder(ModuleEvent.UPDATED, module, builder, revisionInfo);
+		ModuleRevisionBuilder adaptBuilder = getAdaptor().adaptModuleRevisionBuilder(ModuleEvent.UPDATED, module,
+				builder, revisionInfo);
 		if (adaptBuilder != null) {
 			// be sure to restore the id from the original builder
 			adaptBuilder.setInternalId(id);
@@ -464,15 +494,18 @@ public final class ModuleContainer implements DebugOptionsListener {
 				}
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
-				throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR, e); //$NON-NLS-1$
+				throw new BundleException("Failed to obtain id locks for installation.", //$NON-NLS-1$
+						BundleException.STATECHANGE_ERROR, e);
 			}
 
 			Collection<Module> collisionCandidates = Collections.emptyList();
 			moduleDatabase.readLock();
 			try {
-				// Collect existing bundles with the same name and version as the bundle we want to install
+				// Collect existing bundles with the same name and version as the bundle we want
+				// to install
 				// This is to perform the collision check below
-				List<ModuleCapability> sameIdentity = moduleDatabase.findCapabilities(getIdentityRequirement(name, builder.getVersion()));
+				List<ModuleCapability> sameIdentity = moduleDatabase
+						.findCapabilities(getIdentityRequirement(name, builder.getVersion()));
 				if (!sameIdentity.isEmpty()) {
 					collisionCandidates = new ArrayList<>(1);
 					for (ModuleCapability identity : sameIdentity) {
@@ -482,7 +515,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 						Module m = equinoxRevision.getRevisions().getModule();
 						if (m.equals(module))
 							continue; // don't worry about the updating modules revisions
-						// need to prevent duplicates here; this is in case a revisions object contains multiple revision objects.
+						// need to prevent duplicates here; this is in case a revisions object contains
+						// multiple revision objects.
 						if (!collisionCandidates.contains(m))
 							collisionCandidates.add(m);
 					}
@@ -492,14 +526,17 @@ public final class ModuleContainer implements DebugOptionsListener {
 				moduleDatabase.readUnlock();
 			}
 
-			// Check that the module does not collide with other modules with the same name and version
+			// Check that the module does not collide with other modules with the same name
+			// and version
 			// This is from the perspective of the module being updated
 			if (module != null && !collisionCandidates.isEmpty()) {
-				adaptor.getModuleCollisionHook().filterCollisions(ModuleCollisionHook.UPDATING, module, collisionCandidates);
+				adaptor.getModuleCollisionHook().filterCollisions(ModuleCollisionHook.UPDATING, module,
+						collisionCandidates);
 			}
 
 			if (!collisionCandidates.isEmpty()) {
-				throw new BundleException(NLS.bind(Msg.ModuleContainer_NameCollision, name, builder.getVersion()), BundleException.DUPLICATE_BUNDLE_ERROR);
+				throw new BundleException(NLS.bind(Msg.ModuleContainer_NameCollision, name, builder.getVersion()),
+						BundleException.DUPLICATE_BUNDLE_ERROR);
 			}
 
 			module.lockStateChange(ModuleEvent.UPDATED);
@@ -539,6 +576,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * Uninstalls the specified module.
+	 * 
 	 * @param module the module to uninstall
 	 * @throws BundleException if some error occurs uninstalling the module
 	 */
@@ -575,6 +613,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * Returns the {@link FrameworkWiring} for this container
+	 * 
 	 * @return the framework wiring for this container.
 	 */
 	public FrameworkWiring getFrameworkWiring() {
@@ -583,6 +622,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * Returns the {@link FrameworkStartLevel} for this container
+	 * 
 	 * @return the framework start level for this container
 	 */
 	public FrameworkStartLevel getFrameworkStartLevel() {
@@ -591,10 +631,12 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * Attempts to resolve the current revisions of the specified modules.
-	 * @param triggers the modules to resolve or {@code null} to resolve all unresolved
-	 *    current revisions.
-	 * @param triggersMandatory true if the triggers must be resolved.  This will result in
-	 *   a {@link ResolutionException} if set to true and one of the triggers could not be resolved.
+	 * 
+	 * @param triggers          the modules to resolve or {@code null} to resolve
+	 *                          all unresolved current revisions.
+	 * @param triggersMandatory true if the triggers must be resolved. This will
+	 *                          result in a {@link ResolutionException} if set to
+	 *                          true and one of the triggers could not be resolved.
 	 * @see FrameworkWiring#resolveBundles(Collection)
 	 * @return A resolution report for the resolve operation
 	 */
@@ -604,7 +646,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	private ResolutionReport resolve(Collection<Module> triggers, boolean triggersMandatory, boolean restartTriggers) {
 		if (isRefreshingSystemModule()) {
-			return new ModuleResolutionReport(null, Collections.emptyMap(), new ResolutionException("Unable to resolve while shutting down the framework.")); //$NON-NLS-1$
+			return new ModuleResolutionReport(null, Collections.emptyMap(),
+					new ResolutionException("Unable to resolve while shutting down the framework.")); //$NON-NLS-1$
 		}
 		ResolutionReport report = null;
 		try (ResolutionLock.Permits resolutionPermits = _resolutionLock.acquire(1)) {
@@ -614,20 +657,24 @@ public final class ModuleContainer implements DebugOptionsListener {
 				} catch (RuntimeException e) {
 					if (e.getCause() instanceof BundleException) {
 						BundleException be = (BundleException) e.getCause();
-						if (be.getType() == BundleException.REJECTED_BY_HOOK || be.getType() == BundleException.STATECHANGE_ERROR) {
-							return new ModuleResolutionReport(null, Collections.emptyMap(), new ResolutionException(be));
+						if (be.getType() == BundleException.REJECTED_BY_HOOK
+								|| be.getType() == BundleException.STATECHANGE_ERROR) {
+							return new ModuleResolutionReport(null, Collections.emptyMap(),
+									new ResolutionException(be));
 						}
 					}
 					throw e;
 				}
 			} while (report == null);
 		} catch (ResolutionLockException e) {
-			return new ModuleResolutionReport(null, Collections.emptyMap(), new ResolutionException("Timeout acquiring lock for resolution", e, Collections.emptyList())); //$NON-NLS-1$
+			return new ModuleResolutionReport(null, Collections.emptyMap(),
+					new ResolutionException("Timeout acquiring lock for resolution", e, Collections.emptyList())); //$NON-NLS-1$
 		}
 		return report;
 	}
 
-	private ResolutionReport resolveAndApply(Collection<Module> triggers, boolean triggersMandatory, boolean restartTriggers, ResolutionLock.Permits resolutionPermits) {
+	private ResolutionReport resolveAndApply(Collection<Module> triggers, boolean triggersMandatory,
+			boolean restartTriggers, ResolutionLock.Permits resolutionPermits) {
 		if (triggers == null) {
 			triggers = new ArrayList<>(0);
 		}
@@ -660,9 +707,11 @@ public final class ModuleContainer implements DebugOptionsListener {
 			moduleDatabase.readUnlock();
 		}
 
-		ModuleResolutionReport report = moduleResolver.resolveDelta(triggerRevisions, triggersMandatory, unresolved, wiringClone, moduleDatabase);
+		ModuleResolutionReport report = moduleResolver.resolveDelta(triggerRevisions, triggersMandatory, unresolved,
+				wiringClone, moduleDatabase);
 		Map<Resource, List<Wire>> resolutionResult = report.getResolutionResult();
-		Map<ModuleRevision, ModuleWiring> deltaWiring = resolutionResult == null ? Collections.emptyMap() : moduleResolver.generateDelta(resolutionResult, wiringClone);
+		Map<ModuleRevision, ModuleWiring> deltaWiring = resolutionResult == null ? Collections.emptyMap()
+				: moduleResolver.generateDelta(resolutionResult, wiringClone);
 		if (deltaWiring.isEmpty())
 			return report; // nothing to do
 
@@ -672,15 +721,20 @@ public final class ModuleContainer implements DebugOptionsListener {
 				modulesResolved.add(deltaRevision.getRevisions().getModule());
 		}
 
-		return applyDelta(deltaWiring, modulesResolved, triggers, timestamp, restartTriggers, resolutionPermits) ? report : null;
+		return applyDelta(deltaWiring, modulesResolved, triggers, timestamp, restartTriggers, resolutionPermits)
+				? report
+				: null;
 	}
 
 	/**
-	 * Attempts to resolve the specified dynamic package name request for the specified revision.
+	 * Attempts to resolve the specified dynamic package name request for the
+	 * specified revision.
+	 * 
 	 * @param dynamicPkgName the package name to attempt a dynamic resolution for
-	 * @param revision the module revision the dynamic resolution request is for
-	 * @return the new resolution wire establishing a dynamic package resolution or null if
-	 * a dynamic wire could not be established.
+	 * @param revision       the module revision the dynamic resolution request is
+	 *                       for
+	 * @return the new resolution wire establishing a dynamic package resolution or
+	 *         null if a dynamic wire could not be established.
 	 */
 	public ModuleWire resolveDynamic(String dynamicPkgName, ModuleRevision revision) {
 		ModuleWire result;
@@ -730,9 +784,11 @@ public final class ModuleContainer implements DebugOptionsListener {
 				deltaWiring = null;
 				boolean foundCandidates = false;
 				for (DynamicModuleRequirement dynamicReq : dynamicReqs) {
-					ModuleResolutionReport report = moduleResolver.resolveDynamicDelta(dynamicReq, unresolved, wiringClone, moduleDatabase);
+					ModuleResolutionReport report = moduleResolver.resolveDynamicDelta(dynamicReq, unresolved,
+							wiringClone, moduleDatabase);
 					Map<Resource, List<Wire>> resolutionResult = report.getResolutionResult();
-					deltaWiring = resolutionResult == null ? Collections.emptyMap() : moduleResolver.generateDelta(resolutionResult, wiringClone);
+					deltaWiring = resolutionResult == null ? Collections.emptyMap()
+							: moduleResolver.generateDelta(resolutionResult, wiringClone);
 					if (deltaWiring.get(revision) != null) {
 						break;
 					}
@@ -771,7 +827,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 				// Save the result
 				ModuleWiring wiring = deltaWiring.get(revision);
 				result = findExistingDynamicWire(wiring, dynamicPkgName);
-			} while (!applyDelta(deltaWiring, modulesResolved, Collections.emptyList(), timestamp, false, resolutionPermits));
+			} while (!applyDelta(deltaWiring, modulesResolved, Collections.emptyList(), timestamp, false,
+					resolutionPermits));
 		} catch (ResolutionLockException e) {
 			return null;
 		}
@@ -785,13 +842,15 @@ public final class ModuleContainer implements DebugOptionsListener {
 		}
 		List<ModuleWire> wires = wiring.getRequiredModuleWires(PackageNamespace.PACKAGE_NAMESPACE);
 		// No null check; we are holding the database lock here.
-		// Work backwards to find the first wire with the dynamic requirement that matches package name
+		// Work backwards to find the first wire with the dynamic requirement that
+		// matches package name
 		for (int i = wires.size() - 1; i >= 0; i--) {
 			ModuleWire wire = wires.get(i);
 			if (dynamicPkgName.equals(wire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE))) {
 				return wire;
 			}
-			if (!PackageNamespace.RESOLUTION_DYNAMIC.equals(wire.getRequirement().getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
+			if (!PackageNamespace.RESOLUTION_DYNAMIC
+					.equals(wire.getRequirement().getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
 				return null;
 			}
 		}
@@ -801,12 +860,12 @@ public final class ModuleContainer implements DebugOptionsListener {
 	// The resolution algorithm uses optimistic locking approach;
 	// This involves taking a snapshot of the state and performing an
 	// operation on the snapshot while holding no locks and then
-	// obtaining the write lock to apply the results.  If we
+	// obtaining the write lock to apply the results. If we
 	// detect the state has changed since the snapshot taken then
-	// the process is started over.  If we allow too many threads
+	// the process is started over. If we allow too many threads
 	// to try to do this at the same time it causes thrashing
 	// between taking the snapshot and successfully applying the
-	// results.  Instead of resorting to single threaded operations
+	// results. Instead of resorting to single threaded operations
 	// we choose to limit the number of concurrent resolves
 	final ResolutionLock _resolutionLock = new ResolutionLock();
 	final ReentrantLock _bundleStateLock = new ReentrantLock();
@@ -825,11 +884,11 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * A resolution hook allows for a max of 10 threads to do resolution operations
-	 * at the same time.  The implementation uses a semaphore to grant the max number
-	 * of permits (threads) but a reentrant read lock is also used to detect reentry.
-	 * If a thread reenters then no extra permits are required by the thread.
-	 * This lock returns a Permits object that implements closeable for use in
-	 * try->with.  If permits is closed multiple times then the additional close
+	 * at the same time. The implementation uses a semaphore to grant the max number
+	 * of permits (threads) but a reentrant read lock is also used to detect
+	 * reentry. If a thread reenters then no extra permits are required by the
+	 * thread. This lock returns a Permits object that implements closeable for use
+	 * in try->with. If permits is closed multiple times then the additional close
 	 * operations are a no-op.
 	 */
 	static class ResolutionLock {
@@ -877,15 +936,21 @@ public final class ModuleContainer implements DebugOptionsListener {
 		}
 	}
 
-	private boolean applyDelta(Map<ModuleRevision, ModuleWiring> deltaWiring, Collection<Module> modulesResolved, Collection<Module> triggers, long timestamp, boolean restartTriggers, ResolutionLock.Permits resolutionPermits) {
+	private boolean applyDelta(Map<ModuleRevision, ModuleWiring> deltaWiring, Collection<Module> modulesResolved,
+			Collection<Module> triggers, long timestamp, boolean restartTriggers,
+			ResolutionLock.Permits resolutionPermits) {
 		List<Module> modulesLocked = new ArrayList<>(modulesResolved.size());
 		// now attempt to apply the delta
 		try {
 			// Acquire the necessary RESOLVED state change lock.
-			// Note this is done while holding a global lock to avoid multiple threads trying to compete over
-			// locking multiple modules; otherwise out of order locks between modules can happen
-			// NOTE this MUST be done outside of holding the moduleDatabase lock also to avoid
-			// introducing out of order locks between the bundle state change lock and the moduleDatabase
+			// Note this is done while holding a global lock to avoid multiple threads
+			// trying to compete over
+			// locking multiple modules; otherwise out of order locks between modules can
+			// happen
+			// NOTE this MUST be done outside of holding the moduleDatabase lock also to
+			// avoid
+			// introducing out of order locks between the bundle state change lock and the
+			// moduleDatabase
 			// lock.
 			_bundleStateLock.lock();
 			try {
@@ -920,7 +985,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 				for (Map.Entry<ModuleRevision, ModuleWiring> deltaEntry : deltaWiring.entrySet()) {
 					ModuleWiring current = wiringCopy.get(deltaEntry.getKey());
 					if (current != null) {
-						// need to update the provided capabilities, provided and required wires for currently resolved
+						// need to update the provided capabilities, provided and required wires for
+						// currently resolved
 						current.setCapabilities(deltaEntry.getValue().getCapabilities());
 						current.setProvidedWires(deltaEntry.getValue().getProvidedWires());
 						current.setRequirements(deltaEntry.getValue().getRequirements());
@@ -930,7 +996,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 						ModuleRevision revision = deltaEntry.getValue().getRevision();
 						modulesResolved.add(revision.getRevisions().getModule());
 						if ((revision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
-							for (ModuleWire hostWire : deltaEntry.getValue().getRequiredModuleWires(HostNamespace.HOST_NAMESPACE)) {
+							for (ModuleWire hostWire : deltaEntry.getValue()
+									.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE)) {
 								// check to see if the host revision has a wiring
 								ModuleWiring hostWiring = hostWire.getProvider().getWiring();
 								if (hostWiring != null) {
@@ -956,7 +1023,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 			}
 			// attach fragments to already resolved hosts that have
 			// dynamically attached fragments
-			for (Map.Entry<ModuleWiring, Collection<ModuleRevision>> dynamicFragments : hostsWithDynamicFrags.entrySet()) {
+			for (Map.Entry<ModuleWiring, Collection<ModuleRevision>> dynamicFragments : hostsWithDynamicFrags
+					.entrySet()) {
 				dynamicFragments.getKey().loadFragments(dynamicFragments.getValue());
 			}
 		} finally {
@@ -982,13 +1050,18 @@ public final class ModuleContainer implements DebugOptionsListener {
 			}
 		}
 		if (autoStartOnResolve) {
-			// This is questionable behavior according to the spec but this was the way equinox previously behaved
+			// This is questionable behavior according to the spec but this was the way
+			// equinox previously behaved
 			// Need to auto-start any persistently started bundles that got resolved
 			for (Module module : modulesLocked) {
-				// Note that we check inStart here.  There is still a timing issue that is impossible to avoid.
-				// Another thread could attempt to start the module but we could check inStart() before that thread
-				// increments inStart.  One thread will win the race to grab the module STARTED lock.  That thread
-				// will end up actually starting the module and the other thread will block.  If a timeout occurs
+				// Note that we check inStart here. There is still a timing issue that is
+				// impossible to avoid.
+				// Another thread could attempt to start the module but we could check inStart()
+				// before that thread
+				// increments inStart. One thread will win the race to grab the module STARTED
+				// lock. That thread
+				// will end up actually starting the module and the other thread will block. If
+				// a timeout occurs
 				// the blocking thread will get an exception.
 				if (!module.inStart() && module.getId() != 0 && !triggerSet.contains(module)) {
 					start(module, StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
@@ -1113,15 +1186,20 @@ public final class ModuleContainer implements DebugOptionsListener {
 		Collection<Module> modulesUnresolved = new ArrayList<>();
 		try {
 			// Acquire the module state change locks.
-			// Note this is done while holding a global lock to avoid multiple threads trying to compete over
-			// locking multiple modules; otherwise out of order locks between modules can happen
-			// NOTE this MUST be done outside of holding the moduleDatabase lock also to avoid
-			// introducing out of order locks between the bundle state change lock and the moduleDatabase
+			// Note this is done while holding a global lock to avoid multiple threads
+			// trying to compete over
+			// locking multiple modules; otherwise out of order locks between modules can
+			// happen
+			// NOTE this MUST be done outside of holding the moduleDatabase lock also to
+			// avoid
+			// introducing out of order locks between the bundle state change lock and the
+			// moduleDatabase
 			// lock.
 			_bundleStateLock.lock();
 			try {
 				// go in reverse order
-				for (ListIterator<Module> iTriggers = refreshTriggers.listIterator(refreshTriggers.size()); iTriggers.hasPrevious();) {
+				for (ListIterator<Module> iTriggers = refreshTriggers.listIterator(refreshTriggers.size()); iTriggers
+						.hasPrevious();) {
 					Module refreshModule = iTriggers.previous();
 					refreshModule.lockStateChange(ModuleEvent.UNRESOLVED);
 					modulesLocked.add(refreshModule);
@@ -1133,8 +1211,10 @@ public final class ModuleContainer implements DebugOptionsListener {
 				_bundleStateLock.unlock();
 			}
 			// Must not hold the module database lock while stopping bundles
-			// Stop any active bundles and remove non-active modules from the refreshTriggers
-			for (ListIterator<Module> iTriggers = refreshTriggers.listIterator(refreshTriggers.size()); iTriggers.hasPrevious();) {
+			// Stop any active bundles and remove non-active modules from the
+			// refreshTriggers
+			for (ListIterator<Module> iTriggers = refreshTriggers.listIterator(refreshTriggers.size()); iTriggers
+					.hasPrevious();) {
 				Module refreshModule = iTriggers.previous();
 				State previousState = refreshModule.getState();
 				if (Module.ACTIVE_SET.contains(previousState)) {
@@ -1148,10 +1228,12 @@ public final class ModuleContainer implements DebugOptionsListener {
 				}
 			}
 
-			// do a sanity check on states of the modules, they must be INSTALLED, RESOLVED or UNINSTALLED
+			// do a sanity check on states of the modules, they must be INSTALLED, RESOLVED
+			// or UNINSTALLED
 			for (Module module : modulesLocked) {
 				if (Module.ACTIVE_SET.contains(module.getState())) {
-					throw new IllegalStateException("Module is in the wrong state: " + module + ": " + module.getState()); //$NON-NLS-1$ //$NON-NLS-2$
+					throw new IllegalStateException(
+							"Module is in the wrong state: " + module + ": " + module.getState()); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 
@@ -1213,7 +1295,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 		for (Iterator<Module> iModules = initial.iterator(); iModules.hasNext();) {
 			Module m = iModules.next();
 			if (m.getId().equals(zero)) {
-				// never allow system bundle to be unresolved directly if the system module is active
+				// never allow system bundle to be unresolved directly if the system module is
+				// active
 				if (Module.ACTIVE_SET.contains(m.getState())) {
 					iModules.remove();
 				}
@@ -1241,10 +1324,11 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * Refreshes the specified collection of modules.
-	 * @param initial the modules to refresh or {@code null} to refresh the
-	 *     removal pending.
-	 * @return a resolution report for the resolve operation that may have
-	 * occurred during the refresh operation.
+	 * 
+	 * @param initial the modules to refresh or {@code null} to refresh the removal
+	 *                pending.
+	 * @return a resolution report for the resolve operation that may have occurred
+	 *         during the refresh operation.
 	 * @see FrameworkWiring#refreshBundles(Collection, FrameworkListener...)
 	 */
 	public ResolutionReport refresh(Collection<Module> initial) {
@@ -1258,9 +1342,12 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * Returns the dependency closure of for the specified modules.
-	 * @param initial The initial modules for which to generate the dependency closure
-	 * @return A collection containing a snapshot of the dependency closure of the specified
-	 *    modules, or an empty collection if there were no specified modules.
+	 * 
+	 * @param initial The initial modules for which to generate the dependency
+	 *                closure
+	 * @return A collection containing a snapshot of the dependency closure of the
+	 *         specified modules, or an empty collection if there were no specified
+	 *         modules.
 	 */
 	public Collection<Module> getDependencyClosure(Collection<Module> initial) {
 		moduleDatabase.readLock();
@@ -1272,9 +1359,12 @@ public final class ModuleContainer implements DebugOptionsListener {
 	}
 
 	/**
-	 * Returns the revisions that have {@link ModuleWiring#isCurrent() non-current}, {@link ModuleWiring#isInUse() in use} module wirings.
-	 * @return A collection containing a snapshot of the revisions which have non-current, in use ModuleWirings,
-	 * or an empty collection if there are no such revisions.
+	 * Returns the revisions that have {@link ModuleWiring#isCurrent() non-current},
+	 * {@link ModuleWiring#isInUse() in use} module wirings.
+	 * 
+	 * @return A collection containing a snapshot of the revisions which have
+	 *         non-current, in use ModuleWirings, or an empty collection if there
+	 *         are no such revisions.
 	 */
 	public Collection<ModuleRevision> getRemovalPending() {
 		return moduleDatabase.getRemovalPending();
@@ -1283,9 +1373,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 	/**
 	 * Return the active start level value of this container.
 	 *
-	 * If the container is in the process of changing the start level this
-	 * method must return the active start level if this differs from the
-	 * requested start level.
+	 * If the container is in the process of changing the start level this method
+	 * must return the active start level if this differs from the requested start
+	 * level.
 	 *
 	 * @return The active start level value of the Framework.
 	 */
@@ -1432,7 +1522,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 		return refreshClosure;
 	}
 
-	private static void addDependents(Module module, Map<ModuleRevision, ModuleWiring> wiringCopy, Set<Module> refreshClosure) {
+	private static void addDependents(Module module, Map<ModuleRevision, ModuleWiring> wiringCopy,
+			Set<Module> refreshClosure) {
 		if (refreshClosure.contains(module))
 			return;
 		refreshClosure.add(module);
@@ -1457,13 +1548,15 @@ public final class ModuleContainer implements DebugOptionsListener {
 		}
 	}
 
-	static Collection<ModuleRevision> getDependencyClosure(ModuleRevision initial, Map<ModuleRevision, ModuleWiring> wiringCopy) {
+	static Collection<ModuleRevision> getDependencyClosure(ModuleRevision initial,
+			Map<ModuleRevision, ModuleWiring> wiringCopy) {
 		Set<ModuleRevision> dependencyClosure = new HashSet<>();
 		addDependents(initial, wiringCopy, dependencyClosure);
 		return dependencyClosure;
 	}
 
-	private static void addDependents(ModuleRevision revision, Map<ModuleRevision, ModuleWiring> wiringCopy, Set<ModuleRevision> dependencyClosure) {
+	private static void addDependents(ModuleRevision revision, Map<ModuleRevision, ModuleWiring> wiringCopy,
+			Set<ModuleRevision> dependencyClosure) {
 		if (dependencyClosure.contains(revision))
 			return;
 		dependencyClosure.add(revision);
@@ -1528,12 +1621,14 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	static Requirement getIdentityRequirement(String name, Version version) {
 		version = version == null ? Version.emptyVersion : version;
-		String filter = "(&(" + IdentityNamespace.IDENTITY_NAMESPACE + "=" + name + ")(" + IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE + "=" + version.toString() + "))"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+		String filter = "(&(" + IdentityNamespace.IDENTITY_NAMESPACE + "=" + name + ")(" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				+ IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE + "=" + version.toString() + "))"; //$NON-NLS-1$//$NON-NLS-2$
 		Map<String, String> directives = Collections.singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, filter);
 		return new ModuleRequirement(IdentityNamespace.IDENTITY_NAMESPACE, directives, Collections.emptyMap(), null);
 	}
 
-	class ContainerWiring implements FrameworkWiring, EventDispatcher<ContainerWiring, FrameworkListener[], Collection<Module>> {
+	class ContainerWiring
+			implements FrameworkWiring, EventDispatcher<ContainerWiring, FrameworkListener[], Collection<Module>> {
 		private final Object monitor = new Object();
 		private EventManager refreshThread = null;
 
@@ -1551,7 +1646,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 			// notice that we only do one refresh operation at a time
 			CopyOnWriteIdentityMap<ContainerWiring, FrameworkListener[]> dispatchListeners = new CopyOnWriteIdentityMap<>();
 			dispatchListeners.put(this, listeners);
-			ListenerQueue<ContainerWiring, FrameworkListener[], Collection<Module>> queue = new ListenerQueue<>(getManager());
+			ListenerQueue<ContainerWiring, FrameworkListener[], Collection<Module>> queue = new ListenerQueue<>(
+					getManager());
 			queue.queueListeners(dispatchListeners.entrySet(), this);
 
 			// dispatch the refresh job
@@ -1629,11 +1725,13 @@ public final class ModuleContainer implements DebugOptionsListener {
 		}
 
 		@Override
-		public void dispatchEvent(ContainerWiring eventListener, FrameworkListener[] frameworkListeners, int eventAction, Collection<Module> eventObject) {
+		public void dispatchEvent(ContainerWiring eventListener, FrameworkListener[] frameworkListeners,
+				int eventAction, Collection<Module> eventObject) {
 			try {
 				refresh(eventObject);
 			} finally {
-				adaptor.publishContainerEvent(ContainerEvent.REFRESH, moduleDatabase.getModule(0), null, frameworkListeners);
+				adaptor.publishContainerEvent(ContainerEvent.REFRESH, moduleDatabase.getModule(0), null,
+						frameworkListeners);
 			}
 		}
 
@@ -1777,37 +1875,40 @@ public final class ModuleContainer implements DebugOptionsListener {
 		@Override
 		public void dispatchEvent(Module module, FrameworkListener[] listeners, int eventAction, Integer startlevel) {
 			switch (eventAction) {
-				case FRAMEWORK_STARTLEVEL :
-					doContainerStartLevel(module, startlevel, listeners);
-					break;
-				case MODULE_STARTLEVEL :
-					if (debugStartLevel) {
-						Debug.println("StartLevel: changing bundle startlevel; " + toString(module) + "; newSL=" + startlevel + "; activeSL=" + getStartLevel()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
-					try {
-						if (getStartLevel() < startlevel) {
-							if (Module.ACTIVE_SET.contains(module.getState())) {
-								if (debugStartLevel) {
-									Debug.println("StartLevel: stopping bundle; " + toString(module) + "; with startLevel=" + startlevel); //$NON-NLS-1$ //$NON-NLS-2$
-								}
-								// Note that we don't need to hold the state change lock
-								// here when checking the active status because no other
-								// thread will successfully be able to start this bundle
-								// since the start-level is no longer met.
-								module.stop(StopOptions.TRANSIENT);
-							}
-						} else {
+			case FRAMEWORK_STARTLEVEL:
+				doContainerStartLevel(module, startlevel, listeners);
+				break;
+			case MODULE_STARTLEVEL:
+				if (debugStartLevel) {
+					Debug.println("StartLevel: changing bundle startlevel; " + toString(module) + "; newSL=" //$NON-NLS-1$ //$NON-NLS-2$
+							+ startlevel + "; activeSL=" + getStartLevel()); //$NON-NLS-1$
+				}
+				try {
+					if (getStartLevel() < startlevel) {
+						if (Module.ACTIVE_SET.contains(module.getState())) {
 							if (debugStartLevel) {
-								Debug.println("StartLevel: resuming bundle; " + toString(module) + "; with startLevel=" + startlevel); //$NON-NLS-1$ //$NON-NLS-2$
+								Debug.println("StartLevel: stopping bundle; " + toString(module) + "; with startLevel=" //$NON-NLS-1$ //$NON-NLS-2$
+										+ startlevel);
 							}
-							module.start(StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
+							// Note that we don't need to hold the state change lock
+							// here when checking the active status because no other
+							// thread will successfully be able to start this bundle
+							// since the start-level is no longer met.
+							module.stop(StopOptions.TRANSIENT);
 						}
-					} catch (BundleException e) {
-						adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
+					} else {
+						if (debugStartLevel) {
+							Debug.println("StartLevel: resuming bundle; " + toString(module) + "; with startLevel=" //$NON-NLS-1$ //$NON-NLS-2$
+									+ startlevel);
+						}
+						module.start(StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
 					}
-					break;
-				default :
-					break;
+				} catch (BundleException e) {
+					adaptor.publishContainerEvent(ContainerEvent.ERROR, module, e);
+				}
+				break;
+			default:
+				break;
 			}
 		}
 
@@ -1820,14 +1921,16 @@ public final class ModuleContainer implements DebugOptionsListener {
 				try {
 					int currentSL = getStartLevel();
 					if (currentSL == 0) {
-						// check for an active framework; this is only valid when the system bundle is starting
+						// check for an active framework; this is only valid when the system bundle is
+						// starting
 						Module systemModule = moduleDatabase.getModule(0);
 						if (systemModule != null && !State.STARTING.equals(systemModule.getState())) {
 							return;
 						}
 					}
 					// Note that we must get a new list of modules each time;
-					// this is because additional modules could have been installed from the previous start-level
+					// this is because additional modules could have been installed from the
+					// previous start-level
 					// but only do this if the module database has changed!!
 					List<Module> sorted = null;
 					long currentTimestamp = Long.MIN_VALUE;
@@ -1850,7 +1953,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 									lazyStartParallel = new ArrayList<>(sorted.size());
 									eagerStart = new ArrayList<>(sorted.size());
 									eagerStartParallel = new ArrayList<>(sorted.size());
-									separateModulesByActivationPolicy(sorted, lazyStart, lazyStartParallel, eagerStart, eagerStartParallel);
+									separateModulesByActivationPolicy(sorted, lazyStart, lazyStartParallel, eagerStart,
+											eagerStartParallel);
 									currentTimestamp = moduleDatabase.getTimestamp();
 								} finally {
 									moduleDatabase.readUnlock();
@@ -1889,7 +1993,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 			}
 		}
 
-		private void incStartLevel(int toStartLevel, List<Module> lazyStart, List<Module> lazyStartParallel, List<Module> eagerStart, List<Module> eagerStartParallel) {
+		private void incStartLevel(int toStartLevel, List<Module> lazyStart, List<Module> lazyStartParallel,
+				List<Module> eagerStart, List<Module> eagerStartParallel) {
 			// start lazy activated first
 			// start parallel bundles first
 			incStartLevel(toStartLevel, lazyStartParallel, true);
@@ -1898,7 +2003,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 			incStartLevel(toStartLevel, eagerStart, false);
 		}
 
-		private void separateModulesByActivationPolicy(List<Module> sortedModules, List<Module> lazyStart, List<Module> lazyStartParallel, List<Module> eagerStart, List<Module> eagerStartParallel) {
+		private void separateModulesByActivationPolicy(List<Module> sortedModules, List<Module> lazyStart,
+				List<Module> lazyStartParallel, List<Module> eagerStart, List<Module> eagerStartParallel) {
 			for (Module module : sortedModules) {
 				if (!restrictParallelStart || module.isParallelActivated()) {
 					if (module.isLazyActivate()) {
@@ -1956,7 +2062,9 @@ public final class ModuleContainer implements DebugOptionsListener {
 					public void run() {
 						try {
 							if (debugStartLevel) {
-								Debug.println("StartLevel: resuming bundle; " + ContainerStartLevel.this.toString(module) + "; with startLevel=" + toStartLevel); //$NON-NLS-1$ //$NON-NLS-2$
+								Debug.println(
+										"StartLevel: resuming bundle; " + ContainerStartLevel.this.toString(module) //$NON-NLS-1$
+												+ "; with startLevel=" + toStartLevel); //$NON-NLS-1$
 							}
 							module.start(StartOptions.TRANSIENT_IF_AUTO_START, StartOptions.TRANSIENT_RESUME);
 						} catch (BundleException e) {
@@ -1993,7 +2101,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 					try {
 						if (Module.ACTIVE_SET.contains(module.getState())) {
 							if (debugStartLevel) {
-								Debug.println("StartLevel: stopping bundle; " + toString(module) + "; with startLevel=" + moduleStartLevel); //$NON-NLS-1$ //$NON-NLS-2$
+								Debug.println("StartLevel: stopping bundle; " + toString(module) + "; with startLevel=" //$NON-NLS-1$ //$NON-NLS-2$
+										+ moduleStartLevel);
 							}
 							// Note that we don't need to hold the state change lock
 							// here when checking the active status because no other

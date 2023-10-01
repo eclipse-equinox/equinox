@@ -30,7 +30,7 @@ import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.framework.wiring.FrameworkWiring;
 
 public class PolicyHandler implements SynchronousBundleListener {
-	//Key for the framework buddies
+	// Key for the framework buddies
 	private final static String DEPENDENT_POLICY = "dependent"; //$NON-NLS-1$
 	private final static String GLOBAL_POLICY = "global"; //$NON-NLS-1$
 	private final static String REGISTERED_POLICY = "registered"; //$NON-NLS-1$
@@ -39,13 +39,16 @@ public class PolicyHandler implements SynchronousBundleListener {
 	private final static String BOOT_POLICY = "boot"; //$NON-NLS-1$
 	private final static String PARENT_POLICY = "parent"; //$NON-NLS-1$
 
-	//The loader to which this policy is attached.
+	// The loader to which this policy is attached.
 	private final BundleLoader policedLoader;
 	private final List<String> originalBuddyList;
-	//List of the policies as well as cache for the one that have been created. The size of this array never changes over time. This is why the synchronization is not done when iterating over it.
+	// List of the policies as well as cache for the one that have been created. The
+	// size of this array never changes over time. This is why the synchronization
+	// is not done when iterating over it.
 	private volatile Object[] policies = null;
 
-	//Support to cut class / resource loading cycles in the context of one thread. The contained object is a set of classname
+	// Support to cut class / resource loading cycles in the context of one thread.
+	// The contained object is a set of classname
 	private final ThreadLocal<Set<String>> beingLoaded;
 	private final FrameworkWiring frameworkWiring;
 	private final ClassLoader bootLoader;
@@ -110,33 +113,36 @@ public class PolicyHandler implements SynchronousBundleListener {
 				}
 				// Not a valid buddy policy
 				EquinoxBundle bundle = (EquinoxBundle) policedLoader.getModuleClassLoader().getBundle();
-				bundle.getModule().getContainer().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, bundle.getModule(), new RuntimeException("Invalid buddy policy: " + buddyName)); //$NON-NLS-1$
+				bundle.getModule().getContainer().getAdaptor().publishContainerEvent(ContainerEvent.ERROR,
+						bundle.getModule(), new RuntimeException("Invalid buddy policy: " + buddyName)); //$NON-NLS-1$
 				policiesSnapshot[policyOrder] = null;
-				//			//Buddy policy can be provided by service implementations
-				//			BundleContext fwkCtx = policedLoader.bundle.framework.systemBundle.context;
-				//			ServiceReference[] matchingBuddies = null;
-				//			try {
-				//				matchingBuddies = fwkCtx.getAllServiceReferences(IBuddyPolicy.class.getName(), "buddyName=" + buddyName);
-				//			} catch (InvalidSyntaxException e) {
-				//				//The filter is valid
-				//			}
-				//			if (matchingBuddies == null)
-				//				return new IBuddyPolicy() {
-				//					public Class loadClass(String name) {
-				//						return null;
-				//					}
+				// //Buddy policy can be provided by service implementations
+				// BundleContext fwkCtx = policedLoader.bundle.framework.systemBundle.context;
+				// ServiceReference[] matchingBuddies = null;
+				// try {
+				// matchingBuddies =
+				// fwkCtx.getAllServiceReferences(IBuddyPolicy.class.getName(), "buddyName=" +
+				// buddyName);
+				// } catch (InvalidSyntaxException e) {
+				// //The filter is valid
+				// }
+				// if (matchingBuddies == null)
+				// return new IBuddyPolicy() {
+				// public Class loadClass(String name) {
+				// return null;
+				// }
 				//
-				//					public URL loadResource(String name) {
-				//						return null;
-				//					}
+				// public URL loadResource(String name) {
+				// return null;
+				// }
 				//
-				//					public Enumeration loadResources(String name) {
-				//						return null;
-				//					}
-				//				};
+				// public Enumeration loadResources(String name) {
+				// return null;
+				// }
+				// };
 				//
-				//			//The policies loaded through service are not cached
-				//			return ((IBuddyPolicy) fwkCtx.getService(matchingBuddies[0]));
+				// //The policies loaded through service are not cached
+				// return ((IBuddyPolicy) fwkCtx.getService(matchingBuddies[0]));
 			}
 			return (IBuddyPolicy) policiesSnapshot[policyOrder];
 		}

@@ -27,10 +27,10 @@ import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
 import org.eclipse.osgi.internal.debug.Debug;
 
 /**
- * A simple/quick/small implementation of an MRU (Most Recently Used) list to keep
- * track of open BundleFiles.  The MRU will use the file limit specified by the property
- * &quot;osgi.bundlefile.limit&quot; by default unless the MRU is constructed with a specific
- * file limit.
+ * A simple/quick/small implementation of an MRU (Most Recently Used) list to
+ * keep track of open BundleFiles. The MRU will use the file limit specified by
+ * the property &quot;osgi.bundlefile.limit&quot; by default unless the MRU is
+ * constructed with a specific file limit.
  */
 public class MRUBundleFileList implements EventDispatcher<Object, Object, BundleFile> {
 	private static final int MIN = 10;
@@ -72,9 +72,10 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 	}
 
 	/**
-	 * Adds a BundleFile which is about to be opened to the MRU list.  If
-	 * the number of open BundleFiles == the fileLimit then the least
-	 * recently used BundleFile is closed.
+	 * Adds a BundleFile which is about to be opened to the MRU list. If the number
+	 * of open BundleFiles == the fileLimit then the least recently used BundleFile
+	 * is closed.
+	 * 
 	 * @param bundleFile the bundle file about to be opened.
 	 * @return true if back pressure is needed
 	 */
@@ -106,7 +107,8 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 						index = i;
 				toRemove = bundleFileList[index];
 				if (toRemove.getMruIndex() != index)
-					throw new IllegalStateException("The BundleFile has the incorrect mru index: " + index + " != " + toRemove.getMruIndex()); //$NON-NLS-1$//$NON-NLS-2$
+					throw new IllegalStateException(
+							"The BundleFile has the incorrect mru index: " + index + " != " + toRemove.getMruIndex()); //$NON-NLS-1$//$NON-NLS-2$
 				removeInternal(toRemove);
 				backpressureNeeded = isBackPressureNeeded();
 			}
@@ -122,7 +124,8 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 			}
 
 		}
-		// must not close the toRemove bundle file while holding the lock of another bundle file (bug 161976)
+		// must not close the toRemove bundle file while holding the lock of another
+		// bundle file (bug 161976)
 		// This queues the bundle file for close asynchronously.
 		closeBundleFile(toRemove, manager);
 
@@ -131,6 +134,7 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 
 	/**
 	 * Removes a bundle file which is about to be closed
+	 * 
 	 * @param bundleFile the bundle file about to be closed
 	 * @return true if the bundleFile existed in the MRU; false otherwise
 	 */
@@ -158,6 +162,7 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 
 	/**
 	 * Increments the use stamp of a bundle file
+	 * 
 	 * @param bundleFile the bundle file to increment the use stamp for
 	 */
 	public void use(BundleFile bundleFile) {
@@ -182,9 +187,11 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 	}
 
 	@Override
-	public final void dispatchEvent(Object eventListener, Object listenerObject, int eventAction, BundleFile eventObject) {
+	public final void dispatchEvent(Object eventListener, Object listenerObject, int eventAction,
+			BundleFile eventObject) {
 		if (firstDispatch) {
-			// used to work around bug 275166; we don't want to leak the TCCL in this thread.
+			// used to work around bug 275166; we don't want to leak the TCCL in this
+			// thread.
 			Thread.currentThread().setContextClassLoader(null);
 			firstDispatch = false;
 		}
@@ -270,7 +277,9 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 	}
 
 	/**
-	 * Returns true if this MRUBundleFileList is currently closing the specified bundle file on the current thread.
+	 * Returns true if this MRUBundleFileList is currently closing the specified
+	 * bundle file on the current thread.
+	 * 
 	 * @param bundleFile the bundle file
 	 * @return true if the bundle file is being closed on the current thread
 	 */

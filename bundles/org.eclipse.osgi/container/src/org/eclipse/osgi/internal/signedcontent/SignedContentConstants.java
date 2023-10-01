@@ -43,29 +43,29 @@ public interface SignedContentConstants {
 	public static final String digestManifestSearch = "-Digest-Manifest: "; //$NON-NLS-1$
 	public static final int digestManifestSearchLen = digestManifestSearch.length();
 
-	public static final int SIGNEDDATA_OID[] = {1, 2, 840, 113549, 1, 7, 2};
-	public static final int MD5_OID[] = {1, 2, 840, 113549, 2, 5};
-	public static final int MD2_OID[] = {1, 2, 840, 113549, 2, 2};
+	public static final int SIGNEDDATA_OID[] = { 1, 2, 840, 113549, 1, 7, 2 };
+	public static final int MD5_OID[] = { 1, 2, 840, 113549, 2, 5 };
+	public static final int MD2_OID[] = { 1, 2, 840, 113549, 2, 2 };
 
-	public static final int SHA1_OID[] = {1, 3, 14, 3, 2, 26};
+	public static final int SHA1_OID[] = { 1, 3, 14, 3, 2, 26 };
 
-	public static final int SHA256_OID[] = {2, 16, 840, 1, 101, 3, 4, 2, 1};
-	public static final int SHA384_OID[] = {2, 16, 840, 1, 101, 3, 4, 2, 2};
-	public static final int SHA512_OID[] = {2, 16, 840, 1, 101, 3, 4, 2, 3};
-	public static final int SHA224_OID[] = {2, 16, 840, 1, 101, 3, 4, 2, 4};
-	public static final int SHA512_224_OID[] = {2, 16, 840, 1, 101, 3, 4, 2, 5};
-	public static final int SHA512_256_OID[] = {2, 16, 840, 1, 101, 3, 4, 2, 6};
+	public static final int SHA256_OID[] = { 2, 16, 840, 1, 101, 3, 4, 2, 1 };
+	public static final int SHA384_OID[] = { 2, 16, 840, 1, 101, 3, 4, 2, 2 };
+	public static final int SHA512_OID[] = { 2, 16, 840, 1, 101, 3, 4, 2, 3 };
+	public static final int SHA224_OID[] = { 2, 16, 840, 1, 101, 3, 4, 2, 4 };
+	public static final int SHA512_224_OID[] = { 2, 16, 840, 1, 101, 3, 4, 2, 5 };
+	public static final int SHA512_256_OID[] = { 2, 16, 840, 1, 101, 3, 4, 2, 6 };
 
-	public static final int DSA_OID[] = {1, 2, 840, 10040, 4, 1};
-	public static final int RSA_OID[] = {1, 2, 840, 113549, 1, 1, 1};
+	public static final int DSA_OID[] = { 1, 2, 840, 10040, 4, 1 };
+	public static final int RSA_OID[] = { 1, 2, 840, 113549, 1, 1, 1 };
 
 	// constant for trust engine service
 	public static final String TRUST_ENGINE = "osgi.signedcontent.trust.engine"; //$NON-NLS-1$
 	public static final Object DEFAULT_TRUST_ENGINE = "org.eclipse.osgi"; //$NON-NLS-1$
 
 	// constant for the timestamp related
-	public static final int TIMESTAMP_OID[] = {1, 2, 840, 113549, 1, 9, 16, 2, 14};
-	public static final int TIMESTAMP_TST_OID[] = {1, 2, 840, 113549, 1, 9, 16, 1, 4};
-	public static final int SIGNING_TIME[] = {1, 2, 840, 113549, 1, 9, 5};
+	public static final int TIMESTAMP_OID[] = { 1, 2, 840, 113549, 1, 9, 16, 2, 14 };
+	public static final int TIMESTAMP_TST_OID[] = { 1, 2, 840, 113549, 1, 9, 16, 1, 4 };
+	public static final int SIGNING_TIME[] = { 1, 2, 840, 113549, 1, 9, 5 };
 
 }

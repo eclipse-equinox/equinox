@@ -27,7 +27,8 @@ public class ThreadInfoReport extends RuntimeException {
 		long currentId = Thread.currentThread().getId();
 		ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
 		StringBuilder dump = new StringBuilder("Thread dump"); //$NON-NLS-1$
-		ThreadInfo[] infos = threadMXBean.dumpAllThreads(threadMXBean.isObjectMonitorUsageSupported(), threadMXBean.isSynchronizerUsageSupported());
+		ThreadInfo[] infos = threadMXBean.dumpAllThreads(threadMXBean.isObjectMonitorUsageSupported(),
+				threadMXBean.isSynchronizerUsageSupported());
 		for (ThreadInfo info : infos) {
 			dumpThreadIDNameState(info, dump);
 			dumpLockInfo(currentId, failedMonitor, info, dump);

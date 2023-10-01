@@ -58,8 +58,10 @@ public abstract class PackageSource {
 
 	public abstract Enumeration<URL> getResources(String name) throws IOException;
 
-	// This is intentionally lenient; we don't force all suppliers to match (only one)
-	// it is better to get class cast exceptions in split package cases than miss an event
+	// This is intentionally lenient; we don't force all suppliers to match (only
+	// one)
+	// it is better to get class cast exceptions in split package cases than miss an
+	// event
 	public boolean hasCommonSource(PackageSource other) {
 		if (other == null)
 			return false;
@@ -104,11 +106,12 @@ public abstract class PackageSource {
 
 	/**
 	 * Used by ServiceReferenceImpl for isAssignableTo
-	 * @param registrant Bundle registering service
-	 * @param client Bundle desiring to use service
-	 * @param className class name to use
+	 * 
+	 * @param registrant   Bundle registering service
+	 * @param client       Bundle desiring to use service
+	 * @param className    class name to use
 	 * @param serviceClass class of original service object
-	 * @param container the equinox container
+	 * @param container    the equinox container
 	 * @return true if assignable given package wiring
 	 */
 	public static boolean isServiceAssignableTo(Bundle registrant, Bundle client, String className,
@@ -131,9 +134,9 @@ public abstract class PackageSource {
 		if (consumerBL == null) {
 			return false;
 		}
-		// 3) for the specified bundle, find the wiring for the package.  If no wiring is found return true
-		PackageSource consumerSource = getSourceFromLoader(consumerBL, pkgName, className, checkInternal,
-				container);
+		// 3) for the specified bundle, find the wiring for the package. If no wiring is
+		// found return true
+		PackageSource consumerSource = getSourceFromLoader(consumerBL, pkgName, className, checkInternal, container);
 		if (consumerSource == null) {
 			// confirmed no source for consumer
 			return true;
@@ -144,8 +147,7 @@ public abstract class PackageSource {
 		}
 
 		// 4) For the registrant bundle, find the wiring for the package.
-		PackageSource producerSource = getSourceFromLoader(producerBL, pkgName, className, checkInternal,
-				container);
+		PackageSource producerSource = getSourceFromLoader(producerBL, pkgName, className, checkInternal, container);
 		if (producerSource == null) {
 			// confirmed no local class either; now check service object
 			if (serviceClass != null && ServiceFactory.class.isAssignableFrom(serviceClass)) {
@@ -160,13 +162,13 @@ public abstract class PackageSource {
 			}
 			// 5) If no wiring is found for the registrant bundle then find the wiring for
 			// the classloader of the service object. If no wiring is found return false.
-			producerSource = getPackageSource(serviceClass, pkgName, className, checkInternal,
-					container);
+			producerSource = getPackageSource(serviceClass, pkgName, className, checkInternal, container);
 			if (producerSource == null) {
 				return false;
 			}
 		}
-		// 6) If the two wirings found are equal then return true; otherwise return false.
+		// 6) If the two wirings found are equal then return true; otherwise return
+		// false.
 		return producerSource.hasCommonSource(consumerSource);
 	}
 

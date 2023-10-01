@@ -14,12 +14,13 @@
 package org.eclipse.osgi.service.resolver;
 
 /**
- * A representation of one bundle import constraint as seen in a
- * bundle manifest and managed by a state and resolver.
+ * A representation of one bundle import constraint as seen in a bundle manifest
+ * and managed by a state and resolver.
  * <p>
- * This interface is not intended to be implemented by clients.  The
+ * This interface is not intended to be implemented by clients. The
  * {@link StateObjectFactory} should be used to construct instances.
  * </p>
+ * 
  * @since 3.1
  * @noimplement This interface is not intended to be implemented by clients.
  */

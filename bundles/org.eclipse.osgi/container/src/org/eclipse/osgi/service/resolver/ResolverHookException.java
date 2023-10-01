@@ -14,8 +14,9 @@
 package org.eclipse.osgi.service.resolver;
 
 /**
- * A runtime exception thrown by a resolver to indicate that a resolver
- * hook threw an unexpected exception and the resolve operation terminated.
+ * A runtime exception thrown by a resolver to indicate that a resolver hook
+ * threw an unexpected exception and the resolve operation terminated.
+ * 
  * @since 3.7
  */
 public class ResolverHookException extends RuntimeException {
@@ -23,8 +24,9 @@ public class ResolverHookException extends RuntimeException {
 
 	/**
 	 * Constructs a new resolver hook exception.
+	 * 
 	 * @param message the message of the exception
-	 * @param cause the cause of the exception
+	 * @param cause   the cause of the exception
 	 */
 	public ResolverHookException(String message, Throwable cause) {
 		super(message, cause);

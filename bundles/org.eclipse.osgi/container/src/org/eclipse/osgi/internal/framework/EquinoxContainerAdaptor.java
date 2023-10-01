@@ -74,7 +74,8 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 		this.storage = storage;
 		this.hooks = new OSGiFrameworkHooks(container, storage);
 		this.initial = initial;
-		this.moduleClassLoaderParent = getModuleClassLoaderParent(container.getConfiguration(), container.getBootLoader());
+		this.moduleClassLoaderParent = getModuleClassLoaderParent(container.getConfiguration(),
+				container.getBootLoader());
 		this.lastSecurityAdminFlush = new AtomicLong();
 
 		EquinoxConfiguration config = container.getConfiguration();
@@ -84,12 +85,14 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 
 		int resolverThreadCnt;
 		try {
-			// note that resolver thread count defaults to -1 (compute based on processor number)
+			// note that resolver thread count defaults to -1 (compute based on processor
+			// number)
 			resolverThreadCnt = resolverThreadCntProp == null ? -1 : Integer.parseInt(resolverThreadCntProp);
 		} catch (NumberFormatException e) {
 			resolverThreadCnt = -1;
 		}
-		String startLevelThreadCntProp = config.getConfiguration(EquinoxConfiguration.PROP_EQUINOX_START_LEVEL_THREAD_COUNT);
+		String startLevelThreadCntProp = config
+				.getConfiguration(EquinoxConfiguration.PROP_EQUINOX_START_LEVEL_THREAD_COUNT);
 		int startLevelThreadCnt;
 		try {
 			// Note that start-level thread count defaults to 1 (synchronous start)
@@ -98,22 +101,25 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 			startLevelThreadCnt = 1;
 		}
 
-		// Use two different executors for resolver and start-level because of the different queue requirements
+		// Use two different executors for resolver and start-level because of the
+		// different queue requirements
 
 		// For the resolver we must use a SynchronousQueue because multiple threads
 		// can kick off a resolution operation and block one of the executor threads
 		// per resolution operation.
 		// If the number of concurrent resolution operations reaches the number of
 		// executor threads then each executor thread may end up blocked causing the
-		// executor to no longer accept work.  A SynchronousQueue prevents that from
+		// executor to no longer accept work. A SynchronousQueue prevents that from
 		// happening.
 		this.resolverExecutor = new AtomicLazyInitializer<>();
 		this.lazyResolverExecutorCreator = createLazyExecutorCreator( //
 				"Equinox resolver thread - " + EquinoxContainerAdaptor.this.toString(), //$NON-NLS-1$
 				resolverThreadCnt, new SynchronousQueue<>());
 
-		// For the start-level we can safely use a growing queue because the thread feeding the
-		// start-level executor with work is a single thread and it can safely block waiting
+		// For the start-level we can safely use a growing queue because the thread
+		// feeding the
+		// start-level executor with work is a single thread and it can safely block
+		// waiting
 		// for the work of the executor threads to finish.
 		this.startLevelExecutor = new AtomicLazyInitializer<>();
 		this.lazyStartLevelExecutorCreator = createLazyExecutorCreator(//
@@ -122,7 +128,8 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 
 	}
 
-	private Callable<Executor> createLazyExecutorCreator(final String threadName, int threadCnt, final BlockingQueue<Runnable> queue) {
+	private Callable<Executor> createLazyExecutorCreator(final String threadName, int threadCnt,
+			final BlockingQueue<Runnable> queue) {
 		// use the number of processors when configured value is <=0
 		final int maxThreads = threadCnt <= 0 ? Runtime.getRuntime().availableProcessors() : threadCnt;
 		return new Callable<Executor>() {
@@ -150,10 +157,12 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 						return t;
 					}
 				};
-				// use a rejection policy that simply runs the task in the current thread once the max pool size is reached
+				// use a rejection policy that simply runs the task in the current thread once
+				// the max pool size is reached
 				RejectedExecutionHandler rejectHandler = new ThreadPoolExecutor.CallerRunsPolicy();
 
-				ThreadPoolExecutor executor = new ThreadPoolExecutor(coreThreads, maxThreads, idleTimeout, TimeUnit.SECONDS, queue, threadFactory, rejectHandler);
+				ThreadPoolExecutor executor = new ThreadPoolExecutor(coreThreads, maxThreads, idleTimeout,
+						TimeUnit.SECONDS, queue, threadFactory, rejectHandler);
 				executor.allowCoreThreadTimeOut(true);
 				return executor;
 			}
@@ -174,10 +183,12 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 		// check the osgi defined property first
 		String type = configuration.getConfiguration(Constants.FRAMEWORK_BUNDLE_PARENT);
 		if (type == null) {
-			type = configuration.getConfiguration(EquinoxConfiguration.PROP_PARENT_CLASSLOADER, Constants.FRAMEWORK_BUNDLE_PARENT_BOOT);
+			type = configuration.getConfiguration(EquinoxConfiguration.PROP_PARENT_CLASSLOADER,
+					Constants.FRAMEWORK_BUNDLE_PARENT_BOOT);
 		}
 
-		if (Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK.equalsIgnoreCase(type) || EquinoxConfiguration.PARENT_CLASSLOADER_FWK.equalsIgnoreCase(type)) {
+		if (Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK.equalsIgnoreCase(type)
+				|| EquinoxConfiguration.PARENT_CLASSLOADER_FWK.equalsIgnoreCase(type)) {
 			ClassLoader cl = EquinoxContainer.class.getClassLoader();
 			return cl == null ? bootLoader : cl;
 		}
@@ -203,7 +214,8 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	}
 
 	@Override
-	public void publishContainerEvent(ContainerEvent type, Module module, Throwable error, FrameworkListener... listeners) {
+	public void publishContainerEvent(ContainerEvent type, Module module, Throwable error,
+			FrameworkListener... listeners) {
 		EquinoxEventPublisher publisher = container.getEventPublisher();
 		if (publisher != null) {
 			publisher.publishFrameworkEvent(getType(type), module.getBundle(), error, listeners);
@@ -220,7 +232,8 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 
 	@Override
 	public Module createModule(String location, long id, EnumSet<Settings> settings, int startlevel) {
-		EquinoxBundle bundle = new EquinoxBundle(id, location, storage.getModuleContainer(), settings, startlevel, container);
+		EquinoxBundle bundle = new EquinoxBundle(id, location, storage.getModuleContainer(), settings, startlevel,
+				container);
 		return bundle.getModule();
 	}
 
@@ -264,7 +277,8 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 			bundleLoader.close();
 		}
 		long updatedTimestamp = storage.getModuleDatabase().getRevisionsTimestamp();
-		if (System.getSecurityManager() != null && updatedTimestamp != lastSecurityAdminFlush.getAndSet(updatedTimestamp)) {
+		if (System.getSecurityManager() != null
+				&& updatedTimestamp != lastSecurityAdminFlush.getAndSet(updatedTimestamp)) {
 			storage.getSecurityAdmin().clearCaches();
 			List<Module> modules = storage.getModuleContainer().getModules();
 			for (Module module : modules) {
@@ -286,9 +300,11 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 		boolean frameworkActive = Module.ACTIVE_SET.contains(storage.getModuleContainer().getModule(0).getState());
 		ModuleRevision revision = moduleWiring.getRevision();
 		Module module = revision.getRevisions().getModule();
-		boolean isUninstallingOrUninstalled = State.UNINSTALLED.equals(module.getState()) ^ module.holdsTransitionEventLock(ModuleEvent.UNINSTALLED);
+		boolean isUninstallingOrUninstalled = State.UNINSTALLED.equals(module.getState())
+				^ module.holdsTransitionEventLock(ModuleEvent.UNINSTALLED);
 		if (!frameworkActive || !isUninstallingOrUninstalled) {
-			// only do this when the framework is not active or when the bundle is not uninstalled
+			// only do this when the framework is not active or when the bundle is not
+			// uninstalled
 			Generation generation = (Generation) moduleWiring.getRevision().getRevisionInfo();
 			generation.clearManifestCache();
 		}
@@ -296,57 +312,57 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 
 	static int getType(ContainerEvent type) {
 		switch (type) {
-			case ERROR :
-				return FrameworkEvent.ERROR;
-			case INFO :
-				return FrameworkEvent.INFO;
-			case WARNING :
-				return FrameworkEvent.WARNING;
-			case REFRESH :
-				return FrameworkEvent.PACKAGES_REFRESHED;
-			case START_LEVEL :
-				return FrameworkEvent.STARTLEVEL_CHANGED;
-			case STARTED :
-				return FrameworkEvent.STARTED;
-			case STOPPED :
-				return FrameworkEvent.STOPPED;
-			case STOPPED_REFRESH :
-				return FrameworkEvent.STOPPED_SYSTEM_REFRESHED;
-			case STOPPED_UPDATE :
-				return FrameworkEvent.STOPPED_UPDATE;
-			case STOPPED_TIMEOUT :
-				return FrameworkEvent.WAIT_TIMEDOUT;
-			default :
-				// default to error
-				return FrameworkEvent.ERROR;
+		case ERROR:
+			return FrameworkEvent.ERROR;
+		case INFO:
+			return FrameworkEvent.INFO;
+		case WARNING:
+			return FrameworkEvent.WARNING;
+		case REFRESH:
+			return FrameworkEvent.PACKAGES_REFRESHED;
+		case START_LEVEL:
+			return FrameworkEvent.STARTLEVEL_CHANGED;
+		case STARTED:
+			return FrameworkEvent.STARTED;
+		case STOPPED:
+			return FrameworkEvent.STOPPED;
+		case STOPPED_REFRESH:
+			return FrameworkEvent.STOPPED_SYSTEM_REFRESHED;
+		case STOPPED_UPDATE:
+			return FrameworkEvent.STOPPED_UPDATE;
+		case STOPPED_TIMEOUT:
+			return FrameworkEvent.WAIT_TIMEDOUT;
+		default:
+			// default to error
+			return FrameworkEvent.ERROR;
 		}
 	}
 
 	private int getType(ModuleEvent type) {
 		switch (type) {
-			case INSTALLED :
-				return BundleEvent.INSTALLED;
-			case LAZY_ACTIVATION :
-				return BundleEvent.LAZY_ACTIVATION;
-			case RESOLVED :
-				return BundleEvent.RESOLVED;
-			case STARTED :
-				return BundleEvent.STARTED;
-			case STARTING :
-				return BundleEvent.STARTING;
-			case STOPPING :
-				return BundleEvent.STOPPING;
-			case STOPPED :
-				return BundleEvent.STOPPED;
-			case UNINSTALLED :
-				return BundleEvent.UNINSTALLED;
-			case UNRESOLVED :
-				return BundleEvent.UNRESOLVED;
-			case UPDATED :
-				return BundleEvent.UPDATED;
-			default :
-				// TODO log error?
-				return 0;
+		case INSTALLED:
+			return BundleEvent.INSTALLED;
+		case LAZY_ACTIVATION:
+			return BundleEvent.LAZY_ACTIVATION;
+		case RESOLVED:
+			return BundleEvent.RESOLVED;
+		case STARTED:
+			return BundleEvent.STARTED;
+		case STARTING:
+			return BundleEvent.STARTING;
+		case STOPPING:
+			return BundleEvent.STOPPING;
+		case STOPPED:
+			return BundleEvent.STOPPED;
+		case UNINSTALLED:
+			return BundleEvent.UNINSTALLED;
+		case UNRESOLVED:
+			return BundleEvent.UNRESOLVED;
+		case UPDATED:
+			return BundleEvent.UPDATED;
+		default:
+			// TODO log error?
+			return 0;
 		}
 	}
 
@@ -410,7 +426,8 @@ public class EquinoxContainerAdaptor extends ModuleContainerAdaptor {
 	}
 
 	@Override
-	public ModuleRevisionBuilder adaptModuleRevisionBuilder(ModuleEvent operation, Module origin, ModuleRevisionBuilder builder, Object revisionInfo) {
+	public ModuleRevisionBuilder adaptModuleRevisionBuilder(ModuleEvent operation, Module origin,
+			ModuleRevisionBuilder builder, Object revisionInfo) {
 		Generation generation = (Generation) revisionInfo;
 		return generation.adaptModuleRevisionBuilder(operation, origin, builder);
 	}

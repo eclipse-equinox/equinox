@@ -17,12 +17,14 @@ import java.io.IOException;
 
 /**
  * Indicates that signed content is invalid according to one of the signers.
+ * 
  * @since 3.4
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class InvalidContentException extends IOException {
 	private static final long serialVersionUID = -399150159330289387L;
-	// TODO may want to add error codes to indicate the reason for the invalid/corruption error.
+	// TODO may want to add error codes to indicate the reason for the
+	// invalid/corruption error.
 	private final Throwable cause;
 
 	/**
@@ -30,7 +32,7 @@ public class InvalidContentException extends IOException {
 	 * message and cause.
 	 *
 	 * @param message the exception message
-	 * @param cause the cause, may be <code>null</code>
+	 * @param cause   the cause, may be <code>null</code>
 	 */
 	public InvalidContentException(String message, Throwable cause) {
 		super(message);
@@ -38,10 +40,11 @@ public class InvalidContentException extends IOException {
 	}
 
 	/**
-	 * Returns the cause of this exception or <code>null</code> if no cause
-	 * was specified when this exception was created.
+	 * Returns the cause of this exception or <code>null</code> if no cause was
+	 * specified when this exception was created.
 	 *
-	 * @return The cause of this exception or <code>null</code> if no cause was created.
+	 * @return The cause of this exception or <code>null</code> if no cause was
+	 *         created.
 	 */
 	@Override
 	public Throwable getCause() {
@@ -54,8 +57,9 @@ public class InvalidContentException extends IOException {
 	 * @param t Cause of the exception.
 	 * @return This object.
 	 * @throws java.lang.IllegalStateException This method will always throw an
-	 *         <code>IllegalStateException</code> since the cause of this
-	 *         exception can only be set when constructed.
+	 *                                         <code>IllegalStateException</code>
+	 *                                         since the cause of this exception can
+	 *                                         only be set when constructed.
 	 */
 	@Override
 	public Throwable initCause(Throwable t) {

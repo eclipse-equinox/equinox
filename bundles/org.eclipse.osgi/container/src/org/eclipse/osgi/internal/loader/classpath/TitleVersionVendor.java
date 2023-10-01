@@ -15,11 +15,13 @@
 package org.eclipse.osgi.internal.loader.classpath;
 
 /**
- * Stores a (title,version,vendor) triple for Specification-* or Implementation-*
+ * Stores a (title,version,vendor) triple for Specification-* or
+ * Implementation-*
  */
 class TitleVersionVendor {
 	/**
-	 * Constant value when no title, version or vendor are specified for the package.
+	 * Constant value when no title, version or vendor are specified for the
+	 * package.
 	 */
 	static final TitleVersionVendor NONE = new TitleVersionVendor(null, null, null);
 	private final String title;
@@ -27,8 +29,8 @@ class TitleVersionVendor {
 	private final String vendor;
 
 	/**
-	 * Factory for creating TitleVersionVendor objects.  If the given title, version and
-	 * vendor are <code>null</code> then {@link #NONE} is returned.
+	 * Factory for creating TitleVersionVendor objects. If the given title, version
+	 * and vendor are <code>null</code> then {@link #NONE} is returned.
 	 */
 	static TitleVersionVendor of(String title, String version, String vendor) {
 		if (title == null && version == null && vendor == null) {
@@ -45,6 +47,7 @@ class TitleVersionVendor {
 
 	/**
 	 * Returns the title
+	 * 
 	 * @return the title
 	 */
 	String getTitle() {
@@ -53,6 +56,7 @@ class TitleVersionVendor {
 
 	/**
 	 * returns the version
+	 * 
 	 * @return the version
 	 */
 	String getVersion() {
@@ -61,6 +65,7 @@ class TitleVersionVendor {
 
 	/**
 	 * returns the vendor
+	 * 
 	 * @return the vendor
 	 */
 	String getVendor() {

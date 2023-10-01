@@ -20,8 +20,8 @@ import java.io.InputStream;
 import org.eclipse.osgi.storage.ContentProvider;
 
 /**
- * InputStream subclass which provides a reference (via File) to the data
- * rather than allowing the input stream to be directly read.
+ * InputStream subclass which provides a reference (via File) to the data rather
+ * than allowing the input stream to be directly read.
  */
 public class ReferenceInputStream extends InputStream implements ContentProvider {
 	private final File reference;
@@ -30,7 +30,8 @@ public class ReferenceInputStream extends InputStream implements ContentProvider
 		this.reference = reference;
 	}
 
-	/* This method should not be called.
+	/*
+	 * This method should not be called.
 	 */
 	@Override
 	public int read() throws IOException {

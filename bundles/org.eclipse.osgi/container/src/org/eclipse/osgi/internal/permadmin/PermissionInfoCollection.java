@@ -31,10 +31,11 @@ import org.osgi.service.permissionadmin.PermissionInfo;
 public final class PermissionInfoCollection extends PermissionCollection {
 	private static final long serialVersionUID = 3140511562980923957L;
 	/* Used to find permission constructors in addPermissions */
-	static private final Class<?> twoStringClassArray[] = new Class[] {String.class, String.class};
-	static private final Class<?> oneStringClassArray[] = new Class[] {String.class};
+	static private final Class<?> twoStringClassArray[] = new Class[] { String.class, String.class };
+	static private final Class<?> oneStringClassArray[] = new Class[] { String.class };
 	static private final Class<?> noArgClassArray[] = new Class[] {};
-	static private final Class<?>[][] permClassArrayArgs = new Class[][] {noArgClassArray, oneStringClassArray, twoStringClassArray};
+	static private final Class<?>[][] permClassArrayArgs = new Class[][] { noArgClassArray, oneStringClassArray,
+			twoStringClassArray };
 	static private final String ALL_PERMISSION_NAME = AllPermission.class.getName();
 	static final String FILE_PERMISSION_NAME = FilePermission.class.getName();
 	static final String ALL_FILES = "<<ALL FILES>>"; //$NON-NLS-1$
@@ -84,7 +85,8 @@ public final class PermissionInfoCollection extends PermissionCollection {
 			return true;
 		final Class<? extends Permission> permClass = perm.getClass();
 		PermissionCollection collection = getCachedCollection(bundlePermissions, permClass);
-		// must populate the collection outside of the lock to prevent class loader deadlock
+		// must populate the collection outside of the lock to prevent class loader
+		// deadlock
 		if (collection == null) {
 			collection = perm.newPermissionCollection();
 			if (collection == null) {
@@ -108,20 +110,25 @@ public final class PermissionInfoCollection extends PermissionCollection {
 		return collection.implies(perm);
 	}
 
-	PermissionCollection getCachedCollection(BundlePermissions bundlePermissions, Class<? extends Permission> permClass) {
+	PermissionCollection getCachedCollection(BundlePermissions bundlePermissions,
+			Class<? extends Permission> permClass) {
 		synchronized (cachedPermissionCollections) {
-			if (bundlePermissions != null && cachedRelativeFilePermissionCollections != null && FILE_PERMISSION_NAME.equals(permClass.getName())) {
+			if (bundlePermissions != null && cachedRelativeFilePermissionCollections != null
+					&& FILE_PERMISSION_NAME.equals(permClass.getName())) {
 				return cachedRelativeFilePermissionCollections.get(bundlePermissions);
 			}
 			return cachedPermissionCollections.get(permClass);
 		}
 	}
 
-	private PermissionCollection cacheCollection(BundlePermissions bundlePermissions, Class<? extends Permission> permClass, PermissionCollection collection) {
+	private PermissionCollection cacheCollection(BundlePermissions bundlePermissions,
+			Class<? extends Permission> permClass, PermissionCollection collection) {
 		synchronized (cachedPermissionCollections) {
 			// check to see if another thread beat this thread at adding the collection
-			boolean relativeFiles = bundlePermissions != null && cachedRelativeFilePermissionCollections != null && FILE_PERMISSION_NAME.equals(permClass.getName());
-			PermissionCollection exists = relativeFiles ? cachedRelativeFilePermissionCollections.get(bundlePermissions) : cachedPermissionCollections.get(permClass);
+			boolean relativeFiles = bundlePermissions != null && cachedRelativeFilePermissionCollections != null
+					&& FILE_PERMISSION_NAME.equals(permClass.getName());
+			PermissionCollection exists = relativeFiles ? cachedRelativeFilePermissionCollections.get(bundlePermissions)
+					: cachedPermissionCollections.get(permClass);
 			if (exists != null) {
 				collection = exists;
 			} else {
@@ -139,7 +146,8 @@ public final class PermissionInfoCollection extends PermissionCollection {
 		return permInfos;
 	}
 
-	void addPermissions(BundlePermissions bundlePermissions, PermissionCollection collection, Class<? extends Permission> permClass) throws Exception {
+	void addPermissions(BundlePermissions bundlePermissions, PermissionCollection collection,
+			Class<? extends Permission> permClass) throws Exception {
 		String permClassName = permClass.getName();
 		Constructor<? extends Permission> constructor = null;
 		int numArgs = -1;
@@ -156,7 +164,8 @@ public final class PermissionInfoCollection extends PermissionCollection {
 			throw new NoSuchMethodException(permClass.getName() + ".<init>()"); //$NON-NLS-1$
 		}
 		/*
-		 * TODO: We need to cache the permission constructors to enhance performance (see bug 118813).
+		 * TODO: We need to cache the permission constructors to enhance performance
+		 * (see bug 118813).
 		 */
 		for (PermissionInfo permInfo : permInfos) {
 			if (permInfo.getType().equals(permClassName)) {
@@ -172,7 +181,8 @@ public final class PermissionInfoCollection extends PermissionCollection {
 					if (!args[0].equals(ALL_FILES)) {
 						File file = new File(args[0]);
 						if (!file.isAbsolute()) { // relative name
-							File target = bundlePermissions == null ? null : bundlePermissions.getBundle().getDataFile(permInfo.getName());
+							File target = bundlePermissions == null ? null
+									: bundlePermissions.getBundle().getDataFile(permInfo.getName());
 							if (target == null) {
 								// ignore if we cannot find the data area
 								continue;

@@ -33,6 +33,7 @@ import org.osgi.resource.Requirement;
 
 /**
  * An implementation of {@link BundleRevision}.
+ * 
  * @since 3.10
  */
 public final class ModuleRevision implements BundleRevision {
@@ -45,7 +46,8 @@ public final class ModuleRevision implements BundleRevision {
 	private final Object revisionInfo;
 	private volatile Boolean lazyActivationPolicy = null;
 
-	ModuleRevision(String symbolicName, Version version, int types, NamespaceList.Builder<GenericInfo> capabilityInfos, NamespaceList.Builder<GenericInfo> requirementInfos, ModuleRevisions revisions, Object revisionInfo) {
+	ModuleRevision(String symbolicName, Version version, int types, NamespaceList.Builder<GenericInfo> capabilityInfos,
+			NamespaceList.Builder<GenericInfo> requirementInfos, ModuleRevisions revisions, Object revisionInfo) {
 		this.symbolicName = symbolicName;
 		this.version = version;
 		this.types = types;
@@ -56,7 +58,7 @@ public final class ModuleRevision implements BundleRevision {
 	}
 
 	private NamespaceList<ModuleCapability> createCapabilities(NamespaceList.Builder<GenericInfo> capabilityInfos) {
-		return capabilityInfos.transformIntoCopy(new Function<GenericInfo, ModuleCapability>()  {
+		return capabilityInfos.transformIntoCopy(new Function<GenericInfo, ModuleCapability>() {
 			public ModuleCapability apply(GenericInfo i) {
 				Map<String, String> directives = i.mutable ? copyUnmodifiableMap(i.directives) : i.directives;
 				Map<String, Object> attributes = i.mutable ? copyUnmodifiableMap(i.attributes) : i.attributes;
@@ -79,7 +81,7 @@ public final class ModuleRevision implements BundleRevision {
 	}
 
 	private NamespaceList<ModuleRequirement> createRequirements(NamespaceList.Builder<GenericInfo> infos) {
-		return infos.transformIntoCopy(new Function<GenericInfo, ModuleRequirement>()  {
+		return infos.transformIntoCopy(new Function<GenericInfo, ModuleRequirement>() {
 			public ModuleRequirement apply(GenericInfo i) {
 				return new ModuleRequirement(i.namespace, i.directives, i.attributes, ModuleRevision.this);
 			}
@@ -113,8 +115,10 @@ public final class ModuleRevision implements BundleRevision {
 
 	/**
 	 * Returns the capabilities declared by this revision
+	 * 
 	 * @param namespace The namespace of the declared capabilities to return or
-	 * {@code null} to return the declared capabilities from all namespaces.
+	 *                  {@code null} to return the declared capabilities from all
+	 *                  namespaces.
 	 * @return An unmodifiable list containing the declared capabilities.
 	 */
 	public List<ModuleCapability> getModuleCapabilities(String namespace) {
@@ -123,8 +127,10 @@ public final class ModuleRevision implements BundleRevision {
 
 	/**
 	 * Returns the requirements declared by this revision
+	 * 
 	 * @param namespace The namespace of the declared requirements to return or
-	 * {@code null} to return the declared requirements from all namespaces.
+	 *                  {@code null} to return the declared requirements from all
+	 *                  namespaces.
 	 * @return An unmodifiable list containing the declared requirements.
 	 */
 	public List<ModuleRequirement> getModuleRequirements(String namespace) {
@@ -153,6 +159,7 @@ public final class ModuleRevision implements BundleRevision {
 
 	/**
 	 * Returns the {@link ModuleRevisions revisions} for this revision.
+	 * 
 	 * @return the {@link ModuleRevisions revisions} for this revision.
 	 */
 	public ModuleRevisions getRevisions() {
@@ -160,8 +167,9 @@ public final class ModuleRevision implements BundleRevision {
 	}
 
 	/**
-	 * Returns the revision info for this revision.  The revision info is
-	 * assigned when a revision is created to install a module or update module
+	 * Returns the revision info for this revision. The revision info is assigned
+	 * when a revision is created to install a module or update module
+	 * 
 	 * @return the revision info for this revision, may be {@code null}.
 	 */
 	public Object getRevisionInfo() {
@@ -169,9 +177,11 @@ public final class ModuleRevision implements BundleRevision {
 	}
 
 	/**
-	 * A convenience method to quickly determine if this revision
-	 * has declared the lazy activation policy.
-	 * @return true if the lazy activation policy has been declared by this module; otherwise false is returned.
+	 * A convenience method to quickly determine if this revision has declared the
+	 * lazy activation policy.
+	 * 
+	 * @return true if the lazy activation policy has been declared by this module;
+	 *         otherwise false is returned.
 	 */
 	public boolean hasLazyActivatePolicy() {
 		Boolean currentPolicy = lazyActivationPolicy;
@@ -182,7 +192,8 @@ public final class ModuleRevision implements BundleRevision {
 		List<Capability> data = getCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
 		if (!data.isEmpty()) {
 			Capability moduleData = data.get(0);
-			lazyPolicy = EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY.equals(moduleData.getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY));
+			lazyPolicy = EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY
+					.equals(moduleData.getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY));
 		}
 		lazyActivationPolicy = Boolean.valueOf(lazyPolicy);
 		return lazyPolicy;

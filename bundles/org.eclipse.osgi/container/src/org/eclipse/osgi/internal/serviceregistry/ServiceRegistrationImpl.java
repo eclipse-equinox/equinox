@@ -39,16 +39,18 @@ import org.osgi.framework.ServiceRegistration;
  * A registered service.
  *
  * The framework returns a ServiceRegistration object when a
- * {@link BundleContextImpl#registerService(String, Object, Dictionary) BundleContext.registerService}
- * method is successful. This object is for the private use of
- * the registering bundle and should not be shared with other bundles.
- * <p>The ServiceRegistration object may be used to update the properties
- * for the service or to unregister the service.
+ * {@link BundleContextImpl#registerService(String, Object, Dictionary)
+ * BundleContext.registerService} method is successful. This object is for the
+ * private use of the registering bundle and should not be shared with other
+ * bundles.
+ * <p>
+ * The ServiceRegistration object may be used to update the properties for the
+ * service or to unregister the service.
  *
- * <p>If the ServiceRegistration is garbage collected the framework may remove
- * the service. This implies that if a
- * bundle wants to keep its service registered, it should keep the
- * ServiceRegistration object referenced.
+ * <p>
+ * If the ServiceRegistration is garbage collected the framework may remove the
+ * service. This implies that if a bundle wants to keep its service registered,
+ * it should keep the ServiceRegistration object referenced.
  *
  * @ThreadSafe
  */
@@ -71,9 +73,9 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	/* @GuardedBy("registrationLock") */
 	private ServiceReferenceImpl<S> reference;
 
-	/** List of contexts using the service.
-	 * List&lt;BundleContextImpl&gt;.
-	 * */
+	/**
+	 * List of contexts using the service. List&lt;BundleContextImpl&gt;.
+	 */
 	/* @GuardedBy("registrationLock") */
 	private final List<BundleContextImpl> contextsUsing;
 
@@ -99,8 +101,8 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	private static final int UNREGISTERED = 0x02;
 
 	/**
-	 * Construct a ServiceRegistration and register the service
-	 * in the framework's service registry.
+	 * Construct a ServiceRegistration and register the service in the framework's
+	 * service registry.
 	 */
 	ServiceRegistrationImpl(ServiceRegistry registry, BundleContextImpl context, String[] clazzes, S service) {
 		this.registry = registry;
@@ -113,10 +115,10 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 
 		synchronized (registrationLock) {
 			this.state = REGISTERED;
-			/* We leak this from the constructor here, but it is ok
-			 * because the ServiceReferenceImpl constructor only
-			 * stores the value in a final field without
-			 * otherwise using it.
+			/*
+			 * We leak this from the constructor here, but it is ok because the
+			 * ServiceReferenceImpl constructor only stores the value in a final field
+			 * without otherwise using it.
 			 */
 			this.reference = new ServiceReferenceImpl<>(this);
 		}
@@ -146,24 +148,27 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	/**
 	 * Update the properties associated with this service.
 	 *
-	 * <p>The key "objectClass" cannot be modified by this method. It's
-	 * value is set when the service is registered.
+	 * <p>
+	 * The key "objectClass" cannot be modified by this method. It's value is set
+	 * when the service is registered.
 	 *
-	 * <p>The following steps are followed to modify a service's properties:
+	 * <p>
+	 * The following steps are followed to modify a service's properties:
 	 * <ol>
 	 * <li>The service's properties are replaced with the provided properties.
-	 * <li>A {@link ServiceEvent} of type {@link ServiceEvent#MODIFIED}
-	 * is synchronously sent.
+	 * <li>A {@link ServiceEvent} of type {@link ServiceEvent#MODIFIED} is
+	 * synchronously sent.
 	 * </ol>
 	 *
-	 * @param props The properties for this service.
-	 *        Changes should not be made to this object after calling this method.
-	 *        To update the service's properties this method should be called again.
-	 * @exception java.lang.IllegalStateException If
-	 * this ServiceRegistration has already been unregistered.
+	 * @param props The properties for this service. Changes should not be made to
+	 *              this object after calling this method. To update the service's
+	 *              properties this method should be called again.
+	 * @exception java.lang.IllegalStateException If this ServiceRegistration has
+	 *                                            already been unregistered.
 	 *
-	 * @exception IllegalArgumentException If the <code>properties</code>
-	 * parameter contains case variants of the same key name.
+	 * @exception IllegalArgumentException        If the <code>properties</code>
+	 *                                            parameter contains case variants
+	 *                                            of the same key name.
 	 */
 	@Override
 	public void setProperties(Dictionary<String, ?> props) {
@@ -188,33 +193,30 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	}
 
 	/**
-	 * Unregister the service.
-	 * Remove a service registration from the framework's service
-	 * registry.
-	 * All {@link ServiceReferenceImpl} objects for this registration
-	 * can no longer be used to interact with the service.
+	 * Unregister the service. Remove a service registration from the framework's
+	 * service registry. All {@link ServiceReferenceImpl} objects for this
+	 * registration can no longer be used to interact with the service.
 	 *
-	 * <p>The following steps are followed to unregister a service:
+	 * <p>
+	 * The following steps are followed to unregister a service:
 	 * <ol>
-	 * <li>The service is removed from the framework's service
-	 * registry so that it may no longer be used.
-	 * {@link ServiceReferenceImpl}s for the service may no longer be used
-	 * to get a service object for the service.
-	 * <li>A {@link ServiceEvent} of type {@link ServiceEvent#UNREGISTERING}
-	 * is synchronously sent so that bundles using this service
-	 * may release their use of the service.
-	 * <li>For each bundle whose use count for this service is greater
-	 * than zero:
+	 * <li>The service is removed from the framework's service registry so that it
+	 * may no longer be used. {@link ServiceReferenceImpl}s for the service may no
+	 * longer be used to get a service object for the service.
+	 * <li>A {@link ServiceEvent} of type {@link ServiceEvent#UNREGISTERING} is
+	 * synchronously sent so that bundles using this service may release their use
+	 * of the service.
+	 * <li>For each bundle whose use count for this service is greater than zero:
 	 * <ol>
 	 * <li>The bundle's use count for this service is set to zero.
-	 * <li>If the service was registered with a {@link ServiceFactory},
-	 * the {@link ServiceFactory#ungetService ServiceFactory.ungetService} method
-	 * is called to release the service object for the bundle.
+	 * <li>If the service was registered with a {@link ServiceFactory}, the
+	 * {@link ServiceFactory#ungetService ServiceFactory.ungetService} method is
+	 * called to release the service object for the bundle.
 	 * </ol>
 	 * </ol>
 	 *
-	 * @exception java.lang.IllegalStateException If
-	 * this ServiceRegistration has already been unregistered.
+	 * @exception java.lang.IllegalStateException If this ServiceRegistration has
+	 *                                            already been unregistered.
 	 * @see BundleContextImpl#ungetService
 	 */
 	@Override
@@ -246,7 +248,9 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		BundleContextImpl[] users = null;
 
 		synchronized (registrationLock) {
-			/* we have published the ServiceEvent, now mark the service fully unregistered */
+			/*
+			 * we have published the ServiceEvent, now mark the service fully unregistered
+			 */
 			state = UNREGISTERED;
 
 			size = contextsUsing.size();
@@ -284,11 +288,11 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	}
 
 	/**
-	 * Returns a {@link ServiceReferenceImpl} object for this registration.
-	 * The {@link ServiceReferenceImpl} object may be shared with other bundles.
+	 * Returns a {@link ServiceReferenceImpl} object for this registration. The
+	 * {@link ServiceReferenceImpl} object may be shared with other bundles.
 	 *
-	 * @exception java.lang.IllegalStateException If
-	 * this ServiceRegistration has already been unregistered.
+	 * @exception java.lang.IllegalStateException If this ServiceRegistration has
+	 *                                            already been unregistered.
 	 * @return A {@link ServiceReferenceImpl} object.
 	 */
 	@Override
@@ -309,10 +313,11 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	}
 
 	ServiceReferenceImpl<S> getReferenceImpl() {
-		/* use reference instead of unregistered so that ServiceFactorys, called
-		 * by releaseService after the registration is unregistered, can
-		 * get the ServiceReference. Note this technically may violate the spec
-		 * but makes more sense.
+		/*
+		 * use reference instead of unregistered so that ServiceFactorys, called by
+		 * releaseService after the registration is unregistered, can get the
+		 * ServiceReference. Note this technically may violate the spec but makes more
+		 * sense.
 		 */
 		synchronized (registrationLock) {
 			if (reference == null) {
@@ -324,14 +329,14 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	}
 
 	/**
-	 * Count of service properties set by framework for each
-	 * service registration.
+	 * Count of service properties set by framework for each service registration.
 	 * <ul>
 	 * <li>Constants.OBJECTCLASS</li>
 	 * <li>Constants.SERVICE_ID</li>
 	 * <li>Constants.SERVICE_BUNDLEID</li>
 	 * <li>Constants.SERVICE_SCOPE</li>
 	 * </ul>
+	 * 
 	 * @see #createProperties(Dictionary)
 	 */
 	private static final int FRAMEWORK_SET_SERVICE_PROPERTIES_COUNT = 4;
@@ -369,7 +374,9 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		} else {
 			serviceranking = 0;
 			if (ranking != null) {
-				registry.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.WARNING, getBundle(), new ServiceException("Invalid ranking type: " + ranking.getClass(), ServiceException.UNSPECIFIED)); //$NON-NLS-1$
+				registry.getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.WARNING, getBundle(),
+						new ServiceException("Invalid ranking type: " + ranking.getClass(), //$NON-NLS-1$
+								ServiceException.UNSPECIFIED));
 			}
 		}
 
@@ -378,6 +385,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 
 	/**
 	 * Return the properties object. This is for framework internal use only.
+	 * 
 	 * @return The service registration's properties.
 	 */
 	public Map<String, Object> getProperties() {
@@ -389,14 +397,14 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	/**
 	 * Get the value of a service's property.
 	 *
-	 * <p>This method will continue to return property values after the
-	 * service has been unregistered. This is so that references to
-	 * unregistered service can be interrogated.
-	 * (For example: ServiceReference objects stored in the log.)
+	 * <p>
+	 * This method will continue to return property values after the service has
+	 * been unregistered. This is so that references to unregistered service can be
+	 * interrogated. (For example: ServiceReference objects stored in the log.)
 	 *
 	 * @param key Name of the property.
-	 * @return Value of the property or <code>null</code> if there is
-	 * no property by that name.
+	 * @return Value of the property or <code>null</code> if there is no property by
+	 *         that name.
 	 */
 	Object getProperty(String key) {
 		synchronized (registrationLock) {
@@ -407,10 +415,10 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	/**
 	 * Get the list of key names for the service's properties.
 	 *
-	 * <p>This method will continue to return the keys after the
-	 * service has been unregistered. This is so that references to
-	 * unregistered service can be interrogated.
-	 * (For example: ServiceReference objects stored in the log.)
+	 * <p>
+	 * This method will continue to return the keys after the service has been
+	 * unregistered. This is so that references to unregistered service can be
+	 * interrogated. (For example: ServiceReference objects stored in the log.)
 	 *
 	 * @return The list of property key names.
 	 */
@@ -423,10 +431,10 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	/**
 	 * Get a copy of the service's properties.
 	 *
-	 * <p>This method will continue to return the properties after the
-	 * service has been unregistered. This is so that references to
-	 * unregistered service can be interrogated.
-	 * (For example: ServiceReference objects stored in the log.)
+	 * <p>
+	 * This method will continue to return the properties after the service has been
+	 * unregistered. This is so that references to unregistered service can be
+	 * interrogated. (For example: ServiceReference objects stored in the log.)
 	 *
 	 * @return A copy of the properties.
 	 */
@@ -438,6 +446,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 
 	/**
 	 * Return the service id for this service.
+	 * 
 	 * @return The service id for this service.
 	 */
 	long getId() {
@@ -446,6 +455,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 
 	/**
 	 * Return the service ranking for this service.
+	 * 
 	 * @return The service ranking for this service.
 	 */
 	int getRanking() {
@@ -465,9 +475,10 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	/**
 	 * Return the bundle which registered the service.
 	 *
-	 * <p>This method will always return <code>null</code> when the
-	 * service has been unregistered. This can be used to
-	 * determine if the service has been unregistered.
+	 * <p>
+	 * This method will always return <code>null</code> when the service has been
+	 * unregistered. This can be used to determine if the service has been
+	 * unregistered.
 	 *
 	 * @return The bundle which registered the service.
 	 */
@@ -482,10 +493,10 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	}
 
 	/**
-	 * This method returns the bundle which registered the
-	 * service regardless of the registration status of this
-	 * service registration.  This is not an OSGi specified
-	 * method.
+	 * This method returns the bundle which registered the service regardless of the
+	 * registration status of this service registration. This is not an OSGi
+	 * specified method.
+	 * 
 	 * @return The bundle which registered the service.
 	 */
 	public Bundle getRegisteringBundle() {
@@ -495,7 +506,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	/**
 	 * Get a service object for the using BundleContext.
 	 *
-	 * @param user BundleContext using service.
+	 * @param user     BundleContext using service.
 	 * @param consumer The closure for the consumer type.
 	 * @return Service object
 	 */
@@ -522,8 +533,10 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 				@SuppressWarnings("unchecked")
 				ServiceUse<S> u = (ServiceUse<S>) servicesInUse.get(this);
 				if (u == null) {
-					/* if this is the first use of the service
-					 * optimistically record this service is being used. */
+					/*
+					 * if this is the first use of the service optimistically record this service is
+					 * being used.
+					 */
 					use = newServiceUse(user);
 					added = true;
 					synchronized (registrationLock) {
@@ -582,7 +595,6 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		}
 	}
 
-
 	/**
 	 * Create a new ServiceObjects for the requesting bundle.
 	 *
@@ -620,12 +632,12 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	/**
 	 * Unget a service for the using BundleContext.
 	 *
-	 * @param user BundleContext using service.
-	 * @param consumer The closure for the consumer type.
+	 * @param user          BundleContext using service.
+	 * @param consumer      The closure for the consumer type.
 	 * @param serviceObject The service object to release for prototype consumers.
 	 * @return <code>false</code> if the context bundle's use count for the service
-	 *         is zero or if the service has been unregistered,
-	 *         otherwise <code>true</code>.
+	 *         is zero or if the service has been unregistered, otherwise
+	 *         <code>true</code>.
 	 */
 	boolean ungetService(BundleContextImpl user, ServiceConsumer consumer, S serviceObject) {
 		if (isUnregistered()) {
@@ -767,8 +779,8 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	 * <code>ServiceRegistrationImpl</code> for order.
 	 *
 	 * <p>
-	 * This does a reverse comparison so that the highest item is sorted to the left.
-	 * We keep ServiceRegistationImpls in sorted lists such that the highest
+	 * This does a reverse comparison so that the highest item is sorted to the
+	 * left. We keep ServiceRegistationImpls in sorted lists such that the highest
 	 * ranked service is at element 0 for quick retrieval.
 	 *
 	 * @param other The <code>ServiceRegistrationImpl</code> to be compared.

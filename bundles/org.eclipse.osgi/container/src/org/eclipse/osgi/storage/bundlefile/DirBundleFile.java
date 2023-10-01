@@ -38,6 +38,7 @@ public class DirBundleFile extends BundleFile {
 
 	/**
 	 * Constructs a DirBundleFile
+	 * 
 	 * @param basefile the base file
 	 */
 	public DirBundleFile(File basefile, boolean enableStrictBundleEntryPath) throws IOException {
@@ -77,7 +78,8 @@ public class DirBundleFile extends BundleFile {
 		if (path != null) {
 			isBundleRoot = path.equals("/");//$NON-NLS-1$
 			if (!isBundleRoot) {
-				normalize = checkInBundle || path.indexOf(POINTER_SAME_DIRECTORY_1) >= 0 || path.indexOf(POINTER_SAME_DIRECTORY_2) >= 0;
+				normalize = checkInBundle || path.indexOf(POINTER_SAME_DIRECTORY_1) >= 0
+						|| path.indexOf(POINTER_SAME_DIRECTORY_2) >= 0;
 			}
 		}
 		File canonicalFile;

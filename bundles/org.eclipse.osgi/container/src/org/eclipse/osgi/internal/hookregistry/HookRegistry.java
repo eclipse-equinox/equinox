@@ -34,43 +34,49 @@ import org.eclipse.osgi.internal.weaving.WeavingHookConfigurator;
 import org.eclipse.osgi.util.ManifestElement;
 
 /**
- * The hook registry is used to store all the hooks which are
- * configured by the hook configurators.
+ * The hook registry is used to store all the hooks which are configured by the
+ * hook configurators.
+ * 
  * @see HookConfigurator
  */
 public final class HookRegistry {
 	/**
-	 * The hook configurators properties file (&quot;hookconfigurators.properties&quot;) <p>
-	 * A framework extension may supply a hook configurators properties file to specify a
-	 * list of hook configurators.
+	 * The hook configurators properties file
+	 * (&quot;hookconfigurators.properties&quot;)
+	 * <p>
+	 * A framework extension may supply a hook configurators properties file to
+	 * specify a list of hook configurators.
+	 * 
 	 * @see #HOOK_CONFIGURATORS
 	 */
 	public static final String HOOK_CONFIGURATORS_FILE = "hookconfigurators.properties"; //$NON-NLS-1$
 
 	/**
-	 * The hook configurators property key (&quot;hookconfigurators.properties&quot;) used in
-	 * a hook configurators properties file to specify a comma separated list of fully
-	 * qualified hook configurator classes.
+	 * The hook configurators property key
+	 * (&quot;hookconfigurators.properties&quot;) used in a hook configurators
+	 * properties file to specify a comma separated list of fully qualified hook
+	 * configurator classes.
 	 */
 	public static final String HOOK_CONFIGURATORS = "hook.configurators"; //$NON-NLS-1$
 
 	/**
-	 * A system property (&quot;osgi.hook.configurators.include&quot;) used to add additional
-	 * hook configurators.  This is helpful for configuring optional hook configurators.
+	 * A system property (&quot;osgi.hook.configurators.include&quot;) used to add
+	 * additional hook configurators. This is helpful for configuring optional hook
+	 * configurators.
 	 */
 	public static final String PROP_HOOK_CONFIGURATORS_INCLUDE = "osgi.hook.configurators.include"; //$NON-NLS-1$
 
 	/**
-	 * A system property (&quot;osgi.hook.configurators.exclude&quot;) used to exclude
-	 * any hook configurators.  This is helpful for disabling hook
+	 * A system property (&quot;osgi.hook.configurators.exclude&quot;) used to
+	 * exclude any hook configurators. This is helpful for disabling hook
 	 * configurators that is specified in hook configurator properties files.
 	 */
 	public static final String PROP_HOOK_CONFIGURATORS_EXCLUDE = "osgi.hook.configurators.exclude"; //$NON-NLS-1$
 
 	/**
-	 * A system property (&quot;osgi.hook.configurators&quot;) used to specify the list
-	 * of hook configurators.  If this property is set then the list of configurators
-	 * specified will be the only configurators used.
+	 * A system property (&quot;osgi.hook.configurators&quot;) used to specify the
+	 * list of hook configurators. If this property is set then the list of
+	 * configurators specified will be the only configurators used.
 	 */
 	public static final String PROP_HOOK_CONFIGURATORS = "osgi.hook.configurators"; //$NON-NLS-1$
 
@@ -81,26 +87,41 @@ public final class HookRegistry {
 	private final List<ClassLoaderHook> classLoaderHooks = new ArrayList<>();
 	private final List<ClassLoaderHook> classLoaderHooksRO = Collections.unmodifiableList(classLoaderHooks);
 	private final List<StorageHookFactory<?, ?, ?>> storageHookFactories = new ArrayList<>();
-	private final List<StorageHookFactory<?, ?, ?>> storageHookFactoriesRO = Collections.unmodifiableList(storageHookFactories);
+	private final List<StorageHookFactory<?, ?, ?>> storageHookFactoriesRO = Collections
+			.unmodifiableList(storageHookFactories);
 	private final List<BundleFileWrapperFactoryHook> bundleFileWrapperFactoryHooks = new ArrayList<>();
-	private final List<BundleFileWrapperFactoryHook> bundleFileWrapperFactoryHooksRO = Collections.unmodifiableList(bundleFileWrapperFactoryHooks);
+	private final List<BundleFileWrapperFactoryHook> bundleFileWrapperFactoryHooksRO = Collections
+			.unmodifiableList(bundleFileWrapperFactoryHooks);
 	private final List<ActivatorHookFactory> activatorHookFactories = new ArrayList<>();
-	private final List<ActivatorHookFactory> activatorHookFactoriesRO = Collections.unmodifiableList(activatorHookFactories);
+	private final List<ActivatorHookFactory> activatorHookFactoriesRO = Collections
+			.unmodifiableList(activatorHookFactories);
 
 	public HookRegistry(EquinoxContainer container) {
 		this.container = container;
 	}
 
 	/**
-	 * Initializes the hook configurators.  The following steps are used to initialize the hook configurators. <p>
-	 * 1. Get a list of hook configurators from all hook configurators properties files on the classpath,
-	 *    add this list to the overall list of hook configurators, remove duplicates. <p>
-	 * 2. Get a list of hook configurators from the (&quot;osgi.hook.configurators.include&quot;) system property
-	 *    and add this list to the overall list of hook configurators, remove duplicates. <p>
-	 * 3. Get a list of hook configurators from the (&quot;osgi.hook.configurators.exclude&quot;) system property
-	 *    and remove this list from the overall list of hook configurators. <p>
-	 * 4. Load each hook configurator class, create a new instance, then call the {@link HookConfigurator#addHooks(HookRegistry)} method <p>
-	 * 5. Set this HookRegistry object to read only to prevent any other hooks from being added. <p>
+	 * Initializes the hook configurators. The following steps are used to
+	 * initialize the hook configurators.
+	 * <p>
+	 * 1. Get a list of hook configurators from all hook configurators properties
+	 * files on the classpath, add this list to the overall list of hook
+	 * configurators, remove duplicates.
+	 * <p>
+	 * 2. Get a list of hook configurators from the
+	 * (&quot;osgi.hook.configurators.include&quot;) system property and add this
+	 * list to the overall list of hook configurators, remove duplicates.
+	 * <p>
+	 * 3. Get a list of hook configurators from the
+	 * (&quot;osgi.hook.configurators.exclude&quot;) system property and remove this
+	 * list from the overall list of hook configurators.
+	 * <p>
+	 * 4. Load each hook configurator class, create a new instance, then call the
+	 * {@link HookConfigurator#addHooks(HookRegistry)} method
+	 * <p>
+	 * 5. Set this HookRegistry object to read only to prevent any other hooks from
+	 * being added.
+	 * <p>
 	 */
 	public void initialize() {
 		List<String> configurators = new ArrayList<>(5);
@@ -129,9 +150,11 @@ public final class HookRegistry {
 		// get all hook configurators files in your classloader delegation
 		Enumeration<URL> hookConfigurators;
 		try {
-			hookConfigurators = cl != null ? cl.getResources(HookRegistry.HOOK_CONFIGURATORS_FILE) : ClassLoader.getSystemResources(HookRegistry.HOOK_CONFIGURATORS_FILE);
+			hookConfigurators = cl != null ? cl.getResources(HookRegistry.HOOK_CONFIGURATORS_FILE)
+					: ClassLoader.getSystemResources(HookRegistry.HOOK_CONFIGURATORS_FILE);
 		} catch (IOException e) {
-			errors.add(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, "getResources error on " + HookRegistry.HOOK_CONFIGURATORS_FILE, 0, e, null)); //$NON-NLS-1$
+			errors.add(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0,
+					"getResources error on " + HookRegistry.HOOK_CONFIGURATORS_FILE, 0, e, null)); //$NON-NLS-1$
 			return;
 		}
 		int curBuiltin = 0;
@@ -158,7 +181,8 @@ public final class HookRegistry {
 					}
 				}
 			} catch (IOException e) {
-				errors.add(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, "error loading: " + url.toExternalForm(), 0, e, null)); //$NON-NLS-1$
+				errors.add(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0,
+						"error loading: " + url.toExternalForm(), 0, e, null)); //$NON-NLS-1$
 				// ignore and continue to next URL
 			} finally {
 				if (input != null)
@@ -173,7 +197,8 @@ public final class HookRegistry {
 
 	private void mergePropertyHookConfigurators(List<String> configuratorList) {
 		// see if there is a configurators list
-		String[] configurators = ManifestElement.getArrayFromList(container.getConfiguration().getConfiguration(HookRegistry.PROP_HOOK_CONFIGURATORS), ","); //$NON-NLS-1$
+		String[] configurators = ManifestElement.getArrayFromList(
+				container.getConfiguration().getConfiguration(HookRegistry.PROP_HOOK_CONFIGURATORS), ","); //$NON-NLS-1$
 		if (configurators.length > 0) {
 			configuratorList.clear(); // clear the list, we are only going to use the configurators from the list
 			for (String configurator : configurators) {
@@ -184,14 +209,16 @@ public final class HookRegistry {
 			return; // don't do anything else
 		}
 		// Make sure the configurators from the include property are in the list
-		String[] includeConfigurators = ManifestElement.getArrayFromList(container.getConfiguration().getConfiguration(HookRegistry.PROP_HOOK_CONFIGURATORS_INCLUDE), ","); //$NON-NLS-1$
+		String[] includeConfigurators = ManifestElement.getArrayFromList(
+				container.getConfiguration().getConfiguration(HookRegistry.PROP_HOOK_CONFIGURATORS_INCLUDE), ","); //$NON-NLS-1$
 		for (String includeConfigurator : includeConfigurators) {
 			if (!configuratorList.contains(includeConfigurator)) {
 				configuratorList.add(includeConfigurator);
 			}
 		}
 		// Make sure the configurators from the exclude property are no in the list
-		String[] excludeHooks = ManifestElement.getArrayFromList(container.getConfiguration().getConfiguration(HookRegistry.PROP_HOOK_CONFIGURATORS_EXCLUDE), ","); //$NON-NLS-1$
+		String[] excludeHooks = ManifestElement.getArrayFromList(
+				container.getConfiguration().getConfiguration(HookRegistry.PROP_HOOK_CONFIGURATORS_EXCLUDE), ","); //$NON-NLS-1$
 		for (String excludeHook : excludeHooks) {
 			configuratorList.remove(excludeHook);
 		}
@@ -209,13 +236,15 @@ public final class HookRegistry {
 				// IllegalAccessException
 				// InstantiationException
 				// ClassCastException
-				errors.add(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, "error loading hook: " + hookName, 0, t, null)); //$NON-NLS-1$
+				errors.add(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0,
+						"error loading hook: " + hookName, 0, t, null)); //$NON-NLS-1$
 			}
 		}
 	}
 
 	/**
 	 * Returns the list of configured class loading hooks.
+	 * 
 	 * @return the list of configured class loading hooks.
 	 */
 	public List<ClassLoaderHook> getClassLoaderHooks() {
@@ -224,6 +253,7 @@ public final class HookRegistry {
 
 	/**
 	 * Returns the list of configured storage hooks.
+	 * 
 	 * @return the list of configured storage hooks.
 	 */
 	public List<StorageHookFactory<?, ?, ?>> getStorageHookFactories() {
@@ -232,6 +262,7 @@ public final class HookRegistry {
 
 	/**
 	 * Returns the configured bundle file wrapper factories
+	 * 
 	 * @return the configured bundle file wrapper factories
 	 */
 	public List<BundleFileWrapperFactoryHook> getBundleFileWrapperFactoryHooks() {
@@ -240,6 +271,7 @@ public final class HookRegistry {
 
 	/**
 	 * Returns the configured activator hook factories
+	 * 
 	 * @return the configured activator hook factories
 	 */
 	public List<ActivatorHookFactory> getActivatorHookFactories() {
@@ -254,6 +286,7 @@ public final class HookRegistry {
 
 	/**
 	 * Adds a class loader hook to this hook registry.
+	 * 
 	 * @param classLoaderHook a class loading hook object.
 	 */
 	public void addClassLoaderHook(ClassLoaderHook classLoaderHook) {
@@ -262,6 +295,7 @@ public final class HookRegistry {
 
 	/**
 	 * Adds a storage hook to this hook registry.
+	 * 
 	 * @param storageHookFactory a storage hook object.
 	 */
 	public void addStorageHookFactory(StorageHookFactory<?, ?, ?> storageHookFactory) {
@@ -270,6 +304,7 @@ public final class HookRegistry {
 
 	/**
 	 * Adds a bundle file wrapper factory for this hook registry
+	 * 
 	 * @param factory a bundle file wrapper factory object.
 	 */
 	public void addBundleFileWrapperFactoryHook(BundleFileWrapperFactoryHook factory) {
@@ -277,8 +312,9 @@ public final class HookRegistry {
 	}
 
 	/**
-	 * Adds an activator hook factory.  The activators created by this factory will be started and stopped
-	 * when the system bundle is started and stopped.
+	 * Adds an activator hook factory. The activators created by this factory will
+	 * be started and stopped when the system bundle is started and stopped.
+	 * 
 	 * @param activatorHookFactory the activator hook factory.
 	 */
 	public void addActivatorHookFactory(ActivatorHookFactory activatorHookFactory) {
@@ -287,6 +323,7 @@ public final class HookRegistry {
 
 	/**
 	 * Returns the configuration associated with this hook registry.
+	 * 
 	 * @return the configuration associated with this hook registry.
 	 */
 	public EquinoxConfiguration getConfiguration() {
@@ -295,6 +332,7 @@ public final class HookRegistry {
 
 	/**
 	 * Returns the equinox container associated with this hook registry.
+	 * 
 	 * @return the equinox container associated with this hook registry.
 	 */
 	public EquinoxContainer getContainer() {

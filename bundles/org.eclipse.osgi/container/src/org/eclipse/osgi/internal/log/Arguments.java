@@ -37,7 +37,8 @@ public class Arguments {
 			}
 			if (arguments.length > 1) {
 				object = arguments[arguments.length - 2];
-				if ((object instanceof ServiceReference && context == null) || (object instanceof Throwable && exception == null)) {
+				if ((object instanceof ServiceReference && context == null)
+						|| (object instanceof Throwable && exception == null)) {
 					length--;
 					if (object instanceof Throwable) {
 						exception = (Throwable) object;

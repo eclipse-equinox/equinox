@@ -23,17 +23,20 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
- * The ContentHandlerProxy is a ContentHandler that acts as a proxy for registered ContentHandlers.
- * When a ContentHandler is requested from the ContentHandlerFactory and it exists in the service
- * registry, a ContentHandlerProxy is created which will pass all the requests from the requestor to
- * the real ContentHandler.  We can't return the real ContentHandler from the ContentHandlerFactory
- * because the JVM caches ContentHandlers and therefore would not support a dynamic environment of
- * ContentHandlers being registered and unregistered.
+ * The ContentHandlerProxy is a ContentHandler that acts as a proxy for
+ * registered ContentHandlers. When a ContentHandler is requested from the
+ * ContentHandlerFactory and it exists in the service registry, a
+ * ContentHandlerProxy is created which will pass all the requests from the
+ * requestor to the real ContentHandler. We can't return the real ContentHandler
+ * from the ContentHandlerFactory because the JVM caches ContentHandlers and
+ * therefore would not support a dynamic environment of ContentHandlers being
+ * registered and unregistered.
  */
-public class ContentHandlerProxy extends ContentHandler implements ServiceTrackerCustomizer<ContentHandler, ServiceReference<ContentHandler>> {
+public class ContentHandlerProxy extends ContentHandler
+		implements ServiceTrackerCustomizer<ContentHandler, ServiceReference<ContentHandler>> {
 	protected ContentHandler realHandler;
 
-	//TODO avoid type-based names
+	// TODO avoid type-based names
 	protected ServiceTracker<ContentHandler, ServiceReference<ContentHandler>> contentHandlerServiceTracker;
 
 	protected BundleContext context;
@@ -47,7 +50,8 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 		this.context = context;
 		this.contentType = contentType;
 
-		// In case the reference == null, the proxy is constructed with DefaultContentHandler for a Content Handler
+		// In case the reference == null, the proxy is constructed with
+		// DefaultContentHandler for a Content Handler
 		// until a real ContentHandler for this mime-type is registered
 		setNewHandler(reference, getRank(reference));
 
@@ -73,10 +77,10 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 	 */
 	@Override
 	public ServiceReference<ContentHandler> addingService(ServiceReference<ContentHandler> reference) {
-		//check to see if our contentType is being registered by another service
+		// check to see if our contentType is being registered by another service
 		Object prop = reference.getProperty(URLConstants.URL_CONTENT_MIMETYPE);
 		if (prop instanceof String) {
-			prop = new String[] {(String) prop};
+			prop = new String[] { (String) prop };
 		}
 		if (!(prop instanceof String[])) {
 			return null;
@@ -84,7 +88,8 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 		String[] contentTypes = (String[]) prop;
 		for (String candidateContentType : contentTypes) {
 			if (candidateContentType.equals(contentType)) {
-				//If our contentType is registered by another service, check the service ranking and switch URLStreamHandlers if nessecary.
+				// If our contentType is registered by another service, check the service
+				// ranking and switch URLStreamHandlers if nessecary.
 				int newServiceRanking = getRank(reference);
 				if (newServiceRanking > ranking || contentHandlerServiceReference == null)
 					setNewHandler(reference, newServiceRanking);
@@ -92,12 +97,14 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 			}
 		}
 
-		//we don't want to continue hearing events about a ContentHandler service not registered under our contentType
+		// we don't want to continue hearing events about a ContentHandler service not
+		// registered under our contentType
 		return (null);
 	}
 
 	/**
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(ServiceReference, Object)
+	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(ServiceReference,
+	 *      Object)
 	 */
 
 	@Override
@@ -105,12 +112,14 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 		int newrank = getRank(reference);
 		if (reference == contentHandlerServiceReference) {
 			if (newrank < ranking) {
-				// The ContentHandler we are currently using has dropped it's ranking below a ContentHandler
-				// registered for the same protocol.  We need to swap out ContentHandlers.
+				// The ContentHandler we are currently using has dropped it's ranking below a
+				// ContentHandler
+				// registered for the same protocol. We need to swap out ContentHandlers.
 				// this should get us the highest ranked service, if available
 				ServiceReference<ContentHandler> newReference = contentHandlerServiceTracker.getServiceReference();
 				if (newReference != contentHandlerServiceReference && newReference != null) {
-					setNewHandler(newReference, ((Integer) newReference.getProperty(Constants.SERVICE_RANKING)).intValue());
+					setNewHandler(newReference,
+							((Integer) newReference.getProperty(Constants.SERVICE_RANKING)).intValue());
 				}
 			}
 		} else if (newrank > ranking) {
@@ -121,11 +130,12 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 	}
 
 	/**
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(ServiceReference, Object)
+	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(ServiceReference,
+	 *      Object)
 	 */
 	@Override
 	public void removedService(ServiceReference<ContentHandler> reference, ServiceReference<ContentHandler> service) {
-		//check to see if our URLStreamHandler was unregistered.
+		// check to see if our URLStreamHandler was unregistered.
 		if (reference != contentHandlerServiceReference)
 			return;
 		// If so, look for a lower ranking URLHandler

@@ -20,12 +20,13 @@ import org.osgi.service.url.URLStreamHandlerService;
 import org.osgi.service.url.URLStreamHandlerSetter;
 
 /**
- * The NullURLStreamService is created when a registered URLStreamHandler service
- * with an associated URLStreamHandlerProxy becomes unregistered.  The associated
- * URLStreamHandlerProxy must still handle all future requests for the now unregistered
- * scheme (the JVM caches URLStreamHandlers making up impossible to "unregister" them).
- * When requests come in for an unregistered URLStreamHandlerService, the
- * NullURLStreamHandlerService is used in it's place.
+ * The NullURLStreamService is created when a registered URLStreamHandler
+ * service with an associated URLStreamHandlerProxy becomes unregistered. The
+ * associated URLStreamHandlerProxy must still handle all future requests for
+ * the now unregistered scheme (the JVM caches URLStreamHandlers making up
+ * impossible to "unregister" them). When requests come in for an unregistered
+ * URLStreamHandlerService, the NullURLStreamHandlerService is used in it's
+ * place.
  */
 
 public class NullURLStreamHandlerService implements URLStreamHandlerService {
@@ -65,7 +66,8 @@ public class NullURLStreamHandlerService implements URLStreamHandlerService {
 		throw new IllegalStateException();
 	}
 
-	public void setURL(URL u, String protocol, String host, int port, String authority, String userInfo, String file, String query, String ref) {
+	public void setURL(URL u, String protocol, String host, int port, String authority, String userInfo, String file,
+			String query, String ref) {
 		throw new IllegalStateException();
 	}
 

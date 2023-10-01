@@ -80,20 +80,19 @@ public class TextProcessor {
 
 		if ("iw".equals(lang) || "he".equals(lang) || "ar".equals(lang) || "fa".equals(lang) || "ur".equals(lang)) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			String osName = System.getProperty("os.name").toLowerCase(); //$NON-NLS-1$
-			if (osName.startsWith("windows") || osName.startsWith("linux") || osName.startsWith("mac") || osName.startsWith("freebsd")) { //$NON-NLS-1$	//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			if (osName.startsWith("windows") || osName.startsWith("linux") || osName.startsWith("mac") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					|| osName.startsWith("freebsd")) { //$NON-NLS-1$
 				IS_PROCESSING_NEEDED = true;
 			}
 		}
 	}
 
 	/**
-	 * Process the given text and return a string with the appropriate
-	 * substitution based on the locale. This is equivalent to calling
-	 * <code>process(String, String)</code> with the default set of
-	 * delimiters.
+	 * Process the given text and return a string with the appropriate substitution
+	 * based on the locale. This is equivalent to calling
+	 * <code>process(String, String)</code> with the default set of delimiters.
 	 *
-	 * @param text
-	 *            the text to be processed
+	 * @param text the text to be processed
 	 * @return the manipulated string
 	 * @see #process(String, String)
 	 * @see #getDefaultDelimiters()
@@ -106,51 +105,48 @@ public class TextProcessor {
 
 	/**
 	 * Process a string that has a particular semantic meaning to render on BiDi
-	 * locales in way that maintains the semantic meaning of the text, but
-	 * differs from the Unicode BiDi algorithm. The text is segmented according
-	 * to the provided delimiters. Each segment has the Unicode BiDi algorithm
-	 * applied to it, but as a whole, the string is oriented left to right.
+	 * locales in way that maintains the semantic meaning of the text, but differs
+	 * from the Unicode BiDi algorithm. The text is segmented according to the
+	 * provided delimiters. Each segment has the Unicode BiDi algorithm applied to
+	 * it, but as a whole, the string is oriented left to right.
 	 * <p>
 	 * For example a file path such as <code>d:\myFolder\FOLDER\MYFILE.java</code>
 	 * (where capital letters indicate RTL text) should render as
 	 * <code>d:\myFolder\REDLOF\ELIFYM.java</code> when using the Unicode BiDi
-	 * algorithm and segmenting the string according to the specified delimiter
-	 * set.
+	 * algorithm and segmenting the string according to the specified delimiter set.
 	 * </p>
 	 * <p>
 	 * The following algorithm is used:
 	 * </p>
 	 * <ol>
 	 * <li>Scan the string to locate the delimiters.</li>
-	 * <li>While scanning, note the direction of the last strong character
-	 * scanned. Strong characters are characters which have a BiDi
-	 * classification of L, R or AL as defined in the Unicode standard.</li>
-	 * <li>If the last strong character before a separator is of class R or AL,
-	 * add a LRM before the separator. Since LRM itself is a strong L character,
-	 * following separators do not need an LRM until a strong R or AL character
-	 * is found.</li>
+	 * <li>While scanning, note the direction of the last strong character scanned.
+	 * Strong characters are characters which have a BiDi classification of L, R or
+	 * AL as defined in the Unicode standard.</li>
+	 * <li>If the last strong character before a separator is of class R or AL, add
+	 * a LRM before the separator. Since LRM itself is a strong L character,
+	 * following separators do not need an LRM until a strong R or AL character is
+	 * found.</li>
 	 * <li>If the component where the pattern is displayed has a RTL basic
-	 * direction, add a LRE at the beginning of the pattern and a PDF at its
-	 * end. The string is considered to have RTL direction if it contains RTL
-	 * characters and the runtime locale is BiDi. There is no need to add
-	 * LRE/PDF if the string begins with an LTR letter, contains no RTL letter,
-	 * and ends with either a LTR letter or a digit.</li>
+	 * direction, add a LRE at the beginning of the pattern and a PDF at its end.
+	 * The string is considered to have RTL direction if it contains RTL characters
+	 * and the runtime locale is BiDi. There is no need to add LRE/PDF if the string
+	 * begins with an LTR letter, contains no RTL letter, and ends with either a LTR
+	 * letter or a digit.</li>
 	 * </ol>
 	 * <p>
-	 * NOTE: this method will change the shape of the original string passed in
-	 * by inserting punctuation characters into the text in order to make it
-	 * render to correctly reflect the semantic meaning of the text. Methods
-	 * like <code>String.equals(String)</code> and
-	 * <code>String.length()</code> called on the resulting string will not
-	 * return the same values as would be returned for the original string.
+	 * NOTE: this method will change the shape of the original string passed in by
+	 * inserting punctuation characters into the text in order to make it render to
+	 * correctly reflect the semantic meaning of the text. Methods like
+	 * <code>String.equals(String)</code> and <code>String.length()</code> called on
+	 * the resulting string will not return the same values as would be returned for
+	 * the original string.
 	 * </p>
 	 *
-	 * @param str
-	 *            the text to process, if <code>null</code> return the string
-	 *            as it was passed in
-	 * @param delimiter
-	 *            delimiters by which the string will be segmented, if
-	 *            <code>null</code> the default delimiters are used
+	 * @param str       the text to process, if <code>null</code> return the string
+	 *                  as it was passed in
+	 * @param delimiter delimiters by which the string will be segmented, if
+	 *                  <code>null</code> the default delimiters are used
 	 * @return the processed string
 	 */
 	public static String process(String str, String delimiter) {
@@ -209,13 +205,11 @@ public class TextProcessor {
 			target.append(ch);
 		}
 		/*
-		 * TextProcessor is not aware of the orientation of the component owning
-		 * the processed string. Enclose the string in LRE/PDF in either of 2
-		 * cases:
-		 * (1) The string contains BiDi characters - implying that the
-		 * string appearance depends on the basic orientation
-		 * (2) The runtime locale is BiDi AND either the string does not start with
-		 * an LTR character or it ends with LTR char or digit.
+		 * TextProcessor is not aware of the orientation of the component owning the
+		 * processed string. Enclose the string in LRE/PDF in either of 2 cases: (1) The
+		 * string contains BiDi characters - implying that the string appearance depends
+		 * on the basic orientation (2) The runtime locale is BiDi AND either the string
+		 * does not start with an LTR character or it ends with LTR char or digit.
 		 */
 		if (isStringBidi || !Character.isLetter(str.charAt(0)) || isNeutral(str.charAt(str.length() - 1))) {
 			target.append(PDF);
@@ -226,9 +220,9 @@ public class TextProcessor {
 	}
 
 	/**
-	 * Removes directional marker characters in the given string that were inserted by
-	 * utilizing the <code>process(String)</code> or <code>process(String, String)</code>
-	 * methods.
+	 * Removes directional marker characters in the given string that were inserted
+	 * by utilizing the <code>process(String)</code> or
+	 * <code>process(String, String)</code> methods.
 	 *
 	 * @param str string with directional markers to remove
 	 * @return string with no directional markers
@@ -244,14 +238,14 @@ public class TextProcessor {
 		for (int i = 0; i < str.length(); i++) {
 			char c = str.charAt(i);
 			switch (c) {
-				case LRE :
-					continue;
-				case PDF :
-					continue;
-				case LRM :
-					continue;
-				default :
-					buf.append(c);
+			case LRE:
+				continue;
+			case PDF:
+				continue;
+			case LRM:
+				continue;
+			default:
+				buf.append(c);
 			}
 		}
 
@@ -259,8 +253,8 @@ public class TextProcessor {
 	}
 
 	/**
-	 * Return the string containing all the default delimiter characters to be
-	 * used to segment a given string.
+	 * Return the string containing all the default delimiter characters to be used
+	 * to segment a given string.
 	 *
 	 * @return delimiter string
 	 */
@@ -273,12 +267,11 @@ public class TextProcessor {
 	 */
 	private static boolean isRTL(char c) {
 		/*
-		 * Cannot use Character.getDirectionality() since the OSGi library can
-		 * be compiled with execution environments that pre-date that API.
+		 * Cannot use Character.getDirectionality() since the OSGi library can be
+		 * compiled with execution environments that pre-date that API.
 		 *
-		 * The first range of characters is Unicode Hebrew and Arabic
-		 * characters. The second range of characters is Unicode Hebrew and
-		 * Arabic presentation forms.
+		 * The first range of characters is Unicode Hebrew and Arabic characters. The
+		 * second range of characters is Unicode Hebrew and Arabic presentation forms.
 		 *
 		 * NOTE: Farsi and Urdu fall within the Arabic scripts.
 		 */

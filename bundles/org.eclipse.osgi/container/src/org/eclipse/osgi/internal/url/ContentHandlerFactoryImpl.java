@@ -32,11 +32,12 @@ import org.osgi.service.url.URLConstants;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * The ContentHandlerFactory is registered with the JVM to provide content handlers
- * to requestors.  The ContentHandlerFactory will first look for built-in content handlers.
- * If a built in handler exists, this factory will return null.  Otherwise, this ContentHandlerFactory
- * will search the service registry for a maching Content-Handler and, if found, return a
- * proxy for that content handler.
+ * The ContentHandlerFactory is registered with the JVM to provide content
+ * handlers to requestors. The ContentHandlerFactory will first look for
+ * built-in content handlers. If a built in handler exists, this factory will
+ * return null. Otherwise, this ContentHandlerFactory will search the service
+ * registry for a maching Content-Handler and, if found, return a proxy for that
+ * content handler.
  */
 public class ContentHandlerFactoryImpl extends MultiplexingFactory implements java.net.ContentHandlerFactory {
 	private ServiceTracker<ContentHandler, ContentHandler> contentHandlerTracker;
@@ -45,7 +46,8 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 	private static final String CONTENT_HANDLER_PKGS = "java.content.handler.pkgs"; //$NON-NLS-1$
 	private static final String DEFAULT_VM_CONTENT_HANDLERS = "sun.net.www.content|sun.awt.www.content"; //$NON-NLS-1$
 
-	private static final List<Class<?>> ignoredClasses = Arrays.asList(new Class<?>[] {MultiplexingContentHandler.class, ContentHandlerFactoryImpl.class, URLConnection.class});
+	private static final List<Class<?>> ignoredClasses = Arrays.asList(
+			new Class<?>[] { MultiplexingContentHandler.class, ContentHandlerFactoryImpl.class, URLConnection.class });
 
 	private Map<String, ContentHandlerProxy> proxies;
 	private java.net.ContentHandlerFactory parentFactory;
@@ -55,7 +57,7 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 
 		proxies = new Hashtable<>(5);
 
-		//We need to track content handler registrations
+		// We need to track content handler registrations
 		contentHandlerTracker = new ServiceTracker<>(context, contentHandlerClazz, null);
 		contentHandlerTracker.open();
 	}
@@ -63,17 +65,19 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 	/**
 	 * @see java.net.ContentHandlerFactory#createContentHandler(String)
 	 */
-	//TODO method is too long... consider reducing indentation (returning quickly) and moving complex steps to private methods
+	// TODO method is too long... consider reducing indentation (returning quickly)
+	// and moving complex steps to private methods
 	@Override
 	public ContentHandler createContentHandler(String contentType) {
-		//first, we check to see if there exists a built in content handler for
-		//this content type.  we can not overwrite built in ContentHandlers
+		// first, we check to see if there exists a built in content handler for
+		// this content type. we can not overwrite built in ContentHandlers
 		String builtInHandlers = URLStreamHandlerFactoryImpl.secureAction.getProperty(CONTENT_HANDLER_PKGS);
-		builtInHandlers = builtInHandlers == null ? DEFAULT_VM_CONTENT_HANDLERS : DEFAULT_VM_CONTENT_HANDLERS + '|' + builtInHandlers;
+		builtInHandlers = builtInHandlers == null ? DEFAULT_VM_CONTENT_HANDLERS
+				: DEFAULT_VM_CONTENT_HANDLERS + '|' + builtInHandlers;
 		Class<?> clazz = null;
 		if (builtInHandlers != null) {
-			//replace '/' with a '.' and all characters not allowed in a java class name
-			//with a '_'.
+			// replace '/' with a '.' and all characters not allowed in a java class name
+			// with a '_'.
 
 			// find all characters not allowed in java names
 			String convertedContentType = contentType.replace('.', '_');
@@ -88,10 +92,10 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 				try {
 					clazz = URLStreamHandlerFactoryImpl.secureAction.loadSystemClass(name.toString());
 					if (clazz != null) {
-						return (null); //this class exists, it is a built in handler, let the JVM handle it
+						return (null); // this class exists, it is a built in handler, let the JVM handle it
 					}
 				} catch (ClassNotFoundException ex) {
-					//keep looking
+					// keep looking
 				}
 			}
 		}
@@ -103,7 +107,7 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 	}
 
 	public ContentHandler createInternalContentHandler(String contentType) {
-		//first check to see if the handler is in the cache
+		// first check to see if the handler is in the cache
 		ContentHandlerProxy proxy = proxies.get(contentType);
 		if (proxy != null) {
 			return (proxy);
@@ -113,9 +117,10 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 			for (ServiceReference<ContentHandler> serviceReference : serviceReferences) {
 				Object prop = serviceReference.getProperty(URLConstants.URL_CONTENT_MIMETYPE);
 				if (prop instanceof String)
-					prop = new String[] {(String) prop}; // TODO should this be a warning?
+					prop = new String[] { (String) prop }; // TODO should this be a warning?
 				if (!(prop instanceof String[])) {
-					String message = NLS.bind(Msg.URL_HANDLER_INCORRECT_TYPE, new Object[]{URLConstants.URL_CONTENT_MIMETYPE, contentHandlerClazz, serviceReference.getBundle()});
+					String message = NLS.bind(Msg.URL_HANDLER_INCORRECT_TYPE, new Object[] {
+							URLConstants.URL_CONTENT_MIMETYPE, contentHandlerClazz, serviceReference.getBundle() });
 					container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, message, null);
 					continue;
 				}
@@ -135,8 +140,10 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 			if (parentHandler != null)
 				return parentHandler;
 		}
-		//If we can't find the content handler in the service registry, return Proxy with DefaultContentHandler set.
-		//We need to do this because if we return null, we won't get called again for this content type.
+		// If we can't find the content handler in the service registry, return Proxy
+		// with DefaultContentHandler set.
+		// We need to do this because if we return null, we won't get called again for
+		// this content type.
 		proxy = new ContentHandlerProxy(contentType, null, context);
 		proxies.put(contentType, proxy);
 		return (proxy);
@@ -151,10 +158,12 @@ public class ContentHandlerFactoryImpl extends MultiplexingFactory implements ja
 			return createInternalContentHandler(contentType);
 
 		try {
-			Method createInternalContentHandlerMethod = factory.getClass().getMethod("createInternalContentHandler", new Class[] {String.class}); //$NON-NLS-1$
-			return (ContentHandler) createInternalContentHandlerMethod.invoke(factory, new Object[] {contentType});
+			Method createInternalContentHandlerMethod = factory.getClass().getMethod("createInternalContentHandler", //$NON-NLS-1$
+					new Class[] { String.class });
+			return (ContentHandler) createInternalContentHandlerMethod.invoke(factory, new Object[] { contentType });
 		} catch (Exception e) {
-			container.getLogServices().log(ContentHandlerFactoryImpl.class.getName(), FrameworkLogEntry.ERROR, "findAuthorizedContentHandler-loop", e); //$NON-NLS-1$
+			container.getLogServices().log(ContentHandlerFactoryImpl.class.getName(), FrameworkLogEntry.ERROR,
+					"findAuthorizedContentHandler-loop", e); //$NON-NLS-1$
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}

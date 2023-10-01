@@ -26,23 +26,27 @@ public class DefaultStartupMonitor implements StartupMonitor {
 	private final EquinoxConfiguration equinoxConfig;
 
 	/**
-	 * Create a new startup monitor using the given splash handler.  The splash handle must
-	 * have an updateSplash method.
+	 * Create a new startup monitor using the given splash handler. The splash
+	 * handle must have an updateSplash method.
 	 */
-	public DefaultStartupMonitor(Runnable splashHandler, EquinoxConfiguration equinoxConfig) throws IllegalStateException {
+	public DefaultStartupMonitor(Runnable splashHandler, EquinoxConfiguration equinoxConfig)
+			throws IllegalStateException {
 		this.splashHandler = splashHandler;
 		this.equinoxConfig = equinoxConfig;
 
 		try {
 			updateMethod = splashHandler.getClass().getMethod("updateSplash", (Class[]) null); //$NON-NLS-1$
 		} catch (SecurityException | NoSuchMethodException e) {
-			//TODO maybe we could do something else in the update method in this case, like print something to the console?
+			// TODO maybe we could do something else in the update method in this case, like
+			// print something to the console?
 			throw new IllegalStateException(e.getMessage(), e);
 		}
 
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.core.runtime.adaptor.StartupMonitor#update()
 	 */
 	@Override
@@ -54,7 +58,7 @@ public class DefaultStartupMonitor implements StartupMonitor {
 				// ignore, this is best effort
 			}
 		} else {
-			//TODO maybe we could print something interesting to the console?
+			// TODO maybe we could print something interesting to the console?
 		}
 	}
 

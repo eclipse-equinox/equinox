@@ -63,7 +63,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 		LINE_SEPARATOR = s == null ? "\n" : s; //$NON-NLS-1$
 	}
 
-	//Constants for rotating log file
+	// Constants for rotating log file
 	/** The default size a log file can grow before it is rotated */
 	private static final int DEFAULT_LOG_SIZE = 1000;
 	/** The default number of backup log files */
@@ -73,23 +73,35 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	/** The system property used to specify the log level */
 	private static final String PROP_LOG_LEVEL = "eclipse.log.level"; //$NON-NLS-1$
-	/** The system property used to specify size a log file can grow before it is rotated */
+	/**
+	 * The system property used to specify size a log file can grow before it is
+	 * rotated
+	 */
 	private static final String PROP_LOG_SIZE_MAX = "eclipse.log.size.max"; //$NON-NLS-1$
-	/** The system property used to specify the maximim number of backup log files to use */
+	/**
+	 * The system property used to specify the maximim number of backup log files to
+	 * use
+	 */
 	private static final String PROP_LOG_FILE_MAX = "eclipse.log.backup.max"; //$NON-NLS-1$
 	/** The extension used for log files */
 	private static final String LOG_EXT = ".log"; //$NON-NLS-1$
-	/** The extension markup to use for backup log files*/
+	/** The extension markup to use for backup log files */
 	private static final String BACKUP_MARK = ".bak_"; //$NON-NLS-1$
 
-	/** The system property used to specify command line args should be omitted from the log */
+	/**
+	 * The system property used to specify command line args should be omitted from
+	 * the log
+	 */
 	private static final String PROP_LOG_INCLUDE_COMMAND_LINE = "eclipse.log.include.commandline"; //$NON-NLS-1$
-	/** Indicates if the console messages should be printed to the console (System.out) */
+	/**
+	 * Indicates if the console messages should be printed to the console
+	 * (System.out)
+	 */
 	private boolean consoleLog = false;
 	/** Indicates if the next log message is part of a new session */
 	private boolean newSession = true;
 	/**
-	 * The File object to store messages.  This value may be null.
+	 * The File object to store messages. This value may be null.
 	 */
 	private File outFile;
 
@@ -113,6 +125,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	/**
 	 * Constructs an EclipseLog which uses the specified File to log messages to
+	 * 
 	 * @param outFile a file to log messages to
 	 */
 	public EquinoxLogWriter(File outFile, String loggerName, boolean enabled, EquinoxConfiguration environmentInfo) {
@@ -126,6 +139,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	/**
 	 * Constructs an EclipseLog which uses the specified Writer to log messages to
+	 * 
 	 * @param writer a writer to log messages to
 	 */
 	public EquinoxLogWriter(Writer writer, String loggerName, boolean enabled, EquinoxConfiguration environmentInfo) {
@@ -157,15 +171,16 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	/**
 	 * Helper method for writing out argument arrays.
+	 * 
 	 * @param header the header
-	 * @param args the list of arguments
+	 * @param args   the list of arguments
 	 */
 	private void writeArgs(String header, String[] args) throws IOException {
 		if (args == null || args.length == 0)
 			return;
 		write(header);
 		for (int i = 0; i < args.length; i++) {
-			//mask out the password argument for security
+			// mask out the password argument for security
 			if (i > 0 && PASSWORD.equals(args[i - 1]))
 				write(" (omitted)"); //$NON-NLS-1$
 			else
@@ -175,7 +190,8 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	}
 
 	/**
-	 * Returns the session timestamp.  This is the time the platform was started
+	 * Returns the session timestamp. This is the time the platform was started
+	 * 
 	 * @return the session timestamp
 	 */
 	private String getSessionTimestamp() {
@@ -194,6 +210,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	/**
 	 * Writes the session
+	 * 
 	 * @throws IOException if an error occurs writing to the log
 	 */
 	private void writeSession() throws IOException {
@@ -254,8 +271,8 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	}
 
 	/**
-	 * If a File is used to log messages to then the File opened and a Writer is created
-	 * to log messages to.
+	 * If a File is used to log messages to then the File opened and a Writer is
+	 * created to log messages to.
 	 */
 	private void openFile() {
 		if (writer == null) {
@@ -307,7 +324,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 			System.err.println("An exception occurred while writing to the platform log:");//$NON-NLS-1$
 			e.printStackTrace(System.err);
 			System.err.println("Logging to the console instead.");//$NON-NLS-1$
-			//we failed to write, so dump log entry to console instead
+			// we failed to write, so dump log entry to console instead
 			try {
 				writer = logForErrorStream();
 				writeLog(0, logEntry);
@@ -392,6 +409,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	/**
 	 * Returns a date string using the correct format for the log.
+	 * 
 	 * @param date the Date to format
 	 * @return a date string.
 	 */
@@ -426,6 +444,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	/**
 	 * Returns a stacktrace string using the correct format for the log
+	 * 
 	 * @param t the Throwable to get the stacktrace for
 	 * @return a stacktrace string
 	 */
@@ -448,6 +467,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	/**
 	 * Returns a Writer for the given OutputStream
+	 * 
 	 * @param output an OutputStream to use for the Writer
 	 * @return a Writer for the given OutputStream
 	 */
@@ -463,9 +483,10 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	}
 
 	/**
-	 * Writes the log entry to the log using the specified depth.  A depth value of 0
-	 * indicates that the log entry is the root entry.  Any value greater than 0 indicates
-	 * a sub-entry.
+	 * Writes the log entry to the log using the specified depth. A depth value of 0
+	 * indicates that the log entry is the root entry. Any value greater than 0
+	 * indicates a sub-entry.
+	 * 
 	 * @param depth the depth of th entry
 	 * @param entry the entry to log
 	 * @throws IOException if any error occurs writing to the log
@@ -484,9 +505,10 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	}
 
 	/**
-	 * Writes the ENTRY or SUBENTRY header for an entry.  A depth value of 0
-	 * indicates that the log entry is the root entry.  Any value greater than 0 indicates
-	 * a sub-entry.
+	 * Writes the ENTRY or SUBENTRY header for an entry. A depth value of 0
+	 * indicates that the log entry is the root entry. Any value greater than 0
+	 * indicates a sub-entry.
+	 * 
 	 * @param depth the depth of th entry
 	 * @param entry the entry to write the header for
 	 * @throws IOException if any error occurs writing to the log
@@ -513,6 +535,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	/**
 	 * Writes the MESSAGE header to the log for the given entry.
+	 * 
 	 * @param entry the entry to write the message for
 	 * @throws IOException if any error occurs writing to the log
 	 */
@@ -524,6 +547,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	/**
 	 * Writes the STACK header to the log for the given entry.
+	 * 
 	 * @param entry the entry to write the stacktrace for
 	 * @throws IOException if any error occurs writing to the log
 	 */
@@ -541,6 +565,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	/**
 	 * Writes the given message to the log.
+	 * 
 	 * @param message the message
 	 * @throws IOException if any error occurs writing to the log
 	 */
@@ -554,6 +579,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	/**
 	 * Writes the given message to the log and a newline.
+	 * 
 	 * @param s the message
 	 * @throws IOException if any error occurs writing to the log
 	 */
@@ -564,6 +590,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	/**
 	 * Writes a newline log.
+	 * 
 	 * @throws IOException if any error occurs writing to the log
 	 */
 	private void writeln() throws IOException {
@@ -572,6 +599,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	/**
 	 * Writes a space to the log.
+	 * 
 	 * @throws IOException if any error occurs writing to the log
 	 */
 	private void writeSpace() throws IOException {
@@ -579,8 +607,9 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	}
 
 	/**
-	 * Checks the log file size.  If the log file size reaches the limit then the log
+	 * Checks the log file size. If the log file size reaches the limit then the log
 	 * is rotated
+	 * 
 	 * @return false if an error occured trying to rotate the log
 	 */
 	private boolean checkLogFileSize() {
@@ -589,13 +618,15 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 		boolean isBackupOK = true;
 		if (outFile != null) {
-			if ((ExtendedLogServiceFactory.secureAction.length(outFile) >> 10) > maxLogSize) { // Use KB as file size unit.
+			if ((ExtendedLogServiceFactory.secureAction.length(outFile) >> 10) > maxLogSize) { // Use KB as file size
+																								// unit.
 				String logFilename = outFile.getAbsolutePath();
 
 				// Delete old backup file that will be replaced.
 				String backupFilename = ""; //$NON-NLS-1$
 				if (logFilename.toLowerCase().endsWith(LOG_EXT)) {
-					backupFilename = logFilename.substring(0, logFilename.length() - LOG_EXT.length()) + BACKUP_MARK + backupIdx + LOG_EXT;
+					backupFilename = logFilename.substring(0, logFilename.length() - LOG_EXT.length()) + BACKUP_MARK
+							+ backupIdx + LOG_EXT;
 				} else {
 					backupFilename = logFilename + BACKUP_MARK + backupIdx;
 				}
@@ -669,7 +700,8 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 			else if (newLogLevel.equals("WARNING")) //$NON-NLS-1$
 				logLevel = FrameworkLogEntry.ERROR | FrameworkLogEntry.WARNING;
 			else if (newLogLevel.equals("INFO")) //$NON-NLS-1$
-				logLevel = FrameworkLogEntry.INFO | FrameworkLogEntry.ERROR | FrameworkLogEntry.WARNING | FrameworkLogEntry.CANCEL;
+				logLevel = FrameworkLogEntry.INFO | FrameworkLogEntry.ERROR | FrameworkLogEntry.WARNING
+						| FrameworkLogEntry.CANCEL;
 			else
 				logLevel = FrameworkLogEntry.OK; // OK (0) means log everything
 		}
@@ -744,8 +776,10 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 			log((FrameworkLogEntry) context);
 			return;
 		}
-		// OK we are now in a case where someone logged a normal entry to the real LogService
-		log(new FrameworkLogEntry(getFwkEntryTag(entry), convertSeverity(entry.getLevel()), 0, entry.getMessage(), 0, entry.getException(), null));
+		// OK we are now in a case where someone logged a normal entry to the real
+		// LogService
+		log(new FrameworkLogEntry(getFwkEntryTag(entry), convertSeverity(entry.getLevel()), 0, entry.getMessage(), 0,
+				entry.getException(), null));
 	}
 
 	private static String getFwkEntryTag(LogEntry entry) {
@@ -758,16 +792,16 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	@SuppressWarnings("deprecation")
 	private static int convertSeverity(int entryLevel) {
 		switch (entryLevel) {
-			case LogService.LOG_ERROR :
-				return FrameworkLogEntry.ERROR;
-			case LogService.LOG_WARNING :
-				return FrameworkLogEntry.WARNING;
-			case LogService.LOG_INFO :
-				return FrameworkLogEntry.INFO;
-			case LogService.LOG_DEBUG :
-				return FrameworkLogEntry.OK;
-			default :
-				return 32; // unknown
+		case LogService.LOG_ERROR:
+			return FrameworkLogEntry.ERROR;
+		case LogService.LOG_WARNING:
+			return FrameworkLogEntry.WARNING;
+		case LogService.LOG_INFO:
+			return FrameworkLogEntry.INFO;
+		case LogService.LOG_DEBUG:
+			return FrameworkLogEntry.OK;
+		default:
+			return 32; // unknown
 		}
 	}
 

@@ -41,7 +41,8 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 	public static final String PROTOCOL_REFERENCE = "reference"; //$NON-NLS-1$
 	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 
-	private static final List<Class<?>> ignoredClasses = Arrays.asList(new Class<?>[] {MultiplexingURLStreamHandler.class, URLStreamHandlerFactoryImpl.class, URL.class});
+	private static final List<Class<?>> ignoredClasses = Arrays.asList(
+			new Class<?>[] { MultiplexingURLStreamHandler.class, URLStreamHandlerFactoryImpl.class, URL.class });
 	private Map<String, URLStreamHandlerProxy> proxies;
 	private URLStreamHandlerFactory parentFactory;
 	private ThreadLocal<List<String>> creatingProtocols = new ThreadLocal<>();
@@ -70,7 +71,7 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 			try {
 				clazz = secureAction.loadSystemClass(name.toString());
 				if (clazz != null)
-					return clazz; //this class exists, it is a built in handler
+					return clazz; // this class exists, it is a built in handler
 			} catch (ClassNotFoundException ex) {
 				// keep looking
 			}
@@ -79,8 +80,7 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 	}
 
 	/**
-	 * Creates a new URLStreamHandler instance for the specified
-	 * protocol.
+	 * Creates a new URLStreamHandler instance for the specified protocol.
 	 *
 	 * @param protocol The desired protocol
 	 * @return a URLStreamHandler for the specific protocol.
@@ -91,7 +91,7 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 		if (isRecursive(protocol))
 			return null;
 		try {
-			//first check for built in handlers
+			// first check for built in handlers
 			String builtInHandlers = secureAction.getProperty(PROTOCOL_HANDLER_PKGS);
 			Class<?> clazz = getBuiltIn(protocol, builtInHandlers);
 			if (clazz != null)
@@ -107,9 +107,10 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 			// if parent is present do parent lookup
 			if (result == null && parentFactory != null)
 				result = parentFactory.createURLStreamHandler(protocol);
-			return result; //result may be null; let the VM handle it (consider sun.net.protocol.www.*)
+			return result; // result may be null; let the VM handle it (consider sun.net.protocol.www.*)
 		} catch (Throwable t) {
-			container.getLogServices().log(URLStreamHandlerFactoryImpl.class.getName(), FrameworkLogEntry.ERROR, "Unexpected error in factory.", t); //$NON-NLS-1$
+			container.getLogServices().log(URLStreamHandlerFactoryImpl.class.getName(), FrameworkLogEntry.ERROR,
+					"Unexpected error in factory.", t); //$NON-NLS-1$
 			return null;
 		} finally {
 			releaseRecursive(protocol);
@@ -135,22 +136,25 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 
 	private URLStreamHandler getFrameworkHandler(String protocol) {
 		if (BundleResourceHandler.OSGI_ENTRY_URL_PROTOCOL.equals(protocol)) {
-			return new org.eclipse.osgi.storage.url.bundleentry.Handler(container.getStorage().getModuleContainer(), null);
+			return new org.eclipse.osgi.storage.url.bundleentry.Handler(container.getStorage().getModuleContainer(),
+					null);
 		} else if (BundleResourceHandler.OSGI_RESOURCE_URL_PROTOCOL.equals(protocol)) {
-			return new org.eclipse.osgi.storage.url.bundleresource.Handler(container.getStorage().getModuleContainer(), null);
+			return new org.eclipse.osgi.storage.url.bundleresource.Handler(container.getStorage().getModuleContainer(),
+					null);
 		} else if (PROTOCOL_REFERENCE.equals(protocol)) {
-			return new org.eclipse.osgi.storage.url.reference.Handler(container.getConfiguration().getConfiguration(EquinoxLocations.PROP_INSTALL_AREA));
+			return new org.eclipse.osgi.storage.url.reference.Handler(
+					container.getConfiguration().getConfiguration(EquinoxLocations.PROP_INSTALL_AREA));
 		}
 		return null;
 	}
 
 	public URLStreamHandler createInternalURLStreamHandler(String protocol) {
-		//internal protocol handlers
+		// internal protocol handlers
 		URLStreamHandler frameworkHandler = getFrameworkHandler(protocol);
 		if (frameworkHandler != null) {
 			return frameworkHandler;
 		}
-		//Now we check the service registry
+		// Now we check the service registry
 		URLStreamHandlerProxy handler = proxies.computeIfAbsent(protocol, p -> new URLStreamHandlerProxy(p, context));
 		if (handler.isActive()) {
 			return handler;
@@ -168,10 +172,12 @@ public class URLStreamHandlerFactoryImpl extends MultiplexingFactory implements 
 			return createInternalURLStreamHandler(protocol);
 
 		try {
-			Method createInternalURLStreamHandlerMethod = factory.getClass().getMethod("createInternalURLStreamHandler", new Class[] {String.class}); //$NON-NLS-1$
-			return (URLStreamHandler) createInternalURLStreamHandlerMethod.invoke(factory, new Object[] {protocol});
+			Method createInternalURLStreamHandlerMethod = factory.getClass().getMethod("createInternalURLStreamHandler", //$NON-NLS-1$
+					new Class[] { String.class });
+			return (URLStreamHandler) createInternalURLStreamHandlerMethod.invoke(factory, new Object[] { protocol });
 		} catch (Exception e) {
-			container.getLogServices().log(URLStreamHandlerFactoryImpl.class.getName(), FrameworkLogEntry.ERROR, "findAuthorizedURLStreamHandler-loop", e); //$NON-NLS-1$
+			container.getLogServices().log(URLStreamHandlerFactoryImpl.class.getName(), FrameworkLogEntry.ERROR,
+					"findAuthorizedURLStreamHandler-loop", e); //$NON-NLS-1$
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}

@@ -148,9 +148,7 @@ import org.osgi.framework.Version;
  *
  * <pre>
  * Dictionary d = new Hashtable();
- * d.put(&quot;cn&quot;, new String[] {
- * 		&quot;a&quot;, &quot;b&quot;, &quot;c&quot;
- * });
+ * d.put(&quot;cn&quot;, new String[] { &quot;a&quot;, &quot;b&quot;, &quot;c&quot; });
  * </pre>
  *
  * d will match {@code (cn=a)} and also {@code (cn=b)}
@@ -163,15 +161,15 @@ public abstract class FilterImpl implements Filter {
 	private transient String filterString;
 
 	/**
-	 * Creates a {@link FilterImpl} object. This filter object may be used to
-	 * match a {@link ServiceReference} or a Dictionary.
+	 * Creates a {@link FilterImpl} object. This filter object may be used to match
+	 * a {@link ServiceReference} or a Dictionary.
 	 * <p>
 	 * If the filter cannot be parsed, an {@link InvalidSyntaxException} will be
 	 * thrown with a human readable message where the filter became unparsable.
 	 *
 	 * @param filterString the filter string.
-	 * @throws InvalidSyntaxException If the filter parameter contains an
-	 *             invalid filter string that cannot be parsed.
+	 * @throws InvalidSyntaxException If the filter parameter contains an invalid
+	 *                                filter string that cannot be parsed.
 	 */
 	public static FilterImpl newInstance(String filterString) throws InvalidSyntaxException {
 		return newInstance(filterString, false);
@@ -188,14 +186,13 @@ public abstract class FilterImpl implements Filter {
 	/**
 	 * Filter using a service's properties.
 	 * <p>
-	 * This {@code Filter} is executed using the keys and values of the
-	 * referenced service's properties. The keys are looked up in a case
-	 * insensitive manner.
+	 * This {@code Filter} is executed using the keys and values of the referenced
+	 * service's properties. The keys are looked up in a case insensitive manner.
 	 *
-	 * @param reference The reference to the service whose properties are used
-	 *            in the match.
-	 * @return {@code true} if the service's properties match this
-	 *         {@code Filter}; {@code false} otherwise.
+	 * @param reference The reference to the service whose properties are used in
+	 *                  the match.
+	 * @return {@code true} if the service's properties match this {@code Filter};
+	 *         {@code false} otherwise.
 	 */
 	@Override
 	public boolean match(ServiceReference<?> reference) {
@@ -204,15 +201,15 @@ public abstract class FilterImpl implements Filter {
 
 	/**
 	 * Filter using a {@code Dictionary} with case insensitive key lookup. This
-	 * {@code Filter} is executed using the specified {@code Dictionary}'s keys
-	 * and values. The keys are looked up in a case insensitive manner.
+	 * {@code Filter} is executed using the specified {@code Dictionary}'s keys and
+	 * values. The keys are looked up in a case insensitive manner.
 	 *
-	 * @param dictionary The {@code Dictionary} whose key/value pairs are used
-	 *            in the match.
-	 * @return {@code true} if the {@code Dictionary}'s values match this
-	 *         filter; {@code false} otherwise.
-	 * @throws IllegalArgumentException If {@code dictionary} contains case
-	 *             variants of the same key name.
+	 * @param dictionary The {@code Dictionary} whose key/value pairs are used in
+	 *                   the match.
+	 * @return {@code true} if the {@code Dictionary}'s values match this filter;
+	 *         {@code false} otherwise.
+	 * @throws IllegalArgumentException If {@code dictionary} contains case variants
+	 *                                  of the same key name.
 	 */
 	@Override
 	public boolean match(Dictionary<String, ?> dictionary) {
@@ -220,14 +217,14 @@ public abstract class FilterImpl implements Filter {
 	}
 
 	/**
-	 * Filter using a {@code Dictionary}. This {@code Filter} is executed using
-	 * the specified {@code Dictionary}'s keys and values. The keys are looked
-	 * up in a normal manner respecting case.
+	 * Filter using a {@code Dictionary}. This {@code Filter} is executed using the
+	 * specified {@code Dictionary}'s keys and values. The keys are looked up in a
+	 * normal manner respecting case.
 	 *
-	 * @param dictionary The {@code Dictionary} whose key/value pairs are used
-	 *            in the match.
-	 * @return {@code true} if the {@code Dictionary}'s values match this
-	 *         filter; {@code false} otherwise.
+	 * @param dictionary The {@code Dictionary} whose key/value pairs are used in
+	 *                   the match.
+	 * @return {@code true} if the {@code Dictionary}'s values match this filter;
+	 *         {@code false} otherwise.
 	 * @since 1.3
 	 */
 	@Override
@@ -237,12 +234,12 @@ public abstract class FilterImpl implements Filter {
 
 	/**
 	 * Filter using a {@code Map}. This {@code Filter} is executed using the
-	 * specified {@code Map}'s keys and values. The keys are looked up in a
-	 * normal manner respecting case.
+	 * specified {@code Map}'s keys and values. The keys are looked up in a normal
+	 * manner respecting case.
 	 *
-	 * @param map The {@code Map} whose key/value pairs are used in the match.
-	 *            Maps with {@code null} key or values are not supported. A
-	 *            {@code null} value is considered not present to the filter.
+	 * @param map The {@code Map} whose key/value pairs are used in the match. Maps
+	 *            with {@code null} key or values are not supported. A {@code null}
+	 *            value is considered not present to the filter.
 	 * @return {@code true} if the {@code Map}'s values match this filter;
 	 *         {@code false} otherwise.
 	 * @since 1.6
@@ -257,8 +254,8 @@ public abstract class FilterImpl implements Filter {
 	/**
 	 * Returns this {@code Filter}'s filter string.
 	 * <p>
-	 * The filter string is normalized by removing whitespace which does not
-	 * affect the meaning of the filter.
+	 * The filter string is normalized by removing whitespace which does not affect
+	 * the meaning of the filter.
 	 *
 	 * @return This {@code Filter}'s filter string.
 	 */
@@ -274,8 +271,8 @@ public abstract class FilterImpl implements Filter {
 	/**
 	 * Returns this {@code Filter}'s normalized filter string.
 	 * <p>
-	 * The filter string is normalized by removing whitespace which does not
-	 * affect the meaning of the filter.
+	 * The filter string is normalized by removing whitespace which does not affect
+	 * the meaning of the filter.
 	 *
 	 * @return This {@code Filter}'s filter string.
 	 */
@@ -346,12 +343,15 @@ public abstract class FilterImpl implements Filter {
 
 		@Override
 		public String getPrimaryKeyValue(String primaryKey) {
-			// just checking for simple filters here where primaryKey is the only attr or it is one attr of a base '&' clause
+			// just checking for simple filters here where primaryKey is the only attr or it
+			// is one attr of a base '&' clause
 			// (primaryKey=org.acme.BrickService) OK
 			// (&(primaryKey=org.acme.BrickService)(|(vendor=IBM)(vendor=SUN))) OK
 			// (primaryKey=org.acme.*) NOT OK
-			// (|(primaryKey=org.acme.BrickService)(primaryKey=org.acme.CementService)) NOT OK
-			// (&(primaryKey=org.acme.BrickService)(primaryKey=org.acme.CementService)) OK but only the first primaryKey is returned
+			// (|(primaryKey=org.acme.BrickService)(primaryKey=org.acme.CementService)) NOT
+			// OK
+			// (&(primaryKey=org.acme.BrickService)(primaryKey=org.acme.CementService)) OK
+			// but only the first primaryKey is returned
 			for (FilterImpl operand : operands) {
 				if (operand instanceof Equal) {
 					String result = operand.getPrimaryKeyValue(primaryKey);
@@ -702,15 +702,15 @@ public abstract class FilterImpl implements Filter {
 			for (int i = 0, len = value.length(); i < len; i++) {
 				char c = value.charAt(i);
 				switch (c) {
-					case '(' :
-					case '*' :
-					case ')' :
-					case '\\' :
-						sb.append('\\');
-						// FALL-THROUGH
-					default :
-						sb.append(c);
-						break;
+				case '(':
+				case '*':
+				case ')':
+				case '\\':
+					sb.append('\\');
+					// FALL-THROUGH
+				default:
+					sb.append(c);
+					break;
 				}
 			}
 			return sb;
@@ -1201,7 +1201,8 @@ public abstract class FilterImpl implements Filter {
 			} catch (IndexOutOfBoundsException e) {
 				return false;
 			}
-			return (charval == charval2) || (Character.toUpperCase(charval) == Character.toUpperCase(charval2)) || (Character.toLowerCase(charval) == Character.toLowerCase(charval2));
+			return (charval == charval2) || (Character.toUpperCase(charval) == Character.toUpperCase(charval2))
+					|| (Character.toLowerCase(charval) == Character.toLowerCase(charval2));
 		}
 
 		@Override
@@ -1211,9 +1212,8 @@ public abstract class FilterImpl implements Filter {
 		}
 
 		/**
-		 * Map a string for an APPROX (~=) comparison. This implementation
-		 * removes white spaces. This is the minimum implementation allowed by
-		 * the OSGi spec.
+		 * Map a string for an APPROX (~=) comparison. This implementation removes white
+		 * spaces. This is the minimum implementation allowed by the OSGi spec.
 		 *
 		 * @param input Input string.
 		 * @return String ready for APPROX comparison.
@@ -1247,27 +1247,34 @@ public abstract class FilterImpl implements Filter {
 	}
 
 	/**
-	 * Returns the leftmost required objectClass value for the filter to evaluate to true.
+	 * Returns the leftmost required objectClass value for the filter to evaluate to
+	 * true.
 	 *
-	 * @return The leftmost required objectClass value or null if none could be determined.
+	 * @return The leftmost required objectClass value or null if none could be
+	 *         determined.
 	 */
 	public String getRequiredObjectClass() {
 		return getPrimaryKeyValue(Constants.OBJECTCLASS);
 	}
 
 	/**
-	 * Returns the leftmost required primary key value for the filter to evaluate to true.
-	 * This is useful for indexing candidates to match against this filter.
+	 * Returns the leftmost required primary key value for the filter to evaluate to
+	 * true. This is useful for indexing candidates to match against this filter.
+	 * 
 	 * @param primaryKey the primary key
-	 * @return The leftmost required primary key value or null if none could be determined.
+	 * @return The leftmost required primary key value or null if none could be
+	 *         determined.
 	 */
 	public String getPrimaryKeyValue(String primaryKey) {
-		// just checking for simple filters here where primaryKey is the only attr or it is one attr of a base '&' clause
+		// just checking for simple filters here where primaryKey is the only attr or it
+		// is one attr of a base '&' clause
 		// (primaryKey=org.acme.BrickService) OK
 		// (&(primaryKey=org.acme.BrickService)(|(vendor=IBM)(vendor=SUN))) OK
 		// (primaryKey=org.acme.*) NOT OK
-		// (|(primaryKey=org.acme.BrickService)(primaryKey=org.acme.CementService)) NOT OK
-		// (&(primaryKey=org.acme.BrickService)(primaryKey=org.acme.CementService)) OK but only the first objectClass is returned
+		// (|(primaryKey=org.acme.BrickService)(primaryKey=org.acme.CementService)) NOT
+		// OK
+		// (&(primaryKey=org.acme.BrickService)(primaryKey=org.acme.CementService)) OK
+		// but only the first objectClass is returned
 		return null;
 	}
 
@@ -1277,6 +1284,7 @@ public abstract class FilterImpl implements Filter {
 
 	/**
 	 * Returns all the attributes contained within this filter
+	 * 
 	 * @return all the attributes contained within this filter
 	 */
 	public String[] getAttributes() {
@@ -1309,9 +1317,8 @@ public abstract class FilterImpl implements Filter {
 	abstract void addAttributes(Map<String, String> attributes, Map<String, Range> versionAttrs, boolean not);
 
 	/**
-	 * Parser class for OSGi filter strings. This class parses the complete
-	 * filter string and builds a tree of FilterImpl objects rooted at the
-	 * parent.
+	 * Parser class for OSGi filter strings. This class parses the complete filter
+	 * string and builds a tree of FilterImpl objects rooted at the parent.
 	 */
 	static private final class Parser {
 		private final boolean debug;
@@ -1335,7 +1342,8 @@ public abstract class FilterImpl implements Filter {
 			}
 
 			if (pos != filterChars.length) {
-				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_TRAILING_CHARACTERS, filterstring.substring(pos)), filterstring);
+				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_TRAILING_CHARACTERS, filterstring.substring(pos)),
+						filterstring);
 			}
 			return filter;
 		}
@@ -1345,7 +1353,8 @@ public abstract class FilterImpl implements Filter {
 			skipWhiteSpace();
 
 			if (filterChars[pos] != '(') {
-				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_LEFTPAREN, filterstring.substring(pos)), filterstring);
+				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_LEFTPAREN, filterstring.substring(pos)),
+						filterstring);
 			}
 
 			pos++;
@@ -1355,7 +1364,8 @@ public abstract class FilterImpl implements Filter {
 			skipWhiteSpace();
 
 			if (filterChars[pos] != ')') {
-				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_RIGHTPAREN, filterstring.substring(pos)), filterstring);
+				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_RIGHTPAREN, filterstring.substring(pos)),
+						filterstring);
 			}
 
 			pos++;
@@ -1371,18 +1381,18 @@ public abstract class FilterImpl implements Filter {
 			char c = filterChars[pos];
 
 			switch (c) {
-				case '&' : {
-					pos++;
-					return parse_and();
-				}
-				case '|' : {
-					pos++;
-					return parse_or();
-				}
-				case '!' : {
-					pos++;
-					return parse_not();
-				}
+			case '&': {
+				pos++;
+				return parse_and();
+			}
+			case '|': {
+				pos++;
+				return parse_or();
+			}
+			case '!': {
+				pos++;
+				return parse_not();
+			}
 			}
 			return parse_item();
 		}
@@ -1445,56 +1455,57 @@ public abstract class FilterImpl implements Filter {
 			skipWhiteSpace();
 
 			switch (filterChars[pos]) {
-				case '~' : {
-					if (filterChars[pos + 1] == '=') {
-						pos += 2;
-						return new FilterImpl.Approx(attr, parse_value(), debug);
-					}
-					break;
+			case '~': {
+				if (filterChars[pos + 1] == '=') {
+					pos += 2;
+					return new FilterImpl.Approx(attr, parse_value(), debug);
 				}
-				case '>' : {
-					if (filterChars[pos + 1] == '=') {
-						pos += 2;
-						return new FilterImpl.GreaterEqual(attr, parse_value(), debug);
-					}
-					break;
+				break;
+			}
+			case '>': {
+				if (filterChars[pos + 1] == '=') {
+					pos += 2;
+					return new FilterImpl.GreaterEqual(attr, parse_value(), debug);
 				}
-				case '<' : {
-					if (filterChars[pos + 1] == '=') {
-						pos += 2;
-						return new FilterImpl.LessEqual(attr, parse_value(), debug);
-					}
-					break;
+				break;
+			}
+			case '<': {
+				if (filterChars[pos + 1] == '=') {
+					pos += 2;
+					return new FilterImpl.LessEqual(attr, parse_value(), debug);
 				}
-				case '=' : {
-					if (filterChars[pos + 1] == '*') {
-						int oldpos = pos;
-						pos += 2;
-						skipWhiteSpace();
-						if (filterChars[pos] == ')') {
-							return new FilterImpl.Present(attr, debug);
-						}
-						pos = oldpos;
+				break;
+			}
+			case '=': {
+				if (filterChars[pos + 1] == '*') {
+					int oldpos = pos;
+					pos += 2;
+					skipWhiteSpace();
+					if (filterChars[pos] == ')') {
+						return new FilterImpl.Present(attr, debug);
 					}
+					pos = oldpos;
+				}
 
-					pos++;
-					String[] substrings = parse_substring();
+				pos++;
+				String[] substrings = parse_substring();
 
-					int length = substrings.length;
-					if (length == 0) {
-						return new FilterImpl.Equal(attr, "", debug); //$NON-NLS-1$
-					}
-					if (length == 1) {
-						String single = substrings[0];
-						if (single != null) {
-							return new FilterImpl.Equal(attr, single, debug);
-						}
-					}
-					return new FilterImpl.Substring(attr, substrings, debug);
+				int length = substrings.length;
+				if (length == 0) {
+					return new FilterImpl.Equal(attr, "", debug); //$NON-NLS-1$
 				}
+				if (length == 1) {
+					String single = substrings[0];
+					if (single != null) {
+						return new FilterImpl.Equal(attr, single, debug);
+					}
+				}
+				return new FilterImpl.Substring(attr, substrings, debug);
+			}
 			}
 
-			throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_INVALID_OPERATOR, filterstring.substring(pos)), filterstring);
+			throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_INVALID_OPERATOR, filterstring.substring(pos)),
+					filterstring);
 		}
 
 		private String parse_attr() throws InvalidSyntaxException {
@@ -1518,7 +1529,8 @@ public abstract class FilterImpl implements Filter {
 			int length = end - begin;
 
 			if (length == 0) {
-				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_ATTR, filterstring.substring(pos)), filterstring);
+				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_ATTR, filterstring.substring(pos)),
+						filterstring);
 			}
 
 			return new String(filterChars, begin, length);
@@ -1531,30 +1543,32 @@ public abstract class FilterImpl implements Filter {
 				char c = filterChars[pos];
 
 				switch (c) {
-					case ')' : {
-						break parseloop;
-					}
+				case ')': {
+					break parseloop;
+				}
 
-					case '(' : {
-						throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_INVALID_VALUE, filterstring.substring(pos)), filterstring);
-					}
+				case '(': {
+					throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_INVALID_VALUE, filterstring.substring(pos)),
+							filterstring);
+				}
 
-					case '\\' : {
-						pos++;
-						c = filterChars[pos];
-						/* fall through into default */
-					}
+				case '\\': {
+					pos++;
+					c = filterChars[pos];
+					/* fall through into default */
+				}
 
-					default : {
-						sb.append(c);
-						pos++;
-						break;
-					}
+				default: {
+					sb.append(c);
+					pos++;
+					break;
+				}
 				}
 			}
 
 			if (sb.length() == 0) {
-				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_VALUE, filterstring.substring(pos)), filterstring);
+				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_VALUE, filterstring.substring(pos)),
+						filterstring);
 			}
 
 			return sb.toString();
@@ -1569,42 +1583,43 @@ public abstract class FilterImpl implements Filter {
 				char c = filterChars[pos];
 
 				switch (c) {
-					case ')' : {
-						if (sb.length() > 0) {
-							operands.add(sb.toString());
-						}
-
-						break parseloop;
+				case ')': {
+					if (sb.length() > 0) {
+						operands.add(sb.toString());
 					}
 
-					case '(' : {
-						throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_INVALID_VALUE, filterstring.substring(pos)), filterstring);
+					break parseloop;
+				}
+
+				case '(': {
+					throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_INVALID_VALUE, filterstring.substring(pos)),
+							filterstring);
+				}
+
+				case '*': {
+					if (sb.length() > 0) {
+						operands.add(sb.toString());
 					}
 
-					case '*' : {
-						if (sb.length() > 0) {
-							operands.add(sb.toString());
-						}
+					sb.setLength(0);
 
-						sb.setLength(0);
+					operands.add(null);
+					pos++;
 
-						operands.add(null);
-						pos++;
+					break;
+				}
 
-						break;
-					}
+				case '\\': {
+					pos++;
+					c = filterChars[pos];
+					/* fall through into default */
+				}
 
-					case '\\' : {
-						pos++;
-						c = filterChars[pos];
-						/* fall through into default */
-					}
-
-					default : {
-						sb.append(c);
-						pos++;
-						break;
-					}
+				default: {
+					sb.append(c);
+					pos++;
+					break;
+				}
 				}
 			}
 
@@ -1619,10 +1634,9 @@ public abstract class FilterImpl implements Filter {
 	}
 
 	/**
-	 * This Map is used for key lookup during filter
-	 * evaluation. This Map implementation only supports the get operation using
-	 * a String key as no other operations are used by the Filter
-	 * implementation.
+	 * This Map is used for key lookup during filter evaluation. This Map
+	 * implementation only supports the get operation using a String key as no other
+	 * operations are used by the Filter implementation.
 	 */
 	private static final class DictionaryMap extends AbstractMap<String, Object> implements Map<String, Object> {
 		static Map<String, ?> asMap(Dictionary<String, ?> dictionary) {
@@ -1639,8 +1653,8 @@ public abstract class FilterImpl implements Filter {
 		/**
 		 * Create a case insensitive map from the specified dictionary.
 		 *
-		 * @throws IllegalArgumentException If {@code dictionary} contains case
-		 *             variants of the same key name.
+		 * @throws IllegalArgumentException If {@code dictionary} contains case variants
+		 *                                  of the same key name.
 		 */
 		DictionaryMap(Dictionary<String, ?> dictionary) {
 			this.dictionary = requireNonNull(dictionary);
@@ -1659,9 +1673,8 @@ public abstract class FilterImpl implements Filter {
 
 	/**
 	 * This Map is used for key lookup from a ServiceReference during filter
-	 * evaluation. This Map implementation only supports the get operation using
-	 * a String key as no other operations are used by the Filter
-	 * implementation.
+	 * evaluation. This Map implementation only supports the get operation using a
+	 * String key as no other operations are used by the Filter implementation.
 	 */
 	private static final class ServiceReferenceMap extends AbstractMap<String, Object> implements Map<String, Object> {
 		static Map<String, ?> asMap(ServiceReference<?> reference) {

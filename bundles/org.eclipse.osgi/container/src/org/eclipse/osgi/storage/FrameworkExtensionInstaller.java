@@ -53,7 +53,9 @@ import org.osgi.resource.Capability;
 public class FrameworkExtensionInstaller {
 	private static final ClassLoader CL = FrameworkExtensionInstaller.class.getClassLoader();
 	private static final Method ADD_FWK_URL_METHOD = findAddURLMethod(CL, "addURL"); //$NON-NLS-1$
-	private static final Method ADD_FWK_FILE_PATH_METHOD = ADD_FWK_URL_METHOD == null ? findAddFilePathMethod(CL, "appendToClassPathForInstrumentation") : null; //$NON-NLS-1$
+	private static final Method ADD_FWK_FILE_PATH_METHOD = ADD_FWK_URL_METHOD == null
+			? findAddFilePathMethod(CL, "appendToClassPathForInstrumentation") //$NON-NLS-1$
+			: null;
 	private final ArrayMap<BundleActivator, Bundle> hookActivators = new ArrayMap<>(5);
 
 	private static Method findAddURLMethod(ClassLoader cl, String name) {
@@ -65,11 +67,13 @@ public class FrameworkExtensionInstaller {
 	private static Method findAddFilePathMethod(ClassLoader cl, String name) {
 		if (cl == null)
 			return null;
-		return findMethod(cl.getClass(), name, new Class[] {String.class}, MultiplexingFactory.setAccessible);
+		return findMethod(cl.getClass(), name, new Class[] { String.class }, MultiplexingFactory.setAccessible);
 	}
 
-	// recursively searches a class and it's superclasses for a (potentially inaccessable) method
-	private static Method findMethod(Class<?> clazz, String name, Class<?>[] args, Collection<AccessibleObject> setAccessible) {
+	// recursively searches a class and it's superclasses for a (potentially
+	// inaccessable) method
+	private static Method findMethod(Class<?> clazz, String name, Class<?>[] args,
+			Collection<AccessibleObject> setAccessible) {
 		if (clazz == null)
 			return null; // ends the recursion when getSuperClass returns null
 		try {
@@ -89,7 +93,7 @@ public class FrameworkExtensionInstaller {
 
 	private static void callAddURLMethod(URL arg) throws InvocationTargetException {
 		try {
-			ADD_FWK_URL_METHOD.invoke(CL, new Object[] {arg});
+			ADD_FWK_URL_METHOD.invoke(CL, new Object[] { arg });
 		} catch (Throwable t) {
 			throw new InvocationTargetException(t);
 		}
@@ -97,7 +101,7 @@ public class FrameworkExtensionInstaller {
 
 	private static void callAddFilePathMethod(File file) throws InvocationTargetException {
 		try {
-			ADD_FWK_FILE_PATH_METHOD.invoke(CL, new Object[] {file.getCanonicalPath()});
+			ADD_FWK_FILE_PATH_METHOD.invoke(CL, new Object[] { file.getCanonicalPath() });
 		} catch (Throwable t) {
 			throw new InvocationTargetException(t);
 		}
@@ -109,7 +113,8 @@ public class FrameworkExtensionInstaller {
 		this.configuration = configuraiton;
 	}
 
-	public void addExtensionContent(final Collection<ModuleRevision> revisions, final Module systemModule) throws BundleException {
+	public void addExtensionContent(final Collection<ModuleRevision> revisions, final Module systemModule)
+			throws BundleException {
 		if (System.getSecurityManager() == null) {
 			addExtensionContent0(revisions, systemModule);
 		} else {
@@ -134,7 +139,9 @@ public class FrameworkExtensionInstaller {
 		for (ModuleRevision revision : revisions) {
 			if (CL == null || (ADD_FWK_URL_METHOD == null && ADD_FWK_FILE_PATH_METHOD == null)) {
 				// use the first revision as the blame
-				throw new BundleException("Cannot support framework extension bundles without a public addURL(URL) or appendToClassPathForInstrumentation(String) method on the framework class loader: " + revision.getBundle()); //$NON-NLS-1$
+				throw new BundleException(
+						"Cannot support framework extension bundles without a public addURL(URL) or appendToClassPathForInstrumentation(String) method on the framework class loader: " //$NON-NLS-1$
+								+ revision.getBundle());
 			}
 			File[] files = getExtensionFiles(revision);
 			for (File file : files) {
@@ -173,6 +180,7 @@ public class FrameworkExtensionInstaller {
 
 	/**
 	 * Returns a list of classpath files for an extension bundle
+	 * 
 	 * @param revision revision for the extension bundle
 	 * @return a list of classpath files for an extension bundle
 	 */
@@ -182,9 +190,11 @@ public class FrameworkExtensionInstaller {
 			// Don't do anything for connect bundles
 			return new File[0];
 		}
-		List<ModuleCapability> metaDatas = revision.getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
+		List<ModuleCapability> metaDatas = revision
+				.getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
 		@SuppressWarnings("unchecked")
-		List<String> paths = metaDatas.isEmpty() ? null : (List<String>) metaDatas.get(0).getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_CLASSPATH);
+		List<String> paths = metaDatas.isEmpty() ? null
+				: (List<String>) metaDatas.get(0).getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_CLASSPATH);
 		if (paths == null) {
 			paths = new ArrayList<>(1);
 			paths.add("."); //$NON-NLS-1$
@@ -218,10 +228,11 @@ public class FrameworkExtensionInstaller {
 			try {
 				startActivator(activator, context, null);
 			} catch (Exception e) {
-				configuration.getHookRegistry().getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, null, e);
+				configuration.getHookRegistry().getContainer().getEventPublisher()
+						.publishFrameworkEvent(FrameworkEvent.ERROR, null, e);
 			}
 		}
-		// start the extension bundle activators.  In Equinox we let
+		// start the extension bundle activators. In Equinox we let
 		// framework extensions define Bundle-Activator headers.
 		ModuleWiring systemWiring = (ModuleWiring) context.getBundle().adapt(BundleWiring.class);
 		if (systemWiring != null) {
@@ -246,8 +257,12 @@ public class FrameworkExtensionInstaller {
 				activator.stop(context);
 			} catch (Exception e) {
 				Bundle b = current.get(activator);
-				BundleException eventException = new BundleException(NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION, new Object[] {activator.getClass(), "stop", b == null ? "" : b.getSymbolicName()}), BundleException.ACTIVATOR_ERROR, e); //$NON-NLS-1$ //$NON-NLS-2$
-				configuration.getHookRegistry().getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, b, eventException);
+				BundleException eventException = new BundleException(
+						NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION,
+								new Object[] { activator.getClass(), "stop", b == null ? "" : b.getSymbolicName() }), //$NON-NLS-1$ //$NON-NLS-2$
+						BundleException.ACTIVATOR_ERROR, e);
+				configuration.getHookRegistry().getContainer().getEventPublisher()
+						.publishFrameworkEvent(FrameworkEvent.ERROR, b, eventException);
 			}
 		}
 	}
@@ -258,7 +273,8 @@ public class FrameworkExtensionInstaller {
 			return;
 		}
 
-		String activatorName = (String) metadata.get(0).getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATOR);
+		String activatorName = (String) metadata.get(0).getAttributes()
+				.get(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATOR);
 		if (activatorName == null) {
 			return;
 		}
@@ -274,9 +290,13 @@ public class FrameworkExtensionInstaller {
 				eventException = new BundleException(Msg.BundleContextImpl_LoadActivatorError + ' ' + extensionRevision,
 						BundleException.ACTIVATOR_ERROR, e);
 			} else {
-				eventException = new BundleException(NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION, new Object[] {activator.getClass(), "start", extensionRevision.getSymbolicName()}), BundleException.ACTIVATOR_ERROR, e); //$NON-NLS-1$
+				eventException = new BundleException(
+						NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION,
+								new Object[] { activator.getClass(), "start", extensionRevision.getSymbolicName() }), //$NON-NLS-1$
+						BundleException.ACTIVATOR_ERROR, e);
 			}
-			configuration.getHookRegistry().getContainer().getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, extensionRevision.getBundle(), eventException);
+			configuration.getHookRegistry().getContainer().getEventPublisher()
+					.publishFrameworkEvent(FrameworkEvent.ERROR, extensionRevision.getBundle(), eventException);
 		}
 
 	}

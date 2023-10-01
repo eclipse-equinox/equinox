@@ -113,7 +113,8 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 		this.eventPublisher = new EquinoxEventPublisher(this);
 
 		// set the boot delegation according to the osgi boot delegation property
-		// TODO unfortunately this has to be done after constructing storage so the vm profile is loaded
+		// TODO unfortunately this has to be done after constructing storage so the vm
+		// profile is loaded
 		// TODO ideally this should be in equinox configuration or perhaps in storage
 		String bootDelegationProp = equinoxConfig.getConfiguration(Constants.FRAMEWORK_BOOTDELEGATION);
 		String[] bootPackages = ManifestElement.getArrayFromList(bootDelegationProp, ","); //$NON-NLS-1$
@@ -152,7 +153,7 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 		}
 		URL configUrl = equinoxConfig.getEquinoxLocations().getConfigurationLocation().getURL();
 		final File fwkStore = new File(configUrl.getPath());
-		@SuppressWarnings({"rawtypes", "unchecked"})
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		Map<String, String> config = (Map) equinoxConfig.getInitialConfig();
 		moduleConnector.initialize(fwkStore, Collections.unmodifiableMap(config));
 	}
@@ -342,7 +343,8 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 
 	@Override
 	public Thread newThread(Runnable r) {
-		String type = equinoxConfig.getConfiguration(EquinoxConfiguration.PROP_ACTIVE_THREAD_TYPE, EquinoxConfiguration.ACTIVE_THREAD_TYPE_NORMAL);
+		String type = equinoxConfig.getConfiguration(EquinoxConfiguration.PROP_ACTIVE_THREAD_TYPE,
+				EquinoxConfiguration.ACTIVE_THREAD_TYPE_NORMAL);
 		Thread t = new Thread(r, "Active Thread: " + toString()); //$NON-NLS-1$
 		if (EquinoxConfiguration.ACTIVE_THREAD_TYPE_NORMAL.equals(type)) {
 			t.setDaemon(false);
