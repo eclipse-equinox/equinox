@@ -16,7 +16,8 @@ package org.eclipse.equinox.internal.cm;
 import java.util.LinkedList;
 
 /**
- * SerializedTaskQueue is a utility class that will allow asynchronous but serialized execution of tasks
+ * SerializedTaskQueue is a utility class that will allow asynchronous but
+ * serialized execution of tasks
  */
 public class SerializedTaskQueue {
 

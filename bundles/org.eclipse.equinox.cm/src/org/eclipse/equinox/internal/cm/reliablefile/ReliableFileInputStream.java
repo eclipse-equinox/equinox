@@ -19,12 +19,11 @@ import java.io.*;
 //This is a copy of org.eclipse.osgi.framework.internal.reliablefile.ReliableFileInputStream
 
 /**
- * A ReliableFile FileInputStream replacement class.
- * This class can be used just like FileInputStream. The class
- * is in partnership with ReliableFileOutputStream to avoid losing
- * file data by using multiple files.
+ * A ReliableFile FileInputStream replacement class. This class can be used just
+ * like FileInputStream. The class is in partnership with
+ * ReliableFileOutputStream to avoid losing file data by using multiple files.
  *
- * @see			ReliableFileOutputStream
+ * @see ReliableFileOutputStream
  */
 public class ReliableFileInputStream extends FilterInputStream {
 	/**
@@ -32,54 +31,54 @@ public class ReliableFileInputStream extends FilterInputStream {
 	 */
 	private ReliableFile reliable;
 
-	/** 
+	/**
 	 * size of crc and signature
 	 */
 	private int sigSize;
 
-	/** 
+	/**
 	 * current position reading from file
 	 */
 	private int readPos;
 
-	/** 
+	/**
 	 * total file length available for reading
 	 */
 	private int length;
 
 	/**
-	 * Constructs a new ReliableFileInputStream on the file named <code>name</code>.  If the
-	 * file does not exist, the <code>FileNotFoundException</code> is thrown.
-	 * The <code>name</code> may be absolute or relative
-	 * to the System property <code>"user.dir"</code>.
+	 * Constructs a new ReliableFileInputStream on the file named <code>name</code>.
+	 * If the file does not exist, the <code>FileNotFoundException</code> is thrown.
+	 * The <code>name</code> may be absolute or relative to the System property
+	 * <code>"user.dir"</code>.
 	 *
-	 * @param		name	the file on which to stream reads.
-	 * @exception 	java.io.IOException If an error occurs opening the file.
+	 * @param name the file on which to stream reads.
+	 * @exception java.io.IOException If an error occurs opening the file.
 	 */
 	public ReliableFileInputStream(String name) throws IOException {
 		this(ReliableFile.getReliableFile(name), ReliableFile.GENERATION_LATEST, ReliableFile.OPEN_BEST_AVAILABLE);
 	}
 
 	/**
-	 * Constructs a new ReliableFileInputStream on the File <code>file</code>.  If the
-	 * file does not exist, the <code>FileNotFoundException</code> is thrown.
+	 * Constructs a new ReliableFileInputStream on the File <code>file</code>. If
+	 * the file does not exist, the <code>FileNotFoundException</code> is thrown.
 	 *
-	 * @param		file		the File on which to stream reads.
-	 * @exception 	java.io.IOException If an error occurs opening the file.
+	 * @param file the File on which to stream reads.
+	 * @exception java.io.IOException If an error occurs opening the file.
 	 */
 	public ReliableFileInputStream(File file) throws IOException {
 		this(ReliableFile.getReliableFile(file), ReliableFile.GENERATION_LATEST, ReliableFile.OPEN_BEST_AVAILABLE);
 	}
 
 	/**
-	 * Constructs a new ReliableFileInputStream on the File <code>file</code>.  If the
-	 * file does not exist, the <code>FileNotFoundException</code> is thrown.
+	 * Constructs a new ReliableFileInputStream on the File <code>file</code>. If
+	 * the file does not exist, the <code>FileNotFoundException</code> is thrown.
 	 * 
-	 * @param file the File on which to stream reads.
+	 * @param file       the File on which to stream reads.
 	 * @param generation a specific generation requested.
-	 * @param openMask mask used to open data.
-	 * are invalid (corrupt, missing, etc).
-	 * @exception 	java.io.IOException If an error occurs opening the file.
+	 * @param openMask   mask used to open data. are invalid (corrupt, missing,
+	 *                   etc).
+	 * @exception java.io.IOException If an error occurs opening the file.
 	 */
 	public ReliableFileInputStream(File file, int generation, int openMask) throws IOException {
 		this(ReliableFile.getReliableFile(file), generation, openMask);
@@ -87,10 +86,10 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * 
-	 * @param reliable The ReliableFile on which to read.
+	 * @param reliable   The ReliableFile on which to read.
 	 * @param generation a specific generation requested.
-	 * @param openMask mask used to open data. 
-	 * are invalid (corrupt, missing, etc).
+	 * @param openMask   mask used to open data. are invalid (corrupt, missing,
+	 *                   etc).
 	 * @throws IOException If an error occurs opening the file.
 	 */
 	private ReliableFileInputStream(ReliableFile reliable, int generation, int openMask) throws IOException {
@@ -107,10 +106,10 @@ public class ReliableFileInputStream extends FilterInputStream {
 	}
 
 	/**
-	 * Closes this input stream and releases any system resources associated
-	 * with the stream.
+	 * Closes this input stream and releases any system resources associated with
+	 * the stream.
 	 *
-	 * @exception 	java.io.IOException If an error occurs closing the file.
+	 * @exception java.io.IOException If an error occurs closing the file.
 	 */
 	@Override
 	public synchronized void close() throws IOException {
@@ -126,6 +125,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default FilterInputStream method.
+	 * 
 	 * @see FilterInputStream#read(byte[], int, int)
 	 */
 	@Override
@@ -146,6 +146,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default FilterInputStream method.
+	 * 
 	 * @see FilterInputStream#read(byte[])
 	 */
 	@Override
@@ -155,6 +156,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default FilterInputStream method.
+	 * 
 	 * @see FilterInputStream#read()
 	 */
 	@Override
@@ -172,6 +174,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default available method.
+	 * 
 	 * @see FilterInputStream#available()
 	 */
 	@Override
@@ -183,6 +186,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default skip method.
+	 * 
 	 * @see FilterInputStream#skip(long)
 	 */
 	@Override
@@ -196,6 +200,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default markSupported method.
+	 * 
 	 * @see FilterInputStream#markSupported()
 	 */
 	@Override
@@ -205,15 +210,17 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default mark method.
+	 * 
 	 * @see FilterInputStream#mark(int)
 	 */
 	@Override
 	public void mark(int readlimit) {
-		//ignore
+		// ignore
 	}
 
 	/**
 	 * Override default reset method.
+	 * 
 	 * @see FilterInputStream#reset()
 	 */
 	@Override

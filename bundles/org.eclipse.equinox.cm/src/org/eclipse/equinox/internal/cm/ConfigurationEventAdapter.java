@@ -64,14 +64,14 @@ public class ConfigurationEventAdapter implements ConfigurationListener {
 		}
 		String typename = null;
 		switch (event.getType()) {
-			case ConfigurationEvent.CM_UPDATED :
-				typename = CM_UPDATED;
-				break;
-			case ConfigurationEvent.CM_DELETED :
-				typename = CM_DELETED;
-				break;
-			default : // do nothing
-				return;
+		case ConfigurationEvent.CM_UPDATED:
+			typename = CM_UPDATED;
+			break;
+		case ConfigurationEvent.CM_DELETED:
+			typename = CM_DELETED;
+			break;
+		default: // do nothing
+			return;
 		}
 		String topic = TOPIC + TOPIC_SEPARATOR + typename;
 		ServiceReference<ConfigurationAdmin> ref = event.getReference();

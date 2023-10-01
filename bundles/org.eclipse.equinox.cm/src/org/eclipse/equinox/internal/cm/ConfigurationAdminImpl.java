@@ -23,7 +23,7 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
- * ConfigurationAdminImpl provides the ConfigurationAdmin service implementation 
+ * ConfigurationAdminImpl provides the ConfigurationAdmin service implementation
  */
 class ConfigurationAdminImpl implements ConfigurationAdmin {
 
@@ -31,7 +31,8 @@ class ConfigurationAdminImpl implements ConfigurationAdmin {
 	private final String bundleLocation;
 	private final ConfigurationStore configurationStore;
 
-	public ConfigurationAdminImpl(ConfigurationAdminFactory configurationAdminFactory, ConfigurationStore configurationStore, Bundle bundle) {
+	public ConfigurationAdminImpl(ConfigurationAdminFactory configurationAdminFactory,
+			ConfigurationStore configurationStore, Bundle bundle) {
 		this.configurationAdminFactory = configurationAdminFactory;
 		this.configurationStore = configurationStore;
 		this.bundleLocation = ConfigurationAdminImpl.getLocation(bundle);
@@ -67,7 +68,8 @@ class ConfigurationAdminImpl implements ConfigurationAdmin {
 		return internalGetConfiguration(factoryPid, location, true, false, name);
 	}
 
-	private Configuration internalGetConfiguration(String pid, String location, boolean factory, boolean bind, String name) {
+	private Configuration internalGetConfiguration(String pid, String location, boolean factory, boolean bind,
+			String name) {
 		checkPID(pid);
 		this.configurationAdminFactory.checkConfigurePermission(location, bundleLocation);
 
@@ -109,7 +111,7 @@ class ConfigurationAdminImpl implements ConfigurationAdmin {
 					this.configurationAdminFactory.checkConfigurePermission(config.getLocation(), bundleLocation);
 				}
 				result.add(config);
-			}catch (SecurityException e) {
+			} catch (SecurityException e) {
 				// ignore;
 			}
 		}

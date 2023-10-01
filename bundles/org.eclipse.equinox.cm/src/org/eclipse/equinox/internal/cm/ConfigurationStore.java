@@ -23,10 +23,11 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.log.LogService;
 
 /**
- * ConfigurationStore manages all active configurations along with persistence. The current
- * implementation uses a filestore and serialization of the configuration dictionaries to files
- * identified by their pid. Persistence details are in the constructor, saveConfiguration, and
- * deleteConfiguration and can be factored out separately if required.
+ * ConfigurationStore manages all active configurations along with persistence.
+ * The current implementation uses a filestore and serialization of the
+ * configuration dictionaries to files identified by their pid. Persistence
+ * details are in the constructor, saveConfiguration, and deleteConfiguration
+ * and can be factored out separately if required.
  */
 class ConfigurationStore {
 
@@ -66,12 +67,14 @@ class ConfigurationStore {
 						dictionary.remove(ConfigurationAdmin.SERVICE_BUNDLELOCATION);
 					}
 				}
-				ConfigurationImpl config = new ConfigurationImpl(configurationAdminFactory, this, dictionary, configurationFile);
+				ConfigurationImpl config = new ConfigurationImpl(configurationAdminFactory, this, dictionary,
+						configurationFile);
 				configurations.put(config.getPid(), config);
 			} catch (IOException e) {
 				String message = e.getMessage();
 				String pid = configurationFileName.substring(0, configurationFileName.length() - 4);
-				String errorMessage = "{Configuration Admin - pid = " + pid + "} could not be restored." + ((message == null) ? "" : " " + message); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				String errorMessage = "{Configuration Admin - pid = " + pid + "} could not be restored." //$NON-NLS-1$//$NON-NLS-2$
+						+ ((message == null) ? "" : " " + message); //$NON-NLS-1$ //$NON-NLS-2$
 				configurationAdminFactory.log(LogService.LOG_ERROR, errorMessage);
 				deleteFile = true;
 			} catch (ClassNotFoundException e) {
@@ -81,14 +84,14 @@ class ConfigurationStore {
 					try {
 						ois.close();
 					} catch (IOException e) {
-						// ignore 
+						// ignore
 					}
 				}
 				if (ris != null) {
 					try {
 						ris.close();
 					} catch (IOException e) {
-						// ignore 
+						// ignore
 					}
 				}
 			}
@@ -136,14 +139,14 @@ class ConfigurationStore {
 				try {
 					oos.close();
 				} catch (IOException e) {
-					// ignore 
+					// ignore
 				}
 			}
 			if (ros != null) {
 				try {
 					ros.close();
 				} catch (IOException e) {
-					// ignore 
+					// ignore
 				}
 			}
 		}
@@ -176,7 +179,8 @@ class ConfigurationStore {
 		return config;
 	}
 
-	public synchronized ConfigurationImpl getFactoryConfiguration(String factoryPid, String location, boolean bind, String name) {
+	public synchronized ConfigurationImpl getFactoryConfiguration(String factoryPid, String location, boolean bind,
+			String name) {
 		String pid;
 		if (name == null) {
 			pid = factoryPid + "-" + new Date().getTime() + "-" + createdPidCount++; //$NON-NLS-1$ //$NON-NLS-2$
@@ -188,7 +192,8 @@ class ConfigurationStore {
 			}
 		}
 
-		ConfigurationImpl config = new ConfigurationImpl(configurationAdminFactory, this, factoryPid, pid, location, bind);
+		ConfigurationImpl config = new ConfigurationImpl(configurationAdminFactory, this, factoryPid, pid, location,
+				bind);
 		configurations.put(pid, config);
 		return config;
 	}

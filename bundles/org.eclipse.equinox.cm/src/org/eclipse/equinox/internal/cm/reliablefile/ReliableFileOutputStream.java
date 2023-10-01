@@ -20,12 +20,11 @@ import java.util.zip.Checksum;
 //This is a copy of org.eclipse.osgi.framework.internal.reliablefile.ReliableFileOutputStream
 
 /**
- * A ReliableFile FileOutputStream replacement class.
- * This class can be used just like FileOutputStream. The class
- * is in partnership with ReliableFileInputStream to avoid losing
- * file data by using multiple files.
+ * A ReliableFile FileOutputStream replacement class. This class can be used
+ * just like FileOutputStream. The class is in partnership with
+ * ReliableFileInputStream to avoid losing file data by using multiple files.
  *
- * @see			ReliableFileInputStream
+ * @see ReliableFileInputStream
  */
 public class ReliableFileOutputStream extends FilterOutputStream {
 	/**
@@ -41,12 +40,12 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 	private boolean outputOpen = false;
 
 	/**
-	 * Constructs a new ReliableFileOutputStream on the File <code>file</code>.  If the
-	 * file exists, it is written over.  See the constructor which can append to
+	 * Constructs a new ReliableFileOutputStream on the File <code>file</code>. If
+	 * the file exists, it is written over. See the constructor which can append to
 	 * the file if so desired.
 	 *
-	 * @param		file		the File on which to stream reads.
-	 * @exception 	java.io.IOException If an error occurs opening the file.
+	 * @param file the File on which to stream reads.
+	 * @exception java.io.IOException If an error occurs opening the file.
 	 */
 	public ReliableFileOutputStream(File file) throws IOException {
 		this(ReliableFile.getReliableFile(file), false);
@@ -55,36 +54,37 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 	/**
 	 * Constructs a new ReliableFileOutputStream on the File <code>file</code>.
 	 *
-	 * @param		file		the File on which to stream reads.
-	 * @param		append		a boolean indicating whether or not to append to an existing file.
-	 * @exception 	java.io.IOException If an error occurs opening the file.
+	 * @param file   the File on which to stream reads.
+	 * @param append a boolean indicating whether or not to append to an existing
+	 *               file.
+	 * @exception java.io.IOException If an error occurs opening the file.
 	 */
 	public ReliableFileOutputStream(File file, boolean append) throws IOException {
 		this(ReliableFile.getReliableFile(file), append);
 	}
 
 	/**
-	 * Constructs a new ReliableFileOutputStream on the file named <code>name</code>. If
-	 * the file exists, it is written over.  See the constructor which can append to
-	 * the file if so desired.
-	 * The <code>name</code> may be absolute or relative
-	 * to the System property <code>"user.dir"</code>.
+	 * Constructs a new ReliableFileOutputStream on the file named
+	 * <code>name</code>. If the file exists, it is written over. See the
+	 * constructor which can append to the file if so desired. The <code>name</code>
+	 * may be absolute or relative to the System property <code>"user.dir"</code>.
 	 *
-	 * @param		name	the file on which to stream writes.
-	 * @exception 	java.io.IOException If an error occurs opening the file.
+	 * @param name the file on which to stream writes.
+	 * @exception java.io.IOException If an error occurs opening the file.
 	 */
 	public ReliableFileOutputStream(String name) throws IOException {
 		this(ReliableFile.getReliableFile(name), false);
 	}
 
 	/**
-	 * Constructs a new ReliableFileOutputStream on the file named <code>name</code>.
-	 * The <code>name</code> may be absolute or relative
-	 * to the System property <code>"user.dir"</code>.
+	 * Constructs a new ReliableFileOutputStream on the file named
+	 * <code>name</code>. The <code>name</code> may be absolute or relative to the
+	 * System property <code>"user.dir"</code>.
 	 *
-	 * @param		name	the file on which to stream writes.
-	 * @param		append		a boolean indicating whether or not to append to an existing file.
-	 * @exception 	java.io.IOException If an error occurs opening the file.
+	 * @param name   the file on which to stream writes.
+	 * @param append a boolean indicating whether or not to append to an existing
+	 *               file.
+	 * @exception java.io.IOException If an error occurs opening the file.
 	 */
 	public ReliableFileOutputStream(String name, boolean append) throws IOException {
 		this(ReliableFile.getReliableFile(name), append);
@@ -93,9 +93,10 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 	/**
 	 * Private constructor used by other constructors.
 	 *
-	 * @param		reliable		the ReliableFile on which to read.
-	 * @param		append		a boolean indicating whether or not to append to an existing file.
-	 * @exception 	java.io.IOException If an error occurs opening the file.
+	 * @param reliable the ReliableFile on which to read.
+	 * @param append   a boolean indicating whether or not to append to an existing
+	 *                 file.
+	 * @exception java.io.IOException If an error occurs opening the file.
 	 */
 	private ReliableFileOutputStream(ReliableFile reliable, boolean append) throws IOException {
 		super(reliable.getOutputStream(append, ReliableFile.GENERATION_LATEST));
@@ -109,20 +110,20 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 	}
 
 	/**
-	 * Closes this output stream and releases any system resources
-	 * associated with this stream. The general contract of <code>close</code>
-	 * is that it closes the output stream. A closed stream cannot perform
-	 * output operations and cannot be reopened.
+	 * Closes this output stream and releases any system resources associated with
+	 * this stream. The general contract of <code>close</code> is that it closes the
+	 * output stream. A closed stream cannot perform output operations and cannot be
+	 * reopened.
 	 *
-	 * @exception 	java.io.IOException If an error occurs closing the file.
+	 * @exception java.io.IOException If an error occurs closing the file.
 	 */
 	@Override
 	public synchronized void close() throws IOException {
 		closeIntermediateFile();
 		reliable.closeOutputFile(crc);
 		// if the previouse closeOutpuFile() throws exception,
-		//  we don't null out reliable to give another opportunity
-		//  to rename the file.
+		// we don't null out reliable to give another opportunity
+		// to rename the file.
 		reliable = null;
 	}
 
@@ -137,7 +138,7 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 				((FileOutputStream) out).getFD().sync();
 			} catch (IOException e) {
 				// just ignore this Exception
-				//Debug
+				// Debug
 				e.printStackTrace();
 			}
 			out.close();
@@ -148,6 +149,7 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 
 	/**
 	 * Override default FilterOutputStream method.
+	 * 
 	 * @see FilterOutputStream#write(byte[])
 	 */
 	@Override
@@ -157,6 +159,7 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 
 	/**
 	 * Override default FilterOutputStream method.
+	 * 
 	 * @see FilterOutputStream#write(byte[], int, int)
 	 */
 	@Override
@@ -167,6 +170,7 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 
 	/**
 	 * Override default FilterOutputStream method.
+	 * 
 	 * @see FilterOutputStream#write(int)
 	 */
 	@Override
@@ -181,7 +185,7 @@ public class ReliableFileOutputStream extends FilterOutputStream {
 		if (outputOpen) {
 			try {
 				out.close();
-			} catch (IOException e) {/*ignore*/
+			} catch (IOException e) {/* ignore */
 			}
 			outputOpen = false;
 		}

@@ -30,20 +30,19 @@ import org.eclipse.equinox.internal.cm.Activator;
  */
 public class ReliableFile {
 	/**
-	 * Open mask. Obtain the best data stream available. If the primary data 
-	 * contents are invalid (corrupt, missing, etc.), the data for a prior 
-	 * version may be used. 
-	 * An IOException will be thrown if a valid data content can not be
-	 * determined. 
-	 * This is mutually exclusive with <code>OPEN_FAIL_ON_PRIMARY</code>.
+	 * Open mask. Obtain the best data stream available. If the primary data
+	 * contents are invalid (corrupt, missing, etc.), the data for a prior version
+	 * may be used. An IOException will be thrown if a valid data content can not be
+	 * determined. This is mutually exclusive with
+	 * <code>OPEN_FAIL_ON_PRIMARY</code>.
 	 */
 	public static final int OPEN_BEST_AVAILABLE = 0;
 	/**
-	 * Open mask. Obtain only the data stream for the primary file where any other 
-	 * version will not be valid. This should be used for data streams that are 
-	 * managed as a group as a prior contents may not match the other group data.
-	 * If the primary data is not invalid, a IOException will be thrown.
-	 * This is mutually exclusive with <code>OPEN_BEST_AVAILABLE</code>.
+	 * Open mask. Obtain only the data stream for the primary file where any other
+	 * version will not be valid. This should be used for data streams that are
+	 * managed as a group as a prior contents may not match the other group data. If
+	 * the primary data is not invalid, a IOException will be thrown. This is
+	 * mutually exclusive with <code>OPEN_BEST_AVAILABLE</code>.
 	 */
 	public static final int OPEN_FAIL_ON_PRIMARY = 1;
 
@@ -57,27 +56,27 @@ public class ReliableFile {
 	public static final int GENERATIONS_INFINITE = 0;
 
 	/**
-	 * Extension of tmp file used during writing.
-	 * A reliable file with this extension should
-	 * never be directly used.
+	 * Extension of tmp file used during writing. A reliable file with this
+	 * extension should never be directly used.
 	 */
 	public static final String tmpExt = ".tmp"; //$NON-NLS-1$
 
 	/**
-	 * Property to set the maximum size of a file that will be buffered. When calculating a ReliableFile
-	 * checksum, if the file is this size or small, ReliableFile will read the file contents into a 
-	 * <code>BufferedInputStream</code> and reset the buffer to avoid having to read the data from the
-	 * media twice. Since this method require memory for storage, it is limited to this size. The default
-	 * maximum is 128-KBytes.
+	 * Property to set the maximum size of a file that will be buffered. When
+	 * calculating a ReliableFile checksum, if the file is this size or small,
+	 * ReliableFile will read the file contents into a
+	 * <code>BufferedInputStream</code> and reset the buffer to avoid having to read
+	 * the data from the media twice. Since this method require memory for storage,
+	 * it is limited to this size. The default maximum is 128-KBytes.
 	 */
 	public static final String PROP_MAX_BUFFER = "osgi.reliableFile.maxInputStreamBuffer"; //$NON-NLS-1$
 	/**
-	 * The maximum number of generations to keep as backup files in case last generation 
-	 * file is determined to be invalid.
+	 * The maximum number of generations to keep as backup files in case last
+	 * generation file is determined to be invalid.
 	 */
 	public static final String PROP_MAX_GENERATIONS = "osgi.ReliableFile.maxGenerations"; //$NON-NLS-1$
 	/**
-	 *see org.eclipse.core.runtime.internal.adaptor.BasicLocation#PROP_OSGI_LOCKING
+	 * see org.eclipse.core.runtime.internal.adaptor.BasicLocation#PROP_OSGI_LOCKING
 	 */
 	public static final String PROP_OSGI_LOCKING = "osgi.locking"; //$NON-NLS-1$
 
@@ -85,25 +84,25 @@ public class ReliableFile {
 	private static final int FILETYPE_CORRUPT = 1;
 	private static final int FILETYPE_NOSIGNATURE = 2;
 
-	private static final byte identifier1[] = {'.', 'c', 'r', 'c'};
-	private static final byte identifier2[] = {'.', 'v', '1', '\n'};
+	private static final byte identifier1[] = { '.', 'c', 'r', 'c' };
+	private static final byte identifier2[] = { '.', 'v', '1', '\n' };
 
 	private static final int BUF_SIZE = 4096;
 	private static final int maxInputStreamBuffer;
 	private static final int defaultMaxGenerations;
 	private static final boolean fileSharing;
-	//our cache of the last looked up generations for a file
+	// our cache of the last looked up generations for a file
 	private static File lastGenerationFile = null;
 	private static int[] lastGenerations = null;
 	private static final Object lastGenerationLock = new Object();
 
 	static {
 		String prop = Activator.getProperty(PROP_MAX_BUFFER);
-		int tmpMaxInput = 128 * 1024; //128k
+		int tmpMaxInput = 128 * 1024; // 128k
 		if (prop != null) {
 			try {
 				tmpMaxInput = Integer.parseInt(prop);
-			} catch (NumberFormatException e) {/*ignore*/
+			} catch (NumberFormatException e) {/* ignore */
 			}
 		}
 		maxInputStreamBuffer = tmpMaxInput;
@@ -113,7 +112,7 @@ public class ReliableFile {
 		if (prop != null) {
 			try {
 				tmpDefaultMax = Integer.parseInt(prop);
-			} catch (NumberFormatException e) {/*ignore*/
+			} catch (NumberFormatException e) {/* ignore */
 			}
 		}
 		defaultMaxGenerations = tmpDefaultMax;
@@ -141,9 +140,9 @@ public class ReliableFile {
 	/**
 	 * ReliableFile object factory. This method is called by ReliableFileInputStream
 	 * and ReliableFileOutputStream to get a ReliableFile object for a target file.
-	 * If the object is in the cache, the cached copy is returned.
-	 * Otherwise a new ReliableFile object is created and returned.
-	 * The use count of the returned ReliableFile object is incremented.
+	 * If the object is in the cache, the cached copy is returned. Otherwise a new
+	 * ReliableFile object is created and returned. The use count of the returned
+	 * ReliableFile object is incremented.
 	 *
 	 * @param name Name of the target file.
 	 * @return A ReliableFile object for the target file.
@@ -156,9 +155,9 @@ public class ReliableFile {
 	/**
 	 * ReliableFile object factory. This method is called by ReliableFileInputStream
 	 * and ReliableFileOutputStream to get a ReliableFile object for a target file.
-	 * If the object is in the cache, the cached copy is returned.
-	 * Otherwise a new ReliableFile object is created and returned.
-	 * The use count of the returned ReliableFile object is incremented.
+	 * If the object is in the cache, the cached copy is returned. Otherwise a new
+	 * ReliableFile object is created and returned. The use count of the returned
+	 * ReliableFile object is incremented.
 	 *
 	 * @param file File object for the target file.
 	 * @return A ReliableFile object for the target file.
@@ -184,7 +183,7 @@ public class ReliableFile {
 		if (!fileSharing) {
 			synchronized (lastGenerationLock) {
 				if (lastGenerationFile != null) {
-					//shortcut maybe, only if filesharing is not supported
+					// shortcut maybe, only if filesharing is not supported
 					if (file.equals(lastGenerationFile))
 						return lastGenerations;
 				}
@@ -201,13 +200,13 @@ public class ReliableFile {
 				return null;
 			List<Integer> list = new ArrayList<>(defaultMaxGenerations);
 			if (file.exists())
-				list.add(Integer.valueOf(0)); //base file exists
+				list.add(Integer.valueOf(0)); // base file exists
 			for (String n : files) {
 				if (n.startsWith(prefix)) {
 					try {
 						int id = Integer.parseInt(n.substring(prefixLen));
 						list.add(Integer.valueOf(id));
-					}catch (NumberFormatException e) {/*ignore*/
+					} catch (NumberFormatException e) {/* ignore */
 					}
 				}
 			}
@@ -234,8 +233,8 @@ public class ReliableFile {
 	 * Returns an InputStream object for reading the target file.
 	 *
 	 * @param generation the maximum generation to evaluate
-	 * @param openMask mask used to open data. 
-	 * are invalid (corrupt, missing, etc).
+	 * @param openMask   mask used to open data. are invalid (corrupt, missing,
+	 *                   etc).
 	 * @return An InputStream object which can be used to read the target file.
 	 * @throws IOException If an error occurs preparing the file.
 	 */
@@ -280,13 +279,13 @@ public class ReliableFile {
 						int filetype = getStreamType(is, cksum);
 						info = new CacheInfo(filetype, cksum, timeStamp);
 						cacheFiles.put(file, info);
-					} catch (IOException e) {/*ignore*/
+					} catch (IOException e) {/* ignore */
 					}
 				}
 			}
 
 			// if looking for a specific generation only, only look at one
-			//  and return the result.
+			// and return the result.
 			if (failOnPrimary) {
 				if (info != null && info.filetype == FILETYPE_VALID) {
 					inputFile = file;
@@ -301,25 +300,25 @@ public class ReliableFile {
 			if (info == null)
 				continue;
 
-			// we're  not looking for a specific version, so let's pick the best case
+			// we're not looking for a specific version, so let's pick the best case
 			switch (info.filetype) {
-				case FILETYPE_VALID :
-					inputFile = file;
-					if (is != null)
-						return is;
-					return new FileInputStream(file);
+			case FILETYPE_VALID:
+				inputFile = file;
+				if (is != null)
+					return is;
+				return new FileInputStream(file);
 
-				case FILETYPE_NOSIGNATURE :
-					if (textFile == null) {
-						textFile = file;
-						textIS = is;
-					}
-					break;
+			case FILETYPE_NOSIGNATURE:
+				if (textFile == null) {
+					textFile = file;
+					textIS = is;
+				}
+				break;
 			}
 		}
 
 		// didn't find any valid files, if there are any plain text files
-		//  use it instead
+		// use it instead
 		if (textFile != null) {
 			inputFile = textFile;
 			if (textIS != null)
@@ -332,14 +331,14 @@ public class ReliableFile {
 	/**
 	 * Returns an OutputStream object for writing the target file.
 	 * 
-	 * @param append append new data to an existing file.
+	 * @param append           append new data to an existing file.
 	 * @param appendGeneration specific generation of file to append from.
 	 * @return An OutputStream object which can be used to write the target file.
 	 * @throws IOException IOException If an error occurs preparing the file.
 	 */
 	OutputStream getOutputStream(boolean append, int appendGeneration) throws IOException {
 		if (outputFile != null)
-			throw new IOException("Output stream is already open"); //$NON_NLS-1$ //$NON-NLS-1$
+			throw new IOException("Output stream is already open"); // $NON_NLS-1$ //$NON-NLS-1$
 		String name = referenceFile.getName();
 		File parent = new File(referenceFile.getParent());
 		File tmpFile = File.createTempFile(name, tmpExt, parent);
@@ -432,9 +431,9 @@ public class ReliableFile {
 		String name = referenceFile.getName();
 		File parent = new File(referenceFile.getParent());
 		int generationCount = generations.length;
-		// if a base file is in the list (0 in generations[]), we will 
-		//  never delete these files, so don't count them in the old
-		//  generation count.
+		// if a base file is in the list (0 in generations[]), we will
+		// never delete these files, so don't count them in the old
+		// generation count.
 		if (generations[generationCount - 1] == 0)
 			generationCount--;
 		// assume here that the int[] does not include a file just created
@@ -445,8 +444,8 @@ public class ReliableFile {
 			return;
 		synchronized (cacheFiles) {
 			// first, see if any of the files not deleted are known to
-			//  be corrupt. If so, be sure to keep not to delete good
-			//  backup files.
+			// be corrupt. If so, be sure to keep not to delete good
+			// backup files.
 			for (int idx = 0, count = generationCount - rmCount; idx < count; idx++) {
 				File file = new File(parent, name + '.' + generations[idx]);
 				CacheInfo info = cacheFiles.get(file);
@@ -467,7 +466,7 @@ public class ReliableFile {
 	 * Rename a file.
 	 *
 	 * @param from The original file.
-	 * @param to The new file name.
+	 * @param to   The new file name.
 	 * @throws IOException If the rename failed.
 	 */
 	private static void mv(File from, File to) throws IOException {
@@ -509,7 +508,7 @@ public class ReliableFile {
 		} finally {
 			try {
 				in.close();
-			} catch (IOException e) {/*ignore*/
+			} catch (IOException e) {/* ignore */
 			}
 			out.close();
 		}
@@ -517,12 +516,14 @@ public class ReliableFile {
 
 	/**
 	 * Answers a boolean indicating whether or not the specified reliable file
-	 * exists on the underlying file system. This call only returns if a file 
-	 * exists and not if the file contents are valid.
-	 * @param file returns true if the specified reliable file exists; otherwise false is returned
+	 * exists on the underlying file system. This call only returns if a file exists
+	 * and not if the file contents are valid.
+	 * 
+	 * @param file returns true if the specified reliable file exists; otherwise
+	 *             false is returned
 	 *
 	 * @return <code>true</code> if the specified reliable file exists,
-	 * <code>false</code> otherwise.
+	 *         <code>false</code> otherwise.
 	 */
 	public static boolean exists(File file) {
 		String prefix = file.getName() + '.';
@@ -536,7 +537,7 @@ public class ReliableFile {
 				try {
 					Integer.parseInt(n.substring(prefixLen));
 					return true;
-				}catch (NumberFormatException e) {/*ignore*/
+				} catch (NumberFormatException e) {/* ignore */
 				}
 			}
 		}
@@ -544,8 +545,9 @@ public class ReliableFile {
 	}
 
 	/**
-	 * Returns the time that the reliable file was last modified. Only the time 
-	 * of the last file generation is returned.
+	 * Returns the time that the reliable file was last modified. Only the time of
+	 * the last file generation is returned.
+	 * 
 	 * @param file the file to determine the time of.
 	 * @return time the file was last modified (see java.io.File.lastModified()).
 	 */
@@ -562,11 +564,12 @@ public class ReliableFile {
 	}
 
 	/**
-	 * Returns the time that this ReliableFile was last modified. This method is only valid
-	 * after requesting an input stream and the time of the actual input file is returned.
+	 * Returns the time that this ReliableFile was last modified. This method is
+	 * only valid after requesting an input stream and the time of the actual input
+	 * file is returned.
 	 *
 	 * @return time the file was last modified (see java.io.File.lastModified()) or
-	 * 0L if an input stream is not open.
+	 *         0L if an input stream is not open.
 	 */
 	public long lastModified() {
 		if (inputFile != null) {
@@ -576,12 +579,12 @@ public class ReliableFile {
 	}
 
 	/**
-	 * Returns the a version number of a reliable managed file. The version can be expected
-	 * to be unique for each successful file update.
+	 * Returns the a version number of a reliable managed file. The version can be
+	 * expected to be unique for each successful file update.
 	 * 
 	 * @param file the file to determine the version of.
-	 * @return a unique version of this current file. A value of -1 indicates the file does
-	 * not exist or an error occurred.
+	 * @return a unique version of this current file. A value of -1 indicates the
+	 *         file does not exist or an error occurred.
 	 */
 	public static int lastModifiedVersion(File file) {
 		int[] generations = getFileGenerations(file);
@@ -592,10 +595,11 @@ public class ReliableFile {
 
 	/**
 	 * Delete the specified reliable file on the underlying file system.
+	 * 
 	 * @param deleteFile the reliable file to delete
 	 *
 	 * @return <code>true</code> if the specified reliable file was deleted,
-	 * <code>false</code> otherwise.
+	 *         <code>false</code> otherwise.
 	 */
 	public static boolean delete(File deleteFile) {
 		int[] generations = getFileGenerations(deleteFile);
@@ -619,10 +623,11 @@ public class ReliableFile {
 	}
 
 	/**
-	 * Get a list of ReliableFile base names in a given directory. Only files with a valid
-	 * ReliableFile generation are included.
+	 * Get a list of ReliableFile base names in a given directory. Only files with a
+	 * valid ReliableFile generation are included.
+	 * 
 	 * @param directory the directory to inquire.
-	 * @return an array of ReliableFile names in the directory. 
+	 * @return an array of ReliableFile names in the directory.
 	 * @throws IOException if an error occurs.
 	 */
 	public static String[] getBaseFiles(File directory) throws IOException {
@@ -638,7 +643,7 @@ public class ReliableFile {
 			int generation = 0;
 			try {
 				generation = Integer.parseInt(ext);
-			} catch (NumberFormatException e) {/*skip*/
+			} catch (NumberFormatException e) {/* skip */
 			}
 			if (generation == 0)
 				continue;
@@ -655,6 +660,7 @@ public class ReliableFile {
 
 	/**
 	 * Delete any old excess generations of a given reliable file.
+	 * 
 	 * @param base realible file.
 	 */
 	public static void cleanupGenerations(File base) {
@@ -666,8 +672,8 @@ public class ReliableFile {
 	}
 
 	/**
-	 * Inform ReliableFile that a file has been updated outside of 
-	 * ReliableFile.
+	 * Inform ReliableFile that a file has been updated outside of ReliableFile.
+	 * 
 	 * @param file
 	 */
 	public static void fileUpdated(File file) {
@@ -677,7 +683,8 @@ public class ReliableFile {
 
 	/**
 	 * Append a checksum value to the end of an output stream.
-	 * @param out the output stream.
+	 * 
+	 * @param out      the output stream.
 	 * @param checksum the checksum value to append to the file.
 	 * @throws IOException if a write error occurs.
 	 */
@@ -690,24 +697,24 @@ public class ReliableFile {
 
 	/**
 	 * Returns the size of the ReliableFile signature + CRC at the end of the file.
-	 * This method should be called only after calling getInputStream() or 
+	 * This method should be called only after calling getInputStream() or
 	 * getOutputStream() methods.
 	 *
-	 * @return <code>int</code> size of the ReliableFIle signature + CRC appended 
-	 * to the end of the file.
+	 * @return <code>int</code> size of the ReliableFIle signature + CRC appended to
+	 *         the end of the file.
 	 * @throws IOException if getInputStream() or getOutputStream has not been
-	 * called.
+	 *                     called.
 	 */
 	int getSignatureSize() throws IOException {
 		if (inputFile != null) {
 			CacheInfo info = cacheFiles.get(inputFile);
 			if (info != null) {
 				switch (info.filetype) {
-					case FILETYPE_VALID :
-					case FILETYPE_CORRUPT :
-						return 16;
-					case FILETYPE_NOSIGNATURE :
-						return 0;
+				case FILETYPE_VALID:
+				case FILETYPE_CORRUPT:
+					return 16;
+				case FILETYPE_NOSIGNATURE:
+					return 0;
 				}
 			}
 		}
@@ -715,12 +722,11 @@ public class ReliableFile {
 	}
 
 	/**
-	 * Returns a Checksum object for the current file contents. This method 
-	 * should be called only after calling getInputStream() or 
-	 * getOutputStream() methods.
+	 * Returns a Checksum object for the current file contents. This method should
+	 * be called only after calling getInputStream() or getOutputStream() methods.
 	 *
-	 * @return Object implementing Checksum interface initialized to the 
-	 * current file contents.
+	 * @return Object implementing Checksum interface initialized to the current
+	 *         file contents.
 	 * @throws IOException if getOutputStream for append has not been called.
 	 */
 	Checksum getFileChecksum() throws IOException {
@@ -732,8 +738,8 @@ public class ReliableFile {
 	/**
 	 * Create a checksum implementation used by ReliableFile.
 	 *
-	 * @return Object implementing Checksum interface used to calculate
-	 * a reliable file checksum
+	 * @return Object implementing Checksum interface used to calculate a reliable
+	 *         file checksum
 	 */
 	Checksum getChecksumCalculator() {
 		// Using CRC32 because Adler32 isn't in the eeMinimum library.

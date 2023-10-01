@@ -21,9 +21,10 @@ import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * EventDispatcher is responsible for delivering Configuration Events to ConfigurationListeners.
- * The originating ConfigAdmin ServiceReference is needed when delivering events. This reference
- * is made available by the service factory before returning the service object.
+ * EventDispatcher is responsible for delivering Configuration Events to
+ * ConfigurationListeners. The originating ConfigAdmin ServiceReference is
+ * needed when delivering events. This reference is made available by the
+ * service factory before returning the service object.
  */
 
 public class EventDispatcher {
