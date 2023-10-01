@@ -15,8 +15,8 @@ package org.eclipse.core.internal.registry;
 
 /**
  * Note this is a copy of a data structure from OSGi, package
- * org.eclipse.osgi.framework.internal.core.  Unused methods were removed
- * from this copy.
+ * org.eclipse.osgi.framework.internal.core. Unused methods were removed from
+ * this copy.
  */
 public class KeyedHashSet {
 	protected static final int MINIMUM_SIZE = 7;
@@ -42,6 +42,7 @@ public class KeyedHashSet {
 	/**
 	 * Adds an element to this set. If an element with the same key already exists,
 	 * replaces it depending on the replace flag.
+	 * 
 	 * @return true if the element was added/stored, false otherwise
 	 */
 	public boolean add(KeyedElement element) {
@@ -105,8 +106,8 @@ public class KeyedHashSet {
 	}
 
 	/**
-	 * The array isn't large enough so double its size and rehash
-	 * all its current values.
+	 * The array isn't large enough so double its size and rehash all its current
+	 * values.
 	 */
 	protected void expand() {
 		KeyedElement[] oldElements = elements;
@@ -127,8 +128,7 @@ public class KeyedHashSet {
 	}
 
 	/**
-	 * Returns the set element with the given id, or null
-	 * if not found.
+	 * Returns the set element with the given id, or null if not found.
 	 */
 	public KeyedElement get(KeyedElement key) {
 		if (elementCount == 0)
@@ -158,8 +158,7 @@ public class KeyedHashSet {
 	}
 
 	/**
-	 * Returns the set element with the given id, or null
-	 * if not found.
+	 * Returns the set element with the given id, or null if not found.
 	 */
 	public KeyedElement getByKey(Object key) {
 		if (elementCount == 0)
@@ -201,8 +200,8 @@ public class KeyedHashSet {
 	}
 
 	/**
-	 * The element at the given index has been removed so move
-	 * elements to keep the set properly hashed.
+	 * The element at the given index has been removed so move elements to keep the
+	 * set properly hashed.
 	 */
 	protected void rehashTo(int anIndex) {
 

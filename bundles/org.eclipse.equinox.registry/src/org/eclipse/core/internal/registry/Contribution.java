@@ -20,9 +20,9 @@ import org.eclipse.core.runtime.InvalidRegistryObjectException;
 // It is mainly used on removal so we can quickly  find objects to remove.
 // Each contribution is made in the context of a namespace.
 public class Contribution implements KeyedElement {
-	static final int[] EMPTY_CHILDREN = new int[] {0, 0};
+	static final int[] EMPTY_CHILDREN = new int[] { 0, 0 };
 
-	//The registry that owns this object
+	// The registry that owns this object
 	protected ExtensionRegistry registry;
 
 	// The actual contributor of the contribution
@@ -34,11 +34,14 @@ public class Contribution implements KeyedElement {
 	// indicates if this contribution needs to be saved in the registry cache
 	protected boolean persist;
 
-	// This array stores the identifiers of both the extension points and the extensions.
+	// This array stores the identifiers of both the extension points and the
+	// extensions.
 	// The array has always a minimum size of 2.
-	// The first element of the array is the number of extension points and the second the number of extensions.
-	// [numberOfExtensionPoints, numberOfExtensions, extensionPoint#1, extensionPoint#2, extensionPoint..., ext#1, ext#2, ext#3, ... ].
-	// The size of the array is 2 + (numberOfExtensionPoints +  numberOfExtensions).
+	// The first element of the array is the number of extension points and the
+	// second the number of extensions.
+	// [numberOfExtensionPoints, numberOfExtensions, extensionPoint#1,
+	// extensionPoint#2, extensionPoint..., ext#1, ext#2, ext#3, ... ].
+	// The size of the array is 2 + (numberOfExtensionPoints + numberOfExtensions).
 	private int[] children = EMPTY_CHILDREN;
 	static final public byte EXTENSION_POINT = 0;
 	static final public byte EXTENSION = 1;
@@ -55,10 +58,10 @@ public class Contribution implements KeyedElement {
 
 		// persist?
 		// Old New Result
-		//  F   F   F
-		//  F   T   T	=> needs to be adjusted
-		//  T   F   T
-		//  T   T   T
+		// F F F
+		// F T T => needs to be adjusted
+		// T F T
+		// T T T
 		if (shouldPersist() != addContribution.shouldPersist())
 			persist = true;
 
@@ -73,8 +76,10 @@ public class Contribution implements KeyedElement {
 		System.arraycopy(existing, 2, allChildren, 2, existing[EXTENSION_POINT]);
 		System.arraycopy(addition, 2, allChildren, 2 + existing[EXTENSION_POINT], addition[EXTENSION_POINT]);
 		allChildren[EXTENSION] = extensions;
-		System.arraycopy(existing, 2 + existing[EXTENSION_POINT], allChildren, 2 + extensionPoints, existing[EXTENSION]);
-		System.arraycopy(addition, 2 + addition[EXTENSION_POINT], allChildren, 2 + extensionPoints + existing[EXTENSION], addition[EXTENSION]);
+		System.arraycopy(existing, 2 + existing[EXTENSION_POINT], allChildren, 2 + extensionPoints,
+				existing[EXTENSION]);
+		System.arraycopy(addition, 2 + addition[EXTENSION_POINT], allChildren,
+				2 + extensionPoints + existing[EXTENSION], addition[EXTENSION]);
 
 		children = allChildren;
 	}
@@ -114,7 +119,7 @@ public class Contribution implements KeyedElement {
 		return "Contribution: " + contributorId + " in namespace" + getDefaultNamespace(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	//Implements the KeyedElement interface
+	// Implements the KeyedElement interface
 	@Override
 	public int getKeyHashCode() {
 		return getKey().hashCode();
@@ -169,6 +174,7 @@ public class Contribution implements KeyedElement {
 
 	/**
 	 * Find if this contribution has a children with ID = id.
+	 * 
 	 * @param id possible ID of the child
 	 * @return true: contribution has this child
 	 */

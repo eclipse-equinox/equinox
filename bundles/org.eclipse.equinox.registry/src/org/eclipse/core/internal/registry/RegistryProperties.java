@@ -17,8 +17,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 /**
- * Simple Property mechanism to chain property lookup from local registry properties,
- * to BundleContext properties (if available) or System properties otherwise.
+ * Simple Property mechanism to chain property lookup from local registry
+ * properties, to BundleContext properties (if available) or System properties
+ * otherwise.
  */
 public class RegistryProperties {
 
@@ -49,7 +50,8 @@ public class RegistryProperties {
 	}
 
 	// The registry could be used as a stand-alone utility without OSGi.
-	// Try to obtain the property from the OSGi context, but only use bundleContext if
+	// Try to obtain the property from the OSGi context, but only use bundleContext
+	// if
 	// it was already set by Activator indicating that OSGi layer is present.
 	private static String getContextProperty(final String propertyName) {
 		if (context == null)

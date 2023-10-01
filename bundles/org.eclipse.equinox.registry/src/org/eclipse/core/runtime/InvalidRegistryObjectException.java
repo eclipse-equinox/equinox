@@ -14,15 +14,16 @@
 package org.eclipse.core.runtime;
 
 /**
- * An unchecked exception indicating that an attempt to access
- * an extension registry object that is no longer valid.
+ * An unchecked exception indicating that an attempt to access an extension
+ * registry object that is no longer valid.
  * <p>
- * This exception is thrown by methods on extension registry
- * objects. It is not intended to be instantiated or
- * subclassed by clients.
- * </p><p>
+ * This exception is thrown by methods on extension registry objects. It is not
+ * intended to be instantiated or subclassed by clients.
+ * </p>
+ * <p>
  * This class can be used without OSGi running.
  * </p>
+ * 
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
  */

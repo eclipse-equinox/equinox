@@ -82,7 +82,7 @@ public class RegistryIndexElement implements KeyedElement {
 		return extensionPoints.unlinkChildren(IDs);
 	}
 
-	//Implements the KeyedElement interface
+	// Implements the KeyedElement interface
 	@Override
 	public int getKeyHashCode() {
 		return getKey().hashCode();

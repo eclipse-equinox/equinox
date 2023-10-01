@@ -18,8 +18,9 @@ import java.util.Arrays;
 import org.eclipse.core.runtime.*;
 
 /**
- * This is the copy of the ExtensionPointHandle minus the getDeclaringPluginDescriptor()
- * method that was moved into compatibility plugin.
+ * This is the copy of the ExtensionPointHandle minus the
+ * getDeclaringPluginDescriptor() method that was moved into compatibility
+ * plugin.
  *
  * This class should not be used directly. Use ExtensionPointHandle instead.
  *
@@ -33,7 +34,8 @@ public class BaseExtensionPointHandle extends Handle implements IExtensionPoint 
 
 	@Override
 	public IExtension[] getExtensions() {
-		return (IExtension[]) objectManager.getHandles(getExtensionPoint().getRawChildren(), RegistryObjectManager.EXTENSION);
+		return (IExtension[]) objectManager.getHandles(getExtensionPoint().getRawChildren(),
+				RegistryObjectManager.EXTENSION);
 	}
 
 	// This method is left for backward compatibility only
@@ -61,8 +63,10 @@ public class BaseExtensionPointHandle extends Handle implements IExtensionPoint 
 		if (extensionId == null)
 			return null;
 		for (int element : getExtensionPoint().getRawChildren()) {
-			//	Here we directly get the object because it avoids the creation of garbage and because we'll need the object anyway to compare the value
-			if (extensionId.equals(((Extension) objectManager.getObject(element, RegistryObjectManager.EXTENSION)).getUniqueIdentifier()))
+			// Here we directly get the object because it avoids the creation of garbage and
+			// because we'll need the object anyway to compare the value
+			if (extensionId.equals(((Extension) objectManager.getObject(element, RegistryObjectManager.EXTENSION))
+					.getUniqueIdentifier()))
 				return (ExtensionHandle) objectManager.getHandle(element, RegistryObjectManager.EXTENSION);
 		}
 		return null;
@@ -70,14 +74,17 @@ public class BaseExtensionPointHandle extends Handle implements IExtensionPoint 
 
 	@Override
 	public IConfigurationElement[] getConfigurationElements() {
-		//get the actual extension objects since we'll need to get the configuration elements information.
-		Extension[] tmpExtensions = (Extension[]) objectManager.getObjects(getExtensionPoint().getRawChildren(), RegistryObjectManager.EXTENSION);
+		// get the actual extension objects since we'll need to get the configuration
+		// elements information.
+		Extension[] tmpExtensions = (Extension[]) objectManager.getObjects(getExtensionPoint().getRawChildren(),
+				RegistryObjectManager.EXTENSION);
 		if (tmpExtensions.length == 0)
 			return ConfigurationElementHandle.EMPTY_ARRAY;
 
 		ArrayList<Handle> result = new ArrayList<>();
 		for (Extension tmpExtension : tmpExtensions) {
-			result.addAll(Arrays.asList(objectManager.getHandles(tmpExtension.getRawChildren(), RegistryObjectManager.CONFIGURATION_ELEMENT)));
+			result.addAll(Arrays.asList(objectManager.getHandles(tmpExtension.getRawChildren(),
+					RegistryObjectManager.CONFIGURATION_ELEMENT)));
 		}
 		return result.toArray(new IConfigurationElement[result.size()]);
 	}

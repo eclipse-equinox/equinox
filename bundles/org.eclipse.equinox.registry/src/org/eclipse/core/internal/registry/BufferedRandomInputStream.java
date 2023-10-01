@@ -76,7 +76,7 @@ public class BufferedRandomInputStream extends InputStream {
 		int available = buffer_size - buffer_pos;
 		if (available < 0)
 			return -1;
-		//the buffer contains all the bytes we need, so copy over and return
+		// the buffer contains all the bytes we need, so copy over and return
 		if (len <= available) {
 			System.arraycopy(buffer, buffer_pos, b, off, len);
 			buffer_pos += len;
@@ -86,7 +86,7 @@ public class BufferedRandomInputStream extends InputStream {
 		System.arraycopy(buffer, buffer_pos, b, off, available);
 		if (fillBuffer() <= 0)
 			return available;
-		//recursive call to read again until we have the bytes we need
+		// recursive call to read again until we have the bytes we need
 		return available + read(b, off + available, len - available);
 	}
 
@@ -132,10 +132,10 @@ public class BufferedRandomInputStream extends InputStream {
 	 */
 	public void seek(long pos) throws IOException {
 		if (pos >= buffer_start && pos < buffer_start + buffer_size) {
-			//seeking within the current buffer
+			// seeking within the current buffer
 			buffer_pos = (int) (pos - buffer_start);
 		} else {
-			//seeking outside the buffer - just discard the buffer
+			// seeking outside the buffer - just discard the buffer
 			inputFile.seek(pos);
 			file_pointer = pos;
 			resetBuffer();
@@ -144,6 +144,7 @@ public class BufferedRandomInputStream extends InputStream {
 
 	/**
 	 * Supplies functionality of the {@link java.io.RandomAccessFile#length()}.
+	 * 
 	 * @return file length
 	 * @throws IOException
 	 */

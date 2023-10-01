@@ -24,54 +24,56 @@ import org.eclipse.core.runtime.spi.RegistryContributor;
 import org.eclipse.osgi.util.NLS;
 
 public class TableReader {
-	//Markers in the cache
+	// Markers in the cache
 	static final int NULL = 0;
 	static final int OBJECT = 1;
 	static final int LOBJECT = 2;
 
-	//The version of the cache
+	// The version of the cache
 	static final int CACHE_VERSION = 8;
 	// Version 1 -> 2: the contributor Ids changed from "long" to "String"
 	// Version 2 -> 3: added namespace index and the table of contributors
 	// Version 3 -> 4: offset table saved in a binary form (performance)
-	// Version 4 -> 5: remove support added in version 4 to save offset table in a binary form (performance)
-	// Version 5 -> 6: replace HashtableOfInt with OffsetTable (memory usage optimization)
+	// Version 4 -> 5: remove support added in version 4 to save offset table in a
+	// binary form (performance)
+	// Version 5 -> 6: replace HashtableOfInt with OffsetTable (memory usage
+	// optimization)
 	// Version 6 -> 7: added option for multi-language support
 	// Version 7 -> 8: added support for large UTF-8 strings
 
-	//Informations representing the MAIN file
+	// Informations representing the MAIN file
 	static final String MAIN = ".mainData"; //$NON-NLS-1$
 	BufferedRandomInputStream mainDataFile = null;
 	DataInputStream mainInput = null;
 
-	//Informations representing the EXTRA file
+	// Informations representing the EXTRA file
 	static final String EXTRA = ".extraData"; //$NON-NLS-1$
 	BufferedRandomInputStream extraDataFile = null;
 	DataInputStream extraInput = null;
 
-	//The table file
+	// The table file
 	static final String TABLE = ".table"; //$NON-NLS-1$
 	File tableFile;
 
-	//The contributions file
+	// The contributions file
 	static final String CONTRIBUTIONS = ".contributions"; //$NON-NLS-1$
 	File contributionsFile;
 
-	//The contributor file
+	// The contributor file
 	static final String CONTRIBUTORS = ".contributors"; //$NON-NLS-1$
 	File contributorsFile;
 
-	//The namespace file
+	// The namespace file
 	static final String NAMESPACES = ".namespaces"; //$NON-NLS-1$
 	File namespacesFile;
 
-	//The orphan file
+	// The orphan file
 	static final String ORPHANS = ".orphans"; //$NON-NLS-1$
 	File orphansFile;
 
-	//Status code
+	// Status code
 	private static final byte fileError = 0;
-	private static final boolean DEBUG = false; //TODO need to change
+	private static final boolean DEBUG = false; // TODO need to change
 
 	private boolean holdObjects = false;
 
@@ -127,22 +129,23 @@ public class TableReader {
 			OffsetTable offsets = OffsetTable.load(tableInput);
 			extensionPoints = new HashtableOfStringAndInt();
 			extensionPoints.load(tableInput);
-			return new Object[] {offsets, extensionPoints, nextId};
+			return new Object[] { offsets, extensionPoints, nextId };
 		} catch (IOException e) {
-			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, RegistryMessages.meta_registryCacheReadProblems, e));
+			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError,
+					RegistryMessages.meta_registryCacheReadProblems, e));
 			return null;
 		} finally {
 			if (tableInput != null)
 				try {
 					tableInput.close();
 				} catch (IOException e1) {
-					//Ignore
+					// Ignore
 				}
 		}
 
 	}
 
-	//	Check various aspect of the cache to see if it's valid
+	// Check various aspect of the cache to see if it's valid
 	private boolean checkCacheValidity(DataInputStream in, long expectedTimestamp) {
 		int version;
 		try {
@@ -165,9 +168,12 @@ public class TableReader {
 
 			boolean validTime = (expectedTimestamp == 0 || expectedTimestamp == registryStamp);
 			boolean validInstall = (installStamp == registry.computeState());
-			boolean validOS = (osStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_OS, RegistryProperties.empty)));
-			boolean validWS = (windowsStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_WS, RegistryProperties.empty)));
-			boolean validNL = (localeStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_NL, RegistryProperties.empty)));
+			boolean validOS = (osStamp
+					.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_OS, RegistryProperties.empty)));
+			boolean validWS = (windowsStamp
+					.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_WS, RegistryProperties.empty)));
+			boolean validNL = (localeStamp
+					.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_NL, RegistryProperties.empty)));
 			boolean validMultiLang = (registry.isMultiLanguage() == multiLanguage);
 
 			if (!validTime || !validInstall || !validOS || !validWS || !validNL || !validMultiLang)
@@ -182,7 +188,8 @@ public class TableReader {
 
 			return (validMain && validExtra && validContrib && validContributors && validNamespace && validOrphan);
 		} catch (IOException e) {
-			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, RegistryMessages.meta_registryCacheInconsistent, e));
+			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError,
+					RegistryMessages.meta_registryCacheInconsistent, e));
 			return false;
 		}
 	}
@@ -197,23 +204,27 @@ public class TableReader {
 			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, mainDataFile);
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, message, e));
 			if (DEBUG)
-				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, "Error reading a configuration element (" + offset + ") from the registry cache", e)); //$NON-NLS-1$//$NON-NLS-2$
+				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError,
+						"Error reading a configuration element (" + offset + ") from the registry cache", e)); //$NON-NLS-1$//$NON-NLS-2$
 			return null;
 		}
 	}
 
-	private ConfigurationElement basicLoadConfigurationElement(DataInputStream is, String actualContributorId) throws IOException {
+	private ConfigurationElement basicLoadConfigurationElement(DataInputStream is, String actualContributorId)
+			throws IOException {
 		int self = is.readInt();
 		String contributorId = readStringOrNull(is);
 		String name = readStringOrNull(is);
 		int parentId = is.readInt();
 		byte parentType = is.readByte();
-		int misc = is.readInt();//this is set in second level CEs, to indicate where in the extra data file the children CEs are
+		int misc = is.readInt();// this is set in second level CEs, to indicate where in the extra data file the
+								// children CEs are
 		String[] propertiesAndValue = readPropertiesAndValue(is);
 		int[] children = readArray(is);
 		if (actualContributorId == null)
 			actualContributorId = contributorId;
-		ConfigurationElement result = getObjectFactory().createConfigurationElement(self, actualContributorId, name, propertiesAndValue, children, misc, parentId, parentType, true);
+		ConfigurationElement result = getObjectFactory().createConfigurationElement(self, actualContributorId, name,
+				propertiesAndValue, children, misc, parentId, parentType, true);
 		if (registry.isMultiLanguage()) { // cache is multi-language too or it would have failed validation
 			int numberOfLocales = is.readInt();
 			DirectMap translated = null;
@@ -253,13 +264,16 @@ public class TableReader {
 			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, extraDataFile);
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, message, e));
 			if (DEBUG)
-				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, "Error reading a third level configuration element (" + offset + ") from the registry cache", e)); //$NON-NLS-1$//$NON-NLS-2$
+				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError,
+						"Error reading a third level configuration element (" + offset + ") from the registry cache", //$NON-NLS-1$//$NON-NLS-2$
+						e));
 			return null;
 		}
 	}
 
-	//Read a whole configuration element subtree
-	private ConfigurationElement loadConfigurationElementAndChildren(DataInputStream is, DataInputStream extraIs, int depth, int maxDepth, RegistryObjectManager objectManager, String namespaceOwnerId) throws IOException {
+	// Read a whole configuration element subtree
+	private ConfigurationElement loadConfigurationElementAndChildren(DataInputStream is, DataInputStream extraIs,
+			int depth, int maxDepth, RegistryObjectManager objectManager, String namespaceOwnerId) throws IOException {
 		DataInputStream currentStream = is;
 		if (depth > 2)
 			currentStream = extraIs;
@@ -272,7 +286,8 @@ public class TableReader {
 			return ce;
 
 		for (int i = 0; i < children.length; i++) {
-			ConfigurationElement tmp = loadConfigurationElementAndChildren(currentStream, extraIs, depth + 1, maxDepth, objectManager, namespaceOwnerId);
+			ConfigurationElement tmp = loadConfigurationElementAndChildren(currentStream, extraIs, depth + 1, maxDepth,
+					objectManager, namespaceOwnerId);
 			objectManager.add(tmp, holdObjects);
 		}
 		return ce;
@@ -299,7 +314,8 @@ public class TableReader {
 			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, mainDataFile);
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, message, e));
 			if (DEBUG)
-				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, "Error reading an extension (" + offset + ") from the registry cache", e)); //$NON-NLS-1$//$NON-NLS-2$
+				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError,
+						"Error reading an extension (" + offset + ") from the registry cache", e)); //$NON-NLS-1$//$NON-NLS-2$
 		}
 		return null;
 	}
@@ -329,7 +345,8 @@ public class TableReader {
 					for (int j = 0; j < nbrOfCe; j++) {
 						// note that max depth is set to 2 and extra input is never going to
 						// be used in this call to the loadConfigurationElementAndChildren().
-						objects.add(loadConfigurationElementAndChildren(mainInput, null, 1, 2, objects, null), holdObjects);
+						objects.add(loadConfigurationElementAndChildren(mainInput, null, 1, 2, objects, null),
+								holdObjects);
 					}
 				}
 				return xpt;
@@ -338,7 +355,8 @@ public class TableReader {
 			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, mainDataFile);
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, message, e));
 			if (DEBUG)
-				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, "Error reading an extension point tree (" + offset + ") from the registry cache", e)); //$NON-NLS-1$//$NON-NLS-2$
+				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError,
+						"Error reading an extension point tree (" + offset + ") from the registry cache", e)); //$NON-NLS-1$//$NON-NLS-2$
 			return null;
 		}
 	}
@@ -351,7 +369,8 @@ public class TableReader {
 			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, mainDataFile);
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, message, e));
 			if (DEBUG)
-				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, "Error reading an extension point (" + offset + ") from the registry cache", e)); //$NON-NLS-1$ //$NON-NLS-2$
+				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError,
+						"Error reading an extension point (" + offset + ") from the registry cache", e)); //$NON-NLS-1$ //$NON-NLS-2$
 			return null;
 		}
 	}
@@ -399,13 +418,15 @@ public class TableReader {
 			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, extraDataFile);
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, message, e));
 			if (DEBUG)
-				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, "Error reading extension label (" + dataPosition + ") from the registry cache", e)); //$NON-NLS-1$ //$NON-NLS-2$
+				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError,
+						"Error reading extension label (" + dataPosition + ") from the registry cache", e)); //$NON-NLS-1$ //$NON-NLS-2$
 			return null;
 		}
 	}
 
 	private String[] basicLoadExtensionExtraData() throws IOException {
-		return new String[] {readStringOrNull(extraInput), readStringOrNull(extraInput), readStringOrNull(extraInput)};
+		return new String[] { readStringOrNull(extraInput), readStringOrNull(extraInput),
+				readStringOrNull(extraInput) };
 	}
 
 	public String[] loadExtensionPointExtraData(int offset) {
@@ -418,18 +439,19 @@ public class TableReader {
 			String message = NLS.bind(RegistryMessages.meta_regCacheIOExceptionReading, extraDataFile);
 			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, message, e));
 			if (DEBUG)
-				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, "Error reading extension point data (" + offset + ") from the registry cache", e)); //$NON-NLS-1$ //$NON-NLS-2$
+				log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError,
+						"Error reading extension point data (" + offset + ") from the registry cache", e)); //$NON-NLS-1$ //$NON-NLS-2$
 			return null;
 		}
 	}
 
 	private String[] basicLoadExtensionPointExtraData() throws IOException {
 		String[] result = new String[5];
-		result[0] = readStringOrNull(extraInput); //the label
-		result[1] = readStringOrNull(extraInput); //the schema
-		result[2] = readStringOrNull(extraInput); //the fully qualified name
-		result[3] = readStringOrNull(extraInput); //the namespace
-		result[4] = readStringOrNull(extraInput); //the contributor Id
+		result[0] = readStringOrNull(extraInput); // the label
+		result[1] = readStringOrNull(extraInput); // the schema
+		result[2] = readStringOrNull(extraInput); // the fully qualified name
+		result[3] = readStringOrNull(extraInput); // the namespace
+		result[4] = readStringOrNull(extraInput); // the contributor Id
 		return result;
 	}
 
@@ -457,7 +479,7 @@ public class TableReader {
 				try {
 					namespaceInput.close();
 				} catch (IOException e1) {
-					//Ignore
+					// Ignore
 				}
 		}
 	}
@@ -490,7 +512,7 @@ public class TableReader {
 				try {
 					contributorsInput.close();
 				} catch (IOException e1) {
-					//Ignore
+					// Ignore
 				}
 		}
 	}
@@ -520,13 +542,13 @@ public class TableReader {
 				try {
 					namespaceInput.close();
 				} catch (IOException e1) {
-					//Ignore
+					// Ignore
 				}
 		}
 	}
 
 	private void loadAllOrphans(RegistryObjectManager objectManager) throws IOException {
-		//Read the extensions and configuration elements of the orphans
+		// Read the extensions and configuration elements of the orphans
 		int orphans = objectManager.getOrphanExtensions().size();
 		for (int k = 0; k < orphans; k++) {
 			int numberOfOrphanExtensions = mainInput.readInt();
@@ -536,7 +558,8 @@ public class TableReader {
 			for (int i = 0; i < numberOfOrphanExtensions; i++) {
 				int nbrOfCe = mainInput.readInt();
 				for (int j = 0; j < nbrOfCe; j++) {
-					objectManager.add(loadConfigurationElementAndChildren(mainInput, extraInput, 1, Integer.MAX_VALUE, objectManager, null), true);
+					objectManager.add(loadConfigurationElementAndChildren(mainInput, extraInput, 1, Integer.MAX_VALUE,
+							objectManager, null), true);
 				}
 			}
 		}
@@ -569,13 +592,14 @@ public class TableReader {
 		for (int i = 0; i < nbrOfExtension; i++) {
 			int nbrOfCe = mainInput.readInt();
 			for (int j = 0; j < nbrOfCe; j++) {
-				objectManager.add(loadConfigurationElementAndChildren(mainInput, extraInput, 1, Integer.MAX_VALUE, objectManager, null), true);
+				objectManager.add(loadConfigurationElementAndChildren(mainInput, extraInput, 1, Integer.MAX_VALUE,
+						objectManager, null), true);
 			}
 		}
 		return xpt;
 	}
 
-	private ExtensionPoint loadFullExtensionPoint() throws IOException { //TODO I don't like this.
+	private ExtensionPoint loadFullExtensionPoint() throws IOException { // TODO I don't like this.
 		ExtensionPoint xpt = basicLoadExtensionPoint();
 		String[] tmp = basicLoadExtensionPointExtraData();
 		xpt.setLabel(tmp[0]);
@@ -618,7 +642,7 @@ public class TableReader {
 				try {
 					orphanInput.close();
 				} catch (IOException e1) {
-					//ignore
+					// ignore
 				}
 		}
 	}
@@ -636,7 +660,8 @@ public class TableReader {
 		return registry.getElementFactory();
 	}
 
-	// Returns a file name used to test if cache is actually present at a given location
+	// Returns a file name used to test if cache is actually present at a given
+	// location
 	public static String getTestFileName() {
 		return TABLE;
 	}
@@ -648,7 +673,8 @@ public class TableReader {
 			if (extraInput != null)
 				extraInput.close();
 		} catch (IOException e) {
-			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, RegistryMessages.meta_registryCacheReadProblems, e));
+			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError,
+					RegistryMessages.meta_registryCacheReadProblems, e));
 		}
 	}
 
