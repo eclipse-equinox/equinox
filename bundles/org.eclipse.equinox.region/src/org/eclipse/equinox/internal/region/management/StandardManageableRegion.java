@@ -25,7 +25,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * {@link StandardManageableRegion} is the default implementation of {@link ManageableRegion}.
+ * {@link StandardManageableRegion} is the default implementation of
+ * {@link ManageableRegion}.
  * <p />
  * 
  * <strong>Concurrent Semantics</strong><br />
@@ -39,7 +40,8 @@ public class StandardManageableRegion implements ManageableRegion {
 
 	private final RegionDigraph regionDigraph;
 
-	public StandardManageableRegion(Region region, ManageableRegionDigraph manageableRegionDigraph, RegionDigraph regionDigraph) {
+	public StandardManageableRegion(Region region, ManageableRegionDigraph manageableRegionDigraph,
+			RegionDigraph regionDigraph) {
 		this.region = region;
 		this.manageableRegionDigraph = manageableRegionDigraph;
 		this.regionDigraph = regionDigraph;

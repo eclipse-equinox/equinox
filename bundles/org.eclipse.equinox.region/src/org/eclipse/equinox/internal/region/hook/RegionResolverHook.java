@@ -23,7 +23,8 @@ import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.wiring.*;
 
 /**
- * {@link RegionResolverHook} manages the visibility of bundles across regions according to the {@link RegionDigraph}.
+ * {@link RegionResolverHook} manages the visibility of bundles across regions
+ * according to the {@link RegionDigraph}.
  * <p />
  * 
  * <strong>Concurrent Semantics</strong><br />
@@ -130,25 +131,29 @@ public final class RegionResolverHook implements ResolverHook {
 	}
 
 	@Override
-	public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
+	public void filterSingletonCollisions(BundleCapability singleton,
+			Collection<BundleCapability> collisionCandidates) {
 		filterCandidates(singleton.getRevision(), collisionCandidates, true);
 	}
 
 	private void debugEntry(BundleRevision requirer, Collection<BundleCapability> candidates, boolean singleton) {
-		System.out.println((singleton ? "Singleton" : "Requirer: ") + requirer.getSymbolicName() + "_" + requirer.getVersion() + "[" + getBundleId(requirer) + "]"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		System.out.println((singleton ? "Singleton" : "Requirer: ") + requirer.getSymbolicName() + "_" //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+				+ requirer.getVersion() + "[" + getBundleId(requirer) + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 		System.out.println("  Candidates: "); //$NON-NLS-1$
 		for (BundleCapability c : candidates) {
 			String namespace = c.getNamespace();
 			if (BundleRevision.PACKAGE_NAMESPACE.equals(namespace)) {
 				BundleRevision providerRevision = c.getRevision();
 				String pkg = (String) c.getAttributes().get(BundleRevision.PACKAGE_NAMESPACE);
-				System.out.println("    Package " + pkg + " from provider " + providerRevision.getSymbolicName() + "_" + providerRevision.getVersion() + "[" + getBundleId(providerRevision) + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+				System.out.println("    Package " + pkg + " from provider " + providerRevision.getSymbolicName() + "_" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						+ providerRevision.getVersion() + "[" + getBundleId(providerRevision) + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 				if (pkg.equals("slow")) { //$NON-NLS-1$
 					System.out.println(">>> put breakpoint here <<<"); //$NON-NLS-1$
 				}
 			} else {
 				BundleRevision providerRevision = c.getRevision();
-				System.out.println("    Bundle from provider " + providerRevision.getSymbolicName() + "_" + providerRevision.getVersion() + "[" + getBundleId(providerRevision) + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				System.out.println("    Bundle from provider " + providerRevision.getSymbolicName() + "_" //$NON-NLS-1$ //$NON-NLS-2$
+						+ providerRevision.getVersion() + "[" + getBundleId(providerRevision) + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 	}
@@ -160,13 +165,15 @@ public final class RegionResolverHook implements ResolverHook {
 			if (BundleRevision.PACKAGE_NAMESPACE.equals(namespace)) {
 				BundleRevision providerRevision = c.getRevision();
 				String pkg = (String) c.getAttributes().get(BundleRevision.PACKAGE_NAMESPACE);
-				System.out.println("    Package " + pkg + " from provider " + providerRevision.getSymbolicName() + "_" + providerRevision.getVersion() + "[" + getBundleId(providerRevision) + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+				System.out.println("    Package " + pkg + " from provider " + providerRevision.getSymbolicName() + "_" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						+ providerRevision.getVersion() + "[" + getBundleId(providerRevision) + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 				if (pkg.equals("slow")) { //$NON-NLS-1$
 					System.out.println(">>> put breakpoint here <<<"); //$NON-NLS-1$
 				}
 			} else {
 				BundleRevision providerRevision = c.getRevision();
-				System.out.println("    Bundle from provider " + providerRevision.getSymbolicName() + "_" + providerRevision.getVersion() + "[" + getBundleId(providerRevision) + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				System.out.println("    Bundle from provider " + providerRevision.getSymbolicName() + "_" //$NON-NLS-1$ //$NON-NLS-2$
+						+ providerRevision.getVersion() + "[" + getBundleId(providerRevision) + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 	}

@@ -36,7 +36,8 @@ public final class StandardRegionDigraphPersistence implements RegionDigraphPers
 
 	static void writeRegionDigraph(DataOutputStream out, RegionDigraph digraph) throws IOException {
 		if (!(digraph instanceof StandardRegionDigraph))
-			throw new IllegalArgumentException("Only digraphs of type '" + StandardRegionDigraph.class.getName() + "' are allowed: " + digraph.getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new IllegalArgumentException("Only digraphs of type '" + StandardRegionDigraph.class.getName() //$NON-NLS-1$
+					+ "' are allowed: " + digraph.getClass().getName()); //$NON-NLS-1$
 		Map<Region, Set<FilteredRegion>> filteredRegions = ((StandardRegionDigraph) digraph).getFilteredRegions();
 
 		try {
@@ -78,7 +79,8 @@ public final class StandardRegionDigraphPersistence implements RegionDigraphPers
 		}
 	}
 
-	private static void writeEdge(DataOutputStream out, Region tail, RegionFilter filter, Region head) throws IOException {
+	private static void writeEdge(DataOutputStream out, Region tail, RegionFilter filter, Region head)
+			throws IOException {
 		// write tail region name
 		out.writeUTF(tail.getName());
 		// write head region name
@@ -101,7 +103,8 @@ public final class StandardRegionDigraphPersistence implements RegionDigraphPers
 		}
 	}
 
-	static StandardRegionDigraph readRegionDigraph(DataInputStream in, BundleContext bundleContext, ThreadLocal<Region> threadLocal) throws IOException, InvalidSyntaxException, BundleException {
+	static StandardRegionDigraph readRegionDigraph(DataInputStream in, BundleContext bundleContext,
+			ThreadLocal<Region> threadLocal) throws IOException, InvalidSyntaxException, BundleException {
 		StandardRegionDigraph digraph = new StandardRegionDigraph(bundleContext, threadLocal);
 
 		// Read and check the persistent name and version
@@ -111,7 +114,8 @@ public final class StandardRegionDigraphPersistence implements RegionDigraphPers
 		}
 		int persistentVersion = in.readInt();
 		if (PERSISTENT_VERSION != persistentVersion) {
-			throw new IllegalArgumentException("Input stream contains a digraph with an incompatible version '" + persistentVersion + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new IllegalArgumentException(
+					"Input stream contains a digraph with an incompatible version '" + persistentVersion + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		// read the number of regions
 		int numRegions = in.readInt();
@@ -132,7 +136,8 @@ public final class StandardRegionDigraphPersistence implements RegionDigraphPers
 		return digraph;
 	}
 
-	private static Region readRegion(DataInputStream in, RegionDigraph digraph, BundleContext context) throws IOException, BundleException {
+	private static Region readRegion(DataInputStream in, RegionDigraph digraph, BundleContext context)
+			throws IOException, BundleException {
 		// read region name
 		String name = in.readUTF();
 		Region region = digraph.createRegion(name);
@@ -147,7 +152,8 @@ public final class StandardRegionDigraphPersistence implements RegionDigraphPers
 		return region;
 	}
 
-	private static void readEdge(DataInputStream in, RegionDigraph digraph) throws IOException, InvalidSyntaxException, BundleException {
+	private static void readEdge(DataInputStream in, RegionDigraph digraph)
+			throws IOException, InvalidSyntaxException, BundleException {
 		// read tail region name
 		String tailName = in.readUTF();
 		Region tail = digraph.getRegion(tailName);
@@ -181,7 +187,7 @@ public final class StandardRegionDigraphPersistence implements RegionDigraphPers
 		digraph.connect(tail, new StandardRegionFilter(filters), head);
 	}
 
-	/** 
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -199,7 +205,7 @@ public final class StandardRegionDigraphPersistence implements RegionDigraphPers
 		}
 	}
 
-	/** 
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override

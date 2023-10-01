@@ -19,7 +19,8 @@ import org.eclipse.equinox.region.RegionDigraph;
 import javax.management.MXBean;
 
 /**
- * {@link ManageableRegionDigraph} is a JMX representation of the {@link RegionDigraph}.
+ * {@link ManageableRegionDigraph} is a JMX representation of the
+ * {@link RegionDigraph}.
  * <p />
  * 
  * <strong>Concurrent Semantics</strong><br />
@@ -39,7 +40,8 @@ public interface ManageableRegionDigraph {
 	 * Gets the {@link ManageableRegion} with the given name.
 	 * 
 	 * @param regionName the region name
-	 * @return a {@link ManageableRegion} or <code>null</code> if there is no region with the given name
+	 * @return a {@link ManageableRegion} or <code>null</code> if there is no region
+	 *         with the given name
 	 */
 	ManageableRegion getRegion(String regionName);
 

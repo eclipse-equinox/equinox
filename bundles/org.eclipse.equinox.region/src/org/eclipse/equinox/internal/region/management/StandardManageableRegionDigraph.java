@@ -26,8 +26,8 @@ import org.eclipse.equinox.region.management.ManageableRegionDigraph;
 import org.osgi.framework.*;
 
 /**
- * {@link StandardManageableRegionDigraph} is a {@link ManageableRegionDigraph} that delegates to the
- * {@link RegionDigraph}.
+ * {@link StandardManageableRegionDigraph} is a {@link ManageableRegionDigraph}
+ * that delegates to the {@link RegionDigraph}.
  * <p />
  * 
  * <strong>Concurrent Semantics</strong><br />
@@ -83,14 +83,16 @@ public final class StandardManageableRegionDigraph implements ManageableRegionDi
 			mbeanName = new ObjectName(name);
 		} catch (MalformedObjectNameException e) {
 			e.printStackTrace();
-			throw new IllegalArgumentException("Invalid domain name '" + domain + "' resulting in an invalid object name '" + name + "'", e); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+			throw new IllegalArgumentException(
+					"Invalid domain name '" + domain + "' resulting in an invalid object name '" + name + "'", e); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 	}
 
 	private void registerRegionLifecycleListener() {
 		synchronized (this.monitor) {
-			listenerRegistration = this.bundleContext.registerService(RegionLifecycleListener.class, regionLifecycleListener, null);
+			listenerRegistration = this.bundleContext.registerService(RegionLifecycleListener.class,
+					regionLifecycleListener, null);
 		}
 	}
 

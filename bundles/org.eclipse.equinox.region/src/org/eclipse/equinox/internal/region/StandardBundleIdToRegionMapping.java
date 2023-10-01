@@ -30,14 +30,15 @@ public final class StandardBundleIdToRegionMapping implements BundleIdToRegionMa
 	private final Map<Long, Region> bundleToRegion = new HashMap<>();
 
 	/**
-	 * {@inheritDoc} 
+	 * {@inheritDoc}
 	 **/
 	@Override
 	public void associateBundleWithRegion(long bundleId, Region region) throws BundleException {
 		synchronized (this.monitor) {
 			Region r = this.bundleToRegion.get(bundleId);
 			if (r != null && r != region) {
-				throw new BundleException("Bundle '" + bundleId + "' is already associated with region '" + r + "'", BundleException.INVALID_OPERATION); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				throw new BundleException("Bundle '" + bundleId + "' is already associated with region '" + r + "'", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						BundleException.INVALID_OPERATION);
 			}
 			this.bundleToRegion.put(bundleId, region);
 		}
@@ -99,7 +100,7 @@ public final class StandardBundleIdToRegionMapping implements BundleIdToRegionMa
 		}
 	}
 
-	/** 
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override

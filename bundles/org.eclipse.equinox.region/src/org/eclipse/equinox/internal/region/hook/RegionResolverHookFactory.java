@@ -23,8 +23,8 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.wiring.BundleRevision;
 
 /**
- * {@link RegionResolverHook} constructs an instance of {@link RegionResolverHook} for a particular resolution
- * operation.
+ * {@link RegionResolverHook} constructs an instance of
+ * {@link RegionResolverHook} for a particular resolution operation.
  * <p />
  * 
  * <strong>Concurrent Semantics</strong><br />
