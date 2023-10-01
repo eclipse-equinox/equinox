@@ -33,9 +33,10 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 	/**
 	 * Constructs a MetaTypeProviderTracker which tracks all MetaTypeProviders
 	 * registered by the specified bundle.
+	 * 
 	 * @param context The BundleContext of the MetaTypeService implementation
-	 * @param bundle The bundle to track all MetaTypeProviders for.
-	 * @param log The {@code LogService} to use for logging messages.
+	 * @param bundle  The bundle to track all MetaTypeProviders for.
+	 * @param log     The {@code LogService} to use for logging messages.
 	 */
 	public MetaTypeProviderTracker(Bundle bundle, LogTracker log, ServiceTracker<Object, Object> tracker) {
 		this._bundle = bundle;
@@ -113,20 +114,28 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 				Object service = entry.getValue();
 				// If the service is not a MetaTypeProvider, we're not interested in it.
 				if (service instanceof MetaTypeProvider) {
-					// Include the METATYPE_PID, if present, to return as part of getPids(). Also, include the 
+					// Include the METATYPE_PID, if present, to return as part of getPids(). Also,
+					// include the
 					// METATYPE_FACTORY_PID, if present, to return as part of getFactoryPids().
-					// The filter ensures at least one of these properties was set for a standalone MetaTypeProvider.
-					addMetaTypeProviderWrappers(MetaTypeProvider.METATYPE_PID, serviceReference, (MetaTypeProvider) service, false, result);
-					addMetaTypeProviderWrappers(MetaTypeProvider.METATYPE_FACTORY_PID, serviceReference, (MetaTypeProvider) service, true, result);
-					// If the service is a ManagedService, include the SERVICE_PID to return as part of getPids().
+					// The filter ensures at least one of these properties was set for a standalone
+					// MetaTypeProvider.
+					addMetaTypeProviderWrappers(MetaTypeProvider.METATYPE_PID, serviceReference,
+							(MetaTypeProvider) service, false, result);
+					addMetaTypeProviderWrappers(MetaTypeProvider.METATYPE_FACTORY_PID, serviceReference,
+							(MetaTypeProvider) service, true, result);
+					// If the service is a ManagedService, include the SERVICE_PID to return as part
+					// of getPids().
 					// The filter ensures the SERVICE_PID property was set.
 					if (service instanceof ManagedService) {
-						addMetaTypeProviderWrappers(Constants.SERVICE_PID, serviceReference, (MetaTypeProvider) service, false, result);
+						addMetaTypeProviderWrappers(Constants.SERVICE_PID, serviceReference, (MetaTypeProvider) service,
+								false, result);
 					}
-					// If the service is a ManagedServiceFactory, include the SERVICE_PID to return as part of getFactoryPids().
+					// If the service is a ManagedServiceFactory, include the SERVICE_PID to return
+					// as part of getFactoryPids().
 					// The filter ensures the SERVICE_PID property was set.
 					else if (service instanceof ManagedServiceFactory) {
-						addMetaTypeProviderWrappers(Constants.SERVICE_PID, serviceReference, (MetaTypeProvider) service, true, result);
+						addMetaTypeProviderWrappers(Constants.SERVICE_PID, serviceReference, (MetaTypeProvider) service,
+								true, result);
 					}
 				}
 			}
@@ -134,7 +143,8 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 		return result.toArray(new MetaTypeProviderWrapper[result.size()]);
 	}
 
-	private void addMetaTypeProviderWrappers(String servicePropertyName, ServiceReference<Object> serviceReference, MetaTypeProvider service, boolean factory, Set<MetaTypeProviderWrapper> wrappers) {
+	private void addMetaTypeProviderWrappers(String servicePropertyName, ServiceReference<Object> serviceReference,
+			MetaTypeProvider service, boolean factory, Set<MetaTypeProviderWrapper> wrappers) {
 		String[] pids = getStringProperty(servicePropertyName, serviceReference.getProperty(servicePropertyName));
 		for (String pid : pids) {
 			wrappers.add(new MetaTypeProviderWrapper(service, pid, factory));
@@ -142,12 +152,14 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 	}
 
 	private String[] getStringProperty(String name, Object value) {
-		// Don't log a warning if the value is null. The filter guarantees at least one of the necessary properties
-		// is there. If others are not, this method will get called with value equal to null.
+		// Don't log a warning if the value is null. The filter guarantees at least one
+		// of the necessary properties
+		// is there. If others are not, this method will get called with value equal to
+		// null.
 		if (value == null)
 			return new String[0];
 		if (value instanceof String) {
-			return new String[] {(String) value};
+			return new String[] { (String) value };
 		}
 		if (value instanceof String[]) {
 			return (String[]) value;
@@ -162,11 +174,13 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 				e = ase;
 			}
 		}
-		log.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_PID_METATYPE_PROVIDER_IGNORED, new Object[] {_bundle.getSymbolicName(), _bundle.getBundleId(), name, value}), e);
+		log.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_PID_METATYPE_PROVIDER_IGNORED,
+				new Object[] { _bundle.getSymbolicName(), _bundle.getBundleId(), name, value }), e);
 		return new String[0];
 	}
 
-	// this is a simple class just used to temporarily store information about a provider
+	// this is a simple class just used to temporarily store information about a
+	// provider
 	public class MetaTypeProviderWrapper implements MetaTypeProvider {
 		private final MetaTypeProvider provider;
 		final String pid;
@@ -220,12 +234,12 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 
 				@Override
 				public Map<String, String> getExtensionAttributes(String schema) {
-					return Collections.<String, String> emptyMap();
+					return Collections.<String, String>emptyMap();
 				}
 
 				@Override
 				public Set<String> getExtensionUris() {
-					return Collections.<String> emptySet();
+					return Collections.<String>emptySet();
 				}
 
 				@Override
@@ -274,12 +288,12 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 
 							@Override
 							public Map<String, String> getExtensionAttributes(String schema) {
-								return Collections.<String, String> emptyMap();
+								return Collections.<String, String>emptyMap();
 							}
 
 							@Override
 							public Set<String> getExtensionUris() {
-								return Collections.<String> emptySet();
+								return Collections.<String>emptySet();
 							}
 
 							@Override

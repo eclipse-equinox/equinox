@@ -65,11 +65,13 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 		_isThereMeta = readMetaFiles(bundle, parser);
 
 		if (!_isThereMeta) {
-			logger.log(LogTracker.LOG_DEBUG, NLS.bind(MetaTypeMsg.METADATA_NOT_FOUND, bundle.getSymbolicName(), bundle.getBundleId()));
+			logger.log(LogTracker.LOG_DEBUG,
+					NLS.bind(MetaTypeMsg.METADATA_NOT_FOUND, bundle.getSymbolicName(), bundle.getBundleId()));
 		}
 	}
 
-	public MetaTypeProviderImpl(Bundle bundle, LogTracker logger, Map<String, ObjectClassDefinitionImpl> pidOCDs, Map<String, ObjectClassDefinitionImpl> fPidOCDs) {
+	public MetaTypeProviderImpl(Bundle bundle, LogTracker logger, Map<String, ObjectClassDefinitionImpl> pidOCDs,
+			Map<String, ObjectClassDefinitionImpl> fPidOCDs) {
 		this._bundle = bundle;
 		this.logger = logger;
 		this._isThereMeta = true;
@@ -79,22 +81,24 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 
 	/**
 	 * This method should do the following:
-	 * <p> - Obtain a SAX parser from the XML Parser Service:
+	 * <p>
+	 * - Obtain a SAX parser from the XML Parser Service:
 	 * <p>
 	 * 
-	 * <pre>	</pre>
+	 * <pre></pre>
 	 * 
-	 * The parser may be SAX 1 (eXML) or SAX 2 (XML4J). It should attempt to use
-	 * a SAX2 parser by instantiating an XMLReader and extending DefaultHandler
-	 * BUT if that fails it should fall back to instantiating a SAX1 Parser and
-	 * extending HandlerBase.
-	 * <p> - Pass the parser the URL for the bundle's METADATA.XML file
-	 * <p> - Handle the callbacks from the parser and build the appropriate
-	 * MetaType objects - ObjectClassDefinitions & AttributeDefinitions
+	 * The parser may be SAX 1 (eXML) or SAX 2 (XML4J). It should attempt to use a
+	 * SAX2 parser by instantiating an XMLReader and extending DefaultHandler BUT if
+	 * that fails it should fall back to instantiating a SAX1 Parser and extending
+	 * HandlerBase.
+	 * <p>
+	 * - Pass the parser the URL for the bundle's METADATA.XML file
+	 * <p>
+	 * - Handle the callbacks from the parser and build the appropriate MetaType
+	 * objects - ObjectClassDefinitions & AttributeDefinitions
 	 * 
-	 * @param bundle The bundle object for which the metadata should be read
-	 * @param parserFactory The bundle object for which the metadata should be
-	 *        read
+	 * @param bundle        The bundle object for which the metadata should be read
+	 * @param parserFactory The bundle object for which the metadata should be read
 	 * @return void
 	 */
 	private boolean readMetaFiles(Bundle bundle, SAXParser saxParser) {
@@ -119,7 +123,8 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 					}
 				}
 			} catch (Exception e) {
-				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.METADATA_FILE_PARSE_ERROR, new Object[] {entry, bundle.getBundleId(), bundle.getSymbolicName()}), e);
+				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.METADATA_FILE_PARSE_ERROR,
+						new Object[] { entry, bundle.getBundleId(), bundle.getSymbolicName() }), e);
 			}
 		}
 		return result;
@@ -128,8 +133,9 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.osgi.service.metatype.MetaTypeProvider#getObjectClassDefinition(java.lang.String,
-	 *      java.lang.String)
+	 * @see
+	 * org.osgi.service.metatype.MetaTypeProvider#getObjectClassDefinition(java.lang
+	 * .String, java.lang.String)
 	 */
 	public EquinoxObjectClassDefinition getObjectClassDefinition(String pid, String locale) {
 
@@ -211,7 +217,8 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 			while (entries.hasMoreElements()) {
 				String resource = entries.nextElement().getPath();
 				if (resource.startsWith(baseFileName) && resource.toLowerCase().endsWith(RESOURCE_FILE_EXT))
-					locales.add(resource.substring(baseFileName.length(), resource.length() - RESOURCE_FILE_EXT.length()));
+					locales.add(
+							resource.substring(baseFileName.length(), resource.length() - RESOURCE_FILE_EXT.length()));
 			}
 		}
 		_locales = locales.toArray(new String[locales.size()]);
@@ -232,7 +239,8 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	 */
 	private String[] checkForDefault(String[] locales) {
 
-		if (locales == null || locales.length == 0 || (locales.length == 1 && Locale.getDefault().toString().equals(locales[0])))
+		if (locales == null || locales.length == 0
+				|| (locales.length == 1 && Locale.getDefault().toString().equals(locales[0])))
 			return null;
 		return locales;
 	}

@@ -46,14 +46,16 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 	/*
 	 * Constructor of class ObjectClassDefinitionImpl.
 	 */
-	public ObjectClassDefinitionImpl(String name, String description, String id, String localization, Map<String, Map<String, String>> extensionAttributes) {
+	public ObjectClassDefinitionImpl(String name, String description, String id, String localization,
+			Map<String, Map<String, String>> extensionAttributes) {
 		this(name, description, id, 0, localization, new ExtendableHelper(extensionAttributes));
 	}
 
 	/*
 	 * Constructor of class ObjectClassDefinitionImpl.
 	 */
-	public ObjectClassDefinitionImpl(String name, String description, String id, int type, String localization, ExtendableHelper helper) {
+	public ObjectClassDefinitionImpl(String name, String description, String id, int type, String localization,
+			ExtendableHelper helper) {
 		super(localization);
 		this._name = name;
 		this._id = id;
@@ -68,7 +70,8 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 	@Override
 	public Object clone() {
 
-		ObjectClassDefinitionImpl ocd = new ObjectClassDefinitionImpl(_name, _description, _id, _type, getLocalization(), helper);
+		ObjectClassDefinitionImpl ocd = new ObjectClassDefinitionImpl(_name, _description, _id, _type,
+				getLocalization(), helper);
 		for (AttributeDefinitionImpl ad : _required) {
 			ocd.addAttributeDefinition((AttributeDefinitionImpl) ad.clone(), true);
 		}
@@ -111,34 +114,35 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.osgi.service.metatype.ObjectClassDefinition#getAttributeDefinitions(int)
+	 * @see
+	 * org.osgi.service.metatype.ObjectClassDefinition#getAttributeDefinitions(int)
 	 */
 	@Override
 	public EquinoxAttributeDefinition[] getAttributeDefinitions(int filter) {
 
 		EquinoxAttributeDefinition[] atts;
 		switch (filter) {
-			case REQUIRED :
-				atts = new EquinoxAttributeDefinition[_required.size()];
-				_required.toArray(atts);
-				return atts;
-			case OPTIONAL :
-				atts = new EquinoxAttributeDefinition[_optional.size()];
-				_optional.toArray(atts);
-				return atts;
-			case ALL :
-			default :
-				atts = new EquinoxAttributeDefinition[_required.size() + _optional.size()];
-				int i = 0;
-				for (AttributeDefinitionImpl attr : _required) {
-					atts[i] = attr;
-					i++;
-				}
-				for (AttributeDefinitionImpl attr : _optional) {
-					atts[i] = attr;
-					i++;
-				}
-				return atts;
+		case REQUIRED:
+			atts = new EquinoxAttributeDefinition[_required.size()];
+			_required.toArray(atts);
+			return atts;
+		case OPTIONAL:
+			atts = new EquinoxAttributeDefinition[_optional.size()];
+			_optional.toArray(atts);
+			return atts;
+		case ALL:
+		default:
+			atts = new EquinoxAttributeDefinition[_required.size() + _optional.size()];
+			int i = 0;
+			for (AttributeDefinitionImpl attr : _required) {
+				atts[i] = attr;
+				i++;
+			}
+			for (AttributeDefinitionImpl attr : _optional) {
+				atts[i] = attr;
+				i++;
+			}
+			return atts;
 		}
 	}
 
@@ -160,12 +164,15 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 	 * @see org.osgi.service.metatype.ObjectClassDefinition#getIcon(int)
 	 */
 	public InputStream getIcon(int sizeHint) throws IOException {
-		// The parameter simply represents a requested size. This method should never return null if an
+		// The parameter simply represents a requested size. This method should never
+		// return null if an
 		// icon exists.
-		// Temporary icon to hold the requested size for use in binary search comparator.
+		// Temporary icon to hold the requested size for use in binary search
+		// comparator.
 		Icon icon = new Icon(null, sizeHint, null);
 		@SuppressWarnings("hiding")
-		// Use a local reference to the icon list to be sure we don't suddenly start using a new one.
+		// Use a local reference to the icon list to be sure we don't suddenly start
+		// using a new one.
 		List<Icon> icons = this.icons;
 		// Icons will be null if none were specified.
 		if (icons == null)
@@ -173,8 +180,9 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 		int index = Collections.binarySearch(icons, icon, iconComparator);
 		if (index < 0) {
 			// If the index is less than zero, there wasn't an exact match.
-			// Compute the insertion point. This will be the index of the first icon whose 
-			// size was greater than the requested size, or the list's length if there were none.
+			// Compute the insertion point. This will be the index of the first icon whose
+			// size was greater than the requested size, or the list's length if there were
+			// none.
 			int insertionPoint = -(index + 1);
 			Icon lessThan = insertionPoint == 0 ? null : icons.get(insertionPoint - 1);
 			Icon greaterThan = insertionPoint == icons.size() ? null : icons.get(insertionPoint);
@@ -186,7 +194,8 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 				icon = lessThan;
 			else {
 				// There was at least one icon with a smaller size and at least one with
-				// a greater size than the requested size. Compute the average to see which one to choose.
+				// a greater size than the requested size. Compute the average to see which one
+				// to choose.
 				int average = (greaterThan.getIconSize() + lessThan.getIconSize()) / 2;
 				if (sizeHint < average)
 					// The smaller icon is closer to the requested size.
@@ -196,7 +205,8 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 					icon = greaterThan;
 			}
 		} else
-			// The index was greater than or equal to zero, indicating the index of an exact match.
+			// The index was greater than or equal to zero, indicating the index of an exact
+			// match.
 			icon = icons.get(index);
 		Bundle b = icon.getIconBundle();
 		URL[] urls = FragmentUtils.findEntries(b, getLocalized(icon.getIconName()));
@@ -219,7 +229,8 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 
 	/**
 	 * Method to set the resource bundle for this OCD and all its ADs.
-	 * @param resourceBundleCache 
+	 * 
+	 * @param resourceBundleCache
 	 */
 	void setResourceBundle(String assignedLocale, Bundle bundle, Map<String, ResourceBundle> resourceBundleCache) {
 		setLocaleAndBundle(assignedLocale, bundle, resourceBundleCache);
@@ -263,7 +274,8 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 		int type = reader.readInt();
 		String localization = reader.readString();
 		ExtendableHelper helper = ExtendableHelper.load(reader);
-		ObjectClassDefinitionImpl result = new ObjectClassDefinitionImpl(name, description, id, type, localization, helper);
+		ObjectClassDefinitionImpl result = new ObjectClassDefinitionImpl(name, description, id, type, localization,
+				helper);
 
 		int numIcons = reader.readInt();
 		List<Icon> icons = null;

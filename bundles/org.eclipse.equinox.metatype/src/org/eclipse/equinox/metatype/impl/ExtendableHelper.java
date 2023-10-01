@@ -24,7 +24,7 @@ public class ExtendableHelper implements Extendable {
 	private final Map<String, Map<String, String>> extensions;
 
 	public ExtendableHelper() {
-		this(Collections.<String, Map<String, String>> emptyMap());
+		this(Collections.<String, Map<String, String>>emptyMap());
 	}
 
 	public ExtendableHelper(Map<String, Map<String, String>> extensions) {

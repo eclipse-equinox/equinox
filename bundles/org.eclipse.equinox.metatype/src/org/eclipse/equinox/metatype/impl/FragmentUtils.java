@@ -38,16 +38,16 @@ public class FragmentUtils {
 		String file = "*"; //$NON-NLS-1$
 		int index = path.lastIndexOf(MetaTypeProviderImpl.DIRECTORY_SEP);
 		switch (index) {
-			case -1 :
-				file = path;
-				break;
-			case 0 :
-				if (path.length() > 1)
-					file = path.substring(1);
-				break;
-			default :
-				directory = path.substring(0, index);
-				file = path.substring(index + 1);
+		case -1:
+			file = path;
+			break;
+		case 0:
+			if (path.length() > 1)
+				file = path.substring(1);
+			break;
+		default:
+			directory = path.substring(0, index);
+			file = path.substring(index + 1);
 		}
 		Enumeration<URL> entries = bundle.findEntries(directory, file, false);
 		if (entries == null)

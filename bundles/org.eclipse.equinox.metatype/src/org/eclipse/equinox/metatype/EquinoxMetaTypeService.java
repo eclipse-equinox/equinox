@@ -15,15 +15,16 @@ import org.osgi.service.metatype.MetaTypeInformation;
 import org.osgi.service.metatype.MetaTypeService;
 
 /**
- * A {@link MetaTypeService} providing {@link MetaTypeInformation} instances 
- * with {@link Extendable extendable} versions of {@link 
- * EquinoxObjectClassDefinition object class definitions}.
+ * A {@link MetaTypeService} providing {@link MetaTypeInformation} instances
+ * with {@link Extendable extendable} versions of
+ * {@link EquinoxObjectClassDefinition object class definitions}.
+ * 
  * @since 1.2
  *
  */
 public interface EquinoxMetaTypeService extends MetaTypeService {
 	/**
-	 * Returns a {@link MetaTypeInformation} that provides {@link Extendable 
+	 * Returns a {@link MetaTypeInformation} that provides {@link Extendable
 	 * extendable} versions of {@link EquinoxObjectClassDefinition object class
 	 * definitions}.
 	 */

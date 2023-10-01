@@ -47,11 +47,15 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	/**
 	 * Constructor of class AttributeDefinitionImpl.
 	 */
-	public AttributeDefinitionImpl(String id, String name, String description, int type, int cardinality, Object min, Object max, boolean isRequired, String localization, LogTracker logger, Map<String, Map<String, String>> extensionAttributes) {
-		this(id, name, description, type, cardinality, min, max, isRequired, localization, logger, new ExtendableHelper(extensionAttributes));
+	public AttributeDefinitionImpl(String id, String name, String description, int type, int cardinality, Object min,
+			Object max, boolean isRequired, String localization, LogTracker logger,
+			Map<String, Map<String, String>> extensionAttributes) {
+		this(id, name, description, type, cardinality, min, max, isRequired, localization, logger,
+				new ExtendableHelper(extensionAttributes));
 	}
 
-	private AttributeDefinitionImpl(String id, String name, String description, int type, int cardinality, Object min, Object max, boolean isRequired, String localization, LogTracker logger, ExtendableHelper helper) {
+	private AttributeDefinitionImpl(String id, String name, String description, int type, int cardinality, Object min,
+			Object max, boolean isRequired, String localization, LogTracker logger, ExtendableHelper helper) {
 		super(localization);
 		this._id = id;
 		this._name = name;
@@ -71,7 +75,8 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	@Override
 	public Object clone() {
 
-		AttributeDefinitionImpl ad = new AttributeDefinitionImpl(_id, _name, _description, _dataType, _cardinality, _minValue, _maxValue, _isRequired, getLocalization(), logger, helper);
+		AttributeDefinitionImpl ad = new AttributeDefinitionImpl(_id, _name, _description, _dataType, _cardinality,
+				_minValue, _maxValue, _isRequired, getLocalization(), logger, helper);
 
 		String[] curDefaults = _defaults;
 		if (curDefaults != null) {
@@ -193,7 +198,8 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 				values.set(index, vt.getValuesAsString());
 				String reason = vt.validate(this);
 				if ((reason != null) && reason.length() > 0) {
-					logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_OPTIONS, new Object[] {values.get(index), getID(), reason}));
+					logger.log(LogTracker.LOG_WARNING,
+							NLS.bind(MetaTypeMsg.INVALID_OPTIONS, new Object[] { values.get(index), getID(), reason }));
 					labels.remove(index);
 					values.remove(index);
 					index--; // Because this one has been removed.
@@ -219,18 +225,20 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	}
 
 	/**
-	 * Method to set the default value of AttributeDefinition.
-	 * The given parameter is a comma delimited list needed to be parsed.
+	 * Method to set the default value of AttributeDefinition. The given parameter
+	 * is a comma delimited list needed to be parsed.
 	 */
 	void setDefaultValue(String defaults_str, boolean needValidation) {
 		ValueTokenizer vt = new ValueTokenizer(defaults_str, logger);
 		String reason = vt.validate(this);
 		if ((reason != null) && reason.length() > 0) {
-			logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_DEFAULTS, new Object[] {vt.getValuesAsString(), getID(), reason}));
+			logger.log(LogTracker.LOG_WARNING,
+					NLS.bind(MetaTypeMsg.INVALID_DEFAULTS, new Object[] { vt.getValuesAsString(), getID(), reason }));
 			return;
 		}
 		String[] defaults = vt.getValuesAsArray();
-		// If the default value is a single empty string and cardinality != 0, the default value must become String[0].
+		// If the default value is a single empty string and cardinality != 0, the
+		// default value must become String[0].
 		// We know the cardinality has already been set in the constructor.
 		if (_cardinality != 0 && defaults.length == 1 && defaults[0].length() == 0)
 			setDefaultValue(new String[0]);
@@ -239,20 +247,19 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	}
 
 	/**
-	 * Method to set the default value of AttributeDefinition.
-	 * The given parameter is a String array of multi values.
+	 * Method to set the default value of AttributeDefinition. The given parameter
+	 * is a String array of multi values.
 	 */
 	private void setDefaultValue(String[] defaults) {
 		_defaults = defaults;
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * In order to be valid, a value must pass all of the following tests.
-	 * (1) The value must not be null.
-	 * (2) The value must be convertible into the attribute definition's type.
-	 * (3) The following relation must hold: min <= value <= max, if either min or max was specified.
-	 * (4) If options were specified, the value must be equal to one of them.
+	 * (non-Javadoc) In order to be valid, a value must pass all of the following
+	 * tests. (1) The value must not be null. (2) The value must be convertible into
+	 * the attribute definition's type. (3) The following relation must hold: min <=
+	 * value <= max, if either min or max was specified. (4) If options were
+	 * specified, the value must be equal to one of them.
 	 * 
 	 * Note this method will never return null to indicate there's no validation
 	 * present. The type compatibility check can always be performed.
@@ -352,7 +359,8 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 		Object min = readMinMax(type, reader);
 		Object max = readMinMax(type, reader);
 
-		AttributeDefinitionImpl result = new AttributeDefinitionImpl(id, name, description, type, cardinality, min, max, isRequired, localization, logger, helper);
+		AttributeDefinitionImpl result = new AttributeDefinitionImpl(id, name, description, type, cardinality, min, max,
+				isRequired, localization, logger, helper);
 		result.setDefaultValue(defaults);
 		result.setOption(labels, values, false);
 		return result;
@@ -398,32 +406,32 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 			return null;
 		}
 		switch (dataType) {
-			// PASSWORD should be treated like STRING.
-			case AttributeDefinition.PASSWORD :
-			case AttributeDefinition.STRING :
-				return reader.readString();
-			case AttributeDefinition.LONG :
-				return reader.readLong();
-			case AttributeDefinition.INTEGER :
-				return reader.readInt();
-			case AttributeDefinition.SHORT :
-				return reader.readShort();
-			case AttributeDefinition.CHARACTER :
-				return reader.readCharacter();
-			case AttributeDefinition.BYTE :
-				return reader.readByte();
-			case AttributeDefinition.DOUBLE :
-				return reader.readDouble();
-			case AttributeDefinition.FLOAT :
-				return reader.readFloat();
-			case AttributeDefinition.BIGINTEGER :
-				return new BigInteger(reader.readString());
-			case AttributeDefinition.BIGDECIMAL :
-				return new BigDecimal(reader.readString());
-			case AttributeDefinition.BOOLEAN :
-				return reader.readBoolean();
-			default :
-				return reader.readString();
+		// PASSWORD should be treated like STRING.
+		case AttributeDefinition.PASSWORD:
+		case AttributeDefinition.STRING:
+			return reader.readString();
+		case AttributeDefinition.LONG:
+			return reader.readLong();
+		case AttributeDefinition.INTEGER:
+			return reader.readInt();
+		case AttributeDefinition.SHORT:
+			return reader.readShort();
+		case AttributeDefinition.CHARACTER:
+			return reader.readCharacter();
+		case AttributeDefinition.BYTE:
+			return reader.readByte();
+		case AttributeDefinition.DOUBLE:
+			return reader.readDouble();
+		case AttributeDefinition.FLOAT:
+			return reader.readFloat();
+		case AttributeDefinition.BIGINTEGER:
+			return new BigInteger(reader.readString());
+		case AttributeDefinition.BIGDECIMAL:
+			return new BigDecimal(reader.readString());
+		case AttributeDefinition.BOOLEAN:
+			return reader.readBoolean();
+		default:
+			return reader.readString();
 		}
 	}
 
@@ -435,45 +443,45 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 		}
 		writer.writeBoolean(false);
 		switch (_dataType) {
-			// PASSWORD should be treated like STRING.
-			case AttributeDefinition.PASSWORD :
-			case AttributeDefinition.STRING :
-				writer.writeString((String) v);
-				return;
-			case AttributeDefinition.LONG :
-				writer.writeLong((Long) v);
-				return;
-			case AttributeDefinition.INTEGER :
-				writer.writeInt((Integer) v);
-				return;
-			case AttributeDefinition.SHORT :
-				writer.writeShort((Short) v);
-				return;
-			case AttributeDefinition.CHARACTER :
-				writer.writeCharacter((Character) v);
-				return;
-			case AttributeDefinition.BYTE :
-				writer.writeByte((Byte) v);
-				return;
-			case AttributeDefinition.DOUBLE :
-				writer.writeDouble((Double) v);
-				return;
-			case AttributeDefinition.FLOAT :
-				writer.writeFloat((Float) v);
-				return;
-			case AttributeDefinition.BIGINTEGER :
-				writer.writeString(v.toString());
-				return;
-			case AttributeDefinition.BIGDECIMAL :
-				writer.writeString(v.toString());
-				return;
-			case AttributeDefinition.BOOLEAN :
-				writer.writeBoolean((Boolean) v);
-				return;
-			default :
-				// Unknown data type
-				writer.writeString(String.valueOf(v));
-				return;
+		// PASSWORD should be treated like STRING.
+		case AttributeDefinition.PASSWORD:
+		case AttributeDefinition.STRING:
+			writer.writeString((String) v);
+			return;
+		case AttributeDefinition.LONG:
+			writer.writeLong((Long) v);
+			return;
+		case AttributeDefinition.INTEGER:
+			writer.writeInt((Integer) v);
+			return;
+		case AttributeDefinition.SHORT:
+			writer.writeShort((Short) v);
+			return;
+		case AttributeDefinition.CHARACTER:
+			writer.writeCharacter((Character) v);
+			return;
+		case AttributeDefinition.BYTE:
+			writer.writeByte((Byte) v);
+			return;
+		case AttributeDefinition.DOUBLE:
+			writer.writeDouble((Double) v);
+			return;
+		case AttributeDefinition.FLOAT:
+			writer.writeFloat((Float) v);
+			return;
+		case AttributeDefinition.BIGINTEGER:
+			writer.writeString(v.toString());
+			return;
+		case AttributeDefinition.BIGDECIMAL:
+			writer.writeString(v.toString());
+			return;
+		case AttributeDefinition.BOOLEAN:
+			writer.writeBoolean((Boolean) v);
+			return;
+		default:
+			// Unknown data type
+			writer.writeString(String.valueOf(v));
+			return;
 		}
 	}
 

@@ -28,8 +28,10 @@ import org.osgi.framework.*;
  * Extension of MetaTypeProvider
  * <p>
  * Provides methods to:
- * <p> - getPids() get the Pids for a given Locale
- * <p> - getFactoryPids() get the Factory Pids for a given Locale
+ * <p>
+ * - getPids() get the Pids for a given Locale
+ * <p>
+ * - getFactoryPids() get the Factory Pids for a given Locale
  * <p>
  */
 public class MetaTypeInformationImpl extends MetaTypeProviderImpl implements EquinoxMetaTypeInformation {
@@ -42,7 +44,8 @@ public class MetaTypeInformationImpl extends MetaTypeProviderImpl implements Equ
 		super(bundle, parser, logger);
 	}
 
-	public MetaTypeInformationImpl(Bundle bundle, LogTracker logger, Map<String, ObjectClassDefinitionImpl> pidOCDs, Map<String, ObjectClassDefinitionImpl> fPidOCDs) {
+	public MetaTypeInformationImpl(Bundle bundle, LogTracker logger, Map<String, ObjectClassDefinitionImpl> pidOCDs,
+			Map<String, ObjectClassDefinitionImpl> fPidOCDs) {
 		super(bundle, logger, pidOCDs, fPidOCDs);
 	}
 
@@ -80,7 +83,8 @@ public class MetaTypeInformationImpl extends MetaTypeProviderImpl implements Equ
 		return this._bundle;
 	}
 
-	static MetaTypeInformationImpl load(BundleContext systemContext, LogTracker log, Persistence.Reader reader) throws IOException {
+	static MetaTypeInformationImpl load(BundleContext systemContext, LogTracker log, Persistence.Reader reader)
+			throws IOException {
 		long id = reader.readLong();
 		Bundle b = systemContext.getBundle(id);
 		boolean valid = true;

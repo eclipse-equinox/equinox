@@ -110,7 +110,7 @@ public class DataParser {
 		_dp_xmlReader.setErrorHandler(new MyErrorHandler(System.err));
 		InputStream is = _dp_url.openStream();
 		InputSource isource = new InputSource(is);
-		logger.log(LogTracker.LOG_DEBUG, "Starting to parse " + _dp_url); //$NON-NLS-1$					
+		logger.log(LogTracker.LOG_DEBUG, "Starting to parse " + _dp_url); //$NON-NLS-1$
 		_dp_xmlReader.parse(isource);
 		return designates;
 	}
@@ -126,33 +126,33 @@ public class DataParser {
 		}
 
 		switch (type) {
-			// PASSWORD should be treated like STRING.
-			case AttributeDefinition.PASSWORD :
-			case AttributeDefinition.STRING :
-				return value;
-			case AttributeDefinition.LONG :
-				return Long.valueOf(value);
-			case AttributeDefinition.INTEGER :
-				return Integer.valueOf(value);
-			case AttributeDefinition.SHORT :
-				return Short.valueOf(value);
-			case AttributeDefinition.CHARACTER :
-				return Character.valueOf(value.charAt(0));
-			case AttributeDefinition.BYTE :
-				return Byte.valueOf(value);
-			case AttributeDefinition.DOUBLE :
-				return Double.valueOf(value);
-			case AttributeDefinition.FLOAT :
-				return Float.valueOf(value);
-			case AttributeDefinition.BIGINTEGER :
-				return new BigInteger(value);
-			case AttributeDefinition.BIGDECIMAL :
-				return new BigDecimal(value);
-			case AttributeDefinition.BOOLEAN :
-				return Boolean.valueOf(value);
-			default :
-				// Unknown data type
-				return null;
+		// PASSWORD should be treated like STRING.
+		case AttributeDefinition.PASSWORD:
+		case AttributeDefinition.STRING:
+			return value;
+		case AttributeDefinition.LONG:
+			return Long.valueOf(value);
+		case AttributeDefinition.INTEGER:
+			return Integer.valueOf(value);
+		case AttributeDefinition.SHORT:
+			return Short.valueOf(value);
+		case AttributeDefinition.CHARACTER:
+			return Character.valueOf(value.charAt(0));
+		case AttributeDefinition.BYTE:
+			return Byte.valueOf(value);
+		case AttributeDefinition.DOUBLE:
+			return Double.valueOf(value);
+		case AttributeDefinition.FLOAT:
+			return Float.valueOf(value);
+		case AttributeDefinition.BIGINTEGER:
+			return new BigInteger(value);
+		case AttributeDefinition.BIGDECIMAL:
+			return new BigDecimal(value);
+		case AttributeDefinition.BOOLEAN:
+			return Boolean.valueOf(value);
+		default:
+			// Unknown data type
+			return null;
 		}
 	}
 
@@ -184,15 +184,18 @@ public class DataParser {
 		}
 
 		@Override
-		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-			throw new SAXException(NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] {qName, attributes.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+		public void startElement(String uri, String localName, String qName, Attributes attributes)
+				throws SAXException {
+			throw new SAXException(NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] { qName,
+					attributes.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 		}
 
 		@Override
 		public void characters(char[] buf, int start, int end) throws SAXException {
 			String s = new String(buf, start, end).trim();
 			if (s.length() > 0) {
-				throw new SAXException(NLS.bind(MetaTypeMsg.UNEXPECTED_TEXT, new Object[] {s, elementName, elementId, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				throw new SAXException(NLS.bind(MetaTypeMsg.UNEXPECTED_TEXT, new Object[] { s, elementName, elementId,
+						_dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 			}
 		}
 
@@ -211,8 +214,7 @@ public class DataParser {
 		}
 
 		/**
-		 * Called when this element and all elements nested into it have been
-		 * handled.
+		 * Called when this element and all elements nested into it have been handled.
 		 */
 		protected void finished() {
 			// do nothing by default
@@ -237,7 +239,8 @@ public class DataParser {
 			if (name.equalsIgnoreCase(METADATA)) {
 				new MetaDataHandler(this).init(name, attributes);
 			} else {
-				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] {name, attributes.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] { name,
+						attributes.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 			}
 		}
 
@@ -285,7 +288,8 @@ public class DataParser {
 				OcdHandler ocdHandler = new OcdHandler(this);
 				ocdHandler.init(name, atts, _dp_OCDs);
 			} else {
-				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] {name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] { name,
+						atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 			}
 		}
 
@@ -296,16 +300,20 @@ public class DataParser {
 			if (_dp_designateHandlers.size() == 0) {
 				// Schema defines at least one DESIGNATE is required.
 				_isParsedDataValid = false;
-				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.MISSING_ELEMENT, new Object[] {DESIGNATE, METADATA, elementId, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.MISSING_ELEMENT, new Object[] { DESIGNATE,
+						METADATA, elementId, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 				return;
 			}
 
 			for (DesignateHandler dh : _dp_designateHandlers) {
 				ObjectClassDefinitionImpl ocd = _dp_OCDs.get(dh._ocdref);
 				if (ocd != null) {
-					designates.add(new Designate.Builder(ocd).bundle(dh._bundle_val).factoryPid(dh._factory_val).merge(dh._merge_val).pid(dh._pid_val).optional(dh._optional_val).build());
+					designates.add(new Designate.Builder(ocd).bundle(dh._bundle_val).factoryPid(dh._factory_val)
+							.merge(dh._merge_val).pid(dh._pid_val).optional(dh._optional_val).build());
 				} else {
-					logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.OCD_REF_NOT_FOUND, new Object[] {dh._pid_val, dh._factory_val, dh._ocdref, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+					logger.log(LogTracker.LOG_ERROR,
+							NLS.bind(MetaTypeMsg.OCD_REF_NOT_FOUND, new Object[] { dh._pid_val, dh._factory_val,
+									dh._ocdref, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 				}
 			}
 		}
@@ -337,7 +345,8 @@ public class DataParser {
 			String ocd_name_val = atts.getValue(NAME);
 			if (ocd_name_val == null) {
 				_isParsedDataValid = false;
-				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] {NAME, name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] { NAME, name,
+						atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 				return;
 			}
 
@@ -349,11 +358,13 @@ public class DataParser {
 			_refID = atts.getValue(ID);
 			if (_refID == null) {
 				_isParsedDataValid = false;
-				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] {ID, name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] { ID, name,
+						atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 				return;
 			}
 
-			_ocd = new ObjectClassDefinitionImpl(ocd_name_val, ocd_description_val, _refID, _dp_localization, extensionAttributes);
+			_ocd = new ObjectClassDefinitionImpl(ocd_name_val, ocd_description_val, _refID, _dp_localization,
+					extensionAttributes);
 		}
 
 		@Override
@@ -374,7 +385,8 @@ public class DataParser {
 				if (iconHandler._isParsedDataValid)
 					icons.add(iconHandler._icon);
 			} else {
-				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] {name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] { name,
+						atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 			}
 		}
 
@@ -411,7 +423,8 @@ public class DataParser {
 			String icon_resource_val = atts.getValue(RESOURCE);
 			if (icon_resource_val == null) {
 				_isParsedDataValid = false;
-				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] {RESOURCE, name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] { RESOURCE, name,
+						atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 				return;
 			}
 
@@ -465,14 +478,16 @@ public class DataParser {
 			String ad_id_val = atts.getValue(ID);
 			if (ad_id_val == null) {
 				_isParsedDataValid = false;
-				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] {ID, name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] { ID, name,
+						atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 				return;
 			}
 
 			String ad_type_val = atts.getValue(TYPE);
 			if (ad_type_val == null) {
 				_isParsedDataValid = false;
-				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] {TYPE, name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] { TYPE, name,
+						atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 				return;
 			}
 			if (ad_type_val.equalsIgnoreCase(STRING)) {
@@ -501,7 +516,8 @@ public class DataParser {
 				_dataType = AttributeDefinition.BIGINTEGER;
 			} else {
 				_isParsedDataValid = false;
-				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.INVALID_TYPE, new Object[] {ad_type_val, ad_id_val, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.INVALID_TYPE, new Object[] { ad_type_val,
+						ad_id_val, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 				return;
 			}
 
@@ -536,7 +552,9 @@ public class DataParser {
 				ad_required_val = Boolean.TRUE.toString();
 			}
 
-			_ad = new AttributeDefinitionImpl(ad_id_val, ad_name_val, ad_description_val, _dataType, ad_cardinality_val, convert(ad_min_val, _dataType), convert(ad_max_val, _dataType), Boolean.valueOf(ad_required_val).booleanValue(), _dp_localization, logger, extensionAttributes);
+			_ad = new AttributeDefinitionImpl(ad_id_val, ad_name_val, ad_description_val, _dataType, ad_cardinality_val,
+					convert(ad_min_val, _dataType), convert(ad_max_val, _dataType),
+					Boolean.valueOf(ad_required_val).booleanValue(), _dp_localization, logger, extensionAttributes);
 		}
 
 		@Override
@@ -557,7 +575,8 @@ public class DataParser {
 					_optionValues.add(optionHandler._value_val);
 				}
 			} else {
-				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] {name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] { name,
+						atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 			}
 		}
 
@@ -573,12 +592,15 @@ public class DataParser {
 			if (values == null)
 				values = new String[0];
 			if (numOfValues != values.length)
-				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_OPTIONS_XML, new Object[] {elementId, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_OPTIONS_XML,
+						new Object[] { elementId, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 
 			if (ad_defaults_str != null) {
 				_ad.setDefaultValue(ad_defaults_str, true);
 				if (_ad.getDefaultValue() == null)
-					logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_DEFAULTS_XML, new Object[] {ad_defaults_str, elementId, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+					logger.log(LogTracker.LOG_WARNING,
+							NLS.bind(MetaTypeMsg.INVALID_DEFAULTS_XML, new Object[] { ad_defaults_str, elementId,
+									_dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 			}
 
 			_parent_ADs.add(_ad);
@@ -605,14 +627,16 @@ public class DataParser {
 			_label_val = atts.getValue(LABEL);
 			if (_label_val == null) {
 				_isParsedDataValid = false;
-				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] {LABEL, name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] { LABEL, name,
+						atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 				return;
 			}
 
 			_value_val = atts.getValue(VALUE);
 			if (_value_val == null) {
 				_isParsedDataValid = false;
-				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] {VALUE, name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] { VALUE, name,
+						atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 				return;
 			}
 		}
@@ -644,7 +668,8 @@ public class DataParser {
 			_factory_val = atts.getValue(FACTORY);
 			if (_pid_val == null && _factory_val == null) {
 				_isParsedDataValid = false;
-				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_DESIGNATE_PID_AND_FACTORYPID, new Object[] {elementId, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_DESIGNATE_PID_AND_FACTORYPID,
+						new Object[] { elementId, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 				return;
 			}
 
@@ -688,7 +713,8 @@ public class DataParser {
 					_ocdref = objectHandler._ocdref;
 				}
 			} else {
-				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] {name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] { name,
+						atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 			}
 		}
 
@@ -702,7 +728,8 @@ public class DataParser {
 			if (_ocdref == null) {
 				_isParsedDataValid = false;
 				// Schema defines at least one OBJECT is required.
-				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ELEMENT, new Object[] {OBJECT, DESIGNATE, elementId, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ELEMENT, new Object[] { OBJECT, DESIGNATE,
+						elementId, _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 				return;
 
 			}
@@ -728,7 +755,8 @@ public class DataParser {
 			_ocdref = atts.getValue(OCDREF);
 			if (_ocdref == null) {
 				_isParsedDataValid = false;
-				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] {OCDREF, name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] { OCDREF, name,
+						atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 				return;
 			}
 		}
@@ -747,7 +775,8 @@ public class DataParser {
 				attributeHandler.init(name, atts);
 				// The ATTRIBUTE element is only used by RFC94, do nothing for it here.
 			} else {
-				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] {name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, new Object[] { name,
+						atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 			}
 		}
 	}
@@ -774,14 +803,16 @@ public class DataParser {
 			_adref_val = atts.getValue(ADREF);
 			if (_adref_val == null) {
 				_isParsedDataValid = false;
-				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] {ADREF, name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] { ADREF, name,
+						atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 				return;
 			}
 
 			_content_val = atts.getValue(CONTENT);
 			if (_content_val == null) {
 				_isParsedDataValid = false;
-				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] {CONTENT, name, atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName()}));
+				logger.log(LogTracker.LOG_ERROR, NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, new Object[] { CONTENT, name,
+						atts.getValue(ID), _dp_url, _dp_bundle.getBundleId(), _dp_bundle.getSymbolicName() }));
 				return;
 			}
 		}
