@@ -133,7 +133,7 @@ public interface DebugOptions {
 	 * If debug is enabled then notifications will be sent to the
 	 * listeners which have options that have been changed, added or removed.
 	 * </p>
-
+	
 	 * @param options the new set of options
 	 * @since 3.6
 	 */
