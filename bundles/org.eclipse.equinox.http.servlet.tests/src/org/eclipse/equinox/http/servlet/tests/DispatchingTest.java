@@ -1284,7 +1284,7 @@ public class DispatchingTest extends BaseTest {
 
 	@Test
 	public void test_headers_include() throws Exception {
-		SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+		SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
 		format.setTimeZone(TimeZone.getTimeZone("GMT"));
 		final long date1 = System.currentTimeMillis() - (1000*60*60*24*365*30);
 		final long date2 = System.currentTimeMillis() - (1000*60*60*24*365*40);
@@ -1358,7 +1358,7 @@ public class DispatchingTest extends BaseTest {
 
 	@Test
 	public void test_headers_forward() throws Exception {
-		SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+		SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
 		format.setTimeZone(TimeZone.getTimeZone("GMT"));
 		final long date1 = System.currentTimeMillis() - (1000*60*60*24*365*30);
 		final long date2 = System.currentTimeMillis() - (1000*60*60*24*365*40);
