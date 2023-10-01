@@ -26,16 +26,17 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 
 /**
- * Jasper requires that this class loader be an instance of URLClassLoader.
- * At runtime it uses the URLClassLoader's getURLs method to find jar files that are in turn searched for TLDs. In a webapp
- * these jar files would normally be located in WEB-INF/lib. In the OSGi context, this behaviour is provided by returning the
- * URLs of the jar files contained on the Bundle-ClassPath. Other than jar file tld resources this classloader is not used for
- * loading classes which should be done by the other contained class loaders.
+ * Jasper requires that this class loader be an instance of URLClassLoader. At
+ * runtime it uses the URLClassLoader's getURLs method to find jar files that
+ * are in turn searched for TLDs. In a webapp these jar files would normally be
+ * located in WEB-INF/lib. In the OSGi context, this behaviour is provided by
+ * returning the URLs of the jar files contained on the Bundle-ClassPath. Other
+ * than jar file tld resources this classloader is not used for loading classes
+ * which should be done by the other contained class loaders.
  * 
- * The rest of the ClassLoader is as follows:
- * 1) Thread-ContextClassLoader (top - parent) -- see ContextFinder
- * 2) Jasper Bundle
- * 3) The Bundle referenced at JSPServlet creation
+ * The rest of the ClassLoader is as follows: 1) Thread-ContextClassLoader (top
+ * - parent) -- see ContextFinder 2) Jasper Bundle 3) The Bundle referenced at
+ * JSPServlet creation
  */
 public class JspClassLoader extends URLClassLoader {
 
@@ -60,7 +61,8 @@ public class JspClassLoader extends URLClassLoader {
 	};
 
 	public JspClassLoader(Bundle bundle) {
-		super(new URL[0], new BundleProxyClassLoader(bundle, new BundleProxyClassLoader(JASPERBUNDLE, new JSPContextFinder(EMPTY_CLASSLOADER))));
+		super(new URL[0], new BundleProxyClassLoader(bundle,
+				new BundleProxyClassLoader(JASPERBUNDLE, new JSPContextFinder(EMPTY_CLASSLOADER))));
 		addBundleClassPathJars(bundle);
 		Bundle[] fragments = Activator.getFragments(bundle);
 		if (fragments != null) {
@@ -100,7 +102,8 @@ public class JspClassLoader extends URLClassLoader {
 		return super.loadClass(name, resolve);
 	}
 
-	// Classes should "not" be loaded by this classloader from the URLs - it is just used for TLD resource discovery.
+	// Classes should "not" be loaded by this classloader from the URLs - it is just
+	// used for TLD resource discovery.
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException {
 		throw new ClassNotFoundException(name);
