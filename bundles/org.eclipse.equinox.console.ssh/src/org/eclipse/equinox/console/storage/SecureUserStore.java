@@ -28,8 +28,9 @@ import java.util.Set;
 import java.util.StringJoiner;
 
 /**
- * This class implements a storage for users, passwords and roles. The data is stored in a
- * properties-like file in the format /ssh/<username>/password=<password> and
+ * This class implements a storage for users, passwords and roles. The data is
+ * stored in a properties-like file in the format
+ * /ssh/<username>/password=<password> and
  * /ssh/<username>/roles=<comma_separated_list_of_roles>
  *
  *
@@ -61,8 +62,10 @@ public class SecureUserStore {
 				continue;
 			}
 			String[] parts = ((String) key).split(DELIMITER);
-			// since the key starts with DELIMITER, the first element of key.split(DELIMITER) is an empty string
-			// that is why the result is {"", "ssh", "<username>", "password"} or {"", "ssh", "<username>", "roles"}
+			// since the key starts with DELIMITER, the first element of
+			// key.split(DELIMITER) is an empty string
+			// that is why the result is {"", "ssh", "<username>", "password"} or {"",
+			// "ssh", "<username>", "roles"}
 			if (parts.length < KEY_ELEMENTS_COUNT) {
 				continue;
 			}
@@ -84,7 +87,7 @@ public class SecureUserStore {
 	 *
 	 * @param username the name of the user
 	 * @param password the password of the user
-	 * @param roles comma-separated list of the roles of the user
+	 * @param roles    comma-separated list of the roles of the user
 	 */
 	public static void putUser(String username, String password, String roles) {
 		String userFileLoc = getFileLocation();
@@ -105,12 +108,11 @@ public class SecureUserStore {
 		storeProperties(users, userFileLoc);
 	}
 
-
 	/**
 	 * Adds roles for a particular user
 	 *
 	 * @param username user to add roles to
-	 * @param roles comma-separated list of new roles for the user
+	 * @param roles    comma-separated list of new roles for the user
 	 */
 	public static void addRoles(String username, String roles) {
 		if (roles == null || roles.length() == 0) {
@@ -144,7 +146,7 @@ public class SecureUserStore {
 	/**
 	 * Removes roles from a user
 	 *
-	 * @param username user to remove roles from
+	 * @param username      user to remove roles from
 	 * @param rolesToRemove comma-separated list of roles to be removed
 	 */
 	public static void removeRoles(String username, String rolesToRemove) {
@@ -284,10 +286,11 @@ public class SecureUserStore {
 		return users.getProperty(constructPropertyName(username, propertyName));
 	}
 
-	private static String getFileLocation(){
+	private static String getFileLocation() {
 		String userFileLoc = System.getProperty(USER_STORE_FILE_NAME);
 		if (userFileLoc == null) {
-			throw new IllegalArgumentException("Property " + USER_STORE_FILE_NAME + " is not set; cannot use JAAS authentication");
+			throw new IllegalArgumentException(
+					"Property " + USER_STORE_FILE_NAME + " is not set; cannot use JAAS authentication");
 		}
 
 		return userFileLoc;
@@ -306,7 +309,7 @@ public class SecureUserStore {
 	private static boolean existsUser(String username, Properties users) {
 		for (Object user : users.keySet()) {
 			if (user instanceof String && ((String) user).contains(DELIMITER + username + DELIMITER)) {
-				 return true;
+				return true;
 			}
 		}
 		return false;

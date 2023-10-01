@@ -47,7 +47,7 @@ public class SshCommand {
 	private ServiceRegistration<?> configuratorRegistration;
 	private boolean isEnabled = false;
 	private final Object lock = new Object();
-	
+
 	private static final String DEFAULT_USER = "equinox";
 	private static final String DEFAULT_PASSWORD = "equinox";
 	private static final String DEFAULT_USER_STORE_PROPERTY = "osgi.console.ssh.useDefaultSecureStorage";
@@ -56,17 +56,18 @@ public class SshCommand {
 	private static final String USE_CONFIG_ADMIN_PROP = "osgi.console.useConfigAdmin";
 	private static final String SSH_PID = "osgi.console.ssh";
 	private static final String ENABLED = "enabled";
-	
+
 	public SshCommand(CommandProcessor processor, BundleContext context) {
 		processors.add(processor);
 		this.context = context;
-		
+
 		if ("true".equals(context.getProperty(USE_CONFIG_ADMIN_PROP))) {
 			Dictionary<String, String> sshProperties = new Hashtable<>();
 			sshProperties.put(Constants.SERVICE_PID, SSH_PID);
 			try {
 				synchronized (lock) {
-					configuratorRegistration = context.registerService(ManagedService.class.getName(), new SshConfigurator(), sshProperties);
+					configuratorRegistration = context.registerService(ManagedService.class.getName(),
+							new SshConfigurator(), sshProperties);
 				}
 			} catch (NoClassDefFoundError e) {
 				System.out.println("Configuration Admin not available!");
@@ -76,18 +77,18 @@ public class SshCommand {
 			parseHostAndPort();
 		}
 	}
-	
+
 	private void parseHostAndPort() {
 		String sshPort = null;
 		String consolePropValue = context.getProperty(SSH_PID);
-		if(consolePropValue != null) {
+		if (consolePropValue != null) {
 			int index = consolePropValue.lastIndexOf(":");
 			if (index > -1) {
 				defaultHost = consolePropValue.substring(0, index);
 			}
 			sshPort = consolePropValue.substring(index + 1);
 			isEnabled = true;
-		} 
+		}
 		if (sshPort != null && !"".equals(sshPort)) {
 			try {
 				defaultPort = Integer.parseInt(sshPort);
@@ -96,14 +97,14 @@ public class SshCommand {
 			}
 		}
 	}
-	
+
 	public synchronized void startService() {
 		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put("osgi.command.scope", "equinox");
-		properties.put("osgi.command.function", new String[] {"ssh"});
+		properties.put("osgi.command.function", new String[] { "ssh" });
 		if ((port > 0 || defaultPort > 0) && isEnabled == true) {
-			try{
-				ssh(new String[]{"start"});
+			try {
+				ssh(new String[] { "start" });
 			} catch (Exception e) {
 				System.out.println("Cannot start ssh. Reason: " + e.getMessage());
 				e.printStackTrace();
@@ -117,12 +118,12 @@ public class SshCommand {
 		String command = null;
 		String newHost = null;
 		int newPort = 0;
-		
-		for(int i = 0; i < arguments.length; i++) {
-			if("-?".equals(arguments[i]) || "-help".equals(arguments[i])) {
+
+		for (int i = 0; i < arguments.length; i++) {
+			if ("-?".equals(arguments[i]) || "-help".equals(arguments[i])) {
 				printHelp();
 				return;
-			} else if("start".equals(arguments[i])) {
+			} else if ("start".equals(arguments[i])) {
 				command = "start";
 			} else if ("stop".equals(arguments[i])) {
 				command = "stop";
@@ -136,43 +137,44 @@ public class SshCommand {
 				throw new Exception("Unrecognized ssh command/option " + arguments[i]);
 			}
 		}
-		
+
 		if (command == null) {
 			throw new Exception("No ssh command specified");
 		}
-		
+
 		if (newPort != 0) {
 			port = newPort;
 		} else if (port == 0) {
 			port = defaultPort;
 		}
-		
+
 		if (port == 0) {
 			throw new Exception("No ssh port specified");
 		}
-		
+
 		if (newHost != null) {
 			host = newHost;
 		} else {
 			host = defaultHost;
 		}
-		
+
 		if ("start".equals(command)) {
 			if (sshServ != null) {
 				throw new IllegalStateException("ssh is already running on port " + port);
 			}
-			
+
 			checkPortAvailable(port);
-			
+
 			sshServ = new SshServ(processors, context, host, port);
 			sshServ.setName("equinox ssh");
-			
+
 			if ("true".equals(context.getProperty(DEFAULT_USER_STORE_PROPERTY))) {
 				try {
 					checkUserStore();
 					registerUserAdmin();
 				} catch (NoClassDefFoundError e) {
-					System.out.println("If you want to use secure storage, please install Equinox security bundle and its dependencies");
+					System.out.println(
+							"If you want to use secure storage, please install Equinox security bundle and its dependencies");
 					sshServ = null;
 					return;
 				} catch (IOException e) {
@@ -181,65 +183,67 @@ public class SshCommand {
 					return;
 				}
 			}
-			
+
 			try {
 				sshServ.start();
 			} catch (RuntimeException e) {
 				sshServ = null;
 				return;
-			}    
+			}
 		} else if ("stop".equals(command)) {
 			if (sshServ == null) {
 				System.out.println("ssh is not running.");
 				return;
 			}
-			
+
 			sshServ.stopSshServer();
 			sshServ = null;
-		} 
+		}
 	}
-	
+
 	public synchronized void addCommandProcessor(CommandProcessor processor) {
 		processors.add(processor);
 		if (sshServ != null) {
 			sshServ.addCommandProcessor(processor);
 		}
 	}
-	
+
 	public synchronized void removeCommandProcessor(CommandProcessor processor) {
 		processors.remove(processor);
 		if (sshServ != null) {
 			sshServ.removeCommandProcessor(processor);
 		}
 	}
-	
+
 	private void checkPortAvailable(int port) throws Exception {
-		try (ServerSocket socket = new ServerSocket(port)){
+		try (ServerSocket socket = new ServerSocket(port)) {
 		} catch (BindException e) {
-			throw new Exception ("Port " + port + " already in use");
+			throw new Exception("Port " + port + " already in use");
 		}
 	}
-	
+
 	/*
 	 * Register user administration commands
 	 */
 	private void registerUserAdmin() {
 		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put("osgi.command.scope", "equinox");
-		properties.put("osgi.command.function", new String[] {"addUser", "addUser", "deleteUser", "resetPassword", "setPassword", "addRoles", "removeRoles", "listUsers"});
+		properties.put("osgi.command.function", new String[] { "addUser", "addUser", "deleteUser", "resetPassword",
+				"setPassword", "addRoles", "removeRoles", "listUsers" });
 		context.registerService(UserAdminCommand.class.getName(), new UserAdminCommand(), properties);
 	}
-	
+
 	/*
-	 * Create user store if not available. Add the default user, if there is no other user in the store.
+	 * Create user store if not available. Add the default user, if there is no
+	 * other user in the store.
 	 */
 	private void checkUserStore() throws Exception {
 		SecureUserStore.initStorage();
-		if(SecureUserStore.getUserNames().length == 0) {
-			SecureUserStore.putUser(DEFAULT_USER, DigestUtil.encrypt(DEFAULT_PASSWORD), null );
+		if (SecureUserStore.getUserNames().length == 0) {
+			SecureUserStore.putUser(DEFAULT_USER, DigestUtil.encrypt(DEFAULT_PASSWORD), null);
 		}
 	}
-	
+
 	private void printHelp() {
 		StringBuilder help = new StringBuilder();
 		help.append("ssh - start simple ssh server");
@@ -262,11 +266,12 @@ public class SshCommand {
 		help.append("-?, -help");
 		help.append("\t");
 		help.append("show help");
-		System.out.println(help.toString());          
+		System.out.println(help.toString());
 	}
-	
+
 	class SshConfigurator implements ManagedService {
 		private Dictionary<String, Object> properties;
+
 		@Override
 		public synchronized void updated(Dictionary<String, ?> props) throws ConfigurationException {
 			if (props != null) {
@@ -277,26 +282,26 @@ public class SshCommand {
 			} else {
 				return;
 			}
-			
-			defaultPort = Integer.parseInt(((String)properties.get(PORT)));
-			defaultHost = (String)properties.get(HOST);
+
+			defaultPort = Integer.parseInt(((String) properties.get(PORT)));
+			defaultHost = (String) properties.get(HOST);
 			if (properties.get(ENABLED) == null) {
 				isEnabled = false;
 			} else {
-				isEnabled = Boolean.parseBoolean((String)properties.get(ENABLED));
+				isEnabled = Boolean.parseBoolean((String) properties.get(ENABLED));
 			}
 			synchronized (lock) {
 				configuratorRegistration.setProperties(properties);
 			}
 			if (sshServ == null && isEnabled == true) {
 				try {
-					ssh(new String[]{"start"});
+					ssh(new String[] { "start" });
 				} catch (Exception e) {
 					System.out.println("Cannot start ssh: " + e.getMessage());
 					e.printStackTrace();
 				}
 			}
 		}
-		
+
 	}
 }

@@ -37,8 +37,9 @@ import org.eclipse.equinox.console.common.terminal.VT320TerminalTypeMappings;
 import org.osgi.framework.BundleContext;
 
 /**
- * This class manages a ssh connection. It is responsible for starting a sessions to execute commands
- * from the ssh. If there are multiple CommandProcessors, a session is started for each of them.
+ * This class manages a ssh connection. It is responsible for starting a
+ * sessions to execute commands from the ssh. If there are multiple
+ * CommandProcessors, a session is started for each of them.
  *
  */
 public class SshShell implements Command {
@@ -59,7 +60,7 @@ public class SshShell implements Command {
 	public SshShell(List<CommandProcessor> processors, BundleContext context) {
 		this.processors = processors;
 		this.context = context;
-		supportedEscapeSequences = new HashMap<> ();
+		supportedEscapeSequences = new HashMap<>();
 		supportedEscapeSequences.put("ANSI", new ANSITerminalTypeMappings());
 		supportedEscapeSequences.put("WINDOWS", new ANSITerminalTypeMappings());
 		supportedEscapeSequences.put("VT100", new VT100TerminalTypeMappings());
@@ -97,7 +98,7 @@ public class SshShell implements Command {
 	public synchronized void start(ChannelSession channel, Environment env) throws IOException {
 		String term = env.getEnv().get(TERMINAL_PROPERTY);
 		TerminalTypeMappings mapping = supportedEscapeSequences.get(term.toUpperCase());
-		if(mapping != null) {
+		if (mapping != null) {
 			currentMappings = mapping;
 			currentEscapesToKey = mapping.getEscapesToKey();
 		}
@@ -157,7 +158,8 @@ public class SshShell implements Command {
 	}
 
 	private SshSession startNewConsoleSession(CommandProcessor processor) {
-		SshSession consoleSession = new SshSession(processor, context, this, in, out, currentMappings, currentEscapesToKey);
+		SshSession consoleSession = new SshSession(processor, context, this, in, out, currentMappings,
+				currentEscapesToKey);
 		consoleSession.start();
 		return consoleSession;
 	}

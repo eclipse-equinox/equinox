@@ -32,8 +32,9 @@ import org.eclipse.equinox.console.storage.SecureUserStore;
 import org.osgi.framework.BundleContext;
 
 /**
- * This class manages a ssh connection. It is responsible for wrapping the original io streams
- * from the socket, and starting a CommandSession to execute commands from the ssh.
+ * This class manages a ssh connection. It is responsible for wrapping the
+ * original io streams from the socket, and starting a CommandSession to execute
+ * commands from the ssh.
  *
  */
 public class SshSession extends Thread implements Closeable {
@@ -56,7 +57,8 @@ public class SshSession extends Thread implements Closeable {
 	private static final String CLOSEABLE = "CLOSEABLE";
 	private static final int ADD_USER_COUNTER_LIMIT = 2;
 
-	public SshSession(CommandProcessor processor, BundleContext context, SshShell sshShell, InputStream in, OutputStream out, TerminalTypeMappings currentMappings, Map<String, KEYS> currentExcapesToKey) {
+	public SshSession(CommandProcessor processor, BundleContext context, SshShell sshShell, InputStream in,
+			OutputStream out, TerminalTypeMappings currentMappings, Map<String, KEYS> currentExcapesToKey) {
 		this.processor = processor;
 		this.context = context;
 		this.sshShell = sshShell;
@@ -83,7 +85,7 @@ public class SshSession extends Thread implements Closeable {
 		consoleInputHandler.getScanner().setDel(currentMappings.getDel());
 		consoleInputHandler.getScanner().setCurrentEscapesToKey(currentEscapesToKey);
 		consoleInputHandler.getScanner().setEscapes(currentMappings.getEscapes());
-		((ConsoleInputScanner)consoleInputHandler.getScanner()).setContext(context);
+		((ConsoleInputScanner) consoleInputHandler.getScanner()).setContext(context);
 		consoleInputHandler.start();
 
 		final PrintStream output = new PrintStream(outp);
