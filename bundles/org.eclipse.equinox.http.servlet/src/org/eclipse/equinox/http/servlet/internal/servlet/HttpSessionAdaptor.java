@@ -31,13 +31,12 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 	private transient final String attributePrefix;
 	private String string;
 
-	static public HttpSessionAdaptor createHttpSessionAdaptor(
-		HttpSession session, ServletContext servletContext, ContextController controller) {
+	static public HttpSessionAdaptor createHttpSessionAdaptor(HttpSession session, ServletContext servletContext,
+			ContextController controller) {
 		return new HttpSessionAdaptor(session, servletContext, controller);
 	}
 
-	private HttpSessionAdaptor(
-		HttpSession session, ServletContext servletContext, ContextController controller) {
+	private HttpSessionAdaptor(HttpSession session, ServletContext servletContext, ContextController controller) {
 
 		this.session = session;
 		this.servletContext = servletContext;
@@ -68,7 +67,7 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 	private Collection<String> getAttributeNames0() {
 		Collection<String> result = new ArrayList<>();
 		Enumeration<String> containerSessionAttributes = session.getAttributeNames();
-		while(containerSessionAttributes.hasMoreElements()) {
+		while (containerSessionAttributes.hasMoreElements()) {
 			String attribute = containerSessionAttributes.nextElement();
 			if (attribute.startsWith(attributePrefix)) {
 				result.add(attribute.substring(attributePrefix.length()));
@@ -77,12 +76,12 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 		return result;
 	}
 
-	/**@deprecated*/
+	/** @deprecated */
 	public Object getValue(String arg0) {
 		return getAttribute(arg0);
 	}
 
-	/**@deprecated*/
+	/** @deprecated */
 	public String[] getValueNames() {
 		Collection<String> result = getAttributeNames0();
 		return result.toArray(new String[0]);
@@ -94,8 +93,7 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 		for (HttpSessionListener listener : controller.getEventListeners().get(HttpSessionListener.class)) {
 			try {
 				listener.sessionDestroyed(httpSessionEvent);
-			}
-			catch (IllegalStateException ise) {
+			} catch (IllegalStateException ise) {
 				// outer session is already invalidated
 			}
 		}
@@ -104,21 +102,20 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 			for (String attribute : getAttributeNames0()) {
 				removeAttribute(attribute);
 			}
-		}
-		catch (IllegalStateException ise) {
+		} catch (IllegalStateException ise) {
 			// outer session is already invalidated
 		}
 
 		controller.removeActiveSession(session);
 	}
 
-	public void invokeSessionListeners (List<Class<? extends EventListener>> classes, EventListener listener) {
+	public void invokeSessionListeners(List<Class<? extends EventListener>> classes, EventListener listener) {
 		if (classes == null) {
 			return;
 		}
 
 		for (Class<? extends EventListener> clazz : classes) {
-			if (clazz.equals(HttpSessionListener.class)){
+			if (clazz.equals(HttpSessionListener.class)) {
 				HttpSessionEvent sessionEvent = new HttpSessionEvent(this);
 				HttpSessionListener httpSessionListener = (HttpSessionListener) listener;
 				httpSessionListener.sessionDestroyed(sessionEvent);
@@ -144,7 +141,7 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 		}
 	}
 
-	/**@deprecated*/
+	/** @deprecated */
 	public void putValue(String arg0, Object arg1) {
 		setAttribute(arg0, arg1);
 	}
@@ -160,23 +157,21 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 			return;
 		}
 
-		List<HttpSessionAttributeListener> listeners =
-			controller.getEventListeners().get(
-				HttpSessionAttributeListener.class);
+		List<HttpSessionAttributeListener> listeners = controller.getEventListeners()
+				.get(HttpSessionAttributeListener.class);
 
 		if (listeners.isEmpty()) {
 			return;
 		}
 
-		HttpSessionBindingEvent httpSessionBindingEvent =
-			new HttpSessionBindingEvent(this, newName);
+		HttpSessionBindingEvent httpSessionBindingEvent = new HttpSessionBindingEvent(this, newName);
 
 		for (HttpSessionAttributeListener listener : listeners) {
 			listener.attributeRemoved(httpSessionBindingEvent);
 		}
 	}
 
-	/**@deprecated*/
+	/** @deprecated */
 	public void removeValue(String arg0) {
 		removeAttribute(arg0);
 	}
@@ -194,19 +189,16 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 
 		session.setAttribute(newName, value);
 
-		List<HttpSessionAttributeListener> listeners =
-			controller.getEventListeners().get(
-				HttpSessionAttributeListener.class);
+		List<HttpSessionAttributeListener> listeners = controller.getEventListeners()
+				.get(HttpSessionAttributeListener.class);
 
 		if (!listeners.isEmpty()) {
-			HttpSessionBindingEvent httpSessionBindingEvent =
-				new HttpSessionBindingEvent(this, newName, value);
+			HttpSessionBindingEvent httpSessionBindingEvent = new HttpSessionBindingEvent(this, newName, value);
 
 			for (HttpSessionAttributeListener listener : listeners) {
 				if (added) {
 					listener.attributeAdded(httpSessionBindingEvent);
-				}
-				else {
+				} else {
 					listener.attributeReplaced(httpSessionBindingEvent);
 				}
 			}
@@ -238,9 +230,10 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 		return session.getMaxInactiveInterval();
 	}
 
-	/**@deprecated*/
+	/** @deprecated */
 	public javax.servlet.http.HttpSessionContext getSessionContext() {
-		// Not sure this can be done per context helper and I think null is returned anyway
+		// Not sure this can be done per context helper and I think null is returned
+		// anyway
 		return session.getSessionContext();
 	}
 
@@ -262,7 +255,6 @@ public class HttpSessionAdaptor implements HttpSession, Serializable {
 		return value;
 	}
 
-	private static final String SIMPLE_NAME =
-		HttpSessionAdaptor.class.getSimpleName();
+	private static final String SIMPLE_NAME = HttpSessionAdaptor.class.getSimpleName();
 
 }

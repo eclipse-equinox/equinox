@@ -36,10 +36,9 @@ public class ListenerRegistration extends Registration<EventListener, ListenerDT
 	private final ContextController contextController;
 	private final ClassLoader classLoader;
 
-	public ListenerRegistration(
-		ServiceHolder<EventListener> listenerHolder, List<Class<? extends EventListener>> classes,
-		ListenerDTO listenerDTO, ServletContext servletContext,
-		ContextController contextController) {
+	public ListenerRegistration(ServiceHolder<EventListener> listenerHolder,
+			List<Class<? extends EventListener>> classes, ListenerDTO listenerDTO, ServletContext servletContext,
+			ContextController contextController) {
 
 		super(listenerHolder.get(), listenerDTO);
 		this.listenerHolder = listenerHolder;
@@ -51,9 +50,8 @@ public class ListenerRegistration extends Registration<EventListener, ListenerDT
 
 		createContextAttributes();
 
-		proxy = (EventListener)Proxy.newProxyInstance(
-			getClass().getClassLoader(), classes.toArray(new Class[0]),
-			new EventListenerInvocationHandler());
+		proxy = (EventListener) Proxy.newProxyInstance(getClass().getClassLoader(), classes.toArray(new Class[0]),
+				new EventListenerInvocationHandler());
 	}
 
 	@Override
@@ -69,12 +67,11 @@ public class ListenerRegistration extends Registration<EventListener, ListenerDT
 
 			super.destroy();
 
-			if (classes.contains(HttpSessionBindingListener.class) ||
-				classes.contains(HttpSessionAttributeListener.class) ||
-				classes.contains(HttpSessionListener.class)) {
+			if (classes.contains(HttpSessionBindingListener.class)
+					|| classes.contains(HttpSessionAttributeListener.class)
+					|| classes.contains(HttpSessionListener.class)) {
 
-				Map<String, HttpSessionAdaptor> activeSessions =
-					contextController.getActiveSessions();
+				Map<String, HttpSessionAdaptor> activeSessions = contextController.getActiveSessions();
 
 				for (HttpSessionAdaptor adaptor : activeSessions.values()) {
 					adaptor.invokeSessionListeners(classes, super.getT());
@@ -82,14 +79,11 @@ public class ListenerRegistration extends Registration<EventListener, ListenerDT
 			}
 
 			if (classes.contains(ServletContextListener.class)) {
-				ServletContextListener servletContextListener =
-					(ServletContextListener)super.getT();
+				ServletContextListener servletContextListener = (ServletContextListener) super.getT();
 
-				servletContextListener.contextDestroyed(
-					new ServletContextEvent(servletContext));
+				servletContextListener.contextDestroyed(new ServletContextEvent(servletContext));
 			}
-		}
-		finally {
+		} finally {
 			destroyContextAttributes();
 			Thread.currentThread().setContextClassLoader(original);
 			listenerHolder.release();
@@ -102,7 +96,7 @@ public class ListenerRegistration extends Registration<EventListener, ListenerDT
 			return false;
 		}
 
-		ListenerRegistration listenerRegistration = (ListenerRegistration)obj;
+		ListenerRegistration listenerRegistration = (ListenerRegistration) obj;
 
 		return listenerRegistration.getT().equals(super.getT());
 	}
@@ -143,8 +137,7 @@ public class ListenerRegistration extends Registration<EventListener, ListenerDT
 		}
 
 		@Override
-		public Object invoke(Object theProxy, Method method, Object[] args)
-			throws Throwable {
+		public Object invoke(Object theProxy, Method method, Object[] args) throws Throwable {
 
 			Thread thread = Thread.currentThread();
 			ClassLoader original = thread.getContextClassLoader();
@@ -156,8 +149,7 @@ public class ListenerRegistration extends Registration<EventListener, ListenerDT
 				} catch (InvocationTargetException e) {
 					throw e.getCause();
 				}
-			}
-			finally {
+			} finally {
 				thread.setContextClassLoader(original);
 			}
 		}

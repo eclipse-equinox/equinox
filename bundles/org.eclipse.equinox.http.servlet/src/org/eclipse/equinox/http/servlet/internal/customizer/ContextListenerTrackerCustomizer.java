@@ -30,18 +30,16 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  * @author Raymond Augé
  */
 public class ContextListenerTrackerCustomizer
-	extends RegistrationServiceTrackerCustomizer<EventListener,  ListenerRegistration> {
+		extends RegistrationServiceTrackerCustomizer<EventListener, ListenerRegistration> {
 
-	public ContextListenerTrackerCustomizer(
-		BundleContext bundleContext, HttpServiceRuntimeImpl httpServiceRuntime,
-		ContextController contextController) {
+	public ContextListenerTrackerCustomizer(BundleContext bundleContext, HttpServiceRuntimeImpl httpServiceRuntime,
+			ContextController contextController) {
 
 		super(bundleContext, httpServiceRuntime, contextController);
 	}
 
 	@Override
-	public AtomicReference<ListenerRegistration> addingService(
-		ServiceReference<EventListener> serviceReference) {
+	public AtomicReference<ListenerRegistration> addingService(ServiceReference<EventListener> serviceReference) {
 
 		AtomicReference<ListenerRegistration> result = new AtomicReference<>();
 		if (!httpServiceRuntime.matches(serviceReference)) {
@@ -53,11 +51,11 @@ public class ContextListenerTrackerCustomizer
 
 			if (!contextController.matches(serviceReference)) {
 				// Only the default context will perform the "does anyone match" checks.
-				if (httpServiceRuntime.isDefaultContext(contextController) &&
-					!httpServiceRuntime.matchesAnyContext(serviceReference)) {
+				if (httpServiceRuntime.isDefaultContext(contextController)
+						&& !httpServiceRuntime.matchesAnyContext(serviceReference)) {
 
-					throw new HttpWhiteboardFailureException(
-						"Doesn't match any contexts. " + serviceReference, DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING); //$NON-NLS-1$
+					throw new HttpWhiteboardFailureException("Doesn't match any contexts. " + serviceReference, //$NON-NLS-1$
+							DTOConstants.FAILURE_REASON_NO_SERVLET_CONTEXT_MATCHING);
 				}
 
 				return result;
@@ -67,40 +65,36 @@ public class ContextListenerTrackerCustomizer
 
 			Object listenerObj = serviceReference.getProperty(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER);
 
-			if (!(listenerObj instanceof Boolean) &&
-				!"true".equalsIgnoreCase(String.valueOf(listenerObj)) && //$NON-NLS-1$
-				!"false".equalsIgnoreCase(String.valueOf(listenerObj)) && //$NON-NLS-1$
-				!"1".equalsIgnoreCase(String.valueOf(listenerObj)) && //$NON-NLS-1$
-				!"0".equalsIgnoreCase(String.valueOf(listenerObj)) && //$NON-NLS-1$
-				!"yes".equalsIgnoreCase(String.valueOf(listenerObj)) && //$NON-NLS-1$
-				!"no".equalsIgnoreCase(String.valueOf(listenerObj)) //$NON-NLS-1$
-				) {
+			if (!(listenerObj instanceof Boolean) && !"true".equalsIgnoreCase(String.valueOf(listenerObj)) && //$NON-NLS-1$
+					!"false".equalsIgnoreCase(String.valueOf(listenerObj)) && //$NON-NLS-1$
+					!"1".equalsIgnoreCase(String.valueOf(listenerObj)) && //$NON-NLS-1$
+					!"0".equalsIgnoreCase(String.valueOf(listenerObj)) && //$NON-NLS-1$
+					!"yes".equalsIgnoreCase(String.valueOf(listenerObj)) && //$NON-NLS-1$
+					!"no".equalsIgnoreCase(String.valueOf(listenerObj)) //$NON-NLS-1$
+			) {
 				throw new HttpWhiteboardFailureException(
-					HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER + "=" + listenerObj + " is not a valid option. Ignoring!", //$NON-NLS-1$ //$NON-NLS-2$
-					DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
+						HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER + "=" + listenerObj //$NON-NLS-1$
+								+ " is not a valid option. Ignoring!", //$NON-NLS-1$
+						DTOConstants.FAILURE_REASON_VALIDATION_FAILED);
 			}
 
-			if (Boolean.FALSE.equals(listenerObj) ||
-				"false".equalsIgnoreCase(String.valueOf(listenerObj)) ||  //$NON-NLS-1$
-				"0".equalsIgnoreCase(String.valueOf(listenerObj)) ||  //$NON-NLS-1$
-				"no".equalsIgnoreCase(String.valueOf(listenerObj))) { //$NON-NLS-1$
+			if (Boolean.FALSE.equals(listenerObj) || "false".equalsIgnoreCase(String.valueOf(listenerObj)) || //$NON-NLS-1$
+					"0".equalsIgnoreCase(String.valueOf(listenerObj)) || //$NON-NLS-1$
+					"no".equalsIgnoreCase(String.valueOf(listenerObj))) { //$NON-NLS-1$
 				// Asks to be ignored.
 				return result;
 			}
 
 			result.set(contextController.addListenerRegistration(serviceReference));
-		}
-		catch (HttpWhiteboardFailureException hwfe) {
+		} catch (HttpWhiteboardFailureException hwfe) {
 			httpServiceRuntime.debug(hwfe.getMessage(), hwfe);
 
 			recordFailed(serviceReference, hwfe.getFailureReason());
-		}
-		catch (Throwable t) {
+		} catch (Throwable t) {
 			httpServiceRuntime.error(t.getMessage(), t);
 
 			recordFailed(serviceReference, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
-		}
-		finally {
+		} finally {
 			httpServiceRuntime.incrementServiceChangecount();
 		}
 
@@ -112,16 +106,15 @@ public class ContextListenerTrackerCustomizer
 		contextController.getHttpServiceRuntime().removeFailedListenerDTO(serviceReference);
 	}
 
-	private void recordFailed(
-		ServiceReference<EventListener> serviceReference, int failureReason) {
+	private void recordFailed(ServiceReference<EventListener> serviceReference, int failureReason) {
 
 		FailedListenerDTO failedListenerDTO = new FailedListenerDTO();
 
 		failedListenerDTO.failureReason = failureReason;
-		failedListenerDTO.serviceId = (Long)serviceReference.getProperty(Constants.SERVICE_ID);
+		failedListenerDTO.serviceId = (Long) serviceReference.getProperty(Constants.SERVICE_ID);
 		failedListenerDTO.servletContextId = contextController.getServiceId();
-		failedListenerDTO.types = StringPlus.from(
-			serviceReference.getProperty(Constants.OBJECTCLASS)).toArray(new String[0]);
+		failedListenerDTO.types = StringPlus.from(serviceReference.getProperty(Constants.OBJECTCLASS))
+				.toArray(new String[0]);
 
 		contextController.getHttpServiceRuntime().recordFailedListenerDTO(serviceReference, failedListenerDTO);
 	}

@@ -32,15 +32,16 @@ public final class ServiceHolder<S> implements Comparable<ServiceHolder<?>> {
 		this.serviceObjects = serviceObjects;
 		this.bundle = serviceObjects.getServiceReference().getBundle();
 		this.service = serviceObjects.getService();
-		this.legacyTCCL = (ClassLoader)serviceObjects.getServiceReference().getProperty(Const.EQUINOX_LEGACY_TCCL_PROP);
-		Long serviceIdProp = (Long)serviceObjects.getServiceReference().getProperty(Constants.SERVICE_ID);
+		this.legacyTCCL = (ClassLoader) serviceObjects.getServiceReference()
+				.getProperty(Const.EQUINOX_LEGACY_TCCL_PROP);
+		Long serviceIdProp = (Long) serviceObjects.getServiceReference().getProperty(Constants.SERVICE_ID);
 		if (legacyTCCL != null) {
 			// this is a legacy registration; use a negative id for the DTO
 			serviceIdProp = -serviceIdProp;
 		}
 		this.serviceId = serviceIdProp;
 		Object rankProp = serviceObjects.getServiceReference().getProperty(Constants.SERVICE_RANKING);
-		this.serviceRanking = !Integer.class.isInstance(rankProp) ? 0 : ((Integer)rankProp).intValue();
+		this.serviceRanking = !Integer.class.isInstance(rankProp) ? 0 : ((Integer) rankProp).intValue();
 	}
 
 	public ServiceHolder(S service, Bundle bundle, long serviceId, int serviceRanking, ClassLoader legacyTCCL) {
@@ -76,8 +77,7 @@ public final class ServiceHolder<S> implements Comparable<ServiceHolder<?>> {
 				// this can happen if the whiteboard bundle is in the process of stopping
 				// and the framework is in the middle of auto-unregistering any services
 				// the bundle forgot to unregister on stop
-			}
-			finally {
+			} finally {
 				released = true;
 			}
 		}

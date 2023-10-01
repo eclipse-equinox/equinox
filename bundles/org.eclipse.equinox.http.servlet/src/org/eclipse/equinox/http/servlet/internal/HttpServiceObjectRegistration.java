@@ -24,9 +24,9 @@ public class HttpServiceObjectRegistration {
 	public final ServiceRegistration<?> registration;
 	public final HttpContextHolder httpContextHolder;
 	public final Bundle bundle;
-	public HttpServiceObjectRegistration(
-		Object serviceKey, ServiceRegistration<?> registration,
-		HttpContextHolder httpContextHolder, Bundle bundle) {
+
+	public HttpServiceObjectRegistration(Object serviceKey, ServiceRegistration<?> registration,
+			HttpContextHolder httpContextHolder, Bundle bundle) {
 		this.serviceKey = serviceKey;
 		this.registration = registration;
 		this.httpContextHolder = httpContextHolder;

@@ -25,16 +25,13 @@ public class ServletConfigImpl implements ServletConfig {
 	private final ServletContext servletContext;
 	private final String servletName;
 
-	public ServletConfigImpl(
-		String servletName, Map<String, String> initparams,
-		ServletContext servletContext) {
+	public ServletConfigImpl(String servletName, Map<String, String> initparams, ServletContext servletContext) {
 
 		this.servletName = servletName;
 
 		if (initparams != null) {
 			this.initparams = initparams;
-		}
-		else {
+		} else {
 			this.initparams = Collections.emptyMap();
 		}
 

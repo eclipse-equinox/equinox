@@ -35,11 +35,10 @@ public class EventListeners {
 			return Collections.emptyList();
 		}
 
-		return new ListenerList<>(list) ;
+		return new ListenerList<>(list);
 	}
 
-	public <E extends EventListener> void put(
-		Class<E> clazz, ListenerRegistration listenerRegistration) {
+	public <E extends EventListener> void put(Class<E> clazz, ListenerRegistration listenerRegistration) {
 
 		if (clazz == null) {
 			throw new NullPointerException("clazz can't be null"); //$NON-NLS-1$
@@ -48,8 +47,7 @@ public class EventListeners {
 		List<ListenerRegistration> list = map.get(clazz);
 
 		if (list == null) {
-			final List<ListenerRegistration> newList =
-				new CopyOnWriteArrayList<>();
+			final List<ListenerRegistration> newList = new CopyOnWriteArrayList<>();
 
 			list = map.putIfAbsent(clazz, newList);
 
@@ -61,17 +59,14 @@ public class EventListeners {
 		list.add(listenerRegistration);
 	}
 
-	public void put(
-		List<Class<? extends EventListener>> classes,
-		ListenerRegistration listenerRegistration) {
+	public void put(List<Class<? extends EventListener>> classes, ListenerRegistration listenerRegistration) {
 
 		for (Class<? extends EventListener> clazz : classes) {
 			put(clazz, listenerRegistration);
 		}
 	}
 
-	public <E extends EventListener> void remove(
-		Class<E> clazz, ListenerRegistration listenerRegistration) {
+	public <E extends EventListener> void remove(Class<E> clazz, ListenerRegistration listenerRegistration) {
 
 		if (clazz == null) {
 			throw new NullPointerException("clazz can't be null"); //$NON-NLS-1$
@@ -86,17 +81,14 @@ public class EventListeners {
 		list.remove(listenerRegistration);
 	}
 
-	public void remove(
-		List<Class<? extends EventListener>> classes,
-		ListenerRegistration listenerRegistration) {
+	public void remove(List<Class<? extends EventListener>> classes, ListenerRegistration listenerRegistration) {
 
 		for (Class<? extends EventListener> clazz : classes) {
 			remove(clazz, listenerRegistration);
 		}
 	}
 
-	private ConcurrentMap<Class<? extends EventListener>, List<ListenerRegistration>> map =
-		new ConcurrentHashMap<>();
+	private ConcurrentMap<Class<? extends EventListener>, List<ListenerRegistration>> map = new ConcurrentHashMap<>();
 
 	class ListenerList<R extends EventListener> extends AbstractList<R> {
 
@@ -107,7 +99,7 @@ public class EventListeners {
 		@Override
 		@SuppressWarnings("unchecked")
 		public R get(int index) {
-			return (R)list.get(index).getT();
+			return (R) list.get(index).getT();
 		}
 
 		@Override

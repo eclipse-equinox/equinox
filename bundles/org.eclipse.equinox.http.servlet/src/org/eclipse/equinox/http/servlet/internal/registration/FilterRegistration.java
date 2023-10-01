@@ -31,9 +31,8 @@ import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.runtime.dto.FilterDTO;
 
 //This class wraps the filter object registered in the HttpService.registerFilter call, to manage the context classloader when handleRequests are being asked.
-public class FilterRegistration
-	extends MatchableRegistration<Filter, FilterDTO>
-	implements Comparable<FilterRegistration> {
+public class FilterRegistration extends MatchableRegistration<Filter, FilterDTO>
+		implements Comparable<FilterRegistration> {
 
 	private final ServiceHolder<Filter> filterHolder;
 	private final ClassLoader classLoader;
@@ -42,9 +41,8 @@ public class FilterRegistration
 	private final boolean initDestoyWithContextController;
 	private final Pattern[] compiledRegexs;
 
-	public FilterRegistration(
-		ServiceHolder<Filter> filterHolder, FilterDTO filterDTO, int priority,
-		ContextController contextController) {
+	public FilterRegistration(ServiceHolder<Filter> filterHolder, FilterDTO filterDTO, int priority,
+			ContextController contextController) {
 
 		super(filterHolder.get(), filterDTO);
 		this.filterHolder = filterHolder;
@@ -57,16 +55,16 @@ public class FilterRegistration
 		} else {
 			classLoader = filterHolder.getBundle().adapt(BundleWiring.class).getClassLoader();
 		}
-		String legacyContextFilter = (String) filterHolder.getServiceReference().getProperty(Const.EQUINOX_LEGACY_CONTEXT_SELECT);
+		String legacyContextFilter = (String) filterHolder.getServiceReference()
+				.getProperty(Const.EQUINOX_LEGACY_CONTEXT_SELECT);
 		if (legacyContextFilter != null) {
-			// This is a legacy Filter registration.  
+			// This is a legacy Filter registration.
 			// This filter tells us the real context controller,
 			// backed by an HttpContext that should be used to init/destroy this Filter
 			org.osgi.framework.Filter f = null;
 			try {
 				f = FrameworkUtil.createFilter(legacyContextFilter);
-			}
-			catch (InvalidSyntaxException e) {
+			} catch (InvalidSyntaxException e) {
 				// nothing
 			}
 			initDestoyWithContextController = f == null || contextController.matches(f);
@@ -81,8 +79,10 @@ public class FilterRegistration
 		if (priorityDifference != 0)
 			return -priorityDifference;
 
-		// Note that we use abs here because the DTO service ID may have been negated for legacy filters.
-		// We always compare with the positive id values and we know the positive values are unique.
+		// Note that we use abs here because the DTO service ID may have been negated
+		// for legacy filters.
+		// We always compare with the positive id values and we know the positive values
+		// are unique.
 		long thisId = Math.abs(getD().serviceId);
 		long otherId = Math.abs(otherFilterRegistration.getD().serviceId);
 		return (thisId < otherId) ? -1 : ((thisId == otherId) ? 0 : 1);
@@ -101,8 +101,7 @@ public class FilterRegistration
 			contextController.ungetServletContextHelper(filterHolder.getBundle());
 			super.destroy();
 			getT().destroy();
-		}
-		finally {
+		} finally {
 			destroyContextAttributes();
 			Thread.currentThread().setContextClassLoader(original);
 			filterHolder.release();
@@ -110,22 +109,18 @@ public class FilterRegistration
 	}
 
 	public boolean appliesTo(FilterChainImpl filterChainImpl) {
-		return (Arrays.binarySearch(
-			getD().dispatcher, filterChainImpl.getDispatcherType().name()) >= 0);
+		return (Arrays.binarySearch(getD().dispatcher, filterChainImpl.getDispatcherType().name()) >= 0);
 	}
 
-	//Delegate the handling of the request to the actual filter
-	public void doFilter(
-			HttpServletRequest request, HttpServletResponse response,
-			FilterChain chain)
-		throws IOException, ServletException {
+	// Delegate the handling of the request to the actual filter
+	public void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+			throws IOException, ServletException {
 
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(classLoader);
 			getT().doFilter(request, response, chain);
-		}
-		finally {
+		} finally {
 			Thread.currentThread().setContextClassLoader(original);
 		}
 	}
@@ -136,7 +131,7 @@ public class FilterRegistration
 			return false;
 		}
 
-		FilterRegistration filterRegistration = (FilterRegistration)obj;
+		FilterRegistration filterRegistration = (FilterRegistration) obj;
 
 		return getT().equals(filterRegistration.getT());
 	}
@@ -146,7 +141,7 @@ public class FilterRegistration
 		return Long.valueOf(getD().serviceId).hashCode();
 	}
 
-	//Delegate the init call to the actual filter
+	// Delegate the init call to the actual filter
 	public void init(FilterConfig filterConfig) throws ServletException {
 		if (!initDestoyWithContextController) {
 			return;
@@ -159,8 +154,7 @@ public class FilterRegistration
 			createContextAttributes();
 			getT().init(filterConfig);
 			initialized = true;
-		}
-		finally {
+		} finally {
 			if (!initialized) {
 				destroyContextAttributes();
 			}
@@ -168,8 +162,7 @@ public class FilterRegistration
 		}
 	}
 
-	public String match(
-		String name, String requestURI, String extension, Match match) {
+	public String match(String name, String requestURI, String extension, Match match) {
 		if ((name != null) && (getD().servletNames != null)) {
 			for (String servletName : getD().servletNames) {
 				if (servletName.equals(name)) {
@@ -198,8 +191,7 @@ public class FilterRegistration
 	}
 
 	@Override
-	public String match(
-		String name, String servletPath, String pathInfo, String extension, Match match) {
+	public String match(String name, String servletPath, String pathInfo, String extension, Match match) {
 		// TODO need to rework match for filters to remove this method
 		throw new UnsupportedOperationException("Should not be calling this method on FilterRegistration"); //$NON-NLS-1$
 	}
@@ -228,8 +220,7 @@ public class FilterRegistration
 		return pattern.equals(path);
 	}
 
-	protected boolean doPatternMatch(String pattern, String path, String extension)
-		throws IllegalArgumentException {
+	protected boolean doPatternMatch(String pattern, String path, String extension) throws IllegalArgumentException {
 
 		if (pattern.indexOf(Const.SLASH_STAR_DOT) == 0) {
 			pattern = pattern.substring(1);
@@ -243,8 +234,7 @@ public class FilterRegistration
 
 		if (pattern.isEmpty() && Const.SLASH.equals(path)) {
 			return true;
-		}
-		else if (!pattern.isEmpty()) {
+		} else if (!pattern.isEmpty()) {
 			// first try prefix path matching; taking into account wild cards if necessary
 			if (pattern.charAt(0) == '/') {
 				if (isPathWildcardMatch(pattern, path)) {

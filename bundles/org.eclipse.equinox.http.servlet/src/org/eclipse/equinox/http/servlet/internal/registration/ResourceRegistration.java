@@ -20,15 +20,14 @@ import org.eclipse.equinox.http.servlet.internal.context.ServiceHolder;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.runtime.dto.ResourceDTO;
+
 /**
  * @author Raymond Augé
  */
 public class ResourceRegistration extends EndpointRegistration<ResourceDTO> {
 
-	public ResourceRegistration(
-		ServiceReference<?> serviceReference, ServiceHolder<Servlet> servletHolder, ResourceDTO resourceDTO,
-		ServletContextHelper servletContextHelper,
-		ContextController contextController) {
+	public ResourceRegistration(ServiceReference<?> serviceReference, ServiceHolder<Servlet> servletHolder,
+			ResourceDTO resourceDTO, ServletContextHelper servletContextHelper, ContextController contextController) {
 
 		super(servletHolder, resourceDTO, servletContextHelper, contextController);
 

@@ -21,12 +21,9 @@ import org.osgi.service.http.runtime.HttpServiceRuntime;
 
 public class HttpTuple {
 
-	public HttpTuple(
-		ProxyServlet proxyServlet,
-		HttpServiceFactory httpServiceFactory,
-		ServiceRegistration<?> hsfRegistration,
-		HttpServiceRuntimeImpl httpServiceRuntime,
-		ServiceRegistration<HttpServiceRuntime> hsrRegistration) {
+	public HttpTuple(ProxyServlet proxyServlet, HttpServiceFactory httpServiceFactory,
+			ServiceRegistration<?> hsfRegistration, HttpServiceRuntimeImpl httpServiceRuntime,
+			ServiceRegistration<HttpServiceRuntime> hsrRegistration) {
 
 		this.proxyServlet = proxyServlet;
 		this.httpServiceFactory = httpServiceFactory;

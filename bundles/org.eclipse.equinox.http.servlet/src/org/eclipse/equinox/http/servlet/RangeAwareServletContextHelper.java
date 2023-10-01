@@ -19,8 +19,9 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.http.context.ServletContextHelper;
 
 /**
- * A custom servlet context helper type providing support for predicting the need
- * for ranged content responses based on the content type and the user agent.
+ * A custom servlet context helper type providing support for predicting the
+ * need for ranged content responses based on the content type and the user
+ * agent.
  *
  * @since 1.5
  */
@@ -43,7 +44,7 @@ public abstract class RangeAwareServletContextHelper extends ServletContextHelpe
 	 * for a known ranged content type.
 	 *
 	 * @param contentType the content type of the request
-	 * @param userAgent the value obtained from the "User-Agent" header
+	 * @param userAgent   the value obtained from the "User-Agent" header
 	 */
 	public boolean rangeableContentType(String contentType, String userAgent) {
 		return false;

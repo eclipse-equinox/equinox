@@ -30,17 +30,15 @@ public class HttpServiceFactory implements ServiceFactory<HttpService> {
 		this.httpServiceRuntime = httpServiceRuntime;
 	}
 
-	public HttpService getService(
-		Bundle bundle, ServiceRegistration<HttpService> serviceRegistration) {
+	public HttpService getService(Bundle bundle, ServiceRegistration<HttpService> serviceRegistration) {
 
 		return new HttpServiceImpl(bundle, httpServiceRuntime);
 	}
 
-	public void ungetService(
-		Bundle bundle, ServiceRegistration<HttpService> serviceRegistration,
-		HttpService httpService) {
+	public void ungetService(Bundle bundle, ServiceRegistration<HttpService> serviceRegistration,
+			HttpService httpService) {
 
-		HttpServiceImpl httpServiceImpl = (HttpServiceImpl)httpService;
+		HttpServiceImpl httpServiceImpl = (HttpServiceImpl) httpService;
 
 		httpServiceImpl.shutdown();
 	}

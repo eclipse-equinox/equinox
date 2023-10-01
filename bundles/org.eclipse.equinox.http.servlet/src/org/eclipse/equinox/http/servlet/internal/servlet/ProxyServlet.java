@@ -32,10 +32,11 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.whiteboard.Preprocessor;
 
 /**
- * The ProxyServlet is the private side of a Servlet that when registered (and init() called) in a servlet container
- * will in-turn register and provide an OSGi Http Service implementation.
- * This class is not meant for extending or even using directly and is purely meant for registering
- * in a servlet container.
+ * The ProxyServlet is the private side of a Servlet that when registered (and
+ * init() called) in a servlet container will in-turn register and provide an
+ * OSGi Http Service implementation. This class is not meant for extending or
+ * even using directly and is purely meant for registering in a servlet
+ * container.
  */
 public class ProxyServlet extends HttpServlet {
 
@@ -54,8 +55,7 @@ public class ProxyServlet extends HttpServlet {
 		super.destroy();
 	}
 
-	public void setHttpServiceRuntimeImpl(
-		HttpServiceRuntimeImpl httpServiceRuntimeImpl) {
+	public void setHttpServiceRuntimeImpl(HttpServiceRuntimeImpl httpServiceRuntimeImpl) {
 
 		this.httpServiceRuntimeImpl = httpServiceRuntimeImpl;
 	}
@@ -73,15 +73,15 @@ public class ProxyServlet extends HttpServlet {
 	 */
 	private String getNotDecodedAlias(HttpServletRequest request) {
 		String pathInfo = HttpServletRequestWrapperImpl.getDispatchPathInfo(request);
-		if(pathInfo == null) {
+		if (pathInfo == null) {
 			return null;
 		}
 		String requestUri = HttpServletRequestWrapperImpl.getDispatchRequestURI(request);
 		String contextPath = request.getContextPath();
 		String servletPath = request.getServletPath();
 		if (request.getDispatcherType() == DispatcherType.INCLUDE) {
-			contextPath = (String)request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH);
-			servletPath = (String)request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
+			contextPath = (String) request.getAttribute(RequestDispatcher.INCLUDE_CONTEXT_PATH);
+			servletPath = (String) request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
 		}
 		return requestUri.substring(contextPath.length() + servletPath.length());
 	}
@@ -89,9 +89,8 @@ public class ProxyServlet extends HttpServlet {
 	/**
 	 * @see HttpServlet#service(ServletRequest, ServletResponse)
 	 */
-	protected void service(
-			HttpServletRequest request, HttpServletResponse response)
-		throws ServletException, IOException {
+	protected void service(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 
 		checkRuntime();
 
@@ -104,17 +103,15 @@ public class ProxyServlet extends HttpServlet {
 		preprocess(request, response, alias, request.getDispatcherType());
 	}
 
-	public void preprocess(
-			HttpServletRequest request,
-			HttpServletResponse response, String alias, DispatcherType dispatcherType)
-		throws ServletException, IOException {
+	public void preprocess(HttpServletRequest request, HttpServletResponse response, String alias,
+			DispatcherType dispatcherType) throws ServletException, IOException {
 
-		Map<ServiceReference<Preprocessor>, PreprocessorRegistration> registrations = httpServiceRuntimeImpl.getPreprocessorRegistrations();
+		Map<ServiceReference<Preprocessor>, PreprocessorRegistration> registrations = httpServiceRuntimeImpl
+				.getPreprocessorRegistrations();
 
 		if (registrations.isEmpty()) {
 			dispatch(request, response, alias, dispatcherType);
-		}
-		else {
+		} else {
 			List<PreprocessorRegistration> preprocessors = new CopyOnWriteArrayList<>();
 
 			for (Entry<ServiceReference<Preprocessor>, PreprocessorRegistration> entry : registrations.entrySet()) {
@@ -127,8 +124,7 @@ public class ProxyServlet extends HttpServlet {
 				FilterChain chain = new PreprocessorChainImpl(preprocessors, alias, dispatcherType, this);
 
 				chain.doFilter(request, response);
-			}
-			finally {
+			} finally {
 				for (PreprocessorRegistration registration : preprocessors) {
 					registration.removeReference();
 				}
@@ -136,10 +132,8 @@ public class ProxyServlet extends HttpServlet {
 		}
 	}
 
-	public void dispatch(
-			HttpServletRequest request,
-			HttpServletResponse response, String alias, DispatcherType dispatcherType)
-		throws ServletException, IOException {
+	public void dispatch(HttpServletRequest request, HttpServletResponse response, String alias,
+			DispatcherType dispatcherType) throws ServletException, IOException {
 
 		DispatchTargets dispatchTargets = httpServiceRuntimeImpl.getDispatchTargets(alias, null);
 
@@ -149,14 +143,12 @@ public class ProxyServlet extends HttpServlet {
 			return;
 		}
 
-		response.sendError(
-			HttpServletResponse.SC_NOT_FOUND, "ProxyServlet: " + alias); //$NON-NLS-1$
+		response.sendError(HttpServletResponse.SC_NOT_FOUND, "ProxyServlet: " + alias); //$NON-NLS-1$
 	}
 
 	private void checkRuntime() {
 		if (httpServiceRuntimeImpl == null) {
-			throw new IllegalStateException(
-				"Proxy servlet not properly initialized. httpServiceRuntimeImpl is null"); //$NON-NLS-1$
+			throw new IllegalStateException("Proxy servlet not properly initialized. httpServiceRuntimeImpl is null"); //$NON-NLS-1$
 		}
 	}
 

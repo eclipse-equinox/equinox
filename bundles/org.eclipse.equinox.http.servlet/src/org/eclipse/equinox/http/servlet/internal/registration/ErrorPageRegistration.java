@@ -28,10 +28,8 @@ import org.osgi.service.http.context.ServletContextHelper;
  */
 public class ErrorPageRegistration extends EndpointRegistration<ExtendedErrorPageDTO> {
 
-	public ErrorPageRegistration(
-		ServiceHolder<Servlet> servletHolder, ExtendedErrorPageDTO errorPageDTO,
-		ServletContextHelper servletContextHelper,
-		ContextController contextController) {
+	public ErrorPageRegistration(ServiceHolder<Servlet> servletHolder, ExtendedErrorPageDTO errorPageDTO,
+			ServletContextHelper servletContextHelper, ContextController contextController) {
 
 		super(servletHolder, errorPageDTO, servletContextHelper, contextController);
 	}
@@ -57,9 +55,7 @@ public class ErrorPageRegistration extends EndpointRegistration<ExtendedErrorPag
 	}
 
 	@Override
-	public String match(
-		String name, String servletPath, String pathInfo, String extension,
-		Match match) {
+	public String match(String name, String servletPath, String pathInfo, String extension, Match match) {
 
 		if (match != Match.ERROR) {
 			return null;

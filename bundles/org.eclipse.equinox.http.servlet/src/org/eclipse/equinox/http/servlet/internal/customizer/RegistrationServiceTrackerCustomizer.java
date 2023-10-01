@@ -27,10 +27,10 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * @author Raymond Augé
  */
 public abstract class RegistrationServiceTrackerCustomizer<S, T extends Registration<?, ? extends DTO>>
-	implements ServiceTrackerCustomizer<S, AtomicReference<T>> {
+		implements ServiceTrackerCustomizer<S, AtomicReference<T>> {
 
-	public RegistrationServiceTrackerCustomizer(
-		BundleContext bundleContext, HttpServiceRuntimeImpl httpServiceRuntime, ContextController contextController) {
+	public RegistrationServiceTrackerCustomizer(BundleContext bundleContext, HttpServiceRuntimeImpl httpServiceRuntime,
+			ContextController contextController) {
 
 		this.bundleContext = bundleContext;
 		this.httpServiceRuntime = httpServiceRuntime;
@@ -38,20 +38,15 @@ public abstract class RegistrationServiceTrackerCustomizer<S, T extends Registra
 	}
 
 	@Override
-	public void modifiedService(
-		ServiceReference<S> serviceReference,
-		AtomicReference<T> filterReference) {
+	public void modifiedService(ServiceReference<S> serviceReference, AtomicReference<T> filterReference) {
 
 		removedService(serviceReference, filterReference);
 		AtomicReference<T> added = addingService(serviceReference);
 		filterReference.set(added.get());
 	}
 
-
 	@Override
-	public void removedService(
-		ServiceReference<S> serviceReference,
-		AtomicReference<T> filterReference) {
+	public void removedService(ServiceReference<S> serviceReference, AtomicReference<T> filterReference) {
 
 		try {
 			T registration = filterReference.get();
@@ -60,8 +55,7 @@ public abstract class RegistrationServiceTrackerCustomizer<S, T extends Registra
 			}
 
 			removeFailed(serviceReference);
-		}
-		finally {
+		} finally {
 			httpServiceRuntime.incrementServiceChangecount();
 		}
 	}

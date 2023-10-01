@@ -19,7 +19,7 @@ import java.util.*;
 /**
  * @author Raymond Augé
  */
-public class UMDictionaryMap <K, V> implements Map<K, V> {
+public class UMDictionaryMap<K, V> implements Map<K, V> {
 
 	public UMDictionaryMap(Dictionary<K, V> dictionary) {
 		Map<K, V> map = new HashMap<>();
