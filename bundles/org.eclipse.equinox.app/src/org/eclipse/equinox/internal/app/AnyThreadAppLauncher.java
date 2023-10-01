@@ -29,7 +29,8 @@ public class AnyThreadAppLauncher implements Runnable {
 			// pasing null will cause EclipseAppHandle to get the correct arguments
 			appHandle.run(null);
 		} catch (Throwable e) {
-			Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.ERROR, 0, e.getMessage(), 0, e, null));
+			Activator.log(
+					new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.ERROR, 0, e.getMessage(), 0, e, null));
 		}
 	}
 

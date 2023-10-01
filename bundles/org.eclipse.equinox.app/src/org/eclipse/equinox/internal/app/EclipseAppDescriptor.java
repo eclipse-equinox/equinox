@@ -49,9 +49,10 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	private final int cardinality;
 	private final String name;
 	private final URL iconURL;
-	private final boolean[] registrationLock = new boolean[] {true};
+	private final boolean[] registrationLock = new boolean[] { true };
 
-	protected EclipseAppDescriptor(Bundle contributor, String pid, String name, String iconPath, int flags, int cardinality, EclipseAppContainer appContainer) {
+	protected EclipseAppDescriptor(Bundle contributor, String pid, String name, String iconPath, int flags,
+			int cardinality, EclipseAppContainer appContainer) {
 		super(pid);
 		this.name = name;
 		this.contributor = contributor;
@@ -190,12 +191,15 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	}
 
 	/*
-	 * Returns the appHandle.  If it does not exist then one is created.
+	 * Returns the appHandle. If it does not exist then one is created.
 	 */
 	private EclipseAppHandle createAppHandle(Map<String, Object> arguments) throws ApplicationException {
 		EclipseAppHandle newAppHandle = new EclipseAppHandle(getInstanceID(), arguments, this);
 		appContainer.lock(newAppHandle);
-		ServiceRegistration appHandleReg = (ServiceRegistration) AccessController.doPrivileged(appContainer.getRegServiceAction(new String[] {ApplicationHandle.class.getName(), IApplicationContext.class.getName()}, newAppHandle, newAppHandle.getServiceProperties()));
+		ServiceRegistration appHandleReg = (ServiceRegistration) AccessController
+				.doPrivileged(appContainer.getRegServiceAction(
+						new String[] { ApplicationHandle.class.getName(), IApplicationContext.class.getName() },
+						newAppHandle, newAppHandle.getServiceProperties()));
 		newAppHandle.setServiceRegistration(appHandleReg);
 		return newAppHandle;
 	}
@@ -208,7 +212,10 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	public boolean matchDNChain(String pattern) {
 		if (contributor == null)
 			return false;
-		return BundleSignerCondition.getCondition(contributor, new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {pattern})).isSatisfied();
+		return BundleSignerCondition
+				.getCondition(contributor,
+						new ConditionInfo(BundleSignerCondition.class.getName(), new String[] { pattern }))
+				.isSatisfied();
 	}
 
 	@Override
@@ -235,7 +242,8 @@ public class EclipseAppDescriptor extends ApplicationDescriptor {
 	}
 
 	int getCardinalityType() {
-		return flags & (FLAG_CARD_SINGLETON_GLOGAL | FLAG_CARD_SINGLETON_SCOPED | FLAG_CARD_LIMITED | FLAG_CARD_UNLIMITED);
+		return flags
+				& (FLAG_CARD_SINGLETON_GLOGAL | FLAG_CARD_SINGLETON_SCOPED | FLAG_CARD_LIMITED | FLAG_CARD_UNLIMITED);
 	}
 
 	int getCardinality() {

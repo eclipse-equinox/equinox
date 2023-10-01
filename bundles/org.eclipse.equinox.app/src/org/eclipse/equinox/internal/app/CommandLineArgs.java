@@ -20,7 +20,7 @@ public class CommandLineArgs {
 	private static final String NO_PACKAGE_PREFIXES = "-noPackagePrefixes"; //$NON-NLS-1$
 	private static final String NO_UPDATE = "-noUpdate"; //$NON-NLS-1$
 	private static final String BOOT = "-boot"; //$NON-NLS-1$
-	private static final String CLASSLOADER_PROPERTIES = "-classloaderProperties"; //$NON-NLS-1$	
+	private static final String CLASSLOADER_PROPERTIES = "-classloaderProperties"; //$NON-NLS-1$
 	private static final String PLUGINS = "-plugins"; //$NON-NLS-1$
 	private static final String FIRST_USE = "-firstUse"; //$NON-NLS-1$
 	private static final String NEW_UPDATES = "-newUpdates"; //$NON-NLS-1$
@@ -32,7 +32,7 @@ public class CommandLineArgs {
 	// supported command line args
 	private static final String PRODUCT = "-product"; //$NON-NLS-1$
 	private static final String FEATURE = "-feature"; //$NON-NLS-1$
-	private static final String APPLICATION = "-application"; //$NON-NLS-1$	
+	private static final String APPLICATION = "-application"; //$NON-NLS-1$
 
 	// Command line args as seen by the Eclipse runtime. allArgs does NOT
 	// include args consumed by the underlying framework (e.g., OSGi)
@@ -49,7 +49,7 @@ public class CommandLineArgs {
 			return args;
 		allArgs = args;
 		int[] configArgs = new int[args.length];
-		//need to initialize the first element to something that could not be an index.
+		// need to initialize the first element to something that could not be an index.
 		configArgs[0] = -1;
 		int configArgIndex = 0;
 		for (int i = 0; i < args.length; i++) {
@@ -74,13 +74,13 @@ public class CommandLineArgs {
 			if (args[i].equalsIgnoreCase(BOOT))
 				found = true; // ignored
 			if (args[i].equalsIgnoreCase(KEYRING))
-				found = true; // ignored  
+				found = true; // ignored
 			if (args[i].equalsIgnoreCase(PASSWORD))
 				found = true; // ignored
 			if (args[i].equalsIgnoreCase(PLUGIN_CUSTOMIZATION))
 				found = true; // ignored
 
-			// done checking obsolete for args.  Remember where an arg was found 
+			// done checking obsolete for args. Remember where an arg was found
 			if (found) {
 				configArgs[configArgIndex++] = i;
 				// check if the obsolete arg had a second param
@@ -102,14 +102,14 @@ public class CommandLineArgs {
 				found = true;
 			}
 
-			// look for the application to run.  
+			// look for the application to run.
 			if (args[i - 1].equalsIgnoreCase(APPLICATION)) {
 				application = arg;
 				envInfo.setProperty(EclipseAppContainer.PROP_ECLIPSE_APPLICATION, application);
 				found = true;
 			}
 
-			// done checking for args.  Remember where an arg was found 
+			// done checking for args. Remember where an arg was found
 			if (found) {
 				configArgs[configArgIndex++] = i - 1;
 				configArgs[configArgIndex++] = i;

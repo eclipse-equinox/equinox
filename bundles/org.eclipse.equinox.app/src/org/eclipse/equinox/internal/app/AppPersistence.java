@@ -28,7 +28,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
- * Manages all persistent data for ApplicationDescriptors (lock status, 
+ * Manages all persistent data for ApplicationDescriptors (lock status,
  * scheduled applications etc.)
  */
 public class AppPersistence implements ServiceTrackerCustomizer {
@@ -78,7 +78,7 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 		try {
 			filter = context.createFilter(FILTER_PREFIX + PROP_CONFIG_AREA + "))"); //$NON-NLS-1$
 		} catch (InvalidSyntaxException e) {
-			// ignore this.  It should never happen as we have tested the above format.
+			// ignore this. It should never happen as we have tested the above format.
 		}
 		configTracker = new ServiceTracker(context, filter, new AppPersistence());
 		configTracker.open();
@@ -91,7 +91,9 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 	}
 
 	/**
-	 * Used by {@link ApplicationDescriptor} to determine if an application is locked.
+	 * Used by {@link ApplicationDescriptor} to determine if an application is
+	 * locked.
+	 * 
 	 * @param desc the application descriptor
 	 * @return true if the application is persistently locked.
 	 */
@@ -102,8 +104,10 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 	}
 
 	/**
-	 * Used by {@link ApplicationDescriptor} to determine lock and unlock and application.
-	 * @param desc the application descriptor
+	 * Used by {@link ApplicationDescriptor} to determine lock and unlock and
+	 * application.
+	 * 
+	 * @param desc   the application descriptor
 	 * @param locked the locked flag
 	 */
 	public static void saveLock(ApplicationDescriptor desc, boolean locked) {
@@ -134,7 +138,9 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 	}
 
 	/**
-	 * Used by {@link ScheduledApplication} to persistently schedule an application launch
+	 * Used by {@link ScheduledApplication} to persistently schedule an application
+	 * launch
+	 * 
 	 * @param descriptor
 	 * @param arguments
 	 * @param topic
@@ -142,16 +148,20 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 	 * @param recurring
 	 * @return the scheduled application
 	 * @throws InvalidSyntaxException
-	 * @throws ApplicationException 
+	 * @throws ApplicationException
 	 */
-	public static ScheduledApplication addScheduledApp(ApplicationDescriptor descriptor, String scheduleId, Map<String, Object> arguments, String topic, String eventFilter, boolean recurring) throws InvalidSyntaxException, ApplicationException {
+	public static ScheduledApplication addScheduledApp(ApplicationDescriptor descriptor, String scheduleId,
+			Map<String, Object> arguments, String topic, String eventFilter, boolean recurring)
+			throws InvalidSyntaxException, ApplicationException {
 		if (!scheduling && !checkSchedulingSupport())
-			throw new ApplicationException(ApplicationException.APPLICATION_SCHEDULING_FAILED, "Cannot support scheduling without org.osgi.service.event package"); //$NON-NLS-1$
+			throw new ApplicationException(ApplicationException.APPLICATION_SCHEDULING_FAILED,
+					"Cannot support scheduling without org.osgi.service.event package"); //$NON-NLS-1$
 		// check the event filter for correct syntax
 		context.createFilter(eventFilter);
 		EclipseScheduledApplication result;
 		synchronized (scheduledApps) {
-			result = new EclipseScheduledApplication(context, getNextScheduledID(scheduleId), descriptor.getApplicationId(), arguments, topic, eventFilter, recurring);
+			result = new EclipseScheduledApplication(context, getNextScheduledID(scheduleId),
+					descriptor.getApplicationId(), arguments, topic, eventFilter, recurring);
 			addScheduledApp(result);
 			saveData(FILE_APPSCHEDULED);
 		}
@@ -170,19 +180,21 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 		scheduledApps.put(scheduledApp.getScheduleId(), scheduledApp);
 		Hashtable<String, Object> serviceProps = new Hashtable<>();
 		if (scheduledApp.getTopic() != null)
-			serviceProps.put(EventConstants.EVENT_TOPIC, new String[] {scheduledApp.getTopic()});
+			serviceProps.put(EventConstants.EVENT_TOPIC, new String[] { scheduledApp.getTopic() });
 		if (scheduledApp.getEventFilter() != null)
 			serviceProps.put(EventConstants.EVENT_FILTER, scheduledApp.getEventFilter());
 		serviceProps.put(ScheduledApplication.SCHEDULE_ID, scheduledApp.getScheduleId());
 		serviceProps.put(ScheduledApplication.APPLICATION_PID, scheduledApp.getAppPid());
-		ServiceRegistration sr = context.registerService(new String[] {ScheduledApplication.class.getName(), EVENT_HANDLER}, scheduledApp, serviceProps);
+		ServiceRegistration sr = context.registerService(
+				new String[] { ScheduledApplication.class.getName(), EVENT_HANDLER }, scheduledApp, serviceProps);
 		scheduledApp.setServiceRegistration(sr);
 	}
 
 	private static String getNextScheduledID(String scheduledId) throws ApplicationException {
 		if (scheduledId != null) {
 			if (scheduledApps.get(scheduledId) != null)
-				throw new ApplicationException(ApplicationException.APPLICATION_DUPLICATE_SCHEDULE_ID, "Duplicate scheduled ID: " + scheduledId); //$NON-NLS-1$
+				throw new ApplicationException(ApplicationException.APPLICATION_DUPLICATE_SCHEDULE_ID,
+						"Duplicate scheduled ID: " + scheduledId); //$NON-NLS-1$
 			return scheduledId;
 		}
 		if (nextScheduledID == Integer.MAX_VALUE)
@@ -191,7 +203,8 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 		while (scheduledApps.get(result) != null && nextScheduledID < Integer.MAX_VALUE)
 			result = Integer.toString(nextScheduledID++);
 		if (nextScheduledID == Integer.MAX_VALUE)
-			throw new ApplicationException(ApplicationException.APPLICATION_DUPLICATE_SCHEDULE_ID, "Maximum number of scheduled applications reached"); //$NON-NLS-1$
+			throw new ApplicationException(ApplicationException.APPLICATION_DUPLICATE_SCHEDULE_ID,
+					"Maximum number of scheduled applications reached"); //$NON-NLS-1$
 		return result;
 	}
 
@@ -268,7 +281,8 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 				String eventFilter = readString(in, false);
 				boolean recurring = in.readBoolean();
 				Map args = (Map) in.readObject();
-				EclipseScheduledApplication schedApp = new EclipseScheduledApplication(context, id, appPid, args, topic, eventFilter, recurring);
+				EclipseScheduledApplication schedApp = new EclipseScheduledApplication(context, id, appPid, args, topic,
+						eventFilter, recurring);
 				addScheduledApp(schedApp);
 			}
 		} catch (InvalidSyntaxException | NoClassDefFoundError | ClassNotFoundException e) {
@@ -286,9 +300,10 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 			else if (FILE_APPSCHEDULED.equals(fileName))
 				saveSchedules(data);
 			storageManager.lookup(fileName, true);
-			storageManager.update(new String[] {fileName}, new String[] {data.getName()});
+			storageManager.update(new String[] { fileName }, new String[] { data.getName() });
 		} catch (IOException e) {
-			Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.ERROR, 0, NLS.bind(Messages.persistence_error_saving, fileName), 0, e, null));
+			Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.ERROR, 0,
+					NLS.bind(Messages.persistence_error_saving, fileName), 0, e, null));
 		}
 	}
 
@@ -350,7 +365,8 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 					props.put(ScheduledApplication.MINUTE, Integer.valueOf(minute));
 					Event timerEvent = new Event(ScheduledApplication.TIMER_TOPIC, (Dictionary<String, ?>) props);
 					EclipseScheduledApplication[] apps = null;
-					// poor mans implementation of dispatching events; the spec will not allow us to use event admin to dispatch the virtual timer events; boo!!
+					// poor mans implementation of dispatching events; the spec will not allow us to
+					// use event admin to dispatch the virtual timer events; boo!!
 					synchronized (timerApps) {
 						if (timerApps.size() == 0)
 							continue;
@@ -365,7 +381,8 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 							}
 						} catch (Throwable t) {
 							String message = NLS.bind(Messages.scheduled_app_launch_error, app.getAppPid());
-							Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, t, null));
+							Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message,
+									0, t, null));
 						}
 					}
 				} catch (InterruptedException e) {

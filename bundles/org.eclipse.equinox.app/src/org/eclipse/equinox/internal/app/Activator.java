@@ -32,8 +32,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	public static final String PI_APP = "org.eclipse.equinox.app"; //$NON-NLS-1$
 	public static boolean DEBUG = false;
 	private volatile static BundleContext _context;
-	// PackageAdmin is a system service that never goes away as long 
-	// as the framework is active.  No need to track it!!
+	// PackageAdmin is a system service that never goes away as long
+	// as the framework is active. No need to track it!!
 	private volatile static PackageAdmin _packageAdmin;
 	private volatile static EclipseAppContainer container;
 	// tracks the FrameworkLog service
@@ -45,7 +45,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	@Override
 	public void start(BundleContext bc) {
 		_context = bc;
-		// doing simple get service here because we expect the PackageAdmin service to always be available
+		// doing simple get service here because we expect the PackageAdmin service to
+		// always be available
 		ServiceReference ref = bc.getServiceReference(PackageAdmin.class.getName());
 		if (ref != null)
 			_packageAdmin = (PackageAdmin) bc.getService(ref);
@@ -120,7 +121,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	public Object addingService(ServiceReference reference) {
 		BundleContext context = _context;
 		if (context == null)
-			return null; // really should never happen since we close the tracker before nulling out context
+			return null; // really should never happen since we close the tracker before nulling out
+							// context
 		Object service = null;
 		EclipseAppContainer startContainer = null;
 		synchronized (this) {
@@ -135,7 +137,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 				startContainer = container;
 			}
 		}
-		// must not start the container while holding a lock because this will register additional services
+		// must not start the container while holding a lock because this will register
+		// additional services
 		if (startContainer != null) {
 			startContainer.start();
 			return service;
@@ -168,7 +171,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 			currentContainer.stop();
 	}
 
-	// helper used to protect callers from permission checks when opening service trackers
+	// helper used to protect callers from permission checks when opening service
+	// trackers
 	static void openTracker(final ServiceTracker tracker, final boolean allServices) {
 		if (System.getSecurityManager() == null)
 			tracker.open(allServices);
@@ -224,7 +228,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		Bundle[] bundles = packageAdmin.getBundles(contributor.getName(), null);
 		if (bundles == null)
 			return null;
-		//Return the first bundle that is not installed or uninstalled
+		// Return the first bundle that is not installed or uninstalled
 		for (Bundle bundle : bundles) {
 			if ((bundle.getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED)) == 0) {
 				return bundle;
