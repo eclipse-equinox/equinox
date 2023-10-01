@@ -28,5 +28,4 @@ public class BundleStateScopeServiceFactory implements ServiceFactory<IScopeCont
 		// nothing to do here...
 	}
 
-
 }

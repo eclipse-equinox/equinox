@@ -18,13 +18,11 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
 /**
- * Abstract super-class for scope context object contributed
- * by the Platform.
+ * Abstract super-class for scope context object contributed by the Platform.
  *
  * @since 3.0
  */
 public abstract class AbstractScope implements IScopeContext {
-
 
 	@Override
 	public abstract String getName();
@@ -32,7 +30,8 @@ public abstract class AbstractScope implements IScopeContext {
 	/*
 	 * Default path hierarchy for nodes is /<scope>/<qualifier>.
 	 *
-	 * @see org.eclipse.core.runtime.preferences.IScopeContext#getNode(java.lang.String)
+	 * @see
+	 * org.eclipse.core.runtime.preferences.IScopeContext#getNode(java.lang.String)
 	 */
 	@Override
 	public IEclipsePreferences getNode(String qualifier) {
@@ -41,10 +40,8 @@ public abstract class AbstractScope implements IScopeContext {
 		return (IEclipsePreferences) PreferencesService.getDefault().getRootNode().node(getName()).node(qualifier);
 	}
 
-
 	@Override
 	public abstract IPath getLocation();
-
 
 	@Override
 	public boolean equals(Object obj) {
@@ -58,7 +55,6 @@ public abstract class AbstractScope implements IScopeContext {
 		IPath location = getLocation();
 		return location == null ? other.getLocation() == null : location.equals(other.getLocation());
 	}
-
 
 	@Override
 	public int hashCode() {

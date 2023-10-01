@@ -86,28 +86,32 @@ public class DefaultPreferences extends EclipsePreferences {
 	/*
 	 * Apply the values set in the bundle's install directory.
 	 *
-	 * In Eclipse 2.1 this is equivalent to:
-	 *		/eclipse/plugins/<pluginID>/prefs.ini
+	 * In Eclipse 2.1 this is equivalent to: /eclipse/plugins/<pluginID>/prefs.ini
 	 */
 	private void applyBundleDefaults() {
 		Bundle bundle = PreferencesOSGiUtils.getDefault().getBundle(name());
 		if (bundle == null)
 			return;
-		URL url = FileLocator.find(bundle, IPath.fromOSString(IPreferencesConstants.PREFERENCES_DEFAULT_OVERRIDE_FILE_NAME), null);
+		URL url = FileLocator.find(bundle,
+				IPath.fromOSString(IPreferencesConstants.PREFERENCES_DEFAULT_OVERRIDE_FILE_NAME), null);
 		if (url == null) {
 			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
-				PrefsMessages.message("Preference default override file not found for bundle: " + bundle.getSymbolicName()); //$NON-NLS-1$
+				PrefsMessages
+						.message("Preference default override file not found for bundle: " + bundle.getSymbolicName()); //$NON-NLS-1$
 			return;
 		}
-		URL transURL = FileLocator.find(bundle, NL_DIR.append(IPreferencesConstants.PREFERENCES_DEFAULT_OVERRIDE_BASE_NAME).addFileExtension(PROPERTIES_FILE_EXTENSION), null);
+		URL transURL = FileLocator.find(bundle,
+				NL_DIR.append(IPreferencesConstants.PREFERENCES_DEFAULT_OVERRIDE_BASE_NAME)
+						.addFileExtension(PROPERTIES_FILE_EXTENSION),
+				null);
 		if (transURL == null && EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
 			PrefsMessages.message("Preference translation file not found for bundle: " + bundle.getSymbolicName()); //$NON-NLS-1$
 		applyDefaults(name(), loadProperties(url), loadProperties(transURL));
 	}
 
 	/*
-	 * Apply the default values as specified in the file
-	 * as an argument on the command-line.
+	 * Apply the default values as specified in the file as an argument on the
+	 * command-line.
 	 */
 	private void applyCommandLineDefaults() {
 		if (commandLineCustomization != null)
@@ -115,10 +119,8 @@ public class DefaultPreferences extends EclipsePreferences {
 	}
 
 	/*
-	 * If the qualifier is null then the file is of the format:
-	 * 	pluginID/key=value
-	 * otherwise the file is of the format:
-	 * 	key=value
+	 * If the qualifier is null then the file is of the format: pluginID/key=value
+	 * otherwise the file is of the format: key=value
 	 */
 	private void applyDefaults(String id, Properties defaultValues, Properties translations) {
 		for (Enumeration<?> e = defaultValues.keys(); e.hasMoreElements();) {
@@ -140,7 +142,8 @@ public class DefaultPreferences extends EclipsePreferences {
 			if (name().equals(localQualifier)) {
 				value = translatePreference(value, translations);
 				if (EclipsePreferences.DEBUG_PREFERENCE_SET)
-					PrefsMessages.message("Setting default preference: " + (IPath.fromOSString(absolutePath()).append(childPath).append(key)) + '=' + value); //$NON-NLS-1$
+					PrefsMessages.message("Setting default preference: " //$NON-NLS-1$
+							+ (IPath.fromOSString(absolutePath()).append(childPath).append(key)) + '=' + value);
 				((EclipsePreferences) internalNode(childPath.toString(), false, null)).internalPut(key, value);
 			}
 		}
@@ -175,9 +178,11 @@ public class DefaultPreferences extends EclipsePreferences {
 			return true;
 		// if the node does not exist, maybe it has not been loaded yet
 		initializeCustomizations();
-		// scope based path is a path relative to the "/default" node; this is the path that appears in customizations
+		// scope based path is a path relative to the "/default" node; this is the path
+		// that appears in customizations
 		IPath scopeBasedPath = IPath.fromOSString(absolutePath() + PATH_SEPARATOR + path).removeFirstSegments(1);
-		return containsNode(productCustomization, scopeBasedPath) || containsNode(commandLineCustomization, scopeBasedPath);
+		return containsNode(productCustomization, scopeBasedPath)
+				|| containsNode(commandLineCustomization, scopeBasedPath);
 	}
 
 	private void initializeCustomizations() {
@@ -185,7 +190,8 @@ public class DefaultPreferences extends EclipsePreferences {
 		if (productCustomization == null) {
 			BundleContext context = Activator.getContext();
 			if (context != null) {
-				ServiceTracker<?, IProductPreferencesService> productTracker = new ServiceTracker<>(context, IProductPreferencesService.class, null);
+				ServiceTracker<?, IProductPreferencesService> productTracker = new ServiceTracker<>(context,
+						IProductPreferencesService.class, null);
 				productTracker.open();
 				IProductPreferencesService productSpecials = productTracker.getService();
 				if (productSpecials != null) {
@@ -218,8 +224,8 @@ public class DefaultPreferences extends EclipsePreferences {
 	 * In the Eclipse 2.1 world they were the ones which were specified in the
 	 * over-ridden Plugin#initializeDefaultPluginPreferences() method.
 	 *
-	 * In Eclipse 3.0 they are set in the code which is indicated by the
-	 * extension to the plug-in default customizer extension point.
+	 * In Eclipse 3.0 they are set in the code which is indicated by the extension
+	 * to the plug-in default customizer extension point.
 	 */
 	private void applyRuntimeDefaults() {
 		WeakReference<Object> ref = PreferencesService.getDefault().applyRuntimeDefaults(name(), pluginReference);
@@ -228,17 +234,15 @@ public class DefaultPreferences extends EclipsePreferences {
 	}
 
 	/*
-	 * Apply the default values as specified by the file
-	 * in the product extension.
+	 * Apply the default values as specified by the file in the product extension.
 	 *
-	 * In Eclipse 2.1 this is equivalent to the plugin_customization.ini
-	 * file in the primary feature's plug-in directory.
+	 * In Eclipse 2.1 this is equivalent to the plugin_customization.ini file in the
+	 * primary feature's plug-in directory.
 	 */
 	private void applyProductDefaults() {
 		if (!productCustomization.isEmpty())
 			applyDefaults(null, productCustomization, productTranslation);
 	}
-
 
 	@Override
 	public void flush() {
@@ -271,7 +275,6 @@ public class DefaultPreferences extends EclipsePreferences {
 		return loadedNodes.contains(node.name());
 	}
 
-
 	@Override
 	protected void load() {
 		setInitializingBundleDefaults();
@@ -286,7 +289,6 @@ public class DefaultPreferences extends EclipsePreferences {
 		applyCommandLineDefaults();
 	}
 
-
 	@Override
 	protected String internalPut(String key, String newValue) {
 		// set the value in this node
@@ -297,7 +299,8 @@ public class DefaultPreferences extends EclipsePreferences {
 		if (isInitializingBundleDefaults()) {
 			String relativePath = getScopeRelativePath(absolutePath());
 			if (relativePath != null) {
-				Preferences node = PreferencesService.getDefault().getRootNode().node(BundleDefaultsScope.SCOPE).node(relativePath);
+				Preferences node = PreferencesService.getDefault().getRootNode().node(BundleDefaultsScope.SCOPE)
+						.node(relativePath);
 				node.put(key, newValue);
 			}
 		}
@@ -305,9 +308,9 @@ public class DefaultPreferences extends EclipsePreferences {
 	}
 
 	/*
-	 * Set that we are in the middle of initializing the bundle defaults.
-	 * This is stored on the load level so we know where to look when
-	 * we are setting values on sub-nodes.
+	 * Set that we are in the middle of initializing the bundle defaults. This is
+	 * stored on the load level so we know where to look when we are setting values
+	 * on sub-nodes.
 	 */
 	private void setInitializingBundleDefaults() {
 		IEclipsePreferences node = getLoadLevel();
@@ -318,9 +321,9 @@ public class DefaultPreferences extends EclipsePreferences {
 	}
 
 	/*
-	 * Clear the bit saying we are in the middle of initializing the bundle defaults.
-	 * This is stored on the load level so we know where to look when
-	 * we are setting values on sub-nodes.
+	 * Clear the bit saying we are in the middle of initializing the bundle
+	 * defaults. This is stored on the load level so we know where to look when we
+	 * are setting values on sub-nodes.
 	 */
 	private void clearInitializingBundleDefaults() {
 		IEclipsePreferences node = getLoadLevel();
@@ -331,9 +334,9 @@ public class DefaultPreferences extends EclipsePreferences {
 	}
 
 	/*
-	 * Are we in the middle of initializing defaults from the bundle
-	 * initializer or found in the bundle itself? Look on the load level in
-	 * case we are in a sub-node.
+	 * Are we in the middle of initializing defaults from the bundle initializer or
+	 * found in the bundle itself? Look on the load level in case we are in a
+	 * sub-node.
 	 */
 	private boolean isInitializingBundleDefaults() {
 		IEclipsePreferences node = getLoadLevel();
@@ -345,8 +348,8 @@ public class DefaultPreferences extends EclipsePreferences {
 	}
 
 	/*
-	 * Return a path which is relative to the scope of this node.
-	 * e.g. com.example.foo for /instance/com.example.foo
+	 * Return a path which is relative to the scope of this node. e.g.
+	 * com.example.foo for /instance/com.example.foo
 	 */
 	protected static String getScopeRelativePath(String absolutePath) {
 		// shouldn't happen but handle empty or root
@@ -371,8 +374,7 @@ public class DefaultPreferences extends EclipsePreferences {
 				PrefsMessages.message("Problem opening stream to preference customization file: " + url); //$NON-NLS-1$
 				e.printStackTrace();
 			}
-		}
-		finally {
+		} finally {
 			if (input != null)
 				try {
 					input.close();
@@ -412,15 +414,14 @@ public class DefaultPreferences extends EclipsePreferences {
 		loadedNodes.add(name());
 	}
 
-
 	@Override
 	public void sync() {
 		// default values are not persisted
 	}
 
 	/**
-	 * Takes a preference value and a related resource bundle and
-	 * returns the translated version of this value (if one exists).
+	 * Takes a preference value and a related resource bundle and returns the
+	 * translated version of this value (if one exists).
 	 */
 	private String translatePreference(String origValue, Properties props) {
 		if (props == null || origValue.startsWith(KEY_DOUBLE_PREFIX))

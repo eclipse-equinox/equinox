@@ -18,8 +18,9 @@ import java.util.Properties;
 /**
  * A product can customize preferences by implementing this service.
  *
- * This interface is likely going to change as the application model is introduced
- * in which point it might be kept for backward compatibility or removed entirely.
+ * This interface is likely going to change as the application model is
+ * introduced in which point it might be kept for backward compatibility or
+ * removed entirely.
  *
  * @since org.eclipse.equinox.common 3.2
  */

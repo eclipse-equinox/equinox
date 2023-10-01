@@ -23,9 +23,9 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 
 /**
- * Class which handles all registry-related work for the preferences. This code has
- * been separated into a separate class to ensure that the preferences will be able
- * to run without the registry being present.
+ * Class which handles all registry-related work for the preferences. This code
+ * has been separated into a separate class to ensure that the preferences will
+ * be able to run without the registry being present.
  */
 public class PreferenceServiceRegistryHelper implements IRegistryChangeListener {
 
@@ -43,16 +43,16 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	private final IExtensionRegistry registry;
 
 	/*
-	 * Create and return an IStatus object with ERROR severity and the
-	 * given message and exception.
+	 * Create and return an IStatus object with ERROR severity and the given message
+	 * and exception.
 	 */
 	private static IStatus createStatusError(String message, Exception e) {
 		return new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, message, e);
 	}
 
 	/*
-	 * Create and return an IStatus object with WARNING severity and the
-	 * given message and exception.
+	 * Create and return an IStatus object with WARNING severity and the given
+	 * message and exception.
 	 */
 	private static IStatus createStatusWarning(String message, Exception e) {
 		return new Status(IStatus.WARNING, PrefsMessages.OWNER_NAME, IStatus.WARNING, message, e);
@@ -81,19 +81,22 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	}
 
 	/*
-	 * Add the given configuration element into our list of preference modify listeners.
+	 * Add the given configuration element into our list of preference modify
+	 * listeners.
 	 */
 	private void addModifyListener(IConfigurationElement element) {
 		String key = element.getAttribute(ATTRIBUTE_CLASS);
 		if (key == null) {
-			String message = NLS.bind(PrefsMessages.preferences_missingClassAttribute, element.getDeclaringExtension().getUniqueIdentifier());
+			String message = NLS.bind(PrefsMessages.preferences_missingClassAttribute,
+					element.getDeclaringExtension().getUniqueIdentifier());
 			log(new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, message, null));
 			return;
 		}
 		try {
 			Object listener = element.createExecutableExtension(ATTRIBUTE_CLASS);
 			if (!(listener instanceof PreferenceModifyListener)) {
-				log(new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, PrefsMessages.preferences_classCastListener, null));
+				log(new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR,
+						PrefsMessages.preferences_classCastListener, null));
 				return;
 			}
 			modifyListeners.add((PreferenceModifyListener) listener);
@@ -103,8 +106,8 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	}
 
 	/*
-	 * Apply the runtime defaults for the bundle with the given name. Check
-	 * to see if there is a preference initializer registered and if so, then run it.
+	 * Apply the runtime defaults for the bundle with the given name. Check to see
+	 * if there is a preference initializer registered and if so, then run it.
 	 * Otherwise call the legacy Plugin preference initialization code.
 	 */
 	public WeakReference<Object> applyRuntimeDefaults(String name, WeakReference<Object> pluginReference) {
@@ -129,7 +132,8 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 								ownerName = underlyingBundle.getSymbolicName();
 							else
 								ownerName = extensionNamespace;
-							PrefsMessages.message("Running default preference customization as defined by: " + ownerName); //$NON-NLS-1$
+							PrefsMessages
+									.message("Running default preference customization as defined by: " + ownerName); //$NON-NLS-1$
 						}
 						runInitializer(element);
 						// don't return yet in case we have multiple initializers registered
@@ -141,7 +145,8 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 		if (foundInitializer)
 			return null;
 
-		// TODO this means that we don't call the legacy Plugin code if the registry isn't present.
+		// TODO this means that we don't call the legacy Plugin code if the registry
+		// isn't present.
 		// I don't think this is the desired behaviour
 
 		// Do legacy plugin preference initialization
@@ -153,9 +158,9 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	}
 
 	/*
-	 * Create a new child node with the given parent. Look up the name
-	 * in the registry as it may map to a configuration element. This is done
-	 * for lazy initialization of user-contributed scopes.
+	 * Create a new child node with the given parent. Look up the name in the
+	 * registry as it may map to a configuration element. This is done for lazy
+	 * initialization of user-contributed scopes.
 	 */
 	public IEclipsePreferences createNode(RootPreferences parent, String name) {
 		IScope scope = null;
@@ -174,9 +179,11 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 					return new EclipsePreferences(parent, name);
 				}
 			} else if (((IConfigurationElement) value).getAttribute(ATTRIBUTE_STORAGE) != null) {
-				// or if they defined a storage class then use EclipsePreferences to model the prefs.
+				// or if they defined a storage class then use EclipsePreferences to model the
+				// prefs.
 				try {
-					AbstractPreferenceStorage storage = (AbstractPreferenceStorage) ((IConfigurationElement) value).createExecutableExtension(ATTRIBUTE_STORAGE);
+					AbstractPreferenceStorage storage = (AbstractPreferenceStorage) ((IConfigurationElement) value)
+							.createExecutableExtension(ATTRIBUTE_STORAGE);
 					ScopeDescriptor descriptor = new ScopeDescriptor(storage);
 					EclipsePreferences result = new EclipsePreferences(parent, name);
 					result.setDescriptor(descriptor);
@@ -195,8 +202,8 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	}
 
 	/*
-	 * Return a list of the preference modify listeners. They are called during preference
-	 * import and given the chance to modify the imported tree.
+	 * Return a list of the preference modify listeners. They are called during
+	 * preference import and given the chance to modify the imported tree.
 	 */
 	public ListenerList<PreferenceModifyListener> getModifyListeners() {
 		if (modifyListeners == null) {
@@ -222,11 +229,13 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 		IExtension[] extensionsOld = EMPTY_EXTENSION_ARRAY;
 		IExtension[] extensionsNew = EMPTY_EXTENSION_ARRAY;
 		// "old"
-		IExtensionPoint pointOld = registry.getExtensionPoint(IPreferencesConstants.RUNTIME_NAME, IPreferencesConstants.PT_PREFERENCES);
+		IExtensionPoint pointOld = registry.getExtensionPoint(IPreferencesConstants.RUNTIME_NAME,
+				IPreferencesConstants.PT_PREFERENCES);
 		if (pointOld != null)
 			extensionsOld = pointOld.getExtensions();
 		// "new"
-		IExtensionPoint pointNew = registry.getExtensionPoint(IPreferencesConstants.PREFERS_NAME, IPreferencesConstants.PT_PREFERENCES);
+		IExtensionPoint pointNew = registry.getExtensionPoint(IPreferencesConstants.PREFERS_NAME,
+				IPreferencesConstants.PT_PREFERENCES);
 		if (pointNew != null)
 			extensionsNew = pointNew.getExtensions();
 		// combine
@@ -257,32 +266,33 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 		}
 	}
 
-
 	@Override
 	public void registryChanged(IRegistryChangeEvent event) {
-		IExtensionDelta[] deltasOld = event.getExtensionDeltas(IPreferencesConstants.RUNTIME_NAME, IPreferencesConstants.PT_PREFERENCES);
-		IExtensionDelta[] deltasNew = event.getExtensionDeltas(IPreferencesConstants.PREFERS_NAME, IPreferencesConstants.PT_PREFERENCES);
+		IExtensionDelta[] deltasOld = event.getExtensionDeltas(IPreferencesConstants.RUNTIME_NAME,
+				IPreferencesConstants.PT_PREFERENCES);
+		IExtensionDelta[] deltasNew = event.getExtensionDeltas(IPreferencesConstants.PREFERS_NAME,
+				IPreferencesConstants.PT_PREFERENCES);
 		IExtensionDelta[] deltas = new IExtensionDelta[deltasOld.length + deltasNew.length];
 		System.arraycopy(deltasOld, 0, deltas, 0, deltasOld.length);
 		System.arraycopy(deltasNew, 0, deltas, deltasOld.length, deltasNew.length);
 
 		if (deltas.length == 0)
 			return;
-	    // dynamically adjust the registered scopes
+		// dynamically adjust the registered scopes
 		for (IExtensionDelta delta : deltas) {
 			IConfigurationElement[] elements = delta.getExtension().getConfigurationElements();
 			for (IConfigurationElement element : elements) {
 				switch (delta.getKind()) {
-					case IExtensionDelta.ADDED:
-						if (ELEMENT_SCOPE.equalsIgnoreCase(element.getName())) {
-							scopeAdded(element);
-						}
-						break;
-					case IExtensionDelta.REMOVED:
-						String scope = element.getAttribute(ATTRIBUTE_NAME);
-						if (scope != null)
-							scopeRemoved(scope);
-						break;
+				case IExtensionDelta.ADDED:
+					if (ELEMENT_SCOPE.equalsIgnoreCase(element.getName())) {
+						scopeAdded(element);
+					}
+					break;
+				case IExtensionDelta.REMOVED:
+					String scope = element.getAttribute(ATTRIBUTE_NAME);
+					if (scope != null)
+						scopeRemoved(scope);
+					break;
 				}
 			}
 		}
@@ -291,11 +301,13 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	}
 
 	/*
-	 * Run the preference initializer as specified by the given configuration element.
+	 * Run the preference initializer as specified by the given configuration
+	 * element.
 	 */
 	private void runInitializer(IConfigurationElement element) {
 		try {
-			final AbstractPreferenceInitializer initializer = (AbstractPreferenceInitializer) element.createExecutableExtension(ATTRIBUTE_CLASS);
+			final AbstractPreferenceInitializer initializer = (AbstractPreferenceInitializer) element
+					.createExecutableExtension(ATTRIBUTE_CLASS);
 			ISafeRunnable job = new ISafeRunnable() {
 				@Override
 				public void handleException(Throwable exception) {
@@ -309,7 +321,8 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 			};
 			SafeRunner.run(job);
 		} catch (ClassCastException e) {
-			IStatus status = new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, PrefsMessages.preferences_invalidExtensionSuperclass, e);
+			IStatus status = new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR,
+					PrefsMessages.preferences_invalidExtensionSuperclass, e);
 			log(status);
 		} catch (CoreException e) {
 			log(e.getStatus());
@@ -323,7 +336,8 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	private void scopeAdded(IConfigurationElement element) {
 		String key = element.getAttribute(ATTRIBUTE_NAME);
 		if (key == null) {
-			String message = NLS.bind(PrefsMessages.preferences_missingScopeAttribute, element.getDeclaringExtension().getUniqueIdentifier());
+			String message = NLS.bind(PrefsMessages.preferences_missingScopeAttribute,
+					element.getDeclaringExtension().getUniqueIdentifier());
 			log(createStatusWarning(message, null));
 			return;
 		}

@@ -94,7 +94,8 @@ public class ScopeDescriptor {
 				if (exception instanceof BackingStoreException)
 					bse[0] = (BackingStoreException) exception;
 				else
-					bse[0] = new BackingStoreException(NLS.bind(PrefsMessages.preferences_loadException, path), exception);
+					bse[0] = new BackingStoreException(NLS.bind(PrefsMessages.preferences_loadException, path),
+							exception);
 			}
 		};
 		SafeRunner.run(code);
@@ -118,7 +119,8 @@ public class ScopeDescriptor {
 				if (exception instanceof BackingStoreException)
 					bse[0] = (BackingStoreException) exception;
 				else
-					bse[0] = new BackingStoreException(NLS.bind(PrefsMessages.preferences_saveException, path), exception);
+					bse[0] = new BackingStoreException(NLS.bind(PrefsMessages.preferences_saveException, path),
+							exception);
 			}
 		};
 		SafeRunner.run(code);

@@ -31,7 +31,6 @@ public class ExportedPreferences extends EclipsePreferences implements IExported
 		super(parent, name);
 	}
 
-
 	@Override
 	public boolean isExportRoot() {
 		return isExportRoot;
@@ -45,16 +44,16 @@ public class ExportedPreferences extends EclipsePreferences implements IExported
 	}
 
 	/*
-	 * Internal method called only by the import/export mechanism to
-	 * validate bundle versions.
+	 * Internal method called only by the import/export mechanism to validate bundle
+	 * versions.
 	 */
 	public String getVersion() {
 		return version;
 	}
 
 	/*
-	 * Internal method called only by the import/export mechanism to
-	 * validate bundle versions.
+	 * Internal method called only by the import/export mechanism to validate bundle
+	 * versions.
 	 */
 	public void setVersion(String version) {
 		this.version = version;
@@ -66,8 +65,8 @@ public class ExportedPreferences extends EclipsePreferences implements IExported
 	}
 
 	/*
-	 * Return a string representation of this object. To be used for
-	 * debugging purposes only.
+	 * Return a string representation of this object. To be used for debugging
+	 * purposes only.
 	 */
 	@Override
 	public String toString() {
