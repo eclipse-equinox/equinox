@@ -45,7 +45,7 @@ public class Test_table_140_5_HTTP_WHITEBOARD_FILTER_REGEX extends BaseTest {
 
 		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "a");
-		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, new String[] {"", "/"});
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, new String[] { "", "/" });
 		registrations.add(context.registerService(Servlet.class, new MockServlet().content("a"), properties));
 
 		properties = new Hashtable<>();

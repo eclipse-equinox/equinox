@@ -36,14 +36,14 @@ public class TestFilter1 extends AbstractTestServlet {
 
 	@Override
 	public void activate(ComponentContext componentContext) throws ServletException, NamespaceException {
-		ExtendedHttpService service = (ExtendedHttpService)getHttpService();
+		ExtendedHttpService service = (ExtendedHttpService) getHttpService();
 		service.registerServlet(regexAlias(), this, null, null);
 		service.registerFilter(regexAlias(), f1, new Hashtable<>(), null);
 	}
 
 	@Override
 	public void deactivate() {
-		ExtendedHttpService service = (ExtendedHttpService)getHttpService();
+		ExtendedHttpService service = (ExtendedHttpService) getHttpService();
 		service.unregister(regexAlias());
 		service.unregisterFilter(f1);
 	}

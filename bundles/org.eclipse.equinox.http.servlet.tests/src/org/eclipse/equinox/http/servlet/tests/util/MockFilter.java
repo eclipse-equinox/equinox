@@ -65,7 +65,7 @@ public class MockFilter implements Filter {
 		return this;
 	}
 
-	private String	after;
-	private String	before;
+	private String after;
+	private String before;
 
 }

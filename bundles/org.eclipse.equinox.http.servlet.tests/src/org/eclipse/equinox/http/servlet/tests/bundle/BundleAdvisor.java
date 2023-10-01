@@ -23,14 +23,14 @@ import org.osgi.framework.BundleException;
  */
 public class BundleAdvisor extends Object {
 	private final BundleContext bundleContext;
-	
+
 	public BundleAdvisor(BundleContext bundleContext) {
 		super();
 		if (bundleContext == null)
 			throw new IllegalArgumentException("bundleContext must not be null"); //$NON-NLS-1$
 		this.bundleContext = bundleContext;
 	}
-	
+
 	private Bundle getBundle(String symbolicName) {
 		if (symbolicName == null)
 			throw new IllegalArgumentException("symbolicName must not be null"); //$NON-NLS-1$
@@ -38,18 +38,18 @@ public class BundleAdvisor extends Object {
 		Bundle[] bundles = context.getBundles();
 		for (Bundle bundle : bundles) {
 			String bsn = bundle.getSymbolicName();
-			boolean match = symbolicName.equals(bsn); 
+			boolean match = symbolicName.equals(bsn);
 			if (match) {
 				return bundle;
 			}
 		}
 		throw new IllegalArgumentException("Failed to find bundle: " + symbolicName); //$NON-NLS-1$
 	}
-	
+
 	private BundleContext getBundleContext() {
 		return bundleContext;
 	}
-	
+
 	public void startBundle(String symbolicName) throws BundleException {
 		Bundle bundle = getBundle(symbolicName);
 		int state = bundle.getState();
@@ -58,7 +58,7 @@ public class BundleAdvisor extends Object {
 		}
 		bundle.start(Bundle.START_TRANSIENT);
 	}
-	
+
 	public void stopBundle(String symbolicName) throws BundleException {
 		Bundle bundle = getBundle(symbolicName);
 		bundle.stop();

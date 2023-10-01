@@ -46,7 +46,8 @@ public class Test_140_6_1 extends BaseTest {
 
 		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN, "/*");
-		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX, "/org/eclipse/equinox/http/servlet/tests");
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX,
+				"/org/eclipse/equinox/http/servlet/tests");
 		ServiceRegistration<Object> sr = context.registerService(Object.class, new Object(), properties);
 		registrations.add(sr);
 
@@ -54,18 +55,14 @@ public class Test_140_6_1 extends BaseTest {
 		assertNotNull(failedResourceDTO);
 		assertEquals(DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE, failedResourceDTO.failureReason);
 
-		ResourceDTO resourceDTO = getResourceDTOByServiceId(
-				DEFAULT,
-				getServiceId(sr));
+		ResourceDTO resourceDTO = getResourceDTOByServiceId(DEFAULT, getServiceId(sr));
 		assertNull(resourceDTO);
 		assertEquals("b", requestAdvisor.request("index.txt"));
 
 		properties.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
 		sr.setProperties(properties);
 
-		resourceDTO = getResourceDTOByServiceId(
-				DEFAULT,
-				getServiceId(sr));
+		resourceDTO = getResourceDTOByServiceId(DEFAULT, getServiceId(sr));
 		assertNotNull(resourceDTO);
 		assertEquals("a\n", requestAdvisor.request("index.txt"));
 

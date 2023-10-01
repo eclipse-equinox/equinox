@@ -39,6 +39,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 public class TestErrorPage3 extends AbstractTestServlet {
 	private static final long serialVersionUID = 1L;
 	private final Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
+
 	@Override
 	public void activate(ComponentContext componentContext) {
 		Dictionary<String, String> servletProps = new Hashtable<>();
@@ -59,8 +60,7 @@ public class TestErrorPage3 extends AbstractTestServlet {
 	}
 
 	@Override
-	protected void service(HttpServletRequest request, HttpServletResponse response)
-		throws IOException {
+	protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 		response.sendError(400);
 	}
@@ -69,9 +69,7 @@ public class TestErrorPage3 extends AbstractTestServlet {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-			throws IOException {
+		protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 			if (response.isCommitted()) {
 				System.out.println("Problem?");
@@ -81,8 +79,8 @@ public class TestErrorPage3 extends AbstractTestServlet {
 
 			PrintWriter writer = response.getWriter();
 
-			String requestURI = (String)request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
-			Integer status = (Integer)request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+			String requestURI = (String) request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
+			Integer status = (Integer) request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
 
 			writer.print(status + " ERROR : " + requestURI);
 		}

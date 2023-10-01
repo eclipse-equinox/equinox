@@ -22,8 +22,7 @@ import javax.servlet.http.HttpSessionBindingEvent;
 /**
  * @author Raymond Augé
  */
-public class BaseHttpSessionAttributeListener
-	implements HttpSessionAttributeListener {
+public class BaseHttpSessionAttributeListener implements HttpSessionAttributeListener {
 
 	public AtomicBoolean added = new AtomicBoolean(false);
 	public AtomicBoolean replaced = new AtomicBoolean(false);

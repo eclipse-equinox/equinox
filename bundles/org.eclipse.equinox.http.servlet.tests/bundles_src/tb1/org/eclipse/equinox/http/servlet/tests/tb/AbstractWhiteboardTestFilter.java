@@ -40,13 +40,10 @@ public abstract class AbstractWhiteboardTestFilter implements Filter {
 	}
 
 	@Override
-	public void doFilter(
-			ServletRequest request, ServletResponse response,
-			FilterChain chain)
-		throws IOException, ServletException {
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+			throws IOException, ServletException {
 
-		CharResponseWrapper charResponseWrapper = new CharResponseWrapper(
-			(HttpServletResponse) response);
+		CharResponseWrapper charResponseWrapper = new CharResponseWrapper((HttpServletResponse) response);
 
 		chain.doFilter(request, charResponseWrapper);
 

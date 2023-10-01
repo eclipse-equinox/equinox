@@ -38,9 +38,7 @@ public class Bug564747_Test extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void doGet(
-				HttpServletRequest req, HttpServletResponse resp)
-				throws IOException {
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
 				PrintWriter writer = resp.getWriter();
 				writer.write(req.getQueryString());

@@ -41,7 +41,8 @@ public class Test_140_9_ServletContextDTO_custom_listener extends BaseTest {
 		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "a");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, "/a");
-		registrations.add(context.registerService(ServletContextHelper.class, new ServletContextHelper() {}, properties));
+		registrations.add(context.registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, properties));
 
 		ServletContextDTO servletContextDTO = getServletContextDTOByName("a");
 		assertNotNull(servletContextDTO);

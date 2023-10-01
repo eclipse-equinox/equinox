@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 public class TestWBServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	public static final String STATUS_PARAM = "status";
-	
+
 	private final AtomicReference<String> status = new AtomicReference<>("none");
 	private final AtomicBoolean destroyed = new AtomicBoolean(false);
 

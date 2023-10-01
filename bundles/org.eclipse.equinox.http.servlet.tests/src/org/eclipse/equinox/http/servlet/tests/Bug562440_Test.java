@@ -43,8 +43,7 @@ public class Bug562440_Test extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void doGet(
-				HttpServletRequest req, HttpServletResponse resp) throws IOException {
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 				if (error.get()) {
 					resp.sendError(404);
 				}
@@ -76,9 +75,7 @@ public class Bug562440_Test extends BaseTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void doGet(
-				HttpServletRequest req, HttpServletResponse resp)
-				throws IOException {
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
 				resp.sendError(404, "NOT FOUND");
 				if (flushBuffer.get()) {

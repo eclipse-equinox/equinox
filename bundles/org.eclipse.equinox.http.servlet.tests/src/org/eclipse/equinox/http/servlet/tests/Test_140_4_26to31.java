@@ -50,20 +50,20 @@ public class Test_140_4_26to31 extends BaseTest {
 			}
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response)
-					throws IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 				response.getWriter().write(content);
 			}
 
-			private final String	content;
+			private final String content;
 
 		}
 
 		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "a");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/a");
-		//properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, "(osgi.http.whiteboard.context.name=org_eclipse_equinox_http_servlet_internal_HttpServiceImpl_DefaultHttpContext-0)");
+		// properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+		// "(osgi.http.whiteboard.context.name=org_eclipse_equinox_http_servlet_internal_HttpServiceImpl_DefaultHttpContext-0)");
 		properties.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
 		ServiceRegistration<Servlet> srA = context.registerService(Servlet.class, new AServlet("a"), properties);
 		registrations.add(srA);
@@ -73,9 +73,7 @@ public class Test_140_4_26to31 extends BaseTest {
 		assertNotNull(requestInfoDTO);
 		assertNotNull(requestInfoDTO.servletDTO);
 		assertEquals("a", requestInfoDTO.servletDTO.name);
-		assertEquals(
-				getServiceId(srA),
-				requestInfoDTO.servletDTO.serviceId);
+		assertEquals(getServiceId(srA), requestInfoDTO.servletDTO.serviceId);
 		assertEquals("a", requestAdvisor.request("a"));
 
 		HttpService httpService = getHttpService();
