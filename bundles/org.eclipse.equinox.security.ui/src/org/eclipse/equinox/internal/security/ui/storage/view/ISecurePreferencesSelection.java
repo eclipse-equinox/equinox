@@ -19,6 +19,7 @@ public interface ISecurePreferencesSelection {
 	/**
 	 * Called by child elements to inform container that current selection has been
 	 * modified
+	 * 
 	 * @param selectedNode newly selected element
 	 */
 	public void setSelection(ISecurePreferences selectedNode);

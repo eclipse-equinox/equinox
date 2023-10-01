@@ -140,7 +140,7 @@ public class ChallengeResponseDialog extends TitleAreaDialog {
 	public String[][] getResult() {
 		if (questionsText == null || answersText == null)
 			return null;
-		return new String[][] {questionsText, answersText};
+		return new String[][] { questionsText, answersText };
 	}
 
 }

@@ -53,7 +53,7 @@ public class CertificateImportTrustEngineSelectPage extends WizardPage implement
 		aliasField.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL));
 
 		/*
-		 *  create the trust engine area
+		 * create the trust engine area
 		 */
 		Label targetEngineLabel = new Label(certSelectComposite, SWT.None);
 		targetEngineLabel.setText(SecurityUIMsg.WIZARD_TARGET_TRUST_ENGINE);
@@ -98,7 +98,8 @@ public class CertificateImportTrustEngineSelectPage extends WizardPage implement
 				setErrorMessage(SecurityUIMsg.WIZARD_ERROR_ENGINE_REQUIRED);
 			} else {
 				setErrorMessage(null);
-				((CertificateImportWizard) getWizard()).selectTrustEngine = trustEngines.get(trustEngineCombo.getSelectionIndex());
+				((CertificateImportWizard) getWizard()).selectTrustEngine = trustEngines
+						.get(trustEngineCombo.getSelectionIndex());
 			}
 		}
 		getWizard().getContainer().updateButtons();

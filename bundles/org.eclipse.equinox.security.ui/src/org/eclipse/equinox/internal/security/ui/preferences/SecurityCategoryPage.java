@@ -29,7 +29,7 @@ import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 public class SecurityCategoryPage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	public SecurityCategoryPage() {
-		//empty
+		// empty
 	}
 
 	@Override
@@ -43,7 +43,9 @@ public class SecurityCategoryPage extends PreferencePage implements IWorkbenchPr
 		GridLayout layout = new GridLayout();
 		pageArea.setLayout(layout);
 
-		PreferenceLinkArea storageLinkArea = new PreferenceLinkArea(pageArea, SWT.NONE, "org.eclipse.equinox.security.ui.storage", SecurityUIMsg.CATPAGE_LABEL_STORAGE, (IWorkbenchPreferenceContainer) getContainer(), null); //$NON-NLS-1$
+		PreferenceLinkArea storageLinkArea = new PreferenceLinkArea(pageArea, SWT.NONE,
+				"org.eclipse.equinox.security.ui.storage", SecurityUIMsg.CATPAGE_LABEL_STORAGE, //$NON-NLS-1$
+				(IWorkbenchPreferenceContainer) getContainer(), null);
 		storageLinkArea.getControl().setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
 
 		Dialog.applyDialogFont(pageArea);

@@ -58,7 +58,8 @@ public class CertificateImportFileSelectPage extends WizardPage implements Liste
 		// browse button
 		browseDirectoriesButton = new Button(certSelectComposite, SWT.PUSH);
 		browseDirectoriesButton.setText(SecurityUIMsg.WIZARD_BROWSE);
-		browseDirectoriesButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> handleLocationFileButtonPressed()));
+		browseDirectoriesButton
+				.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> handleLocationFileButtonPressed()));
 
 		addListeners();
 	}
@@ -75,7 +76,7 @@ public class CertificateImportFileSelectPage extends WizardPage implements Liste
 		final FileDialog certFileDialog = new FileDialog(filePathField.getShell(), SWT.OPEN);
 		certFileDialog.setText(SecurityUIMsg.WIZARD_SELECT_FILE);
 		certFileDialog.setFilterPath(filePathField.getText());
-		certFileDialog.setFilterExtensions(new String[] {"*.cer", "*.p7b", "*.der"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		certFileDialog.setFilterExtensions(new String[] { "*.cer", "*.p7b", "*.der" }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		String selectedCert = certFileDialog.open();
 		if (selectedCert != null) {
@@ -102,7 +103,7 @@ public class CertificateImportFileSelectPage extends WizardPage implements Liste
 	public IWizardPage getNextPage() {
 		File file = new File(filePathField.getText().trim());
 		if (file.isDirectory() || !file.exists()) {
-			setErrorMessage(NLS.bind(SecurityUIMsg.WIZARD_FILE_NOT_FOUND, new String[] {filePathField.getText()}));
+			setErrorMessage(NLS.bind(SecurityUIMsg.WIZARD_FILE_NOT_FOUND, new String[] { filePathField.getText() }));
 			return null;
 		}
 		saveFileSelection();

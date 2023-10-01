@@ -28,8 +28,8 @@ import org.eclipse.ui.progress.IProgressService;
 import org.eclipse.ui.progress.UIJob;
 
 /**
- * Methods on this class could be called from non-UI thread so need
- * to wrap into Display.syncExec().
+ * Methods on this class could be called from non-UI thread so need to wrap into
+ * Display.syncExec().
  */
 public class UICallbackProvider implements IUICallbacks {
 
@@ -66,7 +66,8 @@ public class UICallbackProvider implements IUICallbacks {
 		UIJob reciverySetupJob = new UIJob(SecUIMessages.pswJobName) {
 			@Override
 			public IStatus runInUIThread(IProgressMonitor monitor) {
-				boolean reply = MessageDialog.openQuestion(StorageUtils.getShell(), SecUIMessages.pswdRecoveryOptionTitle, SecUIMessages.pswdRecoveryOptionMsg);
+				boolean reply = MessageDialog.openQuestion(StorageUtils.getShell(),
+						SecUIMessages.pswdRecoveryOptionTitle, SecUIMessages.pswdRecoveryOptionMsg);
 				if (!reply)
 					return Status.OK_STATUS;
 				ChallengeResponseDialog dialog = new ChallengeResponseDialog(size, StorageUtils.getShell());
@@ -108,7 +109,8 @@ public class UICallbackProvider implements IUICallbacks {
 				}
 				exception[0] = task.getException();
 			});
-		} else { // we are running in non-UI thread, use Job to show small progress indicator on the status bar
+		} else { // we are running in non-UI thread, use Job to show small progress indicator on
+					// the status bar
 			Job job = new Job(SecUIMessages.secureStorageInitialization) {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {

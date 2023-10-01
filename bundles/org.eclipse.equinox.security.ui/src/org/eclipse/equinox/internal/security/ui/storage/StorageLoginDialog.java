@@ -40,7 +40,8 @@ public class StorageLoginDialog extends TitleAreaDialog {
 
 	private static final String HELP_ID = Activator.PLUGIN_ID + ".StorageLoginDialog"; //$NON-NLS-1$
 
-	private static final ImageDescriptor dlgImageDescriptor = ImageDescriptor.createFromFile(StorageLoginDialog.class, "/icons/storage/login_wiz.png"); //$NON-NLS-1$
+	private static final ImageDescriptor dlgImageDescriptor = ImageDescriptor.createFromFile(StorageLoginDialog.class,
+			"/icons/storage/login_wiz.png"); //$NON-NLS-1$
 
 	private static final String DIGEST_ALGORITHM = "MD5"; //$NON-NLS-1$
 
