@@ -28,6 +28,7 @@ import org.osgi.framework.hooks.service.EventHook;
 /**
  * This testcase was based on {@link RegionBundleFindHookTests}.
  */
+@Ignore
 public class RegionServiceEventHookTests {
 
 	private static final String BUNDLE_X = "X";

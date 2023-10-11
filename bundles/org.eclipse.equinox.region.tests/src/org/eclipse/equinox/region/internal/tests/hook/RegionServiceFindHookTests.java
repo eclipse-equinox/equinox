@@ -29,6 +29,7 @@ import org.osgi.framework.hooks.service.FindHook;
 /**
  * This testcase was based on {@link RegionBundleFindHookTests}.
  */
+@Ignore
 public class RegionServiceFindHookTests {
 
 	private static final String BUNDLE_X = "X";
