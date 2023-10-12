@@ -30,12 +30,14 @@ import javax.servlet.ServletContext;
 
 /**
  * The FrameworkLauncher provides the logic to:
- * 1) init
- * 2) deploy
- * 3) start
- * 4) stop
- * 5) undeploy
- * 6) destroy
+ * <ol>
+ * <li>init</li>
+ * <li>deploy</li>
+ * <li>start</li>
+ * <li>stop</li>
+ * <li>undeploy</li>
+ * <li>destroy</li>
+ * </ol>
  * an instance of the OSGi framework.
  * These 6 methods are provided to help manage the life-cycle and are called from outside this
  * class by the BridgeServlet. To create an extended FrameworkLauncher over-ride these methods to allow
