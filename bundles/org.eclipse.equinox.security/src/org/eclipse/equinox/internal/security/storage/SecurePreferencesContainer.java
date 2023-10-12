@@ -28,14 +28,14 @@ import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
  * and knowledge as to how persist the tree. 
  * 
  * On the user side - let's say we have the following preferences open via factory:
- * 
+ * <pre>
  * UserPreferences1 (Options1, URL1)
  * UserPreferences2 (Options2, URL1)
  * UserPreferences3 (Options3, URL2)
  * UserPreferences4 (Options4, URL2)
- * 
+ * </pre>
  * When we'll have 2 actual "back end" secure preferences tree with data: 
- * 
+ * <pre>
  * [UserPreferences1] -> [Options1] + 
  *                                    \
  *                                     [secure preferences1]   <- 1 : 1 -> URL1
@@ -47,7 +47,7 @@ import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
  *                                     [secure preferences2]   <- 1 : 1 -> URL2
  *                                    /
  * [UserPreferences4] -> [Options4] +
- *  
+ * </pre>
  * The user-facing nodes are actually a (node + options for this container). User-facing 
  * nodes are called wrappers as they primarily wrap secure preferences nodes. 
  * 
