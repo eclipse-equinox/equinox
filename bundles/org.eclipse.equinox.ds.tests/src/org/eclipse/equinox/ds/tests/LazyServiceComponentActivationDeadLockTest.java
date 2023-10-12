@@ -14,9 +14,9 @@
 
 package org.eclipse.equinox.ds.tests;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,13 +60,6 @@ public class LazyServiceComponentActivationDeadLockTest {
 			@Override
 			public void ungetService(Bundle bundle, ServiceRegistration<T> registration, T service) {
 			}
-
-		}
-
-		class Service1 {
-		}
-
-		class Service2 {
 		}
 
 		CountDownLatch l1 = new CountDownLatch(1);
@@ -75,13 +68,13 @@ public class LazyServiceComponentActivationDeadLockTest {
 
 		ServiceFactory<Service1> factory1 = new SimpleServiceFactory<>((bundle, registration) -> {
 			countDownAndAwaitOther(l1, l2);
-			ctx.getService(ctx.getServiceReference(Service2.class));
-			return new Service1();
+			Service2 s = ctx.getService(ctx.getServiceReference(Service2.class));
+			return new Service1(s);
 		});
 		ServiceFactory<Service2> factory2 = new SimpleServiceFactory<>((bundle, registration) -> {
 			countDownAndAwaitOther(l2, l1);
-			ctx.getService(ctx.getServiceReference(Service1.class));
-			return new Service2();
+			Service1 s = ctx.getService(ctx.getServiceReference(Service1.class));
+			return new Service2(s);
 		});
 		ctx.registerService(Service1.class, factory1, null);
 		ctx.registerService(Service2.class, factory2, null);
@@ -92,13 +85,28 @@ public class LazyServiceComponentActivationDeadLockTest {
 			Future<Service2> service2 = executor.submit(() -> ctx.getService(ctx.getServiceReference(Service2.class)));
 			Service1 s1 = service1.get(5, TimeUnit.SECONDS); // times out in case of dead-lock
 			Service2 s2 = service2.get(5, TimeUnit.SECONDS); // times out in case of dead-lock
-			if (s1 != null && s2 != null) {
-				fail("At least one dead-locked component should be null");
-			}
-			// TODO: when we have a strategy to re-cover from the deadlock, check that both
-			// services are not null.
+			assertNotNull(s1);
+			assertNotNull(s2);
+			assertFalse(s1.s2 == null && s2.s1 == null);
+			assertTrue(s1.s2 == null || s2.s1 == null);
 		} finally {
 			executor.shutdown();
+		}
+	}
+
+	class Service1 {
+		final Service2 s2;
+
+		Service1(Service2 s2) {
+			this.s2 = s2;
+		}
+	}
+
+	class Service2 {
+		final Service1 s1;
+
+		Service2(Service1 s1) {
+			this.s1 = s1;
 		}
 	}
 
@@ -122,16 +130,12 @@ public class LazyServiceComponentActivationDeadLockTest {
 			// component might or might not be null depending on in which thread the
 			// DeadLock was detected and the SCR-ServiceFactory therefore threw an
 			// Exception.
-			if (c1 != null) {
-				// If the main-thread did not detect the dead-lock and therefore Component1 is
-				// successfully created, the multi-ref from its Comp2 to Comp3 must be empty and
-				// its Comp4 must have its Comp5 successfully created.
-				assertTrue(c1.a.c3s.isEmpty());
-				assertNotNull(c1.b.b);
-			}
-			// TODO: when we have a strategy to re-cover from the deadlock, check that c1 is
-			// never null and that c1.a.c3s is not empty and its only element has a Comp2
-			// and Comp5
+			assertNotNull(c1);
+			assertFalse(c1.a.c3s.isEmpty());
+			assertNotNull(c1.b.b);
+			Component3 c3 = c1.a.c3s.get(0);
+			assertNotNull(c3.a);
+			assertNotNull(c3.b);
 		} finally {
 			executor.shutdown();
 			// ctx.ungetService(reference);

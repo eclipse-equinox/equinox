@@ -219,6 +219,9 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 				}
 			});
 		} catch (Throwable t) {
+			if (t instanceof ServiceException && ((ServiceException) t).getType() == ServiceUse.DEADLOCK) {
+				throw t;
+			}
 			if (debug.DEBUG_SERVICES) {
 				Debug.println(factory + ".getService() exception: " + t.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(t);
