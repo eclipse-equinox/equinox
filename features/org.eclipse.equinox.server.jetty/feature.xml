@@ -15,15 +15,6 @@
       %license
    </license>
 
-   <requires>
-      <import plugin="org.eclipse.jetty.http"/>
-      <import plugin="org.eclipse.jetty.io"/>
-      <import plugin="org.eclipse.jetty.security"/>
-      <import plugin="org.eclipse.jetty.server"/>
-      <import plugin="org.eclipse.jetty.util"/>
-      <import plugin="org.eclipse.jetty.util.ajax"/>
-   </requires>
-
    <plugin
          id="jakarta.servlet-api"
          download-size="0"
