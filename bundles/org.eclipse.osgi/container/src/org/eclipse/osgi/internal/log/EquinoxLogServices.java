@@ -126,9 +126,7 @@ public class EquinoxLogServices {
 	 * @throws BundleException
 	 */
 	public void stop(BundleContext context) throws BundleException {
-		logWriter.close();
 		frameworkLogReg.unregister();
-		perfWriter.close();
 		perfLogReg.unregister();
 		logServiceManager.stop(context);
 	}
