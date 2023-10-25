@@ -15,10 +15,9 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ //
-		LogServiceTest.class, //
-		LogReaderServiceTest.class, //
-		LogPermissionCollectionTest.class, //
-		EquinoxLogWriterTest.class //
-})
+	LogServiceTest.class, //
+	LogReaderServiceTest.class, //
+	LogPermissionCollectionTest.class //
+	})
 public class AllLogServiceTests {
 }

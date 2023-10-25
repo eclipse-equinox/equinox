@@ -10,7 +10,6 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Copyright (c) 2023 Robert Bosch GmbH - https://github.com/eclipse-equinox/equinox/issues/221
  *******************************************************************************/
 package org.eclipse.osgi.internal.log;
 
@@ -85,9 +84,6 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 	/** The system property used to specify command line args should be omitted from the log */
 	private static final String PROP_LOG_INCLUDE_COMMAND_LINE = "eclipse.log.include.commandline"; //$NON-NLS-1$
-	/** The system property used to specify the log file writer should be closed eagerly */
-	private static final String PROP_CLOSE_LOG_FILE_EAGERLY = "eclipse.log.closeFile.eagerClose"; //$NON-NLS-1$
-
 	/** Indicates if the console messages should be printed to the console (System.out) */
 	private boolean consoleLog = false;
 	/** Indicates if the next log message is part of a new session */
@@ -114,15 +110,6 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 	private boolean includeCommandLine = true;
 
 	private LoggerAdmin loggerAdmin = null;
-
-	/**
-	 * Controls whether the log file should be closed eagerly upon every log
-	 * invocation.
-	 * 
-	 * Can be controlled by property
-	 * {@link EquinoxLogWriter#PROP_CLOSE_LOG_FILE_EAGERLY}.
-	 */
-	private boolean closeLogFileEagerly = false;
 
 	/**
 	 * Constructs an EclipseLog which uses the specified File to log messages to
@@ -316,8 +303,6 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 			writeLog(0, logEntry);
 			writer.flush();
 		} catch (Exception e) {
-			// close log file writer upon exceptions
-			closeFile();
 			// any exceptions during logging should be caught
 			System.err.println("An exception occurred while writing to the platform log:");//$NON-NLS-1$
 			e.printStackTrace(System.err);
@@ -330,14 +315,9 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 			} catch (Exception e2) {
 				System.err.println("An exception occurred while logging to the console:");//$NON-NLS-1$
 				e2.printStackTrace(System.err);
-			} finally {
-				// ensure that the error stream writer is closed
-				closeFile();
 			}
 		} finally {
-			if (closeLogFileEagerly) {
-				closeFile();
-			}
+			closeFile();
 		}
 	}
 
@@ -699,13 +679,6 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 
 		includeCommandLine = "true".equals(environmentInfo.getConfiguration(PROP_LOG_INCLUDE_COMMAND_LINE, "true")); //$NON-NLS-1$//$NON-NLS-2$
 		applyLogLevel();
-
-		String newCloseLogFileEagerlyValue = environmentInfo.getConfiguration(PROP_CLOSE_LOG_FILE_EAGERLY);
-		if (newCloseLogFileEagerlyValue != null) {
-			if (Boolean.valueOf(newCloseLogFileEagerlyValue) == Boolean.TRUE) {
-				closeLogFileEagerly = true;
-			}
-		}
 	}
 
 	void applyLogLevel() {
