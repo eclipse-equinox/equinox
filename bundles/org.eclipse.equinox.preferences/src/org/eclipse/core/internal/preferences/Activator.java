@@ -75,7 +75,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Obje
 		boolean shouldRegister = !"false".equalsIgnoreCase(context.getProperty(PROP_REGISTER_PERF_SERVICE)); //$NON-NLS-1$
 		if (shouldRegister) {
 			preferencesService = bundleContext.registerService(IPreferencesService.class,
-					PreferencesService.getDefault(), new Hashtable<String, Object>());
+					PreferencesService.getDefault(), new Hashtable<>());
 			osgiPreferencesService = bundleContext.registerService(org.osgi.service.prefs.PreferencesService.class,
 					new OSGiPreferencesServiceManager(bundleContext), null);
 		}
