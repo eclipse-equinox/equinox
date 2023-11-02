@@ -139,7 +139,7 @@ public class ModuleContainerUsageTest extends AbstractTest {
 		ModuleRevisionBuilder systemModuleBuilder = OSGiManifestBuilderFactory.createBuilder(getSystemManifest(),
 				Constants.SYSTEM_BUNDLE_SYMBOLICNAME, systemPackages.toString(), systemEEs.toString());
 		Module systemBundle = container.install(null, Constants.SYSTEM_BUNDLE_LOCATION, systemModuleBuilder,
-				new AtomicReference<Long>());
+				new AtomicReference<>());
 		executionEnvironments.addAll(systemBundle.getCurrentRevision()
 				.getDeclaredCapabilities(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE));
 
@@ -180,7 +180,7 @@ public class ModuleContainerUsageTest extends AbstractTest {
 	Module installModule(ModuleContainer container, String bsn, String version, String imports, String eeReqs,
 			List<BundleCapability> availableEEs) throws BundleException {
 		ModuleRevisionBuilder builder = createModuleRevisionBuilder(bsn, version, imports, eeReqs);
-		Module m = container.install(null, bsn, builder, new AtomicReference<Long>());
+		Module m = container.install(null, bsn, builder, new AtomicReference<>());
 		// Use a revision info that holds the EE_INDEX of the bundle based
 		// on the EE capability that matches the modules EE requirement
 		Collection<BundleRequirement> eeBundleReqs = m.getCurrentRevision()
