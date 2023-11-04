@@ -1,18 +1,20 @@
-/*
- * Copyright (c) OSGi Alliance (2000, 2017). All Rights Reserved.
+/*******************************************************************************
+ * Copyright (c) Contributors to the Eclipse Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *
+ * SPDX-License-Identifier: Apache-2.0 
+ *******************************************************************************/
 
 package org.osgi.util.tracker;
 
@@ -20,6 +22,7 @@ import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 import org.osgi.annotation.versioning.ConsumerType;
 import org.osgi.framework.AllServiceListener;
@@ -54,7 +57,7 @@ import org.osgi.framework.ServiceReference;
  * @param <S> The type of the service being tracked.
  * @param <T> The type of the tracked object.
  * @ThreadSafe
- * @author $Id$
+ * @author $Id: 67bfe046ad3b548a1f062cb5e2f7efd3d1707d90 $
  */
 @ConsumerType
 public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
@@ -484,7 +487,7 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 	 * @throws IllegalArgumentException If the value of timeout is negative.
 	 */
 	public T waitForService(long timeout) throws InterruptedException {
-		if (timeout < 0) {
+		if (timeout < 0L) {
 			throw new IllegalArgumentException("timeout value is negative");
 		}
 
@@ -492,8 +495,8 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 		if (object != null) {
 			return object;
 		}
-
-		final long endTime = (timeout == 0) ? 0 : (System.currentTimeMillis() + timeout);
+		final long timebound = timeout;
+		final long startTime = System.nanoTime();
 		do {
 			final Tracked t = tracked();
 			if (t == null) { /* if ServiceTracker is not open */
@@ -505,9 +508,10 @@ public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 				}
 			}
 			object = getService();
-			if (endTime > 0) { // if we have a timeout
-				timeout = endTime - System.currentTimeMillis();
-				if (timeout <= 0) { // that has expired
+			if (timebound > 0L) { // if we have a time bound
+				final long elapsed = System.nanoTime() - startTime;
+				timeout = timebound - TimeUnit.NANOSECONDS.toMillis(elapsed);
+				if (timeout <= 0L) { // time bound has expired
 					break;
 				}
 			}
