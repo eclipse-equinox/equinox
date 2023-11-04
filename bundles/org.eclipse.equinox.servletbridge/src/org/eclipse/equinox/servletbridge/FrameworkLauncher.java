@@ -46,6 +46,7 @@ public class FrameworkLauncher {
 	private static final String REFERENCE_SCHEME = "reference:"; //$NON-NLS-1$
 	private static final String CONFIG_INI = "config.ini"; //$NON-NLS-1$
 	private static final String DOT_JAR = ".jar"; //$NON-NLS-1$
+	private static final String[] VERSION_SEPS = {"_", "-" }; //$NON-NLS-1$; //$NON-NLS-2$ 
 	private static final String WS_DELIM = " \t\n\r\f"; //$NON-NLS-1$
 	protected static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
 	protected static final String FRAMEWORK_BUNDLE_NAME = "org.eclipse.osgi"; //$NON-NLS-1$
@@ -208,7 +209,8 @@ public class FrameworkLauncher {
 		FileFilter extensionBundleFilter = new FileFilter() {
 			@Override
 			public boolean accept(File candidate) {
-				return candidate.getName().startsWith(extensionBundleBSN + "_"); //$NON-NLS-1$
+				return candidate.getName().startsWith(extensionBundleBSN + VERSION_SEPS[0]) ||
+					   candidate.getName().startsWith(extensionBundleBSN + VERSION_SEPS[1]); 
 			}
 		};
 		File[] extensionBundles = plugins.listFiles(extensionBundleFilter);
@@ -285,7 +287,7 @@ public class FrameworkLauncher {
 			packageExports += ", " + extendedExports; //$NON-NLS-1$
 
 		attribs.putValue(EXPORT_PACKAGE, packageExports);
-		writeJarFile(new File(plugins, extensionBundleBSN + "_" + extensionBundleVersion + DOT_JAR), mf); //$NON-NLS-1$
+		writeJarFile(new File(plugins, extensionBundleBSN + VERSION_SEPS[0] + extensionBundleVersion + DOT_JAR), mf); //$NON-NLS-1$
 	}
 
 	private void processExtensionBundle(File extensionBundleFile) {
@@ -874,7 +876,9 @@ public class FrameworkLauncher {
 		FileFilter filter = new FileFilter() {
 			@Override
 			public boolean accept(File candidate) {
-				return candidate.getName().equals(target) || candidate.getName().startsWith(target + "_"); //$NON-NLS-1$
+				return candidate.getName().equals(target) || 
+				       candidate.getName().startsWith(target + VERSION_SEPS[0]) ||
+					   candidate.getName().startsWith(target + VERSION_SEPS[1]);
 			}
 		};
 		File[] candidates = new File(start).listFiles(filter);
@@ -896,9 +900,13 @@ public class FrameworkLauncher {
 		for (int i = 0; i < candidates.length; i++) {
 			String name = candidates[i];
 			String version = ""; //$NON-NLS-1$ // Note: directory with version suffix is always > than directory without version suffix
-			int index = name.indexOf('_');
-			if (index != -1)
-				version = name.substring(index + 1);
+			for ( String versionSep : VERSION_SEPS ) {
+				int index = name.indexOf(versionSep);
+				if (index != -1) {
+					version = name.substring(index + 1);
+					break;
+				}
+			}			
 			Object currentVersion = getVersionElements(version);
 			if (maxVersion == null) {
 				result = i;
