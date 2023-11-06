@@ -38,6 +38,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 
+@SuppressWarnings("nls")
 public class WeavingHook extends AbstractWeavingHook {
 
 	private final WeavingAdaptorFactory adaptorFactory;

@@ -28,6 +28,7 @@ import org.osgi.framework.ServiceReference;
 /**
  * The main plugin class to be used in the desktop.
  */
+@SuppressWarnings("nls")
 public class CachingServicePlugin implements BundleActivator {
 
 	public static boolean DEBUG;

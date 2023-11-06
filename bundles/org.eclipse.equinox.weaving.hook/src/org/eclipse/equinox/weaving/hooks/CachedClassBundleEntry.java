@@ -67,7 +67,7 @@ public class CachedClassBundleEntry extends BundleEntry {
 	@Override
 	public InputStream getInputStream() throws IOException {
 		if (delegate == null) {
-			System.err.println("error in: " + name);
+			System.err.println("error in: " + name); //$NON-NLS-1$
 		}
 		return delegate.getInputStream();
 	}

@@ -44,6 +44,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
  *
  * @author mlippert
  */
+@SuppressWarnings("nls")
 public class SupplementerRegistry implements ISupplementerRegistry {
 
 	/**
