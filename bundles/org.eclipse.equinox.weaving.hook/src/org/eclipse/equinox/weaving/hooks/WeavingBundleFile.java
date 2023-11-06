@@ -34,6 +34,7 @@ import org.eclipse.osgi.storage.bundlefile.BundleFile;
  * Those bundle entry objects are used to return class bytes from the cache
  * instead of the bundle itself.
  */
+@SuppressWarnings("nls")
 public class WeavingBundleFile extends AbstractWeavingBundleFile {
 
 	private final URL url;

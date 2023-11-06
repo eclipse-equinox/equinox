@@ -30,6 +30,7 @@ import org.eclipse.equinox.service.weaving.CacheEntry;
 import org.eclipse.equinox.service.weaving.ICachingService;
 import org.osgi.framework.Bundle;
 
+@SuppressWarnings("nls")
 public class CachingService implements ICachingService {
 
 	SharedClassURLHelper urlhelper;

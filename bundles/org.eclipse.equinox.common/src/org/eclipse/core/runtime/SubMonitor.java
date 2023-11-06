@@ -1189,9 +1189,9 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 
 	@Override
 	public String toString() {
-		return "SubMonitor [totalParent=" + totalParent + ", usedForParent=" + usedForParent + ", usedForChildren="
-				+ usedForChildren + ", totalForChildren=" + totalForChildren + ", beginTaskCalled=" + beginTaskCalled
-				+ "]";
+		return "SubMonitor [totalParent=" + totalParent + ", usedForParent=" + usedForParent + ", usedForChildren=" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				+ usedForChildren + ", totalForChildren=" + totalForChildren + ", beginTaskCalled=" + beginTaskCalled //$NON-NLS-1$ //$NON-NLS-2$
+				+ "]"; //$NON-NLS-1$
 	}
 
 }
