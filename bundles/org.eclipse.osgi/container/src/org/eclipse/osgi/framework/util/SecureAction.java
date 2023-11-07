@@ -370,7 +370,6 @@ public class SecureAction {
 	 * @param file the file
 	 * @param handler the URLStreamHandler
 	 * @return a URL
-	 * @throws MalformedURLException
 	 */
 	public URL getURL(final String protocol, final String host, final int port, final String file, final URLStreamHandler handler) throws MalformedURLException {
 		if (System.getSecurityManager() == null)
@@ -438,7 +437,6 @@ public class SecureAction {
 	 * Class.forName(name)
 	 * @param name the name of the class.
 	 * @return a Class
-	 * @throws ClassNotFoundException
 	 */
 	public Class<?> forName(final String name) throws ClassNotFoundException {
 		if (System.getSecurityManager() == null)
@@ -462,7 +460,6 @@ public class SecureAction {
 	 * Tries to load a class from the System ClassLoader or if that doesn't exist tries the boot ClassLoader
 	 * @param name the name of the class.
 	 * @return a Class
-	 * @throws ClassNotFoundException
 	 */
 	public Class<?> loadSystemClass(final String name) throws ClassNotFoundException {
 		if (System.getSecurityManager() == null) {
@@ -506,7 +503,6 @@ public class SecureAction {
 	 * Starts a module.
 	 * @param module the module to start
 	 * @param options the start options
-	 * @throws BundleException
 	 */
 	public void start(final Module module, final Module.StartOptions... options) throws BundleException {
 		if (System.getSecurityManager() == null) {

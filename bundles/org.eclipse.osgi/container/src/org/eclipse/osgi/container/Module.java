@@ -300,7 +300,6 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	 * nested within a started transition event lock.  A stopped transition lock
 	 * may be nested within an updated, unresolved or uninstalled transition lock.
 	 * @param transitionEvent the transition event to acquire the lock for.
-	 * @throws BundleException
 	 */
 	protected final void lockStateChange(ModuleEvent transitionEvent) throws BundleException {
 		boolean previousInterruption = Thread.interrupted();
@@ -360,7 +359,6 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	/**
 	 * Releases the lock for state changes for the specified transition event.
-	 * @param transitionEvent
 	 */
 	protected final void unlockStateChange(ModuleEvent transitionEvent) {
 		if (stateChangeLock.getHoldCount() == 0 || !stateTransitionEvents.contains(transitionEvent))
@@ -371,7 +369,6 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 
 	/**
 	 * Returns true if the current thread holds the state change lock for the specified transition event.
-	 * @param transitionEvent
 	 * @return true if the current thread holds the state change lock for the specified transition event.
 	 */
 	public final boolean holdsTransitionEventLock(ModuleEvent transitionEvent) {
@@ -756,7 +753,6 @@ public abstract class Module implements BundleReference, BundleStartLevel, Compa
 	/**
 	 * Used internally by the container to determine if any thread is in the middle
 	 * of a start operation on this module.
-	 * @return
 	 */
 	final boolean inStart() {
 		return inStart.get() > 0;

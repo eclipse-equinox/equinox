@@ -47,7 +47,6 @@ class ManifestPackageAttributes {
 	 * @param implementationVersion the package implementation version
 	 * @param implementationVendor the package implementation vendor
 	 * @param defaultAttributes the default attributes to use when the specified title, version or vendor is <code>null</code>.
-	 * @return
 	 */
 	static ManifestPackageAttributes of(String specificationTitle, String specificationVersion, String specificationVendor, String implementationTitle, String implementationVersion, String implementationVendor, ManifestPackageAttributes defaultAttributes) {
 		if (defaultAttributes == null) {

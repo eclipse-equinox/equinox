@@ -91,7 +91,6 @@ import org.eclipse.equinox.bidi.custom.StructuredTextTypeHandler;
  *   fullText = expert.leanToFullText(leanText,);
  *   System.out.println("full text = " + fullText);
  * </pre>
- * 
  */
 public interface IStructuredTextExpert {
 
@@ -182,7 +181,6 @@ public interface IStructuredTextExpert {
 	 * @return the structured text string without directional formatting characters
 	 *         which might have been added by processing it with
 	 *         {@link #leanToFullText}.
-	 *
 	 */
 	public String fullToLeanText(String text);
 

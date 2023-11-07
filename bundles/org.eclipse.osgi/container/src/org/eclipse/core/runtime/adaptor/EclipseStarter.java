@@ -1077,7 +1077,6 @@ public class EclipseStarter {
 	/**
 	 * Returns a URL which is equivalent to the given URL relative to the
 	 * specified base URL. Works only for file: URLs
-	 * @throws MalformedURLException
 	 */
 	private static URL makeRelative(URL base, URL location) throws MalformedURLException {
 		if (base == null)

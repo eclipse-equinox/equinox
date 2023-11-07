@@ -34,7 +34,6 @@ import org.osgi.framework.Bundle;
 /**
  * A CommandInterpreter to be passed to the legacy Equinox commands, executed by
  * the CommandProviderAdapter.
- *
  */
 public class CustomCommandInterpreter implements CommandInterpreter {
 	private PrintStream out = System.out;
@@ -233,7 +232,6 @@ public class CustomCommandInterpreter implements CommandInterpreter {
 	/**
 	 * Displays the more... prompt if the max line count has been reached and waits
 	 * for the operator to hit enter.
-	 *
 	 */
 	private void check4More() {
 		int max = getMaximumLinesToScroll();

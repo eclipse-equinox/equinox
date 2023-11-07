@@ -113,18 +113,12 @@ public class EquinoxLogServices {
 	private ServiceRegistration<?> frameworkLogReg;
 	private ServiceRegistration<?> perfLogReg;
 
-	/**
-	 * @throws BundleException
-	 */
 	public void start(BundleContext context) throws BundleException {
 		logServiceManager.start(context);
 		frameworkLogReg = StorageUtil.register(FrameworkLog.class.getName(), eclipseLogFactory, context);
 		perfLogReg = registerPerformanceLog(context);
 	}
 
-	/**
-	 * @throws BundleException
-	 */
 	public void stop(BundleContext context) throws BundleException {
 		frameworkLogReg.unregister();
 		perfLogReg.unregister();

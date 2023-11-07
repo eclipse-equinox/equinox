@@ -51,7 +51,6 @@ public class FragmentClasspath {
 
 	/**
 	 * Closes all the classpath entry resources for this FragmentClasspath.
-	 *
 	 */
 	public void close() {
 		for (ClasspathEntry entry : entries) {

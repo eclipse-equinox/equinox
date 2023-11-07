@@ -21,7 +21,6 @@ import org.osgi.framework.ServiceRegistration;
  * This is effectively a "closure" for calling each hook. The hook context
  * must know the type of the hook object, the method to call on the hook
  * as well as all the parameters which need to be passed to the hook method.
- *
  */
 @FunctionalInterface
 public interface HookContext<T> {

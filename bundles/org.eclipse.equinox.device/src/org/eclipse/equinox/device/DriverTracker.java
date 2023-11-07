@@ -26,7 +26,6 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * DriverTracker class. This class tracks all Driver services.
- *
  */
 public class DriverTracker extends ServiceTracker {
 	/** Driver service name */
@@ -223,7 +222,6 @@ public class DriverTracker extends ServiceTracker {
 	/**
 	 * Get the ServiceReference for a given DRIVER_ID.
 	 *
-	 * @param driver_id
 	 * @return ServiceReference to a Driver service.
 	 */
 	public ServiceReference getDriver(String driver_id) {

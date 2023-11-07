@@ -21,7 +21,6 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * DriverSelectorTracker class. This class tracks all DriverSelector services.
- *
  */
 public class DriverSelectorTracker extends ServiceTracker {
 	/** Driver service name */
@@ -120,7 +119,6 @@ public class DriverSelectorTracker extends ServiceTracker {
 	/**
 	 * Select the service with the highest service.ranking. Break ties buy selecting
 	 * the lowest service.id.
-	 *
 	 */
 	public ServiceReference breakTie(ServiceReference ref1, ServiceReference ref2) {
 		// first we check service rankings

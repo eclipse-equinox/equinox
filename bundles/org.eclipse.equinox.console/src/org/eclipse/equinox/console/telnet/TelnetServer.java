@@ -30,7 +30,6 @@ import org.osgi.framework.BundleContext;
  * A telnet server, which listens for telnet connections and starts a telnet
  * connection manager when a connection is accepted. If there are multiple
  * CommandProcessor, a telnet connection is created for each of them.
- *
  */
 public class TelnetServer extends Thread {
 

@@ -30,11 +30,6 @@ import java.security.cert.*;
 public interface CertificateVerifier {
 	/**
 	 * Verify the content of the repository.
-	 *
-	 * @throws CertificateException
-	 * @throws CertificateExpiredException
-	 * @throws CertificateParsingException
-	 * @throws SignatureException
 	 */
 	public void checkContent() throws CertificateException, CertificateExpiredException, SignatureException;
 

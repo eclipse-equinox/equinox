@@ -20,7 +20,6 @@ import java.util.Set;
 
 /**
  * This class represents a user with password and roles
- *
  */
 public class UserPrincipal implements Principal {
 	private String username;

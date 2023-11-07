@@ -35,7 +35,6 @@ import org.osgi.framework.BundleContext;
  * This class manages a ssh connection. It is responsible for wrapping the
  * original io streams from the socket, and starting a CommandSession to execute
  * commands from the ssh.
- *
  */
 public class SshSession extends Thread implements Closeable {
 	private CommandProcessor processor;

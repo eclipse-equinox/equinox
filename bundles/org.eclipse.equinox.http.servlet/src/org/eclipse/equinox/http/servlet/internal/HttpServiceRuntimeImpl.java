@@ -1351,9 +1351,6 @@ public class HttpServiceRuntimeImpl implements HttpServiceRuntime,
 		// is registered multiple times. This is unfortunate but is an error case on the
 		// client anyway.
 		class LegacyFilter implements Filter {
-			/**
-			 * @throws ServletException
-			 */
 			@Override
 			public void init(FilterConfig filterConfig) throws ServletException {
 				try {
@@ -1385,9 +1382,6 @@ public class HttpServiceRuntimeImpl implements HttpServiceRuntime,
 			this.servlet = servlet;
 		}
 
-		/**
-		 * @throws ServletException
-		 */
 		@Override
 		public void init(ServletConfig config) throws ServletException {
 			try {

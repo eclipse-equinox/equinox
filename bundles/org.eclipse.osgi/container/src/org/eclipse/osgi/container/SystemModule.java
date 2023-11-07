@@ -178,9 +178,6 @@ public abstract class SystemModule extends Module {
 		}
 	}
 
-	/**
-	 * @throws BundleException
-	 */
 	protected void initWorker() throws BundleException {
 		// Do nothing
 	}
@@ -239,7 +236,6 @@ public abstract class SystemModule extends Module {
 	/**
 	 * Restarts the module container.
 	 * @see Framework#update()
-	 * @throws BundleException
 	 */
 	public void update() throws BundleException {
 		getContainer().checkAdminPermission(getBundle(), AdminPermission.LIFECYCLE);

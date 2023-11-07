@@ -66,8 +66,6 @@ public class DirectExtensionRemoveTest extends BaseExtensionRegistryRun {
 	/**
 	 * Tests that configuration elements associated with the removed extension are
 	 * removed.
-	 *
-	 * @throws IOException
 	 */
 	@Test
 	public void testAssociatedConfigElements() throws IOException {

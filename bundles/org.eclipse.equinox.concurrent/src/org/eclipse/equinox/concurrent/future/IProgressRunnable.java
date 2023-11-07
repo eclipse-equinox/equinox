@@ -31,7 +31,6 @@ public interface IProgressRunnable<ResultType> {
 	 * 
 	 * @param monitor the IProgressMonitor associated with this callable
 	 * @return result from the call
-	 * @throws Exception
 	 */
 	ResultType run(IProgressMonitor monitor) throws Exception;
 }

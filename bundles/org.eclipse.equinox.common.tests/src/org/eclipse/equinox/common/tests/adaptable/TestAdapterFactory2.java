@@ -19,8 +19,6 @@ import java.util.function.Supplier;
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.junit.Assert;
 
-/**
- */
 public class TestAdapterFactory2 extends Assert implements IAdapterFactory {
 
 	private Supplier<TestAdapter2> supplier;

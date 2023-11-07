@@ -231,7 +231,6 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 	 * @return The roles managed by this UserAdmin whose properties match the
 	 *         specified filter criteria, or all roles if a <code>null</code> filter
 	 *         is specified.
-	 *
 	 */
 	@Override
 	public org.osgi.service.useradmin.Role[] getRoles(String filterString) throws InvalidSyntaxException {

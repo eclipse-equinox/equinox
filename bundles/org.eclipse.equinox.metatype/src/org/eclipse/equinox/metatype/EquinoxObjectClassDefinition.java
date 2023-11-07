@@ -23,7 +23,6 @@ import org.osgi.service.metatype.ObjectClassDefinition;
  * other than the metatype namespace as extension attributes.
  * 
  * @since 1.2
- *
  */
 public interface EquinoxObjectClassDefinition extends ObjectClassDefinition, Extendable {
 	/**

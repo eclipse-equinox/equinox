@@ -143,8 +143,6 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 
 	/**
 	 * Test relative names, absolute names, and children names
-	 * 
-	 * @throws StorageException
 	 */
 	@Test
 	public void testNames() throws IOException, StorageException {
@@ -255,8 +253,6 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 
 	/**
 	 * Tests node removal.
-	 * 
-	 * @throws StorageException
 	 */
 	@Test
 	public void testNodeRemoval() throws IOException, StorageException {
@@ -316,8 +312,6 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 
 	/**
 	 * Tests validation of node paths.
-	 * 
-	 * @throws Throwable
 	 */
 	@Test
 	public void testPathValidation() throws Throwable {
@@ -364,10 +358,6 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 
 	/**
 	 * Tests data types
-	 * 
-	 * @throws StorageException
-	 * @throws IOException
-	 * @throws MalformedURLException
 	 */
 	@Test
 	public void testDataTypes() throws StorageException, MalformedURLException, IOException {

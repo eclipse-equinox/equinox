@@ -45,7 +45,6 @@ public class WeavingBundleFile extends AbstractWeavingBundleFile {
 	 * @param adaptorProvider A provider that allows this wrapper to gain access to
 	 *                        the adaptor of this bundle
 	 * @param bundleFile      The wrapped bundle file
-	 * @throws IOException
 	 */
 	public WeavingBundleFile(final BundleAdaptorProvider adaptorProvider, final BundleFile bundleFile) {
 		super(adaptorProvider, bundleFile);

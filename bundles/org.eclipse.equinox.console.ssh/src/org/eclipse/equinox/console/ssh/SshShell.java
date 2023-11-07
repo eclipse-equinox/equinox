@@ -40,7 +40,6 @@ import org.osgi.framework.BundleContext;
  * This class manages a ssh connection. It is responsible for starting a
  * sessions to execute commands from the ssh. If there are multiple
  * CommandProcessors, a session is started for each of them.
- *
  */
 public class SshShell implements Command {
 

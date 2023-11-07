@@ -239,7 +239,6 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 *
 	 * @param key header name.
 	 * @param value header value.
-	 * @throws UnsupportedOperationException
 	 */
 	@Override
 	public synchronized V put(K key, V value) {
@@ -252,7 +251,6 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 * Always throws UnsupportedOperationException.
 	 *
 	 * @param key header name.
-	 * @throws UnsupportedOperationException
 	 */
 	@Override
 	public V remove(Object key) {

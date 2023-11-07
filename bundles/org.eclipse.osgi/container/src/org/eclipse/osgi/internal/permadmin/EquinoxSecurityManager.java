@@ -23,7 +23,6 @@ import org.osgi.service.condpermadmin.Condition;
  *
  * This security manager implements the ConditionalPermission processing for
  * OSGi. It is to be used with ConditionalPermissionAdmin.
- *
  */
 public class EquinoxSecurityManager extends SecurityManager {
 	/*

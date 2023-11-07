@@ -30,7 +30,6 @@ import javax.security.auth.x500.X500Principal;
  * In principals which contain multiple occurrences of the same attribute,the
  * default for all the methods is to return the most significant (first)
  * attribute found.
- * 
  */
 
 public class X500PrincipalHelper {
@@ -77,7 +76,6 @@ public class X500PrincipalHelper {
 	 * <p>
 	 * 
 	 * @return the Most significant common name attribute.
-	 * 
 	 */
 	public String getCN() {
 		return findPart(attrCN);
@@ -90,7 +88,6 @@ public class X500PrincipalHelper {
 	 * <p>
 	 * 
 	 * @return the Most significant OU attribute.
-	 * 
 	 */
 
 	public String getOU() {
@@ -105,7 +102,6 @@ public class X500PrincipalHelper {
 	 * <p>
 	 * 
 	 * @return the Most significant O attribute.
-	 * 
 	 */
 
 	public String getO() {
@@ -118,7 +114,6 @@ public class X500PrincipalHelper {
 	 * <p>
 	 * 
 	 * @return the C attribute.
-	 * 
 	 */
 	public String getC() {
 		return findPart(attrC);
@@ -129,7 +124,6 @@ public class X500PrincipalHelper {
 	 * <p>
 	 * 
 	 * @return the L attribute.
-	 * 
 	 */
 	public String getL() {
 		return findPart(attrL);
@@ -140,7 +134,6 @@ public class X500PrincipalHelper {
 	 * <p>
 	 * 
 	 * @return the ST attribute.
-	 * 
 	 */
 	public String getST() {
 		return findPart(attrST);
@@ -151,7 +144,6 @@ public class X500PrincipalHelper {
 	 * <p>
 	 * 
 	 * @return the STREET attribute.
-	 * 
 	 */
 	public String getSTREET() {
 		return findPart(attrSTREET);
@@ -163,7 +155,6 @@ public class X500PrincipalHelper {
 	 * <p>
 	 * 
 	 * @return the EMAILADDRESS attribute.
-	 * 
 	 */
 	public String getEMAILDDRESS() {
 		return findPart(attrEMAIL);
@@ -232,7 +223,6 @@ public class X500PrincipalHelper {
 	 *                    to be returned
 	 * @return ArrayList containing the string values of the requested attribute.
 	 *         Values are in the order they occur. May be empty.
-	 * 
 	 */
 	public ArrayList<String> getAllValues(String attributeID) {
 		ArrayList<String> retList = new ArrayList<>();

@@ -86,7 +86,6 @@ public class KeyStoreTrustEngine extends TrustEngine {
 	/**
 	 * Return the KeyStore managed
 	 * @return The KeyStore instance, initialized and loaded
-	 * @throws KeyStoreException
 	 */
 	private synchronized KeyStore getKeyStore() throws IOException, GeneralSecurityException {
 		if (null == keyStore) {
@@ -320,7 +319,6 @@ public class KeyStoreTrustEngine extends TrustEngine {
 	/**
 	 * Get an input stream for the KeyStore managed
 	 * @return inputstream - the stream
-	 * @throws KeyStoreException
 	 */
 	private InputStream getInputStream() throws IOException {
 		return new FileInputStream(new File(getPath()));
@@ -329,7 +327,6 @@ public class KeyStoreTrustEngine extends TrustEngine {
 	/**
 	 * Get an output stream for the KeyStore managed
 	 * @return outputstream - the stream
-	 * @throws KeyStoreException
 	 */
 	private OutputStream getOutputStream() throws IOException {
 

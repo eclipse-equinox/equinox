@@ -24,7 +24,6 @@ import org.osgi.framework.wiring.BundleRevision;
 public class FragmentUtils {
 
 	/*
-	 * 
 	 */
 	public static boolean isFragment(Bundle bundle) {
 		return (bundle.adapt(BundleRevision.class).getTypes() & BundleRevision.TYPE_FRAGMENT) != 0;

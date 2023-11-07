@@ -33,7 +33,6 @@ import org.eclipse.equinox.console.storage.SecureUserStore;
 /**
  * This class implements a JAAS LoginModule, which performs username/password
  * based authentication. It reads the user data from the store.
- *
  */
 public class SecureStorageLoginModule implements LoginModule {
 

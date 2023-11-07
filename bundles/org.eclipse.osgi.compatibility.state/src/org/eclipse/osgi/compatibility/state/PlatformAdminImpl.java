@@ -129,9 +129,6 @@ public class PlatformAdminImpl implements PlatformAdmin {
 		return StateHelperImpl.getInstance();
 	}
 
-	/**
-	 * @throws BundleException
-	 */
 	@Override
 	public void commit(State state) throws BundleException {
 		throw new UnsupportedOperationException();

@@ -44,8 +44,6 @@ public class FilePath {
 
 	/**
 	 * Constructs a new file path from the given File object.
-	 *
-	 * @param location
 	 */
 	public FilePath(File location) {
 		initialize(location.getPath());
@@ -57,8 +55,6 @@ public class FilePath {
 
 	/**
 	 * Constructs a new file path from the given string path.
-	 *
-	 * @param original
 	 */
 	public FilePath(String original) {
 		initialize(original);

@@ -103,10 +103,6 @@ public class HelpCommand {
 	 * 
 	 * If a command name is passed as argument to the help command, then the help
 	 * message only for the particular command is displayed (if such is defined).
-	 * 
-	 * @param session
-	 * @param args
-	 * @throws Exception
 	 */
 	public void help(final CommandSession session, String... args) throws Exception {
 		String command = null;

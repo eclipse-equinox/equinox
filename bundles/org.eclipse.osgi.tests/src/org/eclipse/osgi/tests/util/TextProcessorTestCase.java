@@ -17,7 +17,6 @@ import junit.framework.TestCase;
 
 /**
  * Common class for TextProcessor test cases.
- *
  */
 public abstract class TextProcessorTestCase extends TestCase {
 	// some Hebrew strings to use for test cases
@@ -94,8 +93,6 @@ public abstract class TextProcessorTestCase extends TestCase {
 
 	/**
 	 * Constructor for class
-	 *
-	 * @param name
 	 */
 	public TextProcessorTestCase(String name) {
 		super(name);

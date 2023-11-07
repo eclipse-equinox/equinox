@@ -39,7 +39,6 @@ public class DirBundleFile extends BundleFile {
 	/**
 	 * Constructs a DirBundleFile
 	 * @param basefile the base file
-	 * @throws IOException
 	 */
 	public DirBundleFile(File basefile, boolean enableStrictBundleEntryPath) throws IOException {
 		super(getBaseFile(basefile, enableStrictBundleEntryPath));

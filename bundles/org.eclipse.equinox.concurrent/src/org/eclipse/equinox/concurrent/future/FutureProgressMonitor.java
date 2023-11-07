@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.ProgressMonitorWrapper;
  * provided by the IExecutor that creates the future instance.
  * 
  * @since 1.1
- * 
  */
 public class FutureProgressMonitor extends ProgressMonitorWrapper {
 

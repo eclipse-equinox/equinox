@@ -98,7 +98,6 @@ public class StreamManagerTests extends OSGiTest {
 	/**
 	 * This tests that FM will keep a backup version of a reliableFile and that
 	 * corrupting the reliableFile will recover the previous contents.
-	 *
 	 */
 	public void testReliableFile() {
 		String fileName = "testReliableFile.txt";
@@ -231,7 +230,6 @@ public class StreamManagerTests extends OSGiTest {
 	/**
 	 * This tests if migration from a prior (non-ReliableFile) .fileTable
 	 * to the current .fileTable is correct.
-	 *
 	 */
 	public void testMigration() {
 		File testDir = new File(base, "testMigrationManager");
@@ -301,7 +299,6 @@ public class StreamManagerTests extends OSGiTest {
 
 	/**
 	 * This tests that an output stream abort behave as expected.
-	 *
 	 */
 	public void testAbort() {
 		testAbort(true);
@@ -366,7 +363,6 @@ public class StreamManagerTests extends OSGiTest {
 
 	/**
 	 * This tests if getting an output stream-set work properly.
-	 *
 	 */
 	public void testGetOutputStreamSet() {
 		testGetOutputStreamSet(true);
@@ -435,7 +431,6 @@ public class StreamManagerTests extends OSGiTest {
 
 	/**
 	 * This tests if aborting a managed stream-set works as expected
-	 *
 	 */
 	public void testAbortStreamSet() {
 		testAbortSet(true);

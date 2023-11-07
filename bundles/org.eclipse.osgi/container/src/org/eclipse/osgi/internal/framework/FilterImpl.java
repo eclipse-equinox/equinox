@@ -1639,7 +1639,6 @@ public abstract class FilterImpl implements Filter {
 		/**
 		 * Create a case insensitive map from the specified dictionary.
 		 *
-		 * @param dictionary
 		 * @throws IllegalArgumentException If {@code dictionary} contains case
 		 *             variants of the same key name.
 		 */

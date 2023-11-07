@@ -78,7 +78,6 @@ public class ConsoleManager {
 
 	/**
 	 *  Stops the OSGi Command console
-	 *
 	 */
 	public void stopConsole() {
 		// nothing

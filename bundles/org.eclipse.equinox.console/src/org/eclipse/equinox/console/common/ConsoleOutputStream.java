@@ -92,8 +92,6 @@ public class ConsoleOutputStream extends OutputStream {
 
 	/**
 	 * Empties the buffer and sends data to the socket output stream.
-	 *
-	 * @throws IOException
 	 */
 	@Override
 	public synchronized void flush() throws IOException {
@@ -125,8 +123,6 @@ public class ConsoleOutputStream extends OutputStream {
 
 	/**
 	 * Closes this OutputStream.
-	 *
-	 * @throws IOException
 	 */
 	@Override
 	public void close() throws IOException {

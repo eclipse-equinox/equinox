@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * Abstract implementation of {@link IExecutor} and {@link IRunnableExecutor}.
  * 
  * @since 1.1
- * 
  */
 public abstract class AbstractExecutor implements IRunnableExecutor, IExecutor {
 

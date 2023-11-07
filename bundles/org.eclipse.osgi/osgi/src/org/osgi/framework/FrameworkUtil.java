@@ -365,9 +365,7 @@ public class FrameworkUtil {
 		 * wildcard ("*"), or a List of Strings, each String representing a
 		 * name/value pair in the RDN.
 		 * 
-		 * @param pattern
 		 * @return a list of DNs.
-		 * @throws IllegalArgumentException
 		 */
 		private static List<Object> parseDNchainPattern(String pattern) {
 			if (pattern == null) {
@@ -642,7 +640,6 @@ public class FrameworkUtil {
 		 * Matches a distinguished name chain against a pattern of a
 		 * distinguished name chain.
 		 * 
-		 * @param dnChain
 		 * @param pattern the pattern of distinguished name (DN) chains to match
 		 *        against the dnChain. Wildcards ("*" or "-") can be used in
 		 *        three cases:
@@ -669,7 +666,6 @@ public class FrameworkUtil {
 		 *        common name of "m*" not any common name starting with "m".</li>
 		 *        </ol>
 		 * @return true if dnChain matches the pattern.
-		 * @throws IllegalArgumentException
 		 */
 		static boolean match(String pattern, List<String> dnChain) {
 			List<Object> parsedDNChain;

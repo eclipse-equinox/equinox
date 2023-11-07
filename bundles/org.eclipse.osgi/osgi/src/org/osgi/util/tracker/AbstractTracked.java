@@ -144,7 +144,6 @@ abstract class AbstractTracked<S, T, R> {
 	 * 
 	 * This method must be called from Tracker's open method while not
 	 * synchronized on this object after the add listener call.
-	 * 
 	 */
 	void trackInitial() {
 		while (true) {

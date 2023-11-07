@@ -128,7 +128,6 @@ public class BufferedRandomInputStream extends InputStream {
 	 * a buffer-friendly manner.
 	 *
 	 * @param pos offset
-	 * @throws IOException
 	 */
 	public void seek(long pos) throws IOException {
 		if (pos >= buffer_start && pos < buffer_start + buffer_size) {
@@ -146,7 +145,6 @@ public class BufferedRandomInputStream extends InputStream {
 	 * Supplies functionality of the {@link java.io.RandomAccessFile#length()}.
 	 * 
 	 * @return file length
-	 * @throws IOException
 	 */
 	public long length() throws IOException {
 		return inputFile.length();

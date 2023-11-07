@@ -23,7 +23,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 /**
  * Acts as abridge between {@link IAdapterManager} services registered in the
  * OSGi-Service-Registry and AdapterManager
- *
  */
 public class AdapterFactoryBridge
 		implements ServiceTrackerCustomizer<IAdapterFactory, AdapterFactoryBridge.LazyAdapterFactory> {

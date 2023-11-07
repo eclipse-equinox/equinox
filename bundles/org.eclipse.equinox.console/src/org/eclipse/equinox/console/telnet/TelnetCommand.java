@@ -30,7 +30,6 @@ import org.osgi.service.cm.ManagedService;
 
 /**
  * This class implements a command for starting/stopping a simple telnet server.
- *
  */
 public class TelnetCommand {
 

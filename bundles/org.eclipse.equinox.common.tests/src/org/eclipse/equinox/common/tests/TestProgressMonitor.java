@@ -17,9 +17,6 @@ package org.eclipse.equinox.common.tests;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.junit.Assert;
 
-/**
- *
- */
 public class TestProgressMonitor implements IProgressMonitor {
 
 	private double totalWork;

@@ -52,7 +52,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
  * @param <ResultType> the type that will be returned by {@link #get()} and/or
  *                     {@link #get(long)}
  * @since 1.1
- * 
  */
 public interface IFuture<ResultType> {
 

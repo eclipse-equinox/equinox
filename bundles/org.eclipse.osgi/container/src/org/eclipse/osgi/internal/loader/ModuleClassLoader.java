@@ -79,7 +79,6 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 
 	/**
 	 * Holds the result of a defining a class.
-	 *
 	 */
 	public static class DefineClassResult {
 		/**

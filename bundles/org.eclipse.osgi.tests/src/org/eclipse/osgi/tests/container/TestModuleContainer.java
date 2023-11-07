@@ -1833,8 +1833,6 @@ public class TestModuleContainer extends AbstractTest {
 
 	/**
 	 * Test optional constraints
-	 * @throws BundleException
-	 * @throws IOException
 	 */
 	@Test
 	public void testUses5Importer() throws BundleException, IOException {

@@ -30,7 +30,6 @@ import org.osgi.framework.BundleContext;
  * This class manages a telnet connection. It is responsible for wrapping the
  * original io streams from the socket, and starting a CommandSession to execute
  * commands from the telnet.
- *
  */
 public class TelnetConnection extends Thread implements Closeable {
 

@@ -314,7 +314,6 @@ public interface State {
 	 * <pre>
 	 *  if (this.getResolver() != value) value.setState(this);
 	 * </pre>
-	 *
 	 */
 	// TODO what happens if you set the Resolver after some bundles have
 	// been added to the state but it is not resolved?  Should setting

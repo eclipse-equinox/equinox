@@ -216,7 +216,6 @@ public class ClasspathEntry {
 	/**
 	 * Adds the BundleFile objects for this classpath in the proper order
 	 * for searching for resources. This handles Multi-Release ordering also.
-	 * @param bundlefiles
 	 */
 	public void addBundleFiles(List<BundleFile> bundlefiles) {
 		bundlefiles.addAll(mrBundleFiles);

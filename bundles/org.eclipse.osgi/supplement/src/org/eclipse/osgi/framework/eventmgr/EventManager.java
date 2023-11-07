@@ -129,7 +129,6 @@ public class EventManager {
 	/**
 	 * EventManager constructor. An EventManager object is responsible for
 	 * the delivery of events to listeners via an EventDispatcher.
-	 *
 	 */
 	public EventManager() {
 		this(null, null);

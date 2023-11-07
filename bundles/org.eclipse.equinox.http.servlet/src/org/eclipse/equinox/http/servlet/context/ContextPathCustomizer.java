@@ -52,7 +52,6 @@ public abstract class ContextPathCustomizer {
 	 * not provide the &quot;osgi.http.whiteboard.context.select&quot; service
 	 * property.
 	 * 
-	 * @param httpWhiteBoardService
 	 * @return a service filter that is used to select the default
 	 *         SErvletContextHelper for the specified whiteboard service.
 	 */

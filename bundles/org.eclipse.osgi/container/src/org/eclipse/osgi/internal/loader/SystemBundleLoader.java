@@ -100,7 +100,6 @@ public class SystemBundleLoader extends BundleLoader {
 	/**
 	 * The ClassLoader that loads OSGi framework classes is used to find the resource.
 	 * This method never gets called because there is no ModuleClassLoader for the framework.
-	 * @throws IOException
 	 */
 	@Override
 	public Enumeration<URL> findResources(String name) throws IOException {

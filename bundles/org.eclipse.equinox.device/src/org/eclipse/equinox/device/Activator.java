@@ -25,7 +25,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  *
  * This implementation does not include the optimizations in section 8.7.4 of
  * the OSGi SP R2 spec.
- *
  */
 public class Activator implements BundleActivator, ServiceTrackerCustomizer, FrameworkListener, Runnable {
 	protected final static boolean DEBUG = false;
@@ -93,7 +92,6 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 
 	/**
 	 * Create a DeviceManager object.
-	 *
 	 */
 
 	public Activator() {
@@ -174,7 +172,6 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 
 	/**
 	 * Start the DeviceManager thread.
-	 *
 	 */
 	public void startDeviceManager() {
 		if (!running) {

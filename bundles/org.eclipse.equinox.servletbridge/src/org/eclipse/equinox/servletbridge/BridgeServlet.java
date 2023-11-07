@@ -127,7 +127,6 @@ public class BridgeServlet extends HttpServlet {
 	 * service is called by the Servlet Container and will first determine if the
 	 * request is a framework control and will otherwise try to delegate to the
 	 * registered servlet delegate
-	 * 
 	 */
 	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

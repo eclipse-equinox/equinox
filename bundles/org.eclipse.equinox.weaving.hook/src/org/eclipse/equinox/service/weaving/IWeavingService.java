@@ -83,7 +83,6 @@ public interface IWeavingService {
 	 * @param loader     The classloader whichi s responsible for loading the class
 	 * @return The modified (woven) bytecode of the class or null, if no
 	 *         modification happened
-	 * @throws IOException
 	 */
 	public byte[] preProcess(String name, byte[] classbytes, ClassLoader loader) throws IOException;
 

@@ -67,9 +67,6 @@ public abstract class ImmutableMap implements Cloneable {
 		/**
 		 * This method destructively adds the key/value pair to the table. The caller
 		 * must ensure the table has an empty slot before calling this method.
-		 * 
-		 * @param key
-		 * @param value
 		 */
 		@Override
 		protected void internalPut(String key, String value) {
@@ -224,7 +221,6 @@ public abstract class ImmutableMap implements Cloneable {
 	 * Returns the value associated with this key in the map, or <code>null</code>
 	 * if the key is not present in the map.
 	 * 
-	 * @param key
 	 * @return The value associated with this key, or <code>null</code>
 	 */
 	public abstract String get(String key);
@@ -238,9 +234,6 @@ public abstract class ImmutableMap implements Cloneable {
 	/**
 	 * Destructively adds a key/value pair to this map. The caller must ensure there
 	 * is enough room in this map to proceed.
-	 *
-	 * @param key
-	 * @param value
 	 */
 	protected abstract void internalPut(String key, String value);
 
@@ -253,8 +246,6 @@ public abstract class ImmutableMap implements Cloneable {
 	 * Returns a new map that is equal to this one, except with the given key/value
 	 * pair added.
 	 *
-	 * @param key
-	 * @param value
 	 * @return The map containing the given key/value pair
 	 */
 	public abstract ImmutableMap put(String key, String value);
@@ -262,7 +253,6 @@ public abstract class ImmutableMap implements Cloneable {
 	/**
 	 * Returns a map that is equal to this one, except without the given key.
 	 * 
-	 * @param key
 	 * @return A map with the given key removed
 	 */
 	public abstract ImmutableMap removeKey(String key);

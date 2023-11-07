@@ -27,7 +27,6 @@ public class FrameworkDebugTraceEntry {
 
 	/**
 	 * The date and time when the trace occurred.
-	 *
 	 */
 	private final long timestamp;
 
@@ -269,10 +268,6 @@ public class FrameworkDebugTraceEntry {
 		return lineNumber;
 	}
 
-	/**
-	 *
-	 * @param newMessage
-	 */
 	void setMessage(final String newMessage) {
 
 		message = newMessage;

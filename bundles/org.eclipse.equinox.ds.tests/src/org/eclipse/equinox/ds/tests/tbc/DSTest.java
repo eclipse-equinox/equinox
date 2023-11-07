@@ -267,10 +267,6 @@ public class DSTest {
 
 	/**
 	 * This methods takes care of the configurations related to this test
-	 * 
-	 * @throws IOException
-	 * @throws InvalidSyntaxException
-	 * @throws InterruptedException
 	 */
 	private void clearConfigurations() throws IOException, InvalidSyntaxException {
 		ServiceReference cmSR = getContext().getServiceReference(ConfigurationAdmin.class.getName());
@@ -338,9 +334,6 @@ public class DSTest {
 		}
 	}
 
-	/**
-	 * @param propertyKey
-	 */
 	private int getSystemProperty(String propertyKey, int defaultValue) {
 		String propertyString = System.getProperty(propertyKey);
 		int sleepTime = defaultValue;
@@ -912,9 +905,6 @@ public class DSTest {
 
 	/**
 	 * Returns the number of available services for the passed tracker
-	 * 
-	 * @param tracker
-	 * @return
 	 */
 	private int countAvailableServices(ServiceTracker tracker) {
 		if (tracker == null)

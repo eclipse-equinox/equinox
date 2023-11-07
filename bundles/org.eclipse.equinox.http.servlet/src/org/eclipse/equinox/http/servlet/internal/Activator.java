@@ -34,9 +34,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class Activator implements BundleActivator, ServiceTrackerCustomizer<HttpServlet, HttpTuple> {
 
-	/**
-	 * 
-	 */
 	private static final Random RANDOM = new Random();
 	private static final String DEFAULT_SERVICE_DESCRIPTION = "Equinox Servlet Bridge"; //$NON-NLS-1$
 	private static final String DEFAULT_SERVICE_VENDOR = "Eclipse.org"; //$NON-NLS-1$

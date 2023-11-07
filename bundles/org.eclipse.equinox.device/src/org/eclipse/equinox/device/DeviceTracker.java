@@ -22,7 +22,6 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * DeviceTracker class. This class has the logic for refining a Device service.
- *
  */
 public class DeviceTracker extends ServiceTracker {
 	/** OSGi Device class name */
@@ -146,7 +145,6 @@ public class DeviceTracker extends ServiceTracker {
 
 	/**
 	 * Attempt to refine this Device service.
-	 *
 	 */
 	public void refine() {
 		if (Activator.DEBUG) {
@@ -261,7 +259,6 @@ public class DeviceTracker extends ServiceTracker {
 
 	/**
 	 * Readonly Dictionary for device properties.
-	 *
 	 */
 	static class Properties extends Hashtable<String, Object> {
 		private static final long serialVersionUID = -8489170394007899809L;
@@ -321,7 +318,6 @@ public class DeviceTracker extends ServiceTracker {
 		 *
 		 * @param key   header name.
 		 * @param value header value.
-		 * @throws UnsupportedOperationException
 		 */
 		public Object put(String key, Object value) {
 			throw new UnsupportedOperationException();
@@ -331,7 +327,6 @@ public class DeviceTracker extends ServiceTracker {
 		 * Override remove to disable it. This Dictionary is readonly once built.
 		 *
 		 * @param key header name.
-		 * @throws UnsupportedOperationException
 		 */
 		public Object remove(Object key) {
 			throw new UnsupportedOperationException();

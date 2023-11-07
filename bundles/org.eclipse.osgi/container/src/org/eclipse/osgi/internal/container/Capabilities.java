@@ -255,7 +255,6 @@ public class Capabilities {
 	 * provided by the specified revision from this database.  These capabilities
 	 * must no longer be available for lookup with the
 	 * {@link #findCapabilities(Requirement)} method.
-	 * @param revision
 	 */
 	public void removeCapabilities(ModuleRevision revision) {
 		for (ModuleCapability capability : revision.getModuleCapabilities(null)) {
