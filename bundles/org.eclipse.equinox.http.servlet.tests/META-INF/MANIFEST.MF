@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.equinox.http.servlet.tests
 Bundle-Vendor: Eclipse.org - Equinox
 Bundle-SymbolicName: org.eclipse.equinox.http.servlet.tests
-Bundle-Version: 1.9.0.qualifier
+Bundle-Version: 1.9.100.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Eclipse-BundleShape: dir
 Require-Bundle: org.junit;bundle-version="4.0",

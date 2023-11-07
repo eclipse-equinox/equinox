@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.equinox.common; singleton:=true
-Bundle-Version: 3.18.200.qualifier
+Bundle-Version: 3.18.300.qualifier
 Bundle-Localization: plugin
 Export-Package: org.eclipse.core.internal.boot;x-friends:="org.eclipse.core.resources,org.eclipse.pde.build",
  org.eclipse.core.internal.runtime;common=split;mandatory:=common;

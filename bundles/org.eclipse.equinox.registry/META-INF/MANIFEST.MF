@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.equinox.registry;singleton:=true
-Bundle-Version: 3.11.400.qualifier
+Bundle-Version: 3.11.500.qualifier
 Bundle-Localization: plugin
 Export-Package: org.eclipse.core.internal.adapter;x-internal:=true,
  org.eclipse.core.internal.registry;x-friends:="org.eclipse.core.runtime",
