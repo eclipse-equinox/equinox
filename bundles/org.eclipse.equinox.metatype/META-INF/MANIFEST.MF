@@ -1,6 +1,6 @@
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
-Bundle-Version: 1.6.400.qualifier
+Bundle-Version: 1.6.500.qualifier
 Bundle-SymbolicName: org.eclipse.equinox.metatype
 Bundle-Activator: org.eclipse.equinox.metatype.impl.Activator
 Import-Package: javax.xml.parsers,
