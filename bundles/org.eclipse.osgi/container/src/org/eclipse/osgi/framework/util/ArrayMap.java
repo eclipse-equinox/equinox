@@ -34,8 +34,6 @@ public class ArrayMap<K, V> implements Collection<K> {
 	/**
 	 * Note that the keys and values are not copied.  Changes to this ArrayMap
 	 * will change the values of the keys and values Lists.
-	 * @param keys
-	 * @param values
 	 */
 	public ArrayMap(List<K> keys, List<V> values) {
 		if (keys.size() != values.size())

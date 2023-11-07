@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * {@link IProgressMonitor}) to be executed via an {@link IExecutor}.
  * 
  * @since 1.1
- * 
  */
 public interface IListenableFuture<ResultType> extends IFuture<ResultType> {
 

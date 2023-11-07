@@ -23,7 +23,6 @@ import java.util.Set;
  * metatype schema, but it is not strictly limited to this use.
  * 
  * @since 1.2
- *
  */
 public interface Extendable {
 	/**

@@ -38,9 +38,6 @@ public abstract class ModuleLoader {
 
 	/**
 	 *
-	 * @param path
-	 * @param filePattern
-	 * @param options
 	 * @return TODO
 	 * @see ModuleWiring#listResources(String, String, int)
 	 */

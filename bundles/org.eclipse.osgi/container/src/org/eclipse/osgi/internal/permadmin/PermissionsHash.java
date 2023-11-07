@@ -31,7 +31,6 @@ import java.util.Hashtable;
  * collections of permissions, as long as it is not necessary
  * to remember when multiple occurances of .equal permissions
  * are added.
- *
  */
 class PermissionsHash extends PermissionCollection {
 	private static final long serialVersionUID = 3258408426341284153L;
@@ -42,7 +41,6 @@ class PermissionsHash extends PermissionCollection {
 
 	/**
 	 * Constructs a new instance of this class.
-	 *
 	 */
 	public PermissionsHash() {
 		super();

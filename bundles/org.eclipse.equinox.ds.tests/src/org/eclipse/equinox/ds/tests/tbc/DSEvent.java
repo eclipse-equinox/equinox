@@ -52,9 +52,6 @@ public class DSEvent implements Comparable {
 
 	/**
 	 * Returns whether this event is before the passed one
-	 * 
-	 * @param event
-	 * @return
 	 */
 	public boolean before(DSEvent event) {
 		if (event.time > this.time) {

@@ -33,7 +33,6 @@ public class EventListeners<K, V> {
 
 	/**
 	 * Creates an empty listener list.
-	 *
 	 */
 	public EventListeners() {
 		super();

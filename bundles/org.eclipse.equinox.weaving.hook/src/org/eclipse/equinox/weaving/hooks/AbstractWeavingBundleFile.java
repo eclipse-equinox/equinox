@@ -32,9 +32,6 @@ public abstract class AbstractWeavingBundleFile extends BundleFileWrapper {
 		this.delegate = bundleFile;
 	}
 
-	/**
-	 * @return
-	 */
 	public IWeavingAdaptor getAdaptor() {
 		return this.adaptorProvider.getAdaptor();
 	}

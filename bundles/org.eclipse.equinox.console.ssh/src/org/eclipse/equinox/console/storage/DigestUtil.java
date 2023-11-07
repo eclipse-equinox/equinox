@@ -32,7 +32,6 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * This class provides utility method for one-way hashing of strings
- * 
  */
 public class DigestUtil {
 	private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
@@ -46,7 +45,6 @@ public class DigestUtil {
 	 * 
 	 * @param originalText the string to be hashed
 	 * @return hashed string
-	 * @throws Exception
 	 */
 	public static String encrypt(String originalText) throws Exception {
 		try {

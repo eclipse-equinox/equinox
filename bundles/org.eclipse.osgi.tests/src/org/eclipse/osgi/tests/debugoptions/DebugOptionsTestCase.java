@@ -1213,7 +1213,6 @@ public class DebugOptionsTestCase extends CoreTest {
 
 		/**
 		 * The date and time when the trace occurred.
-		 *
 		 */
 		private final long timestamp;
 

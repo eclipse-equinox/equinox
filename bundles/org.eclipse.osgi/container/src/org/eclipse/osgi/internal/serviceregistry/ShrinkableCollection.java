@@ -33,7 +33,6 @@ import java.util.List;
  * All the optional <code>Collection</code> operations except
  * <code>add</code> and <code>addAll</code> are supported. Attempting to add to the
  * collection will result in an <code>UnsupportedOperationException</code>.
- *
  */
 
 public class ShrinkableCollection<E> implements Collection<E> {

@@ -34,7 +34,6 @@ import org.eclipse.osgi.util.NLS;
  * Currently this only supports the attributes exposed directly by
  * X509Certificate. Some commonly used extensions may not be displayed.
  * Contributions and enhancements are welcomed.
- * 
  */
 public class X509CertificateAttributeContentProvider implements IStructuredContentProvider {
 

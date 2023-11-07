@@ -32,8 +32,6 @@ import java.util.StringJoiner;
  * stored in a properties-like file in the format
  * /ssh/<username>/password=<password> and
  * /ssh/<username>/roles=<comma_separated_list_of_roles>
- *
- *
  */
 public class SecureUserStore {
 
@@ -266,8 +264,6 @@ public class SecureUserStore {
 
 	/**
 	 * Creates the store file if it does not exist
-	 *
-	 * @throws IOException
 	 */
 	public static void initStorage() throws IOException {
 		String userFileLoc = getFileLocation();

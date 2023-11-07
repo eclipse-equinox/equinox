@@ -58,7 +58,6 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	}
 
 	/**
-	 * @throws ServletException
 	 * @see ExtendedHttpService#registerFilter(String, Filter, Dictionary,
 	 *      HttpContext)
 	 */
@@ -89,7 +88,6 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	}
 
 	/**
-	 * @throws NamespaceException
 	 * @see HttpService#registerResources(String, String, HttpContext)
 	 */
 	public synchronized void registerResources(final String alias, final String name, HttpContext httpContext)
@@ -109,8 +107,6 @@ public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 	}
 
 	/**
-	 * @throws ServletException
-	 * @throws NamespaceException
 	 * @see HttpService#registerServlet(String, Servlet, Dictionary, HttpContext)
 	 */
 	public synchronized void registerServlet(final String alias, final Servlet servlet,

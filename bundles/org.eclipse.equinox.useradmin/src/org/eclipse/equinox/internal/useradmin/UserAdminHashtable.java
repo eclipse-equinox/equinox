@@ -25,9 +25,6 @@ import org.osgi.service.useradmin.UserAdminEvent;
 
 public class UserAdminHashtable extends Hashtable<String, Object> {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -397030865421289240L;
 	protected Role role;
 	protected int propertyType;

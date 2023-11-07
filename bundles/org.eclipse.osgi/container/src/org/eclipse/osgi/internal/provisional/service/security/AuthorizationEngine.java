@@ -67,7 +67,6 @@ public abstract class AuthorizationEngine {
 	/**
 	 * Authorizes a <code>SignedContent</code> object.  The engine determines if the
 	 * signed content authorization should be granted.
-	 * @param content
 	 * @param context the context associated with the signed content
 	 * @return an authorization event which will be fired.  A value of <code>null</code>
 	 * may be returned; in this case no authorization event will be fired.

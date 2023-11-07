@@ -39,7 +39,6 @@ public class NestedDirBundleFile extends BundleFile {
 	/**
 	 * Constructs a NestedDirBundleFile
 	 * @param baseBundlefile the base bundle file
-	 * @param nestedDirName
 	 */
 	public NestedDirBundleFile(BundleFile baseBundlefile, String nestedDirName) {
 		this(baseBundlefile, nestedDirName, Collections.emptyList());
@@ -48,7 +47,6 @@ public class NestedDirBundleFile extends BundleFile {
 	/**
 	 * Constructs a NestedDirBundleFile
 	 * @param baseBundlefile the base bundle file
-	 * @param nestedDirName
 	 * @param filterPrefixes the prefixes to filter out for the bundle file
 	 */
 	public NestedDirBundleFile(BundleFile baseBundlefile, String nestedDirName, Collection<String> filterPrefixes) {
@@ -142,9 +140,6 @@ public class NestedDirBundleFile extends BundleFile {
 		return null;
 	}
 
-	/**
-	 * @throws IOException
-	 */
 	@Override
 	public void open() throws IOException {
 		// do nothing

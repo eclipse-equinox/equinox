@@ -19,7 +19,6 @@ import org.osgi.framework.*;
 
 /**
  * ServiceEvent subtype for MODIFIED_ENDMATCH computation.
- *
  */
 class ModifiedServiceEvent extends ServiceEvent {
 	private static final long serialVersionUID = -5373850978543026102L;

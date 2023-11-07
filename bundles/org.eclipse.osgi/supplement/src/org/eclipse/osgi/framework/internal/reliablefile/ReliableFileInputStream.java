@@ -170,7 +170,6 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 	/**
 	 * Override default available method.
-	 * @throws IOException
 	 * @see FilterInputStream#available()
 	 */
 	@Override

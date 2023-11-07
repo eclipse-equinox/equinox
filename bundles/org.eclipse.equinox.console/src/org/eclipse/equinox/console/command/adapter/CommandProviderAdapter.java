@@ -27,7 +27,6 @@ import org.eclipse.osgi.framework.console.CommandProvider;
  * Gogo shell. The commands are executed through the main method of the adapter.
  * It finds the appropriate Equinox command and executes it with the proper
  * argument.
- *
  */
 public class CommandProviderAdapter {
 

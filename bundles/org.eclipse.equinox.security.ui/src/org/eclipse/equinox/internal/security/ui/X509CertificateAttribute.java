@@ -18,7 +18,6 @@ package org.eclipse.equinox.internal.security.ui;
  * 
  * Objects of this class contain a decomposition of an attribute in an X509
  * certificate so it can be displayed in the UI.
- *
  */
 public class X509CertificateAttribute {
 	// Description of the field

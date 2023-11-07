@@ -101,7 +101,6 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	/**
 	 * Construct a ServiceRegistration and register the service
 	 * in the framework's service registry.
-	 *
 	 */
 	ServiceRegistrationImpl(ServiceRegistry registry, BundleContextImpl context, String[] clazzes, S service) {
 		this.registry = registry;

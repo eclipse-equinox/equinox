@@ -39,7 +39,6 @@ public abstract class ModuleContainerAdaptor {
 	/**
 	 * Event types that may be {@link #publishContainerEvent(ContainerEvent, Module, Throwable, FrameworkListener...) published}
 	 * for a container.
-	 *
 	 */
 	public enum ContainerEvent {
 		/**

@@ -567,7 +567,6 @@ public final class StateHelperImpl implements StateHelper {
  * VISIBLE_INCLUDE_ALL_HOST_WIRES, it uses resolved import packages to find all visible packages by a bundle. Called without this option,
  * it uses imported packages instead of resolved imported packages and does not consider resolved dynamic imports.
  * ImportsHolder serves to hide which of these is used, so that the body of getVisiblePackages() does not become full of checks.
- *
  */
 class ImportsHolder {
 	private final ImportPackageSpecification[] importedPackages;

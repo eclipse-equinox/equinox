@@ -156,7 +156,6 @@ public abstract class ResolveContext {
 	 * @param hostedCapability The HostedCapability to insert in the specified
 	 *        list. Must not be {@code null}.
 	 * @return The index in the list of the inserted HostedCapability.
-	 * 
 	 */
 	public abstract int insertHostedCapability(List<Capability> capabilities, HostedCapability hostedCapability);
 

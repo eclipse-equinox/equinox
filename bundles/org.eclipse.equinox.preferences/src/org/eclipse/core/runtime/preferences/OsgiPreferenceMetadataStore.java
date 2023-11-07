@@ -24,7 +24,6 @@ import org.eclipse.osgi.util.NLS;
  * @see IEclipsePreferences
  *
  * @since 3.8
- *
  */
 public final class OsgiPreferenceMetadataStore implements IPreferenceMetadataStore {
 

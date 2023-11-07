@@ -885,7 +885,6 @@ final class AdminPermissionCollection extends PermissionCollection {
 
 	/**
 	 * Create an empty AdminPermissions object.
-	 * 
 	 */
 	public AdminPermissionCollection() {
 		permissions = new HashMap<String, AdminPermission>();

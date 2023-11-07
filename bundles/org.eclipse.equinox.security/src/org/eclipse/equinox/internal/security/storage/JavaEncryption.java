@@ -35,7 +35,6 @@ import org.eclipse.osgi.util.NLS;
  * Note that algorithm detection skips aliases: Alg.Alias.Cipher.ABC only a few
  * aliases are useful and it will be harder to separate human-readable aliases
  * from internal ones.
- *
  */
 public class JavaEncryption {
 

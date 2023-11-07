@@ -337,7 +337,6 @@ public class StructuredTextTypeHandler {
 	 *         {@link StructuredTextTypeHandler#processSpecial}. Examples of special
 	 *         cases are comments, literals, or anything which is not identified by
 	 *         a one-character separator.
-	 *
 	 */
 	public int getSpecialsCount(IStructuredTextExpert expert) {
 		return 0;
@@ -362,7 +361,6 @@ public class StructuredTextTypeHandler {
 	 *
 	 * @return a flag indicating if there is no need to process the structured text
 	 *         to add directional formatting characters.
-	 *
 	 */
 	public boolean skipProcessing(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes) {
 		return false;

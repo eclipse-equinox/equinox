@@ -69,7 +69,6 @@ public final class ModuleCapability implements BundleCapability {
 	/**
 	 * Only used by the system module for setting transient attributes associated
 	 * with the {@link NativeNamespace osgi.native} namespace.
-	 * @param transientAttrs
 	 */
 	public void setTransientAttrs(Map<String, ?> transientAttrs) {
 		if (this.transientAttrs == null) {

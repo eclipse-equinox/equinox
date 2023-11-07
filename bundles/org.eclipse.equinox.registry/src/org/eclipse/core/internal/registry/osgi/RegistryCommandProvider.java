@@ -112,7 +112,6 @@ public class RegistryCommandProvider implements CommandProvider {
 	/**
 	 * Handles the help command
 	 *
-	 * @param intp
 	 * @return description for a particular command or false if there is no command
 	 *         with the specified name
 	 */

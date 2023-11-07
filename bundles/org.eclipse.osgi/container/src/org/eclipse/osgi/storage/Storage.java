@@ -597,17 +597,11 @@ public class Storage {
 
 			if (in != null) {
 				return new URLConnection(null) {
-					/**
-					 * @throws IOException
-					 */
 					@Override
 					public void connect() throws IOException {
 						connected = true;
 					}
 
-					/**
-					 * @throws IOException
-					 */
 					@Override
 					public InputStream getInputStream() throws IOException {
 						return (in);

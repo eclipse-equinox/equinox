@@ -640,9 +640,6 @@ class EclipseDebugTrace implements DebugTrace {
 		}
 		if (out == null) {
 			out = new FilterOutputStream(System.out) {
-				/**
-				 * @throws IOException
-				 */
 				@Override
 				public void close() throws IOException {
 					// We don't want to close System.out

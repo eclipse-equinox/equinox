@@ -59,7 +59,6 @@ public class ServiceReferenceImpl<S> implements ServiceReference<S> {
 
 	/**
 	 * Construct a reference.
-	 *
 	 */
 	ServiceReferenceImpl(ServiceRegistrationImpl<S> registration) {
 		this.registration = registration;

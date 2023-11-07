@@ -385,7 +385,6 @@ public class BundleLoader extends ModuleLoader {
 	 * Finds a class local to this bundle.  Only the classloader for this bundle is searched.
 	 * @param name The name of the class to find.
 	 * @return The loaded Class or null if the class is not found.
-	 * @throws ClassNotFoundException
 	 */
 	public Class<?> findLocalClass(String name) throws ClassNotFoundException {
 		long start = 0;

@@ -49,7 +49,6 @@ public class RegistryDelta {
 	}
 
 	/**
-	 * @param extensionPointId
 	 * @param extensionId      must not be null
 	 */
 	public IExtensionDelta getExtensionDelta(String extensionPointId, String extensionId) {

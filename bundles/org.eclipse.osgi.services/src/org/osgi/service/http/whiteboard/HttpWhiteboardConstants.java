@@ -104,7 +104,6 @@ public final class HttpWhiteboardConstants {
 	 * <p>
 	 * For {@link ServletContextHelper} services, the value of each
 	 * initialization parameter service property must be of type {@code String}.
-	 * 
 	 */
 	public static final String	HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX	= "context.init.";
 
@@ -216,7 +215,6 @@ public final class HttpWhiteboardConstants {
 	 * <p>
 	 * For {@link Servlet} services, the value of each initialization parameter
 	 * service property must be of type {@code String}.
-	 * 
 	 */
 	public static final String	HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX	= "servlet.init.";
 
@@ -415,7 +413,6 @@ public final class HttpWhiteboardConstants {
 	 * <p>
 	 * For {@link Filter} services, the value of each initialization parameter
 	 * service property must be of type {@code String}.
-	 * 
 	 */
 	public static final String	HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX	= "filter.init.";
 

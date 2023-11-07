@@ -123,7 +123,6 @@ public class ServiceRegistry {
 
 	/**
 	 * Initializes the internal data structures of this ServiceRegistry.
-	 *
 	 */
 	public ServiceRegistry(EquinoxContainer container) {
 		this.container = container;

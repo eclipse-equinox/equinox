@@ -103,7 +103,6 @@ public interface ScheduledApplication {
 	 * Returns the identifier of this schedule. The identifier is unique within
 	 * the scope of the application that the schedule is related to. 
 	 * @return the identifier of this schedule
-	 * 
 	 */
 	public String getScheduleId();
 

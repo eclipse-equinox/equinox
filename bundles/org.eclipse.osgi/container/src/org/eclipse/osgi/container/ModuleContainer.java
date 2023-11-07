@@ -1277,7 +1277,6 @@ public final class ModuleContainer implements DebugOptionsListener {
 
 	/**
 	 * Sets all the module states uninstalled except for the system module.
-	 * @throws BundleException
 	 */
 	public void setInitialModuleStates() throws BundleException {
 		moduleDatabase.readLock();

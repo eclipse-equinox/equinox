@@ -88,7 +88,6 @@ public abstract class BundleEntry {
 	 * Used for class loading.  This default implementation gets the input stream from this entry
 	 * and copies the content into a byte array.
 	 * @return a byte array containing the content of this entry
-	 * @throws IOException
 	 */
 	public byte[] getBytes() throws IOException {
 		InputStream in = getInputStream();

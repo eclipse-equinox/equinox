@@ -141,14 +141,7 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 	 * Used by {@link ScheduledApplication} to persistently schedule an application
 	 * launch
 	 * 
-	 * @param descriptor
-	 * @param arguments
-	 * @param topic
-	 * @param eventFilter
-	 * @param recurring
 	 * @return the scheduled application
-	 * @throws InvalidSyntaxException
-	 * @throws ApplicationException
 	 */
 	public static ScheduledApplication addScheduledApp(ApplicationDescriptor descriptor, String scheduleId,
 			Map<String, Object> arguments, String topic, String eventFilter, boolean recurring)

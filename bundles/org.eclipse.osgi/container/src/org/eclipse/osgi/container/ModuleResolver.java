@@ -165,7 +165,6 @@ final class ModuleResolver {
 	 * @param moduleDatabase the module database.
 	 * @return a delta container the new wirings or modified wirings that should be
 	 * merged into the moduleDatabase
-	 * @throws ResolutionException
 	 */
 	ModuleResolutionReport resolveDelta(Collection<ModuleRevision> triggers, boolean triggersMandatory, Collection<ModuleRevision> unresolved, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDatabase moduleDatabase) {
 		if (!triggersMandatory) {

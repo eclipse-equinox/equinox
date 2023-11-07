@@ -39,9 +39,6 @@ public class DirZipBundleEntry extends BundleEntry {
 		this.bundleFile = bundleFile;
 	}
 
-	/**
-	 * @throws IOException
-	 */
 	@Override
 	public InputStream getInputStream() throws IOException {
 		return new ByteArrayInputStream(new byte[0]);

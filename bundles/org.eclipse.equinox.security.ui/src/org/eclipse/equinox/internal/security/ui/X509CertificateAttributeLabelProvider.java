@@ -31,7 +31,6 @@ import org.eclipse.swt.graphics.Image;
  * representation of the attribute's value.
  * <p>
  * Used by org.eclipse.equinox.security.ui.wizard.CertificateViewer
- *
  */
 public class X509CertificateAttributeLabelProvider extends LabelProvider implements ITableLabelProvider {
 

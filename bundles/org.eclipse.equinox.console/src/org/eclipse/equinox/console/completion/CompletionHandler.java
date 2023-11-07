@@ -31,7 +31,6 @@ import org.osgi.framework.ServiceReference;
  * and file completers. It also searches for registered custom completers and if
  * available uses them too. It call all completers and finally returns the
  * completion candidates returned from all of them.
- *
  */
 public class CompletionHandler {
 

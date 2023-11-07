@@ -137,7 +137,6 @@ public class EventAdminImpl implements EventAdmin {
 	/**
 	 * Checks if the caller bundle has right PUBLISH TopicPermision.
 	 * 
-	 * @param topic
 	 * @throws SecurityException if the caller does not have the right to PUBLISH
 	 *                           TopicPermission
 	 */

@@ -83,8 +83,6 @@ public class URIUtilTest extends CoreTest {
 
 	/**
 	 * Tests for {@link URIUtil#toFile(URI)}.
-	 * 
-	 * @throws URISyntaxException
 	 */
 	public void testToFile() throws URISyntaxException {
 		File base = new File(System.getProperty("java.io.tmpdir"));
@@ -98,8 +96,6 @@ public class URIUtilTest extends CoreTest {
 
 	/**
 	 * Tests for {@link URIUtil#toFile(URI)} involving UNC paths.
-	 * 
-	 * @throws URISyntaxException
 	 */
 	public void testToFileUNC() throws URISyntaxException {
 		if (!WINDOWS) {
@@ -283,8 +279,6 @@ public class URIUtilTest extends CoreTest {
 
 	/**
 	 * Tests for {@link URIUtil#append(URI, String)}.
-	 * 
-	 * @throws URISyntaxException
 	 */
 	public void testAppend() throws URISyntaxException {
 		URI base = new URI("http://a.b.c/a%20b/");
@@ -314,8 +308,6 @@ public class URIUtilTest extends CoreTest {
 	/**
 	 * Tests for {@link URIUtil#append(URI, String)} when dealing with paths
 	 * containing brackets.
-	 * 
-	 * @throws URISyntaxException
 	 */
 	public void testAppendWithBrackets() throws URISyntaxException {
 		// append a simple string

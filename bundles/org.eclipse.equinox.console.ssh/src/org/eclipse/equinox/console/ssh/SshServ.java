@@ -31,7 +31,6 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * This class configures and start an ssh server
- *
  */
 public class SshServ extends Thread {
 

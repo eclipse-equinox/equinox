@@ -47,9 +47,6 @@ public class AuthorizedKeys {
 
 		/**
 		 * Creates a new instance.
-		 *
-		 * @param message
-		 * @param cause
 		 */
 		public ParseKeyException(final String message, final Throwable cause) {
 			super(message, cause);
@@ -85,8 +82,6 @@ public class AuthorizedKeys {
 
 	/**
 	 * Creates a new instance.
-	 *
-	 * @throws FileNotFoundException
 	 */
 	public AuthorizedKeys(final String authorizedKeysFile) throws FileNotFoundException, IOException {
 		// read file line-by-line

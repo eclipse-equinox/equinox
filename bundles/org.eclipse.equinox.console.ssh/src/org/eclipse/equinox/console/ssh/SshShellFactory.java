@@ -26,7 +26,6 @@ import org.osgi.framework.BundleContext;
 
 /**
  * Shell factory used by the SSH server to create a SSH shell
- *
  */
 public class SshShellFactory implements ShellFactory {
 

@@ -27,7 +27,6 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * This class provides completion for command names.
- *
  */
 public class CommandNamesCompleter implements Completer {
 

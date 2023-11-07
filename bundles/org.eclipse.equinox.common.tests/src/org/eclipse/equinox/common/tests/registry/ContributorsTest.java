@@ -81,9 +81,6 @@ public class ContributorsTest {
 	 * bundleA, bundleB, and fragment on bundleA all use the same namespace. Verify
 	 * that getting elements by contributor returns all elements from the
 	 * contributor and only from that contributor.
-	 *
-	 * @throws IOException
-	 * @throws BundleException
 	 */
 	@Test
 	public void testByContributor() throws IOException, BundleException {
@@ -146,9 +143,6 @@ public class ContributorsTest {
 	 * {@link IDynamicExtensionRegistry#removeContributor(IContributor, Object)}. A
 	 * separate registry is created as removal functionality is not allowed by the
 	 * default Eclipse registry.
-	 *
-	 * @throws IOException
-	 * @throws BundleException
 	 */
 	@Test
 	public void testContributorRemoval() throws IOException {

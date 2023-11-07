@@ -115,7 +115,6 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 
 	/**
 	 * Destroy the wrapper. This is called when the bundle is stopped.
-	 *
 	 */
 	protected void close() {
 		valid = false; /* invalidate context */

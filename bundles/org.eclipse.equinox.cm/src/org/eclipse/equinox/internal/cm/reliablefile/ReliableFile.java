@@ -26,7 +26,6 @@ import org.eclipse.equinox.internal.cm.Activator;
 /**
  * ReliableFile class used by ReliableFileInputStream and ReliableOutputStream.
  * This class encapsulates all the logic for reliable file support.
- *
  */
 public class ReliableFile {
 	/**
@@ -404,7 +403,6 @@ public class ReliableFile {
 
 	/**
 	 * Abort the current output stream and do not update the reliable file table.
-	 *
 	 */
 	void abortOutputFile() {
 		if (outputFile == null)
@@ -673,8 +671,6 @@ public class ReliableFile {
 
 	/**
 	 * Inform ReliableFile that a file has been updated outside of ReliableFile.
-	 * 
-	 * @param file
 	 */
 	public static void fileUpdated(File file) {
 		lastGenerationFile = null;

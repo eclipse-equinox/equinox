@@ -103,7 +103,6 @@ public class SubMonitorTest {
 	 * remaining work, and will run for the given number of iterations. Retuns the
 	 * number of ticks reported (out of 1000).
 	 *
-	 * @param ratio
 	 * @return the number of ticks reported
 	 */
 	private double runInfiniteProgress(int ratio, int iterations) {
@@ -750,8 +749,6 @@ public class SubMonitorTest {
 	 * Creates a chain of n nested progress monitors. Calls beginTask on all
 	 * monitors except for the innermost one.
 	 *
-	 * @param parent
-	 * @param depth
 	 * @return the innermost SubMonitor
 	 */
 	public static SubMonitor createSubProgressChain(SubMonitor parent, int depth) {

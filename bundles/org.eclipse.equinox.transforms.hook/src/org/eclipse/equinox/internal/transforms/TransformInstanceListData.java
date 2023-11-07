@@ -58,7 +58,6 @@ public class TransformInstanceListData extends ServiceTracker<URL, URL> {
 	 * registered against the given context the contents of this list will change.
 	 * 
 	 * @param context     the bundle context
-	 * @param logServices
 	 * @throws InvalidSyntaxException thrown if there's an issue listening for
 	 *                                changes to the given transformer type
 	 */

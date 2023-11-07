@@ -28,7 +28,6 @@ import org.junit.Test;
  * indicates data should be immediately persisted with each update. A negative
  * value disables persistence on update altogether (but data will still be
  * persisted on shutdown).
- *
  */
 public class PersistedBundleTests extends AbstractBundleTests {
 

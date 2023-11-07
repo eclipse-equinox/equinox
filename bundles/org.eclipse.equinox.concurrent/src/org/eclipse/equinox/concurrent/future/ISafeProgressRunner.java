@@ -20,7 +20,6 @@ package org.eclipse.equinox.concurrent.future;
  * possibly thrown by the given {@link IProgressRunnable}.
  * 
  * @since 1.1
- * 
  */
 public interface ISafeProgressRunner {
 	void runWithProgress(IProgressRunnable<?> runnable);

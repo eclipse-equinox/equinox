@@ -34,7 +34,6 @@ import org.osgi.service.cm.ManagedService;
 
 /**
  * This class implements a command for starting/stopping a simple ssh server.
- *
  */
 public class SshCommand {
 	private String defaultHost = null;

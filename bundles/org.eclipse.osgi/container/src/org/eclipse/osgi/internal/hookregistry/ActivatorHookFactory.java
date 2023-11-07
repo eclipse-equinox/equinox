@@ -24,7 +24,6 @@ public interface ActivatorHookFactory {
 	 * Creates an activator for an equinox hook.  The returned
 	 * activator will be called when the system bundle is
 	 * started and stopped.
-	 *
 	 */
 	public BundleActivator createActivator();
 }

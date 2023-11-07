@@ -29,10 +29,6 @@ class TitleVersionVendor {
 	/**
 	 * Factory for creating TitleVersionVendor objects.  If the given title, version and
 	 * vendor are <code>null</code> then {@link #NONE} is returned.
-	 * @param title
-	 * @param version
-	 * @param vendor
-	 * @return
 	 */
 	static TitleVersionVendor of(String title, String version, String vendor) {
 		if (title == null && version == null && vendor == null) {

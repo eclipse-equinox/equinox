@@ -697,10 +697,6 @@ public class BaseTest {
 		protected final String contextPrefix;
 		protected final String testName;
 
-		/**
-		 * @param defaultFilter
-		 * @param contextPrefix
-		 */
 		public TestContextPathAdaptor(String defaultFilter, String contextPrefix, String testName) {
 			super();
 			this.defaultFilter = defaultFilter;

@@ -24,7 +24,6 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * DriverLocatorTracker class. This class tracks all DriverLocator services.
- *
  */
 public class DriverLocatorTracker extends ServiceTracker {
 	protected final static String clazz = "org.osgi.service.device.DriverLocator"; //$NON-NLS-1$
@@ -324,7 +323,6 @@ public class DriverLocatorTracker extends ServiceTracker {
 
 	/**
 	 * Uninstall the recently installed but unused driver bundles.
-	 *
 	 */
 	public void uninstallDriverBundles() {
 		int size;

@@ -24,7 +24,6 @@ import org.osgi.service.log.LogService;
 /**
  * A wrapper for EventHandlers. This class caches property values and performs
  * final checks before calling the wrapped handler.
- *
  */
 public class EventHandlerWrapper {
 	final ServiceReference<EventHandler> reference;

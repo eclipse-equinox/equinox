@@ -25,7 +25,6 @@ import org.eclipse.equinox.console.common.terminal.TerminalTypeMappings;
 /**
  * This class performs preprocessing of the input from the ssh server in order
  * to echo the visible characters back to the console.
- *
  */
 public class SshInputScanner extends Scanner {
 

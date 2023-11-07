@@ -31,8 +31,6 @@ import org.eclipse.equinox.console.storage.SecureUserStore;
  * This class provides commands for administering users: adding, removing and
  * listing users; setting or changing password; resetting password; adding and
  * removing roles
- *
- *
  */
 public class UserAdminCommand {
 	private static final String INPUT_SCANNER = "INPUT_SCANNER";
@@ -47,7 +45,6 @@ public class UserAdminCommand {
 	 * @param args command line arguments in the format -username <username>
 	 *             -password <password> -roles <comma-separated list of user roles
 	 *             (optional)>
-	 * @throws Exception
 	 */
 	@Descriptor("Add user with password and roles")
 	public void addUser(
@@ -94,7 +91,6 @@ public class UserAdminCommand {
 	 *
 	 * @param args command-line arguments in the format -username <username>
 	 *             -password <password>
-	 * @throws Exception
 	 */
 	@Descriptor("Set or change password")
 	public void setPassword(@Descriptor("-username <username>\r\n-password <password>") String[] args)
@@ -132,10 +128,7 @@ public class UserAdminCommand {
 	 * password and roles; the input plain text password is encrypted before
 	 * storing.
 	 *
-	 * @param session
 	 * @return true if the user was successfully added
-	 *
-	 * @throws Exception
 	 */
 	@Descriptor("Add user with password and roles interactively")
 	public boolean addUser(final CommandSession session) throws Exception {
@@ -204,7 +197,6 @@ public class UserAdminCommand {
 	 * Command to remove the password for a user
 	 *
 	 * @param username user to remove the password for
-	 * @throws Exception
 	 */
 	@Descriptor("Reset password")
 	public void resetPassword(@Descriptor("username of the user whose password will be reset") String username)
@@ -221,9 +213,7 @@ public class UserAdminCommand {
 	 * interactively for the new password; the input plain text password is
 	 * encrypted before storing.
 	 *
-	 * @param session
 	 * @param username the user whose password will be changed
-	 * @throws Exception
 	 */
 	@Descriptor("Set or change password")
 	public void setPassword(final CommandSession session,
@@ -268,7 +258,6 @@ public class UserAdminCommand {
 	 *
 	 * @param args command line arguments in the format -username
 	 *             <username>\r\n-roles <comma-separated list of roles to add>
-	 * @throws Exception
 	 */
 	@Descriptor("Add roles to user")
 	public void addRoles(
@@ -307,7 +296,6 @@ public class UserAdminCommand {
 	 *
 	 * @param args command line arguments in the format -username
 	 *             <username>\r\n-roles <comma-separated list of roles to remove>
-	 * @throws Exception
 	 */
 	@Descriptor("Remove user roles")
 	public void removeRoles(

@@ -857,7 +857,6 @@ public class ModuleDatabase {
 	 * {@link ModuleDatabase#findCapabilities(Requirement)} method.
 	 * <p>
 	 * This method must be called while holding the {@link #writeLock() write} lock.
-	 * @param revision
 	 */
 	protected void removeCapabilities(ModuleRevision revision) {
 		checkWrite();

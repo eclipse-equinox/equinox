@@ -587,9 +587,6 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			return null;
 		}
 
-		/**
-		 * @throws IOException
-		 */
 		@Override
 		public Enumeration<URL> getResources(String name) throws IOException {
 			return null;
@@ -625,65 +622,41 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			return false;
 		}
 
-		/**
-		 * @throws ClassNotFoundException
-		 */
 		@Override
 		public Class<?> loadClass(String name) throws ClassNotFoundException {
 			throw new IllegalStateException();
 		}
 
-		/**
-		 * @throws BundleException
-		 */
 		@Override
 		public void start(int options) throws BundleException {
 			throw new IllegalStateException();
 		}
 
-		/**
-		 * @throws BundleException
-		 */
 		@Override
 		public void start() throws BundleException {
 			throw new IllegalStateException();
 		}
 
-		/**
-		 * @throws BundleException
-		 */
 		@Override
 		public void stop(int options) throws BundleException {
 			throw new IllegalStateException();
 		}
 
-		/**
-		 * @throws BundleException
-		 */
 		@Override
 		public void stop() throws BundleException {
 			throw new IllegalStateException();
 		}
 
-		/**
-		 * @throws BundleException
-		 */
 		@Override
 		public void uninstall() throws BundleException {
 			throw new IllegalStateException();
 		}
 
-		/**
-		 * @throws BundleException
-		 */
 		@Override
 		public void update() throws BundleException {
 			throw new IllegalStateException();
 		}
 
-		/**
-		 * @throws BundleException
-		 */
 		@Override
 		public void update(InputStream in) throws BundleException {
 			throw new IllegalStateException();
@@ -739,20 +712,12 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			return subject.toString();
 		}
 
-		/**
-		 * @throws CertificateExpiredException
-		 * @throws java.security.cert.CertificateNotYetValidException
-		 */
 		@Override
 		public void checkValidity()
 				throws CertificateExpiredException, java.security.cert.CertificateNotYetValidException {
 			throw new UnsupportedOperationException();
 		}
 
-		/**
-		 * @throws java.security.cert.CertificateExpiredException
-		 * @throws java.security.cert.CertificateNotYetValidException
-		 */
 		@Override
 		public void checkValidity(Date var0) throws java.security.cert.CertificateExpiredException,
 				java.security.cert.CertificateNotYetValidException {
@@ -819,9 +784,6 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			throw new UnsupportedOperationException();
 		}
 
-		/**
-		 * @throws CertificateEncodingException
-		 */
 		@Override
 		public byte[] getTBSCertificate() throws CertificateEncodingException {
 			throw new UnsupportedOperationException();
@@ -832,9 +794,6 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			throw new UnsupportedOperationException();
 		}
 
-		/**
-		 * @throws CertificateEncodingException
-		 */
 		@Override
 		public byte[] getEncoded() throws CertificateEncodingException {
 			throw new UnsupportedOperationException();
@@ -845,13 +804,6 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			throw new UnsupportedOperationException();
 		}
 
-		/**
-		 * @throws java.security.InvalidKeyException
-		 * @throws java.security.NoSuchAlgorithmException
-		 * @throws java.security.NoSuchProviderException
-		 * @throws java.security.SignatureException
-		 * @throws java.security.cert.CertificateException
-		 */
 		@Override
 		public void verify(PublicKey var0) throws java.security.InvalidKeyException,
 				java.security.NoSuchAlgorithmException, java.security.NoSuchProviderException,
@@ -859,13 +811,6 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			throw new UnsupportedOperationException();
 		}
 
-		/**
-		 * @throws InvalidKeyException
-		 * @throws NoSuchAlgorithmException
-		 * @throws NoSuchProviderException
-		 * @throws SignatureException
-		 * @throws CertificateException
-		 */
 		@Override
 		public void verify(PublicKey var0, String var1) throws InvalidKeyException, NoSuchAlgorithmException,
 				NoSuchProviderException, SignatureException, CertificateException {

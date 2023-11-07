@@ -150,7 +150,6 @@ abstract public class BundleFile {
 	 * @param bundleEntry the bundle entry
 	 * @param hostModule the host module
 	 * @param index the resource index
-	 * @param path
 	 * @return a URL to access the contents of the specified entry
 	 */
 	protected URL createResourceURL(BundleEntry bundleEntry, Module hostModule, int index, String path) {

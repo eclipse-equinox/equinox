@@ -28,9 +28,6 @@ public class DefaultStartupMonitor implements StartupMonitor {
 	/**
 	 * Create a new startup monitor using the given splash handler.  The splash handle must
 	 * have an updateSplash method.
-	 *
-	 * @param splashHandler
-	 * @throws IllegalStateException
 	 */
 	public DefaultStartupMonitor(Runnable splashHandler, EquinoxConfiguration equinoxConfig) throws IllegalStateException {
 		this.splashHandler = splashHandler;

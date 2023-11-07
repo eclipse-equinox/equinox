@@ -22,7 +22,6 @@ import org.eclipse.equinox.console.completion.common.Completer;
 
 /**
  * This class provides completion for gogo session variables.
- *
  */
 public class VariableNamesCompleter implements Completer {
 

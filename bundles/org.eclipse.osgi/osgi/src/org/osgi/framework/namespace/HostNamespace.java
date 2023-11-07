@@ -76,7 +76,6 @@ public final class HostNamespace extends AbstractWiringNamespace {
 	 * <p>
 	 * Also, the capability attribute used to specify the symbolic name of the
 	 * host.
-	 * 
 	 */
 	public static final String	HOST_NAMESPACE								= "osgi.wiring.host";
 

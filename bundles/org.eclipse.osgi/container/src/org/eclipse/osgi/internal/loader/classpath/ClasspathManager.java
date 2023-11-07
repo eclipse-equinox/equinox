@@ -141,7 +141,6 @@ public class ClasspathManager {
 
 	/**
 	 * Closes all the classpath entry resources for this classpath manager.
-	 *
 	 */
 	public void close() {
 		for (ClasspathEntry entry : entries) {

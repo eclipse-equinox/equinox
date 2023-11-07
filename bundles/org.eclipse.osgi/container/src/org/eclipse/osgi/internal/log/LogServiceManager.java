@@ -123,7 +123,6 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 
 	/**
 	 * BundleListener.bundleChanged method.
-	 *
 	 */
 	@SuppressWarnings("deprecation")
 	@Override
@@ -140,7 +139,6 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 
 	/**
 	 * ServiceListener.serviceChanged method.
-	 *
 	 */
 	@Override
 	public void serviceChanged(ServiceEvent event) {
@@ -159,7 +157,6 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 
 	/**
 	 * FrameworkListener.frameworkEvent method.
-	 *
 	 */
 	@SuppressWarnings("deprecation")
 	@Override
@@ -188,7 +185,6 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 
 	/**
 	 * Convert BundleEvent type to a string.
-	 *
 	 */
 	private static String getBundleEventTypeName(int type) {
 		switch (type) {
@@ -226,7 +222,6 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 
 	/**
 	 * Convert ServiceEvent type to a string.
-	 *
 	 */
 	private static String getServiceEventTypeName(int type) {
 		switch (type) {
@@ -246,7 +241,6 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 
 	/**
 	 * Convert FrameworkEvent type to a string.
-	 *
 	 */
 	private static String getFrameworkEventTypeName(int type) {
 		switch (type) {

@@ -160,7 +160,6 @@ public class BundleCachingService implements ICachingService {
 	/**
 	 * Hash the shared class namespace using MD5
 	 *
-	 * @param keyToHash
 	 * @return the MD5 version of the input string
 	 */
 	private String hashNamespace(final String namespace) {

@@ -114,7 +114,6 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 	/**
 	 * Internal method that does the work to open this bundle file. Must hold the
 	 * openLock while calling this method.
-	 * 
 	 */
 	private void internalOpen() throws IOException {
 		if (closed) {
@@ -457,7 +456,6 @@ public abstract class CloseableBundleFile<E> extends BundleFile {
 	 * closed until the stream is closed (or a timeout happens).
 	 * @param entry the entry to get the input stream for
 	 * @return the input stream for the entry
-	 * @throws IOException
 	 */
 	public InputStream getInputStream(E entry) throws IOException {
 		if (!lockOpen()) {

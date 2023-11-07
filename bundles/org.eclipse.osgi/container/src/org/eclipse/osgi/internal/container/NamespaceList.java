@@ -353,7 +353,6 @@ public class NamespaceList<E> {
 		 *                        elements should not be excluded from being added
 		 * @param elementFilter   the predicate that returns true for elements to be
 		 *                        added
-		 * 
 		 */
 		public void addAllFiltered(NamespaceList<E> list, Predicate<? super String> namespaceFilter,
 				Predicate<? super E> elementFilter) {

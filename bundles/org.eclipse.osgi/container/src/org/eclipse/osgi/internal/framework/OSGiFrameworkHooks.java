@@ -125,7 +125,6 @@ class OSGiFrameworkHooks {
 	 * which does all the necessary service registry lookups.
 	 *
 	 * This class is not thread safe and expects external synchronization.
-	 *
 	 */
 	static class CoreResolverHookFactory implements ResolverHookFactory {
 		// need a tuple to hold the service reference and hook object

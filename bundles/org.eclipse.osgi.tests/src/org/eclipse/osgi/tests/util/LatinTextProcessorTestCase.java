@@ -19,7 +19,6 @@ import org.eclipse.osgi.util.TextProcessor;
 /**
  * Test for strings that use the TextProcessor but are not run in a bidi locale.
  * Latin locales should return the same String that was passed in.
- *
  */
 public class LatinTextProcessorTestCase extends TextProcessorTestCase {
 

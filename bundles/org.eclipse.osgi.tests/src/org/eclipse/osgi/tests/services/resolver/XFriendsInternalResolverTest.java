@@ -33,7 +33,6 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 	 * declares an x-friends directive and the importer is not a friend.  When a bundle requires
 	 * anther bundle which exports packages which declare an x-friends directive it should not
 	 * have access to the packages unless the requiring bundle is a friend.
-	 * @throws BundleException
 	 */
 	public void testXFriends() throws BundleException {
 		State state = buildEmptyState();
