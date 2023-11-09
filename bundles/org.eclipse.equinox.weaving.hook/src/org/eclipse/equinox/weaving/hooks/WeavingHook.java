@@ -140,10 +140,8 @@ public class WeavingHook extends AbstractWeavingHook {
 	}
 
 	/**
-	 * @see org.eclipse.equinox.weaving.hooks.AbstractWeavingHook#processClass(java.lang.String,
-	 *      byte[], org.eclipse.osgi.baseadaptor.loader.ClasspathEntry,
-	 *      org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry,
-	 *      org.eclipse.osgi.baseadaptor.loader.ClasspathManager)
+	 * @see org.eclipse.equinox.weaving.hooks.AbstractWeavingHook#processClass(String,
+	 *      byte[], ClasspathEntry, BundleEntry, ClasspathManager)
 	 */
 	@Override
 	public byte[] processClass(final String name, final byte[] classbytes, final ClasspathEntry classpathEntry,
@@ -160,11 +158,8 @@ public class WeavingHook extends AbstractWeavingHook {
 	}
 
 	/**
-	 * @see org.eclipse.equinox.weaving.hooks.AbstractWeavingHook#recordClassDefine(java.lang.String,
-	 *      java.lang.Class, byte[],
-	 *      org.eclipse.osgi.baseadaptor.loader.ClasspathEntry,
-	 *      org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry,
-	 *      org.eclipse.osgi.baseadaptor.loader.ClasspathManager)
+	 * @see org.eclipse.equinox.weaving.hooks.AbstractWeavingHook#recordClassDefine(String,
+	 *      Class, byte[], ClasspathEntry, BundleEntry, ClasspathManager)
 	 */
 	@Override
 	public void recordClassDefine(final String name, final Class<?> clazz, final byte[] classbytes,
@@ -190,16 +185,12 @@ public class WeavingHook extends AbstractWeavingHook {
 		this.adaptors.remove(bundleID);
 	}
 
-	/**
-	 * @see org.eclipse.equinox.weaving.hooks.AbstractWeavingHook#frameworkStart(org.osgi.framework.BundleContext)
-	 */
+	@Override
 	public void start(final BundleContext context) throws BundleException {
 		initialize(context);
 	}
 
-	/**
-	 * @see org.eclipse.equinox.weaving.hooks.AbstractWeavingHook#frameworkStop(org.osgi.framework.BundleContext)
-	 */
+	@Override
 	public void stop(final BundleContext context) throws BundleException {
 		adaptorFactory.dispose(context);
 	}
