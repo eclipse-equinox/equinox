@@ -45,7 +45,7 @@ import org.osgi.framework.BundleEvent;
  * 
  * @param <T> The type of the tracked object.
  * @ThreadSafe
- * @author $Id: f2733a974918984537676e30a7a96e7056244d98 $
+ * @author $Id$
  * @since 1.4
  */
 @ConsumerType

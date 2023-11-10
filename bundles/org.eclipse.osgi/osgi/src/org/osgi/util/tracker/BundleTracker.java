@@ -48,7 +48,7 @@ import org.osgi.framework.SynchronousBundleListener;
  * 
  * @param <T> The type of the tracked object.
  * @ThreadSafe
- * @author $Id: 3682b0c1b257ec7c6760e9c4e5d62a3eda567451 $
+ * @author $Id$
  * @since 1.4
  */
 @ConsumerType
