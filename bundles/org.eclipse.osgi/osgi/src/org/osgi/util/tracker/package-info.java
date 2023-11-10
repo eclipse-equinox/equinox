@@ -28,7 +28,7 @@
  * <p>
  * {@code  Import-Package: org.osgi.util.tracker; version="[1.5,2.0)"}
  * 
- * @author $Id: 525c871316f48c75de552961b6e34b621bad047a $
+ * @author $Id$
  */
 
 @Version("1.5.4")

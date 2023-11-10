@@ -48,7 +48,7 @@ import org.osgi.framework.ServiceReference;
  * @param <S> The type of the service being tracked.
  * @param <T> The type of the tracked object.
  * @ThreadSafe
- * @author $Id: 4617b2c5a0fba74a1a48db7188a3c946c672fefb $
+ * @author $Id$
  */
 @ConsumerType
 public interface ServiceTrackerCustomizer<S, T> {
