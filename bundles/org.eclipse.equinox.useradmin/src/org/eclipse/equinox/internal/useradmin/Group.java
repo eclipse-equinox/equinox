@@ -268,7 +268,6 @@ public class Group extends User implements org.osgi.service.useradmin.Group {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected boolean isImpliedBy(Role role, Vector<String> checkLoop) {
 		if (checkLoop.contains(name)) {
 			// we have a circular dependency

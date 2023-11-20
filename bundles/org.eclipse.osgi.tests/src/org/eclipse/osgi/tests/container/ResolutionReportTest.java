@@ -265,7 +265,6 @@ public class ResolutionReportTest extends AbstractTest {
 		assertTrue("Wrong requirement namespace value", requirement.getDirectives().get(Namespace.REQUIREMENT_FILTER_DIRECTIVE).contains(namespace + "=" + namespaceValue));
 	}
 
-	@SuppressWarnings("unchecked")
 	private void assertResolutionReportEntryDataUnresolvedProvider(Object data, Map<Requirement, List<Capability>> expected) {
 		assertResolutionReportEntryDataNotNull(data);
 		assertTrue("Wrong resolution report entry data type", data instanceof Map);
