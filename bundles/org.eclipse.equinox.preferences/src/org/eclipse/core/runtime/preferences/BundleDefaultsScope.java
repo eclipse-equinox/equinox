@@ -59,6 +59,7 @@ public final class BundleDefaultsScope extends AbstractScope {
 	 * 
 	 * @deprecated use <code>BundleDefaultsScope.INSTANCE</code> instead
 	 */
+	@Deprecated
 	public BundleDefaultsScope() {
 		super();
 	}
@@ -66,11 +67,6 @@ public final class BundleDefaultsScope extends AbstractScope {
 	@Override
 	public String getName() {
 		return SCOPE;
-	}
-
-	@Override
-	public IEclipsePreferences getNode(String qualifier) {
-		return super.getNode(qualifier);
 	}
 
 	@Override

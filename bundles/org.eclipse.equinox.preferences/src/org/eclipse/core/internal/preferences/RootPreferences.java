@@ -13,7 +13,8 @@
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
@@ -55,8 +56,9 @@ public class RootPreferences extends EclipsePreferences {
 		Object value = children.get(key);
 		if (value == null)
 			return null;
-		if (value instanceof IEclipsePreferences)
-			return (IEclipsePreferences) value;
+		if (value instanceof IEclipsePreferences eclipsePreferences) {
+			return eclipsePreferences;
+		}
 		// lazy initialization
 		IEclipsePreferences child = PreferencesService.getDefault().createNode(key);
 		addChild(key, child);
@@ -65,11 +67,11 @@ public class RootPreferences extends EclipsePreferences {
 
 	protected synchronized IEclipsePreferences[] getChildren() {
 		// must perform lazy initialization of child nodes
-		String[] childNames = new String[0];
+		String[] childNames;
 		try {
 			childNames = childrenNames();
 		} catch (BackingStoreException e) {
-			log(new Status(IStatus.ERROR, Activator.PI_PREFERENCES, PrefsMessages.childrenNames, e));
+			log(Status.error(PrefsMessages.childrenNames, e));
 			return new IEclipsePreferences[0];
 		}
 		IEclipsePreferences[] childNodes = new IEclipsePreferences[childNames.length];
