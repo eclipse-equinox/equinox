@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.equinox.common; singleton:=true
-Bundle-Version: 3.18.300.qualifier
+Bundle-Version: 3.19.0.qualifier
 Bundle-Localization: plugin
 Export-Package: org.eclipse.core.internal.boot;x-friends:="org.eclipse.core.resources,org.eclipse.pde.build",
  org.eclipse.core.internal.runtime;common=split;mandatory:=common;
@@ -20,6 +20,6 @@ Export-Package: org.eclipse.core.internal.boot;x-friends:="org.eclipse.core.reso
 Bundle-Vendor: %providerName
 Bundle-Activator: org.eclipse.core.internal.runtime.Activator
 Require-Bundle: org.eclipse.osgi;bundle-version="[3.17.200,4.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: org.eclipse.equinox.common
