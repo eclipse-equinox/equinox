@@ -38,7 +38,7 @@ import org.eclipse.osgi.service.datalocation.Location;
  * <p>
  * This class is not intended to be subclassed. This class may be instantiated.
  * </p>
- * 
+ *
  * @see Location#CONFIGURATION_FILTER
  * @since 3.0
  */
@@ -60,9 +60,10 @@ public final class ConfigurationScope extends AbstractScope {
 
 	/**
 	 * Create and return a new configuration scope instance.
-	 * 
+	 *
 	 * @deprecated use <code>ConfigurationScope.INSTANCE</code> instead
 	 */
+	@Deprecated
 	public ConfigurationScope() {
 		super();
 	}
@@ -73,22 +74,17 @@ public final class ConfigurationScope extends AbstractScope {
 	}
 
 	@Override
-	public IEclipsePreferences getNode(String qualifier) {
-		return super.getNode(qualifier);
-	}
-
-	@Override
 	public IPath getLocation() {
-		IPath result = null;
 		Location location = PreferencesOSGiUtils.getDefault().getConfigurationLocation();
 		if (!location.isReadOnly()) {
 			URL url = location.getURL();
 			if (url != null) {
-				result = IPath.fromOSString(url.getFile());
-				if (result.isEmpty())
-					result = null;
+				IPath result = IPath.fromOSString(url.getFile());
+				if (!result.isEmpty()) {
+					return result;
+				}
 			}
 		}
-		return result;
+		return null;
 	}
 }

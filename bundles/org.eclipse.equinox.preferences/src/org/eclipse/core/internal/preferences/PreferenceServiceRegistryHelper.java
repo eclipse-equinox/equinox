@@ -14,7 +14,8 @@
 package org.eclipse.core.internal.preferences;
 
 import java.lang.ref.WeakReference;
-import java.util.*;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.core.internal.preferences.exchange.ILegacyPreferences;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.*;
@@ -36,34 +37,11 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	private static final String ELEMENT_SCOPE = "scope"; //$NON-NLS-1$
 	private static final String ELEMENT_MODIFIER = "modifier"; //$NON-NLS-1$
 	// Store this around for performance
-	private final static IExtension[] EMPTY_EXTENSION_ARRAY = new IExtension[0];
-	private static final Map<String, Object> scopeRegistry = Collections.synchronizedMap(new HashMap<String, Object>());
+	private static final IExtension[] EMPTY_EXTENSION_ARRAY = new IExtension[0];
+	private static final Map<String, Object> SCOPE_REGISTRY = new ConcurrentHashMap<>();
 	private ListenerList<PreferenceModifyListener> modifyListeners;
 	private final PreferencesService service;
 	private final IExtensionRegistry registry;
-
-	/*
-	 * Create and return an IStatus object with ERROR severity and the given message
-	 * and exception.
-	 */
-	private static IStatus createStatusError(String message, Exception e) {
-		return new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, message, e);
-	}
-
-	/*
-	 * Create and return an IStatus object with WARNING severity and the given
-	 * message and exception.
-	 */
-	private static IStatus createStatusWarning(String message, Exception e) {
-		return new Status(IStatus.WARNING, PrefsMessages.OWNER_NAME, IStatus.WARNING, message, e);
-	}
-
-	/*
-	 * Log the given status.
-	 */
-	private static void log(IStatus status) {
-		RuntimeLog.log(status);
-	}
 
 	/*
 	 * Constructor for the class.
@@ -89,19 +67,18 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 		if (key == null) {
 			String message = NLS.bind(PrefsMessages.preferences_missingClassAttribute,
 					element.getDeclaringExtension().getUniqueIdentifier());
-			log(new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, message, null));
+			RuntimeLog.log(Status.error(message));
 			return;
 		}
 		try {
 			Object listener = element.createExecutableExtension(ATTRIBUTE_CLASS);
-			if (!(listener instanceof PreferenceModifyListener)) {
-				log(new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR,
-						PrefsMessages.preferences_classCastListener, null));
+			if (!(listener instanceof PreferenceModifyListener modifyListener)) {
+				RuntimeLog.log(Status.error(PrefsMessages.preferences_classCastListener));
 				return;
 			}
-			modifyListeners.add((PreferenceModifyListener) listener);
+			modifyListeners.add(modifyListener);
 		} catch (CoreException e) {
-			log(e.getStatus());
+			RuntimeLog.log(e.getStatus());
 		}
 	}
 
@@ -113,8 +90,9 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	public WeakReference<Object> applyRuntimeDefaults(String name, WeakReference<Object> pluginReference) {
 		IExtension[] extensions = getPrefExtensions();
 		if (extensions.length == 0) {
-			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
+			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
 				PrefsMessages.message("Skipping runtime default preference customization."); //$NON-NLS-1$
+			}
 			return null;
 		}
 		boolean foundInitializer = false;
@@ -127,11 +105,9 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 							IExtension theExtension = element.getDeclaringExtension();
 							String extensionNamespace = theExtension.getContributor().getName();
 							Bundle underlyingBundle = PreferencesOSGiUtils.getDefault().getBundle(extensionNamespace);
-							String ownerName;
-							if (underlyingBundle != null)
-								ownerName = underlyingBundle.getSymbolicName();
-							else
-								ownerName = extensionNamespace;
+							String ownerName = underlyingBundle != null //
+									? underlyingBundle.getSymbolicName()
+									: extensionNamespace;
 							PrefsMessages
 									.message("Running default preference customization as defined by: " + ownerName); //$NON-NLS-1$
 						}
@@ -142,9 +118,9 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 				}
 			}
 		}
-		if (foundInitializer)
+		if (foundInitializer) {
 			return null;
-
+		}
 		// TODO this means that we don't call the legacy Plugin code if the registry
 		// isn't present.
 		// I don't think this is the desired behaviour
@@ -164,40 +140,40 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	 */
 	public IEclipsePreferences createNode(RootPreferences parent, String name) {
 		IScope scope = null;
-		Object value = scopeRegistry.get(name);
-		if (value instanceof IConfigurationElement) {
+		Object value = SCOPE_REGISTRY.get(name);
+		if (value instanceof IConfigurationElement element) {
 			// did the user define their own class?
-			if (((IConfigurationElement) value).getAttribute(ATTRIBUTE_CLASS) != null) {
+			if (element.getAttribute(ATTRIBUTE_CLASS) != null) {
 				try {
-					scope = (IScope) ((IConfigurationElement) value).createExecutableExtension(ATTRIBUTE_CLASS);
-					scopeRegistry.put(name, scope);
+					scope = (IScope) element.createExecutableExtension(ATTRIBUTE_CLASS);
+					SCOPE_REGISTRY.put(name, scope);
 				} catch (ClassCastException e) {
-					log(createStatusError(PrefsMessages.preferences_classCastScope, e));
+					RuntimeLog.log(Status.error(PrefsMessages.preferences_classCastScope, e));
 					return new EclipsePreferences(parent, name);
 				} catch (CoreException e) {
-					log(e.getStatus());
+					RuntimeLog.log(e.getStatus());
 					return new EclipsePreferences(parent, name);
 				}
-			} else if (((IConfigurationElement) value).getAttribute(ATTRIBUTE_STORAGE) != null) {
+			} else if (element.getAttribute(ATTRIBUTE_STORAGE) != null) {
 				// or if they defined a storage class then use EclipsePreferences to model the
 				// prefs.
 				try {
-					AbstractPreferenceStorage storage = (AbstractPreferenceStorage) ((IConfigurationElement) value)
-							.createExecutableExtension(ATTRIBUTE_STORAGE);
-					ScopeDescriptor descriptor = new ScopeDescriptor(storage);
+					Object storage = element.createExecutableExtension(ATTRIBUTE_STORAGE);
+					ScopeDescriptor descriptor = new ScopeDescriptor((AbstractPreferenceStorage) storage);
 					EclipsePreferences result = new EclipsePreferences(parent, name);
 					result.setDescriptor(descriptor);
 					return result;
 				} catch (ClassCastException e) {
-					log(createStatusError(PrefsMessages.preferences_classCastStorage, e));
+					RuntimeLog.log(Status.error(PrefsMessages.preferences_classCastStorage, e));
 					return new EclipsePreferences(parent, name);
 				} catch (CoreException e) {
-					log(e.getStatus());
+					RuntimeLog.log(e.getStatus());
 					return new EclipsePreferences(parent, name);
 				}
 			}
-		} else
+		} else {
 			scope = (IScope) value;
+		}
 		return scope.create(parent, name);
 	}
 
@@ -243,11 +219,9 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 		System.arraycopy(extensionsOld, 0, extensions, 0, extensionsOld.length);
 		System.arraycopy(extensionsNew, 0, extensions, extensionsOld.length, extensionsNew.length);
 
-		if (extensions.length == 0) {
-			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
-				PrefsMessages.message("No extensions for org.eclipse.core.contenttype."); //$NON-NLS-1$
+		if (extensions.length == 0 && EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
+			PrefsMessages.message("No extensions for org.eclipse.core.contenttype."); //$NON-NLS-1$
 		}
-
 		return extensions;
 	}
 
@@ -308,24 +282,11 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 		try {
 			final AbstractPreferenceInitializer initializer = (AbstractPreferenceInitializer) element
 					.createExecutableExtension(ATTRIBUTE_CLASS);
-			ISafeRunnable job = new ISafeRunnable() {
-				@Override
-				public void handleException(Throwable exception) {
-					// already logged in Platform#run()
-				}
-
-				@Override
-				public void run() throws Exception {
-					initializer.initializeDefaultPreferences();
-				}
-			};
-			SafeRunner.run(job);
+			SafeRunner.run(initializer::initializeDefaultPreferences);
 		} catch (ClassCastException e) {
-			IStatus status = new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR,
-					PrefsMessages.preferences_invalidExtensionSuperclass, e);
-			log(status);
+			RuntimeLog.log(Status.error(PrefsMessages.preferences_invalidExtensionSuperclass, e));
 		} catch (CoreException e) {
-			log(e.getStatus());
+			RuntimeLog.log(e.getStatus());
 		}
 	}
 
@@ -338,10 +299,10 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 		if (key == null) {
 			String message = NLS.bind(PrefsMessages.preferences_missingScopeAttribute,
 					element.getDeclaringExtension().getUniqueIdentifier());
-			log(createStatusWarning(message, null));
+			RuntimeLog.log(Status.warning(message));
 			return;
 		}
-		scopeRegistry.put(key, element);
+		SCOPE_REGISTRY.put(key, element);
 		((RootPreferences) service.getRootNode()).addChild(key, null);
 	}
 
@@ -350,12 +311,14 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	 * registry. Remove the node and its children from the preference tree.
 	 */
 	private void scopeRemoved(String key) {
-		IEclipsePreferences node = (IEclipsePreferences) ((RootPreferences) service.getRootNode()).getNode(key, false);
-		if (node != null)
-			((RootPreferences) service.getRootNode()).removeNode(node);
-		else
-			((RootPreferences) service.getRootNode()).removeNode(key);
-		scopeRegistry.remove(key);
+		RootPreferences rootPreferences = (RootPreferences) service.getRootNode();
+		IEclipsePreferences node = (IEclipsePreferences) rootPreferences.getNode(key, false);
+		if (node != null) {
+			rootPreferences.removeNode(node);
+		} else {
+			rootPreferences.removeNode(key);
+		}
+		SCOPE_REGISTRY.remove(key);
 	}
 
 }

@@ -34,7 +34,7 @@ import org.eclipse.osgi.service.datalocation.Location;
  * <p>
  * This class is not intended to be subclassed. This class may be instantiated.
  * </p>
- * 
+ *
  * @see Location#INSTANCE_FILTER
  * @since 3.0
  */
@@ -56,9 +56,10 @@ public final class InstanceScope extends AbstractScope {
 
 	/**
 	 * Create and return a new instance scope instance.
-	 * 
+	 *
 	 * @deprecated call <code>InstanceScope.INSTANCE</code> instead.
 	 */
+	@Deprecated
 	public InstanceScope() {
 		super();
 	}
@@ -73,10 +74,5 @@ public final class InstanceScope extends AbstractScope {
 	@Override
 	public String getName() {
 		return SCOPE;
-	}
-
-	@Override
-	public IEclipsePreferences getNode(String qualifier) {
-		return super.getNode(qualifier);
 	}
 }

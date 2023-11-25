@@ -13,7 +13,7 @@
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
-import org.eclipse.core.runtime.IPath;
+import java.util.Objects;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
@@ -24,9 +24,6 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
  */
 public abstract class AbstractScope implements IScopeContext {
 
-	@Override
-	public abstract String getName();
-
 	/*
 	 * Default path hierarchy for nodes is /<scope>/<qualifier>.
 	 *
@@ -35,29 +32,24 @@ public abstract class AbstractScope implements IScopeContext {
 	 */
 	@Override
 	public IEclipsePreferences getNode(String qualifier) {
-		if (qualifier == null)
+		if (qualifier == null) {
 			throw new IllegalArgumentException();
+		}
 		return (IEclipsePreferences) PreferencesService.getDefault().getRootNode().node(getName()).node(qualifier);
 	}
 
 	@Override
-	public abstract IPath getLocation();
-
-	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (!(obj instanceof IScopeContext))
-			return false;
-		IScopeContext other = (IScopeContext) obj;
-		if (!getName().equals(other.getName()))
-			return false;
-		IPath location = getLocation();
-		return location == null ? other.getLocation() == null : location.equals(other.getLocation());
+		}
+		return obj instanceof IScopeContext other //
+				&& getName().equals(other.getName()) //
+				&& Objects.equals(getLocation(), other.getLocation());
 	}
 
 	@Override
 	public int hashCode() {
-		return getName().hashCode();
+		return Objects.hash(getName(), getLocation());
 	}
 }
