@@ -197,7 +197,6 @@
 		    <module>bundles/org.eclipse.equinox.region</module>
 		    <module>bundles/org.eclipse.equinox.servletbridge</module>
 		
-		    <module>bundles/org.eclipse.equinox.slf4j.stub</module>
 		    <module>bundles/org.eclipse.equinox.transforms.hook</module>
 		    <module>bundles/org.eclipse.equinox.transforms.xslt</module>
 		    <module>bundles/org.eclipse.equinox.useradmin</module>
