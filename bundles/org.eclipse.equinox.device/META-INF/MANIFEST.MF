@@ -1,6 +1,6 @@
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
-Bundle-Version: 1.1.600.qualifier
+Bundle-Version: 1.2.0.qualifier
 Bundle-Activator: org.eclipse.equinox.device.Activator
 Bundle-SymbolicName: org.eclipse.equinox.device
 Bundle-Vendor: %bundleVendor
@@ -12,5 +12,5 @@ Import-Package: org.osgi.framework;version="1.2",
  org.osgi.util.tracker,
  org.eclipse.osgi.util
 Export-Package: org.eclipse.equinox.device; x-internal:=true
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: org.eclipse.equinox.device

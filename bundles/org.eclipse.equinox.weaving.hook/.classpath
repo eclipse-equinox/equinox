@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry excluding="org/aspectj/weaver/osgi/hooks/AspectJBundleWatcherHook.java|org/aspectj/weaver/osgi/hooks/AspectJBundleFileWrapperFactoryHook.java|org/aspectj/weaver/osgi/hooks/AspectJHookConfigurator.java|org/aspectj/weaver/osgi/hooks/AspectJClassLoadingHook.java|org/aspectj/weaver/osgi/hooks/AspectJClassLoadingStatsHook.java|org/aspectj/osgi/hooks/AspectJHookConfigurator.java|org/aspectj/osgi/hooks/AspectJClassLoadingHook.java|org/aspectj/osgi/hooks/AspectJBundleFileWrapperFactoryHook.java|org/aspectj/osgi/hooks/AspectJBundleWatcherHook.java|org/aspectj/osgi/hooks/AspectJClassLoadingStatsHook.java" kind="src" path="src"/>
 	<classpathentry kind="output" path="bin"/>

@@ -3,10 +3,10 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-Vendor: %providerName
 Bundle-SymbolicName: org.eclipse.equinox.servletbridge;singleton:=true
-Bundle-Version: 1.6.500.qualifier
+Bundle-Version: 1.7.0.qualifier
 Bundle-Localization: plugin
 Import-Package: javax.servlet;version="2.3.0",
  javax.servlet.http;version="2.3.0"
 Export-Package: org.eclipse.equinox.servletbridge;version="1.1.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: org.eclipse.equinox.servletbridge

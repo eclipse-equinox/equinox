@@ -2,12 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-SymbolicName: org.eclipse.equinox.console.ssh
-Bundle-Version: 1.2.1200.qualifier
+Bundle-Version: 1.3.0.qualifier
 Bundle-Activator: org.eclipse.equinox.console.ssh.Activator
 Bundle-Vendor: %bundleVendor
 Bundle-Localization: plugin
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Import-Package: javax.security.auth;resolution:=optional,
  javax.security.auth.callback;resolution:=optional,
  javax.security.auth.login;resolution:=optional,
