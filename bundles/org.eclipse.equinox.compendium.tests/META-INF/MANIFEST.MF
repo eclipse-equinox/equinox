@@ -15,7 +15,7 @@ Import-Package: org.eclipse.equinox.metatype;version="1.2.0",
  org.osgi.service.metatype;version="1.2",
  org.osgi.service.packageadmin;version="1.2.0",
  org.osgi.service.useradmin;version="1.0"
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-Localization: plugin
 Bundle-Vendor: %bundleVendor
 Automatic-Module-Name: org.eclipse.equinox.compendium.tests
