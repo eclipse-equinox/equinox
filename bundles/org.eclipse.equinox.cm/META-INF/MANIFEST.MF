@@ -4,14 +4,14 @@ Bundle-Name: %bundleName
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-SymbolicName: org.eclipse.equinox.cm
-Bundle-Version: 1.5.400.qualifier
+Bundle-Version: 1.6.0.qualifier
 Bundle-Activator: org.eclipse.equinox.internal.cm.Activator
 Import-Package: org.osgi.framework;version="1.7.0",
  org.osgi.service.cm;version="[1.6,1.7)",
  org.osgi.service.log;version="1.3.0",
  org.osgi.service.event;version="1.0"; resolution:=optional,
  org.osgi.util.tracker;version="1.3.1"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Provide-Capability: 
  osgi.service;
   objectClass:List<String>="org.osgi.service.cm.ConfigurationAdmin";
