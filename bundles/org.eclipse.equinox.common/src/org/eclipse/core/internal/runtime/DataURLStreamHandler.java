@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2019 bndtools project and others.
+ * Copyright (c) 2015, 2023 bndtools project and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,46 +11,42 @@
  * Contributors:
  *     Neil Bartlett <njbartlett@gmail.com> - initial API and implementation
  *     BJ Hargrave <bj@hargrave.dev> - ongoing enhancements
+ *     Christoph Läubrich - adapt to equinox code base
  *******************************************************************************/
-package bndtools;
+package org.eclipse.core.internal.runtime;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLDecoder;
-import java.util.StringTokenizer;
-
+import java.io.*;
+import java.net.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import org.osgi.service.url.AbstractURLStreamHandlerService;
-
-import aQute.lib.base64.Base64;
 
 /**
  * Basic implementation of IETF RFC 2397, the "data" URL scheme
  * (http://tools.ietf.org/html/rfc2397).
  */
-public class DataURLStreamHandler extends AbstractURLStreamHandlerService {
+class DataURLStreamHandler extends AbstractURLStreamHandlerService {
 
-	public final static String PROTOCOL = "data";
+	final static String PROTOCOL = "data"; //$NON-NLS-1$
+	private static final String CHARSET_TOKEN = "charset="; //$NON-NLS-1$
 
 	@Override
 	public URLConnection openConnection(URL u) throws IOException {
 		if (!PROTOCOL.equals(u.getProtocol()))
-			throw new MalformedURLException("Unsupported protocol");
+			throw new MalformedURLException("Unsupported protocol"); //$NON-NLS-1$
 		return new DataURLConnection(u);
 	}
 
 	static class ParseResult {
-		String	mediaType	= "text/plain";
-		String	charset		= "US-ASCII";
+		String mediaType = "text/plain"; //$NON-NLS-1$
+		Charset charset;
 		byte[]	data;
 	}
 
 	static final class DataURLConnection extends URLConnection {
 
-		private ParseResult parsed = null;
+		private ParseResult parsed;
 
 		DataURLConnection(URL url) {
 			super(url);
@@ -64,42 +60,43 @@ public class DataURLStreamHandler extends AbstractURLStreamHandlerService {
 		static ParseResult parse(String ssp) throws IOException {
 			int commaIndex = ssp.indexOf(',');
 			if (commaIndex < 0)
-				throw new MalformedURLException("missing comma");
+				throw new MalformedURLException("missing comma"); //$NON-NLS-1$
 
 			String paramSegment = ssp.substring(0, commaIndex);
 			String dataSegment = ssp.substring(commaIndex + 1);
 
 			String mediaType = null;
 			boolean base64 = false;
-			String charset = "US-ASCII";
+			Charset charset = null;
 
-			StringTokenizer tokenizer = new StringTokenizer(paramSegment, ";");
+			StringTokenizer tokenizer = new StringTokenizer(paramSegment, ";"); //$NON-NLS-1$
 			boolean first = true;
 			while (tokenizer.hasMoreTokens()) {
 				String token = tokenizer.nextToken();
 				if (first)
 					mediaType = token;
-				else if ("base64".equals(token))
+				else if ("base64".equals(token)) //$NON-NLS-1$
 					base64 = true;
-				else if (token.startsWith("charset="))
-					charset = token.substring("charset=".length());
+				else if (token.startsWith(CHARSET_TOKEN))
+					charset = Charset.forName(token.substring(CHARSET_TOKEN.length()));
 				first = false;
 			}
 
 			byte[] bytes;
 			if (base64) {
-				bytes = Base64.decodeBase64(dataSegment);
+				bytes = Base64.getDecoder().decode(dataSegment);
 			} else {
-				String decoded = URLDecoder.decode(dataSegment, charset);
-				bytes = decoded.getBytes("UTF-8");
+				String decoded = URLDecoder.decode(dataSegment,
+						Objects.requireNonNullElse(charset, StandardCharsets.US_ASCII));
+				bytes = decoded.getBytes(StandardCharsets.UTF_8);
 			}
 
 			ParseResult parsed = new ParseResult();
 			parsed.data = bytes;
-			if (mediaType != null && !mediaType.isEmpty())
+			if (mediaType != null && !mediaType.isEmpty()) {
 				parsed.mediaType = mediaType;
-			if (charset != null && !charset.isEmpty())
-				parsed.charset = charset;
+			}
+			parsed.charset = charset;
 			return parsed;
 		}
 
@@ -118,7 +115,10 @@ public class DataURLStreamHandler extends AbstractURLStreamHandlerService {
 
 		@Override
 		public String getContentEncoding() {
-			return parsed != null ? parsed.charset : null;
+			if (parsed != null && parsed.charset != null) {
+				return parsed.charset.name();
+			}
+			return null;
 		}
 
 	}
