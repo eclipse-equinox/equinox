@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2023 IBM Corporation and others.
+ * Copyright (c) 2004, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -39,6 +39,7 @@ public class PreferencesService implements IPreferencesService {
 	private static List<String> DEFAULT_DEFAULT_LOOKUP_ORDER = List.of( //
 			InstanceScope.SCOPE, //
 			ConfigurationScope.SCOPE, //
+			UserScope.SCOPE, //
 			DefaultScope.SCOPE);
 	private static final char EXPORT_ROOT_PREFIX = '!';
 	private static final char BUNDLE_VERSION_PREFIX = '@';
@@ -67,6 +68,7 @@ public class PreferencesService implements IPreferencesService {
 		initializeDefaultScope(DefaultScope.SCOPE, new DefaultPreferences());
 		initializeDefaultScope(InstanceScope.SCOPE, new InstancePreferences());
 		initializeDefaultScope(ConfigurationScope.SCOPE, new ConfigurationPreferences());
+		initializeDefaultScope(UserScope.SCOPE, new UserPreferences());
 	}
 
 	@Override
