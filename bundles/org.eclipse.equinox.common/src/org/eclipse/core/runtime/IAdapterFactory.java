@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
+import java.util.Arrays;
+
 /**
  * An adapter factory defines behavioral extensions for one or more classes that
  * implements the <code>IAdaptable</code> interface. Adapter factories are
@@ -28,6 +30,7 @@ package org.eclipse.core.runtime;
  * 
  * @see IAdapterManager
  * @see IAdaptable
+ * @see AdapterTypes
  */
 public interface IAdapterFactory {
 
@@ -69,8 +72,23 @@ public interface IAdapterFactory {
 	 * types are supported, in advance of dispatching any actual
 	 * <code>getAdapter</code> requests.
 	 * </p>
+	 * <p>
+	 * The default implementation collects the required classes from the
+	 * {@link AdapterTypes} annotation, if that is not used implementors must
+	 * override this method.
+	 * </p>
 	 *
 	 * @return the collection of adapter types
 	 */
-	public Class<?>[] getAdapterList();
+	default Class<?>[] getAdapterList() {
+		Class<? extends IAdapterFactory> clz = getClass();
+		AdapterTypes[] types = clz.getAnnotationsByType(AdapterTypes.class);
+		if (types.length == 0) {
+			throw new UnsupportedOperationException(String.format(
+					"No @AdapterTypes annotations found on class %s either add the annotation or override the method IAdapterFactory.getAdapterList()", //$NON-NLS-1$
+					clz.getName()));
+		}
+		return Arrays.stream(types)
+				.flatMap(at -> Arrays.stream(at.adapterNames())).distinct().toArray(Class<?>[]::new);
+	}
 }
