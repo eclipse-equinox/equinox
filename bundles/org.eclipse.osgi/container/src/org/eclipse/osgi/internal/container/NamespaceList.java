@@ -156,9 +156,9 @@ public class NamespaceList<E> {
 
 		private final Function<E, String> getNamespace;
 		private LinkedHashMap<String, List<E>> namespaceElements;
-		private int size = 0;
+		int size = 0;
 
-		private List<E> lastBuildElements;
+		List<E> lastBuildElements;
 
 		private Builder(Function<E, String> getNamespace, int expectedNamespaces) {
 			this.getNamespace = getNamespace;
@@ -196,7 +196,6 @@ public class NamespaceList<E> {
 				}
 
 				@Override
-				@SuppressWarnings("synthetic-access")
 				public void remove() {
 					inner.remove();
 					Builder.this.size--;
@@ -523,7 +522,7 @@ public class NamespaceList<E> {
 			});
 		}
 
-		private List<E> removeElementsIf(List<E> list, Predicate<? super E> filter) {
+		List<E> removeElementsIf(List<E> list, Predicate<? super E> filter) {
 			int sizeBefore = list.size();
 			list.removeIf(filter);
 			this.size -= sizeBefore - list.size();

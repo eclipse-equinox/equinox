@@ -64,19 +64,20 @@ public final class ModuleRevision implements BundleRevision {
 				Map<String, Object> attributes = i.mutable ? copyUnmodifiableMap(i.attributes) : i.attributes;
 				return new ModuleCapability(i.namespace, directives, attributes, ModuleRevision.this);
 			}
-		}, NamespaceList.CAPABILITY).build();
-	}
 
-	private static <K, V> Map<K, V> copyUnmodifiableMap(Map<K, V> map) {
-		int size = map.size();
-		if (size == 0) {
-			return Collections.emptyMap();
-		}
-		if (size == 1) {
-			Map.Entry<K, V> entry = map.entrySet().iterator().next();
-			return Collections.singletonMap(entry.getKey(), entry.getValue());
-		}
-		return Collections.unmodifiableMap(new HashMap<>(map));
+			private <K, V> Map<K, V> copyUnmodifiableMap(Map<K, V> map) {
+				int size = map.size();
+				if (size == 0) {
+					return Collections.emptyMap();
+				}
+				if (size == 1) {
+					Map.Entry<K, V> entry = map.entrySet().iterator().next();
+					return Collections.singletonMap(entry.getKey(), entry.getValue());
+				}
+				return Collections.unmodifiableMap(new HashMap<>(map));
+			}
+
+		}, NamespaceList.CAPABILITY).build();
 	}
 
 	private NamespaceList<ModuleRequirement> createRequirements(NamespaceList.Builder<GenericInfo> infos) {
