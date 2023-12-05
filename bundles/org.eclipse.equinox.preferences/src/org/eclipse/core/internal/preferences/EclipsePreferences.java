@@ -625,6 +625,11 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * null if no value existed.
 	 */
 	protected String internalPut(String key, String newValue) {
+		// intern the Strings to save memory
+		// shareStrings() comes too late,
+		// when plugins may have already copied preferences
+		newValue = newValue.intern();
+		key = key.intern();
 		synchronized (childAndPropertyLock) {
 			// illegal state if this node has been removed
 			checkRemoved();
