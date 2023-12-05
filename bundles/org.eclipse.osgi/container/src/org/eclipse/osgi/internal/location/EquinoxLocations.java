@@ -124,7 +124,7 @@ public class EquinoxLocations {
 		URL parentLocation = computeSharedConfigurationLocation();
 		if (parentLocation != null && !parentLocation.equals(configurationLocation.getURL())) {
 			Location parent = new BasicLocation(null, parentLocation, true, null, equinoxConfig, container, debugLocations);
-			((BasicLocation) configurationLocation).setParent(parent);
+			configurationLocation.setParent(parent);
 		}
 
 		if (equinoxConfig.getConfiguration(PROP_HOME_LOCATION_AREA) == null) {

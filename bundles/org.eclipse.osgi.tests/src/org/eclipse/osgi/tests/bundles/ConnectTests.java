@@ -603,7 +603,7 @@ public class ConnectTests extends AbstractBundleTests {
 					assertNotNull("No services found.", registered);
 					assertEquals("Wrong number of services.", 1, registered.length);
 					assertEquals("Wrong service property.", Activator.class.getSimpleName() + id,
-							(String) registered[0].getProperty("activator"));
+							registered[0].getProperty("activator"));
 					if (provideLoader) {
 						assertTrue("Expected the same classes.",
 								Activator.class.equals(b.loadClass(Activator.class.getName())));
