@@ -17,7 +17,6 @@
 
 package org.eclipse.equinox.weaving.hooks;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
