@@ -359,8 +359,7 @@ public final class Path implements IPath, Cloneable {
 		if (isRoot() || isEmpty() || hasTrailingSeparator())
 			return this;
 		int len = segments.length;
-		String[] newSegments = new String[len];
-		System.arraycopy(segments, 0, newSegments, 0, len - 1);
+		String[] newSegments = Arrays.copyOf(segments, len);
 		newSegments[len - 1] = segments[len - 1] + '.' + extension;
 		return new Path(device, newSegments, flags);
 	}
@@ -402,8 +401,7 @@ public final class Path implements IPath, Cloneable {
 		// concatenate the two segment arrays
 		int myLen = segments.length;
 		int tailLen = tail.segmentCount();
-		String[] newSegments = new String[myLen + tailLen];
-		System.arraycopy(segments, 0, newSegments, 0, myLen);
+		String[] newSegments = Arrays.copyOf(segments, myLen + tailLen);
 		for (int i = 0; i < tailLen; i++) {
 			newSegments[myLen + i] = tail.segment(i);
 		}
@@ -436,8 +434,7 @@ public final class Path implements IPath, Cloneable {
 			}
 			// just add the segment
 			int myLen = segments.length;
-			String[] newSegments = new String[myLen + 1];
-			System.arraycopy(segments, 0, newSegments, 0, myLen);
+			String[] newSegments = Arrays.copyOf(segments, myLen + 1);
 			newSegments[myLen] = tail;
 			return new Path(device, newSegments, flags & ~HAS_TRAILING);
 		}
@@ -510,9 +507,7 @@ public final class Path implements IPath, Cloneable {
 		if (stackPointer == segmentCount)
 			return segments;
 		// build the new segment array backwards by popping the stack
-		String[] newSegments = new String[stackPointer];
-		System.arraycopy(stack, 0, newSegments, 0, stackPointer);
-		return newSegments;
+		return Arrays.copyOf(stack, stackPointer);
 	}
 
 	/**
@@ -1157,8 +1152,7 @@ public final class Path implements IPath, Cloneable {
 		}
 		Assert.isLegal(count > 0);
 		int newSize = segments.length - count;
-		String[] newSegments = new String[newSize];
-		System.arraycopy(this.segments, count, newSegments, 0, newSize);
+		String[] newSegments = Arrays.copyOfRange(segments, count, newSize + count);
 
 		// result is always a relative path
 		return new Path(device, newSegments, flags & (HAS_TRAILING | IS_FOR_WINDOWS));
@@ -1179,8 +1173,7 @@ public final class Path implements IPath, Cloneable {
 		}
 		Assert.isLegal(count > 0);
 		int newSize = segments.length - count;
-		String[] newSegments = new String[newSize];
-		System.arraycopy(this.segments, 0, newSegments, 0, newSize);
+		String[] newSegments = Arrays.copyOf(segments, newSize);
 		return new Path(device, newSegments, flags);
 	}
 
@@ -1226,9 +1219,7 @@ public final class Path implements IPath, Cloneable {
 	 */
 	@Override
 	public String[] segments() {
-		String[] segmentCopy = new String[segments.length];
-		System.arraycopy(segments, 0, segmentCopy, 0, segments.length);
-		return segmentCopy;
+		return Arrays.copyOf(segments, segments.length);
 	}
 
 	/*
@@ -1384,8 +1375,7 @@ public final class Path implements IPath, Cloneable {
 		if (count >= segments.length)
 			return this;
 		Assert.isTrue(count > 0, "Invalid parameter to Path.uptoSegment"); //$NON-NLS-1$
-		String[] newSegments = new String[count];
-		System.arraycopy(segments, 0, newSegments, 0, count);
+		String[] newSegments = Arrays.copyOf(segments, count);
 		return new Path(device, newSegments, flags);
 	}
 }
