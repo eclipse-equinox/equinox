@@ -35,10 +35,10 @@ public class PreferencesService implements IPreferencesService {
 	private static final String MATCH_TYPE_PREFIX = "prefix"; //$NON-NLS-1$
 
 	// the order of search scopes when people don't have a specific order set
-	private static String[] DEFAULT_DEFAULT_LOOKUP_ORDER = new String[] { //
+	private static List<String> DEFAULT_DEFAULT_LOOKUP_ORDER = List.of( //
 			InstanceScope.SCOPE, //
 			ConfigurationScope.SCOPE, //
-			DefaultScope.SCOPE };
+			DefaultScope.SCOPE);
 	private static final char EXPORT_ROOT_PREFIX = '!';
 	private static final char BUNDLE_VERSION_PREFIX = '@';
 	private static final float EXPORT_VERSION = 3;
@@ -565,10 +565,12 @@ public class PreferencesService implements IPreferencesService {
 		String[] order = getDefaultLookupOrder(qualifier, key);
 		// if there wasn't an exact match based on both qualifier and simple name
 		// then do a lookup based only on the qualifier
-		if (order == null && key != null)
+		if (order == null && key != null) {
 			order = getDefaultLookupOrder(qualifier, null);
-		if (order == null)
-			order = DEFAULT_DEFAULT_LOOKUP_ORDER;
+		}
+		if (order == null) {
+			order = DEFAULT_DEFAULT_LOOKUP_ORDER.toArray(String[]::new); // prevent mutations of the original
+		}
 		return order;
 	}
 
@@ -1096,10 +1098,24 @@ public class PreferencesService implements IPreferencesService {
 	}
 
 	/*
+	 * Prepend the given scope to the default search order to use when there is
+	 * nothing else set. Clients should not call this method because it is in an
+	 * internal class and has been created solely for use by the
+	 * org.eclipse.core.resources bundle in response to this bug:
+	 * https://bugs.eclipse.org/330320
+	 */
+	public void prependScopeToDefaultDefaultLookupOrder(String firstScope) {
+		List<String> scopes = new ArrayList<>(DEFAULT_DEFAULT_LOOKUP_ORDER);
+		scopes.add(0, firstScope);
+		DEFAULT_DEFAULT_LOOKUP_ORDER = List.copyOf(scopes);
+	}
+
+	/*
 	 * Return the default search lookup order for when nothing is set.
 	 */
+	@Deprecated(forRemoval = true)
 	public String[] getDefaultDefaultLookupOrder() {
-		return DEFAULT_DEFAULT_LOOKUP_ORDER;
+		return DEFAULT_DEFAULT_LOOKUP_ORDER.toArray(String[]::new);
 	}
 
 	/*
@@ -1108,10 +1124,9 @@ public class PreferencesService implements IPreferencesService {
 	 * created solely for use by the org.eclipse.core.resources bundle in response
 	 * to this bug: https://bugs.eclipse.org/330320
 	 */
+	@Deprecated(forRemoval = true)
 	public void setDefaultDefaultLookupOrder(String[] order) {
 		// shouldn't happen but let's protect against an NPE.
-		if (order == null)
-			order = new String[0];
-		DEFAULT_DEFAULT_LOOKUP_ORDER = order;
+		DEFAULT_DEFAULT_LOOKUP_ORDER = List.of(order);
 	}
 }
