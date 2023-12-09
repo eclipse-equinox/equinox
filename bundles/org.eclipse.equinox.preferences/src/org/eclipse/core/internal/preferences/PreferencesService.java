@@ -24,8 +24,7 @@ import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.preferences.*;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
+import org.osgi.framework.*;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 
@@ -1032,61 +1031,60 @@ public class PreferencesService implements IPreferencesService {
 	 * minor version: WARNING status - plugins that differ in major version: - where
 	 * installed plugin is newer: WARNING status - where installed plugin is older:
 	 * ERROR status
-	 * 
+	 *
 	 * @param bundle    the name of the bundle
 	 * @param pref      The version identifier of the preferences to be loaded
 	 * @param installed The version identifier of the installed plugin
 	 */
-	IStatus validatePluginVersions(String bundle, PluginVersionIdentifier pref, PluginVersionIdentifier installed) {
-		if (installed.getMajorComponent() == pref.getMajorComponent()
-				&& installed.getMinorComponent() == pref.getMinorComponent())
+	private IStatus validatePluginVersions(String bundle, Version pref, Version installed) {
+		if (installed.getMajor() == pref.getMajor() && installed.getMinor() == pref.getMinor()) {
 			return null;
-		int severity;
-		if (installed.getMajorComponent() < pref.getMajorComponent())
-			severity = IStatus.ERROR;
-		else
-			severity = IStatus.WARNING;
-		String msg = NLS.bind(PrefsMessages.preferences_incompatible, (new Object[] { pref, bundle, installed }));
-		return new Status(severity, PrefsMessages.OWNER_NAME, 1, msg, null);
+		}
+		String msg = NLS.bind(PrefsMessages.preferences_incompatible, new Object[] { pref, bundle, installed });
+		boolean isError = installed.getMajor() < pref.getMajor();
+		return isError ? Status.error(msg) : Status.warning(msg);
+	}
+
+	private static Version parseVersion(String version) {
+		if (version != null) {
+			try {
+				return new Version(version);
+			} catch (IllegalArgumentException e) { // invalid
+			}
+		}
+		return null;
 	}
 
 	public IStatus validateVersions(IPath path) {
 		final MultiStatus result = new MultiStatus(PrefsMessages.OWNER_NAME, IStatus.INFO,
 				PrefsMessages.preferences_validate, null);
-		IPreferenceNodeVisitor visitor = new IPreferenceNodeVisitor() {
-			@Override
-			public boolean visit(IEclipsePreferences node) {
-				if (!(node instanceof ExportedPreferences))
-					return false;
-
-				// calculate the version in the file
-				ExportedPreferences realNode = (ExportedPreferences) node;
-				String version = realNode.getVersion();
-				if (version == null || !PluginVersionIdentifier.validateVersion(version).isOK())
-					return true;
-				PluginVersionIdentifier versionInFile = new PluginVersionIdentifier(version);
-
-				// calculate the version of the installed bundle
-				String bundleName = getBundleName(node.absolutePath());
-				if (bundleName == null)
-					return true;
-				String stringVersion = getBundleVersion(bundleName);
-				if (stringVersion == null || !PluginVersionIdentifier.validateVersion(stringVersion).isOK())
-					return true;
-				PluginVersionIdentifier versionInMemory = new PluginVersionIdentifier(stringVersion);
-
-				// verify the versions based on the matching rules
-				IStatus verification = validatePluginVersions(bundleName, versionInFile, versionInMemory);
-				if (verification != null)
-					result.add(verification);
-
+		IPreferenceNodeVisitor visitor = node -> {
+			if (!(node instanceof ExportedPreferences realNode)) {
+				return false;
+			}
+			// calculate the version in the file
+			Version versionInFile = parseVersion(realNode.getVersion());
+			if (versionInFile == null) {
 				return true;
 			}
+			// calculate the version of the installed bundle
+			String bundleName = getBundleName(node.absolutePath());
+			if (bundleName == null) {
+				return true;
+			}
+			Version versionInMemory = parseVersion(getBundleVersion(bundleName));
+			if (versionInMemory == null) {
+				return true;
+			}
+			// verify the versions based on the matching rules
+			IStatus verification = validatePluginVersions(bundleName, versionInFile, versionInMemory);
+			if (verification != null) {
+				result.add(verification);
+			}
+			return true;
 		};
-
-		InputStream input = null;
 		try {
-			input = new BufferedInputStream(new FileInputStream(path.toFile()));
+			InputStream input = new BufferedInputStream(new FileInputStream(path.toFile()));
 			IExportedPreferences prefs = readPreferences(input);
 			prefs.accept(visitor);
 		} catch (FileNotFoundException e) {
