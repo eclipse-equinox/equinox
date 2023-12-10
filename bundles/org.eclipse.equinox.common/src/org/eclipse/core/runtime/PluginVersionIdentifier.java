@@ -60,7 +60,7 @@ import org.osgi.framework.Version;
  * @see java.lang.String#compareTo(java.lang.String)
  * @deprecated clients should use {@link org.osgi.framework.Version} instead
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public final class PluginVersionIdentifier {
 
 	private Version version;
