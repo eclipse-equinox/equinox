@@ -47,7 +47,7 @@ public class PreferencesService implements IPreferencesService {
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
 	private static PreferencesService instance;
-	static final RootPreferences root = new RootPreferences();
+	private static final RootPreferences root = new RootPreferences();
 	private static final Map<String, LookupOrder> DEFAULTS_REGISTRY = new ConcurrentHashMap<>();
 	private Object registryHelper = null;
 	private final Map<String, EclipsePreferences> defaultScopes = new HashMap<>();
@@ -1050,23 +1050,4 @@ public class PreferencesService implements IPreferencesService {
 		DEFAULT_DEFAULT_LOOKUP_ORDER = List.copyOf(scopes);
 	}
 
-	/*
-	 * Return the default search lookup order for when nothing is set.
-	 */
-	@Deprecated(forRemoval = true)
-	public String[] getDefaultDefaultLookupOrder() {
-		return DEFAULT_DEFAULT_LOOKUP_ORDER.toArray(String[]::new);
-	}
-
-	/*
-	 * Set the default search order to use when there is nothing else set. Clients
-	 * should not call this method because it is in an internal class and has been
-	 * created solely for use by the org.eclipse.core.resources bundle in response
-	 * to this bug: https://bugs.eclipse.org/330320
-	 */
-	@Deprecated(forRemoval = true)
-	public void setDefaultDefaultLookupOrder(String[] order) {
-		// shouldn't happen but let's protect against an NPE.
-		DEFAULT_DEFAULT_LOOKUP_ORDER = List.of(order);
-	}
 }
