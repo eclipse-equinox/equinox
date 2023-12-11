@@ -17,13 +17,18 @@ package org.eclipse.equinox.common.tests;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IProgressMonitor.ProgressOption;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -68,7 +73,7 @@ public class SubProgressTest {
 
 	/**
 	 * Tests the style bits in SubProgressMonitor
-	 * 
+	 *
 	 * @deprecated to suppress deprecation warnings
 	 */
 	@Deprecated
@@ -108,13 +113,13 @@ public class SubProgressTest {
 		for (int style : styles) {
 			TestProgressMonitor top = new TestProgressMonitor();
 			top.beginTask("", 100);
-			SubProgressMonitor child = new SubProgressMonitor(top, 100, style);
+			IProgressMonitor child = new SubProgressMonitor(top, 100, style);
 
 			String testName = "style " + style + " as top-level monitor";
 			results.put(testName, runChildTest(0, top, child, 100 * styles.length));
 
 			for (int innerStyle : styles) {
-				SubProgressMonitor innerChild = new SubProgressMonitor(child, 100, innerStyle);
+				IProgressMonitor innerChild = new SubProgressMonitor(child, 100, innerStyle);
 				testName = "style " + innerStyle + " below style " + style;
 				results.put(testName, runChildTest(1, top, innerChild, 100));
 				innerChild.done();
@@ -122,14 +127,96 @@ public class SubProgressTest {
 			child.done();
 		}
 
-		// Output the code for the observed results, in case one of them has changed
-		// intentionally
 		for (Map.Entry<String, String[]> entry : results.entrySet()) {
 			String[] expectedResult = expected.get(entry.getKey());
 			String[] value = entry.getValue();
 			assertArrayEquals(value, expectedResult);
 		}
 
+	}
+
+	/**
+	 * Tests the ProgressOption in IProgressMonitor.create
+	 */
+	@Test
+	public void testIProgressOptions() {
+		testProgressOptions(m -> m);
+	}
+
+	@Test
+	public void testSubProgressOptions() {
+		testProgressOptions(m -> SubMonitor.convert(m));
+	}
+
+	public void testProgressOptions(Function<IProgressMonitor, IProgressMonitor> implementation) {
+		ProgressOption[][] styles = new ProgressOption[][] { {}, { ProgressOption.PREPEND_MAIN_LABEL },
+				{ ProgressOption.SUPPRESS_SUBTASK },
+				{ ProgressOption.PREPEND_MAIN_LABEL, ProgressOption.SUPPRESS_SUBTASK } };
+
+		HashMap<String, String[]> expected = new HashMap<>();
+		expected.put("style [] below style [SUPPRESS_SUBTASK]",
+				new String[] { "setTaskName0", "", "setTaskName1" });
+		expected.put("style [SUPPRESS_SUBTASK] below style []",
+				new String[] { "setTaskName1", "beginTask1 ", "setTaskName1" });
+		expected.put("style [PREPEND_MAIN_LABEL, SUPPRESS_SUBTASK] below style []",
+				new String[] { "setTaskName1", "beginTask1 ", "setTaskName1" });
+		expected.put("style [SUPPRESS_SUBTASK] below style [PREPEND_MAIN_LABEL]",
+				new String[] { "setTaskName1", "beginTask0 beginTask1 ", "setTaskName1" });
+		expected.put("style [] below style []", new String[] { "setTaskName0", "subTask1", "setTaskName1" });
+		expected.put("style [PREPEND_MAIN_LABEL, SUPPRESS_SUBTASK] as top-level monitor",
+				new String[] { "", "", "setTaskName0" });
+		expected.put("style [PREPEND_MAIN_LABEL, SUPPRESS_SUBTASK] below style [SUPPRESS_SUBTASK]",
+				new String[] { "setTaskName1", "", "setTaskName1" });
+		expected.put("style [PREPEND_MAIN_LABEL, SUPPRESS_SUBTASK] below style [PREPEND_MAIN_LABEL, SUPPRESS_SUBTASK]",
+				new String[] { "setTaskName1", "", "setTaskName1" });
+		expected.put("style [] below style [PREPEND_MAIN_LABEL, SUPPRESS_SUBTASK]",
+				new String[] { "setTaskName0", "", "setTaskName1" });
+		expected.put("style [PREPEND_MAIN_LABEL] below style [SUPPRESS_SUBTASK]",
+				new String[] { "setTaskName1", "", "setTaskName1" });
+		expected.put("style [] as top-level monitor", new String[] { "", "subTask0", "setTaskName0" });
+		expected.put("style [] below style [PREPEND_MAIN_LABEL]",
+				new String[] { "setTaskName0", "beginTask0 subTask1", "setTaskName1" });
+		expected.put("style [PREPEND_MAIN_LABEL] below style []",
+				new String[] { "setTaskName1", "beginTask1 subTask1", "setTaskName1" });
+		expected.put("style [PREPEND_MAIN_LABEL] as top-level monitor",
+				new String[] { "", "beginTask0 subTask0", "setTaskName0" });
+		expected.put("style [SUPPRESS_SUBTASK] below style [PREPEND_MAIN_LABEL, SUPPRESS_SUBTASK]",
+				new String[] { "setTaskName1", "", "setTaskName1" });
+		expected.put("style [PREPEND_MAIN_LABEL] below style [PREPEND_MAIN_LABEL, SUPPRESS_SUBTASK]",
+				new String[] { "setTaskName1", "", "setTaskName1" });
+		expected.put("style [SUPPRESS_SUBTASK] below style [SUPPRESS_SUBTASK]",
+				new String[] { "setTaskName1", "", "setTaskName1" });
+		expected.put("style [SUPPRESS_SUBTASK] as top-level monitor", new String[] { "", "", "setTaskName0" });
+		expected.put("style [PREPEND_MAIN_LABEL, SUPPRESS_SUBTASK] below style [PREPEND_MAIN_LABEL]",
+				new String[] { "setTaskName1", "beginTask0 beginTask1 ", "setTaskName1" });
+		expected.put("style [PREPEND_MAIN_LABEL] below style [PREPEND_MAIN_LABEL]",
+				new String[] { "setTaskName1", "beginTask0 beginTask1 subTask1", "setTaskName1" });
+			HashMap<String, String[]> results = new HashMap<>();
+
+			for (ProgressOption[] style : styles) {
+				TestProgressMonitor root = new TestProgressMonitor();
+				IProgressMonitor top = implementation.apply(root);
+				top.beginTask("", 100);
+				IProgressMonitor child = top.submonitor(100, style);
+
+				String testName = "style " + Arrays.asList(style) + " as top-level monitor";
+				results.put(testName, runChildTest(0, root, child, 100 * styles.length));
+
+				for (ProgressOption[] innerStyle : styles) {
+					IProgressMonitor innerChild = child.submonitor(100, innerStyle);
+					testName = "style " + Arrays.asList(innerStyle) + " below style " + Arrays.asList(style);
+					results.put(testName, runChildTest(1, root, innerChild, 100));
+					innerChild.done();
+				}
+				child.done();
+			}
+
+			for (Map.Entry<String, String[]> entry : results.entrySet()) {
+				String[] expectedResult = expected.get(entry.getKey());
+				assertNotNull(entry.getKey(), expectedResult);
+				String[] value = entry.getValue();
+				assertArrayEquals(entry.getKey(), expectedResult, value);
+			}
 	}
 
 	private String[] runChildTest(int depth, TestProgressMonitor root, IProgressMonitor child, int ticks) {
@@ -144,9 +231,9 @@ public class SubProgressTest {
 	}
 
 	/**
-	 * Tests SubProgressMonitor nesting when using the default constructor. (Tests
+	 * Tests IProgressMonitor nesting when using the default constructor. (Tests
 	 * parents in floating point mode)
-	 * 
+	 *
 	 * @deprecated to suppress deprecation warnings
 	 */
 	@Deprecated
@@ -156,7 +243,7 @@ public class SubProgressTest {
 		top.beginTask("", 2000);
 
 		// Create an SPM, put it in floating-point mode, and consume half its work
-		SubProgressMonitor fpMonitor = new SubProgressMonitor(top, 1000);
+		IProgressMonitor fpMonitor = new SubProgressMonitor(top, 1000);
 		fpMonitor.beginTask("", 100);
 		fpMonitor.internalWorked(50.0);
 		fpMonitor.internalWorked(-10.0); // should have no effect
@@ -165,7 +252,7 @@ public class SubProgressTest {
 
 		// Create a child monitor, and ensure that it grabs the correct amount of work
 		// from the parent.
-		SubProgressMonitor childMonitor = new SubProgressMonitor(fpMonitor, 20);
+		IProgressMonitor childMonitor = fpMonitor.submonitor(20);
 		childMonitor.beginTask("", 100);
 		childMonitor.worked(100);
 		childMonitor.done();
@@ -174,7 +261,7 @@ public class SubProgressTest {
 
 		// Create a child monitor, and ensure that it grabs the correct amount of work
 		// from the parent.
-		SubProgressMonitor childMonitor2 = new SubProgressMonitor(fpMonitor, 30);
+		IProgressMonitor childMonitor2 = fpMonitor.submonitor(30);
 		childMonitor2.beginTask("", 100);
 		childMonitor2.worked(100);
 		childMonitor2.done();
@@ -182,7 +269,7 @@ public class SubProgressTest {
 		assertEquals(1000.0, top.getTotalWork(), 0.01d);
 
 		// Ensure that creating another child will have no effect
-		SubProgressMonitor childMonitor3 = new SubProgressMonitor(fpMonitor, 10);
+		IProgressMonitor childMonitor3 = new SubProgressMonitor(fpMonitor, 10);
 		childMonitor3.beginTask("", 100);
 		childMonitor3.worked(100);
 		childMonitor3.done();
@@ -195,9 +282,9 @@ public class SubProgressTest {
 	}
 
 	/**
-	 * Tests SubProgressMonitor nesting when using the default constructor. Tests
+	 * Tests IProgressMonitor nesting when using the default constructor. Tests
 	 * constructors in int mode.
-	 * 
+	 *
 	 * @deprecated to suppress deprecation warnings
 	 */
 	@Deprecated
@@ -207,7 +294,7 @@ public class SubProgressTest {
 		top.beginTask("", 2000);
 
 		// Create an SPM leave it in int mode, and consume half its work
-		SubProgressMonitor fpMonitor = new SubProgressMonitor(top, 1000);
+		IProgressMonitor fpMonitor = new SubProgressMonitor(top, 1000);
 		fpMonitor.beginTask("", 100);
 		fpMonitor.worked(50);
 
@@ -215,7 +302,7 @@ public class SubProgressTest {
 
 		// Create a child monitor, and ensure that it grabs the correct amount of work
 		// from the parent.
-		SubProgressMonitor childMonitor = new SubProgressMonitor(fpMonitor, 20);
+		IProgressMonitor childMonitor = fpMonitor.submonitor(20);
 		childMonitor.beginTask("", 100);
 		childMonitor.worked(100);
 		childMonitor.done();
@@ -224,7 +311,7 @@ public class SubProgressTest {
 
 		// Create a child monitor, and ensure that it grabs the correct amount of work
 		// from the parent.
-		SubProgressMonitor childMonitor2 = new SubProgressMonitor(fpMonitor, 30);
+		IProgressMonitor childMonitor2 = new SubProgressMonitor(fpMonitor, 30);
 		childMonitor2.beginTask("", 100);
 		childMonitor2.worked(100);
 		childMonitor2.done();
@@ -232,7 +319,7 @@ public class SubProgressTest {
 		assertEquals(1000.0, top.getTotalWork(), 0.01d);
 
 		// Ensure that creating another child will have no effect
-		SubProgressMonitor childMonitor3 = new SubProgressMonitor(fpMonitor, 10);
+		IProgressMonitor childMonitor3 = new SubProgressMonitor(fpMonitor, 10);
 		childMonitor3.beginTask("", 100);
 		childMonitor3.worked(100);
 		childMonitor3.done();
@@ -247,7 +334,7 @@ public class SubProgressTest {
 	/**
 	 * Tests the automatic cleanup when progress monitors are created via their
 	 * constructor
-	 * 
+	 *
 	 * @deprecated to suppress deprecation warnings
 	 */
 	@Deprecated
@@ -255,11 +342,11 @@ public class SubProgressTest {
 	public void testParallelChildren() {
 		TestProgressMonitor top = new TestProgressMonitor();
 		top.beginTask("", 1000);
-		SubProgressMonitor mon = new SubProgressMonitor(top, 1000);
+		IProgressMonitor mon = new SubProgressMonitor(top, 1000);
 		mon.beginTask("", 1000);
 
-		SubProgressMonitor monitor1 = new SubProgressMonitor(mon, 200);
-		SubProgressMonitor monitor2 = new SubProgressMonitor(mon, 200);
+		IProgressMonitor monitor1 = new SubProgressMonitor(mon, 200);
+		IProgressMonitor monitor2 = new SubProgressMonitor(mon, 200);
 
 		assertEquals("Ensure no work has been reported yet", 0.0, top.getTotalWork(), 0.01d);
 		monitor1.beginTask("", 1000);
@@ -277,9 +364,9 @@ public class SubProgressTest {
 		// Create a monitor that will leak - monitors won't be auto-completed until
 		// their done methods are
 		// called
-		SubProgressMonitor monitor3 = new SubProgressMonitor(mon, 300);
+		IProgressMonitor monitor3 = new SubProgressMonitor(mon, 300);
 		assertEquals("Monitor2 should not have been cleaned up yet", 300.0, top.getTotalWork(), 0.01d);
-		SubProgressMonitor monitor4 = new SubProgressMonitor(mon, 300);
+		IProgressMonitor monitor4 = new SubProgressMonitor(mon, 300);
 		monitor4.beginTask("", 100);
 		mon.done();
 		Assert.assertNotNull(monitor3);
@@ -296,7 +383,7 @@ public class SubProgressTest {
 		TestProgressMonitor root = new TestProgressMonitor();
 		root.beginTask("", 1000);
 
-		SubProgressMonitor spm = new SubProgressMonitor(root, 1000);
+		IProgressMonitor spm = new SubProgressMonitor(root, 1000);
 
 		// Test that changes at the root propogate to the child
 		root.setCanceled(true);
@@ -312,7 +399,7 @@ public class SubProgressTest {
 
 		// Test a chain of depth 2
 		spm.beginTask("", 1000);
-		SubProgressMonitor spm2 = new SubProgressMonitor(spm, 1000);
+		IProgressMonitor spm2 = new SubProgressMonitor(spm, 1000);
 
 		// Test that changes at the root propogate to the child
 		root.setCanceled(true);
@@ -362,7 +449,7 @@ public class SubProgressTest {
 		monitor.beginTask("", progressSize);
 
 		for (int count = 0; count < progressSize; count++) {
-			SubProgressMonitor mon = new SubProgressMonitor(monitor, 1);
+			IProgressMonitor mon = new SubProgressMonitor(monitor, 1);
 			mon.beginTask("", 100);
 			mon.done();
 		}
@@ -376,7 +463,7 @@ public class SubProgressTest {
 		TestProgressMonitor top = new TestProgressMonitor();
 		top.beginTask("", 10);
 
-		SubProgressMonitor childMonitor = new SubProgressMonitor(top, IProgressMonitor.UNKNOWN); // -1
+		IProgressMonitor childMonitor = new SubProgressMonitor(top, IProgressMonitor.UNKNOWN); // -1
 		childMonitor.beginTask("", 10);
 		childMonitor.worked(5);
 		assertEquals(0.0, top.getTotalWork(), 0.01d);

@@ -206,6 +206,7 @@ import org.eclipse.core.internal.runtime.TracingOptions;
  * 
  * @since org.eclipse.equinox.common 3.3
  */
+@SuppressWarnings({ "removal", "deprecation" })
 public final class SubMonitor implements IProgressMonitorWithBlocking {
 
 	/**
@@ -782,6 +783,38 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 */
 	public SubMonitor newChild(int totalWork) {
 		return newChild(totalWork, SUPPRESS_BEGINTASK);
+	}
+
+	@Override
+	public IProgressMonitor submonitor(int totalWork, ProgressOption... options) {
+		if (options.length == 0) {
+			return newChild(totalWork);
+		}
+		if (options.length == 1 && options[0] == ProgressOption.SUPPRESS_SUBTASK) {
+			return newChild(totalWork, SUPPRESS_BEGINTASK | SUPPRESS_SUBTASK);
+		}
+		// use default implementation for ProgressOption.PREPEND_MAIN_LABEL:
+		return create(this, totalWork, options);
+	}
+
+	static IProgressMonitor create(IProgressMonitor mon, int totalWork, ProgressOption[] options) {
+		if (options.length == 0) {
+			return new SubProgressMonitor(mon, totalWork);
+		}
+		int flags = 0;
+		for (ProgressOption option : options) {
+			switch (option) {
+			case SUPPRESS_SUBTASK: {
+				flags |= SubProgressMonitor.SUPPRESS_SUBTASK_LABEL;
+				continue;
+			}
+			case PREPEND_MAIN_LABEL: {
+				flags |= SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK;
+				continue;
+			}
+			}
+		}
+		return new SubProgressMonitor(mon, totalWork, flags);
 	}
 
 	/**

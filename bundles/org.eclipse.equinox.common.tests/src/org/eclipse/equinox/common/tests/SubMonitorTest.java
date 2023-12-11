@@ -831,7 +831,7 @@ public class SubMonitorTest {
 		int rightBranch = loopSize - leftBranch;
 
 		if (leftBranch > 1) {
-			reportWorkInBalancedTree(monitor.newChild(50), leftBranch);
+			reportWorkInBalancedTree(monitor.submonitor(50), leftBranch);
 		} else {
 			monitor.worked(25);
 			monitor.internalWorked(25.0);
@@ -928,7 +928,7 @@ public class SubMonitorTest {
 		SubMonitor monitor = SubMonitor.convert(parent, progressSize);
 
 		for (int count = 0; count < progressSize; count++) {
-			SubMonitor mon = monitor.newChild(1);
+			IProgressMonitor mon = monitor.submonitor(1);
 			mon.beginTask("", 100);
 		}
 	}

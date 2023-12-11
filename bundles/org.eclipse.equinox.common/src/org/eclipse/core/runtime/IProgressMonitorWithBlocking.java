@@ -35,7 +35,7 @@ package org.eclipse.core.runtime;
  * @see IProgressMonitor
  * @since 3.0
  */
-@Deprecated
+@Deprecated(forRemoval = true, since = "3.19, 2023-03")
 public interface IProgressMonitorWithBlocking extends IProgressMonitor {
 	// content moved to IProgressMonitor
 

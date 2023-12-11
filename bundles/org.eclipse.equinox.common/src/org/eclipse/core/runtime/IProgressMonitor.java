@@ -254,6 +254,43 @@ public interface IProgressMonitor {
 	}
 
 	/**
+	 * Creates a new IProgressMonitor that will consume the given number of ticks
+	 * from this IProgressMonitor.
+	 * 
+	 * This is meant as an easy to use replacement for deprecated
+	 * {@code org.eclipse.core.runtime.SubProgressMonitor.SubProgressMonitor(IProgressMonitor, int, int)}.
+	 * Unlike {link {@link #slice(int)} the returned IProgressMonitor is meant for
+	 * use in the current thread and normally propagate calls to the parent (depends
+	 * on the used options).
+	 * 
+	 * @param totalWork number of ticks to consume from the receiver
+	 * @parma options optional ProgressOption
+	 * @return new IProgressMonitor that may be used in place of a new
+	 *         IProgressMonitor
+	 * @since 3.19
+	 */
+	public default IProgressMonitor submonitor(int totalWork, ProgressOption... options) {
+		return SubMonitor.create(this, totalWork, options);
+	}
+
+	/**
+	 * Options for {@link #submonitor(int, ProgressOption...)}
+	 * 
+	 * @since 3.19
+	 */
+	public static enum ProgressOption {
+		/**
+		 * Calls to <code>subTask</code> should not have any effect. This is equivalent
+		 * to {@link SubMonitor#SUPPRESS_SUBTASK}
+		 */
+		SUPPRESS_SUBTASK,
+		/**
+		 * The main task label should be prepended to the subtask label.
+		 */
+		PREPEND_MAIN_LABEL,
+	}
+
+	/**
 	 * Calls {@link #done()} on the given monitor if is non-null. If the given
 	 * monitor is null, this is a no-op.
 	 * 
