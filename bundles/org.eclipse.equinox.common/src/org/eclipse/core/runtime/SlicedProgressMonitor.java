@@ -86,6 +86,7 @@ public class SlicedProgressMonitor implements IProgressMonitor {
 
 	@Override
 	public void setCanceled(boolean value) {
+		monitor.setCanceled(value);
 		this.canceled = value;
 	}
 
