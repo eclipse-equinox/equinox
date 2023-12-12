@@ -246,7 +246,8 @@ public interface IProgressMonitor {
 	 *         implementation suppress any strings passed to
 	 *         {@link #setTaskName(String)}, {@link #subTask(String)} and
 	 *         {@link #beginTask(String, int)}, and does not propagate
-	 *         {@link #setCanceled(boolean)} (but reports cancelation of the parent
+	 *         {@link #setCanceled(boolean)} - but reports cancelation of the
+	 *         parent.
 	 * @since 3.14
 	 */
 	public default IProgressMonitor slice(int work) {
