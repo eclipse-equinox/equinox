@@ -184,7 +184,7 @@ public final class Path implements IPath, Cloneable {
 		String devicePart = null;
 		int pathLength = pathString.length();
 		if (firstMatch == pathLength || pathString.charAt(firstMatch) != DEVICE_SEPARATOR) {
-			devicePart = pathString.substring(0, firstMatch);
+			devicePart = pathString.substring(0, firstMatch).intern();
 			pathString = pathString.substring(firstMatch, pathLength);
 		}
 		// optimize for no colon literals
@@ -199,7 +199,7 @@ public final class Path implements IPath, Cloneable {
 			}
 			chars[writeOffset++] = chars[readOffset++];
 		}
-		return new Path(devicePart, new String(chars, 0, writeOffset), Constants.RUNNING_ON_WINDOWS);
+		return new Path(devicePart, new String(chars, 0, writeOffset).intern(), Constants.RUNNING_ON_WINDOWS);
 	}
 
 	/**
@@ -312,7 +312,7 @@ public final class Path implements IPath, Cloneable {
 			if (i != -1) {
 				// remove leading slash from device part to handle output of URL.getFile()
 				int start = fullPath.charAt(0) == SEPARATOR ? 1 : 0;
-				devicePart = fullPath.substring(start, i + 1);
+				devicePart = fullPath.substring(start, i + 1).intern();
 				fullPath = fullPath.substring(i + 1, fullPath.length());
 			}
 		}
@@ -360,7 +360,7 @@ public final class Path implements IPath, Cloneable {
 			return this;
 		int len = segments.length;
 		String[] newSegments = Arrays.copyOf(segments, len);
-		newSegments[len - 1] = segments[len - 1] + '.' + extension;
+		newSegments[len - 1] = (segments[len - 1] + '.' + extension).intern();
 		return new Path(device, newSegments, flags);
 	}
 
@@ -435,7 +435,7 @@ public final class Path implements IPath, Cloneable {
 			// just add the segment
 			int myLen = segments.length;
 			String[] newSegments = Arrays.copyOf(segments, myLen + 1);
-			newSegments[myLen] = tail;
+			newSegments[myLen] = tail.intern();
 			return new Path(device, newSegments, flags & ~HAS_TRAILING);
 		}
 		// go with easy implementation
@@ -552,7 +552,7 @@ public final class Path implements IPath, Cloneable {
 				count++;
 			}
 		}
-		return new String(result, 0, count);
+		return new String(result, 0, count).intern();
 	}
 
 	/*
@@ -647,6 +647,7 @@ public final class Path implements IPath, Cloneable {
 			} else {
 				newSegments[i] = path.substring(start, end);
 			}
+			newSegments[i] = newSegments[i].intern();
 			next = end + 1;
 		}
 		return newSegments;
