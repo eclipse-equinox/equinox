@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-SymbolicName: org.eclipse.equinox.coordinator
-Bundle-Version: 1.5.200.qualifier
+Bundle-Version: 1.5.300.qualifier
 Bundle-Activator: org.eclipse.equinox.coordinator.Activator
 Bundle-Vendor: %bundleVendor
 Import-Package: org.eclipse.osgi.util;version="[1.1,2.0)",
