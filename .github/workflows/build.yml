@@ -47,7 +47,7 @@ jobs:
         -Drt.equinox.binaries.loc=${{ github.workspace }}/rt.equinox.binaries
         clean verify
     - name: Upload Test Results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: test-results
         if-no-files-found: error
@@ -78,7 +78,7 @@ jobs:
       run: nmake -f make_win64.mak
       shell: pwsh
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: success()
       with:
         name: Windows launcher artifacts
@@ -116,7 +116,7 @@ jobs:
         -fn
         clean verify
     - name: Upload TCK Results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: tck-results
@@ -127,7 +127,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Event File
         path: ${{ github.event_path }}
