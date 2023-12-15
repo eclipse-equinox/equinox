@@ -194,12 +194,9 @@ public class EventManager {
 		}
 		if (thread == null) {
 			/* if there is no thread, then create a new one */
-			thread = AccessController.doPrivileged(new PrivilegedAction<EventThread<K, V, E>>() {
-				@Override
-				public EventThread<K, V, E> run() {
-					EventThread<K, V, E> t = new EventThread<>(threadGroup, threadName);
-					return t;
-				}
+			thread = AccessController.doPrivileged((PrivilegedAction<EventThread<K, V, E>>) () -> {
+				EventThread<K, V, E> t = new EventThread<>(threadGroup, threadName);
+				return t;
 			});
 			/* start the new thread */
 			thread.start();
