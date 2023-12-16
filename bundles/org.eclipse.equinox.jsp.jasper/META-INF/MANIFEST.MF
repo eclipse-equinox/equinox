@@ -8,13 +8,10 @@ Bundle-Version: 1.2.0.qualifier
 Bundle-Activator: org.eclipse.equinox.internal.jsp.jasper.Activator
 Import-Package: com.sun.el;version="3.0.0",
  javax.servlet;version="[2.4,5.0)",
- javax.servlet.annotation;version="[2.6,5.0)";resolution:=optional,
- javax.servlet.descriptor;version="[2.6,5.0)";resolution:=optional,
+ javax.servlet.descriptor;version="[2.6.0,5.0.0)",
  javax.servlet.http;version="[2.4,5.0)",
- javax.servlet.jsp;version="[2.0,3.0)",
  org.apache.jasper.servlet;version="[9,10)",
  org.osgi.framework;version="1.3.0",
- org.osgi.service.http;version="1.2.0",
  org.osgi.service.packageadmin;version="1.2.0",
  org.osgi.util.tracker;version="1.3.1"
 Export-Package: org.eclipse.equinox.jsp.jasper;version="1.0.0"
