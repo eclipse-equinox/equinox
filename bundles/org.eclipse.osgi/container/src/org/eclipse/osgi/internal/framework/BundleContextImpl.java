@@ -872,7 +872,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 				// move on without setting TCCL (https://github.com/eclipse-equinox/equinox/issues/303)
 				
 				if (debug.DEBUG_GENERAL) {
-					Debug.printStackTrace(t);
+					Debug.printStackTrace(e);
 				}
 
 				return Boolean.FALSE;
