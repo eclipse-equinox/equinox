@@ -46,14 +46,22 @@ class XMLParsingServiceFactory implements ServiceFactory<Object> {
 		 * TCCL loads.
 		 */
 		final ClassLoader savedClassLoader = Thread.currentThread().getContextClassLoader();
+		boolean restoreTccl = true;
 		try {
 			BundleWiring wiring = bundle.adapt(BundleWiring.class);
 			ClassLoader cl = wiring == null ? null : wiring.getClassLoader();
-			if (cl != null)
-				Thread.currentThread().setContextClassLoader(cl);
+			if (cl != null) {
+				try {
+					Thread.currentThread().setContextClassLoader(cl);
+				} catch (SecurityException e) {
+					// move on without setting TCCL (https://github.com/eclipse-equinox/equinox/issues/303)
+					restoreTccl = false;
+				}
+			}
 			return createService();
 		} finally {
-			Thread.currentThread().setContextClassLoader(savedClassLoader);
+			if (restoreTccl)
+				Thread.currentThread().setContextClassLoader(savedClassLoader);
 		}
 	}
 
