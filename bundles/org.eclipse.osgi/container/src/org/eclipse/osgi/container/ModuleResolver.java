@@ -167,10 +167,6 @@ final class ModuleResolver {
 	 * merged into the moduleDatabase
 	 */
 	ModuleResolutionReport resolveDelta(Collection<ModuleRevision> triggers, boolean triggersMandatory, Collection<ModuleRevision> unresolved, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDatabase moduleDatabase) {
-		if (!triggersMandatory) {
-			// we are just resolving all bundles optionally
-			triggers = unresolved;
-		}
 		ResolveProcess resolveProcess = new ResolveProcess(unresolved, triggers, triggersMandatory, wiringCopy, moduleDatabase);
 		return resolveProcess.resolve();
 	}
@@ -500,8 +496,9 @@ final class ModuleResolver {
 		 * back later for other reasons.
 		 */
 		private final Collection<ModuleRevision> disabled;
-		private final Collection<ModuleRevision> triggers;
-		private final boolean triggersMandatory;
+		private final Collection<ModuleRevision> toResolve;
+		private final boolean toResolveMandatory;
+		private final Collection<ModuleRevision> triggersForHook;
 		final ModuleDatabase moduleDatabase;
 		final Map<ModuleRevision, ModuleWiring> wirings;
 		private final Set<ModuleRevision> previouslyResolved;
@@ -528,8 +525,14 @@ final class ModuleResolver {
 		ResolveProcess(Collection<ModuleRevision> unresolved, Collection<ModuleRevision> triggers, boolean triggersMandatory, Map<ModuleRevision, ModuleWiring> wirings, ModuleDatabase moduleDatabase) {
 			this.unresolved = unresolved;
 			this.disabled = new HashSet<>(unresolved);
-			this.triggers = new ArrayList<>(triggers);
-			this.triggersMandatory = triggersMandatory;
+			if (!triggersMandatory) {
+				// we are just resolving all bundles optionally
+				this.toResolve = new ArrayList<>(unresolved);
+			} else {
+				this.toResolve = new ArrayList<>(triggers);
+			}
+			this.triggersForHook = Collections.unmodifiableList(new ArrayList<>(triggers));
+			this.toResolveMandatory = triggersMandatory;
 			this.wirings = new HashMap<>(wirings);
 			this.previouslyResolved = new HashSet<>(wirings.keySet());
 			this.moduleDatabase = moduleDatabase;
@@ -540,9 +543,10 @@ final class ModuleResolver {
 			this.unresolved = unresolved;
 			this.disabled = new HashSet<>(unresolved);
 			ModuleRevision revision = dynamicReq.getRevision();
-			this.triggers = new ArrayList<>(1);
-			this.triggers.add(revision);
-			this.triggersMandatory = false;
+			this.toResolve = new ArrayList<>(1);
+			this.toResolve.add(revision);
+			this.toResolveMandatory = false;
+			this.triggersForHook = Collections.singletonList(revision);
 			this.wirings = wirings;
 			this.previouslyResolved = new HashSet<>(wirings.keySet());
 			this.moduleDatabase = moduleDatabase;
@@ -859,7 +863,8 @@ final class ModuleResolver {
 			threadResolving.set(Boolean.TRUE);
 			try {
 				try {
-					hook = adaptor.getResolverHookFactory().begin(InternalUtils.asList((List<? extends BundleRevision>) triggers));
+					hook = adaptor.getResolverHookFactory()
+							.begin(InternalUtils.asList((List<? extends BundleRevision>) triggersForHook));
 				} catch (RuntimeException e) {
 					if (e.getCause() instanceof BundleException) {
 						BundleException be = (BundleException) e.getCause();
@@ -877,7 +882,7 @@ final class ModuleResolver {
 					filterResolvable();
 					selectSingletons();
 					// remove disabled from triggers to prevent the resolver from resolving them
-					if (triggers.removeAll(disabled) && triggersMandatory) {
+					if (toResolve.removeAll(disabled) && toResolveMandatory) {
 						throw new ResolutionException(Msg.ModuleResolver_SingletonDisabledError + disabled);
 					}
 					if (dynamicReq != null) {
@@ -890,11 +895,11 @@ final class ModuleResolver {
 							// be sure to remove the revisions from the optional and triggers
 							// so they no longer attempt to be resolved
 							Set<Resource> fragmentResources = dynamicAttachWirings.keySet();
-							triggers.removeAll(fragmentResources);
+							toResolve.removeAll(fragmentResources);
 
 							result.putAll(dynamicAttachWirings);
 						}
-						resolveRevisionsInBatch(triggers, triggersMandatory, logger, result);
+						resolveRevisionsInBatch(toResolve, toResolveMandatory, logger, result);
 					}
 				} catch (ResolutionException e) {
 					re = e;
