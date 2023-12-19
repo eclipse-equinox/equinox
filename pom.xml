@@ -114,6 +114,9 @@
 								<keyStores>${project.basedir}/ ../../releng/tck.keystore</keyStores>
 								<reportDirectory>${project.build.directory}/tck-results</reportDirectory>
 								<properties>
+									<org.osgi.test.cases.framework.div.tb12>abc</org.osgi.test.cases.framework.div.tb12>
+									<org.osgi.test.cases.framework.div.tb15>abc</org.osgi.test.cases.framework.div.tb15>
+									<org.osgi.test.cases.framework.div.tb16>xyz</org.osgi.test.cases.framework.div.tb16>
 									<org.osgi.framework.system.capabilities.extra>
 										osgi.ee; osgi.ee="testOSGiEE",
 										osgi.ee; osgi.ee="AA/BB",
