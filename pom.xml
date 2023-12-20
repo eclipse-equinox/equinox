@@ -144,7 +144,6 @@
 			<module>bundles/org.eclipse.equinox.useradmin</module>
 			<module>bundles/org.eclipse.equinox.preferences</module>
 			<module>bundles/org.eclipse.equinox.metatype</module>
-			<module>bundles/org.eclipse.equinox.device</module>
 			<module>bundles/org.eclipse.equinox.event</module>
 		</modules>
 	</profile>

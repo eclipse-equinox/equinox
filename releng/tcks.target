@@ -17,12 +17,6 @@
                 </dependency>
                 <dependency>
                     <groupId>org.osgi</groupId>
-                    <artifactId>org.osgi.test.cases.device</artifactId>
-                    <version>8.1.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>org.osgi</groupId>
                     <artifactId>org.osgi.test.cases.event</artifactId>
                     <version>8.1.0</version>
                     <type>jar</type>
