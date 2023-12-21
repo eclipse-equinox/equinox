@@ -13,8 +13,14 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.resource;
 
+import static org.eclipse.osgi.tests.OSGiTestsActivator.getContext;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
 import java.util.Collection;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.hooks.resolver.ResolverHook;
@@ -26,10 +32,7 @@ import org.osgi.framework.wiring.FrameworkWiring;
 
 public class ResolverHookTests extends AbstractResourceTest {
 
-	public ResolverHookTests(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testSingletonIdentity() throws Exception {
 		final RuntimeException error[] = {null};
 		final boolean called[] = {false};

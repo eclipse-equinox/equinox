@@ -14,6 +14,8 @@
 package org.eclipse.osgi.tests.hooks.framework;
 
 import static org.eclipse.osgi.tests.bundles.AbstractBundleTests.stop;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -24,17 +26,24 @@ import java.net.URLClassLoader;
 import java.util.Enumeration;
 import java.util.Map;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
-import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.launch.EquinoxFactory;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.BundleInstaller;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.connect.FrameworkUtilHelper;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
-public abstract class AbstractFrameworkHookTests extends CoreTest {
+public abstract class AbstractFrameworkHookTests {
+
+	@Rule
+	public TestName testName = new TestName();
+
 	protected static class BasicURLClassLoader extends URLClassLoader {
 		private volatile String testURL;
 
@@ -124,12 +133,14 @@ public abstract class AbstractFrameworkHookTests extends CoreTest {
 		return framework;
 	}
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		setUpBundleInstaller();
 		setUpClassLoader();
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		bundleInstaller.shutdown();
 	}
 

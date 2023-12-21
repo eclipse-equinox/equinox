@@ -14,6 +14,14 @@
 
 package org.eclipse.osgi.tests.debugoptions;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,17 +43,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
-import org.eclipse.core.tests.harness.CoreTest;
+import junit.framework.AssertionFailedError;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.debug.FrameworkDebugTraceEntry;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
 import org.eclipse.osgi.service.debug.DebugTrace;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
-public class DebugOptionsTestCase extends CoreTest {
+public class DebugOptionsTestCase {
+
+	@Rule
+	public TestName testName = new TestName();
 
 	DebugOptions debugOptions;
 	ServiceReference ref;
@@ -63,7 +79,8 @@ public class DebugOptionsTestCase extends CoreTest {
 	}
 	private final static String TAB_CHARACTER = "\t"; //$NON-NLS-1$
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		ref = OSGiTestsActivator.getContext().getServiceReference(DebugOptions.class.getName());
 		assertNotNull("DebugOptions service is not available", ref); //$NON-NLS-1$
 		debugOptions = (DebugOptions) OSGiTestsActivator.getContext().getService(ref);
@@ -74,7 +91,8 @@ public class DebugOptionsTestCase extends CoreTest {
 		reg = OSGiTestsActivator.getContext().registerService(DebugOptionsListener.class.getName(), listener, props);
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		if (debugOptions == null)
 			return;
 		debugOptions.setDebugEnabled(false);
@@ -84,6 +102,11 @@ public class DebugOptionsTestCase extends CoreTest {
 			reg.unregister();
 	}
 
+	private String getName() {
+		return testName.getMethodName();
+	}
+
+	@Test
 	public void testRegistration01() {
 		assertTrue("Listener did not get called", listener.gotCalled()); //$NON-NLS-1$
 	}
@@ -96,6 +119,7 @@ public class DebugOptionsTestCase extends CoreTest {
 	 * This test mimics the tracing framework to ensure that the correct class name and method name
 	 * are returned and written to the trace file.
 	 */
+	@Test
 	public void testTracingEntry01() {
 
 		String bundleName = OSGiTestsActivator.getBundle().getSymbolicName();
@@ -116,6 +140,7 @@ public class DebugOptionsTestCase extends CoreTest {
 	 * This test mimics the tracing framework to ensure that the correct class name and method name
 	 * are returned and written to the trace file.
 	 */
+	@Test
 	public void testTracingEntry02() {
 
 		String correctClassName = Runner1.class.getName();
@@ -141,6 +166,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		}
 	}
 
+	@Test
 	public void testDyanmicEnablement01() {
 		if (debugOptions.isDebugEnabled())
 			return; // cannot test
@@ -155,6 +181,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		assertNull("Found bad value: " + listener.getIncorrectValue(), listener.getIncorrectValue()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testDyanmicEnablement02() {
 		if (debugOptions.isDebugEnabled())
 			return; // cannot test
@@ -169,6 +196,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		assertNotNull("Should find bad value: " + listener.getIncorrectValue(), listener.getIncorrectValue()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testDyanmicEnablement03() {
 		listener.clear();
 		if (debugOptions.isDebugEnabled())
@@ -209,6 +237,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		anotherReg.unregister();
 	}
 
+	@Test
 	public void testDyanmicEnablement04() {
 		if (debugOptions.isDebugEnabled())
 			return; // cannot test
@@ -240,6 +269,7 @@ public class DebugOptionsTestCase extends CoreTest {
 
 	}
 
+	@Test
 	public void testBatchSetOptionsWhenEnabled() {
 
 		if (!debugOptions.isDebugEnabled()) {
@@ -305,6 +335,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		assertEquals("The new option for key6 does not match the retrieved option when tracing is enabled", "ok6", actualValue);
 	}
 
+	@Test
 	public void testSetNullOptions() {
 
 		// make sure setOptions() doesn't like an empty Map
@@ -332,6 +363,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		assertTrue("An exception was not thrown when calling setOption() with a null key", exceptionThrown);
 	}
 
+	@Test
 	public void testBatchSetOptionsWhenDisabled() {
 
 		// enable tracing initially.
@@ -406,6 +438,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		// testing of options when tracing is re-enabled is done in testSetOptionsWhenDisabled so it is not needed here
 	}
 
+	@Test
 	public void testSetOptionsWhenDisabled() {
 
 		// enable tracing initially.
@@ -437,6 +470,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		assertEquals("The value after re-enabling tracing is invalid.", "ok", actualValue);
 	}
 
+	@Test
 	public void testStringValues() {
 
 		if (!debugOptions.isDebugEnabled()) {
@@ -455,6 +489,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		assertEquals("The 'default' value supplied was not returned when the key does not exist in the DebugOptions.", "default", actualValue);
 	}
 
+	@Test
 	public void testIntegerValues() {
 
 		if (!debugOptions.isDebugEnabled()) {
@@ -477,6 +512,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		assertEquals("The 'default' value supplied was not returned when the key does not exist in the DebugOptions.", 0, actualValue);
 	}
 
+	@Test
 	public void testBooleanValues() {
 		if (!debugOptions.isDebugEnabled()) {
 			debugOptions.setDebugEnabled(true);
@@ -513,7 +549,8 @@ public class DebugOptionsTestCase extends CoreTest {
 	/**
 	 * Test all DebugTrace.trace*() API when verbose debugging is disabled
 	 */
-	public void testVerboseDebugging() {
+	@Test
+	public void testVerboseDebugging() throws IOException {
 
 		// TODO: Convert this back to {@link DebugOptions} once is/setVerbose becomes API
 		FrameworkDebugOptions fwDebugOptions = (FrameworkDebugOptions) debugOptions;
@@ -539,7 +576,7 @@ public class DebugOptionsTestCase extends CoreTest {
 			debugTrace.traceExit("/debug", "returnValue"); //$NON-NLS-1$ //$NON-NLS-2$
 			traceOutput = readTraceFile(traceFile); // Note: this call will also delete the trace file
 		} catch (InvalidTraceEntry invalidEx) {
-			fail("Failed 'DebugTrace.trace(option, message)' test as an invalid trace entry was found.  Actual Value: '" + invalidEx.getActualValue() + "'.", invalidEx); //$NON-NLS-1$ //$NON-NLS-2$
+			failWithInvalidTrace("DebugTrace.trace(option, message)", invalidEx);
 		}
 		// make sure all 3 entries exist
 		assertEquals("Wrong number of trace entries", 8, traceOutput.length); //$NON-NLS-1$
@@ -607,8 +644,9 @@ public class DebugOptionsTestCase extends CoreTest {
 
 	/**
 	 * test DebugTrace.trace(option, message);
-	*/
-	public void testTraceFile01() {
+	 */
+	@Test
+	public void testTraceFile01() throws IOException {
 
 		final File traceFile = OSGiTestsActivator.getContext().getDataFile(getName() + ".trace"); //$NON-NLS-1$
 		TestDebugTrace debugTrace = this.createDebugTrace(traceFile);
@@ -619,7 +657,7 @@ public class DebugOptionsTestCase extends CoreTest {
 			debugTrace.trace("/debug", "testing 3"); //$NON-NLS-1$ //$NON-NLS-2$
 			traceOutput = readTraceFile(traceFile); // Note: this call will also delete the trace file
 		} catch (InvalidTraceEntry invalidEx) {
-			fail("Failed 'DebugTrace.trace(option, message)' test as an invalid trace entry was found.  Actual Value: '" + invalidEx.getActualValue() + "'.", invalidEx); //$NON-NLS-1$ //$NON-NLS-2$
+			failWithInvalidTrace("DebugTrace.trace(option, message)", invalidEx);
 		}
 		assertEquals("Wrong number of trace entries", 2, traceOutput.length); //$NON-NLS-1$
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[0].getThreadName()); //$NON-NLS-1$
@@ -644,7 +682,8 @@ public class DebugOptionsTestCase extends CoreTest {
 	/**
 	 * test DebugTrace.trace(option, message, Throwable)
 	 */
-	public void testTraceFile02() {
+	@Test
+	public void testTraceFile02() throws IOException {
 
 		final File traceFile = OSGiTestsActivator.getContext().getDataFile(getName() + ".trace"); //$NON-NLS-1$
 		TestDebugTrace debugTrace = this.createDebugTrace(traceFile);
@@ -658,7 +697,7 @@ public class DebugOptionsTestCase extends CoreTest {
 			debugTrace.trace("/debug", "testing 3", new Exception(exceptionMessage3)); //$NON-NLS-1$ //$NON-NLS-2$
 			traceOutput = readTraceFile(traceFile); // Note: this call will also delete the trace file
 		} catch (InvalidTraceEntry invalidEx) {
-			fail("Failed 'DebugTrace.trace(option, message, Throwable)' test as an invalid trace entry was found.  Actual Value: '" + invalidEx.getActualValue() + "'.", invalidEx); //$NON-NLS-1$ //$NON-NLS-2$
+			failWithInvalidTrace("DebugTrace.trace(option, message, Throwable)", invalidEx);
 		}
 
 		final StringBuilder expectedThrowableText1 = new StringBuilder("java.lang.Exception: "); //$NON-NLS-1$
@@ -734,8 +773,9 @@ public class DebugOptionsTestCase extends CoreTest {
 
 	/**
 	 * test DebugTrace.traceDumpStack(option)
-	*/
-	public void testTraceFile03() {
+	 */
+	@Test
+	public void testTraceFile03() throws IOException {
 
 		final File traceFile = OSGiTestsActivator.getContext().getDataFile(getName() + ".trace"); //$NON-NLS-1$
 		TestDebugTrace debugTrace = this.createDebugTrace(traceFile);
@@ -746,7 +786,7 @@ public class DebugOptionsTestCase extends CoreTest {
 			debugTrace.traceDumpStack("/debug"); //$NON-NLS-1$
 			traceOutput = readTraceFile(traceFile); // Note: this call will also delete the trace file
 		} catch (InvalidTraceEntry invalidEx) {
-			fail("Failed 'DebugTrace.traceDumpStack(option)' test as an invalid trace entry was found.  Actual Value: '" + invalidEx.getActualValue() + "'.", invalidEx); //$NON-NLS-1$ //$NON-NLS-2$
+			failWithInvalidTrace("DebugTrace.traceDumpStack(option)", invalidEx);
 		}
 		assertEquals("Wrong number of trace entries", 2, traceOutput.length); //$NON-NLS-1$
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[0].getThreadName()); //$NON-NLS-1$
@@ -770,8 +810,9 @@ public class DebugOptionsTestCase extends CoreTest {
 
 	/**
 	 * test DebugTrace.traceEntry(option)
-	*/
-	public void testTraceFile04() {
+	 */
+	@Test
+	public void testTraceFile04() throws IOException {
 
 		final File traceFile = OSGiTestsActivator.getContext().getDataFile(getName() + ".trace"); //$NON-NLS-1$
 		TestDebugTrace debugTrace = this.createDebugTrace(traceFile);
@@ -782,7 +823,7 @@ public class DebugOptionsTestCase extends CoreTest {
 			debugTrace.traceEntry("/debug"); //$NON-NLS-1$
 			traceOutput = readTraceFile(traceFile); // Note: this call will also delete the trace file
 		} catch (InvalidTraceEntry invalidEx) {
-			fail("Failed 'DebugTrace.traceEntry(option)' test as an invalid trace entry was found.  Actual Value: '" + invalidEx.getActualValue() + "'.", invalidEx); //$NON-NLS-1$ //$NON-NLS-2$
+			failWithInvalidTrace("DebugTrace.traceEntry(option)", invalidEx);
 		}
 		assertEquals("Wrong number of trace entries", 2, traceOutput.length); //$NON-NLS-1$
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[0].getThreadName()); //$NON-NLS-1$
@@ -807,7 +848,8 @@ public class DebugOptionsTestCase extends CoreTest {
 	/**
 	 * test DebugTrace.traceEntry(option, methodArgument)
 	 */
-	public void testTraceFile05() {
+	@Test
+	public void testTraceFile05() throws IOException {
 
 		final File traceFile = OSGiTestsActivator.getContext().getDataFile(getName() + ".trace"); //$NON-NLS-1$
 		TestDebugTrace debugTrace = this.createDebugTrace(traceFile);
@@ -818,7 +860,7 @@ public class DebugOptionsTestCase extends CoreTest {
 			debugTrace.traceEntry("/debug", new String("arg3")); //$NON-NLS-1$ //$NON-NLS-2$
 			traceOutput = readTraceFile(traceFile); // Note: this call will also delete the trace file
 		} catch (InvalidTraceEntry invalidEx) {
-			fail("Failed 'DebugTrace.traceEntry(option, methodArgument)' test as an invalid trace entry was found.  Actual Value: '" + invalidEx.getActualValue() + "'.", invalidEx); //$NON-NLS-1$ //$NON-NLS-2$
+			failWithInvalidTrace("DebugTrace.traceEntry(option, methodArgument)", invalidEx);
 		}
 		assertEquals("Wrong number of trace entries", 2, traceOutput.length); //$NON-NLS-1$
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[0].getThreadName()); //$NON-NLS-1$
@@ -843,7 +885,8 @@ public class DebugOptionsTestCase extends CoreTest {
 	/**
 	 * test DebugTrace.traceEntry(option, methodArgument[])
 	 */
-	public void testTraceFile06() {
+	@Test
+	public void testTraceFile06() throws IOException {
 
 		final File traceFile = OSGiTestsActivator.getContext().getDataFile(getName() + ".trace"); //$NON-NLS-1$
 		TestDebugTrace debugTrace = this.createDebugTrace(traceFile);
@@ -854,7 +897,7 @@ public class DebugOptionsTestCase extends CoreTest {
 			debugTrace.traceEntry("/debug", new String[] {"arg5", "arg6"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			traceOutput = readTraceFile(traceFile); // Note: this call will also delete the trace file
 		} catch (InvalidTraceEntry invalidEx) {
-			fail("Failed 'DebugTrace.traceEntry(option, methodArgument[])' test as an invalid trace entry was found.  Actual Value: '" + invalidEx.getActualValue() + "'.", invalidEx); //$NON-NLS-1$ //$NON-NLS-2$
+			failWithInvalidTrace("DebugTrace.traceEntry(option, methodArgument[])", invalidEx);
 		}
 		assertEquals("Wrong number of trace entries", 2, traceOutput.length); //$NON-NLS-1$
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[0].getThreadName()); //$NON-NLS-1$
@@ -876,7 +919,8 @@ public class DebugOptionsTestCase extends CoreTest {
 		traceFile.delete();
 	}
 
-	public void testEntryExitWithBracesInArgs() throws InvalidTraceEntry {
+	@Test
+	public void testEntryExitWithBracesInArgs() throws InvalidTraceEntry, IOException {
 		FrameworkDebugOptions fwDebugOptions = (FrameworkDebugOptions) debugOptions;
 		final File traceFile = OSGiTestsActivator.getContext().getDataFile(getName() + ".trace"); //$NON-NLS-1$
 		TestDebugTrace debugTrace = this.createDebugTrace(traceFile);
@@ -918,8 +962,9 @@ public class DebugOptionsTestCase extends CoreTest {
 
 	/**
 	 * test DebugTrace.traceExit(option)
-	*/
-	public void testTraceFile07() {
+	 */
+	@Test
+	public void testTraceFile07() throws IOException {
 
 		final File traceFile = OSGiTestsActivator.getContext().getDataFile(getName() + ".trace"); //$NON-NLS-1$
 		TestDebugTrace debugTrace = this.createDebugTrace(traceFile);
@@ -930,7 +975,7 @@ public class DebugOptionsTestCase extends CoreTest {
 			debugTrace.traceExit("/debug"); //$NON-NLS-1$
 			traceOutput = readTraceFile(traceFile); // Note: this call will also delete the trace file
 		} catch (InvalidTraceEntry invalidEx) {
-			fail("Failed 'DebugTrace.traceExit(option)' test as an invalid trace entry was found.  Actual Value: '" + invalidEx.getActualValue() + "'.", invalidEx); //$NON-NLS-1$ //$NON-NLS-2$
+			failWithInvalidTrace("DebugTrace.traceExit(option)", invalidEx);
 		}
 		assertEquals("Wrong number of trace entries", 2, traceOutput.length); //$NON-NLS-1$
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[0].getThreadName()); //$NON-NLS-1$
@@ -954,8 +999,9 @@ public class DebugOptionsTestCase extends CoreTest {
 
 	/**
 	 * test DebugTrace.traceExit(option, result)
-	*/
-	public void testTraceFile08() {
+	 */
+	@Test
+	public void testTraceFile08() throws IOException {
 
 		final File traceFile = OSGiTestsActivator.getContext().getDataFile(getName() + ".trace"); //$NON-NLS-1$
 		TestDebugTrace debugTrace = this.createDebugTrace(traceFile);
@@ -966,7 +1012,7 @@ public class DebugOptionsTestCase extends CoreTest {
 			debugTrace.traceExit("/debug", new String("returnValue3")); //$NON-NLS-1$ //$NON-NLS-2$
 			traceOutput = readTraceFile(traceFile); // Note: this call will also delete the trace file
 		} catch (InvalidTraceEntry invalidEx) {
-			fail("Failed 'DebugTrace.traceExit(option, result)' test as an invalid trace entry was found.  Actual Value: '" + invalidEx.getActualValue() + "'.", invalidEx); //$NON-NLS-1$ //$NON-NLS-2$
+			failWithInvalidTrace("DebugTrace.traceExit(option, result)", invalidEx);
 		}
 		assertEquals("Wrong number of trace entries", 2, traceOutput.length); //$NON-NLS-1$
 		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[0].getThreadName()); //$NON-NLS-1$
@@ -989,9 +1035,11 @@ public class DebugOptionsTestCase extends CoreTest {
 	}
 
 	/**
-	 * tests DebugTrace.trace(option, message) where the 'option' and 'message contain a '|' character (the delimiter).
-	*/
-	public void testTraceFile09() {
+	 * tests DebugTrace.trace(option, message) where the 'option' and 'message
+	 * contain a '|' character (the delimiter).
+	 */
+	@Test
+	public void testTraceFile09() throws IOException {
 
 		final File traceFile = OSGiTestsActivator.getContext().getDataFile(getName() + ".trace"); //$NON-NLS-1$
 		TestDebugTrace debugTrace = this.createDebugTrace(traceFile);
@@ -1002,7 +1050,7 @@ public class DebugOptionsTestCase extends CoreTest {
 			debugTrace.trace("/debug|path", "|A message with | multiple || characters.|");
 			traceOutput = readTraceFile(traceFile); // Note: this call will also delete the trace file
 		} catch (InvalidTraceEntry invalidEx) {
-			fail("Failed 'DebugTrace.trace(option, message)' test as an invalid trace entry was found.  Actual Value: '" + invalidEx.getActualValue() + "'.", invalidEx); //$NON-NLS-1$ //$NON-NLS-2$
+			failWithInvalidTrace("DebugTrace.trace(option, message)", invalidEx);
 		}
 		assertEquals("Wrong number of entries", 2, traceOutput.length);
 		String optionPath = decodeString(traceOutput[0].getOptionPath());
@@ -1017,6 +1065,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		traceFile.delete();
 	}
 
+	@Test
 	public void testTraceSystemOut() throws IOException {
 		PrintStream old = System.out;
 		File traceFile = OSGiTestsActivator.getContext().getDataFile(getName() + ".trace"); //$NON-NLS-1$
@@ -1046,7 +1095,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		try {
 			traceOutput = readTraceFile(traceFile);
 		} catch (InvalidTraceEntry e) {
-			fail("Failed 'DebugTrace.trace(option, message)' test as an invalid trace entry was found.  Actual Value: '" + e.getActualValue() + "'.", e); //$NON-NLS-1$ //$NON-NLS-2$
+			failWithInvalidTrace("DebugTrace.trace(option, message)", e);
 		}
 		assertEquals("Wrong number of entries", 2, traceOutput.length);
 		String optionPath = decodeString(traceOutput[0].getOptionPath());
@@ -1073,7 +1122,7 @@ public class DebugOptionsTestCase extends CoreTest {
 		return tempBuffer.toString();
 	}
 
-	private TraceEntry[] readTraceFile(File traceFile) throws InvalidTraceEntry {
+	private TraceEntry[] readTraceFile(File traceFile) throws InvalidTraceEntry, IOException {
 
 		BufferedReader traceReader = null;
 		List traceEntries = new ArrayList();
@@ -1084,8 +1133,6 @@ public class DebugOptionsTestCase extends CoreTest {
 			while ((entry = this.readMessage(traceReader)) != null) {
 				traceEntries.add(entry);
 			}
-		} catch (IOException ex) {
-			fail("Failed to read trace file", ex); //$NON-NLS-1$
 		} finally {
 			if (traceReader != null) {
 				try {
@@ -1200,6 +1247,13 @@ public class DebugOptionsTestCase extends CoreTest {
 			}
 		}
 		return buffer.toString().trim();
+	}
+
+	private void failWithInvalidTrace(String methodSignature, InvalidTraceEntry invalidEx) {
+		AssertionFailedError error = new AssertionFailedError("Failed '" + methodSignature
+				+ "' test as an invalid trace entry was found.  Actual Value: '" + invalidEx.getActualValue() + "'.");
+		error.initCause(invalidEx);
+		throw error;
 	}
 
 	static public class TraceEntry {
