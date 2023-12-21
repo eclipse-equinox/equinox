@@ -13,8 +13,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.datalocation;
 
-import static org.eclipse.osgi.tests.OSGiTest.PI_OSGI_TESTS;
-import static org.eclipse.osgi.tests.OSGiTest.addRequiredOSGiTestsBundles;
+import static org.eclipse.osgi.tests.OSGiTestsActivator.PI_OSGI_TESTS;
+import static org.eclipse.osgi.tests.OSGiTestsActivator.addRequiredOSGiTestsBundles;
 
 import java.io.File;
 import java.io.IOException;
