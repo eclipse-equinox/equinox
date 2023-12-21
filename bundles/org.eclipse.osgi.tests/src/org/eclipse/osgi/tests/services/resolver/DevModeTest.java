@@ -13,19 +13,19 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.eclipse.osgi.service.resolver.State;
+import org.junit.Test;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 public class DevModeTest extends AbstractStateTest {
-
-	public DevModeTest(String name) {
-		super(name);
-	}
 
 	private State buildDevModeState() {
 		State state = buildEmptyState();
@@ -35,6 +35,7 @@ public class DevModeTest extends AbstractStateTest {
 		return state;
 	}
 
+	@Test
 	public void testDevModeDomino02() throws BundleException {
 		State state = buildDevModeState();
 
@@ -108,6 +109,7 @@ public class DevModeTest extends AbstractStateTest {
 		assertTrue("3.2", cRequired[0] == a);
 	}
 
+	@Test
 	public void testDevModeDomino01() throws BundleException {
 		State state = buildDevModeState();
 
@@ -156,6 +158,7 @@ public class DevModeTest extends AbstractStateTest {
 		assertTrue("2.2", cRequired[0] == a);
 	}
 
+	@Test
 	public void testDevModeFragment01() throws BundleException {
 		State state = buildDevModeState();
 
@@ -225,6 +228,7 @@ public class DevModeTest extends AbstractStateTest {
 		assertTrue("3.5", aFrag.getHost().getSupplier() == a);
 	}
 
+	@Test
 	public void testDevModeSingleton01() throws BundleException {
 		State state = buildDevModeState();
 
@@ -279,6 +283,7 @@ public class DevModeTest extends AbstractStateTest {
 		assertTrue("2.2", cRequired[0] == a1);
 	}
 
+	@Test
 	public void testDevModeSingleton02() throws BundleException {
 		State state = buildDevModeState();
 
@@ -335,6 +340,7 @@ public class DevModeTest extends AbstractStateTest {
 		assertTrue("2.2", cRequired[0] == a1);
 	}
 
+	@Test
 	public void testDevModeGenericCapability() throws BundleException {
 		State state = buildDevModeState();
 

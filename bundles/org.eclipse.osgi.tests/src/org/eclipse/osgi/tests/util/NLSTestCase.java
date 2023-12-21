@@ -14,17 +14,14 @@
 
 package org.eclipse.osgi.tests.util;
 
-import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.osgi.util.NLS;
+import org.junit.Test;
 
-public class NLSTestCase extends CoreTest {
+public class NLSTestCase {
 
+	@Test
 	public void testEmptyMessageBug200296() {
-		try {
-			NLS.bind("", Integer.valueOf(0));
-		} catch (NegativeArraySizeException e) {
-			fail("1.0", e);
-		}
+		NLS.bind("", Integer.valueOf(0));
 	}
 
 }

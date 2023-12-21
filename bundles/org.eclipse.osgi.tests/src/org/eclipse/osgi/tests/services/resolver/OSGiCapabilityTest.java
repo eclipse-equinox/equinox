@@ -13,6 +13,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
+import static org.eclipse.osgi.tests.OSGiTestsActivator.getContext;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -29,6 +35,9 @@ import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.eclipse.osgi.service.resolver.GenericDescription;
 import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.util.ManifestElement;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.namespace.IdentityNamespace;
@@ -40,51 +49,53 @@ import org.osgi.resource.Requirement;
 public class OSGiCapabilityTest extends AbstractStateTest {
 	private static final String MANIFEST_ROOT = "test_files/genericCapability/";
 
-	public OSGiCapabilityTest(String name) {
-		super(name);
-	}
+	@Rule
+	public TestName testName = new TestName();
 
-	private Dictionary loadManifest(String manifest) {
+	private Dictionary loadManifest(String manifest) throws IOException, BundleException {
 		URL url = getContext().getBundle().getEntry(MANIFEST_ROOT + manifest);
-		try {
-			CaseInsensitiveDictionaryMap<String, String> headers = new CaseInsensitiveDictionaryMap<>();
-			ManifestElement.parseBundleManifest(url.openStream(), headers);
-			return headers.asUnmodifiableDictionary();
-		} catch (IOException | BundleException e) {
-			fail("Unexpected error loading manifest: " + manifest, e);
-		}
-		return null;
+		CaseInsensitiveDictionaryMap<String, String> headers = new CaseInsensitiveDictionaryMap<>();
+		ManifestElement.parseBundleManifest(url.openStream(), headers);
+		return headers.asUnmodifiableDictionary();
 	}
 
-	public void testGenericsOSGiOSGi() throws BundleException {
+	@Test
+	public void testGenericsOSGiOSGi() throws Exception {
 		doGenericBasicsTest("p1.osgi.MF", "p2.osgi.MF", "p3.osgi.MF", "c1.osgi.MF", "c2.osgi.MF", "c3.osgi.MF");
 	}
 
-	public void testGenericsOSGiEquinox() throws BundleException {
+	@Test
+	public void testGenericsOSGiEquinox() throws Exception {
 		doGenericBasicsTest("p1.osgi.MF", "p2.osgi.MF", "p3.osgi.MF", "c1.equinox.MF", "c2.equinox.MF", "c3.equinox.MF");
 	}
 
-	public void testGenericsOSGiNameEquinox() throws BundleException {
+	@Test
+	public void testGenericsOSGiNameEquinox() throws Exception {
 		doGenericBasicsTest("p1.osgi.name.MF", "p2.osgi.name.MF", "p3.osgi.name.MF", "c1.equinox.MF", "c2.equinox.MF", "c3.equinox.MF");
 	}
 
-	public void testGenericsOSGiNameOSGi() throws BundleException {
+	@Test
+	public void testGenericsOSGiNameOSGi() throws Exception {
 		doGenericBasicsTest("p1.osgi.name.MF", "p2.osgi.name.MF", "p3.osgi.name.MF", "c1.osgi.MF", "c2.osgi.MF", "c3.osgi.MF");
 	}
 
-	public void testGenericsOSGiNameEquinoxName() throws BundleException {
+	@Test
+	public void testGenericsOSGiNameEquinoxName() throws Exception {
 		doGenericBasicsTest("p1.osgi.name.MF", "p2.osgi.name.MF", "p3.osgi.name.MF", "c1.equinox.name.MF", "c2.equinox.name.MF", "c3.equinox.name.MF");
 	}
 
-	public void testGenericsEquinoxOSGi() throws BundleException {
+	@Test
+	public void testGenericsEquinoxOSGi() throws Exception {
 		doGenericBasicsTest("p1.equinox.MF", "p2.equinox.MF", "p3.equinox.MF", "c1.osgi.MF", "c2.osgi.MF", "c3.osgi.MF");
 	}
 
-	public void testGenericsEquinoxEquinox() throws BundleException {
+	@Test
+	public void testGenericsEquinoxEquinox() throws Exception {
 		doGenericBasicsTest("p1.equinox.MF", "p2.equinox.MF", "p3.equinox.MF", "c1.equinox.MF", "c2.equinox.MF", "c3.equinox.MF");
 	}
 
-	private void doGenericBasicsTest(String p1Manifest, String p2Manifest, String p3Manifest, String c1Manifest, String c2Manifest, String c3Manifest) throws BundleException {
+	private void doGenericBasicsTest(String p1Manifest, String p2Manifest, String p3Manifest, String c1Manifest,
+			String c2Manifest, String c3Manifest) throws BundleException, IOException {
 		State state = buildEmptyState();
 		long bundleID = 0;
 		Dictionary manifest;
@@ -132,14 +143,10 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 			checkForNonEffectiveRequirement(c3);
 		}
 
-		File stateDir = getContext().getDataFile(getName()); //$NON-NLS-1$
+		File stateDir = getContext().getDataFile(testName.getMethodName()); // $NON-NLS-1$
 		stateDir.mkdirs();
-		try {
-			state.getFactory().writeState(state, stateDir);
-			state = state.getFactory().readState(stateDir);
-		} catch (IOException e) {
-			fail("Error writing/reading state.", e);
-		}
+		state.getFactory().writeState(state, stateDir);
+		state = state.getFactory().readState(stateDir);
 		p1 = state.getBundle(p1.getBundleId());
 		p2 = state.getBundle(p2.getBundleId());
 		p3 = state.getBundle(p3.getBundleId());
@@ -204,7 +211,8 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		}
 	}
 
-	public void testGenericFragments01() throws BundleException {
+	@Test
+	public void testGenericFragments01() throws BundleException, IOException {
 		State state = buildEmptyState();
 		long bundleID = 0;
 		Dictionary manifest;
@@ -235,14 +243,10 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 
 		checkGenericBasics(6, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities(), p1Frag.getSelectedGenericCapabilities()[0]);
 
-		File stateDir = getContext().getDataFile(getName()); //$NON-NLS-1$
+		File stateDir = getContext().getDataFile(testName.getMethodName()); // $NON-NLS-1$
 		stateDir.mkdirs();
-		try {
-			state.getFactory().writeState(state, stateDir);
-			state = state.getFactory().readState(stateDir);
-		} catch (IOException e) {
-			fail("Error writing/reading state.", e);
-		}
+		state.getFactory().writeState(state, stateDir);
+		state = state.getFactory().readState(stateDir);
 		p1 = state.getBundle(p1.getBundleId());
 		p1Frag = state.getBundle(p1Frag.getBundleId());
 		c1 = state.getBundle(c1.getBundleId());
@@ -269,7 +273,8 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		checkGenericBasics(6, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities(), p1Frag.getSelectedGenericCapabilities()[0]);
 	}
 
-	public void testGenericFragments02() throws BundleException {
+	@Test
+	public void testGenericFragments02() throws BundleException, IOException {
 		State state = buildEmptyState();
 		long bundleID = 0;
 		Dictionary manifest;
@@ -296,15 +301,11 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 
 		checkGenericBasics(4, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
 
-		File stateDir = getContext().getDataFile(getName() + 1); //$NON-NLS-1$
+		File stateDir = getContext().getDataFile(testName.getMethodName() + 1); // $NON-NLS-1$
 		stateDir.mkdirs();
-		try {
-			state.getFactory().writeState(state, stateDir);
-			state = state.getFactory().readState(stateDir);
-			state.setResolver(platformAdminService.createResolver());
-		} catch (IOException e) {
-			fail("Error writing/reading state.", e);
-		}
+		state.getFactory().writeState(state, stateDir);
+		state = state.getFactory().readState(stateDir);
+		state.setResolver(platformAdminService.createResolver());
 		p1 = state.getBundle(p1.getBundleId());
 		p1Frag = state.getBundle(p1Frag.getBundleId());
 		c1 = state.getBundle(c1.getBundleId());
@@ -330,14 +331,10 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 
 		checkGenericBasics(6, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities(), p1Frag.getSelectedGenericCapabilities()[0]);
 
-		stateDir = getContext().getDataFile(getName() + 2); //$NON-NLS-1$
+		stateDir = getContext().getDataFile(testName.getMethodName() + 2); // $NON-NLS-1$
 		stateDir.mkdirs();
-		try {
-			state.getFactory().writeState(state, stateDir);
-			state = state.getFactory().readState(stateDir);
-		} catch (IOException e) {
-			fail("Error writing/reading state.", e);
-		}
+		state.getFactory().writeState(state, stateDir);
+		state = state.getFactory().readState(stateDir);
 		p1 = state.getBundle(p1.getBundleId());
 		p1Frag = state.getBundle(p1Frag.getBundleId());
 		c1 = state.getBundle(c1.getBundleId());
@@ -352,7 +349,8 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		checkGenericBasics(6, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities(), p1Frag.getSelectedGenericCapabilities()[0]);
 	}
 
-	public void testGenericUses() throws BundleException {
+	@Test
+	public void testGenericUses() throws Exception {
 		State state = buildEmptyState();
 		long bundleID = 0;
 		Dictionary manifest;
@@ -423,7 +421,8 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		checkUsedCapability(c4v130, p5v100Capability);
 	}
 
-	public void testOSGiCardinalityUses() throws BundleException {
+	@Test
+	public void testOSGiCardinalityUses() throws Exception {
 		State state = buildEmptyState();
 		long bundleID = 0;
 		Dictionary manifest;
@@ -527,6 +526,7 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		assertFalse("c6v160", c6v160.isResolved());
 	}
 
+	@Test
 	public void testDeclaringIdentityCapability() {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -555,7 +555,8 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		}
 	}
 
-	public void testOSGiCardinality() throws BundleException {
+	@Test
+	public void testOSGiCardinality() throws Exception {
 		State state = buildEmptyState();
 		long bundleID = 0;
 		Dictionary manifest;

@@ -13,6 +13,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
@@ -25,26 +31,26 @@ import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.service.resolver.StateObjectFactory;
 import org.eclipse.osgi.service.resolver.VersionConstraint;
-import org.eclipse.osgi.tests.OSGiTest;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 
-public abstract class AbstractStateTest extends OSGiTest {
+public abstract class AbstractStateTest {
 	private ServiceReference platformAdminRef;
 	protected PlatformAdmin platformAdminService;
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		platformAdminRef = OSGiTestsActivator.getContext().getServiceReference(PlatformAdmin.class);
 		platformAdminService = (PlatformAdmin) OSGiTestsActivator.getContext().getService(platformAdminRef);
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		OSGiTestsActivator.getContext().ungetService(platformAdminRef);
-	}
-
-	public AbstractStateTest(String testName) {
-		super(testName);
 	}
 
 	public void assertContains(String tag, Object[] array, Object element) {
@@ -54,6 +60,14 @@ public abstract class AbstractStateTest extends OSGiTest {
 			}
 		}
 		fail(tag);
+	}
+
+	public void assertEquals(Object expected, Object actual) {
+		Assert.assertEquals(expected, actual);
+	}
+
+	public void assertEquals(String message, Object expected, Object actual) {
+		Assert.assertEquals(message, expected, actual);
 	}
 
 	public void assertEquals(State original, State copy) {

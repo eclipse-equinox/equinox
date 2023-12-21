@@ -13,6 +13,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
+import static org.eclipse.osgi.tests.OSGiTestsActivator.getContext;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -34,8 +41,8 @@ import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.service.resolver.StateDelta;
 import org.eclipse.osgi.service.resolver.StateHelper;
 import org.eclipse.osgi.service.resolver.StateObjectFactory;
-import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.util.ManifestElement;
+import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -53,15 +60,13 @@ import org.osgi.resource.Capability;
 
 public class StateResolverTest extends AbstractStateTest {
 
-	public StateResolverTest(String name) {
-		super(name);
-	}
 
 	/**
 	 * Tests adding 3 new bundles to an already resolved state and then
 	 * resolving only one of the bundles. The result should be all 3 added
 	 * bundles being resolved.
 	 */
+	@Test
 	public void testAdd3Resolve1() throws BundleException {
 		State state = buildInitialState();
 		StateDelta delta = state.resolve();
@@ -123,6 +128,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("2.3", (BundleDelta.RESOLVED | BundleDelta.ADDED), ((BundleDelta) deltasMap.get(Long.valueOf(3))).getType()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBasicResolution() throws BundleException {
 		State state = buildSimpleState();
 		StateDelta delta = state.resolve();
@@ -153,6 +159,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFullyUnresolved("5.3", b3); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testComplexResolution() throws BundleException {
 		State state = buildComplexState();
 		StateDelta delta = state.resolve();
@@ -194,6 +201,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFullyResolved("5.6", b6); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testDependentBundles() throws BundleException {
 		State state = buildComplexState();
 		state.resolve();
@@ -209,6 +217,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertContains("2.4", dependent, state.getBundle(6)); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testPrerequisiteBundle() throws BundleException {
 		State state = buildComplexState();
 		state.resolve();
@@ -244,7 +253,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertContains("6.4", prereqs, state.getBundle(6)); //$NON-NLS-1$
 	}
 
-	// temporarily disabled
+	@Test
 	public void testLinkageChange() throws BundleException {
 		State state = buildEmptyState();
 		// don't add b1 for now
@@ -302,7 +311,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFullyResolved("10.3", b3); //$NON-NLS-1$
 	}
 
-	// temporarily disabled
+	@Test
 	public void testReinstall() throws BundleException {
 		State state = buildComplexState();
 		StateDelta delta = state.resolve();
@@ -310,19 +319,20 @@ public class StateResolverTest extends AbstractStateTest {
 		state.removeBundle(4);
 		delta = state.resolve();
 		assertEquals("1.0", 1, delta.getChanges(BundleDelta.REMOVED | BundleDelta.UNRESOLVED | BundleDelta.REMOVAL_COMPLETE, true).length); //$NON-NLS-1$
-		assertEquals("1.1", 4, delta.getChanges(BundleDelta.REMOVED | BundleDelta.UNRESOLVED | BundleDelta.REMOVAL_COMPLETE, true)[0].getBundle().getBundleId()); //$NON-NLS-1$
+		assertEquals("1.1", 4L, delta.getChanges(BundleDelta.REMOVED | BundleDelta.UNRESOLVED | BundleDelta.REMOVAL_COMPLETE, true)[0].getBundle().getBundleId()); //$NON-NLS-1$
 		assertEquals("2.0", 1, delta.getChanges(BundleDelta.UNRESOLVED, true).length); //$NON-NLS-1$
-		assertEquals("2.1", 6, delta.getChanges(BundleDelta.UNRESOLVED, true)[0].getBundle().getBundleId()); //$NON-NLS-1$
+		assertEquals("2.1", 6L, delta.getChanges(BundleDelta.UNRESOLVED, true)[0].getBundle().getBundleId()); //$NON-NLS-1$
 		// reinstall bundle 4 - should cause 6 to be resolved again
 		BundleDescription b4 = delta.getChanges(BundleDelta.REMOVED | BundleDelta.UNRESOLVED | BundleDelta.REMOVAL_COMPLETE, true)[0].getBundle();
 		state.addBundle(b4);
 		delta = state.resolve();
 		assertEquals("3.0", 1, delta.getChanges(BundleDelta.ADDED | BundleDelta.RESOLVED, true).length); //$NON-NLS-1$
-		assertEquals("3.1", 4, delta.getChanges(BundleDelta.ADDED | BundleDelta.RESOLVED, true)[0].getBundle().getBundleId()); //$NON-NLS-1$
+		assertEquals("3.1", 4L, delta.getChanges(BundleDelta.ADDED | BundleDelta.RESOLVED, true)[0].getBundle().getBundleId()); //$NON-NLS-1$
 		assertEquals("4.0", 1, delta.getChanges(BundleDelta.RESOLVED, true).length); //$NON-NLS-1$
-		assertEquals("4.1", 6, delta.getChanges(BundleDelta.RESOLVED, true)[0].getBundle().getBundleId()); //$NON-NLS-1$
+		assertEquals("4.1", 6L, delta.getChanges(BundleDelta.RESOLVED, true)[0].getBundle().getBundleId()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testRemoval() throws BundleException {
 		String B1_LOCATION = "org.eclipse.b1"; //$NON-NLS-1$
 		final String B1_MANIFEST = "Bundle-SymbolicName: org.eclipse.b1\n" + "Bundle-Version: 1.0\n"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -353,6 +363,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("2.4", BundleDelta.REMOVED | BundleDelta.UNRESOLVED, changes[0].getType()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testRemoveAndAdd() throws BundleException {
 		String B_LOCATION = "org.eclipse.b"; //$NON-NLS-1$
 		final String B_MANIFEST = "Bundle-SymbolicName: org.eclipse.b\n" + "Bundle-Version: 1.0\n"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -376,6 +387,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("2.3", b2, delta.getChanges(BundleDelta.RESOLVED | BundleDelta.ADDED, true)[0].getBundle()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testRemovalResolve() throws BundleException {
 		State state = buildInitialState();
 		StateDelta delta = state.resolve();
@@ -450,6 +462,7 @@ public class StateResolverTest extends AbstractStateTest {
 	 * bundles being resolved. Then re-resolving the same bundle. The result
 	 * should be only the one bundle being resolved.
 	 */
+	@Test
 	public void testReresolveBundle() throws BundleException {
 		State state = buildInitialState();
 		StateDelta delta = state.resolve();
@@ -525,6 +538,7 @@ public class StateResolverTest extends AbstractStateTest {
 
 	}
 
+	@Test
 	public void testUpdate() throws BundleException {
 		State state = buildEmptyState();
 		String B1_LOCATION = "org.eclipse.b"; //$NON-NLS-1$
@@ -567,6 +581,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFullyResolved("3.3", b111); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSingletons() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -615,6 +630,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("1.4", testDependent.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSingletonsSameVersion() throws BundleException {
 		// this is a testcase to handle how PDE build is using the state
 		// with multiple singleton bundles installed with the same BSN and version
@@ -657,6 +673,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFalse("1.3", testFrag101.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSingletonsSelection1() throws BundleException {
 		State state = buildEmptyState();
 
@@ -733,6 +750,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFalse("2.6", rcp10.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSingletonsSelection2() throws BundleException {
 		State state = buildEmptyState();
 
@@ -819,6 +837,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFalse("2.7", rcp10.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSingletonsSelection3() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -956,6 +975,7 @@ public class StateResolverTest extends AbstractStateTest {
 
 	}
 
+	@Test
 	public void testSingletonsSelection4() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -1099,6 +1119,7 @@ public class StateResolverTest extends AbstractStateTest {
 
 	}
 
+	@Test
 	public void testSingletonsSelection5() throws BundleException {
 		State state = buildEmptyState();
 		// test the selection algorithm of the resolver to pick the bundles with the largest version
@@ -1197,6 +1218,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFalse("1.9", import10.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSingletonsSelection6() throws BundleException {
 		State state = buildEmptyState();
 
@@ -1283,6 +1305,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFalse("2.6", rcp10.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSingletonsSelection7() throws BundleException {
 		State state = buildEmptyState();
 		long id = 0;
@@ -1348,6 +1371,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("Unexpected exporter", a2, imports[0].getExporter()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testNonSingletonsSameVersion() throws BundleException {
 		// this is a testcase to handle how PDE build is using the state
 		// with multiple singleton bundles installed with the same BSN and version
@@ -1390,6 +1414,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("1.3", testFrag101.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testTransitiveUses() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -1457,6 +1482,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertNull("1.2 Packages are not consistent: " + isConsistent, isConsistent); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testMultipleExportsUses01() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -1524,6 +1550,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertNull("1.2 Packages are not consistent: " + isConsistent, isConsistent); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testRequireBundleUses() throws BundleException {
 		State state = buildEmptyState();
 		int id = 0;
@@ -1579,6 +1606,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("2.2", c1ResolvedImports[index].getExporter(), a_100); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testCyclicTransitiveUses() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -1661,6 +1689,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertNull("3.1 Packages are not consistent: " + isConsistent, isConsistent); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testFragmentTransitiveUses() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -1752,6 +1781,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertNull("3.1 Packages are not consistent: " + isConsistent, isConsistent); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testFragmentUses01() throws BundleException {
 		long id = 0;
 		State state = buildEmptyState();
@@ -1809,6 +1839,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("0.5", c2.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testFragmentUses02() throws BundleException {
 		long id = 0;
 		State state = buildEmptyState();
@@ -1870,6 +1901,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("0.5", c2.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testCyclicUsesExportDrop() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -1918,6 +1950,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("1.2", "b", w1_100.getSelectedExports()[0].getName()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	@Test
 	public void testRemovalPending() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable wManifest = new Hashtable();
@@ -1976,6 +2009,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertNull("4.1 Packages are not consistent: " + isConsistent, isConsistent); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testFragmentConstraints01() throws BundleException {
 		int id = 0;
 		State state = buildEmptyState();
@@ -2088,6 +2122,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFalse("3.5", d1_100.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testFragmentConstraints02() throws BundleException {
 		int id = 0;
 		State state = buildEmptyState();
@@ -2165,6 +2200,7 @@ public class StateResolverTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testFragmentConstraints03() throws BundleException {
 		// same as testFragmentConstraints02 but with a cycle
 		int id = 0;
@@ -2249,6 +2285,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("2.2", aSelectedExports[0], bResolvedImports[0]); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testFragmentConstraints04() throws BundleException {
 		int id = 0;
 		State state = buildEmptyState();
@@ -2330,6 +2367,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("1.3", d, aResolvedRequires[2]); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testFragmentConstraints05() throws BundleException {
 		// same as testFragmentConstraints04 but with a cycle
 		int id = 0;
@@ -2416,6 +2454,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("2.1", a, dResolvedRequires[0]); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testFragmentConstraints06() throws BundleException {
 		int id = 0;
 		State state = buildEmptyState();
@@ -2510,6 +2549,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("1.3", d, aResolvedRequires[2]); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testFragmentConstraints07() throws BundleException {
 		// same as testFragmentConstraints06 but with a cycle
 		int id = 0;
@@ -2613,6 +2653,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("2.2", aSelectedExports[0], dResolvedImports[0]); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testFragmentsBug188199() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -2680,6 +2721,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("3.4", aExports[1] == bImports[1]); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testFragmentsMultipleVersion() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -2730,6 +2772,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("1.4", a1, aFrag2.getHost().getSupplier()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testPlatformProperties01() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -2849,6 +2892,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("2.2", c.getResolvedImports()[1].getExporter() == systemB); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testPlatformProperties02() throws BundleException {
 		// same as 01 except use alias system.bundle to another name "test.system.bundle"
 		State state = buildEmptyState();
@@ -2926,6 +2970,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("2.1", b_updated.getResolvedImports()[0].getExporter() == systemB); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testPlatformProperties03() throws BundleException {
 		// test that require-bundle, fragment-host, and import-package of system.bundle can be aliased properly
 		State state = buildEmptyState();
@@ -3031,6 +3076,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("2.7", h.getHost().getHosts()[0] == systemBundle); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testPlatformProperties04() throws BundleException {
 		// same as 03 except use a different system.bundle alias other than org.eclipse.osgi
 		// test that require-bundle, fragment-host, and import-package of system.bundle can be aliased properly
@@ -3138,6 +3184,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("2.7", h.getHost().getHosts()[0] == systemBundle); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testPlatformPropertiesBug188075() throws BundleException, IOException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -3167,7 +3214,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFalse("1.1", a.isResolved()); //$NON-NLS-1$
 		assertTrue("1.2", b.isResolved()); //$NON-NLS-1$
 
-		BundleContext context = OSGiTestsActivator.getContext();
+		BundleContext context = getContext();
 		File stateCache = context.getDataFile("statecache"); //$NON-NLS-1$
 		stateCache.mkdirs();
 		StateObjectFactory.defaultFactory.writeState(state, stateCache);
@@ -3180,6 +3227,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("2.2", bCache.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testPlatformPropertiesBug207500a() throws BundleException, IOException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -3210,7 +3258,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("1.1", a.isResolved()); //$NON-NLS-1$
 		assertTrue("1.2", b.isResolved()); //$NON-NLS-1$
 
-		BundleContext context = OSGiTestsActivator.getContext();
+		BundleContext context = getContext();
 		File stateCache = context.getDataFile("statecache"); //$NON-NLS-1$
 		stateCache.mkdirs();
 		StateObjectFactory.defaultFactory.writeState(state, stateCache);
@@ -3231,6 +3279,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFalse("3.2", bCache.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testPlatformPropertiesBug207500b() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -3256,6 +3305,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("1.1", a.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testPlatformPropertiesBug246640a() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -3310,6 +3360,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("2.0", a.getResolvedImports()[0].getExporter() == systemBundle2); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testPlatformPropertiesBug246640b() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -3365,6 +3416,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("2.0", a.getResolvedImports()[0].getExporter() == systemBundle2); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testEECapabilityRequirement() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -3569,6 +3621,7 @@ public class StateResolverTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testEECapabilityRequirement1() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -3680,6 +3733,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("2.4", 1, wiresE.size());
 	}
 
+	@Test
 	public void testEEBug377510() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -3723,6 +3777,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("fragment not resolved", aFrag.isResolved());
 	}
 
+	@Test
 	public void testImportJavaPackages() throws Exception {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -3796,18 +3851,14 @@ public class StateResolverTest extends AbstractStateTest {
 
 	private static final String MANIFEST_ROOT = "test_files/resolverTests/";
 
-	private Dictionary loadManifest(String manifest) {
+	private Dictionary loadManifest(String manifest) throws IOException, BundleException {
 		URL url = getContext().getBundle().getEntry(MANIFEST_ROOT + manifest);
-		try {
-			CaseInsensitiveDictionaryMap<String, String> headers = new CaseInsensitiveDictionaryMap<>();
-			ManifestElement.parseBundleManifest(url.openStream(), headers);
-			return headers.asUnmodifiableDictionary();
-		} catch (IOException | BundleException e) {
-			fail("Unexpected error loading manifest: " + manifest, e);
-		}
-		return null;
+		CaseInsensitiveDictionaryMap<String, String> headers = new CaseInsensitiveDictionaryMap<>();
+		ManifestElement.parseBundleManifest(url.openStream(), headers);
+		return headers.asUnmodifiableDictionary();
 	}
 
+	@Test
 	public void testSelectionPolicy() throws BundleException {
 		State state = buildEmptyState();
 		Resolver resolver = state.getResolver();
@@ -3860,6 +3911,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("1.4", testDependent.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBug187616() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -3911,6 +3963,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("2.0", bDelta.length == 5); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBug217150() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -3938,6 +3991,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("Unexpected number of hosts", 0, hosts.length); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testNativeCodeResolution01() throws BundleException {
 		State state = buildEmptyState();
 		Dictionary[] props = new Dictionary[] {new Hashtable()};
@@ -3960,6 +4014,7 @@ public class StateResolverTest extends AbstractStateTest {
 
 	}
 
+	@Test
 	public void testNativeCodeResolution02() throws BundleException {
 		State state = buildEmptyState();
 		Dictionary[] props = new Dictionary[] {new Hashtable()};
@@ -3979,6 +4034,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("1.0", testNativeBundle.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testNativeCodeResolution03() throws BundleException {
 		State state = buildEmptyState();
 		Dictionary[] props = new Dictionary[] {new Hashtable()};
@@ -3998,6 +4054,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("1.0", testNativeBundle.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testNativeCodeResolution04() throws BundleException {
 		State state = buildEmptyState();
 		Dictionary[] props = new Dictionary[] {new Hashtable()};
@@ -4017,6 +4074,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("1.0", testNativeBundle.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testNativeCodeResolution05() throws BundleException {
 		State state = buildEmptyState();
 		Dictionary[] props = new Dictionary[] {new Hashtable(), new Hashtable(), new Hashtable()};
@@ -4071,6 +4129,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("3.0", testNativeBundle3.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testNativeCodeResolution06() throws BundleException {
 		State state = buildEmptyState();
 		Dictionary[] props = new Dictionary[] {new Hashtable(), new Hashtable(), new Hashtable()};
@@ -4102,6 +4161,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("1.0", testNativeBundle1.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testMultiStateAdd01() throws BundleException {
 		State state1 = buildEmptyState();
 
@@ -4153,6 +4213,7 @@ public class StateResolverTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testMultiStateAdd02() throws BundleException {
 		State state1 = buildEmptyState();
 
@@ -4207,6 +4268,7 @@ public class StateResolverTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testMultiStateAdd03() throws BundleException {
 		State state1 = buildEmptyState();
 
@@ -4255,11 +4317,7 @@ public class StateResolverTest extends AbstractStateTest {
 		state1.resolve(new BundleDescription[] {rcp10});
 		State state2 = buildEmptyState();
 
-		try {
-			state2.addBundle(rcp10);
-		} catch (IllegalStateException e) {
-			fail("Unexpected IllegalStateException on adding to state", e); //$NON-NLS-1$
-		}
+		state2.addBundle(rcp10);
 	}
 
 	private State createBug266935State() throws BundleException {
@@ -4300,6 +4358,7 @@ public class StateResolverTest extends AbstractStateTest {
 		return newA;
 	}
 
+	@Test
 	public void testBug266935_01() throws BundleException {
 		State state = createBug266935State();
 		BundleDescription a = state.getBundle("a", new Version("1.0")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -4308,6 +4367,7 @@ public class StateResolverTest extends AbstractStateTest {
 		state.resolve(new BundleDescription[] {newA});
 	}
 
+	@Test
 	public void testBug266935_02() throws BundleException {
 		State state = createBug266935State();
 		BundleDescription a = state.getBundle("a", new Version("1.0")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -4316,6 +4376,7 @@ public class StateResolverTest extends AbstractStateTest {
 		state.resolve(new BundleDescription[] {a});
 	}
 
+	@Test
 	public void testBug266935_03() throws BundleException {
 		State state = createBug266935State();
 		BundleDescription a = state.getBundle("a", new Version("1.0")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -4324,6 +4385,7 @@ public class StateResolverTest extends AbstractStateTest {
 		state.resolve(new BundleDescription[] {newA});
 	}
 
+	@Test
 	public void testBug266935_04() throws BundleException {
 		State state = createBug266935State();
 		BundleDescription a = state.getBundle("a", new Version("1.0")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -4332,6 +4394,7 @@ public class StateResolverTest extends AbstractStateTest {
 		state.resolve(new BundleDescription[] {a});
 	}
 
+	@Test
 	public void testBug320124() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -4390,6 +4453,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("Wrong number of visible", 2, visible.length);
 	}
 
+	@Test
 	public void testCycleBug570984() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -4449,7 +4513,8 @@ public class StateResolverTest extends AbstractStateTest {
 		}
 	}
 
-	public void testBug324618() throws BundleException {
+	@Test
+	public void testBug324618() throws BundleException, IOException {
 		State state = buildEmptyState();
 		long bundleID = 0;
 		Dictionary manifest;
@@ -4477,6 +4542,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertNotNull("x.extra dynamic import is null", xExtra);
 	}
 
+	@Test
 	public void testRequirements() throws BundleException, InvalidSyntaxException, IOException {
 		State state = buildEmptyState();
 		long bundleID = 0;
@@ -4491,7 +4557,7 @@ public class StateResolverTest extends AbstractStateTest {
 
 		doTestRequirements(hostDescription, fragDescription);
 
-		File stateCache = OSGiTestsActivator.getContext().getDataFile("statecache"); //$NON-NLS-1$
+		File stateCache = getContext().getDataFile("statecache"); //$NON-NLS-1$
 		stateCache.mkdirs();
 		StateObjectFactory.defaultFactory.writeState(state, stateCache);
 		state = StateObjectFactory.defaultFactory.readState(stateCache);
@@ -4615,6 +4681,7 @@ public class StateResolverTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testCapabilities() throws InvalidSyntaxException, BundleException, IOException {
 		State state = buildEmptyState();
 		long bundleID = 0;
@@ -4626,7 +4693,7 @@ public class StateResolverTest extends AbstractStateTest {
 
 		doTestCapabilities(hostDescription);
 
-		File stateCache = OSGiTestsActivator.getContext().getDataFile("statecache"); //$NON-NLS-1$
+		File stateCache = getContext().getDataFile("statecache"); //$NON-NLS-1$
 		stateCache.mkdirs();
 		StateObjectFactory.defaultFactory.writeState(state, stateCache);
 		state = StateObjectFactory.defaultFactory.readState(stateCache);
@@ -4669,6 +4736,7 @@ public class StateResolverTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testRanges() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -4724,6 +4792,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("E is not resolved", e.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBug369880() throws BundleException {
 		State state = buildEmptyState();
 		Dictionary[] props = new Dictionary[] {new Hashtable()};
@@ -4768,6 +4837,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("Wrong number of wires from fragment", 1, bRequiredWires.size());
 	}
 
+	@Test
 	public void testResolveFragmentEE01() throws BundleException {
 		State state = buildEmptyState();
 		Dictionary[] props = new Dictionary[] {new Hashtable()};
@@ -4838,6 +4908,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFalse("C is not resolved", c.isResolved()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testResolveFragmentEE02() throws BundleException, IOException {
 		State state = buildEmptyState();
 		Dictionary[] props = new Dictionary[] {new Hashtable()};
@@ -4916,7 +4987,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("Wrong number of osgi.ee requirements from c", 1, cRequirements.size());
 		assertEquals("Wrong number of wires from c", 1, cRequiredWires.size());
 
-		File stateCache = OSGiTestsActivator.getContext().getDataFile("statecache"); //$NON-NLS-1$
+		File stateCache = getContext().getDataFile("statecache"); //$NON-NLS-1$
 		stateCache.mkdirs();
 		StateObjectFactory.defaultFactory.writeState(state, stateCache);
 		state = StateObjectFactory.defaultFactory.readState(stateCache);
@@ -4945,6 +5016,7 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("Wrong number of wires from c", 1, cRequiredWires.size());
 	}
 
+	@Test
 	public void testBug376322() throws BundleException, IOException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -4962,7 +5034,7 @@ public class StateResolverTest extends AbstractStateTest {
 		props[0].put(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, longExport);
 		state.setPlatformProperties(props);
 
-		File stateCache = OSGiTestsActivator.getContext().getDataFile("statecache"); //$NON-NLS-1$
+		File stateCache = getContext().getDataFile("statecache"); //$NON-NLS-1$
 		stateCache.mkdirs();
 		StateObjectFactory.defaultFactory.writeState(state, stateCache);
 		state = StateObjectFactory.defaultFactory.readState(stateCache);
@@ -4974,6 +5046,7 @@ public class StateResolverTest extends AbstractStateTest {
 	 * Not easy to preproduce, as it depends heavily on the internal sort algorithm, TimSort, and
 	 * therefore trimmed real life data is used for this test.
 	 */
+	@Test
 	 public void testIssue156() throws BundleException, IOException, Exception {
 		State state = buildEmptyState();
 		int bundleID = 0;

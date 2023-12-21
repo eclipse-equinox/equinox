@@ -13,12 +13,16 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.GenericDescription;
 import org.eclipse.osgi.service.resolver.GenericSpecification;
 import org.eclipse.osgi.service.resolver.State;
+import org.junit.Test;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
@@ -26,10 +30,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 	static final String GENERIC_REQUIRE = "Eclipse-GenericRequire"; //$NON-NLS-1$
 	static final String GENERIC_CAPABILITY = "Eclipse-GenericCapability"; //$NON-NLS-1$
 
-	public GenericCapabilityTest(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testGenericsBasics() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -80,6 +81,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		assertEquals("2.4.1", genSpecs[3].getSupplier(), genCap.getGenericCapabilities()[3]);
 	}
 
+	@Test
 	public void testGenericsUpdate() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -164,6 +166,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 
 	}
 
+	@Test
 	public void testGenericsRefresh() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -230,6 +233,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 
 	}
 
+	@Test
 	public void testGenericsFrags() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -302,6 +306,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		assertEquals("2.6.1", genSpecs[5].getSupplier(), selectedFragCapabilities[0]);
 	}
 
+	@Test
 	public void testGenericsIntraFrags() throws BundleException {
 		State state = buildEmptyState();
 		long bundleID = 0;
@@ -361,6 +366,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		assertEquals("2.4.1", genSpecs[3].getSupplier(), selectedFragBCapabilities[0]);
 	}
 
+	@Test
 	public void testGenericsAliases() throws BundleException {
 		State state = buildEmptyState();
 		Dictionary[] allPlatProps = state.getPlatformProperties();
@@ -402,6 +408,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		assertEquals("2.3.1", genSpecs[2].getSupplier(), genCap.getGenericCapabilities()[0]);
 	}
 
+	@Test
 	public void testGenericsOptionalMultiple() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -466,6 +473,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		assertEquals("2.6.3", suppliers[1], genCap.getGenericCapabilities()[5]);
 	}
 
+	@Test
 	public void testGenericsCycles() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();

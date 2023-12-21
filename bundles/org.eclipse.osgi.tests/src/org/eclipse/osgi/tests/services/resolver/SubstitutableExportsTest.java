@@ -14,6 +14,10 @@
 package org.eclipse.osgi.tests.services.resolver;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Hashtable;
 import org.eclipse.osgi.service.resolver.BundleDelta;
@@ -23,14 +27,11 @@ import org.eclipse.osgi.service.resolver.ImportPackageSpecification;
 import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.service.resolver.StateDelta;
 import org.eclipse.osgi.service.resolver.VersionConstraint;
+import org.junit.Test;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 public class SubstitutableExportsTest extends AbstractStateTest {
-
-	public SubstitutableExportsTest(String name) {
-		super(name);
-	}
 
 	private State getSubstituteBasicState() throws BundleException {
 		// Basic substitutable export test with A, B, C all exporting and importing x,y packages
@@ -1285,6 +1286,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		return state;
 	}
 
+	@Test
 	public void testSubstitutableExports001() throws BundleException {
 		State state = getSubstituteBasicState();
 		state.resolve();
@@ -1333,6 +1335,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("fVisible not correct", aSubtitutes, fVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports002() throws BundleException {
 		State state = getSubstituteUsesState();
 		state.resolve();
@@ -1385,6 +1388,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports003() throws BundleException {
 		State state = getSubstituteUsesCycleState();
 		state.resolve();
@@ -1451,6 +1455,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testSubstitutableExports004() throws BundleException {
 		State state = getSubstituteBasicFragState();
 		state.resolve();
@@ -1519,6 +1524,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports005() throws BundleException {
 		State state = getSubstituteUsesFragState();
 		state.resolve();
@@ -1593,6 +1599,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports006() throws BundleException {
 		State state = getSubstituteUsesFragCycleState();
 		state.resolve();
@@ -1689,6 +1696,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("iVisible not correct", expectedHIVisible, iVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports007() throws BundleException {
 		State state = getSubstituteBasicReexportState();
 		state.resolve();
@@ -1754,6 +1762,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("iVisible not correct", aExports, iVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports008() throws BundleException {
 		State state = getSubstituteUsesReexportState();
 		state.resolve();
@@ -1824,6 +1833,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("iVisible not correct", aExports, iVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports009() throws BundleException {
 		State state = getSubstituteUsesReexportCycleState();
 		state.resolve();
@@ -1899,6 +1909,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("jVisible not correct", aExports, jVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports010() throws BundleException {
 		State state = getSubstituteBasicState();
 		state.resolve();
@@ -1930,6 +1941,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("bunldeDeltas wrong number", 1, bundleDeltas.length); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports011() throws BundleException {
 		State state = getSubstituteUsesState();
 		state.resolve();
@@ -1967,6 +1979,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("bunldeDeltas wrong number", 1, bundleDeltas.length); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports012() throws BundleException {
 		State state = getSubstituteUsesCycleState();
 		state.resolve();
@@ -2015,6 +2028,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testSubstitutableExports013() throws BundleException {
 		State state = getSubstituteBasicFragState();
 		state.resolve();
@@ -2066,6 +2080,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testSubstitutableExports014() throws BundleException {
 		State state = getSubstituteUsesFragState();
 		state.resolve();
@@ -2124,6 +2139,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testSubstitutableExports015() throws BundleException {
 		State state = getSubstituteUsesFragCycleState();
 		state.resolve();
@@ -2177,6 +2193,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testSubstitutableExports016() throws BundleException {
 		State state = getSubstituteBasicReexportState();
 		state.resolve();
@@ -2227,6 +2244,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("bunldeDeltas wrong number", 1, bundleDeltas.length); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports017() throws BundleException {
 		State state = getSubstituteUsesReexportState();
 		state.resolve();
@@ -2284,6 +2302,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("bunldeDeltas wrong number", 1, bundleDeltas.length); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports018() throws BundleException {
 		State state = getSubstituteUsesReexportCycleState();
 		state.resolve();
@@ -2334,6 +2353,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testSubstitutableExports019() throws BundleException {
 		State state = getSubstituteUnresolvedFragState();
 		state.resolve();
@@ -2398,6 +2418,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports020() throws BundleException {
 		State state = getSubstituteUnresolvedFragState();
 		state.resolve();
@@ -2479,6 +2500,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports021() throws BundleException {
 		State state = getSubstituteBasicState();
 		state.resolve();
@@ -2522,6 +2544,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("fVisible not correct", bExports, fVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports022() throws BundleException {
 		State state = getSubstituteSplitState();
 		state.resolve();
@@ -2601,6 +2624,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testSubstitutableExports023() throws BundleException {
 		State state = getSubstituteSplitUsesState();
 		state.resolve();
@@ -2722,6 +2746,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testSubstitutableExports024() throws BundleException {
 		State state = getNonOverlapingSubstituteBasicState();
 		state.resolve();
@@ -2772,6 +2797,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("Should not have any unresolvable constraints", 0, unsatisfied.length);
 	}
 
+	@Test
 	public void testSubstitutableExports025() throws BundleException {
 		State state = getSubstituteUsesState();
 		BundleDescription a = state.getBundle(1);

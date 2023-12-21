@@ -14,13 +14,27 @@
 
 package org.eclipse.osgi.tests.util;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.osgi.framework.util.ObjectPool;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
 import org.osgi.framework.Version;
 
-public class ObjectPoolTestCase extends CoreTest {
+public class ObjectPoolTestCase {
+
+	@Rule
+	public TestName testName = new TestName();
+
+	private String getName() {
+		return testName.getMethodName();
+	}
+
+	@Test
 	public void testObjectPool01() {
 		// Tests ObjectPool with strings only
 		List objects = new ArrayList();
@@ -55,6 +69,7 @@ public class ObjectPoolTestCase extends CoreTest {
 		doGC();
 	}
 
+	@Test
 	public void testObjectPool02() {
 		// Test both strings and versions
 		List strings = new ArrayList();

@@ -13,20 +13,20 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.service.resolver.StateHelper;
+import org.junit.Test;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 public class XFriendsInternalResolverTest extends AbstractStateTest {
-
-	public XFriendsInternalResolverTest(String name) {
-		super(name);
-	}
 
 	/**
 	 * Tests the x-friends directive.  A bundle should not be allowed to import a package which
@@ -34,6 +34,7 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 	 * anther bundle which exports packages which declare an x-friends directive it should not
 	 * have access to the packages unless the requiring bundle is a friend.
 	 */
+	@Test
 	public void testXFriends() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -142,6 +143,7 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		assertTrue("5.2", contains(validPackages2, required2[1].getName()));
 	}
 
+	@Test
 	public void testVisiblePackages001() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -191,6 +193,7 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		assertTrue("2.4", exporter2 == aBase || exporter2 == aExtra);
 	}
 
+	@Test
 	public void testVisiblePackages002() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
@@ -287,6 +290,7 @@ public class XFriendsInternalResolverTest extends AbstractStateTest {
 		assertTrue("4.2", visImporter3[0].getExporter() == baseImporter2);
 	}
 
+	@Test
 	public void testVisiblePackages003() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;

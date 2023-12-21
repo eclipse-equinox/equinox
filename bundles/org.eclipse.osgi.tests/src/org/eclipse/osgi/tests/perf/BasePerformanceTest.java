@@ -28,10 +28,6 @@ import org.osgi.framework.Version;
 public class BasePerformanceTest extends AbstractStateTest {
 	private Random random;
 
-	public BasePerformanceTest(String name) {
-		super(name);
-	}
-
 	protected State buildRandomState(int size) {
 		State state = buildEmptyState();
 		StateObjectFactory stateFactory = state.getFactory();
@@ -77,7 +73,7 @@ public class BasePerformanceTest extends AbstractStateTest {
 	}
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 		// uses a constant seed to prevent variation on results
 		this.random = new Random(0);

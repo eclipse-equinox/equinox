@@ -13,18 +13,19 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import org.eclipse.osgi.service.resolver.BundleDelta;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.service.resolver.StateDelta;
+import org.junit.Test;
 import org.osgi.framework.BundleException;
 
 public class StateComparisonTest extends AbstractStateTest {
 
-	public StateComparisonTest(String testName) {
-		super(testName);
-	}
-
+	@Test
 	public void testAddition() throws BundleException {
 		State state1 = buildEmptyState();
 		State state2 = state1.getFactory().createState(state1);
@@ -47,6 +48,7 @@ public class StateComparisonTest extends AbstractStateTest {
 		assertEquals("3.3", BundleDelta.ADDED, addition.getType());
 	}
 
+	@Test
 	public void testRemoval() throws BundleException {
 		State state1 = buildSimpleState();
 		State state2 = state1.getFactory().createState(state1);
@@ -69,6 +71,7 @@ public class StateComparisonTest extends AbstractStateTest {
 		assertEquals("3.3", BundleDelta.ADDED, addition.getType());
 	}
 
+	@Test
 	public void testUpdate() throws BundleException {
 		State state1 = buildSimpleState();
 		State state2 = state1.getFactory().createState(state1);

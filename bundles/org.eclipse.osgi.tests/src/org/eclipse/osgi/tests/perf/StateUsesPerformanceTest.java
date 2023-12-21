@@ -16,16 +16,18 @@ package org.eclipse.osgi.tests.perf;
 import java.util.Hashtable;
 import org.eclipse.core.tests.harness.PerformanceTestRunner;
 import org.eclipse.osgi.service.resolver.State;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 public class StateUsesPerformanceTest extends BasePerformanceTest {
 
-	public StateUsesPerformanceTest(String name) {
-		super(name);
-	}
+	@Rule
+	public TestName testName = new TestName();
 
-	private void doUsesResolution(int stateSize, int repetitions, String localName, String degradation) throws BundleException {
+	private void doUsesResolution(int stateSize, int repetitions, String degradation) throws Exception {
 		final State originalState = buildRandomState(stateSize);
 		addUsesBundles(originalState);
 		PerformanceTestRunner runner = new PerformanceTestRunner() {
@@ -34,24 +36,28 @@ public class StateUsesPerformanceTest extends BasePerformanceTest {
 			}
 		};
 		runner.setRegressionReason(degradation);
-		runner.run(this, localName, 10, repetitions);
+		runner.run(getClass(), testName.getMethodName(), 10, repetitions);
 
 	}
 
-	public void testUsesResolution00100() throws BundleException {
-		doUsesResolution(100, 100, null, AllTests.DEGRADATION_RESOLUTION);
+	@Test
+	public void testUsesResolution00100() throws Exception {
+		doUsesResolution(100, 100, AllTests.DEGRADATION_RESOLUTION);
 	}
 
-	public void testUsesResolution00500() throws BundleException {
-		doUsesResolution(500, 10, null, AllTests.DEGRADATION_RESOLUTION);
+	@Test
+	public void testUsesResolution00500() throws Exception {
+		doUsesResolution(500, 10, AllTests.DEGRADATION_RESOLUTION);
 	}
 
-	public void testUsesResolution01000() throws BundleException {
-		doUsesResolution(1000, 10, null, AllTests.DEGRADATION_RESOLUTION);
+	@Test
+	public void testUsesResolution01000() throws Exception {
+		doUsesResolution(1000, 10, AllTests.DEGRADATION_RESOLUTION);
 	}
 
-	public void testUsesResolution05000() throws BundleException {
-		doUsesResolution(5000, 1, null, AllTests.DEGRADATION_RESOLUTION);
+	@Test
+	public void testUsesResolution05000() throws Exception {
+		doUsesResolution(5000, 1, AllTests.DEGRADATION_RESOLUTION);
 	}
 
 	private void addUsesBundles(State state) throws BundleException {
