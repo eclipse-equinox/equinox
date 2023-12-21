@@ -13,6 +13,11 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
+import static org.eclipse.osgi.tests.OSGiTestsActivator.getContext;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -24,16 +29,18 @@ import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.service.resolver.StateObjectFactory;
 import org.eclipse.osgi.service.resolver.VersionConstraint;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 public class PlatformAdminTest extends AbstractStateTest {
+	@Rule
+	public TestName testName = new TestName();
+
 	private static final String GENERIC_REQUIRE = "Eclipse-GenericRequire"; //$NON-NLS-1$
 	private static final String GENERIC_CAPABILITY = "Eclipse-GenericCapability"; //$NON-NLS-1$
-
-	public PlatformAdminTest(String name) {
-		super(name);
-	}
 
 	private State storeAndRetrieve(State toStore) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -42,6 +49,7 @@ public class PlatformAdminTest extends AbstractStateTest {
 		return toStore.getFactory().readState(bais);
 	}
 
+	@Test
 	public void testCache() throws IOException, BundleException {
 		State originalState = buildSimpleState();
 		State retrievedState = storeAndRetrieve(originalState);
@@ -52,6 +60,7 @@ public class PlatformAdminTest extends AbstractStateTest {
 		assertIdentical("2.0", originalState, retrievedState);
 	}
 
+	@Test
 	public void testClone() throws BundleException {
 		State original = buildSimpleState();
 		State newState = original.getFactory().createState(original);
@@ -61,6 +70,7 @@ public class PlatformAdminTest extends AbstractStateTest {
 		assertEquals("2", original, newState);
 	}
 
+	@Test
 	public void testBug205270() throws BundleException {
 		State state = buildSimpleState();
 		Hashtable manifest = new Hashtable();
@@ -71,16 +81,13 @@ public class PlatformAdminTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.BUNDLE_NATIVECODE, "libwrapper-linux-x86-32.so; wrapper-linux-x86-32; osname=linux; processor=x86");
 		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
-		try {
-			BundleDescription aPrime = state.getFactory().createBundleDescription(a);
-			assertEquals("Copy is not equal", a, aPrime);
-		} catch (Throwable t) {
-			fail("Unexpected error while cloning a BundleDescription", t);
-		}
+		BundleDescription aPrime = state.getFactory().createBundleDescription(a);
+		assertEquals("Copy is not equal", a, aPrime);
 	}
 
-	public void testBug184127() throws BundleException {
-		File resolverData = getContext().getDataFile(getName());
+	@Test
+	public void testBug184127() throws BundleException, IOException {
+		File resolverData = getContext().getDataFile(testName.getMethodName());
 		resolverData.mkdirs();
 
 		State systemState = StateObjectFactory.defaultFactory.createState(true);
@@ -133,25 +140,18 @@ public class PlatformAdminTest extends AbstractStateTest {
 		assertTrue("a is not resolved", a.isResolved());
 		assertTrue("b is not resolved", b.isResolved());
 
-		try {
-			StateObjectFactory.defaultFactory.writeState(systemState, resolverData);
-			systemState = StateObjectFactory.defaultFactory.readState(resolverData);
-		} catch (IOException e) {
-			fail("failed to shudown StateManager", e);
-		}
+		StateObjectFactory.defaultFactory.writeState(systemState, resolverData);
+		systemState = StateObjectFactory.defaultFactory.readState(resolverData);
 
 		assertNotNull("SystemState is null", systemState);
 		b = systemState.getBundle("b", null);
 		ExportPackageDescription[] exports = null;
-		try {
-			exports = b.getExportPackages();
-		} catch (Throwable e) {
-			fail("Unexpected exception getting exports", e);
-		}
+		exports = b.getExportPackages();
 		assertNotNull("exports is null", exports);
 		assertEquals("Wrong number of exports", 2, exports.length);
 	}
 
+	@Test
 	public void testBug241128_01() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -193,6 +193,7 @@ public class PlatformAdminTest extends AbstractStateTest {
 		assertEquals("Wrong unsatisfied constraint", b.getRequiredBundles()[0], unsatisified[0]);
 	}
 
+	@Test
 	public void testBug241128_02() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -234,6 +235,7 @@ public class PlatformAdminTest extends AbstractStateTest {
 		assertEquals("Wrong unsatisfied constraint", b.getHost(), unsatisified[0]);
 	}
 
+	@Test
 	public void testBug241128_03() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -277,6 +279,7 @@ public class PlatformAdminTest extends AbstractStateTest {
 		assertEquals("Wrong unsatisfied constraint", b.getImportPackages()[0], unsatisified[0]);
 	}
 
+	@Test
 	public void testBug241128_04() throws BundleException {
 		State state = buildEmptyState();
 		Dictionary[] props = new Dictionary[] {new Hashtable()};
@@ -319,6 +322,7 @@ public class PlatformAdminTest extends AbstractStateTest {
 		assertEquals("Wrong unsatisfied constraint", a2.getNativeCodeSpecification(), unsatisified[0]);
 	}
 
+	@Test
 	public void testGenericsBasics() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();

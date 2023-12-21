@@ -13,23 +13,23 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.resolver;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.service.resolver.StateObjectFactory;
 import org.eclipse.osgi.tests.services.resolver.AbstractStateTest;
+import org.junit.Test;
 import org.osgi.framework.BundleException;
 
-
 public class TestCycle_006 extends AbstractStateTest {
-	public TestCycle_006(String testName) {
-		super(testName);
-	}
 
 	BundleDescription bundle_1 = null;
 	BundleDescription bundle_2 = null;
 	BundleDescription bundle_3 = null;
 
-
+	@Test
 	public void testTest_003() {
 		State state = buildEmptyState();
 		StateObjectFactory sof = StateObjectFactory.defaultFactory;

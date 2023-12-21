@@ -13,19 +13,19 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.Hashtable;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.eclipse.osgi.service.resolver.State;
+import org.junit.Test;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 public class StateCycleTest extends AbstractStateTest {
 
-	public StateCycleTest(String testName) {
-		super(testName);
-	}
-
+	@Test
 	public void testCycle1() throws BundleException {
 		State state1 = buildEmptyState();
 		String A_MANIFEST = "Bundle-SymbolicName: org.eclipse.a\nBundle-Version: 1.0\n";
@@ -65,6 +65,7 @@ public class StateCycleTest extends AbstractStateTest {
 		assertTrue("6.0", bundleF.isResolved());
 	}
 
+	@Test
 	public void testCycle2() throws BundleException {
 		State state1 = buildEmptyState();
 		String A_MANIFEST = "Bundle-SymbolicName: org.eclipse.a\nBundle-Version: 1.0\n";
@@ -105,6 +106,7 @@ public class StateCycleTest extends AbstractStateTest {
 
 	}
 
+	@Test
 	public void testCycle3() throws BundleException {
 		State state = buildEmptyState();
 		String A_MANIFEST = "Bundle-SymbolicName: org.eclipse.a\nBundle-Version: 1.0\n";
@@ -134,6 +136,7 @@ public class StateCycleTest extends AbstractStateTest {
 		assertTrue("3.0", bundleD.isResolved());
 	}
 
+	@Test
 	public void testCycle4() throws BundleException {
 		State state = buildEmptyState();
 		String A_MANIFEST = "Bundle-SymbolicName: org.eclipse.a\nBundle-Version: 1.0\n";
@@ -163,6 +166,7 @@ public class StateCycleTest extends AbstractStateTest {
 		assertTrue("3.0", bundleD.isResolved());
 	}
 
+	@Test
 	public void test185285() throws BundleException {
 		// if two versions of the same bundle export and import two different packages at the same version
 		// then we should resolve both sets of imports to the first bundle installed.

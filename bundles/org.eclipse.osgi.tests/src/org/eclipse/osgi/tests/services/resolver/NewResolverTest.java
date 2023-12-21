@@ -13,21 +13,22 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
+import static org.junit.Assert.assertNotNull;
+
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.State;
+import org.junit.Test;
 import org.osgi.framework.BundleException;
 
 public class NewResolverTest extends AbstractStateTest {
 
-	public NewResolverTest(String testName) {
-		super(testName);
-	}
-
+	@Test
 	public void testSkeleton() {
 		State state = buildEmptyState();
 		state.resolve();
 	}
 
+	@Test
 	public void testBasicScenario1() throws BundleException {
 		State state = buildEmptyState();
 
