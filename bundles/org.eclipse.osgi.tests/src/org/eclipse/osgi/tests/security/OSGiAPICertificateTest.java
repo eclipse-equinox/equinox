@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.security;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.osgi.framework.AdminPermission;
@@ -95,295 +96,212 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 	}
 
 	@Override
-	protected Bundle installBundle(String bundlePath) {
+	protected Bundle installBundle(String bundlePath) throws BundleException, IOException {
 		Bundle b = super.installBundle(bundlePath);
 		installedBundles.add(b);
 		return b;
 	}
 
-	public void testBundleSignerCondition01() {
+	public void testBundleSignerCondition01() throws Exception {
 		// test trusted cert with all signed match
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			Condition condition = BundleSignerCondition.getCondition(testBundle, info01True);
-			assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		Condition condition = BundleSignerCondition.getCondition(testBundle, info01True);
+		assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
 	}
 
-	public void testBundleSignerCondition02() {
+	public void testBundleSignerCondition02() throws Exception {
 		// test trusted cert with all signed match + "!" not operation
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			Condition condition = BundleSignerCondition.getCondition(testBundle, info02False);
-			assertEquals("Unexpected condition value", Condition.FALSE, condition); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		Condition condition = BundleSignerCondition.getCondition(testBundle, info02False);
+		assertEquals("Unexpected condition value", Condition.FALSE, condition); //$NON-NLS-1$
 	}
 
-	public void testBundleSignerCondition03() {
+	public void testBundleSignerCondition03() throws Exception {
 		// test untrusted cert with all signed match
-		try {
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			Condition condition = BundleSignerCondition.getCondition(testBundle, info01True);
-			assertEquals("Unexpected condition value", Condition.FALSE, condition); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		Condition condition = BundleSignerCondition.getCondition(testBundle, info01True);
+		assertEquals("Unexpected condition value", Condition.FALSE, condition); //$NON-NLS-1$
 	}
 
-	public void testBundleSignerCondition04() {
+	public void testBundleSignerCondition04() throws Exception {
 		// test untrusted cert with all signed match + "!" not operation
-		try {
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			Condition condition = BundleSignerCondition.getCondition(testBundle, info02False);
-			assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		Condition condition = BundleSignerCondition.getCondition(testBundle, info02False);
+		assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
 	}
 
-	public void testBundleSignerCondition05() {
+	public void testBundleSignerCondition05() throws Exception {
 		// test trusted cert with exact match pattern
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			Condition condition = BundleSignerCondition.getCondition(testBundle, info03True);
-			assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		Condition condition = BundleSignerCondition.getCondition(testBundle, info03True);
+		assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
 	}
 
-	public void testBundleSignerCondition06() {
+	public void testBundleSignerCondition06() throws Exception {
 		// test trusted cert with prefix wildcard match pattern
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			Condition condition = BundleSignerCondition.getCondition(testBundle, info04True);
-			assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		Condition condition = BundleSignerCondition.getCondition(testBundle, info04True);
+		assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
 	}
 
-	public void testBundleSignerCondition07() {
+	public void testBundleSignerCondition07() throws Exception {
 		// test trusted cert with postfix wildcard match pattern
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			Condition condition = BundleSignerCondition.getCondition(testBundle, info05True);
-			assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		Condition condition = BundleSignerCondition.getCondition(testBundle, info05True);
+		assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
 	}
 
-	public void testBundleSignerCondition08() {
+	public void testBundleSignerCondition08() throws Exception {
 		// test trusted cert with wrong prefix dn
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			Condition condition = BundleSignerCondition.getCondition(testBundle, info06False);
-			assertEquals("Unexpected condition value", Condition.FALSE, condition); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		Condition condition = BundleSignerCondition.getCondition(testBundle, info06False);
+		assertEquals("Unexpected condition value", Condition.FALSE, condition); //$NON-NLS-1$
 	}
 
-	public void testBundleSignerCondition09() {
+	public void testBundleSignerCondition09() throws Exception {
 		// test trusted cert with wrong postfix dn
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			Condition condition = BundleSignerCondition.getCondition(testBundle, info07False);
-			assertEquals("Unexpected condition value", Condition.FALSE, condition); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		Condition condition = BundleSignerCondition.getCondition(testBundle, info07False);
+		assertEquals("Unexpected condition value", Condition.FALSE, condition); //$NON-NLS-1$
 	}
 
-	public void testBundleSignerCondition10() {
+	public void testBundleSignerCondition10() throws Exception {
 		// test trusted cert with RDN wildcard match pattern
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			Condition condition = BundleSignerCondition.getCondition(testBundle, info08True);
-			assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		Condition condition = BundleSignerCondition.getCondition(testBundle, info08True);
+		assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
 	}
 
-	public void testBundleSignerCondition11() {
+	public void testBundleSignerCondition11() throws Exception {
 		// test trusted cert with RDN wildcard match pattern
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			Condition condition = BundleSignerCondition.getCondition(testBundle, info09True);
-			assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		Condition condition = BundleSignerCondition.getCondition(testBundle, info09True);
+		assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
 	}
 
-	public void testBundleSignerCondition12() {
+	public void testBundleSignerCondition12() throws Exception {
 		// test trusted cert with RDN wildcard match pattern
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			Condition condition = BundleSignerCondition.getCondition(testBundle, info10True);
-			assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		Condition condition = BundleSignerCondition.getCondition(testBundle, info10True);
+		assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
 	}
 
-	public void testAdminPermission01() {
+	public void testAdminPermission01() throws Exception {
 		// test trusted cert with exact match pattern
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			AdminPermission declaredPerm = new AdminPermission("(signer=-)", AdminPermission.CONTEXT); //$NON-NLS-1$
-			AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-			assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		AdminPermission declaredPerm = new AdminPermission("(signer=-)", AdminPermission.CONTEXT); //$NON-NLS-1$
+		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
+		assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
 	}
 
-	public void testAdminPermission02() {
+	public void testAdminPermission02() throws Exception {
 		// test trusted cert with exact match pattern
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain01TrueEscaped + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
-			AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-			assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain01TrueEscaped + ")", //$NON-NLS-1$ //$NON-NLS-2$
+				AdminPermission.CONTEXT);
+		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
+		assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
 	}
 
-	public void testAdminPermission03() {
+	public void testAdminPermission03() throws Exception {
 		// test trusted cert with exact match pattern + ! operation
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			AdminPermission declaredPerm = new AdminPermission("(!(signer=-))", AdminPermission.CONTEXT); //$NON-NLS-1$
-			AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-			assertFalse("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		AdminPermission declaredPerm = new AdminPermission("(!(signer=-))", AdminPermission.CONTEXT); //$NON-NLS-1$
+		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
+		assertFalse("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
 	}
 
-	public void testAdminPermission04() {
+	public void testAdminPermission04() throws Exception {
 		// test trusted cert with exact match pattern + ! operation
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			AdminPermission declaredPerm = new AdminPermission("(!(signer=" + dnChain01TrueEscaped + "))", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
-			AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-			assertFalse("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		AdminPermission declaredPerm = new AdminPermission("(!(signer=" + dnChain01TrueEscaped + "))", //$NON-NLS-1$ //$NON-NLS-2$
+				AdminPermission.CONTEXT);
+		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
+		assertFalse("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
 	}
 
-	public void testAdminPermission05() {
+	public void testAdminPermission05() throws Exception {
 		// test trusted cert with prefix wildcard match pattern
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain02TrueEscaped + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
-			AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-			assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain02TrueEscaped + ")", //$NON-NLS-1$ //$NON-NLS-2$
+				AdminPermission.CONTEXT);
+		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
+		assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
 	}
 
-	public void testAdminPermission06() {
+	public void testAdminPermission06() throws Exception {
 		// test trusted cert with postfix wildcard match pattern
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain03TrueEscaped + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
-			AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-			assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain03TrueEscaped + ")", //$NON-NLS-1$ //$NON-NLS-2$
+				AdminPermission.CONTEXT);
+		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
+		assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
 	}
 
-	public void testAdminPermission07() {
+	public void testAdminPermission07() throws Exception {
 		// test trusted cert with bad postfix dn match pattern
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain04FalseEscaped + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
-			AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-			assertFalse("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain04FalseEscaped + ")", //$NON-NLS-1$ //$NON-NLS-2$
+				AdminPermission.CONTEXT);
+		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
+		assertFalse("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
 	}
 
-	public void testAdminPermission08() {
+	public void testAdminPermission08() throws Exception {
 		// test trusted cert with bad prefix dn match pattern
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain05FalseEscaped + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
-			AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-			assertFalse("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain05FalseEscaped + ")", //$NON-NLS-1$ //$NON-NLS-2$
+				AdminPermission.CONTEXT);
+		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
+		assertFalse("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
 	}
 
-	public void testAdminPermission09() {
+	public void testAdminPermission09() throws Exception {
 		// test trusted cert with RDN match pattern
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain06TrueEscaped + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
-			AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-			assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain06TrueEscaped + ")", //$NON-NLS-1$ //$NON-NLS-2$
+				AdminPermission.CONTEXT);
+		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
+		assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
 	}
 
-	public void testAdminPermission10() {
+	public void testAdminPermission10() throws Exception {
 		// test trusted cert with RDN match pattern
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain07TrueEscaped + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
-			AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-			assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain07TrueEscaped + ")", //$NON-NLS-1$ //$NON-NLS-2$
+				AdminPermission.CONTEXT);
+		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
+		assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
 	}
 
-	public void testAdminPermission11() {
+	public void testAdminPermission11() throws Exception {
 		// test trusted cert with RDN match pattern
-		try {
-			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
-			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain08TrueEscaped + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
-			AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-			assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
-		} catch (Exception e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
+		AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain08TrueEscaped + ")", //$NON-NLS-1$ //$NON-NLS-2$
+				AdminPermission.CONTEXT);
+		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
+		assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
 	}
 
 }

@@ -24,8 +24,8 @@ import java.security.KeyStoreException;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import junit.framework.TestCase;
 import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
 import org.eclipse.osgi.internal.provisional.service.security.AuthorizationEngine;
 import org.eclipse.osgi.internal.service.security.KeyStoreTrustEngine;
@@ -33,11 +33,12 @@ import org.eclipse.osgi.service.security.TrustEngine;
 import org.eclipse.osgi.signedcontent.SignedContentFactory;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
-public class BaseSecurityTest extends CoreTest {
+public class BaseSecurityTest extends TestCase {
 
 	private static char[] PASSWORD_DEFAULT = {'c', 'h', 'a', 'n', 'g', 'e', 'i', 't'};
 	private static String TYPE_DEFAULT = "JKS";
@@ -133,15 +134,10 @@ public class BaseSecurityTest extends CoreTest {
 		return engine;
 	}
 
-	protected Bundle installBundle(String bundlePath) {
+	protected Bundle installBundle(String bundlePath) throws BundleException, IOException {
 		URL bundleURL = OSGiTestsActivator.getBundle().getEntry(bundlePath);
 		assertNotNull("Bundle URL is null " + bundlePath, bundleURL);
-		try {
-			return OSGiTestsActivator.getContext().installBundle(bundlePath, bundleURL.openStream());
-		} catch (Exception e) {
-			fail("unexpected install exception", e);
-		}
-		return null;
+		return OSGiTestsActivator.getContext().installBundle(bundlePath, bundleURL.openStream());
 	}
 
 	protected static File getEntryFile(String entryPath) throws IOException {

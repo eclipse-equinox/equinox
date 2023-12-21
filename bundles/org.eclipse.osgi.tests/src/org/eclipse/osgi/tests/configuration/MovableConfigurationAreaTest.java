@@ -13,6 +13,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.configuration;
 
+import static org.eclipse.osgi.tests.OSGiTest.PI_OSGI_TESTS;
+import static org.eclipse.osgi.tests.OSGiTest.addRequiredOSGiTestsBundles;
+import static org.eclipse.osgi.tests.OSGiTestsActivator.getContext;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -24,12 +28,11 @@ import org.eclipse.core.tests.harness.BundleTestingHelper;
 import org.eclipse.core.tests.harness.FileSystemComparator;
 import org.eclipse.core.tests.harness.FileSystemHelper;
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
-import org.eclipse.osgi.tests.OSGiTest;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
-public class MovableConfigurationAreaTest extends OSGiTest {
+public class MovableConfigurationAreaTest extends TestCase {
 
 	static void doMove(final IPath sourcePath, final IPath destinationPath) {
 		assertTrue("Failed moving " + sourcePath + " to " + destinationPath, sourcePath.toFile().renameTo(destinationPath.toFile()));
@@ -109,16 +112,13 @@ public class MovableConfigurationAreaTest extends OSGiTest {
 		}
 	}
 
-	public void testInitialization() throws MalformedURLException, IOException {
+	public void testInitialization() throws Exception {
 		// initialization session
-		try {
-			Bundle installed = BundleTestingHelper.installBundle("1.0", getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle01");
-			// not read-only yet, should work fine
-			if (!BundleTestingHelper.resolveBundles(getContext(), new Bundle[] {installed}))
-				fail("1.1");
-		} catch (BundleException be) {
-			fail("1.2", be);
-		}
+		Bundle installed = BundleTestingHelper.installBundle("1.0", getContext(),
+				OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle01");
+		// not read-only yet, should work fine
+		assertTrue("installed bundle could not be resolved: " + installed,
+				BundleTestingHelper.resolveBundles(getContext(), new Bundle[] { installed }));
 	}
 
 	public void testVerifySnapshot() throws IOException {

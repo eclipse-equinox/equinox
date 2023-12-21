@@ -13,15 +13,20 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.appadmin;
 
+import static org.eclipse.osgi.tests.OSGiTest.PI_OSGI_TESTS;
+import static org.eclipse.osgi.tests.OSGiTest.addRequiredOSGiTestsBundles;
+import static org.eclipse.osgi.tests.OSGiTestsActivator.getContext;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import junit.framework.AssertionFailedError;
 import junit.framework.Test;
+import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
 import org.eclipse.core.tests.session.SetupManager.SetupException;
-import org.eclipse.osgi.tests.OSGiTest;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.BundleInstaller;
 import org.osgi.framework.Bundle;
@@ -37,7 +42,7 @@ import org.osgi.service.application.ScheduledApplication;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-public class ApplicationAdminTest extends OSGiTest {
+public class ApplicationAdminTest extends TestCase {
 	public static final String testRunnerApp = "org.eclipse.pde.junit.runtime.coretestapplicationnonmain"; //$NON-NLS-1$
 	public static final String testResults = "test.results"; //$NON-NLS-1$
 	public static final String SUCCESS = "success"; //$NON-NLS-1$
@@ -106,6 +111,12 @@ public class ApplicationAdminTest extends OSGiTest {
 		HashMap args = new HashMap();
 		args.put(testResults, new HashMap());
 		return args;
+	}
+
+	private void fail(String message, Throwable throwable) {
+		AssertionFailedError error = new AssertionFailedError(message);
+		error.initCause(throwable);
+		throw error;
 	}
 
 	public void testSimpleApp() {
