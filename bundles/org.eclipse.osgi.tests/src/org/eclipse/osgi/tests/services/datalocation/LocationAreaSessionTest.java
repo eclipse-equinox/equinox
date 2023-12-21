@@ -13,9 +13,11 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.datalocation;
 
+import static org.eclipse.osgi.tests.OSGiTest.PI_OSGI_TESTS;
+import static org.eclipse.osgi.tests.OSGiTest.addRequiredOSGiTestsBundles;
+
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -24,12 +26,11 @@ import org.eclipse.core.tests.session.SetupManager.SetupException;
 import org.eclipse.osgi.internal.location.LocationHelper;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.environment.Constants;
-import org.eclipse.osgi.tests.OSGiTest;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-public class LocationAreaSessionTest extends OSGiTest {
+public class LocationAreaSessionTest extends TestCase {
 	private static final String JAVA_NIO = "java.nio"; //$NON-NLS-1$
 	private static final String JAVA_IO = "java.io"; //$NON-NLS-1$
 	private static final String TEST_LOCATION_DIR = "osgi.test.location.dir"; //$NON-NLS-1$
@@ -128,7 +129,8 @@ public class LocationAreaSessionTest extends OSGiTest {
 		super(name);
 	}
 
-	static void doLock(String testLocationDir, String type, boolean release, boolean succeed) {
+	static void doLock(String testLocationDir, String type, boolean release, boolean succeed)
+			throws InvalidSyntaxException, IOException {
 		String oldLockingValue = System.setProperty(LocationHelper.PROP_OSGI_LOCKING, type);
 		try {
 			doLock(testLocationDir, release, succeed);
@@ -140,15 +142,11 @@ public class LocationAreaSessionTest extends OSGiTest {
 		}
 	}
 
-	static void doLock(String testLocationDir, boolean release, boolean succeed) {
-		if (testLocationDir == null)
-			fail("The testLocationDir is not set");
-		ServiceReference[] refs = null;
-		try {
-			refs = OSGiTestsActivator.getContext().getServiceReferences(Location.class.getName(), "(type=osgi.configuration.area)");
-		} catch (InvalidSyntaxException e) {
-			fail("failed to create filter", e);
-		}
+	static void doLock(String testLocationDir, boolean release, boolean succeed)
+			throws InvalidSyntaxException, IOException {
+		assertNotNull("The testLocationDir is not set", testLocationDir);
+		ServiceReference[] refs = OSGiTestsActivator.getContext().getServiceReferences(Location.class.getName(),
+				"(type=osgi.configuration.area)");
 		// this is test code so we are not very careful; just assume there is at lease one service.  Do not copy and paste this code!!!
 		Location configLocation = (Location) OSGiTestsActivator.getContext().getService(refs[0]);
 		Location testLocation = null;
@@ -162,10 +160,6 @@ public class LocationAreaSessionTest extends OSGiTest {
 				fail((succeed ? "Could not" : "Could") + " lock location");
 			if (!testLocation.isLocked())
 				fail("location should be locked");
-		} catch (MalformedURLException e) {
-			fail("failed to create the location URL", e);
-		} catch (IOException e) {
-			fail("failed to lock with IOExcetpion", e);
 		} finally {
 			if (release && testLocation != null)
 				testLocation.release();
@@ -175,7 +169,7 @@ public class LocationAreaSessionTest extends OSGiTest {
 		}
 	}
 
-	static void doRelease() {
+	static void doRelease() throws IOException {
 		try {
 			if (lockedTestLocation == null)
 				fail("lockedTestLocation == null !!");
@@ -184,28 +178,26 @@ public class LocationAreaSessionTest extends OSGiTest {
 			lockedTestLocation.release();
 			if (lockedTestLocation.isLocked())
 				fail("lockedTestLocation is still locked!!");
-		} catch (IOException e) {
-			fail("failed to unlock lockedTestLocation", e);
 		} finally {
 			lockedTestLocation = null;
 		}
 	}
 
-	public void testSessionFailLockJavaNIO() {
+	public void testSessionFailLockJavaNIO() throws Exception {
 		doLock(System.getProperty(TEST_LOCATION_DIR), JAVA_NIO, true, false);
 	}
 
-	public void testSessionSuccessLockJavaNIO() {
+	public void testSessionSuccessLockJavaNIO() throws Exception {
 		doLock(System.getProperty(TEST_LOCATION_DIR), JAVA_NIO, true, true);
 	}
 
-	public void testSessionFailLockJavaIO() {
+	public void testSessionFailLockJavaIO() throws Exception {
 		if (!Constants.OS_WIN32.equals(System.getProperty("osgi.os")))
 			return;
 		doLock(System.getProperty(TEST_LOCATION_DIR), JAVA_IO, true, false);
 	}
 
-	public void testSessionSuccessLockJavaIO() {
+	public void testSessionSuccessLockJavaIO() throws Exception {
 		if (!Constants.OS_WIN32.equals(System.getProperty("osgi.os")))
 			return;
 		doLock(System.getProperty(TEST_LOCATION_DIR), JAVA_IO, true, true);

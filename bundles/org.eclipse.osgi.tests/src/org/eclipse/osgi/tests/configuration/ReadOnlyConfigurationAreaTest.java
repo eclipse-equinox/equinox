@@ -13,19 +13,22 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.configuration;
 
+import static org.eclipse.osgi.tests.OSGiTest.PI_OSGI_TESTS;
+import static org.eclipse.osgi.tests.OSGiTest.addRequiredOSGiTestsBundles;
+import static org.eclipse.osgi.tests.OSGiTestsActivator.getContext;
+
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import junit.framework.Test;
+import junit.framework.TestCase;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
 import org.eclipse.core.tests.harness.FileSystemComparator;
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
-import org.eclipse.osgi.tests.OSGiTest;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
-public class ReadOnlyConfigurationAreaTest extends OSGiTest {
+public class ReadOnlyConfigurationAreaTest extends TestCase {
 
 	public static Test suite() {
 		ConfigurationSessionTestSuite suite = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, ReadOnlyConfigurationAreaTest.class);
@@ -38,31 +41,26 @@ public class ReadOnlyConfigurationAreaTest extends OSGiTest {
 		super(name);
 	}
 
-	public void test0thSession() throws MalformedURLException, IOException {
+	public void test0thSession() throws Exception {
 		// initialization session
-		try {
-			Bundle installed = BundleTestingHelper.installBundle("1.0", getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle01");
-			// not read-only yet, should work fine
-			if (!BundleTestingHelper.resolveBundles(getContext(), new Bundle[] {installed}))
-				fail("1.1");
-		} catch (BundleException be) {
-			fail("1.2", be);
-		}
+		Bundle installed = BundleTestingHelper.installBundle("1.0", getContext(),
+				OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle01");
+		// not read-only yet, should work fine
+		assertTrue("installed bundle could not be resolved: " + installed,
+				BundleTestingHelper.resolveBundles(getContext(), new Bundle[] { installed }));
 	}
 
 	/**
 	 * Takes a snapshot of the file system.
+	 * 
+	 * @throws IOException
 	 */
-	public void test1stSession() {
+	public void test1stSession() throws IOException {
 		// compute and save tree image
 		File configurationDir = ConfigurationSessionTestSuite.getConfigurationDir();
 		FileSystemComparator comparator = new FileSystemComparator();
 		Object snapshot = comparator.takeSnapshot(configurationDir, true);
-		try {
-			comparator.saveSnapshot(snapshot, configurationDir);
-		} catch (IOException e) {
-			fail("1.0");
-		}
+		comparator.saveSnapshot(snapshot, configurationDir);
 	}
 
 	public void test1stSessionFollowUp() throws IOException {

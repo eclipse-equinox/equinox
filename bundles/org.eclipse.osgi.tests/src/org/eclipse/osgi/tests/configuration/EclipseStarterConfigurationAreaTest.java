@@ -13,18 +13,22 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.configuration;
 
+import static org.eclipse.osgi.tests.OSGiTest.PI_OSGI_TESTS;
+import static org.eclipse.osgi.tests.OSGiTest.addRequiredOSGiTestsBundles;
+import static org.eclipse.osgi.tests.OSGiTestsActivator.getContext;
+
 import java.util.List;
 import junit.framework.Test;
+import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
-import org.eclipse.osgi.tests.OSGiTest;
 import org.osgi.framework.Constants;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
 
-public class EclipseStarterConfigurationAreaTest extends OSGiTest {
+public class EclipseStarterConfigurationAreaTest extends TestCase {
 
 	public static Test suite() {
 		TestSuite suite = new TestSuite(EclipseStarterConfigurationAreaTest.class.getName());
