@@ -13,10 +13,11 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.util;
 
+import static org.eclipse.osgi.tests.OSGiTestsActivator.addRequiredOSGiTestsBundles;
+
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
 import org.eclipse.core.tests.session.Setup;
 import org.eclipse.core.tests.session.SetupManager.SetupException;
-import org.eclipse.osgi.tests.OSGiTest;
 
 public class TextProcessorSessionTest extends ConfigurationSessionTestSuite {
 	private String lang = null;
@@ -30,7 +31,7 @@ public class TextProcessorSessionTest extends ConfigurationSessionTestSuite {
 	public TextProcessorSessionTest(String pluginId, Class clazz, String language) {
 		super(pluginId, clazz);
 		lang = language;
-		OSGiTest.addRequiredOSGiTestsBundles(this);
+		addRequiredOSGiTestsBundles(this);
 	}
 
 	/* (non-Javadoc)

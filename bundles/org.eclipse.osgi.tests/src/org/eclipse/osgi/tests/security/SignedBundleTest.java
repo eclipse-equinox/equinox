@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.security;
 
+import static org.eclipse.osgi.tests.OSGiTestsActivator.addRequiredOSGiTestsBundles;
+
 import java.io.File;
 import java.io.IOException;
 import java.security.cert.Certificate;
@@ -23,7 +25,6 @@ import org.eclipse.osgi.signedcontent.InvalidContentException;
 import org.eclipse.osgi.signedcontent.SignedContent;
 import org.eclipse.osgi.signedcontent.SignedContentEntry;
 import org.eclipse.osgi.signedcontent.SignerInfo;
-import org.eclipse.osgi.tests.OSGiTest;
 import org.osgi.framework.Bundle;
 
 public class SignedBundleTest extends BaseSecurityTest {
@@ -74,7 +75,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 
 	public static Test suite() {
 		ConfigurationSessionTestSuite suite = new ConfigurationSessionTestSuite(BUNDLE_SECURITY_TESTS, "Unit session tests for SignedContent");
-		OSGiTest.addRequiredOSGiTestsBundles(suite);
+		addRequiredOSGiTestsBundles(suite);
 		suite.addTestSuite(SignedBundleTest.class);
 		return suite;
 	}

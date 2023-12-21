@@ -13,8 +13,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.configuration;
 
-import static org.eclipse.osgi.tests.OSGiTest.PI_OSGI_TESTS;
-import static org.eclipse.osgi.tests.OSGiTest.addRequiredOSGiTestsBundles;
+import static org.eclipse.osgi.tests.OSGiTestsActivator.PI_OSGI_TESTS;
+import static org.eclipse.osgi.tests.OSGiTestsActivator.addRequiredOSGiTestsBundles;
 import static org.eclipse.osgi.tests.OSGiTestsActivator.getContext;
 
 import java.util.List;
