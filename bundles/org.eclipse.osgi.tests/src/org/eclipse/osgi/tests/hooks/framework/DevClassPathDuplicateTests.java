@@ -14,6 +14,8 @@
 package org.eclipse.osgi.tests.hooks.framework;
 
 import static org.eclipse.osgi.tests.bundles.AbstractBundleTests.stopQuietly;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.net.URL;
@@ -23,6 +25,7 @@ import java.util.Map;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.SystemBundleTests;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
@@ -33,9 +36,9 @@ public class DevClassPathDuplicateTests extends AbstractFrameworkHookTests {
 	private String location;
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
-		File store = OSGiTestsActivator.getContext().getDataFile(getName());
+		File store = OSGiTestsActivator.getContext().getDataFile(testName.getMethodName());
 		configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, store.getAbsolutePath());
 		configuration.put(EquinoxConfiguration.PROP_DEV, "duplicate/");
@@ -53,7 +56,7 @@ public class DevClassPathDuplicateTests extends AbstractFrameworkHookTests {
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
+	public void tearDown() throws Exception {
 		stopQuietly(framework);
 		super.tearDown();
 	}
@@ -66,6 +69,7 @@ public class DevClassPathDuplicateTests extends AbstractFrameworkHookTests {
 		return framework.getBundleContext().installBundle(location);
 	}
 
+	@Test
 	public void testDevClassPathWithExtension() throws Exception {
 		initAndStartFramework();
 

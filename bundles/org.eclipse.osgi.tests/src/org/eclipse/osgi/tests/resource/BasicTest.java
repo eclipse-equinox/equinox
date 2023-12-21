@@ -13,12 +13,17 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.resource;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.junit.Assert;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.framework.namespace.IdentityNamespace;
@@ -80,10 +85,8 @@ public class BasicTest extends AbstractResourceTest {
 	private Bundle tf1;
 	private Bundle tf2;
 
-	public BasicTest(String name) {
-		super(name);
-	}
 
+	@Test
 	public void testRequirementMatches() throws Exception {
 		Bundle tb5 = installer.installBundle("resource.tb5");
 		Resource requirer = tb5.adapt(BundleRevision.class);
@@ -123,6 +126,7 @@ public class BasicTest extends AbstractResourceTest {
 		assertRequirementMatches(requirement5, capability2);
 	}
 
+	@Test
 	public void testIdentity() throws Exception {
 		tb1 = installer.installBundle("resource.tb1");
 		tb2 = installer.installBundle("resource.tb2");
@@ -455,14 +459,6 @@ public class BasicTest extends AbstractResourceTest {
 		if (!(requirement instanceof BundleRequirement) || !(capability instanceof BundleCapability))
 			return;
 		assertFalse("Requirement matches capability", ((BundleRequirement) requirement).matches((BundleCapability) capability));
-	}
-
-	private void assertNotNull(Capability capability) {
-		Assert.assertNotNull("Null capability", capability);
-	}
-
-	private void assertNotNull(Requirement requirement) {
-		Assert.assertNotNull("Null requirement", requirement);
 	}
 
 	private void assertRequirementMatches(Requirement requirement, Capability capability) {

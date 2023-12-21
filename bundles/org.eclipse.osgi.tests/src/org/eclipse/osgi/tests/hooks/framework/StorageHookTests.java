@@ -15,7 +15,11 @@ package org.eclipse.osgi.tests.hooks.framework;
 
 import static org.eclipse.osgi.tests.bundles.AbstractBundleTests.stop;
 import static org.eclipse.osgi.tests.bundles.AbstractBundleTests.stopQuietly;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -27,6 +31,7 @@ import org.eclipse.osgi.container.ModuleContainerAdaptor.ModuleEvent;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.SystemBundleTests;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -61,6 +66,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	 * Bundles must be discarded if a storage hook throws an
 	 * IllegalStateException during validation.
 	 */
+	@Test
 	public void testBundleDiscardedWhenClasspathStorageHookInvalidates() throws Exception {
 		initAndStartFramework();
 		installBundle();
@@ -73,6 +79,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	/*
 	 * Bundles must not be discarded when a storage hook says they are valid.
 	 */
+	@Test
 	public void testBundleNotDiscardedWhenClasspathStorageHookValidates() throws Exception {
 		initAndStartFramework();
 		installBundle();
@@ -86,6 +93,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	 * A storage hook with the wrong factory class should cause bundle
 	 * installation to fail.
 	 */
+	@Test
 	public void testWrongStorageHookFactoryClassOnBundleInstall() throws Exception {
 		setFactoryClassInvalid(true);
 		initAndStartFramework();
@@ -102,6 +110,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	 * A storage hook with the wrong factory class should cause bundle update
 	 * to fail.
 	 */
+	@Test
 	public void testWrongStorageHookFactoryClassOnBundleUpdate() throws Exception {
 		initAndStartFramework();
 		installBundle();
@@ -119,6 +128,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	 * A storage hook with the wrong factory class should cause a framework
 	 * restart with persisted bundles to fail.
 	 */
+	@Test
 	public void testWrongStorageHookFactoryClassOnFrameworkRestart() throws Exception {
 		initAndStartFramework();
 		installBundle();
@@ -132,6 +142,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		assertCreateStorageHookCalled();
 	}
 
+	@Test
 	public void testCleanOnFailLoad() throws Exception {
 		initAndStartFramework();
 		installBundle();
@@ -139,11 +150,13 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		restartFramework();
 		assertBundleDiscarded();
 		// install a bundle without reference to test that the staging area is created correctly after clean
-		File bundlesBase = new File(OSGiTestsActivator.getContext().getDataFile(getName()), "bundles");
+		File bundlesBase = new File(OSGiTestsActivator.getContext().getDataFile(testName.getMethodName()), "bundles");
 		bundlesBase.mkdirs();
-		framework.getBundleContext().installBundle(SystemBundleTests.createBundle(bundlesBase, getName(), false, false).toURI().toString());
+		framework.getBundleContext().installBundle(
+				SystemBundleTests.createBundle(bundlesBase, testName.getMethodName(), false, false).toURI().toString());
 	}
 
+	@Test
 	public void testDeletingGenerationCalledOnDiscard() throws Exception {
 		initAndStartFramework();
 		installBundle();
@@ -153,6 +166,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		assertBundleDiscarded();
 	}
 
+	@Test
 	public void testDeletingGenerationCalledUninstall() throws Exception {
 		initAndStartFramework();
 		installBundle();
@@ -162,6 +176,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		assertStorageHookDeletingGenerationCalled();
 	}
 
+	@Test
 	public void testDeletingGenerationCalledUpdate() throws Exception {
 		initAndStartFramework();
 		installBundle();
@@ -171,6 +186,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		assertStorageHookDeletingGenerationCalled();
 	}
 
+	@Test
 	public void testAdaptModuleRevisionBuilder() throws Exception {
 		setFactoryClassAdaptManifest(true);
 		initAndStartFramework();
@@ -238,6 +254,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		assertEquals("Wrong attribute value", "testDirective", bundleCap.getDirectives().get("matching.directive"));
 	}
 
+	@Test
 	@SuppressWarnings("deprecation")
 	public void testFrameworkUtilHelper() throws Exception {
 		initAndStartFramework();
@@ -249,6 +266,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		assertEquals("Wrong bundle found.", framework.getBundleContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION), b);
 	}
 
+	@Test
 	public void testHandleContent() throws Exception {
 		initAndStartFramework();
 
@@ -284,12 +302,14 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 		assertEquals("Wrong symbolicName", "testHandleContentConnection", b.getSymbolicName());
 	}
 
+	@Test
 	public void testNullStorageHook() throws Exception {
 
 		initAndStartFramework();
-		File bundlesBase = new File(OSGiTestsActivator.getContext().getDataFile(getName()), "bundles");
+		File bundlesBase = new File(OSGiTestsActivator.getContext().getDataFile(testName.getMethodName()), "bundles");
 		bundlesBase.mkdirs();
-		String initialBundleLoc = SystemBundleTests.createBundle(bundlesBase, getName(), false, false).toURI().toString();
+		String initialBundleLoc = SystemBundleTests.createBundle(bundlesBase, testName.getMethodName(), false, false)
+				.toURI().toString();
 		Bundle initialBundle = framework.getBundleContext().installBundle(initialBundleLoc);
 		assertNotNull("Expected to have an initial bundle.", initialBundle);
 
@@ -310,13 +330,13 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	}
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 		String loc = bundleInstaller.getBundleLocation(HOOK_CONFIGURATOR_BUNDLE);
 		loc = loc.substring(loc.indexOf("file:"));
 		classLoader.addURL(new URL(loc));
 		location = bundleInstaller.getBundleLocation(TEST_BUNDLE);
-		File file = OSGiTestsActivator.getContext().getDataFile(getName());
+		File file = OSGiTestsActivator.getContext().getDataFile(testName.getMethodName());
 		configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, file.getAbsolutePath());
 		configuration.put(HookRegistry.PROP_HOOK_CONFIGURATORS_INCLUDE, HOOK_CONFIGURATOR_CLASS);
@@ -325,7 +345,7 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
+	public void tearDown() throws Exception {
 		stopQuietly(framework);
 		super.tearDown();
 	}
