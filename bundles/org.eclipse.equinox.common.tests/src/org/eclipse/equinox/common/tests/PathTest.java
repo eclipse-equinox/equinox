@@ -14,7 +14,13 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -22,24 +28,14 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.tests.harness.CoreTest;
+import org.junit.Test;
 
 /**
  * Test cases for the Path class.
  */
-public class PathTest extends CoreTest {
-	/**
-	 * Need a zero argument constructor to satisfy the test harness. This
-	 * constructor should not do any real work nor should it be called by user code.
-	 */
-	public PathTest() {
-		super(null);
-	}
+public class PathTest {
 
-	public PathTest(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testAddTrailingSeparator() {
 
 		IPath with = new Path("/first/second/third/");
@@ -73,6 +69,7 @@ public class PathTest extends CoreTest {
 		assertEquals("6.1", IPath.ROOT, IPath.EMPTY.addTrailingSeparator());
 	}
 
+	@Test
 	public void testAppend() {
 
 		IPath fore = new Path("/first/second/third/");
@@ -237,6 +234,7 @@ public class PathTest extends CoreTest {
 		assertFalse("11.6.win", win4.isValidSegment(win4.segment(2)));
 	}
 
+	@Test
 	public void testSegmentCount() {
 
 		assertEquals("1.0", 0, IPath.ROOT.segmentCount());
@@ -255,6 +253,7 @@ public class PathTest extends CoreTest {
 		assertEquals("3.4", 2, new Path("//first/second/").segmentCount());
 	}
 
+	@Test
 	public void testCanonicalize() {
 		// Test collapsing multiple separators
 		// double slashes at the beginning of a path
@@ -281,6 +280,7 @@ public class PathTest extends CoreTest {
 		assertEquals("3.6", ".", new Path(".").toString());
 	}
 
+	@Test
 	public void testClone() {
 
 		IPath anyPath = new Path("/a/b/c");
@@ -293,6 +293,7 @@ public class PathTest extends CoreTest {
 		assertEquals("1.3", IPath.ROOT, IPath.ROOT.clone());
 	}
 
+	@Test
 	public void testConstructors() {
 
 		assertEquals("1.0", "", new Path("").toString());
@@ -319,6 +320,7 @@ public class PathTest extends CoreTest {
 		assertEquals("3.1.win", "D:/", IPath.forWindows("/D:/").toString());
 	}
 
+	@Test
 	public void testFactoryMethods() {
 
 		IPath win = IPath.forWindows("a:b\\c/d");
@@ -336,6 +338,7 @@ public class PathTest extends CoreTest {
 		assertNotEquals("3.1", win, posix);
 	}
 
+	@Test
 	public void testFirstSegment() {
 
 		assertNull("1.0", IPath.ROOT.segment(0));
@@ -355,6 +358,7 @@ public class PathTest extends CoreTest {
 
 	}
 
+	@Test
 	public void testFromOSString() {
 		List<String> segments = List.of("first", "first/second/third");
 		for (String segment : segments) {
@@ -370,6 +374,7 @@ public class PathTest extends CoreTest {
 		return new java.io.File(pathname).toString();
 	}
 
+	@Test
 	public void testFromPortableString() {
 		assertEquals("1.0", "", IPath.fromPortableString("").toString());
 		assertEquals("1.1", "/", IPath.fromPortableString("/").toString());
@@ -404,6 +409,7 @@ public class PathTest extends CoreTest {
 		assertEquals("3.12.posix", isLocalPosix, posix2.isValidSegment(":"));
 	}
 
+	@Test
 	public void testFromFile() {
 		List<String> segments = List.of("first", "first/second/third");
 		for (String segment : segments) {
@@ -418,6 +424,7 @@ public class PathTest extends CoreTest {
 		}
 	}
 
+	@Test
 	public void testFromPath() {
 		List<String> segments = List.of("first", "first/second/third");
 		for (String segment : segments) {
@@ -432,6 +439,7 @@ public class PathTest extends CoreTest {
 		}
 	}
 
+	@Test
 	public void testGetFileExtension() {
 
 		IPath anyPath = new Path("index.html");
@@ -450,6 +458,7 @@ public class PathTest extends CoreTest {
 
 	}
 
+	@Test
 	public void testHasTrailingSeparator() {
 
 		// positive
@@ -478,6 +487,7 @@ public class PathTest extends CoreTest {
 
 	}
 
+	@Test
 	public void testIsAbsolute() {
 
 		// positive
@@ -501,6 +511,7 @@ public class PathTest extends CoreTest {
 
 	}
 
+	@Test
 	public void testIsEmpty() {
 
 		// positive
@@ -518,6 +529,7 @@ public class PathTest extends CoreTest {
 		assertTrue("2.3", !new Path("c:/").isEmpty());
 	}
 
+	@Test
 	public void testIsPrefixOf() {
 
 		IPath prefix = new Path("/first/second");
@@ -536,6 +548,7 @@ public class PathTest extends CoreTest {
 		assertTrue("3.3", !path.isPrefixOf(IPath.EMPTY));
 	}
 
+	@Test
 	public void testIsRoot() {
 
 		// negative
@@ -551,6 +564,7 @@ public class PathTest extends CoreTest {
 		assertTrue("2.3.posix", IPath.forPosix("/").isRoot());
 	}
 
+	@Test
 	public void testIsUNC() {
 
 		// negative
@@ -581,6 +595,7 @@ public class PathTest extends CoreTest {
 		assertTrue("6.2.win", IPath.forWindows("c:\\\\").setDevice(null).isUNC());
 	}
 
+	@Test
 	public void testIsValidPath() {
 		IPath test = IPath.ROOT;
 		// positive
@@ -607,6 +622,7 @@ public class PathTest extends CoreTest {
 		assertTrue("3.4.posix", Path.isValidPosixPath("c:a/b:"));
 	}
 
+	@Test
 	public void testIsValidSegment() {
 		IPath test = IPath.ROOT;
 		// positive
@@ -635,6 +651,7 @@ public class PathTest extends CoreTest {
 		assertEquals("5.3", isLocalPosix, new Path("").isValidSegment(":"));
 	}
 
+	@Test
 	public void testLastSegment() {
 
 		assertEquals("1.0", "second", new Path("/first/second").lastSegment());
@@ -657,6 +674,7 @@ public class PathTest extends CoreTest {
 		assertEquals("5.1", "first", new Path("//first/").lastSegment());
 	}
 
+	@Test
 	public void testMakeAbsolute() {
 		IPath anyPath = new Path("first/second/third").makeAbsolute();
 		assertTrue("1.0", anyPath.isAbsolute());
@@ -667,6 +685,7 @@ public class PathTest extends CoreTest {
 		assertEquals("2.1", IPath.ROOT, anyPath);
 	}
 
+	@Test
 	public void testMakeRelative() {
 		IPath anyPath = new Path("/first/second/third").makeRelative();
 		assertTrue("1.0", !anyPath.isAbsolute());
@@ -680,6 +699,7 @@ public class PathTest extends CoreTest {
 	/**
 	 * Tests for {@link Path#makeRelativeTo(IPath)}.
 	 */
+	@Test
 	public void testMakeRelativeTo() {
 		// valid cases
 		IPath[] bases = new IPath[] { new Path("/a/"), new Path("/a/b") };
@@ -717,6 +737,7 @@ public class PathTest extends CoreTest {
 	/**
 	 * Tests for {@link Path#makeRelativeTo(IPath)}.
 	 */
+	@Test
 	public void testMakeRelativeToWindows() {
 		IPath[] bases = new IPath[] { IPath.forWindows("c:/a/"), IPath.forWindows("c:/a/b") };
 		IPath[] children = new IPath[] { IPath.forWindows("d:/a/"), IPath.forWindows("d:/a/b"),
@@ -733,6 +754,7 @@ public class PathTest extends CoreTest {
 
 	}
 
+	@Test
 	public void testMakeUNC() {
 		List<IPath> inputs = new ArrayList<>();
 		List<String> expected = new ArrayList<>();
@@ -815,6 +837,7 @@ public class PathTest extends CoreTest {
 	/**
 	 * This test is for bizarre cases that previously caused errors.
 	 */
+	@Test
 	public void testRegression() {
 		new Path("C:\\/eclipse");
 
@@ -824,6 +847,7 @@ public class PathTest extends CoreTest {
 		assertEquals("2.2.win", "ive", path.segment(0));
 	}
 
+	@Test
 	public void testRemoveFirstSegments() {
 		assertEquals("1.0", new Path("second"), new Path("/first/second").removeFirstSegments(1));
 		assertEquals("1.1", new Path("second/third/"), new Path("/first/second/third/").removeFirstSegments(1));
@@ -860,6 +884,7 @@ public class PathTest extends CoreTest {
 		assertEquals("3.6", new Path("third/fourth"), new Path("//first/second/third/fourth").removeFirstSegments(2));
 	}
 
+	@Test
 	public void testRemoveLastSegments() {
 
 		assertEquals("1.0", new Path("/first"), new Path("/first/second").removeLastSegments(1));
@@ -881,6 +906,7 @@ public class PathTest extends CoreTest {
 		assertEquals("4.2", new Path("//"), new Path("//").removeLastSegments(1));
 	}
 
+	@Test
 	public void testRemoveTrailingSeparator() {
 
 		IPath with = new Path("/first/second/third/");
@@ -914,6 +940,7 @@ public class PathTest extends CoreTest {
 		assertEquals("5.2", new Path("c:a/b"), new Path("c:a/b/").removeTrailingSeparator());
 	}
 
+	@Test
 	public void testSegments() {
 
 		IPath anyPath = null;
@@ -975,6 +1002,7 @@ public class PathTest extends CoreTest {
 		assertEquals("7.5", "c", segs[4]);
 	}
 
+	@Test
 	public void testToString() {
 
 		IPath anyPath = new Path("/first/second/third");
@@ -984,6 +1012,7 @@ public class PathTest extends CoreTest {
 		assertEquals("1.2", "", IPath.EMPTY.toString());
 	}
 
+	@Test
 	public void testHash() {
 		// actual hash codes may depend on JDK implementation of String.hashCode()
 
@@ -1008,6 +1037,7 @@ public class PathTest extends CoreTest {
 				new Path("p").addTrailingSeparator().hashCode());
 	}
 
+	@Test
 	public void testEquals() {
 		assertEquals("a", new Path("a"), new Path("a"));
 		assertEquals("b", new Path("a"), new Path("a"));
@@ -1031,6 +1061,7 @@ public class PathTest extends CoreTest {
 		assertNotEquals("leading\\ dependent", new Path("\\p"), new Path("p"));
 	}
 
+	@Test
 	public void testUptoSegment() {
 
 		// Case 1, absolute path with no trailing separator
@@ -1082,6 +1113,7 @@ public class PathTest extends CoreTest {
 		assertEquals("5.4", new Path("//"), anyPath.uptoSegment(0));
 	}
 
+	@Test
 	public void testToPath() {
 
 		// Case 1, absolute path with no trailing separator

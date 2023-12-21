@@ -13,32 +13,21 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.eclipse.core.runtime.QualifiedName;
-import org.eclipse.core.tests.harness.CoreTest;
+import org.junit.Test;
 
 /**
  * Test cases for the QualifiedName class.
  */
 
-public class QualifiedNameTest extends CoreTest {
+public class QualifiedNameTest {
 
-	/**
-	 * Need a zero argument constructor to satisfy the test harness. This
-	 * constructor should not do any real work nor should it be called by user code.
-	 */
-	public QualifiedNameTest() {
-		super(null);
-	}
-
-	/**
-	 * Constructor for QualifiedNameTest
-	 */
-	public QualifiedNameTest(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testQualifiers() {
 
 		try {
@@ -67,6 +56,7 @@ public class QualifiedNameTest extends CoreTest {
 
 	}
 
+	@Test
 	public void testLocalNames() {
 
 		try {
@@ -97,6 +87,7 @@ public class QualifiedNameTest extends CoreTest {
 
 	}
 
+	@Test
 	public void testEqualsAndHashcode() {
 
 		QualifiedName qN1 = new QualifiedName("org.eclipse.runtime", "myClass");
