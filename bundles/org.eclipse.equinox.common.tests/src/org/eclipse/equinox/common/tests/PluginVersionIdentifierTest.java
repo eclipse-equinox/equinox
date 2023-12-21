@@ -13,20 +13,16 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import org.eclipse.core.runtime.PluginVersionIdentifier;
-import org.eclipse.core.tests.harness.CoreTest;
+import org.junit.Test;
 
 @Deprecated
-public class PluginVersionIdentifierTest extends CoreTest {
+public class PluginVersionIdentifierTest {
 
-	public PluginVersionIdentifierTest() {
-		super(null);
-	}
-
-	public PluginVersionIdentifierTest(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testConstructor() {
 
 		assertEquals("1.0", "123.456.789", new PluginVersionIdentifier(123, 456, 789).toString());
@@ -49,6 +45,7 @@ public class PluginVersionIdentifierTest extends CoreTest {
 	}
 
 	// should test the hashcode() method that is currently missing.
+	@Test
 	public void testEqual() {
 
 		assertTrue("1.0",
@@ -57,6 +54,7 @@ public class PluginVersionIdentifierTest extends CoreTest {
 
 	}
 
+	@Test
 	public void testComparisons() {
 
 		PluginVersionIdentifier plugin1 = new PluginVersionIdentifier("1.896.456");
@@ -77,6 +75,7 @@ public class PluginVersionIdentifierTest extends CoreTest {
 
 	}
 
+	@Test
 	public void testValidate() {
 		// success cases
 		assertTrue("1.0", PluginVersionIdentifier.validateVersion("1").isOK());

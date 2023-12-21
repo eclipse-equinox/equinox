@@ -13,10 +13,14 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -26,19 +30,20 @@ import java.net.URL;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.URIUtil;
-import org.eclipse.core.tests.harness.CoreTest;
+import org.junit.Test;
 import org.osgi.framework.FrameworkUtil;
 
 /**
  * Tests for the {@link URIUtil} class.
  */
-public class URIUtilTest extends CoreTest {
+public class URIUtilTest {
 	/** Constant value indicating if the current platform is Windows */
 	private static final boolean WINDOWS = java.io.File.separatorChar == '\\';
 
 	private static final String[] testPaths = new String[] { "abc", "with spaces", "with%percent" };
 
 	// re-enable once bug 331314 is fixed
+	@Test
 	public void testBug331314() {
 		doTestBug331314("File with spaces");
 		doTestBug331314("FileWithBrackets[]");
@@ -57,34 +62,27 @@ public class URIUtilTest extends CoreTest {
 	/**
 	 * Tests for {@link URIUtil#toJarURI(URI, IPath)}.
 	 */
-	public void testToJARURI() {
+	@Test
+	public void testToJARURI() throws Exception {
 		URL locationURL = FileLocator.find(FrameworkUtil.getBundle(getClass()),
 				IPath.fromOSString("Plugin_Testing/uriutil/test.jar"), null);
-		try {
-			locationURL = FileLocator.resolve(locationURL);
-			URI location = URIUtil.toURI(locationURL);
-			final String suffix = "test/1029/test.txt";
-			URI jar = URIUtil.toJarURI(location, IPath.fromOSString(suffix));
-			InputStream is = jar.toURL().openStream();
-			is.close();
+		locationURL = FileLocator.resolve(locationURL);
+		URI location = URIUtil.toURI(locationURL);
+		final String suffix = "test/1029/test.txt";
+		URI jar = URIUtil.toJarURI(location, IPath.fromOSString(suffix));
+		InputStream is = jar.toURL().openStream();
+		is.close();
 
-			// null entry path
-			URI jar2 = URIUtil.toJarURI(location, null);
-			assertEquals("2.0", jar.toString(), jar2.toString() + suffix);
-
-		} catch (MalformedURLException e) {
-			fail("1.0", e);
-		} catch (IOException e) {
-			fail("1.1", e);
-		} catch (URISyntaxException e) {
-			fail("1.2", e);
-		}
+		// null entry path
+		URI jar2 = URIUtil.toJarURI(location, null);
+		assertEquals("2.0", jar.toString(), jar2.toString() + suffix);
 	}
 
 	/**
 	 * Tests for {@link URIUtil#toFile(URI)}.
 	 */
-	public void testToFile() throws URISyntaxException {
+	@Test
+	public void testToFile() {
 		File base = new File(System.getProperty("java.io.tmpdir"));
 		for (int i = 0; i < testPaths.length; i++) {
 			File original = new File(base, testPaths[i]);
@@ -97,6 +95,7 @@ public class URIUtilTest extends CoreTest {
 	/**
 	 * Tests for {@link URIUtil#toFile(URI)} involving UNC paths.
 	 */
+	@Test
 	public void testToFileUNC() throws URISyntaxException {
 		if (!WINDOWS) {
 			return;
@@ -115,6 +114,7 @@ public class URIUtilTest extends CoreTest {
 	/**
 	 * Tests for {@link URIUtil#toUnencodedString(URI)}.
 	 */
+	@Test
 	public void testToUnencodedString() throws URISyntaxException {
 		assertEquals("1.0", "http://foo.bar", URIUtil.toUnencodedString(new URI("http://foo.bar")));
 		assertEquals("1.1", "http://foo.bar#fragment", URIUtil.toUnencodedString(new URI("http://foo.bar#fragment")));
@@ -131,6 +131,7 @@ public class URIUtilTest extends CoreTest {
 	/**
 	 * Tests for {@link URIUtil#fromString(String)}.
 	 */
+	@Test
 	public void testFromString() throws URISyntaxException {
 		// spaces
 		assertEquals("1.1", new URI("http://foo.bar/a%20b"), URIUtil.fromString("http://foo.bar/a b"));
@@ -172,6 +173,7 @@ public class URIUtilTest extends CoreTest {
 	/**
 	 * Tests for {@link URIUtil#toURI(java.net.URL)}.
 	 */
+	@Test
 	public void testURLtoURI() throws MalformedURLException, URISyntaxException {
 		// spaces
 		assertEquals("1.1", new URI("http://foo.bar/a%20b"), URIUtil.toURI(new URL("http://foo.bar/a b")));
@@ -188,6 +190,7 @@ public class URIUtilTest extends CoreTest {
 	/**
 	 * Tests for {@link URIUtil#toURL(java.net.URI)}.
 	 */
+	@Test
 	public void testURItoURL() throws MalformedURLException, URISyntaxException {
 		// spaces
 		assertEquals("1.1", new URL("http://foo.bar/a%20b"), URIUtil.toURL(new URI("http://foo.bar/a%20b")));
@@ -205,6 +208,7 @@ public class URIUtilTest extends CoreTest {
 	 * Tests handling of Absolute file system paths on Windows incorrectly encoded
 	 * as relative URIs (file:c:/tmp).
 	 */
+	@Test
 	public void testWindowsPathsFromURI() throws MalformedURLException, URISyntaxException {
 		if (!WINDOWS) {
 			return;
@@ -217,6 +221,7 @@ public class URIUtilTest extends CoreTest {
 	 * Tests handling of Absolute file system paths on Windows incorrectly encoded
 	 * as relative URIs (file:c:/tmp).
 	 */
+	@Test
 	public void testWindowsPathsFromString() throws URISyntaxException {
 		if (!WINDOWS) {
 			return;
@@ -229,6 +234,7 @@ public class URIUtilTest extends CoreTest {
 	 * Tests handling of conversion from a File with spaces to URL and File to URI
 	 * and equivalence of the resulting URI
 	 */
+	@Test
 	public void testFileWithSpaces() throws MalformedURLException, URISyntaxException {
 		File fileWithSpaces = new File("/c:/with spaces/goo");
 		URI correctURI = fileWithSpaces.toURI();
@@ -255,6 +261,7 @@ public class URIUtilTest extends CoreTest {
 	 * Tests handling of conversion from a File with spaces to URL and File to URI
 	 * and equivalence of the resulting URI
 	 */
+	@Test
 	public void testFileWithBrackets() throws MalformedURLException, URISyntaxException {
 		File fileWithSpaces = new File("/c:/with[brackets]/goo");
 		URI correctURI = fileWithSpaces.toURI();
@@ -280,6 +287,7 @@ public class URIUtilTest extends CoreTest {
 	/**
 	 * Tests for {@link URIUtil#append(URI, String)}.
 	 */
+	@Test
 	public void testAppend() throws URISyntaxException {
 		URI base = new URI("http://a.b.c/a%20b/");
 		URI result = URIUtil.append(base, "file.txt");
@@ -296,6 +304,7 @@ public class URIUtilTest extends CoreTest {
 	/**
 	 * Tests for {@link URIUtil#append(URI, String)} when dealing with UNC paths.
 	 */
+	@Test
 	public void testAppendUNC() throws URISyntaxException {
 		// UNC paths
 		URI base = new URI("file:////SERVER/some/path/");
@@ -309,6 +318,7 @@ public class URIUtilTest extends CoreTest {
 	 * Tests for {@link URIUtil#append(URI, String)} when dealing with paths
 	 * containing brackets.
 	 */
+	@Test
 	public void testAppendWithBrackets() throws URISyntaxException {
 		// append a simple string
 		URI base = new URI("http://example.com/base/");
@@ -341,6 +351,7 @@ public class URIUtilTest extends CoreTest {
 		// assertEquals("5.1", null, result.getPath());
 	}
 
+	@Test
 	public void testBug286339() throws URISyntaxException {
 
 		// single letter server path
@@ -352,6 +363,7 @@ public class URIUtilTest extends CoreTest {
 
 	}
 
+	@Test
 	public void testAppendWindows() throws URISyntaxException {
 		if (!WINDOWS) {
 			return;
@@ -374,6 +386,7 @@ public class URIUtilTest extends CoreTest {
 	 * Tests handling of conversion from a File with %20 to URL and File to URI and
 	 * equivalence of the resulting URI
 	 */
+	@Test
 	public void testFileWithPercent20() throws MalformedURLException, URISyntaxException {
 		File fileWithPercent20 = new File("/c:/with%20spaces/goo");
 		URI correctURI = fileWithPercent20.toURI();
@@ -387,27 +400,24 @@ public class URIUtilTest extends CoreTest {
 		assertNotSame("1.4", correctURI, URIUtil.fromString(fileURL.toString()));
 	}
 
-	public void testRemoveExtension() {
-		try {
-			URI uri1 = new URI("file:/foo/bar/zoo.txt");
-			assertEquals(new URI("file:/foo/bar/zoo"), URIUtil.removeFileExtension(uri1));
+	@Test
+	public void testRemoveExtension() throws URISyntaxException {
+		URI uri1 = new URI("file:/foo/bar/zoo.txt");
+		assertEquals(new URI("file:/foo/bar/zoo"), URIUtil.removeFileExtension(uri1));
 
-			URI uri2 = new URI("file:/foo/bar.zoo/foo.txt");
-			assertEquals(new URI("file:/foo/bar.zoo/foo"), URIUtil.removeFileExtension(uri2));
+		URI uri2 = new URI("file:/foo/bar.zoo/foo.txt");
+		assertEquals(new URI("file:/foo/bar.zoo/foo"), URIUtil.removeFileExtension(uri2));
 
-			URI uri3 = new URI("file:/foo/bar.zoo/foo");
-			assertEquals(new URI("file:/foo/bar.zoo/foo"), URIUtil.removeFileExtension(uri3));
+		URI uri3 = new URI("file:/foo/bar.zoo/foo");
+		assertEquals(new URI("file:/foo/bar.zoo/foo"), URIUtil.removeFileExtension(uri3));
 
-			URI uri4 = new URI(
-					"file:/C:/DOCUME~1/ADMINI~1/LOCALS~1/Temp/testRepo/plugins/org.junit_3.8.2.v200706111738.jar");
-			assertEquals(
-					new URI("file:/C:/DOCUME~1/ADMINI~1/LOCALS~1/Temp/testRepo/plugins/org.junit_3.8.2.v200706111738"),
-					URIUtil.removeFileExtension(uri4));
-		} catch (URISyntaxException e) {
-			fail("URI syntax exception", e);
-		}
+		URI uri4 = new URI(
+				"file:/C:/DOCUME~1/ADMINI~1/LOCALS~1/Temp/testRepo/plugins/org.junit_3.8.2.v200706111738.jar");
+		assertEquals(new URI("file:/C:/DOCUME~1/ADMINI~1/LOCALS~1/Temp/testRepo/plugins/org.junit_3.8.2.v200706111738"),
+				URIUtil.removeFileExtension(uri4));
 	}
 
+	@Test
 	public void testRemoveFileExtensionFromFile() {
 		String fileName = "/c:/some.dir/afile";
 		File testFileWithExtension = new File(fileName + ".extension");
@@ -418,6 +428,7 @@ public class URIUtilTest extends CoreTest {
 		assertEquals(correctURI, URIUtil.removeFileExtension(testFileWithOutExtension.toURI()));
 	}
 
+	@Test
 	public void testSameURI() throws URISyntaxException {
 		assertFalse("1.0", URIUtil.sameURI(new File("a").toURI(), URIUtil.fromString("file:a")));
 		assertFalse("1.1", URIUtil.sameURI(new URI("file:/a"), URIUtil.fromString("file:a")));
@@ -427,6 +438,7 @@ public class URIUtilTest extends CoreTest {
 		assertTrue("2.1", URIUtil.sameURI(new URI("file:/a%2Cb"), new URI("file:/a,b")));
 	}
 
+	@Test
 	public void testSameURIWindows() throws URISyntaxException {
 		if (!WINDOWS) {
 			return;
@@ -442,6 +454,7 @@ public class URIUtilTest extends CoreTest {
 		assertFalse("2.0", URIUtil.sameURI(new URI("file:/a/b"), new URI("file:/c:/a/b")));
 	}
 
+	@Test
 	public void testMakeAbsolute() throws URISyntaxException {
 		URI[][] data = new URI[][] {
 				// simple path
@@ -522,6 +535,7 @@ public class URIUtilTest extends CoreTest {
 	/**
 	 * Tests for {@link URIUtil#makeAbsolute(URI, URI)} involving UNC paths.
 	 */
+	@Test
 	public void testMakeAbsoluteUNC() throws URISyntaxException {
 		URI base = new URI("file:////SERVER/some/path/");
 		URI relative = new URI("plugins/javax.servlet_2.4.0.v200806031604.jar");
@@ -535,6 +549,7 @@ public class URIUtilTest extends CoreTest {
 
 	}
 
+	@Test
 	public void testMakeRelative() throws URISyntaxException {
 		URI[][] data = new URI[][] {
 				// simple path
@@ -591,6 +606,7 @@ public class URIUtilTest extends CoreTest {
 	/**
 	 * Test UNC-Paths containing a $.
 	 */
+	@Test
 	public void testDollar() throws URISyntaxException {
 		final var relative = "SomePath";
 		final String[] uris = {
