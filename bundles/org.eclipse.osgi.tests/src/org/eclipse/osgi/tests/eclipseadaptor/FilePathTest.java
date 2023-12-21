@@ -13,16 +13,17 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.eclipseadaptor;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.framework.util.FilePath;
-import org.eclipse.osgi.tests.OSGiTest;
+import org.junit.Test;
 
-public class FilePathTest extends OSGiTest {
+public class FilePathTest {
 
-	public FilePathTest(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testColonOnPath() {
 		FilePath path = new FilePath("/c:b/a");
 		if (Platform.getOS().equals(Platform.OS_WIN32)) {

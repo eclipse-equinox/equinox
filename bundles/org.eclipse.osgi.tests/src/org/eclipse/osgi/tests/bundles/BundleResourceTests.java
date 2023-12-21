@@ -13,31 +13,38 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.net.URL;
 import java.util.Enumeration;
-import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-public class BundleResourceTests extends CoreTest {
+public class BundleResourceTests {
 	private BundleInstaller installer;
 
-	protected void setUp() throws Exception {
-		try {
-			installer = new BundleInstaller(OSGiTestsActivator.TEST_FILES_ROOT + "resourcetests/bundles", OSGiTestsActivator.getContext()); //$NON-NLS-1$
-		} catch (InvalidSyntaxException e) {
-			fail("Failed to create bundle installer", e); //$NON-NLS-1$
-		}
+	@Before
+	public void setUp() throws Exception {
+		installer = new BundleInstaller(OSGiTestsActivator.TEST_FILES_ROOT + "resourcetests/bundles", //$NON-NLS-1$
+				OSGiTestsActivator.getContext());
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		installer.shutdown();
 	}
 
+	@Test
 	public void testBug320546_01() throws Exception {
 		Bundle bundle = installer.installBundle("test"); //$NON-NLS-1$
 		URL result = bundle.getEntry("../../../../security");
@@ -54,6 +61,7 @@ public class BundleResourceTests extends CoreTest {
 		assertNotNull("Did not find resource!", result);
 	}
 
+	@Test
 	public void testBug320546_02() throws Exception {
 		Bundle bundle = installer.installBundle("test"); //$NON-NLS-1$
 		Enumeration paths = bundle.getEntryPaths("../");
@@ -66,12 +74,14 @@ public class BundleResourceTests extends CoreTest {
 		assertNotNull("Did not find resource!", paths);
 	}
 
+	@Test
 	public void testBreakOutDirBundle() throws Exception {
 		Bundle bundle = installer.installBundle("test"); //$NON-NLS-1$
 		URL result = bundle.getEntry("../testout/file.txt");
 		assertNull("Found resource!", result);
 	}
 
+	@Test
 	public void testBug395274() throws Exception {
 		ServiceReference<EnvironmentInfo> infoRef = OSGiTestsActivator.getContext().getServiceReference(EnvironmentInfo.class);
 		EnvironmentInfo info = OSGiTestsActivator.getContext().getService(infoRef);
@@ -96,6 +106,7 @@ public class BundleResourceTests extends CoreTest {
 		}
 	}
 
+	@Test
 	public void testBug328795() throws BundleException {
 		Bundle bundle = installer.installBundle("test"); //$NON-NLS-1$
 		checkEntries(bundle, "notFound\\", 0); // this results in invalid syntax exception which is logged because of trailing escape
@@ -130,6 +141,7 @@ public class BundleResourceTests extends CoreTest {
 		checkEntries(bundle, "*\\(*", 2);
 	}
 
+	@Test
 	public void testBug338081() throws BundleException {
 		Bundle bundle = installer.installBundle("test"); //$NON-NLS-1$
 		// Empty string same as '/' for bundle root
