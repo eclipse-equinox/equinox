@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2015 IBM Corporation and others.
+ * Copyright (c) 2004, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -71,11 +71,13 @@ public class ExportedPreferences extends EclipsePreferences implements IExported
 	@Override
 	public String toString() {
 		StringBuilder buffer = new StringBuilder();
-		if (isExportRoot)
+		if (isExportRoot) {
 			buffer.append("* "); //$NON-NLS-1$
+		}
 		buffer.append(absolutePath());
-		if (version != null)
+		if (version != null) {
 			buffer.append(" (" + version + ')'); //$NON-NLS-1$
+		}
 		return buffer.toString();
 	}
 }
