@@ -37,24 +37,16 @@ public class SortedProperties extends Properties {
 
 	@Override
 	public synchronized Enumeration<Object> keys() {
-		TreeSet<Object> set = new TreeSet<>();
-		for (Enumeration<?> e = super.keys(); e.hasMoreElements();) {
-			set.add(e.nextElement());
-		}
-		return Collections.enumeration(set);
+		return Collections.enumeration(new TreeSet<>(keySet()));
 	}
+
+	private static final Comparator<Map.Entry<String, String>> BY_KEY = Comparator.comparing(Map.Entry::getKey);
 
 	@Override
 	public Set<Map.Entry<Object, Object>> entrySet() {
-		TreeSet<Map.Entry<Object, Object>> set = new TreeSet<>(
-				(Map.Entry<Object, Object> e1, Map.Entry<Object, Object> e2) -> {
-					String s1 = (String) e1.getKey();
-					String s2 = (String) e2.getKey();
-					return s1.compareTo(s2);
-				});
-		for (Map.Entry<Object, Object> entry : super.entrySet()) {
-			set.add(entry);
-		}
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		Set<Map.Entry<Object, Object>> set = new TreeSet<>((Comparator) BY_KEY);
+		set.addAll(super.entrySet());
 		return set;
 	}
 }

@@ -25,20 +25,13 @@ package org.eclipse.core.runtime.preferences;
 public abstract class AbstractPreferenceInitializer {
 
 	/**
-	 * Default constructor for the class.
-	 */
-	public AbstractPreferenceInitializer() {
-		super();
-	}
-
-	/**
 	 * This method is called by the preference initializer to initialize default
 	 * preference values. Clients should get the correct node for their bundle and
 	 * then set the default values on it. For example:
 	 * 
 	 * <pre>
 	 * public void initializeDefaultPreferences() {
-	 * 	Preferences node = new DefaultScope().getNode("my.bundle.id");
+	 * 	Preferences node = DefaultScope.INSTANCE.getNode("my.bundle.id");
 	 * 	node.put(key, value);
 	 * }
 	 * </pre>
