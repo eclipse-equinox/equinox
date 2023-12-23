@@ -132,13 +132,8 @@ public class PreferencesService implements IPreferencesService {
 				List<String> propsToRemove = new ArrayList<>(Arrays.asList(globalNode.keys()));
 				if (keys.length > 0) {
 					for (String key : keys) {
-						// preferences that are not in the applied node
-						// will be removed
+						// preferences that are not in the applied node will be removed
 						propsToRemove.remove(key);
-						// intern strings we import because some people
-						// in their property change listeners use identity
-						// instead of equals. See bug 20193 and 20534.
-						key = key.intern();
 						String value = node.get(key, null);
 						if (value != null) {
 							if (EclipsePreferences.DEBUG_PREFERENCE_SET) {
@@ -149,8 +144,12 @@ public class PreferencesService implements IPreferencesService {
 						}
 					}
 				}
+				if (!propsToRemove.isEmpty() && !(globalNode instanceof EclipsePreferences)) {
+					// intern strings we import because some people in their property change
+					// listeners use identity instead of equals. See bug 20193 and 20534.
+					propsToRemove.replaceAll(String::intern);
+				}
 				for (String keyToRemove : propsToRemove) {
-					keyToRemove = keyToRemove.intern();
 					if (EclipsePreferences.DEBUG_PREFERENCE_SET) {
 						PrefsMessages.message("Removing: " + globalNode.absolutePath() + '/' + keyToRemove); //$NON-NLS-1$
 					}
