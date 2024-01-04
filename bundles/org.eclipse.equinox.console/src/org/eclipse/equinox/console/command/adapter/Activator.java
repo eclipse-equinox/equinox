@@ -34,6 +34,7 @@ import org.eclipse.equinox.console.commands.DisconnectCommand;
 import org.eclipse.equinox.console.commands.EquinoxCommandProvider;
 import org.eclipse.equinox.console.commands.HelpCommand;
 import org.eclipse.equinox.console.commands.ManCommand;
+import org.eclipse.equinox.console.commands.WireCommand;
 import org.eclipse.equinox.console.telnet.TelnetCommand;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
@@ -324,6 +325,9 @@ public class Activator implements BundleActivator {
 
 		CommandsTracker commandsTracker = new CommandsTracker(context);
 		context.registerService(CommandsTracker.class.getName(), commandsTracker, null);
+		
+		WireCommand wireCommand = new WireCommand(context);
+		wireCommand.startService();
 
 		GOGO.RUNTIME.start(frameworkWiring);
 		GOGO.SHELL.start(frameworkWiring);

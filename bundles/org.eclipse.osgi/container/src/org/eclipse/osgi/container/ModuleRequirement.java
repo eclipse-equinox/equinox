@@ -18,7 +18,9 @@ import java.util.Map;
 import org.eclipse.osgi.internal.container.Capabilities;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.namespace.*;
+import org.osgi.framework.namespace.BundleNamespace;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.resource.Namespace;
@@ -87,7 +89,7 @@ public class ModuleRequirement implements BundleRequirement {
 
 	@Override
 	public String toString() {
-		return namespace + ModuleRevision.toString(attributes, false) + ModuleRevision.toString(directives, true);
+		return namespace + ModuleContainer.toString(attributes, false) + ModuleContainer.toString(directives, true);
 	}
 
 	private static final String PACKAGENAME_FILTER_COMPONENT = PackageNamespace.PACKAGE_NAMESPACE + "="; //$NON-NLS-1$

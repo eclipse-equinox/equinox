@@ -88,6 +88,6 @@ public final class ModuleCapability implements BundleCapability {
 
 	@Override
 	public String toString() {
-		return namespace + ModuleRevision.toString(attributes, false) + ModuleRevision.toString(directives, true);
+		return namespace + ModuleContainer.toString(attributes, false) + ModuleContainer.toString(directives, true);
 	}
 }
