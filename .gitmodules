@@ -1,0 +1,3 @@
+[submodule "rt.equinox.binaries"]
+	path = rt.equinox.binaries
+	url = https://github.com/eclipse-equinox/equinox.binaries.git
