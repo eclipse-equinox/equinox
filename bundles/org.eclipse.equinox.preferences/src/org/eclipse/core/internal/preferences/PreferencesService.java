@@ -901,7 +901,9 @@ public class PreferencesService implements IPreferencesService {
 		if (order == null) {
 			DEFAULTS_REGISTRY.remove(registryKey);
 		} else {
-			Arrays.asList(order).forEach(Objects::requireNonNull);
+			if (Arrays.stream(order).anyMatch(Objects::isNull)) {
+				throw new IllegalArgumentException();
+			}
 			DEFAULTS_REGISTRY.put(registryKey, order);
 		}
 	}
