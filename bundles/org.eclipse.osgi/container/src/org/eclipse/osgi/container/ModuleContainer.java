@@ -54,6 +54,7 @@ import org.eclipse.osgi.internal.container.LockSet;
 import org.eclipse.osgi.internal.container.NamespaceList;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
+import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.eclipse.osgi.report.resolution.ResolutionReport.Entry;
@@ -66,7 +67,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
+import org.osgi.framework.namespace.BundleNamespace;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
@@ -74,6 +77,7 @@ import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.FrameworkWiring;
+import org.osgi.resource.Capability;
 import org.osgi.resource.Namespace;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
@@ -221,6 +225,112 @@ public final class ModuleContainer implements DebugOptionsListener {
 	 */
 	public static Requirement createRequirement(String namespace, Map<String, String> directives, Map<String, ?> attributes) {
 		return new ModuleRequirement(namespace, directives, attributes, null);
+	}
+
+	/**
+	 * Generates a human readable string representation of the the given capability,
+	 * mapping the namespace to well-known header names.
+	 * 
+	 * @param capability the {@link Capability} for which a string representation is
+	 *                   desired
+	 * @since 3.19
+	 */
+	public static String toString(Capability capability) {
+		if (PackageNamespace.PACKAGE_NAMESPACE.equals(capability.getNamespace())) {
+			return Constants.EXPORT_PACKAGE + ": " + createOSGiCapability(capability); //$NON-NLS-1$
+		} else if (BundleNamespace.BUNDLE_NAMESPACE.equals(capability.getNamespace())) {
+			return Constants.BUNDLE_SYMBOLICNAME + ": " + createOSGiCapability(capability); //$NON-NLS-1$
+		} else if (HostNamespace.HOST_NAMESPACE.equals(capability.getNamespace())) {
+			return Constants.BUNDLE_SYMBOLICNAME + ": " + createOSGiCapability(capability); //$NON-NLS-1$
+		}
+		return Constants.PROVIDE_CAPABILITY + ": " + capability.toString(); //$NON-NLS-1$
+	}
+
+	private static String createOSGiCapability(Capability cap) {
+		Map<String, Object> attributes = new HashMap<>(cap.getAttributes());
+		Map<String, String> directives = cap.getDirectives();
+		String name = String.valueOf(attributes.remove(cap.getNamespace()));
+		return name + toString(attributes, false, true) + toString(directives, true, true);
+	}
+
+	/**
+	 * Generates a human readable string representation of the the given
+	 * requirement, mapping the namespace to well-known header names.
+	 * 
+	 * @param requirement the {@link Requirement} for which a string representation is
+	 *                    desired
+	 * @since 3.19
+	 */
+	public static String toString(Requirement requirement) {
+		if (PackageNamespace.PACKAGE_NAMESPACE.equals(requirement.getNamespace())) {
+			return Constants.IMPORT_PACKAGE + ": " //$NON-NLS-1$
+					+ createOSGiRequirement(requirement, PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE,
+							PackageNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE);
+		} else if (BundleNamespace.BUNDLE_NAMESPACE.equals(requirement.getNamespace())) {
+			return Constants.REQUIRE_BUNDLE + ": " //$NON-NLS-1$
+					+ createOSGiRequirement(requirement, BundleNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE);
+		} else if (HostNamespace.HOST_NAMESPACE.equals(requirement.getNamespace())) {
+			return Constants.FRAGMENT_HOST + ": " //$NON-NLS-1$
+					+ createOSGiRequirement(requirement, HostNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE);
+		}
+		return Constants.REQUIRE_CAPABILITY + ": " + requirement.toString(); //$NON-NLS-1$
+	}
+
+	private static String createOSGiRequirement(Requirement requirement, String... versions) {
+		Map<String, String> directives = new HashMap<>(requirement.getDirectives());
+		String filter = directives.remove(Namespace.REQUIREMENT_FILTER_DIRECTIVE);
+		if (filter == null)
+			throw new IllegalArgumentException("No filter directive found:" + requirement); //$NON-NLS-1$
+		FilterImpl filterImpl;
+		try {
+			filterImpl = FilterImpl.newInstance(filter);
+		} catch (InvalidSyntaxException e) {
+			throw new IllegalArgumentException("Invalid filter directive", e); //$NON-NLS-1$
+		}
+		Map<String, String> matchingAttributes = filterImpl.getStandardOSGiAttributes(versions);
+		String name = matchingAttributes.remove(requirement.getNamespace());
+		if (name == null)
+			throw new IllegalArgumentException("Invalid requirement: " + requirement); //$NON-NLS-1$
+		return name + toString(matchingAttributes, false, true) + toString(directives, true, true);
+	}
+
+	static <V> String toString(Map<String, V> map, boolean directives) {
+		return toString(map, directives, false);
+	}
+
+	static <V> String toString(Map<String, V> map, boolean directives, boolean stringsOnly) {
+		if (map.size() == 0)
+			return ""; //$NON-NLS-1$
+		String assignment = directives ? ":=" : "="; //$NON-NLS-1$ //$NON-NLS-2$
+		Set<java.util.Map.Entry<String, V>> set = map.entrySet();
+		StringBuilder sb = new StringBuilder();
+		for (java.util.Map.Entry<String, V> entry : set) {
+			sb.append("; "); //$NON-NLS-1$
+			String key = entry.getKey();
+			Object value = entry.getValue();
+			if (value instanceof List) {
+				@SuppressWarnings("unchecked")
+				List<Object> list = (List<Object>) value;
+				if (list.isEmpty())
+					continue;
+				Object component = list.get(0);
+				String className = component.getClass().getName();
+				String type = className.substring(className.lastIndexOf('.') + 1);
+				sb.append(key).append(':').append("List<").append(type).append(">").append(assignment).append('"'); //$NON-NLS-1$ //$NON-NLS-2$
+				for (Object object : list)
+					sb.append(object).append(',');
+				sb.setLength(sb.length() - 1);
+				sb.append('"');
+			} else {
+				String type = ""; //$NON-NLS-1$
+				if (!(value instanceof String) && !stringsOnly) {
+					String className = value.getClass().getName();
+					type = ":" + className.substring(className.lastIndexOf('.') + 1); //$NON-NLS-1$
+				}
+				sb.append(key).append(type).append(assignment).append('"').append(value).append('"');
+			}
+		}
+		return sb.toString();
 	}
 
 	/**
