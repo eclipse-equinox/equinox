@@ -32,6 +32,7 @@ import org.apache.felix.service.command.CommandSession;
 import org.eclipse.equinox.console.commands.CommandsTracker;
 import org.eclipse.equinox.console.commands.DisconnectCommand;
 import org.eclipse.equinox.console.commands.EquinoxCommandProvider;
+import org.eclipse.equinox.console.commands.ExportStateCommand;
 import org.eclipse.equinox.console.commands.HelpCommand;
 import org.eclipse.equinox.console.commands.ManCommand;
 import org.eclipse.equinox.console.commands.WireCommand;
@@ -328,6 +329,9 @@ public class Activator implements BundleActivator {
 		
 		WireCommand wireCommand = new WireCommand(context);
 		wireCommand.startService();
+
+		ExportStateCommand exportResourcesCommand = new ExportStateCommand(context);
+		exportResourcesCommand.startService();
 
 		GOGO.RUNTIME.start(frameworkWiring);
 		GOGO.SHELL.start(frameworkWiring);

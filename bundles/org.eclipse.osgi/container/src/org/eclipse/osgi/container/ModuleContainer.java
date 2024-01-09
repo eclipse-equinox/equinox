@@ -14,6 +14,8 @@
 package org.eclipse.osgi.container;
 
 import java.io.Closeable;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -2155,5 +2157,18 @@ public final class ModuleContainer implements DebugOptionsListener {
 			Bundle b = m.getBundle();
 			return b != null ? b.toString() : m.toString();
 		}
+	}
+
+	/**
+	 * Stores the module into the given stream
+	 * 
+	 * @param stream         the stream to use
+	 * @param persistWirings controls if wirings should be persisted or not
+	 * @throws IOException if there is any problem storing to the stream
+	 * 
+	 * @since 3.19
+	 */
+	public void store(DataOutputStream stream, boolean persistWirings) throws IOException {
+		moduleDatabase.store(stream, persistWirings);
 	}
 }
