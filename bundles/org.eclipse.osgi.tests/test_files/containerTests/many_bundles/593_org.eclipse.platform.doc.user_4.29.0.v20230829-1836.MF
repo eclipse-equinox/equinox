@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.eclipse.platform.doc.user; singleton:=true
+Bundle-Version: 4.29.0.v20230829-1836
+Require-Bundle: org.eclipse.help;bundle-version="[3.2.0,4.0.0)"
+

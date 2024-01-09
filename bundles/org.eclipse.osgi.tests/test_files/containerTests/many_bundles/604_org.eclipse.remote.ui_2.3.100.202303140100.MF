@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.remote.ui;singleton:=true
+Import-Package: org.eclipse.core.commands,org.eclipse.core.expressions,o
+ rg.eclipse.core.filesystem,org.eclipse.core.resources,org.eclipse.core.
+ runtime,org.eclipse.core.runtime.jobs,org.eclipse.core.runtime.preferen
+ ces;version="3.3.0",org.eclipse.jface.action,org.eclipse.jface.dialogs,
+ org.eclipse.jface.operation,org.eclipse.jface.preference,org.eclipse.jf
+ ace.resource,org.eclipse.jface.util,org.eclipse.jface.viewers,org.eclip
+ se.jface.window,org.eclipse.jface.wizard,org.eclipse.osgi.util,org.ecli
+ pse.remote.core,org.eclipse.remote.core.exception,org.eclipse.remote.in
+ ternal.core.preferences,org.eclipse.remote.ui.widgets,org.eclipse.swt,o
+ rg.eclipse.swt.events,org.eclipse.swt.graphics,org.eclipse.swt.layout,o
+ rg.eclipse.swt.widgets,org.eclipse.ui,org.eclipse.ui.dialogs,org.eclips
+ e.ui.handlers,org.eclipse.ui.model,org.eclipse.ui.navigator,org.eclipse
+ .ui.plugin,org.eclipse.ui.progress,org.osgi.framework,org.osgi.service.
+ prefs
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.remote.internal.ui;x-internal:=true,org.ecli
+ pse.remote.internal.ui.messages;x-internal:=true,org.eclipse.remote.int
+ ernal.ui.preferences;x-internal:=true,org.eclipse.remote.internal.ui.se
+ rvices.local;x-internal:=true,org.eclipse.remote.ui,org.eclipse.remote.
+ ui.dialogs,org.eclipse.remote.ui.widgets
+Bundle-Version: 2.3.100.202303140100
+

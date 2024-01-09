@@ -1,0 +1,56 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.epp.mpc.core;singleton:=true
+Require-Bundle: org.eclipse.osgi;bundle-version="3.6.0",org.eclipse.core
+ .runtime;bundle-version="3.6.0",org.apache.commons.logging;bundle-versi
+ on="1.0.4",org.eclipse.equinox.p2.repository;bundle-version="2.0.0",org
+ .eclipse.core.net;bundle-version="1.2.100",org.eclipse.osgi.services;bu
+ ndle-version="3.3.100",org.eclipse.userstorage;bundle-version="[1.1.0,2
+ .0.0)",org.eclipse.userstorage.oauth;bundle-version="[1.0.0,2.0.0)",org
+ .eclipse.equinox.security;bundle-version="1.2.0"
+Import-Package: org.apache.hc.client5.http;version="[5.1.0,5.2.0)",org.a
+ pache.hc.client5.http.auth;version="[5.1.0,5.2.0)",org.apache.hc.client
+ 5.http.classic;version="[5.1.0,5.2.0)",org.apache.hc.client5.http.class
+ ic.methods;version="[5.1.0,5.2.0)",org.apache.hc.client5.http.config;ve
+ rsion="[5.1.0,5.2.0)",org.apache.hc.client5.http.cookie;version="[5.1.0
+ ,5.2.0)",org.apache.hc.client5.http.entity;version="[5.1.0,5.2.0)",org.
+ apache.hc.client5.http.impl;version="[5.1.0,5.2.0)",org.apache.hc.clien
+ t5.http.impl.auth;version="[5.1.0,5.2.0)",org.apache.hc.client5.http.im
+ pl.classic;version="[5.1.0,5.2.0)",org.apache.hc.client5.http.impl.io;v
+ ersion="[5.1.0,5.2.0)",org.apache.hc.client5.http.io;version="[5.1.0,5.
+ 2.0)",org.apache.hc.client5.http.protocol;version="[5.1.0,5.2.0)",org.a
+ pache.hc.core5.http;version="[5.1.0,5.2.0)",org.apache.hc.core5.http.io
+ ;version="[5.1.0,5.2.0)",org.apache.hc.core5.http.io.entity;version="[5
+ .1.0,5.2.0)",org.apache.hc.core5.http.io.support;version="[5.1.0,5.2.0)
+ ",org.apache.hc.core5.http.message;version="[5.1.0,5.2.0)",org.apache.h
+ c.core5.http.protocol;version="[5.1.0,5.2.0)",org.apache.hc.core5.util;
+ version="[5.1.0,5.2.0)",org.eclipse.equinox.p2.core;version="2.0.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.epp.internal.mpc.core;x-friends:="org.eclips
+ e.epp.mpc.ui"; uses:="org.osgi.framework,  org.eclipse.epp.mpc.core.ser
+ vice,  org.eclipse.epp.internal.mpc.core.util,  org.eclipse.core.runtim
+ e,  org.eclipse.osgi.util",org.eclipse.epp.internal.mpc.core.model;x-fr
+ iends:="org.eclipse.epp.mpc.ui";uses:="org.eclipse.epp.mpc.core.model",
+ org.eclipse.epp.internal.mpc.core.service;x-friends:="org.eclipse.epp.m
+ pc.ui"; uses:="org.eclipse.epp.mpc.core.model,  org.eclipse.userstorage
+ .util,  org.osgi.framework,  org.eclipse.epp.mpc.core.service,  org.ecl
+ ipse.epp.internal.mpc.core.model,  org.eclipse.core.runtime,  org.eclip
+ se.osgi.util,  org.eclipse.userstorage.oauth,  org.eclipse.userstorage,
+   org.apache.http.client.fluent",org.eclipse.epp.internal.mpc.core.serv
+ ice.xml;x-internal:=true;uses:="org.eclipse.epp.internal.mpc.core.model
+ ,org.xml.sax.helpers,org.xml.sax",org.eclipse.epp.internal.mpc.core.tra
+ nsport.httpclient;x-friends:="org.eclipse.epp.mpc.core.win32"; uses:="o
+ rg.apache.http.auth,  org.apache.http.protocol,  org.apache.http.impl.c
+ lient,  org.apache.http,  org.eclipse.epp.mpc.core.service,  org.apache
+ .http.client,  org.eclipse.core.runtime,  org.apache.http.client.fluent
+ ,  org.apache.http.client.protocol",org.eclipse.epp.internal.mpc.core.u
+ til;x-friends:="org.eclipse.epp.mpc.ui"; uses:="org.osgi.service.compon
+ ent,  org.osgi.util.tracker,  org.apache.http.impl.client,  org.osgi.fr
+ amework,  org.eclipse.epp.mpc.core.service,  org.apache.http.client,  o
+ rg.eclipse.core.runtime,  org.eclipse.osgi.util,  org.eclipse.equinox.i
+ nternal.p2.repository,  org.eclipse.osgi.service.debug,  org.eclipse.co
+ re.net.proxy",org.eclipse.epp.mpc.core.model,org.eclipse.epp.mpc.core.s
+ ervice;uses:="org.eclipse.epp.mpc.core.model,org.eclipse.core.runtime,o
+ rg.eclipse.userstorage,org.apache.http.client.fluent"
+Bundle-Version: 1.10.1.v20221110-1841
+

@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.launchbar.ui.controls;singleton:=true
+Require-Bundle: org.eclipse.osgi.services;bundle-version="3.5.0",org.ecl
+ ipse.core.runtime,org.eclipse.ui,org.eclipse.e4.core.di.annotations;bun
+ dle-version="1.5.0",org.eclipse.e4.core.contexts;bundle-version="1.5.0"
+ ,org.eclipse.e4.core.services;bundle-version="2.0.0",org.eclipse.e4.ui.
+ model.workbench;bundle-version="1.2.0",org.eclipse.e4.ui.workbench;bund
+ le-version="1.4.0",org.eclipse.debug.ui;bundle-version="3.11.200",org.e
+ clipse.launchbar.core;bundle-version="2.0.0",org.eclipse.launchbar.ui;b
+ undle-version="2.0.0"
+Import-Package: javax.annotation,javax.inject
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.launchbar.ui.controls.internal;x-friends:="o
+ rg.eclipse.launchbar.ui.tests"
+Bundle-Version: 1.2.200.202308101623
+

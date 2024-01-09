@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.mylyn.jenkins.core;singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="0.0.0",org.ecli
+ pse.emf.ecore;bundle-version="0.0.0",org.eclipse.mylyn.builds.core;bund
+ le-version="4.0.0",org.eclipse.mylyn.commons.core;bundle-version="4.0.0
+ ",org.eclipse.mylyn.commons.repositories.core;bundle-version="4.0.0",or
+ g.eclipse.mylyn.commons.repositories.http.core;bundle-version="4.0.0",o
+ rg.eclipse.mylyn.jenkins.core;bundle-version="4.0.0"
+Import-Package: com.google.gson;version="2.9.1",com.sun.xml.bind;version
+ ="2.3.3",javax.xml.bind;version="2.3.3",javax.xml.bind.annotation;versi
+ on="2.3.3",org.apache.commons.io;version="2.8.0",org.apache.http;versio
+ n="[4.4.4,4.5.0)",org.apache.http.client;version="[4.5.2,4.6.0)",org.ap
+ ache.http.client.entity;version="[4.5.2,4.6.0)",org.apache.http.client.
+ methods;version="[4.5.2,4.6.0)",org.apache.http.cookie;version="[4.5.2,
+ 4.6.0)",org.apache.http.impl.client;version="[4.5.2,4.6.0)",org.apache.
+ http.message;version="[4.4.4,4.5.0)",org.apache.http.protocol;version="
+ [4.4.4,4.5.0)",org.apache.http.util;version="[4.4.4,4.5.0)",org.glassfi
+ sh.hk2.osgiresourcelocator;version="2.4.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.mylyn.jenkins.core;x-friends:="org.eclipse.m
+ ylyn.jenkins.ui",org.eclipse.mylyn.internal.jenkins.core;x-friends:="or
+ g.eclipse.mylyn.jenkins.ui",org.eclipse.mylyn.internal.jenkins.core.cli
+ ent;x-friends:="org.eclipse.mylyn.jenkins.ui",org.eclipse.mylyn.interna
+ l.hudson.model;x-friends:="org.eclipse.mylyn.jenkins.ui"
+Bundle-Version: 4.0.0.v20230804-1109
+

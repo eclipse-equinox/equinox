@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.jetty.io
+Import-Package: org.slf4j;version="[1.7,3.0)",java.io,java.lang,java.lan
+ g.invoke,java.lang.reflect,java.net,java.nio,java.nio.channels,java.nio
+ .charset,java.nio.file,java.time,java.time.format,java.time.temporal,ja
+ va.util,java.util.concurrent,java.util.concurrent.atomic,java.util.conc
+ urrent.locks,java.util.function,java.util.stream,javax.net.ssl,org.ecli
+ pse.jetty.io,org.eclipse.jetty.jmx;version="[10.0.15,11)";resolution:=o
+ ptional,org.eclipse.jetty.util;version="[10.0.15,11)",org.eclipse.jetty
+ .util.annotation;version="[10.0.15,11)",org.eclipse.jetty.util.componen
+ t;version="[10.0.15,11)",org.eclipse.jetty.util.ssl;version="[10.0.15,1
+ 1)",org.eclipse.jetty.util.statistic;version="[10.0.15,11)",org.eclipse
+ .jetty.util.thread;version="[10.0.15,11)",org.eclipse.jetty.util.thread
+ .strategy;version="[10.0.15,11)",org.slf4j.event;version="[1.7,3.0)",or
+ g.slf4j.helpers;version="[1.7,3.0)",org.slf4j.spi;version="[1.7,3.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.jetty.io;uses:="javax.net.ssl,org.eclipse.je
+ tty.util,org.eclipse.jetty.util.annotation,org.eclipse.jetty.util.compo
+ nent,org.eclipse.jetty.util.ssl,org.eclipse.jetty.util.thread,org.slf4j
+ ";version="10.0.15",org.eclipse.jetty.io.jmx;uses:="org.eclipse.jetty.j
+ mx,org.eclipse.jetty.util.annotation";version="10.0.15",org.eclipse.jet
+ ty.io.ssl;uses:="javax.net.ssl,org.eclipse.jetty.io,org.eclipse.jetty.u
+ til.ssl";version="10.0.15"
+Bundle-Version: 10.0.15
+

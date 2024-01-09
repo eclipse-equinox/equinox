@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-SymbolicName: org.eclipse.xsd;singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.9.0,4.0.0)";
+ resolution:=optional;x-installation:=greedy,org.eclipse.emf.ecore;bundl
+ e-version="[2.33.0,3.0.0)";visibility:=reexport
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.xsd;version="2.19.0",org.eclipse.xsd.ecore;v
+ ersion="2.19.0",org.eclipse.xsd.impl;version="2.19.0",org.eclipse.xsd.i
+ mpl.type;version="2.19.0",org.eclipse.xsd.util;version="2.19.0"
+Bundle-Version: 2.19.0.v20230614-0642
+Provide-Capability: org.eclipse.emf.ecore.generated_package;uri="http://
+ www.eclipse.org/xsd/2002/XSD";class=org.eclipse.xsd.XSDPackage;genModel
+ ="model/XSD.genmodel"
+

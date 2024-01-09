@@ -1,0 +1,50 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.equinox.p2.core;singleton:=true
+Import-Package: org.bouncycastle.bcpg;version="1.65.0",org.bouncycastle.
+ openpgp;version="1.65.0",org.eclipse.core.runtime;common=split;version=
+ "[3.5.0,4.0.0)",org.eclipse.equinox.p2.core;version="[2.8.0,2.9.0)";res
+ olution:=optional,org.eclipse.equinox.p2.core.spi;version="[2.1.0,2.2.0
+ )";resolution:=optional,org.eclipse.osgi.framework.eventmgr;version="1.
+ 2.0",org.eclipse.osgi.framework.log;version="1.0.0",org.eclipse.osgi.se
+ rvice.debug;version="1.0.0",org.eclipse.osgi.util;version="1.0.0",org.o
+ sgi.framework;version="1.6.0",org.osgi.util.tracker;version="1.5.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.equinox.internal.p2.core;x-friends:="org.ecl
+ ipse.equinox.p2.publisher,org.eclipse.equinox.p2.repository",org.eclips
+ e.equinox.internal.p2.core.helpers; x-friends:="org.eclipse.equinox.fra
+ meworkadmin.test,  org.eclipse.equinox.p2.artifact.optimizers,  org.ecl
+ ipse.equinox.p2.artifact.processors,  org.eclipse.equinox.p2.artifact.r
+ epository,  org.eclipse.equinox.p2.console,  org.eclipse.equinox.p2.dir
+ ector,  org.eclipse.equinox.p2.director.app,  org.eclipse.equinox.p2.di
+ rectorywatcher,  org.eclipse.equinox.p2.download,  org.eclipse.equinox.
+ p2.engine,  org.eclipse.equinox.p2.extensionlocation,  org.eclipse.equi
+ nox.p2.garbagecollector,  org.eclipse.equinox.p2.installer,  org.eclips
+ e.equinox.p2.metadata,  org.eclipse.equinox.p2.metadata.repository,  or
+ g.eclipse.equinox.p2.operations,  org.eclipse.equinox.p2.publisher,  or
+ g.eclipse.equinox.p2.publisher.eclipse,  org.eclipse.equinox.p2.reconci
+ ler.dropins,  org.eclipse.equinox.p2.repository,  org.eclipse.equinox.p
+ 2.repository.tools,  org.eclipse.equinox.p2.repositoryoptimizer,  org.e
+ clipse.equinox.p2.touchpoint.eclipse,  org.eclipse.equinox.p2.touchpoin
+ t.natives,  org.eclipse.equinox.p2.ui,  org.eclipse.equinox.p2.ui.admin
+ ,  org.eclipse.equinox.p2.ui.sdk,  org.eclipse.equinox.p2.ui.sdk.schedu
+ ler,  org.eclipse.equinox.p2.updatechecker,  org.eclipse.equinox.p2.upd
+ atechecker.app,  org.eclipse.equinox.p2.updatesite,  org.eclipse.equino
+ x.p2.transport.ecf,  org.eclipse.equinox.p2.discovery.compatibility,  o
+ rg.eclipse.equinox.p2.ui.discovery,  org.eclipse.equinox.p2.discovery",
+ org.eclipse.equinox.internal.provisional.p2.core.eventbus; x-friends:="
+ org.eclipse.equinox.p2.artifact.repository,  org.eclipse.equinox.p2.dir
+ ector,  org.eclipse.equinox.p2.directorywatcher,  org.eclipse.equinox.p
+ 2.engine,  org.eclipse.equinox.p2.garbagecollector,  org.eclipse.equino
+ x.p2.metadata,  org.eclipse.equinox.p2.metadata.repository,  org.eclips
+ e.equinox.p2.operations,  org.eclipse.equinox.p2.publisher,  org.eclips
+ e.equinox.p2.repository,  org.eclipse.equinox.p2.touchpoint.eclipse,  o
+ rg.eclipse.equinox.p2.touchpoint.natives,  org.eclipse.equinox.p2.ui,  
+ org.eclipse.equinox.p2.ui.admin,  org.eclipse.equinox.p2.ui.sdk,  org.e
+ clipse.equinox.p2.ui.sdk.scheduler,  org.eclipse.equinox.p2.updatesite,
+   org.eclipse.equinox.p2.director.app,  org.eclipse.equinox.p2.transpor
+ t.ecf",org.eclipse.equinox.p2.core;version="2.8.0";uses:="org.eclipse.c
+ ore.runtime",org.eclipse.equinox.p2.core.spi;version="2.1.0";uses:="org
+ .eclipse.equinox.p2.core"
+Bundle-Version: 2.10.100.v20230814-2013
+

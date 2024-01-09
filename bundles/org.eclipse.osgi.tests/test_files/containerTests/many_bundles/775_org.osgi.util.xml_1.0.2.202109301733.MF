@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.osgi.util.xml
+Import-Package: javax.xml.parsers,org.osgi.framework;version="[1.8,2)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE/compact1)(version
+ =1.8))"
+Export-Package: org.osgi.util.xml;version="1.0.2";uses:="javax.xml.parse
+ rs,org.osgi.framework"
+Bundle-Version: 1.0.2.202109301733
+

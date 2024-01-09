@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.apache.batik.constants
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: org.apache.batik.constants;version="1.16.0",org.apache.b
+ atik.util;constants=split;mandatory:=constants;version="1.16.0"
+Bundle-Version: 1.16.0.v20221027-0840
+

@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.mylyn.tasks.bugs;singleton:=true
+Require-Bundle: org.eclipse.core.resources;bundle-version="0.0.0",org.ec
+ lipse.core.runtime;bundle-version="0.0.0",org.eclipse.mylyn.commons.cor
+ e;bundle-version="4.0.0",org.eclipse.mylyn.commons.ui;bundle-version="4
+ .0.0",org.eclipse.mylyn.commons.workbench;bundle-version="4.0.0",org.ec
+ lipse.mylyn.tasks.core;bundle-version="4.0.0",org.eclipse.mylyn.tasks.u
+ i;bundle-version="4.0.0",org.eclipse.ui;bundle-version="0.0.0",org.ecli
+ pse.ui.ide;bundle-version="0.0.0",org.eclipse.ui.views.log;bundle-versi
+ on="0.0.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.mylyn.internal.tasks.bugs;x-internal:=true,o
+ rg.eclipse.mylyn.internal.tasks.bugs.actions;x-internal:=true,org.eclip
+ se.mylyn.internal.tasks.bugs.wizards;x-internal:=true,org.eclipse.mylyn
+ .tasks.bugs
+Bundle-Version: 4.0.0.v20230804-1109
+

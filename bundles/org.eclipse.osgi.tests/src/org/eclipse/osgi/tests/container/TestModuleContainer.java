@@ -28,6 +28,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,9 +39,12 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -49,6 +53,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
@@ -78,6 +83,7 @@ import org.eclipse.osgi.framework.util.ThreadInfoReport;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
+import org.eclipse.osgi.report.resolution.ResolutionReport.Entry.Type;
 import org.eclipse.osgi.tests.container.dummys.DummyCollisionHook;
 import org.eclipse.osgi.tests.container.dummys.DummyContainerAdaptor;
 import org.eclipse.osgi.tests.container.dummys.DummyDebugOptions;
@@ -106,6 +112,9 @@ import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.resource.Namespace;
+import org.osgi.resource.Requirement;
+import org.osgi.resource.Resource;
+import org.osgi.service.resolver.ResolutionException;
 
 public class TestModuleContainer extends AbstractTest {
 
@@ -307,6 +316,120 @@ public class TestModuleContainer extends AbstractTest {
 		Module b3 = installDummyModule("b3_v1.MF", "b3_v1", container);
 		ResolutionReport report = container.resolve(Arrays.asList(h1v1, h1v2, f1v1, b3), true);
 		assertNull("Expected no resolution exception.", report.getResolutionException());
+	}
+
+	@Test
+	public void testManyBundles() throws BundleException, IOException {
+		Enumeration<URL> entries = getBundle().findEntries("/test_files/containerTests/many_bundles", "*.MF", false);
+		Map<Long, String> manifests = new TreeMap<>();
+		while (entries.hasMoreElements()) {
+			URL url = entries.nextElement();
+			String path = url.getPath();
+			String[] split = path.split("/");
+			String mfname = split[split.length - 1];
+			long l = Long.parseLong(mfname.split("_")[0]);
+			manifests.put(l, "many_bundles/" + mfname);
+		}
+		// Always want to go to zero threads when idle
+		int coreThreads = 0;
+		// use the number of processors - 1 because we use the current thread when
+		// rejected
+		int maxThreads = Math.max(Runtime.getRuntime().availableProcessors() - 1, 1);
+		// idle timeout; make it short to get rid of threads quickly after resolve
+		int idleTimeout = 1;
+		// use sync queue to force thread creation
+		BlockingQueue<Runnable> queue = new SynchronousQueue<>();
+		// try to name the threads with useful name
+		ThreadFactory threadFactory = r -> {
+			Thread t = new Thread(r, "Resolver thread - UNIT TEST"); //$NON-NLS-1$
+			t.setDaemon(true);
+			return t;
+		};
+		ScheduledExecutorService watchDog = Executors.newSingleThreadScheduledExecutor();
+		// use a rejection policy that simply runs the task in the current thread once
+		// the max threads is reached
+		RejectedExecutionHandler rejectHandler = (r, exe) -> r.run();
+		ExecutorService executor = new ThreadPoolExecutor(coreThreads, maxThreads, idleTimeout, TimeUnit.SECONDS, queue,
+				threadFactory, rejectHandler);
+		ScheduledExecutorService timeoutExecutor = new ScheduledThreadPoolExecutor(1);
+
+		Map<String, String> configuration = new HashMap<>();
+		long batchTimeoutSeconds = TimeUnit.MINUTES.toSeconds(1);
+		configuration.put(EquinoxConfiguration.PROP_RESOLVER_BATCH_TIMEOUT,
+				Long.toString(TimeUnit.SECONDS.toMillis(batchTimeoutSeconds)));
+
+		Map<String, String> debugOpts = Collections.emptyMap();
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), configuration,
+				new DummyResolverHookFactory(), new DummyDebugOptions(debugOpts));
+		adaptor.setResolverExecutor(executor);
+		adaptor.setTimeoutExecutor(timeoutExecutor);
+		ModuleContainer container = adaptor.getContainer();
+		Module systemBundle = installDummyModule(manifests.remove(0L), Constants.SYSTEM_BUNDLE_LOCATION, null, "", "",
+				container);
+		assertEquals(0L, systemBundle.getId().longValue());
+		Set<Module> bundles = new LinkedHashSet<>();
+		for (Entry<Long, String> entry : manifests.entrySet()) {
+			Module dummyModule = installDummyModule(entry.getValue(), entry.getValue().replace(".MF", ""), container);
+			bundles.add(dummyModule);
+		}
+		for (int i = 0; i < 10; i++) {
+			System.out.println("Resolve bundles (" + i + ")...");
+			ScheduledFuture<?> watch1 = watchDog.schedule(() -> System.out.println("Time is up!"), batchTimeoutSeconds,
+					TimeUnit.SECONDS);
+			Set<Module> set1 = getBundlesToRefresh(container, container.resolve(bundles, true));
+			watch1.cancel(true);
+			if (set1.isEmpty()) {
+				return;
+			}
+			bundles = set1;
+		}
+	}
+
+
+
+	protected Set<Module> getBundlesToRefresh(ModuleContainer container, ResolutionReport report) {
+		var resultEntries = report.getEntries();
+		Collection<Requirement> offendingRequirements = new LinkedHashSet<>();
+		Set<Resource> unresolved = new HashSet<>();
+		for (var entry : resultEntries.entrySet()) {
+			for (org.eclipse.osgi.report.resolution.ResolutionReport.Entry error : entry.getValue()) {
+				if (error.getType() == Type.MISSING_CAPABILITY) {
+					Requirement requirement = (Requirement) error.getData();
+					if (!"optional".equals(requirement.getDirectives().get("resolution"))) {
+						offendingRequirements.add(requirement);
+						unresolved.add(entry.getKey());
+					}
+				}
+				if (error.getType() == Type.USES_CONSTRAINT_VIOLATION) {
+					ResolutionException ex = (ResolutionException) error.getData();
+					offendingRequirements.addAll(ex.getUnresolvedRequirements());
+					unresolved.add(entry.getKey());
+				}
+			}
+		}
+		if (offendingRequirements.isEmpty()) {
+			System.out.println("Everything seems resolved now!");
+			return Set.of();
+		}
+		for (Resource resource : unresolved) {
+			System.out.println("Unresolved: " + resource);
+		}
+		Set<Module> bundlesToRefresh = new HashSet<>();
+		for (Requirement requirement : offendingRequirements) {
+			System.out.println("Unsatisfied: " + requirement);
+			Collection<BundleCapability> providers = container.getFrameworkWiring().findProviders(requirement);
+			for (BundleCapability capability : providers) {
+				BundleRevision revision = capability.getRevision();
+				if (revision instanceof ModuleRevision rev) {
+					bundlesToRefresh.add(rev.getRevisions().getModule());
+				}
+			}
+		}
+		System.out.println("bundlesToRefresh:");
+		for (Module bundle : bundlesToRefresh) {
+			System.out.println("\t- " + bundle);
+		}
+		return bundlesToRefresh;
 	}
 
 	@Test

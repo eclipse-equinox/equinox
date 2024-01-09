@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.debug.ui.launchview;singleton:=true
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime;bundle-version="
+ [3.29.0,4.0.0)",org.eclipse.e4.ui.model.workbench,org.eclipse.debug.ui,
+ org.eclipse.e4.core.di.annotations,org.eclipse.e4.ui.di,org.eclipse.e4.
+ ui.services
+Import-Package: javax.annotation;version="[1.0.0,2.0.0)",javax.inject;ve
+ rsion="[1.0.0,2.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.debug.ui.launchview;x-internal:=true,org.ecl
+ ipse.debug.ui.launchview.services;x-internal:=true
+Bundle-Version: 1.1.100.v20230726-0617
+

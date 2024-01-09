@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.ui.views; singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.29.0,4.0.0)"
+ ,org.eclipse.help;bundle-version="[3.10.0,4.0.0)",org.eclipse.ui;bundle
+ -version="[3.204.0,4.0.0)",org.eclipse.jface;bundle-version="[3.31.0,4.
+ 0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.ui.internal.views.contentoutline;x-internal:
+ =true,org.eclipse.ui.internal.views.properties; ui.views="split"; manda
+ tory:="ui.views"; x-internal:=true,org.eclipse.ui.views.contentoutline,
+ org.eclipse.ui.views.properties; ui.views="split"; mandatory:="ui.views
+ "
+Bundle-Version: 3.12.100.v20230821-1342
+

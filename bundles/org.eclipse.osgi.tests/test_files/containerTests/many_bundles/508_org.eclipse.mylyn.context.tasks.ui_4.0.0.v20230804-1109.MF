@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.mylyn.context.tasks.ui;singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="0.0.0",org.ecli
+ pse.jface;bundle-version="0.0.0",org.eclipse.jface.text;bundle-version=
+ "0.0.0",org.eclipse.mylyn.commons.core;bundle-version="4.0.0",org.eclip
+ se.mylyn.commons.ui;bundle-version="4.0.0",org.eclipse.mylyn.commons.wo
+ rkbench;bundle-version="4.0.0",org.eclipse.mylyn.context.core;bundle-ve
+ rsion="4.0.0",org.eclipse.mylyn.context.ui;bundle-version="4.0.0",org.e
+ clipse.mylyn.monitor.core;bundle-version="4.0.0",org.eclipse.mylyn.moni
+ tor.ui;bundle-version="4.0.0",org.eclipse.mylyn.tasks.core;bundle-versi
+ on="4.0.0",org.eclipse.mylyn.tasks.ui;bundle-version="4.0.0",org.eclips
+ e.ui;bundle-version="0.0.0",org.eclipse.ui.forms;bundle-version="0.0.0"
+ ,org.eclipse.ui.navigator;bundle-version="0.0.0"
+Import-Package: com.google.common.base;version="31.1.0",com.google.commo
+ n.collect;version="31.1.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.mylyn.internal.context.tasks.ui;x-internal:=
+ true,org.eclipse.mylyn.internal.context.tasks.ui.editors;x-internal:=tr
+ ue
+Bundle-Version: 4.0.0.v20230804-1109
+

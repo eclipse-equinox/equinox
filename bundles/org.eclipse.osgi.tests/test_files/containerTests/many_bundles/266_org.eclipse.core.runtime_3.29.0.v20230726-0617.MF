@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.core.runtime; singleton:=true
+Require-Bundle: org.eclipse.osgi;bundle-version="[3.17.0,4.0.0)";visibil
+ ity:=reexport,org.eclipse.equinox.common;bundle-version="[3.18.0,4.0.0)
+ ";visibility:=reexport,org.eclipse.core.jobs;bundle-version="[3.13.0,4.
+ 0.0)";visibility:=reexport,org.eclipse.equinox.registry;bundle-version=
+ "[3.11.0,4.0.0)";visibility:=reexport,org.eclipse.equinox.preferences;b
+ undle-version="[3.10.0,4.0.0)";visibility:=reexport,org.eclipse.core.co
+ ntenttype;bundle-version="[3.8.0,4.0.0)";visibility:=reexport,org.eclip
+ se.equinox.app;bundle-version="1.6.0";visibility:=reexport
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.core.internal.preferences.legacy;x-internal:
+ =true,org.eclipse.core.internal.runtime;x-internal:=true,org.eclipse.co
+ re.runtime;version="3.7.0"
+Bundle-Version: 3.29.0.v20230726-0617
+

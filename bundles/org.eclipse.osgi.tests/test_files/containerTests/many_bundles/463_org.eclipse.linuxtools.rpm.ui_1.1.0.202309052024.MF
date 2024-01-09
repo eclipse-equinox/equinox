@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.rpm.ui;singleton:=true
+Require-Bundle: org.eclipse.ui.ide,org.eclipse.jface.text,org.eclipse.co
+ re.runtime,org.eclipse.ui,org.eclipse.linuxtools.rpm.core,org.eclipse.u
+ i.console,org.eclipse.debug.ui;bundle-version="3.6.0"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.linuxtools.rpm.ui
+Bundle-Version: 1.1.0.202309052024
+

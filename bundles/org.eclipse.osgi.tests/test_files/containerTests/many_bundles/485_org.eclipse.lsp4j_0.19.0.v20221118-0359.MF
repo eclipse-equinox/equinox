@@ -1,0 +1,35 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-SymbolicName: org.eclipse.lsp4j
+Import-Package: 
+ com.google.common.base;version="[30.1,31)",
+ com.google.gson;version="[2.9.1,2.10)",
+ com.google.gson.annotations;version="[2.9.1,2.10)",
+ com.google.gson.reflect;version="[2.9.1,2.10)",com.google.gson.stream;version="[2.9.1,2.10)",
+ org.eclipse.lsp4j,
+ org.eclipse.lsp4j.adapters,
+ org.eclipse.lsp4j.services,
+ org.eclipse.lsp4j.util,
+ org.eclipse.lsp4j.jsonrpc;version="[0.19,1)",
+ org.eclipse.lsp4j.jsonrpc.json;version="[0.19,1)",
+ org.eclipse.lsp4j.jsonrpc.json.adapters;version="[0.19,1)",
+ org.eclipse.lsp4j.jsonrpc.messages;version="[0.19,1)",
+ org.eclipse.lsp4j.jsonrpc.services;version="[0.19,1)",
+ org.eclipse.lsp4j.jsonrpc.validation;version="[0.19,1)",
+ org.eclipse.xtext.xbase.lib;version="[2.28,3)",
+ org.eclipse.xtext.xbase.lib.util;version="[2.28,3)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: org.eclipse.lsp4j;uses:="com.google.gson.annotations,org
+ .eclipse.lsp4j.adapters,org.eclipse.lsp4j.jsonrpc.messages,org.eclipse.
+ lsp4j.jsonrpc.validation,org.eclipse.xtext.xbase.lib";version="0.19.0",
+ org.eclipse.lsp4j.adapters;uses:="com.google.gson,com.google.gson.refle
+ ct,com.google.gson.stream,org.eclipse.lsp4j,org.eclipse.lsp4j.jsonrpc.m
+ essages";version="0.19.0",org.eclipse.lsp4j.launch;uses:="org.eclipse.l
+ sp4j.jsonrpc,org.eclipse.lsp4j.services";version="0.19.0",org.eclipse.l
+ sp4j.services;uses:="org.eclipse.lsp4j,org.eclipse.lsp4j.adapters,org.e
+ clipse.lsp4j.jsonrpc.json,org.eclipse.lsp4j.jsonrpc.messages,org.eclips
+ e.lsp4j.jsonrpc.services";version="0.19.0",org.eclipse.lsp4j.util;uses:
+ ="org.eclipse.lsp4j";version="0.19.0"
+Bundle-Version: 0.19.0.v20221118-0359
+

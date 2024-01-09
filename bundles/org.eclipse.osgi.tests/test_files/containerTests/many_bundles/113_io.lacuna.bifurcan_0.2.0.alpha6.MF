@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: io.lacuna.bifurcan
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: io.lacuna.bifurcan;version="0.2.0.alpha6";uses:="io.lacu
+ na.bifurcan.durable,io.lacuna.bifurcan.durable.allocator,io.lacuna.bifu
+ rcan.nodes",io.lacuna.bifurcan.diffs;version="0.2.0.alpha6";uses:="io.l
+ acuna.bifurcan",io.lacuna.bifurcan.durable;version="0.2.0.alpha6";uses:
+ ="io.lacuna.bifurcan",io.lacuna.bifurcan.durable.allocator;version="0.2
+ .0.alpha6";uses:="io.lacuna.bifurcan",io.lacuna.bifurcan.durable.codecs
+ ;version="0.2.0.alpha6";uses:="io.lacuna.bifurcan,io.lacuna.bifurcan.du
+ rable,io.lacuna.bifurcan.durable.allocator,io.lacuna.bifurcan.utils",io
+ .lacuna.bifurcan.durable.io;version="0.2.0.alpha6";uses:="io.lacuna.bif
+ urcan,io.lacuna.bifurcan.durable,io.lacuna.bifurcan.durable.allocator",
+ io.lacuna.bifurcan.hash;version="0.2.0.alpha6";uses:="io.lacuna.bifurca
+ n",io.lacuna.bifurcan.nodes;version="0.2.0.alpha6";uses:="io.lacuna.bif
+ urcan",io.lacuna.bifurcan.utils;version="0.2.0.alpha6";uses:="io.lacuna
+ .bifurcan"
+Bundle-Version: 0.2.0.alpha6
+

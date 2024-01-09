@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-SymbolicName: org.sat4j.core
+Bundle-ManifestVersion: 2
+Export-Package: org.sat4j;version="2.3.6.v20201214",org.sat4j.core;versi
+ on="2.3.6.v20201214",org.sat4j.minisat;version="2.3.6.v20201214",org.sa
+ t4j.minisat.constraints;version="2.3.6.v20201214",org.sat4j.minisat.con
+ straints.card;version="2.3.6.v20201214",org.sat4j.minisat.constraints.c
+ nf;version="2.3.6.v20201214",org.sat4j.minisat.core;version="2.3.6.v202
+ 01214",org.sat4j.minisat.learning;version="2.3.6.v20201214",org.sat4j.m
+ inisat.orders;version="2.3.6.v20201214",org.sat4j.minisat.restarts;vers
+ ion="2.3.6.v20201214",org.sat4j.opt;version="2.3.6.v20201214",org.sat4j
+ .reader;version="2.3.6.v20201214",org.sat4j.specs;version="2.3.6.v20201
+ 214",org.sat4j.tools;version="2.3.6.v20201214",org.sat4j.tools.encoding
+ ;version="2.3.6.v20201214",org.sat4j.tools.xplain;version="2.3.6.v20201
+ 214"
+Bundle-Version: 2.3.6.v20201214
+

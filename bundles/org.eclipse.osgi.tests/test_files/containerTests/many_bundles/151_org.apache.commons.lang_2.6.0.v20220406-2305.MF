@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.apache.commons.lang
+Bundle-Version: 2.6.0.v20220406-2305
+Import-Package: org.apache.commons.lang;version="[2.6,3)",org.apache.com
+ mons.lang.builder;version="[2.6,3)",org.apache.commons.lang.exception;v
+ ersion="[2.6,3)",org.apache.commons.lang.math;version="[2.6,3)",org.apa
+ che.commons.lang.reflect;version="[2.6,3)",org.apache.commons.lang.text
+ ;version="[2.6,3)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.3))"
+Export-Package: org.apache.commons.lang;version="2.6.0";uses:="org.apach
+ e.commons.lang.exception",org.apache.commons.lang.builder;version="2.6.
+ 0",org.apache.commons.lang.enum;version="2.6.0",org.apache.commons.lang
+ .enums;version="2.6.0",org.apache.commons.lang.exception;version="2.6.0
+ ",org.apache.commons.lang.math;version="2.6.0",org.apache.commons.lang.
+ mutable;version="2.6.0",org.apache.commons.lang.reflect;version="2.6.0"
+ ,org.apache.commons.lang.text;version="2.6.0",org.apache.commons.lang.t
+ ime;version="2.6.0"
+

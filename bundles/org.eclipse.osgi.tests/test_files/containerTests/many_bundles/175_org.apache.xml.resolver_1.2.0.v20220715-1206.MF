@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.apache.xml.resolver
+Import-Package: javax.xml.parsers,javax.xml.transform,javax.xml.transfor
+ m.sax,org.apache.xml.resolver;version="[1.2,2)",org.apache.xml.resolver
+ .helpers;version="[1.2,2)",org.apache.xml.resolver.readers;version="[1.
+ 2,2)",org.apache.xml.resolver.tools;version="[1.2,2)",org.w3c.dom,org.x
+ ml.sax,org.xml.sax.helpers
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JRE)(version=1.1))"
+Export-Package: org.apache.env;version="1.2.0",org.apache.xml.resolver;v
+ ersion="1.2.0";uses:="org.apache.xml.resolver.helpers,org.apache.xml.re
+ solver.readers",org.apache.xml.resolver.apps;version="1.2.0";uses:="org
+ .xml.sax",org.apache.xml.resolver.etc;version="1.2.0",org.apache.xml.re
+ solver.helpers;version="1.2.0";uses:="javax.xml.transform,org.w3c.dom,o
+ rg.xml.sax",org.apache.xml.resolver.readers;version="1.2.0";uses:="java
+ x.xml.parsers,org.apache.xml.resolver,org.apache.xml.resolver.helpers,o
+ rg.w3c.dom,org.xml.sax,org.xml.sax.helpers",org.apache.xml.resolver.too
+ ls;version="1.2.0";uses:="javax.xml.transform,org.apache.xml.resolver,o
+ rg.xml.sax,org.xml.sax.helpers"
+Bundle-Version: 1.2.0.v20220715-1206
+

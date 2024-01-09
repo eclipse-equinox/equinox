@@ -1,0 +1,47 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.equinox.p2.publisher.eclipse;singleton:
+ =true
+Require-Bundle: org.eclipse.equinox.common;bundle-version="[3.18.0,4.0.0
+ )"
+Import-Package: org.eclipse.equinox.app;version="[1.0.0,2.0.0)",org.ecli
+ pse.equinox.frameworkadmin;version="[2.0.0,3.0.0)",org.eclipse.equinox.
+ internal.frameworkadmin.equinox,org.eclipse.equinox.internal.frameworka
+ dmin.utils,org.eclipse.equinox.internal.p2.artifact.repository,org.ecli
+ pse.equinox.internal.p2.core.helpers,org.eclipse.equinox.internal.p2.me
+ tadata,org.eclipse.equinox.internal.p2.metadata.repository,org.eclipse.
+ equinox.internal.p2.publisher,org.eclipse.equinox.internal.provisional.
+ frameworkadmin,org.eclipse.equinox.p2.core;version="[2.0.0,3.0.0)",org.
+ eclipse.equinox.p2.core.spi;version="[2.1.0,3.0.0)",org.eclipse.equinox
+ .p2.metadata;version="[2.4.0,3.0.0)",org.eclipse.equinox.p2.metadata.ex
+ pression;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.publisher,org.e
+ clipse.equinox.p2.publisher.actions,org.eclipse.equinox.p2.query;versio
+ n="[2.0.0,3.0.0)",org.eclipse.equinox.p2.repository;version="[2.0.0,3.0
+ .0)",org.eclipse.equinox.p2.repository.artifact;version="[2.0.0,3.0.0)"
+ ,org.eclipse.equinox.p2.repository.artifact.spi;version="[2.0.0,3.0.0)"
+ ,org.eclipse.equinox.p2.repository.metadata;version="[2.0.0,3.0.0)",org
+ .eclipse.equinox.p2.repository.spi;version="[2.0.0,3.0.0)",org.eclipse.
+ equinox.simpleconfigurator.manipulator;version="[2.0.0,3.0.0)",org.ecli
+ pse.equinox.spi.p2.publisher,org.eclipse.osgi.framework.util,org.eclips
+ e.osgi.service.datalocation;version="1.3.0",org.eclipse.osgi.service.en
+ vironment;version="1.1.0",org.eclipse.osgi.service.pluginconversion;ver
+ sion="1.0.0",org.eclipse.osgi.service.resolver;version="1.5.0",org.ecli
+ pse.osgi.util;version="1.1.0",org.osgi.framework;version="1.3.0",org.os
+ gi.framework.wiring;version="1.2.0",org.osgi.resource;version="1.0.0",o
+ rg.osgi.service.application;version="1.1.0",org.osgi.service.packageadm
+ in;version="1.2.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.equinox.internal.p2.publisher.compatibility;
+ x-internal:=true,org.eclipse.equinox.internal.p2.publisher.eclipse; x-f
+ riends:="org.eclipse.equinox.p2.directorywatcher,  org.eclipse.equinox.
+ p2.extensionlocation,  org.eclipse.equinox.p2.repository.tools,  org.ec
+ lipse.equinox.p2.updatesite,  org.eclipse.pde.build",org.eclipse.equino
+ x.p2.publisher.eclipse; x-friends:="org.eclipse.equinox.p2.directorywat
+ cher,  org.eclipse.equinox.p2.extensionlocation,  org.eclipse.equinox.p
+ 2.touchpoint.eclipse,  org.eclipse.equinox.p2.updatesite,  org.eclipse.
+ equinox.p2.repository.tools",org.eclipse.pde.internal.build.publisher;x
+ -friends:="org.eclipse.pde.build",org.eclipse.pde.internal.publishing;x
+ -friends:="org.eclipse.pde.build",org.eclipse.pde.internal.swt.tools;x-
+ internal:=true
+Bundle-Version: 1.5.100.v20230814-2013
+

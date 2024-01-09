@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.cdt.gdb.ui;singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="3.6.0",org.ecli
+ pse.ui;bundle-version="3.6.0",org.eclipse.cdt.debug.ui;bundle-version="
+ 7.0.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.cdt.gdb.ui.internal;x-internal:=true
+Bundle-Version: 7.2.0.202211062329
+

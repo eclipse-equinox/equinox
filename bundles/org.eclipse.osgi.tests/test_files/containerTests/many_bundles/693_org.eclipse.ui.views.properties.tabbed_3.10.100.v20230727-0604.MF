@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.ui.views.properties.tabbed;singleton:=t
+ rue
+Require-Bundle: org.eclipse.ui.forms;bundle-version="[3.3.0,4.0.0)";visi
+ bility:=reexport,org.eclipse.ui.views;bundle-version="[3.2.0,4.0.0)";vi
+ sibility:=reexport,org.eclipse.ui;bundle-version="[3.3.0,4.0.0)";visibi
+ lity:=reexport,org.eclipse.core.runtime;bundle-version="[3.29.0,4.0.0)"
+ ,org.eclipse.e4.ui.css.core;bundle-version="0.12.100",org.eclipse.e4.ui
+ .css.swt,org.eclipse.jface;bundle-version="[3.18.0,4.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.ui.internal.views.properties.tabbed;x-intern
+ al:=true,org.eclipse.ui.internal.views.properties.tabbed.css;x-internal
+ :=true,org.eclipse.ui.internal.views.properties.tabbed.l10n;x-internal:
+ =true,org.eclipse.ui.internal.views.properties.tabbed.view;x-friends:="
+ org.eclipse.ui.tests.views.properties.tabbed",org.eclipse.ui.views.prop
+ erties.tabbed
+Bundle-Version: 3.10.100.v20230727-0604
+

@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.glassfish.jersey.connectors.jersey-apache-conne
+ ctor
+Import-Package: javax.net,javax.net.ssl,javax.ws.rs;version="[2.1,3)",ja
+ vax.ws.rs.client;version="[2.1,3)",javax.ws.rs.core;version="[2.1,3)",o
+ rg.apache.http,org.apache.http.auth,org.apache.http.client,org.apache.h
+ ttp.client.config,org.apache.http.client.methods,org.apache.http.client
+ .protocol,org.apache.http.config,org.apache.http.conn,org.apache.http.c
+ onn.routing,org.apache.http.conn.socket,org.apache.http.conn.ssl,org.ap
+ ache.http.entity,org.apache.http.impl.auth,org.apache.http.impl.client,
+ org.apache.http.impl.conn,org.apache.http.impl.io,org.apache.http.io,or
+ g.apache.http.protocol,org.apache.http.util,org.glassfish.jersey.client
+ ;version="[2.40,3)",org.glassfish.jersey.client.innate;version="[2.40,3
+ )",org.glassfish.jersey.client.innate.http;version="[2.40,3)",org.glass
+ fish.jersey.client.spi;version="[2.40,3)",org.glassfish.jersey.internal
+ .l10n;version="[2.40,3)",org.glassfish.jersey.internal.util;version="[2
+ .40,3)",org.glassfish.jersey.message.internal;version="[2.40,3)",org.gl
+ assfish.jersey.spi;version="[2.40,3)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: org.glassfish.jersey.apache.connector;uses:="javax.ws.rs
+ .client,javax.ws.rs.core,org.apache.http.client,org.apache.http.client.
+ methods,org.apache.http.impl.client,org.glassfish.jersey.client,org.gla
+ ssfish.jersey.client.spi,org.glassfish.jersey.internal.l10n,org.glassfi
+ sh.jersey.internal.util,org.glassfish.jersey.spi";version="2.40.0"
+Bundle-Version: 2.40.0
+

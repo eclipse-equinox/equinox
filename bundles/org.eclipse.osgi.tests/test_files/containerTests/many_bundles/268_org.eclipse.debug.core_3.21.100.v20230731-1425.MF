@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.debug.core; singleton:=true
+Require-Bundle: org.eclipse.core.resources;bundle-version="[3.18.0,4.0.0
+ )";visibility:=reexport,org.eclipse.core.variables;bundle-version="[3.2
+ .800,4.0.0)",org.eclipse.core.runtime;bundle-version="[3.29.0,4.0.0)",o
+ rg.eclipse.core.filesystem;bundle-version="[1.2.0,2.0.0)",org.eclipse.c
+ ore.expressions;bundle-version="[3.4.0,4.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.debug.core,org.eclipse.debug.core.commands,o
+ rg.eclipse.debug.core.model,org.eclipse.debug.core.sourcelookup,org.ecl
+ ipse.debug.core.sourcelookup.containers,org.eclipse.debug.internal.core
+ ;x-friends:="org.eclipse.debug.ui,org.eclipse.debug.tests,org.eclipse.d
+ ebug.examples.mixedmode,org.eclipse.jdt.launching,org.eclipse.ui.consol
+ e",org.eclipse.debug.internal.core.commands;x-friends:="org.eclipse.deb
+ ug.ui",org.eclipse.debug.internal.core.groups;x-friends:="org.eclipse.d
+ ebug.ui",org.eclipse.debug.internal.core.groups.observer;x-internal:=tr
+ ue,org.eclipse.debug.internal.core.sourcelookup;x-friends:="org.eclipse
+ .debug.ui",org.eclipse.debug.internal.core.sourcelookup.containers;x-fr
+ iends:="org.eclipse.debug.ui",org.eclipse.debug.internal.core.variables
+ ;x-friends:="org.eclipse.debug.ui,org.eclipse.jdt.debug.ui"
+Bundle-Version: 3.21.100.v20230731-1425
+

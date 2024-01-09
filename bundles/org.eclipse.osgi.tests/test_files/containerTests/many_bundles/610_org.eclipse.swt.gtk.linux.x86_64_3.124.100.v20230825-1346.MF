@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.swt.gtk.linux.x86_64; singleton:=true
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.swt,org.eclipse.swt.accessibility,org.eclips
+ e.swt.awt,org.eclipse.swt.browser,org.eclipse.swt.custom,org.eclipse.sw
+ t.dnd,org.eclipse.swt.events,org.eclipse.swt.graphics,org.eclipse.swt.l
+ ayout,org.eclipse.swt.opengl,org.eclipse.swt.printing,org.eclipse.swt.p
+ rogram,org.eclipse.swt.widgets,org.eclipse.swt.internal; x-friends:="or
+ g.eclipse.ui",org.eclipse.swt.internal.image; x-internal:=true,org.ecli
+ pse.swt.internal.accessibility.gtk; x-internal:=true,org.eclipse.swt.in
+ ternal.cairo; x-internal:=true,org.eclipse.swt.internal.gtk; x-internal
+ :=true,org.eclipse.swt.internal.gtk3; x-internal:=true,org.eclipse.swt.
+ internal.gtk4; x-internal:=true,org.eclipse.swt.internal.opengl.glx; x-
+ internal:=true
+Bundle-Version: 3.124.100.v20230825-1346
+

@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.tracecompass.tmf.filter.parser
+Require-Bundle: org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)
+ ";resolution:=optional
+Import-Package: org.antlr.runtime,org.antlr.runtime.tree
+Bundle-ManifestVersion: 2
+Export-Package: main.antlr3.org.eclipse.tracecompass.tmf.filter.parser,o
+ rg.eclipse.tracecompass.tmf.filter.parser;x-friends:="org.eclipse.trace
+ compass.tmf.core",org.eclipse.tracecompass.tmf.filter.parser.error
+Bundle-Version: 1.1.1.202308301409
+

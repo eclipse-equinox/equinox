@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.nebula.widgets.tablecombo
+Require-Bundle: org.eclipse.swt,org.eclipse.jface;resolution:=optional
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.nebula.jface.tablecomboviewer,org.eclipse.ne
+ bula.widgets.tablecombo
+Bundle-Version: 1.2.0.202305300939
+

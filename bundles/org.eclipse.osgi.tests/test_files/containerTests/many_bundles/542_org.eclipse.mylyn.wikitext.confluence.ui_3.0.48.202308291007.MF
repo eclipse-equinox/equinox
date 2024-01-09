@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.mylyn.wikitext.confluence.ui;singleton:
+ =true
+Require-Bundle: org.eclipse.mylyn.wikitext;bundle-version="3.0.48",org.e
+ clipse.mylyn.wikitext.confluence;bundle-version="3.0.48",org.eclipse.my
+ lyn.wikitext.ui;bundle-version="3.0.48"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.mylyn.internal.wikitext.confluence.ui;x-inte
+ rnal:=true
+Bundle-Version: 3.0.48.202308291007
+

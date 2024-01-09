@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.ui.browser; singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.29.0,4.0.0)"
+ ,org.eclipse.ui;bundle-version="[3.6.0,4.0.0)",org.eclipse.urischeme;bu
+ ndle-version="1.1.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.ui.browser,org.eclipse.ui.internal.browser;x
+ -friends:="org.eclipse.ua.tests,org.eclipse.ui.tests.browser",org.eclip
+ se.ui.internal.browser.browsers;x-internal:=true,org.eclipse.ui.interna
+ l.browser.macosx;x-internal:=true
+Bundle-Version: 3.8.100.v20230727-0604
+

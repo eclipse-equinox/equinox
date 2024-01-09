@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.jsoup
+Import-Package: javax.annotation;resolution:=optional,javax.annotation.m
+ eta;resolution:=optional,javax.net.ssl,javax.xml.namespace,javax.xml.pa
+ rsers,javax.xml.transform,javax.xml.transform.dom,javax.xml.transform.s
+ tream,javax.xml.xpath,org.jsoup,org.jsoup.helper,org.jsoup.internal,org
+ .jsoup.nodes,org.jsoup.parser,org.jsoup.safety,org.jsoup.select,org.w3c
+ .dom
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: org.jsoup;uses:="javax.annotation,javax.net.ssl,org.jsou
+ p.nodes,org.jsoup.parser,org.jsoup.safety";version="1.16.1",org.jsoup.e
+ xamples;uses:="org.jsoup.nodes";version="1.16.1",org.jsoup.helper;uses:
+ ="javax.annotation,javax.net.ssl,javax.xml.parsers,org.jsoup,org.jsoup.
+ nodes,org.jsoup.parser,org.jsoup.select,org.w3c.dom";version="1.16.1",o
+ rg.jsoup.internal;uses:="javax.annotation,javax.annotation.meta";versio
+ n="1.16.1",org.jsoup.nodes;uses:="javax.annotation,org.jsoup,org.jsoup.
+ helper,org.jsoup.parser,org.jsoup.select";version="1.16.1",org.jsoup.pa
+ rser;uses:="javax.annotation,org.jsoup.nodes";version="1.16.1",org.jsou
+ p.safety;uses:="org.jsoup.nodes";version="1.16.1",org.jsoup.select;uses
+ :="javax.annotation,org.jsoup.nodes";version="1.16.1"
+Bundle-Version: 1.16.1
+

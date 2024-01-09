@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.core.databinding.property
+Require-Bundle: org.eclipse.equinox.common;bundle-version="[3.2.0,4.0.0)
+ ",org.eclipse.core.databinding.observable;bundle-version="[1.3.0,2.0.0)
+ "
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.core.databinding.property,org.eclipse.core.d
+ atabinding.property.list,org.eclipse.core.databinding.property.map,org.
+ eclipse.core.databinding.property.set,org.eclipse.core.databinding.prop
+ erty.value,org.eclipse.core.internal.databinding.property;x-internal:=t
+ rue,org.eclipse.core.internal.databinding.property.list;x-internal:=tru
+ e,org.eclipse.core.internal.databinding.property.map;x-internal:=true,o
+ rg.eclipse.core.internal.databinding.property.set;x-internal:=true,org.
+ eclipse.core.internal.databinding.property.value;x-internal:=true
+Bundle-Version: 1.10.100.v20230708-0916
+

@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-SymbolicName: org.eclipse.emf.common.ui;singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.9.0,4.0.0)",
+ org.eclipse.ui;bundle-version="[3.105.0,4.0.0)";visibility:=reexport,or
+ g.eclipse.emf.common;bundle-version="[2.28.0,3.0.0)",org.eclipse.core.r
+ esources;bundle-version="[3.8.0,4.0.0)";resolution:=optional,org.eclips
+ e.ui.ide;bundle-version="[3.9.0,4.0.0)";resolution:=optional,org.eclips
+ e.jface.text;bundle-version="[3.8.0,4.0.0)";resolution:=optional
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.emf.common.ui;version="2.21.0",org.eclipse.e
+ mf.common.ui.action;version="2.21.0",org.eclipse.emf.common.ui.celledit
+ or;version="2.21.0",org.eclipse.emf.common.ui.dialogs;version="2.21.0",
+ org.eclipse.emf.common.ui.editor;version="2.21.0",org.eclipse.emf.commo
+ n.ui.viewer;version="2.21.0",org.eclipse.emf.common.ui.wizard;version="
+ 2.21.0"
+Bundle-Version: 2.21.0.v20230211-1150
+

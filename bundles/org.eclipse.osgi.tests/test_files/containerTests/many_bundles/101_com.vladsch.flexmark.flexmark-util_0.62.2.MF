@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: com.vladsch.flexmark.flexmark-util
+Bundle-ManifestVersion: 2
+Bundle-Version: 0.62.2
+

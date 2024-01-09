@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.tm.terminal.control; singleton:=true
+Require-Bundle: org.eclipse.core.runtime,org.eclipse.ui
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.tm.internal.terminal.connector;x-internal:=t
+ rue,org.eclipse.tm.internal.terminal.control,org.eclipse.tm.internal.te
+ rminal.control.actions,org.eclipse.tm.internal.terminal.control.impl;x-
+ internal:=true,org.eclipse.tm.internal.terminal.emulator;x-internal:=tr
+ ue,org.eclipse.tm.internal.terminal.model;x-internal:=true,org.eclipse.
+ tm.internal.terminal.preferences,org.eclipse.tm.internal.terminal.provi
+ sional.api,org.eclipse.tm.internal.terminal.provisional.api.provider,or
+ g.eclipse.tm.internal.terminal.textcanvas;x-internal:=true,org.eclipse.
+ tm.terminal.model
+Bundle-Version: 5.5.0.202308191743
+

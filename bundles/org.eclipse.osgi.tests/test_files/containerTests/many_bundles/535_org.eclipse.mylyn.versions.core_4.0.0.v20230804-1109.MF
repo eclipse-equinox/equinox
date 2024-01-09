@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.mylyn.versions.core;singleton:=true
+Require-Bundle: org.eclipse.core.filesystem;bundle-version="0.0.0",org.e
+ clipse.core.resources;bundle-version="0.0.0",org.eclipse.core.runtime;b
+ undle-version="0.0.0",org.eclipse.mylyn.commons.core;bundle-version="4.
+ 0.0",org.eclipse.team.core;bundle-version="0.0.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.mylyn.internal.versions.core;x-friends:="org
+ .eclipse.mylyn.versions.ui",org.eclipse.mylyn.versions.core;x-friends:=
+ "org.eclipse.mylyn.versions.ui",org.eclipse.mylyn.versions.core.spi;x-f
+ riends:="org.eclipse.mylyn.versions.ui"
+Bundle-Version: 4.0.0.v20230804-1109
+

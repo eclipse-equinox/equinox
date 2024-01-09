@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.cdt.flatpak.launcher;singleton:=true
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.cdt.
+ launch;bundle-version="7.1.0",org.eclipse.debug.core;bundle-version="3.
+ 9.1",org.eclipse.debug.ui;bundle-version="3.10.1",org.eclipse.cdt.core;
+ bundle-version="6.5.0",org.eclipse.cdt.debug.core;bundle-version="7.5.0
+ ",org.eclipse.cdt.ui;bundle-version="5.8.0",org.eclipse.ui.ide;bundle-v
+ ersion="3.10.1",org.eclipse.cdt.debug.ui;bundle-version="7.5.0",org.ecl
+ ipse.cdt.dsf.gdb;bundle-version="4.6.0",org.eclipse.cdt.dsf.gdb.ui;bund
+ le-version="2.4.0",org.eclipse.core.variables,org.eclipse.cdt.managedbu
+ ilder.ui,org.eclipse.cdt.managedbuilder.core,org.eclipse.core.databindi
+ ng.observable,org.eclipse.core.databinding.beans,org.eclipse.jface.data
+ binding,org.eclipse.core.databinding;bundle-version="1.6.0",org.eclipse
+ .core.databinding.property;bundle-version="1.6.0",org.eclipse.launchbar
+ .ui;bundle-version="2.2.0",com.google.gson
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.cdt.flatpak.launcher
+Bundle-Version: 1.1.100.202303140100
+

@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.cdt.codan.ui.cxx;singleton:=true
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.cdt.
+ codan.core,org.eclipse.cdt.codan.core.cxx,org.eclipse.ui.editors,org.ec
+ lipse.cdt.core,org.eclipse.cdt.ui,org.eclipse.core.resources,org.eclips
+ e.cdt.codan.ui,org.eclipse.jface.text,org.eclipse.ui.ide
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.cdt.codan.internal.ui.cxx;x-internal:=true,o
+ rg.eclipse.cdt.codan.ui
+Bundle-Version: 3.7.0.202211101937
+

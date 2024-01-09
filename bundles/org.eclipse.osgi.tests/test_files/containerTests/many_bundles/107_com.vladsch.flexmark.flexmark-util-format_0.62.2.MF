@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: com.vladsch.flexmark.flexmark-util-format
+Import-Package: com.vladsch.flexmark.util.ast;resolution:=optional,com.v
+ ladsch.flexmark.util.collection;resolution:=optional,com.vladsch.flexma
+ rk.util.data;resolution:=optional,com.vladsch.flexmark.util.html;resolu
+ tion:=optional,com.vladsch.flexmark.util.misc;resolution:=optional,com.
+ vladsch.flexmark.util.sequence;resolution:=optional,com.vladsch.flexmar
+ k.util.sequence.builder;resolution:=optional,com.vladsch.flexmark.util.
+ sequence.builder.tree;resolution:=optional,com.vladsch.flexmark.util.se
+ quence.mappers;resolution:=optional
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: com.vladsch.flexmark.util.format;version="0.62.2";uses:=
+ "com.vladsch.flexmark.util.ast,com.vladsch.flexmark.util.data,com.vlads
+ ch.flexmark.util.format.options,com.vladsch.flexmark.util.html,com.vlad
+ sch.flexmark.util.misc,com.vladsch.flexmark.util.sequence,com.vladsch.f
+ lexmark.util.sequence.builder,com.vladsch.flexmark.util.sequence.builde
+ r.tree,com.vladsch.flexmark.util.sequence.mappers",com.vladsch.flexmark
+ .util.format.options;version="0.62.2"
+Bundle-Version: 0.62.2
+

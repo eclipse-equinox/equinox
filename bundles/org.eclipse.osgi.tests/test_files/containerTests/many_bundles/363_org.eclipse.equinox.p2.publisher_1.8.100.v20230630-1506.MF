@@ -1,0 +1,37 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.equinox.p2.publisher;singleton:=true
+Require-Bundle: org.eclipse.equinox.common;bundle-version="[3.18.0,4.0.0
+ )",org.eclipse.osgi;bundle-version="3.8.0"
+Import-Package: org.eclipse.equinox.app;version="1.0.0";resolution:=opti
+ onal,org.eclipse.equinox.internal.p2.artifact.processors.checksum,org.e
+ clipse.equinox.internal.p2.artifact.repository,org.eclipse.equinox.inte
+ rnal.p2.artifact.repository.simple,org.eclipse.equinox.internal.p2.core
+ .helpers,org.eclipse.equinox.internal.p2.metadata,org.eclipse.equinox.i
+ nternal.p2.metadata.expression,org.eclipse.equinox.internal.p2.metadata
+ .index,org.eclipse.equinox.internal.p2.metadata.repository,org.eclipse.
+ equinox.internal.p2.repository.helpers,org.eclipse.equinox.p2.core;vers
+ ion="[2.0.0,3.0.0)",org.eclipse.equinox.p2.metadata;version="[2.4.0,3.0
+ .0)",org.eclipse.equinox.p2.metadata.expression;version="[2.0.0,3.0.0)"
+ ,org.eclipse.equinox.p2.metadata.index;version="[2.0.0,3.0.0)",org.ecli
+ pse.equinox.p2.query;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.rep
+ ository;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.repository.artif
+ act;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.repository.artifact.
+ spi;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.repository.metadata;
+ version="[2.0.0,3.0.0)",org.eclipse.osgi.service.resolver;version="1.2.
+ 0",org.eclipse.osgi.util;version="1.1.0",org.osgi.framework;version="1.
+ 6.0",org.osgi.service.application;version="1.1.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.equinox.internal.p2.publisher; x-friends:="o
+ rg.eclipse.equinox.p2.directorywatcher,  org.eclipse.equinox.p2.touchpo
+ int.eclipse,  org.eclipse.equinox.p2.ui.sdk,  org.eclipse.equinox.p2.up
+ datesite,  org.eclipse.equinox.p2.publisher.eclipse",org.eclipse.equino
+ x.p2.publisher; x-friends:="org.eclipse.equinox.p2.directorywatcher,  o
+ rg.eclipse.equinox.p2.touchpoint.eclipse,  org.eclipse.equinox.p2.updat
+ esite,  org.eclipse.equinox.p2.publisher.eclipse",org.eclipse.equinox.p
+ 2.publisher.actions; x-friends:="org.eclipse.equinox.p2.updatesite,  or
+ g.eclipse.equinox.p2.directorywatcher,  org.eclipse.equinox.p2.publishe
+ r.eclipse",org.eclipse.equinox.spi.p2.publisher;x-friends:="org.eclipse
+ .equinox.p2.updatesite,org.eclipse.equinox.p2.publisher.eclipse"
+Bundle-Version: 1.8.100.v20230630-1506
+

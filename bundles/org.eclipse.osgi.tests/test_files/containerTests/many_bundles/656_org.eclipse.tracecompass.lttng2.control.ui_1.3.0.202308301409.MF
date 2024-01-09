@@ -1,0 +1,43 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.tracecompass.lttng2.control.ui;singleto
+ n:=true
+Require-Bundle: org.eclipse.ui,org.eclipse.ui.ide,org.eclipse.core.expre
+ ssions,org.eclipse.core.resources,org.eclipse.core.runtime,org.eclipse.
+ tracecompass.common.core,org.eclipse.tracecompass.lttng2.control.core,o
+ rg.eclipse.tracecompass.tmf.core,org.eclipse.tracecompass.tmf.ui,org.ec
+ lipse.tracecompass.tmf.ctf.core,org.eclipse.remote.core;bundle-version=
+ "2.0.0",org.eclipse.remote.ui;bundle-version="2.0.0",org.eclipse.tracec
+ ompass.tmf.remote.core,org.eclipse.tracecompass.tmf.remote.ui,org.eclip
+ se.core.filesystem,org.eclipse.jface,org.eclipse.core.commands,org.ecli
+ pse.ui.workbench,org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.
+ 0)";resolution:=optional
+Import-Package: com.google.common.collect
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.tracecompass.internal.lttng2.control.ui;x-fr
+ iends:="org.eclipse.tracecompass.lttng2.control.ui.tests",org.eclipse.t
+ racecompass.internal.lttng2.control.ui.relayd;x-internal:=true,org.ecli
+ pse.tracecompass.internal.lttng2.control.ui.views; x-friends:="org.ecli
+ pse.tracecompass.lttng2.kernel.ui,  org.eclipse.tracecompass.lttng2.con
+ trol.ui.tests,  org.eclipse.tracecompass.lttng2.kernel.ui.swtbot.tests,
+   org.eclipse.tracecompass.lttng2.control.ui.swtbot.tests",org.eclipse.
+ tracecompass.internal.lttng2.control.ui.views.dialogs;x-friends:="org.e
+ clipse.tracecompass.lttng2.control.ui.tests",org.eclipse.tracecompass.i
+ nternal.lttng2.control.ui.views.handlers;x-internal:=true,org.eclipse.t
+ racecompass.internal.lttng2.control.ui.views.logging;x-friends:="org.ec
+ lipse.tracecompass.lttng2.control.ui.tests",org.eclipse.tracecompass.in
+ ternal.lttng2.control.ui.views.messages;x-internal:=true,org.eclipse.tr
+ acecompass.internal.lttng2.control.ui.views.model;x-friends:="org.eclip
+ se.tracecompass.lttng2.control.ui.tests,org.eclipse.tracecompass.lttng2
+ .control.ui.swtbot.tests",org.eclipse.tracecompass.internal.lttng2.cont
+ rol.ui.views.model.impl;x-friends:="org.eclipse.tracecompass.lttng2.con
+ trol.ui.tests,org.eclipse.tracecompass.lttng2.control.ui.swtbot.tests",
+ org.eclipse.tracecompass.internal.lttng2.control.ui.views.preferences;x
+ -friends:="org.eclipse.tracecompass.lttng2.control.ui.tests",org.eclips
+ e.tracecompass.internal.lttng2.control.ui.views.property;x-friends:="or
+ g.eclipse.tracecompass.lttng2.control.ui.tests",org.eclipse.tracecompas
+ s.internal.lttng2.control.ui.views.service;x-friends:="org.eclipse.trac
+ ecompass.lttng2.control.ui.tests,org.eclipse.tracecompass.lttng2.contro
+ l.ui.swtbot.tests"
+Bundle-Version: 1.3.0.202308301409
+

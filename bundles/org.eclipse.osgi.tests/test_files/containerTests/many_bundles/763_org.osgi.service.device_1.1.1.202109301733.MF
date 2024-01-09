@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.osgi.service.device
+Import-Package: org.osgi.framework;version="[1.8,2)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE/compact1)(version
+ =1.8))"
+Export-Package: org.osgi.service.device;version="1.1.1";uses:="org.osgi.
+ framework"
+Bundle-Version: 1.1.1.202109301733
+

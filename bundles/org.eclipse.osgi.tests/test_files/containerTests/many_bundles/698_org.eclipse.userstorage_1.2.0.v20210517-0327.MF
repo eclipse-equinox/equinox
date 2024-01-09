@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.eclipse.userstorage;singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.4.0,4.0.0)",
+ org.eclipse.core.net;bundle-version="[1.2.0,2.0.0)",org.eclipse.equinox
+ .security;bundle-version="[1.0.0,2.0.0)"
+Import-Package: org.apache.commons.codec.binary;version="[1.6.0,2.0.0)",
+ org.apache.http;version="[4.3.0,5.0.0)",org.apache.http.auth;version="[
+ 4.3.0,5.0.0)",org.apache.http.client;version="[4.3.0,5.0.0)",org.apache
+ .http.client.fluent;version="[4.3.0,5.0.0)",org.apache.http.impl.client
+ ;version="[4.3.0,5.0.0)",org.apache.http.message;version="[4.3.0,5.0.0)
+ "
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.userstorage;version="1.0.0";uses:="org.eclip
+ se.userstorage.spi",org.eclipse.userstorage.internal;version="1.1.0"; x
+ -friends:="org.eclipse.userstorage.tests,  org.eclipse.userstorage.oaut
+ h,  org.eclipse.userstorage.ui,  org.eclipse.userstorage.sdk"; uses:="o
+ rg.apache.http.client.fluent,  org.apache.http",org.eclipse.userstorage
+ .internal.util;version="1.0.0"; x-friends:="org.eclipse.userstorage.tes
+ ts,  org.eclipse.userstorage.oauth,  org.eclipse.userstorage.ui,  org.e
+ clipse.userstorage.sdk"; uses:="org.apache.http.client.fluent,  org.apa
+ che.http",org.eclipse.userstorage.spi;version="1.1.0";uses:="org.eclips
+ e.userstorage,org.apache.http.client.fluent,org.eclipse.userstorage.int
+ ernal",org.eclipse.userstorage.util;version="1.0.0";uses:="org.eclipse.
+ userstorage.spi"
+Bundle-Version: 1.2.0.v20210517-0327
+

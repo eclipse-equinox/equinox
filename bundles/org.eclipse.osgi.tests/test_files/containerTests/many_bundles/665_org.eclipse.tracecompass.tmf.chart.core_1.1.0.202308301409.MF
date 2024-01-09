@@ -1,0 +1,34 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.tracecompass.tmf.chart.core;singleton:=
+ true
+Require-Bundle: org.eclipse.core.runtime,org.eclipse.tracecompass.common
+ .core,org.eclipse.tracecompass.tmf.core,org.eclipse.jdt.annotation;bund
+ le-version="[2.0.0,3.0.0)";resolution:=optional
+Import-Package: com.google.common.collect
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.tracecompass.internal.provisional.tmf.chart.
+ core.chart; x-friends:="org.eclipse.tracecompass.tmf.chart.ui,  org.ecl
+ ipse.tracecompass.tmf.chart.core.tests,  org.eclipse.tracecompass.analy
+ sis.lami.ui,  org.eclipse.tracecompass.analysis.lami.core,  org.eclipse
+ .tracecompass.analysis.lami.ui.swtbot.tests,  org.eclipse.tracecompass.
+ tmf.chart.ui.swtbot.tests",org.eclipse.tracecompass.internal.provisiona
+ l.tmf.chart.core.descriptor; x-friends:="org.eclipse.tracecompass.tmf.c
+ hart.ui,  org.eclipse.tracecompass.tmf.chart.core.tests,  org.eclipse.t
+ racecompass.tmf.chart.ui.swtbot.tests,  org.eclipse.tracecompass.analys
+ is.lami.core,  org.eclipse.tracecompass.analysis.lami.ui",org.eclipse.t
+ racecompass.internal.provisional.tmf.chart.core.resolver;x-friends:="or
+ g.eclipse.tracecompass.tmf.chart.ui,org.eclipse.tracecompass.tmf.chart.
+ core.tests,org.eclipse.tracecompass.analysis.lami.core",org.eclipse.tra
+ cecompass.internal.provisional.tmf.chart.core.signal;x-friends:="org.ec
+ lipse.tracecompass.tmf.chart.ui,org.eclipse.tracecompass.analysis.lami.
+ ui",org.eclipse.tracecompass.internal.tmf.chart.core;x-internal:=true,o
+ rg.eclipse.tracecompass.internal.tmf.chart.core.aggregator;x-friends:="
+ org.eclipse.tracecompass.tmf.chart.ui,org.eclipse.tracecompass.tmf.char
+ t.core.tests",org.eclipse.tracecompass.internal.tmf.chart.core.chart;x-
+ internal:=true,org.eclipse.tracecompass.internal.tmf.chart.core.consume
+ r;x-friends:="org.eclipse.tracecompass.tmf.chart.ui,org.eclipse.traceco
+ mpass.tmf.chart.core.tests",org.eclipse.tracecompass.tmf.chart.core.mod
+ el
+Bundle-Version: 1.1.0.202308301409
+

@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.tracecompass.common.core;singleton:=tru
+ e
+Require-Bundle: org.eclipse.core.runtime,org.eclipse.core.resources,org.
+ eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optio
+ nal
+Import-Package: com.google.common.base,com.google.common.collect
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.tracecompass.common.core,org.eclipse.traceco
+ mpass.common.core.collect,org.eclipse.tracecompass.common.core.format,o
+ rg.eclipse.tracecompass.common.core.log,org.eclipse.tracecompass.common
+ .core.math,org.eclipse.tracecompass.common.core.process,org.eclipse.tra
+ cecompass.common.core.xml,org.eclipse.tracecompass.internal.common.core
+ ;x-internal:=true,org.eclipse.tracecompass.internal.common.core.log;x-f
+ riends:="org.eclipse.tracecompass.common.core.tests"
+Bundle-Version: 5.2.0.202308301409
+

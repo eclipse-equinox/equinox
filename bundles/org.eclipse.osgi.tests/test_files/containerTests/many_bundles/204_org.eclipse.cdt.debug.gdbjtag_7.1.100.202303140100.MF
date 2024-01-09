@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.eclipse.cdt.debug.gdbjtag
+Bundle-Version: 7.1.100.202303140100
+

@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.eclipse.userstorage.oauth;singleton:=true
+Require-Bundle: org.eclipse.userstorage.ui;bundle-version="[1.0.2,2.0.0)
+ ",org.eclipse.ui;bundle-version="[3.6.0,4.0.0)"
+Import-Package: org.apache.http;version="[4.3.0,5.0.0)",org.apache.http.
+ client;version="[4.3.0,5.0.0)",org.apache.http.client.fluent;version="[
+ 4.3.0,5.0.0)",org.apache.http.client.utils;version="[4.3.0,5.0.0)",org.
+ apache.http.entity;version="[4.3.0,5.0.0)",org.apache.http.message;vers
+ ion="[4.3.0,5.0.0)",org.apache.http.util;version="[4.3.0,5.0.0)",org.ec
+ lipse.core.runtime;version="3.3.0",org.osgi.framework;version="1.7.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.userstorage.internal.oauth;x-internal:=true;
+  uses:="org.eclipse.core.runtime,  org.eclipse.userstorage.oauth,  org.
+ eclipse.userstorage.spi,  org.eclipse.userstorage,  org.eclipse.usersto
+ rage.internal",org.eclipse.userstorage.internal.oauth.ui;x-internal:=tr
+ ue; uses:="org.eclipse.jface.window,  org.eclipse.jface.action,  org.ec
+ lipse.swt.graphics,  org.eclipse.swt.widgets,  org.eclipse.jface.dialog
+ s,  org.eclipse.ui,  org.eclipse.ui.menus,  org.eclipse.core.runtime,  
+ org.eclipse.ui.services,  org.eclipse.jface.resource,  org.eclipse.jfac
+ e.preference,  org.eclipse.userstorage.internal.oauth",org.eclipse.user
+ storage.oauth;version="1.0.0"; uses:="org.eclipse.jface.window,  org.ec
+ lipse.userstorage.spi,  org.eclipse.userstorage,  org.apache.http.clien
+ t.fluent,  org.eclipse.userstorage.internal.oauth,  org.eclipse.usersto
+ rage.internal"
+Bundle-Version: 1.1.0.v20190307-0457
+

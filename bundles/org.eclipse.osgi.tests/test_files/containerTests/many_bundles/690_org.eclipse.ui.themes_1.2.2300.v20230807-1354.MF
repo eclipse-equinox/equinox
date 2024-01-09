@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.ui.themes;singleton:=true
+Require-Bundle: org.eclipse.e4.ui.css.swt.theme
+Bundle-ManifestVersion: 2
+Bundle-Version: 1.2.2300.v20230807-1354
+

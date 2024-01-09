@@ -1,0 +1,99 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.xtext.ui;singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="3.13.0";visibil
+ ity:=reexport,org.eclipse.core.resources;bundle-version="3.12.0";visibi
+ lity:=reexport,org.eclipse.ui;bundle-version="3.109.0";visibility:=reex
+ port,org.eclipse.ui.editors;bundle-version="3.11.0";visibility:=reexpor
+ t,org.eclipse.jface.text;bundle-version="3.12.0";visibility:=reexport,o
+ rg.eclipse.ui.ide;bundle-version="3.13.0",org.eclipse.xtext;visibility:
+ =reexport,org.eclipse.ui.views;bundle-version="3.3.0",org.eclipse.emf.e
+ dit.ui;bundle-version="2.17.0";visibility:=reexport,org.eclipse.ui.work
+ bench.texteditor;bundle-version="3.4.0",org.eclipse.xtext.util,org.ecli
+ pse.jdt.core;bundle-version="3.13.102";resolution:=optional;x-installat
+ ion:=greedy,org.eclipse.core.expressions;bundle-version="3.6.0",org.ecl
+ ipse.search;bundle-version="3.11.100";resolution:=optional;x-installati
+ on:=greedy,org.eclipse.ltk.core.refactoring;bundle-version="3.8.0";reso
+ lution:=optional;visibility:=reexport;x-installation:=greedy,org.eclips
+ e.ltk.ui.refactoring;bundle-version="3.9.0";resolution:=optional;x-inst
+ allation:=greedy,org.eclipse.compare;bundle-version="3.7.101";resolutio
+ n:=optional;x-installation:=greedy,org.eclipse.team.core;bundle-version
+ ="3.5.101";resolution:=optional;x-installation:=greedy,org.eclipse.team
+ .ui;bundle-version="3.8.1";resolution:=optional;x-installation:=greedy,
+ org.eclipse.core.filesystem;bundle-version="1.2.1";resolution:=optional
+ ;x-installation:=greedy,org.eclipse.jdt.launching;bundle-version="3.9.1
+ 00";resolution:=optional;x-installation:=greedy,org.eclipse.xtext.xbase
+ .lib;bundle-version="2.14.0",org.eclipse.ui.forms;bundle-version="3.4.1
+ ",org.eclipse.xtend.lib,org.eclipse.jdt.ui;bundle-version="3.13.100";re
+ solution:=optional,org.eclipse.xtext.ide;visibility:=reexport
+Import-Package: org.apache.log4j;version="1.2.19"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.xtext.common.ui.contentassist,org.eclipse.xt
+ ext.ui,org.eclipse.xtext.ui.compare;x-internal:=true,org.eclipse.xtext.
+ ui.containers,org.eclipse.xtext.ui.editor,org.eclipse.xtext.ui.editor.a
+ ctions,org.eclipse.xtext.ui.editor.autoedit,org.eclipse.xtext.ui.editor
+ .bracketmatching,org.eclipse.xtext.ui.editor.contentassist,org.eclipse.
+ xtext.ui.editor.contentassist.antlr,org.eclipse.xtext.ui.editor.content
+ assist.antlr.internal,org.eclipse.xtext.ui.editor.copyqualifiedname;x-f
+ riends:="org.eclipse.xtext.xbase.ui,org.eclipse.xtend.ide",org.eclipse.
+ xtext.ui.editor.doubleClicking,org.eclipse.xtext.ui.editor.embedded;x-f
+ riends:="org.eclipse.xtext.ui.codetemplates.ui,org.eclipse.xtext.xbase.
+ ui,org.eclipse.xtend.ide",org.eclipse.xtext.ui.editor.findrefs; x-frien
+ ds:="org.eclipse.xtext.ui.tests,  org.eclipse.xtext.ui.shared,  org.ecl
+ ipse.xtext.xtext.ui,  org.eclipse.xtext.xbase.junit,  org.eclipse.xtext
+ .xbase.ui,  org.eclipse.xtext.xbase.ui.testing,  org.eclipse.xtend.ide,
+   org.eclipse.xtend.ide.tests,  org.eclipse.xtext.junit4",org.eclipse.x
+ text.ui.editor.folding,org.eclipse.xtext.ui.editor.formatting,org.eclip
+ se.xtext.ui.editor.formatting2;x-friends:="org.eclipse.xtext.xbase.ui",
+ org.eclipse.xtext.ui.editor.handler,org.eclipse.xtext.ui.editor.hierarc
+ hy;x-friends:="org.eclipse.xtext.example.arithmetics.ui,org.eclipse.xte
+ xt.xtext.ui",org.eclipse.xtext.ui.editor.hover,org.eclipse.xtext.ui.edi
+ tor.hover.html,org.eclipse.xtext.ui.editor.hyperlinking,org.eclipse.xte
+ xt.ui.editor.info,org.eclipse.xtext.ui.editor.model,org.eclipse.xtext.u
+ i.editor.model.edit,org.eclipse.xtext.ui.editor.navigation,org.eclipse.
+ xtext.ui.editor.occurrences,org.eclipse.xtext.ui.editor.outline,org.ecl
+ ipse.xtext.ui.editor.outline.actions,org.eclipse.xtext.ui.editor.outlin
+ e.impl,org.eclipse.xtext.ui.editor.outline.quickoutline,org.eclipse.xte
+ xt.ui.editor.preferences,org.eclipse.xtext.ui.editor.preferences.fields
+ ,org.eclipse.xtext.ui.editor.quickfix,org.eclipse.xtext.ui.editor.recon
+ ciler,org.eclipse.xtext.ui.editor.selection;x-friends:="org.eclipse.xte
+ xt.ui.tests",org.eclipse.xtext.ui.editor.syntaxcoloring,org.eclipse.xte
+ xt.ui.editor.tasks,org.eclipse.xtext.ui.editor.tasks.dialogfields,org.e
+ clipse.xtext.ui.editor.templates,org.eclipse.xtext.ui.editor.toggleComm
+ ents,org.eclipse.xtext.ui.editor.utils,org.eclipse.xtext.ui.editor.vali
+ dation,org.eclipse.xtext.ui.generator; x-friends:="org.eclipse.xtext.bu
+ ilder,  org.eclipse.xtext.xbase.ui,  org.eclipse.xtend.ide,  org.eclips
+ e.xtend.ide.tests,  org.eclipse.xtext.ui.shared",org.eclipse.xtext.ui.g
+ enerator.trace; x-friends:="org.eclipse.xtext.xbase.ui,  org.eclipse.xt
+ end.ide,  org.eclipse.xtend.ide.tests,  org.eclipse.xtext.builder,  org
+ .eclipse.xtext.common.types.ui,  org.eclipse.xtext.purexbase.eclipse.te
+ sts,  org.eclipse.xtext.ui.codetemplates.ui,  org.eclipse.xtext.ui.shar
+ ed",org.eclipse.xtext.ui.guice,org.eclipse.xtext.ui.internal,org.eclips
+ e.xtext.ui.label,org.eclipse.xtext.ui.markers;x-friends:="org.eclipse.x
+ text.builder",org.eclipse.xtext.ui.notification,org.eclipse.xtext.ui.pr
+ eferences; x-friends:="org.eclipse.xtend.m2e,  org.eclipse.xtext.m2e,  
+ org.eclipse.xtext.xbase.ui,  org.eclipse.xtend.ide,  org.eclipse.xtext.
+ xtext.ui,  org.eclipse.xtext.builder",org.eclipse.xtext.ui.refactoring;
+  x-friends:="org.eclipse.xtext.xbase.ui,  org.eclipse.xtend.ide,  org.e
+ clipse.xtend.ide.tests,  org.eclipse.xtext.common.types.ui,  org.eclips
+ e.xtext.ui.tests",org.eclipse.xtext.ui.refactoring.impl; x-friends:="or
+ g.eclipse.xtext.xbase.ui,  org.eclipse.xtend.ide,  org.eclipse.xtend.id
+ e.tests,  org.eclipse.xtext.common.types.eclipse.tests,  org.eclipse.xt
+ ext.common.types.ui,  org.eclipse.xtext.ui.tests",org.eclipse.xtext.ui.
+ refactoring.ui; x-friends:="org.eclipse.xtext.xbase.ui,  org.eclipse.xt
+ end.ide,  org.eclipse.xtend.ide.swtbot.tests,  org.eclipse.xtend.ide.te
+ sts,  org.eclipse.xtext.common.types.eclipse.tests,  org.eclipse.xtext.
+ common.types.ui,  org.eclipse.xtext.ui.testing,  org.eclipse.xtext.ui.t
+ ests",org.eclipse.xtext.ui.refactoring2;x-internal:=true,org.eclipse.xt
+ ext.ui.refactoring2.participant;x-internal:=true,org.eclipse.xtext.ui.r
+ efactoring2.rename;x-internal:=true,org.eclipse.xtext.ui.resource,org.e
+ clipse.xtext.ui.resource.generic,org.eclipse.xtext.ui.search,org.eclips
+ e.xtext.ui.shared.contribution,org.eclipse.xtext.ui.tasks;x-friends:="o
+ rg.eclipse.xtext.ui.tests",org.eclipse.xtext.ui.tasks.preferences;x-int
+ ernal:=true,org.eclipse.xtext.ui.util,org.eclipse.xtext.ui.validation,o
+ rg.eclipse.xtext.ui.views,org.eclipse.xtext.ui.wizard,org.eclipse.xtext
+ .ui.wizard.template,org.eclipse.xtext.ui.workspace; x-friends:="org.ecl
+ ipse.xtext.ui.tests,  org.eclipse.xtext.xbase.ui,  org.eclipse.xtext.ui
+ .shared,  org.eclipse.xtext.builder"
+Bundle-Version: 2.29.0.v20221121-0943
+

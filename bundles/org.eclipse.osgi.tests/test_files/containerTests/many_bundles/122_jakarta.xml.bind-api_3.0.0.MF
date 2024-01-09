@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: jakarta.xml.bind-api
+Import-Package: jakarta.activation;version="[2.0,3)",jakarta.xml.bind;ve
+ rsion="[3.0,4)",jakarta.xml.bind.annotation;version="[3.0,4)",jakarta.x
+ ml.bind.annotation.adapters;version="[3.0,4)",jakarta.xml.bind.attachme
+ nt;version="[3.0,4)",javax.xml.datatype,javax.xml.namespace,javax.xml.p
+ arsers,javax.xml.stream,javax.xml.transform,javax.xml.transform.dom,jav
+ ax.xml.transform.sax,javax.xml.transform.stream,javax.xml.validation,or
+ g.w3c.dom,org.xml.sax,org.xml.sax.ext,org.xml.sax.helpers
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: jakarta.xml.bind;uses:="jakarta.xml.bind.annotation.adap
+ ters,jakarta.xml.bind.attachment,javax.xml.namespace,javax.xml.stream,j
+ avax.xml.transform,javax.xml.validation,org.w3c.dom,org.xml.sax";versio
+ n="3.0.0",jakarta.xml.bind.annotation;uses:="jakarta.xml.bind,javax.xml
+ .parsers,javax.xml.transform,javax.xml.transform.dom,org.w3c.dom";versi
+ on="3.0.0",jakarta.xml.bind.annotation.adapters;version="3.0.0",jakarta
+ .xml.bind.attachment;uses:="jakarta.activation";version="3.0.0",jakarta
+ .xml.bind.helpers;uses:="jakarta.xml.bind,jakarta.xml.bind.annotation.a
+ dapters,jakarta.xml.bind.attachment,javax.xml.stream,javax.xml.transfor
+ m,javax.xml.validation,org.w3c.dom,org.xml.sax";version="3.0.0",jakarta
+ .xml.bind.util;uses:="jakarta.xml.bind,javax.xml.transform.sax";version
+ ="3.0.0"
+Bundle-Version: 3.0.0
+

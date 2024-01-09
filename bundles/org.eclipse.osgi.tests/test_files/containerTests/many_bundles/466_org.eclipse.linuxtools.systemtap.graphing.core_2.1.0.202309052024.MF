@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.systemtap.graphing.core;sing
+ leton:=true
+Require-Bundle: org.eclipse.linuxtools.systemtap.structures,org.eclipse.
+ swt
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.linuxtools.systemtap.graphing.core,org.eclip
+ se.linuxtools.systemtap.graphing.core.adapters,org.eclipse.linuxtools.s
+ ystemtap.graphing.core.aggregates,org.eclipse.linuxtools.systemtap.grap
+ hing.core.datasets,org.eclipse.linuxtools.systemtap.graphing.core.datas
+ ets.row,org.eclipse.linuxtools.systemtap.graphing.core.datasets.table,o
+ rg.eclipse.linuxtools.systemtap.graphing.core.filters,org.eclipse.linux
+ tools.systemtap.graphing.core.structures
+Bundle-Version: 2.1.0.202309052024
+

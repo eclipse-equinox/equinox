@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: com.github.jnr.a64asm
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.7))"
+Export-Package: jnr.a64asm;version="1.0.0"
+Bundle-Version: 1.0.0.v20230715-0746
+

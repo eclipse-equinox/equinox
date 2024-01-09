@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.jcodings
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: org.jcodings;version="1.0.58";uses:="org.jcodings.util",
+ org.jcodings.ascii;version="1.0.58",org.jcodings.constants;version="1.0
+ .58";uses:="org.jcodings.util",org.jcodings.exception;version="1.0.58",
+ org.jcodings.specific;version="1.0.58";uses:="org.jcodings,org.jcodings
+ .unicode",org.jcodings.spi;version="1.0.58",org.jcodings.transcode;vers
+ ion="1.0.58";uses:="org.jcodings,org.jcodings.util",org.jcodings.transc
+ ode.specific;version="1.0.58";uses:="org.jcodings.transcode",org.jcodin
+ gs.unicode;version="1.0.58";uses:="org.jcodings",org.jcodings.util;vers
+ ion="1.0.58",tables;version="1.0.58"
+Bundle-Version: 1.0.58
+

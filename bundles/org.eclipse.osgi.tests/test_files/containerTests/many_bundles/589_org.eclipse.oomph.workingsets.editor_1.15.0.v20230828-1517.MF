@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.oomph.workingsets.editor;singleton:=tru
+ e
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.24.0,4.0.0)"
+ ,org.eclipse.core.resources;bundle-version="[3.5.0,4.0.0)";visibility:=
+ reexport,org.eclipse.oomph.workingsets.edit;bundle-version="[1.13.0,2.0
+ .0)";visibility:=reexport,org.eclipse.emf.ecore.xmi;bundle-version="[2.
+ 10.0,3.0.0)";visibility:=reexport,org.eclipse.emf.edit.ui;bundle-versio
+ n="[2.10.0,3.0.0)";visibility:=reexport,org.eclipse.ui.ide;bundle-versi
+ on="[3.5.0,4.0.0)";visibility:=reexport,org.eclipse.oomph.predicates.ed
+ it;bundle-version="[1.15.0,2.0.0)";visibility:=reexport,org.eclipse.oom
+ ph.base.edit;bundle-version="[1.17.0,2.0.0)";visibility:=reexport,org.e
+ clipse.oomph.ui;bundle-version="[1.20.0,2.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.oomph.workingsets.presentation;version="1.15
+ .0"; x-friends:="org.eclipse.oomph.setup.editor"
+Bundle-Version: 1.15.0.v20230828-1517
+

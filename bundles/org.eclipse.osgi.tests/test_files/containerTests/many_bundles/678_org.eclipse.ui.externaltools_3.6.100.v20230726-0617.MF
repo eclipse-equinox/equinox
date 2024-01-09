@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.ui.externaltools; singleton:=true
+Require-Bundle: org.eclipse.ui.ide;bundle-version="[3.2.0,4.0.0)";resolu
+ tion:=optional,org.eclipse.core.variables;bundle-version="[3.2.800,4.0.
+ 0)",org.eclipse.ui;bundle-version="[3.2.0,4.0.0)",org.eclipse.debug.ui;
+ bundle-version="[3.10.0,4.0.0)",org.eclipse.core.runtime;bundle-version
+ ="[3.29.0,4.0.0)",org.eclipse.core.externaltools;bundle-version="[1.0.3
+ 00,2.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.ui.externaltools.internal.launchConfiguratio
+ ns;x-friends:="org.eclipse.ant.ui",org.eclipse.ui.externaltools.interna
+ l.menu;x-internal:=true,org.eclipse.ui.externaltools.internal.model;x-f
+ riends:="org.eclipse.ant.ui",org.eclipse.ui.externaltools.internal.prog
+ ram.launchConfigurations;x-friends:="org.eclipse.ant.ui",org.eclipse.ui
+ .externaltools.internal.ui;x-friends:="org.eclipse.ant.ui",org.eclipse.
+ ui.externaltools.internal.variables;x-internal:=true
+Bundle-Version: 3.6.100.v20230726-0617
+

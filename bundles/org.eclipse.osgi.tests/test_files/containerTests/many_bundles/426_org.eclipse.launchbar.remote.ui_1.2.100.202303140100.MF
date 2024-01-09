@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.launchbar.remote.ui;singleton:=true
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.remo
+ te.core;bundle-version="2.0.0",org.eclipse.remote.ui;bundle-version="2.
+ 0.0",org.eclipse.launchbar.core;bundle-version="2.0.0",org.eclipse.laun
+ chbar.ui;bundle-version="2.0.0",org.eclipse.launchbar.remote.core;bundl
+ e-version="1.0.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.launchbar.remote.ui
+Bundle-Version: 1.2.100.202303140100
+

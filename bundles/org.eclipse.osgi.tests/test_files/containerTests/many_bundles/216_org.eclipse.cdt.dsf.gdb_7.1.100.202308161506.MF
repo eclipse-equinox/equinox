@@ -1,0 +1,34 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.cdt.dsf.gdb;singleton:=true
+Require-Bundle: org.eclipse.core.runtime,org.eclipse.cdt.dsf,org.eclipse
+ .debug.core,org.eclipse.cdt.core;bundle-version="8.3.0",org.eclipse.cdt
+ .debug.core,org.eclipse.core.variables,org.eclipse.cdt.launch;bundle-ve
+ rsion="10.3.0",org.eclipse.cdt.gdb;bundle-version="7.0.0",org.eclipse.c
+ ore.resources,org.eclipse.launchbar.core;bundle-version="2.0.0";visibil
+ ity:=reexport,org.eclipse.cdt.core.native;bundle-version="[6.0.0,7.0.0)
+ ",org.eclipse.cdt.native.serial;bundle-version="1.1.100"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.cdt.dsf.gdb,org.eclipse.cdt.dsf.gdb.actions,
+ org.eclipse.cdt.dsf.gdb.breakpoints,org.eclipse.cdt.dsf.gdb.internal; x
+ -friends:="org.eclipse.cdt.debug.gdbjtag.ui,  org.eclipse.cdt.dsf.gdb.u
+ i,  org.eclipse.cdt.tests.dsf.gdb,  org.eclipse.cdt.examples.dsf.gdb",o
+ rg.eclipse.cdt.dsf.gdb.internal.commands;x-friends:="org.eclipse.cdt.ds
+ f.gdb.ui",org.eclipse.cdt.dsf.gdb.internal.launching;x-internal:=true,o
+ rg.eclipse.cdt.dsf.gdb.internal.memory;x-friends:="org.eclipse.cdt.dsf.
+ gdb.ui",org.eclipse.cdt.dsf.gdb.internal.service;x-friends:="org.eclips
+ e.cdt.dsf.gdb.ui,org.eclipse.cdt.tests.dsf.gdb",org.eclipse.cdt.dsf.gdb
+ .internal.service.command.commands;x-internal:=true,org.eclipse.cdt.dsf
+ .gdb.internal.service.command.events;x-internal:=true,org.eclipse.cdt.d
+ sf.gdb.internal.service.command.output;x-internal:=true,org.eclipse.cdt
+ .dsf.gdb.internal.service.control;x-internal:=true,org.eclipse.cdt.dsf.
+ gdb.internal.tracepointactions;x-friends:="org.eclipse.cdt.dsf.gdb.ui,o
+ rg.eclipse.cdt.tests.dsf.gdb",org.eclipse.cdt.dsf.gdb.launching,org.ecl
+ ipse.cdt.dsf.gdb.memory,org.eclipse.cdt.dsf.gdb.service,org.eclipse.cdt
+ .dsf.gdb.service.command,org.eclipse.cdt.dsf.gdb.service.extensions,org
+ .eclipse.cdt.dsf.mi.service,org.eclipse.cdt.dsf.mi.service.breakpoint.a
+ ctions,org.eclipse.cdt.dsf.mi.service.command,org.eclipse.cdt.dsf.mi.se
+ rvice.command.commands,org.eclipse.cdt.dsf.mi.service.command.events,or
+ g.eclipse.cdt.dsf.mi.service.command.output
+Bundle-Version: 7.1.100.202308161506
+

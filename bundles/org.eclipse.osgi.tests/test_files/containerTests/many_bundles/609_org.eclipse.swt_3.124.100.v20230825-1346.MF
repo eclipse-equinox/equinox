@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.swt; singleton:=true
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.swt,org.eclipse.swt.accessibility,org.eclips
+ e.swt.awt,org.eclipse.swt.browser,org.eclipse.swt.custom,org.eclipse.sw
+ t.dnd,org.eclipse.swt.events,org.eclipse.swt.graphics,org.eclipse.swt.i
+ nternal;x-friends:="org.eclipse.ui,org.eclipse.swt.tools.spies",org.ecl
+ ipse.swt.internal.image;x-internal:=true,org.eclipse.swt.layout,org.ecl
+ ipse.swt.opengl,org.eclipse.swt.printing,org.eclipse.swt.program,org.ec
+ lipse.swt.widgets
+Bundle-Version: 3.124.100.v20230825-1346
+

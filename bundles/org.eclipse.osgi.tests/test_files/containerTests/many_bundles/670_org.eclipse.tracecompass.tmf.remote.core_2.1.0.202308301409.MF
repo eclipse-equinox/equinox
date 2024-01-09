@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.tracecompass.tmf.remote.core;singleton:
+ =true
+Require-Bundle: org.eclipse.core.runtime,org.eclipse.core.commands,org.e
+ clipse.remote.core;bundle-version="2.0.0",org.eclipse.remote.jsch.core,
+ org.eclipse.tracecompass.common.core,org.eclipse.jdt.annotation;bundle-
+ version="[2.0.0,3.0.0)";resolution:=optional
+Import-Package: com.google.common.base;version="12.0.0",com.google.commo
+ n.collect;version="12.0.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.tracecompass.internal.tmf.remote.core;x-frie
+ nds:="org.eclipse.tracecompass.tmf.remote.core.tests",org.eclipse.trace
+ compass.internal.tmf.remote.core.messages;x-internal:=true,org.eclipse.
+ tracecompass.internal.tmf.remote.core.preferences;x-friends:="org.eclip
+ se.tracecompass.tmf.remote.ui",org.eclipse.tracecompass.internal.tmf.re
+ mote.core.shell;x-friends:="org.eclipse.tracecompass.tmf.remote.core.te
+ sts",org.eclipse.tracecompass.tmf.remote.core.proxy,org.eclipse.traceco
+ mpass.tmf.remote.core.shell
+Bundle-Version: 2.1.0.202308301409
+

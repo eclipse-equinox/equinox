@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.eclipse.userstorage.ui;singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.4.0,4.0.0)",
+ org.eclipse.ui;bundle-version="[3.6.0,4.0.0)",org.eclipse.userstorage;b
+ undle-version="[1.0.0,2.0.0)";visibility:=reexport,org.eclipse.equinox.
+ security;bundle-version="[1.0.0,2.0.0)"
+Import-Package: org.eclipse.userstorage.internal,org.apache.http;version
+ ="[4.3.0,5.0.0)",org.apache.http.client.fluent;version="[4.3.0,5.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.userstorage.ui;version="1.0.0"; uses:="org.e
+ clipse.swt.graphics,  org.eclipse.swt.widgets,  org.eclipse.jface.dialo
+ gs,  org.eclipse.userstorage,  org.eclipse.jface.viewers",org.eclipse.u
+ serstorage.ui.internal;version="1.0.0";x-internal:=true; uses:="org.ecl
+ ipse.swt.events,  org.eclipse.swt.layout,  org.eclipse.swt.graphics,  o
+ rg.eclipse.userstorage.ui,  org.eclipse.swt.widgets,  org.eclipse.users
+ torage.spi,  org.eclipse.jface.dialogs,  org.eclipse.core.commands,  or
+ g.eclipse.jface.viewers,  org.eclipse.ui.plugin,  org.osgi.framework,  
+ org.eclipse.ui,  org.eclipse.core.runtime,  org.eclipse.jface.preferenc
+ e,  org.eclipse.userstorage,  org.eclipse.userstorage.internal"
+Bundle-Version: 1.1.0.v20190307-0457
+

@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.mylyn.commons.net;singleton:=true
+Require-Bundle: org.eclipse.core.net;bundle-version="0.0.0",org.eclipse.
+ core.runtime;bundle-version="0.0.0",org.eclipse.mylyn.commons.core;bund
+ le-version="4.0.0"
+Import-Package: org.apache.commons.httpclient;version="3.1.0",org.apache
+ .commons.httpclient.auth;version="3.1.0",org.apache.commons.httpclient.
+ cookie;version="3.1.0",org.apache.commons.httpclient.methods;version="3
+ .1.0",org.apache.commons.httpclient.methods.multipart;version="3.1.0",o
+ rg.apache.commons.httpclient.params;version="3.1.0",org.apache.commons.
+ httpclient.protocol;version="3.1.0",org.apache.commons.httpclient.util;
+ version="3.1.0",org.apache.commons.lang;version="2.6.0",org.apache.comm
+ ons.logging;version="[1.0.4,2.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.mylyn.commons.net,org.eclipse.mylyn.commons.
+ net.http,org.eclipse.mylyn.internal.commons.net;x-internal:=true,org.ec
+ lipse.mylyn.internal.commons.net.http;x-internal:=true
+Bundle-Version: 4.0.0.v20230804-1109
+

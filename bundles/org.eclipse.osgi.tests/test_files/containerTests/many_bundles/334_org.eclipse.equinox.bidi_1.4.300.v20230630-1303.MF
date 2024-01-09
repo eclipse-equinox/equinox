@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.equinox.bidi;singleton:=true
+Require-Bundle: org.eclipse.equinox.common;bundle-version="3.6.0",org.ec
+ lipse.equinox.registry;bundle-version="3.5.0"
+Import-Package: org.eclipse.osgi.framework.log;version="1.0.0",org.eclip
+ se.osgi.service.localization;version="1.1.0",org.eclipse.osgi.util;vers
+ ion="1.1.0",org.osgi.framework;version="1.5.0",org.osgi.util.tracker;ve
+ rsion="1.4.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.equinox.bidi,org.eclipse.equinox.bidi.advanc
+ ed,org.eclipse.equinox.bidi.custom,org.eclipse.equinox.bidi.internal;x-
+ friends:="org.eclipse.equinox.bidi.tests",org.eclipse.equinox.bidi.inte
+ rnal.consumable;x-internal:=true
+Bundle-Version: 1.4.300.v20230630-1303
+

@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.mylyn.wikitext.tracwiki
+Import-Package: org.eclipse.mylyn.wikitext.parser;version="[3.0,4)",org.
+ eclipse.mylyn.wikitext.parser.markup;version="[3.0,4)",org.eclipse.myly
+ n.wikitext.parser.markup.phrase;version="[3.0,4)",org.eclipse.mylyn.wik
+ itext.parser.markup.token;version="[3.0,4)",org.eclipse.mylyn.wikitext.
+ tracwiki,org.eclipse.mylyn.wikitext.tracwiki.internal.block,org.eclipse
+ .mylyn.wikitext.tracwiki.internal.phrase,org.eclipse.mylyn.wikitext.tra
+ cwiki.internal.token,org.eclipse.mylyn.wikitext.validation;version="[3.
+ 0,4)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
+Export-Package: org.eclipse.mylyn.wikitext.tracwiki.internal.block;x-int
+ ernal:=true;uses:="org.eclipse.mylyn.wikitext.parser.markup";version="3
+ .0.48",org.eclipse.mylyn.wikitext.tracwiki.internal.phrase;x-internal:=
+ true;uses:="org.eclipse.mylyn.wikitext.parser,org.eclipse.mylyn.wikitex
+ t.parser.markup";version="3.0.48",org.eclipse.mylyn.wikitext.tracwiki.i
+ nternal.token;x-internal:=true;uses:="org.eclipse.mylyn.wikitext.parser
+ .markup";version="3.0.48",org.eclipse.mylyn.wikitext.tracwiki.internal.
+ validation;x-internal:=true;uses:="org.eclipse.mylyn.wikitext.parser.ma
+ rkup,org.eclipse.mylyn.wikitext.validation";version="3.0.48",org.eclips
+ e.mylyn.wikitext.tracwiki;uses:="org.eclipse.mylyn.wikitext.parser.mark
+ up";version="3.0.48"
+Bundle-Version: 3.0.48.202308291007
+

@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.cdt.cmake.core;singleton:=true
+Require-Bundle: org.eclipse.core.runtime,org.eclipse.core.resources;bund
+ le-version="3.11.0",org.eclipse.debug.core;bundle-version="3.10.0",org.
+ eclipse.launchbar.core;bundle-version="2.0.0",org.eclipse.cdt.core;bund
+ le-version="5.12.0",org.eclipse.tools.templates.freemarker;bundle-versi
+ on="1.2.200",com.google.gson,org.eclipse.cdt.jsoncdb.core
+Import-Package: org.eclipse.core.variables,org.yaml.snakeyaml;version="[
+ 2.0.0,3.0.0)",org.yaml.snakeyaml.constructor;version="[2.0.0,3.0.0)",or
+ g.yaml.snakeyaml.inspector;version="[2.0.0,3.0.0)",org.yaml.snakeyaml.n
+ odes;version="[2.0.0,3.0.0)",org.yaml.snakeyaml.representer;version="[2
+ .0.0,3.0.0)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.cdt.cmake.core,org.eclipse.cdt.cmake.core.in
+ ternal;x-friends:="org.eclipse.cdt.cmake.ui",org.eclipse.cdt.cmake.core
+ .properties
+Bundle-Version: 1.5.300.202308101338
+

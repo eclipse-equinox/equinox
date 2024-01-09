@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.equinox.p2.transport.ecf
+Require-Bundle: org.eclipse.ecf;bundle-version="3.1.0",org.eclipse.ecf.f
+ iletransfer;bundle-version="4.0.0",org.eclipse.ecf.provider.filetransfe
+ r;bundle-version="3.1.0",org.eclipse.equinox.p2.core;bundle-version="2.
+ 0.100",org.eclipse.equinox.p2.repository;bundle-version="2.1.0",org.ecl
+ ipse.equinox.common;bundle-version="3.6.0",org.eclipse.core.jobs;bundle
+ -version="3.5.100"
+Import-Package: org.eclipse.osgi.util;version="1.1.0",org.osgi.framework
+ ;version="1.6.0",org.osgi.service.packageadmin;version="1.2.0",org.osgi
+ .util.tracker;version="1.5.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.equinox.internal.p2.transport.ecf;x-friends:
+ ="org.eclipse.equinox.p2.discovery.compatibility,org.eclipse.equinox.p2
+ .installer"
+Bundle-Version: 1.4.100.v20230630-1506
+

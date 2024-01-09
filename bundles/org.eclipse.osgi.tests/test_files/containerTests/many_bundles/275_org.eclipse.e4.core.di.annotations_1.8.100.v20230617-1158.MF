@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.e4.core.di.annotations
+Import-Package: javax.inject;version="[1.0.0,2.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.e4.core.di.annotations;version="1.6.0"
+Bundle-Version: 1.8.100.v20230617-1158
+

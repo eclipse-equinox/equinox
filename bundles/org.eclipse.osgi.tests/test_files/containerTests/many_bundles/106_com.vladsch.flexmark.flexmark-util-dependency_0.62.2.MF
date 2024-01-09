@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: com.vladsch.flexmark.flexmark-util-dependency
+Import-Package: com.vladsch.flexmark.util.collection;resolution:=optiona
+ l,com.vladsch.flexmark.util.collection.iteration;resolution:=optional,c
+ om.vladsch.flexmark.util.misc;resolution:=optional
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: com.vladsch.flexmark.util.dependency;version="0.62.2";us
+ es:="com.vladsch.flexmark.util.collection"
+Bundle-Version: 0.62.2
+

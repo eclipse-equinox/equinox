@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: com.carrotsearch.hppc
+Import-Package: com.sun.management;resolution:=optional
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: com.carrotsearch.hppc;version="0.9.1";uses:="com.carrots
+ earch.hppc.comparators,com.carrotsearch.hppc.cursors,com.carrotsearch.h
+ ppc.predicates,com.carrotsearch.hppc.procedures",com.carrotsearch.hppc.
+ comparators;version="0.9.1",com.carrotsearch.hppc.cursors;version="0.9.
+ 1",com.carrotsearch.hppc.predicates;version="0.9.1",com.carrotsearch.hp
+ pc.procedures;version="0.9.1",com.carrotsearch.hppc.sorting;version="0.
+ 9.1"
+Bundle-Version: 0.9.1
+

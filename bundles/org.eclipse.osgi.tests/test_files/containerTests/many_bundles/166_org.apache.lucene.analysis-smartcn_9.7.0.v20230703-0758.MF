@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.apache.lucene.analysis-smartcn
+Import-Package: org.apache.lucene.analysis;version="[9.7,10)",org.apache
+ .lucene.analysis.en;version="[9.7,10)",org.apache.lucene.analysis.token
+ attributes;version="[9.7,10)",org.apache.lucene.analysis.util;version="
+ [9.7,10)",org.apache.lucene.util;version="[9.7,10)",java.io,java.lang,j
+ ava.lang.invoke,java.nio,java.nio.charset,java.nio.file,java.text,java.
+ util
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
+Export-Package: org.apache.lucene.analysis.cn.smart;version="9.7.0";uses
+ :="org.apache.lucene.analysis,org.apache.lucene.analysis.util,org.apach
+ e.lucene.util",org.apache.lucene.analysis.cn.smart.hhmm;version="9.7.0"
+Bundle-Version: 9.7.0.v20230703-0758
+

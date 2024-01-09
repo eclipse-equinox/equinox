@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.tracecompass.ctf.parser
+Require-Bundle: org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)
+ ";resolution:=optional
+Import-Package: org.antlr.runtime;version="3.2.0",org.antlr.runtime.tree
+ ;version="3.2.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.tracecompass.ctf.parser;x-friends:="org.ecli
+ pse.tracecompass.ctf.core,org.eclipse.tracecompass.ctf.parser.tests"
+Bundle-Version: 1.1.1.202308301409
+

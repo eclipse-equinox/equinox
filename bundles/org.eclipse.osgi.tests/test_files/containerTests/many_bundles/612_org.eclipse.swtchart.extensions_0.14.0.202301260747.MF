@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.swtchart.extensions;singleton:=true
+Require-Bundle: org.eclipse.jface,org.eclipse.core.runtime,org.eclipse.s
+ wt,org.eclipse.swtchart;bundle-version="0.14.0",org.eclipse.core.databi
+ nding;bundle-version="1.6.200"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.swtchart.extensions.axisconverter,org.eclips
+ e.swtchart.extensions.barcharts,org.eclipse.swtchart.extensions.charts,
+ org.eclipse.swtchart.extensions.clipboard,org.eclipse.swtchart.extensio
+ ns.core,org.eclipse.swtchart.extensions.dialogs,org.eclipse.swtchart.ex
+ tensions.events,org.eclipse.swtchart.extensions.exceptions,org.eclipse.
+ swtchart.extensions.linecharts,org.eclipse.swtchart.extensions.marker,o
+ rg.eclipse.swtchart.extensions.menu,org.eclipse.swtchart.extensions.men
+ u.toggle,org.eclipse.swtchart.extensions.piecharts,org.eclipse.swtchart
+ .extensions.preferences,org.eclipse.swtchart.extensions.properties,org.
+ eclipse.swtchart.extensions.scattercharts
+Bundle-Version: 0.14.0.202301260747
+

@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.jetty.websocket.core.server
+Import-Package: org.slf4j;version="[1.7,3.0)",java.io,java.lang,java.lan
+ g.invoke,java.net,java.security,java.security.cert,java.util,java.util.
+ concurrent,java.util.concurrent.atomic,java.util.function,java.util.str
+ eam,javax.servlet;version="[4.0.0,5)",javax.servlet.http;version="[4.0.
+ 0,5)",org.eclipse.jetty.http;version="[10.0.13,11)",org.eclipse.jetty.h
+ ttp.pathmap;version="[10.0.13,11)",org.eclipse.jetty.io;version="[10.0.
+ 13,11)",org.eclipse.jetty.server;version="[10.0.13,11)",org.eclipse.jet
+ ty.server.handler;version="[10.0.13,11)",org.eclipse.jetty.util;version
+ ="[10.0.13,11)",org.eclipse.jetty.util.component;version="[10.0.13,11)"
+ ,org.eclipse.jetty.util.compression;version="[10.0.13,11)",org.eclipse.
+ jetty.util.thread;version="[10.0.13,11)",org.eclipse.jetty.websocket.co
+ re;version="[10.0.13,11)",org.eclipse.jetty.websocket.core.exception;ve
+ rsion="[10.0.13,11)",org.eclipse.jetty.websocket.core.internal;version=
+ "[10.0.13,11)",org.slf4j.event;version="[1.7,3.0)",org.slf4j.helpers;ve
+ rsion="[1.7,3.0)",org.slf4j.spi;version="[1.7,3.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.jetty.websocket.core.server;uses:="javax.ser
+ vlet,javax.servlet.http,org.eclipse.jetty.http,org.eclipse.jetty.http.p
+ athmap,org.eclipse.jetty.server,org.eclipse.jetty.server.handler,org.ec
+ lipse.jetty.util.component,org.eclipse.jetty.websocket.core,org.eclipse
+ .jetty.websocket.core.exception";version="10.0.13"
+Bundle-Version: 10.0.13
+

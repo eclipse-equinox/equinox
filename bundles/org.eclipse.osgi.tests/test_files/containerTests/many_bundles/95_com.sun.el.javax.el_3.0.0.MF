@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: com.sun.el.javax.el
+Import-Package: com.sun.el;version="3.0.0",com.sun.el.lang;version="3.0.
+ 0",com.sun.el.parser;version="3.0.0",com.sun.el.stream;version="3.0.0",
+ com.sun.el.util;version="3.0.0",javax.el;version="3.0.0"
+Bundle-ManifestVersion: 2
+Export-Package: javax.el;version="3.0.0",com.sun.el.parser;uses:="javax.
+ el,com.sun.el.lang,com.sun.el.util,com.sun.el";version="3.0.0",com.sun.
+ el.lang;uses:="javax.el,com.sun.el.parser,com.sun.el.util,com.sun.el";v
+ ersion="3.0.0",com.sun.el.stream;uses:="javax.el,com.sun.el.lang";versi
+ on="3.0.0",com.sun.el.util;uses:="javax.el,com.sun.el.lang";version="3.
+ 0.0",com.sun.el;uses:="javax.el,com.sun.el.parser,com.sun.el.lang,com.s
+ un.el.stream,com.sun.el.util";version="3.0.0"
+Bundle-Version: 3.0.0
+

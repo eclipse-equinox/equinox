@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.tracecompass.analysis.counters.ui;singl
+ eton:=true
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.trac
+ ecompass.common.core,org.eclipse.tracecompass.tmf.ui,org.eclipse.tracec
+ ompass.tmf.core,org.eclipse.tracecompass.tmf.ctf.core,org.eclipse.trace
+ compass.analysis.counters.core,org.eclipse.jdt.annotation;bundle-versio
+ n="[2.0.0,3.0.0)";resolution:=optional
+Import-Package: com.google.common.base,com.google.common.collect,com.goo
+ gle.common.primitives,org.apache.commons.lang3
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.tracecompass.analysis.counters.ui.views,org.
+ eclipse.tracecompass.internal.analysis.counters.ui;x-internal:=true
+Bundle-Version: 2.1.0.202308301409
+

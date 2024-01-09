@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.tracecompass.tmf.remote.ui;singleton:=t
+ rue
+Require-Bundle: org.eclipse.core.runtime,org.eclipse.core.filesystem,org
+ .eclipse.core.resources,org.eclipse.remote.core;bundle-version="2.0.0",
+ org.eclipse.remote.ui;bundle-version="2.0.0",org.eclipse.remote.jsch.ui
+ ,org.eclipse.tracecompass.tmf.core,org.eclipse.tracecompass.tmf.ui,org.
+ eclipse.tracecompass.common.core,org.eclipse.tracecompass.tmf.remote.co
+ re,org.eclipse.ui,org.eclipse.ui.ide,org.eclipse.ui.views,org.eclipse.j
+ dt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.tracecompass.internal.tmf.remote.ui;x-intern
+ al:=true,org.eclipse.tracecompass.internal.tmf.remote.ui.messages;x-int
+ ernal:=true,org.eclipse.tracecompass.internal.tmf.remote.ui.preferences
+ ;x-internal:=true,org.eclipse.tracecompass.internal.tmf.remote.ui.wizar
+ ds.fetch;x-friends:="org.eclipse.tracecompass.lttng2.control.ui",org.ec
+ lipse.tracecompass.internal.tmf.remote.ui.wizards.fetch.model;x-friends
+ :="org.eclipse.tracecompass.tmf.remote.ui.tests,org.eclipse.tracecompas
+ s.lttng2.control.ui",org.eclipse.tracecompass.internal.tmf.remote.ui.wi
+ zards.fetch.preferences;x-internal:=true
+Bundle-Version: 1.1.0.202308301409
+

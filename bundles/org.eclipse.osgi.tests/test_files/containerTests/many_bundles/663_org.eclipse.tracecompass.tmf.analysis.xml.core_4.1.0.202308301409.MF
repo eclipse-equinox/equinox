@@ -1,0 +1,43 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.tracecompass.tmf.analysis.xml.core;sing
+ leton:=true
+Require-Bundle: org.eclipse.core.runtime,org.eclipse.tracecompass.common
+ .core,org.eclipse.tracecompass.tmf.core,org.eclipse.tracecompass.datast
+ ore.core,org.eclipse.tracecompass.segmentstore.core,org.eclipse.traceco
+ mpass.analysis.timing.core,org.eclipse.core.commands,com.google.guava,o
+ rg.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=op
+ tional,org.mozilla.javascript;bundle-version="1.7.10"
+Import-Package: com.google.common.base,com.google.common.collect,org.apa
+ che.commons.io,org.apache.commons.lang3
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.tracecompass.internal.tmf.analysis.xml.core;
+ x-friends:="org.eclipse.tracecompass.tmf.analysis.xml.core.tests",org.e
+ clipse.tracecompass.internal.tmf.analysis.xml.core.fsm.compile;x-friend
+ s:="org.eclipse.tracecompass.tmf.analysis.xml.core.tests,org.eclipse.tr
+ acecompass.tmf.analysis.xml.ui",org.eclipse.tracecompass.internal.tmf.a
+ nalysis.xml.core.fsm.model;x-friends:="org.eclipse.tracecompass.tmf.ana
+ lysis.xml.core.tests,org.eclipse.tracecompass.tmf.analysis.xml.ui",org.
+ eclipse.tracecompass.internal.tmf.analysis.xml.core.fsm.model.runtime;x
+ -friends:="org.eclipse.tracecompass.tmf.analysis.xml.core.tests,org.ecl
+ ipse.tracecompass.tmf.analysis.xml.ui",org.eclipse.tracecompass.interna
+ l.tmf.analysis.xml.core.fsm.model.values;x-friends:="org.eclipse.tracec
+ ompass.tmf.analysis.xml.core.tests,org.eclipse.tracecompass.tmf.analysi
+ s.xml.ui",org.eclipse.tracecompass.internal.tmf.analysis.xml.core.fsm.m
+ odule;x-friends:="org.eclipse.tracecompass.tmf.analysis.xml.core.tests,
+ org.eclipse.tracecompass.tmf.analysis.xml.ui",org.eclipse.tracecompass.
+ internal.tmf.analysis.xml.core.fsm.module.pattern;x-internal:=true,org.
+ eclipse.tracecompass.internal.tmf.analysis.xml.core.module; x-friends:=
+ "org.eclipse.tracecompass.tmf.analysis.xml.core.tests,  org.eclipse.tra
+ cecompass.tmf.analysis.xml.ui,  org.eclipse.tracecompass.tmf.analysis.x
+ ml.ui.swtbot.tests,  org.eclipse.tracecompass.tmf.analysis.xml.ui.tests
+ ",org.eclipse.tracecompass.internal.tmf.analysis.xml.core.output;x-frie
+ nds:="org.eclipse.tracecompass.tmf.analysis.xml.ui,org.eclipse.tracecom
+ pass.tmf.analysis.xml.core.tests",org.eclipse.tracecompass.internal.tmf
+ .analysis.xml.core.pattern.stateprovider;x-friends:="org.eclipse.tracec
+ ompass.tmf.analysis.xml.ui,org.eclipse.tracecompass.tmf.analysis.xml.co
+ re.tests",org.eclipse.tracecompass.internal.tmf.analysis.xml.core.segme
+ nt;x-friends:="org.eclipse.tracecompass.tmf.analysis.xml.core.tests",or
+ g.eclipse.tracecompass.tmf.analysis.xml.core.module
+Bundle-Version: 4.1.0.202308301409
+

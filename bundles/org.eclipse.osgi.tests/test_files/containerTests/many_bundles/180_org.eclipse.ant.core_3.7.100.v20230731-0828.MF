@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.ant.core; singleton:=true
+Require-Bundle: org.eclipse.core.variables;bundle-version="[3.1.0,4.0.0)
+ ",org.eclipse.core.runtime;bundle-version="[3.29.0,4.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.ant.core,org.eclipse.ant.internal.core; x-fr
+ iends:="org.eclipse.ant.ui,  org.eclipse.ant.launching,  org.eclipse.an
+ t.tests.ui,  org.eclipse.ant.tests.core",org.eclipse.ant.internal.core.
+ ant;x-friends:="org.eclipse.ant.launching",org.eclipse.ant.internal.cor
+ e.contentDescriber;x-internal:=true
+Bundle-Version: 3.7.100.v20230731-0828
+

@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: jakarta.activation
+Bundle-Version: 2.0.0.v20221203-1659
+Import-Package: com.sun.activation.registries;resolution:=optional
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: jakarta.activation;version="2.0.0"
+

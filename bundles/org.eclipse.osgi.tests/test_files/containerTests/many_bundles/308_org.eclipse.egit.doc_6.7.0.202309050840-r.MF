@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.egit.doc;singleton:=true
+Bundle-ManifestVersion: 2
+Bundle-Version: 6.7.0.202309050840-r
+

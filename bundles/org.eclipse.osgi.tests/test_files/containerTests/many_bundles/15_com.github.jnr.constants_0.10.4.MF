@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: com.github.jnr.constants
+Bundle-ManifestVersion: 2
+Export-Package: jnr.constants;version="0.10.4",jnr.constants.platform;ve
+ rsion="0.10.4",jnr.constants.platform.aix;version="0.10.4",jnr.constant
+ s.platform.darwin;version="0.10.4",jnr.constants.platform.dragonflybsd;
+ version="0.10.4",jnr.constants.platform.fake;version="0.10.4",jnr.const
+ ants.platform.freebsd;version="0.10.4",jnr.constants.platform.freebsd.a
+ arch64;version="0.10.4",jnr.constants.platform.linux;version="0.10.4",j
+ nr.constants.platform.linux.aarch64;version="0.10.4",jnr.constants.plat
+ form.linux.loongarch64;version="0.10.4",jnr.constants.platform.linux.mi
+ ps64el;version="0.10.4",jnr.constants.platform.linux.powerpc64;version=
+ "0.10.4",jnr.constants.platform.linux.s390x;version="0.10.4",jnr.consta
+ nts.platform.openbsd;version="0.10.4",jnr.constants.platform.solaris;ve
+ rsion="0.10.4",jnr.constants.platform.windows;version="0.10.4"
+Bundle-Version: 0.10.4
+

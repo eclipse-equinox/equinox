@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.mylyn.wikitext.markdown.ui;singleton:=t
+ rue
+Require-Bundle: org.eclipse.mylyn.wikitext;bundle-version="3.0.48",org.e
+ clipse.mylyn.wikitext.markdown;bundle-version="3.0.48",org.eclipse.myly
+ n.wikitext.ui;bundle-version="3.0.48"
+Bundle-ManifestVersion: 2
+Bundle-Version: 3.0.48.202308291007
+

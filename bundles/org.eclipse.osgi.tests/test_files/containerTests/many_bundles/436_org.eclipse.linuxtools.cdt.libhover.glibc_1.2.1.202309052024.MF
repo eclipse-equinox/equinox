@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.cdt.libhover.glibc;singleton
+ :=true
+Require-Bundle: org.eclipse.linuxtools.cdt.libhover.library.docs;bundle-
+ version="1.0.0",org.eclipse.linuxtools.cdt.libhover;bundle-version="1.1
+ .0"
+Bundle-ManifestVersion: 2
+Bundle-Version: 1.2.1.202309052024
+

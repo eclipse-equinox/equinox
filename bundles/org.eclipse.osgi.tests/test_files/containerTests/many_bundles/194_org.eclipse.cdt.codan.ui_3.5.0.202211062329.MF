@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.cdt.codan.ui; singleton:=true
+Require-Bundle: org.eclipse.cdt.codan.core,org.eclipse.cdt.core,org.ecli
+ pse.cdt.ui,org.eclipse.core.filesystem,org.eclipse.core.resources,org.e
+ clipse.core.runtime,org.eclipse.jface.text,org.eclipse.ui,org.eclipse.u
+ i.console,org.eclipse.ui.editors,org.eclipse.ui.ide,org.eclipse.ui.work
+ bench.texteditor
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.cdt.codan.internal.ui;x-friends:="org.eclips
+ e.cdt.codan.ui.cxx",org.eclipse.cdt.codan.internal.ui.actions;x-friends
+ :="org.eclipse.cdt.codan.ui.cxx",org.eclipse.cdt.codan.internal.ui.dial
+ ogs;x-friends:="org.eclipse.cdt.codan.ui.cxx",org.eclipse.cdt.codan.int
+ ernal.ui.preferences;x-friends:="org.eclipse.cdt.codan.ui.cxx",org.ecli
+ pse.cdt.codan.internal.ui.views;x-internal:=true,org.eclipse.cdt.codan.
+ internal.ui.widgets;x-internal:=true,org.eclipse.cdt.codan.ui,org.eclip
+ se.cdt.codan.ui.handlers
+Bundle-Version: 3.5.0.202211062329
+

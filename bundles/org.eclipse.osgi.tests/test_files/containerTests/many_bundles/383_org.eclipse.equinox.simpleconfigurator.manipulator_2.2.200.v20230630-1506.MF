@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.equinox.simpleconfigurator.manipulator;
+ singleton:=true
+Require-Bundle: org.eclipse.equinox.common;bundle-version="3.5.0"
+Import-Package: org.eclipse.equinox.frameworkadmin;version="[2.0.0,3.0.0
+ )",org.eclipse.equinox.internal.frameworkadmin.equinox,org.eclipse.equi
+ nox.internal.frameworkadmin.utils,org.eclipse.equinox.internal.provisio
+ nal.configuratormanipulator,org.eclipse.equinox.internal.provisional.fr
+ ameworkadmin,org.eclipse.equinox.internal.simpleconfigurator,org.eclips
+ e.equinox.internal.simpleconfigurator.utils,org.osgi.framework;version=
+ "1.3.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.equinox.internal.simpleconfigurator.manipula
+ tor;x-friends:="org.eclipse.equinox.p2.touchpoint.eclipse",org.eclipse.
+ equinox.simpleconfigurator.manipulator;version="2.0.0"
+Bundle-Version: 2.2.200.v20230630-1506
+

@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.ui.net; singleton:=true
+Require-Bundle: org.eclipse.ui;bundle-version="[3.3.0,4.0.0)",org.eclips
+ e.core.runtime;bundle-version="[3.29.0,4.0.0)",org.eclipse.core.net;bun
+ dle-version="[1.0.0,2.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.ui.internal.net;x-internal:=true,org.eclipse
+ .ui.internal.net.auth;x-internal:=true
+Bundle-Version: 1.5.100.v20230726-0617
+

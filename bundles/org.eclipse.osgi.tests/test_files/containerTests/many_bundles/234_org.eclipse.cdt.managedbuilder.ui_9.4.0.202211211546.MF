@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.cdt.managedbuilder.ui; singleton:=true
+Require-Bundle: org.eclipse.core.resources;bundle-version="[3.2.0,4.0.0)
+ ",org.eclipse.core.runtime;bundle-version="[3.2.0,4.0.0)",org.eclipse.c
+ ore.variables;bundle-version="[3.1.100,4.0.0)",org.eclipse.cdt.core;bun
+ dle-version="[8.0.0,9.0.0)",org.eclipse.cdt.make.core,org.eclipse.cdt.m
+ ake.ui,org.eclipse.cdt.managedbuilder.core;bundle-version="[9.0.0,10.0.
+ 0]",org.eclipse.cdt.ui;bundle-version="[8.0.0,9.0.0)",org.eclipse.ui;bu
+ ndle-version="[3.2.0,4.0.0)",org.eclipse.ui.console;bundle-version="[3.
+ 5.100,4.0.0)",org.eclipse.ui.ide;bundle-version="[3.2.0,4.0.0)",org.ecl
+ ipse.ui.navigator;bundle-version="[3.2.0,4.0.0)";resolution:=optional,o
+ rg.eclipse.core.expressions
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.cdt.managedbuilder.internal.ui.commands;x-in
+ ternal:=true,org.eclipse.cdt.managedbuilder.internal.ui.workingsets;x-i
+ nternal:=true,org.eclipse.cdt.managedbuilder.ui.preferences,org.eclipse
+ .cdt.managedbuilder.ui.properties,org.eclipse.cdt.managedbuilder.ui.wiz
+ ards
+Bundle-Version: 9.4.0.202211211546
+

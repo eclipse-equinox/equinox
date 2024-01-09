@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.changelog.core;singleton:=tr
+ ue
+Require-Bundle: org.eclipse.team.ui,org.eclipse.ui.ide,org.eclipse.jface
+ .text;bundle-version="3.3.0",org.eclipse.ui.workbench.texteditor,org.ec
+ lipse.core.runtime;bundle-version="3.3.100",org.eclipse.ui;bundle-versi
+ on="3.3.0",org.eclipse.ui.editors;bundle-version="3.3.0",org.eclipse.te
+ am.core,org.eclipse.ui.navigator,org.eclipse.compare,org.eclipse.core.r
+ esources,org.eclipse.ui.genericeditor;bundle-version="1.0.0"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.linuxtools.changelog.core
+Bundle-Version: 3.0.0.202309052024
+

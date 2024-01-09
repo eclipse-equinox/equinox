@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.eclipse.linuxtools.systemtap.ui.doc;singleton:=
+ true
+Bundle-Version: 2.6.5.202309052024
+Require-Bundle: org.eclipse.help
+

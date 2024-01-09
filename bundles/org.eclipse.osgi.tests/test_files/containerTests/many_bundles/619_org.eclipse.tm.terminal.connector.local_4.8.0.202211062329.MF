@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.tm.terminal.connector.local;singleton:=
+ true
+Require-Bundle: org.eclipse.core.expressions;bundle-version="3.4.400",or
+ g.eclipse.core.resources;bundle-version="3.8.1";resolution:=optional,or
+ g.eclipse.core.runtime;bundle-version="3.8.0",org.eclipse.core.variable
+ s;bundle-version="3.2.600",org.eclipse.debug.ui;bundle-version="3.8.1";
+ resolution:=optional,org.eclipse.tm.terminal.view.core;bundle-version="
+ 4.5.0";resolution:=optional,org.eclipse.tm.terminal.view.ui;bundle-vers
+ ion="4.5.0";resolution:=optional,org.eclipse.tm.terminal.connector.proc
+ ess;bundle-version="4.5.0",org.eclipse.tm.terminal.control;bundle-versi
+ on="4.5.0",org.eclipse.ui;bundle-version="3.8.0"
+Import-Package: org.eclipse.cdt.utils.pty;mandatory:=native
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.tm.terminal.connector.local.activator;x-inte
+ rnal:=true,org.eclipse.tm.terminal.connector.local.controls,org.eclipse
+ .tm.terminal.connector.local.launcher
+Bundle-Version: 4.8.0.202211062329
+

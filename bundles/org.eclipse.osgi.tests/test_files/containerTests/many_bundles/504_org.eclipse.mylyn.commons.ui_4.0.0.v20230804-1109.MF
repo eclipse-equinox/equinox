@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.mylyn.commons.ui;singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="0.0.0",org.ecli
+ pse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional,
+ org.eclipse.mylyn.commons.core;bundle-version="4.0.0",org.eclipse.mylyn
+ .commons.screenshots;bundle-version="4.0.0",org.eclipse.ui;bundle-versi
+ on="0.0.0",org.eclipse.ui.forms;bundle-version="0.0.0"
+Import-Package: org.apache.commons.lang.reflect;version="2.6.0",org.w3c.
+ dom.css
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.mylyn.commons.ui,org.eclipse.mylyn.commons.u
+ i.actions,org.eclipse.mylyn.commons.ui.compatibility,org.eclipse.mylyn.
+ commons.ui.dialogs,org.eclipse.mylyn.commons.ui.wizard,org.eclipse.myly
+ n.internal.commons.ui;x-internal:=true
+Bundle-Version: 4.0.0.v20230804-1109
+

@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.eclipse.cdt.platform.branding;singleton:=true
+Bundle-Version: 11.3.0.202307110141
+

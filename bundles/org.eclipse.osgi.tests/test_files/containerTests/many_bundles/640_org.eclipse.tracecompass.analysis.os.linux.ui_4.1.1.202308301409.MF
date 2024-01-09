@@ -1,0 +1,44 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.tracecompass.analysis.os.linux.ui;singl
+ eton:=true
+Require-Bundle: org.eclipse.ui,org.eclipse.ui.ide,org.eclipse.core.resou
+ rces,org.eclipse.core.runtime,org.eclipse.tracecompass.common.core,org.
+ eclipse.tracecompass.analysis.os.linux.core,org.eclipse.tracecompass.tm
+ f.core,org.eclipse.tracecompass.tmf.ui,org.eclipse.tracecompass.tmf.ctf
+ .core,org.eclipse.tracecompass.segmentstore.core,org.eclipse.tracecompa
+ ss.analysis.timing.core,org.eclipse.tracecompass.analysis.timing.ui,org
+ .eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=opti
+ onal
+Import-Package: com.google.common.annotations,com.google.common.base,com
+ .google.common.collect,org.eclipse.swtchart
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.tracecompass.internal.analysis.os.linux.ui;x
+ -friends:="org.eclipse.tracecompass.analysis.os.linux.ui.swtbot.tests",
+ org.eclipse.tracecompass.internal.analysis.os.linux.ui.actions;x-friend
+ s:="org.eclipse.tracecompass.analysis.callstack.ui",org.eclipse.traceco
+ mpass.internal.analysis.os.linux.ui.perspectives;x-internal:=true,org.e
+ clipse.tracecompass.internal.analysis.os.linux.ui.views.controlflow; x-
+ friends:="org.eclipse.tracecompass.analysis.os.linux.ui.swtbot.tests,  
+ org.eclipse.tracecompass.analysis.os.linux.ui.tests,  org.eclipse.trace
+ compass.lttng2.kernel.ui.swtbot.tests,  org.eclipse.tracecompass.lttng2
+ .kernel.ui",org.eclipse.tracecompass.internal.analysis.os.linux.ui.view
+ s.controlflow.filters;x-internal:=true,org.eclipse.tracecompass.interna
+ l.analysis.os.linux.ui.views.cpuusage;x-friends:="org.eclipse.tracecomp
+ ass.analysis.os.linux.ui.swtbot.tests,org.eclipse.tracecompass.lttng2.k
+ ernel.ui.swtbot.tests",org.eclipse.tracecompass.internal.analysis.os.li
+ nux.ui.views.io.diskioactivity;x-friends:="org.eclipse.tracecompass.ana
+ lysis.os.linux.ui.swtbot.tests,org.eclipse.tracecompass.lttng2.kernel.u
+ i.swtbot.tests",org.eclipse.tracecompass.internal.analysis.os.linux.ui.
+ views.kernelmemoryusage;x-friends:="org.eclipse.tracecompass.analysis.o
+ s.linux.ui.swtbot.tests,org.eclipse.tracecompass.lttng2.kernel.ui.swtbo
+ t.tests",org.eclipse.tracecompass.internal.analysis.os.linux.ui.views.l
+ atency;x-friends:="org.eclipse.tracecompass.analysis.os.linux.ui.swtbot
+ .tests",org.eclipse.tracecompass.internal.analysis.os.linux.ui.views.me
+ mory;x-internal:=true,org.eclipse.tracecompass.internal.analysis.os.lin
+ ux.ui.views.resources; x-friends:="org.eclipse.tracecompass.analysis.os
+ .linux.ui.swtbot.tests,  org.eclipse.tracecompass.analysis.os.linux.ui.
+ tests,  org.eclipse.tracecompass.lttng2.kernel.ui.swtbot.tests,  org.ec
+ lipse.tracecompass.lttng2.kernel.ui"
+Bundle-Version: 4.1.1.202308301409
+

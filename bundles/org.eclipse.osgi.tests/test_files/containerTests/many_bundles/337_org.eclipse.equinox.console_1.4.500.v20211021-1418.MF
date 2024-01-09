@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-SymbolicName: org.eclipse.equinox.console
+Import-Package: org.apache.felix.service.command;version="[1.0,2.0)",org
+ .eclipse.osgi.framework.console,org.eclipse.osgi.report.resolution;vers
+ ion="[1.0,2.0)",org.eclipse.osgi.service.environment,org.eclipse.osgi.u
+ til,org.osgi.framework,org.osgi.framework.hooks.resolver;version="[1.0,
+ 2.0)",org.osgi.framework.namespace;version="1.0.0",org.osgi.framework.s
+ tartlevel;version="[1.0,2.0)",org.osgi.framework.wiring;version="1.1.0"
+ ,org.osgi.resource;version="1.0.0",org.osgi.service.cm;version="[1.4,2.
+ 0)";resolution:=optional,org.osgi.service.condpermadmin,org.osgi.servic
+ e.packageadmin,org.osgi.service.permissionadmin,org.osgi.service.startl
+ evel,org.osgi.util.tracker
+Bundle-ManifestVersion: 2
+Require-Capability: org.apache.felix.gogo;filter:="(org.apache.felix.gog
+ o=runtime.implementation)",org.apache.felix.gogo;filter:="(org.apache.f
+ elix.gogo=shell.implementation)"
+Export-Package: org.eclipse.equinox.console.common,org.eclipse.equinox.c
+ onsole.common.terminal,org.eclipse.equinox.console.completion.common
+Bundle-Version: 1.4.500.v20211021-1418
+

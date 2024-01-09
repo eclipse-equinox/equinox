@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.tukaani.xz
+Bundle-ManifestVersion: 2
+Export-Package: org.tukaani.xz
+Bundle-Version: 1.9
+

@@ -1,0 +1,77 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.debug.ui; singleton:=true
+Require-Bundle: org.eclipse.core.variables;bundle-version="[3.2.800,4.0.
+ 0)",org.eclipse.ui;bundle-version="[3.115.0,4.0.0)",org.eclipse.ui.cons
+ ole;bundle-version="[3.13.0,4.0.0)",org.eclipse.help;bundle-version="[3
+ .4.0,4.0.0)",org.eclipse.debug.core;bundle-version="[3.9.0,4.0.0)";visi
+ bility:=reexport,org.eclipse.jface.text;bundle-version="[3.5.0,4.0.0)",
+ org.eclipse.ui.workbench.texteditor;bundle-version="[3.5.0,4.0.0)",org.
+ eclipse.ui.ide;bundle-version="[3.5.0,4.0.0)",org.eclipse.ui.editors;bu
+ ndle-version="[3.5.0,4.0.0)",org.eclipse.core.runtime;bundle-version="[
+ 3.29.0,4.0.0)",org.eclipse.core.filesystem;bundle-version="[1.2.0,2.0.0
+ )",org.eclipse.e4.ui.services;bundle-version="[1.3.700,2.0.0)"
+Import-Package: org.eclipse.ui.forms.widgets
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.debug.internal.ui; x-friends:="org.eclipse.j
+ dt.debug.ui,  org.eclipse.wst.jsdt.debug.ui,  org.eclipse.jdt.debug.tes
+ ts,  org.eclipse.debug.tests,  org.eclipse.debug.examples.ui,  org.ecli
+ pse.debug.examples.mixedmode,  org.eclipse.debug.ui.launchview",org.ecl
+ ipse.debug.internal.ui.actions;x-internal:=true,org.eclipse.debug.inter
+ nal.ui.actions.breakpointGroups;x-internal:=true,org.eclipse.debug.inte
+ rnal.ui.actions.breakpointSortBy;x-internal:=true,org.eclipse.debug.int
+ ernal.ui.actions.breakpoints;x-friends:="org.eclipse.jdt.debug.ui",org.
+ eclipse.debug.internal.ui.actions.expressions;x-internal:=true,org.ecli
+ pse.debug.internal.ui.actions.variables;x-internal:=true,org.eclipse.de
+ bug.internal.ui.actions.variables.details;x-internal:=true,org.eclipse.
+ debug.internal.ui.breakpoints.provisional; x-friends:="org.eclipse.debu
+ g.examples.ui,  org.eclipse.jdt.debug.ui,  org.eclipse.cdt.dsf.ui,  org
+ .eclipse.cdt.dsf.gdb.ui,  org.eclipse.debug.tests",org.eclipse.debug.in
+ ternal.ui.commands.actions;x-internal:=true,org.eclipse.debug.internal.
+ ui.contextlaunching;x-internal:=true,org.eclipse.debug.internal.ui.cont
+ exts;x-internal:=true,org.eclipse.debug.internal.ui.elements.adapters;x
+ -friends:="org.eclipse.jdt.debug.ui",org.eclipse.debug.internal.ui.grou
+ ps;x-friends:="org.eclipse.debug.ui",org.eclipse.debug.internal.ui.hove
+ r;x-internal:=true,org.eclipse.debug.internal.ui.importexport.breakpoin
+ ts;x-internal:=true,org.eclipse.debug.internal.ui.importexport.launchco
+ nfigurations;x-internal:=true,org.eclipse.debug.internal.ui.launchConfi
+ gurations;x-friends:="org.eclipse.debug.tests",org.eclipse.debug.intern
+ al.ui.memory;x-internal:=true,org.eclipse.debug.internal.ui.memory.prov
+ isional;x-internal:=true,org.eclipse.debug.internal.ui.model.elements;x
+ -friends:="org.eclipse.debug.examples.ui,org.eclipse.jdt.debug.ui,org.e
+ clipse.wst.jsdt.debug.ui",org.eclipse.debug.internal.ui.preferences;x-i
+ nternal:=true,org.eclipse.debug.internal.ui.quickaccess;x-internal:=tru
+ e,org.eclipse.debug.internal.ui.sourcelookup;x-friends:="org.eclipse.de
+ bug.tests,org.eclipse.jdt.debug.ui",org.eclipse.debug.internal.ui.sourc
+ elookup.browsers;x-internal:=true,org.eclipse.debug.internal.ui.strings
+ ubstitution;x-friends:="org.eclipse.jdt.debug.ui",org.eclipse.debug.int
+ ernal.ui.viewers;x-friends:="org.eclipse.debug.examples.ui",org.eclipse
+ .debug.internal.ui.viewers.breadcrumb;x-internal:=true,org.eclipse.debu
+ g.internal.ui.viewers.model;x-friends:="org.eclipse.debug.tests,org.ecl
+ ipse.jdt.debug.tests,org.eclipse.debug.examples.ui",org.eclipse.debug.i
+ nternal.ui.viewers.model.provisional; x-friends:="org.eclipse.cdt.dsf.g
+ db.ui,org.eclipse.debug.internal.ui.views.memory.renderings;x-internal:
+ =true,  org.eclipse.cdt.dsf.ui,  org.eclipse.debug.examples.ui,  org.ec
+ lipse.debug.tests,  org.eclipse.jdt.debug.ui,  org.eclipse.wst.jsdt.deb
+ ug.ui",org.eclipse.debug.internal.ui.viewers.provisional; x-friends:="o
+ rg.eclipse.debug.tests,  org.eclipse.jdt.debug.ui,  org.eclipse.wst.jsd
+ t.debug.ui,  org.eclipse.debug.examples.ui",org.eclipse.debug.internal.
+ ui.viewers.update;x-friends:="org.eclipse.debug.examples.ui,org.eclipse
+ .jdt.debug.ui,org.eclipse.wst.jsdt.debug.ui",org.eclipse.debug.internal
+ .ui.views;x-internal:=true,org.eclipse.debug.internal.ui.views.breakpoi
+ nts;x-friends:="org.eclipse.debug.tests",org.eclipse.debug.internal.ui.
+ views.console;x-friends:="org.eclipse.ant.ui",org.eclipse.debug.interna
+ l.ui.views.expression;x-internal:=true,org.eclipse.debug.internal.ui.vi
+ ews.launch;x-internal:=true,org.eclipse.debug.internal.ui.views.memory;
+ x-internal:=true,org.eclipse.debug.internal.ui.views.memory.renderings;
+ x-internal:=true,org.eclipse.debug.internal.ui.views.modules;x-internal
+ :=true,org.eclipse.debug.internal.ui.views.registers;x-internal:=true,o
+ rg.eclipse.debug.internal.ui.views.variables;x-friends:="org.eclipse.jd
+ t.debug.ui,org.eclipse.debug.examples.ui,org.eclipse.debug.tests",org.e
+ clipse.debug.internal.ui.views.variables.details;x-friends:="org.eclips
+ e.jdt.debug.ui,org.eclipse.wst.jsdt.debug.ui",org.eclipse.debug.ui,org.
+ eclipse.debug.ui.actions,org.eclipse.debug.ui.console,org.eclipse.debug
+ .ui.contexts,org.eclipse.debug.ui.memory,org.eclipse.debug.ui.sourceloo
+ kup,org.eclipse.debug.ui.stringsubstitution
+Bundle-Version: 3.18.100.v20230802-1257
+

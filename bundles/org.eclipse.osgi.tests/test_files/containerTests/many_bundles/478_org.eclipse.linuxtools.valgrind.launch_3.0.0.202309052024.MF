@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.valgrind.launch;singleton:=t
+ rue
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime
+Import-Package: org.eclipse.cdt.core.model,org.eclipse.cdt.debug.core,or
+ g.eclipse.cdt.launch,org.eclipse.core.filesystem,org.eclipse.core.resou
+ rces,org.eclipse.core.variables,org.eclipse.debug.core,org.eclipse.debu
+ g.core.model,org.eclipse.debug.core.sourcelookup.containers,org.eclipse
+ .debug.ui,org.eclipse.debug.ui.sourcelookup,org.eclipse.linuxtools.inte
+ rnal.valgrind.core,org.eclipse.linuxtools.internal.valgrind.ui,org.ecli
+ pse.linuxtools.profiling.launch,org.eclipse.linuxtools.tools.launch.cor
+ e.factory,org.eclipse.linuxtools.valgrind.core,org.eclipse.linuxtools.v
+ algrind.ui,org.eclipse.ui.model,org.eclipse.ui.views.navigator
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.linuxtools.internal.valgrind.launch; x-frien
+ ds:="org.eclipse.linuxtools.valgrind.cachegrind,  org.eclipse.linuxtool
+ s.valgrind.helgrind,  org.eclipse.linuxtools.valgrind.massif,  org.ecli
+ pse.linuxtools.valgrind.memcheck,  org.eclipse.linuxtools.valgrind.laun
+ ch,  org.eclipse.linuxtools.valgrind.tests,  org.eclipse.linuxtools.val
+ grind.cachegrind.tests,  org.eclipse.linuxtools.valgrind.helgrind.tests
+ ,  org.eclipse.linuxtools.valgrind.massif.tests,  org.eclipse.linuxtool
+ s.valgrind.memcheck.tests",org.eclipse.linuxtools.valgrind.launch
+Bundle-Version: 3.0.0.202309052024
+

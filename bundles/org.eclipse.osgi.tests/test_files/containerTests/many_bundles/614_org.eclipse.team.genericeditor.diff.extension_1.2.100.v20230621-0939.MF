@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.team.genericeditor.diff.extension;singl
+ eton:=true
+Require-Bundle: org.eclipse.ui.workbench.texteditor;bundle-version="[3.1
+ 0.100,4.0.0)",org.eclipse.core.resources;bundle-version="[3.12.0,4.0.0)
+ ",org.eclipse.core.filebuffers,org.eclipse.jface.text;bundle-version="[
+ 3.11.100,4.0.0)",org.eclipse.ui;bundle-version="[3.109.0,4.0.0)",org.ec
+ lipse.core.contenttype,org.eclipse.ui.genericeditor
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.team.internal.genericeditor.diff.extension.p
+ artitioner;x-internal:=true,org.eclipse.team.internal.genericeditor.dif
+ f.extension.presentation;x-internal:=true,org.eclipse.team.internal.gen
+ ericeditor.diff.extension.rules;x-internal:=true
+Bundle-Version: 1.2.100.v20230621-0939
+

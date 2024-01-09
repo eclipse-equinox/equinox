@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.justj.openjdk.hotspot.jre.full;singleto
+ n:=true
+Bundle-ManifestVersion: 2
+Bundle-Version: 17.0.9.v20231028-0858
+

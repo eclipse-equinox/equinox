@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: javaewah
+Import-Package: com.googlecode.javaewah;resolution:=optional;version="[1
+ .1,2)",com.googlecode.javaewah.datastructure;resolution:=optional;versi
+ on="[1.1,2)",com.googlecode.javaewah.symmetric;resolution:=optional;ver
+ sion="[1.1,2)",com.googlecode.javaewah32;resolution:=optional;version="
+ [1.1,2)",com.googlecode.javaewah32.symmetric;resolution:=optional;versi
+ on="[1.1,2)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: com.googlecode.javaewah;version="1.1.13",com.googlecode.
+ javaewah.datastructure;version="1.1.13";uses:="com.googlecode.javaewah"
+ ,com.googlecode.javaewah.symmetric;version="1.1.13";uses:="com.googleco
+ de.javaewah",com.googlecode.javaewah32;version="1.1.13";uses:="com.goog
+ lecode.javaewah",com.googlecode.javaewah32.symmetric;version="1.1.13";u
+ ses:="com.googlecode.javaewah32"
+Bundle-Version: 1.1.13.v20211029-0839
+

@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.gprof;singleton:=true
+Require-Bundle: org.eclipse.core.runtime,org.eclipse.core.variables,org.
+ eclipse.ui,org.eclipse.ui.ide,org.eclipse.debug.ui,org.eclipse.cdt.core
+ ,org.eclipse.linuxtools.dataviewers,org.eclipse.linuxtools.binutils,org
+ .eclipse.linuxtools.dataviewers.charts
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.linuxtools.internal.gprof.view;x-friends:="o
+ rg.eclipse.linuxtools.gprof.launch"
+Bundle-Version: 5.1.0.202309052024
+

@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.mylyn.github.core;singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.19.0,4.0.0)"
+ ,org.eclipse.egit.core;bundle-version="6.2.0",org.eclipse.egit.github.c
+ ore;bundle-version="6.1.0",org.eclipse.jgit;bundle-version="6.2.0",org.
+ eclipse.mylyn.commons.net;bundle-version="[4.0.0,5.0.0)",org.eclipse.my
+ lyn.tasks.core;bundle-version="[4.0.0,5.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.mylyn.internal.github.core;version="6.2.1";x
+ -friends:="org.eclipse.mylyn.github.ui",org.eclipse.mylyn.internal.gith
+ ub.core.gist;version="6.2.1";x-friends:="org.eclipse.mylyn.github.ui",o
+ rg.eclipse.mylyn.internal.github.core.issue;version="6.2.1";x-friends:=
+ "org.eclipse.mylyn.github.ui",org.eclipse.mylyn.internal.github.core.pr
+ ;version="6.2.1";x-friends:="org.eclipse.mylyn.github.ui"
+Bundle-Version: 6.3.0.v20230804-1109
+

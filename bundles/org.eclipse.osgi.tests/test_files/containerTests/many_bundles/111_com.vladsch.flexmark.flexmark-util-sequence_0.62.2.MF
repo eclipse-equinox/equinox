@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: com.vladsch.flexmark.flexmark-util-sequence
+Import-Package: com.vladsch.flexmark.util.collection.iteration;resolutio
+ n:=optional,com.vladsch.flexmark.util.data;resolution:=optional,com.vla
+ dsch.flexmark.util.misc;resolution:=optional
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: com.vladsch.flexmark.util.sequence;version="0.62.2";uses
+ :="com.vladsch.flexmark.util.data,com.vladsch.flexmark.util.misc,com.vl
+ adsch.flexmark.util.sequence.builder,com.vladsch.flexmark.util.sequence
+ .builder.tree,com.vladsch.flexmark.util.sequence.mappers",com.vladsch.f
+ lexmark.util.sequence.builder;version="0.62.2";uses:="com.vladsch.flexm
+ ark.util.misc,com.vladsch.flexmark.util.sequence",com.vladsch.flexmark.
+ util.sequence.builder.tree;version="0.62.2";uses:="com.vladsch.flexmark
+ .util.sequence,com.vladsch.flexmark.util.sequence.builder",com.vladsch.
+ flexmark.util.sequence.mappers;version="0.62.2";uses:="com.vladsch.flex
+ mark.util.data,com.vladsch.flexmark.util.misc,com.vladsch.flexmark.util
+ .sequence"
+Bundle-Version: 0.62.2
+

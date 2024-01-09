@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.glassfish.jersey.ext.jersey-entity-filtering
+Import-Package: javax.annotation;version="[1.2,3)",javax.annotation.secu
+ rity;version="[1.2,3)",javax.inject;version="[1.0,2)",javax.ws.rs;versi
+ on="[2.1,3)",javax.ws.rs.core;version="[2.1,3)",javax.xml.bind;version=
+ "[2.3,3)",org.glassfish.jersey.internal.guava;version="[2.40,3)",org.gl
+ assfish.jersey.internal.inject;version="[2.40,3)",org.glassfish.jersey.
+ internal.l10n;version="[2.40,3)",org.glassfish.jersey.internal.util;ver
+ sion="[2.40,3)",org.glassfish.jersey.internal.util.collection;version="
+ [2.40,3)",org.glassfish.jersey.message.filtering;version="[2.40,3)",org
+ .glassfish.jersey.message.filtering.internal;version="[2.40,3)",org.gla
+ ssfish.jersey.message.filtering.spi;version="[2.40,3)",org.glassfish.je
+ rsey.model.internal;version="[2.40,3)",org.glassfish.jersey.server;vers
+ ion="[2.40,3)",org.glassfish.jersey.server.filter;version="[2.40,3)",or
+ g.glassfish.jersey.server.model;version="[2.40,3)",org.glassfish.jersey
+ .spi;version="[2.40,3)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: org.glassfish.jersey.message.filtering;version="2.40";us
+ es:="javax.annotation,javax.annotation.security,javax.inject,javax.ws.r
+ s.core,org.glassfish.jersey.message.filtering.spi",org.glassfish.jersey
+ .message.filtering.internal;version="2.40";uses:="org.glassfish.jersey.
+ internal.l10n",org.glassfish.jersey.message.filtering.spi;version="2.40
+ ";uses:="javax.ws.rs.core,org.glassfish.jersey.spi"
+Bundle-Version: 2.40.0
+

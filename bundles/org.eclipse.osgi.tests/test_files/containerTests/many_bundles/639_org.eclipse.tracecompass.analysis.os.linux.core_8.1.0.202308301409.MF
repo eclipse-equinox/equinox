@@ -1,0 +1,60 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.tracecompass.analysis.os.linux.core;sin
+ gleton:=true
+Require-Bundle: org.eclipse.core.runtime,org.eclipse.core.resources,org.
+ eclipse.tracecompass.common.core,org.eclipse.tracecompass.tmf.core,org.
+ eclipse.tracecompass.datastore.core,org.eclipse.tracecompass.segmentsto
+ re.core,org.eclipse.tracecompass.analysis.timing.core,org.eclipse.trace
+ compass.statesystem.core,org.eclipse.tracecompass.datastore.core,org.ec
+ lipse.tracecompass.analysis.graph.core,org.eclipse.jdt.annotation;bundl
+ e-version="[2.0.0,3.0.0)";resolution:=optional
+Import-Package: com.google.common.base,com.google.common.cache,com.googl
+ e.common.collect,com.google.common.hash,com.google.common.primitives,or
+ g.apache.commons.io,org.apache.commons.io.input,org.apache.commons.lang
+ 3
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.tracecompass.analysis.os.linux.core.contexts
+ witch,org.eclipse.tracecompass.analysis.os.linux.core.cpuusage,org.ecli
+ pse.tracecompass.analysis.os.linux.core.event.aspect,org.eclipse.tracec
+ ompass.analysis.os.linux.core.execution.graph,org.eclipse.tracecompass.
+ analysis.os.linux.core.kernel,org.eclipse.tracecompass.analysis.os.linu
+ x.core.kernelmemoryusage,org.eclipse.tracecompass.analysis.os.linux.cor
+ e.memory,org.eclipse.tracecompass.analysis.os.linux.core.model,org.ecli
+ pse.tracecompass.analysis.os.linux.core.signals,org.eclipse.tracecompas
+ s.analysis.os.linux.core.swslatency,org.eclipse.tracecompass.analysis.o
+ s.linux.core.tid,org.eclipse.tracecompass.analysis.os.linux.core.trace,
+ org.eclipse.tracecompass.internal.analysis.os.linux.core;x-internal:=tr
+ ue,org.eclipse.tracecompass.internal.analysis.os.linux.core.cpuusage;x-
+ friends:="org.eclipse.tracecompass.analysis.os.linux.ui,org.eclipse.tra
+ cecompass.analysis.os.linux.core.tests,org.eclipse.tracecompass.lttng2.
+ kernel.core.tests",org.eclipse.tracecompass.internal.analysis.os.linux.
+ core.execution.graph;x-internal:=true,org.eclipse.tracecompass.internal
+ .analysis.os.linux.core.inputoutput;x-friends:="org.eclipse.tracecompas
+ s.analysis.os.linux.ui,org.eclipse.tracecompass.analysis.os.linux.core.
+ tests",org.eclipse.tracecompass.internal.analysis.os.linux.core.inputou
+ tput.handlers;x-internal:=true,org.eclipse.tracecompass.internal.analys
+ is.os.linux.core.kernel; x-friends:="org.eclipse.tracecompass.analysis.
+ callstack.core,  org.eclipse.tracecompass.analysis.os.linux.core.tests,
+   org.eclipse.tracecompass.analysis.os.linux.ui,  org.eclipse.tracecomp
+ ass.lttng2.kernel.core.tests",org.eclipse.tracecompass.internal.analysi
+ s.os.linux.core.kernel.handlers;x-friends:="org.eclipse.tracecompass.an
+ alysis.os.linux.core.tests",org.eclipse.tracecompass.internal.analysis.
+ os.linux.core.kernelmemoryusage;x-friends:="org.eclipse.tracecompass.an
+ alysis.os.linux.ui",org.eclipse.tracecompass.internal.analysis.os.linux
+ .core.latency; x-friends:="org.eclipse.tracecompass.analysis.os.linux.c
+ ore.tests,  org.eclipse.tracecompass.analysis.os.linux.ui,  org.eclipse
+ .tracecompass.lttng2.kernel.core.tests,  org.eclipse.tracecompass.analy
+ sis.os.linux.ui.swtbot.tests",org.eclipse.tracecompass.internal.analysi
+ s.os.linux.core.registry; x-friends:="org.eclipse.tracecompass.analysis
+ .callstack.core,  org.eclipse.tracecompass.analysis.os.linux.core.tests
+ ,  org.eclipse.tracecompass.analysis.os.linux.ui,  org.eclipse.tracecom
+ pass.lttng2.kernel.core.tests",org.eclipse.tracecompass.internal.analys
+ is.os.linux.core.resourcesstatus;x-friends:="org.eclipse.tracecompass.a
+ nalysis.os.linux.ui",org.eclipse.tracecompass.internal.analysis.os.linu
+ x.core.threadstatus; x-friends:="org.eclipse.tracecompass.analysis.call
+ stack.core,  org.eclipse.tracecompass.analysis.os.linux.core.tests,  or
+ g.eclipse.tracecompass.analysis.os.linux.ui,  org.eclipse.tracecompass.
+ analysis.os.linux.ui.tests"
+Bundle-Version: 8.1.0.202308301409
+

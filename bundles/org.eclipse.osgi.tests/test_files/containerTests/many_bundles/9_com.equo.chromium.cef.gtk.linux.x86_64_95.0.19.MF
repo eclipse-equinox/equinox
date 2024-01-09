@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: com.equo.chromium.cef.gtk.linux.x86_64
+Bundle-ManifestVersion: 2
+Bundle-Version: 95.0.19
+

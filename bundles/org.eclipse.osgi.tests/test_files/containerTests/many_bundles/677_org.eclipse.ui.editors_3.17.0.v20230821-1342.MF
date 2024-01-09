@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.ui.editors; singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.29.0,4.0.0)"
+ ,org.eclipse.core.expressions;bundle-version="[3.9.0,4.0.0)",org.eclips
+ e.swt;bundle-version="[3.124.0,4.0.0)",org.eclipse.ui.ide;bundle-versio
+ n="[3.21.0,4.0.0)",org.eclipse.ui;bundle-version="[3.204.0,4.0.0)",org.
+ eclipse.jface.text;bundle-version="[3.24.0,4.0.0)",org.eclipse.ui.workb
+ ench;bundle-version="[3.130.0,4.0.0)",org.eclipse.ui.workbench.textedit
+ or;bundle-version="[3.17.0,4.0.0)",org.eclipse.core.filebuffers;bundle-
+ version="[3.8.0,4.0.0)";visibility:=reexport,org.eclipse.core.resources
+ ;bundle-version="[3.19.0,4.0.0)",org.eclipse.core.filesystem;bundle-ver
+ sion="[1.10.0,2.0.0)",org.eclipse.jdt.annotation;bundle-version="2.2";r
+ esolution:=optional
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.ui.editors.text,org.eclipse.ui.editors.text.
+ templates,org.eclipse.ui.internal.editors.quickdiff;x-internal:=true,or
+ g.eclipse.ui.internal.editors.text;x-internal:=true,org.eclipse.ui.inte
+ rnal.editors.text.codemining.annotation;x-internal:=true,org.eclipse.ui
+ .internal.texteditor;x-internal:=true,org.eclipse.ui.texteditor
+Bundle-Version: 3.17.0.v20230821-1342
+

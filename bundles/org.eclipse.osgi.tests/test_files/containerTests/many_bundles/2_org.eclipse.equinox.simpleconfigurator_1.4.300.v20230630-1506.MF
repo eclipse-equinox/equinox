@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.equinox.simpleconfigurator;singleton:=t
+ rue
+Import-Package: org.eclipse.osgi.framework.console;version="1.0.0";resol
+ ution:=optional,org.eclipse.osgi.service.datalocation;version="1.0.0";r
+ esolution:=optional,org.osgi.framework;version="1.3.0",org.osgi.framewo
+ rk.namespace;version="1.0.0",org.osgi.framework.startlevel;version="1.0
+ .0",org.osgi.framework.wiring;version="1.2.0",org.osgi.resource;version
+ ="1.0.0",org.osgi.service.packageadmin;version="1.2.0",org.osgi.service
+ .startlevel;version="1.0.0",org.osgi.util.tracker;version="1.3.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.equinox.internal.provisional.configurator; x
+ -friends:="org.eclipse.equinox.p2.reconciler.dropins,  org.eclipse.equi
+ nox.p2.console,  org.eclipse.equinox.p2.operations,  org.eclipse.equino
+ x.p2.ui,  org.eclipse.equinox.p2.director",org.eclipse.equinox.internal
+ .simpleconfigurator;x-friends:="org.eclipse.equinox.simpleconfigurator.
+ manipulator",org.eclipse.equinox.internal.simpleconfigurator.console;x-
+ internal:=true,org.eclipse.equinox.internal.simpleconfigurator.utils;x-
+ friends:="org.eclipse.equinox.simpleconfigurator.manipulator"
+Bundle-Version: 1.4.300.v20230630-1506
+

@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JRE-1.1
+Bundle-SymbolicName: org.eclipse.oomph.extractor.lib
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.oomph.extractor.lib;version="1.9.0"
+Bundle-Version: 1.9.0.v20220421-1218
+
