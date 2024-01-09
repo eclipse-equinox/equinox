@@ -56,15 +56,11 @@ Framework extension bundles are fragments of the system bundle (org.eclipse.osgi
 
 When using the **osgi.framework.extensions** property to specify a framework extension bundle the bundle symbolic name of the extension bundle must be used. In order for the extension bundle to be found and added to the framework implementation classpath it must be co-located in the same directory as the org.eclipse.osgi bundle at runtime and it must be a single jar (a directory does not work). In a normal eclipse runtime installation you would add your binary framework extension bundle jar to the directory eclipse/plugins/ of your eclipse installation. You also need to add the necessary **osgi.framework.extensions** property to the config.ini of you eclipse installation. For example, you have a framework extension bundle with the bundle symbolic name org.eclipse.equinox.samples.simplehook contained in the binary jar org.eclipse.equinox.samples.simplehook\_1.0.0.jar and eclipse is installed in the root directory of your PC. Place the file org.eclipse.equinox.samples.simplehook\_1.0.0.jar in the following directory structure of your eclipse installation:
 
-`/eclipse/plugins/org.eclipse.osgi_3.2.0.v20060510.jar
-/eclipse/plugins/org.eclipse.equinox.samples.simplehook_1.0.0.jar
-
     /eclipse/plugins/org.eclipse.osgi_3.2.0.v20060510.jar
     /eclipse/plugins/org.eclipse.equinox.samples.simplehook_1.0.0.jar` 
 
 Add the following property to the /eclipse/configuration/config.ini file:
 
-`osgi.framework.extensions=org.eclipse.equinox.samples.simplehook
 
     osgi.framework.extensions=org.eclipse.equinox.samples.simplehook` 
 
@@ -95,18 +91,6 @@ A hook configurator also must be declared in one of the following ways to indica
 ##### hookconfigurators.properties files
 
 A hookconfigurators.properties file can be used to declare a list of hook configator classes. The key hook.configurators is used in a hook configurators properties file to specify a comma separated list of fully qualified hook configurator classes. For example, the Equinox Framework (org.eclipse.osgi.jar) is shipped with a default set of hook configurators specified in a hookconfigurators.properties file:
-
-`hook.configurators= 
-   org.eclipse.osgi.internal.baseadaptor.BaseHookConfigurator,
-   org.eclipse.osgi.internal.baseadaptor.DevClassLoadingHook,
-   org.eclipse.core.runtime.internal.adaptor.EclipseStorageHook,
-   org.eclipse.core.runtime.internal.adaptor.EclipseLogHook,
-   org.eclipse.core.runtime.internal.adaptor.EclipseErrorHandler,
-   org.eclipse.core.runtime.internal.adaptor.EclipseAdaptorHook,
-   org.eclipse.core.runtime.internal.adaptor.EclipseClassLoadingHook,
-   org.eclipse.core.runtime.internal.adaptor.EclipseLazyStarter,
-   org.eclipse.core.runtime.internal.stats.StatsManager,
-   org.eclipse.osgi.internal.verifier.SignedBundleHook
 
     hook.configurators= 
        org.eclipse.osgi.internal.baseadaptor.BaseHookConfigurator,
