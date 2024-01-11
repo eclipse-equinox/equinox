@@ -61,15 +61,15 @@ echo "build $defaultOSArch"
 PROGRAM_OUTPUT="$programOutput"
 DEFAULT_OS="$defaultOS"
 DEFAULT_WS="$defaultWS"
-DEPLOYMENT_TARGET=10.10
+DEPLOYMENT_TARGET=11.0
 EXEC_DIR=../../../../../rt.equinox.binaries/org.eclipse.equinox.executable
+SDKROOT_PATH="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+
 if [ "$defaultOSArch" == "arm64" ] || [ "$defaultOSArch" == "aarch64" ]
 then
-  SDKROOT_PATH="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
   DEFAULT_OS_ARCH="aarch64"
   defaultOSArch="arm64"
 else
-  SDKROOT_PATH="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk"
   DEFAULT_OS_ARCH="$defaultOSArch"
 fi
 
@@ -87,7 +87,7 @@ ARCHS="-arch $defaultOSArch"
 export PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS ARCHS PROGRAM_OUTPUT_DIR JAVA_HEADERS 
 export MACOSX_DEPLOYMENT_TARGET=$DEPLOYMENT_TARGET
 
-# Check if MacOSX 10.10 SDK exists at SDKROOT_PATH before exporting it.
+# Check if MacOSX SDK exists at SDKROOT_PATH before exporting it.
 if [ -d $SDKROOT_PATH ]; then
 	export SDKROOT=$SDKROOT_PATH
 fi
