@@ -28,12 +28,6 @@
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>target-platform-configuration</artifactId>
         <configuration>
-          <environments>
-            <environment>
-              <os>linux</os>
-              <ws>gtk</ws>
-            </environment>
-          </environments>
           <dependency-resolution>
             <extraRequirements>
               <requirement>
