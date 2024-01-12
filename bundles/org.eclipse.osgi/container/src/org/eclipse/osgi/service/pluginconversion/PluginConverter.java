@@ -17,8 +17,8 @@ import java.io.File;
 import java.util.Dictionary;
 
 /**
- * A plug-in convertor is able to convert plug-in manifest files (<tt>plugin.xml</tt>) and
- * fragment manifest files (<tt>fragment.xml</tt>) to bundle manifest files (<tt>MANIFEST.MF</tt>).
+ * A plug-in convertor is able to convert plug-in manifest files (<code>plugin.xml</code>) and
+ * fragment manifest files (<code>fragment.xml</code>) to bundle manifest files (<code>MANIFEST.MF</code>).
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>

@@ -80,7 +80,7 @@ public class ZipBundleEntry extends BundleEntry {
 	/**
 	 * Get the modification time for this BundleEntry.
 	 * <p>If the modification time has not been set,
-	 * this method will return <tt>-1</tt>.
+	 * this method will return <code>-1</code>.
 	 *
 	 * @return last modification time.
 	 */

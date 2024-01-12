@@ -31,8 +31,8 @@ import org.osgi.service.useradmin.UserAdminPermission;
  * propagated to the {@link UserAdmin} service and made persistent.
  * <p>
  * Every UserAdmin contains a set of predefined roles that are always present
- * and cannot be removed. All predefined roles are of type <tt>ROLE</tt>. This
- * version of the <tt>org.osgi.service.useradmin</tt> package defines a single
+ * and cannot be removed. All predefined roles are of type <code>ROLE</code>. This
+ * version of the <code>org.osgi.service.useradmin</code> package defines a single
  * predefined role named &quot;user.anyone&quot;, which is inherited by any
  * other role. Other predefined roles may be added in the future.
  */
@@ -86,10 +86,10 @@ public class Role implements org.osgi.service.useradmin.Role {
 	 * cause a UserAdminEvent of type {@link UserAdminEvent#ROLE_CHANGED} to be
 	 * broadcast to any UserAdminListeners.
 	 * <p>
-	 * Only objects of type <tt>String</tt> may be used as property keys, and only
-	 * objects of type <tt>String</tt> or <tt>byte[]</tt> may be used as property
+	 * Only objects of type <code>String</code> may be used as property keys, and only
+	 * objects of type <code>String</code> or <code>byte[]</code> may be used as property
 	 * values. Any other types will cause an exception of type
-	 * <tt>IllegalArgumentException</tt> to be raised.
+	 * <code>IllegalArgumentException</code> to be raised.
 	 * <p>
 	 * In order to add, change, or remove a property in the returned Dictionary, a
 	 * {@link UserAdminPermission} named after the property name (or a prefix of it)

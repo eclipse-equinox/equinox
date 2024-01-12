@@ -91,7 +91,7 @@ public class DeviceTracker extends ServiceTracker {
 	 *
 	 * @param reference Reference to service being added to the ServiceTracker.
 	 * @return The service object to be tracked for the ServiceReference or
-	 *         <tt>null</tt> if the ServiceReference should not be tracked.
+	 *         <code>null</code> if the ServiceReference should not be tracked.
 	 */
 	public Object addingService(ServiceReference reference) {
 		if (Activator.DEBUG) {

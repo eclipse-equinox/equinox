@@ -38,7 +38,7 @@ import org.osgi.service.prefs.Preferences;
  *
  * Implementation notes:
  *
- * - For thread safety, we always synchronize on <tt>writeLock</tt> when writing
+ * - For thread safety, we always synchronize on <code>writeLock</code> when writing
  * the children or properties fields. Must ensure we don't synchronize when
  * calling client code such as listeners.
  *
