@@ -72,20 +72,20 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 	}
 
 	/**
-	 * A service is being added to the <tt>ServiceTracker</tt> object.
+	 * A service is being added to the <code>ServiceTracker</code> object.
 	 *
 	 * <p>
 	 * This method is called before a service which matched the search parameters of
-	 * the <tt>ServiceTracker</tt> object is added to it. This method should return
-	 * the service object to be tracked for this <tt>ServiceReference</tt> object.
-	 * The returned service object is stored in the <tt>ServiceTracker</tt> object
-	 * and is available from the <tt>getService</tt> and <tt>getServices</tt>
+	 * the <code>ServiceTracker</code> object is added to it. This method should return
+	 * the service object to be tracked for this <code>ServiceReference</code> object.
+	 * The returned service object is stored in the <code>ServiceTracker</code> object
+	 * and is available from the <code>getService</code> and <code>getServices</code>
 	 * methods.
 	 *
 	 * @param reference Reference to service being added to the
-	 *                  <tt>ServiceTracker</tt> object.
-	 * @return The service object to be tracked for the <tt>ServiceReference</tt>
-	 *         object or <tt>null</tt> if the <tt>ServiceReference</tt> object
+	 *                  <code>ServiceTracker</code> object.
+	 * @return The service object to be tracked for the <code>ServiceReference</code>
+	 *         object or <code>null</code> if the <code>ServiceReference</code> object
 	 *         should not be tracked.
 	 */
 	@Override
@@ -98,11 +98,11 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 	}
 
 	/**
-	 * A service tracked by the <tt>ServiceTracker</tt> object has been removed.
+	 * A service tracked by the <code>ServiceTracker</code> object has been removed.
 	 *
 	 * <p>
 	 * This method is called after a service is no longer being tracked by the
-	 * <tt>ServiceTracker</tt> object.
+	 * <code>ServiceTracker</code> object.
 	 *
 	 * @param reference Reference to service that has been removed.
 	 * @param service   The service object for the removed service.

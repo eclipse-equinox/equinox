@@ -223,7 +223,7 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 
 	/**
 	 * Tests if this dictionary maps no keys to value. The general contract
-	 * for the <tt>isEmpty</tt> method is that the result is true if and only
+	 * for the <code>isEmpty</code> method is that the result is true if and only
 	 * if this dictionary contains no entries.
 	 *
 	 * @return  <code>true</code> if this dictionary maps no keys to values;

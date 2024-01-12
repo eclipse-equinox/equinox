@@ -58,8 +58,8 @@ public interface IFuture<ResultType> {
 	/**
 	 * Cancel the operation
 	 * 
-	 * @return <tt>false</tt> if the operation could not be canceled, typically
-	 *         because it has already completed normally; <tt>true</tt> otherwise
+	 * @return <code>false</code> if the operation could not be canceled, typically
+	 *         because it has already completed normally; <code>true</code> otherwise
 	 */
 	public boolean cancel();
 
@@ -119,7 +119,7 @@ public interface IFuture<ResultType> {
 
 	/**
 	 * <p>
-	 * Returns <tt>true</tt> if <b>any</b> underlying operation(s) have completed.
+	 * Returns <code>true</code> if <b>any</b> underlying operation(s) have completed.
 	 * </p>
 	 * <p>
 	 * If this future represents access to just one operation, then this method and
@@ -133,14 +133,14 @@ public interface IFuture<ResultType> {
 	 * first operation is completed, it will return <code>false</code>.
 	 * </p>
 	 * 
-	 * @return <tt>true</tt> if any operations represented by this future have
+	 * @return <code>true</code> if any operations represented by this future have
 	 *         completed.
 	 */
 	boolean hasValue();
 
 	/**
 	 * <p>
-	 * Returns <tt>true</tt> if <b>all</b> underlying operation(s) have been
+	 * Returns <code>true</code> if <b>all</b> underlying operation(s) have been
 	 * completed.
 	 * </p>
 	 * <p>
@@ -156,11 +156,11 @@ public interface IFuture<ResultType> {
 	 * </p>
 	 * <p>
 	 * Completion can be due to normal operation completion, an exception, or user
-	 * cancellation -- in all of these cases, this method will return <tt>true</tt>
+	 * cancellation -- in all of these cases, this method will return <code>true</code>
 	 * if all underlying operation(s) have been completed.
 	 * </p>
 	 * 
-	 * @return <tt>true</tt> if all operation(s) have completed in some manner.
+	 * @return <code>true</code> if all operation(s) have completed in some manner.
 	 */
 	boolean isDone();
 

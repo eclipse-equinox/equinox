@@ -162,7 +162,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 	 * @exception java.lang.IllegalStateException If
 	 * this ServiceRegistration has already been unregistered.
 	 *
-	 * @exception IllegalArgumentException If the <tt>properties</tt>
+	 * @exception IllegalArgumentException If the <code>properties</code>
 	 * parameter contains case variants of the same key name.
 	 */
 	@Override

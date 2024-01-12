@@ -37,7 +37,7 @@ public class PermissionData {
 	 * exists in persistent storage.
 	 *
 	 * @return The locations that have permission data in
-	 * persistent storage, or <tt>null</tt> if there is no permission data
+	 * persistent storage, or <code>null</code> if there is no permission data
 	 * in persistent storage.
 	 */
 	public String[] getLocations() {
@@ -56,10 +56,10 @@ public class PermissionData {
 	 *
 	 * @param location The location whose permission data is to
 	 * be returned.
-	 * The location can be <tt>null</tt> for the default permission data.
+	 * The location can be <code>null</code> for the default permission data.
 	 *
 	 * @return The permission data assigned to the specified
-	 * location, or <tt>null</tt> if that location has not been assigned any
+	 * location, or <code>null</code> if that location has not been assigned any
 	 * permission data.
 	 */
 	public String[] getPermissionData(String location) {
@@ -78,8 +78,8 @@ public class PermissionData {
 	 *
 	 * @param location The location that will be assigned the
 	 * permissions.
-	 * The location can be <tt>null</tt> for the default permission data.
-	 * @param data The permission data to be assigned, or <tt>null</tt>
+	 * The location can be <code>null</code> for the default permission data.
+	 * @param data The permission data to be assigned, or <code>null</code>
 	 * if the specified location is to be removed from persistent storaqe.
 	 */
 	public void setPermissionData(String location, String[] data) {

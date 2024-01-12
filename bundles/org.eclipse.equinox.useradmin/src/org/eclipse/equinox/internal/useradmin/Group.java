@@ -102,8 +102,8 @@ public class Group extends User implements org.osgi.service.useradmin.Group {
 	 *         name matches that of the specified role.
 	 *
 	 * @throws SecurityException If a security manager exists and the caller does
-	 *                           not have the <tt>UserAdminPermission</tt> with name
-	 *                           <tt>admin</tt>.
+	 *                           not have the <code>UserAdminPermission</code> with name
+	 *                           <code>admin</code>.
 	 */
 	@Override
 	public boolean addMember(org.osgi.service.useradmin.Role role) {
@@ -146,8 +146,8 @@ public class Group extends User implements org.osgi.service.useradmin.Group {
 	 *         whose name matches that of the specified role.
 	 *
 	 * @throws SecurityException If a security manager exists and the caller does
-	 *                           not have the <tt>UserAdminPermission</tt> with name
-	 *                           <tt>admin</tt>.
+	 *                           not have the <code>UserAdminPermission</code> with name
+	 *                           <code>admin</code>.
 	 */
 	@Override
 	public boolean addRequiredMember(org.osgi.service.useradmin.Role role) {
@@ -186,8 +186,8 @@ public class Group extends User implements org.osgi.service.useradmin.Group {
 	 *         <code>false</code>.
 	 *
 	 * @throws SecurityException If a security manager exists and the caller does
-	 *                           not have the <tt>UserAdminPermission</tt> with name
-	 *                           <tt>admin</tt>.
+	 *                           not have the <code>UserAdminPermission</code> with name
+	 *                           <code>admin</code>.
 	 */
 	@Override
 	public boolean removeMember(org.osgi.service.useradmin.Role role) {
