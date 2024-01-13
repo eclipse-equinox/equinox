@@ -69,12 +69,16 @@ public class SecureAction {
 	}
 
 	/**
-	 * Creates a privileged action that can be used to construct a SecureAction object.
-	 * The recommended way to construct a SecureAction object is the following: <p>
+	 * Creates a privileged action that can be used to construct a SecureAction
+	 * object. The recommended way to construct a SecureAction object is the
+	 * following:
+	 * 
 	 * <pre>
 	 * SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
 	 * </pre>
-	 * @return a privileged action object that can be used to construct a SecureAction object.
+	 * 
+	 * @return a privileged action object that can be used to construct a
+	 *         SecureAction object.
 	 */
 	public static PrivilegedAction<SecureAction> createSecureAction() {
 		return new PrivilegedAction<SecureAction>() {

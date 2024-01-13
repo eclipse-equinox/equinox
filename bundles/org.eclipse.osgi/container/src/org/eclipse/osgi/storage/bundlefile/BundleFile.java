@@ -29,12 +29,13 @@ import org.eclipse.osgi.storage.url.BundleResourceHandler;
 import org.eclipse.osgi.storage.url.bundleresource.Handler;
 
 /**
- * The BundleFile API is used by Adaptors to read resources out of an
- * installed Bundle in the Framework.
- * <p/>
+ * The BundleFile API is used by Adaptors to read resources out of an installed
+ * Bundle in the Framework.
+ * <p>
  * Clients wishing to modify or extend the functionality of this class at
  * runtime should extend the associated {@link BundleFileWrapper decorator}
  * instead.
+ * </p>
  */
 abstract public class BundleFile {
 	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());

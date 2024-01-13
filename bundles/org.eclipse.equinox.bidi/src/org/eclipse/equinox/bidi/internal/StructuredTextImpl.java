@@ -226,34 +226,39 @@ public class StructuredTextImpl implements IStructuredTextExpert {
 	 * LTR base direction, {@link IStructuredTextExpert#leanToFullText
 	 * leanToFullText} adds LRE+LRM at the head of the <i>full</i> text and LRM+PDF
 	 * at its end.
+	 * </p>
 	 * <p>
 	 * When the orientation is <code>ORIENT_CONTEXTUAL_LTR</code> or
 	 * <code>ORIENT_CONTEXTUAL_RTL</code> and the data content would resolve to a
 	 * RTL orientation while the structured text has a LTR base direction,
 	 * {@link IStructuredTextExpert#leanToFullText leanToFullText} adds LRM at the
 	 * head of the <i>full</i> text.
+	 * </p>
 	 * <p>
 	 * When the orientation is <code>ORIENT_CONTEXTUAL_LTR</code> or
 	 * <code>ORIENT_CONTEXTUAL_RTL</code> and the data content would resolve to a
 	 * LTR orientation while the structured text has a RTL base direction,
 	 * {@link IStructuredTextExpert#leanToFullText leanToFullText} adds RLM at the
 	 * head of the <i>full</i> text.
+	 * </p>
 	 * <p>
 	 * When the orientation is <code>ORIENT_UNKNOWN</code> and the structured text
 	 * has a LTR base direction, {@link IStructuredTextExpert#leanToFullText
 	 * leanToFullText} adds LRE+LRM at the head of the <i>full</i> text and LRM+PDF
 	 * at its end.
+	 * </p>
 	 * <p>
 	 * When the orientation is <code>ORIENT_UNKNOWN</code> and the structured text
 	 * has a RTL base direction, {@link IStructuredTextExpert#leanToFullText
 	 * leanToFullText} adds RLE+RLM at the head of the <i>full</i> text and RLM+PDF
 	 * at its end.
+	 * </p>
 	 * <p>
 	 * When the orientation is <code>ORIENT_IGNORE</code>,
 	 * {@link IStructuredTextExpert#leanToFullText leanToFullText} does not add any
 	 * directional formatting characters as either prefix or suffix of the
 	 * <i>full</i> text.
-	 * <p>
+	 * </p>
 	 */
 	@Override
 	public String leanToFullText(String text) {

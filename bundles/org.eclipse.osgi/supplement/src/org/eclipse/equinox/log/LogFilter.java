@@ -22,12 +22,13 @@ import org.osgi.service.log.LogEntry;
 public interface LogFilter {
 
 	/**
-	 * @param bundle The logging bundle
-	 * @param loggerName The name of the <code>Logger<code>
-	 * @param logLevel The log level or severity
+	 * @param bundle     The logging bundle
+	 * @param loggerName The name of the <code>Logger</code>
+	 * @param logLevel   The log level or severity
 	 * @see LogEntry
 	 * @see Logger
-	 * @see ExtendedLogReaderService#addLogListener(org.osgi.service.log.LogListener, LogFilter)
+	 * @see ExtendedLogReaderService#addLogListener(org.osgi.service.log.LogListener,
+	 *      LogFilter)
 	 */
 	boolean isLoggable(Bundle bundle, String loggerName, int logLevel);
 }
