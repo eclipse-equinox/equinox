@@ -34,7 +34,7 @@ pipeline {
 					archiveArtifacts artifacts: '**/*.log, **/*.jar', allowEmptyArchive: true
 					junit '**/target/surefire-reports/TEST-*.xml'
 					discoverGitReferenceBuild referenceJob: 'equinox/master'
-					recordIssues publishAllIssues: true, tools: [java(), mavenConsole(), javaDoc()]
+					recordIssues publishAllIssues: true, tools: [eclipse(pattern: '**/target/compilelogs/*.xml'), mavenConsole(), javaDoc()]
 				}
 			}
 		}
