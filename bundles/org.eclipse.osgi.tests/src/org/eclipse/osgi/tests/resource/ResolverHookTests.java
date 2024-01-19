@@ -53,7 +53,7 @@ public class ResolverHookTests extends AbstractResourceTest {
 						assertEquals("Wrong singleton directive", "true",
 								candidate.getDirectives().get(IdentityNamespace.CAPABILITY_SINGLETON_DIRECTIVE));
 						assertEquals("Wrong symbolic name", symbolicName,
-								(String) candidate.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE));
+								candidate.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE));
 					}
 				} catch (RuntimeException e) {
 					error[0] = e;
