@@ -156,7 +156,7 @@ class ConfigurationStore {
 		configurations.remove(pid);
 		if (store == null || token == null)
 			return; // no persistent store
-		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+		AccessController.doPrivileged(new PrivilegedAction<>() {
 			@Override
 			public Object run() {
 				deleteConfigurationFile((File) token);
