@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -129,7 +130,8 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		Bundle chainTestB = installer.installBundle("chain.test.b"); //$NON-NLS-1$
 		installer.installBundle("chain.test.c"); //$NON-NLS-1$
 		installer.installBundle("chain.test.d"); //$NON-NLS-1$
-		((ITestRunner) chainTest.loadClass("chain.test.TestSingleChain").newInstance()).testIt(); //$NON-NLS-1$
+		((ITestRunner) chainTest.loadClass("chain.test.TestSingleChain").getDeclaredConstructor().newInstance()) //$NON-NLS-1$
+				.testIt();
 
 		Object[] expectedEvents = new Object[6];
 		expectedEvents[0] = new BundleEvent(BundleEvent.STARTED, chainTestB);
@@ -141,7 +143,8 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 		installer.refreshPackages(new Bundle[] { chainTestB });
 
-		((ITestRunner) chainTest.loadClass("chain.test.TestSingleChain").newInstance()).testIt(); //$NON-NLS-1$
+		((ITestRunner) chainTest.loadClass("chain.test.TestSingleChain").getDeclaredConstructor().newInstance()) //$NON-NLS-1$
+				.testIt();
 
 		Object[] actualEvents = simpleResults.getResults(6);
 		compareResults(expectedEvents, actualEvents);
@@ -154,7 +157,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		Bundle chainTestB = installer.installBundle("chain.test.b"); //$NON-NLS-1$
 		Bundle chainTestC = installer.installBundle("chain.test.c"); //$NON-NLS-1$
 		Bundle chainTestD = installer.installBundle("chain.test.d"); //$NON-NLS-1$
-		chainTest.loadClass("chain.test.TestMultiChain").newInstance(); //$NON-NLS-1$
+		chainTest.loadClass("chain.test.TestMultiChain").getDeclaredConstructor().newInstance(); //$NON-NLS-1$
 
 		Object[] expectedEvents = new Object[8];
 		expectedEvents[0] = new BundleEvent(BundleEvent.STARTED, chainTestD);
@@ -171,7 +174,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		Object[] actualEvents = simpleResults.getResults(8);
 		compareResults(expectedEvents, actualEvents);
 
-		chainTest.loadClass("chain.test.TestMultiChain").newInstance(); //$NON-NLS-1$
+		chainTest.loadClass("chain.test.TestMultiChain").getDeclaredConstructor().newInstance(); //$NON-NLS-1$
 		expectedEvents = new Object[4];
 		expectedEvents[0] = new BundleEvent(BundleEvent.STARTED, chainTestD);
 		expectedEvents[1] = new BundleEvent(BundleEvent.STARTED, chainTestB);
@@ -486,7 +489,8 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertTrue("Host/Frag resolve", installer.resolveBundles(new Bundle[] { hostA, fragA })); //$NON-NLS-1$
 
 		ITestRunner testRunner = (ITestRunner) hostA
-				.loadClass("fragment.test.attach.host.a.internal.test.TestPackageAccess").newInstance(); //$NON-NLS-1$
+				.loadClass("fragment.test.attach.host.a.internal.test.TestPackageAccess").getDeclaredConstructor() //$NON-NLS-1$
+				.newInstance();
 		testRunner.testIt();
 	}
 
@@ -503,7 +507,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	}
 
 	private void runTestRunner(Bundle host, String classname) throws Exception {
-		ITestRunner testRunner = (ITestRunner) host.loadClass(classname).newInstance();
+		ITestRunner testRunner = (ITestRunner) host.loadClass(classname).getDeclaredConstructor().newInstance();
 		testRunner.testIt();
 
 	}
@@ -532,23 +536,28 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertTrue("legacy lazy start resolve", //$NON-NLS-1$
 				installer.resolveBundles(new Bundle[] { legacy, legacyA, legacyB, legacyC }));
 
-		((ITestRunner) legacy.loadClass("legacy.lazystart.SimpleLegacy").newInstance()).testIt(); //$NON-NLS-1$
+		((ITestRunner) legacy.loadClass("legacy.lazystart.SimpleLegacy").getDeclaredConstructor() //$NON-NLS-1$
+				.newInstance()).testIt();
 		Object[] expectedEvents = new Object[1];
 		expectedEvents[0] = new BundleEvent(BundleEvent.STARTED, legacyA);
 		Object[] actualEvents = simpleResults.getResults(1);
 		compareResults(expectedEvents, actualEvents);
 
-		((ITestRunner) legacy.loadClass("legacy.lazystart.TrueExceptionLegacy1").newInstance()).testIt(); //$NON-NLS-1$
+		((ITestRunner) legacy.loadClass("legacy.lazystart.TrueExceptionLegacy1").getDeclaredConstructor() //$NON-NLS-1$
+				.newInstance()).testIt();
 		assertTrue("exceptions no event", simpleResults.getResults(0).length == 0); //$NON-NLS-1$
-		((ITestRunner) legacy.loadClass("legacy.lazystart.TrueExceptionLegacy2").newInstance()).testIt(); //$NON-NLS-1$
+		((ITestRunner) legacy.loadClass("legacy.lazystart.TrueExceptionLegacy2").getDeclaredConstructor().newInstance()) //$NON-NLS-1$
+				.testIt();
 		expectedEvents = new Object[1];
 		expectedEvents[0] = new BundleEvent(BundleEvent.STARTED, legacyB);
 		actualEvents = simpleResults.getResults(1);
 		compareResults(expectedEvents, actualEvents);
 
-		((ITestRunner) legacy.loadClass("legacy.lazystart.FalseExceptionLegacy1").newInstance()).testIt(); //$NON-NLS-1$
+		((ITestRunner) legacy.loadClass("legacy.lazystart.FalseExceptionLegacy1").getDeclaredConstructor() //$NON-NLS-1$
+				.newInstance()).testIt();
 		assertTrue("exceptions no event", simpleResults.getResults(0).length == 0); //$NON-NLS-1$
-		((ITestRunner) legacy.loadClass("legacy.lazystart.FalseExceptionLegacy2").newInstance()).testIt(); //$NON-NLS-1$
+		((ITestRunner) legacy.loadClass("legacy.lazystart.FalseExceptionLegacy2").getDeclaredConstructor() //$NON-NLS-1$
+				.newInstance()).testIt();
 		expectedEvents = new Object[1];
 		expectedEvents[0] = new BundleEvent(BundleEvent.STARTED, legacyC);
 		actualEvents = simpleResults.getResults(1);
@@ -584,23 +593,23 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		Bundle osgiC = installer.installBundle("osgi.lazystart.c"); //$NON-NLS-1$
 		assertTrue("osgi lazy start resolve", installer.resolveBundles(new Bundle[] { osgi, osgiA, osgiB, osgiC })); //$NON-NLS-1$
 
-		((ITestRunner) osgi.loadClass("osgi.lazystart.LazySimple").newInstance()).testIt(); //$NON-NLS-1$
+		((ITestRunner) osgi.loadClass("osgi.lazystart.LazySimple").getDeclaredConstructor().newInstance()).testIt(); //$NON-NLS-1$
 		Object[] expectedEvents = new Object[1];
 		expectedEvents[0] = new BundleEvent(BundleEvent.STARTED, osgiA);
 		Object[] actualEvents = simpleResults.getResults(1);
 		compareResults(expectedEvents, actualEvents);
 
-		((ITestRunner) osgi.loadClass("osgi.lazystart.LazyExclude1").newInstance()).testIt(); //$NON-NLS-1$
+		((ITestRunner) osgi.loadClass("osgi.lazystart.LazyExclude1").getDeclaredConstructor().newInstance()).testIt(); //$NON-NLS-1$
 		assertTrue("exceptions no event", simpleResults.getResults(0).length == 0); //$NON-NLS-1$
-		((ITestRunner) osgi.loadClass("osgi.lazystart.LazyExclude2").newInstance()).testIt(); //$NON-NLS-1$
+		((ITestRunner) osgi.loadClass("osgi.lazystart.LazyExclude2").getDeclaredConstructor().newInstance()).testIt(); //$NON-NLS-1$
 		expectedEvents = new Object[1];
 		expectedEvents[0] = new BundleEvent(BundleEvent.STARTED, osgiB);
 		actualEvents = simpleResults.getResults(1);
 		compareResults(expectedEvents, actualEvents);
 
-		((ITestRunner) osgi.loadClass("osgi.lazystart.LazyInclude1").newInstance()).testIt(); //$NON-NLS-1$
+		((ITestRunner) osgi.loadClass("osgi.lazystart.LazyInclude1").getDeclaredConstructor().newInstance()).testIt(); //$NON-NLS-1$
 		assertTrue("exceptions no event", simpleResults.getResults(0).length == 0); //$NON-NLS-1$
-		((ITestRunner) osgi.loadClass("osgi.lazystart.LazyInclude2").newInstance()).testIt(); //$NON-NLS-1$
+		((ITestRunner) osgi.loadClass("osgi.lazystart.LazyInclude2").getDeclaredConstructor().newInstance()).testIt(); //$NON-NLS-1$
 		expectedEvents = new Object[1];
 		expectedEvents[0] = new BundleEvent(BundleEvent.STARTED, osgiC);
 		actualEvents = simpleResults.getResults(1);
@@ -2149,7 +2158,8 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 	@Test
 	public void testBug490902() throws BundleException, InterruptedException, ClassNotFoundException,
-			InstantiationException, IllegalAccessException {
+			InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+			NoSuchMethodException, SecurityException {
 		final Bundle a1 = installer.installBundle("test.bug490902.a");
 		final Bundle b1 = installer.installBundle("test.bug490902.b");
 		installer.resolveBundles(new Bundle[] { a1, b1 });
@@ -2173,7 +2183,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			new Thread(() -> {
 				try {
 					System.out.println(getName() + ": Initial load test.");
-					a1.loadClass("test.bug490902.a.TestLoadA1").newInstance();
+					a1.loadClass("test.bug490902.a.TestLoadA1").getDeclaredConstructor().newInstance();
 				} catch (Throwable e) {
 					e.printStackTrace();
 				}
@@ -2183,7 +2193,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			Thread secondThread = new Thread(() -> {
 				try {
 					System.out.println(getName() + ": Second load test.");
-					a1.loadClass("test.bug490902.a.TestLoadA1").newInstance();
+					a1.loadClass("test.bug490902.a.TestLoadA1").getDeclaredConstructor().newInstance();
 				} catch (Throwable e) {
 					e.printStackTrace();
 				} finally {
@@ -2197,7 +2207,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			System.out.println(getName() + ": About to interrupt:" + secondThread.getName());
 			secondThread.interrupt();
 			endedSecondThread.await();
-			a1.loadClass("test.bug490902.a.TestLoadA1").newInstance();
+			a1.loadClass("test.bug490902.a.TestLoadA1").getDeclaredConstructor().newInstance();
 		} finally {
 			getContext().removeBundleListener(delayB1);
 		}

@@ -118,7 +118,7 @@ public abstract class AbstractFrameworkHookTests {
 
 	protected Framework createFramework(Map<String, String> configuration) throws Exception {
 		FrameworkFactory factory = (FrameworkFactory) classLoader.loadClass(EquinoxFactory.class.getName())
-				.newInstance();
+				.getDeclaredConstructor().newInstance();
 		Framework framework = factory.newFramework(configuration);
 		return framework;
 	}

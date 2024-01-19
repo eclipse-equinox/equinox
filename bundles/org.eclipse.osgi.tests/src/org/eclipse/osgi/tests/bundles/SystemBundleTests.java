@@ -31,6 +31,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
@@ -1326,7 +1327,8 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 	@Test
 	public void testBug414070()
-			throws BundleException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+			throws BundleException, InstantiationException, IllegalAccessException, ClassNotFoundException,
+			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
 		Map<String, Object> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
@@ -1353,7 +1355,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 		equinox.start();
 
-		chainTest.loadClass("chain.test.TestMultiChain").newInstance(); //$NON-NLS-1$
+		chainTest.loadClass("chain.test.TestMultiChain").getDeclaredConstructor().newInstance(); //$NON-NLS-1$
 		// force a dynamic wire to cause a cycle
 		chainTestD.loadClass("chain.test.a.AMultiChain1");
 
