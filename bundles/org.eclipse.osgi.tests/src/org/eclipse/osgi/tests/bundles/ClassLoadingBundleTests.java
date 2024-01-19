@@ -2205,7 +2205,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 	@Test
 	public void testRecursiveWeavingHookFactory() {
-		final ThreadLocal<Boolean> testThread = new ThreadLocal<Boolean>() {
+		final ThreadLocal<Boolean> testThread = new ThreadLocal<>() {
 			@Override
 			protected Boolean initialValue() {
 				return Boolean.FALSE;
@@ -2217,7 +2217,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		final List<WovenClass> called = new ArrayList<>();
 		final AtomicBoolean loadNewClassInWeave = new AtomicBoolean(false);
 
-		ServiceFactory<WeavingHook> topFactory = new ServiceFactory<WeavingHook>() {
+		ServiceFactory<WeavingHook> topFactory = new ServiceFactory<>() {
 			@Override
 			public WeavingHook getService(Bundle bundle, ServiceRegistration<WeavingHook> registration) {
 				if (!testThread.get()) {

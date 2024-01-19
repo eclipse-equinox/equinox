@@ -417,7 +417,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 	@Override
 	public Enumeration<URL> findResources(final String name) throws IOException {
 		final List<URL> resources = new ArrayList<>();
-		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+		AccessController.doPrivileged(new PrivilegedAction<>() {
 			@Override
 			public Object run() {
 				synchronized (loaders) {
