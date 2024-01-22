@@ -26,7 +26,6 @@ import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.storage.StorageUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.log.LogLevel;
@@ -115,13 +114,13 @@ public class EquinoxLogServices {
 	private ServiceRegistration<?> frameworkLogReg;
 	private ServiceRegistration<?> perfLogReg;
 
-	public void start(BundleContext context) throws BundleException {
+	public void start(BundleContext context) {
 		logServiceManager.start(context);
 		frameworkLogReg = StorageUtil.register(FrameworkLog.class.getName(), eclipseLogFactory, context);
 		perfLogReg = registerPerformanceLog(context);
 	}
 
-	public void stop(BundleContext context) throws BundleException {
+	public void stop(BundleContext context) {
 		frameworkLogReg.unregister();
 		perfLogReg.unregister();
 		logServiceManager.stop(context);

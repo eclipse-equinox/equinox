@@ -2384,7 +2384,7 @@ public class TestModuleContainer extends AbstractTest {
 	}
 
 	@Test
-	public void testBadPackageVersion() throws IOException {
+	public void testBadPackageVersion() throws Exception {
 		Map<String, String> testManifest = new HashMap<>();
 		testManifest.put(Constants.BUNDLE_SYMBOLICNAME, "test");
 		testManifest.put(Constants.BUNDLE_VERSION, "1.0");

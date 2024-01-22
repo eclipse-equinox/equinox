@@ -342,7 +342,7 @@ class EquinoxLogWriter implements SynchronousLogListener, LogFilter {
 		setOutput(null, newWriter, append);
 	}
 
-	public synchronized void setFile(File newFile, boolean append) throws IOException {
+	public synchronized void setFile(File newFile, boolean append) {
 		if (newFile != null && !newFile.equals(this.outFile)) {
 			// If it's a new file, then reset.
 			readLogProperties();

@@ -13,11 +13,19 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.wrapper.hooks.a;
 
-import java.io.*;
-import java.net.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 import org.eclipse.osgi.container.Module;
-import org.eclipse.osgi.internal.hookregistry.*;
-import org.eclipse.osgi.storage.bundlefile.*;
+import org.eclipse.osgi.internal.hookregistry.BundleFileWrapperFactoryHook;
+import org.eclipse.osgi.internal.hookregistry.HookConfigurator;
+import org.eclipse.osgi.internal.hookregistry.HookRegistry;
+import org.eclipse.osgi.storage.bundlefile.BundleEntry;
+import org.eclipse.osgi.storage.bundlefile.BundleFileWrapper;
 
 public class TestHookConfigurator implements HookConfigurator {
 	public void addHooks(HookRegistry hookRegistry) {
@@ -53,7 +61,7 @@ public class TestHookConfigurator implements HookConfigurator {
 								}
 
 								@Override
-								public InputStream getInputStream() throws IOException {
+								public InputStream getInputStream() {
 									return new ByteArrayInputStream(content);
 								}
 
