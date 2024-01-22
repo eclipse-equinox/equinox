@@ -1352,7 +1352,7 @@ public class HttpServiceRuntimeImpl implements HttpServiceRuntime,
 		// client anyway.
 		class LegacyFilter implements Filter {
 			@Override
-			public void init(FilterConfig filterConfig) throws ServletException {
+			public void init(FilterConfig filterConfig) {
 				try {
 					filter.init(filterConfig);
 					error.set(null);
@@ -1383,7 +1383,7 @@ public class HttpServiceRuntimeImpl implements HttpServiceRuntime,
 		}
 
 		@Override
-		public void init(ServletConfig config) throws ServletException {
+		public void init(ServletConfig config) {
 			try {
 				servlet.init(config);
 				error.set(null);

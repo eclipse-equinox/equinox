@@ -5354,7 +5354,7 @@ public class StateResolverTest extends AbstractStateTest {
 	 * and therefore trimmed real life data is used for this test.
 	 */
 	@Test
-	public void testIssue156() throws BundleException, IOException, Exception {
+	public void testIssue156() throws Exception {
 		State state = buildEmptyState();
 		int bundleID = 0;
 		Hashtable manifest = new Hashtable();

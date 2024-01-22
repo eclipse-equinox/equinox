@@ -14,9 +14,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import java.util.*;
-import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.BundleException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.State;
+import org.eclipse.osgi.service.resolver.StateDelta;
 
 /**
  * This implementation of State does a bookkeeping of all added/removed
@@ -42,7 +45,7 @@ public class UserState extends StateImpl {
 		return true;
 	}
 
-	public StateDelta compare(State baseState) throws BundleException {
+	public StateDelta compare(State baseState) {
 		BundleDescription[] currentBundles = this.getBundles();
 		StateDeltaImpl delta = new StateDeltaImpl(this);
 		// process additions and updates

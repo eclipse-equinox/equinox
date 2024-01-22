@@ -183,6 +183,9 @@ public abstract class SystemModule extends Module {
 		}
 	}
 
+	/**
+	 * @throws BundleException may be thrown by overrides
+	 */
 	protected void initWorker() throws BundleException {
 		// Do nothing
 	}

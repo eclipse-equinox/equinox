@@ -34,7 +34,6 @@ import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.service.resolver.StateHelper;
 import org.eclipse.osgi.service.resolver.StateObjectFactory;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
 
 public class PlatformAdminImpl implements PlatformAdmin {
@@ -130,7 +129,7 @@ public class PlatformAdminImpl implements PlatformAdmin {
 	}
 
 	@Override
-	public void commit(State state) throws BundleException {
+	public void commit(State state) {
 		throw new UnsupportedOperationException();
 	}
 

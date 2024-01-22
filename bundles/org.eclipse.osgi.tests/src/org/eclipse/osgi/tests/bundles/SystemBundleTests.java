@@ -1788,7 +1788,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 	}
 
 	@Test
-	public void testSystemBundleListener() throws BundleException, InterruptedException {
+	public void testSystemBundleListener() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		config.mkdirs();
 		Map<String, Object> configuration = new HashMap<>();
@@ -2185,7 +2185,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 	}
 
 	@Test
-	public void testDaemonActiveThread() throws BundleException, InterruptedException {
+	public void testDaemonActiveThread() throws Exception {
 		File config = OSGiTestsActivator.getContext().getDataFile(getName());
 		config.mkdirs();
 		Map<String, Object> configuration = new HashMap<>();
