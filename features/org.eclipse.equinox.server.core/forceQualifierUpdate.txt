@@ -11,3 +11,4 @@ Bug 544571 - Update felix SCR to 2.0.16
 update felix scr to 2.2.4
 https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/pull/798
 https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/pull/832
+https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/pull/1742
