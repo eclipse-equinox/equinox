@@ -27,7 +27,6 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class HttpServiceTracker extends ServiceTracker<HttpService, HttpService> {
 
-	private BundleContext context;
 	private PackageAdmin packageAdmin;
 	private IExtensionRegistry registry;
 
@@ -36,7 +35,6 @@ public class HttpServiceTracker extends ServiceTracker<HttpService, HttpService>
 
 	public HttpServiceTracker(BundleContext context, PackageAdmin packageAdmin, IExtensionRegistry registry) {
 		super(context, HttpService.class, null);
-		this.context = context;
 		this.packageAdmin = packageAdmin;
 		this.registry = registry;
 	}
@@ -81,11 +79,11 @@ public class HttpServiceTracker extends ServiceTracker<HttpService, HttpService>
 	public class HttpContextExtensionServiceFactory implements ServiceFactory<HttpContextExtensionService> {
 
 		public HttpContextExtensionService getService(Bundle bundle,
-				ServiceRegistration<HttpContextExtensionService> registration) {
+				ServiceRegistration<HttpContextExtensionService> r) {
 			return new HttpContextExtensionServiceImpl(bundle);
 		}
 
-		public void ungetService(Bundle bundle, ServiceRegistration<HttpContextExtensionService> registration,
+		public void ungetService(Bundle bundle, ServiceRegistration<HttpContextExtensionService> r,
 				HttpContextExtensionService service) {
 			// do nothing
 		}
