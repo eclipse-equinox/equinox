@@ -153,8 +153,6 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 	}
 
 	private static class ServletWrapper implements Servlet {
-
-		private static final String CLASS = "class"; //$NON-NLS-1$
 		private IConfigurationElement element;
 		private Servlet delegate;
 		private ServletConfig config;
@@ -168,8 +166,8 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 			this.loadOnStartup = true;
 		}
 
-		public void init(ServletConfig config) throws ServletException {
-			this.config = config;
+		public void init(ServletConfig servletConfig) throws ServletException {
+			this.config = servletConfig;
 			if (loadOnStartup)
 				initializeDelegate();
 		}

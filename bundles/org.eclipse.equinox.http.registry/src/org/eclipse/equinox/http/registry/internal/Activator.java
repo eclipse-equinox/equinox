@@ -32,16 +32,16 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	private IExtensionRegistry registry;
 	private BundleContext context;
 
-	public void start(BundleContext context) throws Exception {
-		this.context = context;
-		packageAdminTracker = new ServiceTracker<>(context, PackageAdmin.class, this);
+	public void start(BundleContext bundleContext) throws Exception {
+		this.context = bundleContext;
+		packageAdminTracker = new ServiceTracker<>(bundleContext, PackageAdmin.class, this);
 		packageAdminTracker.open();
 
-		registryTracker = new ServiceTracker<>(context, IExtensionRegistry.class, this);
+		registryTracker = new ServiceTracker<>(bundleContext, IExtensionRegistry.class, this);
 		registryTracker.open();
 	}
 
-	public void stop(BundleContext context) throws Exception {
+	public void stop(BundleContext bundleContext) throws Exception {
 		packageAdminTracker.close();
 		packageAdminTracker = null;
 		registryTracker.close();

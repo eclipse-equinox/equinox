@@ -1017,36 +1017,36 @@ final class ModuleResolver {
 
 			// make a copy so we do not modify the input
 			revisions = new LinkedList<>(revisions);
-			List<Resource> toResolve = new ArrayList<>();
+			List<Resource> resources = new ArrayList<>();
 			try {
 				for (Iterator<ModuleRevision> iResources = revisions.iterator(); iResources.hasNext();) {
 					ModuleRevision single = iResources.next();
 					iResources.remove();
 					if (!wirings.containsKey(single) && !failedToResolve.contains(single)) {
-						toResolve.add(single);
+						resources.add(single);
 					}
-					if (toResolve.size() == resolverRevisionBatchSize || !iResources.hasNext()) {
+					if (resources.size() == resolverRevisionBatchSize || !iResources.hasNext()) {
 						if (DEBUG_ROOTS) {
-							Debug.println("Resolver: resolving " + toResolve.size() + " in batch."); //$NON-NLS-1$ //$NON-NLS-2$
-							for (Resource root : toResolve) {
+							Debug.println("Resolver: resolving " + resources.size() + " in batch."); //$NON-NLS-1$ //$NON-NLS-2$
+							for (Resource root : resources) {
 								Debug.println("    Resolving root bundle: " + root); //$NON-NLS-1$
 							}
 						}
-						resolveRevisions(toResolve, isMandatory, logger, result);
-						toResolve.clear();
+						resolveRevisions(resources, isMandatory, logger, result);
+						resources.clear();
 					}
 					maxUsedMemory = Math.max(maxUsedMemory, Runtime.getRuntime().freeMemory() - initialFreeMemory);
 				}
 			} catch (ResolutionException resolutionException) {
 				if (resolutionException.getCause() instanceof CancellationException) {
 					// revert back to single bundle resolves
-					resolveRevisionsIndividually(isMandatory, logger, result, toResolve, revisions);
+					resolveRevisionsIndividually(isMandatory, logger, result, resources, revisions);
 				} else {
 					throw resolutionException;
 				}
 			} catch (OutOfMemoryError memoryError) {
 				// revert back to single bundle resolves
-				resolveRevisionsIndividually(isMandatory, logger, result, toResolve, revisions);
+				resolveRevisionsIndividually(isMandatory, logger, result, resources, revisions);
 			}
 
 			if (DEBUG_ROOTS) {
@@ -1057,10 +1057,10 @@ final class ModuleResolver {
 		}
 
 		private void resolveRevisionsIndividually(boolean isMandatory, ResolveLogger logger,
-				Map<Resource, List<Wire>> result, Collection<Resource> toResolve, Collection<ModuleRevision> revisions)
+				Map<Resource, List<Wire>> result, Collection<Resource> resources, Collection<ModuleRevision> revisions)
 				throws ResolutionException {
 			scheduleTimeout.set(false);
-			for (Resource resource : toResolve) {
+			for (Resource resource : resources) {
 				if (!wirings.containsKey(resource) && !failedToResolve.contains(resource)) {
 					resolveRevisions(Collections.singletonList(resource), isMandatory, logger, result);
 				}

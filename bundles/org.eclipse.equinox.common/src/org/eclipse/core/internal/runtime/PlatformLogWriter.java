@@ -99,7 +99,7 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 	}
 
 	@Override
-	public boolean isLoggable(Bundle bundle, String loggerName, int logLevel) {
+	public boolean isLoggable(Bundle b, String loggerName, int logLevel) {
 		return EQUINOX_LOGGER_NAME.equals(loggerName) && RuntimeLog.hasListeners();
 	}
 
