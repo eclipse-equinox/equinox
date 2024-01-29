@@ -39,7 +39,11 @@ import org.junit.jupiter.api.Test;
 import main.TestLauncherConstants;
 
 public class LauncherTests {
-	private static final String ECLIPSE_INI_FILE_NAME = "eclipse.ini";
+	private static final String ECLIPSE_INI_PATH_KEY = "ECLIPSE_INI_PATH";
+	// eclipse ini file name is relative to eclipse binary. e.g., in mac, it is ../Eclipse/eclipse.ini
+	// and on other hosts, it is present in same directory as eclipse binary
+	private static final String ECLIPSE_INI_FILE_NAME = System.getProperty(ECLIPSE_INI_PATH_KEY,
+			System.getenv(ECLIPSE_INI_PATH_KEY) == null ? "eclipse.ini" : System.getenv(ECLIPSE_INI_PATH_KEY));
 	// @formatter:off
 	private static final String DEFAULT_ECLIPSE_INI_CONTENT = "-startup\n"
 															+ "../test.launcher.jar\n"

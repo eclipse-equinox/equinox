@@ -37,6 +37,8 @@ EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
 LIBS = -framework Cocoa
 
+LIBRARY_FRAGMENT_NAME ?= org.eclipse.equinox.launcher.$(DEFAULT_WS).$(DEFAULT_OS).$(DEFAULT_OS_ARCH)
+
 ifeq ($(ARCHS),-arch x86_64)
   LDFLAGS=-pagezero_size 0x1000
 endif
@@ -89,3 +91,32 @@ install: all
 
 clean:
 	rm -f $(EXEC) $(DLL) $(MAIN_OBJS) $(COMMON_OBJS) $(DLL_OBJS)
+
+dev_build_install: all
+ifneq ($(filter "$(origin DEV_ECLIPSE)", "environment" "command line"),)
+	$(info Copying $(EXEC) and $(DLL) into your development eclipse folder:)
+	mkdir -p ${DEV_ECLIPSE}/
+	cp $(EXEC) ${DEV_ECLIPSE}/
+	mkdir -p ${DEV_ECLIPSE}/plugins/$(LIBRARY_FRAGMENT_NAME)/
+	cp $(DLL) ${DEV_ECLIPSE}/plugins/$(LIBRARY_FRAGMENT_NAME)/
+else
+	$(error $(DEV_INSTALL_ERROR_MSG))
+endif
+
+test:
+	$(eval export DEV_ECLIPSE=../org.eclipse.launcher.tests/target/test-run)
+	mvn -f ../org.eclipse.launcher.tests/pom.xml clean verify -Dmaven.test.skip=true
+	make -f $(firstword $(MAKEFILE_LIST)) dev_build_install LIBRARY_FRAGMENT_NAME=org.eclipse.equinox.launcher
+	mkdir $(DEV_ECLIPSE)/../Eclipse
+	mvn -f ../org.eclipse.launcher.tests/pom.xml -DargLine="-DECLIPSE_INI_PATH=../Eclipse/eclipse.ini" test
+
+define DEV_INSTALL_ERROR_MSG =
+Note:
+   DEV_ECLIPSE environmental variable is not defined.
+   You can download an integration build eclipse for testing and set DEV_ECLIPSE to point to it's folder
+   as per output of 'pwd'. Note, without trailing forwardslash. Integration build can be downloaded here:
+   See: https://download.eclipse.org/eclipse/downloads/
+   That way you can automatically build and copy eclipse and eclipse_XXXX.so into the relevant folders for testing.
+   E.g: you can put something like the following into your .bashrc
+   export DEV_ECLIPSE="/home/YOUR_USER/Downloads/eclipse-SDK-I20YYMMDD-XXXX-linux-gtk-x86_64/eclipse"
+endef
