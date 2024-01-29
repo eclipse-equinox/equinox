@@ -284,7 +284,7 @@ typedef struct
 static Option options[] = {
     { CONSOLE,		&needConsole,	VALUE_IS_FLAG,	0 },
     { CONSOLELOG,	&needConsole,	VALUE_IS_FLAG,	0 },
-    { DEBUG,		&debug,			VALUE_IS_FLAG,	0 },
+    { DEBUG_ARG,	&debug,			VALUE_IS_FLAG,	0 },
     { NOSPLASH,     &noSplash,      VALUE_IS_FLAG,	1 },
     { SUPRESSERRORS, &suppressErrors, VALUE_IS_FLAG, 1},
     { SECOND_THREAD, &secondThread, VALUE_IS_FLAG,  1 },

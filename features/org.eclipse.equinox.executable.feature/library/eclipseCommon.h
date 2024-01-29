@@ -21,7 +21,7 @@
 /* Define constants for the options recognized by the launcher. */
 #define CONSOLE            _T_ECLIPSE("-console")
 #define CONSOLELOG         _T_ECLIPSE("-consoleLog")
-#define DEBUG              _T_ECLIPSE("-debug")
+#define DEBUG_ARG          _T_ECLIPSE("-debug") // Post-fixing with _ARG. Otherwise it causes failure in macOS build
 #define OS                 _T_ECLIPSE("-os")
 #define OSARCH             _T_ECLIPSE("-arch")
 #define NOSPLASH           _T_ECLIPSE("-nosplash")

@@ -33,7 +33,6 @@
 #include <mach-o/dyld.h>
 
 #define startupJarName "startup.jar"
-#define LAUNCHER "-launcher"
 #define SPLASH_LAUNCHER "/Resources/Splash.app/Contents/"
 
 #define DEBUG 0
