@@ -18,6 +18,55 @@
 
 #include "eclipseUnicode.h"
 
+/* Define constants for the options recognized by the launcher. */
+#define CONSOLE            _T_ECLIPSE("-console")
+#define CONSOLELOG         _T_ECLIPSE("-consoleLog")
+#define DEBUG              _T_ECLIPSE("-debug")
+#define OS                 _T_ECLIPSE("-os")
+#define OSARCH             _T_ECLIPSE("-arch")
+#define NOSPLASH           _T_ECLIPSE("-nosplash")
+#define LAUNCHER           _T_ECLIPSE("-launcher")
+#define SHOWSPLASH         _T_ECLIPSE("-showsplash")
+#define EXITDATA           _T_ECLIPSE("-exitdata")
+#define STARTUP            _T_ECLIPSE("-startup")
+#define VM                 _T_ECLIPSE("-vm")
+#define WS                 _T_ECLIPSE("-ws")
+#define NAME               _T_ECLIPSE("-name")
+#define VMARGS             _T_ECLIPSE("-vmargs")  /* special option processing required */
+#define CP                 _T_ECLIPSE("-cp")
+#define CLASSPATH          _T_ECLIPSE("-classpath")
+#define JAR                _T_ECLIPSE("-jar")
+#define PROTECT            _T_ECLIPSE("-protect")
+#define ROOT               _T_ECLIPSE("root")  /* the only level of protection we care now */
+
+#define OPENFILE           _T_ECLIPSE("--launcher.openFile")
+#define DEFAULTACTION      _T_ECLIPSE("--launcher.defaultAction")
+#define TIMEOUT            _T_ECLIPSE("--launcher.timeout")
+#define LIBRARY            _T_ECLIPSE("--launcher.library")
+#define SUPRESSERRORS      _T_ECLIPSE("--launcher.suppressErrors")
+#define INI                _T_ECLIPSE("--launcher.ini")
+#define APPEND_VMARGS      _T_ECLIPSE("--launcher.appendVmargs")
+#define OVERRIDE_VMARGS    _T_ECLIPSE("--launcher.overrideVmargs")
+#define SECOND_THREAD      _T_ECLIPSE("--launcher.secondThread")
+#define PERM_GEN           _T_ECLIPSE("--launcher.XXMaxPermSize")
+#define OLD_ARGS_START     _T_ECLIPSE("--launcher.oldUserArgsStart")
+#define OLD_ARGS_END       _T_ECLIPSE("--launcher.oldUserArgsEnd")
+#define SKIP_OLD_ARGS      _T_ECLIPSE("--launcher.skipOldUserArgs")
+
+#define XXPERMGEN          _T_ECLIPSE("-XX:MaxPermSize=")
+#define ADDMODULES         _T_ECLIPSE("--add-modules")
+#define ACTION_OPENFILE    _T_ECLIPSE("openFile")
+#define GTK_VERSION        _T_ECLIPSE("--launcher.GTK_version")
+
+/* constants for ee options file */
+#define EE_EXECUTABLE      _T_ECLIPSE("-Dee.executable=")
+#define EE_CONSOLE         _T_ECLIPSE("-Dee.executable.console=")
+#define EE_VM_LIBRARY      _T_ECLIPSE("-Dee.vm.library=")
+#define EE_LIBRARY_PATH    _T_ECLIPSE("-Dee.library.path=")
+#define EE_HOME            _T_ECLIPSE("-Dee.home=")
+#define EE_FILENAME        _T_ECLIPSE("-Dee.filename=")
+#define EE_HOME_VAR        _T_ECLIPSE("${ee.home}")
+
 /* Variables and Methods that will be needed by both the executable and the library */
 
 #define MAX_PATH_LENGTH   2000

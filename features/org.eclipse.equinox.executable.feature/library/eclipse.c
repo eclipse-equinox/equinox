@@ -228,51 +228,6 @@ home directory.");
 #define OLD_STARTUP 		_T_ECLIPSE("startup.jar")
 #define CLASSPATH_PREFIX        _T_ECLIPSE("-Djava.class.path=")
 
-/* Define constants for the options recognized by the launcher. */
-#define CONSOLE      _T_ECLIPSE("-console")
-#define CONSOLELOG   _T_ECLIPSE("-consoleLog")
-#define DEBUG        _T_ECLIPSE("-debug")
-#define OS           _T_ECLIPSE("-os")
-#define OSARCH       _T_ECLIPSE("-arch")
-#define NOSPLASH     _T_ECLIPSE("-nosplash")
-#define LAUNCHER     _T_ECLIPSE("-launcher")
-#define SHOWSPLASH   _T_ECLIPSE("-showsplash")
-#define EXITDATA     _T_ECLIPSE("-exitdata")
-#define STARTUP      _T_ECLIPSE("-startup")
-#define VM           _T_ECLIPSE("-vm")
-#define WS           _T_ECLIPSE("-ws")
-#define NAME         _T_ECLIPSE("-name")
-#define VMARGS       _T_ECLIPSE("-vmargs")					/* special option processing required */
-#define CP			 _T_ECLIPSE("-cp")
-#define CLASSPATH    _T_ECLIPSE("-classpath")
-#define JAR 		 _T_ECLIPSE("-jar")
-#define PROTECT 	 _T_ECLIPSE("-protect")
-
-#define OPENFILE	  _T_ECLIPSE("--launcher.openFile")
-#define DEFAULTACTION _T_ECLIPSE("--launcher.defaultAction")
-#define TIMEOUT		  _T_ECLIPSE("--launcher.timeout")
-#define LIBRARY		  _T_ECLIPSE("--launcher.library")
-#define SUPRESSERRORS _T_ECLIPSE("--launcher.suppressErrors")
-#define INI			  _T_ECLIPSE("--launcher.ini")
-#define APPEND_VMARGS _T_ECLIPSE("--launcher.appendVmargs")
-#define OVERRIDE_VMARGS _T_ECLIPSE("--launcher.overrideVmargs")
-#define SECOND_THREAD _T_ECLIPSE("--launcher.secondThread")
-#define PERM_GEN	  _T_ECLIPSE("--launcher.XXMaxPermSize")
-
-#define XXPERMGEN	  _T_ECLIPSE("-XX:MaxPermSize=")
-#define ADDMODULES	  _T_ECLIPSE("--add-modules")
-#define ACTION_OPENFILE _T_ECLIPSE("openFile")
-#define GTK_VERSION   _T_ECLIPSE("--launcher.GTK_version")
-
-/* constants for ee options file */
-#define EE_EXECUTABLE 			_T_ECLIPSE("-Dee.executable=")
-#define EE_CONSOLE 	_T_ECLIPSE("-Dee.executable.console=")
-#define EE_VM_LIBRARY			_T_ECLIPSE("-Dee.vm.library=")
-#define EE_LIBRARY_PATH			_T_ECLIPSE("-Dee.library.path=")
-#define EE_HOME					_T_ECLIPSE("-Dee.home=")
-#define EE_FILENAME				_T_ECLIPSE("-Dee.filename=")
-#define EE_HOME_VAR				_T_ECLIPSE("${ee.home}")
-
 /* Splash screen names to look for when -showsplash points to a directory or plugin */
 #define SPLASH_IMAGES _T_ECLIPSE("splash.png\0" "splash.jpg\0" "splash.jpeg\0" "splash.gif\0" "splash.bmp\0" "\0")
 
@@ -383,7 +338,7 @@ static _TCHAR*  formatVmCommandMsg( _TCHAR* args[], _TCHAR* vmArgs[], _TCHAR* pr
 static _TCHAR*  getDefaultOfficialName();
 static _TCHAR*  findStartupJar();
 static _TCHAR*  findSplash(_TCHAR* splashArg);
-static _TCHAR** getRelaunchCommand( _TCHAR **vmCommand );
+static _TCHAR** getRelaunchCommand( _TCHAR **newLaucherArgs );
 static const _TCHAR* getVMArch();
 static int      _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[]);
 static _TCHAR** mergeConfigurationFilesVMArgs();
@@ -512,7 +467,7 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     _TCHAR*   errorMsg = NULL, *msg = NULL;
     JavaResults* javaResults = NULL;
     int 	  launchMode;
-    int 	  running = 1;
+    int       exitCode;
 
 	/* Initialize official program name */
    	officialName = name != NULL ? _tcsdup( name ) : getDefaultOfficialName();
@@ -674,137 +629,124 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     	vmCommand = buildLaunchCommand(javaVM, vmCommandArgs, progCommandArgs);
     }
 
-    /* While the Java VM should be restarted */
-    while(running)
-    {
-		msg = formatVmCommandMsg( vmCommand, vmCommandArgs, progCommandArgs );
-		if (debug) _tprintf( goVMMsg, msg );
+	msg = formatVmCommandMsg( vmCommand, vmCommandArgs, progCommandArgs );
+	if (debug) _tprintf( goVMMsg, msg );
 
-		if(launchMode == LAUNCH_JNI) {
-			javaResults = startJavaVM(jniLib, vmCommandArgs, progCommandArgs, jarFile);
-		} else {
-			javaResults = launchJavaVM(vmCommand);
+	if(launchMode == LAUNCH_JNI) {
+		javaResults = startJavaVM(jniLib, vmCommandArgs, progCommandArgs, jarFile);
+	} else {
+		javaResults = launchJavaVM(vmCommand);
+	}
+
+	if (javaResults == NULL) {
+		/* shouldn't happen, but just in case */
+		javaResults = malloc(sizeof(JavaResults));
+		javaResults->launchResult = -11;
+		javaResults->runResult = 0;
+		javaResults->errorMessage = _tcsdup(javaFailureMsg);
+	}
+
+	switch( javaResults->launchResult + javaResults->runResult ) {
+		case 0: /* normal exit */
+			break;
+		case RESTART_LAST_EC:
+			/* copy for relaunch, +1 to ensure NULL terminated */
+			relaunchCommand = malloc((initialArgc + 1) * sizeof(_TCHAR*));
+			memcpy(relaunchCommand, initialArgv, (initialArgc + 1) * sizeof(_TCHAR*));
+			relaunchCommand[initialArgc] = 0;
+			relaunchCommand[0] = program;
+			break;
+
+		case RESTART_NEW_EC:
+			if(launchMode == LAUNCH_EXE) {
+				if (exitData != NULL) free(exitData);
+				if (getSharedData( sharedID, &exitData ) != 0)
+					exitData = NULL;
+			}
+			if (exitData != 0) {
+				if (vmCommand != NULL) free( vmCommand );
+				vmCommand = parseArgList( exitData );
+				relaunchCommand = getRelaunchCommand(vmCommand);
+			} else {
+				if (debug) {
+					if (!suppressErrors)
+						displayMessage( officialName, shareMsg );
+					else
+						_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), officialName, shareMsg);
+				}
+			}
+			break;
+		default: {
+			_TCHAR *title = _tcsdup(officialName);
+			errorMsg = NULL;
+			if (launchMode == LAUNCH_EXE) {
+				if (exitData != NULL) free(exitData);
+				if (getSharedData( sharedID, &exitData ) != 0)
+					exitData = NULL;
+			}
+			if (exitData != 0) {
+				errorMsg = exitData;
+				exitData = NULL;
+				if (_tcslen( errorMsg ) > 0) {
+					_TCHAR *str;
+					if (_tcsncmp(errorMsg, _T_ECLIPSE("<title>"), _tcslen(_T_ECLIPSE("<title>"))) == 0) {
+						str = _tcsstr(errorMsg, _T_ECLIPSE("</title>"));
+						if (str != NULL) {
+							free( title );
+							str[0] = _T_ECLIPSE('\0');
+							title = _tcsdup( errorMsg + _tcslen(_T_ECLIPSE("<title>")) );
+							str = _tcsdup( str + _tcslen(_T_ECLIPSE("</title>")) );
+							free( errorMsg );
+							errorMsg = str;
+						}
+					}
+				}
+			} else {
+				 if (debug) {
+					if (!suppressErrors)
+						displayMessage( title, shareMsg );
+					else
+						_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), title, shareMsg);
+				}
+			}
+			if (errorMsg == NULL) {
+				if (javaResults->runResult) {
+					/* java was started ok, but returned non-zero exit code */
+					errorMsg = malloc( (_tcslen(returnCodeMsg) + _tcslen(msg) + 10) *sizeof(_TCHAR));
+					_stprintf(errorMsg, returnCodeMsg,javaResults->runResult, msg);
+				} else if (javaResults->errorMessage != NULL){
+					/* else we had a problem launching java, use custom error message */
+					errorMsg = javaResults->errorMessage;
+				} else {
+					/* no custom message, use generic message */
+					errorMsg = malloc( (_tcslen(exitMsg) + _tcslen(msg) + 10) * sizeof(_TCHAR) );
+					_stprintf( errorMsg, exitMsg, javaResults->launchResult, msg );
+				}
+			}
+
+			if (_tcslen(errorMsg) > 0) {
+				if (!suppressErrors)
+					displayMessage( title, errorMsg );
+				else
+					_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), title, errorMsg);
+			}
+			free( errorMsg );
+			free( title );
+			break;
 		}
+	}
+	free( msg );
 
-		if (javaResults == NULL) {
-			/* shouldn't happen, but just in case */
-			javaResults = malloc(sizeof(JavaResults));
-			javaResults->launchResult = -11;
-			javaResults->runResult = 0;
-			javaResults->errorMessage = _tcsdup(javaFailureMsg);
-		}
+	if (sharedID != NULL) {
+		destroySharedData( sharedID );
+		free( sharedID );
+	}
 
-	    switch( javaResults->launchResult + javaResults->runResult ) {
-	        case 0: /* normal exit */
-	        	running = 0;
-	            break;
-	        case RESTART_LAST_EC:
-	        	if (launchMode == LAUNCH_JNI) {
-		        	/* copy for relaunch, +1 to ensure NULL terminated */
-		        	relaunchCommand = malloc((initialArgc + 1) * sizeof(_TCHAR*));
-		        	memcpy(relaunchCommand, initialArgv, (initialArgc + 1) * sizeof(_TCHAR*));
-		        	relaunchCommand[initialArgc] = 0;
-		        	relaunchCommand[0] = program;
-		        	running = 0;
-	        	}
-	        	break;
+	if (relaunchCommand != NULL)
+		restartLauncher(NULL, relaunchCommand);
 
-	        case RESTART_NEW_EC:
-	        	if(launchMode == LAUNCH_EXE) {
-	        		if (exitData != NULL) free(exitData);
-	        		if (getSharedData( sharedID, &exitData ) != 0)
-	        			exitData = NULL;
-	        	}
-	            if (exitData != 0) {
-	            	if (vmCommand != NULL) free( vmCommand );
-	                vmCommand = parseArgList( exitData );
-	                if (launchMode == LAUNCH_JNI) {
-	                	relaunchCommand = getRelaunchCommand(vmCommand);
-	                	running = 0;
-	                }
-	            } else {
-	            	running = 0;
-	                if (debug) {
-	                	if (!suppressErrors)
-        	        		displayMessage( officialName, shareMsg );
-        	        	else
-        	           		_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), officialName, shareMsg);
-	                }
-	            }
-	            break;
-			default: {
-				_TCHAR *title = _tcsdup(officialName);
-	            running = 0;
-	            errorMsg = NULL;
-	            if (launchMode == LAUNCH_EXE) {
-	            	if (exitData != NULL) free(exitData);
-	        		if (getSharedData( sharedID, &exitData ) != 0)
-	        			exitData = NULL;
-	        	}
-	            if (exitData != 0) {
-	            	errorMsg = exitData;
-	            	exitData = NULL;
-	                if (_tcslen( errorMsg ) > 0) {
-	                    _TCHAR *str;
-	                	if (_tcsncmp(errorMsg, _T_ECLIPSE("<title>"), _tcslen(_T_ECLIPSE("<title>"))) == 0) {
-							str = _tcsstr(errorMsg, _T_ECLIPSE("</title>"));
-							if (str != NULL) {
-								free( title );
-								str[0] = _T_ECLIPSE('\0');
-								title = _tcsdup( errorMsg + _tcslen(_T_ECLIPSE("<title>")) );
-								str = _tcsdup( str + _tcslen(_T_ECLIPSE("</title>")) );
-								free( errorMsg );
-								errorMsg = str;
-							}
-	                	}
-	                }
-	            } else {
-	            	 if (debug) {
-	                	if (!suppressErrors)
-        	        		displayMessage( title, shareMsg );
-        	        	else
-        	           		_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), title, shareMsg);
-	                }
-	            }
-	            if (errorMsg == NULL) {
-	            	if (javaResults->runResult) {
-	            		/* java was started ok, but returned non-zero exit code */
-	            		errorMsg = malloc( (_tcslen(returnCodeMsg) + _tcslen(msg) + 10) *sizeof(_TCHAR));
-	            		_stprintf(errorMsg, returnCodeMsg,javaResults->runResult, msg);
-	            	} else if (javaResults->errorMessage != NULL){
-	            		/* else we had a problem launching java, use custom error message */
-	            		errorMsg = javaResults->errorMessage;
-	            	} else {
-	            		/* no custom message, use generic message */
-						errorMsg = malloc( (_tcslen(exitMsg) + _tcslen(msg) + 10) * sizeof(_TCHAR) );
-						_stprintf( errorMsg, exitMsg, javaResults->launchResult, msg );
-	            	}
-	            }
-
-	            if (_tcslen(errorMsg) > 0) {
-		            if (!suppressErrors)
-		            	displayMessage( title, errorMsg );
-		            else
-		            	_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), title, errorMsg);
-	            }
-	            free( errorMsg );
-	            free( title );
-	            break;
-	        }
-	    }
-	    free( msg );
-    }
-
-    if(relaunchCommand != NULL)
-    	restartLauncher(NULL, relaunchCommand);
-
-    if (launchMode == LAUNCH_JNI)
-    	cleanupVM(javaResults->launchResult ? javaResults->launchResult : javaResults->runResult);
-
-    if (sharedID != NULL) {
-    	destroySharedData( sharedID );
-    	free( sharedID );
-    }
+	if (launchMode == LAUNCH_JNI)
+		cleanupVM(javaResults->launchResult ? javaResults->launchResult : javaResults->runResult);
 
     /* Cleanup time. */
     free( vmCommandArgs );
@@ -823,10 +765,9 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     if (javaResults == NULL)
     	return -1;
 
-    /* reuse the running variable for convenience */
-    running = javaResults->launchResult != 0 ? javaResults->launchResult : javaResults->runResult;
+    exitCode = javaResults->launchResult != 0 ? javaResults->launchResult : javaResults->runResult;
     free(javaResults);
-    return running;
+    return exitCode;
 }
 
 static _TCHAR** buildLaunchCommand( _TCHAR* program, _TCHAR** vmArgs, _TCHAR** progArgs ) {
@@ -1522,42 +1463,121 @@ static _TCHAR* findStartupJar(){
 }
 
 /*
- * Return the portion of the vmCommand that should be used for relaunching
+ * Return the new launcher arguments that should be used for relaunching
  *
  * The memory allocated for the command array must be freed
  */
-static _TCHAR ** getRelaunchCommand( _TCHAR **vmCommand  )
+static _TCHAR ** getRelaunchCommand( _TCHAR **newLaucherArgs  )
 {
-	int i = -1, req = 0, begin = -1;
+	int newArgsSize = -1, newVmargsStart = -1, skipOldUserArgs = 0;
 	int idx = 0;
 	_TCHAR ** relaunch;
 
-	if (vmCommand == NULL) return NULL;
-	while(vmCommand[++i] != NULL){
-		if ( begin == -1 && _tcsicmp( vmCommand[i], *reqVMarg[req] ) == 0) {
-			if(reqVMarg[++req] == NULL || *reqVMarg[req] == NULL){
-				begin = i + 1;
-			}
+	if (newLaucherArgs == NULL) return NULL;
+	/*
+	 * Visit new args to find
+	 * 1. New args size
+	 * 2. Starting index of new vmargs
+	 * 3. See if old user args should be ignored
+	 */
+	while(newLaucherArgs[++newArgsSize] != NULL){
+		if (_tcsicmp( newLaucherArgs[newArgsSize], VMARGS ) == 0) {
+			newVmargsStart = newArgsSize + 1;
+		}
+		if (_tcsicmp( newLaucherArgs[newArgsSize], SKIP_OLD_ARGS ) == 0) {
+			skipOldUserArgs = 1;
 		}
 	}
 
-	relaunch = malloc((1 + i + 1) * sizeof(_TCHAR *));
-	relaunch[idx++] = program;
-	if(begin == -1) {
-		begin = 1;
+	int oldUserArgsStart = -1, oldUserArgsEnd = -1, oldUserArgsSize = 0;
+	int oldUserVMArgsStart = -1, oldUserVMArgsEnd = -1;
+	// Gather the old user args and old user vmargs
+	for (int i = 1 ; i < initialArgc ; i++) {
+		if (_tcsicmp(initialArgv[i], OLD_ARGS_START) == 0) {
+			oldUserArgsStart = i + 1;
+		}
+		if (_tcsicmp(initialArgv[i], VMARGS) == 0) {
+			oldUserVMArgsStart = i + 1;
+		}
+		if (_tcsicmp(initialArgv[i], OLD_ARGS_END) == 0) {
+			oldUserArgsEnd = oldUserVMArgsEnd = i - 1;
+			if (oldUserArgsStart != -1 && oldUserArgsStart <= oldUserArgsEnd)
+				oldUserArgsSize = oldUserArgsEnd - oldUserArgsStart + 1;
+			break;
+		}
+		if (i + 1 == initialArgc && oldUserVMArgsStart != -1 && oldUserVMArgsEnd == -1) {
+			oldUserVMArgsEnd = i;
+		}
 	}
-	for (i = begin; vmCommand[i] != NULL; i++){
-		if (_tcsicmp(vmCommand[i], SHOWSPLASH) == 0) {
+
+	// "--launcher.oldUserArgsStart" is not found in old args which means the launcher was
+	// invoked by user and its the first restart request after it. Hence track all the args
+	// provided by user as old user args
+	if (oldUserArgsStart == -1) {
+		oldUserArgsStart = 1;
+		oldUserArgsEnd = initialArgc - 1;
+		oldUserArgsSize = oldUserArgsEnd - oldUserArgsStart + 1;
+	}
+
+	relaunch = malloc((1 + (oldUserArgsSize + 2)+ oldUserArgsSize + newArgsSize + 1) * sizeof(_TCHAR *));
+
+	// Step 1. Add program path
+	relaunch[idx++] = program;
+
+	// Step 2. Add old args with --launcher.oldUserArgsStart and --launcher.oldUserArgsEnd
+	// Over multiple restarts, this is required to keep track of args that were provided by user to launcher first time
+	relaunch[idx++] = OLD_ARGS_START;
+	for (int j = oldUserArgsStart; oldUserArgsSize > 0 && j <= oldUserArgsEnd; j++) {
+		relaunch[idx++] = initialArgv[j];
+	}
+	relaunch[idx++] = OLD_ARGS_END;
+
+	// Step 3. Add old non-vmargs launch arguments if old args are not skipped
+	if (skipOldUserArgs == 0) {
+		for (int j = oldUserArgsStart; oldUserArgsSize > 0 && j <= oldUserArgsEnd; j++) {
+			if (_tcsicmp(initialArgv[j], VMARGS) == 0) {
+				break;
+			}
+			relaunch[idx++] = initialArgv[j];
+		}
+	}
+
+	// Step 4. Add new non-vmargs launch arguments which will get precedence over old arguments
+	for (int i = 0; newLaucherArgs[i] != NULL && i != (newVmargsStart - 1); i++){
+		if (_tcsicmp(newLaucherArgs[i], SHOWSPLASH) == 0) {
 			/* remove if the next argument is not the bitmap to show */
-			if(vmCommand[i + 1] != NULL && vmCommand[i + 1][0] == _T_ECLIPSE('-')) {
+			if(newLaucherArgs[i + 1] != NULL && newLaucherArgs[i + 1][0] == _T_ECLIPSE('-')) {
 				continue;
 			}
-		} else if(_tcsncmp(vmCommand[i], CLASSPATH_PREFIX, _tcslen(CLASSPATH_PREFIX)) == 0) {
+		} else if(_tcsncmp(newLaucherArgs[i], CLASSPATH_PREFIX, _tcslen(CLASSPATH_PREFIX)) == 0) {
 			/* skip -Djava.class.path=... */
 			continue;
+		} else if(_tcscmp(newLaucherArgs[i], EXITDATA) == 0) {
+			/* skip -exitdata argument and value as new shm will be created on relaunch */
+			i++;
+			continue;
+		} else if(_tcscmp(newLaucherArgs[i], SKIP_OLD_ARGS) == 0) {
+			/* skip --launcher.skipOldUserArgs */
+			continue;
 		}
-		relaunch[idx++] = vmCommand[i];
+		relaunch[idx++] = newLaucherArgs[i];
 	}
+
+	// Step 5. Add vmargs; first old user vmargs and then new vmargs so that new vmargs get precedence
+	if ((skipOldUserArgs == 0 && oldUserVMArgsStart != -1) || newVmargsStart != -1) {
+		relaunch[idx++] = VMARGS;
+		if (skipOldUserArgs == 0 && oldUserVMArgsStart != -1) {
+			for (int i = oldUserVMArgsStart; i <= oldUserVMArgsEnd ; i++) {
+				relaunch[idx++] = initialArgv[i];
+			}
+		}
+		if (newVmargsStart != -1) {
+			for (int i = newVmargsStart; newLaucherArgs[i] != NULL; i++)
+				relaunch[idx++] = newLaucherArgs[i];
+		}
+	}
+
+	// Step 6. place null at the end to indicate end of arguments
 	if(_tcsicmp(relaunch[idx - 1], VMARGS) == 0)
 		relaunch[idx - 1] = NULL;
 	relaunch[idx] = NULL;
