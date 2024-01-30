@@ -26,6 +26,8 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -100,9 +102,9 @@ public class ResolverImpl implements Resolver {
 	// Repository for generics
 	private Map<String, VersionHashMap<GenericCapability>> resolverGenerics = null;
 	// List of unresolved bundles
-	private HashSet<ResolverBundle> unresolvedBundles = null;
+	private Set<ResolverBundle> unresolvedBundles;
 	// Keys are BundleDescriptions, values are ResolverBundles
-	private HashMap<BundleDescription, ResolverBundle> bundleMapping = null;
+	private Map<BundleDescription, ResolverBundle> bundleMapping;
 	private GroupingChecker groupingChecker;
 	private Comparator<BaseDescription> selectionPolicy;
 	private boolean developmentMode = false;
@@ -123,9 +125,9 @@ public class ResolverImpl implements Resolver {
 	private void initialize() {
 		resolverExports = new VersionHashMap<>(this);
 		resolverBundles = new VersionHashMap<>(this);
-		resolverGenerics = new HashMap<>();
-		unresolvedBundles = new HashSet<>();
-		bundleMapping = new HashMap<>();
+		resolverGenerics = new LinkedHashMap<>();
+		unresolvedBundles = new LinkedHashSet<>();
+		bundleMapping = new LinkedHashMap<>();
 		BundleDescription[] bundles = state.getBundles();
 		groupingChecker = new GroupingChecker();
 
@@ -512,11 +514,12 @@ public class ResolverImpl implements Resolver {
 					iToResolve.remove();
 				}
 			}
-			if (!unresolvedSystemBundles.isEmpty())
-				resolveBundles(unresolvedSystemBundles.toArray(new ResolverBundle[unresolvedSystemBundles.size()]), platformProperties, hookDisabled);
+			if (!unresolvedSystemBundles.isEmpty()) {
+				resolveBundles(unresolvedSystemBundles.toArray(new ResolverBundle[unresolvedSystemBundles.size()]), platformProperties, hookDisabled, false);
+			}
 
 			// Now resolve the rest
-			resolveBundles(toResolve.toArray(new ResolverBundle[toResolve.size()]), platformProperties, hookDisabled);
+			resolveBundles(toResolve.toArray(new ResolverBundle[toResolve.size()]), platformProperties, hookDisabled, true);
 
 			Collection<ResolverBundle> optionalResolved = resolveOptional ? resolveOptionalConstraints(currentlyResolved) : Collections.EMPTY_LIST;
 			ResolverHook current = hook;
@@ -591,7 +594,7 @@ public class ResolverImpl implements Resolver {
 			return reRefresh; // we don't care about this unless we are in development mode
 		// when in develoment mode we need to reRefresh hosts  of unresolved fragments that add new constraints
 		// and reRefresh and unresolved bundles that have dependents
-		Set<BundleDescription> additionalRefresh = new HashSet<>();
+		Set<BundleDescription> additionalRefresh = new LinkedHashSet<>();
 		ResolverBundle[] allUnresolved = unresolvedBundles.toArray(new ResolverBundle[unresolvedBundles.size()]);
 		for (ResolverBundle unresolved : allUnresolved) {
 			addUnresolvedWithDependents(unresolved, additionalRefresh);
@@ -673,7 +676,7 @@ public class ResolverImpl implements Resolver {
 		}
 	}
 
-	private void resolveBundles(ResolverBundle[] bundles, Dictionary<Object, Object>[] platformProperties, Collection<ResolverBundle> hookDisabled) {
+	private void resolveBundles(ResolverBundle[] bundles, Dictionary<Object, Object>[] platformProperties, Collection<ResolverBundle> hookDisabled, boolean resolveFragments) {
 
 		// First check that all the meta-data is valid for each unresolved bundle
 		// This will reset the resolvable flag for each bundle
@@ -681,10 +684,11 @@ public class ResolverImpl implements Resolver {
 			state.removeResolverErrors(bundle.getBundleDescription());
 			// if in development mode then make all bundles resolvable
 			// we still want to call isResolvable here to populate any possible ResolverErrors for the bundle
-			bundle.setResolvable(isResolvable(bundle, platformProperties, hookDisabled) || developmentMode);
+			boolean resolvable = isResolvable(bundle, platformProperties, hookDisabled);
+			bundle.setResolvable(resolvable || developmentMode);
 		}
 		selectSingletons(bundles);
-		resolveBundles0(bundles, platformProperties);
+		resolveBundles0(bundles, platformProperties, resolveFragments);
 		if (DEBUG_WIRING)
 			printWirings();
 	}
@@ -774,7 +778,7 @@ public class ResolverImpl implements Resolver {
 	}
 
 	private Map<ResolverBundle, Collection<ResolverBundle>> getCollisionMap(List<ResolverBundle> sameBSN) {
-		Map<ResolverBundle, Collection<ResolverBundle>> result = new HashMap<>();
+		Map<ResolverBundle, Collection<ResolverBundle>> result = new LinkedHashMap<>();
 		for (ResolverBundle singleton : sameBSN) {
 			if (!singleton.getBundleDescription().isSingleton() || !singleton.isResolvable())
 				continue; // ignore non-singleton and non-resolvable
@@ -798,7 +802,7 @@ public class ResolverImpl implements Resolver {
 		return identities.size() == 1 ? identities.get(0) : bundle.getCapability();
 	}
 
-	private void resolveBundles0(ResolverBundle[] bundles, Dictionary<Object, Object>[] platformProperties) {
+	private void resolveBundles0(ResolverBundle[] bundles, Dictionary<Object, Object>[] platformProperties, boolean resolveFragments) {
 		if (developmentMode)
 			// need to sort bundles to keep consistent order for fragment attachment (bug 174930)
 			Arrays.sort(bundles);
@@ -822,7 +826,7 @@ public class ResolverImpl implements Resolver {
 			checkCycle(cycle);
 		}
 		// Resolve all fragments that are still attached to at least one host.
-		if (unresolvedBundles.size() > 0) {
+		if (resolveFragments && unresolvedBundles.size() > 0) {
 			ResolverBundle[] unresolved = unresolvedBundles.toArray(new ResolverBundle[unresolvedBundles.size()]);
 			for (ResolverBundle toResolve : unresolved) {
 				resolveFragment(toResolve);
@@ -899,7 +903,7 @@ public class ResolverImpl implements Resolver {
 				remainingUnresolved.add(bundle);
 			}
 		}
-		resolveBundles0(remainingUnresolved.toArray(new ResolverBundle[remainingUnresolved.size()]), platformProperties);
+		resolveBundles0(remainingUnresolved.toArray(new ResolverBundle[remainingUnresolved.size()]), platformProperties, true);
 	}
 
 	private List<ResolverConstraint> findBestCombination(ResolverBundle[] bundles, Dictionary<Object, Object>[] platformProperties) {
@@ -1230,13 +1234,13 @@ public class ResolverImpl implements Resolver {
 		if (multipleImportSupplierList.size() + multipleRequireSupplierList.size() + multipleGenericSupplierList.size() > usesMultipleSuppliersLimit) {
 			// we have hit a max on the multiple suppliers in the lists without merging.
 			// first merge the identical constraints that have identical suppliers
-			Map<String, List<List<ResolverConstraint>>> multipleImportSupplierMaps = new HashMap<>();
+			Map<String, List<List<ResolverConstraint>>> multipleImportSupplierMaps = new LinkedHashMap<>();
 			for (ResolverImport importPkg : multipleImportSupplierList)
 				addMutipleSupplierConstraint(multipleImportSupplierMaps, importPkg, importPkg.getName());
-			Map<String, List<List<ResolverConstraint>>> multipleRequireSupplierMaps = new HashMap<>();
+			Map<String, List<List<ResolverConstraint>>> multipleRequireSupplierMaps = new LinkedHashMap<>();
 			for (BundleConstraint requireBundle : multipleRequireSupplierList)
 				addMutipleSupplierConstraint(multipleRequireSupplierMaps, requireBundle, requireBundle.getName());
-			Map<String, List<List<ResolverConstraint>>> multipleGenericSupplierMaps = new HashMap<>();
+			Map<String, List<List<ResolverConstraint>>> multipleGenericSupplierMaps = new LinkedHashMap<>();
 			for (GenericConstraint genericRequire : multipleGenericSupplierList)
 				addMutipleSupplierConstraint(multipleGenericSupplierMaps, genericRequire, genericRequire.getNameSpace());
 			addMergedSuppliers(results, multipleImportSupplierMaps);
@@ -1380,11 +1384,26 @@ public class ResolverImpl implements Resolver {
 	}
 
 	private void resolveFragment(ResolverBundle fragment) {
-		if (!fragment.isFragment())
+		if (!fragment.isFragment()) {
 			return;
-		if (fragment.getHost().getNumPossibleSuppliers() > 0)
-			if (!developmentMode || state.getResolverErrors(fragment.getBundleDescription()).length == 0)
+		}
+		BundleConstraint hostConstraint = fragment.getHost();
+		if (DEBUG){
+			ResolverBundle host = null;
+			if (hostConstraint != null) {
+				String hostName = hostConstraint.getName();
+				host = unresolvedBundles.stream().filter(b -> hostName.equals(b.getName())).findFirst().orElse(null);
+				if (host != null && host.getState() != ResolverBundle.RESOLVED) {
+					ResolverImpl.log("Host " + host + " is not resolved, but fragment " + fragment + " is!"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				}
+			}
+		}
+
+		if (hostConstraint.getNumPossibleSuppliers() > 0) {
+			if (!developmentMode || state.getResolverErrors(fragment.getBundleDescription()).length == 0) {
 				setBundleResolved(fragment);
+			}
+		}
 	}
 
 	// This method will attempt to resolve the supplied bundle and any bundles that it is dependent on
