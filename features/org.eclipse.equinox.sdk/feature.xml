@@ -79,12 +79,4 @@
          id="org.eclipse.equinox.servletbridge.source"
          version="0.0.0"/>
 
-   <plugin
-         id="org.eclipse.jdt.core.compiler.batch"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.eclipse.jdt.core.compiler.batch.source"
-         version="0.0.0"/>
-
 </feature>
