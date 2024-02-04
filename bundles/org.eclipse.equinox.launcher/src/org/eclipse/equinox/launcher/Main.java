@@ -1435,10 +1435,10 @@ public class Main {
 			// In case something weird happens, just dump stack - logging is not available at this point
 			t.printStackTrace();
 		} finally {
-			// If the return code is 23, that means that Equinox requested a restart.
-			// In order to distinguish the request for a restart, do a System.exit(23)
+			// If the return code is 23 or 24, that means that Equinox requested a restart.
+			// In order to distinguish the request for a restart, do a System.exit(result)
 			// no matter of 'osgi.noShutdown' runtime property value.
-			if (!Boolean.getBoolean(PROP_NOSHUTDOWN) || result == 23)
+			if (!Boolean.getBoolean(PROP_NOSHUTDOWN) || result == 23 || result == 24)
 				// make sure we always terminate the VM
 				System.exit(result);
 		}
