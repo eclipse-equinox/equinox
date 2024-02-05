@@ -24,7 +24,6 @@
 
   <properties>
     <defaultSigning-excludeInnerJars>true</defaultSigning-excludeInnerJars>
-    <code.ignoredWarnings>${tests.ignoredWarnings}</code.ignoredWarnings>
     <testSuite>${project.artifactId}</testSuite>
     <testClass>org.eclipse.osgi.tests.AutomatedTests</testClass>
     <skipAPIAnalysis>true</skipAPIAnalysis>
