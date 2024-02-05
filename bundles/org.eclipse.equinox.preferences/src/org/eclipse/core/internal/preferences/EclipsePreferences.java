@@ -19,9 +19,8 @@ package org.eclipse.core.internal.preferences;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.nio.file.*;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.core.internal.runtime.RuntimeLog;
@@ -271,7 +270,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		}
 	}
 
-	private final Object writeLock = new Object();
+	private static final Object WRITE_LOCK = new Object();
 
 	/*
 	 * Helper method to persist a Properties object to the filesystem. We use this
@@ -287,13 +286,19 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		try {
 			Files.createDirectories(parentFile);
 			String fileContent = removeTimestampFromTable(props);
-			synchronized (writeLock) {
+			synchronized (WRITE_LOCK) {
 				if (Files.exists(preferenceFile)) {
 					// Write new file content to a temporary file first to not loose the old content
 					// in case of a failure. If everything goes OK, it is moved to the right place.
 					Path tmp = preferenceFile.resolveSibling(preferenceFile.getFileName() + BACKUP_FILE_EXTENSION);
 					Files.writeString(tmp, fileContent, StandardCharsets.UTF_8);
-					Files.move(tmp, preferenceFile, StandardCopyOption.REPLACE_EXISTING);
+					try {
+						Files.move(tmp, preferenceFile, StandardCopyOption.REPLACE_EXISTING);
+					} catch (NoSuchFileException e) {
+						// workaround for JDK-8325302 throws Exception if file is deleted in parallel.
+						// retry:
+						Files.move(tmp, preferenceFile, StandardCopyOption.REPLACE_EXISTING);
+					}
 				} else {
 					Files.writeString(preferenceFile, fileContent, StandardCharsets.UTF_8);
 				}
