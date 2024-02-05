@@ -14,6 +14,7 @@
 package org.eclipse.osgi.container;
 
 import java.io.Closeable;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.security.AccessController;
@@ -37,6 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 import org.eclipse.osgi.container.Module.StartOptions;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.container.Module.StopOptions;
@@ -2160,12 +2162,13 @@ public final class ModuleContainer implements DebugOptionsListener {
 	}
 
 	/**
-	 * Stores the module into the given stream
+	 * Writes the data for this container in a format suitable for using the
+	 * {@link ModuleDatabase#load(DataInputStream)} method.
 	 * 
 	 * @param stream         the stream to use
-	 * @param persistWirings controls if wirings should be persisted or not
+	 * @param persistWirings true if wirings should be persisted
 	 * @throws IOException if there is any problem storing to the stream
-	 * 
+	 * @see ModuleDatabase#store(DataOutputStream, boolean)
 	 * @since 3.19
 	 */
 	public void store(DataOutputStream stream, boolean persistWirings) throws IOException {
