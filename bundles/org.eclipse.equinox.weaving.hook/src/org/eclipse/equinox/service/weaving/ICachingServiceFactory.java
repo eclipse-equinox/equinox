@@ -26,21 +26,20 @@ import org.osgi.framework.Bundle;
  */
 public interface ICachingServiceFactory {
 
-    /**
-     * Create concrete caching service for the given bundle. The caching service
-     * is then responsible to cache woven bytecode and retrieve those bytecodes
-     * from the cache.
-     * 
-     * @param classLoader The classloader if the given bundle
-     * @param bundle The bundle the caching service should be created for
-     * @param key A fingerprint that is created by the concrete weavers to
-     *            indicate what the weaving configuration for this bundle is.
-     *            The caching service should be able to handle different keys
-     *            for the same bundle in order not the deliver the wrong cached
-     *            bytes from the cache
-     * @return The caching service for the given bundle
-     */
-    public ICachingService createCachingService(ClassLoader classLoader,
-            Bundle bundle, String key);
+	/**
+	 * Create concrete caching service for the given bundle. The caching service is
+	 * then responsible to cache woven bytecode and retrieve those bytecodes from
+	 * the cache.
+	 * 
+	 * @param classLoader The classloader if the given bundle
+	 * @param bundle      The bundle the caching service should be created for
+	 * @param key         A fingerprint that is created by the concrete weavers to
+	 *                    indicate what the weaving configuration for this bundle
+	 *                    is. The caching service should be able to handle different
+	 *                    keys for the same bundle in order not the deliver the
+	 *                    wrong cached bytes from the cache
+	 * @return The caching service for the given bundle
+	 */
+	public ICachingService createCachingService(ClassLoader classLoader, Bundle bundle, String key);
 
 }

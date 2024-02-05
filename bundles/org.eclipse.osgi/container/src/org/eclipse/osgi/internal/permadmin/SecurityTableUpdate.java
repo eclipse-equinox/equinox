@@ -32,7 +32,8 @@ public class SecurityTableUpdate implements ConditionalPermissionUpdate {
 		for (SecurityRow row : rows) {
 			// Use SecurityRowSnapShot to prevent modification before commit
 			// and to throw exceptions from delete
-			this.rows.add(new SecurityRowSnapShot(row.getName(), row.internalGetConditionInfos(), row.internalGetPermissionInfos(), row.getAccessDecision()));
+			this.rows.add(new SecurityRowSnapShot(row.getName(), row.internalGetConditionInfos(),
+					row.internalGetPermissionInfos(), row.getAccessDecision()));
 		}
 	}
 
@@ -43,7 +44,8 @@ public class SecurityTableUpdate implements ConditionalPermissionUpdate {
 
 	@Override
 	public List<ConditionalPermissionInfo> getConditionalPermissionInfos() {
-		// it is fine to return the internal list; it is a snap shot and we allow clients to modify it.
+		// it is fine to return the internal list; it is a snap shot and we allow
+		// clients to modify it.
 		return rows;
 	}
 

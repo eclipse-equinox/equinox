@@ -16,8 +16,8 @@ package org.eclipse.osgi.framework.util;
 import java.util.*;
 
 /**
- * Simple map when dealing with small amounts of entries.
- * This class also provides a Collections view of the keys
+ * Simple map when dealing with small amounts of entries. This class also
+ * provides a Collections view of the keys
  *
  * @param <K> The key type
  * @param <V> the value type
@@ -32,10 +32,8 @@ public class ArrayMap<K, V> implements Collection<K> {
 	}
 
 	/**
-	 * Note that the keys and values are not copied.  Changes to this ArrayMap
-	 * will change the values of the keys and values Lists.
-	 * @param keys
-	 * @param values
+	 * Note that the keys and values are not copied. Changes to this ArrayMap will
+	 * change the values of the keys and values Lists.
 	 */
 	public ArrayMap(List<K> keys, List<V> values) {
 		if (keys.size() != values.size())
@@ -106,18 +104,18 @@ public class ArrayMap<K, V> implements Collection<K> {
 		final Iterator<V> valueIter = values.iterator();
 
 		return new Iterator<K>() {
-		@Override
+			@Override
 			public boolean hasNext() {
 				return keyIter.hasNext();
 			}
 
-		@Override
+			@Override
 			public K next() {
 				valueIter.next();
 				return keyIter.next();
 			}
 
-		@Override
+			@Override
 			public void remove() {
 				valueIter.remove();
 				keyIter.remove();

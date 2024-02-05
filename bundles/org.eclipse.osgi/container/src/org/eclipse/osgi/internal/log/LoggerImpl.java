@@ -21,7 +21,8 @@ import org.osgi.service.log.LoggerConsumer;
 import org.osgi.service.log.admin.LoggerContext;
 
 public class LoggerImpl implements Logger {
-	static final String THIS_PACKAGE_NAME = LoggerImpl.class.getName().substring(0, LoggerImpl.class.getName().length() - LoggerImpl.class.getSimpleName().length());
+	static final String THIS_PACKAGE_NAME = LoggerImpl.class.getName().substring(0,
+			LoggerImpl.class.getName().length() - LoggerImpl.class.getSimpleName().length());
 	static final Object[] EMPTY = new Object[0];
 	protected final ExtendedLogServiceImpl logServiceImpl;
 	protected final String name;
@@ -76,32 +77,35 @@ public class LoggerImpl implements Logger {
 		log(context, null, level, message, null, exception);
 	}
 
-	private void log(Object context, LogLevel logLevelEnum, int level, String message, ServiceReference<?> ref, Throwable exception) {
+	private void log(Object context, LogLevel logLevelEnum, int level, String message, ServiceReference<?> ref,
+			Throwable exception) {
 		log(logServiceImpl.getBundle(), context, logLevelEnum, level, message, ref, exception);
 	}
 
-	void log(Bundle entryBundle, Object context, LogLevel logLevelEnum, int level, String message, ServiceReference<?> ref, Throwable exception) {
+	void log(Bundle entryBundle, Object context, LogLevel logLevelEnum, int level, String message,
+			ServiceReference<?> ref, Throwable exception) {
 		if (logLevelEnum == null) {
 			logLevelEnum = getLogLevel(level);
 		}
 		if (enabledLevel.implies(logLevelEnum)) {
-			logServiceImpl.getFactory().log(entryBundle, name, getLocation(), context, logLevelEnum, level, message, ref, exception);
+			logServiceImpl.getFactory().log(entryBundle, name, getLocation(), context, logLevelEnum, level, message,
+					ref, exception);
 		}
 	}
 
 	@SuppressWarnings("deprecation")
 	private LogLevel getLogLevel(int level) {
 		switch (level) {
-			case LogService.LOG_DEBUG :
-				return LogLevel.DEBUG;
-			case LogService.LOG_ERROR :
-				return LogLevel.ERROR;
-			case LogService.LOG_INFO :
-				return LogLevel.INFO;
-			case LogService.LOG_WARNING :
-				return LogLevel.WARN;
-			default :
-				return LogLevel.TRACE;
+		case LogService.LOG_DEBUG:
+			return LogLevel.DEBUG;
+		case LogService.LOG_ERROR:
+			return LogLevel.ERROR;
+		case LogService.LOG_INFO:
+			return LogLevel.INFO;
+		case LogService.LOG_WARNING:
+			return LogLevel.WARN;
+		default:
+			return LogLevel.TRACE;
 		}
 	}
 
@@ -117,12 +121,12 @@ public class LoggerImpl implements Logger {
 
 	@Override
 	public void trace(String format, Object arg) {
-		trace(format, new Object[] {arg});
+		trace(format, new Object[] { arg });
 	}
 
 	@Override
 	public void trace(String format, Object arg1, Object arg2) {
-		trace(format, new Object[] {arg1, arg2});
+		trace(format, new Object[] { arg1, arg2 });
 	}
 
 	@Override
@@ -142,12 +146,12 @@ public class LoggerImpl implements Logger {
 
 	@Override
 	public void debug(String format, Object arg) {
-		debug(format, new Object[] {arg});
+		debug(format, new Object[] { arg });
 	}
 
 	@Override
 	public void debug(String format, Object arg1, Object arg2) {
-		debug(format, new Object[] {arg1, arg2});
+		debug(format, new Object[] { arg1, arg2 });
 	}
 
 	@Override
@@ -167,12 +171,12 @@ public class LoggerImpl implements Logger {
 
 	@Override
 	public void info(String format, Object arg) {
-		info(format, new Object[] {arg});
+		info(format, new Object[] { arg });
 	}
 
 	@Override
 	public void info(String format, Object arg1, Object arg2) {
-		info(format, new Object[] {arg1, arg2});
+		info(format, new Object[] { arg1, arg2 });
 	}
 
 	@Override
@@ -192,12 +196,12 @@ public class LoggerImpl implements Logger {
 
 	@Override
 	public void warn(String format, Object arg) {
-		warn(format, new Object[] {arg});
+		warn(format, new Object[] { arg });
 	}
 
 	@Override
 	public void warn(String format, Object arg1, Object arg2) {
-		warn(format, new Object[] {arg1, arg2});
+		warn(format, new Object[] { arg1, arg2 });
 	}
 
 	@Override
@@ -217,12 +221,12 @@ public class LoggerImpl implements Logger {
 
 	@Override
 	public void error(String format, Object arg) {
-		error(format, new Object[] {arg});
+		error(format, new Object[] { arg });
 	}
 
 	@Override
 	public void error(String format, Object arg1, Object arg2) {
-		error(format, new Object[] {arg1, arg2});
+		error(format, new Object[] { arg1, arg2 });
 	}
 
 	@Override
@@ -237,12 +241,12 @@ public class LoggerImpl implements Logger {
 
 	@Override
 	public void audit(String format, Object arg) {
-		audit(format, new Object[] {arg});
+		audit(format, new Object[] { arg });
 	}
 
 	@Override
 	public void audit(String format, Object arg1, Object arg2) {
-		audit(format, new Object[] {arg1, arg2});
+		audit(format, new Object[] { arg1, arg2 });
 	}
 
 	@Override
@@ -294,7 +298,9 @@ public class LoggerImpl implements Logger {
 		StackTraceElement location = getLocation();
 		Arguments processedArguments = new Arguments(arguments);
 		String message = processedArguments.isEmpty() ? format : formatMessage(format, processedArguments);
-		logServiceImpl.getFactory().log(logServiceImpl.getBundle(), name, location, processedArguments.serviceReference(), level, level.ordinal(), message.toString(), processedArguments.serviceReference(), processedArguments.throwable());
+		logServiceImpl.getFactory().log(logServiceImpl.getBundle(), name, location,
+				processedArguments.serviceReference(), level, level.ordinal(), message.toString(),
+				processedArguments.serviceReference(), processedArguments.throwable());
 	}
 
 	private StackTraceElement getLocation() {
@@ -319,8 +325,10 @@ public class LoggerImpl implements Logger {
 		int offset = 0;
 		StringBuilder message = new StringBuilder(format.length() * 2);
 		for (Object argument : processedArguments.arguments()) {
-			// By design, the message will continue to be formatted for as long as arguments remain.
-			// Once all arguments have been processed, formatting stops. This means some escape characters
+			// By design, the message will continue to be formatted for as long as arguments
+			// remain.
+			// Once all arguments have been processed, formatting stops. This means some
+			// escape characters
 			// and place holders may remain unconsumed. This matches SLF4J behavior.
 			while (matcher.find()) {
 				if (matcher.group(2).isEmpty()) {
@@ -342,7 +350,8 @@ public class LoggerImpl implements Logger {
 		return message.toString();
 	}
 
-	private static int append(StringBuilder builder, Matcher matcher, char[] chars, int offset, int length, Object argument) {
+	private static int append(StringBuilder builder, Matcher matcher, char[] chars, int offset, int length,
+			Object argument) {
 		builder.append(chars, offset, length);
 		builder.append(argument);
 		return matcher.end(3);

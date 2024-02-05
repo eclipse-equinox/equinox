@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.equinox.preferences; singleton:=true
-Bundle-Version: 3.10.300.qualifier
+Bundle-Version: 3.11.0.qualifier
 Bundle-Activator: org.eclipse.core.internal.preferences.Activator
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
@@ -21,5 +21,5 @@ Import-Package: org.eclipse.osgi.framework.log,
  org.osgi.framework,
  org.osgi.service.packageadmin,
  org.osgi.util.tracker
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: org.eclipse.equinox.preferences

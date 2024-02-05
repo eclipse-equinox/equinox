@@ -13,12 +13,17 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.DisabledInfo;
 import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
@@ -28,10 +33,7 @@ public class DisabledInfoTest extends AbstractStateTest {
 	private final String B3_LOCATION = "b3"; //$NON-NLS-1$
 	private final String POLICY = "test.policy"; //$NON-NLS-1$
 
-	public DisabledInfoTest(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testDisabledInfo01() throws BundleException {
 		State state = buildTestState();
 		BundleDescription b1 = state.getBundleByLocation(B1_LOCATION);
@@ -64,6 +66,7 @@ public class DisabledInfoTest extends AbstractStateTest {
 		assertTrue("copyInfo3 bundle", copyInfo3.getBundle() == copyB3); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testDisabledInfo02() throws BundleException {
 		State state = buildTestState();
 		BundleDescription b1 = state.getBundleByLocation(B1_LOCATION);
@@ -89,7 +92,8 @@ public class DisabledInfoTest extends AbstractStateTest {
 		assertFalse("b3 resolved", b3.isResolved()); //$NON-NLS-1$
 	}
 
-	public void testDisabledInfo03() throws BundleException {
+	@Test
+	public void testDisabledInfo03() throws BundleException, IOException {
 		State state = buildTestState();
 		BundleDescription b1 = state.getBundleByLocation(B1_LOCATION);
 		BundleDescription b2 = state.getBundleByLocation(B2_LOCATION);
@@ -105,28 +109,25 @@ public class DisabledInfoTest extends AbstractStateTest {
 		BundleContext context = OSGiTestsActivator.getContext();
 		File stateDir = context.getDataFile("testDisabledInfo03"); //$NON-NLS-1$
 		stateDir.mkdirs();
-		try {
-			state.getFactory().writeState(state, stateDir);
-			State copy = state.getFactory().readState(stateDir);
-			BundleDescription copyB1 = copy.getBundleByLocation(B1_LOCATION);
-			BundleDescription copyB2 = copy.getBundleByLocation(B2_LOCATION);
-			BundleDescription copyB3 = copy.getBundleByLocation(B3_LOCATION);
-			DisabledInfo copyInfo1 = copy.getDisabledInfo(copyB1, POLICY);
-			DisabledInfo copyInfo2 = copy.getDisabledInfo(copyB2, POLICY);
-			DisabledInfo copyInfo3 = copy.getDisabledInfo(copyB3, POLICY);
+		state.getFactory().writeState(state, stateDir);
+		State copy = state.getFactory().readState(stateDir);
+		BundleDescription copyB1 = copy.getBundleByLocation(B1_LOCATION);
+		BundleDescription copyB2 = copy.getBundleByLocation(B2_LOCATION);
+		BundleDescription copyB3 = copy.getBundleByLocation(B3_LOCATION);
+		DisabledInfo copyInfo1 = copy.getDisabledInfo(copyB1, POLICY);
+		DisabledInfo copyInfo2 = copy.getDisabledInfo(copyB2, POLICY);
+		DisabledInfo copyInfo3 = copy.getDisabledInfo(copyB3, POLICY);
 
-			assertNotNull("copyInfo1", copyInfo1); //$NON-NLS-1$
-			assertNotNull("copyInfo2", copyInfo2); //$NON-NLS-1$
-			assertNotNull("copyInfo3", copyInfo3); //$NON-NLS-1$
+		assertNotNull("copyInfo1", copyInfo1); //$NON-NLS-1$
+		assertNotNull("copyInfo2", copyInfo2); //$NON-NLS-1$
+		assertNotNull("copyInfo3", copyInfo3); //$NON-NLS-1$
 
-			assertTrue("copyInfo1 bundle", copyInfo1.getBundle() == copyB1); //$NON-NLS-1$
-			assertTrue("copyInfo2 bundle", copyInfo2.getBundle() == copyB2); //$NON-NLS-1$
-			assertTrue("copyInfo3 bundle", copyInfo3.getBundle() == copyB3); //$NON-NLS-1$
-		} catch (IOException e) {
-			fail("Unexpected exception", e); //$NON-NLS-1$
-		}
+		assertTrue("copyInfo1 bundle", copyInfo1.getBundle() == copyB1); //$NON-NLS-1$
+		assertTrue("copyInfo2 bundle", copyInfo2.getBundle() == copyB2); //$NON-NLS-1$
+		assertTrue("copyInfo3 bundle", copyInfo3.getBundle() == copyB3); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testDisabledInfo04() throws BundleException {
 		State state = buildTestState();
 		BundleDescription b1 = state.getBundleByLocation(B1_LOCATION);
@@ -172,6 +173,7 @@ public class DisabledInfoTest extends AbstractStateTest {
 		assertEquals("disabledBundles length", 0, disabledBundles.length); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBug251427() throws BundleException {
 		State state = buildTestState();
 		BundleDescription b1 = state.getBundleByLocation(B1_LOCATION);
@@ -191,14 +193,20 @@ public class DisabledInfoTest extends AbstractStateTest {
 
 	private State buildTestState() throws BundleException {
 		State state = buildEmptyState();
-		final String B1_MANIFEST = "Bundle-ManifestVersion: 1\n" + "Bundle-SymbolicName: b1\n" + "Bundle-Version: 1.0\n" + "Import-Package: b2"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-		BundleDescription b1 = state.getFactory().createBundleDescription(state, parseManifest(B1_MANIFEST), B1_LOCATION, 1);
+		final String B1_MANIFEST = "Bundle-ManifestVersion: 1\n" + "Bundle-SymbolicName: b1\n" + "Bundle-Version: 1.0\n" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				+ "Import-Package: b2"; //$NON-NLS-1$
+		BundleDescription b1 = state.getFactory().createBundleDescription(state, parseManifest(B1_MANIFEST),
+				B1_LOCATION, 1);
 		state.addBundle(b1);
-		final String B2_MANIFEST = "Bundle-ManifestVersion: 1\n" + "Bundle-SymbolicName: b2\n" + "Bundle-Version: 1.0\n" + "Export-Package: b2\n" + "Import-Package: b3"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		BundleDescription b2 = state.getFactory().createBundleDescription(state, parseManifest(B2_MANIFEST), B2_LOCATION, 2);
+		final String B2_MANIFEST = "Bundle-ManifestVersion: 1\n" + "Bundle-SymbolicName: b2\n" + "Bundle-Version: 1.0\n" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				+ "Export-Package: b2\n" + "Import-Package: b3"; //$NON-NLS-1$ //$NON-NLS-2$
+		BundleDescription b2 = state.getFactory().createBundleDescription(state, parseManifest(B2_MANIFEST),
+				B2_LOCATION, 2);
 		state.addBundle(b2);
-		final String B3_MANIFEST = "Bundle-ManifestVersion: 1\n" + "Bundle-SymbolicName: b3\n" + "Bundle-Version: 1.0\n" + "Export-Package: b3; version=1.0"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-		BundleDescription b3 = state.getFactory().createBundleDescription(state, parseManifest(B3_MANIFEST), B3_LOCATION, 3);
+		final String B3_MANIFEST = "Bundle-ManifestVersion: 1\n" + "Bundle-SymbolicName: b3\n" + "Bundle-Version: 1.0\n" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				+ "Export-Package: b3; version=1.0"; //$NON-NLS-1$
+		BundleDescription b3 = state.getFactory().createBundleDescription(state, parseManifest(B3_MANIFEST),
+				B3_LOCATION, 3);
 		state.addBundle(b3);
 		return state;
 	}

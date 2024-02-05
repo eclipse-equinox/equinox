@@ -14,6 +14,7 @@
 package org.eclipse.osgi.tests.hooks.framework;
 
 import static org.eclipse.osgi.tests.bundles.AbstractBundleTests.stopQuietly;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -21,6 +22,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
@@ -30,18 +32,18 @@ public class EmbeddedEquinoxWithURLInClassLoadTests extends AbstractFrameworkHoo
 	private Framework framework;
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		URL myManifest = getClass().getResource("/META-INF/MANIFEST.MF");
 		testURL = myManifest.toExternalForm();
 		super.setUp();
-		File file = OSGiTestsActivator.getContext().getDataFile(getName());
+		File file = OSGiTestsActivator.getContext().getDataFile(testName.getMethodName());
 		Map<String, String> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, file.getAbsolutePath());
 		framework = createFramework(configuration);
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
+	public void tearDown() throws Exception {
 		stopQuietly(framework);
 		super.tearDown();
 	}
@@ -50,15 +52,19 @@ public class EmbeddedEquinoxWithURLInClassLoadTests extends AbstractFrameworkHoo
 		initAndStart(framework);
 	}
 
+	@Test
 	public void testFrameworkClassLoaderWithNewURI() throws Exception {
 		initAndStartFramework();
 	}
 
+	@Test
 	public void testEmbeddedURLHandler() throws Exception {
 		initAndStart(framework);
-		Bundle testHandler = framework.getBundleContext().installBundle(bundleInstaller.getBundleLocation("test.protocol.handler"));
+		Bundle testHandler = framework.getBundleContext()
+				.installBundle(bundleInstaller.getBundleLocation("test.protocol.handler"));
 		testHandler.start();
-		Bundle testHandlerUser = framework.getBundleContext().installBundle(bundleInstaller.getBundleLocation("test.protocol.handler.user"));
+		Bundle testHandlerUser = framework.getBundleContext()
+				.installBundle(bundleInstaller.getBundleLocation("test.protocol.handler.user"));
 		testHandlerUser.start();
 		try {
 			URL testingURL = new URL("testing1://test");

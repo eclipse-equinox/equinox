@@ -34,7 +34,7 @@ public class Base64Test {
 	final private static String decoded2 = "lazy frog jumped over sleeping dog";
 	final private static String encoded2 = "bGF6eSBmcm9nIGp1bXBlZCBvdmVyIHNsZWVwaW5nIGRvZw==";
 
-	final private static byte[] decoded3 = {5, 0, 0, 12, 32, 1, 127, (byte) 0xFF};
+	final private static byte[] decoded3 = { 5, 0, 0, 12, 32, 1, 127, (byte) 0xFF };
 	final private static String encoded3 = "BQAADCABf/8=";
 
 	final private static byte[] decoded4 = new byte[0];
@@ -73,7 +73,7 @@ public class Base64Test {
 	}
 
 	/**
-	 * Tests edge conditions: null or empty arguments 
+	 * Tests edge conditions: null or empty arguments
 	 */
 	@Test
 	public void testEdge() {
@@ -89,7 +89,7 @@ public class Base64Test {
 	}
 
 	/**
-	 * Tests round trip using large random sequences 
+	 * Tests round trip using large random sequences
 	 */
 	@Test
 	public void testRandom() {

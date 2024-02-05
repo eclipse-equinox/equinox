@@ -99,12 +99,15 @@ public class SystemBundleFile extends BundleFile {
 		ClassLoader cl = getClass().getClassLoader();
 		try {
 			// get all manifests in your classloader delegation
-			Enumeration<URL> manifests = cl != null ? cl.getResources(BundleInfo.OSGI_BUNDLE_MANIFEST) : ClassLoader.getSystemResources(BundleInfo.OSGI_BUNDLE_MANIFEST);
+			Enumeration<URL> manifests = cl != null ? cl.getResources(BundleInfo.OSGI_BUNDLE_MANIFEST)
+					: ClassLoader.getSystemResources(BundleInfo.OSGI_BUNDLE_MANIFEST);
 			while (manifests.hasMoreElements()) {
 				URL url = manifests.nextElement();
 				try {
-					// check each manifest until we find one with the Eclipse-SystemBundle: true header
-					Map<String, String> headers = ManifestElement.parseBundleManifest(url.openStream(), new CaseInsensitiveDictionaryMap<>());
+					// check each manifest until we find one with the Eclipse-SystemBundle: true
+					// header
+					Map<String, String> headers = ManifestElement.parseBundleManifest(url.openStream(),
+							new CaseInsensitiveDictionaryMap<>());
 					if ("true".equals(headers.get(Storage.ECLIPSE_SYSTEMBUNDLE))) //$NON-NLS-1$
 						return url;
 				} catch (BundleException e) {

@@ -30,7 +30,8 @@ public class AppCommands implements CommandProvider {
 	private final static String NEW_LINE = "\r\n"; //$NON-NLS-1$
 	private final static String TAB = "\t"; //$NON-NLS-1$
 
-	// holds the mappings from command name to command arguments and command description
+	// holds the mappings from command name to command arguments and command
+	// description
 	private Map<String, String[]> commandsHelp = null;
 
 	private static AppCommands instance;
@@ -95,8 +96,8 @@ public class AppCommands implements CommandProvider {
 	}
 
 	/*
-	 * This method either returns the help message for a particular command, 
-	 * or returns the help messages for all commands (if commandName is null)
+	 * This method either returns the help message for a particular command, or
+	 * returns the help messages for all commands (if commandName is null)
 	 */
 	private String getHelp(String commandName) {
 		StringBuffer sb = new StringBuffer();
@@ -124,17 +125,23 @@ public class AppCommands implements CommandProvider {
 
 	private void initializeCommandsHelp() {
 		commandsHelp = new LinkedHashMap<>();
-		commandsHelp.put("activeApps", new String[] {Messages.console_help_activeapps_description}); //$NON-NLS-1$
-		commandsHelp.put("apps", new String[] {Messages.console_help_apps_description}); //$NON-NLS-1$
-		commandsHelp.put("lockApp", new String[] {Messages.console_help_arguments, Messages.console_help_lockapp_description}); //$NON-NLS-1$
-		commandsHelp.put("schedApp", new String[] {Messages.console_help_schedapp_arguments, Messages.console_help_schedapp_description}); //$NON-NLS-1$
-		commandsHelp.put("startApp", new String[] {Messages.console_help_arguments, Messages.console_help_startapp_description}); //$NON-NLS-1$
-		commandsHelp.put("stopApp", new String[] {Messages.console_help_arguments, Messages.console_help_stopapp_description}); //$NON-NLS-1$
-		commandsHelp.put("unlockApp", new String[] {Messages.console_help_arguments, Messages.console_help_unlockapp_description}); //$NON-NLS-1$
-		commandsHelp.put("unschedApp", new String[] {Messages.console_help_arguments, Messages.console_help_unschedapp_description}); //$NON-NLS-1$
+		commandsHelp.put("activeApps", new String[] { Messages.console_help_activeapps_description }); //$NON-NLS-1$
+		commandsHelp.put("apps", new String[] { Messages.console_help_apps_description }); //$NON-NLS-1$
+		commandsHelp.put("lockApp", //$NON-NLS-1$
+				new String[] { Messages.console_help_arguments, Messages.console_help_lockapp_description });
+		commandsHelp.put("schedApp", //$NON-NLS-1$
+				new String[] { Messages.console_help_schedapp_arguments, Messages.console_help_schedapp_description });
+		commandsHelp.put("startApp", //$NON-NLS-1$
+				new String[] { Messages.console_help_arguments, Messages.console_help_startapp_description });
+		commandsHelp.put("stopApp", //$NON-NLS-1$
+				new String[] { Messages.console_help_arguments, Messages.console_help_stopapp_description });
+		commandsHelp.put("unlockApp", //$NON-NLS-1$
+				new String[] { Messages.console_help_arguments, Messages.console_help_unlockapp_description });
+		commandsHelp.put("unschedApp", //$NON-NLS-1$
+				new String[] { Messages.console_help_arguments, Messages.console_help_unschedapp_description });
 	}
 
-	/** Private helper method for getHelp.  Formats the help headers. */
+	/** Private helper method for getHelp. Formats the help headers. */
 	private void addHeader(String header, StringBuffer help) {
 		help.append("---"); //$NON-NLS-1$
 		help.append(header);
@@ -142,7 +149,7 @@ public class AppCommands implements CommandProvider {
 		help.append(NEW_LINE);
 	}
 
-	/** Private helper method for getHelp.  Formats the command descriptions. */
+	/** Private helper method for getHelp. Formats the command descriptions. */
 	private void addCommand(String command, String description, StringBuffer help) {
 		help.append(TAB);
 		help.append(command);
@@ -151,7 +158,10 @@ public class AppCommands implements CommandProvider {
 		help.append(NEW_LINE);
 	}
 
-	/** Private helper method for getHelp.  Formats the command descriptions with command arguments. */
+	/**
+	 * Private helper method for getHelp. Formats the command descriptions with
+	 * command arguments.
+	 */
 	private void addCommand(String command, String parameters, String description, StringBuffer help) {
 		help.append(TAB);
 		help.append(command);
@@ -162,7 +172,10 @@ public class AppCommands implements CommandProvider {
 		help.append(NEW_LINE);
 	}
 
-	/** Private helper method for getHelp. According to its arguments chooses which one of the above addCommand methods to use. */
+	/**
+	 * Private helper method for getHelp. According to its arguments chooses which
+	 * one of the above addCommand methods to use.
+	 */
 	private void addCommand(String command, String[] attributes, StringBuffer help) {
 		if (attributes.length == 1) {
 			addCommand(command, attributes[0], help);
@@ -190,18 +203,20 @@ public class AppCommands implements CommandProvider {
 			String application = (String) app.getProperty(ApplicationDescriptor.APPLICATION_PID);
 			intp.print(application);
 
-			if (getApplication(applicationHandles.getServiceReferences(), application, ApplicationHandle.APPLICATION_DESCRIPTOR, true) != null)
-				intp.print(" [running]"); //$NON-NLS-1$ 
+			if (getApplication(applicationHandles.getServiceReferences(), application,
+					ApplicationHandle.APPLICATION_DESCRIPTOR, true) != null)
+				intp.print(" [running]"); //$NON-NLS-1$
 
-			if (getApplication(scheduledApplications.getServiceReferences(), application, ScheduledApplication.APPLICATION_PID, true) != null)
-				intp.print(" [scheduled]"); //$NON-NLS-1$ 
+			if (getApplication(scheduledApplications.getServiceReferences(), application,
+					ScheduledApplication.APPLICATION_PID, true) != null)
+				intp.print(" [scheduled]"); //$NON-NLS-1$
 			if (!launchableApp.match(getServiceProps(app))) {
-				intp.print(" [not launchable]"); //$NON-NLS-1$ 
+				intp.print(" [not launchable]"); //$NON-NLS-1$
 			} else {
-				intp.print(" [launchable]"); //$NON-NLS-1$ 
+				intp.print(" [launchable]"); //$NON-NLS-1$
 			}
 			if (lockedApp.match(getServiceProps(app))) {
-				intp.print(" [locked]"); //$NON-NLS-1$ 
+				intp.print(" [locked]"); //$NON-NLS-1$
 			}
 			intp.println();
 		}
@@ -221,7 +236,8 @@ public class AppCommands implements CommandProvider {
 		}
 	}
 
-	private ServiceReference getApplication(ServiceReference[] apps, String targetId, String idKey, boolean perfectMatch) {
+	private ServiceReference getApplication(ServiceReference[] apps, String targetId, String idKey,
+			boolean perfectMatch) {
 		if (apps == null || targetId == null)
 			return null;
 
@@ -245,7 +261,8 @@ public class AppCommands implements CommandProvider {
 
 	public void _startApp(CommandInterpreter intp) throws Exception {
 		String appId = intp.nextArgument();
-		ServiceReference application = getApplication(applicationDescriptors.getServiceReferences(), appId, ApplicationDescriptor.APPLICATION_PID, false);
+		ServiceReference application = getApplication(applicationDescriptors.getServiceReferences(), appId,
+				ApplicationDescriptor.APPLICATION_PID, false);
 		if (application == null)
 			intp.println("\"" + appId + "\" does not exist or is ambigous."); //$NON-NLS-1$ //$NON-NLS-2$
 		else {
@@ -258,7 +275,7 @@ public class AppCommands implements CommandProvider {
 				HashMap<String, Object> launchArgs = new HashMap<>(1);
 				if (args != null)
 					launchArgs.put(IApplicationContext.APPLICATION_ARGS, args);
-				ApplicationDescriptor appDesc = (context.<ApplicationDescriptor> getService(application));
+				ApplicationDescriptor appDesc = (context.<ApplicationDescriptor>getService(application));
 				ApplicationHandle handle = appDesc.launch(launchArgs);
 				intp.println("Launched application instance: " + handle.getInstanceId()); //$NON-NLS-1$
 			} finally {
@@ -271,9 +288,11 @@ public class AppCommands implements CommandProvider {
 	public void _stopApp(CommandInterpreter intp) throws Exception {
 		String appId = intp.nextArgument();
 		// first search for the application instance id
-		ServiceReference application = getApplication(applicationHandles.getServiceReferences(), appId, ApplicationHandle.APPLICATION_PID, false);
+		ServiceReference application = getApplication(applicationHandles.getServiceReferences(), appId,
+				ApplicationHandle.APPLICATION_PID, false);
 		if (application == null)
-			application = getApplication(applicationHandles.getServiceReferences(), appId, ApplicationHandle.APPLICATION_DESCRIPTOR, false);
+			application = getApplication(applicationHandles.getServiceReferences(), appId,
+					ApplicationHandle.APPLICATION_DESCRIPTOR, false);
 		if (application == null)
 			intp.println("\"" + appId + "\" does not exist, is not running or is ambigous."); //$NON-NLS-1$ //$NON-NLS-2$
 		else {
@@ -286,7 +305,8 @@ public class AppCommands implements CommandProvider {
 					context.ungetService(application);
 				}
 			} else {
-				intp.println("Application instance is already stopping: " + application.getProperty(ApplicationHandle.APPLICATION_PID)); //$NON-NLS-1$
+				intp.println("Application instance is already stopping: " //$NON-NLS-1$
+						+ application.getProperty(ApplicationHandle.APPLICATION_PID));
 			}
 			return;
 		}
@@ -294,7 +314,8 @@ public class AppCommands implements CommandProvider {
 
 	public void _lockApp(CommandInterpreter intp) throws Exception {
 		String appId = intp.nextArgument();
-		ServiceReference application = getApplication(applicationDescriptors.getServiceReferences(), appId, ApplicationDescriptor.APPLICATION_PID, false);
+		ServiceReference application = getApplication(applicationDescriptors.getServiceReferences(), appId,
+				ApplicationDescriptor.APPLICATION_PID, false);
 		if (application == null)
 			intp.println("\"" + appId + "\" does not exist or is ambigous."); //$NON-NLS-1$ //$NON-NLS-2$
 		else {
@@ -311,7 +332,8 @@ public class AppCommands implements CommandProvider {
 
 	public void _unlockApp(CommandInterpreter intp) throws Exception {
 		String appId = intp.nextArgument();
-		ServiceReference application = getApplication(applicationDescriptors.getServiceReferences(), appId, ApplicationDescriptor.APPLICATION_PID, false);
+		ServiceReference application = getApplication(applicationDescriptors.getServiceReferences(), appId,
+				ApplicationDescriptor.APPLICATION_PID, false);
 		if (application == null)
 			intp.println("\"" + appId + "\" does not exist or is ambigous."); //$NON-NLS-1$ //$NON-NLS-2$
 		else {
@@ -328,7 +350,8 @@ public class AppCommands implements CommandProvider {
 
 	public void _schedApp(CommandInterpreter intp) throws Exception {
 		String appId = intp.nextArgument();
-		ServiceReference application = getApplication(applicationDescriptors.getServiceReferences(), appId, ApplicationDescriptor.APPLICATION_PID, false);
+		ServiceReference application = getApplication(applicationDescriptors.getServiceReferences(), appId,
+				ApplicationDescriptor.APPLICATION_PID, false);
 		if (application == null)
 			intp.println("\"" + appId + "\" does not exist or is ambigous."); //$NON-NLS-1$ //$NON-NLS-2$
 		else {
@@ -347,14 +370,16 @@ public class AppCommands implements CommandProvider {
 
 	public void _unschedApp(CommandInterpreter intp) throws Exception {
 		String appId = intp.nextArgument();
-		ServiceReference application = getApplication(scheduledApplications.getServiceReferences(), appId, ScheduledApplication.APPLICATION_PID, false);
+		ServiceReference application = getApplication(scheduledApplications.getServiceReferences(), appId,
+				ScheduledApplication.APPLICATION_PID, false);
 		if (application == null)
 			intp.println("\"" + appId + "\" does not exist or is ambigous."); //$NON-NLS-1$ //$NON-NLS-2$
 		else {
 			try {
 				ScheduledApplication schedApp = (ScheduledApplication) context.getService(application);
 				schedApp.remove();
-				intp.println("Unscheduled application: " + application.getProperty(ApplicationDescriptor.APPLICATION_PID)); //$NON-NLS-1$
+				intp.println(
+						"Unscheduled application: " + application.getProperty(ApplicationDescriptor.APPLICATION_PID)); //$NON-NLS-1$
 			} finally {
 				context.ungetService(application);
 			}
@@ -364,8 +389,8 @@ public class AppCommands implements CommandProvider {
 	/**
 	 * Handles the help command
 	 * 
-	 * @param intp
-	 * @return description for a particular command or false if there is no command with the specified name
+	 * @return description for a particular command or false if there is no command
+	 *         with the specified name
 	 */
 	public Object _help(CommandInterpreter intp) {
 		String commandName = intp.nextArgument();

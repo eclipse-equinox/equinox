@@ -30,7 +30,8 @@ public final class BundlePermissions extends PermissionCollection {
 	private final PermissionInfoCollection restrictedPermissions;
 	private final Permissions wovenPermissions;
 
-	public BundlePermissions(Bundle bundle, SecurityAdmin securityAdmin, PermissionInfoCollection impliedPermissions, PermissionInfoCollection restrictedPermissions) {
+	public BundlePermissions(Bundle bundle, SecurityAdmin securityAdmin, PermissionInfoCollection impliedPermissions,
+			PermissionInfoCollection restrictedPermissions) {
 		this.bundle = bundle;
 		this.securityAdmin = securityAdmin;
 		this.impliedPermissions = impliedPermissions;
@@ -51,8 +52,8 @@ public final class BundlePermissions extends PermissionCollection {
 	 * woven by weaving hooks.
 	 *
 	 * @param permission The package permission to add to this woven bundle.
-	 * @throws SecurityException If the <code>permission</code>
-	 *         does not have an action of {@link PackagePermission#IMPORT}.
+	 * @throws SecurityException If the <code>permission</code> does not have an
+	 *                           action of {@link PackagePermission#IMPORT}.
 	 */
 	public void addWovenPermission(PackagePermission permission) {
 		if (!permission.getActions().equals(PackagePermission.IMPORT))
@@ -63,7 +64,8 @@ public final class BundlePermissions extends PermissionCollection {
 	@Override
 	public Enumeration<Permission> elements() {
 		// TODO return an empty enumeration for now;
-		// It does not seem possible to do this properly with multiple exports and conditional permissions.
+		// It does not seem possible to do this properly with multiple exports and
+		// conditional permissions.
 		return Collections.emptyEnumeration();
 	}
 
@@ -77,7 +79,8 @@ public final class BundlePermissions extends PermissionCollection {
 		if (wovenPermissions.implies(permission))
 			return true;
 
-		// We must be allowed by the restricted permissions to have any hope of passing the check
+		// We must be allowed by the restricted permissions to have any hope of passing
+		// the check
 		if ((restrictedPermissions != null) && !restrictedPermissions.implies(permission))
 			return false;
 

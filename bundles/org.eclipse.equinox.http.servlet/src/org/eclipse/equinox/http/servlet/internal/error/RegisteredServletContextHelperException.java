@@ -19,8 +19,7 @@ import javax.servlet.ServletException;
 /**
  * @author Raymond Augé
  */
-public class RegisteredServletContextHelperException
-	extends ServletException {
+public class RegisteredServletContextHelperException extends ServletException {
 
 	private static final long serialVersionUID = 7301237379456486249L;
 

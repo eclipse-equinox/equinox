@@ -40,7 +40,7 @@ public class DefaultAuthorizationManager extends AuthorizationManager {
 
 	@Override
 	public boolean needsAttention() {
-		return needsAttention; //TODO: make it happen
+		return needsAttention; // TODO: make it happen
 	}
 
 	@Override
@@ -51,23 +51,23 @@ public class DefaultAuthorizationManager extends AuthorizationManager {
 
 	@Override
 	public void displayManager(IWorkbenchWindow workbenchWindow) {
-		//TODO: manager UI
+		// TODO: manager UI
 	}
 
 	private IStatus transformStatus(int engineStatus) {
 		Status status = null;
 		switch (engineStatus) {
-			case AuthorizationStatus.OK :
-				status = new Status(IStatus.OK, Activator.getSymbolicName(), ""); //$NON-NLS-1$ //TODO: text
-				break;
+		case AuthorizationStatus.OK:
+			status = new Status(IStatus.OK, Activator.getSymbolicName(), ""); //$NON-NLS-1$ //TODO: text
+			break;
 
-			case AuthorizationStatus.ERROR :
-				status = new Status(IStatus.ERROR, Activator.getSymbolicName(), ""); //$NON-NLS-1$ //TODO: text
-				break;
+		case AuthorizationStatus.ERROR:
+			status = new Status(IStatus.ERROR, Activator.getSymbolicName(), ""); //$NON-NLS-1$ //TODO: text
+			break;
 
-			default :
-				status = null;
-				break;
+		default:
+			status = null;
+			break;
 		}
 		return status;
 	}

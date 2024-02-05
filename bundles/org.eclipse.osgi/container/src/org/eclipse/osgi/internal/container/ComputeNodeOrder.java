@@ -17,10 +17,10 @@ package org.eclipse.osgi.internal.container;
 import java.util.*;
 
 /**
- * Borrowed from org.eclipse.core.internal.resources.ComputeProjectOrder
- * to be used when computing the stop order.
- * Implementation of a sort algorithm for computing the node order. This
- * algorithm handles cycles in the node reference graph in a reasonable way.
+ * Borrowed from org.eclipse.core.internal.resources.ComputeProjectOrder to be
+ * used when computing the stop order. Implementation of a sort algorithm for
+ * computing the node order. This algorithm handles cycles in the node reference
+ * graph in a reasonable way.
  *
  * @since 3.0
  */
@@ -34,9 +34,8 @@ public class ComputeNodeOrder {
 	}
 
 	/**
-	 * A directed graph. Once the vertexes and edges of the graph have been
-	 * defined, the graph can be queried for the depth-first finish time of each
-	 * vertex.
+	 * A directed graph. Once the vertexes and edges of the graph have been defined,
+	 * the graph can be queried for the depth-first finish time of each vertex.
 	 * <p>
 	 * Ref: Cormen, Leiserson, and Rivest <it>Introduction to Algorithms</it>,
 	 * McGraw-Hill, 1990. The depth-first search algorithm is in section 23.3.
@@ -44,8 +43,8 @@ public class ComputeNodeOrder {
 	 */
 	private static class Digraph {
 		/**
-		 * struct-like object for representing a vertex along with various
-		 * values computed during depth-first search (DFS).
+		 * struct-like object for representing a vertex along with various values
+		 * computed during depth-first search (DFS).
 		 */
 		public static class Vertex {
 			/**
@@ -54,8 +53,7 @@ public class ComputeNodeOrder {
 			public static final String WHITE = "white"; //$NON-NLS-1$
 
 			/**
-			 * Grey is for marking vertexes as discovered but visit not yet
-			 * finished.
+			 * Grey is for marking vertexes as discovered but visit not yet finished.
 			 */
 			public static final String GREY = "grey"; //$NON-NLS-1$
 
@@ -65,22 +63,21 @@ public class ComputeNodeOrder {
 			public static final String BLACK = "black"; //$NON-NLS-1$
 
 			/**
-			 * Color of the vertex. One of <code>WHITE</code> (unvisited),
-			 * <code>GREY</code> (visit in progress), or <code>BLACK</code>
-			 * (visit finished). <code>WHITE</code> initially.
+			 * Color of the vertex. One of <code>WHITE</code> (unvisited), <code>GREY</code>
+			 * (visit in progress), or <code>BLACK</code> (visit finished).
+			 * <code>WHITE</code> initially.
 			 */
 			public String color = WHITE;
 
 			/**
-			 * The DFS predecessor vertex, or <code>null</code> if there is no
-			 * predecessor. <code>null</code> initially.
+			 * The DFS predecessor vertex, or <code>null</code> if there is no predecessor.
+			 * <code>null</code> initially.
 			 */
 			public Vertex predecessor = null;
 
 			/**
-			 * Timestamp indicating when the vertex was finished (became BLACK)
-			 * in the DFS. Finish times are between 1 and the number of
-			 * vertexes.
+			 * Timestamp indicating when the vertex was finished (became BLACK) in the DFS.
+			 * Finish times are between 1 and the number of vertexes.
 			 */
 			public int finishTime;
 
@@ -90,9 +87,8 @@ public class ComputeNodeOrder {
 			public Object id;
 
 			/**
-			 * Ordered list of adjacent vertexes. In other words, "this" is the
-			 * "from" vertex and the elements of this list are all "to"
-			 * vertexes.
+			 * Ordered list of adjacent vertexes. In other words, "this" is the "from"
+			 * vertex and the elements of this list are all "to" vertexes.
 			 *
 			 * Element type: <code>Vertex</code>
 			 */
@@ -134,19 +130,17 @@ public class ComputeNodeOrder {
 		private boolean initialized = false;
 
 		/**
-		 * Indicates whether the graph contains cycles. Initially
-		 * <code>false</code>.
+		 * Indicates whether the graph contains cycles. Initially <code>false</code>.
 		 */
 		private boolean cycles = false;
 
 		/**
 		 * Creates a new empty directed graph object.
 		 * <p>
-		 * After this graph's vertexes and edges are defined with
-		 * <code>addVertex</code> and <code>addEdge</code>, call
-		 * <code>freeze</code> to indicate that the graph is all there, and then
-		 * call <code>idsByDFSFinishTime</code> to read off the vertexes ordered
-		 * by DFS finish time.
+		 * After this graph's vertexes and edges are defined with <code>addVertex</code>
+		 * and <code>addEdge</code>, call <code>freeze</code> to indicate that the graph
+		 * is all there, and then call <code>idsByDFSFinishTime</code> to read off the
+		 * vertexes ordered by DFS finish time.
 		 * </p>
 		 */
 		public Digraph() {
@@ -154,9 +148,8 @@ public class ComputeNodeOrder {
 		}
 
 		/**
-		 * Freezes this graph. No more vertexes or edges can be added to this
-		 * graph after this method is called. Has no effect if the graph is
-		 * already frozen.
+		 * Freezes this graph. No more vertexes or edges can be added to this graph
+		 * after this method is called. Has no effect if the graph is already frozen.
 		 */
 		public void freeze() {
 			if (!initialized) {
@@ -167,13 +160,12 @@ public class ComputeNodeOrder {
 		}
 
 		/**
-		 * Defines a new vertex with the given id. The depth-first search is
-		 * performed in the relative order in which vertexes were added to the
-		 * graph.
+		 * Defines a new vertex with the given id. The depth-first search is performed
+		 * in the relative order in which vertexes were added to the graph.
 		 *
 		 * @param id the id of the vertex
-		 * @exception IllegalArgumentException if the vertex id is
-		 * already defined or if the graph is frozen
+		 * @exception IllegalArgumentException if the vertex id is already defined or if
+		 *                                     the graph is frozen
 		 */
 		public void addVertex(Object id) throws IllegalArgumentException {
 			if (initialized) {
@@ -189,16 +181,15 @@ public class ComputeNodeOrder {
 		}
 
 		/**
-		 * Adds a new directed edge between the vertexes with the given ids.
-		 * Vertexes for the given ids must be defined beforehand with
-		 * <code>addVertex</code>. The depth-first search is performed in the
-		 * relative order in which adjacent "to" vertexes were added to a given
-		 * "from" index.
+		 * Adds a new directed edge between the vertexes with the given ids. Vertexes
+		 * for the given ids must be defined beforehand with <code>addVertex</code>. The
+		 * depth-first search is performed in the relative order in which adjacent "to"
+		 * vertexes were added to a given "from" index.
 		 *
 		 * @param fromId the id of the "from" vertex
-		 * @param toId the id of the "to" vertex
-		 * @exception IllegalArgumentException if either vertex is undefined or
-		 * if the graph is frozen
+		 * @param toId   the id of the "to" vertex
+		 * @exception IllegalArgumentException if either vertex is undefined or if the
+		 *                                     graph is frozen
 		 */
 		public void addEdge(Object fromId, Object toId) throws IllegalArgumentException {
 			if (initialized) {
@@ -213,15 +204,15 @@ public class ComputeNodeOrder {
 		}
 
 		/**
-		 * Returns the ids of the vertexes in this graph ordered by depth-first
-		 * search finish time. The graph must be frozen.
+		 * Returns the ids of the vertexes in this graph ordered by depth-first search
+		 * finish time. The graph must be frozen.
 		 *
-		 * @param increasing <code>true</code> if objects are to be arranged
-		 * into increasing order of depth-first search finish time, and
-		 * <code>false</code> if objects are to be arranged into decreasing
-		 * order of depth-first search finish time
-		 * @return the list of ids ordered by depth-first search finish time
-		 * (element type: <code>Object</code>)
+		 * @param increasing <code>true</code> if objects are to be arranged into
+		 *                   increasing order of depth-first search finish time, and
+		 *                   <code>false</code> if objects are to be arranged into
+		 *                   decreasing order of depth-first search finish time
+		 * @return the list of ids ordered by depth-first search finish time (element
+		 *         type: <code>Object</code>)
 		 * @exception IllegalArgumentException if the graph is not frozen
 		 */
 		public List<Object> idsByDFSFinishTime(boolean increasing) {
@@ -245,8 +236,8 @@ public class ComputeNodeOrder {
 		/**
 		 * Returns whether the graph contains cycles. The graph must be frozen.
 		 *
-		 * @return <code>true</code> if this graph contains at least one cycle,
-		 * and <code>false</code> if this graph is cycle free
+		 * @return <code>true</code> if this graph contains at least one cycle, and
+		 *         <code>false</code> if this graph is cycle free
 		 * @exception IllegalArgumentException if the graph is not frozen
 		 */
 		public boolean containsCycles() {
@@ -257,13 +248,12 @@ public class ComputeNodeOrder {
 		}
 
 		/**
-		 * Returns the non-trivial components of this graph. A non-trivial
-		 * component is a set of 2 or more vertexes that were traversed
-		 * together. The graph must be frozen.
+		 * Returns the non-trivial components of this graph. A non-trivial component is
+		 * a set of 2 or more vertexes that were traversed together. The graph must be
+		 * frozen.
 		 *
-		 * @return the possibly empty list of non-trivial components, where
-		 * each component is an array of ids (element type:
-		 * <code>Object[]</code>)
+		 * @return the possibly empty list of non-trivial components, where each
+		 *         component is an array of ids (element type: <code>Object[]</code>)
 		 * @exception IllegalArgumentException if the graph is not frozen
 		 */
 		public List<Object[]> nonTrivialComponents() {
@@ -301,58 +291,57 @@ public class ComputeNodeOrder {
 			return result;
 		}
 
-		//		/**
-		//		 * Performs a depth-first search of this graph and records interesting
-		//		 * info with each vertex, including DFS finish time. Employs a recursive
-		//		 * helper method <code>DFSVisit</code>.
-		//		 * <p>
-		//		 * Although this method is not used, it is the basis of the
-		//		 * non-recursive <code>DFS</code> method.
-		//		 * </p>
-		//		 */
-		//		private void recursiveDFS() {
-		//			// initialize
-		//			// all vertex.color initially Vertex.WHITE;
-		//			// all vertex.predecessor initially null;
-		//			time = 0;
-		//			for (Iterator allV = vertexList.iterator(); allV.hasNext();) {
-		//				Vertex nextVertex = (Vertex) allV.next();
-		//				if (nextVertex.color == Vertex.WHITE) {
-		//					DFSVisit(nextVertex);
-		//				}
-		//			}
-		//		}
+		// /**
+		// * Performs a depth-first search of this graph and records interesting
+		// * info with each vertex, including DFS finish time. Employs a recursive
+		// * helper method <code>DFSVisit</code>.
+		// * <p>
+		// * Although this method is not used, it is the basis of the
+		// * non-recursive <code>DFS</code> method.
+		// * </p>
+		// */
+		// private void recursiveDFS() {
+		// // initialize
+		// // all vertex.color initially Vertex.WHITE;
+		// // all vertex.predecessor initially null;
+		// time = 0;
+		// for (Iterator allV = vertexList.iterator(); allV.hasNext();) {
+		// Vertex nextVertex = (Vertex) allV.next();
+		// if (nextVertex.color == Vertex.WHITE) {
+		// DFSVisit(nextVertex);
+		// }
+		// }
+		// }
 		//
-		//		/**
-		//		 * Helper method. Performs a depth first search of this graph.
-		//		 *
-		//		 * @param vertex the vertex to visit
-		//		 */
-		//		private void DFSVisit(Vertex vertex) {
-		//			// mark vertex as discovered
-		//			vertex.color = Vertex.GREY;
-		//			List adj = vertex.adjacent;
-		//			for (Iterator allAdjacent=adj.iterator(); allAdjacent.hasNext();) {
-		//				Vertex adjVertex = (Vertex) allAdjacent.next();
-		//				if (adjVertex.color == Vertex.WHITE) {
-		//					// explore edge from vertex to adjVertex
-		//					adjVertex.predecessor = vertex;
-		//					DFSVisit(adjVertex);
-		//				} else if (adjVertex.color == Vertex.GREY) {
-		//                  // back edge (grey vertex means visit in progress)
-		//                  cycles = true;
-		//              }
-		//			}
-		//			// done exploring vertex
-		//			vertex.color = Vertex.BLACK;
-		//			time++;
-		//			vertex.finishTime = time;
-		//		}
+		// /**
+		// * Helper method. Performs a depth first search of this graph.
+		// *
+		// * @param vertex the vertex to visit
+		// */
+		// private void DFSVisit(Vertex vertex) {
+		// // mark vertex as discovered
+		// vertex.color = Vertex.GREY;
+		// List adj = vertex.adjacent;
+		// for (Iterator allAdjacent=adj.iterator(); allAdjacent.hasNext();) {
+		// Vertex adjVertex = (Vertex) allAdjacent.next();
+		// if (adjVertex.color == Vertex.WHITE) {
+		// // explore edge from vertex to adjVertex
+		// adjVertex.predecessor = vertex;
+		// DFSVisit(adjVertex);
+		// } else if (adjVertex.color == Vertex.GREY) {
+		// // back edge (grey vertex means visit in progress)
+		// cycles = true;
+		// }
+		// }
+		// // done exploring vertex
+		// vertex.color = Vertex.BLACK;
+		// time++;
+		// vertex.finishTime = time;
+		// }
 
 		/**
-		 * Performs a depth-first search of this graph and records interesting
-		 * info with each vertex, including DFS finish time. Does not employ
-		 * recursion.
+		 * Performs a depth-first search of this graph and records interesting info with
+		 * each vertex, including DFS finish time. Does not employ recursion.
 		 */
 		private void DFS() {
 			// state machine rendition of the standard recursive DFS algorithm
@@ -376,65 +365,65 @@ public class ComputeNodeOrder {
 			state = NEXT_VERTEX;
 			nextStateLoop: while (true) {
 				switch (state) {
-					case NEXT_VERTEX :
-						// on entry, "allV" contains vertexes yet to be visited
-						if (!allV.hasNext()) {
-							// all done
-							break nextStateLoop;
-						}
-						Vertex nextVertex = allV.next();
-						if (nextVertex.color == Vertex.WHITE) {
-							stack.add(NEXT_VERTEX_OBJECT);
-							vertex = nextVertex;
+				case NEXT_VERTEX:
+					// on entry, "allV" contains vertexes yet to be visited
+					if (!allV.hasNext()) {
+						// all done
+						break nextStateLoop;
+					}
+					Vertex nextVertex = allV.next();
+					if (nextVertex.color == Vertex.WHITE) {
+						stack.add(NEXT_VERTEX_OBJECT);
+						vertex = nextVertex;
+						state = START_DFS_VISIT;
+						continue nextStateLoop;
+					}
+					state = NEXT_VERTEX;
+					continue nextStateLoop;
+				case START_DFS_VISIT:
+					// on entry, "vertex" contains the vertex to be visited
+					// top of stack is return code
+					// mark the vertex as discovered
+					vertex.color = Vertex.GREY;
+					allAdjacent = vertex.adjacent.iterator();
+					state = NEXT_ADJACENT;
+					continue nextStateLoop;
+				case NEXT_ADJACENT:
+					// on entry, "allAdjacent" contains adjacent vertexes to
+					// be visited; "vertex" contains vertex being visited
+					if (allAdjacent.hasNext()) {
+						Vertex adjVertex = allAdjacent.next();
+						if (adjVertex.color == Vertex.WHITE) {
+							// explore edge from vertex to adjVertex
+							adjVertex.predecessor = vertex;
+							stack.add(allAdjacent);
+							stack.add(vertex);
+							stack.add(AFTER_NEXTED_DFS_VISIT_OBJECT);
+							vertex = adjVertex;
 							state = START_DFS_VISIT;
 							continue nextStateLoop;
 						}
-						state = NEXT_VERTEX;
-						continue nextStateLoop;
-					case START_DFS_VISIT :
-						// on entry, "vertex" contains the vertex to be visited
-						// top of stack is return code
-						// mark the vertex as discovered
-						vertex.color = Vertex.GREY;
-						allAdjacent = vertex.adjacent.iterator();
-						state = NEXT_ADJACENT;
-						continue nextStateLoop;
-					case NEXT_ADJACENT :
-						// on entry, "allAdjacent" contains adjacent vertexes to
-						// be visited; "vertex" contains vertex being visited
-						if (allAdjacent.hasNext()) {
-							Vertex adjVertex = allAdjacent.next();
-							if (adjVertex.color == Vertex.WHITE) {
-								// explore edge from vertex to adjVertex
-								adjVertex.predecessor = vertex;
-								stack.add(allAdjacent);
-								stack.add(vertex);
-								stack.add(AFTER_NEXTED_DFS_VISIT_OBJECT);
-								vertex = adjVertex;
-								state = START_DFS_VISIT;
-								continue nextStateLoop;
-							}
-							if (adjVertex.color == Vertex.GREY) {
-								// back edge (grey means visit in progress)
-								cycles = true;
-							}
-							state = NEXT_ADJACENT;
-							continue nextStateLoop;
+						if (adjVertex.color == Vertex.GREY) {
+							// back edge (grey means visit in progress)
+							cycles = true;
 						}
-						// done exploring vertex
-						vertex.color = Vertex.BLACK;
-						time++;
-						vertex.finishTime = time;
-						state = ((Integer) stack.remove(stack.size() - 1)).intValue();
-						continue nextStateLoop;
-					case AFTER_NEXTED_DFS_VISIT :
-						// on entry, stack contains "vertex" and "allAjacent"
-						vertex = (Vertex) stack.remove(stack.size() - 1);
-						@SuppressWarnings("unchecked")
-						Iterator<Vertex> unchecked = (Iterator<Vertex>) stack.remove(stack.size() - 1);
-						allAdjacent = unchecked;
 						state = NEXT_ADJACENT;
 						continue nextStateLoop;
+					}
+					// done exploring vertex
+					vertex.color = Vertex.BLACK;
+					time++;
+					vertex.finishTime = time;
+					state = ((Integer) stack.remove(stack.size() - 1)).intValue();
+					continue nextStateLoop;
+				case AFTER_NEXTED_DFS_VISIT:
+					// on entry, stack contains "vertex" and "allAjacent"
+					vertex = (Vertex) stack.remove(stack.size() - 1);
+					@SuppressWarnings("unchecked")
+					Iterator<Vertex> unchecked = (Iterator<Vertex>) stack.remove(stack.size() - 1);
+					allAdjacent = unchecked;
+					state = NEXT_ADJACENT;
+					continue nextStateLoop;
 				}
 			}
 		}
@@ -442,29 +431,29 @@ public class ComputeNodeOrder {
 	}
 
 	/**
-	 * Sorts the given list of projects in a manner that honors the given
-	 * project reference relationships. That is, if project A references project
-	 * B, then the resulting order will list B before A if possible. For graphs
-	 * that do not contain cycles, the result is the same as a conventional
-	 * topological sort. For graphs containing cycles, the order is based on
-	 * ordering the strongly connected components of the graph. This has the
-	 * effect of keeping each knot of projects together without otherwise
-	 * affecting the order of projects not involved in a cycle. For a graph G,
-	 * the algorithm performs in O(|G|) space and time.
+	 * Sorts the given list of projects in a manner that honors the given project
+	 * reference relationships. That is, if project A references project B, then the
+	 * resulting order will list B before A if possible. For graphs that do not
+	 * contain cycles, the result is the same as a conventional topological sort.
+	 * For graphs containing cycles, the order is based on ordering the strongly
+	 * connected components of the graph. This has the effect of keeping each knot
+	 * of projects together without otherwise affecting the order of projects not
+	 * involved in a cycle. For a graph G, the algorithm performs in O(|G|) space
+	 * and time.
 	 * <p>
-	 * When there is an arbitrary choice, vertexes are ordered as supplied.
-	 * Arranged projects in descending alphabetical order generally results in
-	 * an order that builds "A" before "Z" when there are no other constraints.
+	 * When there is an arbitrary choice, vertexes are ordered as supplied. Arranged
+	 * projects in descending alphabetical order generally results in an order that
+	 * builds "A" before "Z" when there are no other constraints.
 	 * </p>
-	 * <p> Ref: Cormen, Leiserson, and Rivest <it>Introduction to
-	 * Algorithms</it>, McGraw-Hill, 1990. The strongly-connected-components
-	 * algorithm is in section 23.5.
+	 * <p>
+	 * Ref: Cormen, Leiserson, and Rivest <it>Introduction to Algorithms</it>,
+	 * McGraw-Hill, 1990. The strongly-connected-components algorithm is in section
+	 * 23.5.
 	 * </p>
 	 *
-	 * @param objects a list of projects (element type:
-	 * <code>IProject</code>)
+	 * @param objects    a list of projects (element type: <code>IProject</code>)
 	 * @param references a list of project references [A,B] meaning that A
-	 * references B (element type: <code>IProject[]</code>)
+	 *                   references B (element type: <code>IProject[]</code>)
 	 * @return an object describing the resulting project order
 	 */
 	public static Object[][] computeNodeOrder(Object[] objects, Object[][] references) {

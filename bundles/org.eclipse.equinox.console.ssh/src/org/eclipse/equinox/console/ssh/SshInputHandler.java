@@ -23,7 +23,6 @@ import org.eclipse.equinox.console.common.InputHandler;
 /**
  * This class customizes the generic handler with a concrete content processor,
  * which provides ssh protocol handling.
- *
  */
 public class SshInputHandler extends InputHandler {
 	public SshInputHandler(InputStream input, ConsoleInputStream in, ConsoleOutputStream out) {

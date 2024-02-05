@@ -39,10 +39,11 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 		};
 		Hashtable props = new Hashtable();
 		props.put(testMethodName, Boolean.TRUE);
-		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
+		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt,
+				props);
 		ServiceTracker testTracker = null;
 		try {
-			final boolean[] results = new boolean[] {false, false, false};
+			final boolean[] results = new boolean[] { false, false, false };
 			ServiceTrackerCustomizer testCustomizer = new ServiceTrackerCustomizer() {
 				public Object addingService(ServiceReference reference) {
 					results[0] = true;
@@ -57,7 +58,8 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 					results[2] = true;
 				}
 			};
-			Filter filter = FrameworkUtil.createFilter("(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))");
+			Filter filter = FrameworkUtil
+					.createFilter("(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))");
 			testTracker = new ServiceTracker(OSGiTestsActivator.getContext(), filter, testCustomizer);
 			testTracker.open();
 			assertTrue("Did not call addingService", results[0]); //$NON-NLS-1$
@@ -114,10 +116,11 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 		};
 		Hashtable props = new Hashtable();
 		props.put(testMethodName, Boolean.FALSE);
-		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
+		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt,
+				props);
 		ServiceTracker testTracker = null;
 		try {
-			final boolean[] results = new boolean[] {false, false, false};
+			final boolean[] results = new boolean[] { false, false, false };
 			ServiceTrackerCustomizer testCustomizer = new ServiceTrackerCustomizer() {
 				public Object addingService(ServiceReference reference) {
 					results[0] = true;
@@ -132,7 +135,8 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 					results[2] = true;
 				}
 			};
-			Filter filter = FrameworkUtil.createFilter("(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))");
+			Filter filter = FrameworkUtil
+					.createFilter("(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))");
 			testTracker = new ServiceTracker(OSGiTestsActivator.getContext(), filter, testCustomizer);
 			testTracker.open();
 			assertFalse("Did call addingService", results[0]); //$NON-NLS-1$
@@ -189,10 +193,11 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 		};
 		Hashtable props = new Hashtable();
 		props.put(testMethodName, Boolean.TRUE);
-		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
+		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt,
+				props);
 		ServiceTracker testTracker = null;
 		try {
-			final boolean[] results = new boolean[] {false, false, false};
+			final boolean[] results = new boolean[] { false, false, false };
 			ServiceTrackerCustomizer testCustomizer = new ServiceTrackerCustomizer() {
 				public Object addingService(ServiceReference reference) {
 					results[0] = true;
@@ -207,7 +212,8 @@ public class ServiceTrackerTests extends AbstractBundleTests {
 					results[2] = true;
 				}
 			};
-			Filter filter = FrameworkUtil.createFilter("(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))");
+			Filter filter = FrameworkUtil
+					.createFilter("(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))");
 			testTracker = new ServiceTracker(OSGiTestsActivator.getContext(), filter, testCustomizer);
 			testTracker.open();
 			assertTrue("Did not call addingService", results[0]); //$NON-NLS-1$

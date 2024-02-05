@@ -68,7 +68,8 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 
 		new Label(rightPane, SWT.NONE).setText(SecUIMessages.keysTable);
 
-		Table tableOfValues = new Table(rightPane, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
+		Table tableOfValues = new Table(rightPane,
+				SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
 		tableOfValues.setLinesVisible(true);
 		tableOfValues.setHeaderVisible(true);
 		tableOfValues.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true));
@@ -96,6 +97,7 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 
 		/* Removed for the time being. In future modify/show/export operations could be 
 		 * re-introduced with some special access token required to be entered by the user 
+		 * @formatter:off
 		Button buttonExport = new Button(buttonBar, SWT.CENTER);
 		buttonExport.setText(SecUIMessages.exportButton);
 		setButtonSize(buttonExport, minButtonWidth);
@@ -104,6 +106,7 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 				export();
 			}
 		});
+		 * @formatter:on
 		*/
 
 		Button buttonDelete = new Button(buttonBar, SWT.PUSH);
@@ -206,7 +209,7 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		defaultStorage.clear();
 		defaultStorage.removeNode();
 
-		// clear it from the list of open storages, delete the file 
+		// clear it from the list of open storages, delete the file
 		InternalExchangeUtils.defaultStorageDelete();
 
 		if (nodesView != null)

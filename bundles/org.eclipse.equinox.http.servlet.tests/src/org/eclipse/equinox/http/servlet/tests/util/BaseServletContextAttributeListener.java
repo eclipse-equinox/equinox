@@ -22,8 +22,7 @@ import javax.servlet.ServletContextAttributeListener;
 /**
  * @author Raymond Augé
  */
-public class BaseServletContextAttributeListener
-	implements ServletContextAttributeListener {
+public class BaseServletContextAttributeListener implements ServletContextAttributeListener {
 
 	public AtomicBoolean added = new AtomicBoolean(false);
 	public AtomicBoolean replaced = new AtomicBoolean(false);

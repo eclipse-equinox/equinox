@@ -30,8 +30,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 /**
- *  This class configures and start an ssh server
- *
+ * This class configures and start an ssh server
  */
 public class SshServ extends Thread {
 
@@ -61,7 +60,8 @@ public class SshServ extends Thread {
 			sshServer.setHost(host);
 		}
 		sshServer.setPort(port);
-		sshServer.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(Paths.get(System.getProperty(SSH_KEYSTORE_PROP, SSH_KEYSTORE_PROP_DEFAULT))));
+		sshServer.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(
+				Paths.get(System.getProperty(SSH_KEYSTORE_PROP, SSH_KEYSTORE_PROP_DEFAULT))));
 		sshServer.setShellFactory(shellFactory);
 		sshServer.setPasswordAuthenticator(createJaasPasswordAuthenticator());
 		sshServer.setPublickeyAuthenticator(createSimpleAuthorizedKeysAuthenticator());
@@ -71,7 +71,6 @@ public class SshServ extends Thread {
 			e.printStackTrace();
 		}
 	}
-
 
 	public synchronized void stopSshServer() {
 		try {
@@ -90,9 +89,9 @@ public class SshServ extends Thread {
 	}
 
 	private PasswordAuthenticator createJaasPasswordAuthenticator() {
-			JaasPasswordAuthenticator jaasPasswordAuthenticator = new JaasPasswordAuthenticator();
-			jaasPasswordAuthenticator.setDomain(EQUINOX_CONSOLE_DOMAIN);
-			return jaasPasswordAuthenticator;
+		JaasPasswordAuthenticator jaasPasswordAuthenticator = new JaasPasswordAuthenticator();
+		jaasPasswordAuthenticator.setDomain(EQUINOX_CONSOLE_DOMAIN);
+		return jaasPasswordAuthenticator;
 	}
 
 	private PublickeyAuthenticator createSimpleAuthorizedKeysAuthenticator() {
@@ -106,20 +105,22 @@ public class SshServ extends Thread {
 
 		final String customPublicKeysAuthentication = System.getProperty(SSH_CUSTOM_PUBLIC_KEY_AUTHENTICATION);
 
-		// fall back to dynamic provider based on available OSGi services only if explicitly specified
+		// fall back to dynamic provider based on available OSGi services only if
+		// explicitly specified
 		if ("true".equals(customPublicKeysAuthentication)) {
 			return (username, key, session) -> {
 				// find available services
 				try {
-					for (ServiceReference<PublickeyAuthenticator> reference : context.getServiceReferences(PublickeyAuthenticator.class, null)) {
+					for (ServiceReference<PublickeyAuthenticator> reference : context
+							.getServiceReferences(PublickeyAuthenticator.class, null)) {
 						PublickeyAuthenticator authenticator = null;
 						try {
 							authenticator = context.getService(reference);
 							// first positive match wins; continue looking otherwise
-							if(authenticator.authenticate(username, key, session))
+							if (authenticator.authenticate(username, key, session))
 								return true;
 						} finally {
-							if(null != authenticator)
+							if (null != authenticator)
 								context.ungetService(reference);
 						}
 					}

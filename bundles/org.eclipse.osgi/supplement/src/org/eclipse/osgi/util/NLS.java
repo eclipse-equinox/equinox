@@ -64,12 +64,7 @@ public abstract class NLS {
 	private static String[] nlSuffixes;
 	private static final String PROP_WARNINGS = "osgi.nls.warnings"; //$NON-NLS-1$
 	private static final String IGNORE = "ignore"; //$NON-NLS-1$
-	private static final boolean ignoreWarnings = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
-		@Override
-		public Boolean run() {
-			return IGNORE.equals(System.getProperty(PROP_WARNINGS));
-		}
-	});
+	private static final boolean ignoreWarnings = AccessController.doPrivileged((PrivilegedAction<Boolean>) () -> IGNORE.equals(System.getProperty(PROP_WARNINGS)));
 
 	/*
 	 * NOTE do not change the name of this field; it is set by the Framework using reflection
@@ -152,12 +147,9 @@ public abstract class NLS {
 			load(baseName, clazz);
 			return;
 		}
-		AccessController.doPrivileged(new PrivilegedAction<Void>() {
-			@Override
-			public Void run() {
-				load(baseName, clazz);
-				return null;
-			}
+		AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+			load(baseName, clazz);
+			return null;
 		});
 	}
 

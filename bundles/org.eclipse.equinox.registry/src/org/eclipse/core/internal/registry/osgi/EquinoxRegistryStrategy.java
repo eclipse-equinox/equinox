@@ -26,11 +26,14 @@ import org.osgi.framework.ServiceReference;
 /**
  * The registry strategy used by the Equinox extension registry. Adds to the
  * OSGi registry:
- * <p><ul>
+ * <p>
+ * <ul>
  * <li>Use debug information supplied via .options files</li>
- * <li>Use Eclipse logging - Use Eclipse platform state for cache validation</li>
+ * <li>Use Eclipse logging - Use Eclipse platform state for cache
+ * validation</li>
  * <li>Event scheduling is done using Eclipse job scheduling mechanism</li>
- * </ul></p>
+ * </ul>
+ * </p>
  *
  * @since org.eclipse.equinox.registry 3.2
  */
@@ -41,7 +44,8 @@ public class EquinoxRegistryStrategy extends RegistryStrategyOSGI {
 	public static final String OPTION_DEBUG_EVENTS = PLUGIN_NAME + "/debug/events"; //$NON-NLS-1$
 
 	private static boolean DEBUG_ECLIPSE_REGISTRY = OSGIUtils.getDefault().getBooleanDebugOption(OPTION_DEBUG, false);
-	private static boolean DEBUG_ECLIPSE_EVENTS = OSGIUtils.getDefault().getBooleanDebugOption(OPTION_DEBUG_EVENTS, false);
+	private static boolean DEBUG_ECLIPSE_EVENTS = OSGIUtils.getDefault().getBooleanDebugOption(OPTION_DEBUG_EVENTS,
+			false);
 
 	private boolean useJobs = true;
 
@@ -68,7 +72,8 @@ public class EquinoxRegistryStrategy extends RegistryStrategyOSGI {
 	public long getContainerTimestamp() {
 		BundleContext context = Activator.getContext();
 		if (context == null) {
-			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, RegistryMessages.bundle_not_activated, null));
+			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0,
+					RegistryMessages.bundle_not_activated, null));
 			return -1;
 		}
 		// use a string here instead of the class to prevent class loading.
@@ -79,13 +84,16 @@ public class EquinoxRegistryStrategy extends RegistryStrategyOSGI {
 	}
 
 	/**
-	 * This method will attempt to use Eclipse Jobs mechanism to schedule registry events. If, at any time,
-	 * Eclipse Jobs mechanism is missing, this method will fallback on the "internal" event scheduling
-	 * provided by the registry strategy.
+	 * This method will attempt to use Eclipse Jobs mechanism to schedule registry
+	 * events. If, at any time, Eclipse Jobs mechanism is missing, this method will
+	 * fallback on the "internal" event scheduling provided by the registry
+	 * strategy.
 	 *
-	 * Once the switch to the fallback mechanism occurred, no further attempt to use scheduling from the Jobs bundle
-	 * will be made (until registry bundle is restarted). Avoiding repeated checks in this scenario will ensure that
-	 * most users see no performance degradation and that order of registry events remains consistent.
+	 * Once the switch to the fallback mechanism occurred, no further attempt to use
+	 * scheduling from the Jobs bundle will be made (until registry bundle is
+	 * restarted). Avoiding repeated checks in this scenario will ensure that most
+	 * users see no performance degradation and that order of registry events
+	 * remains consistent.
 	 */
 	@Override
 	public final void scheduleChangeEvent(Object[] listeners, Map<String, ?> deltas, Object registry) {

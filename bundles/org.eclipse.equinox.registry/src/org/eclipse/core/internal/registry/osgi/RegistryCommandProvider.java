@@ -33,8 +33,8 @@ public class RegistryCommandProvider implements CommandProvider {
 	}
 
 	/*
-	 * This method either returns the help message for a particular command,
-	 * or returns the help messages for all commands (if commandName is null)
+	 * This method either returns the help message for a particular command, or
+	 * returns the help messages for all commands (if commandName is null)
 	 */
 	private String getHelp(String commandName) {
 		boolean all = commandName == null;
@@ -48,7 +48,8 @@ public class RegistryCommandProvider implements CommandProvider {
 			sb.append(NEW_LINE);
 		}
 		if (all || "pt".equals(commandName)) { //$NON-NLS-1$
-			sb.append("\tpt [-v] uniqueExtensionPointId - display the extension point and extensions; add -v to display config elements"); //$NON-NLS-1$
+			sb.append(
+					"\tpt [-v] uniqueExtensionPointId - display the extension point and extensions; add -v to display config elements"); //$NON-NLS-1$
 			sb.append(NEW_LINE);
 		}
 		return sb.toString();
@@ -79,7 +80,7 @@ public class RegistryCommandProvider implements CommandProvider {
 			ci.println("-------------------"); //$NON-NLS-1$
 			IExtension[] exts = RegistryFactory.getRegistry().getExtensions(namespace);
 			for (IExtension ext : exts) {
-				displayExtension(ext, ci, true /*full*/);
+				displayExtension(ext, ci, true /* full */);
 			}
 		}
 	}
@@ -97,7 +98,7 @@ public class RegistryCommandProvider implements CommandProvider {
 		ci.println("\nExtension(s):"); //$NON-NLS-1$
 		ci.println("-------------------"); //$NON-NLS-1$
 		for (IExtension ext : exts) {
-			displayExtension(ext, ci, false /*short*/);
+			displayExtension(ext, ci, false /* short */);
 			if (verbose) {
 				IConfigurationElement[] ce = ext.getConfigurationElements();
 				for (IConfigurationElement ce1 : ce) {
@@ -111,8 +112,8 @@ public class RegistryCommandProvider implements CommandProvider {
 	/**
 	 * Handles the help command
 	 *
-	 * @param intp
-	 * @return description for a particular command or false if there is no command with the specified name
+	 * @return description for a particular command or false if there is no command
+	 *         with the specified name
 	 */
 	public Object _help(CommandInterpreter intp) {
 		String commandName = intp.nextArgument();

@@ -15,6 +15,7 @@ package org.eclipse.core.internal.preferences;
 
 /**
  * Container for the constants used by this plugin.
+ * 
  * @since org.eclipse.equinox.preferences 1.0
  */
 public interface IPreferencesConstants {
@@ -34,27 +35,27 @@ public interface IPreferencesConstants {
 	public static final String PLUGIN_CUSTOMIZATION = "-plugincustomization"; //$NON-NLS-1$
 
 	/**
-	 * This is the base filename used to construct the name of the preference
-	 * file and the name of the preference translation file.
+	 * This is the base filename used to construct the name of the preference file
+	 * and the name of the preference translation file.
 	 */
 	public static final String PREFERENCES_DEFAULT_OVERRIDE_BASE_NAME = "preferences"; //$NON-NLS-1$
 
 	/**
-	 * The name of the file (value <code>"preferences.ini"</code>) in a
-	 * plug-in's (read-only) directory that, when present, contains values that
-	 * override the normal default values for this plug-in's preferences.
+	 * The name of the file (value <code>"preferences.ini"</code>) in a plug-in's
+	 * (read-only) directory that, when present, contains values that override the
+	 * normal default values for this plug-in's preferences.
 	 * <p>
-	 * The format of the file is as per <code>java.io.Properties</code> where
-	 * the keys are property names and values are strings.
+	 * The format of the file is as per <code>java.io.Properties</code> where the
+	 * keys are property names and values are strings.
 	 * </p>
 	 */
 	public static final String PREFERENCES_DEFAULT_OVERRIDE_FILE_NAME = PREFERENCES_DEFAULT_OVERRIDE_BASE_NAME + ".ini"; //$NON-NLS-1$
 
 	/**
-	 * The simple identifier constant (value "<code>preferences</code>") of
-	 * the extension point of the Core Runtime plug-in where plug-ins declare
-	 * extensions to the preference facility. A plug-in may define any number
-	 * of preference extensions.
+	 * The simple identifier constant (value "<code>preferences</code>") of the
+	 * extension point of the Core Runtime plug-in where plug-ins declare extensions
+	 * to the preference facility. A plug-in may define any number of preference
+	 * extensions.
 	 */
 	public static final String PT_PREFERENCES = "preferences"; //$NON-NLS-1$
 

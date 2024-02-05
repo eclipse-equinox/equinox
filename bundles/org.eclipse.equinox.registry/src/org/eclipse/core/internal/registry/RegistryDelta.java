@@ -18,14 +18,17 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionDelta;
 
 /**
- * The extension deltas are grouped by namespace. There is one registry delta by namespace.
+ * The extension deltas are grouped by namespace. There is one registry delta by
+ * namespace.
  */
 public class RegistryDelta {
-	private final Set<IExtensionDelta> extensionDeltas = new HashSet<>(); //the extension deltas (each element indicate the type of the delta)
-	private IObjectManager objectManager; //The object manager from which all the objects contained in the deltas will be found.
+	private final Set<IExtensionDelta> extensionDeltas = new HashSet<>(); // the extension deltas (each element indicate
+																			// the type of the delta)
+	private IObjectManager objectManager; // The object manager from which all the objects contained in the deltas will
+											// be found.
 
 	RegistryDelta() {
-		//Nothing to do
+		// Nothing to do
 	}
 
 	public int getExtensionDeltasCount() {
@@ -46,13 +49,13 @@ public class RegistryDelta {
 	}
 
 	/**
-	 * @param extensionPointId
-	 * @param extensionId must not be null
+	 * @param extensionId      must not be null
 	 */
 	public IExtensionDelta getExtensionDelta(String extensionPointId, String extensionId) {
 		for (IExtensionDelta extensionDelta : extensionDeltas) {
 			IExtension extension = extensionDelta.getExtension();
-			if (extension.getExtensionPointUniqueIdentifier().equals(extensionPointId) && extension.getUniqueIdentifier() != null && extension.getUniqueIdentifier().equals(extensionId))
+			if (extension.getExtensionPointUniqueIdentifier().equals(extensionPointId)
+					&& extension.getUniqueIdentifier() != null && extension.getUniqueIdentifier().equals(extensionId))
 				return extensionDelta;
 		}
 		return null;
@@ -70,7 +73,8 @@ public class RegistryDelta {
 
 	void setObjectManager(IObjectManager objectManager) {
 		this.objectManager = objectManager;
-		//TODO May want to add into the existing one here... if it is possible to have batching
+		// TODO May want to add into the existing one here... if it is possible to have
+		// batching
 	}
 
 	public IObjectManager getObjectManager() {

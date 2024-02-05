@@ -26,12 +26,14 @@ public class ThirdLevelConfigurationElementHandle extends ConfigurationElementHa
 
 	@Override
 	protected ConfigurationElement getConfigurationElement() {
-		return (ConfigurationElement) objectManager.getObject(getId(), RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
+		return (ConfigurationElement) objectManager.getObject(getId(),
+				RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
 	}
 
 	@Override
 	public IConfigurationElement[] getChildren() {
-		return (IConfigurationElement[]) objectManager.getHandles(getConfigurationElement().getRawChildren(), RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
+		return (IConfigurationElement[]) objectManager.getHandles(getConfigurationElement().getRawChildren(),
+				RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
 	}
 
 }

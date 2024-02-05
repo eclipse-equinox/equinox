@@ -78,9 +78,11 @@ public class MultiLanguageTest {
 	@Before
 	public void setUp() throws Exception {
 		testBundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
-		bundle = BundleTestingHelper.installBundle("0.1", testBundleContext, "Plugin_Testing/registry/multiLang/bundleA");
-		bundleFragment = BundleTestingHelper.installBundle("0.2", testBundleContext, "Plugin_Testing/registry/multiLang/fragmentA");
-		getBundleAdmin().resolveBundles(new Bundle[] {bundle});
+		bundle = BundleTestingHelper.installBundle("0.1", testBundleContext,
+				"Plugin_Testing/registry/multiLang/bundleA");
+		bundleFragment = BundleTestingHelper.installBundle("0.2", testBundleContext,
+				"Plugin_Testing/registry/multiLang/fragmentA");
+		getBundleAdmin().resolveBundles(new Bundle[] { bundle });
 
 		// find a place for the extension registry cache
 		tmpPath = FileSystemHelper.getRandomLocation(FileSystemHelper.getTempDir());
@@ -100,7 +102,7 @@ public class MultiLanguageTest {
 		// remove test bundles
 		bundleFragment.uninstall();
 		bundle.uninstall();
-		refreshPackages(new Bundle[] {bundle});
+		refreshPackages(new Bundle[] { bundle });
 
 		// restore system environment
 		if (oldMultiLangValue == null) {
@@ -116,7 +118,7 @@ public class MultiLanguageTest {
 	}
 
 	private void refreshPackages(Bundle[] refresh) {
-		final boolean[] flag = new boolean[] {false};
+		final boolean[] flag = new boolean[] { false };
 		FrameworkListener listener = event -> {
 			if (event.getType() == FrameworkEvent.PACKAGES_REFRESHED) {
 				synchronized (flag) {
@@ -150,8 +152,8 @@ public class MultiLanguageTest {
 	public void testMultiLocale() {
 		Object masterToken = new Object();
 		// Create a multi-language extension registry
-		File[] registryLocations = new File[] {registryLocation};
-		boolean[] readOnly = new boolean[] {false};
+		File[] registryLocations = new File[] { registryLocation };
+		boolean[] readOnly = new boolean[] { false };
 		RegistryStrategy strategy = RegistryFactory.createOSGiStrategy(registryLocations, readOnly, masterToken);
 		IExtensionRegistry localRegistry = RegistryFactory.createRegistry(strategy, masterToken, null);
 		assertTrue(localRegistry.isMultiLanguage());
@@ -175,8 +177,8 @@ public class MultiLanguageTest {
 	public void testMultiLocaleService() {
 		Object masterToken = new Object();
 		// Create a multi-language extension registry
-		File[] registryLocations = new File[] {registryLocation};
-		boolean[] readOnly = new boolean[] {false};
+		File[] registryLocations = new File[] { registryLocation };
+		boolean[] readOnly = new boolean[] { false };
 		RegistryStrategy strategy = RegistryFactory.createOSGiStrategy(registryLocations, readOnly, masterToken);
 		IExtensionRegistry localRegistry = RegistryFactory.createRegistry(strategy, masterToken, null);
 		assertTrue(localRegistry.isMultiLanguage());
@@ -199,7 +201,8 @@ public class MultiLanguageTest {
 			assertNotNull(extPoint);
 			IExtension extension = registry.getExtension("org.eclipse.test.registryMulti.ExtA");
 			assertNotNull(extension);
-			IConfigurationElement[] elements = registry.getConfigurationElementsFor("org.eclipse.test.registryMulti", "PointA", "org.eclipse.test.registryMulti.ExtA");
+			IConfigurationElement[] elements = registry.getConfigurationElementsFor("org.eclipse.test.registryMulti",
+					"PointA", "org.eclipse.test.registryMulti.ExtA");
 			assertNotNull(elements);
 			assertEquals(1, elements.length);
 			IConfigurationElement element = elements[0];
@@ -210,7 +213,8 @@ public class MultiLanguageTest {
 			IConfigurationElement[] subdivisionElements = sectionElements[0].getChildren("subdivision");
 			assertNotNull(subdivisionElements);
 			assertEquals(1, subdivisionElements.length);
-			IConfigurationElement[] elementsValue = registry.getConfigurationElementsFor("org.eclipse.test.registryMulti", "PointValue", "org.eclipse.test.registryMulti.ExtValue");
+			IConfigurationElement[] elementsValue = registry.getConfigurationElementsFor(
+					"org.eclipse.test.registryMulti", "PointValue", "org.eclipse.test.registryMulti.ExtValue");
 			assertNotNull(elementsValue);
 			assertEquals(1, elementsValue.length);
 			IConfigurationElement elementValue = elementsValue[0];
@@ -270,7 +274,8 @@ public class MultiLanguageTest {
 		assertNotNull(extPoint);
 		IExtension extension = registry.getExtension("org.eclipse.test.registryMulti.ExtA");
 		assertNotNull(extension);
-		IConfigurationElement[] elements = registry.getConfigurationElementsFor("org.eclipse.test.registryMulti", "PointA", "org.eclipse.test.registryMulti.ExtA");
+		IConfigurationElement[] elements = registry.getConfigurationElementsFor("org.eclipse.test.registryMulti",
+				"PointA", "org.eclipse.test.registryMulti.ExtA");
 		assertNotNull(elements);
 		assertEquals(1, elements.length);
 		IConfigurationElement element = elements[0];
@@ -281,12 +286,14 @@ public class MultiLanguageTest {
 		IConfigurationElement[] subdivisionElements = sectionElements[0].getChildren("subdivision");
 		assertNotNull(subdivisionElements);
 		assertEquals(1, subdivisionElements.length);
-		IConfigurationElement[] elementsValue = registry.getConfigurationElementsFor("org.eclipse.test.registryMulti", "PointValue", "org.eclipse.test.registryMulti.ExtValue");
+		IConfigurationElement[] elementsValue = registry.getConfigurationElementsFor("org.eclipse.test.registryMulti",
+				"PointValue", "org.eclipse.test.registryMulti.ExtValue");
 		assertNotNull(elementsValue);
 		assertEquals(1, elementsValue.length);
 		IConfigurationElement elementValue = elementsValue[0];
 		assertNotNull(elementValue);
-		IConfigurationElement[] elementsFrag = registry.getConfigurationElementsFor("org.eclipse.test.registryMulti", "FragmentPointA", "org.eclipse.test.registryMulti.FragmentExtA");
+		IConfigurationElement[] elementsFrag = registry.getConfigurationElementsFor("org.eclipse.test.registryMulti",
+				"FragmentPointA", "org.eclipse.test.registryMulti.FragmentExtA");
 		assertNotNull(elementsFrag);
 		assertEquals(1, elementsFrag.length);
 		IConfigurationElement elementFrag = elementsFrag[0];

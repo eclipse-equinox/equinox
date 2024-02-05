@@ -33,6 +33,7 @@ import org.osgi.framework.FrameworkUtil;
 
 /**
  * Check dynamic contribution into the Eclipse registry itself.
+ * 
  * @since 3.2
  */
 public class XMLExtensionCreateEclipseTest extends BaseExtensionRegistryRun {
@@ -46,9 +47,10 @@ public class XMLExtensionCreateEclipseTest extends BaseExtensionRegistryRun {
 	}
 
 	private void fillRegistry(IContributor contributor) throws IllegalArgumentException, IOException {
-			Object userKey = ((ExtensionRegistry) RegistryFactory.getRegistry()).getTemporaryUserToken();
-			URL xmlURL = getXML("DynamicExtension.xml"); //$NON-NLS-1$
-			RegistryFactory.getRegistry().addContribution(xmlURL.openStream(), contributor, false, xmlURL.getFile(), null, userKey);
+		Object userKey = ((ExtensionRegistry) RegistryFactory.getRegistry()).getTemporaryUserToken();
+		URL xmlURL = getXML("DynamicExtension.xml"); //$NON-NLS-1$
+		RegistryFactory.getRegistry().addContribution(xmlURL.openStream(), contributor, false, xmlURL.getFile(), null,
+				userKey);
 	}
 
 	private void checkRegistry(String namespace) {
@@ -59,7 +61,8 @@ public class XMLExtensionCreateEclipseTest extends BaseExtensionRegistryRun {
 		IConfigurationElement[] elements = eclipseRegistry.getConfigurationElementsFor(uniqueId);
 		assertEquals(1, elements.length);
 		for (IConfigurationElement element : elements) {
-			assertTrue("org.eclipse.equinox.common.tests.registry.simple.utils.ExecutableRegistryObject".equals(element.getAttribute("class")));
+			assertTrue("org.eclipse.equinox.common.tests.registry.simple.utils.ExecutableRegistryObject"
+					.equals(element.getAttribute("class")));
 		}
 	}
 }

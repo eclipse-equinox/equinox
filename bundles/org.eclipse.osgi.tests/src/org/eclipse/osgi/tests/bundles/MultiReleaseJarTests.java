@@ -101,62 +101,92 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		bundleEntries.put("multi/", null);
 		bundleEntries.put("multi/release/", null);
 		bundleEntries.put("multi/release/test/", null);
-		bundleEntries.put("multi/release/test/TestClassBase.class", getBytes("multi/release/test/TestClassBase.class", base));
+		bundleEntries.put("multi/release/test/TestClassBase.class",
+				getBytes("multi/release/test/TestClassBase.class", base));
 		bundleEntries.put("multi/release/test/TestClass8.class", getBytes("multi/release/test/TestClass8.class", base));
 		bundleEntries.put("multi/release/test/TestClass9.class", getBytes("multi/release/test/TestClass9.class", base));
-		bundleEntries.put("multi/release/test/TestClass10.class", getBytes("multi/release/test/TestClass10.class", base));
-		bundleEntries.put("multi/release/test/TestClass11.class", getBytes("multi/release/test/TestClass11.class", base));
-		bundleEntries.put("multi/release/test/TestService.class", getBytes("multi/release/test/TestService.class", base));
-		bundleEntries.put("multi/release/test/TestService9.class", getBytes("multi/release/test/TestService9.class", base));
-		bundleEntries.put("multi/release/test/TestServiceBase.class", getBytes("multi/release/test/TestServiceBase.class", base));
+		bundleEntries.put("multi/release/test/TestClass10.class",
+				getBytes("multi/release/test/TestClass10.class", base));
+		bundleEntries.put("multi/release/test/TestClass11.class",
+				getBytes("multi/release/test/TestClass11.class", base));
+		bundleEntries.put("multi/release/test/TestService.class",
+				getBytes("multi/release/test/TestService.class", base));
+		bundleEntries.put("multi/release/test/TestService9.class",
+				getBytes("multi/release/test/TestService9.class", base));
+		bundleEntries.put("multi/release/test/TestServiceBase.class",
+				getBytes("multi/release/test/TestServiceBase.class", base));
 
-		bundleEntries.put("multi/release/test/testResourceBase.txt", getBytes("multi/release/test/testResourceBase.txt", base));
-		bundleEntries.put("multi/release/test/testResource8.txt", getBytes("multi/release/test/testResource8.txt", base));
-		bundleEntries.put("multi/release/test/testResource9.txt", getBytes("multi/release/test/testResource9.txt", base));
-		bundleEntries.put("multi/release/test/testResource10.txt", getBytes("multi/release/test/testResource10.txt", base));
-		bundleEntries.put("multi/release/test/testResource11.txt", getBytes("multi/release/test/testResource11.txt", base));
+		bundleEntries.put("multi/release/test/testResourceBase.txt",
+				getBytes("multi/release/test/testResourceBase.txt", base));
+		bundleEntries.put("multi/release/test/testResource8.txt",
+				getBytes("multi/release/test/testResource8.txt", base));
+		bundleEntries.put("multi/release/test/testResource9.txt",
+				getBytes("multi/release/test/testResource9.txt", base));
+		bundleEntries.put("multi/release/test/testResource10.txt",
+				getBytes("multi/release/test/testResource10.txt", base));
+		bundleEntries.put("multi/release/test/testResource11.txt",
+				getBytes("multi/release/test/testResource11.txt", base));
 
 		bundleEntries.put("META-INF/services/", null);
-		bundleEntries.put("META-INF/services/multi.release.test.TestService", "multi.release.test.TestServiceBase".getBytes(StandardCharsets.UTF_8));
+		bundleEntries.put("META-INF/services/multi.release.test.TestService",
+				"multi.release.test.TestServiceBase".getBytes(StandardCharsets.UTF_8));
 		bundleEntries.put("META-INF/versions/", null);
 		bundleEntries.put("META-INF/versions/8/", null);
 		bundleEntries.put("META-INF/versions/8/multi/", null);
 		bundleEntries.put("META-INF/versions/8/multi/release/", null);
 		bundleEntries.put("META-INF/versions/8/multi/release/test/", null);
-		bundleEntries.put("META-INF/versions/8/multi/release/test/TestClass8.class", getBytes("multi/release/test/TestClass8.class", base, new byte[] {'0', '8'}));
-		bundleEntries.put("META-INF/versions/8/multi/release/test/TestClassAdd8.class", getBytes("multi/release/test/TestClassAdd8.class", base));
-		bundleEntries.put("META-INF/versions/8/multi/release/test/testResource8.txt", getBytes("multi/release/test/testResource8.txt", base, new byte[] {'0', '8'}));
-		bundleEntries.put("META-INF/versions/8/multi/release/test/testResourceAdd8.txt", getBytes("multi/release/test/testResourceAdd8.txt", base));
+		bundleEntries.put("META-INF/versions/8/multi/release/test/TestClass8.class",
+				getBytes("multi/release/test/TestClass8.class", base, new byte[] { '0', '8' }));
+		bundleEntries.put("META-INF/versions/8/multi/release/test/TestClassAdd8.class",
+				getBytes("multi/release/test/TestClassAdd8.class", base));
+		bundleEntries.put("META-INF/versions/8/multi/release/test/testResource8.txt",
+				getBytes("multi/release/test/testResource8.txt", base, new byte[] { '0', '8' }));
+		bundleEntries.put("META-INF/versions/8/multi/release/test/testResourceAdd8.txt",
+				getBytes("multi/release/test/testResourceAdd8.txt", base));
 		bundleEntries.put("META-INF/versions/9/", null);
 		bundleEntries.put("META-INF/versions/9/META-INF/", null);
 		bundleEntries.put("META-INF/versions/9/META-INF/addedFor9.txt", "added for 9".getBytes(StandardCharsets.UTF_8));
 		bundleEntries.put("META-INF/versions/9/META-INF/addedDirFor9/", null);
-		bundleEntries.put("META-INF/versions/9/META-INF/addedDirFor9/addedFor9.txt", "added for 9".getBytes(StandardCharsets.UTF_8));
+		bundleEntries.put("META-INF/versions/9/META-INF/addedDirFor9/addedFor9.txt",
+				"added for 9".getBytes(StandardCharsets.UTF_8));
 		bundleEntries.put("META-INF/versions/9/META-INF/services/", null);
-		bundleEntries.put("META-INF/versions/9/META-INF/services/multi.release.test.TestService", "multi.release.test.TestService9".getBytes(StandardCharsets.UTF_8));
+		bundleEntries.put("META-INF/versions/9/META-INF/services/multi.release.test.TestService",
+				"multi.release.test.TestService9".getBytes(StandardCharsets.UTF_8));
 		bundleEntries.put("META-INF/versions/9/multi/", null);
 		bundleEntries.put("META-INF/versions/9/multi/release/", null);
 		bundleEntries.put("META-INF/versions/9/multi/release/test/", null);
-		bundleEntries.put("META-INF/versions/9/multi/release/test/TestClass9.class", getBytes("multi/release/test/TestClass9.class", base, new byte[] {'0', '9'}));
-		bundleEntries.put("META-INF/versions/9/multi/release/test/TestClassAdd9.class", getBytes("multi/release/test/TestClassAdd9.class", base));
-		bundleEntries.put("META-INF/versions/9/multi/release/test/testResource9.txt", getBytes("multi/release/test/testResource9.txt", base, new byte[] {'0', '9'}));
-		bundleEntries.put("META-INF/versions/9/multi/release/test/testResourceAdd9.txt", getBytes("multi/release/test/testResourceAdd9.txt", base));
+		bundleEntries.put("META-INF/versions/9/multi/release/test/TestClass9.class",
+				getBytes("multi/release/test/TestClass9.class", base, new byte[] { '0', '9' }));
+		bundleEntries.put("META-INF/versions/9/multi/release/test/TestClassAdd9.class",
+				getBytes("multi/release/test/TestClassAdd9.class", base));
+		bundleEntries.put("META-INF/versions/9/multi/release/test/testResource9.txt",
+				getBytes("multi/release/test/testResource9.txt", base, new byte[] { '0', '9' }));
+		bundleEntries.put("META-INF/versions/9/multi/release/test/testResourceAdd9.txt",
+				getBytes("multi/release/test/testResourceAdd9.txt", base));
 		bundleEntries.put("META-INF/versions/10/", null);
 		bundleEntries.put("META-INF/versions/10/multi/", null);
 		bundleEntries.put("META-INF/versions/10/multi/release/", null);
 		bundleEntries.put("META-INF/versions/10/multi/release/test/", null);
-		bundleEntries.put("META-INF/versions/10/multi/release/test/TestClass10.class", getBytes("multi/release/test/TestClass10.class", base, new byte[] {'1', '0'}));
-		bundleEntries.put("META-INF/versions/10/multi/release/test/TestClassAdd10.class", getBytes("multi/release/test/TestClassAdd10.class", base));
-		bundleEntries.put("META-INF/versions/10/multi/release/test/testResource10.txt", getBytes("multi/release/test/testResource10.txt", base, new byte[] {'1', '0'}));
-		bundleEntries.put("META-INF/versions/10/multi/release/test/testResourceAdd10.txt", getBytes("multi/release/test/testResourceAdd10.txt", base));
+		bundleEntries.put("META-INF/versions/10/multi/release/test/TestClass10.class",
+				getBytes("multi/release/test/TestClass10.class", base, new byte[] { '1', '0' }));
+		bundleEntries.put("META-INF/versions/10/multi/release/test/TestClassAdd10.class",
+				getBytes("multi/release/test/TestClassAdd10.class", base));
+		bundleEntries.put("META-INF/versions/10/multi/release/test/testResource10.txt",
+				getBytes("multi/release/test/testResource10.txt", base, new byte[] { '1', '0' }));
+		bundleEntries.put("META-INF/versions/10/multi/release/test/testResourceAdd10.txt",
+				getBytes("multi/release/test/testResourceAdd10.txt", base));
 		bundleEntries.put("META-INF/versions/11/", null);
 		bundleEntries.put("META-INF/versions/11/multi/", null);
 		bundleEntries.put("META-INF/versions/11/multi/release/", null);
 		bundleEntries.put("META-INF/versions/11/multi/release/test/", null);
-		bundleEntries.put("META-INF/versions/11/multi/release/test/TestClass11.class", getBytes("multi/release/test/TestClass11.class", base, new byte[] {'1', '1'}));
-		bundleEntries.put("META-INF/versions/11/multi/release/test/TestClassAdd11.class", getBytes("multi/release/test/TestClassAdd11.class", base));
-		bundleEntries.put("META-INF/versions/11/multi/release/test/testResource11.txt", getBytes("multi/release/test/testResource11.txt", base, new byte[] {'1', '1'}));
-		bundleEntries.put("META-INF/versions/11/multi/release/test/testResourceAdd11.txt", getBytes("multi/release/test/testResourceAdd11.txt", base));
+		bundleEntries.put("META-INF/versions/11/multi/release/test/TestClass11.class",
+				getBytes("multi/release/test/TestClass11.class", base, new byte[] { '1', '1' }));
+		bundleEntries.put("META-INF/versions/11/multi/release/test/TestClassAdd11.class",
+				getBytes("multi/release/test/TestClassAdd11.class", base));
+		bundleEntries.put("META-INF/versions/11/multi/release/test/testResource11.txt",
+				getBytes("multi/release/test/testResource11.txt", base, new byte[] { '1', '1' }));
+		bundleEntries.put("META-INF/versions/11/multi/release/test/testResourceAdd11.txt",
+				getBytes("multi/release/test/testResourceAdd11.txt", base));
 
 		bundleEntries.put("META-INF/versions/8/OSGI-INF/", null);
 		bundleEntries.put("META-INF/versions/8/OSGI-INF/MANIFEST.MF", getBytes("manifests/manifest8.mf", base));
@@ -172,16 +202,26 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		classPathJarEntries.put("multi/release/", null);
 		classPathJarEntries.put("multi/release/test/", null);
 		classPathJarEntries.put("multi/release/test/sub/", null);
-		classPathJarEntries.put("multi/release/test/sub/TestClassBase.class", getBytes("multi/release/test/sub/TestClassBase.class", base));
-		classPathJarEntries.put("multi/release/test/sub/TestClass8.class", getBytes("multi/release/test/sub/TestClass8.class", base));
-		classPathJarEntries.put("multi/release/test/sub/TestClass9.class", getBytes("multi/release/test/sub/TestClass9.class", base));
-		classPathJarEntries.put("multi/release/test/sub/TestClass10.class", getBytes("multi/release/test/sub/TestClass10.class", base));
-		classPathJarEntries.put("multi/release/test/sub/TestClass11.class", getBytes("multi/release/test/sub/TestClass11.class", base));
-		classPathJarEntries.put("multi/release/test/sub/testResourceBase.txt", getBytes("multi/release/test/sub/testResourceBase.txt", base));
-		classPathJarEntries.put("multi/release/test/sub/testResource8.txt", getBytes("multi/release/test/sub/testResource8.txt", base));
-		classPathJarEntries.put("multi/release/test/sub/testResource9.txt", getBytes("multi/release/test/sub/testResource9.txt", base));
-		classPathJarEntries.put("multi/release/test/sub/testResource10.txt", getBytes("multi/release/test/sub/testResource10.txt", base));
-		classPathJarEntries.put("multi/release/test/sub/testResource11.txt", getBytes("multi/release/test/sub/testResource11.txt", base));
+		classPathJarEntries.put("multi/release/test/sub/TestClassBase.class",
+				getBytes("multi/release/test/sub/TestClassBase.class", base));
+		classPathJarEntries.put("multi/release/test/sub/TestClass8.class",
+				getBytes("multi/release/test/sub/TestClass8.class", base));
+		classPathJarEntries.put("multi/release/test/sub/TestClass9.class",
+				getBytes("multi/release/test/sub/TestClass9.class", base));
+		classPathJarEntries.put("multi/release/test/sub/TestClass10.class",
+				getBytes("multi/release/test/sub/TestClass10.class", base));
+		classPathJarEntries.put("multi/release/test/sub/TestClass11.class",
+				getBytes("multi/release/test/sub/TestClass11.class", base));
+		classPathJarEntries.put("multi/release/test/sub/testResourceBase.txt",
+				getBytes("multi/release/test/sub/testResourceBase.txt", base));
+		classPathJarEntries.put("multi/release/test/sub/testResource8.txt",
+				getBytes("multi/release/test/sub/testResource8.txt", base));
+		classPathJarEntries.put("multi/release/test/sub/testResource9.txt",
+				getBytes("multi/release/test/sub/testResource9.txt", base));
+		classPathJarEntries.put("multi/release/test/sub/testResource10.txt",
+				getBytes("multi/release/test/sub/testResource10.txt", base));
+		classPathJarEntries.put("multi/release/test/sub/testResource11.txt",
+				getBytes("multi/release/test/sub/testResource11.txt", base));
 
 		classPathJarEntries.put("META-INF/versions/", null);
 		classPathJarEntries.put("META-INF/versions/8/", null);
@@ -189,60 +229,88 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		classPathJarEntries.put("META-INF/versions/8/multi/release/", null);
 		classPathJarEntries.put("META-INF/versions/8/multi/release/test/", null);
 		classPathJarEntries.put("META-INF/versions/8/multi/release/test/sub/", null);
-		classPathJarEntries.put("META-INF/versions/8/multi/release/test/sub/TestClass8.class", getBytes("multi/release/test/sub/TestClass8.class", base, new byte[] {'0', '8'}));
-		classPathJarEntries.put("META-INF/versions/8/multi/release/test/sub/TestClassAdd8.class", getBytes("multi/release/test/sub/TestClassAdd8.class", base));
-		classPathJarEntries.put("META-INF/versions/8/multi/release/test/sub/testResource8.txt", getBytes("multi/release/test/sub/testResource8.txt", base, new byte[] {'0', '8'}));
-		classPathJarEntries.put("META-INF/versions/8/multi/release/test/sub/testResourceAdd8.txt", getBytes("multi/release/test/sub/testResourceAdd8.txt", base));
+		classPathJarEntries.put("META-INF/versions/8/multi/release/test/sub/TestClass8.class",
+				getBytes("multi/release/test/sub/TestClass8.class", base, new byte[] { '0', '8' }));
+		classPathJarEntries.put("META-INF/versions/8/multi/release/test/sub/TestClassAdd8.class",
+				getBytes("multi/release/test/sub/TestClassAdd8.class", base));
+		classPathJarEntries.put("META-INF/versions/8/multi/release/test/sub/testResource8.txt",
+				getBytes("multi/release/test/sub/testResource8.txt", base, new byte[] { '0', '8' }));
+		classPathJarEntries.put("META-INF/versions/8/multi/release/test/sub/testResourceAdd8.txt",
+				getBytes("multi/release/test/sub/testResourceAdd8.txt", base));
 
 		classPathJarEntries.put("META-INF/versions/9/", null);
 		classPathJarEntries.put("META-INF/versions/9/multi/", null);
 		classPathJarEntries.put("META-INF/versions/9/multi/release/", null);
 		classPathJarEntries.put("META-INF/versions/9/multi/release/test/", null);
 		classPathJarEntries.put("META-INF/versions/9/multi/release/test/sub/", null);
-		classPathJarEntries.put("META-INF/versions/9/multi/release/test/sub/TestClass9.class", getBytes("multi/release/test/sub/TestClass9.class", base, new byte[] {'0', '9'}));
-		classPathJarEntries.put("META-INF/versions/9/multi/release/test/sub/TestClassAdd9.class", getBytes("multi/release/test/sub/TestClassAdd9.class", base));
-		classPathJarEntries.put("META-INF/versions/9/multi/release/test/sub/testResource9.txt", getBytes("multi/release/test/sub/testResource9.txt", base, new byte[] {'0', '9'}));
-		classPathJarEntries.put("META-INF/versions/9/multi/release/test/sub/testResourceAdd9.txt", getBytes("multi/release/test/sub/testResourceAdd9.txt", base));
+		classPathJarEntries.put("META-INF/versions/9/multi/release/test/sub/TestClass9.class",
+				getBytes("multi/release/test/sub/TestClass9.class", base, new byte[] { '0', '9' }));
+		classPathJarEntries.put("META-INF/versions/9/multi/release/test/sub/TestClassAdd9.class",
+				getBytes("multi/release/test/sub/TestClassAdd9.class", base));
+		classPathJarEntries.put("META-INF/versions/9/multi/release/test/sub/testResource9.txt",
+				getBytes("multi/release/test/sub/testResource9.txt", base, new byte[] { '0', '9' }));
+		classPathJarEntries.put("META-INF/versions/9/multi/release/test/sub/testResourceAdd9.txt",
+				getBytes("multi/release/test/sub/testResourceAdd9.txt", base));
 
 		classPathJarEntries.put("META-INF/versions/10/", null);
 		classPathJarEntries.put("META-INF/versions/10/multi/", null);
 		classPathJarEntries.put("META-INF/versions/10/multi/release/", null);
 		classPathJarEntries.put("META-INF/versions/10/multi/release/test/", null);
 		classPathJarEntries.put("META-INF/versions/10/multi/release/test/sub/", null);
-		classPathJarEntries.put("META-INF/versions/10/multi/release/test/sub/TestClass10.class", getBytes("multi/release/test/sub/TestClass10.class", base, new byte[] {'1', '0'}));
-		classPathJarEntries.put("META-INF/versions/10/multi/release/test/sub/TestClassAdd10.class", getBytes("multi/release/test/sub/TestClassAdd10.class", base));
-		classPathJarEntries.put("META-INF/versions/10/multi/release/test/sub/testResource10.txt", getBytes("multi/release/test/sub/testResource10.txt", base, new byte[] {'1', '0'}));
-		classPathJarEntries.put("META-INF/versions/10/multi/release/test/sub/testResourceAdd10.txt", getBytes("multi/release/test/sub/testResourceAdd10.txt", base));
+		classPathJarEntries.put("META-INF/versions/10/multi/release/test/sub/TestClass10.class",
+				getBytes("multi/release/test/sub/TestClass10.class", base, new byte[] { '1', '0' }));
+		classPathJarEntries.put("META-INF/versions/10/multi/release/test/sub/TestClassAdd10.class",
+				getBytes("multi/release/test/sub/TestClassAdd10.class", base));
+		classPathJarEntries.put("META-INF/versions/10/multi/release/test/sub/testResource10.txt",
+				getBytes("multi/release/test/sub/testResource10.txt", base, new byte[] { '1', '0' }));
+		classPathJarEntries.put("META-INF/versions/10/multi/release/test/sub/testResourceAdd10.txt",
+				getBytes("multi/release/test/sub/testResourceAdd10.txt", base));
 
 		classPathJarEntries.put("META-INF/versions/11/", null);
 		classPathJarEntries.put("META-INF/versions/11/multi/", null);
 		classPathJarEntries.put("META-INF/versions/11/multi/release/", null);
 		classPathJarEntries.put("META-INF/versions/11/multi/release/test/", null);
 		classPathJarEntries.put("META-INF/versions/11/multi/release/test/sub/", null);
-		classPathJarEntries.put("META-INF/versions/11/multi/release/test/sub/TestClass11.class", getBytes("multi/release/test/sub/TestClass11.class", base, new byte[] {'1', '1'}));
-		classPathJarEntries.put("META-INF/versions/11/multi/release/test/sub/TestClassAdd11.class", getBytes("multi/release/test/sub/TestClassAdd11.class", base));
-		classPathJarEntries.put("META-INF/versions/11/multi/release/test/sub/testResource11.txt", getBytes("multi/release/test/sub/testResource11.txt", base, new byte[] {'1', '1'}));
-		classPathJarEntries.put("META-INF/versions/11/multi/release/test/sub/testResourceAdd11.txt", getBytes("multi/release/test/sub/testResourceAdd11.txt", base));
+		classPathJarEntries.put("META-INF/versions/11/multi/release/test/sub/TestClass11.class",
+				getBytes("multi/release/test/sub/TestClass11.class", base, new byte[] { '1', '1' }));
+		classPathJarEntries.put("META-INF/versions/11/multi/release/test/sub/TestClassAdd11.class",
+				getBytes("multi/release/test/sub/TestClassAdd11.class", base));
+		classPathJarEntries.put("META-INF/versions/11/multi/release/test/sub/testResource11.txt",
+				getBytes("multi/release/test/sub/testResource11.txt", base, new byte[] { '1', '1' }));
+		classPathJarEntries.put("META-INF/versions/11/multi/release/test/sub/testResourceAdd11.txt",
+				getBytes("multi/release/test/sub/testResourceAdd11.txt", base));
 
 		createMRJar(classpathMrJar, Collections.emptyMap(), classPathJarEntries);
-		bundleEntries.put(classpathMrJar.getName(), StorageUtil.getBytes(new FileInputStream(classpathMrJar), -1, 4000));
+		bundleEntries.put(classpathMrJar.getName(),
+				StorageUtil.getBytes(new FileInputStream(classpathMrJar), -1, 4000));
 
-		// This will not be required by the spec, but equinox does support exploded inner jars in a bundle
+		// This will not be required by the spec, but equinox does support exploded
+		// inner jars in a bundle
 		bundleEntries.put("classPathDir/", null);
 		bundleEntries.put("classPathDir/multi/", null);
 		bundleEntries.put("classPathDir/multi/release/", null);
 		bundleEntries.put("classPathDir/multi/release/test/", null);
 		bundleEntries.put("classPathDir/multi/release/test/sub2/", null);
-		bundleEntries.put("classPathDir/multi/release/test/sub2/TestClassBase.class", getBytes("multi/release/test/sub2/TestClassBase.class", base));
-		bundleEntries.put("classPathDir/multi/release/test/sub2/TestClass8.class", getBytes("multi/release/test/sub2/TestClass8.class", base));
-		bundleEntries.put("classPathDir/multi/release/test/sub2/TestClass9.class", getBytes("multi/release/test/sub2/TestClass9.class", base));
-		bundleEntries.put("classPathDir/multi/release/test/sub2/TestClass10.class", getBytes("multi/release/test/sub2/TestClass10.class", base));
-		bundleEntries.put("classPathDir/multi/release/test/sub2/TestClass11.class", getBytes("multi/release/test/sub2/TestClass11.class", base));
-		bundleEntries.put("classPathDir/multi/release/test/sub2/testResourceBase.txt", getBytes("multi/release/test/sub2/testResourceBase.txt", base));
-		bundleEntries.put("classPathDir/multi/release/test/sub2/testResource8.txt", getBytes("multi/release/test/sub2/testResource8.txt", base));
-		bundleEntries.put("classPathDir/multi/release/test/sub2/testResource9.txt", getBytes("multi/release/test/sub2/testResource9.txt", base));
-		bundleEntries.put("classPathDir/multi/release/test/sub2/testResource10.txt", getBytes("multi/release/test/sub2/testResource10.txt", base));
-		bundleEntries.put("classPathDir/multi/release/test/sub2/testResource11.txt", getBytes("multi/release/test/sub2/testResource11.txt", base));
+		bundleEntries.put("classPathDir/multi/release/test/sub2/TestClassBase.class",
+				getBytes("multi/release/test/sub2/TestClassBase.class", base));
+		bundleEntries.put("classPathDir/multi/release/test/sub2/TestClass8.class",
+				getBytes("multi/release/test/sub2/TestClass8.class", base));
+		bundleEntries.put("classPathDir/multi/release/test/sub2/TestClass9.class",
+				getBytes("multi/release/test/sub2/TestClass9.class", base));
+		bundleEntries.put("classPathDir/multi/release/test/sub2/TestClass10.class",
+				getBytes("multi/release/test/sub2/TestClass10.class", base));
+		bundleEntries.put("classPathDir/multi/release/test/sub2/TestClass11.class",
+				getBytes("multi/release/test/sub2/TestClass11.class", base));
+		bundleEntries.put("classPathDir/multi/release/test/sub2/testResourceBase.txt",
+				getBytes("multi/release/test/sub2/testResourceBase.txt", base));
+		bundleEntries.put("classPathDir/multi/release/test/sub2/testResource8.txt",
+				getBytes("multi/release/test/sub2/testResource8.txt", base));
+		bundleEntries.put("classPathDir/multi/release/test/sub2/testResource9.txt",
+				getBytes("multi/release/test/sub2/testResource9.txt", base));
+		bundleEntries.put("classPathDir/multi/release/test/sub2/testResource10.txt",
+				getBytes("multi/release/test/sub2/testResource10.txt", base));
+		bundleEntries.put("classPathDir/multi/release/test/sub2/testResource11.txt",
+				getBytes("multi/release/test/sub2/testResource11.txt", base));
 
 		String classPathDirManifest = //
 				"Manifest-Version: 1\n" + //
@@ -255,40 +323,56 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		bundleEntries.put("classPathDir/META-INF/versions/8/multi/release/", null);
 		bundleEntries.put("classPathDir/META-INF/versions/8/multi/release/test/", null);
 		bundleEntries.put("classPathDir/META-INF/versions/8/multi/release/test/sub2/", null);
-		bundleEntries.put("classPathDir/META-INF/versions/8/multi/release/test/sub2/TestClass8.class", getBytes("multi/release/test/sub2/TestClass8.class", base, new byte[] {'0', '8'}));
-		bundleEntries.put("classPathDir/META-INF/versions/8/multi/release/test/sub2/TestClassAdd8.class", getBytes("multi/release/test/sub2/TestClassAdd8.class", base));
-		bundleEntries.put("classPathDir/META-INF/versions/8/multi/release/test/sub2/testResource8.txt", getBytes("multi/release/test/sub2/testResource8.txt", base, new byte[] {'0', '8'}));
-		bundleEntries.put("classPathDir/META-INF/versions/8/multi/release/test/sub2/testResourceAdd8.txt", getBytes("multi/release/test/sub2/testResourceAdd8.txt", base));
+		bundleEntries.put("classPathDir/META-INF/versions/8/multi/release/test/sub2/TestClass8.class",
+				getBytes("multi/release/test/sub2/TestClass8.class", base, new byte[] { '0', '8' }));
+		bundleEntries.put("classPathDir/META-INF/versions/8/multi/release/test/sub2/TestClassAdd8.class",
+				getBytes("multi/release/test/sub2/TestClassAdd8.class", base));
+		bundleEntries.put("classPathDir/META-INF/versions/8/multi/release/test/sub2/testResource8.txt",
+				getBytes("multi/release/test/sub2/testResource8.txt", base, new byte[] { '0', '8' }));
+		bundleEntries.put("classPathDir/META-INF/versions/8/multi/release/test/sub2/testResourceAdd8.txt",
+				getBytes("multi/release/test/sub2/testResourceAdd8.txt", base));
 
 		bundleEntries.put("classPathDir/META-INF/versions/9/", null);
 		bundleEntries.put("classPathDir/META-INF/versions/9/multi/", null);
 		bundleEntries.put("classPathDir/META-INF/versions/9/multi/release/", null);
 		bundleEntries.put("classPathDir/META-INF/versions/9/multi/release/test/", null);
 		bundleEntries.put("classPathDir/META-INF/versions/9/multi/release/test/sub2/", null);
-		bundleEntries.put("classPathDir/META-INF/versions/9/multi/release/test/sub2/TestClass9.class", getBytes("multi/release/test/sub2/TestClass9.class", base, new byte[] {'0', '9'}));
-		bundleEntries.put("classPathDir/META-INF/versions/9/multi/release/test/sub2/TestClassAdd9.class", getBytes("multi/release/test/sub2/TestClassAdd9.class", base));
-		bundleEntries.put("classPathDir/META-INF/versions/9/multi/release/test/sub2/testResource9.txt", getBytes("multi/release/test/sub2/testResource9.txt", base, new byte[] {'0', '9'}));
-		bundleEntries.put("classPathDir/META-INF/versions/9/multi/release/test/sub2/testResourceAdd9.txt", getBytes("multi/release/test/sub2/testResourceAdd9.txt", base));
+		bundleEntries.put("classPathDir/META-INF/versions/9/multi/release/test/sub2/TestClass9.class",
+				getBytes("multi/release/test/sub2/TestClass9.class", base, new byte[] { '0', '9' }));
+		bundleEntries.put("classPathDir/META-INF/versions/9/multi/release/test/sub2/TestClassAdd9.class",
+				getBytes("multi/release/test/sub2/TestClassAdd9.class", base));
+		bundleEntries.put("classPathDir/META-INF/versions/9/multi/release/test/sub2/testResource9.txt",
+				getBytes("multi/release/test/sub2/testResource9.txt", base, new byte[] { '0', '9' }));
+		bundleEntries.put("classPathDir/META-INF/versions/9/multi/release/test/sub2/testResourceAdd9.txt",
+				getBytes("multi/release/test/sub2/testResourceAdd9.txt", base));
 
 		bundleEntries.put("classPathDir/META-INF/versions/10/", null);
 		bundleEntries.put("classPathDir/META-INF/versions/10/multi/", null);
 		bundleEntries.put("classPathDir/META-INF/versions/10/multi/release/", null);
 		bundleEntries.put("classPathDir/META-INF/versions/10/multi/release/test/", null);
 		bundleEntries.put("classPathDir/META-INF/versions/10/multi/release/test/sub2/", null);
-		bundleEntries.put("classPathDir/META-INF/versions/10/multi/release/test/sub2/TestClass10.class", getBytes("multi/release/test/sub2/TestClass10.class", base, new byte[] {'1', '0'}));
-		bundleEntries.put("classPathDir/META-INF/versions/10/multi/release/test/sub2/TestClassAdd10.class", getBytes("multi/release/test/sub2/TestClassAdd10.class", base));
-		bundleEntries.put("classPathDir/META-INF/versions/10/multi/release/test/sub2/testResource10.txt", getBytes("multi/release/test/sub2/testResource10.txt", base, new byte[] {'1', '0'}));
-		bundleEntries.put("classPathDir/META-INF/versions/10/multi/release/test/sub2/testResourceAdd10.txt", getBytes("multi/release/test/sub2/testResourceAdd10.txt", base));
+		bundleEntries.put("classPathDir/META-INF/versions/10/multi/release/test/sub2/TestClass10.class",
+				getBytes("multi/release/test/sub2/TestClass10.class", base, new byte[] { '1', '0' }));
+		bundleEntries.put("classPathDir/META-INF/versions/10/multi/release/test/sub2/TestClassAdd10.class",
+				getBytes("multi/release/test/sub2/TestClassAdd10.class", base));
+		bundleEntries.put("classPathDir/META-INF/versions/10/multi/release/test/sub2/testResource10.txt",
+				getBytes("multi/release/test/sub2/testResource10.txt", base, new byte[] { '1', '0' }));
+		bundleEntries.put("classPathDir/META-INF/versions/10/multi/release/test/sub2/testResourceAdd10.txt",
+				getBytes("multi/release/test/sub2/testResourceAdd10.txt", base));
 
 		bundleEntries.put("classPathDir/META-INF/versions/11/", null);
 		bundleEntries.put("classPathDir/META-INF/versions/11/multi/", null);
 		bundleEntries.put("classPathDir/META-INF/versions/11/multi/release/", null);
 		bundleEntries.put("classPathDir/META-INF/versions/11/multi/release/test/", null);
 		bundleEntries.put("classPathDir/META-INF/versions/11/multi/release/test/sub2/", null);
-		bundleEntries.put("classPathDir/META-INF/versions/11/multi/release/test/sub2/TestClass11.class", getBytes("multi/release/test/sub2/TestClass11.class", base, new byte[] {'1', '1'}));
-		bundleEntries.put("classPathDir/META-INF/versions/11/multi/release/test/sub2/TestClassAdd11.class", getBytes("multi/release/test/sub2/TestClassAdd11.class", base));
-		bundleEntries.put("classPathDir/META-INF/versions/11/multi/release/test/sub2/testResource11.txt", getBytes("multi/release/test/sub2/testResource11.txt", base, new byte[] {'1', '1'}));
-		bundleEntries.put("classPathDir/META-INF/versions/11/multi/release/test/sub2/testResourceAdd11.txt", getBytes("multi/release/test/sub2/testResourceAdd11.txt", base));
+		bundleEntries.put("classPathDir/META-INF/versions/11/multi/release/test/sub2/TestClass11.class",
+				getBytes("multi/release/test/sub2/TestClass11.class", base, new byte[] { '1', '1' }));
+		bundleEntries.put("classPathDir/META-INF/versions/11/multi/release/test/sub2/TestClassAdd11.class",
+				getBytes("multi/release/test/sub2/TestClassAdd11.class", base));
+		bundleEntries.put("classPathDir/META-INF/versions/11/multi/release/test/sub2/testResource11.txt",
+				getBytes("multi/release/test/sub2/testResource11.txt", base, new byte[] { '1', '1' }));
+		bundleEntries.put("classPathDir/META-INF/versions/11/multi/release/test/sub2/testResourceAdd11.txt",
+				getBytes("multi/release/test/sub2/testResourceAdd11.txt", base));
 
 		createMRJar(mrJarBundle, bundleHeaders, bundleEntries);
 		return mrJarBundle;
@@ -365,7 +449,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			System.setProperty("java.specification.version", Integer.toString(rv));
 		}
 
-		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
 		Equinox equinox = new Equinox(Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath()));
 
 		try {
@@ -376,32 +460,50 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			assertEquals("Wrong class.", "BASEXX", loadClass("multi.release.test.TestClassBase", mrBundle, false));
 			assertEquals("Wrong class.", "BASEXX", loadClass("multi.release.test.TestClass8", mrBundle, false));
 			assertEquals("Wrong class.", CNFE, loadClass("multi.release.test.TestClassAdd8", mrBundle, true));
-			assertEquals("Wrong class.", (rv >= 9) ? "BASE09" : "BASEXX", loadClass("multi.release.test.TestClass9", mrBundle, false));
-			assertEquals("Wrong class.", (rv >= 9) ? "ADD09" : CNFE, loadClass("multi.release.test.TestClassAdd9", mrBundle, true));
-			assertEquals("Wrong class.", (rv >= 10) ? "BASE10" : "BASEXX", loadClass("multi.release.test.TestClass10", mrBundle, false));
-			assertEquals("Wrong class.", (rv >= 10) ? "ADD10" : CNFE, loadClass("multi.release.test.TestClassAdd10", mrBundle, true));
-			assertEquals("Wrong class.", (rv >= 11) ? "BASE11" : "BASEXX", loadClass("multi.release.test.TestClass11", mrBundle, false));
-			assertEquals("Wrong class.", (rv >= 11) ? "ADD11" : CNFE, loadClass("multi.release.test.TestClassAdd11", mrBundle, true));
+			assertEquals("Wrong class.", (rv >= 9) ? "BASE09" : "BASEXX",
+					loadClass("multi.release.test.TestClass9", mrBundle, false));
+			assertEquals("Wrong class.", (rv >= 9) ? "ADD09" : CNFE,
+					loadClass("multi.release.test.TestClassAdd9", mrBundle, true));
+			assertEquals("Wrong class.", (rv >= 10) ? "BASE10" : "BASEXX",
+					loadClass("multi.release.test.TestClass10", mrBundle, false));
+			assertEquals("Wrong class.", (rv >= 10) ? "ADD10" : CNFE,
+					loadClass("multi.release.test.TestClassAdd10", mrBundle, true));
+			assertEquals("Wrong class.", (rv >= 11) ? "BASE11" : "BASEXX",
+					loadClass("multi.release.test.TestClass11", mrBundle, false));
+			assertEquals("Wrong class.", (rv >= 11) ? "ADD11" : CNFE,
+					loadClass("multi.release.test.TestClassAdd11", mrBundle, true));
 
 			assertEquals("Wrong class.", "BASEXX", loadClass("multi.release.test.sub.TestClassBase", mrBundle, false));
 			assertEquals("Wrong class.", "BASEXX", loadClass("multi.release.test.sub.TestClass8", mrBundle, false));
 			assertEquals("Wrong class.", CNFE, loadClass("multi.release.test.TestClassAdd8", mrBundle, true));
-			assertEquals("Wrong class.", (rv >= 9) ? "BASE09" : "BASEXX", loadClass("multi.release.test.sub.TestClass9", mrBundle, false));
-			assertEquals("Wrong class.", (rv >= 9) ? "ADD09" : CNFE, loadClass("multi.release.test.sub.TestClassAdd9", mrBundle, true));
-			assertEquals("Wrong class.", (rv >= 10) ? "BASE10" : "BASEXX", loadClass("multi.release.test.sub.TestClass10", mrBundle, false));
-			assertEquals("Wrong class.", (rv >= 10) ? "ADD10" : CNFE, loadClass("multi.release.test.sub.TestClassAdd10", mrBundle, true));
-			assertEquals("Wrong class.", (rv >= 11) ? "BASE11" : "BASEXX", loadClass("multi.release.test.sub.TestClass11", mrBundle, false));
-			assertEquals("Wrong class.", (rv >= 11) ? "ADD11" : CNFE, loadClass("multi.release.test.sub.TestClassAdd11", mrBundle, true));
+			assertEquals("Wrong class.", (rv >= 9) ? "BASE09" : "BASEXX",
+					loadClass("multi.release.test.sub.TestClass9", mrBundle, false));
+			assertEquals("Wrong class.", (rv >= 9) ? "ADD09" : CNFE,
+					loadClass("multi.release.test.sub.TestClassAdd9", mrBundle, true));
+			assertEquals("Wrong class.", (rv >= 10) ? "BASE10" : "BASEXX",
+					loadClass("multi.release.test.sub.TestClass10", mrBundle, false));
+			assertEquals("Wrong class.", (rv >= 10) ? "ADD10" : CNFE,
+					loadClass("multi.release.test.sub.TestClassAdd10", mrBundle, true));
+			assertEquals("Wrong class.", (rv >= 11) ? "BASE11" : "BASEXX",
+					loadClass("multi.release.test.sub.TestClass11", mrBundle, false));
+			assertEquals("Wrong class.", (rv >= 11) ? "ADD11" : CNFE,
+					loadClass("multi.release.test.sub.TestClassAdd11", mrBundle, true));
 
 			assertEquals("Wrong class.", "BASEXX", loadClass("multi.release.test.sub2.TestClassBase", mrBundle, false));
 			assertEquals("Wrong class.", "BASEXX", loadClass("multi.release.test.sub2.TestClass8", mrBundle, false));
 			assertEquals("Wrong class.", CNFE, loadClass("multi.release.test.TestClassAdd8", mrBundle, true));
-			assertEquals("Wrong class.", (rv >= 9) ? "BASE09" : "BASEXX", loadClass("multi.release.test.sub2.TestClass9", mrBundle, false));
-			assertEquals("Wrong class.", (rv >= 9) ? "ADD09" : CNFE, loadClass("multi.release.test.sub2.TestClassAdd9", mrBundle, true));
-			assertEquals("Wrong class.", (rv >= 10) ? "BASE10" : "BASEXX", loadClass("multi.release.test.sub2.TestClass10", mrBundle, false));
-			assertEquals("Wrong class.", (rv >= 10) ? "ADD10" : CNFE, loadClass("multi.release.test.sub2.TestClassAdd10", mrBundle, true));
-			assertEquals("Wrong class.", (rv >= 11) ? "BASE11" : "BASEXX", loadClass("multi.release.test.sub2.TestClass11", mrBundle, false));
-			assertEquals("Wrong class.", (rv >= 11) ? "ADD11" : CNFE, loadClass("multi.release.test.sub2.TestClassAdd11", mrBundle, true));
+			assertEquals("Wrong class.", (rv >= 9) ? "BASE09" : "BASEXX",
+					loadClass("multi.release.test.sub2.TestClass9", mrBundle, false));
+			assertEquals("Wrong class.", (rv >= 9) ? "ADD09" : CNFE,
+					loadClass("multi.release.test.sub2.TestClassAdd9", mrBundle, true));
+			assertEquals("Wrong class.", (rv >= 10) ? "BASE10" : "BASEXX",
+					loadClass("multi.release.test.sub2.TestClass10", mrBundle, false));
+			assertEquals("Wrong class.", (rv >= 10) ? "ADD10" : CNFE,
+					loadClass("multi.release.test.sub2.TestClassAdd10", mrBundle, true));
+			assertEquals("Wrong class.", (rv >= 11) ? "BASE11" : "BASEXX",
+					loadClass("multi.release.test.sub2.TestClass11", mrBundle, false));
+			assertEquals("Wrong class.", (rv >= 11) ? "ADD11" : CNFE,
+					loadClass("multi.release.test.sub2.TestClassAdd11", mrBundle, true));
 		} finally {
 			stopQuietly(equinox);
 		}
@@ -445,7 +547,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			System.setProperty("java.specification.version", Integer.toString(rv));
 		}
 
-		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
 		Equinox equinox = new Equinox(Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath()));
 
 		try {
@@ -454,35 +556,59 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			Bundle mrBundle = systemContext.installBundle(mrJarBundle.toURI().toString());
 			mrBundle.start();
 
-			assertEquals("Wrong resource.", "RESOURCE XX", readResource("multi/release/test/testResourceBase.txt", mrBundle));
-			assertEquals("Wrong resource.", "RESOURCE XX", readResource("multi/release/test/testResource8.txt", mrBundle));
+			assertEquals("Wrong resource.", "RESOURCE XX",
+					readResource("multi/release/test/testResourceBase.txt", mrBundle));
+			assertEquals("Wrong resource.", "RESOURCE XX",
+					readResource("multi/release/test/testResource8.txt", mrBundle));
 			assertEquals("Wrong resource.", RNF, readResource("multi/release/test/testResourceAdd8.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 9) ? "RESOURCE 09" : "RESOURCE XX", readResource("multi/release/test/testResource9.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 9) ? "ADD 09" : RNF, readResource("multi/release/test/testResourceAdd9.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 10) ? "RESOURCE 10" : "RESOURCE XX", readResource("multi/release/test/testResource10.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 10) ? "ADD 10" : RNF, readResource("multi/release/test/testResourceAdd10.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 11) ? "RESOURCE 11" : "RESOURCE XX", readResource("multi/release/test/testResource11.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 11) ? "ADD 11" : RNF, readResource("multi/release/test/testResourceAdd11.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 9) ? "RESOURCE 09" : "RESOURCE XX",
+					readResource("multi/release/test/testResource9.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 9) ? "ADD 09" : RNF,
+					readResource("multi/release/test/testResourceAdd9.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 10) ? "RESOURCE 10" : "RESOURCE XX",
+					readResource("multi/release/test/testResource10.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 10) ? "ADD 10" : RNF,
+					readResource("multi/release/test/testResourceAdd10.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 11) ? "RESOURCE 11" : "RESOURCE XX",
+					readResource("multi/release/test/testResource11.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 11) ? "ADD 11" : RNF,
+					readResource("multi/release/test/testResourceAdd11.txt", mrBundle));
 
-			assertEquals("Wrong resource.", "RESOURCE XX", readResource("multi/release/test/sub/testResourceBase.txt", mrBundle));
-			assertEquals("Wrong resource.", "RESOURCE XX", readResource("multi/release/test/sub/testResource8.txt", mrBundle));
+			assertEquals("Wrong resource.", "RESOURCE XX",
+					readResource("multi/release/test/sub/testResourceBase.txt", mrBundle));
+			assertEquals("Wrong resource.", "RESOURCE XX",
+					readResource("multi/release/test/sub/testResource8.txt", mrBundle));
 			assertEquals("Wrong resource.", RNF, readResource("multi/release/test/testResourceAdd8.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 9) ? "RESOURCE 09" : "RESOURCE XX", readResource("multi/release/test/sub/testResource9.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 9) ? "ADD 09" : RNF, readResource("multi/release/test/sub/testResourceAdd9.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 10) ? "RESOURCE 10" : "RESOURCE XX", readResource("multi/release/test/sub/testResource10.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 10) ? "ADD 10" : RNF, readResource("multi/release/test/sub/testResourceAdd10.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 11) ? "RESOURCE 11" : "RESOURCE XX", readResource("multi/release/test/sub/testResource11.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 11) ? "ADD 11" : RNF, readResource("multi/release/test/sub/testResourceAdd11.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 9) ? "RESOURCE 09" : "RESOURCE XX",
+					readResource("multi/release/test/sub/testResource9.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 9) ? "ADD 09" : RNF,
+					readResource("multi/release/test/sub/testResourceAdd9.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 10) ? "RESOURCE 10" : "RESOURCE XX",
+					readResource("multi/release/test/sub/testResource10.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 10) ? "ADD 10" : RNF,
+					readResource("multi/release/test/sub/testResourceAdd10.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 11) ? "RESOURCE 11" : "RESOURCE XX",
+					readResource("multi/release/test/sub/testResource11.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 11) ? "ADD 11" : RNF,
+					readResource("multi/release/test/sub/testResourceAdd11.txt", mrBundle));
 
-			assertEquals("Wrong resource.", "RESOURCE XX", readResource("multi/release/test/sub2/testResourceBase.txt", mrBundle));
-			assertEquals("Wrong resource.", "RESOURCE XX", readResource("multi/release/test/sub2/testResource8.txt", mrBundle));
+			assertEquals("Wrong resource.", "RESOURCE XX",
+					readResource("multi/release/test/sub2/testResourceBase.txt", mrBundle));
+			assertEquals("Wrong resource.", "RESOURCE XX",
+					readResource("multi/release/test/sub2/testResource8.txt", mrBundle));
 			assertEquals("Wrong resource.", RNF, readResource("multi/release/test/testResourceAdd8.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 9) ? "RESOURCE 09" : "RESOURCE XX", readResource("multi/release/test/sub2/testResource9.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 9) ? "ADD 09" : RNF, readResource("multi/release/test/sub2/testResourceAdd9.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 10) ? "RESOURCE 10" : "RESOURCE XX", readResource("multi/release/test/sub2/testResource10.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 10) ? "ADD 10" : RNF, readResource("multi/release/test/sub2/testResourceAdd10.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 11) ? "RESOURCE 11" : "RESOURCE XX", readResource("multi/release/test/sub2/testResource11.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 11) ? "ADD 11" : RNF, readResource("multi/release/test/sub2/testResourceAdd11.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 9) ? "RESOURCE 09" : "RESOURCE XX",
+					readResource("multi/release/test/sub2/testResource9.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 9) ? "ADD 09" : RNF,
+					readResource("multi/release/test/sub2/testResourceAdd9.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 10) ? "RESOURCE 10" : "RESOURCE XX",
+					readResource("multi/release/test/sub2/testResource10.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 10) ? "ADD 10" : RNF,
+					readResource("multi/release/test/sub2/testResourceAdd10.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 11) ? "RESOURCE 11" : "RESOURCE XX",
+					readResource("multi/release/test/sub2/testResource11.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 11) ? "ADD 11" : RNF,
+					readResource("multi/release/test/sub2/testResourceAdd11.txt", mrBundle));
 
 		} finally {
 			stopQuietly(equinox);
@@ -495,7 +621,8 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		String result = readURL(url);
 
 		int lastSlash = name.lastIndexOf('/');
-		Collection<String> resourcePaths = wiring.listResources(name.substring(0, lastSlash + 1), name.substring(lastSlash + 1), 0);
+		Collection<String> resourcePaths = wiring.listResources(name.substring(0, lastSlash + 1),
+				name.substring(lastSlash + 1), 0);
 		if (result == RNF) {
 			if (!resourcePaths.isEmpty()) {
 				fail("listResources found path for '" + name + "'");
@@ -552,7 +679,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			System.setProperty("java.specification.version", Integer.toString(rv));
 		}
 
-		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
 		Equinox equinox = new Equinox(Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath()));
 
 		try {
@@ -561,35 +688,59 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			Bundle mrBundle = systemContext.installBundle(mrJarBundle.toURI().toString());
 			mrBundle.start();
 
-			assertEquals("Wrong resource.", "RESOURCE XX", readResources("multi/release/test/testResourceBase.txt", mrBundle));
-			assertEquals("Wrong resource.", "RESOURCE XX", readResources("multi/release/test/testResource8.txt", mrBundle));
+			assertEquals("Wrong resource.", "RESOURCE XX",
+					readResources("multi/release/test/testResourceBase.txt", mrBundle));
+			assertEquals("Wrong resource.", "RESOURCE XX",
+					readResources("multi/release/test/testResource8.txt", mrBundle));
 			assertEquals("Wrong resource.", RNF, readResources("multi/release/test/testResourceAdd8.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 9) ? "RESOURCE 09" : "RESOURCE XX", readResources("multi/release/test/testResource9.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 9) ? "ADD 09" : RNF, readResources("multi/release/test/testResourceAdd9.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 10) ? "RESOURCE 10" : "RESOURCE XX", readResources("multi/release/test/testResource10.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 10) ? "ADD 10" : RNF, readResources("multi/release/test/testResourceAdd10.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 11) ? "RESOURCE 11" : "RESOURCE XX", readResources("multi/release/test/testResource11.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 11) ? "ADD 11" : RNF, readResources("multi/release/test/testResourceAdd11.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 9) ? "RESOURCE 09" : "RESOURCE XX",
+					readResources("multi/release/test/testResource9.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 9) ? "ADD 09" : RNF,
+					readResources("multi/release/test/testResourceAdd9.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 10) ? "RESOURCE 10" : "RESOURCE XX",
+					readResources("multi/release/test/testResource10.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 10) ? "ADD 10" : RNF,
+					readResources("multi/release/test/testResourceAdd10.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 11) ? "RESOURCE 11" : "RESOURCE XX",
+					readResources("multi/release/test/testResource11.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 11) ? "ADD 11" : RNF,
+					readResources("multi/release/test/testResourceAdd11.txt", mrBundle));
 
-			assertEquals("Wrong resource.", "RESOURCE XX", readResources("multi/release/test/sub/testResourceBase.txt", mrBundle));
-			assertEquals("Wrong resource.", "RESOURCE XX", readResources("multi/release/test/sub/testResource8.txt", mrBundle));
+			assertEquals("Wrong resource.", "RESOURCE XX",
+					readResources("multi/release/test/sub/testResourceBase.txt", mrBundle));
+			assertEquals("Wrong resource.", "RESOURCE XX",
+					readResources("multi/release/test/sub/testResource8.txt", mrBundle));
 			assertEquals("Wrong resource.", RNF, readResources("multi/release/test/testResourceAdd8.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 9) ? "RESOURCE 09" : "RESOURCE XX", readResources("multi/release/test/sub/testResource9.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 9) ? "ADD 09" : RNF, readResources("multi/release/test/sub/testResourceAdd9.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 10) ? "RESOURCE 10" : "RESOURCE XX", readResources("multi/release/test/sub/testResource10.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 10) ? "ADD 10" : RNF, readResources("multi/release/test/sub/testResourceAdd10.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 11) ? "RESOURCE 11" : "RESOURCE XX", readResources("multi/release/test/sub/testResource11.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 11) ? "ADD 11" : RNF, readResources("multi/release/test/sub/testResourceAdd11.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 9) ? "RESOURCE 09" : "RESOURCE XX",
+					readResources("multi/release/test/sub/testResource9.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 9) ? "ADD 09" : RNF,
+					readResources("multi/release/test/sub/testResourceAdd9.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 10) ? "RESOURCE 10" : "RESOURCE XX",
+					readResources("multi/release/test/sub/testResource10.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 10) ? "ADD 10" : RNF,
+					readResources("multi/release/test/sub/testResourceAdd10.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 11) ? "RESOURCE 11" : "RESOURCE XX",
+					readResources("multi/release/test/sub/testResource11.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 11) ? "ADD 11" : RNF,
+					readResources("multi/release/test/sub/testResourceAdd11.txt", mrBundle));
 
-			assertEquals("Wrong resource.", "RESOURCE XX", readResources("multi/release/test/sub2/testResourceBase.txt", mrBundle));
-			assertEquals("Wrong resource.", "RESOURCE XX", readResources("multi/release/test/sub2/testResource8.txt", mrBundle));
+			assertEquals("Wrong resource.", "RESOURCE XX",
+					readResources("multi/release/test/sub2/testResourceBase.txt", mrBundle));
+			assertEquals("Wrong resource.", "RESOURCE XX",
+					readResources("multi/release/test/sub2/testResource8.txt", mrBundle));
 			assertEquals("Wrong resource.", RNF, readResources("multi/release/test/testResourceAdd8.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 9) ? "RESOURCE 09" : "RESOURCE XX", readResources("multi/release/test/sub2/testResource9.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 9) ? "ADD 09" : RNF, readResources("multi/release/test/sub2/testResourceAdd9.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 10) ? "RESOURCE 10" : "RESOURCE XX", readResources("multi/release/test/sub2/testResource10.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 10) ? "ADD 10" : RNF, readResources("multi/release/test/sub2/testResourceAdd10.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 11) ? "RESOURCE 11" : "RESOURCE XX", readResources("multi/release/test/sub2/testResource11.txt", mrBundle));
-			assertEquals("Wrong resource.", (rv >= 11) ? "ADD 11" : RNF, readResources("multi/release/test/sub2/testResourceAdd11.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 9) ? "RESOURCE 09" : "RESOURCE XX",
+					readResources("multi/release/test/sub2/testResource9.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 9) ? "ADD 09" : RNF,
+					readResources("multi/release/test/sub2/testResourceAdd9.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 10) ? "RESOURCE 10" : "RESOURCE XX",
+					readResources("multi/release/test/sub2/testResource10.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 10) ? "ADD 10" : RNF,
+					readResources("multi/release/test/sub2/testResourceAdd10.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 11) ? "RESOURCE 11" : "RESOURCE XX",
+					readResources("multi/release/test/sub2/testResource11.txt", mrBundle));
+			assertEquals("Wrong resource.", (rv >= 11) ? "ADD 11" : RNF,
+					readResources("multi/release/test/sub2/testResourceAdd11.txt", mrBundle));
 
 		} finally {
 			stopQuietly(equinox);
@@ -677,7 +828,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			expectedRecurse.add("multi/release/test/sub2/testResourceAdd11.txt");
 		}
 
-		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
 		Equinox equinox = new Equinox(Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath()));
 
 		try {
@@ -736,7 +887,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			expectedPkg = "pkg" + rv;
 		}
 
-		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
 		Equinox equinox = new Equinox(Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath()));
 
 		try {
@@ -748,7 +899,8 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			List<BundleWire> capWires = mrBundle.adapt(BundleWiring.class).getRequiredWires(expectedCap);
 			assertEquals("Wrong number of capability wires.", 1, capWires.size());
 
-			List<BundleRequirement> pkgReqs = mrBundle.adapt(BundleRevision.class).getDeclaredRequirements(PackageNamespace.PACKAGE_NAMESPACE);
+			List<BundleRequirement> pkgReqs = mrBundle.adapt(BundleRevision.class)
+					.getDeclaredRequirements(PackageNamespace.PACKAGE_NAMESPACE);
 			assertEquals("Wrong number of package requiremens.", 1, pkgReqs.size());
 			String filter = pkgReqs.get(0).getDirectives().get(Namespace.REQUIREMENT_FILTER_DIRECTIVE);
 			assertTrue("Wrong package filter: " + filter, filter.contains(expectedPkg));
@@ -760,7 +912,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 
 	@Test
 	public void testMultiReleaseBundleManifestChangeRuntime() throws Exception {
-		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
 		Map<String, String> configMap = Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		Equinox equinox = new Equinox(configMap);
 		String location;
@@ -795,7 +947,8 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 		}
 	}
 
-	private void doTestMultiReleaseBundleManifestChangeRuntime(int rv, Map<String, String> configMap, String location) throws BundleException {
+	private void doTestMultiReleaseBundleManifestChangeRuntime(int rv, Map<String, String> configMap, String location)
+			throws BundleException {
 		if (rv < 9) {
 			System.setProperty("java.specification.version", "1." + rv);
 		} else {
@@ -825,7 +978,8 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			List<BundleWire> capWires = mrBundle.adapt(BundleWiring.class).getRequiredWires(expectedCap);
 			assertEquals("Wrong number of capability wires: " + rv, 1, capWires.size());
 
-			List<BundleRequirement> pkgReqs = mrBundle.adapt(BundleRevision.class).getDeclaredRequirements(PackageNamespace.PACKAGE_NAMESPACE);
+			List<BundleRequirement> pkgReqs = mrBundle.adapt(BundleRevision.class)
+					.getDeclaredRequirements(PackageNamespace.PACKAGE_NAMESPACE);
 			assertEquals("Wrong number of package requiremens: " + rv, 1, pkgReqs.size());
 			String filter = pkgReqs.get(0).getDirectives().get(Namespace.REQUIREMENT_FILTER_DIRECTIVE);
 			assertTrue("Wrong package filter: " + rv + " " + filter, filter.contains(expectedPkg));
@@ -842,7 +996,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 
 		System.setProperty("java.specification.version", "9");
 
-		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
 		Map<String, String> configMap = Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		Equinox equinox = new Equinox(configMap);
 
@@ -871,7 +1025,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 	public void testMultiReleasePreventMetaInfServiceVersions() throws Exception {
 		System.setProperty("java.specification.version", "9");
 
-		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
 		Map<String, String> configMap = Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		Equinox equinox = new Equinox(configMap);
 
@@ -882,7 +1036,8 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 			mrBundle.start();
 
 			Class<?> testServiceClass = mrBundle.loadClass("multi.release.test.TestService");
-			ServiceLoader<?> loader = ServiceLoader.load(testServiceClass, mrBundle.adapt(BundleWiring.class).getClassLoader());
+			ServiceLoader<?> loader = ServiceLoader.load(testServiceClass,
+					mrBundle.adapt(BundleWiring.class).getClassLoader());
 			Object testService = loader.iterator().next();
 			assertEquals("Wrong service found.", "SERVICE_BASE", testService.toString());
 		} finally {
@@ -894,7 +1049,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 	public void testMultiReleasePreventMetaInfResourceURLs() throws Exception {
 		System.setProperty("java.specification.version", "9");
 
-		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
 		Map<String, String> configMap = Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		Equinox equinox = new Equinox(configMap);
 
@@ -918,7 +1073,7 @@ public class MultiReleaseJarTests extends AbstractBundleTests {
 	public void testMultiReleasePreventMetaInfVersionListing() throws Exception {
 		System.setProperty("java.specification.version", "9");
 
-		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); // $NON-NLS-1$
 		Map<String, String> configMap = Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		Equinox equinox = new Equinox(configMap);
 

@@ -31,9 +31,8 @@ import org.eclipse.equinox.http.servlet.internal.util.HttpStatus;
  */
 public class ResponseStateHandler {
 
-	public ResponseStateHandler(
-		HttpServletRequest request, HttpServletResponse response,
-		DispatchTargets dispatchTargets) {
+	public ResponseStateHandler(HttpServletRequest request, HttpServletResponse response,
+			DispatchTargets dispatchTargets) {
 
 		this.request = request;
 		this.response = response;
@@ -65,38 +64,31 @@ public class ResponseStateHandler {
 				try {
 					if (filters.isEmpty()) {
 						endpoint.service(request, response);
-					}
-					else {
+					} else {
 						Collections.sort(filters);
 
-						FilterChain chain = new FilterChainImpl(
-							filters, endpoint, dispatchTargets.getDispatcherType());
+						FilterChain chain = new FilterChainImpl(filters, endpoint, dispatchTargets.getDispatcherType());
 
 						chain.doFilter(request, response);
 					}
-				}
-				finally {
+				} finally {
 					endpoint.getServletContextHelper().finishSecurity(request, response);
 				}
 			}
-		}
-		catch (Exception e) {
-			if (!(e instanceof IOException) &&
-				!(e instanceof RuntimeException) &&
-				!(e instanceof ServletException)) {
+		} catch (Exception e) {
+			if (!(e instanceof IOException) && !(e instanceof RuntimeException) && !(e instanceof ServletException)) {
 
 				e = new ServletException(e);
 			}
 
 			setException(e);
 
-			if (dispatchTargets.getDispatcherType() != DispatcherType.ERROR &&
-				dispatchTargets.getDispatcherType() != DispatcherType.REQUEST) {
+			if (dispatchTargets.getDispatcherType() != DispatcherType.ERROR
+					&& dispatchTargets.getDispatcherType() != DispatcherType.REQUEST) {
 
 				throwException(e);
 			}
-		}
-		finally {
+		} finally {
 			endpoint.removeReference();
 
 			for (FilterRegistration filterRegistration : filters) {
@@ -109,8 +101,8 @@ public class ResponseStateHandler {
 
 				PrintWriter writer = response.getWriter();
 
-				Integer status = (Integer)request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
-				String message = (String)request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
+				Integer status = (Integer) request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+				String message = (String) request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
 
 				if (message == null) {
 					message = exception.getMessage();
@@ -143,24 +135,21 @@ public class ResponseStateHandler {
 			if (dispatchTargets.getDispatcherType() == DispatcherType.FORWARD) {
 				response.flushBuffer();
 
-				HttpServletResponseWrapperImpl responseWrapper = HttpServletResponseWrapperImpl.findHttpRuntimeResponse(response);
+				HttpServletResponseWrapperImpl responseWrapper = HttpServletResponseWrapperImpl
+						.findHttpRuntimeResponse(response);
 
 				if (responseWrapper != null) {
 					responseWrapper.setCompleted(true);
-				}
-				else {
+				} else {
 					try (PrintWriter writer = response.getWriter()) {
 						// just force a close
-					}
-					catch (IllegalStateException ise1) {
+					} catch (IllegalStateException ise1) {
 						try (ServletOutputStream outputStream = response.getOutputStream()) {
 							// just force a close
-						}
-						catch (IllegalStateException | IOException ise2) {
+						} catch (IllegalStateException | IOException ise2) {
 							// ignore
 						}
-					}
-					catch (IOException ioe) {
+					} catch (IOException ioe) {
 						// ignore
 					}
 				}
@@ -187,8 +176,7 @@ public class ResponseStateHandler {
 	private void handleErrors() throws IOException, ServletException {
 		if (exception != null) {
 			handleException();
-		}
-		else {
+		} else {
 			handleResponseCode();
 		}
 	}
@@ -198,13 +186,14 @@ public class ResponseStateHandler {
 			throw new IllegalStateException("Response isn't a wrapper"); //$NON-NLS-1$
 		}
 
-		HttpServletResponseWrapperImpl responseWrapper = HttpServletResponseWrapperImpl.findHttpRuntimeResponse(response);
+		HttpServletResponseWrapperImpl responseWrapper = HttpServletResponseWrapperImpl
+				.findHttpRuntimeResponse(response);
 
 		if (responseWrapper == null) {
 			throw new IllegalStateException("Can't locate response impl"); //$NON-NLS-1$
 		}
 
-		HttpServletResponse wrappedResponse = (HttpServletResponse)responseWrapper.getResponse();
+		HttpServletResponse wrappedResponse = (HttpServletResponse) responseWrapper.getResponse();
 
 		if (wrappedResponse.isCommitted()) {
 			throwException(exception);
@@ -218,8 +207,8 @@ public class ResponseStateHandler {
 		DispatchTargets errorDispatchTargets;
 
 		do {
-			errorDispatchTargets = contextController.getDispatchTargets(
-				className, null, null, null, null, null, Match.ERROR, null);
+			errorDispatchTargets = contextController.getDispatchTargets(className, null, null, null, null, null,
+					Match.ERROR, null);
 
 			if (errorDispatchTargets != null) {
 				break;
@@ -227,14 +216,14 @@ public class ResponseStateHandler {
 
 			clazz = clazz.getSuperclass();
 			className = clazz.getName();
-		}
-		while (Exception.class.isAssignableFrom(clazz));
+		} while (Exception.class.isAssignableFrom(clazz));
 
 		if (errorDispatchTargets == null) {
 			throwException(exception);
 		}
 
-		HttpServletRequestWrapperImpl httpRuntimeRequest = HttpServletRequestWrapperImpl.findHttpRuntimeRequest(request);
+		HttpServletRequestWrapperImpl httpRuntimeRequest = HttpServletRequestWrapperImpl
+				.findHttpRuntimeRequest(request);
 
 		try {
 			errorDispatchTargets.setDispatcherType(DispatcherType.ERROR);
@@ -270,17 +259,15 @@ public class ResponseStateHandler {
 
 			};
 
-			HttpServletResponseWrapper wrapperResponse =
-				new HttpServletResponseWrapperImpl(wrappedResponse);
+			HttpServletResponseWrapper wrapperResponse = new HttpServletResponseWrapperImpl(wrappedResponse);
 
-			ResponseStateHandler responseStateHandler = new ResponseStateHandler(
-				wrapperRequest, wrapperResponse, errorDispatchTargets);
+			ResponseStateHandler responseStateHandler = new ResponseStateHandler(wrapperRequest, wrapperResponse,
+					errorDispatchTargets);
 
 			responseStateHandler.processRequest();
 
 			wrappedResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		}
-		finally {
+		} finally {
 			httpRuntimeRequest.pop();
 		}
 	}
@@ -290,7 +277,8 @@ public class ResponseStateHandler {
 			throw new IllegalStateException("Response isn't a wrapper"); //$NON-NLS-1$
 		}
 
-		final HttpServletResponseWrapperImpl responseWrapper = HttpServletResponseWrapperImpl.findHttpRuntimeResponse(response);
+		final HttpServletResponseWrapperImpl responseWrapper = HttpServletResponseWrapperImpl
+				.findHttpRuntimeResponse(response);
 
 		if (responseWrapper == null) {
 			throw new IllegalStateException("Can't locate response impl"); //$NON-NLS-1$
@@ -302,7 +290,7 @@ public class ResponseStateHandler {
 			return;
 		}
 
-		HttpServletResponse wrappedResponse = (HttpServletResponse)responseWrapper.getResponse();
+		HttpServletResponse wrappedResponse = (HttpServletResponse) responseWrapper.getResponse();
 
 		if (wrappedResponse.isCommitted()) {
 			// There's nothing more we can do here.
@@ -311,8 +299,8 @@ public class ResponseStateHandler {
 
 		ContextController contextController = dispatchTargets.getContextController();
 
-		DispatchTargets errorDispatchTargets = contextController.getDispatchTargets(
-			String.valueOf(status), null, null, null, null, null, Match.ERROR, null);
+		DispatchTargets errorDispatchTargets = contextController.getDispatchTargets(String.valueOf(status), null, null,
+				null, null, null, Match.ERROR, null);
 
 		if (errorDispatchTargets == null) {
 			wrappedResponse.sendError(status, responseWrapper.getMessage());
@@ -320,7 +308,8 @@ public class ResponseStateHandler {
 			return;
 		}
 
-		HttpServletRequestWrapperImpl httpRuntimeRequest = HttpServletRequestWrapperImpl.findHttpRuntimeRequest(request);
+		HttpServletRequestWrapperImpl httpRuntimeRequest = HttpServletRequestWrapperImpl
+				.findHttpRuntimeRequest(request);
 
 		try {
 			errorDispatchTargets.setDispatcherType(DispatcherType.ERROR);
@@ -352,32 +341,27 @@ public class ResponseStateHandler {
 
 			};
 
-			HttpServletResponseWrapper wrapperResponse =
-				new HttpServletResponseWrapperImpl(wrappedResponse);
+			HttpServletResponseWrapper wrapperResponse = new HttpServletResponseWrapperImpl(wrappedResponse);
 
-			ResponseStateHandler responseStateHandler = new ResponseStateHandler(
-				wrapperRequest, wrapperResponse, errorDispatchTargets);
+			ResponseStateHandler responseStateHandler = new ResponseStateHandler(wrapperRequest, wrapperResponse,
+					errorDispatchTargets);
 
 			wrappedResponse.setStatus(status);
 
 			responseStateHandler.processRequest();
-		}
-		finally {
+		} finally {
 			httpRuntimeRequest.pop();
 		}
 	}
 
-	private void throwException(Exception e)
-		throws IOException, ServletException {
+	private void throwException(Exception e) throws IOException, ServletException {
 
 		if (e instanceof RuntimeException) {
-			throw (RuntimeException)e;
-		}
-		else if (e instanceof IOException) {
-			throw (IOException)e;
-		}
-		else if (e instanceof ServletException) {
-			throw (ServletException)e;
+			throw (RuntimeException) e;
+		} else if (e instanceof IOException) {
+			throw (IOException) e;
+		} else if (e instanceof ServletException) {
+			throw (ServletException) e;
 		}
 	}
 

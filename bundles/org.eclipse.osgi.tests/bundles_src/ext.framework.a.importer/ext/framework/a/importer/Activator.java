@@ -27,7 +27,8 @@ public class Activator implements BundleActivator {
 
 	public void start(BundleContext context) throws Exception {
 		AbstractBundleTests.simpleResults.addEvent(new FrameworkExtTest().testIt("success")); //$NON-NLS-1$
-		AbstractBundleTests.simpleResults.addEvent(getURLContent(this.getClass().getResource("/ext/framework/a/fwkresource.txt"))); //$NON-NLS-1$
+		AbstractBundleTests.simpleResults
+				.addEvent(getURLContent(this.getClass().getResource("/ext/framework/a/fwkresource.txt"))); //$NON-NLS-1$
 		ExtensionBundleTests.events.add(context.getBundle().getSymbolicName() + " STARTED");
 	}
 

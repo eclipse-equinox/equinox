@@ -23,9 +23,8 @@ import org.eclipse.equinox.console.common.Scanner;
 import org.eclipse.equinox.console.common.terminal.TerminalTypeMappings;
 
 /**
- * This class performs preprocessing of the input from the ssh server in order to echo the visible
- * characters back to the console.
- *
+ * This class performs preprocessing of the input from the ssh server in order
+ * to echo the visible characters back to the console.
  */
 public class SshInputScanner extends Scanner {
 
@@ -37,7 +36,7 @@ public class SshInputScanner extends Scanner {
 		setBackspace(currentMapping.getBackspace());
 		setDel(currentMapping.getDel());
 	}
-	
+
 	@Override
 	public void scan(int b) throws IOException {
 		b &= 0xFF;
@@ -48,14 +47,14 @@ public class SshInputScanner extends Scanner {
 			switch (b) {
 			case ESC:
 				startEsc();
-				toShell.add(new byte[]{(byte) b});
+				toShell.add(new byte[] { (byte) b });
 				break;
 			default:
 				if (b >= SPACE && b < MAX_CHAR) {
 					echo((byte) b);
 					flush();
 				}
-				toShell.add(new byte[]{(byte) b});
+				toShell.add(new byte[] { (byte) b });
 			}
 		}
 	}
@@ -63,7 +62,7 @@ public class SshInputScanner extends Scanner {
 	@Override
 	protected void scanEsc(int b) throws IOException {
 		esc += (char) b;
-		toShell.add(new byte[]{(byte) b});
+		toShell.add(new byte[] { (byte) b });
 		KEYS key = checkEscape(esc);
 		if (key == KEYS.UNFINISHED) {
 			return;

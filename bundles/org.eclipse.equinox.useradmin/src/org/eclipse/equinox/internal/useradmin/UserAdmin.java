@@ -95,12 +95,12 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 	 * @return The newly created role, or <code>null</code> if a role with the given
 	 *         name already exists.
 	 *
-	 * @throws IllegalArgumentException if <tt>type</tt> is invalid.
+	 * @throws IllegalArgumentException if <code>type</code> is invalid.
 	 *
 	 * @throws SecurityException        If a security manager exists and the caller
 	 *                                  does not have the
-	 *                                  <tt>UserAdminPermission</tt> with name
-	 *                                  <tt>admin</tt>.
+	 *                                  <code>UserAdminPermission</code> with name
+	 *                                  <code>admin</code>.
 	 */
 	@Override
 	public org.osgi.service.useradmin.Role createRole(String name, int type) {
@@ -164,8 +164,8 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 	 *         UserAdmin and could be removed, otherwise <code>false</code>.
 	 *
 	 * @throws SecurityException If a security manager exists and the caller does
-	 *                           not have the <tt>UserAdminPermission</tt> with name
-	 *                           <tt>admin</tt>.
+	 *                           not have the <code>UserAdminPermission</code> with name
+	 *                           <code>admin</code>.
 	 */
 	@Override
 	public boolean removeRole(String name) {
@@ -231,7 +231,6 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 	 * @return The roles managed by this UserAdmin whose properties match the
 	 *         specified filter criteria, or all roles if a <code>null</code> filter
 	 *         is specified.
-	 *
 	 */
 	@Override
 	public org.osgi.service.useradmin.Role[] getRoles(String filterString) throws InvalidSyntaxException {

@@ -138,8 +138,6 @@ public final class BundlePermission extends BasicPermission {
 
 	/**
 	 * Called by constructors and when deserialized.
-	 * 
-	 * @param mask
 	 */
 	private synchronized void setTransients(int mask) {
 		if ((mask == ACTION_NONE) || ((mask & ACTION_ALL) != mask)) {
@@ -450,7 +448,6 @@ final class BundlePermissionCollection extends PermissionCollection {
 
 	/**
 	 * Create an empty BundlePermissions object.
-	 * 
 	 */
 	public BundlePermissionCollection() {
 		permissions = new HashMap<String, BundlePermission>();

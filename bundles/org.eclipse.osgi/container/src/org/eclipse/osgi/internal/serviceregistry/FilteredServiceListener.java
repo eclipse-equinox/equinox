@@ -50,25 +50,29 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	/**
 	 * Constructor.
 	 *
-	 * @param context The bundle context of the bundle which added the specified service listener.
-	 * @param filterstring The filter string specified when this service listener was added.
-	 * @param listener The service listener object.
+	 * @param context      The bundle context of the bundle which added the
+	 *                     specified service listener.
+	 * @param filterstring The filter string specified when this service listener
+	 *                     was added.
+	 * @param listener     The service listener object.
 	 * @exception InvalidSyntaxException if the filter is invalid.
 	 */
-	FilteredServiceListener(final BundleContextImpl context, final ServiceListener listener, final String filterstring) throws InvalidSyntaxException {
+	FilteredServiceListener(final BundleContextImpl context, final ServiceListener listener, final String filterstring)
+			throws InvalidSyntaxException {
 		this.debug = context.getContainer().getConfiguration().getDebug();
 		this.unfiltered = (listener instanceof UnfilteredServiceListener);
 		if (filterstring == null) {
 			this.filter = null;
 			this.objectClass = null;
 		} else {
-			FilterImpl filterImpl = FilterImpl.newInstance(filterstring, context.getContainer().getConfiguration().getDebug().DEBUG_FILTER);
+			FilterImpl filterImpl = FilterImpl.newInstance(filterstring,
+					context.getContainer().getConfiguration().getDebug().DEBUG_FILTER);
 			String clazz = filterImpl.getRequiredObjectClass();
 			if (unfiltered || (clazz == null)) {
 				this.objectClass = null;
 				this.filter = filterImpl;
 			} else {
-				this.objectClass = clazz.intern(); /*intern the name for future identity comparison */
+				this.objectClass = clazz.intern(); /* intern the name for future identity comparison */
 				// a filter with no children and non-null requiredObjectClass is a simple
 				// filter;
 				// e.g. (objectClass=SomeService)
@@ -90,24 +94,29 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	public void serviceChanged(ServiceEvent event) {
 		ServiceReferenceImpl<?> reference = (ServiceReferenceImpl<?>) event.getServiceReference();
 
-		// first check if we can short circuit the filter match if the required objectClass does not match the event
+		// first check if we can short circuit the filter match if the required
+		// objectClass does not match the event
 		objectClassCheck: if (objectClass != null) {
 			String[] classes = reference.getClasses();
 			int size = classes.length;
 			for (int i = 0; i < size; i++) {
-				if (classes[i] == objectClass) // objectClass strings have previously been interned for identity comparison
+				if (classes[i] == objectClass) // objectClass strings have previously been interned for identity
+												// comparison
 					break objectClassCheck;
 			}
-			return; // no class in this event matches a required part of the filter; we do not need to deliver this event
+			return; // no class in this event matches a required part of the filter; we do not need
+					// to deliver this event
 		}
-		// TODO could short circuit service.id filters as well since the id is constant for a registration.
+		// TODO could short circuit service.id filters as well since the id is constant
+		// for a registration.
 
 		if (!ServiceRegistry.hasListenServicePermission(event, context))
 			return;
 
 		if (debug.DEBUG_EVENTS) {
 			String listenerName = this.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(this)); //$NON-NLS-1$
-			Debug.println("filterServiceEvent(" + listenerName + ", \"" + getFilter() + "\", " + reference.getRegistration().getProperties() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			Debug.println("filterServiceEvent(" + listenerName + ", \"" + getFilter() + "\", " //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					+ reference.getRegistration().getProperties() + ")"); //$NON-NLS-1$
 		}
 
 		event = filterMatch(event);
@@ -116,7 +125,8 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 		}
 		if (allservices || ServiceRegistry.isAssignableTo(context, objectClass, reference)) {
 			if (debug.DEBUG_EVENTS) {
-				String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
+				String listenerName = listener.getClass().getName() + "@" //$NON-NLS-1$
+						+ Integer.toHexString(System.identityHashCode(listener));
 				Debug.println("dispatchFilteredServiceEvent(" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 
@@ -125,11 +135,13 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	}
 
 	/**
-	 * Returns a service event that should be delivered to the listener based on the filter evaluation.
-	 * This may result in a service event of type MODIFIED_ENDMATCH.
+	 * Returns a service event that should be delivered to the listener based on the
+	 * filter evaluation. This may result in a service event of type
+	 * MODIFIED_ENDMATCH.
 	 *
 	 * @param delivered The service event delivered by the framework.
-	 * @return The event to be delivered or null if no event is to be delivered to the listener.
+	 * @return The event to be delivered or null if no event is to be delivered to
+	 *         the listener.
 	 */
 	private ServiceEvent filterMatch(ServiceEvent delivered) {
 		boolean modified = delivered.getType() == ServiceEvent.MODIFIED;
@@ -162,11 +174,13 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 		if (filterString == null) {
 			filterString = ""; //$NON-NLS-1$
 		}
-		return listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)) + filterString; //$NON-NLS-1$
+		return listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)) //$NON-NLS-1$
+				+ filterString;
 	}
 
 	/**
 	 * Return the bundle context for the ListenerHook.
+	 * 
 	 * @return The context of the bundle which added the service listener.
 	 * @see org.osgi.framework.hooks.service.ListenerHook.ListenerInfo#getBundleContext()
 	 */
@@ -177,8 +191,9 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 
 	/**
 	 * Return the filter string for the ListenerHook.
-	 * @return The filter string with which the listener was added. This may
-	 * be <code>null</code> if the listener was added without a filter.
+	 * 
+	 * @return The filter string with which the listener was added. This may be
+	 *         <code>null</code> if the listener was added without a filter.
 	 * @see org.osgi.framework.hooks.service.ListenerHook.ListenerInfo#getFilter()
 	 */
 	@Override
@@ -190,11 +205,10 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	}
 
 	/**
-	 * Return the state of the listener for this addition and removal life
-	 * cycle. Initially this method will return <code>false</code>
-	 * indicating the listener has been added but has not been removed.
-	 * After the listener has been removed, this method must always return
-	 * <code>true</code>.
+	 * Return the state of the listener for this addition and removal life cycle.
+	 * Initially this method will return <code>false</code> indicating the listener
+	 * has been added but has not been removed. After the listener has been removed,
+	 * this method must always return <code>true</code>.
 	 *
 	 * @return <code>false</code> if the listener has not been been removed,
 	 *         <code>true</code> otherwise.
@@ -213,8 +227,9 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 
 	/**
 	 * Returns an objectClass filter string for the specified class name.
-	 * @return A filter string for the specified class name or <code>null</code> if the
-	 * specified class name is <code>null</code>.
+	 * 
+	 * @return A filter string for the specified class name or <code>null</code> if
+	 *         the specified class name is <code>null</code>.
 	 */
 	private static String getObjectClassFilterString(String className) {
 		if (className == null) {

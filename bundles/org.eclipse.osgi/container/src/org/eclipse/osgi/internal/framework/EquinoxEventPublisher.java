@@ -56,11 +56,10 @@ public class EquinoxEventPublisher {
 	private EventManager eventManager;
 
 	/*
-	 * The following maps objects keep track of event listeners
-	 * by BundleContext.  Each element is a Map that is the set
-	 * of event listeners for a particular BundleContext.  The max number of
-	 * elements each of the following maps will have is the number of bundles
-	 * installed in the Framework.
+	 * The following maps objects keep track of event listeners by BundleContext.
+	 * Each element is a Map that is the set of event listeners for a particular
+	 * BundleContext. The max number of elements each of the following maps will
+	 * have is the number of bundles installed in the Framework.
 	 */
 	// Map of BundleContexts for bundle's BundleListeners.
 	private final Map<BundleContextImpl, CopyOnWriteIdentityMap<BundleListener, BundleListener>> allBundleListeners = new LinkedHashMap<>();
@@ -118,12 +117,9 @@ public class EquinoxEventPublisher {
 	 * Deliver a BundleEvent to SynchronousBundleListeners (synchronous) and
 	 * BundleListeners (asynchronous).
 	 *
-	 * @param type
-	 *            BundleEvent type.
-	 * @param bundle
-	 *            Affected bundle or null.
-	 * @param origin
-	 *            The origin of the event
+	 * @param type   BundleEvent type.
+	 * @param bundle Affected bundle or null.
+	 * @param origin The origin of the event
 	 */
 	public void publishBundleEvent(int type, Bundle bundle, Bundle origin) {
 		if (origin != null) {
@@ -149,8 +145,8 @@ public class EquinoxEventPublisher {
 			return;
 		}
 		/*
-		 * We must collect the snapshots of the sync and async listeners
-		 * BEFORE we dispatch the event.
+		 * We must collect the snapshots of the sync and async listeners BEFORE we
+		 * dispatch the event.
 		 */
 		/* Collect snapshot of SynchronousBundleListeners */
 		/* Build the listener snapshot */
@@ -159,10 +155,13 @@ public class EquinoxEventPublisher {
 		Set<Map.Entry<SynchronousBundleListener, SynchronousBundleListener>> systemBundleListenersSync = null;
 		synchronized (allSyncBundleListeners) {
 			listenersSync = new LinkedHashMap<>(allSyncBundleListeners.size());
-			for (Map.Entry<BundleContextImpl, CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener>> entry : allSyncBundleListeners.entrySet()) {
-				CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener> listeners = entry.getValue();
+			for (Map.Entry<BundleContextImpl, CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener>> entry : allSyncBundleListeners
+					.entrySet()) {
+				CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener> listeners = entry
+						.getValue();
 				if (!listeners.isEmpty()) {
-					Set<Map.Entry<SynchronousBundleListener, SynchronousBundleListener>> listenerEntries = listeners.entrySet();
+					Set<Map.Entry<SynchronousBundleListener, SynchronousBundleListener>> listenerEntries = listeners
+							.entrySet();
 					if (entry.getKey().getBundleImpl().getBundleId() == 0) {
 						systemContext = entry.getKey();
 						// record the snapshot; no need to create another copy
@@ -173,13 +172,17 @@ public class EquinoxEventPublisher {
 				}
 			}
 		}
-		/* Collect snapshot of BundleListeners; only if the event is NOT STARTING or STOPPING or LAZY_ACTIVATION */
+		/*
+		 * Collect snapshot of BundleListeners; only if the event is NOT STARTING or
+		 * STOPPING or LAZY_ACTIVATION
+		 */
 		Map<BundleContextImpl, Set<Map.Entry<BundleListener, BundleListener>>> listenersAsync = null;
 		Set<Map.Entry<BundleListener, BundleListener>> systemBundleListenersAsync = null;
 		if ((event.getType() & (BundleEvent.STARTING | BundleEvent.STOPPING | BundleEvent.LAZY_ACTIVATION)) == 0) {
 			synchronized (allBundleListeners) {
 				listenersAsync = new LinkedHashMap<>(allBundleListeners.size());
-				for (Map.Entry<BundleContextImpl, CopyOnWriteIdentityMap<BundleListener, BundleListener>> entry : allBundleListeners.entrySet()) {
+				for (Map.Entry<BundleContextImpl, CopyOnWriteIdentityMap<BundleListener, BundleListener>> entry : allBundleListeners
+						.entrySet()) {
 					CopyOnWriteIdentityMap<BundleListener, BundleListener> listeners = entry.getValue();
 					if (!listeners.isEmpty()) {
 						Set<Map.Entry<BundleListener, BundleListener>> listenerEntries = listeners.entrySet();
@@ -195,16 +198,17 @@ public class EquinoxEventPublisher {
 			}
 		}
 
-		/* shrink the snapshot.
-		 * keySet returns a Collection which cannot be added to and
-		 * removals from that collection will result in removals of the
-		 * entry from the snapshot.
+		/*
+		 * shrink the snapshot. keySet returns a Collection which cannot be added to and
+		 * removals from that collection will result in removals of the entry from the
+		 * snapshot.
 		 */
 		Collection<BundleContext> shrinkable;
 		if (listenersAsync == null) {
 			shrinkable = asBundleContexts(listenersSync.keySet());
 		} else {
-			shrinkable = new ShrinkableCollection<>(asBundleContexts(listenersSync.keySet()), asBundleContexts(listenersAsync.keySet()));
+			shrinkable = new ShrinkableCollection<>(asBundleContexts(listenersSync.keySet()),
+					asBundleContexts(listenersAsync.keySet()));
 		}
 
 		notifyEventHooksPrivileged(event, shrinkable);
@@ -220,9 +224,11 @@ public class EquinoxEventPublisher {
 		/* Dispatch the event to the snapshot for sync listeners */
 		if (!listenersSync.isEmpty()) {
 			ListenerQueue<SynchronousBundleListener, SynchronousBundleListener, BundleEvent> queue = newListenerQueue();
-			for (Map.Entry<BundleContextImpl, Set<Map.Entry<SynchronousBundleListener, SynchronousBundleListener>>> entry : listenersSync.entrySet()) {
-				@SuppressWarnings({"rawtypes", "unchecked"})
-				EventDispatcher<SynchronousBundleListener, SynchronousBundleListener, BundleEvent> dispatcher = (EventDispatcher) entry.getKey();
+			for (Map.Entry<BundleContextImpl, Set<Map.Entry<SynchronousBundleListener, SynchronousBundleListener>>> entry : listenersSync
+					.entrySet()) {
+				@SuppressWarnings({ "rawtypes", "unchecked" })
+				EventDispatcher<SynchronousBundleListener, SynchronousBundleListener, BundleEvent> dispatcher = (EventDispatcher) entry
+						.getKey();
 				Set<Map.Entry<SynchronousBundleListener, SynchronousBundleListener>> listeners = entry.getValue();
 				queue.queueListeners(listeners, dispatcher);
 			}
@@ -232,9 +238,11 @@ public class EquinoxEventPublisher {
 		/* Dispatch the event to the snapshot for async listeners */
 		if ((listenersAsync != null) && !listenersAsync.isEmpty()) {
 			ListenerQueue<BundleListener, BundleListener, BundleEvent> queue = newListenerQueue();
-			for (Map.Entry<BundleContextImpl, Set<Map.Entry<BundleListener, BundleListener>>> entry : listenersAsync.entrySet()) {
-				@SuppressWarnings({"rawtypes", "unchecked"})
-				EventDispatcher<BundleListener, BundleListener, BundleEvent> dispatcher = (EventDispatcher) entry.getKey();
+			for (Map.Entry<BundleContextImpl, Set<Map.Entry<BundleListener, BundleListener>>> entry : listenersAsync
+					.entrySet()) {
+				@SuppressWarnings({ "rawtypes", "unchecked" })
+				EventDispatcher<BundleListener, BundleListener, BundleEvent> dispatcher = (EventDispatcher) entry
+						.getKey();
 				Set<Map.Entry<BundleListener, BundleListener>> listeners = entry.getValue();
 				queue.queueListeners(listeners, dispatcher);
 			}
@@ -256,18 +264,16 @@ public class EquinoxEventPublisher {
 	/**
 	 * Deliver a FrameworkEvent.
 	 *
-	 * @param type
-	 *            FrameworkEvent type.
-	 * @param bundle
-	 *            Affected bundle or null for system bundle.
-	 * @param throwable
-	 *            Related exception or null.
+	 * @param type      FrameworkEvent type.
+	 * @param bundle    Affected bundle or null for system bundle.
+	 * @param throwable Related exception or null.
 	 */
 	public void publishFrameworkEvent(int type, Bundle bundle, Throwable throwable) {
 		publishFrameworkEvent(type, bundle, throwable, (FrameworkListener[]) null);
 	}
 
-	public void publishFrameworkEvent(int type, Bundle bundle, Throwable throwable, final FrameworkListener... listeners) {
+	public void publishFrameworkEvent(int type, Bundle bundle, Throwable throwable,
+			final FrameworkListener... listeners) {
 		if (bundle == null)
 			bundle = container.getStorage().getModuleContainer().getModule(0).getBundle();
 		final FrameworkEvent event = new FrameworkEvent(type, bundle, throwable);
@@ -289,7 +295,8 @@ public class EquinoxEventPublisher {
 		Map<BundleContextImpl, Set<Map.Entry<FrameworkListener, FrameworkListener>>> listenerSnapshot;
 		synchronized (allFrameworkListeners) {
 			listenerSnapshot = new LinkedHashMap<>(allFrameworkListeners.size());
-			for (Map.Entry<BundleContextImpl, CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener>> entry : allFrameworkListeners.entrySet()) {
+			for (Map.Entry<BundleContextImpl, CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener>> entry : allFrameworkListeners
+					.entrySet()) {
 				CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener> listeners = entry.getValue();
 				if (!listeners.isEmpty()) {
 					listenerSnapshot.put(entry.getKey(), listeners.entrySet());
@@ -310,16 +317,19 @@ public class EquinoxEventPublisher {
 			}
 			// We use the system bundle context as the dispatcher
 			if (listeners.size() > 0) {
-				BundleContextImpl systemContext = (BundleContextImpl) container.getStorage().getModuleContainer().getModule(0).getBundle().getBundleContext();
-				@SuppressWarnings({"rawtypes", "unchecked"})
+				BundleContextImpl systemContext = (BundleContextImpl) container.getStorage().getModuleContainer()
+						.getModule(0).getBundle().getBundleContext();
+				@SuppressWarnings({ "rawtypes", "unchecked" })
 				EventDispatcher<FrameworkListener, FrameworkListener, FrameworkEvent> dispatcher = (EventDispatcher) systemContext;
 				queue.queueListeners(listeners.entrySet(), dispatcher);
 			}
 		}
 
-		for (Map.Entry<BundleContextImpl, Set<Map.Entry<FrameworkListener, FrameworkListener>>> entry : listenerSnapshot.entrySet()) {
-			@SuppressWarnings({"rawtypes", "unchecked"})
-			EventDispatcher<FrameworkListener, FrameworkListener, FrameworkEvent> dispatcher = (EventDispatcher) entry.getKey();
+		for (Map.Entry<BundleContextImpl, Set<Map.Entry<FrameworkListener, FrameworkListener>>> entry : listenerSnapshot
+				.entrySet()) {
+			@SuppressWarnings({ "rawtypes", "unchecked" })
+			EventDispatcher<FrameworkListener, FrameworkListener, FrameworkEvent> dispatcher = (EventDispatcher) entry
+					.getKey();
 			Set<Map.Entry<FrameworkListener, FrameworkListener>> listeners = entry.getValue();
 			queue.queueListeners(listeners, dispatcher);
 		}
@@ -332,8 +342,9 @@ public class EquinoxEventPublisher {
 	}
 
 	/**
-	 * Coerce the generic type of a collection from Collection<BundleContextImpl>
-	 * to Collection<BundleContext>
+	 * Coerce the generic type of a collection from Collection<BundleContextImpl> to
+	 * Collection<BundleContext>
+	 * 
 	 * @param c Collection to be coerced.
 	 * @return c coerced to Collection<BundleContext>
 	 */
@@ -346,7 +357,8 @@ public class EquinoxEventPublisher {
 		if (listener instanceof SynchronousBundleListener) {
 			container.checkAdminPermission(context.getBundle(), AdminPermission.LISTENER);
 			synchronized (allSyncBundleListeners) {
-				CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener> listeners = allSyncBundleListeners.get(context);
+				CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener> listeners = allSyncBundleListeners
+						.get(context);
 				if (listeners == null) {
 					listeners = new CopyOnWriteIdentityMap<>();
 					allSyncBundleListeners.put(context, listeners);
@@ -369,7 +381,8 @@ public class EquinoxEventPublisher {
 		if (listener instanceof SynchronousBundleListener) {
 			container.checkAdminPermission(context.getBundle(), AdminPermission.LISTENER);
 			synchronized (allSyncBundleListeners) {
-				CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener> listeners = allSyncBundleListeners.get(context);
+				CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener> listeners = allSyncBundleListeners
+						.get(context);
 				if (listeners != null)
 					listeners.remove(listener);
 			}
@@ -421,7 +434,7 @@ public class EquinoxEventPublisher {
 		EventDispatcher<Object, Object, CountDownLatch> dispatcher = (el, lo, ea, signal) -> signal.countDown();
 
 		ListenerQueue<Object, Object, CountDownLatch> queue = newListenerQueue();
-		queue.queueListeners(Collections.<Object, Object> singletonMap(dispatcher, dispatcher).entrySet(), dispatcher);
+		queue.queueListeners(Collections.<Object, Object>singletonMap(dispatcher, dispatcher).entrySet(), dispatcher);
 
 		// fire event with the flushedSignal latch
 		CountDownLatch flushedSignal = new CountDownLatch(1);

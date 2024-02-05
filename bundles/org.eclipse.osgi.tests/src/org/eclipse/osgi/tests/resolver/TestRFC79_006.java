@@ -13,18 +13,19 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.resolver;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.service.resolver.StateObjectFactory;
 import org.eclipse.osgi.tests.services.resolver.AbstractStateTest;
+import org.junit.Test;
 import org.osgi.framework.BundleException;
 
-
 public class TestRFC79_006 extends AbstractStateTest {
-	public TestRFC79_006(String testName) {
-		super(testName);
-	}
 
 	BundleDescription bundle_1 = null;
 	BundleDescription bundle_2 = null;
@@ -33,7 +34,7 @@ public class TestRFC79_006 extends AbstractStateTest {
 	BundleDescription bundle_5 = null;
 	BundleDescription bundle_6 = null;
 
-
+	@Test
 	public void testTest_006() {
 		State state = buildEmptyState();
 		StateObjectFactory sof = StateObjectFactory.defaultFactory;
@@ -44,23 +45,21 @@ public class TestRFC79_006 extends AbstractStateTest {
 		bundle_4 = create_bundle_4(sof);
 		bundle_5 = create_bundle_5(sof);
 		bundle_6 = create_bundle_6(sof);
-		//***************************************************
+		// ***************************************************
 		// stage a
 		// expect to pass =true
-		//***************************************************
+		// ***************************************************
 		addBundlesToState_a(state);
-		//***************************************************
+		// ***************************************************
 		try {
 			state.resolve();
 		} catch (Throwable t) {
-			fail("unexpected exception class=" + t.getClass().getName()
-					+ " message=" + t.getMessage());
+			fail("unexpected exception class=" + t.getClass().getName() + " message=" + t.getMessage());
 			return;
 		}
 		checkBundlesResolved_a();
 		checkWiring_a();
 	} // end of method
-
 
 	public void checkWiringState_1() {
 		ExportPackageDescription[] exports = bundle_1.getResolvedImports();
@@ -120,7 +119,6 @@ public class TestRFC79_006 extends AbstractStateTest {
 		checkWiringState_6();
 	} // end method
 
-
 	public void addBundlesToState_a(State state) {
 		boolean added = false;
 		added = state.addBundle(bundle_1);
@@ -137,7 +135,6 @@ public class TestRFC79_006 extends AbstractStateTest {
 		assertTrue("failed to add bundle ", added);
 	} // end method
 
-
 	public void checkBundlesResolved_a() {
 		assertTrue("unexpected bundle resolution state", bundle_1.isResolved());
 		assertTrue("unexpected bundle resolution state", !bundle_2.isResolved());
@@ -147,13 +144,13 @@ public class TestRFC79_006 extends AbstractStateTest {
 		assertTrue("unexpected bundle resolution state", bundle_6.isResolved());
 	} // end method
 
-
 	public BundleDescription create_bundle_1(StateObjectFactory sof) {
 		java.util.Dictionary dictionary_1 = new java.util.Properties();
 		BundleDescription bundle = null;
 		dictionary_1.put("Bundle-ManifestVersion", "2");
 		dictionary_1.put("Bundle-SymbolicName", "Client A");
-		dictionary_1.put("Import-Package", "org.xml.sax; version=\"[1.3.0, 1.3.0]\", org.w3c.dom; version=\"[2.1.0, 2.1.0]\", javax.xml.parsers; version=\"[1.1.0, 1.1.0]\"");
+		dictionary_1.put("Import-Package",
+				"org.xml.sax; version=\"[1.3.0, 1.3.0]\", org.w3c.dom; version=\"[2.1.0, 2.1.0]\", javax.xml.parsers; version=\"[1.1.0, 1.1.0]\"");
 		try {
 			bundle = sof.createBundleDescription(dictionary_1, "bundle_1", 1);
 		} catch (BundleException be) {
@@ -167,7 +164,8 @@ public class TestRFC79_006 extends AbstractStateTest {
 		BundleDescription bundle = null;
 		dictionary_2.put("Bundle-ManifestVersion", "2");
 		dictionary_2.put("Bundle-SymbolicName", "Client B");
-		dictionary_2.put("Import-Package", "org.xml.sax; version=\"[1.3.0, 1.3.0]\", org.w3c.dom; version=\"[2.2.0, 2.2.0]\", javax.xml.parsers; version=\"[1.1.0, 1.1.0]\"");
+		dictionary_2.put("Import-Package",
+				"org.xml.sax; version=\"[1.3.0, 1.3.0]\", org.w3c.dom; version=\"[2.2.0, 2.2.0]\", javax.xml.parsers; version=\"[1.1.0, 1.1.0]\"");
 		try {
 			bundle = sof.createBundleDescription(dictionary_2, "bundle_2", 2);
 		} catch (BundleException be) {
@@ -224,7 +222,8 @@ public class TestRFC79_006 extends AbstractStateTest {
 		dictionary_6.put("Bundle-ManifestVersion", "2");
 		dictionary_6.put("Bundle-SymbolicName", "JAXP");
 		dictionary_6.put("Export-Package", "javax.xml.parsers; version=1.1.0; uses:=\"org.w3c.dom,org.xml.sax\"");
-		dictionary_6.put("Import-Package", "org.w3c.dom; version=\"[2.1.0, 2.1.0]\", org.xml.sax; version=\"[1.3.0, 1.3.0]\"");
+		dictionary_6.put("Import-Package",
+				"org.w3c.dom; version=\"[2.1.0, 2.1.0]\", org.xml.sax; version=\"[1.3.0, 1.3.0]\"");
 		try {
 			bundle = sof.createBundleDescription(dictionary_6, "bundle_6", 6);
 		} catch (BundleException be) {

@@ -59,7 +59,9 @@ public class ExtendedLogEntryImpl implements ExtendedLogEntry, LogEntry {
 		return threadId.longValue();
 	}
 
-	public ExtendedLogEntryImpl(Bundle bundle, String loggerName, StackTraceElement stackTraceElement, Object contextObject, LogLevel logLevelEnum, int level, String message, ServiceReference<?> ref, Throwable throwable) {
+	public ExtendedLogEntryImpl(Bundle bundle, String loggerName, StackTraceElement stackTraceElement,
+			Object contextObject, LogLevel logLevelEnum, int level, String message, ServiceReference<?> ref,
+			Throwable throwable) {
 		this.time = System.currentTimeMillis();
 		this.loggerName = loggerName;
 		this.bundle = bundle;

@@ -27,7 +27,7 @@ public interface IBranding {
 	public String getId();
 
 	public String getProperty(String key);
-	
+
 	public Bundle getDefiningBundle();
 
 	public Object getProduct();

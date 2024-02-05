@@ -55,14 +55,11 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 /**
  * @author Raymond Augé
  */
-public class HttpServiceRuntimeImpl
-	implements
-		HttpServiceRuntime,
+public class HttpServiceRuntimeImpl implements HttpServiceRuntime,
 		ServiceTrackerCustomizer<ServletContextHelper, AtomicReference<ContextController>> {
 
-	public HttpServiceRuntimeImpl(
-		BundleContext trackingContext, BundleContext consumingContext,
-		ServletContext parentServletContext, Dictionary<String, Object> attributes) {
+	public HttpServiceRuntimeImpl(BundleContext trackingContext, BundleContext consumingContext,
+			ServletContext parentServletContext, Dictionary<String, Object> attributes) {
 
 		this.trackingContext = trackingContext;
 		this.consumingContext = consumingContext;
@@ -75,37 +72,39 @@ public class HttpServiceRuntimeImpl
 
 		this.parentServletContext = parentServletContext;
 		this.attributes = new UMDictionaryMap<>(attributes);
-		this.targetFilter = "(" + Activator.UNIQUE_SERVICE_ID + "=" + this.attributes.get(Activator.UNIQUE_SERVICE_ID) + ")";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		this.targetFilter = "(" + Activator.UNIQUE_SERVICE_ID + "=" + this.attributes.get(Activator.UNIQUE_SERVICE_ID) //$NON-NLS-1$ //$NON-NLS-2$
+				+ ")"; //$NON-NLS-1$
 		this.httpSessionTracker = new HttpSessionTracker(this);
-		this.invalidatorReg = trackingContext.registerService(HttpSessionInvalidator.class, this.httpSessionTracker, attributes);
+		this.invalidatorReg = trackingContext.registerService(HttpSessionInvalidator.class, this.httpSessionTracker,
+				attributes);
 
-		loggerFactoryTracker = new ServiceTracker<>(consumingContext, LoggerFactory.class, new ServiceTrackerCustomizer<LoggerFactory, Logger>() {
-			@Override
-			public Logger addingService(ServiceReference<LoggerFactory> reference) {
-				return getConsumingContext().getService(reference).getLogger(HttpServiceRuntimeImpl.class);
-			}
-			@Override
-			public void modifiedService(ServiceReference<LoggerFactory> reference, Logger service) {
-				// ignore
-			}
-			@Override
-			public void removedService(ServiceReference<LoggerFactory> reference, Logger service) {
-				// ignore
-			}
-		});
+		loggerFactoryTracker = new ServiceTracker<>(consumingContext, LoggerFactory.class,
+				new ServiceTrackerCustomizer<LoggerFactory, Logger>() {
+					@Override
+					public Logger addingService(ServiceReference<LoggerFactory> reference) {
+						return getConsumingContext().getService(reference).getLogger(HttpServiceRuntimeImpl.class);
+					}
+
+					@Override
+					public void modifiedService(ServiceReference<LoggerFactory> reference, Logger service) {
+						// ignore
+					}
+
+					@Override
+					public void removedService(ServiceReference<LoggerFactory> reference, Logger service) {
+						// ignore
+					}
+				});
 		loggerFactoryTracker.open();
 
-		contextServiceTracker =
-			new ServiceTracker<>(
-				trackingContext, ServletContextHelper.class, this);
+		contextServiceTracker = new ServiceTracker<>(trackingContext, ServletContextHelper.class, this);
 
-		preprocessorServiceTracker =
-			new ServiceTracker<>(
-				trackingContext, Preprocessor.class, new PreprocessorCustomizer(this));
+		preprocessorServiceTracker = new ServiceTracker<>(trackingContext, Preprocessor.class,
+				new PreprocessorCustomizer(this));
 
 		contextPathCustomizerHolder = new ContextPathCustomizerHolder(consumingContext, contextServiceTracker);
-		contextPathAdaptorTracker = new ServiceTracker<>(
-			consumingContext, ContextPathCustomizer.class, contextPathCustomizerHolder);
+		contextPathAdaptorTracker = new ServiceTracker<>(consumingContext, ContextPathCustomizer.class,
+				contextPathCustomizerHolder);
 
 		Hashtable<String, Object> defaultContextProps = new Hashtable<>();
 		defaultContextProps.put(HTTP_WHITEBOARD_CONTEXT_NAME, HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME);
@@ -113,8 +112,8 @@ public class HttpServiceRuntimeImpl
 		defaultContextProps.put(HTTP_WHITEBOARD_CONTEXT_PATH, Const.SLASH);
 		defaultContextProps.put(HTTP_WHITEBOARD_TARGET, this.targetFilter);
 		defaultContextProps.put(Const.EQUINOX_HTTP_WHITEBOARD_CONTEXT_HELPER_DEFAULT, Boolean.TRUE);
-		defaultContextReg = consumingContext.registerService(
-			ServletContextHelper.class, new DefaultServletContextHelperFactory(), defaultContextProps);
+		defaultContextReg = consumingContext.registerService(ServletContextHelper.class,
+				new DefaultServletContextHelperFactory(), defaultContextProps);
 	}
 
 	public synchronized void open() {
@@ -125,7 +124,7 @@ public class HttpServiceRuntimeImpl
 
 	@Override
 	public synchronized AtomicReference<ContextController> addingService(
-		ServiceReference<ServletContextHelper> serviceReference) {
+			ServiceReference<ServletContextHelper> serviceReference) {
 
 		AtomicReference<ContextController> result = new AtomicReference<>();
 		if (!matches(serviceReference)) {
@@ -133,24 +132,21 @@ public class HttpServiceRuntimeImpl
 		}
 
 		try {
-			ContextController contextController = new ContextController(
-				trackingContext, consumingContext, serviceReference, parentServletContext, this);
+			ContextController contextController = new ContextController(trackingContext, consumingContext,
+					serviceReference, parentServletContext, this);
 
 			controllerMap.put(serviceReference, contextController);
 
 			result.set(contextController);
-		}
-		catch (HttpWhiteboardFailureException hwfe) {
+		} catch (HttpWhiteboardFailureException hwfe) {
 			debug(hwfe.getMessage(), hwfe);
 
 			recordFailedServletContextDTO(serviceReference, 0, hwfe.getFailureReason());
-		}
-		catch (Throwable t) {
+		} catch (Throwable t) {
 			error(t.getMessage(), t);
 
 			recordFailedServletContextDTO(serviceReference, 0, DTOConstants.FAILURE_REASON_EXCEPTION_ON_INIT);
-		}
-		finally {
+		} finally {
 			incrementServiceChangecount();
 		}
 
@@ -190,8 +186,10 @@ public class HttpServiceRuntimeImpl
 	public boolean isDefaultContext(ContextController contextController) {
 		ServiceReference<?> thisReference = defaultContextReg.getReference();
 		ServiceReference<ServletContextHelper> contextReference = contextController.getServiceReference();
-		if (thisReference == null) throw new NullPointerException("Default Context Service reference is null. " + this); //$NON-NLS-1$
-		if (contextReference == null) throw new NullPointerException("Context Service reference is null. " + contextController); //$NON-NLS-1$
+		if (thisReference == null)
+			throw new NullPointerException("Default Context Service reference is null. " + this); //$NON-NLS-1$
+		if (contextReference == null)
+			throw new NullPointerException("Context Service reference is null. " + contextController); //$NON-NLS-1$
 		return thisReference.equals(contextReference);
 	}
 
@@ -215,8 +213,7 @@ public class HttpServiceRuntimeImpl
 
 		try {
 			getDispatchTargets(path, requestInfoDTO);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 
@@ -228,8 +225,7 @@ public class HttpServiceRuntimeImpl
 
 		try {
 			defaultContextReg.unregister();
-		}
-		catch (IllegalStateException ise) {
+		} catch (IllegalStateException ise) {
 			// ignore
 		}
 
@@ -256,8 +252,7 @@ public class HttpServiceRuntimeImpl
 		loggerFactoryTracker.close();
 	}
 
-	public DispatchTargets getDispatchTargets(
-		String pathString, RequestInfoDTO requestInfoDTO) {
+	public DispatchTargets getDispatchTargets(String pathString, RequestInfoDTO requestInfoDTO) {
 
 		Path path = new Path(pathString);
 
@@ -265,37 +260,33 @@ public class HttpServiceRuntimeImpl
 		String requestURI = path.getRequestURI();
 
 		// perfect match
-		DispatchTargets dispatchTargets = getDispatchTargets(
-			requestURI, null, queryString, Match.EXACT, requestInfoDTO);
+		DispatchTargets dispatchTargets = getDispatchTargets(requestURI, null, queryString, Match.EXACT,
+				requestInfoDTO);
 
 		if (dispatchTargets == null) {
 			// extension match
 
-			dispatchTargets = getDispatchTargets(
-				requestURI, path.getExtension(), queryString, Match.EXTENSION,
-				requestInfoDTO);
+			dispatchTargets = getDispatchTargets(requestURI, path.getExtension(), queryString, Match.EXTENSION,
+					requestInfoDTO);
 		}
 
 		if (dispatchTargets == null) {
 			// regex match
-			dispatchTargets = getDispatchTargets(
-				requestURI, null, queryString, Match.REGEX, requestInfoDTO);
+			dispatchTargets = getDispatchTargets(requestURI, null, queryString, Match.REGEX, requestInfoDTO);
 		}
 
 		if (dispatchTargets == null) {
 			// handle with servlet mapped to '/'
-			// the servletpath is the requestURI minus the contextpath and the pathinfo is null
-			dispatchTargets = getDispatchTargets(
-				requestURI, null, queryString, Match.DEFAULT_SERVLET,
-				requestInfoDTO);
+			// the servletpath is the requestURI minus the contextpath and the pathinfo is
+			// null
+			dispatchTargets = getDispatchTargets(requestURI, null, queryString, Match.DEFAULT_SERVLET, requestInfoDTO);
 		}
 
 		if (dispatchTargets == null && Const.SLASH.equals(pathString)) {
 			// handle with servlet mapped to '' (empty string)
-			// the pathinfo is '/' and the servletpath and contextpath are the empty string ("")
-			dispatchTargets = getDispatchTargets(
-				requestURI, null, queryString, Match.CONTEXT_ROOT,
-				requestInfoDTO);
+			// the pathinfo is '/' and the servletpath and contextpath are the empty string
+			// ("")
+			dispatchTargets = getDispatchTargets(requestURI, null, queryString, Match.CONTEXT_ROOT, requestInfoDTO);
 		}
 
 		return dispatchTargets;
@@ -318,8 +309,7 @@ public class HttpServiceRuntimeImpl
 	}
 
 	public List<String> getHttpServiceEndpoints() {
-		return StringPlus.from(
-			attributes.get(HTTP_SERVICE_ENDPOINT));
+		return StringPlus.from(attributes.get(HTTP_SERVICE_ENDPOINT));
 	}
 
 	@Override
@@ -369,8 +359,7 @@ public class HttpServiceRuntimeImpl
 		Logger logger = loggerFactoryTracker.getService();
 		if (logger == null) {
 			parentServletContext.log(String.valueOf(message));
-		}
-		else {
+		} else {
 			logger.debug(String.valueOf(message));
 		}
 	}
@@ -379,8 +368,7 @@ public class HttpServiceRuntimeImpl
 		Logger logger = loggerFactoryTracker.getService();
 		if (logger == null) {
 			parentServletContext.log(String.valueOf(message), t);
-		}
-		else {
+		} else {
 			logger.debug(String.valueOf(message), t);
 		}
 	}
@@ -389,14 +377,13 @@ public class HttpServiceRuntimeImpl
 		Logger logger = loggerFactoryTracker.getService();
 		if (logger == null) {
 			parentServletContext.log(String.valueOf(message), t);
-		}
-		else {
+		} else {
 			logger.error(String.valueOf(message), t);
 		}
 	}
 
 	public boolean matches(ServiceReference<?> serviceReference) {
-		String target = (String)serviceReference.getProperty(HTTP_WHITEBOARD_TARGET);
+		String target = (String) serviceReference.getProperty(HTTP_WHITEBOARD_TARGET);
 
 		if (target == null) {
 			return true;
@@ -406,8 +393,7 @@ public class HttpServiceRuntimeImpl
 
 		try {
 			whiteboardTargetFilter = FrameworkUtil.createFilter(target);
-		}
-		catch (InvalidSyntaxException ise) {
+		} catch (InvalidSyntaxException ise) {
 			throw new IllegalArgumentException(ise);
 		}
 
@@ -428,9 +414,8 @@ public class HttpServiceRuntimeImpl
 	}
 
 	@Override
-	public synchronized void modifiedService(
-		ServiceReference<ServletContextHelper> serviceReference,
-		AtomicReference<ContextController> contextController) {
+	public synchronized void modifiedService(ServiceReference<ServletContextHelper> serviceReference,
+			AtomicReference<ContextController> contextController) {
 
 		removedService(serviceReference, contextController);
 		AtomicReference<ContextController> added = addingService(serviceReference);
@@ -438,14 +423,14 @@ public class HttpServiceRuntimeImpl
 	}
 
 	@Override
-	public synchronized void removedService(
-		ServiceReference<ServletContextHelper> serviceReference,
-		AtomicReference<ContextController> contextControllerRef) {
+	public synchronized void removedService(ServiceReference<ServletContextHelper> serviceReference,
+			AtomicReference<ContextController> contextControllerRef) {
 
 		try {
 			ContextController contextController = contextControllerRef.get();
 			if (contextController != null) {
-				Iterator<Entry<ServiceReference<ServletContextHelper>, ExtendedFailedServletContextDTO>> iterator = failedServletContextDTOs.entrySet().iterator();
+				Iterator<Entry<ServiceReference<ServletContextHelper>, ExtendedFailedServletContextDTO>> iterator = failedServletContextDTOs
+						.entrySet().iterator();
 				while (iterator.hasNext()) {
 					if (iterator.next().getValue().shadowingServiceId == contextController.getServiceId()) {
 						iterator.remove();
@@ -456,8 +441,7 @@ public class HttpServiceRuntimeImpl
 			failedServletContextDTOs.remove(serviceReference);
 			controllerMap.remove(serviceReference);
 			trackingContext.ungetService(serviceReference);
-		}
-		finally {
+		} finally {
 			incrementServiceChangecount();
 		}
 	}
@@ -486,8 +470,7 @@ public class HttpServiceRuntimeImpl
 			}
 
 			break;
-		}
-		while (true);
+		} while (true);
 
 		return null;
 	}
@@ -496,19 +479,16 @@ public class HttpServiceRuntimeImpl
 		return controllerMap.values();
 	}
 
-	public DispatchTargets getDispatchTargets(
-		String requestURI, String extension, String queryString, Match match,
-		RequestInfoDTO requestInfoDTO) {
+	public DispatchTargets getDispatchTargets(String requestURI, String extension, String queryString, Match match,
+			RequestInfoDTO requestInfoDTO) {
 
-		Collection<ContextController> contextControllers = getContextControllers(
-			requestURI);
+		Collection<ContextController> contextControllers = getContextControllers(requestURI);
 
 		if ((contextControllers == null) || contextControllers.isEmpty()) {
 			return null;
 		}
 
-		String contextPath =
-			contextControllers.iterator().next().getContextPath();
+		String contextPath = contextControllers.iterator().next().getContextPath();
 
 		requestURI = requestURI.substring(contextPath.length());
 
@@ -524,10 +504,8 @@ public class HttpServiceRuntimeImpl
 
 		do {
 			for (ContextController contextController : contextControllers) {
-				DispatchTargets dispatchTargets =
-					contextController.getDispatchTargets(
-						null, requestURI, servletPath, pathInfo,
-						extension, queryString, match, requestInfoDTO);
+				DispatchTargets dispatchTargets = contextController.getDispatchTargets(null, requestURI, servletPath,
+						pathInfo, extension, queryString, match, requestInfoDTO);
 
 				if (dispatchTargets != null) {
 					return dispatchTargets;
@@ -548,8 +526,7 @@ public class HttpServiceRuntimeImpl
 			}
 
 			break;
-		}
-		while (true);
+		} while (true);
 
 		return null;
 	}
@@ -650,8 +627,8 @@ public class HttpServiceRuntimeImpl
 		return preprocessorMap;
 	}
 
-	public void registerHttpServiceFilter(
-		Bundle bundle, String alias, Filter filter, Dictionary<String, String> initparams, HttpContextHolder httpContextHolder) {
+	public void registerHttpServiceFilter(Bundle bundle, String alias, Filter filter,
+			Dictionary<String, String> initparams, HttpContextHolder httpContextHolder) {
 
 		if (alias == null) {
 			throw new IllegalArgumentException("Alias cannot be null"); //$NON-NLS-1$
@@ -662,8 +639,10 @@ public class HttpServiceRuntimeImpl
 
 		ContextController.checkPattern(alias);
 
-		// need to make sure exact matching aliases are converted to wildcard pattern matches
-		if (!alias.endsWith(Const.SLASH_STAR) && !alias.startsWith(Const.STAR_DOT) && !alias.contains(Const.SLASH_STAR_DOT)) {
+		// need to make sure exact matching aliases are converted to wildcard pattern
+		// matches
+		if (!alias.endsWith(Const.SLASH_STAR) && !alias.startsWith(Const.STAR_DOT)
+				&& !alias.contains(Const.SLASH_STAR_DOT)) {
 			if (alias.endsWith(Const.SLASH)) {
 				alias = alias + '*';
 			} else {
@@ -724,9 +703,7 @@ public class HttpServiceRuntimeImpl
 		}
 	}
 
-	private void fillInitParams(
-		Dictionary<String, Object> props,
-		Dictionary<?, ?> initparams, String prefix) {
+	private void fillInitParams(Dictionary<String, Object> props, Dictionary<?, ?> initparams, String prefix) {
 		if (initparams != null) {
 			for (Enumeration<?> eKeys = initparams.keys(); eKeys.hasMoreElements();) {
 				String key = String.valueOf(eKeys.nextElement());
@@ -754,18 +731,16 @@ public class HttpServiceRuntimeImpl
 			if (result >= -1000 && result <= 1000) {
 				return result;
 			}
-		}
-		catch (NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			// fall through
 		}
 
-		throw new IllegalArgumentException(
-			"filter-priority must be an integer between -1000 and 1000 but " + //$NON-NLS-1$
+		throw new IllegalArgumentException("filter-priority must be an integer between -1000 and 1000 but " + //$NON-NLS-1$
 				"was: " + filterPriority); //$NON-NLS-1$
 	}
 
-	public void registerHttpServiceResources(
-		Bundle bundle, String alias, String name, HttpContextHolder httpContextHolder) throws NamespaceException {
+	public void registerHttpServiceResources(Bundle bundle, String alias, String name,
+			HttpContextHolder httpContextHolder) throws NamespaceException {
 		if (alias == null) {
 			throw new IllegalArgumentException("Alias cannot be null"); //$NON-NLS-1$
 		}
@@ -776,8 +751,10 @@ public class HttpServiceRuntimeImpl
 		if (pattern.startsWith(Const.SLASH_STAR_DOT)) {
 			pattern = pattern.substring(1);
 		}
-		// need to make sure exact matching aliases are converted to wildcard pattern matches
-		if (!pattern.endsWith(Const.SLASH_STAR) && !pattern.startsWith(Const.STAR_DOT) && !pattern.contains(Const.SLASH_STAR_DOT)) {
+		// need to make sure exact matching aliases are converted to wildcard pattern
+		// matches
+		if (!pattern.endsWith(Const.SLASH_STAR) && !pattern.startsWith(Const.STAR_DOT)
+				&& !pattern.contains(Const.SLASH_STAR_DOT)) {
 			if (pattern.endsWith(Const.SLASH)) {
 				pattern = pattern + '*';
 			} else {
@@ -805,7 +782,8 @@ public class HttpServiceRuntimeImpl
 				props.put(Const.EQUINOX_LEGACY_TCCL_PROP, Thread.currentThread().getContextClassLoader());
 				registration = bundle.getBundleContext().registerService(String.class, "resource", props); //$NON-NLS-1$
 
-				objectRegistration = new HttpServiceObjectRegistration(fullAlias, registration, httpContextHolder, bundle);
+				objectRegistration = new HttpServiceObjectRegistration(fullAlias, registration, httpContextHolder,
+						bundle);
 
 				Set<HttpServiceObjectRegistration> objectRegistrations = bundleRegistrations.get(bundle);
 				if (objectRegistrations == null) {
@@ -835,12 +813,13 @@ public class HttpServiceRuntimeImpl
 	}
 
 	private Object getFilter(ServiceReference<? extends ServletContextHelper> serviceReference) {
-		String ctxName = (String)serviceReference.getProperty(HTTP_WHITEBOARD_CONTEXT_NAME);
-		return String.format("(&(%s=%s)(%s=%s))", HTTP_SERVICE_CONTEXT_PROPERTY, ctxName, HTTP_WHITEBOARD_CONTEXT_NAME, ctxName); //$NON-NLS-1$
+		String ctxName = (String) serviceReference.getProperty(HTTP_WHITEBOARD_CONTEXT_NAME);
+		return String.format("(&(%s=%s)(%s=%s))", HTTP_SERVICE_CONTEXT_PROPERTY, ctxName, HTTP_WHITEBOARD_CONTEXT_NAME, //$NON-NLS-1$
+				ctxName);
 	}
 
-	public void registerHttpServiceServlet(
-		Bundle bundle, String alias, Servlet servlet, Dictionary<?, ?> initparams, HttpContextHolder httpContextHolder) throws NamespaceException, ServletException{
+	public void registerHttpServiceServlet(Bundle bundle, String alias, Servlet servlet, Dictionary<?, ?> initparams,
+			HttpContextHolder httpContextHolder) throws NamespaceException, ServletException {
 		if (alias == null) {
 			throw new IllegalArgumentException("Alias cannot be null"); //$NON-NLS-1$
 		}
@@ -852,12 +831,14 @@ public class HttpServiceRuntimeImpl
 		ContextController.checkPattern(alias);
 
 		Object pattern = alias;
-		// need to make sure exact matching aliases are converted to exact matching + wildcard pattern matching
-		if (!alias.endsWith(Const.SLASH_STAR) && !alias.startsWith(Const.STAR_DOT) && !alias.contains(Const.SLASH_STAR_DOT)) {
+		// need to make sure exact matching aliases are converted to exact matching +
+		// wildcard pattern matching
+		if (!alias.endsWith(Const.SLASH_STAR) && !alias.startsWith(Const.STAR_DOT)
+				&& !alias.contains(Const.SLASH_STAR_DOT)) {
 			if (alias.endsWith(Const.SLASH)) {
-				pattern = new String[] {alias, alias + '*'};
+				pattern = new String[] { alias, alias + '*' };
 			} else {
-				pattern = new String[] {alias, alias + Const.SLASH_STAR};
+				pattern = new String[] { alias, alias + Const.SLASH_STAR };
 			}
 		}
 
@@ -893,7 +874,8 @@ public class HttpServiceRuntimeImpl
 				// check that init got called and did not throw an exception
 				legacyServlet.checkForError();
 
-				objectRegistration = new HttpServiceObjectRegistration(fullAlias, registration, httpContextHolder, bundle);
+				objectRegistration = new HttpServiceObjectRegistration(fullAlias, registration, httpContextHolder,
+						bundle);
 
 				Set<HttpServiceObjectRegistration> objectRegistrations = bundleRegistrations.get(bundle);
 				if (objectRegistrations == null) {
@@ -925,7 +907,8 @@ public class HttpServiceRuntimeImpl
 
 	private String getFullAlias(String alias, HttpContextHolder httpContextHolder) {
 		@SuppressWarnings("unchecked")
-		AtomicReference<ContextController> controllerRef = contextServiceTracker.getService((ServiceReference<ServletContextHelper>)httpContextHolder.getServiceReference());
+		AtomicReference<ContextController> controllerRef = contextServiceTracker
+				.getService((ServiceReference<ServletContextHelper>) httpContextHolder.getServiceReference());
 		if (controllerRef != null) {
 			ContextController controller = controllerRef.get();
 			if (controller != null) {
@@ -947,8 +930,7 @@ public class HttpServiceRuntimeImpl
 				throw new IllegalArgumentException("No registration found for alias: " + alias); //$NON-NLS-1$
 			}
 			Set<HttpServiceObjectRegistration> objectRegistrations = bundleRegistrations.get(bundle);
-			if (objectRegistrations == null || !objectRegistrations.remove(objectRegistration))
-			{
+			if (objectRegistrations == null || !objectRegistrations.remove(objectRegistration)) {
 				throw new IllegalArgumentException("The bundle did not register the alias: " + alias); //$NON-NLS-1$
 			}
 
@@ -970,8 +952,7 @@ public class HttpServiceRuntimeImpl
 				throw new IllegalArgumentException("No registration found for filter: " + filter); //$NON-NLS-1$
 			}
 			Set<HttpServiceObjectRegistration> objectRegistrations = bundleRegistrations.get(bundle);
-			if (objectRegistrations == null || !objectRegistrations.remove(objectRegistration))
-			{
+			if (objectRegistrations == null || !objectRegistrations.remove(objectRegistration)) {
 				throw new IllegalArgumentException("The bundle did not register the filter: " + filter); //$NON-NLS-1$
 			}
 			try {
@@ -1019,8 +1000,7 @@ public class HttpServiceRuntimeImpl
 
 		try {
 			return context.createFilter(sb.toString());
-		}
-		catch (InvalidSyntaxException ise) {
+		} catch (InvalidSyntaxException ise) {
 			throw new IllegalArgumentException(ise);
 		}
 	}
@@ -1036,8 +1016,7 @@ public class HttpServiceRuntimeImpl
 
 		try {
 			return context.createFilter(sb.toString());
-		}
-		catch (InvalidSyntaxException ise) {
+		} catch (InvalidSyntaxException ise) {
 			throw new IllegalArgumentException(ise);
 		}
 	}
@@ -1055,8 +1034,7 @@ public class HttpServiceRuntimeImpl
 
 		try {
 			return context.createFilter(sb.toString());
-		}
-		catch (InvalidSyntaxException ise) {
+		} catch (InvalidSyntaxException ise) {
 			throw new IllegalArgumentException(ise);
 		}
 	}
@@ -1076,13 +1054,13 @@ public class HttpServiceRuntimeImpl
 
 		try {
 			return context.createFilter(sb.toString());
-		}
-		catch (InvalidSyntaxException ise) {
+		} catch (InvalidSyntaxException ise) {
 			throw new IllegalArgumentException(ise);
 		}
 	}
 
-	private static org.osgi.framework.Filter createListenerFilter(BundleContext context, ServletContext servletContext) {
+	private static org.osgi.framework.Filter createListenerFilter(BundleContext context,
+			ServletContext servletContext) {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("(&"); //$NON-NLS-1$
@@ -1100,8 +1078,7 @@ public class HttpServiceRuntimeImpl
 
 		try {
 			return context.createFilter(sb.toString());
-		}
-		catch (InvalidSyntaxException ise) {
+		} catch (InvalidSyntaxException ise) {
 			throw new IllegalArgumentException(ise);
 		}
 	}
@@ -1126,9 +1103,7 @@ public class HttpServiceRuntimeImpl
 		return resourceServiceFilter;
 	}
 
-	public void recordFailedErrorPageDTO(
-		ServiceReference<?> serviceReference,
-		FailedErrorPageDTO failedErrorPageDTO) {
+	public void recordFailedErrorPageDTO(ServiceReference<?> serviceReference, FailedErrorPageDTO failedErrorPageDTO) {
 
 		if (failedErrorPageDTOs.containsKey(serviceReference)) {
 			return;
@@ -1137,9 +1112,7 @@ public class HttpServiceRuntimeImpl
 		failedErrorPageDTOs.put(serviceReference, failedErrorPageDTO);
 	}
 
-	public void recordFailedFilterDTO(
-		ServiceReference<Filter> serviceReference,
-		FailedFilterDTO failedFilterDTO) {
+	public void recordFailedFilterDTO(ServiceReference<Filter> serviceReference, FailedFilterDTO failedFilterDTO) {
 
 		if (failedFilterDTOs.containsKey(serviceReference)) {
 			return;
@@ -1148,9 +1121,8 @@ public class HttpServiceRuntimeImpl
 		failedFilterDTOs.put(serviceReference, failedFilterDTO);
 	}
 
-	public void recordFailedListenerDTO(
-		ServiceReference<EventListener> serviceReference,
-		FailedListenerDTO failedListenerDTO) {
+	public void recordFailedListenerDTO(ServiceReference<EventListener> serviceReference,
+			FailedListenerDTO failedListenerDTO) {
 
 		if (failedListenerDTOs.containsKey(serviceReference)) {
 			return;
@@ -1159,8 +1131,7 @@ public class HttpServiceRuntimeImpl
 		failedListenerDTOs.put(serviceReference, failedListenerDTO);
 	}
 
-	public void recordFailedResourceDTO(
-		ServiceReference<?> serviceReference, FailedResourceDTO failedResourceDTO) {
+	public void recordFailedResourceDTO(ServiceReference<?> serviceReference, FailedResourceDTO failedResourceDTO) {
 
 		if (failedResourceDTOs.containsKey(serviceReference)) {
 			return;
@@ -1169,31 +1140,30 @@ public class HttpServiceRuntimeImpl
 		failedResourceDTOs.put(serviceReference, failedResourceDTO);
 	}
 
-	public void recordFailedServletContextDTO(
-		ServiceReference<ServletContextHelper> serviceReference, long shadowingServiceId, int failureReason) {
+	public void recordFailedServletContextDTO(ServiceReference<ServletContextHelper> serviceReference,
+			long shadowingServiceId, int failureReason) {
 
 		ExtendedFailedServletContextDTO failedServletContextDTO = new ExtendedFailedServletContextDTO();
 
 		failedServletContextDTO.attributes = Collections.emptyMap();
-		failedServletContextDTO.contextPath = String.valueOf(serviceReference.getProperty(HTTP_WHITEBOARD_CONTEXT_PATH));
+		failedServletContextDTO.contextPath = String
+				.valueOf(serviceReference.getProperty(HTTP_WHITEBOARD_CONTEXT_PATH));
 		failedServletContextDTO.errorPageDTOs = new ExtendedErrorPageDTO[0];
 		failedServletContextDTO.failureReason = failureReason;
 		failedServletContextDTO.filterDTOs = new FilterDTO[0];
-		failedServletContextDTO.initParams = ServiceProperties.parseInitParams(
-			serviceReference, HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX);
+		failedServletContextDTO.initParams = ServiceProperties.parseInitParams(serviceReference,
+				HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX);
 		failedServletContextDTO.listenerDTOs = new ListenerDTO[0];
 		failedServletContextDTO.name = String.valueOf(serviceReference.getProperty(HTTP_WHITEBOARD_CONTEXT_NAME));
 		failedServletContextDTO.resourceDTOs = new ResourceDTO[0];
-		failedServletContextDTO.serviceId = (Long)serviceReference.getProperty(Constants.SERVICE_ID);
+		failedServletContextDTO.serviceId = (Long) serviceReference.getProperty(Constants.SERVICE_ID);
 		failedServletContextDTO.servletDTOs = new ServletDTO[0];
 		failedServletContextDTO.shadowingServiceId = shadowingServiceId;
 
 		failedServletContextDTOs.put(serviceReference, failedServletContextDTO);
 	}
 
-	public void recordFailedServletDTO(
-		ServiceReference<?> serviceReference,
-		FailedServletDTO failedServletDTO) {
+	public void recordFailedServletDTO(ServiceReference<?> serviceReference, FailedServletDTO failedServletDTO) {
 
 		if (failedServletDTOs.containsKey(serviceReference)) {
 			return;
@@ -1202,9 +1172,8 @@ public class HttpServiceRuntimeImpl
 		failedServletDTOs.put(serviceReference, failedServletDTO);
 	}
 
-	public void recordFailedPreprocessorDTO(
-		ServiceReference<Preprocessor> serviceReference,
-		FailedPreprocessorDTO failedPreprocessorDTO) {
+	public void recordFailedPreprocessorDTO(ServiceReference<Preprocessor> serviceReference,
+			FailedPreprocessorDTO failedPreprocessorDTO) {
 
 		if (failedPreprocessorDTOs.containsKey(serviceReference)) {
 			return;
@@ -1213,38 +1182,32 @@ public class HttpServiceRuntimeImpl
 		failedPreprocessorDTOs.put(serviceReference, failedPreprocessorDTO);
 	}
 
-	public void removeFailedErrorPageDTO(
-		ServiceReference<Servlet> serviceReference) {
+	public void removeFailedErrorPageDTO(ServiceReference<Servlet> serviceReference) {
 
 		failedErrorPageDTOs.remove(serviceReference);
 	}
 
-	public void removeFailedFilterDTO(
-		ServiceReference<Filter> serviceReference) {
+	public void removeFailedFilterDTO(ServiceReference<Filter> serviceReference) {
 
 		failedFilterDTOs.remove(serviceReference);
 	}
 
-	public void removeFailedListenerDTO(
-		ServiceReference<EventListener> serviceReference) {
+	public void removeFailedListenerDTO(ServiceReference<EventListener> serviceReference) {
 
 		failedListenerDTOs.remove(serviceReference);
 	}
 
-	public void removeFailedResourceDTO(
-		ServiceReference<Object> serviceReference) {
+	public void removeFailedResourceDTO(ServiceReference<Object> serviceReference) {
 
 		failedResourceDTOs.remove(serviceReference);
 	}
 
-	public void removeFailedServletDTO(
-		ServiceReference<Servlet> serviceReference) {
+	public void removeFailedServletDTO(ServiceReference<Servlet> serviceReference) {
 
 		failedServletDTOs.remove(serviceReference);
 	}
 
-	public void removeFailedPreprocessorDTO(
-		ServiceReference<Preprocessor> serviceReference) {
+	public void removeFailedPreprocessorDTO(ServiceReference<Preprocessor> serviceReference) {
 
 		failedPreprocessorDTOs.remove(serviceReference);
 	}
@@ -1285,8 +1248,7 @@ public class HttpServiceRuntimeImpl
 	private String decode(String urlEncoded) {
 		try {
 			return URLDecoder.decode(urlEncoded, StandardCharsets.UTF_8.name());
-		}
-		catch (UnsupportedEncodingException e) {
+		} catch (UnsupportedEncodingException e) {
 			return urlEncoded;
 		}
 	}
@@ -1304,34 +1266,25 @@ public class HttpServiceRuntimeImpl
 	private final org.osgi.framework.Filter listenerServiceFilter;
 
 	// BEGIN of old HttpService support
-	final ConcurrentMap<HttpContext, HttpContextHolder> legacyContextMap =
-		new ConcurrentHashMap<>();
-	private final Map<Object, HttpServiceObjectRegistration> legacyMappings =
-		Collections.synchronizedMap(new HashMap<Object, HttpServiceObjectRegistration>());
-	private final Map<Bundle, Set<HttpServiceObjectRegistration>> bundleRegistrations =
-		new HashMap<>();
+	final ConcurrentMap<HttpContext, HttpContextHolder> legacyContextMap = new ConcurrentHashMap<>();
+	private final Map<Object, HttpServiceObjectRegistration> legacyMappings = Collections
+			.synchronizedMap(new HashMap<Object, HttpServiceObjectRegistration>());
+	private final Map<Bundle, Set<HttpServiceObjectRegistration>> bundleRegistrations = new HashMap<>();
 	private final Map<Bundle, Map<String, String>> bundleAliasCustomizations = new HashMap<>();
 	// END of old HttpService support
 
-	private final ConcurrentMap<ServiceReference<ServletContextHelper>, ContextController> controllerMap =
-		new ConcurrentSkipListMap<>(Collections.reverseOrder());
-	private final ConcurrentMap<ServiceReference<Preprocessor>, PreprocessorRegistration> preprocessorMap =
-		new ConcurrentSkipListMap<>(Collections.reverseOrder());
+	private final ConcurrentMap<ServiceReference<ServletContextHelper>, ContextController> controllerMap = new ConcurrentSkipListMap<>(
+			Collections.reverseOrder());
+	private final ConcurrentMap<ServiceReference<Preprocessor>, PreprocessorRegistration> preprocessorMap = new ConcurrentSkipListMap<>(
+			Collections.reverseOrder());
 
-	final ConcurrentMap<ServiceReference<?>, FailedErrorPageDTO> failedErrorPageDTOs =
-		new ConcurrentHashMap<>();
-	final ConcurrentMap<ServiceReference<Filter>, FailedFilterDTO> failedFilterDTOs =
-		new ConcurrentHashMap<>();
-	final ConcurrentMap<ServiceReference<EventListener>, FailedListenerDTO> failedListenerDTOs =
-		new ConcurrentHashMap<>();
-	final ConcurrentMap<ServiceReference<?>, FailedResourceDTO> failedResourceDTOs =
-		new ConcurrentHashMap<>();
-	final ConcurrentMap<ServiceReference<ServletContextHelper>, ExtendedFailedServletContextDTO> failedServletContextDTOs =
-		new ConcurrentHashMap<>();
-	final ConcurrentMap<ServiceReference<?>, FailedServletDTO> failedServletDTOs =
-		new ConcurrentHashMap<>();
-	final ConcurrentMap<ServiceReference<?>, FailedPreprocessorDTO> failedPreprocessorDTOs =
-		new ConcurrentHashMap<>();
+	final ConcurrentMap<ServiceReference<?>, FailedErrorPageDTO> failedErrorPageDTOs = new ConcurrentHashMap<>();
+	final ConcurrentMap<ServiceReference<Filter>, FailedFilterDTO> failedFilterDTOs = new ConcurrentHashMap<>();
+	final ConcurrentMap<ServiceReference<EventListener>, FailedListenerDTO> failedListenerDTOs = new ConcurrentHashMap<>();
+	final ConcurrentMap<ServiceReference<?>, FailedResourceDTO> failedResourceDTOs = new ConcurrentHashMap<>();
+	final ConcurrentMap<ServiceReference<ServletContextHelper>, ExtendedFailedServletContextDTO> failedServletContextDTOs = new ConcurrentHashMap<>();
+	final ConcurrentMap<ServiceReference<?>, FailedServletDTO> failedServletDTOs = new ConcurrentHashMap<>();
+	final ConcurrentMap<ServiceReference<?>, FailedPreprocessorDTO> failedPreprocessorDTOs = new ConcurrentHashMap<>();
 
 	private final Set<Object> registeredObjects = Collections.newSetFromMap(new ConcurrentHashMap<Object, Boolean>());
 	private final ServiceTracker<LoggerFactory, Logger> loggerFactoryTracker;
@@ -1351,19 +1304,20 @@ public class HttpServiceRuntimeImpl
 		@Override
 		public Void call() {
 			try {
-				Dictionary<String,Object> properties = getHsrRegistration().getReference().getProperties();
+				Dictionary<String, Object> properties = getHsrRegistration().getReference().getProperties();
 				properties.put(Constants.SERVICE_CHANGECOUNT, getServiceChangecount());
 				getHsrRegistration().setProperties(properties);
 				return null;
-			}
-			finally {
+			} finally {
 				getSemaphore().release();
 			}
 		}
 	}
 
 	static class LegacyServiceObject {
-		final AtomicReference<Exception> error = new AtomicReference<>(new ServletException("The init() method was never called.")); //$NON-NLS-1$
+		final AtomicReference<Exception> error = new AtomicReference<>(
+				new ServletException("The init() method was never called.")); //$NON-NLS-1$
+
 		public void checkForError() {
 			Exception result = error.get();
 			if (result != null) {
@@ -1385,34 +1339,32 @@ public class HttpServiceRuntimeImpl
 		}
 
 		@Override
-		public void ungetService(
-			Bundle bundle, ServiceRegistration<Filter> registration, Filter service) {
+		public void ungetService(Bundle bundle, ServiceRegistration<Filter> registration, Filter service) {
 			// do nothing
 		}
 
-		// NOTE we do not do the same equals check here for filter that we do for servlet
+		// NOTE we do not do the same equals check here for filter that we do for
+		// servlet
 		// this is because we must allow filter to be applied to all context helpers
-		// TODO this means it is still possible that init() will get called if the same filter
-		// is registered multiple times.  This is unfortunate but is an error case on the client anyway.
+		// TODO this means it is still possible that init() will get called if the same
+		// filter
+		// is registered multiple times. This is unfortunate but is an error case on the
+		// client anyway.
 		class LegacyFilter implements Filter {
-			/**
-			 * @throws ServletException
-			 */
 			@Override
 			public void init(FilterConfig filterConfig) throws ServletException {
 				try {
 					filter.init(filterConfig);
 					error.set(null);
-				} catch (Exception e){
+				} catch (Exception e) {
 					error.set(e);
 					Throw.unchecked(e);
 				}
 			}
 
 			@Override
-			public void doFilter(
-				ServletRequest request, ServletResponse response, FilterChain chain)
-				throws IOException, ServletException {
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+					throws IOException, ServletException {
 				filter.doFilter(request, response, chain);
 			}
 
@@ -1430,16 +1382,12 @@ public class HttpServiceRuntimeImpl
 			this.servlet = servlet;
 		}
 
-		/**
-		 * @throws ServletException
-		 */
 		@Override
-		public void init(ServletConfig config)
-			throws ServletException {
+		public void init(ServletConfig config) throws ServletException {
 			try {
 				servlet.init(config);
 				error.set(null);
-			} catch (Exception e){
+			} catch (Exception e) {
 				error.set(e);
 				Throw.unchecked(e);
 			}
@@ -1451,9 +1399,7 @@ public class HttpServiceRuntimeImpl
 		}
 
 		@Override
-		public void
-			service(ServletRequest req, ServletResponse res)
-				throws ServletException, IOException {
+		public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
 			servlet.service(req, res);
 		}
 
@@ -1481,23 +1427,22 @@ public class HttpServiceRuntimeImpl
 		}
 	}
 
-	static class ContextPathCustomizerHolder implements ServiceTrackerCustomizer<ContextPathCustomizer, ContextPathCustomizer> {
+	static class ContextPathCustomizerHolder
+			implements ServiceTrackerCustomizer<ContextPathCustomizer, ContextPathCustomizer> {
 		private final BundleContext context;
 		private final ServiceTracker<ServletContextHelper, AtomicReference<ContextController>> contextServiceTracker;
-		private final NavigableMap<ServiceReference<ContextPathCustomizer>, ContextPathCustomizer> pathCustomizers =
-			new TreeMap<>(Collections.reverseOrder());
+		private final NavigableMap<ServiceReference<ContextPathCustomizer>, ContextPathCustomizer> pathCustomizers = new TreeMap<>(
+				Collections.reverseOrder());
 
-		public ContextPathCustomizerHolder(
-			BundleContext context,
-			ServiceTracker<ServletContextHelper, AtomicReference<ContextController>> contextServiceTracker) {
+		public ContextPathCustomizerHolder(BundleContext context,
+				ServiceTracker<ServletContextHelper, AtomicReference<ContextController>> contextServiceTracker) {
 			super();
 			this.context = context;
 			this.contextServiceTracker = contextServiceTracker;
 		}
 
 		@Override
-		public ContextPathCustomizer addingService(
-			ServiceReference<ContextPathCustomizer> reference) {
+		public ContextPathCustomizer addingService(ServiceReference<ContextPathCustomizer> reference) {
 			ContextPathCustomizer service = context.getService(reference);
 			boolean reset = false;
 			synchronized (pathCustomizers) {
@@ -1512,16 +1457,13 @@ public class HttpServiceRuntimeImpl
 		}
 
 		@Override
-		public void modifiedService(
-			ServiceReference<ContextPathCustomizer> reference,
-			ContextPathCustomizer service) {
+		public void modifiedService(ServiceReference<ContextPathCustomizer> reference, ContextPathCustomizer service) {
 			removedService(reference, service);
 			addingService(reference);
 		}
+
 		@Override
-		public void removedService(
-			ServiceReference<ContextPathCustomizer> reference,
-			ContextPathCustomizer service) {
+		public void removedService(ServiceReference<ContextPathCustomizer> reference, ContextPathCustomizer service) {
 			boolean reset = false;
 			synchronized (pathCustomizers) {
 				ServiceReference<ContextPathCustomizer> currentFirst = pathCustomizers.firstKey();
@@ -1540,7 +1482,8 @@ public class HttpServiceRuntimeImpl
 
 		ContextPathCustomizer getHighestRanked() {
 			synchronized (pathCustomizers) {
-				Map.Entry<ServiceReference<ContextPathCustomizer>, ContextPathCustomizer> firstEntry = pathCustomizers.firstEntry();
+				Map.Entry<ServiceReference<ContextPathCustomizer>, ContextPathCustomizer> firstEntry = pathCustomizers
+						.firstEntry();
 				return firstEntry == null ? null : firstEntry.getValue();
 			}
 		}

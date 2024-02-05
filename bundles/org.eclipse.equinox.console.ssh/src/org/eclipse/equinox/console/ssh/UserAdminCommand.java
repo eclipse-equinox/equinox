@@ -28,10 +28,9 @@ import org.eclipse.equinox.console.storage.DigestUtil;
 import org.eclipse.equinox.console.storage.SecureUserStore;
 
 /**
- * This class provides commands for administering users: adding, removing and listing users; setting or changing password;
- * resetting password; adding and removing roles
- *
- *
+ * This class provides commands for administering users: adding, removing and
+ * listing users; setting or changing password; resetting password; adding and
+ * removing roles
  */
 public class UserAdminCommand {
 	private static final String INPUT_SCANNER = "INPUT_SCANNER";
@@ -43,11 +42,14 @@ public class UserAdminCommand {
 	/**
 	 * Command for adding a user
 	 *
-	 * @param args command line arguments in the format -username <username> -password <password> -roles <comma-separated list of user roles (optional)>
-	 * @throws Exception
+	 * @param args command line arguments in the format -username <username>
+	 *             -password <password> -roles <comma-separated list of user roles
+	 *             (optional)>
 	 */
 	@Descriptor("Add user with password and roles")
-	public void addUser(@Descriptor("-username <username>\r\n-password <password>\r\n-roles <comma-separated list of user roles (optional)>") String[] args) throws Exception {
+	public void addUser(
+			@Descriptor("-username <username>\r\n-password <password>\r\n-roles <comma-separated list of user roles (optional)>") String[] args)
+			throws Exception {
 		String username = null;
 		String password = null;
 		String roles = "";
@@ -65,7 +67,7 @@ public class UserAdminCommand {
 			}
 		}
 
-		if (! validateUsername(username)) {
+		if (!validateUsername(username)) {
 			throw new Exception("Invalid username");
 		}
 
@@ -79,7 +81,7 @@ public class UserAdminCommand {
 
 		SecureUserStore.putUser(username, DigestUtil.encrypt(password), roles);
 
-		if(SecureUserStore.existsUser(DEFAULT_USER)) {
+		if (SecureUserStore.existsUser(DEFAULT_USER)) {
 			SecureUserStore.deleteUser(DEFAULT_USER);
 		}
 	}
@@ -87,11 +89,12 @@ public class UserAdminCommand {
 	/**
 	 * Command for setting or changing the password of a user.
 	 *
-	 * @param args command-line arguments in the format -username <username> -password <password>
-	 * @throws Exception
+	 * @param args command-line arguments in the format -username <username>
+	 *             -password <password>
 	 */
 	@Descriptor("Set or change password")
-	public void setPassword(@Descriptor("-username <username>\r\n-password <password>") String[] args) throws Exception {
+	public void setPassword(@Descriptor("-username <username>\r\n-password <password>") String[] args)
+			throws Exception {
 		String username = null;
 		String password = null;
 
@@ -105,7 +108,7 @@ public class UserAdminCommand {
 			}
 		}
 
-		if (! validateUsername(username)) {
+		if (!validateUsername(username)) {
 			throw new Exception("Invalid username");
 		}
 
@@ -121,13 +124,11 @@ public class UserAdminCommand {
 	}
 
 	/**
-	 * Command for adding a user. The command interactively asks for username, password and roles; the
-	 * input plain text password is encrypted before storing.
+	 * Command for adding a user. The command interactively asks for username,
+	 * password and roles; the input plain text password is encrypted before
+	 * storing.
 	 *
-	 * @param session
 	 * @return true if the user was successfully added
-	 *
-	 * @throws Exception
 	 */
 	@Descriptor("Add user with password and roles interactively")
 	public boolean addUser(final CommandSession session) throws Exception {
@@ -136,7 +137,8 @@ public class UserAdminCommand {
 		Scanner scanner = (Scanner) session.get(SSH_INPUT_SCANNER);
 
 		try {
-			// switch off the history so that username, password and roles will not be saved in console history
+			// switch off the history so that username, password and roles will not be saved
+			// in console history
 			if (scanner != null) {
 				inputScanner.toggleHistoryEnabled(false);
 			}
@@ -157,7 +159,7 @@ public class UserAdminCommand {
 				scanner.toggleEchoEnabled(false);
 			}
 			String password = readPassword(reader);
-			if (password == null){
+			if (password == null) {
 				return false;
 			}
 			if (scanner != null) {
@@ -171,7 +173,7 @@ public class UserAdminCommand {
 
 			SecureUserStore.putUser(username, DigestUtil.encrypt(password), roles);
 
-			if(SecureUserStore.existsUser(DEFAULT_USER)) {
+			if (SecureUserStore.existsUser(DEFAULT_USER)) {
 				SecureUserStore.deleteUser(DEFAULT_USER);
 			}
 		} finally {
@@ -195,10 +197,10 @@ public class UserAdminCommand {
 	 * Command to remove the password for a user
 	 *
 	 * @param username user to remove the password for
-	 * @throws Exception
 	 */
 	@Descriptor("Reset password")
-	public void resetPassword(@Descriptor("username of the user whose password will be reset") String username) throws Exception {
+	public void resetPassword(@Descriptor("username of the user whose password will be reset") String username)
+			throws Exception {
 		if (!SecureUserStore.existsUser(username)) {
 			throw new Exception("Such user does not exist");
 		}
@@ -207,15 +209,15 @@ public class UserAdminCommand {
 	}
 
 	/**
-	 * Command to set or change the password for a user; the command asks interactively for the new password; the
-	 * input plain text password is encrypted before storing.
+	 * Command to set or change the password for a user; the command asks
+	 * interactively for the new password; the input plain text password is
+	 * encrypted before storing.
 	 *
-	 * @param session
 	 * @param username the user whose password will be changed
-	 * @throws Exception
 	 */
 	@Descriptor("Set or change password")
-	public void setPassword(final CommandSession session, @Descriptor("Username of the user whose password will be changed") String username) throws Exception {
+	public void setPassword(final CommandSession session,
+			@Descriptor("Username of the user whose password will be changed") String username) throws Exception {
 		if ("".equals(username)) {
 			System.out.println("Username not specified");
 			return;
@@ -229,7 +231,8 @@ public class UserAdminCommand {
 		Scanner scanner = (Scanner) session.get(SSH_INPUT_SCANNER);
 
 		try {
-			// switch off echo and history so that the password is neither echoed to the console, nor saved in history
+			// switch off echo and history so that the password is neither echoed to the
+			// console, nor saved in history
 			if (scanner != null) {
 				inputScanner.toggleHistoryEnabled(false);
 				scanner.toggleEchoEnabled(false);
@@ -253,11 +256,13 @@ public class UserAdminCommand {
 	/**
 	 * Command to add roles to a user
 	 *
-	 * @param args command line arguments in the format -username <username>\r\n-roles <comma-separated list of roles to add>
-	 * @throws Exception
+	 * @param args command line arguments in the format -username
+	 *             <username>\r\n-roles <comma-separated list of roles to add>
 	 */
 	@Descriptor("Add roles to user")
-	public void addRoles(@Descriptor("-username <username>\r\n-roles <comma-separated list of roles to add>") String[] args) throws Exception {
+	public void addRoles(
+			@Descriptor("-username <username>\r\n-roles <comma-separated list of roles to add>") String[] args)
+			throws Exception {
 		String username = null;
 		String roles = "";
 
@@ -275,7 +280,7 @@ public class UserAdminCommand {
 			throw new Exception("Username not specified");
 		}
 
-		if("".equals(roles)) {
+		if ("".equals(roles)) {
 			return;
 		}
 
@@ -289,11 +294,13 @@ public class UserAdminCommand {
 	/**
 	 * Command to remove roles for a particular user
 	 *
-	 * @param args command line arguments in the format -username <username>\r\n-roles <comma-separated list of roles to remove>
-	 * @throws Exception
+	 * @param args command line arguments in the format -username
+	 *             <username>\r\n-roles <comma-separated list of roles to remove>
 	 */
 	@Descriptor("Remove user roles")
-	public void removeRoles(@Descriptor("-username <username>\r\n-roles <comma-separated list of roles to remove>") String[] args) throws Exception {
+	public void removeRoles(
+			@Descriptor("-username <username>\r\n-roles <comma-separated list of roles to remove>") String[] args)
+			throws Exception {
 		String username = null;
 		String roles = "";
 
@@ -311,7 +318,7 @@ public class UserAdminCommand {
 			throw new Exception("Username not specified");
 		}
 
-		if("".equals(roles)) {
+		if ("".equals(roles)) {
 			return;
 		}
 
@@ -330,12 +337,12 @@ public class UserAdminCommand {
 
 		String[] users = SecureUserStore.getUserNames();
 
-		if(users.length == 0) {
+		if (users.length == 0) {
 			System.out.println("No users available");
 			return;
 		}
 
-		for(String user : users) {
+		for (String user : users) {
 			System.out.println(user);
 		}
 	}
@@ -344,7 +351,7 @@ public class UserAdminCommand {
 		String password = null;
 		int count = 0;
 
-		while (password == null && count < PASSWORD_INPUT_TRIALS_LIMIT){
+		while (password == null && count < PASSWORD_INPUT_TRIALS_LIMIT) {
 			System.out.print("password: ");
 			System.out.flush();
 
@@ -354,7 +361,6 @@ public class UserAdminCommand {
 				System.out.println("Error while reading password");
 				return null;
 			}
-
 
 			if (password == null || "".equals(password)) {
 				System.out.println("Password not specified");
@@ -374,7 +380,7 @@ public class UserAdminCommand {
 		String passwordConfirmation = null;
 		count = 0;
 
-		while (passwordConfirmation == null && count < PASSWORD_INPUT_TRIALS_LIMIT){
+		while (passwordConfirmation == null && count < PASSWORD_INPUT_TRIALS_LIMIT) {
 			System.out.print("Confirm password: ");
 			System.out.flush();
 
@@ -391,13 +397,13 @@ public class UserAdminCommand {
 
 			count++;
 		}
-		if (passwordConfirmation == null){
+		if (passwordConfirmation == null) {
 			return null;
 		}
 		return password;
 	}
 
-	private String readUsername (BufferedReader reader) {
+	private String readUsername(BufferedReader reader) {
 		System.out.print("username: ");
 		System.out.flush();
 		String username = null;
@@ -417,8 +423,8 @@ public class UserAdminCommand {
 		return username;
 	}
 
-	private String readRoles (BufferedReader reader){
-		//roles input validation
+	private String readRoles(BufferedReader reader) {
+		// roles input validation
 		System.out.print("roles: ");
 		System.out.flush();
 		String roles = null;
@@ -435,10 +441,10 @@ public class UserAdminCommand {
 		return roles;
 	}
 
-	private static boolean validateUsername (String username){
-		if( username == null){
+	private static boolean validateUsername(String username) {
+		if (username == null) {
 			return false;
-		}else{
+		} else {
 			Pattern allowedChars = Pattern.compile("[A-Za-z0-9_.]+");
 			Matcher matcher = allowedChars.matcher(username);
 			return matcher.matches();

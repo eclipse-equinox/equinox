@@ -23,14 +23,8 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({
-	StringMatcherTests.class,
-	RuntimeTests.class,
-	AdaptableTests.class,
-	RegistryTests.class,
-	SimpleRegistryTests.class,
-	FileLocatorTest.class
-})
+@SuiteClasses({ StringMatcherTests.class, RuntimeTests.class, AdaptableTests.class, RegistryTests.class,
+		SimpleRegistryTests.class, FileLocatorTest.class })
 public class AllTests {
 	// intentionally left blank
 }

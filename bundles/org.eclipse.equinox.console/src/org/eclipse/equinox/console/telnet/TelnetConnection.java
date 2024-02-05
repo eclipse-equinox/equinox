@@ -27,12 +27,12 @@ import org.eclipse.equinox.console.common.ConsoleInputStream;
 import org.osgi.framework.BundleContext;
 
 /**
- * This class manages a telnet connection. It is responsible for wrapping the original io streams
- * from the socket, and starting a CommandSession to execute commands from the telnet.
- *
+ * This class manages a telnet connection. It is responsible for wrapping the
+ * original io streams from the socket, and starting a CommandSession to execute
+ * commands from the telnet.
  */
 public class TelnetConnection extends Thread implements Closeable {
-	
+
 	private Socket socket;
 	private CommandProcessor processor;
 	private BundleContext context;
@@ -46,13 +46,13 @@ public class TelnetConnection extends Thread implements Closeable {
 	private static final String EQUINOX_SCOPE = "equinox:*";
 	public static final String CLOSEABLE = "CLOSEABLE";
 
-	public TelnetConnection (Socket socket, CommandProcessor processor, BundleContext context) {
+	public TelnetConnection(Socket socket, CommandProcessor processor, BundleContext context) {
 		this.socket = socket;
 		this.processor = processor;
 		this.context = context;
 		callback = new NegotiationFinishedCallback(this);
 	}
-	
+
 	@Override
 	public void run() {
 		try {
@@ -61,11 +61,12 @@ public class TelnetConnection extends Thread implements Closeable {
 			out.autoSend();
 			TelnetInputHandler telnetInputHandler = new TelnetInputHandler(socket.getInputStream(), in, out, callback);
 			telnetInputHandler.start();
-			
+
 			long start = System.currentTimeMillis();
-			
+
 			synchronized (this) {
-				while (isTelnetNegotiationFinished == false && System.currentTimeMillis() - start < NEGOTIATION_TIMEOUT) {
+				while (isTelnetNegotiationFinished == false
+						&& System.currentTimeMillis() - start < NEGOTIATION_TIMEOUT) {
 					try {
 						wait(TIMEOUT);
 					} catch (InterruptedException e) {
@@ -75,25 +76,27 @@ public class TelnetConnection extends Thread implements Closeable {
 			}
 			final CommandSession session;
 			PrintStream output = new PrintStream(out);
-			
+
 			ConsoleInputStream inp = new ConsoleInputStream();
-			
+
 			ConsoleInputHandler consoleInputHandler = new ConsoleInputHandler(in, inp, out);
 			consoleInputHandler.getScanner().setBackspace(telnetInputHandler.getScanner().getBackspace());
 			consoleInputHandler.getScanner().setDel(telnetInputHandler.getScanner().getDel());
-			consoleInputHandler.getScanner().setCurrentEscapesToKey(telnetInputHandler.getScanner().getCurrentEscapesToKey());
+			consoleInputHandler.getScanner()
+					.setCurrentEscapesToKey(telnetInputHandler.getScanner().getCurrentEscapesToKey());
 			consoleInputHandler.getScanner().setEscapes(telnetInputHandler.getScanner().getEscapes());
-			((ConsoleInputScanner)consoleInputHandler.getScanner()).setContext(context);
-			
+			((ConsoleInputScanner) consoleInputHandler.getScanner()).setContext(context);
+
 			consoleInputHandler.start();
-			
+
 			session = processor.createSession(inp, output, output);
 			session.put(SCOPE, EQUINOX_SCOPE);
 			session.put(PROMPT, OSGI_PROMPT);
-			// Store this closeable object in the session, so that the disconnect command can close it
+			// Store this closeable object in the session, so that the disconnect command
+			// can close it
 			session.put(CLOSEABLE, this);
-			((ConsoleInputScanner)consoleInputHandler.getScanner()).setSession(session);
-			
+			((ConsoleInputScanner) consoleInputHandler.getScanner()).setSession(session);
+
 			try {
 				session.execute("gosh --login --noshutdown");
 			} catch (Exception e) {
@@ -102,8 +105,7 @@ public class TelnetConnection extends Thread implements Closeable {
 				session.close();
 				try {
 					socket.close();
-				}
-				catch (IOException e) {
+				} catch (IOException e) {
 					// do nothing
 				}
 			}
@@ -111,7 +113,7 @@ public class TelnetConnection extends Thread implements Closeable {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
 	public void close() {
 		try {
@@ -121,7 +123,7 @@ public class TelnetConnection extends Thread implements Closeable {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public synchronized void telnetNegotiationFinished() {
 		isTelnetNegotiationFinished = true;
 		notify();

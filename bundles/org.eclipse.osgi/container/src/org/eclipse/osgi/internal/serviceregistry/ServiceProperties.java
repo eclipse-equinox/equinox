@@ -31,8 +31,8 @@ class ServiceProperties extends CaseInsensitiveDictionaryMap<String, Object> {
 	 * Create a properties object from a Dictionary.
 	 *
 	 * @param props The properties for this service.
-	 * @throws IllegalArgumentException If a case-variants of a key are
-	 * in the props parameter.
+	 * @throws IllegalArgumentException If a case-variants of a key are in the props
+	 *                                  parameter.
 	 */
 	ServiceProperties(Dictionary<String, ?> props) {
 		this(props, 0);
@@ -43,8 +43,8 @@ class ServiceProperties extends CaseInsensitiveDictionaryMap<String, Object> {
 	 *
 	 * @param props The properties for this service.
 	 * @param extra Extra capacity in the map.
-	 * @throws IllegalArgumentException If a case-variants of a key are
-	 * in the props parameter.
+	 * @throws IllegalArgumentException If a case-variants of a key are in the props
+	 *                                  parameter.
 	 */
 	ServiceProperties(Dictionary<String, ?> props, int extra) {
 		super(initialCapacity((props == null) ? extra : props.size() + extra));
@@ -70,8 +70,8 @@ class ServiceProperties extends CaseInsensitiveDictionaryMap<String, Object> {
 	 * Create a properties object from a Map.
 	 *
 	 * @param props The properties for this service.
-	 * @throws IllegalArgumentException If a case-variants of a key are
-	 * in the props parameter.
+	 * @throws IllegalArgumentException If a case-variants of a key are in the props
+	 *                                  parameter.
 	 */
 	ServiceProperties(Map<String, ?> props) {
 		super(initialCapacity((props == null) ? 0 : props.size()));
@@ -95,9 +95,8 @@ class ServiceProperties extends CaseInsensitiveDictionaryMap<String, Object> {
 	/**
 	 * Attempt to clone the value if necessary and possible.
 	 *
-	 * For some strange reason, you can test to see if an Object is
-	 * Cloneable but you can't call the clone method since it is
-	 * protected on Object!
+	 * For some strange reason, you can test to see if an Object is Cloneable but
+	 * you can't call the clone method since it is protected on Object!
 	 *
 	 * @param value object to be cloned.
 	 * @return cloned object or original object if we didn't clone it.

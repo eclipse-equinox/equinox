@@ -29,8 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 public class BaseAsyncServlet extends BaseServlet {
 	private static final long serialVersionUID = 1L;
 
-	ScheduledThreadPoolExecutor executor =
-		(ScheduledThreadPoolExecutor)Executors.newScheduledThreadPool(4);
+	ScheduledThreadPoolExecutor executor = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(4);
 
 	public BaseAsyncServlet() {
 		super();
@@ -41,8 +40,7 @@ public class BaseAsyncServlet extends BaseServlet {
 	}
 
 	@Override
-	protected void service(
-			HttpServletRequest request, HttpServletResponse response) {
+	protected void service(HttpServletRequest request, HttpServletResponse response) {
 
 		AsyncContext asyncContext = request.startAsync(request, response);
 
@@ -62,11 +60,9 @@ public class BaseAsyncServlet extends BaseServlet {
 				writer.print(Thread.currentThread().getName());
 				writer.print(" - ");
 				writer.print(content);
-			}
-			catch (IOException ioe) {
+			} catch (IOException ioe) {
 				ioe.printStackTrace();
-			}
-			finally {
+			} finally {
 				asyncContext.complete();
 			}
 		}

@@ -24,6 +24,6 @@ public class TestHelper {
 	}
 
 	public static IPath getInstanceBaseLocation() {
-		return InstancePreferences.getBaseLocation();
+		return new InstancePreferences().getBaseLocation();
 	}
 }

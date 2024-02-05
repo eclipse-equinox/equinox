@@ -1,13 +1,16 @@
 package org.eclipse.osgi.tests.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
+import org.junit.Test;
 import org.osgi.framework.Constants;
 
-public class TestCaseinsensitiveMap extends CoreTest {
+public class TestCaseinsensitiveMap {
 	@SuppressWarnings("deprecation")
 	static String[] COMMON_KEY_NAMES = new String[] { //
 
@@ -62,7 +65,7 @@ public class TestCaseinsensitiveMap extends CoreTest {
 			Constants.PROVIDE_CAPABILITY //
 	};
 
-	String[] OTHER_KEY_NAMES = new String[] {"test.key0", //
+	String[] OTHER_KEY_NAMES = new String[] { "test.key0", //
 			"test.key1", //
 			"test.key2", //
 			"test.key3", //
@@ -77,10 +80,12 @@ public class TestCaseinsensitiveMap extends CoreTest {
 	private static final String VALUE1 = "-VALUE1";
 	private static final String VALUE2 = "-VALUE2";
 
+	@Test
 	public void testCommonKeys() {
 		testKeys(COMMON_KEY_NAMES);
 	}
 
+	@Test
 	public void testOtherKeys() {
 		testKeys(OTHER_KEY_NAMES);
 	}

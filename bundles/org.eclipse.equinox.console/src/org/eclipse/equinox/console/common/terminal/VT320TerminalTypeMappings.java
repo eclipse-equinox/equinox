@@ -17,7 +17,7 @@ package org.eclipse.equinox.console.common.terminal;
 import org.eclipse.equinox.console.common.KEYS;
 
 public class VT320TerminalTypeMappings extends TerminalTypeMappings {
-	
+
 	public VT320TerminalTypeMappings() {
 		super();
 		BACKSPACE = 8;
@@ -32,6 +32,6 @@ public class VT320TerminalTypeMappings extends TerminalTypeMappings {
 		escapesToKey.put("[6~", KEYS.PGDN); //$NON-NLS-1$
 		escapesToKey.put("[2~", KEYS.INS); //$NON-NLS-1$
 		escapesToKey.put("[3~", KEYS.DEL); //$NON-NLS-1$
-		
+
 	}
 }

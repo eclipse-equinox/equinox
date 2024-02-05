@@ -20,15 +20,16 @@ import org.osgi.framework.Bundle;
 /**
  * A factory used to create certificate verifiers.
  * <p>
- * <strong>EXPERIMENTAL</strong>. This class or interface has been added as
- * part of a work in progress. There is no guarantee that this API will
- * work or that it will remain the same. Please do not use this API without
- * consulting with the equinox team.
+ * <strong>EXPERIMENTAL</strong>. This class or interface has been added as part
+ * of a work in progress. There is no guarantee that this API will work or that
+ * it will remain the same. Please do not use this API without consulting with
+ * the equinox team.
  * </p>
  */
 public interface CertificateVerifierFactory {
 	/**
 	 * Creates a certificate verifier for the specified content of a repository
+	 * 
 	 * @param content the content of the repository
 	 * @return a certificate verifier for the specified content of a repository
 	 * @throws IOException if an IO exception occurs while reading the repository
@@ -37,9 +38,11 @@ public interface CertificateVerifierFactory {
 
 	/**
 	 * Returns a certificate verifier for the specified bundle.
+	 * 
 	 * @param bundle the bundle to get a verifier for
 	 * @return a certificate verifier for the specified bundle.
-	 * @throws IOException if an IO exception occurs while reading the bundle content
+	 * @throws IOException if an IO exception occurs while reading the bundle
+	 *                     content
 	 */
 	public CertificateVerifier getVerifier(Bundle bundle) throws IOException;
 }

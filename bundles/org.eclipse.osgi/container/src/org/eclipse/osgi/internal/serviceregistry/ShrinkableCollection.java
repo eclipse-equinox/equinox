@@ -21,19 +21,18 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A Shrinkable Collection. This class provides a wrapper for a list of collections
- * that allows items to be removed from the wrapped collections (shrinking) but
- * does not allow items to be added to the wrapped collections.
+ * A Shrinkable Collection. This class provides a wrapper for a list of
+ * collections that allows items to be removed from the wrapped collections
+ * (shrinking) but does not allow items to be added to the wrapped collections.
  *
  * <p>
- * The collections must act as sets in that each collection in the list
- * must not have two entries which are equal.
+ * The collections must act as sets in that each collection in the list must not
+ * have two entries which are equal.
  *
  * <p>
- * All the optional <code>Collection</code> operations except
- * <code>add</code> and <code>addAll</code> are supported. Attempting to add to the
- * collection will result in an <code>UnsupportedOperationException</code>.
- *
+ * All the optional <code>Collection</code> operations except <code>add</code>
+ * and <code>addAll</code> are supported. Attempting to add to the collection
+ * will result in an <code>UnsupportedOperationException</code>.
  */
 
 public class ShrinkableCollection<E> implements Collection<E> {
@@ -143,18 +142,18 @@ public class ShrinkableCollection<E> implements Collection<E> {
 		return new Iterator<E>() {
 			private E last;
 
-		@Override
+			@Override
 			public boolean hasNext() {
 				return iter.hasNext();
 			}
 
-		@Override
+			@Override
 			public E next() {
 				last = iter.next();
 				return last;
 			}
 
-		@Override
+			@Override
 			public void remove() {
 				iter.remove();
 				for (Collection<? extends E> c : collections) {

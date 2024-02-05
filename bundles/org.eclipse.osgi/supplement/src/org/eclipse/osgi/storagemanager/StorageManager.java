@@ -277,7 +277,7 @@ public final class StorageManager {
 					int generation = Integer.parseInt(file.substring(len));
 					if (generation > oldestGeneration)
 						oldestGeneration = generation;
-				}catch (NumberFormatException e) {
+				} catch (NumberFormatException e) {
 					continue;
 				}
 			}
@@ -608,7 +608,6 @@ public final class StorageManager {
 	/**
 	 * This methods remove all the temporary files that have been created by the storage manager.
 	 * This removal is only done if the instance of eclipse calling this method is the last instance using this storage manager.
-	 * @throws IOException
 	 */
 	private void cleanup(boolean doLock) throws IOException {
 		if (readOnly)

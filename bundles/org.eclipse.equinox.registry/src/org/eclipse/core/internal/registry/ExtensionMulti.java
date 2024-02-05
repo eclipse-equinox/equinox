@@ -22,14 +22,15 @@ public class ExtensionMulti extends Extension {
 		super(registry, persist);
 	}
 
-	protected ExtensionMulti(int self, String simpleId, String namespace, int[] children, int extraData, ExtensionRegistry registry, boolean persist) {
+	protected ExtensionMulti(int self, String simpleId, String namespace, int[] children, int extraData,
+			ExtensionRegistry registry, boolean persist) {
 		super(self, simpleId, namespace, children, extraData, registry, persist);
 	}
 
 	@Override
 	protected String getLabel(String locale) {
 		// this method call should be fairly rare, so no caching to save on memory
-		String[] translated = registry.translate(new String[] {getLabelAsIs()}, getContributor(), locale);
+		String[] translated = registry.translate(new String[] { getLabelAsIs() }, getContributor(), locale);
 		return translated[0];
 	}
 

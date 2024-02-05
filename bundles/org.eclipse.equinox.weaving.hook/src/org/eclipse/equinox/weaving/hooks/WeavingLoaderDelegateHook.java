@@ -40,159 +40,155 @@ import org.osgi.framework.Bundle;
  */
 public class WeavingLoaderDelegateHook extends ClassLoaderHook {
 
-    private final ThreadLocal<Set<String>> postFindClassCalls = new ThreadLocal<Set<String>>() {
+	private final ThreadLocal<Set<String>> postFindClassCalls = new ThreadLocal<Set<String>>() {
 
-        @Override
-        protected Set<String> initialValue() {
-            return new HashSet<>();
-        }
-    };
+		@Override
+		protected Set<String> initialValue() {
+			return new HashSet<>();
+		}
+	};
 
-    private final ThreadLocal<Set<String>> postFindResourceCalls = new ThreadLocal<Set<String>>() {
+	private final ThreadLocal<Set<String>> postFindResourceCalls = new ThreadLocal<Set<String>>() {
 
-        @Override
-        protected Set<String> initialValue() {
-            return new HashSet<>();
-        }
-    };
+		@Override
+		protected Set<String> initialValue() {
+			return new HashSet<>();
+		}
+	};
 
-    private final ThreadLocal<Set<String>> postFindResourcesCalls = new ThreadLocal<Set<String>>() {
+	private final ThreadLocal<Set<String>> postFindResourcesCalls = new ThreadLocal<Set<String>>() {
 
-        @Override
-        protected Set<String> initialValue() {
-            return new HashSet<>();
-        }
-    };
+		@Override
+		protected Set<String> initialValue() {
+			return new HashSet<>();
+		}
+	};
 
-    private final ISupplementerRegistry supplementerRegistry;
+	private final ISupplementerRegistry supplementerRegistry;
 
-    /**
-     * Create the hook instance for broaden the visibility according to the
-     * supplementing mechansism.
-     *
-     * @param supplementerRegistry The supplementer registry to be used by this
-     *            hook for information retrieval which bundles are supplemented
-     *            by which other bundles (needs to not be null)
-     */
-    public WeavingLoaderDelegateHook(
-            final ISupplementerRegistry supplementerRegistry) {
-        this.supplementerRegistry = supplementerRegistry;
-    }
+	/**
+	 * Create the hook instance for broaden the visibility according to the
+	 * supplementing mechansism.
+	 *
+	 * @param supplementerRegistry The supplementer registry to be used by this hook
+	 *                             for information retrieval which bundles are
+	 *                             supplemented by which other bundles (needs to not
+	 *                             be null)
+	 */
+	public WeavingLoaderDelegateHook(final ISupplementerRegistry supplementerRegistry) {
+		this.supplementerRegistry = supplementerRegistry;
+	}
 
-    /**
-     *
-     * @see org.eclipse.osgi.internal.hookregistry.ClassLoaderHook#postFindClass(java.lang.String,
-     *      org.eclipse.osgi.internal.loader.ModuleClassLoader)
-     */
-    @Override
-    public Class<?> postFindClass(final String name,
-            final ModuleClassLoader classLoader) throws ClassNotFoundException {
-        final long bundleID = classLoader.getBundle().getBundleId();
+	/**
+	 *
+	 * @see org.eclipse.osgi.internal.hookregistry.ClassLoaderHook#postFindClass(java.lang.String,
+	 *      org.eclipse.osgi.internal.loader.ModuleClassLoader)
+	 */
+	@Override
+	public Class<?> postFindClass(final String name, final ModuleClassLoader classLoader)
+			throws ClassNotFoundException {
+		final long bundleID = classLoader.getBundle().getBundleId();
 
-        final String callKey = bundleID + name;
-        if (postFindClassCalls.get().contains(callKey)) {
-            return null;
-        }
+		final String callKey = bundleID + name;
+		if (postFindClassCalls.get().contains(callKey)) {
+			return null;
+		}
 
-        postFindClassCalls.get().add(callKey);
-        try {
-            final Supplementer[] supplementers = supplementerRegistry
-                    .getSupplementers(bundleID);
-            if (supplementers != null) {
-                for (Supplementer supplementer : supplementers) {
-                    try {
-                        final Bundle bundle = supplementer.getSupplementerHost();
-                        if (bundle.getState() != Bundle.UNINSTALLED) {
-                            final Class<?> clazz = bundle.loadClass(name);
-                            if (clazz != null) {
-                                return clazz;
-                            }
-                        }
-                    }catch (final ClassNotFoundException e) {
-                    }
-                }
-            }
-        } finally {
-            postFindClassCalls.get().remove(callKey);
-        }
+		postFindClassCalls.get().add(callKey);
+		try {
+			final Supplementer[] supplementers = supplementerRegistry.getSupplementers(bundleID);
+			if (supplementers != null) {
+				for (Supplementer supplementer : supplementers) {
+					try {
+						final Bundle bundle = supplementer.getSupplementerHost();
+						if (bundle.getState() != Bundle.UNINSTALLED) {
+							final Class<?> clazz = bundle.loadClass(name);
+							if (clazz != null) {
+								return clazz;
+							}
+						}
+					} catch (final ClassNotFoundException e) {
+					}
+				}
+			}
+		} finally {
+			postFindClassCalls.get().remove(callKey);
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    /**
-     *
-     * @see org.eclipse.osgi.internal.hookregistry.ClassLoaderHook#postFindResource(java.lang.String,
-     *      org.eclipse.osgi.internal.loader.ModuleClassLoader)
-     */
-    @Override
-    public URL postFindResource(final String name,
-            final ModuleClassLoader classLoader) throws FileNotFoundException {
-        final long bundleID = classLoader.getBundle().getBundleId();
+	/**
+	 *
+	 * @see org.eclipse.osgi.internal.hookregistry.ClassLoaderHook#postFindResource(java.lang.String,
+	 *      org.eclipse.osgi.internal.loader.ModuleClassLoader)
+	 */
+	@Override
+	public URL postFindResource(final String name, final ModuleClassLoader classLoader) throws FileNotFoundException {
+		final long bundleID = classLoader.getBundle().getBundleId();
 
-        final String callKey = bundleID + name;
-        if (postFindResourceCalls.get().contains(callKey)) {
-            return null;
-        }
+		final String callKey = bundleID + name;
+		if (postFindResourceCalls.get().contains(callKey)) {
+			return null;
+		}
 
-        postFindResourceCalls.get().add(callKey);
-        try {
-            final Supplementer[] supplementers = supplementerRegistry
-                    .getSupplementers(bundleID);
-            if (supplementers != null) {
-                for (Supplementer supplementer : supplementers) {
-                    try {
-                        final URL resource = supplementer.getSupplementerHost().getResource(name);
-                        if (resource != null) {
-                            return resource;
-                        }
-                    }catch (final Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        } finally {
-            postFindResourceCalls.get().remove(callKey);
-        }
+		postFindResourceCalls.get().add(callKey);
+		try {
+			final Supplementer[] supplementers = supplementerRegistry.getSupplementers(bundleID);
+			if (supplementers != null) {
+				for (Supplementer supplementer : supplementers) {
+					try {
+						final URL resource = supplementer.getSupplementerHost().getResource(name);
+						if (resource != null) {
+							return resource;
+						}
+					} catch (final Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		} finally {
+			postFindResourceCalls.get().remove(callKey);
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    /**
-     *
-     * @see org.eclipse.osgi.internal.hookregistry.ClassLoaderHook#postFindResources(java.lang.String,
-     *      org.eclipse.osgi.internal.loader.ModuleClassLoader)
-     */
-    @Override
-    public Enumeration<URL> postFindResources(final String name,
-            final ModuleClassLoader classLoader) throws FileNotFoundException {
-        final long bundleID = classLoader.getBundle().getBundleId();
+	/**
+	 *
+	 * @see org.eclipse.osgi.internal.hookregistry.ClassLoaderHook#postFindResources(java.lang.String,
+	 *      org.eclipse.osgi.internal.loader.ModuleClassLoader)
+	 */
+	@Override
+	public Enumeration<URL> postFindResources(final String name, final ModuleClassLoader classLoader)
+			throws FileNotFoundException {
+		final long bundleID = classLoader.getBundle().getBundleId();
 
-        final String callKey = bundleID + name;
-        if (postFindResourcesCalls.get().contains(callKey)) {
-            return null;
-        }
+		final String callKey = bundleID + name;
+		if (postFindResourcesCalls.get().contains(callKey)) {
+			return null;
+		}
 
-        postFindResourcesCalls.get().add(callKey);
-        try {
-            final Supplementer[] supplementers = supplementerRegistry
-                    .getSupplementers(bundleID);
-            if (supplementers != null) {
-                for (Supplementer supplementer : supplementers) {
-                    try {
-                        final Enumeration<URL> resource = supplementer.getSupplementerHost().getResources(name);
-                        if (resource != null) {
-                            // TODO: if more than one enumeration is found, we should return all items
-                            return resource;
-                        }
-                    }catch (final Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        } finally {
-            postFindResourcesCalls.get().remove(callKey);
-        }
+		postFindResourcesCalls.get().add(callKey);
+		try {
+			final Supplementer[] supplementers = supplementerRegistry.getSupplementers(bundleID);
+			if (supplementers != null) {
+				for (Supplementer supplementer : supplementers) {
+					try {
+						final Enumeration<URL> resource = supplementer.getSupplementerHost().getResources(name);
+						if (resource != null) {
+							// TODO: if more than one enumeration is found, we should return all items
+							return resource;
+						}
+					} catch (final Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		} finally {
+			postFindResourcesCalls.get().remove(callKey);
+		}
 
-        return null;
-    }
+		return null;
+	}
 }

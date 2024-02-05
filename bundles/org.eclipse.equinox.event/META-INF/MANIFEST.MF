@@ -1,6 +1,6 @@
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
-Bundle-Version: 1.6.300.qualifier
+Bundle-Version: 1.7.0.qualifier
 Bundle-SymbolicName: org.eclipse.equinox.event
 Import-Package: org.eclipse.osgi.framework.eventmgr;version="1.1.0",
  org.eclipse.osgi.util;version="1.1.0",
@@ -12,7 +12,7 @@ Export-Package: org.eclipse.equinox.internal.event;x-internal:=true,
  org.eclipse.equinox.internal.event.mapper;x-internal:=true
 Bundle-Vendor: %bundleVendor
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Service-Component: OSGI-INF/component.xml
 Bundle-ActivationPolicy: lazy
 Provide-Capability: 

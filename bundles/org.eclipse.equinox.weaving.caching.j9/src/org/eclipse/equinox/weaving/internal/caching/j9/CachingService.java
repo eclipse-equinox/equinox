@@ -30,6 +30,7 @@ import org.eclipse.equinox.service.weaving.CacheEntry;
 import org.eclipse.equinox.service.weaving.ICachingService;
 import org.osgi.framework.Bundle;
 
+@SuppressWarnings("nls")
 public class CachingService implements ICachingService {
 
 	SharedClassURLHelper urlhelper;
@@ -83,7 +84,6 @@ public class CachingService implements ICachingService {
 	/**
 	 * Hash the shared class namespace using MD5
 	 * 
-	 * @param keyToHash
 	 * @return the MD5 version of the input string
 	 */
 	public String hashNamespace(final String namespace) {

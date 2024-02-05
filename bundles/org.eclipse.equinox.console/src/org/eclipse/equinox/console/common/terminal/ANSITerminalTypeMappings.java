@@ -17,13 +17,13 @@ package org.eclipse.equinox.console.common.terminal;
 import org.eclipse.equinox.console.common.KEYS;
 
 public class ANSITerminalTypeMappings extends TerminalTypeMappings {
-	
+
 	public ANSITerminalTypeMappings() {
 		super();
 		BACKSPACE = 8;
 		DEL = 127;
 	}
-	
+
 	@Override
 	public void setKeypadMappings() {
 		escapesToKey.put("[1~", KEYS.HOME); //$NON-NLS-1$

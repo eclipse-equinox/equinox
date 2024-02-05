@@ -24,7 +24,8 @@ public class Activator implements BundleActivator {
 
 	public void start(BundleContext context) throws Exception {
 		AbstractBundleTests.simpleResults.addEvent(new ExtClasspathExtTest().toString());
-		AbstractBundleTests.simpleResults.addEvent(getURLContent(this.getClass().getResource("/ext/extclasspath/a/extresource.txt"))); //$NON-NLS-1$
+		AbstractBundleTests.simpleResults
+				.addEvent(getURLContent(this.getClass().getResource("/ext/extclasspath/a/extresource.txt"))); //$NON-NLS-1$
 	}
 
 	private String getURLContent(URL resource) throws IOException {

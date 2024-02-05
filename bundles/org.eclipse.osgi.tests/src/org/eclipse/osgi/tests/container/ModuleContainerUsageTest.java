@@ -80,8 +80,7 @@ public class ModuleContainerUsageTest extends AbstractTest {
 				}
 			}
 
-			private void filterBasedOnEE(AtomicReference<Long> revisionInfo,
-					Collection<BundleCapability> candidates) {
+			private void filterBasedOnEE(AtomicReference<Long> revisionInfo, Collection<BundleCapability> candidates) {
 				Long eeIndex = revisionInfo.get();
 				// if the eeIndex is set for the revision then check if the package is
 				// available in the specified EE
@@ -120,12 +119,10 @@ public class ModuleContainerUsageTest extends AbstractTest {
 		// the set of packages
 		// above for the specified EE_INDEX
 		StringBuilder systemEEs = new StringBuilder();
-		systemEEs.append(
-				"osgi.ee; osgi.ee=\"JavaSE\"; version:List<Version>=\"1.0, 1.1, 1.2, 1.3, 1.4, 1.5\"; " + EE_INDEX
-						+ ":Long=1");
-		systemEEs.append(
-				",osgi.ee; osgi.ee=\"JavaSE\"; version:List<Version>=\"1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6\"; " + EE_INDEX
-						+ ":Long=2");
+		systemEEs.append("osgi.ee; osgi.ee=\"JavaSE\"; version:List<Version>=\"1.0, 1.1, 1.2, 1.3, 1.4, 1.5\"; "
+				+ EE_INDEX + ":Long=1");
+		systemEEs.append(",osgi.ee; osgi.ee=\"JavaSE\"; version:List<Version>=\"1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6\"; "
+				+ EE_INDEX + ":Long=2");
 		systemEEs.append(
 				",osgi.ee; osgi.ee=\"JavaSE\"; version:List<Version>=\"1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7\"; "
 						+ EE_INDEX + ":Long=3");
@@ -139,14 +136,12 @@ public class ModuleContainerUsageTest extends AbstractTest {
 		ModuleRevisionBuilder systemModuleBuilder = OSGiManifestBuilderFactory.createBuilder(getSystemManifest(),
 				Constants.SYSTEM_BUNDLE_SYMBOLICNAME, systemPackages.toString(), systemEEs.toString());
 		Module systemBundle = container.install(null, Constants.SYSTEM_BUNDLE_LOCATION, systemModuleBuilder,
-				new AtomicReference<Long>());
+				new AtomicReference<>());
 		executionEnvironments.addAll(systemBundle.getCurrentRevision()
 				.getDeclaredCapabilities(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE));
 
-		Module m1 = installModule(container, "m1", "1.0", "test.pkg1", "JavaSE-1.5",
-				executionEnvironments);
-		Module m2 = installModule(container, "m2", "1.0", "test.pkg1,test.pkg2", "JavaSE-1.5",
-				executionEnvironments);
+		Module m1 = installModule(container, "m1", "1.0", "test.pkg1", "JavaSE-1.5", executionEnvironments);
+		Module m2 = installModule(container, "m2", "1.0", "test.pkg1,test.pkg2", "JavaSE-1.5", executionEnvironments);
 
 		Module m3 = installModule(container, "m3", "1.0", "test.pkg1,test.pkg2,test.pkg3", "JavaSE-1.7",
 				executionEnvironments);
@@ -180,7 +175,7 @@ public class ModuleContainerUsageTest extends AbstractTest {
 	Module installModule(ModuleContainer container, String bsn, String version, String imports, String eeReqs,
 			List<BundleCapability> availableEEs) throws BundleException {
 		ModuleRevisionBuilder builder = createModuleRevisionBuilder(bsn, version, imports, eeReqs);
-		Module m = container.install(null, bsn, builder, new AtomicReference<Long>());
+		Module m = container.install(null, bsn, builder, new AtomicReference<>());
 		// Use a revision info that holds the EE_INDEX of the bundle based
 		// on the EE capability that matches the modules EE requirement
 		Collection<BundleRequirement> eeBundleReqs = m.getCurrentRevision()

@@ -28,14 +28,17 @@ import org.junit.Test;
 
 public class SlashEncodeTest extends StorageAbstractTest {
 
-	final private static String[] decodedSlash = {"root", "ro/ot", "/root", "root/", "ro/ot/me", "ro//ot"};
-	final private static String[] encodedSlash = {"root", "ro\\2fot", "\\2froot", "root\\2f", "ro\\2fot\\2fme", "ro\\2f\\2fot"};
+	final private static String[] decodedSlash = { "root", "ro/ot", "/root", "root/", "ro/ot/me", "ro//ot" };
+	final private static String[] encodedSlash = { "root", "ro\\2fot", "\\2froot", "root\\2f", "ro\\2fot\\2fme",
+			"ro\\2f\\2fot" };
 
-	final private static String[] decodedBackSlash = {"ro\\ot", "\\root", "root\\", "ro\\ot\\me", "ro\\\\ot"};
-	final private static String[] encodedBackSlash = {"ro\\5cot", "\\5croot", "root\\5c", "ro\\5cot\\5cme", "ro\\5c\\5cot"};
+	final private static String[] decodedBackSlash = { "ro\\ot", "\\root", "root\\", "ro\\ot\\me", "ro\\\\ot" };
+	final private static String[] encodedBackSlash = { "ro\\5cot", "\\5croot", "root\\5c", "ro\\5cot\\5cme",
+			"ro\\5c\\5cot" };
 
-	final private static String[] decodedMixSlash = {"r/o\\ot", "r\\o/ot", "/\\root", "root\\/", "\\5cro\\2f ot"};
-	final private static String[] encodedMixSlash = {"r\\2fo\\5cot", "r\\5co\\2fot", "\\2f\\5croot", "root\\5c\\2f", "\\5c5cro\\5c2f ot"};
+	final private static String[] decodedMixSlash = { "r/o\\ot", "r\\o/ot", "/\\root", "root\\/", "\\5cro\\2f ot" };
+	final private static String[] encodedMixSlash = { "r\\2fo\\5cot", "r\\5co\\2fot", "\\2f\\5croot", "root\\5c\\2f",
+			"\\5c5cro\\5c2f ot" };
 
 	/**
 	 * Tests forward slash
@@ -74,7 +77,7 @@ public class SlashEncodeTest extends StorageAbstractTest {
 	}
 
 	/**
-	 * Tests edge conditions: null or empty arguments 
+	 * Tests edge conditions: null or empty arguments
 	 */
 	@Test
 	public void testEdge() {
@@ -88,15 +91,13 @@ public class SlashEncodeTest extends StorageAbstractTest {
 
 	protected Map<String, Object> getOptions() {
 		// Password value really doesn't matter here; we specify it to avoid
-		// triggering UI elements in case default password provider has the 
+		// triggering UI elements in case default password provider has the
 		// highest priority in the tested configuration
 		return getOptions("password1");
 	}
 
 	/**
 	 * Tests preferences node name using slash encoding
-	 * @throws IOException 
-	 * @throws BackingStoreException 
 	 */
 	@Test
 	public void testPreferencesWithSlashes() throws IOException, StorageException {

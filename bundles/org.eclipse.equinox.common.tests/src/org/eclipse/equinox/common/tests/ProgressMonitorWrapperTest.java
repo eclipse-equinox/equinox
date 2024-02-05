@@ -13,34 +13,29 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests;
 
-import org.eclipse.core.runtime.*;
-import org.eclipse.core.tests.harness.CoreTest;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.ProgressMonitorWrapper;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.junit.Test;
 
 /**
  * Test cases for the Path class.
  */
-public class ProgressMonitorWrapperTest extends CoreTest {
-	/**
-	 * Need a zero argument constructor to satisfy the test harness.
-	 * This constructor should not do any real work nor should it be
-	 * called by user code.
-	 */
-	public ProgressMonitorWrapperTest() {
-		super(null);
-	}
-
-	public ProgressMonitorWrapperTest(String name) {
-		super(name);
-	}
+public class ProgressMonitorWrapperTest {
 
 	/**
 	 * @deprecated to suppress deprecation warnings
 	 */
 	@Deprecated
+	@Test
 	public void testProgressMonitorWrapper() {
 		NullProgressMonitor nullMonitor = new NullProgressMonitor();
 		SubProgressMonitor wrapped = new SubProgressMonitor(nullMonitor, 10);
-		ProgressMonitorWrapper wrapper = new ProgressMonitorWrapper(wrapped) {};
+		ProgressMonitorWrapper wrapper = new ProgressMonitorWrapper(wrapped) {
+		};
 
 		assertSame("1.0", nullMonitor, wrapped.getWrappedProgressMonitor());
 		assertSame("1.1", wrapped, wrapper.getWrappedProgressMonitor());

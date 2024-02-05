@@ -18,7 +18,7 @@ public class Params {
 
 	public static String[] append(String[] params, String value) {
 		if (params.length == 0) {
-			return new String[] {value};
+			return new String[] { value };
 		}
 		String[] tmp = new String[params.length + 1];
 		System.arraycopy(params, 0, tmp, 0, params.length);
@@ -28,7 +28,7 @@ public class Params {
 
 	public static String[] append(String[] params, String... values) {
 		if (values == null) {
-			values = new String[] {null};
+			values = new String[] { null };
 		}
 		String[] tmp = values;
 		int length = 0;
@@ -38,8 +38,7 @@ public class Params {
 			System.arraycopy(params, 0, tmp, 0, params.length);
 		}
 		for (int i = 0; i < values.length; i++) {
-			tmp[length + i] =
-				(values[i] == null) ? Const.BLANK : values[i];
+			tmp[length + i] = (values[i] == null) ? Const.BLANK : values[i];
 		}
 		return tmp;
 	}

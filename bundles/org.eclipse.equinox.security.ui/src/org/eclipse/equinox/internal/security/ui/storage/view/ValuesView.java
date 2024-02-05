@@ -34,8 +34,8 @@ import org.eclipse.swt.widgets.*;
 public class ValuesView {
 
 	/**
-	 * The default value of this variable (false, meaning "not in debug of secure storage"
-	 * removes showValueAction, encryptValueAction, and decryptValueAction.
+	 * The default value of this variable (false, meaning "not in debug of secure
+	 * storage" removes showValueAction, encryptValueAction, and decryptValueAction.
 	 */
 	static private boolean inDevelopmentMode = false;
 
@@ -133,12 +133,12 @@ public class ValuesView {
 			if (!(obj instanceof TableValuesElement))
 				return obj.toString();
 			switch (index) {
-				case 0 :
-					return ((TableValuesElement) obj).getKey();
-				case 1 :
-					return ((TableValuesElement) obj).getValue();
-				default :
-					return obj.toString();
+			case 0:
+				return ((TableValuesElement) obj).getKey();
+			case 1:
+				return ((TableValuesElement) obj).getValue();
+			default:
+				return obj.toString();
 			}
 		}
 
@@ -246,7 +246,8 @@ public class ValuesView {
 				if (selectedNode == null)
 					return;
 
-				NewValueDialog newValueDialog = new NewValueDialog(selectedNode.keys(), tableViewer.getControl().getShell());
+				NewValueDialog newValueDialog = new NewValueDialog(selectedNode.keys(),
+						tableViewer.getControl().getShell());
 				if (newValueDialog.open() != Window.OK)
 					return;
 				String key = newValueDialog.getKey();
@@ -263,7 +264,8 @@ public class ValuesView {
 		};
 		addValueAction.setText(SecUIMessages.addValueCommand);
 		addValueAction.setToolTipText(SecUIMessages.addValueCommandTmp);
-		addValueAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/value_new.gif")); //$NON-NLS-1$
+		addValueAction
+				.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/value_new.gif")); //$NON-NLS-1$
 
 		removeValueAction = new Action() {
 			@Override
@@ -278,7 +280,7 @@ public class ValuesView {
 				TableValuesElement node = (TableValuesElement) selected;
 				String key = node.getKey();
 
-				// "Are you sure?" dialog 
+				// "Are you sure?" dialog
 				MessageBox dialog = new MessageBox(shell, SWT.ICON_WARNING | SWT.YES | SWT.NO);
 				dialog.setText(SecUIMessages.removeValueTitle);
 				String msg = NLS.bind(SecUIMessages.removeValueMsg, key);
@@ -292,7 +294,8 @@ public class ValuesView {
 		};
 		removeValueAction.setText(SecUIMessages.removeValueCommand);
 		removeValueAction.setToolTipText(SecUIMessages.removeValueCommandTmp);
-		removeValueAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/value_delete.gif")); //$NON-NLS-1$
+		removeValueAction
+				.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/value_delete.gif")); //$NON-NLS-1$
 
 		if (inDevelopmentMode)
 			addDevelopmentMenuOptions();
@@ -329,7 +332,8 @@ public class ValuesView {
 		};
 		showValueAction.setText(SecUIMessages.showValueCommand);
 		showValueAction.setToolTipText(SecUIMessages.showValueCommandTmp);
-		showValueAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/value_show.gif")); //$NON-NLS-1$
+		showValueAction
+				.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/value_show.gif")); //$NON-NLS-1$
 
 		encryptValueAction = new Action() {
 			@Override
@@ -339,7 +343,8 @@ public class ValuesView {
 		};
 		encryptValueAction.setText(SecUIMessages.encryptValueCommand);
 		encryptValueAction.setToolTipText(SecUIMessages.encryptValueCommandTmp);
-		encryptValueAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/encrypt.gif")); //$NON-NLS-1$
+		encryptValueAction
+				.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/encrypt.gif")); //$NON-NLS-1$
 
 		decryptValueAction = new Action() {
 			@Override
@@ -349,7 +354,8 @@ public class ValuesView {
 		};
 		decryptValueAction.setText(SecUIMessages.decryptValueCommand);
 		decryptValueAction.setToolTipText(SecUIMessages.decryptValueCommandTmp);
-		decryptValueAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/decrypt.gif")); //$NON-NLS-1$
+		decryptValueAction
+				.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/decrypt.gif")); //$NON-NLS-1$
 	}
 
 	protected void reCodeValue(boolean encrypted) {

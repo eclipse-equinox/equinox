@@ -17,8 +17,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.function.Function;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
 import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
@@ -35,6 +33,7 @@ import org.osgi.resource.Requirement;
 
 /**
  * An implementation of {@link BundleRevision}.
+ * 
  * @since 3.10
  */
 public final class ModuleRevision implements BundleRevision {
@@ -47,7 +46,8 @@ public final class ModuleRevision implements BundleRevision {
 	private final Object revisionInfo;
 	private volatile Boolean lazyActivationPolicy = null;
 
-	ModuleRevision(String symbolicName, Version version, int types, NamespaceList.Builder<GenericInfo> capabilityInfos, NamespaceList.Builder<GenericInfo> requirementInfos, ModuleRevisions revisions, Object revisionInfo) {
+	ModuleRevision(String symbolicName, Version version, int types, NamespaceList.Builder<GenericInfo> capabilityInfos,
+			NamespaceList.Builder<GenericInfo> requirementInfos, ModuleRevisions revisions, Object revisionInfo) {
 		this.symbolicName = symbolicName;
 		this.version = version;
 		this.types = types;
@@ -58,29 +58,30 @@ public final class ModuleRevision implements BundleRevision {
 	}
 
 	private NamespaceList<ModuleCapability> createCapabilities(NamespaceList.Builder<GenericInfo> capabilityInfos) {
-		return capabilityInfos.transformIntoCopy(new Function<GenericInfo, ModuleCapability>()  {
+		return capabilityInfos.transformIntoCopy(new Function<GenericInfo, ModuleCapability>() {
 			public ModuleCapability apply(GenericInfo i) {
 				Map<String, String> directives = i.mutable ? copyUnmodifiableMap(i.directives) : i.directives;
 				Map<String, Object> attributes = i.mutable ? copyUnmodifiableMap(i.attributes) : i.attributes;
 				return new ModuleCapability(i.namespace, directives, attributes, ModuleRevision.this);
 			}
+
+			private <K, V> Map<K, V> copyUnmodifiableMap(Map<K, V> map) {
+				int size = map.size();
+				if (size == 0) {
+					return Collections.emptyMap();
+				}
+				if (size == 1) {
+					Map.Entry<K, V> entry = map.entrySet().iterator().next();
+					return Collections.singletonMap(entry.getKey(), entry.getValue());
+				}
+				return Collections.unmodifiableMap(new HashMap<>(map));
+			}
+
 		}, NamespaceList.CAPABILITY).build();
 	}
 
-	private static <K, V> Map<K, V> copyUnmodifiableMap(Map<K, V> map) {
-		int size = map.size();
-		if (size == 0) {
-			return Collections.emptyMap();
-		}
-		if (size == 1) {
-			Map.Entry<K, V> entry = map.entrySet().iterator().next();
-			return Collections.singletonMap(entry.getKey(), entry.getValue());
-		}
-		return Collections.unmodifiableMap(new HashMap<>(map));
-	}
-
 	private NamespaceList<ModuleRequirement> createRequirements(NamespaceList.Builder<GenericInfo> infos) {
-		return infos.transformIntoCopy(new Function<GenericInfo, ModuleRequirement>()  {
+		return infos.transformIntoCopy(new Function<GenericInfo, ModuleRequirement>() {
 			public ModuleRequirement apply(GenericInfo i) {
 				return new ModuleRequirement(i.namespace, i.directives, i.attributes, ModuleRevision.this);
 			}
@@ -114,8 +115,10 @@ public final class ModuleRevision implements BundleRevision {
 
 	/**
 	 * Returns the capabilities declared by this revision
+	 * 
 	 * @param namespace The namespace of the declared capabilities to return or
-	 * {@code null} to return the declared capabilities from all namespaces.
+	 *                  {@code null} to return the declared capabilities from all
+	 *                  namespaces.
 	 * @return An unmodifiable list containing the declared capabilities.
 	 */
 	public List<ModuleCapability> getModuleCapabilities(String namespace) {
@@ -124,8 +127,10 @@ public final class ModuleRevision implements BundleRevision {
 
 	/**
 	 * Returns the requirements declared by this revision
+	 * 
 	 * @param namespace The namespace of the declared requirements to return or
-	 * {@code null} to return the declared requirements from all namespaces.
+	 *                  {@code null} to return the declared requirements from all
+	 *                  namespaces.
 	 * @return An unmodifiable list containing the declared requirements.
 	 */
 	public List<ModuleRequirement> getModuleRequirements(String namespace) {
@@ -154,6 +159,7 @@ public final class ModuleRevision implements BundleRevision {
 
 	/**
 	 * Returns the {@link ModuleRevisions revisions} for this revision.
+	 * 
 	 * @return the {@link ModuleRevisions revisions} for this revision.
 	 */
 	public ModuleRevisions getRevisions() {
@@ -161,8 +167,9 @@ public final class ModuleRevision implements BundleRevision {
 	}
 
 	/**
-	 * Returns the revision info for this revision.  The revision info is
-	 * assigned when a revision is created to install a module or update module
+	 * Returns the revision info for this revision. The revision info is assigned
+	 * when a revision is created to install a module or update module
+	 * 
 	 * @return the revision info for this revision, may be {@code null}.
 	 */
 	public Object getRevisionInfo() {
@@ -170,9 +177,11 @@ public final class ModuleRevision implements BundleRevision {
 	}
 
 	/**
-	 * A convenience method to quickly determine if this revision
-	 * has declared the lazy activation policy.
-	 * @return true if the lazy activation policy has been declared by this module; otherwise false is returned.
+	 * A convenience method to quickly determine if this revision has declared the
+	 * lazy activation policy.
+	 * 
+	 * @return true if the lazy activation policy has been declared by this module;
+	 *         otherwise false is returned.
 	 */
 	public boolean hasLazyActivatePolicy() {
 		Boolean currentPolicy = lazyActivationPolicy;
@@ -183,7 +192,8 @@ public final class ModuleRevision implements BundleRevision {
 		List<Capability> data = getCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
 		if (!data.isEmpty()) {
 			Capability moduleData = data.get(0);
-			lazyPolicy = EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY.equals(moduleData.getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY));
+			lazyPolicy = EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY
+					.equals(moduleData.getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY));
 		}
 		lazyActivationPolicy = Boolean.valueOf(lazyPolicy);
 		return lazyPolicy;
@@ -199,45 +209,6 @@ public final class ModuleRevision implements BundleRevision {
 		if (identities.isEmpty())
 			return super.toString();
 		return identities.get(0).toString();
-	}
-
-	static <V> String toString(Map<String, V> map, boolean directives) {
-		return toString(map, directives, false);
-	}
-
-	static <V> String toString(Map<String, V> map, boolean directives, boolean stringsOnly) {
-		if (map.size() == 0)
-			return ""; //$NON-NLS-1$
-		String assignment = directives ? ":=" : "="; //$NON-NLS-1$ //$NON-NLS-2$
-		Set<Entry<String, V>> set = map.entrySet();
-		StringBuilder sb = new StringBuilder();
-		for (Entry<String, V> entry : set) {
-			sb.append("; "); //$NON-NLS-1$
-			String key = entry.getKey();
-			Object value = entry.getValue();
-			if (value instanceof List) {
-				@SuppressWarnings("unchecked")
-				List<Object> list = (List<Object>) value;
-				if (list.isEmpty())
-					continue;
-				Object component = list.get(0);
-				String className = component.getClass().getName();
-				String type = className.substring(className.lastIndexOf('.') + 1);
-				sb.append(key).append(':').append("List<").append(type).append(">").append(assignment).append('"'); //$NON-NLS-1$ //$NON-NLS-2$
-				for (Object object : list)
-					sb.append(object).append(',');
-				sb.setLength(sb.length() - 1);
-				sb.append('"');
-			} else {
-				String type = ""; //$NON-NLS-1$
-				if (!(value instanceof String) && !stringsOnly) {
-					String className = value.getClass().getName();
-					type = ":" + className.substring(className.lastIndexOf('.') + 1); //$NON-NLS-1$
-				}
-				sb.append(key).append(type).append(assignment).append('"').append(value).append('"');
-			}
-		}
-		return sb.toString();
 	}
 
 	NamespaceList<ModuleCapability> getCapabilities() {

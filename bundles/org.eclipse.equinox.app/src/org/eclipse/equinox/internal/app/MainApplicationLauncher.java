@@ -18,7 +18,8 @@ import org.eclipse.osgi.service.runnable.ApplicationRunnable;
 import org.osgi.service.application.ApplicationException;
 
 /**
- * A main threaded application may be launched using this class to launch the main threaded application.
+ * A main threaded application may be launched using this class to launch the
+ * main threaded application.
  */
 public class MainApplicationLauncher implements ApplicationRunnable {
 	private final EclipseAppContainer appContainer;

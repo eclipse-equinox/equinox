@@ -32,8 +32,8 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkUtil;
 
 /**
- * Tests reaction of AdapterManager on addition and removal of adapters from
- * the extension registry.
+ * Tests reaction of AdapterManager on addition and removal of adapters from the
+ * extension registry.
  */
 public class AdapterManagerDynamicTest {
 
@@ -83,7 +83,7 @@ public class AdapterManagerDynamicTest {
 			BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
 			bundle01 = BundleTestingHelper.installBundle("0.1", bundleContext, "Plugin_Testing/adapters/dynamic/A");
 			bundle02 = BundleTestingHelper.installBundle("0.2", bundleContext, "Plugin_Testing/adapters/dynamic/B");
-			BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] {bundle01, bundle02});
+			BundleTestingHelper.refreshPackages(bundleContext, new Bundle[] { bundle01, bundle02 });
 
 			// synchronization: listener should receive 2 groups of events
 			assertEquals(2, listener.waitFor(2, 2 * MAX_TIME_PER_BUNDLE));

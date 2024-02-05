@@ -33,15 +33,18 @@ public abstract class SecurityContributionItemFactory {
 	private final String contributionItemId;
 
 	/**
-	* Creates a new contribution item factory with the given id.
-	* @param contributionItemId the id of contribution items created by this factory
-	*/
+	 * Creates a new contribution item factory with the given id.
+	 * 
+	 * @param contributionItemId the id of contribution items created by this
+	 *                           factory
+	 */
 	protected SecurityContributionItemFactory(String contributionItemId) {
 		this.contributionItemId = contributionItemId;
 	}
 
 	/**
 	 * Returns the id of this contribution item factory.
+	 * 
 	 * @return the id of contribution items created by this factory
 	 */
 	public String getId() {
@@ -49,7 +52,7 @@ public abstract class SecurityContributionItemFactory {
 	}
 
 	/**
-	 * Workbench contribution item (id &quot;securityStatus&quot;): An icon for 
+	 * Workbench contribution item (id &quot;securityStatus&quot;): An icon for
 	 * evaluating and inspecting the security status of the system.
 	 */
 	public static final ContributionItemFactory SECURITY_STATUS = new ContributionItemFactory("securityStatus") {//$NON-NLS-1$

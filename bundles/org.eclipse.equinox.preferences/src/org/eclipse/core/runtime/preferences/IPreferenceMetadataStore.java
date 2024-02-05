@@ -23,18 +23,19 @@ public interface IPreferenceMetadataStore {
 	/**
 	 * Checks if this value type can be handled by this preference store.
 	 *
-	 * @param <V> the value type for the preference
+	 * @param <V>       the value type for the preference
 	 * @param valueType the value type to be checked
 	 *
-	 * @return true if this value type can be handled by this preference store and false otherwise
+	 * @return true if this value type can be handled by this preference store and
+	 *         false otherwise
 	 */
 	<V> boolean handles(Class<V> valueType);
 
 	/**
-	 * Loads the value of specified preference from an enclosed storage.
-	 * If the value is not found returns the preference default value.
+	 * Loads the value of specified preference from an enclosed storage. If the
+	 * value is not found returns the preference default value.
 	 *
-	 * @param <V> the value type for the preference
+	 * @param <V>        the value type for the preference
 	 * @param preference the preference metadata, must not be <code>null</code>.
 	 *
 	 * @return the preference value or default value if preference is unknown
@@ -48,8 +49,8 @@ public interface IPreferenceMetadataStore {
 	/**
 	 * Saves the value of specified preference to the enclosed storage.
 	 *
-	 * @param <V> the value type for the preference
-	 * @param value to be saved, must not be <code>null</code>.
+	 * @param <V>        the value type for the preference
+	 * @param value      to be saved, must not be <code>null</code>.
 	 * @param preference the preference metadata, must not be <code>null</code>.
 	 *
 	 * @throws UnsupportedOperationException for unsupported preference value types

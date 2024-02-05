@@ -30,7 +30,8 @@ public final class RegistryProviderFactory {
 
 	public static void setDefault(IRegistryProvider provider) throws CoreException {
 		if (defaultRegistryProvider != null) {
-			Status status = new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, IRegistryConstants.PLUGIN_ERROR, RegistryMessages.registry_default_exists, null);
+			Status status = new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, IRegistryConstants.PLUGIN_ERROR,
+					RegistryMessages.registry_default_exists, null);
 			throw new CoreException(status);
 		}
 		defaultRegistryProvider = provider;

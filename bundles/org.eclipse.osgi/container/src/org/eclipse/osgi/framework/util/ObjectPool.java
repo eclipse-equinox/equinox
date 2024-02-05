@@ -19,8 +19,10 @@ import java.util.WeakHashMap;
 import org.eclipse.osgi.internal.debug.Debug;
 
 public class ObjectPool {
-	//private static String OPTION_DEBUG_OBJECTPOOL_ADDS = Debug.ECLIPSE_OSGI + "/debug/objectPool/adds"; //$NON-NLS-1$
-	//private static String OPTION_DEBUG_OBJECTPOOL_DUPS = Debug.ECLIPSE_OSGI + "/debug/objectPool/dups"; //$NON-NLS-1$
+	// private static String OPTION_DEBUG_OBJECTPOOL_ADDS = Debug.ECLIPSE_OSGI +
+	// "/debug/objectPool/adds"; //$NON-NLS-1$
+	// private static String OPTION_DEBUG_OBJECTPOOL_DUPS = Debug.ECLIPSE_OSGI +
+	// "/debug/objectPool/dups"; //$NON-NLS-1$
 	// TODO need to set these
 	private static final boolean DEBUG_OBJECTPOOL_ADDS = false;
 	private static final boolean DEBUG_OBJECTPOOL_DUPS = false;
@@ -40,7 +42,8 @@ public class ObjectPool {
 			} else {
 				objectCache.put(obj, new WeakReference<>(obj));
 				if (DEBUG_OBJECTPOOL_ADDS)
-					Debug.println("[ObjectPool] Added unique object to pool: " + getObjectString(obj) + " Pool size: " + objectCache.size()); //$NON-NLS-1$ //$NON-NLS-2$
+					Debug.println("[ObjectPool] Added unique object to pool: " + getObjectString(obj) + " Pool size: " //$NON-NLS-1$ //$NON-NLS-2$
+							+ objectCache.size());
 			}
 		}
 		return obj;

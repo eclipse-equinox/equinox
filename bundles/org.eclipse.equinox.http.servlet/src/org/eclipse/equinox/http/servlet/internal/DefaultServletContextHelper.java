@@ -23,6 +23,7 @@ import org.osgi.service.http.context.ServletContextHelper;
 
 public class DefaultServletContextHelper extends ServletContextHelper implements HttpContext {
 	private final Bundle bundle;
+
 	public DefaultServletContextHelper(Bundle bundle) {
 		super(bundle);
 		this.bundle = bundle;

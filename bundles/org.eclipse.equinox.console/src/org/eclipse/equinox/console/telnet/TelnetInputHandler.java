@@ -24,7 +24,7 @@ import org.eclipse.equinox.console.common.InputHandler;
  * which provides telnet protocol handling.
  */
 public class TelnetInputHandler extends InputHandler {
-	
+
 	public TelnetInputHandler(InputStream input, ConsoleInputStream in, ConsoleOutputStream out, Callback callback) {
 		super(input, in, out);
 		inputScanner = new TelnetInputScanner(in, out, callback);

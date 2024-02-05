@@ -19,7 +19,6 @@ import org.osgi.framework.*;
 
 /**
  * ServiceEvent subtype for MODIFIED_ENDMATCH computation.
- *
  */
 class ModifiedServiceEvent extends ServiceEvent {
 	private static final long serialVersionUID = -5373850978543026102L;
@@ -28,9 +27,10 @@ class ModifiedServiceEvent extends ServiceEvent {
 	private final Map<String, Object> previousProperties;
 
 	/**
-	 * Create a ServiceEvent containing the service properties prior to modification.
+	 * Create a ServiceEvent containing the service properties prior to
+	 * modification.
 	 *
-	 * @param reference Reference to service with modified properties.
+	 * @param reference          Reference to service with modified properties.
 	 * @param previousProperties Service properties prior to modification.
 	 */
 	ModifiedServiceEvent(ServiceReference<?> reference, Map<String, Object> previousProperties) {
@@ -59,16 +59,15 @@ class ModifiedServiceEvent extends ServiceEvent {
 	}
 
 	/**
-	 * Return if the specified filter matches the previous service
-	 * properties.
+	 * Return if the specified filter matches the previous service properties.
 	 *
-	 * @param filter The filer to evaluate using the previous service
-	 * properties.
+	 * @param filter The filer to evaluate using the previous service properties.
 	 * @return True is the filter matches the previous service properties.
 	 */
 	boolean matchPreviousProperties(Filter filter) {
-		/* We use matches here since ServiceProperties already
-		 * does case insensitive lookup.
+		/*
+		 * We use matches here since ServiceProperties already does case insensitive
+		 * lookup.
 		 */
 		return filter.matches(previousProperties);
 	}

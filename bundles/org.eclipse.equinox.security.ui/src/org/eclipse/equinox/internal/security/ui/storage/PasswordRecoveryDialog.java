@@ -113,14 +113,16 @@ public class PasswordRecoveryDialog extends TitleAreaDialog {
 			answersText[i] = answers[i].getText();
 		}
 
-		String password = InternalExchangeUtils.recoverPassword(answersText, SecurePreferencesFactory.getDefault(), moduleID);
+		String password = InternalExchangeUtils.recoverPassword(answersText, SecurePreferencesFactory.getDefault(),
+				moduleID);
 		if (password == null) {
 			MessageBox prompt = new MessageBox(getShell(), SWT.ICON_ERROR | SWT.YES | SWT.NO);
 			prompt.setText(SecUIMessages.pswdRecoveryTitle);
 			prompt.setMessage(SecUIMessages.pswNotRecoveredMsg);
 			if (prompt.open() == SWT.YES)
 				return;
-		} else { // even in UI case we use digested and encoded password - makes no sense to show it
+		} else { // even in UI case we use digested and encoded password - makes no sense to show
+					// it
 			MessageBox prompt = new MessageBox(getShell(), SWT.ICON_INFORMATION | SWT.OK);
 			prompt.setText(SecUIMessages.pswdRecoveryTitle);
 			prompt.setMessage(SecUIMessages.pswRecoveredMsg);

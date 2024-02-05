@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2015 IBM Corporation and others.
+ * Copyright (c) 2004, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,7 @@
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
@@ -23,13 +23,9 @@ import org.osgi.service.prefs.Preferences;
  */
 public class RootPreferences extends EclipsePreferences {
 
-	/**
-	 * Default constructor.
-	 */
 	public RootPreferences() {
 		super(null, ""); //$NON-NLS-1$
 	}
-
 
 	@Override
 	public void flush() throws BackingStoreException {
@@ -39,48 +35,35 @@ public class RootPreferences extends EclipsePreferences {
 		for (String n : names) {
 			try {
 				node(n).flush();
-			}catch (BackingStoreException e) {
+			} catch (BackingStoreException e) {
 				// store the first exception we get and still try and flush
 				// the rest of the children.
-				if (exception == null)
+				if (exception == null) {
 					exception = e;
+				}
 			}
 		}
-		if (exception != null)
+		if (exception != null) {
 			throw exception;
+		}
 	}
 
-
-	protected synchronized IEclipsePreferences getChild(String key, Object context) {
-		if (children == null)
+	private synchronized IEclipsePreferences getChild(String key) {
+		if (children == null) {
 			return null;
+		}
 		Object value = children.get(key);
-		if (value == null)
+		if (value == null) {
 			return null;
-		if (value instanceof IEclipsePreferences)
-			return (IEclipsePreferences) value;
-		//lazy initialization
+		}
+		if (value instanceof IEclipsePreferences eclipsePreferences) {
+			return eclipsePreferences;
+		}
+		// lazy initialization
 		IEclipsePreferences child = PreferencesService.getDefault().createNode(key);
 		addChild(key, child);
 		return child;
 	}
-
-
-	protected synchronized IEclipsePreferences[] getChildren() {
-		//must perform lazy initialization of child nodes
-		String[] childNames = new String[0];
-		try {
-			childNames = childrenNames();
-		} catch (BackingStoreException e) {
-			log(new Status(IStatus.ERROR, Activator.PI_PREFERENCES, PrefsMessages.childrenNames, e));
-			return new IEclipsePreferences[0];
-		}
-		IEclipsePreferences[] childNodes = new IEclipsePreferences[childNames.length];
-		for (int i = 0; i < childNames.length; i++)
-			childNodes[i] = getChild(childNames[i], null);
-		return childNodes;
-	}
-
 
 	@Override
 	public Preferences node(String path) {
@@ -88,26 +71,27 @@ public class RootPreferences extends EclipsePreferences {
 	}
 
 	public Preferences getNode(String path, boolean create) {
-		if (path.length() == 0 || (path.length() == 1 && path.charAt(0) == IPath.SEPARATOR))
+		if (path.length() == 0 || (path.length() == 1 && path.charAt(0) == IPath.SEPARATOR)) {
 			return this;
+		}
 		int startIndex = path.charAt(0) == IPath.SEPARATOR ? 1 : 0;
 		int endIndex = path.indexOf(IPath.SEPARATOR, startIndex + 1);
 		String scope = path.substring(startIndex, endIndex == -1 ? path.length() : endIndex);
 		IEclipsePreferences child;
 		if (create) {
-			child = getChild(scope, null);
+			child = getChild(scope);
 			if (child == null) {
 				child = new EclipsePreferences(this, scope);
 				addChild(scope, child);
 			}
 		} else {
 			child = getChild(scope, null, false);
-			if (child == null)
+			if (child == null) {
 				return null;
+			}
 		}
 		return child.node(endIndex == -1 ? "" : path.substring(endIndex + 1)); //$NON-NLS-1$
 	}
-
 
 	@Override
 	public void sync() throws BackingStoreException {
@@ -117,14 +101,16 @@ public class RootPreferences extends EclipsePreferences {
 		for (String n : names) {
 			try {
 				node(n).sync();
-			}catch (BackingStoreException e) {
+			} catch (BackingStoreException e) {
 				// store the first exception we get and still try and sync
 				// the rest of the children.
-				if (exception == null)
+				if (exception == null) {
 					exception = e;
+				}
 			}
 		}
-		if (exception != null)
+		if (exception != null) {
 			throw exception;
+		}
 	}
 }

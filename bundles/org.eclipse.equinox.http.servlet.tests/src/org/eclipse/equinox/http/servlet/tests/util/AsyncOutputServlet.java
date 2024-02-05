@@ -34,10 +34,9 @@ public class AsyncOutputServlet extends HttpServlet {
 		resp.flushBuffer();
 		AsyncContext async = req.startAsync(req, resp);
 		ServletOutputStream out = resp.getOutputStream();
-		out.setWriteListener(new AsyncWriter(
-			async,
-			Integer.parseInt(req.getParameter("iterations") == null ? "1" : req.getParameter("iterations")),
-			Boolean.parseBoolean(req.getParameter("bytes"))));
+		out.setWriteListener(new AsyncWriter(async,
+				Integer.parseInt(req.getParameter("iterations") == null ? "1" : req.getParameter("iterations")),
+				Boolean.parseBoolean(req.getParameter("bytes"))));
 	}
 
 	private class AsyncWriter implements WriteListener {

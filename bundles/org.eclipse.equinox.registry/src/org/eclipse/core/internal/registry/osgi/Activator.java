@@ -23,9 +23,9 @@ import org.eclipse.osgi.service.datalocation.Location;
 import org.osgi.framework.*;
 
 /**
- * The extension registry bundle. This activator will create the default OSGi registry
- * unless told otherwise by setting the following system property to false:
- * <code>eclipse.createRegistry=false</code>
+ * The extension registry bundle. This activator will create the default OSGi
+ * registry unless told otherwise by setting the following system property to
+ * false: <code>eclipse.createRegistry=false</code>
  *
  * The default registry will be stopped on the bundle shutdown.
  *
@@ -78,13 +78,14 @@ public class Activator implements BundleActivator {
 	}
 
 	/**
-	 * Look for the no registry cache flag and check to see if we should NOT be lazily loading plug-in
-	 * definitions from the registry cache file.
-	 * NOTE: this command line processing is only performed in the presence of OSGi
+	 * Look for the no registry cache flag and check to see if we should NOT be
+	 * lazily loading plug-in definitions from the registry cache file. NOTE: this
+	 * command line processing is only performed in the presence of OSGi
 	 */
 	private void processCommandLine() {
 		// use a string here instead of the class to prevent class loading.
-		ServiceReference<?> ref = getContext().getServiceReference("org.eclipse.osgi.service.environment.EnvironmentInfo"); //$NON-NLS-1$
+		ServiceReference<?> ref = getContext()
+				.getServiceReference("org.eclipse.osgi.service.environment.EnvironmentInfo"); //$NON-NLS-1$
 		if (ref == null)
 			return;
 		String[] args = EquinoxUtils.getCommandLine(bundleContext, ref);
@@ -111,9 +112,11 @@ public class Activator implements BundleActivator {
 		if ("true".equals(bundleContext.getProperty(IRegistryConstants.PROP_REGISTRY_NULL_USER_TOKEN))) //$NON-NLS-1$
 			userRegistryKey = null;
 
-		// Determine primary and alternative registry locations. Eclipse extension registry cache
+		// Determine primary and alternative registry locations. Eclipse extension
+		// registry cache
 		// can be found in one of the two locations:
-		// a) in the local configuration area (standard location passed in by the platform) -> priority
+		// a) in the local configuration area (standard location passed in by the
+		// platform) -> priority
 		// b) in the shared configuration area (typically, shared install is used)
 		File[] registryLocations;
 		boolean[] readOnlyLocations;
@@ -131,18 +134,20 @@ public class Activator implements BundleActivator {
 			Location parentLocation = configuration.getParentLocation();
 			if (parentLocation != null) {
 				File secondaryDir = new File(parentLocation.getURL().getFile() + '/' + IRegistryConstants.RUNTIME_NAME);
-				registryLocations = new File[] {primaryDir, secondaryDir};
-				readOnlyLocations = new boolean[] {primaryReadOnly, true}; // secondary Eclipse location is always read only
+				registryLocations = new File[] { primaryDir, secondaryDir };
+				readOnlyLocations = new boolean[] { primaryReadOnly, true }; // secondary Eclipse location is always
+																				// read only
 			} else {
-				registryLocations = new File[] {primaryDir};
-				readOnlyLocations = new boolean[] {primaryReadOnly};
+				registryLocations = new File[] { primaryDir };
+				readOnlyLocations = new boolean[] { primaryReadOnly };
 			}
 			strategy = new EquinoxRegistryStrategy(registryLocations, readOnlyLocations, masterRegistryKey);
 		}
 
 		defaultRegistry = RegistryFactory.createRegistry(strategy, masterRegistryKey, userRegistryKey);
 
-		registryRegistration = Activator.getContext().registerService(IExtensionRegistry.class.getName(), defaultRegistry, new Hashtable<String, Object>());
+		registryRegistration = Activator.getContext().registerService(IExtensionRegistry.class.getName(),
+				defaultRegistry, new Hashtable<>());
 		defaultProvider = new RegistryProviderOSGI(defaultRegistry);
 		// Set the registry provider and specify this as a default registry:
 		RegistryProviderFactory.setDefault(defaultProvider);

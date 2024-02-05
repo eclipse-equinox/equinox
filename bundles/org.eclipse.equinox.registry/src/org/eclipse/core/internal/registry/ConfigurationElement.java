@@ -19,36 +19,42 @@ import org.eclipse.core.runtime.spi.RegistryContributor;
 import org.eclipse.osgi.util.NLS;
 
 /**
- * An object which represents the user-defined contents of an extension
- * in a plug-in manifest.
+ * An object which represents the user-defined contents of an extension in a
+ * plug-in manifest.
  */
 public class ConfigurationElement extends RegistryObject {
 	static final ConfigurationElement[] EMPTY_ARRAY = new ConfigurationElement[0];
 
-	//The id of the parent element. It can be a configuration element or an extension
+	// The id of the parent element. It can be a configuration element or an
+	// extension
 	int parentId;
-	byte parentType; //This value is only interesting when running from cache.
+	byte parentType; // This value is only interesting when running from cache.
 
-	//Store the properties and the value of the configuration element.
-	//The format is the following:
-	//	[p1, v1, p2, v2, configurationElementValue]
-	//If the array size is even, there is no "configurationElementValue (ie getValue returns null)".
-	//The properties and their values are alternated (v1 is the value of p1).
+	// Store the properties and the value of the configuration element.
+	// The format is the following:
+	// [p1, v1, p2, v2, configurationElementValue]
+	// If the array size is even, there is no "configurationElementValue (ie
+	// getValue returns null)".
+	// The properties and their values are alternated (v1 is the value of p1).
 	protected String[] propertiesAndValue;
 
-	//The name of the configuration element
+	// The name of the configuration element
 	private String name;
 
-	//ID of the actual contributor of this element
-	//This value can be null when the element is loaded from disk and the owner has been uninstalled.
-	//This happens when the configuration is obtained from a delta containing removed extension.
+	// ID of the actual contributor of this element
+	// This value can be null when the element is loaded from disk and the owner has
+	// been uninstalled.
+	// This happens when the configuration is obtained from a delta containing
+	// removed extension.
 	private String contributorId;
 
 	protected ConfigurationElement(ExtensionRegistry registry, boolean persist) {
 		super(registry, persist);
 	}
 
-	protected ConfigurationElement(int self, String contributorId, String name, String[] propertiesAndValue, int[] children, int extraDataOffset, int parent, byte parentType, ExtensionRegistry registry, boolean persist) {
+	protected ConfigurationElement(int self, String contributorId, String name, String[] propertiesAndValue,
+			int[] children, int extraDataOffset, int parent, byte parentType, ExtensionRegistry registry,
+			boolean persist) {
 		super(registry, persist);
 
 		setObjectId(self);
@@ -62,7 +68,8 @@ public class ConfigurationElement extends RegistryObject {
 	}
 
 	void throwException(String message, Throwable exception) throws CoreException {
-		throw new CoreException(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, IRegistryConstants.PLUGIN_ERROR, message, exception));
+		throw new CoreException(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, IRegistryConstants.PLUGIN_ERROR,
+				message, exception));
 	}
 
 	protected String getValue() {
@@ -112,7 +119,7 @@ public class ConfigurationElement extends RegistryObject {
 
 	void setValue(String value) {
 		if (propertiesAndValue.length == 0) {
-			propertiesAndValue = new String[] {value};
+			propertiesAndValue = new String[] { value };
 			return;
 		}
 		if (propertiesAndValue.length % 2 == 1) {
@@ -137,11 +144,13 @@ public class ConfigurationElement extends RegistryObject {
 		if (getRawChildren().length == 0)
 			return ConfigurationElement.EMPTY_ARRAY;
 
-		ConfigurationElement[] result = new ConfigurationElement[1]; //Most of the time there is only one match
+		ConfigurationElement[] result = new ConfigurationElement[1]; // Most of the time there is only one match
 		int idx = 0;
 		RegistryObjectManager objectManager = registry.getObjectManager();
 		for (int child : children) {
-			ConfigurationElement toTest = (ConfigurationElement) objectManager.getObject(child, noExtraData() ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
+			ConfigurationElement toTest = (ConfigurationElement) objectManager.getObject(child,
+					noExtraData() ? RegistryObjectManager.CONFIGURATION_ELEMENT
+							: RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
 			if (toTest.name.equals(childrenName)) {
 				if (idx != 0) {
 					ConfigurationElement[] copy = new ConfigurationElement[result.length + 1];
@@ -249,7 +258,8 @@ public class ConfigurationElement extends RegistryObject {
 		// Make the call even if the initialization string is null
 		try {
 			// We need to take into account both "old" and "new" style executable extensions
-			ConfigurationElementHandle confElementHandle = new ConfigurationElementHandle(registry.getObjectManager(), getObjectId());
+			ConfigurationElementHandle confElementHandle = new ConfigurationElementHandle(registry.getObjectManager(),
+					getObjectId());
 			if (result instanceof IExecutableExtension)
 				((IExecutableExtension) result).setInitializationData(confElementHandle, attributeName, initData);
 		} catch (CoreException ce) {
@@ -257,7 +267,8 @@ public class ConfigurationElement extends RegistryObject {
 			throw ce;
 		} catch (Exception te) {
 			// user code caused exception
-			throwException(NLS.bind(RegistryMessages.plugin_initObjectError, getContributor().getName(), className), te);
+			throwException(NLS.bind(RegistryMessages.plugin_initObjectError, getContributor().getName(), className),
+					te);
 		}
 
 		// Deal with executable extension factories.

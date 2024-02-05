@@ -54,7 +54,7 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 	final private static String unicodeValue = "va\u0432lue\u0433";
 
 	protected Map<String, Object> getOptions() {
-		// Note that if the default password value below is modified, 
+		// Note that if the default password value below is modified,
 		// the sample storage file needs to be regenerated.
 		return getOptions("password1");
 	}
@@ -83,8 +83,8 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 	}
 
 	/**
-	 * The method reaches into internal classes to check if modified flag is set on secure
-	 * preference data.
+	 * The method reaches into internal classes to check if modified flag is set on
+	 * secure preference data.
 	 */
 	private boolean isModified(ISecurePreferences node) {
 		return InternalExchangeUtils.isModified(node);
@@ -118,12 +118,12 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 		String[] leafKeys = node3.keys();
 		assertNotNull(leafKeys);
 		assertEquals(leafKeys.length, 4);
-		findAll(new String[] {clearTextKey, key, secondKey, unicodeKey}, leafKeys);
+		findAll(new String[] { clearTextKey, key, secondKey, unicodeKey }, leafKeys);
 	}
 
 	/**
-	 * Basic test to fill / read Preferences implementation. Also tests removal of a value
-	 * and Preferences#keys().
+	 * Basic test to fill / read Preferences implementation. Also tests removal of a
+	 * value and Preferences#keys().
 	 */
 	@Test
 	public void testPreferences() throws IOException, StorageException {
@@ -143,7 +143,6 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 
 	/**
 	 * Test relative names, absolute names, and children names
-	 * @throws StorageException 
 	 */
 	@Test
 	public void testNames() throws IOException, StorageException {
@@ -193,8 +192,8 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 	}
 
 	/**
-	 * Test node existence, resolution: parent -> child; child -> parent, 
-	 * compare absolute and relative paths.
+	 * Test node existence, resolution: parent -> child; child -> parent, compare
+	 * absolute and relative paths.
 	 */
 	@Test
 	public void testNodeResolution() throws IOException, StorageException {
@@ -222,7 +221,7 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 		ISecurePreferences node3 = preferences.node("/test/cvs/eclipse.org/account1");
 		assertNotNull(node3);
 
-		// relative paths, parents and compare to results from absolute paths: 
+		// relative paths, parents and compare to results from absolute paths:
 		assertNull(preferences.parent());
 		assertEquals(nodeRoot, preferences);
 
@@ -247,14 +246,13 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 		assertEquals(node3, relativeNode3);
 		assertEquals(relativeNode2, relativeNode3.parent());
 
-		//check contents to make sure that traversing did not add and new children
+		// check contents to make sure that traversing did not add and new children
 		preferences.flush();
 		check(preferences);
 	}
 
 	/**
 	 * Tests node removal.
-	 * @throws StorageException 
 	 */
 	@Test
 	public void testNodeRemoval() throws IOException, StorageException {
@@ -314,7 +312,6 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 
 	/**
 	 * Tests validation of node paths.
-	 * @throws Throwable 
 	 */
 	@Test
 	public void testPathValidation() throws Throwable {
@@ -361,16 +358,13 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 
 	/**
 	 * Tests data types
-	 * @throws StorageException 
-	 * @throws IOException 
-	 * @throws MalformedURLException 
 	 */
 	@Test
 	public void testDataTypes() throws StorageException, MalformedURLException, IOException {
 		ISecurePreferences preferences = newPreferences(getStorageLocation(), getOptions());
 
 		ISecurePreferences node = preferences.node("/test");
-		byte[] testArray = new byte[] {0, 4, 12, 75, 84, 12, 1, (byte) 0xFF};
+		byte[] testArray = new byte[] { 0, 4, 12, 75, 84, 12, 1, (byte) 0xFF };
 
 		boolean encrypt = true;
 
@@ -410,7 +404,8 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 	@Test
 	public void testIncorrectData() throws IOException {
 		URL location = getFilePath(sampleLocation);
-		// Same default password as in the SecurePreferencesTest.getOptions() - same note
+		// Same default password as in the SecurePreferencesTest.getOptions() - same
+		// note
 		// on regenerating data file.
 		ISecurePreferences preferences = newPreferences(location, getOptions("password1"));
 		try {
@@ -503,7 +498,7 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 	@Test
 	public void testEdgeCases() throws StorageException, MalformedURLException, IOException {
 		byte[] expectedEmptyArray = new byte[0];
-		byte[] wrongArray = new byte[] {1, 2, 3};
+		byte[] wrongArray = new byte[] { 1, 2, 3 };
 
 		{ // block1: fill, check, and save
 			ISecurePreferences preferences = newPreferences(getStorageLocation(), getOptions());

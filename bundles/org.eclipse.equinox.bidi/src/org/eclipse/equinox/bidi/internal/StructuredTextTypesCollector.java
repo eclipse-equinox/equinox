@@ -96,7 +96,8 @@ public class StructuredTextTypesCollector implements IRegistryEventListener {
 		for (IExtension extension : extPoint.getExtensions()) {
 			for (IConfigurationElement confElement : extension.getConfigurationElements()) {
 				if (!CE_NAME.equals(confElement.getName()))
-					StructuredTextActivator.logError("BiDi types: unexpected element name " + confElement.getName(), new IllegalArgumentException()); //$NON-NLS-1$
+					StructuredTextActivator.logError("BiDi types: unexpected element name " + confElement.getName(), //$NON-NLS-1$
+							new IllegalArgumentException());
 				String type = confElement.getAttribute(ATTR_TYPE);
 				Object handler;
 				try {
@@ -134,11 +135,12 @@ public class StructuredTextTypesCollector implements IRegistryEventListener {
 	}
 
 	/**
-	 * Returns the default structured text type handlers. These handlers are
-	 * also supported without OSGi running.
+	 * Returns the default structured text type handlers. These handlers are also
+	 * supported without OSGi running.
 	 * 
-	 * @return a map from structured text type handler identifier (key type: {@link String})
-	 *         to structured text type handler (value type: {@link StructuredTextTypeHandler}).
+	 * @return a map from structured text type handler identifier (key type:
+	 *         {@link String}) to structured text type handler (value type:
+	 *         {@link StructuredTextTypeHandler}).
 	 */
 	public static Map<String, StructuredTextTypeHandler> getDefaultTypeHandlers() {
 		Map<String, StructuredTextTypeHandler> types = new LinkedHashMap<>();

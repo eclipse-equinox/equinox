@@ -19,7 +19,8 @@ public class DummyResolverHook implements ResolutionReport.Listener, ResolverHoo
 	}
 
 	@Override
-	public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
+	public void filterSingletonCollisions(BundleCapability singleton,
+			Collection<BundleCapability> collisionCandidates) {
 		// TODO Auto-generated method stub
 
 	}

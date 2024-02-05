@@ -20,25 +20,22 @@ import org.osgi.framework.wiring.BundleRevision;
 
 public class BundleAdaptorProvider {
 
-    private final IAdaptorProvider adaptorProvider;
+	private final IAdaptorProvider adaptorProvider;
 
-    private final Generation generation;
+	private final Generation generation;
 
-    public BundleAdaptorProvider(final Generation generation,
-            final IAdaptorProvider adaptorProvider) {
-        this.generation = generation;
-        this.adaptorProvider = adaptorProvider;
-    }
+	public BundleAdaptorProvider(final Generation generation, final IAdaptorProvider adaptorProvider) {
+		this.generation = generation;
+		this.adaptorProvider = adaptorProvider;
+	}
 
-    public IWeavingAdaptor getAdaptor() {
+	public IWeavingAdaptor getAdaptor() {
 
-        if ((generation.getRevision().getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
-            return this.adaptorProvider.getHostBundleAdaptor(this.generation
-                    .getBundleInfo().getBundleId());
-        } else {
-            return this.adaptorProvider.getAdaptor(this.generation
-                    .getBundleInfo().getBundleId());
-        }
-    }
+		if ((generation.getRevision().getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
+			return this.adaptorProvider.getHostBundleAdaptor(this.generation.getBundleInfo().getBundleId());
+		} else {
+			return this.adaptorProvider.getAdaptor(this.generation.getBundleInfo().getBundleId());
+		}
+	}
 
 }

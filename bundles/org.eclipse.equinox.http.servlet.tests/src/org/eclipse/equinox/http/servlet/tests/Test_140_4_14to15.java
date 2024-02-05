@@ -46,8 +46,7 @@ public class Test_140_4_14to15 extends BaseTest {
 		Servlet servlet = new HttpServlet() {
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response)
-					throws IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 				invoked.set(true);
 

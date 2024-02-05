@@ -61,8 +61,8 @@ public class SecurityUIMsg extends NLS {
 	public static String CATPAGE_LABEL_ADVANCED;
 
 	// messages for default policy page
-	//public static String POLPAGE_LABEL_SECTION;
-	//public static String POLPAGE_LABEL_TITLE;
+	// public static String POLPAGE_LABEL_SECTION;
+	// public static String POLPAGE_LABEL_TITLE;
 	public static String POLPAGE_LABEL_DESC;
 	public static String POLPAGE_BUTTON_ALLOW_ANY;
 	public static String POLPAGE_BUTTON_ALLOW_ANY_SIGNED;
@@ -82,7 +82,7 @@ public class SecurityUIMsg extends NLS {
 	public static String CERTPAGE_BUTTON_VIEW;
 	public static String CERTPAGE_ERROR_UNKNOWN_FORMAT;
 
-	//messages for advanced page
+	// messages for advanced page
 	public static String ADVPAGE_LABEL_PROVIDER;
 	public static String ADVPAGE_LABEL_VERSION;
 	public static String ADVPAGE_LABEL_DESCRIPTION;
@@ -135,7 +135,7 @@ public class SecurityUIMsg extends NLS {
 	public static String LABEL_NAMECONSTRAINTS_NOTCA;
 
 	// These map to specific Extended Key Usage OIDs
-	//  Not currently used
+	// Not currently used
 	public static String LABEL_EXTKEYUSAGE_SERVERAUTH;
 	public static String LABEL_EXTKEYUSAGE_CLIENTAUTH;
 	public static String LABEL_EXTKEYUSAGE_CODESIGNING;

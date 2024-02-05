@@ -14,10 +14,14 @@
 package org.eclipse.osgi.internal.debug;
 
 /**
- * A framework trace entry is a bean containing all of the attributes for a single trace message.
+ * A framework trace entry is a bean containing all of the attributes for a
+ * single trace message.
  */
 public class FrameworkDebugTraceEntry {
-	/** If a bundles symbolic name is not specified then the default value of /debug can be used */
+	/**
+	 * If a bundles symbolic name is not specified then the default value of /debug
+	 * can be used
+	 */
 	public final static String DEFAULT_OPTION_PATH = "/debug"; //$NON-NLS-1$
 
 	/**
@@ -27,7 +31,6 @@ public class FrameworkDebugTraceEntry {
 
 	/**
 	 * The date and time when the trace occurred.
-	 *
 	 */
 	private final long timestamp;
 
@@ -69,34 +72,27 @@ public class FrameworkDebugTraceEntry {
 	/**
 	 * Construct a new FrameworkTraceRecord object
 	 *
-	 * @param bundleSymbolicName
-	 *            The symbolic name of the bundle being traced
-	 * @param optionPath
-	 *            The trace optionPath
-	 * @param message
-	 *            The trace message
-	 * @param traceClass
-	 *            The class that calls the trace API
+	 * @param bundleSymbolicName The symbolic name of the bundle being traced
+	 * @param optionPath         The trace optionPath
+	 * @param message            The trace message
+	 * @param traceClass         The class that calls the trace API
 	 */
-	public FrameworkDebugTraceEntry(final String bundleSymbolicName, final String optionPath, final String message, final String traceClass) {
+	public FrameworkDebugTraceEntry(final String bundleSymbolicName, final String optionPath, final String message,
+			final String traceClass) {
 		this(bundleSymbolicName, optionPath, message, null, traceClass);
 	}
 
 	/**
 	 * Construct a new FrameworkTraceRecord object
 	 *
-	 * @param bundleSymbolicName
-	 *            The symbolic name of the bundle being traced
-	 * @param optionPath
-	 *            The trace optionPath
-	 * @param message
-	 *            The trace message
-	 * @param error
-	 *            An exception to be traced
-	 * @param traceClass
-	 *            The class that calls the trace API
+	 * @param bundleSymbolicName The symbolic name of the bundle being traced
+	 * @param optionPath         The trace optionPath
+	 * @param message            The trace message
+	 * @param error              An exception to be traced
+	 * @param traceClass         The class that calls the trace API
 	 */
-	public FrameworkDebugTraceEntry(String bundleSymbolicName, final String optionPath, final String message, final Throwable error, final String traceClass) {
+	public FrameworkDebugTraceEntry(String bundleSymbolicName, final String optionPath, final String message,
+			final Throwable error, final String traceClass) {
 		threadName = Thread.currentThread().getName();
 		if (optionPath == null) {
 			this.optionPath = FrameworkDebugTraceEntry.DEFAULT_OPTION_PATH;
@@ -111,19 +107,21 @@ public class FrameworkDebugTraceEntry {
 		String determineClassName = null;
 		String determineMethodName = null;
 		int determineLineNumber = 0;
-		// dynamically determine the class name, method name, and line number of the method calling the trace framework
+		// dynamically determine the class name, method name, and line number of the
+		// method calling the trace framework
 		StackTraceElement[] stackElements = new Exception().getStackTrace();
 		int i = 0;
 		while (i < stackElements.length) {
 			String fullClassName = stackElements[i].getClassName();
-			if (!fullClassName.equals(Thread.class.getName()) && !fullClassName.equals(FrameworkDebugTraceEntry.class.getName()) && !fullClassName.equals(EclipseDebugTrace.class.getName())) {
+			if (!fullClassName.equals(Thread.class.getName())
+					&& !fullClassName.equals(FrameworkDebugTraceEntry.class.getName())
+					&& !fullClassName.equals(EclipseDebugTrace.class.getName())) {
 				/*
-				 * The first class which is non-JDK or framework related has been hit.
-				 * If a traceClass has been specified then this current stack element
-				 * is likely that class so we should find out who called it.  If a
-				 * trace class has not been specified, or has been specified and this
-				 * stack element is not that class, then we assume this stack element
-				 * is the caller of the trace API.
+				 * The first class which is non-JDK or framework related has been hit. If a
+				 * traceClass has been specified then this current stack element is likely that
+				 * class so we should find out who called it. If a trace class has not been
+				 * specified, or has been specified and this stack element is not that class,
+				 * then we assume this stack element is the caller of the trace API.
 				 */
 				if ((traceClass == null) || !fullClassName.equals(traceClass)) {
 					determineClassName = stackElements[i].getClassName();
@@ -242,8 +240,8 @@ public class FrameworkDebugTraceEntry {
 	}
 
 	/**
-	 * Accessor for the option-path being traced. The <i>&lt;option-path&gt;</i> part of the debug option string
-	 * required for the Eclipse debugging framework.
+	 * Accessor for the option-path being traced. The <i>&lt;option-path&gt;</i>
+	 * part of the debug option string required for the Eclipse debugging framework.
 	 *
 	 * <pre>
 	 *    Examples:
@@ -262,17 +260,14 @@ public class FrameworkDebugTraceEntry {
 	/**
 	 * Return the line number in the class/method where the trace originator
 	 *
-	 * @return The line number from the class and method where the trace request originated
+	 * @return The line number from the class and method where the trace request
+	 *         originated
 	 */
 	public final int getLineNumber() {
 
 		return lineNumber;
 	}
 
-	/**
-	 *
-	 * @param newMessage
-	 */
 	void setMessage(final String newMessage) {
 
 		message = newMessage;

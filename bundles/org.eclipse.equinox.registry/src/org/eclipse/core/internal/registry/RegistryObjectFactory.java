@@ -47,7 +47,8 @@ public class RegistryObjectFactory {
 		return new Extension(registry, persist);
 	}
 
-	public Extension createExtension(int self, String simpleId, String namespace, int[] children, int extraData, boolean persist) {
+	public Extension createExtension(int self, String simpleId, String namespace, int[] children, int extraData,
+			boolean persist) {
 		return new Extension(self, simpleId, namespace, children, extraData, registry, persist);
 	}
 
@@ -57,7 +58,10 @@ public class RegistryObjectFactory {
 		return new ConfigurationElement(registry, persist);
 	}
 
-	public ConfigurationElement createConfigurationElement(int self, String contributorId, String name, String[] propertiesAndValue, int[] children, int extraDataOffset, int parent, byte parentType, boolean persist) {
-		return new ConfigurationElement(self, contributorId, name, propertiesAndValue, children, extraDataOffset, parent, parentType, registry, persist);
+	public ConfigurationElement createConfigurationElement(int self, String contributorId, String name,
+			String[] propertiesAndValue, int[] children, int extraDataOffset, int parent, byte parentType,
+			boolean persist) {
+		return new ConfigurationElement(self, contributorId, name, propertiesAndValue, children, extraDataOffset,
+				parent, parentType, registry, persist);
 	}
 }

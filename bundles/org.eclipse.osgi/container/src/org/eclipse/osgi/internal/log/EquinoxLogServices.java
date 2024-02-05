@@ -98,11 +98,13 @@ public class EquinoxLogServices {
 				defaultLevel = LogLevel.valueOf(defaultLevelConfig);
 			}
 		} catch (IllegalArgumentException e) {
-			//ignore and use LogLevel.WARN
+			// ignore and use LogLevel.WARN
 		}
 
-		boolean captureLogEntryLocation = "true".equals(environmentInfo.getConfiguration(EquinoxConfiguration.PROP_LOG_CAPTURE_ENTRY_LOCATION, "true")); //$NON-NLS-1$ //$NON-NLS-2$
-		logServiceManager = new LogServiceManager(logHistoryMax, defaultLevel, captureLogEntryLocation, logWriter, perfWriter);
+		boolean captureLogEntryLocation = "true" //$NON-NLS-1$
+				.equals(environmentInfo.getConfiguration(EquinoxConfiguration.PROP_LOG_CAPTURE_ENTRY_LOCATION, "true")); //$NON-NLS-1$
+		logServiceManager = new LogServiceManager(logHistoryMax, defaultLevel, captureLogEntryLocation, logWriter,
+				perfWriter);
 		eclipseLogFactory = new EquinoxLogFactory(logWriter, logServiceManager);
 		rootFrameworkLog = eclipseLogFactory.createFrameworkLog(null, logWriter);
 
@@ -113,18 +115,12 @@ public class EquinoxLogServices {
 	private ServiceRegistration<?> frameworkLogReg;
 	private ServiceRegistration<?> perfLogReg;
 
-	/**
-	 * @throws BundleException
-	 */
 	public void start(BundleContext context) throws BundleException {
 		logServiceManager.start(context);
 		frameworkLogReg = StorageUtil.register(FrameworkLog.class.getName(), eclipseLogFactory, context);
 		perfLogReg = registerPerformanceLog(context);
 	}
 
-	/**
-	 * @throws BundleException
-	 */
 	public void stop(BundleContext context) throws BundleException {
 		frameworkLogReg.unregister();
 		perfLogReg.unregister();
@@ -141,7 +137,8 @@ public class EquinoxLogServices {
 		Dictionary<String, Object> serviceProperties = new Hashtable<>();
 
 		serviceProperties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
-		serviceProperties.put(Constants.SERVICE_PID, context.getBundle().getBundleId() + '.' + service.getClass().getName());
+		serviceProperties.put(Constants.SERVICE_PID,
+				context.getBundle().getBundleId() + '.' + service.getClass().getName());
 		serviceProperties.put(FrameworkLog.SERVICE_PERFORMANCE, Boolean.TRUE.toString());
 
 		return context.registerService(serviceName, service, serviceProperties);

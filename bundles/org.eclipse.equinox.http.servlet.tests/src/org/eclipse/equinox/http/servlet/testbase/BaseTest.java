@@ -81,7 +81,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class BaseTest {
 
-	public static final String	DEFAULT	= HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME;
+	public static final String DEFAULT = HttpWhiteboardConstants.HTTP_WHITEBOARD_DEFAULT_CONTEXT_NAME;
 
 	@Before
 	public void setUp() throws Exception {
@@ -97,34 +97,32 @@ public class BaseTest {
 		advisor = new BundleAdvisor(bundleContext);
 		stopJetty();
 		startBundles();
-		runtimeTracker = new ServiceTracker<>(bundleContext, HttpServiceRuntime.class, new ServiceTrackerCustomizer<HttpServiceRuntime,ServiceReference<HttpServiceRuntime>>() {
+		runtimeTracker = new ServiceTracker<>(bundleContext, HttpServiceRuntime.class,
+				new ServiceTrackerCustomizer<HttpServiceRuntime, ServiceReference<HttpServiceRuntime>>() {
 
-			@Override
-			public ServiceReference<HttpServiceRuntime> addingService(
-					ServiceReference<HttpServiceRuntime> reference) {
-				final Object obj = reference
-						.getProperty(Constants.SERVICE_CHANGECOUNT);
-				if (obj != null) {
-					httpRuntimeChangeCount.set(Long.valueOf(obj.toString()));
-				}
-				return reference;
-			}
+					@Override
+					public ServiceReference<HttpServiceRuntime> addingService(
+							ServiceReference<HttpServiceRuntime> reference) {
+						final Object obj = reference.getProperty(Constants.SERVICE_CHANGECOUNT);
+						if (obj != null) {
+							httpRuntimeChangeCount.set(Long.valueOf(obj.toString()));
+						}
+						return reference;
+					}
 
-			@Override
-			public void modifiedService(
-					ServiceReference<HttpServiceRuntime> reference,
-					ServiceReference<HttpServiceRuntime> service) {
-				addingService(reference);
-			}
+					@Override
+					public void modifiedService(ServiceReference<HttpServiceRuntime> reference,
+							ServiceReference<HttpServiceRuntime> service) {
+						addingService(reference);
+					}
 
-			@Override
-			public void removedService(
-					ServiceReference<HttpServiceRuntime> reference,
-					ServiceReference<HttpServiceRuntime> service) {
-				httpRuntimeChangeCount.set(-1);
-			}
+					@Override
+					public void removedService(ServiceReference<HttpServiceRuntime> reference,
+							ServiceReference<HttpServiceRuntime> service) {
+						httpRuntimeChangeCount.set(-1);
+					}
 
-		});
+				});
 		runtimeTracker.open();
 		runtimeTracker.waitForService(100);
 		startJetty();
@@ -145,8 +143,7 @@ public class BaseTest {
 		for (ServiceRegistration<? extends Object> serviceRegistration : registrations) {
 			try {
 				serviceRegistration.unregister();
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				// ignore
 			}
 		}
@@ -157,7 +154,8 @@ public class BaseTest {
 		return doRequestGetResponse(action, params).get("responseBody").get(0);
 	}
 
-	protected Map<String, List<String>> doRequestGetResponse(String action, Map<String, String> params) throws IOException {
+	protected Map<String, List<String>> doRequestGetResponse(String action, Map<String, String> params)
+			throws IOException {
 		StringBuilder requestInfo = new StringBuilder(PROTOTYPE);
 		requestInfo.append(action);
 		if (!params.isEmpty()) {
@@ -221,12 +219,10 @@ public class BaseTest {
 	protected List<String> getStringPlus(String key, ServiceReference<?> ref) {
 		Object property = ref.getProperty(key);
 		if (String.class.isInstance(property)) {
-			return Collections.singletonList((String)property);
-		}
-		else if (String[].class.isInstance(property)) {
-			return Arrays.asList((String[])property);
-		}
-		else if (Collection.class.isInstance(property)) {
+			return Collections.singletonList((String) property);
+		} else if (String[].class.isInstance(property)) {
+			return Arrays.asList((String[]) property);
+		} else if (Collection.class.isInstance(property)) {
 			List<String> list = new ArrayList<>();
 			for (Object o : ((Collection<?>) property)) {
 				if (o instanceof String) {
@@ -266,8 +262,9 @@ public class BaseTest {
 		requestAdvisor = new ServletRequestAdvisor(port, contextPath);
 	}
 
-	protected void startJettyWithSSL(String port, String ksPath, String ksPassword, String keyPassword) throws Exception {
-		if(port == null) {
+	protected void startJettyWithSSL(String port, String ksPath, String ksPassword, String keyPassword)
+			throws Exception {
+		if (port == null) {
 			throw new IllegalArgumentException("Port cannot be null");
 		}
 		if (ksPath == null) {
@@ -280,10 +277,10 @@ public class BaseTest {
 
 		setJettyProperty(JettyConstants.SSL_KEYSTORE, ksPath);
 
-		if(ksPassword != null) {
+		if (ksPassword != null) {
 			setJettyProperty(JettyConstants.SSL_PASSWORD, ksPassword);
 		}
-		if(keyPassword != null) {
+		if (keyPassword != null) {
 			setJettyProperty(JettyConstants.SSL_KEYPASSWORD, keyPassword);
 		}
 
@@ -331,8 +328,8 @@ public class BaseTest {
 	}
 
 	protected HttpServiceRuntime getHttpServiceRuntime() {
-		ServiceReference<HttpServiceRuntime> serviceReference =
-				getBundleContext().getServiceReference(HttpServiceRuntime.class);
+		ServiceReference<HttpServiceRuntime> serviceReference = getBundleContext()
+				.getServiceReference(HttpServiceRuntime.class);
 
 		assertNotNull(serviceReference);
 
@@ -519,8 +516,7 @@ public class BaseTest {
 		return waitForRegistration(previousCount, 100);
 	}
 
-	protected long waitForRegistration(final long previousCount,
-			int maxAttempts) {
+	protected long waitForRegistration(final long previousCount, int maxAttempts) {
 		while (this.httpRuntimeChangeCount.longValue() == previousCount) {
 			if (maxAttempts <= 0) {
 				throw new IllegalStateException("Max attempts exceeded");
@@ -539,16 +535,14 @@ public class BaseTest {
 		return httpRuntimeChangeCount.longValue();
 	}
 
-	protected void registerDummyServletInHttpService()
-			throws ServletException, NamespaceException {
+	protected void registerDummyServletInHttpService() throws ServletException, NamespaceException {
 		final String path = "/tesths";
 		final HttpService service = this.getHttpService();
 		service.registerServlet(path, new HttpServlet() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void doGet(HttpServletRequest req,
-					HttpServletResponse resp) throws IOException {
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 				resp.getWriter().print("helloworld");
 				resp.flushBuffer();
 			}
@@ -560,11 +554,9 @@ public class BaseTest {
 	}
 
 	protected ServletContextDTO getServletContextDTOForDummyServlet() {
-		for (final ServletContextDTO dto : this.getHttpServiceRuntime()
-				.getRuntimeDTO().servletContextDTOs) {
+		for (final ServletContextDTO dto : this.getHttpServiceRuntime().getRuntimeDTO().servletContextDTOs) {
 			for (final ServletDTO sd : dto.servletDTOs) {
-				if (sd.patterns.length > 0
-						&& "/tesths".equals(sd.patterns[0])) {
+				if (sd.patterns.length > 0 && "/tesths".equals(sd.patterns[0])) {
 					return dto;
 				}
 			}
@@ -573,8 +565,7 @@ public class BaseTest {
 		return null;
 	}
 
-	protected FailedErrorPageDTO getFailedErrorPageDTOByException(
-			String exception) {
+	protected FailedErrorPageDTO getFailedErrorPageDTOByException(String exception) {
 		for (FailedErrorPageDTO failedErrorPageDTO : getFailedErrorPageDTOs()) {
 			for (String ex : failedErrorPageDTO.exceptions) {
 				if (exception.equals(ex)) {
@@ -586,10 +577,8 @@ public class BaseTest {
 		return null;
 	}
 
-	protected ErrorPageDTO getErrorPageDTOByException(String context,
-			String exception) {
-		ServletContextDTO servletContextDTO = getServletContextDTOByName(
-				context);
+	protected ErrorPageDTO getErrorPageDTOByException(String context, String exception) {
+		ServletContextDTO servletContextDTO = getServletContextDTOByName(context);
 
 		if (servletContextDTO == null) {
 			return null;
@@ -606,7 +595,7 @@ public class BaseTest {
 		return null;
 	}
 
-	final AtomicLong httpRuntimeChangeCount	= new AtomicLong(-1);
+	final AtomicLong httpRuntimeChangeCount = new AtomicLong(-1);
 
 	protected static final String PROTOTYPE = "prototype/";
 	protected static final String CONFIGURE = "configure";
@@ -626,9 +615,7 @@ public class BaseTest {
 	protected static final String TEST_BUNDLE_1 = "tb1";
 	protected static final String TEST_BUNDLE_2 = "tb2";
 
-	protected static final String[] BUNDLES = new String[] {
-		EQUINOX_DS_BUNDLE
-	};
+	protected static final String[] BUNDLES = new String[] { EQUINOX_DS_BUNDLE };
 
 	protected BundleInstaller installer;
 	protected BundleAdvisor advisor;
@@ -639,7 +626,8 @@ public class BaseTest {
 	protected static class TestFilter implements Filter {
 		AtomicInteger called = new AtomicInteger(0);
 
-		public TestFilter() {}
+		public TestFilter() {
+		}
 
 		@Override
 		public void init(FilterConfig filterConfig) {
@@ -675,9 +663,11 @@ public class BaseTest {
 		static class TestServletContextHelper extends ServletContextHelper {
 			public TestServletContextHelper(Bundle bundle) {
 				super(bundle);
-			}}
+			}
+		}
 
-		public TestServletContextHelperFactory() {}
+		public TestServletContextHelperFactory() {
+		}
 
 		@Override
 		public ServletContextHelper getService(Bundle bundle, ServiceRegistration<ServletContextHelper> registration) {
@@ -697,10 +687,6 @@ public class BaseTest {
 		protected final String contextPrefix;
 		protected final String testName;
 
-		/**
-		 * @param defaultFilter
-		 * @param contextPrefix
-		 */
 		public TestContextPathAdaptor(String defaultFilter, String contextPrefix, String testName) {
 			super();
 			this.defaultFilter = defaultFilter;
@@ -726,7 +712,7 @@ public class BaseTest {
 
 	}
 
-	protected static class ErrorServlet extends HttpServlet{
+	protected static class ErrorServlet extends HttpServlet {
 		private static final long serialVersionUID = 1L;
 		private final String errorCode;
 
@@ -736,9 +722,7 @@ public class BaseTest {
 		}
 
 		@Override
-		protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-			throws IOException {
+		protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 			if (response.isCommitted()) {
 				System.out.println("Problem?");
@@ -748,8 +732,8 @@ public class BaseTest {
 
 			PrintWriter writer = response.getWriter();
 
-			String requestURI = (String)request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
-			Integer status = (Integer)request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+			String requestURI = (String) request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
+			Integer status = (Integer) request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
 
 			writer.print(errorCode + " : " + status + " : ERROR : " + requestURI);
 		}

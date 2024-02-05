@@ -26,11 +26,13 @@ import org.eclipse.core.runtime.*;
  * <p>
  * This class can be used without OSGi running.
  * </p>
+ * 
  * @see org.eclipse.core.runtime.dynamichelpers.IExtensionTracker
  * @since 3.1
  */
 public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListener {
-	//Map keeping the association between extensions and a set of objects. Key: IExtension, value: ReferenceHashSet.
+	// Map keeping the association between extensions and a set of objects. Key:
+	// IExtension, value: ReferenceHashSet.
 	private Map<IExtension, ReferenceHashSet<Object>> extensionToObjects = new HashMap<>();
 	private ListenerList<HandlerWrapper> handlers = new ListenerList<>();
 	private final Object lock = new Object();
@@ -58,11 +60,17 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 		if (registry != null)
 			registry.addRegistryChangeListener(this);
 		else
-			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, RegistryMessages.registry_no_default, null));
+			RuntimeLog.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0,
+					RegistryMessages.registry_no_default, null));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.dynamichelpers.IExtensionTracker#registerHandler(org.eclipse.core.runtime.dynamichelpers.IExtensionChangeHandler, org.eclipse.core.runtime.dynamichelpers.IFilter)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.core.runtime.dynamichelpers.IExtensionTracker#registerHandler(org
+	 * .eclipse.core.runtime.dynamichelpers.IExtensionChangeHandler,
+	 * org.eclipse.core.runtime.dynamichelpers.IFilter)
 	 */
 	@Override
 	public void registerHandler(IExtensionChangeHandler handler, IFilter filter) {
@@ -74,7 +82,9 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see IExtensionTracker@unregisterHandler(IExtensionChangeHandler)
 	 */
 	@Override
@@ -86,7 +96,9 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see IExtensionTracker@registerObject(IExtension, Object, int)
 	 */
 	@Override
@@ -119,24 +131,24 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 		int len = delta.length;
 		for (int i = 0; i < len; i++)
 			switch (delta[i].getKind()) {
-				case IExtensionDelta.ADDED :
-					doAdd(delta[i]);
-					break;
-				case IExtensionDelta.REMOVED :
-					doRemove(delta[i]);
-					break;
-				default :
-					break;
+			case IExtensionDelta.ADDED:
+				doAdd(delta[i]);
+				break;
+			case IExtensionDelta.REMOVED:
+				doRemove(delta[i]);
+				break;
+			default:
+				break;
 			}
 	}
 
 	/**
-	 * Notify all handlers whose filter matches that the given delta occurred.
-	 * If the list of objects is not <code>null</code> then this is a removal and
-	 * the handlers will be given a chance to process the list.  If it is <code>null</code>
-	 * then the notification is an addition.
+	 * Notify all handlers whose filter matches that the given delta occurred. If
+	 * the list of objects is not <code>null</code> then this is a removal and the
+	 * handlers will be given a chance to process the list. If it is
+	 * <code>null</code> then the notification is an addition.
 	 *
-	 * @param delta the change to broadcast
+	 * @param delta   the change to broadcast
 	 * @param objects the objects to pass to the handlers on removals
 	 */
 	private void notify(IExtensionDelta delta, Object[] objects) {
@@ -180,7 +192,7 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 			if (associatedObjects == null)
 				removedObjects = EMPTY_ARRAY;
 			else
-				//Copy the objects early so we don't hold the lock too long
+				// Copy the objects early so we don't hold the lock too long
 				removedObjects = associatedObjects.toArray();
 		}
 		notify(delta, removedObjects);
@@ -190,7 +202,9 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 		handler.removeExtension(removedExtension, removedObjects);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see IExtensionTracker@getObjects(IExtension)
 	 */
 	@Override
@@ -206,7 +220,9 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see IExtensionTracker@close()
 	 */
 	@Override
@@ -223,7 +239,9 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see IExtensionTracker@unregisterObject(IExtension, Object)
 	 */
 	@Override
@@ -237,7 +255,9 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see IExtensionTracker@unregisterObject(IExtension)
 	 */
 	@Override
@@ -253,7 +273,8 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	}
 
 	/**
-	 * Return an instance of filter matching all changes for the given extension point.
+	 * Return an instance of filter matching all changes for the given extension
+	 * point.
 	 *
 	 * @param xpt the extension point
 	 * @return a filter
@@ -263,7 +284,8 @@ public class ExtensionTracker implements IExtensionTracker, IRegistryChangeListe
 	}
 
 	/**
-	 * Return an instance of filter matching all changes for the given extension points.
+	 * Return an instance of filter matching all changes for the given extension
+	 * points.
 	 *
 	 * @param xpts the extension points used to filter
 	 * @return a filter

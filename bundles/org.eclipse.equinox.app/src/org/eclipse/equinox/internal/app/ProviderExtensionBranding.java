@@ -49,7 +49,8 @@ public class ProviderExtensionBranding implements IBranding {
 
 	@Override
 	public String getProperty(String key) {
-		return (String) EclipseAppContainer.callMethod(product, "getProperty", new Class[] {String.class}, new Object[] {key}); //$NON-NLS-1$
+		return (String) EclipseAppContainer.callMethod(product, "getProperty", new Class[] { String.class }, //$NON-NLS-1$
+				new Object[] { key });
 	}
 
 	@Override

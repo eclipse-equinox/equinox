@@ -21,13 +21,13 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class Activator implements BundleActivator {
-	
+
 	private static BundleContext context;
 	private static SshCommand sshConnection = null;
 	private static boolean isFirstProcessor = true;
-	
+
 	private ServiceTracker<CommandProcessor, SshCommand> commandProcessorTracker;
-	
+
 	public static class ProcessorCustomizer implements ServiceTrackerCustomizer<CommandProcessor, SshCommand> {
 
 		private final BundleContext context;
@@ -54,9 +54,7 @@ public class Activator implements BundleActivator {
 		}
 
 		@Override
-		public void modifiedService(
-				ServiceReference<CommandProcessor> reference,
-				SshCommand service) {
+		public void modifiedService(ServiceReference<CommandProcessor> reference, SshCommand service) {
 			// nothing
 		}
 
@@ -64,7 +62,7 @@ public class Activator implements BundleActivator {
 		public void removedService(ServiceReference<CommandProcessor> reference, SshCommand service) {
 			CommandProcessor processor = context.getService(reference);
 			service.removeCommandProcessor(processor);
-		}	
+		}
 	}
 
 	static BundleContext getContext() {
@@ -74,7 +72,8 @@ public class Activator implements BundleActivator {
 	@Override
 	public void start(BundleContext bundleContext) throws Exception {
 		context = bundleContext;
-		commandProcessorTracker = new ServiceTracker<>(context, CommandProcessor.class, new ProcessorCustomizer(context));
+		commandProcessorTracker = new ServiceTracker<>(context, CommandProcessor.class,
+				new ProcessorCustomizer(context));
 		commandProcessorTracker.open();
 	}
 
@@ -82,9 +81,9 @@ public class Activator implements BundleActivator {
 	public void stop(BundleContext bundleContext) throws Exception {
 		Activator.context = null;
 		commandProcessorTracker.close();
-		
+
 		try {
-			sshConnection.ssh(new String[]{"stop"});
+			sshConnection.ssh(new String[] { "stop" });
 		} catch (Exception e) {
 			// expected if the ssh server is not started
 		}

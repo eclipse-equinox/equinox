@@ -18,8 +18,8 @@ import java.io.File;
 /**
  * A utility class for manipulating file system paths.
  * <p>
- * This class is not intended to be subclassed by clients but
- * may be instantiated.
+ * This class is not intended to be subclassed by clients but may be
+ * instantiated.
  * </p>
  *
  * @since 3.1
@@ -37,15 +37,14 @@ public class FilePath {
 	private final static String PARENT_DIR = ".."; //$NON-NLS-1$
 	private final static char SEPARATOR = '/';
 	private final static String UNC_SLASHES = "//"; //$NON-NLS-1$
-	// if UNC, device will be \\host\share, otherwise, it will be letter/name + colon
+	// if UNC, device will be \\host\share, otherwise, it will be letter/name +
+	// colon
 	private String device;
 	private byte flags;
 	private String[] segments;
 
 	/**
 	 * Constructs a new file path from the given File object.
-	 *
-	 * @param location
 	 */
 	public FilePath(File location) {
 		initialize(location.getPath());
@@ -57,8 +56,6 @@ public class FilePath {
 
 	/**
 	 * Constructs a new file path from the given string path.
-	 *
-	 * @param original
 	 */
 	public FilePath(String original) {
 		initialize(original);
@@ -125,8 +122,8 @@ public class FilePath {
 	}
 
 	/**
-	 * Returns the device for this file system path, or <code>null</code> if
-	 * none exists. The device string ends with a colon.
+	 * Returns the device for this file system path, or <code>null</code> if none
+	 * exists. The device string ends with a colon.
 	 *
 	 * @return the device string or null
 	 */
@@ -135,7 +132,8 @@ public class FilePath {
 	}
 
 	/**
-	 * Returns the segments in this path. If this path has no segments, returns an empty array.
+	 * Returns the segments in this path. If this path has no segments, returns an
+	 * empty array.
 	 *
 	 * @return an array containing all segments for this path
 	 */
@@ -158,8 +156,8 @@ public class FilePath {
 			// only deal with devices/UNC paths on Windows
 			int deviceSeparatorPos = original.indexOf(DEVICE_SEPARATOR);
 			if (deviceSeparatorPos >= 0) {
-				//extract device if any
-				//remove leading slash from device part to handle output of URL.getFile()
+				// extract device if any
+				// remove leading slash from device part to handle output of URL.getFile()
 				int start = original.charAt(0) == SEPARATOR ? 1 : 0;
 				device = original.substring(start, deviceSeparatorPos + 1);
 				original = original.substring(deviceSeparatorPos + 1, original.length());
@@ -187,7 +185,8 @@ public class FilePath {
 	/**
 	 * Returns whether this path is absolute (begins with a slash).
 	 *
-	 * @return <code>true</code> if this path is absolute, <code>false</code> otherwise
+	 * @return <code>true</code> if this path is absolute, <code>false</code>
+	 *         otherwise
 	 */
 	public boolean isAbsolute() {
 		return (flags & HAS_LEADING) != 0;
@@ -196,12 +195,13 @@ public class FilePath {
 	/**
 	 * Returns a string representing this path as a relative to the given base path.
 	 * <p>
-	 * If this path and the given path do not use the same device letter, this path's
-	 * string representation is returned as is.
+	 * If this path and the given path do not use the same device letter, this
+	 * path's string representation is returned as is.
 	 * </p>
 	 *
 	 * @param base the path this path should be made relative to
-	 * @return a string representation for this path as relative to the given base path
+	 * @return a string representation for this path as relative to the given base
+	 *         path
 	 */
 	public String makeRelative(FilePath base) {
 		if (base.device != null && !base.device.equalsIgnoreCase(this.device))
@@ -241,7 +241,7 @@ public class FilePath {
 	/**
 	 * Returns a string representation of this path.
 	 *
-	 * @return  a string representation of this path
+	 * @return a string representation of this path
 	 */
 	@Override
 	public String toString() {

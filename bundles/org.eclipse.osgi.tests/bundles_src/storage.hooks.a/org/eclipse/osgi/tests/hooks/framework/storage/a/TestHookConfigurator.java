@@ -44,7 +44,8 @@ import org.osgi.framework.namespace.BundleNamespace;
 import org.osgi.framework.namespace.IdentityNamespace;
 
 public class TestHookConfigurator implements HookConfigurator {
-	private static class TestStorageHookFactory extends StorageHookFactory<Object, Object, TestStorageHookFactory.TestStorageHook> {
+	private static class TestStorageHookFactory
+			extends StorageHookFactory<Object, Object, TestStorageHookFactory.TestStorageHook> {
 		private static class TestStorageHook extends StorageHookFactory.StorageHook<Object, Object> {
 			private static AtomicInteger adaptCount = new AtomicInteger(1);
 
@@ -83,7 +84,8 @@ public class TestHookConfigurator implements HookConfigurator {
 			}
 
 			@Override
-			public ModuleRevisionBuilder adaptModuleRevisionBuilder(ModuleEvent operation, Module origin, ModuleRevisionBuilder builder) {
+			public ModuleRevisionBuilder adaptModuleRevisionBuilder(ModuleEvent operation, Module origin,
+					ModuleRevisionBuilder builder) {
 				if (TestHookConfigurator.replaceModuleBuilder) {
 					ModuleRevisionBuilder replace = new ModuleRevisionBuilder();
 					// try setting the ID to something which is checked during the test
@@ -91,8 +93,10 @@ public class TestHookConfigurator implements HookConfigurator {
 					replace.setSymbolicName("replace");
 					replace.setVersion(Version.parseVersion("1.1.1"));
 					replace.addCapability("replace", Collections.emptyMap(), Collections.emptyMap());
-					replace.addCapability(IdentityNamespace.IDENTITY_NAMESPACE, Collections.emptyMap(), Collections.singletonMap(IdentityNamespace.IDENTITY_NAMESPACE, "replace"));
-					replace.addCapability(BundleNamespace.BUNDLE_NAMESPACE, Collections.emptyMap(), Collections.singletonMap(BundleNamespace.BUNDLE_NAMESPACE, "replace"));
+					replace.addCapability(IdentityNamespace.IDENTITY_NAMESPACE, Collections.emptyMap(),
+							Collections.singletonMap(IdentityNamespace.IDENTITY_NAMESPACE, "replace"));
+					replace.addCapability(BundleNamespace.BUNDLE_NAMESPACE, Collections.emptyMap(),
+							Collections.singletonMap(BundleNamespace.BUNDLE_NAMESPACE, "replace"));
 					return replace;
 				}
 				if (TestHookConfigurator.adaptManifest) {
@@ -100,7 +104,8 @@ public class TestHookConfigurator implements HookConfigurator {
 					builder.setId(5678);
 					Map<String, String> dirs = Collections.emptyMap();
 					Map<String, Object> attrs = new HashMap<>();
-					attrs.put("test.file.path", getGeneration().getContent().getPath() + " - " + adaptCount.getAndIncrement());
+					attrs.put("test.file.path",
+							getGeneration().getContent().getPath() + " - " + adaptCount.getAndIncrement());
 					attrs.put("test.operation", operation.toString());
 					attrs.put("test.origin", origin.getLocation());
 					builder.addCapability("test.file.path", dirs, attrs);
@@ -136,7 +141,8 @@ public class TestHookConfigurator implements HookConfigurator {
 		}
 
 		@Override
-		public URLConnection handleContentConnection(Module module, String location, InputStream in) throws IOException {
+		public URLConnection handleContentConnection(Module module, String location, InputStream in)
+				throws IOException {
 			if (handleContentConnection) {
 				final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				Manifest manifest = new Manifest();

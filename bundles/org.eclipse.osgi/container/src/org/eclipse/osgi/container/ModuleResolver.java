@@ -75,8 +75,8 @@ import org.osgi.service.resolver.ResolveContext;
 import org.osgi.service.resolver.Resolver;
 
 /**
- * The module resolver handles calls to the {@link Resolver} service for resolving modules
- * in a module {@link ModuleContainer container}.
+ * The module resolver handles calls to the {@link Resolver} service for
+ * resolving modules in a module {@link ModuleContainer container}.
  */
 final class ModuleResolver {
 	static final String SEPARATOR = System.lineSeparator();
@@ -118,15 +118,18 @@ final class ModuleResolver {
 	}
 
 	static final Collection<String> NON_PAYLOAD_CAPABILITIES = Arrays.asList(IdentityNamespace.IDENTITY_NAMESPACE);
-	static final Collection<String> NON_PAYLOAD_REQUIREMENTS = Arrays.asList(HostNamespace.HOST_NAMESPACE, ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE);
-	static final Collection<String> NON_SUBSTITUTED_REQUIREMENTS = Arrays.asList(PackageNamespace.PACKAGE_NAMESPACE, BundleNamespace.BUNDLE_NAMESPACE);
+	static final Collection<String> NON_PAYLOAD_REQUIREMENTS = Arrays.asList(HostNamespace.HOST_NAMESPACE,
+			ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE);
+	static final Collection<String> NON_SUBSTITUTED_REQUIREMENTS = Arrays.asList(PackageNamespace.PACKAGE_NAMESPACE,
+			BundleNamespace.BUNDLE_NAMESPACE);
 
 	final ThreadLocal<Boolean> threadResolving = new ThreadLocal<>();
 	final ModuleContainerAdaptor adaptor;
 
 	/**
-	 * Constructs the module resolver with the specified resolver hook factory
-	 * and resolver.
+	 * Constructs the module resolver with the specified resolver hook factory and
+	 * resolver.
+	 * 
 	 * @param adaptor the container adaptor
 	 */
 	ModuleResolver(final ModuleContainerAdaptor adaptor) {
@@ -151,46 +154,54 @@ final class ModuleResolver {
 	}
 
 	/**
-	 * Attempts to resolve all unresolved modules installed in the specified module database.
-	 * returns a delta containing the new wirings or modified wirings that should be
-	 * merged into the specified moduleDatabase.
+	 * Attempts to resolve all unresolved modules installed in the specified module
+	 * database. returns a delta containing the new wirings or modified wirings that
+	 * should be merged into the specified moduleDatabase.
 	 * <p>
 	 * This method only does read operations on the database no wirings are modified
-	 * directly by this method.  The returned wirings need to be merged into
-	 * the database.
-	 * @param triggers the triggers that caused the resolver operation to occur
-	 * @param triggersMandatory true if the triggers must be resolved by the resolve process
-	 * @param unresolved a snapshot of unresolved revisions
-	 * @param wiringCopy the wirings snapshot of the currently resolved revisions
-	 * @param moduleDatabase the module database.
+	 * directly by this method. The returned wirings need to be merged into the
+	 * database.
+	 * 
+	 * @param triggers          the triggers that caused the resolver operation to
+	 *                          occur
+	 * @param triggersMandatory true if the triggers must be resolved by the resolve
+	 *                          process
+	 * @param unresolved        a snapshot of unresolved revisions
+	 * @param wiringCopy        the wirings snapshot of the currently resolved
+	 *                          revisions
+	 * @param moduleDatabase    the module database.
 	 * @return a delta container the new wirings or modified wirings that should be
-	 * merged into the moduleDatabase
-	 * @throws ResolutionException
+	 *         merged into the moduleDatabase
 	 */
-	ModuleResolutionReport resolveDelta(Collection<ModuleRevision> triggers, boolean triggersMandatory, Collection<ModuleRevision> unresolved, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDatabase moduleDatabase) {
-		if (!triggersMandatory) {
-			// we are just resolving all bundles optionally
-			triggers = unresolved;
-		}
-		ResolveProcess resolveProcess = new ResolveProcess(unresolved, triggers, triggersMandatory, wiringCopy, moduleDatabase);
+	ModuleResolutionReport resolveDelta(Collection<ModuleRevision> triggers, boolean triggersMandatory,
+			Collection<ModuleRevision> unresolved, Map<ModuleRevision, ModuleWiring> wiringCopy,
+			ModuleDatabase moduleDatabase) {
+		ResolveProcess resolveProcess = new ResolveProcess(unresolved, triggers, triggersMandatory, wiringCopy,
+				moduleDatabase);
 		return resolveProcess.resolve();
 	}
 
-	ModuleResolutionReport resolveDynamicDelta(DynamicModuleRequirement dynamicReq, Collection<ModuleRevision> unresolved, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDatabase moduleDatabase) {
+	ModuleResolutionReport resolveDynamicDelta(DynamicModuleRequirement dynamicReq,
+			Collection<ModuleRevision> unresolved, Map<ModuleRevision, ModuleWiring> wiringCopy,
+			ModuleDatabase moduleDatabase) {
 		ResolveProcess resolveProcess = new ResolveProcess(unresolved, dynamicReq, wiringCopy, moduleDatabase);
 		return resolveProcess.resolve();
 	}
 
-	Map<ModuleRevision, ModuleWiring> generateDelta(Map<Resource, List<Wire>> result, Map<ModuleRevision, ModuleWiring> wiringCopy) {
+	Map<ModuleRevision, ModuleWiring> generateDelta(Map<Resource, List<Wire>> result,
+			Map<ModuleRevision, ModuleWiring> wiringCopy) {
 		Map<ModuleRevision, Map<ModuleCapability, List<ModuleWire>>> provided = new HashMap<>();
 		Map<ModuleRevision, NamespaceList<ModuleWire>> required = new HashMap<>(result.size() * 4 / 3 + 1);
 		// First populate the list of provided and required wires for revision
-		// This is done this way to share the wire object between both the provider and requirer
+		// This is done this way to share the wire object between both the provider and
+		// requirer
 		for (Map.Entry<Resource, List<Wire>> resultEntry : result.entrySet()) {
 			ModuleRevision revision = (ModuleRevision) resultEntry.getKey();
 			NamespaceList.Builder<ModuleWire> requiredWires = NamespaceList.Builder.create(WIRE);
 			for (Wire wire : resultEntry.getValue()) {
-				ModuleWire moduleWire = new ModuleWire((ModuleCapability) wire.getCapability(), (ModuleRevision) wire.getProvider(), (ModuleRequirement) wire.getRequirement(), (ModuleRevision) wire.getRequirer());
+				ModuleWire moduleWire = new ModuleWire((ModuleCapability) wire.getCapability(),
+						(ModuleRevision) wire.getProvider(), (ModuleRequirement) wire.getRequirement(),
+						(ModuleRevision) wire.getRequirer());
 				requiredWires.add(moduleWire);
 				Map<ModuleCapability, List<ModuleWire>> providedWiresMap = provided.get(moduleWire.getProvider());
 				if (providedWiresMap == null) {
@@ -215,7 +226,8 @@ final class ModuleResolver {
 				delta.put(revision, createNewWiring(revision, provided, required));
 			} else {
 				// this is to handle dynamic imports
-				delta.put(revision, createWiringDelta(revision, existingWiring, provided.get(revision), required.get(revision)));
+				delta.put(revision,
+						createWiringDelta(revision, existingWiring, provided.get(revision), required.get(revision)));
 			}
 		}
 		// Also need to create the wiring deltas for already resolved bundles
@@ -224,15 +236,19 @@ final class ModuleResolver {
 		for (ModuleRevision revision : provided.keySet()) {
 			ModuleWiring existingWiring = wiringCopy.get(revision);
 			if (existingWiring != null && !delta.containsKey(revision)) {
-				delta.put(revision, createWiringDelta(revision, existingWiring, provided.get(revision), required.get(revision)));
+				delta.put(revision,
+						createWiringDelta(revision, existingWiring, provided.get(revision), required.get(revision)));
 			}
 		}
 		return delta;
 	}
 
-	private ModuleWiring createNewWiring(ModuleRevision revision, Map<ModuleRevision, Map<ModuleCapability, List<ModuleWire>>> provided, Map<ModuleRevision, NamespaceList<ModuleWire>> required) {
+	private ModuleWiring createNewWiring(ModuleRevision revision,
+			Map<ModuleRevision, Map<ModuleCapability, List<ModuleWire>>> provided,
+			Map<ModuleRevision, NamespaceList<ModuleWire>> required) {
 
-		Map<ModuleCapability, List<ModuleWire>> providedWireMap = provided.getOrDefault(revision, Collections.emptyMap());
+		Map<ModuleCapability, List<ModuleWire>> providedWireMap = provided.getOrDefault(revision,
+				Collections.emptyMap());
 		NamespaceList<ModuleWire> requiredWires = required.getOrDefault(revision, NamespaceList.empty(WIRE));
 
 		NamespaceList.Builder<ModuleCapability> capabilities = revision.getCapabilities().createBuilder();
@@ -270,10 +286,12 @@ final class ModuleResolver {
 		requirements.removeNamespaceIf(namespace -> !NON_PAYLOAD_REQUIREMENTS.contains(namespace));
 	}
 
-	private static Collection<String> removeSubstitutedCapabilities(NamespaceList.Builder<ModuleCapability> capabilities, NamespaceList<ModuleWire> requiredWires) {
+	private static Collection<String> removeSubstitutedCapabilities(
+			NamespaceList.Builder<ModuleCapability> capabilities, NamespaceList<ModuleWire> requiredWires) {
 		Collection<String> substituted = new ArrayList<>();
 		for (ModuleWire moduleWire : requiredWires.getList(PackageNamespace.PACKAGE_NAMESPACE)) {
-			String packageName = (String) moduleWire.getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
+			String packageName = (String) moduleWire.getCapability().getAttributes()
+					.get(PackageNamespace.PACKAGE_NAMESPACE);
 			capabilities.removeElementsOfNamespaceIf(PackageNamespace.PACKAGE_NAMESPACE, capability -> {
 				if (packageName.equals(capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE))) {
 					// found a package capability with the same name as a package that got imported
@@ -289,7 +307,8 @@ final class ModuleResolver {
 		return substituted.isEmpty() ? Collections.emptyList() : substituted;
 	}
 
-	private static void removeNonEffectiveRequirements(NamespaceList.Builder<ModuleRequirement> requirements, NamespaceList<ModuleWire> requiredWires) {
+	private static void removeNonEffectiveRequirements(NamespaceList.Builder<ModuleRequirement> requirements,
+			NamespaceList<ModuleWire> requiredWires) {
 
 		Set<ModuleRequirement> wireRequirements = new HashSet<>();
 		for (ModuleWire mw : requiredWires.getList(null)) {
@@ -334,7 +353,9 @@ final class ModuleResolver {
 		});
 	}
 
-	private static void addPayloadContent(List<ModuleWire> hostWires, NamespaceList.Builder<ModuleCapability> capabilities, NamespaceList.Builder<ModuleRequirement> requirements) {
+	private static void addPayloadContent(List<ModuleWire> hostWires,
+			NamespaceList.Builder<ModuleCapability> capabilities,
+			NamespaceList.Builder<ModuleRequirement> requirements) {
 		if (hostWires == null)
 			return;
 		for (ModuleWire hostWire : hostWires) {
@@ -367,7 +388,9 @@ final class ModuleResolver {
 	}
 
 	static boolean isDynamic(Requirement requirement) {
-		return PackageNamespace.PACKAGE_NAMESPACE.equals(requirement.getNamespace()) && PackageNamespace.RESOLUTION_DYNAMIC.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE));
+		return PackageNamespace.PACKAGE_NAMESPACE.equals(requirement.getNamespace())
+				&& PackageNamespace.RESOLUTION_DYNAMIC
+						.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE));
 	}
 
 	private static void addProvidedWires(Map<ModuleCapability, List<ModuleWire>> toAdd,
@@ -382,12 +405,14 @@ final class ModuleResolver {
 		}
 	}
 
-	private static ModuleWiring createWiringDelta(ModuleRevision revision, ModuleWiring existingWiring, Map<ModuleCapability, List<ModuleWire>> providedWireMap, NamespaceList<ModuleWire> requiredWires) {
+	private static ModuleWiring createWiringDelta(ModuleRevision revision, ModuleWiring existingWiring,
+			Map<ModuleCapability, List<ModuleWire>> providedWireMap, NamespaceList<ModuleWire> requiredWires) {
 		// No null checks are done here on the wires since this is a copy.
 		NamespaceList.Builder<ModuleWire> existingProvidedWires = existingWiring.getProvidedWires().createBuilder();
 		NamespaceList.Builder<ModuleCapability> existingCapabilities = existingWiring.getCapabilities().createBuilder();
 		NamespaceList.Builder<ModuleWire> existingRequiredWires = existingWiring.getRequiredWires().createBuilder();
-		NamespaceList.Builder<ModuleRequirement> existingRequirements = existingWiring.getRequirements().createBuilder();
+		NamespaceList.Builder<ModuleRequirement> existingRequirements = existingWiring.getRequirements()
+				.createBuilder();
 
 		// First, add newly resolved fragment capabilities and requirements
 		if (providedWireMap != null) {
@@ -399,10 +424,12 @@ final class ModuleResolver {
 			}
 		}
 
-		// Create a ModuleWiring that only contains the new ordered list of provided wires
+		// Create a ModuleWiring that only contains the new ordered list of provided
+		// wires
 		addProvidedWires(providedWireMap, existingProvidedWires, existingCapabilities);
 
-		// Also need to include any new required wires that may have be added for fragment hosts
+		// Also need to include any new required wires that may have be added for
+		// fragment hosts
 		// Also will be needed for dynamic imports
 		if (requiredWires != null) {
 			existingRequiredWires.addAll(requiredWires);
@@ -479,30 +506,31 @@ final class ModuleResolver {
 
 			@Override
 			protected void doLog(int level, String msg, Throwable throwable) {
-				Debug.println("RESOLVER: " + msg + SEPARATOR + (throwable != null ? (TAB + TAB + throwable.getMessage()) : "")); //$NON-NLS-1$ //$NON-NLS-2$
+				Debug.println("RESOLVER: " + msg + SEPARATOR //$NON-NLS-1$
+						+ (throwable != null ? (TAB + TAB + throwable.getMessage()) : "")); //$NON-NLS-1$
 			}
 
 		}
 
 		private final ModuleResolutionReport.Builder reportBuilder = new ModuleResolutionReport.Builder();
 		/*
-		 * Contains the revisions that were requested to be resolved and is not
-		 * modified post instantiation.
+		 * Contains the revisions that were requested to be resolved and is not modified
+		 * post instantiation.
 		 */
 		private final Collection<ModuleRevision> unresolved;
 		/*
-		 * Contains unresolved revisions that should not be resolved as part of
-		 * this process. The reasons they should not be resolved will vary. For
-		 * example, some might have been filtered out by the resolver hook while
-		 * others represent singleton collisions. It is assumed that all
-		 * unresolved revisions are disabled at the start of the resolve
-		 * process (see initialization in constructors). Any not filtered out
-		 * by ResolverHook.filterResolvable are then removed but may be added
-		 * back later for other reasons.
+		 * Contains unresolved revisions that should not be resolved as part of this
+		 * process. The reasons they should not be resolved will vary. For example, some
+		 * might have been filtered out by the resolver hook while others represent
+		 * singleton collisions. It is assumed that all unresolved revisions are
+		 * disabled at the start of the resolve process (see initialization in
+		 * constructors). Any not filtered out by ResolverHook.filterResolvable are then
+		 * removed but may be added back later for other reasons.
 		 */
 		private final Collection<ModuleRevision> disabled;
-		private final Collection<ModuleRevision> triggers;
-		private final boolean triggersMandatory;
+		private final Collection<ModuleRevision> toResolve;
+		private final boolean toResolveMandatory;
+		private final Collection<ModuleRevision> triggersForHook;
 		final ModuleDatabase moduleDatabase;
 		final Map<ModuleRevision, ModuleWiring> wirings;
 		private final Set<ModuleRevision> previouslyResolved;
@@ -519,31 +547,39 @@ final class ModuleResolver {
 		 * Used to generate the UNRESOLVED_PROVIDER resolution report entries.
 		 *
 		 * The inner map associates a requirement to the set of all matching
-		 * capabilities that were found. The outer map associates the requiring
-		 * resource to the inner map so that its contents may easily be looked
-		 * up from the set of unresolved resources, if any, after the resolution
-		 * has occurred.
+		 * capabilities that were found. The outer map associates the requiring resource
+		 * to the inner map so that its contents may easily be looked up from the set of
+		 * unresolved resources, if any, after the resolution has occurred.
 		 */
 		private final Map<Resource, Map<Requirement, Set<Capability>>> unresolvedProviders = new HashMap<>();
 
-		ResolveProcess(Collection<ModuleRevision> unresolved, Collection<ModuleRevision> triggers, boolean triggersMandatory, Map<ModuleRevision, ModuleWiring> wirings, ModuleDatabase moduleDatabase) {
+		ResolveProcess(Collection<ModuleRevision> unresolved, Collection<ModuleRevision> triggers,
+				boolean triggersMandatory, Map<ModuleRevision, ModuleWiring> wirings, ModuleDatabase moduleDatabase) {
 			this.unresolved = unresolved;
 			this.disabled = new HashSet<>(unresolved);
-			this.triggers = new ArrayList<>(triggers);
-			this.triggersMandatory = triggersMandatory;
+			if (!triggersMandatory) {
+				// we are just resolving all bundles optionally
+				this.toResolve = new ArrayList<>(unresolved);
+			} else {
+				this.toResolve = new ArrayList<>(triggers);
+			}
+			this.triggersForHook = Collections.unmodifiableList(new ArrayList<>(triggers));
+			this.toResolveMandatory = triggersMandatory;
 			this.wirings = new HashMap<>(wirings);
 			this.previouslyResolved = new HashSet<>(wirings.keySet());
 			this.moduleDatabase = moduleDatabase;
 			this.dynamicReq = null;
 		}
 
-		ResolveProcess(Collection<ModuleRevision> unresolved, DynamicModuleRequirement dynamicReq, Map<ModuleRevision, ModuleWiring> wirings, ModuleDatabase moduleDatabase) {
+		ResolveProcess(Collection<ModuleRevision> unresolved, DynamicModuleRequirement dynamicReq,
+				Map<ModuleRevision, ModuleWiring> wirings, ModuleDatabase moduleDatabase) {
 			this.unresolved = unresolved;
 			this.disabled = new HashSet<>(unresolved);
 			ModuleRevision revision = dynamicReq.getRevision();
-			this.triggers = new ArrayList<>(1);
-			this.triggers.add(revision);
-			this.triggersMandatory = false;
+			this.toResolve = new ArrayList<>(1);
+			this.toResolve.add(revision);
+			this.toResolveMandatory = false;
+			this.triggersForHook = Collections.singletonList(revision);
 			this.wirings = wirings;
 			this.previouslyResolved = new HashSet<>(wirings.keySet());
 			this.moduleDatabase = moduleDatabase;
@@ -553,7 +589,8 @@ final class ModuleResolver {
 		@Override
 		public List<Capability> findProviders(Requirement requirement) {
 			Requirement origReq = requirement;
-			Requirement lookupReq = dynamicReq == null || dynamicReq.getOriginal() != requirement ? requirement : dynamicReq;
+			Requirement lookupReq = dynamicReq == null || dynamicReq.getOriginal() != requirement ? requirement
+					: dynamicReq;
 			return findProviders0(origReq, lookupReq);
 		}
 
@@ -591,7 +628,8 @@ final class ModuleResolver {
 			return filterProviders(requirement, candidates, true);
 		}
 
-		List<Capability> filterProviders(Requirement requirement, List<ModuleCapability> candidates, boolean filterResolvedHosts) {
+		List<Capability> filterProviders(Requirement requirement, List<ModuleCapability> candidates,
+				boolean filterResolvedHosts) {
 			filterDisabled(candidates);
 			removeNonEffectiveCapabilities(candidates);
 			removeSubstituted(candidates);
@@ -605,7 +643,8 @@ final class ModuleResolver {
 			if (DEBUG_PROVIDERS || DEBUG_HOOKS) {
 				filteredMatches.removeAll(candidates);
 				if (!filteredMatches.isEmpty()) {
-					StringBuilder builder = new StringBuilder("RESOLVER: Capabilities filtered by ResolverHook.filterMatches"); //$NON-NLS-1$
+					StringBuilder builder = new StringBuilder(
+							"RESOLVER: Capabilities filtered by ResolverHook.filterMatches"); //$NON-NLS-1$
 					int i = 0;
 					for (Capability capability : filteredMatches) {
 						builder.append(SEPARATOR).append(TAB) //
@@ -620,7 +659,8 @@ final class ModuleResolver {
 				}
 			}
 
-			// filter resolved hosts after calling hooks to allow hooks to see the host capability
+			// filter resolved hosts after calling hooks to allow hooks to see the host
+			// capability
 			filterResolvedHosts(requirement, candidates, filterResolvedHosts);
 
 			if (candidates.isEmpty()) {
@@ -647,20 +687,22 @@ final class ModuleResolver {
 				if (failedToResolve.contains(capability.getRevision())) {
 					iCandidates.remove();
 					if (DEBUG_PROVIDERS) {
-						Debug.println(new StringBuilder("RESOLVER: Capability filtered because its resource was not resolved") //$NON-NLS-1$
-								.append(SEPARATOR).append(TAB) //
-								.append(capability) //
-								.append(SEPARATOR).append(TAB).append(TAB) //
-								.append("of resource") //$NON-NLS-1$
-								.append(SEPARATOR).append(TAB).append(TAB).append(TAB) //
-								.append(capability.getResource()) //
-								.toString());
+						Debug.println(
+								new StringBuilder("RESOLVER: Capability filtered because its resource was not resolved") //$NON-NLS-1$
+										.append(SEPARATOR).append(TAB) //
+										.append(capability) //
+										.append(SEPARATOR).append(TAB).append(TAB) //
+										.append("of resource") //$NON-NLS-1$
+										.append(SEPARATOR).append(TAB).append(TAB).append(TAB) //
+										.append(capability.getResource()) //
+										.toString());
 					}
 				}
 			}
 		}
 
-		private void filterResolvedHosts(Requirement requirement, List<ModuleCapability> candidates, boolean filterResolvedHosts) {
+		private void filterResolvedHosts(Requirement requirement, List<ModuleCapability> candidates,
+				boolean filterResolvedHosts) {
 			if (filterResolvedHosts && HostNamespace.HOST_NAMESPACE.equals(requirement.getNamespace())) {
 				for (Iterator<ModuleCapability> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
 					if (wirings.containsKey(iCandidates.next().getRevision())) {
@@ -691,7 +733,8 @@ final class ModuleResolver {
 				Permission providePermission = InternalUtils.getProvidePermission(candidate);
 				if (!requirement.getRevision().getBundle().hasPermission(requirePermission)) {
 					if (DEBUG_PROVIDERS) {
-						Debug.println(new StringBuilder("RESOLVER: Capability filtered because requirer did not have permission") //$NON-NLS-1$
+						Debug.println(new StringBuilder(
+								"RESOLVER: Capability filtered because requirer did not have permission") //$NON-NLS-1$
 								.append(SEPARATOR).append(TAB) //
 								.append(candidate) //
 								.append(SEPARATOR).append(TAB).append(TAB) //
@@ -703,7 +746,8 @@ final class ModuleResolver {
 					return true;
 				} else if (!candidate.getRevision().getBundle().hasPermission(providePermission)) {
 					if (DEBUG_PROVIDERS) {
-						Debug.println(new StringBuilder("RESOLVER: Capability filtered because provider did not have permission") //$NON-NLS-1$
+						Debug.println(new StringBuilder(
+								"RESOLVER: Capability filtered because provider did not have permission") //$NON-NLS-1$
 								.append(SEPARATOR).append(TAB) //
 								.append(candidate) //
 								.append(SEPARATOR).append(TAB).append(TAB) //
@@ -798,7 +842,8 @@ final class ModuleResolver {
 		@Override
 		public Collection<Resource> findRelatedResources(Resource host) {
 			// for the container we only care about fragments for related resources
-			List<ModuleCapability> hostCaps = ((ModuleRevision) host).getModuleCapabilities(HostNamespace.HOST_NAMESPACE);
+			List<ModuleCapability> hostCaps = ((ModuleRevision) host)
+					.getModuleCapabilities(HostNamespace.HOST_NAMESPACE);
 			if (hostCaps.isEmpty()) {
 				return Collections.emptyList();
 			}
@@ -806,12 +851,16 @@ final class ModuleResolver {
 			Collection<Resource> relatedFragments = new ArrayList<>();
 			for (String hostBSN : getHostBSNs(hostCaps)) {
 				String matchFilter = "(" + EquinoxFragmentNamespace.FRAGMENT_NAMESPACE + "=" + hostBSN + ")"; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-				Requirement fragmentRequirement = ModuleContainer.createRequirement(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, Collections.singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, matchFilter), Collections.emptyMap());
+				Requirement fragmentRequirement = ModuleContainer.createRequirement(
+						EquinoxFragmentNamespace.FRAGMENT_NAMESPACE,
+						Collections.singletonMap(Namespace.REQUIREMENT_FILTER_DIRECTIVE, matchFilter),
+						Collections.emptyMap());
 				List<ModuleCapability> candidates = moduleDatabase.findCapabilities(fragmentRequirement);
 				// filter out disabled fragments and singletons
 				filterDisabled(candidates);
 				for (ModuleCapability candidate : candidates) {
-					ModuleRequirement hostReq = candidate.getRevision().getModuleRequirements(HostNamespace.HOST_NAMESPACE).get(0);
+					ModuleRequirement hostReq = candidate.getRevision()
+							.getModuleRequirements(HostNamespace.HOST_NAMESPACE).get(0);
 					for (ModuleCapability hostCap : hostCaps) {
 						if (hostReq.matches(hostCap)) {
 							relatedFragments.add(candidate.getResource());
@@ -826,7 +875,8 @@ final class ModuleResolver {
 
 		private Collection<String> getHostBSNs(List<ModuleCapability> hostCaps) {
 			if (hostCaps.size() == 1) {
-				// optimization and likely the only case since you are not supposed to have multiple host caps
+				// optimization and likely the only case since you are not supposed to have
+				// multiple host caps
 				return getHostBSNs(hostCaps.get(0));
 			}
 			Set<String> result = new HashSet<>();
@@ -854,18 +904,21 @@ final class ModuleResolver {
 		ModuleResolutionReport resolve() {
 			if (threadResolving()) {
 				// throw up a runtime exception, if this is caused by a resolver hook
-				// then it will get caught at the call to the resolver hook and a proper exception is thrown
+				// then it will get caught at the call to the resolver hook and a proper
+				// exception is thrown
 				throw new IllegalStateException(Msg.ModuleResolver_RecursiveError);
 			}
 			threadResolving.set(Boolean.TRUE);
 			try {
 				try {
-					hook = adaptor.getResolverHookFactory().begin(InternalUtils.asList((List<? extends BundleRevision>) triggers));
+					hook = adaptor.getResolverHookFactory()
+							.begin(InternalUtils.asList((List<? extends BundleRevision>) triggersForHook));
 				} catch (RuntimeException e) {
 					if (e.getCause() instanceof BundleException) {
 						BundleException be = (BundleException) e.getCause();
 						if (be.getType() == BundleException.REJECTED_BY_HOOK) {
-							return new ModuleResolutionReport(null, Collections.emptyMap(), new ResolutionException(be));
+							return new ModuleResolutionReport(null, Collections.emptyMap(),
+									new ResolutionException(be));
 						}
 					}
 					throw e;
@@ -878,7 +931,7 @@ final class ModuleResolver {
 					filterResolvable();
 					selectSingletons();
 					// remove disabled from triggers to prevent the resolver from resolving them
-					if (triggers.removeAll(disabled) && triggersMandatory) {
+					if (toResolve.removeAll(disabled) && toResolveMandatory) {
 						throw new ResolutionException(Msg.ModuleResolver_SingletonDisabledError + disabled);
 					}
 					if (dynamicReq != null) {
@@ -891,11 +944,11 @@ final class ModuleResolver {
 							// be sure to remove the revisions from the optional and triggers
 							// so they no longer attempt to be resolved
 							Set<Resource> fragmentResources = dynamicAttachWirings.keySet();
-							triggers.removeAll(fragmentResources);
+							toResolve.removeAll(fragmentResources);
 
 							result.putAll(dynamicAttachWirings);
 						}
-						resolveRevisionsInBatch(triggers, triggersMandatory, logger, result);
+						resolveRevisionsInBatch(toResolve, toResolveMandatory, logger, result);
 					}
 				} catch (ResolutionException e) {
 					re = e;
@@ -956,7 +1009,8 @@ final class ModuleResolver {
 			Debug.println(builder);
 		}
 
-		private void resolveRevisionsInBatch(Collection<ModuleRevision> revisions, boolean isMandatory, ResolveLogger logger, Map<Resource, List<Wire>> result) throws ResolutionException {
+		private void resolveRevisionsInBatch(Collection<ModuleRevision> revisions, boolean isMandatory,
+				ResolveLogger logger, Map<Resource, List<Wire>> result) throws ResolutionException {
 			long startTime = System.currentTimeMillis();
 			long initialFreeMemory = Runtime.getRuntime().freeMemory();
 			long maxUsedMemory = 0;
@@ -1002,7 +1056,9 @@ final class ModuleResolver {
 			}
 		}
 
-		private void resolveRevisionsIndividually(boolean isMandatory, ResolveLogger logger, Map<Resource, List<Wire>> result, Collection<Resource> toResolve, Collection<ModuleRevision> revisions) throws ResolutionException {
+		private void resolveRevisionsIndividually(boolean isMandatory, ResolveLogger logger,
+				Map<Resource, List<Wire>> result, Collection<Resource> toResolve, Collection<ModuleRevision> revisions)
+				throws ResolutionException {
 			scheduleTimeout.set(false);
 			for (Resource resource : toResolve) {
 				if (!wirings.containsKey(resource) && !failedToResolve.contains(resource)) {
@@ -1016,7 +1072,8 @@ final class ModuleResolver {
 			}
 		}
 
-		private void resolveRevisions(List<Resource> revisions, boolean isMandatory, ResolveLogger logger, Map<Resource, List<Wire>> result) throws ResolutionException {
+		private void resolveRevisions(List<Resource> revisions, boolean isMandatory, ResolveLogger logger,
+				Map<Resource, List<Wire>> result) throws ResolutionException {
 			boolean applyTransitiveFailures = true;
 			currentlyResolving = revisions;
 			currentlyResolvingMandatory = isMandatory;
@@ -1076,16 +1133,17 @@ final class ModuleResolver {
 		}
 
 		private void computeUsesConstraintViolations(Map<Resource, ResolutionException> usesConstraintViolations) {
-			for (Map.Entry<Resource, ResolutionException> usesConstraintViolation : usesConstraintViolations.entrySet()) {
-				reportBuilder.addEntry(usesConstraintViolation.getKey(), Type.USES_CONSTRAINT_VIOLATION, usesConstraintViolation.getValue());
+			for (Map.Entry<Resource, ResolutionException> usesConstraintViolation : usesConstraintViolations
+					.entrySet()) {
+				reportBuilder.addEntry(usesConstraintViolation.getKey(), Type.USES_CONSTRAINT_VIOLATION,
+						usesConstraintViolation.getValue());
 			}
 		}
 
 		/*
-		 * Given the results of a resolution, compute which, if any, of the
-		 * enabled, resolving resources are still unresolved. For those that are
-		 * unresolved, generate resolution report entries for unresolved
-		 * providers, if necessary.
+		 * Given the results of a resolution, compute which, if any, of the enabled,
+		 * resolving resources are still unresolved. For those that are unresolved,
+		 * generate resolution report entries for unresolved providers, if necessary.
 		 */
 		private void computeUnresolvedProviderResolutionReportEntries(Map<Resource, List<Wire>> resolution) {
 			// Create a collection representing the resources asked to be
@@ -1102,14 +1160,16 @@ final class ModuleResolver {
 			// For each resource, add report entries for any unresolved
 			// providers.
 			for (Resource shouldHaveResolvedResource : shouldHaveResolvedResources) {
-				Map<Requirement, Set<Capability>> requirementToCapabilities = unresolvedProviders.get(shouldHaveResolvedResource);
+				Map<Requirement, Set<Capability>> requirementToCapabilities = unresolvedProviders
+						.get(shouldHaveResolvedResource);
 				if (requirementToCapabilities == null)
 					continue;
 				// If nothing resolved then there are no resolved resources to
 				// filter out.
 				if (resolution != null) {
 					// Filter out capability providers that resolved.
-					for (Iterator<Set<Capability>> values = requirementToCapabilities.values().iterator(); values.hasNext();) {
+					for (Iterator<Set<Capability>> values = requirementToCapabilities.values().iterator(); values
+							.hasNext();) {
 						Set<Capability> value = values.next();
 						for (Iterator<Capability> capabilities = value.iterator(); capabilities.hasNext();)
 							if (resolution.containsKey(capabilities.next().getResource()))
@@ -1124,17 +1184,19 @@ final class ModuleResolver {
 				// Add a report entry if there are any remaining requirements
 				// pointing to unresolved capability providers.
 				if (!requirementToCapabilities.isEmpty())
-					reportBuilder.addEntry(shouldHaveResolvedResource, Entry.Type.UNRESOLVED_PROVIDER, requirementToCapabilities);
+					reportBuilder.addEntry(shouldHaveResolvedResource, Entry.Type.UNRESOLVED_PROVIDER,
+							requirementToCapabilities);
 			}
 		}
 
 		/*
-		 * Given a requirement and its matching capabilities, map the
-		 * requirement's resource to the requirement and matching capabilities.
-		 * This data is used to compute report entries for resources that did
-		 * not resolve because a provider did not resolve.
+		 * Given a requirement and its matching capabilities, map the requirement's
+		 * resource to the requirement and matching capabilities. This data is used to
+		 * compute report entries for resources that did not resolve because a provider
+		 * did not resolve.
 		 */
-		private void computeUnresolvedProviders(Requirement requirement, Collection<? extends Capability> capabilities) {
+		private void computeUnresolvedProviders(Requirement requirement,
+				Collection<? extends Capability> capabilities) {
 			Resource requirer = requirement.getResource();
 			Map<Requirement, Set<Capability>> requirementToCapabilities = unresolvedProviders.get(requirer);
 			if (requirementToCapabilities == null) {
@@ -1184,18 +1246,22 @@ final class ModuleResolver {
 				do {
 					retry = false;
 					result.clear();
-					fragmentsLoop: for (Iterator<Map.Entry<String, ModuleRevision>> iFragments = fragments.entrySet().iterator(); iFragments.hasNext();) {
+					fragmentsLoop: for (Iterator<Map.Entry<String, ModuleRevision>> iFragments = fragments.entrySet()
+							.iterator(); iFragments.hasNext();) {
 						Map.Entry<String, ModuleRevision> fragmentEntry = iFragments.next();
 						if (wirings.get(fragmentEntry.getValue()) == null) {
 							for (ModuleRequirement req : fragmentEntry.getValue().getModuleRequirements(null)) {
-								ModuleRevision requirer = NON_PAYLOAD_REQUIREMENTS.contains(req.getNamespace()) ? req.getRevision() : hostCapability.getRevision();
+								ModuleRevision requirer = NON_PAYLOAD_REQUIREMENTS.contains(req.getNamespace())
+										? req.getRevision()
+										: hostCapability.getRevision();
 								List<Wire> newWires = result.get(requirer);
 								if (newWires == null) {
 									newWires = new ArrayList<>();
 									result.put(requirer, newWires);
 								}
 								if (HostNamespace.HOST_NAMESPACE.equals(req.getNamespace())) {
-									newWires.add(new ModuleWire(hostCapability, hostCapability.getRevision(), req, requirer));
+									newWires.add(new ModuleWire(hostCapability, hostCapability.getRevision(), req,
+											requirer));
 								} else {
 									if (failToWire(req, requirer, newWires)) {
 										iFragments.remove();
@@ -1219,24 +1285,32 @@ final class ModuleResolver {
 				List<Wire> newWires = new ArrayList<>(0);
 				filterProviders(requirement, matching, false);
 				for (ModuleCapability candidate : matching) {
-					// If the requirer equals the requirement revision then this is a non-payload requirement.
+					// If the requirer equals the requirement revision then this is a non-payload
+					// requirement.
 					// We let non-payload requirements come from anywhere.
-					// Payload requirements must come from the host or one of the fragments attached to the host
-					if (requirer.equals(requirement.getRevision()) || validProviders.contains(candidate.getRevision())) {
-						ModuleRevision provider = NON_PAYLOAD_CAPABILITIES.contains(candidate.getNamespace()) ? candidate.getRevision() : hostCapability.getRevision();
+					// Payload requirements must come from the host or one of the fragments attached
+					// to the host
+					if (requirer.equals(requirement.getRevision())
+							|| validProviders.contains(candidate.getRevision())) {
+						ModuleRevision provider = NON_PAYLOAD_CAPABILITIES.contains(candidate.getNamespace())
+								? candidate.getRevision()
+								: hostCapability.getRevision();
 						// if there are multiple candidates; then check for cardinality
-						if (newWires.isEmpty() || Namespace.CARDINALITY_MULTIPLE.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_CARDINALITY_DIRECTIVE))) {
+						if (newWires.isEmpty() || Namespace.CARDINALITY_MULTIPLE
+								.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_CARDINALITY_DIRECTIVE))) {
 							newWires.add(new ModuleWire(candidate, provider, requirement, requirer));
 						}
 					}
 				}
 				if (newWires.isEmpty()) {
-					if (!Namespace.RESOLUTION_OPTIONAL.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
+					if (!Namespace.RESOLUTION_OPTIONAL
+							.equals(requirement.getDirectives().get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE))) {
 						// could not resolve mandatory requirement;
 						return true;
 					}
 				}
-				// only create the wire if the namespace is a non-substituted namespace (e.g. NOT package)
+				// only create the wire if the namespace is a non-substituted namespace (e.g.
+				// NOT package)
 				if (!NON_SUBSTITUTED_REQUIREMENTS.contains(requirement.getNamespace())) {
 					wires.addAll(newWires);
 				}
@@ -1277,9 +1351,12 @@ final class ModuleResolver {
 						filterProviders(requirement, matchingHosts, false);
 						for (ModuleCapability hostCandidate : matchingHosts) {
 							ModuleWiring hostWiring = wirings.get(hostCandidate.getRevision());
-							String attachDirective = hostCandidate.getDirectives().get(HostNamespace.CAPABILITY_FRAGMENT_ATTACHMENT_DIRECTIVE);
-							boolean attachAlways = attachDirective == null || HostNamespace.FRAGMENT_ATTACHMENT_ALWAYS.equals(attachDirective);
-							// only do this if the candidate host is already resolved and it allows dynamic attachment
+							String attachDirective = hostCandidate.getDirectives()
+									.get(HostNamespace.CAPABILITY_FRAGMENT_ATTACHMENT_DIRECTIVE);
+							boolean attachAlways = attachDirective == null
+									|| HostNamespace.FRAGMENT_ATTACHMENT_ALWAYS.equals(attachDirective);
+							// only do this if the candidate host is already resolved and it allows dynamic
+							// attachment
 							if (!attachAlways || hostWiring == null) {
 								continue;
 							}
@@ -1355,7 +1432,8 @@ final class ModuleResolver {
 					Collection<ModuleRevision> pickOneToResolve = new ArrayList<>();
 					for (ModuleRevision collision : collisions) {
 						if (selected.contains(collision)) {
-							// Must fail since there is already a selected bundle which is a collision of the singleton bundle
+							// Must fail since there is already a selected bundle which is a collision of
+							// the singleton bundle
 							disabled.add(singleton);
 							reportBuilder.addEntry(singleton, Type.SINGLETON_SELECTION, collision);
 							break;
@@ -1365,12 +1443,15 @@ final class ModuleResolver {
 					}
 					if (!disabled.contains(singleton)) {
 						// need to make sure the bundle does not collide from the POV of another entry
-						for (Map.Entry<ModuleRevision, Collection<ModuleRevision>> collisionEntry : collisionMap.entrySet()) {
+						for (Map.Entry<ModuleRevision, Collection<ModuleRevision>> collisionEntry : collisionMap
+								.entrySet()) {
 							if (collisionEntry.getKey() != singleton && collisionEntry.getValue().contains(singleton)) {
 								if (selected.contains(collisionEntry.getKey())) {
-									// Must fail since there is already a selected bundle for which the singleton bundle is a collision
+									// Must fail since there is already a selected bundle for which the singleton
+									// bundle is a collision
 									disabled.add(singleton);
-									reportBuilder.addEntry(singleton, Type.SINGLETON_SELECTION, collisionEntry.getKey());
+									reportBuilder.addEntry(singleton, Type.SINGLETON_SELECTION,
+											collisionEntry.getKey());
 									break;
 								}
 								if (!pickOneToResolve.contains(collisionEntry.getKey()))
@@ -1452,7 +1533,8 @@ final class ModuleResolver {
 					filteredSingletons.removeAll(collisionCandidates);
 					filteredSingletons.remove(singleton);
 					if (!filteredSingletons.isEmpty()) {
-						StringBuilder builder = new StringBuilder("RESOLVER: Resources filtered by ResolverHook.filterSingletonCollisions") //$NON-NLS-1$
+						StringBuilder builder = new StringBuilder(
+								"RESOLVER: Resources filtered by ResolverHook.filterSingletonCollisions") //$NON-NLS-1$
 								.append(SEPARATOR).append(TAB) //
 								.append("Singleton") //$NON-NLS-1$
 								.append(SEPARATOR).append(TAB).append(TAB) //
@@ -1521,8 +1603,10 @@ final class ModuleResolver {
 		}
 
 		ModuleRevision getModuleRevision(Capability c) {
-			// We assume all capabilities here either come from us and have ModuleRevision resources or
-			// they are HostedCapabilities which have ModuleRevision resources as the host revision
+			// We assume all capabilities here either come from us and have ModuleRevision
+			// resources or
+			// they are HostedCapabilities which have ModuleRevision resources as the host
+			// revision
 			if (c instanceof HostedCapability) {
 				c = ((HostedCapability) c).getDeclaredCapability();
 			}
@@ -1540,12 +1624,14 @@ final class ModuleResolver {
 
 		@Override
 		public void onCancel(Runnable callback) {
-			// Note that for each resolve Process we only want timeout the initial batch resolve
+			// Note that for each resolve Process we only want timeout the initial batch
+			// resolve
 			if (scheduleTimeout.compareAndSet(true, false)) {
 				ScheduledExecutorService scheduledExecutor = adaptor.getScheduledExecutor();
 				if (scheduledExecutor != null) {
 					try {
-						timoutFuture.set(scheduledExecutor.schedule(callback, resolverBatchTimeout, TimeUnit.MILLISECONDS));
+						timoutFuture
+								.set(scheduledExecutor.schedule(callback, resolverBatchTimeout, TimeUnit.MILLISECONDS));
 					} catch (RejectedExecutionException e) {
 						// ignore may have been shutdown, it is ok we will not be able to timeout
 					}

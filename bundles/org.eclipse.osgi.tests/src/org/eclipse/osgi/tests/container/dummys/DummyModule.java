@@ -25,11 +25,13 @@ public class DummyModule extends Module {
 	private final CountDownLatch startLatch;
 	private final CountDownLatch stopLatch;
 
-	public DummyModule(Long id, String location, ModuleContainer container, EnumSet<Settings> settings, int startlevel) {
+	public DummyModule(Long id, String location, ModuleContainer container, EnumSet<Settings> settings,
+			int startlevel) {
 		this(id, location, container, settings, startlevel, null, null);
 	}
 
-	public DummyModule(Long id, String location, ModuleContainer container, EnumSet<Settings> settings, int startlevel, CountDownLatch startLatch, CountDownLatch stopLatch) {
+	public DummyModule(Long id, String location, ModuleContainer container, EnumSet<Settings> settings, int startlevel,
+			CountDownLatch startLatch, CountDownLatch stopLatch) {
 		super(id, location, container, settings, startlevel);
 		this.startLatch = startLatch == null ? new CountDownLatch(0) : startLatch;
 		this.stopLatch = stopLatch == null ? new CountDownLatch(0) : stopLatch;

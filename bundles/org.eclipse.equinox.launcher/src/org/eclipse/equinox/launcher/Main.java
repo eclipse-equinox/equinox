@@ -1478,7 +1478,7 @@ public class Main {
 			} else {
 				// we have an exit code of 13, in most cases the user tries to start a 32/64 bit Eclipse
 				// on a 64/32 bit Eclipse
-				log("Are you trying to start an 64/32-bit Eclipse on a 32/64-JVM? These must be the same, as Eclipse uses native code.");
+				log("Are you trying to start an 64/32-bit Eclipse on a 32/64-JVM? These must be the same, as Eclipse uses native code."); //$NON-NLS-1$
 			}
 			// Return "unlucky" 13 as the exit code. The executable will recognize
 			// this constant and display a message to the user telling them that

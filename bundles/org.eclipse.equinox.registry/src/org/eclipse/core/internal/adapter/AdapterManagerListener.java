@@ -36,9 +36,9 @@ public final class AdapterManagerListener implements IRegistryEventListener, IAd
 	}
 
 	/**
-	 * Loads adapters registered with the adapters extension point from
-	 * the plug-in registry.  Note that the actual factory implementations
-	 * are loaded lazily as they are needed.
+	 * Loads adapters registered with the adapters extension point from the plug-in
+	 * registry. Note that the actual factory implementations are loaded lazily as
+	 * they are needed.
 	 */
 	@Override
 	public boolean addFactories(AdapterManager adapterManager) {
@@ -84,7 +84,8 @@ public final class AdapterManagerListener implements IRegistryEventListener, IAd
 		theAdapterManager.flushLookup();
 		for (IExtension extension : extensions) {
 			for (List<IAdapterFactory> adapterFactories : theAdapterManager.getFactories().values()) {
-				adapterFactories.removeIf(factory -> factory instanceof AdapterFactoryProxy && ((AdapterFactoryProxy) factory).originatesFrom(extension));
+				adapterFactories.removeIf(factory -> factory instanceof AdapterFactoryProxy
+						&& ((AdapterFactoryProxy) factory).originatesFrom(extension));
 			}
 		}
 	}
@@ -96,13 +97,14 @@ public final class AdapterManagerListener implements IRegistryEventListener, IAd
 
 	@Override
 	public synchronized void removed(IExtensionPoint[] extensionPoints) {
-		// all extensions should have been removed by this point by #removed(IExtension[] extensions)
+		// all extensions should have been removed by this point by
+		// #removed(IExtension[] extensions)
 		// nothing to do
 	}
 
 	/*
-	 * Shuts down the listener by removing the registry change listener. Should only be
-	 * invoked during platform shutdown.
+	 * Shuts down the listener by removing the registry change listener. Should only
+	 * be invoked during platform shutdown.
 	 */
 	public synchronized void stop() {
 		RegistryFactory.getRegistry().removeListener(this);

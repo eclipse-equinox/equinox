@@ -39,7 +39,8 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 	private final FrameworkLog log;
 	private final EquinoxConfiguration equinoxConfig;
 
-	public EclipseAppLauncher(BundleContext context, boolean relaunch, boolean failOnNoDefault, FrameworkLog log, EquinoxConfiguration equinoxConfig) {
+	public EclipseAppLauncher(BundleContext context, boolean relaunch, boolean failOnNoDefault, FrameworkLog log,
+			EquinoxConfiguration equinoxConfig) {
 		this.context = context;
 		this.relaunch = relaunch;
 		this.failOnNoDefault = failOnNoDefault;
@@ -52,13 +53,15 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 	 * Used for backwards compatibility with < 3.2 runtime
 	 */
 	private void findRunnableService() {
-		// look for a ParameterizedRunnable registered as a service by runtimes (3.0, 3.1)
+		// look for a ParameterizedRunnable registered as a service by runtimes (3.0,
+		// 3.1)
 		String appClass = ParameterizedRunnable.class.getName();
 		ServiceReference<?>[] runRefs = null;
 		try {
-			runRefs = context.getServiceReferences(ParameterizedRunnable.class.getName(), "(&(objectClass=" + appClass + ")(eclipse.application=*))"); //$NON-NLS-1$//$NON-NLS-2$
+			runRefs = context.getServiceReferences(ParameterizedRunnable.class.getName(),
+					"(&(objectClass=" + appClass + ")(eclipse.application=*))"); //$NON-NLS-1$//$NON-NLS-2$
 		} catch (InvalidSyntaxException e) {
-			// ignore this.  It should never happen as we have tested the above format.
+			// ignore this. It should never happen as we have tested the above format.
 		}
 		if (runRefs != null && runRefs.length > 0) {
 			// found the service use it as the application.
@@ -70,13 +73,15 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 	}
 
 	/*
-	 * Starts this application launcher on the current thread.  This method
-	 * should be called by the main thread to ensure that applications are
-	 * launched in the main thread.
+	 * Starts this application launcher on the current thread. This method should be
+	 * called by the main thread to ensure that applications are launched in the
+	 * main thread.
 	 */
 	public Object start(Object defaultContext) throws Exception {
 		// here we assume that launch has been called by runtime before we started
-		// TODO this may be a bad assumption but it works for now because we register the app launcher as a service and runtime synchronously calls launch on the service
+		// TODO this may be a bad assumption but it works for now because we register
+		// the app launcher as a service and runtime synchronously calls launch on the
+		// service
 		if (failOnNoDefault && runnable == null)
 			throw new IllegalStateException(Msg.ECLIPSE_STARTUP_ERROR_NO_APPLICATION);
 		Object result = null;
@@ -108,7 +113,8 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 				if (!relaunch || (b.getState() & Bundle.ACTIVE) == 0)
 					throw e;
 				if (log != null)
-					log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0, Msg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null));
+					log.log(new FrameworkLogEntry(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, 0,
+							Msg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null));
 			}
 			doRelaunch = (relaunch && (b.getState() & Bundle.ACTIVE) != 0);
 		} while (doRelaunch);
@@ -124,7 +130,8 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 			// wait for an application to be launched.
 			waitForAppLock.acquire();
 			// an application is ready; acquire the running lock.
-			// this must happen after we have acquired an application (by acquiring waitForAppLock above).
+			// this must happen after we have acquired an application (by acquiring
+			// waitForAppLock above).
 			runningLock.acquire();
 			if (EclipseStarter.debug) {
 				String timeString = equinoxConfig.getConfiguration("eclipse.startTime"); //$NON-NLS-1$
@@ -135,7 +142,8 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 				// run the actual application on the current thread (main).
 				return runnable.run(appContext != null ? appContext : defaultContext);
 			} finally {
-				// free the runnable application and release the lock to allow another app to be launched.
+				// free the runnable application and release the lock to allow another app to be
+				// launched.
 				runnable = null;
 				appContext = null;
 				runningLock.release();
@@ -177,17 +185,19 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 	}
 
 	/*
-	 * Similar to the start method this method will restart the default method on current thread.
-	 * This method assumes that the default application was launched at least once and that an ApplicationDescriptor
-	 * exists that can be used to relaunch the default application.
+	 * Similar to the start method this method will restart the default method on
+	 * current thread. This method assumes that the default application was launched
+	 * at least once and that an ApplicationDescriptor exists that can be used to
+	 * relaunch the default application.
 	 */
 	public Object reStart(Object argument) throws Exception {
 		ServiceReference<?> ref[] = null;
-		ref = context.getServiceReferences("org.osgi.service.application.ApplicationDescriptor", "(eclipse.application.default=true)"); //$NON-NLS-1$//$NON-NLS-2$
+		ref = context.getServiceReferences("org.osgi.service.application.ApplicationDescriptor", //$NON-NLS-1$
+				"(eclipse.application.default=true)"); //$NON-NLS-1$
 		if (ref != null && ref.length > 0) {
 			Object defaultApp = context.getService(ref[0]);
-			Method launch = defaultApp.getClass().getMethod("launch", new Class[] {Map.class}); //$NON-NLS-1$
-			launch.invoke(defaultApp, new Object[] {null});
+			Method launch = defaultApp.getClass().getMethod("launch", new Class[] { Map.class }); //$NON-NLS-1$
+			launch.invoke(defaultApp, new Object[] { null });
 			return start(argument);
 		}
 		throw new IllegalStateException(Msg.ECLIPSE_STARTUP_ERROR_NO_APPLICATION);

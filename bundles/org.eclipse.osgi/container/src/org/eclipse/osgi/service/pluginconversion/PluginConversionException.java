@@ -46,7 +46,7 @@ public class PluginConversionException extends Exception {
 	 * Create a new exception with the given message and nested exception.
 	 *
 	 * @param message the message for the exception
-	 * @param cause the nested exception
+	 * @param cause   the nested exception
 	 */
 	public PluginConversionException(String message, Throwable cause) {
 		super(message);
@@ -63,8 +63,8 @@ public class PluginConversionException extends Exception {
 	}
 
 	/**
-	 * Return the nested exception for this exception or <code>null</code>
-	 * if there is none.
+	 * Return the nested exception for this exception or <code>null</code> if there
+	 * is none.
 	 *
 	 * @return the nested exception or <code>null</code>
 	 */

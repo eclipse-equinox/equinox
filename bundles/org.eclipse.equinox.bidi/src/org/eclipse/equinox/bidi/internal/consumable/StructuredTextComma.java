@@ -16,10 +16,11 @@ package org.eclipse.equinox.bidi.internal.consumable;
 import org.eclipse.equinox.bidi.custom.StructuredTextTypeHandler;
 
 /**
- *  Handler adapted to processing comma-delimited lists, such as:
- *  <pre>
+ * Handler adapted to processing comma-delimited lists, such as:
+ * 
+ * <pre>
  *    part1,part2,part3
- *  </pre>
+ * </pre>
  */
 public class StructuredTextComma extends StructuredTextTypeHandler {
 	public StructuredTextComma() {

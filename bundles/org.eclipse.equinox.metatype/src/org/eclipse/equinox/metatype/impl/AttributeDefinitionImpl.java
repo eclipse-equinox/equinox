@@ -70,7 +70,6 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	}
 
 	/*
-	 * 
 	 */
 	@Override
 	public Object clone() {

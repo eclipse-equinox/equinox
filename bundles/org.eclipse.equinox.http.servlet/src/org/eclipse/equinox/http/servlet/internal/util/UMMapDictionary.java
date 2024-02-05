@@ -19,13 +19,12 @@ import java.util.*;
 /**
  * @author Raymond Augé
  */
-public class UMMapDictionary <K, V> extends Dictionary<K, V> {
+public class UMMapDictionary<K, V> extends Dictionary<K, V> {
 
 	public UMMapDictionary(Map<K, V> map) {
 		if (map == null) {
 			_map = Collections.emptyMap();
-		}
-		else {
+		} else {
 			_map = Collections.unmodifiableMap(map);
 		}
 

@@ -18,29 +18,31 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.osgi.service.datalocation.Location;
 
 /**
- * Object representing the instance scope in the Eclipse preferences
- * hierarchy. Can be used as a context for searching for preference
- * values (in the IPreferencesService APIs) or for determining the
- * correct preference node to set values in the store.
+ * Object representing the instance scope in the Eclipse preferences hierarchy.
+ * Can be used as a context for searching for preference values (in the
+ * IPreferencesService APIs) or for determining the correct preference node to
+ * set values in the store.
  * <p>
- * Instance preferences are stored on a per instance basis in the
- * platform's instance area as specified by the {@link Location} class
- * and the {@link Location#INSTANCE_FILTER} filter.
- * </p><p>
- * The path for preferences defined in the instance scope hierarchy
- * is as follows: <code>/instance/&lt;qualifier&gt;</code>
+ * Instance preferences are stored on a per instance basis in the platform's
+ * instance area as specified by the {@link Location} class and the
+ * {@link Location#INSTANCE_FILTER} filter.
+ * </p>
+ * <p>
+ * The path for preferences defined in the instance scope hierarchy is as
+ * follows: <code>/instance/&lt;qualifier&gt;</code>
  * </p>
  * <p>
  * This class is not intended to be subclassed. This class may be instantiated.
  * </p>
+ *
  * @see Location#INSTANCE_FILTER
  * @since 3.0
  */
 public final class InstanceScope extends AbstractScope {
 
 	/**
-	 * String constant (value of <code>"instance"</code>) used for the
-	 * scope name for the instance preference scope.
+	 * String constant (value of <code>"instance"</code>) used for the scope name
+	 * for the instance preference scope.
 	 */
 	public static final String SCOPE = "instance"; //$NON-NLS-1$
 
@@ -54,12 +56,13 @@ public final class InstanceScope extends AbstractScope {
 
 	/**
 	 * Create and return a new instance scope instance.
+	 *
 	 * @deprecated call <code>InstanceScope.INSTANCE</code> instead.
 	 */
+	@Deprecated
 	public InstanceScope() {
 		super();
 	}
-
 
 	@Override
 	public IPath getLocation() {
@@ -68,15 +71,8 @@ public final class InstanceScope extends AbstractScope {
 		return null;
 	}
 
-
 	@Override
 	public String getName() {
 		return SCOPE;
-	}
-
-
-	@Override
-	public IEclipsePreferences getNode(String qualifier) {
-		return super.getNode(qualifier);
 	}
 }

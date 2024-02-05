@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Core OSGi Tests
 Bundle-SymbolicName: org.eclipse.osgi.tests;singleton:=true
-Bundle-Version: 3.18.500.qualifier
+Bundle-Version: 3.19.0.qualifier
 Bundle-Vendor: Eclipse.org
 Require-Bundle: 
  org.eclipse.core.runtime;bundle-version="[3.29.0,4.0.0)",
@@ -18,7 +18,7 @@ Import-Package: org.osgi.service.event,
  org.osgi.util.xml
 Export-Package: org.eclipse.osgi.tests.bundles,
  org.eclipse.osgi.tests.appadmin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 DynamicImport-Package: ext.framework.b
 Eclipse-BundleShape: dir
 Automatic-Module-Name: org.eclipse.osgi.tests

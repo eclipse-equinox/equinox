@@ -15,6 +15,6 @@ package chain.test.a;
 
 import chain.test.b.BChain;
 
-public class AChain extends BChain{
+public class AChain extends BChain {
 
 }

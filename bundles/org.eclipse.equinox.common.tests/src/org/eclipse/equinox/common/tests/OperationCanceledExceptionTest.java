@@ -13,26 +13,17 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests;
 
+import static org.junit.Assert.assertEquals;
+
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.tests.harness.CoreTest;
+import org.junit.Test;
 
 /**
  * Test cases for the Path class.
  */
-public class OperationCanceledExceptionTest extends CoreTest {
-	/**
-	 * Need a zero argument constructor to satisfy the test harness.
-	 * This constructor should not do any real work nor should it be
-	 * called by user code.
-	 */
-	public OperationCanceledExceptionTest() {
-		super(null);
-	}
+public class OperationCanceledExceptionTest {
 
-	public OperationCanceledExceptionTest(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testCoreException() {
 		final String MESSAGE_STRING = "An exception has occurred";
 		OperationCanceledException e = new OperationCanceledException(MESSAGE_STRING);

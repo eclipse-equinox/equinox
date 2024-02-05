@@ -31,7 +31,6 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
  * <strong>Concurrent Semantics</strong><br />
  * 
  * Threadsafe.
- * 
  */
 public final class RegionManager implements BundleActivator {
 

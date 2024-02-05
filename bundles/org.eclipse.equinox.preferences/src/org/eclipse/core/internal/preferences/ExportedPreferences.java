@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2015 IBM Corporation and others.
+ * Copyright (c) 2004, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -31,7 +31,6 @@ public class ExportedPreferences extends EclipsePreferences implements IExported
 		super(parent, name);
 	}
 
-
 	@Override
 	public boolean isExportRoot() {
 		return isExportRoot;
@@ -45,16 +44,16 @@ public class ExportedPreferences extends EclipsePreferences implements IExported
 	}
 
 	/*
-	 * Internal method called only by the import/export mechanism to
-	 * validate bundle versions.
+	 * Internal method called only by the import/export mechanism to validate bundle
+	 * versions.
 	 */
 	public String getVersion() {
 		return version;
 	}
 
 	/*
-	 * Internal method called only by the import/export mechanism to
-	 * validate bundle versions.
+	 * Internal method called only by the import/export mechanism to validate bundle
+	 * versions.
 	 */
 	public void setVersion(String version) {
 		this.version = version;
@@ -66,17 +65,19 @@ public class ExportedPreferences extends EclipsePreferences implements IExported
 	}
 
 	/*
-	 * Return a string representation of this object. To be used for
-	 * debugging purposes only.
+	 * Return a string representation of this object. To be used for debugging
+	 * purposes only.
 	 */
 	@Override
 	public String toString() {
 		StringBuilder buffer = new StringBuilder();
-		if (isExportRoot)
+		if (isExportRoot) {
 			buffer.append("* "); //$NON-NLS-1$
+		}
 		buffer.append(absolutePath());
-		if (version != null)
+		if (version != null) {
 			buffer.append(" (" + version + ')'); //$NON-NLS-1$
+		}
 		return buffer.toString();
 	}
 }

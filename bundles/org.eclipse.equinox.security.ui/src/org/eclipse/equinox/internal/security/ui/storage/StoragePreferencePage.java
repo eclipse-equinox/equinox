@@ -30,7 +30,7 @@ public class StoragePreferencePage extends PreferencePage implements IWorkbenchP
 	protected TabAdvanced advancedTab;
 
 	public StoragePreferencePage() {
-		//empty
+		// empty
 	}
 
 	@Override

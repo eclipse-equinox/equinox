@@ -15,15 +15,18 @@
 package org.eclipse.osgi.storage.url.reference;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 
 /**
- * URLStreamHandler for reference protocol.  A reference URL is used to hold a
- * reference to a local file URL.  A reference URL allows bundles to be installed
- * by reference.  This means the content of the bundle will not be copied.  Instead
- * the content of the bundle will be loaded from the reference location specified
- * by the reference URL.  The Framework only supports reference URLs that refer
- * to a local file URL.  For example: <p>
+ * URLStreamHandler for reference protocol. A reference URL is used to hold a
+ * reference to a local file URL. A reference URL allows bundles to be installed
+ * by reference. This means the content of the bundle will not be copied.
+ * Instead the content of the bundle will be loaded from the reference location
+ * specified by the reference URL. The Framework only supports reference URLs
+ * that refer to a local file URL. For example:
+ * 
  * <pre>
  *     reference:file:/eclipse/plugins/org.eclipse.myplugin_1.0.0/
  *     reference:file:/eclispe/plugins/org.eclipse.mybundle_1.0.0.jar
@@ -43,9 +46,6 @@ public class Handler extends URLStreamHandler {
 		}
 	}
 
-	/**
-	 * @throws IOException
-	 */
 	@Override
 	protected URLConnection openConnection(URL url) throws IOException {
 		return new ReferenceURLConnection(url, installPath);

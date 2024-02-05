@@ -121,7 +121,6 @@ public class UserTest {
 		Activator.getBundle(Activator.BUNDLE_USERADMIN).stop();
 	}
 
-	@SuppressWarnings("unchecked")
 	private void createUser1() {
 		User user = (User) userAdmin.createRole("testUserCreate1", Role.USER); //$NON-NLS-1$
 		assertNotNull(user);
@@ -144,7 +143,6 @@ public class UserTest {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private void createUser2() {
 		User user = (User) userAdmin.createRole("testUserCreate2", Role.USER); //$NON-NLS-1$
 		assertNotNull(user);

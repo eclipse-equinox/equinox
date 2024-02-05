@@ -21,12 +21,13 @@ import java.util.Collections;
 import java.util.Enumeration;
 
 /**
- * A NestedDirBundleFile uses another BundleFile as its source but
- * accesses all of its resources relative to a nested directory within
- * the other BundleFile object.  This is used to support zipped bundles
- * that use a Bundle-ClassPath with an nested directory specified.
+ * A NestedDirBundleFile uses another BundleFile as its source but accesses all
+ * of its resources relative to a nested directory within the other BundleFile
+ * object. This is used to support zipped bundles that use a Bundle-ClassPath
+ * with an nested directory specified.
  * <p>
  * For Example:
+ * 
  * <pre>
  * Bundle-ClassPath: nested.jar,nesteddir/
  * </pre>
@@ -38,8 +39,8 @@ public class NestedDirBundleFile extends BundleFile {
 
 	/**
 	 * Constructs a NestedDirBundleFile
+	 * 
 	 * @param baseBundlefile the base bundle file
-	 * @param nestedDirName
 	 */
 	public NestedDirBundleFile(BundleFile baseBundlefile, String nestedDirName) {
 		this(baseBundlefile, nestedDirName, Collections.emptyList());
@@ -47,8 +48,8 @@ public class NestedDirBundleFile extends BundleFile {
 
 	/**
 	 * Constructs a NestedDirBundleFile
+	 * 
 	 * @param baseBundlefile the base bundle file
-	 * @param nestedDirName
 	 * @param filterPrefixes the prefixes to filter out for the bundle file
 	 */
 	public NestedDirBundleFile(BundleFile baseBundlefile, String nestedDirName, Collection<String> filterPrefixes) {
@@ -122,12 +123,12 @@ public class NestedDirBundleFile extends BundleFile {
 			return null;
 		return new Enumeration<String>() {
 
-		@Override
+			@Override
 			public boolean hasMoreElements() {
 				return basePaths.hasMoreElements();
 			}
 
-		@Override
+			@Override
 			public String nextElement() {
 				String next = basePaths.nextElement();
 				return next.substring(cpLength);
@@ -138,13 +139,11 @@ public class NestedDirBundleFile extends BundleFile {
 	@Override
 	public File getFile(String entry, boolean nativeCode) {
 		// getFile is only valid if this is a root bundle file.
-		// TODO to catch bugs we probably should throw new UnsupportedOperationException()
+		// TODO to catch bugs we probably should throw new
+		// UnsupportedOperationException()
 		return null;
 	}
 
-	/**
-	 * @throws IOException
-	 */
 	@Override
 	public void open() throws IOException {
 		// do nothing

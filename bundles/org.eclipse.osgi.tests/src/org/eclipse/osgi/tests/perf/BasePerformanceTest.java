@@ -28,10 +28,6 @@ import org.osgi.framework.Version;
 public class BasePerformanceTest extends AbstractStateTest {
 	private Random random;
 
-	public BasePerformanceTest(String name) {
-		super(name);
-	}
-
 	protected State buildRandomState(int size) {
 		State state = buildEmptyState();
 		StateObjectFactory stateFactory = state.getFactory();
@@ -47,7 +43,8 @@ public class BasePerformanceTest extends AbstractStateTest {
 			for (int j = 0; j < exportPackages.length; j++) {
 				String packageName = "package." + exportedPackages++;
 				Version packageVersion = Version.parseVersion("1.0.0");
-				exportPackages[j] = stateFactory.createExportPackageDescription(packageName, packageVersion, null, null, true, null);
+				exportPackages[j] = stateFactory.createExportPackageDescription(packageName, packageVersion, null, null,
+						true, null);
 			}
 			int importPackageCount = Math.min(exportPackageCount, random.nextInt(5));
 			int importedPackageIndex = random.nextInt(exportPackageCount + 1);
@@ -57,7 +54,8 @@ public class BasePerformanceTest extends AbstractStateTest {
 				if (importedPackageIndex > exportPackageCount)
 					importedPackageIndex = 1;
 				String packageName = "package." + index;
-				importPackages[j] = stateFactory.createImportPackageSpecification(packageName, new VersionRange("1.0.0"), null, null, null, null, null);
+				importPackages[j] = stateFactory.createImportPackageSpecification(packageName,
+						new VersionRange("1.0.0"), null, null, null, null, null);
 			}
 
 			BundleSpecification[] requiredBundles = new BundleSpecification[Math.min(i, random.nextInt(5))];
@@ -67,17 +65,20 @@ public class BasePerformanceTest extends AbstractStateTest {
 				Version requiredVersion = bundles[requiredIndex].getVersion();
 				boolean export = random.nextInt(10) > 6;
 				boolean optional = random.nextInt(10) > 8;
-				requiredBundles[j] = stateFactory.createBundleSpecification(requiredName, new VersionRange(requiredVersion.toString()), export, optional);
+				requiredBundles[j] = stateFactory.createBundleSpecification(requiredName,
+						new VersionRange(requiredVersion.toString()), export, optional);
 			}
 
-			bundles[i] = stateFactory.createBundleDescription(bundleId, symbolicName, version, symbolicName, requiredBundles, (HostSpecification) null, importPackages, exportPackages, null, random.nextDouble() > 0.05);
+			bundles[i] = stateFactory.createBundleDescription(bundleId, symbolicName, version, symbolicName,
+					requiredBundles, (HostSpecification) null, importPackages, exportPackages, null,
+					random.nextDouble() > 0.05);
 			state.addBundle(bundles[i]);
 		}
 		return state;
 	}
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 		// uses a constant seed to prevent variation on results
 		this.random = new Random(0);

@@ -21,8 +21,9 @@ import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
 
 /**
- * This class has debug constants which can be used by the Framework implementation
- * and Adaptor implementations
+ * This class has debug constants which can be used by the Framework
+ * implementation and Adaptor implementations
+ * 
  * @since 3.1
  */
 public class Debug implements DebugOptionsListener {
@@ -120,7 +121,7 @@ public class Debug implements DebugOptionsListener {
 	/**
 	 * Bundle time debug flag.
 	 */
-	public boolean DEBUG_BUNDLE_TIME = false; //"debug.bundleTime"
+	public boolean DEBUG_BUNDLE_TIME = false; // "debug.bundleTime"
 	/**
 	 * Loader debug flag.
 	 */
@@ -166,11 +167,11 @@ public class Debug implements DebugOptionsListener {
 	 * PackageAdmin timing debug flag.
 	 */
 	// TODO remove this or use it somewhere
-	public boolean DEBUG_PACKAGEADMIN_TIMING = false; //"debug.packageadmin/timing"
+	public boolean DEBUG_PACKAGEADMIN_TIMING = false; // "debug.packageadmin/timing"
 	/**
 	 * Message debug flag.
 	 */
-	public boolean DEBUG_MESSAGE_BUNDLES = false; //"/debug/messageBundles"
+	public boolean DEBUG_MESSAGE_BUNDLES = false; // "/debug/messageBundles"
 	/**
 	 * Monitor activation debug flag.
 	 */
@@ -195,7 +196,8 @@ public class Debug implements DebugOptionsListener {
 	@Override
 	public void optionsChanged(DebugOptions dbgOptions) {
 		DEBUG_GENERAL = dbgOptions.getBooleanOption(OPTION_DEBUG_GENERAL, false);
-		DEBUG_BUNDLE_TIME = dbgOptions.getBooleanOption(OPTION_DEBUG_BUNDLE_TIME, false) || dbgOptions.getBooleanOption("org.eclipse.core.runtime/timing/startup", false); //$NON-NLS-1$
+		DEBUG_BUNDLE_TIME = dbgOptions.getBooleanOption(OPTION_DEBUG_BUNDLE_TIME, false)
+				|| dbgOptions.getBooleanOption("org.eclipse.core.runtime/timing/startup", false); //$NON-NLS-1$
 		DEBUG_LOADER = dbgOptions.getBooleanOption(OPTION_DEBUG_LOADER, false);
 		DEBUG_STORAGE = dbgOptions.getBooleanOption(OPTION_DEBUG_STORAGE, false);
 		DEBUG_EVENTS = dbgOptions.getBooleanOption(OPTION_DEBUG_EVENTS, false);
@@ -207,7 +209,8 @@ public class Debug implements DebugOptionsListener {
 		DEBUG_SECURITY = dbgOptions.getBooleanOption(OPTION_DEBUG_SECURITY, false);
 		DEBUG_STARTLEVEL = dbgOptions.getBooleanOption(OPTION_DEBUG_STARTLEVEL, false);
 		DEBUG_PACKAGEADMIN = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGEADMIN, false);
-		DEBUG_PACKAGEADMIN_TIMING = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGEADMIN_TIMING, false) || dbgOptions.getBooleanOption("org.eclipse.core.runtime/debug", false); //$NON-NLS-1$
+		DEBUG_PACKAGEADMIN_TIMING = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGEADMIN_TIMING, false)
+				|| dbgOptions.getBooleanOption("org.eclipse.core.runtime/debug", false); //$NON-NLS-1$
 		DEBUG_MESSAGE_BUNDLES = dbgOptions.getBooleanOption(OPTION_DEBUG_MESSAGE_BUNDLES, false);
 		SupplementDebug.STATIC_DEBUG_MESSAGE_BUNDLES = DEBUG_MESSAGE_BUNDLES;
 		MONITOR_ACTIVATION = dbgOptions.getBooleanOption(OPTION_MONITOR_ACTIVATION, false);
@@ -226,7 +229,6 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Prints x to the PrintStream
-	 * @param x
 	 */
 	public static void print(boolean x) {
 		out.print(x);
@@ -234,7 +236,6 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Prints x to the PrintStream
-	 * @param x
 	 */
 	public static void print(char x) {
 		out.print(x);
@@ -242,7 +243,6 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Prints x to the PrintStream
-	 * @param x
 	 */
 	public static void print(int x) {
 		out.print(x);
@@ -250,7 +250,6 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Prints x to the PrintStream
-	 * @param x
 	 */
 	public static void print(long x) {
 		out.print(x);
@@ -258,7 +257,6 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Prints x to the PrintStream
-	 * @param x
 	 */
 	public static void print(float x) {
 		out.print(x);
@@ -266,7 +264,6 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Prints x to the PrintStream
-	 * @param x
 	 */
 	public static void print(double x) {
 		out.print(x);
@@ -274,7 +271,6 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Prints x to the PrintStream
-	 * @param x
 	 */
 	public static void print(char x[]) {
 		out.print(x);
@@ -282,7 +278,6 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Prints x to the PrintStream
-	 * @param x
 	 */
 	public static void print(String x) {
 		out.print(x);
@@ -290,7 +285,6 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Prints x to the PrintStream
-	 * @param x
 	 */
 	public static void print(Object x) {
 		out.print(x);
@@ -298,7 +292,6 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Prints x to the PrintStream
-	 * @param x
 	 */
 	public static void println(boolean x) {
 		out.println(x);
@@ -306,7 +299,6 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Prints x to the PrintStream
-	 * @param x
 	 */
 	public static void println(char x) {
 		out.println(x);
@@ -314,7 +306,6 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Prints x to the PrintStream
-	 * @param x
 	 */
 	public static void println(int x) {
 		out.println(x);
@@ -322,7 +313,6 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Prints x to the PrintStream
-	 * @param x
 	 */
 	public static void println(long x) {
 		out.println(x);
@@ -330,7 +320,6 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Prints x to the PrintStream
-	 * @param x
 	 */
 	public static void println(float x) {
 		out.println(x);
@@ -338,7 +327,6 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Prints x to the PrintStream
-	 * @param x
 	 */
 	public static void println(double x) {
 		out.println(x);
@@ -346,7 +334,6 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Prints x to the PrintStream
-	 * @param x
 	 */
 	public static void println(char x[]) {
 		out.println(x);
@@ -354,7 +341,6 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Prints x to the PrintStream
-	 * @param x
 	 */
 	public static void println(String x) {
 		out.println(x);
@@ -362,7 +348,6 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Prints x to the PrintStream
-	 * @param x
 	 */
 	public static void println(Object x) {
 		out.println(x);
@@ -370,7 +355,6 @@ public class Debug implements DebugOptionsListener {
 
 	/**
 	 * Prints t to the PrintStream
-	 * @param t
 	 */
 	public static void printStackTrace(Throwable t) {
 		if (t == null)

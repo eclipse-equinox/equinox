@@ -62,15 +62,16 @@ public class ExtensionDelta implements IExtensionDelta {
 
 	@Override
 	public String toString() {
-		return "\n\t\t" + getExtensionPoint().getUniqueIdentifier() + " - " + getExtension().getNamespaceIdentifier() + '.' + getExtension().getSimpleIdentifier() + " (" + getKindString(this.getKind()) + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		return "\n\t\t" + getExtensionPoint().getUniqueIdentifier() + " - " + getExtension().getNamespaceIdentifier() //$NON-NLS-1$ //$NON-NLS-2$
+				+ '.' + getExtension().getSimpleIdentifier() + " (" + getKindString(this.getKind()) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public static String getKindString(int kind) {
 		switch (kind) {
-			case ADDED :
-				return "ADDED"; //$NON-NLS-1$
-			case REMOVED :
-				return "REMOVED"; //$NON-NLS-1$
+		case ADDED:
+			return "ADDED"; //$NON-NLS-1$
+		case REMOVED:
+			return "REMOVED"; //$NON-NLS-1$
 		}
 		return "UNKNOWN"; //$NON-NLS-1$
 	}

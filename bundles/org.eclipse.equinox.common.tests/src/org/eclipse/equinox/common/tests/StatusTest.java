@@ -15,6 +15,9 @@
 package org.eclipse.equinox.common.tests;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,13 +34,14 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.tests.harness.CoreTest;
+import org.junit.Before;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkUtil;
 
-public class StatusTest extends CoreTest {
+public class StatusTest {
 
 	private int status1Severity = IStatus.OK;
 	private String status1PluginId = "org.eclipse.core.tests.runtime";
@@ -62,25 +66,19 @@ public class StatusTest extends CoreTest {
 
 	private MultiStatus multistatus2;
 
-	public StatusTest() {
-		super(null);
-	}
-
-	public StatusTest(String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() {
+	@Before
+	public void setUp() {
 		status1 = new Status(status1Severity, status1PluginId, status1Code, status1Message, status1Exception);
 		status2 = new Status(status2Severity, status2PluginId, status2Code, status2Message, status2Exception);
 
-		multistatus1 = new MultiStatus(multistatus1PluginId, multistatus1Code, multistatus1Children, multistatus1Message, multistatus1Exception);
+		multistatus1 = new MultiStatus(multistatus1PluginId, multistatus1Code, multistatus1Children,
+				multistatus1Message, multistatus1Exception);
 		multistatus2 = new MultiStatus(" ", 45, new Status[0], "", null);
 		multistatus2.add(status1);
 		multistatus2.add(status1);
 	}
 
+	@Test
 	public void testMultiStatusReturnValues() {
 		assertEquals("1.1", multistatus1PluginId, multistatus1.getPlugin());
 		assertEquals("1.2", multistatus1Code, multistatus1.getCode());
@@ -93,6 +91,7 @@ public class StatusTest extends CoreTest {
 		assertEquals("1.9", false, status1.matches(IStatus.ERROR | IStatus.WARNING | IStatus.INFO));
 	}
 
+	@Test
 	public void testSingleStatusReturnValues() {
 		assertEquals("1.0", status1Severity, status1.getSeverity());
 		assertEquals("1.1", status1PluginId, status1.getPlugin());
@@ -115,6 +114,7 @@ public class StatusTest extends CoreTest {
 		assertEquals("2.8", status2.matches(IStatus.ERROR), !status2.isOK());
 	}
 
+	@Test
 	public void testAdd() {
 
 		multistatus1.add(status1);
@@ -128,6 +128,7 @@ public class StatusTest extends CoreTest {
 
 	}
 
+	@Test
 	public void testSingleFromClass() throws ClassNotFoundException, IOException, BundleException {
 		assertEquals("org.eclipse.equinox.common.tests", new Status(IStatus.WARNING, StatusTest.class, "").getPlugin());
 		assertEquals("org.eclipse.equinox.common", new Status(IStatus.ERROR, IStatus.class, "", null).getPlugin());
@@ -137,6 +138,7 @@ public class StatusTest extends CoreTest {
 				new Status(IStatus.WARNING, installNoBSNBundle().loadClass(TestClass.class.getName()), "").getPlugin());
 	}
 
+	@Test
 	public void testMultiFromClass() throws ClassNotFoundException, IOException, BundleException {
 		assertEquals("org.eclipse.equinox.common", new MultiStatus(IStatus.class, 0, "").getPlugin());
 		assertEquals("org.eclipse.equinox.common.tests", new MultiStatus(StatusTest.class, 0, "").getPlugin());
@@ -169,6 +171,7 @@ public class StatusTest extends CoreTest {
 		return bc.installBundle(noNameBSNFile.toURI().toASCIIString());
 	}
 
+	@Test
 	public void testAddAll() {
 
 		multistatus1.add(status2);
@@ -198,6 +201,7 @@ public class StatusTest extends CoreTest {
 
 	}
 
+	@Test
 	public void testIsOK() {
 
 		assertTrue("1.0", multistatus2.isOK());
@@ -208,6 +212,7 @@ public class StatusTest extends CoreTest {
 
 	}
 
+	@Test
 	public void testMerge() {
 
 		multistatus1.merge(status2);
@@ -239,6 +244,7 @@ public class StatusTest extends CoreTest {
 
 	}
 
+	@Test
 	public void testInfo() {
 		IStatus info = Status.info("message");
 		assertEquals(IStatus.INFO, info.getSeverity());
@@ -249,6 +255,7 @@ public class StatusTest extends CoreTest {
 		assertArrayEquals(new IStatus[] {}, info.getChildren());
 	}
 
+	@Test
 	public void testWarning() {
 		IStatus warning = Status.warning("message");
 		assertEquals(IStatus.WARNING, warning.getSeverity());
@@ -259,6 +266,7 @@ public class StatusTest extends CoreTest {
 		assertArrayEquals(new IStatus[] {}, warning.getChildren());
 	}
 
+	@Test
 	public void testWarningWithException() {
 
 		Status warningWithException = Status.warning("message", new Exception("exception"));
@@ -270,6 +278,7 @@ public class StatusTest extends CoreTest {
 		assertArrayEquals(new IStatus[] {}, warningWithException.getChildren());
 	}
 
+	@Test
 	public void testError() {
 		IStatus error = Status.error("message");
 		assertEquals(IStatus.ERROR, error.getSeverity());
@@ -280,6 +289,7 @@ public class StatusTest extends CoreTest {
 		assertArrayEquals(new IStatus[] {}, error.getChildren());
 	}
 
+	@Test
 	public void testErrorWithException() {
 		IStatus errorWithException = Status.error("message", new Exception("exception"));
 		assertEquals(IStatus.ERROR, errorWithException.getSeverity());

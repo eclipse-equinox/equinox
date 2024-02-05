@@ -36,7 +36,7 @@ public class MultipartSupportImpl implements MultipartSupport {
 		this.servletDTO = servletDTO;
 
 		// Must return non-null File. See Servlet 3.1 §4.8.1
-		File baseStorage = (File)servletContext.getAttribute(ServletContext.TEMPDIR);
+		File baseStorage = (File) servletContext.getAttribute(ServletContext.TEMPDIR);
 
 		if (servletDTO.multipartLocation.length() > 0) {
 			File storage = new File(servletDTO.multipartLocation);
@@ -72,10 +72,11 @@ public class MultipartSupportImpl implements MultipartSupport {
 	}
 
 	private void checkPermission(File baseStorage, ServletContext servletContext) {
-		BundleContext bundleContext = (BundleContext)servletContext.getAttribute("osgi-bundlecontext"); //$NON-NLS-1$
+		BundleContext bundleContext = (BundleContext) servletContext.getAttribute("osgi-bundlecontext"); //$NON-NLS-1$
 		Bundle bundle = bundleContext.getBundle();
 		AccessControlContext accessControlContext = bundle.adapt(AccessControlContext.class);
-		if (accessControlContext == null) return;
+		if (accessControlContext == null)
+			return;
 		accessControlContext.checkPermission(new FilePermission(baseStorage.getAbsolutePath(), "read,write")); //$NON-NLS-1$
 	}
 
@@ -97,12 +98,11 @@ public class MultipartSupportImpl implements MultipartSupport {
 
 		try {
 			for (Object item : upload.parseRequest(request)) {
-				DiskFileItem diskFileItem = (DiskFileItem)item;
+				DiskFileItem diskFileItem = (DiskFileItem) item;
 
 				parts.add(new MultipartSupportPart(diskFileItem));
 			}
-		}
-		catch (FileUploadException fnfe) {
+		} catch (FileUploadException fnfe) {
 			throw new IOException(fnfe);
 		}
 
@@ -111,6 +111,5 @@ public class MultipartSupportImpl implements MultipartSupport {
 
 	private final ServletDTO servletDTO;
 	private final ServletFileUpload upload;
-
 
 }

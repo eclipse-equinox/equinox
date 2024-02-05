@@ -14,7 +14,6 @@
 
 package org.eclipse.equinox.http.servlet.internal.util;
 
-
 /**
  * @author Raymond Augé
  */
@@ -22,13 +21,11 @@ public class BooleanPlus {
 
 	public static boolean from(Object object, boolean defaultValue) {
 		if (object instanceof Boolean) {
-			return ((Boolean)object).booleanValue();
-		}
-		else if (object instanceof String) {
-			if (Boolean.TRUE.toString().equalsIgnoreCase((String)object)) {
+			return ((Boolean) object).booleanValue();
+		} else if (object instanceof String) {
+			if (Boolean.TRUE.toString().equalsIgnoreCase((String) object)) {
 				return true;
-			}
-			else if (Boolean.FALSE.toString().equalsIgnoreCase((String)object)) {
+			} else if (Boolean.FALSE.toString().equalsIgnoreCase((String) object)) {
 				return false;
 			}
 		}

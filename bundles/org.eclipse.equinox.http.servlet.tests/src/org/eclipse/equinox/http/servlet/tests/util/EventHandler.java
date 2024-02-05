@@ -62,8 +62,7 @@ public class EventHandler {
 						// ignore comment lines
 
 						continue;
-					}
-					else if (colon < 0) {
+					} else if (colon < 0) {
 						// No colon? Entire line must be treated as the key with blank value
 
 						eventMap.put(current, "");
@@ -86,15 +85,12 @@ public class EventHandler {
 
 					eventMap.put(key, value);
 				}
-			}
-			catch (IOException e1) {
+			} catch (IOException e1) {
 				e1.printStackTrace();
-			}
-			finally {
+			} finally {
 				try {
 					inputStream.close();
-				}
-				catch (IOException e2) {
+				} catch (IOException e2) {
 					e2.printStackTrace();
 				}
 			}

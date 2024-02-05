@@ -16,8 +16,9 @@ package org.eclipse.core.internal.registry;
 public interface IRegistryConstants {
 
 	/**
-	 * The unique identifier constant (value "<code>org.eclipse.core.runtime</code>")
-	 * of the Core Runtime (pseudo-) plug-in.
+	 * The unique identifier constant (value
+	 * "<code>org.eclipse.core.runtime</code>") of the Core Runtime (pseudo-)
+	 * plug-in.
 	 */
 	public static final String RUNTIME_NAME = "org.eclipse.core.runtime"; //$NON-NLS-1$
 

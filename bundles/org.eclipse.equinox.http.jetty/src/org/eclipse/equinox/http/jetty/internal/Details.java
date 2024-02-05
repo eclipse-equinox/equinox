@@ -41,7 +41,8 @@ public class Details {
 		return getBoolean(dictionary, JettyConstants.PROPERTY_PREFIX + key, dflt);
 	}
 
-	public static boolean getBooleanProp(@SuppressWarnings("rawtypes") Dictionary dictionary, String key, boolean dflt) {
+	public static boolean getBooleanProp(@SuppressWarnings("rawtypes") Dictionary dictionary, String key,
+			boolean dflt) {
 		return getBoolean(dictionary, JettyConstants.PROPERTY_PREFIX + key, dflt);
 	}
 

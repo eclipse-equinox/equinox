@@ -15,6 +15,7 @@ package org.eclipse.osgi.tests.hooks.framework;
 
 import static org.eclipse.osgi.tests.bundles.AbstractBundleTests.stop;
 import static org.eclipse.osgi.tests.bundles.AbstractBundleTests.stopQuietly;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.Collection;
@@ -23,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
@@ -36,10 +38,10 @@ public class DevClassPathWithExtensionTests extends AbstractFrameworkHookTests {
 	private String location;
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 		location = bundleInstaller.getBundleLocation(TEST_BUNDLE);
-		File file = OSGiTestsActivator.getContext().getDataFile(getName());
+		File file = OSGiTestsActivator.getContext().getDataFile(testName.getMethodName());
 		configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, file.getAbsolutePath());
 		configuration.put(EquinoxConfiguration.PROP_DEV, "bin/");
@@ -47,7 +49,7 @@ public class DevClassPathWithExtensionTests extends AbstractFrameworkHookTests {
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
+	public void tearDown() throws Exception {
 		stopQuietly(framework);
 		super.tearDown();
 	}
@@ -60,6 +62,7 @@ public class DevClassPathWithExtensionTests extends AbstractFrameworkHookTests {
 		return framework.getBundleContext().installBundle(location);
 	}
 
+	@Test
 	public void testDevClassPathWithExtension() throws Exception {
 		initAndStartFramework();
 

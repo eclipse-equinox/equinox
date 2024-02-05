@@ -22,9 +22,9 @@ import org.osgi.framework.Bundle;
  * The adaptor factory to test scenario described in the bug 200068: adapting to
  * a class not reachable be the default class loader.
  *
- * This is a test code so almost all sanity checks are omitted (it is working on a known
- * hard-coded set of extensions and extension points). Also, for simplicity no trackers
- * or caching is done.
+ * This is a test code so almost all sanity checks are omitted (it is working on
+ * a known hard-coded set of extensions and extension points). Also, for
+ * simplicity no trackers or caching is done.
  */
 public class TestAdapterFactoryLoader extends Assert implements IAdapterFactory {
 
@@ -55,7 +55,7 @@ public class TestAdapterFactoryLoader extends Assert implements IAdapterFactory 
 		IContributor contributor = extension.getContributor();
 		Bundle extensionBundle = ContributorFactoryOSGi.resolve(contributor);
 		try {
-			return new Class[] {extensionBundle.loadClass(className)};
+			return new Class[] { extensionBundle.loadClass(className) };
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 			fail("Unable to load class " + className);

@@ -39,6 +39,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 public class TestErrorPage1 extends AbstractTestServlet {
 	private static final long serialVersionUID = 1L;
 	private final Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
+
 	@Override
 	public void activate(ComponentContext componentContext) {
 		Dictionary<String, String> servletProps = new Hashtable<>();
@@ -47,7 +48,7 @@ public class TestErrorPage1 extends AbstractTestServlet {
 		registrations.add(componentContext.getBundleContext().registerService(Servlet.class, this, servletProps));
 		Dictionary<String, Object> errorProps = new Hashtable<>();
 		errorProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "E1");
-		errorProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, new String[] {"403", "404"});
+		errorProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, new String[] { "403", "404" });
 		registrations.add(componentContext.getBundleContext().registerService(Servlet.class, errorServlet, errorProps));
 	}
 
@@ -59,8 +60,7 @@ public class TestErrorPage1 extends AbstractTestServlet {
 	}
 
 	@Override
-	protected void service(HttpServletRequest request, HttpServletResponse response)
-		throws IOException {
+	protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 		response.sendError(403);
 	}
@@ -69,9 +69,7 @@ public class TestErrorPage1 extends AbstractTestServlet {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		protected void service(
-				HttpServletRequest request, HttpServletResponse response)
-			throws IOException {
+		protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 			if (response.isCommitted()) {
 				System.out.println("Problem?");
@@ -81,8 +79,8 @@ public class TestErrorPage1 extends AbstractTestServlet {
 
 			PrintWriter writer = response.getWriter();
 
-			String requestURI = (String)request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
-			Integer status = (Integer)request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+			String requestURI = (String) request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
+			Integer status = (Integer) request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
 
 			writer.print(status + " ERROR : " + requestURI);
 		}

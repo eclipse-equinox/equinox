@@ -21,17 +21,16 @@ import org.apache.felix.service.command.CommandSession;
 import org.eclipse.equinox.console.completion.common.Completer;
 
 /**
- * This class provides completion for gogo session variables. 
- *
+ * This class provides completion for gogo session variables.
  */
 public class VariableNamesCompleter implements Completer {
 
-	private CommandSession session; 
-	
+	private CommandSession session;
+
 	public VariableNamesCompleter(CommandSession session) {
 		this.session = session;
 	}
-	
+
 	@Override
 	public Map<String, Integer> getCandidates(String buffer, int cursor) {
 		// CommandSession.get(null) returns the names of all registered varialbes

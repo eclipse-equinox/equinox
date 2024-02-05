@@ -23,10 +23,12 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
- * Listens for the default ApplicationHandle which run on any thread to be destroyed.  This is used to force the main
- * thread to wait while a default application runs on another thread.
+ * Listens for the default ApplicationHandle which run on any thread to be
+ * destroyed. This is used to force the main thread to wait while a default
+ * application runs on another thread.
  * 
- * A main threaded application may be launched using this class to launch the main threaded application.
+ * A main threaded application may be launched using this class to launch the
+ * main threaded application.
  */
 public class DefaultApplicationListener implements ApplicationRunnable, ServiceTrackerCustomizer {
 	private boolean running = true; // indicates the default application is running
@@ -37,7 +39,7 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 	public DefaultApplicationListener(EclipseAppHandle defaultApp) {
 		ServiceReference defaultRef = defaultApp.getServiceReference();
 		if (defaultRef == null) {
-			// service has been unregistered; application has ended already, 
+			// service has been unregistered; application has ended already,
 			// save the result for latter
 			result = defaultApp.waitForResult(100);
 			handleTracker = null;
@@ -64,19 +66,23 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 			return getResult(); // app has ended, return the result
 		EclipseAppHandle anyThreadedDefaultApp = (EclipseAppHandle) handleTracker.getService();
 		if (anyThreadedDefaultApp != null)
-			// We now need to actual launch the application; this will run the application on another thread.
+			// We now need to actual launch the application; this will run the application
+			// on another thread.
 			AnyThreadAppLauncher.launchEclipseApplication(anyThreadedDefaultApp);
 		try {
 			while (waitOnRunning()) {
 				EclipseAppHandle mainHandle = getMainHandle();
 				if (mainHandle != null) {
-					// while we were waiting for the default application to end someone asked for a main threaded app to launch
-					// note that we cannot hold the this lock while launching a main threaded application
+					// while we were waiting for the default application to end someone asked for a
+					// main threaded app to launch
+					// note that we cannot hold the this lock while launching a main threaded
+					// application
 					try {
 						mainHandle.run(null);
 					} catch (Throwable e) {
 						String message = NLS.bind(Messages.application_error_starting, mainHandle.getInstanceId());
-						Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, e, null));
+						Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0,
+								e, null));
 					}
 					unsetMainHandle(mainHandle);
 				}
@@ -118,7 +124,8 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 				handle.destroy();
 			} catch (Throwable t) {
 				String message = NLS.bind(Messages.application_error_stopping, handle.getInstanceId());
-				Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, t, null));
+				Activator.log(
+						new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, t, null));
 			}
 		}
 	}
@@ -136,7 +143,8 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 	@Override
 	synchronized public void removedService(ServiceReference reference, Object service) {
 		running = false;
-		// only wait for 5 seconds; this may timeout if forcing an application to quit takes too long
+		// only wait for 5 seconds; this may timeout if forcing an application to quit
+		// takes too long
 		// this should never timeout if the application exited normally.
 		result = ((EclipseAppHandle) service).waitForResult(5000);
 		EclipseAppHandle mainHandle = getMainHandle();
@@ -146,7 +154,8 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 				mainHandle.destroy();
 			} catch (Throwable t) {
 				String message = NLS.bind(Messages.application_error_stopping, mainHandle.getInstanceId());
-				Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, t, null));
+				Activator.log(
+						new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.WARNING, 0, message, 0, t, null));
 			}
 		this.notify();
 	}

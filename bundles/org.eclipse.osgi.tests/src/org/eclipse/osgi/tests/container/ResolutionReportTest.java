@@ -31,12 +31,14 @@ import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.resource.*;
 
 public class ResolutionReportTest extends AbstractTest {
-	// TODO Add test for dynamic resolution in conjunction with UNRESOLVED_PROVIDER entries.
+	// TODO Add test for dynamic resolution in conjunction with UNRESOLVED_PROVIDER
+	// entries.
 
 	@Test
 	public void testResolutionReportListenerService() throws Exception {
 		DummyResolverHook hook = new DummyResolverHook();
-		registerService(org.osgi.framework.hooks.resolver.ResolverHookFactory.class, new DummyResolverHookFactory(hook));
+		registerService(org.osgi.framework.hooks.resolver.ResolverHookFactory.class,
+				new DummyResolverHookFactory(hook));
 		getSystemBundle().adapt(FrameworkWiring.class).resolveBundles(Collections.singleton(getSystemBundle()));
 		assertEquals("No resolution report listener callback", 1, hook.getResolutionReports().size());
 		assertNotNull("Resolution report was null", hook.getResolutionReports().get(0));
@@ -81,7 +83,8 @@ public class ResolutionReportTest extends AbstractTest {
 		DummyContainerAdaptor adaptor = createDummyAdaptor(hook);
 		ModuleContainer container = adaptor.getContainer();
 		Module resolutionReporta = installDummyModule("resolution.report.a.MF", "resolution.report.a", container);
-		Module resolutionReportaV1 = installDummyModule("resolution.report.a.v1.MF", "resolution.report.a.v1", container);
+		Module resolutionReportaV1 = installDummyModule("resolution.report.a.v1.MF", "resolution.report.a.v1",
+				container);
 		assertResolutionDoesNotSucceed(container, Arrays.asList(resolutionReporta, resolutionReportaV1));
 		ResolutionReport report = hook.getResolutionReports().get(0);
 		Map<Resource, List<ResolutionReport.Entry>> resourceToEntries = report.getEntries();
@@ -99,7 +102,8 @@ public class ResolutionReportTest extends AbstractTest {
 		DummyContainerAdaptor adaptor = createDummyAdaptor(hook);
 		ModuleContainer container = adaptor.getContainer();
 		Module resolutionReporta = installDummyModule("resolution.report.a.MF", "resolution.report.a", container);
-		Module resolutionReportaV1 = installDummyModule("resolution.report.a.v1.MF", "resolution.report.a.v1", container);
+		Module resolutionReportaV1 = installDummyModule("resolution.report.a.v1.MF", "resolution.report.a.v1",
+				container);
 		container.resolve(Arrays.asList(resolutionReportaV1), true);
 		clearResolutionReports(hook);
 		assertResolutionDoesNotSucceed(container, Arrays.asList(resolutionReporta));
@@ -121,7 +125,8 @@ public class ResolutionReportTest extends AbstractTest {
 		Module resolutionReporta = installDummyModule("resolution.report.a.MF", "resolution.report.a", container);
 		container.resolve(Arrays.asList(resolutionReporta), true);
 		clearResolutionReports(hook);
-		Module resolutionReportaV1 = installDummyModule("resolution.report.a.v1.MF", "resolution.report.a.v1", container);
+		Module resolutionReportaV1 = installDummyModule("resolution.report.a.v1.MF", "resolution.report.a.v1",
+				container);
 		assertResolutionDoesNotSucceed(container, Arrays.asList(resolutionReportaV1));
 		ResolutionReport report = hook.getResolutionReports().get(0);
 		Map<Resource, List<ResolutionReport.Entry>> resourceToEntries = report.getEntries();
@@ -166,7 +171,10 @@ public class ResolutionReportTest extends AbstractTest {
 		assertResolutionReportEntriesSize(entries, 1);
 		ResolutionReport.Entry entry = entries.get(0);
 		assertResolutionReportEntryTypeUnresolvedProvider(entry.getType());
-		assertResolutionReportEntryDataUnresolvedProvider(entry.getData(), new UnresolvedProviderEntryBuilder().requirement(resolutionReportC.getCurrentRevision().getRequirements("resolution.report.d").get(0)).capability(resolutionReportD.getCurrentRevision().getCapabilities("resolution.report.d").get(0)).build());
+		assertResolutionReportEntryDataUnresolvedProvider(entry.getData(), new UnresolvedProviderEntryBuilder()
+				.requirement(resolutionReportC.getCurrentRevision().getRequirements("resolution.report.d").get(0))
+				.capability(resolutionReportD.getCurrentRevision().getCapabilities("resolution.report.d").get(0))
+				.build());
 
 		entries = resourceToEntries.get(resolutionReportD.getCurrentRevision());
 		assertResolutionReportEntriesSize(entries, 1);
@@ -192,7 +200,13 @@ public class ResolutionReportTest extends AbstractTest {
 		assertResolutionReportEntriesSize(entries, 1);
 		ResolutionReport.Entry entry = entries.get(0);
 		assertResolutionReportEntryTypeUnresolvedProvider(entry.getType());
-		assertResolutionReportEntryDataUnresolvedProvider(entry.getData(), new UnresolvedProviderEntryBuilder().requirement(resolutionReportG.getCurrentRevision().getRequirements(PackageNamespace.PACKAGE_NAMESPACE).get(1)).capability(resolutionReportF.getCurrentRevision().getCapabilities(PackageNamespace.PACKAGE_NAMESPACE).get(0)).build());
+		assertResolutionReportEntryDataUnresolvedProvider(entry.getData(),
+				new UnresolvedProviderEntryBuilder()
+						.requirement(resolutionReportG.getCurrentRevision()
+								.getRequirements(PackageNamespace.PACKAGE_NAMESPACE).get(1))
+						.capability(resolutionReportF.getCurrentRevision()
+								.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE).get(0))
+						.build());
 
 		entries = resourceToEntries.get(resolutionReportF.getCurrentRevision());
 		assertResolutionReportEntriesSize(entries, 1);
@@ -255,18 +269,20 @@ public class ResolutionReportTest extends AbstractTest {
 		assertResolutionReportEntryType(ResolutionReport.Entry.Type.UNRESOLVED_PROVIDER, type);
 	}
 
-	private void assertResolutionReportEntryDataMissingCapability(Object data, String namespace, String namespaceValue) {
+	private void assertResolutionReportEntryDataMissingCapability(Object data, String namespace,
+			String namespaceValue) {
 		assertResolutionReportEntryDataNotNull(data);
 		assertTrue("Wrong resolution report entry data type", data instanceof Requirement);
 		Requirement requirement = (Requirement) data;
 		assertEquals("Wrong requirement namespace", namespace, requirement.getNamespace());
 		if (namespaceValue == null)
 			return;
-		assertTrue("Wrong requirement namespace value", requirement.getDirectives().get(Namespace.REQUIREMENT_FILTER_DIRECTIVE).contains(namespace + "=" + namespaceValue));
+		assertTrue("Wrong requirement namespace value", requirement.getDirectives()
+				.get(Namespace.REQUIREMENT_FILTER_DIRECTIVE).contains(namespace + "=" + namespaceValue));
 	}
 
-	@SuppressWarnings("unchecked")
-	private void assertResolutionReportEntryDataUnresolvedProvider(Object data, Map<Requirement, List<Capability>> expected) {
+	private void assertResolutionReportEntryDataUnresolvedProvider(Object data,
+			Map<Requirement, List<Capability>> expected) {
 		assertResolutionReportEntryDataNotNull(data);
 		assertTrue("Wrong resolution report entry data type", data instanceof Map);
 		Map<Requirement, Set<Capability>> unresolvedProviders = (Map<Requirement, Set<Capability>>) data;
@@ -284,7 +300,8 @@ public class ResolutionReportTest extends AbstractTest {
 		assertResolutionReportEntryType(ResolutionReport.Entry.Type.MISSING_CAPABILITY, type);
 	}
 
-	private void assertResolutionReportEntryType(ResolutionReport.Entry.Type expected, ResolutionReport.Entry.Type actual) {
+	private void assertResolutionReportEntryType(ResolutionReport.Entry.Type expected,
+			ResolutionReport.Entry.Type actual) {
 		assertEquals("Wrong resolution report entry type", expected, actual);
 	}
 }

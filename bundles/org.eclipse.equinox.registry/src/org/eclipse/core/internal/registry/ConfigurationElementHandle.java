@@ -52,9 +52,11 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 	public IConfigurationElement[] getChildren() {
 		ConfigurationElement actualCe = getConfigurationElement();
 		if (actualCe.noExtraData()) {
-			return (IConfigurationElement[]) objectManager.getHandles(actualCe.getRawChildren(), RegistryObjectManager.CONFIGURATION_ELEMENT);
+			return (IConfigurationElement[]) objectManager.getHandles(actualCe.getRawChildren(),
+					RegistryObjectManager.CONFIGURATION_ELEMENT);
 		}
-		return (IConfigurationElement[]) objectManager.getHandles(actualCe.getRawChildren(), RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
+		return (IConfigurationElement[]) objectManager.getHandles(actualCe.getRawChildren(),
+				RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
 	}
 
 	@Override
@@ -62,7 +64,8 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 		try {
 			return getConfigurationElement().createExecutableExtension(propertyName);
 		} catch (InvalidRegistryObjectException e) {
-			Status status = new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, IRegistryConstants.PLUGIN_ERROR, "Invalid registry object", e); //$NON-NLS-1$
+			Status status = new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, IRegistryConstants.PLUGIN_ERROR,
+					"Invalid registry object", e); //$NON-NLS-1$
 			if (objectManager instanceof RegistryObjectManager)
 				((RegistryObjectManager) objectManager).getRegistry().log(status);
 			throw new CoreException(status);
@@ -77,7 +80,9 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 	@Override
 	public IConfigurationElement[] getChildren(String name) {
 		ConfigurationElement actualCE = getConfigurationElement();
-		ConfigurationElement[] children = (ConfigurationElement[]) objectManager.getObjects(actualCE.getRawChildren(), actualCE.noExtraData() ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
+		ConfigurationElement[] children = (ConfigurationElement[]) objectManager.getObjects(actualCE.getRawChildren(),
+				actualCE.noExtraData() ? RegistryObjectManager.CONFIGURATION_ELEMENT
+						: RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
 		if (children.length == 0)
 			return ConfigurationElementHandle.EMPTY_ARRAY;
 
@@ -90,7 +95,9 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 					System.arraycopy(result, 0, copy, 0, result.length);
 					result = copy;
 				}
-				result[idx++] = (IConfigurationElement) objectManager.getHandle(child.getObjectId(), actualCE.noExtraData() ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
+				result[idx++] = (IConfigurationElement) objectManager.getHandle(child.getObjectId(),
+						actualCE.noExtraData() ? RegistryObjectManager.CONFIGURATION_ELEMENT
+								: RegistryObjectManager.THIRDLEVEL_CONFIGURATION_ELEMENT);
 			}
 		}
 		if (idx == 0)
@@ -101,7 +108,8 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 	@Override
 	public IExtension getDeclaringExtension() {
 		Object result = this;
-		while (!((result = ((ConfigurationElementHandle) result).getParent()) instanceof ExtensionHandle)) { /*do nothing*/
+		while (!((result = ((ConfigurationElementHandle) result)
+				.getParent()) instanceof ExtensionHandle)) { /* do nothing */
 		}
 		return (IExtension) result;
 	}
@@ -170,11 +178,15 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 	}
 
 	/**
-	 * <b>WARNING</b>: this method <b>must</b> return string containing {@link #getHandleId()} identifier, because some clients might have
-	 * misused previously returned {@link Object#toString()} value which was in fact just {@link #hashCode()} value which
-	 * in turn was alwas the value of {@link #getHandleId()}.
+	 * <b>WARNING</b>: this method <b>must</b> return string containing
+	 * {@link #getHandleId()} identifier, because some clients might have misused
+	 * previously returned {@link Object#toString()} value which was in fact just
+	 * {@link #hashCode()} value which in turn was alwas the value of
+	 * {@link #getHandleId()}.
 	 * <p>
-	 * Please read <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=515587#c0">bug 515587</a> for details.
+	 * Please read
+	 * <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=515587#c0">bug
+	 * 515587</a> for details.
 	 */
 	@Override
 	public String toString() {

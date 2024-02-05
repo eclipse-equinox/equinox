@@ -21,15 +21,15 @@ import javax.security.auth.x500.X500Principal;
 /**
  * X500PrincipalHelper
  * <p>
- * Helper class to extract pieces (attributes) of an X500Principal object for display
- * in the UI.
+ * Helper class to extract pieces (attributes) of an X500Principal object for
+ * display in the UI.
  * <p>
- * This helper uses the X500Principal.RFC2253 format of X500Principal.getname() to parse an X500Principal name 
- *   into it's component parts. 
- *  <p> 
- * In principals which contain multiple occurrences of the same attribute,the default for all the methods 
- *  is to return the most significant (first) attribute found. 
- *    
+ * This helper uses the X500Principal.RFC2253 format of X500Principal.getname()
+ * to parse an X500Principal name into it's component parts.
+ * <p>
+ * In principals which contain multiple occurrences of the same attribute,the
+ * default for all the methods is to return the most significant (first)
+ * attribute found.
  */
 
 public class X500PrincipalHelper {
@@ -60,8 +60,9 @@ public class X500PrincipalHelper {
 	}
 
 	/**
-	 *  Set the X500Principal name object to be parsed.
-	 *  <p>
+	 * Set the X500Principal name object to be parsed.
+	 * <p>
+	 * 
 	 * @param principal - X500Principal
 	 */
 	public void setPrincipal(X500Principal principal) {
@@ -69,27 +70,24 @@ public class X500PrincipalHelper {
 	}
 
 	/**
-	 *   Gets the most significant common name (CN) attribute from the given
-	 *      X500Principal object.
-	 *   For names that contains multiple attributes of this type.  The first
-	 *      (most significant) one will be returned   
-	 * <p> 
-	 * @return the Most significant common name attribute.
+	 * Gets the most significant common name (CN) attribute from the given
+	 * X500Principal object. For names that contains multiple attributes of this
+	 * type. The first (most significant) one will be returned
+	 * <p>
 	 * 
+	 * @return the Most significant common name attribute.
 	 */
 	public String getCN() {
 		return findPart(attrCN);
 	}
 
 	/**
-	 *   Gets the most significant Organizational Unit (OU) attribute from the given
-	 *      X500Principal object.
-	 *   For names that contains multiple attributes of this type.  The first
-	 *      (most significant) one will be returned       
-	 * <p> 
+	 * Gets the most significant Organizational Unit (OU) attribute from the given
+	 * X500Principal object. For names that contains multiple attributes of this
+	 * type. The first (most significant) one will be returned
+	 * <p>
 	 * 
 	 * @return the Most significant OU attribute.
-	 * 
 	 */
 
 	public String getOU() {
@@ -98,14 +96,12 @@ public class X500PrincipalHelper {
 	}
 
 	/**
-	 *   Gets the most significant Organization (O) attribute from the given
-	 *      X500Principal object.
-	 *   For names that contains multiple attributes of this type.  The first
-	 *      (most significant) one will be returned       
-	 * <p> 
+	 * Gets the most significant Organization (O) attribute from the given
+	 * X500Principal object. For names that contains multiple attributes of this
+	 * type. The first (most significant) one will be returned
+	 * <p>
 	 * 
 	 * @return the Most significant O attribute.
-	 * 
 	 */
 
 	public String getO() {
@@ -114,60 +110,51 @@ public class X500PrincipalHelper {
 	}
 
 	/**
-	 *   Gets the Country (C) attribute from the given
-	 *      X500Principal object.      
-	 * <p> 
+	 * Gets the Country (C) attribute from the given X500Principal object.
+	 * <p>
 	 * 
 	 * @return the C attribute.
-	 * 
 	 */
 	public String getC() {
 		return findPart(attrC);
 	}
 
 	/**
-	 *   Gets the Locale (L) attribute from the given
-	 *      X500Principal object.      
-	 * <p> 
+	 * Gets the Locale (L) attribute from the given X500Principal object.
+	 * <p>
 	 * 
 	 * @return the L attribute.
-	 * 
 	 */
 	public String getL() {
 		return findPart(attrL);
 	}
 
 	/**
-	 *   Gets the State (ST) attribute from the given
-	 *      X500Principal object.      
-	 * <p> 
+	 * Gets the State (ST) attribute from the given X500Principal object.
+	 * <p>
 	 * 
 	 * @return the ST attribute.
-	 * 
 	 */
 	public String getST() {
 		return findPart(attrST);
 	}
 
 	/**
-	 *   Gets the Street (STREET) attribute from the given
-	 *      X500Principal object.      
-	 * <p> 
+	 * Gets the Street (STREET) attribute from the given X500Principal object.
+	 * <p>
 	 * 
 	 * @return the STREET attribute.
-	 * 
 	 */
 	public String getSTREET() {
 		return findPart(attrSTREET);
 	}
 
 	/**
-	 *   Gets the Email Address (EMAILADDRESS) attribute from the given
-	 *      X500Principal object.      
-	 * <p> 
+	 * Gets the Email Address (EMAILADDRESS) attribute from the given X500Principal
+	 * object.
+	 * <p>
 	 * 
 	 * @return the EMAILADDRESS attribute.
-	 * 
 	 */
 	public String getEMAILDDRESS() {
 		return findPart(attrEMAIL);
@@ -180,8 +167,8 @@ public class X500PrincipalHelper {
 	/**
 	 * Derived From: org.eclipse.osgi.internal.verifier - DNChainMatching.java
 	 * 
-	 * Takes a distinguished name in canonical form and fills in the rdnArray
-	 * with the extracted RDNs.
+	 * Takes a distinguished name in canonical form and fills in the rdnArray with
+	 * the extracted RDNs.
 	 * 
 	 * @param dn the distinguished name in canonical form.
 	 * @throws IllegalArgumentException if a formatting error is found.
@@ -228,13 +215,14 @@ public class X500PrincipalHelper {
 	}
 
 	/**
-	 * Returns an ArrayList containing all the values for the given attribute identifier.
+	 * Returns an ArrayList containing all the values for the given attribute
+	 * identifier.
 	 * <p>
-	 * @param  attributeID  String containing the X500 name attribute whose values are to be 
-	 *      returned
-	 * @return ArrayList containing the string values of the requested attribute. Values are in   
-	 *      the order they occur.  May be empty.
 	 * 
+	 * @param attributeID String containing the X500 name attribute whose values are
+	 *                    to be returned
+	 * @return ArrayList containing the string values of the requested attribute.
+	 *         Values are in the order they occur. May be empty.
 	 */
 	public ArrayList<String> getAllValues(String attributeID) {
 		ArrayList<String> retList = new ArrayList<>();
@@ -244,7 +232,8 @@ public class X500PrincipalHelper {
 			String namePart = nameList.get(0);
 
 			if (namePart.startsWith(searchPart)) {
-				// Return the string starting after the ID string and the = sign that follows it.
+				// Return the string starting after the ID string and the = sign that follows
+				// it.
 				retList.add(namePart.toString().substring(searchPart.length()));
 			}
 		}
@@ -265,9 +254,10 @@ public class X500PrincipalHelper {
 			String namePart = nameList.get(0);
 
 			if (namePart.startsWith(searchPart)) {
-				// Return the string starting after the ID string and the = sign that follows it.
+				// Return the string starting after the ID string and the = sign that follows
+				// it.
 				retNamePart = namePart.toString().substring(searchPart.length());
-				//  By definition the first one is most significant
+				// By definition the first one is most significant
 				if (significance == MOSTSIGNIFICANT)
 					break;
 			}

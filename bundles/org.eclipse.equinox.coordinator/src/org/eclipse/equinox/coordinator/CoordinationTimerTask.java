@@ -30,12 +30,13 @@ public class CoordinationTimerTask extends TimerTask {
 
 	@Override
 	public void run() {
-		// Catch all exceptions and errors in order to prevent the timer 
+		// Catch all exceptions and errors in order to prevent the timer
 		// thread from stopping.
 		try {
 			coordination.fail(Coordination.TIMEOUT);
 		} catch (Throwable t) {
-			coordination.getLogService().log(LogService.LOG_ERROR, NLS.bind(Messages.CoordinationTimedOutError, new Object[]{coordination.getName(), coordination.getId(), Thread.currentThread()}), t);
+			coordination.getLogService().log(LogService.LOG_ERROR, NLS.bind(Messages.CoordinationTimedOutError,
+					new Object[] { coordination.getName(), coordination.getId(), Thread.currentThread() }), t);
 		}
 	}
 }

@@ -43,7 +43,8 @@ PROGRAM_LIBRARY = $(PROGRAM_OUTPUT)_$(LIB_VERSION).so
 
 EXEC_DIR ?= ../../../../../rt.equinox.binaries/org.eclipse.equinox.executable
 OUTPUT_DIR ?= $(EXEC_DIR)/bin/$(DEFAULT_WS)/$(DEFAULT_OS)/$(DEFAULT_OS_ARCH)
-LIBRARY_DIR ?= $(EXEC_DIR)/../org.eclipse.equinox.launcher.$(DEFAULT_WS).$(DEFAULT_OS).$(DEFAULT_OS_ARCH)
+LIBRARY_FRAGMENT_NAME ?= org.eclipse.equinox.launcher.$(DEFAULT_WS).$(DEFAULT_OS).$(DEFAULT_OS_ARCH)
+LIBRARY_DIR ?= $(EXEC_DIR)/../$(LIBRARY_FRAGMENT_NAME)
 
 # 64 bit specific flag:
 ifeq ($(M_CFLAGS),)
@@ -147,15 +148,20 @@ clean:
 
 # Convienience method to install produced output into a developer's eclipse for testing/development.
 dev_build_install: all
-ifeq "$(origin DEV_ECLIPSE)" "environment"
+ifneq ($(filter "$(origin DEV_ECLIPSE)", "environment" "command line"),)
 	$(info Copying $(EXEC) and $(DLL) into your development eclipse folder:)
 	mkdir -p ${DEV_ECLIPSE}/
 	cp $(EXEC) ${DEV_ECLIPSE}/
-	mkdir -p ${DEV_ECLIPSE}/plugins/org.eclipse.equinox.launcher.gtk.linux.x86_64/
-	cp $(DLL) ${DEV_ECLIPSE}/plugins/org.eclipse.equinox.launcher.gtk.linux.x86_64/
+	mkdir -p ${DEV_ECLIPSE}/plugins/$(LIBRARY_FRAGMENT_NAME)/
+	cp $(DLL) ${DEV_ECLIPSE}/plugins/$(LIBRARY_FRAGMENT_NAME)/
 else
 	$(error $(DEV_INSTALL_ERROR_MSG))
 endif
+
+test:
+	mvn -f ../org.eclipse.launcher.tests/pom.xml clean verify -Dmaven.test.skip=true
+	make -f $(firstword $(MAKEFILE_LIST)) dev_build_install LIBRARY_FRAGMENT_NAME=org.eclipse.equinox.launcher DEV_ECLIPSE=../org.eclipse.launcher.tests/target/test-run 
+	mvn -f ../org.eclipse.launcher.tests/pom.xml test
 
 define DEV_INSTALL_ERROR_MSG =
 Note:

@@ -34,8 +34,7 @@ public class HttpSessionTracker implements HttpSessionInvalidator {
 
 	@Override
 	public void invalidate(String sessionId, boolean invalidateParent) {
-		Set<HttpSessionAdaptor> httpSessionAdaptors =
-			httpSessionAdaptorsMap.remove(sessionId);
+		Set<HttpSessionAdaptor> httpSessionAdaptors = httpSessionAdaptorsMap.remove(sessionId);
 
 		if (httpSessionAdaptors == null) {
 			return;
@@ -52,27 +51,21 @@ public class HttpSessionTracker implements HttpSessionInvalidator {
 		if (invalidateParent && parentSession != null) {
 			try {
 				parentSession.invalidate();
-			}
-			catch (IllegalStateException ise) {
-				httpServiceRuntime.debug(
-					"Session was already invalidated: " + parentSession.getId(), ise); //$NON-NLS-1$
+			} catch (IllegalStateException ise) {
+				httpServiceRuntime.debug("Session was already invalidated: " + parentSession.getId(), ise); //$NON-NLS-1$
 			}
 		}
 	}
 
-	public void addHttpSessionAdaptor(
-		String sessionId, HttpSessionAdaptor httpSessionAdaptor) {
+	public void addHttpSessionAdaptor(String sessionId, HttpSessionAdaptor httpSessionAdaptor) {
 
-		Set<HttpSessionAdaptor> httpSessionAdaptors =
-			httpSessionAdaptorsMap.get(sessionId);
+		Set<HttpSessionAdaptor> httpSessionAdaptors = httpSessionAdaptorsMap.get(sessionId);
 
 		if (httpSessionAdaptors == null) {
-			httpSessionAdaptors = Collections.newSetFromMap(
-				new ConcurrentHashMap<HttpSessionAdaptor, Boolean>());
+			httpSessionAdaptors = Collections.newSetFromMap(new ConcurrentHashMap<HttpSessionAdaptor, Boolean>());
 
-			Set<HttpSessionAdaptor> previousHttpSessionAdaptors =
-				httpSessionAdaptorsMap.putIfAbsent(
-					sessionId, httpSessionAdaptors);
+			Set<HttpSessionAdaptor> previousHttpSessionAdaptors = httpSessionAdaptorsMap.putIfAbsent(sessionId,
+					httpSessionAdaptors);
 
 			if (previousHttpSessionAdaptors != null) {
 				httpSessionAdaptors = previousHttpSessionAdaptors;
@@ -86,16 +79,14 @@ public class HttpSessionTracker implements HttpSessionInvalidator {
 		// At this point there should be no left over sessions. If
 		// there are we'll log it because there's some kind of leak.
 		if (!httpSessionAdaptorsMap.isEmpty()) {
-			httpServiceRuntime.debug(
-				"There are HttpSessionAdaptors left over. There might be a context or session leak!"); //$NON-NLS-1$
+			httpServiceRuntime
+					.debug("There are HttpSessionAdaptors left over. There might be a context or session leak!"); //$NON-NLS-1$
 		}
 	}
 
-	public boolean removeHttpSessionAdaptor(
-		String sessionId, HttpSessionAdaptor httpSessionAdaptor) {
+	public boolean removeHttpSessionAdaptor(String sessionId, HttpSessionAdaptor httpSessionAdaptor) {
 
-		Set<HttpSessionAdaptor> httpSessionAdaptors =
-			httpSessionAdaptorsMap.get(sessionId);
+		Set<HttpSessionAdaptor> httpSessionAdaptors = httpSessionAdaptorsMap.get(sessionId);
 
 		if (httpSessionAdaptors == null) {
 			return false;
@@ -103,17 +94,14 @@ public class HttpSessionTracker implements HttpSessionInvalidator {
 
 		try {
 			return httpSessionAdaptors.remove(httpSessionAdaptor);
-		}
-		finally {
+		} finally {
 			if (httpSessionAdaptors.isEmpty()) {
 				httpSessionAdaptorsMap.remove(sessionId, httpSessionAdaptors);
 			}
 		}
 	}
 
-	private final ConcurrentMap<String, Set<HttpSessionAdaptor>>
-		httpSessionAdaptorsMap =
-			new ConcurrentHashMap<>();
+	private final ConcurrentMap<String, Set<HttpSessionAdaptor>> httpSessionAdaptorsMap = new ConcurrentHashMap<>();
 	private final HttpServiceRuntimeImpl httpServiceRuntime;
 
 }

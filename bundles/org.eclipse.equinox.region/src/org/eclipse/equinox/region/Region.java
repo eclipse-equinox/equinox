@@ -149,8 +149,6 @@ public interface Region {
 	/**
 	 * Get the bundle in this region with the given symbolic name and version.
 	 * 
-	 * @param symbolicName
-	 * @param version
 	 * @return the bundle or <code>null</code> if there is no such bundle
 	 */
 	Bundle getBundle(String symbolicName, Version version);

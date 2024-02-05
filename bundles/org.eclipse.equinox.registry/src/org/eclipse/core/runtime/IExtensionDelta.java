@@ -17,9 +17,11 @@ package org.eclipse.core.runtime;
  * An extension delta represents changes to the extension registry.
  * <p>
  * This interface can be used without OSGi running.
- * </p><p>
+ * </p>
+ * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
+ * 
  * @since 3.0
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -27,12 +29,14 @@ public interface IExtensionDelta {
 	/**
 	 * Delta kind constant indicating that an extension has been added to an
 	 * extension point.
+	 * 
 	 * @see IExtensionDelta#getKind()
 	 */
 	public int ADDED = 1;
 	/**
 	 * Delta kind constant indicating that an extension has been removed from an
 	 * extension point.
+	 * 
 	 * @see IExtensionDelta#getKind()
 	 */
 	public int REMOVED = 2;

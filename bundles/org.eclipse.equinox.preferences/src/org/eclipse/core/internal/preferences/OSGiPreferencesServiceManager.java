@@ -23,42 +23,45 @@ import org.osgi.service.prefs.Preferences;
 
 /**
  * <p>
- * Class used to manage OSGi Preferences Service.  Creates a new OSGiPreferencesServiceImpl
- * object for every bundle that gets the Preferences Service.  When a bundle ungets the
- * Preference Service, it's preferences are flushed to disk.
+ * Class used to manage OSGi Preferences Service. Creates a new
+ * OSGiPreferencesServiceImpl object for every bundle that gets the Preferences
+ * Service. When a bundle ungets the Preference Service, it's preferences are
+ * flushed to disk.
  * </p>
  * <p>
  * Also deletes saved preferences for bundles which are uninstalled.
  * </p>
  */
-public class OSGiPreferencesServiceManager implements ServiceFactory<org.osgi.service.prefs.PreferencesService>, BundleListener {
+public class OSGiPreferencesServiceManager
+		implements ServiceFactory<org.osgi.service.prefs.PreferencesService>, BundleListener {
 
 	private static final String ORG_ECLIPSE_CORE_INTERNAL_PREFERENCES_OSGI = "org.eclipse.core.internal.preferences.osgi"; //$NON-NLS-1$
 
-	//keys are bundles that use OSGi prefs
+	// keys are bundles that use OSGi prefs
 	private Preferences prefBundles;
 
 	public OSGiPreferencesServiceManager(BundleContext context) {
 
 		context.addBundleListener(this);
 
-		//prefBundles = new InstanceScope().getNode(ORG_ECLIPSE_CORE_INTERNAL_PREFERENCES_OSGI);
+		// prefBundles = new
+		// InstanceScope().getNode(ORG_ECLIPSE_CORE_INTERNAL_PREFERENCES_OSGI);
 		prefBundles = ConfigurationScope.INSTANCE.getNode(ORG_ECLIPSE_CORE_INTERNAL_PREFERENCES_OSGI);
 
-		//clean up prefs for bundles that have been uninstalled
+		// clean up prefs for bundles that have been uninstalled
 		try {
 
-			//get list of currently installed bundles
+			// get list of currently installed bundles
 			Bundle[] allBundles = context.getBundles();
 			Set<String> bundleQualifiers = new TreeSet<>();
 			for (Bundle allBundle : allBundles) {
 				bundleQualifiers.add(getQualifier(allBundle));
 			}
 
-			//get list of bundles we created prefs for
+			// get list of bundles we created prefs for
 			String[] prefsBundles = prefBundles.keys();
 
-			//remove prefs nodes for bundles that are no longer installed
+			// remove prefs nodes for bundles that are no longer installed
 			for (String prefsBundle : prefsBundles) {
 				if (!bundleQualifiers.contains(prefsBundle)) {
 					removePrefs(prefsBundle);
@@ -66,7 +69,7 @@ public class OSGiPreferencesServiceManager implements ServiceFactory<org.osgi.se
 			}
 
 		} catch (BackingStoreException e) {
-			//best effort
+			// best effort
 		}
 	}
 
@@ -74,17 +77,19 @@ public class OSGiPreferencesServiceManager implements ServiceFactory<org.osgi.se
 	 * Creates a new OSGiPreferencesServiceImpl for each bundle.
 	 */
 	@Override
-	public org.osgi.service.prefs.PreferencesService getService(Bundle bundle, ServiceRegistration<org.osgi.service.prefs.PreferencesService> registration) {
+	public org.osgi.service.prefs.PreferencesService getService(Bundle bundle,
+			ServiceRegistration<org.osgi.service.prefs.PreferencesService> registration) {
 		String qualifier = getQualifier(bundle);
-		//remember we created prefs for this bundle
+		// remember we created prefs for this bundle
 		Preferences bundlesNode = getBundlesNode();
 		bundlesNode.put(qualifier, ""); //$NON-NLS-1$
 		try {
 			bundlesNode.flush();
 		} catch (BackingStoreException e) {
-			//best effort
+			// best effort
 		}
-		//return new OSGiPreferencesServiceImpl(new InstanceScope().getNode(getQualifier(bundle)));
+		// return new OSGiPreferencesServiceImpl(new
+		// InstanceScope().getNode(getQualifier(bundle)));
 		return new OSGiPreferencesServiceImpl(ConfigurationScope.INSTANCE.getNode(getQualifier(bundle)));
 	}
 
@@ -100,12 +105,13 @@ public class OSGiPreferencesServiceManager implements ServiceFactory<org.osgi.se
 	 * Flush the bundle's preferences.
 	 */
 	@Override
-	public void ungetService(Bundle bundle, ServiceRegistration<org.osgi.service.prefs.PreferencesService> registration, org.osgi.service.prefs.PreferencesService service) {
+	public void ungetService(Bundle bundle, ServiceRegistration<org.osgi.service.prefs.PreferencesService> registration,
+			org.osgi.service.prefs.PreferencesService service) {
 		try {
-			//new InstanceScope().getNode(getQualifier(bundle)).flush();
+			// new InstanceScope().getNode(getQualifier(bundle)).flush();
 			ConfigurationScope.INSTANCE.getNode(getQualifier(bundle)).flush();
 		} catch (BackingStoreException e) {
-			//best effort
+			// best effort
 		}
 	}
 
@@ -118,18 +124,18 @@ public class OSGiPreferencesServiceManager implements ServiceFactory<org.osgi.se
 			try {
 				removePrefs(getQualifier(event.getBundle()));
 			} catch (BackingStoreException e) {
-				//best effort
+				// best effort
 			}
 		}
 
 	}
 
 	protected void removePrefs(String qualifier) throws BackingStoreException {
-		//remove bundle's prefs
-		//new InstanceScope().getNode(qualifier).removeNode();
+		// remove bundle's prefs
+		// new InstanceScope().getNode(qualifier).removeNode();
 		ConfigurationScope.INSTANCE.getNode(qualifier).removeNode();
 
-		//remove from our list of bundles with prefs
+		// remove from our list of bundles with prefs
 		Preferences bundlesNode = getBundlesNode();
 		bundlesNode.remove(qualifier);
 		bundlesNode.flush();

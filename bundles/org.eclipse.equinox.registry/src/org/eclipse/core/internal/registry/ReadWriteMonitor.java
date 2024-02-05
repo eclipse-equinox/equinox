@@ -14,25 +14,23 @@
 package org.eclipse.core.internal.registry;
 
 /**
- * Monitor ensuring no more than one writer working concurrently.
- * Multiple readers are allowed to perform simultaneously.
+ * Monitor ensuring no more than one writer working concurrently. Multiple
+ * readers are allowed to perform simultaneously.
  *
  * This class was borrowed from org.eclipse.jdt.internal.core.search.indexing.
  */
 public class ReadWriteMonitor {
 
 	/**
-	 * <0 : writing (cannot go beyond -1, i.e one concurrent writer)
-	 * =0 : idle
-	 * >0 : reading (number of concurrent readers)
+	 * <0 : writing (cannot go beyond -1, i.e one concurrent writer) =0 : idle >0 :
+	 * reading (number of concurrent readers)
 	 */
 	private int status = 0;
 
 	private Thread writeLockowner;
 
 	/**
-	 * Concurrent reading is allowed
-	 * Blocking only when already writing.
+	 * Concurrent reading is allowed Blocking only when already writing.
 	 */
 	public synchronized void enterRead() {
 		if (writeLockowner == Thread.currentThread())
@@ -48,8 +46,8 @@ public class ReadWriteMonitor {
 	}
 
 	/**
-	 * Only one writer at a time is allowed to perform
-	 * Blocking only when already writing or reading.
+	 * Only one writer at a time is allowed to perform Blocking only when already
+	 * writing or reading.
 	 */
 	public synchronized void enterWrite() {
 		if (writeLockowner != Thread.currentThread()) {
@@ -77,14 +75,14 @@ public class ReadWriteMonitor {
 	}
 
 	/**
-	 * When writing is over, all readers and possible
-	 * writers are granted permission to restart concurrently
+	 * When writing is over, all readers and possible writers are granted permission
+	 * to restart concurrently
 	 */
 	public synchronized void exitWrite() {
 		if (writeLockowner != Thread.currentThread())
 			throw new IllegalStateException("Current owner is " + writeLockowner); //$NON-NLS-1$
 		if (++status == 0) {
-			//			System.out.println(this + "exitWrite:" + Thread.currentThread());
+			// System.out.println(this + "exitWrite:" + Thread.currentThread());
 			writeLockowner = null;
 			notifyAll();
 		}

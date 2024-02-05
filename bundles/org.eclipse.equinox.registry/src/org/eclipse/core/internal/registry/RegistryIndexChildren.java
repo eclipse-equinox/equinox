@@ -54,7 +54,7 @@ public class RegistryIndexChildren {
 
 	public boolean linkChild(int id) {
 		if (children.length == 0) {
-			children = new int[] {id};
+			children = new int[] { id };
 			return true;
 		}
 

@@ -15,7 +15,6 @@ package org.eclipse.equinox.internal.launcher;
 
 /**
  * @author aniefer
- *
  */
 public class Constants {
 	public static final String INTERNAL_AMD64 = "amd64"; //$NON-NLS-1$

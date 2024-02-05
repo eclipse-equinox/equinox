@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Export-Package: org.eclipse.core.runtime.adaptor;x-friends:="org.eclipse.core.runtime",
  org.eclipse.core.runtime.internal.adaptor;x-internal:=true,
  org.eclipse.equinox.log;version="1.1";uses:="org.osgi.framework,org.osgi.service.log",
- org.eclipse.osgi.container;version="1.6";
+ org.eclipse.osgi.container;version="1.7.0";
   uses:="org.eclipse.osgi.report.resolution,
    org.osgi.framework.wiring,
    org.eclipse.osgi.framework.eventmgr,
@@ -77,7 +77,7 @@ Export-Package: org.eclipse.core.runtime.adaptor;x-friends:="org.eclipse.core.ru
  org.osgi.service.resolver;version="1.1.1";uses:="org.osgi.resource",
  org.osgi.service.startlevel;version="1.1.1";uses:="org.osgi.framework",
  org.osgi.service.url;version="1.0.1",
- org.osgi.util.tracker;version="1.5.3";uses:="org.osgi.framework"
+ org.osgi.util.tracker;version="1.5.4";uses:="org.osgi.framework"
 Provide-Capability: osgi.service; objectClass:List<String>="org.osgi.service.log.LogReaderService,org.eclipse.equinox.log.ExtendedLogReaderService"; uses:="org.osgi.service.log",
  osgi.service; objectClass:List<String>="org.osgi.service.log.LoggerFactory,org.osgi.service.log.LogService,org.eclipse.equinox.log.ExtendedLogService"; uses:="org.osgi.service.log",
  osgi.service; objectClass:List<String>="org.osgi.service.log.admin.LoggerAdmin"; uses:="org.osgi.service.log.admin",
@@ -107,7 +107,7 @@ Bundle-Activator: org.eclipse.osgi.internal.framework.SystemBundleActivator
 Bundle-Description: %systemBundle
 Bundle-Copyright: %copyright
 Bundle-Vendor: %eclipse.org
-Bundle-Version: 3.18.500.qualifier
+Bundle-Version: 3.19.0.qualifier
 Bundle-Localization: systembundle
 Bundle-DocUrl: http://www.eclipse.org
 Eclipse-ExtensibleAPI: true

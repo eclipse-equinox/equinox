@@ -40,6 +40,7 @@ import org.osgi.framework.FrameworkUtil;
 
 /**
  * Test proper clean-up in case registry gets invalid XML contribution.
+ * 
  * @since 3.4
  */
 public class InputErrorTest {
@@ -47,8 +48,8 @@ public class InputErrorTest {
 	static private final String DATA_LOCATION = "Plugin_Testing/registry/errorHandling/";
 
 	/**
-	 * Use customized registry strategy to both check error processing
-	 * and to remove expected error messages from test log.
+	 * Use customized registry strategy to both check error processing and to remove
+	 * expected error messages from test log.
 	 */
 	private class RegistryStrategyLog extends RegistryStrategyOSGI {
 
@@ -77,7 +78,8 @@ public class InputErrorTest {
 
 	@Test
 	public void testErrorCleanupPoints() {
-		RegistryStrategyLog strategy = new RegistryStrategyLog(null, null, null); // RegistryFactory.createOSGiStrategy(null, null, null);
+		RegistryStrategyLog strategy = new RegistryStrategyLog(null, null, null); // RegistryFactory.createOSGiStrategy(null,
+																					// null, null);
 		IExtensionRegistry localRegistry = RegistryFactory.createRegistry(strategy, null, null);
 		IContributor contributor = ContributorFactorySimple.createContributor("testErrorHandling");
 
@@ -110,7 +112,8 @@ public class InputErrorTest {
 
 	@Test
 	public void testErrorCleanupExtensions() {
-		RegistryStrategyLog strategy = new RegistryStrategyLog(null, null, null); // RegistryFactory.createOSGiStrategy(null, null, null);
+		RegistryStrategyLog strategy = new RegistryStrategyLog(null, null, null); // RegistryFactory.createOSGiStrategy(null,
+																					// null, null);
 		IExtensionRegistry localRegistry = RegistryFactory.createRegistry(strategy, null, null);
 		IContributor contributor = ContributorFactorySimple.createContributor("testErrorHandling");
 

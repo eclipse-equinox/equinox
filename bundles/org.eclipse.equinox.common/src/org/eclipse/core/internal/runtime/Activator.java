@@ -88,6 +88,7 @@ public class Activator implements BundleActivator {
 				urlProperties);
 		adapterManagerService = context.registerService(IAdapterManager.class, AdapterManager.getDefault(), null);
 		installPlatformURLSupport();
+		installDataURLSupport(context);
 		Hashtable<String, String> properties = new Hashtable<>(2);
 		properties.put(DebugOptions.LISTENER_SYMBOLICNAME, PLUGIN_ID);
 		debugRegistration = context.registerService(DebugOptionsListener.class, TracingOptions.DEBUG_OPTIONS_LISTENER,
@@ -95,6 +96,12 @@ public class Activator implements BundleActivator {
 		adapterFactoryTracker = new ServiceTracker<>(context, IAdapterFactory.class,
 				new AdapterFactoryBridge(bundleContext));
 		adapterFactoryTracker.open();
+	}
+
+	private void installDataURLSupport(BundleContext context) {
+		Dictionary<String, String[]> properties = FrameworkUtil.asDictionary(
+				Map.of(URLConstants.URL_HANDLER_PROTOCOL, new String[] { DataURLStreamHandler.PROTOCOL }));
+		context.registerService(URLStreamHandlerService.class, new DataURLStreamHandler(), properties);
 	}
 
 	private PlatformLogWriter getPlatformWriter(BundleContext context) {

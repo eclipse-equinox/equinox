@@ -17,7 +17,6 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * Match implementation class.
- *
  */
 public class Match implements org.osgi.service.device.Match {
 

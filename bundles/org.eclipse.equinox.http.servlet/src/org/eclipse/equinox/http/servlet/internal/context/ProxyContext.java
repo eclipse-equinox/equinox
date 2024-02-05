@@ -25,18 +25,21 @@ import javax.servlet.ServletContext;
 import org.eclipse.equinox.http.servlet.internal.util.Const;
 
 /**
- * The ProxyContext provides something similar to a ServletContext for all servlets and resources under a particular ProxyServlet.
- * In particular it holds and represent the concept of "context path" through the Proxy Servlets servlet path.
- * The Http Service also requires a ServletContext namespaced by each individual HttpContext. The ProxyContext provides support for the
- * attribute map of a ServletContext again namespaced by HttpContext as specified in the Http Service specification. The ContextAttributes
- * are reference counted so that when the HttpContext is no longer referenced the associated context attributes can be
- * garbage collected and the context temp dir deleteted.
+ * The ProxyContext provides something similar to a ServletContext for all
+ * servlets and resources under a particular ProxyServlet. In particular it
+ * holds and represent the concept of "context path" through the Proxy Servlets
+ * servlet path. The Http Service also requires a ServletContext namespaced by
+ * each individual HttpContext. The ProxyContext provides support for the
+ * attribute map of a ServletContext again namespaced by HttpContext as
+ * specified in the Http Service specification. The ContextAttributes are
+ * reference counted so that when the HttpContext is no longer referenced the
+ * associated context attributes can be garbage collected and the context temp
+ * dir deleteted.
  */
 public class ProxyContext {
 	private static final String JAVAX_SERVLET_CONTEXT_TEMPDIR = "javax.servlet.context.tempdir"; //$NON-NLS-1$
 
-	private final ConcurrentMap<ContextController, ContextAttributes> attributesMap =
-		new ConcurrentHashMap<>();
+	private final ConcurrentMap<ContextController, ContextAttributes> attributesMap = new ConcurrentHashMap<>();
 	File proxyContextTempDir;
 	private ServletContext servletContext;
 
@@ -60,8 +63,7 @@ public class ProxyContext {
 		return Const.BLANK;
 	}
 
-	public void createContextAttributes(
-		ContextController controller) {
+	public void createContextAttributes(ContextController controller) {
 
 		synchronized (attributesMap) {
 			ContextAttributes contextAttributes = attributesMap.get(controller);
@@ -76,8 +78,7 @@ public class ProxyContext {
 		}
 	}
 
-	public void destroyContextAttributes(
-		ContextController controller) {
+	public void destroyContextAttributes(ContextController controller) {
 
 		synchronized (attributesMap) {
 			ContextAttributes contextAttributes = attributesMap.get(controller);
@@ -93,8 +94,7 @@ public class ProxyContext {
 		}
 	}
 
-	public Dictionary<String, Object> getContextAttributes(
-		ContextController controller) {
+	public Dictionary<String, Object> getContextAttributes(ContextController controller) {
 
 		return attributesMap.get(controller);
 	}
@@ -105,6 +105,7 @@ public class ProxyContext {
 
 	/**
 	 * deleteDirectory is a convenience method to recursively delete a directory
+	 * 
 	 * @param directory - the directory to delete.
 	 * @return was the delete succesful
 	 */
@@ -122,17 +123,14 @@ public class ProxyContext {
 		return directory.delete();
 	}
 
-	public static class ContextAttributes
-		extends Dictionary<String, Object> implements Serializable {
+	public static class ContextAttributes extends Dictionary<String, Object> implements Serializable {
 
 		private static final long serialVersionUID = 1916670423277243587L;
 		private final AtomicInteger referenceCount = new AtomicInteger();
 
 		public ContextAttributes(ContextController controller, File proxyContextTempDir) {
 			if (proxyContextTempDir != null) {
-				File contextTempDir = new File(
-					proxyContextTempDir,
-					"hc_" + controller.hashCode()); //$NON-NLS-1$
+				File contextTempDir = new File(proxyContextTempDir, "hc_" + controller.hashCode()); //$NON-NLS-1$
 
 				contextTempDir.mkdirs();
 
@@ -193,8 +191,7 @@ public class ProxyContext {
 			return _map.size();
 		}
 
-		private final Map<String, Object> _map =
-			new ConcurrentHashMap<>();
+		private final Map<String, Object> _map = new ConcurrentHashMap<>();
 	}
 
 }

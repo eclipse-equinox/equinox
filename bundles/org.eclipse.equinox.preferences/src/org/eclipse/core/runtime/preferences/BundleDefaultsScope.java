@@ -18,30 +18,31 @@ import org.eclipse.core.runtime.IPath;
 
 /**
  * Object representing the bundle defaults scope in the Eclipse preferences
- * hierarchy. Can be used as a context for searching for preference
- * values (in the IPreferencesService APIs) or for determining the
- * correct preference node to set values in the store.
+ * hierarchy. Can be used as a context for searching for preference values (in
+ * the IPreferencesService APIs) or for determining the correct preference node
+ * to set values in the store.
  * <p>
- * The bundle defaults are the defaults are default values which have
- * been set either by the bundle's preference initializer or by a customization
- * file supplied with the bundle.
+ * The bundle defaults are the defaults are default values which have been set
+ * either by the bundle's preference initializer or by a customization file
+ * supplied with the bundle.
  * <p>
  * Bundle default preferences are not persisted to disk.
  * </p>
  * <p>
- * The path for preferences defined in the bundle defaults scope hierarchy
- * is as follows: <code>/bundle_defaults/&lt;qualifier&gt;</code>
+ * The path for preferences defined in the bundle defaults scope hierarchy is as
+ * follows: <code>/bundle_defaults/&lt;qualifier&gt;</code>
  * </p>
  * <p>
  * This class is not intended to be subclassed. This class may be instantiated.
  * </p>
+ * 
  * @since 3.3
  */
 public final class BundleDefaultsScope extends AbstractScope {
 
 	/**
-	 * String constant (value of <code>"default"</code>) used for the
-	 * scope name for the default preference scope.
+	 * String constant (value of <code>"default"</code>) used for the scope name for
+	 * the default preference scope.
 	 */
 	public static final String SCOPE = "bundle_defaults"; //$NON-NLS-1$
 
@@ -55,24 +56,18 @@ public final class BundleDefaultsScope extends AbstractScope {
 
 	/**
 	 * Create and return a new default scope instance.
+	 * 
 	 * @deprecated use <code>BundleDefaultsScope.INSTANCE</code> instead
 	 */
+	@Deprecated
 	public BundleDefaultsScope() {
 		super();
 	}
-
 
 	@Override
 	public String getName() {
 		return SCOPE;
 	}
-
-
-	@Override
-	public IEclipsePreferences getNode(String qualifier) {
-		return super.getNode(qualifier);
-	}
-
 
 	@Override
 	public IPath getLocation() {

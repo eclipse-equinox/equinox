@@ -17,12 +17,10 @@ import java.io.File;
 import org.osgi.framework.BundleException;
 
 /**
- * A content provider is a marker interface that is used
- * but the framework internally to handle different kinds of
- * bundles.  For example, reference installed bundles or
- * connect bundles.  The type of the provider indicates
- * how the framework will handle the install or update
- * of the bundle content.
+ * A content provider is a marker interface that is used but the framework
+ * internally to handle different kinds of bundles. For example, reference
+ * installed bundles or connect bundles. The type of the provider indicates how
+ * the framework will handle the install or update of the bundle content.
  */
 public interface ContentProvider {
 
@@ -35,13 +33,15 @@ public interface ContentProvider {
 
 	/**
 	 * A file of the content, may be {@code null}
+	 * 
 	 * @return the file, may be {@code null}
-	 * @throws BundleException 
+	 * @throws BundleException
 	 */
 	File getContent() throws BundleException;
 
 	/**
 	 * The type of content
+	 * 
 	 * @return the type of content
 	 */
 	Type getType();

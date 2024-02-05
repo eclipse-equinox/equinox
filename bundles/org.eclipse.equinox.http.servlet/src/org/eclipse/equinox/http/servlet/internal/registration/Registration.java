@@ -39,8 +39,7 @@ public abstract class Registration<T, D extends DTO> {
 
 		try {
 			referenceCount.incrementAndGet();
-		}
-		finally {
+		} finally {
 			readLock.unlock();
 		}
 	}
@@ -56,15 +55,13 @@ public abstract class Registration<T, D extends DTO> {
 
 				try {
 					condition.signalAll();
-				}
-				finally {
+				} finally {
 					writeLock.unlock();
 
 					readLock.lock();
 				}
 			}
-		}
-		finally {
+		} finally {
 			readLock.unlock();
 		}
 	}
@@ -80,13 +77,11 @@ public abstract class Registration<T, D extends DTO> {
 			while (referenceCount.get() != 0) {
 				try {
 					condition.await();
-				}
-				catch (InterruptedException ie) {
+				} catch (InterruptedException ie) {
 					interrupted = true;
 				}
 			}
-		}
-		finally {
+		} finally {
 			writeLock.unlock();
 
 			if (interrupted) {

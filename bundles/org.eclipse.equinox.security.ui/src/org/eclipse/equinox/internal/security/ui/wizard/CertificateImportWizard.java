@@ -23,7 +23,7 @@ import org.eclipse.ui.IWorkbench;
 
 public class CertificateImportWizard extends Wizard implements IImportWizard {
 
-	//	ImportWizardPage mainPage;
+	// ImportWizardPage mainPage;
 	CertificateImportFileSelectPage selectCertFilePage;
 	CertificateImportCertSelectPage selectCertPage;
 	CertificateImportTrustEngineSelectPage selectTrustEnginePage;
@@ -40,13 +40,13 @@ public class CertificateImportWizard extends Wizard implements IImportWizard {
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		//nothing
+		// nothing
 	}
 
 	@Override
 	public void addPages() {
-		//		mainPage = new ImportWizardPage(SecurityUIMsg.IMPORT_FILE); //NON-NLS-1
-		//		addPage(mainPage);
+		// mainPage = new ImportWizardPage(SecurityUIMsg.IMPORT_FILE); //NON-NLS-1
+		// addPage(mainPage);
 
 		selectCertFilePage = new CertificateImportFileSelectPage(SecurityUIMsg.WIZARD_PAGE_FILE_CERT_SELECT);
 		addPage(selectCertFilePage);

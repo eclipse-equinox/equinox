@@ -30,27 +30,22 @@ public class RequestDispatcherAdaptor implements RequestDispatcher {
 	private final String path;
 	private String string;
 
-	public RequestDispatcherAdaptor(
-		DispatchTargets dispatchTargets, String path) {
+	public RequestDispatcherAdaptor(DispatchTargets dispatchTargets, String path) {
 
 		this.dispatchTargets = dispatchTargets;
 		this.path = path;
 	}
 
-	public void forward(ServletRequest request, ServletResponse response)
-		throws IOException, ServletException {
+	public void forward(ServletRequest request, ServletResponse response) throws IOException, ServletException {
 
-		dispatchTargets.doDispatch(
-			(HttpServletRequest)request, (HttpServletResponse)response,
-			path, DispatcherType.FORWARD);
+		dispatchTargets.doDispatch((HttpServletRequest) request, (HttpServletResponse) response, path,
+				DispatcherType.FORWARD);
 	}
 
-	public void include(ServletRequest request, ServletResponse response)
-		throws IOException, ServletException {
+	public void include(ServletRequest request, ServletResponse response) throws IOException, ServletException {
 
-		dispatchTargets.doDispatch(
-			(HttpServletRequest)request, (HttpServletResponse)response,
-			path, DispatcherType.INCLUDE);
+		dispatchTargets.doDispatch((HttpServletRequest) request, (HttpServletResponse) response, path,
+				DispatcherType.INCLUDE);
 	}
 
 	@Override

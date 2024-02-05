@@ -30,16 +30,18 @@ import javax.servlet.ServletContext;
 
 /**
  * The FrameworkLauncher provides the logic to:
- * 1) init
- * 2) deploy
- * 3) start
- * 4) stop
- * 5) undeploy
- * 6) destroy
- * an instance of the OSGi framework.
- * These 6 methods are provided to help manage the life-cycle and are called from outside this
- * class by the BridgeServlet. To create an extended FrameworkLauncher over-ride these methods to allow
- * custom behavior.
+ * <ol>
+ * <li>init</li>
+ * <li>deploy</li>
+ * <li>start</li>
+ * <li>stop</li>
+ * <li>undeploy</li>
+ * <li>destroy</li>
+ * </ol>
+ * an instance of the OSGi framework. These 6 methods are provided to help
+ * manage the life-cycle and are called from outside this class by the
+ * BridgeServlet. To create an extended FrameworkLauncher over-ride these
+ * methods to allow custom behavior.
  */
 public class FrameworkLauncher {
 
@@ -98,7 +100,8 @@ public class FrameworkLauncher {
 	};
 
 	static {
-		// We do this to ensure the anonymous Enumeration class in allPermissions is pre-loaded
+		// We do this to ensure the anonymous Enumeration class in allPermissions is
+		// pre-loaded
 		if (allPermissions.elements() == null)
 			throw new IllegalStateException();
 	}
@@ -118,7 +121,8 @@ public class FrameworkLauncher {
 	}
 
 	/**
-	 * try to find the resource base for this webapp by looking for the launcher initialization file.
+	 * try to find the resource base for this webapp by looking for the launcher
+	 * initialization file.
 	 */
 	protected void initResourceBase() {
 		try {
@@ -138,25 +142,25 @@ public class FrameworkLauncher {
 	}
 
 	/**
-	 * init is the first method called on the FrameworkLauncher and can be used for any initial setup.
-	 * The default behavior is to do nothing.
+	 * init is the first method called on the FrameworkLauncher and can be used for
+	 * any initial setup. The default behavior is to do nothing.
 	 */
 	public void init() {
 		// do nothing for now
 	}
 
 	/**
-	 * destroy is the last method called on the FrameworkLauncher and can be used for any final cleanup.
-	 * The default behavior is to do nothing.
+	 * destroy is the last method called on the FrameworkLauncher and can be used
+	 * for any final cleanup. The default behavior is to do nothing.
 	 */
 	public void destroy() {
 		// do nothing for now
 	}
 
 	/**
-	 * deploy is used to move the OSGi framework libraries into a location suitable for execution.
-	 * The default behavior is to copy the contents of the webapp's WEB-INF/eclipse directory
-	 * to the webapp's temp directory.
+	 * deploy is used to move the OSGi framework libraries into a location suitable
+	 * for execution. The default behavior is to copy the contents of the webapp's
+	 * WEB-INF/eclipse directory to the webapp's temp directory.
 	 */
 	public synchronized void deploy() {
 		if (platformDirectory != null) {
@@ -180,9 +184,11 @@ public class FrameworkLauncher {
 	}
 
 	/**
-	 * deployExtensionBundle will generate the Servletbridge extensionbundle if it is not already present in the platform's
-	 * plugin directory. By default it exports "org.eclipse.equinox.servletbridge" and a versioned export of the Servlet API.
-	 * Additional exports can be added by using the "extendedFrameworkExports" initial-param in the ServletConfig
+	 * deployExtensionBundle will generate the Servletbridge extensionbundle if it
+	 * is not already present in the platform's plugin directory. By default it
+	 * exports "org.eclipse.equinox.servletbridge" and a versioned export of the
+	 * Servlet API. Additional exports can be added by using the
+	 * "extendedFrameworkExports" initial-param in the ServletConfig
 	 */
 	private void deployExtensionBundle(File plugins) {
 		// we might want to parameterize the extension bundle BSN in the future
@@ -191,7 +197,8 @@ public class FrameworkLauncher {
 
 		if (extensionBundleFile == null)
 			generateExtensionBundle(plugins, extensionBundleBSN, EXTENSIONBUNDLE_DEFAULT_VERSION);
-		else if (Boolean.valueOf(config.getInitParameter(CONFIG_OVERRIDE_AND_REPLACE_EXTENSION_BUNDLE)).booleanValue()) {
+		else if (Boolean.valueOf(config.getInitParameter(CONFIG_OVERRIDE_AND_REPLACE_EXTENSION_BUNDLE))
+				.booleanValue()) {
 			String extensionBundleVersion = findExtensionBundleVersion(extensionBundleFile, extensionBundleBSN);
 			if (extensionBundleFile.isDirectory()) {
 				deleteDirectory(extensionBundleFile);
@@ -247,7 +254,8 @@ public class FrameworkLauncher {
 
 		String packageExports = null;
 		if (context.getMajorVersion() > 3) {
-			// we really have no idea what the packages or versions are, it all just a guess ...
+			// we really have no idea what the packages or versions are, it all just a guess
+			// ...
 			String servletVersion = context.getMajorVersion() + "." + context.getMinorVersion(); //$NON-NLS-1$
 			packageExports = "org.eclipse.equinox.servletbridge; version=1.1" + //$NON-NLS-1$
 					", javax.servlet; version=" + servletVersion + //$NON-NLS-1$
@@ -257,7 +265,8 @@ public class FrameworkLauncher {
 					", javax.servlet.resources; version=" + servletVersion; //$NON-NLS-1$
 		} else if (context.getMajorVersion() == 3) {
 			// We know spec version 3.0 corresponds to package version 2.6
-			// we are guessing future 3.x spec versions will increment package versions minor, so ...
+			// we are guessing future 3.x spec versions will increment package versions
+			// minor, so ...
 			String servletVersion = (context.getMajorVersion() - 1) + "." + (context.getMinorVersion() + 6); //$NON-NLS-1$
 			String specVersion = context.getMajorVersion() + "." + context.getMinorVersion(); //$NON-NLS-1$
 			packageExports = "org.eclipse.equinox.servletbridge; version=1.1" + //$NON-NLS-1$
@@ -324,10 +333,11 @@ public class FrameworkLauncher {
 		return null;
 	}
 
-	/** undeploy is the reverse operation of deploy and removes the OSGi framework libraries from their
-	 * execution location. Typically this method will only be called if a manual undeploy is requested in the
-	 * ServletBridge.
-	 * By default, this method removes the OSGi install and also removes the workspace.
+	/**
+	 * undeploy is the reverse operation of deploy and removes the OSGi framework
+	 * libraries from their execution location. Typically this method will only be
+	 * called if a manual undeploy is requested in the ServletBridge. By default,
+	 * this method removes the OSGi install and also removes the workspace.
 	 */
 	public synchronized void undeploy() {
 		if (platformDirectory == null) {
@@ -349,10 +359,11 @@ public class FrameworkLauncher {
 		platformDirectory = null;
 	}
 
-	/** start is used to "start" a previously deployed OSGi framework
-	 * The default behavior will read launcher.ini to create a set of initial properties and
-	 * use the "commandline" configuration parameter to create the equivalent command line arguments
-	 * available when starting Eclipse.
+	/**
+	 * start is used to "start" a previously deployed OSGi framework The default
+	 * behavior will read launcher.ini to create a set of initial properties and use
+	 * the "commandline" configuration parameter to create the equivalent command
+	 * line arguments available when starting Eclipse.
 	 */
 	public synchronized void start() {
 		if (platformDirectory == null)
@@ -490,14 +501,17 @@ public class FrameworkLauncher {
 		try {
 			return extensionFile.toURL();
 		} catch (MalformedURLException e) {
-			throw new RuntimeException("Could not find framework extension -- " + extensionFile.getAbsolutePath() + " : " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new RuntimeException("Could not find framework extension -- " + extensionFile.getAbsolutePath() //$NON-NLS-1$
+					+ " : " + e.getMessage()); //$NON-NLS-1$
 		}
 	}
 
-	private void registerRestartHandler(Class<?> starterClazz) throws IllegalAccessException, InvocationTargetException {
+	private void registerRestartHandler(Class<?> starterClazz)
+			throws IllegalAccessException, InvocationTargetException {
 		Method registerFrameworkShutdownHandler = null;
 		try {
-			registerFrameworkShutdownHandler = starterClazz.getDeclaredMethod("internalAddFrameworkShutdownHandler", Runnable.class); //$NON-NLS-1$
+			registerFrameworkShutdownHandler = starterClazz.getDeclaredMethod("internalAddFrameworkShutdownHandler", //$NON-NLS-1$
+					Runnable.class);
 			if (!registerFrameworkShutdownHandler.isAccessible()) {
 				registerFrameworkShutdownHandler.setAccessible(true);
 			}
@@ -505,7 +519,8 @@ public class FrameworkLauncher {
 			registerFrameworkShutdownHandler.invoke(null, restartHandler);
 		} catch (NoSuchMethodException e) {
 			// Ok. However we will not support restart events. Log this as info
-			context.log(starterClazz.getName() + " does not support setting a shutdown handler. Restart handling is disabled."); //$NON-NLS-1$
+			context.log(starterClazz.getName()
+					+ " does not support setting a shutdown handler. Restart handling is disabled."); //$NON-NLS-1$
 			return;
 		}
 
@@ -538,9 +553,12 @@ public class FrameworkLauncher {
 		return restartHandler;
 	}
 
-	/** buildInitialPropertyMap create the initial set of properties from the contents of launch.ini
-	 * and for a few other properties necessary to launch defaults are supplied if not provided.
-	 * The value '@null' will set the map value to null.
+	/**
+	 * buildInitialPropertyMap create the initial set of properties from the
+	 * contents of launch.ini and for a few other properties necessary to launch
+	 * defaults are supplied if not provided. The value '@null' will set the map
+	 * value to null.
+	 * 
 	 * @return a map containing the initial properties
 	 */
 	@SuppressWarnings("rawtypes")
@@ -651,7 +669,8 @@ public class FrameworkLauncher {
 	}
 
 	/**
-	 * clearPrefixedSystemProperties clears System Properties by writing null properties in the targetPropertyMap that match a prefix
+	 * clearPrefixedSystemProperties clears System Properties by writing null
+	 * properties in the targetPropertyMap that match a prefix
 	 */
 	private static void clearPrefixedSystemProperties(String prefix, Map<String, String> targetPropertyMap) {
 		for (Object key : System.getProperties().keySet()) {
@@ -663,7 +682,9 @@ public class FrameworkLauncher {
 	}
 
 	/**
-	 * buildCommandLineArguments parses the commandline config parameter into a set of arguments
+	 * buildCommandLineArguments parses the commandline config parameter into a set
+	 * of arguments
+	 * 
 	 * @return an array of String containing the commandline arguments
 	 */
 	protected String[] buildCommandLineArguments() {
@@ -715,9 +736,10 @@ public class FrameworkLauncher {
 	}
 
 	/**
-	 * stop is used to "shutdown" the framework and make it avialable for garbage collection.
-	 * The default implementation also has special handling for Apache Commons Logging to "release" any
-	 * resources associated with the frameworkContextClassLoader.
+	 * stop is used to "shutdown" the framework and make it avialable for garbage
+	 * collection. The default implementation also has special handling for Apache
+	 * Commons Logging to "release" any resources associated with the
+	 * frameworkContextClassLoader.
 	 */
 	public synchronized void stop() {
 		if (platformDirectory == null) {
@@ -737,7 +759,8 @@ public class FrameworkLauncher {
 			Thread.currentThread().setContextClassLoader(frameworkContextClassLoader);
 			method.invoke(clazz);
 
-			// ACL keys its loggers off of the ContextClassLoader which prevents GC without calling release.
+			// ACL keys its loggers off of the ContextClassLoader which prevents GC without
+			// calling release.
 			// This section explicitly calls release if ACL is used.
 			try {
 				clazz = this.getClass().getClassLoader().loadClass("org.apache.commons.logging.LogFactory"); //$NON-NLS-1$
@@ -759,11 +782,12 @@ public class FrameworkLauncher {
 	}
 
 	/**
-	 * copyResource is a convenience method to recursively copy resources from the ServletContext to
-	 * an installation target. The default behavior will create a directory if the resourcepath ends
-	 * in '/' and a file otherwise.
+	 * copyResource is a convenience method to recursively copy resources from the
+	 * ServletContext to an installation target. The default behavior will create a
+	 * directory if the resourcepath ends in '/' and a file otherwise.
+	 * 
 	 * @param resourcePath - The resource root path
-	 * @param target - The root location where resources are to be copied
+	 * @param target       - The root location where resources are to be copied
 	 */
 	protected void copyResource(String resourcePath, File target) {
 		if (resourcePath.endsWith("/")) { //$NON-NLS-1$
@@ -778,7 +802,7 @@ public class FrameworkLauncher {
 		} else {
 			try {
 				if (target.createNewFile()) {
-					try (InputStream  is = context.getResourceAsStream(resourcePath)){
+					try (InputStream is = context.getResourceAsStream(resourcePath)) {
 						if (is == null) {
 							return;
 						}
@@ -793,6 +817,7 @@ public class FrameworkLauncher {
 
 	/**
 	 * deleteDirectory is a convenience method to recursively delete a directory
+	 * 
 	 * @param directory - the directory to delete.
 	 * @return was the delete successful
 	 */
@@ -811,8 +836,9 @@ public class FrameworkLauncher {
 	}
 
 	/**
-	 * Used when to set the ContextClassLoader when the BridgeServlet delegates to a Servlet
-	 * inside the framework
+	 * Used when to set the ContextClassLoader when the BridgeServlet delegates to a
+	 * Servlet inside the framework
+	 * 
 	 * @return a Classloader with the OSGi framework's context class loader.
 	 */
 	public synchronized ClassLoader getFrameworkContextClassLoader() {
@@ -821,6 +847,7 @@ public class FrameworkLauncher {
 
 	/**
 	 * Platfom Directory is where the OSGi software is installed
+	 * 
 	 * @return the framework install location
 	 */
 	protected synchronized File getPlatformDirectory() {
@@ -828,7 +855,9 @@ public class FrameworkLauncher {
 	}
 
 	/**
-	 * loadProperties is a convenience method to load properties from a servlet context resource
+	 * loadProperties is a convenience method to load properties from a servlet
+	 * context resource
+	 * 
 	 * @param resource - The target to read properties from
 	 * @return the properties
 	 */
@@ -856,15 +885,16 @@ public class FrameworkLauncher {
 	}
 
 	/***************************************************************************
-	 * See org.eclipse.core.launcher [copy of searchFor, findMax,
-	 * compareVersion, getVersionElements] TODO: If these methods were made
-	 * public and static we could use them directly
+	 * See org.eclipse.core.launcher [copy of searchFor, findMax, compareVersion,
+	 * getVersionElements] TODO: If these methods were made public and static we
+	 * could use them directly
 	 **************************************************************************/
 
 	/**
-	 * Searches for the given target directory starting in the "plugins" subdirectory
-	 * of the given location.  If one is found then this location is returned;
-	 * otherwise an exception is thrown.
+	 * Searches for the given target directory starting in the "plugins"
+	 * subdirectory of the given location. If one is found then this location is
+	 * returned; otherwise an exception is thrown.
+	 * 
 	 * @param target
 	 *
 	 * @return the location where target directory was found
@@ -887,7 +917,8 @@ public class FrameworkLauncher {
 		int result = findMax(arrays);
 		if (result == -1)
 			return null;
-		return candidates[result].getAbsolutePath().replace(File.separatorChar, '/') + (candidates[result].isDirectory() ? "/" : ""); //$NON-NLS-1$//$NON-NLS-2$
+		return candidates[result].getAbsolutePath().replace(File.separatorChar, '/')
+				+ (candidates[result].isDirectory() ? "/" : ""); //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 	protected int findMax(String[] candidates) {
@@ -895,7 +926,8 @@ public class FrameworkLauncher {
 		Object maxVersion = null;
 		for (int i = 0; i < candidates.length; i++) {
 			String name = candidates[i];
-			String version = ""; //$NON-NLS-1$ // Note: directory with version suffix is always > than directory without version suffix
+			String version = ""; //$NON-NLS-1$ // Note: directory with version suffix is always > than directory
+									// without version suffix
 			int index = name.indexOf('_');
 			if (index != -1)
 				version = name.substring(index + 1);
@@ -915,12 +947,9 @@ public class FrameworkLauncher {
 
 	/**
 	 * Compares version strings.
-	 * @param left
-	 * @param right
-	 * @return result of comparison, as integer;
-	 * <code><0</code> if left < right;
-	 * <code>0</code> if left == right;
-	 * <code>>0</code> if left > right;
+	 * 
+	 * @return result of comparison, as integer; <code><0</code> if left < right;
+	 *         <code>0</code> if left == right; <code>>0</code> if left > right;
 	 */
 	private int compareVersion(Object[] left, Object[] right) {
 
@@ -940,18 +969,19 @@ public class FrameworkLauncher {
 	}
 
 	/**
-	 * Do a quick parse of version identifier so its elements can be correctly compared.
-	 * If we are unable to parse the full version, remaining elements are initialized
-	 * with suitable defaults.
-	 * @param version
-	 * @return an array of size 4; first three elements are of type Integer (representing
-	 * major, minor and service) and the fourth element is of type String (representing
-	 * qualifier). Note, that returning anything else will cause exceptions in the caller.
+	 * Do a quick parse of version identifier so its elements can be correctly
+	 * compared. If we are unable to parse the full version, remaining elements are
+	 * initialized with suitable defaults.
+	 * 
+	 * @return an array of size 4; first three elements are of type Integer
+	 *         (representing major, minor and service) and the fourth element is of
+	 *         type String (representing qualifier). Note, that returning anything
+	 *         else will cause exceptions in the caller.
 	 */
 	private Object[] getVersionElements(String version) {
 		if (version.endsWith(DOT_JAR))
 			version = version.substring(0, version.length() - 4);
-		Object[] result = {Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(0), ""}; //$NON-NLS-1$
+		Object[] result = { Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(0), "" }; //$NON-NLS-1$
 		StringTokenizer t = new StringTokenizer(version, "."); //$NON-NLS-1$
 		String token;
 		int i = 0;
@@ -974,9 +1004,10 @@ public class FrameworkLauncher {
 	}
 
 	/**
-	 * The ChildFirstURLClassLoader alters regular ClassLoader delegation and will check the URLs
-	 * used in its initialization for matching classes before delegating to it's parent.
-	 * Sometimes also referred to as a ParentLastClassLoader
+	 * The ChildFirstURLClassLoader alters regular ClassLoader delegation and will
+	 * check the URLs used in its initialization for matching classes before
+	 * delegating to it's parent. Sometimes also referred to as a
+	 * ParentLastClassLoader
 	 */
 	protected static class ChildFirstURLClassLoader extends CloseableURLClassLoader {
 		private static final boolean CHILDFIRST_REGISTERED_AS_PARALLEL;
@@ -984,7 +1015,8 @@ public class FrameworkLauncher {
 		static {
 			boolean registeredAsParallel;
 			try {
-				Method parallelCapableMetod = ClassLoader.class.getDeclaredMethod("registerAsParallelCapable", (Class[]) null); //$NON-NLS-1$
+				Method parallelCapableMetod = ClassLoader.class.getDeclaredMethod("registerAsParallelCapable", //$NON-NLS-1$
+						(Class[]) null);
 				parallelCapableMetod.setAccessible(true);
 				registeredAsParallel = ((Boolean) parallelCapableMetod.invoke(null, (Object[]) null)).booleanValue();
 			} catch (Throwable e) {

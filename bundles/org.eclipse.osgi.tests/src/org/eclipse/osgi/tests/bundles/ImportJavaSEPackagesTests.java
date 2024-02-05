@@ -73,8 +73,10 @@ public class ImportJavaSEPackagesTests extends AbstractBundleTests {
 				Bundle testBundle = systemContext.installBundle(bundle.toURI().toString());
 				testBundle.start();
 			});
-			assertEquals("It should throw a bundle exception of type manifest error", BundleException.MANIFEST_ERROR, e.getType());
-			assertTrue("It should throw a Bundle Exception stating Invalid manifest header Export-Package", e.getMessage().contains("Cannot specify java.* packages in Export headers"));
+			assertEquals("It should throw a bundle exception of type manifest error", BundleException.MANIFEST_ERROR,
+					e.getType());
+			assertTrue("It should throw a Bundle Exception stating Invalid manifest header Export-Package",
+					e.getMessage().contains("Cannot specify java.* packages in Export headers"));
 		} finally {
 			stopQuietly(equinox);
 		}
@@ -97,10 +99,13 @@ public class ImportJavaSEPackagesTests extends AbstractBundleTests {
 			Bundle testBundle = systemContext.installBundle(bundle.toURI().toString());
 			testBundle.start();
 			Dictionary<String, String> testHeaders = testBundle.getHeaders();
-			assertTrue(Constants.IMPORT_PACKAGE + " does not contain the java.* package", testHeaders.get(Constants.IMPORT_PACKAGE).contains(JAVA_LANG));
-			List<BundleWire> pkgWires = testBundle.adapt(BundleWiring.class).getRequiredWires(PackageNamespace.PACKAGE_NAMESPACE);
+			assertTrue(Constants.IMPORT_PACKAGE + " does not contain the java.* package",
+					testHeaders.get(Constants.IMPORT_PACKAGE).contains(JAVA_LANG));
+			List<BundleWire> pkgWires = testBundle.adapt(BundleWiring.class)
+					.getRequiredWires(PackageNamespace.PACKAGE_NAMESPACE);
 			assertEquals("Wrong number of package requiremens: ", 1, pkgWires.size());
-			assertEquals("Wrong package found: " + pkgWires.get(0), JAVA_LANG, pkgWires.get(0).getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
+			assertEquals("Wrong package found: " + pkgWires.get(0), JAVA_LANG,
+					pkgWires.get(0).getCapability().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE));
 		} finally {
 			stopQuietly(equinox);
 		}
@@ -143,10 +148,11 @@ public class ImportJavaSEPackagesTests extends AbstractBundleTests {
 			Object descriptor = getDescriptor.invoke(m);
 			if ((Boolean) isAutomatic.invoke(descriptor)) {
 				/*
-				 * Automatic modules are supposed to export all their packages.
-				 * However, java.lang.module.ModuleDescriptor::exports returns an empty set for them.
-				 * Add all their packages (as returned by java.lang.module.ModuleDescriptor::packages)
-				 * to the list of VM supplied packages.
+				 * Automatic modules are supposed to export all their packages. However,
+				 * java.lang.module.ModuleDescriptor::exports returns an empty set for them. Add
+				 * all their packages (as returned by
+				 * java.lang.module.ModuleDescriptor::packages) to the list of VM supplied
+				 * packages.
 				 */
 				for (String packageName : ((Set<String>) packagesMethod.invoke(descriptor))) {
 					if (packageName.startsWith("java.")) {
@@ -184,9 +190,12 @@ public class ImportJavaSEPackagesTests extends AbstractBundleTests {
 			equinox.start();
 			BundleContext systemContext = equinox.getBundleContext();
 			Dictionary<String, String> testHeaders = equinox.getHeaders();
-			assertTrue(Constants.EXPORT_PACKAGE + " does not contain the java.lang package", testHeaders.get(Constants.EXPORT_PACKAGE).contains(JAVA_LANG));
-			assertTrue(Constants.EXPORT_PACKAGE + " does not contain the java.util package", testHeaders.get(Constants.EXPORT_PACKAGE).contains(JAVA_UTIL));
-			List<BundleCapability> capabilities = equinox.adapt(BundleWiring.class).getCapabilities(PackageNamespace.PACKAGE_NAMESPACE);
+			assertTrue(Constants.EXPORT_PACKAGE + " does not contain the java.lang package",
+					testHeaders.get(Constants.EXPORT_PACKAGE).contains(JAVA_LANG));
+			assertTrue(Constants.EXPORT_PACKAGE + " does not contain the java.util package",
+					testHeaders.get(Constants.EXPORT_PACKAGE).contains(JAVA_UTIL));
+			List<BundleCapability> capabilities = equinox.adapt(BundleWiring.class)
+					.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE);
 
 			int count = 0;
 			for (BundleCapability cap : capabilities) {

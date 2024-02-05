@@ -55,7 +55,7 @@ public class Activator implements BundleActivator {
 		}
 
 		try {
-			clazz.newInstance();
+			clazz.getDeclaredConstructor().newInstance();
 			throw new RuntimeException("Should have failed to create object from class: " + clazz);
 		} catch (NoClassDefFoundError e) {
 			// expected

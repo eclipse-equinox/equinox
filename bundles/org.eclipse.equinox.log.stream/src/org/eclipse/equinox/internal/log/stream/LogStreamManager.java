@@ -30,7 +30,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * ServiceTrackerCustomizer<LogReaderService, AtomicReference<LogReaderService>> which listens to 
  * the incoming logs using the LogListener. It is also responsible to provide service tracker 
  * and each log entry to the LogStreamProviderFactory.
- * 
  */
 public class LogStreamManager implements BundleActivator,
 		ServiceTrackerCustomizer<LogReaderService, AtomicReference<LogReaderService>>, LogListener {

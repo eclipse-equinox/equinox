@@ -40,7 +40,7 @@ public class AuthorizedKeysFileAuthenticator implements PublickeyAuthenticator {
 	@Override
 	public boolean authenticate(String username, PublicKey key, ServerSession session) {
 		String authorizedKeysFile = getAuthorizedKeysFile();
-		if(null == authorizedKeysFile) {
+		if (null == authorizedKeysFile) {
 			// TODO should use better logging than System.err?
 			System.err.println("No authorized_keys file configured!");
 			return false;
@@ -78,6 +78,8 @@ public class AuthorizedKeysFileAuthenticator implements PublickeyAuthenticator {
 	}
 
 	private boolean isSameDSAKey(DSAPublicKey k1, DSAPublicKey k2) {
-		return k1.getY().equals(k2.getY()) && k1.getParams().getG().equals(k2.getParams().getG()) && k1.getParams().getP().equals(k2.getParams().getP()) && k1.getParams().getQ().equals(k2.getParams().getQ());
+		return k1.getY().equals(k2.getY()) && k1.getParams().getG().equals(k2.getParams().getG())
+				&& k1.getParams().getP().equals(k2.getParams().getP())
+				&& k1.getParams().getQ().equals(k2.getParams().getQ());
 	}
 }

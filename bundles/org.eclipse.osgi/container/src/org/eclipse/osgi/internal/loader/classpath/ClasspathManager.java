@@ -51,36 +51,43 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.namespace.HostNamespace;
 
 /**
- * A helper class for {@link ModuleClassLoader} implementations.  This class will keep track of
- * {@link ClasspathEntry} objects for the host bundle and any attached fragment bundles.  This
- * class takes care of searching the {@link ClasspathEntry} objects for a module class loader
- * implementation.  Additional behavior may be added to a classpath manager by configuring a
+ * A helper class for {@link ModuleClassLoader} implementations. This class will
+ * keep track of {@link ClasspathEntry} objects for the host bundle and any
+ * attached fragment bundles. This class takes care of searching the
+ * {@link ClasspathEntry} objects for a module class loader implementation.
+ * Additional behavior may be added to a classpath manager by configuring a
  * {@link ClassLoaderHook}.
+ * 
  * @see ModuleClassLoader
  * @see ClassLoaderHook
  * @since 3.2
  */
 public class ClasspathManager {
 	private static final FragmentClasspath[] emptyFragments = new FragmentClasspath[0];
-	private static final String[] DEFAULT_CLASSPATH = new String[] {"."}; //$NON-NLS-1$
+	private static final String[] DEFAULT_CLASSPATH = new String[] { "." }; //$NON-NLS-1$
 
 	private final Generation generation;
 	private final ModuleClassLoader classloader;
 	private final HookRegistry hookRegistry;
 	private final Debug debug;
 
-	// TODO Note that PDE has internal dependency on this field type/name (bug 267238)
+	// TODO Note that PDE has internal dependency on this field type/name (bug
+	// 267238)
 	private final ClasspathEntry[] entries;
-	// TODO Note that PDE has internal dependency on this field type/name (bug 267238)
+	// TODO Note that PDE has internal dependency on this field type/name (bug
+	// 267238)
 	private volatile FragmentClasspath[] fragments;
 	// a Map<String,String> where "libname" is the key and libpath" is the value
 	private ArrayMap<String, String> loadedLibraries = null;
-	// used to detect recusive defineClass calls for the same class on the same class loader (bug 345500)
+	// used to detect recusive defineClass calls for the same class on the same
+	// class loader (bug 345500)
 	private ThreadLocal<DefineContext> currentDefineContext = new ThreadLocal<>();
 
 	/**
-	 * Constructs a classpath manager for the given generation and module class loader
-	 * @param generation the host generation for this classpath manager
+	 * Constructs a classpath manager for the given generation and module class
+	 * loader
+	 * 
+	 * @param generation  the host generation for this classpath manager
 	 * @param classloader the ModuleClassLoader for this classpath manager
 	 */
 	public ClasspathManager(Generation generation, ModuleClassLoader classloader) {
@@ -95,9 +102,12 @@ public class ClasspathManager {
 	}
 
 	private static String[] getClassPath(ModuleRevision revision) {
-		List<ModuleCapability> moduleDatas = revision.getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
+		List<ModuleCapability> moduleDatas = revision
+				.getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
 		@SuppressWarnings("unchecked")
-		List<String> cp = moduleDatas.isEmpty() ? null : (List<String>) moduleDatas.get(0).getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_CLASSPATH);
+		List<String> cp = moduleDatas.isEmpty() ? null
+				: (List<String>) moduleDatas.get(0).getAttributes()
+						.get(EquinoxModuleDataNamespace.CAPABILITY_CLASSPATH);
 		return cp == null ? DEFAULT_CLASSPATH : cp.toArray(new String[cp.size()]);
 	}
 
@@ -105,7 +115,8 @@ public class ClasspathManager {
 		if (hostloader == null) {
 			return emptyFragments;
 		}
-		List<ModuleWire> fragmentWires = hostloader.getBundleLoader().getWiring().getProvidedModuleWires(HostNamespace.HOST_NAMESPACE);
+		List<ModuleWire> fragmentWires = hostloader.getBundleLoader().getWiring()
+				.getProvidedModuleWires(HostNamespace.HOST_NAMESPACE);
 		if (fragmentWires == null || fragmentWires.isEmpty()) {
 			// we don't hold locks while checking the graph, just return if no longer valid
 			return emptyFragments;
@@ -141,15 +152,15 @@ public class ClasspathManager {
 
 	/**
 	 * Closes all the classpath entry resources for this classpath manager.
-	 *
 	 */
 	public void close() {
 		for (ClasspathEntry entry : entries) {
 			if (entry != null) {
 				try {
 					entry.close();
-				}catch (IOException e) {
-					generation.getBundleInfo().getStorage().getAdaptor().publishContainerEvent(ContainerEvent.ERROR, generation.getRevision().getRevisions().getModule(), e);
+				} catch (IOException e) {
+					generation.getBundleInfo().getStorage().getAdaptor().publishContainerEvent(ContainerEvent.ERROR,
+							generation.getRevision().getRevisions().getModule(), e);
 				}
 			}
 		}
@@ -169,43 +180,55 @@ public class ClasspathManager {
 	}
 
 	/**
-	 * Finds all the ClasspathEntry objects for the requested classpath.  This method will first call all
-	 * the configured class loading hooks {@link ClassLoaderHook#addClassPathEntry(ArrayList, String, ClasspathManager, Generation)}
-	 * methods.  This allows class loading hooks to add additional ClasspathEntry objects to the result for the
-	 * requested classpath.  Then the local host classpath entries and attached fragment classpath entries are
-	 * searched.
-	 * @param result a list of ClasspathEntry objects.  This list is used to add new ClasspathEntry objects to.
-	 * @param cp the requested classpath.
-	 * @param hostloader the host classpath manager for the classpath
+	 * Finds all the ClasspathEntry objects for the requested classpath. This method
+	 * will first call all the configured class loading hooks
+	 * {@link ClassLoaderHook#addClassPathEntry(ArrayList, String, ClasspathManager, Generation)}
+	 * methods. This allows class loading hooks to add additional ClasspathEntry
+	 * objects to the result for the requested classpath. Then the local host
+	 * classpath entries and attached fragment classpath entries are searched.
+	 * 
+	 * @param result           a list of ClasspathEntry objects. This list is used
+	 *                         to add new ClasspathEntry objects to.
+	 * @param cp               the requested classpath.
+	 * @param hostloader       the host classpath manager for the classpath
 	 * @param sourceGeneration the source generation to search for the classpath
 	 */
-	private void findClassPathEntry(ArrayList<ClasspathEntry> result, String cp, ClasspathManager hostloader, Generation sourceGeneration) {
+	private void findClassPathEntry(ArrayList<ClasspathEntry> result, String cp, ClasspathManager hostloader,
+			Generation sourceGeneration) {
 		List<ClassLoaderHook> loaderHooks = hookRegistry.getClassLoaderHooks();
 		boolean hookAdded = false;
 		for (ClassLoaderHook hook : loaderHooks) {
 			hookAdded |= hook.addClassPathEntry(result, cp, hostloader, sourceGeneration);
 		}
 		if (!addClassPathEntry(result, cp, hostloader, sourceGeneration) && !hookAdded) {
-			BundleException be = new BundleException(NLS.bind(Msg.BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION, cp, sourceGeneration.getRevision().toString()), BundleException.MANIFEST_ERROR);
-			sourceGeneration.getBundleInfo().getStorage().getAdaptor().publishContainerEvent(ContainerEvent.INFO, sourceGeneration.getRevision().getRevisions().getModule(), be);
+			BundleException be = new BundleException(NLS.bind(Msg.BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION, cp,
+					sourceGeneration.getRevision().toString()), BundleException.MANIFEST_ERROR);
+			sourceGeneration.getBundleInfo().getStorage().getAdaptor().publishContainerEvent(ContainerEvent.INFO,
+					sourceGeneration.getRevision().getRevisions().getModule(), be);
 		}
 	}
 
 	/**
-	 * Adds a ClasspathEntry for the requested classpath to the result.  The local host classpath entries
-	 * are searched first and then attached fragments classpath entries are searched.  The search stops once the first
-	 * classpath entry is found.
-	 * @param result a list of ClasspathEntry objects.  This list is used to add new ClasspathEntry objects to.
-	 * @param cp the requested classpath.
+	 * Adds a ClasspathEntry for the requested classpath to the result. The local
+	 * host classpath entries are searched first and then attached fragments
+	 * classpath entries are searched. The search stops once the first classpath
+	 * entry is found.
+	 * 
+	 * @param result      a list of ClasspathEntry objects. This list is used to add
+	 *                    new ClasspathEntry objects to.
+	 * @param cp          the requested classpath.
 	 * @param hostManager the host classpath manager for the classpath
-	 * @param source the source generation to search for the classpath
+	 * @param source      the source generation to search for the classpath
 	 * @return true if a ClasspathEntry was added to the result
 	 */
-	public boolean addClassPathEntry(ArrayList<ClasspathEntry> result, String cp, ClasspathManager hostManager, Generation source) {
-		return addStandardClassPathEntry(result, cp, hostManager, source) || addEclipseClassPathEntry(result, cp, hostManager, source);
+	public boolean addClassPathEntry(ArrayList<ClasspathEntry> result, String cp, ClasspathManager hostManager,
+			Generation source) {
+		return addStandardClassPathEntry(result, cp, hostManager, source)
+				|| addEclipseClassPathEntry(result, cp, hostManager, source);
 	}
 
-	public static boolean addStandardClassPathEntry(ArrayList<ClasspathEntry> result, String cp, ClasspathManager hostManager, Generation generation) {
+	public static boolean addStandardClassPathEntry(ArrayList<ClasspathEntry> result, String cp,
+			ClasspathManager hostManager, Generation generation) {
 		if (cp.equals(".")) { //$NON-NLS-1$
 			result.add(hostManager.createClassPathEntry(generation.getBundleFile(), generation));
 			return true;
@@ -230,7 +253,8 @@ public class ClasspathManager {
 		return false;
 	}
 
-	private boolean addEclipseClassPathEntry(ArrayList<ClasspathEntry> result, String cp, ClasspathManager hostManager, Generation source) {
+	private boolean addEclipseClassPathEntry(ArrayList<ClasspathEntry> result, String cp, ClasspathManager hostManager,
+			Generation source) {
 		String var = hasPrefix(cp);
 		if (var != null)
 			// find internal library using eclipse predefined vars
@@ -238,7 +262,8 @@ public class ClasspathManager {
 		if (cp.startsWith(NativeCodeFinder.EXTERNAL_LIB_PREFIX)) {
 			cp = cp.substring(NativeCodeFinder.EXTERNAL_LIB_PREFIX.length());
 			// find external library using system property substitution
-			ClasspathEntry cpEntry = hostManager.getExternalClassPath(source.getBundleInfo().getStorage().getConfiguration().substituteVars(cp), source);
+			ClasspathEntry cpEntry = hostManager.getExternalClassPath(
+					source.getBundleInfo().getStorage().getConfiguration().substituteVars(cp), source);
 			if (cpEntry != null) {
 				result.add(cpEntry);
 				return true;
@@ -247,15 +272,19 @@ public class ClasspathManager {
 		return false;
 	}
 
-	private boolean addInternalClassPath(String var, ArrayList<ClasspathEntry> cpEntries, String cp, ClasspathManager hostManager, Generation source) {
+	private boolean addInternalClassPath(String var, ArrayList<ClasspathEntry> cpEntries, String cp,
+			ClasspathManager hostManager, Generation source) {
 		EquinoxConfiguration configuration = source.getBundleInfo().getStorage().getConfiguration();
 		if (var.equals("ws")) //$NON-NLS-1$
-			return ClasspathManager.addStandardClassPathEntry(cpEntries, "ws/" + configuration.getWS() + cp.substring(4), hostManager, source); //$NON-NLS-1$
+			return ClasspathManager.addStandardClassPathEntry(cpEntries,
+					"ws/" + configuration.getWS() + cp.substring(4), hostManager, source); //$NON-NLS-1$
 		if (var.equals("os")) //$NON-NLS-1$
-			return ClasspathManager.addStandardClassPathEntry(cpEntries, "os/" + configuration.getOS() + cp.substring(4), hostManager, source); //$NON-NLS-1$
+			return ClasspathManager.addStandardClassPathEntry(cpEntries,
+					"os/" + configuration.getOS() + cp.substring(4), hostManager, source); //$NON-NLS-1$
 		if (var.equals("nl")) { //$NON-NLS-1$
 			cp = cp.substring(4);
-			List<String> NL_JAR_VARIANTS = source.getBundleInfo().getStorage().getConfiguration().ECLIPSE_NL_JAR_VARIANTS;
+			List<String> NL_JAR_VARIANTS = source.getBundleInfo().getStorage()
+					.getConfiguration().ECLIPSE_NL_JAR_VARIANTS;
 			for (String nlVariant : NL_JAR_VARIANTS) {
 				if (ClasspathManager.addStandardClassPathEntry(cpEntries, "nl/" + nlVariant + cp, hostManager, source)) //$NON-NLS-1$
 					return true;
@@ -264,7 +293,7 @@ public class ClasspathManager {
 		return false;
 	}
 
-	//return a String representing the string found between the $s
+	// return a String representing the string found between the $s
 	private static String hasPrefix(String libPath) {
 		if (libPath.startsWith("$ws$")) //$NON-NLS-1$
 			return "ws"; //$NON-NLS-1$
@@ -276,10 +305,13 @@ public class ClasspathManager {
 	}
 
 	/**
-	 * Creates a new ClasspathEntry object for the requested classpath if the source exists.
-	 * @param cp the requested classpath.
+	 * Creates a new ClasspathEntry object for the requested classpath if the source
+	 * exists.
+	 * 
+	 * @param cp           the requested classpath.
 	 * @param cpGeneration the source generation to search for the classpath
-	 * @return a new ClasspathEntry for the requested classpath or null if the source does not exist.
+	 * @return a new ClasspathEntry for the requested classpath or null if the
+	 *         source does not exist.
 	 */
 	public ClasspathEntry getClasspath(String cp, Generation cpGeneration) {
 		BundleFile bundlefile = null;
@@ -297,8 +329,10 @@ public class ClasspathManager {
 	}
 
 	/**
-	 * Uses the requested classpath as an absolute path to locate a source for a new ClasspathEntry.
-	 * @param cp the requested classpath
+	 * Uses the requested classpath as an absolute path to locate a source for a new
+	 * ClasspathEntry.
+	 * 
+	 * @param cp           the requested classpath
 	 * @param cpGeneration the source generation to search for the classpath
 	 * @return a classpath entry which uses an absolut path as a source
 	 */
@@ -330,11 +364,13 @@ public class ClasspathManager {
 		if (!content.exists()) {
 			return null;
 		}
-		return generation.getBundleInfo().getStorage().createBundleFile(content, generation, content.isDirectory(), false);
+		return generation.getBundleInfo().getStorage().createBundleFile(content, generation, content.isDirectory(),
+				false);
 	}
 
 	private static BundleFile createBundleFile(String nestedDir, Generation generation) {
-		return generation.getBundleInfo().getStorage().createNestedBundleFile(nestedDir, generation.getBundleFile(), generation);
+		return generation.getBundleInfo().getStorage().createNestedBundleFile(nestedDir, generation.getBundleFile(),
+				generation);
 	}
 
 	private ClasspathEntry createClassPathEntry(BundleFile bundlefile, Generation source) {
@@ -347,11 +383,15 @@ public class ClasspathManager {
 	}
 
 	/**
-	 * Finds a local resource by searching the ClasspathEntry objects of the classpath manager.
-	 * This method will first call all the configured class loading hooks
-	 * {@link ClassLoaderHook#preFindLocalResource(String, ClasspathManager)} methods.  Then it
-	 * will search for the resource.  Finally it will call all the configured class loading hooks
-	 * {@link ClassLoaderHook#postFindLocalResource(String, URL, ClasspathManager)} methods.
+	 * Finds a local resource by searching the ClasspathEntry objects of the
+	 * classpath manager. This method will first call all the configured class
+	 * loading hooks
+	 * {@link ClassLoaderHook#preFindLocalResource(String, ClasspathManager)}
+	 * methods. Then it will search for the resource. Finally it will call all the
+	 * configured class loading hooks
+	 * {@link ClassLoaderHook#postFindLocalResource(String, URL, ClasspathManager)}
+	 * methods.
+	 * 
 	 * @param resource the requested resource name.
 	 * @return the requested resource URL or null if the resource does not exist
 	 */
@@ -386,7 +426,7 @@ public class ClasspathManager {
 	private URL findLocalResourceImpl(String resource, int classPathIndex) {
 		Module m = generation.getRevision().getRevisions().getModule();
 		URL result = null;
-		int[] curIndex = {0};
+		int[] curIndex = { 0 };
 
 		// look in hook specific entries if any
 		for (ClassLoaderHook hook : hookRegistry.getClassLoaderHooks()) {
@@ -414,7 +454,8 @@ public class ClasspathManager {
 		return null;
 	}
 
-	private URL findLocalResourceImpl(String resource, ClasspathEntry[] cpEntries, Module m, int classPathIndex, int[] curIndex) {
+	private URL findLocalResourceImpl(String resource, ClasspathEntry[] cpEntries, Module m, int classPathIndex,
+			int[] curIndex) {
 		URL result;
 		for (ClasspathEntry cpEntry : cpEntries) {
 			if (cpEntry != null) {
@@ -429,14 +470,16 @@ public class ClasspathManager {
 	}
 
 	/**
-	 * Finds the local resources by searching the ClasspathEntry objects of the classpath manager.
+	 * Finds the local resources by searching the ClasspathEntry objects of the
+	 * classpath manager.
+	 * 
 	 * @param resource the requested resource name.
 	 * @return an enumeration of the the requested resources
 	 */
 	public Enumeration<URL> findLocalResources(String resource) {
 		Module m = generation.getRevision().getRevisions().getModule();
 		List<URL> resources = new ArrayList<>(6);
-		int[] classPathIndex = {0};
+		int[] classPathIndex = { 0 };
 
 		// look in hook specific entries if any
 		for (ClassLoaderHook hook : hookRegistry.getClassLoaderHooks()) {
@@ -460,7 +503,8 @@ public class ClasspathManager {
 		return Collections.emptyEnumeration();
 	}
 
-	private void findLocalResources(String resource, ClasspathEntry[] cpEntries, Module m, int[] classPathIndex, List<URL> resources) {
+	private void findLocalResources(String resource, ClasspathEntry[] cpEntries, Module m, int[] classPathIndex,
+			List<URL> resources) {
 		for (ClasspathEntry cpEntry : cpEntries) {
 			if (cpEntry != null) {
 				URL url = cpEntry.findResource(resource, m, classPathIndex[0]);
@@ -473,7 +517,9 @@ public class ClasspathManager {
 	}
 
 	/**
-	 * Finds a local entry by searching the ClasspathEntry objects of the classpath manager.
+	 * Finds a local entry by searching the ClasspathEntry objects of the classpath
+	 * manager.
+	 * 
 	 * @param path the requested entry path.
 	 * @return the requested entry or null if the entry does not exist
 	 */
@@ -482,15 +528,16 @@ public class ClasspathManager {
 	}
 
 	/**
-	 * Finds a local entry by searching the ClasspathEntry with the specified
-	 * class path index.
-	 * @param path the requested entry path.
+	 * Finds a local entry by searching the ClasspathEntry with the specified class
+	 * path index.
+	 * 
+	 * @param path           the requested entry path.
 	 * @param classPathIndex the index of the ClasspathEntry to search
 	 * @return the requested entry or null if the entry does not exist
 	 */
 	public BundleEntry findLocalEntry(String path, int classPathIndex) {
 		BundleEntry result = null;
-		int[] curIndex = {0};
+		int[] curIndex = { 0 };
 
 		// look in hook specific entries if any
 		for (ClassLoaderHook hook : hookRegistry.getClassLoaderHooks()) {
@@ -534,24 +581,27 @@ public class ClasspathManager {
 	}
 
 	/**
-	 * Finds a local class by searching the ClasspathEntry objects of the classpath manager.
-	 * This method will first call all the configured class loader hooks
-	 * {@link ClassLoaderHook#preFindLocalClass(String, ClasspathManager)} methods.  Then it
-	 * will search for the class.  If a class is found then
+	 * Finds a local class by searching the ClasspathEntry objects of the classpath
+	 * manager. This method will first call all the configured class loader hooks
+	 * {@link ClassLoaderHook#preFindLocalClass(String, ClasspathManager)} methods.
+	 * Then it will search for the class. If a class is found then
 	 * <ol>
-	 *   <li>All configured class loader hooks
-	 *       {@link ClassLoaderHook#processClass(String, byte[], ClasspathEntry, BundleEntry, ClasspathManager)}
-	 *       methods will be called.</li>
-	 *   <li>The class is then defined.</li>
-	 *   <li>Finally, all configured class loading
-	 *       stats hooks {@link ClassLoaderHook#recordClassDefine(String, Class, byte[], ClasspathEntry, BundleEntry, ClasspathManager)}
-	 *       methods are called.</li>
+	 * <li>All configured class loader hooks
+	 * {@link ClassLoaderHook#processClass(String, byte[], ClasspathEntry, BundleEntry, ClasspathManager)}
+	 * methods will be called.</li>
+	 * <li>The class is then defined.</li>
+	 * <li>Finally, all configured class loading stats hooks
+	 * {@link ClassLoaderHook#recordClassDefine(String, Class, byte[], ClasspathEntry, BundleEntry, ClasspathManager)}
+	 * methods are called.</li>
 	 * </ol>
 	 * Finally all the configured class loading hooks
-	 * {@link ClassLoaderHook#postFindLocalClass(String, Class, ClasspathManager)} methods are called.
+	 * {@link ClassLoaderHook#postFindLocalClass(String, Class, ClasspathManager)}
+	 * methods are called.
+	 * 
 	 * @param classname the requested class name.
 	 * @return the requested class or null if the class does not exist
-	 * @throws ClassNotFoundException if a ClassLoaderHook prevents the requested class from loading
+	 * @throws ClassNotFoundException if a ClassLoaderHook prevents the requested
+	 *                                class from loading
 	 */
 	public Class<?> findLocalClass(String classname) throws ClassNotFoundException {
 		Class<?> result = null;
@@ -615,7 +665,8 @@ public class ClasspathManager {
 
 	private Class<?> findClassImpl(String name, ClasspathEntry classpathEntry, List<ClassLoaderHook> hooks) {
 		if (debug.DEBUG_LOADER)
-			Debug.println("ModuleClassLoader[" + classloader.getBundleLoader() + " - " + classpathEntry.getBundleFile() + "].findClassImpl(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$
+			Debug.println("ModuleClassLoader[" + classloader.getBundleLoader() + " - " + classpathEntry.getBundleFile() //$NON-NLS-1$ //$NON-NLS-2$
+					+ "].findClassImpl(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		String filename = name.replace('.', '/').concat(".class"); //$NON-NLS-1$
 
 		BundleEntry entry = classpathEntry.findEntry(filename);
@@ -631,7 +682,8 @@ public class ClasspathManager {
 			throw (LinkageError) new LinkageError("Error reading class bytes: " + name).initCause(e); //$NON-NLS-1$
 		}
 		if (debug.DEBUG_LOADER) {
-			Debug.println("  read " + classbytes.length + " bytes from " + classpathEntry.getBundleFile() + "!/" + filename); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			Debug.println(
+					"  read " + classbytes.length + " bytes from " + classpathEntry.getBundleFile() + "!/" + filename); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			Debug.println("  defining class " + name); //$NON-NLS-1$
 		}
 
@@ -650,21 +702,26 @@ public class ClasspathManager {
 	}
 
 	/**
-	 * Defines the specified class.  This method will first call all the configured class loader hooks
+	 * Defines the specified class. This method will first call all the configured
+	 * class loader hooks
 	 * {@link ClassLoadingHook#processClass(String, byte[], ClasspathEntry, BundleEntry, ClasspathManager)}
-	 * methods.  If any hook modifies the bytes the all configured hook
+	 * methods. If any hook modifies the bytes the all configured hook
 	 * {@link ClassLoaderHook#rejectTransformation(String, byte[], ClasspathEntry, BundleEntry, ClasspathManager)}
-	 * methods are called.  Then it will call the {@link ModuleClassLoader#defineClass(String, byte[], ClasspathEntry, BundleEntry)}
-	 * method to define the class. After that, the class loader hooks are called to announce the class
-	 * definition by calling {@link ClassLoaderHook#recordClassDefine(String, Class, byte[], ClasspathEntry, BundleEntry, ClasspathManager)}.
-	 * @param name the name of the class to define
-	 * @param classbytes the class bytes
+	 * methods are called. Then it will call the
+	 * {@link ModuleClassLoader#defineClass(String, byte[], ClasspathEntry, BundleEntry)}
+	 * method to define the class. After that, the class loader hooks are called to
+	 * announce the class definition by calling
+	 * {@link ClassLoaderHook#recordClassDefine(String, Class, byte[], ClasspathEntry, BundleEntry, ClasspathManager)}.
+	 * 
+	 * @param name           the name of the class to define
+	 * @param classbytes     the class bytes
 	 * @param classpathEntry the classpath entry used to load the class bytes
-	 * @param entry the BundleEntry used to load the class bytes
-	 * @param hooks the class loader hooks
+	 * @param entry          the BundleEntry used to load the class bytes
+	 * @param hooks          the class loader hooks
 	 * @return the defined class
 	 */
-	private Class<?> defineClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, List<ClassLoaderHook> hooks) {
+	private Class<?> defineClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry,
+			List<ClassLoaderHook> hooks) {
 		DefineClassResult result = null;
 		boolean recursionDetected = false;
 		try {
@@ -701,7 +758,8 @@ public class ClasspathManager {
 			// Now call the hooks that do support recursion without the check.
 			for (ClassLoaderHook hook : hooks) {
 				if (hook.isProcessClassRecursionSupported()) {
-					// Note if the hooks don't take protective measures for a recursive class load here
+					// Note if the hooks don't take protective measures for a recursive class load
+					// here
 					// it will result in a stack overflow.
 					classbytes = processClass(hook, name, classbytes, classpathEntry, entry, this, hooks);
 				}
@@ -731,10 +789,12 @@ public class ClasspathManager {
 		return result == null ? null : result.clazz;
 	}
 
-	private byte[] processClass(ClassLoaderHook hook, String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager classpathManager, List<ClassLoaderHook> hooks) {
+	private byte[] processClass(ClassLoaderHook hook, String name, byte[] classbytes, ClasspathEntry classpathEntry,
+			BundleEntry entry, ClasspathManager classpathManager, List<ClassLoaderHook> hooks) {
 		byte[] modifiedBytes = hook.processClass(name, classbytes, classpathEntry, entry, this);
 		if (modifiedBytes != null) {
-			// the WeavingHookConfigurator already calls the rejectTransformation method; avoid calling it again.
+			// the WeavingHookConfigurator already calls the rejectTransformation method;
+			// avoid calling it again.
 			if (!(hook instanceof WeavingHookConfigurator)) {
 				for (ClassLoaderHook rejectHook : hooks) {
 					if (rejectHook.rejectTransformation(name, modifiedBytes, classpathEntry, entry, this)) {
@@ -763,10 +823,12 @@ public class ClasspathManager {
 		}
 
 		// get info about the package from the classpath entry's manifest.
-		String specTitle = null, specVersion = null, specVendor = null, implTitle = null, implVersion = null, implVendor = null;
+		String specTitle = null, specVersion = null, specVendor = null, implTitle = null, implVersion = null,
+				implVendor = null;
 
 		if (generation.getBundleInfo().getStorage().getConfiguration().DEFINE_PACKAGE_ATTRIBUTES) {
-			ManifestPackageAttributes manifestPackageAttributes = classpathEntry.manifestPackageAttributesFor(packageName);
+			ManifestPackageAttributes manifestPackageAttributes = classpathEntry
+					.manifestPackageAttributesFor(packageName);
 			TitleVersionVendor specification = manifestPackageAttributes.getSpecification();
 			TitleVersionVendor implementation = manifestPackageAttributes.getImplementation();
 			specTitle = specification.getTitle();
@@ -779,11 +841,13 @@ public class ClasspathManager {
 
 		// The package is not defined yet define it before we define the class.
 		// TODO still need to seal packages.
-		classloader.publicDefinePackage(packageName, specTitle, specVersion, specVendor, implTitle, implVersion, implVendor, null);
+		classloader.publicDefinePackage(packageName, specTitle, specVersion, specVendor, implTitle, implVersion,
+				implVendor, null);
 	}
 
 	/**
 	 * Returns the fragment classpaths of this classpath manager
+	 * 
 	 * @return the fragment classpaths of this classpath manager
 	 */
 	public FragmentClasspath[] getFragmentClasspaths() {
@@ -792,6 +856,7 @@ public class ClasspathManager {
 
 	/**
 	 * Returns the host classpath entries for this classpath manager
+	 * 
 	 * @return the host classpath entries for this classpath manager
 	 */
 	public ClasspathEntry[] getHostClasspathEntries() {
@@ -800,6 +865,7 @@ public class ClasspathManager {
 
 	/**
 	 * Finds a library for the bundle represented by this class path manager
+	 * 
 	 * @param libname the library name
 	 * @return The absolution path to the library or null if not found
 	 */
@@ -810,7 +876,8 @@ public class ClasspathManager {
 		}
 		synchronized (loadedLibraries) {
 			// we assume that each classloader will load a small number of of libraries
-			// instead of wasting space with a map we iterate over our collection of found libraries
+			// instead of wasting space with a map we iterate over our collection of found
+			// libraries
 			// each element is a String[2], each array is {"libname", "libpath"}
 			String libpath = loadedLibraries.get(libname);
 			if (libpath != null)

@@ -21,6 +21,7 @@ import org.osgi.framework.wiring.BundleCapability;
 
 /**
  * An implementation of {@link BundleCapability}.
+ * 
  * @since 3.10
  */
 public final class ModuleCapability implements BundleCapability {
@@ -30,7 +31,8 @@ public final class ModuleCapability implements BundleCapability {
 	private final Map<String, Object> transientAttrs;
 	private final ModuleRevision revision;
 
-	ModuleCapability(String namespace, Map<String, String> directives, Map<String, Object> attributes, ModuleRevision revision) {
+	ModuleCapability(String namespace, Map<String, String> directives, Map<String, Object> attributes,
+			ModuleRevision revision) {
 		this.namespace = namespace;
 		this.directives = directives;
 		this.attributes = attributes;
@@ -69,14 +71,14 @@ public final class ModuleCapability implements BundleCapability {
 	/**
 	 * Only used by the system module for setting transient attributes associated
 	 * with the {@link NativeNamespace osgi.native} namespace.
-	 * @param transientAttrs
 	 */
 	public void setTransientAttrs(Map<String, ?> transientAttrs) {
 		if (this.transientAttrs == null) {
 			throw new UnsupportedOperationException(namespace + ": namespace does not support transient attributes."); //$NON-NLS-1$
 		}
 		if (!(getResource().getRevisions().getModule() instanceof SystemModule)) {
-			throw new UnsupportedOperationException("Only allowed to set transient attributes for the system module: " + getResource()); //$NON-NLS-1$
+			throw new UnsupportedOperationException(
+					"Only allowed to set transient attributes for the system module: " + getResource()); //$NON-NLS-1$
 		}
 		this.transientAttrs.clear();
 		this.transientAttrs.putAll(transientAttrs);
@@ -89,6 +91,6 @@ public final class ModuleCapability implements BundleCapability {
 
 	@Override
 	public String toString() {
-		return namespace + ModuleRevision.toString(attributes, false) + ModuleRevision.toString(directives, true);
+		return namespace + ModuleContainer.toString(attributes, false) + ModuleContainer.toString(directives, true);
 	}
 }

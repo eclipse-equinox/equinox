@@ -17,35 +17,36 @@ import org.eclipse.core.internal.preferences.AbstractScope;
 import org.eclipse.core.runtime.IPath;
 
 /**
- * Object representing the default scope in the Eclipse preferences
- * hierarchy. Can be used as a context for searching for preference
- * values (in the IPreferencesService APIs) or for determining the
- * correct preference node to set values in the store.
+ * Object representing the default scope in the Eclipse preferences hierarchy.
+ * Can be used as a context for searching for preference values (in the
+ * IPreferencesService APIs) or for determining the correct preference node to
+ * set values in the store.
  * <p>
  * Default preferences are not persisted to disk.
  * </p>
  * <p>
- * The path for preferences defined in the default scope hierarchy
- * is as follows: <code>/default/&lt;qualifier&gt;</code>
+ * The path for preferences defined in the default scope hierarchy is as
+ * follows: <code>/default/&lt;qualifier&gt;</code>
  * </p>
  * <p>
- * Note about product preference customization:
- * Clients who define their own org.eclipse.core.runtime.IProduct
- * are able to specify a product key of "<code>preferenceCustomization</code>".
- * (defined as a constant in org.eclipse.ui.branding.IProductConstants)
- * Its value is either a {@link java.net.URL} or a file-system path to a
- * file whose contents are used to customize default preferences.
+ * Note about product preference customization: Clients who define their own
+ * org.eclipse.core.runtime.IProduct are able to specify a product key of
+ * "<code>preferenceCustomization</code>". (defined as a constant in
+ * org.eclipse.ui.branding.IProductConstants) Its value is either a
+ * {@link java.net.URL} or a file-system path to a file whose contents are used
+ * to customize default preferences.
  * </p>
  * <p>
  * This class is not intended to be subclassed. This class may be instantiated.
  * </p>
+ * 
  * @since 3.0
  */
 public final class DefaultScope extends AbstractScope {
 
 	/**
-	 * String constant (value of <code>"default"</code>) used for the
-	 * scope name for the default preference scope.
+	 * String constant (value of <code>"default"</code>) used for the scope name for
+	 * the default preference scope.
 	 */
 	public static final String SCOPE = "default"; //$NON-NLS-1$
 
@@ -59,24 +60,18 @@ public final class DefaultScope extends AbstractScope {
 
 	/**
 	 * Create and return a new default scope instance.
+	 * 
 	 * @deprecated use <code>DefaultScope.INSTANCE</code> instead
 	 */
+	@Deprecated
 	public DefaultScope() {
 		super();
 	}
-
 
 	@Override
 	public String getName() {
 		return SCOPE;
 	}
-
-
-	@Override
-	public IEclipsePreferences getNode(String qualifier) {
-		return super.getNode(qualifier);
-	}
-
 
 	@Override
 	public IPath getLocation() {

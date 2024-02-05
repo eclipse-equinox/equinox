@@ -30,7 +30,8 @@ public final class StorageSaver {
 			try {
 				container.getStorage().save();
 			} catch (IOException e) {
-				container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error saving on update", e); //$NON-NLS-1$
+				container.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.ERROR, "Error saving on update", //$NON-NLS-1$
+						e);
 			}
 		}
 	}

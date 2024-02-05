@@ -39,7 +39,8 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * A utility class with some generally useful static methods for adaptor hook implementations
+ * A utility class with some generally useful static methods for adaptor hook
+ * implementations
  */
 public class StorageUtil {
 
@@ -47,6 +48,7 @@ public class StorageUtil {
 	 * Copies the content of the given path (file or directory) to the specified
 	 * target. If the source is a directory all contained elements are copied
 	 * recursively.
+	 * 
 	 * @param inFile  input directory to copy.
 	 * @param outFile output directory to copy to.
 	 * @throws IOException if any error occurs during the copy.
@@ -68,7 +70,8 @@ public class StorageUtil {
 	/**
 	 * Read a file from an InputStream and write it to the file system.
 	 *
-	 * @param in InputStream from which to read. This stream will be closed by this method.
+	 * @param in   InputStream from which to read. This stream will be closed by
+	 *             this method.
 	 * @param file output file to create.
 	 * @exception IOException
 	 */
@@ -81,7 +84,7 @@ public class StorageUtil {
 	/**
 	 * This function performs the equivalent of "rm -r" on a file or directory.
 	 *
-	 * @param   file file or directory to delete
+	 * @param file file or directory to delete
 	 * @return false is the specified files still exists, true otherwise.
 	 */
 	public static boolean rm(File file, boolean DEBUG) {
@@ -123,7 +126,8 @@ public class StorageUtil {
 
 	/**
 	 * Register a service object.
-	 * @param name the service class name
+	 * 
+	 * @param name    the service class name
 	 * @param service the service object
 	 * @param context the registering bundle context
 	 * @return the service registration object

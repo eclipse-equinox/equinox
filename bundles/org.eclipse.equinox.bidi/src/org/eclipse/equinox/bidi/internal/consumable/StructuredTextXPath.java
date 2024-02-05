@@ -17,7 +17,7 @@ import org.eclipse.equinox.bidi.advanced.IStructuredTextExpert;
 import org.eclipse.equinox.bidi.internal.StructuredTextDelims;
 
 /**
- *  Handler adapted to processing XPath expressions.
+ * Handler adapted to processing XPath expressions.
  */
 public class StructuredTextXPath extends StructuredTextDelims {
 
@@ -26,7 +26,7 @@ public class StructuredTextXPath extends StructuredTextDelims {
 	}
 
 	/**
-	 *  @return 2 as the number of special cases handled by this handler.
+	 * @return 2 as the number of special cases handled by this handler.
 	 */
 	@Override
 	public int getSpecialsCount(IStructuredTextExpert expert) {
@@ -34,7 +34,7 @@ public class StructuredTextXPath extends StructuredTextDelims {
 	}
 
 	/**
-	 *  @return apostrophe and quotation mark as delimiters.
+	 * @return apostrophe and quotation mark as delimiters.
 	 */
 	@Override
 	protected String getDelimiters() {

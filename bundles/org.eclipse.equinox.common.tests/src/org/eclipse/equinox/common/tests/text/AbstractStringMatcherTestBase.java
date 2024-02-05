@@ -54,9 +54,8 @@ public class AbstractStringMatcherTestBase {
 	public static TestData[] getTestData(String fileName) throws IOException {
 		List<TestData> data = new ArrayList<>();
 		BundleContext context = FrameworkUtil.getBundle(AbstractStringMatcherTestBase.class).getBundleContext();
-		URL url = context.getBundle().getEntry(
-				"resources/" + AbstractStringMatcherTestBase.class.getPackage().getName().replace('.', '/') + '/'
-						+ fileName);
+		URL url = context.getBundle().getEntry("resources/"
+				+ AbstractStringMatcherTestBase.class.getPackage().getName().replace('.', '/') + '/' + fileName);
 		url = FileLocator.toFileURL(url);
 		try (BufferedReader reader = new BufferedReader(
 				new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {

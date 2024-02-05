@@ -19,8 +19,7 @@ import org.eclipse.osgi.storage.bundlefile.BundleFile;
 
 public class BaseWeavingBundleFile extends WeavingBundleFile {
 
-    public BaseWeavingBundleFile(final BundleAdaptorProvider adaptorProvider,
-            final BundleFile bundleFile) {
-        super(adaptorProvider, bundleFile);
-    }
+	public BaseWeavingBundleFile(final BundleAdaptorProvider adaptorProvider, final BundleFile bundleFile) {
+		super(adaptorProvider, bundleFile);
+	}
 }

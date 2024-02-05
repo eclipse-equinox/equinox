@@ -19,9 +19,11 @@ import org.eclipse.core.runtime.IExtensionRegistry;
  * Implement this interface to specify a contributed extension registry.
  * <p>
  * This interface can be used without OSGi running.
- * </p><p>
+ * </p>
+ * <p>
  * This interface may be implemented by clients.
  * </p>
+ * 
  * @see org.eclipse.core.runtime.RegistryFactory#getRegistry()
  * @see org.eclipse.core.runtime.RegistryFactory#setDefaultRegistryProvider(IRegistryProvider)
  * @since org.eclipse.equinox.registry 3.2
@@ -29,8 +31,8 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 public interface IRegistryProvider {
 
 	/**
-	 * Returns the extension registry contributed by this provider; must not
-	 * be <code>null</code>.
+	 * Returns the extension registry contributed by this provider; must not be
+	 * <code>null</code>.
 	 *
 	 * @return an extension registry
 	 */

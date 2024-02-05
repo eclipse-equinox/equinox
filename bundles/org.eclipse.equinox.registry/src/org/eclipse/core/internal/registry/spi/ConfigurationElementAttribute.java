@@ -17,7 +17,8 @@ import org.eclipse.core.runtime.IConfigurationElement;
 
 /**
  * Describes properties of configuration elements to be added to the registry.
- * Properties are represented as pairs of strings: {attribute name; attribute value}.
+ * Properties are represented as pairs of strings: {attribute name; attribute
+ * value}.
  * <p>
  * It is expected that both attribute name and attribute value are not null.
  * </p>
@@ -27,6 +28,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
  * <p>
  * This class is not intended to be subclassed.
  * </p>
+ * 
  * @see ConfigurationElementDescription
  * @see IConfigurationElement
  */
@@ -34,12 +36,14 @@ public final class ConfigurationElementAttribute {
 
 	/**
 	 * Attribute name.
+	 * 
 	 * @see IConfigurationElement#getAttributeNames()
 	 */
 	private String name;
 
 	/**
 	 * Attribute value.
+	 * 
 	 * @see IConfigurationElement#getAttributeAsIs(String)
 	 */
 	private String value;
@@ -47,7 +51,7 @@ public final class ConfigurationElementAttribute {
 	/**
 	 * Constructor.
 	 *
-	 * @param name attribute name
+	 * @param name  attribute name
 	 * @param value attribute value
 	 */
 	public ConfigurationElementAttribute(String name, String value) {
@@ -57,6 +61,7 @@ public final class ConfigurationElementAttribute {
 
 	/**
 	 * Returns attribute name.
+	 * 
 	 * @return attribute name
 	 * @see IConfigurationElement#getAttributeNames()
 	 */
@@ -66,6 +71,7 @@ public final class ConfigurationElementAttribute {
 
 	/**
 	 * Returns value of the attribute.
+	 * 
 	 * @return attribute value
 	 * @see IConfigurationElement#getAttributeAsIs(String)
 	 */

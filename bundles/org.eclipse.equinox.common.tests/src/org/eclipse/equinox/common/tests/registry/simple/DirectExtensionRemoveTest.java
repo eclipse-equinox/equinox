@@ -35,6 +35,7 @@ import org.junit.Test;
 
 /**
  * Tests removal APIs using a simple registry.
+ * 
  * @since 3.2
  */
 public class DirectExtensionRemoveTest extends BaseExtensionRegistryRun {
@@ -44,7 +45,6 @@ public class DirectExtensionRemoveTest extends BaseExtensionRegistryRun {
 
 	private final static String extensionA1 = "TestExtensionA1"; //$NON-NLS-1$
 	private final static String extensionA2 = "TestExtensionA2"; //$NON-NLS-1$
-
 
 	// Fill the registry; remove half; check listener; check what's left
 	@Test
@@ -66,8 +66,6 @@ public class DirectExtensionRemoveTest extends BaseExtensionRegistryRun {
 	/**
 	 * Tests that configuration elements associated with the removed extension are
 	 * removed.
-	 *
-	 * @throws IOException
 	 */
 	@Test
 	public void testAssociatedConfigElements() throws IOException {
@@ -135,7 +133,7 @@ public class DirectExtensionRemoveTest extends BaseExtensionRegistryRun {
 			}
 		};
 
-		//SimpleRegistryListener listener = new SimpleRegistryListener() {};
+		// SimpleRegistryListener listener = new SimpleRegistryListener() {};
 		simpleRegistry.addRegistryChangeListener(listener);
 		try {
 			simpleRegistry.removeExtension(ext1, userToken);

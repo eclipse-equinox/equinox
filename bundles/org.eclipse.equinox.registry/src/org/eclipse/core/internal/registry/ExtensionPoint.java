@@ -18,21 +18,23 @@ import java.lang.ref.SoftReference;
 import org.eclipse.core.runtime.IContributor;
 
 /**
- * An object which represents the user-defined extension point in a
- * plug-in manifest.
+ * An object which represents the user-defined extension point in a plug-in
+ * manifest.
  */
 public class ExtensionPoint extends RegistryObject {
 	public static final ExtensionPoint[] EMPTY_ARRAY = new ExtensionPoint[0];
 
-	//Place holder for the label and the schema. It contains either a String[] or a SoftReference to a String[].
-	//The array layout is [label, schemaReference, fullyQualifiedName, namespace, contributorId]
+	// Place holder for the label and the schema. It contains either a String[] or a
+	// SoftReference to a String[].
+	// The array layout is [label, schemaReference, fullyQualifiedName, namespace,
+	// contributorId]
 	private Object extraInformation;
-	//Indexes of the various fields
-	private static final byte LABEL = 0; //The human readable name for the extension point
-	private static final byte SCHEMA = 1; //The schema of the extension point
-	private static final byte QUALIFIED_NAME = 2; //The fully qualified name of the extension point
-	private static final byte NAMESPACE = 3; //The name of the namespace of the extension point
-	private static final byte CONTRIBUTOR_ID = 4; //The ID of the actual contributor of the extension point
+	// Indexes of the various fields
+	private static final byte LABEL = 0; // The human readable name for the extension point
+	private static final byte SCHEMA = 1; // The schema of the extension point
+	private static final byte QUALIFIED_NAME = 2; // The fully qualified name of the extension point
+	private static final byte NAMESPACE = 3; // The name of the namespace of the extension point
+	private static final byte CONTRIBUTOR_ID = 4; // The ID of the actual contributor of the extension point
 	private static final int EXTRA_SIZE = 5;
 
 	protected ExtensionPoint(ExtensionRegistry registry, boolean persist) {
@@ -52,16 +54,20 @@ public class ExtensionPoint extends RegistryObject {
 	}
 
 	private String[] getExtraData() {
-		//The extension point has been created by parsing, or does not have any extra data
-		if (noExtraData()) { //When this is true, the extraInformation is always a String[]. This happens when the object is created by the parser.
+		// The extension point has been created by parsing, or does not have any extra
+		// data
+		if (noExtraData()) { // When this is true, the extraInformation is always a String[]. This happens
+								// when the object is created by the parser.
 			if (extraInformation != null)
 				return (String[]) extraInformation;
 			return new String[EXTRA_SIZE];
 		}
 
-		//The extension point has been loaded from the cache.
+		// The extension point has been loaded from the cache.
 		String[] result = null;
-		if (extraInformation == null || (result = ((extraInformation instanceof SoftReference) ? (String[]) ((SoftReference<?>) extraInformation).get() : (String[]) extraInformation)) == null) {
+		if (extraInformation == null || (result = ((extraInformation instanceof SoftReference)
+				? (String[]) ((SoftReference<?>) extraInformation).get()
+				: (String[]) extraInformation)) == null) {
 			result = registry.getTableReader().loadExtensionPointExtraData(getExtraDataOffset());
 			extraInformation = new SoftReference<>(result);
 		}

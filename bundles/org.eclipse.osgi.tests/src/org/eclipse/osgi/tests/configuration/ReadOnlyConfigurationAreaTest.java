@@ -13,22 +13,26 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.configuration;
 
+import static org.eclipse.osgi.tests.OSGiTestsActivator.PI_OSGI_TESTS;
+import static org.eclipse.osgi.tests.OSGiTestsActivator.addRequiredOSGiTestsBundles;
+import static org.eclipse.osgi.tests.OSGiTestsActivator.getContext;
+
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import junit.framework.Test;
+import junit.framework.TestCase;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
 import org.eclipse.core.tests.harness.FileSystemComparator;
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
-import org.eclipse.osgi.tests.OSGiTest;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
-public class ReadOnlyConfigurationAreaTest extends OSGiTest {
+public class ReadOnlyConfigurationAreaTest extends TestCase {
 
 	public static Test suite() {
-		ConfigurationSessionTestSuite suite = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, ReadOnlyConfigurationAreaTest.class);
+		ConfigurationSessionTestSuite suite = new ConfigurationSessionTestSuite(PI_OSGI_TESTS,
+				ReadOnlyConfigurationAreaTest.class);
 		suite.setReadOnly(true);
 		addRequiredOSGiTestsBundles(suite);
 		return suite;
@@ -38,31 +42,26 @@ public class ReadOnlyConfigurationAreaTest extends OSGiTest {
 		super(name);
 	}
 
-	public void test0thSession() throws MalformedURLException, IOException {
+	public void test0thSession() throws Exception {
 		// initialization session
-		try {
-			Bundle installed = BundleTestingHelper.installBundle("1.0", getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle01");
-			// not read-only yet, should work fine
-			if (!BundleTestingHelper.resolveBundles(getContext(), new Bundle[] {installed}))
-				fail("1.1");
-		} catch (BundleException be) {
-			fail("1.2", be);
-		}
+		Bundle installed = BundleTestingHelper.installBundle("1.0", getContext(),
+				OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle01");
+		// not read-only yet, should work fine
+		assertTrue("installed bundle could not be resolved: " + installed,
+				BundleTestingHelper.resolveBundles(getContext(), new Bundle[] { installed }));
 	}
 
 	/**
 	 * Takes a snapshot of the file system.
+	 * 
+	 * @throws IOException
 	 */
-	public void test1stSession() {
+	public void test1stSession() throws IOException {
 		// compute and save tree image
 		File configurationDir = ConfigurationSessionTestSuite.getConfigurationDir();
 		FileSystemComparator comparator = new FileSystemComparator();
 		Object snapshot = comparator.takeSnapshot(configurationDir, true);
-		try {
-			comparator.saveSnapshot(snapshot, configurationDir);
-		} catch (IOException e) {
-			fail("1.0");
-		}
+		comparator.saveSnapshot(snapshot, configurationDir);
 	}
 
 	public void test1stSessionFollowUp() throws IOException {
@@ -74,15 +73,17 @@ public class ReadOnlyConfigurationAreaTest extends OSGiTest {
 	}
 
 	/**
-	 * Tries to install a plug-in that has no manifest. Should fail because by default the manifest generation area
-	 * is under the configuration area (which is read-only here)
+	 * Tries to install a plug-in that has no manifest. Should fail because by
+	 * default the manifest generation area is under the configuration area (which
+	 * is read-only here)
 	 */
 	public void test2ndSession() throws BundleException, IOException {
 		// try to install plug-in
 		// ensure it is not installed
 		Bundle installed = null;
 		try {
-			installed = BundleTestingHelper.installBundle(getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle02");
+			installed = BundleTestingHelper.installBundle(getContext(),
+					OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle02");
 			// should have failed with BundleException, does not have a bundle manifest
 			fail("1.0");
 		} catch (BundleException be) {
@@ -103,15 +104,17 @@ public class ReadOnlyConfigurationAreaTest extends OSGiTest {
 	}
 
 	/**
-	 * Tries to install a plug-in that has manifest. Should fail because by default the manifest generation area
-	 * is under the configuration area (which is read-only here)
+	 * Tries to install a plug-in that has manifest. Should fail because by default
+	 * the manifest generation area is under the configuration area (which is
+	 * read-only here)
 	 */
 	public void test3rdSession() throws BundleException, IOException {
 		// install plug-in
 		// ensure it is not installed
 		Bundle installed = null;
 		try {
-			installed = BundleTestingHelper.installBundle(getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle03");
+			installed = BundleTestingHelper.installBundle(getContext(),
+					OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle03");
 			// should have failed - cannot install a bundle in read-only mode
 			fail("1.0");
 		} catch (BundleException be) {

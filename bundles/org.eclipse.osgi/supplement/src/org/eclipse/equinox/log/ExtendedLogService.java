@@ -24,7 +24,7 @@ import org.osgi.service.log.LogService;
 public interface ExtendedLogService extends LogService, Logger {
 
 	/**
-	 * Returns the <code>Logger<code> object associated with this logger name for the bundle that retrieved this log service.
+	 * Returns the <code>Logger</code> object associated with this logger name for the bundle that retrieved this log service.
 	 * If loggerName is null the default <code>Logger</code> for this bundle is returned.
 	 *
 	 * @param loggerName The logger name.

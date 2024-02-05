@@ -36,7 +36,6 @@ import java.util.zip.Checksum;
 /**
  * ReliableFile class used by ReliableFileInputStream and ReliableOutputStream.
  * This class encapsulates all the logic for reliable file support.
- *
  */
 public class ReliableFile {
 	/**
@@ -219,7 +218,7 @@ public class ReliableFile {
 					try {
 						int id = Integer.parseInt(candidateFile.substring(prefixLen));
 						list.add(Integer.valueOf(id));
-					}catch (NumberFormatException e) {/*ignore*/
+					} catch (NumberFormatException e) {/*ignore*/
 					}
 				}
 			}
@@ -433,7 +432,6 @@ public class ReliableFile {
 
 	/**
 	 * Abort the current output stream and do not update the reliable file table.
-	 *
 	 */
 	void abortOutputFile() {
 		if (outputFile == null)
@@ -563,7 +561,7 @@ public class ReliableFile {
 				try {
 					Integer.parseInt(candidateFile.substring(prefixLen));
 					return true;
-				}catch (NumberFormatException e) {/*ignore*/
+				} catch (NumberFormatException e) {/*ignore*/
 				}
 			}
 		}
@@ -728,7 +726,6 @@ public class ReliableFile {
 	/**
 	 * Inform ReliableFile that a file has been updated outside of
 	 * ReliableFile.
-	 * @param file
 	 */
 	public static void fileUpdated(File file) {
 		if (!fileSharing) {

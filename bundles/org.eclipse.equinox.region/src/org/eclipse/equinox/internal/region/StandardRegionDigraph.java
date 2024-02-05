@@ -31,7 +31,6 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
  * <strong>Concurrent Semantics</strong><br />
  * 
  * Thread safe.
- * 
  */
 public final class StandardRegionDigraph implements BundleIdToRegionMapping, RegionDigraph {
 

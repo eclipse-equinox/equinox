@@ -23,17 +23,15 @@ import org.apache.felix.service.command.CommandSession;
 import org.eclipse.osgi.framework.console.CommandProvider;
 
 /**
- * This adapter class provides for execution of legacy Equinox commands from 
- * the Gogo shell. The commands are executed through the main method of the
- * adapter. It finds the appropriate Equinox command and executes
- * it with the proper argument.
- *
+ * This adapter class provides for execution of legacy Equinox commands from the
+ * Gogo shell. The commands are executed through the main method of the adapter.
+ * It finds the appropriate Equinox command and executes it with the proper
+ * argument.
  */
 public class CommandProviderAdapter {
 
 	private final CommandProvider commandProvider;
 	private final Method[] commands;
-	
 
 	public CommandProviderAdapter(CommandProvider commandProvider, Method[] commands) {
 		this.commandProvider = commandProvider;

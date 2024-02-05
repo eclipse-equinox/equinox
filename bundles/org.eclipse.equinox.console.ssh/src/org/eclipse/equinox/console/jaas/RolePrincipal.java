@@ -18,11 +18,10 @@ import java.security.Principal;
 
 /**
  * This class represents a user role
- *
  */
 public class RolePrincipal implements Principal {
 	private String roleName;
-	
+
 	public RolePrincipal(String roleName) {
 		this.roleName = roleName;
 	}
@@ -31,22 +30,22 @@ public class RolePrincipal implements Principal {
 	public String getName() {
 		return roleName;
 	}
-	
+
 	@Override
 	public boolean equals(Object role) {
-		
+
 		if (role == null) {
 			return false;
 		}
-		
+
 		if (this == role) {
 			return true;
 		}
-		
+
 		if (!(role instanceof RolePrincipal)) {
 			return false;
 		}
-		
+
 		RolePrincipal otherRole = (RolePrincipal) role;
 		if (roleName != null) {
 			if (roleName.equals(otherRole.roleName)) {

@@ -18,8 +18,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
  * Abstract implementation of {@link IExecutor} and {@link IRunnableExecutor}.
- * @since 1.1
  * 
+ * @since 1.1
  */
 public abstract class AbstractExecutor implements IRunnableExecutor, IExecutor {
 
@@ -32,21 +32,18 @@ public abstract class AbstractExecutor implements IRunnableExecutor, IExecutor {
 		}, null);
 	}
 
-	public abstract <ResultType> IFuture<ResultType> execute(
-			IProgressRunnable<? extends ResultType> runnable,
+	public abstract <ResultType> IFuture<ResultType> execute(IProgressRunnable<? extends ResultType> runnable,
 			IProgressMonitor monitor);
 
 	/**
-	 * Create an {@link AbstractFuture} instance. Subclasses must override to
-	 * define the concrete type of future to return from
+	 * Create an {@link AbstractFuture} instance. Subclasses must override to define
+	 * the concrete type of future to return from
 	 * {@link #execute(IProgressRunnable, IProgressMonitor)}.
 	 * 
-	 * @param progressMonitor
-	 *            any progress monitor to provide to the future upon
-	 *            construction. May be <code>null</code>.
+	 * @param progressMonitor any progress monitor to provide to the future upon
+	 *                        construction. May be <code>null</code>.
 	 * @return the created future
 	 */
-	protected abstract AbstractFuture<?> createFuture(
-			IProgressMonitor progressMonitor);
+	protected abstract AbstractFuture<?> createFuture(IProgressMonitor progressMonitor);
 
 }

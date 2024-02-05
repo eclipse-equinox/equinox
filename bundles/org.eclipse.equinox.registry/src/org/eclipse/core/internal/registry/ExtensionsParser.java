@@ -47,7 +47,8 @@ public class ExtensionsParser extends DefaultHandler {
 		map.put("org.eclipse.ui.resourceFilters", "org.eclipse.ui.ide.resourceFilters"); //$NON-NLS-1$ //$NON-NLS-2$
 		map.put("org.eclipse.ui.markerUpdaters", "org.eclipse.ui.editors.markerUpdaters"); //$NON-NLS-1$ //$NON-NLS-2$
 		map.put("org.eclipse.ui.documentProviders", "org.eclipse.ui.editors.documentProviders"); //$NON-NLS-1$ //$NON-NLS-2$
-		map.put("org.eclipse.ui.workbench.texteditor.markerAnnotationSpecification", "org.eclipse.ui.editors.markerAnnotationSpecification"); //$NON-NLS-1$ //$NON-NLS-2$
+		map.put("org.eclipse.ui.workbench.texteditor.markerAnnotationSpecification", //$NON-NLS-1$
+				"org.eclipse.ui.editors.markerAnnotationSpecification"); //$NON-NLS-1$
 		map.put("org.eclipse.help.browser", "org.eclipse.help.base.browser"); //$NON-NLS-1$ //$NON-NLS-2$
 		map.put("org.eclipse.help.luceneAnalyzer", "org.eclipse.help.base.luceneAnalyzer"); //$NON-NLS-1$ //$NON-NLS-2$
 		map.put("org.eclipse.help.webapp", "org.eclipse.help.base.webapp"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -87,7 +88,8 @@ public class ExtensionsParser extends DefaultHandler {
 
 	private Contribution contribution;
 
-	//This keeps tracks of the value of the configuration element in case the value comes in several pieces (see characters()). See as well bug 75592.
+	// This keeps tracks of the value of the configuration element in case the value
+	// comes in several pieces (see characters()). See as well bug 75592.
 	private String configurationElementValue;
 
 	/**
@@ -128,7 +130,7 @@ public class ExtensionsParser extends DefaultHandler {
 	private static final int BUNDLE_EXTENSION_STATE = 6;
 	private static final int CONFIGURATION_ELEMENT_STATE = 10;
 
-	// Keep a group of vectors as a temporary scratch space.  These
+	// Keep a group of vectors as a temporary scratch space. These
 	// vectors will be used to populate arrays in the bundle model
 	// once processing of the XML file is complete.
 	private static final int EXTENSION_POINT_INDEX = 0;
@@ -140,12 +142,14 @@ public class ExtensionsParser extends DefaultHandler {
 
 	private Locator locator = null;
 
-	// Cache the behavior toggle (true: attempt to extract namespace from qualified IDs)
+	// Cache the behavior toggle (true: attempt to extract namespace from qualified
+	// IDs)
 	private boolean extractNamespaces = false;
 
 	private ArrayList<String> processedExtensionIds = null;
 
-	// Keep track of elements added into the registry manager in case we encounter a error
+	// Keep track of elements added into the registry manager in case we encounter a
+	// error
 	// and need to rollback
 	private final ArrayList<RegistryObject> addedRegistryObjects = new ArrayList<>(5);
 
@@ -155,15 +159,20 @@ public class ExtensionsParser extends DefaultHandler {
 		this.registry = registry;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.xml.sax.helpers.DefaultHandler#setDocumentLocator(org.xml.sax.Locator)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.xml.sax.helpers.DefaultHandler#setDocumentLocator(org.xml.sax.Locator)
 	 */
 	@Override
 	public void setDocumentLocator(Locator locator) {
 		this.locator = locator;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xml.sax.helpers.DefaultHandler#characters(char[], int, int)
 	 */
 	@Override
@@ -188,7 +197,9 @@ public class ExtensionsParser extends DefaultHandler {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xml.sax.helpers.DefaultHandler#endDocument()
 	 */
 	@Override
@@ -196,91 +207,99 @@ public class ExtensionsParser extends DefaultHandler {
 		// do nothing
 	}
 
-	/* (non-Javadoc)
-	 * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String,
+	 * java.lang.String, java.lang.String)
 	 */
 	@Override
 	public void endElement(String uri, String elementName, String qName) {
 		switch (stateStack.peek().intValue()) {
-			case IGNORED_ELEMENT_STATE :
+		case IGNORED_ELEMENT_STATE:
+			stateStack.pop();
+			break;
+		case INITIAL_STATE:
+			// shouldn't get here
+			internalError(NLS.bind(RegistryMessages.parse_internalStack, elementName));
+			break;
+		case BUNDLE_STATE:
+			stateStack.pop();
+
+			ArrayList<?> extensionPoints = scratchVectors[EXTENSION_POINT_INDEX];
+			ArrayList<?> extensions = scratchVectors[EXTENSION_INDEX];
+			int[] namespaceChildren = new int[2 + extensionPoints.size() + extensions.size()];
+			int position = 2;
+			// Put the extension points into this namespace
+			if (extensionPoints.size() > 0) {
+				namespaceChildren[Contribution.EXTENSION_POINT] = extensionPoints.size();
+				for (Object extPoint : extensionPoints) {
+					namespaceChildren[position++] = ((RegistryObject) extPoint).getObjectId();
+				}
+				extensionPoints.clear();
+			}
+
+			// Put the extensions into this namespace too
+			if (extensions.size() > 0) {
+				Extension[] renamedExtensions = fixRenamedExtensionPoints(
+						extensions.toArray(new Extension[extensions.size()]));
+				namespaceChildren[Contribution.EXTENSION] = renamedExtensions.length;
+				for (Extension renamedExtension : renamedExtensions) {
+					namespaceChildren[position++] = renamedExtension.getObjectId();
+				}
+				extensions.clear();
+			}
+			contribution.setRawChildren(namespaceChildren);
+			break;
+		case BUNDLE_EXTENSION_POINT_STATE:
+			if (elementName.equals(EXTENSION_POINT)) {
 				stateStack.pop();
-				break;
-			case INITIAL_STATE :
-				// shouldn't get here
-				internalError(NLS.bind(RegistryMessages.parse_internalStack, elementName));
-				break;
-			case BUNDLE_STATE :
+			}
+			break;
+		case BUNDLE_EXTENSION_STATE:
+			if (elementName.equals(EXTENSION)) {
 				stateStack.pop();
+				// Finish up extension object
+				Extension currentExtension = (Extension) objectStack.pop();
+				if (currentExtension.getNamespaceIdentifier() == null)
+					currentExtension.setNamespaceIdentifier(contribution.getDefaultNamespace());
+				currentExtension.setContributorId(contribution.getContributorId());
+				scratchVectors[EXTENSION_INDEX].add(currentExtension);
+			}
+			break;
+		case CONFIGURATION_ELEMENT_STATE:
+			// We don't care what the element name was
+			stateStack.pop();
+			// Now finish up the configuration element object
+			configurationElementValue = null;
+			ConfigurationElement currentConfigElement = (ConfigurationElement) objectStack.pop();
 
-				ArrayList<?> extensionPoints = scratchVectors[EXTENSION_POINT_INDEX];
-				ArrayList<?> extensions = scratchVectors[EXTENSION_INDEX];
-				int[] namespaceChildren = new int[2 + extensionPoints.size() + extensions.size()];
-				int position = 2;
-				// Put the extension points into this namespace
-				if (extensionPoints.size() > 0) {
-					namespaceChildren[Contribution.EXTENSION_POINT] = extensionPoints.size();
-					for (Object extPoint : extensionPoints) {
-						namespaceChildren[position++] = ((RegistryObject) extPoint).getObjectId();
-					}
-					extensionPoints.clear();
-				}
+			String value = currentConfigElement.getValueAsIs();
+			if (value != null) {
+				currentConfigElement.setValue(translate(value).trim());
+			}
 
-				// Put the extensions into this namespace too
-				if (extensions.size() > 0) {
-					Extension[] renamedExtensions = fixRenamedExtensionPoints(extensions.toArray(new Extension[extensions.size()]));
-					namespaceChildren[Contribution.EXTENSION] = renamedExtensions.length;
-					for (Extension renamedExtension : renamedExtensions) {
-						namespaceChildren[position++] = renamedExtension.getObjectId();
-					}
-					extensions.clear();
-				}
-				contribution.setRawChildren(namespaceChildren);
-				break;
-			case BUNDLE_EXTENSION_POINT_STATE :
-				if (elementName.equals(EXTENSION_POINT)) {
-					stateStack.pop();
-				}
-				break;
-			case BUNDLE_EXTENSION_STATE :
-				if (elementName.equals(EXTENSION)) {
-					stateStack.pop();
-					// Finish up extension object
-					Extension currentExtension = (Extension) objectStack.pop();
-					if (currentExtension.getNamespaceIdentifier() == null)
-						currentExtension.setNamespaceIdentifier(contribution.getDefaultNamespace());
-					currentExtension.setContributorId(contribution.getContributorId());
-					scratchVectors[EXTENSION_INDEX].add(currentExtension);
-				}
-				break;
-			case CONFIGURATION_ELEMENT_STATE :
-				// We don't care what the element name was
-				stateStack.pop();
-				// Now finish up the configuration element object
-				configurationElementValue = null;
-				ConfigurationElement currentConfigElement = (ConfigurationElement) objectStack.pop();
-
-				String value = currentConfigElement.getValueAsIs();
-				if (value != null) {
-					currentConfigElement.setValue(translate(value).trim());
-				}
-
-				RegistryObject parent = (RegistryObject) objectStack.peek();
-				// Want to add this configuration element to the subelements of an extension
-				int[] oldValues = parent.getRawChildren();
-				int size = oldValues.length;
-				int[] newValues = new int[size + 1];
-				for (int i = 0; i < size; i++) {
-					newValues[i] = oldValues[i];
-				}
-				newValues[size] = currentConfigElement.getObjectId();
-				parent.setRawChildren(newValues);
-				currentConfigElement.setParentId(parent.getObjectId());
-				currentConfigElement.setParentType(parent instanceof ConfigurationElement ? RegistryObjectManager.CONFIGURATION_ELEMENT : RegistryObjectManager.EXTENSION);
-				break;
+			RegistryObject parent = (RegistryObject) objectStack.peek();
+			// Want to add this configuration element to the subelements of an extension
+			int[] oldValues = parent.getRawChildren();
+			int size = oldValues.length;
+			int[] newValues = new int[size + 1];
+			for (int i = 0; i < size; i++) {
+				newValues[i] = oldValues[i];
+			}
+			newValues[size] = currentConfigElement.getObjectId();
+			parent.setRawChildren(newValues);
+			currentConfigElement.setParentId(parent.getObjectId());
+			currentConfigElement
+					.setParentType(parent instanceof ConfigurationElement ? RegistryObjectManager.CONFIGURATION_ELEMENT
+							: RegistryObjectManager.EXTENSION);
+			break;
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xml.sax.helpers.DefaultHandler#error(org.xml.sax.SAXParseException)
 	 */
 	@Override
@@ -288,8 +307,11 @@ public class ExtensionsParser extends DefaultHandler {
 		logStatus(ex);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.xml.sax.helpers.DefaultHandler#fatalError(org.xml.sax.SAXParseException)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.xml.sax.helpers.DefaultHandler#fatalError(org.xml.sax.SAXParseException)
 	 */
 	@Override
 	public void fatalError(SAXParseException ex) throws SAXException {
@@ -319,10 +341,10 @@ public class ExtensionsParser extends DefaultHandler {
 
 	private void handleExtensionState(String elementName, Attributes attributes) {
 		// You need to change the state here even though we will be executing the same
-		// code for ExtensionState and ConfigurationElementState.  We ignore the name
-		// of the element for ConfigurationElements.  When we are wrapping up, we will
+		// code for ExtensionState and ConfigurationElementState. We ignore the name
+		// of the element for ConfigurationElements. When we are wrapping up, we will
 		// want to add each configuration element object to the subElements vector of
-		// its parent configuration element object.  However, the first configuration
+		// its parent configuration element object. However, the first configuration
 		// element object we created (the last one we pop off the stack) will need to
 		// be added to a vector in the extension object called _configuration.
 		stateStack.push(Integer.valueOf(CONFIGURATION_ELEMENT_STATE));
@@ -330,14 +352,16 @@ public class ExtensionsParser extends DefaultHandler {
 		configurationElementValue = null;
 
 		// create a new Configuration Element and push it onto the object stack
-		ConfigurationElement currentConfigurationElement = registry.getElementFactory().createConfigurationElement(contribution.shouldPersist());
+		ConfigurationElement currentConfigurationElement = registry.getElementFactory()
+				.createConfigurationElement(contribution.shouldPersist());
 		currentConfigurationElement.setContributorId(contribution.getContributorId());
 		objectStack.push(currentConfigurationElement);
 		currentConfigurationElement.setName(elementName);
 
 		// Processing the attributes of a configuration element involves creating
-		// a new configuration property for each attribute and populating the configuration
-		// property with the name/value pair of the attribute.  Note there will be one
+		// a new configuration property for each attribute and populating the
+		// configuration
+		// property with the name/value pair of the attribute. Note there will be one
 		// configuration property for each attribute
 		parseConfigurationElementAttributes(attributes);
 		objectManager.add(currentConfigurationElement, true);
@@ -384,15 +408,18 @@ public class ExtensionsParser extends DefaultHandler {
 		if (name.equals("")) //$NON-NLS-1$
 			msg = NLS.bind(RegistryMessages.parse_error, ex.getMessage());
 		else
-			msg = NLS.bind(RegistryMessages.parse_errorNameLineColumn, (new Object[] {name, Integer.toString(ex.getLineNumber()), Integer.toString(ex.getColumnNumber()), ex.getMessage()}));
+			msg = NLS.bind(RegistryMessages.parse_errorNameLineColumn, (new Object[] { name,
+					Integer.toString(ex.getLineNumber()), Integer.toString(ex.getColumnNumber()), ex.getMessage() }));
 		error(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, PARSE_PROBLEM, msg, ex));
 	}
 
-	public Contribution parseManifest(SAXParserFactory factory, InputSource in, String manifestName, RegistryObjectManager registryObjects, Contribution currentNamespace, ResourceBundle bundle) throws ParserConfigurationException, SAXException, IOException {
+	public Contribution parseManifest(SAXParserFactory factory, InputSource in, String manifestName,
+			RegistryObjectManager registryObjects, Contribution currentNamespace, ResourceBundle bundle)
+			throws ParserConfigurationException, SAXException, IOException {
 		long start = 0;
 		this.resources = bundle;
 		this.objectManager = registryObjects;
-		//initialize the parser with this object
+		// initialize the parser with this object
 		this.contribution = currentNamespace;
 		if (registry.debug())
 			start = System.currentTimeMillis();
@@ -483,7 +510,8 @@ public class ExtensionsParser extends DefaultHandler {
 			objectStack.pop();
 			return;
 		}
-		// if we have an Id specified, check for duplicates. Only issue warning (not error) if duplicate found
+		// if we have an Id specified, check for duplicates. Only issue warning (not
+		// error) if duplicate found
 		// as it might still work fine - depending on the access pattern.
 		if (simpleId != null && registry.debug()) {
 			String uniqueId = namespaceName + '.' + simpleId;
@@ -491,14 +519,16 @@ public class ExtensionsParser extends DefaultHandler {
 			if (existingExtension != null) {
 				String currentSupplier = contribution.getDefaultNamespace();
 				String existingSupplier = existingExtension.getContributor().getName();
-				String msg = NLS.bind(RegistryMessages.parse_duplicateExtension, new String[] {currentSupplier, existingSupplier, uniqueId});
+				String msg = NLS.bind(RegistryMessages.parse_duplicateExtension,
+						new String[] { currentSupplier, existingSupplier, uniqueId });
 				registry.log(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, 0, msg, null));
 			} else if (processedExtensionIds != null) { // check elements in this contribution
 				for (String extensionId : processedExtensionIds) {
 					if (uniqueId.equals(extensionId)) {
 						String currentSupplier = contribution.getDefaultNamespace();
 						String existingSupplier = currentSupplier;
-						String msg = NLS.bind(RegistryMessages.parse_duplicateExtension, new String[] {currentSupplier, existingSupplier, uniqueId});
+						String msg = NLS.bind(RegistryMessages.parse_duplicateExtension,
+								new String[] { currentSupplier, existingSupplier, uniqueId });
 						registry.log(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, 0, msg, null));
 						break;
 					}
@@ -513,30 +543,34 @@ public class ExtensionsParser extends DefaultHandler {
 		addedRegistryObjects.add(currentExtension);
 	}
 
-	//todo: Are all three methods needed??
+	// todo: Are all three methods needed??
 	private void missingAttribute(String attribute, String element) {
 		if (locator == null)
 			internalError(NLS.bind(RegistryMessages.parse_missingAttribute, attribute, element));
 		else
-			internalError(NLS.bind(RegistryMessages.parse_missingAttributeLine, (new String[] {attribute, element, Integer.toString(locator.getLineNumber())})));
+			internalError(NLS.bind(RegistryMessages.parse_missingAttributeLine,
+					(new String[] { attribute, element, Integer.toString(locator.getLineNumber()) })));
 	}
 
 	private void unknownAttribute(String attribute, String element) {
 		if (locator == null)
 			internalError(NLS.bind(RegistryMessages.parse_unknownAttribute, attribute, element));
 		else
-			internalError(NLS.bind(RegistryMessages.parse_unknownAttributeLine, (new String[] {attribute, element, Integer.toString(locator.getLineNumber())})));
+			internalError(NLS.bind(RegistryMessages.parse_unknownAttributeLine,
+					(new String[] { attribute, element, Integer.toString(locator.getLineNumber()) })));
 	}
 
 	private void unknownElement(String parent, String element) {
 		if (locator == null)
 			internalError(NLS.bind(RegistryMessages.parse_unknownElement, element, parent));
 		else
-			internalError(NLS.bind(RegistryMessages.parse_unknownElementLine, (new String[] {element, parent, Integer.toString(locator.getLineNumber())})));
+			internalError(NLS.bind(RegistryMessages.parse_unknownElementLine,
+					(new String[] { element, parent, Integer.toString(locator.getLineNumber()) })));
 	}
 
 	private void parseExtensionPointAttributes(Attributes attributes) {
-		ExtensionPoint currentExtPoint = registry.getElementFactory().createExtensionPoint(contribution.shouldPersist());
+		ExtensionPoint currentExtPoint = registry.getElementFactory()
+				.createExtensionPoint(contribution.shouldPersist());
 
 		// Process Attributes
 		int len = (attributes != null) ? attributes.getLength() : 0;
@@ -566,7 +600,8 @@ public class ExtensionsParser extends DefaultHandler {
 				unknownAttribute(attrName, EXTENSION_POINT);
 		}
 		if (currentExtPoint.getSimpleIdentifier() == null || currentExtPoint.getLabel() == null) {
-			String attribute = currentExtPoint.getSimpleIdentifier() == null ? EXTENSION_POINT_ID : EXTENSION_POINT_NAME;
+			String attribute = currentExtPoint.getSimpleIdentifier() == null ? EXTENSION_POINT_ID
+					: EXTENSION_POINT_NAME;
 			missingAttribute(attribute, EXTENSION_POINT);
 			stateStack.pop();
 			stateStack.push(Integer.valueOf(IGNORED_ELEMENT_STATE));
@@ -577,7 +612,8 @@ public class ExtensionsParser extends DefaultHandler {
 			// extensions associated with the existing extension point to
 			// become inaccessible.
 			if (registry.debug()) {
-				String msg = NLS.bind(RegistryMessages.parse_duplicateExtensionPoint, currentExtPoint.getUniqueIdentifier(), contribution.getDefaultNamespace());
+				String msg = NLS.bind(RegistryMessages.parse_duplicateExtensionPoint,
+						currentExtPoint.getUniqueIdentifier(), contribution.getDefaultNamespace());
 				registry.log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, msg, null));
 			}
 			stateStack.pop();
@@ -589,11 +625,14 @@ public class ExtensionsParser extends DefaultHandler {
 		currentExtPoint.setContributorId(contribution.getContributorId());
 		addedRegistryObjects.add(currentExtPoint);
 
-		// Now populate the the vector just below us on the objectStack with this extension point
+		// Now populate the the vector just below us on the objectStack with this
+		// extension point
 		scratchVectors[EXTENSION_POINT_INDEX].add(currentExtPoint);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xml.sax.helpers.DefaultHandler#startDocument()
 	 */
 	@Override
@@ -604,34 +643,40 @@ public class ExtensionsParser extends DefaultHandler {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.xml.sax.helpers.DefaultHandler#startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xml.sax.helpers.DefaultHandler#startElement(java.lang.String,
+	 * java.lang.String, java.lang.String, org.xml.sax.Attributes)
 	 */
 	@Override
 	public void startElement(String uri, String elementName, String qName, Attributes attributes) {
 		switch (stateStack.peek().intValue()) {
-			case INITIAL_STATE :
-				handleInitialState(elementName, attributes);
-				break;
-			case BUNDLE_STATE :
-				handleBundleState(elementName, attributes);
-				break;
-			case BUNDLE_EXTENSION_POINT_STATE :
-				handleExtensionPointState(elementName);
-				break;
-			case BUNDLE_EXTENSION_STATE :
-			case CONFIGURATION_ELEMENT_STATE :
-				handleExtensionState(elementName, attributes);
-				break;
-			default :
-				stateStack.push(Integer.valueOf(IGNORED_ELEMENT_STATE));
-				if (!compatibilityMode)
-					internalError(NLS.bind(RegistryMessages.parse_unknownTopElement, elementName));
+		case INITIAL_STATE:
+			handleInitialState(elementName, attributes);
+			break;
+		case BUNDLE_STATE:
+			handleBundleState(elementName, attributes);
+			break;
+		case BUNDLE_EXTENSION_POINT_STATE:
+			handleExtensionPointState(elementName);
+			break;
+		case BUNDLE_EXTENSION_STATE:
+		case CONFIGURATION_ELEMENT_STATE:
+			handleExtensionState(elementName, attributes);
+			break;
+		default:
+			stateStack.push(Integer.valueOf(IGNORED_ELEMENT_STATE));
+			if (!compatibilityMode)
+				internalError(NLS.bind(RegistryMessages.parse_unknownTopElement, elementName));
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.xml.sax.helpers.DefaultHandler#warning(org.xml.sax.SAXParseException)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.xml.sax.helpers.DefaultHandler#warning(org.xml.sax.SAXParseException)
 	 */
 	@Override
 	public void warning(SAXParseException ex) {
@@ -642,8 +687,11 @@ public class ExtensionsParser extends DefaultHandler {
 		error(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, PARSE_PROBLEM, message, null));
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xml.sax.ContentHandler#processingInstruction
+	 * 
 	 * @since 3.0
 	 */
 	@Override
@@ -673,8 +721,8 @@ public class ExtensionsParser extends DefaultHandler {
 	}
 
 	/**
-	 * Handles an error state specified by the status.  The collection of all logged status
-	 * objects can be accessed using <code>getStatus()</code>.
+	 * Handles an error state specified by the status. The collection of all logged
+	 * status objects can be accessed using <code>getStatus()</code>.
 	 *
 	 * @param error a status detailing the error condition
 	 */
@@ -687,11 +735,13 @@ public class ExtensionsParser extends DefaultHandler {
 	}
 
 	/**
-	 * Fixes up the extension declarations in the given pre-3.0 plug-in or fragment to compensate
-	 * for extension points that were renamed between release 2.1 and 3.0.
+	 * Fixes up the extension declarations in the given pre-3.0 plug-in or fragment
+	 * to compensate for extension points that were renamed between release 2.1 and
+	 * 3.0.
 	 */
 	private Extension[] fixRenamedExtensionPoints(Extension[] extensions) {
-		if (extensions == null || versionAtLeast(VERSION_3_0) || RegistryProperties.getProperty(NO_EXTENSION_MUNGING) != null)
+		if (extensions == null || versionAtLeast(VERSION_3_0)
+				|| RegistryProperties.getProperty(NO_EXTENSION_MUNGING) != null)
 			return extensions;
 		for (Extension extension : extensions) {
 			String oldPointId = extension.getExtensionPointIdentifier();
@@ -704,17 +754,18 @@ public class ExtensionsParser extends DefaultHandler {
 	}
 
 	/**
-	 * To preserve backward compatibility, we will only attempt to extract namespace form the name
-	 * if Eclipse version specified in the plugin.xml (<?eclipse version="3.2"?>) is at least 3.2.
+	 * To preserve backward compatibility, we will only attempt to extract namespace
+	 * form the name if Eclipse version specified in the plugin.xml (<?eclipse
+	 * version="3.2"?>) is at least 3.2.
 	 */
 	private void initializeExtractNamespace() {
 		extractNamespaces = Boolean.valueOf(versionAtLeast(VERSION_3_2)).booleanValue();
 	}
 
 	/**
-	 * Makes sense only for plugin.xml versions >= 3.0 (Eclipse version was introduced in 3.0).
-	 * Assumes that version is stored as "X1.X2.....XN" where X1 is a major version; X2 is a minor version
-	 * and so on.
+	 * Makes sense only for plugin.xml versions >= 3.0 (Eclipse version was
+	 * introduced in 3.0). Assumes that version is stored as "X1.X2.....XN" where X1
+	 * is a major version; X2 is a minor version and so on.
 	 */
 	private boolean versionAtLeast(String testVersion) {
 		if (schemaVersion == null)
@@ -724,7 +775,8 @@ public class ExtensionsParser extends DefaultHandler {
 		StringTokenizer schemaVersionTokenizer = new StringTokenizer(schemaVersion, "."); //$NON-NLS-1$
 		while (testVersionTokenizer.hasMoreTokens() && schemaVersionTokenizer.hasMoreTokens()) {
 			try {
-				if (Integer.parseInt(schemaVersionTokenizer.nextToken()) < Integer.parseInt(testVersionTokenizer.nextToken()))
+				if (Integer.parseInt(schemaVersionTokenizer.nextToken()) < Integer
+						.parseInt(testVersionTokenizer.nextToken()))
 					return false;
 			} catch (NumberFormatException e) {
 				return false;

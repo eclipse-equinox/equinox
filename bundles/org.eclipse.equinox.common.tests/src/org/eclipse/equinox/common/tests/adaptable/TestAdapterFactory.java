@@ -16,8 +16,6 @@ package org.eclipse.equinox.common.tests.adaptable;
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.junit.Assert;
 
-/**
- */
 public class TestAdapterFactory extends Assert implements IAdapterFactory {
 	@Override
 	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
@@ -27,6 +25,6 @@ public class TestAdapterFactory extends Assert implements IAdapterFactory {
 
 	@Override
 	public Class<?>[] getAdapterList() {
-		return new Class[] {TestAdapter.class};
+		return new Class[] { TestAdapter.class };
 	}
 }

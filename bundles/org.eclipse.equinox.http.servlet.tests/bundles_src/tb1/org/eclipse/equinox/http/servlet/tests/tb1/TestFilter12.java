@@ -38,6 +38,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 public class TestFilter12 extends AbstractTestServlet {
 	private static final long serialVersionUID = 1L;
 	private final Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
+
 	@Override
 	public void activate(ComponentContext componentContext) {
 

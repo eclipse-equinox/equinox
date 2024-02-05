@@ -21,7 +21,8 @@ import org.osgi.framework.BundleContext;
 public class Activator implements BundleActivator {
 	@Override
 	public void start(BundleContext context) throws Exception {
-		context.registerService(Activator.class, this, new Hashtable<>(Collections.singletonMap("activator", this.getClass().getSimpleName())));
+		context.registerService(Activator.class, this,
+				new Hashtable<>(Collections.singletonMap("activator", this.getClass().getSimpleName())));
 	}
 
 	@Override

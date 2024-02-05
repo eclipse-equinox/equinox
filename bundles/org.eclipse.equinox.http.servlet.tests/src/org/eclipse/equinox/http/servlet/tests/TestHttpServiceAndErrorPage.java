@@ -40,37 +40,24 @@ public class TestHttpServiceAndErrorPage extends BaseTest {
 		try {
 			final String name1 = "testname1";
 			final String name2 = "testname2";
-			Dictionary<String,Object> properties = new Hashtable<>();
-			properties.put(
-					HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE,
-					name1);
-			properties.put(
-					HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
-					"(" + HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY
-							+ "=*)");
+			Dictionary<String, Object> properties = new Hashtable<>();
+			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, name1);
+			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+					"(" + HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY + "=*)");
 			long before = getHttpRuntimeChangeCount();
-			registrations.add(getBundleContext().registerService(
-					Servlet.class, new MockServlet(), properties));
+			registrations.add(getBundleContext().registerService(Servlet.class, new MockServlet(), properties));
 			before = waitForRegistration(before);
 
 			properties = new Hashtable<>();
-			properties.put(
-					HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE,
-					name2);
-			properties.put(
-					HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN,
-					"/" + name2);
-			properties.put(
-					HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
-					"(" + HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY
-							+ "=*)");
-			registrations.add(getBundleContext().registerService(
-					Servlet.class, new MockServlet(), properties));
+			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ERROR_PAGE, name2);
+			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/" + name2);
+			properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+					"(" + HttpWhiteboardConstants.HTTP_SERVICE_CONTEXT_PROPERTY + "=*)");
+			registrations.add(getBundleContext().registerService(Servlet.class, new MockServlet(), properties));
 			before = waitForRegistration(before);
 
 			assertNull(getFailedErrorPageDTOByException(name1));
-			assertNotNull("" + getHttpServiceRuntime().getRuntimeDTO(),
-					getFailedErrorPageDTOByException(name2));
+			assertNotNull("" + getHttpServiceRuntime().getRuntimeDTO(), getFailedErrorPageDTOByException(name2));
 
 			final ServletContextDTO scDTO = getServletContextDTOForDummyServlet();
 			assertNotNull(getErrorPageDTOByException(scDTO.name, name1));

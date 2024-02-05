@@ -21,9 +21,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * An authorization engine is used to grant authorization to {@link SignedContent}.
- * For example, an engine could determine if <code>SignedContent</code> is authorized
- * to enable code from a signed bundle.
+ * An authorization engine is used to grant authorization to
+ * {@link SignedContent}. For example, an engine could determine if
+ * <code>SignedContent</code> is authorized to enable code from a signed bundle.
+ * 
  * @since 3.4
  */
 public abstract class AuthorizationEngine {
@@ -38,12 +39,14 @@ public abstract class AuthorizationEngine {
 	}
 
 	/**
-	 * Authorizes a <code>SignedContent</code> object.  The engine determines if the
-	 * signed content authorization should be granted.  The context is the entity
-	 * associated with the signed content.  For example, signed content
-	 * for a bundle will have a <code>Bundle</code> object as the context.
+	 * Authorizes a <code>SignedContent</code> object. The engine determines if the
+	 * signed content authorization should be granted. The context is the entity
+	 * associated with the signed content. For example, signed content for a bundle
+	 * will have a <code>Bundle</code> object as the context.
+	 * 
 	 * @param content the signed content. The value may be <code>null</code>.
-	 * @param context the context associated with the signed content. The value may be <code>null</code>.
+	 * @param context the context associated with the signed content. The value may
+	 *                be <code>null</code>.
 	 */
 	public final void authorize(SignedContent content, Object context) {
 		fireEvent(doAuthorize(content, context));
@@ -65,19 +68,21 @@ public abstract class AuthorizationEngine {
 	}
 
 	/**
-	 * Authorizes a <code>SignedContent</code> object.  The engine determines if the
+	 * Authorizes a <code>SignedContent</code> object. The engine determines if the
 	 * signed content authorization should be granted.
-	 * @param content
+	 * 
 	 * @param context the context associated with the signed content
-	 * @return an authorization event which will be fired.  A value of <code>null</code>
-	 * may be returned; in this case no authorization event will be fired.
+	 * @return an authorization event which will be fired. A value of
+	 *         <code>null</code> may be returned; in this case no authorization
+	 *         event will be fired.
 	 */
 	protected abstract AuthorizationEvent doAuthorize(SignedContent content, Object context);
 
 	/**
 	 * Return the current status of the Authorization system.
 	 *
-	 * @return A value of {@link AuthorizationStatus#OK} or {@link AuthorizationStatus#ERROR}
+	 * @return A value of {@link AuthorizationStatus#OK} or
+	 *         {@link AuthorizationStatus#ERROR}
 	 * @see AuthorizationStatus#OK
 	 * @see AuthorizationStatus#ERROR
 	 */
@@ -85,7 +90,8 @@ public abstract class AuthorizationEngine {
 
 	class AuthEventDispatcher implements EventDispatcher<AuthorizationListener, Object, AuthorizationEvent> {
 		@Override
-		public void dispatchEvent(AuthorizationListener eventListener, Object listenerObject, int eventAction, AuthorizationEvent eventObject) {
+		public void dispatchEvent(AuthorizationListener eventListener, Object listenerObject, int eventAction,
+				AuthorizationEvent eventObject) {
 			eventListener.authorizationEvent(eventObject);
 		}
 	}

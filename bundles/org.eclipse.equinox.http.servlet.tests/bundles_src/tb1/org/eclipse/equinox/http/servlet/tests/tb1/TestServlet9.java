@@ -36,6 +36,7 @@ public class TestServlet9 extends AbstractTestServlet {
 	private static final long serialVersionUID = 1L;
 
 	private final DispatchTo dispatchTo = new DispatchTo();
+
 	@Override
 	public void activate(ComponentContext componentContext) throws ServletException, NamespaceException {
 		HttpService service = getHttpService();
@@ -47,10 +48,10 @@ public class TestServlet9 extends AbstractTestServlet {
 
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response)
-		throws ServletException, IOException {
+			throws ServletException, IOException {
 
-		RequestDispatcher requestDispatcher =
-			request.getServletContext().getNamedDispatcher(DispatchTo.class.getName());
+		RequestDispatcher requestDispatcher = request.getServletContext()
+				.getNamedDispatcher(DispatchTo.class.getName());
 
 		requestDispatcher.include(request, response);
 	}
@@ -62,10 +63,11 @@ public class TestServlet9 extends AbstractTestServlet {
 
 	class DispatchTo extends AbstractTestServlet {
 		private static final long serialVersionUID = 1L;
+
 		@Override
 		protected void handleDoGet(HttpServletRequest request, PrintWriter writer) {
 			writer.print(TestServlet9.this.getProperties().get(Constants.SERVICE_DESCRIPTION));
 		}
-		
+
 	}
 }

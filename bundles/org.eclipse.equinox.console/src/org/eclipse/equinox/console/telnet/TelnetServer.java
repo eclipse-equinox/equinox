@@ -27,37 +27,34 @@ import org.apache.felix.service.command.CommandProcessor;
 import org.osgi.framework.BundleContext;
 
 /**
- * A telnet server, which listens for telnet connections and starts a telnet connection manager
- * when a connection is accepted. If there are multiple CommandProcessor, a telnet connection
- * is created for each of them.
- *
+ * A telnet server, which listens for telnet connections and starts a telnet
+ * connection manager when a connection is accepted. If there are multiple
+ * CommandProcessor, a telnet connection is created for each of them.
  */
 public class TelnetServer extends Thread {
-	
+
 	private ServerSocket server;
 	private boolean isRunning = true;
 	private List<CommandProcessor> processors = null;
 	private BundleContext context;
 	private List<Socket> sockets = new ArrayList<>();
 	private Map<CommandProcessor, List<TelnetConnection>> processorToConnectionsMapping = new HashMap<>();
-	
-	public TelnetServer(BundleContext context, List<CommandProcessor> processors, String host, int port) throws IOException {
+
+	public TelnetServer(BundleContext context, List<CommandProcessor> processors, String host, int port)
+			throws IOException {
 		this.context = context;
 		this.processors = processors;
-		if(host != null) {
+		if (host != null) {
 			server = new ServerSocket(port, 0, InetAddress.getByName(host));
 		} else {
 			server = new ServerSocket(port);
 		}
 	}
-	
+
 	@Override
-	public void run()
-	{
-		try
-		{
-			while (isRunning)
-			{
+	public void run() {
+		try {
+			while (isRunning) {
 				final Socket socket = server.accept();
 				sockets.add(socket);
 				for (CommandProcessor processor : processors) {
@@ -81,12 +78,12 @@ public class TelnetServer extends Thread {
 				if (server != null) {
 					server.close();
 				}
-			} catch (IOException e){
+			} catch (IOException e) {
 				// do nothing
 			}
 		}
 	}
-	
+
 	public synchronized void addCommandProcessor(CommandProcessor processor) {
 		processors.add(processor);
 		if (!sockets.isEmpty()) {
@@ -99,7 +96,7 @@ public class TelnetServer extends Thread {
 			processorToConnectionsMapping.put(processor, telnetConnections);
 		}
 	}
-	
+
 	public synchronized void removeCommandProcessor(CommandProcessor processor) {
 		processors.remove(processor);
 		List<TelnetConnection> telnetConnections = processorToConnectionsMapping.remove(processor);
@@ -109,23 +106,23 @@ public class TelnetServer extends Thread {
 			}
 		}
 	}
-	
+
 	public synchronized void stopTelnetServer() {
 		isRunning = false;
 		try {
 			if (server != null) {
 				server.close();
-			}    
-		} catch (IOException e){
+			}
+		} catch (IOException e) {
 			// do nothing
 		}
-		
-		for(List<TelnetConnection> telnetConnections : processorToConnectionsMapping.values()) {
+
+		for (List<TelnetConnection> telnetConnections : processorToConnectionsMapping.values()) {
 			for (TelnetConnection telnetConnection : telnetConnections) {
 				telnetConnection.close();
 			}
 		}
-		
+
 		this.interrupt();
 	}
 }

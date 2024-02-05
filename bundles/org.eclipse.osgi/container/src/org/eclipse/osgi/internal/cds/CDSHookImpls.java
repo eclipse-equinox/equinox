@@ -47,12 +47,13 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 	private static SharedClassHelperFactory factory = Shared.getSharedClassHelperFactory();
 
 	// With Equinox bug 226038 (v3.4), the framework will now pass an instance
-	// of BundleFileWrapperChain rather than the wrapped BundleFile.  This is
+	// of BundleFileWrapperChain rather than the wrapped BundleFile. This is
 	// so that multiple wrapping hooks can each wrap the BundleFile and all
 	// wrappers are accessible.
 	//
 	// The Wrapper chain will look like below:
-	// WrapperChain -> Wrapper<N> -> WrapperChain -> CDSBundleFile -> WrapperChain -> BundleFile
+	// WrapperChain -> Wrapper<N> -> WrapperChain -> CDSBundleFile -> WrapperChain
+	// -> BundleFile
 	//
 	private static CDSBundleFile getCDSBundleFile(BundleFile bundleFile) {
 		if (bundleFile instanceof BundleFileWrapperChain) {
@@ -62,12 +63,15 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 	}
 
 	@Override
-	public void recordClassDefine(String name, Class<?> clazz, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) { // only attempt to record the class define if:
+	public void recordClassDefine(String name, Class<?> clazz, byte[] classbytes, ClasspathEntry classpathEntry,
+			BundleEntry entry, ClasspathManager manager) { // only attempt to record the class define if:
 		// 1) the class was found (clazz != null)
 		// 2) the class has the magic class number CAFEBABE indicating a real class
 		// 3) the bundle file for the classpath entry is of type CDSBundleFile
-		// 4) class bytes is same as passed to weaving hook i.e. weaving hook did not modify the class bytes
-		if ((null == clazz) || (false == hasMagicClassNumber(classbytes)) || (null == getCDSBundleFile(classpathEntry.getBundleFile()))) {
+		// 4) class bytes is same as passed to weaving hook i.e. weaving hook did not
+		// modify the class bytes
+		if ((null == clazz) || (false == hasMagicClassNumber(classbytes))
+				|| (null == getCDSBundleFile(classpathEntry.getBundleFile()))) {
 			return;
 		}
 		try {
@@ -84,7 +88,8 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 				}
 				if (modified) {
 					// Class bytes have been modified by weaving hooks.
-					// Such classes need to be stored as Orphans, so skip the call to storeSharedClass()
+					// Such classes need to be stored as Orphans, so skip the call to
+					// storeSharedClass()
 					return;
 				}
 			}
@@ -100,10 +105,12 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 			return;
 		}
 
-		// look for the urlHelper; if it does not exist then we are not sharing for this class loader
+		// look for the urlHelper; if it does not exist then we are not sharing for this
+		// class loader
 		SharedClassURLHelper urlHelper = cdsFile.getURLHelper();
 		if (urlHelper == null) {
-			// this should never happen but just in case get the helper from the base host bundle file.
+			// this should never happen but just in case get the helper from the base host
+			// bundle file.
 			CDSBundleFile hostBundleFile = getCDSBundleFile(manager.getGeneration().getBundleFile());
 			if (null != hostBundleFile) {
 				// try getting the helper from the host base cdsFile
@@ -124,8 +131,10 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 	private boolean hasMagicClassNumber(byte[] classbytes) {
 		if (classbytes == null || classbytes.length < 4)
 			return false;
-		// TODO maybe there is a better way to do this? I'm not sure why I had to AND each byte with the value I was checking ...
-		return (classbytes[0] & 0xCA) == 0xCA && (classbytes[1] & 0xFE) == 0xFE && (classbytes[2] & 0xBA) == 0xBA && (classbytes[3] & 0xBE) == 0xBE;
+		// TODO maybe there is a better way to do this? I'm not sure why I had to AND
+		// each byte with the value I was checking ...
+		return (classbytes[0] & 0xCA) == 0xCA && (classbytes[1] & 0xFE) == 0xFE && (classbytes[2] & 0xBA) == 0xBA
+				&& (classbytes[3] & 0xBE) == 0xBE;
 	}
 
 	@Override
@@ -138,7 +147,8 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 			SharedClassURLHelper urlHelper = factory.getURLHelper(classLoader);
 			boolean minimizeUpdateChecks = urlHelper.setMinimizeUpdateChecks();
 			// set the url helper for the host base CDSBundleFile
-			CDSBundleFile hostFile = getCDSBundleFile(classLoader.getClasspathManager().getGeneration().getBundleFile());
+			CDSBundleFile hostFile = getCDSBundleFile(
+					classLoader.getClasspathManager().getGeneration().getBundleFile());
 			if (hostFile != null) {
 				hostFile.setURLHelper(urlHelper);
 				if (minimizeUpdateChecks) {
@@ -176,11 +186,13 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 	}
 
 	@Override
-	public boolean addClassPathEntry(ArrayList<ClasspathEntry> cpEntries, String cp, ClasspathManager hostmanager, Generation sourceGeneration) {
+	public boolean addClassPathEntry(ArrayList<ClasspathEntry> cpEntries, String cp, ClasspathManager hostmanager,
+			Generation sourceGeneration) {
 		CDSBundleFile hostFile = getCDSBundleFile(hostmanager.getGeneration().getBundleFile());
 		CDSBundleFile sourceFile = getCDSBundleFile(sourceGeneration.getBundleFile());
 		if ((hostFile != sourceFile) && (null != hostFile) && (null != sourceFile)) {
-			// Set the helper that got set on the host base bundle file in classLoaderCreated.
+			// Set the helper that got set on the host base bundle file in
+			// classLoaderCreated.
 			// This is to handle the case where fragments are dynamically attached
 			SharedClassURLHelper urlHelper = hostFile.getURLHelper();
 			sourceFile.setURLHelper(urlHelper);

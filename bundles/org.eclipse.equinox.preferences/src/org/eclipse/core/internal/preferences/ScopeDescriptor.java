@@ -94,7 +94,8 @@ public class ScopeDescriptor {
 				if (exception instanceof BackingStoreException)
 					bse[0] = (BackingStoreException) exception;
 				else
-					bse[0] = new BackingStoreException(NLS.bind(PrefsMessages.preferences_loadException, path), exception);
+					bse[0] = new BackingStoreException(NLS.bind(PrefsMessages.preferences_loadException, path),
+							exception);
 			}
 		};
 		SafeRunner.run(code);
@@ -118,7 +119,8 @@ public class ScopeDescriptor {
 				if (exception instanceof BackingStoreException)
 					bse[0] = (BackingStoreException) exception;
 				else
-					bse[0] = new BackingStoreException(NLS.bind(PrefsMessages.preferences_saveException, path), exception);
+					bse[0] = new BackingStoreException(NLS.bind(PrefsMessages.preferences_saveException, path),
+							exception);
 			}
 		};
 		SafeRunner.run(code);
@@ -135,18 +137,8 @@ public class ScopeDescriptor {
 	}
 
 	void removed(final String path) {
-		if (storage == null)
-			return;
-		SafeRunner.run(new ISafeRunnable() {
-			@Override
-			public void run() throws Exception {
-				storage.removed(path);
-			}
-
-			@Override
-			public void handleException(Throwable exception) {
-				// ignore here, error will be logged in saferunner
-			}
-		});
+		if (storage != null) {
+			SafeRunner.run(() -> storage.removed(path));
+		}
 	}
 }

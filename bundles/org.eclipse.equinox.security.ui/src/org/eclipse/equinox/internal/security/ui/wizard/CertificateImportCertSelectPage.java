@@ -66,7 +66,7 @@ public class CertificateImportCertSelectPage extends WizardPage implements Liste
 		certPreview = new Composite(certSelectComposite, SWT.None);
 		certPreview.setLayout(new GridLayout());
 		GridData gd = new GridData(GridData.FILL_BOTH | GridData.GRAB_HORIZONTAL);
-		//		gd.horizontalSpan = 2;
+		// gd.horizontalSpan = 2;
 		certPreview.setLayoutData(gd);
 	}
 
@@ -81,7 +81,8 @@ public class CertificateImportCertSelectPage extends WizardPage implements Liste
 		try {
 			certList = new ArrayList<>();
 			// For a set or list
-			for (Certificate certificate : certFact.generateCertificates(new FileInputStream(certImportWizard.selectedImportFile))) {
+			for (Certificate certificate : certFact
+					.generateCertificates(new FileInputStream(certImportWizard.selectedImportFile))) {
 				certList.add(certificate);
 			}
 

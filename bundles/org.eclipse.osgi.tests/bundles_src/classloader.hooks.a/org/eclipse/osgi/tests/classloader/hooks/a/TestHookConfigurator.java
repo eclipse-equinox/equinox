@@ -31,7 +31,7 @@ public class TestHookConfigurator implements HookConfigurator {
 	private static final String FILTER_CLASS_PATHS = "classloader.hooks.a.filter.class.paths";
 	private static final String PREVENT_RESOURCE_LOAD_PRE = "classloader.hooks.a.fail.resource.load.pre";
 	private static final String PREVENT_RESOURCE_LOAD_POST = "classloader.hooks.a.fail.resource.load.post";
-	final ThreadLocal<Boolean> doingRecursionLoad = new ThreadLocal<Boolean>() {
+	final ThreadLocal<Boolean> doingRecursionLoad = new ThreadLocal<>() {
 		@Override
 		protected Boolean initialValue() {
 			return false;
@@ -42,14 +42,16 @@ public class TestHookConfigurator implements HookConfigurator {
 		hookRegistry.addClassLoaderHook(new ClassLoaderHook() {
 
 			@Override
-			public boolean rejectTransformation(String name, byte[] transformedBytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
+			public boolean rejectTransformation(String name, byte[] transformedBytes, ClasspathEntry classpathEntry,
+					BundleEntry entry, ClasspathManager manager) {
 				return Boolean.getBoolean(REJECT_PROP);
 			}
 
 			@Override
-			public byte[] processClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
+			public byte[] processClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry,
+					ClasspathManager manager) {
 				if (Boolean.getBoolean(BAD_TRANSFORM_PROP)) {
-					return new byte[] {'b', 'a', 'd', 'b', 'y', 't', 'e', 's'};
+					return new byte[] { 'b', 'a', 'd', 'b', 'y', 't', 'e', 's' };
 				}
 				if (Boolean.getBoolean(RECURSION_LOAD)) {
 					if (isProcessClassRecursionSupported() && doingRecursionLoad.get()) {

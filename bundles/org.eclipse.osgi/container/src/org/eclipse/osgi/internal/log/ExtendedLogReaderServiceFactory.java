@@ -84,7 +84,8 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 		} catch (RuntimeException | LinkageError e) {
 			// "listener.logged" calls user code and might throw an unchecked exception
 			// we catch the error here to gather information on where the problem occurred.
-			// Catch linkage errors as these are generally recoverable but let other Errors propagate (see bug 222001)
+			// Catch linkage errors as these are generally recoverable but let other Errors
+			// propagate (see bug 222001)
 			getErrorStream().println("LogFilter.isLoggable threw a non-fatal unchecked exception as follows:"); //$NON-NLS-1$
 			e.printStackTrace(getErrorStream());
 		}
@@ -108,7 +109,8 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 		} catch (RuntimeException | LinkageError e) {
 			// "listener.logged" calls user code and might throw an unchecked exception
 			// we catch the error here to gather information on where the problem occurred.
-			// Catch linkage errors as these are generally recoverable but let other Errors propagate (see bug 222001)
+			// Catch linkage errors as these are generally recoverable but let other Errors
+			// propagate (see bug 222001)
 			getErrorStream().println("LogListener.logged threw a non-fatal unchecked exception as follows:"); //$NON-NLS-1$
 			e.printStackTrace(getErrorStream());
 		}
@@ -137,12 +139,14 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 	}
 
 	@Override
-	public ExtendedLogReaderServiceImpl getService(Bundle bundle, ServiceRegistration<ExtendedLogReaderServiceImpl> registration) {
+	public ExtendedLogReaderServiceImpl getService(Bundle bundle,
+			ServiceRegistration<ExtendedLogReaderServiceImpl> registration) {
 		return new ExtendedLogReaderServiceImpl(this);
 	}
 
 	@Override
-	public void ungetService(Bundle bundle, ServiceRegistration<ExtendedLogReaderServiceImpl> registration, ExtendedLogReaderServiceImpl service) {
+	public void ungetService(Bundle bundle, ServiceRegistration<ExtendedLogReaderServiceImpl> registration,
+			ExtendedLogReaderServiceImpl service) {
 		service.shutdown();
 	}
 
@@ -203,18 +207,21 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 	private int[] getCount() {
 		int[] count = nestedCallCount.get();
 		if (count == null) {
-			count = new int[] {0};
+			count = new int[] { 0 };
 			nestedCallCount.set(count);
 		}
 		return count;
 	}
 
-	void log(final Bundle bundle, final String name, final StackTraceElement stackTraceElement, final Object context, final LogLevel logLevelEnum, final int level, final String message, final ServiceReference<?> ref, final Throwable exception) {
+	void log(final Bundle bundle, final String name, final StackTraceElement stackTraceElement, final Object context,
+			final LogLevel logLevelEnum, final int level, final String message, final ServiceReference<?> ref,
+			final Throwable exception) {
 		if (System.getSecurityManager() != null) {
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
 				@Override
 				public Void run() {
-					logPrivileged(bundle, name, stackTraceElement, context, logLevelEnum, level, message, ref, exception);
+					logPrivileged(bundle, name, stackTraceElement, context, logLevelEnum, level, message, ref,
+							exception);
 					return null;
 				}
 			});
@@ -223,8 +230,10 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 		}
 	}
 
-	void logPrivileged(Bundle bundle, String name, StackTraceElement stackTraceElement, Object context, LogLevel logLevelEnum, int level, String message, ServiceReference<?> ref, Throwable exception) {
-		LogEntry logEntry = new ExtendedLogEntryImpl(bundle, name, stackTraceElement, context, logLevelEnum, level, message, ref, exception);
+	void logPrivileged(Bundle bundle, String name, StackTraceElement stackTraceElement, Object context,
+			LogLevel logLevelEnum, int level, String message, ServiceReference<?> ref, Throwable exception) {
+		LogEntry logEntry = new ExtendedLogEntryImpl(bundle, name, stackTraceElement, context, logLevelEnum, level,
+				message, ref, exception);
 		storeEntry(logEntry);
 		ArrayMap<LogListener, Object[]> listenersCopy;
 		listenersLock.readLock().lock();
@@ -274,8 +283,9 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 			Object[] listenerObjects = listenersCopy.get(listener);
 			if (listenerObjects == null) {
 				// Only create a task queue for non-SynchronousLogListeners
-				OrderedTaskQueue taskQueue = (listener instanceof SynchronousLogListener) ? null : executor.createQueue();
-				listenerObjects = new Object[] {filter, taskQueue};
+				OrderedTaskQueue taskQueue = (listener instanceof SynchronousLogListener) ? null
+						: executor.createQueue();
+				listenerObjects = new Object[] { filter, taskQueue };
 			} else if (filter != listenerObjects[0]) {
 				// update the filter
 				listenerObjects[0] = filter;
@@ -331,8 +341,8 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 }
 
 /**
-* This Executor uses OrderedTaskQueue to execute tasks in a FIFO order.
-*/
+ * This Executor uses OrderedTaskQueue to execute tasks in a FIFO order.
+ */
 class OrderedExecutor implements ThreadFactory {
 	private final int nThreads = Math.min(Runtime.getRuntime().availableProcessors(), 10);
 	private final String logThreadName;
@@ -400,13 +410,13 @@ class OrderedExecutor implements ThreadFactory {
 
 	/**
 	 * Keeps an list of ordered tasks and guarantees the tasks are run in the order
-	 * they are queued.  Tasks executed with this queue will always be run
-	 * in FIFO order and will never run in parallel to guarantee events are
-	 * received in the proper order by the listener.  Each log listener
-	 * has its own ordered task queue.
+	 * they are queued. Tasks executed with this queue will always be run in FIFO
+	 * order and will never run in parallel to guarantee events are received in the
+	 * proper order by the listener. Each log listener has its own ordered task
+	 * queue.
 	 * <p>
-	 * Note that only the execute method is thread safe.  All other methods
-	 * must be guarded by the OrderedExecutor monitor.
+	 * Note that only the execute method is thread safe. All other methods must be
+	 * guarded by the OrderedExecutor monitor.
 	 */
 	class OrderedTaskQueue {
 		private final Queue<OrderedTask> dependencyQueue = new LinkedList<>();

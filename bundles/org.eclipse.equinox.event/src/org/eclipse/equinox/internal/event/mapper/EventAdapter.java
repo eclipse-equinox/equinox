@@ -26,9 +26,6 @@ import org.osgi.service.event.EventAdmin;
 public abstract class EventAdapter {
 	final EventAdmin eventAdmin;
 
-	/**
-	 * @param eventAdmin
-	 */
 	public EventAdapter(EventAdmin eventAdmin) {
 		this.eventAdmin = eventAdmin;
 	}

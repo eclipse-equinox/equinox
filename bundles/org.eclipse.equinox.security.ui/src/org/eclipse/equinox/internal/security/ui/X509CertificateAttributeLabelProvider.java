@@ -22,15 +22,15 @@ import org.eclipse.swt.graphics.Image;
 /**
  * X509CertificateAttributeLabelProvider
  * <p>
- * Label provider for a 2 column table that shows the attributes (fields) in an X509 digital
- * certificate. 
- * See <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/security/cert/X509Certificate.html"> X509Certificate </a>
+ * Label provider for a 2 column table that shows the attributes (fields) in an
+ * X509 digital certificate. See <a href=
+ * "http://java.sun.com/j2se/1.4.2/docs/api/java/security/cert/X509Certificate.html">
+ * X509Certificate </a>
  * <p>
- * The first column is the Attribute name and the second column is the string representation of the 
- * attribute's value.
+ * The first column is the Attribute name and the second column is the string
+ * representation of the attribute's value.
  * <p>
- * Used by org.eclipse.equinox.security.ui.wizard.CertificateViewer 
- *
+ * Used by org.eclipse.equinox.security.ui.wizard.CertificateViewer
  */
 public class X509CertificateAttributeLabelProvider extends LabelProvider implements ITableLabelProvider {
 
@@ -52,14 +52,14 @@ public class X509CertificateAttributeLabelProvider extends LabelProvider impleme
 		if (element instanceof X509CertificateAttribute) {
 			X509CertificateAttribute curEntry = (X509CertificateAttribute) element;
 			switch (columnIndex) {
-				// Attribute/field Name
-				case 0 :
-					text = curEntry.getDescription();
-					break;
-				// Attribute/field string value
-				case 1 :
-					text = curEntry.getStringValue();
-					break;
+			// Attribute/field Name
+			case 0:
+				text = curEntry.getDescription();
+				break;
+			// Attribute/field string value
+			case 1:
+				text = curEntry.getStringValue();
+				break;
 			}
 		}
 		return text;

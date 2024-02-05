@@ -24,7 +24,8 @@ public class SecurityRowSnapShot implements ConditionalPermissionInfo {
 	private final PermissionInfo[] permissionInfos;
 	private final String decision;
 
-	public SecurityRowSnapShot(String name, ConditionInfo[] conditionInfos, PermissionInfo[] permissionInfos, String decision) {
+	public SecurityRowSnapShot(String name, ConditionInfo[] conditionInfos, PermissionInfo[] permissionInfos,
+			String decision) {
 		if (permissionInfos == null || permissionInfos.length == 0)
 			throw new IllegalArgumentException("It is invalid to have empty permissionInfos"); //$NON-NLS-1$
 		decision = decision.toLowerCase();

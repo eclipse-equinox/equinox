@@ -17,20 +17,20 @@ import org.eclipse.equinox.bidi.advanced.IStructuredTextExpert;
 import org.eclipse.equinox.bidi.custom.*;
 
 /**
- *  A base handler for structured text composed of text segments separated 
- *  by separators where the text segments may include delimited parts within 
- *  which separators are treated like regular characters and the delimiters 
- *  may be escaped.
- *  <p>
- *  This is similar to {@link StructuredTextDelims} except that delimiters can be escaped 
- *  using the backslash character.
- *  <ul>
- *    <li>Two consecutive backslashes in a delimited part are treated like
- *        one regular character.</li>
- *    <li>An ending delimiter preceded by an odd number of backslashes is
- *        treated like a regular character within the delimited part.</li>
- *  </ul>
- *  </p>
+ * A base handler for structured text composed of text segments separated by
+ * separators where the text segments may include delimited parts within which
+ * separators are treated like regular characters and the delimiters may be
+ * escaped.
+ * <p>
+ * This is similar to {@link StructuredTextDelims} except that delimiters can be
+ * escaped using the backslash character.
+ * </p>
+ * <ul>
+ * <li>Two consecutive backslashes in a delimited part are treated like one
+ * regular character.</li>
+ * <li>An ending delimiter preceded by an odd number of backslashes is treated
+ * like a regular character within the delimited part.</li>
+ * </ul>
  */
 public abstract class StructuredTextDelimsEsc extends StructuredTextDelims {
 
@@ -43,14 +43,14 @@ public abstract class StructuredTextDelimsEsc extends StructuredTextDelims {
 	}
 
 	/**
-	 *  Handles the text between start and end delimiters as a token.
-	 *  This method inserts a directional mark if needed at position
-	 *  <code>separLocation</code> which corresponds to a start delimiter,
-	 *  and skips until after the matching end delimiter,
-	 *  ignoring possibly escaped end delimiters.
+	 * Handles the text between start and end delimiters as a token. This method
+	 * inserts a directional mark if needed at position <code>separLocation</code>
+	 * which corresponds to a start delimiter, and skips until after the matching
+	 * end delimiter, ignoring possibly escaped end delimiters.
 	 */
 	@Override
-	public int processSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes, StructuredTextOffsets offsets, int caseNumber, int separLocation) {
+	public int processSpecial(IStructuredTextExpert expert, String text, StructuredTextCharTypes charTypes,
+			StructuredTextOffsets offsets, int caseNumber, int separLocation) {
 		StructuredTextTypeHandler.processSeparator(text, charTypes, offsets, separLocation);
 		int location = separLocation + 1;
 		char delim = getDelimiters().charAt((caseNumber * 2) - 1);

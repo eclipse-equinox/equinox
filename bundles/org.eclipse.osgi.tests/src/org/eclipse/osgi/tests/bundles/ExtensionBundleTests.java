@@ -36,7 +36,7 @@ public class ExtensionBundleTests extends AbstractBundleTests {
 	public void testFrameworkExtension01() throws Exception {
 		Bundle fwkext = installer.installBundle("ext.framework.a", false); //$NON-NLS-1$
 		Bundle importer = installer.installBundle("ext.framework.a.importer"); //$NON-NLS-1$
-		installer.resolveBundles(new Bundle[] {fwkext, importer});
+		installer.resolveBundles(new Bundle[] { fwkext, importer });
 
 		importer.start();
 		importer.stop();
@@ -50,7 +50,7 @@ public class ExtensionBundleTests extends AbstractBundleTests {
 	public void testFrameworkExtension02() throws Exception {
 		Bundle fwkext = installer.installBundle("ext.framework.a", false); //$NON-NLS-1$
 		Bundle importer = installer.installBundle("ext.framework.a.requires"); //$NON-NLS-1$
-		installer.resolveBundles(new Bundle[] {fwkext, importer});
+		installer.resolveBundles(new Bundle[] { fwkext, importer });
 
 		importer.start();
 		importer.stop();
@@ -64,7 +64,7 @@ public class ExtensionBundleTests extends AbstractBundleTests {
 	public void testExtClasspathExtension01() throws Exception {
 		Bundle fwkext = installer.installBundle("ext.extclasspath.a", false); //$NON-NLS-1$
 		Bundle importer = installer.installBundle("ext.extclasspath.a.importer"); //$NON-NLS-1$
-		installer.resolveBundles(new Bundle[] {fwkext, importer});
+		installer.resolveBundles(new Bundle[] { fwkext, importer });
 
 		importer.start();
 		importer.stop();
@@ -77,15 +77,18 @@ public class ExtensionBundleTests extends AbstractBundleTests {
 	@Test
 	public void testExtensionBundleWithRequireCapabilityOsgiEeInstalls() throws BundleException {
 		Bundle b = installer.installBundle("ext.framework.osgiee.b", false);
-		assertTrue("Could not resolve bundle: " + b, installer.resolveBundles(new Bundle[] {b}));
+		assertTrue("Could not resolve bundle: " + b, installer.resolveBundles(new Bundle[] { b }));
 		BundleWiring wiring = b.adapt(BundleWiring.class);
 		assertNotNull("No wiring for bundle: " + b, wiring);
 		List<BundleWire> allRequired = wiring.getRequiredWires(null);
 		assertEquals("Wrong number of wires: " + allRequired, 2, allRequired.size());
 		BundleWire hostWire = wiring.getRequiredWires(HostNamespace.HOST_NAMESPACE).get(0);
-		assertEquals("Wrong provider for host: " + hostWire.getProvider().getBundle(), 0, hostWire.getProvider().getBundle().getBundleId());
-		BundleWire eeWire = wiring.getRequiredWires(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE).get(0);
-		assertEquals("Wrong provider for osgi.ee: " + eeWire.getProvider().getBundle(), 0, eeWire.getProvider().getBundle().getBundleId());
+		assertEquals("Wrong provider for host: " + hostWire.getProvider().getBundle(), 0,
+				hostWire.getProvider().getBundle().getBundleId());
+		BundleWire eeWire = wiring.getRequiredWires(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE)
+				.get(0);
+		assertEquals("Wrong provider for osgi.ee: " + eeWire.getProvider().getBundle(), 0,
+				eeWire.getProvider().getBundle().getBundleId());
 	}
 
 	@Test
@@ -93,7 +96,7 @@ public class ExtensionBundleTests extends AbstractBundleTests {
 		Bundle b = installer.installBundle("ext.framework.a", false);
 		Bundle bImp = installer.installBundle("ext.framework.a.importer");
 		Bundle bReq = installer.installBundle("ext.framework.a.requires");
-		installer.resolveBundles(new Bundle[] {b, bImp, bReq});
+		installer.resolveBundles(new Bundle[] { b, bImp, bReq });
 
 		try {
 			bImp.start();
@@ -101,7 +104,9 @@ public class ExtensionBundleTests extends AbstractBundleTests {
 		} finally {
 			installer.uninstallAllBundles();
 		}
-		List<String> expectedEvents = Arrays.asList(bImp.getSymbolicName() + " STARTED", bReq.getSymbolicName() + " STARTED", bReq.getSymbolicName() + " STOPPED", bImp.getSymbolicName() + " STOPPED");
+		List<String> expectedEvents = Arrays.asList(bImp.getSymbolicName() + " STARTED",
+				bReq.getSymbolicName() + " STARTED", bReq.getSymbolicName() + " STOPPED",
+				bImp.getSymbolicName() + " STOPPED");
 		assertEquals("Expected number of events not found", expectedEvents.size(), events.size());
 		for (int i = 0; i < events.size(); i++) {
 			assertEquals("Expected event not found", expectedEvents.get(i), events.get(i));

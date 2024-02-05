@@ -29,20 +29,24 @@ import org.osgi.framework.launch.Framework;
 import org.osgi.service.resolver.ResolutionException;
 
 /**
- * A special kind of module that represents the system module for the container.  Additional
- * methods are available on the system module for operations that effect the whole container.
- * For example, initializing the container, restarting and waiting for the container to stop.
+ * A special kind of module that represents the system module for the container.
+ * Additional methods are available on the system module for operations that
+ * effect the whole container. For example, initializing the container,
+ * restarting and waiting for the container to stop.
+ * 
  * @since 3.10
  */
 public abstract class SystemModule extends Module {
 	private volatile AtomicReference<ContainerEvent> forStop = new AtomicReference<>();
 
 	public SystemModule(ModuleContainer container) {
-		super(Long.valueOf(0), Constants.SYSTEM_BUNDLE_LOCATION, container, EnumSet.of(Settings.AUTO_START, Settings.USE_ACTIVATION_POLICY), Integer.valueOf(0));
+		super(Long.valueOf(0), Constants.SYSTEM_BUNDLE_LOCATION, container,
+				EnumSet.of(Settings.AUTO_START, Settings.USE_ACTIVATION_POLICY), Integer.valueOf(0));
 	}
 
 	/**
 	 * Initializes the module container
+	 * 
 	 * @throws BundleException if an exeption occurred while initializing
 	 */
 	public final void init() throws BundleException {
@@ -119,9 +123,10 @@ public abstract class SystemModule extends Module {
 
 	/**
 	 * Waits until the module container has stopped.
+	 * 
 	 * @param timeout The amount of time to wait.
-	 * @return The container event indicated why the framework stopped
-	 * or if there was a time out waiting for stop.
+	 * @return The container event indicated why the framework stopped or if there
+	 *         was a time out waiting for stop.
 	 * @see Framework#waitForStop(long)
 	 * @throws InterruptedException if the thread was interrupted while waiting
 	 */
@@ -178,9 +183,6 @@ public abstract class SystemModule extends Module {
 		}
 	}
 
-	/**
-	 * @throws BundleException
-	 */
 	protected void initWorker() throws BundleException {
 		// Do nothing
 	}
@@ -238,8 +240,8 @@ public abstract class SystemModule extends Module {
 
 	/**
 	 * Restarts the module container.
+	 * 
 	 * @see Framework#update()
-	 * @throws BundleException
 	 */
 	public void update() throws BundleException {
 		getContainer().checkAdminPermission(getBundle(), AdminPermission.LIFECYCLE);
@@ -253,20 +255,21 @@ public abstract class SystemModule extends Module {
 		}
 		// would publish an updated event here but the listener services are down
 		switch (previousState) {
-			case STARTING :
-				init();
-				break;
-			case ACTIVE :
-				start();
-			default :
-				break;
+		case STARTING:
+			init();
+			break;
+		case ACTIVE:
+			start();
+		default:
+			break;
 		}
 	}
 
 	@Override
 	protected void startWorker() throws BundleException {
 		super.startWorker();
-		((ContainerStartLevel) getRevisions().getContainer().getFrameworkStartLevel()).doContainerStartLevel(this, ContainerStartLevel.USE_BEGINNING_START_LEVEL);
+		((ContainerStartLevel) getRevisions().getContainer().getFrameworkStartLevel()).doContainerStartLevel(this,
+				ContainerStartLevel.USE_BEGINNING_START_LEVEL);
 	}
 
 	@Override

@@ -19,7 +19,6 @@ import org.eclipse.osgi.service.resolver.*;
 
 /**
  * This class is threadsafe.
- *
  */
 final class StateDeltaImpl implements StateDelta {
 

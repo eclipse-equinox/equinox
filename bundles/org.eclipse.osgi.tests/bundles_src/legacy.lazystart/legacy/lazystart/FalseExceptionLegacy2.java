@@ -15,6 +15,7 @@ package legacy.lazystart;
 
 import org.eclipse.osgi.tests.bundles.ITestRunner;
 import legacy.lazystart.c.CTest;
+
 public class FalseExceptionLegacy2 implements ITestRunner {
 
 	@Override

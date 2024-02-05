@@ -155,7 +155,6 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 	 * Return the set of handlers which subscribe to the event topic. A set is used
 	 * to ensure a handler is not called for an event more than once.
 	 * 
-	 * @param topic
 	 * @return a set of handlers
 	 */
 	public synchronized Set<EventHandlerWrapper> getHandlers(final String topic) {
@@ -193,10 +192,6 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 	/**
 	 * Dispatches Event to EventHandlers
 	 * 
-	 * @param eventListener
-	 * @param listenerObject
-	 * @param eventAction
-	 * @param eventObject
 	 * @see org.eclipse.osgi.framework.eventmgr.EventDispatcher#dispatchEvent(java.lang.Object,
 	 *      java.lang.Object, int, java.lang.Object)
 	 */

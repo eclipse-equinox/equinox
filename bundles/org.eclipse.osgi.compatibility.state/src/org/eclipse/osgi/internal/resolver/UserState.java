@@ -42,9 +42,6 @@ public class UserState extends StateImpl {
 		return true;
 	}
 
-	/**
-	 * @throws BundleException
-	 */
 	public StateDelta compare(State baseState) throws BundleException {
 		BundleDescription[] currentBundles = this.getBundles();
 		StateDeltaImpl delta = new StateDeltaImpl(this);

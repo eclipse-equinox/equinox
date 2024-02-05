@@ -22,8 +22,8 @@ import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * LogTracker class. This class encapsulates the LogService
- * and handles all issues such as the service coming and going.
+ * LogTracker class. This class encapsulates the LogService and handles all
+ * issues such as the service coming and going.
  */
 
 public class LogTracker extends ServiceTracker {
@@ -42,7 +42,7 @@ public class LogTracker extends ServiceTracker {
 	 * Create new LogTracker.
 	 *
 	 * @param context BundleContext of parent bundle.
-	 * @param out Default PrintStream to use if LogService is unavailable.
+	 * @param out     Default PrintStream to use if LogService is unavailable.
 	 */
 	public LogTracker(BundleContext context, PrintStream out) {
 		super(context, clazz, null);
@@ -54,7 +54,7 @@ public class LogTracker extends ServiceTracker {
 
 	/*
 	 * ----------------------------------------------------------------------
-	 *      LogService Interface implementation
+	 * LogService Interface implementation
 	 * ----------------------------------------------------------------------
 	 */
 
@@ -96,47 +96,47 @@ public class LogTracker extends ServiceTracker {
 	/**
 	 * The LogService is not available so we write the message to a PrintStream.
 	 *
-	 * @param level Logging level
-	 * @param message Log message.
+	 * @param level     Logging level
+	 * @param message   Log message.
 	 * @param throwable Log exception or null if none.
 	 * @param reference ServiceReference associated with message or null if none.
 	 */
 	protected void noLogService(int level, String message, Throwable throwable, ServiceReference reference) {
 		if (out != null) {
 			synchronized (out) {
-				// Bug #113286.  If no log service present and messages are being
+				// Bug #113286. If no log service present and messages are being
 				// printed to stdout, prepend message with a timestamp.
 				timestamp = dateFormat.format(calendar.getTime());
 				out.print(timestamp + " "); //$NON-NLS-1$
 
 				switch (level) {
-					case LogService.LOG_DEBUG : {
-						out.print("Debug: "); //$NON-NLS-1$
+				case LogService.LOG_DEBUG: {
+					out.print("Debug: "); //$NON-NLS-1$
 
-						break;
-					}
-					case LogService.LOG_INFO : {
-						out.print(LogTrackerMsg.Info);
+					break;
+				}
+				case LogService.LOG_INFO: {
+					out.print(LogTrackerMsg.Info);
 
-						break;
-					}
-					case LogService.LOG_WARNING : {
-						out.print(LogTrackerMsg.Warning);
+					break;
+				}
+				case LogService.LOG_WARNING: {
+					out.print(LogTrackerMsg.Warning);
 
-						break;
-					}
-					case LogService.LOG_ERROR : {
-						out.print(LogTrackerMsg.Error);
+					break;
+				}
+				case LogService.LOG_ERROR: {
+					out.print(LogTrackerMsg.Error);
 
-						break;
-					}
-					default : {
-						out.print("["); //$NON-NLS-1$
-						out.print(LogTrackerMsg.Unknown_Log_level);
-						out.print("]: "); //$NON-NLS-1$
+					break;
+				}
+				default: {
+					out.print("["); //$NON-NLS-1$
+					out.print(LogTrackerMsg.Unknown_Log_level);
+					out.print("]: "); //$NON-NLS-1$
 
-						break;
-					}
+					break;
+				}
 				}
 
 				out.println(message);

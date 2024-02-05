@@ -20,7 +20,6 @@ import org.osgi.service.metatype.MetaTypeService;
  * {@link EquinoxObjectClassDefinition object class definitions}.
  * 
  * @since 1.2
- *
  */
 public interface EquinoxMetaTypeService extends MetaTypeService {
 	/**

@@ -25,7 +25,8 @@ public class Activator implements BundleActivator {
 
 	public void stop(BundleContext context) throws Exception {
 
-		new Service3() {/* nothing*/};
+		new Service3() {
+			/* nothing */};
 		AbstractBundleTests.simpleResults.addEvent(new BundleEvent(BundleEvent.STOPPED, context.getBundle()));
 	}
 

@@ -50,7 +50,6 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 
 	/**
 	 * Creates an empty map.
-	 *
 	 */
 	public CopyOnWriteIdentityMap() {
 		entries = empty();
@@ -235,7 +234,6 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 
 	/**
 	 * Remove all entries from the map.
-	 *
 	 */
 	@Override
 	public synchronized void clear() {

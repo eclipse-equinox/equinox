@@ -20,7 +20,7 @@ package org.eclipse.equinox.events;
  * <p>
  * For example, the following handler is registered to handle critical memory
  * events:
- * 
+ * </p>
  * <pre>
  * BundleContext context = getContext();
  * EventHandler handler = getHandler();
@@ -28,7 +28,7 @@ package org.eclipse.equinox.events;
  * ht.put(EventConstants.EVENT_TOPIC, MemoryEventConstants.TOPIC_CRITICAL);
  * context.registerService(EventHandler.class.getName(), handler, ht);
  * </pre>
- * 
+ * <p>
  * There is no policy implemented for sending memory events in Equinox or
  * Eclipse by default. Another bundle must implement the policy that determines
  * when to send memory events. This policy must use the Event Admin Service to

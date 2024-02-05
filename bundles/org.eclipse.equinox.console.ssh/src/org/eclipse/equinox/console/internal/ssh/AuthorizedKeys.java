@@ -31,7 +31,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
-
 /**
  * Reader for 'authorized_keys' file as typically found on Unix systems.
  */
@@ -48,9 +47,6 @@ public class AuthorizedKeys {
 
 		/**
 		 * Creates a new instance.
-		 *
-		 * @param message
-		 * @param cause
 		 */
 		public ParseKeyException(final String message, final Throwable cause) {
 			super(message, cause);
@@ -64,11 +60,11 @@ public class AuthorizedKeys {
 	private static final String NEWLINE = "\n";
 
 	private static byte[] asBytes(final String string) {
-			return string.getBytes(StandardCharsets.UTF_8);
+		return string.getBytes(StandardCharsets.UTF_8);
 	}
 
 	private static String asString(final byte[] bytes) {
-			return new String(bytes, StandardCharsets.UTF_8);
+		return new String(bytes, StandardCharsets.UTF_8);
 	}
 
 	public static void main(final String[] args) {
@@ -86,8 +82,6 @@ public class AuthorizedKeys {
 
 	/**
 	 * Creates a new instance.
-	 *
-	 * @throws FileNotFoundException
 	 */
 	public AuthorizedKeys(final String authorizedKeysFile) throws FileNotFoundException, IOException {
 		// read file line-by-line
@@ -179,20 +173,20 @@ public class AuthorizedKeys {
 
 		// parse key
 		switch (type) {
-			case RSA:
-				// exponent + modulus
-				final BigInteger pubExp = readBigInteger(buffer);
-				final BigInteger mod = readBigInteger(buffer);
-				return KeyFactory.getInstance(KeyType.RSA.name()).generatePublic(new RSAPublicKeySpec(mod, pubExp));
-			case DSA:
-				// p + q+ g + y
-				final BigInteger p = readBigInteger(buffer);
-				final BigInteger q = readBigInteger(buffer);
-				final BigInteger g = readBigInteger(buffer);
-				final BigInteger y = readBigInteger(buffer);
-				return KeyFactory.getInstance(KeyType.DSA.name()).generatePublic(new DSAPublicKeySpec(y, p, q, g));
-			default:
-				throw new IOException("not implemented: " + type);
+		case RSA:
+			// exponent + modulus
+			final BigInteger pubExp = readBigInteger(buffer);
+			final BigInteger mod = readBigInteger(buffer);
+			return KeyFactory.getInstance(KeyType.RSA.name()).generatePublic(new RSAPublicKeySpec(mod, pubExp));
+		case DSA:
+			// p + q+ g + y
+			final BigInteger p = readBigInteger(buffer);
+			final BigInteger q = readBigInteger(buffer);
+			final BigInteger g = readBigInteger(buffer);
+			final BigInteger y = readBigInteger(buffer);
+			return KeyFactory.getInstance(KeyType.DSA.name()).generatePublic(new DSAPublicKeySpec(y, p, q, g));
+		default:
+			throw new IOException("not implemented: " + type);
 		}
 	}
 

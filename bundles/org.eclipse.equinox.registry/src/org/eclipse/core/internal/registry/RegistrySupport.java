@@ -17,18 +17,16 @@ import java.util.ResourceBundle;
 import org.eclipse.core.runtime.IStatus;
 
 /**
- * Simple implementation if the registry support functionality.
- * The logging output is done onto System.out (for both specific and generic logs)
- * in the following format:
+ * Simple implementation if the registry support functionality. The logging
+ * output is done onto System.out (for both specific and generic logs) in the
+ * following format:
  *
- * [Error|Warning|Log]: Main error message
- * [Error|Warning|Log]: Child error message 1
- * 	...
- * [Error|Warning|Log]: Child error message N
+ * [Error|Warning|Log]: Main error message [Error|Warning|Log]: Child error
+ * message 1 ... [Error|Warning|Log]: Child error message N
  *
- * The translation routine assumes that keys are prefixed with '%'. If no resource
- * bundle is present, the key itself (without leading '%') is returned. There is
- * no decoding for the leading '%%'.
+ * The translation routine assumes that keys are prefixed with '%'. If no
+ * resource bundle is present, the key itself (without leading '%') is returned.
+ * There is no decoding for the leading '%%'.
  */
 public class RegistrySupport {
 
@@ -51,15 +49,15 @@ public class RegistrySupport {
 
 		String statusMsg;
 		switch (severity) {
-			case IStatus.ERROR :
-				statusMsg = RegistryMessages.log_error;
-				break;
-			case IStatus.WARNING :
-				statusMsg = RegistryMessages.log_warning;
-				break;
-			default :
-				statusMsg = RegistryMessages.log_log;
-				break;
+		case IStatus.ERROR:
+			statusMsg = RegistryMessages.log_error;
+			break;
+		case IStatus.WARNING:
+			statusMsg = RegistryMessages.log_warning;
+			break;
+		default:
+			statusMsg = RegistryMessages.log_log;
+			break;
 		}
 		statusMsg += message;
 

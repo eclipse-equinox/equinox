@@ -20,15 +20,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * This class adds to the output stream wrapper initial negotiation of telnet communication.
+ * This class adds to the output stream wrapper initial negotiation of telnet
+ * communication.
  */
 public class TelnetOutputStream extends ConsoleOutputStream {
-	
-	static final byte[] autoMessage = new byte[]{(byte) 255, (byte) 251, (byte) 1, // IAC WILL ECHO
-												 (byte) 255, (byte) 251, (byte) 3, // IAC WILL SUPPRESS GO_AHEAD
-												 (byte) 255, (byte) 253, (byte) 31, // IAC DO NAWS
-												 (byte) 255, (byte) 253, (byte) 24}; // IAC DO TTYPE
-	
+
+	static final byte[] autoMessage = new byte[] { (byte) 255, (byte) 251, (byte) 1, // IAC WILL ECHO
+			(byte) 255, (byte) 251, (byte) 3, // IAC WILL SUPPRESS GO_AHEAD
+			(byte) 255, (byte) 253, (byte) 31, // IAC DO NAWS
+			(byte) 255, (byte) 253, (byte) 24 }; // IAC DO TTYPE
+
 	public TelnetOutputStream(OutputStream out) {
 		super(out);
 	}

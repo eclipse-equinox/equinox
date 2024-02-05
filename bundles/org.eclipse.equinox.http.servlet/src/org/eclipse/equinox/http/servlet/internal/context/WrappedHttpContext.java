@@ -36,9 +36,7 @@ public class WrappedHttpContext extends DefaultServletContextHelper {
 	}
 
 	@Override
-	public boolean handleSecurity(
-		HttpServletRequest request, HttpServletResponse response)
-		throws IOException {
+	public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		return httpContext.handleSecurity(request, response);
 	}
 
@@ -58,8 +56,7 @@ public class WrappedHttpContext extends DefaultServletContextHelper {
 			return null;
 		}
 
-		final Enumeration<URL> enumeration = bundle.findEntries(
-			path, null, false);
+		final Enumeration<URL> enumeration = bundle.findEntries(path, null, false);
 
 		if (enumeration == null) {
 			return null;

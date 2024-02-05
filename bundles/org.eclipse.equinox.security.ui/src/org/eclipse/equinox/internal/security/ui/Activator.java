@@ -187,7 +187,6 @@ public class Activator extends AbstractUIPlugin {
 	/**
 	 * Get the workbench image with the given path relative to ICON_PATH.
 	 * 
-	 * @param relativePath
 	 * @return ImageDescriptor
 	 */
 	public static ImageDescriptor getImageDescriptor(String relativePath) {

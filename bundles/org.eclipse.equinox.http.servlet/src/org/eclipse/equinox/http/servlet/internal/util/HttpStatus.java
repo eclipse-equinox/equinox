@@ -43,7 +43,7 @@ public enum HttpStatus {
 	RESET_CONTENT(205, "Reset Content", "RFC7231"), //$NON-NLS-1$ //$NON-NLS-2$
 
 	PARTIAL_CONTENT(206, "Partial Content", "RFC7233"), //$NON-NLS-1$ //$NON-NLS-2$
-	/** )*/
+	/** ) */
 	MULTI_STATUS(207, "Partial Update OK", "RFC4918"), //$NON-NLS-1$ //$NON-NLS-2$
 
 	ALREADY_REPORTED(208, "Already Reported", "RFC5842"), //$NON-NLS-1$ //$NON-NLS-2$

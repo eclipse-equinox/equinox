@@ -22,22 +22,17 @@ import org.eclipse.osgi.storage.bundlefile.BundleFileWrapper;
 
 public abstract class AbstractWeavingBundleFile extends BundleFileWrapper {
 
-    private final BundleAdaptorProvider adaptorProvider;
+	private final BundleAdaptorProvider adaptorProvider;
 
-    protected BundleFile delegate;
+	protected BundleFile delegate;
 
-    public AbstractWeavingBundleFile(
-            final BundleAdaptorProvider adaptorProvider,
-            final BundleFile bundleFile) {
-        super(bundleFile);
-        this.adaptorProvider = adaptorProvider;
-        this.delegate = bundleFile;
-    }
+	public AbstractWeavingBundleFile(final BundleAdaptorProvider adaptorProvider, final BundleFile bundleFile) {
+		super(bundleFile);
+		this.adaptorProvider = adaptorProvider;
+		this.delegate = bundleFile;
+	}
 
-    /**
-     * @return
-     */
-    public IWeavingAdaptor getAdaptor() {
-        return this.adaptorProvider.getAdaptor();
-    }
+	public IWeavingAdaptor getAdaptor() {
+		return this.adaptorProvider.getAdaptor();
+	}
 }

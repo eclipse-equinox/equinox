@@ -45,226 +45,211 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class WeavingAdaptorFactory {
 
-    private static final Collection<String> IGNORE_WEAVING_SERVICE_BUNDLES = Arrays
-            .asList(new String[] { "org.eclipse.equinox.weaving.aspectj", //$NON-NLS-1$
-                    "org.eclipse.equinox.weaving.caching", //$NON-NLS-1$
-                    "org.eclipse.equinox.weaving.caching.j9", //$NON-NLS-1$
-                    "org.eclipse.equinox.simpleconfigurator", //$NON-NLS-1$
-                    "org.eclipse.equinox.common" }); //$NON-NLS-1$
+	private static final Collection<String> IGNORE_WEAVING_SERVICE_BUNDLES = Arrays
+			.asList(new String[] { "org.eclipse.equinox.weaving.aspectj", //$NON-NLS-1$
+					"org.eclipse.equinox.weaving.caching", //$NON-NLS-1$
+					"org.eclipse.equinox.weaving.caching.j9", //$NON-NLS-1$
+					"org.eclipse.equinox.simpleconfigurator", //$NON-NLS-1$
+					"org.eclipse.equinox.common" }); //$NON-NLS-1$
 
-    private ServiceTracker<ICachingServiceFactory, ICachingServiceFactory> cachingServiceFactoryTracker;
+	private ServiceTracker<ICachingServiceFactory, ICachingServiceFactory> cachingServiceFactoryTracker;
 
-    private PackageAdmin packageAdminService;
+	private PackageAdmin packageAdminService;
 
-    private StartLevel startLevelService;
+	private StartLevel startLevelService;
 
-    private ISupplementerRegistry supplementerRegistry;
+	private ISupplementerRegistry supplementerRegistry;
 
-    private ServiceTracker<IWeavingServiceFactory, IWeavingServiceFactory> weavingServiceFactoryTracker;
+	private ServiceTracker<IWeavingServiceFactory, IWeavingServiceFactory> weavingServiceFactoryTracker;
 
-    private ServiceListener weavingServiceListener;
+	private ServiceListener weavingServiceListener;
 
-    private final Map<Bundle, IWeavingService> weavingServices = new ConcurrentHashMap<>();
+	private final Map<Bundle, IWeavingService> weavingServices = new ConcurrentHashMap<>();
 
-    public WeavingAdaptorFactory() {
-    }
+	public WeavingAdaptorFactory() {
+	}
 
-    public void dispose(final BundleContext context) {
+	public void dispose(final BundleContext context) {
 
-        context.removeServiceListener(weavingServiceListener);
-        if (Debug.DEBUG_WEAVE)
-            Debug.println("> Removed service listener for weaving service."); //$NON-NLS-1$
+		context.removeServiceListener(weavingServiceListener);
+		if (Debug.DEBUG_WEAVE)
+			Debug.println("> Removed service listener for weaving service."); //$NON-NLS-1$
 
-        weavingServiceFactoryTracker.close();
-        if (Debug.DEBUG_WEAVE)
-            Debug.println("> Closed service tracker for weaving service."); //$NON-NLS-1$
+		weavingServiceFactoryTracker.close();
+		if (Debug.DEBUG_WEAVE)
+			Debug.println("> Closed service tracker for weaving service."); //$NON-NLS-1$
 
-        cachingServiceFactoryTracker.close();
-        if (Debug.DEBUG_CACHE)
-            Debug.println("> Closed service tracker for caching service."); //$NON-NLS-1$
-    }
+		cachingServiceFactoryTracker.close();
+		if (Debug.DEBUG_CACHE)
+			Debug.println("> Closed service tracker for caching service."); //$NON-NLS-1$
+	}
 
-    protected ICachingService getCachingService(final ModuleClassLoader loader,
-            final Bundle bundle, final IWeavingService weavingService) {
-        if (Debug.DEBUG_CACHE)
-            Debug.println("> WeavingAdaptorFactory.getCachingService() bundle=" //$NON-NLS-1$
-                    + bundle + ", weavingService=" + weavingService); //$NON-NLS-1$
-        ICachingService service = null;
-        String key = ""; //$NON-NLS-1$
+	protected ICachingService getCachingService(final ModuleClassLoader loader, final Bundle bundle,
+			final IWeavingService weavingService) {
+		if (Debug.DEBUG_CACHE)
+			Debug.println("> WeavingAdaptorFactory.getCachingService() bundle=" //$NON-NLS-1$
+					+ bundle + ", weavingService=" + weavingService); //$NON-NLS-1$
+		ICachingService service = null;
+		String key = ""; //$NON-NLS-1$
 
-        if (weavingService != null) {
-            key = weavingService.getKey();
-        }
-        final ICachingServiceFactory cachingServiceFactory = cachingServiceFactoryTracker
-                .getService();
-        if (cachingServiceFactory != null) {
-            service = cachingServiceFactory.createCachingService(loader, bundle,
-                    key);
-        }
-        if (Debug.DEBUG_CACHE)
-            Debug.println("< WeavingAdaptorFactory.getCachingService() service=" //$NON-NLS-1$
-                    + service + ", key='" + key + "'"); //$NON-NLS-1$ //$NON-NLS-2$
-        return service;
-    }
+		if (weavingService != null) {
+			key = weavingService.getKey();
+		}
+		final ICachingServiceFactory cachingServiceFactory = cachingServiceFactoryTracker.getService();
+		if (cachingServiceFactory != null) {
+			service = cachingServiceFactory.createCachingService(loader, bundle, key);
+		}
+		if (Debug.DEBUG_CACHE)
+			Debug.println("< WeavingAdaptorFactory.getCachingService() service=" //$NON-NLS-1$
+					+ service + ", key='" + key + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+		return service;
+	}
 
-    public Bundle getHost(final Bundle fragment) {
-        if (Debug.DEBUG_GENERAL) Debug.println(
-                "> WeavingAdaptorFactory.getHost() fragment=" + fragment); //$NON-NLS-1$
+	public Bundle getHost(final Bundle fragment) {
+		if (Debug.DEBUG_GENERAL)
+			Debug.println("> WeavingAdaptorFactory.getHost() fragment=" + fragment); //$NON-NLS-1$
 
-        Bundle host = null;
-        if (packageAdminService != null)
-            host = packageAdminService.getHosts(fragment)[0];
+		Bundle host = null;
+		if (packageAdminService != null)
+			host = packageAdminService.getHosts(fragment)[0];
 
-        if (Debug.DEBUG_GENERAL)
-            Debug.println("< WeavingAdaptorFactory.getHost() " + host); //$NON-NLS-1$
-        return host;
-    }
+		if (Debug.DEBUG_GENERAL)
+			Debug.println("< WeavingAdaptorFactory.getHost() " + host); //$NON-NLS-1$
+		return host;
+	}
 
-    protected IWeavingService getWeavingService(
-            final ModuleClassLoader loader) {
-        if (Debug.DEBUG_WEAVE) Debug.println(
-                "> WeavingAdaptorFactory.getWeavingService() baseClassLoader=" //$NON-NLS-1$
-                        + loader);
+	protected IWeavingService getWeavingService(final ModuleClassLoader loader) {
+		if (Debug.DEBUG_WEAVE)
+			Debug.println("> WeavingAdaptorFactory.getWeavingService() baseClassLoader=" //$NON-NLS-1$
+					+ loader);
 
-        final Generation generation = loader.getClasspathManager()
-                .getGeneration();
-        final Bundle bundle = loader.getBundle();
+		final Generation generation = loader.getClasspathManager().getGeneration();
+		final Bundle bundle = loader.getBundle();
 
-        IWeavingService weavingService = null;
-        if (!IGNORE_WEAVING_SERVICE_BUNDLES
-                .contains(bundle.getSymbolicName())) {
-            final IWeavingServiceFactory weavingServiceFactory = weavingServiceFactoryTracker
-                    .getService();
-            if (weavingServiceFactory != null) {
-                weavingService = weavingServiceFactory.createWeavingService(
-                        loader, bundle, generation.getRevision(),
-                        supplementerRegistry);
+		IWeavingService weavingService = null;
+		if (!IGNORE_WEAVING_SERVICE_BUNDLES.contains(bundle.getSymbolicName())) {
+			final IWeavingServiceFactory weavingServiceFactory = weavingServiceFactoryTracker.getService();
+			if (weavingServiceFactory != null) {
+				weavingService = weavingServiceFactory.createWeavingService(loader, bundle, generation.getRevision(),
+						supplementerRegistry);
 
-                if (weavingService != null) {
-                    weavingServices.put(bundle, weavingService);
-                }
-            }
-        }
-        if (Debug.DEBUG_WEAVE)
-            Debug.println("< WeavingAdaptorFactory.getWeavingService() service=" //$NON-NLS-1$
-                    + weavingService);
-        return weavingService;
-    }
+				if (weavingService != null) {
+					weavingServices.put(bundle, weavingService);
+				}
+			}
+		}
+		if (Debug.DEBUG_WEAVE)
+			Debug.println("< WeavingAdaptorFactory.getWeavingService() service=" //$NON-NLS-1$
+					+ weavingService);
+		return weavingService;
+	}
 
-    public void initialize(final BundleContext context,
-            final ISupplementerRegistry supplementerRegistry) {
-        if (Debug.DEBUG_GENERAL)
-            Debug.println("> WeavingAdaptorFactory.initialize() context=" //$NON-NLS-1$
-                    + context);
-        this.supplementerRegistry = supplementerRegistry;
+	public void initialize(final BundleContext context, final ISupplementerRegistry supplementerRegistry) {
+		if (Debug.DEBUG_GENERAL)
+			Debug.println("> WeavingAdaptorFactory.initialize() context=" //$NON-NLS-1$
+					+ context);
+		this.supplementerRegistry = supplementerRegistry;
 
-        initializePackageAdminService(context);
-        initializeStartLevelService(context);
+		initializePackageAdminService(context);
+		initializeStartLevelService(context);
 
-        // Service tracker for weaving service
-        weavingServiceFactoryTracker = new ServiceTracker<>(
-                context, IWeavingServiceFactory.class, null);
-        weavingServiceFactoryTracker.open();
-        if (Debug.DEBUG_WEAVE)
-            Debug.println("> Opened service tracker for weaving service."); //$NON-NLS-1$
+		// Service tracker for weaving service
+		weavingServiceFactoryTracker = new ServiceTracker<>(context, IWeavingServiceFactory.class, null);
+		weavingServiceFactoryTracker.open();
+		if (Debug.DEBUG_WEAVE)
+			Debug.println("> Opened service tracker for weaving service."); //$NON-NLS-1$
 
-        // Service listener for weaving service
-        weavingServiceListener = new ServiceListener() {
+		// Service listener for weaving service
+		weavingServiceListener = new ServiceListener() {
 
-            @Override
-            public void serviceChanged(final ServiceEvent event) {
-                if (event.getType() == ServiceEvent.REGISTERED) {
-                    final List<Bundle> bundlesToRefresh = new ArrayList<>();
+			@Override
+			public void serviceChanged(final ServiceEvent event) {
+				if (event.getType() == ServiceEvent.REGISTERED) {
+					final List<Bundle> bundlesToRefresh = new ArrayList<>();
 
-                    synchronized (weavingServices) {
-                        final Iterator<Bundle> bundleEntries = weavingServices
-                                .keySet().iterator();
-                        while (bundleEntries.hasNext()) {
-                            final Bundle bundle = bundleEntries.next();
-                            bundleEntries.remove();
-                            bundlesToRefresh.add(bundle);
-                            if (Debug.DEBUG_WEAVE)
-                                Debug.println("> Updated bundle " //$NON-NLS-1$
-                                        + bundle.getSymbolicName());
-                        }
-                    }
+					synchronized (weavingServices) {
+						final Iterator<Bundle> bundleEntries = weavingServices.keySet().iterator();
+						while (bundleEntries.hasNext()) {
+							final Bundle bundle = bundleEntries.next();
+							bundleEntries.remove();
+							bundlesToRefresh.add(bundle);
+							if (Debug.DEBUG_WEAVE)
+								Debug.println("> Updated bundle " //$NON-NLS-1$
+										+ bundle.getSymbolicName());
+						}
+					}
 
-                    if (bundlesToRefresh.size() > 0) {
-                        supplementerRegistry.refreshBundles(bundlesToRefresh
-                                .toArray(new Bundle[bundlesToRefresh.size()]));
-                    }
-                }
-                if (event.getType() == ServiceEvent.UNREGISTERING
-                        && startLevelService != null
-                        && startLevelService.getStartLevel() > 0) {
-                    final List<Bundle> bundlesToRefresh = new ArrayList<>();
+					if (bundlesToRefresh.size() > 0) {
+						supplementerRegistry
+								.refreshBundles(bundlesToRefresh.toArray(new Bundle[bundlesToRefresh.size()]));
+					}
+				}
+				if (event.getType() == ServiceEvent.UNREGISTERING && startLevelService != null
+						&& startLevelService.getStartLevel() > 0) {
+					final List<Bundle> bundlesToRefresh = new ArrayList<>();
 
-                    synchronized (weavingServices) {
-                        final Iterator<Bundle> bundleEntries = weavingServices
-                                .keySet().iterator();
-                        while (bundleEntries.hasNext()) {
-                            final Bundle bundle = bundleEntries.next();
-                            bundleEntries.remove();
-                            bundlesToRefresh.add(bundle);
-                            if (Debug.DEBUG_WEAVE)
-                                Debug.println("> Updated bundle " //$NON-NLS-1$
-                                        + bundle.getSymbolicName());
-                        }
-                    }
-                    if (bundlesToRefresh.size() > 0) {
-                        supplementerRegistry.refreshBundles(bundlesToRefresh
-                                .toArray(new Bundle[bundlesToRefresh.size()]));
-                    }
-                }
-            }
-        };
+					synchronized (weavingServices) {
+						final Iterator<Bundle> bundleEntries = weavingServices.keySet().iterator();
+						while (bundleEntries.hasNext()) {
+							final Bundle bundle = bundleEntries.next();
+							bundleEntries.remove();
+							bundlesToRefresh.add(bundle);
+							if (Debug.DEBUG_WEAVE)
+								Debug.println("> Updated bundle " //$NON-NLS-1$
+										+ bundle.getSymbolicName());
+						}
+					}
+					if (bundlesToRefresh.size() > 0) {
+						supplementerRegistry
+								.refreshBundles(bundlesToRefresh.toArray(new Bundle[bundlesToRefresh.size()]));
+					}
+				}
+			}
+		};
 
-        //        if (System.getProperty(WEAVING_SERVICE_DYNAMICS_PROPERTY, "false")
-        //                .equals("true")) {
-        try {
-            context.addServiceListener(weavingServiceListener, "(" //$NON-NLS-1$
-                    + Constants.OBJECTCLASS + "=" //$NON-NLS-1$
-                    + IWeavingServiceFactory.class.getName() + ")"); //$NON-NLS-1$
-        } catch (final InvalidSyntaxException e) { // This is correct!
-        }
+		// if (System.getProperty(WEAVING_SERVICE_DYNAMICS_PROPERTY, "false")
+		// .equals("true")) {
+		try {
+			context.addServiceListener(weavingServiceListener, "(" //$NON-NLS-1$
+					+ Constants.OBJECTCLASS + "=" //$NON-NLS-1$
+					+ IWeavingServiceFactory.class.getName() + ")"); //$NON-NLS-1$
+		} catch (final InvalidSyntaxException e) { // This is correct!
+		}
 
-        // Service tracker for caching service
-        cachingServiceFactoryTracker = new ServiceTracker<>(
-                context, ICachingServiceFactory.class, null);
-        cachingServiceFactoryTracker.open();
-        if (Debug.DEBUG_CACHE)
-            Debug.println("> Opened service tracker for caching service."); //$NON-NLS-1$
-    }
+		// Service tracker for caching service
+		cachingServiceFactoryTracker = new ServiceTracker<>(context, ICachingServiceFactory.class, null);
+		cachingServiceFactoryTracker.open();
+		if (Debug.DEBUG_CACHE)
+			Debug.println("> Opened service tracker for caching service."); //$NON-NLS-1$
+	}
 
-    private void initializePackageAdminService(final BundleContext context) {
-        if (Debug.DEBUG_GENERAL) Debug.println(
-                "> AdaptorFactory.initializePackageAdminService() context=" //$NON-NLS-1$
-                        + context);
+	private void initializePackageAdminService(final BundleContext context) {
+		if (Debug.DEBUG_GENERAL)
+			Debug.println("> AdaptorFactory.initializePackageAdminService() context=" //$NON-NLS-1$
+					+ context);
 
-        final ServiceReference<PackageAdmin> ref = context
-                .getServiceReference(PackageAdmin.class);
-        if (ref != null) {
-            packageAdminService = context.getService(ref);
-        }
+		final ServiceReference<PackageAdmin> ref = context.getServiceReference(PackageAdmin.class);
+		if (ref != null) {
+			packageAdminService = context.getService(ref);
+		}
 
-        if (Debug.DEBUG_GENERAL)
-            Debug.println("< AdaptorFactory.initializePackageAdminService() " //$NON-NLS-1$
-                    + packageAdminService);
-    }
+		if (Debug.DEBUG_GENERAL)
+			Debug.println("< AdaptorFactory.initializePackageAdminService() " //$NON-NLS-1$
+					+ packageAdminService);
+	}
 
-    private void initializeStartLevelService(final BundleContext context) {
-        if (Debug.DEBUG_GENERAL) Debug.println(
-                "> AdaptorFactory.initializeStartLevelService() context=" //$NON-NLS-1$
-                        + context);
+	private void initializeStartLevelService(final BundleContext context) {
+		if (Debug.DEBUG_GENERAL)
+			Debug.println("> AdaptorFactory.initializeStartLevelService() context=" //$NON-NLS-1$
+					+ context);
 
-        final ServiceReference<StartLevel> ref = context
-                .getServiceReference(StartLevel.class);
-        if (ref != null) {
-            startLevelService = context.getService(ref);
-        }
+		final ServiceReference<StartLevel> ref = context.getServiceReference(StartLevel.class);
+		if (ref != null) {
+			startLevelService = context.getService(ref);
+		}
 
-        if (Debug.DEBUG_GENERAL)
-            Debug.println("< AdaptorFactory.initializeStartLevelService() " //$NON-NLS-1$
-                    + startLevelService);
-    }
+		if (Debug.DEBUG_GENERAL)
+			Debug.println("< AdaptorFactory.initializeStartLevelService() " //$NON-NLS-1$
+					+ startLevelService);
+	}
 }

@@ -46,7 +46,7 @@ import org.eclipse.osgi.container.ModuleWire;
  */
 public class NamespaceList<E> {
 
-	public final static Function<ModuleWire, String> WIRE = new Function<ModuleWire, String>() { 
+	public final static Function<ModuleWire, String> WIRE = new Function<ModuleWire, String>() {
 		public String apply(ModuleWire wire) {
 			return wire.getCapability().getNamespace();
 		}
@@ -156,9 +156,9 @@ public class NamespaceList<E> {
 
 		private final Function<E, String> getNamespace;
 		private LinkedHashMap<String, List<E>> namespaceElements;
-		private int size = 0;
+		int size = 0;
 
-		private List<E> lastBuildElements;
+		List<E> lastBuildElements;
 
 		private Builder(Function<E, String> getNamespace, int expectedNamespaces) {
 			this.getNamespace = getNamespace;
@@ -196,7 +196,6 @@ public class NamespaceList<E> {
 				}
 
 				@Override
-				@SuppressWarnings("synthetic-access")
 				public void remove() {
 					inner.remove();
 					Builder.this.size--;
@@ -258,7 +257,7 @@ public class NamespaceList<E> {
 		public <R> Builder<R> transformIntoCopy(Function<E, R> transformation, Function<R, String> newGetNamespace) {
 			Builder<R> transformedBuilder = new Builder<>(newGetNamespace, this.namespaceElements.size());
 			transformedBuilder.size = this.size;
-                        for (Map.Entry<String, List<E>> entry : namespaceElements.entrySet()) {
+			for (Map.Entry<String, List<E>> entry : namespaceElements.entrySet()) {
 				List<E> es = entry.getValue();
 				List<R> transformedElements = new ArrayList<>(es.size());
 				for (E e : es) {
@@ -353,7 +352,6 @@ public class NamespaceList<E> {
 		 *                        elements should not be excluded from being added
 		 * @param elementFilter   the predicate that returns true for elements to be
 		 *                        added
-		 * 
 		 */
 		public void addAllFiltered(NamespaceList<E> list, Predicate<? super String> namespaceFilter,
 				Predicate<? super E> elementFilter) {
@@ -450,7 +448,7 @@ public class NamespaceList<E> {
 
 		private void removeNamespaceElement(String namespace, E element) {
 			namespaceElements.computeIfPresent(namespace, new BiFunction<String, List<E>, List<E>>() {
-				public List<E> apply (String n, List<E> es) {
+				public List<E> apply(String n, List<E> es) {
 					if (es.remove(element)) {
 						Builder.this.size--;
 					}
@@ -524,7 +522,7 @@ public class NamespaceList<E> {
 			});
 		}
 
-		private List<E> removeElementsIf(List<E> list, Predicate<? super E> filter) {
+		List<E> removeElementsIf(List<E> list, Predicate<? super E> filter) {
 			int sizeBefore = list.size();
 			list.removeIf(filter);
 			this.size -= sizeBefore - list.size();

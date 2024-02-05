@@ -13,29 +13,23 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests;
 
-import org.eclipse.core.runtime.*;
-import org.eclipse.core.tests.harness.CoreTest;
+import static org.junit.Assert.assertEquals;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.junit.Test;
 
 /**
  * Test cases for the Path class.
  */
-public class CoreExceptionTest extends CoreTest {
-	/**
-	 * Need a zero argument constructor to satisfy the test harness.
-	 * This constructor should not do any real work nor should it be
-	 * called by user code.
-	 */
-	public CoreExceptionTest() {
-		super(null);
-	}
+public class CoreExceptionTest {
 
-	public CoreExceptionTest(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testCoreException() {
 		final String MESSAGE_STRING = "An exception has occurred";
-		IStatus status = new Status(IStatus.ERROR, "org.eclipse.core.tests.runtime", 31415, MESSAGE_STRING, new NumberFormatException());
+		IStatus status = new Status(IStatus.ERROR, "org.eclipse.core.tests.runtime", 31415, MESSAGE_STRING,
+				new NumberFormatException());
 
 		CoreException e = new CoreException(status);
 

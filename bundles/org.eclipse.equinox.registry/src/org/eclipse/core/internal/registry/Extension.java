@@ -23,16 +23,18 @@ import org.eclipse.core.runtime.IContributor;
 public class Extension extends RegistryObject {
 	public static final Extension[] EMPTY_ARRAY = new Extension[0];
 
-	//Extension simple identifier
+	// Extension simple identifier
 	private String simpleId;
-	//The namespace for the extension.
+	// The namespace for the extension.
 	private String namespaceIdentifier;
 
-	//	Place holder for the label and  the extension point. It contains either a String[] or a SoftReference to a String[].
-	//The array layout is [label, extension point name]
+	// Place holder for the label and the extension point. It contains either a
+	// String[] or a SoftReference to a String[].
+	// The array layout is [label, extension point name]
 	private Object extraInformation;
-	private static final byte LABEL = 0; //The human readable name of the extension
-	private static final byte XPT_NAME = 1; // The fully qualified name of the extension point to which this extension is attached to
+	private static final byte LABEL = 0; // The human readable name of the extension
+	private static final byte XPT_NAME = 1; // The fully qualified name of the extension point to which this extension
+											// is attached to
 	private static final byte CONTRIBUTOR_ID = 2; // ID of the actual contributor of this extension
 	private static final int EXTRA_SIZE = 3;
 
@@ -40,7 +42,8 @@ public class Extension extends RegistryObject {
 		super(registry, persist);
 	}
 
-	protected Extension(int self, String simpleId, String namespace, int[] children, int extraData, ExtensionRegistry registry, boolean persist) {
+	protected Extension(int self, String simpleId, String namespace, int[] children, int extraData,
+			ExtensionRegistry registry, boolean persist) {
 		super(registry, persist);
 
 		setObjectId(self);
@@ -76,16 +79,18 @@ public class Extension extends RegistryObject {
 	}
 
 	private String[] getExtraData() {
-		//The extension has been created by parsing, or does not have any extra data
+		// The extension has been created by parsing, or does not have any extra data
 		if (noExtraData()) {
 			if (extraInformation != null)
 				return (String[]) extraInformation;
 			return null;
 		}
 
-		//The extension has been loaded from the cache.
+		// The extension has been loaded from the cache.
 		String[] result = null;
-		if (extraInformation == null || (result = ((extraInformation instanceof SoftReference) ? (String[]) ((SoftReference<?>) extraInformation).get() : (String[]) extraInformation)) == null) {
+		if (extraInformation == null || (result = ((extraInformation instanceof SoftReference)
+				? (String[]) ((SoftReference<?>) extraInformation).get()
+				: (String[]) extraInformation)) == null) {
 			result = registry.getTableReader().loadExtensionExtraData(getExtraDataOffset());
 			extraInformation = new SoftReference<>(result);
 		}

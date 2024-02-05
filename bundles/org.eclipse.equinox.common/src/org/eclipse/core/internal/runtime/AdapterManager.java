@@ -138,7 +138,6 @@ public final class AdapterManager implements IAdapterManager {
 	 * @return the class with the given fully qualified name, or <code>null</code>
 	 *         if that class does not exist or belongs to a plug-in that has not yet
 	 *         been loaded.
-	 * 
 	 */
 	private Class<?> classForName(IAdapterFactory adapterFactory, String typeName) {
 		return classLookup.computeIfAbsent(adapterFactory, factory -> new ConcurrentHashMap<>())

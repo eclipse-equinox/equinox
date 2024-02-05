@@ -32,7 +32,8 @@ public class DelegatingConnectClassLoader extends EquinoxClassLoader {
 	}
 	private final ClassLoader connectClassLoader;
 
-	public DelegatingConnectClassLoader(ClassLoader parent, EquinoxConfiguration configuration, BundleLoader delegate, Generation generation, ClassLoader connectClassLoader) {
+	public DelegatingConnectClassLoader(ClassLoader parent, EquinoxConfiguration configuration, BundleLoader delegate,
+			Generation generation, ClassLoader connectClassLoader) {
 		super(parent, configuration, delegate, generation);
 		this.connectClassLoader = connectClassLoader;
 	}

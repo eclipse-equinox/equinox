@@ -13,33 +13,22 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.resource;
 
-import org.eclipse.osgi.tests.OSGiTest;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.BundleInstaller;
-import org.osgi.framework.InvalidSyntaxException;
+import org.junit.After;
+import org.junit.Before;
 
-public abstract class AbstractResourceTest extends OSGiTest {
+public abstract class AbstractResourceTest {
 	protected BundleInstaller installer;
 
-	public AbstractResourceTest() {
-		super();
+	@Before
+	public void setUp() throws Exception {
+		installer = new BundleInstaller(OSGiTestsActivator.TEST_FILES_ROOT + "wiringTests/bundles", //$NON-NLS-1$
+				OSGiTestsActivator.getContext());
 	}
 
-	public AbstractResourceTest(String name) {
-		super(name);
-	}
-
-	protected void setUp() throws Exception {
-		super.setUp();
-		try {
-			installer = new BundleInstaller(OSGiTestsActivator.TEST_FILES_ROOT + "wiringTests/bundles", OSGiTestsActivator.getContext()); //$NON-NLS-1$
-		} catch (InvalidSyntaxException e) {
-			fail("Failed to create bundle installer", e); //$NON-NLS-1$
-		}
-	}
-
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		installer.shutdown();
-		super.tearDown();
 	}
 }

@@ -32,9 +32,9 @@ import org.eclipse.swt.widgets.Tree;
 public class NodesView {
 
 	/**
-	 * For tree viewer to work, the input must not be the same as the root node
-	 * or it will get short circuit. Also input can not be null - so have to pass
-	 * some dummy value as an input.
+	 * For tree viewer to work, the input must not be the same as the root node or
+	 * it will get short circuit. Also input can not be null - so have to pass some
+	 * dummy value as an input.
 	 */
 	final private static String defaultPrefs = "default"; //$NON-NLS-1$
 
@@ -65,7 +65,7 @@ public class NodesView {
 		@Override
 		public Object[] getElements(Object parent) {
 			if (defaultPrefs.equals(parent))
-				return new Object[] {SecurePreferencesFactory.getDefault()};
+				return new Object[] { SecurePreferencesFactory.getDefault() };
 			return new Object[0];
 		}
 
@@ -181,7 +181,8 @@ public class NodesView {
 		};
 		refreshNodesAction.setText(SecUIMessages.refreshNodesCommand);
 		refreshNodesAction.setToolTipText(SecUIMessages.refreshNodesCommandTip);
-		refreshNodesAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/node_refresh.gif")); //$NON-NLS-1$
+		refreshNodesAction
+				.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/node_refresh.gif")); //$NON-NLS-1$
 
 		addNodeAction = new Action() {
 			@Override
@@ -212,7 +213,8 @@ public class NodesView {
 		};
 		addNodeAction.setText(SecUIMessages.addNodeCommand);
 		addNodeAction.setToolTipText(SecUIMessages.addNodeCommandTip);
-		addNodeAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/node_new.gif")); //$NON-NLS-1$
+		addNodeAction
+				.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/node_new.gif")); //$NON-NLS-1$
 
 		removeNodeAction = new Action() {
 			@Override
@@ -236,7 +238,8 @@ public class NodesView {
 		};
 		removeNodeAction.setText(SecUIMessages.removeNodeCommand);
 		removeNodeAction.setToolTipText(SecUIMessages.removeNodeCommandTip);
-		removeNodeAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/node_delete.gif")); //$NON-NLS-1$
+		removeNodeAction
+				.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/node_delete.gif")); //$NON-NLS-1$
 	}
 
 	public void setFocus() {

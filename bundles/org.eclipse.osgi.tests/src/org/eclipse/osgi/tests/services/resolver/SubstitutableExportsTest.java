@@ -14,6 +14,10 @@
 package org.eclipse.osgi.tests.services.resolver;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Hashtable;
 import org.eclipse.osgi.service.resolver.BundleDelta;
@@ -23,17 +27,15 @@ import org.eclipse.osgi.service.resolver.ImportPackageSpecification;
 import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.service.resolver.StateDelta;
 import org.eclipse.osgi.service.resolver.VersionConstraint;
+import org.junit.Test;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 public class SubstitutableExportsTest extends AbstractStateTest {
 
-	public SubstitutableExportsTest(String name) {
-		super(name);
-	}
-
 	private State getSubstituteBasicState() throws BundleException {
-		// Basic substitutable export test with A, B, C all exporting and importing x,y packages
+		// Basic substitutable export test with A, B, C all exporting and importing x,y
+		// packages
 		// D, E, F all requiring A, B, C respectively to access x, y packages
 		// all should get packages x and y from A
 		State state = buildEmptyState();
@@ -46,7 +48,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; z; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -54,7 +58,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -62,28 +68,36 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "A"); //$NON-NLS-1$
-		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "E"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "B"); //$NON-NLS-1$
-		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "F"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "C"); //$NON-NLS-1$
-		BundleDescription f = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription f = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		state.addBundle(a);
 		state.addBundle(b);
@@ -95,7 +109,8 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 	}
 
 	private State getSubstituteUsesState() throws BundleException {
-		// Same as basic substitutable export test with A, B, C all exporting and importing x,y packages + "uses" clause
+		// Same as basic substitutable export test with A, B, C all exporting and
+		// importing x,y packages + "uses" clause
 		// D, E, F all requiring A, B, C respectively to access x, y packages
 		// all should get packages x and y from A
 		// bundle G cannot resolve because of uses conflict with x package from Z
@@ -108,7 +123,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "Z"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; version=0.5; bundle=Z, z; uses:=x; version=1.0"); //$NON-NLS-1$
-		BundleDescription z = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription z = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -116,7 +133,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -124,7 +143,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -132,28 +153,36 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "A"); //$NON-NLS-1$
-		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "E"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "B"); //$NON-NLS-1$
-		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "F"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "C"); //$NON-NLS-1$
-		BundleDescription f = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription f = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -161,7 +190,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "C"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x;  bundle=Z"); //$NON-NLS-1$
-		BundleDescription g = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription g = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		state.addBundle(z);
 		state.addBundle(a);
@@ -175,7 +206,8 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 	}
 
 	private State getSubstituteUsesCycleState() throws BundleException {
-		// Same as basic substitutable export test with A, B, C all exporting and importing x,y packages + "uses" clause + cycle
+		// Same as basic substitutable export test with A, B, C all exporting and
+		// importing x,y packages + "uses" clause + cycle
 		// D, E, F all requiring A, B, C respectively to access x, y packages
 		// all should get packages x and y from A and package z from G
 		State state = buildEmptyState();
@@ -187,7 +219,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "Z"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; z; version=0.5"); //$NON-NLS-1$
-		BundleDescription z = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription z = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -195,7 +229,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y,z\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; z; version=1.0"); //$NON-NLS-1$
-		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -203,7 +239,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y,z\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; z; version=1.0"); //$NON-NLS-1$
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -211,7 +249,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y,z\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; z; version=1.0"); //$NON-NLS-1$
-		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -219,7 +259,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "A"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "z"); //$NON-NLS-1$
-		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -227,7 +269,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "B"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "z"); //$NON-NLS-1$
-		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -235,7 +279,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "C"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "z"); //$NON-NLS-1$
-		BundleDescription f = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription f = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -244,7 +290,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.REQUIRE_BUNDLE, "C"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "z; version=1.0; uses:=x"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "z; version=1.0"); //$NON-NLS-1$
-		BundleDescription g = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription g = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -253,7 +301,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.REQUIRE_BUNDLE, "C"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "z; version=1.0; uses:=x"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "z; version=1.0"); //$NON-NLS-1$
-		BundleDescription h = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription h = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		state.addBundle(z);
 		state.addBundle(a);
@@ -268,7 +318,8 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 	}
 
 	private State getSubstituteBasicFragState() throws BundleException {
-		// Basic substitutable export test with A, B, C all exporting and importing x,y packages
+		// Basic substitutable export test with A, B, C all exporting and importing x,y
+		// packages
 		// Each have a fragment that exports and imports z package
 		// D, E, F all requiring A, B, C respectively to access x, y, z packages
 		// all should get packages x, y and z from A + fragment
@@ -282,7 +333,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -291,7 +344,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.FRAGMENT_HOST, "A"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "z; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "z; version=1.0"); //$NON-NLS-1$
-		BundleDescription aFrag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription aFrag = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -299,7 +354,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -308,7 +365,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.FRAGMENT_HOST, "B"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "z; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "z; version=1.0"); //$NON-NLS-1$
-		BundleDescription bFrag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription bFrag = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -316,7 +375,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -325,28 +386,36 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.FRAGMENT_HOST, "C"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "z; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "z; version=1.0"); //$NON-NLS-1$
-		BundleDescription cFrag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription cFrag = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "A"); //$NON-NLS-1$
-		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "E"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "B"); //$NON-NLS-1$
-		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "F"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "C"); //$NON-NLS-1$
-		BundleDescription f = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription f = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		state.addBundle(a);
 		state.addBundle(aFrag);
@@ -361,7 +430,8 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 	}
 
 	private State getSubstituteUsesFragState() throws BundleException {
-		// Basic substitutable export test with A, B, C all exporting and importing x,y packages + "uses" clause
+		// Basic substitutable export test with A, B, C all exporting and importing x,y
+		// packages + "uses" clause
 		// Each have a fragment that exports and imports z package
 		// D, E, F all requiring A, B, C respectively to access x, y, z packages
 		// all should get packages x, y and z from A + fragment
@@ -374,7 +444,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "Z"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; version=0.5; bundle=Z"); //$NON-NLS-1$
-		BundleDescription z = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription z = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -382,7 +454,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -391,7 +465,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.FRAGMENT_HOST, "A"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "z; version=1.0; uses:=\"x,y\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "z; version=1.0"); //$NON-NLS-1$
-		BundleDescription aFrag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription aFrag = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -399,7 +475,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -408,7 +486,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.FRAGMENT_HOST, "B"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "z; version=1.0; uses:=\"x,y\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "z; version=1.0"); //$NON-NLS-1$
-		BundleDescription bFrag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription bFrag = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -416,7 +496,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -425,28 +507,36 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.FRAGMENT_HOST, "C"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "z; version=1.0; uses:=\"x,y\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "z; version=1.0"); //$NON-NLS-1$
-		BundleDescription cFrag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription cFrag = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "A"); //$NON-NLS-1$
-		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "E"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "B"); //$NON-NLS-1$
-		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "F"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "C"); //$NON-NLS-1$
-		BundleDescription f = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription f = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -454,7 +544,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "C"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x;  bundle=Z"); //$NON-NLS-1$
-		BundleDescription g = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription g = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		state.addBundle(z);
 		state.addBundle(a);
@@ -471,7 +563,8 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 	}
 
 	private State getSubstituteUsesFragCycleState() throws BundleException {
-		// Same as basic substitutable export test with A, B, C all exporting and importing x,y packages + "uses" clause + cycle + frags
+		// Same as basic substitutable export test with A, B, C all exporting and
+		// importing x,y packages + "uses" clause + cycle + frags
 		// D, E, F all requiring A, B, C respectively to access x, y packages
 		// all should get packages x and y from A and package z from G
 		State state = buildEmptyState();
@@ -483,7 +576,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "Z"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; z; version=2.0"); //$NON-NLS-1$
-		BundleDescription z = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription z = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -491,7 +586,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y,q\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=\"[1.0,2.0)\", q"); //$NON-NLS-1$
-		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -500,7 +597,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.FRAGMENT_HOST, "A"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "z; version=1.0; uses:=\"x,y\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "z; version=\"[1.0,2.0)\""); //$NON-NLS-1$
-		BundleDescription aFrag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription aFrag = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -508,7 +607,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y,q\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=\"[1.0,2.0)\", q"); //$NON-NLS-1$
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -517,7 +618,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.FRAGMENT_HOST, "B"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "z; version=1.0; uses:=\"x,y\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "z; version=\"[1.0,2.0)\""); //$NON-NLS-1$
-		BundleDescription bFrag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription bFrag = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -525,7 +628,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y,q\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=\"[1.0,2.0)\", q"); //$NON-NLS-1$
-		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -534,28 +639,36 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.FRAGMENT_HOST, "C"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "z; version=1.0; uses:=\"x,y\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "z; version=\"[1.0,2.0)\""); //$NON-NLS-1$
-		BundleDescription cFrag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription cFrag = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "A"); //$NON-NLS-1$
-		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "E"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "B"); //$NON-NLS-1$
-		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "F"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "C"); //$NON-NLS-1$
-		BundleDescription f = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription f = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -564,7 +677,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.REQUIRE_BUNDLE, "C"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "q; version=1.0; uses:=x"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "q; version=1.0"); //$NON-NLS-1$
-		BundleDescription g = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription g = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -573,7 +688,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.REQUIRE_BUNDLE, "C"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "q; version=1.0; uses:=x"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "q; version=1.0"); //$NON-NLS-1$
-		BundleDescription h = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription h = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -581,7 +698,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "C"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "q; x; version=1.0"); //$NON-NLS-1$
-		BundleDescription i = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription i = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		state.addBundle(z);
 		state.addBundle(a);
@@ -600,8 +719,10 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 	}
 
 	private State getSubstituteBasicReexportState() throws BundleException {
-		// Basic substitutable export test with A, B, C all exporting and importing x,y packages
-		// D, E, F all requiring A, B, C respectively to access x, y packages are reexporting
+		// Basic substitutable export test with A, B, C all exporting and importing x,y
+		// packages
+		// D, E, F all requiring A, B, C respectively to access x, y packages are
+		// reexporting
 		// G, H, I all requiring D, E, F repectively to access x, y packages
 		// all should get packages x and y from A
 		State state = buildEmptyState();
@@ -614,7 +735,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -622,7 +745,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -630,49 +755,63 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "A; visibility:=reexport"); //$NON-NLS-1$
-		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "E"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "B; visibility:=reexport"); //$NON-NLS-1$
-		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "F"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "C; visibility:=reexport"); //$NON-NLS-1$
-		BundleDescription f = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription f = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "G"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "D"); //$NON-NLS-1$
-		BundleDescription g = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription g = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "H"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "E"); //$NON-NLS-1$
-		BundleDescription h = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription h = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "I"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "F"); //$NON-NLS-1$
-		BundleDescription i = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription i = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		state.addBundle(a);
 		state.addBundle(b);
@@ -687,8 +826,10 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 	}
 
 	private State getSubstituteUsesReexportState() throws BundleException {
-		// Basic substitutable export test with A, B, C all exporting and importing x,y packages + "uses" clause
-		// D, E, F all requiring A, B, C respectively to access x, y packages are reexporting
+		// Basic substitutable export test with A, B, C all exporting and importing x,y
+		// packages + "uses" clause
+		// D, E, F all requiring A, B, C respectively to access x, y packages are
+		// reexporting
 		// G, H, I all requiring D, E, F repectively to access x, y packages
 		// all should get packages x and y from A
 		// J cannot resolve because of uses conflicy with package x from Z
@@ -701,7 +842,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "Z"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; version=0.5; bundle=Z"); //$NON-NLS-1$
-		BundleDescription z = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription z = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -709,7 +852,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -717,7 +862,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -725,49 +872,63 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "A; visibility:=reexport"); //$NON-NLS-1$
-		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "E"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "B; visibility:=reexport"); //$NON-NLS-1$
-		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "F"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "C; visibility:=reexport"); //$NON-NLS-1$
-		BundleDescription f = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription f = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "G"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "D"); //$NON-NLS-1$
-		BundleDescription g = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription g = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "H"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "E"); //$NON-NLS-1$
-		BundleDescription h = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription h = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "I"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "F"); //$NON-NLS-1$
-		BundleDescription i = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription i = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -775,7 +936,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "F"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x;  bundle=Z"); //$NON-NLS-1$
-		BundleDescription j = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription j = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		state.addBundle(z);
 		state.addBundle(a);
@@ -792,8 +955,10 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 	}
 
 	private State getSubstituteUsesReexportCycleState() throws BundleException {
-		// Basic substitutable export test with A, B, C all exporting and importing x,y packages + uses clause + cycle
-		// D, E, F all requiring A, B, C respectively to access x, y packages are reexporting
+		// Basic substitutable export test with A, B, C all exporting and importing x,y
+		// packages + uses clause + cycle
+		// D, E, F all requiring A, B, C respectively to access x, y packages are
+		// reexporting
 		// G, H, I all requiring D, E, F repectively to access x, y packages
 		// all should get packages x and y from A
 		// J cannot resolve because of uses conflicy with package x from Z
@@ -806,7 +971,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "Z"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; z; version=2.0"); //$NON-NLS-1$
-		BundleDescription z = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription z = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -814,7 +981,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y,z\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; z; version=\"[1.0,2.0)\""); //$NON-NLS-1$
-		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -822,7 +991,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y,z\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; z; version=\"[1.0,2.0)\""); //$NON-NLS-1$
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -830,49 +1001,63 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y,z\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; z; version=\"[1.0,2.0)\""); //$NON-NLS-1$
-		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "A; visibility:=reexport"); //$NON-NLS-1$
-		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "E"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "B; visibility:=reexport"); //$NON-NLS-1$
-		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "F"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "C; visibility:=reexport"); //$NON-NLS-1$
-		BundleDescription f = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription f = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "G"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "D"); //$NON-NLS-1$
-		BundleDescription g = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription g = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "H"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "E"); //$NON-NLS-1$
-		BundleDescription h = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription h = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "I"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "F"); //$NON-NLS-1$
-		BundleDescription i = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription i = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -881,7 +1066,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.REQUIRE_BUNDLE, "F"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "z; version=1.0; uses=\"x,y\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "z; version=\"[1.0,2.0)\""); //$NON-NLS-1$
-		BundleDescription j = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription j = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		state.addBundle(z);
 		state.addBundle(a);
@@ -898,9 +1085,12 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 	}
 
 	private State getSubstituteUnresolvedFragState() throws BundleException {
-		// Basic substitutable export test with A, B, C all exporting and importing x,y packages
-		// Each have a fragment that exports and imports z package and an extra unresolved import of q
-		// D, E, F all requiring A, B, C respectively to access x, y. z should not be accessible
+		// Basic substitutable export test with A, B, C all exporting and importing x,y
+		// packages
+		// Each have a fragment that exports and imports z package and an extra
+		// unresolved import of q
+		// D, E, F all requiring A, B, C respectively to access x, y. z should not be
+		// accessible
 		// all should get packages x, y.
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -912,7 +1102,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -921,7 +1113,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.FRAGMENT_HOST, "A"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "z; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "z; q; version=1.0"); //$NON-NLS-1$
-		BundleDescription aFrag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription aFrag = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -929,7 +1123,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -938,7 +1134,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.FRAGMENT_HOST, "B"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "z; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "z; q; version=1.0"); //$NON-NLS-1$
-		BundleDescription bFrag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription bFrag = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -946,7 +1144,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -955,28 +1155,36 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.FRAGMENT_HOST, "C"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "z; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "z, q; version=1.0"); //$NON-NLS-1$
-		BundleDescription cFrag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription cFrag = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "A"); //$NON-NLS-1$
-		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "E"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "B"); //$NON-NLS-1$
-		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "F"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "C"); //$NON-NLS-1$
-		BundleDescription f = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription f = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		state.addBundle(a);
 		state.addBundle(aFrag);
@@ -991,8 +1199,10 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 	}
 
 	private State getSubstituteSplitState() throws BundleException {
-		// Basic substitutable export test with A, B, C all exporting and importing x,y packages
-		// D, E, F all requiring A, B, C respectively to access x, y packages and export more content (split)
+		// Basic substitutable export test with A, B, C all exporting and importing x,y
+		// packages
+		// D, E, F all requiring A, B, C respectively to access x, y packages and export
+		// more content (split)
 		// all should get packages x and y from A
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -1004,7 +1214,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; split=split; mandatory:=split"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0; split=split"); //$NON-NLS-1$
-		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -1012,7 +1224,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; split=split; mandatory:=split"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0; split=split"); //$NON-NLS-1$
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -1020,7 +1234,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; split=split; mandatory:=split"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0; split=split"); //$NON-NLS-1$
-		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -1029,7 +1245,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "A"); //$NON-NLS-1$
-		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -1038,7 +1256,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "B"); //$NON-NLS-1$
-		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -1047,35 +1267,45 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "C"); //$NON-NLS-1$
-		BundleDescription f = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription f = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "G"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription g = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription g = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "H"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "D"); //$NON-NLS-1$
-		BundleDescription h = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription h = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "I"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "E"); //$NON-NLS-1$
-		BundleDescription i = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription i = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "J"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "F"); //$NON-NLS-1$
-		BundleDescription j = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription j = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		state.addBundle(a);
 		state.addBundle(b);
@@ -1091,8 +1321,10 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 	}
 
 	private State getSubstituteSplitUsesState() throws BundleException {
-		// Basic substitutable export test with A, B, C all exporting and importing x,y packages + uses
-		// D, E, F all requiring A, B, C respectively to access x, y packages and add more content (split)
+		// Basic substitutable export test with A, B, C all exporting and importing x,y
+		// packages + uses
+		// D, E, F all requiring A, B, C respectively to access x, y packages and add
+		// more content (split)
 		// all should get packages x and y from A
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -1104,7 +1336,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; split=split; mandatory:=split; uses:=\"x,y,q\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0; split=split, q; version=\"[1.0,2.0)\""); //$NON-NLS-1$
-		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -1112,7 +1346,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; split=split; mandatory:=split; uses:=\"x,y,q\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0; split=split, q; version=\"[1.0,2.0)\""); //$NON-NLS-1$
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -1120,7 +1356,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; split=split; mandatory:=split; uses:=\"x,y,q\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0; split=split, q; version=\"[1.0,2.0)\""); //$NON-NLS-1$
-		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -1129,7 +1367,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y,r\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0, r; version=\"[1.0,2.0)\""); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "A"); //$NON-NLS-1$
-		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -1138,7 +1378,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y,r\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0, r; version=\"[1.0,2.0)\""); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "B"); //$NON-NLS-1$
-		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -1147,56 +1389,72 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0; uses:=\"x,y,r\""); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0, r; version=\"[1.0,2.0)\""); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "C"); //$NON-NLS-1$
-		BundleDescription f = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription f = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "G"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription g = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription g = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "H"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "D"); //$NON-NLS-1$
-		BundleDescription h = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription h = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "I"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "E"); //$NON-NLS-1$
-		BundleDescription i = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription i = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "J"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "F"); //$NON-NLS-1$
-		BundleDescription j = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription j = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "K"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "q; r; version=2.0"); //$NON-NLS-1$
-		BundleDescription k = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription k = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "L"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "q; r; version=1.0"); //$NON-NLS-1$
-		BundleDescription l = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription l = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "M"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x, y, q, r"); //$NON-NLS-1$
-		BundleDescription m = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription m = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -1204,7 +1462,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "q, r"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "F"); //$NON-NLS-1$
-		BundleDescription n = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription n = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		state.addBundle(a);
 		state.addBundle(b);
@@ -1224,7 +1484,8 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 	}
 
 	private State getNonOverlapingSubstituteBasicState() throws BundleException {
-		// Basic substitutable export test with A, B, C all exporting and importing x,y packages
+		// Basic substitutable export test with A, B, C all exporting and importing x,y
+		// packages
 		// D, E, F all requiring A, B, C respectively to access x, y packages
 		// all should get packages x and y from A
 		State state = buildEmptyState();
@@ -1237,7 +1498,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0; nomatch=nomatch"); //$NON-NLS-1$
-		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -1245,7 +1508,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -1253,28 +1518,36 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
-		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "A"); //$NON-NLS-1$
-		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "E"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "B"); //$NON-NLS-1$
-		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "F"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "C"); //$NON-NLS-1$
-		BundleDescription f = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+		BundleDescription f = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				bundleID++);
 
 		state.addBundle(a);
 		state.addBundle(b);
@@ -1285,6 +1558,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		return state;
 	}
 
+	@Test
 	public void testSubstitutableExports001() throws BundleException {
 		State state = getSubstituteBasicState();
 		state.resolve();
@@ -1324,7 +1598,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("fVisible wrong number", 2, fVisible.length); //$NON-NLS-1$
 
 		ExportPackageDescription[] aExports = a.getSelectedExports();
-		ExportPackageDescription[] aSubtitutes = new ExportPackageDescription[] {aExports[0], aExports[1]};
+		ExportPackageDescription[] aSubtitutes = new ExportPackageDescription[] { aExports[0], aExports[1] };
 		assertArrayEquals("aVisible not correct", aExports, a.getExportPackages()); //$NON-NLS-1$
 		assertArrayEquals("bVisible not correct", aSubtitutes, bVisible); //$NON-NLS-1$
 		assertArrayEquals("cVisible not correct", aSubtitutes, cVisible); //$NON-NLS-1$
@@ -1333,6 +1607,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("fVisible not correct", aSubtitutes, fVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports002() throws BundleException {
 		State state = getSubstituteUsesState();
 		state.resolve();
@@ -1385,6 +1660,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports003() throws BundleException {
 		State state = getSubstituteUsesCycleState();
 		state.resolve();
@@ -1451,6 +1727,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testSubstitutableExports004() throws BundleException {
 		State state = getSubstituteBasicFragState();
 		state.resolve();
@@ -1508,7 +1785,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		ExportPackageDescription[] aExports = a.getSelectedExports();
 		assertEquals("a has wrong number of exports", 3, aExports.length); //$NON-NLS-1$
 		ExportPackageDescription[] aDeclaredExports = a.getExportPackages();
-		ExportPackageDescription[] aFragExports = new ExportPackageDescription[] {aExports[2]};
+		ExportPackageDescription[] aFragExports = new ExportPackageDescription[] { aExports[2] };
 		assertArrayEquals("bVisible not correct", aDeclaredExports, bVisible); //$NON-NLS-1$
 		assertArrayEquals("bFragVisible not correct", aFragExports, bFragVisible); //$NON-NLS-1$
 		assertArrayEquals("cVisible not correct", aDeclaredExports, cVisible); //$NON-NLS-1$
@@ -1519,11 +1796,12 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports005() throws BundleException {
 		State state = getSubstituteUsesFragState();
 		state.resolve();
 
-		//		BundleDescription z = state.getBundle(0);
+		// BundleDescription z = state.getBundle(0);
 		BundleDescription a = state.getBundle(1);
 		BundleDescription aFrag = state.getBundle(2);
 		BundleDescription b = state.getBundle(3);
@@ -1582,7 +1860,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		ExportPackageDescription[] aExports = a.getSelectedExports();
 		assertEquals("a has wrong number of exports", 3, aExports.length); //$NON-NLS-1$
 		ExportPackageDescription[] aDeclaredExports = a.getExportPackages();
-		ExportPackageDescription[] aFragExports = new ExportPackageDescription[] {aExports[2]};
+		ExportPackageDescription[] aFragExports = new ExportPackageDescription[] { aExports[2] };
 		assertArrayEquals("bVisible not correct", aDeclaredExports, bVisible); //$NON-NLS-1$
 		assertArrayEquals("bFragVisible not correct", aFragExports, bFragVisible); //$NON-NLS-1$
 		assertArrayEquals("cVisible not correct", aDeclaredExports, cVisible); //$NON-NLS-1$
@@ -1593,11 +1871,12 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports006() throws BundleException {
 		State state = getSubstituteUsesFragCycleState();
 		state.resolve();
 
-		//		BundleDescription z = state.getBundle(0);
+		// BundleDescription z = state.getBundle(0);
 		BundleDescription a = state.getBundle(1);
 		BundleDescription aFrag = state.getBundle(2);
 		BundleDescription b = state.getBundle(3);
@@ -1670,7 +1949,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		ExportPackageDescription[] bcExpectedVisible = new ExportPackageDescription[aDeclaredExports.length + 1];
 		System.arraycopy(aDeclaredExports, 0, bcExpectedVisible, 0, aDeclaredExports.length);
 		bcExpectedVisible[2] = g.getSelectedExports()[0];
-		ExportPackageDescription[] aFragExports = new ExportPackageDescription[] {aExports[2]};
+		ExportPackageDescription[] aFragExports = new ExportPackageDescription[] { aExports[2] };
 		assertArrayEquals("aVisible not correct", g.getSelectedExports(), aVisible); //$NON-NLS-1$
 		assertArrayEquals("bVisible not correct", bcExpectedVisible, bVisible); //$NON-NLS-1$
 		assertArrayEquals("bFragVisible not correct", aFragExports, bFragVisible); //$NON-NLS-1$
@@ -1683,12 +1962,14 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 
 		ExportPackageDescription[] gExports = g.getSelectedExports();
 		assertEquals("g has wrong number of exports", 1, gExports.length); //$NON-NLS-1$
-		ExportPackageDescription[] expectedHIVisible = new ExportPackageDescription[] {gExports[0], aExports[0], aExports[1], aExports[2]};
+		ExportPackageDescription[] expectedHIVisible = new ExportPackageDescription[] { gExports[0], aExports[0],
+				aExports[1], aExports[2] };
 		assertArrayEquals("gVisible not correct", aExports, gVisible); //$NON-NLS-1$
 		assertArrayEquals("hVisible not correct", expectedHIVisible, hVisible); //$NON-NLS-1$
 		assertArrayEquals("iVisible not correct", expectedHIVisible, iVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports007() throws BundleException {
 		State state = getSubstituteBasicReexportState();
 		state.resolve();
@@ -1754,6 +2035,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("iVisible not correct", aExports, iVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports008() throws BundleException {
 		State state = getSubstituteUsesReexportState();
 		state.resolve();
@@ -1824,6 +2106,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("iVisible not correct", aExports, iVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports009() throws BundleException {
 		State state = getSubstituteUsesReexportCycleState();
 		state.resolve();
@@ -1886,7 +2169,8 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("aExports count wrong", 2, aExports.length); //$NON-NLS-1$
 		ExportPackageDescription[] jExports = j.getSelectedExports();
 		assertEquals("aExports count wrong", 1, jExports.length); //$NON-NLS-1$
-		ExportPackageDescription[] bcExpected = new ExportPackageDescription[] {aExports[0], aExports[1], jExports[0]};
+		ExportPackageDescription[] bcExpected = new ExportPackageDescription[] { aExports[0], aExports[1],
+				jExports[0] };
 		assertArrayEquals("aVisible not correct", jExports, aVisible); //$NON-NLS-1$
 		assertArrayEquals("bVisible not correct", bcExpected, bVisible); //$NON-NLS-1$
 		assertArrayEquals("cVisible not correct", bcExpected, cVisible); //$NON-NLS-1$
@@ -1899,6 +2183,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("jVisible not correct", aExports, jVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports010() throws BundleException {
 		State state = getSubstituteBasicState();
 		state.resolve();
@@ -1909,27 +2194,29 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDescription e = state.getBundle(4);
 		BundleDescription f = state.getBundle(5);
 
-		BundleDescription[] allBundles = new BundleDescription[] {a, b, c, d, e, f};
-		StateDelta stateDelta = state.resolve(new BundleDescription[] {a});
+		BundleDescription[] allBundles = new BundleDescription[] { a, b, c, d, e, f };
+		StateDelta stateDelta = state.resolve(new BundleDescription[] { a });
 		BundleDelta[] bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 6, bundleDeltas.length); //$NON-NLS-1$
 		for (BundleDescription description : allBundles) {
 			boolean found = false;
 			for (int j = 0; j < bundleDeltas.length && !found; j++) {
-				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, bundleDeltas[j].getType()); //$NON-NLS-1$
+				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, //$NON-NLS-1$
+						bundleDeltas[j].getType());
 				found = bundleDeltas[j].getBundle() == description;
 			}
 			if (!found) {
 				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
-		stateDelta = state.resolve(new BundleDescription[] {f});
+		stateDelta = state.resolve(new BundleDescription[] { f });
 		bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 1, bundleDeltas.length); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports011() throws BundleException {
 		State state = getSubstituteUsesState();
 		state.resolve();
@@ -1941,32 +2228,34 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDescription e = state.getBundle(5);
 		BundleDescription f = state.getBundle(6);
 
-		BundleDescription[] allRefreshBundles = new BundleDescription[] {a, b, c, d, e, f};
-		StateDelta stateDelta = state.resolve(new BundleDescription[] {a});
+		BundleDescription[] allRefreshBundles = new BundleDescription[] { a, b, c, d, e, f };
+		StateDelta stateDelta = state.resolve(new BundleDescription[] { a });
 		BundleDelta[] bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 6, bundleDeltas.length); //$NON-NLS-1$
 		for (BundleDescription description : allRefreshBundles) {
 			boolean found = false;
 			for (int j = 0; j < bundleDeltas.length && !found; j++) {
-				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, bundleDeltas[j].getType()); //$NON-NLS-1$
+				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, //$NON-NLS-1$
+						bundleDeltas[j].getType());
 				found = bundleDeltas[j].getBundle() == description;
 			}
 			if (!found) {
 				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
-		stateDelta = state.resolve(new BundleDescription[] {f});
+		stateDelta = state.resolve(new BundleDescription[] { f });
 		bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 1, bundleDeltas.length); //$NON-NLS-1$
 
-		stateDelta = state.resolve(new BundleDescription[] {z});
+		stateDelta = state.resolve(new BundleDescription[] { z });
 		bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 1, bundleDeltas.length); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports012() throws BundleException {
 		State state = getSubstituteUsesCycleState();
 		state.resolve();
@@ -1979,34 +2268,36 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDescription g = state.getBundle(7);
 		BundleDescription h = state.getBundle(8);
 
-		BundleDescription[] allRefreshBundles = new BundleDescription[] {a, b, c, d, e, f, g, h};
-		StateDelta stateDelta = state.resolve(new BundleDescription[] {a});
+		BundleDescription[] allRefreshBundles = new BundleDescription[] { a, b, c, d, e, f, g, h };
+		StateDelta stateDelta = state.resolve(new BundleDescription[] { a });
 		BundleDelta[] bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 8, bundleDeltas.length); //$NON-NLS-1$
 		for (BundleDescription description : allRefreshBundles) {
 			boolean found = false;
 			for (int j = 0; j < bundleDeltas.length && !found; j++) {
-				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, bundleDeltas[j].getType()); //$NON-NLS-1$
+				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, //$NON-NLS-1$
+						bundleDeltas[j].getType());
 				found = bundleDeltas[j].getBundle() == description;
 			}
 			if (!found) {
 				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
-		stateDelta = state.resolve(new BundleDescription[] {f});
+		stateDelta = state.resolve(new BundleDescription[] { f });
 		bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 1, bundleDeltas.length); //$NON-NLS-1$
 
-		stateDelta = state.resolve(new BundleDescription[] {c});
+		stateDelta = state.resolve(new BundleDescription[] { c });
 		bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 8, bundleDeltas.length); //$NON-NLS-1$
 		for (BundleDescription description : allRefreshBundles) {
 			boolean found = false;
 			for (int j = 0; j < bundleDeltas.length && !found; j++) {
-				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, bundleDeltas[j].getType()); //$NON-NLS-1$
+				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, //$NON-NLS-1$
+						bundleDeltas[j].getType());
 				found = bundleDeltas[j].getBundle() == description;
 			}
 			if (!found) {
@@ -2015,6 +2306,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testSubstitutableExports013() throws BundleException {
 		State state = getSubstituteBasicFragState();
 		state.resolve();
@@ -2029,35 +2321,37 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDescription e = state.getBundle(7);
 		BundleDescription f = state.getBundle(8);
 
-		BundleDescription[] allBundles = new BundleDescription[] {a, aFrag, b, bFrag, c, cFrag, d, e, f};
-		StateDelta stateDelta = state.resolve(new BundleDescription[] {a});
+		BundleDescription[] allBundles = new BundleDescription[] { a, aFrag, b, bFrag, c, cFrag, d, e, f };
+		StateDelta stateDelta = state.resolve(new BundleDescription[] { a });
 		BundleDelta[] bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 9, bundleDeltas.length); //$NON-NLS-1$
 		for (BundleDescription description : allBundles) {
 			boolean found = false;
 			for (int j = 0; j < bundleDeltas.length && !found; j++) {
-				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, bundleDeltas[j].getType()); //$NON-NLS-1$
+				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, //$NON-NLS-1$
+						bundleDeltas[j].getType());
 				found = bundleDeltas[j].getBundle() == description;
 			}
 			if (!found) {
 				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
-		stateDelta = state.resolve(new BundleDescription[] {f});
+		stateDelta = state.resolve(new BundleDescription[] { f });
 		bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 1, bundleDeltas.length); //$NON-NLS-1$
 
-		stateDelta = state.resolve(new BundleDescription[] {c});
+		stateDelta = state.resolve(new BundleDescription[] { c });
 		bundleDeltas = stateDelta.getChanges();
-		BundleDescription[] expectedRefresh = new BundleDescription[] {c, cFrag, f};
+		BundleDescription[] expectedRefresh = new BundleDescription[] { c, cFrag, f };
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 3, bundleDeltas.length); //$NON-NLS-1$
 		for (BundleDescription description : expectedRefresh) {
 			boolean found = false;
 			for (int j = 0; j < bundleDeltas.length && !found; j++) {
-				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, bundleDeltas[j].getType()); //$NON-NLS-1$
+				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, //$NON-NLS-1$
+						bundleDeltas[j].getType());
 				found = bundleDeltas[j].getBundle() == description;
 			}
 			if (!found) {
@@ -2066,6 +2360,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testSubstitutableExports014() throws BundleException {
 		State state = getSubstituteUsesFragState();
 		state.resolve();
@@ -2080,42 +2375,44 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDescription d = state.getBundle(7);
 		BundleDescription e = state.getBundle(8);
 		BundleDescription f = state.getBundle(9);
-		//BundleDescription g = state.getBundle(10);
+		// BundleDescription g = state.getBundle(10);
 
-		BundleDescription[] allRefreshBundles = new BundleDescription[] {a, aFrag, b, bFrag, c, cFrag, d, e, f};
-		StateDelta stateDelta = state.resolve(new BundleDescription[] {a});
+		BundleDescription[] allRefreshBundles = new BundleDescription[] { a, aFrag, b, bFrag, c, cFrag, d, e, f };
+		StateDelta stateDelta = state.resolve(new BundleDescription[] { a });
 		BundleDelta[] bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", allRefreshBundles.length, bundleDeltas.length); //$NON-NLS-1$
 		for (BundleDescription description : allRefreshBundles) {
 			boolean found = false;
 			for (int j = 0; j < bundleDeltas.length && !found; j++) {
-				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, bundleDeltas[j].getType()); //$NON-NLS-1$
+				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, //$NON-NLS-1$
+						bundleDeltas[j].getType());
 				found = bundleDeltas[j].getBundle() == description;
 			}
 			if (!found) {
 				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
-		stateDelta = state.resolve(new BundleDescription[] {f});
+		stateDelta = state.resolve(new BundleDescription[] { f });
 		bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 1, bundleDeltas.length); //$NON-NLS-1$
 
-		stateDelta = state.resolve(new BundleDescription[] {z});
+		stateDelta = state.resolve(new BundleDescription[] { z });
 		bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 1, bundleDeltas.length); //$NON-NLS-1$
 
-		stateDelta = state.resolve(new BundleDescription[] {c});
+		stateDelta = state.resolve(new BundleDescription[] { c });
 		bundleDeltas = stateDelta.getChanges();
-		BundleDescription[] expectedRefresh = new BundleDescription[] {c, cFrag, f};
+		BundleDescription[] expectedRefresh = new BundleDescription[] { c, cFrag, f };
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 3, bundleDeltas.length); //$NON-NLS-1$
 		for (BundleDescription description : expectedRefresh) {
 			boolean found = false;
 			for (int j = 0; j < bundleDeltas.length && !found; j++) {
-				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, bundleDeltas[j].getType()); //$NON-NLS-1$
+				assertEquals("unexpected delta type " + bundleDeltas[j], BundleDelta.RESOLVED, //$NON-NLS-1$
+						bundleDeltas[j].getType());
 				found = bundleDeltas[j].getBundle() == description;
 			}
 			if (!found) {
@@ -2124,10 +2421,11 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testSubstitutableExports015() throws BundleException {
 		State state = getSubstituteUsesFragCycleState();
 		state.resolve();
-		//		BundleDescription z = state.getBundle(0);
+		// BundleDescription z = state.getBundle(0);
 		BundleDescription a = state.getBundle(1);
 		BundleDescription aFrag = state.getBundle(2);
 		BundleDescription b = state.getBundle(3);
@@ -2141,34 +2439,37 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDescription h = state.getBundle(11);
 		BundleDescription i = state.getBundle(12);
 
-		BundleDescription[] allRefreshBundles = new BundleDescription[] {a, aFrag, b, bFrag, c, cFrag, d, e, f, g, h, i};
-		StateDelta stateDelta = state.resolve(new BundleDescription[] {a});
+		BundleDescription[] allRefreshBundles = new BundleDescription[] { a, aFrag, b, bFrag, c, cFrag, d, e, f, g, h,
+				i };
+		StateDelta stateDelta = state.resolve(new BundleDescription[] { a });
 		BundleDelta[] bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", allRefreshBundles.length, bundleDeltas.length); //$NON-NLS-1$
 		for (BundleDescription description : allRefreshBundles) {
 			boolean found = false;
 			for (int k = 0; k < bundleDeltas.length && !found; k++) {
-				assertEquals("unexpected delta type " + bundleDeltas[k], BundleDelta.RESOLVED, bundleDeltas[k].getType()); //$NON-NLS-1$
+				assertEquals("unexpected delta type " + bundleDeltas[k], BundleDelta.RESOLVED, //$NON-NLS-1$
+						bundleDeltas[k].getType());
 				found = bundleDeltas[k].getBundle() == description;
 			}
 			if (!found) {
 				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
-		stateDelta = state.resolve(new BundleDescription[] {f});
+		stateDelta = state.resolve(new BundleDescription[] { f });
 		bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 1, bundleDeltas.length); //$NON-NLS-1$
 
-		stateDelta = state.resolve(new BundleDescription[] {c});
+		stateDelta = state.resolve(new BundleDescription[] { c });
 		bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", allRefreshBundles.length, bundleDeltas.length); //$NON-NLS-1$
 		for (BundleDescription description : allRefreshBundles) {
 			boolean found = false;
 			for (int k = 0; k < bundleDeltas.length && !found; k++) {
-				assertEquals("unexpected delta type " + bundleDeltas[k], BundleDelta.RESOLVED, bundleDeltas[k].getType()); //$NON-NLS-1$
+				assertEquals("unexpected delta type " + bundleDeltas[k], BundleDelta.RESOLVED, //$NON-NLS-1$
+						bundleDeltas[k].getType());
 				found = bundleDeltas[k].getBundle() == description;
 			}
 			if (!found) {
@@ -2177,6 +2478,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testSubstitutableExports016() throws BundleException {
 		State state = getSubstituteBasicReexportState();
 		state.resolve();
@@ -2190,15 +2492,16 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDescription h = state.getBundle(7);
 		BundleDescription i = state.getBundle(8);
 
-		BundleDescription[] allBundles = new BundleDescription[] {a, b, c, d, e, f, g, h, i};
-		StateDelta stateDelta = state.resolve(new BundleDescription[] {a});
+		BundleDescription[] allBundles = new BundleDescription[] { a, b, c, d, e, f, g, h, i };
+		StateDelta stateDelta = state.resolve(new BundleDescription[] { a });
 		BundleDelta[] bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", allBundles.length, bundleDeltas.length); //$NON-NLS-1$
 		for (BundleDescription description : allBundles) {
 			boolean found = false;
 			for (int k = 0; k < bundleDeltas.length && !found; k++) {
-				assertEquals("unexpected delta type " + bundleDeltas[k], BundleDelta.RESOLVED, bundleDeltas[k].getType()); //$NON-NLS-1$
+				assertEquals("unexpected delta type " + bundleDeltas[k], BundleDelta.RESOLVED, //$NON-NLS-1$
+						bundleDeltas[k].getType());
 				found = bundleDeltas[k].getBundle() == description;
 			}
 			if (!found) {
@@ -2206,27 +2509,29 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 			}
 		}
 
-		stateDelta = state.resolve(new BundleDescription[] {f});
+		stateDelta = state.resolve(new BundleDescription[] { f });
 		bundleDeltas = stateDelta.getChanges();
-		BundleDescription[] expectedRefresh = new BundleDescription[] {f, i};
+		BundleDescription[] expectedRefresh = new BundleDescription[] { f, i };
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", expectedRefresh.length, bundleDeltas.length); //$NON-NLS-1$
 		for (BundleDescription description : expectedRefresh) {
 			boolean found = false;
 			for (int k = 0; k < bundleDeltas.length && !found; k++) {
-				assertEquals("unexpected delta type " + bundleDeltas[k], BundleDelta.RESOLVED, bundleDeltas[k].getType()); //$NON-NLS-1$
+				assertEquals("unexpected delta type " + bundleDeltas[k], BundleDelta.RESOLVED, //$NON-NLS-1$
+						bundleDeltas[k].getType());
 				found = bundleDeltas[k].getBundle() == description;
 			}
 			if (!found) {
 				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
-		stateDelta = state.resolve(new BundleDescription[] {i});
+		stateDelta = state.resolve(new BundleDescription[] { i });
 		bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 1, bundleDeltas.length); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports017() throws BundleException {
 		State state = getSubstituteUsesReexportState();
 		state.resolve();
@@ -2240,17 +2545,18 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDescription g = state.getBundle(7);
 		BundleDescription h = state.getBundle(8);
 		BundleDescription i = state.getBundle(9);
-		//BundleDescription j = state.getBundle(10);
+		// BundleDescription j = state.getBundle(10);
 
-		BundleDescription[] allRefreshBundles = new BundleDescription[] {a, b, c, d, e, f, g, h, i};
-		StateDelta stateDelta = state.resolve(new BundleDescription[] {a});
+		BundleDescription[] allRefreshBundles = new BundleDescription[] { a, b, c, d, e, f, g, h, i };
+		StateDelta stateDelta = state.resolve(new BundleDescription[] { a });
 		BundleDelta[] bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", allRefreshBundles.length, bundleDeltas.length); //$NON-NLS-1$
 		for (BundleDescription description : allRefreshBundles) {
 			boolean found = false;
 			for (int m = 0; m < bundleDeltas.length && !found; m++) {
-				assertEquals("unexpected delta type " + bundleDeltas[m], BundleDelta.RESOLVED, bundleDeltas[m].getType()); //$NON-NLS-1$
+				assertEquals("unexpected delta type " + bundleDeltas[m], BundleDelta.RESOLVED, //$NON-NLS-1$
+						bundleDeltas[m].getType());
 				found = bundleDeltas[m].getBundle() == description;
 			}
 			if (!found) {
@@ -2258,32 +2564,34 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 			}
 		}
 
-		stateDelta = state.resolve(new BundleDescription[] {f});
+		stateDelta = state.resolve(new BundleDescription[] { f });
 		bundleDeltas = stateDelta.getChanges();
-		BundleDescription[] expectedRefresh = new BundleDescription[] {f, i};
+		BundleDescription[] expectedRefresh = new BundleDescription[] { f, i };
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", expectedRefresh.length, bundleDeltas.length); //$NON-NLS-1$
 		for (BundleDescription description : expectedRefresh) {
 			boolean found = false;
 			for (int m = 0; m < bundleDeltas.length && !found; m++) {
-				assertEquals("unexpected delta type " + bundleDeltas[m], BundleDelta.RESOLVED, bundleDeltas[m].getType()); //$NON-NLS-1$
+				assertEquals("unexpected delta type " + bundleDeltas[m], BundleDelta.RESOLVED, //$NON-NLS-1$
+						bundleDeltas[m].getType());
 				found = bundleDeltas[m].getBundle() == description;
 			}
 			if (!found) {
 				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
-		stateDelta = state.resolve(new BundleDescription[] {i});
+		stateDelta = state.resolve(new BundleDescription[] { i });
 		bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 1, bundleDeltas.length); //$NON-NLS-1$
 
-		stateDelta = state.resolve(new BundleDescription[] {z});
+		stateDelta = state.resolve(new BundleDescription[] { z });
 		bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 1, bundleDeltas.length); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports018() throws BundleException {
 		State state = getSubstituteUsesReexportCycleState();
 		state.resolve();
@@ -2298,34 +2606,36 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDescription i = state.getBundle(9);
 		BundleDescription j = state.getBundle(10);
 
-		BundleDescription[] allRefreshBundles = new BundleDescription[] {a, b, c, d, e, f, g, h, i, j};
-		StateDelta stateDelta = state.resolve(new BundleDescription[] {a});
+		BundleDescription[] allRefreshBundles = new BundleDescription[] { a, b, c, d, e, f, g, h, i, j };
+		StateDelta stateDelta = state.resolve(new BundleDescription[] { a });
 		BundleDelta[] bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", allRefreshBundles.length, bundleDeltas.length); //$NON-NLS-1$
 		for (BundleDescription description : allRefreshBundles) {
 			boolean found = false;
 			for (int l = 0; l < bundleDeltas.length && !found; l++) {
-				assertEquals("unexpected delta type " + bundleDeltas[l], BundleDelta.RESOLVED, bundleDeltas[l].getType()); //$NON-NLS-1$
+				assertEquals("unexpected delta type " + bundleDeltas[l], BundleDelta.RESOLVED, //$NON-NLS-1$
+						bundleDeltas[l].getType());
 				found = bundleDeltas[l].getBundle() == description;
 			}
 			if (!found) {
 				fail("Did not find RESOLVED BundleDelta for " + description); //$NON-NLS-1$
 			}
 		}
-		stateDelta = state.resolve(new BundleDescription[] {i});
+		stateDelta = state.resolve(new BundleDescription[] { i });
 		bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", 1, bundleDeltas.length); //$NON-NLS-1$
 
-		stateDelta = state.resolve(new BundleDescription[] {c});
+		stateDelta = state.resolve(new BundleDescription[] { c });
 		bundleDeltas = stateDelta.getChanges();
 		assertNotNull("bundleDeltas is null", bundleDeltas); //$NON-NLS-1$
 		assertEquals("bunldeDeltas wrong number", allRefreshBundles.length, bundleDeltas.length); //$NON-NLS-1$
 		for (BundleDescription description : allRefreshBundles) {
 			boolean found = false;
 			for (int l = 0; l < bundleDeltas.length && !found; l++) {
-				assertEquals("unexpected delta type " + bundleDeltas[l], BundleDelta.RESOLVED, bundleDeltas[l].getType()); //$NON-NLS-1$
+				assertEquals("unexpected delta type " + bundleDeltas[l], BundleDelta.RESOLVED, //$NON-NLS-1$
+						bundleDeltas[l].getType());
 				found = bundleDeltas[l].getBundle() == description;
 			}
 			if (!found) {
@@ -2334,6 +2644,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testSubstitutableExports019() throws BundleException {
 		State state = getSubstituteUnresolvedFragState();
 		state.resolve();
@@ -2398,6 +2709,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports020() throws BundleException {
 		State state = getSubstituteUnresolvedFragState();
 		state.resolve();
@@ -2419,9 +2731,11 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "Q"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "q; version=1.0"); //$NON-NLS-1$
-		BundleDescription q = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), f.getBundleId() + 1);
+		BundleDescription q = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				f.getBundleId() + 1);
 		state.addBundle(q);
-		state.resolve(new BundleDescription[] {a});
+		state.resolve(new BundleDescription[] { a });
 
 		assertTrue("1.0", a.isResolved()); //$NON-NLS-1$
 		assertTrue("1.0.1", aFrag.isResolved()); //$NON-NLS-1$
@@ -2467,7 +2781,8 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("a has wrong number of exports", 3, aExports.length); //$NON-NLS-1$
 
 		ExportPackageDescription[] aDeclaredExports = a.getExportPackages();
-		ExportPackageDescription[] aFragExpected = new ExportPackageDescription[] {aExports[2], q.getExportPackages()[0]};
+		ExportPackageDescription[] aFragExpected = new ExportPackageDescription[] { aExports[2],
+				q.getExportPackages()[0] };
 		assertArrayEquals("aFragVisible not correct", q.getSelectedExports(), aFragVisible); //$NON-NLS-1$
 		assertArrayEquals("bVisible not correct", aDeclaredExports, bVisible); //$NON-NLS-1$
 		assertArrayEquals("bFragVisible not correct", aFragExpected, bFragVisible); //$NON-NLS-1$
@@ -2479,6 +2794,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports021() throws BundleException {
 		State state = getSubstituteBasicState();
 		state.resolve();
@@ -2490,7 +2806,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		BundleDescription f = state.getBundle(5);
 
 		state.removeBundle(a);
-		state.resolve(new BundleDescription[] {a});
+		state.resolve(new BundleDescription[] { a });
 		assertFalse("1.0", a.isResolved()); //$NON-NLS-1$
 		assertTrue("1.1", b.isResolved()); //$NON-NLS-1$
 		assertTrue("1.2", c.isResolved()); //$NON-NLS-1$
@@ -2522,6 +2838,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertArrayEquals("fVisible not correct", bExports, fVisible); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSubstitutableExports022() throws BundleException {
 		State state = getSubstituteSplitState();
 		state.resolve();
@@ -2601,6 +2918,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testSubstitutableExports023() throws BundleException {
 		State state = getSubstituteSplitUsesState();
 		state.resolve();
@@ -2681,13 +2999,15 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 
 		ExportPackageDescription[] aExports = a.getSelectedExports();
 		assertEquals("aExports wrong number", 2, aExports.length); //$NON-NLS-1$
-		ExportPackageDescription[] bcExpected = new ExportPackageDescription[] {aExports[0], aExports[1], l.getSelectedExports()[0]};
-		ExportPackageDescription[] aExpected = new ExportPackageDescription[] {l.getSelectedExports()[0]};
+		ExportPackageDescription[] bcExpected = new ExportPackageDescription[] { aExports[0], aExports[1],
+				l.getSelectedExports()[0] };
+		ExportPackageDescription[] aExpected = new ExportPackageDescription[] { l.getSelectedExports()[0] };
 		assertArrayEquals("aVisible not correct", aExpected, aVisible); //$NON-NLS-1$
 		assertArrayEquals("bVisible not correct", bcExpected, bVisible); //$NON-NLS-1$
 		assertArrayEquals("cVisible not correct", bcExpected, cVisible); //$NON-NLS-1$
 
-		ExportPackageDescription[] dExpected = new ExportPackageDescription[] {l.getSelectedExports()[1], aExports[0], aExports[1]};
+		ExportPackageDescription[] dExpected = new ExportPackageDescription[] { l.getSelectedExports()[1], aExports[0],
+				aExports[1] };
 		assertArrayEquals("dVisible not correct", dExpected, dVisible); //$NON-NLS-1$
 
 		ExportPackageDescription[] aExported = a.getSelectedExports();
@@ -2712,7 +3032,8 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		}
 
 		ExportPackageDescription[] lExported = l.getSelectedExports();
-		ExportPackageDescription[] mnExpected = new ExportPackageDescription[aExported.length + dExported.length + lExported.length];
+		ExportPackageDescription[] mnExpected = new ExportPackageDescription[aExported.length + dExported.length
+				+ lExported.length];
 		System.arraycopy(aExported, 0, mnExpected, 0, aExported.length);
 		System.arraycopy(dExported, 0, mnExpected, aExported.length, dExported.length);
 		System.arraycopy(lExported, 0, mnExpected, aExported.length + dExported.length, lExported.length);
@@ -2722,6 +3043,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		}
 	}
 
+	@Test
 	public void testSubstitutableExports024() throws BundleException {
 		State state = getNonOverlapingSubstituteBasicState();
 		state.resolve();
@@ -2772,6 +3094,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("Should not have any unresolvable constraints", 0, unsatisfied.length);
 	}
 
+	@Test
 	public void testSubstitutableExports025() throws BundleException {
 		State state = getSubstituteUsesState();
 		BundleDescription a = state.getBundle(1);
@@ -2789,7 +3112,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.REQUIRE_BUNDLE, "C"); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "z; version=0.5"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "z"); //$NON-NLS-1$
-		BundleDescription h = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), g.getBundleId() + 1);
+		BundleDescription h = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION),
+				g.getBundleId() + 1);
 		state.addBundle(h);
 
 		state.resolve();

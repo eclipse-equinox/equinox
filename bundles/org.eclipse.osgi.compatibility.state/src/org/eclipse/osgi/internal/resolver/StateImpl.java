@@ -91,7 +91,7 @@ public abstract class StateImpl implements State {
 	 * syntax version 2 will not recognize this header.
 	 *
 	 * <p>The attribute value may be retrieved from the
-	 * <tt>Dictionary</tt> object returned by the <tt>Bundle.getHeaders</tt> method.
+	 * <code>Dictionary</code> object returned by the <code>Bundle.getHeaders</code> method.
 	 * @deprecated
 	 */
 	@Deprecated
@@ -102,7 +102,7 @@ public abstract class StateImpl implements State {
 	 * for Require-Bundle
 	 * identifying that any packages that are provided
 	 * by the required bundle must be reprovided by the requiring bundle.
-	 * The default value is <tt>false</tt>.
+	 * The default value is <code>false</code>.
 	 * <p>
 	 * The attribute value is encoded in the Require-Bundle manifest
 	 * header like:
@@ -123,7 +123,7 @@ public abstract class StateImpl implements State {
 	 * identifying that a required bundle is optional and that
 	 * the requiring bundle can be resolved if there is no
 	 * suitable required bundle.
-	 * The default value is <tt>false</tt>.
+	 * The default value is <code>false</code>.
 	 *
 	 * <p>The attribute value is encoded in the Require-Bundle manifest
 	 * header like:

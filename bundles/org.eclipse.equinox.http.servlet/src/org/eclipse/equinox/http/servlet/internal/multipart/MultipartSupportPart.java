@@ -55,8 +55,7 @@ public class MultipartSupportPart implements Part {
 	public void write(String fileName) throws IOException {
 		try {
 			item.write(new File(item.getStoreLocation(), fileName));
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new IOException(e);
 		}
 	}

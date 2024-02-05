@@ -28,7 +28,8 @@ public class NewValueDialog extends TitleAreaDialog {
 
 	private static final String HELP_ID = Activator.PLUGIN_ID + ".NewValueDialog"; //$NON-NLS-1$
 
-	private static final ImageDescriptor dlgImageDescriptor = ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/new_value_wiz.png"); //$NON-NLS-1$
+	private static final ImageDescriptor dlgImageDescriptor = ImageDescriptor.createFromFile(NodesView.class,
+			"/icons/storage/new_value_wiz.png"); //$NON-NLS-1$
 
 	private final String[] existingKeys;
 

@@ -18,10 +18,12 @@ package org.eclipse.equinox.http.servlet;
 import org.eclipse.equinox.http.servlet.internal.servlet.ProxyServlet;
 
 /**
- * The HttpServiceServlet is the "public" side of a Servlet that when registered (and init() called) in a servlet container
- * will in-turn register and provide an OSGi Http Service implementation.
- * This class is not meant for extending or even using directly and is purely meant for registering
- * in a servlet container.
+ * The HttpServiceServlet is the "public" side of a Servlet that when registered
+ * (and init() called) in a servlet container will in-turn register and provide
+ * an OSGi Http Service implementation. This class is not meant for extending or
+ * even using directly and is purely meant for registering in a servlet
+ * container.
+ * 
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class HttpServiceServlet extends ProxyServlet {

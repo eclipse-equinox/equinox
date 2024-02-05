@@ -50,7 +50,9 @@ import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Namespace;
 
 /**
- * A factory for creating {@link ModuleRevisionBuilder}s based on OSGi bundle manifests.
+ * A factory for creating {@link ModuleRevisionBuilder}s based on OSGi bundle
+ * manifests.
+ * 
  * @since 3.10
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
@@ -64,12 +66,17 @@ public final class OSGiManifestBuilderFactory {
 	private static final String ATTR_TYPE_LIST = "List"; //$NON-NLS-1$
 	private static final String ATTR_OLD_REPRIVIDE = "reprovide"; //$NON-NLS-1$
 	private static final String HEADER_OLD_PROVIDE_PACKAGE = "Provide-Package"; //$NON-NLS-1$
-	private static final String[] DEFINED_OSGI_VALIDATE_HEADERS = {Constants.IMPORT_PACKAGE, Constants.DYNAMICIMPORT_PACKAGE, Constants.EXPORT_PACKAGE, Constants.FRAGMENT_HOST, Constants.BUNDLE_SYMBOLICNAME, Constants.REQUIRE_BUNDLE};
-	private static final Collection<String> SYSTEM_CAPABILITIES = Collections.unmodifiableCollection(Arrays.asList(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE, NativeNamespace.NATIVE_NAMESPACE));
-	private static final Collection<String> PROHIBITED_CAPABILITIES = Collections.unmodifiableCollection(Arrays.asList(IdentityNamespace.IDENTITY_NAMESPACE));
+	private static final String[] DEFINED_OSGI_VALIDATE_HEADERS = { Constants.IMPORT_PACKAGE,
+			Constants.DYNAMICIMPORT_PACKAGE, Constants.EXPORT_PACKAGE, Constants.FRAGMENT_HOST,
+			Constants.BUNDLE_SYMBOLICNAME, Constants.REQUIRE_BUNDLE };
+	private static final Collection<String> SYSTEM_CAPABILITIES = Collections.unmodifiableCollection(Arrays
+			.asList(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE, NativeNamespace.NATIVE_NAMESPACE));
+	private static final Collection<String> PROHIBITED_CAPABILITIES = Collections
+			.unmodifiableCollection(Arrays.asList(IdentityNamespace.IDENTITY_NAMESPACE));
 
 	/**
 	 * Creates a builder for the specified bundle manifest
+	 * 
 	 * @param manifest the bundle manifest
 	 * @return a builder for the specified bundle manifest
 	 * @throws BundleException if the bundle manifest is invalid
@@ -79,20 +86,25 @@ public final class OSGiManifestBuilderFactory {
 	}
 
 	/**
-	 * Creates a builder for the specified bundle manifest.  An alias can be supplied
-	 * for the symbolic name.  Also extra package exports and extra provided capabilities
-	 * may be specified outside of the supplied manifest.  This is useful for creating
-	 * a builder for the system module which takes into account the configuration
-	 * properties {@link Constants#FRAMEWORK_SYSTEMPACKAGES_EXTRA} and
-	 * {@link Constants#FRAMEWORK_SYSTEMCAPABILITIES_EXTRA}.
-	 * @param manifest the bundle manifest
-	 * @param symbolicNameAlias the symbolic name alias.  A <code>null</code> value is allowed.
-	 * @param extraExports the extra package exports.  A <code>null</code> value is allowed.
-	 * @param extraCapabilities the extra provided capabilities.   A <code>null</code> value is allowed.
+	 * Creates a builder for the specified bundle manifest. An alias can be supplied
+	 * for the symbolic name. Also extra package exports and extra provided
+	 * capabilities may be specified outside of the supplied manifest. This is
+	 * useful for creating a builder for the system module which takes into account
+	 * the configuration properties {@link Constants#FRAMEWORK_SYSTEMPACKAGES_EXTRA}
+	 * and {@link Constants#FRAMEWORK_SYSTEMCAPABILITIES_EXTRA}.
+	 * 
+	 * @param manifest          the bundle manifest
+	 * @param symbolicNameAlias the symbolic name alias. A <code>null</code> value
+	 *                          is allowed.
+	 * @param extraExports      the extra package exports. A <code>null</code> value
+	 *                          is allowed.
+	 * @param extraCapabilities the extra provided capabilities. A <code>null</code>
+	 *                          value is allowed.
 	 * @return a builder for the specified bundle manifest
 	 * @throws BundleException if the bundle manifest is invalid
 	 */
-	public static ModuleRevisionBuilder createBuilder(Map<String, String> manifest, String symbolicNameAlias, String extraExports, String extraCapabilities) throws BundleException {
+	public static ModuleRevisionBuilder createBuilder(Map<String, String> manifest, String symbolicNameAlias,
+			String extraExports, String extraCapabilities) throws BundleException {
 		ModuleRevisionBuilder builder = new ModuleRevisionBuilder();
 
 		int manifestVersion = getManifestVersion(manifest);
@@ -103,26 +115,37 @@ public final class OSGiManifestBuilderFactory {
 		Object symbolicName = getSymbolicNameAndVersion(builder, manifest, symbolicNameAlias, manifestVersion);
 
 		Collection<Map<String, Object>> exportedPackages = new ArrayList<>();
-		getPackageExports(builder, ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, manifest.get(Constants.EXPORT_PACKAGE)), symbolicName, exportedPackages);
-		getPackageExports(builder, ManifestElement.parseHeader(HEADER_OLD_PROVIDE_PACKAGE, manifest.get(HEADER_OLD_PROVIDE_PACKAGE)), symbolicName, exportedPackages);
+		getPackageExports(builder,
+				ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, manifest.get(Constants.EXPORT_PACKAGE)),
+				symbolicName, exportedPackages);
+		getPackageExports(builder,
+				ManifestElement.parseHeader(HEADER_OLD_PROVIDE_PACKAGE, manifest.get(HEADER_OLD_PROVIDE_PACKAGE)),
+				symbolicName, exportedPackages);
 		if (extraExports != null && !extraExports.isEmpty()) {
-			getPackageExports(builder, ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, extraExports), symbolicName, exportedPackages);
+			getPackageExports(builder, ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, extraExports),
+					symbolicName, exportedPackages);
 		}
 		getPackageImports(builder, manifest, exportedPackages, manifestVersion);
 
-		getRequireBundle(builder, ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE, manifest.get(Constants.REQUIRE_BUNDLE)));
+		getRequireBundle(builder,
+				ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE, manifest.get(Constants.REQUIRE_BUNDLE)));
 
-		getProvideCapabilities(builder, ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, manifest.get(Constants.PROVIDE_CAPABILITY)), extraCapabilities == null);
+		getProvideCapabilities(builder,
+				ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, manifest.get(Constants.PROVIDE_CAPABILITY)),
+				extraCapabilities == null);
 		if (extraCapabilities != null && !extraCapabilities.isEmpty()) {
-			getProvideCapabilities(builder, ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, extraCapabilities), false);
+			getProvideCapabilities(builder,
+					ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, extraCapabilities), false);
 		}
-		getRequireCapabilities(builder, ManifestElement.parseHeader(Constants.REQUIRE_CAPABILITY, manifest.get(Constants.REQUIRE_CAPABILITY)));
+		getRequireCapabilities(builder,
+				ManifestElement.parseHeader(Constants.REQUIRE_CAPABILITY, manifest.get(Constants.REQUIRE_CAPABILITY)));
 
 		addRequireEclipsePlatform(builder, manifest);
 
 		getEquinoxDataCapability(builder, manifest);
 
-		getFragmentHost(builder, ManifestElement.parseHeader(Constants.FRAGMENT_HOST, manifest.get(Constants.FRAGMENT_HOST)));
+		getFragmentHost(builder,
+				ManifestElement.parseHeader(Constants.FRAGMENT_HOST, manifest.get(Constants.FRAGMENT_HOST)));
 
 		convertBREEs(builder, manifest);
 
@@ -149,7 +172,8 @@ public final class OSGiManifestBuilderFactory {
 					checkExtensionBundle(definedOSGiValidateHeader, elements, manifest);
 				}
 			} else if (definedOSGiValidateHeader == Constants.BUNDLE_SYMBOLICNAME) {
-				throw new BundleException(Constants.BUNDLE_SYMBOLICNAME + " header is required.", BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+				throw new BundleException(Constants.BUNDLE_SYMBOLICNAME + " header is required.", //$NON-NLS-1$
+						BundleException.MANIFEST_ERROR);
 			}
 		}
 	}
@@ -167,12 +191,14 @@ public final class OSGiManifestBuilderFactory {
 			for (String packageName : packageNames) {
 				if (!export && !dynamic && packages.contains(packageName)) {
 					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
-					throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_PACKAGE_DUPLICATES, packageName), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+					throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_PACKAGE_DUPLICATES, packageName), //$NON-NLS-1$
+							BundleException.MANIFEST_ERROR);
 				}
 				// check for java.*
 				if (export && !allowJavaExports && packageName.startsWith("java.")) { //$NON-NLS-1$
 					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
-					throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_PACKAGE_JAVA, packageName), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+					throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_PACKAGE_JAVA, packageName), //$NON-NLS-1$
+							BundleException.MANIFEST_ERROR);
 				}
 				packages.add(packageName);
 			}
@@ -181,24 +207,31 @@ public final class OSGiManifestBuilderFactory {
 			if (version != null) {
 				String specVersion = elements[i].getAttribute(Constants.PACKAGE_SPECIFICATION_VERSION);
 				if (specVersion != null && !specVersion.equals(version))
-					throw new BundleException(NLS.bind(Msg.HEADER_VERSION_ERROR, Constants.VERSION_ATTRIBUTE, Constants.PACKAGE_SPECIFICATION_VERSION), BundleException.MANIFEST_ERROR);
+					throw new BundleException(NLS.bind(Msg.HEADER_VERSION_ERROR, Constants.VERSION_ATTRIBUTE,
+							Constants.PACKAGE_SPECIFICATION_VERSION), BundleException.MANIFEST_ERROR);
 			}
 			// check for bundle-symbolic-name and bundle-version attributes on exports
 			// (failure)
 			if (export) {
 				if (elements[i].getAttribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE) != null) {
 					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
-					throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_EXPORT_ATTR_ERROR, Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, Constants.EXPORT_PACKAGE), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+					throw new BundleException(
+							message + " : " + NLS.bind(Msg.HEADER_EXPORT_ATTR_ERROR, //$NON-NLS-1$
+									Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, Constants.EXPORT_PACKAGE),
+							BundleException.MANIFEST_ERROR);
 				}
 				if (elements[i].getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE) != null) {
 					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
-					throw new BundleException(NLS.bind(message + " : " + Msg.HEADER_EXPORT_ATTR_ERROR, Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.EXPORT_PACKAGE), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+					throw new BundleException(NLS.bind(message + " : " + Msg.HEADER_EXPORT_ATTR_ERROR, //$NON-NLS-1$
+							Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.EXPORT_PACKAGE),
+							BundleException.MANIFEST_ERROR);
 				}
 			}
 		}
 	}
 
-	private static void checkForDuplicateDirectivesAttributes(String headerKey, ManifestElement[] elements) throws BundleException {
+	private static void checkForDuplicateDirectivesAttributes(String headerKey, ManifestElement[] elements)
+			throws BundleException {
 		// check for duplicate directives
 		for (ManifestElement element : elements) {
 			Enumeration<String> directiveKeys = element.getDirectiveKeys();
@@ -208,7 +241,8 @@ public final class OSGiManifestBuilderFactory {
 					String[] directives = element.getDirectives(key);
 					if (directives.length > 1) {
 						String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, element.toString());
-						throw new BundleException(NLS.bind(message + " : " + Msg.HEADER_DIRECTIVE_DUPLICATES, key), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+						throw new BundleException(NLS.bind(message + " : " + Msg.HEADER_DIRECTIVE_DUPLICATES, key), //$NON-NLS-1$
+								BundleException.MANIFEST_ERROR);
 					}
 				}
 			}
@@ -219,28 +253,34 @@ public final class OSGiManifestBuilderFactory {
 					String[] attrs = element.getAttributes(key);
 					if (attrs.length > 1) {
 						String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, element.toString());
-						throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_ATTRIBUTE_DUPLICATES, key), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+						throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_ATTRIBUTE_DUPLICATES, key), //$NON-NLS-1$
+								BundleException.MANIFEST_ERROR);
 					}
 				}
 			}
 		}
 	}
 
-	private static void checkExtensionBundle(String headerKey, ManifestElement[] elements, Map<String, String> manifest) throws BundleException {
+	private static void checkExtensionBundle(String headerKey, ManifestElement[] elements, Map<String, String> manifest)
+			throws BundleException {
 		if (elements.length == 0)
 			return;
 		String hostName = elements[0].getValue();
-		// XXX: The extension bundle check is done against system.bundle and org.eclipse.osgi
+		// XXX: The extension bundle check is done against system.bundle and
+		// org.eclipse.osgi
 		if (!hostName.equals(Constants.SYSTEM_BUNDLE_SYMBOLICNAME) && !hostName.equals(EquinoxContainer.NAME)) {
 			if (elements[0].getDirective(Constants.EXTENSION_DIRECTIVE) != null) {
 				String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[0].toString());
-				throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_EXTENSION_ERROR, hostName), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+				throw new BundleException(message + " : " + NLS.bind(Msg.HEADER_EXTENSION_ERROR, hostName), //$NON-NLS-1$
+						BundleException.MANIFEST_ERROR);
 			}
 		} else {
 			if (manifest.get(Constants.REQUIRE_BUNDLE) != null)
-				throw new BundleException(Msg.OSGiManifestBuilderFactory_ExtensionReqBundleError, BundleException.MANIFEST_ERROR);
+				throw new BundleException(Msg.OSGiManifestBuilderFactory_ExtensionReqBundleError,
+						BundleException.MANIFEST_ERROR);
 			if (manifest.get(Constants.BUNDLE_NATIVECODE) != null)
-				throw new BundleException(Msg.OSGiManifestBuilderFactory_ExtensionNativeError, BundleException.MANIFEST_ERROR);
+				throw new BundleException(Msg.OSGiManifestBuilderFactory_ExtensionNativeError,
+						BundleException.MANIFEST_ERROR);
 
 		}
 	}
@@ -250,7 +290,8 @@ public final class OSGiManifestBuilderFactory {
 		return manifestVersionHeader == null ? 1 : Integer.parseInt(manifestVersionHeader);
 	}
 
-	private static Object getSymbolicNameAndVersion(ModuleRevisionBuilder builder, Map<String, String> manifest, String symbolicNameAlias, int manifestVersion) throws BundleException {
+	private static Object getSymbolicNameAndVersion(ModuleRevisionBuilder builder, Map<String, String> manifest,
+			String symbolicNameAlias, int manifestVersion) throws BundleException {
 		boolean isFragment = manifest.get(Constants.FRAGMENT_HOST) != null;
 		builder.setTypes(isFragment ? BundleRevision.TYPE_FRAGMENT : 0);
 		String version = manifest.get(Constants.BUNDLE_VERSION);
@@ -258,7 +299,8 @@ public final class OSGiManifestBuilderFactory {
 			builder.setVersion((version != null) ? Version.parseVersion(version) : Version.emptyVersion);
 		} catch (IllegalArgumentException ex) {
 			if (manifestVersion >= 2) {
-				String message = NLS.bind(Msg.OSGiManifestBuilderFactory_InvalidManifestError, Constants.BUNDLE_VERSION, version);
+				String message = NLS.bind(Msg.OSGiManifestBuilderFactory_InvalidManifestError, Constants.BUNDLE_VERSION,
+						version);
 				throw new BundleException(message, BundleException.MANIFEST_ERROR, ex);
 			}
 			// prior to R4 the Bundle-Version header was not interpreted by the Framework;
@@ -268,7 +310,8 @@ public final class OSGiManifestBuilderFactory {
 		Object symbolicName = null;
 		String symbolicNameHeader = manifest.get(Constants.BUNDLE_SYMBOLICNAME);
 		if (symbolicNameHeader != null) {
-			ManifestElement[] symbolicNameElements = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameHeader);
+			ManifestElement[] symbolicNameElements = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME,
+					symbolicNameHeader);
 			if (symbolicNameElements.length > 0) {
 				ManifestElement bsnElement = symbolicNameElements[0];
 				builder.setSymbolicName(bsnElement.getValue());
@@ -300,7 +343,8 @@ public final class OSGiManifestBuilderFactory {
 
 					// create the host namespace
 					// only if the directive is not never
-					if (!HostNamespace.FRAGMENT_ATTACHMENT_NEVER.equals(directives.get(HostNamespace.CAPABILITY_FRAGMENT_ATTACHMENT_DIRECTIVE))) {
+					if (!HostNamespace.FRAGMENT_ATTACHMENT_NEVER
+							.equals(directives.get(HostNamespace.CAPABILITY_FRAGMENT_ATTACHMENT_DIRECTIVE))) {
 						Map<String, Object> hostAttributes = new HashMap<>(attributes);
 						hostAttributes.put(HostNamespace.HOST_NAMESPACE, symbolicName);
 						hostAttributes.put(HostNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE, builder.getVersion());
@@ -312,7 +356,8 @@ public final class OSGiManifestBuilderFactory {
 				Map<String, Object> identityAttributes = new HashMap<>(attributes);
 				identityAttributes.put(IdentityNamespace.IDENTITY_NAMESPACE, builder.getSymbolicName());
 				identityAttributes.put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, builder.getVersion());
-				identityAttributes.put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, isFragment ? IdentityNamespace.TYPE_FRAGMENT : IdentityNamespace.TYPE_BUNDLE);
+				identityAttributes.put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE,
+						isFragment ? IdentityNamespace.TYPE_FRAGMENT : IdentityNamespace.TYPE_BUNDLE);
 				builder.addCapability(IdentityNamespace.IDENTITY_NAMESPACE, directives, identityAttributes);
 			}
 		}
@@ -320,7 +365,8 @@ public final class OSGiManifestBuilderFactory {
 		return symbolicName == null ? symbolicNameAlias : symbolicName;
 	}
 
-	private static void getPackageExports(ModuleRevisionBuilder builder, ManifestElement[] exportElements, Object symbolicName, Collection<Map<String, Object>> exportedPackages) throws BundleException {
+	private static void getPackageExports(ModuleRevisionBuilder builder, ManifestElement[] exportElements,
+			Object symbolicName, Collection<Map<String, Object>> exportedPackages) throws BundleException {
 		if (exportElements == null)
 			return;
 		for (ManifestElement exportElement : exportElements) {
@@ -357,17 +403,21 @@ public final class OSGiManifestBuilderFactory {
 		}
 	}
 
-	private static void getPackageImports(ModuleRevisionBuilder builder, Map<String, String> manifest, Collection<Map<String, Object>> exportedPackages, int manifestVersion) throws BundleException {
+	private static void getPackageImports(ModuleRevisionBuilder builder, Map<String, String> manifest,
+			Collection<Map<String, Object>> exportedPackages, int manifestVersion) throws BundleException {
 		Collection<String> importPackageNames = new ArrayList<>();
-		ManifestElement[] importElements = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, manifest.get(Constants.IMPORT_PACKAGE));
-		ManifestElement[] dynamicImportElements = ManifestElement.parseHeader(Constants.DYNAMICIMPORT_PACKAGE, manifest.get(Constants.DYNAMICIMPORT_PACKAGE));
+		ManifestElement[] importElements = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE,
+				manifest.get(Constants.IMPORT_PACKAGE));
+		ManifestElement[] dynamicImportElements = ManifestElement.parseHeader(Constants.DYNAMICIMPORT_PACKAGE,
+				manifest.get(Constants.DYNAMICIMPORT_PACKAGE));
 		addPackageImports(builder, importElements, importPackageNames, false);
 		addPackageImports(builder, dynamicImportElements, importPackageNames, true);
 		if (manifestVersion < 2)
 			addImplicitImports(builder, exportedPackages, importPackageNames);
 	}
 
-	private static void addPackageImports(ModuleRevisionBuilder builder, ManifestElement[] importElements, Collection<String> importPackageNames, boolean dynamic) throws BundleException {
+	private static void addPackageImports(ModuleRevisionBuilder builder, ManifestElement[] importElements,
+			Collection<String> importPackageNames, boolean dynamic) throws BundleException {
 		if (importElements == null)
 			return;
 		for (ManifestElement importElement : importElements) {
@@ -382,10 +432,15 @@ public final class OSGiManifestBuilderFactory {
 			String versionRangeAttr = (String) attributes.remove(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
 			@SuppressWarnings("deprecation")
 			String specVersionRangeAttr = (String) attributes.remove(Constants.PACKAGE_SPECIFICATION_VERSION);
-			VersionRange versionRange = versionRangeAttr == null ? (specVersionRangeAttr == null ? null : new VersionRange(specVersionRangeAttr)) : new VersionRange(versionRangeAttr);
-			String bundleVersionRangeAttr = (String) attributes.remove(PackageNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE);
-			VersionRange bundleVersionRange = bundleVersionRangeAttr == null ? null : new VersionRange(bundleVersionRangeAttr);
-			// the attribute "optional" used to be used in old versions of equinox to specify optional imports
+			VersionRange versionRange = versionRangeAttr == null
+					? (specVersionRangeAttr == null ? null : new VersionRange(specVersionRangeAttr))
+					: new VersionRange(versionRangeAttr);
+			String bundleVersionRangeAttr = (String) attributes
+					.remove(PackageNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE);
+			VersionRange bundleVersionRange = bundleVersionRangeAttr == null ? null
+					: new VersionRange(bundleVersionRangeAttr);
+			// the attribute "optional" used to be used in old versions of equinox to
+			// specify optional imports
 			// preserving behavior for compatibility
 			Object optionalAttr = attributes.remove(Namespace.RESOLUTION_OPTIONAL);
 			for (String packageName : packageNames) {
@@ -395,14 +450,16 @@ public final class OSGiManifestBuilderFactory {
 				// fill in the filter directive based on the attributes
 				Map<String, String> packageDirectives = new HashMap<>(directives);
 				StringBuilder filter = new StringBuilder();
-				filter.append('(').append(PackageNamespace.PACKAGE_NAMESPACE).append('=').append(packageName).append(')');
+				filter.append('(').append(PackageNamespace.PACKAGE_NAMESPACE).append('=').append(packageName)
+						.append(')');
 				int size = filter.length();
 				for (Map.Entry<String, Object> attribute : attributes.entrySet())
 					filter.append('(').append(attribute.getKey()).append('=').append(attribute.getValue()).append(')');
 				if (versionRange != null)
 					filter.append(versionRange.toFilterString(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE));
 				if (bundleVersionRange != null)
-					filter.append(bundleVersionRange.toFilterString(PackageNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE));
+					filter.append(
+							bundleVersionRange.toFilterString(PackageNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE));
 				if (size != filter.length())
 					// need to add (&...)
 					filter.insert(0, "(&").append(')'); //$NON-NLS-1$
@@ -410,10 +467,12 @@ public final class OSGiManifestBuilderFactory {
 
 				// fill in cardinality for dynamic wild cards
 				if (dynamic && packageName.indexOf('*') >= 0)
-					packageDirectives.put(PackageNamespace.REQUIREMENT_CARDINALITY_DIRECTIVE, PackageNamespace.CARDINALITY_MULTIPLE);
+					packageDirectives.put(PackageNamespace.REQUIREMENT_CARDINALITY_DIRECTIVE,
+							PackageNamespace.CARDINALITY_MULTIPLE);
 
 				// check the old optional attribute
-				if ("true".equals(optionalAttr) && packageDirectives.get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE) == null) { //$NON-NLS-1$
+				if ("true".equals(optionalAttr) //$NON-NLS-1$
+						&& packageDirectives.get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE) == null) {
 					packageDirectives.put(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE, Namespace.RESOLUTION_OPTIONAL);
 				}
 				builder.addRequirement(PackageNamespace.PACKAGE_NAMESPACE, packageDirectives, new HashMap<>(0));
@@ -421,7 +480,8 @@ public final class OSGiManifestBuilderFactory {
 		}
 	}
 
-	private static void addImplicitImports(ModuleRevisionBuilder builder, Collection<Map<String, Object>> exportedPackages, Collection<String> importPackageNames) {
+	private static void addImplicitImports(ModuleRevisionBuilder builder,
+			Collection<Map<String, Object>> exportedPackages, Collection<String> importPackageNames) {
 		for (Map<String, Object> exportAttributes : exportedPackages) {
 			String packageName = (String) exportAttributes.get(PackageNamespace.PACKAGE_NAMESPACE);
 			if (importPackageNames.contains(packageName))
@@ -430,7 +490,8 @@ public final class OSGiManifestBuilderFactory {
 			Version packageVersion = (Version) exportAttributes.get(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
 			StringBuilder filter = new StringBuilder();
 			filter.append("(&(").append(PackageNamespace.PACKAGE_NAMESPACE).append('=').append(packageName).append(')'); //$NON-NLS-1$
-			filter.append('(').append(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE).append(">=").append(packageVersion).append("))"); //$NON-NLS-1$//$NON-NLS-2$
+			filter.append('(').append(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE).append(">=").append(packageVersion) //$NON-NLS-1$
+					.append("))"); //$NON-NLS-1$
 			Map<String, String> directives = new HashMap<>(1);
 			directives.put(PackageNamespace.REQUIREMENT_FILTER_DIRECTIVE, filter.toString());
 			builder.addRequirement(PackageNamespace.PACKAGE_NAMESPACE, directives, new HashMap<>(0));
@@ -449,7 +510,8 @@ public final class OSGiManifestBuilderFactory {
 		return directives;
 	}
 
-	private static void getRequireBundle(ModuleRevisionBuilder builder, ManifestElement[] requireBundles) throws BundleException {
+	private static void getRequireBundle(ModuleRevisionBuilder builder, ManifestElement[] requireBundles)
+			throws BundleException {
 		if (requireBundles == null)
 			return;
 		for (ManifestElement requireElement : requireBundles) {
@@ -483,18 +545,22 @@ public final class OSGiManifestBuilderFactory {
 					filter.insert(0, "(&").append(')'); //$NON-NLS-1$
 				bundleDirectives.put(BundleNamespace.REQUIREMENT_FILTER_DIRECTIVE, filter.toString());
 				// check the old compatibility attributes
-				if ("true".equals(optionalAttr) && bundleDirectives.get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE) == null) { //$NON-NLS-1$
+				if ("true".equals(optionalAttr) //$NON-NLS-1$
+						&& bundleDirectives.get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE) == null) {
 					bundleDirectives.put(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE, Namespace.RESOLUTION_OPTIONAL);
 				}
-				if ("true".equals(reprovideAttr) && bundleDirectives.get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE) == null) { //$NON-NLS-1$
-					bundleDirectives.put(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE, BundleNamespace.VISIBILITY_REEXPORT);
+				if ("true".equals(reprovideAttr) //$NON-NLS-1$
+						&& bundleDirectives.get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE) == null) {
+					bundleDirectives.put(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE,
+							BundleNamespace.VISIBILITY_REEXPORT);
 				}
 				builder.addRequirement(BundleNamespace.BUNDLE_NAMESPACE, bundleDirectives, new HashMap<>(0));
 			}
 		}
 	}
 
-	private static void getFragmentHost(ModuleRevisionBuilder builder, ManifestElement[] fragmentHosts) throws BundleException {
+	private static void getFragmentHost(ModuleRevisionBuilder builder, ManifestElement[] fragmentHosts)
+			throws BundleException {
 		if (fragmentHosts == null || fragmentHosts.length == 0)
 			return;
 
@@ -521,12 +587,16 @@ public final class OSGiManifestBuilderFactory {
 			filter.insert(0, "(&").append(')'); //$NON-NLS-1$
 		directives.put(BundleNamespace.REQUIREMENT_FILTER_DIRECTIVE, filter.toString());
 		builder.addRequirement(HostNamespace.HOST_NAMESPACE, directives, new HashMap<>(0));
-		// Add a fragment capability to advertise what host this resource is providing a fragment for
-		directives = Collections.singletonMap(EquinoxModuleDataNamespace.CAPABILITY_EFFECTIVE_DIRECTIVE, EquinoxModuleDataNamespace.EFFECTIVE_INFORMATION);
-		builder.addCapability(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, directives, Collections.singletonMap(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, hostName));
+		// Add a fragment capability to advertise what host this resource is providing a
+		// fragment for
+		directives = Collections.singletonMap(EquinoxModuleDataNamespace.CAPABILITY_EFFECTIVE_DIRECTIVE,
+				EquinoxModuleDataNamespace.EFFECTIVE_INFORMATION);
+		builder.addCapability(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, directives,
+				Collections.singletonMap(EquinoxFragmentNamespace.FRAGMENT_NAMESPACE, hostName));
 	}
 
-	private static void getProvideCapabilities(ModuleRevisionBuilder builder, ManifestElement[] provideElements, boolean checkSystemCapabilities) throws BundleException {
+	private static void getProvideCapabilities(ModuleRevisionBuilder builder, ManifestElement[] provideElements,
+			boolean checkSystemCapabilities) throws BundleException {
 		if (provideElements == null)
 			return;
 		for (ManifestElement provideElement : provideElements) {
@@ -534,8 +604,11 @@ public final class OSGiManifestBuilderFactory {
 			Map<String, Object> attributes = getAttributes(provideElement);
 			Map<String, String> directives = getDirectives(provideElement);
 			for (String namespace : namespaces) {
-				if (PROHIBITED_CAPABILITIES.contains(namespace) || (checkSystemCapabilities && SYSTEM_CAPABILITIES.contains(namespace))) {
-					throw new BundleException("A bundle is not allowed to define a capability in the " + namespace + " name space.", BundleException.MANIFEST_ERROR); //$NON-NLS-1$ //$NON-NLS-2$
+				if (PROHIBITED_CAPABILITIES.contains(namespace)
+						|| (checkSystemCapabilities && SYSTEM_CAPABILITIES.contains(namespace))) {
+					throw new BundleException(
+							"A bundle is not allowed to define a capability in the " + namespace + " name space.", //$NON-NLS-1$ //$NON-NLS-2$
+							BundleException.MANIFEST_ERROR);
 				}
 
 				builder.addCapability(namespace, directives, attributes);
@@ -543,7 +616,8 @@ public final class OSGiManifestBuilderFactory {
 		}
 	}
 
-	private static void getRequireCapabilities(ModuleRevisionBuilder builder, ManifestElement[] requireElements) throws BundleException {
+	private static void getRequireCapabilities(ModuleRevisionBuilder builder, ManifestElement[] requireElements)
+			throws BundleException {
 		if (requireElements == null)
 			return;
 		for (ManifestElement requireElement : requireElements) {
@@ -568,11 +642,13 @@ public final class OSGiManifestBuilderFactory {
 	}
 
 	@SuppressWarnings("deprecation")
-	private static void getEquinoxDataCapability(ModuleRevisionBuilder builder, Map<String, String> manifest) throws BundleException {
+	private static void getEquinoxDataCapability(ModuleRevisionBuilder builder, Map<String, String> manifest)
+			throws BundleException {
 		Map<String, Object> attributes = new HashMap<>();
 
 		// Get the activation policy attributes
-		ManifestElement[] policyElements = ManifestElement.parseHeader(Constants.BUNDLE_ACTIVATIONPOLICY, manifest.get(Constants.BUNDLE_ACTIVATIONPOLICY));
+		ManifestElement[] policyElements = ManifestElement.parseHeader(Constants.BUNDLE_ACTIVATIONPOLICY,
+				manifest.get(Constants.BUNDLE_ACTIVATIONPOLICY));
 		if (policyElements != null) {
 			ManifestElement policy = policyElements[0];
 			String policyName = policy.getValue();
@@ -580,31 +656,40 @@ public final class OSGiManifestBuilderFactory {
 				attributes.put(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY, policyName);
 				String includeSpec = policy.getDirective(Constants.INCLUDE_DIRECTIVE);
 				if (includeSpec != null) {
-					attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_INCLUDE_ATTRIBUTE, convertValueWithNoWhitespace("List<String>", includeSpec)); //$NON-NLS-1$
+					attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_INCLUDE_ATTRIBUTE,
+							convertValueWithNoWhitespace("List<String>", includeSpec)); //$NON-NLS-1$
 				}
 				String excludeSpec = policy.getDirective(Constants.EXCLUDE_DIRECTIVE);
 				if (excludeSpec != null) {
-					attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_EXCLUDE_ATTRIBUTE, convertValueWithNoWhitespace("List<String>", excludeSpec)); //$NON-NLS-1$
+					attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_EXCLUDE_ATTRIBUTE,
+							convertValueWithNoWhitespace("List<String>", excludeSpec)); //$NON-NLS-1$
 				}
 			}
 		} else {
-			policyElements = ManifestElement.parseHeader(EquinoxModuleDataNamespace.LAZYSTART_HEADER, manifest.get(EquinoxModuleDataNamespace.LAZYSTART_HEADER));
+			policyElements = ManifestElement.parseHeader(EquinoxModuleDataNamespace.LAZYSTART_HEADER,
+					manifest.get(EquinoxModuleDataNamespace.LAZYSTART_HEADER));
 			if (policyElements == null) {
-				policyElements = ManifestElement.parseHeader(EquinoxModuleDataNamespace.AUTOSTART_HEADER, manifest.get(EquinoxModuleDataNamespace.AUTOSTART_HEADER));
+				policyElements = ManifestElement.parseHeader(EquinoxModuleDataNamespace.AUTOSTART_HEADER,
+						manifest.get(EquinoxModuleDataNamespace.AUTOSTART_HEADER));
 			}
 			if (policyElements != null) {
 				ManifestElement policy = policyElements[0];
 				String excludeSpec = policy.getAttribute(EquinoxModuleDataNamespace.LAZYSTART_EXCEPTIONS_ATTRIBUTE);
 				if ("true".equals(policy.getValue())) { //$NON-NLS-1$
-					attributes.put(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY, EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY);
+					attributes.put(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY,
+							EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY);
 					if (excludeSpec != null) {
-						attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_EXCLUDE_ATTRIBUTE, convertValueWithNoWhitespace("List<String>", excludeSpec)); //$NON-NLS-1$
+						attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_EXCLUDE_ATTRIBUTE,
+								convertValueWithNoWhitespace("List<String>", excludeSpec)); //$NON-NLS-1$
 					}
 				} else {
-					// NOTICE - the exclude list gets converted to an include list when the header is not true
+					// NOTICE - the exclude list gets converted to an include list when the header
+					// is not true
 					if (excludeSpec != null) {
-						attributes.put(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY, EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY);
-						attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_INCLUDE_ATTRIBUTE, convertValueWithNoWhitespace("List<String>", excludeSpec)); //$NON-NLS-1$
+						attributes.put(EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY,
+								EquinoxModuleDataNamespace.CAPABILITY_ACTIVATION_POLICY_LAZY);
+						attributes.put(EquinoxModuleDataNamespace.CAPABILITY_LAZY_INCLUDE_ATTRIBUTE,
+								convertValueWithNoWhitespace("List<String>", excludeSpec)); //$NON-NLS-1$
 					}
 				}
 			}
@@ -614,7 +699,8 @@ public final class OSGiManifestBuilderFactory {
 		String activator = manifest.get(Constants.BUNDLE_ACTIVATOR);
 		if (activator == null && manifest.get(Constants.FRAGMENT_HOST) != null) {
 			// we look for the extension activator for fragments
-			// probably should do this only for framework extensions, but there is no harm to check for others
+			// probably should do this only for framework extensions, but there is no harm
+			// to check for others
 			// it is only acted upon for framework extension fragments
 			activator = manifest.get(Constants.EXTENSION_BUNDLE_ACTIVATOR);
 		}
@@ -623,7 +709,8 @@ public final class OSGiManifestBuilderFactory {
 		}
 
 		// Get the class path
-		ManifestElement[] classpathElements = ManifestElement.parseHeader(Constants.BUNDLE_CLASSPATH, manifest.get(Constants.BUNDLE_CLASSPATH));
+		ManifestElement[] classpathElements = ManifestElement.parseHeader(Constants.BUNDLE_CLASSPATH,
+				manifest.get(Constants.BUNDLE_CLASSPATH));
 		if (classpathElements != null) {
 			List<String> classpath = new ArrayList<>();
 			for (ManifestElement element : classpathElements) {
@@ -634,7 +721,8 @@ public final class OSGiManifestBuilderFactory {
 		}
 
 		// Get the buddy policy list
-		ManifestElement[] buddyPolicies = ManifestElement.parseHeader(EquinoxModuleDataNamespace.BUDDY_POLICY_HEADER, manifest.get(EquinoxModuleDataNamespace.BUDDY_POLICY_HEADER));
+		ManifestElement[] buddyPolicies = ManifestElement.parseHeader(EquinoxModuleDataNamespace.BUDDY_POLICY_HEADER,
+				manifest.get(EquinoxModuleDataNamespace.BUDDY_POLICY_HEADER));
 		if (buddyPolicies != null) {
 			List<String> policies = new ArrayList<>();
 			for (ManifestElement element : buddyPolicies) {
@@ -644,7 +732,9 @@ public final class OSGiManifestBuilderFactory {
 		}
 
 		// Get the registered buddy list
-		ManifestElement[] registeredBuddies = ManifestElement.parseHeader(EquinoxModuleDataNamespace.REGISTERED_BUDDY_HEADER, manifest.get(EquinoxModuleDataNamespace.REGISTERED_BUDDY_HEADER));
+		ManifestElement[] registeredBuddies = ManifestElement.parseHeader(
+				EquinoxModuleDataNamespace.REGISTERED_BUDDY_HEADER,
+				manifest.get(EquinoxModuleDataNamespace.REGISTERED_BUDDY_HEADER));
 		if (registeredBuddies != null) {
 			List<String> buddies = new ArrayList<>();
 			for (ManifestElement element : registeredBuddies) {
@@ -655,7 +745,9 @@ public final class OSGiManifestBuilderFactory {
 
 		// only create the capability if the attributes is not empty
 		if (!attributes.isEmpty()) {
-			Map<String, String> directives = Collections.singletonMap(EquinoxModuleDataNamespace.CAPABILITY_EFFECTIVE_DIRECTIVE, EquinoxModuleDataNamespace.EFFECTIVE_INFORMATION);
+			Map<String, String> directives = Collections.singletonMap(
+					EquinoxModuleDataNamespace.CAPABILITY_EFFECTIVE_DIRECTIVE,
+					EquinoxModuleDataNamespace.EFFECTIVE_INFORMATION);
 			builder.addCapability(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE, directives, attributes);
 		}
 	}
@@ -700,7 +792,8 @@ public final class OSGiManifestBuilderFactory {
 		} else if (ATTR_TYPE_VERSION.equalsIgnoreCase(type)) {
 			return new Version(trimmed);
 		} else if (ATTR_TYPE_SET.equalsIgnoreCase(type)) {
-			// just use List<String> here so we don't have to deal with String[] in other places
+			// just use List<String> here so we don't have to deal with String[] in other
+			// places
 			return Collections.unmodifiableList(Arrays.asList(ManifestElement.getArrayFromList(trimmed, ","))); //$NON-NLS-1$
 		}
 		// assume list type, anything else will throw an exception
@@ -723,7 +816,8 @@ public final class OSGiManifestBuilderFactory {
 		return Collections.unmodifiableList(components);
 	}
 
-	private static void convertBREEs(ModuleRevisionBuilder builder, Map<String, String> manifest) throws BundleException {
+	private static void convertBREEs(ModuleRevisionBuilder builder, Map<String, String> manifest)
+			throws BundleException {
 		@SuppressWarnings("deprecation")
 		String[] brees = ManifestElement.getArrayFromList(manifest.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT));
 		if (brees == null || brees.length == 0)
@@ -744,7 +838,8 @@ public final class OSGiManifestBuilderFactory {
 
 		Map<String, String> directives = new HashMap<>(1);
 		directives.put(ExecutionEnvironmentNamespace.REQUIREMENT_FILTER_DIRECTIVE, filterSpec);
-		builder.addRequirement(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE, directives, new HashMap<>(0));
+		builder.addRequirement(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE, directives,
+				new HashMap<>(0));
 	}
 
 	static String escapeFilterInput(final String value) {
@@ -759,14 +854,14 @@ public final class OSGiManifestBuilderFactory {
 		for (int i = inlen; i < outlen; i++) {
 			char c = output[i];
 			switch (c) {
-				case '*' :
-				case '\\' :
-				case '(' :
-				case ')' :
-					output[cursor] = '\\';
-					cursor++;
-					escaped = true;
-					break;
+			case '*':
+			case '\\':
+			case '(':
+			case ')':
+				output[cursor] = '\\';
+				cursor++;
+				escaped = true;
+				break;
 			}
 
 			output[cursor] = c;
@@ -794,7 +889,8 @@ public final class OSGiManifestBuilderFactory {
 				// do another sanity check
 				FilterImpl.newInstance(filterSpec);
 			} catch (InvalidSyntaxException e1) {
-				throw new BundleException("Error converting required execution environment.", BundleException.MANIFEST_ERROR, e1); //$NON-NLS-1$
+				throw new BundleException("Error converting required execution environment.", //$NON-NLS-1$
+						BundleException.MANIFEST_ERROR, e1);
 			}
 		}
 		return filterSpec;
@@ -854,7 +950,7 @@ public final class OSGiManifestBuilderFactory {
 
 		String eeName = ee1 + (ee2 == null ? "" : '/' + ee2); //$NON-NLS-1$
 
-		return new String[] {escapeFilterInput(eeName), v1};
+		return new String[] { escapeFilterInput(eeName), v1 };
 	}
 
 	static class NativeClause implements Comparable<NativeClause> {
@@ -872,7 +968,8 @@ public final class OSGiManifestBuilderFactory {
 			addToNativeCodeFilter(sb, clause, Constants.BUNDLE_NATIVECODE_OSNAME);
 			addToNativeCodeFilter(sb, clause, Constants.BUNDLE_NATIVECODE_PROCESSOR);
 			this.highestFloor = (Version) addToNativeCodeFilter(sb, clause, Constants.BUNDLE_NATIVECODE_OSVERSION);
-			this.hasLanguage = ((Boolean) addToNativeCodeFilter(sb, clause, Constants.BUNDLE_NATIVECODE_LANGUAGE)).booleanValue();
+			this.hasLanguage = ((Boolean) addToNativeCodeFilter(sb, clause, Constants.BUNDLE_NATIVECODE_LANGUAGE))
+					.booleanValue();
 			String selectionFilter = clause.getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE);
 			if (selectionFilter != null) {
 				// do a sanity check to make sure the filter is valid
@@ -892,7 +989,8 @@ public final class OSGiManifestBuilderFactory {
 			this.filter = filterResult;
 		}
 
-		private static Object addToNativeCodeFilter(StringBuilder filter, ManifestElement nativeCode, String attribute) {
+		private static Object addToNativeCodeFilter(StringBuilder filter, ManifestElement nativeCode,
+				String attribute) {
 			Boolean hasLanguage = Boolean.FALSE;
 			Version highestFloor = null;
 			String[] attrValues = nativeCode.getAttributes(attribute);
@@ -921,7 +1019,8 @@ public final class OSGiManifestBuilderFactory {
 						}
 						filter.append(range.toFilterString(filterAttribute));
 					} else {
-						filter.append('(').append(filterAttribute).append("~=").append(escapeFilterInput(attrAlias)).append(')'); //$NON-NLS-1$
+						filter.append('(').append(filterAttribute).append("~=").append(escapeFilterInput(attrAlias)) //$NON-NLS-1$
+								.append(')');
 					}
 				}
 				if (attrValues.length > 1) {
@@ -954,8 +1053,10 @@ public final class OSGiManifestBuilderFactory {
 		}
 	}
 
-	private static void getNativeCode(ModuleRevisionBuilder builder, Map<String, String> manifest) throws BundleException {
-		ManifestElement[] elements = ManifestElement.parseHeader(Constants.BUNDLE_NATIVECODE, manifest.get(Constants.BUNDLE_NATIVECODE));
+	private static void getNativeCode(ModuleRevisionBuilder builder, Map<String, String> manifest)
+			throws BundleException {
+		ManifestElement[] elements = ManifestElement.parseHeader(Constants.BUNDLE_NATIVECODE,
+				manifest.get(Constants.BUNDLE_NATIVECODE));
 		if (elements == null) {
 			return;
 		}
@@ -975,7 +1076,8 @@ public final class OSGiManifestBuilderFactory {
 
 		int numNativePaths = nativeClauses.size();
 		if (numNativePaths == 0) {
-			String msg = "No native code clauses found in the value of " + Constants.BUNDLE_NATIVECODE + ": " + manifest.get(Constants.BUNDLE_NATIVECODE); //$NON-NLS-1$//$NON-NLS-2$
+			String msg = "No native code clauses found in the value of " + Constants.BUNDLE_NATIVECODE + ": " //$NON-NLS-1$//$NON-NLS-2$
+					+ manifest.get(Constants.BUNDLE_NATIVECODE);
 			throw new BundleException(msg, BundleException.MANIFEST_ERROR);
 		}
 		StringBuilder allNativeFilters = new StringBuilder();

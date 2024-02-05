@@ -58,24 +58,25 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		Runnable runIt = () -> {
 			// nothing
 		};
-		final boolean[] results = new boolean[] {false, false, false, false};
+		final boolean[] results = new boolean[] { false, false, false, false };
 		ServiceListener testListener = event -> {
 			switch (event.getType()) {
-				case ServiceEvent.REGISTERED :
-					results[0] = true;
-					break;
-				case ServiceEvent.MODIFIED :
-					results[1] = true;
-					break;
-				case ServiceEvent.MODIFIED_ENDMATCH :
-					results[2] = true;
-					break;
-				case ServiceEvent.UNREGISTERING :
-					results[3] = true;
-					break;
+			case ServiceEvent.REGISTERED:
+				results[0] = true;
+				break;
+			case ServiceEvent.MODIFIED:
+				results[1] = true;
+				break;
+			case ServiceEvent.MODIFIED_ENDMATCH:
+				results[2] = true;
+				break;
+			case ServiceEvent.UNREGISTERING:
+				results[3] = true;
+				break;
 			}
 		};
-		OSGiTestsActivator.getContext().addServiceListener(testListener, "(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))"); //$NON-NLS-1$ //$NON-NLS-2$
+		OSGiTestsActivator.getContext().addServiceListener(testListener,
+				"(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		ServiceRegistration reg = null;
 		try {
@@ -147,24 +148,25 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		Runnable runIt = () -> {
 			// nothing
 		};
-		final boolean[] results = new boolean[] {false, false, false, false};
+		final boolean[] results = new boolean[] { false, false, false, false };
 		ServiceListener testListener = event -> {
 			switch (event.getType()) {
-				case ServiceEvent.REGISTERED :
-					results[0] = true;
-					break;
-				case ServiceEvent.MODIFIED :
-					results[1] = true;
-					break;
-				case ServiceEvent.MODIFIED_ENDMATCH :
-					results[2] = true;
-					break;
-				case ServiceEvent.UNREGISTERING :
-					results[3] = true;
-					break;
+			case ServiceEvent.REGISTERED:
+				results[0] = true;
+				break;
+			case ServiceEvent.MODIFIED:
+				results[1] = true;
+				break;
+			case ServiceEvent.MODIFIED_ENDMATCH:
+				results[2] = true;
+				break;
+			case ServiceEvent.UNREGISTERING:
+				results[3] = true;
+				break;
 			}
 		};
-		OSGiTestsActivator.getContext().addServiceListener(testListener, "(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))"); //$NON-NLS-1$ //$NON-NLS-2$
+		OSGiTestsActivator.getContext().addServiceListener(testListener,
+				"(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		ServiceRegistration reg = null;
 		try {
@@ -236,24 +238,25 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		Runnable runIt = () -> {
 			// nothing
 		};
-		final int[] results = new int[] {0, 0, 0, 0};
+		final int[] results = new int[] { 0, 0, 0, 0 };
 		ServiceListener testListener = event -> {
 			switch (event.getType()) {
-				case ServiceEvent.REGISTERED :
-					results[0]++;
-					break;
-				case ServiceEvent.MODIFIED :
-					results[1]++;
-					break;
-				case ServiceEvent.MODIFIED_ENDMATCH :
-					results[2]++;
-					break;
-				case ServiceEvent.UNREGISTERING :
-					results[3]++;
-					break;
+			case ServiceEvent.REGISTERED:
+				results[0]++;
+				break;
+			case ServiceEvent.MODIFIED:
+				results[1]++;
+				break;
+			case ServiceEvent.MODIFIED_ENDMATCH:
+				results[2]++;
+				break;
+			case ServiceEvent.UNREGISTERING:
+				results[3]++;
+				break;
 			}
 		};
-		OSGiTestsActivator.getContext().addServiceListener(testListener, "(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))"); //$NON-NLS-1$ //$NON-NLS-2$
+		OSGiTestsActivator.getContext().addServiceListener(testListener,
+				"(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))"); //$NON-NLS-1$ //$NON-NLS-2$
 		ServiceRegistration reg1 = null;
 		ServiceRegistration reg2 = null;
 		try {
@@ -363,15 +366,18 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		props.put("name", testMethodName); //$NON-NLS-1$
 		props.put(Constants.SERVICE_DESCRIPTION, "min value"); //$NON-NLS-1$
 		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
-		ServiceRegistration reg1 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
+		ServiceRegistration reg1 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt,
+				props);
 
 		props.put(Constants.SERVICE_DESCRIPTION, "max value first"); //$NON-NLS-1$
 		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
-		ServiceRegistration reg2 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
+		ServiceRegistration reg2 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt,
+				props);
 
 		props.put(Constants.SERVICE_DESCRIPTION, "max value second"); //$NON-NLS-1$
 		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
-		ServiceRegistration reg3 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
+		ServiceRegistration reg3 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt,
+				props);
 
 		try {
 			ServiceReference ref = null;
@@ -392,9 +398,11 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 	public void testDuplicateObjectClass() {
 		ServiceRegistration reg = null;
 		try {
-			reg = OSGiTestsActivator.getContext().registerService(new String[] {Runnable.class.getName(), Object.class.getName(), Object.class.getName()}, (Runnable) () -> {
-				// nothing
-			}, null);
+			reg = OSGiTestsActivator.getContext().registerService(
+					new String[] { Runnable.class.getName(), Object.class.getName(), Object.class.getName() },
+					(Runnable) () -> {
+						// nothing
+					}, null);
 		} finally {
 			if (reg != null)
 				reg.unregister();
@@ -412,15 +420,18 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		props.put("name", testMethodName); //$NON-NLS-1$
 		props.put(Constants.SERVICE_DESCRIPTION, "min value"); //$NON-NLS-1$
 		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
-		ServiceRegistration reg1 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
+		ServiceRegistration reg1 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt,
+				props);
 
 		props.put(Constants.SERVICE_DESCRIPTION, "max value first"); //$NON-NLS-1$
 		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
-		ServiceRegistration reg2 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
+		ServiceRegistration reg2 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt,
+				props);
 
 		props.put(Constants.SERVICE_DESCRIPTION, "max value second"); //$NON-NLS-1$
 		props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
-		ServiceRegistration reg3 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
+		ServiceRegistration reg3 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt,
+				props);
 
 		try {
 			ServiceReference ref = OSGiTestsActivator.getContext().getServiceReference(Runnable.class.getName());
@@ -467,11 +478,13 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		props.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
 		ServiceRegistration reg2 = getContext().registerService(Runnable.class.getName(), runIt, props);
 		try {
-			assertEquals("wrong service reference", reg1.getReference(), getContext().getServiceReference("java.lang.Runnable")); //$NON-NLS-1$//$NON-NLS-2$
+			assertEquals("wrong service reference", reg1.getReference(), //$NON-NLS-1$
+					getContext().getServiceReference("java.lang.Runnable")); //$NON-NLS-1$
 
 			props.put(Constants.SERVICE_RANKING, Integer.valueOf(20));
 			reg2.setProperties(props);
-			assertEquals("wrong service reference", reg2.getReference(), getContext().getServiceReference("java.lang.Runnable")); //$NON-NLS-1$//$NON-NLS-2$
+			assertEquals("wrong service reference", reg2.getReference(), //$NON-NLS-1$
+					getContext().getServiceReference("java.lang.Runnable")); //$NON-NLS-1$
 		} finally {
 			if (reg1 != null)
 				reg1.unregister();
@@ -516,9 +529,12 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 			nullProps.put("test.non.null", "v1");
 			reg = OSGiTestsActivator.getContext().registerService(Object.class, new Object(), nullProps);
 			assertFalse(OSGiTestsActivator.getContext().createFilter("(test.null=*)").match(reg.getReference()));
-			assertFalse(OSGiTestsActivator.getContext().createFilter("(test.null=*)").match(reg.getReference().getProperties()));
-			assertTrue(OSGiTestsActivator.getContext().createFilter("(&(!(test.null=*))(test.non.null=v1))").match(reg.getReference()));
-			assertTrue(OSGiTestsActivator.getContext().createFilter("(&(!(test.null=*))(test.non.null=v1))").match(reg.getReference().getProperties()));
+			assertFalse(OSGiTestsActivator.getContext().createFilter("(test.null=*)")
+					.match(reg.getReference().getProperties()));
+			assertTrue(OSGiTestsActivator.getContext().createFilter("(&(!(test.null=*))(test.non.null=v1))")
+					.match(reg.getReference()));
+			assertTrue(OSGiTestsActivator.getContext().createFilter("(&(!(test.null=*))(test.non.null=v1))")
+					.match(reg.getReference().getProperties()));
 		} finally {
 			if (reg != null)
 				reg.unregister();
@@ -534,7 +550,8 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 			nullProps.put("test.non.null", "v1");
 			reg = OSGiTestsActivator.getContext().registerService(Object.class, new Object(), nullProps);
 			assertTrue(OSGiTestsActivator.getContext().createFilter("(test.non.null=v1)").match(reg.getReference()));
-			assertTrue(OSGiTestsActivator.getContext().createFilter("(test.non.null=v1)").match(reg.getReference().getProperties()));
+			assertTrue(OSGiTestsActivator.getContext().createFilter("(test.non.null=v1)")
+					.match(reg.getReference().getProperties()));
 		} finally {
 			if (reg != null)
 				reg.unregister();

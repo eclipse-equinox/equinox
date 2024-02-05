@@ -40,43 +40,37 @@ public class ServletContextAdaptor {
 
 	private static Map<Method, Method> createContextToHandlerMethods() {
 		Map<Method, Method> methods = new HashMap<>();
-		Method[] handlerMethods =
-			ServletContextAdaptor.class.getDeclaredMethods();
+		Method[] handlerMethods = ServletContextAdaptor.class.getDeclaredMethods();
 
 		for (Method handlerMethod : handlerMethods) {
 			String name = handlerMethod.getName();
 			Class<?>[] parameterTypes = handlerMethod.getParameterTypes();
 
 			try {
-				Method method = ServletContext.class.getMethod(
-					name, parameterTypes);
+				Method method = ServletContext.class.getMethod(name, parameterTypes);
 				methods.put(method, handlerMethod);
-			}
-			catch (NoSuchMethodException e) {
+			} catch (NoSuchMethodException e) {
 				// do nothing
 			}
 		}
 
 		try {
-			Method equalsMethod = Object.class.getMethod("equals", Object.class);  //$NON-NLS-1$
+			Method equalsMethod = Object.class.getMethod("equals", Object.class); //$NON-NLS-1$
 			Method equalsHandlerMethod = ServletContextAdaptor.class.getMethod("equals", Object.class); //$NON-NLS-1$
 			methods.put(equalsMethod, equalsHandlerMethod);
 
-			Method hashCodeMethod = Object.class.getMethod("hashCode", (Class<?>[])null);  //$NON-NLS-1$
-			Method hashCodeHandlerMethod = ServletContextAdaptor.class.getMethod("hashCode", (Class<?>[])null); //$NON-NLS-1$
+			Method hashCodeMethod = Object.class.getMethod("hashCode", (Class<?>[]) null); //$NON-NLS-1$
+			Method hashCodeHandlerMethod = ServletContextAdaptor.class.getMethod("hashCode", (Class<?>[]) null); //$NON-NLS-1$
 			methods.put(hashCodeMethod, hashCodeHandlerMethod);
-		}
-		catch (NoSuchMethodException e) {
-				// do nothing
+		} catch (NoSuchMethodException e) {
+			// do nothing
 		}
 
 		return methods;
 	}
 
-	public ServletContextAdaptor(
-		ContextController contextController, Bundle bundle,
-		ServletContextHelper servletContextHelper,
-		EventListeners eventListeners, AccessControlContext acc) {
+	public ServletContextAdaptor(ContextController contextController, Bundle bundle,
+			ServletContextHelper servletContextHelper, EventListeners eventListeners, AccessControlContext acc) {
 
 		this.contextController = contextController;
 		this.proxyContext = contextController.getProxyContext();
@@ -94,19 +88,18 @@ public class ServletContextAdaptor {
 	public ServletContext createServletContext() {
 		Class<?> clazz = getClass();
 		ClassLoader curClassLoader = clazz.getClassLoader();
-		Class<?>[] interfaces = new Class[] {ServletContext.class};
+		Class<?>[] interfaces = new Class[] { ServletContext.class };
 
-		return (ServletContext)Proxy.newProxyInstance(
-			curClassLoader, interfaces, new AdaptorInvocationHandler());
+		return (ServletContext) Proxy.newProxyInstance(curClassLoader, interfaces, new AdaptorInvocationHandler());
 	}
 
 	@Override
-	public boolean equals (Object obj) {
+	public boolean equals(Object obj) {
 		if (!(obj instanceof ServletContext)) {
 			return false;
 		}
 
-		if (!(Proxy.isProxyClass(obj.getClass())))  {
+		if (!(Proxy.isProxyClass(obj.getClass()))) {
 			return false;
 		}
 
@@ -116,7 +109,7 @@ public class ServletContextAdaptor {
 			return false;
 		}
 
-		AdaptorInvocationHandler adaptorInvocationHandler = (AdaptorInvocationHandler)invocationHandler;
+		AdaptorInvocationHandler adaptorInvocationHandler = (AdaptorInvocationHandler) invocationHandler;
 
 		return contextController.equals(adaptorInvocationHandler.getContextController());
 	}
@@ -149,8 +142,7 @@ public class ServletContextAdaptor {
 	}
 
 	public Enumeration<String> getInitParameterNames() {
-		return Collections.enumeration(
-			contextController.getInitParams().keySet());
+		return Collections.enumeration(contextController.getInitParams().keySet());
 	}
 
 	public String getMimeType(final String name) {
@@ -158,10 +150,8 @@ public class ServletContextAdaptor {
 
 		try {
 			mimeType = AccessController.doPrivileged(
-				(PrivilegedExceptionAction<String>) () -> servletContextHelper.getMimeType(name), acc
-			);
-		}
-		catch (PrivilegedActionException e) {
+					(PrivilegedExceptionAction<String>) () -> servletContextHelper.getMimeType(name), acc);
+		} catch (PrivilegedActionException e) {
 			servletContext.log(e.getException().getMessage(), e.getException());
 		}
 
@@ -169,8 +159,8 @@ public class ServletContextAdaptor {
 	}
 
 	public RequestDispatcher getNamedDispatcher(String servletName) {
-		DispatchTargets dispatchTargets = contextController.getDispatchTargets(
-			servletName, null, null, null, null, null, Match.EXACT, null);
+		DispatchTargets dispatchTargets = contextController.getDispatchTargets(servletName, null, null, null, null,
+				null, Match.EXACT, null);
 
 		if (dispatchTargets == null) {
 			return null;
@@ -182,10 +172,8 @@ public class ServletContextAdaptor {
 	public String getRealPath(final String path) {
 		try {
 			return AccessController.doPrivileged(
-				(PrivilegedExceptionAction<String>) () -> servletContextHelper.getRealPath(path), acc
-			);
-		}
-		catch (PrivilegedActionException e) {
+					(PrivilegedExceptionAction<String>) () -> servletContextHelper.getRealPath(path), acc);
+		} catch (PrivilegedActionException e) {
 			servletContext.log(e.getException().getMessage(), e.getException());
 		}
 
@@ -213,11 +201,9 @@ public class ServletContextAdaptor {
 
 	public URL getResource(final String name) {
 		try {
-			return AccessController.doPrivileged(
-				(PrivilegedExceptionAction<URL>) () -> servletContextHelper.getResource(name), acc
-			);
-		}
-		catch (PrivilegedActionException e) {
+			return AccessController
+					.doPrivileged((PrivilegedExceptionAction<URL>) () -> servletContextHelper.getResource(name), acc);
+		} catch (PrivilegedActionException e) {
 			servletContext.log(e.getException().getMessage(), e.getException());
 		}
 
@@ -230,8 +216,7 @@ public class ServletContextAdaptor {
 		if (url != null) {
 			try {
 				return url.openStream();
-			}
-			catch (IOException ioe) {
+			} catch (IOException ioe) {
 				servletContext.log(ioe.getMessage(), ioe);
 			}
 		}
@@ -240,7 +225,7 @@ public class ServletContextAdaptor {
 	}
 
 	/**
-	 * 	@see javax.servlet.ServletContext#getResourcePaths(java.lang.String)
+	 * @see javax.servlet.ServletContext#getResourcePaths(java.lang.String)
 	 */
 	public Set<String> getResourcePaths(final String name) {
 		if (name == null || !name.startsWith(Const.SLASH))
@@ -248,10 +233,8 @@ public class ServletContextAdaptor {
 
 		try {
 			return AccessController.doPrivileged(
-				(PrivilegedExceptionAction<Set<String>>) () -> servletContextHelper.getResourcePaths(name), acc
-			);
-		}
-		catch (PrivilegedActionException e) {
+					(PrivilegedExceptionAction<Set<String>>) () -> servletContextHelper.getResourcePaths(name), acc);
+		} catch (PrivilegedActionException e) {
 			servletContext.log(e.getException().getMessage(), e.getException());
 		}
 
@@ -271,49 +254,52 @@ public class ServletContextAdaptor {
 		Dictionary<String, Object> attributes = getContextAttributes();
 		Object attributeValue = attributes.remove(attributeName);
 
-		List<ServletContextAttributeListener> listeners =
-			eventListeners.get(ServletContextAttributeListener.class);
+		List<ServletContextAttributeListener> listeners = eventListeners.get(ServletContextAttributeListener.class);
 
 		if (listeners.isEmpty()) {
 			return;
 		}
 
-		ServletContextAttributeEvent servletContextAttributeEvent =
-			new ServletContextAttributeEvent(
+		ServletContextAttributeEvent servletContextAttributeEvent = new ServletContextAttributeEvent(
 				servletContextTL.get(), attributeName, attributeValue);
 
 		for (ServletContextAttributeListener servletContextAttributeListener : listeners) {
-			servletContextAttributeListener.attributeRemoved(
-				servletContextAttributeEvent);
+			servletContextAttributeListener.attributeRemoved(servletContextAttributeEvent);
 		}
 	}
 
 	public void addFilter(String arg1, Class<? extends Filter> arg2) {
 		throw new UnsupportedOperationException();
 	}
+
 	public void addFilter(String arg1, String arg2) {
 		throw new UnsupportedOperationException();
 	}
+
 	public void addFilter(String arg1, Filter arg2) {
 		throw new UnsupportedOperationException();
 	}
 
-	public void addListener(Class<?> arg1){
+	public void addListener(Class<?> arg1) {
 		throw new UnsupportedOperationException();
 	}
-	public void addListener(String arg1){
+
+	public void addListener(String arg1) {
 		throw new UnsupportedOperationException();
 	}
-	public void addListener(EventListener arg1){
+
+	public void addListener(EventListener arg1) {
 		throw new UnsupportedOperationException();
 	}
 
 	public void addServlet(String arg1, Class<? extends Servlet> arg2) {
 		throw new UnsupportedOperationException();
 	}
+
 	public void addServlet(String arg1, String arg2) {
 		throw new UnsupportedOperationException();
 	}
+
 	public void addServlet(String arg1, Servlet arg2) {
 		throw new UnsupportedOperationException();
 	}
@@ -321,9 +307,11 @@ public class ServletContextAdaptor {
 	public void createFilter(Class<?> arg1) {
 		throw new UnsupportedOperationException();
 	}
+
 	public void createServlet(Class<?> arg1) {
 		throw new UnsupportedOperationException();
 	}
+
 	public void createListener(Class<?> arg1) {
 		throw new UnsupportedOperationException();
 	}
@@ -343,25 +331,20 @@ public class ServletContextAdaptor {
 		boolean added = (attributes.get(attributeName) == null);
 		attributes.put(attributeName, attributeValue);
 
-		List<ServletContextAttributeListener> listeners =
-			eventListeners.get(ServletContextAttributeListener.class);
+		List<ServletContextAttributeListener> listeners = eventListeners.get(ServletContextAttributeListener.class);
 
 		if (listeners.isEmpty()) {
 			return;
 		}
 
-		ServletContextAttributeEvent servletContextAttributeEvent =
-			new ServletContextAttributeEvent(
+		ServletContextAttributeEvent servletContextAttributeEvent = new ServletContextAttributeEvent(
 				servletContextTL.get(), attributeName, attributeValue);
 
 		for (ServletContextAttributeListener servletContextAttributeListener : listeners) {
 			if (added) {
-				servletContextAttributeListener.attributeAdded(
-					servletContextAttributeEvent);
-			}
-			else {
-				servletContextAttributeListener.attributeReplaced(
-					servletContextAttributeEvent);
+				servletContextAttributeListener.attributeAdded(servletContextAttributeEvent);
+			} else {
+				servletContextAttributeListener.attributeReplaced(servletContextAttributeEvent);
 			}
 		}
 	}
@@ -380,12 +363,11 @@ public class ServletContextAdaptor {
 	}
 
 	Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		boolean useThreadLocal =
-			"removeAttribute".equals(method.getName()) || //$NON-NLS-1$
-			"setAttribute".equals(method.getName()); //$NON-NLS-1$
+		boolean useThreadLocal = "removeAttribute".equals(method.getName()) || //$NON-NLS-1$
+				"setAttribute".equals(method.getName()); //$NON-NLS-1$
 
 		if (useThreadLocal) {
-			servletContextTL.set((ServletContext)proxy);
+			servletContextTL.set((ServletContext) proxy);
 		}
 
 		try {
@@ -398,8 +380,7 @@ public class ServletContextAdaptor {
 			} catch (InvocationTargetException e) {
 				throw e.getCause();
 			}
-		}
-		finally {
+		} finally {
 			if (useThreadLocal) {
 				servletContextTL.remove();
 			}
@@ -411,23 +392,22 @@ public class ServletContextAdaptor {
 	}
 
 	private class AdaptorInvocationHandler implements InvocationHandler {
-		public AdaptorInvocationHandler() {}
+		public AdaptorInvocationHandler() {
+		}
 
 		public ContextController getContextController() {
 			return contextController;
 		}
 
 		@Override
-		public Object invoke(Object proxy, Method method, Object[] args)
-			throws Throwable {
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
 			return ServletContextAdaptor.this.invoke(proxy, method, args);
 		}
 
 	}
 
-	private final static String SIMPLE_NAME =
-		ServletContextAdaptor.class.getSimpleName();
+	private final static String SIMPLE_NAME = ServletContextAdaptor.class.getSimpleName();
 
 	private final static ThreadLocal<ServletContext> servletContextTL = new ThreadLocal<>();
 

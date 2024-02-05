@@ -20,8 +20,9 @@ import org.eclipse.core.runtime.*;
 import org.junit.Assert;
 
 /**
- * Allows test cases to wait for the extension registry notifications.
- * This listener checks navigability to related elements from extensions.
+ * Allows test cases to wait for the extension registry notifications. This
+ * listener checks navigability to related elements from extensions.
+ * 
  * @since 3.4
  */
 public class WaitingRegistryListener extends Assert implements IRegistryEventListener {
@@ -106,8 +107,7 @@ public class WaitingRegistryListener extends Assert implements IRegistryEventLis
 			while (callbacks < events) {
 				long currentTime = System.currentTimeMillis();
 				long alreadyWaited = currentTime - startTime;
-				if (alreadyWaited < 0)
-				 {
+				if (alreadyWaited < 0) {
 					alreadyWaited = 0; // just in case if system timer is not very precise
 				}
 				long timeToWait = maxTimeout - alreadyWaited;
@@ -123,8 +123,11 @@ public class WaitingRegistryListener extends Assert implements IRegistryEventLis
 		return callbacks;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.IRegistryEventListener#added(org.eclipse.core.runtime.IExtension[])
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.core.runtime.IRegistryEventListener#added(org.eclipse.core.
+	 * runtime.IExtension[])
 	 */
 	@Override
 	synchronized public void added(IExtension[] extensions) {

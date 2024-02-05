@@ -14,8 +14,8 @@
 package org.eclipse.core.internal.registry;
 
 /**
- * A factory method for the creation of the registry objects for
- * registries supporting multiple languages.
+ * A factory method for the creation of the registry objects for registries
+ * supporting multiple languages.
  */
 public class RegistryObjectFactoryMulti extends RegistryObjectFactory {
 
@@ -39,7 +39,8 @@ public class RegistryObjectFactoryMulti extends RegistryObjectFactory {
 	}
 
 	@Override
-	public Extension createExtension(int self, String simpleId, String namespace, int[] children, int extraData, boolean persist) {
+	public Extension createExtension(int self, String simpleId, String namespace, int[] children, int extraData,
+			boolean persist) {
 		return new ExtensionMulti(self, simpleId, namespace, children, extraData, registry, persist);
 	}
 
@@ -49,7 +50,10 @@ public class RegistryObjectFactoryMulti extends RegistryObjectFactory {
 	}
 
 	@Override
-	public ConfigurationElement createConfigurationElement(int self, String contributorId, String name, String[] propertiesAndValue, int[] children, int extraDataOffset, int parent, byte parentType, boolean persist) {
-		return new ConfigurationElementMulti(self, contributorId, name, propertiesAndValue, children, extraDataOffset, parent, parentType, registry, persist);
+	public ConfigurationElement createConfigurationElement(int self, String contributorId, String name,
+			String[] propertiesAndValue, int[] children, int extraDataOffset, int parent, byte parentType,
+			boolean persist) {
+		return new ConfigurationElementMulti(self, contributorId, name, propertiesAndValue, children, extraDataOffset,
+				parent, parentType, registry, persist);
 	}
 }

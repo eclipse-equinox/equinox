@@ -32,12 +32,11 @@ import org.osgi.resource.Namespace;
 public class EquinoxFragmentNamespace extends Namespace {
 
 	/**
-	/**
-	 * Namespace name for fragment capabilities and requirements.
+	 * /** Namespace name for fragment capabilities and requirements.
 	 *
 	 * <p>
-	 * Also, the capability attribute used to specify the symbolic name of the host the
-	 * resource is providing a fragment for.
+	 * Also, the capability attribute used to specify the symbolic name of the host
+	 * the resource is providing a fragment for.
 	 */
 	public static final String FRAGMENT_NAMESPACE = "equinox.fragment"; //$NON-NLS-1$
 }

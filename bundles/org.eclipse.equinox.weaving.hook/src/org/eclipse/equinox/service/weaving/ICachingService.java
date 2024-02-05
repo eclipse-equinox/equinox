@@ -22,18 +22,15 @@ import java.util.Map;
 
 public interface ICachingService {
 
-    public boolean canCacheGeneratedClasses();
+	public boolean canCacheGeneratedClasses();
 
-    public CacheEntry findStoredClass(String namespace, URL sourceFileURL,
-            String name);
+	public CacheEntry findStoredClass(String namespace, URL sourceFileURL, String name);
 
-    public void stop();
+	public void stop();
 
-    public boolean storeClass(String namespace, URL sourceFileURL,
-            Class<?> clazz, byte[] classbytes);
+	public boolean storeClass(String namespace, URL sourceFileURL, Class<?> clazz, byte[] classbytes);
 
-    public boolean storeClassAndGeneratedClasses(String namespace,
-            URL sourceFileURL, Class<?> clazz, byte[] classbytes,
-            Map<String, byte[]> generatedClasses);
+	public boolean storeClassAndGeneratedClasses(String namespace, URL sourceFileURL, Class<?> clazz, byte[] classbytes,
+			Map<String, byte[]> generatedClasses);
 
 }

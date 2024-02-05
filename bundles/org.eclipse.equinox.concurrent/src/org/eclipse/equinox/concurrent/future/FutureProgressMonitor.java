@@ -21,8 +21,8 @@ import org.eclipse.core.runtime.ProgressMonitorWrapper;
  * wrapper for potentially two progress monitors: one provided by the
  * {@link IFuture} client in a method call, the other (a child progress monitor)
  * provided by the IExecutor that creates the future instance.
- * @since 1.1
  * 
+ * @since 1.1
  */
 public class FutureProgressMonitor extends ProgressMonitorWrapper {
 
@@ -30,12 +30,11 @@ public class FutureProgressMonitor extends ProgressMonitorWrapper {
 	private Object lock = new Object();
 
 	/**
-	 * Create a new progress monitor wrapping the given monitor. The nested
-	 * monitor is the one exposed to clients of futures.
+	 * Create a new progress monitor wrapping the given monitor. The nested monitor
+	 * is the one exposed to clients of futures.
 	 * 
-	 * @param progressMonitor
-	 *            the client-facing monitor used with a future. May be
-	 *            <code>null</code>.
+	 * @param progressMonitor the client-facing monitor used with a future. May be
+	 *                        <code>null</code>.
 	 * 
 	 * @see #setChildProgressMonitor(IProgressMonitor)
 	 */
@@ -102,11 +101,10 @@ public class FutureProgressMonitor extends ProgressMonitorWrapper {
 	/**
 	 * Set the client-facing progress monitor to the given value.
 	 * 
-	 * @param value
-	 *            a second (child) monitor to report progress/take cancelation
-	 *            from. If the parent progress monitor has been previously
-	 *            canceled, the child progress monitor's setCanceled method will
-	 *            be called.
+	 * @param value a second (child) monitor to report progress/take cancelation
+	 *              from. If the parent progress monitor has been previously
+	 *              canceled, the child progress monitor's setCanceled method will
+	 *              be called.
 	 */
 	public void setChildProgressMonitor(IProgressMonitor value) {
 		synchronized (lock) {

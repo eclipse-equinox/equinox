@@ -20,9 +20,11 @@ import org.eclipse.core.runtime.spi.RegistryContributor;
  * registry based on the String representation of the determining object.
  * <p>
  * This class can be used without OSGi running.
- * </p><p>
+ * </p>
+ * <p>
  * This class can not be extended or instantiated by clients.
  * </p>
+ * 
  * @since org.eclipse.equinox.registry 3.2
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
@@ -30,8 +32,8 @@ import org.eclipse.core.runtime.spi.RegistryContributor;
 public final class ContributorFactorySimple {
 
 	/**
-	 * Creates registry contributor object based on a determining object.The determining
-	 * object must not be <code>null</code>.
+	 * Creates registry contributor object based on a determining object.The
+	 * determining object must not be <code>null</code>.
 	 *
 	 * @param determiningObject object associated with the contribution
 	 * @return new registry contributor based on the determining object

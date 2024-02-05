@@ -63,8 +63,8 @@ import org.osgi.framework.hooks.service.ListenerHook;
 import org.osgi.framework.hooks.service.ListenerHook.ListenerInfo;
 
 /**
- * The Service Registry. This class is the main control point for service
- * layer operations in the framework.
+ * The Service Registry. This class is the main control point for service layer
+ * operations in the framework.
  *
  * @ThreadSafe
  */
@@ -73,26 +73,27 @@ public class ServiceRegistry {
 
 	static final String listenerHookName = ListenerHook.class.getName();
 
-
-	/** Published services by class name.
-	 * The {@literal List<ServiceRegistrationImpl<?>>}s are both sorted
-	 * in the natural order of ServiceRegistrationImpl and also are sets in that
-	 * there must be no two entries in a List which are equal.
+	/**
+	 * Published services by class name. The
+	 * {@literal List<ServiceRegistrationImpl<?>>}s are both sorted in the natural
+	 * order of ServiceRegistrationImpl and also are sets in that there must be no
+	 * two entries in a List which are equal.
 	 */
 	/* @GuardedBy("this") */
 	private final Map<String, List<ServiceRegistrationImpl<?>>> publishedServicesByClass;
 
-	/** All published services.
-	 * The List is both sorted in the natural order of ServiceRegistrationImpl and also is a
-	 * set in that there must be no two entries in the List which are equal.
+	/**
+	 * All published services. The List is both sorted in the natural order of
+	 * ServiceRegistrationImpl and also is a set in that there must be no two
+	 * entries in the List which are equal.
 	 */
 	/* @GuardedBy("this") */
 	private final List<ServiceRegistrationImpl<?>> allPublishedServices;
 
-	/** Published services by BundleContextImpl.
-	 * The {@literal List<ServiceRegistrationImpl<?>>}s are NOT sorted
-	 * and also are sets in that
-	 * there must be no two entries in a List which are equal.
+	/**
+	 * Published services by BundleContextImpl. The
+	 * {@literal List<ServiceRegistrationImpl<?>>}s are NOT sorted and also are sets
+	 * in that there must be no two entries in a List which are equal.
 	 */
 	/* @GuardedBy("this") */
 	private final Map<BundleContextImpl, List<ServiceRegistrationImpl<?>>> publishedServicesByContext;
@@ -101,7 +102,8 @@ public class ServiceRegistry {
 	/* @GuardedBy("this") */
 	private long serviceid;
 
-	/** Active Service Listeners.
+	/**
+	 * Active Service Listeners.
 	 * {@literal Map<BundleContextImpl,CopyOnWriteIdentityMap<ServiceListener,FilteredServiceListener>>}.
 	 */
 	/* @GuardedBy("serviceEventListeners") */
@@ -123,7 +125,6 @@ public class ServiceRegistry {
 
 	/**
 	 * Initializes the internal data structures of this ServiceRegistry.
-	 *
 	 */
 	public ServiceRegistry(EquinoxContainer container) {
 		this.container = container;
@@ -139,14 +140,14 @@ public class ServiceRegistry {
 	}
 
 	/**
-	 * Registers the specified service object with the specified properties
-	 * under the specified class names into the Framework. A
+	 * Registers the specified service object with the specified properties under
+	 * the specified class names into the Framework. A
 	 * <code>ServiceRegistrationImpl</code> object is returned. The
 	 * <code>ServiceRegistrationImpl</code> object is for the private use of the
-	 * bundle registering the service and should not be shared with other
-	 * bundles. The registering bundle is defined to be the context bundle.
-	 * Other bundles can locate the service by using either the
-	 * {@link #getServiceReferences} or {@link #getServiceReference} method.
+	 * bundle registering the service and should not be shared with other bundles.
+	 * The registering bundle is defined to be the context bundle. Other bundles can
+	 * locate the service by using either the {@link #getServiceReferences} or
+	 * {@link #getServiceReference} method.
 	 *
 	 * <p>
 	 * A bundle can register a service object that implements the
@@ -156,66 +157,68 @@ public class ServiceRegistry {
 	 * <p>
 	 * The following steps are required to register a service:
 	 * <ol>
-	 * <li>If <code>service</code> is not a <code>ServiceFactory</code>,
-	 * an <code>IllegalArgumentException</code> is thrown if
-	 * <code>service</code> is not an <code>instanceof</code> all the
-	 * classes named.
+	 * <li>If <code>service</code> is not a <code>ServiceFactory</code>, an
+	 * <code>IllegalArgumentException</code> is thrown if <code>service</code> is
+	 * not an <code>instanceof</code> all the classes named.
 	 * <li>The Framework adds these service properties to the specified
-	 * <code>Dictionary</code> (which may be <code>null</code>): a property
-	 * named {@link Constants#SERVICE_ID} identifying the registration number of
-	 * the service and a property named {@link Constants#OBJECTCLASS} containing
-	 * all the specified classes. If any of these properties have already been
-	 * specified by the registering bundle, their values will be overwritten by
-	 * the Framework.
-	 * <li>The service is added to the Framework service registry and may now
-	 * be used by other bundles.
+	 * <code>Dictionary</code> (which may be <code>null</code>): a property named
+	 * {@link Constants#SERVICE_ID} identifying the registration number of the
+	 * service and a property named {@link Constants#OBJECTCLASS} containing all the
+	 * specified classes. If any of these properties have already been specified by
+	 * the registering bundle, their values will be overwritten by the Framework.
+	 * <li>The service is added to the Framework service registry and may now be
+	 * used by other bundles.
 	 * <li>A service event of type {@link ServiceEvent#REGISTERED} is fired.
 	 * <li>A <code>ServiceRegistration</code> object for this registration is
 	 * returned.
 	 * </ol>
 	 *
-	 * @param context The BundleContext of the registering bundle.
-	 * @param clazzes The class names under which the service can be located.
-	 *        The class names in this array will be stored in the service's
-	 *        properties under the key {@link Constants#OBJECTCLASS}.
-	 * @param service The service object or a <code>ServiceFactory</code>
-	 *        object.
-	 * @param properties The properties for this service. The keys in the
-	 *        properties object must all be <code>String</code> objects. See
-	 *        {@link Constants} for a list of standard service property keys.
-	 *        Changes should not be made to this object after calling this
-	 *        method. To update the service's properties the
-	 *        {@link ServiceRegistration#setProperties} method must be called.
-	 *        The set of properties may be <code>null</code> if the service
-	 *        has no properties.
+	 * @param context    The BundleContext of the registering bundle.
+	 * @param clazzes    The class names under which the service can be located. The
+	 *                   class names in this array will be stored in the service's
+	 *                   properties under the key {@link Constants#OBJECTCLASS}.
+	 * @param service    The service object or a <code>ServiceFactory</code> object.
+	 * @param properties The properties for this service. The keys in the properties
+	 *                   object must all be <code>String</code> objects. See
+	 *                   {@link Constants} for a list of standard service property
+	 *                   keys. Changes should not be made to this object after
+	 *                   calling this method. To update the service's properties the
+	 *                   {@link ServiceRegistration#setProperties} method must be
+	 *                   called. The set of properties may be <code>null</code> if
+	 *                   the service has no properties.
 	 *
 	 * @return A <code>ServiceRegistrationImpl</code> object for use by the bundle
 	 *         registering the service to update the service's properties or to
 	 *         unregister the service.
 	 *
-	 * @throws java.lang.IllegalArgumentException If one of the following is
-	 *         true:
-	 *         <ul>
-	 *         <li><code>service</code> is <code>null</code>.
-	 *         <li><code>service</code> is not a <code>ServiceFactory</code>
-	 *         object and is not an instance of all the named classes in
-	 *         <code>clazzes</code>.
-	 *         <li><code>properties</code> contains case variants of the same
-	 *         key name.
-	 *         </ul>
+	 * @throws java.lang.IllegalArgumentException If one of the following is true:
+	 *                                            <ul>
+	 *                                            <li><code>service</code> is
+	 *                                            <code>null</code>.
+	 *                                            <li><code>service</code> is not a
+	 *                                            <code>ServiceFactory</code> object
+	 *                                            and is not an instance of all the
+	 *                                            named classes in
+	 *                                            <code>clazzes</code>.
+	 *                                            <li><code>properties</code>
+	 *                                            contains case variants of the same
+	 *                                            key name.
+	 *                                            </ul>
 	 *
-	 * @throws java.lang.SecurityException If the caller does not have the
-	 *         <code>ServicePermission</code> to register the service for all
-	 *         the named classes and the Java Runtime Environment supports
-	 *         permissions.
+	 * @throws java.lang.SecurityException        If the caller does not have the
+	 *                                            <code>ServicePermission</code> to
+	 *                                            register the service for all the
+	 *                                            named classes and the Java Runtime
+	 *                                            Environment supports permissions.
 	 *
-	 * @throws java.lang.IllegalStateException If this BundleContext is no
-	 *         longer valid.
+	 * @throws java.lang.IllegalStateException    If this BundleContext is no longer
+	 *                                            valid.
 	 *
 	 * @see ServiceRegistration
 	 * @see ServiceFactory
 	 */
-	public ServiceRegistrationImpl<?> registerService(BundleContextImpl context, String[] clazzes, Object service, Dictionary<String, ?> properties) {
+	public ServiceRegistrationImpl<?> registerService(BundleContextImpl context, String[] clazzes, Object service,
+			Dictionary<String, ?> properties) {
 		if (service == null) {
 			if (debug.DEBUG_SERVICES) {
 				Debug.println("Service object is null"); //$NON-NLS-1$
@@ -259,7 +262,8 @@ public class ServiceRegistry {
 				if (debug.DEBUG_SERVICES) {
 					Debug.println("Service object is not an instanceof " + invalidService); //$NON-NLS-1$
 				}
-				throw new IllegalArgumentException(NLS.bind(Msg.SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION, invalidService));
+				throw new IllegalArgumentException(
+						NLS.bind(Msg.SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION, invalidService));
 			}
 		}
 
@@ -314,48 +318,47 @@ public class ServiceRegistry {
 	 * Returns an array of <code>ServiceReferenceImpl</code> objects. The returned
 	 * array of <code>ServiceReferenceImpl</code> objects contains services that
 	 * were registered under the specified class, match the specified filter
-	 * criteria, and the packages for the class names under which the services
-	 * were registered match the context bundle's packages as defined in
+	 * criteria, and the packages for the class names under which the services were
+	 * registered match the context bundle's packages as defined in
 	 * {@link ServiceReference#isAssignableTo(Bundle, String)}.
 	 *
 	 * <p>
-	 * The list is valid at the time of the call to this method, however since
-	 * the Framework is a very dynamic environment, services can be modified or
+	 * The list is valid at the time of the call to this method, however since the
+	 * Framework is a very dynamic environment, services can be modified or
 	 * unregistered at anytime.
 	 *
 	 * <p>
-	 * <code>filter</code> is used to select the registered service whose
-	 * properties objects contain keys and values which satisfy the filter. See
-	 * {@link Filter} for a description of the filter string syntax.
+	 * <code>filter</code> is used to select the registered service whose properties
+	 * objects contain keys and values which satisfy the filter. See {@link Filter}
+	 * for a description of the filter string syntax.
 	 *
 	 * <p>
-	 * If <code>filter</code> is <code>null</code>, all registered services
-	 * are considered to match the filter. If <code>filter</code> cannot be
-	 * parsed, an {@link InvalidSyntaxException} will be thrown with a human
-	 * readable message where the filter became unparsable.
+	 * If <code>filter</code> is <code>null</code>, all registered services are
+	 * considered to match the filter. If <code>filter</code> cannot be parsed, an
+	 * {@link InvalidSyntaxException} will be thrown with a human readable message
+	 * where the filter became unparsable.
 	 *
 	 * <p>
 	 * The following steps are required to select a set of
 	 * <code>ServiceReferenceImpl</code> objects:
 	 * <ol>
-	 * <li>If the filter string is not <code>null</code>, the filter string
-	 * is parsed and the set <code>ServiceReferenceImpl</code> objects of
-	 * registered services that satisfy the filter is produced. If the filter
-	 * string is <code>null</code>, then all registered services are
-	 * considered to satisfy the filter.
+	 * <li>If the filter string is not <code>null</code>, the filter string is
+	 * parsed and the set <code>ServiceReferenceImpl</code> objects of registered
+	 * services that satisfy the filter is produced. If the filter string is
+	 * <code>null</code>, then all registered services are considered to satisfy the
+	 * filter.
 	 * <li>If the Java Runtime Environment supports permissions, the set of
 	 * <code>ServiceReferenceImpl</code> objects produced by the previous step is
-	 * reduced by checking that the caller has the
-	 * <code>ServicePermission</code> to get at least one of the class names
-	 * under which the service was registered. If the caller does not have the
-	 * correct permission for a particular <code>ServiceReferenceImpl</code>
-	 * object, then it is removed from the set.
-	 * <li>If <code>clazz</code> is not <code>null</code>, the set is
-	 * further reduced to those services that are an <code>instanceof</code>
-	 * and were registered under the specified class. The complete list of
-	 * classes of which a service is an instance and which were specified when
-	 * the service was registered is available from the service's
-	 * {@link Constants#OBJECTCLASS} property.
+	 * reduced by checking that the caller has the <code>ServicePermission</code> to
+	 * get at least one of the class names under which the service was registered.
+	 * If the caller does not have the correct permission for a particular
+	 * <code>ServiceReferenceImpl</code> object, then it is removed from the set.
+	 * <li>If <code>clazz</code> is not <code>null</code>, the set is further
+	 * reduced to those services that are an <code>instanceof</code> and were
+	 * registered under the specified class. The complete list of classes of which a
+	 * service is an instance and which were specified when the service was
+	 * registered is available from the service's {@link Constants#OBJECTCLASS}
+	 * property.
 	 * <li>The set is reduced one final time by cycling through each
 	 * <code>ServiceReference</code> object and calling
 	 * {@link ServiceReference#isAssignableTo(Bundle, String)} with the context
@@ -369,22 +372,25 @@ public class ServiceRegistry {
 	 * returned.
 	 * </ol>
 	 *
-	 * @param context The BundleContext of the requesting bundle.
-	 * @param clazz The class name with which the service was registered or
-	 *        <code>null</code> for all services.
+	 * @param context      The BundleContext of the requesting bundle.
+	 * @param clazz        The class name with which the service was registered or
+	 *                     <code>null</code> for all services.
 	 * @param filterstring The filter criteria.
-	 * @param allservices True if the bundle called getAllServiceReferences.
+	 * @param allservices  True if the bundle called getAllServiceReferences.
 	 * @return An array of <code>ServiceReferenceImpl</code> objects or
-	 *         <code>null</code> if no services are registered which satisfy
-	 *         the search.
-	 * @throws InvalidSyntaxException If <code>filter</code> contains an
-	 *         invalid filter string that cannot be parsed.
-	 * @throws java.lang.IllegalStateException If this BundleContext is no
-	 *         longer valid.
+	 *         <code>null</code> if no services are registered which satisfy the
+	 *         search.
+	 * @throws InvalidSyntaxException          If <code>filter</code> contains an
+	 *                                         invalid filter string that cannot be
+	 *                                         parsed.
+	 * @throws java.lang.IllegalStateException If this BundleContext is no longer
+	 *                                         valid.
 	 */
-	public ServiceReferenceImpl<?>[] getServiceReferences(final BundleContextImpl context, final String clazz, final String filterstring, final boolean allservices) throws InvalidSyntaxException {
+	public ServiceReferenceImpl<?>[] getServiceReferences(final BundleContextImpl context, final String clazz,
+			final String filterstring, final boolean allservices) throws InvalidSyntaxException {
 		if (debug.DEBUG_SERVICES) {
-			Debug.println((allservices ? "getAllServiceReferences(" : "getServiceReferences(") + clazz + ", \"" + filterstring + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			Debug.println((allservices ? "getAllServiceReferences(" : "getServiceReferences(") + clazz + ", \"" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					+ filterstring + "\")"); //$NON-NLS-1$
 		}
 		Filter filter = (filterstring == null) ? null : context.createFilter(filterstring);
 		List<ServiceRegistrationImpl<?>> registrations = lookupServiceRegistrations(clazz, filter);
@@ -425,34 +431,33 @@ public class ServiceRegistry {
 	}
 
 	/**
-	 * Returns a <code>ServiceReference</code> object for a service that
-	 * implements and was registered under the specified class.
+	 * Returns a <code>ServiceReference</code> object for a service that implements
+	 * and was registered under the specified class.
 	 *
 	 * <p>
-	 * This <code>ServiceReference</code> object is valid at the time of the
-	 * call to this method, however as the Framework is a very dynamic
-	 * environment, services can be modified or unregistered at anytime.
+	 * This <code>ServiceReference</code> object is valid at the time of the call to
+	 * this method, however as the Framework is a very dynamic environment, services
+	 * can be modified or unregistered at anytime.
 	 *
 	 * <p>
 	 * This method is the same as calling
 	 * {@link BundleContext#getServiceReferences(String, String)} with a
-	 * <code>null</code> filter string. It is provided as a convenience for
-	 * when the caller is interested in any service that implements the
-	 * specified class.
+	 * <code>null</code> filter string. It is provided as a convenience for when the
+	 * caller is interested in any service that implements the specified class.
 	 * <p>
 	 * If multiple such services exist, the service with the highest ranking (as
 	 * specified in its {@link Constants#SERVICE_RANKING} property) is returned.
 	 * <p>
 	 * If there is a tie in ranking, the service with the lowest service ID (as
-	 * specified in its {@link Constants#SERVICE_ID} property); that is, the
-	 * service that was registered first is returned.
+	 * specified in its {@link Constants#SERVICE_ID} property); that is, the service
+	 * that was registered first is returned.
 	 *
 	 * @param context The BundleContext of the requesting bundle.
-	 * @param clazz The class name with which the service was registered.
-	 * @return A <code>ServiceReference</code> object, or <code>null</code>
-	 *         if no services are registered which implement the named class.
-	 * @throws java.lang.IllegalStateException If this BundleContext is no
-	 *         longer valid.
+	 * @param clazz   The class name with which the service was registered.
+	 * @return A <code>ServiceReference</code> object, or <code>null</code> if no
+	 *         services are registered which implement the named class.
+	 * @throws java.lang.IllegalStateException If this BundleContext is no longer
+	 *                                         valid.
 	 */
 	public ServiceReferenceImpl<?> getServiceReference(BundleContextImpl context, String clazz) {
 		if (debug.DEBUG_SERVICES) {
@@ -463,7 +468,8 @@ public class ServiceRegistry {
 			ServiceReferenceImpl<?>[] references = getServiceReferences(context, clazz, null, false);
 
 			if (references != null) {
-				// Since we maintain the registrations in a sorted List, the first element is always the
+				// Since we maintain the registrations in a sorted List, the first element is
+				// always the
 				// correct one to return.
 				return references[0];
 			}
@@ -482,57 +488,57 @@ public class ServiceRegistry {
 	 * <p>
 	 * A bundle's use of a service is tracked by the bundle's use count of that
 	 * service. Each time a service's service object is returned by
-	 * {@link #getService(BundleContextImpl, ServiceReferenceImpl)} the context bundle's use count for
-	 * that service is incremented by one. Each time the service is released by
-	 * {@link #ungetService(BundleContextImpl, ServiceReferenceImpl)} the context bundle's use count
-	 * for that service is decremented by one.
+	 * {@link #getService(BundleContextImpl, ServiceReferenceImpl)} the context
+	 * bundle's use count for that service is incremented by one. Each time the
+	 * service is released by
+	 * {@link #ungetService(BundleContextImpl, ServiceReferenceImpl)} the context
+	 * bundle's use count for that service is decremented by one.
 	 * <p>
-	 * When a bundle's use count for a service drops to zero, the bundle should
-	 * no longer use that service.
+	 * When a bundle's use count for a service drops to zero, the bundle should no
+	 * longer use that service.
 	 *
 	 * <p>
-	 * This method will always return <code>null</code> when the service
-	 * associated with this <code>reference</code> has been unregistered.
+	 * This method will always return <code>null</code> when the service associated
+	 * with this <code>reference</code> has been unregistered.
 	 *
 	 * <p>
 	 * The following steps are required to get the service object:
 	 * <ol>
-	 * <li>If the service has been unregistered, <code>null</code> is
-	 * returned.
-	 * <li>The context bundle's use count for this service is incremented by
-	 * one.
-	 * <li>If the context bundle's use count for the service is currently one
-	 * and the service was registered with an object implementing the
+	 * <li>If the service has been unregistered, <code>null</code> is returned.
+	 * <li>The context bundle's use count for this service is incremented by one.
+	 * <li>If the context bundle's use count for the service is currently one and
+	 * the service was registered with an object implementing the
 	 * <code>ServiceFactory</code> interface, the
 	 * {@link ServiceFactory#getService(Bundle, ServiceRegistration)} method is
-	 * called to create a service object for the context bundle. This service
-	 * object is cached by the Framework. While the context bundle's use count
-	 * for the service is greater than zero, subsequent calls to get the
-	 * services's service object for the context bundle will return the cached
-	 * service object. <br>
-	 * If the service object returned by the <code>ServiceFactory</code>
-	 * object is not an <code>instanceof</code> all the classes named when the
-	 * service was registered or the <code>ServiceFactory</code> object throws
-	 * an exception, <code>null</code> is returned and a Framework event of
-	 * type {@link FrameworkEvent#ERROR} containing a {@link ServiceException}
-	 * describing the error is fired.
+	 * called to create a service object for the context bundle. This service object
+	 * is cached by the Framework. While the context bundle's use count for the
+	 * service is greater than zero, subsequent calls to get the services's service
+	 * object for the context bundle will return the cached service object. <br>
+	 * If the service object returned by the <code>ServiceFactory</code> object is
+	 * not an <code>instanceof</code> all the classes named when the service was
+	 * registered or the <code>ServiceFactory</code> object throws an exception,
+	 * <code>null</code> is returned and a Framework event of type
+	 * {@link FrameworkEvent#ERROR} containing a {@link ServiceException} describing
+	 * the error is fired.
 	 * <li>The service object for the service is returned.
 	 * </ol>
 	 *
-	 * @param context The BundleContext of the requesting bundle.
+	 * @param context   The BundleContext of the requesting bundle.
 	 * @param reference A reference to the service.
 	 * @return A service object for the service associated with
-	 *         <code>reference</code> or <code>null</code> if the service is
-	 *         not registered, the service object returned by a
-	 *         <code>ServiceFactory</code> does not implement the classes
-	 *         under which it was registered or the <code>ServiceFactory</code>
-	 *         threw an exception.
-	 * @throws java.lang.SecurityException If the caller does not have the
-	 *         <code>ServicePermission</code> to get the service using at
-	 *         least one of the named classes the service was registered under
-	 *         and the Java Runtime Environment supports permissions.
-	 * @throws java.lang.IllegalStateException If this BundleContext is no
-	 *         longer valid.
+	 *         <code>reference</code> or <code>null</code> if the service is not
+	 *         registered, the service object returned by a
+	 *         <code>ServiceFactory</code> does not implement the classes under
+	 *         which it was registered or the <code>ServiceFactory</code> threw an
+	 *         exception.
+	 * @throws java.lang.SecurityException     If the caller does not have the
+	 *                                         <code>ServicePermission</code> to get
+	 *                                         the service using at least one of the
+	 *                                         named classes the service was
+	 *                                         registered under and the Java Runtime
+	 *                                         Environment supports permissions.
+	 * @throws java.lang.IllegalStateException If this BundleContext is no longer
+	 *                                         valid.
 	 * @see #ungetService(BundleContextImpl, ServiceReferenceImpl)
 	 * @see ServiceFactory
 	 */
@@ -543,35 +549,36 @@ public class ServiceRegistry {
 	}
 
 	/**
-	 * Returns the {@link ServiceObjects} object for the service referenced by
-	 * the specified {@code ServiceReference} object.
+	 * Returns the {@link ServiceObjects} object for the service referenced by the
+	 * specified {@code ServiceReference} object.
 	 *
 	 * <p>
-	 * The {@link ServiceObjects} object can be used to obtain multiple
-	 * service objects for services with {@link Constants#SCOPE_PROTOTYPE
-	 * prototype} scope. For services with {@link Constants#SCOPE_SINGLETON
-	 * singleton} or {@link Constants#SCOPE_BUNDLE bundle} scope, the
+	 * The {@link ServiceObjects} object can be used to obtain multiple service
+	 * objects for services with {@link Constants#SCOPE_PROTOTYPE prototype} scope.
+	 * For services with {@link Constants#SCOPE_SINGLETON singleton} or
+	 * {@link Constants#SCOPE_BUNDLE bundle} scope, the
 	 * {@link ServiceObjects#getService()} method behaves the same as the
 	 * {@link BundleContext#getService(ServiceReference)} method and the
-	 * {@link ServiceObjects#ungetService(Object)} method behaves the same as
-	 * the {@link BundleContext#ungetService(ServiceReference)} method. That is, only one,
-	 * use-counted service object is available from the {@link ServiceObjects}
+	 * {@link ServiceObjects#ungetService(Object)} method behaves the same as the
+	 * {@link BundleContext#ungetService(ServiceReference)} method. That is, only
+	 * one, use-counted service object is available from the {@link ServiceObjects}
 	 * object.
 	 *
 	 * <p>
-	 * This method will always return {@code null} when the service associated
-	 * with the specified {@code reference} has been unregistered.
+	 * This method will always return {@code null} when the service associated with
+	 * the specified {@code reference} has been unregistered.
 	 *
-	 * @param <S> Type of Service.
-	 * @param context The BundleContext of the requesting bundle.
+	 * @param <S>       Type of Service.
+	 * @param context   The BundleContext of the requesting bundle.
 	 * @param reference A reference to the service.
-	 * @return A {@link ServiceObjects} object for the service associated with
-	 *         the specified {@code reference} or {@code null} if the service is
-	 *         not registered.
+	 * @return A {@link ServiceObjects} object for the service associated with the
+	 *         specified {@code reference} or {@code null} if the service is not
+	 *         registered.
 	 * @throws SecurityException If the caller does not have the
-	 *         {@code ServicePermission} to get the service using at least one
-	 *         of the named classes the service was registered under and the
-	 *         Java Runtime Environment supports permissions.
+	 *                           {@code ServicePermission} to get the service using
+	 *                           at least one of the named classes the service was
+	 *                           registered under and the Java Runtime Environment
+	 *                           supports permissions.
 	 */
 	public <S> ServiceObjectsImpl<S> getServiceObjects(BundleContextImpl context, ServiceReferenceImpl<S> reference) {
 		checkGetServicePermission(reference);
@@ -580,38 +587,35 @@ public class ServiceRegistry {
 
 	/**
 	 * Releases the service object referenced by the specified
-	 * <code>ServiceReference</code> object. If the context bundle's use count
-	 * for the service is zero, this method returns <code>false</code>.
-	 * Otherwise, the context bundle's use count for the service is decremented
-	 * by one.
+	 * <code>ServiceReference</code> object. If the context bundle's use count for
+	 * the service is zero, this method returns <code>false</code>. Otherwise, the
+	 * context bundle's use count for the service is decremented by one.
 	 *
 	 * <p>
-	 * The service's service object should no longer be used and all references
-	 * to it should be destroyed when a bundle's use count for the service drops
-	 * to zero.
+	 * The service's service object should no longer be used and all references to
+	 * it should be destroyed when a bundle's use count for the service drops to
+	 * zero.
 	 *
 	 * <p>
 	 * The following steps are required to unget the service object:
 	 * <ol>
-	 * <li>If the context bundle's use count for the service is zero or the
-	 * service has been unregistered, <code>false</code> is returned.
-	 * <li>The context bundle's use count for this service is decremented by
-	 * one.
-	 * <li>If the context bundle's use count for the service is currently zero
-	 * and the service was registered with a <code>ServiceFactory</code>
-	 * object, the
+	 * <li>If the context bundle's use count for the service is zero or the service
+	 * has been unregistered, <code>false</code> is returned.
+	 * <li>The context bundle's use count for this service is decremented by one.
+	 * <li>If the context bundle's use count for the service is currently zero and
+	 * the service was registered with a <code>ServiceFactory</code> object, the
 	 * {@link ServiceFactory#ungetService(Bundle, ServiceRegistration, Object)}
 	 * method is called to release the service object for the context bundle.
 	 * <li><code>true</code> is returned.
 	 * </ol>
 	 *
-	 * @param context The BundleContext of the requesting bundle.
+	 * @param context   The BundleContext of the requesting bundle.
 	 * @param reference A reference to the service to be released.
-	 * @return <code>false</code> if the context bundle's use count for the
-	 *         service is zero or if the service has been unregistered;
-	 *         <code>true</code> otherwise.
-	 * @throws java.lang.IllegalStateException If this BundleContext is no
-	 *         longer valid.
+	 * @return <code>false</code> if the context bundle's use count for the service
+	 *         is zero or if the service has been unregistered; <code>true</code>
+	 *         otherwise.
+	 * @throws java.lang.IllegalStateException If this BundleContext is no longer
+	 *                                         valid.
 	 * @see #getService
 	 * @see ServiceFactory
 	 */
@@ -622,15 +626,15 @@ public class ServiceRegistry {
 	}
 
 	/**
-	 * Returns this bundle's <code>ServiceReference</code> list for all
-	 * services it has registered or <code>null</code> if this bundle has no
-	 * registered services.
+	 * Returns this bundle's <code>ServiceReference</code> list for all services it
+	 * has registered or <code>null</code> if this bundle has no registered
+	 * services.
 	 *
 	 * <p>
 	 * If the Java runtime supports permissions, a <code>ServiceReference</code>
-	 * object to a service is included in the returned list only if the caller
-	 * has the <code>ServicePermission</code> to get the service using at
-	 * least one of the named classes the service was registered under.
+	 * object to a service is included in the returned list only if the caller has
+	 * the <code>ServicePermission</code> to get the service using at least one of
+	 * the named classes the service was registered under.
 	 *
 	 * <p>
 	 * The list is valid at the time of the call to this method, however, as the
@@ -640,8 +644,7 @@ public class ServiceRegistry {
 	 * @param context The BundleContext of the requesting bundle.
 	 * @return An array of <code>ServiceReference</code> objects or
 	 *         <code>null</code>.
-	 * @throws java.lang.IllegalStateException If this bundle has been
-	 *         uninstalled.
+	 * @throws java.lang.IllegalStateException If this bundle has been uninstalled.
 	 * @see ServiceRegistration
 	 * @see ServiceReference
 	 * @see ServicePermission
@@ -673,17 +676,17 @@ public class ServiceRegistry {
 	}
 
 	/**
-	 * Returns this bundle's <code>ServiceReference</code> list for all
-	 * services it is using or returns <code>null</code> if this bundle is not
-	 * using any services. A bundle is considered to be using a service if its
-	 * use count for that service is greater than zero.
+	 * Returns this bundle's <code>ServiceReference</code> list for all services it
+	 * is using or returns <code>null</code> if this bundle is not using any
+	 * services. A bundle is considered to be using a service if its use count for
+	 * that service is greater than zero.
 	 *
 	 * <p>
 	 * If the Java Runtime Environment supports permissions, a
-	 * <code>ServiceReference</code> object to a service is included in the
-	 * returned list only if the caller has the <code>ServicePermission</code>
-	 * to get the service using at least one of the named classes the service
-	 * was registered under.
+	 * <code>ServiceReference</code> object to a service is included in the returned
+	 * list only if the caller has the <code>ServicePermission</code> to get the
+	 * service using at least one of the named classes the service was registered
+	 * under.
 	 * <p>
 	 * The list is valid at the time of the call to this method, however, as the
 	 * Framework is a very dynamic environment, services can be modified or
@@ -692,8 +695,7 @@ public class ServiceRegistry {
 	 * @param context The BundleContext of the requesting bundle.
 	 * @return An array of <code>ServiceReference</code> objects or
 	 *         <code>null</code>.
-	 * @throws java.lang.IllegalStateException If this bundle has been
-	 *         uninstalled.
+	 * @throws java.lang.IllegalStateException If this bundle has been uninstalled.
 	 * @see ServiceReference
 	 * @see ServicePermission
 	 */
@@ -735,8 +737,8 @@ public class ServiceRegistry {
 	}
 
 	/**
-	 * Called when the BundleContext is closing to unregister all services
-	 * currently registered by the bundle.
+	 * Called when the BundleContext is closing to unregister all services currently
+	 * registered by the bundle.
 	 *
 	 * @param context The BundleContext of the closing bundle.
 	 */
@@ -752,8 +754,8 @@ public class ServiceRegistry {
 	}
 
 	/**
-	 * Called when the BundleContext is closing to unget all services
-	 * currently used by the bundle.
+	 * Called when the BundleContext is closing to unget all services currently used
+	 * by the bundle.
 	 *
 	 * @param context The BundleContext of the closing bundle.
 	 */
@@ -780,21 +782,25 @@ public class ServiceRegistry {
 	/**
 	 * Add a new Service Listener for a bundle.
 	 *
-	 * @param context Context of bundle adding listener.
+	 * @param context  Context of bundle adding listener.
 	 * @param listener Service Listener to be added.
-	 * @param filter Filter string for listener or null.
+	 * @param filter   Filter string for listener or null.
 	 * @throws InvalidSyntaxException If the filter string is invalid.
 	 */
-	public void addServiceListener(BundleContextImpl context, ServiceListener listener, String filter) throws InvalidSyntaxException {
+	public void addServiceListener(BundleContextImpl context, ServiceListener listener, String filter)
+			throws InvalidSyntaxException {
 		if (debug.DEBUG_EVENTS) {
-			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
-			Debug.println("addServiceListener[" + context.getBundleImpl() + "](" + listenerName + ", \"" + filter + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			String listenerName = listener.getClass().getName() + "@" //$NON-NLS-1$
+					+ Integer.toHexString(System.identityHashCode(listener));
+			Debug.println(
+					"addServiceListener[" + context.getBundleImpl() + "](" + listenerName + ", \"" + filter + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 
 		FilteredServiceListener filteredListener = new FilteredServiceListener(context, listener, filter);
 		FilteredServiceListener oldFilteredListener;
 		synchronized (serviceEventListeners) {
-			CopyOnWriteIdentityMap<ServiceListener, FilteredServiceListener> listeners = serviceEventListeners.get(context);
+			CopyOnWriteIdentityMap<ServiceListener, FilteredServiceListener> listeners = serviceEventListeners
+					.get(context);
 			if (listeners == null) {
 				listeners = new CopyOnWriteIdentityMap<>();
 				serviceEventListeners.put(context, listeners);
@@ -815,12 +821,13 @@ public class ServiceRegistry {
 	/**
 	 * Remove a Service Listener for a bundle.
 	 *
-	 * @param context Context of bundle removing listener.
+	 * @param context  Context of bundle removing listener.
 	 * @param listener Service Listener to be removed.
 	 */
 	public void removeServiceListener(BundleContextImpl context, ServiceListener listener) {
 		if (debug.DEBUG_EVENTS) {
-			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
+			String listenerName = listener.getClass().getName() + "@" //$NON-NLS-1$
+					+ Integer.toHexString(System.identityHashCode(listener));
 			Debug.println("removeServiceListener[" + context.getBundleImpl() + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
@@ -862,8 +869,9 @@ public class ServiceRegistry {
 	}
 
 	/**
-	 * Coerce the generic type of a collection from Collection<FilteredServiceListener>
-	 * to Collection<ListenerInfo>
+	 * Coerce the generic type of a collection from
+	 * Collection<FilteredServiceListener> to Collection<ListenerInfo>
+	 * 
 	 * @param c Collection to be coerced.
 	 * @return c coerced to Collection<ListenerInfo>
 	 */
@@ -898,7 +906,8 @@ public class ServiceRegistry {
 		BundleContextImpl systemContext = null;
 		synchronized (serviceEventListeners) {
 			listenerSnapshot = new LinkedHashMap<>(serviceEventListeners.size());
-			for (Map.Entry<BundleContextImpl, CopyOnWriteIdentityMap<ServiceListener, FilteredServiceListener>> entry : serviceEventListeners.entrySet()) {
+			for (Map.Entry<BundleContextImpl, CopyOnWriteIdentityMap<ServiceListener, FilteredServiceListener>> entry : serviceEventListeners
+					.entrySet()) {
 				Map<ServiceListener, FilteredServiceListener> listeners = entry.getValue();
 				if (!listeners.isEmpty()) {
 					if (entry.getKey().getBundleImpl().getBundleId() == 0) {
@@ -911,10 +920,10 @@ public class ServiceRegistry {
 			}
 		}
 
-		/* shrink the snapshot.
-		 * keySet returns a Collection which cannot be added to and
-		 * removals from that collection will result in removals of the
-		 * entry from the snapshot.
+		/*
+		 * shrink the snapshot. keySet returns a Collection which cannot be added to and
+		 * removals from that collection will result in removals of the entry from the
+		 * snapshot.
 		 */
 		Collection<BundleContext> contexts = asBundleContexts(listenerSnapshot.keySet());
 		notifyEventHooksPrivileged(event, contexts);
@@ -936,9 +945,11 @@ public class ServiceRegistry {
 
 		/* deliver the event to the snapshot */
 		ListenerQueue<ServiceListener, FilteredServiceListener, ServiceEvent> queue = container.newListenerQueue();
-		for (Map.Entry<BundleContextImpl, Set<Map.Entry<ServiceListener, FilteredServiceListener>>> entry : listenerSnapshot.entrySet()) {
-			@SuppressWarnings({"unchecked", "rawtypes"})
-			EventDispatcher<ServiceListener, FilteredServiceListener, ServiceEvent> dispatcher = (EventDispatcher) entry.getKey();
+		for (Map.Entry<BundleContextImpl, Set<Map.Entry<ServiceListener, FilteredServiceListener>>> entry : listenerSnapshot
+				.entrySet()) {
+			@SuppressWarnings({ "unchecked", "rawtypes" })
+			EventDispatcher<ServiceListener, FilteredServiceListener, ServiceEvent> dispatcher = (EventDispatcher) entry
+					.getKey();
 			Set<Map.Entry<ServiceListener, FilteredServiceListener>> listenerSet = entry.getValue();
 			queue.queueListeners(listenerSet, dispatcher);
 		}
@@ -946,8 +957,9 @@ public class ServiceRegistry {
 	}
 
 	/**
-	 * Coerce the generic type of a collection from Collection<BundleContextImpl>
-	 * to Collection<BundleContext>
+	 * Coerce the generic type of a collection from Collection<BundleContextImpl> to
+	 * Collection<BundleContext>
+	 * 
 	 * @param c Collection to be coerced.
 	 * @return c coerced to Collection<BundleContext>
 	 */
@@ -970,13 +982,14 @@ public class ServiceRegistry {
 	/**
 	 * Add the ServiceRegistrationImpl to the data structure.
 	 *
-	 * @param context The BundleContext of the bundle registering the service.
+	 * @param context      The BundleContext of the bundle registering the service.
 	 * @param registration The new ServiceRegistration.
 	 */
 	/* @GuardedBy("this") */
 	void addServiceRegistration(BundleContextImpl context, ServiceRegistrationImpl<?> registration) {
 		assert Thread.holdsLock(this);
-		// Add the ServiceRegistrationImpl to the list of Services published by BundleContextImpl.
+		// Add the ServiceRegistrationImpl to the list of Services published by
+		// BundleContextImpl.
 		List<ServiceRegistrationImpl<?>> contextServices = publishedServicesByContext.get(context);
 		if (contextServices == null) {
 			contextServices = new ArrayList<>(initialSubCapacity);
@@ -985,7 +998,8 @@ public class ServiceRegistry {
 		// The list is NOT sorted, so we just add
 		contextServices.add(registration);
 
-		// Add the ServiceRegistrationImpl to the list of Services published by Class Name.
+		// Add the ServiceRegistrationImpl to the list of Services published by Class
+		// Name.
 		int insertIndex;
 		for (String clazz : registration.getClasses()) {
 			List<ServiceRegistrationImpl<?>> services = publishedServicesByClass.get(clazz);
@@ -1009,7 +1023,7 @@ public class ServiceRegistry {
 	/**
 	 * Modify the ServiceRegistrationImpl in the data structure.
 	 *
-	 * @param context The BundleContext of the bundle registering the service.
+	 * @param context      The BundleContext of the bundle registering the service.
 	 * @param registration The modified ServiceRegistration.
 	 */
 	/* @GuardedBy("this") */
@@ -1045,19 +1059,21 @@ public class ServiceRegistry {
 	/**
 	 * Remove the ServiceRegistrationImpl from the data structure.
 	 *
-	 * @param context The BundleContext of the bundle registering the service.
+	 * @param context      The BundleContext of the bundle registering the service.
 	 * @param registration The ServiceRegistration to remove.
 	 */
 	/* @GuardedBy("this") */
 	void removeServiceRegistration(BundleContextImpl context, ServiceRegistrationImpl<?> registration) {
 		assert Thread.holdsLock(this);
-		// Remove the ServiceRegistrationImpl from the list of Services published by BundleContextImpl.
+		// Remove the ServiceRegistrationImpl from the list of Services published by
+		// BundleContextImpl.
 		List<ServiceRegistrationImpl<?>> contextServices = publishedServicesByContext.get(context);
 		if (contextServices != null) {
 			contextServices.remove(registration);
 		}
 
-		// Remove the ServiceRegistrationImpl from the list of Services published by Class Name.
+		// Remove the ServiceRegistrationImpl from the list of Services published by
+		// Class Name.
 		for (String clazz : registration.getClasses()) {
 			List<ServiceRegistrationImpl<?>> services = publishedServicesByClass.get(clazz);
 			services.remove(registration);
@@ -1073,8 +1089,8 @@ public class ServiceRegistry {
 	/**
 	 * Lookup Service Registrations in the data structure by class name and filter.
 	 *
-	 * @param clazz The class name with which the service was registered or
-	 *        <code>null</code> for all services.
+	 * @param clazz  The class name with which the service was registered or
+	 *               <code>null</code> for all services.
 	 * @param filter The filter criteria.
 	 * @return List<ServiceRegistrationImpl>
 	 */
@@ -1093,7 +1109,7 @@ public class ServiceRegistry {
 							filter = null;
 						}
 					} else {
-					  result = allPublishedServices;
+						result = allPublishedServices;
 					}
 				} else {
 					// have to check all services
@@ -1200,7 +1216,8 @@ public class ServiceRegistry {
 
 	/**
 	 * Return the name of the class that is not satisfied by the service object.
-	 * @param clazzes Array of class names.
+	 * 
+	 * @param clazzes       Array of class names.
 	 * @param serviceObject Service object.
 	 * @return The name of the class that is not satisfied by the service object.
 	 */
@@ -1217,7 +1234,7 @@ public class ServiceRegistry {
 				if (!serviceClazz.isInstance(serviceObject))
 					return element;
 			} catch (ClassNotFoundException e) {
-				//This check is rarely done
+				// This check is rarely done
 				if (extensiveCheckServiceClass(element, serviceObject.getClass()))
 					return element;
 			}
@@ -1249,17 +1266,20 @@ public class ServiceRegistry {
 	}
 
 	/**
-	 * Call the registered FindHook services to allow them to inspect and possibly shrink the result.
-	 * The FindHook must be called in order: descending by service.ranking, then ascending by service.id.
-	 * This is the natural order for ServiceReference.
+	 * Call the registered FindHook services to allow them to inspect and possibly
+	 * shrink the result. The FindHook must be called in order: descending by
+	 * service.ranking, then ascending by service.id. This is the natural order for
+	 * ServiceReference.
 	 *
-	 * @param context The context of the bundle getting the service references.
-	 * @param clazz The class name used to search for the service references.
+	 * @param context      The context of the bundle getting the service references.
+	 * @param clazz        The class name used to search for the service references.
 	 * @param filterstring The filter used to search for the service references.
-	 * @param allservices True if getAllServiceReferences called.
-	 * @param result The result to return to the caller which may have been shrunk by the FindHooks.
+	 * @param allservices  True if getAllServiceReferences called.
+	 * @param result       The result to return to the caller which may have been
+	 *                     shrunk by the FindHooks.
 	 */
-	private void notifyFindHooks(final BundleContextImpl context, final String clazz, final String filterstring, final boolean allservices, final Collection<ServiceReference<?>> result) {
+	private void notifyFindHooks(final BundleContextImpl context, final String clazz, final String filterstring,
+			final boolean allservices, final Collection<ServiceReference<?>> result) {
 		if (System.getSecurityManager() == null) {
 			notifyFindHooksPrivileged(context, clazz, filterstring, allservices, result);
 		} else {
@@ -1273,42 +1293,51 @@ public class ServiceRegistry {
 		}
 	}
 
-	void notifyFindHooksPrivileged(final BundleContextImpl context, final String clazz, final String filterstring, final boolean allservices, final Collection<ServiceReference<?>> result) {
+	void notifyFindHooksPrivileged(final BundleContextImpl context, final String clazz, final String filterstring,
+			final boolean allservices, final Collection<ServiceReference<?>> result) {
 		if (debug.DEBUG_HOOKS) {
-			Debug.println("notifyServiceFindHooks(" + context.getBundleImpl() + "," + clazz + "," + filterstring + "," + allservices + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+			Debug.println("notifyServiceFindHooks(" + context.getBundleImpl() + "," + clazz + "," + filterstring + "," //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					+ allservices + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		notifyHooksPrivileged(FindHook.class, "find", //$NON-NLS-1$
 				(hook, hookRegistration) -> hook.find(context, clazz, filterstring, allservices, result));
 	}
 
 	/**
-	 * Call the registered EventHook services to allow them to inspect and possibly shrink the result.
-	 * The EventHooks must be called in order: descending by service.ranking, then ascending by service.id.
-	 * This is the natural order for ServiceReference.
+	 * Call the registered EventHook services to allow them to inspect and possibly
+	 * shrink the result. The EventHooks must be called in order: descending by
+	 * service.ranking, then ascending by service.id. This is the natural order for
+	 * ServiceReference.
 	 *
-	 * @param event The service event to be delivered.
-	 * @param result The result to return to the caller which may have been shrunk by the EventHooks.
+	 * @param event  The service event to be delivered.
+	 * @param result The result to return to the caller which may have been shrunk
+	 *               by the EventHooks.
 	 */
 	@SuppressWarnings("deprecation")
 	private void notifyEventHooksPrivileged(final ServiceEvent event, final Collection<BundleContext> result) {
 		if (debug.DEBUG_HOOKS) {
-			Debug.println("notifyServiceEventHooks(" + event.getType() + ":" + event.getServiceReference() + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			Debug.println("notifyServiceEventHooks(" + event.getType() + ":" + event.getServiceReference() + "," //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					+ result + ")"); //$NON-NLS-1$
 		}
 		notifyHooksPrivileged(org.osgi.framework.hooks.service.EventHook.class, "event", //$NON-NLS-1$
 				(hook, hookRegistration) -> hook.event(event, result));
 	}
 
 	/**
-	 * Call the registered EventListenerHook services to allow them to inspect and possibly shrink the result.
-	 * The EventListenerHooks must be called in order: descending by service.ranking, then ascending by service.id.
-	 * This is the natural order for ServiceReference.
+	 * Call the registered EventListenerHook services to allow them to inspect and
+	 * possibly shrink the result. The EventListenerHooks must be called in order:
+	 * descending by service.ranking, then ascending by service.id. This is the
+	 * natural order for ServiceReference.
 	 *
-	 * @param event The service event to be delivered.
-	 * @param result The result to return to the caller which may have been shrunk by the EventListenerHooks.
+	 * @param event  The service event to be delivered.
+	 * @param result The result to return to the caller which may have been shrunk
+	 *               by the EventListenerHooks.
 	 */
-	private void notifyEventListenerHooksPrivileged(final ServiceEvent event, final Map<BundleContext, Collection<ListenerInfo>> result) {
+	private void notifyEventListenerHooksPrivileged(final ServiceEvent event,
+			final Map<BundleContext, Collection<ListenerInfo>> result) {
 		if (debug.DEBUG_HOOKS) {
-			Debug.println("notifyServiceEventListenerHooks(" + event.getType() + ":" + event.getServiceReference() + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			Debug.println("notifyServiceEventListenerHooks(" + event.getType() + ":" + event.getServiceReference() + "," //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					+ result + ")"); //$NON-NLS-1$
 		}
 		notifyHooksPrivileged(EventListenerHook.class, "event", (hook, r) -> hook.event(event, result)); //$NON-NLS-1$
 	}
@@ -1323,7 +1352,8 @@ public class ServiceRegistry {
 	@SuppressWarnings("unchecked")
 	public <T> void notifyHooksPrivileged(Class<T> hookType, String serviceMethod, HookContext<T> hookContext) {
 		List<ServiceRegistrationImpl<?>> hooks = lookupServiceRegistrations(hookType.getName(), null);
-		// Since the list is already sorted, we don't need to sort the list to call the hooks
+		// Since the list is already sorted, we don't need to sort the list to call the
+		// hooks
 		// in the proper order.
 
 		for (ServiceRegistrationImpl<?> registration : hooks) {
@@ -1369,8 +1399,8 @@ public class ServiceRegistry {
 	}
 
 	/**
-	 * Call a newly registered ListenerHook service to provide the current collection of
-	 * service listeners.
+	 * Call a newly registered ListenerHook service to provide the current
+	 * collection of service listeners.
 	 *
 	 * @param registration The newly registered ListenerHook service.
 	 */
@@ -1397,7 +1427,8 @@ public class ServiceRegistry {
 		// snapshot the listeners
 		Collection<ListenerInfo> addedListeners = new ArrayList<>(initialCapacity);
 		synchronized (serviceEventListeners) {
-			for (CopyOnWriteIdentityMap<ServiceListener, FilteredServiceListener> listeners : serviceEventListeners.values()) {
+			for (CopyOnWriteIdentityMap<ServiceListener, FilteredServiceListener> listeners : serviceEventListeners
+					.values()) {
 				if (!listeners.isEmpty()) {
 					addedListeners.addAll(listeners.values());
 				}
@@ -1413,14 +1444,16 @@ public class ServiceRegistry {
 	}
 
 	/**
-	 * Call the registered ListenerHook services to notify them of newly added or removed service listeners.
-	 * The ListenerHook must be called in order: descending by service.ranking, then ascending by service.id.
-	 * This is the natural order for ServiceReference.
+	 * Call the registered ListenerHook services to notify them of newly added or
+	 * removed service listeners. The ListenerHook must be called in order:
+	 * descending by service.ranking, then ascending by service.id. This is the
+	 * natural order for ServiceReference.
 	 *
-	 * @param listeners A non-empty, unmodifiable collection of ListenerInfo objects.
-	 * All elements in the list must be for the same bundle.
-	 * @param added <code>true</code> if the specified listeners are being added. <code>false</code>
-	 * if they are being removed.
+	 * @param listeners A non-empty, unmodifiable collection of ListenerInfo
+	 *                  objects. All elements in the list must be for the same
+	 *                  bundle.
+	 * @param added     <code>true</code> if the specified listeners are being
+	 *                  added. <code>false</code> if they are being removed.
 	 */
 	private void notifyListenerHooks(final Collection<ListenerInfo> listeners, final boolean added) {
 		if (System.getSecurityManager() == null) {

@@ -23,7 +23,7 @@ jobs:
        repository: eclipse-equinox/equinox.binaries
        path: rt.equinox.binaries
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
@@ -47,7 +47,7 @@ jobs:
         -Drt.equinox.binaries.loc=${{ github.workspace }}/rt.equinox.binaries
         clean verify
     - name: Upload Test Results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: test-results
         if-no-files-found: error
@@ -64,21 +64,26 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 1
-    - name: Set up JDK 8
-      uses: actions/setup-java@v3
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
       with:
-        java-version: '8'
+        java-version: '17'
         distribution: 'temurin'
+        cache: maven
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@v4.5
+      with:
+        maven-version: 3.9.2
     - name: Visual Studio shell
       uses: egor-tensin/vs-shell@v2
       with:
         arch: x64
     - name: Build
       working-directory: features/org.eclipse.equinox.executable.feature/library/win32
-      run: nmake -f make_win64.mak
+      run: nmake -f make_win64.mak test
       shell: pwsh
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: success()
       with:
         name: Windows launcher artifacts
@@ -86,12 +91,84 @@ jobs:
           features/org.eclipse.equinox.executable.feature/library/win32/eclipse*.exe
           features/org.eclipse.equinox.executable.feature/library/win32/eclipse*.dll
         if-no-files-found: error
+    - name: Upload Windows Test Results
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-win64
+        if-no-files-found: error
+        path: '**/target/*-reports/*.xml'
+  build-launcher-linux64:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@v4.5
+      with:
+        maven-version: 3.9.2
+    - name: Install GTK headers
+      run: sudo apt-get install -y libgtk-3-dev
+    - name: Build
+      working-directory: features/org.eclipse.equinox.executable.feature/library/gtk
+      run: ./build.sh test
+      shell: bash
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      if: success()
+      with:
+        name: Linux launcher artifacts
+        path: |
+          features/org.eclipse.equinox.executable.feature/library/gtk/eclipse
+          features/org.eclipse.equinox.executable.feature/library/gtk/eclipse*.so
+        if-no-files-found: error
+    - name: Upload Linux Test Results
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-linux64
+        if-no-files-found: error
+        path: '**/target/*-reports/*.xml'
+  build-launcher-mac64:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@v4.5
+      with:
+        maven-version: 3.9.2
+    - name: Build
+      working-directory: features/org.eclipse.equinox.executable.feature/library/cocoa
+      run: ./build.sh
+      shell: bash
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      if: success()
+      with:
+        name: MacOS launcher artifacts
+        path: |
+          features/org.eclipse.equinox.executable.feature/library/cocoa/eclipse
+          features/org.eclipse.equinox.executable.feature/library/cocoa/eclipse*.so
+        if-no-files-found: error
   tck:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
@@ -116,7 +193,7 @@ jobs:
         -fn
         clean verify
     - name: Upload TCK Results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: tck-results
@@ -127,7 +204,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Event File
         path: ${{ github.event_path }}
