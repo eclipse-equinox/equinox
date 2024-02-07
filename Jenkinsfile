@@ -24,7 +24,6 @@ pipeline {
 				sh """
 				mvn clean verify --batch-mode --fail-at-end -Dmaven.repo.local=$WORKSPACE/.m2/repository \
 					-Pbree-libs -Papi-check -Pjavadoc\
-					-Dcompare-version-with-baselines.skip=false \
 					-Dproject.build.sourceEncoding=UTF-8 \
 					-Drt.equinox.binaries.loc=$WORKSPACE/rt.equinox.binaries 
 				"""

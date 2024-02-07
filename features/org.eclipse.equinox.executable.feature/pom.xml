@@ -25,23 +25,21 @@
   <build>
     <plugins>
       <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
+		<groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-packaging-plugin</artifactId>
         <executions>
           <execution>
-            <id>repack</id>
-            <phase>package</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
+            <id>default-package-feature</id>
             <configuration>
-              <target>
-                <!-- note that here we reference previously declared dependency -->
-                <unzip src="${project.build.directory}/${project.build.finalName}.jar" dest="${project.build.directory}/tmp"/>
-                <copy file="resources/build.properties" todir="${project.build.directory}/tmp"/>
-                <copy file="resources/build.xml" todir="${project.build.directory}/tmp"/>
-                <zip basedir="${project.build.directory}/tmp" destfile="${project.build.directory}/${project.build.finalName}.jar"/>
-                <!-- now the modified jar is available -->
-              </target>
+				<additionalFileSets>
+				 <fileSet>
+				  <directory>${project.basedir}/resources</directory>
+				  <includes>
+				   <include>build.properties</include>
+				   <include>build.xml</include>
+				  </includes>
+				 </fileSet>
+				</additionalFileSets>
             </configuration>
           </execution>
         </executions>
