@@ -60,7 +60,7 @@
   <setupTask
       xsi:type="setup:EclipseIniTask"
       option="-Xmx"
-      value="2048m"
+      value="4g"
       vm="true"/>
   <setupTask
       xsi:type="setup:ResourceCreationTask"
