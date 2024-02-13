@@ -89,11 +89,12 @@ public class CacheWriter {
 	 */
 	public void stop() {
 		this.writerThread.interrupt();
-		// wait for the writer thread to finish, so we don't System.exit() in the middle of writing...
+		// wait for the writer thread to finish, so we don't System.exit() in the middle
+		// of writing...
 		try {
 			this.writerThread.join(JOIN_TIMEOUT);
-		} catch (InterruptedException e) {
-			Log.error("Interrupted while joining the writerThread", e);
+		} catch (final InterruptedException e) {
+			Log.error("Interrupted while joining the writerThread", e); //$NON-NLS-1$
 			Thread.currentThread().interrupt();
 		}
 	}
@@ -138,22 +139,22 @@ public class CacheWriter {
 			outCache.write(classBytes);
 			outCache.flush();
 			fosCache.getFD().sync();
-		} catch (IOException e) {
-			Log.error("Failed to store class " + className + " in cache", e);
+		} catch (final IOException e) {
+			Log.error("Failed to store class " + className + " in cache", e); //$NON-NLS-1$ //$NON-NLS-2$
 			success = false;
 		}
 
 		// if there was an error during writing the file, or if an interrupt happened,
 		// we have a risk of having written an incomplete file. To be sure, we check
-		// the length of the file on disk. If it does not match, we delete the file 
+		// the length of the file on disk. If it does not match, we delete the file
 		// again.
 		if ((!success || Thread.currentThread().isInterrupted()) && outputFile.exists()
 				&& outputFile.length() != classBytes.length) {
-			Log.debug("File " + outputFile.getAbsolutePath() + " was not completely written to disk. Removing it.");
+			Log.debug("File " + outputFile.getAbsolutePath() + " was not completely written to disk. Removing it."); //$NON-NLS-1$ //$NON-NLS-2$
 			try {
 				Files.delete(outputFile.toPath());
-			} catch (IOException e) {
-				Log.error("File " + outputFile.getAbsolutePath() + " is corrupted but could not be deleted.", e);
+			} catch (final IOException e) {
+				Log.error("File " + outputFile.getAbsolutePath() + " is corrupted but could not be deleted.", e); //$NON-NLS-1$ //$NON-NLS-2$
 				// last resort: try to delete the file when the VM terminates
 				outputFile.deleteOnExit();
 			}
@@ -161,7 +162,8 @@ public class CacheWriter {
 
 		// after writing the file, remove the item from the itemsInQueue lookup map as
 		// well - we do this even the writing was unsuccessful to keep the queue and the
-		// itemsInQueue in sync. It will do no further harm, just the file is not cached and will be woven and
+		// itemsInQueue in sync. It will do no further harm, just the file is not cached
+		// and will be woven and
 		// cached again next time.
 		itemsInQueue.remove(new CacheItemKey(cacheDirectory, className));
 	}
