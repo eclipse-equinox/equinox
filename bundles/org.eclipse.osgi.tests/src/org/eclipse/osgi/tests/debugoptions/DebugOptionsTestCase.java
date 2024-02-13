@@ -1147,9 +1147,8 @@ public class DebugOptionsTestCase {
 	public void testTraceSystemOut() throws IOException {
 		PrintStream old = System.out;
 		File traceFile = OSGiTestsActivator.getContext().getDataFile(getName() + ".trace"); //$NON-NLS-1$
-		OutputStream out = new FileOutputStream(traceFile);
 		final AtomicReference<Boolean> closed = new AtomicReference<>(Boolean.FALSE);
-		out = new FilterOutputStream(out) {
+		try (OutputStream out = new FilterOutputStream(new FileOutputStream(traceFile)) {
 
 			@Override
 			public void close() throws IOException {
@@ -1157,17 +1156,17 @@ public class DebugOptionsTestCase {
 				closed.set(Boolean.TRUE);
 			}
 
-		};
-		System.setOut(new PrintStream(out));
-		try {
-			TestDebugTrace debugTrace = this.createDebugTrace(new File("/does/not/exist/trace.out"));
-			debugOptions.setOption(getName() + "/debug", "true");
-			debugTrace.trace("/debug", "A message to System.out.");
-			debugTrace.trace("/debug", "Another message.");
-			assertFalse("Closed System.out.", closed.get().booleanValue());
-		} finally {
-			System.setOut(old);
-			out.close();
+		}) {
+			System.setOut(new PrintStream(out));
+			try {
+				TestDebugTrace debugTrace = this.createDebugTrace(new File("/does/not/exist/trace.out"));
+				debugOptions.setOption(getName() + "/debug", "true");
+				debugTrace.trace("/debug", "A message to System.out.");
+				debugTrace.trace("/debug", "Another message.");
+				assertFalse("Closed System.out.", closed.get().booleanValue());
+			} finally {
+				System.setOut(old);
+			}
 		}
 		TraceEntry[] traceOutput = null;
 		try {
