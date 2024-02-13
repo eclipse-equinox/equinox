@@ -13,12 +13,25 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.service.security;
 
-import java.io.*;
-import java.security.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.signedcontent.SignedBundleHook;
 import org.eclipse.osgi.internal.signedcontent.SignedContentMessages;
@@ -129,7 +142,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 						// this is the last certificate in the chain
 						// determine if we have a valid root
 						X509Certificate cert = (X509Certificate) certChain[i];
-						if (cert.getSubjectDN().equals(cert.getIssuerDN())) {
+						if (cert.getSubjectX500Principal().equals(cert.getIssuerX500Principal())) {
 							cert.verify(cert.getPublicKey());
 							rootCert = cert; // this is a self-signed certificate
 						} else {
@@ -176,8 +189,8 @@ public class KeyStoreTrustEngine extends TrustEngine {
 		synchronized (store) {
 			for (Enumeration<String> e = store.aliases(); e.hasMoreElements();) {
 				Certificate nextCert = store.getCertificate(e.nextElement());
-				if (nextCert instanceof X509Certificate
-						&& ((X509Certificate) nextCert).getSubjectDN().equals(cert.getIssuerDN())) {
+				if (nextCert instanceof X509Certificate && ((X509Certificate) nextCert).getSubjectX500Principal()
+						.equals(cert.getIssuerX500Principal())) {
 					cert.verify(nextCert.getPublicKey());
 					return nextCert;
 				}

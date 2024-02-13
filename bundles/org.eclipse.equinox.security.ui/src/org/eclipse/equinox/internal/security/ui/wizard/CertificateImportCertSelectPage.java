@@ -92,7 +92,7 @@ public class CertificateImportCertSelectPage extends WizardPage implements Liste
 
 		for (Certificate certificate : certList) {
 			X509Certificate x509Cert = (X509Certificate) certificate;
-			String subjectDN = x509Cert.getSubjectDN().getName();
+			String subjectDN = x509Cert.getSubjectX500Principal().getName();
 			certDropDown.add(subjectDN);
 		}
 		certDropDown.addListener(SWT.Selection, this);
