@@ -50,6 +50,7 @@ import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogListener;
 import org.osgi.service.log.LogService;
 
+@SuppressWarnings("deprecation") // LogService
 public class LoggingTests extends AbstractBundleTests {
 	static final String EQUINOX_LOGGER = "org.eclipse.equinox.logger";
 

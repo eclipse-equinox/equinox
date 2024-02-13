@@ -33,6 +33,7 @@ import org.osgi.service.log.Logger;
 import org.osgi.service.log.admin.LoggerAdmin;
 import org.osgi.service.log.admin.LoggerContext;
 
+@SuppressWarnings("deprecation") // LogService
 public class ExtendedLogServiceTest {
 
 	private Bundle bundle;
