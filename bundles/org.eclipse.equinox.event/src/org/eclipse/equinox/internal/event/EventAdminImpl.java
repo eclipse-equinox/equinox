@@ -50,7 +50,6 @@ public class EventAdminImpl implements EventAdmin {
 	void start() {
 		log.open();
 		ThreadGroup eventGroup = new ThreadGroup("Equinox Event Admin"); //$NON-NLS-1$
-		eventGroup.setDaemon(true);
 		eventManager = new EventManager(EventAdminMsg.EVENT_ASYNC_THREAD_NAME, eventGroup);
 		handlers.open();
 	}
