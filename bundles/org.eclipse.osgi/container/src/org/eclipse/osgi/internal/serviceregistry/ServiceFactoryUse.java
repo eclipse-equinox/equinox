@@ -89,7 +89,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 	/* @GuardedBy("getLock()") */
 	@Override
 	S getService() {
-		assert getLock().isHeldByCurrentThread();
+		assert isLocked();
 		if (inUse()) {
 			incrementUse();
 			return cachedService;
@@ -151,7 +151,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 	/* @GuardedBy("getLock()") */
 	@Override
 	boolean ungetService() {
-		assert getLock().isHeldByCurrentThread();
+		assert isLocked();
 		if (!inUse()) {
 			return false;
 		}

@@ -63,7 +63,7 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	/* @GuardedBy("getLock()") */
 	@Override
 	S newServiceObject() {
-		assert getLock().isHeldByCurrentThread();
+		assert isLocked();
 		if (debug.DEBUG_SERVICES) {
 			Debug.println('[' + Thread.currentThread().getName() + "] getServiceObject[PSfactory=" //$NON-NLS-1$
 					+ registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -95,7 +95,7 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	/* @GuardedBy("getLock()") */
 	@Override
 	boolean releaseServiceObject(final S service) {
-		assert getLock().isHeldByCurrentThread();
+		assert isLocked();
 		if ((service == null) || !serviceObjects.containsKey(service)) {
 			throw new IllegalArgumentException(Msg.SERVICE_OBJECTS_UNGET_ARGUMENT_EXCEPTION);
 		}
