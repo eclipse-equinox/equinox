@@ -512,9 +512,7 @@ public class FrameworkLauncher {
 		try {
 			registerFrameworkShutdownHandler = starterClazz.getDeclaredMethod("internalAddFrameworkShutdownHandler", //$NON-NLS-1$
 					Runnable.class);
-			if (!registerFrameworkShutdownHandler.isAccessible()) {
-				registerFrameworkShutdownHandler.setAccessible(true);
-			}
+			registerFrameworkShutdownHandler.trySetAccessible();
 			Runnable restartHandler = createRestartHandler(starterClazz);
 			registerFrameworkShutdownHandler.invoke(null, restartHandler);
 		} catch (NoSuchMethodException e) {
@@ -528,9 +526,7 @@ public class FrameworkLauncher {
 
 	private Runnable createRestartHandler(Class<?> starterClazz) throws NoSuchMethodException {
 		final Method getProperty = starterClazz.getDeclaredMethod("getProperty", String.class); //$NON-NLS-1$
-		if (!getProperty.isAccessible()) {
-			getProperty.setAccessible(true);
-		}
+		getProperty.trySetAccessible();
 		Runnable restartHandler = new Runnable() {
 			@Override
 			public void run() {
