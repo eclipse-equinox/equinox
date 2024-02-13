@@ -26,7 +26,8 @@ import org.osgi.util.tracker.ServiceTracker;
  * issues such as the service coming and going.
  */
 
-public class LogTracker extends ServiceTracker {
+@SuppressWarnings("deprecation")
+class LogTracker extends ServiceTracker {
 	/** LogService interface class name */
 	protected final static String clazz = "org.osgi.service.log.LogService"; //$NON-NLS-1$
 
@@ -44,7 +45,7 @@ public class LogTracker extends ServiceTracker {
 	 * @param context BundleContext of parent bundle.
 	 * @param out     Default PrintStream to use if LogService is unavailable.
 	 */
-	public LogTracker(BundleContext context, PrintStream out) {
+	LogTracker(BundleContext context, PrintStream out) {
 		super(context, clazz, null);
 		this.out = out;
 		calendar = Calendar.getInstance();
@@ -58,20 +59,56 @@ public class LogTracker extends ServiceTracker {
 	 * ----------------------------------------------------------------------
 	 */
 
-	public void log(int level, String message) {
-		log(null, level, message, null);
+	void info(String message) {
+		log(null, LogService.LOG_INFO, message, null);
 	}
 
-	public void log(int level, String message, Throwable exception) {
-		log(null, level, message, exception);
+	void debug(String message) {
+		if (Activator.DEBUG) {
+			log(null, LogService.LOG_DEBUG, message, null);
+		}
 	}
 
-	public void log(ServiceReference reference, int level, String message) {
-		log(reference, level, message, null);
+	void error(String message) {
+		if (Activator.DEBUG) {
+			log(null, LogService.LOG_ERROR, message, null);
+		}
 	}
 
-	public synchronized void log(ServiceReference reference, int level, String message, Throwable exception) {
-		ServiceReference[] references = getServiceReferences();
+	void error(String message, Throwable exception) {
+		if (Activator.DEBUG) {
+			log(null, LogService.LOG_ERROR, message, exception);
+		}
+	}
+
+	void info(ServiceReference<?> reference, String message) {
+		log(reference, LogService.LOG_INFO, message, null);
+	}
+
+	void warn(ServiceReference<?> reference, String message) {
+		log(reference, LogService.LOG_WARNING, message, null);
+	}
+
+	void debug(ServiceReference<?> reference, String message) {
+		if (Activator.DEBUG) {
+			log(reference, LogService.LOG_DEBUG, message, null);
+		}
+	}
+
+	void error(ServiceReference<?> reference, String message) {
+		if (Activator.DEBUG) {
+			log(reference, LogService.LOG_ERROR, message, null);
+		}
+	}
+
+	void error(ServiceReference<?> reference, String message, Throwable exception) {
+		if (Activator.DEBUG) {
+			log(reference, LogService.LOG_ERROR, message, exception);
+		}
+	}
+
+	private synchronized void log(ServiceReference<?> reference, int level, String message, Throwable exception) {
+		ServiceReference<?>[] references = getServiceReferences();
 
 		if (references != null) {
 			int size = references.length;
@@ -99,9 +136,9 @@ public class LogTracker extends ServiceTracker {
 	 * @param level     Logging level
 	 * @param message   Log message.
 	 * @param throwable Log exception or null if none.
-	 * @param reference ServiceReference associated with message or null if none.
+	 * @param reference ServiceReference<?> associated with message or null if none.
 	 */
-	protected void noLogService(int level, String message, Throwable throwable, ServiceReference reference) {
+	protected void noLogService(int level, String message, Throwable throwable, ServiceReference<?> reference) {
 		if (out != null) {
 			synchronized (out) {
 				// Bug #113286. If no log service present and messages are being
