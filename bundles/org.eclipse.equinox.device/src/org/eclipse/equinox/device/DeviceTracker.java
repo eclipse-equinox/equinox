@@ -156,7 +156,7 @@ public class DeviceTracker extends ServiceTracker {
 
 			manager.locators.loadDrivers(properties, drivers);
 
-			Vector exclude = new Vector(drivers.size());
+			Vector<ServiceReference> exclude = new Vector<>(drivers.size());
 
 			while (running) {
 				ServiceReference driver = drivers.match(device, exclude);

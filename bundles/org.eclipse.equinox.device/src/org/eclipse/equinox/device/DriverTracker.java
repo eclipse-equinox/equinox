@@ -229,7 +229,7 @@ public class DriverTracker extends ServiceTracker {
 	 *
 	 * @return ServiceReference to best matched Driver or null of their is no match.
 	 */
-	public ServiceReference match(ServiceReference device, Vector exclude) {
+	public ServiceReference match(ServiceReference device, Vector<ServiceReference> exclude) {
 		if (Activator.DEBUG) {
 			log.debug(device, this + ": Driver match called"); //$NON-NLS-1$
 		}
@@ -334,7 +334,7 @@ public class DriverTracker extends ServiceTracker {
 	 * @param device Device to be attached
 	 * @return true is the Driver successfully attached.
 	 */
-	public boolean attach(ServiceReference driver, ServiceReference device, Vector exclude) {
+	public boolean attach(ServiceReference driver, ServiceReference device, Vector<ServiceReference> exclude) {
 		if (Activator.DEBUG) {
 			log.debug(driver, this + ": Driver attach called: " + drivers.get(driver)); //$NON-NLS-1$
 		}
