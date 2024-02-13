@@ -81,7 +81,7 @@ public class ServiceUse<S> {
 	 */
 	/* @GuardedBy("getLock()") */
 	S getService() {
-		assert getLock().isHeldByCurrentThread();
+		assert isLocked();
 		if (debug.DEBUG_SERVICES) {
 			Debug.println("[" + Thread.currentThread().getName() + "] getService[factory=" + registration.getBundle() //$NON-NLS-1$ //$NON-NLS-2$
 					+ "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -101,7 +101,7 @@ public class ServiceUse<S> {
 	 */
 	/* @GuardedBy("getLock()") */
 	boolean ungetService() {
-		assert getLock().isHeldByCurrentThread();
+		assert isLocked();
 		if (!inUse()) {
 			return false;
 		}
@@ -164,7 +164,7 @@ public class ServiceUse<S> {
 	 */
 	/* @GuardedBy("getLock()") */
 	void release() {
-		assert getLock().isHeldByCurrentThread();
+		assert isLocked();
 		resetUse();
 	}
 
@@ -176,7 +176,7 @@ public class ServiceUse<S> {
 	 */
 	/* @GuardedBy("getLock()") */
 	boolean isEmpty() {
-		assert getLock().isHeldByCurrentThread();
+		assert isLocked();
 		return !inUse();
 	}
 
@@ -228,6 +228,10 @@ public class ServiceUse<S> {
 	 */
 	ServiceUseLock getLock() {
 		return lock;
+	}
+
+	protected boolean isLocked() {
+		return getLock().isHeldByCurrentThread();
 	}
 
 	/**
