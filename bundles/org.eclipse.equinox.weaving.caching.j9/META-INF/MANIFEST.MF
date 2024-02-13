@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: J9 CachingService Plug-in
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.eclipse.equinox.weaving.caching.j9
 Bundle-Version: 1.3.0.qualifier
-Bundle-Vendor: Eclipse.org - Equinox
+Bundle-Vendor: %Bundle-Vendor
 Bundle-Activator: org.eclipse.equinox.weaving.internal.caching.j9.CachingServicePlugin
 Bundle-ActivationPolicy: lazy
 Import-Package: com.ibm.oti.shared;resolution:=optional,
