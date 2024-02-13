@@ -16,7 +16,6 @@ package org.eclipse.equinox.internal.useradmin;
 import org.eclipse.osgi.framework.eventmgr.*;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.log.LogService;
 import org.osgi.service.useradmin.UserAdminEvent;
 import org.osgi.service.useradmin.UserAdminListener;
 import org.osgi.util.tracker.ServiceTracker;
@@ -146,7 +145,7 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 		try {
 			ual.roleChanged((UserAdminEvent) eventObject);
 		} catch (Throwable t) {
-			log.log(userAdmin, LogService.LOG_WARNING, UserAdminMsg.Event_Delivery_Exception, t);
+			log.warn(userAdmin, UserAdminMsg.Event_Delivery_Exception, t);
 		}
 	}
 }
