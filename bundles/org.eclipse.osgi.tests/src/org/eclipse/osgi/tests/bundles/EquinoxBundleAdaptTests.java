@@ -38,6 +38,7 @@ public class EquinoxBundleAdaptTests extends AbstractBundleTests {
 	}
 
 	@Test
+	@SuppressWarnings({ "deprecation", "removal" }) // SecurityManager
 	public void testAdapt_ProtectionDomain() throws Exception {
 		Bundle bundle = installer.installBundle("test");
 		SecurityManager previousSM = System.getSecurityManager();

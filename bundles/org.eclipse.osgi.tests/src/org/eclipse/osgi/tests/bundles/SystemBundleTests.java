@@ -136,6 +136,7 @@ import org.osgi.service.url.AbstractURLStreamHandlerService;
 import org.osgi.service.url.URLConstants;
 import org.osgi.service.url.URLStreamHandlerService;
 
+@SuppressWarnings({ "deprecation", "removal" }) // SecurityManager
 public class SystemBundleTests extends AbstractBundleTests {
 
 	@Test
@@ -1981,7 +1982,6 @@ public class SystemBundleTests extends AbstractBundleTests {
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
 		Equinox equinox = new Equinox(configuration);
 		equinox.init();
-		@SuppressWarnings("deprecation")
 		String osgiEE = equinox.getBundleContext().getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
 		// don't do anything; just put the framework back to the RESOLVED state
 		stop(equinox);

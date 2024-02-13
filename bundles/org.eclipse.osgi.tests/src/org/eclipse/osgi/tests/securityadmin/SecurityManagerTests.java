@@ -67,6 +67,7 @@ import org.osgi.service.packageadmin.RequiredBundle;
 import org.osgi.service.permissionadmin.PermissionInfo;
 import org.osgi.service.startlevel.StartLevel;
 
+@SuppressWarnings({ "deprecation", "removal" }) // Policy
 public class SecurityManagerTests extends AbstractBundleTests {
 	private static final PermissionInfo hostFragmentPermission = new PermissionInfo(BundlePermission.class.getName(),
 			"*", "host,fragment"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -82,7 +83,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 
 	@Override
 	public void setUp() throws Exception {
-		assertNull("Cannot test with security manager set", System.getSecurityManager());
+		assertNull("Cannot test with security manager set", getSecurityManager());
 		previousPolicy = Policy.getPolicy();
 		final Permission allPermission = new AllPermission();
 		final PermissionCollection allPermissions = new PermissionCollection() {
@@ -140,7 +141,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 	@Override
 	public void tearDown() throws Exception {
 		super.tearDown();
-		if (System.getSecurityManager() != null)
+		if (getSecurityManager() != null)
 			System.setSecurityManager(null);
 		Policy.setPolicy(previousPolicy);
 	}
@@ -154,7 +155,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		Equinox equinox = new Equinox(configuration);
 		equinox.init();
 
-		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
+		assertNotNull("SecurityManager is null", getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
 		equinox.start();
@@ -163,7 +164,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		// put the framework back to the RESOLVED state
 		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
-		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
+		assertNull("SecurityManager is not null", getSecurityManager()); //$NON-NLS-1$
 	}
 
 	@Test
@@ -176,7 +177,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		Equinox equinox = new Equinox(configuration);
 		equinox.init();
 
-		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
+		assertNotNull("SecurityManager is null", getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
 
@@ -207,7 +208,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			stop(equinox);
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
-		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
+		assertNull("SecurityManager is not null", getSecurityManager()); //$NON-NLS-1$
 	}
 
 	@Test
@@ -219,7 +220,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		Equinox equinox = new Equinox(configuration);
 		equinox.init();
 
-		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
+		assertNotNull("SecurityManager is null", getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
 
@@ -273,7 +274,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			stop(equinox);
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
-		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
+		assertNull("SecurityManager is not null", getSecurityManager()); //$NON-NLS-1$
 	}
 
 	@Test
@@ -285,7 +286,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		Equinox equinox = new Equinox(configuration);
 		equinox.init();
 
-		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
+		assertNotNull("SecurityManager is null", getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
 
@@ -345,7 +346,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			stop(equinox);
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
-		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
+		assertNull("SecurityManager is not null", getSecurityManager()); //$NON-NLS-1$
 	}
 
 	@Test
@@ -357,7 +358,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		Equinox equinox = new Equinox(configuration);
 		equinox.init();
 
-		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
+		assertNotNull("SecurityManager is null", getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
 
@@ -386,7 +387,11 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			stop(equinox);
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
-		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
+		assertNull("SecurityManager is not null", getSecurityManager()); //$NON-NLS-1$
+	}
+
+	private SecurityManager getSecurityManager() {
+		return System.getSecurityManager();
 	}
 
 	@Test
@@ -398,7 +403,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
 		Equinox equinox = new Equinox(configuration);
 		equinox.init();
-		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
+		assertNotNull("SecurityManager is null", getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
 
@@ -436,7 +441,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			stop(equinox);
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
-		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
+		assertNull("SecurityManager is not null", getSecurityManager()); //$NON-NLS-1$
 	}
 
 	@Test
@@ -447,7 +452,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
 		Equinox equinox = new Equinox(configuration);
 		equinox.init();
-		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
+		assertNotNull("SecurityManager is null", getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
 		equinox.start();
@@ -482,7 +487,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 
 		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
-		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
+		assertNull("SecurityManager is not null", getSecurityManager()); //$NON-NLS-1$
 	}
 
 	@Test
@@ -493,7 +498,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
 		Equinox equinox = new Equinox(configuration);
 		equinox.init();
-		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
+		assertNotNull("SecurityManager is null", getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
 		equinox.start();
@@ -517,7 +522,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		assertEquals("Wrong startlevel", 10, sl.getStartLevel()); //$NON-NLS-1$
 		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
-		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
+		assertNull("SecurityManager is not null", getSecurityManager()); //$NON-NLS-1$
 	}
 
 	@Test
@@ -528,7 +533,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		configuration.put(Constants.FRAMEWORK_SECURITY, Constants.FRAMEWORK_SECURITY_OSGI);
 		Equinox equinox = new Equinox(configuration);
 		equinox.init();
-		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
+		assertNotNull("SecurityManager is null", getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
 		equinox.start();
@@ -572,7 +577,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		// put the framework back to the RESOLVED state
 		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
-		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
+		assertNull("SecurityManager is not null", getSecurityManager()); //$NON-NLS-1$
 	}
 
 	@Test
@@ -636,7 +641,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		// put the framework back to the RESOLVED state
 		stop(equinox);
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
-		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
+		assertNull("SecurityManager is not null", getSecurityManager()); //$NON-NLS-1$
 	}
 
 	@Test
@@ -671,9 +676,9 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			try {
 				equinox.init();
 				if (isSecurityManager) {
-					assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
+					assertNotNull("SecurityManager is null", getSecurityManager()); //$NON-NLS-1$
 				} else {
-					assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
+					assertNull("SecurityManager is not null", getSecurityManager()); //$NON-NLS-1$
 				}
 			} catch (BundleException e) {
 				if (isSecurityManager && e.getCause() instanceof UnsupportedOperationException) {
