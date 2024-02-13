@@ -321,7 +321,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		if (lastDot != -1) {
 			String packageName = name.substring(0, lastDot);
 			synchronized (pkgLock) {
-				Package pkg = getPackage(packageName);
+				Package pkg = getDefinedPackage(packageName);
 				if (pkg != null) {
 					checkForSealedPackage(pkg, packageName, manifest, connection.getJarFileURL());
 				} else {
