@@ -268,7 +268,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 				if (info.isTrusted()) {
 					X509Certificate x509Cert = (X509Certificate) certs[0];
 					assertTrue("CA1 LeafA signer is not trusted",
-							x509Cert.getSubjectDN().getName().indexOf("CA1 LeafA") >= 0);
+							x509Cert.getSubjectX500Principal().getName().indexOf("CA1 LeafA") >= 0);
 				}
 			}
 		} finally {
@@ -508,7 +508,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 			if (info.isTrusted()) {
 				X509Certificate x509Cert = (X509Certificate) certs[0];
 				assertTrue("CA1 LeafA signer is not trusted",
-						x509Cert.getSubjectDN().getName().indexOf("CA1 LeafA") >= 0);
+						x509Cert.getSubjectX500Principal().getName().indexOf("CA1 LeafA") >= 0);
 			}
 		}
 	}
