@@ -42,7 +42,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 
-@SuppressWarnings("deprecation")
+@SuppressWarnings({ "deprecation", "removal" }) // AccessController
 public class BundleInstaller {
 	private BundleContext context;
 	private String rootLocation;

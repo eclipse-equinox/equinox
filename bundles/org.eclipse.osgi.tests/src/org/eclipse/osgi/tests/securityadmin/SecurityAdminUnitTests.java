@@ -51,7 +51,7 @@ import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
 import org.osgi.service.permissionadmin.PermissionAdmin;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
-@SuppressWarnings("deprecation")
+@SuppressWarnings({ "deprecation", "removal" }) // AccessControlContext
 public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 	private static final PermissionInfo[] SOCKET_INFOS = new PermissionInfo[] {
