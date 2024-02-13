@@ -41,7 +41,6 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 		this.userAdmin = userAdmin;
 		this.log = log;
 		ThreadGroup eventGroup = new ThreadGroup("Equinox User Admin"); //$NON-NLS-1$
-		eventGroup.setDaemon(true);
 		eventManager = new EventManager("UserAdmin Event Dispatcher", eventGroup); //$NON-NLS-1$
 		listeners = new CopyOnWriteIdentityMap<>();
 
@@ -76,17 +75,17 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 	 *
 	 * <p>
 	 * This method is called before a service which matched the search parameters of
-	 * the <code>ServiceTracker</code> object is added to it. This method should return
-	 * the service object to be tracked for this <code>ServiceReference</code> object.
-	 * The returned service object is stored in the <code>ServiceTracker</code> object
-	 * and is available from the <code>getService</code> and <code>getServices</code>
-	 * methods.
+	 * the <code>ServiceTracker</code> object is added to it. This method should
+	 * return the service object to be tracked for this
+	 * <code>ServiceReference</code> object. The returned service object is stored
+	 * in the <code>ServiceTracker</code> object and is available from the
+	 * <code>getService</code> and <code>getServices</code> methods.
 	 *
 	 * @param reference Reference to service being added to the
 	 *                  <code>ServiceTracker</code> object.
-	 * @return The service object to be tracked for the <code>ServiceReference</code>
-	 *         object or <code>null</code> if the <code>ServiceReference</code> object
-	 *         should not be tracked.
+	 * @return The service object to be tracked for the
+	 *         <code>ServiceReference</code> object or <code>null</code> if the
+	 *         <code>ServiceReference</code> object should not be tracked.
 	 */
 	@Override
 	public Object addingService(ServiceReference reference) {
