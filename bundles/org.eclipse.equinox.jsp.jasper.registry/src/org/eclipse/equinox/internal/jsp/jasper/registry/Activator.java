@@ -64,6 +64,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer<Pack
 
 	@Override
 	public void modifiedService(ServiceReference<PackageAdmin> reference, PackageAdmin service) {
+		// do nothing
 	}
 
 	@Override
