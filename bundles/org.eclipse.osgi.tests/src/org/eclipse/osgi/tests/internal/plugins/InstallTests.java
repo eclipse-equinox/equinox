@@ -33,6 +33,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
 /**
  * Provisory home for tests that install plugins.
  */
+@SuppressWarnings("deprecation") // PackageAdmin
 public class InstallTests {
 
 	@Test

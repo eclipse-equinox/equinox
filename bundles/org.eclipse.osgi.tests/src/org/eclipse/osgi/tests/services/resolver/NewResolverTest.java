@@ -29,6 +29,7 @@ public class NewResolverTest extends AbstractStateTest {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation") // StateObjectFactory.createBundleDescription()
 	public void testBasicScenario1() throws BundleException {
 		State state = buildEmptyState();
 

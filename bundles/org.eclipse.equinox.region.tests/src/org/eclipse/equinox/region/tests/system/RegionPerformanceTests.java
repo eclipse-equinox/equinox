@@ -156,6 +156,7 @@ public class RegionPerformanceTests extends TestCase {
 		runner.run(this, fingerPrintName, 10, 2000);
 	}
 
+	@SuppressWarnings("deprecation") // VISIBLE_SERVICE_NAMESPACE
 	private void createRegions(final int numRegions) throws BundleException {
 		System.out.println("Starting region create: " + numRegions);
 		long time = System.currentTimeMillis();

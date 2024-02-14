@@ -42,6 +42,7 @@ import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Capability;
 import org.osgi.service.packageadmin.PackageAdmin;
 
+@SuppressWarnings("deprecation") // PackageAdmin
 public class StorageHookTests extends AbstractFrameworkHookTests {
 	private static final String TEST_BUNDLE = "test";
 	private static final String HOOK_CONFIGURATOR_BUNDLE = "storage.hooks.a";
@@ -257,7 +258,6 @@ public class StorageHookTests extends AbstractFrameworkHookTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	public void testFrameworkUtilHelper() throws Exception {
 		initAndStartFramework();
 		Class<?> frameworkUtilClass = classLoader.loadClass("org.osgi.framework.FrameworkUtil");

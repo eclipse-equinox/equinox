@@ -28,6 +28,7 @@ import org.osgi.framework.hooks.service.EventHook;
 /**
  * This testcase was based on {@link RegionBundleFindHookTests}.
  */
+@SuppressWarnings("deprecation") // EventHook, RegionFilter.VISIBLE_SERVICE_NAMESPACE
 public class RegionServiceEventHookTests {
 
 	private static final String BUNDLE_X = "X";
@@ -57,7 +58,6 @@ public class RegionServiceEventHookTests {
 
 	private RegionDigraph digraph;
 
-	@SuppressWarnings("deprecation")
 	private EventHook serviceEventHook;
 
 	private Map<String, Region> regions;

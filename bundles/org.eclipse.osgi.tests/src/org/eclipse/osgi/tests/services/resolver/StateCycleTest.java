@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
+@SuppressWarnings("deprecation") // StateObjectFactory.createBundleDescription()
 public class StateCycleTest extends AbstractStateTest {
 
 	@Test

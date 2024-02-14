@@ -42,6 +42,7 @@ public class PlatformAdminTest extends AbstractStateTest {
 	private static final String GENERIC_REQUIRE = "Eclipse-GenericRequire"; //$NON-NLS-1$
 	private static final String GENERIC_CAPABILITY = "Eclipse-GenericCapability"; //$NON-NLS-1$
 
+	@SuppressWarnings("deprecation") // writeState
 	private State storeAndRetrieve(State toStore) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		toStore.getFactory().writeState(toStore, baos);

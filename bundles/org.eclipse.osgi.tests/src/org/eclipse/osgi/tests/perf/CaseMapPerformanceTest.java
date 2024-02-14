@@ -23,6 +23,7 @@ import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.osgi.framework.Constants;
 
+@SuppressWarnings("deprecation") // Headers
 public class CaseMapPerformanceTest {
 	@Rule
 	public TestName testName = new TestName();

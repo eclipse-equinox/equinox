@@ -42,6 +42,7 @@ import org.osgi.framework.hooks.service.EventHook;
 import org.osgi.framework.hooks.service.FindHook;
 import org.osgi.framework.hooks.service.ListenerHook;
 
+@SuppressWarnings("deprecation") // EventHook
 public class ServiceHookTests extends AbstractBundleTests {
 
 	@Test

@@ -84,6 +84,7 @@ import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 
+@SuppressWarnings("deprecation") // StartLevel, PackageAdmin, ExportedPackage
 public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 	@Test

@@ -99,6 +99,7 @@ public class MovableConfigurationAreaTest extends TestCase {
 	 * default the manifest generation area is under the configuration area (which
 	 * is read-only here)
 	 */
+	@SuppressWarnings("deprecation") // installBundle
 	public void testAfterMoving() throws MalformedURLException, IOException, BundleException {
 		// try to install plug-in
 		// ensure it is not installed

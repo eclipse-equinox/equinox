@@ -207,6 +207,7 @@ public class StandardRegionDigraphPeristenceTests {
 		input.close();
 	}
 
+	@SuppressWarnings("deprecation") // VISIBLE_SERVICE_NAMESPACE
 	private RegionFilter createFilter(String... input) throws InvalidSyntaxException {
 		RegionFilterBuilder builder = digraph.createRegionFilterBuilder();
 		for (String param : input) {

@@ -41,6 +41,7 @@ import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 
+@SuppressWarnings("deprecation") // PackageAdmin, ExportedPackage
 public class PackageAdminBundleTests extends AbstractBundleTests {
 	public class TestListener implements SynchronousBundleListener {
 		ArrayList events = new ArrayList();
