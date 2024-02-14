@@ -27,6 +27,7 @@ public class StatePerformanceTest extends BasePerformanceTest {
 	@Rule
 	public TestName testName = new TestName();
 
+	@SuppressWarnings("deprecation") // writeState
 	State storeAndRetrieve(State toStore) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		toStore.getFactory().writeState(toStore, baos);

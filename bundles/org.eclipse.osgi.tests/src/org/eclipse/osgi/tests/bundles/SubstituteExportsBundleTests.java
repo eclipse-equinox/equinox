@@ -24,6 +24,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 
+@SuppressWarnings("deprecation") // PackageAdmin, ExportedPackage
 public class SubstituteExportsBundleTests extends AbstractBundleTests {
 
 	@Test

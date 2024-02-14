@@ -191,6 +191,7 @@ public class RegionReflectionUtils {
 		return (ResolverHook) newInstance(regionResolverHook, classParams, constructorArgs);
 	}
 
+	@SuppressWarnings("deprecation") // EventHook
 	public static org.osgi.framework.hooks.service.EventHook newRegionServiceEventHook(RegionDigraph digraph) {
 		Class<?> regionServiceEventHook = loadRegionImplClass(RegionServiceEventHook);
 		Class<?>[] classParams = new Class<?>[] { RegionDigraph.class };

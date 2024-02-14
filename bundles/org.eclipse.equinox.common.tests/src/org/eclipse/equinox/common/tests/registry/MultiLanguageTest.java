@@ -20,8 +20,14 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.Locale;
+
 import org.eclipse.core.internal.registry.IRegistryConstants;
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.core.runtime.spi.RegistryStrategy;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
 import org.eclipse.core.tests.harness.FileSystemHelper;
@@ -29,13 +35,19 @@ import org.eclipse.osgi.service.localization.LocaleProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Run with no NL argument or with "-nl en".
  */
+@SuppressWarnings("deprecation") // PackageAdmin
 public class MultiLanguageTest {
 
 	class LocaleProviderTest implements LocaleProvider {

@@ -261,6 +261,7 @@ public class AbstractBundleTests {
 		}
 	}
 
+	@SuppressWarnings("deprecation") // STOPPED_BOOTCLASSPATH_MODIFIED
 	static private String getFrameworkEventType(int type) {
 		switch (type) {
 		case FrameworkEvent.ERROR:

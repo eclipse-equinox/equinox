@@ -29,6 +29,7 @@ import org.osgi.framework.hooks.service.FindHook;
 /**
  * This testcase was based on {@link RegionBundleFindHookTests}.
  */
+@SuppressWarnings("deprecation") // RegionFilter.VISIBLE_SERVICE_NAMESPACE
 public class RegionServiceFindHookTests {
 
 	private static final String BUNDLE_X = "X";

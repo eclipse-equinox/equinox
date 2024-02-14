@@ -25,6 +25,7 @@ import org.eclipse.osgi.service.resolver.VersionRange;
 import org.eclipse.osgi.tests.services.resolver.AbstractStateTest;
 import org.osgi.framework.Version;
 
+@SuppressWarnings("deprecation") // StateObjectFactory.createBundleDescription()
 public class BasePerformanceTest extends AbstractStateTest {
 	private Random random;
 

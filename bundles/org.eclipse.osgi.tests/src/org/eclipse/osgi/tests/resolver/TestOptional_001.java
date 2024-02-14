@@ -26,6 +26,7 @@ import org.eclipse.osgi.tests.services.resolver.AbstractStateTest;
 import org.junit.Test;
 import org.osgi.framework.BundleException;
 
+@SuppressWarnings("deprecation") // StateObjectFactory.createBundleDescription()
 public class TestOptional_001 extends AbstractStateTest {
 
 	BundleDescription bundle_1 = null;

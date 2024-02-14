@@ -20,6 +20,7 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * The activator class controls the plug-in life cycle
  */
+@SuppressWarnings("deprecation") // PackageAdmin
 public class Activator implements BundleActivator {
 	public static String BUNDLE_COORDINATOR = "org.eclipse.equinox.coordinator"; //$NON-NLS-1$
 	public static String BUNDLE_EVENT = "org.eclipse.equinox.event"; //$NON-NLS-1$

@@ -387,6 +387,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		assertEquals("2.4.1", genSpecs[3].getSupplier(), selectedFragBCapabilities[0]);
 	}
 
+	@SuppressWarnings("deprecation") // Constants.EXPORT_SERVICE
 	@Test
 	public void testGenericsAliases() throws BundleException {
 		State state = buildEmptyState();

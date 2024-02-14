@@ -77,6 +77,7 @@ public class ReadOnlyConfigurationAreaTest extends TestCase {
 	 * default the manifest generation area is under the configuration area (which
 	 * is read-only here)
 	 */
+	@SuppressWarnings("deprecation") // installBundle
 	public void test2ndSession() throws BundleException, IOException {
 		// try to install plug-in
 		// ensure it is not installed
@@ -108,6 +109,7 @@ public class ReadOnlyConfigurationAreaTest extends TestCase {
 	 * the manifest generation area is under the configuration area (which is
 	 * read-only here)
 	 */
+	@SuppressWarnings("deprecation") // installBundle
 	public void test3rdSession() throws BundleException, IOException {
 		// install plug-in
 		// ensure it is not installed

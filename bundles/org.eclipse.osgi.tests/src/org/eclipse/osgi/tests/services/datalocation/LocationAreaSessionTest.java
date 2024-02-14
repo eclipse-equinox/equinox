@@ -143,6 +143,7 @@ public class LocationAreaSessionTest extends TestCase {
 		}
 	}
 
+	@SuppressWarnings("deprecation") // setURL
 	static void doLock(String testLocationDir, boolean release, boolean succeed)
 			throws InvalidSyntaxException, IOException {
 		assertNotNull("The testLocationDir is not set", testLocationDir);

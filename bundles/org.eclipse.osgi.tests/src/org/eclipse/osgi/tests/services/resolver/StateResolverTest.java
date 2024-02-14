@@ -58,6 +58,7 @@ import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.resource.Capability;
 
+@SuppressWarnings("deprecation") // Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT
 public class StateResolverTest extends AbstractStateTest {
 
 	/**

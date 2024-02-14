@@ -358,6 +358,7 @@ public class FileManagerTests {
 		// holds a file lock. This is true on Win32 but not on Linux/Mac unless using
 		// Java 6.
 		// So run this test for windows only.
+		@SuppressWarnings("deprecation")
 		String ee = System.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
 		if (!"win32".equalsIgnoreCase(System.getProperty("osgi.os")) && ee.indexOf("JavaSE-1.6") == -1)
 			// this is a Windows-only test or JavaSE-1.6 or higher test
@@ -510,6 +511,7 @@ public class FileManagerTests {
 			// holds a file lock. This is true on Win32 but not on Linux/Mac unless using
 			// Java 6.
 			// So run this test for windows only or Java 6 or higher.
+			@SuppressWarnings("deprecation")
 			String ee = System.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
 			if ("win32".equalsIgnoreCase(System.getProperty("osgi.os")) || ee.indexOf("JavaSE-1.6") != -1) {
 				// this is a Windows-only test or JavaSE-1.6 or higher test

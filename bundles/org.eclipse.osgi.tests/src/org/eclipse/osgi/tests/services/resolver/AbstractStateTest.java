@@ -213,6 +213,7 @@ public abstract class AbstractStateTest {
 		assertEquals(tag, original, copy);
 	}
 
+	@SuppressWarnings("deprecation") // StateObjectFactory.createBundleDescription()
 	public State buildComplexState() throws BundleException {
 		State state = buildEmptyState();
 		/*
@@ -270,6 +271,7 @@ public abstract class AbstractStateTest {
 		return StateObjectFactory.defaultFactory.createState(true);
 	}
 
+	@SuppressWarnings("deprecation") // StateObjectFactory.createBundleDescription()
 	public State buildInitialState() throws BundleException {
 		State state = buildEmptyState();
 		/*
@@ -284,6 +286,7 @@ public abstract class AbstractStateTest {
 		return state;
 	}
 
+	@SuppressWarnings("deprecation") // StateObjectFactory.createBundleDescription()
 	public State buildSimpleState() throws BundleException {
 		State state = buildEmptyState();
 		/*

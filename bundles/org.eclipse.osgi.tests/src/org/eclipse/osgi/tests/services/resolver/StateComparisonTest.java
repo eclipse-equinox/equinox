@@ -26,6 +26,7 @@ import org.osgi.framework.BundleException;
 public class StateComparisonTest extends AbstractStateTest {
 
 	@Test
+	@SuppressWarnings("deprecation") // StateObjectFactory.createBundleDescription()
 	public void testAddition() throws BundleException {
 		State state1 = buildEmptyState();
 		State state2 = state1.getFactory().createState(state1);
@@ -73,6 +74,7 @@ public class StateComparisonTest extends AbstractStateTest {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation") // StateObjectFactory.createBundleDescription()
 	public void testUpdate() throws BundleException {
 		State state1 = buildSimpleState();
 		State state2 = state1.getFactory().createState(state1);
