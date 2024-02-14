@@ -27,7 +27,6 @@ import org.osgi.service.coordinator.Coordination;
 import org.osgi.service.coordinator.CoordinationException;
 import org.osgi.service.coordinator.CoordinationPermission;
 import org.osgi.service.coordinator.Participant;
-import org.osgi.service.log.LogService;
 
 public class CoordinationImpl {
 	// Holds a strong reference to the CoordinationWeakReference object associated
@@ -124,7 +123,7 @@ public class CoordinationImpl {
 			} catch (InterruptedException e) {
 				String message = NLS.bind(Messages.LockInterrupted,
 						new Object[] { participant, name, id, coordination.getName(), coordination.getId() });
-				coordinator.getLogService().log(LogService.LOG_DEBUG, message, e);
+				coordinator.getLogService().debug(message, e);
 				// This thread was interrupted while waiting for the coordination
 				// to terminate.
 				throw new CoordinationException(message, referent, CoordinationException.LOCK_INTERRUPTED, e);
@@ -189,8 +188,7 @@ public class CoordinationImpl {
 			try {
 				participant.ended(referent);
 			} catch (Exception e) {
-				coordinator.getLogService().log(LogService.LOG_WARNING,
-						NLS.bind(Messages.ParticipantEndedError, new Object[] { participant, name, id }), e);
+				coordinator.getLogService().warn(NLS.bind(Messages.ParticipantEndedError, new Object[] { participant, name, id }), e);
 				// Only the first exception will be propagated.
 				if (exception == null) {
 					exception = e;
@@ -303,8 +301,7 @@ public class CoordinationImpl {
 			try {
 				participant.failed(referent);
 			} catch (Exception e) {
-				coordinator.getLogService().log(LogService.LOG_WARNING,
-						NLS.bind(Messages.ParticipantFailedError, new Object[] { participant, name, id }), e);
+				coordinator.getLogService().warn(NLS.bind(Messages.ParticipantFailedError, new Object[] { participant, name, id }), e);
 			}
 		}
 		synchronized (this) {

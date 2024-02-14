@@ -26,6 +26,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * issues such as the service coming and going.
  */
 
+@SuppressWarnings("deprecation") // LogService
 public class LogTracker extends ServiceTracker<LogService, LogService> {
 	/** LogService interface class name */
 	protected final static String clazz = "org.osgi.service.log.LogService"; //$NON-NLS-1$
@@ -50,19 +51,19 @@ public class LogTracker extends ServiceTracker<LogService, LogService> {
 	 * ----------------------------------------------------------------------
 	 */
 
-	public void log(int level, String message) {
-		log(null, level, message, null);
+	void warn(String message) {
+		log(null, LogService.LOG_WARNING, message, null);
 	}
 
-	public void log(int level, String message, Throwable exception) {
-		log(null, level, message, exception);
+	void error(String message) {
+		log(null, LogService.LOG_ERROR, message, null);
 	}
 
-	public void log(ServiceReference<?> reference, int level, String message) {
-		log(reference, level, message, null);
+	void error(String message, Throwable exception) {
+		log(null, LogService.LOG_ERROR, message, exception);
 	}
 
-	public synchronized void log(ServiceReference<?> reference, int level, String message, Throwable exception) {
+	private synchronized void log(ServiceReference<?> reference, int level, String message, Throwable exception) {
 		ServiceReference<LogService>[] references = getServiceReferences();
 
 		if (references != null) {

@@ -120,12 +120,16 @@ public class ConfigurationAdminFactory implements ServiceFactory<ConfigurationAd
 		}
 	}
 
-	void log(int level, String message) {
-		log.log(level, message);
+	void warn(String message) {
+		log.warn(message);
 	}
 
-	void log(int level, String message, Throwable exception) {
-		log.log(level, message, exception);
+	void error(String message) {
+		log.error(message);
+	}
+
+	void error(String message, Throwable exception) {
+		log.error(message, exception);
 	}
 
 	void dispatchEvent(int type, String factoryPid, String pid) {

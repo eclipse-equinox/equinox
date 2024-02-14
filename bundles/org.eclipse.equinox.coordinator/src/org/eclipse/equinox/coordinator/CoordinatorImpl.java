@@ -33,7 +33,6 @@ import org.osgi.service.coordinator.CoordinationException;
 import org.osgi.service.coordinator.CoordinationPermission;
 import org.osgi.service.coordinator.Coordinator;
 import org.osgi.service.coordinator.Participant;
-import org.osgi.service.log.LogService;
 
 public class CoordinatorImpl implements Coordinator {
 	// IDs must be positive integers and monotonically increasing.
@@ -136,8 +135,7 @@ public class CoordinatorImpl implements Coordinator {
 		// Override the requested timeout with the max timeout, if necessary.
 		if (maxTimeout != 0) {
 			if (timeout == 0 || maxTimeout < timeout) {
-				logTracker.log(LogService.LOG_WARNING,
-						NLS.bind(Messages.MaximumTimeout, new Object[] { timeout, maxTimeout, name }));
+				logTracker.warn(NLS.bind(Messages.MaximumTimeout, new Object[] { timeout, maxTimeout, name }));
 				timeout = maxTimeout;
 			}
 		}
@@ -189,7 +187,7 @@ public class CoordinatorImpl implements Coordinator {
 			try {
 				checkPermission(CoordinationPermission.ADMIN, result.getName());
 			} catch (SecurityException e) {
-				logTracker.log(LogService.LOG_DEBUG, NLS.bind(Messages.GetCoordinationNotPermitted,
+				logTracker.debug(NLS.bind(Messages.GetCoordinationNotPermitted,
 						new Object[] { Thread.currentThread(), result.getName(), result.getId() }), e);
 				result = null;
 			}
@@ -211,7 +209,7 @@ public class CoordinatorImpl implements Coordinator {
 					checkPermission(CoordinationPermission.ADMIN, coordination.getName());
 					result.add(coordination.getReferent());
 				} catch (SecurityException e) {
-					logTracker.log(LogService.LOG_DEBUG, NLS.bind(Messages.GetCoordinationNotPermitted,
+					logTracker.debug(NLS.bind(Messages.GetCoordinationNotPermitted,
 							new Object[] { Thread.currentThread(), coordination.getName(), coordination.getId() }), e);
 				}
 			}
@@ -276,7 +274,7 @@ public class CoordinatorImpl implements Coordinator {
 		try {
 			Timer.class.getMethod("purge", (Class<?>[]) null).invoke(timer, (Object[]) null); //$NON-NLS-1$
 		} catch (Exception e) {
-			logTracker.log(LogService.LOG_DEBUG, Messages.CanceledTaskNotPurged, e);
+			logTracker.debug(Messages.CanceledTaskNotPurged, e);
 		}
 	}
 

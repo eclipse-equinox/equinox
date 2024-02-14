@@ -17,7 +17,6 @@ package org.eclipse.equinox.internal.cm;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.*;
-import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -72,7 +71,7 @@ public class EventDispatcher {
 					try {
 						syncListener.configurationEvent(event);
 					} catch (Throwable t) {
-						log.log(LogService.LOG_ERROR, t.getMessage(), t);
+						log.error(t.getMessage(), t);
 					}
 				}
 			}
@@ -92,7 +91,7 @@ public class EventDispatcher {
 					try {
 						listener.configurationEvent(event);
 					} catch (Throwable t) {
-						log.log(LogService.LOG_ERROR, t.getMessage(), t);
+						log.error(t.getMessage(), t);
 					}
 				}
 			});
