@@ -26,6 +26,7 @@ import org.osgi.util.tracker.ServiceTracker;
  *
  * @since org.eclipse.equinox.preferences 3.2
  */
+@SuppressWarnings("deprecation") // ILegacyPreferences
 public class PreferencesOSGiUtils {
 	private ServiceTracker<?, ILegacyPreferences> initTracker;
 	private ServiceTracker<?, DebugOptions> debugTracker;

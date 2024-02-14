@@ -28,6 +28,7 @@ import org.osgi.framework.Bundle;
  * has been separated into a separate class to ensure that the preferences will
  * be able to run without the registry being present.
  */
+@SuppressWarnings("deprecation") // ILegacyPreferences
 public class PreferenceServiceRegistryHelper implements IRegistryChangeListener {
 
 	private static final String ELEMENT_INITIALIZER = "initializer"; //$NON-NLS-1$
