@@ -1,0 +1,76 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  schedule:
+    - cron: '36 18 * * 4'
+
+jobs:
+  analyze:
+    name: Analyze
+    # Runner size impacts CodeQL analysis time. To learn more, please see:
+    #   - https://gh.io/recommended-hardware-resources-for-running-codeql
+    #   - https://gh.io/supported-runners-and-hardware-resources
+    #   - https://gh.io/using-larger-runners
+    # Consider using larger runners for possible analysis time improvements.
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'java' ]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # required for jgit timestamp provider to work
+    - name: checkout equinox.binaries
+      uses: actions/checkout@v4
+      with:
+       fetch-depth: 1 # only shallow here, we don't have jgit timestamps
+       repository: eclipse-equinox/equinox.binaries
+       path: rt.equinox.binaries
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@v4.5
+      with:
+        maven-version: 3.9.2
+    - name: Build with Maven
+      uses: GabrielBB/xvfb-action@v1
+      with:
+       run: >- 
+        mvn
+        --batch-mode
+        --global-toolchains ${{ github.workspace }}/.github/workflows/toolchains.xml
+        -Pbree-libs
+        -Papi-check
+        -Dcompare-version-with-baselines.skip=false
+        -Dproject.build.sourceEncoding=UTF-8
+        -Dmaven.test.failure.ignore=true
+        -Drt.equinox.binaries.loc=${{ github.workspace }}/rt.equinox.binaries
+        -DskipTests=true
+        clean verify
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
