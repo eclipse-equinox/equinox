@@ -17,7 +17,6 @@ package org.eclipse.equinox.internal.cm;
 import java.util.*;
 import org.osgi.framework.*;
 import org.osgi.service.cm.*;
-import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -223,8 +222,8 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 						config.lock();
 						if (!config.isDeleted()) {
 							if (config.getFactoryPid() != null) {
-								configurationAdminFactory.log(LogService.LOG_WARNING,
-										"Configuration for " + Constants.SERVICE_PID + "=" + qualifiedPid //$NON-NLS-1$//$NON-NLS-2$
+								configurationAdminFactory
+										.warn("Configuration for " + Constants.SERVICE_PID + "=" + qualifiedPid //$NON-NLS-1$//$NON-NLS-2$
 												+ " should only be used by a " + ManagedServiceFactory.class.getName()); //$NON-NLS-1$
 							}
 							String location = config.getLocation();
@@ -241,8 +240,8 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 									foundConfig = true;
 									break qualifiedPids;
 								}
-								configurationAdminFactory.log(LogService.LOG_WARNING,
-										"Configuration for " + Constants.SERVICE_PID + "=" + qualifiedPid //$NON-NLS-1$//$NON-NLS-2$
+								configurationAdminFactory
+										.warn("Configuration for " + Constants.SERVICE_PID + "=" + qualifiedPid //$NON-NLS-1$//$NON-NLS-2$
 												+ " could not be bound to " //$NON-NLS-1$
 												+ ConfigurationAdminImpl.getLocation(reference.getBundle()));
 							}
@@ -292,9 +291,9 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 				} catch (ConfigurationException e) {
 					// we might consider doing more for ConfigurationExceptions
 					Throwable cause = e.getCause();
-					configurationAdminFactory.log(LogService.LOG_ERROR, e.getMessage(), cause != null ? cause : e);
+					configurationAdminFactory.error(e.getMessage(), cause != null ? cause : e);
 				} catch (Throwable t) {
-					configurationAdminFactory.log(LogService.LOG_ERROR, t.getMessage(), t);
+					configurationAdminFactory.error(t.getMessage(), t);
 				}
 			}
 		});

@@ -18,7 +18,6 @@ import java.util.*;
 import org.osgi.framework.*;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
-import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -229,8 +228,8 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 									asynchUpdated(serviceFactory, config.getPid(), properties);
 									foundConfig = true;
 								} else {
-									configurationAdminFactory.log(LogService.LOG_WARNING,
-											"Configuration for " + Constants.SERVICE_PID + "=" + config.getPid() //$NON-NLS-1$//$NON-NLS-2$
+									configurationAdminFactory
+											.warn("Configuration for " + Constants.SERVICE_PID + "=" + config.getPid() //$NON-NLS-1$//$NON-NLS-2$
 													+ " could not be bound to " //$NON-NLS-1$
 													+ ConfigurationAdminImpl.getLocation(reference.getBundle()));
 								}
@@ -279,7 +278,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 				try {
 					service.deleted(pid);
 				} catch (Throwable t) {
-					configurationAdminFactory.log(LogService.LOG_ERROR, t.getMessage(), t);
+					configurationAdminFactory.error(t.getMessage(), t);
 				}
 			}
 		});
@@ -298,9 +297,9 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 				} catch (ConfigurationException e) {
 					// we might consider doing more for ConfigurationExceptions
 					Throwable cause = e.getCause();
-					configurationAdminFactory.log(LogService.LOG_ERROR, e.getMessage(), cause != null ? cause : e);
+					configurationAdminFactory.error(e.getMessage(), cause != null ? cause : e);
 				} catch (Throwable t) {
-					configurationAdminFactory.log(LogService.LOG_ERROR, t.getMessage(), t);
+					configurationAdminFactory.error(t.getMessage(), t);
 				}
 			}
 		});
