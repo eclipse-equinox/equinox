@@ -98,5 +98,4 @@ else
 	echo "Building $defaultOS launcher. Defaults: -os $DEFAULT_OS -arch $DEFAULT_OS_ARCH -ws $DEFAULT_WS"
 	make -f $makefile clean
 	make -f $makefile all
-	make -f $makefile install
 fi
