@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2024 Cognos Incorporated, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     Cognos Incorporated - initial API and implementation
  *     IBM Corporation - bug fixes and enhancements
+ *     Christoph Läubrich - add support for Coordinator
  *******************************************************************************/
 package org.eclipse.equinox.internal.cm;
 
@@ -202,13 +203,14 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 	@Override
 	public void removedService(ServiceReference<ManagedService> reference, ManagedService service) {
 		untrackManagedService(reference);
-
+		configurationAdminFactory.cancelExecuteCoordinated(service);
 		context.ungetService(reference);
 	}
 
 	private void addReference(ServiceReference<ManagedService> reference, ManagedService service) {
 		List<List<String>> qualifiedPidLists = trackManagedService(reference);
-		updateManagedService(qualifiedPidLists, reference, service);
+		configurationAdminFactory.executeCoordinated(service,
+				() -> updateManagedService(qualifiedPidLists, reference, service));
 	}
 
 	private void updateManagedService(List<List<String>> qualifiedPidLists, ServiceReference<ManagedService> reference,
@@ -283,19 +285,17 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 	}
 
 	private void asynchUpdated(final ManagedService service, final Dictionary<String, ?> properties) {
-		queue.put(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					service.updated(properties);
-				} catch (ConfigurationException e) {
-					// we might consider doing more for ConfigurationExceptions
-					Throwable cause = e.getCause();
-					configurationAdminFactory.error(e.getMessage(), cause != null ? cause : e);
-				} catch (Throwable t) {
-					configurationAdminFactory.error(t.getMessage(), t);
-				}
+		configurationAdminFactory.cancelExecuteCoordinated(service);
+		configurationAdminFactory.executeCoordinated(service, () -> queue.put(() -> {
+			try {
+				service.updated(properties);
+			} catch (ConfigurationException e) {
+				// we might consider doing more for ConfigurationExceptions
+				Throwable cause = e.getCause();
+				configurationAdminFactory.error(e.getMessage(), cause != null ? cause : e);
+			} catch (Throwable t) {
+				configurationAdminFactory.error(t.getMessage(), t);
 			}
-		});
+		}));
 	}
 }
