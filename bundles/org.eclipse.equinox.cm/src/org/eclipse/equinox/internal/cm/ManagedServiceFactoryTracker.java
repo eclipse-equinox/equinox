@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2024 Cognos Incorporated, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     Cognos Incorporated - initial API and implementation
  *     IBM Corporation - bug fixes and enhancements
+ *     Christoph Läubrich - add support for Coordinator
  *******************************************************************************/
 package org.eclipse.equinox.internal.cm;
 
@@ -286,12 +287,12 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 
 	private void asynchUpdated(final ManagedServiceFactory service, final String pid,
 			final Dictionary<String, Object> properties) {
+		configurationAdminFactory.cancelExecuteCoordinated(service);
 		if (properties == null) {
 			return;
 		}
-		queue.put(new Runnable() {
-			@Override
-			public void run() {
+		configurationAdminFactory.executeCoordinated(service, () -> {
+			queue.put(() -> {
 				try {
 					service.updated(pid, properties);
 				} catch (ConfigurationException e) {
@@ -301,7 +302,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 				} catch (Throwable t) {
 					configurationAdminFactory.error(t.getMessage(), t);
 				}
-			}
+			});
 		});
 	}
 }
