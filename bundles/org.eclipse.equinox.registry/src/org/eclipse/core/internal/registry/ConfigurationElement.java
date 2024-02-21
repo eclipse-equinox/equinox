@@ -23,7 +23,9 @@ import org.eclipse.osgi.util.NLS;
  * plug-in manifest.
  */
 public class ConfigurationElement extends RegistryObject {
+
 	static final ConfigurationElement[] EMPTY_ARRAY = new ConfigurationElement[0];
+	private static final String[] EMPTY_STRINGS = new String[0];
 
 	// The id of the parent element. It can be a configuration element or an
 	// extension
@@ -60,7 +62,7 @@ public class ConfigurationElement extends RegistryObject {
 		setObjectId(self);
 		this.contributorId = contributorId;
 		this.name = name;
-		this.propertiesAndValue = propertiesAndValue;
+		this.propertiesAndValue = intern(propertiesAndValue);
 		setRawChildren(children);
 		setExtraDataOffset(extraDataOffset);
 		parentId = parent;
@@ -110,7 +112,24 @@ public class ConfigurationElement extends RegistryObject {
 	}
 
 	void setProperties(String[] value) {
-		propertiesAndValue = value;
+		propertiesAndValue = intern(value);
+	}
+
+	private static String[] intern(String[] a) {
+		if (a == null) {
+			return null;
+		}
+		if (a.length == 0) {
+			return EMPTY_STRINGS;
+		}
+		for (int i = 0; i < a.length; i++) {
+			a[i] = intern(a[i]);
+		}
+		return a;
+	}
+
+	private static String intern(String s) {
+		return s == null ? null : s.intern();
 	}
 
 	protected String[] getPropertiesAndValue() {
@@ -118,6 +137,7 @@ public class ConfigurationElement extends RegistryObject {
 	}
 
 	void setValue(String value) {
+		value = intern(value);
 		if (propertiesAndValue.length == 0) {
 			propertiesAndValue = new String[] { value };
 			return;
