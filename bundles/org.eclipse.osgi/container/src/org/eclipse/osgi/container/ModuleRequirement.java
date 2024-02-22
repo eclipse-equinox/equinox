@@ -15,6 +15,7 @@ package org.eclipse.osgi.container;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import org.eclipse.osgi.internal.container.Capabilities;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.osgi.framework.InvalidSyntaxException;
@@ -24,6 +25,7 @@ import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.resource.Namespace;
+import org.osgi.resource.Requirement;
 
 /**
  * An implementation of {@link BundleRequirement}. This requirement implements
@@ -38,6 +40,7 @@ public class ModuleRequirement implements BundleRequirement {
 	private final Map<String, String> directives;
 	private final Map<String, Object> attributes;
 	private final ModuleRevision revision;
+	private transient int hashCode;
 
 	ModuleRequirement(String namespace, Map<String, String> directives, Map<String, ?> attributes,
 			ModuleRevision revision) {
@@ -151,6 +154,28 @@ public class ModuleRequirement implements BundleRequirement {
 		ModuleRequirement getOriginal() {
 			return ModuleRequirement.this;
 		}
+	}
+
+	@Override
+	public int hashCode() {
+		if (hashCode != 0) {
+			return hashCode;
+		}
+		return hashCode = Objects.hash(namespace, directives, attributes, revision);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj instanceof Requirement) {
+			Requirement other = (Requirement) obj;
+			return Objects.equals(revision, other.getResource()) && Objects.equals(namespace, other.getNamespace())
+					&& Objects.equals(directives, other.getDirectives())
+					&& Objects.equals(attributes, other.getAttributes());
+		}
+		return false;
 	}
 
 }

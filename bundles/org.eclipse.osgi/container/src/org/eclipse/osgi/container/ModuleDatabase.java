@@ -25,6 +25,7 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1084,7 +1085,7 @@ public class ModuleDatabase {
 			}
 
 			// Now persist all the Strings
-			Map<Object, Integer> objectTable = new HashMap<>();
+			Map<Object, Integer> objectTable = new IdentityHashMap<>();
 			allStrings.remove(null);
 			out.writeInt(allStrings.size());
 			for (String string : allStrings) {
