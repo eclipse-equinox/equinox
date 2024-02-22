@@ -18,23 +18,49 @@
  */
 package org.apache.felix.resolver;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.felix.resolver.ResolverImpl.PermutationType;
 import org.apache.felix.resolver.ResolverImpl.ResolveSession;
 import org.apache.felix.resolver.reason.ReasonException;
-import org.apache.felix.resolver.util.*;
+import org.apache.felix.resolver.util.CandidateSelector;
+import org.apache.felix.resolver.util.CopyOnWriteSet;
+import org.apache.felix.resolver.util.OpenHashMap;
+import org.apache.felix.resolver.util.OpenHashMapList;
+import org.apache.felix.resolver.util.OpenHashMapSet;
+import org.apache.felix.resolver.util.ShadowList;
 import org.osgi.framework.Version;
-import org.osgi.framework.namespace.*;
-import org.osgi.resource.*;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.IdentityNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
+import org.osgi.resource.Capability;
+import org.osgi.resource.Requirement;
+import org.osgi.resource.Resource;
+import org.osgi.resource.Wire;
+import org.osgi.resource.Wiring;
 import org.osgi.service.resolver.HostedCapability;
 import org.osgi.service.resolver.ResolutionException;
 import org.osgi.service.resolver.ResolveContext;
 
 class Candidates
 {
+
+	private static final boolean USE_REQUIREMENTS_EQUALS = Boolean
+			.getBoolean("org.apache.felix.resolver.requirements.equals");
+
     static class PopulateResult {
         boolean success;
         ResolutionError error;
@@ -1227,7 +1253,8 @@ class Candidates
                 // Check if the current candidate is substitutable by the req;
                 // This check is necessary here because of the way we traverse used blames
                 // allows multiple requirements to be permuted in one Candidates
-                if (req.equals(m_subtitutableMap.get(current)))
+				Requirement currentRequirement = m_subtitutableMap.get(current);
+				if (isMatchingRequirement(req, currentRequirement))
                 {
                     // this is a substitute req,
                     // make sure there is not an existing dependency that would fail if we substitute
@@ -1259,6 +1286,25 @@ class Candidates
         }
         return false;
     }
+
+	private boolean isMatchingRequirement(Requirement requirement, Requirement other) {
+		if (USE_REQUIREMENTS_EQUALS) {
+			// only for people who wants slow resolver like before...
+			return Objects.equals(requirement, other);
+		}
+		// Requirements from different resources are never equal, therefore here we
+		// compare them based on their values
+		if (requirement == other) {
+			return true;
+		}
+		if (other != null && requirement != null) {
+			// namespace, directives and attributes should be compared
+			return Objects.equals(requirement.getNamespace(), other.getNamespace())
+					&& Objects.equals(requirement.getDirectives(), other.getDirectives())
+					&& Objects.equals(requirement.getAttributes(), other.getAttributes());
+		}
+		return false;
+	}
 
     static class DynamicImportFailed extends ResolutionError {
 
