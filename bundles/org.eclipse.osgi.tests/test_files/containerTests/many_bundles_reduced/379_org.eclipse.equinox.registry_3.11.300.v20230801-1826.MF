@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.equinox.registry;singleton:=true
+Require-Bundle: org.eclipse.equinox.common;bundle-version="[3.15.100,4.0
+ .0)"
+Import-Package: javax.xml.parsers,org.eclipse.core.runtime.jobs;resoluti
+ on:=optional,org.eclipse.osgi.framework.console;resolution:=optional,or
+ g.eclipse.osgi.service.datalocation,org.eclipse.osgi.service.debug,org.
+ eclipse.osgi.service.environment;resolution:=optional,org.eclipse.osgi.
+ service.localization;version="1.1.0",org.eclipse.osgi.service.resolver;
+ resolution:=optional,org.eclipse.osgi.storagemanager,org.eclipse.osgi.u
+ til,org.osgi.framework,org.osgi.service.packageadmin,org.osgi.util.trac
+ ker,org.xml.sax,org.xml.sax.helpers
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.core.internal.adapter;x-internal:=true,org.e
+ clipse.core.internal.registry;x-friends:="org.eclipse.core.runtime",org
+ .eclipse.core.internal.registry.osgi;x-friends:="org.eclipse.core.runti
+ me",org.eclipse.core.internal.registry.spi;x-internal:=true,org.eclipse
+ .core.runtime;registry=split;version="3.7.0";mandatory:=registry,org.ec
+ lipse.core.runtime.dynamichelpers;version="3.4.0",org.eclipse.core.runt
+ ime.spi;version="3.4.0"
+Bundle-Version: 3.11.300.v20230801-1826
+

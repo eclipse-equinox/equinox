@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.osgi.service.component
+Import-Package: org.osgi.dto;version="[1.0,2)",org.osgi.framework;versio
+ n="[1.8,2)",org.osgi.framework.dto;version="[1.8,2)",org.osgi.service.c
+ omponent.runtime.dto;version="[1.5,2)",org.osgi.util.promise;version="[
+ 1.0,2)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE/compact1)(version
+ =1.8))"
+Export-Package: org.osgi.service.component;version="1.5.1";uses:="org.os
+ gi.framework",org.osgi.service.component.propertytypes;version="1.5",or
+ g.osgi.service.component.runtime;version="1.5";uses:="org.osgi.framewor
+ k,org.osgi.service.component.runtime.dto,org.osgi.util.promise",org.osg
+ i.service.component.runtime.dto;version="1.5";uses:="org.osgi.dto,org.o
+ sgi.framework.dto"
+Bundle-Version: 1.5.1.202212101352
+

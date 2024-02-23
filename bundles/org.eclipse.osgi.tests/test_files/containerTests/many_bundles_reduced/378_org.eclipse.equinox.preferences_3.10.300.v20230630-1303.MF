@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.equinox.preferences; singleton:=true
+Require-Bundle: org.eclipse.equinox.common;bundle-version="[3.18.0,4.0.0
+ )",org.eclipse.equinox.registry;bundle-version="[3.2.0,4.0.0)";resoluti
+ on:=optional,org.osgi.service.prefs;bundle-version="[1.1.0,1.2.0)";visi
+ bility:=reexport
+Import-Package: org.eclipse.osgi.framework.log,org.eclipse.osgi.service.
+ datalocation,org.eclipse.osgi.service.debug,org.eclipse.osgi.service.en
+ vironment,org.eclipse.osgi.util,org.osgi.framework,org.osgi.service.pac
+ kageadmin,org.osgi.util.tracker
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.core.internal.preferences;x-friends:="org.ec
+ lipse.core.resources,org.eclipse.core.runtime,org.eclipse.equinox.p2.en
+ gine",org.eclipse.core.internal.preferences.exchange;x-friends:="org.ec
+ lipse.core.runtime",org.eclipse.core.runtime.preferences;version="3.5.0
+ "
+Bundle-Version: 3.10.300.v20230630-1303
+
