@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.osgi.resource.Capability;
 
 public class CandidateSelector {
@@ -44,6 +43,10 @@ public class CandidateSelector {
     public CandidateSelector copy() {
         return new CandidateSelector(this);
     }
+
+	public CandidateSelector copy(List<Capability> collect) {
+		return new CandidateSelector(collect, isUnmodifiable);
+	}
 
     public int getRemainingCandidateCount() {
         return unmodifiable.size() - currentIndex;
@@ -87,4 +90,9 @@ public class CandidateSelector {
             throw new IllegalStateException("Trying to mutate after candidates have been prepared.");
         }
     }
+
+	public boolean isModifiable() {
+		return !isUnmodifiable.get();
+	}
+
 }

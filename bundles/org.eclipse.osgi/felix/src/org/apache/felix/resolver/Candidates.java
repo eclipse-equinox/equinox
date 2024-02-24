@@ -18,17 +18,44 @@
  */
 package org.apache.felix.resolver;
 
-import java.util.*;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-
+import java.util.stream.Collectors;
 import org.apache.felix.resolver.ResolverImpl.PermutationType;
 import org.apache.felix.resolver.ResolverImpl.ResolveSession;
 import org.apache.felix.resolver.reason.ReasonException;
-import org.apache.felix.resolver.util.*;
+import org.apache.felix.resolver.util.CandidateSelector;
+import org.apache.felix.resolver.util.CopyOnWriteSet;
+import org.apache.felix.resolver.util.OpenHashMap;
+import org.apache.felix.resolver.util.OpenHashMapList;
+import org.apache.felix.resolver.util.OpenHashMapSet;
+import org.apache.felix.resolver.util.ShadowList;
+import org.eclipse.osgi.container.ModuleContainer;
 import org.osgi.framework.Version;
-import org.osgi.framework.namespace.*;
-import org.osgi.resource.*;
+import org.osgi.framework.namespace.BundleNamespace;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.IdentityNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
+import org.osgi.resource.Capability;
+import org.osgi.resource.Requirement;
+import org.osgi.resource.Resource;
+import org.osgi.resource.Wire;
+import org.osgi.resource.Wiring;
 import org.osgi.service.resolver.HostedCapability;
 import org.osgi.service.resolver.ResolutionException;
 import org.osgi.service.resolver.ResolveContext;
@@ -700,6 +727,22 @@ class Candidates
         return null;
     }
 
+	public List<Capability> getCandidatesList(Requirement req) {
+		CandidateSelector candidates = m_candidateMap.get(req);
+		if (candidates != null) {
+			return candidates.getRemainingCandidates();
+		}
+		return Collections.emptyList();
+	}
+
+	public Optional<Capability> getUniqueCandidate(Requirement requirement) {
+		List<Capability> candidatesList = getCandidatesList(requirement);
+		if (candidatesList.size() == 1) {
+			return Optional.of(candidatesList.get(0));
+		}
+		return Optional.empty();
+	}
+
     public Capability getFirstCandidate(Requirement req)
     {
         CandidateSelector candidates = m_candidateMap.get(req);
@@ -710,7 +753,7 @@ class Candidates
         return null;
     }
 
-    public void removeFirstCandidate(Requirement req)
+	public Capability removeFirstCandidate(Requirement req)
     {
         CandidateSelector candidates = m_candidateMap.get(req);
         // Remove the conflicting candidate.
@@ -722,6 +765,7 @@ class Candidates
         // Update the delta with the removed capability
         CopyOnWriteSet<Capability> capPath = m_delta.getOrCompute(req);
         capPath.add(cap);
+		return cap;
     }
 
     public CandidateSelector clearMultipleCardinalityCandidates(Requirement req, Collection<Capability> caps)
@@ -1122,9 +1166,24 @@ class Candidates
         }
     }
 
-    private CandidateSelector removeCandidate(Requirement req, Capability cap) {
+	CandidateSelector removeCandidate(Requirement req, Capability cap) {
         CandidateSelector candidates = m_candidateMap.get(req);
-        candidates.remove(cap);
+		if (candidates != null) {
+			if (candidates.isModifiable()) {
+				candidates.remove(cap);
+			} else {
+				List<Capability> remaining = candidates.getRemainingCandidates().stream().filter(c -> c != cap)
+						.collect(Collectors.toList());
+				if (remaining.isEmpty()) {
+					m_candidateMap.remove(req);
+				} else {
+					candidates = candidates.copy(remaining);
+					m_candidateMap.put(req, candidates);
+				}
+				CopyOnWriteSet<Capability> capPath = m_delta.getOrCompute(req);
+				capPath.add(cap);
+			}
+		}
         return candidates;
     }
 
@@ -1147,7 +1206,15 @@ class Candidates
                 m_delta.deepClone());
     }
 
-    public void dump(ResolveContext rc)
+	/**
+	 * Dump the current candidate set to system out
+	 * 
+	 * @param rc  the resolve context that should be used to look for existing
+	 *            wirings
+	 * @param all if true all requirements are printed, if false only those that
+	 *            have more than one provider
+	 */
+	public void dump(ResolveContext rc, boolean all, PrintStream printStream)
     {
         // Create set of all revisions from requirements.
         Set<Resource> resources = new CopyOnWriteSet<Resource>();
@@ -1157,44 +1224,69 @@ class Candidates
             resources.add(entry.getKey().getResource());
         }
         // Now dump the revisions.
-        System.out.println("=== BEGIN CANDIDATE MAP ===");
+		printStream.println("=== BEGIN CANDIDATE MAP ===");
         for (Resource resource : resources)
         {
-            Wiring wiring = rc.getWirings().get(resource);
-            System.out.println("  " + resource
-                + " (" + ((wiring != null) ? "RESOLVED)" : "UNRESOLVED)"));
-            List<Requirement> reqs = (wiring != null)
-                ? wiring.getResourceRequirements(null)
-                : resource.getRequirements(null);
-            for (Requirement req : reqs)
-            {
-                CandidateSelector candidates = m_candidateMap.get(req);
-                if ((candidates != null) && (!candidates.isEmpty()))
-                {
-                    System.out.println("    " + req + ": " + candidates);
-                }
-            }
-            reqs = (wiring != null)
-                ? Util.getDynamicRequirements(wiring.getResourceRequirements(null))
-                : Util.getDynamicRequirements(resource.getRequirements(null));
-            for (Requirement req : reqs)
-            {
-                CandidateSelector candidates = m_candidateMap.get(req);
-                if ((candidates != null) && (!candidates.isEmpty()))
-                {
-                    System.out.println("    " + req + ": " + candidates);
-                }
-            }
+			dumpResource(resource, rc, all, printStream);
         }
-        System.out.println("=== END CANDIDATE MAP ===");
+		printStream.println("=== END CANDIDATE MAP ===");
     }
+
+	protected void dumpResource(Resource resource, ResolveContext rc, boolean all, PrintStream printStream) {
+		Wiring wiring = rc == null ? null : rc.getWirings().get(resource);
+		List<Requirement> reqs = (wiring != null) ? wiring.getResourceRequirements(null)
+				: resource.getRequirements(null);
+		List<Requirement> dreqs = (wiring != null) ? Util.getDynamicRequirements(wiring.getResourceRequirements(null))
+				: Util.getDynamicRequirements(resource.getRequirements(null));
+		boolean hasMulti = hasMulti(reqs);
+		printStream.println("  " + (hasMulti ? "[?]" : "[!]") + Util.getResourceName(resource) + " ("
+				+ ((wiring != null) ? "RESOLVED)" : "UNRESOLVED)"));
+		if (all || hasMulti) {
+			printRe(reqs, printStream, all);
+			printRe(dreqs, printStream, all);
+		}
+	}
+
+	private boolean hasMulti(List<Requirement> reqs) {
+		for (Requirement req : reqs) {
+			CandidateSelector candidates = m_candidateMap.get(req);
+			if ((candidates != null) && (!candidates.isEmpty())) {
+				List<Capability> remaining = candidates.getRemainingCandidates();
+				if (remaining.size() > 1) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	protected int printRe(List<Requirement> reqs, PrintStream printStream, boolean all) {
+		int dup = 0;
+		for (Requirement req : reqs) {
+			CandidateSelector candidates = m_candidateMap.get(req);
+			if ((candidates != null) && (!candidates.isEmpty())) {
+				List<Capability> remaining = candidates.getRemainingCandidates();
+				boolean hasMulti = remaining.size() > 1;
+				if (all || hasMulti) {
+					dup++;
+					printStream.println("    " + (hasMulti ? "[?]" : "[!]") + ModuleContainer.toString(req) + ": ");
+					for (Capability cap : remaining) {
+						printStream.println("        " + ModuleContainer.toString(cap));
+					}
+				}
+			}
+		}
+		return dup;
+	}
 
     public Candidates permutate(Requirement req)
     {
         if (!Util.isMultiple(req) && canRemoveCandidate(req))
         {
             Candidates perm = copy();
-            perm.removeFirstCandidate(req);
+			Capability candidate = perm.removeFirstCandidate(req);
+//			ProblemReduction.removeUsesViolations(this, candidate, req);
+//			ProblemReduction.removeUsesViolationsForSingletons(this, req.getResource());
             return perm;
         }
         return null;
@@ -1260,6 +1352,14 @@ class Candidates
         return false;
     }
 
+	Collection<Requirement> getDependent(Capability capability) {
+		CopyOnWriteSet<Requirement> set = m_dependentMap.get(capability);
+		if (set == null) {
+			return Collections.emptySet();
+		}
+		return set;
+	}
+    
     static class DynamicImportFailed extends ResolutionError {
 
         private final Requirement requirement;
@@ -1342,5 +1442,68 @@ class Candidates
         }
 
     }
+
+	public Optional<Capability> getSubstitutionPackage(Requirement requirement) {
+		if (PackageNamespace.PACKAGE_NAMESPACE.equals(requirement.getNamespace())) {
+			List<Capability> remainingCandidates = getCandidates(requirement);
+			if (remainingCandidates == null || remainingCandidates.isEmpty()) {
+				// if no candidate, then there can not be substitution detected...
+				return Optional.empty();
+			}
+			// now find out if we have a self export here in the list of candidates ...
+			return remainingCandidates.stream()
+					.filter(cap -> Objects.equals(cap.getResource(), requirement.getResource())).findFirst();
+		}
+		return Optional.empty();
+	}
+
+	/**
+	 * This computes the "implied bundles set", an implied bundle is one that
+	 * <ol>
+	 * <li>is a require-bundle</li>
+	 * <li>marked as reexported dependency</li>
+	 * <li>currently has only one candidate</li>
+	 * <li>is not optional</li>
+	 * </ol>
+	 * because in this case A strictly implies B.
+	 * 
+	 * @param requirement the requirement to compute the set
+	 * @return the set of implied bundles (may be empty but never <code>null</code>)
+	 *         or an empty set if the requirement is not a bundle requirement.
+	 */
+	public Set<Capability> getImpliedBundles(Requirement requirement) {
+		if (BundleNamespace.BUNDLE_NAMESPACE.equals(requirement.getNamespace()) && !Util.isOptional(requirement)) {
+			// for an implication there can only be one candidate, because otherwise A does
+			// not imply B but A implies (B | C | ...) what needs to be solved by a
+			// permutation.
+			Optional<Capability> uniqueCandidate = getUniqueCandidate(requirement);
+			if (uniqueCandidate.isPresent()) {
+				Capability capability = uniqueCandidate.get();
+				Resource resource = capability.getResource();
+				Set<Capability> implied = new HashSet<>();
+				Set<Resource> resources = new HashSet<>();
+				collectReexportedBundles(resource, resources, implied);
+				return implied;
+			}
+		}
+		return Collections.emptySet();
+	}
+
+	private void collectReexportedBundles(Resource resource, Set<Resource> resources, Set<Capability> implied) {
+		if (resources.add(resource)) {
+			for (Requirement requirement : resource.getRequirements(BundleNamespace.BUNDLE_NAMESPACE)) {
+				if (BundleNamespace.VISIBILITY_REEXPORT
+						.equals(requirement.getDirectives().get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE))
+						&& !Util.isOptional(requirement)) {
+					Optional<Capability> candidate = getUniqueCandidate(requirement);
+					if (candidate.isPresent()) {
+						Capability capability = candidate.get();
+						implied.add(capability);
+						collectReexportedBundles(capability.getResource(), resources, implied);
+					}
+				}
+			}
+		}
+	}
 
 }
