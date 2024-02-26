@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.eclipse.osgi.container.ModuleResolver.ResolveProcess.ResolveLogger;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.report.resolution.ResolutionReport;
 import org.osgi.framework.wiring.BundleRevision;
@@ -49,9 +50,12 @@ class ModuleResolutionReport implements ResolutionReport {
 			entries.add(new EntryImpl(type, data));
 		}
 
-		public ModuleResolutionReport build(Map<Resource, List<Wire>> resolutionResult, ResolutionException cause) {
-			return new ModuleResolutionReport(resolutionResult, resourceToEntries, cause);
+		public ModuleResolutionReport build(Map<Resource, List<Wire>> resolutionResult, ResolutionException cause,
+				ResolveLogger logger) {
+			return new ModuleResolutionReport(resolutionResult, resourceToEntries, cause, logger.totalPerm,
+					logger.processedPerm, logger.usesPerm, logger.subPerm, logger.importPerm);
 		}
+
 	}
 
 	static class EntryImpl implements Entry {
@@ -77,9 +81,19 @@ class ModuleResolutionReport implements ResolutionReport {
 	private final Map<Resource, List<Entry>> entries;
 	private final ResolutionException resolutionException;
 	private final Map<Resource, List<Wire>> resolutionResult;
+	private int totalPerm;
+	private int processedPerm;
+	private int usesPerm;
+	private int subPerm;
+	private int importPerm;
 
 	ModuleResolutionReport(Map<Resource, List<Wire>> resolutionResult, Map<Resource, List<Entry>> entries,
-			ResolutionException cause) {
+			ResolutionException cause, int totalPerm, int processedPerm, int usesPerm, int subPerm, int importPerm) {
+		this.totalPerm = totalPerm;
+		this.processedPerm = processedPerm;
+		this.usesPerm = usesPerm;
+		this.subPerm = subPerm;
+		this.importPerm = importPerm;
 		this.entries = entries == null ? Collections.emptyMap() : Collections.unmodifiableMap(new HashMap<>(entries));
 		this.resolutionResult = resolutionResult == null ? Collections.emptyMap()
 				: Collections.unmodifiableMap(resolutionResult);
@@ -175,5 +189,30 @@ class ModuleResolutionReport implements ResolutionReport {
 	@Override
 	public String getResolutionReportMessage(Resource resource) {
 		return getResolutionReport0(null, (ModuleRevision) resource, getEntries(), null);
+	}
+
+	@Override
+	public int getTotalPermutations() {
+		return totalPerm;
+	}
+
+	@Override
+	public int getProcessedPermutations() {
+		return processedPerm;
+	}
+
+	@Override
+	public int getUsesPermutations() {
+		return usesPerm;
+	}
+
+	@Override
+	public int getImportPermutations() {
+		return importPerm;
+	}
+
+	@Override
+	public int getSubstitutionPermutations() {
+		return subPerm;
 	}
 }

@@ -22,7 +22,6 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.felix.resolver.ResolverImpl.PermutationType;
 import org.apache.felix.resolver.ResolverImpl.ResolveSession;
 import org.apache.felix.resolver.reason.ReasonException;
 import org.apache.felix.resolver.util.*;
