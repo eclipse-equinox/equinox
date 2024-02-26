@@ -1981,20 +1981,20 @@ public class TestModuleContainer extends AbstractTest {
 	 */
 	@Test
 	public void testUses5Importer() throws BundleException, IOException {
-		doTestUses5("uses.k.importer.MF");
+		doTestUses5("uses.k.importer.MF", 3);
 	}
 
 	@Test
 	public void testUses5ReqCap() throws BundleException, IOException {
-		doTestUses5("uses.k.reqCap.MF");
+		doTestUses5("uses.k.reqCap.MF", 3);
 	}
 
 	@Test
 	public void testUses5Requirer() throws BundleException, IOException {
-		doTestUses5("uses.k.requirer.MF");
+		doTestUses5("uses.k.requirer.MF", 3);
 	}
 
-	public void doTestUses5(String kManifest) throws BundleException, IOException {
+	public void doTestUses5(String kManifest, int max) throws BundleException, IOException {
 		DummyContainerAdaptor adaptor = createDummyAdaptor();
 		ModuleContainer container = adaptor.getContainer();
 
@@ -2006,12 +2006,13 @@ public class TestModuleContainer extends AbstractTest {
 		Module uses_m_conflict1 = installDummyModule("uses.m.conflict1.MF", "m.conflict1", container);
 		Module uses_m_conflict2 = installDummyModule("uses.m.conflict2.MF", "m.conflict2", container);
 
-		container.resolve(null, false);
+		ResolutionReport report = container.resolve(null, false);
 
 		assertEquals("k should resolve.", State.RESOLVED, uses_k.getState());
 		assertEquals("l should resolve.", State.RESOLVED, uses_l.getState());
 		assertEquals("m.conflict1 should resolve.", State.RESOLVED, uses_m_conflict1.getState());
 		assertEquals("m.conflict2 should resolve.", State.RESOLVED, uses_m_conflict2.getState());
+		assertNotMoreThanPermutationCreated(report, max);
 	}
 
 	@Test
@@ -3929,14 +3930,28 @@ public class TestModuleContainer extends AbstractTest {
 				"osgi.ee; osgi.ee=JavaSE; version:List<Version>=\"1.3, 1.4, 1.5, 1.6, 1.7\"", //
 				container);
 		ResolutionReport report = container.resolve(Arrays.asList(systemBundle), true);
-		assertNull("Failed to resolve test.", report.getResolutionException());
+		assertSucessfulWith(report, 1);
 
 		List<Module> modules = new ArrayList<>();
 		for (String manifest : HTTPCOMPS_AND_EATHER) {
 			modules.add(installDummyModule(manifest, manifest, container));
 		}
 		report = container.resolve(modules, true);
+		assertSucessfulWith(report, 115);
+	}
+
+	protected void assertSucessfulWith(ResolutionReport report, int maxTotalPermutations) {
 		assertNull("Failed to resolve test.", report.getResolutionException());
+		assertNotMoreThanPermutationCreated(report, maxTotalPermutations);
+	}
+
+	protected void assertNotMoreThanPermutationCreated(ResolutionReport report, int maxTotal) {
+		int totalPermutations = report.getTotalPermutations();
+		if (totalPermutations > maxTotal) {
+			fail("Maximum of " + maxTotal + " permutations expected but was " + totalPermutations + " ("
+					+ report.getProcessedPermutations() + " processed).");
+		}
+		return;
 	}
 
 	@Test

@@ -15,6 +15,8 @@ package org.eclipse.osgi.report.resolution;
 
 import java.util.List;
 import java.util.Map;
+import org.eclipse.pde.api.tools.annotations.NoImplement;
+import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.resource.Resource;
 import org.osgi.service.resolver.ResolutionException;
@@ -96,6 +98,8 @@ import org.osgi.service.resolver.ResolutionException;
  * 
  * @since 3.10
  */
+@ProviderType
+@NoImplement
 public interface ResolutionReport {
 	public interface Entry {
 		enum Type {
@@ -193,4 +197,38 @@ public interface ResolutionReport {
 	 * @return a resolution report message.
 	 */
 	String getResolutionReportMessage(Resource resource);
+
+	/**
+	 * @return the number of permutations created to solve the problem or -1 if
+	 *         unknown
+	 * @since 3.20
+	 */
+	int getTotalPermutations();
+
+	/**
+	 * @return the number of processed permutations -1 if unknown
+	 * @since 3.20
+	 */
+	int getProcessedPermutations();
+
+	/**
+	 * @return the number of permutations cause by a use-constraint violation -1 if
+	 *         unknown
+	 * @since 3.20
+	 */
+	int getUsesPermutations();
+
+	/**
+	 * @return the number of permutations cause by a package substitution or -1 if
+	 *         unknown
+	 * @since 3.20
+	 */
+	int getSubstitutionPermutations();
+
+	/**
+	 * @return the number of permutations cause by a different package provider
+	 *         selected or -1 if unknown
+	 * @since 3.20
+	 */
+	int getImportPermutations();
 }

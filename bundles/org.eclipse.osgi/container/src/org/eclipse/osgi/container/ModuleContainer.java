@@ -38,7 +38,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import org.eclipse.osgi.container.Module.StartOptions;
 import org.eclipse.osgi.container.Module.State;
 import org.eclipse.osgi.container.Module.StopOptions;
@@ -651,7 +650,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 	private ResolutionReport resolve(Collection<Module> triggers, boolean triggersMandatory, boolean restartTriggers) {
 		if (isRefreshingSystemModule()) {
 			return new ModuleResolutionReport(null, Collections.emptyMap(),
-					new ResolutionException("Unable to resolve while shutting down the framework.")); //$NON-NLS-1$
+					new ResolutionException("Unable to resolve while shutting down the framework."), -1, -1, -1, -1, //$NON-NLS-1$
+					-1);
 		}
 		ResolutionReport report = null;
 		try (ResolutionLock.Permits resolutionPermits = _resolutionLock.acquire(1)) {
@@ -664,7 +664,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 						if (be.getType() == BundleException.REJECTED_BY_HOOK
 								|| be.getType() == BundleException.STATECHANGE_ERROR) {
 							return new ModuleResolutionReport(null, Collections.emptyMap(),
-									new ResolutionException(be));
+									new ResolutionException(be), -1, -1, -1, -1, -1);
 						}
 					}
 					throw e;
@@ -672,7 +672,8 @@ public final class ModuleContainer implements DebugOptionsListener {
 			} while (report == null);
 		} catch (ResolutionLockException e) {
 			return new ModuleResolutionReport(null, Collections.emptyMap(),
-					new ResolutionException("Timeout acquiring lock for resolution", e, Collections.emptyList())); //$NON-NLS-1$
+					new ResolutionException("Timeout acquiring lock for resolution", e, Collections.emptyList()), -1, //$NON-NLS-1$
+					-1, -1, -1, -1);
 		}
 		return report;
 	}
@@ -1341,7 +1342,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 		if (!isRefreshingSystemModule()) {
 			return resolve(refreshTriggers, false, true);
 		}
-		return new ModuleResolutionReport(null, null, null);
+		return new ModuleResolutionReport(null, null, null, -1, -1, -1, -1, -1);
 	}
 
 	/**
