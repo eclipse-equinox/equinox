@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.osgi" version="2">
+    <resource path="supplement/src/org/eclipse/osgi/report/resolution/ResolutionReport.java" type="org.eclipse.osgi.report.resolution.ResolutionReport">
+        <filter id="403853384">
+            <message_arguments>
+                <message_argument value="@noimplement"/>
+                <message_argument value="org.eclipse.osgi.report.resolution.ResolutionReport"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>

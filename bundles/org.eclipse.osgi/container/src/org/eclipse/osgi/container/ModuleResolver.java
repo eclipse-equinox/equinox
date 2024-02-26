@@ -37,7 +37,10 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.ToIntFunction;
+import java.util.stream.Collectors;
 import org.apache.felix.resolver.Logger;
+import org.apache.felix.resolver.PermutationType;
 import org.apache.felix.resolver.ResolutionError;
 import org.apache.felix.resolver.ResolverImpl;
 import org.eclipse.osgi.container.ModuleRequirement.DynamicModuleRequirement;
@@ -89,11 +92,13 @@ final class ModuleResolver {
 	private static final String OPTION_USES = OPTION_RESOLVER + "/uses"; //$NON-NLS-1$
 	private static final String OPTION_WIRING = OPTION_RESOLVER + "/wiring"; //$NON-NLS-1$
 	private static final String OPTION_REPORT = OPTION_RESOLVER + "/report"; //$NON-NLS-1$
+	private static final String OPTION_PERMUTATION = OPTION_RESOLVER + "/permutation"; //$NON-NLS-1$
 
 	boolean DEBUG_ROOTS = false;
 	boolean DEBUG_PROVIDERS = false;
 	boolean DEBUG_HOOKS = false;
 	boolean DEBUG_USES = false;
+	boolean DEBUG_PERMUTATIONS = false;
 	boolean DEBUG_WIRING = false;
 	boolean DEBUG_REPORT = false;
 
@@ -115,6 +120,7 @@ final class ModuleResolver {
 		DEBUG_USES = debugAll || options.getBooleanOption(OPTION_USES, false);
 		DEBUG_WIRING = debugAll || options.getBooleanOption(OPTION_WIRING, false);
 		DEBUG_REPORT = debugAll || options.getBooleanOption(OPTION_REPORT, false);
+		DEBUG_PERMUTATIONS = debugAll || options.getBooleanOption(OPTION_PERMUTATION, false);
 	}
 
 	static final Collection<String> NON_PAYLOAD_CAPABILITIES = Arrays.asList(IdentityNamespace.IDENTITY_NAMESPACE);
@@ -470,6 +476,9 @@ final class ModuleResolver {
 
 		class ResolveLogger extends Logger {
 			private Map<Resource, ResolutionException> errors = null;
+			public int totalPerm;
+			public int processedPerm;
+			public int usesPerm;
 
 			public ResolveLogger() {
 				super(DEBUG_USES ? Logger.LOG_DEBUG : 0);
@@ -508,6 +517,27 @@ final class ModuleResolver {
 			protected void doLog(int level, String msg, Throwable throwable) {
 				Debug.println("RESOLVER: " + msg + SEPARATOR //$NON-NLS-1$
 						+ (throwable != null ? (TAB + TAB + throwable.getMessage()) : "")); //$NON-NLS-1$
+			}
+
+			@Override
+			public void logPermutationAdded(PermutationType type, ToIntFunction<PermutationType> remaining) {
+				totalPerm++;
+				if (type == PermutationType.USES) {
+					usesPerm++;
+				}
+			}
+
+			PermutationType[] permutationTypes = PermutationType.values();
+
+			@Override
+			public void logProcessPermutation(PermutationType type, ToIntFunction<PermutationType> remaining) {
+				processedPerm++;
+				if (DEBUG_PERMUTATIONS) {
+					Debug.println(
+							"RESOLVER: Process " + type + " permutation remaining: " + SEPARATOR + TAB //$NON-NLS-1$ //$NON-NLS-2$
+									+ Arrays.stream(permutationTypes).map(t -> t + ": " + remaining.applyAsInt(t)) //$NON-NLS-1$
+											.collect(Collectors.joining(SEPARATOR + TAB)));
+				}
 			}
 
 		}
@@ -918,7 +948,7 @@ final class ModuleResolver {
 						BundleException be = (BundleException) e.getCause();
 						if (be.getType() == BundleException.REJECTED_BY_HOOK) {
 							return new ModuleResolutionReport(null, Collections.emptyMap(),
-									new ResolutionException(be));
+									new ResolutionException(be), -1, -1, -1);
 						}
 					}
 					throw e;
@@ -962,7 +992,7 @@ final class ModuleResolver {
 					if (DEBUG_WIRING) {
 						printWirings(result);
 					}
-					report = reportBuilder.build(result, re);
+					report = reportBuilder.build(result, re, logger.totalPerm, logger.processedPerm, logger.usesPerm);
 					if (DEBUG_REPORT) {
 						if (report.getResolutionException() != null) {
 							Debug.printStackTrace(report.getResolutionException());

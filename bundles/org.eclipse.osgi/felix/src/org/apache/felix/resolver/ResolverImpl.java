@@ -23,7 +23,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
-
+import java.util.function.ToIntFunction;
 import org.apache.felix.resolver.reason.ReasonException;
 import org.apache.felix.resolver.util.ArrayMap;
 import org.apache.felix.resolver.util.CandidateSelector;
@@ -44,12 +44,6 @@ public class ResolverImpl implements Resolver
     private final int m_parallelism;
 
     private final Executor m_executor;
-
-    enum PermutationType {
-        USES,
-        IMPORT,
-        SUBSTITUTE
-    }
 
     // Note this class is not thread safe.
     // Only use in the context of a single thread.
@@ -91,10 +85,24 @@ public class ResolverImpl implements Resolver
         private final ConcurrentMap<String, List<String>> m_usesCache = new ConcurrentHashMap<String, List<String>>();
         private ResolutionError m_currentError;
         volatile private CancellationException m_isCancelled = null;
+        private final Logger logger;
+        private final ToIntFunction<PermutationType> remaining = type -> {
+            switch (type) {
+            case USES:
+                return m_usesPermutations.size();
+            case IMPORT:
+                return m_importPermutations.size();
+            case SUBSTITUTE:
+                return m_substPermutations.size();
+            }
+            return 0;
+        };
 
-        static ResolveSession createSession(ResolveContext resolveContext, Executor executor, Resource dynamicHost, Requirement dynamicReq, List<Capability> dynamicCandidates)
+        static ResolveSession createSession(ResolveContext resolveContext, Executor executor, Resource dynamicHost,
+                Requirement dynamicReq, List<Capability> dynamicCandidates, Logger logger)
         {
-            ResolveSession session = new ResolveSession(resolveContext, executor, dynamicHost, dynamicReq, dynamicCandidates);
+            ResolveSession session = new ResolveSession(resolveContext, executor, dynamicHost, dynamicReq,
+                    dynamicCandidates, logger);
             // call onCancel first
             session.getContext().onCancel(session);
             // now gather the mandatory and optional resources
@@ -102,13 +110,15 @@ public class ResolverImpl implements Resolver
             return session;
         }
 
-        private ResolveSession(ResolveContext resolveContext, Executor executor, Resource dynamicHost, Requirement dynamicReq, List<Capability> dynamicCandidates)
+        private ResolveSession(ResolveContext resolveContext, Executor executor, Resource dynamicHost,
+                Requirement dynamicReq, List<Capability> dynamicCandidates, Logger logger)
         {
             m_resolveContext = resolveContext;
             m_executor = executor;
             m_dynamicHost = dynamicHost;
             m_dynamicReq = dynamicReq;
             m_dynamicCandidates = dynamicCandidates;
+            this.logger = logger;
             if (m_dynamicHost != null) {
                 m_mandatoryResources = Collections.singletonList(dynamicHost);
                 m_optionalResources = Collections.emptyList();
@@ -186,29 +196,34 @@ public class ResolverImpl implements Resolver
                             m_substPermutations.add(m_substituteIndex++, permutation);
                             break;
                         default :
-                            throw new IllegalArgumentException("Unknown permitation type: " + type);
+                            throw new IllegalArgumentException("Unknown permutation type: " + type);
                     }
                 } catch (IndexOutOfBoundsException e) {
                     // just a safeguard, this really should never happen
                     typeToAddTo.add(permutation);
                 }
+                logger.logPermutationAdded(type, remaining);
             }
         }
 
         Candidates getNextPermutation() {
             Candidates next = null;
+            PermutationType type;
             do {
                 if (!m_usesPermutations.isEmpty())
                 {
                     next = m_usesPermutations.remove(0);
+                    type = PermutationType.USES;
                 }
                 else if (!m_importPermutations.isEmpty())
                 {
                     next = m_importPermutations.remove(0);
+                    type = PermutationType.IMPORT;
                 }
                 else if (!m_substPermutations.isEmpty())
                 {
                     next = m_substPermutations.remove(0);
+                    type = PermutationType.SUBSTITUTE;
                 }
                 else {
                     return null;
@@ -222,6 +237,8 @@ public class ResolverImpl implements Resolver
             // clear mutateIndexes also so we insert new permutations
             // based of this permutation as a higher priority
             clearMutateIndexes();
+
+            logger.logProcessPermutation(type, remaining);
             return next;
         }
 
@@ -416,7 +433,7 @@ public class ResolverImpl implements Resolver
 
     public Map<Resource, List<Wire>> resolve(ResolveContext rc, Executor executor) throws ResolutionException
     {
-        ResolveSession session = ResolveSession.createSession(rc, executor, null, null, null);
+        ResolveSession session = ResolveSession.createSession(rc, executor, null, null, null, m_logger);
         return doResolve(session);
     }
 
@@ -667,7 +684,8 @@ public class ResolverImpl implements Resolver
                         "Matching candidate does not provide a package name.");
                 }
             }
-            ResolveSession session = ResolveSession.createSession(context,  new DumbExecutor(), host, dynamicRequirement, matches);
+            ResolveSession session = ResolveSession.createSession(context, new DumbExecutor(), host, dynamicRequirement,
+                    matches, m_logger);
             return doResolve(session);
         }
 
