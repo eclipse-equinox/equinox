@@ -929,18 +929,7 @@ class Candidates
                             // matter if they come from the host or fragment,
                             // since we are completing replacing the declaring
                             // host and fragments with the wrapped host.
-                            CandidateSelector cands = m_candidateMap.get(r);
-                            ShadowList shadow;
-                            if (!(cands instanceof ShadowList))
-                            {
-                                shadow = ShadowList.createShadowList(cands);
-                                m_candidateMap.put(r, shadow);
-                                cands = shadow;
-                            }
-                            else
-                            {
-                                shadow = (ShadowList) cands;
-                            }
+                            ShadowList shadow = getShadowList(r);
 
                             // If the original capability is from a fragment, then
                             // ask the ResolveContext to insert it and update the
@@ -986,6 +975,16 @@ class Candidates
         m_candidateSelectorsUnmodifiable.set(true);
         return null;
     }
+
+	protected ShadowList getShadowList(Requirement r) {
+		CandidateSelector cands = m_candidateMap.get(r);
+		if (cands instanceof ShadowList) {
+			return (ShadowList) cands;
+		}
+		ShadowList shadow = ShadowList.createShadowList(cands);
+		m_candidateMap.put(r, shadow);
+		return shadow;
+	}
 
     // Maps a host capability to a map containing its potential fragments;
     // the fragment map maps a fragment symbolic name to a map that maps
