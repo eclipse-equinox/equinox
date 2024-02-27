@@ -22,13 +22,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.osgi.resource.Capability;
 
 public class CandidateSelector {
     protected final AtomicBoolean isUnmodifiable;
     protected final List<Capability> unmodifiable;
-    private int currentIndex = 0;
+	protected int currentIndex = 0;
 
     public CandidateSelector(List<Capability> candidates, AtomicBoolean isUnmodifiable) {
         this.isUnmodifiable = isUnmodifiable;
