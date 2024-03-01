@@ -15,6 +15,8 @@
 
 package org.eclipse.osgi.storage;
 
+import static org.eclipse.osgi.service.environment.Constants.OS_ZOS;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +34,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
 import java.util.stream.Stream;
+
 import org.eclipse.osgi.framework.internal.reliablefile.ReliableFile;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.osgi.framework.BundleContext;
@@ -139,12 +142,18 @@ public class StorageUtil {
 		return context.registerService(name, service, properties);
 	}
 
-	public static boolean canWrite(File installDir) {
-		if (!installDir.isDirectory())
+	public static boolean canWrite(File installDir, String os) {
+		if (!installDir.isDirectory()) {
 			return false;
+		}
 
-		if (Files.isWritable(installDir.toPath()))
+		if (Files.isWritable(installDir.toPath())) {
 			return true;
+		} else if (OS_ZOS.equals(os)) {
+			// For z/OS avoid doing the windows specific .dll check below.
+			// This causes additional alarms on z/OS for unauthorized attempts to write.
+			return false;
+		}
 
 		File fileTest = null;
 		try {
@@ -153,8 +162,8 @@ public class StorageUtil {
 			// like "Program Files"
 			fileTest = ReliableFile.createTempFile("writableArea", ".dll", installDir); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (IOException e) {
-			// If an exception occured while trying to create the file, it means that it is
-			// not writtable
+			// If an exception occurred while trying to create the file, it means that it is
+			// not writable
 			return false;
 		} finally {
 			if (fileTest != null)
