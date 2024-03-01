@@ -18,17 +18,47 @@
  *******************************************************************************/
 package org.eclipse.equinox.launcher;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.net.URLConnection;
+import java.net.URLDecoder;
+import java.net.URLStreamHandlerFactory;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.*;
-import java.util.*;
+import java.security.AllPermission;
+import java.security.CodeSource;
+import java.security.Permission;
+import java.security.PermissionCollection;
+import java.security.Policy;
+import java.security.ProtectionDomain;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.StringJoiner;
+import java.util.StringTokenizer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
 import org.eclipse.equinox.internal.launcher.Constants;
 
 /**
@@ -715,7 +745,7 @@ public class Main {
 				return false;
 			}
 		}
-		if (!canWrite(configDir)) {
+		if (!canWrite(configDir, getOS())) {
 			System.setProperty(PROP_EXITCODE, "15"); //$NON-NLS-1$
 			System.setProperty(PROP_EXITDATA, "<title>Invalid Configuration Location</title>The configuration area at '" + configDir + //$NON-NLS-1$
 					"' is not writable.  Please choose a writable location using the '-configuration' command line option."); //$NON-NLS-1$
@@ -1273,19 +1303,24 @@ public class Main {
 		// TODO a little dangerous here.  Basically we have to assume that it is a file URL.
 		if (install.getProtocol().equals("file")) { //$NON-NLS-1$
 			File installDir = new File(install.getFile());
-			if (canWrite(installDir))
+			if (canWrite(installDir, getOS()))
 				return installDir.getAbsolutePath() + File.separator + CONFIG_DIR;
 		}
 		// We can't write in the eclipse install dir so try for some place in the user's home dir
 		return computeDefaultUserAreaLocation(CONFIG_DIR);
 	}
 
-	private static boolean canWrite(File installDir) {
+	private static boolean canWrite(File installDir, String os) {
 		if (!installDir.isDirectory())
 			return false;
 
-		if (Files.isWritable(installDir.toPath()))
+		if (Files.isWritable(installDir.toPath())) {
 			return true;
+		} else if (Constants.OS_ZOS.equals(os)) {
+			// For z/OS avoid doing the windows specific .dll check below.
+			// This causes additional alarms on z/OS for unauthorized attempts to write.
+			return false;
+		}
 
 		File fileTest = null;
 		try {
@@ -1320,7 +1355,7 @@ public class Main {
 		File installDir = new File(installURL.getFile());
 		String installDirHash = getInstallDirHash();
 
-		if (protectBase && Constants.OS_MACOSX.equals(os)) {
+		if (protectBase && Constants.OS_MACOSX.equals(getOS())) {
 			initializeBridgeEarly();
 			String macConfiguration = computeConfigurationLocationForMacOS();
 			if (macConfiguration != null) {

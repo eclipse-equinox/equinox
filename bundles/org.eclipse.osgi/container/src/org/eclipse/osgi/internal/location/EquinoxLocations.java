@@ -23,6 +23,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration.ConfigValues;
@@ -205,7 +206,8 @@ public class EquinoxLocations {
 		// put the instance area inside the workspace meta area.
 		if (location == null)
 			return new BasicLocation(property, defaultLocation,
-					userReadOnlySetting != null || !computeReadOnly ? readOnly : !canWrite(defaultLocation),
+					userReadOnlySetting != null || !computeReadOnly ? readOnly
+							: !canWrite(defaultLocation, getOS()),
 					dataAreaPrefix, equinoxConfig, container, debugLocations);
 		String trimmedLocation = location.trim();
 		if (trimmedLocation.equalsIgnoreCase(NONE))
@@ -232,7 +234,9 @@ public class EquinoxLocations {
 		BasicLocation result = null;
 		if (url != null) {
 			result = new BasicLocation(property, null,
-					userReadOnlySetting != null || !computeReadOnly ? readOnly : !canWrite(url), dataAreaPrefix,
+					userReadOnlySetting != null || !computeReadOnly ? readOnly
+							: !canWrite(url, getOS()),
+					dataAreaPrefix,
 					equinoxConfig, container, debugLocations);
 			result.setURL(url, false);
 		}
@@ -289,7 +293,7 @@ public class EquinoxLocations {
 			File defaultConfigDir = new File(installDir, CONFIG_DIR);
 			if (!defaultConfigDir.exists())
 				defaultConfigDir.mkdirs();
-			if (defaultConfigDir.exists() && StorageUtil.canWrite(defaultConfigDir))
+			if (defaultConfigDir.exists() && StorageUtil.canWrite(defaultConfigDir, getOS()))
 				return defaultConfigDir.getAbsolutePath();
 		}
 		// We can't write in the eclipse install dir so try for some place in the user's
@@ -297,12 +301,16 @@ public class EquinoxLocations {
 		return computeDefaultUserAreaLocation(CONFIG_DIR);
 	}
 
-	private static boolean canWrite(URL location) {
+	private String getOS() {
+		return equinoxConfig.getConfiguration(EquinoxConfiguration.PROP_OSGI_OS);
+	}
+
+	private static boolean canWrite(URL location, String os) {
 		if (location != null && "file".equals(location.getProtocol())) { //$NON-NLS-1$
 			File locationDir = new File(location.getPath());
 			if (!locationDir.exists())
 				locationDir.mkdirs();
-			if (locationDir.exists() && StorageUtil.canWrite(locationDir))
+			if (locationDir.exists() && StorageUtil.canWrite(locationDir, os))
 				return true;
 		}
 		return false;
