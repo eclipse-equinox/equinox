@@ -58,6 +58,7 @@ public class SystemBundleActivator implements BundleActivator {
 	private EquinoxFactoryManager urlFactoryManager;
 	private List<ServiceRegistration<?>> registrations = new ArrayList<>(10);
 	private SecurityManager setSecurityManagner;
+	private EventForwarder eventForwarder;
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -134,6 +135,7 @@ public class SystemBundleActivator implements BundleActivator {
 		props.put(DebugOptions.LISTENER_SYMBOLICNAME, EquinoxContainer.NAME);
 		register(bc, DebugOptionsListener.class, bundle.getEquinoxContainer().getConfiguration().getDebug(), props);
 		register(bc, DebugOptionsListener.class, bundle.getModule().getContainer(), props);
+		eventForwarder = EventForwarder.create(bc);
 	}
 
 	private void installSecurityManager(EquinoxConfiguration configuration) throws BundleException {
@@ -224,6 +226,9 @@ public class SystemBundleActivator implements BundleActivator {
 		bundle.getEquinoxContainer().getLogServices().stop(bc);
 		unintallSecurityManager();
 		bundle.getEquinoxContainer().systemStop(bc);
+		if (eventForwarder != null) {
+			eventForwarder.close();
+		}
 	}
 
 	private void unintallSecurityManager() {
