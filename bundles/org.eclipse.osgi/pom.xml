@@ -34,7 +34,7 @@
         <version>${tycho.version}</version>
         <configuration>
           <compilerArgs>
-            <arg>-nowarn:[${project.basedir}/osgi/src${path.separator}${project.basedir}/felix/src]</arg>
+            <arg>-nowarn:[${project.basedir}/osgi/src${path.separator}${project.basedir}/felix/src${path.separator}${project.basedir}/felix/src_test]</arg>
           </compilerArgs>
         </configuration>
       </plugin>
@@ -55,7 +55,35 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-surefire-plugin</artifactId>
+			<executions>
+				<execution>
+					<id>execute-tests</id>
+					<goals>
+						<goal>test</goal>
+					</goals>
+				</execution>
+			</executions>
+		</plugin>
     </plugins>
   </build>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>5.11.0</version>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
 
 </project>
