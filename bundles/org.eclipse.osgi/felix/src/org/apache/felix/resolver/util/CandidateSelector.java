@@ -68,6 +68,16 @@ public class CandidateSelector {
         return current;
     }
 
+	public CandidateSelector replace(Capability origCap, Capability c) {
+		int idx = unmodifiable.indexOf(origCap);
+		if (idx < 0) {
+			return this;
+		}
+		List<Capability> list = new ArrayList<Capability>(unmodifiable);
+		list.set(idx, c);
+		return new CandidateSelector(list, isUnmodifiable);
+	}
+
     public String toString() {
         return getRemainingCandidates().toString();
     }

@@ -929,13 +929,13 @@ class Candidates
                             // matter if they come from the host or fragment,
                             // since we are completing replacing the declaring
                             // host and fragments with the wrapped host.
-                            ShadowList shadow = getShadowList(r);
 
                             // If the original capability is from a fragment, then
                             // ask the ResolveContext to insert it and update the
                             // shadow copy of the list accordingly.
                             if (!origCap.getResource().equals(hostResource.getDeclaredResource()))
                             {
+                            	ShadowList shadow = getShadowList(r);
                                 shadow.insertHostedCapability(
                                         m_session.getContext(),
                                         (HostedCapability) c,
@@ -947,7 +947,8 @@ class Candidates
                             // we just need to replace it in the shadow list.
                             else
                             {
-                                shadow.replace(origCap, c);
+                            	CandidateSelector cands = m_candidateMap.get(r);
+								m_candidateMap.put(r, cands.replace(origCap, c));
                             }
                         }
                     }

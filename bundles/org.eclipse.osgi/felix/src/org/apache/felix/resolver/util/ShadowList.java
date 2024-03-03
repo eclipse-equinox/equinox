@@ -71,14 +71,4 @@ public class ShadowList extends CandidateSelector
         unmodifiable.add(insertIdx, wrappedCapability);
     }
 
-    public void replace(Capability origCap, Capability c) {
-        checkModifiable();
-		if (currentIndex != 0) {
-			throw new IllegalStateException("modifiable but index != 0??");
-		}
-        int idx = unmodifiable.indexOf(origCap);
-        unmodifiable.set(idx, c);
-        
-		throw new IllegalStateException("replace was hit!");
-    }
 }
