@@ -1,4 +1,5 @@
 /*/*/bin/
+bin_test
 /bundles/archived/*/bin/
 .DS_Store
 
