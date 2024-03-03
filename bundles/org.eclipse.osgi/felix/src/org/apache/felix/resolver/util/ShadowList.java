@@ -78,5 +78,7 @@ public class ShadowList extends CandidateSelector
 		}
         int idx = unmodifiable.indexOf(origCap);
         unmodifiable.set(idx, c);
+        
+		throw new IllegalStateException("replace was hit!");
     }
 }
