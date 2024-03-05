@@ -40,7 +40,6 @@ import org.apache.felix.resolver.util.CopyOnWriteSet;
 import org.apache.felix.resolver.util.OpenHashMap;
 import org.apache.felix.resolver.util.OpenHashMapList;
 import org.apache.felix.resolver.util.OpenHashMapSet;
-import org.apache.felix.resolver.util.ShadowList;
 import org.osgi.framework.Version;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.namespace.IdentityNamespace;
@@ -863,13 +862,7 @@ class Candidates
                 CandidateSelector cands = m_candidateMap.get(origReq);
                 if (cands != null)
                 {
-                    if (cands instanceof ShadowList)
-                    {
-						// m_candidateMap.put(r, ShadowList.deepCopy((ShadowList) cands));
-						throw new IllegalStateException("Shaddow list in candidates?!?!");
-                    } else {
                         m_candidateMap.put(r, cands.copy());
-                    }
                     for (Capability cand : cands.getRemainingCandidates())
                     {
                         Set<Requirement> dependents = m_dependentMap.get(cand);
@@ -935,13 +928,13 @@ class Candidates
                             // shadow copy of the list accordingly.
                             if (!origCap.getResource().equals(hostResource.getDeclaredResource()))
                             {
-                            	ShadowList shadow = getShadowList(r);
-                                shadow.insertHostedCapability(
+								CandidateSelector cands = m_candidateMap.get(r);
+								m_candidateMap.put(r, cands.insertHostedCapability(
                                         m_session.getContext(),
                                         (HostedCapability) c,
                                         new SimpleHostedCapability(
                                                 hostResource.getDeclaredResource(),
-                                                origCap));
+												origCap)));
                             }
                             // If the original capability is from the host, then
                             // we just need to replace it in the shadow list.
@@ -977,15 +970,15 @@ class Candidates
         return null;
     }
 
-	protected ShadowList getShadowList(Requirement r) {
-		CandidateSelector cands = m_candidateMap.get(r);
-		if (cands instanceof ShadowList) {
-			return (ShadowList) cands;
-		}
-		ShadowList shadow = ShadowList.createShadowList(cands);
-		m_candidateMap.put(r, shadow);
-		return shadow;
-	}
+//	protected ShadowList getShadowList(Requirement r) {
+//		CandidateSelector cands = m_candidateMap.get(r);
+//		if (cands instanceof ShadowList) {
+//			return (ShadowList) cands;
+//		}
+//		ShadowList shadow = ShadowList.createShadowList(cands);
+//		m_candidateMap.put(r, shadow);
+//		return shadow;
+//	}
 
     // Maps a host capability to a map containing its potential fragments;
     // the fragment map maps a fragment symbolic name to a map that maps

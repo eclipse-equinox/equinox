@@ -23,6 +23,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.resource.Capability;
+import org.osgi.service.resolver.HostedCapability;
+import org.osgi.service.resolver.ResolveContext;
 
 public class CandidateSelector {
     protected final AtomicBoolean isUnmodifiable;
@@ -53,8 +55,15 @@ public class CandidateSelector {
     }
 
     public List<Capability> getRemainingCandidates() {
-        return Collections.unmodifiableList(unmodifiable.subList(currentIndex, unmodifiable.size()));
+		return Collections.unmodifiableList(getRemainingView());
     }
+
+	private List<Capability> getRemainingView() {
+		if (currentIndex == 0) {
+			return unmodifiable;
+		}
+		return unmodifiable.subList(currentIndex, unmodifiable.size());
+	}
 
     public boolean isEmpty() {
         return unmodifiable.size() <= currentIndex;
@@ -69,11 +78,12 @@ public class CandidateSelector {
     }
 
 	public CandidateSelector replace(Capability origCap, Capability c) {
-		int idx = unmodifiable.indexOf(origCap);
+		List<Capability> view = getRemainingView();
+		int idx = view.indexOf(origCap);
 		if (idx < 0) {
 			return this;
 		}
-		List<Capability> list = new ArrayList<Capability>(unmodifiable);
+		List<Capability> list = new ArrayList<Capability>(view);
 		list.set(idx, c);
 		return new CandidateSelector(list, isUnmodifiable);
 	}
@@ -90,6 +100,33 @@ public class CandidateSelector {
         }
         return index;
     }
+
+//    public void insertHostedCapability(ResolveContext context, HostedCapability wrappedCapability, HostedCapability toInsertCapability) {
+//        checkModifiable();
+//		if (currentIndex != 0) {
+//			throw new IllegalStateException("modifiable but index != 0??");
+//		}
+//        int removeIdx = m_original.indexOf(toInsertCapability.getDeclaredCapability());
+//        if (removeIdx != -1)
+//        {
+//            m_original.remove(removeIdx);
+//            unmodifiable.remove(removeIdx);
+//        }
+//        int insertIdx = context.insertHostedCapability(m_original, toInsertCapability);
+//        unmodifiable.add(insertIdx, wrappedCapability);
+//    }
+
+	public CandidateSelector insertHostedCapability(ResolveContext context, HostedCapability wrappedCapability,
+			HostedCapability toInsertCapability) {
+		List<Capability> list = new ArrayList<Capability>(getRemainingView());
+		int removeIdx = list.indexOf(toInsertCapability.getDeclaredCapability());
+		if (removeIdx != -1) {
+			list.remove(removeIdx);
+		}
+		int insertIdx = context.insertHostedCapability(list, toInsertCapability);
+		list.add(insertIdx, wrappedCapability);
+		return new CandidateSelector(list, isUnmodifiable);
+	}
 
     protected void checkModifiable() {
         if (isUnmodifiable.get()) {
