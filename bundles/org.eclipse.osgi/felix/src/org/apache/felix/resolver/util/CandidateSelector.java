@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.osgi.resource.Capability;
+import org.osgi.service.resolver.HostedCapability;
 
 public class CandidateSelector {
     protected final AtomicBoolean isUnmodifiable;
@@ -82,9 +82,22 @@ public class CandidateSelector {
         return index;
     }
 
+    public void replaceHostedCapability(HostedCapability c) {
+        checkModifiable();
+        Capability origCap = c.getDeclaredCapability();
+        int idx = unmodifiable.indexOf(origCap);
+        if (idx < 0) {
+            return;
+        }
+        unmodifiable.set(idx, new ShadowedCapability(c, origCap));
+    }
+
     protected void checkModifiable() {
         if (isUnmodifiable.get()) {
             throw new IllegalStateException("Trying to mutate after candidates have been prepared.");
+        }
+        if (currentIndex > 0) {
+            throw new IllegalStateException("Trying to mutate after candidates have been removed already.");
         }
     }
 }

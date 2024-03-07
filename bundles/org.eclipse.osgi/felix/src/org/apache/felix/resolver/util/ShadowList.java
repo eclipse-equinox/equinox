@@ -64,13 +64,19 @@ public class ShadowList extends CandidateSelector
             m_original.remove(removeIdx);
             unmodifiable.remove(removeIdx);
         }
-        int insertIdx = context.insertHostedCapability(m_original, toInsertCapability);
+        List<Capability> copy = new ArrayList<>(m_original); // make a copy here
+        for (int i = 0; i < copy.size(); i++) {
+            Capability capability = copy.get(i);
+            if (capability instanceof ShadowedCapability) {
+                // we unwrap the ShadowedCapability here as we always must pass only what we
+                // have got from the ResolveContext#findProviders.
+                copy.set(i, ((ShadowedCapability) capability).getShadowed());
+            }
+        }
+        int insertIdx = context.insertHostedCapability(copy, toInsertCapability);
+        // now insert at the given position into our internal data structure
         unmodifiable.add(insertIdx, wrappedCapability);
+        m_original.add(insertIdx, toInsertCapability);
     }
 
-    public void replace(Capability origCap, Capability c) {
-        checkModifiable();
-        int idx = unmodifiable.indexOf(origCap);
-        unmodifiable.set(idx, c);
-    }
 }
