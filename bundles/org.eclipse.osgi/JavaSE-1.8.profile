@@ -192,6 +192,7 @@ org.osgi.framework.system.packages = \
  javax.xml.ws.spi.http,\
  javax.xml.ws.wsaddressing,\
  javax.xml.xpath,\
+ jdk.net,\
  org.ietf.jgss,\
  org.omg.CORBA,\
  org.omg.CORBA_2_3,\
