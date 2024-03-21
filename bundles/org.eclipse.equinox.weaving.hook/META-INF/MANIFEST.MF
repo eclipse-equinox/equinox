@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.eclipse.equinox.weaving.hook
-Bundle-Version: 1.4.0.qualifier
+Bundle-Version: 1.4.100.qualifier
 Fragment-Host: org.eclipse.osgi;bundle-version="[3.10.0,4.0.0)"
 Bundle-Vendor: %Bundle-Vendor
 Export-Package: org.eclipse.equinox.service.weaving,

@@ -1,6 +1,6 @@
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
-Bundle-Version: 1.7.0.qualifier
+Bundle-Version: 1.7.100.qualifier
 Bundle-SymbolicName: org.eclipse.equinox.event
 Import-Package: org.eclipse.osgi.framework.eventmgr;version="1.1.0",
  org.eclipse.osgi.util;version="1.1.0",
