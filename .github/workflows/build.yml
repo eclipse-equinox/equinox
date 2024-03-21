@@ -29,7 +29,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Set up Maven
-      uses: stCarolas/setup-maven@v4.5
+      uses: stCarolas/setup-maven@v5
       with:
         maven-version: 3.9.2
     - name: Build with Maven
@@ -71,7 +71,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Set up Maven
-      uses: stCarolas/setup-maven@v4.5
+      uses: stCarolas/setup-maven@v5
       with:
         maven-version: 3.9.2
     - name: Visual Studio shell
@@ -110,7 +110,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Set up Maven
-      uses: stCarolas/setup-maven@v4.5
+      uses: stCarolas/setup-maven@v5
       with:
         maven-version: 3.9.2
     - name: Install GTK headers
@@ -147,7 +147,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Set up Maven
-      uses: stCarolas/setup-maven@v4.5
+      uses: stCarolas/setup-maven@v5
       with:
         maven-version: 3.9.2
     - name: Build
@@ -180,7 +180,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Set up Maven
-      uses: stCarolas/setup-maven@v4.5
+      uses: stCarolas/setup-maven@v5
       with:
         maven-version: 3.9.2
     - name: Run OSGi TCKs
