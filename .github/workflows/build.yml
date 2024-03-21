@@ -31,7 +31,7 @@ jobs:
     - name: Set up Maven
       uses: stCarolas/setup-maven@v5
       with:
-        maven-version: 3.9.2
+        maven-version: 3.9.6
     - name: Build with Maven
       uses: GabrielBB/xvfb-action@v1
       with:
@@ -73,7 +73,7 @@ jobs:
     - name: Set up Maven
       uses: stCarolas/setup-maven@v5
       with:
-        maven-version: 3.9.2
+        maven-version: 3.9.6
     - name: Visual Studio shell
       uses: egor-tensin/vs-shell@v2
       with:
@@ -112,7 +112,7 @@ jobs:
     - name: Set up Maven
       uses: stCarolas/setup-maven@v5
       with:
-        maven-version: 3.9.2
+        maven-version: 3.9.6
     - name: Install GTK headers
       run: sudo apt-get install -y libgtk-3-dev
     - name: Build
@@ -149,7 +149,7 @@ jobs:
     - name: Set up Maven
       uses: stCarolas/setup-maven@v5
       with:
-        maven-version: 3.9.2
+        maven-version: 3.9.6
     - name: Build
       working-directory: features/org.eclipse.equinox.executable.feature/library/cocoa
       run: ./build.sh test
@@ -182,7 +182,7 @@ jobs:
     - name: Set up Maven
       uses: stCarolas/setup-maven@v5
       with:
-        maven-version: 3.9.2
+        maven-version: 3.9.6
     - name: Run OSGi TCKs
       run: >- 
         mvn
