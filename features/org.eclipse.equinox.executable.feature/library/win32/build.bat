@@ -42,6 +42,31 @@ IF "%MSVC_EDITION%"=="" set "MSVC_EDITION=auto"
 @rem Specify VisualStudio Version: '2022', '2019' etc.
 IF "%MSVC_VERSION%"=="" set "MSVC_VERSION=auto"
 
+@REM Compose host architecture string for MSVC
+IF "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
+  SET HOST_ARCH=x64
+  SET defaultOSArch=x86_64
+) ELSE IF "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
+  SET HOST_ARCH=arm64
+  SET defaultOSArch=aarch64
+) ELSE (
+  CALL :ECHO "ERROR: Unknown host architecture: %PROCESSOR_ARCHITECTURE%."
+  EXIT /B 1
+)
+
+@REM %TARGET_ARCH% may be specified by the caller for cross-compiling.
+@REM If not, build for builder machine's architecture
+IF "%TARGET_ARCH%"=="" (
+  SET TARGET_ARCH=%HOST_ARCH%
+)
+
+@REM Compose build argument for MSVC
+IF "%TARGET_ARCH%"=="%HOST_ARCH%" (
+  SET BUILD_ARCH=%TARGET_ARCH%
+) ELSE (
+  SET BUILD_ARCH=%HOST_ARCH%_%TARGET_ARCH%
+)
+
 @rem Search for a usable Visual Studio
 @rem ---------------------------------
 IF "%MSVC_HOME%"=="" echo "'MSVC_HOME' was not provided, auto-searching for Visual Studio..."
@@ -58,14 +83,14 @@ IF EXIST "%MSVC_HOME%" (
 	echo "     Refer steps for SWT Windows native setup: https://www.eclipse.org/swt/swt_win_native.php"
 )
 IF EXIST "%JAVA_HOME%" (
-	echo "JAVA_HOME x64: %JAVA_HOME%"
+	echo "JAVA_HOME 64-bit: %JAVA_HOME%"
 ) ELSE (
-	echo "WARNING: x64 Java JDK not found. Please set JAVA_HOME to your JDK directory."
+	echo "WARNING: 64-bit Java JDK not found. Please set JAVA_HOME to your JDK directory."
 	echo "     Refer steps for SWT Windows native setup: https://www.eclipse.org/swt/swt_win_native.php"
 )
 set javaHome=%JAVA_HOME%
 set makefile=make_win64.mak
-call "%MSVC_HOME%\VC\Auxiliary\Build\vcvarsall.bat" x64
+call "%MSVC_HOME%\VC\Auxiliary\Build\vcvarsall.bat" %BUILD_ARCH%
 
 rem --------------------------
 rem Define default values for environment variables used in the makefiles.
@@ -74,7 +99,6 @@ set programOutput=eclipse.exe
 set programLibrary=eclipse.dll
 set defaultOS=win32
 set defaultWS=win32
-set defaultOSArch=x86_64
 
 rem --------------------------
 rem Parse the command line arguments and override the default values.
