@@ -881,7 +881,7 @@ public class FrameworkLauncher {
 	}
 
 	/***************************************************************************
-	 * See org.eclipse.core.launcher [copy of searchFor, findMax, compareVersion,
+	 * See org.eclipse.equinox.launcher [copy of searchFor, findMax, compareVersion,
 	 * getVersionElements] TODO: If these methods were made public and static we
 	 * could use them directly
 	 **************************************************************************/
