@@ -7,6 +7,5 @@ Main-Class: org.eclipse.equinox.launcher.Main
 Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Localization: launcher
-Export-Package: org.eclipse.core.launcher;x-internal:=true,
- org.eclipse.equinox.launcher;x-internal:=true
+Export-Package: org.eclipse.equinox.launcher;x-internal:=true
 Automatic-Module-Name: org.eclipse.equinox.launcher
