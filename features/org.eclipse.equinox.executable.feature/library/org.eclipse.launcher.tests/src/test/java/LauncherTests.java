@@ -32,11 +32,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.eclipse.equinox.launcher.TestLauncherConstants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import main.TestLauncherConstants;
 
 public class LauncherTests {
 	private static final String ECLIPSE_INI_PATH_KEY = "ECLIPSE_INI_PATH";

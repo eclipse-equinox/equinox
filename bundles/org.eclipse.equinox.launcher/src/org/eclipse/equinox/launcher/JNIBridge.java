@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2015 IBM Corporation and others.
+ * Copyright (c) 2006, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -23,8 +23,7 @@ package org.eclipse.equinox.launcher;
  * @noextend This class is not intended to be subclassed by clients.
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
-public class JNIBridge {
-	//TODO: This class should not be public
+class JNIBridge {
 	private native void _set_exit_data(String sharedId, String data);
 
 	private native void _set_launcher_info(String launcher, String name);

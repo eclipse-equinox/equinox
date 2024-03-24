@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,12 +11,12 @@
  * Contributors:
  *     Andrew Niefer - IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.internal.launcher;
+package org.eclipse.equinox.launcher;
 
 /**
  * @author aniefer
  */
-public class Constants {
+class Constants {
 	public static final String INTERNAL_AMD64 = "amd64"; //$NON-NLS-1$
 	public static final String INTERNAL_OS_SUNOS = "SunOS"; //$NON-NLS-1$
 	public static final String INTERNAL_OS_LINUX = "Linux"; //$NON-NLS-1$

@@ -11,7 +11,7 @@
  * Contributors:
  *     Umair Sair - initial API and implementation
  *******************************************************************************/
-package main;
+package org.eclipse.equinox.launcher;
 
 public interface TestLauncherConstants {
 	public static final String ARGS_PARAMETER = "-args"; //$NON-NLS-1$
