@@ -6,7 +6,7 @@
          name="%windowsModuleName"
          point="org.eclipse.equinox.security.secureStorage">
       <provider
-            class="org.eclipse.equinox.internal.security.win32.WinCrypto"
+            class="org.eclipse.equinox.internal.security.win32.WindowsPasswordProvider"
             description="%providerDescription"
             priority="5">
          <hint

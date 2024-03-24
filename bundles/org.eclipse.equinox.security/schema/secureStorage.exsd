@@ -141,7 +141,7 @@
       </appInfo>
       <documentation>
          &lt;p&gt;The &lt;code&gt;org.eclipse.equinox.security.ui&lt;/code&gt; bundle supplies default password provider that prompts user to enter the password.&lt;/p&gt;
-&lt;p&gt;The &lt;code&gt;org.eclipse.equinox.security.win32.x86_64&lt;/code&gt; fragment provides Windows OS integration.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;org.eclipse.equinox.security.win32&lt;/code&gt; fragment provides Windows OS integration.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;org.eclipse.equinox.security.linux&lt;/code&gt; fragment provides Linux OS integration.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;org.eclipse.equinox.security.macosx&lt;/code&gt; fragment provides Mac OS integration.&lt;/p&gt;
       </documentation>

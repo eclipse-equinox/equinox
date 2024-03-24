@@ -72,13 +72,13 @@
          version="0.0.0"/>
 
    <plugin
-         id="org.eclipse.equinox.security.win32.x86_64"
+         id="org.eclipse.equinox.security.win32"
          os="win32"
          arch="x86_64"
          version="0.0.0"/>
 
    <plugin
-         id="org.eclipse.equinox.security.win32.x86_64.source"
+         id="org.eclipse.equinox.security.win32.source"
          os="win32"
          arch="x86_64"
          version="0.0.0"/>

@@ -24,11 +24,11 @@ import org.osgi.framework.BundleContext;
  */
 public class WinPreferencesTest extends SecurePreferencesTest {
 
-	final private static String WIN_64BIT_BUNDLE = "org.eclipse.equinox.security.win32.x86_64";
+	final private static String WIN_BUNDLE = "org.eclipse.equinox.security.win32";
 
 	@Before
 	public void setUp() {
-		org.junit.Assume.assumeTrue(hasBundle(WIN_64BIT_BUNDLE));
+		org.junit.Assume.assumeTrue(hasBundle(WIN_BUNDLE));
 	}
 
 	/**
