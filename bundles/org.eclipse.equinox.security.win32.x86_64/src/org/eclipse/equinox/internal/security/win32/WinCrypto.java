@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2017 IBM Corporation and others.
+ * Copyright (c) 2008, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -41,21 +41,22 @@ public class WinCrypto extends PasswordProvider {
 		System.loadLibrary("jnicrypt64");
 	}
 
-	private final static String WIN_PROVIDER_NODE = "/org.eclipse.equinox.secure.storage/windows64";
-	private final static String PASSWORD_KEY = "encryptedPassword";
+	private static final String WIN_PROVIDER_NODE = "/org.eclipse.equinox.secure.storage/windows64";
+	private static final String PASSWORD_KEY = "encryptedPassword";
 
 	/**
 	 * The length of the randomly generated password in bytes
 	 */
-	private final static int PASSWORD_LENGTH = 250;
+	private static final int PASSWORD_LENGTH = 250;
 
 	@Override
 	public PBEKeySpec getPassword(IPreferencesContainer container, int passwordType) {
 		byte[] encryptedPassword;
-		if ((passwordType & CREATE_NEW_PASSWORD) == 0)
+		if ((passwordType & CREATE_NEW_PASSWORD) == 0) {
 			encryptedPassword = getEncryptedPassword(container);
-		else
+		} else {
 			encryptedPassword = null;
+		}
 
 		if (encryptedPassword != null) {
 			byte[] decryptedPassword = windecrypt(encryptedPassword);
@@ -78,24 +79,24 @@ public class WinCrypto extends PasswordProvider {
 		random.setSeed(System.currentTimeMillis());
 		random.nextBytes(rawPassword);
 		String password = Base64.encode(rawPassword);
-		if (savePassword(password, container))
+		if (savePassword(password, container)) {
 			return new PBEKeySpec(password.toCharArray());
-		else
+		} else {
 			return null;
+		}
 	}
 
 	private byte[] getEncryptedPassword(IPreferencesContainer container) {
 		ISecurePreferences node = container.getPreferences().node(WIN_PROVIDER_NODE);
-		String passwordHint;
 		try {
-			passwordHint = node.get(PASSWORD_KEY, null);
+			String passwordHint = node.get(PASSWORD_KEY, null);
+			if (passwordHint != null) {
+				return Base64.decode(passwordHint);
+			}
 		} catch (StorageException e) { // should never happen in this scenario
 			AuthPlugin.getDefault().logError(WinCryptoMessages.decryptPasswordFailed, e);
-			return null;
 		}
-		if (passwordHint == null)
-			return null;
-		return Base64.decode(passwordHint);
+		return null;
 	}
 
 	private boolean savePassword(String password, IPreferencesContainer container) {

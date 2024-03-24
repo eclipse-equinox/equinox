@@ -31,7 +31,7 @@ import javax.crypto.spec.PBEKeySpec;
  * password provider module to the secure storage system.
  * </p>
  */
-abstract public class PasswordProvider {
+public abstract class PasswordProvider {
 
 	/**
 	 * Bit mask for the password type field of the
@@ -40,7 +40,7 @@ abstract public class PasswordProvider {
 	 * otherwise this is a request for the password previously used for this secure
 	 * storage.
 	 */
-	final public static int CREATE_NEW_PASSWORD = 1 << 0;
+	public static final int CREATE_NEW_PASSWORD = 1 << 0;
 
 	/**
 	 * Bit mask for the password type field of the
@@ -48,7 +48,7 @@ abstract public class PasswordProvider {
 	 * set to <code>1</code>, it indicates that a new password is requested as a
 	 * part of the password change operation.
 	 */
-	final public static int PASSWORD_CHANGE = 1 << 1;
+	public static final int PASSWORD_CHANGE = 1 << 1;
 
 	/**
 	 * This method should return the password used to encrypt entries in the secure
@@ -63,14 +63,7 @@ abstract public class PasswordProvider {
 	 * @return password used to encrypt entries in the secure preferences,
 	 *         <code>null</code> if unable to obtain password
 	 */
-	abstract public PBEKeySpec getPassword(IPreferencesContainer container, int passwordType);
-
-	/**
-	 * Constructor.
-	 */
-	public PasswordProvider() {
-		// placeholder
-	}
+	public abstract PBEKeySpec getPassword(IPreferencesContainer container, int passwordType);
 
 	/**
 	 * The framework might call this method if it suspects that the password is
