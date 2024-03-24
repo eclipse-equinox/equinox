@@ -11,7 +11,7 @@
  * Contributors:
  *     Umair Sair - initial API and implementation
  *******************************************************************************/
-package main;
+package org.eclipse.equinox.launcher;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -21,8 +21,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.equinox.launcher.JNIBridge;
-
 /**
  * Dummy test application used for eclipse launcher testing. JUnit tests
  * launches the eclipse launcher with startup application pointing to the jar file
@@ -31,11 +29,11 @@ import org.eclipse.equinox.launcher.JNIBridge;
  * port and accepts following queries
  * - -args - returns the arguments passed to this application. Test verify if the
  * arguments are passed to application correctly by the launcher.
- * 
+ *
  * And accepts following information
  * - -exitdata - The exit data this application should set before exiting
  * - -exitcode - The exit code with which this application should exit
- * 
+ *
  * @author umairsair
  *
  */
@@ -98,8 +96,9 @@ public class TestLauncherApp {
 					out.flush();
 				} else if (TestLauncherConstants.EXITDATA_PARAMETER.equals(line)) {
 					while ((line = in.readLine()) != null) {
-						if (TestLauncherConstants.MULTILINE_ARG_VALUE_TERMINATOR.equals(line))
+						if (TestLauncherConstants.MULTILINE_ARG_VALUE_TERMINATOR.equals(line)) {
 							break;
+						}
 						exitData.add(line);
 					}
 				} else if (TestLauncherConstants.EXITCODE_PARAMETER.equals(line)) {

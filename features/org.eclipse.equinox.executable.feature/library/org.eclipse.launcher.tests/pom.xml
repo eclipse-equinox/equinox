@@ -37,7 +37,7 @@
 						<configuration>
 							<archive>
 								<manifest>
-									<mainClass>main.TestLauncherApp</mainClass>
+									<mainClass>org.eclipse.equinox.launcher.TestLauncherApp</mainClass>
 								</manifest>
 							</archive>
 						</configuration>
