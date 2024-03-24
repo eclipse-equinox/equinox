@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,8 +12,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-This is a JNI bridge to access native Windows encryption methods from Java. This version
-works in a 64-bit Windows environment.
+This is a JNA bridge to access native Windows encryption methods from Java. This version
+works in a Windows environment.
 
 The methods perform user-specific encryption of the data. The same user can later decrypt 
 data using methods provided by this DLL. A different user won't be able to decrypt the data. 
@@ -28,9 +28,3 @@ Note that this mechanism is intended to be used with small size data (i.e., pass
 large amount of data consider encrypting your password using this mechanism and using 
 symmetric encryption to encrypt the data.
 
-To compile this DLL:
-=> JAVA_HOME environment variable needs to be setup so that jni.h can be found
-
-Note C++ projects settings:
-=> Additional include directories - "$(JAVA_HOME)/include";"$(JAVA_HOME)/include/win32"
-=> Additional linker dependency - Crypt32.lib

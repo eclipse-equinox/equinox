@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Hannes Wellmann - Migrate to JNA as CPU-architecture independent access to Windows' Crypt32 native library
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.win32;
 
@@ -27,18 +28,24 @@ import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
 import org.eclipse.equinox.security.storage.provider.PasswordProvider;
 
+import com.sun.jna.platform.win32.Crypt32Util;
+
 /**
  * Provides interface with native Windows data protection API. This provider
  * auto-generates separate passwords for each secure preferences tree.
  */
-public class WinCrypto extends PasswordProvider {
+public class WindowsPasswordProvider extends PasswordProvider {
 
-	native public byte[] windecrypt(byte[] encryptedText);
+	private static byte[] windecrypt(byte[] encryptedText) {
+		// Call through JNA
+		// https://learn.microsoft.com/en-us/windows/win32/api/dpapi/nf-dpapi-cryptunprotectdata
+		return Crypt32Util.cryptUnprotectData(encryptedText);
+	}
 
-	native public byte[] winencrypt(byte[] clearText);
-
-	static {
-		System.loadLibrary("jnicrypt64");
+	private static byte[] winencrypt(byte[] clearText) {
+		// Call through JNA
+		// https://learn.microsoft.com/en-us/windows/win32/api/dpapi/nf-dpapi-cryptprotectdata
+		return Crypt32Util.cryptProtectData(clearText, null, 0, "Equinox", null);
 	}
 
 	private static final String WIN_PROVIDER_NODE = "/org.eclipse.equinox.secure.storage/windows64";
