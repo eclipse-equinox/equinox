@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 IBM Corporation and others.
+ * Copyright (c) 2017, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,7 +17,6 @@ package org.eclipse.equinox.internal.security.linux;
 
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.crypto.spec.PBEKeySpec;
@@ -42,25 +41,13 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 	private static final int PASSWORD_LENGTH = 64;
 
 	private static final String SECRET_COLLECTION_DEFAULT = "default"; //$NON-NLS-1$
-	private static final Map<String, Object> LIB_LOAD_OPTIONS = new HashMap<>();
+	// open flags = (RTLD_NODELETE | RTLD_GLOBAL | RTLD_LAZY)
+	private static final Map<String, Object> LIB_LOAD_OPTIONS = Map.of(Library.OPTION_OPEN_FLAGS, 0x1101);
 
-	private SecretSchema fEquinoxSchema;
+	private final SecretSchema fEquinoxSchema = new SecretSchema("org.eclipse.equinox", //$NON-NLS-1$
+			SecretSchemaFlags.SECRET_SCHEMA_NONE, new SecretSchemaAttribute(null, 0));
 	private LibSecret fLibSecret;
 	private LibGio fLibGio;
-
-	static {
-		// open flags = (RTLD_NODELETE | RTLD_GLOBAL | RTLD_LAZY)
-		LIB_LOAD_OPTIONS.put(Library.OPTION_OPEN_FLAGS, 0x1101);
-	}
-
-	public LinuxPasswordProvider() {
-		initEquinoxSchema();
-	}
-
-	private void initEquinoxSchema() {
-		fEquinoxSchema = new SecretSchema("org.eclipse.equinox", //$NON-NLS-1$
-				SecretSchemaFlags.SECRET_SCHEMA_NONE, new SecretSchemaAttribute(null, 0));
-	}
 
 	private interface LibGio extends Library {
 		Pointer g_bus_get_sync(int bus_type, Pointer cancellable, PointerByReference gerror);
@@ -97,31 +84,16 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 		PointerByReference gerror = new PointerByReference();
 		gerror.setValue(Pointer.NULL);
 		fLibGio.g_bus_get_sync(GBusType.G_BUS_TYPE_SESSION, Pointer.NULL, gerror);
-		if (gerror.getValue() != Pointer.NULL) {
-			GError error = new GError(gerror.getValue());
-			String message = "Unable to get DBus session bus: " + error.message; //$NON-NLS-1$
-			fLibGio.g_error_free(gerror.getValue());
-			throw new SecurityException(message);
-		}
+		requireNoError(gerror, "Unable to get DBus session bus: "); //$NON-NLS-1$
 
 		fLibSecret = Native.load("secret-1", LibSecret.class, LIB_LOAD_OPTIONS); //$NON-NLS-1$
 		Pointer secretService = fLibSecret.secret_service_get_sync(SecretServiceFlags.SECRET_SERVICE_LOAD_COLLECTIONS,
 				Pointer.NULL, gerror);
-		if (gerror.getValue() != Pointer.NULL) {
-			GError error = new GError(gerror.getValue());
-			String message = "Unable to get secret service: " + error.message; //$NON-NLS-1$
-			fLibGio.g_error_free(gerror.getValue());
-			throw new SecurityException(message);
-		}
+		requireNoError(gerror, "Unable to get secret service: "); //$NON-NLS-1$
 
 		Pointer defaultCollection = fLibSecret.secret_collection_for_alias_sync(secretService,
 				SECRET_COLLECTION_DEFAULT, SecretCollectionFlags.SECRET_COLLECTION_NONE, Pointer.NULL, gerror);
-		if (gerror.getValue() != Pointer.NULL) {
-			GError error = new GError(gerror.getValue());
-			String message = "Unable to get secret collection: " + error.message; //$NON-NLS-1$
-			fLibGio.g_error_free(gerror.getValue());
-			throw new SecurityException(message);
-		}
+		requireNoError(gerror, "Unable to get secret collection: "); //$NON-NLS-1$
 		if (defaultCollection == Pointer.NULL) {
 			throw new SecurityException("Unable to find default secret collection"); //$NON-NLS-1$
 		}
@@ -132,23 +104,10 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 			fLibSecret.secret_service_unlock_sync(secretService, list, Pointer.NULL, unlocked, gerror);
 			fLibGio.g_error_free(unlocked.getValue());
 			fLibGio.g_error_free(list.getPointer());
-			if (gerror.getValue() != Pointer.NULL) {
-				GError error = new GError(gerror.getValue());
-				String message = "Unable to unlock: " + error.message; //$NON-NLS-1$
-				fLibGio.g_error_free(gerror.getValue());
-				throw new SecurityException(message);
-			}
+
+			requireNoError(gerror, "Unable to unlock: "); //$NON-NLS-1$
 		}
 
-	}
-
-	private boolean canUnlock() {
-		try {
-			unlockSecretService();
-		} catch (SecurityException e) {
-			return false;
-		}
-		return true;
 	}
 
 	private String getMasterPassword() throws SecurityException {
@@ -156,12 +115,8 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 		PointerByReference gerror = new PointerByReference();
 		String password = fLibSecret.secret_password_lookup_sync(fEquinoxSchema, Pointer.NULL, gerror, Pointer.NULL);
 
-		if (gerror.getValue() != Pointer.NULL) {
-			GError error = new GError(gerror.getValue());
-			String message = error.message;
-			fLibGio.g_error_free(gerror.getValue());
-			throw new SecurityException(message);
-		} else if (password == null) {
+		requireNoError(gerror, ""); //$NON-NLS-1$
+		if (password == null) {
 			throw new SecurityException("Unable to find password"); //$NON-NLS-1$
 		}
 
@@ -171,20 +126,22 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 
 	private void saveMasterPassword(String password) throws SecurityException {
 		unlockSecretService();
-		String passwordUTF8 = password;
 		PointerByReference gerror = new PointerByReference();
 
-		byte[] utfbytes = password.getBytes();
-		passwordUTF8 = new String(utfbytes, StandardCharsets.UTF_8);
+		String passwordUTF8 = new String(password.getBytes(), StandardCharsets.UTF_8);
 
 		fLibSecret.secret_password_store_sync(fEquinoxSchema, SECRET_COLLECTION_DEFAULT, "Equinox master password", //$NON-NLS-1$
 				passwordUTF8, Pointer.NULL, gerror, Pointer.NULL);
 
+		requireNoError(gerror, ""); //$NON-NLS-1$
+	}
+
+	private void requireNoError(PointerByReference gerror, String details) {
 		if (gerror.getValue() != Pointer.NULL) {
 			GError error = new GError(gerror.getValue());
 			String message = error.message;
 			fLibGio.g_error_free(gerror.getValue());
-			throw new SecurityException(message);
+			throw new SecurityException(details + message);
 		}
 	}
 
@@ -224,7 +181,8 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 	@Override
 	public boolean isValid() {
 		try {
-			return canUnlock();
+			unlockSecretService();
+			return true;
 		} catch (SecurityException e) {
 			return false;
 		}

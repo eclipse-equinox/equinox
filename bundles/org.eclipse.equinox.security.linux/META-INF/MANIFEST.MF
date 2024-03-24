@@ -10,5 +10,4 @@ Bundle-Localization: fragment
 Eclipse-PlatformFilter: (osgi.os=linux)
 Export-Package: org.eclipse.equinox.internal.security.linux;x-internal:=true
 Automatic-Module-Name: org.eclipse.equinox.security.linux
-Eclipse-BundleShape: dir
 Require-Bundle: com.sun.jna;bundle-version="[5.8.0,6.0.0)"
