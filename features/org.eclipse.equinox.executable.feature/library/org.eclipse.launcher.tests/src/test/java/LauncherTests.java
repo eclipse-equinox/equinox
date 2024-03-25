@@ -20,17 +20,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,18 +45,17 @@ public class LauncherTests {
 	// and on other hosts, it is present in same directory as eclipse binary
 	private static final String ECLIPSE_INI_FILE_NAME = System.getProperty(ECLIPSE_INI_PATH_KEY,
 			System.getenv(ECLIPSE_INI_PATH_KEY) == null ? "eclipse.ini" : System.getenv(ECLIPSE_INI_PATH_KEY));
-	// @formatter:off
-	private static final String DEFAULT_ECLIPSE_INI_CONTENT = "-startup\n"
-															+ "../test.launcher.jar\n"
-															+ "--launcher.library\n"
-															+ "plugins/org.eclipse.equinox.launcher\n"
-															+ "-vmargs\n"
-															+ "-Xms40m\n"
-															+ "";
-	// @formatter:on
-	public static final Integer EXIT_OK = Integer.valueOf(0);
-	public static final Integer EXIT_RESTART = Integer.valueOf(23);
-	public static final Integer EXIT_RELAUNCH = Integer.valueOf(24);
+	private static final String DEFAULT_ECLIPSE_INI_CONTENT = """
+			-startup
+			../test.launcher.jar
+			--launcher.library
+			plugins/org.eclipse.equinox.launcher
+			-Xms40m
+			-vmargs
+			""";
+	public static final Integer EXIT_OK = 0;
+	public static final Integer EXIT_RESTART = 23;
+	public static final Integer EXIT_RELAUNCH = 24;
 
 	private ServerSocket server;
 
@@ -121,8 +121,8 @@ public class LauncherTests {
 		appArgs2.remove(appArgs2.indexOf("-Dtest"));
 
 		// Convert backslashes to forward slashes before comparison so that all paths are consistent
-		assertEquals(appArgs1.stream().map(s -> s.replace('\\', '/')).collect(Collectors.toList()),
-				appArgs2.stream().map(s -> s.replace('\\', '/')).collect(Collectors.toList()));
+		assertEquals(appArgs1.stream().map(s -> s.replace('\\', '/')).toList(),
+				appArgs2.stream().map(s -> s.replace('\\', '/')).toList());
 	}
 
 	@Test
@@ -157,8 +157,8 @@ public class LauncherTests {
 		appArgs2.remove(appArgs2.indexOf("dir1"));
 
 		// Convert backslashes to forward slashes before comparison so that all paths are consistent
-		assertEquals(appArgs1.stream().map(s -> s.replace('\\', '/')).collect(Collectors.toList()),
-				appArgs2.stream().map(s -> s.replace('\\', '/')).collect(Collectors.toList()));
+		assertEquals(appArgs1.stream().map(s -> s.replace('\\', '/')).toList(),
+				appArgs2.stream().map(s -> s.replace('\\', '/')).toList());
 	}
 
 	@Test
@@ -490,8 +490,8 @@ public class LauncherTests {
 			appArgs2.remove(appArgs2.indexOf(TestLauncherConstants.EXITDATA_PARAMETER) + 1);
 
 			// Convert backslashes to forward slashes before comparison so that all paths are consistent
-			assertEquals(appArgs1.stream().map(s -> s.replace('\\', '/')).collect(Collectors.toList()),
-					appArgs2.stream().map(s -> s.replace('\\', '/')).collect(Collectors.toList()));
+			assertEquals(appArgs1.stream().map(s -> s.replace('\\', '/')).toList(),
+					appArgs2.stream().map(s -> s.replace('\\', '/')).toList());
 		}
 	}
 
@@ -516,8 +516,8 @@ public class LauncherTests {
 			appArgs2.remove(appArgs2.indexOf(TestLauncherConstants.EXITDATA_PARAMETER) + 1);
 
 			// Convert backslashes to forward slashes before comparison so that all paths are consistent
-			assertEquals(appArgs1.stream().map(s -> s.replace('\\', '/')).collect(Collectors.toList()),
-					appArgs2.stream().map(s -> s.replace('\\', '/')).collect(Collectors.toList()));
+			assertEquals(appArgs1.stream().map(s -> s.replace('\\', '/')).toList(),
+					appArgs2.stream().map(s -> s.replace('\\', '/')).toList());
 		}
 	}
 
@@ -530,16 +530,18 @@ public class LauncherTests {
 		String line = null;
 		System.out.println("--- start ----");
 		while ((line = in.readLine()) != null) {
-			if (TestLauncherConstants.MULTILINE_ARG_VALUE_TERMINATOR.equals(line))
+			if (TestLauncherConstants.MULTILINE_ARG_VALUE_TERMINATOR.equals(line)) {
 				break;
+			}
 			System.out.println(line);
 			appArgs.add(line);
 		}
 		System.out.println("--- end ----");
 		{
 			out.writeBytes(TestLauncherConstants.EXITDATA_PARAMETER + "\n");
-			if (restartArgs != null && !restartArgs.isBlank())
+			if (restartArgs != null && !restartArgs.isBlank()) {
 				out.writeBytes(restartArgs + "\n");
+			}
 			out.writeBytes(TestLauncherConstants.MULTILINE_ARG_VALUE_TERMINATOR + "\n");
 			out.flush();
 
@@ -562,11 +564,7 @@ public class LauncherTests {
 	}
 
 	private void writeEclipseIni(String content) throws IOException {
-		File iniFile = new File(ECLIPSE_INI_FILE_NAME);
-		iniFile.createNewFile();
-		FileWriter myWriter = new FileWriter(ECLIPSE_INI_FILE_NAME);
-		myWriter.write(content);
-		myWriter.close();
+		Files.writeString(Path.of(ECLIPSE_INI_FILE_NAME), content, Charset.defaultCharset());
 	}
 
 }
