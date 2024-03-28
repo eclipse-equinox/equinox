@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.e4.ui.widgets
+Require-Bundle: org.eclipse.swt;bundle-version="[3.6.0,4.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.e4.ui.widgets;x-friends:="org.eclipse.e4.ui.
+ workbench.swt,org.eclipse.e4.ui.workbench.addons.swt"
+Bundle-Version: 1.4.0.v20230317-0802
+

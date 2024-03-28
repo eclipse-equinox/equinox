@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: com.github.jnr.x86asm
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.5))"
+Export-Package: com.kenai.jnr.x86asm;version="1.0.2",jnr.x86asm;version=
+ "1.0.2"
+Bundle-Version: 1.0.2.v20230715-0746
+

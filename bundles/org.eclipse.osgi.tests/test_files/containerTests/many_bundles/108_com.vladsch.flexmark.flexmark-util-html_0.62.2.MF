@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: com.vladsch.flexmark.flexmark-util-html
+Import-Package: com.vladsch.flexmark.util.misc;resolution:=optional,com.
+ vladsch.flexmark.util.sequence;resolution:=optional,com.vladsch.flexmar
+ k.util.sequence.builder;resolution:=optional,javax.swing;resolution:=op
+ tional,javax.swing.plaf;resolution:=optional
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: com.vladsch.flexmark.util.html;version="0.62.2";uses:="c
+ om.vladsch.flexmark.util.misc,com.vladsch.flexmark.util.sequence,com.vl
+ adsch.flexmark.util.sequence.builder",com.vladsch.flexmark.util.html.ui
+ ;version="0.62.2";uses:="com.vladsch.flexmark.util.html,com.vladsch.fle
+ xmark.util.sequence,javax.swing"
+Bundle-Version: 0.62.2
+

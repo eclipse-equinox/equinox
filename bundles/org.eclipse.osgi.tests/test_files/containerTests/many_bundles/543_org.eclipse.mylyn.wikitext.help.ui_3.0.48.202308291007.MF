@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.mylyn.wikitext.help.ui;singleton:=true
+Require-Bundle: org.eclipse.help
+Bundle-ManifestVersion: 2
+Bundle-Version: 3.0.48.202308291007
+

@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.callgraph.core;singleton:=tr
+ ue
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime
+Import-Package: org.eclipse.cdt.core.model,org.eclipse.core.resources,or
+ g.eclipse.jface.text,org.eclipse.linuxtools.profiling.ui,org.eclipse.li
+ nuxtools.tools.launch.core.factory,org.eclipse.ui,org.eclipse.ui.consol
+ e
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.linuxtools.internal.callgraph.core
+Bundle-Version: 3.1.0.202309052024
+

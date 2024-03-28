@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.systemtap.ui.ide;singleton:=
+ true
+Require-Bundle: org.eclipse.core.expressions,org.eclipse.core.filesystem
+ ,org.eclipse.core.runtime,org.eclipse.debug.ui;bundle-version="3.8.0",o
+ rg.eclipse.jface.text,org.eclipse.linuxtools.man.core;bundle-version="1
+ .1",org.eclipse.linuxtools.profiling.launch;bundle-version="0.11.0",org
+ .eclipse.linuxtools.systemtap.graphing.core,org.eclipse.linuxtools.syst
+ emtap.graphing.ui,org.eclipse.linuxtools.systemtap.ui.consolelog,org.ec
+ lipse.linuxtools.systemtap.structures,org.eclipse.ui,org.eclipse.ui.con
+ sole,org.eclipse.ui.editors,org.eclipse.ui.ide
+Import-Package: com.jcraft.jsch;version="0.1.37",org.eclipse.cdt.core.mo
+ del,org.eclipse.linuxtools.tools.launch.core.factory
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Bundle-Version: 2.3.1.202309052024
+

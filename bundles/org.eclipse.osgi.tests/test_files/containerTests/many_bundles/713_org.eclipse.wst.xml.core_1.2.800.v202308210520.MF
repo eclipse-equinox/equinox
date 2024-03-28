@@ -1,0 +1,156 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.wst.xml.core; singleton:=true
+Require-Bundle: org.apache.xerces;bundle-version="[2.12.2,3.0.0)";visibi
+ lity:=reexport,org.eclipse.core.runtime;bundle-version="[3.14.0,4.0.0)"
+ ,org.eclipse.core.resources;bundle-version="[3.13.0,4.0.0)",org.eclipse
+ .core.filebuffers;bundle-version="[3.6.200,4.0.0)";resolution:=optional
+ ,org.eclipse.wst.common.uriresolver;bundle-version="[1.2.300,2.0.0)",or
+ g.eclipse.wst.sse.core;bundle-version="[1.2.0,1.4.0)",org.eclipse.jem.u
+ til;bundle-version="[2.1.200,3.0.0)";resolution:=optional,org.eclipse.w
+ st.validation;bundle-version="[1.3.0,2.0.0)";resolution:=optional,org.e
+ clipse.wst.common.emf;bundle-version="[1.2.500,1.3.0)";resolution:=opti
+ onal,org.eclipse.emf.ecore.xmi;bundle-version="[2.14.0,3.0.0)";resoluti
+ on:=optional,org.eclipse.wst.common.emfworkbench.integration;bundle-ver
+ sion="[1.3.0,2.0.0)";resolution:=optional,org.eclipse.wst.common.core;b
+ undle-version="[1.2.0,2.0.0)",com.ibm.icu;bundle-version="73.1.0",org.e
+ clipse.osgi.services;bundle-version="[3.7.0,4.0.0)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
+Export-Package: org.eclipse.wst.xml.core.contentmodel.modelquery,org.ecl
+ ipse.wst.xml.core.internal; x-friends:="org.eclipse.wst.dtd.core,  org.
+ eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.core,
+   org.eclipse.wst.xsd.ui",org.eclipse.wst.xml.core.internal.catalog; x-
+ friends:="org.eclipse.wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclip
+ se.wst.xml.ui,  org.eclipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.
+ eclipse.wst.xml.core.internal.catalog.provisional; x-friends:="org.ecli
+ pse.wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui,  or
+ g.eclipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.eclipse.wst.xml.co
+ re.internal.cleanup; x-friends:="org.eclipse.wst.dtd.core,  org.eclipse
+ .wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.core,  org.e
+ clipse.wst.xsd.ui",org.eclipse.wst.xml.core.internal.commentelement; x-
+ friends:="org.eclipse.wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclip
+ se.wst.xml.ui,  org.eclipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.
+ eclipse.wst.xml.core.internal.commentelement.impl; x-friends:="org.ecli
+ pse.wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui,  or
+ g.eclipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.eclipse.wst.xml.co
+ re.internal.commentelement.util; x-friends:="org.eclipse.wst.dtd.core, 
+  org.eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.
+ core,  org.eclipse.wst.xsd.ui",org.eclipse.wst.xml.core.internal.conten
+ tmodel; x-friends:="org.eclipse.wst.dtd.core,  org.eclipse.wst.dtd.ui, 
+  org.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.core,  org.eclipse.wst.xs
+ d.ui",org.eclipse.wst.xml.core.internal.contentmodel.annotation; x-frie
+ nds:="org.eclipse.wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclipse.w
+ st.xml.ui,  org.eclipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.ecli
+ pse.wst.xml.core.internal.contentmodel.basic; x-friends:="org.eclipse.w
+ st.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.ecl
+ ipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.eclipse.wst.xml.core.in
+ ternal.contentmodel.factory; x-friends:="org.eclipse.wst.dtd.core,  org
+ .eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.core
+ ,  org.eclipse.wst.xsd.ui",org.eclipse.wst.xml.core.internal.contentmod
+ el.internal.annotation; x-friends:="org.eclipse.wst.dtd.core,  org.ecli
+ pse.wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.core,  or
+ g.eclipse.wst.xsd.ui",org.eclipse.wst.xml.core.internal.contentmodel.in
+ ternal.modelqueryimpl; x-friends:="org.eclipse.wst.dtd.core,  org.eclip
+ se.wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.core,  org
+ .eclipse.wst.xsd.ui",org.eclipse.wst.xml.core.internal.contentmodel.int
+ ernal.util; x-friends:="org.eclipse.wst.dtd.core,  org.eclipse.wst.dtd.
+ ui,  org.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.core,  org.eclipse.ws
+ t.xsd.ui",org.eclipse.wst.xml.core.internal.contentmodel.modelquery; x-
+ friends:="org.eclipse.wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclip
+ se.wst.xml.ui,  org.eclipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.
+ eclipse.wst.xml.core.internal.contentmodel.modelquery.extension; x-frie
+ nds:="org.eclipse.wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclipse.w
+ st.xml.ui,  org.eclipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.ecli
+ pse.wst.xml.core.internal.contentmodel.modelqueryimpl; x-friends:="org.
+ eclipse.wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui,
+   org.eclipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.eclipse.wst.xm
+ l.core.internal.contentmodel.util; x-friends:="org.eclipse.wst.dtd.core
+ ,  org.eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.eclipse.wst.xs
+ d.core,  org.eclipse.wst.xsd.ui",org.eclipse.wst.xml.core.internal.cont
+ enttype; x-friends:="org.eclipse.wst.dtd.core,  org.eclipse.wst.dtd.ui,
+   org.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.core,  org.eclipse.wst.x
+ sd.ui",org.eclipse.wst.xml.core.internal.document; x-friends:="org.ecli
+ pse.wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui,  or
+ g.eclipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.eclipse.wst.xml.co
+ re.internal.emf2xml; x-friends:="org.eclipse.wst.dtd.core,  org.eclipse
+ .wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.core,  org.e
+ clipse.wst.xsd.ui",org.eclipse.wst.xml.core.internal.encoding; x-friend
+ s:="org.eclipse.wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclipse.wst
+ .xml.ui,  org.eclipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.eclips
+ e.wst.xml.core.internal.formatter; x-friends:="org.eclipse.wst.dtd.core
+ ,  org.eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.eclipse.wst.xs
+ d.core,  org.eclipse.wst.xsd.ui",org.eclipse.wst.xml.core.internal.mode
+ lhandler; x-friends:="org.eclipse.wst.dtd.core,  org.eclipse.wst.dtd.ui
+ ,  org.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.core,  org.eclipse.wst.
+ xsd.ui",org.eclipse.wst.xml.core.internal.modelquery; x-friends:="org.e
+ clipse.wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui, 
+  org.eclipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.eclipse.wst.xml
+ .core.internal.parser; x-friends:="org.eclipse.wst.dtd.core,  org.eclip
+ se.wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.core,  org
+ .eclipse.wst.xsd.ui",org.eclipse.wst.xml.core.internal.parser.regions; 
+ x-friends:="org.eclipse.wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.ecl
+ ipse.wst.xml.ui,  org.eclipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",or
+ g.eclipse.wst.xml.core.internal.preferences; x-friends:="org.eclipse.ws
+ t.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.ecli
+ pse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.eclipse.wst.xml.core.int
+ ernal.propagate; x-friends:="org.eclipse.wst.dtd.core,  org.eclipse.wst
+ .dtd.ui,  org.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.core,  org.eclip
+ se.wst.xsd.ui",org.eclipse.wst.xml.core.internal.provisional; x-friends
+ :="org.eclipse.wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclipse.wst.
+ xml.ui,  org.eclipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.eclipse
+ .wst.xml.core.internal.provisional.contentmodel; x-friends:="org.eclips
+ e.wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.
+ eclipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.eclipse.wst.xml.core
+ .internal.provisional.contenttype; x-friends:="org.eclipse.wst.dtd.core
+ ,  org.eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.eclipse.wst.xs
+ d.core,  org.eclipse.wst.xsd.ui",org.eclipse.wst.xml.core.internal.prov
+ isional.document; x-friends:="org.eclipse.wst.dtd.core,  org.eclipse.ws
+ t.dtd.ui,  org.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.core,  org.ecli
+ pse.wst.xsd.ui",org.eclipse.wst.xml.core.internal.provisional.format; x
+ -friends:="org.eclipse.wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.ecli
+ pse.wst.xml.ui,  org.eclipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org
+ .eclipse.wst.xml.core.internal.provisional.text; x-friends:="org.eclips
+ e.wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.
+ eclipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.eclipse.wst.xml.core
+ .internal.regions; x-friends:="org.eclipse.wst.dtd.core,  org.eclipse.w
+ st.dtd.ui,  org.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.core,  org.ecl
+ ipse.wst.xsd.ui",org.eclipse.wst.xml.core.internal.search; x-friends:="
+ org.eclipse.wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclipse.wst.xml
+ .ui,  org.eclipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.eclipse.ws
+ t.xml.core.internal.search.impl; x-friends:="org.eclipse.wst.dtd.core, 
+  org.eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.
+ core,  org.eclipse.wst.xsd.ui",org.eclipse.wst.xml.core.internal.search
+ .matching; x-friends:="org.eclipse.wst.dtd.core,  org.eclipse.wst.dtd.u
+ i,  org.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.core,  org.eclipse.wst
+ .xsd.ui",org.eclipse.wst.xml.core.internal.search.quickscan; x-friends:
+ ="org.eclipse.wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclipse.wst.x
+ ml.ui,  org.eclipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.eclipse.
+ wst.xml.core.internal.ssemodelquery; x-friends:="org.eclipse.wst.dtd.co
+ re,  org.eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.eclipse.wst.
+ xsd.core,  org.eclipse.wst.xsd.ui",org.eclipse.wst.xml.core.internal.ta
+ sks; x-friends:="org.eclipse.wst.dtd.core,  org.eclipse.wst.dtd.ui,  or
+ g.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.core,  org.eclipse.wst.xsd.u
+ i",org.eclipse.wst.xml.core.internal.text; x-friends:="org.eclipse.wst.
+ dtd.core,  org.eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.eclips
+ e.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.eclipse.wst.xml.core.inter
+ nal.text.rules; x-friends:="org.eclipse.wst.dtd.core,  org.eclipse.wst.
+ dtd.ui,  org.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.core,  org.eclips
+ e.wst.xsd.ui",org.eclipse.wst.xml.core.internal.validate; x-friends:="o
+ rg.eclipse.wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclipse.wst.xml.
+ ui,  org.eclipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.eclipse.wst
+ .xml.core.internal.validation; x-friends:="org.eclipse.wst.dtd.core,  o
+ rg.eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.co
+ re,  org.eclipse.wst.xsd.ui",org.eclipse.wst.xml.core.internal.validati
+ on.core; x-friends:="org.eclipse.wst.dtd.core,  org.eclipse.wst.dtd.ui,
+   org.eclipse.wst.xml.ui,  org.eclipse.wst.xsd.core,  org.eclipse.wst.x
+ sd.ui",org.eclipse.wst.xml.core.internal.validation.core.logging; x-fri
+ ends:="org.eclipse.wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclipse.
+ wst.xml.ui,  org.eclipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.ecl
+ ipse.wst.xml.core.internal.validation.eclipse; x-friends:="org.eclipse.
+ wst.dtd.core,  org.eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.ec
+ lipse.wst.xsd.core,  org.eclipse.wst.xsd.ui",org.eclipse.wst.xml.core.i
+ nternal.validation.errorcustomization; x-friends:="org.eclipse.wst.dtd.
+ core,  org.eclipse.wst.dtd.ui,  org.eclipse.wst.xml.ui,  org.eclipse.ws
+ t.xsd.core,  org.eclipse.wst.xsd.ui",org.eclipse.wst.xml.core.text
+Bundle-Version: 1.2.800.v202308210520
+

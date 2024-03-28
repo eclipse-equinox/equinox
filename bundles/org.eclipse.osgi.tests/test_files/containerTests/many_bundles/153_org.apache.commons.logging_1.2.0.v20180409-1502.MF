@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.apache.commons.logging
+Bundle-Version: 1.2.0.v20180409-1502
+Import-Package: javax.servlet;resolution:=optional,org.apache.avalon.fra
+ mework.logger;resolution:=optional,org.apache.commons.logging;resolutio
+ n:=optional;version="[1.2,2)",org.apache.commons.logging.impl;resolutio
+ n:=optional;version="[1.2,2)",org.apache.log;resolution:=optional,org.a
+ pache.log4j;resolution:=optional
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.2))"
+Bundle-ManifestVersion: 2
+Export-Package: org.apache.commons.logging.impl;x-internal:=true;version
+ ="1.2.0";uses:="javax.servlet,org.apache.avalon.framework.logger,org.ap
+ ache.commons.logging,org.apache.log,org.apache.log4j",org.apache.common
+ s.logging;version="1.2.0"
+

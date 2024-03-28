@@ -1,0 +1,32 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.cdt.make.ui; singleton:=true
+Require-Bundle: org.eclipse.ui.ide;bundle-version="[3.2.0,4.0.0)",org.ec
+ lipse.ui.views;bundle-version="[3.2.0,4.0.0)",org.eclipse.jface.text;bu
+ ndle-version="[3.5.0,4.0.0)",org.eclipse.ui.workbench.texteditor;bundle
+ -version="[3.2.0,4.0.0)",org.eclipse.ui.editors;bundle-version="[3.2.0,
+ 4.0.0)",org.eclipse.core.resources;bundle-version="[3.2.0,4.0.0)",org.e
+ clipse.ui;bundle-version="[3.2.0,4.0.0)",org.eclipse.cdt.core;bundle-ve
+ rsion="[8.0.0,9.0.0)",org.eclipse.cdt.ui;bundle-version="[8.0.0,9.0.0)"
+ ,org.eclipse.cdt.make.core;bundle-version="[7.0.0,8.1.0)",org.eclipse.c
+ ore.runtime;bundle-version="[3.2.0,4.0.0)",org.eclipse.debug.ui;bundle-
+ version="[3.2.0,4.0.0)",org.eclipse.ui.navigator;bundle-version="[3.2.0
+ ,4.0.0)";resolution:=optional,org.eclipse.compare;bundle-version="[3.3.
+ 0,4.0.0)",org.eclipse.core.filesystem;bundle-version="1.2.0",org.eclips
+ e.tools.templates.ui;bundle-version="1.1.1",org.eclipse.tools.templates
+ .freemarker;bundle-version="1.0.0",org.eclipse.cdt.launch;bundle-versio
+ n="9.2.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.cdt.make.internal.ui;x-internal:=true,org.ec
+ lipse.cdt.make.internal.ui.compare;x-internal:=true,org.eclipse.cdt.mak
+ e.internal.ui.editor;x-internal:=true,org.eclipse.cdt.make.internal.ui.
+ part;x-internal:=true,org.eclipse.cdt.make.internal.ui.preferences;x-in
+ ternal:=true,org.eclipse.cdt.make.internal.ui.properties;x-internal:=tr
+ ue,org.eclipse.cdt.make.internal.ui.scannerconfig;x-internal:=true,org.
+ eclipse.cdt.make.internal.ui.text;x-internal:=true,org.eclipse.cdt.make
+ .internal.ui.text.makefile;x-internal:=true,org.eclipse.cdt.make.intern
+ al.ui.wizards;x-internal:=true,org.eclipse.cdt.make.ui,org.eclipse.cdt.
+ make.ui.actions,org.eclipse.cdt.make.ui.dialogs,org.eclipse.cdt.make.ui
+ .views,org.eclipse.cdt.make.ui.wizards
+Bundle-Version: 8.2.0.202211062329
+

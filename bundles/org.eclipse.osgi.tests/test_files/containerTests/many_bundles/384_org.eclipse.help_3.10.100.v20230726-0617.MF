@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.help; singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.29.0,4.0.0)"
+ ,org.eclipse.core.expressions;bundle-version="[3.4.200,4.0.0)";visibili
+ ty:=reexport
+Import-Package: javax.xml.parsers,javax.xml.transform,javax.xml.transfor
+ m.dom,javax.xml.transform.stream,org.w3c.dom,org.xml.sax,org.xml.sax.he
+ lpers
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.help,org.eclipse.help.internal; x-friends:="
+ org.eclipse.help.base,  org.eclipse.help.ui,  org.eclipse.help.webapp, 
+  org.eclipse.ui.intro,  org.eclipse.ua.tests,  org.eclipse.ui.cheatshee
+ ts,  org.eclipse.ua.tests.doc",org.eclipse.help.internal.context; x-fri
+ ends:="org.eclipse.help.base,  org.eclipse.help.ui,  org.eclipse.ua.tes
+ ts,  org.eclipse.help.webapp",org.eclipse.help.internal.criteria; x-fri
+ ends:="org.eclipse.help.base,  org.eclipse.help.webapp,  org.eclipse.ua
+ .tests,  org.eclipse.help.ui",org.eclipse.help.internal.dynamic; x-frie
+ nds:="org.eclipse.ua.tests,  org.eclipse.help.ui,  org.eclipse.help.bas
+ e,  org.eclipse.ui.intro,  org.eclipse.help.webapp,  org.eclipse.ui.che
+ atsheets",org.eclipse.help.internal.entityresolver; x-friends:="org.ecl
+ ipse.help.base,  org.eclipse.help.ui,  org.eclipse.ui.cheatsheets,  org
+ .eclipse.ua.tests",org.eclipse.help.internal.extension;x-friends:="org.
+ eclipse.help.webapp,org.eclipse.help.base,org.eclipse.ua.tests",org.ecl
+ ipse.help.internal.index; x-friends:="org.eclipse.help.webapp,  org.ecl
+ ipse.ua.tests,  org.eclipse.help.ui,  org.eclipse.help.base",org.eclips
+ e.help.internal.toc; x-friends:="org.eclipse.help.base,  org.eclipse.he
+ lp.ui,  org.eclipse.help.webapp,  org.eclipse.ua.tests,  org.eclipse.ua
+ .tests.doc",org.eclipse.help.internal.util; x-friends:="org.eclipse.hel
+ p.base,  org.eclipse.help.ui,  org.eclipse.help.webapp,  org.eclipse.ua
+ .tests,  org.eclipse.ui.intro.universal,  org.eclipse.ui.intro"
+Bundle-Version: 3.10.100.v20230726-0617
+

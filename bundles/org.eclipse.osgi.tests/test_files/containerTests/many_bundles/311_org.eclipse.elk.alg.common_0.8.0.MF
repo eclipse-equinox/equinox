@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-SymbolicName: org.eclipse.elk.alg.common;singleton:=true
+Require-Bundle: com.google.guava,org.eclipse.elk.core,org.eclipse.elk.gr
+ aph
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.elk.alg.common,org.eclipse.elk.alg.common.co
+ mpaction,org.eclipse.elk.alg.common.compaction.oned,org.eclipse.elk.alg
+ .common.compaction.options,org.eclipse.elk.alg.common.networksimplex,or
+ g.eclipse.elk.alg.common.nodespacing,org.eclipse.elk.alg.common.nodespa
+ cing.cellsystem,org.eclipse.elk.alg.common.overlaps,org.eclipse.elk.alg
+ .common.polyomino,org.eclipse.elk.alg.common.polyomino.structures,org.e
+ clipse.elk.alg.common.spore,org.eclipse.elk.alg.common.utils
+Bundle-Version: 0.8.0
+

@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.oomph.ui;singleton:=true
+Require-Bundle: org.eclipse.core.expressions;bundle-version="[3.4.0,4.0.
+ 0)",org.eclipse.core.runtime;bundle-version="[3.24.0,4.0.0)",org.eclips
+ e.core.resources;bundle-version="[3.5.0,4.0.0)";resolution:=optional,or
+ g.eclipse.core.filebuffers;bundle-version="[3.5.0,4.0.0)",org.eclipse.j
+ face.text;bundle-version="[3.5.0,4.0.0)",org.eclipse.ui;bundle-version=
+ "[3.5.0,4.0.0)",org.eclipse.oomph.base.edit;bundle-version="[1.17.0,2.0
+ .0)";visibility:=reexport,org.eclipse.emf.edit.ui;bundle-version="[2.10
+ .0,3.0.0)";visibility:=reexport,org.eclipse.emf.ecore.xmi;bundle-versio
+ n="[2.10.0,3.0.0)",org.eclipse.ui.workbench.texteditor;bundle-version="
+ [3.5.0,4.0.0)";resolution:=optional
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.oomph.internal.ui;version="1.20.0";x-interna
+ l:=true,org.eclipse.oomph.ui;version="1.20.0";x-internal:=true
+Bundle-Version: 1.20.0.v20230828-1517
+

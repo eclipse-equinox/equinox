@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.text.quicksearch;singleton:=true
+Require-Bundle: org.eclipse.ui;bundle-version="[3.113.0,4.0.0)",org.ecli
+ pse.core.resources;bundle-version="[3.13.0,4.0.0)",org.eclipse.ui.ide;b
+ undle-version="[3.16.0,4.0.0)",org.eclipse.core.expressions;bundle-vers
+ ion="[3.6.0,4.0.0)",org.eclipse.search;bundle-version="[3.11.0,4.0.0)",
+ org.eclipse.ui.editors;bundle-version="[3.11.0,4.0.0)",org.eclipse.jfac
+ e;bundle-version="[3.17.0,4.0.0)",org.eclipse.jface.text;bundle-version
+ ="[3.15.0,4.0.0)",org.apache.ant;bundle-version="[1.10.0,2.0.0)"
+Import-Package: org.eclipse.core.runtime;version="3.5.0",org.eclipse.cor
+ e.runtime.jobs,org.eclipse.osgi.util;version="1.1.0",org.osgi.framework
+ ;version="1.9.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.text.quicksearch.internal.core;x-internal:=t
+ rue,org.eclipse.text.quicksearch.internal.core.pathmatch;x-internal:=tr
+ ue,org.eclipse.text.quicksearch.internal.core.preferences;x-internal:=t
+ rue,org.eclipse.text.quicksearch.internal.core.priority;x-friends:="org
+ .eclipse.text.quicksearch.tests",org.eclipse.text.quicksearch.internal.
+ ui;x-friends:="org.eclipse.text.quicksearch.tests",org.eclipse.text.qui
+ cksearch.internal.util;x-internal:=true
+Bundle-Version: 1.2.200.v20230701-1052
+

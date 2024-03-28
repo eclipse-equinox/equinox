@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: one.util.streamex
+Bundle-ManifestVersion: 2
+Export-Package: one.util.streamex;version="0.8.1"
+Bundle-Version: 0.8.1
+

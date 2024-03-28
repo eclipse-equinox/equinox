@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.cdt.codan.core;singleton:=true
+Require-Bundle: org.eclipse.core.runtime,org.eclipse.core.resources
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.cdt.codan.core,org.eclipse.cdt.codan.core.mo
+ del,org.eclipse.cdt.codan.core.model.cfg;x-friends:="org.eclipse.cdt.co
+ dan.core.cxx,org.eclipse.cdt.codan.checkers",org.eclipse.cdt.codan.core
+ .param,org.eclipse.cdt.codan.internal.core; x-friends:="org.eclipse.cdt
+ .codan.core,  org.eclipse.cdt.codan.core.cxx,  org.eclipse.cdt.codan.co
+ re.test,  org.eclipse.cdt.codan.ui,  org.eclipse.cdt.codan.ui.cxx",org.
+ eclipse.cdt.codan.internal.core.cfg;x-friends:="org.eclipse.cdt.codan.c
+ ore.cxx,org.eclipse.cdt.codan.checkers",org.eclipse.cdt.codan.internal.
+ core.model; x-friends:="org.eclipse.cdt.codan.core.cxx,  org.eclipse.cd
+ t.codan.core.test,  org.eclipse.cdt.codan.ui,  org.eclipse.cdt.codan.ui
+ .cxx,  org.eclipse.cdt.codan.checkers.ui"
+Bundle-Version: 4.2.0.202211062329
+

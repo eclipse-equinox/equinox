@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.jetty.websocket.servlet
+Import-Package: org.slf4j;version="[1.7,3.0)",java.io,java.lang,java.tim
+ e,java.util,javax.servlet;version="[4.0.0,5)",javax.servlet.http;versio
+ n="[4.0.0,5)",org.eclipse.jetty.server;version="[10.0.13,11)",org.eclip
+ se.jetty.server.handler;version="[10.0.13,11)",org.eclipse.jetty.servle
+ t;version="[10.0.13,11)",org.eclipse.jetty.util.annotation;version="[10
+ .0.13,11)",org.eclipse.jetty.util.component;version="[10.0.13,11)",org.
+ eclipse.jetty.util.thread;version="[10.0.13,11)",org.eclipse.jetty.webs
+ ocket.core;version="[10.0.13,11)",org.eclipse.jetty.websocket.core.serv
+ er;version="[10.0.13,11)",org.slf4j.event;version="[1.7,3.0)",org.slf4j
+ .helpers;version="[1.7,3.0)",org.slf4j.spi;version="[1.7,3.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.jetty.websocket.servlet;uses:="javax.servlet
+ ,org.eclipse.jetty.servlet,org.eclipse.jetty.util.annotation,org.eclips
+ e.jetty.util.component";version="10.0.13"
+Bundle-Version: 10.0.13
+

@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.cdt.docker.launcher;singleton:=true
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.linu
+ xtools.docker.core;bundle-version="[5.0.0,6.0.0)",org.eclipse.linuxtool
+ s.docker.ui;bundle-version="[5.0.0,6.0.0)",org.eclipse.cdt.launch;bundl
+ e-version="7.1.0",org.eclipse.debug.core;bundle-version="3.9.1",org.ecl
+ ipse.debug.ui;bundle-version="3.10.1",org.eclipse.cdt.core;bundle-versi
+ on="8.3.0",org.eclipse.cdt.debug.core;bundle-version="7.5.0",org.eclips
+ e.cdt.ui;bundle-version="5.8.0",org.eclipse.ui.ide;bundle-version="3.10
+ .1",org.eclipse.cdt.debug.ui;bundle-version="7.5.0",org.eclipse.cdt.dsf
+ .gdb;bundle-version="4.6.0",org.eclipse.cdt.dsf.gdb.ui;bundle-version="
+ 2.4.0",org.eclipse.core.variables,org.eclipse.cdt.managedbuilder.ui,org
+ .eclipse.cdt.managedbuilder.core,org.eclipse.core.databinding.observabl
+ e,org.eclipse.core.databinding.beans,org.eclipse.jface.databinding,org.
+ eclipse.core.databinding;bundle-version="1.6.0",org.eclipse.core.databi
+ nding.property;bundle-version="1.6.0",org.eclipse.launchbar.ui;bundle-v
+ ersion="2.2.0",com.google.gson
+Import-Package: org.eclipse.jdt.annotation
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.cdt.docker.launcher,org.eclipse.cdt.internal
+ .docker.launcher;x-internal:=true,org.eclipse.cdt.internal.docker.launc
+ her.ui.preferences;x-internal:=true
+Bundle-Version: 2.1.0.202308160000
+

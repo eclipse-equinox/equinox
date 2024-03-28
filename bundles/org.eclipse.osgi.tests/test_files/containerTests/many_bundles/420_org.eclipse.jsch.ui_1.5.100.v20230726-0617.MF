@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.jsch.ui;singleton:=true
+Require-Bundle: org.eclipse.ui;bundle-version="[3.5.0,4.0.0)",org.eclips
+ e.core.runtime;bundle-version="[3.29.0,4.0.0)",org.eclipse.jsch.core;bu
+ ndle-version="[1.2.0,2.0.0)",com.jcraft.jsch;bundle-version="[0.1.50,1.
+ 0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.jsch.internal.ui;x-internal:=true,org.eclips
+ e.jsch.internal.ui.authenticator;x-internal:=true,org.eclipse.jsch.inte
+ rnal.ui.preference;x-internal:=true,org.eclipse.jsch.ui;uses:="com.jcra
+ ft.jsch"
+Bundle-Version: 1.5.100.v20230726-0617
+

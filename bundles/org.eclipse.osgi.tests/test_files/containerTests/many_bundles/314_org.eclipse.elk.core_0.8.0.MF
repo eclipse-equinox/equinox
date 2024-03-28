@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-SymbolicName: org.eclipse.elk.core;singleton:=true
+Require-Bundle: com.google.guava,org.eclipse.emf.ecore,org.eclipse.emf.e
+ core.xmi,org.eclipse.elk.graph
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.elk.core,org.eclipse.elk.core.alg,org.eclips
+ e.elk.core.comments,org.eclipse.elk.core.data,org.eclipse.elk.core.labe
+ ls,org.eclipse.elk.core.math,org.eclipse.elk.core.options,org.eclipse.e
+ lk.core.testing,org.eclipse.elk.core.util,org.eclipse.elk.core.util.ada
+ pters,org.eclipse.elk.core.util.internal;x-friends:="org.eclipse.elk.gr
+ aph.text",org.eclipse.elk.core.util.persistence,org.eclipse.elk.core.ut
+ il.selection,org.eclipse.elk.core.validation
+Bundle-Version: 0.8.0
+

@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.mylyn.wikitext.ant
+Import-Package: org.apache.tools.ant,org.apache.tools.ant.types,org.ecli
+ pse.mylyn.wikitext.ant,org.eclipse.mylyn.wikitext.ant.internal,org.ecli
+ pse.mylyn.wikitext.parser;version="[3.0,4)",org.eclipse.mylyn.wikitext.
+ parser.builder;version="[3.0,4)",org.eclipse.mylyn.wikitext.parser.mark
+ up;version="[3.0,4)",org.eclipse.mylyn.wikitext.parser.outline;version=
+ "[3.0,4)",org.eclipse.mylyn.wikitext.parser.util;version="[3.0,4)",org.
+ eclipse.mylyn.wikitext.splitter;version="[3.0,4)",org.eclipse.mylyn.wik
+ itext.util;version="[3.0,4)",org.eclipse.mylyn.wikitext.validation;vers
+ ion="[3.0,4)",org.xml.sax
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
+Export-Package: org.eclipse.mylyn.wikitext.ant.internal;x-internal:=true
+ ;uses:="org.apache.tools.ant,org.apache.tools.ant.types,org.eclipse.myl
+ yn.wikitext.ant,org.eclipse.mylyn.wikitext.parser.markup";version="3.0.
+ 48",org.eclipse.mylyn.wikitext.ant;uses:="org.apache.tools.ant,org.ecli
+ pse.mylyn.wikitext.parser.markup";version="3.0.48"
+Bundle-Version: 3.0.48.202308291007
+

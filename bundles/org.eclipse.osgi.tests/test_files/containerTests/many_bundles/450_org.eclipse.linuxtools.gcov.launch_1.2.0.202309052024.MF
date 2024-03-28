@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.gcov.launch;singleton:=true
+Require-Bundle: org.eclipse.linuxtools.profiling.launch;bundle-version="
+ 1.2.0",org.eclipse.core.runtime;bundle-version="3.8.0",org.eclipse.cdt.
+ debug.core;bundle-version="7.2.0",org.eclipse.cdt.launch;bundle-version
+ ="7.1.0",org.eclipse.cdt.core;bundle-version="5.2.0",org.eclipse.ui;bun
+ dle-version="3.103.0",org.eclipse.linuxtools.gcov.core;bundle-version="
+ 4.2.0",org.eclipse.debug.ui;bundle-version="3.8.0",org.eclipse.linuxtoo
+ ls.profiling.ui,org.eclipse.linuxtools.dataviewers;bundle-version="6.1.
+ 0"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Bundle-Version: 1.2.0.202309052024
+

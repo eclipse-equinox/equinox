@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.core.commands
+Require-Bundle: org.eclipse.equinox.common;bundle-version="[3.2.0,4.0.0)
+ "
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.core.commands,org.eclipse.core.commands.comm
+ on,org.eclipse.core.commands.contexts,org.eclipse.core.commands.interna
+ l.util;x-internal:=true,org.eclipse.core.commands.operations,org.eclips
+ e.core.commands.util,org.eclipse.core.internal.commands.operations;x-in
+ ternal:=true,org.eclipse.core.internal.commands.util;x-internal:=true
+Bundle-Version: 3.11.100.v20230708-0916
+

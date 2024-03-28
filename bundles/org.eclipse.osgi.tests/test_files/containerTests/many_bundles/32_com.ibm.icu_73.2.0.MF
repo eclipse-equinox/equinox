@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-SymbolicName: com.ibm.icu
+Bundle-ManifestVersion: 2
+Export-Package: com.ibm.icu.lang,com.ibm.icu.math,com.ibm.icu.number,com
+ .ibm.icu.text,com.ibm.icu.util
+Bundle-Version: 73.2
+

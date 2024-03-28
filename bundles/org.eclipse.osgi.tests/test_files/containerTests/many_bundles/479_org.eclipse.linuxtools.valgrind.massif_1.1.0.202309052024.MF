@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.valgrind.massif;singleton:=t
+ rue
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.swtc
+ hart.extensions
+Import-Package: org.eclipse.cdt.core.model,org.eclipse.cdt.debug.core,or
+ g.eclipse.core.filesystem,org.eclipse.core.resources,org.eclipse.debug.
+ core,org.eclipse.debug.core.model,org.eclipse.debug.core.sourcelookup,o
+ rg.eclipse.debug.ui,org.eclipse.jface.text,org.eclipse.linuxtools.inter
+ nal.valgrind.launch,org.eclipse.linuxtools.internal.valgrind.ui,org.ecl
+ ipse.linuxtools.profiling.launch,org.eclipse.linuxtools.profiling.ui,or
+ g.eclipse.linuxtools.valgrind.core,org.eclipse.linuxtools.valgrind.laun
+ ch,org.eclipse.linuxtools.valgrind.ui,org.eclipse.ui,org.eclipse.swtcha
+ rt
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Bundle-Version: 1.1.0.202309052024
+

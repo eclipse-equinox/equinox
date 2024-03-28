@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.justj.epp;singleton:=true
+Require-Bundle: org.eclipse.justj.openjdk.hotspot.jre.full;bundle-versio
+ n="[17.0.8.v20230831-0857,18.0.0)"
+Bundle-ManifestVersion: 2
+Bundle-Version: 17.0.0.v20230831-1210
+

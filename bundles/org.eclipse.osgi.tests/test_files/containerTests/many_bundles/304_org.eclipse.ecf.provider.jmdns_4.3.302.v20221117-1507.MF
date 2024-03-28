@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: CDC-1.1/Foundation-1.1,J2SE-1.4
+Bundle-SymbolicName: org.eclipse.ecf.provider.jmdns;singleton:=true
+Require-Bundle: org.eclipse.equinox.common,org.eclipse.ecf,org.eclipse.e
+ cf.discovery
+Import-Package: org.osgi.framework;version="1.3.0",org.osgi.service.log;
+ version="1.3.0",org.osgi.util.tracker;version="1.3.2"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.ecf.internal.provider.jmdns;x-internal:=true
+ ,org.eclipse.ecf.provider.jmdns.container;version="4.1.0",org.eclipse.e
+ cf.provider.jmdns.identity;version="4.1.0"
+Bundle-Version: 4.3.302.v20221117-1507
+Provide-Capability: osgi.remoteserviceadmin.discovery;protocols:List<Str
+ ing>="ZEROCONF,JMDNS,ecf.discovery.jmdns,ecf.discovery.jmdns.locator,ec
+ f.discovery.jmdns.advertiser";version:Version=1.1
+

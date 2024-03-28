@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.cdt.testsrunner.boost;singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="3.5.0",org.ecli
+ pse.cdt.testsrunner;bundle-version="3.5.0",org.eclipse.cdt.core;bundle-
+ version="8.3.0"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.cdt.testsrunner.internal.boost;x-friends:="o
+ rg.eclipse.cdt.testsrunner.tests"
+Bundle-Version: 7.2.100.202308181406
+

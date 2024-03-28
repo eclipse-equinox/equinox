@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.core.variables; singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.29.0,4.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.core.internal.variables;x-internal:=true,org
+ .eclipse.core.variables
+Bundle-Version: 3.6.100.v20230726-0617
+

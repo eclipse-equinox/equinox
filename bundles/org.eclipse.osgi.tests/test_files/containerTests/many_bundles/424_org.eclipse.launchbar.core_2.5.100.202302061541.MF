@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.launchbar.core;singleton:=true
+Require-Bundle: org.eclipse.core.runtime,org.eclipse.debug.core,org.ecli
+ pse.core.expressions
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.launchbar.core,org.eclipse.launchbar.core.in
+ ternal;x-friends:="org.eclipse.launchbar.core.tests,org.eclipse.launchb
+ ar.ui",org.eclipse.launchbar.core.target,org.eclipse.launchbar.core.tar
+ get.launch
+Bundle-Version: 2.5.100.202302061541
+

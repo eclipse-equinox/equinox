@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.mylyn.wikitext.html
+Import-Package: com.google.common.base;version="[31.1,33.0)",com.google.
+ common.collect;version="[31.1,33.0)",org.eclipse.mylyn.wikitext.html,or
+ g.eclipse.mylyn.wikitext.html.internal,org.eclipse.mylyn.wikitext.parse
+ r;version="[3.0,4)",org.eclipse.mylyn.wikitext.parser.builder;version="
+ [3.0,4)",org.eclipse.mylyn.wikitext.parser.css;version="[3.0,4)",org.ec
+ lipse.mylyn.wikitext.parser.markup;version="[3.0,4)",org.eclipse.mylyn.
+ wikitext.util;version="[3.0,4)",org.xml.sax
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
+Export-Package: org.eclipse.mylyn.wikitext.html.internal;x-internal:=tru
+ e;uses:="org.eclipse.mylyn.wikitext.html,org.eclipse.mylyn.wikitext.par
+ ser,org.eclipse.mylyn.wikitext.parser.builder,org.eclipse.mylyn.wikitex
+ t.parser.markup,org.eclipse.mylyn.wikitext.util";version="3.0.48",org.e
+ clipse.mylyn.wikitext.html;uses:="org.eclipse.mylyn.wikitext.parser,org
+ .eclipse.mylyn.wikitext.parser.markup";version="3.0.48"
+Bundle-Version: 3.0.48.202308291007
+

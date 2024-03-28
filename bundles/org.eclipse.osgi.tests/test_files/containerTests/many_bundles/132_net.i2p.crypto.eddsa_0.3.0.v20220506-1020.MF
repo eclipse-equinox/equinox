@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: net.i2p.crypto.eddsa
+Import-Package: sun.security.x509;resolution:=optional
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version>=1.6))"
+Export-Package: net.i2p.crypto.eddsa;version="0.3.0";uses:="net.i2p.cryp
+ to.eddsa.math,net.i2p.crypto.eddsa.spec",net.i2p.crypto.eddsa.math;vers
+ ion="0.3.0",net.i2p.crypto.eddsa.math.bigint;version="0.3.0";uses:="net
+ .i2p.crypto.eddsa.math",net.i2p.crypto.eddsa.math.ed25519;version="0.3.
+ 0";uses:="net.i2p.crypto.eddsa.math",net.i2p.crypto.eddsa.spec;version=
+ "0.3.0";uses:="net.i2p.crypto.eddsa.math"
+Bundle-Version: 0.3.0.v20220506-1020
+

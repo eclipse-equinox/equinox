@@ -1,0 +1,118 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.xtext;singleton:=true
+Require-Bundle: org.eclipse.emf.ecore.xmi;bundle-version="2.16.0";visibi
+ lity:=reexport,org.eclipse.emf.ecore;bundle-version="2.20.0";visibility
+ :=reexport,org.eclipse.emf.common;bundle-version="2.17.0",org.antlr.run
+ time;bundle-version="[3.2.0,3.2.1)";visibility:=reexport,com.google.inj
+ ect;bundle-version="5.0.1";visibility:=reexport,org.objectweb.asm;bundl
+ e-version="[9.4.0,9.5.0)";resolution:=optional,org.eclipse.emf.mwe.core
+ ;bundle-version="1.3.21";resolution:=optional;visibility:=reexport,org.
+ eclipse.emf.mwe.utils;bundle-version="1.3.21";resolution:=optional;visi
+ bility:=reexport,org.eclipse.xtend;bundle-version="2.2.0";resolution:=o
+ ptional,org.eclipse.xtend.typesystem.emf;bundle-version="2.2.0";resolut
+ ion:=optional,org.eclipse.xtext.util;visibility:=reexport,org.eclipse.c
+ ore.runtime;bundle-version="3.13.0";resolution:=optional;x-installation
+ :=greedy,org.eclipse.xtend.lib;resolution:=optional,org.eclipse.equinox
+ .common;bundle-version="3.9.0"
+Import-Package: org.apache.log4j;version="1.2.19",org.osgi.framework
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.xtext,org.eclipse.xtext.build;x-friends:="or
+ g.eclipse.xtext.testing,  org.eclipse.xtext.ide,  org.eclipse.xtext.jun
+ it4,  org.eclipse.xtext.tests,  org.eclipse.xtend.core.tests",org.eclip
+ se.xtext.common,org.eclipse.xtext.common.parser.packrat;x-friends:="org
+ .eclipse.xtext.generator",org.eclipse.xtext.common.parser.packrat.consu
+ mers;x-friends:="org.eclipse.xtext.generator",org.eclipse.xtext.common.
+ services,org.eclipse.xtext.conversion,org.eclipse.xtext.conversion.impl
+ ,org.eclipse.xtext.debug;x-friends:="org.eclipse.xtext.builder,  org.ec
+ lipse.xtext.ide.tests,  org.eclipse.xtext.xbase",org.eclipse.xtext.diag
+ nostics,org.eclipse.xtext.documentation,org.eclipse.xtext.documentation
+ .impl,org.eclipse.xtext.findReferences;x-friends:="org.eclipse.xtext.id
+ e,  org.eclipse.xtext.ui,  org.eclipse.xtext.ui.tests,  org.eclipse.xte
+ xt.xbase,  org.eclipse.xtend.core",org.eclipse.xtext.formatting,org.ecl
+ ipse.xtext.formatting.impl,org.eclipse.xtext.formatting2,org.eclipse.xt
+ ext.formatting2.debug;x-friends:="org.eclipse.xtext.ide,  org.eclipse.x
+ text.eclipse.tests,  org.eclipse.xtext.ide.tests,  org.eclipse.xtext.ju
+ nit4,  org.eclipse.xtext.testing,  org.eclipse.xtext.tests",org.eclipse
+ .xtext.formatting2.internal;x-friends:="org.eclipse.xtext.tests,  org.e
+ clipse.xtend.core",org.eclipse.xtext.formatting2.regionaccess,org.eclip
+ se.xtext.formatting2.regionaccess.internal;x-friends:="org.eclipse.xtex
+ t.ide,  org.eclipse.xtend.core,  org.eclipse.xtend.ide,  org.eclipse.xt
+ ext.junit4,  org.eclipse.xtext.testing,  org.eclipse.xtext.tests,  org.
+ eclipse.xtext.xbase",org.eclipse.xtext.generator,org.eclipse.xtext.gene
+ rator.trace;x-friends:="org.eclipse.xtext.xbase.ui,org.eclipse.xtend.id
+ e,  org.eclipse.xtext.builder,  org.eclipse.xtext.builder.tests,  org.e
+ clipse.xtext.common.types.ui,  org.eclipse.xtext.smap,  org.eclipse.xte
+ xt.tests,  org.eclipse.xtext.ui,  org.eclipse.xtext.ui.shared,  org.ecl
+ ipse.xtext.ui.tests,  org.eclipse.xtext.xbase,  org.eclipse.xtend.core,
+   org.eclipse.xtend.ide.tests",org.eclipse.xtext.generator.trace.intern
+ al;x-friends:="org.eclipse.xtext.ui,  org.eclipse.xtext.xbase.ui,  org.
+ eclipse.xtext.builder,  org.eclipse.xtext.builder.tests,  org.eclipse.x
+ text.common.types.ui,  org.eclipse.xtend.ide.tests",org.eclipse.xtext.g
+ enerator.trace.node;x-friends:="org.eclipse.xtext.tests",org.eclipse.xt
+ ext.grammaranalysis;x-friends:="org.eclipse.xtext.tests",org.eclipse.xt
+ ext.grammaranalysis.impl;x-friends:="org.eclipse.xtext.generator,  org.
+ eclipse.xtext.ide.tests,  org.eclipse.xtext.junit4,  org.eclipse.xtext.
+ testing,  org.eclipse.xtext.tests,  org.eclipse.xtext.xtext.generator",
+ org.eclipse.xtext.impl,org.eclipse.xtext.internal;x-internal:=true,org.
+ eclipse.xtext.linking,org.eclipse.xtext.linking.impl,org.eclipse.xtext.
+ linking.lazy,org.eclipse.xtext.mwe,org.eclipse.xtext.naming,org.eclipse
+ .xtext.nodemodel,org.eclipse.xtext.nodemodel.impl,org.eclipse.xtext.nod
+ emodel.serialization;x-friends:="org.eclipse.xtext.tests",org.eclipse.x
+ text.nodemodel.util,org.eclipse.xtext.parser,org.eclipse.xtext.parser.a
+ ntlr,org.eclipse.xtext.parser.antlr.internal;x-friends:="org.eclipse.xt
+ ext.ui.tests",org.eclipse.xtext.parser.impl,org.eclipse.xtext.parser.pa
+ ckrat;x-friends:="org.eclipse.xtext.generator",org.eclipse.xtext.parser
+ .packrat.consumers;x-friends:="org.eclipse.xtext.generator",org.eclipse
+ .xtext.parser.packrat.debug;x-internal:=true,org.eclipse.xtext.parser.p
+ ackrat.internal;x-internal:=true,org.eclipse.xtext.parser.packrat.match
+ ing;x-friends:="org.eclipse.xtext.generator",org.eclipse.xtext.parser.p
+ ackrat.tokens;x-friends:="org.eclipse.xtext.generator",org.eclipse.xtex
+ t.parsetree.reconstr,org.eclipse.xtext.parsetree.reconstr.impl,org.ecli
+ pse.xtext.preferences,org.eclipse.xtext.resource,org.eclipse.xtext.reso
+ urce.clustering;x-friends:="org.eclipse.xtext.builder,  org.eclipse.xte
+ xt.builder.standalone,  org.eclipse.xtext.ui.shared",org.eclipse.xtext.
+ resource.containers,org.eclipse.xtext.resource.generic,org.eclipse.xtex
+ t.resource.impl,org.eclipse.xtext.resource.persistence;x-friends:="org.
+ eclipse.xtend.core,  org.eclipse.xtend.core.tests,  org.eclipse.xtend.i
+ de.tests,  org.eclipse.xtext.eclipse.tests,  org.eclipse.xtext.builder,
+   org.eclipse.xtext.builder.standalone,  org.eclipse.xtext.builder.stan
+ dalone.tests,  org.eclipse.xtext.builder.tests,  org.eclipse.xtext.test
+ s,  org.eclipse.xtext.ui,  org.eclipse.xtext.xbase",org.eclipse.xtext.s
+ coping,org.eclipse.xtext.scoping.impl,org.eclipse.xtext.serializer,org.
+ eclipse.xtext.serializer.acceptor;x-friends:="org.eclipse.xtext.ide,  o
+ rg.eclipse.xtext.junit4,  org.eclipse.xtext.testing,  org.eclipse.xtext
+ .tests,  org.eclipse.xtext.xbase,  org.eclipse.xtext.xtext.generator",o
+ rg.eclipse.xtext.serializer.analysis;x-friends:="org.eclipse.xtext.ide,
+   org.eclipse.xtext.junit4,  org.eclipse.xtext.tests,  org.eclipse.xtex
+ t.xbase,  org.eclipse.xtext.xtext.generator,  org.eclipse.xtend.core",o
+ rg.eclipse.xtext.serializer.diagnostic;x-friends:="org.eclipse.xtext.id
+ e,  org.eclipse.xtext.junit4,  org.eclipse.xtext.testing,  org.eclipse.
+ xtext.tests,  org.eclipse.xtext.xbase",org.eclipse.xtext.serializer.imp
+ l;x-friends:="org.eclipse.xtext.generator,  org.eclipse.xtext.ide.tests
+ ,  org.eclipse.xtext.testing,  org.eclipse.xtext.tests,  org.eclipse.xt
+ ext.xtext.generator,  org.eclipse.xtext.junit4",org.eclipse.xtext.seria
+ lizer.sequencer;x-friends:="org.eclipse.xtext.ide,  org.eclipse.xtext.g
+ enerator,  org.eclipse.xtext.junit,  org.eclipse.xtext.junit4,  org.ecl
+ ipse.xtext.testing,  org.eclipse.xtext.tests,  org.eclipse.xtext.xtext.
+ generator,  org.eclipse.xtext.ui,  org.eclipse.xtext.xbase,  org.eclips
+ e.xtend.core",org.eclipse.xtext.serializer.tokens,org.eclipse.xtext.ser
+ vice,org.eclipse.xtext.services;x-friends:="org.eclipse.xtext.tests,  o
+ rg.eclipse.xtext.xtext.ui",org.eclipse.xtext.tasks;x-friends:="org.ecli
+ pse.xtext.ide,  org.eclipse.xtext.tests,  org.eclipse.xtext.ui,  org.ec
+ lipse.xtend.core",org.eclipse.xtext.util,org.eclipse.xtext.validation,o
+ rg.eclipse.xtext.validation.impl,org.eclipse.xtext.workspace;x-friends:
+ ="org.eclipse.xtext.xbase.ui,  org.eclipse.xtext.builder.tests,  org.ec
+ lipse.xtext.ide,  org.eclipse.xtext.tests,  org.eclipse.xtext.ui,  org.
+ eclipse.xtext.ui.tests,  org.eclipse.xtext.xbase,  org.eclipse.xtext.xb
+ ase.junit,  org.eclipse.xtext.xbase.testing,  org.eclipse.xtend.core,  
+ org.eclipse.xtend.ide.tests",org.eclipse.xtext.xtext;x-friends:="org.ec
+ lipse.xtext.ide,  org.eclipse.xtext.extras.tests,  org.eclipse.xtext.ge
+ nerator,  org.eclipse.xtext.tests,  org.eclipse.xtext.xtext.ui,  org.ec
+ lipse.xtext.xtext.generator,  org.eclipse.xtext.ui,  org.eclipse.xtext.
+ ui.codetemplates,  org.eclipse.xtext.ui.tests,  org.eclipse.xtext.xtext
+ .ui.tests",org.eclipse.xtext.xtext.ecoreInference;x-friends:="org.eclip
+ se.xtext.extras.tests,  org.eclipse.xtext.tests",org.eclipse.xtext.xtex
+ t.parser;x-friends:="org.eclipse.xtext.eclipse.tests"
+Bundle-Version: 2.29.0.v20221121-0917
+

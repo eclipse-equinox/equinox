@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.oomph.jreinfo
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.24.0,4.0.0)"
+ ,org.eclipse.oomph.util;bundle-version="[1.20.0,2.0.0)";visibility:=ree
+ xport,org.eclipse.oomph.extractor.lib;bundle-version="[1.9.0,2.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.oomph.internal.jreinfo;version="1.18.0";x-in
+ ternal:=true,org.eclipse.oomph.jreinfo;version="1.18.0";x-internal:=tru
+ e
+Bundle-Version: 1.18.0.v20230817-0718
+

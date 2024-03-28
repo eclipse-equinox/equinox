@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: com.equo.chromium
+Require-Bundle: org.eclipse.swt;resolution:=optional
+Bundle-ManifestVersion: 2
+Export-Package: com.equo.chromium,com.equo.chromium.swt,com.equo.chromiu
+ m.utils
+Bundle-Version: 95.0.24
+

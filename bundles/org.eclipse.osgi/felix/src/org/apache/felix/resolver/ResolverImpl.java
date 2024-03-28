@@ -18,19 +18,56 @@
  */
 package org.apache.felix.resolver;
 
-import java.security.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.security.AccessControlContext;
+import java.security.AccessController;
+import java.security.DigestOutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivilegedAction;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.*;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.apache.felix.resolver.reason.ReasonException;
 import org.apache.felix.resolver.util.ArrayMap;
 import org.apache.felix.resolver.util.CandidateSelector;
 import org.apache.felix.resolver.util.OpenHashMap;
-import org.osgi.framework.namespace.*;
-import org.osgi.resource.*;
-import org.osgi.service.resolver.*;
+import org.osgi.framework.namespace.BundleNamespace;
+import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.IdentityNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
+import org.osgi.resource.Capability;
+import org.osgi.resource.Namespace;
+import org.osgi.resource.Requirement;
+import org.osgi.resource.Resource;
+import org.osgi.resource.Wire;
+import org.osgi.resource.Wiring;
+import org.osgi.service.resolver.HostedCapability;
+import org.osgi.service.resolver.ResolutionException;
+import org.osgi.service.resolver.ResolveContext;
+import org.osgi.service.resolver.Resolver;
 
 public class ResolverImpl implements Resolver
 {
@@ -91,6 +128,8 @@ public class ResolverImpl implements Resolver
         private final ConcurrentMap<String, List<String>> m_usesCache = new ConcurrentHashMap<String, List<String>>();
         private ResolutionError m_currentError;
         volatile private CancellationException m_isCancelled = null;
+		private Set<String> m_permutation_hash = new HashSet<>();
+		int dup = 0;
 
         static ResolveSession createSession(ResolveContext resolveContext, Executor executor, Resource dynamicHost, Requirement dynamicReq, List<Capability> dynamicCandidates)
         {
@@ -167,9 +206,36 @@ public class ResolverImpl implements Resolver
             // more permutations would really help.
         }
 
+		MessageDigest md;
+
+		OutputStream nullStream = new OutputStream() {
+
+			@Override
+			public void write(int b) throws IOException {
+
+			}
+		};
+
         void addPermutation(PermutationType type, Candidates permutation) {
             if (permutation != null)
             {
+				try {
+					if (md == null) {
+						md = MessageDigest.getInstance("SHA-512");
+					}
+					try (DigestOutputStream digestOutputStream = new DigestOutputStream(nullStream,
+							md); PrintWriter writer = new PrintWriter(digestOutputStream, true)) {
+						permutation.dump(m_resolveContext, writer);
+					} catch (IOException e1) {
+					}
+					if (!m_permutation_hash.add(new String(md.digest()))) {
+						if (dup == 0) {
+							System.out.println("Duplicate permutation found!");
+						}
+						dup++;
+					}
+				} catch (NoSuchAlgorithmException e) {
+				}
                 List<Candidates> typeToAddTo = null;
                 try {
                     switch (type) {
@@ -226,6 +292,8 @@ public class ResolverImpl implements Resolver
         }
 
         void clearPermutations() {
+			dup = 0;
+			m_permutation_hash.clear();
             m_usesPermutations.clear();
             m_importPermutations.clear();
             m_substPermutations.clear();
@@ -261,7 +329,7 @@ public class ResolverImpl implements Resolver
         }
 
         long getPermutationCount() {
-            return m_usesPermutations.size() + m_importPermutations.size() + m_substPermutations.size(); 
+			return m_usesPermutations.size() + m_importPermutations.size() + m_substPermutations.size();
         }
 
         Executor getExecutor() {
@@ -558,6 +626,8 @@ public class ResolverImpl implements Resolver
     private Candidates findValidCandidates(ResolveSession session, Map<Resource, ResolutionError> faultyResources) {
         Candidates allCandidates = null;
         boolean foundFaultyResources = false;
+		int totalDup = 0;
+		int round = 0;
         do
         {
             allCandidates = session.getNextPermutation();
@@ -592,9 +662,13 @@ public class ResolverImpl implements Resolver
                     faultyResources.putAll(currentFaultyResources);
                 }
             }
+			totalDup += session.dup;
+			System.out.println("Duplicate in round " + (++round) + ": " + session.dup + ", total: " + totalDup);
         }
         while (!session.isCancelled() && session.getCurrentError() != null);
-
+		if (totalDup > 0) {
+			throw new RuntimeException(totalDup + " duplicate permutations detected!");
+		}
         return allCandidates;
     }
 

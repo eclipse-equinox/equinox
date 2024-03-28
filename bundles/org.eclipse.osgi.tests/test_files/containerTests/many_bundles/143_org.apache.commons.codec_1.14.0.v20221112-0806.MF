@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.apache.commons.codec
+Import-Package: javax.crypto;resolution:=optional,javax.crypto.spec;reso
+ lution:=optional,org.apache.commons.codec;resolution:=optional;version=
+ "[1.14,2)",org.apache.commons.codec.binary;resolution:=optional;version
+ ="[1.14,2)",org.apache.commons.codec.digest;resolution:=optional;versio
+ n="[1.14,2)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.7))"
+Export-Package: org.apache.commons.codec;version="1.14.0",org.apache.com
+ mons.codec.binary;version="1.14.0";uses:="org.apache.commons.codec",org
+ .apache.commons.codec.cli;version="1.14.0",org.apache.commons.codec.dig
+ est;version="1.14.0";uses:="javax.crypto",org.apache.commons.codec.lang
+ uage;version="1.14.0";uses:="org.apache.commons.codec",org.apache.commo
+ ns.codec.language.bm;version="1.14.0";uses:="org.apache.commons.codec",
+ org.apache.commons.codec.net;version="1.14.0";uses:="org.apache.commons
+ .codec"
+Bundle-Version: 1.14.0.v20221112-0806
+

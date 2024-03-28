@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.6))"
+Export-Package: com.google.re2j;version="1.6"
+Bundle-SymbolicName: com.google.re2j
+Bundle-Version: 1.6
+

@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-SymbolicName: org.eclipse.emf.databinding; singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.9.0,4.0.0)",
+ org.eclipse.emf.ecore;bundle-version="[2.33.0,3.0.0)";visibility:=reexp
+ ort,org.eclipse.core.databinding;bundle-version="[1.3.0,2.0.0)";visibil
+ ity:=reexport,org.eclipse.core.databinding.property;bundle-version="[1.
+ 3.0,2.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.emf.databinding;version="1.7.0",org.eclipse.
+ emf.databinding.internal;version="1.7.0";x-friends:="org.eclipse.emf.da
+ tabinding.edit"
+Bundle-Version: 1.7.0.v20230211-1150
+

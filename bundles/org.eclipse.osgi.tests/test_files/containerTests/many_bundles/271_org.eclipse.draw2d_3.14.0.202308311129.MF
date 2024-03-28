@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.draw2d;singleton:=true
+Require-Bundle: org.eclipse.swt;bundle-version="[3.4.0,4.0.0)";visibilit
+ y:=reexport
+Import-Package: com.ibm.icu.text
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.draw2d,org.eclipse.draw2d.geometry,org.eclip
+ se.draw2d.graph,org.eclipse.draw2d.images,org.eclipse.draw2d.internal;x
+ -internal:=true,org.eclipse.draw2d.parts,org.eclipse.draw2d.text,org.ec
+ lipse.draw2d.widgets,org.eclipse.draw2d.zoom
+Bundle-Version: 3.14.0.202308311129
+

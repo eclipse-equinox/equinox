@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.platform; singleton:=true
+Require-Bundle: org.eclipse.ui.intro;bundle-version="[3.2.0,4.0.0)",org.
+ eclipse.ui.cheatsheets;bundle-version="[3.2.0,4.0.0)";resolution:=optio
+ nal,org.eclipse.ui.forms;bundle-version="[3.2.0,4.0.0)";resolution:=opt
+ ional,org.eclipse.ui;bundle-version="[3.2.0,4.0.0)";resolution:=optiona
+ l,org.eclipse.core.runtime;bundle-version="[3.29.0,4.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.platform.internal;x-internal:=true
+Bundle-Version: 4.29.0.v20230903-1000
+

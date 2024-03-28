@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: com.sun.jna
+Bundle-ManifestVersion: 2
+Export-Package: com.sun.jna;version="5.13.0", com.sun.jna.ptr;version="5
+ .13.0";uses:="com.sun.jna", com.sun.jna.win32;version="5.13.0";uses:="c
+ om.sun.jna"
+Bundle-Version: 5.13.0.v20230812-1000
+

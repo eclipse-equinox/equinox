@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.epp.package.common;singleton:=true
+Require-Bundle: org.eclipse.platform,org.eclipse.equinox.app,org.eclipse
+ .ui,org.eclipse.core.commands,org.eclipse.core.runtime,org.eclipse.ui.w
+ orkbench
+Bundle-ManifestVersion: 2
+Bundle-Version: 4.29.0.20230907-1200
+

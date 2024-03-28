@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.ui.console; singleton:=true
+Require-Bundle: org.eclipse.ui;bundle-version="[3.5.0,4.0.0)",org.eclips
+ e.jface.text;bundle-version="[3.5.0,4.0.0)",org.eclipse.ui.workbench.te
+ xteditor;bundle-version="[3.5.0,4.0.0)",org.eclipse.core.runtime;bundle
+ -version="[3.29.0,4.0.0)",org.eclipse.core.expressions;bundle-version="
+ [3.4.0,4.0.0)",org.eclipse.core.variables;bundle-version="[3.2.800,4.0.
+ 0)",org.eclipse.debug.core;bundle-version="[3.16.0,4.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.ui.console,org.eclipse.ui.console.actions,or
+ g.eclipse.ui.internal.console;x-internal:=true
+Bundle-Version: 3.13.0.v20230726-0617
+

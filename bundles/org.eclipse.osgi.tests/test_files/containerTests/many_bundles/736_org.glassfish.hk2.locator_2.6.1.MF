@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.glassfish.hk2.locator
+Import-Package: javassist.util.proxy;version="[3.22,4)",javax.inject;ver
+ sion="[1.0,2)",org.aopalliance.intercept;version="[1.0,2)",org.glassfis
+ h.hk2.api;version="[2.6,3)",org.glassfish.hk2.api.messaging;version="[2
+ .6,3)",org.glassfish.hk2.extension;version="[2.6,3)",org.glassfish.hk2.
+ utilities;version="[2.6,3)",org.glassfish.hk2.utilities.cache;version="
+ [2.6,3)",org.glassfish.hk2.utilities.general;version="[2.6,3)",org.glas
+ sfish.hk2.utilities.reflection;version="[2.6,3)",org.glassfish.hk2.util
+ ities.reflection.internal;version="[2.6,3)",org.jvnet.hk2.annotations;v
+ ersion="[2.6,3)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: org.jvnet.hk2.external.generator;version="2.6.1";uses:="
+ org.glassfish.hk2.api,org.glassfish.hk2.extension",org.jvnet.hk2.extern
+ al.runtime;version="2.6.1";uses:="org.glassfish.hk2.api,org.jvnet.hk2.a
+ nnotations"
+Bundle-Version: 2.6.1
+

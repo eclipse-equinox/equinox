@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.equinox.http.jetty
+Import-Package: javax.servlet;version="[3.1.0,5.0.0)",javax.servlet.http
+ ;version="[3.1.0,5.0.0)",org.eclipse.equinox.http.servlet;version="[1.2
+ .0,2.0.0)",org.eclipse.jetty.http;version="[10.0.2,11.0.0)",org.eclipse
+ .jetty.server;version="[10.0.2,11.0.0)",org.eclipse.jetty.server.handle
+ r;version="[10.0.2,11.0.0)",org.eclipse.jetty.server.session;version="[
+ 10.0.2,11.0.0)",org.eclipse.jetty.servlet;version="[10.0.2,11.0.0)",org
+ .eclipse.jetty.util;version="[10.0.2,11.0.0)",org.eclipse.jetty.util.co
+ mponent;version="[10.0.2,11.0.0)",org.eclipse.jetty.util.log;version="[
+ 10.0.2,11.0.0)",org.eclipse.jetty.util.ssl;version="[10.0.2,11.0.0)",or
+ g.eclipse.jetty.util.thread;version="[10.0.2,11.0.0)",org.osgi.framewor
+ k;version="1.3.0",org.osgi.framework.startlevel;version="1.0.0",org.osg
+ i.framework.wiring;version="1.2.0",org.osgi.service.cm;version="1.2.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.equinox.http.jetty;version="1.5.0"
+Bundle-Version: 3.8.300.v20230630-1303
+

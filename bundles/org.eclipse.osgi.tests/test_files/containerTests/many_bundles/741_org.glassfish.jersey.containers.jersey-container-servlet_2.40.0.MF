@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.glassfish.jersey.containers.jersey-container-se
+ rvlet
+Import-Package: javax.servlet;version="[3.0,5.0)",javax.servlet.annotati
+ on;version="[3.0,5.0)",javax.servlet.http;version="[3.0,5.0)",javax.ws.
+ rs;version="[2.1,3)",javax.ws.rs.core;version="[2.1,3)",javax.ws.rs.ext
+ ;version="[2.1,3)",org.glassfish.jersey.internal.l10n;version="[2.40,3)
+ ",org.glassfish.jersey.server;version="[2.40,3)",org.glassfish.jersey.s
+ ervlet;version="[2.40,3)",org.glassfish.jersey.servlet.internal;version
+ ="[2.40,3)",org.glassfish.jersey.servlet.internal.spi;version="[2.40,3)
+ ",org.glassfish.jersey.servlet.spi;version="[2.40,3)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: org.glassfish.jersey.servlet.async;uses:="javax.servlet.
+ http,org.glassfish.jersey.servlet.spi";version="2.40.0",org.glassfish.j
+ ersey.servlet.init;uses:="javax.servlet,javax.servlet.annotation,javax.
+ ws.rs,javax.ws.rs.core,javax.ws.rs.ext,org.glassfish.jersey.servlet.spi
+ ";version="2.40.0"
+Bundle-Version: 2.40.0
+

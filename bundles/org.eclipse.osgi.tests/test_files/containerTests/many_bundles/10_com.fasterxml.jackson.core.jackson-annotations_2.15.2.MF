@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: com.fasterxml.jackson.core.jackson-annotations
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.6))"
+Export-Package: com.fasterxml.jackson.annotation;version="2.15.2"
+Bundle-Version: 2.15.2
+

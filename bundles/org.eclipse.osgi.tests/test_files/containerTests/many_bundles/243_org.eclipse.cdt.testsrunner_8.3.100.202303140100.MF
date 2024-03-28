@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.cdt.testsrunner;singleton:=true
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime;bundle-version="
+ 3.5.0",org.eclipse.cdt.core;bundle-version="5.1.0",org.eclipse.core.res
+ ources;bundle-version="3.5.0",org.eclipse.debug.ui;bundle-version="3.5.
+ 0",org.eclipse.cdt.debug.core;bundle-version="6.0.0",org.eclipse.cdt.de
+ bug.ui,org.eclipse.cdt.ui,org.eclipse.cdt.dsf.gdb.ui,org.eclipse.cdt.ds
+ f.gdb
+Import-Package: org.eclipse.cdt.dsf.gdb.launching,org.eclipse.cdt.intern
+ al.ui.viewsupport,org.eclipse.cdt.launch,org.eclipse.cdt.launch.interna
+ l.ui,org.eclipse.cdt.launch.ui,org.eclipse.core.filesystem,org.eclipse.
+ jface.text,org.eclipse.ui.ide,org.eclipse.ui.texteditor
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.cdt.testsrunner.internal,org.eclipse.cdt.tes
+ tsrunner.internal.launcher,org.eclipse.cdt.testsrunner.internal.model,o
+ rg.eclipse.cdt.testsrunner.internal.ui.launcher,org.eclipse.cdt.testsru
+ nner.internal.ui.view,org.eclipse.cdt.testsrunner.internal.ui.view.acti
+ ons,org.eclipse.cdt.testsrunner.launcher,org.eclipse.cdt.testsrunner.mo
+ del
+Bundle-Version: 8.3.100.202303140100
+

@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.equinox.security.linux;singleton:=true
+Require-Bundle: com.sun.jna;bundle-version="[5.8.0,6.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.equinox.internal.security.linux;x-internal:=
+ true
+Bundle-Version: 1.1.0.v20230630-1303
+
