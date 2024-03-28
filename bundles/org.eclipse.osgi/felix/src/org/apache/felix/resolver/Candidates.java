@@ -18,17 +18,38 @@
  */
 package org.apache.felix.resolver;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.felix.resolver.ResolverImpl.PermutationType;
 import org.apache.felix.resolver.ResolverImpl.ResolveSession;
 import org.apache.felix.resolver.reason.ReasonException;
-import org.apache.felix.resolver.util.*;
+import org.apache.felix.resolver.util.CandidateSelector;
+import org.apache.felix.resolver.util.CopyOnWriteSet;
+import org.apache.felix.resolver.util.OpenHashMap;
+import org.apache.felix.resolver.util.OpenHashMapList;
+import org.apache.felix.resolver.util.OpenHashMapSet;
+import org.apache.felix.resolver.util.ShadowList;
 import org.osgi.framework.Version;
-import org.osgi.framework.namespace.*;
-import org.osgi.resource.*;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.namespace.IdentityNamespace;
+import org.osgi.framework.namespace.PackageNamespace;
+import org.osgi.resource.Capability;
+import org.osgi.resource.Requirement;
+import org.osgi.resource.Resource;
+import org.osgi.resource.Wire;
+import org.osgi.resource.Wiring;
 import org.osgi.service.resolver.HostedCapability;
 import org.osgi.service.resolver.ResolutionException;
 import org.osgi.service.resolver.ResolveContext;
@@ -868,7 +889,8 @@ class Candidates
                 // really be attached to the original host, not the wrapper.
                 if (!c.getNamespace().equals(HostNamespace.HOST_NAMESPACE))
                 {
-                    Capability origCap = ((HostedCapability) c).getDeclaredCapability();
+                    HostedCapability hostedCapability = (HostedCapability) c;
+                    Capability origCap = hostedCapability.getDeclaredCapability();
                     // Note that you might think we could remove the original cap
                     // from the dependent map, but you can't since it may come from
                     // a fragment that is attached to multiple hosts, so each host
@@ -912,7 +934,7 @@ class Candidates
                             {
                                 // If the original capability is from the host, then
                                 // we just need to replace it in the shadow list.
-                                getShadowList(r).replace(origCap, c);
+                                m_candidateMap.get(r).replaceHostedCapability(hostedCapability);
                             }
                             else
                             {
@@ -921,7 +943,7 @@ class Candidates
                                 // shadow copy of the list accordingly.
                                 getShadowList(r).insertHostedCapability(
                                         m_session.getContext(),
-                                        (HostedCapability) c,
+                                        hostedCapability,
                                         new SimpleHostedCapability(
                                                 hostResource.getDeclaredResource(),
                                                 origCap));
