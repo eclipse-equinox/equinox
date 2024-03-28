@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.changelog.doc;singleton:=tru
+ e
+Require-Bundle: org.eclipse.help
+Bundle-ManifestVersion: 2
+Bundle-Version: 2.7.1.202309052024
+

@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.eclipse.mylyn.github.doc;singleton:=true
+Bundle-Version: 6.3.0.v20230804-1109
+

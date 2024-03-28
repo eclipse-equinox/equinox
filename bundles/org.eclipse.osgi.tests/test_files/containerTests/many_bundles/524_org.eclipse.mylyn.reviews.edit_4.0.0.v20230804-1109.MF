@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.mylyn.reviews.edit;singleton:=true
+Require-Bundle: org.eclipse.core.resources;bundle-version="0.0.0",org.ec
+ lipse.core.runtime;bundle-version="0.0.0",org.eclipse.emf.common;bundle
+ -version="0.0.0",org.eclipse.emf.ecore;bundle-version="0.0.0",org.eclip
+ se.emf.ecore.xmi;bundle-version="0.0.0",org.eclipse.emf.edit;bundle-ver
+ sion="0.0.0",org.eclipse.mylyn.commons.core;bundle-version="4.0.0",org.
+ eclipse.mylyn.reviews.core;bundle-version="4.0.0",org.eclipse.mylyn.tas
+ ks.core;bundle-version="4.0.0"
+Import-Package: org.apache.commons.io,org.apache.commons.lang;version="[
+ 2.6.0,3.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.mylyn.reviews.edit,org.eclipse.mylyn.reviews
+ .edit.provider,org.eclipse.mylyn.reviews.spi.edit.remote;x-friends:="or
+ g.eclipse.mylyn.reviews.ui",org.eclipse.mylyn.reviews.spi.edit.remote.r
+ eview;x-friends:="org.eclipse.mylyn.reviews.ui"
+Bundle-Version: 4.0.0.v20230804-1109
+

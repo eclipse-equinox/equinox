@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.e4.ui.dialogs
+Require-Bundle: org.eclipse.jface;bundle-version="3.11.0",org.eclipse.co
+ re.runtime;bundle-version="3.29.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.e4.ui.dialogs.filteredtree,org.eclipse.e4.ui
+ .dialogs.textbundles;x-internal:=true,org.eclipse.e4.ui.internal.dialog
+ s.about;x-internal:=true
+Bundle-Version: 1.4.100.v20230727-0604
+

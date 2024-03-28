@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-SymbolicName: org.eclipse.emf.edit.ui;singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.9.0,4.0.0)",
+ org.eclipse.ui.views;bundle-version="[3.5.0,4.0.0)";visibility:=reexpor
+ t,org.eclipse.ui.workbench;bundle-version="[3.6.0,4.0.0)";visibility:=r
+ eexport,org.eclipse.emf.edit;bundle-version="[2.18.0,3.0.0)";visibility
+ :=reexport,org.eclipse.emf.common.ui;bundle-version="[2.21.0,3.0.0)";vi
+ sibility:=reexport,org.eclipse.core.resources;bundle-version="[3.8.0,4.
+ 0.0)";resolution:=optional,org.eclipse.ui.ide;bundle-version="[3.9.0,4.
+ 0.0)";resolution:=optional,org.eclipse.jface.text;bundle-version="[3.8.
+ 0,4.0.0)";resolution:=optional,org.eclipse.nebula.widgets.cdatetime;bun
+ dle-version="[1.0.0,2.0.0)";resolution:=optional;x-installation:=greedy
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.emf.edit.ui;version="2.23.0",org.eclipse.emf
+ .edit.ui.action;version="2.23.0",org.eclipse.emf.edit.ui.celleditor;ver
+ sion="2.23.0",org.eclipse.emf.edit.ui.dnd;version="2.23.0",org.eclipse.
+ emf.edit.ui.provider;version="2.23.0",org.eclipse.emf.edit.ui.util;vers
+ ion="2.23.0",org.eclipse.emf.edit.ui.view;version="2.23.0"
+Bundle-Version: 2.23.0.v20230211-1150
+

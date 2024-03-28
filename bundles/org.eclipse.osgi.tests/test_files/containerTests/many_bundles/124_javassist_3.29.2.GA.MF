@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: javassist
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: javassist;version="3.29.2.GA";uses:="javassist.bytecode,
+ javassist.compiler,javassist.compiler.ast,javassist.convert,javassist.e
+ xpr",javassist.bytecode;version="3.29.2.GA";uses:="javassist,javassist.
+ bytecode.annotation",javassist.bytecode.analysis;version="3.29.2.GA";us
+ es:="javassist,javassist.bytecode,javassist.bytecode.stackmap",javassis
+ t.bytecode.annotation;version="3.29.2.GA";uses:="javassist,javassist.by
+ tecode",javassist.bytecode.stackmap;version="3.29.2.GA";uses:="javassis
+ t,javassist.bytecode",javassist.compiler;version="3.29.2.GA";uses:="jav
+ assist,javassist.bytecode,javassist.compiler.ast",javassist.compiler.as
+ t;version="3.29.2.GA";uses:="javassist,javassist.compiler",javassist.co
+ nvert;version="3.29.2.GA";uses:="javassist,javassist.bytecode",javassis
+ t.expr;version="3.29.2.GA";uses:="javassist,javassist.bytecode",javassi
+ st.runtime;version="3.29.2.GA",javassist.scopedpool;version="3.29.2.GA"
+ ;uses:=javassist,javassist.tools;version="3.29.2.GA";uses:=javassist,ja
+ vassist.tools.reflect;version="3.29.2.GA";uses:="javassist,javassist.by
+ tecode",javassist.tools.rmi;version="3.29.2.GA";uses:="javassist,javass
+ ist.tools.web",javassist.tools.web;version="3.29.2.GA";uses:=javassist,
+ javassist.util;version="3.29.2.GA";uses:=javassist,javassist.util.proxy
+ ;version="3.29.2.GA";uses:="javassist,javassist.bytecode"
+Bundle-Version: 3.29.2.GA
+

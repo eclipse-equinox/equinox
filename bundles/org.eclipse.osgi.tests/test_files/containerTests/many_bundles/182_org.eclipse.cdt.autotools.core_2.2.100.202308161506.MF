@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.cdt.autotools.core;singleton:=true
+Require-Bundle: org.eclipse.ui;bundle-version="3.4.0",org.eclipse.core.r
+ untime;bundle-version="3.4.0",org.eclipse.jface.text;bundle-version="3.
+ 4.0",org.eclipse.ui.editors;bundle-version="3.4.0",org.eclipse.ui.workb
+ ench.texteditor;bundle-version="3.4.0",org.eclipse.core.resources;bundl
+ e-version="3.4.0",org.eclipse.ui.ide;bundle-version="3.4.0",org.eclipse
+ .cdt.managedbuilder.core;bundle-version="5.0.100",org.eclipse.cdt.core;
+ bundle-version="8.3.0",org.eclipse.cdt.ui;bundle-version="5.1.0",org.ec
+ lipse.cdt.managedbuilder.ui;bundle-version="5.0.100",org.eclipse.cdt.ma
+ nagedbuilder.gnu.ui;bundle-version="5.0.100",org.eclipse.cdt.make.core;
+ bundle-version="5.1.0",org.eclipse.cdt.make.ui;bundle-version="5.0.100"
+ ,org.eclipse.ui.console;bundle-version="3.3.0",org.eclipse.help;bundle-
+ version="3.3.100",org.eclipse.core.variables;bundle-version="3.2.100",o
+ rg.eclipse.ui.views;bundle-version="3.3.0",org.eclipse.core.filesystem;
+ bundle-version="1.2.0",org.eclipse.remote.core;bundle-version="2.0.0",o
+ rg.eclipse.cdt.remote.core;bundle-version="1.0.1"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.cdt.autotools.core;x-friends:="org.eclipse.c
+ dt.autotools.ui",org.eclipse.cdt.internal.autotools.core;x-friends:="or
+ g.eclipse.cdt.autotools.ui",org.eclipse.cdt.internal.autotools.core.con
+ figure;x-friends:="org.eclipse.cdt.autotools.ui",org.eclipse.cdt.intern
+ al.autotools.core.wizards;x-friends:="org.eclipse.cdt.autotools.ui"
+Bundle-Version: 2.2.100.202308161506
+

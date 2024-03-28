@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.tracecompass.lttng2.control.core;single
+ ton:=true
+Require-Bundle: org.eclipse.core.runtime,org.eclipse.tracecompass.ctf.co
+ re,org.eclipse.tracecompass.tmf.core,org.eclipse.tracecompass.tmf.ctf.c
+ ore,org.eclipse.tracecompass.common.core,org.eclipse.jdt.annotation;bun
+ dle-version="[2.0.0,3.0.0)";resolution:=optional
+Import-Package: com.google.common.collect
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.tracecompass.internal.lttng2.control.core;x-
+ friends:="org.eclipse.tracecompass.lttng2.control.core.tests,org.eclips
+ e.tracecompass.lttng2.control.ui,org.eclipse.tracecompass.lttng2.contro
+ l.ui.tests",org.eclipse.tracecompass.internal.lttng2.control.core.model
+ ; x-friends:="org.eclipse.tracecompass.lttng2.control.ui,  org.eclipse.
+ tracecompass.lttng2.control.ui.tests,  org.eclipse.tracecompass.lttng2.
+ control.core.tests,  org.eclipse.tracecompass.lttng2.control.ui.swtbot.
+ tests",org.eclipse.tracecompass.internal.lttng2.control.core.model.impl
+ ;x-friends:="org.eclipse.tracecompass.lttng2.control.ui,org.eclipse.tra
+ cecompass.lttng2.control.ui.tests,org.eclipse.tracecompass.lttng2.contr
+ ol.core.tests",org.eclipse.tracecompass.internal.lttng2.control.core.re
+ layd;x-friends:="org.eclipse.tracecompass.lttng2.control.core.tests,org
+ .eclipse.tracecompass.lttng2.control.ui,org.eclipse.tracecompass.lttng2
+ .control.ui.tests",org.eclipse.tracecompass.internal.lttng2.control.cor
+ e.relayd.commands;x-friends:="org.eclipse.tracecompass.lttng2.control.c
+ ore.tests,org.eclipse.tracecompass.lttng2.control.ui,org.eclipse.tracec
+ ompass.lttng2.control.ui.tests",org.eclipse.tracecompass.internal.lttng
+ 2.control.core.relayd.impl;x-friends:="org.eclipse.tracecompass.lttng2.
+ control.core.tests,org.eclipse.tracecompass.lttng2.control.ui,org.eclip
+ se.tracecompass.lttng2.control.ui.tests",org.eclipse.tracecompass.lttng
+ 2.control.core.session
+Bundle-Version: 1.3.0.202308301409
+

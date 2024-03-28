@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.ui.workbench.texteditor; singleton:=tru
+ e
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.29.0,4.0.0)"
+ ,org.eclipse.compare.core;bundle-version="[3.5.0,4.0.0)",org.eclipse.co
+ re.expressions;bundle-version="[3.4.100,4.0.0)",org.eclipse.jface.text;
+ bundle-version="[3.19.0,4.0.0)",org.eclipse.swt;bundle-version="[3.107.
+ 0,4.0.0)",org.eclipse.ui;bundle-version="[3.5.0,4.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.ui.contentassist,org.eclipse.ui.internal.tex
+ teditor;texteditor=split;mandatory:=texteditor;x-friends:="org.eclipse.
+ ui.editors",org.eclipse.ui.internal.texteditor.codemining;x-internal:=t
+ rue,org.eclipse.ui.internal.texteditor.quickdiff;x-internal:=true,org.e
+ clipse.ui.internal.texteditor.quickdiff.compare.equivalence;x-internal:
+ =true,org.eclipse.ui.internal.texteditor.rulers;x-internal:=true,org.ec
+ lipse.ui.internal.texteditor.spelling;x-internal:=true,org.eclipse.ui.i
+ nternal.texteditor.templates;x-internal:=true,org.eclipse.ui.internal.v
+ iews.minimap;x-internal:=true,org.eclipse.ui.texteditor;texteditor=spli
+ t;mandatory:=texteditor,org.eclipse.ui.texteditor.link,org.eclipse.ui.t
+ exteditor.quickdiff,org.eclipse.ui.texteditor.rulers,org.eclipse.ui.tex
+ teditor.spelling,org.eclipse.ui.texteditor.templates
+Bundle-Version: 3.17.100.v20230821-0745
+

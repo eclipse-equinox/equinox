@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.oomph.setup.ui.questionnaire;singleton:
+ =true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.24.0,4.0.0)"
+ ,org.eclipse.emf.ecore.xmi;bundle-version="[2.10.0,3.0.0)",org.eclipse.
+ oomph.preferences;bundle-version="[1.13.0,2.0.0)",org.eclipse.oomph.set
+ up.ui;bundle-version="[1.23.0,2.0.0)",org.eclipse.oomph.ui;bundle-versi
+ on="[1.16.0,2.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.oomph.setup.ui.questionnaire;version="1.13.0
+ ";x-internal:=true
+Bundle-Version: 1.13.0.v20220421-1218
+

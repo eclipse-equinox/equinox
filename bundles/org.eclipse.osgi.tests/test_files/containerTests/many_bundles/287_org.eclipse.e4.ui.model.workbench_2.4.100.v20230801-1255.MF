@@ -1,0 +1,52 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.e4.ui.model.workbench;singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.29.0,4.0.0)"
+ ,org.eclipse.e4.core.services;bundle-version="0.9.0",org.eclipse.e4.cor
+ e.contexts;bundle-version="1.0.0",org.eclipse.core.commands;bundle-vers
+ ion="[3.5.0,4.0.0)",org.eclipse.e4.core.di;bundle-version="1.0.0",org.e
+ clipse.emf.ecore;bundle-version="2.35.0",org.eclipse.e4.emf.xpath;bundl
+ e-version="0.1.100"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.e4.ui.model;x-friends:="org.eclipse.e4.ui.wo
+ rkbench,org.eclipse.e4.ui.workbench.swt,org.eclipse.ui.workbench",org.e
+ clipse.e4.ui.model.application,org.eclipse.e4.ui.model.application.comm
+ ands,org.eclipse.e4.ui.model.application.commands.impl; x-friends:="org
+ .eclipse.e4.ui.model.workbench.edit,  org.eclipse.e4.ui.workbench,  org
+ .eclipse.e4.ui.workbench.swt,  org.eclipse.ui.workbench,  org.eclipse.e
+ 4.emf.xpath.test",org.eclipse.e4.ui.model.application.commands.util;x-i
+ nternal:=true,org.eclipse.e4.ui.model.application.descriptor.basic,org.
+ eclipse.e4.ui.model.application.descriptor.basic.impl;x-friends:="org.e
+ clipse.e4.ui.workbench,org.eclipse.e4.ui.workbench.swt,org.eclipse.ui.w
+ orkbench",org.eclipse.e4.ui.model.application.descriptor.basic.util;x-i
+ nternal:=true,org.eclipse.e4.ui.model.application.impl; x-friends:="org
+ .eclipse.e4.ui.model.workbench.edit,  org.eclipse.e4.ui.workbench,  org
+ .eclipse.e4.ui.workbench.swt,  org.eclipse.e4.ui.workbench.addons.swt, 
+  org.eclipse.e4.emf.xpath.test",org.eclipse.e4.ui.model.application.ui,
+ org.eclipse.e4.ui.model.application.ui.advanced,org.eclipse.e4.ui.model
+ .application.ui.advanced.impl; x-friends:="org.eclipse.e4.ui.workbench,
+   org.eclipse.e4.ui.workbench.addons.swt,  org.eclipse.e4.ui.workbench.
+ swt,  org.eclipse.ui.workbench,  org.eclipse.e4.emf.xpath.test",org.ecl
+ ipse.e4.ui.model.application.ui.advanced.util;x-internal:=true,org.ecli
+ pse.e4.ui.model.application.ui.basic,org.eclipse.e4.ui.model.applicatio
+ n.ui.basic.impl; x-friends:="org.eclipse.e4.ui.model.workbench.edit,  o
+ rg.eclipse.e4.ui.workbench,  org.eclipse.e4.ui.workbench.addons.swt,  o
+ rg.eclipse.e4.ui.workbench.swt,  org.eclipse.ui.workbench,  org.eclipse
+ .e4.emf.xpath.test",org.eclipse.e4.ui.model.application.ui.basic.util;x
+ -internal:=true,org.eclipse.e4.ui.model.application.ui.impl; x-friends:
+ ="org.eclipse.e4.ui.model.workbench.edit,  org.eclipse.e4.ui.workbench,
+   org.eclipse.e4.ui.workbench.swt,  org.eclipse.ui.workbench,  org.ecli
+ pse.e4.ui.workbench.renderers.swt,  org.eclipse.e4.emf.xpath.test",org.
+ eclipse.e4.ui.model.application.ui.menu,org.eclipse.e4.ui.model.applica
+ tion.ui.menu.impl; x-friends:="org.eclipse.e4.ui.model.workbench.edit, 
+  org.eclipse.e4.ui.workbench,  org.eclipse.e4.ui.workbench.addons.swt, 
+  org.eclipse.e4.ui.workbench.renderers.swt,  org.eclipse.e4.ui.workbenc
+ h.swt,  org.eclipse.ui.workbench,  org.eclipse.e4.emf.xpath.test",org.e
+ clipse.e4.ui.model.application.ui.menu.util;x-internal:=true,org.eclips
+ e.e4.ui.model.application.ui.util;x-internal:=true,org.eclipse.e4.ui.mo
+ del.application.util;x-internal:=true,org.eclipse.e4.ui.model.fragment,
+ org.eclipse.e4.ui.model.fragment.impl;x-friends:="org.eclipse.e4.ui.wor
+ kbench",org.eclipse.e4.ui.model.fragment.util;x-internal:=true,org.ecli
+ pse.e4.ui.model.internal;x-friends:="org.eclipse.e4.ui.workbench"
+Bundle-Version: 2.4.100.v20230801-1255
+

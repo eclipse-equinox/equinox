@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.equinox.p2.updatechecker;singleton:=tru
+ e
+Require-Bundle: org.eclipse.equinox.common;bundle-version="[3.3.0,4.0)"
+Import-Package: org.eclipse.equinox.internal.p2.core.helpers,org.eclipse
+ .equinox.p2.core;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.core.sp
+ i;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.engine;version="[2.0.0
+ ,3.0.0)",org.eclipse.equinox.p2.metadata;version="[2.0.0,3.0.0)",org.ec
+ lipse.equinox.p2.planner;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2
+ .query;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.repository;versio
+ n="[2.0.0,3.0.0)",org.eclipse.equinox.p2.repository.metadata;version="[
+ 2.0.0,3.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.equinox.internal.p2.updatechecker;x-internal
+ :=true,org.eclipse.equinox.internal.provisional.p2.updatechecker;x-frie
+ nds:="org.eclipse.equinox.p2.ui.sdk.scheduler"
+Bundle-Version: 1.4.100.v20230630-1506
+

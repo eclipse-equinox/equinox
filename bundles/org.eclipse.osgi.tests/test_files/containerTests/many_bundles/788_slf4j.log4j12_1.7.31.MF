@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-SymbolicName: slf4j.log4j12
+Import-Package: org.slf4j;version=1.7.31,org.slf4j.spi;version=1.7.31,or
+ g.slf4j.helpers;version=1.7.31,org.slf4j.event;version=1.7.31,org.apach
+ e.log4j
+Bundle-ManifestVersion: 2
+Export-Package: org.slf4j.impl;version=1.7.31
+Bundle-Version: 1.7.31
+

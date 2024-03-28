@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.equinox.common; singleton:=true
+Require-Bundle: org.eclipse.osgi;bundle-version="[3.17.200,4.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.core.internal.boot;x-friends:="org.eclipse.c
+ ore.resources,org.eclipse.pde.build",org.eclipse.core.internal.runtime;
+ common=split;mandatory:=common; x-friends:="org.eclipse.core.contenttyp
+ e,  org.eclipse.core.jobs,  org.eclipse.equinox.preferences,  org.eclip
+ se.equinox.registry,  org.eclipse.core.runtime,  org.eclipse.core.runti
+ me.compatibility,  org.eclipse.core.filesystem,  org.eclipse.equinox.se
+ curity",org.eclipse.core.runtime;common=split;version="3.7.0";mandatory
+ :=common,org.eclipse.core.text;version="3.13.0",org.eclipse.equinox.eve
+ nts;version="1.0.0"
+Bundle-Version: 3.18.100.v20230730-1117
+

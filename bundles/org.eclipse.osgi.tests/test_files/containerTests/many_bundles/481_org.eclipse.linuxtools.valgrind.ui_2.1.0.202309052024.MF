@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.valgrind.ui;singleton:=true
+Require-Bundle: org.eclipse.core.runtime,org.eclipse.ui,org.eclipse.ui.i
+ de,org.eclipse.linuxtools.valgrind.core,org.eclipse.linuxtools.profilin
+ g.ui,org.eclipse.jface.text,org.eclipse.debug.ui,org.eclipse.cdt.core,o
+ rg.eclipse.swt;bundle-version="3.106.0",org.eclipse.cdt.codan.ui.cxx
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.linuxtools.internal.valgrind.ui; x-friends:=
+ "org.eclipse.linuxtools.valgrind.cachegrind,  org.eclipse.linuxtools.va
+ lgrind.helgrind,  org.eclipse.linuxtools.valgrind.launch,  org.eclipse.
+ linuxtools.valgrind.massif,  org.eclipse.linuxtools.valgrind.memcheck, 
+  org.eclipse.linuxtools.valgrind.tests,  org.eclipse.linuxtools.valgrin
+ d.cachegrind.tests,  org.eclipse.linuxtools.valgrind.helgrind.tests,  o
+ rg.eclipse.linuxtools.valgrind.massif.tests,  org.eclipse.linuxtools.va
+ lgrind.memcheck.tests",org.eclipse.linuxtools.valgrind.ui
+Bundle-Version: 2.1.0.202309052024
+

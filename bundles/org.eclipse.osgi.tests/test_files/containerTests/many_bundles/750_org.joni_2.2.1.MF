@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.joni
+Import-Package: org.jcodings;resolution:=optional;version="[1.0,2)",org.
+ jcodings.constants;resolution:=optional;version="[1.0,2)",org.jcodings.
+ exception;resolution:=optional;version="[1.0,2)",org.jcodings.specific;
+ resolution:=optional;version="[1.0,2)",org.jcodings.unicode;resolution:
+ =optional;version="[1.0,2)",org.jcodings.util;resolution:=optional;vers
+ ion="[1.0,2)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.7))"
+Export-Package: org.joni;version="2.2.1";uses:="org.jcodings,org.joni.as
+ t,org.joni.constants",org.joni.ast;version="2.2.1";uses:="org.jcodings,
+ org.joni,org.joni.constants.internal",org.joni.bench;version="2.2.1",or
+ g.joni.constants;version="2.2.1",org.joni.constants.internal;version="2
+ .2.1",org.joni.exception;version="2.2.1";uses:="org.jcodings.exception"
+Bundle-Version: 2.2.1
+

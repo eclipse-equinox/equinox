@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.mylyn.help.ui;singleton:=true
+Bundle-ManifestVersion: 2
+Bundle-Version: 4.0.0.v20230804-1109
+

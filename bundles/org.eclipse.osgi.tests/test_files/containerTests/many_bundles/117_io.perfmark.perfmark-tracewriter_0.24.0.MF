@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: io.perfmark.perfmark-tracewriter
+Import-Package: com.google.gson;resolution:=optional,com.google.gson.ann
+ otations;resolution:=optional,io.perfmark.impl;resolution:=optional,jav
+ ax.annotation;resolution:=optional
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.7))"
+Export-Package: io.perfmark.tracewriter;version="0.24.0";uses:="io.perfm
+ ark.impl"
+Bundle-Version: 0.24.0
+

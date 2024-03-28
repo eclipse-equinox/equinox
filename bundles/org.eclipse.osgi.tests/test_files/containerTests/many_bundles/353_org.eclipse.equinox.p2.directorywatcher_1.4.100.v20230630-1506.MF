@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.equinox.p2.directorywatcher;singleton:=
+ true
+Require-Bundle: org.eclipse.equinox.common;bundle-version="[3.7.0,4.0)"
+Import-Package: org.eclipse.equinox.internal.p2.artifact.repository.simp
+ le,org.eclipse.equinox.internal.p2.core.helpers,org.eclipse.equinox.int
+ ernal.p2.metadata.expression,org.eclipse.equinox.internal.p2.update,org
+ .eclipse.equinox.p2.core;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2
+ .metadata;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.publisher,org.
+ eclipse.equinox.p2.publisher.actions,org.eclipse.equinox.p2.publisher.e
+ clipse,org.eclipse.equinox.p2.query;version="[2.0.0,3.0.0)",org.eclipse
+ .equinox.p2.repository;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.r
+ epository.artifact;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.repos
+ itory.artifact.spi;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.repos
+ itory.metadata;version="[2.0.0,3.0.0)",org.eclipse.osgi.service.resolve
+ r;version="1.1.0",org.eclipse.osgi.util,org.osgi.framework;version="1.4
+ .0",org.osgi.service.packageadmin;version="1.2.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.equinox.internal.provisional.p2.directorywat
+ cher;x-friends:="org.eclipse.equinox.p2.reconciler.dropins,org.eclipse.
+ equinox.p2.extensionlocation"
+Bundle-Version: 1.4.100.v20230630-1506
+

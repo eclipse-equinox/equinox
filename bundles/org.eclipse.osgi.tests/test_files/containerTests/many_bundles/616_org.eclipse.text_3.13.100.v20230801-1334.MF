@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.text
+Require-Bundle: org.eclipse.core.commands;bundle-version="[3.5.0,4.0.0)"
+ ,org.eclipse.equinox.common;bundle-version="[3.5.0,4.0.0)",org.eclipse.
+ equinox.preferences;bundle-version="[3.7.0,4.0.0)",org.eclipse.core.run
+ time;bundle-version="[3.29.0,4.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.jface.text; text="split"; mandatory:="text",
+ org.eclipse.jface.text.link; text="split"; mandatory:="text",org.eclips
+ e.jface.text.projection,org.eclipse.jface.text.source; text="split"; ma
+ ndatory:="text",org.eclipse.jface.text.templates; text="split"; mandato
+ ry:="text",org.eclipse.text.edits,org.eclipse.text.templates,org.eclips
+ e.text.undo
+Bundle-Version: 3.13.100.v20230801-1334
+

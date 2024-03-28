@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.glassfish.hk2.api
+Import-Package: javax.inject;version="[1.0,2)",org.aopalliance.intercept
+ ;version="[1.0,2)",org.glassfish.hk2.extension;version="[2.6,3)",org.gl
+ assfish.hk2.osgiresourcelocator;version="[1.0,2)";resolution:=optional,
+ org.glassfish.hk2.utilities.binding;version="[2.6,3)",org.glassfish.hk2
+ .utilities.general;version="[2.6,3)",org.glassfish.hk2.utilities.reflec
+ tion;version="[2.6,3)",org.jvnet.hk2.annotations;version="[2.6,3)",org.
+ jvnet.hk2.component;version="[2.6,3)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: org.glassfish.hk2.api;version="2.6.1";uses:="javax.injec
+ t,org.aopalliance.intercept,org.glassfish.hk2.extension,org.glassfish.h
+ k2.utilities,org.jvnet.hk2.annotations",org.glassfish.hk2.api.messaging
+ ;version="2.6.1";uses:="javax.inject,org.glassfish.hk2.api,org.jvnet.hk
+ 2.annotations",org.glassfish.hk2.extension;version="2.6.1";uses:="org.g
+ lassfish.hk2.api",org.glassfish.hk2.utilities;version="2.6.1";uses:="ja
+ vax.inject,org.glassfish.hk2.api,org.glassfish.hk2.utilities.binding,or
+ g.jvnet.hk2.annotations",org.glassfish.hk2.utilities.binding;version="2
+ .6.1";uses:="org.glassfish.hk2.api,org.glassfish.hk2.utilities",org.jvn
+ et.hk2.annotations;version="2.6.1";uses:="org.glassfish.hk2.api",com.su
+ n.hk2.component;version="2.6.1"
+Bundle-Version: 2.6.1
+

@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.apache.commons.commons-codec
+Import-Package: javax.crypto,javax.crypto.spec
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: org.apache.commons.codec;version="1.16.0",org.apache.com
+ mons.codec.binary;version="1.16.0",org.apache.commons.codec.cli;version
+ ="1.16.0",org.apache.commons.codec.digest;version="1.16.0",org.apache.c
+ ommons.codec.language;version="1.16.0",org.apache.commons.codec.languag
+ e.bm;version="1.16.0",org.apache.commons.codec.net;version="1.16.0"
+Bundle-Version: 1.16.0
+

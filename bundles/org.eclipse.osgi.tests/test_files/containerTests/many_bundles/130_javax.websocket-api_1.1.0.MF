@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: javax.websocket-api
+Bundle-ManifestVersion: 2
+Export-Package: javax.websocket.server;uses:="javax.websocket";version="
+ 1.1",javax.websocket;version="1.1"
+Bundle-Version: 1.1
+

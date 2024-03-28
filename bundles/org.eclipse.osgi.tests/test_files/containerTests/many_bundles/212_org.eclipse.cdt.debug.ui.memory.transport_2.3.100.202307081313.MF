@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.cdt.debug.ui.memory.transport;singleton
+ :=true
+Require-Bundle: org.eclipse.cdt.debug.core.memory;bundle-version="0.1.0"
+ ,org.eclipse.debug.core,org.eclipse.debug.ui,org.eclipse.core.runtime,o
+ rg.eclipse.swt,org.eclipse.jface,org.eclipse.ui
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.cdt.debug.internal.ui.memory.transport;x-int
+ ernal:=true,org.eclipse.cdt.debug.ui.memory.transport,org.eclipse.cdt.d
+ ebug.ui.memory.transport.actions,org.eclipse.cdt.debug.ui.memory.transp
+ ort.model
+Bundle-Version: 2.3.100.202307081313
+

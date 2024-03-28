@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.wst.common.ui; singleton:=true
+Require-Bundle: org.eclipse.ui.ide;bundle-version="[3.4.0,4.0.0)",org.ec
+ lipse.ui;bundle-version="[3.203.0,4.0.0)",org.eclipse.core.runtime;bund
+ le-version="[3.26.0,4.0.0)",org.eclipse.core.resources;bundle-version="
+ [3.4.0,4.0.0)",org.eclipse.search;bundle-version="[3.4.0,4.0.0)",org.ec
+ lipse.wst.common.core;bundle-version="[1.4.0,2.0.0)",org.eclipse.jface.
+ text;bundle-version="[3.4.0,4.0.0)",org.eclipse.ui.workbench.texteditor
+ ;bundle-version="[3.4.0,4.0.0)",com.ibm.icu;bundle-version="73.1.0"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.wst.common.ui.internal;x-internal:=true,org.
+ eclipse.wst.common.ui.internal.dialogs;x-internal:=true,org.eclipse.wst
+ .common.ui.internal.dnd;x-internal:=true,org.eclipse.wst.common.ui.inte
+ rnal.navigator,org.eclipse.wst.common.ui.internal.search;x-internal:=tr
+ ue,org.eclipse.wst.common.ui.internal.search.dialogs,org.eclipse.wst.co
+ mmon.ui.internal.viewers;x-internal:=true
+Bundle-Version: 1.2.401.v202308161955
+

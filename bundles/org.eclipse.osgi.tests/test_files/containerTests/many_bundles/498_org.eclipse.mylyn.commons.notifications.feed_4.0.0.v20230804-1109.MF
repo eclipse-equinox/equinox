@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.mylyn.commons.notifications.feed;single
+ ton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="0.0.0",org.ecli
+ pse.mylyn.commons.core;bundle-version="4.0.0",org.eclipse.mylyn.commons
+ .notifications.core;bundle-version="4.0.0"
+Import-Package: com.sun.xml.bind;version="2.3.3",javax.activation;versio
+ n="1.2.2",javax.xml.bind;version="2.3.3",javax.xml.bind.annotation;vers
+ ion="2.3.3"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.mylyn.commons.notifications.feed;x-internal:
+ =true,org.eclipse.mylyn.internal.commons.notifications.feed;x-internal:
+ =true
+Bundle-Version: 4.0.0.v20230804-1109
+

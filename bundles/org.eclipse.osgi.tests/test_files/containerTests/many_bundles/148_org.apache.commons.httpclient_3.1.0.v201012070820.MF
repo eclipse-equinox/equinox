@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Import-Package: javax.crypto;resolution:=optional,javax.crypto.spec;reso
+ lution:=optional,javax.net;resolution:=optional,javax.net.ssl;resolutio
+ n:=optional,org.apache.commons.codec;version="[1.2.0,2.0.0)",org.apache
+ .commons.codec.binary;version="[1.2.0,2.0.0)",org.apache.commons.codec.
+ net;version="[1.2.0,2.0.0)",org.apache.commons.logging;version="[1.0.4,
+ 2.0.0)"
+Bundle-RequiredExecutionEnvironment: CDC-1.0/Foundation-1.0,J2SE-1.2
+Bundle-ManifestVersion: 2
+Export-Package: org.apache.commons.httpclient;version="3.1.0",org.apache
+ .commons.httpclient.auth;version="3.1.0",org.apache.commons.httpclient.
+ cookie;version="3.1.0",org.apache.commons.httpclient.methods;version="3
+ .1.0",org.apache.commons.httpclient.methods.multipart;version="3.1.0",o
+ rg.apache.commons.httpclient.params;version="3.1.0",org.apache.commons.
+ httpclient.protocol;version="3.1.0",org.apache.commons.httpclient.util;
+ version="3.1.0"
+Bundle-SymbolicName: org.apache.commons.httpclient
+Bundle-Version: 3.1.0.v201012070820
+

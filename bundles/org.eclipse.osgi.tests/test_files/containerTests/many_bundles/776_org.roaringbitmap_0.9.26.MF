@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: org.roaringbitmap;version="0.9.26";uses:="org.roaringbit
+ map.buffer",org.roaringbitmap.art;version="0.9.26";uses:="org.roaringbi
+ tmap",org.roaringbitmap.buffer;version="0.9.26";uses:="org.roaringbitma
+ p",org.roaringbitmap.insights;version="0.9.26";uses:="org.roaringbitmap
+ ",org.roaringbitmap.longlong;version="0.9.26";uses:="org.roaringbitmap,
+ org.roaringbitmap.art"
+Bundle-SymbolicName: org.roaringbitmap
+Bundle-Version: 0.9.26
+

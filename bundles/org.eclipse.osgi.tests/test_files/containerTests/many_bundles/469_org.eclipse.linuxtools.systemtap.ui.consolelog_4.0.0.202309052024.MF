@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.systemtap.ui.consolelog;sing
+ leton:=true
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.ui.c
+ onsole,org.eclipse.linuxtools.systemtap.structures,com.jcraft.jsch;bund
+ le-version="0.1.37",org.eclipse.debug.ui
+Import-Package: org.eclipse.core.filesystem,org.eclipse.core.resources,o
+ rg.eclipse.debug.ui,org.eclipse.jface.text,org.eclipse.linuxtools.syste
+ mtap.graphing.ui.widgets,org.eclipse.linuxtools.tools.launch.core.facto
+ ry,org.eclipse.ui.ide,org.eclipse.ui.texteditor
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.linuxtools.systemtap.ui.consolelog,org.eclip
+ se.linuxtools.systemtap.ui.consolelog.internal,org.eclipse.linuxtools.s
+ ystemtap.ui.consolelog.preferences,org.eclipse.linuxtools.systemtap.ui.
+ consolelog.structures
+Bundle-Version: 4.0.0.202309052024
+

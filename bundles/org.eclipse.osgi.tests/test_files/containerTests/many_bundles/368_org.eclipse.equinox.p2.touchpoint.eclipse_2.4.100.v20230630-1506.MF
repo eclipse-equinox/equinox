@@ -1,0 +1,45 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.equinox.p2.touchpoint.eclipse;singleton
+ :=true
+Require-Bundle: org.eclipse.equinox.common;bundle-version="[3.18.0,4.0.0
+ )"
+Import-Package: javax.xml.parsers,org.eclipse.core.runtime.preferences;v
+ ersion="[3.0.0,4.0.0)",org.eclipse.equinox.frameworkadmin;version="[2.0
+ .0,3.0.0)",org.eclipse.equinox.internal.p2.artifact.processors.pgp,org.
+ eclipse.equinox.internal.p2.core.helpers,org.eclipse.equinox.internal.p
+ 2.engine,org.eclipse.equinox.internal.p2.engine.phases,org.eclipse.equi
+ nox.internal.p2.garbagecollector,org.eclipse.equinox.internal.p2.metada
+ ta,org.eclipse.equinox.internal.provisional.frameworkadmin,org.eclipse.
+ equinox.internal.provisional.p2.repository,org.eclipse.equinox.internal
+ .simpleconfigurator.manipulator,org.eclipse.equinox.p2.core;version="[2
+ .0.0,3.0.0)",org.eclipse.equinox.p2.core.spi;version="[2.1.0,3.0.0)",or
+ g.eclipse.equinox.p2.engine;version="[2.0.0,3.0.0)",org.eclipse.equinox
+ .p2.engine.spi;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.metadata;
+ version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.metadata.expression;vers
+ ion="[2.0.0,3.0.0)",org.eclipse.equinox.p2.planner;version="[2.0.0,3.0.
+ 0)";resolution:=optional,org.eclipse.equinox.p2.publisher;resolution:=o
+ ptional,org.eclipse.equinox.p2.publisher.eclipse;resolution:=optional,o
+ rg.eclipse.equinox.p2.query;version="[2.0.0,3.0.0)",org.eclipse.equinox
+ .p2.repository;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.repositor
+ y.artifact;version="[2.3.0,3.0.0)",org.eclipse.equinox.p2.repository.ar
+ tifact.spi;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.repository.me
+ tadata;version="[2.0.0,3.0.0)",org.eclipse.equinox.simpleconfigurator.m
+ anipulator;version="[2.0.0,3.0.0)",org.eclipse.osgi.service.datalocatio
+ n;version="1.0.0",org.eclipse.osgi.service.environment;version="1.0.0",
+ org.eclipse.osgi.service.resolver;version="1.2.0";resolution:=optional,
+ org.eclipse.osgi.util;version="1.1.0",org.osgi.framework;version="1.3.0
+ ",org.osgi.service.prefs;version="1.1.1",org.osgi.util.tracker;version=
+ "1.4.0",org.w3c.dom,org.xml.sax
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.equinox.internal.p2.touchpoint.eclipse;versi
+ on="2.0.0"; x-friends:="org.eclipse.equinox.p2.reconciler.dropins,  org
+ .eclipse.equinox.p2.extensionlocation,  org.eclipse.equinox.p2.ui.impor
+ texport,  org.eclipse.equinox.p2.ui.sdk.scheduler",org.eclipse.equinox.
+ internal.p2.touchpoint.eclipse.actions;version="2.0.0";x-internal:=true
+ ,org.eclipse.equinox.internal.p2.update;version="2.0.0";x-friends:="org
+ .eclipse.equinox.p2.reconciler.dropins,org.eclipse.equinox.p2.extension
+ location,org.eclipse.equinox.p2.directorywatcher",org.eclipse.equinox.p
+ 2.touchpoint.eclipse.query;version="2.0.0"
+Bundle-Version: 2.4.100.v20230630-1506
+

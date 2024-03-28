@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.remote.telnet.ui;singleton:=true
+Import-Package: org.eclipse.core.runtime,org.eclipse.jface.dialogs,org.e
+ clipse.jface.operation,org.eclipse.jface.resource,org.eclipse.jface.vie
+ wers,org.eclipse.jface.window,org.eclipse.jface.wizard,org.eclipse.osgi
+ .util,org.eclipse.remote.core,org.eclipse.remote.core.exception,org.ecl
+ ipse.remote.telnet.core,org.eclipse.remote.ui,org.eclipse.swt,org.eclip
+ se.swt.events,org.eclipse.swt.graphics,org.eclipse.swt.layout,org.eclip
+ se.swt.widgets,org.eclipse.ui.plugin,org.osgi.framework
+Bundle-ManifestVersion: 2
+Bundle-Version: 1.1.100.202303140100
+

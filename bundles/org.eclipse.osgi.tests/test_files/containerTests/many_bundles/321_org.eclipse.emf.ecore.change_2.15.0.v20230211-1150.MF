@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-SymbolicName: org.eclipse.emf.ecore.change;singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.9.0,4.0.0)";
+ resolution:=optional;x-installation:=greedy,org.eclipse.emf.ecore;bundl
+ e-version="[2.33.0,3.0.0)";visibility:=reexport
+Import-Package: org.osgi.framework;version="[1.5.0,2.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.emf.ecore.change;version="2.15.0",org.eclips
+ e.emf.ecore.change.impl;version="2.15.0",org.eclipse.emf.ecore.change.u
+ til;version="2.15.0"
+Bundle-Version: 2.15.0.v20230211-1150
+Provide-Capability: org.eclipse.emf.ecore.generated_package;uri="http://
+ www.eclipse.org/emf/2003/Change";class=org.eclipse.emf.ecore.change.Cha
+ ngePackage;genModel="model/Change.genmodel"
+

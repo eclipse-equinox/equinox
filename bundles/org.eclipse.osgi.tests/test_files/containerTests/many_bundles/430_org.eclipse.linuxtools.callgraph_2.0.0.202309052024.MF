@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.callgraph;singleton:=true
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.zest
+ .layouts;bundle-version="1.1.0",org.eclipse.zest.core;bundle-version="1
+ .2.0"
+Import-Package: org.eclipse.cdt.core.model,org.eclipse.linuxtools.intern
+ al.callgraph.core
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.linuxtools.internal.callgraph,org.eclipse.li
+ nuxtools.internal.callgraph.graphlisteners
+Bundle-Version: 2.0.0.202309052024
+

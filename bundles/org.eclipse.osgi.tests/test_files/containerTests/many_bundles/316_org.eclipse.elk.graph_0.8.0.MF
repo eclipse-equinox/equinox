@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-SymbolicName: org.eclipse.elk.graph;singleton:=true
+Require-Bundle: org.eclipse.emf.ecore;bundle-version="2.10.0";visibility
+ :=reexport,com.google.guava
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.elk.graph,org.eclipse.elk.graph.impl,org.ecl
+ ipse.elk.graph.properties,org.eclipse.elk.graph.util
+Bundle-Version: 0.8.0
+

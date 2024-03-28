@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.equinox.p2.operations;singleton:=true
+Require-Bundle: org.eclipse.equinox.common;bundle-version="3.6.0",org.ec
+ lipse.core.jobs;bundle-version="3.5.0"
+Import-Package: org.eclipse.equinox.internal.p2.core.helpers,org.eclipse
+ .equinox.internal.p2.director,org.eclipse.equinox.internal.p2.metadata.
+ query,org.eclipse.equinox.internal.p2.repository.helpers,org.eclipse.eq
+ uinox.internal.provisional.configurator,org.eclipse.equinox.internal.pr
+ ovisional.p2.core.eventbus,org.eclipse.equinox.internal.provisional.p2.
+ director,org.eclipse.equinox.p2.core;version="[2.0.0,3.0.0)",org.eclips
+ e.equinox.p2.engine;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.engi
+ ne.query;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.metadata;versio
+ n="[2.0.0,3.0.0)",org.eclipse.equinox.p2.metadata.expression;version="2
+ .0.0",org.eclipse.equinox.p2.planner;version="[2.0.0,3.0.0)",org.eclips
+ e.equinox.p2.query;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.repos
+ itory;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.repository.artifac
+ t;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.repository.metadata;ve
+ rsion="[2.0.0,3.0.0)",org.eclipse.osgi.util;version="1.1.0",org.osgi.fr
+ amework;version="1.4.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.equinox.internal.p2.operations;x-friends:="o
+ rg.eclipse.pde.ui,org.eclipse.equinox.p2.ui",org.eclipse.equinox.p2.ope
+ rations;version="2.0.0"
+Bundle-Version: 2.7.100.v20230630-1506
+

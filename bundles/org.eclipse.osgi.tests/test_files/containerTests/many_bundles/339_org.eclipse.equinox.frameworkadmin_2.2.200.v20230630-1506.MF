@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.equinox.frameworkadmin;singleton:=true
+Require-Bundle: org.eclipse.equinox.common;bundle-version="3.4.0"
+Import-Package: org.eclipse.osgi.service.pluginconversion;version="1.0.0
+ ",org.eclipse.osgi.util;version="1.1.0",org.osgi.framework;version="1.3
+ .0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.equinox.frameworkadmin;version="2.0.0",org.e
+ clipse.equinox.internal.frameworkadmin.utils; x-friends:="org.eclipse.e
+ quinox.frameworkadmin.equinox,  org.eclipse.equinox.p2.publisher,  org.
+ eclipse.equinox.simpleconfigurator.manipulator,  org.eclipse.equinox.p2
+ .publisher.eclipse",org.eclipse.equinox.internal.provisional.configurat
+ ormanipulator;x-friends:="org.eclipse.equinox.frameworkadmin.equinox,or
+ g.eclipse.equinox.simpleconfigurator.manipulator",org.eclipse.equinox.i
+ nternal.provisional.frameworkadmin; x-friends:="org.eclipse.equinox.fra
+ meworkadmin.equinox,  org.eclipse.equinox.p2.publisher,  org.eclipse.eq
+ uinox.p2.touchpoint.eclipse,  org.eclipse.equinox.simpleconfigurator.ma
+ nipulator,  org.eclipse.pde.core,  org.eclipse.pde.ui,  org.eclipse.equ
+ inox.p2.publisher.eclipse"
+Bundle-Version: 2.2.200.v20230630-1506
+

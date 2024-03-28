@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.tracecompass.lttng2.ust.ui;singleton:=t
+ rue
+Require-Bundle: org.eclipse.core.resources,org.eclipse.core.runtime,org.
+ eclipse.ui,org.eclipse.tracecompass.common.core,org.eclipse.tracecompas
+ s.lttng2.ust.core,org.eclipse.tracecompass.tmf.core,org.eclipse.traceco
+ mpass.tmf.ui,org.eclipse.tracecompass.tmf.ctf.core,org.eclipse.tracecom
+ pass.analysis.profiling.core,org.eclipse.tracecompass.analysis.profilin
+ g.ui,org.eclipse.tracecompass.lttng2.common.core,org.eclipse.tracecompa
+ ss.analysis.timing.ui,org.eclipse.jdt.annotation;bundle-version="[2.0.0
+ ,3.0.0)";resolution:=optional
+Import-Package: com.google.common.base,com.google.common.collect,org.ecl
+ ipse.tracecompass.analysis.os.linux.core.kernelmemoryusage,org.eclipse.
+ tracecompass.analysis.os.linux.core.memory,org.eclipse.tracecompass.int
+ ernal.analysis.os.linux.ui.views.memory
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.tracecompass.internal.lttng2.ust.ui;x-friend
+ s:="org.eclipse.tracecompass.lttng2.ust.ui.tests",org.eclipse.tracecomp
+ ass.internal.lttng2.ust.ui.analysis.debuginfo;x-internal:=true,org.ecli
+ pse.tracecompass.internal.lttng2.ust.ui.views.memusage;x-friends:="org.
+ eclipse.tracecompass.lttng2.ust.ui.tests,org.eclipse.tracecompass.lttng
+ 2.ust.ui.swtbot.tests"
+Bundle-Version: 3.1.0.202308301409
+

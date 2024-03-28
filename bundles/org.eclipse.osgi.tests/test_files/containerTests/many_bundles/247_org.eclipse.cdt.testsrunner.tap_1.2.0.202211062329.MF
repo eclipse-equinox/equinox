@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.cdt.testsrunner.tap;singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="3.5.0",org.ecli
+ pse.cdt.testsrunner;bundle-version="3.5.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.cdt.testsrunner.internal.tap;x-friends:="org
+ .eclipse.cdt.testsrunner.tests"
+Bundle-Version: 1.2.0.202211062329
+

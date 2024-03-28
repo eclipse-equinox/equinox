@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: slf4j.api
+Import-Package: org.slf4j.spi;version="[2.0.7,3)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.extender;filter:="(&(osgi.extender=osgi.service
+ loader.processor)(version>=1.0.0)(!(version>=2.0.0)))",osgi.serviceload
+ er;filter:="(osgi.serviceloader=org.slf4j.spi.SLF4JServiceProvider)";os
+ gi.serviceloader="org.slf4j.spi.SLF4JServiceProvider",osgi.ee;filter:="
+ (&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: org.slf4j;version="2.0.7";uses:="org.slf4j.event,org.slf
+ 4j.helpers,org.slf4j.spi",org.slf4j.event;version="2.0.7";uses:="org.sl
+ f4j,org.slf4j.helpers",org.slf4j.helpers;version="2.0.7";uses:="org.slf
+ 4j,org.slf4j.event,org.slf4j.spi",org.slf4j.spi;version="2.0.7";uses:="
+ org.slf4j,org.slf4j.event,org.slf4j.helpers",org.slf4j;uses:="org.slf4j
+ .event,org.slf4j.helpers,org.slf4j.spi";version="1.7.36"
+Bundle-Version: 2.0.7
+

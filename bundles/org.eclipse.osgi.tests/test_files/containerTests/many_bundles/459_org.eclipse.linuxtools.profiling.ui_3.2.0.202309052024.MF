@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.profiling.ui;singleton:=true
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.cdt.
+ managedbuilder.core,org.eclipse.cdt.autotools.core,org.eclipse.cdt.core
+Import-Package: org.eclipse.cdt.debug.core,org.eclipse.core.filesystem,o
+ rg.eclipse.core.resources,org.eclipse.debug.core.model,org.eclipse.debu
+ g.core.sourcelookup.containers,org.eclipse.debug.ui,org.eclipse.debug.u
+ i.sourcelookup,org.eclipse.jface.text,org.eclipse.linuxtools.profiling.
+ launch,org.eclipse.ui.ide,org.eclipse.ui.texteditor
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.linuxtools.profiling.ui
+Bundle-Version: 3.2.0.202309052024
+

@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.mylyn.jenkins.ui;singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="0.0.0",org.ecli
+ pse.ecf;bundle-version="3.0.0";resolution:=optional,org.eclipse.ecf.dis
+ covery;bundle-version="3.0.0",org.eclipse.ecf.provider.jmdns;bundle-ver
+ sion="3.0.0",org.eclipse.mylyn.builds.core;bundle-version="4.0.0",org.e
+ clipse.mylyn.builds.ui;bundle-version="4.0.0",org.eclipse.mylyn.commons
+ .core;bundle-version="4.0.0",org.eclipse.mylyn.commons.notifications.ui
+ ;bundle-version="4.0.0",org.eclipse.mylyn.commons.repositories.core;bun
+ dle-version="4.0.0",org.eclipse.mylyn.commons.repositories.ui;bundle-ve
+ rsion="4.0.0",org.eclipse.mylyn.jenkins.core;bundle-version="4.0.0",org
+ .eclipse.ui;bundle-version="0.0.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.mylyn.internal.jenkins.ui;x-internal:=true
+Bundle-Version: 4.0.0.v20230804-1109
+

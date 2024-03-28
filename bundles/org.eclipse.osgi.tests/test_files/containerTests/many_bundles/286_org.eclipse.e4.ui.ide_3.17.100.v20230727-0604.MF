@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.e4.ui.ide
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.29.0,4.0.0)"
+ ,org.eclipse.core.resources;bundle-version="[3.7.0,4.0.0)";resolution:=
+ optional,org.eclipse.swt;bundle-version="[3.107.0,4.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.e4.ui.internal.workspace.markers;x-friends:=
+ "org.eclipse.ui.ide"
+Bundle-Version: 3.17.100.v20230727-0604
+

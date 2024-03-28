@@ -1,0 +1,117 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.jgit
+Import-Package: com.googlecode.javaewah;version="[1.1.6,2.0.0)",javax.cr
+ ypto,javax.management,javax.net.ssl,org.apache.commons.codec.digest;ver
+ sion="1.15.0",org.slf4j;version="[1.7.0,2.0.0)",org.xml.sax,org.xml.sax
+ .helpers
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.jgit.annotations;version="6.7.0",org.eclipse
+ .jgit.api;version="6.7.0"; uses:="org.eclipse.jgit.transport,  org.ecli
+ pse.jgit.notes,  org.eclipse.jgit.dircache,  org.eclipse.jgit.lib,  org
+ .eclipse.jgit.revwalk,  org.eclipse.jgit.treewalk.filter,  org.eclipse.
+ jgit.diff,  org.eclipse.jgit.treewalk,  org.eclipse.jgit.util,  org.ecl
+ ipse.jgit.submodule,  org.eclipse.jgit.api.errors,  org.eclipse.jgit.re
+ vwalk.filter,  org.eclipse.jgit.blame,  org.eclipse.jgit.merge",org.ecl
+ ipse.jgit.api.errors;version="6.7.0"; uses:="org.eclipse.jgit.lib,  org
+ .eclipse.jgit.errors",org.eclipse.jgit.attributes;version="6.7.0"; uses
+ :="org.eclipse.jgit.lib,  org.eclipse.jgit.treewalk",org.eclipse.jgit.b
+ lame;version="6.7.0"; uses:="org.eclipse.jgit.lib,  org.eclipse.jgit.re
+ vwalk,  org.eclipse.jgit.treewalk.filter,  org.eclipse.jgit.diff",org.e
+ clipse.jgit.diff;version="6.7.0"; uses:="org.eclipse.jgit.lib,  org.ecl
+ ipse.jgit.attributes,  org.eclipse.jgit.revwalk,  org.eclipse.jgit.patc
+ h,  org.eclipse.jgit.treewalk.filter,  org.eclipse.jgit.treewalk,  org.
+ eclipse.jgit.util",org.eclipse.jgit.dircache;version="6.7.0"; uses:="or
+ g.eclipse.jgit.events,  org.eclipse.jgit.lib,  org.eclipse.jgit.attribu
+ tes,  org.eclipse.jgit.treewalk,  org.eclipse.jgit.util",org.eclipse.jg
+ it.errors;version="6.7.0"; uses:="org.eclipse.jgit.transport,  org.ecli
+ pse.jgit.dircache,  org.eclipse.jgit.lib,  org.eclipse.jgit.internal.st
+ orage.pack",org.eclipse.jgit.events;version="6.7.0"; uses:="org.eclipse
+ .jgit.lib",org.eclipse.jgit.fnmatch;version="6.7.0",org.eclipse.jgit.gi
+ trepo;version="6.7.0"; uses:="org.xml.sax.helpers,  org.eclipse.jgit.ap
+ i,  org.eclipse.jgit.lib,  org.eclipse.jgit.revwalk,  org.xml.sax",org.
+ eclipse.jgit.gitrepo.internal;version="6.7.0";x-internal:=true,org.ecli
+ pse.jgit.hooks;version="6.7.0";uses:="org.eclipse.jgit.lib",org.eclipse
+ .jgit.ignore;version="6.7.0",org.eclipse.jgit.ignore.internal;version="
+ 6.7.0"; x-friends:="org.eclipse.jgit.test",org.eclipse.jgit.internal;ve
+ rsion="6.7.0"; x-friends:="org.eclipse.jgit.test,  org.eclipse.jgit.htt
+ p.test",org.eclipse.jgit.internal.diff;version="6.7.0"; x-friends:="org
+ .eclipse.jgit.test",org.eclipse.jgit.internal.diffmergetool;version="6.
+ 7.0"; x-friends:="org.eclipse.jgit.test,  org.eclipse.jgit.pgm.test,  o
+ rg.eclipse.jgit.pgm,  org.eclipse.egit.ui",org.eclipse.jgit.internal.fs
+ ck;version="6.7.0"; x-friends:="org.eclipse.jgit.test",org.eclipse.jgit
+ .internal.revwalk;version="6.7.0"; x-friends:="org.eclipse.jgit.test",o
+ rg.eclipse.jgit.internal.storage.commitgraph;version="6.7.0"; x-friends
+ :="org.eclipse.jgit.test",org.eclipse.jgit.internal.storage.dfs;version
+ ="6.7.0"; x-friends:="org.eclipse.jgit.test,  org.eclipse.jgit.http.ser
+ ver,  org.eclipse.jgit.http.test,  org.eclipse.jgit.lfs.test",org.eclip
+ se.jgit.internal.storage.file;version="6.7.0"; x-friends:="org.eclipse.
+ jgit.test,  org.eclipse.jgit.junit,  org.eclipse.jgit.junit.http,  org.
+ eclipse.jgit.http.server,  org.eclipse.jgit.lfs,  org.eclipse.jgit.pgm,
+   org.eclipse.jgit.pgm.test,  org.eclipse.jgit.ssh.apache",org.eclipse.
+ jgit.internal.storage.io;version="6.7.0"; x-friends:="org.eclipse.jgit.
+ junit,  org.eclipse.jgit.test,  org.eclipse.jgit.pgm",org.eclipse.jgit.
+ internal.storage.memory;version="6.7.0"; x-friends:="org.eclipse.jgit.t
+ est",org.eclipse.jgit.internal.storage.pack;version="6.7.0"; x-friends:
+ ="org.eclipse.jgit.junit,  org.eclipse.jgit.test,  org.eclipse.jgit.pgm
+ ",org.eclipse.jgit.internal.storage.reftable;version="6.7.0"; x-friends
+ :="org.eclipse.jgit.http.test,  org.eclipse.jgit.junit,  org.eclipse.jg
+ it.test,  org.eclipse.jgit.pgm",org.eclipse.jgit.internal.submodule;ver
+ sion="6.7.0";x-internal:=true,org.eclipse.jgit.internal.transport.conne
+ ctivity;version="6.7.0"; x-friends:="org.eclipse.jgit.test",org.eclipse
+ .jgit.internal.transport.http;version="6.7.0"; x-friends:="org.eclipse.
+ jgit.test",org.eclipse.jgit.internal.transport.parser;version="6.7.0"; 
+ x-friends:="org.eclipse.jgit.http.server,  org.eclipse.jgit.test",org.e
+ clipse.jgit.internal.transport.ssh;version="6.7.0"; x-friends:="org.ecl
+ ipse.jgit.ssh.apache,  org.eclipse.jgit.ssh.jsch,  org.eclipse.jgit.tes
+ t",org.eclipse.jgit.internal.util;version="6.7.0";x-internal:=true,org.
+ eclipse.jgit.lib;version="6.7.0"; uses:="org.eclipse.jgit.transport,  o
+ rg.eclipse.jgit.util.sha1,  org.eclipse.jgit.dircache,  org.eclipse.jgi
+ t.revwalk,  org.eclipse.jgit.internal.storage.file,  org.eclipse.jgit.a
+ ttributes,  org.eclipse.jgit.events,  com.googlecode.javaewah,  org.ecl
+ ipse.jgit.treewalk.filter,  org.eclipse.jgit.treewalk,  org.eclipse.jgi
+ t.util,  org.eclipse.jgit.submodule,  org.eclipse.jgit.util.time",org.e
+ clipse.jgit.lib.internal;version="6.7.0"; x-friends:="org.eclipse.jgit.
+ test,  org.eclipse.jgit.pgm,  org.eclipse.egit.ui",org.eclipse.jgit.log
+ ging;version="6.7.0",org.eclipse.jgit.merge;version="6.7.0"; uses:="org
+ .eclipse.jgit.dircache,  org.eclipse.jgit.lib,  org.eclipse.jgit.revwal
+ k,  org.eclipse.jgit.diff,  org.eclipse.jgit.treewalk,  org.eclipse.jgi
+ t.util,  org.eclipse.jgit.api,  org.eclipse.jgit.attributes",org.eclips
+ e.jgit.nls;version="6.7.0",org.eclipse.jgit.notes;version="6.7.0"; uses
+ :="org.eclipse.jgit.lib,  org.eclipse.jgit.revwalk,  org.eclipse.jgit.t
+ reewalk,  org.eclipse.jgit.merge",org.eclipse.jgit.patch;version="6.7.0
+ "; uses:="org.eclipse.jgit.lib,  org.eclipse.jgit.diff",org.eclipse.jgi
+ t.revplot;version="6.7.0"; uses:="org.eclipse.jgit.lib,  org.eclipse.jg
+ it.revwalk",org.eclipse.jgit.revwalk;version="6.7.0"; uses:="org.eclips
+ e.jgit.lib,  org.eclipse.jgit.diff,  org.eclipse.jgit.treewalk.filter, 
+  org.eclipse.jgit.revwalk.filter,  org.eclipse.jgit.treewalk",org.eclip
+ se.jgit.revwalk.filter;version="6.7.0"; uses:="org.eclipse.jgit.revwalk
+ ,  org.eclipse.jgit.lib,  org.eclipse.jgit.util",org.eclipse.jgit.stora
+ ge.file;version="6.7.0"; uses:="org.eclipse.jgit.lib,  org.eclipse.jgit
+ .util",org.eclipse.jgit.storage.pack;version="6.7.0"; uses:="org.eclips
+ e.jgit.lib",org.eclipse.jgit.submodule;version="6.7.0"; uses:="org.ecli
+ pse.jgit.lib,  org.eclipse.jgit.diff,  org.eclipse.jgit.treewalk.filter
+ ,  org.eclipse.jgit.treewalk,  org.eclipse.jgit.util",org.eclipse.jgit.
+ transport;version="6.7.0"; uses:="javax.crypto,  org.eclipse.jgit.util.
+ io,  org.eclipse.jgit.lib,  org.eclipse.jgit.revwalk,  org.eclipse.jgit
+ .transport.http,  org.eclipse.jgit.internal.storage.file,  org.eclipse.
+ jgit.treewalk,  org.eclipse.jgit.util,  org.eclipse.jgit.internal.stora
+ ge.pack,  org.eclipse.jgit.transport.resolver,  org.eclipse.jgit.storag
+ e.pack,  org.eclipse.jgit.errors",org.eclipse.jgit.transport.http;versi
+ on="6.7.0"; uses:="javax.net.ssl",org.eclipse.jgit.transport.resolver;v
+ ersion="6.7.0"; uses:="org.eclipse.jgit.transport,  org.eclipse.jgit.li
+ b",org.eclipse.jgit.treewalk;version="6.7.0"; uses:="org.eclipse.jgit.d
+ ircache,  org.eclipse.jgit.lib,  org.eclipse.jgit.attributes,  org.ecli
+ pse.jgit.revwalk,  org.eclipse.jgit.treewalk.filter,  org.eclipse.jgit.
+ util",org.eclipse.jgit.treewalk.filter;version="6.7.0"; uses:="org.ecli
+ pse.jgit.treewalk",org.eclipse.jgit.util;version="6.7.0"; uses:="org.ec
+ lipse.jgit.transport,  org.eclipse.jgit.hooks,  org.eclipse.jgit.revwal
+ k,  org.eclipse.jgit.storage.file,  org.ietf.jgss,  org.eclipse.jgit.at
+ tributes,  javax.management,  org.eclipse.jgit.lib,  org.eclipse.jgit.t
+ ransport.http,  org.eclipse.jgit.treewalk,  javax.net.ssl,  org.eclipse
+ .jgit.util.time",org.eclipse.jgit.util.io;version="6.7.0"; uses:="org.e
+ clipse.jgit.attributes,  org.eclipse.jgit.lib,  org.eclipse.jgit.treewa
+ lk",org.eclipse.jgit.util.sha1;version="6.7.0",org.eclipse.jgit.util.ti
+ me;version="6.7.0"
+Bundle-Version: 6.7.0.202309050840-r
+

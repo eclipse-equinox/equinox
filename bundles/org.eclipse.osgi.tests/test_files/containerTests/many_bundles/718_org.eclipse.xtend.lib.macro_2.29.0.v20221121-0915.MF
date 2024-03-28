@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Export-Package: org.eclipse.xtend.lib.macro;version="2.29.0";uses:="org.
+ eclipse.xtend.lib.macro.file,org.eclipse.xtend.lib.macro.services,org.e
+ clipse.xtend.lib.macro.declaration",org.eclipse.xtend.lib.macro.declara
+ tion;version="2.29.0";uses:="org.eclipse.xtend.lib.macro.file,  org.ecl
+ ipse.xtend2.lib,  org.eclipse.xtend.lib.macro.expression,  org.eclipse.
+ xtext.xbase.lib",org.eclipse.xtend.lib.macro.expression;version="2.29.0
+ ";uses:="org.eclipse.xtend.lib.macro.declaration",org.eclipse.xtend.lib
+ .macro.file;version="2.29.0",org.eclipse.xtend.lib.macro.services;versi
+ on="2.29.0";uses:="org.eclipse.xtend.lib.macro.declaration,org.eclipse.
+ xtext.xbase.lib"
+Bundle-SymbolicName: org.eclipse.xtend.lib.macro
+Bundle-Version: 2.29.0.v20221121-0915
+Require-Bundle: org.eclipse.xtext.xbase.lib;visibility:=reexport
+

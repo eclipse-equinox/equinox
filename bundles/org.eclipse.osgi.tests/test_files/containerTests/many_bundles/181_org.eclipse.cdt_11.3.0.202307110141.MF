@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.cdt; singleton:=true
+Require-Bundle: org.eclipse.ui.intro;bundle-version="[3.2.0,4.0.0)",org.
+ eclipse.ui.cheatsheets;bundle-version="[3.2.0,4.0.0)"
+Bundle-ManifestVersion: 2
+Bundle-Version: 11.3.0.202307110141
+

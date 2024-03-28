@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.dataviewers.charts;singleton
+ :=true
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.linu
+ xtools.dataviewers;bundle-version="4.0.0"
+Import-Package: org.eclipse.linuxtools.dataviewers.piechart,org.eclipse.
+ linuxtools.internal.dataviewers.piechart,org.eclipse.swtchart,org.eclip
+ se.swtchart.extensions.charts
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.linuxtools.dataviewers.charts.actions,org.ec
+ lipse.linuxtools.dataviewers.charts.provider
+Bundle-Version: 7.0.0.202309052024
+

@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: jakarta.xml.bind
+Bundle-Version: 2.3.3.v20201118-1818
+Import-Package: javax.activation;version="1.0",javax.xml.stream;resoluti
+ on:=optional,javax.xml.bind;version="2.3.3",javax.xml.bind.annotation;v
+ ersion="2.3.3",javax.xml.bind.annotation.adapters;version="2.3.3",javax
+ .xml.bind.attachment;version="2.3.3",javax.xml.datatype;version="1.3",j
+ avax.xml.namespace;version="1.3",javax.xml.parsers;version="1.3",javax.
+ xml.transform;version="1.3",javax.xml.transform.dom;version="1.3",javax
+ .xml.transform.sax;version="1.3",javax.xml.transform.stream;version="1.
+ 3",javax.xml.validation;version="1.3",org.glassfish.hk2.osgiresourceloc
+ ator;resolution:=optional,org.w3c.dom;resolution:=optional,org.xml.sax;
+ resolution:=optional,org.xml.sax.ext;resolution:=optional,org.xml.sax.h
+ elpers;resolution:=optional
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Bundle-ManifestVersion: 2
+Export-Package: javax.xml.bind;version="2.3.3",javax.xml.bind.annotation
+ ;version="2.3.3",javax.xml.bind.annotation.adapters;version="2.3.3",jav
+ ax.xml.bind.attachment;version="2.3.3",javax.xml.bind.helpers;version="
+ 2.3.3",javax.xml.bind.util;version="2.3.3"
+

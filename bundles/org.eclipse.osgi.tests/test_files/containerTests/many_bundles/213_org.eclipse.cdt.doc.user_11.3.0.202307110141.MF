@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.cdt.doc.user; singleton:=true
+Require-Bundle: org.eclipse.help,org.eclipse.ui.cheatsheets,org.eclipse.
+ ui.intro,org.eclipse.ui.intro.universal
+Bundle-ManifestVersion: 2
+Bundle-Version: 11.3.0.202307110141
+

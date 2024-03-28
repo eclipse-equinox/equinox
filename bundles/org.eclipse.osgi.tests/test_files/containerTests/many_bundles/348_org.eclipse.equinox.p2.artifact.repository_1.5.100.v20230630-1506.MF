@@ -1,0 +1,54 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.equinox.p2.artifact.repository;singleto
+ n:=true
+Require-Bundle: org.eclipse.equinox.common;bundle-version="[3.18.0,4.0.0
+ )",org.eclipse.equinox.registry,org.eclipse.equinox.p2.metadata,org.tuk
+ aani.xz;bundle-version="1.3.0"
+Import-Package: javax.xml.parsers,org.bouncycastle.bcpg;version="1.65.0"
+ ,org.bouncycastle.jce.provider;version="1.65.1",org.bouncycastle.openpg
+ p;version="1.65.0",org.bouncycastle.openpgp.bc;version="1.65.0",org.bou
+ ncycastle.openpgp.jcajce;version="1.65.0",org.bouncycastle.openpgp.oper
+ ator;version="1.65.0",org.bouncycastle.openpgp.operator.bc;version="1.6
+ 5.0",org.bouncycastle.openpgp.operator.jcajce;version="1.65.0",org.ecli
+ pse.core.runtime.jobs,org.eclipse.equinox.internal.p2.core.helpers,org.
+ eclipse.equinox.internal.p2.jarprocessor,org.eclipse.equinox.internal.p
+ 2.metadata,org.eclipse.equinox.internal.p2.persistence,org.eclipse.equi
+ nox.internal.p2.repository,org.eclipse.equinox.internal.p2.repository.h
+ elpers,org.eclipse.equinox.internal.provisional.p2.core.eventbus,org.ec
+ lipse.equinox.internal.provisional.p2.repository,org.eclipse.equinox.p2
+ .core;version="[2.0.0,3.0.0)",org.eclipse.equinox.p2.core.spi;version="
+ [2.0.0,3.0.0)",org.eclipse.equinox.p2.repository;version="[2.0.0,3.0.0)
+ ",org.eclipse.equinox.p2.repository.artifact;version="[2.0.0,3.0.0)",or
+ g.eclipse.equinox.p2.repository.artifact.spi;version="[2.0.0,3.0.0)",or
+ g.eclipse.equinox.p2.repository.spi;version="[2.0.0,3.0.0)",org.eclipse
+ .internal.provisional.equinox.p2.jarprocessor;resolution:=optional,org.
+ eclipse.osgi.service.datalocation;version="[1.3.0,2.0.0)",org.eclipse.o
+ sgi.signedcontent;version="1.0.0",org.eclipse.osgi.util;version="1.1.0"
+ ,org.osgi.framework;version="1.3.0",org.osgi.service.prefs;version="1.1
+ .1",org.w3c.dom,org.xml.sax;resolution:=optional
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.equinox.internal.p2.artifact.processing;x-fr
+ iends:="org.eclipse.equinox.p2.artifact.processors,org.eclipse.equinox.
+ p2.artifact.optimizers",org.eclipse.equinox.internal.p2.artifact.proces
+ sors.checksum;x-friends:="org.eclipse.equinox.p2.publisher",org.eclipse
+ .equinox.internal.p2.artifact.processors.md5;x-internal:=true,org.eclip
+ se.equinox.internal.p2.artifact.processors.pgp;x-friends:="org.eclipse.
+ equinox.p2.engine,org.eclipse.equinox.p2.ui.sdk,org.eclipse.equinox.p2.
+ ui",org.eclipse.equinox.internal.p2.artifact.repository; x-friends:="or
+ g.eclipse.equinox.p2.publisher,  org.eclipse.equinox.p2.reconciler.drop
+ ins,  org.eclipse.equinox.p2.ui,  org.eclipse.equinox.p2.directorywatch
+ er,  org.eclipse.equinox.p2.repository.tools,  org.eclipse.equinox.p2.p
+ ublisher.eclipse",org.eclipse.equinox.internal.p2.artifact.repository.s
+ imple; x-friends:="org.eclipse.equinox.p2.touchpoint.eclipse,  org.ecli
+ pse.equinox.p2.engine,  org.eclipse.equinox.p2.tests,  org.eclipse.equi
+ nox.p2.directorywatcher,  org.eclipse.equinox.p2.updatesite,  org.eclip
+ se.equinox.p2.publisher,  org.eclipse.equinox.p2.extensionlocation,  or
+ g.eclipse.equinox.p2.repository.tools",org.eclipse.equinox.internal.pro
+ visional.p2.artifact.repository.processing; x-friends:="org.eclipse.equ
+ inox.p2.artifact.processors,  org.eclipse.equinox.p2.artifact.optimizer
+ s,  org.eclipse.equinox.p2.artifact.repository,  org.eclipse.equinox.p2
+ .ui,  org.eclipse.equinox.p2.publisher,  org.eclipse.equinox.p2.updates
+ ite"
+Bundle-Version: 1.5.100.v20230630-1506
+

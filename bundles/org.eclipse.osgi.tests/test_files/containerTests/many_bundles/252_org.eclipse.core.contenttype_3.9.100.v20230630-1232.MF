@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.core.contenttype; singleton:=true
+Require-Bundle: org.eclipse.equinox.preferences;bundle-version="[3.2.0,4
+ .0.0)",org.eclipse.equinox.registry;bundle-version="[3.2.0,4.0.0)",org.
+ eclipse.equinox.common;bundle-version="[3.13.0,4.0.0)"
+Import-Package: javax.xml.parsers,org.eclipse.osgi.service.debug,org.ecl
+ ipse.osgi.util;version="1.0.0",org.osgi.framework,org.osgi.util.tracker
+ ,org.xml.sax,org.xml.sax.ext,org.xml.sax.helpers
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.core.internal.content;x-internal:=true,org.e
+ clipse.core.runtime.content
+Bundle-Version: 3.9.100.v20230630-1232
+
