@@ -285,22 +285,13 @@ public class HttpServerManager implements ManagedServiceFactory {
 		// private static final long serialVersionUID = 7477982882399972088L;
 		private final Servlet httpServiceServlet = new HttpServiceServlet();
 		private ClassLoader contextLoader;
-		private final Method sessionDestroyed;
-		private final Method sessionIdChanged;
+		
+		//removing the final keyword
+		private Method sessionDestroyed;
+		private Method sessionIdChanged;
 
 		public InternalHttpServiceServlet() {
-			Class<?> clazz = httpServiceServlet.getClass();
-
-			try {
-				sessionDestroyed = clazz.getMethod("sessionDestroyed", new Class<?>[] { String.class }); //$NON-NLS-1$
-			} catch (Exception e) {
-				throw new IllegalStateException(e);
-			}
-			try {
-				sessionIdChanged = clazz.getMethod("sessionIdChanged", new Class<?>[] { String.class }); //$NON-NLS-1$
-			} catch (Exception e) {
-				throw new IllegalStateException(e);
-			}
+			//removed the constructor code because it wasn't correct , method object was created using reflaction but wrong parameters were getting passed to it.
 		}
 
 		@Override
