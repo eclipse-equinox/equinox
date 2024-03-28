@@ -20,7 +20,6 @@ java.profiles = \
  J2SE-1.4.profile,\
  J2SE-1.3.profile,\
  J2SE-1.2.profile,\
- JRE-1.1.profile,\
  JavaSE_compact1-1.8.profile,\
  JavaSE_compact2-1.8.profile,\
  JavaSE_compact3-1.8.profile,\
