@@ -18,6 +18,7 @@
  */
 package org.apache.felix.resolver;
 
+import java.util.function.ToIntFunction;
 import org.osgi.resource.Resource;
 
 /**
@@ -131,4 +132,29 @@ public class Logger
     {
         // do nothing by default
     }
+
+	/**
+	 * Called whenever a new permutation is added by the resolver.
+	 * 
+	 * @param type      the type of the permutation
+	 * @param remaining a function that can be used to query the now current number
+	 *                  of permutation types
+	 */
+	public void logPermutationAdded(PermutationType type, ToIntFunction<PermutationType> remaining) 
+	{
+		// do nothing by default
+	}
+
+	/**
+	 * Called whenever a permutation is removed and about to be processed by the
+	 * resolver.
+	 * 
+	 * @param type      the type of permutation that will be processed
+	 * @param remaining a function that can be used to query the now current number
+	 *                  of permutation types
+	 */
+	public void logProcessPermutation(PermutationType type, ToIntFunction<PermutationType> remaining) 
+	{
+		// do nothing by default
+	}
 }

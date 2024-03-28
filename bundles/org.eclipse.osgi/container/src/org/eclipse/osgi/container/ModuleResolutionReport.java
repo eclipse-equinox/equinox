@@ -49,8 +49,10 @@ class ModuleResolutionReport implements ResolutionReport {
 			entries.add(new EntryImpl(type, data));
 		}
 
-		public ModuleResolutionReport build(Map<Resource, List<Wire>> resolutionResult, ResolutionException cause) {
-			return new ModuleResolutionReport(resolutionResult, resourceToEntries, cause);
+		public ModuleResolutionReport build(Map<Resource, List<Wire>> resolutionResult, ResolutionException cause,
+				int totalPerm, int processedPerm, int usesPerm) {
+			return new ModuleResolutionReport(resolutionResult, resourceToEntries, cause, totalPerm, processedPerm,
+					usesPerm);
 		}
 	}
 
@@ -77,9 +79,15 @@ class ModuleResolutionReport implements ResolutionReport {
 	private final Map<Resource, List<Entry>> entries;
 	private final ResolutionException resolutionException;
 	private final Map<Resource, List<Wire>> resolutionResult;
+	private int totalPerm;
+	private int processedPerm;
+	private int usesPerm;
 
 	ModuleResolutionReport(Map<Resource, List<Wire>> resolutionResult, Map<Resource, List<Entry>> entries,
-			ResolutionException cause) {
+			ResolutionException cause, int totalPerm, int processedPerm, int usesPerm) {
+		this.totalPerm = totalPerm;
+		this.processedPerm = processedPerm;
+		this.usesPerm = usesPerm;
 		this.entries = entries == null ? Collections.emptyMap() : Collections.unmodifiableMap(new HashMap<>(entries));
 		this.resolutionResult = resolutionResult == null ? Collections.emptyMap()
 				: Collections.unmodifiableMap(resolutionResult);
@@ -175,5 +183,20 @@ class ModuleResolutionReport implements ResolutionReport {
 	@Override
 	public String getResolutionReportMessage(Resource resource) {
 		return getResolutionReport0(null, (ModuleRevision) resource, getEntries(), null);
+	}
+
+	@Override
+	public int getTotalPermutations() {
+		return totalPerm;
+	}
+
+	@Override
+	public int getProcessedPermutations() {
+		return processedPerm;
+	}
+
+	@Override
+	public int getUsesPermutations() {
+		return usesPerm;
 	}
 }
