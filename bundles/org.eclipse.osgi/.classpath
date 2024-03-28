@@ -14,5 +14,12 @@
 	</classpathentry>
 	<classpathentry kind="src" path="supplement/src"/>
 	<classpathentry kind="src" path="container/src"/>
+	<classpathentry kind="src" output="bin_test" path="felix/src_test">
+		<attributes>
+			<attribute name="test" value="true"/>
+			<attribute name="ignore_optional_problems" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
