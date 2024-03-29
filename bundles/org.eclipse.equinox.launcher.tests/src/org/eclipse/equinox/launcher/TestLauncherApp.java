@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eclipse Foundation, Inc. and others.
+ * Copyright (c) 2023, 2024 Eclipse Foundation, Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -38,6 +38,13 @@ import java.util.List;
  *
  */
 public class TestLauncherApp {
+
+	public static final String ARGS_PARAMETER = "-args"; //$NON-NLS-1$
+	public static final String EXITDATA_PARAMETER = "-exitdata"; //$NON-NLS-1$
+	public static final String EXITCODE_PARAMETER = "-exitcode"; //$NON-NLS-1$
+	public static final String MULTILINE_ARG_VALUE_TERMINATOR = "---"; //$NON-NLS-1$
+
+	public static final String PORT_ENV_KEY = "eclipse_test_port"; //$NON-NLS-1$
 
 	private static JNIBridge bridge;
 	private static String sharedId;
@@ -84,25 +91,25 @@ public class TestLauncherApp {
 	}
 
 	private static void communicateToServer() throws Exception {
-		String port = System.getenv(TestLauncherConstants.PORT_ENV_KEY);
+		String port = System.getenv(PORT_ENV_KEY);
 		try (Socket socket = new Socket()) {
 			socket.connect(new InetSocketAddress("localhost", Integer.parseInt(port)), 10000);
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 			String line;
 			while ((line = in.readLine()) != null) {
-				if (TestLauncherConstants.ARGS_PARAMETER.equals(line)) {
-					out.writeBytes(String.join("\n", args) + "\n" + TestLauncherConstants.MULTILINE_ARG_VALUE_TERMINATOR + "\n");
+				if (ARGS_PARAMETER.equals(line)) {
+					out.writeBytes(String.join("\n", args) + "\n" + MULTILINE_ARG_VALUE_TERMINATOR + "\n");
 					out.flush();
-				} else if (TestLauncherConstants.EXITDATA_PARAMETER.equals(line)) {
+				} else if (EXITDATA_PARAMETER.equals(line)) {
 					while ((line = in.readLine()) != null) {
-						if (TestLauncherConstants.MULTILINE_ARG_VALUE_TERMINATOR.equals(line)) {
+						if (MULTILINE_ARG_VALUE_TERMINATOR.equals(line)) {
 							break;
 						}
 						exitData.add(line);
 					}
-				} else if (TestLauncherConstants.EXITCODE_PARAMETER.equals(line)) {
-					TestLauncherApp.exitCode = Integer.parseInt(in.readLine());
+				} else if (EXITCODE_PARAMETER.equals(line)) {
+					exitCode = Integer.parseInt(in.readLine());
 					break;
 				}
 			}

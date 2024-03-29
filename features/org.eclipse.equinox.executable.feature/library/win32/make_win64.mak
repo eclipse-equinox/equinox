@@ -65,7 +65,6 @@ wcflags = -DUNICODE -I.. -DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
 	-I"$(JAVA_HOME)\include" -I"$(JAVA_HOME)\include\win32" \
 	$(cflags)
-LIBRARY_FRAGMENT_NAME = org.eclipse.equinox.launcher.$(DEFAULT_WS).$(DEFAULT_OS).$(DEFAULT_OS_ARCH)
 all: $(EXEC) $(DLL) $(CONSOLE)
 
 eclipseMain.obj: ../eclipseUnicode.h ../eclipseCommon.h ../eclipseMain.c 
@@ -122,31 +121,3 @@ install: all
 
 clean:
 	del $(EXEC) $(CONSOLE) $(DLL) $(MAIN_OBJS) $(MAIN_CONSOLE_OBJS) $(DLL_OBJS) $(COMMON_OBJS) $(RES) eclipse_*.exp eclipse_*.lib
-
-# Convienience method to install produced output into a developer's eclipse for testing/development.
-dev_build_install: all
-!ifdef DEV_ECLIPSE
-	@echo Copying $(EXEC) and $(DLL) into your development eclipse folder
-	mkdir $(DEV_ECLIPSE)
-	copy $(EXEC) $(DEV_ECLIPSE)
-	mkdir $(DEV_ECLIPSE)\plugins
-	mkdir $(DEV_ECLIPSE)\plugins\$(LIBRARY_FRAGMENT_NAME)
-	copy $(DLL) $(DEV_ECLIPSE)\plugins\$(LIBRARY_FRAGMENT_NAME)
-!else
-	!error $(DEV_INSTALL_ERROR_MSG)
-!endif
-
-test:
-	mvn -f ../org.eclipse.launcher.tests/pom.xml clean verify -Dmaven.test.skip=true
-	nmake -f make_win64.mak dev_build_install LIBRARY_FRAGMENT_NAME=org.eclipse.equinox.launcher DEV_ECLIPSE=..\org.eclipse.launcher.tests\target\test-run 
-	mvn -f ../org.eclipse.launcher.tests/pom.xml test
-
-DEV_INSTALL_ERROR_MSG =\
-Note:\
-   DEV_ECLIPSE environmental variable is not defined.\
-   You can download an integration build eclipse for testing and set DEV_ECLIPSE to point to it's folder\
-   as per output of 'pwd'. Note, without trailing forwardslash. Integration build can be downloaded here:\
-   See: https://download.eclipse.org/eclipse/downloads/\
-   That way you can automatically build and copy eclipse and eclipse_XXXX.so into the relevant folders for testing. \
-   E.g: you can put something like the following into your .bashrc\
-   export DEV_ECLIPSE="/home/YOUR_USER/Downloads/eclipse-SDK-I20YYMMDD-XXXX-linux-win32-x86_64/eclipse"

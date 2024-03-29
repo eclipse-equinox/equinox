@@ -1,1 +1,0 @@
-../../../../../../../../../bundles/org.eclipse.equinox.launcher/src/org/eclipse/equinox/launcher/JNIBridge.java
