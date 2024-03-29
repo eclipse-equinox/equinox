@@ -16,7 +16,7 @@
 # Martin Oberhuber (Wind River) - [517013] Avoid memcpy@GLIBC_2.14 dependency
 #*******************************************************************************
 #
-# Usage: sh build.sh [<optional switches>] [clean] [test]
+# Usage: sh build.sh [<optional switches>] [clean]
 #
 #   where the optional switches are:
 #       -output <PROGRAM_OUTPUT>  - executable filename ("eclipse")
@@ -30,8 +30,6 @@
 #
 #   Examples:
 #   sh build.sh clean
-#   sh build.sh test
-#   sh build.sh clean test
 #   sh build.sh -java /usr/j2se OPTFLAG=-g PICFLAG=-fpic
 
 cd `dirname $0`

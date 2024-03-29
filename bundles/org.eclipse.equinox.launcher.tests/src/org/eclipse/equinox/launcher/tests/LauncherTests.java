@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eclipse Foundation, Inc. and others.
+ * Copyright (c) 2023, 2024 Eclipse Foundation, Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,7 +11,7 @@
  * Contributors:
  *     Umair Sair - initial API and implementation
  *******************************************************************************/
-package test.java;
+package org.eclipse.equinox.launcher.tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -19,42 +19,155 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import java.util.jar.Attributes;
+import java.util.jar.Attributes.Name;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
 
-import org.eclipse.equinox.launcher.TestLauncherConstants;
+import org.eclipse.equinox.launcher.TestLauncherApp;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 public class LauncherTests {
-	private static final String ECLIPSE_INI_PATH_KEY = "ECLIPSE_INI_PATH";
-	// eclipse ini file name is relative to eclipse binary. e.g., in mac, it is ../Eclipse/eclipse.ini
-	// and on other hosts, it is present in same directory as eclipse binary
-	private static final String ECLIPSE_INI_FILE_NAME = System.getProperty(ECLIPSE_INI_PATH_KEY,
-			System.getenv(ECLIPSE_INI_PATH_KEY) == null ? "eclipse.ini" : System.getenv(ECLIPSE_INI_PATH_KEY));
-	// @formatter:off
-	private static final String DEFAULT_ECLIPSE_INI_CONTENT = "-startup\n"
-															+ "../test.launcher.jar\n"
-															+ "--launcher.library\n"
-															+ "plugins/org.eclipse.equinox.launcher\n"
-															+ "-vmargs\n"
-															+ "-Xms40m\n"
-															+ "";
-	// @formatter:on
-	public static final Integer EXIT_OK = Integer.valueOf(0);
-	public static final Integer EXIT_RESTART = Integer.valueOf(23);
-	public static final Integer EXIT_RELAUNCH = Integer.valueOf(24);
+
+	private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
+	private static final String ECLIPSE_EXE_NAME = (OS_NAME.contains("win") ? "eclipsec.exe" : "eclipse");
+	private static final String ECLIPSE_INI_FILE_NAME = "eclipse.ini";
+
+	private static final String DEFAULT_ECLIPSE_INI_CONTENT = """
+			-startup
+			test.launcher.jar
+			--launcher.library
+			plugins/org.eclipse.equinox.launcher
+			-vmargs
+			-Xms40m
+			""";
+	public static final Integer EXIT_OK = 0;
+	public static final Integer EXIT_RESTART = 23;
+	public static final Integer EXIT_RELAUNCH = 24;
+
+	@TempDir
+	static Path tempDir;
+	private static Path eclipseInstallationMockLocation;
+
+	@BeforeAll
+	static void prepareLauncherSetup() throws Exception {
+		eclipseInstallationMockLocation = Files.createDirectories(tempDir.resolve("eclipse"));
+
+		Path codeSource = Path.of(LauncherTests.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+		Path equinoxRepo;
+		Path classesDirectory;
+		if (Files.isDirectory(codeSource) && codeSource.endsWith(Path.of("org.eclipse.equinox.launcher.tests"))) {
+			// Test executed from within the IDE
+			equinoxRepo = codeSource.getParent().getParent();
+			classesDirectory = Path.of("bin");
+		} else if (Files.isDirectory(codeSource)
+				&& codeSource.endsWith(Path.of("org.eclipse.equinox.launcher.tests/target/classes"))) {
+			// Test executed by Maven+Tycho
+			equinoxRepo = codeSource.getParent().getParent().getParent().getParent();
+			classesDirectory = Path.of("target", "classes");
+		} else {
+			throw new IllegalStateException("Unkown state");
+		}
+
+		Path binariesRoot = findBinariesRoot(equinoxRepo);
+		if (!Files.isDirectory(binariesRoot)) {
+			throw new IllegalArgumentException("Supplied equinox binaries location does not exist: " + binariesRoot);
+		}
+		String os = System.getProperty("osgi.os");
+		String ws = System.getProperty("osgi.ws");
+		String arch = System.getProperty("osgi.arch");
+
+		// Assemble a Eclipse installation mock in the test-temporary directory
+
+		Path exePath = Path.of("org.eclipse.equinox.executable", "bin", ws, os, arch);
+		if (os.contains("mac")) {
+			exePath = exePath.resolve("Eclipse.app/Contents/MacOS/eclipse");
+		} else {
+			exePath = exePath.resolve(ECLIPSE_EXE_NAME);
+		}
+		Files.createDirectories(eclipseInstallationMockLocation.resolve(ECLIPSE_EXE_NAME).getParent());
+		Files.copy(binariesRoot.resolve(exePath), eclipseInstallationMockLocation.resolve(ECLIPSE_EXE_NAME));
+
+		Properties versions = new Properties();
+		try (var in = Files.newInputStream(
+				equinoxRepo.resolve("features/org.eclipse.equinox.executable.feature/library/make_version.mak"))) {
+			versions.load(in);
+		}
+		String launcherLibrary = "eclipse_" + versions.get("maj_ver") + versions.get("min_ver")
+		+ (os.contains("win") ? ".dll" : ".so");
+		String launcherLibFile = "org.eclipse.equinox.launcher." + ws + "." + os + "." + arch + "/" + launcherLibrary;
+		Files.copy(binariesRoot.resolve(launcherLibFile),
+				Files.createDirectories(eclipseInstallationMockLocation.resolve("plugins/org.eclipse.equinox.launcher"))
+				.resolve(launcherLibrary));
+
+		Manifest manifest = new Manifest();
+		Attributes mainAttributes = manifest.getMainAttributes();
+		mainAttributes.put(Name.MANIFEST_VERSION, "1.0");
+		mainAttributes.putValue("Bundle-ManifestVersion", "2");
+		mainAttributes.putValue("Main-Class", "org.eclipse.equinox.launcher.TestLauncherApp");
+
+		Path launcherJarPath = eclipseInstallationMockLocation.resolve("test.launcher.jar");
+		try (var out = Files.newOutputStream(launcherJarPath);
+				JarOutputStream jar = new JarOutputStream(out, manifest);) {
+			addProjectsClassFiles(jar,
+					equinoxRepo.resolve("bundles/org.eclipse.equinox.launcher.tests").resolve(classesDirectory));
+			addProjectsClassFiles(jar,
+					equinoxRepo.resolve("bundles/org.eclipse.equinox.launcher").resolve(classesDirectory));
+		}
+	}
+
+	private static Path findBinariesRoot(Path equinoxRepositoryPath) {
+		String binariesLocationName = "EQUINOX_BINARIES_LOC"; // dots in variable names are not permitted in POSIX
+		Optional<Path> binariesRepo = Optional.ofNullable(System.getProperty(binariesLocationName))
+				.or(() -> Optional.ofNullable(System.getenv(binariesLocationName))).map(Path::of);
+		if (binariesRepo.isEmpty()) { // search for co-located repository with known names
+			binariesRepo = Stream.of("equinox.binaries", "rt.equinox.binaries")
+					.map(equinoxRepositoryPath::resolveSibling).filter(Files::isDirectory).findFirst();
+		}
+		return binariesRepo.orElseThrow(() -> new IllegalStateException(
+				"Location of equinox binaries could not be auto-detected and was not provided via the System.property or environment.variable '"
+						+ binariesLocationName + "'."));
+	}
+
+	private static void addProjectsClassFiles(JarOutputStream jar, Path classesFolder) throws IOException {
+		try (Stream<Path> classFiles = Files.walk(classesFolder);) {
+			for (Path classFile : (Iterable<Path>) classFiles::iterator) {
+				if (Files.isRegularFile(classFile)) {
+					String entryName = classesFolder.relativize(classFile).toString().replace('\\', '/');
+					jar.putNextEntry(new ZipEntry(entryName));
+					Files.copy(classFile, jar);
+				}
+			}
+		}
+	}
+
+	@AfterAll
+	static void cleanUp() throws Exception {
+		// Some of the processes launched stay alive for a bit too long to be able to
+		// delete the temp directory
+		ProcessHandle.current().descendants().forEach(ProcessHandle::destroyForcibly);
+		Thread.sleep(100);
+	}
 
 	private ServerSocket server;
 
@@ -87,7 +200,7 @@ public class LauncherTests {
 		assertTrue(appArgs.containsAll(Arrays.asList("-vmargs", "-Xms40m")));
 		// Make sure launcher exited with code zero
 		launcherProcess.waitFor(5, TimeUnit.SECONDS);
-		assertTrue(launcherProcess.exitValue() == 0);
+		assertEquals(0, launcherProcess.exitValue());
 	}
 
 	@Test
@@ -113,15 +226,15 @@ public class LauncherTests {
 		assertTrue(appArgs2.contains("-Dtest"));
 
 		// Other than exitdata arg, all other args should be same over restarts
-		appArgs1.remove(appArgs1.indexOf(TestLauncherConstants.EXITDATA_PARAMETER) + 1);
-		appArgs2.remove(appArgs2.indexOf(TestLauncherConstants.EXITDATA_PARAMETER) + 1);
+		appArgs1.remove(appArgs1.indexOf(TestLauncherApp.EXITDATA_PARAMETER) + 1);
+		appArgs2.remove(appArgs2.indexOf(TestLauncherApp.EXITDATA_PARAMETER) + 1);
 		// After restart, only -Dtest arg should be extra, other than that args should
 		// be same
 		appArgs2.remove(appArgs2.indexOf("-Dtest"));
 
 		// Convert backslashes to forward slashes before comparison so that all paths are consistent
-		assertEquals(appArgs1.stream().map(s -> s.replace('\\', '/')).collect(Collectors.toList()),
-				appArgs2.stream().map(s -> s.replace('\\', '/')).collect(Collectors.toList()));
+		assertEquals(appArgs1.stream().map(s -> s.replace('\\', '/')).toList(),
+				appArgs2.stream().map(s -> s.replace('\\', '/')).toList());
 	}
 
 	@Test
@@ -147,8 +260,8 @@ public class LauncherTests {
 		assertTrue(appArgs2.contains("-Dtest"));
 
 		// Other than exitdata arg, all other args should be same over relaunches
-		appArgs1.remove(appArgs1.indexOf(TestLauncherConstants.EXITDATA_PARAMETER) + 1);
-		appArgs2.remove(appArgs2.indexOf(TestLauncherConstants.EXITDATA_PARAMETER) + 1);
+		appArgs1.remove(appArgs1.indexOf(TestLauncherApp.EXITDATA_PARAMETER) + 1);
+		appArgs2.remove(appArgs2.indexOf(TestLauncherApp.EXITDATA_PARAMETER) + 1);
 		// After relaunch, -Dtest and -data args should be extra, other than that args should
 		// be same
 		appArgs2.remove(appArgs2.indexOf("-Dtest"));
@@ -156,8 +269,8 @@ public class LauncherTests {
 		appArgs2.remove(appArgs2.indexOf("dir1"));
 
 		// Convert backslashes to forward slashes before comparison so that all paths are consistent
-		assertEquals(appArgs1.stream().map(s -> s.replace('\\', '/')).collect(Collectors.toList()),
-				appArgs2.stream().map(s -> s.replace('\\', '/')).collect(Collectors.toList()));
+		assertEquals(appArgs1.stream().map(s -> s.replace('\\', '/')).toList(),
+				appArgs2.stream().map(s -> s.replace('\\', '/')).toList());
 	}
 
 	@Test
@@ -200,7 +313,7 @@ public class LauncherTests {
 		analyzeLaunchedTestApp(socket, appArgs2, null, EXIT_OK);
 
 		// Relaunched app should contain '-data dir1 -data dir2'
-		assertEquals(Collections.frequency(appArgs2, "-data"), 2);
+		assertEquals(2, Collections.frequency(appArgs2, "-data"));
 		assertTrue(appArgs2.contains("dir1"));
 		assertTrue(appArgs2.contains("dir2"));
 		// dir2 argument should appear later so that it gets effective
@@ -478,7 +591,7 @@ public class LauncherTests {
 
 		List<String> appArgs1 = new ArrayList<>();
 		analyzeLaunchedTestApp(socket, appArgs1, null, EXIT_RESTART);
-		appArgs1.remove(appArgs1.indexOf(TestLauncherConstants.EXITDATA_PARAMETER) + 1);
+		appArgs1.remove(appArgs1.indexOf(TestLauncherApp.EXITDATA_PARAMETER) + 1);
 
 		for (int i = 0; i < 10; i++) {
 			socket = server.accept();
@@ -486,11 +599,11 @@ public class LauncherTests {
 			List<String> appArgs2 = new ArrayList<>();
 			analyzeLaunchedTestApp(socket, appArgs2, null, i == 9 ? EXIT_OK : EXIT_RESTART);
 			// Other than exitdata arg, all other args should be same over restarts
-			appArgs2.remove(appArgs2.indexOf(TestLauncherConstants.EXITDATA_PARAMETER) + 1);
+			appArgs2.remove(appArgs2.indexOf(TestLauncherApp.EXITDATA_PARAMETER) + 1);
 
 			// Convert backslashes to forward slashes before comparison so that all paths are consistent
-			assertEquals(appArgs1.stream().map(s -> s.replace('\\', '/')).collect(Collectors.toList()),
-					appArgs2.stream().map(s -> s.replace('\\', '/')).collect(Collectors.toList()));
+			assertEquals(appArgs1.stream().map(s -> s.replace('\\', '/')).toList(),
+					appArgs2.stream().map(s -> s.replace('\\', '/')).toList());
 		}
 	}
 
@@ -504,7 +617,7 @@ public class LauncherTests {
 
 		List<String> appArgs1 = new ArrayList<>();
 		analyzeLaunchedTestApp(socket, appArgs1, "--launcher.skipOldUserArgs\n-data\ndir1", EXIT_RELAUNCH);
-		appArgs1.remove(appArgs1.indexOf(TestLauncherConstants.EXITDATA_PARAMETER) + 1);
+		appArgs1.remove(appArgs1.indexOf(TestLauncherApp.EXITDATA_PARAMETER) + 1);
 
 		for (int i = 0; i < 10; i++) {
 			socket = server.accept();
@@ -512,11 +625,11 @@ public class LauncherTests {
 			List<String> appArgs2 = new ArrayList<>();
 			analyzeLaunchedTestApp(socket, appArgs2, "--launcher.skipOldUserArgs\n-data\ndir1", i == 9 ? EXIT_OK : EXIT_RELAUNCH);
 			// Other than exitdata arg, all other args should be same over these relaunches
-			appArgs2.remove(appArgs2.indexOf(TestLauncherConstants.EXITDATA_PARAMETER) + 1);
+			appArgs2.remove(appArgs2.indexOf(TestLauncherApp.EXITDATA_PARAMETER) + 1);
 
 			// Convert backslashes to forward slashes before comparison so that all paths are consistent
-			assertEquals(appArgs1.stream().map(s -> s.replace('\\', '/')).collect(Collectors.toList()),
-					appArgs2.stream().map(s -> s.replace('\\', '/')).collect(Collectors.toList()));
+			assertEquals(appArgs1.stream().map(s -> s.replace('\\', '/')).toList(),
+					appArgs2.stream().map(s -> s.replace('\\', '/')).toList());
 		}
 	}
 
@@ -524,48 +637,45 @@ public class LauncherTests {
 			throws IOException {
 		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-		out.writeBytes(TestLauncherConstants.ARGS_PARAMETER + "\n");
+		out.writeBytes(TestLauncherApp.ARGS_PARAMETER + "\n");
 		out.flush();
 		String line = null;
 		System.out.println("--- start ----");
 		while ((line = in.readLine()) != null) {
-			if (TestLauncherConstants.MULTILINE_ARG_VALUE_TERMINATOR.equals(line))
+			if (TestLauncherApp.MULTILINE_ARG_VALUE_TERMINATOR.equals(line)) {
 				break;
+			}
 			System.out.println(line);
 			appArgs.add(line);
 		}
 		System.out.println("--- end ----");
 		{
-			out.writeBytes(TestLauncherConstants.EXITDATA_PARAMETER + "\n");
-			if (restartArgs != null && !restartArgs.isBlank())
+			out.writeBytes(TestLauncherApp.EXITDATA_PARAMETER + "\n");
+			if (restartArgs != null && !restartArgs.isBlank()) {
 				out.writeBytes(restartArgs + "\n");
-			out.writeBytes(TestLauncherConstants.MULTILINE_ARG_VALUE_TERMINATOR + "\n");
+			}
+			out.writeBytes(TestLauncherApp.MULTILINE_ARG_VALUE_TERMINATOR + "\n");
 			out.flush();
 
-			out.writeBytes(TestLauncherConstants.EXITCODE_PARAMETER + "\n");
+			out.writeBytes(TestLauncherApp.EXITCODE_PARAMETER + "\n");
 			out.writeBytes(appExitCode + "\n");
 			out.flush();
 		}
 	}
 
 	private Process startEclipseLauncher(List<String> args) throws IOException {
-		String launcherPath = new File(
-				"eclipse" + (System.getProperty("os.name").toLowerCase().contains("win") ? ".exe" : ""))
-				.getAbsolutePath();
+		Path launcherPath = eclipseInstallationMockLocation.resolve(ECLIPSE_EXE_NAME);
 		List<String> allArgs = new ArrayList<>();
-		allArgs.add(launcherPath);
+		allArgs.add(launcherPath.toString());
 		allArgs.addAll(args);
 		ProcessBuilder pb = new ProcessBuilder(allArgs);
-		pb.environment().put(TestLauncherConstants.PORT_ENV_KEY, Integer.toString(server.getLocalPort()));
+		pb.directory(eclipseInstallationMockLocation.toFile());
+		pb.environment().put(TestLauncherApp.PORT_ENV_KEY, Integer.toString(server.getLocalPort()));
 		return pb.start();
 	}
 
-	private void writeEclipseIni(String content) throws IOException {
-		File iniFile = new File(ECLIPSE_INI_FILE_NAME);
-		iniFile.createNewFile();
-		FileWriter myWriter = new FileWriter(ECLIPSE_INI_FILE_NAME);
-		myWriter.write(content);
-		myWriter.close();
+	private static void writeEclipseIni(String content) throws IOException {
+		Files.writeString(eclipseInstallationMockLocation.resolve(ECLIPSE_INI_FILE_NAME), content);
 	}
 
 }

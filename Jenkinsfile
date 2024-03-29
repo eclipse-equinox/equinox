@@ -11,6 +11,9 @@ pipeline {
 		maven 'apache-maven-latest'
 		jdk 'temurin-jdk17-latest'
 	}
+	environment {
+		EQUINOX_BINARIES_LOC = "$WORKSPACE/rt.equinox.binaries"
+	}
 	stages {
 		stage('get binaries') {
 			steps{

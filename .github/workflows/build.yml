@@ -58,14 +58,14 @@ jobs:
 
   build-launcher:
     name: Build launcher ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
+    runs-on: ${{ matrix.config.runner-os }}
     strategy:
       fail-fast: false
       matrix:
         config: 
-          - { name: Linux, os: ubuntu-latest, ws: gtk, native-extension: so }
-          - { name: Windows, os: windows-2019, ws: win32, native-extension: dll }
-          - { name: MacOS, os: macos-latest, ws: cocoa, native-extension: so }
+          - { name: Linux, runner-os: ubuntu-latest, ws: gtk, os: linux, native-extension: so }
+          - { name: Windows, runner-os: windows-2019, ws: win32, os: win32, native-extension: dll }
+          - { name: MacOS, runner-os: macos-latest, ws: cocoa, os: macosx, native-extension: so }
     steps:
     - uses: actions/checkout@v4
       with:
@@ -87,21 +87,28 @@ jobs:
       if: ${{ matrix.config.ws == 'gtk'}}
     - name: Build on POSIX
       working-directory: features/org.eclipse.equinox.executable.feature/library/${{ matrix.config.ws }}
-      run: ./build.sh test
+      env:
+        BINARIES_DIR: ${{ github.workspace }}/equinox.binaries
+      run: ./build.sh -ws ${{ matrix.config.ws }} -os ${{ matrix.config.os }} -arch x86_64 install
       if: ${{ matrix.config.ws != 'win32'}}
     - name: Build on Windows
       working-directory: features/org.eclipse.equinox.executable.feature/library/win32
-      run: .\build.bat test
+      env:
+        BINARIES_DIR: ${{ github.workspace }}\equinox.binaries
+      run: .\build.bat -ws win32 -os win32 -arch x86_64 install
       if: ${{ matrix.config.ws == 'win32'}}
+    - name: Test native launcher and executable
+      env:
+        EQUINOX_BINARIES_LOC: ${{ github.workspace }}/equinox.binaries
+      run: mvn -B -pl org.eclipse.equinox:org.eclipse.equinox.launcher.tests -am verify
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       if: success()
       with:
         name: ${{ matrix.config.name }} launcher artifacts
         path: |
-          features/org.eclipse.equinox.executable.feature/library/${{ matrix.config.ws }}/eclipse
-          features/org.eclipse.equinox.executable.feature/library/${{ matrix.config.ws }}/eclipse*.exe
-          features/org.eclipse.equinox.executable.feature/library/${{ matrix.config.ws }}/eclipse*.${{ matrix.config.native-extension }}
+          equinox.binaries/org.eclipse.equinox.executable/bin/${{ matrix.config.ws }}/${{ matrix.config.os }}/x86_64/**/eclipse*
+          equinox.binaries/org.eclipse.equinox.launcher.${{ matrix.config.ws }}.${{ matrix.config.os }}.x86_64/eclipse_*.${{ matrix.config.native-extension }}
         if-no-files-found: error
     - name: Upload ${{ matrix.config.name }} Test Results
       uses: actions/upload-artifact@v4
