@@ -25,7 +25,12 @@ jobs:
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
+        java-version: |
+          8
+          17
+        mvn-toolchain-id: |
+          JavaSE-1.8
+          JavaSE-17
         distribution: 'temurin'
         cache: maven
     - name: Set up Maven
@@ -38,7 +43,6 @@ jobs:
        run: >- 
         mvn
         --batch-mode
-        --global-toolchains ${{ github.workspace }}/.github/workflows/toolchains.xml
         -Pbree-libs
         -Papi-check
         -Dcompare-version-with-baselines.skip=false
@@ -176,7 +180,12 @@ jobs:
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
+        java-version: |
+          8
+          17
+        mvn-toolchain-id: |
+          JavaSE-1.8
+          JavaSE-17
         distribution: 'temurin'
         cache: maven
     - name: Set up Maven
@@ -188,7 +197,6 @@ jobs:
         mvn
         -U
         --batch-mode
-        --global-toolchains ${{ github.workspace }}/.github/workflows/toolchains.xml
         --threads 1C
         -Pbuild-individual-bundles
         -Pbree-libs
