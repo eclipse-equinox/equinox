@@ -20,8 +20,6 @@ package org.eclipse.equinox.launcher;
  * a native launcher. To launch Eclipse programmatically, use
  * org.eclipse.core.runtime.adaptor.EclipseStarter. This class is not API.
  *
- * @noextend This class is not intended to be subclassed by clients.
- * @noinstantiate This class is not intended to be instantiated by clients.
  */
 class JNIBridge {
 	private native void _set_exit_data(String sharedId, String data);
@@ -46,8 +44,6 @@ class JNIBridge {
 	private boolean libraryLoaded = false;
 
 	/**
-	 * @noreference This constructor is not intended to be referenced by clients.
-	 *
 	 * @param library the given library
 	 */
 	public JNIBridge(String library) {
@@ -74,9 +70,6 @@ class JNIBridge {
 		libraryLoaded = true;
 	}
 
-	/**
-	 * @noreference This method is not intended to be referenced by clients.
-	 */
 	public boolean setExitData(String sharedId, String data) {
 		try {
 			_set_exit_data(sharedId, data);
@@ -90,9 +83,6 @@ class JNIBridge {
 		}
 	}
 
-	/**
-	 * @noreference This method is not intended to be referenced by clients
-	 */
 	public boolean setLauncherInfo(String launcher, String name) {
 		try {
 			_set_launcher_info(launcher, name);
@@ -106,9 +96,6 @@ class JNIBridge {
 		}
 	}
 
-	/**
-	 * @noreference This method is not intended to be referenced by clients.
-	 */
 	public boolean showSplash(String bitmap) {
 		try {
 			_show_splash(bitmap);
@@ -122,9 +109,6 @@ class JNIBridge {
 		}
 	}
 
-	/**
-	 * @noreference This method is not intended to be referenced by clients.
-	 */
 	public boolean updateSplash() {
 		try {
 			_update_splash();
@@ -138,9 +122,6 @@ class JNIBridge {
 		}
 	}
 
-	/**
-	 * @noreference This method is not intended to be referenced by clients.
-	 */
 	public long getSplashHandle() {
 		try {
 			return _get_splash_handle();
@@ -164,9 +145,6 @@ class JNIBridge {
 		return libraryLoaded;
 	}
 
-	/**
-	 * @noreference This method is not intended to be referenced by clients.
-	 */
 	public boolean takeDownSplash() {
 		try {
 			_takedown_splash();
@@ -180,9 +158,6 @@ class JNIBridge {
 		}
 	}
 
-	/**
-	 * @noreference This method is not intended to be referenced by clients.
-	 */
 	public boolean uninitialize() {
 		if (libraryLoaded && library != null) {
 			if (library.contains("wpf")) { //$NON-NLS-1$
