@@ -57,12 +57,6 @@ jobs:
         path: '**/target/*-reports/*.xml'
   build-launcher-win64:
     runs-on: windows-2019
-    env:
-      PROGRAM_OUTPUT: eclipse.exe
-      PROGRAM_LIBRARY: eclipse.dll
-      DEFAULT_OS: win32
-      DEFAULT_OS_ARCH: x86_64
-      DEFAULT_WS: win32
     steps:
     - uses: actions/checkout@v4
       with:
@@ -83,7 +77,7 @@ jobs:
         arch: x64
     - name: Build
       working-directory: features/org.eclipse.equinox.executable.feature/library/win32
-      run: nmake -f make_win64.mak test
+      run: .\build.bat test
       shell: pwsh
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
