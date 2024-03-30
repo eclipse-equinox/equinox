@@ -31,11 +31,11 @@
                 				
                 <buildTargets>
                     					
-                    <target name="linux-all" path="library/gtk" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+                    <target name="all" path="library/gtk" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
                         						
                         <buildCommand>make</buildCommand>
                         						
-                        <buildArguments>-f make_linux.mak DEFAULT_OS_ARCH=x86_64 JAVA_HOME=/usr/java/ibm-150</buildArguments>
+                        <buildArguments>-f make_linux.mak DEFAULT_OS_ARCH=x86_64</buildArguments>
                         						
                         <buildTarget>all</buildTarget>
                         						
@@ -63,11 +63,11 @@
                         					
                     </target>
                     					
-                    <target name="all" path="library/carbon" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+                    <target name="all" path="library/cocoa" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
                         						
                         <buildCommand>make</buildCommand>
                         						
-                        <buildArguments>-f make_macosx.mak</buildArguments>
+                        <buildArguments>-f make_cocoa.mak</buildArguments>
                         						
                         <buildTarget>all</buildTarget>
                         						
@@ -79,11 +79,11 @@
                         					
                     </target>
                     					
-                    <target name="clean" path="library/carbon" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+                    <target name="clean" path="library/cocoa" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
                         						
                         <buildCommand>make</buildCommand>
                         						
-                        <buildArguments>-f make_macosx.mak</buildArguments>
+                        <buildArguments>-f make_cocoa.mak</buildArguments>
                         						
                         <buildTarget>clean</buildTarget>
                         						
@@ -95,11 +95,11 @@
                         					
                     </target>
                     					
-                    <target name="all-mingw" path="library/win32" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+                    <target name="all" path="library/win32" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
                         						
                         <buildCommand>make</buildCommand>
                         						
-                        <buildArguments>-f make_mingw.mak JAVA_HOME=C:/Dev/Java/IBM-1.6.0-20090519-SR5</buildArguments>
+                        <buildArguments>-f make_win64.mak</buildArguments>
                         						
                         <buildTarget>all</buildTarget>
                         						
@@ -115,7 +115,7 @@
                         						
                         <buildCommand>make</buildCommand>
                         						
-                        <buildArguments>-f make_mingw.mak</buildArguments>
+                        <buildArguments>-f make_win64.mak</buildArguments>
                         						
                         <buildTarget>clean</buildTarget>
                         						
