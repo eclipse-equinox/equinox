@@ -30,7 +30,7 @@ packageinfo crlf=input
 Makefile crlf=input
 
 # No EOL translation
-*.bat -crlf
+*.bat text eol=crlf
 
 # Binary. No EOL translation, no diff
 *.ico binary
