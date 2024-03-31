@@ -1,5 +1,5 @@
 @rem *******************************************************************************
-@rem  Copyright (c) 2000, 2021 IBM Corporation and others.
+@rem  Copyright (c) 2000, 2024 IBM Corporation and others.
 @rem 
 @rem  This program and the accompanying materials
 @rem  are made available under the terms of the Eclipse Public License 2.0
@@ -27,7 +27,7 @@
 @rem     This script can also be invoked with the "clean" argument.
 @rem
 @rem NOTE: The C compiler needs to be setup. This script has been
-@rem       tested against Microsoft Visual C and C++ Compiler 6.0.
+@rem       tested against Microsoft Visual C and C++ Compiler 2022.
 @rem	
 @rem Uncomment the lines below and edit MSVC_HOME to point to the
 @rem correct root directory of the compiler installation, if you
@@ -37,18 +37,24 @@
 @echo off
 
 @rem Specify VisualStudio Edition: 'Community', 'Enterprise', 'Professional' etc.
-IF "x.%MSVC_EDITION%"=="x." set "MSVC_EDITION=Community"
+IF "%MSVC_EDITION%"=="" set "MSVC_EDITION=auto"
 
-@rem Specify VisualStudio Version: '2017' or newer '2019'
-IF "x.%MSVC_VERSION%"=="x." set "MSVC_VERSION=2019"
+@rem Specify VisualStudio Version: '2022', '2019' etc.
+IF "%MSVC_VERSION%"=="" set "MSVC_VERSION=auto"
 
-set defaultOSArch=x86_64
-IF NOT EXIST "%MSVC_HOME%" set "MSVC_HOME=%ProgramFiles(x86)%\Microsoft Visual Studio\%MSVC_VERSION%\BuildTools"
-IF NOT EXIST "%MSVC_HOME%" set "MSVC_HOME=%ProgramFiles(x86)%\Microsoft Visual Studio\%MSVC_VERSION%\%MSVC_EDITION%"
+@rem Search for a usable Visual Studio
+@rem ---------------------------------
+IF "%MSVC_HOME%"=="" echo "'MSVC_HOME' was not provided, auto-searching for Visual Studio..."
+@rem Bug 574007: Path used on Azure build machines
+IF "%MSVC_HOME%"=="" CALL :FindVisualStudio "%ProgramFiles(x86)%\Microsoft Visual Studio\$MSVC_VERSION$\BuildTools"
+@rem Bug 578519: Common installation paths; VisualStudio is installed in x64 ProgramFiles since VS2022
+IF "%MSVC_HOME%"=="" CALL :FindVisualStudio "%ProgramFiles%\Microsoft Visual Studio\$MSVC_VERSION$\$MSVC_EDITION$"
+IF "%MSVC_HOME%"=="" CALL :FindVisualStudio "%ProgramFiles(x86)%\Microsoft Visual Studio\$MSVC_VERSION$\$MSVC_EDITION$"
+@rem Report
 IF EXIST "%MSVC_HOME%" (
-	echo "Microsoft Visual Studio %MSVC_VERSION% dir: %MSVC_HOME%"
+	echo "MSVC_HOME: %MSVC_HOME%"
 ) ELSE (
-	echo "WARNING: Microsoft Visual Studio %MSVC_VERSION% was not found."
+	echo "WARNING: Microsoft Visual Studio was not found (for edition=%MSVC_EDITION% version=%MSVC_VERSION%)"
 	echo "     Refer steps for SWT Windows native setup: https://www.eclipse.org/swt/swt_win_native.php"
 )
 IF EXIST "%JAVA_HOME%" (
@@ -68,6 +74,7 @@ set programOutput=eclipse.exe
 set programLibrary=eclipse.dll
 set defaultOS=win32
 set defaultWS=win32
+set defaultOSArch=x86_64
 
 rem --------------------------
 rem Parse the command line arguments and override the default values.
@@ -133,3 +140,55 @@ IF NOT "%extraArgs%"=="" (
 	nmake -f %makefile% clean
 	nmake -f %makefile% %1 %2 %3 %4
 )
+
+GOTO :EOF
+
+
+@rem Find Visual Studio
+@rem %1 = path template with '$MSVC_VERSION$' and '$MSVC_EDITION$' tokens
+:FindVisualStudio
+	IF "%MSVC_VERSION%"=="auto" (
+		CALL :FindVisualStudio2 "%~1" "2022"
+		CALL :FindVisualStudio2 "%~1" "2019"
+	) ELSE (
+		CALL :FindVisualStudio2 "%~1" "%MSVC_VERSION%"
+	)
+GOTO :EOF
+
+@rem Find Visual Studio
+@rem %1 = path template with '$MSVC_VERSION$' and '$MSVC_EDITION$' tokens
+@rem %2 = value for '$MSVC_VERSION$'
+:FindVisualStudio2
+	IF "%MSVC_EDITION%"=="auto" (
+		CALL :FindVisualStudio3 "%~1" "%~2" "Community"
+		CALL :FindVisualStudio3 "%~1" "%~2" "Enterprise"
+		CALL :FindVisualStudio3 "%~1" "%~2" "Professional"
+	) ELSE (
+		CALL :FindVisualStudio3 "%~1" "%~2" "%MSVC_EDITION%"
+	)
+GOTO :EOF
+
+@rem Find Visual Studio and set '%MSVC_HOME%' on success
+@rem %1 = path template with '$MSVC_VERSION$' and '$MSVC_EDITION$' tokens
+@rem %2 = value for '$MSVC_VERSION$'
+@rem %3 = value for '$MSVC_EDITION$'
+:FindVisualStudio3
+	@rem Early return if already found
+	IF NOT "%MSVC_HOME%"=="" GOTO :EOF
+
+	SET "TESTED_VS_PATH=%~1"
+	@rem Substitute '$MSVC_VERSION$' and '$MSVC_EDITION$'
+	CALL SET "TESTED_VS_PATH=%%TESTED_VS_PATH:$MSVC_VERSION$=%~2%%"
+	CALL SET "TESTED_VS_PATH=%%TESTED_VS_PATH:$MSVC_EDITION$=%~3%%"
+
+	@rem If the folder isn't there, then skip it without printing errors
+	IF NOT EXIST "%TESTED_VS_PATH%" GOTO :EOF
+
+	@rem Try this path
+	IF NOT EXIST "%TESTED_VS_PATH%\VC\Auxiliary\Build\vcvarsall.bat" (
+		echo "-- VisualStudio '%TESTED_VS_PATH%' is bad: 'vcvarsall.bat' not found"
+		GOTO :EOF
+	)
+	echo "-- VisualStudio '%TESTED_VS_PATH%' looks good, selecting it"
+	SET "MSVC_HOME=%TESTED_VS_PATH%"
+GOTO :EOF
