@@ -46,7 +46,6 @@ jobs:
         -Pbree-libs
         -Papi-check
         -Dcompare-version-with-baselines.skip=false
-        -Dproject.build.sourceEncoding=UTF-8
         -Dmaven.test.failure.ignore=true
         -Drt.equinox.binaries.loc=${{ github.workspace }}/rt.equinox.binaries
         clean verify
@@ -202,7 +201,6 @@ jobs:
         -Pbree-libs
         -Ptck
         -Dskip-default-modules=true
-        -Dproject.build.sourceEncoding=UTF-8
         -Dtycho.resolver.classic=false
         -fn
         clean verify
