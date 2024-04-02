@@ -55,8 +55,17 @@ jobs:
         name: test-results
         if-no-files-found: error
         path: '**/target/*-reports/*.xml'
-  build-launcher-win64:
-    runs-on: windows-2019
+
+  build-launcher:
+    name: Build launcher ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config: 
+          - { name: Linux, os: ubuntu-latest, ws: gtk, native-extension: so }
+          - { name: Windows, os: windows-2019, ws: win32, native-extension: dll }
+          - { name: MacOS, os: macos-latest, ws: cocoa, native-extension: so }
     steps:
     - uses: actions/checkout@v4
       with:
@@ -71,97 +80,36 @@ jobs:
       uses: stCarolas/setup-maven@v5
       with:
         maven-version: 3.9.6
-    - name: Build
+    - name: Install GTK requirements
+      run: |
+        sudo apt-get update -q -y 
+        sudo apt-get install -q -y libgtk-3-dev 
+      if: ${{ matrix.config.ws == 'gtk'}}
+    - name: Build on POSIX
+      working-directory: features/org.eclipse.equinox.executable.feature/library/${{ matrix.config.ws }}
+      run: ./build.sh test
+      if: ${{ matrix.config.ws != 'win32'}}
+    - name: Build on Windows
       working-directory: features/org.eclipse.equinox.executable.feature/library/win32
       run: .\build.bat test
-      shell: pwsh
+      if: ${{ matrix.config.ws == 'win32'}}
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       if: success()
       with:
-        name: Windows launcher artifacts
+        name: ${{ matrix.config.name }} launcher artifacts
         path: |
-          features/org.eclipse.equinox.executable.feature/library/win32/eclipse*.exe
-          features/org.eclipse.equinox.executable.feature/library/win32/eclipse*.dll
+          features/org.eclipse.equinox.executable.feature/library/${{ matrix.config.ws }}/eclipse
+          features/org.eclipse.equinox.executable.feature/library/${{ matrix.config.ws }}/eclipse*.exe
+          features/org.eclipse.equinox.executable.feature/library/${{ matrix.config.ws }}/eclipse*.${{ matrix.config.native-extension }}
         if-no-files-found: error
-    - name: Upload Windows Test Results
+    - name: Upload ${{ matrix.config.name }} Test Results
       uses: actions/upload-artifact@v4
       with:
-        name: test-results-win64
+        name: test-results-${{ matrix.config.name }}64
         if-no-files-found: error
         path: '**/target/*-reports/*.xml'
-  build-launcher-linux64:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 1
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-    - name: Set up Maven
-      uses: stCarolas/setup-maven@v5
-      with:
-        maven-version: 3.9.6
-    - name: Install GTK headers
-      run: sudo apt-get install -y libgtk-3-dev
-    - name: Build
-      working-directory: features/org.eclipse.equinox.executable.feature/library/gtk
-      run: ./build.sh test
-      shell: bash
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      if: success()
-      with:
-        name: Linux launcher artifacts
-        path: |
-          features/org.eclipse.equinox.executable.feature/library/gtk/eclipse
-          features/org.eclipse.equinox.executable.feature/library/gtk/eclipse*.so
-        if-no-files-found: error
-    - name: Upload Linux Test Results
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-results-linux64
-        if-no-files-found: error
-        path: '**/target/*-reports/*.xml'
-  build-launcher-mac64:
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 1
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-    - name: Set up Maven
-      uses: stCarolas/setup-maven@v5
-      with:
-        maven-version: 3.9.6
-    - name: Build
-      working-directory: features/org.eclipse.equinox.executable.feature/library/cocoa
-      run: ./build.sh test
-      shell: bash
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      if: success()
-      with:
-        name: MacOS launcher artifacts
-        path: |
-          features/org.eclipse.equinox.executable.feature/library/cocoa/eclipse
-          features/org.eclipse.equinox.executable.feature/library/cocoa/eclipse*.so
-        if-no-files-found: error
-    - name: Upload MacOS Test Results
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-results-mac64
-        if-no-files-found: error
-        path: '**/target/*-reports/*.xml'
+
   tck:
     runs-on: ubuntu-latest
     steps:
