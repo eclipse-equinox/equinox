@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -125,6 +126,8 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class ServletTest extends BaseTest {
+	public static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("win");
+
 	@Rule
 	public TestName testName = new TestName();
 
@@ -1967,6 +1970,11 @@ public class ServletTest extends BaseTest {
 		assertEquals("Wrong value.", "test\n", actual);
 	}
 
+	private static final int MP4_CONTENT_LENGTH = (20_400 + 255 * System.lineSeparator().length());
+	private static final List<String> EXPECTED_MP4_CONTENT_RANGE = List
+			.of("bytes 0-" + (MP4_CONTENT_LENGTH - 1) + "/" + MP4_CONTENT_LENGTH);
+	private static final List<String> EXPECTED_MP4_CONTENT_LENGTH = List.of(String.valueOf(MP4_CONTENT_LENGTH));
+
 	@Test
 	public void test_ResourceRangeRequest_Complete() throws Exception {
 		Bundle bundle = installBundle(TEST_BUNDLE_2);
@@ -1993,9 +2001,9 @@ public class ServletTest extends BaseTest {
 			uninstallBundle(bundle);
 		}
 		assertEquals("Response Code", Collections.singletonList("206"), actual.get("responseCode"));
-		assertEquals("Content-Length", Collections.singletonList("20655"), actual.get("Content-Length"));
+		assertEquals("Content-Length", EXPECTED_MP4_CONTENT_LENGTH, actual.get("Content-Length"));
 		assertEquals("Accept-Ranges", Collections.singletonList("bytes"), actual.get("Accept-Ranges"));
-		assertEquals("Content-Range", Collections.singletonList("bytes 0-20654/20655"), actual.get("Content-Range"));
+		assertEquals("Content-Range", EXPECTED_MP4_CONTENT_RANGE, actual.get("Content-Range"));
 	}
 
 	@Test
@@ -2026,9 +2034,11 @@ public class ServletTest extends BaseTest {
 		assertEquals("Response Code", Collections.singletonList("206"), actual.get("responseCode"));
 		assertEquals("Content-Length", Collections.singletonList("9000"), actual.get("Content-Length"));
 		assertEquals("Accept-Ranges", Collections.singletonList("bytes"), actual.get("Accept-Ranges"));
-		assertEquals("Content-Range", Collections.singletonList("bytes 1000-9999/20655"), actual.get("Content-Range"));
-		assertEquals("Response Body Prefix", "901", actual.get("responseBody").get(0).substring(0, 3));
-		assertEquals("Response Body Suffix", "567", actual.get("responseBody").get(0).substring(8997, 9000));
+		assertEquals("Content-Range", List.of("bytes 1000-9999/" + MP4_CONTENT_LENGTH), actual.get("Content-Range"));
+		assertEquals("Response Body Prefix", IS_WINDOWS ? "789" : "901",
+				actual.get("responseBody").get(0).substring(0, 3));
+		assertEquals("Response Body Suffix", IS_WINDOWS ? "678" : "567",
+				actual.get("responseBody").get(0).substring(8997, 9000));
 	}
 
 	@Test
@@ -2063,11 +2073,12 @@ public class ServletTest extends BaseTest {
 			uninstallBundle(bundle);
 		}
 		assertEquals("Response Code", Collections.singletonList("206"), actual.get("responseCode"));
-		assertEquals("Content-Length", Collections.singletonList("20655"), actual.get("Content-Length"));
+		assertEquals("Content-Length", EXPECTED_MP4_CONTENT_LENGTH, actual.get("Content-Length"));
 		assertEquals("Accept-Ranges", Collections.singletonList("bytes"), actual.get("Accept-Ranges"));
-		assertEquals("Content-Range", Collections.singletonList("bytes 0-20654/20655"), actual.get("Content-Range"));
+		assertEquals("Content-Range", EXPECTED_MP4_CONTENT_RANGE, actual.get("Content-Range"));
 		assertEquals("Response Body Prefix", "123", actual.get("responseBody").get(0).substring(0, 3));
-		assertEquals("Response Body Suffix", "789", actual.get("responseBody").get(0).substring(8997, 9000));
+		assertEquals("Response Body Suffix", IS_WINDOWS ? "012" : "789",
+				actual.get("responseBody").get(0).substring(8997, 9000));
 	}
 
 	@Test
@@ -3105,9 +3116,9 @@ public class ServletTest extends BaseTest {
 			getHttpService().registerResources("/" + HTTP_CONTEXT_TEST_ROOT + "/1", "", ctx1);
 			getHttpService().registerResources("/" + HTTP_CONTEXT_TEST_ROOT + "/2", "", ctx2);
 			actual = requestAdvisor.request(HTTP_CONTEXT_TEST_ROOT + "/1/test");
-			assertEquals("1\n", actual);
+			assertEquals("1" + System.lineSeparator(), actual);
 			actual = requestAdvisor.request(HTTP_CONTEXT_TEST_ROOT + "/2/test");
-			assertEquals("2\n", actual);
+			assertEquals("2" + System.lineSeparator(), actual);
 		} finally {
 			try {
 				getHttpService().unregister("/" + HTTP_CONTEXT_TEST_ROOT + "/1");
