@@ -41,7 +41,7 @@ programOutput="eclipse"
 defaultOS=""
 defaultOSArch=""
 defaultWS="gtk"
-EXEC_DIR=../../../../../rt.equinox.binaries/org.eclipse.equinox.executable
+if [ "$BINARIES_DIR" = "" ]; then BINARIES_DIR="../../../../../rt.equinox.binaries"; fi
 defaultJava=DEFAULT_JAVA_JNI
 defaultJavaHome=""
 javaHome=""
@@ -97,22 +97,19 @@ case $defaultOS in
 				defaultJava=DEFAULT_JAVA_EXEC
 				#[ -d /bluebird/teamswt/swt-builddir/JDKs/PPC64LE/ibm-java2-ppc64le-50 ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/PPC64LE/ibm-java2-ppc64le-50"
 				defaultJavaHome=`readlink -f /usr/bin/java | sed "s:jre/bin/java::"`
-				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			"s390x")
 				defaultOSArch="s390x"
 				defaultJava=DEFAULT_JAVA_EXEC
-				OUTPUT_DIR="$EXEC_DIR/contributed/$defaultWS/$defaultOS/$defaultOSArch"
+				EXE_OUTPUT_DIR="$BINARIES_DIR/org.eclipse.equinox.executable/contributed/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
-            "aarch64")
+			"aarch64")
 				defaultOSArch="aarch64"
 				defaultJava=DEFAULT_JAVA_EXEC
-				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
-            		"loongarch64")
+			"loongarch64")
 				defaultOSArch="loongarch64"
 				defaultJava=DEFAULT_JAVA_EXEC
-				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			*)
 				echo "*** Unknown MODEL <${MODEL}>"
@@ -151,10 +148,10 @@ elif [ "$defaultOSArch" = "s390x" ];  then
 	fi
 fi
 
-LIBRARY_DIR="$EXEC_DIR/../org.eclipse.equinox.launcher.$defaultWS.$defaultOS.$defaultOSArch"
-OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
+if [ "$EXE_OUTPUT_DIR" = "" ]; then EXE_OUTPUT_DIR="$BINARIES_DIR/org.eclipse.equinox.executable/bin/$defaultWS/$defaultOS/$defaultOSArch"; fi
+if [ "$LIB_OUTPUT_DIR" = "" ]; then LIB_OUTPUT_DIR="$BINARIES_DIR/org.eclipse.equinox.launcher.$defaultWS.$defaultOS.$defaultOSArch"; fi
 
-export OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS DEFAULT_JAVA LIBRARY_DIR
+export PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS DEFAULT_JAVA EXE_OUTPUT_DIR LIB_OUTPUT_DIR
 
 # If the OS is supported (a makefile exists)
 if [ "$makefile" != "" ]; then
