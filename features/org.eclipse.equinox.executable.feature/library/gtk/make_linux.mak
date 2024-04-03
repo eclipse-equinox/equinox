@@ -30,8 +30,10 @@ include ../make_version.mak
 # DEFAULT_OS      - the default value of the "-os" switch
 # DEFAULT_OS_ARCH - the default value of the "-arch" switch
 # DEFAULT_WS      - the default value of the "-ws" switch
-# JAVA_HOME      - JAVA_HOME for jni headers
+# JAVA_HOME       - JAVA_HOME for jni headers
 # M_ARCH & M_CFLAGS - architecture/cflags for gcc command (if relevant)
+# EXE_OUTPUT_DIR  - the location into which the executable is installed (only used in 'install' target)
+# LIB_OUTPUT_DIR  - the location into which the launcher library is installed (only used in 'install' target)
 
 # Environment Variables:
 DEFAULT_OS ?= $(shell uname -s | tr "[:upper:]" "[:lower:]")
@@ -41,10 +43,7 @@ JAVA_HOME ?= $(shell readlink -f /usr/bin/java | sed "s:jre/::" | sed "s:bin/jav
 PROGRAM_OUTPUT ?= eclipse
 PROGRAM_LIBRARY = $(PROGRAM_OUTPUT)_$(LIB_VERSION).so
 
-EXEC_DIR ?= ../../../../../rt.equinox.binaries/org.eclipse.equinox.executable
-OUTPUT_DIR ?= $(EXEC_DIR)/bin/$(DEFAULT_WS)/$(DEFAULT_OS)/$(DEFAULT_OS_ARCH)
 LIBRARY_FRAGMENT_NAME ?= org.eclipse.equinox.launcher.$(DEFAULT_WS).$(DEFAULT_OS).$(DEFAULT_OS_ARCH)
-LIBRARY_DIR ?= $(EXEC_DIR)/../$(LIBRARY_FRAGMENT_NAME)
 
 # 64 bit specific flag:
 ifeq ($(M_CFLAGS),)
@@ -65,8 +64,7 @@ CC ?= gcc
 INFO_PROG=CC:$(CC)  PROGRAM_OUTPUT:$(PROGRAM_OUTPUT)  PROGRAM_LIBRARY:$(PROGRAM_LIBRARY) #
 INFO_ARCH=DEFAULT_OS:$(DEFAULT_OS)  DEFAULT_WS:$(DEFAULT_WS)  DEFAULT_OS_ARCH:$(DEFAULT_OS_ARCH)  M_ARCH:$(M_ARCH)  M_CFLAGS:$(M_CFLAGS) #
 INFO_JAVA=JAVA_HOME:$(JAVA_HOME)  DEFAULT_JAVA:$(DEFAULT_JAVA) #
-INFO_OUT_LIB_DIRS=OUTPUT_DIR:$(OUTPUT_DIR)  LIBRARY_DIR:$(LIBRARY_DIR) #
-$(info Input info: $(INFO_PROG) $(INFO_ARCH) $(INFO_JAVA) $(INFO_OUT_LIB_DIRS))
+$(info Input info: $(INFO_PROG) $(INFO_ARCH) $(INFO_JAVA))
 
 # Define the object modules to be compiled and flags.
 MAIN_OBJS = eclipseMain.o
@@ -138,9 +136,13 @@ $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
 	$(CC) $(LFLAGS) -o $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
 
 install: all
-	cp $(EXEC) $(OUTPUT_DIR)
-	cp $(DLL) $(LIBRARY_DIR)
-	rm -f $(EXEC) $(DLL) $(MAIN_OBJS) $(COMMON_OBJS) $(DLL_OBJS)
+	$(info Install into: EXE_OUTPUT_DIR:$(EXE_OUTPUT_DIR) LIB_OUTPUT_DIR:$(LIB_OUTPUT_DIR))
+	mkdir -p $(EXE_OUTPUT_DIR)
+	mv $(EXEC) $(EXE_OUTPUT_DIR)
+	mkdir -p $(LIB_OUTPUT_DIR)
+	rm -f $(LIB_OUTPUT_DIR)/eclipse_*.so
+	mv $(DLL) $(LIB_OUTPUT_DIR)
+	rm -f $(MAIN_OBJS) $(COMMON_OBJS) $(DLL_OBJS)
 
 clean:
 	$(info Clean up:)

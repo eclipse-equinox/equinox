@@ -62,8 +62,7 @@ PROGRAM_OUTPUT="$programOutput"
 DEFAULT_OS="$defaultOS"
 DEFAULT_WS="$defaultWS"
 DEPLOYMENT_TARGET=11.0
-EXEC_DIR=../../../../../rt.equinox.binaries/org.eclipse.equinox.executable
-SDKROOT_PATH="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+if [ "$BINARIES_DIR" = "" ]; then BINARIES_DIR="../../../../../rt.equinox.binaries"; fi
 
 if [ "$defaultOSArch" == "arm64" ] || [ "$defaultOSArch" == "aarch64" ]
 then
@@ -73,7 +72,8 @@ else
   DEFAULT_OS_ARCH="$defaultOSArch"
 fi
 
-PROGRAM_OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$DEFAULT_OS_ARCH/Eclipse.app/Contents/MacOS"
+if [ "$EXE_OUTPUT_DIR" = "" ]; then EXE_OUTPUT_DIR="$BINARIES_DIR/org.eclipse.equinox.executable/bin/$defaultWS/$defaultOS/$DEFAULT_OS_ARCH/Eclipse.app/Contents/MacOS"; fi
+if [ "$LIB_OUTPUT_DIR" = "" ]; then LIB_OUTPUT_DIR="$BINARIES_DIR/org.eclipse.equinox.launcher.$defaultWS.$defaultOS.$DEFAULT_OS_ARCH"; fi
 
 # /System/Library/Frameworks/JavaVM.framework/Headers does not exist anymore on Yosemite
 if [ -e /System/Library/Frameworks/JavaVM.framework/Headers ]; then
@@ -84,13 +84,8 @@ fi
 
 ARCHS="-arch $defaultOSArch"
 
-export PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS ARCHS PROGRAM_OUTPUT_DIR JAVA_HEADERS 
+export PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS ARCHS JAVA_HEADERS EXE_OUTPUT_DIR LIB_OUTPUT_DIR 
 export MACOSX_DEPLOYMENT_TARGET=$DEPLOYMENT_TARGET
-
-# Check if MacOSX SDK exists at SDKROOT_PATH before exporting it.
-if [ -d $SDKROOT_PATH ]; then
-	export SDKROOT=$SDKROOT_PATH
-fi
 
 if [ "$extraArgs" != "" ]; then
 	make -f $makefile $extraArgs

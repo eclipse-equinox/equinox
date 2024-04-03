@@ -126,9 +126,10 @@ set PROGRAM_LIBRARY=%programLibrary%
 set DEFAULT_OS=%defaultOS%
 set DEFAULT_OS_ARCH=%defaultOSArch%
 set DEFAULT_WS=%defaultWS%
-set EXEC_DIR=..\..\.\..\..\rt.equinox.binaries\org.eclipse.equinox.executable
-set OUTPUT_DIR=%EXEC_DIR%\bin\%defaultWS%\%defaultOS%\%defaultOSArch%
 set JAVA_HOME=%javaHome%
+IF "%BINARIES_DIR%"=="" set "BINARIES_DIR=..\..\..\..\..\rt.equinox.binaries"
+IF "%EXE_OUTPUT_DIR%"=="" set "EXE_OUTPUT_DIR=%BINARIES_DIR%\org.eclipse.equinox.executable\bin\%defaultWS%\%defaultOS%\%defaultOSArch%"
+IF "%LIB_OUTPUT_DIR%"=="" set "LIB_OUTPUT_DIR=%BINARIES_DIR%\org.eclipse.equinox.launcher.%defaultWS%.%defaultOS%.%defaultOSArch%"
 
 rem --------------------------
 rem Run nmake to build the executable.
