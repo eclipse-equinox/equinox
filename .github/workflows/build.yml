@@ -17,9 +17,9 @@ jobs:
       fail-fast: false
       matrix:
         config: 
-          - { name: Linux, runner-os: ubuntu-latest, ws: gtk, os: linux, native-extension: so, script-extension: sh }
-          - { name: Windows, runner-os: windows-2019, ws: win32, os: win32, native-extension: dll, script-extension: bat }
-          - { name: MacOS, runner-os: macos-latest, ws: cocoa, os: macosx, native-extension: so, script-extension: sh }
+          - { name: Linux, runner-os: ubuntu-latest, ws: gtk, os: linux, native-extension: so }
+          - { name: Windows, runner-os: windows-2019, ws: win32, os: win32, native-extension: dll }
+          - { name: MacOS, runner-os: macos-latest, ws: cocoa, os: macosx, native-extension: so }
     steps:
     - uses: actions/checkout@v4
       with:
@@ -51,9 +51,6 @@ jobs:
       run: |
         sudo apt-get update -q -y 
         sudo apt-get install -q -y libgtk-3-dev 
-    - name: Build native executable and launcher
-      working-directory: equinox/features/org.eclipse.equinox.executable.feature/library/${{ matrix.config.ws }}
-      run: ./build.${{ matrix.config.script-extension }} -ws ${{ matrix.config.ws }} -os ${{ matrix.config.os }} -arch x86_64 install
     - name: Build with Maven
       uses: coactions/setup-xvfb@v1
       env:
@@ -67,6 +64,7 @@ jobs:
         -Papi-check
         -Dcompare-version-with-baselines.skip=false
         -Dmaven.test.failure.ignore=true
+        -Dnative=${{ matrix.config.ws }}.${{ matrix.config.os }}.x86_64
         -Drt.equinox.binaries.loc=${{ github.workspace }}/rt.equinox.binaries
         clean verify
     - name: Upload native artifacts
