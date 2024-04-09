@@ -39,6 +39,8 @@ jobs:
         maven-version: 3.9.6
     - name: Build with Maven
       uses: coactions/setup-xvfb@v1
+      env:
+        EQUINOX_BINARIES_LOC: ${{ github.workspace }}/rt.equinox.binaries
       with:
        run: >- 
         mvn
