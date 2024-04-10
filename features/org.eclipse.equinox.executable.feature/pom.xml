@@ -25,26 +25,6 @@
   <build>
     <plugins>
       <plugin>
-		<groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-packaging-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>default-package-feature</id>
-            <configuration>
-				<additionalFileSets>
-				 <fileSet>
-				  <directory>${project.basedir}/resources</directory>
-				  <includes>
-				   <include>build.properties</include>
-				   <include>build.xml</include>
-				  </includes>
-				 </fileSet>
-				</additionalFileSets>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>xml-maven-plugin</artifactId>
         <executions>
