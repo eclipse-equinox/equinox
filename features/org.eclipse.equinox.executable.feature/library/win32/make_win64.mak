@@ -38,6 +38,9 @@ PROGRAM_NAME=$(PROGRAM_OUTPUT:.exe=)
 
 PROGRAM_LIBRARY = eclipse_$(LIB_VERSION).dll
 
+EXE_OUTPUT_DIR=$(EXE_OUTPUT_DIR:/=\)
+LIB_OUTPUT_DIR=$(LIB_OUTPUT_DIR:/=\)
+
 # Define the object modules to be compiled and flags.
 MAIN_OBJS = eclipseMain.obj
 MAIN_CONSOLE_OBJS = eclipseMainConsole.obj
@@ -110,7 +113,7 @@ $(RES): $(PROGRAM_NAME).rc
     rc -r -fo $(RES) eclipse.rc
 
 install: all
-	@echo Install into: EXE_OUTPUT_DIR:$(EXE_OUTPUT_DIR) LIB_OUTPUT_DIR:$(LIB_OUTPUT_DIR))
+	@echo Install into: EXE_OUTPUT_DIR:$(EXE_OUTPUT_DIR) LIB_OUTPUT_DIR:$(LIB_OUTPUT_DIR)
 	-1cmd /c "mkdir $(EXE_OUTPUT_DIR)"
 	move /y $(EXEC) $(EXE_OUTPUT_DIR)
 	move /y $(CONSOLE) $(EXE_OUTPUT_DIR)
