@@ -261,6 +261,9 @@ pipeline {
 											echo 'Copy new binaries'
 											mv eclipse${exeFileExt} ${binPath}
 											mv eclipse_*.${libFileExt} ${libPath}
+											
+											echo 'Set file permissions for launcher library'
+											chmod 755 ${libPath}/eclipse_*.${libFileExt}
 										'''
 									}
 								}
