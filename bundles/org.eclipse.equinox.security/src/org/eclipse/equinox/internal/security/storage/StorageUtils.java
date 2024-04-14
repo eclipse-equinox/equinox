@@ -39,15 +39,15 @@ public class StorageUtils {
 	/**
 	 * Default name of the storage file
 	 */
-	final private static String propertiesFileName = ".eclipse/org.eclipse.equinox.security/secure_storage"; //$NON-NLS-1$
+	private static final String PROPERTIES_FILENAME = ".eclipse/org.eclipse.equinox.security/secure_storage"; //$NON-NLS-1$
 
 	/**
 	 * Default locations: 1) user.home 2) Eclipse config location
 	 */
-	static public URL getDefaultLocation() throws IOException {
+	public static URL getDefaultLocation() throws IOException {
 		String userHome = System.getProperty("user.home"); //$NON-NLS-1$
 		if (userHome != null) {
-			File file = new File(userHome, propertiesFileName);
+			File file = new File(userHome, PROPERTIES_FILENAME);
 			// NOTE: Don't use File.toURI().toURL() as it will escape space characters and
 			// such.
 			// The escaped sequence will fail later when we try to open a stream on it.
@@ -56,7 +56,7 @@ public class StorageUtils {
 		// use install location
 		URL installLocation = AuthPlugin.getDefault().getConfigURL();
 		if (installLocation != null && isFile(installLocation)) {
-			File file = new File(installLocation.getPath(), propertiesFileName);
+			File file = new File(installLocation.getPath(), PROPERTIES_FILENAME);
 			// NOTE: Same thing about toURI() as above
 			return file.toURL();
 		}
@@ -64,7 +64,7 @@ public class StorageUtils {
 		throw new IOException(SecAuthMessages.loginNoDefaultLocation);
 	}
 
-	static public OutputStream getOutputStream(URL url) throws IOException {
+	public static OutputStream getOutputStream(URL url) throws IOException {
 		if (isFile(url)) {
 			File file = new File(url.getPath());
 			if (!file.exists()) {
@@ -82,7 +82,7 @@ public class StorageUtils {
 		return connection.getOutputStream();
 	}
 
-	static public InputStream getInputStream(URL url) throws IOException {
+	public static InputStream getInputStream(URL url) throws IOException {
 		if (url == null)
 			return null;
 		try {
@@ -92,7 +92,7 @@ public class StorageUtils {
 		}
 	}
 
-	static public boolean delete(URL url) {
+	public static boolean delete(URL url) {
 		if (isFile(url)) {
 			File file = new File(url.getPath());
 			return file.delete();
@@ -100,7 +100,7 @@ public class StorageUtils {
 		return false;
 	}
 
-	static public boolean exists(URL url) {
+	public static boolean exists(URL url) {
 		if (isFile(url)) {
 			File file = new File(url.getPath());
 			return file.exists();
@@ -108,8 +108,8 @@ public class StorageUtils {
 		return true;
 	}
 
-	static public boolean isFile(URL url) {
-		return ("file".equals(url.getProtocol())); //$NON-NLS-1$
+	public static boolean isFile(URL url) {
+		return "file".equals(url.getProtocol()); //$NON-NLS-1$
 	}
 
 	/**
@@ -118,7 +118,7 @@ public class StorageUtils {
 	 * the default Java encoding can be changed via system variables or startup
 	 * conditions.
 	 */
-	static public byte[] getBytes(String string) {
+	public static byte[] getBytes(String string) {
 		if (string == null)
 			return null;
 		return string.getBytes(StandardCharsets.UTF_8);
@@ -131,7 +131,7 @@ public class StorageUtils {
 	 * Pairing {@link #getBytes(String)} and {@link #getString(byte[])} methods
 	 * allows round trip of non-ASCII characters.
 	 */
-	static public String getString(byte[] bytes) {
+	public static String getString(byte[] bytes) {
 		if (bytes == null)
 			return null;
 		return new String(bytes, StandardCharsets.UTF_8);

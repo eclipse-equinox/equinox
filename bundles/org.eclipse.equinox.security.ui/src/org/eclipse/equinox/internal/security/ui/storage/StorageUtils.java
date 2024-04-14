@@ -25,7 +25,7 @@ public class StorageUtils {
 	/**
 	 * Get the shell from an active window. If not found, returns null.
 	 */
-	static public Shell getShell() {
+	public static Shell getShell() {
 		if (runningUI()) {
 			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 			if (window != null)
@@ -37,20 +37,18 @@ public class StorageUtils {
 	/**
 	 * Determines if it is a good idea to show UI prompts
 	 */
-	static public boolean showUI(IPreferencesContainer container) {
+	public static boolean showUI(IPreferencesContainer container) {
 		if (!runningUI() || InternalExchangeUtils.isJUnitApp())
 			return false;
 		if (container == null)
 			return true;
-		if (container.hasOption(IProviderHints.PROMPT_USER)) {
-			Object promptHint = container.getOption(IProviderHints.PROMPT_USER);
-			if (promptHint instanceof Boolean)
-				return ((Boolean) promptHint).booleanValue();
+		if (container.getOption(IProviderHints.PROMPT_USER) instanceof Boolean prompt) {
+			return prompt.booleanValue();
 		}
 		return true;
 	}
 
-	static public boolean runningUI() {
+	public static boolean runningUI() {
 		return PlatformUI.isWorkbenchRunning();
 	}
 

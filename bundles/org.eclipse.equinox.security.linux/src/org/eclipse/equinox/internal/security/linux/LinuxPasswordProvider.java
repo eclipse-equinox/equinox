@@ -22,7 +22,6 @@ import java.util.Map;
 import javax.crypto.spec.PBEKeySpec;
 
 import org.eclipse.equinox.internal.security.auth.AuthPlugin;
-import org.eclipse.equinox.internal.security.linux.nls.LinuxPasswordProviderMessages;
 import org.eclipse.equinox.internal.security.storage.Base64;
 import org.eclipse.equinox.internal.security.storage.provider.IValidatingPasswordProvider;
 import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
@@ -119,9 +118,7 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 		if (password == null) {
 			throw new SecurityException("Unable to find password"); //$NON-NLS-1$
 		}
-
-		byte[] utfbytes = password.getBytes();
-		return new String(utfbytes, StandardCharsets.UTF_8);
+		return new String(password.getBytes(), StandardCharsets.UTF_8);
 	}
 
 	private void saveMasterPassword(String password) throws SecurityException {
@@ -161,9 +158,7 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 		}
 
 		byte[] rawPassword = new byte[PASSWORD_LENGTH];
-		SecureRandom random = new SecureRandom();
-		random.setSeed(System.currentTimeMillis());
-		random.nextBytes(rawPassword);
+		new SecureRandom().nextBytes(rawPassword);
 		String newPasswordString = Base64.encode(rawPassword);
 
 		// add info message in the log
