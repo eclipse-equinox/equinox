@@ -14,9 +14,14 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.storage;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
 import javax.crypto.spec.PBEKeySpec;
 import org.eclipse.equinox.internal.security.auth.AuthPlugin;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
@@ -26,32 +31,31 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.util.NLS;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
 public class SecurePreferencesMapper {
 
 	/**
 	 * Command line argument specifying default location
 	 */
-	final private static String KEYRING_ARGUMENT = "-eclipse.keyring"; //$NON-NLS-1$
+	private static final String KEYRING_ARGUMENT = "-eclipse.keyring"; //$NON-NLS-1$
 
 	/**
 	 * Environment variable name for the location
 	 */
-	final private static String KEYRING_ENVIRONMENT = "ECLIPSE_KEYRING"; //$NON-NLS-1$
+	private static final String KEYRING_ENVIRONMENT = "ECLIPSE_KEYRING"; //$NON-NLS-1$
 
 	/**
 	 * Command line argument specifying default password
 	 */
-	final private static String PASSWORD_ARGUMENT = "-eclipse.password"; //$NON-NLS-1$
+	private static final String PASSWORD_ARGUMENT = "-eclipse.password"; //$NON-NLS-1$
 
-	static private ISecurePreferences defaultPreferences = null;
+	private static ISecurePreferences defaultPreferences = null;
 
-	static private Map<String, SecurePreferencesRoot> preferences = new HashMap<>(); // URL.toString() ->
+	private static Map<String, SecurePreferencesRoot> preferences = new HashMap<>(); // URL.toString() ->
 																						// SecurePreferencesRoot
 
-	final public static String USER_HOME = "user.home"; //$NON-NLS-1$
+	public static final String USER_HOME = "user.home"; //$NON-NLS-1$
 
-	static public ISecurePreferences getDefault() {
+	public static ISecurePreferences getDefault() {
 		if (defaultPreferences == null) {
 			try {
 				defaultPreferences = open(null, null);
@@ -62,10 +66,10 @@ public class SecurePreferencesMapper {
 		return defaultPreferences;
 	}
 
-	static public void clearDefault() {
-		if (defaultPreferences == null)
+	public static void clearDefault() {
+		if (defaultPreferences == null) {
 			return;
-
+		}
 		try {
 			defaultPreferences.flush();
 		} catch (IOException e) {
@@ -75,7 +79,7 @@ public class SecurePreferencesMapper {
 		defaultPreferences = null;
 	}
 
-	static public ISecurePreferences open(URL location, Map options) throws IOException {
+	public static ISecurePreferences open(URL location, Map<Object, Object> options) throws IOException {
 		// 1) find if there are any command line arguments that need to be added
 		EnvironmentInfo infoService = AuthPlugin.getDefault().getEnvironmentInfoService();
 		if (infoService != null) {
@@ -98,33 +102,31 @@ public class SecurePreferencesMapper {
 
 		// 2) process location from environment
 		String environmentKeyring = System.getenv(KEYRING_ENVIRONMENT);
-		if (location == null && environmentKeyring != null)
+		if (location == null && environmentKeyring != null) {
 			location = getKeyringFile(environmentKeyring).toURL();
-
+		}
 		// 3) process default location
-		if (location == null)
+		if (location == null) {
 			location = StorageUtils.getDefaultLocation();
-		if (!StorageUtils.isFile(location))
+		}
+		if (!StorageUtils.isFile(location)) {
 			// at this time we only accept file URLs; check URL type right away
 			throw new IOException(NLS.bind(SecAuthMessages.loginFileURL, location.toString()));
-
+		}
 		// 3) see if there is already SecurePreferencesRoot at that location; if not
 		// open a new one
 		String key = location.toString();
-		SecurePreferencesRoot root;
-		if (preferences.containsKey(key))
-			root = preferences.get(key);
-		else {
+		SecurePreferencesRoot root = preferences.get(key);
+		if (root == null) {
 			root = new SecurePreferencesRoot(location);
 			preferences.put(key, root);
 		}
-
 		// 4) create container with the options passed in
 		SecurePreferencesContainer container = new SecurePreferencesContainer(root, options);
 		return container.getPreferences();
 	}
 
-	static public void stop() {
+	public static void stop() {
 		synchronized (preferences) {
 			for (SecurePreferencesRoot provider : preferences.values()) {
 				try {
@@ -139,7 +141,7 @@ public class SecurePreferencesMapper {
 		}
 	}
 
-	static public void clearPasswordCache() {
+	public static void clearPasswordCache() {
 		synchronized (preferences) {
 			for (SecurePreferencesRoot provider : preferences.values()) {
 				provider.clearPasswordCache();
@@ -148,65 +150,48 @@ public class SecurePreferencesMapper {
 	}
 
 	// Not exposed as API; mostly intended for testing
-	static public void close(SecurePreferencesRoot root) {
-		if (root == null)
-			return;
-		synchronized (preferences) {
-			for (Iterator<SecurePreferencesRoot> i = preferences.values().iterator(); i.hasNext();) {
-				SecurePreferencesRoot provider = i.next();
-				if (!root.equals(provider))
-					continue;
-				i.remove();
-				break;
+	public static void close(SecurePreferencesRoot root) {
+		if (root != null) {
+			synchronized (preferences) {
+				preferences.values().remove(root);
 			}
 		}
 	}
 
 	// Replace any @user.home variables found in eclipse.keyring path arg
-	static private File getKeyringFile(String path) {
-		if (path.startsWith('@' + USER_HOME))
+	private static File getKeyringFile(String path) {
+		if (path.startsWith('@' + USER_HOME)) {
 			return new File(System.getProperty(USER_HOME), path.substring(USER_HOME.length() + 1));
-
+		}
 		return new File(path);
 	}
 
-	static private Map processPassword(Map options, String arg) {
-		if (arg == null || arg.length() == 0)
+	private static Map<Object, Object> processPassword(Map<Object, Object> options, String arg) {
+		if (arg == null || arg.isEmpty()) {
 			return options;
-		File file = new File(arg);
-		if (!file.canRead()) {
+		}
+		Path file = Path.of(arg);
+		if (!Files.isReadable(file)) {
 			String msg = NLS.bind(SecAuthMessages.unableToReadPswdFile, arg);
 			AuthPlugin.getDefault().logError(msg, null);
 			return options;
 		}
-		BufferedReader is = null;
-		try {
-			is = new BufferedReader(new FileReader(file));
+		try (Stream<String> lines = Files.lines(file)) {
 			StringBuilder buffer = new StringBuilder();
-			for (;;) { // this eliminates new line characters but that's fine
-				String tmp = is.readLine();
-				if (tmp == null)
-					break;
-				buffer.append(tmp);
-			}
-			if (buffer.length() == 0)
+			// this eliminates new line characters but that's fine
+			lines.forEach(buffer::append);
+			if (buffer.isEmpty()) {
 				return options;
-			if (options == null)
+			}
+			if (options == null) {
 				options = new HashMap<>(1);
-			if (!options.containsKey(IProviderHints.DEFAULT_PASSWORD))
+			}
+			if (!options.containsKey(IProviderHints.DEFAULT_PASSWORD)) {
 				options.put(IProviderHints.DEFAULT_PASSWORD, new PBEKeySpec(buffer.toString().toCharArray()));
+			}
 		} catch (IOException e) {
 			String msg = NLS.bind(SecAuthMessages.unableToReadPswdFile, arg);
 			AuthPlugin.getDefault().logError(msg, e);
-		} finally {
-			if (is != null) {
-				try {
-					is.close();
-				} catch (IOException e) {
-					String msg = NLS.bind(SecAuthMessages.unableToReadPswdFile, arg);
-					AuthPlugin.getDefault().logError(msg, e);
-				}
-			}
 		}
 		return options;
 	}

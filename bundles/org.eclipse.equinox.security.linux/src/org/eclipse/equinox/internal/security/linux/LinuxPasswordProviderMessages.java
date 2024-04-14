@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2017 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,20 +7,21 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
- *     IBM Corporation - initial API and implementation
+ *     Julien HENRY - Linux implementation
  *******************************************************************************/
-package org.eclipse.equinox.internal.security.osx.nls;
+package org.eclipse.equinox.internal.security.linux;
 
 import org.eclipse.osgi.util.NLS;
 
-public class OSXProviderMessages extends NLS {
+public class LinuxPasswordProviderMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.equinox.internal.security.osx.nls.messages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.equinox.internal.security.linux.messages"; //$NON-NLS-1$
 
-	public static String getPasswordError;
-	public static String setPasswordError;
+	public static String getMasterPasswordError;
+	public static String saveMasterPasswordError;
+	public static String newMasterPasswordGenerated;
 
 	static {
 		// load message values from bundle file
@@ -28,6 +29,6 @@ public class OSXProviderMessages extends NLS {
 	}
 
 	public static void reloadMessages() {
-		NLS.initializeMessages(BUNDLE_NAME, OSXProviderMessages.class);
+		NLS.initializeMessages(BUNDLE_NAME, LinuxPasswordProviderMessages.class);
 	}
 }

@@ -17,7 +17,6 @@ import java.io.*;
 import java.net.URL;
 import java.security.SecureRandom;
 import java.util.*;
-import java.util.Map.Entry;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.spec.PBEKeySpec;
@@ -43,34 +42,34 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 	/**
 	 * Node path reserved for persisted preferences of the modules.
 	 */
-	static final public String PROVIDER_PATH = "org.eclipse.equinox.security.storage.impl"; //$NON-NLS-1$
+	public static final String PROVIDER_PATH = "org.eclipse.equinox.security.storage.impl"; //$NON-NLS-1$
 
 	/**
 	 * Description of the property file - information only
 	 */
-	final private static String description = "Equinox secure storage version 1.0"; //$NON-NLS-1$
+	private static final String description = "Equinox secure storage version 1.0"; //$NON-NLS-1$
 
 	/**
 	 * The node used by the secure preferences itself
 	 */
-	private final static String PROVIDER_NODE = "/org.eclipse.equinox.secure.storage"; //$NON-NLS-1$
+	private static final String PROVIDER_NODE = "/org.eclipse.equinox.secure.storage"; //$NON-NLS-1$
 
 	/**
 	 * Node used to store password verification tokens
 	 */
-	private final static String PASSWORD_VERIFICATION_NODE = PROVIDER_NODE + "/verification"; //$NON-NLS-1$
+	private static final String PASSWORD_VERIFICATION_NODE = PROVIDER_NODE + "/verification"; //$NON-NLS-1$
 
 	/**
 	 * Text used to verify password
 	 */
-	private final static String PASSWORD_VERIFICATION_SAMPLE = "-> brown fox jumped over lazy dog <-"; //$NON-NLS-1$
+	private static final String PASSWORD_VERIFICATION_SAMPLE = "-> brown fox jumped over lazy dog <-"; //$NON-NLS-1$
 
 	/**
 	 * Maximum unsuccessful decryption attempts per operation
 	 */
-	static protected final int MAX_ATTEMPTS = 20;
+	protected static final int MAX_ATTEMPTS = 20;
 
-	static private ILock lock = Job.getJobManager().newLock();
+	private static ILock lock = Job.getJobManager().newLock();
 
 	private URL location;
 
@@ -132,35 +131,30 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 		if (properties.containsKey(CIPHER_KEY) && properties.containsKey(KEY_FACTORY_KEY)) {
 			Object cipherAlgorithm = properties.get(CIPHER_KEY);
 			Object keyFactoryAlgorithm = properties.get(KEY_FACTORY_KEY);
-			if ((cipherAlgorithm instanceof String) && (keyFactoryAlgorithm instanceof String))
-				cipher.setAlgorithms((String) cipherAlgorithm, (String) keyFactoryAlgorithm);
+			if ((cipherAlgorithm instanceof String cipherName) && (keyFactoryAlgorithm instanceof String keyName)) {
+				cipher.setAlgorithms(cipherName, keyName);
+			}
 			properties.remove(CIPHER_KEY);
 			properties.remove(KEY_FACTORY_KEY);
 		}
 
-		for (Entry<Object, Object> entry : properties.entrySet()) {
-			Object externalKey = entry.getKey();
-			Object value = entry.getValue();
-			if (!(externalKey instanceof String))
-				continue;
-			if (!(value instanceof String))
-				continue;
-			PersistedPath storedPath = new PersistedPath((String) externalKey);
-			if (storedPath.getKey() == null)
-				continue;
-
-			SecurePreferences node = node(storedPath.getPath());
-			// don't use regular put() method as that would mark node as dirty
-			node.internalPut(storedPath.getKey(), (String) value);
-		}
+		properties.forEach((key, value) -> {
+			if (key instanceof String stringKey && value instanceof String stringValue) {
+				PersistedPath storedPath = new PersistedPath(stringKey);
+				if (storedPath.getKey() != null) {
+					SecurePreferences node = node(storedPath.getPath());
+					// don't use regular put() method as that would mark node as dirty
+					node.internalPut(storedPath.getKey(), stringValue);
+				}
+			}
+		});
 	}
 
 	@Override
-	synchronized public void flush() throws IOException {
-		if (location == null)
+	public synchronized void flush() throws IOException {
+		if (location == null || !modified) {
 			return;
-		if (!modified)
-			return;
+		}
 
 		// check if the file has been modified since the last time it was touched
 		if (timestamp != 0 && (timestamp != getLastModified())) {
@@ -314,8 +308,8 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 	private PasswordExt getDefaultPassword(IPreferencesContainer container) {
 		if (container.hasOption(IProviderHints.DEFAULT_PASSWORD)) {
 			Object passwordHint = container.getOption(IProviderHints.DEFAULT_PASSWORD);
-			if (passwordHint instanceof PBEKeySpec)
-				return new PasswordExt((PBEKeySpec) passwordHint, DEFAULT_PASSWORD_ID);
+			if (passwordHint instanceof PBEKeySpec spec)
+				return new PasswordExt(spec, DEFAULT_PASSWORD_ID);
 		}
 		return null;
 	}
@@ -324,10 +318,8 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 	 * Retrieves requested module ID from options, if any
 	 */
 	private String getDefaultModuleID(IPreferencesContainer container) {
-		if (container.hasOption(IProviderHints.REQUIRED_MODULE_ID)) {
-			Object idHint = container.getOption(IProviderHints.REQUIRED_MODULE_ID);
-			if (idHint instanceof String)
-				return (String) idHint;
+		if (container.getOption(IProviderHints.REQUIRED_MODULE_ID) instanceof String hint) {
+			return hint;
 		}
 		return null;
 	}
@@ -400,21 +392,9 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 	 */
 	private String createTestString() {
 		SecureRandom rand = new SecureRandom();
-		rand.setSeed(System.currentTimeMillis());
-
 		long num1 = rand.nextInt(10000);
 		long num2 = rand.nextInt(10000);
-
-		StringBuilder tmp = new StringBuilder();
-		tmp.append(num1);
-		tmp.append('\t');
-		tmp.append(num2);
-		tmp.append('\t');
-		tmp.append(num2);
-		tmp.append('\t');
-		tmp.append(num1);
-
-		return tmp.toString();
+		return Long.toString(num1) + '\t' + num2 + '\t' + num2 + '\t' + num1;
 	}
 
 	/**

@@ -53,9 +53,9 @@ public class StorageLoginDialog extends TitleAreaDialog {
 
 	protected PBEKeySpec generatedPassword;
 
-	final protected boolean confirmPassword;
-	final protected boolean passwordChange;
-	final protected String location;
+	protected final boolean confirmPassword;
+	protected final boolean passwordChange;
+	protected final String location;
 
 	private Image dlgTitleImage = null;
 
@@ -207,15 +207,16 @@ public class StorageLoginDialog extends TitleAreaDialog {
 	@Override
 	protected void okPressed() {
 		String internalPassword;
+		String text = password.getText();
 		try {
 			// normally use digest of what was entered
 			MessageDigest digest = MessageDigest.getInstance(DIGEST_ALGORITHM);
-			byte[] digested = digest.digest(new String(password.getText()).getBytes());
+			byte[] digested = digest.digest(text.getBytes());
 			internalPassword = EncodingUtils.encodeBase64(digested);
 		} catch (NoSuchAlgorithmException e) {
 			// just use the text as is
 			Activator.log(IStatus.WARNING, SecUIMessages.noDigestPassword, new Object[] { DIGEST_ALGORITHM }, e);
-			internalPassword = password.getText();
+			internalPassword = text;
 		}
 		generatedPassword = new PBEKeySpec(internalPassword.toCharArray());
 
