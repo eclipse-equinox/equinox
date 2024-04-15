@@ -1,5 +1,5 @@
 ###############################################################################
-# Copyright (c) 2003, 2012 IBM Corporation and others.
+# Copyright (c) 2003, 2024 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -12,30 +12,30 @@
 #     IBM Corporation - initial API and implementation
 ###############################################################################
 org.osgi.framework.system.packages = \
-java.applet,\
-java.awt,\
-java.awt.datatransfer,\
-java.awt.event,\
-java.awt.image,\
-java.awt.peer,\
-java.beans,\
-java.io,\
-java.lang,\
-java.lang.reflect,\
-java.math,\
-java.net,\
-java.rmi,\
-java.rmi.dgc,\
-java.rmi.registry,\
-java.rmi.server,\
-java.security,\
-java.security.acl,\
-java.security.interfaces,\
-java.sql,\
-java.text,\
-java.text.resources,\
-java.util,\
-java.util.zip
+ java.applet,\
+ java.awt,\
+ java.awt.datatransfer,\
+ java.awt.event,\
+ java.awt.image,\
+ java.awt.peer,\
+ java.beans,\
+ java.io,\
+ java.lang,\
+ java.lang.reflect,\
+ java.math,\
+ java.net,\
+ java.rmi,\
+ java.rmi.dgc,\
+ java.rmi.registry,\
+ java.rmi.server,\
+ java.security,\
+ java.security.acl,\
+ java.security.interfaces,\
+ java.sql,\
+ java.text,\
+ java.text.resources,\
+ java.util,\
+ java.util.zip
 org.osgi.framework.bootdelegation = \
  sun.*,\
  com.sun.*
