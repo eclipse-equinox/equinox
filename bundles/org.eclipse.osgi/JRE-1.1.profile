@@ -11,7 +11,31 @@
 # Contributors:
 #     IBM Corporation - initial API and implementation
 ###############################################################################
-org.osgi.framework.system.packages = 
+org.osgi.framework.system.packages = \
+java.applet,\
+java.awt,\
+java.awt.datatransfer,\
+java.awt.event,\
+java.awt.image,\
+java.awt.peer,\
+java.beans,\
+java.io,\
+java.lang,\
+java.lang.reflect,\
+java.math,\
+java.net,\
+java.rmi,\
+java.rmi.dgc,\
+java.rmi.registry,\
+java.rmi.server,\
+java.security,\
+java.security.acl,\
+java.security.interfaces,\
+java.sql,\
+java.text,\
+java.text.resources,\
+java.util,\
+java.util.zip
 org.osgi.framework.bootdelegation = \
  sun.*,\
  com.sun.*
