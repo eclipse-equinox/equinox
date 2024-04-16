@@ -868,7 +868,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			try {
 				currentThread.setContextClassLoader(container.getContextFinder());
 				return previousTCCL;
-			} catch (SecurityException e) {
+			} catch (RuntimeException e) {
 				// move on without setting TCCL (https://github.com/eclipse-equinox/equinox/issues/303)
 				
 				if (debug.DEBUG_GENERAL) {
