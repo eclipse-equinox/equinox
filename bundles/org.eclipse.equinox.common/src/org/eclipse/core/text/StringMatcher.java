@@ -128,8 +128,9 @@ public final class StringMatcher {
 	 * If invoking the StringMatcher with string literals in Java, don't forget
 	 * escape characters are represented by "\\".
 	 * </p>
-	 * <p An empty pattern matches only an empty text, unless
-	 * {@link #usePrefixMatch()} is used, in which case it always matches.
+	 * <p>
+	 * An empty pattern matches only an empty text, unless {@link #usePrefixMatch()}
+	 * is used, in which case it always matches.
 	 * </p>
 	 *
 	 * @param pattern         the pattern to match text against, must not be

@@ -21,7 +21,11 @@ import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
-import org.eclipse.core.runtime.*;
+
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
@@ -57,6 +61,7 @@ public class ExtensionRegistryStaticTest {
 		testExtensionPoint("A");
 	}
 
+	@SuppressWarnings("deprecation") // getNamespace
 	private void testExtensionPoint(String name) {
 		assertNotNull(RegistryFactory.getRegistry().getExtensionPoint("test" + name + ".xpt" + name));
 		assertEquals(RegistryFactory.getRegistry().getExtensionPoint("test" + name + ".xpt" + name).getLabel(),
@@ -242,6 +247,7 @@ public class ExtensionRegistryStaticTest {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation") // getNamespace
 	public void testG() throws IOException, BundleException {
 		// fragment contributing an extension point to a plugin that do not have
 		// extension or extension point

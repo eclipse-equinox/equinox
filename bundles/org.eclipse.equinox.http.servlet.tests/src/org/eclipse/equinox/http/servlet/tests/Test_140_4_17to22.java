@@ -46,20 +46,20 @@ public class Test_140_4_17to22 extends BaseTest {
 			}
 
 			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response)
-					throws IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 				response.getWriter().write(content);
 			}
 
-			private final String	content;
+			private final String content;
 
 		}
 
 		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "a");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/a");
-		ServiceRegistration<Servlet> srA = getBundleContext().registerService(Servlet.class, new AServlet("a"), properties);
+		ServiceRegistration<Servlet> srA = getBundleContext().registerService(Servlet.class, new AServlet("a"),
+				properties);
 		registrations.add(srA);
 
 		assertEquals("a", requestAdvisor.request("a"));
@@ -67,7 +67,8 @@ public class Test_140_4_17to22 extends BaseTest {
 		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "b");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/a");
-		ServiceRegistration<Servlet> srB = getBundleContext().registerService(Servlet.class, new AServlet("b"), properties);
+		ServiceRegistration<Servlet> srB = getBundleContext().registerService(Servlet.class, new AServlet("b"),
+				properties);
 		registrations.add(srB);
 
 		assertEquals("a", requestAdvisor.request("a"));
@@ -75,12 +76,8 @@ public class Test_140_4_17to22 extends BaseTest {
 		FailedServletDTO failedServletDTO = getFailedServletDTOByName("b");
 
 		assertNotNull(failedServletDTO);
-		assertEquals(
-				DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE,
-				failedServletDTO.failureReason);
-		assertEquals(
-				getServiceId(srB),
-				failedServletDTO.serviceId);
+		assertEquals(DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE, failedServletDTO.failureReason);
+		assertEquals(getServiceId(srB), failedServletDTO.serviceId);
 
 		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "c");
@@ -93,12 +90,8 @@ public class Test_140_4_17to22 extends BaseTest {
 		failedServletDTO = getFailedServletDTOByName("a");
 
 		assertNotNull(failedServletDTO);
-		assertEquals(
-				DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE,
-				failedServletDTO.failureReason);
-		assertEquals(
-				getServiceId(srA),
-				failedServletDTO.serviceId);
+		assertEquals(DTOConstants.FAILURE_REASON_SHADOWED_BY_OTHER_SERVICE, failedServletDTO.failureReason);
+		assertEquals(getServiceId(srA), failedServletDTO.serviceId);
 	}
 
 }

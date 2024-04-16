@@ -24,7 +24,10 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class EventAdminAdapter implements ServiceTrackerCustomizer<Object, Object> {
 	public static final String EVENT_TOPIC = "event.topics"; //$NON-NLS-1$
-	private static final String[] LOG_TOPICS_ARRAY = {"*", "org/*", "org/osgi/*", "org/osgi/service/*", "org/osgi/service/log/*", "org/osgi/service/log/LogEntry/*", "org/osgi/service/log/LogEntry/LOG_ERROR", "org/osgi/service/log/LogEntry/LOG_WARNING", "org/osgi/service/log/LogEntry/LOG_INFO", "org/osgi/service/log/LogEntry/LOG_DEBUG", "org/osgi/service/log/LogEntry/LOG_OTHER"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$//$NON-NLS-10$ //$NON-NLS-11$
+	private static final String[] LOG_TOPICS_ARRAY = { "*", "org/*", "org/osgi/*", "org/osgi/service/*", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			"org/osgi/service/log/*", "org/osgi/service/log/LogEntry/*", "org/osgi/service/log/LogEntry/LOG_ERROR", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			"org/osgi/service/log/LogEntry/LOG_WARNING", "org/osgi/service/log/LogEntry/LOG_INFO", //$NON-NLS-1$ //$NON-NLS-2$
+			"org/osgi/service/log/LogEntry/LOG_DEBUG", "org/osgi/service/log/LogEntry/LOG_OTHER" }; //$NON-NLS-1$ //$NON-NLS-2$
 	private static final Object LOG_TOPIC_TOKEN = new Object();
 	private static Collection<String> logTopics = new HashSet<>(Arrays.asList(LOG_TOPICS_ARRAY));
 	private static Collection<String> eventAdminObjectClass = Arrays.asList("org.osgi.service.event.EventAdmin"); //$NON-NLS-1$

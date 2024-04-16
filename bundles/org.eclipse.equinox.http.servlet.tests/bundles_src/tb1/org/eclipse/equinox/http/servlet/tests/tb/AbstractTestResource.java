@@ -38,7 +38,7 @@ public abstract class AbstractTestResource {
 	public void activate(ComponentContext componentContext) throws ServletException, NamespaceException {
 		HttpService service = getHttpService();
 		String alias = getAlias();
-		service.registerResources(alias, getName() , null);
+		service.registerResources(alias, getName(), null);
 	}
 
 	protected final String createDefaultAlias() {

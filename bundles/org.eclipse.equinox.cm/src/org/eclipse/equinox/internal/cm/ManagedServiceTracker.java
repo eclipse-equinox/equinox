@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2024 Cognos Incorporated, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,13 +11,13 @@
  * Contributors:
  *     Cognos Incorporated - initial API and implementation
  *     IBM Corporation - bug fixes and enhancements
+ *     Christoph Läubrich - add support for Coordinator
  *******************************************************************************/
 package org.eclipse.equinox.internal.cm;
 
 import java.util.*;
 import org.osgi.framework.*;
 import org.osgi.service.cm.*;
-import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -203,13 +203,14 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 	@Override
 	public void removedService(ServiceReference<ManagedService> reference, ManagedService service) {
 		untrackManagedService(reference);
-
+		configurationAdminFactory.cancelExecuteCoordinated(service);
 		context.ungetService(reference);
 	}
 
 	private void addReference(ServiceReference<ManagedService> reference, ManagedService service) {
 		List<List<String>> qualifiedPidLists = trackManagedService(reference);
-		updateManagedService(qualifiedPidLists, reference, service);
+		configurationAdminFactory.executeCoordinated(service,
+				() -> updateManagedService(qualifiedPidLists, reference, service));
 	}
 
 	private void updateManagedService(List<List<String>> qualifiedPidLists, ServiceReference<ManagedService> reference,
@@ -223,8 +224,8 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 						config.lock();
 						if (!config.isDeleted()) {
 							if (config.getFactoryPid() != null) {
-								configurationAdminFactory.log(LogService.LOG_WARNING,
-										"Configuration for " + Constants.SERVICE_PID + "=" + qualifiedPid //$NON-NLS-1$//$NON-NLS-2$
+								configurationAdminFactory
+										.warn("Configuration for " + Constants.SERVICE_PID + "=" + qualifiedPid //$NON-NLS-1$//$NON-NLS-2$
 												+ " should only be used by a " + ManagedServiceFactory.class.getName()); //$NON-NLS-1$
 							}
 							String location = config.getLocation();
@@ -241,8 +242,8 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 									foundConfig = true;
 									break qualifiedPids;
 								}
-								configurationAdminFactory.log(LogService.LOG_WARNING,
-										"Configuration for " + Constants.SERVICE_PID + "=" + qualifiedPid //$NON-NLS-1$//$NON-NLS-2$
+								configurationAdminFactory
+										.warn("Configuration for " + Constants.SERVICE_PID + "=" + qualifiedPid //$NON-NLS-1$//$NON-NLS-2$
 												+ " could not be bound to " //$NON-NLS-1$
 												+ ConfigurationAdminImpl.getLocation(reference.getBundle()));
 							}
@@ -284,19 +285,17 @@ class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedServic
 	}
 
 	private void asynchUpdated(final ManagedService service, final Dictionary<String, ?> properties) {
-		queue.put(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					service.updated(properties);
-				} catch (ConfigurationException e) {
-					// we might consider doing more for ConfigurationExceptions
-					Throwable cause = e.getCause();
-					configurationAdminFactory.log(LogService.LOG_ERROR, e.getMessage(), cause != null ? cause : e);
-				} catch (Throwable t) {
-					configurationAdminFactory.log(LogService.LOG_ERROR, t.getMessage(), t);
-				}
+		configurationAdminFactory.cancelExecuteCoordinated(service);
+		configurationAdminFactory.executeCoordinated(service, () -> queue.put(() -> {
+			try {
+				service.updated(properties);
+			} catch (ConfigurationException e) {
+				// we might consider doing more for ConfigurationExceptions
+				Throwable cause = e.getCause();
+				configurationAdminFactory.error(e.getMessage(), cause != null ? cause : e);
+			} catch (Throwable t) {
+				configurationAdminFactory.error(t.getMessage(), t);
 			}
-		});
+		}));
 	}
 }

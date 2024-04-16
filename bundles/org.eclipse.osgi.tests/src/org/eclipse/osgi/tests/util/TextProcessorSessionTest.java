@@ -13,27 +13,31 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.util;
 
+import static org.eclipse.osgi.tests.OSGiTestsActivator.addRequiredOSGiTestsBundles;
+
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
 import org.eclipse.core.tests.session.Setup;
 import org.eclipse.core.tests.session.SetupManager.SetupException;
-import org.eclipse.osgi.tests.OSGiTest;
 
 public class TextProcessorSessionTest extends ConfigurationSessionTestSuite {
 	private String lang = null;
 
 	/**
 	 * Create a session test for the given class.
+	 * 
 	 * @param pluginId tests plugin id
-	 * @param clazz the test class to run
+	 * @param clazz    the test class to run
 	 * @param language the language to run the tests under (the -nl parameter value)
 	 */
 	public TextProcessorSessionTest(String pluginId, Class clazz, String language) {
 		super(pluginId, clazz);
 		lang = language;
-		OSGiTest.addRequiredOSGiTestsBundles(this);
+		addRequiredOSGiTestsBundles(this);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.core.tests.session.SessionTestSuite#newSetup()
 	 */
 	protected Setup newSetup() throws SetupException {

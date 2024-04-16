@@ -25,10 +25,10 @@ import javax.servlet.http.HttpServletResponseWrapper;
 /**
  * @author Raymond Augé
  */
-public class CharResponseWrapper  extends HttpServletResponseWrapper {
+public class CharResponseWrapper extends HttpServletResponseWrapper {
 	private CharArrayWriter output;
 
-	public CharResponseWrapper(HttpServletResponse response){
+	public CharResponseWrapper(HttpServletResponse response) {
 		super(response);
 		output = new CharArrayWriter();
 	}
@@ -56,7 +56,7 @@ public class CharResponseWrapper  extends HttpServletResponseWrapper {
 	}
 
 	@Override
-	public PrintWriter getWriter(){
+	public PrintWriter getWriter() {
 		return new PrintWriter(output);
 	}
 

@@ -77,8 +77,8 @@ public class TableWriter {
 		return extraOutput.size();
 	}
 
-	public boolean saveCache(RegistryObjectManager objectManager, long timestamp) {
-		this.objectManager = objectManager;
+	public boolean saveCache(RegistryObjectManager manager, long timestamp) {
+		this.objectManager = manager;
 		try {
 			if (!openFiles())
 				return false;

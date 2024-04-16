@@ -25,10 +25,9 @@ public class Bug562843_Test extends BaseTest {
 		final AtomicReference<String> pathInfo = new AtomicReference<>();
 		Servlet servlet = new HttpServlet() {
 			private static final long serialVersionUID = 1L;
+
 			@Override
-			protected void doGet(
-				final HttpServletRequest req, final HttpServletResponse resp)
-				throws IOException {
+			protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 				requestURI.set(req.getRequestURI());
 				servletPath.set(req.getServletPath());
 				pathInfo.set(req.getPathInfo());

@@ -27,7 +27,6 @@ import org.osgi.service.coordinator.Coordination;
 import org.osgi.service.coordinator.CoordinationException;
 import org.osgi.service.coordinator.CoordinationPermission;
 import org.osgi.service.coordinator.Participant;
-import org.osgi.service.log.LogService;
 
 public class CoordinationImpl {
 	// Holds a strong reference to the CoordinationWeakReference object associated
@@ -37,7 +36,7 @@ public class CoordinationImpl {
 	private volatile Throwable failure;
 	private volatile boolean terminated;
 	private volatile boolean ending = false;
-	
+
 	private Date deadline;
 	private CoordinationImpl enclosingCoordination;
 	private Thread thread;
@@ -62,7 +61,8 @@ public class CoordinationImpl {
 		this.coordinator = coordinator;
 		participants = Collections.synchronizedList(new ArrayList<Participant>());
 		variables = new HashMap<>();
-		// Not an escaping 'this' reference. It will not escape the thread calling the constructor.
+		// Not an escaping 'this' reference. It will not escape the thread calling the
+		// constructor.
 		referent = new CoordinationReferent(this);
 	}
 
@@ -71,16 +71,16 @@ public class CoordinationImpl {
 		coordinator.checkPermission(CoordinationPermission.PARTICIPATE, name);
 		if (participant == null)
 			throw new NullPointerException(NLS.bind(Messages.NullParameter, "participant")); //$NON-NLS-1$
-		/* The caller has permission. Check to see if the participant is already
+		/*
+		 * The caller has permission. Check to see if the participant is already
 		 * participating in another coordination. Do this in a loop in case the
-		 * participant must wait for the other coordination to finish. The loop
-		 * will exit under the following circumstances.
+		 * participant must wait for the other coordination to finish. The loop will
+		 * exit under the following circumstances.
 		 *
-		 * (1) This coordination is terminated.
-		 * (2) The participant is already participating in another coordination
-		 * using the same thread as this one.
-		 * (3) This thread is interrupted.
-		 * (4) The participant is not participating in another coordination.
+		 * (1) This coordination is terminated. (2) The participant is already
+		 * participating in another coordination using the same thread as this one. (3)
+		 * This thread is interrupted. (4) The participant is not participating in
+		 * another coordination.
 		 */
 		while (true) {
 			CoordinationImpl coordination;
@@ -107,7 +107,9 @@ public class CoordinationImpl {
 					// any thread, and there's nothing to compare. If the coordination
 					// is using this thread, then we can't block due to risk of deadlock.
 					if (t == Thread.currentThread()) {
-						throw new CoordinationException(NLS.bind(Messages.Deadlock, new Object[]{participant, getName(), getId()}), referent, CoordinationException.DEADLOCK_DETECTED);
+						throw new CoordinationException(
+								NLS.bind(Messages.Deadlock, new Object[] { participant, getName(), getId() }), referent,
+								CoordinationException.DEADLOCK_DETECTED);
 					}
 				}
 			}
@@ -119,8 +121,9 @@ public class CoordinationImpl {
 			try {
 				coordination.join(1000);
 			} catch (InterruptedException e) {
-				String message = NLS.bind(Messages.LockInterrupted, new Object[]{participant, name, id, coordination.getName(), coordination.getId()});
-				coordinator.getLogService().log(LogService.LOG_DEBUG, message, e);
+				String message = NLS.bind(Messages.LockInterrupted,
+						new Object[] { participant, name, id, coordination.getName(), coordination.getId() });
+				coordinator.getLogService().debug(message, e);
 				// This thread was interrupted while waiting for the coordination
 				// to terminate.
 				throw new CoordinationException(message, referent, CoordinationException.LOCK_INTERRUPTED, e);
@@ -133,20 +136,14 @@ public class CoordinationImpl {
 		// Terminating the coordination must be atomic.
 		synchronized (this) {
 			/*
-			 * Set the ending flag to avoid spurious failures for orphans
-			 * It appears the VM can aggressively puts objects on the queue if the last call is done in a finally
-			 * Coordination c = coordinator.begin("name", 0);
-			 * try {
-			 *   ...
-			 * } finally {
-			 *   c.end()
-			 * }
-			 * In some cases it appears that while in the finally call to c.end()
-			 * that c can become put on the queue for GC.
-			 * This makes it eligible for orphan processing which will cause 
-			 * issues below when calling methods that invoke
-			 * CoordinationWeakReference.processOrphanedCoordinations()
-			 * We set an ending flag so that we can detect this
+			 * Set the ending flag to avoid spurious failures for orphans It appears the VM
+			 * can aggressively puts objects on the queue if the last call is done in a
+			 * finally Coordination c = coordinator.begin("name", 0); try { ... } finally {
+			 * c.end() } In some cases it appears that while in the finally call to c.end()
+			 * that c can become put on the queue for GC. This makes it eligible for orphan
+			 * processing which will cause issues below when calling methods that invoke
+			 * CoordinationWeakReference.processOrphanedCoordinations() We set an ending
+			 * flag so that we can detect this
 			 */
 			ending = true;
 			// If this coordination is associated with a thread, an additional
@@ -155,15 +152,18 @@ public class CoordinationImpl {
 				// Coordinations may only be ended by the same thread that
 				// pushed them onto the stack, if any.
 				if (thread != Thread.currentThread()) {
-					throw new CoordinationException(NLS.bind(Messages.EndingThreadNotSame, new Object[]{name, id, thread, Thread.currentThread()}), referent, CoordinationException.WRONG_THREAD);
+					throw new CoordinationException(
+							NLS.bind(Messages.EndingThreadNotSame,
+									new Object[] { name, id, thread, Thread.currentThread() }),
+							referent, CoordinationException.WRONG_THREAD);
 				}
 				// Unwind the stack in case there are other coordinations higher
 				// up than this one. See bug 421487 for why peek() may be null.
-				for (Coordination peeked = coordinator.peek(); !(peeked == null || referent.equals(peeked)); peeked = coordinator.peek()) {
+				for (Coordination peeked = coordinator.peek(); !(peeked == null
+						|| referent.equals(peeked)); peeked = coordinator.peek()) {
 					try {
 						peeked.end();
-					}
-					catch (CoordinationException e) {
+					} catch (CoordinationException e) {
 						peeked = coordinator.peek();
 						if (peeked != null)
 							peeked.fail(e);
@@ -188,7 +188,7 @@ public class CoordinationImpl {
 			try {
 				participant.ended(referent);
 			} catch (Exception e) {
-				coordinator.getLogService().log(LogService.LOG_WARNING, NLS.bind(Messages.ParticipantEndedError, new Object[]{participant, name, id}), e);
+				coordinator.getLogService().warn(NLS.bind(Messages.ParticipantEndedError, new Object[] { participant, name, id }), e);
 				// Only the first exception will be propagated.
 				if (exception == null) {
 					exception = e;
@@ -202,7 +202,9 @@ public class CoordinationImpl {
 		}
 		// If a partial ending has occurred, throw the required exception.
 		if (exception != null) {
-			throw new CoordinationException(NLS.bind(Messages.CoordinationPartiallyEnded, new Object[]{name, id, exceptionParticipant}), referent, CoordinationException.PARTIALLY_ENDED, exception);
+			throw new CoordinationException(
+					NLS.bind(Messages.CoordinationPartiallyEnded, new Object[] { name, id, exceptionParticipant }),
+					referent, CoordinationException.PARTIALLY_ENDED, exception);
 		}
 	}
 
@@ -256,9 +258,11 @@ public class CoordinationImpl {
 					join(0);
 					// Now determine how it terminated and throw the appropriate exception.
 					checkTerminated();
-				}
-				catch (InterruptedException e) {
-					throw new CoordinationException(NLS.bind(Messages.InterruptedTimeoutExtension, new Object[]{totalTimeout, getName(), getId(), timeInMillis}), referent, CoordinationException.UNKNOWN, e);
+				} catch (InterruptedException e) {
+					throw new CoordinationException(
+							NLS.bind(Messages.InterruptedTimeoutExtension,
+									new Object[] { totalTimeout, getName(), getId(), timeInMillis }),
+							referent, CoordinationException.UNKNOWN, e);
 				}
 			}
 			// Create the new timeout.
@@ -297,7 +301,7 @@ public class CoordinationImpl {
 			try {
 				participant.failed(referent);
 			} catch (Exception e) {
-				coordinator.getLogService().log(LogService.LOG_WARNING, NLS.bind(Messages.ParticipantFailedError, new Object[]{participant, name, id}), e);
+				coordinator.getLogService().warn(NLS.bind(Messages.ParticipantFailedError, new Object[] { participant, name, id }), e);
 			}
 		}
 		synchronized (this) {
@@ -422,11 +426,13 @@ public class CoordinationImpl {
 		// must be thrown.
 		if (failure != null) {
 			// The fail() method was called indicating the coordination failed.
-			throw new CoordinationException(NLS.bind(Messages.CoordinationFailed, name, id), referent, CoordinationException.FAILED, failure);
+			throw new CoordinationException(NLS.bind(Messages.CoordinationFailed, name, id), referent,
+					CoordinationException.FAILED, failure);
 		}
 		// The coordination did not fail, so it either partially ended or
 		// ended successfully.
-		throw new CoordinationException(NLS.bind(Messages.CoordinationEnded, name, id), referent, CoordinationException.ALREADY_ENDED);
+		throw new CoordinationException(NLS.bind(Messages.CoordinationEnded, name, id), referent,
+				CoordinationException.ALREADY_ENDED);
 	}
 
 	private void terminate() throws CoordinationException {

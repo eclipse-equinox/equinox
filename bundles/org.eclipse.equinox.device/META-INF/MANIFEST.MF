@@ -2,7 +2,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-Version: 1.2.0.qualifier
 Bundle-Activator: org.eclipse.equinox.device.Activator
-Bundle-SymbolicName: org.eclipse.equinox.device
+Bundle-SymbolicName: org.eclipse.equinox.device;deprecated:="Deprecated without any direct replacement, please use a different implementation or get in contact with the Equinox team to fix up this one"
 Bundle-Vendor: %bundleVendor
 Bundle-Localization: plugin
 Import-Service: org.osgi.service.log.LogService

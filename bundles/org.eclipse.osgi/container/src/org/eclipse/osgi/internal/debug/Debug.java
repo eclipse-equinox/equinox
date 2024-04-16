@@ -21,8 +21,9 @@ import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
 
 /**
- * This class has debug constants which can be used by the Framework implementation
- * and Adaptor implementations
+ * This class has debug constants which can be used by the Framework
+ * implementation and Adaptor implementations
+ * 
  * @since 3.1
  */
 public class Debug implements DebugOptionsListener {
@@ -120,7 +121,7 @@ public class Debug implements DebugOptionsListener {
 	/**
 	 * Bundle time debug flag.
 	 */
-	public boolean DEBUG_BUNDLE_TIME = false; //"debug.bundleTime"
+	public boolean DEBUG_BUNDLE_TIME = false; // "debug.bundleTime"
 	/**
 	 * Loader debug flag.
 	 */
@@ -166,11 +167,11 @@ public class Debug implements DebugOptionsListener {
 	 * PackageAdmin timing debug flag.
 	 */
 	// TODO remove this or use it somewhere
-	public boolean DEBUG_PACKAGEADMIN_TIMING = false; //"debug.packageadmin/timing"
+	public boolean DEBUG_PACKAGEADMIN_TIMING = false; // "debug.packageadmin/timing"
 	/**
 	 * Message debug flag.
 	 */
-	public boolean DEBUG_MESSAGE_BUNDLES = false; //"/debug/messageBundles"
+	public boolean DEBUG_MESSAGE_BUNDLES = false; // "/debug/messageBundles"
 	/**
 	 * Monitor activation debug flag.
 	 */
@@ -195,7 +196,8 @@ public class Debug implements DebugOptionsListener {
 	@Override
 	public void optionsChanged(DebugOptions dbgOptions) {
 		DEBUG_GENERAL = dbgOptions.getBooleanOption(OPTION_DEBUG_GENERAL, false);
-		DEBUG_BUNDLE_TIME = dbgOptions.getBooleanOption(OPTION_DEBUG_BUNDLE_TIME, false) || dbgOptions.getBooleanOption("org.eclipse.core.runtime/timing/startup", false); //$NON-NLS-1$
+		DEBUG_BUNDLE_TIME = dbgOptions.getBooleanOption(OPTION_DEBUG_BUNDLE_TIME, false)
+				|| dbgOptions.getBooleanOption("org.eclipse.core.runtime/timing/startup", false); //$NON-NLS-1$
 		DEBUG_LOADER = dbgOptions.getBooleanOption(OPTION_DEBUG_LOADER, false);
 		DEBUG_STORAGE = dbgOptions.getBooleanOption(OPTION_DEBUG_STORAGE, false);
 		DEBUG_EVENTS = dbgOptions.getBooleanOption(OPTION_DEBUG_EVENTS, false);
@@ -207,7 +209,8 @@ public class Debug implements DebugOptionsListener {
 		DEBUG_SECURITY = dbgOptions.getBooleanOption(OPTION_DEBUG_SECURITY, false);
 		DEBUG_STARTLEVEL = dbgOptions.getBooleanOption(OPTION_DEBUG_STARTLEVEL, false);
 		DEBUG_PACKAGEADMIN = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGEADMIN, false);
-		DEBUG_PACKAGEADMIN_TIMING = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGEADMIN_TIMING, false) || dbgOptions.getBooleanOption("org.eclipse.core.runtime/debug", false); //$NON-NLS-1$
+		DEBUG_PACKAGEADMIN_TIMING = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGEADMIN_TIMING, false)
+				|| dbgOptions.getBooleanOption("org.eclipse.core.runtime/debug", false); //$NON-NLS-1$
 		DEBUG_MESSAGE_BUNDLES = dbgOptions.getBooleanOption(OPTION_DEBUG_MESSAGE_BUNDLES, false);
 		SupplementDebug.STATIC_DEBUG_MESSAGE_BUNDLES = DEBUG_MESSAGE_BUNDLES;
 		MONITOR_ACTIVATION = dbgOptions.getBooleanOption(OPTION_MONITOR_ACTIVATION, false);

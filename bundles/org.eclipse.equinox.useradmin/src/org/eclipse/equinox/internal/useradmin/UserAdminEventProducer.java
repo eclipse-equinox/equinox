@@ -16,7 +16,6 @@ package org.eclipse.equinox.internal.useradmin;
 import org.eclipse.osgi.framework.eventmgr.*;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.log.LogService;
 import org.osgi.service.useradmin.UserAdminEvent;
 import org.osgi.service.useradmin.UserAdminListener;
 import org.osgi.util.tracker.ServiceTracker;
@@ -41,7 +40,6 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 		this.userAdmin = userAdmin;
 		this.log = log;
 		ThreadGroup eventGroup = new ThreadGroup("Equinox User Admin"); //$NON-NLS-1$
-		eventGroup.setDaemon(true);
 		eventManager = new EventManager("UserAdmin Event Dispatcher", eventGroup); //$NON-NLS-1$
 		listeners = new CopyOnWriteIdentityMap<>();
 
@@ -72,21 +70,21 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 	}
 
 	/**
-	 * A service is being added to the <tt>ServiceTracker</tt> object.
+	 * A service is being added to the <code>ServiceTracker</code> object.
 	 *
 	 * <p>
 	 * This method is called before a service which matched the search parameters of
-	 * the <tt>ServiceTracker</tt> object is added to it. This method should return
-	 * the service object to be tracked for this <tt>ServiceReference</tt> object.
-	 * The returned service object is stored in the <tt>ServiceTracker</tt> object
-	 * and is available from the <tt>getService</tt> and <tt>getServices</tt>
-	 * methods.
+	 * the <code>ServiceTracker</code> object is added to it. This method should
+	 * return the service object to be tracked for this
+	 * <code>ServiceReference</code> object. The returned service object is stored
+	 * in the <code>ServiceTracker</code> object and is available from the
+	 * <code>getService</code> and <code>getServices</code> methods.
 	 *
 	 * @param reference Reference to service being added to the
-	 *                  <tt>ServiceTracker</tt> object.
-	 * @return The service object to be tracked for the <tt>ServiceReference</tt>
-	 *         object or <tt>null</tt> if the <tt>ServiceReference</tt> object
-	 *         should not be tracked.
+	 *                  <code>ServiceTracker</code> object.
+	 * @return The service object to be tracked for the
+	 *         <code>ServiceReference</code> object or <code>null</code> if the
+	 *         <code>ServiceReference</code> object should not be tracked.
 	 */
 	@Override
 	public Object addingService(ServiceReference reference) {
@@ -98,11 +96,11 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 	}
 
 	/**
-	 * A service tracked by the <tt>ServiceTracker</tt> object has been removed.
+	 * A service tracked by the <code>ServiceTracker</code> object has been removed.
 	 *
 	 * <p>
 	 * This method is called after a service is no longer being tracked by the
-	 * <tt>ServiceTracker</tt> object.
+	 * <code>ServiceTracker</code> object.
 	 *
 	 * @param reference Reference to service that has been removed.
 	 * @param service   The service object for the removed service.
@@ -147,7 +145,7 @@ public class UserAdminEventProducer extends ServiceTracker implements EventDispa
 		try {
 			ual.roleChanged((UserAdminEvent) eventObject);
 		} catch (Throwable t) {
-			log.log(userAdmin, LogService.LOG_WARNING, UserAdminMsg.Event_Delivery_Exception, t);
+			log.warn(userAdmin, UserAdminMsg.Event_Delivery_Exception, t);
 		}
 	}
 }

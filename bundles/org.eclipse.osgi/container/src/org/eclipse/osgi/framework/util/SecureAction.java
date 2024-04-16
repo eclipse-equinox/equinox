@@ -40,28 +40,31 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Utility class to execute common privileged code.
+ * 
  * @since 3.1
  */
 public class SecureAction {
 	// make sure we use the correct controlContext;
 	private AccessControlContext controlContext;
 
-        // uses initialization-on-demand holder idiom to do fast lazy loading
+	// uses initialization-on-demand holder idiom to do fast lazy loading
 	private static class BootClassLoaderHolder {
-		// This ClassLoader is used in loadSystemClass if System.getClassLoader() returns null
+		// This ClassLoader is used in loadSystemClass if System.getClassLoader()
+		// returns null
 		static final ClassLoader bootClassLoader = AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
 			@Override
 			public ClassLoader run() {
-				return new ClassLoader(Object.class.getClassLoader()) { /* boot class loader */};
+				return new ClassLoader(Object.class.getClassLoader()) {
+					/* boot class loader */};
 			}
 		});
 
-        }
+	}
 
 	/*
-	 * Package privaet constructor a new SecureAction object.
-	 * The constructed SecureAction object uses the caller's AccessControlContext
-	 * to perform security checks
+	 * Package privaet constructor a new SecureAction object. The constructed
+	 * SecureAction object uses the caller's AccessControlContext to perform
+	 * security checks
 	 */
 	SecureAction() {
 		// save the control context to be used.
@@ -69,12 +72,16 @@ public class SecureAction {
 	}
 
 	/**
-	 * Creates a privileged action that can be used to construct a SecureAction object.
-	 * The recommended way to construct a SecureAction object is the following: <p>
+	 * Creates a privileged action that can be used to construct a SecureAction
+	 * object. The recommended way to construct a SecureAction object is the
+	 * following:
+	 * 
 	 * <pre>
 	 * SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
 	 * </pre>
-	 * @return a privileged action object that can be used to construct a SecureAction object.
+	 * 
+	 * @return a privileged action object that can be used to construct a
+	 *         SecureAction object.
 	 */
 	public static PrivilegedAction<SecureAction> createSecureAction() {
 		return new PrivilegedAction<SecureAction>() {
@@ -86,8 +93,8 @@ public class SecureAction {
 	}
 
 	/**
-	 * Returns a system property.  Same as calling
-	 * System.getProperty(String).
+	 * Returns a system property. Same as calling System.getProperty(String).
+	 * 
 	 * @param property the property key.
 	 * @return the value of the property or null if it does not exist.
 	 */
@@ -103,8 +110,8 @@ public class SecureAction {
 	}
 
 	/**
-	 * Returns a system properties.  Same as calling
-	 * System.getProperties().
+	 * Returns a system properties. Same as calling System.getProperties().
+	 * 
 	 * @return the system properties.
 	 */
 	public Properties getProperties() {
@@ -119,8 +126,9 @@ public class SecureAction {
 	}
 
 	/**
-	 * Creates a FileInputStream from a File.  Same as calling
-	 * new FileInputStream(File).
+	 * Creates a FileInputStream from a File. Same as calling new
+	 * FileInputStream(File).
+	 * 
 	 * @param file the File to craete a FileInputStream from.
 	 * @return The FileInputStream.
 	 * @throws FileNotFoundException if the File does not exist.
@@ -143,9 +151,10 @@ public class SecureAction {
 	}
 
 	/**
-	 * Creates a FileInputStream from a File.  Same as calling
-	 * new FileOutputStream(File,boolean).
-	 * @param file the File to create a FileOutputStream from.
+	 * Creates a FileInputStream from a File. Same as calling new
+	 * FileOutputStream(File,boolean).
+	 * 
+	 * @param file   the File to create a FileOutputStream from.
 	 * @param append indicates if the OutputStream should append content.
 	 * @return The FileOutputStream.
 	 * @throws FileNotFoundException if the File does not exist.
@@ -168,8 +177,8 @@ public class SecureAction {
 	}
 
 	/**
-	 * Returns the length of a file.  Same as calling
-	 * file.length().
+	 * Returns the length of a file. Same as calling file.length().
+	 * 
 	 * @param file a file object
 	 * @return the length of a file.
 	 */
@@ -185,8 +194,9 @@ public class SecureAction {
 	}
 
 	/**
-	 * Returns the canonical path of a file.  Same as calling
+	 * Returns the canonical path of a file. Same as calling
 	 * file.getCanonicalPath().
+	 * 
 	 * @param file a file object
 	 * @return the canonical path of a file.
 	 * @throws IOException on error
@@ -209,8 +219,8 @@ public class SecureAction {
 	}
 
 	/**
-	 * Returns the absolute file.  Same as calling
-	 * file.getAbsoluteFile().
+	 * Returns the absolute file. Same as calling file.getAbsoluteFile().
+	 * 
 	 * @param file a file object
 	 * @return the absolute file.
 	 */
@@ -225,10 +235,9 @@ public class SecureAction {
 		}, controlContext);
 	}
 
-
 	/**
-	 * Returns the canonical file.  Same as calling
-	 * file.getCanonicalFile().
+	 * Returns the canonical file. Same as calling file.getCanonicalFile().
+	 * 
 	 * @param file a file object
 	 * @return the canonical file.
 	 */
@@ -250,8 +259,9 @@ public class SecureAction {
 	}
 
 	/**
-	 * Returns true if a file exists, otherwise false is returned.  Same as calling
+	 * Returns true if a file exists, otherwise false is returned. Same as calling
 	 * file.exists().
+	 * 
 	 * @param file a file object
 	 * @return true if a file exists, otherwise false
 	 */
@@ -278,8 +288,9 @@ public class SecureAction {
 	}
 
 	/**
-	 * Returns true if a file is a directory, otherwise false is returned.  Same as calling
-	 * file.isDirectory().
+	 * Returns true if a file is a directory, otherwise false is returned. Same as
+	 * calling file.isDirectory().
+	 * 
 	 * @param file a file object
 	 * @return true if a file is a directory, otherwise false
 	 */
@@ -295,8 +306,8 @@ public class SecureAction {
 	}
 
 	/**
-	 * Returns a file's last modified stamp.  Same as calling
-	 * file.lastModified().
+	 * Returns a file's last modified stamp. Same as calling file.lastModified().
+	 * 
 	 * @param file a file object
 	 * @return a file's last modified stamp.
 	 */
@@ -312,8 +323,8 @@ public class SecureAction {
 	}
 
 	/**
-	 * Returns a file's list.  Same as calling
-	 * file.list().
+	 * Returns a file's list. Same as calling file.list().
+	 * 
 	 * @param file a file object
 	 * @return a file's list.
 	 */
@@ -364,14 +375,16 @@ public class SecureAction {
 	/**
 	 * Gets a URL. Same a calling
 	 * {@link URL#URL(java.lang.String, java.lang.String, int, java.lang.String, java.net.URLStreamHandler)}
+	 * 
 	 * @param protocol the protocol
-	 * @param host the host
-	 * @param port the port
-	 * @param file the file
-	 * @param handler the URLStreamHandler
+	 * @param host     the host
+	 * @param port     the port
+	 * @param file     the file
+	 * @param handler  the URLStreamHandler
 	 * @return a URL
 	 */
-	public URL getURL(final String protocol, final String host, final int port, final String file, final URLStreamHandler handler) throws MalformedURLException {
+	public URL getURL(final String protocol, final String host, final int port, final String file,
+			final URLStreamHandler handler) throws MalformedURLException {
 		if (System.getSecurityManager() == null)
 			return new URL(protocol, host, port, file, handler);
 		try {
@@ -389,10 +402,11 @@ public class SecureAction {
 	}
 
 	/**
-	 * Creates a new Thread from a Runnable.  Same as calling
-	 * new Thread(target,name).setContextClassLoader(contextLoader).
-	 * @param target the Runnable to create the Thread from.
-	 * @param name The name of the Thread.
+	 * Creates a new Thread from a Runnable. Same as calling new
+	 * Thread(target,name).setContextClassLoader(contextLoader).
+	 * 
+	 * @param target        the Runnable to create the Thread from.
+	 * @param name          The name of the Thread.
 	 * @param contextLoader the context class loader for the thread
 	 * @return The new Thread
 	 */
@@ -415,10 +429,10 @@ public class SecureAction {
 	}
 
 	/**
-	 * Gets a service object. Same as calling
-	 * context.getService(reference)
+	 * Gets a service object. Same as calling context.getService(reference)
+	 * 
 	 * @param reference the ServiceReference
-	 * @param context the BundleContext
+	 * @param context   the BundleContext
 	 * @return a service object
 	 */
 	public <S> S getService(final ServiceReference<S> reference, final BundleContext context) {
@@ -433,8 +447,8 @@ public class SecureAction {
 	}
 
 	/**
-	 * Returns a Class. Same as calling
-	 * Class.forName(name)
+	 * Returns a Class. Same as calling Class.forName(name)
+	 * 
 	 * @param name the name of the class.
 	 * @return a Class
 	 */
@@ -456,22 +470,25 @@ public class SecureAction {
 	}
 
 	/**
-	 * Returns a Class.
-	 * Tries to load a class from the System ClassLoader or if that doesn't exist tries the boot ClassLoader
+	 * Returns a Class. Tries to load a class from the System ClassLoader or if that
+	 * doesn't exist tries the boot ClassLoader
+	 * 
 	 * @param name the name of the class.
 	 * @return a Class
 	 */
 	public Class<?> loadSystemClass(final String name) throws ClassNotFoundException {
 		if (System.getSecurityManager() == null) {
 			ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
-			return (systemClassLoader != null) ? systemClassLoader.loadClass(name) : BootClassLoaderHolder.bootClassLoader.loadClass(name);
+			return (systemClassLoader != null) ? systemClassLoader.loadClass(name)
+					: BootClassLoaderHolder.bootClassLoader.loadClass(name);
 		}
 		try {
 			return AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?>>() {
 				@Override
 				public Class<?> run() throws Exception {
 					ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
-					return (systemClassLoader != null) ? systemClassLoader.loadClass(name) : BootClassLoaderHolder.bootClassLoader.loadClass(name);
+					return (systemClassLoader != null) ? systemClassLoader.loadClass(name)
+							: BootClassLoaderHolder.bootClassLoader.loadClass(name);
 				}
 			}, controlContext);
 		} catch (PrivilegedActionException e) {
@@ -483,6 +500,7 @@ public class SecureAction {
 
 	/**
 	 * Opens a ServiceTracker. Same as calling tracker.open()
+	 * 
 	 * @param tracker the ServiceTracker to open.
 	 */
 	public void open(final ServiceTracker<?, ?> tracker) {
@@ -501,7 +519,8 @@ public class SecureAction {
 
 	/**
 	 * Starts a module.
-	 * @param module the module to start
+	 * 
+	 * @param module  the module to start
 	 * @param options the start options
 	 */
 	public void start(final Module module, final Module.StartOptions... options) throws BundleException {

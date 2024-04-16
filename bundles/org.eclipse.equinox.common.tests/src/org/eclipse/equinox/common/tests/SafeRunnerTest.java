@@ -13,65 +13,72 @@
  *******************************************************************************/
 package org.eclipse.equinox.common.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.fail;
+
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.ISafeRunnableWithResult;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SafeRunner;
-import org.eclipse.core.tests.harness.CoreTest;
+import org.junit.Test;
 
 /**
  * Tests for {@link SafeRunner}.
  */
-public class SafeRunnerTest extends CoreTest {
+public class SafeRunnerTest {
 
 	/**
 	 * Ensures that cancellation exceptions are handled
 	 */
+	@Test
 	public void testOperationCanceledExceptionAreHandled() {
 		try {
 			SafeRunner.run(() -> {
 				throw new OperationCanceledException();
 			});
 		} catch (OperationCanceledException e) {
-			fail("OperationCanceledException unexpectedly caught.", e);
+			fail("OperationCanceledException unexpectedly caught.");
 		}
 	}
 
+	@Test
 	public void testAssertionErrorIsCaught() {
 		assertExceptionHandled(new AssertionError());
 	}
 
+	@Test
 	public void testLinkageErrorIsCaught() {
 		assertExceptionHandled(new LinkageError());
 	}
 
+	@Test
 	public void testRuntimeExceptionIsCaught() {
 		assertExceptionHandled(new RuntimeException());
 	}
 
+	@Test
 	public void testRethrowsError() {
 		assertExceptionRethrown(new Error());
 	}
 
+	@Test
 	public void testRethrowsOutOfMemoryError() {
 		assertExceptionRethrown(new OutOfMemoryError());
 	}
 
+	@Test
 	public void testNull() {
-		try {
-			SafeRunner.run(null);
-			fail("1.0");
-		} catch (RuntimeException e) {
-			// expected
-		}
+		assertThrows(RuntimeException.class, () -> SafeRunner.run(null));
 	}
 
 	/**
 	 * Ensures that exceptions are propagated when the safe runner re-throws it
 	 */
+	@Test
 	public void testRethrow() {
-		IllegalArgumentException caughtException = null;
-		try {
+		assertThrows(IllegalArgumentException.class, () -> {
 			SafeRunner.run(new ISafeRunnable() {
 				@Override
 				public void handleException(Throwable exception) {
@@ -85,17 +92,15 @@ public class SafeRunnerTest extends CoreTest {
 					throw new IllegalArgumentException();
 				}
 			});
-		} catch (IllegalArgumentException e) {
-			caughtException = e;
-		}
-		assertNotNull("Cathed exception expected.", caughtException);
-
+		});
 	}
 
+	@Test
 	public void testWithResult() {
 		assertEquals("TestRun", SafeRunner.run(() -> "TestRun"));
 	}
 
+	@Test
 	public void testWithResultReturnsNullOnException() {
 		ISafeRunnableWithResult<String> code = () -> {
 			throw new IllegalArgumentException();
@@ -104,46 +109,35 @@ public class SafeRunnerTest extends CoreTest {
 	}
 
 	private void assertExceptionRethrown(Throwable current) {
-		Throwable caughtException = null;
-		try {
-			SafeRunner.run(new ISafeRunnable() {
-
-				@Override
-				public void run() throws Exception {
-					if (current instanceof Exception) {
-						throw (Exception) current;
-					} else if (current instanceof Error) {
-						throw (Error) current;
-					}
+		Throwable caughtException = assertThrows(Throwable.class, () -> {
+			SafeRunner.run(() -> {
+				if (current instanceof Exception) {
+					throw (Exception) current;
+				} else if (current instanceof Error) {
+					throw (Error) current;
 				}
 			});
-		} catch (Throwable t) {
-			caughtException = t;
-		}
+		});
 		assertEquals("Unexpected exception.", current, caughtException);
 	}
 
 	private void assertExceptionHandled(Throwable throwable) {
 		final Throwable[] handled = new Throwable[1];
-		try {
-			SafeRunner.run(new ISafeRunnable() {
-				@Override
-				public void handleException(Throwable exception) {
-					handled[0] = exception;
-				}
+		SafeRunner.run(new ISafeRunnable() {
+			@Override
+			public void handleException(Throwable exception) {
+				handled[0] = exception;
+			}
 
-				@Override
-				public void run() throws Exception {
-					if (throwable instanceof Exception) {
-						throw (Exception) throwable;
-					} else if (throwable instanceof Error) {
-						throw (Error) throwable;
-					}
+			@Override
+			public void run() throws Exception {
+				if (throwable instanceof Exception) {
+					throw (Exception) throwable;
+				} else if (throwable instanceof Error) {
+					throw (Error) throwable;
 				}
-			});
-		} catch (Throwable t) {
-			fail("Exception unexpectedly caught.", t);
-		}
+			}
+		});
 		assertEquals("Unexpected exception.", throwable, handled[0]);
 	}
 }

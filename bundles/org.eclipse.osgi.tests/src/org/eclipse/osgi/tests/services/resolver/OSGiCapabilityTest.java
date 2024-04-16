@@ -13,6 +13,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
+import static org.eclipse.osgi.tests.OSGiTestsActivator.getContext;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -29,6 +35,9 @@ import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.eclipse.osgi.service.resolver.GenericDescription;
 import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.util.ManifestElement;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.namespace.IdentityNamespace;
@@ -40,67 +49,81 @@ import org.osgi.resource.Requirement;
 public class OSGiCapabilityTest extends AbstractStateTest {
 	private static final String MANIFEST_ROOT = "test_files/genericCapability/";
 
-	public OSGiCapabilityTest(String name) {
-		super(name);
-	}
+	@Rule
+	public TestName testName = new TestName();
 
-	private Dictionary loadManifest(String manifest) {
+	private Dictionary loadManifest(String manifest) throws IOException, BundleException {
 		URL url = getContext().getBundle().getEntry(MANIFEST_ROOT + manifest);
-		try {
-			CaseInsensitiveDictionaryMap<String, String> headers = new CaseInsensitiveDictionaryMap<>();
-			ManifestElement.parseBundleManifest(url.openStream(), headers);
-			return headers.asUnmodifiableDictionary();
-		} catch (IOException | BundleException e) {
-			fail("Unexpected error loading manifest: " + manifest, e);
-		}
-		return null;
+		CaseInsensitiveDictionaryMap<String, String> headers = new CaseInsensitiveDictionaryMap<>();
+		ManifestElement.parseBundleManifest(url.openStream(), headers);
+		return headers.asUnmodifiableDictionary();
 	}
 
-	public void testGenericsOSGiOSGi() throws BundleException {
+	@Test
+	public void testGenericsOSGiOSGi() throws Exception {
 		doGenericBasicsTest("p1.osgi.MF", "p2.osgi.MF", "p3.osgi.MF", "c1.osgi.MF", "c2.osgi.MF", "c3.osgi.MF");
 	}
 
-	public void testGenericsOSGiEquinox() throws BundleException {
-		doGenericBasicsTest("p1.osgi.MF", "p2.osgi.MF", "p3.osgi.MF", "c1.equinox.MF", "c2.equinox.MF", "c3.equinox.MF");
+	@Test
+	public void testGenericsOSGiEquinox() throws Exception {
+		doGenericBasicsTest("p1.osgi.MF", "p2.osgi.MF", "p3.osgi.MF", "c1.equinox.MF", "c2.equinox.MF",
+				"c3.equinox.MF");
 	}
 
-	public void testGenericsOSGiNameEquinox() throws BundleException {
-		doGenericBasicsTest("p1.osgi.name.MF", "p2.osgi.name.MF", "p3.osgi.name.MF", "c1.equinox.MF", "c2.equinox.MF", "c3.equinox.MF");
+	@Test
+	public void testGenericsOSGiNameEquinox() throws Exception {
+		doGenericBasicsTest("p1.osgi.name.MF", "p2.osgi.name.MF", "p3.osgi.name.MF", "c1.equinox.MF", "c2.equinox.MF",
+				"c3.equinox.MF");
 	}
 
-	public void testGenericsOSGiNameOSGi() throws BundleException {
-		doGenericBasicsTest("p1.osgi.name.MF", "p2.osgi.name.MF", "p3.osgi.name.MF", "c1.osgi.MF", "c2.osgi.MF", "c3.osgi.MF");
+	@Test
+	public void testGenericsOSGiNameOSGi() throws Exception {
+		doGenericBasicsTest("p1.osgi.name.MF", "p2.osgi.name.MF", "p3.osgi.name.MF", "c1.osgi.MF", "c2.osgi.MF",
+				"c3.osgi.MF");
 	}
 
-	public void testGenericsOSGiNameEquinoxName() throws BundleException {
-		doGenericBasicsTest("p1.osgi.name.MF", "p2.osgi.name.MF", "p3.osgi.name.MF", "c1.equinox.name.MF", "c2.equinox.name.MF", "c3.equinox.name.MF");
+	@Test
+	public void testGenericsOSGiNameEquinoxName() throws Exception {
+		doGenericBasicsTest("p1.osgi.name.MF", "p2.osgi.name.MF", "p3.osgi.name.MF", "c1.equinox.name.MF",
+				"c2.equinox.name.MF", "c3.equinox.name.MF");
 	}
 
-	public void testGenericsEquinoxOSGi() throws BundleException {
-		doGenericBasicsTest("p1.equinox.MF", "p2.equinox.MF", "p3.equinox.MF", "c1.osgi.MF", "c2.osgi.MF", "c3.osgi.MF");
+	@Test
+	public void testGenericsEquinoxOSGi() throws Exception {
+		doGenericBasicsTest("p1.equinox.MF", "p2.equinox.MF", "p3.equinox.MF", "c1.osgi.MF", "c2.osgi.MF",
+				"c3.osgi.MF");
 	}
 
-	public void testGenericsEquinoxEquinox() throws BundleException {
-		doGenericBasicsTest("p1.equinox.MF", "p2.equinox.MF", "p3.equinox.MF", "c1.equinox.MF", "c2.equinox.MF", "c3.equinox.MF");
+	@Test
+	public void testGenericsEquinoxEquinox() throws Exception {
+		doGenericBasicsTest("p1.equinox.MF", "p2.equinox.MF", "p3.equinox.MF", "c1.equinox.MF", "c2.equinox.MF",
+				"c3.equinox.MF");
 	}
 
-	private void doGenericBasicsTest(String p1Manifest, String p2Manifest, String p3Manifest, String c1Manifest, String c2Manifest, String c3Manifest) throws BundleException {
+	private void doGenericBasicsTest(String p1Manifest, String p2Manifest, String p3Manifest, String c1Manifest,
+			String c2Manifest, String c3Manifest) throws BundleException, IOException {
 		State state = buildEmptyState();
 		long bundleID = 0;
 		Dictionary manifest;
 
 		manifest = loadManifest(p1Manifest);
-		BundleDescription p1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p1 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest(p2Manifest);
-		BundleDescription p2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p2 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest(p3Manifest);
-		BundleDescription p3 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p3 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest(c1Manifest);
-		BundleDescription c1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription c1 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest(c2Manifest);
-		BundleDescription c2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription c2 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest(c3Manifest);
-		BundleDescription c3 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription c3 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		state.addBundle(p3);
 		state.addBundle(p2);
@@ -132,14 +155,10 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 			checkForNonEffectiveRequirement(c3);
 		}
 
-		File stateDir = getContext().getDataFile(getName()); //$NON-NLS-1$
+		File stateDir = getContext().getDataFile(testName.getMethodName()); // $NON-NLS-1$
 		stateDir.mkdirs();
-		try {
-			state.getFactory().writeState(state, stateDir);
-			state = state.getFactory().readState(stateDir);
-		} catch (IOException e) {
-			fail("Error writing/reading state.", e);
-		}
+		state.getFactory().writeState(state, stateDir);
+		state = state.getFactory().readState(stateDir);
 		p1 = state.getBundle(p1.getBundleId());
 		p2 = state.getBundle(p2.getBundleId());
 		p3 = state.getBundle(p3.getBundleId());
@@ -176,7 +195,8 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		assertNotNull(nonEffectiveCaps);
 		assertEquals("Wrong number of not.effective", 1, nonEffectiveCaps.size());
 		Capability c = (Capability) nonEffectiveCaps.get(0);
-		assertEquals("Wrong effective value", Constants.EFFECTIVE_ACTIVE, c.getDirectives().get(Constants.EFFECTIVE_DIRECTIVE));
+		assertEquals("Wrong effective value", Constants.EFFECTIVE_ACTIVE,
+				c.getDirectives().get(Constants.EFFECTIVE_DIRECTIVE));
 	}
 
 	private void checkForNonEffectiveRequirement(BundleDescription c1) {
@@ -184,41 +204,53 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		assertNotNull(nonEffectiveReqs);
 		assertEquals("Wrong number of not.effective", 1, nonEffectiveReqs.size());
 		Requirement r = (Requirement) nonEffectiveReqs.get(0);
-		assertEquals("Wrong effective value", Constants.EFFECTIVE_ACTIVE, r.getDirectives().get(Constants.EFFECTIVE_DIRECTIVE));
+		assertEquals("Wrong effective value", Constants.EFFECTIVE_ACTIVE,
+				r.getDirectives().get(Constants.EFFECTIVE_DIRECTIVE));
 	}
 
-	private void checkGenericBasics(int expectedCnt, GenericDescription[] genRequired, GenericDescription[] genProvided) {
+	private void checkGenericBasics(int expectedCnt, GenericDescription[] genRequired,
+			GenericDescription[] genProvided) {
 		checkGenericBasics(expectedCnt, genRequired, genProvided, null);
 	}
 
-	private void checkGenericBasics(int expectedCnt, GenericDescription[] genRequired, GenericDescription[] genProvided, GenericDescription fragIdentity) {
+	private void checkGenericBasics(int expectedCnt, GenericDescription[] genRequired, GenericDescription[] genProvided,
+			GenericDescription fragIdentity) {
 		assertEquals("Expected number of capabilities do not match", expectedCnt, genRequired.length);
-		assertEquals("Specs do not match Descs", genRequired.length, genProvided.length + (fragIdentity == null ? 0 : 1));
+		assertEquals("Specs do not match Descs", genRequired.length,
+				genProvided.length + (fragIdentity == null ? 0 : 1));
 		Collection providedCollection = new ArrayList(Arrays.asList(genProvided));
 		for (GenericDescription requiredDescription : genRequired) {
-			if (IdentityNamespace.IDENTITY_NAMESPACE.equals(requiredDescription.getType()) && requiredDescription.getSupplier().getHost() != null) {
+			if (IdentityNamespace.IDENTITY_NAMESPACE.equals(requiredDescription.getType())
+					&& requiredDescription.getSupplier().getHost() != null) {
 				assertEquals("Wrong fragment provider: " + requiredDescription, fragIdentity, requiredDescription);
 			} else {
-				assertTrue("Wrong provider for requirement: " + requiredDescription, providedCollection.remove(requiredDescription));
+				assertTrue("Wrong provider for requirement: " + requiredDescription,
+						providedCollection.remove(requiredDescription));
 			}
 		}
 	}
 
-	public void testGenericFragments01() throws BundleException {
+	@Test
+	public void testGenericFragments01() throws BundleException, IOException {
 		State state = buildEmptyState();
 		long bundleID = 0;
 		Dictionary manifest;
 
 		manifest = loadManifest("p1.osgi.MF");
-		BundleDescription p1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p1 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("p1.osgi.frag.MF");
-		BundleDescription p1Frag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p1Frag = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("c1.osgi.MF");
-		BundleDescription c1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription c1 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("c1.osgi.frag.MF");
-		BundleDescription c1Frag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription c1Frag = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("p4.osgi.MF");
-		BundleDescription p4 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p4 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		state.addBundle(p1);
 		state.addBundle(p1Frag);
@@ -233,16 +265,13 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		assertTrue("c1Frag", c1Frag.isResolved());
 		assertTrue("p4", p4.isResolved());
 
-		checkGenericBasics(6, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities(), p1Frag.getSelectedGenericCapabilities()[0]);
+		checkGenericBasics(6, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities(),
+				p1Frag.getSelectedGenericCapabilities()[0]);
 
-		File stateDir = getContext().getDataFile(getName()); //$NON-NLS-1$
+		File stateDir = getContext().getDataFile(testName.getMethodName()); // $NON-NLS-1$
 		stateDir.mkdirs();
-		try {
-			state.getFactory().writeState(state, stateDir);
-			state = state.getFactory().readState(stateDir);
-		} catch (IOException e) {
-			fail("Error writing/reading state.", e);
-		}
+		state.getFactory().writeState(state, stateDir);
+		state = state.getFactory().readState(stateDir);
 		p1 = state.getBundle(p1.getBundleId());
 		p1Frag = state.getBundle(p1Frag.getBundleId());
 		c1 = state.getBundle(c1.getBundleId());
@@ -255,10 +284,11 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		assertTrue("c1Frag", c1Frag.isResolved());
 		assertTrue("p4", p4.isResolved());
 
-		checkGenericBasics(6, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities(), p1Frag.getSelectedGenericCapabilities()[0]);
+		checkGenericBasics(6, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities(),
+				p1Frag.getSelectedGenericCapabilities()[0]);
 
 		state.setResolver(platformAdminService.createResolver());
-		state.resolve(new BundleDescription[] {p1});
+		state.resolve(new BundleDescription[] { p1 });
 
 		assertTrue("p1", p1.isResolved());
 		assertTrue("p1Frag", p1Frag.isResolved());
@@ -266,22 +296,28 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		assertTrue("c1Frag", c1Frag.isResolved());
 		assertTrue("p4", p4.isResolved());
 
-		checkGenericBasics(6, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities(), p1Frag.getSelectedGenericCapabilities()[0]);
+		checkGenericBasics(6, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities(),
+				p1Frag.getSelectedGenericCapabilities()[0]);
 	}
 
-	public void testGenericFragments02() throws BundleException {
+	@Test
+	public void testGenericFragments02() throws BundleException, IOException {
 		State state = buildEmptyState();
 		long bundleID = 0;
 		Dictionary manifest;
 
 		manifest = loadManifest("p1.osgi.MF");
-		BundleDescription p1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p1 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("p1.osgi.frag.MF");
-		BundleDescription p1Frag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p1Frag = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("c1.osgi.MF");
-		BundleDescription c1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription c1 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("c1.osgi.frag.MF");
-		BundleDescription c1Frag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription c1Frag = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		state.addBundle(p1);
 		state.addBundle(p1Frag);
@@ -296,15 +332,11 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 
 		checkGenericBasics(4, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
 
-		File stateDir = getContext().getDataFile(getName() + 1); //$NON-NLS-1$
+		File stateDir = getContext().getDataFile(testName.getMethodName() + 1); // $NON-NLS-1$
 		stateDir.mkdirs();
-		try {
-			state.getFactory().writeState(state, stateDir);
-			state = state.getFactory().readState(stateDir);
-			state.setResolver(platformAdminService.createResolver());
-		} catch (IOException e) {
-			fail("Error writing/reading state.", e);
-		}
+		state.getFactory().writeState(state, stateDir);
+		state = state.getFactory().readState(stateDir);
+		state.setResolver(platformAdminService.createResolver());
 		p1 = state.getBundle(p1.getBundleId());
 		p1Frag = state.getBundle(p1Frag.getBundleId());
 		c1 = state.getBundle(c1.getBundleId());
@@ -317,27 +349,25 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		checkGenericBasics(4, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
 
 		manifest = loadManifest("p4.osgi.MF");
-		BundleDescription p4 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p4 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		state.addBundle(p4);
 
 		// have to force host to re-resolve because we are adding new constraints
-		state.resolve(new BundleDescription[] {p1});
+		state.resolve(new BundleDescription[] { p1 });
 		assertTrue("p1", p1.isResolved());
 		assertTrue("p1Frag", p1Frag.isResolved());
 		assertTrue("c1", c1.isResolved());
 		assertTrue("c1Frag", c1Frag.isResolved());
 		assertTrue("p4", p4.isResolved());
 
-		checkGenericBasics(6, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities(), p1Frag.getSelectedGenericCapabilities()[0]);
+		checkGenericBasics(6, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities(),
+				p1Frag.getSelectedGenericCapabilities()[0]);
 
-		stateDir = getContext().getDataFile(getName() + 2); //$NON-NLS-1$
+		stateDir = getContext().getDataFile(testName.getMethodName() + 2); // $NON-NLS-1$
 		stateDir.mkdirs();
-		try {
-			state.getFactory().writeState(state, stateDir);
-			state = state.getFactory().readState(stateDir);
-		} catch (IOException e) {
-			fail("Error writing/reading state.", e);
-		}
+		state.getFactory().writeState(state, stateDir);
+		state = state.getFactory().readState(stateDir);
 		p1 = state.getBundle(p1.getBundleId());
 		p1Frag = state.getBundle(p1Frag.getBundleId());
 		c1 = state.getBundle(c1.getBundleId());
@@ -349,34 +379,46 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		assertTrue("c1Frag", c1Frag.isResolved());
 		assertTrue("p4", p4.isResolved());
 
-		checkGenericBasics(6, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities(), p1Frag.getSelectedGenericCapabilities()[0]);
+		checkGenericBasics(6, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities(),
+				p1Frag.getSelectedGenericCapabilities()[0]);
 	}
 
-	public void testGenericUses() throws BundleException {
+	@Test
+	public void testGenericUses() throws Exception {
 		State state = buildEmptyState();
 		long bundleID = 0;
 		Dictionary manifest;
 
 		manifest = loadManifest("p5.v100.osgi.MF");
-		BundleDescription p5v100 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p5v100 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("p5.v110.osgi.MF");
-		BundleDescription p5v110 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p5v110 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("p6.v100.osgi.MF");
-		BundleDescription p6v100 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p6v100 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("p6.v110.osgi.MF");
-		BundleDescription p6v110 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p6v110 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("p7.v100.osgi.MF");
-		BundleDescription p7v100 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p7v100 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("p7.v110.osgi.MF");
-		BundleDescription p7v110 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p7v110 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("c4.v100.osgi.MF");
-		BundleDescription c4v100 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription c4v100 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("c4.v110.osgi.MF");
-		BundleDescription c4v110 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription c4v110 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("c4.v120.osgi.MF");
-		BundleDescription c4v120 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription c4v120 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("c4.v130.osgi.MF");
-		BundleDescription c4v130 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription c4v130 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		state.addBundle(p5v100);
 		state.addBundle(p5v110);
@@ -408,13 +450,14 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		GenericDescription[] p5v100Capability = p5v100.getSelectedGenericCapabilities();
 		ExportPackageDescription[] p6v100Exports = p6v100.getSelectedExports();
 		ExportPackageDescription[] p7v100Exports = p7v100.getSelectedExports();
-		ExportPackageDescription[] expectedPackages = new ExportPackageDescription[] {p6v100Exports[0], p7v100Exports[0]};
+		ExportPackageDescription[] expectedPackages = new ExportPackageDescription[] { p6v100Exports[0],
+				p7v100Exports[0] };
 
 		checkUsedImports(c4v100, expectedPackages);
 		checkUsedImports(c4v110, expectedPackages);
 		checkUsedImports(c4v120, expectedPackages);
 
-		BundleDescription[] expectedRequired = new BundleDescription[] {p6v100, p7v100};
+		BundleDescription[] expectedRequired = new BundleDescription[] { p6v100, p7v100 };
 		checkUsedRequires(c4v130, expectedRequired);
 
 		checkUsedCapability(c4v100, p5v100Capability);
@@ -423,35 +466,48 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		checkUsedCapability(c4v130, p5v100Capability);
 	}
 
-	public void testOSGiCardinalityUses() throws BundleException {
+	@Test
+	public void testOSGiCardinalityUses() throws Exception {
 		State state = buildEmptyState();
 		long bundleID = 0;
 		Dictionary manifest;
 
 		manifest = loadManifest("p5.v100.osgi.MF");
-		BundleDescription p5v100 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p5v100 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("p5.v101.osgi.MF");
-		BundleDescription p5v101 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p5v101 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("p5.v110.osgi.MF");
-		BundleDescription p5v110 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p5v110 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("p6.v100.osgi.MF");
-		BundleDescription p6v100 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p6v100 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("p6.v110.osgi.MF");
-		BundleDescription p6v110 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p6v110 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("p7.v100.osgi.MF");
-		BundleDescription p7v100 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p7v100 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("p7.v110.osgi.MF");
-		BundleDescription p7v110 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p7v110 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("c6.v100.osgi.MF");
-		BundleDescription c6v100 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription c6v100 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("c6.v110.osgi.MF");
-		BundleDescription c6v110 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription c6v110 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("c6.v120.osgi.MF");
-		BundleDescription c6v120 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription c6v120 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("c6.v130.osgi.MF");
-		BundleDescription c6v130 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription c6v130 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("c6.v140.osgi.MF");
-		BundleDescription c6v140 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription c6v140 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		state.addBundle(p5v100);
 		state.addBundle(p5v101);
@@ -497,17 +553,19 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 
 		ExportPackageDescription[] p6v100Exports = p6v100.getSelectedExports();
 		ExportPackageDescription[] p7v100Exports = p7v100.getSelectedExports();
-		ExportPackageDescription[] expectedPackages = new ExportPackageDescription[] {p6v100Exports[0], p7v100Exports[0]};
+		ExportPackageDescription[] expectedPackages = new ExportPackageDescription[] { p6v100Exports[0],
+				p7v100Exports[0] };
 
 		checkUsedImports(c6v100, expectedPackages);
 		checkUsedImports(c6v110, expectedPackages);
 		checkUsedImports(c6v120, expectedPackages);
 
-		BundleDescription[] expectedRequired = new BundleDescription[] {p6v100, p7v100};
+		BundleDescription[] expectedRequired = new BundleDescription[] { p6v100, p7v100 };
 		checkUsedRequires(c6v130, expectedRequired);
 		checkUsedRequires(c6v140, expectedRequired);
 
-		GenericDescription[] expectedCapabilities = (GenericDescription[]) expectedCapabilityList.toArray(new GenericDescription[expectedCapabilityList.size()]);
+		GenericDescription[] expectedCapabilities = (GenericDescription[]) expectedCapabilityList
+				.toArray(new GenericDescription[expectedCapabilityList.size()]);
 		checkUsedCapability(c6v100, expectedCapabilities);
 		checkUsedCapability(c6v110, expectedCapabilities);
 		checkUsedCapability(c6v120, expectedCapabilities);
@@ -515,9 +573,11 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		checkUsedCapability(c6v140, expectedCapabilities);
 
 		manifest = loadManifest("c6.v150.osgi.MF");
-		BundleDescription c6v150 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription c6v150 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("c6.v160.osgi.MF");
-		BundleDescription c6v160 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription c6v160 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		state.addBundle(c6v150);
 		state.addBundle(c6v160);
@@ -527,6 +587,7 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		assertFalse("c6v160", c6v160.isResolved());
 	}
 
+	@Test
 	public void testDeclaringIdentityCapability() {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();
@@ -539,7 +600,8 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		manifest.put(GenericCapabilityTest.GENERIC_CAPABILITY, capabililty.toString());
 
 		try {
-			state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+			state.getFactory().createBundleDescription(state, manifest,
+					(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 			fail("Expected failure to create description that specifies osgi.identity capability");
 		} catch (BundleException e) {
 			// expected
@@ -548,26 +610,32 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		manifest.remove(GenericCapabilityTest.GENERIC_CAPABILITY);
 		manifest.put(Constants.PROVIDE_CAPABILITY, "osgi.identity; osgi.identity=testFailure; test=failure");
 		try {
-			state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+			state.getFactory().createBundleDescription(state, manifest,
+					(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 			fail("Expected failure to create description that specifies osgi.identity capability");
 		} catch (BundleException e) {
 			// expected
 		}
 	}
 
-	public void testOSGiCardinality() throws BundleException {
+	@Test
+	public void testOSGiCardinality() throws Exception {
 		State state = buildEmptyState();
 		long bundleID = 0;
 		Dictionary manifest;
 
 		manifest = loadManifest("p1.osgi.MF");
-		BundleDescription p1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p1 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("p2.osgi.MF");
-		BundleDescription p2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p2 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("p3.osgi.MF");
-		BundleDescription p3 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription p3 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 		manifest = loadManifest("c5.osgi.MF");
-		BundleDescription c5 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		BundleDescription c5 = state.getFactory().createBundleDescription(state, manifest,
+				(String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		state.addBundle(p1);
 		state.addBundle(p2);
@@ -613,10 +681,12 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 
 	private void checkUsedCapability(BundleDescription requirer, GenericDescription[] expectedCapabilities) {
 		GenericDescription[] required = requirer.getResolvedGenericRequires();
-		assertEquals("Wrong number of capabilities for bundle: " + requirer, expectedCapabilities.length, required.length);
+		assertEquals("Wrong number of capabilities for bundle: " + requirer, expectedCapabilities.length,
+				required.length);
 		Collection providedCollection = new ArrayList(Arrays.asList(expectedCapabilities));
 		for (GenericDescription requiredDescription : required) {
-			assertTrue("Wrong provider for requirement: " + requiredDescription, providedCollection.remove(requiredDescription));
+			assertTrue("Wrong provider for requirement: " + requiredDescription,
+					providedCollection.remove(requiredDescription));
 		}
 	}
 }

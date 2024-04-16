@@ -13,19 +13,20 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.resolver;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.service.resolver.StateObjectFactory;
 import org.eclipse.osgi.tests.services.resolver.AbstractStateTest;
+import org.junit.Test;
 import org.osgi.framework.BundleException;
 
-
-
+@SuppressWarnings("deprecation") // StateObjectFactory.createBundleDescription()
 public class TestGenerated_001 extends AbstractStateTest {
-	public TestGenerated_001(String testName) {
-		super(testName);
-	}
 
 	BundleDescription bundle_1 = null;
 	BundleDescription bundle_2 = null;
@@ -38,6 +39,7 @@ public class TestGenerated_001 extends AbstractStateTest {
 	BundleDescription bundle_9 = null;
 	BundleDescription bundle_10 = null;
 
+	@Test
 	public void testTest_001() {
 		State state = buildEmptyState();
 		StateObjectFactory sof = StateObjectFactory.defaultFactory;
@@ -52,17 +54,16 @@ public class TestGenerated_001 extends AbstractStateTest {
 		bundle_8 = create_bundle_8(sof);
 		bundle_9 = create_bundle_9(sof);
 		bundle_10 = create_bundle_10(sof);
-		//***************************************************
+		// ***************************************************
 		// stage a
 		// expect to pass =true
-		//***************************************************
+		// ***************************************************
 		addBundlesToState_a(state);
-		//***************************************************
+		// ***************************************************
 		try {
 			state.resolve();
 		} catch (Throwable t) {
-			fail("unexpected exception class=" + t.getClass().getName()
-					+ " message=" + t.getMessage());
+			fail("unexpected exception class=" + t.getClass().getName() + " message=" + t.getMessage());
 			return;
 		}
 		checkBundlesResolved_a();

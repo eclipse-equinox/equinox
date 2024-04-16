@@ -907,36 +907,24 @@ class Candidates
                             // matter if they come from the host or fragment,
                             // since we are completing replacing the declaring
                             // host and fragments with the wrapped host.
-                            CandidateSelector cands = m_candidateMap.get(r);
-                            ShadowList shadow;
-                            if (!(cands instanceof ShadowList))
+
+                            if (origCap.getResource().equals(hostResource.getDeclaredResource()))
                             {
-                                shadow = ShadowList.createShadowList(cands);
-                                m_candidateMap.put(r, shadow);
-                                cands = shadow;
+                                // If the original capability is from the host, then
+                                // we just need to replace it in the shadow list.
+                                getShadowList(r).replace(origCap, c);
                             }
                             else
                             {
-                                shadow = (ShadowList) cands;
-                            }
-
-                            // If the original capability is from a fragment, then
-                            // ask the ResolveContext to insert it and update the
-                            // shadow copy of the list accordingly.
-                            if (!origCap.getResource().equals(hostResource.getDeclaredResource()))
-                            {
-                                shadow.insertHostedCapability(
+                                // If the original capability is from a fragment, then
+                                // ask the ResolveContext to insert it and update the
+                                // shadow copy of the list accordingly.
+                                getShadowList(r).insertHostedCapability(
                                         m_session.getContext(),
                                         (HostedCapability) c,
                                         new SimpleHostedCapability(
                                                 hostResource.getDeclaredResource(),
                                                 origCap));
-                            }
-                            // If the original capability is from the host, then
-                            // we just need to replace it in the shadow list.
-                            else
-                            {
-                                shadow.replace(origCap, c);
                             }
                         }
                     }
@@ -963,6 +951,17 @@ class Candidates
         // mark the selectors as unmodifiable now
         m_candidateSelectorsUnmodifiable.set(true);
         return null;
+    }
+
+    private ShadowList getShadowList(Requirement r) {
+        CandidateSelector cands = m_candidateMap.get(r);
+        if (cands instanceof ShadowList)
+        {
+            return (ShadowList) cands;
+        }
+        ShadowList shadow = ShadowList.createShadowList(cands);
+        m_candidateMap.put(r, shadow);
+        return shadow;
     }
 
     // Maps a host capability to a map containing its potential fragments;

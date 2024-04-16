@@ -29,6 +29,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * Note that this class just provides a bridge from the old ILog interface to
  * the new extended log service
  */
+@SuppressWarnings("deprecation") // LogService, PackageAdmin
 public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 	public static final String EQUINOX_LOGGER_NAME = "org.eclipse.equinox.logger"; //$NON-NLS-1$
 	private final ExtendedLogService logService;
@@ -99,7 +100,7 @@ public class PlatformLogWriter implements SynchronousLogListener, LogFilter {
 	}
 
 	@Override
-	public boolean isLoggable(Bundle bundle, String loggerName, int logLevel) {
+	public boolean isLoggable(Bundle b, String loggerName, int logLevel) {
 		return EQUINOX_LOGGER_NAME.equals(loggerName) && RuntimeLog.hasListeners();
 	}
 

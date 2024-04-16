@@ -69,8 +69,7 @@ public class ServletRequestAdvisor extends Object {
 
 	public ServletRequestAdvisor(String port, String contextPath, String ksPath, String ksPassword, int timeout) {
 		super();
-		if (port == null)
-		{
+		if (port == null) {
 			throw new IllegalArgumentException("port must not be null"); //$NON-NLS-1$
 		}
 		this.port = port;
@@ -125,14 +124,14 @@ public class ServletRequestAdvisor extends Object {
 		log("Requesting " + spec); //$NON-NLS-1$
 		URL url = new URL(spec);
 
-		HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
 		connection.setInstanceFollowRedirects(false);
 		connection.setConnectTimeout(timeout);
 		connection.setReadTimeout(timeout);
 		connection.connect();
 
-		try (InputStream stream = connection.getInputStream()){
+		try (InputStream stream = connection.getInputStream()) {
 			return drain(stream);
 		}
 	}
@@ -144,7 +143,7 @@ public class ServletRequestAdvisor extends Object {
 		SSLContext sslContext = SSLContext.getInstance("SSL");
 		initializeSSLContext(sslContext, ksPath, ksPassword);
 
-		HttpsURLConnection httpsConn = (HttpsURLConnection)url.openConnection();
+		HttpsURLConnection httpsConn = (HttpsURLConnection) url.openConnection();
 		httpsConn.setSSLSocketFactory(sslContext.getSocketFactory());
 		httpsConn.setRequestMethod("GET");
 		httpsConn.setDoOutput(false);
@@ -153,7 +152,7 @@ public class ServletRequestAdvisor extends Object {
 		httpsConn.setReadTimeout(timeout);
 		httpsConn.connect();
 
-		assertEquals("Request to the url " + spec + " was not successful", 200 , httpsConn.getResponseCode());
+		assertEquals("Request to the url " + spec + " was not successful", 200, httpsConn.getResponseCode());
 		try (InputStream stream = httpsConn.getInputStream()) {
 			return drain(stream);
 		}
@@ -166,7 +165,7 @@ public class ServletRequestAdvisor extends Object {
 			File ksFile = new File(ksPath);
 			KeyStore keyStore = KeyStore.getInstance("JKS");
 
-			try(InputStream ksStream = new FileInputStream(ksFile)){
+			try (InputStream ksStream = new FileInputStream(ksFile)) {
 				keyStore.load(ksStream, ksPassword.toCharArray());
 				kmFactory.init(keyStore, ksPassword.toCharArray());
 				keyManagers = kmFactory.getKeyManagers();
@@ -187,12 +186,12 @@ public class ServletRequestAdvisor extends Object {
 			}
 
 			@Override
-			public void checkClientTrusted(
-										java.security.cert.X509Certificate[] certs, String authType) {}
+			public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+			}
 
 			@Override
-			public void checkServerTrusted(
-										java.security.cert.X509Certificate[] certs, String authType) {}
+			public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+			}
 		} };
 
 		return trustAllCerts;
@@ -202,15 +201,15 @@ public class ServletRequestAdvisor extends Object {
 		String spec = createUrlSpec(value);
 		log("Requesting " + spec); //$NON-NLS-1$
 		URL url = new URL(spec);
-		HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
 		connection.setInstanceFollowRedirects(false);
 		connection.setConnectTimeout(timeout);
 		connection.setReadTimeout(timeout);
 
 		if (headers != null) {
-			for(Map.Entry<String, List<String>> entry : headers.entrySet()) {
-				for(String entryValue : entry.getValue()) {
+			for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+				for (String entryValue : entry.getValue()) {
 					connection.setRequestProperty(entry.getKey(), entryValue);
 				}
 			}
@@ -225,15 +224,14 @@ public class ServletRequestAdvisor extends Object {
 
 		if (responseCode >= 400) {
 			stream = connection.getErrorStream();
-		}
-		else {
+		} else {
 			stream = connection.getInputStream();
 		}
 
 		try {
 			String drainedStream = drain(stream);
 			map.put("responseBody", Arrays.asList(drainedStream));
-		} catch (IOException e){
+		} catch (IOException e) {
 			map.put("responseBody", Arrays.asList(e.getMessage()));
 		} finally {
 			stream.close();
@@ -241,22 +239,23 @@ public class ServletRequestAdvisor extends Object {
 		return map;
 	}
 
-	public Map<String, List<String>> eventSource(String value, Map<String, List<String>> headers, final EventHandler handler) throws IOException {
+	public Map<String, List<String>> eventSource(String value, Map<String, List<String>> headers,
+			final EventHandler handler) throws IOException {
 		String spec = createUrlSpec(value);
 		log("Requesting " + spec); //$NON-NLS-1$
 		URL url = new URL(spec);
-		HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
 		connection.setChunkedStreamingMode(0);
 		connection.setDoOutput(true);
-		//connection.setRequestProperty("Connection", "Close");
+		// connection.setRequestProperty("Connection", "Close");
 		connection.setInstanceFollowRedirects(false);
 		connection.setConnectTimeout(timeout);
 		connection.setReadTimeout(timeout);
 
 		if (headers != null) {
-			for(Map.Entry<String, List<String>> entry : headers.entrySet()) {
-				for(String entryValue : entry.getValue()) {
+			for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+				for (String entryValue : entry.getValue()) {
 					connection.setRequestProperty(entry.getKey(), entryValue);
 				}
 			}
@@ -271,8 +270,7 @@ public class ServletRequestAdvisor extends Object {
 
 		if (responseCode >= 400) {
 			stream = connection.getErrorStream();
-		}
-		else {
+		} else {
 			stream = connection.getInputStream();
 		}
 
@@ -284,12 +282,13 @@ public class ServletRequestAdvisor extends Object {
 	public Map<String, List<String>> upload(String value, Map<String, List<Object>> headers) throws IOException {
 		return upload(value, headers, null);
 	}
-	
-	public Map<String, List<String>> upload(String value, Map<String, List<Object>> headers, Map<String, Object> formFields) throws IOException {
+
+	public Map<String, List<String>> upload(String value, Map<String, List<Object>> headers,
+			Map<String, Object> formFields) throws IOException {
 		String spec = createUrlSpec(value);
 		log("Requesting " + spec); //$NON-NLS-1$
 		URL url = new URL(spec);
-		HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
 		connection.setInstanceFollowRedirects(false);
 		connection.setConnectTimeout(timeout);
@@ -298,29 +297,26 @@ public class ServletRequestAdvisor extends Object {
 
 		if (headers != null) {
 			if (headers.containsKey("method")) {
-				String method = (String)headers.remove("method").get(0);
+				String method = (String) headers.remove("method").get(0);
 				connection.setRequestMethod(method);
 			}
 
-			for(Map.Entry<String, List<Object>> entry : headers.entrySet()) {
-				for(Object entryValue : entry.getValue()) {
+			for (Map.Entry<String, List<Object>> entry : headers.entrySet()) {
+				for (Object entryValue : entry.getValue()) {
 					if (entryValue instanceof String) {
 						if (entry.getKey().equals("x-www-form-urlencoded")) {
-							postFormURLEncoded(connection, (String)entryValue);
-						}
-						else {
+							postFormURLEncoded(connection, (String) entryValue);
+						} else {
 							String property = connection.getRequestProperty(entry.getKey());
 							if (property == null) {
-								connection.setRequestProperty(entry.getKey(), (String)entryValue);
+								connection.setRequestProperty(entry.getKey(), (String) entryValue);
 							} else {
 								connection.setRequestProperty(entry.getKey(), property + "," + entryValue);
 							}
 						}
-					}
-					else if (entryValue instanceof URL) {
-						uploadFileConnection(connection, entry.getKey(), (URL)entryValue, formFields);
-					}
-					else {
+					} else if (entryValue instanceof URL) {
+						uploadFileConnection(connection, entry.getKey(), (URL) entryValue, formFields);
+					} else {
 						throw new IllegalArgumentException("only supports strings and files");
 					}
 				}
@@ -336,8 +332,7 @@ public class ServletRequestAdvisor extends Object {
 
 		if (responseCode >= 400) {
 			stream = connection.getErrorStream();
-		}
-		else {
+		} else {
 			stream = connection.getInputStream();
 		}
 
@@ -349,24 +344,24 @@ public class ServletRequestAdvisor extends Object {
 		}
 	}
 
-	private void postFormURLEncoded(HttpURLConnection connection, String param)
-		throws IOException {
+	private void postFormURLEncoded(HttpURLConnection connection, String param) throws IOException {
 
 		byte[] bytes = param.getBytes(StandardCharsets.UTF_8);
 
 		connection.setDoOutput(true);
 		connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-		//connection.setRequestProperty("Content-Length", Integer.toString(bytes.length));
+		// connection.setRequestProperty("Content-Length",
+		// Integer.toString(bytes.length));
 
-		try(DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
+		try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
 			wr.write(bytes);
 			wr.flush();
 		}
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void uploadFileConnection(HttpURLConnection connection, String param, URL file, Map<String, Object> formFields)
-		throws IOException {
+	private void uploadFileConnection(HttpURLConnection connection, String param, URL file,
+			Map<String, Object> formFields) throws IOException {
 
 		String fileName = file.getPath();
 		fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
@@ -384,7 +379,7 @@ public class ServletRequestAdvisor extends Object {
 			if (formFields != null) {
 				formFields.entrySet().forEach(entry -> {
 					if (entry.getValue() instanceof Collection) {
-						((Collection)entry.getValue()).forEach(value -> {
+						((Collection) entry.getValue()).forEach(value -> {
 							writer.append("--" + boundary);
 							writer.append(CRLF);
 							writer.append("Content-Disposition: form-data; name=\"" + entry.getKey() + "\"");
@@ -410,7 +405,7 @@ public class ServletRequestAdvisor extends Object {
 					}
 				});
 			}
-			
+
 			writer.append("--" + boundary);
 			writer.append(CRLF);
 			writer.append("Content-Disposition: form-data; name=\"");

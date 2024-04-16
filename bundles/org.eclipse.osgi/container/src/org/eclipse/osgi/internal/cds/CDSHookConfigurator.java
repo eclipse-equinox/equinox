@@ -57,7 +57,9 @@ public class CDSHookConfigurator implements HookConfigurator {
 			if (reportErrors) {
 				EquinoxContainer container = hookRegistry.getContainer();
 				EquinoxLogServices logServices = container.getLogServices();
-				logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, "The J9 Class Sharing Adaptor will not work in this configuration. You are not running on a J9 Java VM.", null); //$NON-NLS-1$
+				logServices.log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING,
+						"The J9 Class Sharing Adaptor will not work in this configuration. You are not running on a J9 Java VM.", //$NON-NLS-1$
+						null);
 			}
 			return;
 		}

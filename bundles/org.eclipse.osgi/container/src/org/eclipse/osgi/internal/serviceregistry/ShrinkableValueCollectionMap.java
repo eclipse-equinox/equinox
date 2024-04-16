@@ -43,9 +43,10 @@ public class ShrinkableValueCollectionMap<K, V> extends AbstractMap<K, Collectio
 
 	@Override
 	public boolean containsValue(Object value) {
-		/* Since values are collections and the collection has identity equality,
-		 * there is no way any value could be contained in this map unless that
-		 * value has already been gotten from this map.
+		/*
+		 * Since values are collections and the collection has identity equality, there
+		 * is no way any value could be contained in this map unless that value has
+		 * already been gotten from this map.
 		 */
 		if (values == null) {
 			return false;

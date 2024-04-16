@@ -14,17 +14,16 @@
 <parent>
     <groupId>org.eclipse.equinox</groupId>
     <artifactId>parent</artifactId>
-    <version>4.31.0-SNAPSHOT</version>
+    <version>4.32.0-SNAPSHOT</version>
     <relativePath>../../</relativePath>
 </parent>
   <groupId>org.eclipse.osgi</groupId>
   <artifactId>org.eclipse.osgi.tests</artifactId>
-  <version>3.19.0-SNAPSHOT</version>
+  <version>3.19.100-SNAPSHOT</version>
   <packaging>eclipse-test-plugin</packaging>
 
   <properties>
     <defaultSigning-excludeInnerJars>true</defaultSigning-excludeInnerJars>
-    <code.ignoredWarnings>${tests.ignoredWarnings}</code.ignoredWarnings>
     <testSuite>${project.artifactId}</testSuite>
     <testClass>org.eclipse.osgi.tests.AutomatedTests</testClass>
     <skipAPIAnalysis>true</skipAPIAnalysis>

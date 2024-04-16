@@ -22,6 +22,8 @@
 # DEFAULT_OS_ARCH - the default value of the "-arch" switch
 # DEFAULT_WS      - the default value of the "-ws" switch
 # JAVA_HOME       - the location of the Java for JNI includes
+# EXE_OUTPUT_DIR  - the location into which the executable is installed (only used in 'install' target)
+# LIB_OUTPUT_DIR  - the location into which the launcher library is installed (only used in 'install' target)
 NODEBUG=1
 
 APPVER=4.0
@@ -35,6 +37,9 @@ PROGRAM_OUTPUT=eclipse.exe
 PROGRAM_NAME=$(PROGRAM_OUTPUT:.exe=)
 
 PROGRAM_LIBRARY = eclipse_$(LIB_VERSION).dll
+
+EXE_OUTPUT_DIR=$(EXE_OUTPUT_DIR:/=\)
+LIB_OUTPUT_DIR=$(LIB_OUTPUT_DIR:/=\)
 
 # Define the object modules to be compiled and flags.
 MAIN_OBJS = eclipseMain.obj
@@ -94,7 +99,7 @@ eclipseJNI.obj: ../eclipseCommon.h ../eclipseOS.h ../eclipseJNI.c
 
 eclipseShm.obj: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
 	cl $(DEBUG) $(wcflags) $(cvarsmt) /Fo$*.obj ../eclipseShm.c
-	
+
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS) $(RES)
     link $(LFLAGS) -out:$(PROGRAM_OUTPUT) $(MAIN_OBJS) $(COMMON_OBJS) $(RES) $(LIBS)
 
@@ -108,8 +113,14 @@ $(RES): $(PROGRAM_NAME).rc
     rc -r -fo $(RES) eclipse.rc
 
 install: all
-	copy $(EXEC) $(OUTPUT_DIR)
-	del -f $(EXEC) $(MAIN_OBJS) $(DLL_OBJS) $(COMMON_OBJS) $(RES)
-   
+	@echo Install into: EXE_OUTPUT_DIR:$(EXE_OUTPUT_DIR) LIB_OUTPUT_DIR:$(LIB_OUTPUT_DIR)
+	-1cmd /c "mkdir $(EXE_OUTPUT_DIR)"
+	move /y $(EXEC) $(EXE_OUTPUT_DIR)
+	move /y $(CONSOLE) $(EXE_OUTPUT_DIR)
+	-1cmd /c "mkdir $(LIB_OUTPUT_DIR)"
+	del $(LIB_OUTPUT_DIR)\eclipse_*.dll
+	move /y $(DLL) $(LIB_OUTPUT_DIR)
+	del $(MAIN_OBJS) $(MAIN_CONSOLE_OBJS) $(DLL_OBJS) $(COMMON_OBJS) $(RES) eclipse_*.exp eclipse_*.lib
+
 clean:
-	del $(EXEC) $(DLL) $(MAIN_OBJS) $(MAIN_CONSOLE_OBJS) $(DLL_OBJS) $(COMMON_OBJS) $(RES)
+	del $(EXEC) $(CONSOLE) $(DLL) $(MAIN_OBJS) $(MAIN_CONSOLE_OBJS) $(DLL_OBJS) $(COMMON_OBJS) $(RES) eclipse_*.exp eclipse_*.lib

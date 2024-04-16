@@ -18,11 +18,12 @@ import java.io.*;
 import java.util.*;
 
 /**
- * Permission Storage interface for managing a persistent storage of
- * bundle permissions.
+ * Permission Storage interface for managing a persistent storage of bundle
+ * permissions.
  *
- * <p>This class is used to provide methods to manage
- * persistent storage of bundle permissions.
+ * <p>
+ * This class is used to provide methods to manage persistent storage of bundle
+ * permissions.
  */
 public class PermissionData {
 	private static final int PERMDATA_VERSION = 1;
@@ -32,13 +33,12 @@ public class PermissionData {
 	private boolean dirty;
 
 	/**
-	 * Returns the locations that have permission data assigned to them,
-	 * that is, locations for which permission data
-	 * exists in persistent storage.
+	 * Returns the locations that have permission data assigned to them, that is,
+	 * locations for which permission data exists in persistent storage.
 	 *
-	 * @return The locations that have permission data in
-	 * persistent storage, or <tt>null</tt> if there is no permission data
-	 * in persistent storage.
+	 * @return The locations that have permission data in persistent storage, or
+	 *         <code>null</code> if there is no permission data in persistent
+	 *         storage.
 	 */
 	public String[] getLocations() {
 		synchronized (locations) {
@@ -51,16 +51,15 @@ public class PermissionData {
 	}
 
 	/**
-	 * Gets the permission data assigned to the specified
-	 * location.
+	 * Gets the permission data assigned to the specified location.
 	 *
-	 * @param location The location whose permission data is to
-	 * be returned.
-	 * The location can be <tt>null</tt> for the default permission data.
+	 * @param location The location whose permission data is to be returned. The
+	 *                 location can be <code>null</code> for the default permission
+	 *                 data.
 	 *
-	 * @return The permission data assigned to the specified
-	 * location, or <tt>null</tt> if that location has not been assigned any
-	 * permission data.
+	 * @return The permission data assigned to the specified location, or
+	 *         <code>null</code> if that location has not been assigned any
+	 *         permission data.
 	 */
 	public String[] getPermissionData(String location) {
 		if (location == null)
@@ -73,14 +72,14 @@ public class PermissionData {
 	}
 
 	/**
-	 * Assigns the specified permission data to the specified
-	 * location.
+	 * Assigns the specified permission data to the specified location.
 	 *
-	 * @param location The location that will be assigned the
-	 * permissions.
-	 * The location can be <tt>null</tt> for the default permission data.
-	 * @param data The permission data to be assigned, or <tt>null</tt>
-	 * if the specified location is to be removed from persistent storaqe.
+	 * @param location The location that will be assigned the permissions. The
+	 *                 location can be <code>null</code> for the default permission
+	 *                 data.
+	 * @param data     The permission data to be assigned, or <code>null</code> if
+	 *                 the specified location is to be removed from persistent
+	 *                 storaqe.
 	 */
 	public void setPermissionData(String location, String[] data) {
 		if (location == null) {
@@ -98,6 +97,7 @@ public class PermissionData {
 
 	/**
 	 * Persists the array of encoded ConditionalPermissionInfo strings
+	 * 
 	 * @param infos an array of encoded ConditionalPermissionInfo strings
 	 */
 	public void saveConditionalPermissionInfos(String[] infos) {
@@ -107,8 +107,9 @@ public class PermissionData {
 
 	/**
 	 * Returns the persistent array of encoded ConditionalPermissionInfo strings
-	 * @return an array of encoded ConditionalPermissionInfo strings or null
-	 * if none exist in persistent storage.
+	 * 
+	 * @return an array of encoded ConditionalPermissionInfo strings or null if none
+	 *         exist in persistent storage.
 	 */
 	public String[] getConditionalPermissionInfos() {
 		return condPermInfos;

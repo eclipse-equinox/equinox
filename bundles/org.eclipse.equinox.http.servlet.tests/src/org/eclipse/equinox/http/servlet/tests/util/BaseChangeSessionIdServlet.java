@@ -19,7 +19,6 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
 public class BaseChangeSessionIdServlet extends BaseServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -28,9 +27,7 @@ public class BaseChangeSessionIdServlet extends BaseServlet {
 	}
 
 	@Override
-	protected void service(
-			HttpServletRequest request, HttpServletResponse response)
-		throws IOException {
+	protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 		request.getSession(true);
 

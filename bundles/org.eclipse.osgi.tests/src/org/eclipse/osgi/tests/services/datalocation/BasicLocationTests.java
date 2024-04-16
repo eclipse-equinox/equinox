@@ -13,6 +13,14 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.datalocation;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,14 +33,20 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.SortedMap;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.tests.harness.CoreTest;
+import junit.framework.AssertionFailedError;
+import org.eclipse.core.runtime.Platform.OS;
 import org.eclipse.equinox.log.SynchronousLogListener;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.location.EquinoxLocations;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
@@ -41,33 +55,32 @@ import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogReaderService;
 import org.osgi.util.tracker.ServiceTracker;
 
-public class BasicLocationTests extends CoreTest {
+public class BasicLocationTests {
+
+	@Rule
+	public TestName testName = new TestName();
 
 	String prefix = "";
-	boolean windows = Platform.getOS().equals(Platform.OS_WIN32);
 	ServiceTracker<Location, Location> configLocationTracker = null;
 	ServiceTracker<Location, Location> instanceLocationTracker = null;
 
-	public BasicLocationTests(String name) {
-		super(name);
-	}
+	@Before
+	public void setUp() throws Exception {
+		prefix = OS.isWindows() ? "c:" : "";
 
-	protected void setUp() throws Exception {
-		super.setUp();
-
-		prefix = windows ? "c:" : "";
-
-		configLocationTracker = new ServiceTracker<>(OSGiTestsActivator.getContext(), OSGiTestsActivator.getContext().createFilter(Location.CONFIGURATION_FILTER), null);
-		instanceLocationTracker = new ServiceTracker<>(OSGiTestsActivator.getContext(), OSGiTestsActivator.getContext().createFilter(Location.INSTANCE_FILTER), null);
+		configLocationTracker = new ServiceTracker<>(OSGiTestsActivator.getContext(),
+				OSGiTestsActivator.getContext().createFilter(Location.CONFIGURATION_FILTER), null);
+		instanceLocationTracker = new ServiceTracker<>(OSGiTestsActivator.getContext(),
+				OSGiTestsActivator.getContext().createFilter(Location.INSTANCE_FILTER), null);
 
 		configLocationTracker.open();
 		instanceLocationTracker.open();
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		configLocationTracker.close();
 		instanceLocationTracker.close();
-		super.tearDown();
 	}
 
 	private void checkSlashes(Map<String, Location> locations) {
@@ -85,11 +98,20 @@ public class BasicLocationTests extends CoreTest {
 			assertEquals(scheme, url.getProtocol());
 		if (!url.getProtocol().equals("file"))
 			return;
-		assertTrue(url.toExternalForm() + " should " + (trailing ? "" : "not") + " have a trailing slash", url.getFile().endsWith("/") == trailing);
-		if (windows)
-			assertTrue(url.toExternalForm() + " should " + (leading ? "" : "not") + " have a leading slash", url.getFile().startsWith("/") == leading);
+		assertTrue(url.toExternalForm() + " should " + (trailing ? "" : "not") + " have a trailing slash",
+				url.getFile().endsWith("/") == trailing);
+		if (OS.isWindows())
+			assertTrue(url.toExternalForm() + " should " + (leading ? "" : "not") + " have a leading slash",
+					url.getFile().startsWith("/") == leading);
 	}
 
+	private void fail(String message, Throwable exception) {
+		AssertionFailedError error = new AssertionFailedError(message);
+		error.initCause(exception);
+		throw error;
+	}
+
+	@Test
 	public void testCreateLocation01() {
 		Location configLocation = configLocationTracker.getService();
 		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testCreateLocation01");
@@ -107,6 +129,7 @@ public class BasicLocationTests extends CoreTest {
 		testLocation.release();
 	}
 
+	@Test
 	public void testCreateLocation02() {
 		Location configLocation = configLocationTracker.getService();
 		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testCreateLocation02");
@@ -116,15 +139,13 @@ public class BasicLocationTests extends CoreTest {
 		} catch (Throwable t) {
 			fail("Failed to set location", t);
 		}
-		try {
+		assertThrows("Should not be able to lock read-only location", IOException.class, () -> {
 			assertTrue("Could not lock location", testLocation.lock());
 			testLocation.release();
-			fail("Should not be able to lock read-only location");
-		} catch (IOException e) {
-			// expected
-		}
+		});
 	}
 
+	@Test
 	public void testCreateLocation03() {
 		Location configLocation = configLocationTracker.getService();
 		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testCreateLocation03");
@@ -142,6 +163,7 @@ public class BasicLocationTests extends CoreTest {
 		testLocation.release();
 	}
 
+	@Test
 	public void testCreateLocation04() {
 		Location configLocation = configLocationTracker.getService();
 		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testCreateLocation04");
@@ -149,12 +171,13 @@ public class BasicLocationTests extends CoreTest {
 		try {
 			testLocation.set(testLocationFile.toURL(), true);
 			testLocation.release();
-			fail("Should not be able to lock read-only location");
+			Assert.fail("Should not be able to lock read-only location");
 		} catch (Throwable t) {
 			// expected
 		}
 	}
 
+	@Test
 	public void testCreateLocation05() {
 		Location configLocation = configLocationTracker.getService();
 		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testCreateLocation01");
@@ -184,6 +207,7 @@ public class BasicLocationTests extends CoreTest {
 
 	private static final String INSTANCE_DATA_AREA_PREFIX = ".metadata/.plugins/"; //$NON-NLS-1$
 
+	@Test
 	public void testLocationDataArea01() {
 		Location instance = instanceLocationTracker.getService();
 		doAllTestLocationDataArea(instance, INSTANCE_DATA_AREA_PREFIX);
@@ -193,34 +217,31 @@ public class BasicLocationTests extends CoreTest {
 	}
 
 	private void doAllTestLocationDataArea(Location location, String dataAreaPrefix) {
-		doTestLocateDataArea(location, dataAreaPrefix, getName());
+		doTestLocateDataArea(location, dataAreaPrefix, testName.getMethodName());
 		doTestLocateDataArea(location, dataAreaPrefix, "");
 		doTestLocateDataArea(location, dataAreaPrefix, "test/multiple/paths");
 		doTestLocateDataArea(location, dataAreaPrefix, "test/multiple/../paths");
 		doTestLocateDataArea(location, dataAreaPrefix, "test\\multiple\\paths");
 		doTestLocateDataArea(location, dataAreaPrefix, "/test/begin/slash");
 
-		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/" + getName());
+		File testLocationFile = OSGiTestsActivator.getContext()
+				.getDataFile("testLocations/" + testName.getMethodName());
 		Location createdLocation = location.createLocation(null, null, false);
 		try {
 			createdLocation.set(testLocationFile.toURL(), false);
 		} catch (Exception e) {
 			fail("Failed to set location", e);
 		}
-		doTestLocateDataArea(createdLocation, dataAreaPrefix, getName());
+		doTestLocateDataArea(createdLocation, dataAreaPrefix, testName.getMethodName());
 		doTestLocateDataArea(createdLocation, dataAreaPrefix, "");
 		doTestLocateDataArea(createdLocation, dataAreaPrefix, "test/multiple/paths");
 		doTestLocateDataArea(createdLocation, dataAreaPrefix, "test/multiple/../paths");
 		doTestLocateDataArea(location, dataAreaPrefix, "test\\multiple\\paths");
 		doTestLocateDataArea(location, dataAreaPrefix, "/test/begin/slash");
 
-		createdLocation = location.createLocation(null, null, false);
-		try {
-			createdLocation.getDataArea("shouldFail");
-			fail("expected failure when location is not set");
-		} catch (IOException e) {
-			// expected;
-		}
+		Location recreatedLocation = location.createLocation(null, null, false);
+		assertThrows("expected failure when location is not set", IOException.class,
+				() -> recreatedLocation.getDataArea("shouldFail"));
 	}
 
 	private void doTestLocateDataArea(Location location, String dataAreaPrefix, String namespace) {
@@ -237,12 +258,15 @@ public class BasicLocationTests extends CoreTest {
 		if (namespace.startsWith("/")) {
 			namespace = namespace.substring(1);
 		}
-		assertTrue("Data area is not the expected value: " + dataArea.toExternalForm(), dataArea.toExternalForm().endsWith(dataAreaPrefix + namespace));
+		assertTrue("Data area is not the expected value: " + dataArea.toExternalForm(),
+				dataArea.toExternalForm().endsWith(dataAreaPrefix + namespace));
 	}
 
+	@Test
 	public void testSetLocationWithEmptyLockFile() {
 		Location configLocation = configLocationTracker.getService();
-		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testSetLocationWithEmptyLockFile"); //$NON-NLS-1$
+		File testLocationFile = OSGiTestsActivator.getContext()
+				.getDataFile("testLocations/testSetLocationWithEmptyLockFile"); //$NON-NLS-1$
 		Location testLocation = configLocation.createLocation(null, null, false);
 		try {
 			testLocation.set(testLocationFile.toURL(), true, ""); //$NON-NLS-1$
@@ -260,9 +284,11 @@ public class BasicLocationTests extends CoreTest {
 		testLocation.release();
 	}
 
+	@Test
 	public void testSetLocationWithRelLockFile() {
 		Location configLocation = configLocationTracker.getService();
-		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testSetLocationWithRelLockFile"); //$NON-NLS-1$
+		File testLocationFile = OSGiTestsActivator.getContext()
+				.getDataFile("testLocations/testSetLocationWithRelLockFile"); //$NON-NLS-1$
 		Location testLocation = configLocation.createLocation(null, null, false);
 		try {
 			testLocation.set(testLocationFile.toURL(), true, ".mocklock"); //$NON-NLS-1$
@@ -279,9 +305,11 @@ public class BasicLocationTests extends CoreTest {
 		testLocation.release();
 	}
 
+	@Test
 	public void testSetLocationWithAbsLockFile() {
 		Location configLocation = configLocationTracker.getService();
-		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testSetLocationWithAbsLockFile"); //$NON-NLS-1$
+		File testLocationFile = OSGiTestsActivator.getContext()
+				.getDataFile("testLocations/testSetLocationWithAbsLockFile"); //$NON-NLS-1$
 		File testLocationLockFile = OSGiTestsActivator.getContext().getDataFile("testLocations/mock.lock"); //$NON-NLS-1$
 		assertTrue(testLocationLockFile.isAbsolute());
 		Location testLocation = configLocation.createLocation(null, null, false);
@@ -300,6 +328,7 @@ public class BasicLocationTests extends CoreTest {
 		assertTrue("The lock file could not be removed!", testLocationLockFile.delete()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testSlashes() throws BundleException, InvalidSyntaxException {
 		Map<String, String> fwkConfig = new HashMap<>();
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
@@ -328,13 +357,15 @@ public class BasicLocationTests extends CoreTest {
 		return locations;
 	}
 
-	private static void addLocation(BundleContext context, String filter, Map<String, Location> locations) throws InvalidSyntaxException {
+	private static void addLocation(BundleContext context, String filter, Map<String, Location> locations)
+			throws InvalidSyntaxException {
 		Collection<ServiceReference<Location>> locationRefs = context.getServiceReferences(Location.class, filter);
 		if (!locationRefs.isEmpty()) {
 			locations.put(filter, context.getService(locationRefs.iterator().next()));
 		}
 	}
 
+	@Test
 	public void testSchemes() throws Exception {
 		Map<String, String> fwkConfig = new HashMap<>();
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
@@ -357,6 +388,7 @@ public class BasicLocationTests extends CoreTest {
 		}
 	}
 
+	@Test
 	public void testNone() throws Exception {
 		Map<String, String> fwkConfig = new HashMap<>();
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
@@ -372,12 +404,14 @@ public class BasicLocationTests extends CoreTest {
 			Map<String, Location> locations = getLocations(equinox);
 			assertNull("User location should be null", locations.get(Location.USER_FILTER));
 			assertNull("Instance location should be null", locations.get(Location.INSTANCE_FILTER));
-			// TODO assertNull("Configuration location should be null", locations.get(Location.CONFIGURATION_FILTER));
+			// TODO assertNull("Configuration location should be null",
+			// locations.get(Location.CONFIGURATION_FILTER));
 		} finally {
 			equinox.stop();
 		}
 	}
 
+	@Test
 	public void testNoDefault() throws Exception {
 		Map<String, String> fwkConfig = new HashMap<>();
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
@@ -398,6 +432,7 @@ public class BasicLocationTests extends CoreTest {
 		}
 	}
 
+	@Test
 	public void testSetUrl() throws Exception {
 		Map<String, String> fwkConfig = new HashMap<>();
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
@@ -431,6 +466,7 @@ public class BasicLocationTests extends CoreTest {
 		}
 	}
 
+	@Test
 	public void testUserDir() throws Exception {
 		Map<String, String> fwkConfig = new HashMap<>();
 		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "@user.dir");
@@ -452,6 +488,7 @@ public class BasicLocationTests extends CoreTest {
 		}
 	}
 
+	@Test
 	public void testUserHome() throws Exception {
 		Map<String, String> fwkConfig = new HashMap<>();
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
@@ -474,9 +511,10 @@ public class BasicLocationTests extends CoreTest {
 
 	}
 
+	@Test
 	public void testUNC() throws Exception {
-		if (!windows)
-			return;
+		assumeTrue("only relevant on Windows", OS.isWindows());
+
 		Map<String, String> fwkConfig = new HashMap<>();
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
 		fwkConfig.put(EquinoxLocations.PROP_USER_AREA, "//server/share/a");
@@ -497,11 +535,12 @@ public class BasicLocationTests extends CoreTest {
 		}
 	}
 
+	@Test
 	public void testDebugLogOnGetURL() throws Exception {
 		Properties debugOptions = new Properties();
 		debugOptions.put("org.eclipse.osgi/debug/location", "true");
-		File debugOptionsFile = OSGiTestsActivator.getContext().getDataFile(getName() + ".options");
-		debugOptions.store(new FileOutputStream(debugOptionsFile), getName());
+		File debugOptionsFile = OSGiTestsActivator.getContext().getDataFile(testName.getMethodName() + ".options");
+		debugOptions.store(new FileOutputStream(debugOptionsFile), testName.getMethodName());
 		Map<String, String> fwkConfig = new HashMap<>();
 		fwkConfig.put(EquinoxLocations.PROP_CONFIG_AREA + EquinoxLocations.READ_ONLY_AREA_SUFFIX, "true");
 		fwkConfig.put(EquinoxLocations.PROP_INSTALL_AREA, "file:" + prefix + "/g");
@@ -527,6 +566,7 @@ public class BasicLocationTests extends CoreTest {
 	}
 
 	private LogReaderService getLogReaderService(Equinox equinox) {
-		return equinox.getBundleContext().getService(equinox.getBundleContext().getServiceReference(LogReaderService.class));
+		return equinox.getBundleContext()
+				.getService(equinox.getBundleContext().getServiceReference(LogReaderService.class));
 	}
 }

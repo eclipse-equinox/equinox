@@ -16,8 +16,9 @@ package org.eclipse.osgi.internal.provisional.service.security;
 import org.eclipse.osgi.signedcontent.SignedContent;
 
 /**
- * An event that is fired when an AuthorizationEngine implementation makes
- * a decision.
+ * An event that is fired when an AuthorizationEngine implementation makes a
+ * decision.
+ * 
  * @since 3.4
  */
 public class AuthorizationEvent {
@@ -39,9 +40,10 @@ public class AuthorizationEvent {
 
 	/**
 	 * Create a new AuthorizationEvent
-	 * @param result - the result code
-	 * @param content - the signed content
-	 * @param context - operation specific context
+	 * 
+	 * @param result   - the result code
+	 * @param content  - the signed content
+	 * @param context  - operation specific context
 	 * @param severity - severity code
 	 */
 	public AuthorizationEvent(int result, SignedContent content, Object context, int severity) {
@@ -53,6 +55,7 @@ public class AuthorizationEvent {
 
 	/**
 	 * Get the result code
+	 * 
 	 * @return - the result code
 	 */
 	public int getResult() {
@@ -61,6 +64,7 @@ public class AuthorizationEvent {
 
 	/**
 	 * get the severity
+	 * 
 	 * @return - the severity
 	 */
 	public int getSeverity() {
@@ -69,6 +73,7 @@ public class AuthorizationEvent {
 
 	/**
 	 * Get the SignedContent object being evaluated
+	 * 
 	 * @return - SignedContent
 	 */
 	public SignedContent getSignedContent() {
@@ -77,6 +82,7 @@ public class AuthorizationEvent {
 
 	/**
 	 * Get the operation specific context
+	 * 
 	 * @return - context
 	 */
 	public Object getContext() {

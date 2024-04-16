@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2015 IBM Corporation and others.
+ * Copyright (c) 2004, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,6 +19,7 @@ import java.io.*;
 import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.core.internal.preferences.exchange.IProductPreferencesService;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.*;
@@ -36,7 +37,7 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class DefaultPreferences extends EclipsePreferences {
 	// cache which nodes have been loaded from disk
-	private static Set<String> loadedNodes = Collections.synchronizedSet(new HashSet<String>());
+	private static final Set<String> LOADED_NODES = ConcurrentHashMap.newKeySet();
 	private static final String KEY_PREFIX = "%"; //$NON-NLS-1$
 	private static final String KEY_DOUBLE_PREFIX = "%%"; //$NON-NLS-1$
 	private static final IPath NL_DIR = IPath.fromOSString("$nl$"); //$NON-NLS-1$
@@ -49,15 +50,12 @@ public class DefaultPreferences extends EclipsePreferences {
 	private Thread initializingThread;
 
 	// cached values
-	private String qualifier;
-	private int segmentCount;
+	private final String qualifier;
+	private final int segmentCount;
 	private WeakReference<Object> pluginReference;
 
-	public static String pluginCustomizationFile = null;
+	static String pluginCustomizationFile = null;
 
-	/**
-	 * Default constructor for this class.
-	 */
 	public DefaultPreferences() {
 		this(null, null);
 	}
@@ -70,17 +68,13 @@ public class DefaultPreferences extends EclipsePreferences {
 	private DefaultPreferences(EclipsePreferences parent, String name) {
 		super(parent, name);
 
-		if (parent instanceof DefaultPreferences)
-			this.pluginReference = ((DefaultPreferences) parent).pluginReference;
-
+		if (parent instanceof DefaultPreferences defaultPreferences) {
+			this.pluginReference = defaultPreferences.pluginReference;
+		}
 		// cache the segment count
 		String path = absolutePath();
 		segmentCount = getSegmentCount(path);
-		if (segmentCount < 2)
-			return;
-
-		// cache the qualifier
-		qualifier = getSegment(path, 1);
+		qualifier = segmentCount > 1 ? getSegment(path, 1) : null; // cache the qualifier
 	}
 
 	/*
@@ -90,22 +84,25 @@ public class DefaultPreferences extends EclipsePreferences {
 	 */
 	private void applyBundleDefaults() {
 		Bundle bundle = PreferencesOSGiUtils.getDefault().getBundle(name());
-		if (bundle == null)
+		if (bundle == null) {
 			return;
+		}
 		URL url = FileLocator.find(bundle,
 				IPath.fromOSString(IPreferencesConstants.PREFERENCES_DEFAULT_OVERRIDE_FILE_NAME), null);
 		if (url == null) {
-			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
+			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
 				PrefsMessages
 						.message("Preference default override file not found for bundle: " + bundle.getSymbolicName()); //$NON-NLS-1$
+			}
 			return;
 		}
 		URL transURL = FileLocator.find(bundle,
 				NL_DIR.append(IPreferencesConstants.PREFERENCES_DEFAULT_OVERRIDE_BASE_NAME)
 						.addFileExtension(PROPERTIES_FILE_EXTENSION),
 				null);
-		if (transURL == null && EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
+		if (transURL == null && EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
 			PrefsMessages.message("Preference translation file not found for bundle: " + bundle.getSymbolicName()); //$NON-NLS-1$
+		}
 		applyDefaults(name(), loadProperties(url), loadProperties(transURL));
 	}
 
@@ -114,8 +111,9 @@ public class DefaultPreferences extends EclipsePreferences {
 	 * command-line.
 	 */
 	private void applyCommandLineDefaults() {
-		if (commandLineCustomization != null)
+		if (commandLineCustomization != null) {
 			applyDefaults(null, commandLineCustomization, null);
+		}
 	}
 
 	/*
@@ -126,8 +124,9 @@ public class DefaultPreferences extends EclipsePreferences {
 		for (Enumeration<?> e = defaultValues.keys(); e.hasMoreElements();) {
 			String fullKey = (String) e.nextElement();
 			String value = defaultValues.getProperty(fullKey);
-			if (value == null)
+			if (value == null) {
 				continue;
+			}
 			String localQualifier = id;
 			String fullPath = fullKey;
 			int firstIndex = fullKey.indexOf(PATH_SEPARATOR);
@@ -141,10 +140,11 @@ public class DefaultPreferences extends EclipsePreferences {
 			String key = splitPath[1];
 			if (name().equals(localQualifier)) {
 				value = translatePreference(value, translations);
-				if (EclipsePreferences.DEBUG_PREFERENCE_SET)
+				if (EclipsePreferences.DEBUG_PREFERENCE_SET) {
 					PrefsMessages.message("Setting default preference: " //$NON-NLS-1$
-							+ (IPath.fromOSString(absolutePath()).append(childPath).append(key)) + '=' + value);
-				((EclipsePreferences) internalNode(childPath.toString(), false, null)).internalPut(key, value);
+							+ IPath.fromOSString(absolutePath()).append(childPath).append(key) + '=' + value);
+				}
+				((EclipsePreferences) internalNode(childPath, false, null)).internalPut(key, value);
 			}
 		}
 	}
@@ -154,28 +154,27 @@ public class DefaultPreferences extends EclipsePreferences {
 	}
 
 	private boolean containsNode(Properties props, IPath path) {
-		if (props == null)
+		if (props == null) {
 			return false;
-		for (Enumeration<?> e = props.keys(); e.hasMoreElements();) {
-			String fullKey = (String) e.nextElement();
-			if (props.getProperty(fullKey) == null)
-				continue;
+		}
+		return props.entrySet().stream().filter(e -> e.getValue() != null).anyMatch(e -> {
+			String fullKey = (String) e.getKey();
 			// remove last segment which stands for key
 			IPath nodePath = IPath.fromOSString(fullKey).removeLastSegments(1);
-			if (path.isPrefixOf(nodePath))
-				return true;
-		}
-		return false;
+			return path.isPrefixOf(nodePath);
+		});
 	}
 
 	@Override
 	public boolean nodeExists(String path) throws BackingStoreException {
 		// use super implementation for empty and absolute paths
-		if (path.length() == 0 || path.charAt(0) == IPath.SEPARATOR)
+		if (path.length() == 0 || path.charAt(0) == IPath.SEPARATOR) {
 			return super.nodeExists(path);
+		}
 		// if the node already exists, nothing more to do
-		if (super.nodeExists(path))
+		if (super.nodeExists(path)) {
 			return true;
+		}
 		// if the node does not exist, maybe it has not been loaded yet
 		initializeCustomizations();
 		// scope based path is a path relative to the "/default" node; this is the path
@@ -185,7 +184,7 @@ public class DefaultPreferences extends EclipsePreferences {
 				|| containsNode(commandLineCustomization, scopeBasedPath);
 	}
 
-	private void initializeCustomizations() {
+	private static void initializeCustomizations() {
 		// prime the cache the first time
 		if (productCustomization == null) {
 			BundleContext context = Activator.getContext();
@@ -202,17 +201,20 @@ public class DefaultPreferences extends EclipsePreferences {
 			} else {
 				PrefsMessages.message("Product-specified preferences called before plugin is started"); //$NON-NLS-1$
 			}
-			if (productCustomization == null)
+			if (productCustomization == null) {
 				productCustomization = new Properties();
+			}
 		}
 		if (commandLineCustomization == null) {
 			String filename = pluginCustomizationFile;
 			if (filename == null) {
-				if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
+				if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
 					PrefsMessages.message("Command-line preferences customization file not specified."); //$NON-NLS-1$
+				}
 			} else {
-				if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
+				if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
 					PrefsMessages.message("Using command-line preference customization file: " + filename); //$NON-NLS-1$
+				}
 				commandLineCustomization = loadProperties(filename);
 			}
 		}
@@ -229,8 +231,9 @@ public class DefaultPreferences extends EclipsePreferences {
 	 */
 	private void applyRuntimeDefaults() {
 		WeakReference<Object> ref = PreferencesService.getDefault().applyRuntimeDefaults(name(), pluginReference);
-		if (ref != null)
+		if (ref != null) {
 			pluginReference = ref;
+		}
 	}
 
 	/*
@@ -240,8 +243,9 @@ public class DefaultPreferences extends EclipsePreferences {
 	 * primary feature's plug-in directory.
 	 */
 	private void applyProductDefaults() {
-		if (!productCustomization.isEmpty())
+		if (!productCustomization.isEmpty()) {
 			applyDefaults(null, productCustomization, productTranslation);
+		}
 	}
 
 	@Override
@@ -252,14 +256,16 @@ public class DefaultPreferences extends EclipsePreferences {
 	@Override
 	protected IEclipsePreferences getLoadLevel() {
 		if (loadLevel == null) {
-			if (qualifier == null)
+			if (qualifier == null) {
 				return null;
+			}
 			// Make it relative to this node rather than navigating to it from the root.
 			// Walk backwards up the tree starting at this node.
 			// This is important to avoid a chicken/egg thing on startup.
 			EclipsePreferences node = this;
-			for (int i = 2; i < segmentCount; i++)
+			for (int i = 2; i < segmentCount; i++) {
 				node = (EclipsePreferences) node.parent();
+			}
 			loadLevel = node;
 		}
 		return loadLevel;
@@ -272,7 +278,7 @@ public class DefaultPreferences extends EclipsePreferences {
 
 	@Override
 	protected boolean isAlreadyLoaded(IEclipsePreferences node) {
-		return loadedNodes.contains(node.name());
+		return LOADED_NODES.contains(node.name());
 	}
 
 	@Override
@@ -299,8 +305,8 @@ public class DefaultPreferences extends EclipsePreferences {
 		if (isInitializingBundleDefaults()) {
 			String relativePath = getScopeRelativePath(absolutePath());
 			if (relativePath != null) {
-				Preferences node = PreferencesService.getDefault().getRootNode().node(BundleDefaultsScope.SCOPE)
-						.node(relativePath);
+				IEclipsePreferences rootNode = PreferencesService.getDefault().getRootNode();
+				Preferences node = rootNode.node(BundleDefaultsScope.SCOPE).node(relativePath);
 				node.put(key, newValue);
 			}
 		}
@@ -314,8 +320,7 @@ public class DefaultPreferences extends EclipsePreferences {
 	 */
 	private void setInitializingBundleDefaults() {
 		IEclipsePreferences node = getLoadLevel();
-		if (node instanceof DefaultPreferences) {
-			DefaultPreferences loader = (DefaultPreferences) node;
+		if (node instanceof DefaultPreferences loader) {
 			loader.initializingThread = Thread.currentThread();
 		}
 	}
@@ -327,8 +332,7 @@ public class DefaultPreferences extends EclipsePreferences {
 	 */
 	private void clearInitializingBundleDefaults() {
 		IEclipsePreferences node = getLoadLevel();
-		if (node instanceof DefaultPreferences) {
-			DefaultPreferences loader = (DefaultPreferences) node;
+		if (node instanceof DefaultPreferences loader) {
 			loader.initializingThread = null;
 		}
 	}
@@ -340,8 +344,7 @@ public class DefaultPreferences extends EclipsePreferences {
 	 */
 	private boolean isInitializingBundleDefaults() {
 		IEclipsePreferences node = getLoadLevel();
-		if (node instanceof DefaultPreferences) {
-			DefaultPreferences loader = (DefaultPreferences) node;
+		if (node instanceof DefaultPreferences loader) {
 			return loader.initializingThread == Thread.currentThread();
 		}
 		return false;
@@ -353,65 +356,49 @@ public class DefaultPreferences extends EclipsePreferences {
 	 */
 	protected static String getScopeRelativePath(String absolutePath) {
 		// shouldn't happen but handle empty or root
-		if (absolutePath.length() < 2)
+		if (absolutePath.length() < 2) {
 			return null;
+		}
 		int index = absolutePath.indexOf('/', 1);
-		if (index == -1 || index + 1 >= absolutePath.length())
+		if (index == -1 || index + 1 >= absolutePath.length()) {
 			return null;
+		}
 		return absolutePath.substring(index + 1);
 	}
 
 	private Properties loadProperties(URL url) {
 		Properties result = new Properties();
-		if (url == null)
+		if (url == null) {
 			return result;
-		InputStream input = null;
-		try {
-			input = url.openStream();
+		}
+		try (InputStream input = url.openStream()) {
 			result.load(input);
 		} catch (IOException | IllegalArgumentException e) {
 			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
 				PrefsMessages.message("Problem opening stream to preference customization file: " + url); //$NON-NLS-1$
 				e.printStackTrace();
 			}
-		} finally {
-			if (input != null)
-				try {
-					input.close();
-				} catch (IOException e) {
-					// ignore
-				}
 		}
 		return result;
 	}
 
-	private Properties loadProperties(String filename) {
+	private static Properties loadProperties(String filename) {
 		Properties result = new Properties();
-		InputStream input = null;
-		try {
-			input = new BufferedInputStream(new FileInputStream(filename));
+		try (InputStream input = new FileInputStream(filename)) {
 			result.load(input);
 		} catch (FileNotFoundException e) {
-			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL)
+			if (EclipsePreferences.DEBUG_PREFERENCE_GENERAL) {
 				PrefsMessages.message("Preference customization file not found: " + filename); //$NON-NLS-1$
+			}
 		} catch (IOException | IllegalArgumentException e) {
-			String message = NLS.bind(PrefsMessages.preferences_loadException, filename);
-			IStatus status = new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, message, e);
-			RuntimeLog.log(status);
-		} finally {
-			if (input != null)
-				try {
-					input.close();
-				} catch (IOException e) {
-					// ignore
-				}
+			RuntimeLog.log(Status.error(NLS.bind(PrefsMessages.preferences_loadException, filename), e));
 		}
 		return result;
 	}
 
 	@Override
 	protected void loaded() {
-		loadedNodes.add(name());
+		LOADED_NODES.add(name());
 	}
 
 	@Override
@@ -424,8 +411,9 @@ public class DefaultPreferences extends EclipsePreferences {
 	 * translated version of this value (if one exists).
 	 */
 	private String translatePreference(String origValue, Properties props) {
-		if (props == null || origValue.startsWith(KEY_DOUBLE_PREFIX))
+		if (props == null || origValue.startsWith(KEY_DOUBLE_PREFIX)) {
 			return origValue;
+		}
 		if (origValue.startsWith(KEY_PREFIX)) {
 			String value = origValue.trim();
 			int ix = value.indexOf(" "); //$NON-NLS-1$

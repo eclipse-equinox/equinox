@@ -19,7 +19,6 @@ import java.util.Collection;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.event.*;
-import org.osgi.service.log.LogService;
 
 /**
  * A wrapper for EventHandlers. This class caches property values and performs
@@ -68,7 +67,7 @@ public class EventHandlerWrapper {
 				Collection<String> c = (Collection<String>) o;
 				topics = c.toArray(new String[c.size()]);
 			} catch (ArrayStoreException e) {
-				log.log(LogService.LOG_ERROR, NLS.bind(EventAdminMsg.EVENT_INVALID_HANDLER_TOPICS, o), e);
+				log.error(NLS.bind(EventAdminMsg.EVENT_INVALID_HANDLER_TOPICS, o), e);
 			}
 		}
 
@@ -82,7 +81,7 @@ public class EventHandlerWrapper {
 			try {
 				filter = context.createFilter((String) o);
 			} catch (InvalidSyntaxException e) {
-				log.log(LogService.LOG_ERROR, NLS.bind(EventAdminMsg.EVENT_INVALID_HANDLER_FILTER, o), e);
+				log.error(NLS.bind(EventAdminMsg.EVENT_INVALID_HANDLER_FILTER, o), e);
 				return false;
 			}
 		}
@@ -214,8 +213,7 @@ public class EventHandlerWrapper {
 				t = new LogTopicException(t);
 			}
 			// log/handle any Throwable thrown by the listener
-			log.log(LogService.LOG_ERROR,
-					NLS.bind(EventAdminMsg.EVENT_DISPATCH_HANDLER_EXCEPTION, event, handlerService), t);
+			log.error(NLS.bind(EventAdminMsg.EVENT_DISPATCH_HANDLER_EXCEPTION, event, handlerService), t);
 		}
 	}
 

@@ -13,25 +13,27 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.resolver;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.service.resolver.StateObjectFactory;
 import org.eclipse.osgi.tests.services.resolver.AbstractStateTest;
+import org.junit.Test;
 import org.osgi.framework.BundleException;
 
-
+@SuppressWarnings("deprecation") // StateObjectFactory.createBundleDescription()
 public class TestRFC79_004 extends AbstractStateTest {
-	public TestRFC79_004(String testName) {
-		super(testName);
-	}
 
 	BundleDescription bundle_1 = null;
 	BundleDescription bundle_2 = null;
 	BundleDescription bundle_3 = null;
 	BundleDescription bundle_4 = null;
 
-
+	@Test
 	public void testTest_004() {
 		State state = buildEmptyState();
 		StateObjectFactory sof = StateObjectFactory.defaultFactory;
@@ -40,23 +42,21 @@ public class TestRFC79_004 extends AbstractStateTest {
 		bundle_2 = create_bundle_2(sof);
 		bundle_3 = create_bundle_3(sof);
 		bundle_4 = create_bundle_4(sof);
-		//***************************************************
+		// ***************************************************
 		// stage a
 		// expect to pass =true
-		//***************************************************
+		// ***************************************************
 		addBundlesToState_a(state);
-		//***************************************************
+		// ***************************************************
 		try {
 			state.resolve();
 		} catch (Throwable t) {
-			fail("unexpected exception class=" + t.getClass().getName()
-					+ " message=" + t.getMessage());
+			fail("unexpected exception class=" + t.getClass().getName() + " message=" + t.getMessage());
 			return;
 		}
 		checkBundlesResolved_a();
 		checkWiring_a();
 	} // end of method
-
 
 	public void checkWiringState_1() {
 		ExportPackageDescription[] exports = bundle_1.getResolvedImports();
@@ -66,8 +66,10 @@ public class TestRFC79_004 extends AbstractStateTest {
 			String exportPackageName = export.getName();
 			assertNotNull("package name is null", exportPackageName);
 			if (exportPackageName.equals("org.apache.commons.logging")) {
-				assertNotNull("Package [org.apache.commons.logging] is not wired when it should be ", export.getExporter());
-				assertEquals("Package [org.apache.commons.logging] is wired incorrectly ", export.getExporter(), bundle_4);
+				assertNotNull("Package [org.apache.commons.logging] is not wired when it should be ",
+						export.getExporter());
+				assertEquals("Package [org.apache.commons.logging] is wired incorrectly ", export.getExporter(),
+						bundle_4);
 			} else if (exportPackageName.equals("org.apache.commons.io")) {
 				assertNotNull("Package [org.apache.commons.io] is not wired when it should be ", export.getExporter());
 				assertEquals("Package [org.apache.commons.io] is wired incorrectly ", export.getExporter(), bundle_4);
@@ -83,8 +85,10 @@ public class TestRFC79_004 extends AbstractStateTest {
 			String exportPackageName = export.getName();
 			assertNotNull("package name is null", exportPackageName);
 			if (exportPackageName.equals("org.apache.commons.logging")) {
-				assertNotNull("Package [org.apache.commons.logging] is not wired when it should be ", export.getExporter());
-				assertEquals("Package [org.apache.commons.logging] is wired incorrectly ", export.getExporter(), bundle_3);
+				assertNotNull("Package [org.apache.commons.logging] is not wired when it should be ",
+						export.getExporter());
+				assertEquals("Package [org.apache.commons.logging] is wired incorrectly ", export.getExporter(),
+						bundle_3);
 			} else if (exportPackageName.equals("org.apache.commons.io")) {
 				assertNotNull("Package [org.apache.commons.io] is not wired when it should be ", export.getExporter());
 				assertEquals("Package [org.apache.commons.io] is wired incorrectly ", export.getExporter(), bundle_3);
@@ -98,15 +102,12 @@ public class TestRFC79_004 extends AbstractStateTest {
 	public void checkWiringState_4() {
 	} // end method
 
-
-
 	public void checkWiring_a() {
 		checkWiringState_1();
 		checkWiringState_2();
 		checkWiringState_3();
 		checkWiringState_4();
 	} // end method
-
 
 	public void addBundlesToState_a(State state) {
 		boolean added = false;
@@ -120,14 +121,12 @@ public class TestRFC79_004 extends AbstractStateTest {
 		assertTrue("failed to add bundle ", added);
 	} // end method
 
-
 	public void checkBundlesResolved_a() {
 		assertTrue("unexpected bundle resolution state", bundle_1.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_2.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_3.isResolved());
 		assertTrue("unexpected bundle resolution state", bundle_4.isResolved());
 	} // end method
-
 
 	public BundleDescription create_bundle_1(StateObjectFactory sof) {
 		java.util.Dictionary dictionary_1 = new java.util.Properties();
@@ -148,7 +147,8 @@ public class TestRFC79_004 extends AbstractStateTest {
 		BundleDescription bundle = null;
 		dictionary_2.put("Bundle-ManifestVersion", "2");
 		dictionary_2.put("Bundle-SymbolicName", "B");
-		dictionary_2.put("Import-Package", "org.apache.commons.logging; version=2.0.0, org.apache.commons.io; version=\"[2.0.0, 2.0.0]\"");
+		dictionary_2.put("Import-Package",
+				"org.apache.commons.logging; version=2.0.0, org.apache.commons.io; version=\"[2.0.0, 2.0.0]\"");
 		try {
 			bundle = sof.createBundleDescription(dictionary_2, "bundle_2", 2);
 		} catch (BundleException be) {
@@ -162,7 +162,8 @@ public class TestRFC79_004 extends AbstractStateTest {
 		BundleDescription bundle = null;
 		dictionary_3.put("Bundle-ManifestVersion", "2");
 		dictionary_3.put("Bundle-SymbolicName", "ApacheCommons");
-		dictionary_3.put("Export-Package", "org.apache.commons.logging; org.apache.commons.io; version=2.0.0; uses:=\"org.apache.commons.logging,org.apache.commons.io\"");
+		dictionary_3.put("Export-Package",
+				"org.apache.commons.logging; org.apache.commons.io; version=2.0.0; uses:=\"org.apache.commons.logging,org.apache.commons.io\"");
 		try {
 			bundle = sof.createBundleDescription(dictionary_3, "bundle_3", 3);
 		} catch (BundleException be) {
@@ -176,7 +177,8 @@ public class TestRFC79_004 extends AbstractStateTest {
 		BundleDescription bundle = null;
 		dictionary_4.put("Bundle-ManifestVersion", "2");
 		dictionary_4.put("Bundle-SymbolicName", "ApacheCommons'");
-		dictionary_4.put("Export-Package", "org.apache.commons.logging; org.apache.commons.io; version=2.1.0; uses:=\"org.apache.commons.logging,org.apache.commons.io\"");
+		dictionary_4.put("Export-Package",
+				"org.apache.commons.logging; org.apache.commons.io; version=2.1.0; uses:=\"org.apache.commons.logging,org.apache.commons.io\"");
 		try {
 			bundle = sof.createBundleDescription(dictionary_4, "bundle_4", 4);
 		} catch (BundleException be) {
@@ -184,6 +186,5 @@ public class TestRFC79_004 extends AbstractStateTest {
 		}
 		return bundle;
 	} // end of method
-
 
 } // end of testcase

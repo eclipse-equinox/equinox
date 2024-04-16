@@ -33,7 +33,6 @@ import org.osgi.service.coordinator.CoordinationException;
 import org.osgi.service.coordinator.CoordinationPermission;
 import org.osgi.service.coordinator.Coordinator;
 import org.osgi.service.coordinator.Participant;
-import org.osgi.service.log.LogService;
 
 public class CoordinatorImpl implements Coordinator {
 	// IDs must be positive integers and monotonically increasing.
@@ -49,7 +48,8 @@ public class CoordinatorImpl implements Coordinator {
 	// Coordination IDs must be unique across all using bundles.
 	private static final Map<Long, CoordinationImpl> idToCoordination = new HashMap<>();
 	// Coordination participation must be tracked across all using bundles.
-	private static final Map<Participant, CoordinationImpl> participantToCoordination = Collections.synchronizedMap(new IdentityHashMap<Participant, CoordinationImpl>());
+	private static final Map<Participant, CoordinationImpl> participantToCoordination = Collections
+			.synchronizedMap(new IdentityHashMap<Participant, CoordinationImpl>());
 
 	private static ThreadLocal<WeakCoordinationStack> coordinationStack = new ThreadLocal<WeakCoordinationStack>() {
 		@Override
@@ -85,8 +85,12 @@ public class CoordinatorImpl implements Coordinator {
 
 		public void push(CoordinationImpl c) {
 			if (contains(c))
-				throw new CoordinationException(NLS.bind(Messages.CoordinationAlreadyExists, new Object[]{c.getName(), c.getId(), Thread.currentThread()}), c.getReferent(), CoordinationException.ALREADY_PUSHED);
-			c.setThreadAndEnclosingCoordination(Thread.currentThread(), coordinations.isEmpty() ? null : coordinations.getFirst());
+				throw new CoordinationException(
+						NLS.bind(Messages.CoordinationAlreadyExists,
+								new Object[] { c.getName(), c.getId(), Thread.currentThread() }),
+						c.getReferent(), CoordinationException.ALREADY_PUSHED);
+			c.setThreadAndEnclosingCoordination(Thread.currentThread(),
+					coordinations.isEmpty() ? null : coordinations.getFirst());
 			coordinations.addFirst(c);
 		}
 	}
@@ -131,7 +135,7 @@ public class CoordinatorImpl implements Coordinator {
 		// Override the requested timeout with the max timeout, if necessary.
 		if (maxTimeout != 0) {
 			if (timeout == 0 || maxTimeout < timeout) {
-				logTracker.log(LogService.LOG_WARNING, NLS.bind(Messages.MaximumTimeout, new Object[]{timeout, maxTimeout, name}));
+				logTracker.warn(NLS.bind(Messages.MaximumTimeout, new Object[] { timeout, maxTimeout, name }));
 				timeout = maxTimeout;
 			}
 		}
@@ -142,7 +146,8 @@ public class CoordinatorImpl implements Coordinator {
 		CoordinationReferent referent = new CoordinationReferent(coordination);
 		// Create a weak reference to the referent returned to the initiator. No other
 		// references to the initiator's referent must be maintained outside of this
-		// method. A strong reference to the CoordinationWeakReference must be maintained
+		// method. A strong reference to the CoordinationWeakReference must be
+		// maintained
 		// by the coordination in order to avoid garbage collection. It serves no other
 		// purpose. Just "set it and forget it".
 		coordination.reference = new CoordinationWeakReference(referent, coordination);
@@ -182,7 +187,8 @@ public class CoordinatorImpl implements Coordinator {
 			try {
 				checkPermission(CoordinationPermission.ADMIN, result.getName());
 			} catch (SecurityException e) {
-				logTracker.log(LogService.LOG_DEBUG, NLS.bind(Messages.GetCoordinationNotPermitted, new Object[]{Thread.currentThread(), result.getName(), result.getId()}), e);
+				logTracker.debug(NLS.bind(Messages.GetCoordinationNotPermitted,
+						new Object[] { Thread.currentThread(), result.getName(), result.getId() }), e);
 				result = null;
 			}
 		}
@@ -203,7 +209,8 @@ public class CoordinatorImpl implements Coordinator {
 					checkPermission(CoordinationPermission.ADMIN, coordination.getName());
 					result.add(coordination.getReferent());
 				} catch (SecurityException e) {
-					logTracker.log(LogService.LOG_DEBUG, NLS.bind(Messages.GetCoordinationNotPermitted, new Object[]{Thread.currentThread(), coordination.getName(), coordination.getId()}), e);
+					logTracker.debug(NLS.bind(Messages.GetCoordinationNotPermitted,
+							new Object[] { Thread.currentThread(), coordination.getName(), coordination.getId() }), e);
 				}
 			}
 		}
@@ -222,7 +229,8 @@ public class CoordinatorImpl implements Coordinator {
 	public Coordination pop() {
 		CoordinationWeakReference.processOrphanedCoordinations();
 		CoordinationImpl c = coordinationStack.get().peek();
-		if (c == null) return null;
+		if (c == null)
+			return null;
 		checkPermission(CoordinationPermission.INITIATE, c.getName());
 		return coordinationStack.get().pop().getReferent();
 	}
@@ -256,7 +264,7 @@ public class CoordinatorImpl implements Coordinator {
 	LogTracker getLogService() {
 		return logTracker;
 	}
-	
+
 	long getMaxTimeout() {
 		return maxTimeout;
 	}
@@ -266,7 +274,7 @@ public class CoordinatorImpl implements Coordinator {
 		try {
 			Timer.class.getMethod("purge", (Class<?>[]) null).invoke(timer, (Object[]) null); //$NON-NLS-1$
 		} catch (Exception e) {
-			logTracker.log(LogService.LOG_DEBUG, Messages.CanceledTaskNotPurged, e);
+			logTracker.debug(Messages.CanceledTaskNotPurged, e);
 		}
 	}
 
@@ -296,7 +304,8 @@ public class CoordinatorImpl implements Coordinator {
 	 * This procedure must occur when a coordination is being failed or ended.
 	 */
 	void terminate(CoordinationImpl coordination, List<Participant> participants) {
-		// A coordination has been terminated and needs to be removed from the thread local stack.
+		// A coordination has been terminated and needs to be removed from the thread
+		// local stack.
 		synchronized (this) {
 			synchronized (CoordinatorImpl.class) {
 				this.coordinations.remove(coordination);

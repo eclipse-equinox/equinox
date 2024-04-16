@@ -40,7 +40,8 @@ public class NativeCodeFinder {
 	public static final String EXTERNAL_LIB_PREFIX = "external:"; //$NON-NLS-1$
 	private final Generation generation;
 	private final Debug debug;
-	// This is only used to keep track of when the same native library is loaded more than once
+	// This is only used to keep track of when the same native library is loaded
+	// more than once
 	private final Collection<String> loadedNativeCode = new ArrayList<>(1);
 
 	public NativeCodeFinder(Generation generation) {
@@ -50,8 +51,8 @@ public class NativeCodeFinder {
 
 	/*
 	 * Maps an already mapped library name to additional library file extensions.
-	 * This is needed on platforms like AIX where .a and .so can be used as library file
-	 * extensions, but System.mapLibraryName only returns a single string.
+	 * This is needed on platforms like AIX where .a and .so can be used as library
+	 * file extensions, but System.mapLibraryName only returns a single string.
 	 */
 	public String[] mapLibraryNames(String mappedLibName) {
 		int extIndex = mappedLibName.lastIndexOf('.');
@@ -69,8 +70,10 @@ public class NativeCodeFinder {
 		String path = findLibrary0(libname);
 		if (path != null) {
 			synchronized (loadedNativeCode) {
-				if (loadedNativeCode.contains(path) || generation.getBundleInfo().getStorage().getConfiguration().COPY_NATIVES) {
-					// we must copy the library to a temp space to allow another class loader to load the library
+				if (loadedNativeCode.contains(path)
+						|| generation.getBundleInfo().getStorage().getConfiguration().COPY_NATIVES) {
+					// we must copy the library to a temp space to allow another class loader to
+					// load the library
 					String temp = generation.getBundleInfo().getStorage().copyToTempLibrary(generation, path);
 					if (temp != null)
 						path = temp;
@@ -84,7 +87,8 @@ public class NativeCodeFinder {
 
 	private String findLibrary0(String libname) {
 		String path = null;
-		List<ClassLoaderHook> hooks = generation.getBundleInfo().getStorage().getConfiguration().getHookRegistry().getClassLoaderHooks();
+		List<ClassLoaderHook> hooks = generation.getBundleInfo().getStorage().getConfiguration().getHookRegistry()
+				.getClassLoaderHooks();
 		for (ClassLoaderHook hook : hooks) {
 			path = hook.findLocalLibrary(generation, libname);
 			if (path != null) {
@@ -114,7 +118,8 @@ public class NativeCodeFinder {
 	}
 
 	private String searchEclipseVariants(String path) {
-		List<String> ECLIPSE_LIB_VARIANTS = generation.getBundleInfo().getStorage().getConfiguration().ECLIPSE_LIB_VARIANTS;
+		List<String> ECLIPSE_LIB_VARIANTS = generation.getBundleInfo().getStorage()
+				.getConfiguration().ECLIPSE_LIB_VARIANTS;
 		for (String variant : ECLIPSE_LIB_VARIANTS) {
 			BundleFile baseBundleFile = generation.getBundleFile();
 			BundleEntry libEntry = baseBundleFile.getEntry(variant + path);
@@ -123,10 +128,11 @@ public class NativeCodeFinder {
 				if (libFile == null)
 					return null;
 				// see bug 88697 - HP requires libraries to have executable permissions
-				if (org.eclipse.osgi.service.environment.Constants.OS_HPUX.equals(generation.getBundleInfo().getStorage().getConfiguration().getOS())) {
+				if (org.eclipse.osgi.service.environment.Constants.OS_HPUX
+						.equals(generation.getBundleInfo().getStorage().getConfiguration().getOS())) {
 					try {
 						// use the string array method in case there is a space in the path
-						Runtime.getRuntime().exec(new String[] {"chmod", "755", libFile.getAbsolutePath()}).waitFor(); //$NON-NLS-1$ //$NON-NLS-2$
+						Runtime.getRuntime().exec(new String[] { "chmod", "755", libFile.getAbsolutePath() }).waitFor(); //$NON-NLS-1$ //$NON-NLS-2$
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -164,13 +170,13 @@ public class NativeCodeFinder {
 		ModuleRevision revision = generation.getRevision();
 		ModuleWiring wiring = revision.getWiring();
 		if (wiring == null) {
-			// unresolved?  should not be possible
+			// unresolved? should not be possible
 			return Collections.emptyList();
 		}
 		if ((revision.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
 			List<ModuleWire> hosts = wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
 			if (hosts == null) {
-				// unresolved or invalid?  should not be possible
+				// unresolved or invalid? should not be possible
 				return Collections.emptyList();
 			}
 			if (!hosts.isEmpty()) {
@@ -184,7 +190,8 @@ public class NativeCodeFinder {
 			return Collections.emptyList();
 		}
 
-		// just taking the first paths for the revision, we sorted correctly when transforming to the requirement
+		// just taking the first paths for the revision, we sorted correctly when
+		// transforming to the requirement
 		for (ModuleWire moduleWire : nativeCode) {
 			if (moduleWire.getRequirement().getRevision().equals(revision)) {
 				@SuppressWarnings("unchecked")
@@ -192,9 +199,11 @@ public class NativeCodeFinder {
 						.get(REQUIREMENT_NATIVE_PATHS_ATTRIBUTE);
 				if (result != null)
 					return result;
-				// this must be a multi-clause Bundle-NativeCode header, need to check for the correct one in the index
+				// this must be a multi-clause Bundle-NativeCode header, need to check for the
+				// correct one in the index
 				try {
-					FilterImpl filter = FilterImpl.newInstance(moduleWire.getRequirement().getDirectives().get(NativeNamespace.REQUIREMENT_FILTER_DIRECTIVE));
+					FilterImpl filter = FilterImpl.newInstance(moduleWire.getRequirement().getDirectives()
+							.get(NativeNamespace.REQUIREMENT_FILTER_DIRECTIVE));
 					int index = -1;
 					Map<String, Object> capabilityAttrs = moduleWire.getCapability().getAttributes();
 					for (FilterImpl child : filter.getChildren()) {
@@ -228,7 +237,8 @@ public class NativeCodeFinder {
 			if (path.equals(libname)) {
 				if (nativePath.startsWith(NativeCodeFinder.EXTERNAL_LIB_PREFIX)) {
 					// references an external library; do variable substitution
-					String externalPath = generation.getBundleInfo().getStorage().getConfiguration().substituteVars(nativePath.substring(NativeCodeFinder.EXTERNAL_LIB_PREFIX.length()));
+					String externalPath = generation.getBundleInfo().getStorage().getConfiguration()
+							.substituteVars(nativePath.substring(NativeCodeFinder.EXTERNAL_LIB_PREFIX.length()));
 					File nativeFile = new File(externalPath);
 					return nativeFile.getAbsolutePath();
 				}

@@ -49,7 +49,7 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED extends Ba
 		@SuppressWarnings("serial")
 		class AServlet extends HttpServlet {
 
-			final ExecutorService	executor	= Executors.newCachedThreadPool();
+			final ExecutorService executor = Executors.newCachedThreadPool();
 
 			@Override
 			protected void doGet(HttpServletRequest req, HttpServletResponse resp) {

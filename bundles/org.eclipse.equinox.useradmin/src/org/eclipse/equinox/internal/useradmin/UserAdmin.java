@@ -15,7 +15,6 @@ package org.eclipse.equinox.internal.useradmin;
 
 import java.util.*;
 import org.osgi.framework.*;
-import org.osgi.service.log.LogService;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.PreferencesService;
 import org.osgi.service.useradmin.UserAdminEvent;
@@ -68,7 +67,7 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 			userAdminStore = new UserAdminStore(preferencesService, this, log);
 			userAdminStore.init();
 		} catch (Exception e) {
-			log.log(LogService.LOG_ERROR, UserAdminMsg.Backing_Store_Read_Exception, e);
+			log.error(UserAdminMsg.Backing_Store_Read_Exception, e);
 			throw e;
 		}
 	}
@@ -95,12 +94,12 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 	 * @return The newly created role, or <code>null</code> if a role with the given
 	 *         name already exists.
 	 *
-	 * @throws IllegalArgumentException if <tt>type</tt> is invalid.
+	 * @throws IllegalArgumentException if <code>type</code> is invalid.
 	 *
 	 * @throws SecurityException        If a security manager exists and the caller
 	 *                                  does not have the
-	 *                                  <tt>UserAdminPermission</tt> with name
-	 *                                  <tt>admin</tt>.
+	 *                                  <code>UserAdminPermission</code> with name
+	 *                                  <code>admin</code>.
 	 */
 	@Override
 	public org.osgi.service.useradmin.Role createRole(String name, int type) {
@@ -164,8 +163,8 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 	 *         UserAdmin and could be removed, otherwise <code>false</code>.
 	 *
 	 * @throws SecurityException If a security manager exists and the caller does
-	 *                           not have the <tt>UserAdminPermission</tt> with name
-	 *                           <tt>admin</tt>.
+	 *                           not have the <code>UserAdminPermission</code> with
+	 *                           name <code>admin</code>.
 	 */
 	@Override
 	public boolean removeRole(String name) {

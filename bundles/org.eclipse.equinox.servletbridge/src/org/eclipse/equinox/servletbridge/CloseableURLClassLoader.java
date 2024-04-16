@@ -321,7 +321,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		if (lastDot != -1) {
 			String packageName = name.substring(0, lastDot);
 			synchronized (pkgLock) {
-				Package pkg = getPackage(packageName);
+				Package pkg = getDefinedPackage(packageName);
 				if (pkg != null) {
 					checkForSealedPackage(pkg, packageName, manifest, connection.getJarFileURL());
 				} else {
@@ -417,7 +417,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 	@Override
 	public Enumeration<URL> findResources(final String name) throws IOException {
 		final List<URL> resources = new ArrayList<>();
-		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+		AccessController.doPrivileged(new PrivilegedAction<>() {
 			@Override
 			public Object run() {
 				synchronized (loaders) {

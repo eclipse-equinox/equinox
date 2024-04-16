@@ -22,7 +22,7 @@ import java.net.URL;
 import java.util.zip.ZipEntry;
 
 /**
- * A BundleEntry represented by a ZipEntry in a ZipFile.  The ZipBundleEntry
+ * A BundleEntry represented by a ZipEntry in a ZipFile. The ZipBundleEntry
  * class is used for bundles that are installed as a ZipFile on a file system.
  */
 public class ZipBundleEntry extends BundleEntry {
@@ -38,8 +38,9 @@ public class ZipBundleEntry extends BundleEntry {
 
 	/**
 	 * Constructs the BundleEntry using a ZipEntry.
+	 * 
 	 * @param bundleFile BundleFile object this entry is a member of
-	 * @param zipEntry ZipEntry object of this entry
+	 * @param zipEntry   ZipEntry object of this entry
 	 */
 	ZipBundleEntry(ZipEntry zipEntry, ZipBundleFile bundleFile) {
 		this.zipEntry = zipEntry;
@@ -79,8 +80,9 @@ public class ZipBundleEntry extends BundleEntry {
 
 	/**
 	 * Get the modification time for this BundleEntry.
-	 * <p>If the modification time has not been set,
-	 * this method will return <tt>-1</tt>.
+	 * <p>
+	 * If the modification time has not been set, this method will return
+	 * <code>-1</code>.
 	 *
 	 * @return last modification time.
 	 */
@@ -95,7 +97,7 @@ public class ZipBundleEntry extends BundleEntry {
 		try {
 			return new URL("jar:" + bundleFile.basefile.toURL() + "!/" + zipEntry.getName()); //$NON-NLS-1$//$NON-NLS-2$
 		} catch (MalformedURLException e) {
-			//This can not happen.
+			// This can not happen.
 			return null;
 		}
 	}
@@ -108,7 +110,7 @@ public class ZipBundleEntry extends BundleEntry {
 			if (file != null)
 				return file.toURL();
 		} catch (MalformedURLException e) {
-			//This can not happen.
+			// This can not happen.
 		}
 		return null;
 	}

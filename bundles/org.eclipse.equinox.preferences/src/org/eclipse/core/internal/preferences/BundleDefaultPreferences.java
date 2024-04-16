@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2015 IBM Corporation and others.
+ * Copyright (c) 2009, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,8 @@
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
-import java.util.*;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.preferences.*;
 
@@ -29,14 +30,11 @@ import org.eclipse.core.runtime.preferences.*;
  */
 public class BundleDefaultPreferences extends EclipsePreferences {
 
-	private static Set<String> loadedNodes = Collections.synchronizedSet(new HashSet<String>());
-	private String qualifier;
-	private int segmentCount;
+	private static final Set<String> LOADED_NODES = ConcurrentHashMap.newKeySet();
+	private final String qualifier;
+	private final int segmentCount;
 	private IEclipsePreferences loadLevel;
 
-	/*
-	 * Default constructor.
-	 */
 	public BundleDefaultPreferences() {
 		this(null, null);
 	}
@@ -46,30 +44,24 @@ public class BundleDefaultPreferences extends EclipsePreferences {
 		// cache the segment count
 		IPath path = IPath.fromOSString(absolutePath());
 		segmentCount = path.segmentCount();
-		if (segmentCount < 2)
-			return;
-
-		// cache the qualifier
-		String scope = path.segment(0);
-		if (BundleDefaultsScope.SCOPE.equals(scope))
-			qualifier = path.segment(1);
-
-		// cache the location
-		if (qualifier == null)
-			return;
+		qualifier = segmentCount > 1 && BundleDefaultsScope.SCOPE.equals(path.segment(0)) // cache the qualifier
+				? path.segment(1)
+				: null;
 	}
 
 	@Override
 	protected IEclipsePreferences getLoadLevel() {
 		if (loadLevel == null) {
-			if (qualifier == null)
+			if (qualifier == null) {
 				return null;
+			}
 			// Make it relative to this node rather than navigating to it from the root.
 			// Walk backwards up the tree starting at this node.
 			// This is important to avoid a chicken/egg thing on startup.
 			IEclipsePreferences node = this;
-			for (int i = 2; i < segmentCount; i++)
+			for (int i = 2; i < segmentCount; i++) {
 				node = (IEclipsePreferences) node.parent();
+			}
 			loadLevel = node;
 		}
 		return loadLevel;
@@ -77,12 +69,12 @@ public class BundleDefaultPreferences extends EclipsePreferences {
 
 	@Override
 	protected boolean isAlreadyLoaded(IEclipsePreferences node) {
-		return loadedNodes.contains(node.name());
+		return LOADED_NODES.contains(node.name());
 	}
 
 	@Override
 	protected void loaded() {
-		loadedNodes.add(name());
+		LOADED_NODES.add(name());
 	}
 
 	@Override

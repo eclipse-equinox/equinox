@@ -40,37 +40,44 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		if (methodsInitialized)
 			return;
 		try {
-			openConnectionMethod = URLStreamHandler.class.getDeclaredMethod("openConnection", new Class[] {URL.class}); //$NON-NLS-1$
+			openConnectionMethod = URLStreamHandler.class.getDeclaredMethod("openConnection", //$NON-NLS-1$
+					new Class[] { URL.class });
 			MultiplexingFactory.setAccessible(openConnectionMethod);
 
-			openConnectionProxyMethod = URLStreamHandler.class.getDeclaredMethod("openConnection", new Class[] {URL.class, Proxy.class}); //$NON-NLS-1$
+			openConnectionProxyMethod = URLStreamHandler.class.getDeclaredMethod("openConnection", //$NON-NLS-1$
+					new Class[] { URL.class, Proxy.class });
 			MultiplexingFactory.setAccessible(openConnectionProxyMethod);
 
-			equalsMethod = URLStreamHandler.class.getDeclaredMethod("equals", new Class[] {URL.class, URL.class}); //$NON-NLS-1$
+			equalsMethod = URLStreamHandler.class.getDeclaredMethod("equals", new Class[] { URL.class, URL.class }); //$NON-NLS-1$
 			MultiplexingFactory.setAccessible(equalsMethod);
 
 			getDefaultPortMethod = URLStreamHandler.class.getDeclaredMethod("getDefaultPort", (Class[]) null); //$NON-NLS-1$
 			MultiplexingFactory.setAccessible(getDefaultPortMethod);
 
-			getHostAddressMethod = URLStreamHandler.class.getDeclaredMethod("getHostAddress", new Class[] {URL.class}); //$NON-NLS-1$
+			getHostAddressMethod = URLStreamHandler.class.getDeclaredMethod("getHostAddress", //$NON-NLS-1$
+					new Class[] { URL.class });
 			MultiplexingFactory.setAccessible(getHostAddressMethod);
 
-			hashCodeMethod = URLStreamHandler.class.getDeclaredMethod("hashCode", new Class[] {URL.class}); //$NON-NLS-1$
+			hashCodeMethod = URLStreamHandler.class.getDeclaredMethod("hashCode", new Class[] { URL.class }); //$NON-NLS-1$
 			MultiplexingFactory.setAccessible(hashCodeMethod);
 
-			hostsEqualMethod = URLStreamHandler.class.getDeclaredMethod("hostsEqual", new Class[] {URL.class, URL.class}); //$NON-NLS-1$
+			hostsEqualMethod = URLStreamHandler.class.getDeclaredMethod("hostsEqual", //$NON-NLS-1$
+					new Class[] { URL.class, URL.class });
 			MultiplexingFactory.setAccessible(hostsEqualMethod);
 
-			parseURLMethod = URLStreamHandler.class.getDeclaredMethod("parseURL", new Class[] {URL.class, String.class, Integer.TYPE, Integer.TYPE}); //$NON-NLS-1$
+			parseURLMethod = URLStreamHandler.class.getDeclaredMethod("parseURL", //$NON-NLS-1$
+					new Class[] { URL.class, String.class, Integer.TYPE, Integer.TYPE });
 			MultiplexingFactory.setAccessible(parseURLMethod);
 
-			sameFileMethod = URLStreamHandler.class.getDeclaredMethod("sameFile", new Class[] {URL.class, URL.class}); //$NON-NLS-1$
+			sameFileMethod = URLStreamHandler.class.getDeclaredMethod("sameFile", new Class[] { URL.class, URL.class }); //$NON-NLS-1$
 			MultiplexingFactory.setAccessible(sameFileMethod);
 
-			setURLMethod = URLStreamHandler.class.getDeclaredMethod("setURL", new Class[] {URL.class, String.class, String.class, Integer.TYPE, String.class, String.class, String.class, String.class, String.class}); //$NON-NLS-1$
+			setURLMethod = URLStreamHandler.class.getDeclaredMethod("setURL", new Class[] { URL.class, String.class, //$NON-NLS-1$
+					String.class, Integer.TYPE, String.class, String.class, String.class, String.class, String.class });
 			MultiplexingFactory.setAccessible(setURLMethod);
 
-			toExternalFormMethod = URLStreamHandler.class.getDeclaredMethod("toExternalForm", new Class[] {URL.class}); //$NON-NLS-1$
+			toExternalFormMethod = URLStreamHandler.class.getDeclaredMethod("toExternalForm", //$NON-NLS-1$
+					new Class[] { URL.class });
 			MultiplexingFactory.setAccessible(toExternalFormMethod);
 
 			try {
@@ -82,13 +89,15 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			}
 			MultiplexingFactory.setAccessible(handlerField);
 		} catch (Exception e) {
-			factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, "initializeMethods", e); //$NON-NLS-1$
+			factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(),
+					FrameworkLogEntry.ERROR, "initializeMethods", e); //$NON-NLS-1$
 			throw new RuntimeException(e.getMessage(), e);
 		}
 		methodsInitialized = true;
 	}
 
-	public MultiplexingURLStreamHandler(String protocol, URLStreamHandlerFactoryImpl factory, URLStreamHandler authorized) {
+	public MultiplexingURLStreamHandler(String protocol, URLStreamHandlerFactoryImpl factory,
+			URLStreamHandler authorized) {
 		this.protocol = protocol;
 		this.factory = factory;
 		this.authorized = authorized;
@@ -100,13 +109,14 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
-				return (URLConnection) openConnectionMethod.invoke(handler, new Object[] {url});
+				return (URLConnection) openConnectionMethod.invoke(handler, new Object[] { url });
 			} catch (InvocationTargetException e) {
 				if (e.getTargetException() instanceof IOException)
 					throw (IOException) e.getTargetException();
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, "openConnection", e); //$NON-NLS-1$
+				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(),
+						FrameworkLogEntry.ERROR, "openConnection", e); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
@@ -118,13 +128,14 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
-				return (URLConnection) openConnectionProxyMethod.invoke(handler, new Object[] {url, proxy});
+				return (URLConnection) openConnectionProxyMethod.invoke(handler, new Object[] { url, proxy });
 			} catch (InvocationTargetException e) {
 				if (e.getTargetException() instanceof IOException)
 					throw (IOException) e.getTargetException();
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, "openConnection", e); //$NON-NLS-1$
+				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(),
+						FrameworkLogEntry.ERROR, "openConnection", e); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
@@ -136,11 +147,12 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
-				return ((Boolean) equalsMethod.invoke(handler, new Object[] {url1, url2})).booleanValue();
+				return ((Boolean) equalsMethod.invoke(handler, new Object[] { url1, url2 })).booleanValue();
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, "equals", e); //$NON-NLS-1$
+				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(),
+						FrameworkLogEntry.ERROR, "equals", e); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
@@ -156,7 +168,8 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, "getDefaultPort", e); //$NON-NLS-1$
+				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(),
+						FrameworkLogEntry.ERROR, "getDefaultPort", e); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
@@ -168,11 +181,12 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
-				return (InetAddress) getHostAddressMethod.invoke(handler, new Object[] {url});
+				return (InetAddress) getHostAddressMethod.invoke(handler, new Object[] { url });
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, "hashCode", e); //$NON-NLS-1$
+				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(),
+						FrameworkLogEntry.ERROR, "hashCode", e); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
@@ -184,11 +198,12 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
-				return ((Integer) hashCodeMethod.invoke(handler, new Object[] {url})).intValue();
+				return ((Integer) hashCodeMethod.invoke(handler, new Object[] { url })).intValue();
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, "hashCode", e); //$NON-NLS-1$
+				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(),
+						FrameworkLogEntry.ERROR, "hashCode", e); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
@@ -200,11 +215,12 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
-				return ((Boolean) hostsEqualMethod.invoke(handler, new Object[] {url1, url2})).booleanValue();
+				return ((Boolean) hostsEqualMethod.invoke(handler, new Object[] { url1, url2 })).booleanValue();
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, "hostsEqual", e); //$NON-NLS-1$
+				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(),
+						FrameworkLogEntry.ERROR, "hostsEqual", e); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
@@ -218,12 +234,14 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			try {
 				// set the real handler for the URL
 				handlerField.set(arg0, handler);
-				parseURLMethod.invoke(handler, new Object[] {arg0, arg1, Integer.valueOf(arg2), Integer.valueOf(arg3)});
+				parseURLMethod.invoke(handler,
+						new Object[] { arg0, arg1, Integer.valueOf(arg2), Integer.valueOf(arg3) });
 				return;
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, "parseURL", e); //$NON-NLS-1$
+				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(),
+						FrameworkLogEntry.ERROR, "parseURL", e); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
@@ -235,11 +253,12 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
-				return ((Boolean) sameFileMethod.invoke(handler, new Object[] {url1, url2})).booleanValue();
+				return ((Boolean) sameFileMethod.invoke(handler, new Object[] { url1, url2 })).booleanValue();
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, "sameFile", e); //$NON-NLS-1$
+				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(),
+						FrameworkLogEntry.ERROR, "sameFile", e); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
@@ -247,18 +266,21 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 	}
 
 	@Override
-	protected void setURL(URL arg0, String arg1, String arg2, int arg3, String arg4, String arg5, String arg6, String arg7, String arg8) {
+	protected void setURL(URL arg0, String arg1, String arg2, int arg3, String arg4, String arg5, String arg6,
+			String arg7, String arg8) {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
 				// set the real handler for the URL
 				handlerField.set(arg0, handler);
-				setURLMethod.invoke(handler, new Object[] {arg0, arg1, arg2, Integer.valueOf(arg3), arg4, arg5, arg6, arg7, arg8});
+				setURLMethod.invoke(handler,
+						new Object[] { arg0, arg1, arg2, Integer.valueOf(arg3), arg4, arg5, arg6, arg7, arg8 });
 				return;
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, "setURL", e); //$NON-NLS-1$
+				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(),
+						FrameworkLogEntry.ERROR, "setURL", e); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
@@ -270,11 +292,12 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		URLStreamHandler handler = findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
-				return (String) toExternalFormMethod.invoke(handler, new Object[] {url});
+				return (String) toExternalFormMethod.invoke(handler, new Object[] { url });
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, "toExternalForm", e); //$NON-NLS-1$
+				factory.container.getLogServices().log(MultiplexingURLStreamHandler.class.getName(),
+						FrameworkLogEntry.ERROR, "toExternalForm", e); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}

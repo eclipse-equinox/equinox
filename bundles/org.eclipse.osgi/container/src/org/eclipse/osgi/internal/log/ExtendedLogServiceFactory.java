@@ -39,7 +39,8 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 	private final LoggerAdmin loggerAdmin = new EquinoxLoggerAdmin();
 	private final boolean captureLogEntryLocation;
 
-	public ExtendedLogServiceFactory(ExtendedLogReaderServiceFactory logReaderServiceFactory, boolean captureLogEntryLocation) {
+	public ExtendedLogServiceFactory(ExtendedLogReaderServiceFactory logReaderServiceFactory,
+			boolean captureLogEntryLocation) {
 		this.logReaderServiceFactory = logReaderServiceFactory;
 		this.captureLogEntryLocation = captureLogEntryLocation;
 	}
@@ -54,9 +55,11 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 	}
 
 	@Override
-	public void ungetService(Bundle bundle, ServiceRegistration<ExtendedLogService> registration, ExtendedLogService service) {
+	public void ungetService(Bundle bundle, ServiceRegistration<ExtendedLogService> registration,
+			ExtendedLogService service) {
 		// do nothing
-		// Notice that we do not remove the the LogService impl for the bundle because other bundles
+		// Notice that we do not remove the the LogService impl for the bundle because
+		// other bundles
 		// still need to be able to get the cached loggers for a bundle.
 	}
 
@@ -98,8 +101,10 @@ public class ExtendedLogServiceFactory implements ServiceFactory<ExtendedLogServ
 		return logReaderServiceFactory.isLoggable(bundle, name, level);
 	}
 
-	void log(Bundle bundle, String name, StackTraceElement stackTraceElement, Object context, LogLevel logLevelEnum, int level, String message, ServiceReference<?> ref, Throwable exception) {
-		logReaderServiceFactory.log(bundle, name, stackTraceElement, context, logLevelEnum, level, message, ref, exception);
+	void log(Bundle bundle, String name, StackTraceElement stackTraceElement, Object context, LogLevel logLevelEnum,
+			int level, String message, ServiceReference<?> ref, Throwable exception) {
+		logReaderServiceFactory.log(bundle, name, stackTraceElement, context, logLevelEnum, level, message, ref,
+				exception);
 	}
 
 	void checkLogPermission() throws SecurityException {

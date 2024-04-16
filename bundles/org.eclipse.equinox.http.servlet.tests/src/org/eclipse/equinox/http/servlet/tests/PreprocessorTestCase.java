@@ -46,26 +46,18 @@ public class PreprocessorTestCase extends BaseTest {
 
 	@Test
 	public void testPreprocessorInitParameters() {
-		Dictionary<String,Object> properties = new Hashtable<>();
-		properties
-				.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_PREPROCESSOR_INIT_PARAM_PREFIX
-						+ "param1", "value1");
-		properties
-				.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_PREPROCESSOR_INIT_PARAM_PREFIX
-						+ "param2", "value2");
-		properties
-				.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_PREPROCESSOR_INIT_PARAM_PREFIX
-						+ "param3", 345l);
+		Dictionary<String, Object> properties = new Hashtable<>();
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_PREPROCESSOR_INIT_PARAM_PREFIX + "param1", "value1");
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_PREPROCESSOR_INIT_PARAM_PREFIX + "param2", "value2");
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_PREPROCESSOR_INIT_PARAM_PREFIX + "param3", 345l);
 
 		long before = this.getHttpRuntimeChangeCount();
-		final ServiceRegistration<Preprocessor> reg = getBundleContext()
-				.registerService(Preprocessor.class, new MockPreprocessor(),
-						properties);
+		final ServiceRegistration<Preprocessor> reg = getBundleContext().registerService(Preprocessor.class,
+				new MockPreprocessor(), properties);
 		registrations.add(reg);
 		this.waitForRegistration(before);
 
-		final PreprocessorDTO[] dtos = this.getHttpServiceRuntime()
-				.getRuntimeDTO().preprocessorDTOs;
+		final PreprocessorDTO[] dtos = this.getHttpServiceRuntime().getRuntimeDTO().preprocessorDTOs;
 		assertEquals(1, dtos.length);
 
 		assertTrue(dtos[0].initParams.containsKey("param1"));
@@ -77,22 +69,20 @@ public class PreprocessorTestCase extends BaseTest {
 	@Test
 	public void testPreprocessorRanking() throws Exception {
 		// register preprocessor with ranking -5
-		Dictionary<String,Object> properties = new Hashtable<>();
+		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(Constants.SERVICE_RANKING, -5);
 
 		long before = this.getHttpRuntimeChangeCount();
-		registrations
-				.add(getBundleContext().registerService(Preprocessor.class.getName(),
-						new MockPreprocessor().around("d"), properties));
+		registrations.add(getBundleContext().registerService(Preprocessor.class.getName(),
+				new MockPreprocessor().around("d"), properties));
 		before = this.waitForRegistration(before);
 
 		// register preprocessor with ranking 8
 		properties = new Hashtable<>();
 		properties.put(Constants.SERVICE_RANKING, 8);
 
-		registrations
-				.add(getBundleContext().registerService(Preprocessor.class.getName(),
-						new MockPreprocessor().around("a"), properties));
+		registrations.add(getBundleContext().registerService(Preprocessor.class.getName(),
+				new MockPreprocessor().around("a"), properties));
 		before = this.waitForRegistration(before);
 
 		// register preprocessor with invalid ranking
@@ -100,30 +90,26 @@ public class PreprocessorTestCase extends BaseTest {
 		properties.put(Constants.SERVICE_RANKING, 3L); // this is invalid ->
 														// ranking = 0
 
-		registrations
-				.add(getBundleContext().registerService(Preprocessor.class.getName(),
-						new MockPreprocessor().around("b"), properties));
+		registrations.add(getBundleContext().registerService(Preprocessor.class.getName(),
+				new MockPreprocessor().around("b"), properties));
 		before = this.waitForRegistration(before);
 
 		// register preprocessor with no ranking
 		properties = new Hashtable<>();
 
-		registrations
-				.add(getBundleContext().registerService(Preprocessor.class.getName(),
-						new MockPreprocessor().around("c"), properties));
+		registrations.add(getBundleContext().registerService(Preprocessor.class.getName(),
+				new MockPreprocessor().around("c"), properties));
 		before = this.waitForRegistration(before);
 
 		// check that we have four preprocessors
-		final PreprocessorDTO[] dtos = this.getHttpServiceRuntime()
-				.getRuntimeDTO().preprocessorDTOs;
+		final PreprocessorDTO[] dtos = this.getHttpServiceRuntime().getRuntimeDTO().preprocessorDTOs;
 		assertEquals(4, dtos.length);
 
 		// register endpoint
 		properties = new Hashtable<>();
-		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN,
-				"/available");
-		registrations.add(getBundleContext().registerService(
-				Servlet.class, new MockServlet().content("hello"), properties));
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/available");
+		registrations
+				.add(getBundleContext().registerService(Servlet.class, new MockServlet().content("hello"), properties));
 
 		assertEquals("abcdhellodcba", requestAdvisor.request("available"));
 	}
@@ -137,58 +123,53 @@ public class PreprocessorTestCase extends BaseTest {
 		// register preprocessor
 		final List<String> filterActions = new ArrayList<>();
 		long before = this.getHttpRuntimeChangeCount();
-		registrations.add(getBundleContext().registerService(
-				Preprocessor.class.getName(), new MockPreprocessor() {
+		registrations.add(getBundleContext().registerService(Preprocessor.class.getName(), new MockPreprocessor() {
 
-					@Override
-					public void doFilter(ServletRequest request,
-							ServletResponse response, FilterChain chain)
-							throws IOException, ServletException {
-						filterActions.add("a");
-						super.doFilter(request, new HttpServletResponseWrapper(
-								(HttpServletResponse) response) {
+			@Override
+			public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+					throws IOException, ServletException {
+				filterActions.add("a");
+				super.doFilter(request, new HttpServletResponseWrapper((HttpServletResponse) response) {
 
-							private boolean hasStatus = false;
+					private boolean hasStatus = false;
 
-							private void addStatus(final int sc) {
-								if (!hasStatus) {
-									hasStatus = true;
-									filterActions.add(String.valueOf(sc));
-								}
-							}
-
-							@Override
-							public void setStatus(int sc) {
-								addStatus(sc);
-								super.setStatus(sc);
-							}
-
-							@Override
-							public void sendError(int sc, String msg)
-									throws IOException {
-								addStatus(sc);
-								super.sendError(sc, msg);
-							}
-
-							@Override
-							public void sendError(int sc) throws IOException {
-								addStatus(sc);
-								super.sendError(sc);
-							}
-
-						}, chain);
-						filterActions.add("b");
+					private void addStatus(final int sc) {
+						if (!hasStatus) {
+							hasStatus = true;
+							filterActions.add(String.valueOf(sc));
+						}
 					}
 
-				}, null));
+					@Override
+					public void setStatus(int sc) {
+						addStatus(sc);
+						super.setStatus(sc);
+					}
+
+					@Override
+					public void sendError(int sc, String msg) throws IOException {
+						addStatus(sc);
+						super.sendError(sc, msg);
+					}
+
+					@Override
+					public void sendError(int sc) throws IOException {
+						addStatus(sc);
+						super.sendError(sc);
+					}
+
+				}, chain);
+				filterActions.add("b");
+			}
+
+		}, null));
 		before = this.waitForRegistration(before);
 
 		// register endpoint
-		Dictionary<String,Object> properties = new Hashtable<>();
-		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN,
-				"/available");
-		registrations.add(getBundleContext().registerService(
-				Servlet.class, new MockServlet().content("hello"), properties));
+		Dictionary<String, Object> properties = new Hashtable<>();
+		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/available");
+		registrations
+				.add(getBundleContext().registerService(Servlet.class, new MockServlet().content("hello"), properties));
 
 		assertEquals("hello", requestAdvisor.request("available"));
 		assertEquals(2, filterActions.size());

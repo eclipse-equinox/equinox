@@ -13,14 +13,20 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.resolver;
 
-import org.eclipse.osgi.service.resolver.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.State;
+import org.eclipse.osgi.service.resolver.StateObjectFactory;
 import org.eclipse.osgi.tests.services.resolver.AbstractStateTest;
+import org.junit.Test;
 import org.osgi.framework.BundleException;
 
+@SuppressWarnings("deprecation") // StateObjectFactory.createBundleDescription()
 public class TestAttributes_001 extends AbstractStateTest {
-	public TestAttributes_001(String testName) {
-		super(testName);
-	}
 
 	BundleDescription bundle_1 = null;
 	BundleDescription bundle_2 = null;
@@ -28,6 +34,7 @@ public class TestAttributes_001 extends AbstractStateTest {
 	BundleDescription bundle_4 = null;
 	BundleDescription bundle_5 = null;
 
+	@Test
 	public void testTest_001() {
 		State state = buildEmptyState();
 		StateObjectFactory sof = StateObjectFactory.defaultFactory;
@@ -37,12 +44,12 @@ public class TestAttributes_001 extends AbstractStateTest {
 		bundle_3 = create_bundle_3(sof);
 		bundle_4 = create_bundle_4(sof);
 		bundle_5 = create_bundle_5(sof);
-		//***************************************************
+		// ***************************************************
 		// stage a
 		// expect to pass =true
-		//***************************************************
+		// ***************************************************
 		addBundlesToState_a(state);
-		//***************************************************
+		// ***************************************************
 		try {
 			state.resolve();
 		} catch (Throwable t) {

@@ -45,15 +45,6 @@ static _TCHAR* rootMsg =
 _T_ECLIPSE("The %s executable launcher is configured to not start with \n\
 administrative privileges.");
 
-#define NAME         _T_ECLIPSE("-name")
-#define VMARGS       _T_ECLIPSE("-vmargs")		/* special option processing required */
-/* New arguments have the form --launcher.<arg> to avoid collisions */
-#define LIBRARY		  _T_ECLIPSE("--launcher.library")
-#define SUPRESSERRORS _T_ECLIPSE("--launcher.suppressErrors")
-#define INI			  _T_ECLIPSE("--launcher.ini")
-#define PROTECT	      _T_ECLIPSE("-protect")	/* This argument is also handled in eclipse.c for Mac specific processing */
-#define ROOT		  _T_ECLIPSE("root")		/* the only level of protection we care now */
-
 /* this typedef must match the run method in eclipse.c */
 typedef int (*RunMethod)(int argc, _TCHAR* argv[], _TCHAR* vmArgs[]);
 typedef void (*SetInitialArgs)(int argc, _TCHAR*argv[], _TCHAR* library, int consoleLauncher);
@@ -284,13 +275,20 @@ static _TCHAR* findProgram(_TCHAR* argv[]) {
 static void parseArgs( int* pArgc, _TCHAR* argv[], int useVMargs )
 {
     int     index;
+    int skipOldArgs = 0;
 
     /* Ensure the list of user argument is NULL terminated. */
     argv[ *pArgc ] = NULL;
 
 	/* For each user defined argument */
     for (index = 0; index < *pArgc; index++){
-        if(_tcsicmp(argv[index], VMARGS) == 0) {
+		if (_tcsicmp(argv[index], OLD_ARGS_START) == 0) {
+			skipOldArgs = 1;
+		} else if (_tcsicmp(argv[index], OLD_ARGS_END) == 0) {
+			skipOldArgs = 0;
+		} else if (skipOldArgs) {
+			continue;
+		} else if(_tcsicmp(argv[index], VMARGS) == 0) {
         	if (useVMargs == 1)	{ //Use the VMargs as the user specified vmArgs
         		userVMarg = &argv[ index+1 ];
         	}
@@ -306,7 +304,7 @@ static void parseArgs( int* pArgc, _TCHAR* argv[], int useVMargs )
         	if(_tcsicmp(argv[++index], ROOT) == 0){
         		protectRoot = 1;
         	}
-        }
+		}
     }
 }
 
@@ -336,17 +334,40 @@ static _TCHAR* checkForIni(int argc, _TCHAR* argv[])
  */
 static int createUserArgs(int configArgc, _TCHAR **configArgv, int *argc, _TCHAR ***argv)
 {
-	_TCHAR** newArray = (_TCHAR **)malloc((configArgc + *argc + 1) * sizeof(_TCHAR *));
+	int argsSize = configArgc + *argc;
+	int skipOldArgs = 0;
+	_TCHAR** newArray = (_TCHAR **)malloc((argsSize + 1) * sizeof(_TCHAR *));
 
 	newArray[0] = (*argv)[0];	/* use the original argv[0] */
 	memcpy(newArray + 1, configArgv, configArgc * sizeof(_TCHAR *));	
 	
+	int startIndex = 1 + configArgc;
 	/* Skip the argument zero (program path and name) */
-	memcpy(newArray + 1 + configArgc, *argv + 1, (*argc - 1) * sizeof(_TCHAR *));
+	for (int i = 1 ; i < *argc ; i++) {
+		if (_tcsicmp((*argv)[i], OLD_ARGS_START) == 0) {
+			argsSize--;
+			skipOldArgs = 1;
+			continue;
+		}
+		if (_tcsicmp((*argv)[i], OLD_ARGS_END) == 0) {
+			argsSize--;
+			skipOldArgs = 0;
+			continue;
+		}
+		if (skipOldArgs) {
+			argsSize--;
+			continue;
+		}
+		if (_tcscmp((*argv)[i], SKIP_OLD_ARGS) == 0) {
+			argsSize--;
+			continue;
+		}
+		newArray[startIndex++] = (*argv)[i];
+	}
 
 	/* Null terminate the new list of arguments and return it. */	 
 	*argv = newArray;
-	*argc += configArgc;
+	*argc = argsSize;
 	(*argv)[*argc] = NULL;
 	
 	return 0;

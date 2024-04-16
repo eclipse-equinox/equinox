@@ -13,13 +13,15 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.util;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.osgi.storage.StorageUtil;
 import org.junit.Test;
 
-public class StorageUtilTestCase extends CoreTest {
+public class StorageUtilTestCase {
 
 	@Test
 	public void testRegularWindowsFileName() {

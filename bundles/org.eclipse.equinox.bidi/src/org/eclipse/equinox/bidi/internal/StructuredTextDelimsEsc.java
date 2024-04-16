@@ -24,13 +24,13 @@ import org.eclipse.equinox.bidi.custom.*;
  * <p>
  * This is similar to {@link StructuredTextDelims} except that delimiters can be
  * escaped using the backslash character.
+ * </p>
  * <ul>
  * <li>Two consecutive backslashes in a delimited part are treated like one
  * regular character.</li>
  * <li>An ending delimiter preceded by an odd number of backslashes is treated
  * like a regular character within the delimited part.</li>
  * </ul>
- * </p>
  */
 public abstract class StructuredTextDelimsEsc extends StructuredTextDelims {
 

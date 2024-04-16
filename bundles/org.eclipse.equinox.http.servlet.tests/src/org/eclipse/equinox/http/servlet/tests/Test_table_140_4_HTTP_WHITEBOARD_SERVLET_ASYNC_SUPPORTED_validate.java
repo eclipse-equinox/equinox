@@ -40,7 +40,8 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED_validate e
 		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED, "blah");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/a");
-		registrations.add(context.registerService(Servlet.class, new HttpServlet() {}, properties));
+		registrations.add(context.registerService(Servlet.class, new HttpServlet() {
+		}, properties));
 
 		RequestInfoDTO requestInfoDTO = calculateRequestInfoDTO("/a");
 
@@ -51,7 +52,8 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED_validate e
 		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED, "true");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/b");
-		registrations.add(context.registerService(Servlet.class, new HttpServlet() {}, properties));
+		registrations.add(context.registerService(Servlet.class, new HttpServlet() {
+		}, properties));
 
 		requestInfoDTO = calculateRequestInfoDTO("/b");
 
@@ -62,7 +64,8 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED_validate e
 		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED, "false");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/c");
-		registrations.add(context.registerService(Servlet.class, new HttpServlet() {}, properties));
+		registrations.add(context.registerService(Servlet.class, new HttpServlet() {
+		}, properties));
 
 		requestInfoDTO = calculateRequestInfoDTO("/c");
 
@@ -73,7 +76,8 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED_validate e
 		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED, 234l);
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/d");
-		registrations.add(context.registerService(Servlet.class, new HttpServlet() {}, properties));
+		registrations.add(context.registerService(Servlet.class, new HttpServlet() {
+		}, properties));
 
 		requestInfoDTO = calculateRequestInfoDTO("/d");
 
@@ -83,7 +87,8 @@ public class Test_table_140_4_HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED_validate e
 
 		properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/e");
-		registrations.add(context.registerService(Servlet.class, new HttpServlet() {}, properties));
+		registrations.add(context.registerService(Servlet.class, new HttpServlet() {
+		}, properties));
 
 		requestInfoDTO = calculateRequestInfoDTO("/e");
 

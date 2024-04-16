@@ -15,6 +15,6 @@ package org.eclipse.osgi.tests.bundles;
 
 import org.osgi.framework.SynchronousBundleListener;
 
-public class SyncEventListenerTestResults extends EventListenerTestResults implements SynchronousBundleListener{
+public class SyncEventListenerTestResults extends EventListenerTestResults implements SynchronousBundleListener {
 	// implements SynchronousBundleListener
 }

@@ -17,14 +17,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import org.eclipse.core.tests.harness.CoreTest;
+import org.junit.Test;
 
-public class URLTest extends CoreTest {
+public class URLTest {
 
-	public URLTest(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testPlatformPlugin() throws IOException {
 		URL url = new URL("platform:/plugin/org.eclipse.equinox.common.tests/test.xml");
 		InputStream is = url.openStream();

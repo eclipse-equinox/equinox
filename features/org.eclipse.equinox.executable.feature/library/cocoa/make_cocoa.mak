@@ -21,6 +21,8 @@ include ../make_version.mak
 # DEFAULT_OS      - the default value of the "-os" switch
 # DEFAULT_OS_ARCH - the default value of the "-arch" switch
 # DEFAULT_WS      - the default value of the "-ws" switch
+# EXE_OUTPUT_DIR  - the location into which the executable is installed (only used in 'install' target)
+# LIB_OUTPUT_DIR  - the location into which the launcher library is installed (only used in 'install' target)
 
 #default value for PROGRAM_OUTPUT
 ifeq ($(PROGRAM_OUTPUT),)
@@ -84,7 +86,12 @@ $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
 	$(CC) -bundle -o $(DLL) $(ARCHS) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
 
 install: all
-	cp -v $(EXEC) $(PROGRAM_OUTPUT_DIR)
+	$(info Install into: EXE_OUTPUT_DIR:$(EXE_OUTPUT_DIR) LIB_OUTPUT_DIR:$(LIB_OUTPUT_DIR))
+	mkdir -p $(EXE_OUTPUT_DIR)
+	mv $(EXEC) $(EXE_OUTPUT_DIR)
+	mkdir -p $(LIB_OUTPUT_DIR)
+	rm -f $(LIB_OUTPUT_DIR)/eclipse_*.so
+	mv $(DLL) $(LIB_OUTPUT_DIR)
 	rm -f $(EXEC) $(OBJS)
 
 clean:

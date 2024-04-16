@@ -164,14 +164,19 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	public static final String PROP_OSGI_JAVA_PROFILE = "osgi.java.profile"; //$NON-NLS-1$
 	public static final String PROP_OSGI_JAVA_PROFILE_NAME = "osgi.java.profile.name"; //$NON-NLS-1$
-	// OSGi java profile bootdelegation; used to indicate how the org.osgi.framework.bootdelegation
-	// property defined in the java profile should be processed, (ingnore, override, none). default is ignore
+	// OSGi java profile bootdelegation; used to indicate how the
+	// org.osgi.framework.bootdelegation
+	// property defined in the java profile should be processed, (ingnore, override,
+	// none). default is ignore
 	public static final String PROP_OSGI_JAVA_PROFILE_BOOTDELEGATION = "osgi.java.profile.bootdelegation"; //$NON-NLS-1$
-	// indicates that the org.osgi.framework.bootdelegation in the java profile should be ingored
+	// indicates that the org.osgi.framework.bootdelegation in the java profile
+	// should be ingored
 	public static final String PROP_OSGI_BOOTDELEGATION_IGNORE = "ignore"; //$NON-NLS-1$
-	// indicates that the org.osgi.framework.bootdelegation in the java profile should override the system property
+	// indicates that the org.osgi.framework.bootdelegation in the java profile
+	// should override the system property
 	public static final String PROP_OSGI_BOOTDELEGATION_OVERRIDE = "override"; //$NON-NLS-1$
-	// indicates that the org.osgi.framework.bootdelegation in the java profile AND the system properties should be ignored
+	// indicates that the org.osgi.framework.bootdelegation in the java profile AND
+	// the system properties should be ignored
 	public static final String PROP_OSGI_BOOTDELEGATION_NONE = "none"; //$NON-NLS-1$
 
 	public static final String PROP_CONTEXT_BOOTDELEGATION = "osgi.context.bootdelegation"; //$NON-NLS-1$
@@ -192,7 +197,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String PROP_PARENT_CLASSLOADER = "osgi.parentClassloader"; //$NON-NLS-1$
 	// A parent classloader type that specifies the framework classlaoder
 	public static final String PARENT_CLASSLOADER_FWK = "fwk"; //$NON-NLS-1$
-	// System property used to set the context classloader parent classloader type (ccl is the default)
+	// System property used to set the context classloader parent classloader type
+	// (ccl is the default)
 	public static final String PROP_CONTEXTCLASSLOADER_PARENT = "osgi.contextClassLoaderParent"; //$NON-NLS-1$
 	public static final String CONTEXTCLASSLOADER_PARENT_APP = "app"; //$NON-NLS-1$
 	public static final String CONTEXTCLASSLOADER_PARENT_EXT = "ext"; //$NON-NLS-1$
@@ -242,7 +248,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public static final String SYSTEM_PROVIDE_HEADER_SYSTEM_EXTRA = "system.extra"; //$NON-NLS-1$
 
 	public static final String PROP_DEFAULT_SUFFIX = ".default"; //$NON-NLS-1$
-	public static final Collection<String> PROP_WITH_ECLIPSE_STARTER_DEFAULTS = Collections.unmodifiableList(Arrays.asList(PROP_COMPATIBILITY_BOOTDELEGATION, PROP_DS_DELAYED_KEEPINSTANCES));
+	public static final Collection<String> PROP_WITH_ECLIPSE_STARTER_DEFAULTS = Collections
+			.unmodifiableList(Arrays.asList(PROP_COMPATIBILITY_BOOTDELEGATION, PROP_DS_DELAYED_KEEPINSTANCES));
 	public static final String PROP_INIT_UUID = "equinox.init.uuid"; //$NON-NLS-1$
 
 	public static final String PROP_ACTIVE_THREAD_TYPE = "osgi.framework.activeThreadType"; //$NON-NLS-1$
@@ -271,12 +278,13 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		/**
 		 * Value of {@link #localConfig} properties that should be considered
 		 * <code>null</code> and for which access should not fall back to
-		 * {@link System#getProperty(String)}.
-		 * The instance must be compared by identity (==, not equals) and must not
-		 * be leaked outside this class.
+		 * {@link System#getProperty(String)}. The instance must be compared by identity
+		 * (==, not equals) and must not be leaked outside this class.
 		 */
 		private final static String NULL_CONFIG = new String("org.eclipse.equinox.configuration.null.value"); //$NON-NLS-1$
-		private final static Collection<String> populateInitConfig = Arrays.asList(PROP_OSGI_ARCH, PROP_OSGI_OS, PROP_OSGI_WS, PROP_OSGI_NL, FRAMEWORK_OS_NAME, FRAMEWORK_OS_VERSION, FRAMEWORK_PROCESSOR, FRAMEWORK_LANGUAGE);
+		private final static Collection<String> populateInitConfig = Arrays.asList(PROP_OSGI_ARCH, PROP_OSGI_OS,
+				PROP_OSGI_WS, PROP_OSGI_NL, FRAMEWORK_OS_NAME, FRAMEWORK_OS_VERSION, FRAMEWORK_PROCESSOR,
+				FRAMEWORK_LANGUAGE);
 
 		private final boolean useSystemProperties;
 		private final Map<String, Object> initialConfig;
@@ -288,8 +296,10 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			this.exceptions = exceptions;
 			this.initialConfig = initialConfiguration == null ? new HashMap<>(0) : new HashMap<>(initialConfiguration);
 			Object useSystemPropsValue = initialConfig.get(PROP_USE_SYSTEM_PROPERTIES);
-			this.useSystemProperties = useSystemPropsValue == null ? false : Boolean.parseBoolean(useSystemPropsValue.toString());
-			Properties tempConfiguration = useSystemProperties ? EquinoxContainer.secureAction.getProperties() : new Properties();
+			this.useSystemProperties = useSystemPropsValue == null ? false
+					: Boolean.parseBoolean(useSystemPropsValue.toString());
+			Properties tempConfiguration = useSystemProperties ? EquinoxContainer.secureAction.getProperties()
+					: new Properties();
 			// do this the hard way to handle null values
 			for (Map.Entry<String, ?> initialEntry : this.initialConfig.entrySet()) {
 				if (initialEntry.getValue() == null) {
@@ -353,10 +363,12 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 				consoleProp = consoleProp == null ? null : consoleProp.trim();
 				if (consoleProp == null || consoleProp.length() > 0) {
 					// no -console was specified or it has specified none or a port for telnet;
-					// need to make sure the gogo shell does not create an interactive console on standard in/out
+					// need to make sure the gogo shell does not create an interactive console on
+					// standard in/out
 					setConfiguration(PROP_GOSH_ARGS, "--nointeractive"); //$NON-NLS-1$
 				} else {
-					// Need to make sure we don't shutdown the framework if no console is around (bug 362412)
+					// Need to make sure we don't shutdown the framework if no console is around
+					// (bug 362412)
 					setConfiguration(PROP_GOSH_ARGS, "--noshutdown"); //$NON-NLS-1$
 				}
 			}
@@ -395,7 +407,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 		private Properties substituteVars(Properties result) {
 			if (result == null) {
-				//nothing todo.
+				// nothing todo.
 				return null;
 			}
 			for (Enumeration<Object> eKeys = result.keys(); eKeys.hasMoreElements();) {
@@ -429,8 +441,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 						if (prop == null) {
 							try {
 								// try using the System.getenv method if it exists (bug 126921)
-								Method getenv = System.class.getMethod("getenv", new Class[] {String.class}); //$NON-NLS-1$
-								prop = (String) getenv.invoke(null, new Object[] {var});
+								Method getenv = System.class.getMethod("getenv", new Class[] { String.class }); //$NON-NLS-1$
+								prop = (String) getenv.invoke(null, new Object[] { var });
 							} catch (Throwable t) {
 								// do nothing;
 								// on 1.4 VMs this throws an error
@@ -461,13 +473,15 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 				}
 			}
 			if (var != null)
-				// found a case of $var at the end of the path with no trailing $; just append it as is.
+				// found a case of $var at the end of the path with no trailing $; just append
+				// it as is.
 				buf.append(VARIABLE_DELIM_CHAR).append(var);
 			return buf.toString();
 		}
 
 		public String getProperty(String key) {
-			// have to access configuration directly instead of using getConfiguration to get access to NULL_CONFIG values
+			// have to access configuration directly instead of using getConfiguration to
+			// get access to NULL_CONFIG values
 			String result = internalGet(key);
 			if (result == NULL_CONFIG) {
 				return null;
@@ -552,17 +566,23 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	EquinoxConfiguration(Map<String, ?> initialConfiguration, HookRegistry hookRegistry) {
 		this.hookRegistry = hookRegistry;
 		// Care must be taken to bootstrap of the config values properly
-		// A separate class is used to hold the configuration maps so that we can pass them
-		// to the EquionxLocations before the EquinoxConfiguration has been fully constructed
+		// A separate class is used to hold the configuration maps so that we can pass
+		// them
+		// to the EquionxLocations before the EquinoxConfiguration has been fully
+		// constructed
 		this.configValues = new ConfigValues(initialConfiguration, exceptions);
 
-		// We need to initialize some properties always before constructing the EquinoxLocations
+		// We need to initialize some properties always before constructing the
+		// EquinoxLocations
 		initializeProperties();
 
-		// At this point we do not know if we want to debug locations because we have not determined if osgi.debug is set yet
-		// We use an AttomicBoolean to hold the setting so we can set it after the config.ini has been loaded
+		// At this point we do not know if we want to debug locations because we have
+		// not determined if osgi.debug is set yet
+		// We use an AttomicBoolean to hold the setting so we can set it after the
+		// config.ini has been loaded
 		AtomicBoolean debugLocations = new AtomicBoolean();
-		this.equinoxLocations = new EquinoxLocations(this.configValues, this.hookRegistry.getContainer(), debugLocations, exceptions);
+		this.equinoxLocations = new EquinoxLocations(this.configValues, this.hookRegistry.getContainer(),
+				debugLocations, exceptions);
 		this.configValues.loadConfigIni(getConfigIni(equinoxLocations, false));
 		this.configValues.loadConfigIni(getConfigIni(equinoxLocations, true));
 		this.configValues.finalizeValues();
@@ -587,7 +607,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 					devLastModified = f.lastModified();
 				}
 
-				// Check the osgi.dev property to see if dev classpath entries have been defined.
+				// Check the osgi.dev property to see if dev classpath entries have been
+				// defined.
 				try {
 					loadDevProperties(LocationHelper.getStream(location));
 					devMode = true;
@@ -604,10 +625,15 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 		contextBootDelegation = "true".equals(getConfiguration(PROP_CONTEXT_BOOTDELEGATION, "true")); //$NON-NLS-1$ //$NON-NLS-2$
 		compatibilityBootDelegation = "true".equals(getConfiguration(PROP_COMPATIBILITY_BOOTDELEGATION)); //$NON-NLS-1$
-		compatibilityLazyTriggerOnFailLoad = "true".equals(getConfiguration(PROP_COMPATIBILITY_START_LAZY_ON_FAIL_CLASSLOAD)); //$NON-NLS-1$
+		compatibilityLazyTriggerOnFailLoad = "true" //$NON-NLS-1$
+				.equals(getConfiguration(PROP_COMPATIBILITY_START_LAZY_ON_FAIL_CLASSLOAD));
 
 		COPY_NATIVES = Boolean.valueOf(getConfiguration(PROP_COPY_NATIVES)).booleanValue();
-		String[] libExtensions = ManifestElement.getArrayFromList(getConfiguration(EquinoxConfiguration.PROP_FRAMEWORK_LIBRARY_EXTENSIONS, getConfiguration(org.osgi.framework.Constants.FRAMEWORK_LIBRARY_EXTENSIONS, getOSLibraryExtDefaults())), ","); //$NON-NLS-1$
+		String[] libExtensions = ManifestElement
+				.getArrayFromList(
+						getConfiguration(EquinoxConfiguration.PROP_FRAMEWORK_LIBRARY_EXTENSIONS, getConfiguration(
+								org.osgi.framework.Constants.FRAMEWORK_LIBRARY_EXTENSIONS, getOSLibraryExtDefaults())),
+						","); //$NON-NLS-1$
 		for (int i = 0; i < libExtensions.length; i++)
 			if (libExtensions[i].length() > 0 && libExtensions[i].charAt(0) != '.')
 				libExtensions[i] = '.' + libExtensions[i];
@@ -633,8 +659,10 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 		// A specified osgi.dev property but unspecified osgi.checkConfiguration
 		// property implies osgi.checkConfiguration = true.
-		inCheckConfigurationMode = Boolean.valueOf(getConfiguration(PROP_CHECK_CONFIGURATION, Boolean.toString(devMode)));
-		// Must ensure the check configuration property is set if in osgi.dev mode (bug 443340)
+		inCheckConfigurationMode = Boolean
+				.valueOf(getConfiguration(PROP_CHECK_CONFIGURATION, Boolean.toString(devMode)));
+		// Must ensure the check configuration property is set if in osgi.dev mode (bug
+		// 443340)
 		if (inCheckConfigurationMode && getConfiguration(PROP_CHECK_CONFIGURATION) == null) {
 			setConfiguration(PROP_CHECK_CONFIGURATION, "true"); //$NON-NLS-1$
 		}
@@ -676,7 +704,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		try {
 			return new URL(configArea.getURL().toExternalForm() + CONFIG_FILE);
 		} catch (MalformedURLException e) {
-			// its ok.  This should never happen
+			// its ok. This should never happen
 		}
 		return null;
 	}
@@ -770,17 +798,20 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	}
 
 	public void setAllArgs(String[] allArgs) {
-		// do not check if this is set already to allow arguments to change when multiple applications are launched
+		// do not check if this is set already to allow arguments to change when
+		// multiple applications are launched
 		this.allArgs = allArgs;
 	}
 
 	public void setAppArgs(String[] appArgs) {
-		// do not check if this is set already to allow arguments to change when multiple applications are launched
+		// do not check if this is set already to allow arguments to change when
+		// multiple applications are launched
 		this.appArgs = appArgs;
 	}
 
 	public void setFrameworkArgs(String[] frameworkArgs) {
-		// do not check if this is set already to allow arguments to change when multiple applications are launched
+		// do not check if this is set already to allow arguments to change when
+		// multiple applications are launched
 		this.frameworkArgs = frameworkArgs;
 	}
 
@@ -894,7 +925,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		}
 	}
 
-	private static String[] getDevClassPath(BundleRevision bundle, Map<String, String> properties, String[] defaultClasspath) {
+	private static String[] getDevClassPath(BundleRevision bundle, Map<String, String> properties,
+			String[] defaultClasspath) {
 		String[] result = null;
 		String id = bundle.getSymbolicName();
 		if (id != null && properties != null) {
@@ -910,6 +942,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	/**
 	 * Returns a list of classpath elements for the specified bundle symbolic name.
+	 * 
 	 * @param bundle a bundle revision to get the development classpath for
 	 * @return a list of development classpath elements
 	 */
@@ -943,7 +976,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	}
 
 	private void initializeProperties() {
-		// initialize some framework properties that must always be set AND cannot be set with config.ini
+		// initialize some framework properties that must always be set AND cannot be
+		// set with config.ini
 		if (getConfiguration(PROP_FRAMEWORK) == null || getConfiguration(EquinoxLocations.PROP_INSTALL_AREA) == null) {
 			ProtectionDomain pd = EquinoxConfiguration.class.getProtectionDomain();
 			CodeSource cs = pd == null ? null : pd.getCodeSource();
@@ -960,7 +994,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 					}
 				}
 				if (url == null) {
-					throw new IllegalArgumentException(NLS.bind(Msg.ECLIPSE_STARTUP_PROPS_NOT_SET, PROP_FRAMEWORK + ", " + EquinoxLocations.PROP_INSTALL_AREA), cause); //$NON-NLS-1$
+					throw new IllegalArgumentException(NLS.bind(Msg.ECLIPSE_STARTUP_PROPS_NOT_SET,
+							PROP_FRAMEWORK + ", " + EquinoxLocations.PROP_INSTALL_AREA), cause); //$NON-NLS-1$
 				}
 			}
 
@@ -983,7 +1018,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		}
 		// always decode these properties
 		setConfiguration(PROP_FRAMEWORK, LocationHelper.decode(getConfiguration(PROP_FRAMEWORK), true));
-		setConfiguration(EquinoxLocations.PROP_INSTALL_AREA, LocationHelper.decode(getConfiguration(EquinoxLocations.PROP_INSTALL_AREA), true));
+		setConfiguration(EquinoxLocations.PROP_INSTALL_AREA,
+				LocationHelper.decode(getConfiguration(EquinoxLocations.PROP_INSTALL_AREA), true));
 
 		setConfiguration(FRAMEWORK_VENDOR, ECLIPSE_FRAMEWORK_VENDOR);
 		String value = getConfiguration(FRAMEWORK_PROCESSOR);
@@ -1054,7 +1090,7 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		setConfiguration(SUPPORTS_FRAMEWORK_EXTENSION, "true"); //$NON-NLS-1$
 
 		/*
-		 * Initializes the execution context for this run of the platform.  The context
+		 * Initializes the execution context for this run of the platform. The context
 		 * includes information about the locale, operating system and window system.
 		 *
 		 * NOTE: The OS, WS, and ARCH values should never be null. The executable should
@@ -1062,7 +1098,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		 * when run from the executable.
 		 */
 
-		// if the user didn't set the locale with a command line argument then use the default.
+		// if the user didn't set the locale with a command line argument then use the
+		// default.
 		String nlValue = getConfiguration(PROP_OSGI_NL);
 		if (nlValue != null) {
 			Locale userLocale = toLocale(nlValue, Locale.getDefault());
@@ -1115,7 +1152,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 			path = path.replace('\\', '/');
 		}
 		// TODO is there a better way?
-		// this is a hack to get the framework to launch from a self-hosted eclipse instance
+		// this is a hack to get the framework to launch from a self-hosted eclipse
+		// instance
 		// we assume the code source will end in the path org.eclipse.osgi/bin/
 		if (path.endsWith("org.eclipse.osgi/bin/")) { //$NON-NLS-1$
 			path = path.substring(0, path.length() - "bin/".length()); //$NON-NLS-1$
@@ -1159,27 +1197,29 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	 * </p>
 	 *
 	 * <p>
-	 * This method takes the string format of a locale and creates the locale object from it.
+	 * This method takes the string format of a locale and creates the locale object
+	 * from it.
 	 * </p>
 	 *
 	 * <p>
-	 * This method validates the input strictly. The language code must be lowercase. The country
-	 * code must be uppercase. The separator must be an underscore. The length must be correct.
+	 * This method validates the input strictly. The language code must be
+	 * lowercase. The country code must be uppercase. The separator must be an
+	 * underscore. The length must be correct.
 	 * </p>
 	 *
 	 * <p>
-	 * This method is inspired by <code>org.apache.commons.lang.LocaleUtils.toLocale(String)</code>
-	 * by fixing the parsing error for uncommon Locales like having a language and a variant code
-	 * but no country code, or a Locale that only consists of a country code.
+	 * This method is inspired by
+	 * <code>org.apache.commons.lang.LocaleUtils.toLocale(String)</code> by fixing
+	 * the parsing error for uncommon Locales like having a language and a variant
+	 * code but no country code, or a Locale that only consists of a country code.
 	 * </p>
 	 *
-	 * @param str
-	 *            the locale String to convert
-	 * @param defaultLocale
-	 *            the Locale that should be returned in case of an invalid Locale String
-	 * @return a Locale that matches the specified locale String. If the given input String is
-	 *         <code>null</code> or can not be parsed because of an invalid format, the given
-	 *         default {@link Locale} will be returned.
+	 * @param str           the locale String to convert
+	 * @param defaultLocale the Locale that should be returned in case of an invalid
+	 *                      Locale String
+	 * @return a Locale that matches the specified locale String. If the given input
+	 *         String is <code>null</code> or can not be parsed because of an
+	 *         invalid format, the given default {@link Locale} will be returned.
 	 */
 	public static Locale toLocale(String str, Locale defaultLocale) {
 		if (str == null) {
@@ -1192,7 +1232,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		String variant = ""; //$NON-NLS-1$
 
 		String[] localeParts = str.split("_"); //$NON-NLS-1$
-		if (localeParts.length == 0 || localeParts.length > 3 || (localeParts.length == 1 && localeParts[0].length() == 0)) {
+		if (localeParts.length == 0 || localeParts.length > 3
+				|| (localeParts.length == 1 && localeParts[0].length() == 0)) {
 			System.err.println(NLS.bind(Msg.error_badNL, str));
 			return defaultLocale;
 		}
@@ -1234,7 +1275,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 
 	void logMessages(EquinoxLogServices logServices) {
 		for (Map.Entry<Throwable, Integer> exception : exceptions.entrySet()) {
-			logServices.log(EquinoxContainer.NAME, exception.getValue(), exception.getKey().getMessage(), exception.getKey());
+			logServices.log(EquinoxContainer.NAME, exception.getValue(), exception.getKey().getMessage(),
+					exception.getKey());
 		}
 		exceptions.clear();
 	}

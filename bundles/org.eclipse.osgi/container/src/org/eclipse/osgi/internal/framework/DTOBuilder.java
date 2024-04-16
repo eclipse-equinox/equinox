@@ -420,7 +420,8 @@ public class DTOBuilder {
 	}
 
 	private static Object mapValue(Object v) {
-		if ((v == null) || v instanceof Number || v instanceof Boolean || v instanceof Character || v instanceof String || v instanceof DTO) {
+		if ((v == null) || v instanceof Number || v instanceof Boolean || v instanceof Character || v instanceof String
+				|| v instanceof DTO) {
 			return v;
 		}
 		if (v instanceof Map) {
@@ -460,7 +461,10 @@ public class DTOBuilder {
 	}
 
 	private static Class<?> mapComponentType(Class<?> componentType) {
-		if (componentType.isPrimitive() || componentType.isArray() || Object.class.equals(componentType) || Number.class.isAssignableFrom(componentType) || Boolean.class.isAssignableFrom(componentType) || Character.class.isAssignableFrom(componentType) || String.class.isAssignableFrom(componentType) || DTO.class.isAssignableFrom(componentType)) {
+		if (componentType.isPrimitive() || componentType.isArray() || Object.class.equals(componentType)
+				|| Number.class.isAssignableFrom(componentType) || Boolean.class.isAssignableFrom(componentType)
+				|| Character.class.isAssignableFrom(componentType) || String.class.isAssignableFrom(componentType)
+				|| DTO.class.isAssignableFrom(componentType)) {
 			return componentType;
 		}
 		if (Map.class.isAssignableFrom(componentType)) {

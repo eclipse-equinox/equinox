@@ -15,6 +15,7 @@ package osgi.lazystart;
 
 import org.eclipse.osgi.tests.bundles.ITestRunner;
 import osgi.lazystart.c.CTest;
+
 public class LazyInclude2 implements ITestRunner {
 
 	@Override

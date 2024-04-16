@@ -79,9 +79,9 @@ public class User extends Role implements org.osgi.service.useradmin.User {
 	 * Checks to see if this User has a credential with the specified key set to the
 	 * specified value.
 	 * <p>
-	 * If the specified credential value is not of type <tt>String</tt> or
-	 * <tt>byte[]</tt>, it is ignored, that is, <tt>false</tt> is returned (as
-	 * opposed to an <tt>IllegalArgumentException</tt> being raised).
+	 * If the specified credential value is not of type <code>String</code> or
+	 * <code>byte[]</code>, it is ignored, that is, <code>false</code> is returned (as
+	 * opposed to an <code>IllegalArgumentException</code> being raised).
 	 *
 	 * @param key   The credential key.
 	 * @param value The credential value.
@@ -90,7 +90,7 @@ public class User extends Role implements org.osgi.service.useradmin.User {
 	 *         <code>false</code> otherwise.
 	 *
 	 * @throws SecurityException If a security manager exists and the caller does
-	 *                           not have the <tt>UserAdminPermission</tt> named
+	 *                           not have the <code>UserAdminPermission</code> named
 	 *                           after the credential key (or a prefix of it) with
 	 *                           action <code>getCredential</code>.
 	 */

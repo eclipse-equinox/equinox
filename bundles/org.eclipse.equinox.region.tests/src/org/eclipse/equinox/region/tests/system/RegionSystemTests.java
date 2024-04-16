@@ -40,6 +40,7 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.wiring.*;
 import org.osgi.util.tracker.ServiceTracker;
 
+@SuppressWarnings("deprecation") // RegionFilter.VISIBLE_SERVICE_NAMESPACE
 public class RegionSystemTests extends AbstractRegionSystemTest {
 
 	@Rule

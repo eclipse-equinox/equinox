@@ -30,7 +30,7 @@ public class TestServlet2 extends AbstractTestServlet {
 	private int getEffectiveMajorVersion() {
 		ServletContext context = getServletContext();
 		return context.getEffectiveMajorVersion(); // This is a Servlet 4.0 API.
-		
+
 	}
 
 	@Override

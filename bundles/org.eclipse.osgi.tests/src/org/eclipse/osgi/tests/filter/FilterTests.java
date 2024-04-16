@@ -62,7 +62,6 @@ public class FilterTests {
 	@Parameter(1)
 	public FilterFactory filterFactory;
 
-
 	static final int ISTRUE = 1;
 	static final int ISFALSE = 2;
 	static final int ISILLEGAL = 3;

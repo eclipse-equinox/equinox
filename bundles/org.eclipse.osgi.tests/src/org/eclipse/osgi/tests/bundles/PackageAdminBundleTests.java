@@ -41,6 +41,7 @@ import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 
+@SuppressWarnings("deprecation") // PackageAdmin, ExportedPackage
 public class PackageAdminBundleTests extends AbstractBundleTests {
 	public class TestListener implements SynchronousBundleListener {
 		ArrayList events = new ArrayList();
@@ -96,8 +97,8 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 		Bundle chainTestB = installer.installBundle("chain.test.b"); //$NON-NLS-1$
 		Bundle chainTestC = installer.installBundle("chain.test.c"); //$NON-NLS-1$
 		Bundle chainTestD = installer.installBundle("chain.test.d"); //$NON-NLS-1$
-		Bundle[] resolveBundles = new Bundle[] {chainTestC, chainTestA, chainTestB, chainTest, chainTestD};
-		Bundle[] dependencyOrder = new Bundle[] {chainTest, chainTestA, chainTestB, chainTestC, chainTestD};
+		Bundle[] resolveBundles = new Bundle[] { chainTestC, chainTestA, chainTestB, chainTest, chainTestD };
+		Bundle[] dependencyOrder = new Bundle[] { chainTest, chainTestA, chainTestB, chainTestC, chainTestD };
 		TestListener testListener = new TestListener();
 		OSGiTestsActivator.getContext().addBundleListener(testListener);
 		try {
@@ -106,12 +107,14 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 			assertEquals("Event count", 10, events.length); //$NON-NLS-1$
 			int j = 0;
 			for (int i = dependencyOrder.length - 1; i >= 0; i--, j++) {
-				assertTrue("Resolved Event Bundle: " + dependencyOrder[i].getSymbolicName(), dependencyOrder[i] == events[j].getBundle()); //$NON-NLS-1$
+				assertTrue("Resolved Event Bundle: " + dependencyOrder[i].getSymbolicName(), //$NON-NLS-1$
+						dependencyOrder[i] == events[j].getBundle());
 				assertEquals("Expecting Resolved event", BundleEvent.RESOLVED, events[j].getType()); //$NON-NLS-1$
 			}
 			j = 5;
 			for (int i = dependencyOrder.length - 1; i >= 0; i--, j++) {
-				assertTrue("Lazy Starting Bundle: " + dependencyOrder[i].getSymbolicName(), dependencyOrder[i] == events[j].getBundle()); //$NON-NLS-1$
+				assertTrue("Lazy Starting Bundle: " + dependencyOrder[i].getSymbolicName(), //$NON-NLS-1$
+						dependencyOrder[i] == events[j].getBundle());
 				assertEquals("Expecting Lazy Starting event", BundleEvent.LAZY_ACTIVATION, events[j].getType()); //$NON-NLS-1$
 			}
 		} finally {
@@ -126,37 +129,42 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 		Bundle chainTestB = installer.installBundle("chain.test.b"); //$NON-NLS-1$
 		Bundle chainTestC = installer.installBundle("chain.test.c"); //$NON-NLS-1$
 		Bundle chainTestD = installer.installBundle("chain.test.d"); //$NON-NLS-1$
-		Bundle[] resolveBundles = new Bundle[] {chainTestC, chainTestA, chainTestB, chainTest, chainTestD};
-		Bundle[] dependencyOrder = new Bundle[] {chainTest, chainTestA, chainTestB, chainTestC, chainTestD};
+		Bundle[] resolveBundles = new Bundle[] { chainTestC, chainTestA, chainTestB, chainTest, chainTestD };
+		Bundle[] dependencyOrder = new Bundle[] { chainTest, chainTestA, chainTestB, chainTestC, chainTestD };
 		TestListener testListener = new TestListener();
 		OSGiTestsActivator.getContext().addBundleListener(testListener);
 		try {
 			installer.resolveBundles(resolveBundles);
 			BundleEvent[] events = testListener.getEvents();
-			// throw away the events.  This was already tested
+			// throw away the events. This was already tested
 			installer.refreshPackages(resolveBundles);
 			events = testListener.getEvents();
 			assertEquals("Event count", 25, events.length); //$NON-NLS-1$
 			int j = 0;
 			for (int i = 0; i < dependencyOrder.length; i++, j += 2) {
-				assertTrue("Stopping Event Bundle: " + dependencyOrder[i].getSymbolicName(), dependencyOrder[i] == events[j].getBundle()); //$NON-NLS-1$
+				assertTrue("Stopping Event Bundle: " + dependencyOrder[i].getSymbolicName(), //$NON-NLS-1$
+						dependencyOrder[i] == events[j].getBundle());
 				assertEquals("Expecting Stopping event", BundleEvent.STOPPING, events[j].getType()); //$NON-NLS-1$
-				assertTrue("Stopped Event Bundle: " + dependencyOrder[i].getSymbolicName(), dependencyOrder[i] == events[j + 1].getBundle()); //$NON-NLS-1$
+				assertTrue("Stopped Event Bundle: " + dependencyOrder[i].getSymbolicName(), //$NON-NLS-1$
+						dependencyOrder[i] == events[j + 1].getBundle());
 				assertEquals("Expecting Stopping event", BundleEvent.STOPPED, events[j + 1].getType()); //$NON-NLS-1$
 			}
 			j = 10;
 			for (int i = 0; i < dependencyOrder.length; i++, j++) {
-				assertTrue("Unresolved Event Bundle: " + dependencyOrder[i].getSymbolicName(), dependencyOrder[i] == events[j].getBundle()); //$NON-NLS-1$
+				assertTrue("Unresolved Event Bundle: " + dependencyOrder[i].getSymbolicName(), //$NON-NLS-1$
+						dependencyOrder[i] == events[j].getBundle());
 				assertEquals("Expecting Unresolved event", BundleEvent.UNRESOLVED, events[j].getType()); //$NON-NLS-1$
 			}
 			j = 15;
 			for (int i = dependencyOrder.length - 1; i >= 0; i--, j++) {
-				assertTrue("Resolved Event Bundle: " + dependencyOrder[i].getSymbolicName(), dependencyOrder[i] == events[j].getBundle()); //$NON-NLS-1$
+				assertTrue("Resolved Event Bundle: " + dependencyOrder[i].getSymbolicName(), //$NON-NLS-1$
+						dependencyOrder[i] == events[j].getBundle());
 				assertEquals("Expecting Resolved event", BundleEvent.RESOLVED, events[j].getType()); //$NON-NLS-1$
 			}
 			j = 20;
 			for (int i = dependencyOrder.length - 1; i >= 0; i--, j++) {
-				assertTrue("Lazy Starting Event Bundle: " + dependencyOrder[i].getSymbolicName(), dependencyOrder[i] == events[j].getBundle()); //$NON-NLS-1$
+				assertTrue("Lazy Starting Event Bundle: " + dependencyOrder[i].getSymbolicName(), //$NON-NLS-1$
+						dependencyOrder[i] == events[j].getBundle());
 				assertEquals("Expecting Lazy Starting event", BundleEvent.LAZY_ACTIVATION, events[j].getType()); //$NON-NLS-1$
 			}
 
@@ -224,7 +232,7 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 		Bug289719Listener testListener = new Bug289719Listener();
 
 		try {
-			installer.resolveBundles(new Bundle[] {bug259903a, bug259903b, bug259903c});
+			installer.resolveBundles(new Bundle[] { bug259903a, bug259903b, bug259903c });
 			bug259903a.start();
 			bug259903b.start();
 			bug259903c.start();
@@ -232,24 +240,50 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 			installer.getStartLevel().setBundleStartLevel(bug259903b, 3);
 			installer.getStartLevel().setBundleStartLevel(bug259903a, 4);
 			OSGiTestsActivator.getContext().addBundleListener(testListener);
-			BundleEvent[] expectedEvents = new BundleEvent[] {new BundleEvent(BundleEvent.STOPPING, bug259903a), new BundleEvent(BundleEvent.STOPPED, bug259903a), new BundleEvent(BundleEvent.STOPPING, bug259903b), new BundleEvent(BundleEvent.STOPPED, bug259903b), new BundleEvent(BundleEvent.STOPPING, bug259903c), new BundleEvent(BundleEvent.STOPPED, bug259903c), new BundleEvent(BundleEvent.UNRESOLVED, bug259903a), new BundleEvent(BundleEvent.UNRESOLVED, bug259903b), new BundleEvent(BundleEvent.UNRESOLVED, bug259903c), new BundleEvent(BundleEvent.RESOLVED, bug259903c), new BundleEvent(BundleEvent.RESOLVED, bug259903b), new BundleEvent(BundleEvent.RESOLVED, bug259903a), new BundleEvent(BundleEvent.STARTING, bug259903c), new BundleEvent(BundleEvent.STARTED, bug259903c),
-					new BundleEvent(BundleEvent.STARTING, bug259903b), new BundleEvent(BundleEvent.STARTED, bug259903b), new BundleEvent(BundleEvent.STARTING, bug259903a), new BundleEvent(BundleEvent.STARTED, bug259903a)};
+			BundleEvent[] expectedEvents = new BundleEvent[] { new BundleEvent(BundleEvent.STOPPING, bug259903a),
+					new BundleEvent(BundleEvent.STOPPED, bug259903a), new BundleEvent(BundleEvent.STOPPING, bug259903b),
+					new BundleEvent(BundleEvent.STOPPED, bug259903b), new BundleEvent(BundleEvent.STOPPING, bug259903c),
+					new BundleEvent(BundleEvent.STOPPED, bug259903c),
+					new BundleEvent(BundleEvent.UNRESOLVED, bug259903a),
+					new BundleEvent(BundleEvent.UNRESOLVED, bug259903b),
+					new BundleEvent(BundleEvent.UNRESOLVED, bug259903c),
+					new BundleEvent(BundleEvent.RESOLVED, bug259903c),
+					new BundleEvent(BundleEvent.RESOLVED, bug259903b),
+					new BundleEvent(BundleEvent.RESOLVED, bug259903a),
+					new BundleEvent(BundleEvent.STARTING, bug259903c), new BundleEvent(BundleEvent.STARTED, bug259903c),
+					new BundleEvent(BundleEvent.STARTING, bug259903b), new BundleEvent(BundleEvent.STARTED, bug259903b),
+					new BundleEvent(BundleEvent.STARTING, bug259903a),
+					new BundleEvent(BundleEvent.STARTED, bug259903a) };
 			testListener.setExpectedEvents(expectedEvents);
-			// add a small delay to ensure the async bundle start-level changes above are done (bug 300820)
+			// add a small delay to ensure the async bundle start-level changes above are
+			// done (bug 300820)
 			Thread.sleep(500);
-			installer.refreshPackages(new Bundle[] {bug259903a});
+			installer.refreshPackages(new Bundle[] { bug259903a });
 			Throwable[] results = testListener.getFailures();
 			assertEquals(getMessage(results), 0, results.length);
 
-			expectedEvents = new BundleEvent[] {new BundleEvent(BundleEvent.STOPPING, bug259903c), new BundleEvent(BundleEvent.STOPPED, bug259903c), new BundleEvent(BundleEvent.STOPPING, bug259903b), new BundleEvent(BundleEvent.STOPPED, bug259903b), new BundleEvent(BundleEvent.STOPPING, bug259903a), new BundleEvent(BundleEvent.STOPPED, bug259903a), new BundleEvent(BundleEvent.UNRESOLVED, bug259903c), new BundleEvent(BundleEvent.UNRESOLVED, bug259903b), new BundleEvent(BundleEvent.UNRESOLVED, bug259903a), new BundleEvent(BundleEvent.RESOLVED, bug259903a), new BundleEvent(BundleEvent.RESOLVED, bug259903b), new BundleEvent(BundleEvent.RESOLVED, bug259903c), new BundleEvent(BundleEvent.STARTING, bug259903a), new BundleEvent(BundleEvent.STARTED, bug259903a),
-					new BundleEvent(BundleEvent.STARTING, bug259903b), new BundleEvent(BundleEvent.STARTED, bug259903b), new BundleEvent(BundleEvent.STARTING, bug259903c), new BundleEvent(BundleEvent.STARTED, bug259903c)};
+			expectedEvents = new BundleEvent[] { new BundleEvent(BundleEvent.STOPPING, bug259903c),
+					new BundleEvent(BundleEvent.STOPPED, bug259903c), new BundleEvent(BundleEvent.STOPPING, bug259903b),
+					new BundleEvent(BundleEvent.STOPPED, bug259903b), new BundleEvent(BundleEvent.STOPPING, bug259903a),
+					new BundleEvent(BundleEvent.STOPPED, bug259903a),
+					new BundleEvent(BundleEvent.UNRESOLVED, bug259903c),
+					new BundleEvent(BundleEvent.UNRESOLVED, bug259903b),
+					new BundleEvent(BundleEvent.UNRESOLVED, bug259903a),
+					new BundleEvent(BundleEvent.RESOLVED, bug259903a),
+					new BundleEvent(BundleEvent.RESOLVED, bug259903b),
+					new BundleEvent(BundleEvent.RESOLVED, bug259903c),
+					new BundleEvent(BundleEvent.STARTING, bug259903a), new BundleEvent(BundleEvent.STARTED, bug259903a),
+					new BundleEvent(BundleEvent.STARTING, bug259903b), new BundleEvent(BundleEvent.STARTED, bug259903b),
+					new BundleEvent(BundleEvent.STARTING, bug259903c),
+					new BundleEvent(BundleEvent.STARTED, bug259903c) };
 			testListener.setExpectedEvents(expectedEvents);
 			installer.getStartLevel().setBundleStartLevel(bug259903c, 4);
 			installer.getStartLevel().setBundleStartLevel(bug259903b, 4);
 			installer.getStartLevel().setBundleStartLevel(bug259903a, 4);
-			// add a small delay to ensure the async bundle start-level changes above are done (bug 300820)
+			// add a small delay to ensure the async bundle start-level changes above are
+			// done (bug 300820)
 			Thread.sleep(500);
-			installer.refreshPackages(new Bundle[] {bug259903a});
+			installer.refreshPackages(new Bundle[] { bug259903a });
 			results = testListener.getFailures();
 			assertEquals(getMessage(results), 0, results.length);
 
@@ -264,34 +298,37 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 		Bundle[] systemBundles = pa.getBundles(Constants.SYSTEM_BUNDLE_SYMBOLICNAME, null);
 		assertNotNull("No system bundles found.", systemBundles);
 		assertEquals("Srong number of system bundles.", 1, systemBundles.length);
-		assertEquals("Wrong system bundle found.", OSGiTestsActivator.getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION), systemBundles[0]);
+		assertEquals("Wrong system bundle found.",
+				OSGiTestsActivator.getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION), systemBundles[0]);
 	}
 
 	@Test
 	public void testUninstallWhileResolving() throws BundleException {
-		ServiceRegistration<ResolverHookFactory> resolverHookReg = getContext().registerService(ResolverHookFactory.class, triggers -> new ResolverHook() {
+		ServiceRegistration<ResolverHookFactory> resolverHookReg = getContext()
+				.registerService(ResolverHookFactory.class, triggers -> new ResolverHook() {
 
-			@Override
-			public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
-				// Nothing
-			}
+					@Override
+					public void filterSingletonCollisions(BundleCapability singleton,
+							Collection<BundleCapability> collisionCandidates) {
+						// Nothing
+					}
 
-			@Override
-			public void filterResolvable(Collection<BundleRevision> candidates) {
-				// prevent all resolves
-				candidates.clear();
-			}
+					@Override
+					public void filterResolvable(Collection<BundleRevision> candidates) {
+						// prevent all resolves
+						candidates.clear();
+					}
 
-			@Override
-			public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
-				// nothing
-			}
+					@Override
+					public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
+						// nothing
+					}
 
-			@Override
-			public void end() {
-				// nothing
-			}
-		}, null);
+					@Override
+					public void end() {
+						// nothing
+					}
+				}, null);
 		try {
 			Bundle b1 = installer.installBundle("test.uninstall.start1"); //$NON-NLS-1$
 			Bundle b2 = installer.installBundle("test.uninstall.start2"); //$NON-NLS-1$
@@ -307,7 +344,8 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 			}
 			resolverHookReg.unregister();
 			resolverHookReg = null;
-			getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION).adapt(FrameworkWiring.class).resolveBundles(Arrays.asList(b1, b2));
+			getContext().getBundle(Constants.SYSTEM_BUNDLE_LOCATION).adapt(FrameworkWiring.class)
+					.resolveBundles(Arrays.asList(b1, b2));
 		} finally {
 			if (resolverHookReg != null) {
 				resolverHookReg.unregister();

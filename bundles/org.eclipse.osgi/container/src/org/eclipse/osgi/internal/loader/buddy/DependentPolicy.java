@@ -27,22 +27,22 @@ import org.osgi.framework.namespace.BundleNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
 
 /**
- * DependentPolicy is an implementation of a buddy policy.
- * It is responsible for looking up a class in the dependents of the bundle
- * to which this policy is attached to.
+ * DependentPolicy is an implementation of a buddy policy. It is responsible for
+ * looking up a class in the dependents of the bundle to which this policy is
+ * attached to.
  */
 public class DependentPolicy implements IBuddyPolicy {
 	BundleLoader buddyRequester;
-	int lastDependentOfAdded = -1; //remember the index of the bundle for which we last added the dependent
-	List<ModuleWiring> allDependents = null; //the list of all dependents known so far
+	int lastDependentOfAdded = -1; // remember the index of the bundle for which we last added the dependent
+	List<ModuleWiring> allDependents = null; // the list of all dependents known so far
 
 	public DependentPolicy(BundleLoader requester) {
 		buddyRequester = requester;
 
-		//Initialize with the first level of dependent the list
+		// Initialize with the first level of dependent the list
 		allDependents = new ArrayList<>();
 		basicAddImmediateDependents(requester.getWiring());
-		//If there is no dependent, reset to null
+		// If there is no dependent, reset to null
 		if (allDependents.size() == 0)
 			allDependents = null;
 	}
@@ -52,7 +52,7 @@ public class DependentPolicy implements IBuddyPolicy {
 		if (allDependents == null) {
 			return null;
 		}
-		//size may change, so we must check it every time
+		// size may change, so we must check it every time
 		for (int i = 0; i < allDependents.size(); i++) {
 			ModuleWiring searchWiring = allDependents.get(i);
 			BundleLoader searchLoader = (BundleLoader) searchWiring.getModuleLoader();
@@ -80,7 +80,7 @@ public class DependentPolicy implements IBuddyPolicy {
 			return null;
 
 		URL result = null;
-		//size may change, so we must check it every time
+		// size may change, so we must check it every time
 		for (int i = 0; i < allDependents.size() && result == null; i++) {
 			ModuleWiring searchWiring = allDependents.get(i);
 			BundleLoader searchLoader = (BundleLoader) searchWiring.getModuleLoader();
@@ -100,7 +100,7 @@ public class DependentPolicy implements IBuddyPolicy {
 			return null;
 
 		Enumeration<URL> results = null;
-		//size may change, so we must check it every time
+		// size may change, so we must check it every time
 		for (int i = 0; i < allDependents.size(); i++) {
 			ModuleWiring searchWiring = allDependents.get(i);
 			BundleLoader searchLoader = (BundleLoader) searchWiring.getModuleLoader();
@@ -109,7 +109,7 @@ public class DependentPolicy implements IBuddyPolicy {
 					results = BundleLoader.compoundEnumerations(results, searchLoader.findResources(name));
 					addDependent(i, searchWiring);
 				} catch (IOException e) {
-					//Ignore and keep looking
+					// Ignore and keep looking
 				}
 			}
 		}
@@ -134,7 +134,8 @@ public class DependentPolicy implements IBuddyPolicy {
 		if (providedWires != null) {
 			for (ModuleWire wire : providedWires) {
 				String namespace = wire.getRequirement().getNamespace();
-				if (PackageNamespace.PACKAGE_NAMESPACE.equals(namespace) || BundleNamespace.BUNDLE_NAMESPACE.equals(namespace)) {
+				if (PackageNamespace.PACKAGE_NAMESPACE.equals(namespace)
+						|| BundleNamespace.BUNDLE_NAMESPACE.equals(namespace)) {
 					ModuleWiring dependent = wire.getRequirerWiring();
 					if (!allDependents.contains(dependent)) {
 						allDependents.add(dependent);

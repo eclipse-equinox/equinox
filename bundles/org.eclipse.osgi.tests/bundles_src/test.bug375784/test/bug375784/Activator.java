@@ -15,7 +15,9 @@ package test.bug375784;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -55,8 +57,12 @@ public class Activator implements BundleActivator {
 		}
 
 		try {
-			clazz.newInstance();
+			clazz.getDeclaredConstructor().newInstance();
 			throw new RuntimeException("Should have failed to create object from class: " + clazz);
+		} catch (InvocationTargetException e) {
+			if (!(e.getCause() instanceof NoClassDefFoundError)) {
+				throw e;
+			}
 		} catch (NoClassDefFoundError e) {
 			// expected
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2024 Cognos Incorporated, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,13 +11,13 @@
  * Contributors:
  *     Cognos Incorporated - initial API and implementation
  *     IBM Corporation - bug fixes and enhancements
+ *     Christoph Läubrich - add support for Coordinator
  *******************************************************************************/
 package org.eclipse.equinox.internal.cm;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.*;
-import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -34,9 +34,11 @@ public class EventDispatcher {
 	/** @GuardedBy this */
 	private ServiceReference<ConfigurationAdmin> configAdminReference;
 	final LogTracker log;
+	private ConfigurationAdminFactory configurationAdminFactory;
 
-	public EventDispatcher(BundleContext context, LogTracker log) {
+	public EventDispatcher(BundleContext context, LogTracker log, ConfigurationAdminFactory configurationAdminFactory) {
 		this.log = log;
+		this.configurationAdminFactory = configurationAdminFactory;
 		tracker = new ServiceTracker<>(context, ConfigurationListener.class, null);
 		syncTracker = new ServiceTracker<>(context, SynchronousConfigurationListener.class, null);
 	}
@@ -72,7 +74,7 @@ public class EventDispatcher {
 					try {
 						syncListener.configurationEvent(event);
 					} catch (Throwable t) {
-						log.log(LogService.LOG_ERROR, t.getMessage(), t);
+						log.error(t.getMessage(), t);
 					}
 				}
 			}
@@ -82,21 +84,25 @@ public class EventDispatcher {
 			return;
 
 		for (final ServiceReference<ConfigurationListener> ref : refs) {
-			queue.put(new Runnable() {
-				@Override
-				public void run() {
-					ConfigurationListener listener = tracker.getService(ref);
-					if (listener == null) {
-						return;
-					}
-					try {
-						listener.configurationEvent(event);
-					} catch (Throwable t) {
-						log.log(LogService.LOG_ERROR, t.getMessage(), t);
-					}
-				}
-			});
+			configurationAdminFactory.executeCoordinated(new Object(), () -> enqueue(event, ref));
 		}
+	}
+
+	protected void enqueue(final ConfigurationEvent event, final ServiceReference<ConfigurationListener> ref) {
+		queue.put(new Runnable() {
+			@Override
+			public void run() {
+				ConfigurationListener listener = tracker.getService(ref);
+				if (listener == null) {
+					return;
+				}
+				try {
+					listener.configurationEvent(event);
+				} catch (Throwable t) {
+					log.error(t.getMessage(), t);
+				}
+			}
+		});
 	}
 
 	private synchronized ConfigurationEvent createConfigurationEvent(int type, String factoryPid, String pid) {
@@ -105,4 +111,5 @@ public class EventDispatcher {
 
 		return new ConfigurationEvent(configAdminReference, type, factoryPid, pid);
 	}
+
 }

@@ -13,12 +13,25 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.service.security;
 
-import java.io.*;
-import java.security.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.signedcontent.SignedBundleHook;
 import org.eclipse.osgi.internal.signedcontent.SignedContentMessages;
@@ -47,11 +60,13 @@ public class KeyStoreTrustEngine extends TrustEngine {
 
 	/**
 	 * Create a new KeyStoreTrustEngine that is backed by a KeyStore
-	 * @param path - path to the keystore
-	 * @param type - the type of keystore at the path location
+	 * 
+	 * @param path     - path to the keystore
+	 * @param type     - the type of keystore at the path location
 	 * @param password - the password required to unlock the keystore
 	 */
-	public KeyStoreTrustEngine(String path, String type, char[] password, String name, SignedBundleHook signedBundleHook) { //TODO: This should be a *CallbackHandler*
+	public KeyStoreTrustEngine(String path, String type, char[] password, String name,
+			SignedBundleHook signedBundleHook) { // TODO: This should be a *CallbackHandler*
 		this.path = path;
 		this.type = type;
 		this.password = password;
@@ -61,6 +76,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 
 	/**
 	 * Return the type
+	 * 
 	 * @return type - the type for the KeyStore being managed
 	 */
 	private String getType() {
@@ -69,6 +85,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 
 	/**
 	 * Return the path
+	 * 
 	 * @return - the path for the KeyStore being managed
 	 */
 	private String getPath() {
@@ -77,6 +94,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 
 	/**
 	 * Return the password
+	 * 
 	 * @return password - the password as a char[]
 	 */
 	private char[] getPassword() {
@@ -85,6 +103,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 
 	/**
 	 * Return the KeyStore managed
+	 * 
 	 * @return The KeyStore instance, initialized and loaded
 	 */
 	private synchronized KeyStore getKeyStore() throws IOException, GeneralSecurityException {
@@ -97,7 +116,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 				try {
 					in.close();
 				} catch (IOException e) {
-					//ignore secondary failure
+					// ignore secondary failure
 				}
 			}
 		}
@@ -123,7 +142,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 						// this is the last certificate in the chain
 						// determine if we have a valid root
 						X509Certificate cert = (X509Certificate) certChain[i];
-						if (cert.getSubjectDN().equals(cert.getIssuerDN())) {
+						if (cert.getSubjectX500Principal().equals(cert.getIssuerX500Principal())) {
 							cert.verify(cert.getPublicKey());
 							rootCert = cert; // this is a self-signed certificate
 						} else {
@@ -145,9 +164,11 @@ public class KeyStoreTrustEngine extends TrustEngine {
 						if (alias != null)
 							return store.getCertificate(alias);
 					}
-					// if we have reached the end and the last cert is not found to be a valid root CA
+					// if we have reached the end and the last cert is not found to be a valid root
+					// CA
 					// then we need to back off the root CA and try to find an alternative
-					if (certChain.length > 1 && i == certChain.length - 1 && certChain[i - 1] instanceof X509Certificate)
+					if (certChain.length > 1 && i == certChain.length - 1
+							&& certChain[i - 1] instanceof X509Certificate)
 						return findAlternativeRoot((X509Certificate) certChain[i - 1], store);
 				}
 			}
@@ -162,11 +183,14 @@ public class KeyStoreTrustEngine extends TrustEngine {
 		return null;
 	}
 
-	private Certificate findAlternativeRoot(X509Certificate cert, KeyStore store) throws InvalidKeyException, KeyStoreException, NoSuchAlgorithmException, NoSuchProviderException, SignatureException, CertificateException {
+	private Certificate findAlternativeRoot(X509Certificate cert, KeyStore store)
+			throws InvalidKeyException, KeyStoreException, NoSuchAlgorithmException, NoSuchProviderException,
+			SignatureException, CertificateException {
 		synchronized (store) {
 			for (Enumeration<String> e = store.aliases(); e.hasMoreElements();) {
 				Certificate nextCert = store.getCertificate(e.nextElement());
-				if (nextCert instanceof X509Certificate && ((X509Certificate) nextCert).getSubjectDN().equals(cert.getIssuerDN())) {
+				if (nextCert instanceof X509Certificate && ((X509Certificate) nextCert).getSubjectX500Principal()
+						.equals(cert.getIssuerX500Principal())) {
 					cert.verify(nextCert.getPublicKey());
 					return nextCert;
 				}
@@ -303,21 +327,22 @@ public class KeyStoreTrustEngine extends TrustEngine {
 	}
 
 	/**
-	 * Closes a stream and ignores any resulting exception. This is useful
-	 * when doing stream cleanup in a finally block where secondary exceptions
-	 * are not worth logging.
+	 * Closes a stream and ignores any resulting exception. This is useful when
+	 * doing stream cleanup in a finally block where secondary exceptions are not
+	 * worth logging.
 	 */
 	private void safeClose(OutputStream out) {
 		try {
 			if (out != null)
 				out.close();
 		} catch (IOException e) {
-			//ignore
+			// ignore
 		}
 	}
 
 	/**
 	 * Get an input stream for the KeyStore managed
+	 * 
 	 * @return inputstream - the stream
 	 */
 	private InputStream getInputStream() throws IOException {
@@ -326,6 +351,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 
 	/**
 	 * Get an output stream for the KeyStore managed
+	 * 
 	 * @return outputstream - the stream
 	 */
 	private OutputStream getOutputStream() throws IOException {

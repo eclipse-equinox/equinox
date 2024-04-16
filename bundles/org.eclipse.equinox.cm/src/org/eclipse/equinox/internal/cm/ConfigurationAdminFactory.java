@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2019 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2024 Cognos Incorporated, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,14 +11,18 @@
  * Contributors:
  *     Cognos Incorporated - initial API and implementation
  *     IBM Corporation - bug fixes and enhancements
+ *     Christoph Läubrich - add support for Coordinator
  *******************************************************************************/
 package org.eclipse.equinox.internal.cm;
 
 import java.security.Permission;
-import java.util.Dictionary;
+import java.util.*;
+import java.util.function.Predicate;
 import org.osgi.framework.*;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationPermission;
+import org.osgi.service.coordinator.*;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * ConfigurationAdminFactory provides a Configuration Admin ServiceFactory but
@@ -37,17 +41,20 @@ public class ConfigurationAdminFactory implements ServiceFactory<ConfigurationAd
 	private final ManagedServiceTracker managedServiceTracker;
 	private final ManagedServiceFactoryTracker managedServiceFactoryTracker;
 	private final ConfigurationStore configurationStore;
+	private final ServiceTracker<Coordinator, Coordinator> coordinationServiceTracker;
 
 	public ConfigurationAdminFactory(BundleContext context, LogTracker log) {
 		this.log = log;
 		configurationStore = new ConfigurationStore(this, context);
-		eventDispatcher = new EventDispatcher(context, log);
+		eventDispatcher = new EventDispatcher(context, log, this);
 		pluginManager = new PluginManager(context);
 		managedServiceTracker = new ManagedServiceTracker(this, configurationStore, context);
 		managedServiceFactoryTracker = new ManagedServiceFactoryTracker(this, configurationStore, context);
+		coordinationServiceTracker = new ServiceTracker<>(context, Coordinator.class, null);
 	}
 
 	void start() {
+		coordinationServiceTracker.open();
 		eventDispatcher.start();
 		pluginManager.start();
 		managedServiceTracker.open();
@@ -59,6 +66,7 @@ public class ConfigurationAdminFactory implements ServiceFactory<ConfigurationAd
 		managedServiceFactoryTracker.close();
 		eventDispatcher.stop();
 		pluginManager.stop();
+		coordinationServiceTracker.close();
 	}
 
 	@Override
@@ -120,12 +128,16 @@ public class ConfigurationAdminFactory implements ServiceFactory<ConfigurationAd
 		}
 	}
 
-	void log(int level, String message) {
-		log.log(level, message);
+	void warn(String message) {
+		log.warn(message);
 	}
 
-	void log(int level, String message, Throwable exception) {
-		log.log(level, message, exception);
+	void error(String message) {
+		log.error(message);
+	}
+
+	void error(String message, Throwable exception) {
+		log.error(message, exception);
 	}
 
 	void dispatchEvent(int type, String factoryPid, String pid) {
@@ -156,5 +168,57 @@ public class ConfigurationAdminFactory implements ServiceFactory<ConfigurationAd
 
 	Dictionary<String, Object> modifyConfiguration(ServiceReference<?> reference, ConfigurationImpl config) {
 		return pluginManager.modifyConfiguration(reference, config);
+	}
+
+	ConfigurationAdminParticipant coordinationParticipant(Coordination coordination) {
+		return coordination.getParticipants().stream().filter(ConfigurationAdminParticipant.class::isInstance)
+				.map(ConfigurationAdminParticipant.class::cast).findFirst()
+				.orElseGet(() -> new ConfigurationAdminParticipant(coordination));
+	}
+
+	Optional<Coordination> coordinate() {
+		return Optional.ofNullable(coordinationServiceTracker.getService()).map(Coordinator::peek)
+				.filter(Predicate.not(Coordination::isTerminated));
+	}
+
+	private final class ConfigurationAdminParticipant implements Participant {
+
+		private Map<Object, Runnable> tasks = new LinkedHashMap<>();
+
+		public ConfigurationAdminParticipant(Coordination coordination) {
+			coordination.addParticipant(this);
+		}
+
+		@Override
+		public void ended(Coordination coordination) throws Exception {
+			finish(coordination);
+		}
+
+		@Override
+		public void failed(Coordination coordination) throws Exception {
+			finish(coordination);
+		}
+
+		private void finish(Coordination coordination) {
+			tasks.values().forEach(Runnable::run);
+			tasks.clear();
+		}
+
+		public void cancelTask(Object key) {
+			tasks.remove(key);
+		}
+
+		public void addTask(Object key, Runnable runnable) {
+			tasks.put(key, runnable);
+		}
+	}
+
+	void executeCoordinated(Object key, Runnable runnable) {
+		coordinate().ifPresentOrElse(coordination -> coordinationParticipant(coordination).addTask(key, runnable),
+				() -> runnable.run());
+	}
+
+	void cancelExecuteCoordinated(Object key) {
+		coordinate().ifPresent(coordination -> coordinationParticipant(coordination).cancelTask(key));
 	}
 }

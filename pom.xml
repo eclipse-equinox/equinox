@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.eclipse</groupId>
     <artifactId>eclipse-platform-parent</artifactId>
-    <version>4.31.0-SNAPSHOT</version>
+    <version>4.32.0-SNAPSHOT</version>
     <relativePath>../eclipse-platform-parent</relativePath>
   </parent>
 
@@ -114,6 +114,9 @@
 								<keyStores>${project.basedir}/ ../../releng/tck.keystore</keyStores>
 								<reportDirectory>${project.build.directory}/tck-results</reportDirectory>
 								<properties>
+									<org.osgi.test.cases.framework.div.tb12>abc</org.osgi.test.cases.framework.div.tb12>
+									<org.osgi.test.cases.framework.div.tb15>abc</org.osgi.test.cases.framework.div.tb15>
+									<org.osgi.test.cases.framework.div.tb16>xyz</org.osgi.test.cases.framework.div.tb16>
 									<org.osgi.framework.system.capabilities.extra>
 										osgi.ee; osgi.ee="testOSGiEE",
 										osgi.ee; osgi.ee="AA/BB",
@@ -141,7 +144,6 @@
 			<module>bundles/org.eclipse.equinox.useradmin</module>
 			<module>bundles/org.eclipse.equinox.preferences</module>
 			<module>bundles/org.eclipse.equinox.metatype</module>
-			<module>bundles/org.eclipse.equinox.device</module>
 			<module>bundles/org.eclipse.equinox.event</module>
 		</modules>
 	</profile>
@@ -172,7 +174,7 @@
 		    <module>bundles/org.eclipse.equinox.concurrent</module>
 		    <module>bundles/org.eclipse.equinox.security</module>
 		    <module>bundles/org.eclipse.equinox.security.macosx</module>
-		    <module>bundles/org.eclipse.equinox.security.win32.x86_64</module>
+		    <module>bundles/org.eclipse.equinox.security.win32</module>
 		    <module>bundles/org.eclipse.equinox.security.linux</module>
 		    <module>bundles/org.eclipse.equinox.bidi</module>
 		    <module>bundles/org.eclipse.equinox.cm</module>
@@ -185,6 +187,7 @@
 		    <module>bundles/org.eclipse.equinox.device</module>
 		    <module>bundles/org.eclipse.equinox.event</module>
 		
+		    <module>bundles/org.eclipse.equinox.http.service.api</module>
 		    <module>bundles/org.eclipse.equinox.http.jetty</module>
 		    <module>bundles/org.eclipse.equinox.http.registry</module>
 		    <module>bundles/org.eclipse.equinox.http.servlet</module>
@@ -217,6 +220,7 @@
 		    <module>bundles/org.eclipse.equinox.launcher.gtk.linux.ppc64le</module>
 		    <module>bundles/org.eclipse.equinox.launcher.gtk.linux.x86_64</module>
 		    <module>bundles/org.eclipse.equinox.launcher.win32.win32.x86_64</module>
+		    <module>bundles/org.eclipse.equinox.launcher.tests</module>
 		
 		    <module>bundles/org.eclipse.osgi.tests</module>
         </modules>
@@ -256,7 +260,7 @@
         <plugin>
           <groupId>biz.aQute.bnd</groupId>
           <artifactId>bnd-maven-plugin</artifactId>
-          <version>6.3.1</version>
+          <version>7.0.0</version>
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>

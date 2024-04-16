@@ -23,14 +23,15 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleException;
 
 /**
- * Headers classes. This class implements a Dictionary that has
- * the following behavior:
+ * Headers classes. This class implements a Dictionary that has the following
+ * behavior:
  * <ul>
- * <li>put and remove clear throw UnsupportedOperationException.
- * The Dictionary is thus read-only to others.
- * <li>The String keys in the Dictionary are case-preserved,
- * but the get operation is case-insensitive.
+ * <li>put and remove clear throw UnsupportedOperationException. The Dictionary
+ * is thus read-only to others.
+ * <li>The String keys in the Dictionary are case-preserved, but the get
+ * operation is case-insensitive.
  * </ul>
+ * 
  * @since 3.1
  * @deprecated As of 3.13. Replaced by {@link CaseInsensitiveDictionaryMap}.
  */
@@ -60,8 +61,8 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	 * Create a Headers dictionary from a Dictionary.
 	 *
 	 * @param values The initial dictionary for this Headers object.
-	 * @exception IllegalArgumentException If a case-variant of the key is
-	 * in the dictionary parameter.
+	 * @exception IllegalArgumentException If a case-variant of the key is in the
+	 *                                     dictionary parameter.
 	 */
 	public Headers(Dictionary<? extends K, ? extends V> values) {
 		this(values.size());
@@ -154,17 +155,17 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	/**
 	 * Set a header value or optionally replace it if it already exists.
 	 *
-	 * @param key Key name.
-	 * @param value Value of the key or null to remove key.
-	 * @param replace A value of true will allow a previous
-	 * value of the key to be replaced.  A value of false
-	 * will cause an IllegalArgumentException to be thrown
-	 * if a previous value of the key exists.
-	 * @return the previous value to which the key was mapped,
-	 * or null if the key did not have a previous mapping.
+	 * @param key     Key name.
+	 * @param value   Value of the key or null to remove key.
+	 * @param replace A value of true will allow a previous value of the key to be
+	 *                replaced. A value of false will cause an
+	 *                IllegalArgumentException to be thrown if a previous value of
+	 *                the key exists.
+	 * @return the previous value to which the key was mapped, or null if the key
+	 *         did not have a previous mapping.
 	 *
-	 * @exception IllegalArgumentException If a case-variant of the key is
-	 * already present.
+	 * @exception IllegalArgumentException If a case-variant of the key is already
+	 *                                     present.
 	 * @since 3.2
 	 */
 	public synchronized V set(K key, V value, boolean replace) {
@@ -195,13 +196,13 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	/**
 	 * Set a header value.
 	 *
-	 * @param key Key name.
+	 * @param key   Key name.
 	 * @param value Value of the key or null to remove key.
-	 * @return the previous value to which the key was mapped,
-	 * or null if the key did not have a previous mapping.
+	 * @return the previous value to which the key was mapped, or null if the key
+	 *         did not have a previous mapping.
 	 *
-	 * @exception IllegalArgumentException If a case-variant of the key is
-	 * already present.
+	 * @exception IllegalArgumentException If a case-variant of the key is already
+	 *                                     present.
 	 */
 	public synchronized V set(K key, V value) {
 		return set(key, value, false);
@@ -214,7 +215,7 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	/**
 	 * Returns the number of entries (distinct keys) in this dictionary.
 	 *
-	 * @return  the number of keys in this dictionary.
+	 * @return the number of keys in this dictionary.
 	 */
 	@Override
 	public synchronized int size() {
@@ -222,12 +223,12 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	}
 
 	/**
-	 * Tests if this dictionary maps no keys to value. The general contract
-	 * for the <tt>isEmpty</tt> method is that the result is true if and only
-	 * if this dictionary contains no entries.
+	 * Tests if this dictionary maps no keys to value. The general contract for the
+	 * <code>isEmpty</code> method is that the result is true if and only if this
+	 * dictionary contains no entries.
 	 *
-	 * @return  <code>true</code> if this dictionary maps no keys to values;
-	 *          <code>false</code> otherwise.
+	 * @return <code>true</code> if this dictionary maps no keys to values;
+	 *         <code>false</code> otherwise.
 	 */
 	@Override
 	public synchronized boolean isEmpty() {
@@ -237,7 +238,7 @@ public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	/**
 	 * Always throws UnsupportedOperationException.
 	 *
-	 * @param key header name.
+	 * @param key   header name.
 	 * @param value header value.
 	 */
 	@Override

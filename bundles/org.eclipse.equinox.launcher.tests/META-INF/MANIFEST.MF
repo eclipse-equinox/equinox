@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Tests
+Bundle-SymbolicName: org.eclipse.equinox.launcher.tests
+Bundle-Version: 1.0.0.qualifier
+Fragment-Host: org.eclipse.equinox.launcher
+Automatic-Module-Name: org.eclipse.launcher.tests
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Import-Package: org.junit.jupiter.api;version="[5.10.0,6.0.0)",
+ org.junit.jupiter.api.io;version="[5.10.0,6.0.0)"

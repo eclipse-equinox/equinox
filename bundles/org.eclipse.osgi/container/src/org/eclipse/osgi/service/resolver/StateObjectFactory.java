@@ -31,6 +31,7 @@ import org.osgi.framework.Version;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
+ * 
  * @since 3.1
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -38,14 +39,14 @@ public interface StateObjectFactory {
 
 	/**
 	 * The default object factory that can be used to create, populate and resolve
-	 * states.  This is particularly useful when using the resolver outside the context
-	 * of a running Equinox framework.
+	 * states. This is particularly useful when using the resolver outside the
+	 * context of a running Equinox framework.
 	 */
 	public static final StateObjectFactory defaultFactory = new StateObjectFactoryProxy();
 
 	/**
-	 * Creates an empty state. The returned state does not have an
-	 * attached resolver.
+	 * Creates an empty state. The returned state does not have an attached
+	 * resolver.
 	 *
 	 * @return the created state
 	 * @deprecated use {@link #createState(boolean) }
@@ -55,7 +56,8 @@ public interface StateObjectFactory {
 	/**
 	 * Creates an empty state with or without a resolver.
 	 *
-	 * @param resolver true if the created state should be initialized with a resolver.
+	 * @param resolver true if the created state should be initialized with a
+	 *                 resolver.
 	 * @return the created state
 	 * @since 3.2
 	 */
@@ -63,10 +65,10 @@ public interface StateObjectFactory {
 
 	/**
 	 * Creates a new state that is a copy of the given state. The returned state
-	 * will contain copies of all bundle descriptions in the given state.
-	 * The user objects from the original bundle descriptions is not copied and
-	 * no data pertaining to resolution is copied.  The returned state will have a
-	 * new resolver attached to it.
+	 * will contain copies of all bundle descriptions in the given state. The user
+	 * objects from the original bundle descriptions is not copied and no data
+	 * pertaining to resolution is copied. The returned state will have a new
+	 * resolver attached to it.
 	 *
 	 * @param state a state to be copied
 	 * @return the created state
@@ -76,153 +78,226 @@ public interface StateObjectFactory {
 	/**
 	 * Creates a bundle description from the given parameters.
 	 *
-	 * @param id id for the bundle
-	 * @param symbolicName symbolic name for the bundle (may be
-	 * <code>null</code>)
-	 * @param version version for the bundle (may be <code>null</code>)
-	 * @param location location for the bundle (may be <code>null</code>)
-	 * @param required version constraints for all required bundles (may be
-	 * <code>null</code>)
-	 * @param host version constraint specifying the host for the bundle to be
-	 * created. Should be <code>null</code> if the bundle is not a fragment
-	 * @param imports version constraints for all packages imported
-	 * (may be <code>null</code>)
-	 * @param exports package descriptions of all the exported packages
-	 * (may be <code>null</code>)
-	 * @param providedPackages the list of provided packages (may be <code>null</code>)
-	 * @param singleton whether the bundle created should be a singleton
+	 * @param id               id for the bundle
+	 * @param symbolicName     symbolic name for the bundle (may be
+	 *                         <code>null</code>)
+	 * @param version          version for the bundle (may be <code>null</code>)
+	 * @param location         location for the bundle (may be <code>null</code>)
+	 * @param required         version constraints for all required bundles (may be
+	 *                         <code>null</code>)
+	 * @param host             version constraint specifying the host for the bundle
+	 *                         to be created. Should be <code>null</code> if the
+	 *                         bundle is not a fragment
+	 * @param imports          version constraints for all packages imported (may be
+	 *                         <code>null</code>)
+	 * @param exports          package descriptions of all the exported packages
+	 *                         (may be <code>null</code>)
+	 * @param providedPackages the list of provided packages (may be
+	 *                         <code>null</code>)
+	 * @param singleton        whether the bundle created should be a singleton
 	 * @return the created bundle description
-	 * @deprecated use {@link #createBundleDescription(long, String, Version, String, BundleSpecification[], HostSpecification, ImportPackageSpecification[], ExportPackageDescription[], boolean, boolean, boolean, String, String[], GenericSpecification[], GenericDescription[])}
+	 * @deprecated use
+	 *             {@link #createBundleDescription(long, String, Version, String, BundleSpecification[], HostSpecification, ImportPackageSpecification[], ExportPackageDescription[], boolean, boolean, boolean, String, String[], GenericSpecification[], GenericDescription[])}
 	 */
-	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton);
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location,
+			BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports,
+			ExportPackageDescription[] exports, String[] providedPackages, boolean singleton);
 
 	/**
 	 * Creates a bundle description from the given parameters.
 	 *
-	 * @param id id for the bundle
-	 * @param symbolicName symbolic name for the bundle (may be
-	 * <code>null</code>)
-	 * @param version version for the bundle (may be <code>null</code>)
-	 * @param location location for the bundle (may be <code>null</code>)
-	 * @param required version constraints for all required bundles (may be
-	 * <code>null</code>)
-	 * @param host version constraint specifying the host for the bundle to be
-	 * created. Should be <code>null</code> if the bundle is not a fragment
-	 * @param imports version constraints for all packages imported
-	 * (may be <code>null</code>)
-	 * @param exports package descriptions of all the exported packages
-	 * (may be <code>null</code>)
-	 * @param providedPackages the list of provided packages (may be <code>null</code>)
-	 * @param singleton whether the bundle created should be a singleton
-	 * @param attachFragments whether the bundle allows fragments to attach
-	 * @param dynamicFragments whether the bundle allows fragments to dynamically attach
-	 * @param platformFilter the platform filter (may be <code>null</code>)
-	 * @param executionEnvironment the execution environment (may be <code>null</code>)
-	 * @param genericRequires the version constraints for all required capabilities (may be <code>null</code>)
-	 * @param genericCapabilities the specifications of all the capabilities of the bundle (may be <code>null</code>)
+	 * @param id                   id for the bundle
+	 * @param symbolicName         symbolic name for the bundle (may be
+	 *                             <code>null</code>)
+	 * @param version              version for the bundle (may be <code>null</code>)
+	 * @param location             location for the bundle (may be
+	 *                             <code>null</code>)
+	 * @param required             version constraints for all required bundles (may
+	 *                             be <code>null</code>)
+	 * @param host                 version constraint specifying the host for the
+	 *                             bundle to be created. Should be <code>null</code>
+	 *                             if the bundle is not a fragment
+	 * @param imports              version constraints for all packages imported
+	 *                             (may be <code>null</code>)
+	 * @param exports              package descriptions of all the exported packages
+	 *                             (may be <code>null</code>)
+	 * @param providedPackages     the list of provided packages (may be
+	 *                             <code>null</code>)
+	 * @param singleton            whether the bundle created should be a singleton
+	 * @param attachFragments      whether the bundle allows fragments to attach
+	 * @param dynamicFragments     whether the bundle allows fragments to
+	 *                             dynamically attach
+	 * @param platformFilter       the platform filter (may be <code>null</code>)
+	 * @param executionEnvironment the execution environment (may be
+	 *                             <code>null</code>)
+	 * @param genericRequires      the version constraints for all required
+	 *                             capabilities (may be <code>null</code>)
+	 * @param genericCapabilities  the specifications of all the capabilities of the
+	 *                             bundle (may be <code>null</code>)
 	 * @return the created bundle description
-	 * @deprecated use {@link #createBundleDescription(long, String, Version, String, BundleSpecification[], HostSpecification, ImportPackageSpecification[], ExportPackageDescription[], boolean, boolean, boolean, String, String[], GenericSpecification[], GenericDescription[])}
+	 * @deprecated use
+	 *             {@link #createBundleDescription(long, String, Version, String, BundleSpecification[], HostSpecification, ImportPackageSpecification[], ExportPackageDescription[], boolean, boolean, boolean, String, String[], GenericSpecification[], GenericDescription[])}
 	 */
-	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String executionEnvironment, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities);
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location,
+			BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports,
+			ExportPackageDescription[] exports, String[] providedPackages, boolean singleton, boolean attachFragments,
+			boolean dynamicFragments, String platformFilter, String executionEnvironment,
+			GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities);
 
 	/**
 	 * Creates a bundle description from the given parameters.
 	 *
-	 * @param id id for the bundle
-	 * @param symbolicName symbolic name for the bundle (may be  <code>null</code>)
-	 * @param version version for the bundle (may be <code>null</code>)
-	 * @param location location for the bundle (may be <code>null</code>)
-	 * @param required version constraints for all required bundles (may be  <code>null</code>)
-	 * @param host version constraint specifying the host for the bundle to be created. Should be <code>null</code> if the bundle is not a fragment
-	 * @param imports version constraints for all packages imported  (may be <code>null</code>)
-	 * @param exports package descriptions of all the exported packages (may be <code>null</code>)
-	 * @param singleton whether the bundle created should be a singleton
-	 * @param attachFragments whether the bundle allows fragments to attach
-	 * @param dynamicFragments whether the bundle allows fragments to dynamically attach
-	 * @param platformFilter the platform filter (may be <code>null</code>)
-	 * @param executionEnvironments the execution environment (may be <code>null</code>)
-	 * @param genericRequires the version constraints for all required capabilities (may be <code>null</code>)
-	 * @param genericCapabilities the specifications of all the capabilities of the bundle (may be <code>null</code>)
+	 * @param id                    id for the bundle
+	 * @param symbolicName          symbolic name for the bundle (may be
+	 *                              <code>null</code>)
+	 * @param version               version for the bundle (may be
+	 *                              <code>null</code>)
+	 * @param location              location for the bundle (may be
+	 *                              <code>null</code>)
+	 * @param required              version constraints for all required bundles
+	 *                              (may be <code>null</code>)
+	 * @param host                  version constraint specifying the host for the
+	 *                              bundle to be created. Should be
+	 *                              <code>null</code> if the bundle is not a
+	 *                              fragment
+	 * @param imports               version constraints for all packages imported
+	 *                              (may be <code>null</code>)
+	 * @param exports               package descriptions of all the exported
+	 *                              packages (may be <code>null</code>)
+	 * @param singleton             whether the bundle created should be a singleton
+	 * @param attachFragments       whether the bundle allows fragments to attach
+	 * @param dynamicFragments      whether the bundle allows fragments to
+	 *                              dynamically attach
+	 * @param platformFilter        the platform filter (may be <code>null</code>)
+	 * @param executionEnvironments the execution environment (may be
+	 *                              <code>null</code>)
+	 * @param genericRequires       the version constraints for all required
+	 *                              capabilities (may be <code>null</code>)
+	 * @param genericCapabilities   the specifications of all the capabilities of
+	 *                              the bundle (may be <code>null</code>)
 	 * @return the created bundle description
 	 */
-	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities);
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location,
+			BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports,
+			ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments,
+			String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires,
+			GenericDescription[] genericCapabilities);
 
 	/**
 	 * Creates a bundle description from the given parameters.
 	 *
-	 * @param id id for the bundle
-	 * @param symbolicName symbolic name for the bundle (may be  <code>null</code>)
-	 * @param version version for the bundle (may be <code>null</code>)
-	 * @param location location for the bundle (may be <code>null</code>)
-	 * @param required version constraints for all required bundles (may be  <code>null</code>)
-	 * @param host version constraint specifying the host for the bundle to be created. Should be <code>null</code> if the bundle is not a fragment
-	 * @param imports version constraints for all packages imported  (may be <code>null</code>)
-	 * @param exports package descriptions of all the exported packages (may be <code>null</code>)
-	 * @param singleton whether the bundle created should be a singleton
-	 * @param attachFragments whether the bundle allows fragments to attach
-	 * @param dynamicFragments whether the bundle allows fragments to dynamically attach
-	 * @param platformFilter the platform filter (may be <code>null</code>)
-	 * @param executionEnvironments the execution environment (may be <code>null</code>)
-	 * @param genericRequires the version constraints for all required capabilities (may be <code>null</code>)
-	 * @param genericCapabilities the specifications of all the capabilities of the bundle (may be <code>null</code>)
-	 * @param nativeCode the native code specification of the bundle (may be <code>null</code>)
+	 * @param id                    id for the bundle
+	 * @param symbolicName          symbolic name for the bundle (may be
+	 *                              <code>null</code>)
+	 * @param version               version for the bundle (may be
+	 *                              <code>null</code>)
+	 * @param location              location for the bundle (may be
+	 *                              <code>null</code>)
+	 * @param required              version constraints for all required bundles
+	 *                              (may be <code>null</code>)
+	 * @param host                  version constraint specifying the host for the
+	 *                              bundle to be created. Should be
+	 *                              <code>null</code> if the bundle is not a
+	 *                              fragment
+	 * @param imports               version constraints for all packages imported
+	 *                              (may be <code>null</code>)
+	 * @param exports               package descriptions of all the exported
+	 *                              packages (may be <code>null</code>)
+	 * @param singleton             whether the bundle created should be a singleton
+	 * @param attachFragments       whether the bundle allows fragments to attach
+	 * @param dynamicFragments      whether the bundle allows fragments to
+	 *                              dynamically attach
+	 * @param platformFilter        the platform filter (may be <code>null</code>)
+	 * @param executionEnvironments the execution environment (may be
+	 *                              <code>null</code>)
+	 * @param genericRequires       the version constraints for all required
+	 *                              capabilities (may be <code>null</code>)
+	 * @param genericCapabilities   the specifications of all the capabilities of
+	 *                              the bundle (may be <code>null</code>)
+	 * @param nativeCode            the native code specification of the bundle (may
+	 *                              be <code>null</code>)
 	 * @return the created bundle description
 	 * @since 3.4
 	 */
-	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities, NativeCodeSpecification nativeCode);
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location,
+			BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports,
+			ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments,
+			String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires,
+			GenericDescription[] genericCapabilities, NativeCodeSpecification nativeCode);
 
 	/**
 	 * Creates a bundle description from the given parameters.
 	 *
-	 * @param id id for the bundle
-	 * @param symbolicName the symbolic name of the bundle.  This may include directives and/or attributes encoded using the Bundle-SymbolicName header.
-	 * @param version version for the bundle (may be <code>null</code>)
-	 * @param location location for the bundle (may be <code>null</code>)
-	 * @param required version constraints for all required bundles (may be  <code>null</code>)
-	 * @param host version constraint specifying the host for the bundle to be created. Should be <code>null</code> if the bundle is not a fragment
-	 * @param imports version constraints for all packages imported  (may be <code>null</code>)
-	 * @param exports package descriptions of all the exported packages (may be <code>null</code>)
-	 * @param platformFilter the platform filter (may be <code>null</code>)
-	 * @param executionEnvironments the execution environment (may be <code>null</code>)
-	 * @param genericRequires the version constraints for all required capabilities (may be <code>null</code>)
-	 * @param genericCapabilities the specifications of all the capabilities of the bundle (may be <code>null</code>)
-	 * @param nativeCode the native code specification of the bundle (may be <code>null</code>)
+	 * @param id                    id for the bundle
+	 * @param symbolicName          the symbolic name of the bundle. This may
+	 *                              include directives and/or attributes encoded
+	 *                              using the Bundle-SymbolicName header.
+	 * @param version               version for the bundle (may be
+	 *                              <code>null</code>)
+	 * @param location              location for the bundle (may be
+	 *                              <code>null</code>)
+	 * @param required              version constraints for all required bundles
+	 *                              (may be <code>null</code>)
+	 * @param host                  version constraint specifying the host for the
+	 *                              bundle to be created. Should be
+	 *                              <code>null</code> if the bundle is not a
+	 *                              fragment
+	 * @param imports               version constraints for all packages imported
+	 *                              (may be <code>null</code>)
+	 * @param exports               package descriptions of all the exported
+	 *                              packages (may be <code>null</code>)
+	 * @param platformFilter        the platform filter (may be <code>null</code>)
+	 * @param executionEnvironments the execution environment (may be
+	 *                              <code>null</code>)
+	 * @param genericRequires       the version constraints for all required
+	 *                              capabilities (may be <code>null</code>)
+	 * @param genericCapabilities   the specifications of all the capabilities of
+	 *                              the bundle (may be <code>null</code>)
+	 * @param nativeCode            the native code specification of the bundle (may
+	 *                              be <code>null</code>)
 	 * @return the created bundle description
 	 * @since 3.8
 	 */
-	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities, NativeCodeSpecification nativeCode);
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location,
+			BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports,
+			ExportPackageDescription[] exports, String platformFilter, String[] executionEnvironments,
+			GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities,
+			NativeCodeSpecification nativeCode);
 
 	/**
-	 * Returns a bundle description based on the information in the supplied manifest dictionary.
-	 * The manifest should contain String keys and String values which correspond to
-	 * proper OSGi manifest headers and values.
+	 * Returns a bundle description based on the information in the supplied
+	 * manifest dictionary. The manifest should contain String keys and String
+	 * values which correspond to proper OSGi manifest headers and values.
 	 *
-	 * @param state the state for which the description is being created
+	 * @param state    the state for which the description is being created
 	 * @param manifest a collection of OSGi manifest headers and values
 	 * @param location the URL location of the bundle (may be <code>null</code>)
-	 * @param id the id of the bundle
+	 * @param id       the id of the bundle
 	 * @return a bundle description derived from the given information
 	 * @throws BundleException if an error occurs while reading the manifest
 	 */
-	public BundleDescription createBundleDescription(State state, Dictionary<String, String> manifest, String location, long id) throws BundleException;
+	public BundleDescription createBundleDescription(State state, Dictionary<String, String> manifest, String location,
+			long id) throws BundleException;
 
 	/**
-	 * Returns a bundle description based on the information in the supplied manifest dictionary.
-	 * The manifest should contain String keys and String values which correspond to
-	 * proper OSGi manifest headers and values.
+	 * Returns a bundle description based on the information in the supplied
+	 * manifest dictionary. The manifest should contain String keys and String
+	 * values which correspond to proper OSGi manifest headers and values.
 	 *
 	 * @param manifest a collection of OSGi manifest headers and values
 	 * @param location the URL location of the bundle (may be <code>null</code>)
-	 * @param id the id of the bundle
+	 * @param id       the id of the bundle
 	 * @return a bundle description derived from the given information
 	 * @throws BundleException if an error occurs while reading the manifest
-	 * @deprecated use {@link #createBundleDescription(State, Dictionary, String, long)}
+	 * @deprecated use
+	 *             {@link #createBundleDescription(State, Dictionary, String, long)}
 	 */
-	public BundleDescription createBundleDescription(Dictionary<String, String> manifest, String location, long id) throws BundleException;
+	public BundleDescription createBundleDescription(Dictionary<String, String> manifest, String location, long id)
+			throws BundleException;
 
 	/**
-	 * Creates a bundle description that is a copy of the given description.
-	 * The user object of the original bundle description is not copied.
+	 * Creates a bundle description that is a copy of the given description. The
+	 * user object of the original bundle description is not copied.
 	 *
 	 * @param original the bundle description to be copied
 	 * @return the created bundle description
@@ -233,13 +308,15 @@ public interface StateObjectFactory {
 	 * Creates a bundle specification from the given parameters.
 	 *
 	 * @param requiredSymbolicName the symbolic name for the required bundle
-	 * @param requiredVersionRange the required version range (may be <code>null</code>)
-	 * @param export whether the required bundle should be re-exported
-	 * @param optional whether the constraint should be optional
+	 * @param requiredVersionRange the required version range (may be
+	 *                             <code>null</code>)
+	 * @param export               whether the required bundle should be re-exported
+	 * @param optional             whether the constraint should be optional
 	 * @return the created bundle specification
 	 * @see VersionConstraint for information on the available match rules
 	 */
-	public BundleSpecification createBundleSpecification(String requiredSymbolicName, VersionRange requiredVersionRange, boolean export, boolean optional);
+	public BundleSpecification createBundleSpecification(String requiredSymbolicName, VersionRange requiredVersionRange,
+			boolean export, boolean optional);
 
 	/**
 	 * Creates a bundle specification that is a copy of the given constraint.
@@ -250,8 +327,9 @@ public interface StateObjectFactory {
 	public BundleSpecification createBundleSpecification(BundleSpecification original);
 
 	/**
-	 * Creates bundle specifications from the given declaration.  The declaration uses
-	 * the bundle manifest syntax for the Require-Bundle header.
+	 * Creates bundle specifications from the given declaration. The declaration
+	 * uses the bundle manifest syntax for the Require-Bundle header.
+	 * 
 	 * @param declaration a string declaring bundle specifications
 	 * @return the bundle specifications
 	 * @since 3.8
@@ -262,15 +340,17 @@ public interface StateObjectFactory {
 	 * Creates a host specification from the given parameters.
 	 *
 	 * @param hostSymbolicName the symbolic name for the host bundle
-	 * @param hostVersionRange the version range for the host bundle (may be <code>null</code>)
+	 * @param hostVersionRange the version range for the host bundle (may be
+	 *                         <code>null</code>)
 	 * @return the created host specification
 	 * @see VersionConstraint for information on the available match rules
 	 */
 	public HostSpecification createHostSpecification(String hostSymbolicName, VersionRange hostVersionRange);
 
 	/**
-	 * Creates host specifications from the given declaration.  The declaration uses
+	 * Creates host specifications from the given declaration. The declaration uses
 	 * the bundle manifest syntax for the Fragment-Host header.
+	 * 
 	 * @param declaration a string declaring host specifications
 	 * @return the host specifications
 	 * @since 3.8
@@ -288,27 +368,36 @@ public interface StateObjectFactory {
 	/**
 	 * Creates an import package specification from the given parameters.
 	 *
-	 * @param packageName the package name
-	 * @param versionRange the package versionRange (may be <code>null</code>).
-	 * @param bundleSymbolicName the Bundle-SymbolicName of the bundle that must export the package (may be <code>null</code>)
+	 * @param packageName        the package name
+	 * @param versionRange       the package versionRange (may be
+	 *                           <code>null</code>).
+	 * @param bundleSymbolicName the Bundle-SymbolicName of the bundle that must
+	 *                           export the package (may be <code>null</code>)
 	 * @param bundleVersionRange the bundle versionRange (may be <code>null</code>).
-	 * @param directives the directives for this package (may be <code>null</code>)
-	 * @param attributes the arbitrary attributes for the package import (may be <code>null</code>)
-	 * @param importer the importing bundle (may be <code>null</code>)
+	 * @param directives         the directives for this package (may be
+	 *                           <code>null</code>)
+	 * @param attributes         the arbitrary attributes for the package import
+	 *                           (may be <code>null</code>)
+	 * @param importer           the importing bundle (may be <code>null</code>)
 	 * @return the created package specification
 	 */
-	public ImportPackageSpecification createImportPackageSpecification(String packageName, VersionRange versionRange, String bundleSymbolicName, VersionRange bundleVersionRange, Map<String, ?> directives, Map<String, ?> attributes, BundleDescription importer);
+	public ImportPackageSpecification createImportPackageSpecification(String packageName, VersionRange versionRange,
+			String bundleSymbolicName, VersionRange bundleVersionRange, Map<String, ?> directives,
+			Map<String, ?> attributes, BundleDescription importer);
 
 	/**
-	 * Creates an import package specification that is a copy of the given import package
+	 * Creates an import package specification that is a copy of the given import
+	 * package
+	 * 
 	 * @param original the import package to be copied
 	 * @return the created package specification
 	 */
 	public ImportPackageSpecification createImportPackageSpecification(ImportPackageSpecification original);
 
 	/**
-	 * Creates an import package specifications from the given declaration.  The declaration uses
-	 * the bundle manifest syntax for the Import-Package header.
+	 * Creates an import package specifications from the given declaration. The
+	 * declaration uses the bundle manifest syntax for the Import-Package header.
+	 * 
 	 * @param declaration a string declaring import package specifications
 	 * @return the import package specifications
 	 * @since 3.8
@@ -329,33 +418,47 @@ public interface StateObjectFactory {
 	 * @param exporter    the exporter of the package (may be <code>null</code>)
 	 * @return the created package
 	 */
-	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, Map<String, ?> directives, Map<String, ?> attributes, boolean root, BundleDescription exporter);
+	public ExportPackageDescription createExportPackageDescription(String packageName, Version version,
+			Map<String, ?> directives, Map<String, ?> attributes, boolean root, BundleDescription exporter);
 
 	/**
 	 * Creates a generic description from the given parameters
-	 * @param name the name of the generic description
-	 * @param type the type of the generic description (may be <code>null</code>)
-	 * @param version the version of the generic description (may be <code>null</code>)
-	 * @param attributes the attributes for the generic description (may be <code>null</code>)
+	 * 
+	 * @param name       the name of the generic description
+	 * @param type       the type of the generic description (may be
+	 *                   <code>null</code>)
+	 * @param version    the version of the generic description (may be
+	 *                   <code>null</code>)
+	 * @param attributes the attributes for the generic description (may be
+	 *                   <code>null</code>)
 	 * @return the created generic description
-	 * @deprecated use {@link #createGenericDescription(String, String, Version, Map)}
+	 * @deprecated use
+	 *             {@link #createGenericDescription(String, String, Version, Map)}
 	 */
-	public GenericDescription createGenericDescription(String name, String type, Version version, Map<String, ?> attributes);
+	public GenericDescription createGenericDescription(String name, String type, Version version,
+			Map<String, ?> attributes);
 
 	/**
 	 * Creates a generic description from the given parameters
-	 * @param type the type of the generic description (may be <code>null</code>)
-	 * @param attributes the attributes for the generic description (may be <code>null</code>)
-	 * @param directives the directives for the generic description (may be <code>null</code>)
-	 * @param supplier the supplier of the generic description (may be <code>null</code>)
+	 * 
+	 * @param type       the type of the generic description (may be
+	 *                   <code>null</code>)
+	 * @param attributes the attributes for the generic description (may be
+	 *                   <code>null</code>)
+	 * @param directives the directives for the generic description (may be
+	 *                   <code>null</code>)
+	 * @param supplier   the supplier of the generic description (may be
+	 *                   <code>null</code>)
 	 * @return the created generic description
 	 * @since 3.7
 	 */
-	public GenericDescription createGenericDescription(String type, Map<String, ?> attributes, Map<String, String> directives, BundleDescription supplier);
+	public GenericDescription createGenericDescription(String type, Map<String, ?> attributes,
+			Map<String, String> directives, BundleDescription supplier);
 
 	/**
-	 * Creates generic descriptions from the given declaration.  The declaration uses
+	 * Creates generic descriptions from the given declaration. The declaration uses
 	 * the bundle manifest syntax for the Provide-Capability header.
+	 * 
 	 * @param declaration a string declaring generic descriptions
 	 * @return the generic descriptions
 	 * @since 3.8
@@ -364,19 +467,23 @@ public interface StateObjectFactory {
 
 	/**
 	 * Creates a generic specification from the given parameters
-	 * @param name the name of the generic specification
-	 * @param type the type of the generic specification (may be <code>null</code>)
+	 * 
+	 * @param name           the name of the generic specification
+	 * @param type           the type of the generic specification (may be
+	 *                       <code>null</code>)
 	 * @param matchingFilter the matching filter (may be <code>null</code>)
-	 * @param optional whether the specification is optional
-	 * @param multiple whether the specification allows for multiple suppliers
+	 * @param optional       whether the specification is optional
+	 * @param multiple       whether the specification allows for multiple suppliers
 	 * @return the created generic specification
 	 * @throws InvalidSyntaxException if the matching filter is invalid
 	 */
-	public GenericSpecification createGenericSpecification(String name, String type, String matchingFilter, boolean optional, boolean multiple) throws InvalidSyntaxException;
+	public GenericSpecification createGenericSpecification(String name, String type, String matchingFilter,
+			boolean optional, boolean multiple) throws InvalidSyntaxException;
 
 	/**
-	 * Creates generic specifications from the given declaration.  The declaration uses
-	 * the bundle manifest syntax for the Require-Capability header.
+	 * Creates generic specifications from the given declaration. The declaration
+	 * uses the bundle manifest syntax for the Require-Capability header.
+	 * 
 	 * @param declaration a string declaring generic specifications
 	 * @return the generic specifications
 	 * @since 3.8
@@ -385,37 +492,47 @@ public interface StateObjectFactory {
 
 	/**
 	 * Creates a native code specification from the given parameters
+	 * 
 	 * @param nativeCodeDescriptions the native code descriptors
-	 * @param optional whether the specification is optional
+	 * @param optional               whether the specification is optional
 	 * @return the created native code specification
 	 * @since 3.4
 	 */
-	public NativeCodeSpecification createNativeCodeSpecification(NativeCodeDescription[] nativeCodeDescriptions, boolean optional);
+	public NativeCodeSpecification createNativeCodeSpecification(NativeCodeDescription[] nativeCodeDescriptions,
+			boolean optional);
 
 	/**
 	 * Creates a native code description from the given parameters
+	 * 
 	 * @param nativePaths the native code paths (may be <code>null</code>)
-	 * @param processors the supported processors (may be <code>null</code>)
-	 * @param osNames the supported operating system names (may be <code>null</code>)
-	 * @param osVersions the supported operating system version ranges (may be <code>null</code>)
-	 * @param languages the supported languages (may be <code>null</code>)
-	 * @param filter the selection filter (may be <code>null</code>)
+	 * @param processors  the supported processors (may be <code>null</code>)
+	 * @param osNames     the supported operating system names (may be
+	 *                    <code>null</code>)
+	 * @param osVersions  the supported operating system version ranges (may be
+	 *                    <code>null</code>)
+	 * @param languages   the supported languages (may be <code>null</code>)
+	 * @param filter      the selection filter (may be <code>null</code>)
 	 * @return the created native code description
 	 * @throws InvalidSyntaxException if the selection filter is invalid
 	 * @since 3.4
 	 */
-	public NativeCodeDescription createNativeCodeDescription(String[] nativePaths, String[] processors, String[] osNames, VersionRange[] osVersions, String[] languages, String filter) throws InvalidSyntaxException;
+	public NativeCodeDescription createNativeCodeDescription(String[] nativePaths, String[] processors,
+			String[] osNames, VersionRange[] osVersions, String[] languages, String filter)
+			throws InvalidSyntaxException;
 
 	/**
-	 * Creates an export package specification that is a copy of the given constraint
+	 * Creates an export package specification that is a copy of the given
+	 * constraint
+	 * 
 	 * @param original the export package to be copied
 	 * @return the created package
 	 */
 	public ExportPackageDescription createExportPackageDescription(ExportPackageDescription original);
 
 	/**
-	 * Creates export package descriptions from the given declaration.  The declaration uses
-	 * the bundle manifest syntax for the Export-Package header.
+	 * Creates export package descriptions from the given declaration. The
+	 * declaration uses the bundle manifest syntax for the Export-Package header.
+	 * 
 	 * @param declaration a string declaring export package descriptions
 	 * @return the export package descriptions
 	 * @since 3.8
@@ -425,12 +542,12 @@ public interface StateObjectFactory {
 	/**
 	 * Persists the given state in the given output stream. Closes the stream.
 	 *
-	 * @param state the state to be written
+	 * @param state  the state to be written
 	 * @param stream the stream where to write the state to
-	 * @throws IOException if an IOException happens while writing the state to
-	 * the stream
+	 * @throws IOException              if an IOException happens while writing the
+	 *                                  state to the stream
 	 * @throws IllegalArgumentException if the state provided was not created by
-	 * this factory
+	 *                                  this factory
 	 * @deprecated use {@link #writeState(State, File)} instead
 	 * @since 3.1
 	 */
@@ -439,12 +556,12 @@ public interface StateObjectFactory {
 	/**
 	 * Persists the given state in the given output stream. Closes the stream.
 	 *
-	 * @param state the state to be written
+	 * @param state  the state to be written
 	 * @param stream the stream where to write the state to
-	 * @throws IOException if an IOException happens while writing the state to
-	 * the stream
+	 * @throws IOException              if an IOException happens while writing the
+	 *                                  state to the stream
 	 * @throws IllegalArgumentException if the state provided was not created by
-	 * this factory
+	 *                                  this factory
 	 * @deprecated use {@link #writeState(State, File)} instead
 	 * @see #writeState(State, OutputStream)
 	 */
@@ -453,12 +570,12 @@ public interface StateObjectFactory {
 	/**
 	 * Persists the given state in the given directory.
 	 *
-	 * @param state the state to be written
+	 * @param state          the state to be written
 	 * @param stateDirectory the directory where to write the state to
-	 * @throws IOException if an IOException happens while writing the state to
-	 * the stream
+	 * @throws IOException              if an IOException happens while writing the
+	 *                                  state to the stream
 	 * @throws IllegalArgumentException if the state provided was not created by
-	 * this factory
+	 *                                  this factory
 	 */
 	public void writeState(State state, File stateDirectory) throws IOException;
 
@@ -468,7 +585,7 @@ public interface StateObjectFactory {
 	 * @param stream the stream where to read the state from
 	 * @return the state read
 	 * @throws IOException if an IOException happens while reading the state from
-	 * the stream
+	 *                     the stream
 	 * @deprecated use {@link #readState(File)} instead
 	 * @since 3.1
 	 */
@@ -480,7 +597,7 @@ public interface StateObjectFactory {
 	 * @param stream the stream where to read the state from
 	 * @return the state read
 	 * @throws IOException if an IOException happens while reading the state from
-	 * the stream
+	 *                     the stream
 	 * @deprecated use {@link #readState(File)} instead
 	 * @see #readState(InputStream)
 	 */
@@ -492,7 +609,7 @@ public interface StateObjectFactory {
 	 * @param stateDirectory the directory where to read the state from
 	 * @return the state read
 	 * @throws IOException if an IOException happens while reading the state from
-	 * the stream
+	 *                     the stream
 	 */
 	public State readState(File stateDirectory) throws IOException;
 
@@ -508,7 +625,8 @@ public interface StateObjectFactory {
 						Class<?> implClass = Class.forName(IMPL_NAME);
 						implementation = (StateObjectFactory) implClass.getConstructor().newInstance();
 					} catch (Throwable t) {
-						throw new UnsupportedOperationException("Not able to create StateObjectFactory implementation: " + IMPL_NAME, t); //$NON-NLS-1$
+						throw new UnsupportedOperationException(
+								"Not able to create StateObjectFactory implementation: " + IMPL_NAME, t); //$NON-NLS-1$
 					}
 				}
 				return implementation;
@@ -533,39 +651,69 @@ public interface StateObjectFactory {
 
 		@Deprecated
 		@Override
-		public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton) {
-			return getImplementation().createBundleDescription(id, symbolicName, version, location, required, host, imports, exports, providedPackages, singleton);
+		public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location,
+				BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports,
+				ExportPackageDescription[] exports, String[] providedPackages, boolean singleton) {
+			return getImplementation().createBundleDescription(id, symbolicName, version, location, required, host,
+					imports, exports, providedPackages, singleton);
 		}
 
 		@Deprecated
 		@Override
-		public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String[] providedPackages, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String executionEnvironment, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities) {
-			return getImplementation().createBundleDescription(id, symbolicName, version, location, required, host, imports, exports, providedPackages, singleton, attachFragments, dynamicFragments, platformFilter, executionEnvironment, genericRequires, genericCapabilities);
+		public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location,
+				BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports,
+				ExportPackageDescription[] exports, String[] providedPackages, boolean singleton,
+				boolean attachFragments, boolean dynamicFragments, String platformFilter, String executionEnvironment,
+				GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities) {
+			return getImplementation().createBundleDescription(id, symbolicName, version, location, required, host,
+					imports, exports, providedPackages, singleton, attachFragments, dynamicFragments, platformFilter,
+					executionEnvironment, genericRequires, genericCapabilities);
 		}
 
 		@Override
-		public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities) {
-			return getImplementation().createBundleDescription(id, symbolicName, version, location, required, host, imports, exports, singleton, attachFragments, dynamicFragments, platformFilter, executionEnvironments, genericRequires, genericCapabilities);
+		public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location,
+				BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports,
+				ExportPackageDescription[] exports, boolean singleton, boolean attachFragments,
+				boolean dynamicFragments, String platformFilter, String[] executionEnvironments,
+				GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities) {
+			return getImplementation().createBundleDescription(id, symbolicName, version, location, required, host,
+					imports, exports, singleton, attachFragments, dynamicFragments, platformFilter,
+					executionEnvironments, genericRequires, genericCapabilities);
 		}
 
 		@Override
-		public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities, NativeCodeSpecification nativeCode) {
-			return getImplementation().createBundleDescription(id, symbolicName, version, location, required, host, imports, exports, singleton, attachFragments, dynamicFragments, platformFilter, executionEnvironments, genericRequires, genericCapabilities, nativeCode);
+		public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location,
+				BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports,
+				ExportPackageDescription[] exports, boolean singleton, boolean attachFragments,
+				boolean dynamicFragments, String platformFilter, String[] executionEnvironments,
+				GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities,
+				NativeCodeSpecification nativeCode) {
+			return getImplementation().createBundleDescription(id, symbolicName, version, location, required, host,
+					imports, exports, singleton, attachFragments, dynamicFragments, platformFilter,
+					executionEnvironments, genericRequires, genericCapabilities, nativeCode);
 		}
 
 		@Override
-		public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities, NativeCodeSpecification nativeCode) {
-			return getImplementation().createBundleDescription(id, symbolicName, version, location, required, host, imports, exports, platformFilter, executionEnvironments, genericRequires, genericCapabilities, nativeCode);
+		public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location,
+				BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports,
+				ExportPackageDescription[] exports, String platformFilter, String[] executionEnvironments,
+				GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities,
+				NativeCodeSpecification nativeCode) {
+			return getImplementation().createBundleDescription(id, symbolicName, version, location, required, host,
+					imports, exports, platformFilter, executionEnvironments, genericRequires, genericCapabilities,
+					nativeCode);
 		}
 
 		@Override
-		public BundleDescription createBundleDescription(State state, Dictionary<String, String> manifest, String location, long id) throws BundleException {
+		public BundleDescription createBundleDescription(State state, Dictionary<String, String> manifest,
+				String location, long id) throws BundleException {
 			return getImplementation().createBundleDescription(state, manifest, location, id);
 		}
 
 		@Deprecated
 		@Override
-		public BundleDescription createBundleDescription(Dictionary<String, String> manifest, String location, long id) throws BundleException {
+		public BundleDescription createBundleDescription(Dictionary<String, String> manifest, String location, long id)
+				throws BundleException {
 			return getImplementation().createBundleDescription(manifest, location, id);
 		}
 
@@ -575,8 +723,10 @@ public interface StateObjectFactory {
 		}
 
 		@Override
-		public BundleSpecification createBundleSpecification(String requiredSymbolicName, VersionRange requiredVersionRange, boolean export, boolean optional) {
-			return getImplementation().createBundleSpecification(requiredSymbolicName, requiredVersionRange, export, optional);
+		public BundleSpecification createBundleSpecification(String requiredSymbolicName,
+				VersionRange requiredVersionRange, boolean export, boolean optional) {
+			return getImplementation().createBundleSpecification(requiredSymbolicName, requiredVersionRange, export,
+					optional);
 		}
 
 		@Override
@@ -605,8 +755,11 @@ public interface StateObjectFactory {
 		}
 
 		@Override
-		public ImportPackageSpecification createImportPackageSpecification(String packageName, VersionRange versionRange, String bundleSymbolicName, VersionRange bundleVersionRange, Map<String, ?> directives, Map<String, ?> attributes, BundleDescription importer) {
-			return getImplementation().createImportPackageSpecification(packageName, versionRange, bundleSymbolicName, bundleVersionRange, directives, attributes, importer);
+		public ImportPackageSpecification createImportPackageSpecification(String packageName,
+				VersionRange versionRange, String bundleSymbolicName, VersionRange bundleVersionRange,
+				Map<String, ?> directives, Map<String, ?> attributes, BundleDescription importer) {
+			return getImplementation().createImportPackageSpecification(packageName, versionRange, bundleSymbolicName,
+					bundleVersionRange, directives, attributes, importer);
 		}
 
 		@Override
@@ -620,18 +773,22 @@ public interface StateObjectFactory {
 		}
 
 		@Override
-		public ExportPackageDescription createExportPackageDescription(String packageName, Version version, Map<String, ?> directives, Map<String, ?> attributes, boolean root, BundleDescription exporter) {
-			return getImplementation().createExportPackageDescription(packageName, version, directives, attributes, root, exporter);
+		public ExportPackageDescription createExportPackageDescription(String packageName, Version version,
+				Map<String, ?> directives, Map<String, ?> attributes, boolean root, BundleDescription exporter) {
+			return getImplementation().createExportPackageDescription(packageName, version, directives, attributes,
+					root, exporter);
 		}
 
 		@Deprecated
 		@Override
-		public GenericDescription createGenericDescription(String name, String type, Version version, Map<String, ?> attributes) {
+		public GenericDescription createGenericDescription(String name, String type, Version version,
+				Map<String, ?> attributes) {
 			return getImplementation().createGenericDescription(name, type, version, attributes);
 		}
 
 		@Override
-		public GenericDescription createGenericDescription(String type, Map<String, ?> attributes, Map<String, String> directives, BundleDescription supplier) {
+		public GenericDescription createGenericDescription(String type, Map<String, ?> attributes,
+				Map<String, String> directives, BundleDescription supplier) {
 			return getImplementation().createGenericDescription(type, attributes, directives, supplier);
 		}
 
@@ -641,7 +798,8 @@ public interface StateObjectFactory {
 		}
 
 		@Override
-		public GenericSpecification createGenericSpecification(String name, String type, String matchingFilter, boolean optional, boolean multiple) throws InvalidSyntaxException {
+		public GenericSpecification createGenericSpecification(String name, String type, String matchingFilter,
+				boolean optional, boolean multiple) throws InvalidSyntaxException {
 			return getImplementation().createGenericSpecification(name, type, matchingFilter, optional, multiple);
 		}
 
@@ -651,13 +809,17 @@ public interface StateObjectFactory {
 		}
 
 		@Override
-		public NativeCodeSpecification createNativeCodeSpecification(NativeCodeDescription[] nativeCodeDescriptions, boolean optional) {
+		public NativeCodeSpecification createNativeCodeSpecification(NativeCodeDescription[] nativeCodeDescriptions,
+				boolean optional) {
 			return getImplementation().createNativeCodeSpecification(nativeCodeDescriptions, optional);
 		}
 
 		@Override
-		public NativeCodeDescription createNativeCodeDescription(String[] nativePaths, String[] processors, String[] osNames, VersionRange[] osVersions, String[] languages, String filter) throws InvalidSyntaxException {
-			return getImplementation().createNativeCodeDescription(nativePaths, processors, osNames, osVersions, languages, filter);
+		public NativeCodeDescription createNativeCodeDescription(String[] nativePaths, String[] processors,
+				String[] osNames, VersionRange[] osVersions, String[] languages, String filter)
+				throws InvalidSyntaxException {
+			return getImplementation().createNativeCodeDescription(nativePaths, processors, osNames, osVersions,
+					languages, filter);
 		}
 
 		@Override

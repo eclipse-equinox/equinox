@@ -25,25 +25,28 @@ import org.eclipse.osgi.container.namespaces.EquinoxModuleDataNamespace;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 
 /**
- *Registered policy is an implementation of a buddy policy.
- * It is responsible for looking up a class in the bundles (registrant) that declare interest in the bundle that require the buddy loading.
- * Note that the registrants must have a direct dependency on the bundle needing buddy.
+ * Registered policy is an implementation of a buddy policy. It is responsible
+ * for looking up a class in the bundles (registrant) that declare interest in
+ * the bundle that require the buddy loading. Note that the registrants must
+ * have a direct dependency on the bundle needing buddy.
  */
 public class RegisteredPolicy extends DependentPolicy {
 
 	public RegisteredPolicy(BundleLoader requester) {
 		super(requester);
 
-		//Filter the dependents;
+		// Filter the dependents;
 		if (allDependents == null)
 			return;
 
 		String requesterName = requester.getWiring().getRevision().getSymbolicName();
 		for (Iterator<ModuleWiring> iter = allDependents.iterator(); iter.hasNext();) {
 			ModuleWiring wiring = iter.next();
-			List<ModuleCapability> moduleDatas = wiring.getRevision().getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
+			List<ModuleCapability> moduleDatas = wiring.getRevision()
+					.getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
 			@SuppressWarnings("unchecked")
-			List<String> registeredList = (List<String>) (moduleDatas.isEmpty() ? null : moduleDatas.get(0).getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_BUDDY_REGISTERED));
+			List<String> registeredList = (List<String>) (moduleDatas.isEmpty() ? null
+					: moduleDatas.get(0).getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_BUDDY_REGISTERED));
 			if (registeredList == null || registeredList.isEmpty()) {
 				iter.remove();
 			} else {
@@ -60,7 +63,8 @@ public class RegisteredPolicy extends DependentPolicy {
 			}
 		}
 
-		//After the filtering, if nothing is left then null out the variable for optimization
+		// After the filtering, if nothing is left then null out the variable for
+		// optimization
 		if (allDependents.size() == 0)
 			allDependents = null;
 	}
@@ -116,7 +120,7 @@ public class RegisteredPolicy extends DependentPolicy {
 					results = BundleLoader.compoundEnumerations(results, searchLoader.findResources(name));
 				}
 			} catch (IOException e) {
-				//Ignore and keep looking
+				// Ignore and keep looking
 			}
 		}
 		return results;

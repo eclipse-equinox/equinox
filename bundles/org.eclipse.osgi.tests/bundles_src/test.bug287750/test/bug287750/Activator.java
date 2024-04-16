@@ -17,6 +17,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.startlevel.StartLevel;
 
+@SuppressWarnings("deprecation") // StartLevel
 public class Activator implements BundleActivator {
 
 	public void start(BundleContext context) throws Exception {

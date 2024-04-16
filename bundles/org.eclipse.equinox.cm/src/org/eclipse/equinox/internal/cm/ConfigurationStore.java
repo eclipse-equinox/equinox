@@ -20,7 +20,6 @@ import java.util.*;
 import org.eclipse.equinox.internal.cm.reliablefile.*;
 import org.osgi.framework.*;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.log.LogService;
 
 /**
  * ConfigurationStore manages all active configurations along with persistence.
@@ -75,10 +74,10 @@ class ConfigurationStore {
 				String pid = configurationFileName.substring(0, configurationFileName.length() - 4);
 				String errorMessage = "{Configuration Admin - pid = " + pid + "} could not be restored." //$NON-NLS-1$//$NON-NLS-2$
 						+ ((message == null) ? "" : " " + message); //$NON-NLS-1$ //$NON-NLS-2$
-				configurationAdminFactory.log(LogService.LOG_ERROR, errorMessage);
+				configurationAdminFactory.error(errorMessage);
 				deleteFile = true;
 			} catch (ClassNotFoundException e) {
-				configurationAdminFactory.log(LogService.LOG_ERROR, e.getMessage());
+				configurationAdminFactory.error(e.getMessage());
 			} finally {
 				if (ois != null) {
 					try {
@@ -156,7 +155,7 @@ class ConfigurationStore {
 		configurations.remove(pid);
 		if (store == null || token == null)
 			return; // no persistent store
-		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+		AccessController.doPrivileged(new PrivilegedAction<>() {
 			@Override
 			public Object run() {
 				deleteConfigurationFile((File) token);

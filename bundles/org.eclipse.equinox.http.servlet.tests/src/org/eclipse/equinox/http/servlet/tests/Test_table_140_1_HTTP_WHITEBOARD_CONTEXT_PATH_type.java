@@ -39,7 +39,8 @@ public class Test_table_140_1_HTTP_WHITEBOARD_CONTEXT_PATH_type extends BaseTest
 		Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "context");
 		properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, Boolean.FALSE);
-		registrations.add(context.registerService(ServletContextHelper.class, new ServletContextHelper() {}, properties));
+		registrations.add(context.registerService(ServletContextHelper.class, new ServletContextHelper() {
+		}, properties));
 
 		HttpServiceRuntime httpServiceRuntime = getHttpServiceRuntime();
 
@@ -49,9 +50,7 @@ public class Test_table_140_1_HTTP_WHITEBOARD_CONTEXT_PATH_type extends BaseTest
 
 		assertNotNull(failedServletContextDTOs);
 		assertEquals(1, failedServletContextDTOs.length);
-		assertEquals(
-				DTOConstants.FAILURE_REASON_VALIDATION_FAILED,
-				failedServletContextDTOs[0].failureReason);
+		assertEquals(DTOConstants.FAILURE_REASON_VALIDATION_FAILED, failedServletContextDTOs[0].failureReason);
 	}
 
 }

@@ -16,12 +16,13 @@ package org.eclipse.osgi.service.resolver;
 import java.util.Map;
 
 /**
- * A representation of one package import constraint as seen in a
- * bundle manifest and managed by a state and resolver.
+ * A representation of one package import constraint as seen in a bundle
+ * manifest and managed by a state and resolver.
  * <p>
- * This interface is not intended to be implemented by clients.  The
+ * This interface is not intended to be implemented by clients. The
  * {@link StateObjectFactory} should be used to construct instances.
  * </p>
+ * 
  * @since 3.1
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -40,32 +41,40 @@ public interface ImportPackageSpecification extends VersionConstraint {
 	public static final String RESOLUTION_DYNAMIC = "dynamic"; //$NON-NLS-1$
 
 	/**
-	 * Returns the symbolic name of the bundle this import package must be resolved to.
-	 * @return the symbolic name of the bundle this import pacakge must be resolved to.
-	 * A value of <code>null</code> indicates any symbolic name.
+	 * Returns the symbolic name of the bundle this import package must be resolved
+	 * to.
+	 * 
+	 * @return the symbolic name of the bundle this import pacakge must be resolved
+	 *         to. A value of <code>null</code> indicates any symbolic name.
 	 */
 	public String getBundleSymbolicName();
 
 	/**
 	 * Returns the version range which this import package may be resolved to.
+	 * 
 	 * @return the version range which this import package may be resolved to.
 	 */
 	public VersionRange getBundleVersionRange();
 
 	/**
-	 * Returns the arbitrary attributes which this import package may be resolved to.
-	 * @return the arbitrary attributes which this import package may be resolved to.
+	 * Returns the arbitrary attributes which this import package may be resolved
+	 * to.
+	 * 
+	 * @return the arbitrary attributes which this import package may be resolved
+	 *         to.
 	 */
 	public Map<String, Object> getAttributes();
 
 	/**
 	 * Returns the directives that control this import package.
+	 * 
 	 * @return the directives that control this import package.
 	 */
 	public Map<String, Object> getDirectives();
 
 	/**
 	 * Returns the specified directive that control this import package.
+	 * 
 	 * @return the specified directive that control this import package.
 	 */
 	public Object getDirective(String key);

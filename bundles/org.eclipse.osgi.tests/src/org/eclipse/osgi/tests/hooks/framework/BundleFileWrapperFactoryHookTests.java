@@ -14,6 +14,7 @@
 package org.eclipse.osgi.tests.hooks.framework;
 
 import static org.eclipse.osgi.tests.bundles.AbstractBundleTests.stopQuietly;
+import static org.junit.Assert.assertEquals;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
@@ -38,13 +40,13 @@ public class BundleFileWrapperFactoryHookTests extends AbstractFrameworkHookTest
 	private String location;
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 		String loc = bundleInstaller.getBundleLocation(HOOK_CONFIGURATOR_BUNDLE);
 		loc = loc.substring(loc.indexOf("file:"));
 		classLoader.addURL(new URL(loc));
 		location = bundleInstaller.getBundleLocation(TEST_BUNDLE);
-		File file = OSGiTestsActivator.getContext().getDataFile(getName());
+		File file = OSGiTestsActivator.getContext().getDataFile(testName.getMethodName());
 		configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE, file.getAbsolutePath());
 		configuration.put(HookRegistry.PROP_HOOK_CONFIGURATORS_INCLUDE, HOOK_CONFIGURATOR_CLASS);
@@ -52,7 +54,7 @@ public class BundleFileWrapperFactoryHookTests extends AbstractFrameworkHookTest
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
+	public void tearDown() throws Exception {
 		stopQuietly(framework);
 		super.tearDown();
 	}
@@ -65,6 +67,7 @@ public class BundleFileWrapperFactoryHookTests extends AbstractFrameworkHookTest
 		return framework.getBundleContext().installBundle(location);
 	}
 
+	@Test
 	public void testGetResourceURL() throws Exception {
 		initAndStartFramework();
 
@@ -74,19 +77,15 @@ public class BundleFileWrapperFactoryHookTests extends AbstractFrameworkHookTest
 		assertEquals("Wrong content found.", "CUSTOM_CONTENT", readURL(url1));
 	}
 
-	private String readURL(URL url) {
+	private String readURL(URL url) throws IOException {
 		StringBuilder sb = new StringBuilder();
-		try {
-			try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
-				for (String line = reader.readLine(); line != null;) {
-					sb.append(line);
-					line = reader.readLine();
-					if (line != null)
-						sb.append('\n');
-				}
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
+			for (String line = reader.readLine(); line != null;) {
+				sb.append(line);
+				line = reader.readLine();
+				if (line != null)
+					sb.append('\n');
 			}
-		} catch (IOException e) {
-			fail("Unexpected exception reading url: " + url.toExternalForm(), e); //$NON-NLS-1$
 		}
 		return sb.toString();
 	}

@@ -60,7 +60,8 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		if (end < start)
 			return;
 		if (url.getPath() != null)
-			// A call to a URL constructor has been made that uses an authorized URL as its context.
+			// A call to a URL constructor has been made that uses an authorized URL as its
+			// context.
 			// Null out bundleEntry because it will not be valid for the new path
 			bundleEntry = null;
 		String spec = ""; //$NON-NLS-1$
@@ -108,7 +109,8 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 			path = ""; //$NON-NLS-1$
 		// modify path if there's any relative references
 		// see RFC2396 Section 5.2
-		// Note: For ".." references above the root the approach taken is removing them from the resolved path
+		// Note: For ".." references above the root the approach taken is removing them
+		// from the resolved path
 		if (path.endsWith("/.") || path.endsWith("/..")) //$NON-NLS-1$ //$NON-NLS-2$
 			path = path + '/';
 		int dotIndex;
@@ -144,14 +146,15 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 	}
 
 	/**
-	 * Establishes a connection to the resource specified by <code>URL</code>.
-	 * Since different protocols may have unique ways of connecting, it must be
-	 * overridden by the subclass.
+	 * Establishes a connection to the resource specified by <code>URL</code>. Since
+	 * different protocols may have unique ways of connecting, it must be overridden
+	 * by the subclass.
 	 *
 	 * @return java.net.URLConnection
 	 * @param url java.net.URL
 	 *
-	 * @exception	IOException 	thrown if an IO error occurs during connection establishment
+	 * @exception IOException thrown if an IO error occurs during connection
+	 *                        establishment
 	 */
 	@Override
 	protected URLConnection openConnection(URL url) throws IOException {
@@ -166,7 +169,8 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		try {
 			bundleID = parseBundleIDFromURLHost(host);
 		} catch (NumberFormatException nfe) {
-			throw (MalformedURLException) new MalformedURLException(NLS.bind(Msg.URL_INVALID_BUNDLE_ID, host)).initCause(nfe);
+			throw (MalformedURLException) new MalformedURLException(NLS.bind(Msg.URL_INVALID_BUNDLE_ID, host))
+					.initCause(nfe);
 		}
 		Module module = getModule(bundleID);
 		if (module == null) {
@@ -183,11 +187,11 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 	}
 
 	/**
-	 * Finds the bundle entry for this protocal.  This is handled
-	 * differently for Bundle.gerResource() and Bundle.getEntry()
-	 * because getResource uses the bundle classloader and getEntry
-	 * only used the base bundle file.
-	 * @param url The URL to find the entry for.
+	 * Finds the bundle entry for this protocal. This is handled differently for
+	 * Bundle.gerResource() and Bundle.getEntry() because getResource uses the
+	 * bundle classloader and getEntry only used the base bundle file.
+	 * 
+	 * @param url    The URL to find the entry for.
 	 * @param module the module to find the entry for.
 	 * @return the bundle entry
 	 */
@@ -196,8 +200,8 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 	/**
 	 * Converts a bundle URL to a String.
 	 *
-	 * @param   url   the URL.
-	 * @return  a string representation of the URL.
+	 * @param url the URL.
+	 * @return a string representation of the URL.
 	 */
 	@Override
 	protected String toExternalForm(URL url) {
@@ -267,11 +271,10 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 		// do a hashcode test to allow each handler to check the adaptor first
 		if (url1.hashCode() != url2.hashCode())
 			return false;
-		return equalsIgnoreCase(url1.getProtocol(), url2.getProtocol())
-				&& hostsEqual(url1, url2)
-				&& url1.getPort() == url2.getPort()
-				&& Objects.equals(url1.getPath(), url2.getPath());
-		// note that the authority is not checked here because it can be different for two
+		return equalsIgnoreCase(url1.getProtocol(), url2.getProtocol()) && hostsEqual(url1, url2)
+				&& url1.getPort() == url2.getPort() && Objects.equals(url1.getPath(), url2.getPath());
+		// note that the authority is not checked here because it can be different for
+		// two
 		// URLs depending on how they were constructed.
 	}
 
@@ -296,6 +299,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler {
 
 	static long parseBundleIDFromURLHost(String host) {
 		int dotIndex = host.indexOf(BID_FWKID_SEPARATOR);
-		return (dotIndex >= 0 && dotIndex < host.length() - 1) ? Long.parseLong(host.substring(0, dotIndex)) : Long.parseLong(host);
+		return (dotIndex >= 0 && dotIndex < host.length() - 1) ? Long.parseLong(host.substring(0, dotIndex))
+				: Long.parseLong(host);
 	}
 }

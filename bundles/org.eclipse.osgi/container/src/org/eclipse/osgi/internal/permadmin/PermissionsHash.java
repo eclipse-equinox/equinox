@@ -21,16 +21,14 @@ import java.util.Hashtable;
 /**
  * A simple Hashtable based collection of Permission objects.
  * <p>
- * The class' .implies method simply scans each permission
- * individually and asks if the permission should be granted.
- * No addition semantics is provided by the collection, so it is
- * not possible to grant permissions whose "grantedness" is
+ * The class' .implies method simply scans each permission individually and asks
+ * if the permission should be granted. No addition semantics is provided by the
+ * collection, so it is not possible to grant permissions whose "grantedness" is
  * split across multiple stored Permissions.
  * <p>
- * Instances of this class can be used to store heterogeneous
- * collections of permissions, as long as it is not necessary
- * to remember when multiple occurances of .equal permissions
- * are added.
+ * Instances of this class can be used to store heterogeneous collections of
+ * permissions, as long as it is not necessary to remember when multiple
+ * occurances of .equal permissions are added.
  */
 class PermissionsHash extends PermissionCollection {
 	private static final long serialVersionUID = 3258408426341284153L;
@@ -49,10 +47,8 @@ class PermissionsHash extends PermissionCollection {
 	/**
 	 * Adds the argument to the collection.
 	 *
-	 * @param		perm java.security.Permission
-	 *					the permission to add to the collection.
-	 * @exception	IllegalStateException
-	 *					if the collection is read only.
+	 * @param perm java.security.Permission the permission to add to the collection.
+	 * @exception IllegalStateException if the collection is read only.
 	 */
 	@Override
 	public void add(Permission perm) {
@@ -64,11 +60,9 @@ class PermissionsHash extends PermissionCollection {
 	}
 
 	/**
-	 * Answers an enumeration of the permissions
-	 * in the receiver.
+	 * Answers an enumeration of the permissions in the receiver.
 	 *
-	 * @return		Enumeration
-	 *					the permissions in the receiver.
+	 * @return Enumeration the permissions in the receiver.
 	 */
 	@Override
 	public Enumeration<Permission> elements() {
@@ -76,15 +70,12 @@ class PermissionsHash extends PermissionCollection {
 	}
 
 	/**
-	 * Indicates whether the argument permission is implied
-	 * by the permissions contained in the receiver.
+	 * Indicates whether the argument permission is implied by the permissions
+	 * contained in the receiver.
 	 *
-	 * @return		boolean
-	 *					<code>true</code> if the argument permission
-	 *					is implied by the permissions in the receiver,
-	 *					and <code>false</code> if it is not.
-	 * @param		perm java.security.Permission
-	 *					the permission to check
+	 * @return boolean <code>true</code> if the argument permission is implied by
+	 *         the permissions in the receiver, and <code>false</code> if it is not.
+	 * @param perm java.security.Permission the permission to check
 	 */
 	@Override
 	public boolean implies(Permission perm) {

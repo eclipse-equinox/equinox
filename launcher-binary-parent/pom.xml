@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Copyright (c) 2012, 2018 Eclipse Foundation and others.
+  Copyright (c) 2012, 2024 Eclipse Foundation and others.
   All rights reserved. This program and the accompanying materials
   are made available under the terms of the Eclipse Distribution License v1.0
   which accompanies this distribution, and is available at
@@ -15,7 +15,7 @@
 <parent>
     <groupId>org.eclipse.equinox</groupId>
     <artifactId>parent</artifactId>
-    <version>4.31.0-SNAPSHOT</version>
+    <version>4.32.0-SNAPSHOT</version>
 </parent>
 
   <artifactId>launcher-binary-parent</artifactId>
@@ -26,7 +26,6 @@
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>target-platform-configuration</artifactId>
-        <version>${tycho.version}</version>
         <configuration>
           <environments>
             <environment>
@@ -64,7 +63,6 @@
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-packaging-plugin</artifactId>
-        <version>${tycho.version}</version>
         <configuration>
           <additionalFileSets>
             <fileSet>
@@ -94,6 +92,9 @@
           <name>native</name>
         </property>
       </activation>
+      <properties>
+        <natives.source.dir>${project.basedir}/../../features/org.eclipse.equinox.executable.feature/library/${ws}</natives.source.dir>
+      </properties>
       <build>
         <plugins>
           <plugin>
@@ -102,28 +103,79 @@
               <execution>
                 <id>compile-launcher-natives</id>
                 <phase>generate-resources</phase>
-                <configuration>
-                  <target>
-                    <ant dir="../../features/org.eclipse.equinox.executable.feature/library/${ws}/" target="build_eclipse"/>
-                  </target>
-                </configuration>
                 <goals>
                   <goal>run</goal>
                 </goals>
+                <configuration>
+                  <target>
+                    <!-- See https://stackoverflow.com/a/53227117 and http://ant-contrib.sourceforge.net/tasks/tasks/index.html -->
+                    <taskdef resource="net/sf/antcontrib/antlib.xml"/>
+                    <if><equals arg1="${native}" arg2="${ws}.${os}.${arch}"/>
+                      <then>
+                        <property name="JAVA_HOME" value="${java.home}"/><!-- Not overwritten if already set, e.g. as CLI argument -->
+                        <if><equals arg1="${ws}" arg2="win32" />
+                          <then>
+                            <exec dir="${natives.source.dir}" executable="cmd" failonerror="true">
+                              <arg line="/c build.bat install -ws ${ws} -os ${os} -arch ${arch}"/>
+                            </exec>
+                          </then><else>
+                            <exec dir="${natives.source.dir}" executable="sh" failonerror="true">
+                              <arg line="build.sh install -ws ${ws} -os ${os} -arch ${arch}"/>
+                            </exec>
+                          </else>
+                        </if>
+                      </then>
+                    </if>
+                  </target>
+                </configuration>
               </execution>
               <execution>
                 <id>clean-launcher-natives</id>
                 <phase>clean</phase>
-                <configuration>
-                  <target>
-                    <ant dir="../../features/org.eclipse.equinox.executable.feature/library/${ws}/" target="clean"/>
-                  </target>
-                </configuration>
                 <goals>
                   <goal>run</goal>
                 </goals>
+                <configuration>
+                  <target>
+                    <!-- See https://stackoverflow.com/a/53227117 and http://ant-contrib.sourceforge.net/tasks/tasks/index.html -->
+                    <taskdef resource="net/sf/antcontrib/antlib.xml"/>
+                    <if><equals arg1="${native}" arg2="${ws}.${os}.${arch}"/>
+                      <then>
+                        <if><equals arg1="${ws}" arg2="win32" />
+                          <then>
+                            <exec dir="${natives.source.dir}" executable="cmd">
+                              <arg line="/c build.bat clean"/>
+                            </exec>
+                          </then><else>
+                            <exec dir="${natives.source.dir}" executable="sh">
+                              <arg line="build.sh clean"/>
+                            </exec>
+                          </else>
+                        </if>
+                      </then>
+                    </if>
+                  </target>
+                </configuration>
               </execution>
             </executions>
+            <dependencies>
+              <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant</artifactId>
+                <version>1.10.14</version>
+              </dependency>
+              <dependency>
+                <groupId>ant-contrib</groupId>
+                <artifactId>ant-contrib</artifactId>
+                <version>1.0b3</version>
+                <exclusions>
+                  <exclusion>
+                    <groupId>ant</groupId>
+                    <artifactId>ant</artifactId>
+                  </exclusion>
+                </exclusions>
+              </dependency>
+            </dependencies>
           </plugin>
         </plugins>
       </build>

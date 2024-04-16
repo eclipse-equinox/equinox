@@ -86,6 +86,7 @@ public class StructuredTextSomeMoreTest extends StructuredTextTestBase {
 			StructuredTextEnvironment.ORIENT_LTR);
 
 	@Test
+	@SuppressWarnings("deprecation") // isProcessingNeeded
 	public void testSomeMore() {
 		assertFalse(env1.isProcessingNeeded());
 		assertTrue(env2.isProcessingNeeded());

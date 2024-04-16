@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2024 Cognos Incorporated, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     Cognos Incorporated - initial API and implementation
  *     IBM Corporation - bug fixes and enhancements
+ *     Christoph Läubrich - add support for Coordinator
  *******************************************************************************/
 package org.eclipse.equinox.internal.cm;
 
@@ -18,7 +19,6 @@ import java.util.*;
 import org.osgi.framework.*;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
-import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -229,8 +229,8 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 									asynchUpdated(serviceFactory, config.getPid(), properties);
 									foundConfig = true;
 								} else {
-									configurationAdminFactory.log(LogService.LOG_WARNING,
-											"Configuration for " + Constants.SERVICE_PID + "=" + config.getPid() //$NON-NLS-1$//$NON-NLS-2$
+									configurationAdminFactory
+											.warn("Configuration for " + Constants.SERVICE_PID + "=" + config.getPid() //$NON-NLS-1$//$NON-NLS-2$
 													+ " could not be bound to " //$NON-NLS-1$
 													+ ConfigurationAdminImpl.getLocation(reference.getBundle()));
 								}
@@ -279,7 +279,7 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 				try {
 					service.deleted(pid);
 				} catch (Throwable t) {
-					configurationAdminFactory.log(LogService.LOG_ERROR, t.getMessage(), t);
+					configurationAdminFactory.error(t.getMessage(), t);
 				}
 			}
 		});
@@ -287,22 +287,22 @@ class ManagedServiceFactoryTracker extends ServiceTracker<ManagedServiceFactory,
 
 	private void asynchUpdated(final ManagedServiceFactory service, final String pid,
 			final Dictionary<String, Object> properties) {
+		configurationAdminFactory.cancelExecuteCoordinated(service);
 		if (properties == null) {
 			return;
 		}
-		queue.put(new Runnable() {
-			@Override
-			public void run() {
+		configurationAdminFactory.executeCoordinated(service, () -> {
+			queue.put(() -> {
 				try {
 					service.updated(pid, properties);
 				} catch (ConfigurationException e) {
 					// we might consider doing more for ConfigurationExceptions
 					Throwable cause = e.getCause();
-					configurationAdminFactory.log(LogService.LOG_ERROR, e.getMessage(), cause != null ? cause : e);
+					configurationAdminFactory.error(e.getMessage(), cause != null ? cause : e);
 				} catch (Throwable t) {
-					configurationAdminFactory.log(LogService.LOG_ERROR, t.getMessage(), t);
+					configurationAdminFactory.error(t.getMessage(), t);
 				}
-			}
+			});
 		});
 	}
 }

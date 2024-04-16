@@ -49,8 +49,10 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 	private static final String LOGGER_BUNDLE_EVENT = "Events.Bundle"; //$NON-NLS-1$
 	private static final String LOGGER_SERVICE_EVENT = "Events.Service"; //$NON-NLS-1$
 
-	private static final String[] LOGSERVICE_CLASSES = {LogService.class.getName(), LoggerFactory.class.getName(), ExtendedLogService.class.getName()};
-	private static final String[] LOGREADERSERVICE_CLASSES = {LogReaderService.class.getName(), ExtendedLogReaderService.class.getName()};
+	private static final String[] LOGSERVICE_CLASSES = { LogService.class.getName(), LoggerFactory.class.getName(),
+			ExtendedLogService.class.getName() };
+	private static final String[] LOGREADERSERVICE_CLASSES = { LogReaderService.class.getName(),
+			ExtendedLogReaderService.class.getName() };
 
 	private ServiceRegistration<?> logReaderServiceRegistration;
 	private ServiceRegistration<?> logServiceRegistration;
@@ -61,7 +63,8 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 	private EventAdminAdapter eventAdminAdapter;
 	private ConfigAdminListener configAdminListener;
 
-	public LogServiceManager(int maxHistory, LogLevel defaultLevel, boolean captureLogEntryLocation, LogListener... systemListeners) {
+	public LogServiceManager(int maxHistory, LogLevel defaultLevel, boolean captureLogEntryLocation,
+			LogListener... systemListeners) {
 		logReaderServiceFactory = new ExtendedLogReaderServiceFactory(maxHistory, defaultLevel);
 		logServiceFactory = new ExtendedLogServiceFactory(logReaderServiceFactory, captureLogEntryLocation);
 		systemBundleLog = logServiceFactory.getLogService(new MockSystemBundle());
@@ -86,8 +89,10 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 		logServiceRegistration = context.registerService(LOGSERVICE_CLASSES, logServiceFactory, null);
 		Hashtable<String, Object> loggerAdminProps = new Hashtable<>();
 		// TODO the constant for log service id will like be defined
-		loggerAdminProps.put("osgi.log.service.id", logServiceRegistration.getReference().getProperty(Constants.SERVICE_ID)); //$NON-NLS-1$
-		loggerAdminRegistration = context.registerService(LoggerAdmin.class, logServiceFactory.getLoggerAdmin(), loggerAdminProps);
+		loggerAdminProps.put("osgi.log.service.id", //$NON-NLS-1$
+				logServiceRegistration.getReference().getProperty(Constants.SERVICE_ID));
+		loggerAdminRegistration = context.registerService(LoggerAdmin.class, logServiceFactory.getLoggerAdmin(),
+				loggerAdminProps);
 
 		eventAdminAdapter = new EventAdminAdapter(context, logReaderServiceFactory);
 		eventAdminAdapter.start();
@@ -165,15 +170,15 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 		int eventType = event.getType();
 		int logType;
 		switch (eventType) {
-			case FrameworkEvent.ERROR :
-				logType = LogService.LOG_ERROR;
-				break;
-			case FrameworkEvent.WARNING :
-				logType = LogService.LOG_WARNING;
-				break;
-			default :
-				logType = LogService.LOG_INFO;
-				break;
+		case FrameworkEvent.ERROR:
+			logType = LogService.LOG_ERROR;
+			break;
+		case FrameworkEvent.WARNING:
+			logType = LogService.LOG_WARNING;
+			break;
+		default:
+			logType = LogService.LOG_INFO;
+			break;
 		}
 		String bsn = (bundle == null) ? null : bundle.getSymbolicName();
 		String loggerName = (bsn == null) ? LOGGER_FRAMEWORK_EVENT : LOGGER_FRAMEWORK_EVENT + "." + bsn; //$NON-NLS-1$
@@ -188,35 +193,35 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 	 */
 	private static String getBundleEventTypeName(int type) {
 		switch (type) {
-			case BundleEvent.INSTALLED :
-				return ("BundleEvent INSTALLED"); //$NON-NLS-1$
+		case BundleEvent.INSTALLED:
+			return ("BundleEvent INSTALLED"); //$NON-NLS-1$
 
-			case BundleEvent.RESOLVED :
-				return ("BundleEvent RESOLVED"); //$NON-NLS-1$
+		case BundleEvent.RESOLVED:
+			return ("BundleEvent RESOLVED"); //$NON-NLS-1$
 
-			case BundleEvent.STARTED :
-				return ("BundleEvent STARTED"); //$NON-NLS-1$
+		case BundleEvent.STARTED:
+			return ("BundleEvent STARTED"); //$NON-NLS-1$
 
-			case BundleEvent.STARTING :
-				return ("BundleEvent STARTING"); //$NON-NLS-1$
+		case BundleEvent.STARTING:
+			return ("BundleEvent STARTING"); //$NON-NLS-1$
 
-			case BundleEvent.STOPPED :
-				return ("BundleEvent STOPPED"); //$NON-NLS-1$
+		case BundleEvent.STOPPED:
+			return ("BundleEvent STOPPED"); //$NON-NLS-1$
 
-			case BundleEvent.STOPPING :
-				return ("BundleEvent STOPPING"); //$NON-NLS-1$
+		case BundleEvent.STOPPING:
+			return ("BundleEvent STOPPING"); //$NON-NLS-1$
 
-			case BundleEvent.UNINSTALLED :
-				return ("BundleEvent UNINSTALLED"); //$NON-NLS-1$
+		case BundleEvent.UNINSTALLED:
+			return ("BundleEvent UNINSTALLED"); //$NON-NLS-1$
 
-			case BundleEvent.UNRESOLVED :
-				return ("BundleEvent UNRESOLVED"); //$NON-NLS-1$
+		case BundleEvent.UNRESOLVED:
+			return ("BundleEvent UNRESOLVED"); //$NON-NLS-1$
 
-			case BundleEvent.UPDATED :
-				return ("BundleEvent UPDATED"); //$NON-NLS-1$
+		case BundleEvent.UPDATED:
+			return ("BundleEvent UPDATED"); //$NON-NLS-1$
 
-			default :
-				return ("BundleEvent " + Integer.toHexString(type)); //$NON-NLS-1$
+		default:
+			return ("BundleEvent " + Integer.toHexString(type)); //$NON-NLS-1$
 		}
 	}
 
@@ -225,17 +230,17 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 	 */
 	private static String getServiceEventTypeName(int type) {
 		switch (type) {
-			case ServiceEvent.REGISTERED :
-				return ("ServiceEvent REGISTERED"); //$NON-NLS-1$
+		case ServiceEvent.REGISTERED:
+			return ("ServiceEvent REGISTERED"); //$NON-NLS-1$
 
-			case ServiceEvent.MODIFIED :
-				return ("ServiceEvent MODIFIED"); //$NON-NLS-1$
+		case ServiceEvent.MODIFIED:
+			return ("ServiceEvent MODIFIED"); //$NON-NLS-1$
 
-			case ServiceEvent.UNREGISTERING :
-				return ("ServiceEvent UNREGISTERING"); //$NON-NLS-1$
+		case ServiceEvent.UNREGISTERING:
+			return ("ServiceEvent UNREGISTERING"); //$NON-NLS-1$
 
-			default :
-				return ("ServiceEvent " + Integer.toHexString(type)); //$NON-NLS-1$
+		default:
+			return ("ServiceEvent " + Integer.toHexString(type)); //$NON-NLS-1$
 		}
 	}
 
@@ -244,26 +249,26 @@ public class LogServiceManager implements SynchronousBundleListener, FrameworkLi
 	 */
 	private static String getFrameworkEventTypeName(int type) {
 		switch (type) {
-			case FrameworkEvent.ERROR :
-				return ("FrameworkEvent ERROR"); //$NON-NLS-1$
+		case FrameworkEvent.ERROR:
+			return ("FrameworkEvent ERROR"); //$NON-NLS-1$
 
-			case FrameworkEvent.INFO :
-				return ("FrameworkEvent INFO"); //$NON-NLS-1$
+		case FrameworkEvent.INFO:
+			return ("FrameworkEvent INFO"); //$NON-NLS-1$
 
-			case FrameworkEvent.PACKAGES_REFRESHED :
-				return ("FrameworkEvent PACKAGES REFRESHED"); //$NON-NLS-1$
+		case FrameworkEvent.PACKAGES_REFRESHED:
+			return ("FrameworkEvent PACKAGES REFRESHED"); //$NON-NLS-1$
 
-			case FrameworkEvent.STARTED :
-				return ("FrameworkEvent STARTED"); //$NON-NLS-1$
+		case FrameworkEvent.STARTED:
+			return ("FrameworkEvent STARTED"); //$NON-NLS-1$
 
-			case FrameworkEvent.STARTLEVEL_CHANGED :
-				return ("FrameworkEvent STARTLEVEL CHANGED"); //$NON-NLS-1$
+		case FrameworkEvent.STARTLEVEL_CHANGED:
+			return ("FrameworkEvent STARTLEVEL CHANGED"); //$NON-NLS-1$
 
-			case FrameworkEvent.WARNING :
-				return ("FrameworkEvent WARNING"); //$NON-NLS-1$
+		case FrameworkEvent.WARNING:
+			return ("FrameworkEvent WARNING"); //$NON-NLS-1$
 
-			default :
-				return ("FrameworkEvent " + Integer.toHexString(type)); //$NON-NLS-1$
+		default:
+			return ("FrameworkEvent " + Integer.toHexString(type)); //$NON-NLS-1$
 		}
 	}
 

@@ -64,7 +64,8 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 	private int state;
 	final EquinoxContainer container;
 
-	public WovenClassImpl(String className, byte[] bytes, BundleEntry entry, ClasspathEntry classpathEntry, BundleLoader loader, EquinoxContainer container, Map<ServiceRegistration<?>, Boolean> deniedHooks) {
+	public WovenClassImpl(String className, byte[] bytes, BundleEntry entry, ClasspathEntry classpathEntry,
+			BundleLoader loader, EquinoxContainer container, Map<ServiceRegistration<?>, Boolean> deniedHooks) {
 		super();
 		this.className = className;
 		this.validBytes = this.resultBytes = bytes;
@@ -259,8 +260,10 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 			}
 		} finally {
 			if ((hookFlags & FLAG_HOOKCALLED) != 0) {
-				for (ClassLoaderHook classLoaderHook : container.getConfiguration().getHookRegistry().getClassLoaderHooks()) {
-					rejected |= classLoaderHook.rejectTransformation(className, resultBytes, classpathEntry, entry, loader.getModuleClassLoader().getClasspathManager());
+				for (ClassLoaderHook classLoaderHook : container.getConfiguration().getHookRegistry()
+						.getClassLoaderHooks()) {
+					rejected |= classLoaderHook.rejectTransformation(className, resultBytes, classpathEntry, entry,
+							loader.getModuleClassLoader().getClasspathManager());
 				}
 				if (!rejected) {
 					wovenBytes = resultBytes;
@@ -300,12 +303,14 @@ public final class WovenClassImpl implements WovenClass, HookContext<WeavingHook
 	}
 
 	private void addImpliedImportPackagePermissions(ManifestElement[] importElements) {
-		ProtectionDomain wovenDomain = ((Generation) ((ModuleRevision) getBundleWiring().getRevision()).getRevisionInfo()).getDomain();
+		ProtectionDomain wovenDomain = ((Generation) ((ModuleRevision) getBundleWiring().getRevision())
+				.getRevisionInfo()).getDomain();
 		if (wovenDomain != null) {
 			// security is enabled; add the permissions
 			for (ManifestElement clause : importElements)
 				for (String pkg : clause.getValueComponents())
-					((BundlePermissions) wovenDomain.getPermissions()).addWovenPermission(new PackagePermission(pkg, PackagePermission.IMPORT));
+					((BundlePermissions) wovenDomain.getPermissions())
+							.addWovenPermission(new PackagePermission(pkg, PackagePermission.IMPORT));
 		}
 	}
 

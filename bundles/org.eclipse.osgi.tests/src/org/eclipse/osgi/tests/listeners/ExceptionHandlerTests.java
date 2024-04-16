@@ -57,6 +57,7 @@ public class ExceptionHandlerTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation") // installBundle
 	public void testNonFatalException() {
 		FrameworkEventListenerWithResult fwkListener = new FrameworkEventListenerWithResult();
 		OSGiTestsActivator.getContext().addFrameworkListener(fwkListener);
@@ -82,6 +83,7 @@ public class ExceptionHandlerTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation") // installBundle
 	public void testFatalException() {
 		FrameworkEventListenerWithResult fwkListener = new FrameworkEventListenerWithResult();
 		OSGiTestsActivator.getContext().addFrameworkListener(fwkListener);

@@ -24,6 +24,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 
+@SuppressWarnings("deprecation") // PackageAdmin, ExportedPackage
 public class SubstituteExportsBundleTests extends AbstractBundleTests {
 
 	@Test
@@ -205,7 +206,8 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 
 	@Test
 	public void testSubstituteExports07() throws Exception {
-		// same as previous split test but bundles are installed in opposite order to force the opposite classes to load
+		// same as previous split test but bundles are installed in opposite order to
+		// force the opposite classes to load
 		Bundle jBundle = installer.installBundle("substitutes.j"); //$NON-NLS-1$
 		Bundle iBundle = installer.installBundle("substitutes.i"); //$NON-NLS-1$
 		Bundle lBundle = installer.installBundle("substitutes.l"); //$NON-NLS-1$
@@ -261,7 +263,8 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		assertEquals("pBundle has different copy of Ny", nY, pBundle.loadClass(classNameNy)); //$NON-NLS-1$
 		assertEquals("qBundle has different copy of Ny", nY, qBundle.loadClass(classNameNy)); //$NON-NLS-1$
 
-		String[] unexpectedClasseNames = new String[] {"substitutes.x.Ix", "substitutes.x.Kx", "substitutes.x.Mx", "substitutes.y.Iy", "substitutes.y.Ky", "substitutes.y.My"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+		String[] unexpectedClasseNames = new String[] { "substitutes.x.Ix", "substitutes.x.Kx", "substitutes.x.Mx", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"substitutes.y.Iy", "substitutes.y.Ky", "substitutes.y.My" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		for (String unexpectedClasseName : unexpectedClasseNames) {
 			for (Bundle bundle : allBundles) {
 				assertThrows("Found class " + unexpectedClasseName + " in bundle " + bundle,
@@ -312,7 +315,8 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		Bundle nBundle = installer.installBundle("substitutes.n"); //$NON-NLS-1$
 		Bundle pBundle = installer.installBundle("substitutes.p"); //$NON-NLS-1$
 		Bundle qBundle = installer.installBundle("substitutes.q"); //$NON-NLS-1$
-		Bundle[] allBundles = new Bundle[] {iBundle, jBundle, mBundle, nBundle, pBundle, qBundle}; // k and l do not depend on i
+		Bundle[] allBundles = new Bundle[] { iBundle, jBundle, mBundle, nBundle, pBundle, qBundle }; // k and l do not
+																										// depend on i
 		doRefreshTest(allBundles, iBundle);
 	}
 
@@ -326,7 +330,8 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		Bundle mBundle = installer.installBundle("substitutes.m"); //$NON-NLS-1$
 		Bundle qBundle = installer.installBundle("substitutes.q"); //$NON-NLS-1$
 		Bundle pBundle = installer.installBundle("substitutes.p"); //$NON-NLS-1$
-		Bundle[] allBundles = new Bundle[] {iBundle, jBundle, mBundle, nBundle, pBundle, qBundle}; // k and l do not depend on j
+		Bundle[] allBundles = new Bundle[] { iBundle, jBundle, mBundle, nBundle, pBundle, qBundle }; // k and l do not
+																										// depend on j
 		doRefreshTest(allBundles, jBundle);
 	}
 
@@ -387,7 +392,14 @@ public class SubstituteExportsBundleTests extends AbstractBundleTests {
 		Bundle nBundle = installer.installBundle("substitutes.n"); //$NON-NLS-1$
 		Bundle pBundle = installer.installBundle("substitutes.p"); //$NON-NLS-1$
 		Bundle qBundle = installer.installBundle("substitutes.q"); //$NON-NLS-1$
-		Bundle[] allBundles = new Bundle[] {iBundle, jBundle, kBundle, lBundle, mBundle, nBundle, pBundle, qBundle}; // k and l do not depend on i
+		Bundle[] allBundles = new Bundle[] { iBundle, jBundle, kBundle, lBundle, mBundle, nBundle, pBundle, qBundle }; // k
+																														// and
+																														// l
+																														// do
+																														// not
+																														// depend
+																														// on
+																														// i
 		assertTrue("Bundles are not resolved", installer.resolveBundles(allBundles)); //$NON-NLS-1$
 
 		PackageAdmin pa = installer.getPackageAdmin();

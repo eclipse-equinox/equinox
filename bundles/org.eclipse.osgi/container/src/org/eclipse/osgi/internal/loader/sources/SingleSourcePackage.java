@@ -29,7 +29,7 @@ public class SingleSourcePackage extends PackageSource {
 
 	@Override
 	public SingleSourcePackage[] getSuppliers() {
-		return new SingleSourcePackage[] {this};
+		return new SingleSourcePackage[] { this };
 	}
 
 	public BundleLoader getLoader() {
@@ -58,7 +58,8 @@ public class SingleSourcePackage extends PackageSource {
 		if (!(source instanceof SingleSourcePackage))
 			return false;
 		SingleSourcePackage singleSource = (SingleSourcePackage) source;
-		// we do an == test on id because the id is interned in the constructor of PackageSource
+		// we do an == test on id because the id is interned in the constructor of
+		// PackageSource
 		return supplier == singleSource.supplier && id == singleSource.getId();
 	}
 

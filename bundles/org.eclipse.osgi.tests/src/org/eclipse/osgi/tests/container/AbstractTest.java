@@ -65,7 +65,8 @@ public abstract class AbstractTest {
 	}
 
 	protected DummyContainerAdaptor createDummyAdaptor(DebugOptions debugOptions) {
-		return new DummyContainerAdaptor(new DummyCollisionHook(false), null, new DummyResolverHookFactory(), debugOptions);
+		return new DummyContainerAdaptor(new DummyCollisionHook(false), null, new DummyResolverHookFactory(),
+				debugOptions);
 	}
 
 	protected Bundle getBundle() {
@@ -90,22 +91,27 @@ public abstract class AbstractTest {
 		return getSystemBundle().getBundleContext();
 	}
 
-	protected Module installDummyModule(String manifestFile, String location, ModuleContainer container) throws BundleException, IOException {
+	protected Module installDummyModule(String manifestFile, String location, ModuleContainer container)
+			throws BundleException, IOException {
 		return installDummyModule(manifestFile, location, null, null, null, container);
 	}
 
-	protected Module installDummyModule(String manifestFile, String location, String alias, String extraExports, String extraCapabilities, ModuleContainer container) throws BundleException, IOException {
+	protected Module installDummyModule(String manifestFile, String location, String alias, String extraExports,
+			String extraCapabilities, ModuleContainer container) throws BundleException, IOException {
 		Map<String, String> manifest = getManifest(manifestFile);
-		ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(manifest, alias, extraExports, extraCapabilities);
+		ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(manifest, alias, extraExports,
+				extraCapabilities);
 		Module system = container.getModule(0);
 		return container.install(system, location, builder, null);
 	}
 
-	protected Module installDummyModule(Map<String, String> manifest, String location, ModuleContainer container) throws BundleException {
+	protected Module installDummyModule(Map<String, String> manifest, String location, ModuleContainer container)
+			throws BundleException {
 		return installDummyModule(manifest, -1, location, container);
 	}
 
-	protected Module installDummyModule(Map<String, String> manifest, long id, String location, ModuleContainer container) throws BundleException {
+	protected Module installDummyModule(Map<String, String> manifest, long id, String location,
+			ModuleContainer container) throws BundleException {
 		ModuleRevisionBuilder builder = OSGiManifestBuilderFactory.createBuilder(manifest);
 		if (id > 0) {
 			builder.setId(id);

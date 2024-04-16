@@ -91,24 +91,25 @@ public class EventAdminLogListener implements SynchronousLogListener {
 	}
 
 	@SuppressWarnings("deprecation")
-	Object convertEvent(LogEntry entry) throws InstantiationException, IllegalAccessException, InvocationTargetException {
+	Object convertEvent(LogEntry entry)
+			throws InstantiationException, IllegalAccessException, InvocationTargetException {
 		String topic = TOPIC;
 		int level = entry.getLevel();
 		switch (level) {
-			case LogService.LOG_ERROR :
-				topic += TOPIC_SEPARATOR + LOG_ERROR;
-				break;
-			case LogService.LOG_WARNING :
-				topic += TOPIC_SEPARATOR + LOG_WARNING;
-				break;
-			case LogService.LOG_INFO :
-				topic += TOPIC_SEPARATOR + LOG_INFO;
-				break;
-			case LogService.LOG_DEBUG :
-				topic += TOPIC_SEPARATOR + LOG_DEBUG;
-				break;
-			default : // other log levels are represented by LOG_OTHER
-				topic += TOPIC_SEPARATOR + LOG_OTHER;
+		case LogService.LOG_ERROR:
+			topic += TOPIC_SEPARATOR + LOG_ERROR;
+			break;
+		case LogService.LOG_WARNING:
+			topic += TOPIC_SEPARATOR + LOG_WARNING;
+			break;
+		case LogService.LOG_INFO:
+			topic += TOPIC_SEPARATOR + LOG_INFO;
+			break;
+		case LogService.LOG_DEBUG:
+			topic += TOPIC_SEPARATOR + LOG_DEBUG;
+			break;
+		default: // other log levels are represented by LOG_OTHER
+			topic += TOPIC_SEPARATOR + LOG_OTHER;
 		}
 		Hashtable<String, Object> properties = new Hashtable<>();
 		Bundle bundle = entry.getBundle();

@@ -31,7 +31,7 @@ import org.osgi.service.permissionadmin.PermissionInfo;
 
 public final class SecurityRow implements ConditionalPermissionInfo {
 	/* Used to find condition constructors getConditions */
-	static final Class<?>[] conditionMethodArgs = new Class[] {Bundle.class, ConditionInfo.class};
+	static final Class<?>[] conditionMethodArgs = new Class[] { Bundle.class, ConditionInfo.class };
 	static Condition[] ABSTAIN_LIST = new Condition[0];
 	static Condition[] SATISFIED_LIST = new Condition[0];
 	static final Decision DECISION_ABSTAIN = new Decision(SecurityTable.ABSTAIN, null, null, null);
@@ -47,7 +47,8 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	final Map<BundlePermissions, Condition[]> bundleConditions;
 	final Object bundleConditionsLock = new Object();
 
-	public SecurityRow(SecurityAdmin securityAdmin, String name, ConditionInfo[] conditionInfos, PermissionInfo[] permissionInfos, String decision) {
+	public SecurityRow(SecurityAdmin securityAdmin, String name, ConditionInfo[] conditionInfos,
+			PermissionInfo[] permissionInfos, String decision) {
 		if (permissionInfos == null || permissionInfos.length == 0)
 			throw new IllegalArgumentException("It is invalid to have empty permissionInfos"); //$NON-NLS-1$
 		this.securityAdmin = securityAdmin;
@@ -74,7 +75,8 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		return (SecurityRow) createConditionalPermissionInfo(securityAdmin, encoded);
 	}
 
-	private static ConditionalPermissionInfo createConditionalPermissionInfo(SecurityAdmin securityAdmin, String encoded) {
+	private static ConditionalPermissionInfo createConditionalPermissionInfo(SecurityAdmin securityAdmin,
+			String encoded) {
 		encoded = encoded.trim();
 		if (encoded.length() == 0)
 			throw new IllegalArgumentException("Empty encoded string is invalid"); //$NON-NLS-1$
@@ -113,7 +115,8 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 
 		String decision = encoded.substring(0, start);
 		decision = decision.trim();
-		if (decision.length() == 0 || (!ConditionalPermissionInfo.DENY.equalsIgnoreCase(decision) && !ConditionalPermissionInfo.ALLOW.equalsIgnoreCase(decision)))
+		if (decision.length() == 0 || (!ConditionalPermissionInfo.DENY.equalsIgnoreCase(decision)
+				&& !ConditionalPermissionInfo.ALLOW.equalsIgnoreCase(decision)))
 			throw new IllegalArgumentException(encoded);
 
 		List<ConditionInfo> condList = new ArrayList<>();
@@ -167,20 +170,20 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		for (int i = 0; i < len; i++) {
 			char c = str.charAt(i);
 			switch (c) {
-				case '"' :
-				case '\\' :
-					output.append('\\');
-					output.append(c);
-					break;
-				case '\r' :
-					output.append("\\r"); //$NON-NLS-1$
-					break;
-				case '\n' :
-					output.append("\\n"); //$NON-NLS-1$
-					break;
-				default :
-					output.append(c);
-					break;
+			case '"':
+			case '\\':
+				output.append('\\');
+				output.append(c);
+				break;
+			case '\r':
+				output.append("\\r"); //$NON-NLS-1$
+				break;
+			case '\n':
+				output.append("\\n"); //$NON-NLS-1$
+				break;
+			default:
+				output.append(c);
+				break;
 			}
 		}
 	}
@@ -195,19 +198,19 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 				if (i < end) {
 					c = str.charAt(i);
 					switch (c) {
-						case '"' :
-						case '\\' :
-							break;
-						case 'r' :
-							c = '\r';
-							break;
-						case 'n' :
-							c = '\n';
-							break;
-						default :
-							c = '\\';
-							i--;
-							break;
+					case '"':
+					case '\\':
+						break;
+					case 'r':
+						c = '\r';
+						break;
+					case 'n':
+						c = '\n';
+						break;
+					default:
+						c = '\\';
+						i--;
+						break;
 					}
 				}
 			}
@@ -285,7 +288,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 						}
 					}
 
-					Object[] args = {bundlePermissions.getBundle(), conditionInfos[i]};
+					Object[] args = { bundlePermissions.getBundle(), conditionInfos[i] };
 					try {
 						if (method != null)
 							conditions[i] = (Condition) method.invoke(null, args);
@@ -354,14 +357,16 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 			if (condition == null)
 				continue; // this condition must have been satisfied && !mutable in a previous check
 			if (!isPostponed(condition)) {
-				// must call isMutable before calling isSatisfied according to the specification.
+				// must call isMutable before calling isSatisfied according to the
+				// specification.
 				boolean mutable = condition.isMutable();
 				if (condition.isSatisfied()) {
 					if (!mutable)
 						conditions[i] = null; // ignore this condition for future checks
 				} else {
 					if (!mutable)
-						// this will cause the row to always abstain; mark this to be ignored in future checks
+						// this will cause the row to always abstain; mark this to be ignored in future
+						// checks
 						synchronized (bundleConditionsLock) {
 							bundleConditions.put(bundlePermissions, ABSTAIN_LIST);
 						}
@@ -373,7 +378,8 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 					postponedPermCheck = evaluatePermission(bundlePermissions, permission);
 				if (postponedPermCheck == DECISION_ABSTAIN)
 					return postponedPermCheck; // no need to postpone the condition if the row abstains
-				// this row will deny or allow the permission; must queue the postponed condition
+				// this row will deny or allow the permission; must queue the postponed
+				// condition
 				if (postponedConditions == null)
 					postponedConditions = new ArrayList<>(1);
 				postponedConditions.add(condition);
@@ -386,7 +392,8 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 			}
 		}
 		if (postponedPermCheck != null)
-			return new Decision(postponedPermCheck.decision | SecurityTable.POSTPONED, postponedConditions.toArray(new Condition[postponedConditions.size()]), this, bundlePermissions);
+			return new Decision(postponedPermCheck.decision | SecurityTable.POSTPONED,
+					postponedConditions.toArray(new Condition[postponedConditions.size()]), this, bundlePermissions);
 		return evaluatePermission(bundlePermissions, permission);
 	}
 
@@ -396,7 +403,9 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	}
 
 	private Decision evaluatePermission(BundlePermissions bundlePermissions, Permission permission) {
-		return permissionInfoCollection.implies(bundlePermissions, permission) ? (deny ? DECISION_DENIED : DECISION_GRANTED) : DECISION_ABSTAIN;
+		return permissionInfoCollection.implies(bundlePermissions, permission)
+				? (deny ? DECISION_DENIED : DECISION_GRANTED)
+				: DECISION_ABSTAIN;
 	}
 
 	@Override
@@ -438,7 +447,8 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		return h;
 	}
 
-	static String getEncoded(String name, ConditionInfo[] conditionInfos, PermissionInfo[] permissionInfos, boolean deny) {
+	static String getEncoded(String name, ConditionInfo[] conditionInfos, PermissionInfo[] permissionInfos,
+			boolean deny) {
 		StringBuilder result = new StringBuilder();
 		if (deny)
 			result.append(ConditionalPermissionInfo.DENY);

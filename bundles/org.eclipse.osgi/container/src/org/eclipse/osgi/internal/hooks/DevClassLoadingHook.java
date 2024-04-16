@@ -43,31 +43,37 @@ public class DevClassLoadingHook extends ClassLoaderHook implements KeyedElement
 	}
 
 	@Override
-	public boolean addClassPathEntry(ArrayList<ClasspathEntry> cpEntries, String cp, ClasspathManager hostmanager, Generation sourceGeneration) {
+	public boolean addClassPathEntry(ArrayList<ClasspathEntry> cpEntries, String cp, ClasspathManager hostmanager,
+			Generation sourceGeneration) {
 		// if this is a connect bundle just ignore
 		if (sourceGeneration.getContentType() == Type.CONNECT) {
 			return false;
 		}
 		// first check that we are in devmode for this sourcedata
-		String[] devClassPaths = !configuration.inDevelopmentMode() ? null : configuration.getDevClassPath(sourceGeneration.getRevision());
+		String[] devClassPaths = !configuration.inDevelopmentMode() ? null
+				: configuration.getDevClassPath(sourceGeneration.getRevision());
 		if (devClassPaths == null || devClassPaths.length == 0)
 			return false; // not in dev mode return
-		// check that dev classpath entries have not already been added; we mark this in the first entry below
+		// check that dev classpath entries have not already been added; we mark this in
+		// the first entry below
 		if (!cpEntries.isEmpty() && cpEntries.get(0).getUserObject(KEY) != null)
 			return false; // this source has already had its dev classpath entries added.
 
-		// get the specified classpath from the Bundle-ClassPath header to check for dups
-		List<ModuleCapability> moduleDatas = sourceGeneration.getRevision().getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
+		// get the specified classpath from the Bundle-ClassPath header to check for
+		// dups
+		List<ModuleCapability> moduleDatas = sourceGeneration.getRevision()
+				.getModuleCapabilities(EquinoxModuleDataNamespace.MODULE_DATA_NAMESPACE);
 		@SuppressWarnings("unchecked")
-		List<String> specifiedCP = Optional.ofNullable(moduleDatas.isEmpty()
-				?
-				null
-				: (List<String>) moduleDatas.get(0).getAttributes().get(EquinoxModuleDataNamespace.CAPABILITY_CLASSPATH))
+		List<String> specifiedCP = Optional
+				.ofNullable(moduleDatas.isEmpty() ? null
+						: (List<String>) moduleDatas.get(0).getAttributes()
+								.get(EquinoxModuleDataNamespace.CAPABILITY_CLASSPATH))
 				.orElse(Collections.singletonList(".")); //$NON-NLS-1$
 		boolean result = false;
 		for (String devClassPath : devClassPaths) {
 			if (specifiedCP.contains(devClassPath)) {
-				// dev properties contained a duplicate of an entry on the Bundle-ClassPath header
+				// dev properties contained a duplicate of an entry on the Bundle-ClassPath
+				// header
 				// don't add anything, the framework will do it for us
 				continue;
 			}
@@ -81,7 +87,8 @@ public class DevClassLoadingHook extends ClassLoaderHook implements KeyedElement
 					File base = sourceGeneration.getBundleFile().getBaseFile();
 					if (base != null && base.isDirectory()) {
 						// this is only supported for directory bundles
-						ClasspathEntry entry = hostmanager.getExternalClassPath(new File(base, devCP).getAbsolutePath(), sourceGeneration);
+						ClasspathEntry entry = hostmanager.getExternalClassPath(new File(base, devCP).getAbsolutePath(),
+								sourceGeneration);
 						if (entry != null) {
 							cpEntries.add(entry);
 							result = true;
@@ -89,7 +96,7 @@ public class DevClassLoadingHook extends ClassLoaderHook implements KeyedElement
 					}
 				} else {
 					// if in dev mode, try using the cp as an absolute path
-					// we assume absolute entries come from fragments.  Find the source
+					// we assume absolute entries come from fragments. Find the source
 					if (fromFragment)
 						devCP = devCP.substring(0, devCP.length() - FRAGMENT.length());
 					Generation fragSource = findFragmentSource(sourceGeneration, devCP, hostmanager, fromFragment);
@@ -104,13 +111,15 @@ public class DevClassLoadingHook extends ClassLoaderHook implements KeyedElement
 			}
 		}
 		// mark the first entry of the list.
-		// This way we can quickly tell that dev classpath entries have been added to the list
+		// This way we can quickly tell that dev classpath entries have been added to
+		// the list
 		if (result && !cpEntries.isEmpty())
 			cpEntries.get(0).addUserObject(this);
 		return result;
 	}
 
-	private Generation findFragmentSource(Generation hostGeneration, String cp, ClasspathManager manager, boolean fromFragment) {
+	private Generation findFragmentSource(Generation hostGeneration, String cp, ClasspathManager manager,
+			boolean fromFragment) {
 		if (hostGeneration != manager.getGeneration())
 			return hostGeneration;
 

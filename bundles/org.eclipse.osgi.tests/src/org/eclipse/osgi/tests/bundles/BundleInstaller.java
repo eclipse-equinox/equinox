@@ -42,7 +42,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 
-@SuppressWarnings("deprecation")
+@SuppressWarnings({ "deprecation", "removal" }) // AccessController
 public class BundleInstaller {
 	private BundleContext context;
 	private String rootLocation;
@@ -55,7 +55,9 @@ public class BundleInstaller {
 	public BundleInstaller(String bundlesRoot, BundleContext context) throws InvalidSyntaxException {
 		this.context = context;
 		rootLocation = bundlesRoot;
-		converter = new ServiceTracker<>(context, context.createFilter("(&(objectClass=" + URLConverter.class.getName() + ")(protocol=bundleentry))"), null);
+		converter = new ServiceTracker<>(context,
+				context.createFilter("(&(objectClass=" + URLConverter.class.getName() + ")(protocol=bundleentry))"),
+				null);
 		converter.open();
 		startlevel = new ServiceTracker<>(context, StartLevel.class.getName(), null);
 		startlevel.open();

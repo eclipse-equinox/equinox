@@ -134,7 +134,8 @@ public class InternalUtils {
 	public static Permission getRequirePermission(BundleCapability candidate) {
 		String name = candidate.getNamespace();
 		if (PackageNamespace.PACKAGE_NAMESPACE.equals(name)) {
-			return new PackagePermission(getPermisionName(candidate), candidate.getRevision().getBundle(), PackagePermission.IMPORT);
+			return new PackagePermission(getPermisionName(candidate), candidate.getRevision().getBundle(),
+					PackagePermission.IMPORT);
 		}
 		if (HostNamespace.HOST_NAMESPACE.equals(name)) {
 			return new BundlePermission(getPermisionName(candidate), BundlePermission.FRAGMENT);
@@ -142,7 +143,8 @@ public class InternalUtils {
 		if (BundleNamespace.BUNDLE_NAMESPACE.equals(name)) {
 			return new BundlePermission(getPermisionName(candidate), BundlePermission.REQUIRE);
 		}
-		return new CapabilityPermission(name, candidate.getAttributes(), candidate.getRevision().getBundle(), CapabilityPermission.REQUIRE);
+		return new CapabilityPermission(name, candidate.getAttributes(), candidate.getRevision().getBundle(),
+				CapabilityPermission.REQUIRE);
 	}
 
 	public static Permission getProvidePermission(BundleCapability candidate) {

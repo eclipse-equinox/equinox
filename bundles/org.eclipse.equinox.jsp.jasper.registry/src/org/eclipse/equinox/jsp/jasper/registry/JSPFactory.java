@@ -43,8 +43,7 @@ public class JSPFactory implements IExecutableExtensionFactory, IExecutableExten
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void setInitializationData(IConfigurationElement config, String propertyName, Object data)
-			throws CoreException {
+	public void setInitializationData(IConfigurationElement config, String propertyName, Object data) {
 		this.config = config;
 		if (data != null) {
 			if (data instanceof String)
@@ -56,7 +55,7 @@ public class JSPFactory implements IExecutableExtensionFactory, IExecutableExten
 	}
 
 	@Override
-	public Object create() throws CoreException {
+	public Object create() {
 		Bundle b = Activator.getBundle(config.getContributor().getName()); // check for null and illegal state exception
 		String alias = config.getAttribute("alias"); //$NON-NLS-1$
 		if (alias != null && alias.indexOf("/*.") == alias.lastIndexOf('/')) { //$NON-NLS-1$

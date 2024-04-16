@@ -147,8 +147,6 @@ char * resolveSymlinks( char * path ) {
 	char * result = 0;
 	CFURLRef url, resolved;
 	CFStringRef string;
-	FSRef fsRef;
-	Boolean isFolder, wasAliased;
 
 	if(path == NULL)
 		return path;
@@ -159,9 +157,12 @@ char * resolveSymlinks( char * path ) {
 	if(url == NULL)
 		return path;
 
-	if(CFURLGetFSRef(url, &fsRef)) {
-		if( FSResolveAliasFile(&fsRef, true, &isFolder, &wasAliased) == noErr) {
-			resolved = CFURLCreateFromFSRef(kCFAllocatorDefault, &fsRef);
+	UInt8 fsPath[PATH_MAX];
+	if (CFURLGetFileSystemRepresentation(url, true, fsPath, sizeof(fsPath))) {
+		NSError *error = nil;
+		NSURL *resolvedURL = [NSURL URLByResolvingAliasFileAtURL:(NSURL *)url options:NSURLBookmarkResolutionWithSecurityScope error:&error];
+		if (resolvedURL) {
+			resolved = CFURLCopyAbsoluteURL(url);
 			if(resolved != NULL) {
 				string = CFURLCopyFileSystemPath(resolved, kCFURLPOSIXPathStyle);
 				CFIndex length = CFStringGetMaximumSizeForEncoding(CFStringGetLength(string), kCFStringEncodingUTF8);

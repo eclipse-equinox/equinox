@@ -18,11 +18,16 @@ import java.util.Map;
 import org.eclipse.core.tests.harness.PerformanceTestRunner;
 import org.eclipse.osgi.framework.util.CaseInsensitiveDictionaryMap;
 import org.eclipse.osgi.framework.util.Headers;
-import org.eclipse.osgi.tests.OSGiTest;
 import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 import org.osgi.framework.Constants;
 
-public class CaseMapPerformanceTest extends OSGiTest {
+@SuppressWarnings("deprecation") // Headers
+public class CaseMapPerformanceTest {
+	@Rule
+	public TestName testName = new TestName();
+
 	static final String[] KEYS;
 	static final Object VALUE = new Object();
 	static {
@@ -32,81 +37,77 @@ public class CaseMapPerformanceTest extends OSGiTest {
 		}
 	}
 
-	public CaseMapPerformanceTest(String name) {
-		super(name);
-	}
-
-	public void testHeaders004() {
+	public void testHeaders004() throws Exception {
 		final Map<String, Object> headers = new Headers<>(4);
 		doTestMap(headers, 4);
 	}
 
-	public void testHeaders005() {
+	public void testHeaders005() throws Exception {
 		final Map<String, Object> headers = new Headers<>(5);
 		doTestMap(headers, 5);
 	}
 
-	public void testHeaders006() {
+	public void testHeaders006() throws Exception {
 		final Map<String, Object> headers = new Headers<>(6);
 		doTestMap(headers, 6);
 	}
 
-	public void testHeaders010() {
+	public void testHeaders010() throws Exception {
 		final Map<String, Object> headers = new Headers<>(10);
 		doTestMap(headers, 10);
 	}
 
-	public void testHeaders020() {
+	public void testHeaders020() throws Exception {
 		final Map<String, Object> headers = new Headers<>(20);
 		doTestMap(headers, 20);
 	}
 
-	public void testHeaders100() {
+	public void testHeaders100() throws Exception {
 		final Map<String, Object> headers = new Headers<>(100);
 		doTestMap(headers, 100);
 	}
 
-	public void testXCaseMap004() {
+	public void testXCaseMap004() throws Exception {
 		final Map<String, Object> headers = new CaseInsensitiveDictionaryMap<>(4);
 		doTestMap(headers, 4);
 	}
 
-	public void testXCaseMap005() {
+	public void testXCaseMap005() throws Exception {
 		final Map<String, Object> headers = new CaseInsensitiveDictionaryMap<>(5);
 		doTestMap(headers, 5);
 	}
 
-	public void testXCaseMap006() {
+	public void testXCaseMap006() throws Exception {
 		final Map<String, Object> headers = new CaseInsensitiveDictionaryMap<>(6);
 		doTestMap(headers, 6);
 	}
 
-	public void testXCaseMap010() {
+	public void testXCaseMap010() throws Exception {
 		final Map<String, Object> headers = new CaseInsensitiveDictionaryMap<>(10);
 		doTestMap(headers, 10);
 	}
 
-	public void testXCaseMap034() {
+	public void testXCaseMap034() throws Exception {
 		final Map<String, Object> headers = new CaseInsensitiveDictionaryMap<>(34);
 		doTestMap(headers, 34);
 	}
 
-	public void testXCaseMap100() {
+	public void testXCaseMap100() throws Exception {
 		final Map<String, Object> headers = new CaseInsensitiveDictionaryMap<>(100);
 		doTestMap(headers, 100);
 	}
 
-	private void doTestMap(final Map<String, Object> map, final int numKeys) {
+	private void doTestMap(final Map<String, Object> map, final int numKeys) throws Exception {
 		new PerformanceTestRunner() {
 			protected void test() {
 				fillMap(map, numKeys);
 				doMapGet(map, numKeys);
 			}
 
-		}.run(this, 10, 10000);
+		}.run(getClass(), testName.getMethodName(), 10, 10000);
 	}
 
-	public void testCommonKeyMap() {
+	public void testCommonKeyMap() throws Exception {
 		final Map<String, Object> map = new CaseInsensitiveDictionaryMap<>(34);
 		new PerformanceTestRunner() {
 			protected void test() {
@@ -114,10 +115,10 @@ public class CaseMapPerformanceTest extends OSGiTest {
 				doCommonKeyMapGet(map);
 			}
 
-		}.run(this, 10, 10000);
+		}.run(getClass(), testName.getMethodName(), 10, 10000);
 	}
 
-	public void testCommonHashMap() {
+	public void testCommonHashMap() throws Exception {
 		final Map<String, Object> map = new HashMap<>(34);
 		new PerformanceTestRunner() {
 			protected void test() {
@@ -125,7 +126,7 @@ public class CaseMapPerformanceTest extends OSGiTest {
 				doCommonKeyMapGet(map);
 			}
 
-		}.run(this, 10, 10000);
+		}.run(getClass(), testName.getMethodName(), 10, 10000);
 	}
 
 	static void fillMap(Map<String, Object> map, int numKeys) {

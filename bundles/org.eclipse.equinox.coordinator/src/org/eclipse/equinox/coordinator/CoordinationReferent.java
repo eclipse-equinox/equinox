@@ -95,7 +95,7 @@ public class CoordinationReferent implements Coordination {
 			return true;
 		if (!(object instanceof CoordinationReferent))
 			return false;
-		return coordination.equals(((CoordinationReferent)object).coordination);
+		return coordination.equals(((CoordinationReferent) object).coordination);
 	}
 
 	@Override

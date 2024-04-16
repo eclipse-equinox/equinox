@@ -11,6 +11,9 @@ pipeline {
 		maven 'apache-maven-latest'
 		jdk 'temurin-jdk17-latest'
 	}
+	environment {
+		EQUINOX_BINARIES_LOC = "$WORKSPACE/rt.equinox.binaries"
+	}
 	stages {
 		stage('get binaries') {
 			steps{
@@ -24,8 +27,6 @@ pipeline {
 				sh """
 				mvn clean verify --batch-mode --fail-at-end -Dmaven.repo.local=$WORKSPACE/.m2/repository \
 					-Pbree-libs -Papi-check -Pjavadoc\
-					-Dcompare-version-with-baselines.skip=false \
-					-Dproject.build.sourceEncoding=UTF-8 \
 					-Drt.equinox.binaries.loc=$WORKSPACE/rt.equinox.binaries 
 				"""
 			}
@@ -34,7 +35,7 @@ pipeline {
 					archiveArtifacts artifacts: '**/*.log, **/*.jar', allowEmptyArchive: true
 					junit '**/target/surefire-reports/TEST-*.xml'
 					discoverGitReferenceBuild referenceJob: 'equinox/master'
-					recordIssues publishAllIssues: true, tools: [java(), mavenConsole(), javaDoc()]
+					recordIssues publishAllIssues: true, tools: [eclipse(name: 'Compiler and API Tools', pattern: '**/target/compilelogs/*.xml'), mavenConsole(), javaDoc()]
 				}
 			}
 		}

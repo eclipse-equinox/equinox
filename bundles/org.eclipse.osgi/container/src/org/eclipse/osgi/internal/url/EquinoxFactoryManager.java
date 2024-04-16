@@ -70,13 +70,14 @@ public class EquinoxFactoryManager {
 		Object lock = getURLStreamHandlerFactoryLock();
 		synchronized (lock) {
 			URLStreamHandlerFactory factory = (URLStreamHandlerFactory) factoryField.get(null);
-			// doing a null check here just in case, but it would be really strange if it was null,
+			// doing a null check here just in case, but it would be really strange if it
+			// was null,
 			// because we failed to set the factory normally!!
 			if (factory != null) {
 				try {
 					factory.getClass().getMethod("isMultiplexing", (Class[]) null); //$NON-NLS-1$
-					Method register = factory.getClass().getMethod("register", new Class[] {Object.class}); //$NON-NLS-1$
-					register.invoke(factory, new Object[] {shf});
+					Method register = factory.getClass().getMethod("register", new Class[] { Object.class }); //$NON-NLS-1$
+					register.invoke(factory, new Object[] { shf });
 				} catch (NoSuchMethodException e) {
 					// current factory does not support multiplexing, ok we'll wrap it
 					shf.setParentFactory(factory);
@@ -139,14 +140,15 @@ public class EquinoxFactoryManager {
 			throw new Exception("Could not find ContentHandlerFactory field"); //$NON-NLS-1$
 		synchronized (URLConnection.class) {
 			java.net.ContentHandlerFactory factory = (java.net.ContentHandlerFactory) factoryField.get(null);
-			// doing a null check here just in case, but it would be really strange if it was null,
+			// doing a null check here just in case, but it would be really strange if it
+			// was null,
 			// because we failed to set the factory normally!!
 
 			if (factory != null) {
 				try {
 					factory.getClass().getMethod("isMultiplexing", (Class[]) null); //$NON-NLS-1$
-					Method register = factory.getClass().getMethod("register", new Class[] {Object.class}); //$NON-NLS-1$
-					register.invoke(factory, new Object[] {chf});
+					Method register = factory.getClass().getMethod("register", new Class[] { Object.class }); //$NON-NLS-1$
+					register.invoke(factory, new Object[] { chf });
 				} catch (NoSuchMethodException e) {
 					// current factory does not support multiplexing, ok we'll wrap it
 					chf.setParentFactory(factory);
@@ -191,8 +193,8 @@ public class EquinoxFactoryManager {
 				if (factory == urlStreamHandlerFactory) {
 					factory = (URLStreamHandlerFactory) urlStreamHandlerFactory.designateSuccessor();
 				} else {
-					Method unregister = factory.getClass().getMethod("unregister", new Class[] {Object.class}); //$NON-NLS-1$
-					unregister.invoke(factory, new Object[] {urlStreamHandlerFactory});
+					Method unregister = factory.getClass().getMethod("unregister", new Class[] { Object.class }); //$NON-NLS-1$
+					unregister.invoke(factory, new Object[] { urlStreamHandlerFactory });
 				}
 				factoryField.set(null, null);
 				// always attempt to clear the handlers cache
@@ -223,8 +225,8 @@ public class EquinoxFactoryManager {
 				if (factory == contentHandlerFactory) {
 					factory = (java.net.ContentHandlerFactory) contentHandlerFactory.designateSuccessor();
 				} else {
-					Method unregister = factory.getClass().getMethod("unregister", new Class[] {Object.class}); //$NON-NLS-1$
-					unregister.invoke(factory, new Object[] {contentHandlerFactory});
+					Method unregister = factory.getClass().getMethod("unregister", new Class[] { Object.class }); //$NON-NLS-1$
+					unregister.invoke(factory, new Object[] { contentHandlerFactory });
 				}
 				// null out the field so that we can successfully call setContentHandlerFactory
 				factoryField.set(null, null);

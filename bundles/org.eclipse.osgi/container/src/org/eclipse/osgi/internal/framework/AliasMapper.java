@@ -33,7 +33,8 @@ public class AliasMapper {
 		getTables("processor.aliases", processorAliasTable, processorCanonicalTable); //$NON-NLS-1$
 	}
 
-	private static void getTables(String resourceName, Map<String, Collection<String>> aliasTable, Map<String, String> canonicalTable) {
+	private static void getTables(String resourceName, Map<String, Collection<String>> aliasTable,
+			Map<String, String> canonicalTable) {
 		InputStream in = AliasMapper.class.getResourceAsStream(resourceName);
 		if (in != null) {
 			try {
@@ -101,7 +102,8 @@ public class AliasMapper {
 	 * @param in InputStream from which to read alias data.
 	 * @return Map of aliases.
 	 */
-	private static Map<String, Collection<String>> initAliases(InputStream in, Map<String, Collection<String>> aliasTable, Map<String, String> canonicalTable) {
+	private static Map<String, Collection<String>> initAliases(InputStream in,
+			Map<String, Collection<String>> aliasTable, Map<String, String> canonicalTable) {
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
 			Map<String, Set<String>> multiMaster = new HashMap<>();

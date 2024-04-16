@@ -13,34 +13,34 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
+import static org.junit.Assert.assertNotNull;
+
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.State;
+import org.junit.Test;
 import org.osgi.framework.BundleException;
 
 public class NewResolverTest extends AbstractStateTest {
 
-	public NewResolverTest(String testName) {
-		super(testName);
-	}
-
+	@Test
 	public void testSkeleton() {
 		State state = buildEmptyState();
 		state.resolve();
 	}
 
+	@Test
+	@SuppressWarnings("deprecation") // StateObjectFactory.createBundleDescription()
 	public void testBasicScenario1() throws BundleException {
 		State state = buildEmptyState();
 
-		final String MAN_A = "Bundle-SymbolicName: A\n" +
-		                     "Export-Package: servlet; specification-version=2.1";
-		BundleDescription bA = state.getFactory().createBundleDescription(parseManifest(MAN_A),
-																		"org.eclipse.basic1A", 0);
+		final String MAN_A = "Bundle-SymbolicName: A\n" + "Export-Package: servlet; specification-version=2.1";
+		BundleDescription bA = state.getFactory().createBundleDescription(parseManifest(MAN_A), "org.eclipse.basic1A",
+				0);
 		state.addBundle(bA);
 
-		final String MAN_B = "Bundle-SymbolicName: B\n" +
-        					 "Import-Package: servlet; specification-version=2.1";
-		BundleDescription bB = state.getFactory().createBundleDescription(parseManifest(MAN_B),
-													"org.eclipse.basic1B", 1);
+		final String MAN_B = "Bundle-SymbolicName: B\n" + "Import-Package: servlet; specification-version=2.1";
+		BundleDescription bB = state.getFactory().createBundleDescription(parseManifest(MAN_B), "org.eclipse.basic1B",
+				1);
 		state.addBundle(bB);
 
 		state.resolve();
@@ -54,5 +54,3 @@ public class NewResolverTest extends AbstractStateTest {
 		assertFullyResolved("0.4", b1);
 	}
 }
-
-

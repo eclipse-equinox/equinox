@@ -21,7 +21,6 @@ import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.event.*;
-import org.osgi.service.log.LogService;
 
 /**
  * Implementation of org.osgi.service.event.EventAdmin. EventAdminImpl uses
@@ -50,7 +49,6 @@ public class EventAdminImpl implements EventAdmin {
 	void start() {
 		log.open();
 		ThreadGroup eventGroup = new ThreadGroup("Equinox Event Admin"); //$NON-NLS-1$
-		eventGroup.setDaemon(true);
 		eventManager = new EventManager(EventAdminMsg.EVENT_ASYNC_THREAD_NAME, eventGroup);
 		handlers.open();
 	}
@@ -91,7 +89,7 @@ public class EventAdminImpl implements EventAdmin {
 			return;
 		}
 		if (event == null) {
-			log.log(LogService.LOG_ERROR, EventAdminMsg.EVENT_NULL_EVENT);
+			log.error(EventAdminMsg.EVENT_NULL_EVENT);
 			// continue from here will result in an NPE below; the spec for EventAdmin does
 			// not allow for null here
 			throw new NullPointerException(EventAdminMsg.EVENT_NULL_EVENT);
@@ -103,7 +101,7 @@ public class EventAdminImpl implements EventAdmin {
 			checkTopicPermissionPublish(topic);
 		} catch (SecurityException e) {
 			String msg = NLS.bind(EventAdminMsg.EVENT_NO_TOPICPERMISSION_PUBLISH, event.getTopic());
-			log.log(LogService.LOG_ERROR, msg);
+			log.error(msg);
 			// must throw a security exception here according to the EventAdmin spec
 			throw e;
 		}

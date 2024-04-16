@@ -53,7 +53,8 @@ public class AuthenticationTest extends BaseTest {
 		// request with auth and forward -> servlet invoked
 		requestAdvisor.request("context1/servlet?forward=true&auth=true");
 		assertEquals(6, callStack.size());
-		assertEquals(Arrays.asList("handle1", "servlet/context1", "handle1", "servlet/context1", "finish1", "finish1"), callStack);
+		assertEquals(Arrays.asList("handle1", "servlet/context1", "handle1", "servlet/context1", "finish1", "finish1"),
+				callStack);
 		callStack.clear();
 	}
 
@@ -78,86 +79,74 @@ public class AuthenticationTest extends BaseTest {
 		assertEquals(Arrays.asList("handle2", "servlet/context2", "finish2"), callStack);
 	}
 
-	private static final String	AUTH_PAR	= "auth";
+	private static final String AUTH_PAR = "auth";
 
-	private static final String	REC_PAR		= "rec";
+	private static final String REC_PAR = "rec";
 
 	private void setup(final List<String> callStack) {
 		final BundleContext context = getBundleContext();
 
 		// setup context 1
-		final Dictionary<String,Object> ctx1Props = new Hashtable<>();
+		final Dictionary<String, Object> ctx1Props = new Hashtable<>();
 		ctx1Props.put(HTTP_WHITEBOARD_CONTEXT_NAME, "context1");
 		ctx1Props.put(HTTP_WHITEBOARD_CONTEXT_PATH, "/context1");
-		registrations.add(context.registerService(
-			ServletContextHelper.class,
-			new ServletContextHelper() {
+		registrations.add(context.registerService(ServletContextHelper.class, new ServletContextHelper() {
 
-				@Override
-				public boolean handleSecurity(final HttpServletRequest request, final HttpServletResponse response) {
+			@Override
+			public boolean handleSecurity(final HttpServletRequest request, final HttpServletResponse response) {
 
-					if (request.getParameter(AUTH_PAR) != null) {
-						callStack.add("handle1");
-						return true;
-					}
-					return false;
-				}
-
-				@Override
-				public void finishSecurity(final HttpServletRequest request, final HttpServletResponse response) {
-					callStack.add("finish1");
-				}
-
-			},
-			ctx1Props)
-		);
-
-		// setup context 2
-		final Dictionary<String,Object> ctx2Props = new Hashtable<>();
-		ctx2Props.put(HTTP_WHITEBOARD_CONTEXT_NAME, "context2");
-		ctx2Props.put(HTTP_WHITEBOARD_CONTEXT_PATH, "/context2");
-		registrations.add(context.registerService(
-			ServletContextHelper.class,
-			new ServletContextHelper() {
-
-				@Override
-				public boolean handleSecurity(final HttpServletRequest request, final HttpServletResponse response) {
-
-					callStack.add("handle2");
+				if (request.getParameter(AUTH_PAR) != null) {
+					callStack.add("handle1");
 					return true;
 				}
+				return false;
+			}
 
-				@Override
-				public void finishSecurity(final HttpServletRequest request, final HttpServletResponse response) {
-					callStack.add("finish2");
-				}
+			@Override
+			public void finishSecurity(final HttpServletRequest request, final HttpServletResponse response) {
+				callStack.add("finish1");
+			}
 
-			},
-			ctx2Props)
-		);
+		}, ctx1Props));
+
+		// setup context 2
+		final Dictionary<String, Object> ctx2Props = new Hashtable<>();
+		ctx2Props.put(HTTP_WHITEBOARD_CONTEXT_NAME, "context2");
+		ctx2Props.put(HTTP_WHITEBOARD_CONTEXT_PATH, "/context2");
+		registrations.add(context.registerService(ServletContextHelper.class, new ServletContextHelper() {
+
+			@Override
+			public boolean handleSecurity(final HttpServletRequest request, final HttpServletResponse response) {
+
+				callStack.add("handle2");
+				return true;
+			}
+
+			@Override
+			public void finishSecurity(final HttpServletRequest request, final HttpServletResponse response) {
+				callStack.add("finish2");
+			}
+
+		}, ctx2Props));
 
 		// servlet for both contexts
 		@SuppressWarnings("serial")
 		class AServlet extends HttpServlet {
 
 			@Override
-			protected void service(HttpServletRequest request,
-					HttpServletResponse response)
-				throws ServletException, IOException {
+			protected void service(HttpServletRequest request, HttpServletResponse response)
+					throws ServletException, IOException {
 
 				callStack.add("servlet" + request.getContextPath());
 
-				if (request.getContextPath().equals("/context1")
-						&& request.getAttribute(REC_PAR) == null) {
+				if (request.getContextPath().equals("/context1") && request.getAttribute(REC_PAR) == null) {
 					if (request.getParameter("forward") != null) {
 						request.setAttribute(REC_PAR, "true");
-						request.getRequestDispatcher("/servlet")
-									.forward(request, response);
+						request.getRequestDispatcher("/servlet").forward(request, response);
 						return;
 					} else if (request.getParameter("include") != null) {
 						request.setAttribute(REC_PAR, "true");
-						request.getRequestDispatcher("/servlet")
-									.include(request, response);
+						request.getRequestDispatcher("/servlet").include(request, response);
 					} else if (request.getParameter("throw") != null) {
 						callStack.add("throw");
 						throw new ServletException("throw");
@@ -168,9 +157,9 @@ public class AuthenticationTest extends BaseTest {
 
 		}
 
-		final Dictionary<String,Object> servletProps = new Hashtable<>();
+		final Dictionary<String, Object> servletProps = new Hashtable<>();
 
-		servletProps.put(HTTP_WHITEBOARD_SERVLET_PATTERN, new String[] {"/servlet"});
+		servletProps.put(HTTP_WHITEBOARD_SERVLET_PATTERN, new String[] { "/servlet" });
 		servletProps.put(HTTP_WHITEBOARD_CONTEXT_SELECT, "(" + HTTP_WHITEBOARD_CONTEXT_NAME + "=context1)");
 		registrations.add(context.registerService(Servlet.class, new AServlet(), servletProps));
 

@@ -13,6 +13,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
@@ -25,26 +31,26 @@ import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.service.resolver.StateObjectFactory;
 import org.eclipse.osgi.service.resolver.VersionConstraint;
-import org.eclipse.osgi.tests.OSGiTest;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 
-public abstract class AbstractStateTest extends OSGiTest {
+public abstract class AbstractStateTest {
 	private ServiceReference platformAdminRef;
 	protected PlatformAdmin platformAdminService;
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		platformAdminRef = OSGiTestsActivator.getContext().getServiceReference(PlatformAdmin.class);
 		platformAdminService = (PlatformAdmin) OSGiTestsActivator.getContext().getService(platformAdminRef);
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		OSGiTestsActivator.getContext().ungetService(platformAdminRef);
-	}
-
-	public AbstractStateTest(String testName) {
-		super(testName);
 	}
 
 	public void assertContains(String tag, Object[] array, Object element) {
@@ -54,6 +60,14 @@ public abstract class AbstractStateTest extends OSGiTest {
 			}
 		}
 		fail(tag);
+	}
+
+	public void assertEquals(Object expected, Object actual) {
+		Assert.assertEquals(expected, actual);
+	}
+
+	public void assertEquals(String message, Object expected, Object actual) {
+		Assert.assertEquals(message, expected, actual);
 	}
 
 	public void assertEquals(State original, State copy) {
@@ -127,9 +141,11 @@ public abstract class AbstractStateTest extends OSGiTest {
 		if (original.getSupplier() != null) {
 			Object o = original.getSupplier();
 			if (o instanceof BundleDescription)
-				assertEquals(tag + ".5", (BundleDescription) original.getSupplier(), (BundleDescription) copy.getSupplier());
+				assertEquals(tag + ".5", (BundleDescription) original.getSupplier(),
+						(BundleDescription) copy.getSupplier());
 			else
-				assertEquals(tag + ".5", (ExportPackageDescription) original.getSupplier(), (ExportPackageDescription) copy.getSupplier());
+				assertEquals(tag + ".5", (ExportPackageDescription) original.getSupplier(),
+						(ExportPackageDescription) copy.getSupplier());
 		}
 	}
 
@@ -197,48 +213,55 @@ public abstract class AbstractStateTest extends OSGiTest {
 		assertEquals(tag, original, copy);
 	}
 
+	@SuppressWarnings("deprecation") // StateObjectFactory.createBundleDescription()
 	public State buildComplexState() throws BundleException {
 		State state = buildEmptyState();
 		/*
 		 * org.eclipse.b1_1.0 exports org.eclipse.p1_1.0 imports org.eclipse.p2
 		 */
 		final String B1_LOCATION = "org.eclipse.b1";
-		final String B1_MANIFEST = "Bundle-SymbolicName: org.eclipse.b1\n" + "Bundle-Version: 1.0\n" + "Export-Package: org.eclipse.p1;specification-version=1.0\n" + "Import-Package: org.eclipse.p2";
+		final String B1_MANIFEST = "Bundle-SymbolicName: org.eclipse.b1\n" + "Bundle-Version: 1.0\n"
+				+ "Export-Package: org.eclipse.p1;specification-version=1.0\n" + "Import-Package: org.eclipse.p2";
 		BundleDescription b1 = state.getFactory().createBundleDescription(parseManifest(B1_MANIFEST), B1_LOCATION, 1);
 		state.addBundle(b1);
 		/*
 		 * org.eclipse.b2_2.0 exports org.eclipse.p2 imports org.eclipse.p1
 		 */
 		final String B2_LOCATION = "org.eclipse.b2";
-		final String B2_MANIFEST = "Bundle-SymbolicName: org.eclipse.b2\n" + "Bundle-Version: 2.0\n" + "Export-Package: org.eclipse.p2\n" + "Import-Package: org.eclipse.p1";
+		final String B2_MANIFEST = "Bundle-SymbolicName: org.eclipse.b2\n" + "Bundle-Version: 2.0\n"
+				+ "Export-Package: org.eclipse.p2\n" + "Import-Package: org.eclipse.p1";
 		BundleDescription b2 = state.getFactory().createBundleDescription(parseManifest(B2_MANIFEST), B2_LOCATION, 2);
 		state.addBundle(b2);
 		/*
 		 * org.eclipse.b3_2.0 exports org.eclipse.p2_2.0
 		 */
 		final String B3_LOCATION = "org.eclipse.b3";
-		final String B3_MANIFEST = "Bundle-SymbolicName: org.eclipse.b3\n" + "Bundle-Version: 2.0\n" + "Export-Package: org.eclipse.p2; specification-version=2.0";
+		final String B3_MANIFEST = "Bundle-SymbolicName: org.eclipse.b3\n" + "Bundle-Version: 2.0\n"
+				+ "Export-Package: org.eclipse.p2; specification-version=2.0";
 		BundleDescription b3 = state.getFactory().createBundleDescription(parseManifest(B3_MANIFEST), B3_LOCATION, 3);
 		state.addBundle(b3);
 		/*
 		 * org.eclipse.b4_1.0 requires org.eclipse.b1_*
 		 */
 		final String B4_LOCATION = "org.eclipse.b4";
-		final String B4_MANIFEST = "Bundle-SymbolicName: org.eclipse.b4\n" + "Bundle-Version: 2.0\n" + "Require-Bundle: org.eclipse.b1";
+		final String B4_MANIFEST = "Bundle-SymbolicName: org.eclipse.b4\n" + "Bundle-Version: 2.0\n"
+				+ "Require-Bundle: org.eclipse.b1";
 		BundleDescription b4 = state.getFactory().createBundleDescription(parseManifest(B4_MANIFEST), B4_LOCATION, 4);
 		state.addBundle(b4);
 		/*
 		 * org.eclipse.b5_1.0 fragment for org.eclipse.b3_*
 		 */
 		final String B5_LOCATION = "org.eclipse.b5";
-		final String B5_MANIFEST = "Bundle-SymbolicName: org.eclipse.b5\n" + "Bundle-Version: 1.0\n" + "Fragment-Host: org.eclipse.b3";
+		final String B5_MANIFEST = "Bundle-SymbolicName: org.eclipse.b5\n" + "Bundle-Version: 1.0\n"
+				+ "Fragment-Host: org.eclipse.b3";
 		BundleDescription b5 = state.getFactory().createBundleDescription(parseManifest(B5_MANIFEST), B5_LOCATION, 5);
 		state.addBundle(b5);
 		/*
 		 * org.eclipse.b6_1.0 requires org.eclipse.b4
 		 */
 		final String B6_LOCATION = "org.eclipse.b6";
-		final String B6_MANIFEST = "Bundle-SymbolicName: org.eclipse.b6\n" + "Bundle-Version: 1.0\n" + "Require-Bundle: org.eclipse.b4";
+		final String B6_MANIFEST = "Bundle-SymbolicName: org.eclipse.b6\n" + "Bundle-Version: 1.0\n"
+				+ "Require-Bundle: org.eclipse.b4";
 		BundleDescription b6 = state.getFactory().createBundleDescription(parseManifest(B6_MANIFEST), B6_LOCATION, 6);
 		state.addBundle(b6);
 		return state;
@@ -248,39 +271,46 @@ public abstract class AbstractStateTest extends OSGiTest {
 		return StateObjectFactory.defaultFactory.createState(true);
 	}
 
+	@SuppressWarnings("deprecation") // StateObjectFactory.createBundleDescription()
 	public State buildInitialState() throws BundleException {
 		State state = buildEmptyState();
 		/*
 		 * org.eclipse.b1_1.0 exports org.eclipse.p1_1.0
 		 */
 		final String SYSTEM_BUNDLE_LOCATION = "org.eclipse.b1";
-		final String SYSTEM_BUNDLE_MANIFEST = "Bundle-SymbolicName: org.osgi.framework\n" + "Bundle-Version: 3.0\n" + "Export-Package: org.osgi.framework; specification-version=3.0";
-		BundleDescription b0 = state.getFactory().createBundleDescription(parseManifest(SYSTEM_BUNDLE_MANIFEST), SYSTEM_BUNDLE_LOCATION, 0);
+		final String SYSTEM_BUNDLE_MANIFEST = "Bundle-SymbolicName: org.osgi.framework\n" + "Bundle-Version: 3.0\n"
+				+ "Export-Package: org.osgi.framework; specification-version=3.0";
+		BundleDescription b0 = state.getFactory().createBundleDescription(parseManifest(SYSTEM_BUNDLE_MANIFEST),
+				SYSTEM_BUNDLE_LOCATION, 0);
 		state.addBundle(b0);
 		return state;
 	}
 
+	@SuppressWarnings("deprecation") // StateObjectFactory.createBundleDescription()
 	public State buildSimpleState() throws BundleException {
 		State state = buildEmptyState();
 		/*
 		 * org.eclipse.b1_1.0 exports org.eclipse.p1_1.0 imports org.eclipse.p2
 		 */
 		final String B1_LOCATION = "org.eclipse.b1";
-		final String B1_MANIFEST = "Bundle-SymbolicName: org.eclipse.b1\n" + "Bundle-Version: 1.0\n" + "Export-Package: org.eclipse.p1;specification-version=1.0\n" + "Import-Package: org.eclipse.p2";
+		final String B1_MANIFEST = "Bundle-SymbolicName: org.eclipse.b1\n" + "Bundle-Version: 1.0\n"
+				+ "Export-Package: org.eclipse.p1;specification-version=1.0\n" + "Import-Package: org.eclipse.p2";
 		BundleDescription b1 = state.getFactory().createBundleDescription(parseManifest(B1_MANIFEST), B1_LOCATION, 1);
 		state.addBundle(b1);
 		/*
 		 * org.eclipse.b2_2.0 exports org.eclipse.p2 imports org.eclipse.p1
 		 */
 		final String B2_LOCATION = "org.eclipse.b2";
-		final String B2_MANIFEST = "Bundle-SymbolicName: org.eclipse.b2\n" + "Bundle-Version: 2.0\n" + "Export-Package: org.eclipse.p2\n" + "Import-Package: org.eclipse.p1";
+		final String B2_MANIFEST = "Bundle-SymbolicName: org.eclipse.b2\n" + "Bundle-Version: 2.0\n"
+				+ "Export-Package: org.eclipse.p2\n" + "Import-Package: org.eclipse.p1";
 		BundleDescription b2 = state.getFactory().createBundleDescription(parseManifest(B2_MANIFEST), B2_LOCATION, 2);
 		state.addBundle(b2);
 		/*
 		 * org.eclipse.b3_2.0 imports org.eclipse.p1_2.0
 		 */
 		final String B3_LOCATION = "org.eclipse.b3";
-		final String B3_MANIFEST = "Bundle-SymbolicName: org.eclipse.b3\n" + "Bundle-Version: 2.0\n" + "Import-Package: org.eclipse.p1; specification-version=2.0";
+		final String B3_MANIFEST = "Bundle-SymbolicName: org.eclipse.b3\n" + "Bundle-Version: 2.0\n"
+				+ "Import-Package: org.eclipse.p1; specification-version=2.0";
 		BundleDescription b3 = state.getFactory().createBundleDescription(parseManifest(B3_MANIFEST), B3_LOCATION, 3);
 		state.addBundle(b3);
 		return state;

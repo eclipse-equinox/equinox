@@ -52,16 +52,18 @@ public abstract class BundleEntry {
 
 	/**
 	 * Get the modification time for this BundleEntry.
-	 * <p>If the modification time has not been set,
-	 * this method will return <tt>-1</tt>.
+	 * <p>
+	 * If the modification time has not been set, this method will return
+	 * <code>-1</code>.
 	 *
 	 * @return last modification time.
 	 */
 	public abstract long getTime();
 
 	/**
-	 * Get a URL to the bundle entry that uses a common protocol (i.e. file:
-	 * jar: or http: etc.).
+	 * Get a URL to the bundle entry that uses a common protocol (i.e. file: jar: or
+	 * http: etc.).
+	 * 
 	 * @return a URL to the bundle entry that uses a common protocol
 	 */
 	public abstract URL getLocalURL();
@@ -70,6 +72,7 @@ public abstract class BundleEntry {
 	 * Get a URL to the content of the bundle entry that uses the file: protocol.
 	 * The content of the bundle entry may be downloaded or extracted to the local
 	 * file system in order to create a file: URL.
+	 * 
 	 * @return a URL to the content of the bundle entry that uses the file: protocol
 	 */
 	public abstract URL getFileURL();
@@ -85,15 +88,17 @@ public abstract class BundleEntry {
 	}
 
 	/**
-	 * Used for class loading.  This default implementation gets the input stream from this entry
-	 * and copies the content into a byte array.
+	 * Used for class loading. This default implementation gets the input stream
+	 * from this entry and copies the content into a byte array.
+	 * 
 	 * @return a byte array containing the content of this entry
 	 */
 	public byte[] getBytes() throws IOException {
 		InputStream in = getInputStream();
 		int length = (int) getSize();
-		//		if (Debug.DEBUG_LOADER)
-		//			Debug.println("  about to read " + length + " bytes from " + getName()); //$NON-NLS-1$ //$NON-NLS-2$
+		// if (Debug.DEBUG_LOADER)
+		// Debug.println(" about to read " + length + " bytes from " + getName());
+		// //$NON-NLS-1$ //$NON-NLS-2$
 		return StorageUtil.getBytes(in, length, BUF_SIZE);
 	}
 }

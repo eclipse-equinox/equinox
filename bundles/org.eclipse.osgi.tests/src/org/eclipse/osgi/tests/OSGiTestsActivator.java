@@ -14,15 +14,18 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests;
 
+import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
 public class OSGiTestsActivator {
-	private OSGiTestsActivator() {
-	}
+	public static final String PI_OSGI_TESTS = "org.eclipse.osgi.tests";
 
 	public static final String TEST_FILES_ROOT = "test_files/";
+
+	private OSGiTestsActivator() {
+	}
 
 	public static Bundle getBundle() {
 		return FrameworkUtil.getBundle(OSGiTestsActivator.class);
@@ -31,4 +34,16 @@ public class OSGiTestsActivator {
 	public static BundleContext getContext() {
 		return getBundle().getBundleContext();
 	}
+
+	public static void addRequiredOSGiTestsBundles(ConfigurationSessionTestSuite suite) {
+		suite.addMinimalBundleSet();
+		suite.addThisBundle();
+		suite.addBundle(org.osgi.util.function.Function.class);
+		suite.addBundle(org.osgi.util.measurement.Measurement.class);
+		suite.addBundle(org.osgi.util.position.Position.class);
+		suite.addBundle(org.osgi.util.promise.Promise.class);
+		suite.addBundle(org.osgi.util.xml.XMLParserActivator.class);
+		suite.addBundle(org.osgi.service.event.Event.class);
+	}
+
 }

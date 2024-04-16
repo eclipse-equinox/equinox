@@ -91,7 +91,8 @@ public final class BundleInfo {
 			this.cachedHeaders = new CachedManifest(this, Collections.emptyMap());
 		}
 
-		Generation(long generationId, File content, boolean isDirectory, Type contentType, boolean hasPackageInfo, Map<String, String> cached, long lastModified, boolean isMRJar) {
+		Generation(long generationId, File content, boolean isDirectory, Type contentType, boolean hasPackageInfo,
+				Map<String, String> cached, long lastModified, boolean isMRJar) {
 			this.generationId = generationId;
 			this.content = content;
 			this.isDirectory = isDirectory;
@@ -152,14 +153,17 @@ public final class BundleInfo {
 						rawHeaders = Collections.emptyMap();
 					} else {
 						try {
-							Map<String, String> merged = ManifestElement.parseBundleManifest(manifest.getInputStream(), new CaseInsensitiveDictionaryMap<>());
-							// For MRJARs only replace Import-Package and Require-Capability if the versioned values are non-null
+							Map<String, String> merged = ManifestElement.parseBundleManifest(manifest.getInputStream(),
+									new CaseInsensitiveDictionaryMap<>());
+							// For MRJARs only replace Import-Package and Require-Capability if the
+							// versioned values are non-null
 							if (Boolean.parseBoolean(merged.get(MULTI_RELEASE_HEADER))) {
 								for (int i = getStorage().getRuntimeVersion().getMajor(); i > 8; i--) {
 									String versionManifest = MULTI_RELEASE_VERSIONS + i + "/OSGI-INF/MANIFEST.MF"; //$NON-NLS-1$
 									BundleEntry versionEntry = getBundleFile().getEntry(versionManifest);
 									if (versionEntry != null) {
-										Map<String, String> versioned = ManifestElement.parseBundleManifest(versionEntry.getInputStream(), new CaseInsensitiveDictionaryMap<>());
+										Map<String, String> versioned = ManifestElement.parseBundleManifest(
+												versionEntry.getInputStream(), new CaseInsensitiveDictionaryMap<>());
 										String versionedImport = versioned.get(Constants.IMPORT_PACKAGE);
 										String versionedRequireCap = versioned.get(Constants.REQUIRE_CAPABILITY);
 										if (versionedImport != null) {
@@ -202,7 +206,8 @@ public final class BundleInfo {
 		private ManifestLocalization getManifestLocalization() {
 			synchronized (genMonitor) {
 				if (headerLocalization == null) {
-					headerLocalization = new ManifestLocalization(this, getHeaders(), getStorage().getConfiguration().getConfiguration(EquinoxConfiguration.PROP_ROOT_LOCALE, "en")); //$NON-NLS-1$
+					headerLocalization = new ManifestLocalization(this, getHeaders(), getStorage().getConfiguration()
+							.getConfiguration(EquinoxConfiguration.PROP_ROOT_LOCALE, "en")); //$NON-NLS-1$
 				}
 				return headerLocalization;
 			}
@@ -273,7 +278,8 @@ public final class BundleInfo {
 
 		private void setLastModified(File content) {
 			if (content == null) {
-				// Bug 477787: content will be null when the osgi.framework configuration property contains an invalid value.
+				// Bug 477787: content will be null when the osgi.framework configuration
+				// property contains an invalid value.
 				lastModified = 0;
 				return;
 			}
@@ -293,7 +299,8 @@ public final class BundleInfo {
 		}
 
 		@SuppressWarnings("unchecked")
-		public <S, L, H extends StorageHook<S, L>> H getStorageHook(Class<? extends StorageHookFactory<S, L, H>> factoryClass) {
+		public <S, L, H extends StorageHook<S, L>> H getStorageHook(
+				Class<? extends StorageHookFactory<S, L, H>> factoryClass) {
 			synchronized (this.genMonitor) {
 				if (this.storageHooks == null)
 					return null;
@@ -338,28 +345,31 @@ public final class BundleInfo {
 		}
 
 		/**
-		 * Gets called by BundleFile during {@link BundleFile#getFile(String, boolean)}.  This method
-		 * will allocate a File object where content of the specified path may be
-		 * stored for this generation.  The returned File object may
-		 * not exist if the content has not previously been stored.
+		 * Gets called by BundleFile during {@link BundleFile#getFile(String, boolean)}.
+		 * This method will allocate a File object where content of the specified path
+		 * may be stored for this generation. The returned File object may not exist if
+		 * the content has not previously been stored.
+		 * 
 		 * @param path the path to the content to extract from the generation
 		 * @return a file object where content of the specified path may be stored.
-		 * @throws StorageException if the path will escape the persistent storage of the generation
+		 * @throws StorageException if the path will escape the persistent storage of
+		 *                          the generation
 		 */
 		public File getExtractFile(String path) {
 			return getExtractFile(null, path);
 		}
 
 		/**
-		 * Gets called by BundleFile during {@link BundleFile#getFile(String, boolean)}.  This method
-		 * will allocate a File object where content of the specified path may be
-		 * stored for this generation.  The returned File object may
-		 * not exist if the content has not previously been stored.
+		 * Gets called by BundleFile during {@link BundleFile#getFile(String, boolean)}.
+		 * This method will allocate a File object where content of the specified path
+		 * may be stored for this generation. The returned File object may not exist if
+		 * the content has not previously been stored.
+		 * 
 		 * @param path the path to the content to extract from the generation
 		 * @param base the base path that is prepended to the path, may be null
 		 * @return a file object where content of the specified path may be stored.
 		 * @throws StorageException if the path will escape the persistent storage of
-		 * the generation starting at the specified base
+		 *                          the generation starting at the specified base
 		 */
 		public File getExtractFile(String base, String path) {
 			StringBuilder baseBuilder = new StringBuilder();
@@ -450,7 +460,8 @@ public final class BundleInfo {
 			}
 		}
 
-		public ModuleRevisionBuilder adaptModuleRevisionBuilder(ModuleEvent operation, Module origin, ModuleRevisionBuilder builder) {
+		public ModuleRevisionBuilder adaptModuleRevisionBuilder(ModuleEvent operation, Module origin,
+				ModuleRevisionBuilder builder) {
 			List<StorageHook<?, ?>> hooks = getStorageHooks();
 			if (hooks != null) {
 				for (StorageHook<?, ?> hook : hooks) {
@@ -496,10 +507,13 @@ public final class BundleInfo {
 				lockedID = generationLocks.tryLock(nextGenerationId, 5, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
-				throw new BundleException("Failed to obtain id locks for generation.", BundleException.STATECHANGE_ERROR, e); //$NON-NLS-1$
+				throw new BundleException("Failed to obtain id locks for generation.", //$NON-NLS-1$
+						BundleException.STATECHANGE_ERROR, e);
 			}
 			if (!lockedID) {
-				throw new BundleException("Failed to obtain id locks for generation.", BundleException.STATECHANGE_ERROR, new ThreadInfoReport(generationLocks.getLockInfo(nextGenerationId))); //$NON-NLS-1$
+				throw new BundleException("Failed to obtain id locks for generation.", //$NON-NLS-1$
+						BundleException.STATECHANGE_ERROR,
+						new ThreadInfoReport(generationLocks.getLockInfo(nextGenerationId)));
 			}
 			return new Generation(nextGenerationId++);
 		}
@@ -514,9 +528,11 @@ public final class BundleInfo {
 		}
 	}
 
-	Generation restoreGeneration(long generationId, File content, boolean isDirectory, Type contentType, boolean hasPackageInfo, Map<String, String> cached, long lastModified, boolean isMRJar) {
+	Generation restoreGeneration(long generationId, File content, boolean isDirectory, Type contentType,
+			boolean hasPackageInfo, Map<String, String> cached, long lastModified, boolean isMRJar) {
 		synchronized (this.infoMonitor) {
-			return new Generation(generationId, content, isDirectory, contentType, hasPackageInfo, cached, lastModified, isMRJar);
+			return new Generation(generationId, content, isDirectory, contentType, hasPackageInfo, cached, lastModified,
+					isMRJar);
 		}
 	}
 
@@ -528,7 +544,8 @@ public final class BundleInfo {
 		try {
 			getStorage().delete(getStorage().getFile(Long.toString(getBundleId()), false));
 		} catch (IOException e) {
-			storage.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, "Error deleting bunlde info.", e); //$NON-NLS-1$
+			storage.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING,
+					"Error deleting bunlde info.", e); //$NON-NLS-1$
 		}
 	}
 
@@ -536,7 +553,8 @@ public final class BundleInfo {
 		try {
 			getStorage().delete(getStorage().getFile(getBundleId() + "/" + generation.getGenerationId(), false)); //$NON-NLS-1$
 		} catch (IOException e) {
-			storage.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, "Error deleting generation.", e); //$NON-NLS-1$
+			storage.getLogServices().log(EquinoxContainer.NAME, FrameworkLogEntry.WARNING, "Error deleting generation.", //$NON-NLS-1$
+					e);
 		}
 	}
 
@@ -548,7 +566,8 @@ public final class BundleInfo {
 
 	public File getDataFile(String path) {
 		File dataRoot = getStorage().getFile(getBundleId() + "/" + Storage.BUNDLE_DATA_DIR, false); //$NON-NLS-1$
-		if (!Storage.secureAction.isDirectory(dataRoot) && (storage.isReadOnly() || !(Storage.secureAction.mkdirs(dataRoot) || Storage.secureAction.isDirectory(dataRoot)))) {
+		if (!Storage.secureAction.isDirectory(dataRoot) && (storage.isReadOnly()
+				|| !(Storage.secureAction.mkdirs(dataRoot) || Storage.secureAction.isDirectory(dataRoot)))) {
 			if (getStorage().getConfiguration().getDebug().DEBUG_STORAGE)
 				Debug.println("Unable to create bundle data directory: " + dataRoot.getAbsolutePath()); //$NON-NLS-1$
 			return null;
@@ -611,8 +630,10 @@ public final class BundleInfo {
 			if (cached.containsKey(key)) {
 				return cached.get(key);
 			}
-			if (!cached.isEmpty() && generation.getBundleInfo().getStorage().getConfiguration().getDebug().DEBUG_CACHED_MANIFEST) {
-				Debug.println("Header key is not cached: " + key + "; for bundle: " + generation.getBundleInfo().getBundleId()); //$NON-NLS-1$ //$NON-NLS-2$
+			if (!cached.isEmpty()
+					&& generation.getBundleInfo().getStorage().getConfiguration().getDebug().DEBUG_CACHED_MANIFEST) {
+				Debug.println("Header key is not cached: " + key + "; for bundle: " //$NON-NLS-1$ //$NON-NLS-2$
+						+ generation.getBundleInfo().getBundleId());
 			}
 			return generation.getRawHeaders().get(key);
 		}

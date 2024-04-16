@@ -50,6 +50,7 @@ import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogListener;
 import org.osgi.service.log.LogService;
 
+@SuppressWarnings("deprecation") // LogService
 public class LoggingTests extends AbstractBundleTests {
 	static final String EQUINOX_LOGGER = "org.eclipse.equinox.logger";
 
@@ -61,7 +62,8 @@ public class LoggingTests extends AbstractBundleTests {
 		private final ServiceReference fwkLogRef;
 		final FrameworkLog fwkLog;
 
-		public LogServiceReference(ServiceReference logRef, ExtendedLogService logService, ServiceReference readerRef, ExtendedLogReaderService readerService, ServiceReference fwkLogRef, FrameworkLog fwkLog) {
+		public LogServiceReference(ServiceReference logRef, ExtendedLogService logService, ServiceReference readerRef,
+				ExtendedLogReaderService readerService, ServiceReference fwkLogRef, FrameworkLog fwkLog) {
 
 			this.logRef = logRef;
 			this.logService = logService;
@@ -214,7 +216,8 @@ public class LoggingTests extends AbstractBundleTests {
 			iLogListener2.addContext(new ArrayList(context));
 			logListener.addContext(new ArrayList(context));
 
-			logger.log(new FrameworkLogEntry(a, testBundle.getSymbolicName(), a.getSeverity(), a.getCode(), a.getMessage(), 0, null, null), LogService.LOG_ERROR, a.getMessage());
+			logger.log(new FrameworkLogEntry(a, testBundle.getSymbolicName(), a.getSeverity(), a.getCode(),
+					a.getMessage(), 0, null, null), LogService.LOG_ERROR, a.getMessage());
 			assertTrue("Missing context", iLogListener1.waitforContext());
 			assertTrue("Missing context", iLogListener2.waitforContext());
 			assertTrue("Missing context", logListener.waitforContext());
@@ -338,7 +341,8 @@ public class LoggingTests extends AbstractBundleTests {
 		Platform.addLogListener(iLogListener2);
 		logRef.readerService.addLogListener(logListener, logListener);
 		try {
-			FrameworkLogEntry fwkLogEntry = new FrameworkLogEntry(a, testBundle.getSymbolicName(), a.getSeverity(), a.getCode(), a.getMessage(), 0, null, null);
+			FrameworkLogEntry fwkLogEntry = new FrameworkLogEntry(a, testBundle.getSymbolicName(), a.getSeverity(),
+					a.getCode(), a.getMessage(), 0, null, null);
 			logRef.fwkLog.log(fwkLogEntry);
 			assertTrue("Missing context", iLogListener1.waitforContext());
 			assertTrue("Missing context", iLogListener2.waitforContext());
@@ -358,7 +362,8 @@ public class LoggingTests extends AbstractBundleTests {
 			logListener.addContext(new ArrayList(context));
 
 			logListener.entries.clear();
-			logRef.fwkLog.log(new FrameworkLogEntry(testBundle.getSymbolicName(), a.getSeverity(), a.getCode(), a.getMessage(), 0, null, null));
+			logRef.fwkLog.log(new FrameworkLogEntry(testBundle.getSymbolicName(), a.getSeverity(), a.getCode(),
+					a.getMessage(), 0, null, null));
 			assertTrue("Missing context", iLogListener1.waitforContext());
 			assertTrue("Missing context", iLogListener2.waitforContext());
 			// there is no status here
@@ -457,12 +462,14 @@ public class LoggingTests extends AbstractBundleTests {
 		ILogListener recurseLog = (status, plugin) -> ILog.of(testBundle).log(status);
 		Platform.addLogListener(recurseLog);
 		try {
-			logRef.fwkLog.log(new FrameworkLogEntry(getContext().getBundle().getSymbolicName(), FrameworkLogEntry.ERROR, 0, "Test message", 0, null, null));
+			logRef.fwkLog.log(new FrameworkLogEntry(getContext().getBundle().getSymbolicName(), FrameworkLogEntry.ERROR,
+					0, "Test message", 0, null, null));
 
 			// prime the log so we don't have to create it in the logging call
 			ILog.of(testBundle);
 
-			logRef.fwkLog.log(new FrameworkLogEntry(getContext().getBundle().getSymbolicName(), FrameworkLogEntry.ERROR, 0, "Test message", 0, null, null));
+			logRef.fwkLog.log(new FrameworkLogEntry(getContext().getBundle().getSymbolicName(), FrameworkLogEntry.ERROR,
+					0, "Test message", 0, null, null));
 		} finally {
 			Platform.removeLogListener(recurseLog);
 		}

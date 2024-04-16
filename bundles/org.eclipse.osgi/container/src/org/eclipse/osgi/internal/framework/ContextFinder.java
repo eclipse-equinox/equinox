@@ -36,8 +36,10 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 		}
 	}
 
-	//This is used to detect cycle that could be caused while delegating the loading to other classloaders
-	//It keeps track on a thread basis of the set of requested classes and resources
+	// This is used to detect cycle that could be caused while delegating the
+	// loading to other classloaders
+	// It keeps track on a thread basis of the set of requested classes and
+	// resources
 	private static ThreadLocal<Set<String>> cycleDetector = new ThreadLocal<>();
 	static ClassLoader finderClassLoader;
 	static Finder contextFinder;
@@ -62,9 +64,10 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 	}
 
 	// Return a list of all classloaders on the stack that are neither the
-	// ContextFinder classloader nor the boot classloader.  The last classloader
+	// ContextFinder classloader nor the boot classloader. The last classloader
 	// in the list is either a bundle classloader or the framework's classloader
-	// We assume that the bootclassloader never uses the context classloader to find classes in itself.
+	// We assume that the bootclassloader never uses the context classloader to find
+	// classes in itself.
 	List<ClassLoader> basicFindClassLoaders() {
 		Class<?>[] stack = contextFinder.getClassContext();
 		List<ClassLoader> result = new ArrayList<>(1);
@@ -87,7 +90,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 	}
 
 	// ensures that a classloader does not have the ContextFinder as part of the
-	// parent hierachy.  A classloader which has the ContextFinder as a parent must
+	// parent hierachy. A classloader which has the ContextFinder as a parent must
 	// not be used as a delegate, otherwise we endup in endless recursion.
 	private boolean checkClassLoader(ClassLoader classloader) {
 		if (classloader == null || classloader == getParent())
@@ -109,8 +112,8 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 		return basicFindClassLoaders();
 	}
 
-	//Return whether the request for loading "name" should proceed.
-	//False is returned when a cycle is being detected
+	// Return whether the request for loading "name" should proceed.
+	// False is returned when a cycle is being detected
 	private boolean startLoading(String name) {
 		Set<String> classesAndResources = cycleDetector.get();
 		if (classesAndResources != null && classesAndResources.contains(name))
@@ -130,7 +133,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 
 	@Override
 	protected Class<?> loadClass(String arg0, boolean arg1) throws ClassNotFoundException {
-		//Shortcut cycle
+		// Shortcut cycle
 		if (startLoading(arg0) == false)
 			throw new ClassNotFoundException(arg0);
 
@@ -142,7 +145,8 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 				} catch (ClassNotFoundException e) {
 					// go to the next class loader
 				}
-			// avoid calling super.loadClass here because it checks the local cache (bug 127963)
+			// avoid calling super.loadClass here because it checks the local cache (bug
+			// 127963)
 			return parentContextClassLoader.loadClass(arg0);
 		} finally {
 			stopLoading(arg0);
@@ -151,7 +155,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 
 	@Override
 	public URL getResource(String arg0) {
-		//Shortcut cycle
+		// Shortcut cycle
 		if (startLoading(arg0) == false)
 			return null;
 		try {
@@ -170,7 +174,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 
 	@Override
 	public Enumeration<URL> getResources(String arg0) throws IOException {
-		//Shortcut cycle
+		// Shortcut cycle
 		if (!startLoading(arg0)) {
 			return Collections.emptyEnumeration();
 		}
@@ -180,7 +184,8 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 			for (ClassLoader classLoader : toConsult) {
 				result = classLoader.getResources(arg0);
 				if (result != null && result.hasMoreElements()) {
-					// For context finder we do not compound results after this first loader that has resources
+					// For context finder we do not compound results after this first loader that
+					// has resources
 					break;
 				}
 				// no results yet, go to the next class loader

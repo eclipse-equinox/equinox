@@ -13,6 +13,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.configuration;
 
+import static org.eclipse.osgi.tests.OSGiTestsActivator.PI_OSGI_TESTS;
+import static org.eclipse.osgi.tests.OSGiTestsActivator.addRequiredOSGiTestsBundles;
+import static org.eclipse.osgi.tests.OSGiTestsActivator.getContext;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -24,15 +28,15 @@ import org.eclipse.core.tests.harness.BundleTestingHelper;
 import org.eclipse.core.tests.harness.FileSystemComparator;
 import org.eclipse.core.tests.harness.FileSystemHelper;
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
-import org.eclipse.osgi.tests.OSGiTest;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
-public class MovableConfigurationAreaTest extends OSGiTest {
+public class MovableConfigurationAreaTest extends TestCase {
 
 	static void doMove(final IPath sourcePath, final IPath destinationPath) {
-		assertTrue("Failed moving " + sourcePath + " to " + destinationPath, sourcePath.toFile().renameTo(destinationPath.toFile()));
+		assertTrue("Failed moving " + sourcePath + " to " + destinationPath,
+				sourcePath.toFile().renameTo(destinationPath.toFile()));
 	}
 
 	static void doTakeSnapshot(final IPath destinationPath) {
@@ -50,7 +54,8 @@ public class MovableConfigurationAreaTest extends OSGiTest {
 	public static Test suite() {
 		TestSuite suite = new TestSuite(MovableConfigurationAreaTest.class.getName());
 
-		ConfigurationSessionTestSuite initialization = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, MovableConfigurationAreaTest.class.getName());
+		ConfigurationSessionTestSuite initialization = new ConfigurationSessionTestSuite(PI_OSGI_TESTS,
+				MovableConfigurationAreaTest.class.getName());
 		addRequiredOSGiTestsBundles(initialization);
 		initialization.setReadOnly(true);
 		// disable clean-up, we want to reuse the configuration
@@ -72,7 +77,8 @@ public class MovableConfigurationAreaTest extends OSGiTest {
 			}
 		});
 
-		ConfigurationSessionTestSuite afterMoving = new ConfigurationSessionTestSuite(PI_OSGI_TESTS, MovableConfigurationAreaTest.class.getName());
+		ConfigurationSessionTestSuite afterMoving = new ConfigurationSessionTestSuite(PI_OSGI_TESTS,
+				MovableConfigurationAreaTest.class.getName());
 		afterMoving.setConfigurationPath(destinationPath);
 		afterMoving.addMinimalBundleSet();
 		afterMoving.setReadOnly(true);
@@ -89,15 +95,18 @@ public class MovableConfigurationAreaTest extends OSGiTest {
 	}
 
 	/**
-	 * Tries to install a plug-in that has no manifest. Should fail because by default the manifest generation area
-	 * is under the configuration area (which is read-only here)
+	 * Tries to install a plug-in that has no manifest. Should fail because by
+	 * default the manifest generation area is under the configuration area (which
+	 * is read-only here)
 	 */
+	@SuppressWarnings("deprecation") // installBundle
 	public void testAfterMoving() throws MalformedURLException, IOException, BundleException {
 		// try to install plug-in
 		// ensure it is not installed
 		Bundle installed = null;
 		try {
-			installed = BundleTestingHelper.installBundle(getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle02");
+			installed = BundleTestingHelper.installBundle(getContext(),
+					OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle02");
 			// should have failed with BundleException, does not have a bundle manifest
 			fail("1.0");
 		} catch (BundleException be) {
@@ -109,16 +118,13 @@ public class MovableConfigurationAreaTest extends OSGiTest {
 		}
 	}
 
-	public void testInitialization() throws MalformedURLException, IOException {
+	public void testInitialization() throws Exception {
 		// initialization session
-		try {
-			Bundle installed = BundleTestingHelper.installBundle("1.0", getContext(), OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle01");
-			// not read-only yet, should work fine
-			if (!BundleTestingHelper.resolveBundles(getContext(), new Bundle[] {installed}))
-				fail("1.1");
-		} catch (BundleException be) {
-			fail("1.2", be);
-		}
+		Bundle installed = BundleTestingHelper.installBundle("1.0", getContext(),
+				OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle01");
+		// not read-only yet, should work fine
+		assertTrue("installed bundle could not be resolved: " + installed,
+				BundleTestingHelper.resolveBundles(getContext(), new Bundle[] { installed }));
 	}
 
 	public void testVerifySnapshot() throws IOException {

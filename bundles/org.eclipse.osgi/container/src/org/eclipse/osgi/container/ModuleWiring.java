@@ -45,6 +45,7 @@ import org.osgi.resource.Wire;
 
 /**
  * An implementation of {@link BundleWiring}.
+ * 
  * @since 3.10
  */
 public final class ModuleWiring implements BundleWiring {
@@ -254,8 +255,9 @@ public final class ModuleWiring implements BundleWiring {
 	}
 
 	/**
-	 * Returns the module loader for this wiring.  If the module
-	 * loader does not exist yet then one will be created
+	 * Returns the module loader for this wiring. If the module loader does not
+	 * exist yet then one will be created
+	 * 
 	 * @return the module loader for this wiring.
 	 */
 	public ModuleLoader getModuleLoader() {
@@ -372,17 +374,21 @@ public final class ModuleWiring implements BundleWiring {
 	}
 
 	/**
-	 * Returns true if the specified package name has been substituted in this wiring
+	 * Returns true if the specified package name has been substituted in this
+	 * wiring
+	 * 
 	 * @param packageName the package name to check
-	 * @return true if the specified package name has been substituted in this wiring
+	 * @return true if the specified package name has been substituted in this
+	 *         wiring
 	 */
 	public boolean isSubstitutedPackage(String packageName) {
 		return substitutedPkgNames.contains(packageName);
 	}
 
 	/**
-	 * Returns an unmodifiable collection of package names for
-	 * package capabilities that have been substituted.
+	 * Returns an unmodifiable collection of package names for package capabilities
+	 * that have been substituted.
+	 * 
 	 * @return the substituted package names
 	 */
 	public Collection<String> getSubstitutedNames() {
@@ -403,9 +409,10 @@ public final class ModuleWiring implements BundleWiring {
 
 	/**
 	 * Adds the {@link ModuleRevisionBuilder#getRequirements() requirements} from
-	 * the specified builder to this wiring.  The new requirements must be in the
-	 * {@link PackageNamespace}.  These requirements are transient
-	 * and will not exist when loading up persistent wirings.
+	 * the specified builder to this wiring. The new requirements must be in the
+	 * {@link PackageNamespace}. These requirements are transient and will not exist
+	 * when loading up persistent wirings.
+	 * 
 	 * @param builder the builder that defines the new dynamic imports.
 	 */
 	public void addDynamicImports(ModuleRevisionBuilder builder) {
@@ -470,7 +477,8 @@ public final class ModuleWiring implements BundleWiring {
 		if (substitutedPkgNames.isEmpty()) {
 			return Collections.emptyList();
 		}
-		// Could cache this, but seems unnecessary since it will only be used by the resolver
+		// Could cache this, but seems unnecessary since it will only be used by the
+		// resolver
 		List<Wire> substitutionWires = new ArrayList<>(substitutedPkgNames.size());
 		List<ModuleWire> current = requiredWires.getList(PackageNamespace.PACKAGE_NAMESPACE);
 		for (ModuleWire wire : current) {

@@ -115,6 +115,7 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 		// make sure b1 is still last bundle in bundles list
 		Bundle[] bundles = OSGiTestsActivator.getContext().getBundles();
 		assertTrue("Wrong bundle at the end: " + bundles[bundles.length - 1], bundles[bundles.length - 1] == b1); //$NON-NLS-1$
+		@SuppressWarnings("deprecation") // getBundles
 		Bundle[] tests = installer.getPackageAdmin().getBundles(test.getSymbolicName(), null);
 		assertNotNull("null tests", tests); //$NON-NLS-1$
 		assertEquals("Wrong number", 1, tests.length); //$NON-NLS-1$
@@ -333,7 +334,8 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 		findLibrary.setAccessible(true);
 		assertNull("Found library.", findLibrary.invoke(cl, "nativeCode"));
 
-		URLConverter bundleURLConverter = getContext().getService(getContext().getServiceReferences(URLConverter.class, "(protocol=bundleentry)").iterator().next());
+		URLConverter bundleURLConverter = getContext().getService(
+				getContext().getServiceReferences(URLConverter.class, "(protocol=bundleentry)").iterator().next());
 
 		URL dir1 = bundleURLConverter.toFileURL(testBundle.getEntry("dir1/"));
 		File dir1File = new File(dir1.toExternalForm().substring(5));

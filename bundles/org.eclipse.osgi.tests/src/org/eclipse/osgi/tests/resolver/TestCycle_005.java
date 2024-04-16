@@ -13,19 +13,26 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.resolver;
 
-import org.eclipse.osgi.service.resolver.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.State;
+import org.eclipse.osgi.service.resolver.StateObjectFactory;
 import org.eclipse.osgi.tests.services.resolver.AbstractStateTest;
+import org.junit.Test;
 import org.osgi.framework.BundleException;
 
+@SuppressWarnings("deprecation") // StateObjectFactory.createBundleDescription()
 public class TestCycle_005 extends AbstractStateTest {
-	public TestCycle_005(String testName) {
-		super(testName);
-	}
 
 	BundleDescription bundle_1 = null;
 	BundleDescription bundle_2 = null;
 	BundleDescription bundle_3 = null;
 
+	@Test
 	public void testTest_002() {
 		State state = buildEmptyState();
 		StateObjectFactory sof = StateObjectFactory.defaultFactory;
@@ -33,12 +40,12 @@ public class TestCycle_005 extends AbstractStateTest {
 		bundle_1 = create_bundle_1(sof);
 		bundle_2 = create_bundle_2(sof);
 		bundle_3 = create_bundle_3(sof);
-		//***************************************************
+		// ***************************************************
 		// stage a
 		// expect to pass =true
-		//***************************************************
+		// ***************************************************
 		addBundlesToState_a(state);
-		//***************************************************
+		// ***************************************************
 		try {
 			state.resolve();
 		} catch (Throwable t) {

@@ -22,8 +22,7 @@ import javax.servlet.ServletRequestAttributeListener;
 /**
  * @author Raymond Augé
  */
-public class BaseServletRequestAttributeListener
-	implements ServletRequestAttributeListener {
+public class BaseServletRequestAttributeListener implements ServletRequestAttributeListener {
 
 	public AtomicBoolean added = new AtomicBoolean(false);
 	public AtomicBoolean replaced = new AtomicBoolean(false);

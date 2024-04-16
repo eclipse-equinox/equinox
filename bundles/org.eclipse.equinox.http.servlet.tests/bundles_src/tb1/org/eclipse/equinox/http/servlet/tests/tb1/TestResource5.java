@@ -34,12 +34,14 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 public class TestResource5 extends AbstractTestResource {
 
 	private final Collection<ServiceRegistration<?>> registrations = new ArrayList<>();
+
 	@Override
 	public void activate(ComponentContext componentContext) {
 		Dictionary<String, String> resourceProps = new Hashtable<>();
 		resourceProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN, regexAlias());
 		resourceProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX, getName());
-		registrations.add(componentContext.getBundleContext().registerService(TestResource5.class, this, resourceProps));
+		registrations
+				.add(componentContext.getBundleContext().registerService(TestResource5.class, this, resourceProps));
 
 		Dictionary<String, Object> filterProps = new Hashtable<>();
 		filterProps.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_NAME, "F1");
