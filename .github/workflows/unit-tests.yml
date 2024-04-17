@@ -115,7 +115,7 @@ jobs:
           path: tck-badge-${{ matrix.tck.name }}.svg
       - name: Upload badge of ${{ matrix.tck.name }} to Gist
         if: github.ref == 'refs/heads/master'
-        uses: andymckay/append-gist-action@6e8d64427fe47cbacf4ab6b890411f1d67c07f3e
+        uses: andymckay/append-gist-action@ab30bf28df67017c7ad696500b218558c7c04db3
         with:
           token: ${{ secrets.GIST_TOKEN }}
           gistURL: https://gist.github.com/eclipse-equinox-bot/d941fe2a4992a018d88e778b48ee3135
