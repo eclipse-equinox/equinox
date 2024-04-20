@@ -53,7 +53,7 @@ public final class AdapterManager implements IAdapterManager {
 	 * note</b>: always use the compute methods to update the map and make sure the
 	 * values (inner map) are never modified but replaced if necessary.
 	 */
-	private final ConcurrentMap<String, Map<String, List<IAdapterFactory>>> adapterLookup;
+	private final ConcurrentMap<String, AdapterLookup> adapterLookup;
 
 	/**
 	 * Cache of classes for a given type name. Avoids too many loadClass calls.
@@ -77,7 +77,7 @@ public final class AdapterManager implements IAdapterManager {
 	 * the adaptable class that the factory provides adapters for. Value is a
 	 * <code>List</code> of <code>IAdapterFactory</code>.
 	 */
-	private final Map<String, List<IAdapterFactory>> factories;
+	private final ConcurrentMap<String, List<IAdapterFactory>> factories;
 
 	private final Queue<IAdapterManagerProvider> lazyFactoryProviders;
 
@@ -173,14 +173,8 @@ public final class AdapterManager implements IAdapterManager {
 	 */
 	private Map<String, List<IAdapterFactory>> getFactories(Class<? extends Object> adaptable) {
 		// cache reference to lookup to protect against concurrent flush
-		return adapterLookup.computeIfAbsent(adaptable.getName(), adaptableType -> {
-			// calculate adapters for the class
-			Map<String, List<IAdapterFactory>> table = new HashMap<>(4);
-			for (Class<?> cl : computeClassOrder(adaptable)) {
-				addFactoriesFor(cl.getName(), table);
-			}
-			return Collections.unmodifiableMap(table);
-		});
+		return adapterLookup.computeIfAbsent(adaptable.getName(), adaptableType -> new AdapterLookup(adaptable, this))
+				.getMap();
 	}
 
 	/**
@@ -241,7 +235,7 @@ public final class AdapterManager implements IAdapterManager {
 	 * smart and remove only those entries affected.
 	 * </p>
 	 */
-	public synchronized void flushLookup() {
+	public void flushLookup() {
 		adapterLookup.clear();
 		classLookup.clear();
 		classSearchOrderLookup.clear();
@@ -346,7 +340,7 @@ public final class AdapterManager implements IAdapterManager {
 	 * @see IAdapterManager#registerAdapters
 	 */
 	@Override
-	public synchronized void registerAdapters(IAdapterFactory factory, Class<?> adaptable) {
+	public void registerAdapters(IAdapterFactory factory, Class<?> adaptable) {
 		registerFactory(factory, adaptable.getName());
 		flushLookup();
 	}
@@ -362,29 +356,33 @@ public final class AdapterManager implements IAdapterManager {
 	 * @see IAdapterManager#unregisterAdapters
 	 */
 	@Override
-	public synchronized void unregisterAdapters(IAdapterFactory factory) {
-		for (List<IAdapterFactory> list : factories.values())
-			list.remove(factory);
-		flushLookup();
+	public void unregisterAdapters(IAdapterFactory factory) {
+		for (List<IAdapterFactory> list : factories.values()) {
+			if (list.remove(factory)) {
+				flushLookup();
+			}
+		}
 	}
 
 	/*
 	 * @see IAdapterManager#unregisterAdapters
 	 */
 	@Override
-	public synchronized void unregisterAdapters(IAdapterFactory factory, Class<?> adaptable) {
+	public void unregisterAdapters(IAdapterFactory factory, Class<?> adaptable) {
 		List<IAdapterFactory> factoryList = factories.get(adaptable.getName());
-		if (factoryList == null)
+		if (factoryList == null || factoryList.isEmpty()) {
 			return;
-		factoryList.remove(factory);
-		flushLookup();
+		}
+		if (factoryList.remove(factory)) {
+			flushLookup();
+		}
 	}
 
 	/*
 	 * Shuts down the adapter manager by removing all factories and removing the
 	 * registry change listener. Should only be invoked during platform shutdown.
 	 */
-	public synchronized void unregisterAllAdapters() {
+	public void unregisterAllAdapters() {
 		lazyFactoryProviders.clear();
 		factories.clear();
 		flushLookup();
@@ -409,7 +407,7 @@ public final class AdapterManager implements IAdapterManager {
 	}
 
 	/**
-	 * Try to laod the given factory according to the force parameter
+	 * Try to load the given factory according to the force parameter
 	 * 
 	 * @param factory the factory to load
 	 * @param force   if loading should be forced
@@ -420,5 +418,29 @@ public final class AdapterManager implements IAdapterManager {
 			return Optional.ofNullable(((IAdapterFactoryExt) factory).loadFactory(force));
 		}
 		return Optional.ofNullable(factory);
+	}
+
+	private static final class AdapterLookup {
+
+		private Class<?> adaptable;
+		private AdapterManager manager;
+		private Map<String, List<IAdapterFactory>> map;
+
+		AdapterLookup(Class<?> adaptable, AdapterManager manager) {
+			this.adaptable = adaptable;
+			this.manager = manager;
+		}
+
+		synchronized Map<String, List<IAdapterFactory>> getMap() {
+			if (map == null) {
+				// calculate adapters for the class
+				Map<String, List<IAdapterFactory>> table = new HashMap<>(4);
+				for (Class<?> cl : manager.computeClassOrder(adaptable)) {
+					manager.addFactoriesFor(cl.getName(), table);
+				}
+				map = Collections.unmodifiableMap(table);
+			}
+			return map;
+		}
 	}
 }
