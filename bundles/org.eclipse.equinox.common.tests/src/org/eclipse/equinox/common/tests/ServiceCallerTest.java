@@ -251,6 +251,18 @@ public class ServiceCallerTest {
 
 			reg1.setProperties(asDictionary(singletonMap(Constants.SERVICE_RANKING, 1)));
 			assertHighestRankedCalled(caller, s2, s1, s3, reg2, reg1, reg3);
+
+			// re-register a new service with highest rank
+			reg3.unregister();
+			reg3 = context.registerService(IServiceExample.class, s3,
+					asDictionary(singletonMap(Constants.SERVICE_RANKING, 200)));
+			assertHighestRankedCalled(caller, s3, s2, s1, reg3, reg2, reg1);
+
+			// re-register another service with lower rank
+			reg1.unregister();
+			reg1 = context.registerService(IServiceExample.class, s1,
+					asDictionary(singletonMap(Constants.SERVICE_RANKING, 200)));
+			assertHighestRankedCalled(caller, s3, s2, s1, reg3, reg2, reg1);
 		} finally {
 			if (reg1 != null) {
 				reg1.unregister();

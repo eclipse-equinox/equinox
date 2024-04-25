@@ -19,7 +19,17 @@ import java.security.PrivilegedAction;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.osgi.framework.*;
+
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -210,13 +220,15 @@ public class ServiceCaller<S> {
 		}
 
 		private boolean requiresUnget(ServiceEvent e) {
+			int eventType = e.getType();
 			if (e.getServiceReference().equals(ref)) {
-				return (e.getType() == ServiceEvent.UNREGISTERING)
-						|| (filter != null && e.getType() == ServiceEvent.MODIFIED_ENDMATCH)
-						|| (e.getType() == ServiceEvent.MODIFIED && getRank(ref) != rank);
+				return (eventType == ServiceEvent.UNREGISTERING)
+						|| (filter != null && eventType == ServiceEvent.MODIFIED_ENDMATCH)
+						|| (eventType == ServiceEvent.MODIFIED && getRank(ref) != rank);
 				// if rank changed: untrack to force a new ReferenceAndService with new rank
 			}
-			return e.getType() == ServiceEvent.MODIFIED && getRank(e.getServiceReference()) > rank;
+			return (eventType == ServiceEvent.MODIFIED || eventType == ServiceEvent.REGISTERED)
+					&& getRank(e.getServiceReference()) > rank;
 		}
 
 		// must hold monitor on ServiceCaller.this when calling track
