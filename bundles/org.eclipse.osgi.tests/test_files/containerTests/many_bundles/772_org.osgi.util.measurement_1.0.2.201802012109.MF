@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.osgi.util.measurement
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.7))"
+Export-Package: org.osgi.util.measurement;version="1.0.2"
+Bundle-Version: 1.0.2.201802012109
+

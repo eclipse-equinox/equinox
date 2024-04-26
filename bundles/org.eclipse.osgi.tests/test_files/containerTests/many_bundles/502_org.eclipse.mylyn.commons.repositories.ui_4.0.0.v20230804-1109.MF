@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.mylyn.commons.repositories.ui; singleto
+ n:=true
+Require-Bundle: org.eclipse.core.databinding;bundle-version="0.0.0",org.
+ eclipse.core.databinding.beans;bundle-version="0.0.0",org.eclipse.core.
+ databinding.property;bundle-version="0.0.0";resolution:=optional,org.ec
+ lipse.core.runtime;bundle-version="0.0.0",org.eclipse.equinox.security;
+ bundle-version="0.0.0",org.eclipse.jface.databinding;bundle-version="0.
+ 0.0",org.eclipse.mylyn.commons.core;bundle-version="4.0.0",org.eclipse.
+ mylyn.commons.repositories.core;bundle-version="4.0.0",org.eclipse.myly
+ n.commons.ui;bundle-version="4.0.0",org.eclipse.mylyn.commons.workbench
+ ;bundle-version="4.0.0",org.eclipse.ui;bundle-version="0.0.0",org.eclip
+ se.ui.forms;bundle-version="0.0.0",org.eclipse.ui.navigator;bundle-vers
+ ion="0.0.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.mylyn.commons.repositories.ui;x-internal:=tr
+ ue,org.eclipse.mylyn.internal.commons.repositories.ui;x-internal:=true,
+ org.eclipse.mylyn.internal.commons.repositories.ui.auth;x-internal:=tru
+ e,org.eclipse.mylyn.internal.commons.repositories.ui.wizards;x-internal
+ :=true
+Bundle-Version: 4.0.0.v20230804-1109
+

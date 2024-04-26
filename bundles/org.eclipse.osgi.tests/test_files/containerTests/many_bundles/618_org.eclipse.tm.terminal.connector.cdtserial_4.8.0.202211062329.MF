@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.tm.terminal.connector.cdtserial;singlet
+ on:=true
+Require-Bundle: org.eclipse.core.expressions;bundle-version="3.4.400",or
+ g.eclipse.core.runtime;bundle-version="3.8.0",org.eclipse.equinox.secur
+ ity;bundle-version="1.1.100",org.eclipse.tm.terminal.view.core;bundle-v
+ ersion="4.5.0";resolution:=optional,org.eclipse.tm.terminal.view.ui;bun
+ dle-version="4.5.0";resolution:=optional,org.eclipse.tm.terminal.contro
+ l;bundle-version="4.5.0",org.eclipse.ui;bundle-version="3.8.0",org.ecli
+ pse.cdt.native.serial;bundle-version="1.0.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.tm.terminal.connector.cdtserial.activator;x-
+ internal:=true,org.eclipse.tm.terminal.connector.cdtserial.connector,or
+ g.eclipse.tm.terminal.connector.cdtserial.controls,org.eclipse.tm.termi
+ nal.connector.cdtserial.launcher,org.eclipse.tm.terminal.connector.cdts
+ erial.nls;x-internal:=true
+Bundle-Version: 4.8.0.202211062329
+

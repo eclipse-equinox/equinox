@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: com.jcraft.jsch
+Import-Package: com.jcraft.jzlib;resolution:=optional;version="1.0.7",co
+ m.jcraft.jsch;resolution:=optional;version="[0.1,1)",javax.crypto;resol
+ ution:=optional,javax.crypto.interfaces;resolution:=optional,javax.cryp
+ to.spec;resolution:=optional,org.ietf.jgss;resolution:=optional
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.5))"
+Export-Package: com.jcraft.jsch;version="0.1.55",com.jcraft.jsch.jce;ver
+ sion="0.1.55";uses:="com.jcraft.jsch",com.jcraft.jsch.jcraft;version="0
+ .1.55";uses:="com.jcraft.jsch",com.jcraft.jsch.jgss;version="0.1.55";us
+ es:="com.jcraft.jsch"
+Bundle-Version: 0.1.55.v20221112-0806
+

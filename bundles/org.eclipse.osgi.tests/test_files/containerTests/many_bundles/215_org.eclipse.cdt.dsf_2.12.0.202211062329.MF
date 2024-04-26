@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.cdt.dsf;singleton:=true
+Require-Bundle: org.eclipse.core.runtime,org.eclipse.debug.core,org.ecli
+ pse.cdt.core,org.eclipse.cdt.debug.core,org.eclipse.core.resources
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.cdt.dsf.concurrent,org.eclipse.cdt.dsf.datam
+ odel,org.eclipse.cdt.dsf.debug.internal.provisional.model;x-friends:="o
+ rg.eclipse.cdt.dsf.ui,org.eclipse.cdt.dsf.gdb",org.eclipse.cdt.dsf.debu
+ g.internal.provisional.service;x-friends:="org.eclipse.cdt.dsf.ui",org.
+ eclipse.cdt.dsf.debug.model,org.eclipse.cdt.dsf.debug.service,org.eclip
+ se.cdt.dsf.debug.service.command,org.eclipse.cdt.dsf.debug.sourcelookup
+ ,org.eclipse.cdt.dsf.internal;x-friends:="org.eclipse.cdt.dsf.ui,org.ec
+ lipse.cdt.tests.dsf.gdb",org.eclipse.cdt.dsf.service
+Bundle-Version: 2.12.0.202211062329
+

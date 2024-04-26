@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.cdt.core.linux.x86_64;singleton:=true
+Bundle-ManifestVersion: 2
+Bundle-Version: 11.3.0.202309051907
+

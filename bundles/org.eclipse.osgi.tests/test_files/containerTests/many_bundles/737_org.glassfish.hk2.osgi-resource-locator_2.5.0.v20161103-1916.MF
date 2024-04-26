@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.glassfish.hk2.osgi-resource-locator
+Import-Package: org.osgi.framework;version="[1.7,2)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.6))"
+Export-Package: org.glassfish.hk2.osgiresourcelocator;version="2.5.0.b03
+ ";uses:="org.osgi.framework"
+Bundle-Version: 2.5.0.v20161103-1916
+

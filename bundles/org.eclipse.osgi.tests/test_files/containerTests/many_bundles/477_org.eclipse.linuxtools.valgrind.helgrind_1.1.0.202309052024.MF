@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.valgrind.helgrind;singleton:
+ =true
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime
+Import-Package: org.eclipse.cdt.core.model,org.eclipse.debug.core,org.ec
+ lipse.debug.ui,org.eclipse.linuxtools.internal.valgrind.launch,org.ecli
+ pse.linuxtools.profiling.launch,org.eclipse.linuxtools.valgrind.launch,
+ org.eclipse.linuxtools.valgrind.ui
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Bundle-Version: 1.1.0.202309052024
+

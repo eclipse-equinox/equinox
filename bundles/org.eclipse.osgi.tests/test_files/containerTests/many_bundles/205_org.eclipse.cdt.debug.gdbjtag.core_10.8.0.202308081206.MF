@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.cdt.debug.gdbjtag.core;singleton:=true
+Require-Bundle: org.eclipse.core.runtime,org.eclipse.debug.core,org.ecli
+ pse.cdt.launch,org.eclipse.cdt.debug.core,org.eclipse.cdt.core,org.ecli
+ pse.core.variables,org.eclipse.cdt.dsf.gdb,org.eclipse.cdt.dsf
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.cdt.debug.gdbjtag.core,org.eclipse.cdt.debug
+ .gdbjtag.core.dsf.gdb.service,org.eclipse.cdt.debug.gdbjtag.core.dsf.gd
+ b.service.extensions,org.eclipse.cdt.debug.gdbjtag.core.jtagdevice
+Bundle-Version: 10.8.0.202308081206
+

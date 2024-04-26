@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.oomph.predicates.edit;singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.24.0,4.0.0)"
+ ,org.eclipse.oomph.predicates;bundle-version="[1.16.0,2.0.0)";visibilit
+ y:=reexport,org.eclipse.emf.edit;bundle-version="[2.10.0,3.0.0)";visibi
+ lity:=reexport,org.eclipse.oomph.base.edit;bundle-version="[1.16.0,2.0.
+ 0)";visibility:=reexport
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.oomph.predicates.provider;version="1.15.0";x
+ -internal:=true
+Bundle-Version: 1.15.0.v20230416-0642
+

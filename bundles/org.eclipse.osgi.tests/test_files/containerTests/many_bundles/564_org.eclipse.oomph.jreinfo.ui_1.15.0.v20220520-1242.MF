@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.oomph.jreinfo.ui;singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.24.0,4.0.0)"
+ ,org.eclipse.oomph.ui;bundle-version="[1.17.0,2.0.0)",org.eclipse.oomph
+ .jreinfo;bundle-version="[1.17.0,2.0.0)";visibility:=reexport
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.oomph.jreinfo.ui;version="1.15.0";x-internal
+ :=true
+Bundle-Version: 1.15.0.v20220520-1242
+

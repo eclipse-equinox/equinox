@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.team.ui; singleton:=true
+Require-Bundle: org.eclipse.ui.ide;bundle-version="[3.3.0,4.0.0)";resolu
+ tion:=optional,org.eclipse.core.resources;bundle-version="[3.3.0,4.0.0)
+ ",org.eclipse.core.runtime;bundle-version="[3.29.0,4.0.0)",org.eclipse.
+ team.core;bundle-version="[3.6.0,4.0.0)",org.eclipse.ui;bundle-version=
+ "[3.5.0,4.0.0)",org.eclipse.compare;bundle-version="[3.3.0,4.0.0)",org.
+ eclipse.ui.forms;bundle-version="[3.3.0,4.0.0)",org.eclipse.ui.navigato
+ r;bundle-version="[3.3.0,4.0.0)",org.eclipse.jface.text;bundle-version=
+ "[3.3.0,4.0.0)",org.eclipse.ui.editors;bundle-version="[3.3.0,4.0.0)",o
+ rg.eclipse.core.expressions;bundle-version="[3.6.0,4.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.team.internal.ui;x-friends:="org.eclipse.tea
+ m.cvs.ssh2,org.eclipse.team.cvs.ui",org.eclipse.team.internal.ui.action
+ s;x-friends:="org.eclipse.team.cvs.ssh2,org.eclipse.team.cvs.ui",org.ec
+ lipse.team.internal.ui.dialogs;x-friends:="org.eclipse.team.cvs.ssh2,or
+ g.eclipse.team.cvs.ui",org.eclipse.team.internal.ui.history;x-friends:=
+ "org.eclipse.team.cvs.ssh2,org.eclipse.team.cvs.ui",org.eclipse.team.in
+ ternal.ui.mapping;x-friends:="org.eclipse.team.cvs.ssh2,org.eclipse.tea
+ m.cvs.ui",org.eclipse.team.internal.ui.preferences;x-friends:="org.ecli
+ pse.team.cvs.ssh2,org.eclipse.team.cvs.ui",org.eclipse.team.internal.ui
+ .registry;x-friends:="org.eclipse.team.cvs.ssh2,org.eclipse.team.cvs.ui
+ ",org.eclipse.team.internal.ui.synchronize;x-friends:="org.eclipse.team
+ .cvs.ssh2,org.eclipse.team.cvs.ui",org.eclipse.team.internal.ui.synchro
+ nize.actions;x-friends:="org.eclipse.team.cvs.ssh2,org.eclipse.team.cvs
+ .ui",org.eclipse.team.internal.ui.synchronize.patch;x-friends:="org.ecl
+ ipse.jdt.ui",org.eclipse.team.internal.ui.wizards;x-friends:="org.eclip
+ se.team.cvs.ssh2,org.eclipse.team.cvs.ui",org.eclipse.team.ui,org.eclip
+ se.team.ui.history,org.eclipse.team.ui.mapping,org.eclipse.team.ui.sync
+ hronize
+Bundle-Version: 3.10.100.v20230726-0617
+

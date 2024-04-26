@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.cdt.libhover.devhelp; single
+ ton:=true
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.help
+ ;bundle-version="3.5.0",org.eclipse.linuxtools.cdt.libhover;bundle-vers
+ ion="1.1.0",org.eclipse.linuxtools.cdt.libhover.library.docs;bundle-ver
+ sion="1.0.1",org.codelibs.nekohtml;bundle-version="2.1.2"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Bundle-Version: 1.1.0.202309052024
+

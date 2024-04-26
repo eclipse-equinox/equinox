@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.osgi.service.provisioning
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.2))"
+Export-Package: org.osgi.service.provisioning;version="1.2"
+Bundle-Version: 1.2.0.201505202024
+

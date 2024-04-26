@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.swtchart
+Require-Bundle: org.eclipse.swt
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.swtchart,org.eclipse.swtchart.internal;x-fri
+ ends:="org.eclipse.swtchart.export",org.eclipse.swtchart.internal.axis;
+ x-friends:="org.eclipse.swtchart.export",org.eclipse.swtchart.internal.
+ compress,org.eclipse.swtchart.internal.series,org.eclipse.swtchart.mode
+ l,org.eclipse.swtchart.support
+Bundle-Version: 0.14.0.202301260747
+

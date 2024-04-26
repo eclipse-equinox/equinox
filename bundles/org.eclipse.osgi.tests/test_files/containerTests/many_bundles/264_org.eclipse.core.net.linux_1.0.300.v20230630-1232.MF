@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.core.net.linux;singleton:=true
+Require-Bundle: com.sun.jna
+Bundle-ManifestVersion: 2
+Bundle-Version: 1.0.300.v20230630-1232
+

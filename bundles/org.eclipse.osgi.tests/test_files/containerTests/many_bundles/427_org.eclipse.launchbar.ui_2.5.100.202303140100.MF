@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.launchbar.ui;singleton:=true
+Require-Bundle: org.eclipse.core.runtime,org.eclipse.ui,org.eclipse.ui.i
+ de,org.eclipse.debug.ui,org.eclipse.launchbar.core
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.launchbar.ui,org.eclipse.launchbar.ui.intern
+ al;x-internal:=true,org.eclipse.launchbar.ui.internal.commands;x-intern
+ al:=true,org.eclipse.launchbar.ui.internal.dialogs;x-internal:=true,org
+ .eclipse.launchbar.ui.target
+Bundle-Version: 2.5.100.202303140100
+

@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: javax.activation
+Bundle-Version: 1.2.2.v20221203-1659
+Import-Package: com.sun.activation.registries;version="[1.2,2)",javax.ac
+ tivation;version="[1.2,2)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=9.0))"
+Export-Package: com.sun.activation.registries;version="1.2.2",com.sun.ac
+ tivation.viewers;version="1.2.2";uses:="javax.activation",javax.activat
+ ion;version="1.2.2"
+

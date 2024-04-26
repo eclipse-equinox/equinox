@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.wst.common.project.facet.core; singleto
+ n:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.26.0,4.0.0)"
+ ,org.eclipse.core.resources;bundle-version="[3.4.0,4.0.0)",org.eclipse.
+ core.expressions;bundle-version="[3.4.0,4.0.0)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.wst.common.project.facet.core,org.eclipse.ws
+ t.common.project.facet.core.events,org.eclipse.wst.common.project.facet
+ .core.internal;x-friends:="org.eclipse.wst.common.project.facet.ui,org.
+ eclipse.wst.common.project.facet.core.tests",org.eclipse.wst.common.pro
+ ject.facet.core.runtime,org.eclipse.wst.common.project.facet.core.runti
+ me.events,org.eclipse.wst.common.project.facet.core.runtime.internal;x-
+ friends:="org.eclipse.wst.common.project.facet.ui",org.eclipse.wst.comm
+ on.project.facet.core.util,org.eclipse.wst.common.project.facet.core.ut
+ il.internal; x-friends:="org.eclipse.wst.common.project.facet.ui,  org.
+ eclipse.wst.common.project.facet.core.tests,  org.eclipse.jst.common.pr
+ oject.facet.ui,  org.eclipse.jst.common.project.facet.core"
+Bundle-Version: 1.5.0.v202308161955
+

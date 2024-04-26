@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.systemtap.graphing.ui;single
+ ton:=true
+Require-Bundle: org.eclipse.linuxtools.systemtap.graphing.core,org.eclip
+ se.linuxtools.systemtap.structures,org.eclipse.ui,org.eclipse.core.runt
+ ime,org.eclipse.ui.forms,org.eclipse.swtchart,org.eclipse.linuxtools.da
+ taviewers.piechart,org.eclipse.linuxtools.dataviewers.charts
+Import-Package: org.eclipse.swtchart.extensions.charts
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.linuxtools.systemtap.graphing.ui,org.eclipse
+ .linuxtools.systemtap.graphing.ui.charts,org.eclipse.linuxtools.systemt
+ ap.graphing.ui.charts.listeners,org.eclipse.linuxtools.systemtap.graphi
+ ng.ui.datadisplay,org.eclipse.linuxtools.systemtap.graphing.ui.views,or
+ g.eclipse.linuxtools.systemtap.graphing.ui.widgets,org.eclipse.linuxtoo
+ ls.systemtap.graphing.ui.wizards.dataset,org.eclipse.linuxtools.systemt
+ ap.graphing.ui.wizards.graph
+Bundle-Version: 4.2.0.202309052024
+

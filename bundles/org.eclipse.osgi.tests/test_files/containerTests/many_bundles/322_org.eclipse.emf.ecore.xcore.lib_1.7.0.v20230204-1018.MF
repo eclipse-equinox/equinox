@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-SymbolicName: org.eclipse.emf.ecore.xcore.lib;singleton:=true
+Require-Bundle: org.eclipse.emf.ecore;bundle-version="[2.33.0,3.0.0)";re
+ solution:=optional,org.eclipse.emf.common;bundle-version="[2.28.0,3.0.0
+ )",org.eclipse.xtext.xbase.lib;bundle-version="[2.18.0,3.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.emf.ecore.xcore.lib;version="1.7.0"
+Bundle-Version: 1.7.0.v20230204-1018
+

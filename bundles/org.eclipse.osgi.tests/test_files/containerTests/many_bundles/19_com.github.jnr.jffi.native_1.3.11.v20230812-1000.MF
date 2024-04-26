@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: com.github.jnr.jffi.native
+Require-Bundle: com.github.jnr.jffi
+Bundle-ManifestVersion: 2
+Bundle-Version: 1.3.11.v20230812-1000
+

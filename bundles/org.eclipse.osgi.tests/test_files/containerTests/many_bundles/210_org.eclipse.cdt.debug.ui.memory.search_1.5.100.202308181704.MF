@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.cdt.debug.ui.memory.search;singleton:=t
+ rue
+Require-Bundle: org.eclipse.debug.core,org.eclipse.debug.ui,org.eclipse.
+ core.runtime,org.eclipse.swt,org.eclipse.jface,org.eclipse.ui,org.eclip
+ se.search;bundle-version="3.4.0",org.eclipse.cdt.debug.ui;bundle-versio
+ n="6.0.0"
+Import-Package: org.eclipse.debug.ui.memory
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.cdt.debug.ui.memory.search
+Bundle-Version: 1.5.100.202308181704
+

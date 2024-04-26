@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.callgraph.launch;singleton:=
+ true
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.debu
+ g.ui,org.eclipse.draw2d,org.eclipse.cdt.core,org.eclipse.cdt.ui,org.ecl
+ ipse.linuxtools.tools.launch.core
+Import-Package: org.eclipse.cdt.core.model,org.eclipse.cdt.debug.core,or
+ g.eclipse.cdt.launch,org.eclipse.cdt.launch.ui,org.eclipse.core.resourc
+ es,org.eclipse.debug.core,org.eclipse.debug.ui,org.eclipse.linuxtools.i
+ nternal.callgraph.core,org.eclipse.linuxtools.profiling.launch,org.ecli
+ pse.ui,org.eclipse.ui.console,org.eclipse.ui.model,org.eclipse.ui.views
+ .navigator
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Bundle-Version: 2.1.0.202309052024
+

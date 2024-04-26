@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.eclipse.rcp; singleton:=true
+Bundle-Version: 4.29.0.v20230903-1000
+

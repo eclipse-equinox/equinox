@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.glassfish.jersey.inject.jersey-hk2
+Import-Package: javax.annotation;version="[1.2,3)",org.jvnet.hk2.externa
+ l.runtime;version="[2.5,4)",org.glassfish.hk2.api;version="[2.5,4)",org
+ .glassfish.hk2.extension;version="[2.5,4)",org.glassfish.hk2.utilities;
+ version="[2.5,4)",org.glassfish.hk2.utilities.binding;version="[2.5,4)"
+ ,org.glassfish.hk2.utilities.reflection;version="[2.5,4)",javax.inject;
+ version="[1.0,2)",javax.ws.rs.core;version="[2.1,3)",org.glassfish.jers
+ ey.internal;version="[2.40,3)",org.glassfish.jersey.internal.guava;vers
+ ion="[2.40,3)",org.glassfish.jersey.internal.inject;version="[2.40,3)",
+ org.glassfish.jersey.internal.l10n;version="[2.40,3)",org.glassfish.jer
+ sey.internal.util;version="[2.40,3)",org.glassfish.jersey.internal.util
+ .collection;version="[2.40,3)",org.glassfish.jersey.process.internal;ve
+ rsion="[2.40,3)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: org.glassfish.jersey.inject.hk2;version="2.40";uses:="ja
+ vax.annotation,javax.inject,javax.ws.rs.core,org.glassfish.hk2.api,org.
+ glassfish.hk2.utilities.binding,org.glassfish.jersey.internal.inject,or
+ g.glassfish.jersey.internal.l10n,org.glassfish.jersey.internal.util.col
+ lection,org.glassfish.jersey.process.internal"
+Bundle-Version: 2.40.0
+

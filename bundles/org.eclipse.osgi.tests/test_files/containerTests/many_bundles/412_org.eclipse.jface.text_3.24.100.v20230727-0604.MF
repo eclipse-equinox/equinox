@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.jface.text
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.29.0,4.0.0)"
+ ,org.eclipse.text;bundle-version="[3.8.0,4.0.0)";visibility:=reexport,o
+ rg.eclipse.swt;bundle-version="[3.117.0,4.0.0)",org.eclipse.jface;bundl
+ e-version="[3.19.0,4.0.0)"
+Import-Package: com.ibm.icu.text
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.jface.contentassist,org.eclipse.jface.conten
+ tassist.images,org.eclipse.jface.internal.text;x-internal:=true,org.ecl
+ ipse.jface.internal.text.codemining;x-internal:=true,org.eclipse.jface.
+ internal.text.html;x-friends:="org.eclipse.ant.ui, org.eclipse.jdt.ui, 
+ org.eclipse.ltk.ui.refactoring, org.eclipse.pde.ui, org.eclipse.ui.edit
+ ors, org.eclipse.xtext.ui",org.eclipse.jface.internal.text.link.content
+ assist;x-internal:=true,org.eclipse.jface.internal.text.revisions;x-int
+ ernal:=true,org.eclipse.jface.internal.text.source;x-internal:=true,org
+ .eclipse.jface.text,org.eclipse.jface.text.codemining,org.eclipse.jface
+ .text.contentassist,org.eclipse.jface.text.formatter,org.eclipse.jface.
+ text.hyperlink,org.eclipse.jface.text.information,org.eclipse.jface.tex
+ t.link,org.eclipse.jface.text.presentation,org.eclipse.jface.text.quick
+ assist,org.eclipse.jface.text.reconciler,org.eclipse.jface.text.revisio
+ ns,org.eclipse.jface.text.rules,org.eclipse.jface.text.source,org.eclip
+ se.jface.text.source.inlined,org.eclipse.jface.text.source.projection,o
+ rg.eclipse.jface.text.source.projection.images,org.eclipse.jface.text.t
+ emplates,org.eclipse.jface.text.templates.persistence
+Bundle-Version: 3.24.100.v20230727-0604
+

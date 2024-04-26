@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-SymbolicName: org.eclipse.nebula.cwt
+Require-Bundle: org.eclipse.swt
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.nebula.cwt.animation,org.eclipse.nebula.cwt.
+ animation.effects,org.eclipse.nebula.cwt.animation.movement,org.eclipse
+ .nebula.cwt.base,org.eclipse.nebula.cwt.svg,org.eclipse.nebula.cwt.v
+Bundle-Version: 1.1.0.202303072132
+

@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: com.j2html
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: j2html.attributes;uses:="j2html.rendering,j2html.tags";v
+ ersion="1.5.0",j2html;uses:="j2html.attributes,j2html.tags,j2html.tags.
+ specialized,j2html.utils";version="1.5.0",j2html.rendering;uses:=j2html
+ ;version="1.5.0",j2html.tags.attributes;uses:="j2html.tags";version="1.
+ 5.0",j2html.tags;uses:="j2html.attributes,j2html.rendering";version="1.
+ 5.0",j2html.tags.specialized;uses:="j2html.tags,j2html.tags.attributes"
+ ;version="1.5.0",j2html.utils;version="1.5.0"
+Bundle-Version: 1.5.0
+

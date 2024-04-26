@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.ui; singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.29.0,4.0.0)"
+ ,org.eclipse.swt;bundle-version="[3.124.0,4.0.0)";visibility:=reexport,
+ org.eclipse.jface;bundle-version="[3.31.0,4.0.0)";visibility:=reexport,
+ org.eclipse.ui.workbench;bundle-version="[3.130.0,4.0.0)";visibility:=r
+ eexport,org.eclipse.core.expressions;bundle-version="[3.4.0,4.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.ui.internal;x-internal:=true
+Bundle-Version: 3.204.0.v20230821-1342
+

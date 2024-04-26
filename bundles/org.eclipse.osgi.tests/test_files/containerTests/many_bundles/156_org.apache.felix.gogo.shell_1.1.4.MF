@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.apache.felix.gogo.shell
+Import-Package: org.apache.felix.service.command;version="[1.0,2)",org.o
+ sgi.framework;version="[1.8,2)",org.osgi.framework.startlevel;version="
+ [1.0,2)",org.osgi.util.tracker;version="[1.5,2)"
+Bundle-ManifestVersion: 2
+Require-Capability: org.apache.felix.gogo;filter:="(&(org.apache.felix.g
+ ogo=command.implementation)(version>=1.0.0)(!(version>=2.0.0)))";effect
+ ive:=active,osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.7))"
+Bundle-Version: 1.1.4
+Provide-Capability: org.apache.felix.gogo;org.apache.felix.gogo="shell.i
+ mplementation";version:Version="1.0.0";implementation.name="gogo.shell"
+

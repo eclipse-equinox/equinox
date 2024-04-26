@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.core.jobs; singleton:=true
+Require-Bundle: org.eclipse.equinox.common;bundle-version="[3.8.0,4.0.0)
+ "
+Import-Package: org.eclipse.osgi.service.debug,org.eclipse.osgi.util,org
+ .osgi.framework;version="1.3.0",org.osgi.service.packageadmin,org.osgi.
+ util.tracker
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.core.internal.jobs;x-internal:=true,org.ecli
+ pse.core.internal.jobs;x-friends:="org.eclipse.core.tests.runtime.jobs"
+ ,org.eclipse.core.runtime.jobs
+Bundle-Version: 3.15.0.v20230808-1403
+

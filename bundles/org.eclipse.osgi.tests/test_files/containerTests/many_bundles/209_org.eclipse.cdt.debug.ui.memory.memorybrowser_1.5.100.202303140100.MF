@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.cdt.debug.ui.memory.memorybrowser;singl
+ eton:=true
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.debu
+ g.core;bundle-version="3.5.0",org.eclipse.debug.ui;bundle-version="3.5.
+ 0",org.eclipse.cdt.debug.core;bundle-version="7.0.0",org.eclipse.cdt.de
+ bug.ui;bundle-version="7.0.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.cdt.debug.ui.memory.memorybrowser,org.eclips
+ e.cdt.debug.ui.memory.memorybrowser.api
+Bundle-Version: 1.5.100.202303140100
+

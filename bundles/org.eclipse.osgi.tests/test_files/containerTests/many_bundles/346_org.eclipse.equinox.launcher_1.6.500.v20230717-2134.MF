@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-SymbolicName: org.eclipse.equinox.launcher;singleton:=true
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.core.launcher;x-internal:=true,org.eclipse.e
+ quinox.internal.launcher;x-internal:=true,org.eclipse.equinox.launcher;
+ x-internal:=true
+Bundle-Version: 1.6.500.v20230717-2134
+

@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.apache.ws.commons.util
+Import-Package: javax.xml.namespace,org.w3c.dom,org.xml.sax,org.xml.sax.
+ ext,org.xml.sax.helpers
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.2))"
+Export-Package: org.apache.ws.commons.serialize;version="1.0.2";uses:="o
+ rg.w3c.dom,org.xml.sax",org.apache.ws.commons.util;version="1.0.2";uses
+ :="javax.xml.namespace,org.xml.sax"
+Bundle-Version: 1.0.2.v20230723-0712
+

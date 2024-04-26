@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.e4.emf.xpath
+Require-Bundle: org.apache.commons.jxpath;bundle-version="1.2.0",org.ecl
+ ipse.emf.ecore;bundle-version="2.35.0",org.eclipse.core.runtime;bundle-
+ version="3.29.0"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.e4.emf.internal.xpath;x-internal:=true,org.e
+ clipse.e4.emf.internal.xpath.helper;x-friends:="org.eclipse.e4.emf.xpat
+ h.test,org.eclipse.e4.ui.model.workbench,org.eclipse.e4.ui.workbench",o
+ rg.eclipse.e4.emf.xpath
+Bundle-Version: 0.4.100.v20230801-1255
+

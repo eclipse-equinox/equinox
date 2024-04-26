@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: picocli
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.5))"
+Export-Package: picocli;version="4.6.3"
+Bundle-Version: 4.6.3
+

@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.cdt.managedbuilder.gnu.ui; singleton:=t
+ rue
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.2.0,4.0.0)",
+ org.eclipse.cdt.managedbuilder.core;bundle-version="[9.0.0,10.0.0]",org
+ .eclipse.cdt.core;bundle-version="[8.0.0,9.0.0)",org.eclipse.core.resou
+ rces
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.cdt.managedbuilder.gnu.cygwin,org.eclipse.cd
+ t.managedbuilder.gnu.mingw;x-internal:=true,org.eclipse.cdt.managedbuil
+ der.gnu.templates;x-internal:=true,org.eclipse.cdt.managedbuilder.gnu.u
+ i
+Bundle-Version: 8.5.200.202307110141
+

@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.ui.cheatsheets; singleton:=true
+Require-Bundle: org.eclipse.ui.forms;bundle-version="[3.5.0,4.0.0)",org.
+ eclipse.help.ui;bundle-version="[4.6.0,5.0.0)";resolution:=optional
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.ui.cheatsheets,org.eclipse.ui.internal.cheat
+ sheets;x-friends:="org.eclipse.ua.tests",org.eclipse.ui.internal.cheats
+ heets.actions;x-friends:="org.eclipse.ua.tests",org.eclipse.ui.internal
+ .cheatsheets.composite.explorer;x-friends:="org.eclipse.ua.tests",org.e
+ clipse.ui.internal.cheatsheets.composite.model;x-friends:="org.eclipse.
+ ua.tests",org.eclipse.ui.internal.cheatsheets.composite.parser;x-friend
+ s:="org.eclipse.ua.tests",org.eclipse.ui.internal.cheatsheets.composite
+ .views;x-friends:="org.eclipse.ua.tests",org.eclipse.ui.internal.cheats
+ heets.data;x-friends:="org.eclipse.ua.tests",org.eclipse.ui.internal.ch
+ eatsheets.dialogs;x-friends:="org.eclipse.ua.tests",org.eclipse.ui.inte
+ rnal.cheatsheets.handlers;x-friends:="org.eclipse.ua.tests",org.eclipse
+ .ui.internal.cheatsheets.registry;x-friends:="org.eclipse.ua.tests",org
+ .eclipse.ui.internal.cheatsheets.state;x-friends:="org.eclipse.ua.tests
+ ",org.eclipse.ui.internal.cheatsheets.views;x-friends:="org.eclipse.ua.
+ tests",org.eclipse.ui.internal.provisional.cheatsheets;x-friends:="org.
+ eclipse.ua.tests"
+Bundle-Version: 3.8.100.v20230725-0936
+

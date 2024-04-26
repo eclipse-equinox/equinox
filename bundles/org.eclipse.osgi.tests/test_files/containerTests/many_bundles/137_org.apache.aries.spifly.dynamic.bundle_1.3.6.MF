@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.apache.aries.spifly.dynamic.bundle
+Bundle-Version: 1.3.6
+Import-Package: org.apache.aries.spifly.weaver;version="[1.3,2)",org.obj
+ ectweb.asm;version="[9.4,10)",org.objectweb.asm.commons;version="[9.4,1
+ 0)",org.objectweb.asm.util;version="[9.4,10)",org.osgi.framework;versio
+ n="[1.7,2)",org.osgi.framework.hooks.weaving;version="[1.0,2)",org.osgi
+ .framework.wiring;version="[1.1,2)",org.osgi.util.tracker;version="[1.5
+ ,2)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: org.apache.aries.spifly;version="1.3.6";uses:="org.osgi.
+ framework,org.osgi.util.tracker",org.apache.aries.spifly.dynamic;versio
+ n="1.3.6";uses:="org.apache.aries.spifly,org.objectweb.asm,org.osgi.fra
+ mework,org.osgi.framework.hooks.weaving",org.apache.aries.spifly.weaver
+ ;version="1.3.6";uses:="org.apache.aries.spifly,org.objectweb.asm"
+Provide-Capability: osgi.extender;osgi.extender="osgi.serviceloader.regi
+ strar";version:Version="1.0",osgi.extender;osgi.extender="osgi.servicel
+ oader.processor";version:Version="1.0";uses:="org.apache.aries.spifly"
+

@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.cdt.make.core; singleton:=true
+Require-Bundle: org.eclipse.cdt.core;bundle-version="[8.3.0,9.0.0)",org.
+ eclipse.core.resources;bundle-version="[3.2.0,4.0.0)",org.eclipse.core.
+ variables;bundle-version="[3.1.100,4.0.0)",org.eclipse.core.runtime;bun
+ dle-version="[3.2.0,4.0.0)",org.eclipse.core.filesystem;bundle-version=
+ "1.2.0",org.eclipse.tools.templates.core;bundle-version="1.1.0",org.ecl
+ ipse.tools.templates.freemarker;bundle-version="1.0.0"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Export-Package: org.eclipse.cdt.make.core,org.eclipse.cdt.make.core.make
+ file,org.eclipse.cdt.make.core.makefile.gnu,org.eclipse.cdt.make.core.s
+ cannerconfig,org.eclipse.cdt.make.internal.core;x-internal:=true,org.ec
+ lipse.cdt.make.internal.core.makefile;x-internal:=true,org.eclipse.cdt.
+ make.internal.core.makefile.gnu;x-friends:="org.eclipse.cdt.make.ui",or
+ g.eclipse.cdt.make.internal.core.makefile.posix;x-internal:=true,org.ec
+ lipse.cdt.make.internal.core.scannerconfig;x-internal:=true,org.eclipse
+ .cdt.make.internal.core.scannerconfig.gnu;x-internal:=true,org.eclipse.
+ cdt.make.internal.core.scannerconfig.jobs;x-internal:=true,org.eclipse.
+ cdt.make.internal.core.scannerconfig.util;x-internal:=true,org.eclipse.
+ cdt.make.internal.core.scannerconfig2;x-internal:=true
+Bundle-Version: 7.6.300.202308161506
+

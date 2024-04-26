@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: io.perfmark.perfmark-api
+Import-Package: io.perfmark.impl;resolution:=optional,javax.annotation;r
+ esolution:=optional
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.6))"
+Export-Package: io.perfmark;version="0.24.0";uses:="javax.annotation"
+Bundle-Version: 0.24.0
+

@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.valgrind.memcheck;singleton:
+ =true
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime
+Import-Package: org.eclipse.debug.core,org.eclipse.debug.ui,org.eclipse.
+ linuxtools.internal.valgrind.launch,org.eclipse.linuxtools.profiling.la
+ unch,org.eclipse.linuxtools.valgrind.launch,org.eclipse.linuxtools.valg
+ rind.ui
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Bundle-Version: 1.1.0.202309052024
+

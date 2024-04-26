@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-SymbolicName: org.eclipse.jdt.annotation
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.jdt.annotation
+Bundle-Version: 2.2.700.v20220826-1026
+

@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.linuxtools.docker.editor.ls;singleton:=
+ true
+Require-Bundle: org.eclipse.lsp4e;bundle-version="0.11.0",org.eclipse.ui
+ .genericeditor;bundle-version="1.0.0",org.eclipse.ui,org.eclipse.core.c
+ ontenttype,org.eclipse.tm4e.registry;bundle-version="0.1.0",org.eclipse
+ .tm4e.ui;bundle-version="0.1.0",org.eclipse.core.runtime;bundle-version
+ ="3.13.0",org.eclipse.wildwebdeveloper.embedder.node
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Bundle-Version: 1.0.1.202309052024
+

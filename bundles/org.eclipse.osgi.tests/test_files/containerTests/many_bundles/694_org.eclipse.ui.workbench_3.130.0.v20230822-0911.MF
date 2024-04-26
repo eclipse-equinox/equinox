@@ -1,0 +1,91 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.ui.workbench; singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.29.0,4.0.0)"
+ ,org.eclipse.help;bundle-version="[3.2.0,4.0.0)",org.eclipse.jface;bund
+ le-version="[3.31.0,4.0.0)",org.eclipse.jface.databinding;bundle-versio
+ n="[1.3.0,2.0.0)",org.eclipse.core.databinding.property;bundle-version=
+ "[1.2.0,2.0.0)",org.eclipse.core.databinding.observable;bundle-version=
+ "[1.2.0,2.0.0)",org.eclipse.e4.core.services;bundle-version="2.2.0",org
+ .eclipse.e4.core.contexts;bundle-version="1.0.0",org.eclipse.e4.core.di
+ ;bundle-version="1.1.0",org.eclipse.e4.ui.workbench.swt;bundle-version=
+ "0.9.1",org.eclipse.e4.ui.di;bundle-version="0.9.0",org.eclipse.e4.ui.m
+ odel.workbench;bundle-version="0.9.1",org.eclipse.e4.ui.css.swt.theme;b
+ undle-version="0.9.0",org.eclipse.e4.ui.bindings;bundle-version="0.9.0"
+ ,org.eclipse.e4.ui.css.swt;bundle-version="0.9.1",org.eclipse.e4.ui.wor
+ kbench3;bundle-version="0.15.0";visibility:=reexport,org.eclipse.e4.ui.
+ workbench.addons.swt;bundle-version="0.10.0",org.eclipse.e4.ui.services
+ ;bundle-version="1.3.0",org.eclipse.emf.ecore.xmi;bundle-version="2.11.
+ 0",org.eclipse.e4.core.di.extensions;bundle-version="0.13.0"
+Import-Package: com.ibm.icu.util,javax.annotation;version="[1.3.0,2.0.0)
+ ",javax.inject;version="[1.0.0,2.0.0)",javax.xml.parsers,org.eclipse.e4
+ .core.commands,org.eclipse.e4.core.commands.internal,org.eclipse.e4.ui.
+ internal.workbench,org.eclipse.e4.ui.internal.workbench.addons,org.ecli
+ pse.e4.ui.internal.workbench.renderers.swt,org.eclipse.e4.ui.internal.w
+ orkbench.swt,org.eclipse.e4.ui.services,org.eclipse.e4.ui.workbench,org
+ .eclipse.e4.ui.workbench.modeling,org.eclipse.e4.ui.workbench.renderers
+ .swt,org.osgi.service.event;version="[1.2.0,2.0.0)",org.w3c.dom,org.xml
+ .sax
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.extender; filter:="(&(osgi.extender=osgi.compon
+ ent)(version>=1.2)(!(version>=2.0)))"
+Export-Package: org.eclipse.e4.ui.workbench.addons.perspectiveswitcher;x
+ -internal:=true,org.eclipse.ui;ui.workbench=split;mandatory:="ui.workbe
+ nch",org.eclipse.ui.about,org.eclipse.ui.actions;ui.workbench=split;man
+ datory:="ui.workbench",org.eclipse.ui.activities,org.eclipse.ui.applica
+ tion,org.eclipse.ui.branding,org.eclipse.ui.browser;ui.workbench=split;
+ mandatory:="ui.workbench",org.eclipse.ui.commands,org.eclipse.ui.contex
+ ts,org.eclipse.ui.databinding.typed,org.eclipse.ui.dialogs;ui.workbench
+ =split;mandatory:="ui.workbench",org.eclipse.ui.dnd,org.eclipse.ui.fiel
+ dassist,org.eclipse.ui.handlers,org.eclipse.ui.help,org.eclipse.ui.inte
+ rnal;ui.workbench=split;mandatory:="ui.workbench"; x-friends:="org.ecli
+ pse.ui,  org.eclipse.ui.intro,  org.eclipse.ui.ide,  org.eclipse.ui.ide
+ .application,  org.eclipse.ui.views,  org.eclipse.ui.navigator.resource
+ s,  org.eclipse.debug.ui",org.eclipse.ui.internal.about;x-friends:="org
+ .eclipse.ui,org.eclipse.equinox.p2.ui",org.eclipse.ui.internal.actions;
+ x-friends:="org.eclipse.ui.ide",org.eclipse.ui.internal.activities;x-fr
+ iends:="org.eclipse.ui",org.eclipse.ui.internal.activities.ws;x-interna
+ l:=true,org.eclipse.ui.internal.application;x-internal:=true,org.eclips
+ e.ui.internal.browser;ui.workbench=split;mandatory:="ui.workbench";x-in
+ ternal:=true,org.eclipse.ui.internal.commands;x-friends:="org.eclipse.u
+ i",org.eclipse.ui.internal.contexts;x-friends:="org.eclipse.ui",org.ecl
+ ipse.ui.internal.decorators;x-friends:="org.eclipse.ui.ide",org.eclipse
+ .ui.internal.dialogs; x-friends:="org.eclipse.ui.ide,  org.eclipse.ui.i
+ de.application,  org.eclipse.ui.navigator.resources,  org.eclipse.ui.te
+ sts.browser",org.eclipse.ui.internal.dialogs.cpd;x-friends:="org.eclips
+ e.ui.ide,org.eclipse.ui.ide.application",org.eclipse.ui.internal.e4.com
+ patibility;x-friends:="org.eclipse.e4.ui.workbench.addons.swt",org.ecli
+ pse.ui.internal.e4.migration;x-internal:=true,org.eclipse.ui.internal.e
+ ditorsupport;x-internal:=true,org.eclipse.ui.internal.expressions;x-int
+ ernal:=true,org.eclipse.ui.internal.handlers;x-friends:="org.eclipse.ui
+ ,org.eclipse.ui.ide",org.eclipse.ui.internal.help;x-internal:=true,org.
+ eclipse.ui.internal.intro;x-internal:=true,org.eclipse.ui.internal.keys
+ ;x-internal:=true,org.eclipse.ui.internal.keys.model;x-internal:=true,o
+ rg.eclipse.ui.internal.layout;x-friends:="org.eclipse.ui.intro",org.ecl
+ ipse.ui.internal.menus;x-friends:="org.eclipse.ui",org.eclipse.ui.inter
+ nal.misc;x-friends:="org.eclipse.ui.ide",org.eclipse.ui.internal.model;
+ x-internal:=true,org.eclipse.ui.internal.operations;x-internal:=true,or
+ g.eclipse.ui.internal.part;x-internal:=true,org.eclipse.ui.internal.pre
+ ferences;x-friends:="org.eclipse.ui",org.eclipse.ui.internal.progress;x
+ -friends:="org.eclipse.ui.ide,org.eclipse.ui.ide.application",org.eclip
+ se.ui.internal.provisional.application;x-friends:="org.eclipse.ui.ide",
+ org.eclipse.ui.internal.quickaccess;x-friends:="org.eclipse.ui",org.ecl
+ ipse.ui.internal.quickaccess.providers;x-friends:="org.eclipse.ui",org.
+ eclipse.ui.internal.registry;x-friends:="org.eclipse.ui,org.eclipse.ui.
+ ide",org.eclipse.ui.internal.services;x-friends:="org.eclipse.ui",org.e
+ clipse.ui.internal.splash;x-internal:=true,org.eclipse.ui.internal.stat
+ ushandlers;x-internal:=true,org.eclipse.ui.internal.testing;x-internal:
+ =true,org.eclipse.ui.internal.themes;x-friends:="org.eclipse.ui",org.ec
+ lipse.ui.internal.tweaklets;x-friends:="org.eclipse.ui.ide,org.eclipse.
+ ui.ide.application,org.eclipse.ui.cocoa",org.eclipse.ui.internal.util;x
+ -friends:="org.eclipse.ui,org.eclipse.ui.ide",org.eclipse.ui.internal.w
+ izards;x-internal:=true,org.eclipse.ui.internal.wizards.preferences;x-i
+ nternal:=true,org.eclipse.ui.intro,org.eclipse.ui.keys,org.eclipse.ui.m
+ enus,org.eclipse.ui.model;ui.workbench=split;mandatory:="ui.workbench",
+ org.eclipse.ui.operations,org.eclipse.ui.part;ui.workbench=split;mandat
+ ory:="ui.workbench",org.eclipse.ui.plugin,org.eclipse.ui.preferences,or
+ g.eclipse.ui.progress,org.eclipse.ui.quickaccess,org.eclipse.ui.service
+ s,org.eclipse.ui.splash,org.eclipse.ui.statushandlers,org.eclipse.ui.sw
+ t,org.eclipse.ui.themes,org.eclipse.ui.views,org.eclipse.ui.wizards
+Bundle-Version: 3.130.0.v20230822-0911
+

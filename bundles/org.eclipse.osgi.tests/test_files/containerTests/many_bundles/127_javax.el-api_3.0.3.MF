@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: javax.el-api
+Import-Package: javax.el;version="3.0.3"
+Bundle-ManifestVersion: 2
+Export-Package: javax.el;version="3.0.3"
+Bundle-Version: 3.0.3
+

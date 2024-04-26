@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-SymbolicName: org.eclipse.ltk.ui.refactoring; singleton:=true
+Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.29.0,4.0.0)"
+ ,org.eclipse.core.expressions;bundle-version="[3.4.100,4.0.0)",org.ecli
+ pse.core.filebuffers;bundle-version="[3.5.0,4.0.0)",org.eclipse.core.fi
+ lesystem;bundle-version="[1.2.0,2.0.0)",org.eclipse.core.resources;bund
+ le-version="[3.5.0,4.0.0)",org.eclipse.ltk.core.refactoring;bundle-vers
+ ion="[3.8.100,4.0.0)",org.eclipse.jface.text;bundle-version="[3.5.0,4.0
+ .0)",org.eclipse.ui;bundle-version="[3.5.0,4.0.0)",org.eclipse.ui.navig
+ ator;bundle-version="[3.3.200,4.0.0)",org.eclipse.compare;bundle-versio
+ n="[3.5.0,4.0.0)",org.eclipse.team.core;bundle-version="[3.4.100,4.0.0)
+ ",org.eclipse.team.ui;bundle-version="[3.4.100,4.0.0)"
+Bundle-ManifestVersion: 2
+Export-Package: org.eclipse.ltk.internal.ui.refactoring;x-internal:=true
+ ,org.eclipse.ltk.internal.ui.refactoring.actions;x-internal:=true,org.e
+ clipse.ltk.internal.ui.refactoring.history;x-internal:=true,org.eclipse
+ .ltk.internal.ui.refactoring.model;x-internal:=true,org.eclipse.ltk.int
+ ernal.ui.refactoring.scripting;x-internal:=true,org.eclipse.ltk.interna
+ l.ui.refactoring.util;x-internal:=true,org.eclipse.ltk.ui.refactoring,o
+ rg.eclipse.ltk.ui.refactoring.actions,org.eclipse.ltk.ui.refactoring.hi
+ story,org.eclipse.ltk.ui.refactoring.model,org.eclipse.ltk.ui.refactori
+ ng.resource
+Bundle-Version: 3.13.100.v20230728-0612
+

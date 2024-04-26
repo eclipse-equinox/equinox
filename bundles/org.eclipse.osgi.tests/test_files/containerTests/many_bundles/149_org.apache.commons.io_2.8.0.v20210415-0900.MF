@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.apache.commons.io
+Bundle-Version: 2.8.0.v20210415-0900
+Import-Package: org.apache.commons.io;resolution:=optional;version="[2.8
+ ,3)",org.apache.commons.io.comparator;resolution:=optional;version="[2.
+ 8,3)",org.apache.commons.io.file;resolution:=optional;version="[2.8,3)"
+ ,org.apache.commons.io.filefilter;resolution:=optional;version="[2.8,3)
+ ",org.apache.commons.io.function;resolution:=optional;version="[2.8,3)"
+ ,org.apache.commons.io.input;resolution:=optional;version="[2.8,3)",org
+ .apache.commons.io.output;resolution:=optional;version="[2.8,3)"
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: org.apache.commons.io;version="2.8.0";uses:="org.apache.
+ commons.io.filefilter,org.apache.commons.io.function",org.apache.common
+ s.io.comparator;version="2.8.0";uses:="org.apache.commons.io",org.apach
+ e.commons.io.file;version="2.8.0",org.apache.commons.io.filefilter;vers
+ ion="2.8.0";uses:="org.apache.commons.io",org.apache.commons.io.functio
+ n;version="2.8.0",org.apache.commons.io.input;version="2.8.0";uses:="or
+ g.apache.commons.io",org.apache.commons.io.input.buffer;version="2.8.0"
+ ,org.apache.commons.io.monitor;version="2.8.0";uses:="org.apache.common
+ s.io",org.apache.commons.io.output;version="2.8.0",org.apache.commons.i
+ o.serialization;version="2.8.0"
+
