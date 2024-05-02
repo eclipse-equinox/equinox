@@ -1,0 +1,2 @@
+# Ensure the matching text-files are checked out with Unix-line endings (LF) on all platforms
+rangerequest.mp4 text eol=lf
