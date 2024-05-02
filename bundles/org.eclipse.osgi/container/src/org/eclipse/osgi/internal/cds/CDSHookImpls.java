@@ -22,13 +22,13 @@
 
 package org.eclipse.osgi.internal.cds;
 
-import com.ibm.oti.shared.HelperAlreadyDefinedException;
-import com.ibm.oti.shared.Shared;
-import com.ibm.oti.shared.SharedClassHelperFactory;
-import com.ibm.oti.shared.SharedClassURLHelper;
+import static org.eclipse.osgi.internal.cds.CDSHookConfigurator.print;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.hookregistry.BundleFileWrapperFactoryHook;
 import org.eclipse.osgi.internal.hookregistry.ClassLoaderHook;
 import org.eclipse.osgi.internal.hookregistry.HookRegistry;
@@ -43,8 +43,19 @@ import org.eclipse.osgi.storage.bundlefile.BundleFile;
 import org.eclipse.osgi.storage.bundlefile.BundleFileWrapper;
 import org.eclipse.osgi.storage.bundlefile.BundleFileWrapperChain;
 
+import com.ibm.oti.shared.HelperAlreadyDefinedException;
+import com.ibm.oti.shared.Shared;
+import com.ibm.oti.shared.SharedClassHelperFactory;
+import com.ibm.oti.shared.SharedClassURLHelper;
+
 public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFactoryHook {
 	private static SharedClassHelperFactory factory = Shared.getSharedClassHelperFactory();
+
+	private final Debug debug;
+
+	public CDSHookImpls(Debug debug) {
+		this.debug = debug;
+	}
 
 	// With Equinox bug 226038 (v3.4), the framework will now pass an instance
 	// of BundleFileWrapperChain rather than the wrapped BundleFile. This is
@@ -70,8 +81,17 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 		// 3) the bundle file for the classpath entry is of type CDSBundleFile
 		// 4) class bytes is same as passed to weaving hook i.e. weaving hook did not
 		// modify the class bytes
-		if ((null == clazz) || (false == hasMagicClassNumber(classbytes))
-				|| (null == getCDSBundleFile(classpathEntry.getBundleFile()))) {
+		if (null == clazz) {
+			print(debug, () -> "No class to store: " + name); //$NON-NLS-1$
+			return;
+		}
+		if ((false == hasMagicClassNumber(classbytes))) {
+			print(debug, () -> "Class was already stored: " + name); //$NON-NLS-1$
+			return;
+		}
+		CDSBundleFile cdsFile = getCDSBundleFile(classpathEntry.getBundleFile());
+		if (null == cdsFile) {
+			print(debug, () -> "No CDSBundleFile for class: " + name); //$NON-NLS-1$
 			return;
 		}
 		try {
@@ -90,6 +110,7 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 					// Class bytes have been modified by weaving hooks.
 					// Such classes need to be stored as Orphans, so skip the call to
 					// storeSharedClass()
+					print(debug, () -> "class bytes have changed, cannot store."); //$NON-NLS-1$
 					return;
 				}
 			}
@@ -97,8 +118,6 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 			// this should never happen, but in case it does, its safe to return
 			return;
 		}
-
-		CDSBundleFile cdsFile = getCDSBundleFile(classpathEntry.getBundleFile());
 
 		if (null == cdsFile.getURL()) {
 			// something went wrong trying to determine the url to the real bundle file
@@ -123,8 +142,11 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 		}
 		if (null != urlHelper) {
 			// store the class in the cache
-			urlHelper.storeSharedClass(null, cdsFile.getURL(), clazz);
+			boolean successStore = urlHelper.storeSharedClass(null, cdsFile.getURL(), clazz);
+			print(debug, () -> successStore ? "Stored class: " + name : "Failed to store class: " + name); //$NON-NLS-1$//$NON-NLS-2$
 			cdsFile.setPrimed(true);
+		} else {
+			print(debug, () -> "No helper found to store class: " + name); //$NON-NLS-1$
 		}
 	}
 
@@ -217,9 +239,9 @@ public class CDSHookImpls extends ClassLoaderHook implements BundleFileWrapperFa
 			if ((baseFile = getCDSBundleFile(baseFile)) != null) {
 				urlHelper = ((CDSBundleFile) baseFile).getURLHelper();
 			}
-			newBundleFile = new CDSBundleFile(bundleFile, urlHelper);
+			newBundleFile = new CDSBundleFile(bundleFile, debug, urlHelper);
 		} else {
-			newBundleFile = new CDSBundleFile(bundleFile);
+			newBundleFile = new CDSBundleFile(bundleFile, debug);
 		}
 
 		return newBundleFile;
