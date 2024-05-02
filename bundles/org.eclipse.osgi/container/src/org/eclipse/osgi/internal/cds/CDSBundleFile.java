@@ -22,12 +22,17 @@
 
 package org.eclipse.osgi.internal.cds;
 
-import com.ibm.oti.shared.SharedClassURLHelper;
+import static org.eclipse.osgi.internal.cds.CDSHookConfigurator.print;
+
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.storage.bundlefile.BundleEntry;
 import org.eclipse.osgi.storage.bundlefile.BundleFile;
 import org.eclipse.osgi.storage.bundlefile.BundleFileWrapper;
+
+import com.ibm.oti.shared.SharedClassURLHelper;
 
 /**
  * Wraps an actual BundleFile object for purposes of loading classes from the
@@ -38,14 +43,16 @@ public class CDSBundleFile extends BundleFileWrapper {
 	private final URL url; // the URL to the content of the real bundle file
 	private SharedClassURLHelper urlHelper; // the url helper set by the classloader
 	private boolean primed = false;
+	private final Debug debug;
 
 	/**
 	 * The constructor
 	 * 
 	 * @param wrapped the real bundle file
 	 */
-	public CDSBundleFile(BundleFile wrapped) {
+	public CDSBundleFile(BundleFile wrapped, Debug debug) {
 		super(wrapped);
+		this.debug = debug;
 		// get the url to the content of the real bundle file
 		URL content = null;
 		try {
@@ -56,8 +63,8 @@ public class CDSBundleFile extends BundleFileWrapper {
 		this.url = content;
 	}
 
-	public CDSBundleFile(BundleFile bundleFile, SharedClassURLHelper urlHelper) {
-		this(bundleFile);
+	public CDSBundleFile(BundleFile bundleFile, Debug debug, SharedClassURLHelper urlHelper) {
+		this(bundleFile, debug);
 		this.urlHelper = urlHelper;
 	}
 
@@ -80,7 +87,11 @@ public class CDSBundleFile extends BundleFileWrapper {
 		}
 		byte[] classbytes = getClassBytes(path.substring(0, path.length() - classFileExt.length()));
 		if (classbytes == null) {
-			return super.getEntry(path);
+			BundleEntry fromSuper = super.getEntry(path);
+			if (fromSuper != null) {
+				print(debug, () -> "Defining class from original bytes: " + url + ' ' + fromSuper.getName()); //$NON-NLS-1$
+			}
+			return fromSuper;
 		}
 
 		BundleEntry be = new CDSBundleEntry(path, classbytes, this);
@@ -141,7 +152,10 @@ public class CDSBundleFile extends BundleFileWrapper {
 	private byte[] getClassBytes(String name) {
 		if (urlHelper == null || url == null)
 			return null;
-		return urlHelper.findSharedClass(null, url, name);
+		byte[] results = urlHelper.findSharedClass(null, url, name);
+		print(debug, () -> results != null ? "Found shared class bytes for: " + name + ' ' + url //$NON-NLS-1$
+				: "No shared class bytes found for: " + name + ' ' + url); //$NON-NLS-1$
+		return results;
 	}
 
 	/**

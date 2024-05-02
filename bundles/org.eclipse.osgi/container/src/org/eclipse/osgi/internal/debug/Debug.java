@@ -15,6 +15,7 @@
 package org.eclipse.osgi.internal.debug;
 
 import java.io.PrintStream;
+
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.util.SupplementDebug;
 import org.eclipse.osgi.service.debug.DebugOptions;
@@ -48,6 +49,12 @@ public class Debug implements DebugOptionsListener {
 	 * Loader Debug option key.
 	 */
 	public static final String OPTION_DEBUG_LOADER = ECLIPSE_OSGI + "/debug/loader"; //$NON-NLS-1$
+
+	/**
+	 * Loader Debug option key.
+	 */
+	public static final String OPTION_DEBUG_LOADER_CDS = ECLIPSE_OSGI + "/debug/loader/cds"; //$NON-NLS-1$
+
 	/**
 	 * Storage Debug option key.
 	 */
@@ -127,6 +134,10 @@ public class Debug implements DebugOptionsListener {
 	 */
 	public boolean DEBUG_LOADER = false; // "debug.loader"
 	/**
+	 * Loader debug flag.
+	 */
+	public boolean DEBUG_LOADER_CDS = false; // "debug.loader"
+	/**
 	 * Storage debug flag.
 	 */
 	public boolean DEBUG_STORAGE = false; // "debug.storage"
@@ -199,6 +210,7 @@ public class Debug implements DebugOptionsListener {
 		DEBUG_BUNDLE_TIME = dbgOptions.getBooleanOption(OPTION_DEBUG_BUNDLE_TIME, false)
 				|| dbgOptions.getBooleanOption("org.eclipse.core.runtime/timing/startup", false); //$NON-NLS-1$
 		DEBUG_LOADER = dbgOptions.getBooleanOption(OPTION_DEBUG_LOADER, false);
+		DEBUG_LOADER_CDS = dbgOptions.getBooleanOption(OPTION_DEBUG_LOADER_CDS, false);
 		DEBUG_STORAGE = dbgOptions.getBooleanOption(OPTION_DEBUG_STORAGE, false);
 		DEBUG_EVENTS = dbgOptions.getBooleanOption(OPTION_DEBUG_EVENTS, false);
 		DEBUG_SERVICES = dbgOptions.getBooleanOption(OPTION_DEBUG_SERVICES, false);

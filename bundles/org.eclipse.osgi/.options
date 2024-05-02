@@ -6,6 +6,8 @@ org.eclipse.osgi/debug=false
 org.eclipse.osgi/debug/location = false
 # Prints out class loading debug information
 org.eclipse.osgi/debug/loader=false
+# Prints out CDS class loading debug information
+org.eclipse.osgi/debug/loader/cds=false
 # Prints out event (FrameworkEvent/BundleEvent/ServiceEvent) and listener debug information
 org.eclipse.osgi/debug/events=false
 # Prints out OSGi service debug information (registration/getting/ungetting etc.)
