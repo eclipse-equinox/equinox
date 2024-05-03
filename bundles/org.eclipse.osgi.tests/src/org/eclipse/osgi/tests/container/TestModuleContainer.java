@@ -28,6 +28,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,9 +39,12 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -49,14 +53,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.ToIntFunction;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import org.eclipse.osgi.container.Module;
@@ -2012,7 +2019,7 @@ public class TestModuleContainer extends AbstractTest {
 		assertEquals("l should resolve.", State.RESOLVED, uses_l.getState());
 		assertEquals("m.conflict1 should resolve.", State.RESOLVED, uses_m_conflict1.getState());
 		assertEquals("m.conflict2 should resolve.", State.RESOLVED, uses_m_conflict2.getState());
-		assertNotMoreThanPermutationCreated(report, max);
+		assertSucessfulWith(report, max);
 	}
 
 	@Test
@@ -3942,14 +3949,17 @@ public class TestModuleContainer extends AbstractTest {
 
 	protected void assertSucessfulWith(ResolutionReport report, int maxTotalPermutations) {
 		assertNull("Failed to resolve test.", report.getResolutionException());
-		assertNotMoreThanPermutationCreated(report, maxTotalPermutations);
+		assertNotMoreThanPermutationCreated(report, ResolutionReport::getTotalPermutations, maxTotalPermutations);
 	}
 
-	protected void assertNotMoreThanPermutationCreated(ResolutionReport report, int maxTotal) {
-		int totalPermutations = report.getTotalPermutations();
-		if (totalPermutations > maxTotal) {
-			fail("Maximum of " + maxTotal + " permutations expected but was " + totalPermutations + " ("
-					+ report.getProcessedPermutations() + " processed).");
+	protected void assertNotMoreThanPermutationCreated(ResolutionReport report,
+			ToIntFunction<ResolutionReport> extractor, int max) {
+		int permutations = extractor.applyAsInt(report);
+		if (permutations > max) {
+			fail("Maximum of " + max + " permutations expected but was " + permutations);
+		} else if (permutations < max) {
+			System.out.println(
+					"## Permutations are below the threshold, consider adjusting the testcase to assert the lower count!");
 		}
 		return;
 	}
@@ -4342,6 +4352,85 @@ public class TestModuleContainer extends AbstractTest {
 			}
 			fail("Could not find required wire in expected provider wires: " + requiredWire);
 		}
+	}
+
+	/**
+	 * This testcase checks that local uses constraint violations are considered
+	 * without result in a new permutation. A local use-constraint violation is one
+	 * where one bundle imports a package that has multiple providers, because of
+	 * the uses constraints of that imported packages, maybe some choices are become
+	 * invalid and should be discarded right away.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testLocalUseConstraintViolations() throws Exception {
+		ResolutionReport result = resolveTestSet("set1");
+		// TODO get down permutation count!
+		assertSucessfulWith(result, 52);
+		assertNotMoreThanPermutationCreated(result, ResolutionReport::getSubstitutionPermutations, 23);
+	}
+
+	private ResolutionReport resolveTestSet(String name) throws Exception {
+		Enumeration<URL> entries = getBundle().findEntries("/test_files/containerTests/" + name, "*.MF", false);
+		Map<Long, String> manifests = new TreeMap<>();
+		while (entries.hasMoreElements()) {
+			URL url = entries.nextElement();
+			String path = url.getPath();
+			String[] split = path.split("/");
+			String mfname = split[split.length - 1];
+			long l = Long.parseLong(mfname.split("_")[0]);
+			manifests.put(l, name + "/" + mfname);
+		}
+		// Always want to go to zero threads when idle
+		int coreThreads = 0;
+		// use the number of processors - 1 because we use the current thread when
+		// rejected
+		int maxThreads = Math.max(Runtime.getRuntime().availableProcessors() - 1, 1);
+		// idle timeout; make it short to get rid of threads quickly after resolve
+		int idleTimeout = 1;
+		// use sync queue to force thread creation
+		BlockingQueue<Runnable> queue = new SynchronousQueue<>();
+		// try to name the threads with useful name
+		ThreadFactory threadFactory = r -> {
+			Thread t = new Thread(r, "Resolver thread - UNIT TEST"); //$NON-NLS-1$
+			t.setDaemon(true);
+			return t;
+		};
+		ScheduledExecutorService watchDog = Executors.newSingleThreadScheduledExecutor();
+		// use a rejection policy that simply runs the task in the current thread once
+		// the max threads is reached
+		RejectedExecutionHandler rejectHandler = (r, exe) -> r.run();
+		ExecutorService executor = new ThreadPoolExecutor(coreThreads, maxThreads, idleTimeout, TimeUnit.SECONDS, queue,
+				threadFactory, rejectHandler);
+		ScheduledExecutorService timeoutExecutor = new ScheduledThreadPoolExecutor(1);
+
+		Map<String, String> configuration = new HashMap<>();
+		long batchTimeoutSeconds = TimeUnit.MINUTES.toSeconds(1);
+		configuration.put(EquinoxConfiguration.PROP_RESOLVER_BATCH_TIMEOUT,
+				Long.toString(TimeUnit.SECONDS.toMillis(batchTimeoutSeconds)));
+
+		Map<String, String> debugOpts = Collections.emptyMap();
+		DummyContainerAdaptor adaptor = new DummyContainerAdaptor(new DummyCollisionHook(false), configuration,
+				new DummyResolverHookFactory(), new DummyDebugOptions(debugOpts));
+		adaptor.setResolverExecutor(executor);
+		adaptor.setTimeoutExecutor(timeoutExecutor);
+		ModuleContainer container = adaptor.getContainer();
+		Module systemBundle = installDummyModule(manifests.remove(0L), Constants.SYSTEM_BUNDLE_LOCATION, null, "", "",
+				container);
+		assertEquals(0L, systemBundle.getId().longValue());
+		Set<Module> bundles = new LinkedHashSet<>();
+		for (Entry<Long, String> entry : manifests.entrySet()) {
+			Module dummyModule = installDummyModule(entry.getValue(), entry.getValue().replace(".MF", ""), container);
+			bundles.add(dummyModule);
+		}
+		AtomicBoolean timeout = new AtomicBoolean();
+		ScheduledFuture<?> watch = watchDog.schedule(() -> timeout.set(true), batchTimeoutSeconds,
+				TimeUnit.SECONDS);
+		ResolutionReport report = container.resolve(bundles, true);
+		watch.cancel(true);
+		assertFalse("Resolve operation timed out!", timeout.get());
+		return report;
 	}
 
 	private void assertEvents(List<DummyModuleEvent> expected, List<DummyModuleEvent> actual, boolean orderMatters) {
