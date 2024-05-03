@@ -261,6 +261,34 @@ public final class ModuleContainer implements DebugOptionsListener {
 		return Constants.PROVIDE_CAPABILITY + ": " + capability.toString(); //$NON-NLS-1$
 	}
 
+	/**
+	 * Generates a human readable string representation of the the given
+	 * {@link Resource} using the IDENTITY_NAMESPACE
+	 * 
+	 * @param resource the {@link Resource} for which a string representation is
+	 *                 desired
+	 * 
+	 * @since 3.21
+	 */
+	public static String toString(Resource resource) {
+		String id = null;
+		Version version = null;
+		List<Capability> caps = resource.getCapabilities(null);
+		for (Capability cap : caps) {
+			if (cap.getNamespace().equals(IdentityNamespace.IDENTITY_NAMESPACE)) {
+				id = cap.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE).toString();
+				version = (Version) cap.getAttributes().get(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE);
+			}
+		}
+		if (id != null) {
+			if (version != null) {
+				return String.format("%s %s", id, version); //$NON-NLS-1$
+			}
+			return id;
+		}
+		return resource.toString();
+	}
+
 	private static String createOSGiCapability(Capability cap) {
 		Map<String, Object> attributes = new HashMap<>(cap.getAttributes());
 		Map<String, String> directives = cap.getDirectives();

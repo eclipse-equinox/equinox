@@ -18,8 +18,11 @@
  */
 package org.apache.felix.resolver;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.osgi.framework.Version;
 import org.osgi.framework.namespace.BundleNamespace;
 import org.osgi.framework.namespace.IdentityNamespace;
@@ -81,13 +84,13 @@ public class Util
 
     public static boolean isMultiple(Requirement req)
     {
-    	return Namespace.CARDINALITY_MULTIPLE.equals(req.getDirectives()
+        return Namespace.CARDINALITY_MULTIPLE.equals(req.getDirectives()
             .get(Namespace.REQUIREMENT_CARDINALITY_DIRECTIVE)) && !isDynamic(req);
     }
 
     public static boolean isDynamic(Requirement req)
     {
-    	return PackageNamespace.RESOLUTION_DYNAMIC.equals(req.getDirectives()
+        return PackageNamespace.RESOLUTION_DYNAMIC.equals(req.getDirectives()
             .get(Namespace.REQUIREMENT_RESOLUTION_DIRECTIVE));
     }
 
@@ -97,22 +100,23 @@ public class Util
             .get(BundleNamespace.REQUIREMENT_VISIBILITY_DIRECTIVE));
     }
 
-    public static List<Requirement> getDynamicRequirements(List<Requirement> reqs)
-    {
-        List<Requirement> result = new ArrayList<Requirement>();
-        if (reqs != null)
-        {
-            for (Requirement req : reqs)
-            {
-                String resolution = req.getDirectives()
-                    .get(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
-                if ((resolution != null)
-                    && resolution.equals(PackageNamespace.RESOLUTION_DYNAMIC))
-                {
-                    result.add(req);
-                }
+    public static String getPackageName(Capability capability) {
+        if (capability != null && PackageNamespace.PACKAGE_NAMESPACE.equals(capability.getNamespace())) {
+            Object object = capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
+            if (object instanceof String) {
+                return (String) object;
             }
         }
-        return result;
+        return "";
+    }
+
+    public static Set<String> getUses(Capability capability) {
+        if (capability != null && PackageNamespace.PACKAGE_NAMESPACE.equals(capability.getNamespace())) {
+            String uses = capability.getDirectives().get(PackageNamespace.CAPABILITY_USES_DIRECTIVE);
+            if (uses != null && !uses.isEmpty()) {
+                return Arrays.stream(uses.split(",")).map(String::trim).collect(Collectors.toSet());
+            }
+        }
+        return Collections.emptySet();
     }
 }
