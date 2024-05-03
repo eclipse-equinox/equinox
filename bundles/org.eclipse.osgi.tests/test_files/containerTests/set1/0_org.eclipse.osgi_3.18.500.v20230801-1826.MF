@@ -1,0 +1,194 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.eclipse.osgi; singleton:=true
+Bundle-ManifestVersion: 2
+Require-Capability: osgi.ee; filter:="(| (&(osgi.ee=JavaSE)(version=1.8)
+ ) (&(osgi.ee=JavaSE/compact1)(version=1.8)) )"
+Export-Package: org.eclipse.core.runtime.adaptor;x-friends:="org.eclipse
+ .core.runtime",org.eclipse.core.runtime.internal.adaptor;x-internal:=tr
+ ue,org.eclipse.equinox.log;version="1.1";uses:="org.osgi.framework,org.
+ osgi.service.log",org.eclipse.osgi.container;version="1.6"; uses:="org.
+ eclipse.osgi.report.resolution,  org.osgi.framework.wiring,  org.eclips
+ e.osgi.framework.eventmgr,  org.osgi.framework.startlevel,  org.osgi.fr
+ amework,  org.osgi.framework.hooks.resolver,  org.osgi.service.resolver
+ ,  org.osgi.resource,  org.eclipse.osgi.service.debug",org.eclipse.osgi
+ .container.builders;version="1.0";uses:="org.eclipse.osgi.util,org.ecli
+ pse.osgi.container",org.eclipse.osgi.container.namespaces;version="1.0"
+ ;uses:="org.osgi.resource",org.eclipse.osgi.framework.console;version="
+ 1.1";uses:="org.osgi.framework",org.eclipse.osgi.framework.eventmgr;ver
+ sion="1.2",org.eclipse.osgi.framework.internal.reliablefile;x-internal:
+ =true,org.eclipse.osgi.framework.log;version="1.1";uses:="org.osgi.fram
+ ework",org.eclipse.osgi.framework.util;x-internal:=true,org.eclipse.osg
+ i.internal.debug;x-internal:=true,org.eclipse.osgi.internal.framework;x
+ -internal:=true,org.eclipse.osgi.internal.hookregistry;x-friends:="org.
+ eclipse.osgi.tests",org.eclipse.osgi.internal.loader;x-internal:=true,o
+ rg.eclipse.osgi.internal.loader.buddy;x-internal:=true,org.eclipse.osgi
+ .internal.loader.classpath;x-internal:=true,org.eclipse.osgi.internal.l
+ oader.sources;x-internal:=true,org.eclipse.osgi.internal.location;x-int
+ ernal:=true,org.eclipse.osgi.internal.messages;x-internal:=true,org.ecl
+ ipse.osgi.internal.provisional.service.security;version="1.0.0";x-frien
+ ds:="org.eclipse.equinox.security.ui",org.eclipse.osgi.internal.provisi
+ onal.verifier;x-friends:="org.eclipse.ui.workbench,org.eclipse.equinox.
+ p2.artifact.repository",org.eclipse.osgi.internal.service.security;x-fr
+ iends:="org.eclipse.equinox.security.ui",org.eclipse.osgi.internal.serv
+ iceregistry;x-internal:=true,org.eclipse.osgi.internal.signedcontent;x-
+ internal:=true,org.eclipse.osgi.internal.url;x-internal:=true,org.eclip
+ se.osgi.launch;version="1.1";uses:="org.osgi.framework,org.osgi.framewo
+ rk.launch,org.osgi.framework.connect",org.eclipse.osgi.report.resolutio
+ n;version="1.0";uses:="org.osgi.service.resolver,org.osgi.resource",org
+ .eclipse.osgi.service.datalocation;version="1.4.0",org.eclipse.osgi.ser
+ vice.debug;version="1.2",org.eclipse.osgi.service.environment;version="
+ 1.4",org.eclipse.osgi.service.localization;version="1.1";uses:="org.osg
+ i.framework",org.eclipse.osgi.service.pluginconversion;version="1.0",or
+ g.eclipse.osgi.service.resolver;version="1.6";uses:="org.osgi.framework
+ ,org.osgi.framework.hooks.resolver,org.osgi.framework.wiring",org.eclip
+ se.osgi.service.runnable;version="1.1",org.eclipse.osgi.service.securit
+ y;version="1.0",org.eclipse.osgi.service.urlconversion;version="1.0",or
+ g.eclipse.osgi.signedcontent;version="1.1";uses:="org.osgi.framework",o
+ rg.eclipse.osgi.storage;x-friends:="org.eclipse.osgi.tests",org.eclipse
+ .osgi.storage.bundlefile;x-internal:=true,org.eclipse.osgi.storage.url.
+ reference;x-internal:=true,org.eclipse.osgi.storagemanager;version="1.0
+ ",org.eclipse.osgi.util;version="1.1",org.osgi.dto;version="1.1.1",org.
+ osgi.framework;version="1.10",org.osgi.framework.connect;version="1.0";
+ uses:="org.osgi.framework.launch",org.osgi.framework.dto;version="1.8";
+ uses:="org.osgi.dto",org.osgi.framework.hooks.bundle;version="1.1";uses
+ :="org.osgi.framework",org.osgi.framework.hooks.resolver;version="1.0";
+ uses:="org.osgi.framework.wiring",org.osgi.framework.hooks.service;vers
+ ion="1.1";uses:="org.osgi.framework",org.osgi.framework.hooks.weaving;v
+ ersion="1.1";uses:="org.osgi.framework.wiring",org.osgi.framework.launc
+ h;version="1.2";uses:="org.osgi.framework",org.osgi.framework.namespace
+ ;version="1.2";uses:="org.osgi.resource",org.osgi.framework.startlevel;
+ version="1.0";uses:="org.osgi.framework",org.osgi.framework.startlevel.
+ dto;version="1.0";uses:="org.osgi.dto",org.osgi.framework.wiring;versio
+ n="1.2";uses:="org.osgi.framework,org.osgi.resource",org.osgi.framework
+ .wiring.dto;version="1.3";uses:="org.osgi.dto,org.osgi.resource.dto",or
+ g.osgi.resource;version="1.0.1",org.osgi.resource.dto;version="1.0.1";u
+ ses:="org.osgi.dto",org.osgi.service.condition;version="1.0",org.osgi.s
+ ervice.condpermadmin;version="1.1.2";uses:="org.osgi.framework",org.osg
+ i.service.log;version="1.5";uses:="org.osgi.framework",org.osgi.service
+ .log.admin;version="1.0";uses:="org.osgi.service.log",org.osgi.service.
+ packageadmin;version="1.2.1";uses:="org.osgi.framework",org.osgi.servic
+ e.permissionadmin;version="1.2.1",org.osgi.service.resolver;version="1.
+ 1.1";uses:="org.osgi.resource",org.osgi.service.startlevel;version="1.1
+ .1";uses:="org.osgi.framework",org.osgi.service.url;version="1.0.1",org
+ .osgi.util.tracker;version="1.5.3";uses:="org.osgi.framework", com.sun.
+ jarsigner, com.sun.java.accessibility.util, com.sun.jdi, com.sun.jdi.co
+ nnect, com.sun.jdi.connect.spi, com.sun.jdi.event, com.sun.jdi.request,
+  com.sun.management, com.sun.net.httpserver, com.sun.net.httpserver.spi
+ , com.sun.nio.file, com.sun.nio.sctp, com.sun.security.auth, com.sun.se
+ curity.auth.callback, com.sun.security.auth.login, com.sun.security.aut
+ h.module, com.sun.security.jgss, com.sun.source.doctree, com.sun.source
+ .tree, com.sun.source.util, com.sun.tools.attach, com.sun.tools.attach.
+ spi, com.sun.tools.javac, com.sun.tools.jconsole, java.applet, java.awt
+ , java.awt.color, java.awt.datatransfer, java.awt.desktop, java.awt.dnd
+ , java.awt.event, java.awt.font, java.awt.geom, java.awt.im, java.awt.i
+ m.spi, java.awt.image, java.awt.image.renderable, java.awt.print, java.
+ beans, java.beans.beancontext, java.io, java.lang, java.lang.annotation
+ , java.lang.constant, java.lang.instrument, java.lang.invoke, java.lang
+ .management, java.lang.module, java.lang.ref, java.lang.reflect, java.l
+ ang.runtime, java.math, java.net, java.net.http, java.net.spi, java.nio
+ , java.nio.channels, java.nio.channels.spi, java.nio.charset, java.nio.
+ charset.spi, java.nio.file, java.nio.file.attribute, java.nio.file.spi,
+  java.rmi, java.rmi.dgc, java.rmi.registry, java.rmi.server, java.secur
+ ity, java.security.cert, java.security.interfaces, java.security.spec, 
+ java.sql, java.text, java.text.spi, java.time, java.time.chrono, java.t
+ ime.format, java.time.temporal, java.time.zone, java.util, java.util.co
+ ncurrent, java.util.concurrent.atomic, java.util.concurrent.locks, java
+ .util.function, java.util.jar, java.util.logging, java.util.prefs, java
+ .util.random, java.util.regex, java.util.spi, java.util.stream, java.ut
+ il.zip, javax.accessibility, javax.annotation.processing, javax.crypto,
+  javax.crypto.interfaces, javax.crypto.spec, javax.imageio, javax.image
+ io.event, javax.imageio.metadata, javax.imageio.plugins.bmp, javax.imag
+ eio.plugins.jpeg, javax.imageio.plugins.tiff, javax.imageio.spi, javax.
+ imageio.stream, javax.lang.model, javax.lang.model.element, javax.lang.
+ model.type, javax.lang.model.util, javax.management, javax.management.l
+ oading, javax.management.modelmbean, javax.management.monitor, javax.ma
+ nagement.openmbean, javax.management.relation, javax.management.remote,
+  javax.management.remote.rmi, javax.management.timer, javax.naming, jav
+ ax.naming.directory, javax.naming.event, javax.naming.ldap, javax.namin
+ g.ldap.spi, javax.naming.spi, javax.net, javax.net.ssl, javax.print, ja
+ vax.print.attribute, javax.print.attribute.standard, javax.print.event,
+  javax.rmi.ssl, javax.script, javax.security.auth, javax.security.auth.
+ callback, javax.security.auth.kerberos, javax.security.auth.login, java
+ x.security.auth.spi, javax.security.auth.x500, javax.security.cert, jav
+ ax.security.sasl, javax.smartcardio, javax.sound.midi, javax.sound.midi
+ .spi, javax.sound.sampled, javax.sound.sampled.spi, javax.sql, javax.sq
+ l.rowset, javax.sql.rowset.serial, javax.sql.rowset.spi, javax.swing, j
+ avax.swing.border, javax.swing.colorchooser, javax.swing.event, javax.s
+ wing.filechooser, javax.swing.plaf, javax.swing.plaf.basic, javax.swing
+ .plaf.metal, javax.swing.plaf.multi, javax.swing.plaf.nimbus, javax.swi
+ ng.plaf.synth, javax.swing.table, javax.swing.text, javax.swing.text.ht
+ ml, javax.swing.text.html.parser, javax.swing.text.rtf, javax.swing.tre
+ e, javax.swing.undo, javax.tools, javax.transaction.xa, javax.xml, java
+ x.xml.catalog, javax.xml.crypto, javax.xml.crypto.dom, javax.xml.crypto
+ .dsig, javax.xml.crypto.dsig.dom, javax.xml.crypto.dsig.keyinfo, javax.
+ xml.crypto.dsig.spec, javax.xml.datatype, javax.xml.namespace, javax.xm
+ l.parsers, javax.xml.stream, javax.xml.stream.events, javax.xml.stream.
+ util, javax.xml.transform, javax.xml.transform.dom, javax.xml.transform
+ .sax, javax.xml.transform.stax, javax.xml.transform.stream, javax.xml.v
+ alidation, javax.xml.xpath, jdk.dynalink, jdk.dynalink.beans, jdk.dynal
+ ink.linker, jdk.dynalink.linker.support, jdk.dynalink.support, jdk.java
+ doc.doclet, jdk.jfr, jdk.jfr.consumer, jdk.jshell, jdk.jshell.execution
+ , jdk.jshell.spi, jdk.jshell.tool, jdk.management.jfr, jdk.net, jdk.nio
+ , jdk.nio.mapmode, jdk.security.jarsigner, jdk.swing.interop, netscape.
+ javascript, org.ietf.jgss, org.w3c.dom, org.w3c.dom.bootstrap, org.w3c.
+ dom.css, org.w3c.dom.events, org.w3c.dom.html, org.w3c.dom.ls, org.w3c.
+ dom.ranges, org.w3c.dom.stylesheets, org.w3c.dom.traversal, org.w3c.dom
+ .views, org.w3c.dom.xpath, org.xml.sax, org.xml.sax.ext, org.xml.sax.he
+ lpers, sun.misc, sun.reflect
+Bundle-Version: 3.18.500.v20230801-1826
+Provide-Capability: osgi.service; objectClass:List<String>="org.osgi.ser
+ vice.log.LogReaderService,org.eclipse.equinox.log.ExtendedLogReaderServ
+ ice"; uses:="org.osgi.service.log",osgi.service; objectClass:List<Strin
+ g>="org.osgi.service.log.LoggerFactory,org.osgi.service.log.LogService,
+ org.eclipse.equinox.log.ExtendedLogService"; uses:="org.osgi.service.lo
+ g",osgi.service; objectClass:List<String>="org.osgi.service.log.admin.L
+ oggerAdmin"; uses:="org.osgi.service.log.admin",osgi.service; objectCla
+ ss:List<String>="org.eclipse.osgi.framework.log.FrameworkLog"; uses:=""
+ ,osgi.service; objectClass:List<String>="org.eclipse.osgi.service.datal
+ ocation.Location"; type="osgi.user.area"; uses:="org.eclipse.osgi.servi
+ ce.datalocation",osgi.service; objectClass:List<String>="org.eclipse.os
+ gi.service.datalocation.Location"; type="osgi.instance.area"; uses:="or
+ g.eclipse.osgi.service.datalocation",osgi.service; objectClass:List<Str
+ ing>="org.eclipse.osgi.service.datalocation.Location"; type="osgi.confi
+ guration.area"; uses:="org.eclipse.osgi.service.datalocation",osgi.serv
+ ice; objectClass:List<String>="org.eclipse.osgi.service.datalocation.Lo
+ cation"; type="osgi.install.area"; uses:="org.eclipse.osgi.service.data
+ location",osgi.service; objectClass:List<String>="org.eclipse.osgi.serv
+ ice.datalocation.Location"; type="eclipse.home.location"; uses:="org.ec
+ lipse.osgi.service.datalocation",osgi.service; objectClass:List<String>
+ ="org.eclipse.osgi.service.environment.EnvironmentInfo"; uses:="org.ecl
+ ipse.osgi.service.environment",osgi.service; objectClass:List<String>="
+ org.osgi.service.packageadmin.PackageAdmin"; uses:="org.osgi.service.pa
+ ckageadmin",osgi.service; objectClass:List<String>="org.osgi.service.st
+ artlevel.StartLevel"; uses:="org.osgi.service.startlevel",osgi.service;
+  objectClass:List<String>="org.osgi.service.permissionadmin.PermissionA
+ dmin"; uses:="org.osgi.service.permissionadmin",osgi.service; objectCla
+ ss:List<String>="org.osgi.service.condpermadmin.ConditionalPermissionAd
+ min"; uses:="org.osgi.service.condpermadmin",osgi.service; objectClass:
+ List<String>="org.osgi.service.resolver.Resolver"; uses:="org.osgi.serv
+ ice.resolver",osgi.service; objectClass:List<String>="org.eclipse.osgi.
+ service.debug.DebugOptions"; uses:="org.eclipse.osgi.service.debug",osg
+ i.service; objectClass:List<String>="org.eclipse.osgi.service.urlconver
+ sion.URLConverter"; uses:="org.eclipse.osgi.service.urlconversion",osgi
+ .service; objectClass:List<String>="org.eclipse.osgi.service.localizati
+ on.BundleLocalization"; uses:="org.eclipse.osgi.service.localization",o
+ sgi.service; objectClass:List<String>="org.eclipse.osgi.service.securit
+ y.TrustEngine"; uses:="org.eclipse.osgi.service.security",osgi.service;
+  objectClass:List<String>="org.eclipse.osgi.signedcontent.SignedContent
+ Factory"; uses:="org.eclipse.osgi.signedcontent",osgi.service; objectCl
+ ass:List<String>="org.osgi.service.condition.Condition"; osgi.condition
+ .id="true"; uses:="org.osgi.service.condition",osgi.serviceloader;osgi.
+ serviceloader="org.osgi.framework.connect.ConnectFrameworkFactory";regi
+ ster:="org.eclipse.osgi.launch.EquinoxFactory",osgi.serviceloader;osgi.
+ serviceloader="org.osgi.framework.launch.FrameworkFactory";register:="o
+ rg.eclipse.osgi.launch.EquinoxFactory", osgi.ee; osgi.ee="OSGi/Minimum"
+ ; version:List<Version>="1.0, 1.1, 1.2", osgi.ee; osgi.ee="JRE"; versio
+ n:List<Version>="1.0, 1.1", osgi.ee; osgi.ee="JavaSE"; version:List<Ver
+ sion>="1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 9.0, 10.0, 11.0, 12
+ .0, 13.0, 14.0, 15.0, 16.0, 17.0",osgi.ee; osgi.ee="JavaSE/compact1"; v
+ ersion:List<Version>="1.8, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.
+ 0, 17.0",osgi.ee; osgi.ee="JavaSE/compact2"; version:List<Version>="1.8
+ , 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0",osgi.ee; osgi.ee
+ ="JavaSE/compact3"; version:List<Version>="1.8, 9.0, 10.0, 11.0, 12.0, 
+ 13.0, 14.0, 15.0, 16.0, 17.0"
+
