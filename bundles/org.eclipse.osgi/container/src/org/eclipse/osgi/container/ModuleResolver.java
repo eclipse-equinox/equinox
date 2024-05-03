@@ -16,6 +16,7 @@ package org.eclipse.osgi.container;
 import static org.eclipse.osgi.internal.container.NamespaceList.WIRE;
 
 import java.security.Permission;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,6 +38,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import org.apache.felix.resolver.Logger;
 import org.apache.felix.resolver.PermutationType;
 import org.apache.felix.resolver.ResolutionError;
@@ -502,6 +504,74 @@ final class ModuleResolver {
 							.append(error.getMessage()) //
 							.toString());
 				}
+			}
+
+			public void logRequirement(String message, Requirement requirement) {
+				debug(String.format(message, ModuleContainer.toString(requirement)));
+			}
+
+			public void logCapability(String message, Capability requirement) {
+				debug(String.format(message, ModuleContainer.toString(requirement)));
+			}
+
+			@Override
+			public void logCandidates(Resource resource, Function<Requirement, List<Capability>> candidateLookup) {
+				if (DEBUG_USES) {
+					Wiring wiring = getWirings().get(resource);
+					List<Requirement> reqs = (wiring != null) ? wiring.getResourceRequirements(null)
+							: resource.getRequirements(null);
+					List<Requirement> dreqs = (wiring != null)
+							? getDynamicRequirements(wiring.getResourceRequirements(null))
+							: getDynamicRequirements(resource.getRequirements(null));
+					boolean hasMulti = hasMulti(reqs, candidateLookup);
+					Debug.println(String.format("  %s%s (%s)", getMultiMarker(hasMulti), //$NON-NLS-1$
+							ModuleContainer.toString(resource),
+							((wiring != null) ? "RESOLVED)" : "UNRESOLVED)"))); //$NON-NLS-1$ //$NON-NLS-2$
+					printRe(reqs, candidateLookup);
+					printRe(dreqs, candidateLookup);
+				}
+			}
+
+			private String getMultiMarker(boolean hasMulti) {
+				return hasMulti ? "[?]" : "[!]"; //$NON-NLS-1$ //$NON-NLS-2$
+			}
+
+			private boolean hasMulti(List<Requirement> reqs, Function<Requirement, List<Capability>> candidateLookup) {
+				for (Requirement req : reqs) {
+					List<Capability> remaining = candidateLookup.apply(req);
+					if (remaining.size() > 1) {
+						return true;
+					}
+				}
+				return false;
+			}
+
+			private int printRe(List<Requirement> reqs, Function<Requirement, List<Capability>> candidateLookup) {
+				int dup = 0;
+				for (Requirement req : reqs) {
+					List<Capability> remaining = candidateLookup.apply(req);
+						boolean hasMulti = remaining.size() > 1;
+							dup++;
+							Debug.println(MessageFormat.format("    {0}{1}: ", getMultiMarker(hasMulti), //$NON-NLS-1$
+									ModuleContainer.toString(req)));
+							for (Capability cap : remaining) {
+								Debug.println(String.format("        %s", ModuleContainer.toString(cap))); //$NON-NLS-1$
+							}
+				}
+				return dup;
+			}
+
+			private List<Requirement> getDynamicRequirements(List<Requirement> reqs) {
+				List<Requirement> result = new ArrayList<>();
+				if (reqs != null) {
+					for (Requirement req : reqs) {
+						String resolution = req.getDirectives().get(PackageNamespace.REQUIREMENT_RESOLUTION_DIRECTIVE);
+						if ((resolution != null) && resolution.equals(PackageNamespace.RESOLUTION_DYNAMIC)) {
+							result.add(req);
+						}
+					}
+				}
+				return result;
 			}
 
 			Map<Resource, ResolutionException> getUsesConstraintViolations() {

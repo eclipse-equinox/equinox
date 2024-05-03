@@ -18,6 +18,7 @@
  */
 package org.apache.felix.resolver;
 
+import java.io.PrintStream;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -34,6 +35,8 @@ import org.osgi.service.resolver.ResolveContext;
 
 class Candidates
 {
+    private static final boolean FILTER_USES = Boolean
+            .parseBoolean(System.getProperty("felix.resolver.candidates.filteruses", "true"));
     static class PopulateResult {
         boolean success;
         ResolutionError error;
@@ -709,7 +712,7 @@ class Candidates
         return null;
     }
 
-    public void removeFirstCandidate(Requirement req)
+    public Capability removeFirstCandidate(Requirement req)
     {
         CandidateSelector candidates = m_candidateMap.get(req);
         // Remove the conflicting candidate.
@@ -721,6 +724,7 @@ class Candidates
         // Update the delta with the removed capability
         CopyOnWriteSet<Capability> capPath = m_delta.getOrCompute(req);
         capPath.add(cap);
+        return cap;
     }
 
     public CandidateSelector clearMultipleCardinalityCandidates(Requirement req, Collection<Capability> caps)
@@ -1145,54 +1149,15 @@ class Candidates
                 m_delta.deepClone());
     }
 
-    public void dump(ResolveContext rc)
-    {
-        // Create set of all revisions from requirements.
-        Set<Resource> resources = new CopyOnWriteSet<Resource>();
-        for (Entry<Requirement, CandidateSelector> entry
-            : m_candidateMap.entrySet())
-        {
-            resources.add(entry.getKey().getResource());
-        }
-        // Now dump the revisions.
-        System.out.println("=== BEGIN CANDIDATE MAP ===");
-        for (Resource resource : resources)
-        {
-            Wiring wiring = rc.getWirings().get(resource);
-            System.out.println("  " + resource
-                + " (" + ((wiring != null) ? "RESOLVED)" : "UNRESOLVED)"));
-            List<Requirement> reqs = (wiring != null)
-                ? wiring.getResourceRequirements(null)
-                : resource.getRequirements(null);
-            for (Requirement req : reqs)
-            {
-                CandidateSelector candidates = m_candidateMap.get(req);
-                if ((candidates != null) && (!candidates.isEmpty()))
-                {
-                    System.out.println("    " + req + ": " + candidates);
-                }
-            }
-            reqs = (wiring != null)
-                ? Util.getDynamicRequirements(wiring.getResourceRequirements(null))
-                : Util.getDynamicRequirements(resource.getRequirements(null));
-            for (Requirement req : reqs)
-            {
-                CandidateSelector candidates = m_candidateMap.get(req);
-                if ((candidates != null) && (!candidates.isEmpty()))
-                {
-                    System.out.println("    " + req + ": " + candidates);
-                }
-            }
-        }
-        System.out.println("=== END CANDIDATE MAP ===");
-    }
-
     public Candidates permutate(Requirement req)
     {
         if (!Util.isMultiple(req) && canRemoveCandidate(req))
         {
             Candidates perm = copy();
-            perm.removeFirstCandidate(req);
+            Capability removed = perm.removeFirstCandidate(req);
+            if (FILTER_USES) {
+                    ProblemReduction.removeUsesViolations(perm, req, m_session.getLogger());
+            }
             return perm;
         }
         return null;
@@ -1339,6 +1304,27 @@ class Candidates
                 ReasonException.Reason.MissingRequirement, getMessage(), cause != null ? cause.toException() : null, getUnresolvedRequirements());
         }
 
+    }
+
+    /**
+     * Returns the current provided {@link Capability} for the given resource if it
+     * is a candidate for the {@link Requirement}
+     * 
+     * @param resource    the resource to check
+     * @param requirement the requirement to check
+     * @return the {@link Capability} this Resource currently provides for the given
+     *         {@link Requirement} or <code>null</code> if none is provided.
+     */
+    public Capability getCapability(Resource resource, Requirement requirement) {
+        List<Capability> providers = getCandidates(requirement);
+        if (providers != null) {
+            for (Capability capability : providers) {
+                if (capability.getResource().equals(resource)) {
+                    return capability;
+                }
+            }
+        }
+        return null;
     }
 
 }
