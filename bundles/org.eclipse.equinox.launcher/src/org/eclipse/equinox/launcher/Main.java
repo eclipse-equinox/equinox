@@ -40,6 +40,9 @@ import java.net.URLStreamHandlerFactory;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.security.AllPermission;
 import java.security.CodeSource;
 import java.security.Permission;
@@ -54,6 +57,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.StringTokenizer;
 import java.util.zip.ZipEntry;
@@ -296,6 +300,8 @@ public class Main {
 	private static final String BASE_TIMESTAMP_FILE_CONFIGINI = ".baseConfigIniTimestamp"; //$NON-NLS-1$
 	private static final String KEY_CONFIGINI_TIMESTAMP = "configIniTimestamp"; //$NON-NLS-1$
 	private static final String PROP_IGNORE_USER_CONFIGURATION = "eclipse.ignoreUserConfiguration"; //$NON-NLS-1$
+
+	private static final Set<PosixFilePermission> PERMISSION_755 = PosixFilePermissions.fromString("rwxr-xr-x"); //$NON-NLS-1$
 
 	/**
 	 * A structured form for a version identifier.
@@ -550,7 +556,7 @@ public class Main {
 				String lib = extractFromJAR(fragment, entry);
 				if (!getOS().equals("win32")) { //$NON-NLS-1$
 					try {
-						Runtime.getRuntime().exec(new String[] {"chmod", "755", lib}).waitFor(); //$NON-NLS-1$ //$NON-NLS-2$
+						Files.setPosixFilePermissions(Paths.get(lib), PERMISSION_755);
 					} catch (Throwable e) {
 						//ignore
 					}
