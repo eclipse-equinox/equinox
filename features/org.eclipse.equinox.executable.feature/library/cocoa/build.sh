@@ -75,9 +75,8 @@ fi
 if [ "$EXE_OUTPUT_DIR" = "" ]; then EXE_OUTPUT_DIR="$BINARIES_DIR/org.eclipse.equinox.executable/bin/$defaultWS/$defaultOS/$DEFAULT_OS_ARCH/Eclipse.app/Contents/MacOS"; fi
 if [ "$LIB_OUTPUT_DIR" = "" ]; then LIB_OUTPUT_DIR="$BINARIES_DIR/org.eclipse.equinox.launcher.$defaultWS.$defaultOS.$DEFAULT_OS_ARCH"; fi
 
-# /System/Library/Frameworks/JavaVM.framework/Headers does not exist anymore on Yosemite
-if [ -e /System/Library/Frameworks/JavaVM.framework/Headers ]; then
-  JAVA_HEADERS="-I/System/Library/Frameworks/JavaVM.framework/Headers"
+if [ "$JAVA_HOME" != "" ]; then
+  JAVA_HEADERS="-I$JAVA_HOME/include -I$JAVA_HOME/include/darwin"
 else
   JAVA_HEADERS="-I$(/usr/libexec/java_home)/include -I$(/usr/libexec/java_home)/include/darwin"
 fi
