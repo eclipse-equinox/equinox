@@ -19,7 +19,7 @@ jobs:
         config: 
           - { name: Linux, runner-os: ubuntu-latest, ws: gtk, os: linux, native-extension: so }
           - { name: Windows, runner-os: windows-2019, ws: win32, os: win32, native-extension: dll }
-          - { name: MacOS, runner-os: macos-latest-large, ws: cocoa, os: macosx, native-extension: so }
+          - { name: MacOS, runner-os: macos-13, ws: cocoa, os: macosx, native-extension: so }
     steps:
     - uses: actions/checkout@v4
       with:
