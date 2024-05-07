@@ -315,9 +315,9 @@ pipeline {
 			post {
 				always {
 					archiveArtifacts artifacts: '**/*.log, equinox/**/target/*.jar, equinox.binaries/**', allowEmptyArchive: true
-					junit '**/target/surefire-reports/TEST-*.xml'
+					junit 'equinox/**/target/surefire-reports/TEST-*.xml'
 					discoverGitReferenceBuild referenceJob: 'equinox/master'
-					recordIssues publishAllIssues: true, tools: [eclipse(name: 'Compiler and API Tools', pattern: '**/target/compilelogs/*.xml'), mavenConsole(), javaDoc()]
+					recordIssues publishAllIssues: true, tools: [eclipse(name: 'Compiler and API Tools', pattern: 'equinox/**/target/compilelogs/*.xml'), mavenConsole(), javaDoc()]
 				}
 			}
 		}
