@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.internal.util.SupplementDebug;
 import org.eclipse.osgi.internal.util.Tokenizer;
@@ -483,6 +484,27 @@ public class ManifestElement {
 				list.add(token);
 		}
 		return list.toArray(new String[list.size()]);
+	}
+
+	/**
+	 * Parses a bundle manifest and returns the header/value pairs into as case
+	 * insensitive map. Only the main section of the manifest is parsed (up to the
+	 * first blank line). All other sections are ignored. If a header is duplicated
+	 * then only the last value is stored in the map.
+	 * <p>
+	 * The supplied input stream is consumed by this method and will be closed.
+	 * </p>
+	 * 
+	 * @param manifest an input stream for a bundle manifest.
+	 * @throws BundleException if the manifest has an invalid syntax
+	 * @throws IOException     if an error occurs while reading the manifest
+	 * @return the map with the header/value pairs from the bundle manifest
+	 * @since 3.21
+	 */
+	public static Map<String, String> parseBundleManifest(InputStream manifest) throws IOException, BundleException {
+		Map<String, String> headers = new TreeMap<>(String::compareToIgnoreCase);
+		parseBundleManifest(manifest, headers);
+		return headers;
 	}
 
 	/**
