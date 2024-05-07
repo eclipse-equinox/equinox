@@ -42,7 +42,7 @@ spec:
 		if (platform == 'cocoa.macosx.x86_64') {
 			platform = 'cocoa.macosx.aarch64'
 		}
-		return node('swt.natives-' + platform) { stage(nativeBuildStageName) { body() } } //TODO: generalize labels
+		return node('native.builder-' + platform) { stage(nativeBuildStageName) { body() } }
 	}
 }
 
