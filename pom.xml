@@ -223,6 +223,7 @@
 		    <module>bundles/org.eclipse.equinox.launcher.tests</module>
 		
 		    <module>bundles/org.eclipse.osgi.tests</module>
+		    <module>repository</module>
         </modules>
     </profile>
   </profiles>
