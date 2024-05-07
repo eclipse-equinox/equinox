@@ -30,7 +30,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
@@ -108,17 +107,19 @@ public class LauncherTests {
 		Files.createDirectories(eclipseInstallationMockLocation.resolve(ECLIPSE_EXE_NAME).getParent());
 		Files.copy(binariesRoot.resolve(exePath), eclipseInstallationMockLocation.resolve(ECLIPSE_EXE_NAME));
 
-		Properties versions = new Properties();
-		try (var in = Files.newInputStream(
-				equinoxRepo.resolve("features/org.eclipse.equinox.executable.feature/library/make_version.mak"))) {
-			versions.load(in);
+		Path launcherDir = binariesRoot.resolve("org.eclipse.equinox.launcher." + ws + "." + os + "." + arch);
+		try (var files = Files.walk(launcherDir, 1).filter(Files::isRegularFile)) {
+			List<Path> launcherLibs = files.filter(f -> {
+				String filename = f.getFileName().toString();
+				return filename.startsWith("eclipse_") && filename.endsWith((os.contains("win") ? ".dll" : ".so"));
+			}).toList();
+			assertEquals(1, launcherLibs.size(), () -> "Not exactly one launcher library file found: " + launcherLibs);
+			Path launcherLibFile = launcherLibs.get(0);
+
+			Path mockLauncherDir = eclipseInstallationMockLocation.resolve("plugins/org.eclipse.equinox.launcher");
+			Files.copy(launcherLibFile,
+					Files.createDirectories(mockLauncherDir).resolve(launcherLibFile.getFileName()));
 		}
-		String launcherLibrary = "eclipse_" + versions.get("maj_ver") + versions.get("min_ver")
-		+ (os.contains("win") ? ".dll" : ".so");
-		String launcherLibFile = "org.eclipse.equinox.launcher." + ws + "." + os + "." + arch + "/" + launcherLibrary;
-		Files.copy(binariesRoot.resolve(launcherLibFile),
-				Files.createDirectories(eclipseInstallationMockLocation.resolve("plugins/org.eclipse.equinox.launcher"))
-				.resolve(launcherLibrary));
 
 		Manifest manifest = new Manifest();
 		Attributes mainAttributes = manifest.getMainAttributes();
