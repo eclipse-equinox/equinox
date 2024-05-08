@@ -38,13 +38,6 @@
          version="0.0.0"/>
 
    <plugin
-         id="org.eclipse.equinox.launcher.cocoa.macosx"
-         os="macosx"
-         ws="cocoa"
-         arch="aarch64"
-         version="0.0.0"/>
-
-   <plugin
          id="org.eclipse.equinox.launcher.gtk.linux.ppc64le"
          os="linux"
          ws="gtk"
