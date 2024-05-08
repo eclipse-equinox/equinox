@@ -91,20 +91,6 @@
           </execution>
         </executions>
       </plugin>
-      <!-- Temporary work-around until win32.win32.aarch64 environment is enabled in general. -->
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>target-platform-configuration</artifactId>
-        <configuration>
-          <environments combine.children="append">
-            <environment>
-              <os>win32</os>
-              <ws>win32</ws>
-              <arch>aarch64</arch>
-            </environment>
-          </environments>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
 
