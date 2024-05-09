@@ -36,10 +36,6 @@ class JNIBridge {
 
 	private native String _get_os_recommended_folder();
 
-	private native int OleInitialize(int reserved);
-
-	private native void OleUninitialize();
-
 	private String library;
 	private boolean libraryLoaded = false;
 
@@ -53,15 +49,6 @@ class JNIBridge {
 	private void loadLibrary() {
 		if (library != null) {
 			try {
-				if (library.contains("wpf")) { //$NON-NLS-1$
-					int idx = library.indexOf("eclipse_"); //$NON-NLS-1$
-					if (idx != -1) {
-						String comLibrary = library.substring(0, idx) + "com_"; //$NON-NLS-1$
-						comLibrary += library.substring(idx + 8, library.length());
-						Runtime.getRuntime().load(comLibrary);
-						OleInitialize(0);
-					}
-				}
 				Runtime.getRuntime().load(library);
 			} catch (UnsatisfiedLinkError e) {
 				//failed
@@ -156,20 +143,6 @@ class JNIBridge {
 			}
 			return false;
 		}
-	}
-
-	public boolean uninitialize() {
-		if (libraryLoaded && library != null) {
-			if (library.contains("wpf")) { //$NON-NLS-1$
-				try {
-					OleUninitialize();
-				} catch (UnsatisfiedLinkError e) {
-					// library not loaded
-					return false;
-				}
-			}
-		}
-		return true;
 	}
 
 	public String getOSRecommendedFolder() {
