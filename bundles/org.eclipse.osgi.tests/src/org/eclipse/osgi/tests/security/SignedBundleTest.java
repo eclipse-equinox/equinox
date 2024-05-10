@@ -19,12 +19,16 @@ import java.io.File;
 import java.io.IOException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import junit.framework.Test;
-import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
+import org.eclipse.core.tests.harness.session.CustomSessionConfiguration;
+import org.eclipse.core.tests.harness.session.SessionTestExtension;
 import org.eclipse.osgi.signedcontent.InvalidContentException;
 import org.eclipse.osgi.signedcontent.SignedContent;
 import org.eclipse.osgi.signedcontent.SignedContentEntry;
 import org.eclipse.osgi.signedcontent.SignerInfo;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.osgi.framework.Bundle;
 
 public class SignedBundleTest extends BaseSecurityTest {
@@ -65,15 +69,17 @@ public class SignedBundleTest extends BaseSecurityTest {
 	// private String jarName;
 	// private String[] aliases;
 
-	public static Test suite() {
-		ConfigurationSessionTestSuite suite = new ConfigurationSessionTestSuite(BUNDLE_SECURITY_TESTS,
-				"Unit session tests for SignedContent");
-		addRequiredOSGiTestsBundles(suite);
-		suite.addTestSuite(SignedBundleTest.class);
-		return suite;
+	@RegisterExtension
+	final SessionTestExtension extension = SessionTestExtension.forPlugin(BUNDLE_SECURITY_TESTS)
+			.withCustomization(createCustomConfiguration()).create();
+
+	private static CustomSessionConfiguration createCustomConfiguration() {
+		CustomSessionConfiguration configuration = SessionTestExtension.createCustomConfiguration();
+		addRequiredOSGiTestsBundles(configuration);
+		return configuration;
 	}
 
-	@Override
+	@BeforeEach
 	protected void setUp() throws Exception {
 		registerEclipseTrustEngine();
 		/*
@@ -89,12 +95,14 @@ public class SignedBundleTest extends BaseSecurityTest {
 		 */
 	}
 
+	@AfterEach
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}
 
 	// SignedContent positive test: unsigned jar
+	@Test
 	public void testSignedContent01() throws Exception {
 
 		Bundle testBundle = null;
@@ -113,6 +121,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 	}
 
 	// SignedContent positive test: signed jar, 1 trusted signer
+	@Test
 	public void testSignedContent02() throws Exception {
 
 		Bundle testBundle = null;
@@ -152,6 +161,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 	}
 
 	// SignedContent positive test: signed jar, 2 trusted signers
+	@Test
 	public void testSignedContent03() throws Exception {
 
 		Bundle testBundle = null;
@@ -196,6 +206,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 	}
 
 	// SignedContent negative, 1 signer, 1 untrusted
+	@Test
 	public void testSignedContent04() throws Exception {
 		Bundle testBundle = null;
 		try {
@@ -221,6 +232,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 	}
 
 	// SignedContent negative, 2 signers, 2 untrusted
+	@Test
 	public void testSignedContent05() throws Exception {
 		Bundle testBundle = null;
 		try {
@@ -246,6 +258,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 	}
 
 	// SignedContent negative, 2 signers, 1 untrusted
+	@Test
 	public void testSignedContent06() throws Exception {
 		Bundle testBundle = null;
 		try {
@@ -279,6 +292,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 	}
 
 	// negative, 1 signer, 1 corrupt signed_with_corrupt.jar
+	@Test
 	public void testSignedContent07() throws Exception {
 		Bundle testBundle = null;
 		try {
@@ -322,6 +336,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		}
 	}
 
+	@Test
 	public void testSignedContent07a() throws Exception {
 		Bundle testBundle = null;
 		try {
@@ -344,6 +359,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 	}
 
 	// positve 1 signer, 1 tsa
+	@Test
 	public void testSignedContent08() throws Exception {
 		Bundle testBundle = null;
 		try {
@@ -368,6 +384,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 	}
 
 	// SignedContent positive test: unsigned jar
+	@Test
 	public void testSignedContent09() throws Exception {
 		File unsignedFile = getEntryFile(getTestJarPath("unsigned"));
 
@@ -381,6 +398,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 	}
 
 	// SignedContent positive test: signed jar, 1 trusted signer
+	@Test
 	public void testSignedContent10() throws Exception {
 		File signedFile = getEntryFile(getTestJarPath("signed"));
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa");
@@ -413,6 +431,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 	}
 
 	// SignedContent positive test: signed jar, 2 trusted signers
+	@Test
 	public void testSignedContent11() throws Exception {
 		File multipleSigned = getEntryFile(getTestJarPath("multiply_signed"));
 		this.getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa");
@@ -449,6 +468,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 	}
 
 	// SignedContent negative, 1 signer, 1 untrusted
+	@Test
 	public void testSignedContent12() throws Exception {
 		File signedFile = getEntryFile(getTestJarPath("signed"));
 		// get the signed content for the bundle
@@ -468,6 +488,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 	}
 
 	// SignedContent negative, 2 signers, 2 untrusted
+	@Test
 	public void testSignedContent13() throws Exception {
 		File multipleSigned = getEntryFile(getTestJarPath("multiply_signed"));
 
@@ -488,6 +509,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 	}
 
 	// SignedContent negative, 2 signers, 1 untrusted
+	@Test
 	public void testSignedContent14() throws Exception {
 		File multipleSigned = getEntryFile(getTestJarPath("multiply_signed"));
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa");
@@ -515,6 +537,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 	}
 
 	// negative, 1 signer, 1 corrupt signed_with_corrupt.jar
+	@Test
 	public void testSignedContent15() throws Exception {
 		File corruptedFile = getEntryFile(getTestJarPath("signed_with_corrupt"));
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa");
@@ -550,6 +573,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 	}
 
 	// positve 1 signer, 1 tsa
+	@Test
 	public void testSignedContent16() throws Exception {
 		File signedTsaFile = getEntryFile(getTestJarPath("signed_tsa"));
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa");
@@ -568,6 +592,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 	}
 
 	// SignedContent positive test: signed jar, 1 trusted signer
+	@Test
 	public void testBug225090_01() throws Exception {
 		File signedFile = copyEntryFile(getTestJarPath("signed"));
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa");
@@ -602,6 +627,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 	}
 
 	// SignedContent positive test: unsigned jar
+	@Test
 	public void testBug225090_02() throws Exception {
 		File unsignedFile = copyEntryFile(getTestJarPath("unsigned"));
 
@@ -624,6 +650,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		assertFalse("File should not exist", unsignedFile.exists());
 	}
 
+	@Test
 	public void testBug228427_01() throws Exception {
 		File signedFile = copyEntryFile(getTestJarPath("signed_with_metadata"));
 
@@ -647,6 +674,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		assertFalse("File should not exist", signedFile.exists());
 	}
 
+	@Test
 	public void testBug228427_02() throws Exception {
 		File signedFile = copyEntryFile(getTestJarPath("signed_with_metadata_added"));
 
@@ -670,6 +698,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		assertFalse("File should not exist", signedFile.exists());
 	}
 
+	@Test
 	public void testBug228427_03() throws Exception {
 		File signedFile = copyEntryFile(getTestJarPath("signed_with_metadata_corrupt"));
 
@@ -703,6 +732,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		assertFalse("File should not exist", signedFile.exists());
 	}
 
+	@Test
 	public void testBug228427_04() throws Exception {
 		File signedFile = copyEntryFile(getTestJarPath("signed_with_metadata_removed"));
 
@@ -726,6 +756,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		assertFalse("File should not exist", signedFile.exists());
 	}
 
+	@Test
 	public void testBug236329_01() throws Exception {
 		File signedFile = copyEntryFile(getTestJarPath("signed_with_sf_corrupted"));
 
@@ -741,6 +772,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		}
 	}
 
+	@Test
 	public void testBug252098() throws Exception {
 
 		Bundle testBundle = null;
@@ -755,6 +787,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		}
 	}
 
+	@Test
 	public void testBug378155() throws Exception {
 		doTestBug378155("SHA256withRSA");
 		doTestBug378155("SHA384withRSA");
@@ -799,6 +832,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		}
 	}
 
+	@Test
 	public void testBug434711() throws Exception {
 		File nonAsciiFile = getEntryFile(getTestJarPath("bundleWithNonAsciiCharsFilename"));
 
@@ -811,6 +845,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		}
 	}
 
+	@Test
 	public void test489686() throws Exception {
 		Bundle testBundle = null;
 		try {
@@ -836,6 +871,7 @@ public class SignedBundleTest extends BaseSecurityTest {
 		}
 	}
 
+	@Test
 	public void testSignedContentJava16() throws Exception {
 
 		Bundle testBundle = null;

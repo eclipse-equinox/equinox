@@ -16,13 +16,17 @@ package org.eclipse.osgi.tests.appadmin;
 import static org.eclipse.osgi.tests.OSGiTestsActivator.PI_OSGI_TESTS;
 import static org.eclipse.osgi.tests.OSGiTestsActivator.addRequiredOSGiTestsBundles;
 import static org.eclipse.osgi.tests.OSGiTestsActivator.getContext;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.HashMap;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
-import org.eclipse.core.tests.session.SetupManager.SetupException;
+import org.eclipse.core.tests.harness.session.CustomSessionConfiguration;
+import org.eclipse.core.tests.harness.session.ExecuteInHost;
+import org.eclipse.core.tests.harness.session.SessionTestExtension;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -30,43 +34,33 @@ import org.osgi.service.application.ApplicationDescriptor;
 import org.osgi.service.application.ApplicationHandle;
 
 // This is for the most part a stripped down copy of ApplicationAdminTest.
-public class ApplicationRelaunchTest extends TestCase {
+public class ApplicationRelaunchTest {
 	public static final String testRunnerRelauncherApp = PI_OSGI_TESTS + ".relaunchApp"; //$NON-NLS-1$
 	public static final String testResults = "test.results"; //$NON-NLS-1$
 	public static final String SUCCESS = "success"; //$NON-NLS-1$
 	public static final String simpleResults = "test.simpleResults"; //$NON-NLS-1$
-	public static final String[] tests = new String[] { "testRelaunch" };
 
-	public static Test suite() {
-		TestSuite suite = new TestSuite(ApplicationRelaunchTest.class.getName());
+	@RegisterExtension
+	static final SessionTestExtension extension = SessionTestExtension.forPlugin(PI_OSGI_TESTS)
+			.withApplicationId(testRunnerRelauncherApp).withCustomization(createSessionConfiguration()).create();
 
-		ConfigurationSessionTestSuite appAdminSessionTest = new ConfigurationSessionTestSuite(PI_OSGI_TESTS,
-				ApplicationRelaunchTest.class.getName());
-		addRequiredOSGiTestsBundles(appAdminSessionTest);
-		appAdminSessionTest.setApplicationId(testRunnerRelauncherApp);
-
-		try {
-			appAdminSessionTest.getSetup().setSystemProperty("eclipse.application.registerDescriptors", "true"); //$NON-NLS-1$//$NON-NLS-2$
-		} catch (SetupException e) {
-			throw new RuntimeException(e);
-		}
-		// we add tests the hard way so we can control the order of the tests.
-		for (String test : tests) {
-			appAdminSessionTest.addTest(new ApplicationRelaunchTest(test));
-		}
-		suite.addTest(appAdminSessionTest);
-		return suite;
+	private static final CustomSessionConfiguration createSessionConfiguration() {
+		CustomSessionConfiguration configuration = SessionTestExtension.createCustomConfiguration();
+		addRequiredOSGiTestsBundles(configuration);
+		return configuration;
 	}
 
-	public ApplicationRelaunchTest(String name) {
-		super(name);
+	@BeforeAll
+	@ExecuteInHost
+	public static void setup() {
+		extension.setSystemProperty("eclipse.application.registerDescriptors", "true");
 	}
 
 	private ApplicationDescriptor getApplication(String appName) throws InvalidSyntaxException {
 		BundleContext context = getContext();
-		assertNotNull("BundleContext is null!!", context); //$NON-NLS-1$
+		assertNotNull(context, "BundleContext is null"); //$NON-NLS-1$
 		Class appDescClass = ApplicationDescriptor.class;
-		assertNotNull("ApplicationDescriptor.class is null!!", appDescClass); //$NON-NLS-1$
+		assertNotNull(appDescClass, "ApplicationDescriptor.class is null"); //$NON-NLS-1$
 		ServiceReference[] refs = context.getServiceReferences(appDescClass.getName(),
 				"(" + ApplicationDescriptor.APPLICATION_PID + "=" + appName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		if (refs == null || refs.length == 0) {
@@ -97,6 +91,7 @@ public class ApplicationRelaunchTest extends TestCase {
 		return args;
 	}
 
+	@Test
 	public void testRelaunch() throws Exception {
 		// this is the same as ApplicationAdminTest.testSimpleApp() (but launched
 		// through a different test runner app RelaunchApp which is the thing being
@@ -107,7 +102,7 @@ public class ApplicationRelaunchTest extends TestCase {
 		ApplicationHandle handle = app.launch(args);
 		handle.destroy();
 		String result = (String) results.get(simpleResults);
-		assertEquals("Check application result", SUCCESS, result); //$NON-NLS-1$
+		assertEquals(SUCCESS, result, "Check application result"); //$NON-NLS-1$
 	}
 
 }
