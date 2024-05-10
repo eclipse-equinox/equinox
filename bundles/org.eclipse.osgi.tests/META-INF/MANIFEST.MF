@@ -9,7 +9,12 @@ Require-Bundle:
  org.eclipse.core.tests.harness;bundle-version="3.13.0",
  org.junit
 Bundle-ActivationPolicy: lazy
-Import-Package: org.osgi.service.event,
+Import-Package: org.junit.jupiter.api;version="[5.14.0,6.0.0)",
+ org.junit.jupiter.api.extension;version="[5.14.0,6.0.0)",
+ org.junit.jupiter.api.function;version="[5.14.0,6.0.0)",
+ org.junit.jupiter.api.io;version="[5.14.0,6.0.0)",
+ org.junit.platform.suite.api;version="[1.14.0,2.0.0)",
+ org.osgi.service.event,
  org.osgi.util.function,
  org.osgi.util.measurement,
  org.osgi.util.position,
