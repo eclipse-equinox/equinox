@@ -14,13 +14,13 @@
 
 package org.eclipse.osgi.tests.security;
 
-import static org.eclipse.osgi.tests.security.BaseSecurityTest.copy;
-import static org.eclipse.osgi.tests.security.BaseSecurityTest.getEntryFile;
-import static org.eclipse.osgi.tests.security.BaseSecurityTest.getTestJarPath;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.eclipse.osgi.tests.security.SecurityTestUtil.copy;
+import static org.eclipse.osgi.tests.security.SecurityTestUtil.getEntryFile;
+import static org.eclipse.osgi.tests.security.SecurityTestUtil.getTestJarPath;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -41,7 +41,7 @@ import java.util.zip.ZipInputStream;
 import org.eclipse.osgi.internal.signedcontent.BundleToJarInputStream;
 import org.eclipse.osgi.storage.bundlefile.DirBundleFile;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.osgi.framework.BundleContext;
 
 public class BundleToJarInputStreamTest {
@@ -109,8 +109,8 @@ public class BundleToJarInputStreamTest {
 						byte[] extractedBytes = getBytes(jarInput);
 						byte[] originalBytes = getBytes(
 								jarFile.getInputStream(jarFile.getEntry(extractedEntry.getName())));
-						assertArrayEquals("Wrong entry content: " + extractedEntry.getName(), originalBytes,
-								extractedBytes);
+						assertArrayEquals(originalBytes, extractedBytes,
+								"Wrong entry content: " + extractedEntry.getName());
 						validated.add(extractedEntry.getName());
 					}
 				}
@@ -121,12 +121,12 @@ public class BundleToJarInputStreamTest {
 			if (first.toUpperCase().endsWith("META-INF/")) {
 				first = validpaths.next();
 			}
-			assertEquals("Expected manifest.", JarFile.MANIFEST_NAME, first.toUpperCase());
+			assertEquals(JarFile.MANIFEST_NAME, first.toUpperCase(), "Expected manifest.");
 			// If there are signature files, make sure they are before all other entries
 			AtomicReference<String> foundNonSignatureFile = new AtomicReference<>();
 			validpaths.forEachRemaining(s -> {
 				if (isSignatureFile(s)) {
-					assertNull("Found non signature file before.", foundNonSignatureFile.get());
+					assertNull(foundNonSignatureFile.get(), "Found non signature file before.");
 				} else {
 					foundNonSignatureFile.compareAndSet(null, s);
 				}
@@ -137,7 +137,7 @@ public class BundleToJarInputStreamTest {
 				ZipEntry originalEntry = originalEntries.nextElement();
 				validated.remove(originalEntry.getName());
 			}
-			assertTrue("More paths extracted content: " + validated, validated.isEmpty());
+			assertTrue(validated.isEmpty(), "More paths extracted content: " + validated);
 		}
 	}
 
