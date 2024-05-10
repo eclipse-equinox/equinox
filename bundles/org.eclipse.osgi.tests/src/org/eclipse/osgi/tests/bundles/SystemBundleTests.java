@@ -91,7 +91,7 @@ import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.eclipse.osgi.storage.url.reference.Handler;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
-import org.eclipse.osgi.tests.security.BaseSecurityTest;
+import org.eclipse.osgi.tests.security.SecurityTestUtil;
 import org.eclipse.osgi.tests.securityadmin.SecurityManagerTests;
 import org.junit.Assert;
 import org.junit.Assume;
@@ -2479,7 +2479,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			return;
 		}
 		File testDestination = OSGiTestsActivator.getContext().getDataFile(getName() + ".framework.jar");
-		BaseSecurityTest.copy(new FileInputStream(f), testDestination);
+		SecurityTestUtil.copy(new FileInputStream(f), testDestination);
 		FilePath userDir = new FilePath(System.getProperty("user.dir"));
 		FilePath testPath = new FilePath(testDestination);
 		String relative = userDir.makeRelative(testPath);

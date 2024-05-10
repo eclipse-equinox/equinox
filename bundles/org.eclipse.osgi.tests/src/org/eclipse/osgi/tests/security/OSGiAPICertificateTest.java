@@ -13,17 +13,30 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.security;
 
+import static org.eclipse.osgi.tests.security.SecurityTestUtil.getTestCertificate;
+import static org.eclipse.osgi.tests.security.SecurityTestUtil.getTestJarPath;
+import static org.eclipse.osgi.tests.security.SecurityTestUtil.getTrustEngine;
+import static org.eclipse.osgi.tests.security.SecurityTestUtil.registerEclipseTrustEngine;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.condpermadmin.BundleSignerCondition;
 import org.osgi.service.condpermadmin.Condition;
 import org.osgi.service.condpermadmin.ConditionInfo;
 
-public class OSGiAPICertificateTest extends BaseSecurityTest {
+public class OSGiAPICertificateTest {
+
 	private static String dn1 = "CN=CA1 LeafA, O=CA1, L=Boston, ST=Massachusetts, C=US"; //$NON-NLS-1$
 	private static String dn2 = "CN=CA1 Root, O=CA1, L=Boston, ST=Massachusetts, C=US"; //$NON-NLS-1$
 	private static String dn3 = "CN=CA1 LeafA, O=CA1, L=Austin, ST=Texas, C=US"; //$NON-NLS-1$
@@ -73,6 +86,8 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 
 	private final Collection<Bundle> installedBundles = new ArrayList<>();
 
+	private ServiceRegistration trustReg;
+
 	private static String escapeStar(String dnChain) {
 		if (dnChain == null || dnChain.length() == 0) {
 			return dnChain;
@@ -83,22 +98,16 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		return dnChain;
 	}
 
-	public OSGiAPICertificateTest() {
-		super();
-	}
-
-	public OSGiAPICertificateTest(String name, String jarname, String[] aliases) {
-		super(name);
-	}
-
-	@Override
+	@BeforeEach
 	protected void setUp() throws Exception {
-		registerEclipseTrustEngine();
+		trustReg = registerEclipseTrustEngine();
 	}
 
-	@Override
+	@AfterEach
 	protected void tearDown() throws Exception {
-		super.tearDown();
+		if (trustReg != null) {
+			trustReg.unregister();
+		}
 		for (Bundle b : installedBundles) {
 			try {
 				b.uninstall();
@@ -108,116 +117,129 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		}
 	}
 
-	@Override
 	protected Bundle installBundle(String bundlePath) throws BundleException, IOException {
-		Bundle b = super.installBundle(bundlePath);
+		Bundle b = SecurityTestUtil.installBundle(bundlePath);
 		installedBundles.add(b);
 		return b;
 	}
 
+	@Test
 	public void testBundleSignerCondition01() throws Exception {
 		// test trusted cert with all signed match
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
 		Condition condition = BundleSignerCondition.getCondition(testBundle, info01True);
-		assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
+		assertEquals(Condition.TRUE, condition, "Unexpected condition value"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBundleSignerCondition02() throws Exception {
 		// test trusted cert with all signed match + "!" not operation
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
 		Condition condition = BundleSignerCondition.getCondition(testBundle, info02False);
-		assertEquals("Unexpected condition value", Condition.FALSE, condition); //$NON-NLS-1$
+		assertEquals(Condition.FALSE, condition, "Unexpected condition value"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBundleSignerCondition03() throws Exception {
 		// test untrusted cert with all signed match
 		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
 		Condition condition = BundleSignerCondition.getCondition(testBundle, info01True);
-		assertEquals("Unexpected condition value", Condition.FALSE, condition); //$NON-NLS-1$
+		assertEquals(Condition.FALSE, condition, "Unexpected condition value"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBundleSignerCondition04() throws Exception {
 		// test untrusted cert with all signed match + "!" not operation
 		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
 		Condition condition = BundleSignerCondition.getCondition(testBundle, info02False);
-		assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
+		assertEquals(Condition.TRUE, condition, "Unexpected condition value"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBundleSignerCondition05() throws Exception {
 		// test trusted cert with exact match pattern
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
 		Condition condition = BundleSignerCondition.getCondition(testBundle, info03True);
-		assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
+		assertEquals(Condition.TRUE, condition, "Unexpected condition value"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBundleSignerCondition06() throws Exception {
 		// test trusted cert with prefix wildcard match pattern
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
 		Condition condition = BundleSignerCondition.getCondition(testBundle, info04True);
-		assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
+		assertEquals(Condition.TRUE, condition, "Unexpected condition value"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBundleSignerCondition07() throws Exception {
 		// test trusted cert with postfix wildcard match pattern
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
 		Condition condition = BundleSignerCondition.getCondition(testBundle, info05True);
-		assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
+		assertEquals(Condition.TRUE, condition, "Unexpected condition value"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBundleSignerCondition08() throws Exception {
 		// test trusted cert with wrong prefix dn
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
 		Condition condition = BundleSignerCondition.getCondition(testBundle, info06False);
-		assertEquals("Unexpected condition value", Condition.FALSE, condition); //$NON-NLS-1$
+		assertEquals(Condition.FALSE, condition, "Unexpected condition value"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBundleSignerCondition09() throws Exception {
 		// test trusted cert with wrong postfix dn
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
 		Condition condition = BundleSignerCondition.getCondition(testBundle, info07False);
-		assertEquals("Unexpected condition value", Condition.FALSE, condition); //$NON-NLS-1$
+		assertEquals(Condition.FALSE, condition, "Unexpected condition value"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBundleSignerCondition10() throws Exception {
 		// test trusted cert with RDN wildcard match pattern
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
 		Condition condition = BundleSignerCondition.getCondition(testBundle, info08True);
-		assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
+		assertEquals(Condition.TRUE, condition, "Unexpected condition value"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBundleSignerCondition11() throws Exception {
 		// test trusted cert with RDN wildcard match pattern
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
 		Condition condition = BundleSignerCondition.getCondition(testBundle, info09True);
-		assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
+		assertEquals(Condition.TRUE, condition, "Unexpected condition value"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBundleSignerCondition12() throws Exception {
 		// test trusted cert with RDN wildcard match pattern
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
 		Condition condition = BundleSignerCondition.getCondition(testBundle, info10True);
-		assertEquals("Unexpected condition value", Condition.TRUE, condition); //$NON-NLS-1$
+		assertEquals(Condition.TRUE, condition, "Unexpected condition value"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testAdminPermission01() throws Exception {
 		// test trusted cert with exact match pattern
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
 		AdminPermission declaredPerm = new AdminPermission("(signer=-)", AdminPermission.CONTEXT); //$NON-NLS-1$
 		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-		assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
+		assertTrue(declaredPerm.implies(checkedPerm), "Security check failed"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testAdminPermission02() throws Exception {
 		// test trusted cert with exact match pattern
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -225,18 +247,20 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain01TrueEscaped + ")", //$NON-NLS-1$ //$NON-NLS-2$
 				AdminPermission.CONTEXT);
 		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-		assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
+		assertTrue(declaredPerm.implies(checkedPerm), "Security check failed"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testAdminPermission03() throws Exception {
 		// test trusted cert with exact match pattern + ! operation
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 		Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
 		AdminPermission declaredPerm = new AdminPermission("(!(signer=-))", AdminPermission.CONTEXT); //$NON-NLS-1$
 		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-		assertFalse("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
+		assertFalse(declaredPerm.implies(checkedPerm), "Security check failed"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testAdminPermission04() throws Exception {
 		// test trusted cert with exact match pattern + ! operation
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -244,9 +268,10 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		AdminPermission declaredPerm = new AdminPermission("(!(signer=" + dnChain01TrueEscaped + "))", //$NON-NLS-1$ //$NON-NLS-2$
 				AdminPermission.CONTEXT);
 		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-		assertFalse("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
+		assertFalse(declaredPerm.implies(checkedPerm), "Security check failed"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testAdminPermission05() throws Exception {
 		// test trusted cert with prefix wildcard match pattern
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -254,9 +279,10 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain02TrueEscaped + ")", //$NON-NLS-1$ //$NON-NLS-2$
 				AdminPermission.CONTEXT);
 		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-		assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
+		assertTrue(declaredPerm.implies(checkedPerm), "Security check failed"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testAdminPermission06() throws Exception {
 		// test trusted cert with postfix wildcard match pattern
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -264,9 +290,10 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain03TrueEscaped + ")", //$NON-NLS-1$ //$NON-NLS-2$
 				AdminPermission.CONTEXT);
 		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-		assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
+		assertTrue(declaredPerm.implies(checkedPerm), "Security check failed"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testAdminPermission07() throws Exception {
 		// test trusted cert with bad postfix dn match pattern
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -274,9 +301,10 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain04FalseEscaped + ")", //$NON-NLS-1$ //$NON-NLS-2$
 				AdminPermission.CONTEXT);
 		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-		assertFalse("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
+		assertFalse(declaredPerm.implies(checkedPerm), "Security check failed"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testAdminPermission08() throws Exception {
 		// test trusted cert with bad prefix dn match pattern
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -284,9 +312,10 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain05FalseEscaped + ")", //$NON-NLS-1$ //$NON-NLS-2$
 				AdminPermission.CONTEXT);
 		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-		assertFalse("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
+		assertFalse(declaredPerm.implies(checkedPerm), "Security check failed"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testAdminPermission09() throws Exception {
 		// test trusted cert with RDN match pattern
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -294,9 +323,10 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain06TrueEscaped + ")", //$NON-NLS-1$ //$NON-NLS-2$
 				AdminPermission.CONTEXT);
 		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-		assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
+		assertTrue(declaredPerm.implies(checkedPerm), "Security check failed"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testAdminPermission10() throws Exception {
 		// test trusted cert with RDN match pattern
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -304,9 +334,10 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain07TrueEscaped + ")", //$NON-NLS-1$ //$NON-NLS-2$
 				AdminPermission.CONTEXT);
 		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-		assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
+		assertTrue(declaredPerm.implies(checkedPerm), "Security check failed"); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testAdminPermission11() throws Exception {
 		// test trusted cert with RDN match pattern
 		getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -314,7 +345,7 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain08TrueEscaped + ")", //$NON-NLS-1$ //$NON-NLS-2$
 				AdminPermission.CONTEXT);
 		AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
-		assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
+		assertTrue(declaredPerm.implies(checkedPerm), "Security check failed"); //$NON-NLS-1$
 	}
 
 }
