@@ -14,6 +14,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests;
 
+import java.util.stream.Stream;
+import org.eclipse.core.tests.harness.session.CustomSessionConfiguration;
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -38,12 +40,22 @@ public class OSGiTestsActivator {
 	public static void addRequiredOSGiTestsBundles(ConfigurationSessionTestSuite suite) {
 		suite.addMinimalBundleSet();
 		suite.addThisBundle();
-		suite.addBundle(org.osgi.util.function.Function.class);
-		suite.addBundle(org.osgi.util.measurement.Measurement.class);
-		suite.addBundle(org.osgi.util.position.Position.class);
-		suite.addBundle(org.osgi.util.promise.Promise.class);
-		suite.addBundle(org.osgi.util.xml.XMLParserActivator.class);
-		suite.addBundle(org.osgi.service.event.Event.class);
+		getClassesFromRequiredOSGITestsBundles().forEach(suite::addBundle);
+	}
+
+	public static void addRequiredOSGiTestsBundles(CustomSessionConfiguration sessionConfiguration) {
+		getClassesFromRequiredOSGITestsBundles().forEach(sessionConfiguration::addBundle);
+	}
+
+	private static Stream<Class<?>> getClassesFromRequiredOSGITestsBundles() {
+		return Stream.of( //
+				org.osgi.util.function.Function.class, //
+				org.osgi.util.measurement.Measurement.class, //
+				org.osgi.util.position.Position.class, //
+				org.osgi.util.promise.Promise.class, //
+				org.osgi.util.xml.XMLParserActivator.class, //
+				org.osgi.service.event.Event.class //
+		);
 	}
 
 }

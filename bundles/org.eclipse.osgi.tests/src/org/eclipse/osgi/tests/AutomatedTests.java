@@ -13,11 +13,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({ org.eclipse.osgi.tests.container.AllTests.class, //
+@Suite
+@SelectClasses({ //
+		org.eclipse.osgi.tests.container.AllTests.class, //
 		org.eclipse.osgi.tests.hooks.framework.AllFrameworkHookTests.class, //
 		org.eclipse.osgi.tests.internal.plugins.InstallTests.class, //
 		org.eclipse.osgi.tests.eclipseadaptor.AllTests.class, //
