@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
-import java.util.StringJoiner;
 import java.util.StringTokenizer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -447,15 +446,6 @@ public class Main {
 		return name;
 	}
 
-	private String getFragmentString(String fragmentOS, String fragmentWS, String fragmentArch) {
-		StringJoiner buffer = new StringJoiner("."); //$NON-NLS-1$
-		buffer.add(PLUGIN_ID).add(fragmentWS).add(fragmentOS);
-		if (!(fragmentOS.equals(Constants.OS_MACOSX) && !Constants.ARCH_X86_64.equals(fragmentArch))) {
-			buffer.add(fragmentArch);
-		}
-		return buffer.toString();
-	}
-
 	/**
 	 *  Sets up the JNI bridge to native calls
 	 */
@@ -475,11 +465,8 @@ public class Main {
 		}
 		if (libPath == null) {
 			//find our fragment name
-			String fragmentOS = getOS();
-			String fragmentWS = getWS();
-			String fragmentArch = getArch();
-
-			libPath = getLibraryPath(getFragmentString(fragmentOS, fragmentWS, fragmentArch), defaultPath);
+			String fragmentName = String.join(".", PLUGIN_ID, getWS(), getOS(), getArch()); //$NON-NLS-1$
+			libPath = getLibraryPath(fragmentName, defaultPath);
 		}
 		library = libPath;
 		if (library != null)
@@ -509,10 +496,6 @@ public class Main {
 				for (int i = urls.length - 1; i >= 0 && libPath == null; i--) {
 					File entryFile = new File(urls[i].getFile());
 					String dir = entryFile.getParent();
-					if (inDevelopmentMode) {
-						String devDir = dir + "/" + PLUGIN_ID + "/fragments"; //$NON-NLS-1$ //$NON-NLS-2$
-						fragment = searchFor(fragmentName, devDir);
-					}
 					if (fragment == null)
 						fragment = searchFor(fragmentName, dir);
 					if (fragment != null)
