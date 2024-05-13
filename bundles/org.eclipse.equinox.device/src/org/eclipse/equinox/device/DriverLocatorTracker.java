@@ -39,8 +39,7 @@ public class DriverLocatorTracker extends ServiceTracker {
 	/**
 	 * Create the DriverLocatorTracker.
 	 *
-	 * @param context Device manager bundle context.
-	 * @param log     LogService object
+	 * @param manager Device manager bundle context.
 	 */
 	public DriverLocatorTracker(Activator manager) {
 		super(manager.context, clazz, null);
@@ -112,8 +111,7 @@ public class DriverLocatorTracker extends ServiceTracker {
 	 * Call the DriverLocator services in an attempt to locate and install driver
 	 * bundles to refine the device service.
 	 *
-	 * @param locators Array of DriverLocator objects
-	 * @param drivers  Dictionary of drivers with key=DRIVER_ID, value=Driver object
+	 * @param drivers Dictionary of drivers with key=DRIVER_ID, value=Driver object
 	 */
 	public void loadDrivers(Dictionary<String, ?> properties, DriverTracker drivers) {
 		if (Activator.DEBUG) {
