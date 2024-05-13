@@ -34,9 +34,8 @@ public class MetaTypeProviderTracker implements EquinoxMetaTypeInformation {
 	 * Constructs a MetaTypeProviderTracker which tracks all MetaTypeProviders
 	 * registered by the specified bundle.
 	 * 
-	 * @param context The BundleContext of the MetaTypeService implementation
-	 * @param bundle  The bundle to track all MetaTypeProviders for.
-	 * @param log     The {@code LogService} to use for logging messages.
+	 * @param bundle The bundle to track all MetaTypeProviders for.
+	 * @param log    The {@code LogService} to use for logging messages.
 	 */
 	public MetaTypeProviderTracker(Bundle bundle, LogTracker log, ServiceTracker<Object, Object> tracker) {
 		this._bundle = bundle;
