@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 Martin Lippert and others.
+ * Copyright (c) 2009, 2024 Martin Lippert and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -106,7 +106,6 @@ public class CacheWriter {
 	 * does not exist
 	 *
 	 * @param item the cache item to store to disc
-	 * @throws IOException if an error occurs while writing to the cache
 	 */
 	protected void store(final CacheItem item) {
 		// write out generated classes first
