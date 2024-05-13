@@ -15,7 +15,8 @@
 
 package org.eclipse.equinox.internal.provisional.security.ui;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import javax.security.auth.x500.X500Principal;
 
 /**
@@ -61,7 +62,6 @@ public class X500PrincipalHelper {
 
 	/**
 	 * Set the X500Principal name object to be parsed.
-	 * <p>
 	 * 
 	 * @param principal - X500Principal
 	 */
@@ -73,7 +73,6 @@ public class X500PrincipalHelper {
 	 * Gets the most significant common name (CN) attribute from the given
 	 * X500Principal object. For names that contains multiple attributes of this
 	 * type. The first (most significant) one will be returned
-	 * <p>
 	 * 
 	 * @return the Most significant common name attribute.
 	 */
@@ -85,7 +84,6 @@ public class X500PrincipalHelper {
 	 * Gets the most significant Organizational Unit (OU) attribute from the given
 	 * X500Principal object. For names that contains multiple attributes of this
 	 * type. The first (most significant) one will be returned
-	 * <p>
 	 * 
 	 * @return the Most significant OU attribute.
 	 */
@@ -99,7 +97,6 @@ public class X500PrincipalHelper {
 	 * Gets the most significant Organization (O) attribute from the given
 	 * X500Principal object. For names that contains multiple attributes of this
 	 * type. The first (most significant) one will be returned
-	 * <p>
 	 * 
 	 * @return the Most significant O attribute.
 	 */
@@ -111,7 +108,6 @@ public class X500PrincipalHelper {
 
 	/**
 	 * Gets the Country (C) attribute from the given X500Principal object.
-	 * <p>
 	 * 
 	 * @return the C attribute.
 	 */
@@ -121,7 +117,6 @@ public class X500PrincipalHelper {
 
 	/**
 	 * Gets the Locale (L) attribute from the given X500Principal object.
-	 * <p>
 	 * 
 	 * @return the L attribute.
 	 */
@@ -131,7 +126,6 @@ public class X500PrincipalHelper {
 
 	/**
 	 * Gets the State (ST) attribute from the given X500Principal object.
-	 * <p>
 	 * 
 	 * @return the ST attribute.
 	 */
@@ -141,7 +135,6 @@ public class X500PrincipalHelper {
 
 	/**
 	 * Gets the Street (STREET) attribute from the given X500Principal object.
-	 * <p>
 	 * 
 	 * @return the STREET attribute.
 	 */
@@ -152,7 +145,6 @@ public class X500PrincipalHelper {
 	/**
 	 * Gets the Email Address (EMAILADDRESS) attribute from the given X500Principal
 	 * object.
-	 * <p>
 	 * 
 	 * @return the EMAILADDRESS attribute.
 	 */
@@ -217,7 +209,6 @@ public class X500PrincipalHelper {
 	/**
 	 * Returns an ArrayList containing all the values for the given attribute
 	 * identifier.
-	 * <p>
 	 * 
 	 * @param attributeID String containing the X500 name attribute whose values are
 	 *                    to be returned

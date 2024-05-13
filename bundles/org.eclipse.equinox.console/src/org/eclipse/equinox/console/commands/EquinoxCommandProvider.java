@@ -195,8 +195,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	 * Constructor.
 	 *
 	 * start() must be called after creating this object.
-	 *
-	 * @param framework The current instance of the framework
 	 */
 	public EquinoxCommandProvider(BundleContext context, Activator activator) {
 		this.context = context;
@@ -1874,7 +1872,6 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	 * Given a string containing a startlevel value, validate it and convert it to
 	 * an int
 	 *
-	 * @param intp  A CommandInterpreter object used for printing out error messages
 	 * @param value A string containing a potential startlevel
 	 * @return The start level or an int <0 if it was invalid
 	 */

@@ -46,7 +46,7 @@ public class TransformedBundleFile extends BundleFileWrapper {
 	 * the transformed entity is returned instead of the original.
 	 * 
 	 * @param transformerHook the transformer hook
-	 * @param data            the original data
+	 * @param generation      the original data
 	 * @param delegate        the original file
 	 */
 	public TransformedBundleFile(TransformerHook transformerHook, Generation generation, BundleFile delegate) {

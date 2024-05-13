@@ -35,11 +35,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 /**
- * <p>
  * {@link ICachingService} instantiated by {@link CachingServiceFactory} for
  * each bundle.
- * </p>
- * <p>
  *
  * @author Heiko Seeberger
  * @author Martin Lippert
@@ -112,18 +109,11 @@ public class BundleCachingService implements ICachingService {
 		}
 	}
 
-	/**
-	 * @see org.eclipse.equinox.service.weaving.ICachingService#canCacheGeneratedClasses()
-	 */
 	@Override
 	public boolean canCacheGeneratedClasses() {
 		return true;
 	}
 
-	/**
-	 * @see org.eclipse.equinox.service.weaving.ICachingService#findStoredClass(java.lang.String,
-	 *      java.net.URL, java.lang.String)
-	 */
 	@Override
 	public CacheEntry findStoredClass(final String namespace, final URL sourceFileURL, final String name) {
 
@@ -239,10 +229,6 @@ public class BundleCachingService implements ICachingService {
 	public void stop() {
 	}
 
-	/**
-	 * @see org.eclipse.equinox.service.weaving.ICachingService#storeClass(java.lang.String,
-	 *      java.net.URL, java.lang.Class, byte[])
-	 */
 	@Override
 	public boolean storeClass(final String namespace, final URL sourceFileURL, final Class<?> clazz,
 			final byte[] classbytes) {
@@ -266,10 +252,6 @@ public class BundleCachingService implements ICachingService {
 		return queued;
 	}
 
-	/**
-	 * @see org.eclipse.equinox.service.weaving.ICachingService#storeClassAndGeneratedClasses(java.lang.String,
-	 *      java.net.URL, java.lang.Class, byte[], java.util.Map)
-	 */
 	@Override
 	public boolean storeClassAndGeneratedClasses(final String namespace, final URL sourceFileUrl, final Class<?> clazz,
 			final byte[] classbytes, final Map<String, byte[]> generatedClasses) {

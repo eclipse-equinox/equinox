@@ -768,7 +768,7 @@ public class SubMonitorTest {
 	 * Tests progress monitor creation and cleanup time, and ensures that excess
 	 * progress is being collected when IProgressMonitor.done() is called.
 	 *
-	 * @param monitor  progress monitor (callers are responsible for calling done()
+	 * @param parent   progress monitor (callers are responsible for calling done()
 	 *                 if necessary)
 	 * @param loopSize total size of the recursion tree
 	 */
@@ -821,7 +821,7 @@ public class SubMonitorTest {
 	 * using internalWorked and half is reported using worked, to simulate mixed
 	 * usage of the progress monitor.
 	 *
-	 * @param monitor  progress monitor (callers are responsible for calling done()
+	 * @param parent   progress monitor (callers are responsible for calling done()
 	 *                 if necessary)
 	 * @param loopSize total size of the recursion tree
 	 */

@@ -35,7 +35,6 @@ public class DriverSelectorTracker extends ServiceTracker {
 	 * Create the DriverTracker.
 	 *
 	 * @param manager DeviceManager object.
-	 * @param device  DeviceTracker we are working for.
 	 */
 	public DriverSelectorTracker(Activator manager) {
 		super(manager.context, clazz, null);
