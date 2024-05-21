@@ -19,6 +19,7 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 import java.io.File;
 import java.io.InputStream;
@@ -26,6 +27,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
@@ -97,9 +99,7 @@ public class URIUtilTest {
 	 */
 	@Test
 	public void testToFileUNC() throws URISyntaxException {
-		if (!WINDOWS) {
-			return;
-		}
+		assumeTrue(WINDOWS);
 		// UNC paths
 		URI path = new URI("file://HOST/some/path");
 		File result = URIUtil.toFile(path);
@@ -187,6 +187,38 @@ public class URIUtilTest {
 		assertEquals("3.2", new URI("file:////SERVER/some/path"), URIUtil.toURI(new URL("file:////SERVER/some/path")));
 	}
 
+	@Test
+	public void testURLtoPath() throws MalformedURLException {
+
+		assertThrows(IllegalArgumentException.class, () -> URIUtil.toFilePath(new URL("http://foo.bar")));
+
+		assertEquals(Path.of("C:/foo/bar.txt"), URIUtil.toFilePath(new URL("file:/C:/foo/bar.txt")));
+		assertEquals(Path.of("C:/foo/bar.txt"), URIUtil.toFilePath(new URL("file:///C:/foo/bar.txt")));
+
+		// Not escaped special characters like spaces, % or #
+		assertEquals(Path.of("C:/foo/a b.txt"), URIUtil.toFilePath(new URL("file:/C:/foo/a b.txt")));
+		assertEquals(Path.of("C:/foo/a#b c.txt"), URIUtil.toFilePath(new URL("file:/C:/foo/a#b c.txt")));
+		assertEquals(Path.of("C:/foo/a%b.txt"), URIUtil.toFilePath(new URL("file:/C:/foo/a%b.txt")));
+		assertEquals(Path.of("C:/foo/bar#my-query"), URIUtil.toFilePath(new URL("file:/C:/foo/bar#my-query")));
+
+		// UNC paths (with not escaped spaces and %)
+		assertEquals(Path.of("////SERVER/some/path"), URIUtil.toFilePath(new URL("file://SERVER/some/path")));
+		assertEquals(Path.of("////SERVER/some/path"), URIUtil.toFilePath(new URL("file:////SERVER/some/path")));
+		assertEquals(Path.of("////SERVER/a b/path"), URIUtil.toFilePath(new URL("file://SERVER/a b/path")));
+		assertEquals(Path.of("////SERVER/a#b c/path"), URIUtil.toFilePath(new URL("file:////SERVER/a#b c/path")));
+		assertEquals(Path.of("////SERVER/some/a%b.txt"), URIUtil.toFilePath(new URL("file://SERVER/some/a%b.txt")));
+		assertEquals(Path.of("////SERVER/some/a%b.txt"), URIUtil.toFilePath(new URL("file:////SERVER/some/a%b.txt")));
+
+
+		// TODO: split the following? Make this a Windows only test case and create a
+		// separate UNIX test-case?
+		assumeTrue(WINDOWS);
+		assertEquals(Path.of("C:/foo/bar.txt"), URIUtil.toFilePath(new URL("file:c:/foo/bar.txt")));
+		assertEquals(Path.of("C:/foo/bar.txt"), URIUtil.toFilePath(new URL("file:/c:/foo/bar.txt")));
+
+		assertEquals(Path.of("foo/bar.txt"), URIUtil.toFilePath(new URL("file:foo/bar.txt")));
+	}
+
 	/**
 	 * Tests for {@link URIUtil#toURL(java.net.URI)}.
 	 */
@@ -210,9 +242,7 @@ public class URIUtilTest {
 	 */
 	@Test
 	public void testWindowsPathsFromURI() throws MalformedURLException, URISyntaxException {
-		if (!WINDOWS) {
-			return;
-		}
+		assumeTrue(WINDOWS);
 		assertEquals("1.1", new URI("file:/c:/foo/bar.txt"), URIUtil.toURI(new URL("file:c:/foo/bar.txt")));
 		assertEquals("1.2", new URI("file:/c:/foo/bar.txt"), URIUtil.toURI(new URL("file:/c:/foo/bar.txt")));
 	}
@@ -223,9 +253,7 @@ public class URIUtilTest {
 	 */
 	@Test
 	public void testWindowsPathsFromString() throws URISyntaxException {
-		if (!WINDOWS) {
-			return;
-		}
+		assumeTrue(WINDOWS);
 		assertEquals("1.1", new URI("file:/c:/foo/bar.txt"), URIUtil.fromString("file:c:/foo/bar.txt"));
 		assertEquals("1.2", new URI("file:/c:/foo/bar.txt"), URIUtil.fromString("file:/c:/foo/bar.txt"));
 	}
@@ -239,22 +267,13 @@ public class URIUtilTest {
 		File fileWithSpaces = new File("/c:/with spaces/goo");
 		URI correctURI = fileWithSpaces.toURI();
 		URL fileURL = fileWithSpaces.toURL();
-		URI fileURI = null;
-		try {
-			fileURI = fileURL.toURI();
-			fail();
-		} catch (URISyntaxException e) {
-			fileURI = URIUtil.toURI(fileURL);
-		}
-		assertEquals("1.1", correctURI, fileURI);
 
-		try {
-			fileURI = new URI(fileURL.toString());
-			fail();
-		} catch (URISyntaxException e) {
-			fileURI = URIUtil.fromString(fileURL.toString());
-		}
-		assertEquals("1.2", correctURI, fileURI);
+		assertThrows(URISyntaxException.class, () -> fileURL.toURI());
+		assertEquals("1.1", correctURI, URIUtil.toURI(fileURL));
+
+		String fileURLString = fileURL.toString();
+		assertThrows(URISyntaxException.class, () -> new URI(fileURLString));
+		assertEquals("1.2", correctURI, URIUtil.fromString(fileURLString));
 	}
 
 	/**
@@ -365,9 +384,8 @@ public class URIUtilTest {
 
 	@Test
 	public void testAppendWindows() throws URISyntaxException {
-		if (!WINDOWS) {
-			return;
-		}
+		assumeTrue(WINDOWS);
+
 		URI base = new URI("file:/C:/a%20b");
 		URI result = URIUtil.append(base, "file.txt");
 		assertEquals("1.0", "file:/C:/a%20b/file.txt", result.toString());
@@ -440,9 +458,7 @@ public class URIUtilTest {
 
 	@Test
 	public void testSameURIWindows() throws URISyntaxException {
-		if (!WINDOWS) {
-			return;
-		}
+		assumeTrue(WINDOWS);
 		// device and case variants
 		assertTrue("1.0", URIUtil.sameURI(new URI("file:C:/a"), new URI("file:c:/a")));
 		assertTrue("1.1", URIUtil.sameURI(new URI("file:/C:/a"), new URI("file:/c:/a")));
