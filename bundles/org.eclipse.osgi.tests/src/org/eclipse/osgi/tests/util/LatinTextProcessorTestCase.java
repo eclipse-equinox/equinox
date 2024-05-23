@@ -13,20 +13,25 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.util;
 
-import junit.framework.Test;
+import static org.eclipse.osgi.tests.OSGiTestsActivator.PI_OSGI_TESTS;
+import static org.eclipse.osgi.tests.OSGiTestsActivator.addRequiredOSGiTestsBundles;
+import static org.junit.Assert.assertNull;
+
+import org.eclipse.core.tests.harness.session.CustomSessionConfiguration;
+import org.eclipse.core.tests.harness.session.ExecuteInHost;
+import org.eclipse.core.tests.harness.session.SessionTestExtension;
 import org.eclipse.osgi.util.TextProcessor;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
  * Test for strings that use the TextProcessor but are not run in a bidi locale.
  * Latin locales should return the same String that was passed in.
  */
 public class LatinTextProcessorTestCase extends TextProcessorTestCase {
+	private static String[] ALL_PATHS;
 
-	public static Test suite() {
-		return new TextProcessorSessionTest("org.eclipse.osgi.tests", LatinTextProcessorTestCase.class, "en");
-	}
-
-	protected static String[] ALL_PATHS;
 	static {
 		// merge all test strings into one array for Latin locales
 		int size = TEST_DEFAULT_PATHS.length + TEST_STAR_PATHS.length + TEST_EQUALS_PATHS.length
@@ -51,15 +56,25 @@ public class LatinTextProcessorTestCase extends TextProcessorTestCase {
 		}
 	}
 
-	/**
-	 * Constructor for class.
-	 *
-	 * @param name test name
-	 */
-	public LatinTextProcessorTestCase(String name) {
-		super(name);
+	private CustomSessionConfiguration sessionConfiguration = createSessionConfiguration();
+
+	@RegisterExtension
+	SessionTestExtension extension = SessionTestExtension.forPlugin(PI_OSGI_TESTS)
+			.withCustomization(sessionConfiguration).create();
+
+	private static CustomSessionConfiguration createSessionConfiguration() {
+		CustomSessionConfiguration configuration = SessionTestExtension.createCustomConfiguration();
+		addRequiredOSGiTestsBundles(configuration);
+		return configuration;
 	}
 
+	@BeforeEach
+	@ExecuteInHost
+	public void setup() {
+		extension.setEclipseArgument("nl", "en");
+	}
+
+	@Test
 	public void testLatinPaths() {
 		// test all strings using process(String) method
 		for (int i = 0; i < ALL_PATHS.length; i++) {
@@ -68,6 +83,7 @@ public class LatinTextProcessorTestCase extends TextProcessorTestCase {
 		}
 	}
 
+	@Test
 	public void testLatinPathsDeprocess() {
 		// test all strings using process(String) method
 		for (int i = 0; i < ALL_PATHS.length; i++) {
@@ -77,6 +93,7 @@ public class LatinTextProcessorTestCase extends TextProcessorTestCase {
 		}
 	}
 
+	@Test
 	public void testLatinPathsWithNullDelimiter() {
 		// should use default delimiters
 		for (int i = 0; i < ALL_PATHS.length; i++) {
@@ -85,6 +102,7 @@ public class LatinTextProcessorTestCase extends TextProcessorTestCase {
 		}
 	}
 
+	@Test
 	public void testLatinOtherStrings() {
 		// test the process(String, String) method
 		for (int i = 0; i < TEST_STAR_PATHS.length; i++) {
@@ -98,6 +116,7 @@ public class LatinTextProcessorTestCase extends TextProcessorTestCase {
 		}
 	}
 
+	@Test
 	public void testLatinOtherStringsDeprocess() {
 		// test the process(String, String) method
 		for (int i = 0; i < TEST_STAR_PATHS.length; i++) {
@@ -113,6 +132,7 @@ public class LatinTextProcessorTestCase extends TextProcessorTestCase {
 		}
 	}
 
+	@Test
 	public void testLatinOtherStringsWithNoDelimiter() {
 		for (int i = 0; i < TEST_STAR_PATHS.length; i++) {
 			String result = TextProcessor.process(TEST_STAR_PATHS[i], null);
@@ -125,21 +145,25 @@ public class LatinTextProcessorTestCase extends TextProcessorTestCase {
 		}
 	}
 
+	@Test
 	public void testEmptyStringParams() {
 		verifyResult("TextProcessor.process(String) for empty string ", TextProcessor.process(""), EMPTY_STRING);
 		verifyResult("TextProcessor.process(String, String) for empty strings ", TextProcessor.process("", ""),
 				EMPTY_STRING);
 	}
 
+	@Test
 	public void testEmptyStringParamsDeprocess() {
 		verifyResult("TextProcessor.deprocess(String) for empty string ", TextProcessor.deprocess(""), EMPTY_STRING);
 	}
 
+	@Test
 	public void testNullParams() {
 		assertNull("TextProcessor.process(String) for null param ", TextProcessor.process(null));
 		assertNull("TextProcessor.process(String, String) for params ", TextProcessor.process(null, null));
 	}
 
+	@Test
 	public void testNullParamsDeprocess() {
 		assertNull("TextProcessor.deprocess(String) for null param ", TextProcessor.deprocess(null));
 	}
