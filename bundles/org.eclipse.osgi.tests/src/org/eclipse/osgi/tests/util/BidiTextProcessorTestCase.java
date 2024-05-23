@@ -14,8 +14,19 @@
 
 package org.eclipse.osgi.tests.util;
 
-import junit.framework.Test;
+import static org.eclipse.osgi.tests.OSGiTestsActivator.PI_OSGI_TESTS;
+import static org.eclipse.osgi.tests.OSGiTestsActivator.addRequiredOSGiTestsBundles;
+import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.eclipse.core.tests.harness.session.CustomSessionConfiguration;
+import org.eclipse.core.tests.harness.session.ExecuteInHost;
+import org.eclipse.core.tests.harness.session.SessionTestExtension;
 import org.eclipse.osgi.util.TextProcessor;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
  * Tests for strings that use the TextProcessor and are run in a bidi locale.
@@ -24,10 +35,6 @@ import org.eclipse.osgi.util.TextProcessor;
  * set. Run class AllTests.
  */
 public class BidiTextProcessorTestCase extends TextProcessorTestCase {
-
-	public static Test suite() {
-		return new TextProcessorSessionTest("org.eclipse.osgi.tests", BidiTextProcessorTestCase.class, "iw");
-	}
 
 	// left to right marker
 	protected static final char LRM = '\u200e';
@@ -130,18 +137,28 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 
 	protected static String defaultDelimiters = TextProcessor.getDefaultDelimiters();
 
-	/**
-	 * Constructor.
-	 *
-	 * @param name test name
-	 */
-	public BidiTextProcessorTestCase(String name) {
-		super(name);
+	private CustomSessionConfiguration sessionConfiguration = createSessionConfiguration();
+
+	@RegisterExtension
+	SessionTestExtension extension = SessionTestExtension.forPlugin(PI_OSGI_TESTS)
+			.withCustomization(sessionConfiguration).create();
+
+	private static CustomSessionConfiguration createSessionConfiguration() {
+		CustomSessionConfiguration configuration = SessionTestExtension.createCustomConfiguration();
+		addRequiredOSGiTestsBundles(configuration);
+		return configuration;
+	}
+
+	@BeforeEach
+	@ExecuteInHost
+	public void setup() {
+		extension.setEclipseArgument("nl", "iw");
 	}
 
 	/*
 	 * Test TextProcessor for file paths.
 	 */
+	@Test
 	public void testBidiPaths() {
 		for (int i = 0; i < TEST_DEFAULT_PATHS.length; i++) {
 			String result = TextProcessor.process(TEST_DEFAULT_PATHS[i]);
@@ -153,6 +170,7 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 		}
 	}
 
+	@Test
 	public void testBidiPathsDeprocess() {
 		for (int i = 0; i < TEST_DEFAULT_PATHS.length; i++) {
 			String result = TextProcessor.process(TEST_DEFAULT_PATHS[i]);
@@ -161,6 +179,7 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 		}
 	}
 
+	@Test
 	public void testBidiPathsWithNullDelimiter() {
 		// should use default delimiters
 		for (int i = 0; i < TEST_DEFAULT_PATHS.length; i++) {
@@ -173,15 +192,17 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 		}
 	}
 
+	@Test
 	public void testBidiStringWithNoDelimiters() {
 		String result = TextProcessor.process(OTHER_STRING_NO_DELIM);
-		assertEquals("Other string containing no delimiters not equivalent.", OTHER_STRING_NO_DELIM, result);
+		assertEquals(OTHER_STRING_NO_DELIM, result, "Other string containing no delimiters not equivalent.");
 	}
 
 	/*
 	 * Test other possible uses for TextProcessor, including file associations and
 	 * variable assignment statements.
 	 */
+	@Test
 	public void testOtherStrings() {
 		int testNum = 1;
 		for (int i = 0; i < TEST_STAR_PATHS.length; i++) {
@@ -205,6 +226,7 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 		}
 	}
 
+	@Test
 	public void testOtherStringsDeprocess() {
 		int testNum = 1;
 		for (String testStarPath : TEST_STAR_PATHS) {
@@ -221,6 +243,7 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 		}
 	}
 
+	@Test
 	public void testOtherStringsWithNullDelimiter() {
 		int testNum = 1;
 		for (int i = 0; i < TEST_STAR_PATHS.length; i++) {
@@ -248,6 +271,7 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 	 * Test the result to ensure markers aren't added more than once if the string
 	 * is processed multiple times.
 	 */
+	@Test
 	public void testDoubleProcessPaths() {
 		for (int i = 0; i < TEST_DEFAULT_PATHS.length; i++) {
 			String result = TextProcessor.process(TEST_DEFAULT_PATHS[i]);
@@ -264,6 +288,7 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 	 * Test the result to ensure markers aren't added more than once if the string
 	 * is processed multiple times.
 	 */
+	@Test
 	public void testDoubleProcessOtherStrings() {
 		int testNum = 1;
 		for (int i = 0; i < TEST_STAR_PATHS.length; i++) {
@@ -289,6 +314,7 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 		}
 	}
 
+	@Test
 	public void testAdditionalStrings() {
 		for (int i = 0; i < TEST_ADDITIONAL_STRINGS.length; i++) {
 			String result = TextProcessor.process(TEST_ADDITIONAL_STRINGS[i]);
@@ -300,6 +326,7 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 		}
 	}
 
+	@Test
 	public void testAdditionalStringsDeprocess() {
 		for (int i = 0; i < TEST_ADDITIONAL_STRINGS.length; i++) {
 			String result = TextProcessor.process(TEST_ADDITIONAL_STRINGS[i]);
@@ -308,28 +335,32 @@ public class BidiTextProcessorTestCase extends TextProcessorTestCase {
 		}
 	}
 
+	@Test
 	public void testEmptyStringParams() {
 		verifyBidiResult("TextProcessor.process(String) for empty string ", TextProcessor.process(""), EMPTY_STRING);
 		verifyBidiResult("TextProcessor.process(String, String) for empty strings ", TextProcessor.process("", ""),
 				EMPTY_STRING);
 	}
 
+	@Test
 	public void testEmptyStringParamsDeprocess() {
 		verifyBidiResult("TextProcessor.deprocess(String) for empty string ", TextProcessor.deprocess(""),
 				EMPTY_STRING);
 	}
 
+	@Test
 	public void testNullParams() {
 		assertNull("TextProcessor.process(String) for null param ", TextProcessor.process(null));
 		assertNull("TextProcessor.process(String, String) for params ", TextProcessor.process(null, null));
 	}
 
+	@Test
 	public void testNullParamsDeprocess() {
 		assertNull("TextProcessor.deprocess(String) for null param ", TextProcessor.deprocess(null));
 	}
 
 	private void verifyBidiResult(String testName, String result, String expected) {
 		boolean testResult = result.equals(expected);
-		assertTrue(testName + " result string is not the same as expected string.", testResult);
+		assertTrue(testResult, testName + " result string is not the same as expected string.");
 	}
 }

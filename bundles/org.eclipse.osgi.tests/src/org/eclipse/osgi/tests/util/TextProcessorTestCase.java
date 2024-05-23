@@ -13,12 +13,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.util;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Common class for TextProcessor test cases.
  */
-public abstract class TextProcessorTestCase extends TestCase {
+public abstract class TextProcessorTestCase {
 	// some Hebrew strings to use for test cases
 	protected static String HEBREW_STRING_1 = "\u05d0\u05d1\u05d2\u05d3 \u05d4\u05d5";
 	protected static String HEBREW_STRING_2 = "\u05ea\u05e9\u05e8\u05e7\u05e6";
@@ -98,15 +98,8 @@ public abstract class TextProcessorTestCase extends TestCase {
 
 	protected static String[] TEST_EQUALS_PATHS = { OTHER_STRING_3 };
 
-	/**
-	 * Constructor for class
-	 */
-	public TextProcessorTestCase(String name) {
-		super(name);
-	}
-
 	protected void verifyResult(String testName, String expected, String result) {
-		assertTrue(testName + " result string is not the same as string passed in.", result.equals(expected));
+		assertTrue(result.equals(expected), testName + " result string is not the same as string passed in.");
 	}
 
 }
