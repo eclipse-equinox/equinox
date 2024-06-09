@@ -151,7 +151,7 @@ set DEFAULT_OS=%defaultOS%
 set DEFAULT_OS_ARCH=%defaultOSArch%
 set DEFAULT_WS=%defaultWS%
 set JAVA_HOME=%javaHome%
-IF "%BINARIES_DIR%"=="" set "BINARIES_DIR=..\..\..\..\..\rt.equinox.binaries"
+IF "%BINARIES_DIR%"=="" set "BINARIES_DIR=..\..\..\..\..\equinox.binaries"
 IF "%EXE_OUTPUT_DIR%"=="" set "EXE_OUTPUT_DIR=%BINARIES_DIR%\org.eclipse.equinox.executable\bin\%defaultWS%\%defaultOS%\%defaultOSArch%"
 IF "%LIB_OUTPUT_DIR%"=="" set "LIB_OUTPUT_DIR=%BINARIES_DIR%\org.eclipse.equinox.launcher.%defaultWS%.%defaultOS%.%defaultOSArch%"
 

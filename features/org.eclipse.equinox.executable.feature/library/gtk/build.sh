@@ -39,7 +39,7 @@ programOutput="eclipse"
 defaultOS=""
 defaultOSArch=""
 defaultWS="gtk"
-if [ "$BINARIES_DIR" = "" ]; then BINARIES_DIR="../../../../../rt.equinox.binaries"; fi
+if [ "$BINARIES_DIR" = "" ]; then BINARIES_DIR="../../../../../equinox.binaries"; fi
 defaultJava=DEFAULT_JAVA_JNI
 defaultJavaHome=""
 javaHome=""
