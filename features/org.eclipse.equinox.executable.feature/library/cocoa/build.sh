@@ -62,7 +62,7 @@ PROGRAM_OUTPUT="$programOutput"
 DEFAULT_OS="$defaultOS"
 DEFAULT_WS="$defaultWS"
 DEPLOYMENT_TARGET=11.0
-if [ "$BINARIES_DIR" = "" ]; then BINARIES_DIR="../../../../../rt.equinox.binaries"; fi
+if [ "$BINARIES_DIR" = "" ]; then BINARIES_DIR="../../../../../equinox.binaries"; fi
 
 if [ "$defaultOSArch" == "arm64" ] || [ "$defaultOSArch" == "aarch64" ]
 then

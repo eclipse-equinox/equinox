@@ -38,7 +38,7 @@ jobs:
       with:
        fetch-depth: 1 # only shallow here, we don't have jgit timestamps
        repository: eclipse-equinox/equinox.binaries
-       path: rt.equinox.binaries
+       path: equinox.binaries
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
@@ -69,7 +69,7 @@ jobs:
         -Papi-check
         -Dcompare-version-with-baselines.skip=false
         -Dmaven.test.failure.ignore=true
-        -Drt.equinox.binaries.loc=${{ github.workspace }}/rt.equinox.binaries
+        -Dequinox.binaries.loc=${{ github.workspace }}/equinox.binaries
         -DskipTests=true
         clean verify
 

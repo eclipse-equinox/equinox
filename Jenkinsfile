@@ -323,7 +323,7 @@ pipeline {
 					sh '''
 						mvn clean verify --batch-mode --fail-at-end -Dmaven.repo.local=$WORKSPACE/.m2/repository \
 							-Pbree-libs -Papi-check -Pjavadoc\
-							-Drt.equinox.binaries.loc=$WORKSPACE/equinox.binaries
+							-Dequinox.binaries.loc=$WORKSPACE/equinox.binaries
 					'''
 				}
 			}

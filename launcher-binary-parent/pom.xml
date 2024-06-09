@@ -42,7 +42,7 @@
         <configuration>
           <additionalFileSets>
             <fileSet>
-              <directory>${rt.equinox.binaries.loc}/${project.artifactId}</directory>
+              <directory>${equinox.binaries.loc}/${project.artifactId}</directory>
               <includes>
                 <include>*.so</include>
                 <include>*.dll</include>

@@ -25,10 +25,10 @@
 
   <properties>
     <tycho.scmUrl>scm:git:https://github.com/eclipse-equinox/equinox.git</tycho.scmUrl>
-    <!-- location of rt.equinox.binaries project -->
+    <!-- location of equinox.binaries project -->
     <!-- required by: org.eclipse.equinox.feature:org.eclipse.equinox.executable -->
     <!-- required by: org.eclipse.equinox.framework:launcher-binary-parent -->
-    <rt.equinox.binaries.loc>../../../rt.equinox.binaries</rt.equinox.binaries.loc>
+    <equinox.binaries.loc>../../../equinox.binaries</equinox.binaries.loc>
     <target-platform.optionalDependencies>require</target-platform.optionalDependencies>
   </properties>
 
