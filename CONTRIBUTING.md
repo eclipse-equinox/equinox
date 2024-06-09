@@ -12,25 +12,26 @@ and other infrastructure for running OSGi-based systems.
 
 ## Developer resources
 
-Information regarding source code management, builds, coding standards, and
-more.
-
-* https://projects.eclipse.org/projects/eclipse.equinox/developer
+Information regarding source code management, builds, coding standards, and more.
 
 The project maintains the following source code repositories
 
-* https://github.com/eclipse-equinox/equinox.binaries
 * https://github.com/eclipse-equinox/equinox
+* https://github.com/eclipse-equinox/equinox.binaries
 * https://github.com/eclipse-equinox/p2
 
 This project uses GitHub to track ongoing development and issues.
 
-* Search for issues: https://github.com/eclipse-equinox/equinox.binaries/issues
+* Search for issues: https://github.com/eclipse-equinox/equinox/issues
 * Search for historical issues: https://eclipse.org/bugs/buglist.cgi?product=Equinox
-* Create a new report: https://github.com/eclipse-equinox/equinox.binaries/issues/new
+* Create a new report: https://github.com/eclipse-equinox/equinox/issues/new
 
 Be sure to search for existing bugs before you create another one. Remember that
 contributions are always welcome!
+
+### Setting up the Development Environment automatically, using the Eclipse Installer (Oomph)
+
+[![Create Eclipse Development Environment for Equinox](https://download.eclipse.org/oomph/www/setups/svg/Equinox.svg)](https://www.eclipse.org/setups/installer/?url=https://raw.githubusercontent.com/eclipse-equinox/equinox/master/releng/org.eclipse.equinox.releng/EquinoxConfiguration.setup&show=true "Click to open Eclipse-Installer Auto Launch or drag into your running installer")
 
 ### Running the Technology Compatibility Kit (TCK)
 
@@ -38,6 +39,11 @@ To run a TCK on a bundle you just need to go to the directory (e.g. `bundles/org
 and run:
 
 `mvn clean verify -Pbuild-individual-bundles -Pbree-libs -Ptck`
+
+### Building the native executable and launcher library binaries
+
+The source code of the platform specific executables and launcher libraries for Equinox is located in the [org.eclipse.equinox.executable.feature](features/org.eclipse.equinox.executable.feature).
+For details and instructions how to build it see its [README.md](features/org.eclipse.equinox.executable.feature/README.md).
 
 ## Eclipse Contributor Agreement
 

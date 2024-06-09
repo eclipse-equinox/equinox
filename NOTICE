@@ -26,7 +26,6 @@ SPDX-License-Identifier: EPL-2.0
 
 The project maintains the following source code repositories:
 
-* http://git.eclipse.org/c/equinox/rt.equinox.binaries.git
-* http://git.eclipse.org/c/equinox/rt.equinox.bundles.git
-* http://git.eclipse.org/c/equinox/rt.equinox.framework.git
-* http://git.eclipse.org/c/equinox/rt.equinox.p2.git
+* https://github.com/eclipse-equinox/equinox.git
+* https://github.com/eclipse-equinox/equinox.binaries.git
+* https://github.com/eclipse-equinox/p2.git
