@@ -36,69 +36,23 @@
 @rem ******
 @echo off
 
-@rem Specify VisualStudio Edition: 'Community', 'Enterprise', 'Professional' etc.
-IF "%MSVC_EDITION%"=="" set "MSVC_EDITION=auto"
-
-@rem Specify VisualStudio Version: '2022', '2019' etc.
-IF "%MSVC_VERSION%"=="" set "MSVC_VERSION=auto"
-
-@REM Compose host architecture string for MSVC
-IF "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
-  SET HOST_ARCH=x64
-  SET defaultOSArch=x86_64
-) ELSE IF "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
-  SET HOST_ARCH=arm64
-  SET defaultOSArch=aarch64
-) ELSE (
-  CALL :ECHO "ERROR: Unknown host architecture: %PROCESSOR_ARCHITECTURE%."
-  EXIT /B 1
-)
-
-@REM %TARGET_ARCH% may be specified by the caller for cross-compiling.
-@REM If not, build for builder machine's architecture
-IF "%TARGET_ARCH%"=="" (
-  SET TARGET_ARCH=%HOST_ARCH%
-)
-
-@REM Compose build argument for MSVC
-IF "%TARGET_ARCH%"=="%HOST_ARCH%" (
-  SET BUILD_ARCH=%TARGET_ARCH%
-) ELSE (
-  SET BUILD_ARCH=%HOST_ARCH%_%TARGET_ARCH%
-)
-
-@rem Search for a usable Visual Studio
-@rem ---------------------------------
-IF "%MSVC_HOME%"=="" echo "'MSVC_HOME' was not provided, auto-searching for Visual Studio..."
-@rem Bug 574007: Path used on Azure build machines
-IF "%MSVC_HOME%"=="" CALL :FindVisualStudio "%ProgramFiles(x86)%\Microsoft Visual Studio\$MSVC_VERSION$\BuildTools"
-@rem Bug 578519: Common installation paths; VisualStudio is installed in x64 ProgramFiles since VS2022
-IF "%MSVC_HOME%"=="" CALL :FindVisualStudio "%ProgramFiles%\Microsoft Visual Studio\$MSVC_VERSION$\$MSVC_EDITION$"
-IF "%MSVC_HOME%"=="" CALL :FindVisualStudio "%ProgramFiles(x86)%\Microsoft Visual Studio\$MSVC_VERSION$\$MSVC_EDITION$"
-@rem Report
-IF EXIST "%MSVC_HOME%" (
-	echo "MSVC_HOME: %MSVC_HOME%"
-) ELSE (
-	echo "WARNING: Microsoft Visual Studio was not found (for edition=%MSVC_EDITION% version=%MSVC_VERSION%)"
-	echo "     Refer steps for SWT Windows native setup: https://www.eclipse.org/swt/swt_win_native.php"
-)
-IF EXIST "%JAVA_HOME%" (
-	echo "JAVA_HOME 64-bit: %JAVA_HOME%"
-) ELSE (
-	echo "WARNING: 64-bit Java JDK not found. Please set JAVA_HOME to your JDK directory."
-	echo "     Refer steps for SWT Windows native setup: https://www.eclipse.org/swt/swt_win_native.php"
-)
-set javaHome=%JAVA_HOME%
-set makefile=make_win64.mak
-call "%MSVC_HOME%\VC\Auxiliary\Build\vcvarsall.bat" %BUILD_ARCH%
-
 rem --------------------------
 rem Define default values for environment variables used in the makefiles.
 rem --------------------------
+set makefile=make_win64.mak
+set javaHome=%JAVA_HOME%
 set programOutput=eclipse.exe
 set programLibrary=eclipse.dll
 set defaultOS=win32
 set defaultWS=win32
+if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
+  set defaultOSArch=x86_64
+) else if "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
+  set defaultOSArch=aarch64
+) else (
+  echo "ERROR: Unknown host architecture: %PROCESSOR_ARCHITECTURE%."
+  exit /B 1
+)
 
 rem --------------------------
 rem Parse the command line arguments and override the default values.
@@ -154,6 +108,57 @@ set JAVA_HOME=%javaHome%
 IF "%BINARIES_DIR%"=="" set "BINARIES_DIR=..\..\..\..\..\rt.equinox.binaries"
 IF "%EXE_OUTPUT_DIR%"=="" set "EXE_OUTPUT_DIR=%BINARIES_DIR%\org.eclipse.equinox.executable\bin\%defaultWS%\%defaultOS%\%defaultOSArch%"
 IF "%LIB_OUTPUT_DIR%"=="" set "LIB_OUTPUT_DIR=%BINARIES_DIR%\org.eclipse.equinox.launcher.%defaultWS%.%defaultOS%.%defaultOSArch%"
+
+if exist "%JAVA_HOME%" (
+	echo "JAVA_HOME 64-bit: %JAVA_HOME%"
+) else (
+	echo "WARNING: 64-bit Java JDK not found. Please set JAVA_HOME to your JDK directory."
+	echo "     Refer steps for SWT Windows native setup: https://www.eclipse.org/swt/swt_win_native.php"
+)
+
+rem --------------------------
+rem Search for Microsoft Visual Studio and set up its C compiler.
+rem --------------------------
+rem Specify VisualStudio Edition: 'Community', 'Enterprise', 'Professional' etc.
+if "%MSVC_EDITION%"=="" set "MSVC_EDITION=auto"
+rem Specify VisualStudio Version: '2022', '2019' etc.
+if "%MSVC_VERSION%"=="" set "MSVC_VERSION=auto"
+
+rem Search for a usable Visual Studio
+rem ---------------------------------
+if "%MSVC_HOME%"=="" echo "'MSVC_HOME' was not provided, auto-searching for Visual Studio..."
+rem Bug 574007: Path used on Azure build machines
+if "%MSVC_HOME%"=="" call :FindVisualStudio "%ProgramFiles(x86)%\Microsoft Visual Studio\$MSVC_VERSION$\BuildTools"
+rem Bug 578519: Common installation paths; VisualStudio is installed in x64 ProgramFiles since VS2022
+if "%MSVC_HOME%"=="" call :FindVisualStudio "%ProgramFiles%\Microsoft Visual Studio\$MSVC_VERSION$\$MSVC_EDITION$"
+if "%MSVC_HOME%"=="" call :FindVisualStudio "%ProgramFiles(x86)%\Microsoft Visual Studio\$MSVC_VERSION$\$MSVC_EDITION$"
+rem Report
+if exist "%MSVC_HOME%" (
+	echo "MSVC_HOME: %MSVC_HOME%"
+) else (
+	echo "WARNING: Microsoft Visual Studio was not found (for edition=%MSVC_EDITION% version=%MSVC_VERSION%)"
+	echo "     Refer steps for SWT Windows native setup: https://www.eclipse.org/swt/swt_win_native.php"
+)
+
+rem Compose build argument for MSVC setup
+rem ---------------------------------
+rem '-arch' may be specified explicitly by the caller for cross-compiling.
+rem If not, build for builder machine's architecture
+if "%defaultOSArch%"=="x86_64" (
+  set TARGET_ARCH=amd64
+) else if "%defaultOSArch%"=="aarch64" (
+  set TARGET_ARCH=arm64
+) else (
+  echo "ERROR: Unsupported target architecture: %defaultOSArch%."
+  exit /B 1
+)
+if /I "%TARGET_ARCH%"=="%PROCESSOR_ARCHITECTURE%" (
+  set BUILD_ARCH=%TARGET_ARCH%
+) else (
+  set BUILD_ARCH=%PROCESSOR_ARCHITECTURE%_%TARGET_ARCH%
+)
+
+call "%MSVC_HOME%\VC\Auxiliary\Build\vcvarsall.bat" %BUILD_ARCH%
 
 rem --------------------------
 rem Run nmake to build the executable.
