@@ -18,6 +18,10 @@
  */
 package org.apache.felix.resolver;
 
+import java.util.List;
+import java.util.function.Function;
+import org.osgi.resource.Capability;
+import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 
 /**
@@ -130,6 +134,31 @@ public class Logger
     public void logUsesConstraintViolation(Resource resource, ResolutionError error)
     {
         // do nothing by default
+    }
+
+    /**
+     * Called to debug the current mapping of {@link Requirement}s to
+     * {@link Capability}s in a resolve operation
+     * 
+     * @param resource        the resource for this log message
+     * @param candidateLookup a mapping between a requirement and a list of all
+     *                        current candidate {@link Capability}s eligible for
+     *                        resolving
+     */
+    public void logCandidates(Resource resource,
+            Function<Requirement, List<Capability>> candidateLookup) 
+    {
+        // do nothing by default
+    }
+
+    public void logRequirement(String message, Requirement requirement) 
+    {
+        debug(String.format(message, requirement));
+    }
+    
+    public void logCapability(String message, Capability requirement) 
+    {
+        debug(String.format(message, requirement));
     }
 
     /**

@@ -3959,7 +3959,8 @@ public class TestModuleContainer extends AbstractTest {
 			fail("Maximum of " + max + " permutations expected but was " + permutations);
 		} else if (permutations < max) {
 			System.out.println(
-					"## Permutations are below the threshold, consider adjusting the testcase to assert the lower count!");
+					"## Permutations (" + permutations + ") are below the threshold (" + max
+							+ "), consider adjusting the testcase to assert the lower count!");
 		}
 		return;
 	}
@@ -4367,8 +4368,8 @@ public class TestModuleContainer extends AbstractTest {
 	public void testLocalUseConstraintViolations() throws Exception {
 		ResolutionReport result = resolveTestSet("set1");
 		// TODO get down permutation count!
-		assertSucessfulWith(result, 52);
-		assertNotMoreThanPermutationCreated(result, ResolutionReport::getSubstitutionPermutations, 23);
+		assertSucessfulWith(result, 49);
+		assertNotMoreThanPermutationCreated(result, ResolutionReport::getSubstitutionPermutations, 20);
 	}
 
 	private ResolutionReport resolveTestSet(String name) throws Exception {
