@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -47,6 +47,7 @@
 #define INI                _T_ECLIPSE("--launcher.ini")
 #define APPEND_VMARGS      _T_ECLIPSE("--launcher.appendVmargs")
 #define OVERRIDE_VMARGS    _T_ECLIPSE("--launcher.overrideVmargs")
+#define NORESTART          _T_ECLIPSE("--launcher.noRestart")
 #define SECOND_THREAD      _T_ECLIPSE("--launcher.secondThread")
 #define PERM_GEN           _T_ECLIPSE("--launcher.XXMaxPermSize")
 #define OLD_ARGS_START     _T_ECLIPSE("--launcher.oldUserArgsStart")
