@@ -702,7 +702,7 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 					}
 				}
 			} else {
-				 if (debug) {
+				if (debug) {
 					if (!suppressErrors)
 						displayMessage( title, shareMsg );
 					else
@@ -1103,12 +1103,15 @@ static void getVMCommand( int launchMode, int argc, _TCHAR* argv[], _TCHAR **vmA
 	(*vmArgv)[dst] = NULL;
 
 	/* Program arguments */
-    /*  OS <os> + WS <ws> + ARCH <arch> + LAUNCHER <launcher> + NAME <officialName> +
-     *  + LIBRARY <library> + SHOWSPLASH <cmd> + EXITDATA <cmd> + STARTUP <jar> + OVERRIDE/APPEND + argv[] + VM + <vm> +
-     * VMARGS + vmArg + requiredVMargs
+    /*  OS <os> + WS <ws> + ARCH <arch> + SHOWSPLASH <cmd> + LAUNCHER <program> + NAME <officialName>
+     *  + LIBRARY <eclipseLibrary> + STARTUP <jarFile> + PROTECT <protectMode> + APPEND/OVERRIDE
+     *  + EXITDATA <sharedId> + argv[] + VM <jniLib/javaVM> + VMARGS + vmArg[] + eeVMarg[] + reqVMarg[]
      *  + NULL)
      */
-    totalProgArgs  = 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 1 + argc + 2 + 1 + nVMarg + nEEargs + nReqVMarg + 1;
+    totalProgArgs = 2 + 2 + 2 + 2 + 2 + 2
+                  + 2 + 2 + 2 + 1
+                  + 2 + argc + 2 + 1 + nVMarg + nEEargs + nReqVMarg
+                  + 1;
 	*progArgv = malloc( totalProgArgs * sizeof( _TCHAR* ) );
     dst = 0;
 
