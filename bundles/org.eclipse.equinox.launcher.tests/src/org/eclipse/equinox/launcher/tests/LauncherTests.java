@@ -16,6 +16,7 @@ package org.eclipse.equinox.launcher.tests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -202,6 +204,66 @@ public class LauncherTests {
 		// Make sure launcher exited with code zero
 		launcherProcess.waitFor(5, TimeUnit.SECONDS);
 		assertEquals(0, launcherProcess.exitValue());
+	}
+
+	@Test
+	void test_appTerminatesWithoutNoRestartWithEXIT_OK() throws IOException, InterruptedException {
+		test_norestart(EXIT_OK, false);
+	}
+
+	@Test
+	void test_appTerminatesWithNoRestartAndEXIT_OK() throws IOException, InterruptedException {
+		test_norestart(EXIT_OK, true);
+	}
+
+	@Test
+	void test_appTerminatesWithNoRestartAndEXIT_RESTART() throws IOException, InterruptedException {
+		test_norestart(EXIT_RESTART, true);
+	}
+
+	@Test
+	void test_appTerminatesWithNoRestartAndEXIT_RELAUNCH() throws IOException, InterruptedException {
+		test_norestart(EXIT_RELAUNCH, true);
+	}
+
+	@Test
+	void test_appTerminatesWithoutNoRestartWithExitCode100() throws IOException, InterruptedException {
+		test_norestart(100, false);
+	}
+
+	@Test
+	void test_appTerminatesWithNoRestartAndExitCode100() throws IOException, InterruptedException {
+		test_norestart(100, true);
+	}
+
+	private void test_norestart(int exitCode, boolean addNoRestartArg) throws IOException, InterruptedException {
+		writeEclipseIni(DEFAULT_ECLIPSE_INI_CONTENT);
+
+		List<String> launcherArgs = addNoRestartArg ? List.of("--launcher.noRestart", "--launcher.suppressErrors")
+				: List.of("--launcher.suppressErrors");
+		Process launcherProcess = startEclipseLauncher(launcherArgs);
+
+		Socket socket = server.accept();
+
+		List<String> appArgs = new ArrayList<>();
+		analyzeLaunchedTestApp(socket, appArgs, null, exitCode);
+
+		// Make sure --launcher.noRestart arg is picked
+		assertEquals(addNoRestartArg, appArgs.contains("--launcher.noRestart"));
+		// Make sure launcher exited with expected exit value
+		launcherProcess.waitFor(5, TimeUnit.SECONDS);
+		assertEquals(exitCode, launcherProcess.exitValue());
+		try {
+			server.accept();
+			if (addNoRestartArg) {
+				fail("New eclipse started even with --launcher.noRestart arg and exit code " + exitCode);
+			} else {
+				fail("New eclipse started even with exit code " + exitCode);
+			}
+		} catch (SocketTimeoutException e) {
+			// No new instance launched
+			return;
+		}
 	}
 
 	@Test

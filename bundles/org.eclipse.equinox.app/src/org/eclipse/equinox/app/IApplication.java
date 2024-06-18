@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 IBM Corporation and others.
+ * Copyright (c) 2005, 2024 IBM Corporation and others.
  *
  *  This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  *  https://www.eclipse.org/legal/epl-2.0/
  *
  *  SPDX-License-Identifier: EPL-2.0
- * 
+ *
  *  Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -23,7 +23,7 @@ package org.eclipse.equinox.app;
  * <p>
  * Clients may implement this interface.
  * </p>
- * 
+ *
  * @since 1.0
  */
 public interface IApplication {
@@ -34,7 +34,12 @@ public interface IApplication {
 	public static final Integer EXIT_OK = Integer.valueOf(0);
 
 	/**
-	 * Exit object requesting platform restart
+	 * Exit object requesting platform restart.
+	 *
+	 * <p>
+	 * Note: The handling of this special exit code may be disabled by launcher
+	 * argument {@code --launcher.noRestart}.
+	 * </p>
 	 */
 	public static final Integer EXIT_RESTART = Integer.valueOf(23);
 
@@ -44,6 +49,11 @@ public interface IApplication {
 	 * the executable is relaunched the command line will be retrieved from the
 	 * {@link IApplicationContext#EXIT_DATA_PROPERTY eclipse.exitdata} system
 	 * property.
+	 *
+	 * <p>
+	 * Note: The handling of this special exit code may be disabled by launcher
+	 * argument {@code --launcher.noRestart}.
+	 * </p>
 	 */
 	public static final Integer EXIT_RELAUNCH = Integer.valueOf(24);
 
@@ -64,7 +74,7 @@ public interface IApplication {
 	 * Note: This method is called by the platform; it is not intended to be called
 	 * directly by clients.
 	 * </p>
-	 * 
+	 *
 	 * @return the return value of the application
 	 * @see #EXIT_OK
 	 * @see #EXIT_RESTART
@@ -80,7 +90,7 @@ public interface IApplication {
 	 * running application is ready to exit. The {@link #start(IApplicationContext)}
 	 * should already have exited or should exit very soon after this method exits
 	 * <p>
-	 * 
+	 *
 	 * This method is only called to force an application to exit. This method will
 	 * not be called if an application exits normally from the
 	 * {@link #start(IApplicationContext)} method.
