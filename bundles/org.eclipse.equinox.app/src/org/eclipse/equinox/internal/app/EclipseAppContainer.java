@@ -568,7 +568,7 @@ public class EclipseAppContainer
 					.getCardinalityType() == EclipseAppDescriptor.FLAG_CARD_LIMITED) {
 				if (activeLimited != null) {
 					ArrayList<EclipseAppHandle> limited = activeLimited
-							.get(((EclipseAppDescriptor) appHandle.getApplicationDescriptor()).getApplicationId());
+							.get(appHandle.getApplicationDescriptor().getApplicationId());
 					if (limited != null)
 						limited.remove(appHandle);
 				}
