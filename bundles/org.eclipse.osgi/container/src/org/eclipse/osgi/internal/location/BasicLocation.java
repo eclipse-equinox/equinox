@@ -171,7 +171,7 @@ public class BasicLocation implements Location {
 			}
 		}
 		updateUrl(serviceRegistration);
-		return true;
+		return lock;
 	}
 
 	private void updateUrl(ServiceRegistration<?> registration) {

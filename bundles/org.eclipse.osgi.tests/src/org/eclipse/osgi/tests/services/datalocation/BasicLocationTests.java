@@ -24,6 +24,7 @@ import static org.junit.Assume.assumeTrue;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,7 +43,6 @@ import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -164,17 +164,19 @@ public class BasicLocationTests {
 	}
 
 	@Test
-	public void testCreateLocation04() {
+	public void testCreateLocation04() throws IllegalStateException, MalformedURLException, IOException {
 		Location configLocation = configLocationTracker.getService();
 		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testCreateLocation04");
 		Location testLocation = configLocation.createLocation(null, null, true);
-		try {
-			testLocation.set(testLocationFile.toURL(), true);
+		// note that if read-only and lock was requested then false is returned; but the
+		// location is set
+		assertFalse("Could not set location", testLocation.set(testLocationFile.toURL(), true));
+		assertTrue("Location should be set", testLocation.isSet());
+
+		assertThrows("Should not be able to lock read-only location", IOException.class, () -> {
+			assertTrue("Could not lock location", testLocation.lock());
 			testLocation.release();
-			Assert.fail("Should not be able to lock read-only location");
-		} catch (Throwable t) {
-			// expected
-		}
+		});
 	}
 
 	@Test
