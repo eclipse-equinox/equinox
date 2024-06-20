@@ -136,6 +136,7 @@ public class BasicLocation implements Location {
 	@Override
 	public synchronized boolean set(URL value, boolean lock, String lockFilePath)
 			throws IllegalStateException, IOException {
+		boolean gotLock = false;
 		synchronized (this) {
 			if (location != null)
 				throw new IllegalStateException(Msg.ECLIPSE_CANNOT_CHANGE_LOCATION);
@@ -159,10 +160,11 @@ public class BasicLocation implements Location {
 					file = new File(value.getPath(), DEFAULT_LOCK_FILENAME);
 				}
 			}
-			lock = lock && !isReadOnly;
-			if (lock) {
-				if (!lock(file, value))
+			if (lock && !isReadOnly) {
+				if (!lock(file, value)) {
 					return false;
+				}
+				gotLock = true;
 			}
 			lockFile = file;
 			location = value;
@@ -171,7 +173,7 @@ public class BasicLocation implements Location {
 			}
 		}
 		updateUrl(serviceRegistration);
-		return lock;
+		return lock ? gotLock : true;
 	}
 
 	private void updateUrl(ServiceRegistration<?> registration) {

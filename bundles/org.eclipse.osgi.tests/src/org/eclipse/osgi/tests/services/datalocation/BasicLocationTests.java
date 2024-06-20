@@ -180,15 +180,14 @@ public class BasicLocationTests {
 	}
 
 	@Test
-	public void testCreateLocation05() {
+	public void testCreateLocation05() throws IllegalStateException, MalformedURLException, IOException {
 		Location configLocation = configLocationTracker.getService();
 		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testCreateLocation01");
 		Location testLocation = configLocation.createLocation(null, null, false);
-		try {
-			testLocation.set(testLocationFile.toURL(), false);
-		} catch (Throwable t) {
-			fail("Failed to set location", t);
-		}
+
+		assertTrue("Could not set location", testLocation.set(testLocationFile.toURL(), false));
+		assertTrue("Location should be set", testLocation.isSet());
+
 		try {
 			assertTrue("Could not lock location", testLocation.lock());
 			assertFalse("Could lock a secend time", testLocation.lock());
