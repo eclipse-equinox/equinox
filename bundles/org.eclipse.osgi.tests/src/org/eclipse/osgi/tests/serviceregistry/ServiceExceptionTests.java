@@ -212,7 +212,7 @@ public class ServiceExceptionTests extends AbstractBundleTests {
 				return;
 			if (!(event.getThrowable() instanceof ServiceException))
 				return;
-			if (((ServiceException) event.getThrowable()).getCause() != exception)
+			if (event.getThrowable().getCause() != exception)
 				return;
 			if (((ServiceException) event.getThrowable()).getType() != exceptionType)
 				return;
