@@ -19,7 +19,7 @@
 </parent>
   <groupId>org.eclipse.osgi</groupId>
   <artifactId>org.eclipse.osgi.tests</artifactId>
-  <version>3.19.100-SNAPSHOT</version>
+  <version>3.20.100-SNAPSHOT</version>
   <packaging>eclipse-test-plugin</packaging>
 
   <properties>
