@@ -127,8 +127,6 @@ if "%MSVC_VERSION%"=="" set "MSVC_VERSION=auto"
 rem Search for a usable Visual Studio
 rem ---------------------------------
 if "%MSVC_HOME%"=="" echo "'MSVC_HOME' was not provided, auto-searching for Visual Studio..."
-rem Bug 574007: Path used on Azure build machines
-if "%MSVC_HOME%"=="" call :FindVisualStudio "%ProgramFiles(x86)%\Microsoft Visual Studio\$MSVC_VERSION$\BuildTools"
 rem Bug 578519: Common installation paths; VisualStudio is installed in x64 ProgramFiles since VS2022
 if "%MSVC_HOME%"=="" call :FindVisualStudio "%ProgramFiles%\Microsoft Visual Studio\$MSVC_VERSION$\$MSVC_EDITION$"
 if "%MSVC_HOME%"=="" call :FindVisualStudio "%ProgramFiles(x86)%\Microsoft Visual Studio\$MSVC_VERSION$\$MSVC_EDITION$"
