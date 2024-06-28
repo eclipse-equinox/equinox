@@ -1,4 +1,4 @@
-This feature contains the executables and launcher bundle along with its fragments used to launch Equinox respectivly Eclipse based standalone applications.
+This feature contains the executables and launcher bundle along with its fragments used to launch Equinox respectively Eclipse based stand-alone applications.
 It also hosts the native C source files and scripts to build these executable and launcher library binaries for all supported platforms.
 
 The _Equinox launcher executable_ is the executable binary file that can be used to launch an Equinox based applications like Eclipse. It is for example named `eclipse.exe` (on Windows) or `eclipse` (on Linux and Mac).
@@ -43,6 +43,6 @@ For more options and details see the `build.sh/bat` files and corresponding make
 
 ### Cross compilation
 
-On some platforms cross-compilation for other CPU architecutres is possible by invoking the `build.sh/bat` scripts with an explicit `-arch <target-arch>` argument.
+On some platforms cross-compilation for other CPU architectures is possible by invoking the `build.sh/bat` scripts with an explicit `-arch <target-arch>` argument.
 Of course the required tools for the targeted architecture have to be available.
 For example on a Windows computer with `x86_64` CPU, to build the binaries for Windows on ARM one can call `build.bat -arch aarch64 -java <path-to-arm-jdk>`.
