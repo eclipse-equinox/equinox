@@ -34,7 +34,12 @@ public interface IApplication {
 	public static final Integer EXIT_OK = Integer.valueOf(0);
 
 	/**
-	 * Exit object requesting platform restart
+	 * Exit object requesting platform restart.
+	 *
+	 * <p>
+	 * Note: The handling of this special exit code may be disabled by launcher
+	 * argument '-norestart'.
+	 * </p>
 	 */
 	public static final Integer EXIT_RESTART = Integer.valueOf(23);
 
@@ -44,6 +49,11 @@ public interface IApplication {
 	 * the executable is relaunched the command line will be retrieved from the
 	 * {@link IApplicationContext#EXIT_DATA_PROPERTY eclipse.exitdata} system
 	 * property.
+	 *
+	 * <p>
+	 * Note: The handling of this special exit code may be disabled by launcher
+	 * argument '-norestart'.
+	 * </p>
 	 */
 	public static final Integer EXIT_RELAUNCH = Integer.valueOf(24);
 

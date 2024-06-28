@@ -71,6 +71,7 @@
  *  -nosplash                  do not display the splash screen. The java application will
  *                             not receive the -showsplash command.
  *  -showsplash <bitmap>	   show the given bitmap in the splash screen.
+ *  -norestart                 disables the restart behavior of exit codes 23 and 24.
  *  -name <name>               application name displayed in error message dialogs and
  *                             splash screen window. Default value is computed from the
  *                             name of the executable - with the first letter capitalized
@@ -235,6 +236,7 @@ home directory.");
 static int     needConsole   = 0;				/* True: user wants a console	*/
 static int     debug         = 0;				/* True: output debugging info	*/
 static int     noSplash      = 0;				/* True: do not show splash win	*/
+static int     noRestart     = 0;				/* True: disables the restart behavior of the launcher */
 static int	   suppressErrors = 0;				/* True: do not display errors dialogs */
        int     secondThread  = 0;				/* True: start the VM on a second thread */
 static int     appendVmargs = 0;                /* True: append cmdline vmargs to launcher.ini vmargs */
@@ -286,6 +288,7 @@ static Option options[] = {
     { CONSOLELOG,	&needConsole,	VALUE_IS_FLAG,	0 },
     { DEBUG_ARG,	&debug,			VALUE_IS_FLAG,	0 },
     { NOSPLASH,     &noSplash,      VALUE_IS_FLAG,	1 },
+    { NORESTART,    &noRestart,     VALUE_IS_FLAG,	1 },
     { SUPRESSERRORS, &suppressErrors, VALUE_IS_FLAG, 1},
     { SECOND_THREAD, &secondThread, VALUE_IS_FLAG,  1 },
     { APPEND_VMARGS, &appendVmargs,	VALUE_IS_FLAG, 1 },
@@ -650,32 +653,35 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 		case 0: /* normal exit */
 			break;
 		case RESTART_LAST_EC:
-			/* copy for relaunch, +1 to ensure NULL terminated */
-			relaunchCommand = malloc((initialArgc + 1) * sizeof(_TCHAR*));
-			memcpy(relaunchCommand, initialArgv, (initialArgc + 1) * sizeof(_TCHAR*));
-			relaunchCommand[initialArgc] = 0;
-			relaunchCommand[0] = program;
-			break;
-
+			if (!noRestart) {
+				/* copy for relaunch, +1 to ensure NULL terminated */
+				relaunchCommand = malloc((initialArgc + 1) * sizeof(_TCHAR*));
+				memcpy(relaunchCommand, initialArgv, (initialArgc + 1) * sizeof(_TCHAR*));
+				relaunchCommand[initialArgc] = 0;
+				relaunchCommand[0] = program;
+				break;
+			} // fall-through to default non-zero exit code handling.
 		case RESTART_NEW_EC:
-			if(launchMode == LAUNCH_EXE) {
-				if (exitData != NULL) free(exitData);
-				if (getSharedData( sharedID, &exitData ) != 0)
-					exitData = NULL;
-			}
-			if (exitData != 0) {
-				if (vmCommand != NULL) free( vmCommand );
-				vmCommand = parseArgList( exitData );
-				relaunchCommand = getRelaunchCommand(vmCommand);
-			} else {
-				if (debug) {
-					if (!suppressErrors)
-						displayMessage( officialName, shareMsg );
-					else
-						_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), officialName, shareMsg);
+			if (!noRestart) {
+				if(launchMode == LAUNCH_EXE) {
+					if (exitData != NULL) free(exitData);
+					if (getSharedData( sharedID, &exitData ) != 0)
+						exitData = NULL;
 				}
-			}
-			break;
+				if (exitData != 0) {
+					if (vmCommand != NULL) free( vmCommand );
+					vmCommand = parseArgList( exitData );
+					relaunchCommand = getRelaunchCommand(vmCommand);
+				} else {
+					if (debug) {
+						if (!suppressErrors)
+							displayMessage( officialName, shareMsg );
+						else
+							_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), officialName, shareMsg);
+					}
+				}
+				break;
+			} // fall-through to default non-zero exit code handling.
 		default: {
 			_TCHAR *title = _tcsdup(officialName);
 			errorMsg = NULL;
@@ -702,7 +708,7 @@ static int _run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 					}
 				}
 			} else {
-				 if (debug) {
+				if (debug) {
 					if (!suppressErrors)
 						displayMessage( title, shareMsg );
 					else
@@ -1103,12 +1109,15 @@ static void getVMCommand( int launchMode, int argc, _TCHAR* argv[], _TCHAR **vmA
 	(*vmArgv)[dst] = NULL;
 
 	/* Program arguments */
-    /*  OS <os> + WS <ws> + ARCH <arch> + LAUNCHER <launcher> + NAME <officialName> +
-     *  + LIBRARY <library> + SHOWSPLASH <cmd> + EXITDATA <cmd> + STARTUP <jar> + OVERRIDE/APPEND + argv[] + VM + <vm> +
-     * VMARGS + vmArg + requiredVMargs
+    /*  OS <os> + WS <ws> + ARCH <arch> + SHOWSPLASH <cmd> + LAUNCHER <program> + NAME <officialName>
+     *  + LIBRARY <eclipseLibrary> + STARTUP <jarFile> + PROTECT <protectMode> + APPEND/OVERRIDE + NORESTART
+     *  + EXITDATA <sharedId> + argv[] + VM <jniLib/javaVM> + VMARGS + vmArg[] + eeVMarg[] + reqVMarg[]
      *  + NULL)
      */
-    totalProgArgs  = 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 1 + argc + 2 + 1 + nVMarg + nEEargs + nReqVMarg + 1;
+    totalProgArgs = 2 + 2 + 2 + 2 + 2 + 2
+                  + 2 + 2 + 2 + 1 + 1
+                  + 2 + argc + 2 + 1 + nVMarg + nEEargs + nReqVMarg
+                  + 1;
 	*progArgv = malloc( totalProgArgs * sizeof( _TCHAR* ) );
     dst = 0;
 
@@ -1156,6 +1165,11 @@ static void getVMCommand( int launchMode, int argc, _TCHAR* argv[], _TCHAR **vmA
 
 	/* override or append vm args */
 	(*progArgv)[ dst++ ] = appendVmargs ? APPEND_VMARGS : OVERRIDE_VMARGS;
+
+	/* 'No restart' argument, if applicable. */
+	if (noRestart) {
+		(*progArgv)[ dst++ ] = LAUNCHER_NORESTART;
+	}
 
 	/* Append the exit data command. */
 	if (sharedID) {
