@@ -29,6 +29,7 @@ import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.hooks.DevClassLoadingHook;
 import org.eclipse.osgi.internal.hooks.EclipseLazyStarter;
+import org.eclipse.osgi.internal.hooks.ServiceLoaderMediatorHook;
 import org.eclipse.osgi.internal.signedcontent.SignedBundleHook;
 import org.eclipse.osgi.internal.weaving.WeavingHookConfigurator;
 import org.eclipse.osgi.util.ManifestElement;
@@ -134,6 +135,7 @@ public final class HookRegistry {
 			addClassLoaderHook(new DevClassLoadingHook(container.getConfiguration()));
 			addClassLoaderHook(new EclipseLazyStarter(container));
 			addClassLoaderHook(new WeavingHookConfigurator(container));
+			addClassLoaderHook(new ServiceLoaderMediatorHook());
 			configurators.add(SignedBundleHook.class.getName());
 			configurators.add(CDSHookConfigurator.class.getName());
 			loadConfigurators(configurators, errors);
