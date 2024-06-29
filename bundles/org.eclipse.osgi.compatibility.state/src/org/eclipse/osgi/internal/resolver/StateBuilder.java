@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2020 IBM Corporation and others.
+ * Copyright (c) 2003, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,7 +25,9 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
 import org.eclipse.osgi.internal.framework.FilterImpl;
 import org.eclipse.osgi.internal.messages.Msg;
@@ -47,6 +49,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
 import org.osgi.framework.namespace.BundleNamespace;
+import org.osgi.framework.namespace.ExecutionEnvironmentNamespace;
 import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.resource.Namespace;
 
@@ -128,8 +131,6 @@ public class StateBuilder {
 		}
 		result.setLocation(location);
 		result.setPlatformFilter(manifest.get(StateImpl.ECLIPSE_PLATFORMFILTER));
-		String[] brees = ManifestElement.getArrayFromList(manifest.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT));
-		result.setExecutionEnvironments(brees);
 		ManifestElement[] host = ManifestElement.parseHeader(Constants.FRAGMENT_HOST, manifest.get(Constants.FRAGMENT_HOST));
 		if (host != null)
 			result.setHost(createHostSpecification(host[0], state));
@@ -146,7 +147,10 @@ public class StateBuilder {
 		String[][] genericAliases = getGenericAliases(state);
 		ManifestElement[] genericRequires = getGenericRequires(manifest, genericAliases);
 		ManifestElement[] osgiRequires = ManifestElement.parseHeader(Constants.REQUIRE_CAPABILITY, manifest.get(Constants.REQUIRE_CAPABILITY));
-		result.setGenericRequires(createGenericRequires(genericRequires, osgiRequires, brees));
+		String[] brees = ManifestElement.getArrayFromList(manifest.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT));
+		GenericSpecification[] genericRequiresSpecs = createGenericRequires(genericRequires, osgiRequires, brees);
+		result.setExecutionEnvironments(getDeclaredRequiredEE(genericRequiresSpecs));
+		result.setGenericRequires(genericRequiresSpecs);
 		ManifestElement[] genericCapabilities = getGenericCapabilities(manifest, genericAliases);
 		ManifestElement[] osgiCapabilities = ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, manifest.get(Constants.PROVIDE_CAPABILITY));
 		result.setGenericCapabilities(createGenericCapabilities(genericCapabilities, osgiCapabilities, result));
@@ -940,5 +944,52 @@ public class StateBuilder {
 			directives.remove(Constants.FRAGMENT_ATTACHMENT_DIRECTIVE);
 		result.setDirectives(directives);
 		return result;
+	}
+
+	/**
+	 * The required execution environments are declared via the
+	 * filter attribute of the generic capabilities. Those specs
+	 * contain both capabilties that are declared with the
+	 * {@link Constants#BUNDLE_REQUIREDEXECUTIONENVIRONMENT} or
+	 * the {@link Constants#REQUIRE_CAPABILITY} header.
+	 * 
+	 * @see {@link #getEEFromFilter(String)}
+	 */
+	private static String[] getDeclaredRequiredEE(GenericSpecification[] genericRequiresSpecs) {
+		if (genericRequiresSpecs == null) {
+			return null;
+		}
+		return Stream.of(genericRequiresSpecs) //
+				.map(GenericSpecification::getMatchingFilter) //
+				.map(StateBuilder::getEEFromFilter) //
+				.filter(Objects::nonNull) //
+				.toArray(String[]::new);
+	}
+
+	/**
+	 * Extracts the execution environment of the given filter specification
+	 * using the environment namespace (e.g. JavaSE) and version attribute
+	 * (e.g. 17). Both values are joined with a '-'. If the filter doesn't
+	 * contain either value or if the filter is otherwise invalid, {@code null}
+	 * is returned.
+	 * 
+	 * @see ExecutionEnvironmentNamespace#EXECUTION_ENVIRONMENT_NAMESPACE
+	 * @see ExecutionEnvironmentNamespace#CAPABILITY_VERSION_ATTRIBUTE
+	 */
+	private static String getEEFromFilter(String filterSpec) {
+		if (filterSpec == null) {
+			return null;
+		}
+		try {
+			FilterImpl filter = FilterImpl.newInstance(filterSpec);
+			String ee = filter.getPrimaryKeyValue(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE);
+			String version = filter.getPrimaryKeyValue(ExecutionEnvironmentNamespace.CAPABILITY_VERSION_ATTRIBUTE);
+			if (ee != null && version != null) {
+				return ee + '-' + version;
+			}
+		} catch (InvalidSyntaxException e) {
+			// Already validated by createOSGiRequires(...)
+		}
+		return null;
 	}
 }
