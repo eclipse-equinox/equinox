@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2018 IBM Corporation and others.
+ * Copyright (c) 2008, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Christian Georgi (SAP SE) - Bug 460430: environment variable for secure store
+ *     Maxime Porhel (Obeo) - #652: handle @user.home in -eclipse.password file retrieval
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.storage;
 
@@ -170,7 +171,13 @@ public class SecurePreferencesMapper {
 		if (arg == null || arg.isEmpty()) {
 			return options;
 		}
-		Path file = Path.of(arg);
+		
+		String path = arg;
+		if (path.startsWith('@' + USER_HOME)) {
+			path = System.getProperty(USER_HOME, "") + path.substring(USER_HOME.length() + 1); //$NON-NLS-1$
+		}
+		
+		Path file = Path.of(path);
 		if (!Files.isReadable(file)) {
 			String msg = NLS.bind(SecAuthMessages.unableToReadPswdFile, arg);
 			AuthPlugin.getDefault().logError(msg, null);
