@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Collections;
@@ -283,7 +284,7 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 		InputStream is = entryURL.openStream();
 		is.close();
 
-		String encodeEntry = URLEncoder.encode(entryName, "UTF-8");
+		String encodeEntry = URLEncoder.encode(entryName, StandardCharsets.UTF_8);
 		String urlString = entryURL.toExternalForm();
 		urlString = urlString.substring(0, urlString.indexOf(entryName)) + encodeEntry;
 		URL encodedURL = new URL(urlString);
