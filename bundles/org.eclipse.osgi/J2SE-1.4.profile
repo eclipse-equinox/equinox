@@ -175,6 +175,6 @@ org.osgi.framework.system.capabilities = \
 osgi.java.profile.name = J2SE-1.4
 org.eclipse.jdt.core.compiler.compliance=1.4
 org.eclipse.jdt.core.compiler.source=1.3
-org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.2
+org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.4
 org.eclipse.jdt.core.compiler.problem.assertIdentifier=warning
 org.eclipse.jdt.core.compiler.problem.enumIdentifier=warning
