@@ -16,19 +16,18 @@
 def runOnNativeBuildAgent(String platform, Closure body) {
 	def final nativeBuildStageName = 'Perform native launcher build'
 	if (platform == 'gtk.linux.x86_64') {
-		podTemplate(inheritFrom: 'centos-latest' /* inhert general configuration */, containers: [
+		podTemplate(containers: [
 			containerTemplate(name: 'jnlp', image: 'eclipsecbi/jiro-agent-centos-8',
 				resourceRequestCpu:'1000m', resourceRequestMemory:'512Mi',
-				resourceLimitCpu:'2000m', resourceLimitMemory:'4096Mi',
-				alwaysPullImage: true, command: 'cat', ttyEnabled: true)
+				resourceLimitCpu:'2000m', resourceLimitMemory:'4096Mi'
+			)
 		]) {
-			node(POD_LABEL) { stage(nativeBuildStageName) { container('jnlp') {
+			node(POD_LABEL) { stage(nativeBuildStageName) {
 				sh '''
-					#TODO try dnf
-					#sudo yum -y install gtk3-devel
+					yum -y install gtk3-devel
 				'''
 				body()
-			} } }
+			} }
 		}
 	} else {
 		if (platform == 'cocoa.macosx.x86_64') {
