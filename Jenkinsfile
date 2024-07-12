@@ -91,9 +91,9 @@ pipeline {
 		label "centos-latest"
 	}
 	parameters {
-		booleanParam(name: 'forceNativeBuilds-cocoa', defaultValue: false, description: 'Enforce a re-build of Equinox\' launcher binaries for Mac OS X. Will push the built binaries to the master branch, unless \'skipCommit\' is set.')
-		booleanParam(name: 'forceNativeBuilds-gtk', defaultValue: false, description: 'Enforce a re-build of Equinox\' launcher binaries for Linux. Will push the built binaries to the master branch, unless \'skipCommit\' is set.')
-		booleanParam(name: 'forceNativeBuilds-win32', defaultValue: false, description: 'Enforce a re-build of Equinox\' launcher binaries for Windows. Will push the built binaries to the master branch, unless \'skipCommit\' is set.')
+		booleanParam(name: 'forceNativeBuilds-cocoa', defaultValue: true, description: 'Enforce a re-build of Equinox\' launcher binaries for Mac OS X. Will push the built binaries to the master branch, unless \'skipCommit\' is set.')
+		booleanParam(name: 'forceNativeBuilds-gtk', defaultValue: true, description: 'Enforce a re-build of Equinox\' launcher binaries for Linux. Will push the built binaries to the master branch, unless \'skipCommit\' is set.')
+		booleanParam(name: 'forceNativeBuilds-win32', defaultValue: true, description: 'Enforce a re-build of Equinox\' launcher binaries for Windows. Will push the built binaries to the master branch, unless \'skipCommit\' is set.')
 		booleanParam(name: 'skipCommit', defaultValue: false, description: 'Stops committing to equinox and equinox binaries repo at the end. Useful in debugging.')
 	}
 	stages {
@@ -173,7 +173,7 @@ pipeline {
 				axes {
 					axis {
 						name 'PLATFORM'
-						values 'cocoa.macosx.aarch64' , 'cocoa.macosx.x86_64', 'gtk.linux.aarch64', 'gtk.linux.ppc64le', 'gtk.linux.x86_64', 'win32.win32.aarch64', 'win32.win32.x86_64'
+						values 'gtk.linux.aarch64', 'gtk.linux.x86_64', 'win32.win32.x86_64'
 					}
 				}
 				stages {
