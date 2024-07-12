@@ -16,33 +16,25 @@
 def runOnNativeBuildAgent(String platform, Closure body) {
 	def final nativeBuildStageName = 'Perform native launcher build'
 	if (platform == 'gtk.linux.x86_64') {
-		return podTemplate(yaml: '''
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-  - name: "launcherbuild"
-    image: "eclipse/platformreleng-centos-swt-build:8"
-    imagePullPolicy: "Always"
-    command:
-    - cat
-    tty: true
-    volumeMounts:
-    - name: tools
-      mountPath: /opt/tools
-  volumes:
-  - name: tools
-    persistentVolumeClaim:
-      claimName: tools-claim-jiro-releng
-  - name: volume-known-hosts
-    configMap:
-      name: known-hosts
-''') { node(POD_LABEL) { stage(nativeBuildStageName) { container('launcherbuild') { body() } } } }
+		podTemplate(inheritFrom: 'centos-8', containers: [
+			containerTemplate(name: 'jnlp', image: 'eclipsecbi/jiro-agent-centos-8',
+				resourceRequestCpu:'1000m', resourceRequestMemory:'512Mi',
+				resourceLimitCpu:'2000m', resourceLimitMemory:'4096Mi'
+			)
+		]) { node(POD_LABEL) { stage(nativeBuildStageName) { container('jnlp') {
+			sh '''
+				#TODO try dnf
+				#sudo yum -y install gtk3-devel
+			'''
+			body.call()
+		} } } }
 	} else {
 		if (platform == 'cocoa.macosx.x86_64') {
 			platform = 'cocoa.macosx.aarch64'
 		}
-		return node('native.builder-' + platform) { stage(nativeBuildStageName) { body() } }
+		// See the Definition of the eclipse.platform Jenkins instance in
+		// https://github.com/eclipse-cbi/jiro/tree/master/instances/eclipse.platform
+		node('native.builder-' + platform) { stage(nativeBuildStageName) { body() } }
 	}
 }
 
