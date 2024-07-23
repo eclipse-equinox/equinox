@@ -16,33 +16,24 @@
 def runOnNativeBuildAgent(String platform, Closure body) {
 	def final nativeBuildStageName = 'Perform native launcher build'
 	if (platform == 'gtk.linux.x86_64') {
-		return podTemplate(yaml: '''
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-  - name: "launcherbuild"
-    image: "eclipse/platformreleng-centos-swt-build:8"
-    imagePullPolicy: "Always"
-    command:
-    - cat
-    tty: true
-    volumeMounts:
-    - name: tools
-      mountPath: /opt/tools
-  volumes:
-  - name: tools
-    persistentVolumeClaim:
-      claimName: tools-claim-jiro-releng
-  - name: volume-known-hosts
-    configMap:
-      name: known-hosts
-''') { node(POD_LABEL) { stage(nativeBuildStageName) { container('launcherbuild') { body() } } } }
+		podTemplate(containers: [
+			containerTemplate(name: 'jnlp', image: 'eclipsecbi/jiro-agent-centos-8',
+				resourceRequestCpu:'1000m', resourceRequestMemory:'512Mi',
+				resourceLimitCpu:'2000m', resourceLimitMemory:'4096Mi'
+			)
+		]) { node(POD_LABEL) { stage(nativeBuildStageName) {
+			sh '''
+				yum -y install gtk3-devel
+			'''
+			body.call()
+		} } }
 	} else {
 		if (platform == 'cocoa.macosx.x86_64') {
 			platform = 'cocoa.macosx.aarch64'
 		}
-		return node('native.builder-' + platform) { stage(nativeBuildStageName) { body() } }
+		// See the Definition of the eclipse.platform Jenkins instance in
+		// https://github.com/eclipse-cbi/jiro/tree/master/instances/eclipse.platform
+		node('native.builder-' + platform) { stage(nativeBuildStageName) { body() } }
 	}
 }
 
@@ -99,9 +90,9 @@ pipeline {
 		label "centos-latest"
 	}
 	parameters {
-		booleanParam(name: 'forceNativeBuilds-cocoa', defaultValue: false, description: 'Enforce a re-build of Equinox\' launcher binaries for Mac OS X. Will push the built binaries to the master branch, unless \'skipCommit\' is set.')
-		booleanParam(name: 'forceNativeBuilds-gtk', defaultValue: false, description: 'Enforce a re-build of Equinox\' launcher binaries for Linux. Will push the built binaries to the master branch, unless \'skipCommit\' is set.')
-		booleanParam(name: 'forceNativeBuilds-win32', defaultValue: false, description: 'Enforce a re-build of Equinox\' launcher binaries for Windows. Will push the built binaries to the master branch, unless \'skipCommit\' is set.')
+		booleanParam(name: 'forceNativeBuilds-cocoa', defaultValue: true, description: 'Enforce a re-build of Equinox\' launcher binaries for Mac OS X. Will push the built binaries to the master branch, unless \'skipCommit\' is set.')
+		booleanParam(name: 'forceNativeBuilds-gtk', defaultValue: true, description: 'Enforce a re-build of Equinox\' launcher binaries for Linux. Will push the built binaries to the master branch, unless \'skipCommit\' is set.')
+		booleanParam(name: 'forceNativeBuilds-win32', defaultValue: true, description: 'Enforce a re-build of Equinox\' launcher binaries for Windows. Will push the built binaries to the master branch, unless \'skipCommit\' is set.')
 		booleanParam(name: 'skipCommit', defaultValue: false, description: 'Stops committing to equinox and equinox binaries repo at the end. Useful in debugging.')
 	}
 	stages {
@@ -181,7 +172,7 @@ pipeline {
 				axes {
 					axis {
 						name 'PLATFORM'
-						values 'cocoa.macosx.aarch64' , 'cocoa.macosx.x86_64', 'gtk.linux.aarch64', 'gtk.linux.ppc64le', 'gtk.linux.x86_64', 'win32.win32.aarch64', 'win32.win32.x86_64'
+						values 'gtk.linux.aarch64', 'gtk.linux.x86_64', 'win32.win32.x86_64'
 					}
 				}
 				stages {
