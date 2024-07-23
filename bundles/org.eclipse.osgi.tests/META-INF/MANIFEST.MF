@@ -10,7 +10,12 @@ Require-Bundle:
  org.eclipse.test.performance,
  org.junit
 Bundle-ActivationPolicy: lazy
-Import-Package: org.osgi.service.event,
+Import-Package: org.junit.jupiter.api,
+ org.junit.jupiter.api.extension,
+ org.junit.jupiter.api.function,
+ org.junit.jupiter.api.io,
+ org.junit.platform.suite.api,
+ org.osgi.service.event,
  org.osgi.util.function,
  org.osgi.util.measurement,
  org.osgi.util.position,
