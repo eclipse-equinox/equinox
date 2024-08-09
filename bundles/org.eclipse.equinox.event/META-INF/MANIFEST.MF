@@ -13,7 +13,7 @@ Export-Package: org.eclipse.equinox.internal.event;x-internal:=true,
 Bundle-Vendor: %bundleVendor
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-17
-Service-Component: OSGI-INF/component.xml
+Service-Component: OSGI-INF/org.eclipse.equinox.internal.event.EventComponent.xml
 Bundle-ActivationPolicy: lazy
 Provide-Capability: 
  osgi.service;
