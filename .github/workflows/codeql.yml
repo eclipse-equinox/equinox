@@ -30,11 +30,11 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       with:
         fetch-depth: 0 # required for jgit timestamp provider to work
     - name: checkout equinox.binaries
-      uses: actions/checkout@v4
+      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       with:
        fetch-depth: 1 # only shallow here, we don't have jgit timestamps
        repository: eclipse-equinox/equinox.binaries
@@ -45,7 +45,7 @@ jobs:
       with:
         languages: ${{ matrix.language }}
     - name: Set up JDK 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@6a0805fcefea3d4657a47ac4c165951e33482018 # v4.2.2
       with:
         java-version: |
           8
@@ -56,11 +56,11 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Set up Maven
-      uses: stCarolas/setup-maven@v5
+      uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
       with:
         maven-version: 3.9.6
     - name: Build with Maven
-      uses: coactions/setup-xvfb@v1
+      uses: coactions/setup-xvfb@6b00cf1889f4e1d5a48635647013c0508128ee1a
       with:
        run: >- 
         mvn
