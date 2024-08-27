@@ -22,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.preferences.*;
@@ -58,8 +57,10 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	private static final String BACKUP_FILE_EXTENSION = ".bak"; //$NON-NLS-1$
 
 	private String cachedPath;
-	protected ImmutableMap properties = ImmutableMap.EMPTY;
-	protected Map<String, Object> children;
+	/** synchronized by childAndPropertyLock */
+	private ImmutableMap properties = ImmutableMap.EMPTY;
+	/** synchronized by childAndPropertyLock */
+	private Map<String, Object> children;
 	/**
 	 * Protects write access to properties and children.
 	 */
@@ -125,12 +126,11 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	protected IEclipsePreferences addChild(String childName, IEclipsePreferences child) {
-		// Thread safety: synchronize method to protect modification of children field
 		synchronized (childAndPropertyLock) {
 			if (children == null) {
-				children = new ConcurrentHashMap<>();
+				children = new HashMap<>();
 			}
-			children.put(childName, child == null ? (Object) childName : child);
+			children.put(childName, child == null ? childName : child);
 			return child;
 		}
 	}
@@ -469,7 +469,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			if (children == null) {
 				return false;
 			}
-			return children.get(childName) != null;
+			return children.containsKey(childName);
 		}
 	}
 
@@ -493,8 +493,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			if (!create) {
 				return null;
 			}
+			return addChild(key, create(this, key, context));
 		}
-		return addChild(key, create(this, key, context));
 	}
 
 	/**
@@ -1143,5 +1143,30 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 
 	void setDescriptor(ScopeDescriptor descriptor) {
 		this.descriptor = descriptor;
+	}
+
+	protected IEclipsePreferences getOrCreate(String scope) {
+		IEclipsePreferences child;
+		synchronized (childAndPropertyLock) {
+			if (children == null) {
+				child = null;
+			} else {
+				Object value = children.get(scope);
+				if (value == null) {
+					child = null;
+				} else if (value instanceof IEclipsePreferences eclipsePreferences) {
+					child = eclipsePreferences;
+				} else {
+					// lazy initialization
+					child = PreferencesService.getDefault().createNode(scope);
+					addChild(scope, child);
+				}
+			}
+			if (child == null) {
+				child = new EclipsePreferences(this, scope);
+				addChild(scope, child);
+			}
+		}
+		return child;
 	}
 }

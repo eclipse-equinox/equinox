@@ -128,7 +128,7 @@ public class PreferencesService implements IPreferencesService {
 
 				// iterate over the preferences in this node and set them
 				// in the global space.
-				String[] keys = epNode.properties.keys();
+				String[] keys = epNode.keys();
 
 				// if this node was removed then we need to create a new one
 				if (removed) {
