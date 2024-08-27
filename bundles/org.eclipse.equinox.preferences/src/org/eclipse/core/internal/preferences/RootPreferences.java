@@ -48,23 +48,6 @@ public class RootPreferences extends EclipsePreferences {
 		}
 	}
 
-	private synchronized IEclipsePreferences getChild(String key) {
-		if (children == null) {
-			return null;
-		}
-		Object value = children.get(key);
-		if (value == null) {
-			return null;
-		}
-		if (value instanceof IEclipsePreferences eclipsePreferences) {
-			return eclipsePreferences;
-		}
-		// lazy initialization
-		IEclipsePreferences child = PreferencesService.getDefault().createNode(key);
-		addChild(key, child);
-		return child;
-	}
-
 	@Override
 	public Preferences node(String path) {
 		return getNode(path, true); // create if not found
@@ -79,11 +62,7 @@ public class RootPreferences extends EclipsePreferences {
 		String scope = path.substring(startIndex, endIndex == -1 ? path.length() : endIndex);
 		IEclipsePreferences child;
 		if (create) {
-			child = getChild(scope);
-			if (child == null) {
-				child = new EclipsePreferences(this, scope);
-				addChild(scope, child);
-			}
+			child = getOrCreate(scope);
 		} else {
 			child = getChild(scope, null, false);
 			if (child == null) {
