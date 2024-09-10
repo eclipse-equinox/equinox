@@ -59,6 +59,13 @@
          version="0.0.0"/>
 
    <plugin
+         id="org.eclipse.equinox.launcher.gtk.linux.riscv64"
+         os="linux"
+         ws="gtk"
+         arch="riscv64"
+         version="0.0.0"/>
+
+   <plugin
          id="org.eclipse.equinox.launcher.win32.win32.aarch64"
          os="win32"
          ws="win32"

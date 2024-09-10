@@ -35,6 +35,10 @@ Bundle-NativeCode: nativefile2.txt;
  processor=loongarch;
  osname=Linux,
  nativefile2.txt;
+ processor=riscv64;
+ processor=riscv;
+ osname=Linux,
+ nativefile2.txt;
  processor=Sparc;
  osname=Solaris;
  osname=SunOS,
