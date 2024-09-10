@@ -126,6 +126,14 @@
 		</copy>
 		<chmod perm="755" dir="${feature.base}/linux.gtk.loongarch64/${collectingFolder}" includes="launcher" />
 	</target>
+	<target name="rootFileslinux_gtk_riscv64">
+		<mkdir dir="${feature.base}/linux.gtk.riscv64/${collectingFolder}"/>
+		<copy todir="${feature.base}/linux.gtk.riscv64/${collectingFolder}" failonerror="true" overwrite="true">
+			<fileset dir="${basedir}/bin/gtk/linux/riscv64" includes="**"			/>
+			<fileset dir="${basedir}/gtk_root" includes="**"			/>
+		</copy>
+		<chmod perm="755" dir="${feature.base}/linux.gtk.riscv64/${collectingFolder}" includes="launcher" />
+	</target>
 	<target name="rootFileslinux_gtk_ia64">
 		<mkdir dir="${feature.base}/linux.gtk.ia64/${collectingFolder}"/>
 		<copy todir="${feature.base}/linux.gtk.ia64/${collectingFolder}" failonerror="true" overwrite="true">
@@ -168,6 +176,7 @@
 		<antcall target="rootFileslinux_gtk_ppc64le"/>
 		<antcall target="rootFileslinux_gtk_aarch64"/>
 		<antcall target="rootFileslinux_gtk_x86_64"/>
+		<antcall target="rootFileslinux_gtk_riscv64"/>
 	</target>
 
 	<target name="zip.distribution" depends="init" description="Create a zip containing all the plug-ins and features for the feature: org.eclipse.platform.launchers.">

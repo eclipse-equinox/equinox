@@ -109,6 +109,10 @@ case $defaultOS in
 				defaultOSArch="loongarch64"
 				defaultJava=DEFAULT_JAVA_EXEC
 				;;
+			"riscv64")
+				defaultOSArch="riscv64"
+				defaultJava=DEFAULT_JAVA_EXEC
+				;;
 			*)
 				echo "*** Unknown MODEL <${MODEL}>"
 				;;
