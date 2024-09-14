@@ -216,6 +216,7 @@ pipeline {
 									dir('libs') {
 										stash "equinox.binaries.${PLATFORM}"
 									}
+									cleanWs() // workspace not cleaned by default
 								}
 								dir("libs/${PLATFORM}") {
 									unstash "equinox.binaries.${PLATFORM}"
