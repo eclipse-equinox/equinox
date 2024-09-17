@@ -268,7 +268,7 @@ public final class ModuleContainer implements DebugOptionsListener {
 	 * @param resource the {@link Resource} for which a string representation is
 	 *                 desired
 	 * 
-	 * @since 3.21
+	 * @since 3.22
 	 */
 	public static String toString(Resource resource) {
 		String id = null;
