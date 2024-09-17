@@ -107,7 +107,7 @@ Bundle-Activator: org.eclipse.osgi.internal.framework.SystemBundleActivator
 Bundle-Description: %systemBundle
 Bundle-Copyright: %copyright
 Bundle-Vendor: %eclipse.org
-Bundle-Version: 3.21.100.qualifier
+Bundle-Version: 3.22.0.qualifier
 Bundle-Localization: systembundle
 Bundle-DocUrl: http://www.eclipse.org
 Eclipse-ExtensibleAPI: true
