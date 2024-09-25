@@ -61,10 +61,8 @@ jobs:
       with:
         maven-version: 3.9.9
     - name: Build
-      uses: coactions/setup-xvfb@6b00cf1889f4e1d5a48635647013c0508128ee1a
-      with:
-       working-directory: equinox
-       run: >- 
+      working-directory: equinox
+      run: >- 
         mvn
         --batch-mode
         -Pbree-libs
