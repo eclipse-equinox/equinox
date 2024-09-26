@@ -33,6 +33,7 @@ jobs:
       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       with:
         fetch-depth: 0 # required for jgit timestamp provider to work
+        path: equinox
     - name: checkout equinox.binaries
       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       with:
@@ -58,17 +59,16 @@ jobs:
     - name: Set up Maven
       uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
       with:
-        maven-version: 3.9.6
-    - name: Build with Maven
+        maven-version: 3.9.9
+    - name: Build
       uses: coactions/setup-xvfb@6b00cf1889f4e1d5a48635647013c0508128ee1a
       with:
+       working-directory: equinox
        run: >- 
         mvn
         --batch-mode
         -Pbree-libs
         -Papi-check
-        -Dcompare-version-with-baselines.skip=false
-        -Dmaven.test.failure.ignore=true
         -Dequinox.binaries.loc=${{ github.workspace }}/equinox.binaries
         -DskipTests=true
         clean verify

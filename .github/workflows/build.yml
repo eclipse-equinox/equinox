@@ -11,8 +11,6 @@ on:
 
 jobs:
   build:
-    name: Build ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.runner-os }}
     strategy:
       fail-fast: false
       matrix:
@@ -20,6 +18,8 @@ jobs:
           - { name: Linux, runner-os: ubuntu-latest, ws: gtk, os: linux, native-extension: so }
           - { name: Windows, runner-os: windows-2019, ws: win32, os: win32, native-extension: dll }
           - { name: MacOS, runner-os: macos-13, ws: cocoa, os: macosx, native-extension: so }
+    name: Build ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.runner-os }}
     steps:
     - uses: actions/checkout@v4
       with:
@@ -45,13 +45,13 @@ jobs:
     - name: Set up Maven
       uses: stCarolas/setup-maven@v5
       with:
-        maven-version: 3.9.6
+        maven-version: 3.9.9
     - name: Install GTK requirements
       if: ${{ matrix.config.ws == 'gtk'}}
       run: |
         sudo apt-get update -q -y 
         sudo apt-get install -q -y libgtk-3-dev 
-    - name: Build with Maven
+    - name: Build
       uses: coactions/setup-xvfb@v1
       env:
         EQUINOX_BINARIES_LOC: ${{ github.workspace }}/equinox.binaries
@@ -101,7 +101,7 @@ jobs:
     - name: Set up Maven
       uses: stCarolas/setup-maven@v5
       with:
-        maven-version: 3.9.6
+        maven-version: 3.9.9
     - name: Run OSGi TCKs
       run: >- 
         mvn
