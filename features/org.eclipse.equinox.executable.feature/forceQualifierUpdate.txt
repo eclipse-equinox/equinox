@@ -12,3 +12,4 @@ Bug 550714 - Comparator errors in I20190903-1110
 Bug 550674 - Specify hardened runtime for Mac app signing
 Bug 551174 - Comparator errors in 4.14 I build - I20190917-1800
 Bug 578952 - Add LoongArch64 Support
+Pick up linux.riscv64 support - https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/2310
