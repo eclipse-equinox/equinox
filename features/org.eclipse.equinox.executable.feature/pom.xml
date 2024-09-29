@@ -91,20 +91,6 @@
           </execution>
         </executions>
       </plugin>
-      <!-- Temporary work-around until gtk.linux.riscv64 environment is enabled in general. -->
-       <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>target-platform-configuration</artifactId>
-        <configuration>
-          <environments combine.children="append">
-            <environment>
-              <os>linux</os>
-              <ws>gtk</ws>
-              <arch>riscv64</arch>
-            </environment>
-          </environments>
-        </configuration>
-       </plugin>
     </plugins>
   </build>
 
