@@ -53,6 +53,7 @@
 #define OLD_ARGS_START     _T_ECLIPSE("--launcher.oldUserArgsStart")
 #define OLD_ARGS_END       _T_ECLIPSE("--launcher.oldUserArgsEnd")
 #define SKIP_OLD_ARGS      _T_ECLIPSE("--launcher.skipOldUserArgs")
+#define ADDITIONAL_VMARGS  _T_ECLIPSE("--launcher.additionalVmargs")
 
 #define XXPERMGEN          _T_ECLIPSE("-XX:MaxPermSize=")
 #define ADDMODULES         _T_ECLIPSE("--add-modules")
@@ -152,6 +153,9 @@ extern void * findSymbol( void * handle, _TCHAR * symbol );
 
 /* check the given path and attempt to make it absolute if it is relative */
 extern _TCHAR* checkPath( _TCHAR* path, _TCHAR* programDir, int reverseOrder );
+
+/* expands environment-variable strings and replaces them with the values defined for the current user */
+extern _TCHAR* expandPath( _TCHAR* path );
 
 extern _TCHAR * lastDirSeparator(_TCHAR* str);
 

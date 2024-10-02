@@ -256,6 +256,7 @@ static _TCHAR*  defaultAction = NULL;			/* default action for non '-' command li
 static _TCHAR*  iniFile       = NULL;			/* the launcher.ini file set if  --launcher.ini was specified */
 static _TCHAR*  gtkVersionString = NULL;        /* GTK+ version specified by --launcher.GTK_version */
 static _TCHAR*  protectMode   = NULL;			/* Process protectMode specified via -protect, to trigger the reading of eclipse.ini in the configuration (Mac specific currently) */
+static _TCHAR** additionalVmargsPath = NULL;    /* List of locations containing a file with extra arguments for the JVM */
 
 /* variables for ee options */
 static _TCHAR* eeExecutable = NULL;
@@ -282,6 +283,7 @@ typedef struct
 #define ADJUST_PATH		4  	/* value is a path, do processing on relative paths to try and make them absolute */
 #define VALUE_IS_LIST	8  	/* value is a pointer to a tokenized _TCHAR* string for EE files, or a _TCHAR** list for the command line */
 #define INVERT_FLAG    16   /* invert the meaning of a flag, i.e. reset it */
+#define EXPAND_PATH	   32  	/* value is a path, expand environment variables, if present */
 
 static Option options[] = {
     { CONSOLE,		&needConsole,	VALUE_IS_FLAG,	0 },
@@ -307,7 +309,8 @@ static Option options[] = {
     { DEFAULTACTION,&defaultAction, 0,			2 },
     { WS,			&wsArg,			0,			2 },
     { GTK_VERSION,  &gtkVersionString, 0,       2 },
-	{ PROTECT,		&protectMode,	0,			2 } };
+	{ PROTECT,		&protectMode,	0,			2 },
+    { ADDITIONAL_VMARGS, &additionalVmargsPath, ADJUST_PATH | EXPAND_PATH | VALUE_IS_LIST, -1 } };
 
 static int optionsSize = (sizeof(options) / sizeof(options[0]));
 
@@ -864,6 +867,8 @@ static void parseArgs(int* pArgc, _TCHAR* argv[]) {
 							_TCHAR * next = argv[index + i + 1];
 							if (option->flag & ADJUST_PATH)
 								next = checkPath(next, getProgramDir(), 0);
+							if (option->flag & EXPAND_PATH)
+								next = expandPath(next);
 							if (next[0] != _T_ECLIPSE('-')) {
 								if (option->flag & VALUE_IS_LIST)
 									(*((_TCHAR***) option->value))[i] = next;
@@ -996,15 +1001,31 @@ static _TCHAR** extractVMArgs(_TCHAR** launcherIniValues) {
 	return NULL;
 }
 
+/** Attempts to read the first configuration file
+ *  If the file is not found, it will try the next one in the list
+ *  Returns the arguments read from the file or NULL if no file was found */
+static _TCHAR** getAdditionalVMArgs() {
+    int argc = 0;
+    _TCHAR** argv = NULL;
+
+    for (_TCHAR** path = additionalVmargsPath; path; path++) {
+        if (readConfigFile(*path, &argc, &argv) == 0)
+            break;
+    }
+
+    return argv;
+}
+
 //Reads the installation eclipse.ini file, reads a eclipse.ini from the configuration location,
 //and merge the VM arguments
 static _TCHAR** mergeConfigurationFilesVMArgs() {
 	_TCHAR** userLauncherIniVMArgs = extractVMArgs(getLauncherIniFileFromConfiguration());
 	_TCHAR** configVMArgs = extractVMArgs(getConfigArgs());
+    _TCHAR** additionalVMArgs = getAdditionalVMArgs();
 
-	/* This always allocates new memory so we don't need to guess if it is safe
-	 * to free later  */
-	return concatArgs(configVMArgs, userLauncherIniVMArgs);
+    /* This always allocates new memory so we don't need to guess if it is safe
+     * to free later  */
+	return concatArgs(concatArgs(configVMArgs, userLauncherIniVMArgs), additionalVMArgs);
 }
 
 static void adjustVMArgs(_TCHAR *javaVM, _TCHAR *jniLib, _TCHAR **vmArgv[]) {

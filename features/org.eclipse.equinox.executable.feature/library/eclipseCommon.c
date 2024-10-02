@@ -541,6 +541,46 @@ _TCHAR* checkPath( _TCHAR* path, _TCHAR* programDir, int reverseOrder )
     return result != NULL ? result : path;
 }
 
+_TCHAR* expandPath(_TCHAR* inPath) {
+    _TCHAR buffer[MAX_PATH_LENGTH];
+    _TCHAR variable[MAX_PATH_LENGTH];
+    _TCHAR value[MAX_PATH_LENGTH];
+
+    _TCHAR* dstCur = &buffer[0];
+    _TCHAR* dstEnd = &buffer[MAX_PATH_LENGTH];
+    _TCHAR* srcCur = &inPath[0];
+
+    for(;;) {
+        _TCHAR* start = _tcschr(srcCur, _T_ECLIPSE('%'));
+        if (start == NULL) {
+            // No more variables
+            _tcsncpy_s(dstCur, dstEnd - dstCur, srcCur, _TRUNCATE);
+            return _tcsdup(buffer);
+        }
+        _TCHAR* end = _tcschr(start + 1, _T_ECLIPSE('%'));
+        if (end == NULL) {
+            // Not a variable
+            *dstCur++ = *srcCur++;
+            continue;
+        }
+        _tcsncpy_s(variable, end - start, start + 1, _TRUNCATE);
+        size_t count;
+        _tgetenv_s(&count, value, MAX_PATH_LENGTH, variable);
+        if (count > 0) {
+            // Found a variable
+            _tcsncpy_s(dstCur, dstEnd - dstCur, srcCur, start - srcCur);
+            dstCur += start - srcCur;
+            _tcsncpy_s(dstCur, dstEnd - dstCur, value, _TRUNCATE);
+            dstCur += _tcslen(value);
+        } else {
+            // Variable is not found
+            _tcsncpy_s(dstCur, dstEnd - dstCur, srcCur, end - srcCur + 1);
+            dstCur += end - srcCur + 1;
+        }
+        srcCur = end + 1;
+    }
+}
+
 _TCHAR * lastDirSeparator(_TCHAR* str) {
 #ifndef _WIN32
 	return _tcsrchr(str, dirSeparator);
