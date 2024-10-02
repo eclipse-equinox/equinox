@@ -541,6 +541,44 @@ _TCHAR* checkPath( _TCHAR* path, _TCHAR* programDir, int reverseOrder )
     return result != NULL ? result : path;
 }
 
+_TCHAR* expandPath(_TCHAR* inPath) {
+    _TCHAR buffer[MAX_PATH_LENGTH];
+    _TCHAR variable[MAX_PATH_LENGTH];
+
+    _TCHAR* dstCur = &buffer[0];
+    _TCHAR* srcCur = &inPath[0];
+
+    for(;;) {
+        _TCHAR* start = _tcschr(srcCur, _T_ECLIPSE('%'));
+        if (start == NULL) {
+            // No more variables
+            _tcscpy(dstCur, srcCur);
+            return _tcsdup(buffer);
+        }
+        _TCHAR* end = _tcschr(start + 1, _T_ECLIPSE('%'));
+        if (end == NULL) {
+            // Not a variable
+            *dstCur++ = *srcCur++;
+            continue;
+        }
+        _tcsncpy(variable, start + 1, end - start);
+        variable[end - start - 1] = _T_ECLIPSE('\0');
+        _TCHAR* value = _tgetenv(variable);
+        if (value != NULL) {
+            // Found a variable
+            _tcsncpy(dstCur, srcCur, start - srcCur);
+            dstCur += start - srcCur;
+            _tcscpy(dstCur, value);
+            dstCur += _tcslen(value);
+        } else {
+            // Variable is not found
+            _tcsncpy(dstCur, srcCur, end - srcCur + 1);
+            dstCur += end - srcCur + 1;
+        }
+        srcCur = end + 1;
+    }
+}
+
 _TCHAR * lastDirSeparator(_TCHAR* str) {
 #ifndef _WIN32
 	return _tcsrchr(str, dirSeparator);
