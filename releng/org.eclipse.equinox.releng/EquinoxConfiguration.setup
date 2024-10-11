@@ -25,7 +25,7 @@
         value="equinox"/>
     <productVersion
         href="index:/org.eclipse.setup#//@productCatalogs[name='org.eclipse.applications']/@products[name='eclipse.platform.sdk']/@versions[name='latest']"/>
-    <description>The Equinox installation provides the latest tools needed to work with the Eclipse Equinox's source code.</description>
+    <description>The Equinox installation provides the latest tools needed to work with the project's source code.</description>
   </installation>
   <workspace
       name="equinox.workspace"
@@ -61,29 +61,24 @@
             value="Equinox"/>
       </setupTask>
     </setupTask>
-    <setupTask
-        xsi:type="setup:VariableTask"
-        name="eclipse.git.authentication.style"
-        defaultValue="anonymous"/>
     <stream
         href="index:/org.eclipse.setup#//@projectCatalogs[name='org.eclipse']/@projects[name='equinox']/@projects[name='binaries']/@streams[name='master']"/>
     <stream
         href="index:/org.eclipse.setup#//@projectCatalogs[name='org.eclipse']/@projects[name='equinox']/@projects[name='core']/@streams[name='master']"/>
-    <stream
-        href="index:/org.eclipse.setup#//@projectCatalogs[name='org.eclipse']/@projects[name='equinox']/@projects[name='p2']/@streams[name='master']"/>
-    <description>The Equinox workspace provides the source code of the Equinox project.</description>
+    <description>The Equinox workspace provides all the source code of the project.</description>
   </workspace>
   <description>
     &lt;p>
-    The &lt;a href=&quot;https://www.eclipse.org/equinox/&quot;/>Equinox&lt;/a> configuration provisions a dedicated development environment 
-    for the complete set of source projects of the &lt;a href=&quot;https://projects.eclipse.org/projects/eclipse.equinox&quot;>Equinox project&lt;/a>.
+    The &lt;a href=&quot;https://www.eclipse.org/equinox/&quot;/>Equinox&lt;/a> configuration provisions a dedicated development environment for the complete set of projects that comprise the Equinox framework,
+    i.e. the projects that are contained in the &lt;a href=&quot;https://github.com/eclipse-equinox/equinox&quot;>equinox&lt;/a> repository.
     &lt;/p>
     &lt;p>
-    All the source projects from &lt;a href=&quot;https://github.com/eclipse-equinox&quot;>Equinox's Github Repositories&lt;/a>
-    are available, organized into working sets, and ready for contribution.
+    The installation is based on the latest successful integration build of the &lt;code>Eclipse Platform SDK&lt;/code>,
+    the PDE target platform, like the installation, is also based on the latest integration build,
+    and the API baseline is based on the most recent release.
+    &lt;p>
     &lt;/p>
-    &lt;/p>
-    Please &lt;a href=&quot;https://wiki.eclipse.org/Eclipse_Platform_SDK_Provisioning&quot;>read the analogous tutorial instructions&lt;/a> for the Eclipse Platform SDK's configuration for more details.
+    Please &lt;a href=&quot;https://wiki.eclipse.org/Eclipse_Platform_SDK_Provisioning&quot;>read the tutorial instructions&lt;/a> for more details.
     &lt;/p>
   </description>
 </setup:Configuration>
