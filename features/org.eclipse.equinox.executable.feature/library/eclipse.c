@@ -1005,6 +1005,10 @@ static _TCHAR** extractVMArgs(_TCHAR** launcherIniValues) {
  *  If the file is not found, it will try the next one in the list
  *  Returns the arguments read from the file or NULL if no file was found */
 static _TCHAR** getAdditionalVMArgs() {
+    if (additionalVmargsPath == NULL) {
+        return NULL;
+    }
+
     int argc = 0;
     _TCHAR** argv = NULL;
 
