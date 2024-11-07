@@ -15,7 +15,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.location;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import org.eclipse.osgi.internal.messages.Msg;
@@ -50,7 +53,7 @@ public class Locker_JavaNio implements Locker {
 				System.out.println(NLS.bind(Msg.location_cannotLock, lockFile));
 			// produce a more specific message for clients
 			String specificMessage = NLS.bind(Msg.location_cannotLockNIO, new Object[] {lockFile, ioe.getMessage(), "\"-D" + LocationHelper.PROP_OSGI_LOCKING + "=none\""}); //$NON-NLS-1$ //$NON-NLS-2$
-			throw new IOException(specificMessage);
+			throw new IOException(specificMessage, ioe);
 		} catch (OverlappingFileLockException e) {
 			// handle it as null result
 			fileLock = null;
