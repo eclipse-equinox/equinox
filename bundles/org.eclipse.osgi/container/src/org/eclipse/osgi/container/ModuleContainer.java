@@ -616,7 +616,10 @@ public final class ModuleContainer implements DebugOptionsListener {
 		module.lockStateChange(ModuleEvent.UNINSTALLED);
 		State previousState;
 		try {
-			module.checkValid();
+			if (module.getState().equals(State.UNINSTALLED)) {
+				// no longer throwing an IllegalStateException here.
+				return;
+			}
 			previousState = module.getState();
 			if (Module.ACTIVE_SET.contains(module.getState())) {
 				try {

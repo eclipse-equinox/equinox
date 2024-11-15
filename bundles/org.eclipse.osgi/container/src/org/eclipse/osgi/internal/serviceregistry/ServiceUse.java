@@ -149,7 +149,7 @@ public class ServiceUse<S> {
 	 */
 	/* @GuardedBy("getLock()") */
 	boolean releaseServiceObject(final S service) {
-		if ((service == null) || (service != getCachedService())) {
+		if ((service == null) || (service != getCachedService()) && context.isValid()) {
 			throw new IllegalArgumentException(Msg.SERVICE_OBJECTS_UNGET_ARGUMENT_EXCEPTION);
 		}
 		if (debug.DEBUG_SERVICES) {

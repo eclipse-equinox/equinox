@@ -96,7 +96,7 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	@Override
 	boolean releaseServiceObject(final S service) {
 		assert isLocked();
-		if ((service == null) || !serviceObjects.containsKey(service)) {
+		if (((service == null) || !serviceObjects.containsKey(service)) && context.isValid()) {
 			throw new IllegalArgumentException(Msg.SERVICE_OBJECTS_UNGET_ARGUMENT_EXCEPTION);
 		}
 		if (debug.DEBUG_SERVICES) {

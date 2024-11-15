@@ -16,7 +16,15 @@ package org.eclipse.osgi.internal.serviceregistry;
 
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.messages.Msg;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.PrototypeServiceFactory;
+import org.osgi.framework.ServiceException;
+import org.osgi.framework.ServiceObjects;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 
 /**
  * ServiceObjects implementation.
@@ -132,13 +140,14 @@ public class ServiceObjectsImpl<S> implements ServiceObjects<S> {
 	 */
 	@Override
 	public void ungetService(S service) {
-		user.checkValid();
 		boolean removed = registration.ungetService(user, ServiceConsumer.prototypeConsumer, service);
 		if (!removed) {
 			if (registration.isUnregistered()) {
 				return;
 			}
-			throw new IllegalArgumentException(Msg.SERVICE_OBJECTS_UNGET_ARGUMENT_EXCEPTION);
+			if (user.isValid()) {
+				throw new IllegalArgumentException(Msg.SERVICE_OBJECTS_UNGET_ARGUMENT_EXCEPTION);
+			}
 		}
 	}
 
