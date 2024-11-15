@@ -25,10 +25,10 @@ import java.security.ProtectionDomain;
 import java.security.cert.Certificate;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.function.Function;
 import org.eclipse.osgi.container.ModuleRevision;
+import org.eclipse.osgi.internal.container.KeyBasedLockStore;
 import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.EquinoxConfiguration;
 import org.eclipse.osgi.internal.loader.classpath.ClasspathEntry;
@@ -61,15 +61,12 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	 * ProtectionDomains when security is disabled
 	 */
 	protected static final PermissionCollection ALLPERMISSIONS;
-	protected static final boolean REGISTERED_AS_PARALLEL;
 	static {
-		boolean registered;
 		try {
-			registered = ClassLoader.registerAsParallelCapable();
+			ClassLoader.registerAsParallelCapable();
 		} catch (Throwable t) {
-			registered = false;
+			// ignore all exceptions; substrate native image fails here
 		}
-		REGISTERED_AS_PARALLEL = registered;
 	}
 
 	static {
@@ -100,7 +97,26 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 		}
 	}
 
-	private final Map<String, Thread> classNameLocks = new HashMap<>(5);
+	private static final class ClassNameLock {
+		static final Function<String, ClassNameLock> SUPPLIER = new Function<String, ClassNameLock>() {
+			public ClassNameLock apply(String className) {
+				return new ClassNameLock(className);
+			}
+		};
+		final String name;
+
+		ClassNameLock(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String toString() {
+			return "ClassNameLock: " + name; //$NON-NLS-1$
+		}
+	}
+
+	private final KeyBasedLockStore<String, ClassNameLock> classNameLocks = new KeyBasedLockStore<>(
+			ClassNameLock.SUPPLIER);
 	private final Object pkgLock = new Object();
 
 	/**
@@ -149,12 +165,15 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 
 	/**
 	 * Returns true if this class loader implementation has been registered with the
-	 * JVM as a parallel class loader. This requires Java 7 or later.
+	 * JVM as a parallel class loader. This requires Java 7 or later. This always
+	 * returns true now that Java 8 is required.
 	 * 
 	 * @return true if this class loader implementation has been registered with the
 	 *         JVM as a parallel class loader; otherwise false is returned.
 	 */
-	public abstract boolean isRegisteredAsParallel();
+	public boolean isRegisteredAsParallel() {
+		return true;
+	}
 
 	/**
 	 * Loads a class for the bundle. First delegate.findClass(name) is called. The
@@ -284,38 +303,18 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 		// See ClasspathManager.findLocalClass(String)
 		boolean defined = false;
 		Class<?> result = null;
-		if (isRegisteredAsParallel()) {
-			// lock by class name in this case
-			boolean initialLock = lockClassName(name);
-			try {
-				result = findLoadedClass(name);
-				if (result == null) {
-					result = defineClass(name, classbytes, 0, classbytes.length, classpathEntry.getDomain());
-					defined = true;
-				}
-			} finally {
-				if (initialLock) {
-					unlockClassName(name);
-				}
-			}
-		} else {
-			// lock by class loader instance in this case
-			synchronized (this) {
-				result = findLoadedClass(name);
-				if (result == null) {
-					result = defineClass(name, classbytes, 0, classbytes.length, classpathEntry.getDomain());
-					defined = true;
-				}
+		synchronized (getClassLoadingLock(name)) {
+			result = findLoadedClass(name);
+			if (result == null) {
+				result = defineClass(name, classbytes, 0, classbytes.length, classpathEntry.getDomain());
+				defined = true;
 			}
 		}
 		return new DefineClassResult(result, defined);
 	}
 
 	public Class<?> publicFindLoaded(String classname) {
-		if (isRegisteredAsParallel()) {
-			return findLoadedClass(classname);
-		}
-		synchronized (this) {
+		synchronized (getClassLoadingLock(classname)) {
 			return findLoadedClass(classname);
 		}
 	}
@@ -427,42 +426,9 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 		getClasspathManager().loadFragments(fragments);
 	}
 
-	private boolean lockClassName(String classname) {
-		synchronized (classNameLocks) {
-			Object lockingThread = classNameLocks.get(classname);
-			Thread current = Thread.currentThread();
-			if (lockingThread == current)
-				return false;
-			boolean previousInterruption = Thread.interrupted();
-			try {
-				while (true) {
-					if (lockingThread == null) {
-						classNameLocks.put(classname, current);
-						return true;
-					}
-
-					classNameLocks.wait();
-					lockingThread = classNameLocks.get(classname);
-				}
-			} catch (InterruptedException e) {
-				previousInterruption = true;
-				// must not throw LinkageError or ClassNotFoundException here because that will
-				// cause all threads
-				// to fail to load the class (see bug 490902)
-				throw new Error("Interrupted while waiting for classname lock: " + classname, e); //$NON-NLS-1$
-			} finally {
-				if (previousInterruption) {
-					current.interrupt();
-				}
-			}
-		}
-	}
-
-	private void unlockClassName(String classname) {
-		synchronized (classNameLocks) {
-			classNameLocks.remove(classname);
-			classNameLocks.notifyAll();
-		}
+	@Override
+	public Object getClassLoadingLock(String classname) {
+		return classNameLocks.getLock(classname);
 	}
 
 	public void close() {
