@@ -225,7 +225,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		synchronized (registry) {
 			synchronized (registrationLock) {
 				if (state != REGISTERED) { /* in the process of unregisterING */
-					throw new IllegalStateException(Msg.SERVICE_ALREADY_UNREGISTERED_EXCEPTION + ' ' + this);
+					return;
 				}
 
 				/* remove this object from the service registry */
