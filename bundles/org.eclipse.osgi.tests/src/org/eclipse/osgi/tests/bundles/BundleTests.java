@@ -40,7 +40,8 @@ import org.junit.runners.Suite;
 		PlatformAdminBundleTests.class, //
 		ListenerTests.class, //
 		AddDynamicImportTests.class, //
-		BundleNativeCodeTests.class //
+		BundleNativeCodeTests.class, //
+		IllegalStateExceptionTests.class
 })
 public class BundleTests {
 }

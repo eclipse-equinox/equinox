@@ -160,8 +160,6 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 */
 	@Override
 	public Bundle getBundle() {
-		checkValid();
-
 		return getBundleImpl();
 	}
 
@@ -305,12 +303,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 * method does nothing.
 	 *
 	 * @param listener The service listener to remove.
-	 * @exception java.lang.IllegalStateException If the bundle context has stopped.
 	 */
 	@Override
 	public void removeServiceListener(ServiceListener listener) {
-		checkValid();
-
 		if (listener == null) {
 			throw new IllegalArgumentException();
 		}
@@ -354,11 +349,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 * method does nothing.
 	 *
 	 * @param listener The bundle listener to remove.
-	 * @exception java.lang.IllegalStateException If the bundle context has stopped.
 	 */
 	@Override
 	public void removeBundleListener(BundleListener listener) {
-		checkValid();
 		if (listener == null) {
 			throw new IllegalArgumentException();
 		}
@@ -409,11 +402,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 * method does nothing.
 	 *
 	 * @param listener The framework listener to remove.
-	 * @exception java.lang.IllegalStateException If the bundle context has stopped.
 	 */
 	@Override
 	public void removeFrameworkListener(FrameworkListener listener) {
-		checkValid();
 		if (listener == null) {
 			throw new IllegalArgumentException();
 		}
@@ -708,8 +699,6 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 */
 	@Override
 	public boolean ungetService(ServiceReference<?> reference) {
-		checkValid();
-
 		return container.getServiceRegistry().ungetService(this, (ServiceReferenceImpl<?>) reference);
 	}
 
@@ -1043,13 +1032,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 *
 	 * @param filter The filter string.
 	 * @return A Filter object encapsulating the filter string.
-	 * @exception InvalidSyntaxException If the filter parameter contains an invalid
-	 *                                   filter string which cannot be parsed.
 	 */
 	@Override
 	public Filter createFilter(String filter) throws InvalidSyntaxException {
-		checkValid();
-
 		return FilterImpl.newInstance(filter, container.getConfiguration().getDebug().DEBUG_FILTER);
 	}
 
@@ -1070,7 +1055,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 *
 	 * @return true if the context is still valid; false otherwise
 	 */
-	protected boolean isValid() {
+	public boolean isValid() {
 		return valid;
 	}
 

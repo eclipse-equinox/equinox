@@ -26,7 +26,6 @@ import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
@@ -50,16 +49,6 @@ public class ExceptionMessageTest extends AbstractBundleTests {
 		b.uninstall();
 		IllegalStateException e = assertThrows(IllegalStateException.class, () -> bsl.getStartLevel());
 		assertTrue("Wrong message: " + e.getMessage(), e.getMessage().endsWith(b.adapt(Module.class).toString()));
-	}
-
-	@Test
-	public void testUninstallContextError() throws BundleException {
-		Bundle b = installer.installBundle("test");
-		b.start();
-		BundleContext context = b.getBundleContext();
-		b.uninstall();
-		IllegalStateException e = assertThrows(IllegalStateException.class, () -> context.createFilter("(a=b)"));
-		assertTrue("Wrong message: " + e.getMessage(), e.getMessage().endsWith(b.toString()));
 	}
 
 	@Test
@@ -101,21 +90,8 @@ public class ExceptionMessageTest extends AbstractBundleTests {
 		IllegalStateException e1 = assertThrows(IllegalStateException.class, () -> reg.setProperties(props2));
 		assertTrue("Wrong message: " + e1.getMessage(), e1.getMessage().endsWith(reg.toString()));
 
-		IllegalStateException e2 = assertThrows(IllegalStateException.class, () -> reg.unregister());
-		assertTrue("Wrong message: " + e2.getMessage(), e2.getMessage().endsWith(reg.toString()));
-
 		IllegalStateException e3 = assertThrows(IllegalStateException.class, () -> reg.getReference());
 		assertTrue("Wrong message: " + e3.getMessage(), e3.getMessage().endsWith(reg.toString()));
-	}
-
-	@Test
-	public void testUnregisterTwiceError() throws BundleException {
-		Bundle b = installer.installBundle("test");
-		b.start();
-		BundleContext context = b.getBundleContext();
-		ServiceRegistration<Object> reg = context.registerService(Object.class, new Object(),
-				getDicinotary("k1", "v1"));
-		reg.unregister();
 	}
 
 	private Dictionary<String, Object> getDicinotary(String key, Object value) {
