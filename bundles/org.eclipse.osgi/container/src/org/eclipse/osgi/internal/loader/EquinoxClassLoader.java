@@ -20,15 +20,12 @@ import org.eclipse.osgi.internal.loader.classpath.ClasspathManager;
 import org.eclipse.osgi.storage.BundleInfo.Generation;
 
 public class EquinoxClassLoader extends ModuleClassLoader {
-	protected static final boolean EQUINOX_REGISTERED_AS_PARALLEL;
 	static {
-		boolean registered;
 		try {
-			registered = ClassLoader.registerAsParallelCapable();
+			ClassLoader.registerAsParallelCapable();
 		} catch (Throwable t) {
-			registered = false;
+			// ignore all exceptions; substrate native image fails here
 		}
-		EQUINOX_REGISTERED_AS_PARALLEL = registered;
 	}
 	private final EquinoxConfiguration configuration;
 	private final Debug debug;
@@ -37,7 +34,6 @@ public class EquinoxClassLoader extends ModuleClassLoader {
 	// TODO Note that PDE has internal dependency on this field type/name (bug
 	// 267238)
 	private final ClasspathManager manager;
-	private final boolean isRegisteredAsParallel;
 
 	/**
 	 * Constructs a new DefaultClassLoader.
@@ -55,8 +51,6 @@ public class EquinoxClassLoader extends ModuleClassLoader {
 		this.delegate = delegate;
 		this.generation = generation;
 		this.manager = new ClasspathManager(generation, this);
-		this.isRegisteredAsParallel = (ModuleClassLoader.REGISTERED_AS_PARALLEL && EQUINOX_REGISTERED_AS_PARALLEL)
-				|| this.configuration.PARALLEL_CAPABLE;
 	}
 
 	@Override
@@ -67,11 +61,6 @@ public class EquinoxClassLoader extends ModuleClassLoader {
 	@Override
 	public final ClasspathManager getClasspathManager() {
 		return manager;
-	}
-
-	@Override
-	public final boolean isRegisteredAsParallel() {
-		return isRegisteredAsParallel;
 	}
 
 	@Override
