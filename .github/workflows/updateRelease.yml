@@ -2,11 +2,23 @@ name: Update to next release
 on:
   milestone:
     types: [created]
+  workflow_dispatch:
+    inputs:
+      nextReleaseVersion:
+        description: 'The version of the release, e.g.: 4.35'
+        type: string
+        required: true
 
 jobs:
   update:
-    if: contains(github.event.milestone.description, 'Release')
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.milestone.description, 'Release')
     permissions:
       pull-requests: write
       contents: write
     uses: eclipse-platform/eclipse.platform.releng.aggregator/.github/workflows/updateRelease.yml@master
+    with:
+      nextReleaseVersion: ${{ inputs.nextReleaseVersion || github.event.milestone.title }}
+      botName: Eclipse Equinox Bot
+      botMail: equinox-bot@eclipse.org
+    secrets:
+      githubBotPAT: ${{ secrets.EQUINOX_BOT_PAT }}
