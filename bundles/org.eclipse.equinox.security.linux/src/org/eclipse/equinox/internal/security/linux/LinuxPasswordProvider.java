@@ -128,7 +128,7 @@ public class LinuxPasswordProvider extends PasswordProvider implements IValidati
 		String passwordUTF8 = new String(password.getBytes(), StandardCharsets.UTF_8);
 
 		fLibSecret.secret_password_store_sync(fEquinoxSchema, SECRET_COLLECTION_DEFAULT, "Equinox master password", //$NON-NLS-1$
-				passwordUTF8, Pointer.NULL, gerror, Pointer.NULL);
+				passwordUTF8, Pointer.NULL, gerror, ""); //$NON-NLS-1$
 
 		requireNoError(gerror, ""); //$NON-NLS-1$
 	}
