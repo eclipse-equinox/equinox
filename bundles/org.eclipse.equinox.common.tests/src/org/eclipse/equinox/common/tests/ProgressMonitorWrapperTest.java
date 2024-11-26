@@ -24,7 +24,6 @@ import org.junit.Test;
 /**
  * Test cases for the Path class.
  */
-@SuppressWarnings("deprecation") // SubProgressMonitor
 public class ProgressMonitorWrapperTest {
 
 	/**
