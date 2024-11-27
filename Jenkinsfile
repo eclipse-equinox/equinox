@@ -16,7 +16,7 @@
 def runOnNativeBuildAgent(String platform, Closure body) {
 	def final nativeBuildStageName = 'Perform native launcher build'
 	if (platform == 'gtk.linux.x86_64') {
-		podTemplate(inheritFrom: 'centos-latest' /* inhert general configuration */, containers: [
+		podTemplate(inheritFrom: 'basic' /* inherit general configuration */, containers: [
 			containerTemplate(name: 'launcherbuild', image: 'eclipse/platformreleng-centos-swt-build:8',
 				resourceRequestCpu:'1000m', resourceRequestMemory:'512Mi',
 				resourceLimitCpu:'2000m', resourceLimitMemory:'4096Mi',
