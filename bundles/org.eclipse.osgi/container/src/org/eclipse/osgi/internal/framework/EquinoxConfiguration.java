@@ -274,6 +274,10 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 	public final int supportSignedBundles;
 	public final boolean runtimeVerifySignedBundles;
 
+	// TODO temp internal prop to pass the TCK
+	public final static String PROP_THROW_ISE_UNREGISTER = "org.eclipse.osgi.internal.throw.ise.unregister"; //$NON-NLS-1$
+	public final boolean THROW_ISE_UNREGISTER;
+
 	public static final class ConfigValues {
 		/**
 		 * Value of {@link #localConfig} properties that should be considered
@@ -670,6 +674,8 @@ public class EquinoxConfiguration implements EnvironmentInfo {
 		CLASS_CERTIFICATE = (supportSignedBundles & SIGNED_CONTENT_VERIFY_CERTIFICATE) != 0 && //
 				Boolean.valueOf(getConfiguration(PROP_CLASS_CERTIFICATE_SUPPORT, "true")).booleanValue(); //$NON-NLS-1$
 		runtimeVerifySignedBundles = (supportSignedBundles & SIGNED_CONTENT_VERIFY_RUNTIME) != 0;
+
+		THROW_ISE_UNREGISTER = "true".equals(getConfiguration(PROP_THROW_ISE_UNREGISTER)); //$NON-NLS-1$
 	}
 
 	private static int getSupportSignedBundles(EquinoxConfiguration config) {

@@ -225,6 +225,10 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		synchronized (registry) {
 			synchronized (registrationLock) {
 				if (state != REGISTERED) { /* in the process of unregisterING */
+					if (context.getContainer().getConfiguration().THROW_ISE_UNREGISTER) {
+						// TODO temp behavior enabled to pass the OSGi TCK
+						throw new IllegalStateException(Msg.SERVICE_ALREADY_UNREGISTERED_EXCEPTION + ' ' + this);
+					}
 					return;
 				}
 

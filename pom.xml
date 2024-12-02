@@ -126,6 +126,7 @@
 										osgi.ee; osgi.ee="II-1.0/JJ-2.0",
 										osgi.ee; osgi.ee="div/tb7a"
 									</org.osgi.framework.system.capabilities.extra>
+									<org.eclipse.osgi.internal.throw.ise.unregister>true</org.eclipse.osgi.internal.throw.ise.unregister>
 								</properties>
 							</configuration>
 						</execution>
