@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.PropertyResourceBundle;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.util.SupplementDebug;
@@ -138,6 +139,16 @@ public abstract class NLS {
 	 *   org/eclipse/example/nls/messages_en.properties
 	 *   org/eclipse/example/nls/messages.properties
 	 * </pre>
+	 * <p>
+	 * The properties files are read using the default encoding for resource bundles:
+	 * <ul>
+	 *   <li>In Java 8, resource files are read using ISO-8859-1 character encoding. Characters outside
+	 *   its range must be represented using Unicode escape sequences (e.g., <code>&#92;uXXXX</code>).</li>
+	 *   <li>In Java 11 and later, resource files are initially read using UTF-8 character encoding. If a
+	 *   resource cannot be successfully read in UTF-8, it will be read from the start in ISO-8859-1
+	 *   character encoding.</li>
+	 * </ul>
+	 * </p>
 	 *
 	 * @param baseName the base name of a fully qualified message properties file.
 	 * @param clazz the class where the constants will exist
@@ -347,7 +358,10 @@ public abstract class NLS {
 				continue;
 			try {
 				final MessagesProperties properties = new MessagesProperties(fields, bundleName, isAccessible);
-				properties.load(input);
+				final PropertyResourceBundle bundle = new PropertyResourceBundle(input);
+				for (String key : bundle.keySet()) {
+					properties.put(key, bundle.getString(key));
+				}
 			} catch (IOException e) {
 				log(SEVERITY_ERROR, "Error loading " + variant, e); //$NON-NLS-1$
 			} finally {
