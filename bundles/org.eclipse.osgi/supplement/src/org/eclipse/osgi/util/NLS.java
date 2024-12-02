@@ -13,10 +13,15 @@
  *******************************************************************************/
 package org.eclipse.osgi.util;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -347,7 +352,7 @@ public abstract class NLS {
 				continue;
 			try {
 				final MessagesProperties properties = new MessagesProperties(fields, bundleName, isAccessible);
-				properties.load(input);
+				properties.load(newBomReader(input));
 			} catch (IOException e) {
 				log(SEVERITY_ERROR, "Error loading " + variant, e); //$NON-NLS-1$
 			} finally {
@@ -401,6 +406,35 @@ public abstract class NLS {
 		if (e != null)
 			e.printStackTrace();
 	}
+
+	private static Reader newBomReader(InputStream input) throws IOException {
+		BufferedInputStream is = new BufferedInputStream(input);
+		Charset cs = consumeBom(is);
+		if (cs == null) {
+			cs = StandardCharsets.ISO_8859_1;
+		}
+		return new InputStreamReader(is, cs);
+	}
+
+	private static Charset consumeBom(BufferedInputStream is) throws IOException {
+		is.mark(3);
+		switch (is.read()) {
+		case 0xEF: // EF BB BF
+				if (is.read() == 0xBB && is.read() == 0xBF)
+					return StandardCharsets.UTF_8;
+				break;
+			case 0xFE: // FE FF
+				if (is.read() == 0xFF)
+					return StandardCharsets.UTF_16BE;
+				break;
+			case 0xFF: // FF FE
+				if (is.read() == 0xFE)
+					return StandardCharsets.UTF_16LE;
+				break;
+			}
+			is.reset();
+			return null;
+		}
 
 	/*
 	 * Class which sub-classes java.util.Properties and uses the #put method
