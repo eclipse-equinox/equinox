@@ -16,59 +16,74 @@ package org.eclipse.osgi.tests.configuration;
 import static org.eclipse.osgi.tests.OSGiTestsActivator.PI_OSGI_TESTS;
 import static org.eclipse.osgi.tests.OSGiTestsActivator.addRequiredOSGiTestsBundles;
 import static org.eclipse.osgi.tests.OSGiTestsActivator.getContext;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.File;
 import java.io.IOException;
-import junit.framework.Test;
-import junit.framework.TestCase;
+import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
 import org.eclipse.core.tests.harness.FileSystemComparator;
-import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
+import org.eclipse.core.tests.harness.session.CustomSessionConfiguration;
+import org.eclipse.core.tests.harness.session.ExecuteInHost;
+import org.eclipse.core.tests.harness.session.SessionTestExtension;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
-public class ReadOnlyConfigurationAreaTest extends TestCase {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+public class ReadOnlyConfigurationAreaTest {
 
-	public static Test suite() {
-		ConfigurationSessionTestSuite suite = new ConfigurationSessionTestSuite(PI_OSGI_TESTS,
-				ReadOnlyConfigurationAreaTest.class);
-		suite.setReadOnly(true);
-		addRequiredOSGiTestsBundles(suite);
-		return suite;
+	private static CustomSessionConfiguration sessionConfiguration = createSessionConfiguration();
+
+	@RegisterExtension
+	static SessionTestExtension extension = SessionTestExtension.forPlugin(PI_OSGI_TESTS)
+			.withCustomization(sessionConfiguration).create();
+
+	private static CustomSessionConfiguration createSessionConfiguration() {
+		CustomSessionConfiguration configuration = SessionTestExtension.createCustomConfiguration().setReadOnly();
+		addRequiredOSGiTestsBundles(configuration);
+		return configuration;
 	}
 
-	public ReadOnlyConfigurationAreaTest(String name) {
-		super(name);
-	}
-
+	@Test
+	@Order(1)
 	public void test0thSession() throws Exception {
 		// initialization session
 		Bundle installed = BundleTestingHelper.installBundle("1.0", getContext(),
 				OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle01");
 		// not read-only yet, should work fine
-		assertTrue("installed bundle could not be resolved: " + installed,
-				BundleTestingHelper.resolveBundles(getContext(), new Bundle[] { installed }));
+		assertTrue(BundleTestingHelper.resolveBundles(getContext(), new Bundle[] { installed }),
+				"installed bundle could not be resolved: " + installed);
 	}
 
 	/**
 	 * Takes a snapshot of the file system.
-	 * 
-	 * @throws IOException
 	 */
+	@Test
+	@Order(2)
+	@ExecuteInHost
 	public void test1stSession() throws IOException {
 		// compute and save tree image
-		File configurationDir = ConfigurationSessionTestSuite.getConfigurationDir();
+		Path configurationDir = sessionConfiguration.getConfigurationDirectory();
 		FileSystemComparator comparator = new FileSystemComparator();
-		Object snapshot = comparator.takeSnapshot(configurationDir, true);
-		comparator.saveSnapshot(snapshot, configurationDir);
+		Object snapshot = comparator.takeSnapshot(configurationDir.toFile(), true);
+		comparator.saveSnapshot(snapshot, configurationDir.toFile());
 	}
 
+	@Test
+	@Order(3)
+	@ExecuteInHost
 	public void test1stSessionFollowUp() throws IOException {
 		FileSystemComparator comparator = new FileSystemComparator();
-		File configurationDir = ConfigurationSessionTestSuite.getConfigurationDir();
-		Object oldSnaphot = comparator.loadSnapshot(configurationDir);
-		Object newSnapshot = comparator.takeSnapshot(configurationDir, true);
+		Path configurationDir = sessionConfiguration.getConfigurationDirectory();
+		Object oldSnaphot = comparator.loadSnapshot(configurationDir.toFile());
+		Object newSnapshot = comparator.takeSnapshot(configurationDir.toFile(), true);
 		comparator.compareSnapshots("1.0", oldSnaphot, newSnapshot);
 	}
 
@@ -76,32 +91,31 @@ public class ReadOnlyConfigurationAreaTest extends TestCase {
 	 * Tries to install a plug-in that has no manifest. Should fail because by
 	 * default the manifest generation area is under the configuration area (which
 	 * is read-only here)
+	 * 
+	 * @throws BundleException
 	 */
+	@Test
+	@Order(4)
 	@SuppressWarnings("deprecation") // installBundle
-	public void test2ndSession() throws BundleException, IOException {
-		// try to install plug-in
-		// ensure it is not installed
-		Bundle installed = null;
-		try {
-			installed = BundleTestingHelper.installBundle(getContext(),
-					OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle02");
-			// should have failed with BundleException, does not have a bundle manifest
-			fail("1.0");
-		} catch (BundleException be) {
-			// success
-		} finally {
-			if (installed != null)
-				// clean-up - only runs if we end-up accepting an invalid manifest
-				installed.uninstall();
+	public void test2ndSession() throws BundleException {
+		AtomicReference<Bundle> installedBundle = new AtomicReference<>();
+		assertThrows(BundleException.class, () -> installedBundle.set(BundleTestingHelper.installBundle(getContext(),
+				OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle02")));
+		if (installedBundle.get() != null) {
+			// clean-up - only runs if we end-up accepting an invalid manifest
+			installedBundle.get().uninstall();
 		}
 	}
 
+	@Test
+	@Order(5)
+	@ExecuteInHost
 	public void test2ndSessionFollowUp() throws IOException {
 		FileSystemComparator comparator = new FileSystemComparator();
-		File configurationDir = ConfigurationSessionTestSuite.getConfigurationDir();
-		Object oldSnaphot = comparator.loadSnapshot(configurationDir);
-		Object newSnapshot = comparator.takeSnapshot(configurationDir, true);
-		comparator.compareSnapshots("1.0", oldSnaphot, newSnapshot);
+		Path configurationDir = sessionConfiguration.getConfigurationDirectory();
+		Object oldSnaphot = comparator.loadSnapshot(configurationDir.toFile());
+		Object newSnapshot = comparator.takeSnapshot(configurationDir.toFile(), true);
+		comparator.compareSnapshots("", oldSnaphot, newSnapshot);
 	}
 
 	/**
@@ -109,31 +123,28 @@ public class ReadOnlyConfigurationAreaTest extends TestCase {
 	 * the manifest generation area is under the configuration area (which is
 	 * read-only here)
 	 */
+	@Test
+	@Order(6)
 	@SuppressWarnings("deprecation") // installBundle
-	public void test3rdSession() throws BundleException, IOException {
-		// install plug-in
-		// ensure it is not installed
-		Bundle installed = null;
-		try {
-			installed = BundleTestingHelper.installBundle(getContext(),
-					OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle03");
-			// should have failed - cannot install a bundle in read-only mode
-			fail("1.0");
-		} catch (BundleException be) {
-			// success
-		} finally {
-			if (installed != null)
-				// clean-up - only runs if we end-up accepting an invalid manifest
-				installed.uninstall();
+	public void test3rdSession() throws BundleException {
+		AtomicReference<Bundle> installedBundle = new AtomicReference<>();
+		assertThrows(BundleException.class, () -> BundleTestingHelper.installBundle(getContext(),
+				OSGiTestsActivator.TEST_FILES_ROOT + "configuration/bundle03"));
+		if (installedBundle.get() != null) {
+			// clean-up - only runs if we end-up accepting an invalid manifest
+			installedBundle.get().uninstall();
 		}
 	}
 
+	@Test
+	@Order(7)
+	@ExecuteInHost
 	public void test3rdSessionFollowUp() throws IOException {
 		FileSystemComparator comparator = new FileSystemComparator();
-		File configurationDir = ConfigurationSessionTestSuite.getConfigurationDir();
-		Object oldSnaphot = comparator.loadSnapshot(configurationDir);
-		Object newSnapshot = comparator.takeSnapshot(configurationDir, true);
-		comparator.compareSnapshots("1.0", oldSnaphot, newSnapshot);
+		Path configurationDir = sessionConfiguration.getConfigurationDirectory();
+		Object oldSnaphot = comparator.loadSnapshot(configurationDir.toFile());
+		Object newSnapshot = comparator.takeSnapshot(configurationDir.toFile(), true);
+		comparator.compareSnapshots("", oldSnaphot, newSnapshot);
 	}
 
 }
