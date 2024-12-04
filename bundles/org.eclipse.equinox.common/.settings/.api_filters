@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.equinox.common" version="2">
+    <resource path="src/org/eclipse/core/runtime/IProduct.java" type="org.eclipse.core.runtime.IProduct">
+        <filter id="1108344834">
+            <message_arguments>
+                <message_argument value="3.0"/>
+                <message_argument value="3.20"/>
+                <message_argument value="org.eclipse.core.runtime.IProduct"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/eclipse/core/runtime/IProductProvider.java" type="org.eclipse.core.runtime.IProductProvider">
+        <filter id="1108344834">
+            <message_arguments>
+                <message_argument value="3.0"/>
+                <message_argument value="3.20"/>
+                <message_argument value="org.eclipse.core.runtime.IProductProvider"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>
