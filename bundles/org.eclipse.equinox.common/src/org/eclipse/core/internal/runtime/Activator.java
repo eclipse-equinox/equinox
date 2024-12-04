@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.eclipse.core.internal.runtime;
 
-import java.net.URL;
 import java.util.*;
 import org.eclipse.core.internal.boot.PlatformURLBaseConnection;
 import org.eclipse.core.internal.boot.PlatformURLHandler;
@@ -46,7 +45,6 @@ public class Activator implements BundleActivator {
 	/**
 	 * Table to keep track of all the URL converter services.
 	 */
-	private static final Map<String, ServiceTracker<Object, URLConverter>> urlTrackers = new HashMap<>();
 	private static BundleContext bundleContext;
 	private static Activator singleton;
 	private ServiceRegistration<URLConverter> platformURLConverterService = null;
@@ -89,10 +87,6 @@ public class Activator implements BundleActivator {
 		adapterManagerService = context.registerService(IAdapterManager.class, AdapterManager.getDefault(), null);
 		installPlatformURLSupport();
 		installDataURLSupport(context);
-		Hashtable<String, String> properties = new Hashtable<>(2);
-		properties.put(DebugOptions.LISTENER_SYMBOLICNAME, PLUGIN_ID);
-		debugRegistration = context.registerService(DebugOptionsListener.class, TracingOptions.DEBUG_OPTIONS_LISTENER,
-				properties);
 		adapterFactoryTracker = new ServiceTracker<>(context, IAdapterFactory.class,
 				new AdapterFactoryBridge(bundleContext));
 		adapterFactoryTracker.open();
@@ -235,7 +229,6 @@ public class Activator implements BundleActivator {
 		if (adapterFactoryTracker != null) {
 			adapterFactoryTracker.close();
 		}
-		closeURLTrackerServices();
 		if (platformURLConverterService != null) {
 			platformURLConverterService.unregister();
 			platformURLConverterService = null;
@@ -258,50 +251,6 @@ public class Activator implements BundleActivator {
 	 */
 	static BundleContext getContext() {
 		return bundleContext;
-	}
-
-	/*
-	 * Let go of all the services that we acquired and kept track of.
-	 */
-	private static void closeURLTrackerServices() {
-		synchronized (urlTrackers) {
-			if (!urlTrackers.isEmpty()) {
-				for (ServiceTracker<Object, URLConverter> tracker : urlTrackers.values()) {
-					tracker.close();
-				}
-				urlTrackers.clear();
-			}
-		}
-	}
-
-	/*
-	 * Return the URL Converter for the given URL. Return null if we can't find one.
-	 */
-	public static URLConverter getURLConverter(URL url) {
-		BundleContext ctx = getContext();
-		if (url == null || ctx == null) {
-			return null;
-		}
-		String protocol = url.getProtocol();
-		synchronized (urlTrackers) {
-			ServiceTracker<Object, URLConverter> tracker = urlTrackers.get(protocol);
-			if (tracker == null) {
-				// get the right service based on the protocol
-				String FILTER_PREFIX = "(&(objectClass=" + URLConverter.class.getName() + ")(protocol="; //$NON-NLS-1$ //$NON-NLS-2$
-				String FILTER_POSTFIX = "))"; //$NON-NLS-1$
-				Filter filter = null;
-				try {
-					filter = ctx.createFilter(FILTER_PREFIX + protocol + FILTER_POSTFIX);
-				} catch (InvalidSyntaxException e) {
-					return null;
-				}
-				tracker = new ServiceTracker<>(getContext(), filter, null);
-				tracker.open();
-				// cache it in the registry
-				urlTrackers.put(protocol, tracker);
-			}
-			return tracker.getService();
-		}
 	}
 
 	/**

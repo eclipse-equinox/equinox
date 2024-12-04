@@ -12,14 +12,19 @@
  *     IBM Corporation - initial API and implementation
  *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
  *******************************************************************************/
-package org.eclipse.core.internal.runtime;
+package org.eclipse.equinox.api.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
-import org.eclipse.core.runtime.*;
+
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.osgi.framework.Bundle;
 
 // This class provides implements the find* methods exposed on Platform.
@@ -32,8 +37,7 @@ public class FindSupport {
 	public static final String PROP_WS = "osgi.ws"; //$NON-NLS-1$
 	public static final String PROP_ARCH = "osgi.arch"; //$NON-NLS-1$
 
-	private static String[] NL_JAR_VARIANTS = buildNLVariants(
-			Activator.getContext() == null ? System.getProperty(PROP_NL) : Activator.getContext().getProperty(PROP_NL));
+	private static final String[] NL_JAR_VARIANTS = buildNLVariants(APISupport.getProperty(PROP_NL));
 
 	private static String[] buildNLVariants(String nl) {
 		ArrayList<String> result = new ArrayList<>();
@@ -53,30 +57,30 @@ public class FindSupport {
 		return result.toArray(new String[result.size()]);
 	}
 
-	/**
-	 * See doc on {@link FileLocator#find(Bundle, IPath, Map)}
-	 */
+//	/**
+//	 * See doc on {@link FileLocator#find(Bundle, IPath, Map)}
+//	 */
 	public static URL find(Bundle bundle, IPath path) {
 		return find(bundle, path, null);
 	}
 
-	/**
-	 * See doc on {@link FileLocator#find(Bundle, IPath, Map)}
-	 */
+//	/**
+//	 * See doc on {@link FileLocator#find(Bundle, IPath, Map)}
+//	 */
 	public static URL find(Bundle b, IPath path, Map<String, String> override) {
 		return find(b, path, override, null);
 	}
 
-	/**
-	 * See doc on {@link FileLocator#findEntries(Bundle, IPath)}
-	 */
+//	/**
+//	 * See doc on {@link FileLocator#findEntries(Bundle, IPath)}
+//	 */
 	public static URL[] findEntries(Bundle bundle, IPath path) {
 		return findEntries(bundle, path, null);
 	}
 
-	/**
-	 * See doc on {@link FileLocator#findEntries(Bundle, IPath, Map)}
-	 */
+//	/**
+//	 * See doc on {@link FileLocator#findEntries(Bundle, IPath, Map)}
+//	 */
 	public static URL[] findEntries(Bundle bundle, IPath path, Map<String, String> override) {
 		ArrayList<URL> results = new ArrayList<>(1);
 		find(bundle, path, override, results);
@@ -134,7 +138,7 @@ public class FindSupport {
 			}
 		if (os == null)
 			// use default
-			os = Activator.getContext().getProperty(PROP_OS);
+			os = APISupport.getProperty(PROP_OS);
 		if (os.length() == 0)
 			return null;
 
@@ -149,7 +153,7 @@ public class FindSupport {
 			}
 		if (osArch == null)
 			// use default
-			osArch = Activator.getContext().getProperty(PROP_ARCH);
+			osArch = APISupport.getProperty(PROP_ARCH);
 		if (osArch.length() == 0)
 			return null;
 
@@ -185,7 +189,7 @@ public class FindSupport {
 			}
 		if (ws == null)
 			// use default
-			ws = Activator.getContext().getProperty(PROP_WS);
+			ws = APISupport.getProperty(PROP_WS);
 		IPath filePath = IPath.fromOSString("ws").append(ws).append(path); //$NON-NLS-1$
 		// We know that there is only one segment to the ws path
 		// e.g. ws/win32
@@ -243,10 +247,7 @@ public class FindSupport {
 	}
 
 	private static URL findInFragments(Bundle b, IPath filePath, ArrayList<URL> multiple) {
-		Activator activator = Activator.getDefault();
-		if (activator == null)
-			return null;
-		Bundle[] fragments = activator.getFragments(b);
+		Bundle[] fragments = APISupport.getFragments(b);
 		if (fragments == null)
 			return null;
 
@@ -264,9 +265,9 @@ public class FindSupport {
 		return null;
 	}
 
-	/**
-	 * See doc on {@link FileLocator#openStream(Bundle, IPath, boolean)}
-	 */
+//	/**
+//	 * See doc on {@link FileLocator#openStream(Bundle, IPath, boolean)}
+//	 */
 	public static final InputStream openStream(Bundle bundle, IPath file, boolean substituteArgs) throws IOException {
 		URL url = null;
 		if (!substituteArgs) {
@@ -293,9 +294,12 @@ public class FindSupport {
 		String spec = url.getFile().trim();
 		Object[] obj = null;
 		try {
-			obj = PlatformURLPluginConnection.parse(spec, url);
-		} catch (IOException e) {
-			RuntimeLog.log(new Status(IStatus.ERROR, IRuntimeConstants.PI_RUNTIME, "Invalid input url:" + url, e)); //$NON-NLS-1$
+			Class<?> clz = APISupport.equinoxCommonBundle
+					.loadClass("org.eclipse.core.internal.runtime.PlatformURLPluginConnection");
+			Method method = clz.getMethod("parse", String.class, URL.class);
+			obj = (Object[]) method.invoke(null, spec, url);
+		} catch (Exception e) {
+			APISupport.log(new Status(IStatus.ERROR, APISupport.PI_RUNTIME, "Can't parse input url:" + url, e)); //$NON-NLS-1$
 			return null;
 		}
 		Bundle bundle = (Bundle) obj[0];

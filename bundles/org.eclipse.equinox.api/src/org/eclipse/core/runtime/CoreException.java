@@ -15,7 +15,8 @@ package org.eclipse.core.runtime;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import org.eclipse.core.internal.runtime.PrintStackUtil;
+
+import org.eclipse.equinox.api.internal.PrintStackUtil;
 
 /**
  * A checked exception representing a failure.
