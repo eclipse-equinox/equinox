@@ -12,7 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
  *******************************************************************************/
-package org.eclipse.core.internal.runtime;
+package org.eclipse.equinox.api.internal;
 
 import java.lang.reflect.Field;
 
