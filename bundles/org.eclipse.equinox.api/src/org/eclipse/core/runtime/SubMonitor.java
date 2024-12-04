@@ -22,8 +22,9 @@ package org.eclipse.core.runtime;
 
 import java.util.HashSet;
 import java.util.Set;
-import org.eclipse.core.internal.runtime.RuntimeLog;
-import org.eclipse.core.internal.runtime.TracingOptions;
+
+import org.eclipse.equinox.api.internal.APISupport;
+import org.eclipse.equinox.api.internal.TracingOptions;
 
 /**
  * <p>
@@ -1184,7 +1185,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 				return;
 			}
 		}
-		RuntimeLog.log(new Status(IStatus.WARNING, "org.eclipse.core.runtime", message, new Throwable())); //$NON-NLS-1$
+		APISupport.log(new Status(IStatus.WARNING, "org.eclipse.core.runtime", message, new Throwable())); //$NON-NLS-1$
 	}
 
 	@Override
