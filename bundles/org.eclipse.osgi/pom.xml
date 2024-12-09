@@ -19,7 +19,7 @@
 </parent>
   <groupId>org.eclipse.osgi</groupId>
   <artifactId>org.eclipse.osgi</artifactId>
-  <version>3.22.100-SNAPSHOT</version>
+  <version>3.23.0-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
   <properties>
 	  <!-- The actual TCKs are executed in the org.eclipse.osgi.tck module because of reference to other service implementations -->
