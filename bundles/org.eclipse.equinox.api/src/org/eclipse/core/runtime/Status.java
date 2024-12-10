@@ -15,7 +15,8 @@
 package org.eclipse.core.runtime;
 
 import java.util.Optional;
-import org.eclipse.core.internal.runtime.LocalizationUtils;
+
+import org.eclipse.equinox.api.internal.LocalizationUtils;
 import org.osgi.framework.FrameworkUtil;
 
 /**

@@ -14,7 +14,7 @@
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
-import org.eclipse.core.internal.runtime.AdapterManager;
+import org.eclipse.equinox.api.internal.APISupport;
 
 /**
  * An abstract superclass implementing the <code>IAdaptable</code> interface.
@@ -70,6 +70,6 @@ public abstract class PlatformObject implements IAdaptable {
 	 */
 	@Override
 	public <T> T getAdapter(Class<T> adapter) {
-		return AdapterManager.getDefault().getAdapter(this, adapter);
+		return APISupport.getAdapterManager().getAdapter(this, adapter);
 	}
 }

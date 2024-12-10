@@ -16,12 +16,15 @@
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
 import java.util.Optional;
-import org.eclipse.core.internal.runtime.Activator;
-import org.eclipse.core.internal.runtime.FindSupport;
+
+import org.eclipse.equinox.api.internal.APISupport;
+import org.eclipse.equinox.api.internal.FindSupport;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.osgi.framework.Bundle;
 
@@ -273,7 +276,7 @@ public final class FileLocator {
 	 * @throws IOException if an error occurs during the conversion
 	 */
 	public static URL toFileURL(URL url) throws IOException {
-		URLConverter converter = Activator.getURLConverter(url);
+		URLConverter converter = APISupport.getURLConverter(url);
 		return converter == null ? url : converter.toFileURL(url);
 	}
 
@@ -297,7 +300,7 @@ public final class FileLocator {
 	 * @throws IOException if an error occurs during the resolution
 	 */
 	public static URL resolve(URL url) throws IOException {
-		URLConverter converter = Activator.getURLConverter(url);
+		URLConverter converter = APISupport.getURLConverter(url);
 		return converter == null ? url : converter.resolve(url);
 	}
 
