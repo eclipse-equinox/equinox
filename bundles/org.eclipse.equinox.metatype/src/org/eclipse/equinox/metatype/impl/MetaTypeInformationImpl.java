@@ -26,13 +26,14 @@ import org.osgi.framework.*;
  * Implementation of MetaTypeProvider
  * <p>
  * Extension of MetaTypeProvider
+ * </p>
  * <p>
  * Provides methods to:
- * <p>
- * - getPids() get the Pids for a given Locale
- * <p>
- * - getFactoryPids() get the Factory Pids for a given Locale
- * <p>
+ * </p>
+ * <ul>
+ * <li>getPids() get the Pids for a given Locale</li>
+ * <li>getFactoryPids() get the Factory Pids for a given Locale</li>
+ * </ul>
  */
 public class MetaTypeInformationImpl extends MetaTypeProviderImpl implements EquinoxMetaTypeInformation {
 	static final String[] emptyStringArray = new String[0];
