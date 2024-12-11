@@ -33,21 +33,25 @@ public class DriverTracker extends ServiceTracker {
 	/** LogService object */
 	protected LogTracker log;
 
-	/** Dictionary mapping DRIVER_ID strings <==> Driver ServiceReferences */
+	/**
+	 * Dictionary mapping {@code DRIVER_ID strings <==> Driver ServiceReferences}
+	 */
 	protected Hashtable<Object, Object> drivers;
 
 	/** DeviceManager object. */
 	protected Activator manager;
 
 	/**
-	 * Dictionary mapping Driver ID String => Hashtable (Device ServiceReference =>
-	 * cached Match objects)
+	 * Dictionary mapping
+	 * {@code Driver ID String => Hashtable (Device ServiceReference =>
+	 * cached Match objects)}
 	 */
 	protected Hashtable<String, Hashtable<ServiceReference, Match>> matches;
 
 	/**
-	 * Dictionary mapping Driver ID String => Hashtable (Device ServiceReference =>
-	 * cached referral String)
+	 * Dictionary mapping
+	 * {@code Driver ID String => Hashtable (Device ServiceReference =>
+	 * cached referral String)}
 	 */
 	protected Hashtable<String, Hashtable<ServiceReference, String>> referrals;
 
