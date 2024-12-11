@@ -34,7 +34,6 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * The registry strategy that can be used in OSGi world. It provides the
  * following functionality:
- * <p>
  * <ul>
  * <li>Translation is done with ResourceTranslator</li>
  * <li>Registry is filled with information stored in plugin.xml / fragment.xml
@@ -44,8 +43,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * fragment.xml files</li>
  * <li>XML parser is obtained via an OSGi service</li>
  * </ul>
- * </p>
- * 
+ *
  * @see RegistryFactory#setDefaultRegistryProvider(IRegistryProvider)
  * @since org.eclipse.equinox.registry 3.2
  */
@@ -108,7 +106,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.core.runtime.spi.RegistryStrategy#translate(java.lang.String,
 	 * java.util.ResourceBundle)
@@ -120,7 +118,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.core.runtime.spi.RegistryStrategy#translate(java.lang.String[],
 	 * org.eclipse.core.runtime.IContributor, java.lang.String)
@@ -198,7 +196,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.core.runtime.spi.RegistryStrategy#createExecutableExtension(org.
 	 * eclipse.core.runtime.spi.RegistryContributor, java.lang.String,
@@ -256,7 +254,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#onStart(org.eclipse.core.
 	 * runtime.IExtensionRegistry, boolean)
 	 */
@@ -282,7 +280,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.core.runtime.spi.RegistryStrategy#onStop(org.eclipse.core.runtime
 	 * .IExtensionRegistry)
@@ -307,7 +305,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#cacheUse()
 	 */
 	@Override
@@ -317,7 +315,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#cacheLazyLoading()
 	 */
 	@Override
@@ -328,7 +326,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.core.runtime.spi.RegistryStrategy#getContributionsTimestamp()
 	 */
@@ -369,7 +367,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#getXMLParser()
 	 */
 	@Override
@@ -383,7 +381,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#getLocale()
 	 */
 	@Override
