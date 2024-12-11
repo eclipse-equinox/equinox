@@ -125,33 +125,38 @@ public abstract class NLS {
 	}
 
 	/**
-	 * Initialize the given class with the values from the message properties specified by the
-	 * base name.  The base name specifies a fully qualified base name to a message properties file,
-	 * including the package where the message properties file is located.  The class loader of the
-	 * specified class will be used to load the message properties resources.
+	 * Initialize the given class with the values from the message properties
+	 * specified by the base name. The base name specifies a fully qualified base
+	 * name to a message properties file, including the package where the message
+	 * properties file is located. The class loader of the specified class will be
+	 * used to load the message properties resources.
 	 * <p>
-	 * For example, if the locale is set to en_US and <code>org.eclipse.example.nls.messages</code>
-	 * is used as the base name then the following resources will be searched using the class
-	 * loader of the specified class:
+	 * For example, if the locale is set to en_US and
+	 * <code>org.eclipse.example.nls.messages</code> is used as the base name then
+	 * the following resources will be searched using the class loader of the
+	 * specified class:
 	 * </p>
+	 * 
 	 * <pre>
 	 *   org/eclipse/example/nls/messages_en_US.properties
 	 *   org/eclipse/example/nls/messages_en.properties
 	 *   org/eclipse/example/nls/messages.properties
 	 * </pre>
 	 * <p>
-	 * The properties files are read using the default encoding for resource bundles:
-	 * <ul>
-	 *   <li>In Java 8, resource files are read using ISO-8859-1 character encoding. Characters outside
-	 *   its range must be represented using Unicode escape sequences (e.g., <code>&#92;uXXXX</code>).</li>
-	 *   <li>In Java 11 and later, resource files are initially read using UTF-8 character encoding. If a
-	 *   resource cannot be successfully read in UTF-8, it will be read from the start in ISO-8859-1
-	 *   character encoding.</li>
-	 * </ul>
+	 * The properties files are read using the default encoding for resource
+	 * bundles:
 	 * </p>
+	 * <ul>
+	 * <li>In Java 8, resource files are read using ISO-8859-1 character encoding.
+	 * Characters outside its range must be represented using Unicode escape
+	 * sequences (e.g., <code>&#92;uXXXX</code>).</li>
+	 * <li>In Java 11 and later, resource files are initially read using UTF-8
+	 * character encoding. If a resource cannot be successfully read in UTF-8, it
+	 * will be read from the start in ISO-8859-1 character encoding.</li>
+	 * </ul>
 	 *
 	 * @param baseName the base name of a fully qualified message properties file.
-	 * @param clazz the class where the constants will exist
+	 * @param clazz    the class where the constants will exist
 	 */
 	public static void initializeMessages(final String baseName, final Class<?> clazz) {
 		if (System.getSecurityManager() == null) {
