@@ -30,6 +30,7 @@
     <!-- required by: org.eclipse.equinox.framework:launcher-binary-parent -->
     <equinox.binaries.loc>../../../equinox.binaries</equinox.binaries.loc>
     <target-platform.optionalDependencies>require</target-platform.optionalDependencies>
+    <tycho.baseline.skip>true</tycho.baseline.skip>
   </properties>
 
   <!-- 
@@ -255,6 +256,30 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-baseline-plugin</artifactId>
+          <version>${tycho.version}</version>
+				<configuration>
+					<extensions>true</extensions>
+					<increment>100</increment>
+					<baselines>
+						<repository>
+							<id>baseline-repo</id>
+							<url>${previous-release.baseline}</url>
+						</repository>
+					</baselines>
+					<ignores>
+						<ignore>META-INF/maven/*/pom.xml</ignore>
+						<ignore>META-INF/maven/*/pom.properties</ignore>
+						<ignore>OSGI-INF/*</ignore>
+						<ignore>META-INF/ECLIPSE_.RSA</ignore>
+						<ignore>META-INF/ECLIPSE_.SF</ignore>
+						<ignore>jars/*.jar</ignore>
+						<ignore>Eclipse-SourceReferences</ignore>
+					</ignores>
+          </configuration>
       </plugin>
     </plugins>
     <pluginManagement>

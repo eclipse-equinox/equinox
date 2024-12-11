@@ -11,7 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.core.internal.runtime;
+package org.eclipse.equinox.api.internal;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;

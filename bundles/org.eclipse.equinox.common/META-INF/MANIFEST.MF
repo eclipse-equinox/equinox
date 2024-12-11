@@ -19,7 +19,8 @@ Export-Package: org.eclipse.core.internal.boot;x-friends:="org.eclipse.core.reso
  org.eclipse.equinox.events;version="1.0.0"
 Bundle-Vendor: %providerName
 Bundle-Activator: org.eclipse.core.internal.runtime.Activator
-Require-Bundle: org.eclipse.osgi;bundle-version="[3.17.200,4.0.0)"
+Require-Bundle: org.eclipse.osgi;bundle-version="[3.17.200,4.0.0)",
+ org.eclipse.equinox.api;bundle-version="1.0.0";visibility:=reexport
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: org.eclipse.equinox.common

@@ -13,7 +13,8 @@
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
-import org.eclipse.core.internal.runtime.*;
+import org.eclipse.equinox.api.internal.APISupport;
+import org.eclipse.equinox.api.internal.LocalizationUtils;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -83,36 +84,25 @@ public final class SafeRunner {
 		if (!(exception instanceof OperationCanceledException)) {
 			String pluginId = getBundleIdOfSafeRunnable(code);
 			IStatus status = convertToStatus(exception, pluginId);
-			makeSureUserSeesException(exception, status);
+			APISupport.log(status);
 		}
 		code.handleException(exception);
 	}
 
-	private static void makeSureUserSeesException(Throwable exception, IStatus status) {
-		if (RuntimeLog.isEmpty()) {
-			exception.printStackTrace();
-		} else {
-			RuntimeLog.log(status);
-		}
-	}
-
 	private static String getBundleIdOfSafeRunnable(ISafeRunnable code) {
-		Activator activator = Activator.getDefault();
-		String pluginId = null;
-		if (activator != null)
-			pluginId = activator.getBundleId(code);
+		String pluginId = APISupport.getBundleId(code);
 		if (pluginId == null)
-			return IRuntimeConstants.PI_COMMON;
+			return APISupport.PI_COMMON;
 		return pluginId;
 	}
 
 	private static IStatus convertToStatus(Throwable exception, String pluginId) {
-		String message = NLS.bind(CommonMessages.meta_pluginProblems, pluginId);
+		String message = NLS.bind(LocalizationUtils.safeLocalize("meta_pluginProblems"), pluginId);
 		if (exception instanceof CoreException) {
-			MultiStatus status = new MultiStatus(pluginId, IRuntimeConstants.PLUGIN_ERROR, message, exception);
+			MultiStatus status = new MultiStatus(pluginId, APISupport.PLUGIN_ERROR, message, exception);
 			status.merge(((CoreException) exception).getStatus());
 			return status;
 		}
-		return new Status(IStatus.ERROR, pluginId, IRuntimeConstants.PLUGIN_ERROR, message, exception);
+		return new Status(IStatus.ERROR, pluginId, APISupport.PLUGIN_ERROR, message, exception);
 	}
 }

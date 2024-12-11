@@ -12,9 +12,11 @@
  *     IBM Corporation - initial API and implementation
  *     Sergey Prigogin (Google) - use parameterized types (bug 442021)
  *******************************************************************************/
-package org.eclipse.core.internal.runtime;
+package org.eclipse.equinox.api.internal;
 
 import java.lang.reflect.Field;
+
+import org.osgi.framework.Bundle;
 
 /**
  * Helper methods related to string localization.
@@ -33,7 +35,7 @@ public class LocalizationUtils {
 	 */
 	static public String safeLocalize(String key) {
 		try {
-			Class<?> messageClass = Class.forName("org.eclipse.core.internal.runtime.CommonMessages"); //$NON-NLS-1$
+			Class<?> messageClass = getMessageClass(); // $NON-NLS-1$
 			if (messageClass == null)
 				return key;
 			Field field = messageClass.getDeclaredField(key);
@@ -42,10 +44,18 @@ public class LocalizationUtils {
 			Object value = field.get(null);
 			if (value instanceof String)
 				return (String) value;
-		} catch (ClassNotFoundException | NoClassDefFoundError | SecurityException | NoSuchFieldException
-				| IllegalArgumentException | IllegalAccessException e) {
+		} catch (ClassNotFoundException | NoClassDefFoundError | NoSuchFieldException
+				| IllegalAccessException | RuntimeException e) {
 			// eat exception and fall through
 		}
 		return key;
+	}
+
+	protected static Class<?> getMessageClass() throws ClassNotFoundException {
+		Bundle bundle = APISupport.equinoxCommonBundle;
+		if (bundle != null) {
+			return bundle.loadClass("org.eclipse.core.internal.runtime.CommonMessages");
+		}
+		return Class.forName("org.eclipse.core.internal.runtime.CommonMessages");
 	}
 }

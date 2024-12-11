@@ -17,7 +17,9 @@ package org.eclipse.core.runtime;
 
 import java.util.Objects;
 import java.util.Optional;
-import org.eclipse.core.internal.runtime.*;
+
+import org.eclipse.equinox.api.internal.APISupport;
+import org.eclipse.equinox.api.internal.LocalizationUtils;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -136,8 +138,8 @@ public class Adapters {
 		try {
 			return Optional.ofNullable(adapt(sourceObject, adapter));
 		} catch (AssertionFailedException e) {
-			RuntimeLog.log(Status.error(
-					NLS.bind(CommonMessages.adapters_internal_error_of, new Object[] {
+			APISupport.log(Status.error(
+					NLS.bind(LocalizationUtils.safeLocalize("adapters_internal_error_of"), new Object[] {
 							sourceObject.getClass().getName(), adapter.getClass().getName(), e.getLocalizedMessage() }),
 					e));
 			return Optional.empty();
@@ -147,9 +149,9 @@ public class Adapters {
 	private static Object queryAdapterManager(Object sourceObject, String adapterId, boolean allowActivation) {
 		Object result;
 		if (allowActivation) {
-			result = AdapterManager.getDefault().loadAdapter(sourceObject, adapterId);
+			result = APISupport.getAdapterManager().loadAdapter(sourceObject, adapterId);
 		} else {
-			result = AdapterManager.getDefault().getAdapter(sourceObject, adapterId);
+			result = APISupport.getAdapterManager().getAdapter(sourceObject, adapterId);
 		}
 		return result;
 	}

@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.eclipse.equinox.api
+Bundle-Version: 1.0.0.qualifier
+Export-Package: org.eclipse.core.runtime;version="3.7.0"
+Automatic-Module-Name: org.eclipse.equinox.api
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-ActivationPolicy: lazy
+Bundle-Vendor: %providerName
+Bundle-Localization: plugin
+Import-Package: org.eclipse.osgi.service.debug;version="[1.2.0,2.0.0)",
+ org.eclipse.osgi.service.urlconversion;version="[1.0.0,2.0.0)",
+ org.eclipse.osgi.util;version="[1.2.0,2.0.0)",
+ org.osgi.framework;version="[1.10.0,2.0.0)",
+ org.osgi.service.packageadmin;version="[1.2.0,2.0.0)",
+ org.osgi.util.tracker;version="[1.5.0,2.0.0)"
