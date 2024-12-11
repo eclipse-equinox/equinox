@@ -17,10 +17,11 @@ import org.osgi.service.metatype.AttributeDefinition;
  * attribute definition} allowing access to any
  * {@link Extendable#getExtensionAttributes(String) extension attributes}
  * provided by third parties.
- * <p/>
+ * <p>
  * For example, an Equinox attribute definition will contain all XML attributes
  * specified as part of the &lt;AD/&gt; element with namespaces other than the
  * metatype namespace as extension attributes.
+ * </p>
  * 
  * @since 1.2
  * @noimplement This interface is not intended to be implemented by clients.

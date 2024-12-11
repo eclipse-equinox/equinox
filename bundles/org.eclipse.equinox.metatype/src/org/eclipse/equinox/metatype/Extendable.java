@@ -19,8 +19,8 @@ import java.util.Set;
  * a custom property added by a third party.
  * 
  * The use case for this interface was to expose third party attributes included
- * in the metadata XML on elements that support <anyAttribute/> according to the
- * metatype schema, but it is not strictly limited to this use.
+ * in the metadata XML on elements that support {@code <anyAttribute/>}
+ * according to the metatype schema, but it is not strictly limited to this use.
  * 
  * @since 1.2
  */

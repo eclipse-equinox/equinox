@@ -27,7 +27,7 @@ import java.util.Vector;
  * Authorization contexts are instantiated by calling
  * {@link UserAdmin#getAuthorization}
  * <p>
- * <font size="+1">Trusting Authorization objects.</font>
+ * <h2>Trusting Authorization objects.</h2>
  * <p>
  * There are no restrictions regarding the creation of Authorization objects.
  * Hence, a service must only accept Authorization objects from bundles that has

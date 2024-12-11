@@ -17,10 +17,11 @@ import org.osgi.service.metatype.ObjectClassDefinition;
  * object class definition} allowing access to any
  * {@link Extendable#getExtensionAttributes(String) extension attributes}
  * provided by third parties.
- * <p/>
+ * <p>
  * For example, an Equinox object class definition will contain all XML
  * attributes specified as part of the &lt;OCD/&gt; element with namespaces
  * other than the metatype namespace as extension attributes.
+ * </p>
  * 
  * @since 1.2
  */
