@@ -40,7 +40,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
  * values have been provided to the future (if <code>true</code>, meaning that
  * subsequent calls to {@link #get()} will not block), or {@link #isDone()} to
  * determine if <b>all</b> operations and results have been completed.
- * </p>
  * <p>
  * If {@link #hasValue()} is true, then the client may access status information
  * associated with the completed operation(s) via {@link #getStatus()}. Until
@@ -72,8 +71,7 @@ public interface IFuture<ResultType> {
 	 * @throws InterruptedException       if thread calling this method is
 	 *                                    interrupted.
 	 * @throws OperationCanceledException if the operation has been canceled via
-	 *                                    progress monitor
-	 *                                    {@link #getProgressMonitor()}.
+	 *                                    progress monitor.
 	 */
 	ResultType get() throws InterruptedException, OperationCanceledException;
 
@@ -90,8 +88,7 @@ public interface IFuture<ResultType> {
 	 * @throws TimeoutException           if the given wait time is exceeded without
 	 *                                    getting result.
 	 * @throws OperationCanceledException if the operation has been canceled via
-	 *                                    progress monitor
-	 *                                    {@link #getProgressMonitor()}.
+	 *                                    progress monitor.
 	 */
 	ResultType get(long waitTimeInMillis) throws InterruptedException, TimeoutException, OperationCanceledException;
 
