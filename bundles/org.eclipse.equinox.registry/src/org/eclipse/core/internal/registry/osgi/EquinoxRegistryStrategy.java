@@ -26,14 +26,12 @@ import org.osgi.framework.ServiceReference;
 /**
  * The registry strategy used by the Equinox extension registry. Adds to the
  * OSGi registry:
- * <p>
  * <ul>
  * <li>Use debug information supplied via .options files</li>
  * <li>Use Eclipse logging - Use Eclipse platform state for cache
  * validation</li>
  * <li>Event scheduling is done using Eclipse job scheduling mechanism</li>
  * </ul>
- * </p>
  *
  * @since org.eclipse.equinox.registry 3.2
  */

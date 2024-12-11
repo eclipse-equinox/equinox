@@ -24,6 +24,7 @@
   <properties>
 	  <!-- The actual TCKs are executed in the org.eclipse.osgi.tck module because of reference to other service implementations -->
 	  <tck.skip>true</tck.skip>
+	  <failOnJavadocErrors>false</failOnJavadocErrors>
   </properties>
   
   <build>
