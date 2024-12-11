@@ -14,10 +14,8 @@
 
 package org.eclipse.equinox.internal.region.hook;
 
-import org.eclipse.equinox.region.RegionDigraph;
-
 import java.util.Collection;
-
+import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.wiring.BundleRevision;
@@ -25,9 +23,9 @@ import org.osgi.framework.wiring.BundleRevision;
 /**
  * {@link RegionResolverHook} constructs an instance of
  * {@link RegionResolverHook} for a particular resolution operation.
- * <p />
- * 
- * <strong>Concurrent Semantics</strong><br />
+ * <p>
+ * <strong>Concurrent Semantics</strong>
+ * </p>
  * 
  * Thread safe.
  */

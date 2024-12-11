@@ -14,22 +14,19 @@
 
 package org.eclipse.equinox.internal.region.management;
 
+import java.util.*;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
 import org.eclipse.equinox.region.management.ManageableRegion;
 import org.eclipse.equinox.region.management.ManageableRegionDigraph;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 /**
  * {@link StandardManageableRegion} is the default implementation of
  * {@link ManageableRegion}.
- * <p />
- * 
- * <strong>Concurrent Semantics</strong><br />
+ * <p>
+ * <strong>Concurrent Semantics</strong>
+ * </p>
  * Thread safe.
  */
 public class StandardManageableRegion implements ManageableRegion {

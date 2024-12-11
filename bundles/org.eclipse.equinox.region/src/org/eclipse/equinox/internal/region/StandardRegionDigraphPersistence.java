@@ -23,9 +23,9 @@ import org.osgi.framework.*;
 /**
  * 
  * Class used for reading and writing a region digraph to persistent storage.
- * <p />
- * 
- * <strong>Concurrent Semantics</strong><br />
+ * <p>
+ * <strong>Concurrent Semantics</strong>
+ * </p>
  * Thread safe.
  */
 public final class StandardRegionDigraphPersistence implements RegionDigraphPersistence {

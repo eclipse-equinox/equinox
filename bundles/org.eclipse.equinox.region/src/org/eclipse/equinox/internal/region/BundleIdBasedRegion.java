@@ -28,9 +28,9 @@ import org.osgi.framework.*;
  * {@link BundleIdBasedRegion} is an implementation of {@link Region} which
  * keeps a track of the bundles in the region by recording their bundle
  * identifiers.
- * <p />
- * 
- * <strong>Concurrent Semantics</strong><br />
+ * <p>
+ * <strong>Concurrent Semantics</strong>
+ * </p>
  * Thread safe.
  */
 public final class BundleIdBasedRegion implements Region {

@@ -98,7 +98,7 @@ public class HelpCommand {
 	 * Provides help for the available commands. Prints the names, descriptions and
 	 * parameters of all registered commands.
 	 * 
-	 * If -scope <command_scope> is passed to the command, help is printed only for
+	 * If -scope {@code <command_scope>} is passed to the command, help is printed only for
 	 * the commands with the specified scope.
 	 * 
 	 * If a command name is passed as argument to the help command, then the help

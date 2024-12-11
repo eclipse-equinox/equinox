@@ -217,7 +217,7 @@ public class JavaEncryption {
 	// Algorithm detection
 
 	/**
-	 * Result: Map: <String>cipher -> <String>keyFactory
+	 * Result: {@code Map: <String>cipher -> <String>keyFactory}
 	 */
 	public HashMap<String, String> detect() {
 		IUICallbacks callback = CallbacksProvider.getDefault().getCallback();

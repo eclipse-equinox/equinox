@@ -30,8 +30,8 @@ import java.util.StringJoiner;
 /**
  * This class implements a storage for users, passwords and roles. The data is
  * stored in a properties-like file in the format
- * /ssh/<username>/password=<password> and
- * /ssh/<username>/roles=<comma_separated_list_of_roles>
+ * {@code /ssh/<username>/password=<password>} and
+ * {@code /ssh/<username>/roles=<comma_separated_list_of_roles>}
  */
 public class SecureUserStore {
 

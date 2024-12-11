@@ -96,36 +96,36 @@ import org.osgi.service.permissionadmin.PermissionAdmin;
  * <li>gc - perform a garbage collection</li>
  * <li>init - uninstall all bundles</li>
  * <li>launch - start the Service Management Framework</li>
- * <li>setprop <key>=<value> - set the OSGI property</li>
+ * <li>setprop {@code <key>=<value>} - set the OSGI property</li>
  * <li>shutdown - shutdown the Service Management Framework</li>
  * </ul>
  * <p>
  * ---Controlliing Bundles---
  * </p>
  * <ul>
- * <li>install <url> {s[tart]} - install and optionally start bundle from the
+ * <li>install {@code <url>} {s[tart]} - install and optionally start bundle from the
  * given URL</li>
- * <li>refresh (<id>|<location>) - refresh the packages of the specified
+ * <li>refresh ({@code <id>|<location>}) - refresh the packages of the specified
  * bundles</li>
- * <li>start (<id>|<location>) - start the specified bundle(s)</li>
- * <li>stop (<id>|<location>) - stop the specified bundle(s)</li>
- * <li>uninstall (<id>|<location>) - uninstall the specified bundle(s)</li>
- * <li>update (<id>|<location>|<*>) - update the specified bundle(s)</li>
+ * <li>start ({@code <id>|<location>}) - start the specified bundle(s)</li>
+ * <li>stop ({@code <id>|<location>}) - stop the specified bundle(s)</li>
+ * <li>uninstall ({@code <id>|<location>}) - uninstall the specified bundle(s)</li>
+ * <li>update ({@code <id>|<location>|<*>}) - update the specified bundle(s)</li>
  * </ul>
  * <p>
  * ---Displaying Status---
  * </p>
  * <ul>
- * <li>bundle (<id>|<location>) - display details for the specified
+ * <li>bundle ({@code <id>|<location>}) - display details for the specified
  * bundle(s)</li>
  * <li>bundles - display details for all installed bundles</li>
- * <li>headers (<id>|<location>) - print bundle headers</li>
- * <li>packages {<pkgname>|<id>|<location>} - display imported/exported package
+ * <li>headers ({@code <id>|<location>}) - print bundle headers</li>
+ * <li>packages {{@code <pkgname>|<id>|<location>}} - display imported/exported package
  * details</li>
  * <li>props - display System properties</li>
  * <li>services {filter} - display registered service details. Examples for
- * [filter]: (objectClass=com.xyz.Person);
- * (&(objectClass=com.xyz.Person)(|(sn=Jensen)(cn=Babs J*))); passing only
+ * [filter]: {@code (objectClass=com.xyz.Person);
+ * (&(objectClass=com.xyz.Person)(|(sn=Jensen)(cn=Babs J*)));} passing only
  * com.xyz.Person is a shortcut for (objectClass=com.xyz.Person). The filter
  * syntax specification is available at http://www.ietf.org/rfc/rfc1960.txt</li>
  * <li>ss - display installed bundles (short status)</li>
@@ -136,25 +136,25 @@ import org.osgi.service.permissionadmin.PermissionAdmin;
  * ---Extras---
  * </p>
  * <ul>
- * <li>exec <command> - execute a command in a separate process and wait</li>
- * <li>fork <command> - execute a command in a separate process</li>
- * <li>getprop <name> - Displays the system properties with the given name, or
+ * <li>exec {@code <command>} - execute a command in a separate process and wait</li>
+ * <li>fork {@code <command>} - execute a command in a separate process</li>
+ * <li>getprop {@code <name>} - Displays the system properties with the given name, or
  * all of them.</li>
- * <li>requiredBundles [<bsn>] - lists required bundles having the specified
+ * <li>requiredBundles [{@code <bsn>}] - lists required bundles having the specified
  * symbolic name or all if no bsn is specified</li>
- * <li>classSpaces [<bsn>] - lists required bundles having the specified
+ * <li>classSpaces [{@code <bsn>}] - lists required bundles having the specified
  * symbolic name or all if no bsn is specified</li>
  * </ul>
  * <p>
  * ---Controlling StartLevel---
  * </p>
  * <ul>
- * <li>sl {(<id>|<location>)} - display the start level for the specified
+ * <li>sl {({@code <id>|<location>})} - display the start level for the specified
  * bundle, or for the framework if no bundle specified</li>
- * <li>setfwsl <start level> - set the framework start level</li>
- * <li>setbsl <start level> (<id>|<location>) - set the start level for the
+ * <li>setfwsl {@code <start level>} - set the framework start level</li>
+ * <li>setbsl {@code <start level> (<id>|<location>)} - set the start level for the
  * bundle(s)</li>
- * <li>setibsl <start level> - set the initial bundle start level</li>
+ * <li>setibsl {@code <start level>} - set the initial bundle start level</li>
  * </ul>
  * <p>
  * ---Eclipse Runtime commands---
@@ -1873,7 +1873,7 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	 * an int
 	 *
 	 * @param value A string containing a potential startlevel
-	 * @return The start level or an int <0 if it was invalid
+	 * @return The start level or an int &lt;0 if it was invalid
 	 */
 	protected int getStartLevelFromToken(String value) {
 		int retval = -1;

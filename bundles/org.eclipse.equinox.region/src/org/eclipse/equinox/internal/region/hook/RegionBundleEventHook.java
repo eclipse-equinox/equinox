@@ -27,7 +27,7 @@ import org.osgi.framework.hooks.bundle.EventHook;
  * The current implementation delegates to {@link RegionBundleFindHook}. This is
  * likely to perform adequately because of the low frequency of bundle events
  * and the typically small number of bundle listeners.
- * <p />
+ * </p>
  * 
  * <strong>Concurrent Semantics</strong><br />
  * Thread safe.

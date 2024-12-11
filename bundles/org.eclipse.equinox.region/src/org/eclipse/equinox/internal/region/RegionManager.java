@@ -26,9 +26,9 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 /**
  * Creates and manages the {@link RegionDigraph} associated with the running
  * framework.
- * <p />
- * 
- * <strong>Concurrent Semantics</strong><br />
+ * <p>
+ * <strong>Concurrent Semantics</strong>
+ * </p>
  * 
  * Threadsafe.
  */

@@ -26,10 +26,10 @@ import org.osgi.framework.*;
  * from other regions to which it is connected. However a bundle running in a
  * region is not protected from discovering bundles in other regions, e.g. by
  * following wires using Wire Admin or similar services, so this is why regions
- * are only weakly isolated from each other.
- * <p />
+ * are only weakly isolated from each other. <br>
+ * <br>
  * 
- * <strong>Concurrent Semantics</strong><br />
+ * <strong>Concurrent Semantics</strong><br>
  * 
  * Implementations must be thread safe.
  * 

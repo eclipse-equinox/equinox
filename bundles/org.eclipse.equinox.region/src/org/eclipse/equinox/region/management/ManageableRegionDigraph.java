@@ -14,16 +14,15 @@
 
 package org.eclipse.equinox.region.management;
 
-import org.eclipse.equinox.region.RegionDigraph;
-
 import javax.management.MXBean;
+import org.eclipse.equinox.region.RegionDigraph;
 
 /**
  * {@link ManageableRegionDigraph} is a JMX representation of the
  * {@link RegionDigraph}.
- * <p />
- * 
- * <strong>Concurrent Semantics</strong><br />
+ * <p>
+ * <strong>Concurrent Semantics</strong>
+ * </p>
  * Thread safe.
  */
 @MXBean
