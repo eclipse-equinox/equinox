@@ -30,8 +30,11 @@ import org.osgi.framework.Bundle;
  * following way:
  *
  * <pre>
- * @Reference(target = "(type=bundle)")
+ * <code>
+ * {@literal @}Reference(target = "(type=bundle)")
  * private IScopeContext scopeContext;
+ * }
+ * </code>
  * </pre>
  */
 public class BundleStateScope implements IScopeContext {
