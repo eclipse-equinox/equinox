@@ -342,11 +342,11 @@ public class EquinoxEventPublisher {
 	}
 
 	/**
-	 * Coerce the generic type of a collection from Collection<BundleContextImpl> to
-	 * Collection<BundleContext>
+	 * Coerce the generic type of a collection from
+	 * {@code Collection<BundleContextImpl>} to {@code Collection<BundleContext>}
 	 * 
 	 * @param c Collection to be coerced.
-	 * @return c coerced to Collection<BundleContext>
+	 * @return c coerced to {@code Collection<BundleContext>}
 	 */
 	@SuppressWarnings("unchecked")
 	public static Collection<BundleContext> asBundleContexts(Collection<? extends BundleContext> c) {
