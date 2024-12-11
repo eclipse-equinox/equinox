@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %osgiServices
 Bundle-SymbolicName: org.eclipse.osgi.services;deprecated:="Deprecated in favour of the original jars published by the OSGi working-group."
-Bundle-Version: 3.12.100.qualifier
+Bundle-Version: 3.12.200.qualifier
 Bundle-Description: %osgiServicesDes
 Bundle-Localization: plugin
 Bundle-Vendor: %eclipse.org
