@@ -30,6 +30,7 @@
     <!-- required by: org.eclipse.equinox.framework:launcher-binary-parent -->
     <equinox.binaries.loc>../../../equinox.binaries</equinox.binaries.loc>
     <target-platform.optionalDependencies>require</target-platform.optionalDependencies>
+    <failOnJavadocErrors>true</failOnJavadocErrors>
   </properties>
 
   <!-- 

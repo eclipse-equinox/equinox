@@ -41,7 +41,7 @@ import java.util.Map;
  * {@code AdaptPermission} has one action: {@code adapt}.
  * 
  * @ThreadSafe
- * @author $Id$
+ * @author $Id: a2bc7aac583601ace28b252fdf4ae9a53ce32a9a $
  */
 public final class AdaptPermission extends BasicPermission {
 
@@ -275,14 +275,14 @@ public final class AdaptPermission extends BasicPermission {
 	 * 
 	 * <p>
 	 * This method checks that the filter of the target is implied by the adapt
-	 * class name of this object. The list of {@code AdaptPermission} actions
-	 * must either match or allow for the list of the target object to imply the
-	 * target {@code AdaptPermission} action.
-	 * <p>
+	 * class name of this object. The list of {@code AdaptPermission} actions must
+	 * either match or allow for the list of the target object to imply the target
+	 * {@code AdaptPermission} action.
+	 * </p>
 	 * 
 	 * @param p The requested permission.
-	 * @return {@code true} if the specified permission is implied by this
-	 *         object; {@code false} otherwise.
+	 * @return {@code true} if the specified permission is implied by this object;
+	 *         {@code false} otherwise.
 	 */
 	@Override
 	public boolean implies(Permission p) {
