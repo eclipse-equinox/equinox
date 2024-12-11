@@ -36,7 +36,7 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
  * known as <i>simple</i> digraphs. So the digraph is a simple, labelled
  * digraph.
  * <p>
- * The region digraph extends <code>Iterable<Region></code> and so a foreach
+ * The region digraph extends {@code Iterable<Region>} and so a foreach
  * statement may be used to iterate over (a snapshot of) the regions in the
  * digraph, e.g.
  * 

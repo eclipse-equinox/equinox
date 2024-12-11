@@ -17,9 +17,10 @@ package org.eclipse.equinox.region;
 /**
  * {@link RegionDigraphVisitor} is used to traverse a subgraph of a
  * {@link RegionDigraph}.
- * <p />
  * 
- * <strong>Concurrent Semantics</strong><br />
+ * <p>
+ * <strong>Concurrent Semantics</strong>
+ * </p>
  * 
  * Implementations of this interface must be thread safe.
  */

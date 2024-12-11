@@ -25,9 +25,9 @@ import org.osgi.framework.wiring.*;
 /**
  * {@link RegionResolverHook} manages the visibility of bundles across regions
  * according to the {@link RegionDigraph}.
- * <p />
- * 
- * <strong>Concurrent Semantics</strong><br />
+ * <p>
+ * <strong>Concurrent Semantics</strong>
+ * </p>
  * Thread safe.
  */
 public final class RegionResolverHook implements ResolverHook {

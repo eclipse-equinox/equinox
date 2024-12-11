@@ -22,9 +22,9 @@ import org.osgi.framework.hooks.service.FindHook;
 /**
  * {@link RegionServiceFindHook} manages the visibility of services across
  * regions according to the {@link RegionDigraph}.
- * <p />
- * 
- * <strong>Concurrent Semantics</strong><br />
+ * <p>
+ * <strong>Concurrent Semantics</strong>
+ * </p>
  * Thread safe.
  */
 public final class RegionServiceFindHook implements FindHook {

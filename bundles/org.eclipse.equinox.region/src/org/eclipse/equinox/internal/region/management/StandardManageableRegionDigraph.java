@@ -28,9 +28,9 @@ import org.osgi.framework.*;
 /**
  * {@link StandardManageableRegionDigraph} is a {@link ManageableRegionDigraph}
  * that delegates to the {@link RegionDigraph}.
- * <p />
- * 
- * <strong>Concurrent Semantics</strong><br />
+ * <p>
+ * <strong>Concurrent Semantics</strong>
+ * </p>
  * Thread safe.
  */
 public final class StandardManageableRegionDigraph implements ManageableRegionDigraph {

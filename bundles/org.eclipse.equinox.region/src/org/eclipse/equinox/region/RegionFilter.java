@@ -26,9 +26,9 @@ import org.osgi.framework.wiring.BundleRevision;
  * which are visible across the connection. A region filter is constant; its
  * sharing policy cannot be changed after construction. Instances of region
  * filters can be created with a {@link RegionFilterBuilder}.
- * <p />
- * 
- * <strong>Concurrent Semantics</strong><br />
+ * <p>
+ * <strong>Concurrent Semantics</strong>
+ * </p>
  * 
  * Implementations must be thread safe.
  * 

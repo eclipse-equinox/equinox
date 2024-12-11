@@ -42,9 +42,9 @@ public class UserAdminCommand {
 	/**
 	 * Command for adding a user
 	 *
-	 * @param args command line arguments in the format -username <username>
+	 * @param args command line arguments in the format {@code -username <username>
 	 *             -password <password> -roles <comma-separated list of user roles
-	 *             (optional)>
+	 *             (optional)>}
 	 */
 	@Descriptor("Add user with password and roles")
 	public void addUser(
@@ -89,8 +89,8 @@ public class UserAdminCommand {
 	/**
 	 * Command for setting or changing the password of a user.
 	 *
-	 * @param args command-line arguments in the format -username <username>
-	 *             -password <password>
+	 * @param args command-line arguments in the format {@code -username <username>
+	 *             -password <password>}
 	 */
 	@Descriptor("Set or change password")
 	public void setPassword(@Descriptor("-username <username>\r\n-password <password>") String[] args)
@@ -256,8 +256,8 @@ public class UserAdminCommand {
 	/**
 	 * Command to add roles to a user
 	 *
-	 * @param args command line arguments in the format -username
-	 *             <username>\r\n-roles <comma-separated list of roles to add>
+	 * @param args command line arguments in the format {@code -username
+	 *             <username>\r\n-roles <comma-separated list of roles to add>}
 	 */
 	@Descriptor("Add roles to user")
 	public void addRoles(
@@ -294,8 +294,8 @@ public class UserAdminCommand {
 	/**
 	 * Command to remove roles for a particular user
 	 *
-	 * @param args command line arguments in the format -username
-	 *             <username>\r\n-roles <comma-separated list of roles to remove>
+	 * @param args command line arguments in the format {@code -username
+	 *             <username>\r\n-roles <comma-separated list of roles to remove>}
 	 */
 	@Descriptor("Remove user roles")
 	public void removeRoles(

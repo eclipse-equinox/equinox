@@ -19,9 +19,9 @@ import org.eclipse.equinox.region.Region;
 /**
  * {@link RegionLifecycleListener} is a service interface to listen for regions
  * being added to and deleted from the region digraph.
- * <p />
+ * <p>
  * Note that this is an internal interface and is not intended for external use.
- * <p />
+ * </p>
  * 
  * <strong>Concurrent Semantics</strong><br />
  * Implementations of this interface must be thread safe.

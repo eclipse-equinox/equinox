@@ -26,9 +26,9 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 /**
  * {@link StandardRegionDigraph} is the default implementation of
  * {@link RegionDigraph}.
- * <p />
- * 
- * <strong>Concurrent Semantics</strong><br />
+ * <p>
+ * <strong>Concurrent Semantics</strong>
+ * </p>
  * 
  * Thread safe.
  */

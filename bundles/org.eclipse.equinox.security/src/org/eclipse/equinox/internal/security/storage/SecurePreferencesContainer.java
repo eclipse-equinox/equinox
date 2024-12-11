@@ -40,6 +40,7 @@ import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
  * When we'll have 2 actual "back end" secure preferences tree with data:
  * 
  * <pre>
+ * {@code
  * [UserPreferences1] -> [Options1] + 
  *                                    \
  *                                     [secure preferences1]   <- 1 : 1 -> URL1
@@ -51,6 +52,7 @@ import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
  *                                     [secure preferences2]   <- 1 : 1 -> URL2
  *                                    /
  * [UserPreferences4] -> [Options4] +
+ * }
  * </pre>
  * 
  * The user-facing nodes are actually a (node + options for this container).

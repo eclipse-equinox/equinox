@@ -21,7 +21,6 @@ public class Util {
 	/**
 	 * Performs a quicksort of the given objects by their string representation in
 	 * ascending order.
-	 * <p>
 	 *
 	 * @param array The array of objects to sort
 	 */
@@ -33,13 +32,14 @@ public class Util {
 	 * Sorts the array of objects by their string representation in ascending order.
 	 * <p>
 	 * This is a version of C.A.R Hoare's Quick Sort algorithm.
+	 * </p>
 	 *
 	 * @param array the array of objects to sort
 	 * @param start the start index to begin sorting
 	 * @param stop  the end index to stop sorting
 	 * 
-	 * @exception ArrayIndexOutOfBoundsException when <code>start < 0</code> or
-	 *                                           <code>end >= array.length</code>
+	 * @exception ArrayIndexOutOfBoundsException when <code>start &lt; 0</code> or
+	 *                                           <code>end &gt;= array.length</code>
 	 */
 	public static void qSortByString(Object[] array, int start, int stop) {
 		if (start >= stop)
@@ -95,9 +95,9 @@ public class Util {
 	 *                                           not implement Comparable or
 	 *                                           elements cannot be compared to each
 	 *                                           other
-	 * @exception IllegalArgumentException       when <code>start > end</code>
-	 * @exception ArrayIndexOutOfBoundsException when <code>start < 0</code> or
-	 *                                           <code>end > array.size()</code>
+	 * @exception IllegalArgumentException       when {@code start > end}
+	 * @exception ArrayIndexOutOfBoundsException when {@code start < 0} or
+	 *                                           {@code end > array.size()}
 	 */
 	@SuppressWarnings("unchecked")
 	public static void sort(Object[] array, int start, int end) {
@@ -137,9 +137,9 @@ public class Util {
 	 *                                           not implement Comparable or
 	 *                                           elements cannot be compared to each
 	 *                                           other
-	 * @exception IllegalArgumentException       when <code>start > end</code>
-	 * @exception ArrayIndexOutOfBoundsException when <code>start < 0</code> or
-	 *                                           <code>end > array.size()</code>
+	 * @exception IllegalArgumentException       when {@code start > end}
+	 * @exception ArrayIndexOutOfBoundsException when {@code start < 0} or
+	 *                                           {@code end > array.size()}
 	 */
 	public static void dsort(Object[] array, int start, int end) {
 		// first sort in ascending order

@@ -20,13 +20,13 @@ import org.osgi.framework.InvalidSyntaxException;
  * A builder for creating {@link RegionFilter} instances. A builder instance can
  * be obtained from the {@link RegionDigraph#createRegionFilterBuilder()}
  * method.
- * <p />
+ * <p>
  * Name spaces are used to configure the filters with a builder. A name space is
  * a string which is used to separate the names of various kinds of OSGi
  * resource whose names could otherwise collide. It can be either an OSGi
  * standard value such as {@link RegionFilter#VISIBLE_PACKAGE_NAMESPACE
  * osgi.wiring.package} or a user defined value.
- * <p />
+ * </p>
  * <strong>Concurrent Semantics</strong><br />
  * 
  * Implementations of this interface must be thread safe.

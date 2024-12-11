@@ -27,7 +27,7 @@ import org.osgi.framework.hooks.service.EventHook;
  * The current implementation avoids traversing the graph multiple times from
  * the same region. This is necessary to optimize the case where many bundles
  * with service listeners are contained in the same region.
- * <p />
+ * </p>
  * 
  * <strong>Concurrent Semantics</strong><br />
  * Thread safe.

@@ -14,15 +14,15 @@
 
 package org.eclipse.equinox.region.management;
 
-import org.eclipse.equinox.region.Region;
-
 import javax.management.MXBean;
+import org.eclipse.equinox.region.Region;
 
 /**
  * A {@link ManageableRegion} is a JMX representation of a {@link Region}.
- * <p />
+ * <p>
  * 
- * <strong>Concurrent Semantics</strong><br />
+ * <strong>Concurrent Semantics</strong>
+ * </p>
  * Thread safe.
  */
 @MXBean
@@ -36,7 +36,7 @@ public interface ManageableRegion {
 	String getName();
 
 	/**
-	 * Returns the {@ManageableRegion}s that this region depends upon.
+	 * Returns the {@link ManageableRegion}s that this region depends upon.
 	 * 
 	 * @return an array of {@link ManageableRegion}s
 	 */
