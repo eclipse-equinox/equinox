@@ -23,15 +23,17 @@ import java.util.Vector;
  * with roles. Before granting access to a restricted resource or operation, a
  * bundle will check if the Authorization object passed to it possesses the
  * required role, by calling its hasRole method.
+ * </p>
  * <p>
  * Authorization contexts are instantiated by calling
  * {@link UserAdmin#getAuthorization}
- * <p>
+ * </p>
  * <h2>Trusting Authorization objects.</h2>
  * <p>
  * There are no restrictions regarding the creation of Authorization objects.
  * Hence, a service must only accept Authorization objects from bundles that has
  * been authorized to use the service using code based (or Java 2) permissions.
+ * </p>
  * <p>
  * In some cases it is useful to use ServicePermissions to do the code based
  * access control. A service basing user access control on Authorization objects
@@ -39,14 +41,16 @@ import java.util.Vector;
  * ServicePermission to get the service in question. This is the most convenient
  * way. The framework will do the code based permission check when the calling
  * bundle attempts to get the service from the service registry.
+ * </p>
  * <p>
  * Example: A servlet using a service on a user's behalf. The bundle with the
  * servlet must be given the ServicePermission to get the Service.
+ * </p>
  * <p>
  * However, in some cases the code based permission checks need to be more
  * fine-grained. A service might allow all bundles to get it, but require
  * certain code based permissions for some of its methods.
- * <p>
+ * </p>
  * Example: A servlet using a service on a user's behalf, where some service
  * functionality is open to anyone, and some is restricted by code based
  * permissions. When a restricted method is called (e.g., one handing over an

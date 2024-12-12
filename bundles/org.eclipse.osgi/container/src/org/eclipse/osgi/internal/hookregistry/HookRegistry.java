@@ -103,25 +103,21 @@ public final class HookRegistry {
 	/**
 	 * Initializes the hook configurators. The following steps are used to
 	 * initialize the hook configurators.
-	 * <p>
-	 * 1. Get a list of hook configurators from all hook configurators properties
+	 * <ol>
+	 * <li>Get a list of hook configurators from all hook configurators properties
 	 * files on the classpath, add this list to the overall list of hook
-	 * configurators, remove duplicates.
-	 * <p>
-	 * 2. Get a list of hook configurators from the
+	 * configurators, remove duplicates.</li>
+	 * <li>Get a list of hook configurators from the
 	 * (&quot;osgi.hook.configurators.include&quot;) system property and add this
-	 * list to the overall list of hook configurators, remove duplicates.
-	 * <p>
-	 * 3. Get a list of hook configurators from the
+	 * list to the overall list of hook configurators, remove duplicates.</li>
+	 * <li>Get a list of hook configurators from the
 	 * (&quot;osgi.hook.configurators.exclude&quot;) system property and remove this
-	 * list from the overall list of hook configurators.
-	 * <p>
-	 * 4. Load each hook configurator class, create a new instance, then call the
-	 * {@link HookConfigurator#addHooks(HookRegistry)} method
-	 * <p>
-	 * 5. Set this HookRegistry object to read only to prevent any other hooks from
-	 * being added.
-	 * <p>
+	 * list from the overall list of hook configurators.</li>
+	 * <li>Load each hook configurator class, create a new instance, then call the
+	 * {@link HookConfigurator#addHooks(HookRegistry)} method</li>
+	 * <li>Set this HookRegistry object to read only to prevent any other hooks from
+	 * being added.</li>
+	 * </ol>
 	 */
 	public void initialize() {
 		List<String> configurators = new ArrayList<>(5);

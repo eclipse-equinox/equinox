@@ -67,7 +67,7 @@ public class FrameworkDebugOptions
 	private Properties disabledOptions = null;
 	/**
 	 * A cache of all of the bundles <code>DebugTrace</code> in the format
-	 * <key,value> --> <bundle name, DebugTrace>
+	 * {@code <key,value> --> <bundle name, DebugTrace>}
 	 */
 	protected final Map<String, DebugTrace> debugTraceCache = new HashMap<>();
 	/** The File object to store messages. This value may be null. */
