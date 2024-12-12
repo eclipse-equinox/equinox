@@ -18,8 +18,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import org.eclipse.core.runtime.*;
-import org.eclipse.core.runtime.dynamichelpers.*;
+
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionDelta;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.RegistryFactory;
+import org.eclipse.core.runtime.dynamichelpers.ExtensionTracker;
+import org.eclipse.core.runtime.dynamichelpers.IExtensionChangeHandler;
+import org.eclipse.core.runtime.dynamichelpers.IExtensionTracker;
 import org.eclipse.core.tests.harness.BundleTestingHelper;
 import org.eclipse.core.tests.harness.TestRegistryChangeListener;
 import org.junit.Test;
@@ -61,7 +68,7 @@ public class ExtensionRegistryDynamicTest {
 	}
 
 	/**
-	 * @see bug 65783
+	 * @see "bug 65783"
 	 */
 	@Test
 	public void testReresolving() throws IOException, BundleException {
@@ -95,7 +102,7 @@ public class ExtensionRegistryDynamicTest {
 	boolean removalCalled = false;
 
 	/**
-	 * @see bug 178028
+	 * @see "bug 178028"
 	 */
 	@Test
 	public void testEventTracker() throws IOException, BundleException {
