@@ -22,7 +22,6 @@ import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ICoreRunnable;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
@@ -32,7 +31,6 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.INodeChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.NodeChangeEvent;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.osgi.service.datalocation.Location;
@@ -97,27 +95,22 @@ public class EclipsePreferencesTest {
 	/**
 	 * Concurrent access to listener collection should not lead to exceptions
 	 * 
-	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=444188
+	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=444188">bug
+	 *      444188</a>
 	 */
 	@Test
 	public void testConcurrentPreferenceChangeListener() throws InterruptedException, CoreException {
 		final IEclipsePreferences node = createTestNode();
 		final int runSize = 100000;
 
-		executeInTwoThreads(new ICoreRunnable() {
-			@Override
-			public void run(IProgressMonitor monitor) throws CoreException {
-				IPreferenceChangeListener listener = new IPreferenceChangeListener() {
-					@Override
-					public void preferenceChange(PreferenceChangeEvent event) {
-					}
-				};
-				for (int i = 0; i < runSize && !monitor.isCanceled(); i++) {
-					node.addPreferenceChangeListener(listener); // Should not throw
-					node.put("x", "y"); // Should not throw
-					node.remove("x"); // Should not throw
-					node.removePreferenceChangeListener(listener); // Should not throw
-				}
+		executeInTwoThreads(monitor -> {
+			IPreferenceChangeListener listener = event -> {
+			};
+			for (int i = 0; i < runSize && !monitor.isCanceled(); i++) {
+				node.addPreferenceChangeListener(listener); // Should not throw
+				node.put("x", "y"); // Should not throw
+				node.remove("x"); // Should not throw
+				node.removePreferenceChangeListener(listener); // Should not throw
 			}
 		});
 	}
@@ -125,47 +118,41 @@ public class EclipsePreferencesTest {
 	/**
 	 * Concurrent access to listener collection should not lead to exceptions
 	 * 
-	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=444188
+	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=444188">bug
+	 *      444188</a>
 	 */
 	@Test
 	public void testConcurrentNodeChangeListener() throws InterruptedException, CoreException {
 		final IEclipsePreferences node = createTestNode();
 		final int runSize = 100000;
-		executeInTwoThreads(new ICoreRunnable() {
-			@Override
-			public void run(IProgressMonitor monitor) throws CoreException {
-				INodeChangeListener listener = new INodeChangeListener() {
+		executeInTwoThreads(monitor -> {
+			INodeChangeListener listener = new INodeChangeListener() {
 
-					@Override
-					public void removed(NodeChangeEvent event) {
-					}
-
-					@Override
-					public void added(NodeChangeEvent event) {
-					}
-				};
-				for (int i = 0; i < runSize && !monitor.isCanceled(); i++) {
-					node.addNodeChangeListener(listener); // Should not throw
-					try {
-						node.node(Thread.currentThread().getName()).removeNode(); // Should not throw
-					} catch (BackingStoreException e) {
-						throw new CoreException(
-								new Status(IStatus.ERROR, "org.eclipse.core.tests.runtime", 0, "", null));
-					}
-					node.removeNodeChangeListener(listener); // Should not throw
+				@Override
+				public void removed(NodeChangeEvent event) {
 				}
+
+				@Override
+				public void added(NodeChangeEvent event) {
+				}
+			};
+			for (int i = 0; i < runSize && !monitor.isCanceled(); i++) {
+				node.addNodeChangeListener(listener); // Should not throw
+				try {
+					node.node(Thread.currentThread().getName()).removeNode(); // Should not throw
+				} catch (BackingStoreException e) {
+					throw new CoreException(new Status(IStatus.ERROR, "org.eclipse.core.tests.runtime", 0, "", null));
+				}
+				node.removeNodeChangeListener(listener); // Should not throw
 			}
 		});
 	}
 
 	private static void executeInTwoThreads(final ICoreRunnable runnable) throws InterruptedException, CoreException {
 		final CountDownLatch latch = new CountDownLatch(1);
-		Job job = Job.create("", new ICoreRunnable() {
-			@Override
-			public void run(IProgressMonitor monitor) throws CoreException {
-				latch.countDown();
-				runnable.run(monitor);
-			}
+		Job job = Job.create("", (ICoreRunnable) monitor -> {
+			latch.countDown();
+			runnable.run(monitor);
 		});
 		job.schedule();
 		try {
