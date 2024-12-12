@@ -112,7 +112,7 @@ import org.osgi.framework.Version;
  * that keys in the match argument must always be strings. The comparison is
  * defined by the object type of the key's value. The following rules apply for
  * comparison: <blockquote>
- * <TABLE BORDER=0>
+ * <TABLE>
  * <TR>
  * <TD><b>Property Value Type </b></TD>
  * <TD><b>Comparison Type</b></TD>
@@ -121,7 +121,7 @@ import org.osgi.framework.Version;
  * <TD>String</TD>
  * <TD>String comparison</TD>
  * </TR>
- * <TR valign=top>
+ * <TR>
  * <TD>Integer, Long, Float, Double, Byte, Short, BigInteger, BigDecimal</TD>
  * <TD>numerical comparison</TD>
  * </TR>

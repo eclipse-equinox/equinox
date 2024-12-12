@@ -33,7 +33,6 @@ import org.osgi.framework.BundleException;
  * A StorageHookFactory hooks into the persistent storage loading and saving of
  * bundle {@link Generation generations}. A factory creates StorageHook
  * instances that get associated with each Generation object installed.
- * <p>
  * 
  * @see Generation#getStorageHook(Class)
  * @param <S> the save context type

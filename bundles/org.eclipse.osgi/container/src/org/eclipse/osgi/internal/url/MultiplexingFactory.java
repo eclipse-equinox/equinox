@@ -41,8 +41,9 @@ public abstract class MultiplexingFactory {
 	/**
 	 * As a short-term (hopefully) solution we use a special class which is defined
 	 * using the Unsafe class from the VM. This class is an implementation of
-	 * Collection<AccessibleObject> simply to provide a method add(AccessibleObject)
-	 * which turns around and calls AccessibleObject.setAccessible(true).
+	 * {@code Collection<AccessibleObject>} simply to provide a method
+	 * add(AccessibleObject) which turns around and calls
+	 * AccessibleObject.setAccessible(true).
 	 * <p>
 	 * The reason this is needed is to hack into the VM to get deep reflective
 	 * access to the java.net package for the various hacks we have to do to
