@@ -38,6 +38,8 @@ import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
 import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -81,9 +83,13 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			PackagePermission.class.getName(), "org.osgi.framework", "import"); //$NON-NLS-1$ //$NON-NLS-2$
 	private Policy previousPolicy;
 
+	@BeforeClass
+	public static void setupClass() {
+		Assume.assumeTrue("Security-Manager is disallowed", SecurityManagerTests.isSecurityManagerAllowed());
+	}
+
 	@Override
 	public void setUp() throws Exception {
-		assertNull("Cannot test with security manager set", getSecurityManager());
 		previousPolicy = Policy.getPolicy();
 		final Permission allPermission = new AllPermission();
 		final PermissionCollection allPermissions = new PermissionCollection() {
@@ -721,4 +727,21 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			}
 		}
 	}
+
+	public static boolean isSecurityManagerAllowed() {
+		SecurityManager original = System.getSecurityManager();
+		try { // Try to set a dummy to provoke an UnsupportedOperationException if disallowed
+			System.setSecurityManager(new SecurityManager() {
+				@Override
+				public void checkPermission(Permission perm) {
+					// Permit everything
+				}
+			});
+			System.setSecurityManager(original); // restore original
+			return true;
+		} catch (UnsupportedOperationException e) {
+			return false; // security-manager is not allowed
+		}
+	}
+
 }

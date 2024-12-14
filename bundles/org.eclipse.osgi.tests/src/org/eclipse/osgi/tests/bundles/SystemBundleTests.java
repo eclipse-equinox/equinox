@@ -92,7 +92,9 @@ import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.eclipse.osgi.storage.url.reference.Handler;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.security.BaseSecurityTest;
+import org.eclipse.osgi.tests.securityadmin.SecurityManagerTests;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -1427,6 +1429,8 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 	@Test
 	public void testDynamicSecurityManager() throws BundleException {
+		Assume.assumeTrue("Security-Manager is disallowed", SecurityManagerTests.isSecurityManagerAllowed());
+
 		SecurityManager sm = System.getSecurityManager();
 		assertNull("SecurityManager must be null to test.", sm);
 		try {
@@ -3267,16 +3271,21 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 		Map<String, String> launchProps = new HashMap<>();
 		launchProps.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
-		SecurityManager sm = new SecurityManager() {
-			public void checkPermission(Permission perm) {
-				// do nothing;
-			}
-		};
-		System.setSecurityManager(sm);
+		boolean unsetSecurityManager = false;
+		if (SecurityManagerTests.isSecurityManagerAllowed()) {
+			unsetSecurityManager = true;
+			System.setSecurityManager(new SecurityManager() {
+				public void checkPermission(Permission perm) {
+					// do nothing;
+				}
+			});
+		}
 		try {
 			equinox = new Equinox(Collections.singletonMap(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath()));
 		} finally {
-			System.setSecurityManager(null);
+			if (unsetSecurityManager) {
+				System.setSecurityManager(null);
+			}
 		}
 		equinox.start();
 		stop(equinox);
