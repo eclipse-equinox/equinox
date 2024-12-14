@@ -24,6 +24,8 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.osgi.container.Module;
 import org.eclipse.osgi.internal.framework.EquinoxBundle;
 import org.eclipse.osgi.signedcontent.SignedContent;
+import org.eclipse.osgi.tests.securityadmin.SecurityManagerTests;
+import org.junit.Assume;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
@@ -40,6 +42,8 @@ public class EquinoxBundleAdaptTests extends AbstractBundleTests {
 	@Test
 	@SuppressWarnings({ "deprecation", "removal" }) // SecurityManager
 	public void testAdapt_ProtectionDomain() throws Exception {
+		Assume.assumeTrue("Security-Manager is disallowed", SecurityManagerTests.isSecurityManagerAllowed());
+
 		Bundle bundle = installer.installBundle("test");
 		SecurityManager previousSM = System.getSecurityManager();
 		try {

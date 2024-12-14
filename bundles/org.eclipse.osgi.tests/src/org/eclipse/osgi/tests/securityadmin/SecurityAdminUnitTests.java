@@ -40,6 +40,8 @@ import java.util.NoSuchElementException;
 import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
+import org.junit.Assume;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -107,6 +109,11 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 	private Equinox equinox;
 	private ConditionalPermissionAdmin cpa;
 	private PermissionAdmin pa;
+
+	@BeforeClass
+	public static void setupClass() {
+		Assume.assumeTrue("Security-Manager is disallowed", SecurityManagerTests.isSecurityManagerAllowed());
+	}
 
 	@Override
 	public void setUp() throws Exception {
