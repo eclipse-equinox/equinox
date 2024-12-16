@@ -89,8 +89,8 @@
       storageURI="scope://Workspace"/>
   <setupTask
       xsi:type="jdt:JRETask"
-      version="JavaSE-17"
-      location="${jre.location-17}"/>
+      version="JavaSE-21"
+      location="${jre.location-21}"/>
   <setupTask
       xsi:type="setup.targlets:TargletTask"
       targetName="Modular API Baseline Target"
