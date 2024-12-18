@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,11 +10,12 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Thomas Wolf, Patrick Ziegler - support for matching individual words
  *******************************************************************************/
 package org.eclipse.core.text;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * A string pattern matcher. Supports '*' and '?' wildcards.
@@ -22,6 +23,10 @@ import java.util.List;
  * @since 3.12
  */
 public final class StringMatcher {
+
+	private static final Pattern NON_WORD = Pattern.compile("\\W+", Pattern.UNICODE_CHARACTER_CLASS); //$NON-NLS-1$
+
+	private static final StringMatcher[] NO_MATCHERS = new StringMatcher[0];
 
 	private final String fPattern;
 
@@ -31,9 +36,13 @@ public final class StringMatcher {
 
 	private boolean fIgnoreWildCards;
 
+	private final boolean fIgnoreWords;
+
 	private boolean fHasLeadingStar;
 
 	private boolean fHasTrailingStar;
+
+	private final StringMatcher fParts[]; // the given pattern is split into space-separated sub-patterns
 
 	private String fSegments[]; // the given pattern is split into * separated segments
 
@@ -113,6 +122,25 @@ public final class StringMatcher {
 	}
 
 	/**
+	 * Splits a given text into words.
+	 *
+	 * @param text to split
+	 * @return the words of the text
+	 * @since 3.20
+	 */
+	public static String[] getWords(String text) {
+		// Previous implementations (in the removed StringMatcher) used the ICU
+		// BreakIterator to split the text. That worked well, but in 2020 it was decided
+		// to drop the dependency to the ICU library due to its size. The JDK
+		// BreakIterator splits differently, causing e.g.
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=563121 . The NON_WORD regexp
+		// appears to work well for programming language text, but may give sub-optimal
+		// results for natural languages. See also
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=90579 .
+		return NON_WORD.split(text);
+	}
+
+	/**
 	 * StringMatcher constructor takes in a String object that is a simple pattern.
 	 * The pattern may contain '*' for 0 and many characters and '?' for exactly one
 	 * character.
@@ -141,14 +169,75 @@ public final class StringMatcher {
 	 * @throws IllegalArgumentException if {@code pattern == null}
 	 */
 	public StringMatcher(String pattern, boolean ignoreCase, boolean ignoreWildCards) {
+		this(pattern, ignoreCase, ignoreWildCards, true);
+	}
+
+	/**
+	 * StringMatcher constructor takes in a String object that is a simple pattern.
+	 * The pattern may contain '*' for 0 and many characters and '?' for exactly one
+	 * character.
+	 * <p>
+	 * Literal '*' and '?' characters must be escaped in the pattern e.g., "\*"
+	 * means literal "*", etc.
+	 * </p>
+	 * <p>
+	 * The escape character '\' is an escape only if followed by '*', '?', or '\'.
+	 * All other occurrences are taken literally.
+	 * </p>
+	 * <p>
+	 * If invoking the StringMatcher with string literals in Java, don't forget
+	 * escape characters are represented by "\\".
+	 * </p>
+	 * <p>
+	 * If {@code ignoreWords} is true, this {@code StringMatcher} matches a pattern
+	 * that may contain the wildcards '?' or '*' against a text. However, the
+	 * matching is not only done on the full text, but also on individual words from
+	 * the text, and if the pattern contains whitespace, the pattern is split into
+	 * sub-patterns and those are matched, too.
+	 * </p>
+	 * <p>
+	 * The precise rules are:
+	 * </p>
+	 * <ul>
+	 * <li>Leading and trailing whitespace in the pattern is ignored.</li>
+	 * <li>If the full pattern matches the full text, the match succeeds.</li>
+	 * <li>If the full pattern matches a single word of the text, the match
+	 * succeeds.</li>
+	 * <li>If all sub-patterns match a prefix of the whole text or any prefix of any
+	 * word, the match succeeds.</li>
+	 * <li>Otherwise, the match fails.</li>
+	 * </ul>
+	 * <p>
+	 * An empty pattern matches only an empty text, unless {@link #usePrefixMatch()}
+	 * is used, in which case it always matches.
+	 * </p>
+	 *
+	 * @param pattern         the pattern to match text against, must not be
+	 *                        {@code null}
+	 * @param ignoreCase      if true, case is ignored
+	 * @param ignoreWildCards if true, wild cards and their escape sequences are
+	 *                        ignored (everything is taken literally).
+	 * @param ignoreWords     if true, only matches against the whole text but not
+	 *                        individual words
+	 * @throws IllegalArgumentException if {@code pattern == null}
+	 * @since 3.20
+	 */
+	public StringMatcher(String pattern, boolean ignoreCase, boolean ignoreWildCards, boolean ignoreWords) {
 		if (pattern == null) {
 			throw new IllegalArgumentException();
 		}
 		fIgnoreCase = ignoreCase;
 		fIgnoreWildCards = ignoreWildCards;
-		fPattern = pattern;
-		fLength = pattern.length();
-
+		fIgnoreWords = ignoreWords;
+		if (fIgnoreWords) {
+			fPattern = pattern;
+			fLength = fPattern.length();
+			fParts = NO_MATCHERS;
+		} else {
+			fPattern = pattern.trim();
+			fLength = fPattern.length();
+			fParts = splitPattern();
+		}
 		if (fIgnoreWildCards) {
 			parseNoWildCards();
 		} else {
@@ -256,7 +345,27 @@ public final class StringMatcher {
 		if (text == null) {
 			throw new IllegalArgumentException();
 		}
-		return match(text, 0, text.length());
+		// match the whole text
+		if (match(text, 0, text.length())) {
+			return true;
+		}
+		// match individual words
+		if (!fIgnoreWords) {
+			String[] words = StringMatcher.getWords(text);
+			if (match(this, words)) {
+				return true;
+			}
+			if (fParts.length == 0) {
+				return false;
+			}
+			for (StringMatcher subMatcher : fParts) {
+				if (!subMatcher.match(text) && !match(subMatcher, words)) {
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -351,6 +460,41 @@ public final class StringMatcher {
 			return regExpRegionMatches(text, end - clen, current, clen);
 		}
 		return i == segCount;
+	}
+
+	/**
+	 * Determines whether the given {@code matcher} matches at least one of the
+	 * given {@code words}.
+	 *
+	 * @param matcher either this or a sub-matcher; must not be {@code null}
+	 * @param words   words to match; must not be {@code null} and not contain
+	 *                {@code null} words.
+	 * @return {@code true} if at least one word is matched by the pattern;
+	 *         {@code false} otherwise
+	 */
+	private static boolean match(StringMatcher matcher, String[] words) {
+		return Arrays.stream(words).anyMatch(word -> matcher.match(word, 0, word.length()));
+	}
+
+	private StringMatcher[] splitPattern() {
+		String pattern = fPattern.trim();
+		if (pattern.isEmpty()) {
+			return NO_MATCHERS;
+		}
+		String[] subPatterns = pattern.split("\\s+"); //$NON-NLS-1$
+		if (subPatterns.length <= 1) {
+			return NO_MATCHERS;
+		}
+		List<StringMatcher> matchers = new ArrayList<>();
+		for (String s : subPatterns) {
+			if (s == null || s.isEmpty()) {
+				continue;
+			}
+			StringMatcher m = new StringMatcher(s, fIgnoreCase, fIgnoreWildCards);
+			m.usePrefixMatch();
+			matchers.add(m);
+		}
+		return matchers.toArray(StringMatcher[]::new);
 	}
 
 	/**
