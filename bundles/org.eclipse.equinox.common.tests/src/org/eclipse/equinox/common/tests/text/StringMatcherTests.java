@@ -16,7 +16,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({ StringMatcherFindTest.class, StringMatcherPlainTest.class, StringMatcherWildcardTest.class,
-		StringMatcherPrefixTest.class, StringMatcherOtherTest.class })
+		StringMatcherPrefixTest.class, StringMatcherOtherTest.class, TextMatcherTest.class })
 public class StringMatcherTests {
 	// empty
 }
