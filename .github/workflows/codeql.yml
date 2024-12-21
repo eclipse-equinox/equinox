@@ -45,14 +45,16 @@ jobs:
       uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
-    - name: Set up JDK 17
+    - name: Set up JDK
       uses: actions/setup-java@6a0805fcefea3d4657a47ac4c165951e33482018 # v4.2.2
       with:
         java-version: |
           8
+          21
           17
         mvn-toolchain-id: |
           JavaSE-1.8
+          JavaSE-21
           JavaSE-17
         distribution: 'temurin'
         cache: maven
