@@ -47,6 +47,7 @@ public class TransformerHook
 	public void start(BundleContext context) throws BundleException {
 		try {
 			ReplaceTransformer.register(context, this);
+			TransformerBundleExtender.start(context);
 			this.transformers = new TransformerList(context, logServices);
 		} catch (InvalidSyntaxException e) {
 			throw new BundleException("Problem registering service tracker: transformers", e); //$NON-NLS-1$
