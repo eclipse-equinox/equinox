@@ -34,14 +34,16 @@ jobs:
         fetch-depth: 1 # only shallow here, we don't have jgit timestamps
         repository: eclipse-equinox/equinox.binaries
         path: equinox.binaries
-    - name: Set up JDK 17
+    - name: Set up JDK
       uses: actions/setup-java@v4
       with:
         java-version: |
           8
+          21
           17
         mvn-toolchain-id: |
           JavaSE-1.8
+          JavaSE-21
           JavaSE-17
         distribution: 'temurin'
         cache: maven
