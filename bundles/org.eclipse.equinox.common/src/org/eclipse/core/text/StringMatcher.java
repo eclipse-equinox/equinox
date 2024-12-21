@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,11 +10,12 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Thomas Wolf, Patrick Ziegler - support for matching individual words
  *******************************************************************************/
 package org.eclipse.core.text;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * A string pattern matcher. Supports '*' and '?' wildcards.
@@ -22,6 +23,10 @@ import java.util.List;
  * @since 3.12
  */
 public final class StringMatcher {
+
+	private static final Pattern NON_WORD = Pattern.compile("\\W+", Pattern.UNICODE_CHARACTER_CLASS); //$NON-NLS-1$
+
+	private static final StringMatcher[] NO_MATCHERS = new StringMatcher[0];
 
 	private final String fPattern;
 
@@ -34,6 +39,8 @@ public final class StringMatcher {
 	private boolean fHasLeadingStar;
 
 	private boolean fHasTrailingStar;
+
+	private StringMatcher fParts[]; // the given pattern is split into space-separated sub-patterns
 
 	private String fSegments[]; // the given pattern is split into * separated segments
 
@@ -351,6 +358,105 @@ public final class StringMatcher {
 			return regExpRegionMatches(text, end - clen, current, clen);
 		}
 		return i == segCount;
+	}
+	
+	/**
+	 * Similar to {@link #match(String)}, this methods matches a pattern that may
+	 * contain the wildcards '?' or '*' against a text. However, the matching is not
+	 * only done on the full text, but also on individual words from the text, and
+	 * if the pattern contains whitespace, the pattern is split into sub-patterns
+	 * and those are matched, too.
+	 * <p>
+	 * The precise rules are:
+	 * </p>
+	 * <ul>
+	 * <li>If the full pattern matches the full text, the match succeeds.</li>
+	 * <li>If the full pattern matches a single word of the text, the match
+	 * succeeds.</li>
+	 * <li>If all sub-patterns match a prefix of the whole text or any prefix of any
+	 * word, the match succeeds.</li>
+	 * <li>Otherwise, the match fails.</li>
+	 * </ul>
+	 * <p>
+	 * An empty pattern matches only the empty text.
+	 * </p>
+	 * 
+	 * @since 3.20
+	 */
+	public boolean matchWords(String text) {
+		if (match(text)) {
+			return true;
+		}
+		String[] words = getWords(text);
+		if (match(this, words)) {
+			return true;
+		}
+		if (fParts == null) {
+			fParts = splitPattern();
+		}
+		if (fParts.length == 0) {
+			return false;
+		}
+		for (StringMatcher subMatcher : fParts) {
+			if (!subMatcher.match(text) && !match(subMatcher, words)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private StringMatcher[] splitPattern() {
+		String pattern = fPattern.trim();
+		if (pattern.isEmpty()) {
+			return NO_MATCHERS;
+		}
+		String[] subPatterns = pattern.split("\\s+"); //$NON-NLS-1$
+		if (subPatterns.length <= 1) {
+			return NO_MATCHERS;
+		}
+		List<StringMatcher> matchers = new ArrayList<>();
+		for (String s : subPatterns) {
+			if (s == null || s.isEmpty()) {
+				continue;
+			}
+			StringMatcher m = new StringMatcher(s, fIgnoreCase, fIgnoreWildCards);
+			m.usePrefixMatch();
+			matchers.add(m);
+		}
+		return matchers.toArray(StringMatcher[]::new);
+	}
+
+	/**
+	 * Determines whether the given {@code matcher} matches at least one of the
+	 * given {@code words}.
+	 *
+	 * @param matcher either this or a sub-matcher; must not be {@code null}
+	 * @param words   words to match; must not be {@code null} and not contain
+	 *                {@code null} words.
+	 * @return {@code true} if at least one word is matched by the pattern;
+	 *         {@code false} otherwise
+	 */
+	private static boolean match(StringMatcher matcher, String[] words) {
+		return Arrays.stream(words).anyMatch(word -> matcher.match(word, 0, word.length()));
+	}
+
+	/**
+	 * Splits a given text into words.
+	 *
+	 * @param text to split
+	 * @return the words of the text
+	 * @since 3.20
+	 */
+	public static String[] getWords(String text) {
+		// Previous implementations (in the removed StringMatcher) used the ICU
+		// BreakIterator to split the text. That worked well, but in 2020 it was decided
+		// to drop the dependency to the ICU library due to its size. The JDK
+		// BreakIterator splits differently, causing e.g.
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=563121 . The NON_WORD regexp
+		// appears to work well for programming language text, but may give sub-optimal
+		// results for natural languages. See also
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=90579 .
+		return NON_WORD.split(text);
 	}
 
 	/**
