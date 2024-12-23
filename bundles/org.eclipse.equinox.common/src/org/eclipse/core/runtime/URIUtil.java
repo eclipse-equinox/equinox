@@ -15,6 +15,7 @@ package org.eclipse.core.runtime;
 
 import java.io.File;
 import java.net.*;
+import java.nio.file.Path;
 
 /**
  * A utility class for manipulating URIs. This class works around some of the
@@ -312,11 +313,12 @@ public final class URIUtil {
 		// URL behaves differently across platforms so for file: URLs we parse from
 		// string form
 		if (SCHEME_FILE.equals(url.getProtocol())) {
-			String pathString = url.toExternalForm().substring(5);
+			String pathString = url.toExternalForm().substring(SCHEME_FILE.length() + 1);
 			// ensure there is a leading slash to handle common malformed URLs such as
 			// file:c:/tmp
-			if (pathString.indexOf('/') != 0)
+			if (!pathString.startsWith("/")) { //$NON-NLS-1$
 				pathString = '/' + pathString;
+			}
 			return toURI(SCHEME_FILE, null, pathString, null);
 		}
 		try {
@@ -325,6 +327,33 @@ public final class URIUtil {
 			// try multi-argument URI constructor to perform encoding
 			return toURI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(),
 					url.getQuery(), url.getRef());
+		}
+	}
+
+	/**
+	 * Returns the {@code Path} specified by the given {@code file} {@link URL}.
+	 * 
+	 * @throws IllegalArgumentException if the specified URL does not use the
+	 *                                  {@code file} protocol
+	 * 
+	 * @since 3.20
+	 */
+	public static Path toFilePath(URL url) {
+		if (!SCHEME_FILE.equals(url.getProtocol())) {
+			throw new IllegalArgumentException("Not a 'file' url: " + url); //$NON-NLS-1$
+		}
+		try {
+			return Path.of(url.toURI());
+		} catch (URISyntaxException | IllegalArgumentException e) {
+			try {
+				return Path.of(toURI(url));
+			} catch (URISyntaxException e1) {
+				String pathString = url.toExternalForm().substring(SCHEME_FILE.length() + 1);
+				if (pathString.length() > 1 && pathString.charAt(0) == '/' && pathString.charAt(1) != '/') {
+					pathString = pathString.substring(1);
+				}
+				return Path.of(pathString);
+			}
 		}
 	}
 
