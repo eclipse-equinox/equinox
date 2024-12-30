@@ -16,8 +16,10 @@ package org.eclipse.core.internal.runtime;
 import java.io.*;
 import java.net.URL;
 import java.net.UnknownServiceException;
+import java.nio.file.Files;
 import org.eclipse.core.internal.boot.PlatformURLConnection;
 import org.eclipse.core.internal.boot.PlatformURLHandler;
+import org.eclipse.core.runtime.URIUtil;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.util.NLS;
 
@@ -51,23 +53,21 @@ public class PlatformURLConfigConnection extends PlatformURLConnection {
 		Location parentConfig = localConfig.getParentLocation();
 		// assume we will find the file locally
 		URL localURL = new URL(localConfig.getURL(), path);
-		if (!FILE_PROTOCOL.equals(localURL.getProtocol()) || parentConfig == null)
+		if (!FILE_PROTOCOL.equals(localURL.getProtocol()) || parentConfig == null) {
 			// we only support cascaded file: URLs
 			return localURL;
-		File localFile = new File(localURL.getPath());
-		if (localFile.exists())
+		}
+		if (Files.exists(URIUtil.toFilePath(localURL))) {
 			// file exists in local configuration
 			return localURL;
+		}
 		// try to find in the parent configuration
 		URL parentURL = new URL(parentConfig.getURL(), path);
-		if (FILE_PROTOCOL.equals(parentURL.getProtocol())) {
-			// we only support cascaded file: URLs
-			File parentFile = new File(parentURL.getPath());
-			if (parentFile.exists()) {
-				// parent has the location
-				parentConfiguration = true;
-				return parentURL;
-			}
+		// we only support cascaded file: URLs
+		if (FILE_PROTOCOL.equals(parentURL.getProtocol()) && Files.exists(URIUtil.toFilePath(parentURL))) {
+			// parent has the location
+			parentConfiguration = true;
+			return parentURL;
 		}
 		return localURL;
 	}
