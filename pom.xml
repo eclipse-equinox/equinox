@@ -64,6 +64,7 @@
 					<configuration>
 						<!-- Special code only for J9 -->
 						<excludePackageNames>org.eclipse.osgi.internal.cds</excludePackageNames>
+						<source>17</source>
 					</configuration>
 				</plugin>
 			</plugins>
