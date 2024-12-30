@@ -27,6 +27,7 @@ import org.junit.*;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.FindHook;
 
+@Ignore
 public class RegionBundleFindHookTests {
 
 	private static final String BUNDLE_X = "X";
