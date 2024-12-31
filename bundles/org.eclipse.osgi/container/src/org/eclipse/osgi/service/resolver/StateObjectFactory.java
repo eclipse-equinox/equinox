@@ -51,6 +51,7 @@ public interface StateObjectFactory {
 	 * @return the created state
 	 * @deprecated use {@link #createState(boolean) }
 	 */
+	@Deprecated(forRemoval = true)
 	public State createState();
 
 	/**
@@ -99,6 +100,7 @@ public interface StateObjectFactory {
 	 * @deprecated use
 	 *             {@link #createBundleDescription(long, String, Version, String, BundleSpecification[], HostSpecification, ImportPackageSpecification[], ExportPackageDescription[], boolean, boolean, boolean, String, String[], GenericSpecification[], GenericDescription[])}
 	 */
+	@Deprecated(forRemoval = true)
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location,
 			BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports,
 			ExportPackageDescription[] exports, String[] providedPackages, boolean singleton);
@@ -138,6 +140,7 @@ public interface StateObjectFactory {
 	 * @deprecated use
 	 *             {@link #createBundleDescription(long, String, Version, String, BundleSpecification[], HostSpecification, ImportPackageSpecification[], ExportPackageDescription[], boolean, boolean, boolean, String, String[], GenericSpecification[], GenericDescription[])}
 	 */
+	@Deprecated(forRemoval = true)
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location,
 			BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports,
 			ExportPackageDescription[] exports, String[] providedPackages, boolean singleton, boolean attachFragments,
@@ -551,6 +554,7 @@ public interface StateObjectFactory {
 	 * @deprecated use {@link #writeState(State, File)} instead
 	 * @since 3.1
 	 */
+	@Deprecated(forRemoval = true)
 	public void writeState(State state, OutputStream stream) throws IOException;
 
 	/**
@@ -565,6 +569,7 @@ public interface StateObjectFactory {
 	 * @deprecated use {@link #writeState(State, File)} instead
 	 * @see #writeState(State, OutputStream)
 	 */
+	@Deprecated(forRemoval = true)
 	public void writeState(State state, DataOutputStream stream) throws IOException;
 
 	/**
@@ -589,6 +594,7 @@ public interface StateObjectFactory {
 	 * @deprecated use {@link #readState(File)} instead
 	 * @since 3.1
 	 */
+	@Deprecated(forRemoval = true)
 	public State readState(InputStream stream) throws IOException;
 
 	/**
@@ -601,6 +607,7 @@ public interface StateObjectFactory {
 	 * @deprecated use {@link #readState(File)} instead
 	 * @see #readState(InputStream)
 	 */
+	@Deprecated(forRemoval = true)
 	public State readState(DataInputStream stream) throws IOException;
 
 	/**
