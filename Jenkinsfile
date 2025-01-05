@@ -95,7 +95,7 @@ pipeline {
 		disableConcurrentBuilds(abortPrevious: true)
 	}
 	agent {
-		label "centos-latest"
+		label 'ubuntu-latest'
 	}
 	parameters {
 		booleanParam(name: 'forceNativeBuilds-cocoa', defaultValue: false, description: 'Enforce a re-build of Equinox\' launcher binaries for Mac OS X. Will push the built binaries to the master branch, unless \'skipCommit\' is set.')
