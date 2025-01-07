@@ -14,6 +14,8 @@
 
 package org.eclipse.osgi.internal.loader;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_LOADER;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -225,7 +227,8 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	@Override
 	public URL getResource(String name) {
 		if (getDebug().DEBUG_LOADER) {
-			Debug.println("ModuleClassLoader[" + getBundleLoader() + "].getResource(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			getDebug().trace(OPTION_DEBUG_LOADER,
+					"ModuleClassLoader[" + getBundleLoader() + "].getResource(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		URL url = getBundleLoader().findResource(name);
@@ -233,7 +236,8 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 			return (url);
 
 		if (getDebug().DEBUG_LOADER) {
-			Debug.println("ModuleClassLoader[" + getBundleLoader() + "].getResource(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			getDebug().trace(OPTION_DEBUG_LOADER,
+					"ModuleClassLoader[" + getBundleLoader() + "].getResource(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		return (null);
@@ -262,12 +266,14 @@ public abstract class ModuleClassLoader extends ClassLoader implements BundleRef
 	@Override
 	public Enumeration<URL> getResources(String name) throws IOException {
 		if (getDebug().DEBUG_LOADER) {
-			Debug.println("ModuleClassLoader[" + getBundleLoader() + "].getResources(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			getDebug().trace(OPTION_DEBUG_LOADER,
+					"ModuleClassLoader[" + getBundleLoader() + "].getResources(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		Enumeration<URL> result = getBundleLoader().findResources(name);
 		if (getDebug().DEBUG_LOADER) {
 			if (result == null || !result.hasMoreElements()) {
-				Debug.println("ModuleClassLoader[" + getBundleLoader() + "].getResources(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				getDebug().trace(OPTION_DEBUG_LOADER,
+						"ModuleClassLoader[" + getBundleLoader() + "].getResources(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		}
 		return result;

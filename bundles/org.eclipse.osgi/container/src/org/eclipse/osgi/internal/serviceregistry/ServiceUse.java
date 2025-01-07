@@ -15,6 +15,8 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_SERVICES;
+
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
@@ -83,7 +85,8 @@ public class ServiceUse<S> {
 	S getService() {
 		assert isLocked();
 		if (debug.DEBUG_SERVICES) {
-			Debug.println("[" + Thread.currentThread().getName() + "] getService[factory=" + registration.getBundle() //$NON-NLS-1$ //$NON-NLS-2$
+			debug.trace(OPTION_DEBUG_SERVICES,
+					"[" + Thread.currentThread().getName() + "] getService[factory=" + registration.getBundle() //$NON-NLS-1$ //$NON-NLS-2$
 					+ "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
@@ -106,7 +109,8 @@ public class ServiceUse<S> {
 			return false;
 		}
 		if (debug.DEBUG_SERVICES) {
-			Debug.println("[" + Thread.currentThread().getName() + "] ungetService[factory=" + registration.getBundle() //$NON-NLS-1$ //$NON-NLS-2$
+			debug.trace(OPTION_DEBUG_SERVICES,
+					"[" + Thread.currentThread().getName() + "] ungetService[factory=" + registration.getBundle() //$NON-NLS-1$ //$NON-NLS-2$
 					+ "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		decrementUse();
@@ -153,7 +157,8 @@ public class ServiceUse<S> {
 			throw new IllegalArgumentException(Msg.SERVICE_OBJECTS_UNGET_ARGUMENT_EXCEPTION);
 		}
 		if (debug.DEBUG_SERVICES) {
-			Debug.println("[" + Thread.currentThread().getName() + "] releaseServiceObject[factory=" //$NON-NLS-1$ //$NON-NLS-2$
+			debug.trace(OPTION_DEBUG_SERVICES,
+					"[" + Thread.currentThread().getName() + "] releaseServiceObject[factory=" //$NON-NLS-1$ //$NON-NLS-2$
 					+ registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		return ungetService();

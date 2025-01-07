@@ -14,6 +14,8 @@
 
 package org.eclipse.osgi.internal.loader.classpath;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_LOADER;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -665,7 +667,8 @@ public class ClasspathManager {
 
 	private Class<?> findClassImpl(String name, ClasspathEntry classpathEntry, List<ClassLoaderHook> hooks) {
 		if (debug.DEBUG_LOADER)
-			Debug.println("ModuleClassLoader[" + classloader.getBundleLoader() + " - " + classpathEntry.getBundleFile() //$NON-NLS-1$ //$NON-NLS-2$
+			debug.trace(OPTION_DEBUG_LOADER,
+					"ModuleClassLoader[" + classloader.getBundleLoader() + " - " + classpathEntry.getBundleFile() //$NON-NLS-1$ //$NON-NLS-2$
 					+ "].findClassImpl(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		String filename = name.replace('.', '/').concat(".class"); //$NON-NLS-1$
 
@@ -678,20 +681,21 @@ public class ClasspathManager {
 			classbytes = entry.getBytes();
 		} catch (IOException e) {
 			if (debug.DEBUG_LOADER)
-				Debug.println("  IOException reading " + filename + " from " + classpathEntry.getBundleFile()); //$NON-NLS-1$ //$NON-NLS-2$
+				debug.trace(OPTION_DEBUG_LOADER,
+						"  IOException reading " + filename + " from " + classpathEntry.getBundleFile()); //$NON-NLS-1$ //$NON-NLS-2$
 			throw (LinkageError) new LinkageError("Error reading class bytes: " + name).initCause(e); //$NON-NLS-1$
 		}
 		if (debug.DEBUG_LOADER) {
-			Debug.println(
+			debug.trace(OPTION_DEBUG_LOADER,
 					"  read " + classbytes.length + " bytes from " + classpathEntry.getBundleFile() + "!/" + filename); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			Debug.println("  defining class " + name); //$NON-NLS-1$
+			debug.trace(OPTION_DEBUG_LOADER, "  defining class " + name); //$NON-NLS-1$
 		}
 
 		try {
 			return defineClass(name, classbytes, classpathEntry, entry, hooks);
 		} catch (Error e) {
 			if (debug.DEBUG_LOADER)
-				Debug.println("  error defining class " + name); //$NON-NLS-1$
+				debug.trace(OPTION_DEBUG_LOADER, "  error defining class " + name); //$NON-NLS-1$
 			throw e;
 		}
 	}

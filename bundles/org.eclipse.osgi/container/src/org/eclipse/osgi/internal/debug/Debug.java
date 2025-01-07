@@ -15,11 +15,10 @@
 package org.eclipse.osgi.internal.debug;
 
 import java.io.PrintStream;
-
 import org.eclipse.osgi.internal.framework.EquinoxContainer;
-import org.eclipse.osgi.internal.util.SupplementDebug;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
+import org.osgi.service.log.LogService;
 
 /**
  * This class has debug constants which can be used by the Framework
@@ -28,6 +27,11 @@ import org.eclipse.osgi.service.debug.DebugOptionsListener;
  * @since 3.1
  */
 public class Debug implements DebugOptionsListener {
+	/**
+	 * Equinox trace logger setting for LoggerAdmin. If set to TRACE then the keys
+	 * are understood to be trace options.
+	 */
+	public static final String EQUINOX_TRACE = "EQUINOX.TRACE"; //$NON-NLS-1$
 	/**
 	 * Base debug option key (org.eclispe.osgi).
 	 */
@@ -71,14 +75,7 @@ public class Debug implements DebugOptionsListener {
 	 * Services Debug option key.
 	 */
 	public static final String OPTION_DEBUG_HOOKS = ECLIPSE_OSGI + "/debug/hooks"; //$NON-NLS-1$
-	/**
-	 * Manifest Debug option key.
-	 */
-	public static final String OPTION_DEBUG_MANIFEST = ECLIPSE_OSGI + "/debug/manifest"; //$NON-NLS-1$
-	/**
-	 * Filter Debug option key.
-	 */
-	public static final String OPTION_DEBUG_FILTER = ECLIPSE_OSGI + "/debug/filter"; //$NON-NLS-1$
+
 	/**
 	 * Security Debug option key.
 	 */
@@ -87,14 +84,7 @@ public class Debug implements DebugOptionsListener {
 	 * Start level Debug option key.
 	 */
 	public static final String OPTION_DEBUG_STARTLEVEL = ECLIPSE_OSGI + "/debug/startlevel"; //$NON-NLS-1$
-	/**
-	 * PackageAdmin Debug option key.
-	 */
-	public static final String OPTION_DEBUG_PACKAGEADMIN = ECLIPSE_OSGI + "/debug/packageadmin"; //$NON-NLS-1$
-	/**
-	 * PackageAdmin timing Debug option key.
-	 */
-	public static final String OPTION_DEBUG_PACKAGEADMIN_TIMING = ECLIPSE_OSGI + "/debug/packageadmin/timing"; //$NON-NLS-1$
+
 	/**
 	 * Monitor activation Debug option key.
 	 */
@@ -155,14 +145,6 @@ public class Debug implements DebugOptionsListener {
 	 */
 	public boolean DEBUG_HOOKS = false; // "debug.hooks"
 	/**
-	 * Manifest debug flag.
-	 */
-	public boolean DEBUG_MANIFEST = false; // "debug.manifest"
-	/**
-	 * Filter debug flag.
-	 */
-	public boolean DEBUG_FILTER = false; // "debug.filter"
-	/**
 	 * Security debug flag.
 	 */
 	public boolean DEBUG_SECURITY = false; // "debug.security"
@@ -170,19 +152,6 @@ public class Debug implements DebugOptionsListener {
 	 * Start level debug flag.
 	 */
 	public boolean DEBUG_STARTLEVEL = false; // "debug.startlevel"
-	/**
-	 * PackageAdmin debug flag.
-	 */
-	public boolean DEBUG_PACKAGEADMIN = false; // "debug.packageadmin"
-	/**
-	 * PackageAdmin timing debug flag.
-	 */
-	// TODO remove this or use it somewhere
-	public boolean DEBUG_PACKAGEADMIN_TIMING = false; // "debug.packageadmin/timing"
-	/**
-	 * Message debug flag.
-	 */
-	public boolean DEBUG_MESSAGE_BUNDLES = false; // "/debug/messageBundles"
 	/**
 	 * Monitor activation debug flag.
 	 */
@@ -215,16 +184,8 @@ public class Debug implements DebugOptionsListener {
 		DEBUG_EVENTS = dbgOptions.getBooleanOption(OPTION_DEBUG_EVENTS, false);
 		DEBUG_SERVICES = dbgOptions.getBooleanOption(OPTION_DEBUG_SERVICES, false);
 		DEBUG_HOOKS = dbgOptions.getBooleanOption(OPTION_DEBUG_HOOKS, false);
-		DEBUG_MANIFEST = dbgOptions.getBooleanOption(OPTION_DEBUG_MANIFEST, false);
-		SupplementDebug.STATIC_DEBUG_MANIFEST = DEBUG_MANIFEST;
-		DEBUG_FILTER = dbgOptions.getBooleanOption(OPTION_DEBUG_FILTER, false);
 		DEBUG_SECURITY = dbgOptions.getBooleanOption(OPTION_DEBUG_SECURITY, false);
 		DEBUG_STARTLEVEL = dbgOptions.getBooleanOption(OPTION_DEBUG_STARTLEVEL, false);
-		DEBUG_PACKAGEADMIN = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGEADMIN, false);
-		DEBUG_PACKAGEADMIN_TIMING = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGEADMIN_TIMING, false)
-				|| dbgOptions.getBooleanOption("org.eclipse.core.runtime/debug", false); //$NON-NLS-1$
-		DEBUG_MESSAGE_BUNDLES = dbgOptions.getBooleanOption(OPTION_DEBUG_MESSAGE_BUNDLES, false);
-		SupplementDebug.STATIC_DEBUG_MESSAGE_BUNDLES = DEBUG_MESSAGE_BUNDLES;
 		MONITOR_ACTIVATION = dbgOptions.getBooleanOption(OPTION_MONITOR_ACTIVATION, false);
 		DEBUG_LOCATION = dbgOptions.getBooleanOption(OPTION_DEBUG_LOCATION, false);
 		DEBUG_CACHED_MANIFEST = dbgOptions.getBooleanOption(OPTION_CACHED_MANIFEST, false);
@@ -238,119 +199,11 @@ public class Debug implements DebugOptionsListener {
 	 * The PrintStream to print debug messages to.
 	 */
 	public static PrintStream out = System.out;
+	private volatile LogService logService;
 
-	/**
-	 * Prints x to the PrintStream
-	 */
-	public static void print(boolean x) {
-		out.print(x);
+	public void setLogService(LogService log) {
+		logService = log;
 	}
-
-	/**
-	 * Prints x to the PrintStream
-	 */
-	public static void print(char x) {
-		out.print(x);
-	}
-
-	/**
-	 * Prints x to the PrintStream
-	 */
-	public static void print(int x) {
-		out.print(x);
-	}
-
-	/**
-	 * Prints x to the PrintStream
-	 */
-	public static void print(long x) {
-		out.print(x);
-	}
-
-	/**
-	 * Prints x to the PrintStream
-	 */
-	public static void print(float x) {
-		out.print(x);
-	}
-
-	/**
-	 * Prints x to the PrintStream
-	 */
-	public static void print(double x) {
-		out.print(x);
-	}
-
-	/**
-	 * Prints x to the PrintStream
-	 */
-	public static void print(char x[]) {
-		out.print(x);
-	}
-
-	/**
-	 * Prints x to the PrintStream
-	 */
-	public static void print(String x) {
-		out.print(x);
-	}
-
-	/**
-	 * Prints x to the PrintStream
-	 */
-	public static void print(Object x) {
-		out.print(x);
-	}
-
-	/**
-	 * Prints x to the PrintStream
-	 */
-	public static void println(boolean x) {
-		out.println(x);
-	}
-
-	/**
-	 * Prints x to the PrintStream
-	 */
-	public static void println(char x) {
-		out.println(x);
-	}
-
-	/**
-	 * Prints x to the PrintStream
-	 */
-	public static void println(int x) {
-		out.println(x);
-	}
-
-	/**
-	 * Prints x to the PrintStream
-	 */
-	public static void println(long x) {
-		out.println(x);
-	}
-
-	/**
-	 * Prints x to the PrintStream
-	 */
-	public static void println(float x) {
-		out.println(x);
-	}
-
-	/**
-	 * Prints x to the PrintStream
-	 */
-	public static void println(double x) {
-		out.println(x);
-	}
-
-	/**
-	 * Prints x to the PrintStream
-	 */
-	public static void println(char x[]) {
-		out.println(x);
-	}
-
 	/**
 	 * Prints x to the PrintStream
 	 */
@@ -359,18 +212,41 @@ public class Debug implements DebugOptionsListener {
 	}
 
 	/**
-	 * Prints x to the PrintStream
+	 * Trace the message for the specified topic
+	 * 
+	 * @param topic
+	 * @param message
 	 */
-	public static void println(Object x) {
-		out.println(x);
+	public void trace(String topic, String message) {
+		LogService current = logService;
+		if (current != null) {
+			current.getLogger(topic).trace(message);
+		} else {
+			out.println(message);
+		}
+	}
+
+	/**
+	 * Trace the throwable for the specified topic.
+	 * 
+	 * @param topic
+	 * @param t
+	 */
+	public void traceThrowable(String topic, Throwable t) {
+		if (t == null)
+			return;
+		LogService current = logService;
+		if (current != null) {
+			current.getLogger(topic).trace(topic, t);
+		} else {
+			t.printStackTrace(out);
+		}
 	}
 
 	/**
 	 * Prints t to the PrintStream
 	 */
 	public static void printStackTrace(Throwable t) {
-		if (t == null)
-			return;
 		t.printStackTrace(out);
 	}
 }

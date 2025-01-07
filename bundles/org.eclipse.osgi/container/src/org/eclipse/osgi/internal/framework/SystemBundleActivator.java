@@ -15,13 +15,14 @@
 
 package org.eclipse.osgi.internal.framework;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_SECURITY;
+
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import org.apache.felix.resolver.Logger;
 import org.apache.felix.resolver.ResolverImpl;
-import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.internal.framework.legacy.PackageAdminImpl;
 import org.eclipse.osgi.internal.framework.legacy.StartLevelImpl;
@@ -63,14 +64,16 @@ public class SystemBundleActivator implements BundleActivator {
 	@Override
 	public void start(BundleContext bc) throws Exception {
 		registrations.clear();
+
 		EquinoxBundle bundle = (EquinoxBundle) bc.getBundle();
 		EquinoxContainer equinoxContainer = bundle.getEquinoxContainer();
 
-		equinoxContainer.systemStart(bc);
-
 		EquinoxConfiguration configuration = bundle.getEquinoxContainer().getConfiguration();
-		installSecurityManager(configuration);
 		equinoxContainer.getLogServices().start(bc);
+
+		installSecurityManager(configuration);
+
+		equinoxContainer.systemStart(bc);
 
 		urlFactoryManager = new EquinoxFactoryManager(equinoxContainer);
 		urlFactoryManager.installHandlerFactories(bc);
@@ -178,7 +181,7 @@ public class SystemBundleActivator implements BundleActivator {
 		}
 
 		if (configuration.getDebug().DEBUG_SECURITY)
-			Debug.println("Setting SecurityManager to: " + toInstall); //$NON-NLS-1$
+			configuration.getDebug().trace(OPTION_DEBUG_SECURITY, "Setting SecurityManager to: " + toInstall); //$NON-NLS-1$
 		try {
 			if (toInstall != null) {
 				System.setSecurityManager(toInstall);

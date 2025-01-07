@@ -13,6 +13,7 @@ package org.eclipse.osgi.internal.log;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eclipse.equinox.log.Logger;
+import org.eclipse.osgi.internal.debug.Debug;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogLevel;
@@ -23,6 +24,7 @@ import org.osgi.service.log.admin.LoggerContext;
 public class LoggerImpl implements Logger {
 	static final String THIS_PACKAGE_NAME = LoggerImpl.class.getName().substring(0,
 			LoggerImpl.class.getName().length() - LoggerImpl.class.getSimpleName().length());
+	static final String DEBUG_CLASS_NAME = Debug.class.getName();
 	static final Object[] EMPTY = new Object[0];
 	protected final ExtendedLogServiceImpl logServiceImpl;
 	protected final String name;
@@ -312,7 +314,8 @@ public class LoggerImpl implements Logger {
 			return null;
 		}
 		for (int i = 1; i < elements.length; i++) {
-			if (!elements[i].getClassName().startsWith(THIS_PACKAGE_NAME)) {
+			String className = elements[i].getClassName();
+			if (!className.startsWith(THIS_PACKAGE_NAME) && !className.equals(DEBUG_CLASS_NAME)) {
 				return elements[i];
 			}
 		}

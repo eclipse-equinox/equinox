@@ -28,7 +28,6 @@ import java.util.Properties;
 import java.util.PropertyResourceBundle;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.internal.util.SupplementDebug;
 
 /**
  * Common superclass for all message bundle classes.  Provides convenience
@@ -324,8 +323,6 @@ public abstract class NLS {
 				// log it and continue. This means that the field will (most likely) be un-initialized and
 				// will fail later in the code and if so then we will see both the NPE and this error.
 				String value = "NLS missing message: " + field.getName() + " in: " + bundleName; //$NON-NLS-1$ //$NON-NLS-2$
-				if (SupplementDebug.STATIC_DEBUG_MESSAGE_BUNDLES)
-					System.out.println(value);
 				log(SEVERITY_WARNING, value, null);
 				if (!isAccessible)
 					field.setAccessible(true);
@@ -379,8 +376,6 @@ public abstract class NLS {
 			}
 		}
 		computeMissingMessages(bundleName, clazz, fields, fieldArray, isAccessible);
-		if (SupplementDebug.STATIC_DEBUG_MESSAGE_BUNDLES)
-			System.out.println("Time to load message bundle: " + bundleName + " was " + (System.currentTimeMillis() - start) + "ms."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	/*
@@ -453,8 +448,6 @@ public abstract class NLS {
 				return null;
 			if (fieldObject == null) {
 				final String msg = "NLS unused message: " + key + " in: " + bundleName;//$NON-NLS-1$ //$NON-NLS-2$
-				if (SupplementDebug.STATIC_DEBUG_MESSAGE_BUNDLES)
-					System.out.println(msg);
 				// keys with '.' are ignored by design (bug 433424)
 				if (key instanceof String && ((String) key).indexOf('.') < 0) {
 					log(SEVERITY_WARNING, msg, null);

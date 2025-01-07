@@ -14,9 +14,10 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_SERVICES;
+
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.osgi.util.NLS;
@@ -96,13 +97,14 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 		}
 
 		if (debug.DEBUG_SERVICES) {
-			Debug.println("[" + Thread.currentThread().getName() + "] getService[Sfactory=" + registration.getBundle() //$NON-NLS-1$ //$NON-NLS-2$
+			debug.trace(OPTION_DEBUG_SERVICES,
+					"[" + Thread.currentThread().getName() + "] getService[Sfactory=" + registration.getBundle() //$NON-NLS-1$ //$NON-NLS-2$
 					+ "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		// check for recursive call on this thread
 		if (factoryInUse) {
 			if (debug.DEBUG_SERVICES) {
-				Debug.println(factory + ".getService() recursively called."); //$NON-NLS-1$
+				debug.trace(OPTION_DEBUG_SERVICES, factory + ".getService() recursively called."); //$NON-NLS-1$
 			}
 
 			ServiceException se = new ServiceException(
@@ -165,7 +167,8 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 		cachedService = null;
 
 		if (debug.DEBUG_SERVICES) {
-			Debug.println("[" + Thread.currentThread().getName() + "] ungetService[Sfactory=" + registration.getBundle() //$NON-NLS-1$ //$NON-NLS-2$
+			debug.trace(OPTION_DEBUG_SERVICES,
+					"[" + Thread.currentThread().getName() + "] ungetService[Sfactory=" + registration.getBundle() //$NON-NLS-1$ //$NON-NLS-2$
 					+ "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		factoryUngetService(service);
@@ -194,7 +197,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 		cachedService = null;
 
 		if (debug.DEBUG_SERVICES) {
-			Debug.println("[" + Thread.currentThread().getName() + "] releaseService[Sfactory=" //$NON-NLS-1$ //$NON-NLS-2$
+			debug.trace(OPTION_DEBUG_SERVICES, "[" + Thread.currentThread().getName() + "] releaseService[Sfactory=" //$NON-NLS-1$ //$NON-NLS-2$
 					+ registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		factoryUngetService(service);
@@ -228,11 +231,10 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 			});
 		} catch (Throwable t) {
 			if (debug.DEBUG_SERVICES) {
-				Debug.println(factory + ".getService() exception: " + t.getMessage()); //$NON-NLS-1$
-				Debug.printStackTrace(t);
+				debug.trace(OPTION_DEBUG_SERVICES, factory + ".getService() exception: " + t.getMessage()); //$NON-NLS-1$
+				debug.traceThrowable(OPTION_DEBUG_SERVICES, t);
 			}
-			// allow the adaptor to handle this unexpected error
-			context.getContainer().handleRuntimeError(t);
+
 			ServiceException se = new ServiceException(
 					NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "getService"), //$NON-NLS-1$
 					ServiceException.FACTORY_EXCEPTION, t);
@@ -243,7 +245,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 
 		if (service == null) {
 			if (debug.DEBUG_SERVICES) {
-				Debug.println(factory + ".getService() returned null."); //$NON-NLS-1$
+				debug.trace(OPTION_DEBUG_SERVICES, factory + ".getService() returned null."); //$NON-NLS-1$
 			}
 
 			ServiceException se = new ServiceException(
@@ -258,7 +260,7 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 		String invalidService = ServiceRegistry.checkServiceClass(clazzes, service);
 		if (invalidService != null) {
 			if (debug.DEBUG_SERVICES) {
-				Debug.println("Service object is not an instanceof " + invalidService); //$NON-NLS-1$
+				debug.trace(OPTION_DEBUG_SERVICES, "Service object is not an instanceof " + invalidService); //$NON-NLS-1$
 			}
 			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_NOT_INSTANCEOF_CLASS_EXCEPTION,
 					new Object[] { factory.getClass().getName(), service.getClass().getName(), invalidService }),
@@ -287,8 +289,8 @@ public class ServiceFactoryUse<S> extends ServiceUse<S> {
 			});
 		} catch (Throwable t) {
 			if (debug.DEBUG_SERVICES) {
-				Debug.println(factory + ".ungetService() exception"); //$NON-NLS-1$
-				Debug.printStackTrace(t);
+				debug.trace(OPTION_DEBUG_SERVICES, factory + ".ungetService() exception"); //$NON-NLS-1$
+				debug.traceThrowable(OPTION_DEBUG_SERVICES, t);
 			}
 
 			ServiceException se = new ServiceException(

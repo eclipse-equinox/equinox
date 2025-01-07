@@ -14,6 +14,10 @@
 
 package org.eclipse.osgi.internal.framework;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_BUNDLE_TIME;
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_EVENTS;
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_GENERAL;
+
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -250,7 +254,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 
 	void notifyFindHooksPriviledged(final BundleContextImpl context, final Collection<Bundle> allBundles) {
 		if (debug.DEBUG_HOOKS) {
-			Debug.println("notifyBundleFindHooks(" + allBundles + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			debug.trace(OPTION_DEBUG_EVENTS, "notifyBundleFindHooks(" + allBundles + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		ServiceRegistry sr = container.getServiceRegistry();
 		if (sr == null) {
@@ -286,10 +290,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		try {
 			addServiceListener(listener, null);
 		} catch (InvalidSyntaxException e) {
-			if (debug.DEBUG_GENERAL) {
-				Debug.println("InvalidSyntaxException w/ null filter" + e.getMessage()); //$NON-NLS-1$
-				Debug.printStackTrace(e);
-			}
+			// This would be very unexpected and should not be ignored.
+			// Throw a runtime exception to the caller
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -333,7 +336,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		if (debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" //$NON-NLS-1$
 					+ Integer.toHexString(System.identityHashCode(listener));
-			Debug.println("addBundleListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			debug.trace(OPTION_DEBUG_EVENTS, "addBundleListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		container.getEventPublisher().addBundleListener(listener, this);
@@ -359,7 +362,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		if (debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" //$NON-NLS-1$
 					+ Integer.toHexString(System.identityHashCode(listener));
-			Debug.println("removeBundleListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			debug.trace(OPTION_DEBUG_EVENTS, "removeBundleListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		container.getEventPublisher().removeBundleListener(listener, this);
@@ -386,7 +389,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		if (debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" //$NON-NLS-1$
 					+ Integer.toHexString(System.identityHashCode(listener));
-			Debug.println("addFrameworkListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			debug.trace(OPTION_DEBUG_EVENTS, "addFrameworkListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		container.getEventPublisher().addFrameworkListener(listener, this);
@@ -412,7 +415,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 		if (debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" //$NON-NLS-1$
 					+ Integer.toHexString(System.identityHashCode(listener));
-			Debug.println("removeFrameworkListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			debug.trace(OPTION_DEBUG_EVENTS, "removeFrameworkListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		container.getEventPublisher().removeFrameworkListener(listener, this);
@@ -749,7 +752,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			}
 			activator = loadBundleActivator();
 			if (debug.DEBUG_BUNDLE_TIME) {
-				Debug.println((System.currentTimeMillis() - start) + " ms to load the activator of " + bundle); //$NON-NLS-1$
+				debug.trace(OPTION_DEBUG_BUNDLE_TIME,
+						(System.currentTimeMillis() - start) + " ms to load the activator of " + bundle); //$NON-NLS-1$
 			}
 		} catch (Exception e) {
 			if (e instanceof RuntimeException) {
@@ -767,7 +771,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 				throw be;
 			} finally {
 				if (debug.DEBUG_BUNDLE_TIME) {
-					Debug.println(
+					debug.trace(OPTION_DEBUG_BUNDLE_TIME,
 							(System.currentTimeMillis() - start) + " ms to load and start the activator of " + bundle); //$NON-NLS-1$
 				}
 			}
@@ -834,7 +838,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			}
 
 			if (debug.DEBUG_GENERAL) {
-				Debug.printStackTrace(t);
+				debug.traceThrowable(OPTION_DEBUG_GENERAL, t);
 			}
 
 			String clazz = null;
@@ -861,7 +865,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 				// move on without setting TCCL (https://github.com/eclipse-equinox/equinox/issues/303)
 				
 				if (debug.DEBUG_GENERAL) {
-					Debug.printStackTrace(e);
+					debug.traceThrowable(OPTION_DEBUG_GENERAL, e);
 				}
 
 				return Boolean.FALSE;
@@ -904,7 +908,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 			}
 
 			if (debug.DEBUG_GENERAL) {
-				Debug.printStackTrace(t);
+				debug.traceThrowable(OPTION_DEBUG_GENERAL, t);
 			}
 
 			String clazz = (activator == null) ? "" : activator.getClass().getName(); //$NON-NLS-1$
@@ -965,7 +969,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 					if (debug.DEBUG_EVENTS) {
 						String listenerName = listener.getClass().getName() + "@" //$NON-NLS-1$
 								+ Integer.toHexString(System.identityHashCode(listener));
-						Debug.println("dispatchBundleEvent[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						debug.trace(OPTION_DEBUG_EVENTS, "dispatchBundleEvent[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 
 					listener.bundleChanged((BundleEvent) object);
@@ -979,7 +983,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 					if (debug.DEBUG_EVENTS) {
 						String listenerName = listener.getClass().getName() + "@" //$NON-NLS-1$
 								+ Integer.toHexString(System.identityHashCode(listener));
-						Debug.println("dispatchServiceEvent[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						debug.trace(OPTION_DEBUG_EVENTS, "dispatchServiceEvent[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 					listener.serviceChanged(event);
 					break;
@@ -991,7 +995,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 					if (debug.DEBUG_EVENTS) {
 						String listenerName = listener.getClass().getName() + "@" //$NON-NLS-1$
 								+ Integer.toHexString(System.identityHashCode(listener));
-						Debug.println("dispatchFrameworkEvent[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						debug.trace(OPTION_DEBUG_EVENTS,
+								"dispatchFrameworkEvent[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 
 					listener.frameworkEvent((FrameworkEvent) object);
@@ -1003,20 +1008,18 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 				}
 			}
 		} catch (Throwable t) {
-			if (debug.DEBUG_GENERAL) {
-				Debug.println("Exception in bottom level event dispatcher: " + t.getMessage()); //$NON-NLS-1$
-				Debug.printStackTrace(t);
+			if (debug.DEBUG_EVENTS) {
+				debug.trace(OPTION_DEBUG_EVENTS, "Exception in bottom level event dispatcher: " + t.getMessage()); //$NON-NLS-1$
+				// It may seem redundant to trace the exception here giving we publish
+				// an error event below, but that event may not get fired if the current event
+				// is a framework event error
+				debug.traceThrowable(OPTION_DEBUG_EVENTS, t);
 			}
-			// allow the adaptor to handle this unexpected error
-			container.handleRuntimeError(t);
-			publisherror: {
-				if (action == EquinoxEventPublisher.FRAMEWORKEVENT) {
-					FrameworkEvent event = (FrameworkEvent) object;
-					if (event.getType() == FrameworkEvent.ERROR) {
-						break publisherror; // avoid infinite loop
-					}
-				}
 
+			if (action == EquinoxEventPublisher.FRAMEWORKEVENT
+					&& ((FrameworkEvent) object).getType() == FrameworkEvent.ERROR) {
+				// avoid infinite loop by publishing another error
+			} else {
 				container.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundle, t);
 			}
 		} finally {
@@ -1035,7 +1038,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 */
 	@Override
 	public Filter createFilter(String filter) throws InvalidSyntaxException {
-		return FilterImpl.newInstance(filter, container.getConfiguration().getDebug().DEBUG_FILTER);
+		return FilterImpl.newInstance(filter);
 	}
 
 	/**

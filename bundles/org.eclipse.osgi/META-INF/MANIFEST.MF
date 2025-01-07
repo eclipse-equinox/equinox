@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Export-Package: org.eclipse.core.runtime.adaptor;x-friends:="org.eclipse.core.runtime",
  org.eclipse.core.runtime.internal.adaptor;x-internal:=true,
  org.eclipse.equinox.log;version="1.1";uses:="org.osgi.framework,org.osgi.service.log",
- org.eclipse.osgi.container;version="1.8.0";
+ org.eclipse.osgi.container;version="1.9.0";
   uses:="org.eclipse.osgi.report.resolution,
    org.osgi.framework.wiring,
    org.eclipse.osgi.framework.eventmgr,

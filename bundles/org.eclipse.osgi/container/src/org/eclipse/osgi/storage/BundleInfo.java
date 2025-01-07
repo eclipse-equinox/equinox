@@ -14,6 +14,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.storage;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_CACHED_MANIFEST;
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_STORAGE;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -382,14 +385,15 @@ public final class BundleInfo {
 		}
 
 		public void storeContent(File destination, InputStream in, boolean nativeCode) throws IOException {
+			Debug debug = getStorage().getConfiguration().getDebug();
 			/* the entry has not been cached */
-			if (getStorage().getConfiguration().getDebug().DEBUG_STORAGE)
-				Debug.println("Creating file: " + destination.getPath()); //$NON-NLS-1$
+			if (debug.DEBUG_STORAGE)
+				debug.trace(OPTION_DEBUG_STORAGE, "Creating file: " + destination.getPath()); //$NON-NLS-1$
 			/* create the necessary directories */
 			File dir = new File(destination.getParent());
 			if (!dir.mkdirs() && !dir.isDirectory()) {
-				if (getStorage().getConfiguration().getDebug().DEBUG_STORAGE)
-					Debug.println("Unable to create directory: " + dir.getPath()); //$NON-NLS-1$
+				if (debug.DEBUG_STORAGE)
+					debug.trace(OPTION_DEBUG_STORAGE, "Unable to create directory: " + dir.getPath()); //$NON-NLS-1$
 				throw new IOException(NLS.bind(Msg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, dir.getAbsolutePath()));
 			}
 			/* copy the entry to the cache */
@@ -400,7 +404,7 @@ public final class BundleInfo {
 				// just delete our staged copy
 				tempDest.delete();
 			} else {
-				StorageUtil.move(tempDest, destination, getStorage().getConfiguration().getDebug().DEBUG_STORAGE);
+				StorageUtil.move(tempDest, destination, getStorage().getConfiguration().getDebug());
 			}
 			if (nativeCode) {
 				getBundleInfo().getStorage().setPermissions(destination);
@@ -568,8 +572,10 @@ public final class BundleInfo {
 		File dataRoot = getStorage().getFile(getBundleId() + "/" + Storage.BUNDLE_DATA_DIR, false); //$NON-NLS-1$
 		if (!Storage.secureAction.isDirectory(dataRoot) && (storage.isReadOnly()
 				|| !(Storage.secureAction.mkdirs(dataRoot) || Storage.secureAction.isDirectory(dataRoot)))) {
-			if (getStorage().getConfiguration().getDebug().DEBUG_STORAGE)
-				Debug.println("Unable to create bundle data directory: " + dataRoot.getAbsolutePath()); //$NON-NLS-1$
+			Debug debug = getStorage().getConfiguration().getDebug();
+			if (debug.DEBUG_STORAGE)
+				debug.trace(OPTION_DEBUG_STORAGE,
+						"Unable to create bundle data directory: " + dataRoot.getAbsolutePath()); //$NON-NLS-1$
 			return null;
 		}
 		return path == null ? dataRoot : new File(dataRoot, path);
@@ -630,9 +636,9 @@ public final class BundleInfo {
 			if (cached.containsKey(key)) {
 				return cached.get(key);
 			}
-			if (!cached.isEmpty()
-					&& generation.getBundleInfo().getStorage().getConfiguration().getDebug().DEBUG_CACHED_MANIFEST) {
-				Debug.println("Header key is not cached: " + key + "; for bundle: " //$NON-NLS-1$ //$NON-NLS-2$
+			Debug debug = generation.getBundleInfo().getStorage().getConfiguration().getDebug();
+			if (!cached.isEmpty() && debug.DEBUG_CACHED_MANIFEST) {
+				debug.trace(OPTION_CACHED_MANIFEST, "Header key is not cached: " + key + "; for bundle: " //$NON-NLS-1$ //$NON-NLS-2$
 						+ generation.getBundleInfo().getBundleId());
 			}
 			return generation.getRawHeaders().get(key);

@@ -14,13 +14,14 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_SERVICES;
+
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
-import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.loader.sources.PackageSource;
 import org.eclipse.osgi.internal.messages.Msg;
@@ -136,7 +137,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 				this.properties = createProperties(props); /* must be valid after unregister is called. */
 			}
 			if (registry.debug.DEBUG_SERVICES) {
-				Debug.println("registerService[" + bundle + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				registry.debug.trace(OPTION_DEBUG_SERVICES, "registerService[" + bundle + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			registry.addServiceRegistration(context, this);
 		}
@@ -234,7 +235,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 
 				/* remove this object from the service registry */
 				if (registry.debug.DEBUG_SERVICES) {
-					Debug.println("unregisterService[" + bundle + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					registry.debug.trace(OPTION_DEBUG_SERVICES, "unregisterService[" + bundle + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 
 				registry.removeServiceRegistration(context, this);
@@ -260,7 +261,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 			size = contextsUsing.size();
 			if (size > 0) {
 				if (registry.debug.DEBUG_SERVICES) {
-					Debug.println("unregisterService: releasing users"); //$NON-NLS-1$
+					registry.debug.trace(OPTION_DEBUG_SERVICES, "unregisterService: releasing users"); //$NON-NLS-1$
 				}
 				users = contextsUsing.toArray(new BundleContextImpl[size]);
 			}
@@ -524,7 +525,8 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		}
 
 		if (registry.debug.DEBUG_SERVICES) {
-			Debug.println("[" + Thread.currentThread().getName() + "] getService[" + user.getBundleImpl() + "](" + this //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			registry.debug.trace(OPTION_DEBUG_SERVICES,
+					"[" + Thread.currentThread().getName() + "] getService[" + user.getBundleImpl() + "](" + this //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					+ ")"); //$NON-NLS-1$
 		}
 		/* Use a while loop to support retry if a call to a ServiceFactory fails */
@@ -560,7 +562,8 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 			try (ServiceUseLock locked = use.lock()) {
 				if (registry.debug.DEBUG_SERVICES) {
 					ReentrantLock useLock = use.getLock();
-					Debug.println("[" + Thread.currentThread().getName() + "] getServiceLock[" //$NON-NLS-1$ //$NON-NLS-2$
+					registry.debug.trace(OPTION_DEBUG_SERVICES,
+							"[" + Thread.currentThread().getName() + "] getServiceLock[" //$NON-NLS-1$ //$NON-NLS-2$
 							+ user.getBundleImpl() + "](" + this + "), id:" + System.identityHashCode(useLock) //$NON-NLS-1$ //$NON-NLS-2$
 							+ ". holdCount:" + useLock.getHoldCount() //$NON-NLS-1$
 							+ ", queued:" + useLock.getQueueLength()); //$NON-NLS-1$
@@ -574,7 +577,8 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 					user.checkValid();
 					if (servicesInUse.get(this) != use) {
 						if (registry.debug.DEBUG_SERVICES) {
-							Debug.println("[" + Thread.currentThread().getName() + "] getServiceContinue[" //$NON-NLS-1$ //$NON-NLS-2$
+							registry.debug.trace(OPTION_DEBUG_SERVICES,
+									"[" + Thread.currentThread().getName() + "] getServiceContinue[" //$NON-NLS-1$ //$NON-NLS-2$
 									+ user.getBundleImpl() + "](" + this //$NON-NLS-1$
 									+ ")"); //$NON-NLS-1$
 						}
@@ -610,7 +614,8 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 			return null;
 		}
 		if (registry.debug.DEBUG_SERVICES) {
-			Debug.println("[" + Thread.currentThread().getName() + "] getServiceObjects[" + user.getBundleImpl() + "](" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			registry.debug.trace(OPTION_DEBUG_SERVICES,
+					"[" + Thread.currentThread().getName() + "] getServiceObjects[" + user.getBundleImpl() + "](" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					+ this + ")"); //$NON-NLS-1$
 		}
 
@@ -653,7 +658,8 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		}
 
 		if (registry.debug.DEBUG_SERVICES) {
-			Debug.println("[" + Thread.currentThread().getName() + "] ungetService[" + user.getBundleImpl() + "](" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			registry.debug.trace(OPTION_DEBUG_SERVICES,
+					"[" + Thread.currentThread().getName() + "] ungetService[" + user.getBundleImpl() + "](" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					+ this + ")"); //$NON-NLS-1$
 		}
 
@@ -670,7 +676,8 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		try (ServiceUseLock locked = use.lock()) {
 			if (registry.debug.DEBUG_SERVICES) {
 				ReentrantLock useLock = use.getLock();
-				Debug.println("[" + Thread.currentThread().getName() + "] ungetServiceLock[" + user.getBundleImpl() //$NON-NLS-1$ //$NON-NLS-2$
+				registry.debug.trace(OPTION_DEBUG_SERVICES,
+						"[" + Thread.currentThread().getName() + "] ungetServiceLock[" + user.getBundleImpl() //$NON-NLS-1$ //$NON-NLS-2$
 						+ "](" + this + "), id:" + System.identityHashCode(useLock) + ", holdCount:" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						+ useLock.getHoldCount() + ", queued:" + useLock.getQueueLength()); //$NON-NLS-1$
 			}
@@ -701,7 +708,7 @@ public class ServiceRegistrationImpl<S> implements ServiceRegistration<S>, Compa
 		}
 
 		if (registry.debug.DEBUG_SERVICES) {
-			Debug.println("releaseService[" + user.getBundleImpl() + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			registry.debug.trace(OPTION_DEBUG_SERVICES, "releaseService[" + user.getBundleImpl() + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		Map<ServiceRegistrationImpl<?>, ServiceUse<?>> servicesInUse = user.getServicesInUseMap();

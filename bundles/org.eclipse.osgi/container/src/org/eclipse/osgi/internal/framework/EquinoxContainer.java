@@ -308,10 +308,6 @@ public class EquinoxContainer implements ThreadFactory, Runnable {
 			sm.checkPermission(new AdminPermission(bundle, action));
 	}
 
-	public void handleRuntimeError(Throwable t) {
-		// TODO need to call some hook here
-	}
-
 	void systemStart(BundleContext bc) {
 		synchronized (this.monitor) {
 			signedContentFactory = new ServiceTracker<>(bc, SignedContentFactory.class, null);

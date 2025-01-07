@@ -128,7 +128,7 @@ public class LoggerContextTargetMap {
 		return loggerContexts.get(null);
 	}
 
-	void applyLogLevels(EquinoxLoggerContext loggerContext) {
+	EquinoxLoggerContext applyLogLevels(EquinoxLoggerContext loggerContext) {
 		Collection<Bundle> matching;
 		boolean isRoot = loggerContext.getName() == null;
 		if (isRoot) {
@@ -138,17 +138,23 @@ public class LoggerContextTargetMap {
 			matching = qualifiedNameToTargets.get(loggerContext.getName());
 		}
 		if (matching == null) {
-			return;
+			return null;
 		}
+		EquinoxLoggerContext systemBundleLoggerContext = null;
 		for (Bundle bundle : matching) {
 			ExtendedLogServiceImpl logService = logServices.get(bundle);
 			if (logService != null) {
 				// Always apply the effective log context.
 				// This may be more costly but it is more simple than checking
 				// if the changed context overrides the existing settings
-				logService.applyLogLevels(getEffectiveLoggerContext(bundle));
+				EquinoxLoggerContext effectiveLoggerContext = getEffectiveLoggerContext(bundle);
+				logService.applyLogLevels(effectiveLoggerContext);
+				if (bundle.getBundleId() == 0) {
+					systemBundleLoggerContext = effectiveLoggerContext;
+				}
 			}
 		}
+		return systemBundleLoggerContext;
 	}
 
 	EquinoxLoggerContext getEffectiveLoggerContext(Bundle bundle) {

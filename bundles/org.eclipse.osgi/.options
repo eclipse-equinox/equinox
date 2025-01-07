@@ -12,10 +12,6 @@ org.eclipse.osgi/debug/loader/cds=false
 org.eclipse.osgi/debug/events=false
 # Prints out OSGi service debug information (registration/getting/ungetting etc.)
 org.eclipse.osgi/debug/services=false
-# Prints out bundle manifest parsing debug information
-org.eclipse.osgi/debug/manifest=false
-# Prints out LDAP filter debug information
-org.eclipse.osgi/debug/filter=false
 # Prints out security (PermissionAdmin service) debug information
 org.eclipse.osgi/debug/security=false
 # Prints out start level service debug information

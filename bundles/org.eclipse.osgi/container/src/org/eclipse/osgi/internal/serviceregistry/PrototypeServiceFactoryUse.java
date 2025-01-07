@@ -14,10 +14,11 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
+import static org.eclipse.osgi.internal.debug.Debug.OPTION_DEBUG_SERVICES;
+
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.eclipse.osgi.internal.debug.Debug;
 import org.eclipse.osgi.internal.framework.BundleContextImpl;
 import org.eclipse.osgi.internal.messages.Msg;
 import org.osgi.framework.Bundle;
@@ -65,7 +66,7 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 	S newServiceObject() {
 		assert isLocked();
 		if (debug.DEBUG_SERVICES) {
-			Debug.println('[' + Thread.currentThread().getName() + "] getServiceObject[PSfactory=" //$NON-NLS-1$
+			debug.trace(OPTION_DEBUG_SERVICES, '[' + Thread.currentThread().getName() + "] getServiceObject[PSfactory=" //$NON-NLS-1$
 					+ registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		final S service = factoryGetService();
@@ -100,7 +101,7 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 			throw new IllegalArgumentException(Msg.SERVICE_OBJECTS_UNGET_ARGUMENT_EXCEPTION);
 		}
 		if (debug.DEBUG_SERVICES) {
-			Debug.println(
+			debug.trace(OPTION_DEBUG_SERVICES,
 					'[' + Thread.currentThread().getName() + "] ungetService[PSfactory=" + registration.getBundle() //$NON-NLS-1$
 							+ "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
@@ -128,7 +129,8 @@ public class PrototypeServiceFactoryUse<S> extends ServiceFactoryUse<S> {
 		super.release();
 		for (S service : serviceObjects.keySet()) {
 			if (debug.DEBUG_SERVICES) {
-				Debug.println('[' + Thread.currentThread().getName() + "] releaseService[PSfactory=" //$NON-NLS-1$
+				debug.trace(OPTION_DEBUG_SERVICES,
+						'[' + Thread.currentThread().getName() + "] releaseService[PSfactory=" //$NON-NLS-1$
 						+ registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			factoryUngetService(service);
